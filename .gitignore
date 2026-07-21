@@ -9,4 +9,5 @@ node_modules/
 playwright-report/
 test-results/
 *.tsbuildinfo
+__pycache__/
 artifacts/proof/

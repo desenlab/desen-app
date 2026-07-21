@@ -4,4 +4,20 @@
  * @packageDocumentation
  */
 
-export {};
+export {
+  validateDesenBundle,
+  validateDesenCatalog,
+  validateDesenSource,
+  validateDesenStructure,
+} from "./structural-validation.js";
+
+export type {
+  DesenDocumentForTarget,
+  DesenStructuralDiagnostic,
+  DesenStructuralDiagnosticCode,
+  DesenStructuralTarget,
+  DesenStructuralValidationFailure,
+  DesenStructuralValidationResult,
+  DesenStructuralValidationSuccess,
+  ImmutableJson,
+} from "./structural-validation.js";

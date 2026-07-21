@@ -77,3 +77,33 @@ This file records implementation discoveries without changing the frozen DESEN 0
   string literals without enforcing an invented universal grammar.
 - Future action: Consider standardizing the extension-code grammar, diagnostic envelope, severity,
   ordering, and localization keys in a later protocol version.
+
+## PF-007 — Embedded-schema dialect and external-reference loading are underspecified
+
+- Status: OPEN
+- Blocks proof: No
+- Protocol location: SPEC Sections 7.2 and 8.3
+- Observation: DESEN 0.1.0 requires embedded schemas to use JSON Schema Draft 2020-12, but the
+  frozen examples omit `$schema` and the protocol does not define whether an implementation may
+  fetch external `$ref` targets, which registries are trusted, or how custom vocabularies are
+  distributed.
+- Implementation decision: Treat an omitted `$schema` as Draft 2020-12 because the containing
+  protocol contract fixes that dialect. Accept the exact Draft 2020-12 URI, reject an explicitly
+  different dialect, reject non-local `$ref` and `$dynamicRef`, and never fetch schema content from
+  the network during document validation. Unknown annotation keywords remain valid JSON Schema
+  keywords and receive no invented DESEN semantics.
+- Future action: Define a portable embedded-schema resource and vocabulary profile in a future
+  protocol version if interoperable external references become necessary.
+
+## PF-008 — Frozen schema version patterns are broader than Semantic Versioning 2.0.0
+
+- Status: OPEN
+- Blocks proof: No; structural validation must execute the frozen schema exactly.
+- Protocol location: SPEC Section 5.2 and the three canonical root schemas
+- Observation: The frozen regular expressions accept some prerelease and build strings that the
+  Semantic Versioning 2.0.0 grammar rejects, including leading-zero numeric prerelease identifiers
+  and empty dot-separated identifiers.
+- Implementation decision: M02-T06 applies the frozen patterns without silently rewriting them.
+  M02-T07 owns the stricter semantic version check required by the prose contract.
+- Future action: Tighten the canonical schema pattern in the next protocol revision and add
+  positive and negative SemVer vectors.

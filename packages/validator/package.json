@@ -7,7 +7,8 @@
   "type": "module",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "exports": {
     ".": {
@@ -16,10 +17,21 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src --max-warnings=0",
+    "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.build.json",
+    "generate:structural-validation": "node scripts/generate-structural-validators.mjs",
+    "lint": "eslint src test --max-warnings=0",
+    "verify:structural-validation": "node scripts/verify-structural-validators.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:coverage": "vitest run --coverage --passWithNoTests"
+    "test": "vitest run",
+    "test:structural-validation": "vitest run test/structural-validation.test.ts",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@desen/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "prettier": "3.9.6",
+    "vitest": "4.1.10"
   }
 }

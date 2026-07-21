@@ -11,8 +11,10 @@ machine-enumerated JSON Schema constraints to future implementation and test own
 derives the Source, Bundle, and Catalog TypeScript roots deterministically from those frozen
 schemas. M02-T04 now provides RFC 8785 canonical JSON, platform-neutral SHA-256, and the exact
 Source-digest and Bundle-revision projections. M02-T05 now provides the exact 36-code core
-diagnostic registry, inert shared diagnostic data, and RFC 6901 JSON Pointer primitives. Structural
-validation and runtime semantics have not started and are not claimed as proven.
+diagnostic registry, inert shared diagnostic data, and RFC 6901 JSON Pointer primitives. M02-T06
+now provides exact frozen-root structural validation for Source, Bundle, Catalog, and all 13
+embedded-schema locator families, returning an independent immutable snapshot. Semantic
+validation and runtime behavior have not started and are not claimed as proven.
 
 ## Current milestone
 
@@ -22,9 +24,10 @@ validation and runtime semantics have not started and are not claimed as proven.
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
-  `M02-T05 — Stable diagnostic model and JSON Pointer support`
+  `M02-T05 — Stable diagnostic model and JSON Pointer support`,
+  `M02-T06 — Structural validation`
 - Active task: None
-- Ready next task: `M02-T06 — Structural validation`
+- Ready next task: `M02-T07 — Identity, SemVer, entry, catalog namespace, extension, and reference validation`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -52,6 +55,11 @@ validation and runtime semantics have not started and are not claimed as proven.
   frozen diagnostic data, and RFC 6901 JSON Pointer primitives pass 17 package tests and 8 root
   evidence/mutation tests. The complete 12-example RFC table, hostile caller-owned inputs, public
   exports, command wiring, and tracked implementation hashes are covered by the M02-T05 artifact.
+- The three exact DESEN roots and all 44 embedded schemas in the frozen valid corpus pass
+  structural validation. All 13 generic embedded-schema locator families are guarded by 14
+  mutation cases; 63 package tests and 8 root evidence/mutation tests also cover immutable input
+  isolation, stable diagnostics, malformed URI references, no external resolution, deterministic
+  standalone generation, and the built platform-neutral distribution.
 - The foundation passes formatting, lint, strict typecheck, build, protocol integrity tests,
   protocol traceability and type-generation tests, remaining scaffold test runners, and
   dependency-boundary checks.
@@ -65,9 +73,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M02-T06`: implement structural validation for Source, Bundle, Catalog, and embedded
-JSON Schemas. Do not begin identity, reference, catalog-contract, or other semantic validation from
-`M02-T07` and later tasks in the same task.
+Begin only `M02-T07`: add identity, strict Semantic Versioning, entry, catalog namespace,
+extension, and reference validation. Keep component-contract, event/action, state/binding,
+publication, and runtime responsibilities in their later assigned tasks.
 
 M02-T02 evidence:
 
@@ -90,7 +98,14 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `9d89e0ebb539e08b069dba187b024b00dcd8c8f39517e1c41d044b59f065df26`
+- artifact SHA-256: `b00f245a0d7173fcb7a51b83bdcf2e6bb43d6351e7605e8e480667cc5f5ae9df`
+
+M02-T06 evidence:
+
+- `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
+- `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
+- artifact SHA-256: `29ab8c2ef030981c77f6b007d32a11477d3fe35fe6cc36e5950144455444a4ce`
+- generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 ## Status vocabulary
 

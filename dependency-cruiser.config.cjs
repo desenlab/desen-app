@@ -71,8 +71,8 @@ const allowedApplicationDependencies = {
   ],
 };
 
-const neutralPackagePath =
-  "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core)/";
+const neutralProductionSourcePath =
+  "^packages/(protocol|validator|publisher|catalog-sdk|runtime-core|editor-core)/src/";
 
 /**
  * Builds a regular expression for package folders. The current package is included because
@@ -155,7 +155,7 @@ module.exports = {
       severity: "error",
       comment:
         "Platform-neutral packages receive clocks, storage, cryptography, and I/O through explicit ports or universal dependencies.",
-      from: { path: neutralPackagePath },
+      from: { path: neutralProductionSourcePath },
       to: { dependencyTypes: ["core"] },
     },
     {
@@ -163,7 +163,7 @@ module.exports = {
       severity: "error",
       comment:
         "Protocol, validation, publishing, catalog contracts, runtime semantics, and editor commands must stay outside framework and platform adapters.",
-      from: { path: neutralPackagePath },
+      from: { path: neutralProductionSourcePath },
       to: {
         path: [
           "^(?:react|react-dom|react-native|expo|next)(?:/|$)",
@@ -178,7 +178,7 @@ module.exports = {
       name: "neutral-packages-no-styles",
       severity: "error",
       comment: "CSS and other stylesheet formats belong only to Web-facing packages.",
-      from: { path: neutralPackagePath },
+      from: { path: neutralProductionSourcePath },
       to: { path: "\\.(?:css|scss|sass|less|styl)(?:$|\\?)" },
     },
     {

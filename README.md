@@ -65,6 +65,7 @@ packages/
 - [Master implementation plan](docs/plan/MASTER-PLAN.md)
 - [Task board](docs/plan/TASKS.md)
 - [Proof matrix](docs/proof/PROOF-MATRIX.md)
+- [Structural-validation proof](docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -84,9 +85,16 @@ exist; an absent proof runner is never treated as a successful proof.
 
 The exact DESEN 0.1.0 input snapshot is vendored and checksum-enforced. Schema-derived types,
 canonical JSON and SHA-256 primitives, the 36-code diagnostic registry, and RFC 6901 JSON Pointer
-support are implemented without claiming validator or runtime behavior. The next implementation
-task is `M02-T06`, which adds structural validation for Source, Bundle, Catalog, and embedded JSON
-Schemas while leaving semantic rules to later tasks.
+support are implemented. Structural validation now checks unknown input against the exact frozen
+Source, Bundle, and Catalog roots and validates all protocol-defined embedded JSON Schema locations.
+It returns an independent immutable snapshot and stable pointer diagnostics; runtime validation
+does not compile document schemas, evaluate document content, or access the network.
+
+This is deliberately not the same as semantic validity. Entry and identity relationships,
+references, exact Semantic Versioning, capability resolution, digest comparison, and applying
+embedded schemas to runtime values begin with `M02-T07` and later tasks. The first product proof is
+still `web-react`, while the protocol and validator packages remain independent of React, DOM, and
+browser APIs so future iOS and Android runtimes can reuse the same contract.
 
 ## License
 

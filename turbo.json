@@ -27,9 +27,11 @@
         "../../scripts/lib/protocol-types.mjs",
         "../../scripts/lib/protocol-canonicalization-proof.mjs",
         "../../scripts/lib/protocol-diagnostics-proof.mjs",
+        "../../scripts/lib/protocol-structural-validation-proof.mjs",
         "../../tests/protocol-canonicalization.test.mjs",
         "../../tests/protocol-diagnostics.test.mjs",
         "../../tests/protocol-snapshot-integrity.test.mjs",
+        "../../tests/protocol-structural-validation.test.mjs",
         "../../tests/protocol-types.test.mjs"
       ],
       "outputs": []
@@ -42,9 +44,11 @@
         "../../scripts/lib/protocol-types.mjs",
         "../../scripts/lib/protocol-canonicalization-proof.mjs",
         "../../scripts/lib/protocol-diagnostics-proof.mjs",
+        "../../scripts/lib/protocol-structural-validation-proof.mjs",
         "../../tests/protocol-canonicalization.test.mjs",
         "../../tests/protocol-diagnostics.test.mjs",
         "../../tests/protocol-snapshot-integrity.test.mjs",
+        "../../tests/protocol-structural-validation.test.mjs",
         "../../tests/protocol-types.test.mjs"
       ],
       "outputs": ["coverage/**"]
