@@ -19,7 +19,10 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test ../../tests/protocol-snapshot-integrity.test.mjs ../../tests/protocol-types.test.mjs",
-    "test:coverage": "node --test --experimental-test-coverage ../../tests/protocol-snapshot-integrity.test.mjs ../../tests/protocol-types.test.mjs"
+    "test": "vitest run test/canonicalization.test.ts",
+    "test:coverage": "vitest run test/canonicalization.test.ts --coverage"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
   }
 }

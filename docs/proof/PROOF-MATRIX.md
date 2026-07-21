@@ -39,3 +39,9 @@ M02-T03's deterministic type-generation artifact is compile-time structural evid
 does not change any `P-*` status:
 `protocol-0.1.0-types.json`
 `sha256:e21826f5d171aefbed2e3fd833e6f0dc10de1bac71e7b74f51a255f43bb37971`.
+
+M02-T04's canonicalization artifact proves RFC 8785, SHA-256, and the two Section 11 projection
+primitives. It does not yet prove official-suite parity, publisher determinism, or activation-time
+verification, so no `P-*` status changes:
+`protocol-0.1.0-canonicalization.json`
+`sha256:7c96deb2206cec49b312f1a4f385d0c1720aa06924a4268f7b56c3391f79d2aa`.

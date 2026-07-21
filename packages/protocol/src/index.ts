@@ -8,6 +8,18 @@ import type { DESENPublishedDesignBundle } from "./generated/0.1.0/desen-bundle.
 import type { DESENCapabilityCatalog } from "./generated/0.1.0/desen-catalog.generated.js";
 import type { DESENDesignSourceDocument } from "./generated/0.1.0/desen-source.generated.js";
 
+export {
+  calculateDesenBundleRevision,
+  calculateDesenSourceDigest,
+  canonicalizeJson,
+  canonicalizeJsonBytes,
+  digestCanonicalJson,
+  isSha256Digest,
+  sha256Bytes,
+  sha256Digest,
+  sha256Hex,
+} from "./canonicalization.js";
+
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 

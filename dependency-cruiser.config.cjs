@@ -205,6 +205,7 @@ module.exports = {
     exclude: "^packages/protocol/upstream/",
     enhancedResolveOptions: {
       exportsFields: ["exports"],
+      conditionNames: ["import", "require", "node", "default", "types"],
     },
     tsPreCompilationDeps: "specify",
   },

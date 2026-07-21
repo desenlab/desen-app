@@ -1,0 +1,236 @@
+{
+  "task": "M02-T04",
+  "protocolVersion": "0.1.0",
+  "profile": "rfc8785-sha256-v1",
+  "frozenInput": {
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060"
+  },
+  "standards": [
+    {
+      "id": "RFC 8785",
+      "url": "https://www.rfc-editor.org/rfc/rfc8785.html",
+      "coverage": [
+        "canonical primitive serialization",
+        "recursive UTF-16 property ordering",
+        "UTF-8 output",
+        "all 24 finite Appendix B number samples",
+        "lone-surrogate and non-finite rejection"
+      ]
+    },
+    {
+      "id": "FIPS 180-4",
+      "url": "https://doi.org/10.6028/NIST.FIPS.180-4",
+      "coverage": ["SHA-256 empty, short, multi-block, and padding-boundary vectors"]
+    }
+  ],
+  "implementation": {
+    "package": "@desen/protocol",
+    "platform": "ECMAScript 2023",
+    "runtimeDependencies": [],
+    "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
+    "publicExports": [
+      "canonicalizeJson",
+      "canonicalizeJsonBytes",
+      "sha256Bytes",
+      "sha256Hex",
+      "sha256Digest",
+      "digestCanonicalJson",
+      "calculateDesenSourceDigest",
+      "calculateDesenBundleRevision",
+      "isSha256Digest"
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/protocol/src/canonicalization.ts",
+        "bytes": 17820,
+        "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
+      },
+      {
+        "path": "packages/protocol/src/index.ts",
+        "bytes": 2627,
+        "sha256": "177d4099af8d5a321a4f6bf948f31c2b68d5e6afabfd71525bfb53e212d5fe9d"
+      },
+      {
+        "path": "packages/protocol/test/canonicalization.test.ts",
+        "bytes": 14047,
+        "sha256": "aff2fdac4609d7f12d7e0422d0fc9885d09d7fc118b6c8ab95e2e980a28967fd"
+      },
+      {
+        "path": "scripts/lib/protocol-canonicalization-proof.mjs",
+        "bytes": 20937,
+        "sha256": "861f904c2969c7d579aa712b7e0be692e47a4859fd70ba31db8e739194c3b2f2"
+      },
+      {
+        "path": "scripts/generate-protocol-canonicalization-proof.mjs",
+        "bytes": 818,
+        "sha256": "4c929f65cc1bae64eea4dc9389a63a861dbbb4554ed86fb303caa25c2e62c4f6"
+      },
+      {
+        "path": "scripts/verify-protocol-canonicalization.mjs",
+        "bytes": 644,
+        "sha256": "31b5e9d8e0de668697714a4595c9ab2ed34689efea2132305a354fa308a76167"
+      },
+      {
+        "path": "tests/protocol-canonicalization.test.mjs",
+        "bytes": 5777,
+        "sha256": "666773f1345e434245e2fe8f2439789d408cb859861197e08c9502d930129036"
+      }
+    ]
+  },
+  "rfc8785": {
+    "canonicalExample": {
+      "canonicalText": "{\"literals\":[null,true,false],\"numbers\":[333333333.3333333,1e+30,4.5,0.002,1e-27],\"string\":\"€$\\u000f\\nA'B\\\"\\\\\\\\\\\"/\"}",
+      "canonicalUtf8Hex": "7b226c69746572616c73223a5b6e756c6c2c747275652c66616c73655d2c226e756d62657273223a5b3333333333333333332e333333333333332c31652b33302c342e352c302e3030322c31652d32375d2c22737472696e67223a22e282ac245c75303030665c6e4127425c225c5c5c5c5c222f227d",
+      "canonicalBytes": 118,
+      "sha256": "2d5e01a318d0f0879ab568c4be289c8b1f64ef8921a53c6277d5e069978baacb"
+    },
+    "utf16PropertyOrder": ["\r", "1", "", "ö", "€", "😀", "דּ"],
+    "numberSamples": [
+      { "ieee754": "0000000000000000", "canonical": "0" },
+      { "ieee754": "8000000000000000", "canonical": "0" },
+      { "ieee754": "0000000000000001", "canonical": "5e-324" },
+      { "ieee754": "8000000000000001", "canonical": "-5e-324" },
+      { "ieee754": "7fefffffffffffff", "canonical": "1.7976931348623157e+308" },
+      { "ieee754": "ffefffffffffffff", "canonical": "-1.7976931348623157e+308" },
+      { "ieee754": "4340000000000000", "canonical": "9007199254740992" },
+      { "ieee754": "c340000000000000", "canonical": "-9007199254740992" },
+      { "ieee754": "4430000000000000", "canonical": "295147905179352830000" },
+      { "ieee754": "44b52d02c7e14af5", "canonical": "9.999999999999997e+22" },
+      { "ieee754": "44b52d02c7e14af6", "canonical": "1e+23" },
+      { "ieee754": "44b52d02c7e14af7", "canonical": "1.0000000000000001e+23" },
+      { "ieee754": "444b1ae4d6e2ef4e", "canonical": "999999999999999700000" },
+      { "ieee754": "444b1ae4d6e2ef4f", "canonical": "999999999999999900000" },
+      { "ieee754": "444b1ae4d6e2ef50", "canonical": "1e+21" },
+      { "ieee754": "3eb0c6f7a0b5ed8c", "canonical": "9.999999999999997e-7" },
+      { "ieee754": "3eb0c6f7a0b5ed8d", "canonical": "0.000001" },
+      { "ieee754": "41b3de4355555553", "canonical": "333333333.3333332" },
+      { "ieee754": "41b3de4355555554", "canonical": "333333333.33333325" },
+      { "ieee754": "41b3de4355555555", "canonical": "333333333.3333333" },
+      { "ieee754": "41b3de4355555556", "canonical": "333333333.3333334" },
+      { "ieee754": "41b3de4355555557", "canonical": "333333333.33333343" },
+      { "ieee754": "becbf647612f3696", "canonical": "-0.0000033333333333333333" },
+      { "ieee754": "43143ff3c1cb0959", "canonical": "1424953923781206.2" }
+    ],
+    "rejectedInputClasses": [
+      "NaN and infinity",
+      "lone surrogates",
+      "undefined, bigint, symbol, and function",
+      "sparse or extended arrays",
+      "cycles, accessors, serialization hooks, and non-JSON prototypes"
+    ]
+  },
+  "sha256": {
+    "outputBytes": 32,
+    "vectors": [
+      {
+        "id": "nist-empty",
+        "input": { "encoding": "ascii", "value": "", "bytes": 0 },
+        "digestHex": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "id": "nist-abc",
+        "input": { "encoding": "ascii", "value": "abc", "bytes": 3 },
+        "digestHex": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      {
+        "id": "nist-multiblock",
+        "input": {
+          "encoding": "ascii",
+          "value": "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+          "bytes": 56
+        },
+        "digestHex": "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+      },
+      {
+        "id": "padding-55",
+        "input": { "encoding": "repeat-byte", "byte": 97, "bytes": 55 },
+        "digestHex": "9f4390f8d30c2dd92ec9f095b65e2b9ae9b0a925a5258e241c9f1e910f734318"
+      },
+      {
+        "id": "padding-56",
+        "input": { "encoding": "repeat-byte", "byte": 97, "bytes": 56 },
+        "digestHex": "b35439a4ac6f0948b6d6f9e3c6af0f5f590ce20f1bde7090ef7970686ec6738a"
+      },
+      {
+        "id": "padding-63",
+        "input": { "encoding": "repeat-byte", "byte": 97, "bytes": 63 },
+        "digestHex": "7d3e74a05d7db15bce4ad9ec0658ea98e3f06eeecf16b4c6fff2da457ddc2f34"
+      },
+      {
+        "id": "padding-64",
+        "input": { "encoding": "repeat-byte", "byte": 97, "bytes": 64 },
+        "digestHex": "ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb"
+      },
+      {
+        "id": "padding-65",
+        "input": { "encoding": "repeat-byte", "byte": 97, "bytes": 65 },
+        "digestHex": "635361c48bb9eab14198e76ea8ab7f1a41685d6ad62aa9146d301d4f17eb0ae0"
+      }
+    ]
+  },
+  "desen": {
+    "digestFormat": "sha256:<64 lowercase hexadecimal characters>",
+    "digestFormatAccepted": true,
+    "source": {
+      "path": "examples/sign-in.source.desen.json",
+      "fileSha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1",
+      "projection": "omit only top-level authoring; retain extensions",
+      "rawCanonicalBytes": 2025,
+      "rawDigest": "sha256:1ecc6666503a5c9e5825f9db2455356bbbe22f48978a0016d00f4531b7bc4963",
+      "projectedCanonicalBytes": 1903,
+      "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878"
+    },
+    "bundle": {
+      "path": "examples/sign-in.bundle.desen.json",
+      "fileSha256": "96be7f18b7b825110d7ba3703c15124ab7a09b9926b01cde43633915eaaf2edf",
+      "projection": "omit only top-level revision and publication",
+      "rawCanonicalBytes": 2270,
+      "rawDigest": "sha256:adb67ee33f7e8f0428fb2da10c4762c9d4d0517fd90acc65ccbcace24efc3d73",
+      "projectedCanonicalBytes": 2088,
+      "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601"
+    },
+    "revisionMismatch": {
+      "path": "conformance/invalid/bundle-revision-mismatch.json",
+      "fileSha256": "9d62db332b8e62f54f1470489959b31c6ce34617a3103cb1bf8d370d870b87e2",
+      "storedRevision": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "calculatedRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601"
+    },
+    "regressionSources": [
+      {
+        "path": "examples/sortable-list.source.desen.json",
+        "fileSha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b",
+        "projectedCanonicalBytes": 1016,
+        "projectedDigest": "sha256:52f96e80d8e8b40f379bf4c872cb5abf78383cff0f08f861c1f96ba69472a2be"
+      },
+      {
+        "path": "examples/store-map.source.desen.json",
+        "fileSha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e",
+        "projectedCanonicalBytes": 1515,
+        "projectedDigest": "sha256:6ef45d43c603bd1e3fa0ccd4d538869be65a6782d5f51a87e0028a2cc1109990"
+      }
+    ]
+  },
+  "verification": {
+    "commands": [
+      "pnpm verify:protocol-canonicalization",
+      "pnpm test:protocol-canonicalization",
+      "pnpm check"
+    ],
+    "packageTests": 12,
+    "independentOracles": [
+      "fixed RFC 8785 expected text and bytes",
+      "fixed FIPS/NIST and SHA-256 padding vectors",
+      "Node.js crypto comparisons in root tests",
+      "frozen upstream tools/jcs.mjs for valid DESEN fixtures"
+    ]
+  },
+  "limitations": [
+    "This proves canonicalization and digest primitives, not DESEN structural or semantic validation.",
+    "Value-based canonicalization cannot recover duplicate names already discarded by a JSON parser; parsing must enforce I-JSON before this API.",
+    "Source and Bundle helpers implement only the Section 11 projections and do not prove a document is otherwise valid.",
+    "A raw Catalog JCS hash is not a capability package digest; package archive digest rules remain owned by M03-T04.",
+    "Publisher determinism, digest verification during activation, and stable diagnostics remain assigned to later tasks."
+  ]
+}

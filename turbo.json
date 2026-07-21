@@ -25,6 +25,8 @@
         "$TURBO_DEFAULT$",
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
         "../../scripts/lib/protocol-types.mjs",
+        "../../scripts/lib/protocol-canonicalization-proof.mjs",
+        "../../tests/protocol-canonicalization.test.mjs",
         "../../tests/protocol-snapshot-integrity.test.mjs",
         "../../tests/protocol-types.test.mjs"
       ],
@@ -36,6 +38,8 @@
         "$TURBO_DEFAULT$",
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
         "../../scripts/lib/protocol-types.mjs",
+        "../../scripts/lib/protocol-canonicalization-proof.mjs",
+        "../../tests/protocol-canonicalization.test.mjs",
         "../../tests/protocol-snapshot-integrity.test.mjs",
         "../../tests/protocol-types.test.mjs"
       ],

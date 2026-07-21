@@ -9,7 +9,9 @@ Local implementation preparation is complete and the private GitHub repository i
 DESEN 0.1.0 input snapshot. M02-T02 then assigned all 269 reviewed prose entries and all 989
 machine-enumerated JSON Schema constraints to future implementation and test owners. M02-T03 now
 derives the Source, Bundle, and Catalog TypeScript roots deterministically from those frozen
-schemas. Runtime validation and runtime semantics have not started and are not claimed as proven.
+schemas. M02-T04 now provides RFC 8785 canonical JSON, platform-neutral SHA-256, and the exact
+Source-digest and Bundle-revision projections. Runtime validation and runtime semantics have not
+started and are not claimed as proven.
 
 ## Current milestone
 
@@ -17,9 +19,10 @@ schemas. Runtime validation and runtime semantics have not started and are not c
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M02 — Protocol package and validator`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
-  `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`
+  `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
+  `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`
 - Active task: None
-- Ready next task: `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`
+- Ready next task: `M02-T05 — Stable diagnostic model and JSON Pointer support`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -39,6 +42,10 @@ schemas. Runtime validation and runtime semantics have not started and are not c
 - Three schema-root declarations are generated with a pinned build-only tool, exposed as three
   documented package types, and protected by 10 deterministic drift tests plus strict compile-time
   positive and negative fixtures.
+- RFC 8785 canonicalization, UTF-8 encoding, pure ECMAScript SHA-256, exact digest formatting,
+  Source authoring exclusion, and Bundle revision/publication exclusion pass 12 package tests and
+  8 root evidence/differential tests. All 24 finite RFC number samples, 8 SHA-256 goldens, and 5
+  frozen DESEN documents are content-addressed in the M02-T04 artifact.
 - The foundation passes formatting, lint, strict typecheck, build, protocol integrity tests,
   protocol traceability and type-generation tests, remaining scaffold test runners, and
   dependency-boundary checks.
@@ -52,8 +59,8 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M02-T04`: implement RFC 8785-compatible canonicalization and SHA-256 golden tests.
-Do not begin diagnostics or validator semantics in the same task.
+Complete only `M02-T05`: implement the stable shared diagnostic model and JSON Pointer support.
+Do not begin structural or semantic validator behavior in the same task.
 
 M02-T02 evidence:
 
@@ -65,6 +72,12 @@ M02-T03 evidence:
 - `docs/proof/PROTOCOL-TYPES.md`
 - `docs/proof/artifacts/protocol-0.1.0-types.json`
 - artifact SHA-256: `e21826f5d171aefbed2e3fd833e6f0dc10de1bac71e7b74f51a255f43bb37971`
+
+M02-T04 evidence:
+
+- `docs/proof/PROTOCOL-CANONICALIZATION.md`
+- `docs/proof/artifacts/protocol-0.1.0-canonicalization.json`
+- artifact SHA-256: `7c96deb2206cec49b312f1a4f385d0c1720aa06924a4268f7b56c3391f79d2aa`
 
 ## Status vocabulary
 
