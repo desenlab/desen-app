@@ -34,3 +34,8 @@ M02-T02's traceability artifact is planning evidence rather than a behavior clai
 does not change any `P-*` status:
 `protocol-0.1.0-traceability.json`
 `sha256:749cbae719a5deb216e9ed3be171eb710b47fc547f4f270dbba21bb14c2af514`.
+
+M02-T03's deterministic type-generation artifact is compile-time structural evidence and likewise
+does not change any `P-*` status:
+`protocol-0.1.0-types.json`
+`sha256:e21826f5d171aefbed2e3fd833e6f0dc10de1bac71e7b74f51a255f43bb37971`.

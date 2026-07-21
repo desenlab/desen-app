@@ -7,8 +7,9 @@ Last updated: 2026-07-21
 Local implementation preparation is complete and the private GitHub repository is active at
 `desenlab/desen-app`. M02-T01 proved that the implementation consumes an exact, checksum-enforced
 DESEN 0.1.0 input snapshot. M02-T02 then assigned all 269 reviewed prose entries and all 989
-machine-enumerated JSON Schema constraints to future implementation and test owners. Validator and
-runtime semantics have not started and are not claimed as proven.
+machine-enumerated JSON Schema constraints to future implementation and test owners. M02-T03 now
+derives the Source, Bundle, and Catalog TypeScript roots deterministically from those frozen
+schemas. Runtime validation and runtime semantics have not started and are not claimed as proven.
 
 ## Current milestone
 
@@ -16,9 +17,9 @@ runtime semantics have not started and are not claimed as proven.
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M02 — Protocol package and validator`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
-  `M02-T02 — Complete protocol traceability`
+  `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`
 - Active task: None
-- Ready next task: `M02-T03 — Schema-derived or mechanically checked types`
+- Ready next task: `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -35,8 +36,12 @@ runtime semantics have not started and are not claimed as proven.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
 - The complete protocol trace reviews 196 normative headings, assigns 269 prose entries, and maps
   all 989 schema constraints exactly once across 61 families; 11 verifier mutation tests pass.
+- Three schema-root declarations are generated with a pinned build-only tool, exposed as three
+  documented package types, and protected by 10 deterministic drift tests plus strict compile-time
+  positive and negative fixtures.
 - The foundation passes formatting, lint, strict typecheck, build, protocol integrity tests,
-  protocol traceability tests, remaining scaffold test runners, and dependency-boundary checks.
+  protocol traceability and type-generation tests, remaining scaffold test runners, and
+  dependency-boundary checks.
 
 ## Current blocker
 
@@ -47,14 +52,19 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M02-T03`: generate TypeScript types from the frozen JSON Schemas or prove through a
-mechanical check that maintained types remain structurally aligned. Do not begin canonicalization,
-diagnostic, or validator semantics in the same task.
+Complete only `M02-T04`: implement RFC 8785-compatible canonicalization and SHA-256 golden tests.
+Do not begin diagnostics or validator semantics in the same task.
 
 M02-T02 evidence:
 
 - `docs/proof/artifacts/protocol-0.1.0-traceability.json`
 - artifact SHA-256: `749cbae719a5deb216e9ed3be171eb710b47fc547f4f270dbba21bb14c2af514`
+
+M02-T03 evidence:
+
+- `docs/proof/PROTOCOL-TYPES.md`
+- `docs/proof/artifacts/protocol-0.1.0-types.json`
+- artifact SHA-256: `e21826f5d171aefbed2e3fd833e6f0dc10de1bac71e7b74f51a255f43bb37971`
 
 ## Status vocabulary
 

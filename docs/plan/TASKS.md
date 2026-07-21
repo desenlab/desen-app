@@ -43,7 +43,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | ------- | ----------- | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | M02-T01 | DONE        | M01-T07         | Checksum-verified upstream 0.1.0 snapshot vendored read-only; P-01 evidence                                            |
 | M02-T02 | DONE        | M02-T01         | 269 prose traces and all 989 schema constraints assigned to exact owner/test tasks; deterministic checker and artifact |
-| M02-T03 | NOT_STARTED | M02-T01–M02-T02 | Types generated from or mechanically checked against JSON Schema                                                       |
+| M02-T03 | DONE        | M02-T01–M02-T02 | Types generated from or mechanically checked against JSON Schema                                                       |
 | M02-T04 | NOT_STARTED | M02-T01         | RFC 8785-compatible canonicalization and SHA-256 golden tests                                                          |
 | M02-T05 | NOT_STARTED | M02-T03         | Stable diagnostic model and JSON Pointer support                                                                       |
 | M02-T06 | NOT_STARTED | M02-T03–M02-T05 | Source, Bundle, Catalog, and embedded-schema structural validation                                                     |

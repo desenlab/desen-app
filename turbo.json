@@ -24,7 +24,9 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
-        "../../tests/protocol-snapshot-integrity.test.mjs"
+        "../../scripts/lib/protocol-types.mjs",
+        "../../tests/protocol-snapshot-integrity.test.mjs",
+        "../../tests/protocol-types.test.mjs"
       ],
       "outputs": []
     },
@@ -33,7 +35,9 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
-        "../../tests/protocol-snapshot-integrity.test.mjs"
+        "../../scripts/lib/protocol-types.mjs",
+        "../../tests/protocol-snapshot-integrity.test.mjs",
+        "../../tests/protocol-types.test.mjs"
       ],
       "outputs": ["coverage/**"]
     },

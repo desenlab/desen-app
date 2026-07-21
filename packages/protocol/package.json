@@ -19,7 +19,7 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test ../../tests/protocol-snapshot-integrity.test.mjs",
-    "test:coverage": "node --test --experimental-test-coverage ../../tests/protocol-snapshot-integrity.test.mjs"
+    "test": "node --test ../../tests/protocol-snapshot-integrity.test.mjs ../../tests/protocol-types.test.mjs",
+    "test:coverage": "node --test --experimental-test-coverage ../../tests/protocol-snapshot-integrity.test.mjs ../../tests/protocol-types.test.mjs"
   }
 }
