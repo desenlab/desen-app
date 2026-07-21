@@ -23,6 +23,7 @@
     "verify:structural-validation": "node scripts/verify-structural-validators.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:semantic-foundation": "vitest run test/semantic-foundation.test.ts",
     "test:structural-validation": "vitest run test/structural-validation.test.ts",
     "test:coverage": "vitest run --coverage"
   },

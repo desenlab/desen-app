@@ -371,6 +371,14 @@
         "index.d.ts.map",
         "index.js",
         "index.js.map",
+        "semantic-diagnostics.d.ts",
+        "semantic-diagnostics.d.ts.map",
+        "semantic-diagnostics.js",
+        "semantic-diagnostics.js.map",
+        "semantic-validation.d.ts",
+        "semantic-validation.d.ts.map",
+        "semantic-validation.js",
+        "semantic-validation.js.map",
         "standalone-runtime.d.ts",
         "standalone-runtime.d.ts.map",
         "standalone-runtime.js",
@@ -396,6 +404,8 @@
         "embedded-schema-validation.js",
         "generated/0.1.0/structural-validators.js",
         "index.js",
+        "semantic-diagnostics.js",
+        "semantic-validation.js",
         "standalone-runtime.js",
         "structural-diagnostics.js",
         "structural-validation.js",
@@ -426,8 +436,8 @@
     "trackedFiles": [
       {
         "path": "package.json",
-        "bytes": 4007,
-        "sha256": "933f6c09127fc402d9d194a5f53027d1d6971792c2612cb13a132e5ecea1602a"
+        "bytes": 4589,
+        "sha256": "39f61f688c37a750cdcbb011233c0318335eb561f5c55a87f9f98df9d93dbed4"
       },
       {
         "path": "pnpm-lock.yaml",
@@ -436,8 +446,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 2126,
-        "sha256": "82c045835200715f9a68195eb8b901527054e74e277844bee6b950920ede178e"
+        "bytes": 2384,
+        "sha256": "967ba08327723abda1c5f69481d698cb83f703830c837cad6b0a2d788000c0d1"
       },
       {
         "path": "THIRD_PARTY_NOTICES.md",
@@ -471,8 +481,8 @@
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 1097,
-        "sha256": "3976253d8728f0f637d1d51d50546863eccdb325ba079c17004660d24f037474"
+        "bytes": 1176,
+        "sha256": "8d9c7ded95fb1b04b5dbe83f494e55163001d45be53e0c6ab05530b25e700087"
       },
       {
         "path": "packages/validator/THIRD_PARTY_NOTICES.md",
@@ -491,8 +501,8 @@
       },
       {
         "path": "packages/validator/src/index.ts",
-        "bytes": 558,
-        "sha256": "66b4c602e4844e9eec2807f5b6f9a643ac203640db2e3a763775870a1f941435"
+        "bytes": 1293,
+        "sha256": "0ae08a1cf278915cfd234d14eef802053777e9414f525d9165b99f07616317d5"
       },
       {
         "path": "packages/validator/src/validation-internals.ts",
@@ -556,13 +566,13 @@
       },
       {
         "path": "packages/validator/README.md",
-        "bytes": 9576,
-        "sha256": "69c097d64ab7ded1750d3f5605a9612b01438a1226bf96cf7894775f3ae20f12"
+        "bytes": 13074,
+        "sha256": "90f7d7b3b372457f744effd488c7974cb17022df2050a3b3360f35eb4bd6f0e8"
       },
       {
         "path": "scripts/lib/protocol-structural-validation-proof.mjs",
-        "bytes": 39508,
-        "sha256": "02323ff600d1cd8f93ab4ce1d1c4558b7b08c3084552ec3bd34d3b6fd6c3092d"
+        "bytes": 39653,
+        "sha256": "8fef073ba4bee4f90be75fd0681d655f47ca630cb661981a10c8e17321c37cd0"
       },
       {
         "path": "scripts/generate-protocol-structural-validation-proof.mjs",
@@ -576,8 +586,8 @@
       },
       {
         "path": "tests/protocol-structural-validation.test.mjs",
-        "bytes": 8329,
-        "sha256": "a6deafe665113424d9308d643e7bcb033f49b41cdcb92f4ca984f9622772409a"
+        "bytes": 8384,
+        "sha256": "070e13c188e03cecf9adef1d1020a6b244320c661e621733a929be8e491e1752"
       }
     ]
   },

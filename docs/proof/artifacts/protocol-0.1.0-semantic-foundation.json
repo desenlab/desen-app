@@ -1,0 +1,558 @@
+{
+  "schemaVersion": 1,
+  "task": "M02-T07",
+  "result": "PASS",
+  "protocolVersion": "0.1.0",
+  "profile": "desen-semantic-foundation-v1",
+  "prerequisite": {
+    "structuralValidation": {
+      "path": "docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
+      "bytes": 22068,
+      "sha256": "bcd4d25168e9d65fa4b5568cd027131799d7d6b953687fbe125ad37f4e82996a",
+      "task": "M02-T06",
+      "profile": "desen-structural-validation-v1"
+    }
+  },
+  "frozenInput": {
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+    "catalogTuple": {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react",
+      "packageDigest": "sha256:c8e15513005c9f54d2fc35b60c01f9f7d187dabd3c5efba71cd4dc6db2542a1f"
+    }
+  },
+  "traceability": {
+    "schemaFamilies": [
+      "SC-004",
+      "SC-005",
+      "SC-006",
+      "SC-007",
+      "SC-009",
+      "SC-013",
+      "SC-016",
+      "SC-017",
+      "SC-018",
+      "SC-020",
+      "SC-024",
+      "SC-025",
+      "SC-026",
+      "SC-027",
+      "SC-034",
+      "SC-046",
+      "SC-049",
+      "SC-050",
+      "SC-051"
+    ],
+    "schemaFamilyCount": 19,
+    "schemaConstraints": 201,
+    "conformanceResponsibilities": ["C-003"],
+    "proseRules": [
+      "R-014",
+      "R-015",
+      "R-016",
+      "R-017",
+      "R-023",
+      "R-024",
+      "R-033",
+      "R-069",
+      "R-083",
+      "R-147"
+    ],
+    "mandatoryClauses": [
+      { "id": "N-006", "status": "TESTED" },
+      { "id": "N-007", "status": "TESTED" },
+      { "id": "N-008", "status": "TESTED" },
+      { "id": "N-009", "status": "TESTED" },
+      { "id": "N-012", "status": "PLANNED" },
+      { "id": "N-017", "status": "TESTED" },
+      { "id": "N-022", "status": "TESTED" },
+      { "id": "N-025", "status": "TESTED" }
+    ],
+    "recommendedClauses": [{ "id": "S-003", "status": "PLANNED" }],
+    "coreDiagnostics": [
+      { "id": "D-003", "code": "DUPLICATE_SURFACE_ID" },
+      { "id": "D-004", "code": "DUPLICATE_NODE_ID" },
+      { "id": "D-005", "code": "ENTRY_NOT_FOUND" },
+      { "id": "D-006", "code": "UNKNOWN_CAPABILITY" },
+      { "id": "D-007", "code": "AMBIGUOUS_CAPABILITY" }
+    ],
+    "implementationDiagnostics": [
+      "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH",
+      "run.desen.validator/INVALID_SEMVER"
+    ],
+    "implementationFinding": "PF-009"
+  },
+  "publicApi": {
+    "package": "@desen/validator",
+    "runtimeExports": [
+      "isExactSemanticVersion",
+      "validateDesenBundleSemantics",
+      "validateDesenCatalogSemantics",
+      "validateDesenCatalogSet",
+      "validateDesenSemanticFoundation",
+      "validateDesenSourceSemantics"
+    ],
+    "catalogSetBoundary": "validateDesenCatalogSet returns the only branded immutable value accepted by Source and Bundle semantics",
+    "failureValue": "absent",
+    "successValue": "independent recursively frozen JSON snapshot"
+  },
+  "semanticVersioning": {
+    "standard": "Semantic Versioning 2.0.0 exact syntax",
+    "normalization": "none",
+    "precedenceComparison": "not used for package identity",
+    "goldens": [
+      { "version": "0.0.0", "valid": true },
+      { "version": "1.2.3", "valid": true },
+      { "version": "1.0.0-0", "valid": true },
+      { "version": "1.0.0-alpha", "valid": true },
+      { "version": "1.0.0-alpha.1", "valid": true },
+      { "version": "1.0.0-0.3.7", "valid": true },
+      { "version": "1.0.0-x.7.z.92", "valid": true },
+      { "version": "1.0.0+20130313144700", "valid": true },
+      { "version": "1.0.0+001", "valid": true },
+      { "version": "1.0.0-beta+exp.sha.5114f85", "valid": true },
+      { "version": "999999999999999999999999999999.0.0", "valid": true },
+      { "version": "1", "valid": false },
+      { "version": "1.2", "valid": false },
+      { "version": "01.2.3", "valid": false },
+      { "version": "1.02.3", "valid": false },
+      { "version": "1.2.03", "valid": false },
+      { "version": "v1.2.3", "valid": false },
+      { "version": "=1.2.3", "valid": false },
+      { "version": "^1.2.3", "valid": false },
+      { "version": "1.2.x", "valid": false },
+      { "version": "1.2.3-", "valid": false },
+      { "version": "1.2.3+", "valid": false },
+      { "version": "1.2.3-01", "valid": false },
+      { "version": "1.2.3-alpha..1", "valid": false },
+      { "version": "1.2.3+build..1", "valid": false },
+      { "version": " 1.2.3", "valid": false },
+      { "version": "1.2.3 ", "valid": false },
+      { "version": "1.2.3-α", "valid": false }
+    ],
+    "integration": {
+      "catalog": [{ "code": "run.desen.validator/INVALID_SEMVER", "pointer": "/version" }],
+      "source": [
+        { "code": "run.desen.validator/INVALID_SEMVER", "pointer": "/catalogs/0/version" }
+      ],
+      "bundle": [
+        { "code": "run.desen.validator/INVALID_SEMVER", "pointer": "/requires/catalogs/0/version" }
+      ]
+    }
+  },
+  "catalogRequirements": {
+    "comparison": "literal id/version/target equality without trim, case-fold, or substitution",
+    "mismatchValues": {
+      "id": "com.example.web-catalog-x",
+      "version": "1.0.1",
+      "target": "Web-React"
+    },
+    "sourceMismatches": {
+      "id": [
+        { "code": "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH", "pointer": "/catalogs/0" }
+      ],
+      "version": [
+        { "code": "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH", "pointer": "/catalogs/0" }
+      ],
+      "target": [
+        { "code": "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH", "pointer": "/catalogs/0" }
+      ]
+    },
+    "bundleMismatches": {
+      "id": [
+        {
+          "code": "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH",
+          "pointer": "/requires/catalogs/0"
+        }
+      ],
+      "version": [
+        {
+          "code": "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH",
+          "pointer": "/requires/catalogs/0"
+        }
+      ],
+      "target": [
+        {
+          "code": "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH",
+          "pointer": "/requires/catalogs/0"
+        }
+      ]
+    },
+    "forgedCatalogSet": [
+      { "code": "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH", "pointer": "/catalogs" }
+    ],
+    "undeclaredExtraCatalog": {
+      "acceptedInTrustedPool": true,
+      "ignoredWhenUnused": true,
+      "capabilityNotAuthorized": [
+        {
+          "code": "UNKNOWN_CAPABILITY",
+          "pointer": "/surfaces/sign-in/root/slots/default/4/on/press/0/operation"
+        }
+      ]
+    }
+  },
+  "catalogNamespace": {
+    "validCatalogCount": 1,
+    "duplicateCapability": "com.example.ui/Button",
+    "duplicateDiagnostics": [
+      { "code": "AMBIGUOUS_CAPABILITY", "pointer": "/1/components/com.example.ui~1Button" }
+    ],
+    "winnerSelection": "none",
+    "lookupStructure": "one namespace with explicit ambiguous outcomes"
+  },
+  "frozenValidation": {
+    "validConformance": [
+      { "file": "valid/web.catalog.json", "target": "catalog", "valid": true },
+      { "file": "valid/sign-in.source.json", "target": "source", "valid": true },
+      { "file": "valid/sign-in.bundle.json", "target": "bundle", "valid": true }
+    ],
+    "genericDispatcherTargets": ["catalog", "source", "bundle"],
+    "officialSemanticInvalid": [
+      {
+        "file": "invalid/source-duplicate-node-id.json",
+        "target": "source",
+        "diagnostics": [
+          { "code": "DUPLICATE_NODE_ID", "pointer": "/surfaces/home/root/slots/default/1/id" }
+        ]
+      },
+      {
+        "file": "invalid/source-unknown-capability.json",
+        "target": "source",
+        "diagnostics": [
+          { "code": "UNKNOWN_CAPABILITY", "pointer": "/surfaces/home/root/slots/default/0/use" }
+        ]
+      }
+    ],
+    "laterTaskScopeAccepted": [
+      { "file": "invalid/source-unknown-event.json", "target": "source", "valid": true },
+      { "file": "invalid/bundle-revision-mismatch.json", "target": "bundle", "valid": true },
+      { "file": "invalid/bundle-catalog-digest-mismatch.json", "target": "bundle", "valid": true }
+    ],
+    "validExamples": [
+      { "file": "catalog.web.example.json", "target": "catalog", "valid": true },
+      { "file": "sign-in.source.desen.json", "target": "source", "valid": true },
+      { "file": "sign-in.bundle.desen.json", "target": "bundle", "valid": true },
+      { "file": "sortable-list.source.desen.json", "target": "source", "valid": true },
+      { "file": "store-map.source.desen.json", "target": "source", "valid": true }
+    ]
+  },
+  "extensionOpacity": {
+    "nonNamespacedKeyAccepted": true,
+    "dangerousOwnKeysPreserved": ["__proto__", "constructor"],
+    "apparentCoreFieldsIgnored": ["use", "$ref", "version"],
+    "arrayOrderPreserved": [3, 2, 1],
+    "callerMutationIsolated": true,
+    "resultDeeplyFrozen": true,
+    "prototypePolluted": false
+  },
+  "determinism": {
+    "repeatedBuildInputsEqual": true,
+    "objectInsertionOrderIndependent": true,
+    "objectPermutation": "all object members recursively reversed; array order preserved",
+    "comparison": "locale-independent ECMAScript code-unit order",
+    "arrays": "protocol-semantic order preserved",
+    "diagnosticIdentity": [
+      { "code": "DUPLICATE_NODE_ID", "pointer": "/surfaces/home/root/slots/default/1/id" }
+    ]
+  },
+  "security": {
+    "rawInputs": "re-enter the M02-T06 immutable structural boundary before semantic inspection",
+    "untrustedCatalogSet": "fails closed without accepting a forged TypeScript cast",
+    "catalogLocationIo": "none; Source location remains an inert discovery hint",
+    "dynamicExecution": false,
+    "platformAudit": {
+      "sourceFiles": [
+        "embedded-schema-validation.ts",
+        "generated/0.1.0/structural-validators.ts",
+        "index.ts",
+        "semantic-diagnostics.ts",
+        "semantic-validation.ts",
+        "standalone-runtime.ts",
+        "structural-diagnostics.ts",
+        "structural-validation.ts",
+        "uri-reference.ts",
+        "validation-internals.ts"
+      ],
+      "distributionFiles": [
+        "embedded-schema-validation.d.ts",
+        "embedded-schema-validation.d.ts.map",
+        "embedded-schema-validation.js",
+        "embedded-schema-validation.js.map",
+        "generated/0.1.0/structural-validators.d.ts",
+        "generated/0.1.0/structural-validators.d.ts.map",
+        "generated/0.1.0/structural-validators.js",
+        "generated/0.1.0/structural-validators.js.map",
+        "index.d.ts",
+        "index.d.ts.map",
+        "index.js",
+        "index.js.map",
+        "semantic-diagnostics.d.ts",
+        "semantic-diagnostics.d.ts.map",
+        "semantic-diagnostics.js",
+        "semantic-diagnostics.js.map",
+        "semantic-validation.d.ts",
+        "semantic-validation.d.ts.map",
+        "semantic-validation.js",
+        "semantic-validation.js.map",
+        "standalone-runtime.d.ts",
+        "standalone-runtime.d.ts.map",
+        "standalone-runtime.js",
+        "standalone-runtime.js.map",
+        "structural-diagnostics.d.ts",
+        "structural-diagnostics.d.ts.map",
+        "structural-diagnostics.js",
+        "structural-diagnostics.js.map",
+        "structural-validation.d.ts",
+        "structural-validation.d.ts.map",
+        "structural-validation.js",
+        "structural-validation.js.map",
+        "uri-reference.d.ts",
+        "uri-reference.d.ts.map",
+        "uri-reference.js",
+        "uri-reference.js.map",
+        "validation-internals.d.ts",
+        "validation-internals.d.ts.map",
+        "validation-internals.js",
+        "validation-internals.js.map"
+      ],
+      "runtimeFiles": [
+        "embedded-schema-validation.js",
+        "generated/0.1.0/structural-validators.js",
+        "index.js",
+        "semantic-diagnostics.js",
+        "semantic-validation.js",
+        "standalone-runtime.js",
+        "structural-diagnostics.js",
+        "structural-validation.js",
+        "uri-reference.js",
+        "validation-internals.js"
+      ],
+      "forbiddenConstructs": [
+        "runtime require",
+        "eval",
+        "Function constructor",
+        "dynamic import",
+        "network fetch",
+        "Node built-in import",
+        "framework import",
+        "workspace absolute path",
+        "frozen upstream runtime import",
+        "TypeScript runtime import"
+      ]
+    }
+  },
+  "implementation": {
+    "platform": "ECMAScript 2023; no Node, DOM, React, or browser API in production source",
+    "runtimeDependencies": [
+      { "name": "@desen/protocol", "version": "workspace:*", "license": "Apache-2.0" }
+    ],
+    "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
+    "trackedFiles": [
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 7356,
+        "sha256": "36e55a04a76679749c006603f1ecbb1060baf6a73a7f53c85b35fb5cf3d4aef0"
+      },
+      {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 23922,
+        "sha256": "fd8aaffeb8a20335ba35109979fc6821d129240a644b108bdd467b8d39807b93"
+      },
+      {
+        "path": "docs/proof/protocol-0.1.0-traceability.json",
+        "bytes": 134870,
+        "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+      },
+      {
+        "path": "package.json",
+        "bytes": 4589,
+        "sha256": "39f61f688c37a750cdcbb011233c0318335eb561f5c55a87f9f98df9d93dbed4"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/protocol/src/canonicalization.ts",
+        "bytes": 17820,
+        "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
+      },
+      {
+        "path": "packages/protocol/src/diagnostics.ts",
+        "bytes": 13831,
+        "sha256": "d9cffbaae026c1bf027624f8c21b14172cdcf52fc3e546708e7becb0973019a4"
+      },
+      {
+        "path": "packages/protocol/src/index.ts",
+        "bytes": 3261,
+        "sha256": "e2ceeea8bd84d4d7e6e9431bc970cd8168478d8a7cad27f0f4909f71fabe8bcb"
+      },
+      {
+        "path": "packages/protocol/src/json-pointer.ts",
+        "bytes": 7460,
+        "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
+      },
+      {
+        "path": "packages/validator/README.md",
+        "bytes": 13074,
+        "sha256": "90f7d7b3b372457f744effd488c7974cb17022df2050a3b3360f35eb4bd6f0e8"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 1176,
+        "sha256": "8d9c7ded95fb1b04b5dbe83f494e55163001d45be53e0c6ab05530b25e700087"
+      },
+      {
+        "path": "packages/validator/scripts/clean-dist.mjs",
+        "bytes": 808,
+        "sha256": "e40927b824fdfce7f16a4698522bffc63d4f280f3bf9fe604034ea10d97c8adc"
+      },
+      {
+        "path": "packages/validator/scripts/generate-structural-validators.mjs",
+        "bytes": 851,
+        "sha256": "4ba802da3fabd66863109e42c13a440e9db9177cd1040cacb68f05bab76235fa"
+      },
+      {
+        "path": "packages/validator/scripts/lib/structural-validator-codegen.mjs",
+        "bytes": 22644,
+        "sha256": "beb61667243cb1db3118cc3eca4c3afcccf431e827eef7b87d1018e0db395779"
+      },
+      {
+        "path": "packages/validator/scripts/verify-structural-validators.mjs",
+        "bytes": 672,
+        "sha256": "cb53a3ff7ce07f03c12eeef66f812ba87fcb1ed962461f0ac40c9700765f2738"
+      },
+      {
+        "path": "packages/validator/src/embedded-schema-validation.ts",
+        "bytes": 9807,
+        "sha256": "f3fa31f08989c991b4b896cb41e0765abe97c5cc171d197e2d8c1043dc24737b"
+      },
+      {
+        "path": "packages/validator/src/generated/0.1.0/structural-validators.ts",
+        "bytes": 761360,
+        "sha256": "d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd"
+      },
+      {
+        "path": "packages/validator/src/index.ts",
+        "bytes": 1293,
+        "sha256": "0ae08a1cf278915cfd234d14eef802053777e9414f525d9165b99f07616317d5"
+      },
+      {
+        "path": "packages/validator/src/semantic-diagnostics.ts",
+        "bytes": 5183,
+        "sha256": "ad3711b748453db9f24d85c68a57c5f238a7d8046789906cdcd0111fc8d1781c"
+      },
+      {
+        "path": "packages/validator/src/semantic-validation.ts",
+        "bytes": 31291,
+        "sha256": "7aeb1ad014df92a11e6db7a69c34b187d50f20aa9abcb3ba4bf5df287c80e13f"
+      },
+      {
+        "path": "packages/validator/src/standalone-runtime.ts",
+        "bytes": 1963,
+        "sha256": "3fcba82ea37bf1027d67375bc51cb329b0bee4f76cb324232c9e40bf9aecb0cf"
+      },
+      {
+        "path": "packages/validator/src/structural-diagnostics.ts",
+        "bytes": 3574,
+        "sha256": "efdb86e5db349f8dee694a7d182ec24d0d0e8764618ad1108edc7a61b2c6b85a"
+      },
+      {
+        "path": "packages/validator/src/structural-validation.ts",
+        "bytes": 8399,
+        "sha256": "439082c5edf75473aa2d1d6580906a53186058e7c97b3e572ad25550dbe480ca"
+      },
+      {
+        "path": "packages/validator/src/uri-reference.ts",
+        "bytes": 5134,
+        "sha256": "aba2dcb9d62f17a1abfd9f10a8bad2d0c1a15453bd70563fa6a7c1607479c81f"
+      },
+      {
+        "path": "packages/validator/src/validation-internals.ts",
+        "bytes": 2396,
+        "sha256": "341e4cc2737afd8fa9047a274d9b9f8301f9346c50c9ea2b912b793970609392"
+      },
+      {
+        "path": "packages/validator/test/semantic-foundation.test.ts",
+        "bytes": 32893,
+        "sha256": "fe9db79a8f585132b5b740aae4bd54307ecff5a1b00110678ccf35e59052d6d4"
+      },
+      {
+        "path": "packages/validator/test/structural-validation.test.ts",
+        "bytes": 24492,
+        "sha256": "25cb7fe4469ce64f91459c1679d1a61dda2b22751b65309b3d0cd41240e1285b"
+      },
+      {
+        "path": "packages/validator/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/validator/tsconfig.json",
+        "bytes": 167,
+        "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 93999,
+        "sha256": "cf6e969d99bcac203d13fab6defed006c47b656d37f77ab31bcfc9bd3ab5e252"
+      },
+      {
+        "path": "scripts/generate-protocol-semantic-foundation-proof.mjs",
+        "bytes": 832,
+        "sha256": "8250e3d9d56ff8190ce89f285bf73d4eb8ad4c4e9926f55b71194b4ca33ad80d"
+      },
+      {
+        "path": "scripts/lib/protocol-semantic-foundation-proof.mjs",
+        "bytes": 44523,
+        "sha256": "c2d23e8d58c98387dfb8d5dc69b188042ede14fffe28c72b5bff9bb348c90025"
+      },
+      {
+        "path": "scripts/verify-protocol-semantic-foundation.mjs",
+        "bytes": 655,
+        "sha256": "1f4708aac59380a6a7f5b0c93eab06ed6bf496cb8aa948e7b92aaf38d0ad6d47"
+      },
+      {
+        "path": "tests/protocol-semantic-foundation.test.mjs",
+        "bytes": 9893,
+        "sha256": "fc9e5e9c39231392ad7fce3774dacfee06c3ccfa2c0607ad562abfa8187d1c7f"
+      },
+      {
+        "path": "turbo.json",
+        "bytes": 2384,
+        "sha256": "967ba08327723abda1c5f69481d698cb83f703830c837cad6b0a2d788000c0d1"
+      }
+    ]
+  },
+  "verification": {
+    "commands": [
+      "pnpm generate:protocol-semantic-foundation",
+      "pnpm verify:protocol-semantic-foundation",
+      "pnpm test:protocol-semantic-foundation",
+      "pnpm check"
+    ],
+    "independentAnchors": [
+      "byte-verified M02-T06 structural-validation artifact dependency",
+      "reviewed 19-family / 201-constraint trace ownership",
+      "BCP 14 N-006/N-007/N-008/N-009/N-012/N-017/N-022/N-025 and S-003 ledger rows",
+      "frozen valid, duplicate, unknown, later-task fence, and example documents",
+      "strict Semantic Versioning 2.0.0 positive and negative goldens",
+      "source and built-distribution platform audits"
+    ]
+  },
+  "limitations": [
+    "M02-T07 validates semantic identity and exact capability existence, not component props, slots, style parts, or visual-state contracts owned by M02-T08.",
+    "Event, command, behavior attachment, conflict, and payload contracts remain M02-T09.",
+    "State, predicate, repeat, alias, and ValueSpec binding semantics remain M02-T10.",
+    "Resource input/policy, operation input, actions, navigation, and command-target semantics remain M02-T11.",
+    "Catalog acquisition, trust, digest integrity, publication, activation, and package availability remain M06 and M07 responsibilities; Source location is never fetched here.",
+    "Unknown extension keys remain opaque; reverse-domain naming is a recommendation and therefore not a validation failure.",
+    "Raw duplicate JSON member names require a future I-JSON text-ingestion boundary, and finite resource-limit policy remains a later task.",
+    "This foundation does not claim complete official-suite parity, G02, or any Proof Matrix P-* result."
+  ]
+}

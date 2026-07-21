@@ -47,7 +47,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | M02-T04 | DONE        | M02-T01         | RFC 8785-compatible canonicalization and SHA-256 golden tests                                                          |
 | M02-T05 | DONE        | M02-T03         | Stable diagnostic model and JSON Pointer support                                                                       |
 | M02-T06 | DONE        | M02-T03–M02-T05 | Source, Bundle, Catalog, and embedded-schema structural validation                                                     |
-| M02-T07 | NOT_STARTED | M02-T06         | Identity, SemVer, entry, catalog namespace, extension, and reference validation                                        |
+| M02-T07 | DONE        | M02-T06         | Identity, SemVer, entry, catalog namespace, extension, and reference validation                                        |
 | M02-T08 | NOT_STARTED | M02-T07         | Component prop, slot, style-part, and visual-state contract validation                                                 |
 | M02-T09 | NOT_STARTED | M02-T07         | Event, command, behavior attachment, conflict, and payload-contract validation                                         |
 | M02-T10 | NOT_STARTED | M02-T07         | State, predicate, repeat, alias, and static binding validation                                                         |

@@ -135,9 +135,10 @@ structural stage:
 - Catalog digest mismatch.
 
 Keeping those vectors structurally valid is positive evidence for the task boundary: M02-T06 does
-not silently absorb identity, catalog, reference, or integrity rules assigned to M02-T07 and later
-tasks. Root-invalid inputs also stop before embedded traversal, preventing secondary errors from an
-untrusted outer shape.
+not silently absorb identity, catalog, reference, or integrity rules assigned to later stages.
+M02-T07 now consumes the first two vectors as semantic-foundation failures while deliberately
+leaving the other three to their later owners. Root-invalid inputs also stop before embedded
+traversal, preventing secondary errors from an untrusted outer shape.
 
 Tests additionally cover deterministic ordering and de-duplication, RFC 6901 escaping, unsupported
 protocol mapping, input non-mutation, immutable snapshots, foreign dialects, local and external
@@ -173,10 +174,12 @@ generator and verifier because a file cannot contain its own ordinary SHA-256 di
   instance application belong to later tasks.
 - Unknown JSON Schema annotation keywords are accepted and receive no invented DESEN semantics.
 - The frozen version patterns are executed exactly even where they are broader than strict Semantic
-  Versioning 2.0.0; M02-T07 owns the stricter prose requirement.
-- Entry existence, map-key/ID equality, duplicate IDs, capability resolution, extension semantics,
-  reference resolution, digest comparison, and runtime-value contract checks are not implemented
-  here.
+  Versioning 2.0.0; the separate M02-T07 semantic foundation now enforces the stricter prose rule.
+- Entry existence, map-key/ID equality, node/behavior identities, catalog namespaces, extension
+  opacity, and category-aware capability existence are implemented only by the next semantic
+  layer, not by this structural API.
+- ValueSpec reference resolution, capability contracts, digest comparison, and runtime-value
+  checks remain later tasks.
 - No publication, runtime, activation, editor, or public npm readiness is claimed by this task.
 - The implementation is platform-neutral. `web-react` is the first proof target, not a constraint
   on future iOS, Android, or other native consumers.

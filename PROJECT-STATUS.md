@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 
 ## Plain-language status
 
@@ -13,8 +13,11 @@ schemas. M02-T04 now provides RFC 8785 canonical JSON, platform-neutral SHA-256,
 Source-digest and Bundle-revision projections. M02-T05 now provides the exact 36-code core
 diagnostic registry, inert shared diagnostic data, and RFC 6901 JSON Pointer primitives. M02-T06
 now provides exact frozen-root structural validation for Source, Bundle, Catalog, and all 13
-embedded-schema locator families, returning an independent immutable snapshot. Semantic
-validation and runtime behavior have not started and are not claimed as proven.
+embedded-schema locator families, returning an independent immutable snapshot. M02-T07 now adds
+the platform-neutral semantic foundation: strict SemVer, exact declared-catalog matching, entry and
+identity namespaces, set-wide capability uniqueness, category-aware capability existence, and
+opaque extension preservation. Component contracts and runtime behavior have not started and are
+not claimed as proven.
 
 ## Current milestone
 
@@ -25,9 +28,10 @@ validation and runtime behavior have not started and are not claimed as proven.
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
   `M02-T05 — Stable diagnostic model and JSON Pointer support`,
-  `M02-T06 — Structural validation`
+  `M02-T06 — Structural validation`,
+  `M02-T07 — Identity, SemVer, entry, catalog namespace, extension, and reference validation`
 - Active task: None
-- Ready next task: `M02-T07 — Identity, SemVer, entry, catalog namespace, extension, and reference validation`
+- Ready next task: `M02-T08 — Component prop, slot, style-part, and visual-state contract validation`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -60,6 +64,11 @@ validation and runtime behavior have not started and are not claimed as proven.
   mutation cases; 63 package tests and 8 root evidence/mutation tests also cover immutable input
   isolation, stable diagnostics, malformed URI references, no external resolution, deterministic
   standalone generation, and the built platform-neutral distribution.
+- The semantic foundation passes 85 focused package tests and 9 independent evidence/mutation
+  tests. It covers 19 reviewed schema-owner families with 201 constraints, 28 strict SemVer
+  goldens, exact requirement and target matching, entry and shared identity namespaces, all four
+  capability categories, undeclared-catalog isolation, extension opacity, the two official T07
+  invalid vectors, and explicit T08–T11 scope fences.
 - The foundation passes formatting, lint, strict typecheck, build, protocol integrity tests,
   protocol traceability and type-generation tests, remaining scaffold test runners, and
   dependency-boundary checks.
@@ -73,8 +82,8 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Begin only `M02-T07`: add identity, strict Semantic Versioning, entry, catalog namespace,
-extension, and reference validation. Keep component-contract, event/action, state/binding,
+Begin only `M02-T08`: apply component prop schemas and validate slot names, cardinality, accepted
+children, style parts, and visual states. Keep event/action, state/binding, resource/operation,
 publication, and runtime responsibilities in their later assigned tasks.
 
 M02-T02 evidence:
@@ -98,14 +107,20 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `b00f245a0d7173fcb7a51b83bdcf2e6bb43d6351e7605e8e480667cc5f5ae9df`
+- artifact SHA-256: `866878161013463a296da5a2e36b88d1162291fb781fb0706b94a12f263b414e`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `29ab8c2ef030981c77f6b007d32a11477d3fe35fe6cc36e5950144455444a4ce`
+- artifact SHA-256: `bcd4d25168e9d65fa4b5568cd027131799d7d6b953687fbe125ad37f4e82996a`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
+
+M02-T07 evidence:
+
+- `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
+- `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
+- artifact SHA-256: `5a588238f697decfdce82063643adab77b46ec0494b89d5897345e446c41f221`
 
 ## Status vocabulary
 

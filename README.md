@@ -66,6 +66,7 @@ packages/
 - [Task board](docs/plan/TASKS.md)
 - [Proof matrix](docs/proof/PROOF-MATRIX.md)
 - [Structural-validation proof](docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md)
+- [Semantic-foundation proof](docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -90,11 +91,14 @@ Source, Bundle, and Catalog roots and validates all protocol-defined embedded JS
 It returns an independent immutable snapshot and stable pointer diagnostics; runtime validation
 does not compile document schemas, evaluate document content, or access the network.
 
-This is deliberately not the same as semantic validity. Entry and identity relationships,
-references, exact Semantic Versioning, capability resolution, digest comparison, and applying
-embedded schemas to runtime values begin with `M02-T07` and later tasks. The first product proof is
-still `web-react`, while the protocol and validator packages remain independent of React, DOM, and
-browser APIs so future iOS and Android runtimes can reuse the same contract.
+The M02-T07 semantic foundation now adds strict Semantic Versioning, exact declared-catalog
+matching, entry and identity rules, one catalog capability namespace, category-aware component,
+behavior, resource, and operation existence, and opaque extension preservation. Trusted catalog
+pools may contain extra packages, but an undeclared package never authorizes a document capability.
+Component contracts, event/action behavior, ValueSpec references, digests, publication, and runtime
+values remain later tasks. The first product proof is still `web-react`, while the protocol and
+validator packages remain independent of React, DOM, and browser APIs so future iOS and Android
+runtimes can reuse the same contract.
 
 ## License
 

@@ -104,6 +104,28 @@ This file records implementation discoveries without changing the frozen DESEN 0
   Semantic Versioning 2.0.0 grammar rejects, including leading-zero numeric prerelease identifiers
   and empty dot-separated identifiers.
 - Implementation decision: M02-T06 applies the frozen patterns without silently rewriting them.
-  M02-T07 owns the stricter semantic version check required by the prose contract.
+  M02-T07 now applies a separate exact, non-coercing Semantic Versioning 2.0.0 grammar check while
+  retaining the frozen structural behavior.
 - Future action: Tighten the canonical schema pattern in the next protocol revision and add
   positive and negative SemVer vectors.
+
+## PF-009 — Semantic version and catalog-requirement failures lack core diagnostics
+
+- Status: OPEN
+- Blocks proof: No; the validator must expose the distinction without changing Appendix B.
+- Protocol location: SPEC Sections 7.1, 8.3, 8.4, 12.2, 23.9, and 26.1; Appendix B
+- Observation: DESEN 0.1.0 requires exact Semantic Versioning and exact catalog requirement
+  matching, but Appendix B defines no core diagnostic for an invalid exact version or a resolved
+  catalog set that does not match a declared `id`/`version`/`target` tuple. `SCHEMA_INVALID` would
+  be inaccurate for values accepted by the frozen schemas, while `CATALOG_VERSION_UNAVAILABLE`
+  belongs to later package resolution and activation work.
+- Implementation decision: M02-T07 uses the documented implementation-namespaced codes
+  `run.desen.validator/INVALID_SEMVER` and
+  `run.desen.validator/CATALOG_REQUIREMENT_MISMATCH`. These diagnostics use the shared portable
+  diagnostic envelope without an invented Appendix B classification. Core semantic failures keep
+  the exact `DUPLICATE_SURFACE_ID`, `DUPLICATE_NODE_ID`, `ENTRY_NOT_FOUND`,
+  `UNKNOWN_CAPABILITY`, and `AMBIGUOUS_CAPABILITY` codes. When a resolved catalog-set collision
+  has no unique usage site, the validator points deterministically to the later declaration in the
+  caller-supplied catalog array and RFC 6901-escapes its capability ID.
+- Future action: Define first-class core diagnostics and a normative cross-document pointer model
+  in a later protocol revision.

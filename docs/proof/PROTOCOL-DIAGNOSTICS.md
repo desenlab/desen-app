@@ -96,15 +96,16 @@ goldens, verifies all named runtime and type exports, command/test wiring, the a
 dependencies, and tracked implementation hashes, and rejects any byte drift.
 
 - Artifact: `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- Artifact SHA-256: `b00f245a0d7173fcb7a51b83bdcf2e6bb43d6351e7605e8e480667cc5f5ae9df`
+- Artifact SHA-256: `866878161013463a296da5a2e36b88d1162291fb781fb0706b94a12f263b414e`
 - Package tests: 17
 - Root evidence and mutation tests: 8
 
 ## Boundaries and limitations
 
-- Source, Bundle, Catalog, and embedded-schema validation remains assigned to `M02-T06`.
-- Identity and reference semantics and actual diagnostic micro-vectors remain assigned to
-  `M02-T07` through `M02-T13`.
+- Source, Bundle, Catalog, and embedded-schema validation is implemented by `M02-T06`.
+- M02-T07 now emits the five foundation-owned identity/catalog codes and two documented namespaced
+  codes. Capability-contract, runtime-reference, and complete diagnostic micro-vectors remain
+  assigned to `M02-T08` through `M02-T13`.
 - Runtime, publisher, activation, and editor diagnostic emission remains assigned to their later
   owner tasks.
 - DESEN 0.1.0 does not define a namespaced diagnostic-code grammar. The generic model preserves a
