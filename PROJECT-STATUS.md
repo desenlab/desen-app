@@ -5,18 +5,20 @@ Last updated: 2026-07-21
 ## Plain-language status
 
 Local implementation preparation is complete and the private GitHub repository is active at
-`desenlab/desen-app`. The first remote CI run passed. M02-T01 also completed the first narrowly
-scoped proof claim: the implementation now consumes an exact, checksum-enforced DESEN 0.1.0 input
-snapshot. Validator and runtime semantics have not started and are not claimed as proven.
+`desenlab/desen-app`. M02-T01 proved that the implementation consumes an exact, checksum-enforced
+DESEN 0.1.0 input snapshot. M02-T02 then assigned all 269 reviewed prose entries and all 989
+machine-enumerated JSON Schema constraints to future implementation and test owners. Validator and
+runtime semantics have not started and are not claimed as proven.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only)
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M02 — Protocol package and validator`
-- Completed implementation task: `M02-T01 — Frozen snapshot and checksum enforcement`
+- Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
+  `M02-T02 — Complete protocol traceability`
 - Active task: None
-- Ready next task: `M02-T02 — Trace remaining normative prose and schema constraints`
+- Ready next task: `M02-T03 — Schema-derived or mechanically checked types`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -31,8 +33,10 @@ snapshot. Validator and runtime semantics have not started and are not claimed a
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
+- The complete protocol trace reviews 196 normative headings, assigns 269 prose entries, and maps
+  all 989 schema constraints exactly once across 61 families; 11 verifier mutation tests pass.
 - The foundation passes formatting, lint, strict typecheck, build, protocol integrity tests,
-  remaining scaffold test runners, and dependency-boundary checks.
+  protocol traceability tests, remaining scaffold test runners, and dependency-boundary checks.
 
 ## Current blocker
 
@@ -43,9 +47,14 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M02-T02`: trace every in-scope schema constraint and normative prose rule not
-represented by the BCP 14 ledger to an owning task and future test. Do not generate types or begin
-validator implementation in the same task.
+Complete only `M02-T03`: generate TypeScript types from the frozen JSON Schemas or prove through a
+mechanical check that maintained types remain structurally aligned. Do not begin canonicalization,
+diagnostic, or validator semantics in the same task.
+
+M02-T02 evidence:
+
+- `docs/proof/artifacts/protocol-0.1.0-traceability.json`
+- artifact SHA-256: `749cbae719a5deb216e9ed3be171eb710b47fc547f4f270dbba21bb14c2af514`
 
 ## Status vocabulary
 

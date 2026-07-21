@@ -1,0 +1,3677 @@
+{
+  "schemaVersion": 1,
+  "protocol": {
+    "version": "0.1.0",
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8"
+  },
+  "scope": {
+    "normativeProse": "SPEC sections 3 through 31 and Appendices A through C",
+    "schemaDialect": "JSON Schema Draft 2020-12",
+    "schemaFiles": [
+      "desen-source.schema.json",
+      "desen-bundle.schema.json",
+      "desen-catalog.schema.json"
+    ],
+    "method": "Human section review for prose; schema-aware exhaustive keyword discovery for JSON Schema constraints"
+  },
+  "schemaRoute": {
+    "owners": ["M02-T03", "M02-T05", "M02-T06"],
+    "tests": ["M02-T12", "M02-T13"],
+    "evidence": "Generated or checked types, stable pointer diagnostics, structural validation, official parity, and one positive/negative micro-vector per represented constraint branch"
+  },
+  "expectedSchemaInventory": {
+    "totalConstraints": 989,
+    "byFile": {
+      "desen-bundle.schema.json": 360,
+      "desen-catalog.schema.json": 277,
+      "desen-source.schema.json": 352
+    },
+    "byKeyword": {
+      "$ref": 112,
+      "additionalProperties": 116,
+      "allOf": 2,
+      "anyOf": 5,
+      "const": 22,
+      "enum": 15,
+      "if": 6,
+      "items": 34,
+      "maxItems": 8,
+      "minItems": 11,
+      "minLength": 23,
+      "minProperties": 2,
+      "minimum": 6,
+      "not": 2,
+      "oneOf": 8,
+      "pattern": 89,
+      "properties": 75,
+      "propertyNames": 37,
+      "required": 66,
+      "then": 6,
+      "type": 341,
+      "uniqueItems": 3
+    }
+  },
+  "sharedSourceBundleDefinitions": [
+    "literalObject",
+    "refSpec",
+    "tokenSpec",
+    "formatSpec",
+    "valueSpec",
+    "predicateSpec",
+    "actionSpec",
+    "styleSpec",
+    "variantSpec",
+    "behaviorSpec",
+    "repeatSpec",
+    "nodeSpec",
+    "stateSpec",
+    "resourceInstanceSpec",
+    "surfaceSpec",
+    "sourceCatalogRequirement",
+    "exactCatalogRequirement"
+  ],
+  "schemaNonConstraintDecisions": [
+    {
+      "id": "SN-001",
+      "keyword": "$schema",
+      "expectedOccurrences": 3,
+      "status": "PLANNED",
+      "owners": ["M02-T06"],
+      "tests": ["M02-T13"],
+      "evidence": "Load every canonical schema using the declared Draft 2020-12 dialect"
+    },
+    {
+      "id": "SN-002",
+      "keyword": "$id",
+      "expectedOccurrences": 3,
+      "status": "PLANNED",
+      "owners": ["M02-T06"],
+      "tests": ["M02-T13"],
+      "evidence": "Register and resolve every canonical schema identifier without network access"
+    },
+    {
+      "id": "SN-003",
+      "keyword": "$defs",
+      "expectedOccurrences": 3,
+      "status": "JUSTIFIED_NA",
+      "owners": ["M02-T03"],
+      "tests": ["M02-T12"],
+      "evidence": "All child schemas are inventoried through their own constraints",
+      "rationale": "$defs is a definition container and has no independent instance assertion"
+    },
+    {
+      "id": "SN-004",
+      "keyword": "title",
+      "expectedOccurrences": 3,
+      "status": "JUSTIFIED_NA",
+      "owners": ["M12-T06"],
+      "tests": ["M12-T06"],
+      "evidence": "Public documentation audit retains schema titles",
+      "rationale": "title is an annotation and does not change validation outcome"
+    },
+    {
+      "id": "SN-005",
+      "keyword": "default",
+      "expectedOccurrences": 4,
+      "status": "PLANNED",
+      "owners": ["M02-T08", "M04-T09", "M06-T07"],
+      "tests": ["M02-T13", "M04-T16", "M06-T10"],
+      "evidence": "Prove validators do not mutate instances; test slot and operation-concurrency default semantics in their owning layers"
+    }
+  ],
+  "schemaFamilies": [
+    {
+      "id": "SC-001",
+      "summary": "Source root schema",
+      "selectors": [{ "schema": "desen-source.schema.json", "kind": "ROOT" }],
+      "expectedConstraints": 4,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-002",
+      "summary": "Source kind",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/kind" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-003",
+      "summary": "Source protocol version",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/desen" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-004",
+      "summary": "Source identifier",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/id" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-005",
+      "summary": "Source catalog requirements",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/catalogs" }],
+      "expectedConstraints": 4,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-006",
+      "summary": "Source entry",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/entry" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-007",
+      "summary": "Source surface map",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/surfaces" }],
+      "expectedConstraints": 6,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-008",
+      "summary": "Source authoring metadata",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/authoring" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M08-T07"]
+    },
+    {
+      "id": "SC-009",
+      "summary": "Source extensions",
+      "selectors": [{ "schema": "desen-source.schema.json", "prefix": "/properties/extensions" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-010",
+      "summary": "Bundle root schema",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "kind": "ROOT" }],
+      "expectedConstraints": 4,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-011",
+      "summary": "Bundle kind",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/kind" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-012",
+      "summary": "Bundle protocol version",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/desen" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-013",
+      "summary": "Bundle identifier",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/id" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-014",
+      "summary": "Bundle revision",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/revision" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T04"]
+    },
+    {
+      "id": "SC-015",
+      "summary": "Bundle source digest",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/sourceDigest" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T04"]
+    },
+    {
+      "id": "SC-016",
+      "summary": "Bundle exact requirements",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/requires" }],
+      "expectedConstraints": 8,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-017",
+      "summary": "Bundle entry",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/entry" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-018",
+      "summary": "Bundle surface map",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/surfaces" }],
+      "expectedConstraints": 6,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-019",
+      "summary": "Bundle publication metadata",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/publication" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M06-T09"]
+    },
+    {
+      "id": "SC-020",
+      "summary": "Bundle extensions",
+      "selectors": [{ "schema": "desen-bundle.schema.json", "prefix": "/properties/extensions" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-021",
+      "summary": "Catalog root schema",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "kind": "ROOT" }],
+      "expectedConstraints": 4,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-022",
+      "summary": "Catalog kind",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/kind" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-023",
+      "summary": "Catalog protocol version",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/desen" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-024",
+      "summary": "Catalog identifier",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/id" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-025",
+      "summary": "Catalog version",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/version" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-026",
+      "summary": "Catalog target",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/target" }],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-027",
+      "summary": "Catalog package digest",
+      "selectors": [
+        { "schema": "desen-catalog.schema.json", "prefix": "/properties/packageDigest" }
+      ],
+      "expectedConstraints": 2,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-028",
+      "summary": "Catalog description",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/description" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T06"]
+    },
+    {
+      "id": "SC-029",
+      "summary": "Catalog component map",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/components" }],
+      "expectedConstraints": 5,
+      "semanticOwners": ["M02-T08"]
+    },
+    {
+      "id": "SC-030",
+      "summary": "Catalog behavior map",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/behaviors" }],
+      "expectedConstraints": 5,
+      "semanticOwners": ["M02-T09"]
+    },
+    {
+      "id": "SC-031",
+      "summary": "Catalog operation map",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/operations" }],
+      "expectedConstraints": 5,
+      "semanticOwners": ["M02-T11"]
+    },
+    {
+      "id": "SC-032",
+      "summary": "Catalog resource map",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/resources" }],
+      "expectedConstraints": 5,
+      "semanticOwners": ["M02-T11"]
+    },
+    {
+      "id": "SC-033",
+      "summary": "Catalog authoring metadata",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/authoring" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M03-T03"]
+    },
+    {
+      "id": "SC-034",
+      "summary": "Catalog extensions",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/properties/extensions" }],
+      "expectedConstraints": 1,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-035",
+      "summary": "Literal object value form",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/literalObject" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/literalObject" }
+      ],
+      "expectedConstraints": 12,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-036",
+      "summary": "Reference value form",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/refSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/refSpec" }
+      ],
+      "expectedConstraints": 14,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-037",
+      "summary": "Token value form",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/tokenSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/tokenSpec" }
+      ],
+      "expectedConstraints": 12,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-038",
+      "summary": "Format value form",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/formatSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/formatSpec" }
+      ],
+      "expectedConstraints": 28,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-039",
+      "summary": "ValueSpec union",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/valueSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/valueSpec" }
+      ],
+      "expectedConstraints": 18,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-040",
+      "summary": "Predicate structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/predicateSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/predicateSpec" }
+      ],
+      "expectedConstraints": 76,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-041",
+      "summary": "Closed action union",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/actionSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/actionSpec" }
+      ],
+      "expectedConstraints": 178,
+      "semanticOwners": ["M02-T11"]
+    },
+    {
+      "id": "SC-042",
+      "summary": "Style structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/styleSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/styleSpec" }
+      ],
+      "expectedConstraints": 26,
+      "semanticOwners": ["M02-T08"]
+    },
+    {
+      "id": "SC-043",
+      "summary": "Variant structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/variantSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/variantSpec" }
+      ],
+      "expectedConstraints": 26,
+      "semanticOwners": ["M02-T08"]
+    },
+    {
+      "id": "SC-044",
+      "summary": "Behavior instance structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/behaviorSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/behaviorSpec" }
+      ],
+      "expectedConstraints": 54,
+      "semanticOwners": ["M02-T09"]
+    },
+    {
+      "id": "SC-045",
+      "summary": "Repeat structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/repeatSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/repeatSpec" }
+      ],
+      "expectedConstraints": 22,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-046",
+      "summary": "Component node structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/nodeSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/nodeSpec" }
+      ],
+      "expectedConstraints": 70,
+      "semanticOwners": ["M02-T07", "M02-T08", "M02-T09", "M02-T10", "M02-T11"]
+    },
+    {
+      "id": "SC-047",
+      "summary": "State declaration structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/stateSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/stateSpec" }
+      ],
+      "expectedConstraints": 12,
+      "semanticOwners": ["M02-T10"]
+    },
+    {
+      "id": "SC-048",
+      "summary": "Resource instance structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/resourceInstanceSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/resourceInstanceSpec" }
+      ],
+      "expectedConstraints": 24,
+      "semanticOwners": ["M02-T11"]
+    },
+    {
+      "id": "SC-049",
+      "summary": "Surface structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/surfaceSpec" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/surfaceSpec" }
+      ],
+      "expectedConstraints": 36,
+      "semanticOwners": ["M02-T07", "M02-T10", "M02-T11"]
+    },
+    {
+      "id": "SC-050",
+      "summary": "Source catalog requirement structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/sourceCatalogRequirement" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/sourceCatalogRequirement" }
+      ],
+      "expectedConstraints": 26,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-051",
+      "summary": "Exact catalog requirement structure",
+      "selectors": [
+        { "schema": "desen-source.schema.json", "prefix": "/$defs/exactCatalogRequirement" },
+        { "schema": "desen-bundle.schema.json", "prefix": "/$defs/exactCatalogRequirement" }
+      ],
+      "expectedConstraints": 26,
+      "semanticOwners": ["M02-T07"]
+    },
+    {
+      "id": "SC-052",
+      "summary": "Catalog slot contract",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/$defs/slotSpec" }],
+      "expectedConstraints": 18,
+      "semanticOwners": ["M02-T08"]
+    },
+    {
+      "id": "SC-053",
+      "summary": "Catalog event contract",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/$defs/eventSpec" }],
+      "expectedConstraints": 7,
+      "semanticOwners": ["M02-T09"]
+    },
+    {
+      "id": "SC-054",
+      "summary": "Catalog command contract",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/$defs/commandSpec" }],
+      "expectedConstraints": 7,
+      "semanticOwners": ["M02-T09"]
+    },
+    {
+      "id": "SC-055",
+      "summary": "Catalog style-part contract",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/$defs/stylePartSpec" }],
+      "expectedConstraints": 7,
+      "semanticOwners": ["M02-T08"]
+    },
+    {
+      "id": "SC-056",
+      "summary": "Catalog authoring contract",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/$defs/authoringSpec" }],
+      "expectedConstraints": 33,
+      "semanticOwners": ["M03-T03"]
+    },
+    {
+      "id": "SC-057",
+      "summary": "Catalog component capability",
+      "selectors": [
+        { "schema": "desen-catalog.schema.json", "prefix": "/$defs/componentCapability" }
+      ],
+      "expectedConstraints": 39,
+      "semanticOwners": ["M02-T08", "M02-T09"]
+    },
+    {
+      "id": "SC-058",
+      "summary": "Catalog behavior capability",
+      "selectors": [
+        { "schema": "desen-catalog.schema.json", "prefix": "/$defs/behaviorCapability" }
+      ],
+      "expectedConstraints": 64,
+      "semanticOwners": ["M02-T09"]
+    },
+    {
+      "id": "SC-059",
+      "summary": "Catalog public error contract",
+      "selectors": [{ "schema": "desen-catalog.schema.json", "prefix": "/$defs/publicErrorSpec" }],
+      "expectedConstraints": 8,
+      "semanticOwners": ["M02-T11"]
+    },
+    {
+      "id": "SC-060",
+      "summary": "Catalog operation capability",
+      "selectors": [
+        { "schema": "desen-catalog.schema.json", "prefix": "/$defs/operationCapability" }
+      ],
+      "expectedConstraints": 23,
+      "semanticOwners": ["M02-T11"]
+    },
+    {
+      "id": "SC-061",
+      "summary": "Catalog resource capability",
+      "selectors": [
+        { "schema": "desen-catalog.schema.json", "prefix": "/$defs/resourceCapability" }
+      ],
+      "expectedConstraints": 34,
+      "semanticOwners": ["M02-T11"]
+    }
+  ],
+  "conformanceRules": [
+    {
+      "id": "C-001",
+      "section": "7.1",
+      "line": 318,
+      "anchor": "emits structurally valid",
+      "summary": "A Source Producer emits structurally valid source documents",
+      "owners": ["M02-T06", "M08-T09"],
+      "tests": ["M08-T10", "M10-T01"],
+      "evidence": "Create, save, and validate a source produced from an empty project"
+    },
+    {
+      "id": "C-002",
+      "section": "7.1",
+      "line": 319,
+      "anchor": "preserves stable node",
+      "summary": "A Source Producer preserves stable surface and node identities",
+      "owners": ["M08-T02", "M08-T03"],
+      "tests": ["M08-T10"],
+      "evidence": "Ordinary edit sequences preserve conceptually unchanged IDs"
+    },
+    {
+      "id": "C-003",
+      "section": "7.1",
+      "line": 320,
+      "anchor": "targets declared catalog versions",
+      "summary": "A Source Producer targets declared catalog versions",
+      "owners": ["M02-T07", "M08-T09"],
+      "tests": ["M02-T13", "M08-T10"],
+      "evidence": "Reject missing, ranged, or undeclared catalog requirements"
+    },
+    {
+      "id": "C-004",
+      "section": "7.1",
+      "line": 321,
+      "anchor": "does not place executable code",
+      "summary": "A Source Producer emits data-only documents",
+      "owners": ["M12-T03"],
+      "tests": ["M12-T03"],
+      "evidence": "Source audit rejects every prohibited executable-content form"
+    },
+    {
+      "id": "C-005",
+      "section": "7.1",
+      "line": 322,
+      "anchor": "distinguishes authoring-only",
+      "summary": "A Source Producer distinguishes authoring metadata from production semantics",
+      "owners": ["M08-T07", "M06-T07"],
+      "tests": ["M06-T10", "M08-T10"],
+      "evidence": "Round-trip source metadata and prove publication removes authoring state"
+    },
+    {
+      "id": "C-006",
+      "section": "7.2",
+      "line": 328,
+      "anchor": "resolves catalog authoring contracts",
+      "summary": "An Editor resolves catalog authoring contracts",
+      "owners": ["M03-T03", "M09-T02"],
+      "tests": ["M03-T09", "M10-T01"],
+      "evidence": "Component controls and scenarios derive from the exact catalog contract"
+    },
+    {
+      "id": "C-007",
+      "section": "7.2",
+      "line": 329,
+      "anchor": "validates capability usage",
+      "summary": "An Editor validates capability usage continuously or before publication",
+      "owners": ["M08-T09", "M09-T13"],
+      "tests": ["M10-T06"],
+      "evidence": "Invalid prop, slot, and event use produces node-linked diagnostics before publish"
+    },
+    {
+      "id": "C-008",
+      "section": "7.2",
+      "line": 330,
+      "anchor": "Design Mode and Run Mode",
+      "summary": "An Editor provides Design and Run workflows",
+      "owners": ["M09-T10"],
+      "tests": ["M10-T02", "M10-T03", "M10-T04"],
+      "evidence": "The same source tree supports editing and executable preview"
+    },
+    {
+      "id": "C-009",
+      "section": "7.2",
+      "line": 331,
+      "anchor": "discloses adapter fidelity",
+      "summary": "An Editor discloses adapter fidelity",
+      "owners": ["M09-T11"],
+      "tests": ["M09-T11"],
+      "evidence": "Approximate adapters display fidelity and difference notices"
+    },
+    {
+      "id": "C-010",
+      "section": "7.2",
+      "line": 332,
+      "anchor": "preview declared scenarios",
+      "summary": "An Editor previews declared scenarios, state, resources, and operation outcomes",
+      "owners": ["M09-T10", "M09-T11"],
+      "tests": ["M10-T02", "M10-T03", "M10-T04"],
+      "evidence": "Fixture scenarios cover pending, failure, and success outcomes"
+    },
+    {
+      "id": "C-011",
+      "section": "7.3",
+      "line": 338,
+      "anchor": "performs the checks in Section 25",
+      "summary": "A Publisher performs the complete publication pipeline",
+      "owners": ["M06-T01", "M06-T11"],
+      "tests": ["M06-T10", "M06-T11"],
+      "evidence": "Pipeline trace covers every PIPE-025 through PIPE-041 step"
+    },
+    {
+      "id": "C-012",
+      "section": "7.3",
+      "line": 339,
+      "anchor": "structurally and semantically valid",
+      "summary": "A Publisher emits only structurally and semantically valid bundles",
+      "owners": ["M06-T09"],
+      "tests": ["M06-T10", "M06-T11"],
+      "evidence": "Golden publication succeeds and the invalid-source matrix emits no bundle"
+    },
+    {
+      "id": "C-013",
+      "section": "7.3",
+      "line": 340,
+      "anchor": "pins exact capability package",
+      "summary": "A Publisher pins exact package versions, targets, and digests",
+      "owners": ["M06-T08"],
+      "tests": ["M06-T10"],
+      "evidence": "Published requirements contain an exact immutable package tuple"
+    },
+    {
+      "id": "C-014",
+      "section": "7.3",
+      "line": 341,
+      "anchor": "calculates digests",
+      "summary": "A Publisher calculates source and bundle digests exactly as specified",
+      "owners": ["M02-T04", "M06-T08", "M06-T09"],
+      "tests": ["M06-T10"],
+      "evidence": "Golden JCS digests and byte-identical double publication agree"
+    },
+    {
+      "id": "C-015",
+      "section": "7.3",
+      "line": 342,
+      "anchor": "does not require production runtime execution",
+      "summary": "A Publisher removes production dependence on authoring-only fields",
+      "owners": ["M06-T07"],
+      "tests": ["M05-T08", "M06-T10"],
+      "evidence": "The production host executes a bundle with no authoring state"
+    },
+    {
+      "id": "C-016",
+      "section": "7.4",
+      "line": 348,
+      "anchor": "includes a valid",
+      "summary": "A Capability Package includes a valid catalog manifest",
+      "owners": ["M02-T06", "M03-T10"],
+      "tests": ["M02-T12", "M03-T10"],
+      "evidence": "Built package catalog validates against the canonical schema"
+    },
+    {
+      "id": "C-017",
+      "section": "7.4",
+      "line": 349,
+      "anchor": "production implementation for every declared",
+      "summary": "A Capability Package implements every declared component and behavior",
+      "owners": ["M03-T09", "M05-T04"],
+      "tests": ["M03-T09", "M11-T14"],
+      "evidence": "Catalog-to-adapter parity audit detects missing implementations"
+    },
+    {
+      "id": "C-018",
+      "section": "7.4",
+      "line": 350,
+      "anchor": "host bindings for declared resources",
+      "summary": "A Capability Package provides or explicitly delegates resource and operation bindings",
+      "owners": ["M03-T02", "M03-T08"],
+      "tests": ["M03-T09", "M10-T04"],
+      "evidence": "Manifest and host registration agree for all declared bindings"
+    },
+    {
+      "id": "C-019",
+      "section": "7.4",
+      "line": 351,
+      "anchor": "exposes only contract-declared",
+      "summary": "A Capability Package exposes only its declared public contract",
+      "owners": ["M03-T09", "M05-T02", "M05-T03", "M05-T04"],
+      "tests": ["M03-T09", "M09-T04"],
+      "evidence": "Parity and source audits reject private implementation access"
+    },
+    {
+      "id": "C-020",
+      "section": "7.4",
+      "line": 352,
+      "anchor": "provides an authoring adapter",
+      "summary": "A Capability Package provides an authoring adapter or declares fidelity consequences",
+      "owners": ["M03-T09", "M09-T11"],
+      "tests": ["M03-T09", "M09-T11"],
+      "evidence": "Package metadata and visible editor disclosure agree"
+    },
+    {
+      "id": "C-021",
+      "section": "7.4",
+      "line": 353,
+      "anchor": "is immutable for a given",
+      "summary": "A Capability Package is immutable for an exact package tuple",
+      "owners": ["M03-T04", "M03-T10"],
+      "tests": ["M03-T10"],
+      "evidence": "Same bytes retain a digest and any byte change changes the digest"
+    },
+    {
+      "id": "C-022",
+      "section": "7.5",
+      "line": 357,
+      "anchor": "never executes production side effects",
+      "summary": "An Authoring Runtime satisfies Section 23 and isolates production side effects",
+      "owners": ["M03-T07", "M09-T11"],
+      "tests": ["M09-T11", "M10-T02"],
+      "evidence": "Default preview uses fixtures; integration preview requires explicit authorization"
+    },
+    {
+      "id": "C-023",
+      "section": "7.6",
+      "line": 361,
+      "anchor": "including exact package resolution",
+      "summary": "A Production Runtime satisfies runtime, failure, and security semantics",
+      "owners": ["M04-T16", "M07-T10"],
+      "tests": ["M10-T07", "M12-T08"],
+      "evidence": "Runtime trace and activation fault matrix support the final conformance report"
+    },
+    {
+      "id": "C-024",
+      "section": "7.7",
+      "line": 365,
+      "anchor": "schema-only validator",
+      "summary": "A Validator supports canonical schemas and applicable diagnostic classes without overstating scope",
+      "owners": ["M02-T05", "M02-T06", "M02-T13"],
+      "tests": ["M02-T12", "M02-T13", "M12-T08"],
+      "evidence": "Registry, parity report, diagnostic vectors, and final scope statement distinguish schema-only from full validation"
+    }
+  ],
+  "pipelineSteps": [
+    {
+      "id": "PIPE-001",
+      "section": "6.3",
+      "line": 296,
+      "anchor": "publishes immutable Capability Packages",
+      "summary": "Lifecycle step 1: publish immutable capability packages",
+      "owners": ["M03-T10"],
+      "tests": ["M03-T10"],
+      "evidence": "Build one content-addressed reference package"
+    },
+    {
+      "id": "PIPE-002",
+      "section": "6.3",
+      "line": 297,
+      "anchor": "resolves their Capability Catalogs",
+      "summary": "Lifecycle step 2: resolve package catalogs",
+      "owners": ["M09-T02"],
+      "tests": ["M10-T01"],
+      "evidence": "Editor resolves the exact reference catalog"
+    },
+    {
+      "id": "PIPE-003",
+      "section": "6.3",
+      "line": 298,
+      "anchor": "composes and tests a Design Source",
+      "summary": "Lifecycle step 3: compose and test source",
+      "owners": ["M09-T10"],
+      "tests": ["M10-T01"],
+      "evidence": "Browser proof begins from an empty project"
+    },
+    {
+      "id": "PIPE-004",
+      "section": "6.3",
+      "line": 299,
+      "anchor": "validates the source against the exact catalogs",
+      "summary": "Lifecycle step 4: validate source against exact catalogs",
+      "owners": ["M06-T03", "M06-T04", "M06-T05"],
+      "tests": ["M06-T11"],
+      "evidence": "Invalid source matrix covers structure, catalog contracts, and bindings"
+    },
+    {
+      "id": "PIPE-005",
+      "section": "6.3",
+      "line": 300,
+      "anchor": "emits and stores a Published Design Bundle",
+      "summary": "Lifecycle step 5: emit and store an immutable bundle",
+      "owners": ["M06-T09", "M07-T01"],
+      "tests": ["M06-T10", "M07-T10"],
+      "evidence": "Golden bundle is content-addressed and immutable"
+    },
+    {
+      "id": "PIPE-006",
+      "section": "6.3",
+      "line": 301,
+      "anchor": "stages the bundle and resolves exact package digests",
+      "summary": "Lifecycle step 6: stage bundle and resolve exact packages",
+      "owners": ["M07-T03", "M07-T06"],
+      "tests": ["M07-T09"],
+      "evidence": "Fault injection covers tuple resolution and staging"
+    },
+    {
+      "id": "PIPE-007",
+      "section": "6.3",
+      "line": 302,
+      "anchor": "preflights and atomically activates",
+      "summary": "Lifecycle step 7: preflight and atomically activate",
+      "owners": ["M07-T04", "M07-T07"],
+      "tests": ["M07-T09", "M07-T10"],
+      "evidence": "No pre-commit fault changes the active record"
+    },
+    {
+      "id": "PIPE-008",
+      "section": "6.3",
+      "line": 303,
+      "anchor": "materializes surfaces from the bundle",
+      "summary": "Lifecycle step 8: materialize requested bundle surfaces",
+      "owners": ["M04-T16", "M05-T08"],
+      "tests": ["M05-T08"],
+      "evidence": "Separate host renders the official bundle through real adapters"
+    },
+    {
+      "id": "PIPE-009",
+      "section": "24.1",
+      "line": 1304,
+      "anchor": "fetch or receive the immutable bundle",
+      "summary": "Activation step 1: receive immutable bundle",
+      "owners": ["M07-T01", "M07-T11"],
+      "tests": ["M07-T09"],
+      "evidence": "Fetch failure preserves the durable active record"
+    },
+    {
+      "id": "PIPE-010",
+      "section": "24.1",
+      "line": 1305,
+      "anchor": "verify document syntax and supported protocol",
+      "summary": "Activation step 2: verify syntax and protocol version",
+      "owners": ["M07-T02"],
+      "tests": ["M07-T09"],
+      "evidence": "Malformed and unsupported bundles never stage"
+    },
+    {
+      "id": "PIPE-011",
+      "section": "24.1",
+      "line": 1306,
+      "anchor": "verify `revision`",
+      "summary": "Activation step 3: verify revision and publication integrity",
+      "owners": ["M07-T02"],
+      "tests": ["M07-T09", "M07-T10"],
+      "evidence": "Tampered revision fails before activation"
+    },
+    {
+      "id": "PIPE-012",
+      "section": "24.1",
+      "line": 1307,
+      "anchor": "resolve exact capability package tuples",
+      "summary": "Activation step 4: resolve exact packages",
+      "owners": ["M07-T03"],
+      "tests": ["M07-T09", "M10-T07"],
+      "evidence": "Unavailable or substituted tuple is rejected"
+    },
+    {
+      "id": "PIPE-013",
+      "section": "24.1",
+      "line": 1308,
+      "anchor": "verify package digests",
+      "summary": "Activation step 5: verify package digests",
+      "owners": ["M07-T03"],
+      "tests": ["M07-T09", "M10-T07"],
+      "evidence": "Catalog digest mismatch preserves last known good"
+    },
+    {
+      "id": "PIPE-014",
+      "section": "24.1",
+      "line": 1309,
+      "anchor": "preflight surface and capability references",
+      "summary": "Activation step 6: preflight bundle references",
+      "owners": ["M07-T04"],
+      "tests": ["M07-T09"],
+      "evidence": "Reference and limit failures occur before durable commit"
+    },
+    {
+      "id": "PIPE-015",
+      "section": "24.1",
+      "line": 1310,
+      "anchor": "stage runtime indexes",
+      "summary": "Activation step 7: stage runtime indexes and loading plans",
+      "owners": ["M07-T06"],
+      "tests": ["M07-T09"],
+      "evidence": "Staging remains separate from active state"
+    },
+    {
+      "id": "PIPE-016",
+      "section": "24.1",
+      "line": 1311,
+      "anchor": "atomically mark the revision active",
+      "summary": "Activation step 8: atomically commit active revision",
+      "owners": ["M07-T07"],
+      "tests": ["M07-T09", "M07-T10"],
+      "evidence": "Active and previous-good pointers commit as one record"
+    },
+    {
+      "id": "PIPE-017",
+      "section": "24.1",
+      "line": 1312,
+      "anchor": "preserve the previous active revision",
+      "summary": "Activation step 9: preserve last known good",
+      "owners": ["M07-T07", "M07-T08"],
+      "tests": ["M07-T10", "M10-T07"],
+      "evidence": "Restart and invalid activation restore a compatible prior revision"
+    },
+    {
+      "id": "PIPE-018",
+      "section": "24.2",
+      "line": 1320,
+      "anchor": "creates its local state",
+      "summary": "Materialization step 1: create local state",
+      "owners": ["M04-T06"],
+      "tests": ["M04-T16"],
+      "evidence": "Headless trace begins from schema-valid initial state"
+    },
+    {
+      "id": "PIPE-019",
+      "section": "24.2",
+      "line": 1321,
+      "anchor": "initializes resource lifecycles",
+      "summary": "Materialization step 2: initialize resources",
+      "owners": ["M04-T08"],
+      "tests": ["M04-T16"],
+      "evidence": "Resource lifecycle snapshot starts deterministically"
+    },
+    {
+      "id": "PIPE-020",
+      "section": "24.2",
+      "line": 1322,
+      "anchor": "resolves the root node",
+      "summary": "Materialization step 3: resolve root",
+      "owners": ["M04-T02"],
+      "tests": ["M04-T16"],
+      "evidence": "Root resolution appears in the JSON trace"
+    },
+    {
+      "id": "PIPE-021",
+      "section": "24.2",
+      "line": 1323,
+      "anchor": "evaluates conditions, repeats, variants",
+      "summary": "Materialization step 4: evaluate declarative semantics",
+      "owners": ["M04-T04", "M04-T05", "M04-T07"],
+      "tests": ["M04-T16"],
+      "evidence": "Trace covers predicates, repeat identity, values, and style order"
+    },
+    {
+      "id": "PIPE-022",
+      "section": "24.2",
+      "line": 1324,
+      "anchor": "instantiates component and behavior adapters",
+      "summary": "Materialization step 5: instantiate adapters",
+      "owners": ["M05-T01", "M05-T04"],
+      "tests": ["M05-T08"],
+      "evidence": "Real registered adapters render the bundle"
+    },
+    {
+      "id": "PIPE-023",
+      "section": "24.2",
+      "line": 1325,
+      "anchor": "subscribes to declared events",
+      "summary": "Materialization step 6: subscribe to events and environment",
+      "owners": ["M04-T14", "M04-T15"],
+      "tests": ["M04-T16"],
+      "evidence": "Declared event and reactive dependencies drive reevaluation"
+    },
+    {
+      "id": "PIPE-024",
+      "section": "24.2",
+      "line": 1326,
+      "anchor": "starts `mount` and `once` resources",
+      "summary": "Materialization step 7: start automatic resources",
+      "owners": ["M04-T08"],
+      "tests": ["M04-T16"],
+      "evidence": "Mount and once policies produce distinct deterministic traces"
+    },
+    {
+      "id": "PIPE-025",
+      "section": "25.1",
+      "line": 1360,
+      "anchor": "JSON parsing",
+      "summary": "Publication step 1: parse JSON",
+      "owners": ["M06-T01"],
+      "tests": ["M06-T11"],
+      "evidence": "Malformed JSON emits a staged diagnostic and no bundle"
+    },
+    {
+      "id": "PIPE-026",
+      "section": "25.1",
+      "line": 1361,
+      "anchor": "source schema validation",
+      "summary": "Publication step 2: validate source schema",
+      "owners": ["M06-T03"],
+      "tests": ["M06-T11"],
+      "evidence": "Structurally invalid source emits no bundle"
+    },
+    {
+      "id": "PIPE-027",
+      "section": "25.1",
+      "line": 1362,
+      "anchor": "embedded JSON Schema validation",
+      "summary": "Publication step 3: validate embedded schemas",
+      "owners": ["M06-T03"],
+      "tests": ["M06-T11"],
+      "evidence": "Invalid embedded Draft 2020-12 schema is rejected"
+    },
+    {
+      "id": "PIPE-028",
+      "section": "25.1",
+      "line": 1363,
+      "anchor": "identifier and reference validation",
+      "summary": "Publication step 4: validate source IDs and references",
+      "owners": ["M06-T03"],
+      "tests": ["M06-T11"],
+      "evidence": "Duplicate IDs and missing static references are rejected"
+    },
+    {
+      "id": "PIPE-029",
+      "section": "25.1",
+      "line": 1364,
+      "anchor": "exact catalog resolution",
+      "summary": "Publication step 5: resolve exact catalogs",
+      "owners": ["M06-T02"],
+      "tests": ["M06-T11"],
+      "evidence": "Missing, ambiguous, or incompatible catalogs are rejected"
+    },
+    {
+      "id": "PIPE-030",
+      "section": "25.1",
+      "line": 1365,
+      "anchor": "catalog schema and digest",
+      "summary": "Publication step 6: validate catalog schema and digest",
+      "owners": ["M06-T02", "M06-T03"],
+      "tests": ["M06-T11"],
+      "evidence": "Invalid or tampered catalog is rejected"
+    },
+    {
+      "id": "PIPE-031",
+      "section": "25.1",
+      "line": 1366,
+      "anchor": "namespace conflict detection",
+      "summary": "Publication step 7: detect capability namespace conflicts",
+      "owners": ["M06-T02"],
+      "tests": ["M06-T11"],
+      "evidence": "Duplicate capability ID across the resolved set is rejected"
+    },
+    {
+      "id": "PIPE-032",
+      "section": "25.1",
+      "line": 1367,
+      "anchor": "prop, slot, event, command",
+      "summary": "Publication step 8: validate capability contracts",
+      "owners": ["M06-T04"],
+      "tests": ["M06-T11"],
+      "evidence": "Capability contract invalid-source matrix emits no bundle"
+    },
+    {
+      "id": "PIPE-033",
+      "section": "25.1",
+      "line": 1368,
+      "anchor": "predicate, repeat, and state",
+      "summary": "Publication step 9: validate predicate, repeat, and state semantics",
+      "owners": ["M06-T03", "M06-T05"],
+      "tests": ["M06-T11"],
+      "evidence": "Statically invalid semantic forms are rejected"
+    },
+    {
+      "id": "PIPE-034",
+      "section": "25.1",
+      "line": 1369,
+      "anchor": "static binding compatibility",
+      "summary": "Publication step 10: check provable binding compatibility",
+      "owners": ["M06-T05"],
+      "tests": ["M06-T11"],
+      "evidence": "Provable mismatch fails; dynamic uncertainty records a runtime obligation"
+    },
+    {
+      "id": "PIPE-035",
+      "section": "25.1",
+      "line": 1370,
+      "anchor": "source digest calculation",
+      "summary": "Publication step 11: calculate source digest",
+      "owners": ["M06-T08"],
+      "tests": ["M06-T10"],
+      "evidence": "Golden source digest excludes only authoring"
+    },
+    {
+      "id": "PIPE-036",
+      "section": "25.1",
+      "line": 1371,
+      "anchor": "removal of `authoring`",
+      "summary": "Publication step 12: remove authoring state",
+      "owners": ["M06-T07"],
+      "tests": ["M06-T10"],
+      "evidence": "Golden bundle contains no authoring member"
+    },
+    {
+      "id": "PIPE-037",
+      "section": "25.1",
+      "line": 1372,
+      "anchor": "deterministic normalization",
+      "summary": "Publication step 13: normalize deterministically",
+      "owners": ["M06-T07"],
+      "tests": ["M06-T10"],
+      "evidence": "Repeated publication produces equal semantic bundle bytes"
+    },
+    {
+      "id": "PIPE-038",
+      "section": "25.1",
+      "line": 1373,
+      "anchor": "exact catalog pinning",
+      "summary": "Publication step 14: pin exact catalogs",
+      "owners": ["M06-T08"],
+      "tests": ["M06-T10"],
+      "evidence": "Discovery hints become exact target and digest requirements"
+    },
+    {
+      "id": "PIPE-039",
+      "section": "25.1",
+      "line": 1374,
+      "anchor": "bundle schema and semantic validation",
+      "summary": "Publication step 15: validate final bundle",
+      "owners": ["M06-T09"],
+      "tests": ["M06-T10", "M06-T11"],
+      "evidence": "Only a valid final bundle reaches revision calculation"
+    },
+    {
+      "id": "PIPE-040",
+      "section": "25.1",
+      "line": 1375,
+      "anchor": "bundle revision calculation",
+      "summary": "Publication step 16: calculate bundle revision",
+      "owners": ["M06-T09"],
+      "tests": ["M06-T10"],
+      "evidence": "Golden revision excludes revision and publication fields"
+    },
+    {
+      "id": "PIPE-041",
+      "section": "25.1",
+      "line": 1376,
+      "anchor": "optional signing",
+      "summary": "Publication step 17: attach optional signing or publication metadata",
+      "status": "JUSTIFIED_NA",
+      "owners": ["M12-T08"],
+      "tests": ["M12-T08"],
+      "evidence": "Final report states that the local proof is unsigned",
+      "rationale": "DESEN 0.1.0 defines no signing profile and the local Web-React proof makes no authenticity claim"
+    }
+  ],
+  "proseRules": [
+    {
+      "id": "R-001",
+      "section": "3",
+      "line": 162,
+      "endLine": 171,
+      "anchor": "Sections 3 through 31",
+      "summary": "Normative scope uses JSON, Draft 2020-12, SemVer, JCS, and stricter conflict handling",
+      "owners": ["M02-T04", "M02-T06", "M12-T08"],
+      "tests": ["M02-T12", "M12-T08"],
+      "evidence": "Quality report verifies dialect, canonicalization, and records any prose/schema conflict as a finding"
+    },
+    {
+      "id": "R-002",
+      "section": "4.2",
+      "line": 199,
+      "endLine": 214,
+      "anchor": "out of scope for 0.1.0",
+      "summary": "The 0.1.0 implementation does not claim or silently add excluded protocol features",
+      "owners": ["M12-T03", "M12-T08"],
+      "tests": ["M12-T03", "M12-T08"],
+      "evidence": "Security audit and final report state the excluded feature boundary"
+    },
+    {
+      "id": "R-003",
+      "section": "5.1",
+      "line": 226,
+      "anchor": "editable DESEN source is the authority",
+      "summary": "Editable source owns managed composition and production executes derived published revisions",
+      "owners": ["M05-T09", "M10-T05"],
+      "tests": ["M10-T05"],
+      "evidence": "A published layout change activates without host composition source changes"
+    },
+    {
+      "id": "R-004",
+      "section": "5.2",
+      "line": 230,
+      "anchor": "declared equivalent adapter",
+      "summary": "Non-production adapters are declared with fidelity disclosure and screenshots are not interactive adapters",
+      "owners": ["M03-T09", "M09-T11"],
+      "tests": ["M09-T11"],
+      "evidence": "Reject screenshot surrogates and display equivalent or approximate fidelity",
+      "bcp14": ["S-001"]
+    },
+    {
+      "id": "R-005",
+      "section": "5.3",
+      "line": 234,
+      "anchor": "All executable behavior originates",
+      "summary": "Executable behavior originates only from host-trusted capabilities",
+      "owners": ["M07-T03", "M12-T03"],
+      "tests": ["M12-T03"],
+      "evidence": "Source audit finds no document-selected executable code path",
+      "bcp14": ["N-002"]
+    },
+    {
+      "id": "R-006",
+      "section": "5.4",
+      "line": 238,
+      "anchor": "Undeclared internals remain inaccessible",
+      "summary": "Capability schemas define the complete designer-accessible boundary",
+      "owners": ["M03-T09", "M05-T02", "M05-T03", "M05-T04"],
+      "tests": ["M03-T09", "M09-T04"],
+      "evidence": "Contract parity and private-structure audits reject undeclared access"
+    },
+    {
+      "id": "R-007",
+      "section": "5.5",
+      "line": 242,
+      "anchor": "source document is not directly activated",
+      "summary": "Production activates validated bundles rather than source or authoring state",
+      "owners": ["M06-T09", "M07-T02"],
+      "tests": ["M05-T08", "M07-T10"],
+      "evidence": "Reference host accepts bundles only after publication and preflight"
+    },
+    {
+      "id": "R-008",
+      "section": "5.7",
+      "line": 250,
+      "anchor": "only after preflight checks pass",
+      "summary": "Atomic activation occurs only after successful preflight",
+      "owners": ["M07-T04", "M07-T07"],
+      "tests": ["M07-T09", "M07-T10"],
+      "evidence": "Fault injection before commit leaves active revision unchanged",
+      "bcp14": ["N-004"]
+    },
+    {
+      "id": "R-009",
+      "section": "5.8",
+      "line": 254,
+      "anchor": "capability catalogs are target-specific",
+      "summary": "The core remains platform-neutral while catalogs and profiles declare exact target contracts",
+      "owners": ["M03-T10", "M04-T16", "M12-T07"],
+      "tests": ["M04-T16", "M12-T08"],
+      "evidence": "Boundary audit and final report distinguish core semantics from web-react adapters"
+    },
+    {
+      "id": "R-010",
+      "section": "5.9",
+      "line": 258,
+      "anchor": "must not depend on manual reimplementation",
+      "summary": "A conforming runtime workflow has no manual managed-surface handoff artifact",
+      "owners": ["M05-T09", "M10-T05"],
+      "tests": ["M10-T05"],
+      "evidence": "Host source audit remains unchanged after publication"
+    },
+    {
+      "id": "R-011",
+      "section": "6.1.1",
+      "line": 270,
+      "anchor": "editable, producer-owned representation",
+      "summary": "A source document is the editable project representation with authoring and catalog requirements",
+      "owners": ["M08-T01"],
+      "tests": ["M08-T10"],
+      "evidence": "Editor document model round-trips the source artifact"
+    },
+    {
+      "id": "R-012",
+      "section": "6.1.2",
+      "line": 274,
+      "anchor": "immutable production representation",
+      "summary": "A bundle is immutable production data with exact package and reproducible digest information",
+      "owners": ["M06-T09", "M07-T01"],
+      "tests": ["M06-T10", "M07-T10"],
+      "evidence": "Golden bundle and content-addressed storage enforce artifact identity"
+    },
+    {
+      "id": "R-013",
+      "section": "6.1.3",
+      "line": 278,
+      "anchor": "public contract of an immutable capability package",
+      "summary": "A catalog declares one target package contract while executable code stays outside JSON",
+      "owners": ["M03-T01", "M03-T10"],
+      "tests": ["M03-T09", "M03-T10"],
+      "evidence": "Catalog manifest and package artifact remain separate but digest-linked"
+    },
+    {
+      "id": "R-014",
+      "section": "8.1",
+      "line": 373,
+      "endLine": 377,
+      "anchor": "Surface, node, behavior-instance",
+      "summary": "Local semantic identifiers follow the exact 1-to-128-character grammar",
+      "owners": ["M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Boundary micro-vectors cover valid and invalid local IDs"
+    },
+    {
+      "id": "R-015",
+      "section": "8.2",
+      "line": 385,
+      "endLine": 389,
+      "anchor": "reverse-domain package namespace",
+      "summary": "Capability identifiers use a reverse-domain namespace and local name",
+      "owners": ["M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Capability ID grammar micro-vectors cover all categories"
+    },
+    {
+      "id": "R-016",
+      "section": "8.3",
+      "line": 404,
+      "endLine": 406,
+      "anchor": "exactly `0.1.0`",
+      "summary": "Documents use protocol 0.1.0 and package requirements do not use version ranges",
+      "owners": ["M02-T06", "M02-T07"],
+      "tests": ["M02-T13", "M07-T09"],
+      "evidence": "Reject unsupported protocol and ranged package versions",
+      "bcp14": ["N-008"]
+    },
+    {
+      "id": "R-017",
+      "section": "8.4",
+      "line": 410,
+      "anchor": "Target strings are open but exact",
+      "summary": "Target strings are exact and package resolution cannot normalize or substitute them",
+      "owners": ["M02-T07", "M07-T03"],
+      "tests": ["M02-T13", "M10-T07"],
+      "evidence": "Case or value mismatch rejects publication or activation",
+      "bcp14": ["N-009"]
+    },
+    {
+      "id": "R-018",
+      "section": "8.5",
+      "line": 414,
+      "endLine": 418,
+      "anchor": "uniquely identifies a capability package",
+      "summary": "Package identity is the id, version, target, and packageDigest tuple",
+      "owners": ["M03-T04", "M06-T08", "M07-T03"],
+      "tests": ["M03-T10", "M10-T07"],
+      "evidence": "Tuple identity drives digest, publication, and activation tests"
+    },
+    {
+      "id": "R-019",
+      "section": "9.1",
+      "line": 428,
+      "endLine": 442,
+      "anchor": "bundle is authoritative",
+      "summary": "The bundle owns all managed-root composition and hosts may add only honest platform wrappers",
+      "owners": ["M05-T07", "M05-T09"],
+      "tests": ["M05-T09", "M10-T05"],
+      "evidence": "Source audit rejects host-injected product UI inside the managed root"
+    },
+    {
+      "id": "R-020",
+      "section": "9.2",
+      "line": 446,
+      "endLine": 457,
+      "anchor": "Capability Packages are authoritative",
+      "summary": "Capability packages own implementation internals and only declared surfaces are design-addressable",
+      "owners": ["M03-T09", "M09-T04"],
+      "tests": ["M03-T09", "M09-T04"],
+      "evidence": "Contract parity and editor boundary tests expose no private DOM or library option"
+    },
+    {
+      "id": "R-021",
+      "section": "9.3",
+      "line": 461,
+      "anchor": "requires a major package version",
+      "summary": "Breaking contract changes require a major version and incompatible fallback is prohibited",
+      "owners": ["M03-T04", "M07-T03", "M12-T07"],
+      "tests": ["M03-T10", "M10-T07"],
+      "evidence": "Compatibility documentation and mismatch activation tests enforce major-version boundaries",
+      "bcp14": ["N-011"]
+    },
+    {
+      "id": "R-022",
+      "section": "9.4",
+      "line": 465,
+      "anchor": "do not become authoritative",
+      "summary": "Screenshots, generated code, rendered output, and caches remain derived artifacts",
+      "owners": ["M12-T08"],
+      "tests": ["M10-T05", "M12-T08"],
+      "evidence": "Final report names source and bundle as authority despite derivative output"
+    },
+    {
+      "id": "R-023",
+      "section": "10.1",
+      "line": 473,
+      "anchor": "additionalProperties: false",
+      "summary": "Core objects are closed and new semantic fields require a protocol version or extensions",
+      "owners": ["M02-T06", "M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Unknown core fields fail while namespaced extensions remain accepted"
+    },
+    {
+      "id": "R-024",
+      "section": "10.2",
+      "line": 487,
+      "anchor": "may ignore unknown extensions",
+      "summary": "Unknown extensions have no implicit core semantics and production may ignore optional ones",
+      "owners": ["M02-T07", "M08-T07"],
+      "tests": ["M08-T10"],
+      "evidence": "Unknown extension round-trip preserves bytes and does not affect core execution",
+      "bcp14": ["N-012"]
+    },
+    {
+      "id": "R-025",
+      "section": "10.3",
+      "line": 491,
+      "anchor": "use JSON Schema Draft 2020-12",
+      "summary": "Embedded catalog and state schemas use Draft 2020-12",
+      "owners": ["M02-T06", "M06-T03"],
+      "tests": ["M02-T13", "M06-T11"],
+      "evidence": "Compile valid embedded schemas and reject invalid dialect documents",
+      "bcp14": ["N-013"]
+    },
+    {
+      "id": "R-026",
+      "section": "10.4",
+      "line": 495,
+      "anchor": "missing reference is distinct",
+      "summary": "Missing resolution differs from JSON null and fallback applies only to missing values",
+      "owners": ["M02-T10", "M04-T02"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Reference tests distinguish missing, null, and fallback"
+    },
+    {
+      "id": "R-027",
+      "section": "11.1",
+      "line": 507,
+      "endLine": 510,
+      "anchor": "lowercase hexadecimal SHA-256",
+      "summary": "Digests use the sha256 prefix and exactly 64 lowercase hexadecimal characters",
+      "owners": ["M02-T04"],
+      "tests": ["M02-T04"],
+      "evidence": "Golden and malformed digest vectors cover prefix, length, and alphabet"
+    },
+    {
+      "id": "R-028",
+      "section": "11.2",
+      "line": 515,
+      "endLine": 521,
+      "anchor": "source_without_authoring",
+      "summary": "Source digest is JCS SHA-256 after removing only top-level authoring",
+      "owners": ["M02-T04", "M06-T08"],
+      "tests": ["M02-T04", "M06-T10"],
+      "evidence": "Golden digest proves extensions remain semantic and authoring is excluded"
+    },
+    {
+      "id": "R-029",
+      "section": "11.3",
+      "line": 525,
+      "endLine": 531,
+      "anchor": "bundle_without_revision_and_publication",
+      "summary": "Bundle revision is JCS SHA-256 after removing revision and publication",
+      "owners": ["M02-T04", "M06-T09"],
+      "tests": ["M02-T04", "M06-T10"],
+      "evidence": "Publication metadata changes do not change the semantic revision"
+    },
+    {
+      "id": "R-030",
+      "section": "11.4",
+      "line": 535,
+      "anchor": "including its catalog and target adapter artifacts",
+      "summary": "Package digest covers the immutable distributable catalog and target adapters",
+      "owners": ["M03-T04", "M03-T10"],
+      "tests": ["M03-T10"],
+      "evidence": "Package byte mutation changes the digest",
+      "bcp14": ["N-015"]
+    },
+    {
+      "id": "R-031",
+      "section": "11.5",
+      "line": 539,
+      "anchor": "mismatch is an integrity error",
+      "summary": "Available digest material is verified and mismatch prevents activation",
+      "owners": ["M06-T09", "M07-T02"],
+      "tests": ["M07-T09", "M10-T07"],
+      "evidence": "Source or revision tampering never becomes active",
+      "bcp14": ["N-016"]
+    },
+    {
+      "id": "R-032",
+      "section": "12",
+      "line": 545,
+      "anchor": "desen-source.schema.json",
+      "summary": "Every Design Source Document conforms to the canonical source schema",
+      "owners": ["M02-T06"],
+      "tests": ["M02-T12", "M02-T13"],
+      "evidence": "Official parity and structural micro-vectors exercise the source schema"
+    },
+    {
+      "id": "R-033",
+      "section": "12.2",
+      "line": 570,
+      "endLine": 572,
+      "anchor": "discovery hint only",
+      "summary": "Source catalog hints resolve to one trusted immutable package and are not production authority",
+      "owners": ["M02-T07", "M06-T02", "M06-T08"],
+      "tests": ["M06-T10", "M06-T11"],
+      "evidence": "Untrusted location cannot override exact package trust or enter the bundle"
+    },
+    {
+      "id": "R-034",
+      "section": "12.4",
+      "line": 580,
+      "anchor": "excluded from `sourceDigest`",
+      "summary": "Authoring metadata is non-production and excluded from digest and bundle",
+      "owners": ["M06-T07", "M06-T08", "M08-T07"],
+      "tests": ["M06-T10", "M08-T10"],
+      "evidence": "Authoring round-trips in source but disappears from digest input and bundle",
+      "bcp14": ["N-018"]
+    },
+    {
+      "id": "R-035",
+      "section": "13",
+      "line": 588,
+      "anchor": "desen-bundle.schema.json",
+      "summary": "Every Published Design Bundle conforms to the canonical bundle schema",
+      "owners": ["M02-T06", "M06-T09"],
+      "tests": ["M02-T12", "M06-T10"],
+      "evidence": "Official parity and final publication validate the bundle schema"
+    },
+    {
+      "id": "R-036",
+      "section": "13.4",
+      "line": 626,
+      "anchor": "non-semantic pipeline metadata",
+      "summary": "Publication metadata is non-semantic and does not affect revision calculation",
+      "owners": ["M02-T04", "M06-T09"],
+      "tests": ["M02-T04", "M06-T10"],
+      "evidence": "Metadata-only mutations retain the same revision"
+    },
+    {
+      "id": "R-037",
+      "section": "13.5",
+      "line": 630,
+      "anchor": "preserve its protocol-observable experience",
+      "summary": "Publication preserves observable behavior and source-node identity",
+      "owners": ["M05-T05", "M06-T06"],
+      "tests": ["M06-T10", "M09-T13"],
+      "evidence": "Golden publication preserves IDs and runtime-observable trace",
+      "bcp14": ["N-021"]
+    },
+    {
+      "id": "R-038",
+      "section": "14",
+      "line": 636,
+      "endLine": 643,
+      "anchor": "A `ValueSpec` is one of",
+      "summary": "ValueSpec is the closed union of scalar, array, literal, reference, token, and format values",
+      "owners": ["M02-T03", "M02-T06"],
+      "tests": ["M02-T13"],
+      "evidence": "Positive and negative vectors cover every union branch"
+    },
+    {
+      "id": "R-039",
+      "section": "14.2",
+      "line": 658,
+      "endLine": 670,
+      "anchor": "References are read-only",
+      "summary": "References are read-only and use only the seven declared namespaces",
+      "owners": ["M02-T10", "M04-T02"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Namespace resolver tests never produce writes or accept unknown namespaces"
+    },
+    {
+      "id": "R-040",
+      "section": "14.2.1",
+      "line": 674,
+      "anchor": "resolves the current state value",
+      "summary": "State references resolve surface state through array-free nested paths",
+      "owners": ["M02-T10", "M04-T02"],
+      "tests": ["M04-T16"],
+      "evidence": "State path resolution succeeds and invalid path forms fail"
+    },
+    {
+      "id": "R-041",
+      "section": "14.2.2",
+      "line": 678,
+      "anchor": "provided by the host",
+      "summary": "Host context is profile-defined, non-secret, and constrained to safe design bindings",
+      "owners": ["M04-T01", "M12-T04"],
+      "tests": ["M04-T16", "M12-T04"],
+      "evidence": "Context port schema and fixture audit expose no secret",
+      "bcp14": ["N-023"]
+    },
+    {
+      "id": "R-042",
+      "section": "14.2.3",
+      "line": 682,
+      "endLine": 691,
+      "anchor": "resource.stores.status",
+      "summary": "Resource references expose only declared lifecycle fields and schema-permitted output",
+      "owners": ["M02-T11", "M04-T08"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Resource lifecycle trace rejects undeclared response paths"
+    },
+    {
+      "id": "R-043",
+      "section": "14.2.4",
+      "line": 695,
+      "endLine": 704,
+      "anchor": "scoped to its surface",
+      "summary": "Operation aliases expose one surface-scoped public lifecycle",
+      "owners": ["M02-T11", "M04-T09"],
+      "tests": ["M04-T16"],
+      "evidence": "Alias scope and lifecycle fields are deterministic and isolated by surface"
+    },
+    {
+      "id": "R-044",
+      "section": "14.2.5",
+      "line": 708,
+      "anchor": "valid only while evaluating handlers",
+      "summary": "Event references exist only during the current declared event handler",
+      "owners": ["M02-T09", "M02-T10", "M04-T14"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Event payload resolves in-handler and fails outside its scope"
+    },
+    {
+      "id": "R-045",
+      "section": "14.2.6",
+      "line": 712,
+      "anchor": "Reusing an active alias",
+      "summary": "Nested repeats add aliases and cannot shadow an active alias",
+      "owners": ["M02-T10", "M04-T07"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Nested alias and shadowing vectors cover valid and invalid scopes"
+    },
+    {
+      "id": "R-046",
+      "section": "14.2.7",
+      "line": 716,
+      "endLine": 729,
+      "anchor": "core reserves these environment paths",
+      "summary": "The core environment path set is reserved and changes trigger dependent reevaluation",
+      "owners": ["M04-T01", "M04-T15"],
+      "tests": ["M04-T16"],
+      "evidence": "Environment-port changes update only equivalent dependent results"
+    },
+    {
+      "id": "R-047",
+      "section": "14.3",
+      "line": 733,
+      "anchor": "fallback` is used if present and type-valid",
+      "summary": "Fallback is used only on failed resolution and must be target-type valid",
+      "owners": ["M02-T10", "M04-T02"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Fallback tests cover valid, invalid, absent, and null cases"
+    },
+    {
+      "id": "R-048",
+      "section": "14.4",
+      "line": 741,
+      "anchor": "resolved by the host's token provider",
+      "summary": "Token resolution is host-provided and its result obeys the receiving schema",
+      "owners": ["M03-T07", "M04-T03"],
+      "tests": ["M04-T16"],
+      "evidence": "Token golden tests validate schema-compatible resolved values"
+    },
+    {
+      "id": "R-049",
+      "section": "14.5",
+      "line": 756,
+      "anchor": "placeholder substitution only",
+      "summary": "Formatting is deterministic placeholder substitution, not an expression language",
+      "owners": ["M02-T10", "M04-T03", "M12-T03"],
+      "tests": ["M02-T13", "M04-T16", "M12-T03"],
+      "evidence": "Formatting tests require matching keys and inert string output"
+    },
+    {
+      "id": "R-050",
+      "section": "15",
+      "line": 762,
+      "anchor": "deterministic, side-effect-free conditions",
+      "summary": "Predicates are deterministic and side-effect free",
+      "owners": ["M02-T10", "M04-T04"],
+      "tests": ["M04-T16"],
+      "evidence": "Predicate property tests produce stable results and no host effects"
+    },
+    {
+      "id": "R-051",
+      "section": "15.1",
+      "line": 778,
+      "endLine": 790,
+      "anchor": "canonical JSON equality",
+      "summary": "Predicate operators have fixed arity, comparison, membership, existence, and truth conversion semantics",
+      "owners": ["M02-T10", "M04-T04"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Operator table and complete truthy/unresolved truth table become golden vectors"
+    },
+    {
+      "id": "R-052",
+      "section": "15.1",
+      "line": 792,
+      "anchor": "Ordering operands of different types is invalid",
+      "summary": "Statically provable predicate mismatches fail publication and dynamic mismatches report false with diagnostics",
+      "owners": ["M02-T10", "M04-T04", "M06-T05"],
+      "tests": ["M02-T13", "M04-T16", "M06-T11"],
+      "evidence": "Static and dynamic type mismatch tests exercise both stages"
+    },
+    {
+      "id": "R-053",
+      "section": "15.2",
+      "line": 796,
+      "anchor": "one consistent snapshot",
+      "summary": "Predicate evaluation uses one consistent snapshot and cannot mutate or invoke",
+      "owners": ["M04-T04", "M04-T15"],
+      "tests": ["M04-T16"],
+      "evidence": "Concurrent input changes cannot produce a mixed predicate snapshot"
+    },
+    {
+      "id": "R-054",
+      "section": "16.1",
+      "line": 818,
+      "endLine": 823,
+      "anchor": "initial value, which must validate",
+      "summary": "State initial values validate, remain surface-local and ephemeral, and do not write back to source",
+      "owners": ["M02-T10", "M04-T06"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Initial schema failure, navigation disposal, and source immutability are tested"
+    },
+    {
+      "id": "R-055",
+      "section": "16.2",
+      "line": 829,
+      "endLine": 845,
+      "anchor": "Policies are",
+      "summary": "Resource mount, once, and manual policies have fixed load behavior and require catalog support",
+      "owners": ["M02-T11", "M04-T08"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Lifecycle traces distinguish all policies and reject unsupported policy use"
+    },
+    {
+      "id": "R-056",
+      "section": "16.3",
+      "line": 849,
+      "anchor": "root` is a normal component node",
+      "summary": "A surface root is a normal catalog component rather than a universal page primitive",
+      "owners": ["M05-T01"],
+      "tests": ["M05-T08"],
+      "evidence": "Reference bundle root resolves through the ordinary adapter registry"
+    },
+    {
+      "id": "R-057",
+      "section": "17.2",
+      "line": 876,
+      "anchor": "validates literal values immediately",
+      "summary": "Publisher checks literal and provable dynamic props and records unresolved runtime obligations",
+      "owners": ["M02-T08", "M06-T04", "M06-T05"],
+      "tests": ["M02-T13", "M06-T11"],
+      "evidence": "Literal mismatch fails and dynamic uncertainty is explicitly recorded",
+      "bcp14": ["N-027"]
+    },
+    {
+      "id": "R-058",
+      "section": "17.3",
+      "line": 880,
+      "endLine": 887,
+      "anchor": "A publisher enforces",
+      "summary": "Slots enforce declared names, cardinality, accepted IDs or categories, and leaf boundaries",
+      "owners": ["M02-T08", "M06-T04"],
+      "tests": ["M02-T13", "M10-T06"],
+      "evidence": "Slot micro-vectors cover unknown name, count, child, and no-slot leaf failures"
+    },
+    {
+      "id": "R-059",
+      "section": "17.4",
+      "line": 891,
+      "anchor": "absent, not merely visually hidden",
+      "summary": "A false node condition removes the complete subtree and its active semantics",
+      "owners": ["M04-T04", "M04-T15"],
+      "tests": ["M04-T16"],
+      "evidence": "Conditional trace proves descendants, resources, events, and commands are inactive"
+    },
+    {
+      "id": "R-060",
+      "section": "17.5",
+      "line": 895,
+      "endLine": 907,
+      "anchor": "All matching variants are applied in array order",
+      "summary": "Variants apply after base values, in order, with later path wins and no structural mutation",
+      "owners": ["M02-T08", "M04-T05"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Overlapping variant golden tests prove precedence and reject child mutation"
+    },
+    {
+      "id": "R-061",
+      "section": "17.6",
+      "line": 922,
+      "endLine": 930,
+      "anchor": "duplicate or missing keys invalidate",
+      "summary": "Repeats require array items, unique scalar keys, bounded instances, scoped aliases, and stable instance identity",
+      "owners": ["M02-T10", "M04-T07", "M05-T05"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Repeat vectors cover item type, key type, duplicates, limit, alias, and canonical identity"
+    },
+    {
+      "id": "R-062",
+      "section": "17.7",
+      "line": 934,
+      "endLine": 936,
+      "anchor": "immutable event-payload snapshot",
+      "summary": "Only declared events run ordered actions against a fixed payload; async settlement does not block the turn",
+      "owners": ["M02-T09", "M04-T09", "M04-T13", "M04-T14"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Event trace proves declaration, payload snapshot, order, and nonblocking settlement"
+    },
+    {
+      "id": "R-063",
+      "section": "17.8",
+      "line": 940,
+      "anchor": "node ids remain stable across revisions",
+      "summary": "Conceptually stable nodes retain identity across revisions",
+      "owners": ["M05-T05", "M08-T02"],
+      "tests": ["M08-T10", "M09-T13"],
+      "evidence": "Edit and compatible update tests retain selection and diagnostic identity"
+    },
+    {
+      "id": "R-064",
+      "section": "18.1",
+      "line": 950,
+      "endLine": 954,
+      "anchor": "visual state → style part",
+      "summary": "Style values use the visual-state, style-part, property hierarchy",
+      "owners": ["M02-T08", "M05-T03"],
+      "tests": ["M02-T13", "M05-T08"],
+      "evidence": "Style shape vectors and render adapter tests preserve the hierarchy"
+    },
+    {
+      "id": "R-065",
+      "section": "18.2",
+      "line": 977,
+      "anchor": "may force a state for preview",
+      "summary": "Production capabilities own state activation while authoring may force declared states only for preview",
+      "owners": ["M05-T03", "M09-T10"],
+      "tests": ["M09-T10"],
+      "evidence": "Forced preview state never changes production state activation"
+    },
+    {
+      "id": "R-066",
+      "section": "18.3",
+      "line": 983,
+      "anchor": "semantic styling hooks, not DOM selectors",
+      "summary": "Style parts remain semantic hooks independent of private implementation structure",
+      "owners": ["M03-T09", "M05-T03", "M09-T04"],
+      "tests": ["M03-T09", "M09-T04"],
+      "evidence": "Private selectors are unavailable and internal refactors preserve declared meaning"
+    },
+    {
+      "id": "R-067",
+      "section": "18.4",
+      "line": 987,
+      "anchor": "does not require every style value to be a token",
+      "summary": "Tokens are preferred but not mandatory unless a stronger project profile says so",
+      "owners": ["M03-T07", "M12-T08"],
+      "tests": ["M04-T16", "M12-T08"],
+      "evidence": "Literal and token style values both remain valid in the claimed profile"
+    },
+    {
+      "id": "R-068",
+      "section": "18.5",
+      "line": 991,
+      "anchor": "Editors should expose accessibility-relevant props",
+      "summary": "Editors expose declared accessibility props and report invalid combinations without suppressing host semantics",
+      "owners": ["M03-T09", "M09-T05"],
+      "tests": ["M03-T09", "M10-T06"],
+      "evidence": "Accessibility contract tests and inspector diagnostics cover invalid combinations",
+      "bcp14": ["N-030"]
+    },
+    {
+      "id": "R-069",
+      "section": "19.1",
+      "line": 1025,
+      "anchor": "Behavior ids are unique",
+      "summary": "Behavior instance IDs share the surface uniqueness requirement",
+      "owners": ["M02-T07", "M02-T09"],
+      "tests": ["M02-T13"],
+      "evidence": "Duplicate node and behavior identity vectors fail"
+    },
+    {
+      "id": "R-070",
+      "section": "19.2",
+      "line": 1029,
+      "anchor": "rejects an invalid attachment",
+      "summary": "Behavior attachments obey declared compatible capabilities or categories",
+      "owners": ["M02-T09", "M06-T04"],
+      "tests": ["M02-T13", "M11-T14"],
+      "evidence": "Valid and invalid attachTo vectors cover capability and category routes"
+    },
+    {
+      "id": "R-071",
+      "section": "19.3",
+      "line": 1033,
+      "anchor": "cannot be attached to the same node",
+      "summary": "Exclusive behavior channels conflict unless contracts explicitly declare compatibility",
+      "owners": ["M02-T09", "M03-T02"],
+      "tests": ["M02-T13", "M11-T14"],
+      "evidence": "Conflict matrix covers shared channels and explicit compatibility"
+    },
+    {
+      "id": "R-072",
+      "section": "19.4",
+      "line": 1037,
+      "anchor": "same contract surfaces as components",
+      "summary": "Behavior capabilities expose only the same declared public contract surfaces as components",
+      "owners": ["M03-T02", "M05-T04"],
+      "tests": ["M03-T09", "M11-T12"],
+      "evidence": "Sortable contract and adapter parity cover props, slots, events, commands, styles, and scenarios"
+    },
+    {
+      "id": "R-073",
+      "section": "20",
+      "line": 1043,
+      "endLine": 1045,
+      "anchor": "only protocol-defined responses",
+      "summary": "Actions are a closed data-only event response set and false guards skip without error",
+      "owners": ["M02-T11", "M04-T04", "M08-T06"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Unknown actions fail structurally and guarded actions leave no effect"
+    },
+    {
+      "id": "R-074",
+      "section": "20.1",
+      "line": 1049,
+      "anchor": "first path segment names a declared state entry",
+      "summary": "state.set targets declared state and leaves the complete entry schema-valid",
+      "owners": ["M02-T11", "M04-T10"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Path and post-write schema vectors cover success and rejection"
+    },
+    {
+      "id": "R-075",
+      "section": "20.2",
+      "line": 1053,
+      "anchor": "Non-boolean targets are invalid",
+      "summary": "state.toggle accepts only boolean state paths",
+      "owners": ["M02-T11", "M04-T10"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Boolean toggles succeed and non-boolean targets report failure"
+    },
+    {
+      "id": "R-076",
+      "section": "20.3",
+      "line": 1057,
+      "endLine": 1059,
+      "anchor": "another surface in the same bundle",
+      "summary": "Core navigation targets an existing managed surface; external URLs require trusted operations or profiles",
+      "owners": ["M02-T11", "M04-T10", "M12-T03"],
+      "tests": ["M02-T13", "M04-T16", "M12-T03"],
+      "evidence": "Missing and external targets cannot bypass declared navigation or trusted operation boundaries"
+    },
+    {
+      "id": "R-077",
+      "section": "20.4",
+      "line": 1082,
+      "anchor": "validates resolved input",
+      "summary": "Operation input validates before invocation and successful output before exposure",
+      "owners": ["M02-T11", "M04-T09"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Invalid input prevents calls and invalid output never reaches bindings"
+    },
+    {
+      "id": "R-078",
+      "section": "20.4",
+      "line": 1084,
+      "endLine": 1092,
+      "anchor": "Concurrency modes are",
+      "summary": "Operation alias lifecycle, reject/replace/queue concurrency, public errors, and settlement turns are deterministic",
+      "owners": ["M04-T09", "M04-T11", "M04-T13"],
+      "tests": ["M04-T16"],
+      "evidence": "Lifecycle traces cover synchronous pending, stale settlement, ordering, public errors, and non-retroactive handlers"
+    },
+    {
+      "id": "R-079",
+      "section": "20.5",
+      "line": 1096,
+      "anchor": "declared surface resource instance",
+      "summary": "resource.refresh reloads a declared instance with current resolved input",
+      "owners": ["M02-T11", "M04-T08", "M04-T11"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Unknown resources fail and refresh uses the latest input snapshot"
+    },
+    {
+      "id": "R-080",
+      "section": "20.6",
+      "line": 1100,
+      "endLine": 1102,
+      "anchor": "currently instantiated component node",
+      "summary": "Component commands are declared, schema-validated, live-target operations and never arbitrary method access",
+      "owners": ["M02-T09", "M02-T11", "M04-T12"],
+      "tests": ["M02-T13", "M04-T16", "M12-T03"],
+      "evidence": "Unknown, unmounted, invalid-input, and generic-method command attempts fail"
+    },
+    {
+      "id": "R-081",
+      "section": "20.8",
+      "line": 1110,
+      "anchor": "default maximum is 64",
+      "summary": "An event turn defaults to 64 actions and limit overflow terminates with the stable code",
+      "owners": ["M04-T13"],
+      "tests": ["M04-T16", "M12-T05"],
+      "evidence": "Boundary tests cover 64, 65, settlement depth, and terminated turn state",
+      "bcp14": ["N-032"]
+    },
+    {
+      "id": "R-082",
+      "section": "21",
+      "line": 1116,
+      "anchor": "desen-catalog.schema.json",
+      "summary": "Every Capability Catalog conforms to the canonical catalog schema",
+      "owners": ["M02-T06", "M03-T10"],
+      "tests": ["M02-T12", "M03-T10"],
+      "evidence": "Official parity and built reference catalog validate against the schema"
+    },
+    {
+      "id": "R-083",
+      "section": "21.1",
+      "line": 1135,
+      "anchor": "treated as one namespace",
+      "summary": "All resolved catalogs form one namespace and duplicate capability IDs are invalid",
+      "owners": ["M02-T07", "M06-T02"],
+      "tests": ["M02-T13", "M06-T11"],
+      "evidence": "Duplicate IDs fail within and across categories and catalogs"
+    },
+    {
+      "id": "R-084",
+      "section": "21.2",
+      "line": 1139,
+      "endLine": 1149,
+      "anchor": "A component capability declares",
+      "summary": "Component manifests declare their complete public property, composition, interaction, style, authoring, and deprecation contract",
+      "owners": ["M03-T01", "M03-T03"],
+      "tests": ["M03-T09"],
+      "evidence": "Reference component manifests pass contract completeness and parity checks"
+    },
+    {
+      "id": "R-085",
+      "section": "21.3",
+      "line": 1155,
+      "anchor": "matches either list",
+      "summary": "When both slot acceptance lists exist they combine with logical OR",
+      "owners": ["M02-T08"],
+      "tests": ["M02-T13"],
+      "evidence": "Acceptance matrix covers ID-only, category-only, either, and neither"
+    },
+    {
+      "id": "R-086",
+      "section": "21.6",
+      "line": 1167,
+      "anchor": "semantic role and cross-version stability",
+      "summary": "Style-part documentation describes stable semantic meaning",
+      "owners": ["M03-T09", "M12-T06", "M12-T07"],
+      "tests": ["M03-T09", "M12-T06"],
+      "evidence": "Package documentation audit links every style part to a stable contract"
+    },
+    {
+      "id": "R-087",
+      "section": "21.7",
+      "line": 1171,
+      "endLine": 1181,
+      "anchor": "do not override `propsSchema` validation",
+      "summary": "Authoring metadata guides controls and scenarios but never weakens the property schema",
+      "owners": ["M03-T03", "M09-T05", "M09-T06"],
+      "tests": ["M03-T09", "M10-T06"],
+      "evidence": "Misleading control hints cannot make an invalid prop publishable"
+    },
+    {
+      "id": "R-088",
+      "section": "21.8",
+      "line": 1185,
+      "endLine": 1191,
+      "anchor": "adapterFidelity` values mean",
+      "summary": "Adapter fidelity values have exact meanings and approximate preview cannot support exactness claims",
+      "owners": ["M03-T09", "M09-T11", "M12-T08"],
+      "tests": ["M09-T11", "M12-T08"],
+      "evidence": "Metadata, visible disclosure, and final claims agree for each fidelity value",
+      "bcp14": ["N-035"]
+    },
+    {
+      "id": "R-089",
+      "section": "22.1",
+      "line": 1199,
+      "endLine": 1214,
+      "anchor": "effect class is descriptive",
+      "summary": "Operations declare schemas, public errors and effect class, while current host authorization governs execution",
+      "owners": ["M03-T02", "M04-T01", "M04-T09"],
+      "tests": ["M03-T09", "M04-T16"],
+      "evidence": "Effect classes map to contracts but never bypass a denying host policy"
+    },
+    {
+      "id": "R-090",
+      "section": "22.2",
+      "line": 1218,
+      "endLine": 1227,
+      "anchor": "modifies domain data must be an operation",
+      "summary": "Resources are read-oriented schema contracts and domain mutation uses operations",
+      "owners": ["M03-T02", "M04-T08", "M12-T03"],
+      "tests": ["M03-T09", "M12-T03"],
+      "evidence": "Catalog and source audit prevent resource-based external writes"
+    },
+    {
+      "id": "R-091",
+      "section": "22.3",
+      "line": 1231,
+      "anchor": "production runtime ignores authoring fixtures",
+      "summary": "Fixtures are synthetic authoring-only data and never live production inputs",
+      "owners": ["M03-T07", "M05-T08", "M12-T04"],
+      "tests": ["M10-T02", "M12-T04"],
+      "evidence": "Production bundle/host and fixture audit contain no live or sensitive fixture data",
+      "bcp14": ["N-036"]
+    },
+    {
+      "id": "R-092",
+      "section": "22.4",
+      "line": 1235,
+      "anchor": "binds a capability id to trusted implementation code",
+      "summary": "The host binds capability IDs to trusted code rather than document-selected service details",
+      "owners": ["M03-T02", "M03-T08", "M12-T03"],
+      "tests": ["M10-T04", "M12-T03"],
+      "evidence": "Host binding and source audit show no endpoint, SDK, database, or arbitrary service selection"
+    },
+    {
+      "id": "R-093",
+      "section": "23.1",
+      "line": 1243,
+      "anchor": "not reconstruct it from screenshots",
+      "summary": "Editors instantiate declared authoring adapters and never guess UI from screenshots or CSS",
+      "owners": ["M09-T03", "M09-T11"],
+      "tests": ["M09-T11"],
+      "evidence": "Adapter identity succeeds and static surrogate fixture fails conformance"
+    },
+    {
+      "id": "R-094",
+      "section": "23.2",
+      "line": 1247,
+      "anchor": "must still render current resolved",
+      "summary": "Design Mode may intercept input but renders current resolved runtime semantics",
+      "owners": ["M09-T10"],
+      "tests": ["M10-T01", "M10-T02"],
+      "evidence": "Mode parity E2E compares rendered props, slots, states, conditions, and repeats"
+    },
+    {
+      "id": "R-095",
+      "section": "23.3",
+      "line": 1251,
+      "anchor": "experience the surface as a user would",
+      "summary": "Run Mode routes real adapter interaction through DESEN runtime semantics under authoring safety",
+      "owners": ["M09-T10", "M09-T11"],
+      "tests": ["M10-T02", "M10-T03", "M10-T04"],
+      "evidence": "Run-mode E2E covers state, resource, event, action, and fixture outcomes"
+    },
+    {
+      "id": "R-096",
+      "section": "23.4",
+      "line": 1255,
+      "anchor": "structured JSON editor",
+      "summary": "Property controls derive from schema and unsupported schema features remain editable through an honest fallback",
+      "owners": ["M03-T03", "M09-T05", "M09-T06"],
+      "tests": ["M09-T06"],
+      "evidence": "Unsupported nested schema remains visible and editable instead of disappearing"
+    },
+    {
+      "id": "R-097",
+      "section": "23.5",
+      "line": 1259,
+      "anchor": "affordances are authoring-only",
+      "summary": "Editors expose named slots, enforce contracts, and keep direct-manipulation affordances non-semantic",
+      "owners": ["M08-T03", "M09-T07"],
+      "tests": ["M08-T10", "M09-T07"],
+      "evidence": "Drop, move, reorder, acceptance, and cardinality tests preserve runtime document meaning"
+    },
+    {
+      "id": "R-098",
+      "section": "23.6",
+      "line": 1263,
+      "anchor": "must not discover or edit private",
+      "summary": "Style editing exposes only declared parts and state selectors",
+      "owners": ["M09-T04", "M09-T05"],
+      "tests": ["M09-T04"],
+      "evidence": "Private selector discovery is absent and declared style controls remain available"
+    },
+    {
+      "id": "R-099",
+      "section": "23.7",
+      "line": 1277,
+      "anchor": "never copied into the Published Design Bundle",
+      "summary": "Scenario props, fixtures, and state remain authoring-only",
+      "owners": ["M03-T07", "M06-T07", "M09-T11"],
+      "tests": ["M06-T10", "M09-T11"],
+      "evidence": "Scenario activation changes preview but never bundle bytes"
+    },
+    {
+      "id": "R-100",
+      "section": "23.8",
+      "line": 1281,
+      "anchor": "after explicit user and host authorization",
+      "summary": "Authoring defaults to fixtures; non-production integration preview requires explicit authorization and clear context labels",
+      "owners": ["M03-T07", "M03-T08", "M09-T11"],
+      "tests": ["M09-T11", "M12-T04"],
+      "evidence": "Fixture, integration, and production contexts are visibly distinct and production calls stay disabled"
+    },
+    {
+      "id": "R-101",
+      "section": "23.9",
+      "line": 1285,
+      "endLine": 1294,
+      "anchor": "Diagnostics must identify at least",
+      "summary": "Editor diagnostics carry stable document, surface, node, capability, path, and code identity while invalid subtrees remain selectable",
+      "owners": ["M02-T05", "M09-T13"],
+      "tests": ["M02-T13", "M09-T13"],
+      "evidence": "Diagnostic fixtures assert every context field and selectable invalid placeholders"
+    },
+    {
+      "id": "R-102",
+      "section": "24.1",
+      "line": 1314,
+      "anchor": "failure before step 8",
+      "summary": "Any activation failure before durable commit leaves the active revision unchanged",
+      "owners": ["M07-T07", "M07-T09"],
+      "tests": ["M07-T09", "M07-T10"],
+      "evidence": "Boundary fault injection proves the invariant at every pre-commit stage"
+    },
+    {
+      "id": "R-103",
+      "section": "24.3",
+      "line": 1332,
+      "endLine": 1334,
+      "anchor": "observable result must be equivalent",
+      "summary": "Reactive updates produce equivalent snapshots and stale asynchronous generations never overwrite newer state",
+      "owners": ["M04-T15"],
+      "tests": ["M04-T16"],
+      "evidence": "Dependency and stale-result race tests preserve deterministic observable state"
+    },
+    {
+      "id": "R-104",
+      "section": "24.4",
+      "line": 1338,
+      "anchor": "uses stable node identity and repeat keys",
+      "summary": "Compatible instances persist by stable identity and remount only for declared identity or adapter changes",
+      "owners": ["M04-T06", "M04-T07", "M05-T05"],
+      "tests": ["M04-T16", "M05-T05"],
+      "evidence": "Reevaluation tests distinguish preserved and allowed-remount cases"
+    },
+    {
+      "id": "R-105",
+      "section": "24.5",
+      "line": 1342,
+      "anchor": "denial is reported without substituting",
+      "summary": "Navigation uses host integration, requires an active-bundle target, and reports denial without substitution",
+      "owners": ["M04-T01", "M04-T10", "M05-T07"],
+      "tests": ["M04-T16", "M10-T04"],
+      "evidence": "Missing and denied navigation remain controlled failures"
+    },
+    {
+      "id": "R-106",
+      "section": "24.6",
+      "line": 1346,
+      "anchor": "must not falsify success",
+      "summary": "Host policy denial becomes a controlled failure and never a fabricated success",
+      "owners": ["M04-T01", "M04-T09", "M04-T12"],
+      "tests": ["M04-T16"],
+      "evidence": "Denied resource, operation, command, and event paths report failure"
+    },
+    {
+      "id": "R-107",
+      "section": "25.2",
+      "line": 1380,
+      "endLine": 1389,
+      "anchor": "Normalization must not change child order",
+      "summary": "Normalization may perform only listed non-semantic transforms and cannot change observable order, identity, values, conditions, or capabilities",
+      "owners": ["M06-T06", "M06-T07"],
+      "tests": ["M06-T10"],
+      "evidence": "Golden normalization preserves every semantic field and repeated publication is identical"
+    },
+    {
+      "id": "R-108",
+      "section": "25.3",
+      "line": 1393,
+      "anchor": "correctness cannot be proven",
+      "summary": "Unprovable source correctness rejects publication and never delegates semantic guessing to production",
+      "owners": ["M06-T11"],
+      "tests": ["M06-T11"],
+      "evidence": "Invalid-source matrix proves no bundle is emitted for uncertainty"
+    },
+    {
+      "id": "R-109",
+      "section": "25.4",
+      "line": 1397,
+      "anchor": "artifacts are non-normative",
+      "summary": "Optional generated artifacts remain derived and cannot replace the Published Design Bundle",
+      "owners": ["M12-T08"],
+      "tests": ["M10-T05", "M12-T08"],
+      "evidence": "Final report and host audit retain bundle authority",
+      "status": "JUSTIFIED_NA",
+      "rationale": "The first Web-React proof does not claim an optional export or cache format"
+    },
+    {
+      "id": "R-110",
+      "section": "26.1",
+      "line": 1405,
+      "anchor": "stable core error codes",
+      "summary": "Core diagnostic codes are stable and implementation-specific additions are namespaced",
+      "owners": ["M02-T05"],
+      "tests": ["M02-T13", "M12-T08"],
+      "evidence": "Registry uniqueness tests and final report preserve core and namespaced code identities"
+    },
+    {
+      "id": "R-111",
+      "section": "26.2",
+      "line": 1409,
+      "anchor": "should be caught at publication",
+      "summary": "Known structure and contract errors belong at publication; runtime errors are changing or external failures",
+      "owners": ["M02-T13", "M06-T11", "M04-T16"],
+      "tests": ["M06-T11", "M04-T16"],
+      "evidence": "Stage-classification tests prevent known contract errors from being deferred"
+    },
+    {
+      "id": "R-112",
+      "section": "26.3",
+      "line": 1413,
+      "endLine": 1418,
+      "anchor": "prop schema permits omission",
+      "summary": "Unresolved dynamic props are omitted only when allowed; otherwise the node fails and no invalid value reaches an adapter",
+      "owners": ["M04-T02", "M05-T02", "M05-T06"],
+      "tests": ["M04-T16", "M05-T08"],
+      "evidence": "Optional and required prop failure vectors assert adapter inputs"
+    },
+    {
+      "id": "R-113",
+      "section": "26.4",
+      "line": 1422,
+      "anchor": "host-defined safe boundary",
+      "summary": "Node failure isolates safely under profile policy while authoring keeps a selectable diagnostic representation",
+      "owners": ["M05-T06", "M09-T13"],
+      "tests": ["M05-T08", "M09-T13"],
+      "evidence": "Failed node boundary preserves safe siblings and editor selection"
+    },
+    {
+      "id": "R-114",
+      "section": "26.5",
+      "line": 1426,
+      "anchor": "expose only a public error code",
+      "summary": "Resource and operation failures update their lifecycle and expose only declared public errors",
+      "owners": ["M04-T08", "M04-T09"],
+      "tests": ["M04-T16", "M12-T04"],
+      "evidence": "Failure trace contains public codes and no raw secret or server data"
+    },
+    {
+      "id": "R-115",
+      "section": "26.7",
+      "line": 1434,
+      "anchor": "must not be interpreted as a successful",
+      "summary": "Adapter crashes are isolated and never interpreted as successful resource or operation results",
+      "owners": ["M05-T06", "M04-T09"],
+      "tests": ["M05-T08"],
+      "evidence": "Injected adapter crash produces ADAPTER_FAILURE and no success transition"
+    },
+    {
+      "id": "R-116",
+      "section": "27.1",
+      "line": 1442,
+      "anchor": "may be attacked or corrupted",
+      "summary": "Documents, delivery, data, outputs, and capability packages are treated as untrusted or corruptible inputs",
+      "owners": ["M12-T03", "M12-T04", "M12-T05"],
+      "tests": ["M12-T03", "M12-T04", "M12-T05"],
+      "evidence": "Security, data, and finite-limit audits use adversarial fixtures"
+    },
+    {
+      "id": "R-117",
+      "section": "27.2",
+      "line": 1457,
+      "anchor": "Text-like values are inert data",
+      "summary": "Text remains inert and rich content can execute only inside a trusted, schema-bound, sanitizing capability",
+      "owners": ["M12-T03"],
+      "tests": ["M12-T03"],
+      "evidence": "Text and markup fixtures cannot execute; no rich-content capability is claimed"
+    },
+    {
+      "id": "R-118",
+      "section": "27.3",
+      "line": 1461,
+      "anchor": "Only host-approved capability packages execute code",
+      "summary": "Bundle data cannot govern loading or updating executable package code",
+      "owners": ["M07-T03", "M12-T03"],
+      "tests": ["M10-T07", "M12-T03"],
+      "evidence": "Unknown document-selected code references fail exact host package resolution"
+    },
+    {
+      "id": "R-119",
+      "section": "27.4",
+      "line": 1465,
+      "anchor": "do not prove publisher identity",
+      "summary": "Digests provide integrity but not authenticity; the local proof records its unsigned transport limitation",
+      "owners": ["M12-T08"],
+      "tests": ["M12-T08"],
+      "evidence": "Final conformance report makes no signing or production-authenticity claim",
+      "status": "JUSTIFIED_NA",
+      "rationale": "A signed publication profile and production transport are outside DESEN 0.1.0 and this local proof",
+      "bcp14": ["S-005"]
+    },
+    {
+      "id": "R-120",
+      "section": "27.5",
+      "line": 1469,
+      "endLine": 1474,
+      "anchor": "references are read-only",
+      "summary": "Writes, commands, events, navigation, and capability data crossing occur only through declared schema-bound channels",
+      "owners": ["M02-T08", "M02-T09", "M02-T11", "M04-T12"],
+      "tests": ["M02-T13", "M04-T16", "M12-T03"],
+      "evidence": "Least-authority matrix rejects undeclared writes, methods, events, targets, and data"
+    },
+    {
+      "id": "R-121",
+      "section": "27.6",
+      "line": 1478,
+      "anchor": "fixtures must use synthetic data",
+      "summary": "Catalogs and bundles contain no secrets and fixtures use synthetic data",
+      "owners": ["M03-T07", "M12-T04"],
+      "tests": ["M12-T04"],
+      "evidence": "Artifact and fixture audit detects secrets, personal data, and live records",
+      "bcp14": ["N-040"]
+    },
+    {
+      "id": "R-122",
+      "section": "27.7",
+      "line": 1482,
+      "anchor": "valid design request is not authorization",
+      "summary": "Every resource, operation, navigation, command, and event remains subject to current host policy",
+      "owners": ["M04-T01", "M04-T08", "M04-T09", "M04-T10", "M04-T12"],
+      "tests": ["M04-T16"],
+      "evidence": "Deny policies cover every host-effect channel without false success"
+    },
+    {
+      "id": "R-123",
+      "section": "27.8",
+      "line": 1486,
+      "endLine": 1498,
+      "anchor": "Bundle size",
+      "summary": "Reference limits cover bundle bytes, nodes, depth, repeats, actions, settlement, and predicate arguments and never become unbounded",
+      "owners": ["M02-T13", "M04-T07", "M04-T13", "M07-T04"],
+      "tests": ["M12-T05"],
+      "evidence": "Measured boundary matrix tests every default and rejects unbounded profile values",
+      "bcp14": ["N-041"]
+    },
+    {
+      "id": "R-124",
+      "section": "28.1",
+      "line": 1506,
+      "anchor": "not the render hot path",
+      "summary": "Catalog resolution, literal validation, indexing, and authoring removal occur before rendering",
+      "owners": ["M06-T07", "M07-T06"],
+      "tests": ["M12-T05"],
+      "evidence": "Performance audit locates expensive preparation outside render materialization"
+    },
+    {
+      "id": "R-125",
+      "section": "28.2",
+      "line": 1510,
+      "anchor": "revision artifact itself never changes",
+      "summary": "Bundles and packages are content-addressed immutable artifacts while channels alone are mutable",
+      "owners": ["M03-T10", "M07-T01", "M07-T05"],
+      "tests": ["M03-T10", "M07-T10"],
+      "evidence": "Mutation attempts fail and channel updates point to new immutable revisions"
+    },
+    {
+      "id": "R-126",
+      "section": "28.3",
+      "line": 1514,
+      "anchor": "Users never observe a half-applied bundle",
+      "summary": "A revision stages separately and switches active state only after preflight",
+      "owners": ["M07-T06", "M07-T07"],
+      "tests": ["M07-T09", "M07-T10"],
+      "evidence": "Concurrent readers never observe partial activation state"
+    },
+    {
+      "id": "R-127",
+      "section": "28.4",
+      "line": 1518,
+      "anchor": "never embedded in the bundle",
+      "summary": "Lazy code remains exact, preflight-known, and loaded only from trusted package distribution",
+      "owners": ["M07-T03", "M07-T06", "M12-T03"],
+      "tests": ["M07-T09", "M12-T03"],
+      "evidence": "Lazy package tests reject bundle-embedded or unpinned runtime code"
+    },
+    {
+      "id": "R-128",
+      "section": "28.5",
+      "line": 1522,
+      "anchor": "bundle remains logically complete",
+      "summary": "The runtime may materialize only active surfaces but every 0.1.0 bundle remains logically complete",
+      "owners": ["M04-T16"],
+      "tests": ["M04-T16", "M12-T05"],
+      "evidence": "Lazy surface materialization preserves complete bundle semantics"
+    },
+    {
+      "id": "R-129",
+      "section": "28.6",
+      "line": 1526,
+      "anchor": "observable behavior and performance limits",
+      "summary": "Dependency optimization is optional but all reevaluation strategies preserve observable behavior within limits",
+      "owners": ["M04-T15"],
+      "tests": ["M04-T16", "M12-T05"],
+      "evidence": "Optimized and whole-surface evaluation traces are equivalent"
+    },
+    {
+      "id": "R-130",
+      "section": "28.7",
+      "line": 1530,
+      "anchor": "same bundle revision and exact catalog contract",
+      "summary": "Any future server rendering or native precomposition preserves exact revision, catalog, identity, and state semantics",
+      "status": "JUSTIFIED_NA",
+      "owners": ["M12-T08"],
+      "tests": ["M12-T08"],
+      "evidence": "Final report records that SSR and native precomposition are not claimed",
+      "rationale": "The first implementation is client-side web-react and no SSR or native profile is in scope"
+    },
+    {
+      "id": "R-131",
+      "section": "28.8",
+      "line": 1534,
+      "anchor": "Capability packages remain responsible",
+      "summary": "Capability packages own implementation-specific performance algorithms",
+      "owners": ["M03-T09", "M11-T02", "M11-T09"],
+      "tests": ["M03-T09", "M11-T06", "M11-T12"],
+      "evidence": "Map and Sortable integrations keep provider mechanics behind adapters"
+    },
+    {
+      "id": "R-132",
+      "section": "29.1",
+      "line": 1542,
+      "endLine": 1554,
+      "anchor": "integrates a complex capability once",
+      "summary": "Complex capabilities provide adapters, schemas, public contract surfaces, scenarios, and immutable identity once",
+      "owners": ["M11-T01", "M11-T05", "M11-T08", "M11-T11"],
+      "tests": ["M11-T06", "M11-T12", "M11-T14"],
+      "evidence": "Map and Sortable contract artifacts integrate without runtime-core changes"
+    },
+    {
+      "id": "R-133",
+      "section": "29.4",
+      "line": 1585,
+      "endLine": 1597,
+      "anchor": "correct evolution is to",
+      "summary": "Additional designer control evolves through public contract surfaces or new capabilities, never private inspection",
+      "owners": ["M09-T04", "M11-T01", "M11-T08"],
+      "tests": ["M09-T04", "M11-T14"],
+      "evidence": "Editor boundary and extensibility proof expose only contract evolution routes",
+      "bcp14": ["N-042"]
+    },
+    {
+      "id": "R-134",
+      "section": "30.1",
+      "line": 1605,
+      "endLine": 1609,
+      "anchor": "DESEN follows Semantic Versioning",
+      "summary": "Protocol patch, minor, and major versions have the declared compatibility meanings",
+      "owners": ["M12-T07", "M12-T08"],
+      "tests": ["M12-T08"],
+      "evidence": "Compatibility and final conformance documentation state protocol version policy"
+    },
+    {
+      "id": "R-135",
+      "section": "30.1",
+      "line": 1611,
+      "anchor": "must be documented in `CHANGELOG.md`",
+      "summary": "Breaking developmental protocol changes require changelog and migration guidance",
+      "status": "JUSTIFIED_NA",
+      "owners": ["M12-T08"],
+      "tests": ["M12-T08"],
+      "evidence": "Final report confirms no protocol-byte or version change occurred",
+      "rationale": "This implementation consumes the frozen upstream 0.1.0 protocol and does not author a protocol change"
+    },
+    {
+      "id": "R-136",
+      "section": "30.2",
+      "line": 1615,
+      "endLine": 1621,
+      "anchor": "A package patch still produces a different digest",
+      "summary": "Package SemVer classifies contract change while every artifact change receives a new digest and explicit adoption",
+      "owners": ["M03-T04", "M03-T10", "M06-T08"],
+      "tests": ["M03-T10", "M06-T10"],
+      "evidence": "Version/digest compatibility matrix and exact bundle pinning agree"
+    },
+    {
+      "id": "R-137",
+      "section": "30.3",
+      "line": 1625,
+      "anchor": "Removal requires a breaking package version",
+      "summary": "Deprecated usage warns while exact packages remain available; removal is breaking",
+      "owners": ["M06-T04", "M12-T07"],
+      "tests": ["M06-T11", "M12-T08"],
+      "evidence": "Deprecation emits a warning and removal compatibility is documented"
+    },
+    {
+      "id": "R-138",
+      "section": "30.4",
+      "line": 1629,
+      "anchor": "reject unsupported versions before activation",
+      "summary": "Runtimes declare supported protocol versions, reject unsupported input early, and never guess forward compatibility",
+      "owners": ["M02-T06", "M07-T02"],
+      "tests": ["M02-T13", "M07-T09"],
+      "evidence": "Unsupported version fails before staging or activation"
+    },
+    {
+      "id": "R-139",
+      "section": "30.5",
+      "line": 1633,
+      "anchor": "no runtime negotiation to a different version",
+      "summary": "Runtime package selection uses exact bundle requirements rather than version negotiation",
+      "owners": ["M06-T08", "M07-T03"],
+      "tests": ["M10-T07"],
+      "evidence": "Newer compatible package cannot substitute for the exact tuple"
+    },
+    {
+      "id": "R-140",
+      "section": "31.1",
+      "line": 1641,
+      "endLine": 1647,
+      "anchor": "Recommended suffixes",
+      "summary": "Public documentation recommends distinct source, bundle, and catalog JSON suffixes",
+      "owners": ["M12-T07", "M12-T10"],
+      "tests": ["M12-T06"],
+      "evidence": "Documentation and published examples use or explicitly explain the recommended suffixes"
+    },
+    {
+      "id": "R-141",
+      "section": "31.2",
+      "line": 1651,
+      "anchor": "should use `application/json`",
+      "summary": "The working draft uses application/json and makes no registered DESEN media-type claim",
+      "owners": ["M12-T07", "M12-T10"],
+      "tests": ["M12-T08"],
+      "evidence": "Integration docs and final report state the media-type limitation"
+    },
+    {
+      "id": "R-142",
+      "section": "31.3",
+      "line": 1655,
+      "anchor": "canonical identifiers for this draft",
+      "summary": "Canonical schema IDs use schemas.desen.dev but validators may use exact vendored copies offline",
+      "owners": ["M02-T01", "M02-T06", "M12-T10"],
+      "tests": ["M02-T12", "M12-T10"],
+      "evidence": "Vendored schema registration resolves canonical IDs without network fetch"
+    },
+    {
+      "id": "R-143",
+      "section": "31.4",
+      "line": 1659,
+      "anchor": "trust must be established independently",
+      "summary": "Catalog location aids discovery only and cannot establish package trust",
+      "owners": ["M06-T02", "M06-T11"],
+      "tests": ["M06-T11"],
+      "evidence": "A location hint cannot bypass exact digest and trust checks"
+    },
+    {
+      "id": "R-144",
+      "section": "31.5",
+      "line": 1663,
+      "anchor": "requests no IANA actions",
+      "summary": "The working draft makes no IANA registration claim",
+      "status": "JUSTIFIED_NA",
+      "owners": ["M12-T08"],
+      "tests": ["M12-T08"],
+      "evidence": "Final report does not claim registered media types or IANA status",
+      "rationale": "IANA registration is specification governance, not part of the local implementation proof"
+    },
+    {
+      "id": "R-145",
+      "section": "Appendix B",
+      "line": 1892,
+      "anchor": "JSON Pointer to the failing location",
+      "summary": "Diagnostics include a JSON Pointer whenever a location is available",
+      "owners": ["M02-T05"],
+      "tests": ["M02-T13"],
+      "evidence": "Every validator-owned diagnostic micro-vector asserts its pointer"
+    },
+    {
+      "id": "R-146",
+      "section": "16",
+      "line": 802,
+      "anchor": "navigable, independently materialized",
+      "summary": "A surface is the independently materialized navigation unit",
+      "owners": ["M04-T16", "M05-T08"],
+      "tests": ["M04-T16", "M05-T08"],
+      "evidence": "Headless and React traces materialize surfaces independently"
+    },
+    {
+      "id": "R-147",
+      "section": "17",
+      "line": 855,
+      "anchor": "instance of a component capability",
+      "summary": "Every component node resolves through a declared capability",
+      "owners": ["M02-T07", "M05-T01"],
+      "tests": ["M02-T13", "M05-T08"],
+      "evidence": "Node resolution uses the exact catalog and adapter registry"
+    },
+    {
+      "id": "R-148",
+      "section": "18",
+      "line": 946,
+      "anchor": "Styling occurs through declared",
+      "summary": "DESEN styling never grants general implementation access and uses declared style parts",
+      "owners": ["M02-T08", "M05-T03", "M09-T04"],
+      "tests": ["M02-T13", "M09-T04"],
+      "evidence": "Style validation and editor audit reject private selectors"
+    },
+    {
+      "id": "R-149",
+      "section": "19",
+      "line": 997,
+      "anchor": "adds interaction mechanics",
+      "summary": "Behavior mechanics remain capability implementations rather than new core primitives",
+      "owners": ["M03-T02", "M05-T04"],
+      "tests": ["M11-T12"],
+      "evidence": "Sortable integrates as a separate behavior package with unchanged runtime-core"
+    },
+    {
+      "id": "R-150",
+      "section": "6.2",
+      "line": 282,
+      "endLine": 291,
+      "anchor": "A complete ecosystem may contain",
+      "summary": "Protocol actors have distinct producer, publisher, validator, package, runtime, and host responsibilities",
+      "owners": ["M12-T08"],
+      "tests": ["M12-T08"],
+      "evidence": "Final implementation report states the exact conformance targets and actor boundaries"
+    },
+    {
+      "id": "R-151",
+      "section": "12.4",
+      "line": 582,
+      "anchor": "namespace high-value interoperable additions through extensions",
+      "summary": "Producer-specific authoring additions use namespaced extensions until standardized",
+      "owners": ["M08-T07", "M12-T07"],
+      "tests": ["M08-T10", "M12-T08"],
+      "evidence": "Unknown authoring extension round-trip and compatibility documentation preserve the namespaced addition"
+    }
+  ],
+  "invariants": [
+    {
+      "id": "A-001",
+      "section": "Appendix A",
+      "line": 1834,
+      "anchor": "Design authority",
+      "summary": "Managed surfaces compose from the active bundle rather than a manual duplicate",
+      "owners": ["M05-T09", "M10-T05"],
+      "tests": ["M10-T05"],
+      "evidence": "Host source audit and publication-change E2E"
+    },
+    {
+      "id": "A-002",
+      "section": "Appendix A",
+      "line": 1835,
+      "anchor": "Data-only documents",
+      "summary": "Source, bundle, and catalog documents contain no arbitrary executable code",
+      "owners": ["M12-T03"],
+      "tests": ["M12-T03"],
+      "evidence": "Executable-content source and artifact audit"
+    },
+    {
+      "id": "A-003",
+      "section": "Appendix A",
+      "line": 1836,
+      "anchor": "Trusted execution",
+      "summary": "Only host-approved capability packages provide executable behavior",
+      "owners": ["M07-T03", "M12-T03"],
+      "tests": ["M10-T07", "M12-T03"],
+      "evidence": "Exact trusted package resolution and no remote code selection"
+    },
+    {
+      "id": "A-004",
+      "section": "Appendix A",
+      "line": 1837,
+      "anchor": "Exact package pinning",
+      "summary": "Production bundles pin exact package identity tuples",
+      "owners": ["M06-T08", "M07-T03"],
+      "tests": ["M06-T10", "M10-T07"],
+      "evidence": "Golden package tuple and mismatch activation test"
+    },
+    {
+      "id": "A-005",
+      "section": "Appendix A",
+      "line": 1838,
+      "anchor": "Closed capability boundary",
+      "summary": "Designers configure only declared capability contract surfaces",
+      "owners": ["M02-T08", "M02-T09", "M02-T11", "M03-T09"],
+      "tests": ["M02-T13", "M03-T09"],
+      "evidence": "Contract micro-vectors and package parity audit"
+    },
+    {
+      "id": "A-006",
+      "section": "Appendix A",
+      "line": 1839,
+      "anchor": "Read-only bindings",
+      "summary": "References never write and external effects use named operations",
+      "owners": ["M04-T02", "M04-T09"],
+      "tests": ["M04-T16", "M12-T03"],
+      "evidence": "Resolver and least-authority source audit"
+    },
+    {
+      "id": "A-007",
+      "section": "Appendix A",
+      "line": 1840,
+      "anchor": "Immutable revisions",
+      "summary": "Bundle revisions and package digests never change associated content",
+      "owners": ["M03-T10", "M07-T01"],
+      "tests": ["M03-T10", "M07-T10"],
+      "evidence": "Content-addressed immutability tests"
+    },
+    {
+      "id": "A-008",
+      "section": "Appendix A",
+      "line": 1841,
+      "anchor": "Atomic activation",
+      "summary": "A revision activates only after successful preflight",
+      "owners": ["M07-T07"],
+      "tests": ["M07-T09", "M07-T10"],
+      "evidence": "Transactional activation fault matrix"
+    },
+    {
+      "id": "A-009",
+      "section": "Appendix A",
+      "line": 1842,
+      "anchor": "Last-known-good safety",
+      "summary": "Activation failure preserves a compatible active revision",
+      "owners": ["M07-T07", "M07-T08"],
+      "tests": ["M07-T10", "M10-T07"],
+      "evidence": "Invalid revision and restart recovery tests"
+    },
+    {
+      "id": "A-010",
+      "section": "Appendix A",
+      "line": 1843,
+      "anchor": "Stable identity",
+      "summary": "Conceptually unchanged surfaces and nodes preserve IDs",
+      "owners": ["M08-T02", "M08-T03"],
+      "tests": ["M08-T10"],
+      "evidence": "Deterministic editor command identity tests"
+    },
+    {
+      "id": "A-011",
+      "section": "Appendix A",
+      "line": 1844,
+      "anchor": "Schema-enforced boundaries",
+      "summary": "Data crossing design and capability boundaries is validated",
+      "owners": ["M02-T08", "M02-T09", "M02-T10", "M02-T11", "M03-T09"],
+      "tests": ["M02-T13", "M03-T09", "M04-T16"],
+      "evidence": "Static, runtime, and adapter contract validation tests"
+    },
+    {
+      "id": "A-012",
+      "section": "Appendix A",
+      "line": 1845,
+      "anchor": "No silent substitution",
+      "summary": "Runtimes never guess unknown capabilities or incompatible versions",
+      "owners": ["M05-T06", "M07-T03"],
+      "tests": ["M10-T07", "M11-T14"],
+      "evidence": "Unknown capability and exact-version mismatch failures"
+    },
+    {
+      "id": "A-013",
+      "section": "Appendix A",
+      "line": 1846,
+      "anchor": "Developer implementation ownership",
+      "summary": "Implementation internals, integrations, security, and performance remain developer concerns",
+      "owners": ["M03-T09", "M05-T07"],
+      "tests": ["M03-T09", "M12-T08"],
+      "evidence": "Package/host boundary audit and final report"
+    },
+    {
+      "id": "A-014",
+      "section": "Appendix A",
+      "line": 1847,
+      "anchor": "Authoring honesty",
+      "summary": "Editors disclose preview adapters that differ from production",
+      "owners": ["M09-T11"],
+      "tests": ["M09-T11"],
+      "evidence": "Visible approximate-fidelity and differences test"
+    }
+  ],
+  "diagnostics": [
+    {
+      "id": "D-001",
+      "section": "Appendix B",
+      "line": 1855,
+      "anchor": "SCHEMA_INVALID",
+      "summary": "Document failed its normative JSON Schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T06"],
+      "tests": ["M02-T13"],
+      "evidence": "Validator structural micro-vector with stable pointer"
+    },
+    {
+      "id": "D-002",
+      "section": "Appendix B",
+      "line": 1856,
+      "anchor": "UNKNOWN_CORE_FIELD",
+      "summary": "Closed core object contains an unknown field",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T06"],
+      "tests": ["M02-T13"],
+      "evidence": "Unknown-field validator micro-vector"
+    },
+    {
+      "id": "D-003",
+      "section": "Appendix B",
+      "line": 1857,
+      "anchor": "DUPLICATE_SURFACE_ID",
+      "summary": "Surface identity is duplicated or key and ID differ",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Duplicate and key-mismatch vectors"
+    },
+    {
+      "id": "D-004",
+      "section": "Appendix B",
+      "line": 1858,
+      "anchor": "DUPLICATE_NODE_ID",
+      "summary": "Node or behavior identity is duplicated in a surface",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Node/behavior identity collision vectors"
+    },
+    {
+      "id": "D-005",
+      "section": "Appendix B",
+      "line": 1859,
+      "anchor": "ENTRY_NOT_FOUND",
+      "summary": "Entry surface does not exist",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Missing-entry validator vector"
+    },
+    {
+      "id": "D-006",
+      "section": "Appendix B",
+      "line": 1860,
+      "anchor": "UNKNOWN_CAPABILITY",
+      "summary": "Referenced component, behavior, operation, or resource is undeclared",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Unknown capability vector for every category"
+    },
+    {
+      "id": "D-007",
+      "section": "Appendix B",
+      "line": 1861,
+      "anchor": "AMBIGUOUS_CAPABILITY",
+      "summary": "Capability ID resolves more than once",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T07"],
+      "tests": ["M02-T13"],
+      "evidence": "Resolved-catalog namespace collision vector"
+    },
+    {
+      "id": "D-008",
+      "section": "Appendix B",
+      "line": 1862,
+      "anchor": "UNKNOWN_PROP",
+      "summary": "Property is not accepted by its capability schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T08"],
+      "tests": ["M02-T13"],
+      "evidence": "Unknown property vector"
+    },
+    {
+      "id": "D-009",
+      "section": "Appendix B",
+      "line": 1863,
+      "anchor": "PROP_TYPE_MISMATCH",
+      "summary": "Resolved property is invalid for its schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T08", "M04-T02"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Static and dynamic property mismatch vectors"
+    },
+    {
+      "id": "D-010",
+      "section": "Appendix B",
+      "line": 1864,
+      "anchor": "UNKNOWN_SLOT",
+      "summary": "Slot is undeclared",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T08"],
+      "tests": ["M02-T13"],
+      "evidence": "Unknown slot vector"
+    },
+    {
+      "id": "D-011",
+      "section": "Appendix B",
+      "line": 1865,
+      "anchor": "SLOT_CARDINALITY",
+      "summary": "Slot item count violates its contract",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T08"],
+      "tests": ["M02-T13"],
+      "evidence": "Required, minimum, and maximum slot vectors"
+    },
+    {
+      "id": "D-012",
+      "section": "Appendix B",
+      "line": 1866,
+      "anchor": "SLOT_CHILD_REJECTED",
+      "summary": "Child capability or category is not accepted",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T08"],
+      "tests": ["M02-T13"],
+      "evidence": "Slot child acceptance matrix"
+    },
+    {
+      "id": "D-013",
+      "section": "Appendix B",
+      "line": 1867,
+      "anchor": "UNKNOWN_EVENT",
+      "summary": "Event handler targets an undeclared event",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T09"],
+      "tests": ["M02-T13"],
+      "evidence": "Unknown component and behavior event vectors"
+    },
+    {
+      "id": "D-014",
+      "section": "Appendix B",
+      "line": 1868,
+      "anchor": "EVENT_PAYLOAD_INVALID",
+      "summary": "Adapter emitted an invalid event payload",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T09", "M04-T14"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Adapter payload contract vector"
+    },
+    {
+      "id": "D-015",
+      "section": "Appendix B",
+      "line": 1869,
+      "anchor": "UNKNOWN_COMMAND",
+      "summary": "Component command is undeclared",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T09", "M04-T12"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Unknown command validation and runtime vectors"
+    },
+    {
+      "id": "D-016",
+      "section": "Appendix B",
+      "line": 1870,
+      "anchor": "COMMAND_INPUT_INVALID",
+      "summary": "Resolved command input is invalid",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T11", "M04-T12"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Command input schema vectors"
+    },
+    {
+      "id": "D-017",
+      "section": "Appendix B",
+      "line": 1871,
+      "anchor": "BEHAVIOR_ATTACHMENT_INVALID",
+      "summary": "Behavior cannot attach to the target component",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T09"],
+      "tests": ["M02-T13", "M11-T14"],
+      "evidence": "Behavior attachment matrix"
+    },
+    {
+      "id": "D-018",
+      "section": "Appendix B",
+      "line": 1872,
+      "anchor": "BEHAVIOR_CONFLICT",
+      "summary": "Attached behaviors have incompatible channels",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T09"],
+      "tests": ["M02-T13", "M11-T14"],
+      "evidence": "Exclusive-channel conflict matrix"
+    },
+    {
+      "id": "D-019",
+      "section": "Appendix B",
+      "line": 1873,
+      "anchor": "STATE_WRITE_INVALID",
+      "summary": "State write violates its schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T10", "M04-T06"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Static state target and runtime write vectors"
+    },
+    {
+      "id": "D-020",
+      "section": "Appendix B",
+      "line": 1874,
+      "anchor": "REFERENCE_UNRESOLVED",
+      "summary": "Required reference has no value or fallback",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T10", "M04-T02"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Missing reference/fallback vectors"
+    },
+    {
+      "id": "D-021",
+      "section": "Appendix B",
+      "line": 1875,
+      "anchor": "PREDICATE_TYPE_MISMATCH",
+      "summary": "Predicate operands are incompatible",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T10", "M04-T04"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Static and dynamic predicate mismatch vectors"
+    },
+    {
+      "id": "D-022",
+      "section": "Appendix B",
+      "line": 1876,
+      "anchor": "REPEAT_ITEMS_INVALID",
+      "summary": "Repeat items are not an array",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T10", "M04-T07"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Repeat item type vectors"
+    },
+    {
+      "id": "D-023",
+      "section": "Appendix B",
+      "line": 1877,
+      "anchor": "REPEAT_KEY_INVALID",
+      "summary": "Repeat key is missing, invalid, or duplicated",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T10", "M04-T07"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Repeat key type, absence, and duplicate vectors"
+    },
+    {
+      "id": "D-024",
+      "section": "Appendix B",
+      "line": 1878,
+      "anchor": "OPERATION_INPUT_INVALID",
+      "summary": "Operation input violates its schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T11", "M04-T09"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Operation input contract vector"
+    },
+    {
+      "id": "D-025",
+      "section": "Appendix B",
+      "line": 1879,
+      "anchor": "OPERATION_OUTPUT_INVALID",
+      "summary": "Operation output violates its schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T11", "M04-T09"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Operation output contract vector"
+    },
+    {
+      "id": "D-026",
+      "section": "Appendix B",
+      "line": 1880,
+      "anchor": "OPERATION_DENIED",
+      "summary": "Host policy denied an operation invocation",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M04-T01", "M04-T09"],
+      "tests": ["M04-T16"],
+      "evidence": "Host-denied operation lifecycle trace"
+    },
+    {
+      "id": "D-027",
+      "section": "Appendix B",
+      "line": 1881,
+      "anchor": "RESOURCE_INPUT_INVALID",
+      "summary": "Resource input violates its schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T11", "M04-T08"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Resource input contract vector"
+    },
+    {
+      "id": "D-028",
+      "section": "Appendix B",
+      "line": 1882,
+      "anchor": "RESOURCE_OUTPUT_INVALID",
+      "summary": "Resource output violates its schema",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T11", "M04-T08"],
+      "tests": ["M02-T13", "M04-T16"],
+      "evidence": "Resource output contract vector"
+    },
+    {
+      "id": "D-029",
+      "section": "Appendix B",
+      "line": 1883,
+      "anchor": "ACTION_LIMIT_EXCEEDED",
+      "summary": "Action turn exceeded its configured bound",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M04-T13"],
+      "tests": ["M04-T16", "M12-T05"],
+      "evidence": "Action and settlement boundary vectors"
+    },
+    {
+      "id": "D-030",
+      "section": "Appendix B",
+      "line": 1884,
+      "anchor": "REVISION_MISMATCH",
+      "summary": "Bundle revision differs from canonical content",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T04", "M07-T02"],
+      "tests": ["M02-T04", "M07-T09"],
+      "evidence": "Canonical revision tamper vector"
+    },
+    {
+      "id": "D-031",
+      "section": "Appendix B",
+      "line": 1885,
+      "anchor": "SOURCE_DIGEST_MISMATCH",
+      "summary": "Bundle source digest differs from source",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M06-T08", "M07-T02"],
+      "tests": ["M06-T10", "M07-T09"],
+      "evidence": "Available-source digest mismatch vector"
+    },
+    {
+      "id": "D-032",
+      "section": "Appendix B",
+      "line": 1886,
+      "anchor": "CATALOG_DIGEST_MISMATCH",
+      "summary": "Required package digest differs from installed package",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M06-T02", "M07-T03"],
+      "tests": ["M06-T11", "M10-T07"],
+      "evidence": "Package digest mismatch publication and activation vectors"
+    },
+    {
+      "id": "D-033",
+      "section": "Appendix B",
+      "line": 1887,
+      "anchor": "CATALOG_VERSION_UNAVAILABLE",
+      "summary": "Exact package tuple cannot be resolved",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M06-T02", "M07-T03"],
+      "tests": ["M06-T11", "M10-T07"],
+      "evidence": "Unavailable exact version vector"
+    },
+    {
+      "id": "D-034",
+      "section": "Appendix B",
+      "line": 1888,
+      "anchor": "UNSUPPORTED_PROTOCOL",
+      "summary": "Runtime does not support the document version",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M02-T06", "M07-T02"],
+      "tests": ["M02-T13", "M07-T09"],
+      "evidence": "Unsupported protocol validation and activation vectors"
+    },
+    {
+      "id": "D-035",
+      "section": "Appendix B",
+      "line": 1889,
+      "anchor": "BUNDLE_LIMIT_EXCEEDED",
+      "summary": "Bundle violates configured resource limits",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M07-T02", "M07-T04"],
+      "tests": ["M07-T09", "M12-T05"],
+      "evidence": "Bundle byte, depth, and materialization limit vectors"
+    },
+    {
+      "id": "D-036",
+      "section": "Appendix B",
+      "line": 1890,
+      "anchor": "ADAPTER_FAILURE",
+      "summary": "Capability adapter failed unexpectedly",
+      "registryOwner": "M02-T05",
+      "owners": ["M02-T05", "M05-T06"],
+      "tests": ["M05-T08"],
+      "evidence": "Injected adapter crash produces a safe diagnostic boundary"
+    }
+  ],
+  "schemaRegistry": [
+    {
+      "id": "SR-001",
+      "section": "Appendix C",
+      "line": 1900,
+      "endLine": 1904,
+      "anchor": "desen-source.schema.json",
+      "summary": "The distributed source schema is canonical for DESEN 0.1.0",
+      "owners": ["M02-T01", "M02-T06"],
+      "tests": ["M02-T12"],
+      "evidence": "Snapshot integrity and source-schema parity"
+    },
+    {
+      "id": "SR-002",
+      "section": "Appendix C",
+      "line": 1901,
+      "endLine": 1904,
+      "anchor": "desen-bundle.schema.json",
+      "summary": "The distributed bundle schema is canonical for DESEN 0.1.0",
+      "owners": ["M02-T01", "M02-T06"],
+      "tests": ["M02-T12"],
+      "evidence": "Snapshot integrity and bundle-schema parity"
+    },
+    {
+      "id": "SR-003",
+      "section": "Appendix C",
+      "line": 1902,
+      "endLine": 1904,
+      "anchor": "desen-catalog.schema.json",
+      "summary": "The distributed catalog schema is canonical for DESEN 0.1.0",
+      "owners": ["M02-T01", "M02-T06"],
+      "tests": ["M02-T12"],
+      "evidence": "Snapshot integrity and catalog-schema parity"
+    }
+  ],
+  "sectionDispositions": [
+    {
+      "section": "4",
+      "disposition": "CONTAINER",
+      "rationale": "All independent normative content is reviewed in subsections 4.1 through 4.3"
+    },
+    {
+      "section": "4.1",
+      "disposition": "CONTEXT_ONLY",
+      "rationale": "The capability goals describe intended scope; operative requirements are traced in their owning semantic sections"
+    },
+    {
+      "section": "4.3",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-001"],
+      "rationale": "The only operative implementation obligation is already assigned in the BCP 14 ledger"
+    },
+    {
+      "section": "5",
+      "disposition": "CONTAINER",
+      "rationale": "All design-principle rules are reviewed in subsections 5.1 through 5.9"
+    },
+    {
+      "section": "5.6",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-003"],
+      "rationale": "Runtime determinism is fully represented by N-003"
+    },
+    {
+      "section": "6",
+      "disposition": "CONTAINER",
+      "rationale": "Artifact, actor, and lifecycle rules are reviewed in subsections 6.1 through 6.3"
+    },
+    {
+      "section": "6.1",
+      "disposition": "CONTAINER",
+      "rationale": "The three normative artifacts are reviewed separately in 6.1.1 through 6.1.3"
+    },
+    {
+      "section": "7",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-005"],
+      "rationale": "The target-declaration requirement is N-005 and each target's additional obligations are C-001 through C-024"
+    },
+    {
+      "section": "8",
+      "disposition": "CONTAINER",
+      "rationale": "Identifier, version, target, and package identity rules are reviewed in subsections"
+    },
+    {
+      "section": "9",
+      "disposition": "CONTAINER",
+      "rationale": "Authority rules are reviewed in subsections 9.1 through 9.4"
+    },
+    {
+      "section": "10",
+      "disposition": "CONTAINER",
+      "rationale": "Common data conventions are reviewed in subsections"
+    },
+    {
+      "section": "10.5",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-014"],
+      "rationale": "Semantic array order and preservation are fully assigned by N-014"
+    },
+    {
+      "section": "11",
+      "disposition": "CONTAINER",
+      "rationale": "Digest format, algorithms, package digest, and verification are reviewed in subsections"
+    },
+    {
+      "section": "12.1",
+      "disposition": "INFORMATIVE_EXAMPLE",
+      "rationale": "The required-shape JSON is an example under the global informative-example rule; the canonical schema is traced separately"
+    },
+    {
+      "section": "12.3",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-017"],
+      "rationale": "Entry existence and surface key/ID equality are fully represented by N-017"
+    },
+    {
+      "section": "13.1",
+      "disposition": "INFORMATIVE_EXAMPLE",
+      "rationale": "The required-shape JSON is illustrative; the bundle schema and exact semantic rules are traced elsewhere"
+    },
+    {
+      "section": "13.2",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-019"],
+      "rationale": "Bundle revision immutability is fully represented by N-019"
+    },
+    {
+      "section": "13.3",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-020"],
+      "rationale": "Exact package substitution prohibition is fully represented by N-020"
+    },
+    {
+      "section": "14.1",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-022"],
+      "rationale": "The reserved dollar-prefixed literal-object namespace is fully represented by N-022"
+    },
+    {
+      "section": "17.1",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-025"],
+      "rationale": "Exact component capability resolution is fully represented by N-025"
+    },
+    {
+      "section": "20.7",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-031"],
+      "rationale": "Host event allowlisting and payload validation are fully represented by N-031"
+    },
+    {
+      "section": "21.4",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-033"],
+      "rationale": "Event payload contract enforcement is fully represented by N-033"
+    },
+    {
+      "section": "21.5",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-034"],
+      "rationale": "Declared command implementation is fully represented by N-034"
+    },
+    {
+      "section": "22",
+      "disposition": "CONTAINER",
+      "rationale": "Operation, resource, fixture, and host binding rules are reviewed in subsections"
+    },
+    {
+      "section": "23",
+      "disposition": "CONTAINER",
+      "rationale": "Every authoring runtime and editor semantic is reviewed in subsections 23.1 through 23.9"
+    },
+    {
+      "section": "24",
+      "disposition": "CONTAINER",
+      "rationale": "Every production runtime semantic is reviewed in subsections 24.1 through 24.7"
+    },
+    {
+      "section": "24.7",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-037"],
+      "rationale": "Production unknown-capability behavior is fully represented by N-037"
+    },
+    {
+      "section": "25",
+      "disposition": "CONTAINER",
+      "rationale": "Publication pipeline, normalization, failure, and optional artifacts are reviewed in subsections"
+    },
+    {
+      "section": "26",
+      "disposition": "CONTAINER",
+      "rationale": "All failure classes are reviewed in subsections 26.1 through 26.7"
+    },
+    {
+      "section": "26.6",
+      "disposition": "BCP14_ONLY",
+      "bcp14": ["N-038"],
+      "rationale": "Invalid activation and last-known-good behavior are fully represented by N-038"
+    },
+    {
+      "section": "27",
+      "disposition": "CONTAINER",
+      "rationale": "Threat, execution, authority, data, authorization, and limit rules are reviewed in subsections"
+    },
+    {
+      "section": "28",
+      "disposition": "CONTAINER",
+      "rationale": "All performance and scalability guidance is reviewed in subsections"
+    },
+    {
+      "section": "29",
+      "disposition": "CONTAINER",
+      "rationale": "General integration and black-box rules are reviewed; examples have explicit dispositions"
+    },
+    {
+      "section": "29.2",
+      "disposition": "INFORMATIVE_EXAMPLE",
+      "rationale": "The map example is informative under SPEC line 171; the Map proof is planned independently in M11"
+    },
+    {
+      "section": "29.3",
+      "disposition": "INFORMATIVE_EXAMPLE",
+      "rationale": "The Sortable example is informative under SPEC line 171; the behavior proof is planned independently in M11"
+    },
+    {
+      "section": "30",
+      "disposition": "CONTAINER",
+      "rationale": "Protocol, package, deprecation, and negotiation compatibility rules are reviewed in subsections"
+    },
+    {
+      "section": "31",
+      "disposition": "CONTAINER",
+      "rationale": "File, media type, schema ID, discovery, and IANA decisions are reviewed in subsections"
+    }
+  ],
+  "explicitExclusions": [
+    {
+      "id": "X-001",
+      "source": "SPEC sections 1 and 2",
+      "rationale": "SPEC line 162 defines normative scope as sections 3 through 31"
+    },
+    {
+      "id": "X-002",
+      "source": "Examples and code blocks unless stated otherwise",
+      "rationale": "SPEC line 171 explicitly marks examples informative; operative prose surrounding them remains traced"
+    },
+    {
+      "id": "X-003",
+      "source": "Non-operative future and non-goal details in section 4",
+      "rationale": "The scope decision is traced as R-002; operative security prohibitions and compatibility rules have their own entries"
+    },
+    {
+      "id": "X-004",
+      "source": "SPEC section 32",
+      "rationale": "Line 1669 explicitly defines the Reference Web-React Profile as informative"
+    },
+    {
+      "id": "X-005",
+      "source": "SPEC section 33",
+      "rationale": "The worked example is informative under line 171 and is covered later by implementation vectors rather than treated as new prose law"
+    },
+    {
+      "id": "X-006",
+      "source": "SPEC section 34",
+      "rationale": "Open questions target 0.2 and line 1826 says they are intentionally unsolved in 0.1.0"
+    },
+    {
+      "id": "X-007",
+      "source": "Appendix D",
+      "rationale": "Appendix D explicitly declares itself informative at line 1910"
+    },
+    {
+      "id": "X-008",
+      "source": "References, contents, editorial metadata, and protocol-authoring mechanics",
+      "rationale": "These do not define implementation-observable DESEN 0.1.0 behavior; relevant version/report obligations are traced in sections 30 and 31"
+    }
+  ]
+}

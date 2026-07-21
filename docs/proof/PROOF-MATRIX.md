@@ -29,3 +29,8 @@ the complete claim is not established. A visual demonstration alone cannot chang
 
 The implementation report must preserve failed and partial results. `PROVEN` requires all owner
 tasks to be `DONE`, final evidence to exist at a stable path, and the artifact hash to be recorded.
+
+M02-T02's traceability artifact is planning evidence rather than a behavior claim and therefore
+does not change any `P-*` status:
+`protocol-0.1.0-traceability.json`
+`sha256:749cbae719a5deb216e9ed3be171eb710b47fc547f4f270dbba21bb14c2af514`.

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "claim": "M02-T02 protocol traceability inventory is complete for the frozen DESEN 0.1.0 review scope",
+  "result": "PASS",
+  "protocol": "0.1.0",
+  "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+  "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+  "ledger": "docs/proof/protocol-0.1.0-traceability.json",
+  "ledgerSha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147",
+  "counts": {
+    "normativeSectionsReviewed": 196,
+    "proseTraceEntries": 269,
+    "conformanceRules": 24,
+    "pipelineSteps": 41,
+    "normativeProseGroups": 151,
+    "appendixInvariants": 14,
+    "diagnosticCodes": 36,
+    "schemaRegistryEntries": 3,
+    "explicitExclusions": 8,
+    "schemaFamilies": 61,
+    "schemaConstraints": 989,
+    "schemaAssertions": 586,
+    "schemaApplicators": 291,
+    "schemaReferences": 112,
+    "schemaNonConstraintKeywords": 16
+  },
+  "coverage": {
+    "reviewedNormativeSectionsPercent": 100,
+    "assignedProseEntriesPercent": 100,
+    "assignedSchemaConstraintsPercent": 100,
+    "missingSchemaConstraints": 0,
+    "duplicateSchemaAssignments": 0,
+    "unresolvedLocalSchemaReferences": 0
+  },
+  "limitations": [
+    "This artifact proves reviewed scope and future owner/test assignment, not validator or runtime conformance.",
+    "Natural-language completeness is a human section-by-section review backed by frozen line anchors; schema constraint completeness is machine-enumerated.",
+    "Informative material and conditional features excluded by the ledger remain outside the current Web-React proof claim."
+  ],
+  "verificationCommand": "pnpm verify:protocol-traceability"
+}

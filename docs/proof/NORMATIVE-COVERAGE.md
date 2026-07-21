@@ -10,6 +10,9 @@ This is intentionally the BCP 14 ledger, not the complete normative trace. M02-T
 separate traceability inventory for in-scope schema constraints and normative prose obligations
 that are not expressed with uppercase BCP 14 keywords.
 
+The completed companion inventory is `docs/proof/PROTOCOL-TRACEABILITY.md`; its canonical
+machine-readable ledger is `docs/proof/protocol-0.1.0-traceability.json`.
+
 Coverage status values: `PLANNED`, `IMPLEMENTED`, `TESTED`, `JUSTIFIED_NA`, `BLOCKED`.
 
 ## Planned conformance claims

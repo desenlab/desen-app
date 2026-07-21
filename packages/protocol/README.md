@@ -12,8 +12,9 @@ No editor, runtime, React, DOM, network, or application behavior.
 
 ## Status
 
-The exact upstream snapshot and its integrity gate are implemented. Derived types, validation,
-diagnostics, and digest APIs remain unimplemented until their tracked tasks.
+The exact upstream snapshot, integrity gate, and complete protocol traceability inventory are
+implemented. Derived types, validation, diagnostics, and digest APIs remain unimplemented until
+their tracked tasks.
 
 ## Protocol and target support
 
@@ -30,6 +31,17 @@ Snapshot-specific commands:
 pnpm verify:protocol-snapshot
 pnpm test:protocol-snapshot
 ```
+
+Protocol traceability commands:
+
+```bash
+pnpm verify:protocol-traceability
+pnpm test:protocol-traceability
+```
+
+Traceability proves that every reviewed prose rule and every normative schema constraint has a
+future implementation and test owner. It does not claim that validation or runtime semantics are
+implemented yet.
 
 The verifier is root build tooling rather than platform-neutral package runtime code; Node file
 system or crypto APIs never enter this package's public surface.
