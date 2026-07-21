@@ -1,0 +1,398 @@
+{
+  "task": "M02-T05",
+  "protocolVersion": "0.1.0",
+  "profile": "desen-diagnostics-json-pointer-v1",
+  "frozenInput": {
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+    "specification": "SPEC.md#appendix-b--core-diagnostic-codes"
+  },
+  "standards": [
+    {
+      "id": "DESEN 0.1.0 Appendix B",
+      "coverage": ["36 stable core codes", "exact classifications", "exact canonical meanings"]
+    },
+    {
+      "id": "RFC 6901",
+      "url": "https://www.rfc-editor.org/rfc/rfc6901.html",
+      "coverage": [
+        "all 12 Section 5 JSON-string examples",
+        "reference-token escaping",
+        "parsing",
+        "append",
+        "syntax guard"
+      ]
+    }
+  ],
+  "traceability": {
+    "proseRules": ["R-101", "R-110", "R-145"],
+    "diagnosticRegistry": { "first": "D-001", "last": "D-036", "count": 36 }
+  },
+  "implementation": {
+    "package": "@desen/protocol",
+    "platform": "ECMAScript 2023",
+    "runtimeDependencies": [],
+    "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
+    "publicRuntimeExports": [
+      "CORE_DIAGNOSTIC_REGISTRY",
+      "createCoreDiagnostic",
+      "getCoreDiagnosticDefinition",
+      "isCoreDiagnosticCode",
+      "appendJsonPointer",
+      "createJsonPointer",
+      "escapeJsonPointerToken",
+      "isJsonPointer",
+      "parseJsonPointer",
+      "unescapeJsonPointerToken"
+    ],
+    "publicTypeExports": [
+      "CoreDiagnosticClassification",
+      "CoreDiagnosticCode",
+      "CoreDiagnosticDefinition",
+      "CreateCoreDiagnosticInput",
+      "DesenCoreDiagnostic",
+      "DesenDiagnostic",
+      "DesenDiagnosticContext",
+      "DesenDiagnosticSubject",
+      "JsonPointer",
+      "JsonPointerSegment"
+    ],
+    "trackedFiles": [
+      {
+        "path": "package.json",
+        "bytes": 3279,
+        "sha256": "cad153bb474138d95e35c7d1a73fe23794913a4b631b432c763a3d9b3fddff94"
+      },
+      {
+        "path": "turbo.json",
+        "bytes": 1860,
+        "sha256": "7cba58ce89366ae35015e0a548b6cfa442540128ab54d8e0bf929169f55f9619"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/protocol/tsconfig.json",
+        "bytes": 252,
+        "sha256": "e85de556134485bf859e0721710907df3faef563a6204b615c01fbc54cab5201"
+      },
+      {
+        "path": "packages/protocol/src/index.ts",
+        "bytes": 3261,
+        "sha256": "e2ceeea8bd84d4d7e6e9431bc970cd8168478d8a7cad27f0f4909f71fabe8bcb"
+      },
+      {
+        "path": "packages/protocol/src/diagnostics.ts",
+        "bytes": 13831,
+        "sha256": "d9cffbaae026c1bf027624f8c21b14172cdcf52fc3e546708e7becb0973019a4"
+      },
+      {
+        "path": "packages/protocol/src/json-pointer.ts",
+        "bytes": 7460,
+        "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
+      },
+      {
+        "path": "packages/protocol/test/diagnostics.test.ts",
+        "bytes": 14711,
+        "sha256": "fd2cf958eaca4b3944af9bd9b0fccbfbd07def22f9254715237b66a36f1cdd54"
+      },
+      {
+        "path": "scripts/lib/protocol-diagnostics-proof.mjs",
+        "bytes": 21092,
+        "sha256": "f6303caeb60cc786d471fc66d369b4b650420b35db679db71edae3b815a8a950"
+      },
+      {
+        "path": "scripts/generate-protocol-diagnostics-proof.mjs",
+        "bytes": 787,
+        "sha256": "60f2f01b997efaf2010b9eecf512b3e08b3392bd337598b1097856f85914443e"
+      },
+      {
+        "path": "scripts/verify-protocol-diagnostics.mjs",
+        "bytes": 619,
+        "sha256": "76cae3049f9e713f74393a009876fe4e1b07510bed0acb82919ee7d735fa230d"
+      },
+      {
+        "path": "tests/protocol-diagnostics.test.mjs",
+        "bytes": 7090,
+        "sha256": "5200e494203d9d09195eda8a3898b255c332071c85c8c8ece75b1cb6cfd3b611"
+      }
+    ]
+  },
+  "registry": {
+    "count": 36,
+    "uniqueCodes": 36,
+    "classificationCounts": {
+      "schema": 2,
+      "semantic": 3,
+      "catalog": 10,
+      "catalog/runtime": 1,
+      "runtime": 14,
+      "integrity": 2,
+      "activation": 4
+    },
+    "entries": [
+      {
+        "code": "SCHEMA_INVALID",
+        "classification": "schema",
+        "meaning": "Document failed its normative JSON Schema"
+      },
+      {
+        "code": "UNKNOWN_CORE_FIELD",
+        "classification": "schema",
+        "meaning": "Closed core object contains an unknown field"
+      },
+      {
+        "code": "DUPLICATE_SURFACE_ID",
+        "classification": "semantic",
+        "meaning": "Surface identity is duplicated or key/id differ"
+      },
+      {
+        "code": "DUPLICATE_NODE_ID",
+        "classification": "semantic",
+        "meaning": "Node or behavior identity is duplicated in a surface"
+      },
+      {
+        "code": "ENTRY_NOT_FOUND",
+        "classification": "semantic",
+        "meaning": "Entry surface does not exist"
+      },
+      {
+        "code": "UNKNOWN_CAPABILITY",
+        "classification": "catalog",
+        "meaning": "Component, behavior, operation, or resource is undeclared"
+      },
+      {
+        "code": "AMBIGUOUS_CAPABILITY",
+        "classification": "catalog",
+        "meaning": "Capability id resolves more than once"
+      },
+      {
+        "code": "UNKNOWN_PROP",
+        "classification": "catalog",
+        "meaning": "Property is not accepted by the capability schema"
+      },
+      {
+        "code": "PROP_TYPE_MISMATCH",
+        "classification": "catalog/runtime",
+        "meaning": "Resolved property is invalid for its schema"
+      },
+      { "code": "UNKNOWN_SLOT", "classification": "catalog", "meaning": "Slot is undeclared" },
+      {
+        "code": "SLOT_CARDINALITY",
+        "classification": "catalog",
+        "meaning": "Slot item count is invalid"
+      },
+      {
+        "code": "SLOT_CHILD_REJECTED",
+        "classification": "catalog",
+        "meaning": "Child capability/category is not accepted"
+      },
+      {
+        "code": "UNKNOWN_EVENT",
+        "classification": "catalog",
+        "meaning": "Event handler targets an undeclared event"
+      },
+      {
+        "code": "EVENT_PAYLOAD_INVALID",
+        "classification": "runtime",
+        "meaning": "Adapter emitted invalid event payload"
+      },
+      {
+        "code": "UNKNOWN_COMMAND",
+        "classification": "catalog",
+        "meaning": "Component command is undeclared"
+      },
+      {
+        "code": "COMMAND_INPUT_INVALID",
+        "classification": "runtime",
+        "meaning": "Resolved command input is invalid"
+      },
+      {
+        "code": "BEHAVIOR_ATTACHMENT_INVALID",
+        "classification": "catalog",
+        "meaning": "Behavior cannot attach to target component"
+      },
+      {
+        "code": "BEHAVIOR_CONFLICT",
+        "classification": "catalog",
+        "meaning": "Attached behaviors have incompatible channels"
+      },
+      {
+        "code": "STATE_WRITE_INVALID",
+        "classification": "runtime",
+        "meaning": "State write violates its state schema"
+      },
+      {
+        "code": "REFERENCE_UNRESOLVED",
+        "classification": "runtime",
+        "meaning": "Required reference has no value or fallback"
+      },
+      {
+        "code": "PREDICATE_TYPE_MISMATCH",
+        "classification": "runtime",
+        "meaning": "Predicate operands are incompatible"
+      },
+      {
+        "code": "REPEAT_ITEMS_INVALID",
+        "classification": "runtime",
+        "meaning": "Repeat items are not an array"
+      },
+      {
+        "code": "REPEAT_KEY_INVALID",
+        "classification": "runtime",
+        "meaning": "Repeat key is missing, invalid, or duplicated"
+      },
+      {
+        "code": "OPERATION_INPUT_INVALID",
+        "classification": "runtime",
+        "meaning": "Operation input violates its schema"
+      },
+      {
+        "code": "OPERATION_OUTPUT_INVALID",
+        "classification": "runtime",
+        "meaning": "Operation output violates its schema"
+      },
+      {
+        "code": "OPERATION_DENIED",
+        "classification": "runtime",
+        "meaning": "Host policy denied an invocation"
+      },
+      {
+        "code": "RESOURCE_INPUT_INVALID",
+        "classification": "runtime",
+        "meaning": "Resource input violates its schema"
+      },
+      {
+        "code": "RESOURCE_OUTPUT_INVALID",
+        "classification": "runtime",
+        "meaning": "Resource output violates its schema"
+      },
+      {
+        "code": "ACTION_LIMIT_EXCEEDED",
+        "classification": "runtime",
+        "meaning": "Action turn exceeded configured bound"
+      },
+      {
+        "code": "REVISION_MISMATCH",
+        "classification": "integrity",
+        "meaning": "Bundle revision does not match canonical content"
+      },
+      {
+        "code": "SOURCE_DIGEST_MISMATCH",
+        "classification": "integrity",
+        "meaning": "Bundle source digest does not match source"
+      },
+      {
+        "code": "CATALOG_DIGEST_MISMATCH",
+        "classification": "activation",
+        "meaning": "Required package digest differs from installed package"
+      },
+      {
+        "code": "CATALOG_VERSION_UNAVAILABLE",
+        "classification": "activation",
+        "meaning": "Exact package tuple cannot be resolved"
+      },
+      {
+        "code": "UNSUPPORTED_PROTOCOL",
+        "classification": "activation",
+        "meaning": "Runtime does not support the document version"
+      },
+      {
+        "code": "BUNDLE_LIMIT_EXCEEDED",
+        "classification": "activation",
+        "meaning": "Bundle violates resource limits"
+      },
+      {
+        "code": "ADAPTER_FAILURE",
+        "classification": "runtime",
+        "meaning": "Capability adapter failed unexpectedly"
+      }
+    ]
+  },
+  "jsonPointer": {
+    "representation": "RFC 6901 JSON string form",
+    "unavailableLocation": "omit the pointer property",
+    "knownRoot": "",
+    "vectors": [
+      { "id": "rfc-section-5-document-root", "segments": [], "pointer": "", "tokens": [] },
+      {
+        "id": "rfc-section-5-foo-array",
+        "segments": ["foo"],
+        "pointer": "/foo",
+        "tokens": ["foo"]
+      },
+      {
+        "id": "rfc-section-5-foo-first-item",
+        "segments": ["foo", "0"],
+        "pointer": "/foo/0",
+        "tokens": ["foo", "0"]
+      },
+      { "id": "rfc-section-5-empty-member-name", "segments": [""], "pointer": "/", "tokens": [""] },
+      { "id": "rfc-section-5-slash", "segments": ["a/b"], "pointer": "/a~1b", "tokens": ["a/b"] },
+      { "id": "rfc-section-5-percent", "segments": ["c%d"], "pointer": "/c%d", "tokens": ["c%d"] },
+      { "id": "rfc-section-5-caret", "segments": ["e^f"], "pointer": "/e^f", "tokens": ["e^f"] },
+      { "id": "rfc-section-5-pipe", "segments": ["g|h"], "pointer": "/g|h", "tokens": ["g|h"] },
+      {
+        "id": "rfc-section-5-backslash",
+        "segments": ["i\\j"],
+        "pointer": "/i\\j",
+        "tokens": ["i\\j"]
+      },
+      { "id": "rfc-section-5-quote", "segments": ["k\"l"], "pointer": "/k\"l", "tokens": ["k\"l"] },
+      { "id": "rfc-section-5-space", "segments": [" "], "pointer": "/ ", "tokens": [" "] },
+      { "id": "rfc-section-5-tilde", "segments": ["m~n"], "pointer": "/m~0n", "tokens": ["m~n"] },
+      { "id": "decode-order", "segments": ["~1"], "pointer": "/~01", "tokens": ["~1"] },
+      {
+        "id": "unicode-and-percent",
+        "segments": ["é", "é", "😀", "%2F", "\u0000"],
+        "pointer": "/é/é/😀/%2F/\u0000",
+        "tokens": ["é", "é", "😀", "%2F", "\u0000"]
+      }
+    ],
+    "rejectedSyntax": ["relative", "#/fragment", "/bad~", "/bad~2escape"],
+    "exclusions": ["URI-fragment form", "document resolution", "array-index interpretation"]
+  },
+  "diagnosticModel": {
+    "stableMachineFields": ["code", "pointer when available"],
+    "contextFields": ["documentId", "surfaceId", "subject", "capabilityId"],
+    "messageStability": "human-readable only; consumers must not branch on message text",
+    "appendixClassification": "derived for core codes; not an emission-stage category",
+    "namespacedExtensionExample": "com.example.validator/REMOTE_TIMEOUT",
+    "namespacedGrammar": "not defined by DESEN 0.1.0 and therefore not enforced here",
+    "golden": {
+      "code": "UNKNOWN_PROP",
+      "classification": "catalog",
+      "message": "Property label/text is not declared by the component contract.",
+      "pointer": "/surfaces/sign-in/root/props/label~1text",
+      "context": {
+        "documentId": "com.example/sign-in",
+        "surfaceId": "sign-in",
+        "subject": { "kind": "node", "id": "submit" },
+        "capabilityId": "com.example.ui/Button"
+      }
+    }
+  },
+  "verification": {
+    "commands": [
+      "pnpm verify:protocol-diagnostics",
+      "pnpm test:protocol-diagnostics",
+      "pnpm check"
+    ],
+    "packageTests": 17,
+    "independentOracles": [
+      "frozen SPEC.md Appendix B parser",
+      "reviewed D-001 through D-036 trace ledger",
+      "complete RFC 6901 Section 5 JSON-string table plus edge-case vectors"
+    ]
+  },
+  "limitations": [
+    "This establishes shared diagnostic data and pointer primitives, not validator emission behavior.",
+    "Structural, semantic, catalog, runtime, publisher, and activation diagnostics remain assigned to later tasks.",
+    "DESEN 0.1.0 permits namespaced codes but does not define their syntax; this API preserves caller-defined string literals without claiming a universal grammar.",
+    "JSON Pointer URI fragments and document resolution are outside M02-T05.",
+    "No Proof Matrix behavior claim becomes PROVEN from registry infrastructure alone."
+  ]
+}

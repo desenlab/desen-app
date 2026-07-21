@@ -19,8 +19,10 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run test/canonicalization.test.ts",
-    "test:coverage": "vitest run test/canonicalization.test.ts --coverage"
+    "test": "vitest run test/canonicalization.test.ts test/diagnostics.test.ts",
+    "test:canonicalization": "vitest run test/canonicalization.test.ts",
+    "test:diagnostics": "vitest run test/diagnostics.test.ts",
+    "test:coverage": "vitest run test/canonicalization.test.ts test/diagnostics.test.ts --coverage"
   },
   "devDependencies": {
     "vitest": "4.1.10"

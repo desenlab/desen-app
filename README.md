@@ -82,9 +82,11 @@ pnpm check
 `pnpm proof` and `pnpm test:e2e` deliberately return `NOT_IMPLEMENTED` until their G10 runners
 exist; an absent proof runner is never treated as a successful proof.
 
-The exact DESEN 0.1.0 input snapshot is vendored and checksum-enforced; this does not yet claim
-validator or runtime semantics. The next implementation task is `M02-T02`, which traces normative
-prose and schema constraints before type generation begins.
+The exact DESEN 0.1.0 input snapshot is vendored and checksum-enforced. Schema-derived types,
+canonical JSON and SHA-256 primitives, the 36-code diagnostic registry, and RFC 6901 JSON Pointer
+support are implemented without claiming validator or runtime behavior. The next implementation
+task is `M02-T06`, which adds structural validation for Source, Bundle, Catalog, and embedded JSON
+Schemas while leaving semantic rules to later tasks.
 
 ## License
 

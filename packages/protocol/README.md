@@ -4,28 +4,33 @@
 
 This platform-neutral package owns the frozen DESEN protocol inputs and the TypeScript structures
 derived from them. It also owns the universal RFC 8785 canonicalization and SHA-256 primitives
-used by later validation, publication, and activation packages. The complete upstream 0.1.0 Git
-tree remains vendored as opaque input under `upstream/0.1.0/snapshot/` and protected by byte-level
-integrity tests.
+used by later validation, publication, and activation packages. The shared stable diagnostic model,
+the Appendix B core-code registry, and RFC 6901 JSON Pointer primitives also live here so every
+platform reports the same machine identities. The complete upstream 0.1.0 Git tree remains
+vendored as opaque input under `upstream/0.1.0/snapshot/` and protected by byte-level integrity
+tests.
 
 ## Explicit non-responsibilities
 
 No editor, runtime, React, DOM, network, application behavior, or executable adapter code belongs
 here. The generated TypeScript structures are not runtime validators: untrusted JSON must remain
 `unknown` until the future validator package accepts it. The digest helpers do not validate DESEN
-document structure, compare stored digests, emit diagnostics, or define capability-package archive
-hashing.
+document structure or compare stored digests. The diagnostic primitives define data and location
+contracts but do not detect or emit validation, runtime, publication, or activation failures. This
+package also does not define capability-package archive hashing.
 
 ## Status
 
 The exact upstream snapshot, integrity gate, complete protocol traceability inventory, and
 schema-derived TypeScript root types are implemented. RFC 8785 canonical JSON, platform-neutral
 SHA-256, DESEN digest formatting, Source projection, and Bundle revision projection are also
-implemented. Runtime validation and stable diagnostics remain assigned to later tasks.
+implemented. All 36 Appendix B diagnostic definitions, shared JSON-serializable diagnostic data,
+and RFC 6901 JSON Pointer construction and parsing are implemented. Runtime validation and actual
+diagnostic emission remain assigned to later tasks.
 
 ## Public entry point
 
-The package root exports three documented types:
+The package root exports three schema-derived document types:
 
 - `DesenSource` — editable DESEN 0.1.0 source documents;
 - `DesenBundle` — published DESEN 0.1.0 bundles; and
@@ -43,6 +48,17 @@ It also exports these one-shot runtime functions:
 - `calculateDesenSourceDigest` — omit only top-level `authoring`, then canonicalize and hash;
 - `calculateDesenBundleRevision` — omit only top-level `revision` and `publication`, then hash; and
 - `isSha256Digest` — check the exact `sha256:<64 lowercase hex>` lexical form.
+
+The diagnostic surface exports:
+
+- `CORE_DIAGNOSTIC_REGISTRY`, `isCoreDiagnosticCode`, and `getCoreDiagnosticDefinition` — the exact
+  36-code Appendix B registry and lookups;
+- `createCoreDiagnostic` — frozen diagnostic data whose Appendix classification is derived from
+  its code;
+- `DesenDiagnostic`, `DesenCoreDiagnostic`, and context/registry types — portable shared data
+  contracts; and
+- `createJsonPointer`, `parseJsonPointer`, `appendJsonPointer`, `isJsonPointer`, and token helpers —
+  RFC 6901 JSON string-form paths.
 
 ```ts
 import { calculateDesenSourceDigest, type DesenSource } from "@desen/protocol";
@@ -69,6 +85,53 @@ const sourceDigest = calculateDesenSourceDigest(source);
 The `satisfies` check helps while authoring trusted TypeScript. It must not be used as evidence that
 parsed JSON is valid. Likewise, obtaining `sourceDigest` proves only that the supplied data can be
 canonically hashed; it does not prove that the Source is structurally or semantically valid.
+
+```ts
+import { createCoreDiagnostic, createJsonPointer } from "@desen/protocol";
+
+const diagnostic = createCoreDiagnostic({
+  code: "UNKNOWN_PROP",
+  message: "Property label/text is not declared by the component contract.",
+  pointer: createJsonPointer(["surfaces", "main", "root", "props", "label/text"]),
+  context: {
+    documentId: "sign-in",
+    surfaceId: "main",
+    subject: { kind: "node", id: "submit" },
+    capabilityId: "com.example.ui/Button",
+  },
+});
+```
+
+The diagnostic is inert, frozen, and JSON-serializable. Its `code` and available `pointer` are
+machine contracts; consumers must not branch on the human `message` text.
+
+## Diagnostic and JSON Pointer contract
+
+`CORE_DIAGNOSTIC_REGISTRY` preserves Appendix B order, code, classification, and canonical English
+meaning. `createCoreDiagnostic` derives classification from the selected code, preventing a caller
+from pairing conflicting registry metadata. Appendix classification is not the stage or suite
+outcome at which an implementation detects the failure; those are separate concerns.
+
+The factory copies caller-owned context into inert frozen data. Accessor properties are rejected
+without invocation, preventing a stateful caller from replacing a code, pointer, or identity after
+it has been checked.
+
+Diagnostic context can carry the document, surface, node-or-behavior subject, and capability
+identities that are available. An omitted `pointer` means no reliable location is available. An
+explicit empty pointer `""` means the known failing location is the document root; these states are
+not interchangeable.
+
+The pointer helpers implement RFC 6901's JSON string representation. They escape `~` as `~0` and
+`/` as `~1`, preserve Unicode spelling, keep numeric-looking parsed tokens as strings, and reject
+malformed escapes. Pointer construction accepts dense data-only arrays; sparse or accessor-backed
+slots are rejected without invoking those accessors or the input's `map` method. URI-fragment
+pointers such as `#/entry`, document resolution, and array-index interpretation are outside this
+task.
+
+DESEN 0.1.0 allows implementation-defined namespaced diagnostic codes but does not define their
+grammar. `DesenDiagnostic<Code>` therefore preserves a caller-documented namespaced string literal
+without presenting one separator or syntax as a universal protocol rule. Core codes remain a closed
+union and cannot be added to the registry by extensions.
 
 ## Canonicalization and digest contract
 
@@ -123,10 +186,13 @@ the only supported writer.
 
 Canonicalization functions throw `TypeError` for data that cannot be represented as the accepted
 RFC 8785/I-JSON value tree. SHA-256 functions throw `TypeError` when a JavaScript caller supplies
-something other than a genuine `Uint8Array`. These are primitive API failures, not the stable DESEN
-diagnostic model scheduled for M02-T05. Because this API accepts an already-created value tree, it
-cannot recover duplicate property names that a permissive parser discarded; parsing and validation
-must enforce I-JSON before canonicalization.
+something other than a genuine `Uint8Array`. JSON Pointer helpers throw `TypeError` for malformed
+syntax, invalid Unicode, invalid numeric builder segments, sparse arrays, or accessor-backed array
+slots. `createCoreDiagnostic` throws `TypeError` for an unknown code, empty message, invalid pointer,
+malformed context, or accessor-backed input. These API misuse exceptions are not DESEN diagnostics.
+Because canonicalization accepts an already-created value tree, it cannot recover duplicate
+property names that a permissive parser discarded; parsing and validation must enforce I-JSON
+before canonicalization.
 
 ## Protocol, target, and dependencies
 
@@ -148,11 +214,16 @@ pnpm test:protocol-types
 pnpm generate:protocol-canonicalization
 pnpm verify:protocol-canonicalization
 pnpm test:protocol-canonicalization
+pnpm generate:protocol-diagnostics
+pnpm verify:protocol-diagnostics
+pnpm test:protocol-diagnostics
 pnpm check
 ```
 
 `generate:protocol-types` intentionally writes tracked declarations and evidence. The verifier and
 tests are read-only. `generate:protocol-canonicalization` writes only its deterministic evidence
-artifact; its verifier and tests are read-only. Snapshot and traceability checks remain available
-as `pnpm verify:protocol-snapshot`, `pnpm test:protocol-snapshot`,
+artifact; its verifier and tests are read-only. `generate:protocol-diagnostics` likewise writes only
+its deterministic evidence artifact after comparing the runtime registry with frozen Appendix B;
+its verifier and tests are read-only. Snapshot and traceability checks remain available as
+`pnpm verify:protocol-snapshot`, `pnpm test:protocol-snapshot`,
 `pnpm verify:protocol-traceability`, and `pnpm test:protocol-traceability`.

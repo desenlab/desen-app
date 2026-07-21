@@ -59,3 +59,21 @@ This file records implementation discoveries without changing the frozen DESEN 0
   and outdated repository metadata.
 - Implementation decision: Do not delete or publish during the proof phase. Follow the npm
   transition runbook after G12.
+
+## PF-006 — Diagnostic extension syntax and emission categories are not normative
+
+- Status: OPEN
+- Blocks proof: No
+- Protocol location: SPEC Sections 23.9 and 26.1, Appendix B
+- Observation: DESEN 0.1.0 permits namespaced implementation diagnostic codes but does not define
+  their grammar. It also defines Appendix B `Class` metadata while the frozen conformance runner
+  separately uses stage-oriented outcomes such as `catalog_error`; those vocabularies are not a
+  one-to-one mapping. The exact diagnostic object field names and applicability rules are likewise
+  not specified.
+- Implementation decision: Preserve the 36 core codes and exact Appendix classifications in an
+  immutable registry. Use a portable data model with stable `code`, optional RFC 6901 `pointer`,
+  safe human `message`, and optional identity context. Derive classification only for core
+  diagnostics and do not interpret it as an emission stage. Preserve caller-documented namespaced
+  string literals without enforcing an invented universal grammar.
+- Future action: Consider standardizing the extension-code grammar, diagnostic envelope, severity,
+  ordering, and localization keys in a later protocol version.

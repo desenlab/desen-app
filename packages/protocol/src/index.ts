@@ -19,6 +19,32 @@ export {
   sha256Digest,
   sha256Hex,
 } from "./canonicalization.js";
+export {
+  CORE_DIAGNOSTIC_REGISTRY,
+  createCoreDiagnostic,
+  getCoreDiagnosticDefinition,
+  isCoreDiagnosticCode,
+} from "./diagnostics.js";
+export {
+  appendJsonPointer,
+  createJsonPointer,
+  escapeJsonPointerToken,
+  isJsonPointer,
+  parseJsonPointer,
+  unescapeJsonPointerToken,
+} from "./json-pointer.js";
+
+export type {
+  CoreDiagnosticClassification,
+  CoreDiagnosticCode,
+  CoreDiagnosticDefinition,
+  CreateCoreDiagnosticInput,
+  DesenCoreDiagnostic,
+  DesenDiagnostic,
+  DesenDiagnosticContext,
+  DesenDiagnosticSubject,
+} from "./diagnostics.js";
+export type { JsonPointer, JsonPointerSegment } from "./json-pointer.js";
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };

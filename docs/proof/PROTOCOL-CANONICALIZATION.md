@@ -83,7 +83,7 @@ production SHA-256 with independent oracles, checks tracked implementation/test 
 one-byte evidence drift.
 
 - Artifact: `docs/proof/artifacts/protocol-0.1.0-canonicalization.json`
-- Artifact SHA-256: `7c96deb2206cec49b312f1a4f385d0c1720aa06924a4268f7b56c3391f79d2aa`
+- Artifact SHA-256: `8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6`
 - Package tests: 12
 - Root evidence and differential tests: 8
 
@@ -95,7 +95,8 @@ one-byte evidence drift.
   still required.
 - A raw Catalog JSON hash is not `packageDigest`. The deterministic capability-package archive
   profile remains assigned to `M03-T04`.
-- Stable diagnostic objects and JSON Pointers remain assigned to `M02-T05`.
+- Stable diagnostic objects and JSON Pointers are now provided by `M02-T05`; actual diagnostic
+  emission remains assigned to the relevant validator, runtime, publisher, and activation tasks.
 - Official TypeScript suite parity remains assigned to `M02-T12`; publisher determinism remains
   assigned to `M06-T10`; activation verification remains assigned to `M07-T02`.
 - No Proof Matrix claim changes status in this task.

@@ -152,7 +152,6 @@ const FROZEN_FIXTURES = Object.freeze({
 
 const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
   "packages/protocol/src/canonicalization.ts",
-  "packages/protocol/src/index.ts",
   "packages/protocol/test/canonicalization.test.ts",
   "scripts/lib/protocol-canonicalization-proof.mjs",
   "scripts/generate-protocol-canonicalization-proof.mjs",
@@ -221,6 +220,30 @@ function assertEqual(actual, expected, label) {
   }
 }
 
+async function assertPublicExports() {
+  const indexSource = await readFile(
+    path.join(WORKSPACE_ROOT, "packages/protocol/src/index.ts"),
+    "utf8",
+  );
+  const runtimeExports = new Set(
+    [...indexSource.matchAll(/export\s*\{([\s\S]*?)\}\s*from\s*"[^"]+";/gu)].flatMap(([, names]) =>
+      names
+        .split(",")
+        .map((name) => name.trim())
+        .filter((name) => name !== "" && !name.startsWith("type ")),
+    ),
+  );
+  for (const exportName of PUBLIC_EXPORTS) {
+    if (!runtimeExports.has(exportName)) {
+      fail(
+        "CANONICALIZATION_PUBLIC_EXPORT_MISSING",
+        `The package root no longer exposes ${exportName}.`,
+        { exportName },
+      );
+    }
+  }
+}
+
 function shaVectorInput(vector) {
   return vector.input.encoding === "ascii"
     ? ascii(vector.input.value)
@@ -248,6 +271,7 @@ export async function buildProtocolCanonicalizationEvidence({
   verifySnapshot = true,
 } = {}) {
   if (verifySnapshot) await verifyProtocolSnapshot(snapshotRoot);
+  await assertPublicExports();
 
   const rfcInput = {
     numbers: [Number("333333333.33333329"), 1e30, 4.5, 2e-3, 1e-27],
@@ -489,7 +513,7 @@ export async function buildProtocolCanonicalizationEvidence({
       "Value-based canonicalization cannot recover duplicate names already discarded by a JSON parser; parsing must enforce I-JSON before this API.",
       "Source and Bundle helpers implement only the Section 11 projections and do not prove a document is otherwise valid.",
       "A raw Catalog JCS hash is not a capability package digest; package archive digest rules remain owned by M03-T04.",
-      "Publisher determinism, digest verification during activation, and stable diagnostics remain assigned to later tasks.",
+      "Publisher determinism, activation-time verification, and diagnostic emission remain assigned to later tasks; shared diagnostic primitives are covered separately by M02-T05.",
     ],
   };
 

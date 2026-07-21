@@ -48,19 +48,14 @@
         "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
       },
       {
-        "path": "packages/protocol/src/index.ts",
-        "bytes": 2627,
-        "sha256": "177d4099af8d5a321a4f6bf948f31c2b68d5e6afabfd71525bfb53e212d5fe9d"
-      },
-      {
         "path": "packages/protocol/test/canonicalization.test.ts",
         "bytes": 14047,
         "sha256": "aff2fdac4609d7f12d7e0422d0fc9885d09d7fc118b6c8ab95e2e980a28967fd"
       },
       {
         "path": "scripts/lib/protocol-canonicalization-proof.mjs",
-        "bytes": 20937,
-        "sha256": "861f904c2969c7d579aa712b7e0be692e47a4859fd70ba31db8e739194c3b2f2"
+        "bytes": 21687,
+        "sha256": "76fcdfd62c2243b988f553cd27517094cb2421f94701c980430c34f61d540ac8"
       },
       {
         "path": "scripts/generate-protocol-canonicalization-proof.mjs",
@@ -231,6 +226,6 @@
     "Value-based canonicalization cannot recover duplicate names already discarded by a JSON parser; parsing must enforce I-JSON before this API.",
     "Source and Bundle helpers implement only the Section 11 projections and do not prove a document is otherwise valid.",
     "A raw Catalog JCS hash is not a capability package digest; package archive digest rules remain owned by M03-T04.",
-    "Publisher determinism, digest verification during activation, and stable diagnostics remain assigned to later tasks."
+    "Publisher determinism, activation-time verification, and diagnostic emission remain assigned to later tasks; shared diagnostic primitives are covered separately by M02-T05."
   ]
 }

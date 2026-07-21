@@ -44,4 +44,10 @@ M02-T04's canonicalization artifact proves RFC 8785, SHA-256, and the two Sectio
 primitives. It does not yet prove official-suite parity, publisher determinism, or activation-time
 verification, so no `P-*` status changes:
 `protocol-0.1.0-canonicalization.json`
-`sha256:7c96deb2206cec49b312f1a4f385d0c1720aa06924a4268f7b56c3391f79d2aa`.
+`sha256:8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6`.
+
+M02-T05's diagnostic artifact proves the exact Appendix B registry, shared portable diagnostic
+data, and RFC 6901 JSON Pointer primitives. It does not prove that later validators, runtimes,
+publishers, activation code, or editor surfaces emit those diagnostics, so no `P-*` status changes:
+`protocol-0.1.0-diagnostics.json`
+`sha256:9d89e0ebb539e08b069dba187b024b00dcd8c8f39517e1c41d044b59f065df26`.

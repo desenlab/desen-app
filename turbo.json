@@ -26,7 +26,9 @@
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
         "../../scripts/lib/protocol-types.mjs",
         "../../scripts/lib/protocol-canonicalization-proof.mjs",
+        "../../scripts/lib/protocol-diagnostics-proof.mjs",
         "../../tests/protocol-canonicalization.test.mjs",
+        "../../tests/protocol-diagnostics.test.mjs",
         "../../tests/protocol-snapshot-integrity.test.mjs",
         "../../tests/protocol-types.test.mjs"
       ],
@@ -39,7 +41,9 @@
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
         "../../scripts/lib/protocol-types.mjs",
         "../../scripts/lib/protocol-canonicalization-proof.mjs",
+        "../../scripts/lib/protocol-diagnostics-proof.mjs",
         "../../tests/protocol-canonicalization.test.mjs",
+        "../../tests/protocol-diagnostics.test.mjs",
         "../../tests/protocol-snapshot-integrity.test.mjs",
         "../../tests/protocol-types.test.mjs"
       ],
