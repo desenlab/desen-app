@@ -1,0 +1,42 @@
+name: Implementation task
+description: Track one approved task from the implementation board.
+title: "[TASK] "
+labels:
+  - implementation
+body:
+  - type: input
+    id: task_id
+    attributes:
+      label: Task ID
+      description: Exact ID from docs/plan/TASKS.md.
+      placeholder: M04-T02
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What observable result closes this task?
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Which required tasks and gates are already complete?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      description: Tests, artifacts, hashes, source audit, or proof claims.
+    validations:
+      required: true
+  - type: textarea
+    id: exclusions
+    attributes:
+      label: Explicit exclusions
+      description: Work that must not be pulled into this task.
+    validations:
+      required: true

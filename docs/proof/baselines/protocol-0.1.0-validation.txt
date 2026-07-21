@@ -1,0 +1,22 @@
+DESEN 0.1.0 baseline validation
+Date: 2026-07-21
+Commit: b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca
+Command: python3 tools/validate.py --suite
+Suite composition: 9 conformance vectors + 5 public examples = 14 cases
+
+PASS valid/sign-in.source.json (valid)
+PASS valid/sign-in.bundle.json (valid)
+PASS valid/web.catalog.json (valid)
+PASS invalid/source-unknown-core-field.json (schema_error/UNKNOWN_CORE_FIELD)
+PASS invalid/source-duplicate-node-id.json (semantic_error/DUPLICATE_NODE_ID)
+PASS invalid/source-unknown-capability.json (catalog_error/UNKNOWN_CAPABILITY)
+PASS invalid/source-unknown-event.json (catalog_error/UNKNOWN_EVENT)
+PASS invalid/bundle-revision-mismatch.json (integrity_error/REVISION_MISMATCH)
+PASS invalid/bundle-catalog-digest-mismatch.json (activation_error/CATALOG_DIGEST_MISMATCH)
+PASS example catalog.web.example.json
+PASS example sign-in.source.desen.json
+PASS example sign-in.bundle.desen.json
+PASS example store-map.source.desen.json
+PASS example sortable-list.source.desen.json
+
+14 suite cases passed, 0 failed (9 vectors, 5 examples)

@@ -1,0 +1,45 @@
+{
+  "name": "desen-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reference implementation and developer ecosystem for DESEN 0.1.0.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@11.15.1",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=11.15.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "eslint . --max-warnings=0 && turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:e2e": "node scripts/not-implemented.mjs browser-e2e G10",
+    "proof": "node scripts/not-implemented.mjs protocol-proof-runner G10",
+    "boundaries": "depcruise --config dependency-cruiser.config.cjs apps packages && node scripts/verify-boundary-fixtures.mjs",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm boundaries",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "node --eval \"throw new Error('External publishing is reserved until G12 and explicit approval; follow docs/release/NPM-TRANSITION.md')\""
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.31.1",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.13.3",
+    "@vitest/coverage-v8": "4.1.10",
+    "dependency-cruiser": "18.1.0",
+    "eslint": "10.7.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.7.0",
+    "prettier": "3.9.6",
+    "turbo": "2.10.5",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.65.0",
+    "vitest": "4.1.10"
+  }
+}

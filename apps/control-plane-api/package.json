@@ -1,0 +1,8 @@
+{
+  "name": "@desen/control-plane-api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Control Plane API workspace",
+  "license": "Apache-2.0",
+  "type": "module"
+}

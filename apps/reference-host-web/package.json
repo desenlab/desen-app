@@ -1,0 +1,8 @@
+{
+  "name": "@desen/reference-host-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reference Host Web workspace",
+  "license": "Apache-2.0",
+  "type": "module"
+}

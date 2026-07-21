@@ -1,0 +1,8 @@
+.turbo
+coverage
+dist
+node_modules
+playwright-report
+test-results
+pnpm-lock.yaml
+packages/protocol/upstream

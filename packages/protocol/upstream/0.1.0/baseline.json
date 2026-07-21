@@ -1,0 +1,19 @@
+{
+  "protocol": "0.1.0",
+  "repository": "https://github.com/desenlab/desen-protocol",
+  "commit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+  "intendedTag": "v0.1.0",
+  "tagVerified": false,
+  "sha256Manifest": "92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd",
+  "validation": {
+    "date": "2026-07-21",
+    "officialVectorsPassed": 14,
+    "officialVectorsFailed": 0,
+    "checksumsPassed": true
+  },
+  "notes": [
+    "The upstream snapshot has not been copied into this directory yet.",
+    "M02-T01 will vendor exact bytes and verify every file before implementation consumes them.",
+    "The missing upstream Git tag is tracked as PF-004."
+  ]
+}

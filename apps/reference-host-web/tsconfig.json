@@ -1,0 +1,4 @@
+{
+  "extends": "../../tsconfig.react-web.json",
+  "files": []
+}

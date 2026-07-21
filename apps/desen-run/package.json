@@ -1,0 +1,8 @@
+{
+  "name": "@desen/run-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "DESEN Developer Platform workspace for desen.run",
+  "license": "Apache-2.0",
+  "type": "module"
+}

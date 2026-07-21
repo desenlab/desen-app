@@ -1,0 +1,40 @@
+name: Protocol finding
+description: Record an implementation discovery without silently changing DESEN 0.1.0.
+title: "[PROTOCOL FINDING] "
+labels:
+  - protocol-finding
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Protocol location
+      placeholder: SPEC.md section 20.4
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: Observation
+      description: What became ambiguous, contradictory, or underspecified during implementation?
+    validations:
+      required: true
+  - type: dropdown
+    id: blocker
+    attributes:
+      label: Does it block the 0.1.0 proof?
+      options:
+        - "No"
+        - "Partially"
+        - "Yes"
+    validations:
+      required: true
+  - type: textarea
+    id: reference_decision
+    attributes:
+      label: Safe reference-implementation decision
+      description: Leave blank if no safe choice exists without changing protocol meaning.
+  - type: textarea
+    id: future
+    attributes:
+      label: Future protocol action
+      description: Candidate errata, profile, test, or future-version work.

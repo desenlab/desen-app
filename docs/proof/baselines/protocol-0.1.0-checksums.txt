@@ -1,0 +1,36 @@
+DESEN 0.1.0 checksum baseline
+Date: 2026-07-21
+Commit: b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca
+SHA256SUMS sha256: 92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd
+Command: shasum -a 256 -c SHA256SUMS
+
+./CHANGELOG.md: OK
+./CONTRIBUTING.md: OK
+./IMPLEMENTATION-GUIDE.md: OK
+./LICENSE: OK
+./README.md: OK
+./README.tr.md: OK
+./ROADMAP.md: OK
+./SPEC.md: OK
+./VALIDATION-REPORT.md: OK
+./conformance/README.md: OK
+./conformance/invalid/bundle-catalog-digest-mismatch.json: OK
+./conformance/invalid/bundle-revision-mismatch.json: OK
+./conformance/invalid/source-duplicate-node-id.json: OK
+./conformance/invalid/source-unknown-capability.json: OK
+./conformance/invalid/source-unknown-core-field.json: OK
+./conformance/invalid/source-unknown-event.json: OK
+./conformance/valid/sign-in.bundle.json: OK
+./conformance/valid/sign-in.source.json: OK
+./conformance/valid/web.catalog.json: OK
+./conformance/vectors.json: OK
+./examples/catalog.web.example.json: OK
+./examples/sign-in.bundle.desen.json: OK
+./examples/sign-in.source.desen.json: OK
+./examples/sortable-list.source.desen.json: OK
+./examples/store-map.source.desen.json: OK
+./schemas/desen-bundle.schema.json: OK
+./schemas/desen-catalog.schema.json: OK
+./schemas/desen-source.schema.json: OK
+./tools/jcs.mjs: OK
+./tools/validate.py: OK
