@@ -1,21 +1,21 @@
 {
   "date": "2026-07-21",
-  "scope": "current local uncommitted scaffold",
+  "scope": "tracked local foundation baseline",
   "node": "24.10.0",
   "pnpm": "11.15.1",
   "typescript": "6.0.3",
   "sourceControl": {
     "repositoryInitialized": true,
-    "commit": null,
+    "commit": "cd335e795593634d2820c549dda4db55f27056b1",
     "remoteConfigured": false,
-    "cleanCheckoutVerified": false
+    "cleanCheckoutVerified": true
   },
   "commands": {
-    "localInstall": {
-      "command": "pnpm install --frozen-lockfile --offline",
+    "cleanCloneInstall": {
+      "command": "pnpm install --frozen-lockfile",
       "result": "PASS"
     },
-    "localQuality": {
+    "cleanCloneQuality": {
       "command": "pnpm check",
       "result": "PASS",
       "checks": [
@@ -24,18 +24,19 @@
         "strict typecheck",
         "package build",
         "test runners",
-        "dependency boundaries"
+        "dependency boundaries",
+        "one allowed and five forbidden boundary fixtures"
       ]
     }
   },
   "ci": {
     "workflowConfigured": true,
     "remoteRunVerified": false,
-    "reason": "No user-authorized baseline commit or remote push exists yet."
+    "reason": "No remote is configured or authorized for this implementation repository."
   },
   "limitations": [
     "Functional package tests begin with M02; current package entry points are documented scaffolds.",
-    "Passing G01 proves only the current local scaffold quality gate, not DESEN runtime correctness.",
-    "This evidence does not prove a clean checkout, tracked tree, or remote CI run."
+    "Passing G01 proves the tracked workspace foundation, not DESEN runtime correctness.",
+    "This evidence does not prove a remote CI run."
   ]
 }

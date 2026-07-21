@@ -21,17 +21,17 @@ explicitly parallel branches inside M11 may progress independently.
 
 ## M01 — Professional workspace foundation
 
-| ID      | Status      | Depends on                               | Deliverable                                                                                                 | Evidence                                              |
-| ------- | ----------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| M01-T01 | DONE        | G00                                      | Monorepo apps/packages structure and documented placeholder entry points                                    | `apps/*/README.md`, `packages/*/README.md`            |
-| M01-T02 | DONE        | M01-T01                                  | Pinned local Node, pnpm, lockfile, and local frozen-lockfile install                                        | `.node-version`, `package.json`, `pnpm-lock.yaml`     |
-| M01-T03 | DONE        | M01-T02                                  | Build, lint, typecheck, test, boundary, and format commands; proof command reserved for evidence milestones | `package.json`, `turbo.json`                          |
-| M01-T04 | DONE        | M01-T03                                  | CI workflow configured; remote execution explicitly unverified until an authorized commit/push              | `.github/workflows/ci.yml`                            |
-| M01-T05 | DONE        | M01-T01                                  | Automated dependency-boundary rules                                                                         | `dependency-cruiser.config.cjs`                       |
-| M01-T06 | DONE        | M01-T01                                  | Engineering, TSDoc, README, ADR, and testing standards                                                      | `docs/standards/*`                                    |
-| G01     | DONE        | M01-T01–M01-T06                          | Current local scaffold installs and passes `pnpm check`; no clean-checkout or remote-CI claim               | `docs/proof/baselines/foundation-quality.json`        |
-| M01-T07 | IN_PROGRESS | G01                                      | Create the Selman-authored local baseline commit and verify install/check from a temporary clean clone      | Future `docs/proof/baselines/tracked-foundation.json` |
-| M01-T08 | NOT_STARTED | M01-T07, explicit external authorization | Configure/push a remote and archive the first verified remote CI run                                        | Future CI URL and run metadata                        |
+| ID      | Status      | Depends on                               | Deliverable                                                                                                 | Evidence                                          |
+| ------- | ----------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| M01-T01 | DONE        | G00                                      | Monorepo apps/packages structure and documented placeholder entry points                                    | `apps/*/README.md`, `packages/*/README.md`        |
+| M01-T02 | DONE        | M01-T01                                  | Pinned local Node, pnpm, lockfile, and local frozen-lockfile install                                        | `.node-version`, `package.json`, `pnpm-lock.yaml` |
+| M01-T03 | DONE        | M01-T02                                  | Build, lint, typecheck, test, boundary, and format commands; proof command reserved for evidence milestones | `package.json`, `turbo.json`                      |
+| M01-T04 | DONE        | M01-T03                                  | CI workflow configured; remote execution explicitly unverified until an authorized commit/push              | `.github/workflows/ci.yml`                        |
+| M01-T05 | DONE        | M01-T01                                  | Automated dependency-boundary rules                                                                         | `dependency-cruiser.config.cjs`                   |
+| M01-T06 | DONE        | M01-T01                                  | Engineering, TSDoc, README, ADR, and testing standards                                                      | `docs/standards/*`                                |
+| G01     | DONE        | M01-T01–M01-T06                          | Current local scaffold installs and passes `pnpm check`; no clean-checkout or remote-CI claim               | `docs/proof/baselines/foundation-quality.json`    |
+| M01-T07 | DONE        | G01                                      | Create the Selman-authored local baseline commit and verify install/check from a temporary clean clone      | `docs/proof/baselines/tracked-foundation.json`    |
+| M01-T08 | NOT_STARTED | M01-T07, explicit external authorization | Configure/push a remote and archive the first verified remote CI run                                        | Future CI URL and run metadata                    |
 
 `M01-T07` closes the local preparation baseline before functional implementation. `M01-T08` is
 external release hygiene and does not block local implementation. Until each task is complete, no

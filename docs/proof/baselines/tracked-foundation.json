@@ -1,0 +1,36 @@
+{
+  "date": "2026-07-21",
+  "baselineCommit": "cd335e795593634d2820c549dda4db55f27056b1",
+  "baselineTree": "658a5de87dbb1217dd4f90533e29cb88b7d50bab",
+  "lockfileSha256": "5867c05389514fa4b1c2510430bf5e9902a38994031ed0b7c0e7e353b96c5936",
+  "identity": {
+    "author": "Selman Ay <51993713+selmanays@users.noreply.github.com>",
+    "committer": "Selman Ay <51993713+selmanays@users.noreply.github.com>",
+    "coAuthorTrailers": false
+  },
+  "verification": {
+    "temporaryCleanClone": true,
+    "install": {
+      "command": "pnpm install --frozen-lockfile",
+      "result": "PASS"
+    },
+    "quality": {
+      "command": "pnpm check",
+      "result": "PASS"
+    },
+    "boundaryFixtures": {
+      "allowedCasesPassed": 1,
+      "forbiddenCasesRejected": 5
+    }
+  },
+  "externalState": {
+    "remoteConfigured": false,
+    "remoteCiVerified": false,
+    "npmRegistryMutated": false
+  },
+  "limitations": [
+    "Functional package tests begin at M02; the current package entry points are documented scaffolds.",
+    "The proof and browser E2E commands intentionally fail with NOT_IMPLEMENTED until G10.",
+    "This baseline proves clean-clone workspace reproducibility, not DESEN semantic conformance."
+  ]
+}

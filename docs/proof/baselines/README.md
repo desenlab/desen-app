@@ -8,10 +8,9 @@ These files distinguish two different starting points:
 The protocol suite contains 14 cases: 9 entries from `conformance/vectors.json` and 5 public
 examples. It must not be described as “14 vectors.”
 
-The Desen scaffold currently has no local baseline commit or remote. Its local quality result
-therefore does not prove a clean checkout or remote CI. M01-T07 creates the Selman-authored local
-baseline and verifies a temporary clean clone. M01-T08 remains the separately authorized remote
-push/CI step.
+`tracked-foundation.json` records the Selman-authored local baseline commit and the successful
+temporary clean-clone install and quality check. No remote exists, so it does not claim a remote CI
+result. M01-T08 remains the separately authorized remote push/CI step.
 
 Evidence files must state the command, scope, source commit when one exists, result, and known
 limitations. Generated proof artifacts additionally record SHA-256 hashes at their owning task.
