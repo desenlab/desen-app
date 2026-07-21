@@ -21,10 +21,20 @@
     },
     "test": {
       "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "../../scripts/lib/protocol-snapshot-integrity.mjs",
+        "../../tests/protocol-snapshot-integrity.test.mjs"
+      ],
       "outputs": []
     },
     "test:coverage": {
       "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "../../scripts/lib/protocol-snapshot-integrity.mjs",
+        "../../tests/protocol-snapshot-integrity.test.mjs"
+      ],
       "outputs": ["coverage/**"]
     },
     "test:e2e": {

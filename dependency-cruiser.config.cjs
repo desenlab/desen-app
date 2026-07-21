@@ -202,6 +202,7 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: "node_modules" },
+    exclude: "^packages/protocol/upstream/",
     enhancedResolveOptions: {
       exportsFields: ["exports"],
     },

@@ -1,0 +1,185 @@
+{
+  "kind": "desen.bundle",
+  "desen": "0.1.0",
+  "id": "com.example.account-app",
+  "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+  "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+  "requires": {
+    "catalogs": [
+      {
+        "id": "com.example.web-catalog",
+        "version": "1.0.0",
+        "target": "web-react",
+        "digest": "sha256:c8e15513005c9f54d2fc35b60c01f9f7d187dabd3c5efba71cd4dc6db2542a1f"
+      }
+    ]
+  },
+  "entry": "sign-in",
+  "surfaces": {
+    "sign-in": {
+      "id": "sign-in",
+      "state": {
+        "email": {
+          "schema": {
+            "type": "string"
+          },
+          "initial": ""
+        },
+        "password": {
+          "schema": {
+            "type": "string"
+          },
+          "initial": ""
+        }
+      },
+      "resources": {},
+      "root": {
+        "id": "sign-in.layout",
+        "use": "com.example.ui/Stack",
+        "props": {
+          "direction": "vertical",
+          "gap": "md",
+          "maxWidth": 420
+        },
+        "slots": {
+          "default": [
+            {
+              "id": "sign-in.title",
+              "use": "com.example.ui/Text",
+              "props": {
+                "text": "Sign in",
+                "role": "heading"
+              }
+            },
+            {
+              "id": "sign-in.email",
+              "use": "com.example.ui/TextField",
+              "props": {
+                "label": "Email",
+                "value": {
+                  "$ref": "state.email"
+                }
+              },
+              "on": {
+                "change": [
+                  {
+                    "type": "state.set",
+                    "path": "email",
+                    "value": {
+                      "$ref": "event.value"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sign-in.password",
+              "use": "com.example.ui/TextField",
+              "props": {
+                "label": "Password",
+                "secure": true,
+                "value": {
+                  "$ref": "state.password"
+                }
+              },
+              "on": {
+                "change": [
+                  {
+                    "type": "state.set",
+                    "path": "password",
+                    "value": {
+                      "$ref": "event.value"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "sign-in.error",
+              "use": "com.example.ui/Alert",
+              "when": {
+                "op": "eq",
+                "args": [
+                  {
+                    "$ref": "operation.signIn.status"
+                  },
+                  "failed"
+                ]
+              },
+              "props": {
+                "tone": "critical",
+                "text": "Sign-in failed. Check your details and try again."
+              }
+            },
+            {
+              "id": "sign-in.submit",
+              "use": "com.example.ui/Button",
+              "props": {
+                "label": "Sign in",
+                "variant": "primary",
+                "loading": {
+                  "$ref": "operation.signIn.pending",
+                  "fallback": false
+                }
+              },
+              "on": {
+                "press": [
+                  {
+                    "type": "operation.invoke",
+                    "operation": "com.example.auth/signIn",
+                    "as": "signIn",
+                    "input": {
+                      "email": {
+                        "$ref": "state.email"
+                      },
+                      "password": {
+                        "$ref": "state.password"
+                      }
+                    },
+                    "concurrency": "replace",
+                    "onSuccess": [
+                      {
+                        "type": "navigate",
+                        "surface": "home"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "home": {
+      "id": "home",
+      "state": {},
+      "resources": {},
+      "root": {
+        "id": "home.layout",
+        "use": "com.example.ui/Stack",
+        "props": {
+          "direction": "vertical",
+          "gap": "md"
+        },
+        "slots": {
+          "default": [
+            {
+              "id": "home.title",
+              "use": "com.example.ui/Text",
+              "props": {
+                "text": "Welcome",
+                "role": "heading"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "publication": {
+    "publishedAt": "2026-07-21T00:00:00Z",
+    "publisher": "desen-example-publisher/0.1.0"
+  },
+  "extensions": {}
+}

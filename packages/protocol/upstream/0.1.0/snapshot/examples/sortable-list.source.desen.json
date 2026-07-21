@@ -1,0 +1,95 @@
+{
+  "kind": "desen.source",
+  "desen": "0.1.0",
+  "id": "com.example.task-list",
+  "catalogs": [
+    {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react"
+    }
+  ],
+  "entry": "tasks",
+  "surfaces": {
+    "tasks": {
+      "id": "tasks",
+      "state": {},
+      "resources": {
+        "tasks": {
+          "use": "com.example.tasks/list",
+          "input": {},
+          "policy": "mount"
+        }
+      },
+      "root": {
+        "id": "tasks.list",
+        "use": "com.example.ui/Stack",
+        "props": {
+          "direction": "vertical",
+          "gap": "sm"
+        },
+        "behaviors": [
+          {
+            "id": "tasks.sort",
+            "use": "com.example.interactions/Sortable",
+            "props": {
+              "axis": "vertical",
+              "handle": "item"
+            },
+            "on": {
+              "reorder": [
+                {
+                  "type": "operation.invoke",
+                  "operation": "com.example.tasks/reorder",
+                  "as": "reorderTasks",
+                  "concurrency": "queue",
+                  "input": {
+                    "itemKey": {
+                      "$ref": "event.itemKey"
+                    },
+                    "fromIndex": {
+                      "$ref": "event.fromIndex"
+                    },
+                    "toIndex": {
+                      "$ref": "event.toIndex"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "slots": {
+          "default": [
+            {
+              "id": "tasks.item",
+              "use": "com.example.ui/Text",
+              "repeat": {
+                "items": {
+                  "$ref": "resource.tasks.value"
+                },
+                "as": "task",
+                "key": {
+                  "$ref": "item.task.id"
+                },
+                "limit": 100
+              },
+              "props": {
+                "text": {
+                  "$ref": "item.task.title"
+                },
+                "role": "body"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "authoring": {
+    "scenario": {
+      "tasks": "default"
+    }
+  },
+  "extensions": {}
+}

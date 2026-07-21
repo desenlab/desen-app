@@ -24,6 +24,7 @@ const browserFiles = [
 const nodeFiles = [
   "apps/control-plane-api/**/*.{ts,tsx}",
   "scripts/**/*.{js,cjs,mjs,ts}",
+  "tests/**/*.{js,cjs,mjs,ts}",
   "*.config.{js,cjs,mjs,ts}",
 ];
 
@@ -77,6 +78,7 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/playwright-report/**",
       "**/test-results/**",
+      "packages/protocol/upstream/**",
       "tests/boundaries/fixtures/**",
     ],
   },

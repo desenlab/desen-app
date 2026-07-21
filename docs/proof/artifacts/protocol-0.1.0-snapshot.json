@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "task": "M02-T01",
+  "claim": "P-01",
+  "date": "2026-07-21",
+  "status": "PASS",
+  "source": {
+    "repository": "https://github.com/desenlab/desen-protocol",
+    "commit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "tree": "cd7afa57888095718c4ee82b69b5b282980763c8"
+  },
+  "snapshot": {
+    "path": "packages/protocol/upstream/0.1.0/snapshot",
+    "files": 31,
+    "bytes": 306604,
+    "manifestEntries": 30,
+    "manifestSha256": "92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd",
+    "aggregateAlgorithm": "sha256(concat(sort(relativePath + NUL + sha256(fileBytes) + LF)))",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+    "executablePaths": ["tools/jcs.mjs", "tools/validate.py"]
+  },
+  "verification": {
+    "commands": [
+      {
+        "command": "pnpm verify:protocol-snapshot",
+        "result": "PASS"
+      },
+      {
+        "command": "pnpm test:protocol-snapshot",
+        "result": "PASS",
+        "testsPassed": 7,
+        "testsFailed": 0
+      },
+      {
+        "command": "pnpm check",
+        "result": "PASS"
+      }
+    ],
+    "negativeCases": [
+      "changed file bytes",
+      "missing manifest-owned file",
+      "unexpected extra file",
+      "coordinated file and manifest tampering",
+      "symlink replacing a regular file",
+      "duplicate manifest entry",
+      "manifest path traversal"
+    ]
+  },
+  "limitations": [
+    "This proves exact vendored input bytes and inventory, not DESEN validator or runtime semantics.",
+    "Executable-mode verification is skipped on Windows; byte and inventory checks remain mandatory."
+  ]
+}

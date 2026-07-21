@@ -1,0 +1,147 @@
+{
+  "kind": "desen.source",
+  "desen": "0.1.0",
+  "id": "com.example.store-locator",
+  "catalogs": [
+    {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react"
+    }
+  ],
+  "entry": "stores",
+  "surfaces": {
+    "stores": {
+      "id": "stores",
+      "state": {
+        "selectedStoreId": {
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "initial": null
+        }
+      },
+      "resources": {
+        "stores": {
+          "use": "com.example.stores/list",
+          "input": {},
+          "policy": "mount"
+        }
+      },
+      "root": {
+        "id": "stores.layout",
+        "use": "com.example.ui/Stack",
+        "props": {
+          "direction": "vertical",
+          "gap": "md"
+        },
+        "slots": {
+          "default": [
+            {
+              "id": "store-map",
+              "use": "com.example.maps/Map",
+              "props": {
+                "center": {
+                  "latitude": 41.0082,
+                  "longitude": 28.9784
+                },
+                "zoom": 11,
+                "mapStyle": "light",
+                "showControls": true
+              },
+              "slots": {
+                "popup": [
+                  {
+                    "id": "store-map.popupText",
+                    "use": "com.example.ui/Text",
+                    "props": {
+                      "text": {
+                        "$format": {
+                          "template": "Selected store: {id}",
+                          "values": {
+                            "id": {
+                              "$ref": "state.selectedStoreId",
+                              "fallback": "none"
+                            }
+                          }
+                        }
+                      },
+                      "role": "body"
+                    }
+                  }
+                ],
+                "emptyState": [
+                  {
+                    "id": "store-map.empty",
+                    "use": "com.example.ui/Alert",
+                    "props": {
+                      "tone": "info",
+                      "text": "No stores are available."
+                    }
+                  }
+                ]
+              },
+              "on": {
+                "markerSelect": [
+                  {
+                    "type": "state.set",
+                    "path": "selectedStoreId",
+                    "value": {
+                      "$ref": "event.id"
+                    }
+                  }
+                ]
+              },
+              "style": {
+                "base": {
+                  "marker": {
+                    "fill": {
+                      "$token": "color.marker.default"
+                    }
+                  },
+                  "selectedMarker": {
+                    "fill": {
+                      "$token": "color.marker.selected"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "store-map.fit",
+              "use": "com.example.ui/Button",
+              "props": {
+                "label": "Show all stores",
+                "variant": "secondary"
+              },
+              "on": {
+                "press": [
+                  {
+                    "type": "component.command",
+                    "target": "store-map",
+                    "command": "fitBounds",
+                    "input": {
+                      "bounds": {
+                        "$ref": "resource.stores.value.bounds"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "authoring": {
+    "scenario": {
+      "stores": "default",
+      "store-map": "selectedMarker"
+    }
+  },
+  "extensions": {}
+}

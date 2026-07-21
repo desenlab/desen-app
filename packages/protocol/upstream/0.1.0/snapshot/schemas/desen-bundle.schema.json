@@ -1,0 +1,878 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.desen.dev/0.1/desen-bundle.schema.json",
+  "title": "DESEN Published Design Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "desen",
+    "id",
+    "revision",
+    "sourceDigest",
+    "requires",
+    "entry",
+    "surfaces"
+  ],
+  "properties": {
+    "kind": {
+      "const": "desen.bundle"
+    },
+    "desen": {
+      "const": "0.1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "sourceDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "requires": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogs"
+      ],
+      "properties": {
+        "catalogs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/exactCatalogRequirement"
+          }
+        }
+      }
+    },
+    "entry": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+    },
+    "surfaces": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/surfaceSpec"
+      }
+    },
+    "publication": {
+      "type": "object"
+    },
+    "extensions": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "literalObject": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "pattern": "^\\$"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/valueSpec"
+      }
+    },
+    "refSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$ref"
+      ],
+      "properties": {
+        "$ref": {
+          "type": "string",
+          "pattern": "^(state|context|resource|operation|event|item|env)(\\.[A-Za-z_][A-Za-z0-9_-]*)+$"
+        },
+        "fallback": {
+          "$ref": "#/$defs/valueSpec"
+        }
+      }
+    },
+    "tokenSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$token"
+      ],
+      "properties": {
+        "$token": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "formatSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$format"
+      ],
+      "properties": {
+        "$format": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "template",
+            "values"
+          ],
+          "properties": {
+            "template": {
+              "type": "string"
+            },
+            "values": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/valueSpec"
+              }
+            }
+          }
+        }
+      }
+    },
+    "valueSpec": {
+      "oneOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/valueSpec"
+          }
+        },
+        {
+          "$ref": "#/$defs/refSpec"
+        },
+        {
+          "$ref": "#/$defs/tokenSpec"
+        },
+        {
+          "$ref": "#/$defs/formatSpec"
+        },
+        {
+          "$ref": "#/$defs/literalObject"
+        }
+      ]
+    },
+    "predicateSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "op",
+        "args"
+      ],
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any",
+            "not",
+            "eq",
+            "neq",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "in",
+            "contains",
+            "exists",
+            "truthy"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/valueSpec"
+              },
+              {
+                "$ref": "#/$defs/predicateSpec"
+              }
+            ]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "const": "not"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "minItems": 1,
+                "maxItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": [
+                  "eq",
+                  "neq",
+                  "gt",
+                  "gte",
+                  "lt",
+                  "lte",
+                  "in",
+                  "contains"
+                ]
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": [
+                  "exists",
+                  "truthy"
+                ]
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "minItems": 1,
+                "maxItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "actionSpec": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "path",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "const": "state.set"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "value": {
+              "$ref": "#/$defs/valueSpec"
+            },
+            "when": {
+              "$ref": "#/$defs/predicateSpec"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "path"
+          ],
+          "properties": {
+            "type": {
+              "const": "state.toggle"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "when": {
+              "$ref": "#/$defs/predicateSpec"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "surface"
+          ],
+          "properties": {
+            "type": {
+              "const": "navigate"
+            },
+            "surface": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/valueSpec"
+              }
+            },
+            "when": {
+              "$ref": "#/$defs/predicateSpec"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "operation",
+            "as",
+            "input"
+          ],
+          "properties": {
+            "type": {
+              "const": "operation.invoke"
+            },
+            "operation": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "as": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "input": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/valueSpec"
+              }
+            },
+            "concurrency": {
+              "type": "string",
+              "enum": [
+                "reject",
+                "replace",
+                "queue"
+              ],
+              "default": "reject"
+            },
+            "onSuccess": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/actionSpec"
+              }
+            },
+            "onFailure": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/actionSpec"
+              }
+            },
+            "when": {
+              "$ref": "#/$defs/predicateSpec"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "resource"
+          ],
+          "properties": {
+            "type": {
+              "const": "resource.refresh"
+            },
+            "resource": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "when": {
+              "$ref": "#/$defs/predicateSpec"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "target",
+            "command"
+          ],
+          "properties": {
+            "type": {
+              "const": "component.command"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "command": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+            },
+            "input": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/valueSpec"
+              }
+            },
+            "when": {
+              "$ref": "#/$defs/predicateSpec"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "event.emit"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "payload": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/valueSpec"
+              }
+            },
+            "when": {
+              "$ref": "#/$defs/predicateSpec"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        }
+      ]
+    },
+    "styleSpec": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": {
+          "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "additionalProperties": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/valueSpec"
+          }
+        }
+      }
+    },
+    "variantSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "when"
+      ],
+      "properties": {
+        "when": {
+          "$ref": "#/$defs/predicateSpec"
+        },
+        "props": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/valueSpec"
+          }
+        },
+        "style": {
+          "$ref": "#/$defs/styleSpec"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "props"
+          ]
+        },
+        {
+          "required": [
+            "style"
+          ]
+        }
+      ]
+    },
+    "behaviorSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "use"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "use": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "props": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/valueSpec"
+          }
+        },
+        "slots": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/nodeSpec"
+            }
+          }
+        },
+        "style": {
+          "$ref": "#/$defs/styleSpec"
+        },
+        "on": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/actionSpec"
+            }
+          }
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "repeatSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "as",
+        "key"
+      ],
+      "properties": {
+        "items": {
+          "$ref": "#/$defs/valueSpec"
+        },
+        "as": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "key": {
+          "$ref": "#/$defs/valueSpec"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "nodeSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "use"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "use": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "props": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/valueSpec"
+          }
+        },
+        "slots": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/nodeSpec"
+            }
+          }
+        },
+        "style": {
+          "$ref": "#/$defs/styleSpec"
+        },
+        "when": {
+          "$ref": "#/$defs/predicateSpec"
+        },
+        "repeat": {
+          "$ref": "#/$defs/repeatSpec"
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/variantSpec"
+          }
+        },
+        "behaviors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/behaviorSpec"
+          }
+        },
+        "on": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/actionSpec"
+            }
+          }
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "stateSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "initial"
+      ],
+      "properties": {
+        "schema": {
+          "type": "object"
+        },
+        "initial": {},
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "resourceInstanceSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "use",
+        "input",
+        "policy"
+      ],
+      "properties": {
+        "use": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/valueSpec"
+          }
+        },
+        "policy": {
+          "type": "string",
+          "enum": [
+            "mount",
+            "manual",
+            "once"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "surfaceSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "state",
+        "resources",
+        "root"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "state": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/stateSpec"
+          }
+        },
+        "resources": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/resourceInstanceSpec"
+          }
+        },
+        "root": {
+          "$ref": "#/$defs/nodeSpec"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "sourceCatalogRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "exactCatalogRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "target",
+        "digest"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

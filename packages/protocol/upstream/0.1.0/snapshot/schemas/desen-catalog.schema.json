@@ -1,0 +1,656 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.desen.dev/0.1/desen-catalog.schema.json",
+  "title": "DESEN Capability Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "desen",
+    "id",
+    "version",
+    "target",
+    "packageDigest",
+    "components",
+    "behaviors",
+    "operations",
+    "resources"
+  ],
+  "properties": {
+    "kind": {
+      "const": "desen.catalog"
+    },
+    "desen": {
+      "const": "0.1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packageDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "components": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/componentCapability"
+      }
+    },
+    "behaviors": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/behaviorCapability"
+      }
+    },
+    "operations": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/operationCapability"
+      }
+    },
+    "resources": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/resourceCapability"
+      }
+    },
+    "authoring": {
+      "type": "object"
+    },
+    "extensions": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "slotSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "minItems": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "accepts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          }
+        },
+        "acceptsCategories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "eventSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payloadSchema"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "payloadSchema": {
+          "type": "object"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "commandSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputSchema"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "inputSchema": {
+          "type": "object"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "stylePartSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "propertiesSchema"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "propertiesSchema": {
+          "type": "object"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "authoringSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "defaultProps": {
+          "type": "object"
+        },
+        "controls": {
+          "type": "object"
+        },
+        "scenarios": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "props": {
+                "type": "object"
+              },
+              "fixtures": {
+                "type": "object"
+              },
+              "state": {
+                "type": "object"
+              },
+              "description": {
+                "type": "string"
+              },
+              "extensions": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "resize": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "horizontal": {
+              "type": "string",
+              "enum": [
+                "fixed",
+                "hug",
+                "fill",
+                "resizable"
+              ]
+            },
+            "vertical": {
+              "type": "string",
+              "enum": [
+                "fixed",
+                "hug",
+                "fill",
+                "resizable"
+              ]
+            }
+          }
+        },
+        "adapterFidelity": {
+          "type": "string",
+          "enum": [
+            "same",
+            "equivalent",
+            "approximate"
+          ]
+        },
+        "differences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "componentCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "propsSchema"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "propsSchema": {
+          "type": "object"
+        },
+        "slots": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/slotSpec"
+          }
+        },
+        "events": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/eventSpec"
+          }
+        },
+        "commands": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/commandSpec"
+          }
+        },
+        "styleParts": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/stylePartSpec"
+          }
+        },
+        "visualStates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          }
+        },
+        "authoring": {
+          "$ref": "#/$defs/authoringSpec"
+        },
+        "deprecated": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "replacement": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "behaviorCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "propsSchema",
+        "attachTo"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "propsSchema": {
+          "type": "object"
+        },
+        "attachTo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "capabilities": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+              }
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "anyOf": [
+            {
+              "required": [
+                "capabilities"
+              ]
+            },
+            {
+              "required": [
+                "categories"
+              ]
+            }
+          ]
+        },
+        "slots": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/slotSpec"
+          }
+        },
+        "events": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/eventSpec"
+          }
+        },
+        "commands": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/commandSpec"
+          }
+        },
+        "styleParts": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/stylePartSpec"
+          }
+        },
+        "visualStates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+          }
+        },
+        "composition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "exclusiveChannels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "compatibleWith": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+              }
+            }
+          }
+        },
+        "authoring": {
+          "$ref": "#/$defs/authoringSpec"
+        },
+        "deprecated": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "replacement": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "publicErrorSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "operationCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputSchema",
+        "outputSchema",
+        "errors",
+        "effect"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/publicErrorSpec"
+          }
+        },
+        "effect": {
+          "type": "string",
+          "enum": [
+            "none",
+            "local",
+            "network",
+            "external"
+          ]
+        },
+        "authoring": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fixtures": {
+              "type": "object"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        "deprecated": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "replacement": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "resourceCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputSchema",
+        "outputSchema",
+        "errors",
+        "policies"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/publicErrorSpec"
+          }
+        },
+        "policies": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "mount",
+              "manual",
+              "once"
+            ]
+          }
+        },
+        "cacheHints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ttlSeconds": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "staleWhileRevalidateSeconds": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "authoring": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fixtures": {
+              "type": "object"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          }
+        },
+        "deprecated": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "replacement": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*(\\.[A-Za-z0-9][A-Za-z0-9.-]*)*/[A-Za-z][A-Za-z0-9._:-]{0,127}$"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,949 @@
+{
+  "kind": "desen.catalog",
+  "desen": "0.1.0",
+  "id": "com.example.web-catalog",
+  "version": "1.0.0",
+  "target": "web-react",
+  "packageDigest": "sha256:c8e15513005c9f54d2fc35b60c01f9f7d187dabd3c5efba71cd4dc6db2542a1f",
+  "description": "Example web catalog for DESEN 0.1.0. The packageDigest is illustrative for this standalone fixture.",
+  "components": {
+    "com.example.ui/Stack": {
+      "description": "Linear layout container.",
+      "category": "layout",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "vertical",
+              "horizontal"
+            ],
+            "default": "vertical"
+          },
+          "gap": {
+            "type": "string",
+            "enum": [
+              "none",
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ]
+          },
+          "maxWidth": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "align": {
+            "type": "string",
+            "enum": [
+              "start",
+              "center",
+              "end",
+              "stretch"
+            ]
+          }
+        }
+      },
+      "slots": {
+        "default": {
+          "required": false,
+          "minItems": 0,
+          "acceptsCategories": [
+            "layout",
+            "content",
+            "input",
+            "action",
+            "feedback",
+            "complex"
+          ]
+        }
+      },
+      "styleParts": {
+        "root": {
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "background": {
+                "type": [
+                  "string",
+                  "object"
+                ]
+              },
+              "padding": {
+                "type": [
+                  "string",
+                  "number",
+                  "object"
+                ]
+              },
+              "borderRadius": {
+                "type": [
+                  "string",
+                  "number",
+                  "object"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "authoring": {
+        "displayName": "Stack",
+        "category": "Layout",
+        "icon": "stack",
+        "defaultProps": {
+          "direction": "vertical",
+          "gap": "md"
+        },
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "hug"
+        },
+        "adapterFidelity": "same"
+      }
+    },
+    "com.example.ui/TextField": {
+      "description": "Text input.",
+      "category": "input",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "value"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "secure": {
+            "type": "boolean"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "invalid": {
+            "type": "boolean"
+          }
+        }
+      },
+      "events": {
+        "change": {
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "commands": {
+        "focus": {
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false
+          }
+        }
+      },
+      "styleParts": {
+        "root": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "label": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "control": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "message": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "focus",
+        "disabled",
+        "invalid"
+      ],
+      "authoring": {
+        "displayName": "Text field",
+        "category": "Inputs",
+        "icon": "text-field",
+        "defaultProps": {
+          "label": "Label",
+          "value": ""
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "label": "Email",
+              "value": ""
+            }
+          },
+          "invalid": {
+            "props": {
+              "label": "Email",
+              "value": "bad",
+              "invalid": true
+            }
+          }
+        },
+        "resize": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "adapterFidelity": "same"
+      }
+    },
+    "com.example.ui/Button": {
+      "description": "Action button.",
+      "category": "action",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "primary",
+              "secondary",
+              "danger"
+            ]
+          },
+          "loading": {
+            "type": "boolean"
+          },
+          "disabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "events": {
+        "press": {
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false
+          }
+        }
+      },
+      "styleParts": {
+        "root": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "label": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "leadingIcon": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "hover",
+        "focus",
+        "pressed",
+        "disabled",
+        "loading"
+      ],
+      "authoring": {
+        "displayName": "Button",
+        "category": "Actions",
+        "icon": "button",
+        "defaultProps": {
+          "label": "Button",
+          "variant": "primary",
+          "loading": false
+        },
+        "scenarios": {
+          "default": {
+            "props": {
+              "label": "Continue",
+              "variant": "primary"
+            }
+          },
+          "loading": {
+            "props": {
+              "label": "Continue",
+              "variant": "primary",
+              "loading": true
+            }
+          }
+        },
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "adapterFidelity": "same"
+      }
+    },
+    "com.example.ui/Alert": {
+      "description": "Feedback message.",
+      "category": "feedback",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tone",
+          "text"
+        ],
+        "properties": {
+          "tone": {
+            "type": "string",
+            "enum": [
+              "info",
+              "success",
+              "warning",
+              "critical"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "styleParts": {
+        "root": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "icon": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "text": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        }
+      },
+      "authoring": {
+        "displayName": "Alert",
+        "category": "Feedback",
+        "icon": "alert",
+        "defaultProps": {
+          "tone": "info",
+          "text": "Message"
+        },
+        "resize": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "adapterFidelity": "same"
+      }
+    },
+    "com.example.ui/Text": {
+      "description": "Text content.",
+      "category": "content",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "body",
+              "heading",
+              "caption"
+            ]
+          }
+        }
+      },
+      "styleParts": {
+        "text": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        }
+      },
+      "authoring": {
+        "displayName": "Text",
+        "category": "Content",
+        "icon": "text",
+        "defaultProps": {
+          "text": "Text",
+          "role": "body"
+        },
+        "resize": {
+          "horizontal": "hug",
+          "vertical": "hug"
+        },
+        "adapterFidelity": "same"
+      }
+    },
+    "com.example.maps/Map": {
+      "description": "Interactive store map backed by a host-selected map library.",
+      "category": "complex",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "center",
+          "zoom",
+          "mapStyle"
+        ],
+        "properties": {
+          "center": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "latitude",
+              "longitude"
+            ],
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "longitude": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            }
+          },
+          "zoom": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 24
+          },
+          "mapStyle": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark",
+              "satellite"
+            ]
+          },
+          "showControls": {
+            "type": "boolean"
+          }
+        }
+      },
+      "slots": {
+        "popup": {
+          "required": false,
+          "minItems": 0,
+          "maxItems": 1,
+          "acceptsCategories": [
+            "content",
+            "layout"
+          ]
+        },
+        "emptyState": {
+          "required": false,
+          "minItems": 0,
+          "maxItems": 1,
+          "acceptsCategories": [
+            "content",
+            "feedback",
+            "layout"
+          ]
+        }
+      },
+      "events": {
+        "markerSelect": {
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "viewportChange": {
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "center",
+              "zoom"
+            ],
+            "properties": {
+              "center": {
+                "type": "object"
+              },
+              "zoom": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "commands": {
+        "fitBounds": {
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bounds"
+            ],
+            "properties": {
+              "bounds": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "styleParts": {
+        "surface": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "marker": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "selectedMarker": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "popup": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        },
+        "controls": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "loading",
+        "empty",
+        "selectedMarker"
+      ],
+      "authoring": {
+        "displayName": "Map",
+        "category": "Complex",
+        "icon": "map",
+        "defaultProps": {
+          "center": {
+            "latitude": 41.0082,
+            "longitude": 28.9784
+          },
+          "zoom": 11,
+          "mapStyle": "light",
+          "showControls": true
+        },
+        "scenarios": {
+          "default": {
+            "fixtures": {
+              "markers": [
+                {
+                  "id": "store-1"
+                }
+              ]
+            }
+          },
+          "empty": {
+            "fixtures": {
+              "markers": []
+            }
+          },
+          "selectedMarker": {
+            "fixtures": {
+              "selectedId": "store-1"
+            }
+          }
+        },
+        "resize": {
+          "horizontal": "resizable",
+          "vertical": "resizable"
+        },
+        "adapterFidelity": "same"
+      }
+    }
+  },
+  "behaviors": {
+    "com.example.interactions/Sortable": {
+      "description": "Sortable child interaction.",
+      "category": "drag-drop",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "type": "string",
+            "enum": [
+              "vertical",
+              "horizontal",
+              "both"
+            ]
+          },
+          "handle": {
+            "type": "string",
+            "enum": [
+              "item",
+              "explicit"
+            ]
+          }
+        }
+      },
+      "attachTo": {
+        "categories": [
+          "layout"
+        ]
+      },
+      "slots": {
+        "dragPreview": {
+          "required": false,
+          "minItems": 0,
+          "maxItems": 1,
+          "acceptsCategories": [
+            "content",
+            "layout"
+          ]
+        }
+      },
+      "events": {
+        "reorder": {
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fromIndex",
+              "toIndex",
+              "itemKey"
+            ],
+            "properties": {
+              "fromIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "toIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "itemKey": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "styleParts": {
+        "dropIndicator": {
+          "propertiesSchema": {
+            "type": "object"
+          }
+        }
+      },
+      "visualStates": [
+        "dragging",
+        "validTarget",
+        "invalidTarget"
+      ],
+      "composition": {
+        "exclusiveChannels": [
+          "pointer-drag"
+        ],
+        "compatibleWith": []
+      },
+      "authoring": {
+        "displayName": "Sortable",
+        "category": "Behaviors",
+        "icon": "sort",
+        "defaultProps": {
+          "axis": "vertical",
+          "handle": "item"
+        },
+        "adapterFidelity": "same"
+      }
+    }
+  },
+  "operations": {
+    "com.example.auth/signIn": {
+      "description": "Authenticate with email and password.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string"
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "invalidCredentials",
+          "description": "Credentials are not accepted."
+        },
+        {
+          "code": "unavailable",
+          "description": "Authentication service unavailable."
+        }
+      ],
+      "effect": "network",
+      "authoring": {
+        "fixtures": {
+          "success": {
+            "userId": "user-1"
+          },
+          "errors": {
+            "invalidCredentials": {}
+          }
+        }
+      }
+    },
+    "com.example.tasks/reorder": {
+      "description": "Persist task order.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "itemKey",
+          "fromIndex",
+          "toIndex"
+        ],
+        "properties": {
+          "itemKey": {
+            "type": [
+              "string",
+              "number"
+            ]
+          },
+          "fromIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "toIndex": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "errors": [
+        {
+          "code": "conflict"
+        }
+      ],
+      "effect": "network"
+    }
+  },
+  "resources": {
+    "com.example.stores/list": {
+      "description": "Read available store locations.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "bounds"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "bounds": {
+            "type": "object"
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "unavailable"
+        }
+      ],
+      "policies": [
+        "mount",
+        "manual",
+        "once"
+      ],
+      "cacheHints": {
+        "ttlSeconds": 60
+      },
+      "authoring": {
+        "fixtures": {
+          "default": {
+            "items": [
+              {
+                "id": "store-1",
+                "name": "Karaköy",
+                "latitude": 41.0256,
+                "longitude": 28.9744
+              }
+            ],
+            "bounds": {}
+          },
+          "empty": {
+            "items": [],
+            "bounds": {}
+          }
+        }
+      }
+    },
+    "com.example.tasks/list": {
+      "description": "Read tasks in display order.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "title"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "unavailable"
+        }
+      ],
+      "policies": [
+        "mount",
+        "manual",
+        "once"
+      ],
+      "authoring": {
+        "fixtures": {
+          "default": [
+            {
+              "id": "task-1",
+              "title": "Research"
+            },
+            {
+              "id": "task-2",
+              "title": "Prototype"
+            },
+            {
+              "id": "task-3",
+              "title": "Test"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "authoring": {
+    "publisher": "example"
+  },
+  "extensions": {}
+}

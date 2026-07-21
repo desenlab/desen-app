@@ -1,0 +1,57 @@
+{
+  "version": "0.1.0",
+  "catalog": "valid/web.catalog.json",
+  "vectors": [
+    {
+      "file": "valid/sign-in.source.json",
+      "target": "source",
+      "expect": "valid"
+    },
+    {
+      "file": "valid/sign-in.bundle.json",
+      "target": "bundle",
+      "expect": "valid"
+    },
+    {
+      "file": "valid/web.catalog.json",
+      "target": "catalog",
+      "expect": "valid"
+    },
+    {
+      "file": "invalid/source-unknown-core-field.json",
+      "target": "source",
+      "expect": "schema_error",
+      "code": "UNKNOWN_CORE_FIELD"
+    },
+    {
+      "file": "invalid/source-duplicate-node-id.json",
+      "target": "source",
+      "expect": "semantic_error",
+      "code": "DUPLICATE_NODE_ID"
+    },
+    {
+      "file": "invalid/source-unknown-capability.json",
+      "target": "source",
+      "expect": "catalog_error",
+      "code": "UNKNOWN_CAPABILITY"
+    },
+    {
+      "file": "invalid/source-unknown-event.json",
+      "target": "source",
+      "expect": "catalog_error",
+      "code": "UNKNOWN_EVENT"
+    },
+    {
+      "file": "invalid/bundle-revision-mismatch.json",
+      "target": "bundle",
+      "expect": "integrity_error",
+      "code": "REVISION_MISMATCH"
+    },
+    {
+      "file": "invalid/bundle-catalog-digest-mismatch.json",
+      "target": "bundle",
+      "expect": "activation_error",
+      "code": "CATALOG_DIGEST_MISMATCH"
+    }
+  ]
+}

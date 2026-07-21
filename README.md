@@ -75,14 +75,16 @@ packages/
 
 ```bash
 pnpm install
+pnpm verify:protocol-snapshot
 pnpm check
 ```
 
 `pnpm proof` and `pnpm test:e2e` deliberately return `NOT_IMPLEMENTED` until their G10 runners
 exist; an absent proof runner is never treated as a successful proof.
 
-No functional implementation has been claimed yet. Gates `G00` and `G01` prepare the workspace;
-the next implementation task is `M02-T01`, followed by the runtime-first vertical slice.
+The exact DESEN 0.1.0 input snapshot is vendored and checksum-enforced; this does not yet claim
+validator or runtime semantics. The next implementation task is `M02-T02`, which traces normative
+prose and schema constraints before type generation begins.
 
 ## License
 

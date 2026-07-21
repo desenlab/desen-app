@@ -9,8 +9,9 @@ The protocol suite contains 14 cases: 9 entries from `conformance/vectors.json` 
 examples. It must not be described as “14 vectors.”
 
 `tracked-foundation.json` records the Selman-authored local baseline commit and the successful
-temporary clean-clone install and quality check. No remote exists, so it does not claim a remote CI
-result. M01-T08 remains the separately authorized remote push/CI step.
+temporary clean-clone install and quality check before a remote existed. `remote-ci.json` records
+the later authorized creation of `desenlab/desen-app` and the first successful `main` CI run. The
+historical baseline files retain the state that was true when each check occurred.
 
 Evidence files must state the command, scope, source commit when one exists, result, and known
 limitations. Generated proof artifacts additionally record SHA-256 hashes at their owning task.
