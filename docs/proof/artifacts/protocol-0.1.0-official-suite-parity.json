@@ -1,0 +1,459 @@
+{
+  "schemaVersion": 1,
+  "task": "M02-T12",
+  "profile": "desen-official-suite-parity-v1",
+  "protocolVersion": "0.1.0",
+  "result": "PASS",
+  "frozenInput": {
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+    "validationBaseline": {
+      "path": "docs/proof/baselines/protocol-0.1.0-validation.txt",
+      "bytes": 1062,
+      "sha256": "d2c5e7e27a5a1f5ecc66f3aad4956451c81b420a60908be5c948071a7305aa86",
+      "execution": "not rerun; archived Python oracle"
+    },
+    "checksumBaseline": {
+      "path": "docs/proof/baselines/protocol-0.1.0-checksums.txt",
+      "bytes": 1298,
+      "sha256": "6208ed37fa4da3b816e505c106be1801fcee504e1dde2ab4a4e4ceb5b0ca166f"
+    }
+  },
+  "prerequisites": {
+    "canonicalization": {
+      "task": "M02-T04",
+      "profile": "rfc8785-sha256-v1",
+      "result": "PASS",
+      "sha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6",
+      "verifiedBy": "verifyProtocolCanonicalization"
+    },
+    "executionContracts": {
+      "task": "M02-T11",
+      "profile": "desen-execution-contract-validation-v1",
+      "result": "PASS",
+      "sha256": "badc93880d5e7b7119e4b6f51c1d6690376a9a92ca85335aa1152c134408efd2",
+      "verifiedBy": "verifyProtocolExecutionContracts"
+    }
+  },
+  "traceability": {
+    "ownership": { "schemaFamilies": 0, "invariants": 0, "diagnostics": 0 },
+    "tests": {
+      "proseRules": ["R-001", "R-032", "R-035", "R-082", "R-142"],
+      "conformanceRules": ["C-016", "C-024"],
+      "schemaNonConstraintDecisions": ["SN-003"],
+      "schemaRegistry": ["SR-001", "SR-002", "SR-003"]
+    }
+  },
+  "suite": {
+    "composition": {
+      "cases": 14,
+      "conformanceVectors": 9,
+      "publicExamples": 5,
+      "valid": 8,
+      "invalid": 6
+    },
+    "targets": { "source": 8, "bundle": 4, "catalog": 2 },
+    "negativeCategories": {
+      "schema_error": 1,
+      "semantic_error": 1,
+      "catalog_error": 2,
+      "integrity_error": 1,
+      "activation_error": 1
+    },
+    "cases": [
+      {
+        "family": "conformance-vector",
+        "file": "valid/sign-in.source.json",
+        "target": "source",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      },
+      {
+        "family": "conformance-vector",
+        "file": "valid/sign-in.bundle.json",
+        "target": "bundle",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      },
+      {
+        "family": "conformance-vector",
+        "file": "valid/web.catalog.json",
+        "target": "catalog",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      },
+      {
+        "family": "conformance-vector",
+        "file": "invalid/source-unknown-core-field.json",
+        "target": "source",
+        "outcome": "invalid",
+        "category": "schema_error",
+        "code": "UNKNOWN_CORE_FIELD",
+        "result": "PASS",
+        "matchedBy": "validator-diagnostic",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_CORE_FIELD",
+            "classification": "schema",
+            "category": "schema_error",
+            "pointer": "/script"
+          }
+        ]
+      },
+      {
+        "family": "conformance-vector",
+        "file": "invalid/source-duplicate-node-id.json",
+        "target": "source",
+        "outcome": "invalid",
+        "category": "semantic_error",
+        "code": "DUPLICATE_NODE_ID",
+        "result": "PASS",
+        "matchedBy": "validator-diagnostic",
+        "diagnostics": [
+          {
+            "code": "DUPLICATE_NODE_ID",
+            "classification": "semantic",
+            "category": "semantic_error",
+            "pointer": "/surfaces/home/root/slots/default/1/id"
+          }
+        ]
+      },
+      {
+        "family": "conformance-vector",
+        "file": "invalid/source-unknown-capability.json",
+        "target": "source",
+        "outcome": "invalid",
+        "category": "catalog_error",
+        "code": "UNKNOWN_CAPABILITY",
+        "result": "PASS",
+        "matchedBy": "validator-diagnostic",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_CAPABILITY",
+            "classification": "catalog",
+            "category": "catalog_error",
+            "pointer": "/surfaces/home/root/slots/default/0/use"
+          }
+        ]
+      },
+      {
+        "family": "conformance-vector",
+        "file": "invalid/source-unknown-event.json",
+        "target": "source",
+        "outcome": "invalid",
+        "category": "catalog_error",
+        "code": "UNKNOWN_EVENT",
+        "result": "PASS",
+        "matchedBy": "validator-diagnostic",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_EVENT",
+            "classification": "catalog",
+            "category": "catalog_error",
+            "pointer": "/surfaces/home/root/slots/default/0/on/teleport"
+          }
+        ]
+      },
+      {
+        "family": "conformance-vector",
+        "file": "invalid/bundle-revision-mismatch.json",
+        "target": "bundle",
+        "outcome": "invalid",
+        "category": "integrity_error",
+        "code": "REVISION_MISMATCH",
+        "result": "PASS",
+        "matchedBy": "proof-only-bundle-revision-supplement",
+        "diagnostics": [
+          {
+            "code": "REVISION_MISMATCH",
+            "classification": null,
+            "category": "integrity_error",
+            "pointer": "/revision"
+          }
+        ]
+      },
+      {
+        "family": "conformance-vector",
+        "file": "invalid/bundle-catalog-digest-mismatch.json",
+        "target": "bundle",
+        "outcome": "invalid",
+        "category": "activation_error",
+        "code": "CATALOG_DIGEST_MISMATCH",
+        "result": "PASS",
+        "matchedBy": "proof-only-catalog-digest-supplement",
+        "diagnostics": [
+          {
+            "code": "CATALOG_DIGEST_MISMATCH",
+            "classification": null,
+            "category": "activation_error",
+            "pointer": "/requires/catalogs/0/digest"
+          }
+        ]
+      },
+      {
+        "family": "public-example",
+        "file": "catalog.web.example.json",
+        "target": "catalog",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      },
+      {
+        "family": "public-example",
+        "file": "sign-in.source.desen.json",
+        "target": "source",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      },
+      {
+        "family": "public-example",
+        "file": "sign-in.bundle.desen.json",
+        "target": "bundle",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      },
+      {
+        "family": "public-example",
+        "file": "store-map.source.desen.json",
+        "target": "source",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      },
+      {
+        "family": "public-example",
+        "file": "sortable-list.source.desen.json",
+        "target": "source",
+        "outcome": "valid",
+        "result": "PASS",
+        "matchedBy": "validator-success",
+        "diagnostics": []
+      }
+    ],
+    "semanticParity": {
+      "encoding": "RFC 8785 canonical JSON UTF-8",
+      "bytes": 1850,
+      "expectedSha256": "cbded8f036de23aff4525a3c4738438e185a33873a873f51c399541cb681bf5f",
+      "actualSha256": "cbded8f036de23aff4525a3c4738438e185a33873a873f51c399541cb681bf5f",
+      "byteEqual": true
+    },
+    "transcriptParity": {
+      "normalization": "14 PASS lines + blank line + summary + LF",
+      "bytes": 848,
+      "expectedSha256": "5f03bedd9ad9c3755a41a462bf1b5da48077aa32ac93941d53dc6cc2f6d57cfd",
+      "actualSha256": "5f03bedd9ad9c3755a41a462bf1b5da48077aa32ac93941d53dc6cc2f6d57cfd",
+      "byteEqual": true
+    },
+    "supplements": [
+      {
+        "code": "REVISION_MISMATCH",
+        "category": "integrity_error",
+        "mechanism": "calculateDesenBundleRevision(bundle) !== bundle.revision",
+        "scope": "official Bundle cases only"
+      },
+      {
+        "code": "CATALOG_DIGEST_MISMATCH",
+        "category": "activation_error",
+        "mechanism": "exact (id, version, target) requirement digest !== catalog packageDigest",
+        "scope": "official Bundle cases only"
+      }
+    ]
+  },
+  "implementation": {
+    "packages": ["@desen/protocol", "@desen/validator"],
+    "publicApi": {
+      "protocol": ["calculateDesenBundleRevision", "canonicalizeJsonBytes"],
+      "validator": [
+        "validateDesenBundleExecutionContracts",
+        "validateDesenExecutionCatalogSet",
+        "validateDesenSourceExecutionContracts"
+      ]
+    },
+    "trackedFiles": [
+      {
+        "path": "docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md",
+        "bytes": 10191,
+        "sha256": "3e9713d5a0c0512b797899ad4b796aebb2f4a6107fcb1e1aae62b7942e580082"
+      },
+      {
+        "path": "docs/proof/baselines/protocol-0.1.0-checksums.txt",
+        "bytes": 1298,
+        "sha256": "6208ed37fa4da3b816e505c106be1801fcee504e1dde2ab4a4e4ceb5b0ca166f"
+      },
+      {
+        "path": "docs/proof/baselines/protocol-0.1.0-validation.txt",
+        "bytes": 1062,
+        "sha256": "d2c5e7e27a5a1f5ecc66f3aad4956451c81b420a60908be5c948071a7305aa86"
+      },
+      {
+        "path": "docs/proof/protocol-0.1.0-traceability.json",
+        "bytes": 134870,
+        "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+      },
+      {
+        "path": "package.json",
+        "bytes": 7517,
+        "sha256": "2a07bea0ca7524f0925b4e432575021e042f2419526d120ddff343825d9b8357"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/bundle-catalog-digest-mismatch.json",
+        "bytes": 4895,
+        "sha256": "11240b7bc62fef95dab22fee79d41b30e8abe74c4527981a7bfa1afbed34e2b9"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/bundle-revision-mismatch.json",
+        "bytes": 4894,
+        "sha256": "9d62db332b8e62f54f1470489959b31c6ce34617a3103cb1bf8d370d870b87e2"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-duplicate-node-id.json",
+        "bytes": 4935,
+        "sha256": "c7bb3bce450e0db4c0e1bb962d10138fbba6becfa47f240087de027a10387cb9"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-capability.json",
+        "bytes": 4726,
+        "sha256": "302c579e5d30716de7b9e6cdf11c4d127cdad2b2ba96452c794a21f93ceea72f"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-core-field.json",
+        "bytes": 4746,
+        "sha256": "6b1e25971761c5695f97c8a993908e104bd6d27581c5eb2c6422dbcee6c9bb7d"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-event.json",
+        "bytes": 4927,
+        "sha256": "de0c8c544171f5b012cc57cc4da0427713bdf91d523747616eb9c28ae5443857"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.bundle.json",
+        "bytes": 4894,
+        "sha256": "96be7f18b7b825110d7ba3703c15124ab7a09b9926b01cde43633915eaaf2edf"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+        "bytes": 4719,
+        "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+        "bytes": 22084,
+        "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/vectors.json",
+        "bytes": 1377,
+        "sha256": "19cd13718234f8a95b83b6f7725985529e5b134f8fe7b636b9433c16696096e8"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json",
+        "bytes": 22084,
+        "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sign-in.bundle.desen.json",
+        "bytes": 4894,
+        "sha256": "96be7f18b7b825110d7ba3703c15124ab7a09b9926b01cde43633915eaaf2edf"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sign-in.source.desen.json",
+        "bytes": 4719,
+        "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+        "bytes": 2252,
+        "sha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+        "bytes": 3877,
+        "sha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 2095,
+        "sha256": "c2ceb32db958b2e0f29eebf9ba38d3d68a7077cbfc2b10ab9980bdbc518f0e74"
+      },
+      {
+        "path": "packages/validator/test/official-suite-parity.test.ts",
+        "bytes": 18785,
+        "sha256": "38c9716f60dd2d0b1283fac221bc2de7c6c21f6f2425f0e3a5f3270a720298db"
+      },
+      {
+        "path": "scripts/generate-protocol-official-suite-parity-proof.mjs",
+        "bytes": 840,
+        "sha256": "7b68edf169d7156c8e92a0fe3dbf91e33855f67cbd56e37b6c482d5b05296765"
+      },
+      {
+        "path": "scripts/lib/protocol-official-suite-parity-proof.mjs",
+        "bytes": 39677,
+        "sha256": "6583653fe5bd95250dc011fa0787f7c5ace0b3c8a435ae7f8c7d83f7b0528627"
+      },
+      {
+        "path": "scripts/verify-protocol-official-suite-parity.mjs",
+        "bytes": 661,
+        "sha256": "4fd75e2cfd61f52ce8ec6da175655347c37cfc3def6caa6790d018c04ae423e5"
+      },
+      {
+        "path": "tests/protocol-official-suite-parity.test.mjs",
+        "bytes": 14984,
+        "sha256": "6510c998cdb3deebe78948cc74d8b407e517c525ffa2505801c4afade1868387"
+      },
+      {
+        "path": "turbo.json",
+        "bytes": 3682,
+        "sha256": "cc2d02c4baf6fed64c9110bf71e3a062b8f6c4f70781b44833c5023ba56d2ca6"
+      }
+    ]
+  },
+  "verification": {
+    "commands": [
+      "pnpm generate:protocol-official-suite-parity",
+      "pnpm verify:protocol-official-suite-parity",
+      "pnpm test:protocol-official-suite-parity",
+      "pnpm check"
+    ],
+    "commandWiring": {
+      "generate:protocol-official-suite-parity": "pnpm --filter @desen/validator... build && node scripts/generate-protocol-official-suite-parity-proof.mjs",
+      "verify:protocol-official-suite-parity": "pnpm --filter @desen/validator... build && node scripts/verify-protocol-official-suite-parity.mjs",
+      "test:protocol-official-suite-parity": "pnpm --filter @desen/validator... build && pnpm --filter @desen/validator test:official-suite-parity && node --test tests/protocol-official-suite-parity.test.mjs"
+    },
+    "artifactWriter": {
+      "parentResolution": "realpath",
+      "temporaryFile": "same-directory exclusive create",
+      "durabilityBeforeCommit": "file sync",
+      "commit": "atomic rename",
+      "failureCleanup": "temporary file removed"
+    },
+    "independentAnchors": [
+      "exact M02-T04 and M02-T11 verifier PASS plus prerequisite bytes",
+      "frozen snapshot commit, tree, aggregate, validation transcript, and checksum transcript",
+      "exact 9-vector manifest order and exact five-example order",
+      "built public APIs routed across Source, Bundle, and Catalog",
+      "RFC 8785 canonical structured outcome byte parity",
+      "normalized TypeScript/Python transcript byte parity",
+      "narrow proof-only Bundle revision and catalog-digest supplements"
+    ]
+  },
+  "limitations": [
+    "The archived Python baseline is not executed by pnpm check; parity remains hermetic and deterministic.",
+    "Negative parity claims only expected category/code presence, not diagnostic message, pointer, order, or multiplicity parity.",
+    "Exhaustive diagnostic micro-vectors and exact portable diagnostic results remain M02-T13.",
+    "The proof-only supplements are not production activation APIs and do not execute adapters or runtime behavior.",
+    "This artifact does not claim publication, package activation, G02 completion, or a new complete Proof Matrix result; P-02 remains PARTIAL pending M02-T13."
+  ]
+}

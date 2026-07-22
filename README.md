@@ -8,11 +8,11 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████░░░░░░░░░░░░░░░░░░░░` **25 / 144 tasks complete (17%)**
+**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **26 / 144 tasks complete (18%)**
 
-**Current milestone — M02:** `███████████░░` **11 / 13 tasks complete (85%)**
+**Current milestone — M02:** `████████████░` **12 / 13 tasks complete (92%)**
 
-**Proof gates:** **2 / 13 complete** · **Next:** `M02-T12`
+**Proof gates:** **2 / 13 complete** · **Next:** `M02-T13`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -86,6 +86,7 @@ packages/
 - [Interaction-contract proof](docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md)
 - [Binding-contract proof](docs/proof/PROTOCOL-BINDING-CONTRACTS.md)
 - [Execution-contract proof](docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md)
+- [Official-suite parity proof](docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -145,6 +146,13 @@ binding obligations. Its detached five-kind resolved-value API checks command in
 operation/resource input or output as immutable inert JSON. This proves the validator handoff, not
 host authorization, mounted-component liveness, adapter invocation, lifecycle settlement, or
 action-turn execution.
+
+M02-T12 now proves built TypeScript parity with the frozen DESEN 0.1.0 starter suite: all 9 official
+conformance vectors and all 5 public examples produce the outcomes required by the manifest, just
+as the archived Python baseline passes 14/14. The proof composes T04 canonicalization with the
+cumulative T11 validator and adds no public API. P-02 remains `PARTIAL` and G02 remains
+`NOT_STARTED` until M02-T13 supplies exhaustive project micro-vectors for every validator-owned
+diagnostic.
 
 ## License
 

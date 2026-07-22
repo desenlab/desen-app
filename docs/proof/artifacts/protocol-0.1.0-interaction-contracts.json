@@ -21,8 +21,8 @@
       "profile": "desen-component-contract-validation-v1",
       "result": "PASS",
       "verifiedBy": "verifyProtocolComponentContracts",
-      "sha256": "8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79",
-      "verificationSha256": "8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79"
+      "sha256": "c898e683efc6d42ccbe8798b32653b0288a1bccefaea18752c1aa930da88f97f",
+      "verificationSha256": "c898e683efc6d42ccbe8798b32653b0288a1bccefaea18752c1aa930da88f97f"
     }
   },
   "traceability": {
@@ -540,7 +540,7 @@
     "queuedChildReservation": true,
     "schemaProfile": {
       "finding": "PF-011",
-      "inheritedFromVerifiedT08Artifact": "8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79",
+      "inheritedFromVerifiedT08Artifact": "c898e683efc6d42ccbe8798b32653b0288a1bccefaea18752c1aa930da88f97f",
       "evaluationBudget": 50000,
       "unsafeNativePatternExecution": false
     },
@@ -710,8 +710,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 6917,
-        "sha256": "0a9293c5b238fb725447b3e0cc758d577e4222ff1884597ca8cb7d47ce714859"
+        "bytes": 7517,
+        "sha256": "2a07bea0ca7524f0925b4e432575021e042f2419526d120ddff343825d9b8357"
       },
       {
         "path": "packages/protocol/dist/canonicalization.d.ts",
@@ -905,8 +905,8 @@
       },
       {
         "path": "packages/validator/README.md",
-        "bytes": 48277,
-        "sha256": "eb5ea811dd8f4fbab954e57ce8f86c1820176790061ddbd88784df77a01935f6"
+        "bytes": 50290,
+        "sha256": "2836671c1f7e47e3f561953f41bb5e6a59e769488762da61b399909f20873b8f"
       },
       {
         "path": "packages/validator/THIRD_PARTY_NOTICES.md",
@@ -1215,8 +1215,8 @@
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 2012,
-        "sha256": "e0e23258ef3312fe4093a8207987221b5e43608e71ff49adc09f2833d493dd47"
+        "bytes": 2095,
+        "sha256": "c2ceb32db958b2e0f29eebf9ba38d3d68a7077cbfc2b10ab9980bdbc518f0e74"
       },
       {
         "path": "packages/validator/scripts/clean-dist.mjs",
@@ -1355,8 +1355,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 3416,
-        "sha256": "14bba1af5f60aa2f32dc3d26749da8c8925bb68087811602f3f2f0de4a7f01bc"
+        "bytes": 3682,
+        "sha256": "cc2d02c4baf6fed64c9110bf71e3a062b8f6c4f70781b44833c5023ba56d2ca6"
       }
     ]
   },

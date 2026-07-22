@@ -26,7 +26,10 @@ arrays, aliases, keys, direct limits, and narrow state-action roots while preser
 runtime responsibilities for their assigned later tasks. M02-T11 now validates resource and
 operation schemas, lifecycle value references, navigation and refresh actions, command targets and
 inputs, and state writes while preserving resolved-value checks as explicit bounded obligations.
-Runtime adapter execution has not started and is not claimed as proven.
+M02-T12 now proves that the built TypeScript implementation matches the archived Python baseline
+across the exact frozen 14-case starter suite: 9 conformance vectors and 5 public examples pass.
+This is proof-only composition with no new public validator API. Runtime adapter execution has not
+started and is not claimed as proven.
 
 ## Current milestone
 
@@ -42,9 +45,10 @@ Runtime adapter execution has not started and is not claimed as proven.
   `M02-T08 — Component prop, slot, style-part, and visual-state contract validation`,
   `M02-T09 — Event, command, behavior attachment, conflict, and payload-contract validation`,
   `M02-T10 — State, predicate, repeat, alias, and static binding validation`,
-  `M02-T11 — Resource, operation, action, navigation, and command-target validation`
+  `M02-T11 — Resource, operation, action, navigation, and command-target validation`,
+  `M02-T12 — TypeScript parity for the official 14-case suite`
 - Active task: None
-- Ready next task: `M02-T12 — TypeScript parity for the official 14-case suite`
+- Ready next task: `M02-T13 — Validator diagnostic micro-vectors`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -108,6 +112,13 @@ Runtime adapter execution has not started and is not claimed as proven.
   obligation kinds, and all 5 resolved-value selectors. It validates static operation/resource
   inputs, lifecycle references, navigation, refresh, component commands, and state actions without
   claiming runtime execution.
+- The official-suite proof passes all 14 exact frozen cases through built TypeScript distributions:
+  9 conformance vectors and 5 public examples, comprising 8 valid and 6 invalid outcomes across 8
+  Source, 4 Bundle, and 2 Catalog executions. It matches the archived Python runner's 14/14 result,
+  passes 4 focused package tests and 11 independent root proof/mutation tests, composes T04 and T11
+  only inside the proof boundary, exports no new validator API, and does not claim exhaustive
+  diagnostic coverage. P-02 remains `PARTIAL` and G02 remains `NOT_STARTED` until M02-T13 completes
+  the project micro-vectors.
 - The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
   integrity tests, protocol traceability and type-generation tests, remaining scaffold test
   runners, and dependency-boundary checks.
@@ -121,9 +132,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Begin only `M02-T12`: prove TypeScript parity for the official 14-case suite—9 validation vectors
-and 5 examples—without pulling project-owned micro-vectors from M02-T13 or runtime execution from
-later milestones forward.
+Begin only `M02-T13`: add positive and negative project micro-vectors for every validator-owned
+diagnostic without pulling runtime execution, publication, or activation work from later
+milestones forward.
 
 M02-T02 evidence:
 
@@ -146,44 +157,50 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `5a6e45d12152d7788c479fcfb80793646110abaa13d59b36e5180ab6c48cae63`
+- artifact SHA-256: `c79324b88043b3dcb17248d345f0e65f836b37ca7e0b0268085b1c9b4299fdcd`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `8108abc465aebca4e6540cdef0f2ef726b1020214e2f28e301da2231708f1ad8`
+- artifact SHA-256: `dc6935afbf61e9f99409931355bdced6eef16ef645d0956712317b3faf37d9f2`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `cb121317d0c6cfcb9a3bdba3779a30b8b4cb5fa87c65074eff49bb9414531df0`
+- artifact SHA-256: `2b03bfe043376a398571f66f964e71309d3dad142b6622922ab1d40173a99a44`
 
 M02-T08 evidence:
 
 - `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
-- artifact SHA-256: `8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79`
+- artifact SHA-256: `c898e683efc6d42ccbe8798b32653b0288a1bccefaea18752c1aa930da88f97f`
 
 M02-T09 evidence:
 
 - `docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json`
-- artifact SHA-256: `776ac2162fe1a654ebf2fdce4fbb686fa596bf282a2b4f7a440533a010421ad8`
+- artifact SHA-256: `246a3740a83fdcbe7422445620015f4d432e8c5fd5d8c214c10ecc20d9b81dde`
 
 M02-T10 evidence:
 
 - `docs/proof/PROTOCOL-BINDING-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-binding-contracts.json`
-- artifact SHA-256: `b3958de2d1004f6f9bcd28487fc3d9c7ca07adb29500df2a15df610ea5686016`
+- artifact SHA-256: `e627c16c67ecaf7ef13382c59295f5f523c4d1aa963283d0be294fef8d9dd1c7`
 
 M02-T11 evidence:
 
 - `docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-execution-contracts.json`
-- artifact SHA-256: `853a47075ad3e86cb649a2e88e1a178d7f87ca0f0945919b46ebc56d06f376fc`
+- artifact SHA-256: `badc93880d5e7b7119e4b6f51c1d6690376a9a92ca85335aa1152c134408efd2`
+
+M02-T12 evidence:
+
+- `docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md`
+- `docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json`
+- artifact SHA-256: `f69f8691f7dfbcb335c8f0042dc7ad05e77a3c595b05271aa72b9e30a98f6ff1`
 
 ## Status vocabulary
 

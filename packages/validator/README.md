@@ -47,7 +47,8 @@ A cumulative T11 success does not:
 - prove that a production adapter validates every emitted payload or implements every declared
   command. T09 supplies bounded contract primitives, but the adapter guarantees in `N-033` and
   `N-034` remain assigned to later capability and runtime tasks;
-- compare Source, Bundle, or package digests;
+- compare Source, Bundle, or package digests through the public validator API; M02-T12 performs
+  only the two frozen-suite comparisons in a proof-only runner;
 - acquire, install, or trust catalog packages from `location` or any network/filesystem input;
 - render, publish, activate, store, or fetch a document; or
 - prove the full protocol prohibition on every possible executable-content representation.
@@ -107,10 +108,43 @@ The M02-T11 execution layer is implemented cumulatively on top of T10. It:
 - exposes one detached resolved-value API for component command input and operation/resource input
   and output contracts.
 
+M02-T12 proves built TypeScript parity with the frozen DESEN 0.1.0 starter suite. All 9 official
+conformance vectors and all 5 public examples pass their exact manifest outcomes, matching the
+archived Python runner's 14/14 baseline. The proof-only runner composes the cumulative T11
+validator with T04 Bundle-revision calculation and the frozen Catalog digest comparison needed by
+the two official integrity cases. It does not expand T11's production responsibility or export a
+new package API.
+
 The package remains private while the wider proof application is under construction. No npm
 package is published by these commands.
 
+## Official-suite parity
+
+The tracked report is
+`docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json`; its evidence contract is
+`docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md`.
+
+The 14 exact cases are:
+
+- 9 manifest vectors: 3 valid and 6 invalid;
+- 5 valid public examples;
+- 8 Source, 4 Bundle, and 2 Catalog executions in total; and
+- negative categories `schema_error`, `semantic_error`, `integrity_error`, and
+  `activation_error` once each, plus `catalog_error` twice.
+
+A valid manifest case requires zero diagnostics. An invalid case requires at least one diagnostic
+with the manifest's exact category and code. The frozen manifest does not make diagnostic pointer,
+message, multiplicity, or order part of this parity claim. Exhaustive project-owned diagnostic
+micro-vectors remain M02-T13, so P-02 stays `PARTIAL` and G02 stays `NOT_STARTED`.
+
+This evidence exercises built package distributions. It is not a new conformance or validation
+entry point and is not exported from `@desen/validator`. The final boundary passes 4 focused
+package tests and 11 independent root proof and mutation tests.
+
 ## Public entry point
+
+M02-T12 adds no public entry point. The APIs below remain the complete package surface established
+through M02-T11.
 
 ### Structural and semantic APIs
 
@@ -749,6 +783,9 @@ pnpm test:protocol-binding-contracts
 pnpm generate:protocol-execution-contracts
 pnpm verify:protocol-execution-contracts
 pnpm test:protocol-execution-contracts
+pnpm generate:protocol-official-suite-parity
+pnpm verify:protocol-official-suite-parity
+pnpm test:protocol-official-suite-parity
 pnpm check
 ```
 
@@ -757,4 +794,5 @@ in memory and rejects tool-version drift, schema-byte drift, trace ownership, Se
 unexpected code-loading constructs, non-deterministic bytes, changed tracked artifacts, or unsafe
 output paths. Tests cover public behavior, frozen vectors and examples, locator families, identity
 and catalog boundaries, interaction/binding/execution contracts, detached resolved-value limits,
-lifecycle scope fences, hostile inputs, mutation resistance, and built-distribution loading.
+lifecycle scope fences, hostile inputs, mutation resistance, built-distribution loading, and all
+14 exact frozen official-suite cases.
