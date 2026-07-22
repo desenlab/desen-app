@@ -3,6 +3,21 @@
 This repository contains the Web–React reference implementation of the frozen DESEN 0.1.0
 protocol, the Desen App product, and the developer tooling intended for `desen.run`.
 
+## Implementation progress
+
+<!-- task-progress:start -->
+<!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
+
+**Overall:** `████░░░░░░░░░░░░░░░░░░░░` **24 / 144 tasks complete (17%)**
+
+**Current milestone — M02:** `██████████░░░` **10 / 13 tasks complete (77%)**
+
+**Proof gates:** **2 / 13 complete** · **Next:** `M02-T11`
+
+[View the detailed task board](docs/plan/TASKS.md)
+
+<!-- task-progress:end -->
+
 ## Product boundaries
 
 - **DESEN** is the open, data-only executable design protocol.

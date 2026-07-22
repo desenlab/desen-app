@@ -28,6 +28,8 @@
 - Update the package README and any affected ADR, finding, or proof evidence.
 - Run `pnpm check` and task-specific verification.
 - Update `docs/plan/TASKS.md` and `PROJECT-STATUS.md` only after evidence passes.
+- When a task becomes `DONE`, update the README task-progress block from `docs/plan/TASKS.md` in
+  the same commit.
 - Do not include AI or tool co-author trailers in commits.
 
 Comments must explain invariants and reasoning. Do not add comments that merely restate the code.
