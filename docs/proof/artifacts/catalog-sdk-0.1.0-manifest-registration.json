@@ -1,0 +1,469 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen-catalog-manifest-registration-proof-v1",
+  "task": "M03-T01",
+  "result": "PASS",
+  "protocol": { "version": "0.1.0", "documentKind": "desen.catalog" },
+  "prerequisite": {
+    "gate": "G02",
+    "closingTask": "M02-T13",
+    "artifact": "docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json",
+    "sha256": "104227f76404dabcd1d56b1b24c253226f24e08fa6054016ddb8e1840e1a357c",
+    "result": "PASS"
+  },
+  "claim": {
+    "summary": "Component contracts register as detached, immutable, deterministic JSON and compose into a framework-neutral Catalog manifest.",
+    "directTraceRules": [
+      {
+        "id": "R-013",
+        "section": "6.1.3",
+        "summary": "A catalog declares one target package contract while executable code stays outside JSON",
+        "owners": ["M03-T01", "M03-T10"],
+        "finalTestOwners": ["M03-T09", "M03-T10"]
+      },
+      {
+        "id": "R-084",
+        "section": "21.2",
+        "summary": "Component manifests declare their complete public property, composition, interaction, style, authoring, and deprecation contract",
+        "owners": ["M03-T01", "M03-T03"],
+        "finalTestOwners": ["M03-T09"]
+      }
+    ],
+    "proofClaimStatusChanges": []
+  },
+  "publicApi": {
+    "runtimeExports": ["createCatalogManifest", "registerComponent"],
+    "typeExports": [
+      "ComponentManifest",
+      "CreateCatalogManifestInput",
+      "ImmutableJson",
+      "JsonInput",
+      "JsonPrimitive",
+      "RegisterComponentInput",
+      "RegisteredComponent"
+    ],
+    "componentManifestAuthority": "DesenCatalog[\"components\"][string]",
+    "registryApiExported": false,
+    "registrationWrapperFields": ["id", "manifest"],
+    "manifestRuntimeValidation": "@desen/validator",
+    "targetAdapters": "deferred to M05"
+  },
+  "vectors": {
+    "componentFields": [
+      "authoring",
+      "category",
+      "commands",
+      "deprecated",
+      "description",
+      "events",
+      "extensions",
+      "propsSchema",
+      "replacement",
+      "slots",
+      "styleParts",
+      "visualStates"
+    ],
+    "registrationCanonicalSha256": "74e7d7f6974dcbf5f3dcbb223708234f2827bed6ea27fd71518aa459fb9c8d7c",
+    "catalogCanonicalSha256": "df627cf210b9bb627c45c6a48d9d68ceb2a9e35fe8a2aa465a3991843ea6da74",
+    "deterministicRuns": 2,
+    "successfulRegistrations": 8,
+    "successfulCatalogs": 3,
+    "callerInputsPreserved": 11,
+    "deeplyFrozenOutputs": 11,
+    "detachedOutputs": 11,
+    "recognizedExoticOutputs": "REJECTED",
+    "duplicateId": {
+      "result": "REJECTED",
+      "message": "Invalid Catalog manifest input at /components/1/id: duplicate component id \"com.example.ui/Button\""
+    },
+    "accessor": { "result": "REJECTED", "invoked": false },
+    "hostileValues": [
+      { "id": "undefined", "result": "REJECTED" },
+      { "id": "function", "result": "REJECTED" },
+      { "id": "symbol", "result": "REJECTED" },
+      { "id": "bigint", "result": "REJECTED" },
+      { "id": "nan", "result": "REJECTED" },
+      { "id": "infinity", "result": "REJECTED" },
+      { "id": "date", "result": "REJECTED" },
+      { "id": "map", "result": "REJECTED" },
+      { "id": "set", "result": "REJECTED" },
+      { "id": "regexp", "result": "REJECTED" },
+      { "id": "custom-class", "result": "REJECTED" },
+      { "id": "frozen-date", "result": "REJECTED" },
+      { "id": "frozen-map", "result": "REJECTED" },
+      { "id": "sparse-array", "result": "REJECTED" },
+      { "id": "extra-array-property", "result": "REJECTED" },
+      { "id": "cycle", "result": "REJECTED" },
+      { "id": "non-enumerable-property", "result": "REJECTED" },
+      { "id": "symbol-property", "result": "REJECTED" },
+      { "id": "laundered-date", "result": "REJECTED" },
+      { "id": "laundered-map", "result": "REJECTED" },
+      { "id": "laundered-set", "result": "REJECTED" },
+      { "id": "laundered-weak-map", "result": "REJECTED" },
+      { "id": "laundered-weak-set", "result": "REJECTED" },
+      { "id": "laundered-uint8-array", "result": "REJECTED" },
+      { "id": "laundered-array-buffer", "result": "REJECTED" },
+      { "id": "laundered-shared-array-buffer", "result": "REJECTED" },
+      { "id": "laundered-data-view", "result": "REJECTED" },
+      { "id": "laundered-boolean", "result": "REJECTED" },
+      { "id": "laundered-number", "result": "REJECTED" },
+      { "id": "laundered-string", "result": "REJECTED" },
+      { "id": "laundered-bigint", "result": "REJECTED" },
+      { "id": "laundered-symbol", "result": "REJECTED" },
+      { "id": "laundered-regexp", "result": "REJECTED" },
+      { "id": "laundered-weak-ref", "result": "REJECTED" },
+      { "id": "laundered-finalization-registry", "result": "REJECTED" }
+    ],
+    "opaquePrototypeKeys": ["__proto__", "constructor", "prototype"],
+    "componentMapKeys": ["__proto__", "constructor"],
+    "caseSensitiveIds": ["com.example.ui/Text", "com.example.ui/text"],
+    "validator": { "valid": true, "diagnostics": 0 }
+  },
+  "catalogGolden": {
+    "authoring": { "publisher": "proof" },
+    "behaviors": {},
+    "components": {
+      "com.example.ui/Button": {
+        "authoring": {
+          "adapterFidelity": "same",
+          "category": "Actions",
+          "defaultProps": { "disabled": false, "label": "Continue" },
+          "displayName": "Button"
+        },
+        "category": "action",
+        "commands": {
+          "focus": { "inputSchema": { "additionalProperties": false, "type": "object" } }
+        },
+        "deprecated": false,
+        "description": "Accessible action button.",
+        "events": {
+          "press": { "payloadSchema": { "additionalProperties": false, "type": "object" } }
+        },
+        "extensions": { "com.example.audit/owner": "design-system" },
+        "propsSchema": {
+          "additionalProperties": false,
+          "properties": { "disabled": { "type": "boolean" }, "label": { "type": "string" } },
+          "required": ["label"],
+          "type": "object"
+        },
+        "replacement": "com.example.ui/PrimaryButton",
+        "slots": { "leading": { "acceptsCategories": ["content"], "maxItems": 1 } },
+        "styleParts": {
+          "root": { "propertiesSchema": { "additionalProperties": false, "type": "object" } }
+        },
+        "visualStates": ["focus", "disabled"]
+      }
+    },
+    "description": "M03-T01 proof Catalog.",
+    "desen": "0.1.0",
+    "extensions": { "com.example/proof": true },
+    "id": "com.example.catalog",
+    "kind": "desen.catalog",
+    "operations": {},
+    "packageDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "resources": {},
+    "target": "web-react",
+    "version": "1.0.0"
+  },
+  "platformBoundary": {
+    "sourceFiles": 4,
+    "declarationFiles": 4,
+    "sourcePaths": [
+      "packages/catalog-sdk/src/catalog-manifest.ts",
+      "packages/catalog-sdk/src/component-registration.ts",
+      "packages/catalog-sdk/src/index.ts",
+      "packages/catalog-sdk/src/inert-json.ts"
+    ],
+    "declarationPaths": [
+      "packages/catalog-sdk/dist/catalog-manifest.d.ts",
+      "packages/catalog-sdk/dist/component-registration.d.ts",
+      "packages/catalog-sdk/dist/index.d.ts",
+      "packages/catalog-sdk/dist/inert-json.d.ts"
+    ],
+    "distributionPaths": [
+      "packages/catalog-sdk/dist/catalog-manifest.d.ts",
+      "packages/catalog-sdk/dist/catalog-manifest.js",
+      "packages/catalog-sdk/dist/component-registration.d.ts",
+      "packages/catalog-sdk/dist/component-registration.js",
+      "packages/catalog-sdk/dist/index.d.ts",
+      "packages/catalog-sdk/dist/index.js",
+      "packages/catalog-sdk/dist/inert-json.d.ts",
+      "packages/catalog-sdk/dist/inert-json.js"
+    ],
+    "runtimeDependencies": ["@desen/protocol"],
+    "typeExports": [
+      "ComponentManifest",
+      "CreateCatalogManifestInput",
+      "ImmutableJson",
+      "JsonInput",
+      "JsonPrimitive",
+      "RegisterComponentInput",
+      "RegisteredComponent"
+    ],
+    "ambientTypes": [],
+    "forbiddenProfiles": [
+      "React import or package",
+      "JSX namespace",
+      "DOM type",
+      "Node platform type",
+      "native framework type"
+    ]
+  },
+  "evidence": {
+    "packageTests": 8,
+    "compileTimeNegativeCases": 21,
+    "rootEvidenceTests": 29,
+    "trackedFiles": [
+      {
+        "path": "package.json",
+        "bytes": 8953,
+        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
+      },
+      {
+        "path": "packages/catalog-sdk/README.md",
+        "bytes": 5353,
+        "sha256": "4782e79c7d92f3c904edaf33528a652b898077decc568a990f5626e3371e535a"
+      },
+      {
+        "path": "packages/catalog-sdk/package.json",
+        "bytes": 822,
+        "sha256": "d355be573afc71b3009ffe55b86b9b9365d98c97041ae022fb291e38bdbbd85a"
+      },
+      {
+        "path": "packages/catalog-sdk/src/catalog-manifest.ts",
+        "bytes": 6749,
+        "sha256": "c20b86cbf4b2a6688c67f3eed51f88bd40171b4f43f4af8e4484d8383d49ac1a"
+      },
+      {
+        "path": "packages/catalog-sdk/src/component-registration.ts",
+        "bytes": 4852,
+        "sha256": "b7e04e6bbd08ce315b06578873d487fe16d4c773a7b653443ebaec0d72f15c84"
+      },
+      {
+        "path": "packages/catalog-sdk/src/index.ts",
+        "bytes": 527,
+        "sha256": "4a549f2312348acc5608afafc7197ef3235093e59801e64461ac462d9de79109"
+      },
+      {
+        "path": "packages/catalog-sdk/src/inert-json.ts",
+        "bytes": 6807,
+        "sha256": "3290a43ddbf6fe6e6c323757698154f0ef9d7f5afc63d9a6c1f3ccfd3af71c2d"
+      },
+      {
+        "path": "packages/catalog-sdk/test/catalog-manifest-registration.test.ts",
+        "bytes": 11831,
+        "sha256": "1f34e71da627c19a5a0169220b557e153d1b16b6e2102fa3c0a4f510898dac88"
+      },
+      {
+        "path": "packages/catalog-sdk/test/public-api.types.ts",
+        "bytes": 8522,
+        "sha256": "03be6039b7342bd0337dc9d8d634ad944203b0831efa239f9a0337000ca6b9da"
+      },
+      {
+        "path": "packages/catalog-sdk/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/catalog-sdk/tsconfig.json",
+        "bytes": 167,
+        "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 94271,
+        "sha256": "0247d25583fee737a389cbce7b93207a38b57c1871818457995d35f1e962dcd8"
+      },
+      {
+        "path": "scripts/generate-catalog-manifest-registration-proof.mjs",
+        "bytes": 838,
+        "sha256": "f81def14912a8843581b4015b356ec4930bd1607f8ca425ad9f857203548eeff"
+      },
+      {
+        "path": "scripts/lib/catalog-manifest-registration-proof.mjs",
+        "bytes": 67472,
+        "sha256": "bed7795827d042be63546b792f775511566b69813ab1fb42e59f444320552d57"
+      },
+      {
+        "path": "scripts/verify-boundary-fixtures.mjs",
+        "bytes": 3110,
+        "sha256": "421f3f961cb47fe2343d927305e906d269f41763903e23b698c6d4e04aa50ac9"
+      },
+      {
+        "path": "scripts/verify-catalog-manifest-registration.mjs",
+        "bytes": 660,
+        "sha256": "c24fdf1b8ac7d6e2e5880ec5ef2c52c3d876ecf7217b791203645cefebe2f364"
+      },
+      {
+        "path": "tests/boundaries/README.md",
+        "bytes": 680,
+        "sha256": "73f425d924c484bcdfdfc093a1a41ce1e834850dad61453d15ae7869ab498914"
+      },
+      {
+        "path": "tests/boundaries/fixtures/catalog-sdk-imports-runtime-react/packages/catalog-sdk/src/index.ts",
+        "bytes": 125,
+        "sha256": "4025753b011d61dd8106dbe3ebd23d15115950a958dbb731f27630495ff72c83"
+      },
+      {
+        "path": "tests/boundaries/fixtures/catalog-sdk-imports-runtime-react/packages/runtime-react/src/index.ts",
+        "bytes": 44,
+        "sha256": "549364a42e1fb0a50d7bb74d557eb83e88e3e1cdc3556da5af3f75384e6d9453"
+      },
+      {
+        "path": "tests/catalog-manifest-registration.test.mjs",
+        "bytes": 19238,
+        "sha256": "a9c3981806ea772ed2080e5e2e314fb34761f514d67cea3d5c8993d62bd8a298"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "bytes": 852,
+        "sha256": "cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
+      },
+      {
+        "path": "turbo.json",
+        "bytes": 4262,
+        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
+      }
+    ],
+    "distributionFiles": [
+      {
+        "path": "packages/catalog-sdk/dist/catalog-manifest.d.ts",
+        "bytes": 3108,
+        "sha256": "8067ecbd37fad7177661a274d4e55378caf498f7997632dfa853eb4ab4680c76"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/catalog-manifest.js",
+        "bytes": 4168,
+        "sha256": "93da6db2d41ea830a8a9e48311b16a08433193bcd580cd313e838f72b4a9a699"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/component-registration.d.ts",
+        "bytes": 3665,
+        "sha256": "0ec209af07e5c6d23c29bb1c300938faae9813900a3dde70d02b1cedd9ee401b"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/component-registration.js",
+        "bytes": 1509,
+        "sha256": "bd692eb37fbd8b36c415cde3b1fe9c6f938b7971c1f10b5cd54dd7a22f525416"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/index.d.ts",
+        "bytes": 554,
+        "sha256": "5ddd1e2dc07b41b18ffea84748f606bc2970a14f838843c4ca717f268265411e"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/index.js",
+        "bytes": 283,
+        "sha256": "a2f8465ea4b41252b04d7ffa0e42e68c00db5f1b2e6b803f3d56733e12cc1c1c"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/inert-json.d.ts",
+        "bytes": 2692,
+        "sha256": "3108b5a59b00d30832a8cfeb0bc49f1f214679c94ef5022d5d1a3e014ce82a72"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/inert-json.js",
+        "bytes": 4523,
+        "sha256": "a2366a224fff48105d8f9c4b13d0e45905dd281285daa469880e68847529260f"
+      }
+    ],
+    "commandWiring": {
+      "generate": [
+        "pnpm --filter @desen/validator... build",
+        "pnpm --filter @desen/catalog-sdk... build",
+        "node scripts/generate-catalog-manifest-registration-proof.mjs"
+      ],
+      "verify": [
+        "pnpm --filter @desen/validator... build",
+        "pnpm --filter @desen/catalog-sdk... build",
+        "node scripts/verify-catalog-manifest-registration.mjs"
+      ],
+      "test": [
+        "pnpm --filter @desen/validator... build",
+        "pnpm --filter @desen/catalog-sdk... build",
+        "pnpm --filter @desen/catalog-sdk test:manifest-registration",
+        "node --test tests/catalog-manifest-registration.test.mjs"
+      ],
+      "rootTest": [
+        "pnpm test:protocol-snapshot",
+        "pnpm test:protocol-traceability",
+        "pnpm test:protocol-types",
+        "pnpm test:protocol-canonicalization",
+        "pnpm test:protocol-diagnostics",
+        "pnpm test:protocol-structural-validation",
+        "pnpm test:protocol-semantic-foundation",
+        "pnpm test:protocol-component-contracts",
+        "pnpm test:protocol-interaction-contracts",
+        "pnpm test:protocol-binding-contracts",
+        "pnpm test:protocol-execution-contracts",
+        "pnpm test:protocol-official-suite-parity",
+        "pnpm test:protocol-validator-diagnostic-micro-vectors",
+        "pnpm test:catalog-manifest-registration",
+        "turbo run test"
+      ],
+      "rootCheck": [
+        "pnpm format:check",
+        "pnpm verify:protocol-snapshot",
+        "pnpm verify:protocol-traceability",
+        "pnpm verify:protocol-types",
+        "pnpm verify:protocol-canonicalization",
+        "pnpm verify:protocol-diagnostics",
+        "pnpm verify:protocol-structural-validation",
+        "pnpm verify:protocol-semantic-foundation",
+        "pnpm verify:protocol-component-contracts",
+        "pnpm verify:protocol-interaction-contracts",
+        "pnpm verify:protocol-binding-contracts",
+        "pnpm verify:protocol-execution-contracts",
+        "pnpm verify:protocol-official-suite-parity",
+        "pnpm verify:protocol-validator-diagnostic-micro-vectors",
+        "pnpm verify:catalog-manifest-registration",
+        "pnpm lint",
+        "pnpm typecheck",
+        "pnpm build",
+        "pnpm test",
+        "pnpm boundaries"
+      ],
+      "boundaries": [
+        "depcruise --config dependency-cruiser.config.cjs apps packages",
+        "node scripts/verify-boundary-fixtures.mjs"
+      ]
+    },
+    "artifactWriter": {
+      "parentResolution": "realpath",
+      "temporaryFile": "same-directory exclusive create",
+      "durabilityBeforeCommit": "file sync",
+      "temporaryVerification": "open-handle identity and exact bytes",
+      "commit": "atomic rename",
+      "postCommitVerification": "same inode and exact bytes",
+      "failureCleanup": "temporary file removed"
+    }
+  },
+  "scope": {
+    "included": [
+      "component manifest registration",
+      "complete Catalog root composition with empty later-category maps",
+      "duplicate component-id rejection",
+      "detached canonical-key-ordered deep-frozen JSON snapshots",
+      "built declaration and production-source platform audit"
+    ],
+    "deferred": [
+      "M03-T02 behavior, operation, and resource registration",
+      "M03-T03 schema-authoritative TypeScript and inspector-control derivation",
+      "M03-T04 deterministic Web-React package digest profile",
+      "M03-T05 and M03-T06 reference components",
+      "M03-T09 manifest-to-implementation parity",
+      "M03-T10 final package artifact and exact tuple",
+      "M05 target renderer adapter registration"
+    ]
+  },
+  "limitations": [
+    "The SDK accepts programmatic object input; duplicate members already lost by an external JSON parser cannot be detected here.",
+    "A general JavaScript Proxy cannot be classified without allowing its traps to run; callers must not use proxies as authoring input.",
+    "Promise, generator, iterator, and host-exotic internal slots have no universal side-effect-free ECMAScript brand probe; if their prototypes are deliberately replaced with Object.prototype, their observable enumerable data shape is what gets snapshotted.",
+    "TypeScript may erase extra-property information when a structural union member absorbs another member; runtime exact-key checks remain authoritative for that language-level edge case.",
+    "The atomic writer assumes its real parent directory is not concurrently controlled by an attacker during the final verified rename window.",
+    "TypeScript projections and inert snapshotting do not replace Catalog structural or semantic validation.",
+    "packageDigest is caller-supplied until M03-T04 defines the deterministic Web-React package profile.",
+    "No P-* claim changes status and G03 remains open."
+  ]
+}

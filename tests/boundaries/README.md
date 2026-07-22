@@ -4,6 +4,9 @@ These fixtures prove that the architecture gate fails for representative forbidd
 continues to accept a documented dependency. They are intentionally outside `apps/` and
 `packages/`, so the normal workspace cruise does not treat their violations as product code.
 
+The fixture set includes a direct `catalog-sdk` → `runtime-react` edge so the platform-neutral
+manifest boundary remains executable rather than documentation-only.
+
 Run them after installing workspace dependencies:
 
 ```bash

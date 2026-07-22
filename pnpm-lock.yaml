@@ -59,7 +59,15 @@ importers:
 
   apps/reference-host-web: {}
 
-  packages/catalog-sdk: {}
+  packages/catalog-sdk:
+    dependencies:
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+    devDependencies:
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@8.1.5(@types/node@24.13.3))
 
   packages/desen: {}
 

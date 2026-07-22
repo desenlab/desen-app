@@ -19,7 +19,7 @@
       "profile": "desen-component-contract-validation-v1",
       "result": "PASS",
       "bytes": 44918,
-      "sha256": "c158b9b982bb52011760c81f0ad305919c461ea66f019ed83438e0e39aeddd93",
+      "sha256": "f587375f0da3bf9ec061a2c67d39b8319487afb3387fe29363b2c9980201295a",
       "verifier": "verifyProtocolComponentContracts"
     },
     {
@@ -27,7 +27,7 @@
       "profile": "desen-interaction-contract-validation-v1",
       "result": "PASS",
       "bytes": 52824,
-      "sha256": "4a4a62ee9b64f448bcb1612b1ece89cf9007dc8f4112c6fd1a8a2b3e1e3e98b6",
+      "sha256": "d3a3b5248475705b001c169bf8f62b0174c89c238a7a69f6a08aa888f8d90178",
       "verifier": "verifyProtocolInteractionContracts"
     },
     {
@@ -35,7 +35,7 @@
       "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
       "bytes": 61636,
-      "sha256": "33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae",
+      "sha256": "acec8add9cd54ff0d8ec37174d1f06d494d9b818976f97d80ea722c6049b64f5",
       "verifier": "verifyProtocolBindingContracts"
     },
     {
@@ -43,7 +43,7 @@
       "profile": "desen-execution-contract-validation-v1",
       "result": "PASS",
       "bytes": 61091,
-      "sha256": "30a1c69430f316e90a2dcee1f12bdf4dec971b54edf6cfcacf975442479e352c",
+      "sha256": "f0f6852e7ec9bc6a37dd3d31475a421454ca2a39ea473627038e1f053ccdb6b3",
       "verifier": "verifyProtocolExecutionContracts"
     },
     {
@@ -51,7 +51,7 @@
       "profile": "desen-official-suite-parity-v1",
       "result": "PASS",
       "bytes": 16902,
-      "sha256": "b8515a277bc3f26bcee4c09172ae95fb90aeb461be3a261a11bcac7e27a22aa8",
+      "sha256": "9fd6c647d3548dfd18430ab2b77110ac2a732e0afaa6b0c1f1aa58c92c8a16e7",
       "verifier": "verifyProtocolOfficialSuiteParity"
     }
   ],
@@ -2060,8 +2060,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 8224,
-        "sha256": "1ad96276e2df578c29bb6afe0a90bd23be72ea8e2e90a51a378fa02191018306"
+        "bytes": 8953,
+        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
       },
       {
         "path": "packages/validator/README.md",
@@ -2105,8 +2105,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 4000,
-        "sha256": "9c5de0a2b8e4511f06d3640e3e62bc0bc2209a89c3bf9b89e89f9ea37b66645b"
+        "bytes": 4262,
+        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
       }
     ]
   },

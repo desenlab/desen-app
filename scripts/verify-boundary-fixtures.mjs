@@ -23,6 +23,10 @@ const cases = [
     expectedRule: "neutral-packages-no-styles",
   },
   {
+    name: "catalog-sdk-imports-runtime-react",
+    expectedRule: "neutral-packages-no-frameworks",
+  },
+  {
     name: "runtime-core-imports-testkit",
     expectedRule: "production-source-never-imports-testkit",
   },

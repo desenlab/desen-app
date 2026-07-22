@@ -8,7 +8,7 @@
     "diagnostics": {
       "path": "docs/proof/artifacts/protocol-0.1.0-diagnostics.json",
       "bytes": 13709,
-      "sha256": "4e869c1451352857a4b221c367446f0e185f22c81b6991cbba364555da9cdbd1",
+      "sha256": "daaa4009d8e7a868f5cbe351b75d49fa7dbe4283f4eb60ad2fed2c56d89dd037",
       "task": "M02-T05",
       "profile": "desen-diagnostics-json-pointer-v1",
       "verifiedBy": "verifyProtocolDiagnostics",
@@ -17,7 +17,7 @@
     "semanticFoundation": {
       "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
       "bytes": 25301,
-      "sha256": "8703bb3a664b70fef2055d0d1821d3a7259e7e7e38a41f2076aa9b3460e44947",
+      "sha256": "565278a4c66a2d672eb3570f4df28adc8d45b8cacfdb01735ce94319d41b4d3b",
       "task": "M02-T07",
       "profile": "desen-semantic-foundation-v1",
       "verifiedBy": "verifyProtocolSemanticFoundation",
@@ -926,8 +926,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 8224,
-        "sha256": "1ad96276e2df578c29bb6afe0a90bd23be72ea8e2e90a51a378fa02191018306"
+        "bytes": 8953,
+        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
       },
       {
         "path": "packages/protocol/dist/canonicalization.js",
@@ -1156,8 +1156,8 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 93999,
-        "sha256": "cf6e969d99bcac203d13fab6defed006c47b656d37f77ab31bcfc9bd3ab5e252"
+        "bytes": 94271,
+        "sha256": "0247d25583fee737a389cbce7b93207a38b57c1871818457995d35f1e962dcd8"
       },
       {
         "path": "scripts/generate-protocol-component-contracts-proof.mjs",
@@ -1181,8 +1181,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 4000,
-        "sha256": "9c5de0a2b8e4511f06d3640e3e62bc0bc2209a89c3bf9b89e89f9ea37b66645b"
+        "bytes": 4262,
+        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
       }
     ]
   },

@@ -32,7 +32,12 @@ M02-T13 now proves one accepted and one exact rejected micro-vector for every di
 validator currently emits: 28 core codes and 6 validator-namespaced extension codes. The proof
 checks both runs, both caller inputs, complete inert-result equality, deep immutability, and exact
 diagnostic identity. This closes G02 without adding a public validator API. Runtime adapter
-execution has not started and is not claimed as proven.
+execution has not started and is not claimed as proven. M03-T01 now adds the first Catalog SDK
+slice: component contracts register as exact, detached, canonical-key-ordered, deeply frozen JSON,
+and compose into a complete validator-accepted Catalog root with later capability maps kept empty.
+Its 8 package tests, 21 compile-time negative cases, and 29 independent evidence tests also prove
+caller isolation, duplicate rejection, platform neutrality, exact public exports, and deterministic
+safe evidence writing. No `P-*` status changes, and G03 remains open.
 
 ## Current milestone
 
@@ -50,10 +55,11 @@ execution has not started and is not claimed as proven.
   `M02-T10 — State, predicate, repeat, alias, and static binding validation`,
   `M02-T11 — Resource, operation, action, navigation, and command-target validation`,
   `M02-T12 — TypeScript parity for the official 14-case suite`,
-  `M02-T13 — Validator diagnostic micro-vectors`
+  `M02-T13 — Validator diagnostic micro-vectors`,
+  `M03-T01 — Framework-neutral catalog registration API`
 - Active task: None
-- Ready next task: `M03-T01 — Framework-neutral catalog registration API`
-- Status: `READY_TO_START`
+- Ready next task: `M03-T02 — Behavior, operation, and resource registration APIs`
+- Status: `DONE`
 
 ## Completed preparation
 
@@ -129,6 +135,13 @@ execution has not started and is not claimed as proven.
   writes. Eight later-owner core diagnostics stay explicitly excluded. P-02 is `PROVEN`, G02 is
   `DONE`, and P-17 is only `PARTIAL`; N-041 remains `PLANNED` until runtime, Bundle-ingress, and
   activation limits are implemented.
+- The first Catalog SDK slice passes 8 package tests, 21 compile-time negative cases, and 29
+  independent evidence/mutation tests. It preserves all 12 schema-derived component fields,
+  readonly authoring inputs, literal inference, exact wrapper and nested manifest shapes,
+  canonical property order, caller ownership, deep immutability, case-sensitive and prototype-like
+  ids, distinct-object duplicate rejection, and 35 hostile-value rejections. Source, emitted
+  declarations, and built JavaScript remain framework-neutral with only `@desen/protocol` as a
+  runtime dependency. Three post-fix reviews found no remaining P1/P2 issue.
 - The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
   integrity tests, protocol traceability and type-generation tests, remaining scaffold test
   runners, and dependency-boundary checks.
@@ -142,8 +155,8 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Begin only `M03-T01`: build the framework-neutral JSON manifest and contract registration API with
-no React, DOM, browser, iOS, or Android types in its public boundary.
+Start only `M03-T02`: add framework-neutral behavior, operation, and resource registration APIs
+without weakening the M03-T01 JSON, immutability, exactness, or platform boundaries.
 
 M02-T02 evidence:
 
@@ -166,56 +179,62 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `4e869c1451352857a4b221c367446f0e185f22c81b6991cbba364555da9cdbd1`
+- artifact SHA-256: `daaa4009d8e7a868f5cbe351b75d49fa7dbe4283f4eb60ad2fed2c56d89dd037`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `7b3a8ca36b3c4191c5691a4c19c1ac086acfd05142ab54f8a6caad08638210c8`
+- artifact SHA-256: `da9760dc361e640ddb2080bd599285f97570ebe22bda08def283f4cb9412288c`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `8703bb3a664b70fef2055d0d1821d3a7259e7e7e38a41f2076aa9b3460e44947`
+- artifact SHA-256: `565278a4c66a2d672eb3570f4df28adc8d45b8cacfdb01735ce94319d41b4d3b`
 
 M02-T08 evidence:
 
 - `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
-- artifact SHA-256: `c158b9b982bb52011760c81f0ad305919c461ea66f019ed83438e0e39aeddd93`
+- artifact SHA-256: `f587375f0da3bf9ec061a2c67d39b8319487afb3387fe29363b2c9980201295a`
 
 M02-T09 evidence:
 
 - `docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json`
-- artifact SHA-256: `4a4a62ee9b64f448bcb1612b1ece89cf9007dc8f4112c6fd1a8a2b3e1e3e98b6`
+- artifact SHA-256: `d3a3b5248475705b001c169bf8f62b0174c89c238a7a69f6a08aa888f8d90178`
 
 M02-T10 evidence:
 
 - `docs/proof/PROTOCOL-BINDING-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-binding-contracts.json`
-- artifact SHA-256: `33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae`
+- artifact SHA-256: `acec8add9cd54ff0d8ec37174d1f06d494d9b818976f97d80ea722c6049b64f5`
 
 M02-T11 evidence:
 
 - `docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-execution-contracts.json`
-- artifact SHA-256: `30a1c69430f316e90a2dcee1f12bdf4dec971b54edf6cfcacf975442479e352c`
+- artifact SHA-256: `f0f6852e7ec9bc6a37dd3d31475a421454ca2a39ea473627038e1f053ccdb6b3`
 
 M02-T12 evidence:
 
 - `docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md`
 - `docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json`
-- artifact SHA-256: `b8515a277bc3f26bcee4c09172ae95fb90aeb461be3a261a11bcac7e27a22aa8`
+- artifact SHA-256: `9fd6c647d3548dfd18430ab2b77110ac2a732e0afaa6b0c1f1aa58c92c8a16e7`
 
 M02-T13 evidence:
 
 - `docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md`
 - `docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json`
-- artifact SHA-256: `a59b2a1bdb727c882e47171b38a68c11b0f5f5f320a40044f387d2ca1f67c306`
+- artifact SHA-256: `104227f76404dabcd1d56b1b24c253226f24e08fa6054016ddb8e1840e1a357c`
+
+M03-T01 evidence:
+
+- `docs/proof/CATALOG-MANIFEST-REGISTRATION.md`
+- `docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json`
+- artifact SHA-256: `2f97bdd57c26e8922836464d3415b55b10eac034c359e8363a8ed68d1002d030`
 
 ## Status vocabulary
 

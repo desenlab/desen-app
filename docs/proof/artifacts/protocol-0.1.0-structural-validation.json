@@ -461,18 +461,18 @@
     "trackedFiles": [
       {
         "path": "package.json",
-        "bytes": 8224,
-        "sha256": "1ad96276e2df578c29bb6afe0a90bd23be72ea8e2e90a51a378fa02191018306"
+        "bytes": 8953,
+        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 93999,
-        "sha256": "cf6e969d99bcac203d13fab6defed006c47b656d37f77ab31bcfc9bd3ab5e252"
+        "bytes": 94271,
+        "sha256": "0247d25583fee737a389cbce7b93207a38b57c1871818457995d35f1e962dcd8"
       },
       {
         "path": "turbo.json",
-        "bytes": 4000,
-        "sha256": "9c5de0a2b8e4511f06d3640e3e62bc0bc2209a89c3bf9b89e89f9ea37b66645b"
+        "bytes": 4262,
+        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
       },
       {
         "path": "THIRD_PARTY_NOTICES.md",

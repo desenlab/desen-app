@@ -21,8 +21,8 @@
       "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
       "verifiedBy": "verifyProtocolBindingContracts",
-      "sha256": "33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae",
-      "verificationSha256": "33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae"
+      "sha256": "acec8add9cd54ff0d8ec37174d1f06d494d9b818976f97d80ea722c6049b64f5",
+      "verificationSha256": "acec8add9cd54ff0d8ec37174d1f06d494d9b818976f97d80ea722c6049b64f5"
     }
   },
   "traceability": {
@@ -863,7 +863,7 @@
       }
     },
     "schemaProfile": {
-      "inheritedFromVerifiedT10Artifact": "33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae",
+      "inheritedFromVerifiedT10Artifact": "acec8add9cd54ff0d8ec37174d1f06d494d9b818976f97d80ea722c6049b64f5",
       "unsafeNativePatternExecution": false
     },
     "platformAudit": {
@@ -1033,8 +1033,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 8224,
-        "sha256": "1ad96276e2df578c29bb6afe0a90bd23be72ea8e2e90a51a378fa02191018306"
+        "bytes": 8953,
+        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
       },
       {
         "path": "packages/protocol/dist/canonicalization.d.ts",
@@ -1623,8 +1623,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 4000,
-        "sha256": "9c5de0a2b8e4511f06d3640e3e62bc0bc2209a89c3bf9b89e89f9ea37b66645b"
+        "bytes": 4262,
+        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
       }
     ]
   },
