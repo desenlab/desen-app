@@ -11,7 +11,7 @@ the complete claim is not established. A visual demonstration alone cannot chang
 | P-01 | The implementation consumes exact, immutable DESEN 0.1.0 bytes                                    | M02-T01                            | PROVEN         | Complete 31-file upstream Git tree is vendored; pinned manifest, inventory, bytes, aggregate, modes, and drift tests pass                              | Vendored-byte checksum test against exact upstream commit                                                             | `protocol-0.1.0-snapshot.json` `sha256:aaf58f79bc95924fbaa0c2b278cc06f3d28b3986e5d168b5468e6432c04cd5a9`              | 2026-07-21    |
 | P-02 | Official valid/negative cases and examples produce expected results                               | M02-T12, M02-T13                   | PARTIAL        | Python suite passes 14/14 cases: 9 vectors + 5 examples; no TypeScript parity yet                                                                      | TypeScript parity report plus project micro-vectors                                                                   | `protocol-0.1.0-validation.txt` `sha256:d2c5e7e2…`; checksums evidence `sha256:6208ed37…`                             | 2026-07-21    |
 | P-03 | Publication is deterministic                                                                      | M06-T10                            | NOT_PROVEN     | —                                                                                                                                                      | Same source/catalog twice produces byte-identical semantic bundle and revision                                        | —                                                                                                                     | —             |
-| P-04 | Source and bundle documents are inert data and cannot select executable code                      | M02-T06, M12-T03                   | PARTIAL        | M02-T06 returns detached deep-frozen snapshots; ahead-of-time validators and source/distribution audits reject runtime code loading and network access | Exhaustive executable-content forms, markup interpretation, and remote code-selection proof under M12-T03             | `protocol-0.1.0-structural-validation.json` `sha256:bcd4d25168e9d65fa4b5568cd027131799d7d6b953687fbe125ad37f4e82996a` | 2026-07-22    |
+| P-04 | Source and bundle documents are inert data and cannot select executable code                      | M02-T06, M12-T03                   | PARTIAL        | M02-T06 returns detached deep-frozen snapshots; ahead-of-time validators and source/distribution audits reject runtime code loading and network access | Exhaustive executable-content forms, markup interpretation, and remote code-selection proof under M12-T03             | `protocol-0.1.0-structural-validation.json` `sha256:616eadef51b78b42221b76dcff381e2aead0881f0a8fadf6f9f8f4ef071c7a80` | 2026-07-22    |
 | P-05 | Capabilities are pinned by exact id/version/target/digest                                         | M03-T04, M03-T10, M06-T08, M07-T03 | NOT_PROVEN     | —                                                                                                                                                      | Deterministic artifact tuple plus package mismatch publication and activation tests                                   | —                                                                                                                     | —             |
 | P-06 | Desen App and the production-like host use the same real components                               | M03-T09, M09-T03                   | NOT_PROVEN     | —                                                                                                                                                      | Registry identity, package digest, and separately built host evidence                                                 | —                                                                                                                     | —             |
 | P-07 | Managed surfaces have no handwritten host component tree                                          | M05-T09, M10-T05                   | NOT_PROVEN     | —                                                                                                                                                      | Automated import/source audit and host E2E                                                                            | —                                                                                                                     | —             |
@@ -50,7 +50,7 @@ M02-T05's diagnostic artifact proves the exact Appendix B registry, shared porta
 data, and RFC 6901 JSON Pointer primitives. It does not prove that later validators, runtimes,
 publishers, activation code, or editor surfaces emit those diagnostics, so no `P-*` status changes:
 `protocol-0.1.0-diagnostics.json`
-`sha256:866878161013463a296da5a2e36b88d1162291fb781fb0706b94a12f263b414e`.
+`sha256:d993fb5bc6c4e473286569d92effc7dfa77ede6ec014f22c436e00d46e9e84c8`.
 
 M02-T06's structural-validation artifact proves the exact three frozen root validators, all 13
 embedded-schema locator families, an independent immutable input boundary, stable structural
@@ -58,7 +58,7 @@ diagnostics, deterministic standalone generation, and a production-source/distri
 no runtime compilation, dynamic loading, or network access. P-04 becomes `PARTIAL`, not `PROVEN`,
 because exhaustive prohibited-content and remote-selection coverage remains assigned to M12-T03:
 `protocol-0.1.0-structural-validation.json`
-`sha256:bcd4d25168e9d65fa4b5568cd027131799d7d6b953687fbe125ad37f4e82996a`.
+`sha256:616eadef51b78b42221b76dcff381e2aead0881f0a8fadf6f9f8f4ef071c7a80`.
 
 M02-T07's semantic-foundation artifact proves strict SemVer syntax, exact declared-catalog
 matching, entry and identity namespaces, set-wide capability uniqueness, category-aware component,
@@ -66,4 +66,14 @@ behavior, resource, and operation existence, extension opacity, and the two offi
 vectors. No `P-*` status changes: P-05 still requires publication/activation digest work, and P-17
 still requires complete M02-T13 diagnostics plus runtime and activation bounds:
 `protocol-0.1.0-semantic-foundation.json`
-`sha256:5a588238f697decfdce82063643adab77b46ec0494b89d5897345e446c41f221`.
+`sha256:18d41297f3333dd21e6786208eafe81ffbf07d7164172cc73673964d43b1592d`.
+
+M02-T08's component-contract artifact proves statically knowable base and Variant props,
+slot presence/cardinality/acceptance, visual states, style parts, dynamic validation obligations,
+five core diagnostic identities, and the project-owned host-safe schema boundary. It covers 7
+reviewed schema families with 191 constraints, 15 project mutation goldens, and 7 schema-safety
+goldens. No official invalid vector is assigned specifically to T08, and no `P-*` status changes:
+official-suite parity remains M02-T12/M02-T13 and complete bounded-runtime behavior remains later
+work:
+`protocol-0.1.0-component-contracts.json`
+`sha256:cb66272d15cbad9a3c75d87061150ce70caec387ad9eb651dad48cf1e38901c0`.

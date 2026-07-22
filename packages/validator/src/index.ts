@@ -20,7 +20,18 @@ export {
   validateDesenSourceSemantics,
 } from "./semantic-validation.js";
 
-export { CATALOG_REQUIREMENT_MISMATCH_CODE, INVALID_SEMVER_CODE } from "./semantic-diagnostics.js";
+export {
+  validateDesenBundleComponentContracts,
+  validateDesenComponentCatalogSet,
+  validateDesenComponentContracts,
+  validateDesenSourceComponentContracts,
+} from "./component-contract-validation.js";
+
+export {
+  CATALOG_REQUIREMENT_MISMATCH_CODE,
+  INVALID_COMPONENT_CONTRACT_CODE,
+  INVALID_SEMVER_CODE,
+} from "./semantic-diagnostics.js";
 
 export type {
   DesenDocumentForTarget,
@@ -47,3 +58,16 @@ export type {
   DesenSemanticDiagnostic,
   DesenSemanticExtensionDiagnosticCode,
 } from "./semantic-diagnostics.js";
+
+export type {
+  DesenComponentCatalogSetValidationFailure,
+  DesenComponentCatalogSetValidationResult,
+  DesenComponentCatalogSetValidationSuccess,
+  DesenComponentContractObligation,
+  DesenComponentContractObligationKind,
+  DesenComponentContractTarget,
+  DesenComponentContractValidationFailure,
+  DesenComponentContractValidationResult,
+  DesenComponentContractValidationSuccess,
+  DesenValidatedComponentCatalogSet,
+} from "./component-contract-validation.js";

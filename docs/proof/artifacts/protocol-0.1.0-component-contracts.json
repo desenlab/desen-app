@@ -1,0 +1,1150 @@
+{
+  "schemaVersion": 1,
+  "task": "M02-T08",
+  "result": "PASS",
+  "protocolVersion": "0.1.0",
+  "profile": "desen-component-contract-validation-v1",
+  "prerequisites": {
+    "diagnostics": {
+      "path": "docs/proof/artifacts/protocol-0.1.0-diagnostics.json",
+      "bytes": 13709,
+      "sha256": "d993fb5bc6c4e473286569d92effc7dfa77ede6ec014f22c436e00d46e9e84c8",
+      "task": "M02-T05",
+      "profile": "desen-diagnostics-json-pointer-v1",
+      "verifiedBy": "verifyProtocolDiagnostics",
+      "verifierResult": "PASS"
+    },
+    "semanticFoundation": {
+      "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
+      "bytes": 22271,
+      "sha256": "18d41297f3333dd21e6786208eafe81ffbf07d7164172cc73673964d43b1592d",
+      "task": "M02-T07",
+      "profile": "desen-semantic-foundation-v1",
+      "verifiedBy": "verifyProtocolSemanticFoundation",
+      "verifierResult": "PASS"
+    }
+  },
+  "frozenInput": {
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+    "catalogTuple": {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react",
+      "packageDigest": "sha256:c8e15513005c9f54d2fc35b60c01f9f7d187dabd3c5efba71cd4dc6db2542a1f"
+    }
+  },
+  "traceability": {
+    "schemaFamilies": [
+      { "id": "SC-029", "expectedConstraints": 5 },
+      { "id": "SC-042", "expectedConstraints": 26 },
+      { "id": "SC-043", "expectedConstraints": 26 },
+      { "id": "SC-046", "expectedConstraints": 70 },
+      { "id": "SC-052", "expectedConstraints": 18 },
+      { "id": "SC-055", "expectedConstraints": 7 },
+      { "id": "SC-057", "expectedConstraints": 39 }
+    ],
+    "schemaFamilyCount": 7,
+    "schemaConstraints": 191,
+    "conformanceResponsibilities": [],
+    "proseRules": ["R-057", "R-058", "R-060", "R-064", "R-085", "R-120", "R-148"],
+    "mandatoryClauses": [
+      { "id": "N-026", "status": "TESTED" },
+      { "id": "N-028", "status": "TESTED" },
+      { "id": "N-029", "status": "TESTED" }
+    ],
+    "coreDiagnostics": [
+      { "id": "D-008", "code": "UNKNOWN_PROP" },
+      { "id": "D-009", "code": "PROP_TYPE_MISMATCH" },
+      { "id": "D-010", "code": "UNKNOWN_SLOT" },
+      { "id": "D-011", "code": "SLOT_CARDINALITY" },
+      { "id": "D-012", "code": "SLOT_CHILD_REJECTED" }
+    ],
+    "implementationDiagnostic": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+    "implementationFindings": {
+      "slotEdgeSemantics": {
+        "id": "PF-010",
+        "status": "OPEN",
+        "blocksProof": false,
+        "implementationDiagnostic": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+        "decisions": [
+          "required slot presence and explicit effective minimum",
+          "empty acceptance union rejects every child",
+          "impossible slot range fails the catalog-set boundary",
+          "unknown visual state and style part use UNKNOWN_PROP"
+        ]
+      },
+      "regexSafety": {
+        "id": "PF-011",
+        "status": "OPEN",
+        "blocksProof": false,
+        "profile": "host-safe component-schema profile",
+        "maximumSchemaDepth": 128,
+        "maximumUnanchoredFixedPatternWidth": 16,
+        "evaluationBudget": 50000,
+        "variableWidthPlacement": "final consuming atom; only a terminal $ may follow",
+        "implementationDiagnostic": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+        "nativeUnsafePatternExecution": false,
+        "scope": ["component props", "style-part properties"]
+      }
+    }
+  },
+  "publicApi": {
+    "package": "@desen/validator",
+    "runtimeExports": [
+      "INVALID_COMPONENT_CONTRACT_CODE",
+      "validateDesenBundleComponentContracts",
+      "validateDesenComponentCatalogSet",
+      "validateDesenComponentContracts",
+      "validateDesenSourceComponentContracts"
+    ],
+    "catalogSetBoundary": "validateDesenComponentCatalogSet returns the trusted component-contract catalog set",
+    "failureValue": "absent",
+    "successValue": "independent recursively frozen JSON snapshot",
+    "dynamicObligations": "deeply frozen deterministic inert JSON array",
+    "failureObligations": "required for Source and Bundle; deeply frozen inert JSON array",
+    "dispatcherParity": "generic Source and Bundle success/failure results exactly match specialized API data"
+  },
+  "frozenValidation": {
+    "validConformance": [
+      { "file": "valid/web.catalog.json", "target": "catalog-set", "valid": true },
+      { "file": "valid/sign-in.source.json", "target": "source", "valid": true },
+      { "file": "valid/sign-in.bundle.json", "target": "bundle", "valid": true }
+    ],
+    "validExamples": [
+      { "file": "catalog.web.example.json", "target": "catalog-set", "valid": true },
+      { "file": "sign-in.source.desen.json", "target": "source", "valid": true },
+      { "file": "sign-in.bundle.desen.json", "target": "bundle", "valid": true },
+      { "file": "sortable-list.source.desen.json", "target": "source", "valid": true },
+      { "file": "store-map.source.desen.json", "target": "source", "valid": true }
+    ],
+    "predecessorFailures": [
+      {
+        "file": "invalid/source-unknown-core-field.json",
+        "code": "UNKNOWN_CORE_FIELD",
+        "pointer": "/script",
+        "owner": "M02-T06"
+      },
+      {
+        "file": "invalid/source-duplicate-node-id.json",
+        "code": "DUPLICATE_NODE_ID",
+        "pointer": "/surfaces/home/root/slots/default/1/id",
+        "owner": "M02-T07"
+      },
+      {
+        "file": "invalid/source-unknown-capability.json",
+        "code": "UNKNOWN_CAPABILITY",
+        "pointer": "/surfaces/home/root/slots/default/0/use",
+        "owner": "M02-T07"
+      }
+    ],
+    "officialT08Invalid": [],
+    "duplicateFrozenBytes": [
+      {
+        "left": "conformance/valid/web.catalog.json",
+        "right": "examples/catalog.web.example.json"
+      },
+      {
+        "left": "conformance/valid/sign-in.source.json",
+        "right": "examples/sign-in.source.desen.json"
+      },
+      {
+        "left": "conformance/valid/sign-in.bundle.json",
+        "right": "examples/sign-in.bundle.desen.json"
+      }
+    ]
+  },
+  "componentProps": {
+    "projectMutationGoldens": [
+      {
+        "id": "base-unknown-property",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_PROP",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/props/ghost"
+          }
+        ]
+      },
+      {
+        "id": "base-literal-schema-mismatch",
+        "diagnostics": [
+          {
+            "code": "PROP_TYPE_MISMATCH",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/props/variant"
+          }
+        ]
+      },
+      {
+        "id": "base-required-property-missing",
+        "diagnostics": [
+          {
+            "code": "PROP_TYPE_MISMATCH",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/props/label"
+          }
+        ]
+      },
+      {
+        "id": "nested-literal-schema-mismatch",
+        "diagnostics": [
+          {
+            "code": "PROP_TYPE_MISMATCH",
+            "pointer": "/surfaces/stores/root/slots/default/0/props/center/latitude"
+          }
+        ]
+      },
+      {
+        "id": "variant-unknown-property",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_PROP",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/variants/0/props/ghost"
+          }
+        ]
+      },
+      {
+        "id": "variant-literal-schema-mismatch",
+        "diagnostics": [
+          {
+            "code": "PROP_TYPE_MISMATCH",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/variants/0/props/loading"
+          }
+        ]
+      }
+    ],
+    "validPartialVariant": true,
+    "dynamicValueKinds": ["$format", "$ref", "$token"],
+    "dynamicObligations": [
+      {
+        "context": {
+          "capabilityId": "com.example.ui/TextField",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.email", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/1/props/value"
+      },
+      {
+        "context": {
+          "capabilityId": "com.example.ui/TextField",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.password", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/2/props/value"
+      },
+      {
+        "context": {
+          "capabilityId": "com.example.ui/Button",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.submit", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/4/props/label"
+      },
+      {
+        "context": {
+          "capabilityId": "com.example.ui/Button",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.submit", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading"
+      }
+    ]
+  },
+  "slots": {
+    "projectMutationGoldens": [
+      {
+        "id": "undeclared-leaf-slot",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_SLOT",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/slots/content"
+          }
+        ]
+      },
+      {
+        "id": "maximum-cardinality",
+        "diagnostics": [
+          {
+            "code": "SLOT_CARDINALITY",
+            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup"
+          }
+        ]
+      },
+      {
+        "id": "category-rejected-child",
+        "diagnostics": [
+          {
+            "code": "SLOT_CHILD_REJECTED",
+            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/use"
+          }
+        ]
+      },
+      {
+        "id": "required-slot-absent",
+        "diagnostics": [
+          { "code": "SLOT_CARDINALITY", "pointer": "/surfaces/home/root/slots/header" },
+          { "code": "SLOT_CARDINALITY", "pointer": "/surfaces/sign-in/root/slots/header" }
+        ]
+      }
+    ],
+    "acceptanceOr": {
+      "exactCapability": true,
+      "category": true,
+      "neither": [
+        {
+          "code": "SLOT_CHILD_REJECTED",
+          "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/use"
+        }
+      ]
+    },
+    "contradictoryCatalog": {
+      "code": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+      "pointer": "/0/components/com.example.ui~1Stack/slots/default"
+    }
+  },
+  "styles": {
+    "projectMutationGoldens": [
+      {
+        "id": "undeclared-visual-state",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_PROP",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/style/levitating"
+          }
+        ]
+      },
+      {
+        "id": "undeclared-style-part",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_PROP",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/style/base/privatePart"
+          }
+        ]
+      },
+      {
+        "id": "undeclared-style-property",
+        "diagnostics": [
+          { "code": "UNKNOWN_PROP", "pointer": "/surfaces/sign-in/root/style/base/root/color" }
+        ]
+      },
+      {
+        "id": "style-property-schema-mismatch",
+        "diagnostics": [
+          {
+            "code": "PROP_TYPE_MISMATCH",
+            "pointer": "/surfaces/sign-in/root/style/base/root/background"
+          }
+        ]
+      },
+      {
+        "id": "variant-undeclared-style-part",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_PROP",
+            "pointer": "/surfaces/sign-in/root/slots/default/4/variants/0/style/hover/privatePart"
+          }
+        ]
+      }
+    ],
+    "baseAlwaysAvailable": true,
+    "declaredStateAndPart": true,
+    "unknownStateAndPartDiagnostic": "UNKNOWN_PROP"
+  },
+  "schemaSafetyGoldens": {
+    "publicBoundary": "validateDesenComponentCatalogSet",
+    "profile": "host-safe component-schema profile",
+    "maximumSchemaDepth": 128,
+    "maximumUnanchoredFixedPatternWidth": 16,
+    "variableWidthPlacement": "final consuming atom; only a terminal $ may follow",
+    "accepted": [
+      { "id": "maximum-schema-depth", "boundary": 128, "valid": true },
+      { "id": "maximum-unanchored-fixed-width", "boundary": 16, "valid": true },
+      { "id": "final-variable-width-atom", "boundary": "^a+$", "valid": true }
+    ],
+    "rejected": [
+      {
+        "id": "above-maximum-schema-depth",
+        "boundary": 129,
+        "valid": false,
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+            "pointer": "/0/components/com.example.ui~1Button/propsSchema"
+          }
+        ]
+      },
+      {
+        "id": "above-maximum-unanchored-fixed-width",
+        "boundary": 17,
+        "valid": false,
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+            "pointer": "/0/components/com.example.ui~1Button/propsSchema/patternProperties/abcdefghijklmnopq"
+          }
+        ]
+      },
+      {
+        "id": "fixed-suffix-after-variable-width",
+        "boundary": "^a+b$",
+        "valid": false,
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+            "pointer": "/0/components/com.example.ui~1Button/propsSchema/pattern"
+          }
+        ]
+      },
+      {
+        "id": "pathological-quantified-prefix-suffix",
+        "boundary": "^.*a{1024}a{1024}a{1024}$",
+        "valid": false,
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+            "pointer": "/0/components/com.example.ui~1Button/propsSchema/pattern"
+          }
+        ]
+      }
+    ]
+  },
+  "dynamicObligations": {
+    "source": [
+      {
+        "context": {
+          "capabilityId": "com.example.ui/TextField",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.email", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/1/props/value"
+      },
+      {
+        "context": {
+          "capabilityId": "com.example.ui/TextField",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.password", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/2/props/value"
+      },
+      {
+        "context": {
+          "capabilityId": "com.example.ui/Button",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.submit", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading"
+      }
+    ],
+    "bundle": [
+      {
+        "context": {
+          "capabilityId": "com.example.ui/TextField",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.email", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/1/props/value"
+      },
+      {
+        "context": {
+          "capabilityId": "com.example.ui/TextField",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.password", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/2/props/value"
+      },
+      {
+        "context": {
+          "capabilityId": "com.example.ui/Button",
+          "documentId": "com.example.account-app",
+          "subject": { "id": "sign-in.submit", "kind": "node" },
+          "surfaceId": "sign-in"
+        },
+        "kind": "component-prop",
+        "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading"
+      }
+    ],
+    "storeMap": [
+      {
+        "valueSpec": "$format",
+        "obligation": {
+          "context": {
+            "capabilityId": "com.example.ui/Text",
+            "documentId": "com.example.store-locator",
+            "subject": { "id": "store-map.popupText", "kind": "node" },
+            "surfaceId": "stores"
+          },
+          "kind": "component-prop",
+          "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text"
+        }
+      },
+      {
+        "valueSpec": "$token",
+        "obligation": {
+          "context": {
+            "capabilityId": "com.example.maps/Map",
+            "documentId": "com.example.store-locator",
+            "subject": { "id": "store-map", "kind": "node" },
+            "surfaceId": "stores"
+          },
+          "kind": "style-part-property",
+          "pointer": "/surfaces/stores/root/slots/default/0/style/base/marker/fill"
+        }
+      },
+      {
+        "valueSpec": "$token",
+        "obligation": {
+          "context": {
+            "capabilityId": "com.example.maps/Map",
+            "documentId": "com.example.store-locator",
+            "subject": { "id": "store-map", "kind": "node" },
+            "surfaceId": "stores"
+          },
+          "kind": "style-part-property",
+          "pointer": "/surfaces/stores/root/slots/default/0/style/base/selectedMarker/fill"
+        }
+      }
+    ],
+    "failures": {
+      "source": [
+        {
+          "context": {
+            "capabilityId": "com.example.ui/TextField",
+            "documentId": "com.example.account-app",
+            "subject": { "id": "sign-in.email", "kind": "node" },
+            "surfaceId": "sign-in"
+          },
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/1/props/value"
+        },
+        {
+          "context": {
+            "capabilityId": "com.example.ui/TextField",
+            "documentId": "com.example.account-app",
+            "subject": { "id": "sign-in.password", "kind": "node" },
+            "surfaceId": "sign-in"
+          },
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/2/props/value"
+        },
+        {
+          "context": {
+            "capabilityId": "com.example.ui/Button",
+            "documentId": "com.example.account-app",
+            "subject": { "id": "sign-in.submit", "kind": "node" },
+            "surfaceId": "sign-in"
+          },
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading"
+        }
+      ],
+      "bundle": [
+        {
+          "context": {
+            "capabilityId": "com.example.ui/TextField",
+            "documentId": "com.example.account-app",
+            "subject": { "id": "sign-in.email", "kind": "node" },
+            "surfaceId": "sign-in"
+          },
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/1/props/value"
+        },
+        {
+          "context": {
+            "capabilityId": "com.example.ui/TextField",
+            "documentId": "com.example.account-app",
+            "subject": { "id": "sign-in.password", "kind": "node" },
+            "surfaceId": "sign-in"
+          },
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/2/props/value"
+        },
+        {
+          "context": {
+            "capabilityId": "com.example.ui/Button",
+            "documentId": "com.example.account-app",
+            "subject": { "id": "sign-in.submit", "kind": "node" },
+            "surfaceId": "sign-in"
+          },
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading"
+        }
+      ]
+    }
+  },
+  "laterTaskScopeAccepted": [
+    {
+      "id": "official-unknown-event",
+      "file": "invalid/source-unknown-event.json",
+      "owner": "M02-T09",
+      "valid": true
+    },
+    {
+      "id": "behavior-prop-contract",
+      "file": "examples/sortable-list.source.desen.json",
+      "owner": "M02-T09",
+      "valid": true
+    },
+    {
+      "id": "unresolved-component-reference",
+      "file": "valid/sign-in.source.json",
+      "owner": "M02-T10",
+      "valid": true
+    },
+    {
+      "id": "operation-input-contract",
+      "file": "valid/sign-in.source.json",
+      "owner": "M02-T11",
+      "valid": true
+    },
+    {
+      "id": "navigation-target",
+      "file": "valid/sign-in.source.json",
+      "owner": "M02-T11",
+      "valid": true
+    },
+    {
+      "id": "bundle-revision",
+      "file": "invalid/bundle-revision-mismatch.json",
+      "owner": "M06-T09/M07-T02",
+      "valid": true
+    },
+    {
+      "id": "catalog-digest",
+      "file": "invalid/bundle-catalog-digest-mismatch.json",
+      "owner": "M07-T03",
+      "valid": true
+    }
+  ],
+  "determinism": {
+    "objectPermutation": "all object members recursively reversed; array order preserved",
+    "diagnosticsStable": true,
+    "obligationsStable": true
+  },
+  "security": {
+    "rawInputs": "re-enter T06 structural and T07 semantic trust boundaries",
+    "documentCodeExecution": false,
+    "remoteSchemaResolution": false,
+    "platformAudit": {
+      "packages": {
+        "validator": {
+          "sourceFiles": [
+            "component-contract-validation.ts",
+            "embedded-schema-validation.ts",
+            "generated/0.1.0/structural-validators.ts",
+            "index.ts",
+            "schema-instance-validation.ts",
+            "semantic-diagnostics.ts",
+            "semantic-validation.ts",
+            "standalone-runtime.ts",
+            "structural-diagnostics.ts",
+            "structural-validation.ts",
+            "uri-reference.ts",
+            "validation-internals.ts"
+          ],
+          "distributionFiles": [
+            "component-contract-validation.d.ts",
+            "component-contract-validation.d.ts.map",
+            "component-contract-validation.js",
+            "component-contract-validation.js.map",
+            "embedded-schema-validation.d.ts",
+            "embedded-schema-validation.d.ts.map",
+            "embedded-schema-validation.js",
+            "embedded-schema-validation.js.map",
+            "generated/0.1.0/structural-validators.d.ts",
+            "generated/0.1.0/structural-validators.d.ts.map",
+            "generated/0.1.0/structural-validators.js",
+            "generated/0.1.0/structural-validators.js.map",
+            "index.d.ts",
+            "index.d.ts.map",
+            "index.js",
+            "index.js.map",
+            "schema-instance-validation.d.ts",
+            "schema-instance-validation.d.ts.map",
+            "schema-instance-validation.js",
+            "schema-instance-validation.js.map",
+            "semantic-diagnostics.d.ts",
+            "semantic-diagnostics.d.ts.map",
+            "semantic-diagnostics.js",
+            "semantic-diagnostics.js.map",
+            "semantic-validation.d.ts",
+            "semantic-validation.d.ts.map",
+            "semantic-validation.js",
+            "semantic-validation.js.map",
+            "standalone-runtime.d.ts",
+            "standalone-runtime.d.ts.map",
+            "standalone-runtime.js",
+            "standalone-runtime.js.map",
+            "structural-diagnostics.d.ts",
+            "structural-diagnostics.d.ts.map",
+            "structural-diagnostics.js",
+            "structural-diagnostics.js.map",
+            "structural-validation.d.ts",
+            "structural-validation.d.ts.map",
+            "structural-validation.js",
+            "structural-validation.js.map",
+            "uri-reference.d.ts",
+            "uri-reference.d.ts.map",
+            "uri-reference.js",
+            "uri-reference.js.map",
+            "validation-internals.d.ts",
+            "validation-internals.d.ts.map",
+            "validation-internals.js",
+            "validation-internals.js.map"
+          ],
+          "auditedDistributionFiles": [
+            "component-contract-validation.d.ts",
+            "component-contract-validation.js",
+            "embedded-schema-validation.d.ts",
+            "embedded-schema-validation.js",
+            "generated/0.1.0/structural-validators.d.ts",
+            "generated/0.1.0/structural-validators.js",
+            "index.d.ts",
+            "index.js",
+            "schema-instance-validation.d.ts",
+            "schema-instance-validation.js",
+            "semantic-diagnostics.d.ts",
+            "semantic-diagnostics.js",
+            "semantic-validation.d.ts",
+            "semantic-validation.js",
+            "standalone-runtime.d.ts",
+            "standalone-runtime.js",
+            "structural-diagnostics.d.ts",
+            "structural-diagnostics.js",
+            "structural-validation.d.ts",
+            "structural-validation.js",
+            "uri-reference.d.ts",
+            "uri-reference.js",
+            "validation-internals.d.ts",
+            "validation-internals.js"
+          ],
+          "allowedImports": ["relative", "@desen/protocol"]
+        },
+        "protocol": {
+          "sourceFiles": [
+            "canonicalization.ts",
+            "diagnostics.ts",
+            "generated/0.1.0/desen-bundle.generated.ts",
+            "generated/0.1.0/desen-catalog.generated.ts",
+            "generated/0.1.0/desen-source.generated.ts",
+            "index.ts",
+            "json-pointer.ts"
+          ],
+          "distributionFiles": [
+            "canonicalization.d.ts",
+            "canonicalization.d.ts.map",
+            "canonicalization.js",
+            "canonicalization.js.map",
+            "diagnostics.d.ts",
+            "diagnostics.d.ts.map",
+            "diagnostics.js",
+            "diagnostics.js.map",
+            "generated/0.1.0/desen-bundle.generated.d.ts",
+            "generated/0.1.0/desen-bundle.generated.d.ts.map",
+            "generated/0.1.0/desen-bundle.generated.js",
+            "generated/0.1.0/desen-bundle.generated.js.map",
+            "generated/0.1.0/desen-catalog.generated.d.ts",
+            "generated/0.1.0/desen-catalog.generated.d.ts.map",
+            "generated/0.1.0/desen-catalog.generated.js",
+            "generated/0.1.0/desen-catalog.generated.js.map",
+            "generated/0.1.0/desen-source.generated.d.ts",
+            "generated/0.1.0/desen-source.generated.d.ts.map",
+            "generated/0.1.0/desen-source.generated.js",
+            "generated/0.1.0/desen-source.generated.js.map",
+            "index.d.ts",
+            "index.d.ts.map",
+            "index.js",
+            "index.js.map",
+            "json-pointer.d.ts",
+            "json-pointer.d.ts.map",
+            "json-pointer.js",
+            "json-pointer.js.map"
+          ],
+          "auditedDistributionFiles": [
+            "canonicalization.d.ts",
+            "canonicalization.js",
+            "diagnostics.d.ts",
+            "diagnostics.js",
+            "generated/0.1.0/desen-bundle.generated.d.ts",
+            "generated/0.1.0/desen-bundle.generated.js",
+            "generated/0.1.0/desen-catalog.generated.d.ts",
+            "generated/0.1.0/desen-catalog.generated.js",
+            "generated/0.1.0/desen-source.generated.d.ts",
+            "generated/0.1.0/desen-source.generated.js",
+            "index.d.ts",
+            "index.js",
+            "json-pointer.d.ts",
+            "json-pointer.js"
+          ],
+          "allowedImports": ["relative"],
+          "runtimeSourceFiles": [
+            "canonicalization.ts",
+            "diagnostics.ts",
+            "index.ts",
+            "json-pointer.ts"
+          ],
+          "runtimeDistributionFiles": [
+            "canonicalization.js",
+            "diagnostics.js",
+            "index.js",
+            "json-pointer.js"
+          ]
+        }
+      },
+      "runtimeSchemaEngine": "code-free in-package Draft 2020-12 interpreter",
+      "runtimeSchemaCompilation": false,
+      "dynamicExecution": false,
+      "networkResolution": "none; T06 rejects non-local schema references",
+      "guardGoldens": [
+        { "id": "validator-node-prefix", "rejectedConstructs": ["Node built-in import"] },
+        { "id": "validator-bare-node-builtin", "rejectedConstructs": ["unapproved bare import"] },
+        {
+          "id": "validator-other-bare-dependency",
+          "rejectedConstructs": ["unapproved bare import"]
+        },
+        { "id": "validator-protocol-subpath", "rejectedConstructs": ["unapproved bare import"] },
+        { "id": "protocol-bare-dependency", "rejectedConstructs": ["unapproved bare import"] },
+        {
+          "id": "dynamic-code-execution",
+          "rejectedConstructs": [
+            "Function constructor",
+            "dynamic import",
+            "eval",
+            "network fetch",
+            "runtime require"
+          ]
+        }
+      ],
+      "forbiddenConstructs": [
+        "runtime require",
+        "eval",
+        "Function constructor",
+        "dynamic import",
+        "network fetch",
+        "XMLHttpRequest",
+        "WebSocket",
+        "workspace absolute path",
+        "frozen upstream runtime access",
+        "Node built-in import",
+        "unapproved bare import",
+        "TypeScript distribution import"
+      ]
+    }
+  },
+  "implementation": {
+    "platform": "ECMAScript 2023; no Node, DOM, React, browser, eval, or network API",
+    "runtimeDependencies": [
+      { "name": "@desen/protocol", "version": "workspace:*", "license": "Apache-2.0" }
+    ],
+    "transitiveRuntimeDependencies": [],
+    "schemaEngine": {
+      "delivery": "code-free in-package interpreter",
+      "dialect": "https://json-schema.org/draft/2020-12/schema",
+      "runtimeCompilation": false,
+      "typeCoercion": false,
+      "defaults": false,
+      "removeAdditional": false,
+      "externalReferences": false,
+      "regexSafetyProfile": {
+        "finding": "PF-011",
+        "profile": "host-safe component-schema profile",
+        "maximumSchemaDepth": 128,
+        "maximumPatternCodeUnits": 256,
+        "maximumPatternTokens": 128,
+        "maximumQuantifier": 1024,
+        "maximumExpandedFixedWidth": 4096,
+        "maximumUnanchoredFixedPatternWidth": 16,
+        "maximumSchemaNodes": 4096,
+        "maximumLocalReferenceEdges": 4096,
+        "maximumPatterns": 64,
+        "maximumAggregatePatternCodeUnits": 4096,
+        "evaluationBudget": 50000,
+        "variableWidthPlacement": "final consuming atom; only a terminal $ may follow",
+        "unsafeNativeRegExpExecution": false,
+        "scope": ["component props", "style-part properties"]
+      }
+    },
+    "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
+    "trackedFiles": [
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 12112,
+        "sha256": "f5d3f9f341ae80f3a0a8e99eddd2c49ca9c160478d461b4d1c621e7c87442210"
+      },
+      {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 25784,
+        "sha256": "67289796441382746d3beafd9e0753a3045d0d22156ca972f6af074f383ecc94"
+      },
+      {
+        "path": "docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md",
+        "bytes": 12280,
+        "sha256": "d1141192130c70792c1729acd972f62e0c0e5eeb7c3c9d0cf7362f14c2e93cae"
+      },
+      {
+        "path": "docs/proof/protocol-0.1.0-traceability.json",
+        "bytes": 134870,
+        "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+      },
+      {
+        "path": "package.json",
+        "bytes": 5171,
+        "sha256": "9a38b29b6ad4193ed71cf0de8853d2e9fca0b1d1670e1d6aa3838ba07c6f4d91"
+      },
+      {
+        "path": "packages/protocol/dist/canonicalization.js",
+        "bytes": 17634,
+        "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.js",
+        "bytes": 8905,
+        "sha256": "0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+      },
+      {
+        "path": "packages/protocol/dist/index.js",
+        "bytes": 679,
+        "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.js",
+        "bytes": 6499,
+        "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/protocol/src/canonicalization.ts",
+        "bytes": 17820,
+        "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
+      },
+      {
+        "path": "packages/protocol/src/diagnostics.ts",
+        "bytes": 13831,
+        "sha256": "d9cffbaae026c1bf027624f8c21b14172cdcf52fc3e546708e7becb0973019a4"
+      },
+      {
+        "path": "packages/protocol/src/index.ts",
+        "bytes": 3261,
+        "sha256": "e2ceeea8bd84d4d7e6e9431bc970cd8168478d8a7cad27f0f4909f71fabe8bcb"
+      },
+      {
+        "path": "packages/protocol/src/json-pointer.ts",
+        "bytes": 7460,
+        "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
+      },
+      {
+        "path": "packages/validator/README.md",
+        "bytes": 20505,
+        "sha256": "48213df08a849d09c07325c5e794e5725f57af751d3d5bd768013240ffc51cab"
+      },
+      {
+        "path": "packages/validator/THIRD_PARTY_NOTICES.md",
+        "bytes": 1216,
+        "sha256": "1e538937d6504807ab15280d8a821466a85a2a1949142305c81757eb9b86ae5b"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 1295,
+        "sha256": "7159aacb2adb4884ddb088f7a79c9f93f31d019778ffb14a8cc91c6b239e16d9"
+      },
+      {
+        "path": "packages/validator/scripts/clean-dist.mjs",
+        "bytes": 808,
+        "sha256": "e40927b824fdfce7f16a4698522bffc63d4f280f3bf9fe604034ea10d97c8adc"
+      },
+      {
+        "path": "packages/validator/scripts/generate-structural-validators.mjs",
+        "bytes": 851,
+        "sha256": "4ba802da3fabd66863109e42c13a440e9db9177cd1040cacb68f05bab76235fa"
+      },
+      {
+        "path": "packages/validator/scripts/lib/structural-validator-codegen.mjs",
+        "bytes": 22644,
+        "sha256": "beb61667243cb1db3118cc3eca4c3afcccf431e827eef7b87d1018e0db395779"
+      },
+      {
+        "path": "packages/validator/scripts/verify-structural-validators.mjs",
+        "bytes": 672,
+        "sha256": "cb53a3ff7ce07f03c12eeef66f812ba87fcb1ed962461f0ac40c9700765f2738"
+      },
+      {
+        "path": "packages/validator/src/component-contract-validation.ts",
+        "bytes": 32215,
+        "sha256": "ece2537429a792c4e8d464cb5b7761d9d9f5177933face1893709d9e4be9a9d7"
+      },
+      {
+        "path": "packages/validator/src/embedded-schema-validation.ts",
+        "bytes": 9807,
+        "sha256": "f3fa31f08989c991b4b896cb41e0765abe97c5cc171d197e2d8c1043dc24737b"
+      },
+      {
+        "path": "packages/validator/src/generated/0.1.0/structural-validators.ts",
+        "bytes": 761360,
+        "sha256": "d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd"
+      },
+      {
+        "path": "packages/validator/src/index.ts",
+        "bytes": 2008,
+        "sha256": "0930f29ac3e9c3672b46e644341eb4d080f2cd8ea8e94cae8bfa43245bf40524"
+      },
+      {
+        "path": "packages/validator/src/schema-instance-validation.ts",
+        "bytes": 61664,
+        "sha256": "50eb5baef52d134d52f65d89177f873933c9f0c265fa469e81289b8fb34a402a"
+      },
+      {
+        "path": "packages/validator/src/semantic-diagnostics.ts",
+        "bytes": 5912,
+        "sha256": "056db3c7c60f8b7599f8fc65b02268d038256d938cba8dda572d52a3462ce151"
+      },
+      {
+        "path": "packages/validator/src/semantic-validation.ts",
+        "bytes": 31291,
+        "sha256": "7aeb1ad014df92a11e6db7a69c34b187d50f20aa9abcb3ba4bf5df287c80e13f"
+      },
+      {
+        "path": "packages/validator/src/standalone-runtime.ts",
+        "bytes": 1963,
+        "sha256": "3fcba82ea37bf1027d67375bc51cb329b0bee4f76cb324232c9e40bf9aecb0cf"
+      },
+      {
+        "path": "packages/validator/src/structural-diagnostics.ts",
+        "bytes": 3574,
+        "sha256": "efdb86e5db349f8dee694a7d182ec24d0d0e8764618ad1108edc7a61b2c6b85a"
+      },
+      {
+        "path": "packages/validator/src/structural-validation.ts",
+        "bytes": 8591,
+        "sha256": "49c7b4a71e1c12c4641b7ce3a15b134d65e6c5f45fe92ec6c791b4be45f96b72"
+      },
+      {
+        "path": "packages/validator/src/uri-reference.ts",
+        "bytes": 10248,
+        "sha256": "f7e30daae65137377fbe8fef678101bc385d31f1d976e7cde0b048d434c4bdd6"
+      },
+      {
+        "path": "packages/validator/src/validation-internals.ts",
+        "bytes": 2396,
+        "sha256": "341e4cc2737afd8fa9047a274d9b9f8301f9346c50c9ea2b912b793970609392"
+      },
+      {
+        "path": "packages/validator/test/component-contracts.test.ts",
+        "bytes": 31344,
+        "sha256": "9c6760b60b654e4f33dedcadd1513bd3b3928c384a5fe59f0a6623bfc6379981"
+      },
+      {
+        "path": "packages/validator/test/schema-instance-validation.test.ts",
+        "bytes": 23462,
+        "sha256": "f192ccee103af0037b389a9076a1dd6a4ca393a08cfc269746009c76facd5281"
+      },
+      {
+        "path": "packages/validator/test/semantic-foundation.test.ts",
+        "bytes": 32893,
+        "sha256": "fe9db79a8f585132b5b740aae4bd54307ecff5a1b00110678ccf35e59052d6d4"
+      },
+      {
+        "path": "packages/validator/test/structural-validation.test.ts",
+        "bytes": 24492,
+        "sha256": "25cb7fe4469ce64f91459c1679d1a61dda2b22751b65309b3d0cd41240e1285b"
+      },
+      {
+        "path": "packages/validator/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/validator/tsconfig.json",
+        "bytes": 167,
+        "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 93999,
+        "sha256": "cf6e969d99bcac203d13fab6defed006c47b656d37f77ab31bcfc9bd3ab5e252"
+      },
+      {
+        "path": "scripts/generate-protocol-component-contracts-proof.mjs",
+        "bytes": 831,
+        "sha256": "c7806da68e58a54ad037de63cdc49a4cb44f8e0a90c25548df8911fb28b8d27b"
+      },
+      {
+        "path": "scripts/lib/protocol-component-contracts-proof.mjs",
+        "bytes": 88477,
+        "sha256": "22a5bc2e4e315a0edaa9e6d9ed8e848ebc541adbacd0c0b2e934968010dfd33a"
+      },
+      {
+        "path": "scripts/verify-protocol-component-contracts.mjs",
+        "bytes": 655,
+        "sha256": "ae8a49ae84a4e25220415a5188a5d998695de42839e95de66641f301f263fad0"
+      },
+      {
+        "path": "tests/protocol-component-contracts.test.mjs",
+        "bytes": 26643,
+        "sha256": "eaaef9cc8b4a9359510312faac30443592c74ddd5ca75e53839407b0cf988ddf"
+      },
+      {
+        "path": "turbo.json",
+        "bytes": 2642,
+        "sha256": "df407b3e7dd15005395380be8e124b7c7dfa61ca4b57496fd9bd7fbaa4930d6e"
+      }
+    ]
+  },
+  "verification": {
+    "commands": [
+      "pnpm generate:protocol-component-contracts",
+      "pnpm verify:protocol-component-contracts",
+      "pnpm test:protocol-component-contracts",
+      "pnpm check"
+    ],
+    "artifactWriter": {
+      "parentResolution": "realpath",
+      "temporaryFile": "same-directory exclusive create",
+      "durabilityBeforeCommit": "file sync",
+      "commit": "atomic rename",
+      "failureCleanup": "temporary file removed",
+      "rejectedDestinations": ["symlink", "directory", "special file", "symlink parent"]
+    },
+    "independentAnchors": [
+      "complete predecessor-verifier PASS plus exact bytes for M02-T05 diagnostics and M02-T07 semantic foundation",
+      "reviewed exact per-family T08 counts totalling 7 families / 191 constraints",
+      "BCP 14 N-026/N-028/N-029 TESTED ownership rows",
+      "reviewed PF-010 slot decisions plus PF-011 host-safe schema/regex budget decisions and implementation diagnostic",
+      "five core diagnostic identities D-008 through D-012",
+      "frozen valid documents and explicit absence of official T08 invalid vectors",
+      "project-owned prop, slot, style, variant, exact sign-in/store-map/failure obligation, dispatcher, and scope-fence goldens",
+      "public catalog-set depth and host-safe regex boundary goldens",
+      "validator and transitive @desen/protocol source/distribution import and code-execution audits",
+      "same-directory exclusive temporary write followed by atomic rename"
+    ]
+  },
+  "limitations": [
+    "The frozen suite contains no official M02-T08 invalid vector; all T08 negative contract cases are explicitly project-owned mutations.",
+    "Dynamic ValueSpec values produce deterministic obligations; reference resolution and runtime value validation remain M02-T10, M04, M05, and M06 responsibilities.",
+    "Behavior props, slots, style, attachment, conflicts, event, command, and payload contracts remain M02-T09.",
+    "Resource, operation, action, navigation, refresh, and command-target contracts remain M02-T11.",
+    "Official-suite parity and exhaustive diagnostic micro-vectors remain M02-T12 and M02-T13.",
+    "PF-011 remains OPEN: DESEN 0.1.0 does not standardize a portable regex engine or schema-complexity bound, so T08 fails closed under a documented project-owned host-safe profile and 50,000-step budget.",
+    "This task does not claim publication, runtime execution, activation, G02, or any new Proof Matrix P-* result."
+  ]
+}

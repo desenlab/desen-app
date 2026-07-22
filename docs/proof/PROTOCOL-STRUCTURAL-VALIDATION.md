@@ -115,6 +115,13 @@ import, or absolute workspace path. Document validation does not compile the emb
 does not perform network or filesystem access. The Ajv compiler and Node filesystem code run only
 in the explicit development-time generator, not in the public validation path.
 
+The proof also inventories and scans every built module shipped by `@desen/validator`. That
+reviewed package inventory now includes the T07 semantic modules and the T08
+`component-contract-validation` and `schema-instance-validation` modules. Admitting those files to
+the inventory does not assign their later semantics to T06: it ensures unexpected output remains a
+failure while every shipped JavaScript module is still checked for the same prohibited runtime
+constructs.
+
 This proves that the M02-T06 validation path does not execute document content. It does not claim
 that this task alone detects every executable-looking string or every future extension encoding;
 the complete prohibited-executable-content claim remains a later cross-cutting conformance proof.

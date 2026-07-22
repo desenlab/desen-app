@@ -16,8 +16,10 @@ now provides exact frozen-root structural validation for Source, Bundle, Catalog
 embedded-schema locator families, returning an independent immutable snapshot. M02-T07 now adds
 the platform-neutral semantic foundation: strict SemVer, exact declared-catalog matching, entry and
 identity namespaces, set-wide capability uniqueness, category-aware capability existence, and
-opaque extension preservation. Component contracts and runtime behavior have not started and are
-not claimed as proven.
+opaque extension preservation. M02-T08 now applies component prop and Variant schemas, slot
+contracts, accepted-child rules, visual states, and style-part contracts while preserving dynamic
+values as explicit later-validation obligations. Behavior contracts and runtime execution have not
+started and are not claimed as proven.
 
 ## Current milestone
 
@@ -29,9 +31,10 @@ not claimed as proven.
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
   `M02-T05 — Stable diagnostic model and JSON Pointer support`,
   `M02-T06 — Structural validation`,
-  `M02-T07 — Identity, SemVer, entry, catalog namespace, extension, and reference validation`
+  `M02-T07 — Identity, SemVer, entry, catalog namespace, extension, and reference validation`,
+  `M02-T08 — Component prop, slot, style-part, and visual-state contract validation`
 - Active task: None
-- Ready next task: `M02-T08 — Component prop, slot, style-part, and visual-state contract validation`
+- Ready next task: `M02-T09 — Event, command, behavior attachment, conflict, and payload-contract validation`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -69,9 +72,15 @@ not claimed as proven.
   goldens, exact requirement and target matching, entry and shared identity namespaces, all four
   capability categories, undeclared-catalog isolation, extension opacity, the two official T07
   invalid vectors, and explicit T08–T11 scope fences.
-- The foundation passes formatting, lint, strict typecheck, build, protocol integrity tests,
-  protocol traceability and type-generation tests, remaining scaffold test runners, and
-  dependency-boundary checks.
+- The component-contract layer passes 58 focused package tests and 21 independent evidence/mutation
+  tests over 7 reviewed schema families with 191 constraints. It checks base and Variant props,
+  slot presence/cardinality/acceptance, visual states, style parts, dynamic obligations,
+  dispatcher parity, immutable results, depth and regex safety boundaries, and explicit T09–T11
+  fences. A separate post-fix review reran all four safety/semantics reproducers and found no
+  remaining P1/P2 issue.
+- The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
+  integrity tests, protocol traceability and type-generation tests, remaining scaffold test
+  runners, and dependency-boundary checks.
 
 ## Current blocker
 
@@ -82,9 +91,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Begin only `M02-T08`: apply component prop schemas and validate slot names, cardinality, accepted
-children, style parts, and visual states. Keep event/action, state/binding, resource/operation,
-publication, and runtime responsibilities in their later assigned tasks.
+Begin only `M02-T09`: validate behavior-owned props, slots, style parts, attachment and conflict
+rules, component and behavior events, commands, and payload contracts. Keep state/binding,
+resource/operation, publication, and runtime responsibilities in their later assigned tasks.
 
 M02-T02 evidence:
 
@@ -107,20 +116,26 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `866878161013463a296da5a2e36b88d1162291fb781fb0706b94a12f263b414e`
+- artifact SHA-256: `d993fb5bc6c4e473286569d92effc7dfa77ede6ec014f22c436e00d46e9e84c8`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `bcd4d25168e9d65fa4b5568cd027131799d7d6b953687fbe125ad37f4e82996a`
+- artifact SHA-256: `616eadef51b78b42221b76dcff381e2aead0881f0a8fadf6f9f8f4ef071c7a80`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `5a588238f697decfdce82063643adab77b46ec0494b89d5897345e446c41f221`
+- artifact SHA-256: `18d41297f3333dd21e6786208eafe81ffbf07d7164172cc73673964d43b1592d`
+
+M02-T08 evidence:
+
+- `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
+- `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
+- artifact SHA-256: `cb66272d15cbad9a3c75d87061150ce70caec387ad9eb651dad48cf1e38901c0`
 
 ## Status vocabulary
 

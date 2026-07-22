@@ -17,11 +17,17 @@ export const INVALID_SEMVER_CODE = "run.desen.validator/INVALID_SEMVER" as const
 export const CATALOG_REQUIREMENT_MISMATCH_CODE =
   "run.desen.validator/CATALOG_REQUIREMENT_MISMATCH" as const;
 
-/** Namespaced diagnostics introduced by the M02-T07 semantic foundation. */
-export type DesenSemanticExtensionDiagnosticCode =
-  typeof INVALID_SEMVER_CODE | typeof CATALOG_REQUIREMENT_MISMATCH_CODE;
+/** Project-owned code for an internally contradictory component capability contract. */
+export const INVALID_COMPONENT_CONTRACT_CODE =
+  "run.desen.validator/INVALID_COMPONENT_CONTRACT" as const;
 
-/** Any core or project-owned diagnostic returned by semantic-foundation validation. */
+/** Namespaced diagnostics introduced by the cumulative semantic validation stages. */
+export type DesenSemanticExtensionDiagnosticCode =
+  | typeof INVALID_SEMVER_CODE
+  | typeof CATALOG_REQUIREMENT_MISMATCH_CODE
+  | typeof INVALID_COMPONENT_CONTRACT_CODE;
+
+/** Any core or project-owned diagnostic returned by cumulative semantic validation stages. */
 export type DesenSemanticDiagnostic =
   | Readonly<DesenCoreDiagnostic<CoreDiagnosticCode>>
   | Readonly<DesenDiagnostic<DesenSemanticExtensionDiagnosticCode>>;
@@ -79,6 +85,19 @@ export function catalogRequirementMismatchDiagnostic(
   return extensionDiagnostic(
     CATALOG_REQUIREMENT_MISMATCH_CODE,
     "The document and trusted catalog set do not have an exact catalog requirement relationship.",
+    pointer,
+    context,
+  );
+}
+
+/** Creates the safe project diagnostic used for contradictory component catalog contracts. */
+export function invalidComponentContractDiagnostic(
+  pointer: JsonPointer,
+  context?: DesenDiagnosticContext,
+): Readonly<DesenDiagnostic<typeof INVALID_COMPONENT_CONTRACT_CODE>> {
+  return extensionDiagnostic(
+    INVALID_COMPONENT_CONTRACT_CODE,
+    "The component catalog set has not passed a coherent component-contract boundary.",
     pointer,
     context,
   );

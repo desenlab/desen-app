@@ -135,6 +135,137 @@ function parseUriReference(value: string): UriReferenceParts | undefined {
   return { scheme, authority, path, query, fragment };
 }
 
+function normalizePercentEncoding(value: string): string {
+  return value.replace(/%([0-9A-Fa-f]{2})/gu, (_match, hexadecimal: string) => {
+    const character = String.fromCharCode(Number.parseInt(hexadecimal, 16));
+    return isUnreserved(character) ? character : `%${hexadecimal.toUpperCase()}`;
+  });
+}
+
+function removeLastPathSegment(path: string): string {
+  const slash = path.lastIndexOf("/");
+  return slash < 0 ? "" : path.slice(0, slash);
+}
+
+function removeDotSegments(path: string): string {
+  let input = path;
+  let output = "";
+  while (input !== "") {
+    if (input.startsWith("../")) input = input.slice(3);
+    else if (input.startsWith("./")) input = input.slice(2);
+    else if (input.startsWith("/./")) input = input.slice(2);
+    else if (input === "/.") input = "/";
+    else if (input.startsWith("/../")) {
+      input = input.slice(3);
+      output = removeLastPathSegment(output);
+    } else if (input === "/..") {
+      input = "/";
+      output = removeLastPathSegment(output);
+    } else if (input === "." || input === "..") input = "";
+    else {
+      const segmentEnd = input.startsWith("/") ? input.indexOf("/", 1) : input.indexOf("/");
+      if (segmentEnd < 0) {
+        output += input;
+        input = "";
+      } else {
+        output += input.slice(0, segmentEnd);
+        input = input.slice(segmentEnd);
+      }
+    }
+  }
+  return output;
+}
+
+function mergePaths(base: UriReferenceParts, relativePath: string): string {
+  if (base.authority !== undefined && base.path === "") return `/${relativePath}`;
+  const slash = base.path.lastIndexOf("/");
+  return slash < 0 ? relativePath : `${base.path.slice(0, slash + 1)}${relativePath}`;
+}
+
+function normalizeAuthority(authority: string, scheme: string): string {
+  const encoded = normalizePercentEncoding(authority);
+  const at = encoded.lastIndexOf("@");
+  const userInfo = at < 0 ? "" : encoded.slice(0, at + 1);
+  const hostAndPort = at < 0 ? encoded : encoded.slice(at + 1);
+
+  let host: string;
+  let port: string | undefined;
+  if (hostAndPort.startsWith("[")) {
+    const closing = hostAndPort.indexOf("]");
+    host = hostAndPort.slice(0, closing + 1).toLowerCase();
+    const suffix = hostAndPort.slice(closing + 1);
+    port = suffix.startsWith(":") ? suffix.slice(1) : undefined;
+  } else {
+    const colon = hostAndPort.lastIndexOf(":");
+    host = (colon < 0 ? hostAndPort : hostAndPort.slice(0, colon)).toLowerCase();
+    port = colon < 0 ? undefined : hostAndPort.slice(colon + 1);
+  }
+
+  const normalizedPort =
+    (scheme === "http" && port === "80") || (scheme === "https" && port === "443")
+      ? undefined
+      : port;
+  return `${userInfo}${host}${normalizedPort === undefined ? "" : `:${normalizedPort}`}`;
+}
+
+/**
+ * Resolves and syntax-normalizes one RFC 3986 URI reference against an absolute base URI.
+ *
+ * @remarks This is a platform-neutral implementation of RFC 3986 section 5.2. It performs no
+ * network access and intentionally avoids WHATWG URL or another host API. Syntax normalization
+ * lowercases schemes and hosts, removes dot segments and default HTTP(S) ports, uppercases retained
+ * percent escapes, and decodes percent-encoded unreserved characters.
+ */
+export function resolveUriReference(reference: string, baseUri: string): string | undefined {
+  const referenceParts = parseUriReference(reference);
+  const base = parseUriReference(baseUri);
+  if (referenceParts === undefined || base?.scheme === undefined) return undefined;
+
+  let scheme: string;
+  let authority: string | undefined;
+  let path: string;
+  let query: string | undefined;
+  if (referenceParts.scheme !== undefined) {
+    scheme = referenceParts.scheme.toLowerCase();
+    authority = referenceParts.authority;
+    path = removeDotSegments(normalizePercentEncoding(referenceParts.path));
+    query = referenceParts.query;
+  } else {
+    scheme = base.scheme.toLowerCase();
+    if (referenceParts.authority !== undefined) {
+      authority = referenceParts.authority;
+      path = removeDotSegments(normalizePercentEncoding(referenceParts.path));
+      query = referenceParts.query;
+    } else {
+      authority = base.authority;
+      if (referenceParts.path === "") {
+        path = normalizePercentEncoding(base.path);
+        query = referenceParts.query ?? base.query;
+      } else {
+        path = removeDotSegments(
+          normalizePercentEncoding(
+            referenceParts.path.startsWith("/")
+              ? referenceParts.path
+              : mergePaths(base, referenceParts.path),
+          ),
+        );
+        query = referenceParts.query;
+      }
+    }
+  }
+
+  const normalizedAuthority =
+    authority === undefined ? undefined : normalizeAuthority(authority, scheme);
+  const normalizedQuery = query === undefined ? "" : `?${normalizePercentEncoding(query)}`;
+  const normalizedFragment =
+    referenceParts.fragment === undefined || referenceParts.fragment === ""
+      ? ""
+      : `#${normalizePercentEncoding(referenceParts.fragment)}`;
+  return `${scheme}:${
+    normalizedAuthority === undefined ? "" : `//${normalizedAuthority}`
+  }${path}${normalizedQuery}${normalizedFragment}`;
+}
+
 /** Tests exact RFC 3986 URI-reference syntax without resolving, normalizing, or fetching it. */
 export function isUriReference(value: string): boolean {
   return parseUriReference(value) !== undefined;

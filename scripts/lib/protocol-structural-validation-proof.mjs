@@ -251,9 +251,11 @@ const EMBEDDED_LOCATOR_MUTATIONS = Object.freeze([
   }),
 ]);
 const EXPECTED_DISTRIBUTION_MODULES = Object.freeze([
+  "component-contract-validation",
   "embedded-schema-validation",
   "generated/0.1.0/structural-validators",
   "index",
+  "schema-instance-validation",
   "semantic-diagnostics",
   "semantic-validation",
   "standalone-runtime",

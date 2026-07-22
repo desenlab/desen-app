@@ -129,3 +129,64 @@ This file records implementation discoveries without changing the frozen DESEN 0
   caller-supplied catalog array and RFC 6901-escapes its capability ID.
 - Future action: Define first-class core diagnostics and a normative cross-document pointer model
   in a later protocol revision.
+
+## PF-010 — Slot edge semantics and impossible component contracts are underspecified
+
+- Status: OPEN
+- Blocks proof: No; the validator can make the edge behavior explicit without changing the frozen
+  documents.
+- Protocol location: SPEC Sections 17.3, 21.3, and 26.1; Catalog Schema `$defs/slotSpec`; Appendix B
+- Observation: DESEN 0.1.0 names `required`, `minItems`, and `maxItems` as separate slot-cardinality
+  inputs but does not state how an omitted `minItems` combines with `required`, whether an explicit
+  `minItems: 0` permits an empty required slot, or whether empty-but-present `accepts` and
+  `acceptsCategories` arrays mean unrestricted or reject-all. The frozen schema also permits
+  `maxItems` below the effective minimum. The informative starter validator treats `required` as an
+  implicit minimum of one only when `minItems` is omitted, treats empty acceptance arrays as
+  unrestricted, and reports an impossible range as `SCHEMA_INVALID`; these choices are not all
+  stated by the normative schema or prose.
+- Implementation decision: A required slot must be present. For a present slot,
+  `effectiveMin = minItems ?? (required ? 1 : 0)`; therefore an explicit
+  `required: true, minItems: 0` accepts an empty-but-present array. When both acceptance fields are
+  absent, the slot is unrestricted. When either field is present, the accepted set is the exact OR
+  union of the declared capability IDs and categories, so an explicitly empty union rejects every
+  child. A component contract with `maxItems < effectiveMin` is rejected with the documented
+  implementation-namespaced code `run.desen.validator/INVALID_COMPONENT_CONTRACT` because the
+  frozen schema accepts the document and `SCHEMA_INVALID` would make an inaccurate claim. Unknown
+  visual states and style parts continue to use the core `UNKNOWN_PROP` code, matching the frozen
+  starter behavior rather than inventing additional diagnostic identities.
+- Future action: Define slot-presence, effective-minimum, empty-acceptance, impossible-range, and
+  diagnostic behavior directly in a future protocol revision and add matching conformance vectors.
+
+## PF-011 — Draft 2020-12 regex execution has no portable complexity bound
+
+- Status: OPEN
+- Blocks proof: No; the validator can fail closed under a documented host-safe component-schema
+  profile without weakening the frozen protocol.
+- Protocol location: SPEC Sections 10.3, 17.2, 18.3, 21.2, 21.6, and 27.8; embedded Draft 2020-12
+  schemas; mandatory clause `N-041`
+- Observation: A catalog pattern may be valid ECMA-262 syntax and still cause catastrophic
+  backtracking in a native JavaScript `RegExp`. DESEN 0.1.0 requires finite runtime and publisher
+  limits but does not define a regex engine, a linear-time dialect, or schema-evaluation budgets.
+  Syntax validation alone therefore cannot make untrusted component schemas safe to execute on the
+  UI thread.
+- Implementation decision: M02-T08 keeps T06 Draft 2020-12 syntax validation intact, then admits a
+  component prop or style-part schema only through a stricter host-safe preparation boundary.
+  Patterns are limited to 256 UTF-16 code units, 128 tokens, quantifiers no greater than 1,024, and
+  an expanded fixed width no greater than 4,096. An unanchored fixed-width pattern is limited to 16
+  expanded atoms. Groups, alternation, lookaround, backreferences, Unicode-property escapes,
+  interior zero-width assertions, and lazy or possessive repetition are rejected. At most one
+  variable-width quantifier is allowed, it requires both edge anchors, and it must be the final
+  consuming atom; only the terminal `$` may follow. This rejects pathological quantified prefixes
+  followed by fixed suffixes before native matching. Each schema is also limited to a maximum
+  traversal/evaluation depth of 128, 4,096 schema nodes, 4,096 local-reference edges, 64 patterns,
+  4,096 aggregate pattern code units, and a deterministic 50,000-step evaluation budget.
+  Unresolved local references, duplicate same-resource anchors, profile violations, and statically
+  excessive schema fan-out fail at the exact catalog schema pointer with
+  `run.desen.validator/INVALID_COMPONENT_CONTRACT`. The evaluator independently enforces the same
+  step ceiling and fails closed at the component prop or style value pointer if input-driven work
+  exhausts it. Unsafe patterns are never passed to native `RegExp`. T08 applies this profile only
+  to component prop and style-part schemas, preserving the behavior/event/command boundary
+  assigned to T09.
+- Future action: Standardize a portable linear-time regex and schema-resource-limit profile, or
+  adopt a platform-neutral linear-time engine, then add official conformance vectors for safe and
+  rejected schemas.

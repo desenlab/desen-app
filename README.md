@@ -67,6 +67,7 @@ packages/
 - [Proof matrix](docs/proof/PROOF-MATRIX.md)
 - [Structural-validation proof](docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md)
 - [Semantic-foundation proof](docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md)
+- [Component-contract proof](docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -95,10 +96,15 @@ The M02-T07 semantic foundation now adds strict Semantic Versioning, exact decla
 matching, entry and identity rules, one catalog capability namespace, category-aware component,
 behavior, resource, and operation existence, and opaque extension preservation. Trusted catalog
 pools may contain extra packages, but an undeclared package never authorizes a document capability.
-Component contracts, event/action behavior, ValueSpec references, digests, publication, and runtime
-values remain later tasks. The first product proof is still `web-react`, while the protocol and
-validator packages remain independent of React, DOM, and browser APIs so future iOS and Android
-runtimes can reuse the same contract.
+
+The M02-T08 component-contract stage now validates statically knowable component props and Variant
+patches, slot declarations and children, visual states, style parts, and style properties. Dynamic
+ValueSpecs remain inert and become explicit later-validation obligations. Component schemas pass a
+documented host-safe preparation profile before the code-free interpreter can apply them.
+Behavior/event/command contracts, reference resolution, resource and operation contracts, digests,
+publication, and runtime values remain later tasks. The first product proof is still `web-react`,
+while the protocol and validator packages remain independent of React, DOM, and browser APIs so
+future iOS and Android runtimes can reuse the same contract.
 
 ## License
 

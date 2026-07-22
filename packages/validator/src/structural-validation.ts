@@ -166,33 +166,40 @@ export function validateDesenStructure<Target extends DesenStructuralTarget>(
   const snapshot = inertSnapshot(input);
   if (snapshot === undefined) return invalidInputResult(target);
 
-  const rootValidator = ROOT_VALIDATORS[target];
-  if (!rootValidator(snapshot)) {
-    const unsupportedProtocol = hasUnsupportedProtocolVersion(snapshot);
-    const rootDiagnostics = (rootValidator.errors ?? [])
-      .filter(
-        (error) =>
-          !(unsupportedProtocol && error.keyword === "const" && error.instancePath === "/desen"),
-      )
-      .map((error) => diagnosticFromAjvError(error, ROOT_POINTER, "root"));
-    if (unsupportedProtocol) {
-      rootDiagnostics.push(unsupportedProtocolDiagnostic(appendJsonPointer(ROOT_POINTER, "desen")));
+  try {
+    const rootValidator = ROOT_VALIDATORS[target];
+    if (!rootValidator(snapshot)) {
+      const unsupportedProtocol = hasUnsupportedProtocolVersion(snapshot);
+      const rootDiagnostics = (rootValidator.errors ?? [])
+        .filter(
+          (error) =>
+            !(unsupportedProtocol && error.keyword === "const" && error.instancePath === "/desen"),
+        )
+        .map((error) => diagnosticFromAjvError(error, ROOT_POINTER, "root"));
+      if (unsupportedProtocol) {
+        rootDiagnostics.push(
+          unsupportedProtocolDiagnostic(appendJsonPointer(ROOT_POINTER, "desen")),
+        );
+      }
+      const diagnostics = normalizeDiagnostics(rootDiagnostics);
+      return validationFailure(target, diagnostics);
     }
-    const diagnostics = normalizeDiagnostics(rootDiagnostics);
-    return validationFailure(target, diagnostics);
-  }
 
-  if (!isJsonObject(snapshot)) {
-    // The generated root schemas require an object, so this is defensive against artifact drift.
-    return invalidInputResult(target);
-  }
+    if (!isJsonObject(snapshot)) {
+      // The generated root schemas require an object, so this is defensive against artifact drift.
+      return invalidInputResult(target);
+    }
 
-  const embeddedDiagnostics = normalizeDiagnostics(
-    validateEmbeddedSchemas(target, snapshot as JsonObject, META_SCHEMA_VALIDATOR),
-  );
-  return embeddedDiagnostics.length === 0
-    ? validationSuccess(target, snapshot)
-    : validationFailure(target, embeddedDiagnostics);
+    const embeddedDiagnostics = normalizeDiagnostics(
+      validateEmbeddedSchemas(target, snapshot as JsonObject, META_SCHEMA_VALIDATOR),
+    );
+    return embeddedDiagnostics.length === 0
+      ? validationSuccess(target, snapshot)
+      : validationFailure(target, embeddedDiagnostics);
+  } catch (error) {
+    if (error instanceof RangeError) return invalidInputResult(target);
+    throw error;
+  }
 }
 
 /** Validates unknown input as a DESEN 0.1.0 editable Source document. */
