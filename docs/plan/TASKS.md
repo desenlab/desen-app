@@ -50,7 +50,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | M02-T07 | DONE        | M02-T06         | Identity, SemVer, entry, catalog namespace, extension, and reference validation                                        |
 | M02-T08 | DONE        | M02-T07         | Component prop, slot, style-part, and visual-state contract validation                                                 |
 | M02-T09 | DONE        | M02-T07         | Event, command, behavior attachment, conflict, and payload-contract validation                                         |
-| M02-T10 | NOT_STARTED | M02-T07         | State, predicate, repeat, alias, and static binding validation                                                         |
+| M02-T10 | DONE        | M02-T07         | State, predicate, repeat, alias, and static binding validation                                                         |
 | M02-T11 | NOT_STARTED | M02-T07         | Resource, operation, action, navigation, and command-target validation                                                 |
 | M02-T12 | NOT_STARTED | M02-T04–M02-T11 | TypeScript parity for official 14-case suite: 9 vectors + 5 examples                                                   |
 | M02-T13 | NOT_STARTED | M02-T08–M02-T12 | Positive and negative project micro-vectors for every validator-owned diagnostic                                       |

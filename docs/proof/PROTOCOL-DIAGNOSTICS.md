@@ -96,7 +96,7 @@ goldens, verifies all named runtime and type exports, command/test wiring, the a
 dependencies, and tracked implementation hashes, and rejects any byte drift.
 
 - Artifact: `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- Artifact SHA-256: `48a3b2d7d5ac336a70f4c58d9ef485a5340305528b5ba777af612703a0df7bb5`
+- Artifact SHA-256: `e3fd61109c574eb8e60b3daebb594f47fd507b2eb79c1d99671c86764a586b14`
 - Package tests: 17
 - Root evidence and mutation tests: 8
 

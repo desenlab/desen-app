@@ -68,6 +68,8 @@ packages/
 - [Structural-validation proof](docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md)
 - [Semantic-foundation proof](docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md)
 - [Component-contract proof](docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md)
+- [Interaction-contract proof](docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md)
+- [Binding-contract proof](docs/proof/PROTOCOL-BINDING-CONTRACTS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -110,6 +112,13 @@ bindings. Event-reference resolution, command targets and inputs, resource and o
 digests, publication, adapters, and runtime execution remain later tasks. The first product proof
 is still `web-react`, while the protocol and validator packages remain independent of React, DOM,
 and browser APIs so future iOS and Android runtimes can reuse the same contract.
+
+The M02-T10 binding stage now validates each surface's state schema and inert initial value,
+surface-local `state.*`, lexical `item.*`, and immediate-turn `event.*` references, exact `$format`
+placeholders, statically decidable predicate operand types, and repeat item/alias/key contracts. It
+preserves every unresolved component and behavior obligation from T09 instead of guessing dynamic
+host values. Resource and operation contracts, complete action semantics, runtime predicate
+evaluation, and dynamic repeat materialization remain deliberately assigned to later stages.
 
 ## License
 

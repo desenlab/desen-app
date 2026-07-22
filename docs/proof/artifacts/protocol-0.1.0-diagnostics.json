@@ -61,13 +61,13 @@
     "trackedFiles": [
       {
         "path": "package.json",
-        "bytes": 5771,
-        "sha256": "b1769558f9d739760cc70c948068010556bb695a71c05e440b5ac82fdfcd987e"
+        "bytes": 6335,
+        "sha256": "592cc589e77353afcc1b13c3857699fcb26a66bab9b25b133f39a10479e9b024"
       },
       {
         "path": "turbo.json",
-        "bytes": 2908,
-        "sha256": "1683e8759f25e4e74f70e61c607afb9888ea80574af836d4432684b704bc95cc"
+        "bytes": 3158,
+        "sha256": "d1bd0854dddd7bedff088a005a86c37c13e0cb5fa59760f2f67d477e82fd9b75"
       },
       {
         "path": "packages/protocol/package.json",

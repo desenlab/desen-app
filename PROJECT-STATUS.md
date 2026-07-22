@@ -20,8 +20,11 @@ opaque extension preservation. M02-T08 now applies component prop and Variant sc
 contracts, accepted-child rules, visual states, and style-part contracts while preserving dynamic
 values as explicit later-validation obligations. M02-T09 now adds behavior prop/slot/style
 contracts, attachment and conflict rules, declared event and known-target command names, plus a
-bounded resolved-event-payload validator. Runtime adapter execution has not started and is not
-claimed as proven.
+bounded resolved-event-payload validator. M02-T10 now validates state schemas and initial values,
+lexical references and event turns, predicate operand types, formatting placeholders, repeat
+arrays, aliases, keys, direct limits, and narrow state-action roots while preserving all dynamic
+runtime responsibilities for their assigned later tasks. Runtime adapter execution has not started
+and is not claimed as proven.
 
 ## Current milestone
 
@@ -35,9 +38,10 @@ claimed as proven.
   `M02-T06 — Structural validation`,
   `M02-T07 — Identity, SemVer, entry, catalog namespace, extension, and reference validation`,
   `M02-T08 — Component prop, slot, style-part, and visual-state contract validation`,
-  `M02-T09 — Event, command, behavior attachment, conflict, and payload-contract validation`
+  `M02-T09 — Event, command, behavior attachment, conflict, and payload-contract validation`,
+  `M02-T10 — State, predicate, repeat, alias, and static binding validation`
 - Active task: None
-- Ready next task: `M02-T10 — State, predicate, repeat, alias, and static binding validation`
+- Ready next task: `M02-T11 — Resource, operation, action, navigation, and command-target validation`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -86,6 +90,13 @@ claimed as proven.
   behavior, 6 attachment, 7 conflict, 8 schema-safety, and 10 payload-safety goldens; the official
   T09 unknown-event vector; R-069 behavior identity; private trust branding; exact diagnostic
   pointers; prototype-inherited declaration rejection; and explicit T10/T11 scope fences.
+- The cumulative binding-contract layer passes 173 focused package tests and 48 deterministic
+  project mutation goldens over 10 reviewed schema families with 300 constraints and 12 prose
+  rules. It validates inert state initials, fallback/null distinctions, lexical state/item/event
+  scopes, predicate types, exact linear formatting, repeat arrays/aliases/keys/direct limits,
+  narrow state-action roots, immutable results, dispatcher parity, all five frozen binding
+  diagnostic identities, and byte-for-byte preservation of all four T09 obligation kinds. Two
+  independent post-fix reviews found no remaining open source issue.
 - The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
   integrity tests, protocol traceability and type-generation tests, remaining scaffold test
   runners, and dependency-boundary checks.
@@ -99,9 +110,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Begin only `M02-T10`: validate state, predicate, repeat, alias, and statically decidable binding and
-event-reference rules. Keep resource/operation/action targets, command input, publication, adapter,
-and runtime responsibilities in their later assigned tasks.
+Begin only `M02-T11`: validate resource, operation, action, navigation, and command targets without
+pulling publication, adapter execution, or runtime lifecycle work forward from their assigned later
+tasks.
 
 M02-T02 evidence:
 
@@ -124,32 +135,38 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `48a3b2d7d5ac336a70f4c58d9ef485a5340305528b5ba777af612703a0df7bb5`
+- artifact SHA-256: `e3fd61109c574eb8e60b3daebb594f47fd507b2eb79c1d99671c86764a586b14`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `1abb36f0a9f7ff233bf7077f818135a912b3b87999a359cf9b51233df590eafc`
+- artifact SHA-256: `f5fa6918c76a9328fbd1700c2b1b434ff3966ce5e15235256dbbdddd1be815db`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `df0bb50f1a8ac6a4e071458e13deccb2693db19cbed0c8514ac3560caee97561`
+- artifact SHA-256: `e5c08a222935905f9e664e1aa35739d37bd363de435f66f78cf998651209dcd8`
 
 M02-T08 evidence:
 
 - `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
-- artifact SHA-256: `75d6fad78b763ab74182f4bdfdac034d6dce382f5c842856dbedf1de1b6ce3b5`
+- artifact SHA-256: `41cb8c266bf5c3052597d5d35baa89e630fbc5000eaf97ad1769cbcb5f0096f0`
 
 M02-T09 evidence:
 
 - `docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json`
-- artifact SHA-256: `e9de90164dd7c80a7cb49568b96276771de7c14c9fa5bf2f4e26101458a286fe`
+- artifact SHA-256: `68074a273c6d03b407b6e52e078ce57a92a8b50da5ef6335a7c92a305868cc4c`
+
+M02-T10 evidence:
+
+- `docs/proof/PROTOCOL-BINDING-CONTRACTS.md`
+- `docs/proof/artifacts/protocol-0.1.0-binding-contracts.json`
+- artifact SHA-256: `4ac15c6b9e7a34ea05aed96ac1ff3a3512dc810d8c4e1daa09efdd721936342f`
 
 ## Status vocabulary
 

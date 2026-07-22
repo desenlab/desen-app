@@ -25,12 +25,17 @@ export const INVALID_COMPONENT_CONTRACT_CODE =
 export const INVALID_INTERACTION_CONTRACT_CODE =
   "run.desen.validator/INVALID_INTERACTION_CONTRACT" as const;
 
+/** Project-owned code for a statically incoherent state or binding contract. */
+export const INVALID_BINDING_CONTRACT_CODE =
+  "run.desen.validator/INVALID_BINDING_CONTRACT" as const;
+
 /** Namespaced diagnostics introduced by the cumulative semantic validation stages. */
 export type DesenSemanticExtensionDiagnosticCode =
   | typeof INVALID_SEMVER_CODE
   | typeof CATALOG_REQUIREMENT_MISMATCH_CODE
   | typeof INVALID_COMPONENT_CONTRACT_CODE
-  | typeof INVALID_INTERACTION_CONTRACT_CODE;
+  | typeof INVALID_INTERACTION_CONTRACT_CODE
+  | typeof INVALID_BINDING_CONTRACT_CODE;
 
 /** Any core or project-owned diagnostic returned by cumulative semantic validation stages. */
 export type DesenSemanticDiagnostic =
@@ -116,6 +121,19 @@ export function invalidInteractionContractDiagnostic(
   return extensionDiagnostic(
     INVALID_INTERACTION_CONTRACT_CODE,
     "The catalog set has not passed a coherent behavior, event, and command contract boundary.",
+    pointer,
+    context,
+  );
+}
+
+/** Creates the safe project diagnostic used for statically incoherent state or binding data. */
+export function invalidBindingContractDiagnostic(
+  pointer: JsonPointer,
+  context?: DesenDiagnosticContext,
+): Readonly<DesenDiagnostic<typeof INVALID_BINDING_CONTRACT_CODE>> {
+  return extensionDiagnostic(
+    INVALID_BINDING_CONTRACT_CODE,
+    "A state declaration or statically decidable binding contract is incoherent.",
     pointer,
     context,
   );

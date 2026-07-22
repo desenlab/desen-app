@@ -23,6 +23,7 @@
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "../../scripts/lib/protocol-binding-contracts-proof.mjs",
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
         "../../scripts/lib/protocol-types.mjs",
         "../../scripts/lib/protocol-canonicalization-proof.mjs",
@@ -32,6 +33,7 @@
         "../../scripts/lib/protocol-semantic-foundation-proof.mjs",
         "../../scripts/lib/protocol-structural-validation-proof.mjs",
         "../../tests/protocol-canonicalization.test.mjs",
+        "../../tests/protocol-binding-contracts.test.mjs",
         "../../tests/protocol-component-contracts.test.mjs",
         "../../tests/protocol-diagnostics.test.mjs",
         "../../tests/protocol-interaction-contracts.test.mjs",
@@ -46,6 +48,7 @@
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "../../scripts/lib/protocol-binding-contracts-proof.mjs",
         "../../scripts/lib/protocol-snapshot-integrity.mjs",
         "../../scripts/lib/protocol-types.mjs",
         "../../scripts/lib/protocol-canonicalization-proof.mjs",
@@ -55,6 +58,7 @@
         "../../scripts/lib/protocol-semantic-foundation-proof.mjs",
         "../../scripts/lib/protocol-structural-validation-proof.mjs",
         "../../tests/protocol-canonicalization.test.mjs",
+        "../../tests/protocol-binding-contracts.test.mjs",
         "../../tests/protocol-component-contracts.test.mjs",
         "../../tests/protocol-diagnostics.test.mjs",
         "../../tests/protocol-interaction-contracts.test.mjs",

@@ -189,6 +189,29 @@ export interface SchemaContractGraphIssue {
   readonly keyword: string;
 }
 
+/**
+ * JSON value categories exposed by the package-private schema path inspector.
+ *
+ * @internal `integer` is represented by `number` because DESEN resolved values use JSON's six
+ * runtime value categories rather than JSON Schema's narrower numeric assertion.
+ */
+export type SchemaContractJsonType = "array" | "boolean" | "null" | "number" | "object" | "string";
+
+/**
+ * Conservative reachability and value-type information for one schema-relative property path.
+ *
+ * @internal `impossible` is the only negative proof: every statically supported branch rejects
+ * the path. `possible` means the supported keywords leave at least one path open. `unknown` keeps
+ * the same sound type over-approximation but records that an unsupported conditional, cyclic
+ * reference, malformed programmatic input, or safety budget prevented a complete conclusion.
+ */
+export interface SchemaContractPathInspection {
+  /** Whether the property path is definitely excluded, remains open, or cannot be decided. */
+  readonly reachability: "impossible" | "possible" | "unknown";
+  /** Sorted JSON categories that the value at the path may have. */
+  readonly types: readonly SchemaContractJsonType[];
+}
+
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -1125,6 +1148,437 @@ export function validateSchemaContractGraph(schema: unknown): readonly SchemaCon
   if (evaluationProfileIssue !== undefined) issues.push(evaluationProfileIssue);
 
   return normalizeGraphIssues(issues);
+}
+
+const SCHEMA_CONTRACT_JSON_TYPES = Object.freeze([
+  "array",
+  "boolean",
+  "null",
+  "number",
+  "object",
+  "string",
+] as const satisfies readonly SchemaContractJsonType[]);
+
+type PathInspectionReachability = SchemaContractPathInspection["reachability"];
+
+interface PathInspectionAnalysis {
+  readonly reachability: PathInspectionReachability;
+  readonly types: Set<SchemaContractJsonType>;
+}
+
+interface PathInspectionState {
+  readonly active: Set<string>;
+  readonly path: readonly string[];
+  readonly registry: SchemaRegistry;
+  readonly schemaIds: WeakMap<object, number>;
+  nextSchemaId: number;
+  steps: number;
+}
+
+function pathInspection(
+  reachability: PathInspectionReachability,
+  types: Iterable<SchemaContractJsonType> = [],
+): PathInspectionAnalysis {
+  const normalizedTypes = new Set(types);
+  return normalizedTypes.size === 0
+    ? { reachability: "impossible", types: normalizedTypes }
+    : { reachability, types: normalizedTypes };
+}
+
+function possiblePathInspection(
+  types: Iterable<SchemaContractJsonType> = SCHEMA_CONTRACT_JSON_TYPES,
+): PathInspectionAnalysis {
+  return pathInspection("possible", types);
+}
+
+function unknownPathInspection(
+  types: Iterable<SchemaContractJsonType> = SCHEMA_CONTRACT_JSON_TYPES,
+): PathInspectionAnalysis {
+  return pathInspection("unknown", types);
+}
+
+function impossiblePathInspection(): PathInspectionAnalysis {
+  return pathInspection("impossible");
+}
+
+function withUnknownReachability(analysis: PathInspectionAnalysis): PathInspectionAnalysis {
+  return analysis.reachability === "impossible"
+    ? analysis
+    : pathInspection("unknown", analysis.types);
+}
+
+function intersectPathInspections(
+  left: PathInspectionAnalysis,
+  right: PathInspectionAnalysis,
+): PathInspectionAnalysis {
+  if (left.reachability === "impossible" || right.reachability === "impossible") {
+    return impossiblePathInspection();
+  }
+  const types = new Set([...left.types].filter((candidate) => right.types.has(candidate)));
+  return pathInspection(
+    left.reachability === "unknown" || right.reachability === "unknown" ? "unknown" : "possible",
+    types,
+  );
+}
+
+function unionPathInspections(analyses: readonly PathInspectionAnalysis[]): PathInspectionAnalysis {
+  const viable = analyses.filter((analysis) => analysis.reachability !== "impossible");
+  if (viable.length === 0) return impossiblePathInspection();
+  const types = new Set<SchemaContractJsonType>();
+  viable.forEach((analysis) => analysis.types.forEach((type) => types.add(type)));
+  return pathInspection(
+    viable.some((analysis) => analysis.reachability === "unknown") ? "unknown" : "possible",
+    types,
+  );
+}
+
+function jsonTypeOf(value: unknown): SchemaContractJsonType | undefined {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return "array";
+  if (isObject(value)) return "object";
+  if (typeof value === "boolean") return "boolean";
+  if (typeof value === "string") return "string";
+  if (typeof value === "number" && Number.isFinite(value)) return "number";
+  return undefined;
+}
+
+function schemaTypeKeywordInspection(schema: SchemaObject): PathInspectionAnalysis {
+  let result = possiblePathInspection();
+  if (Object.hasOwn(schema, "type")) {
+    const candidates = Array.isArray(schema.type) ? schema.type : [schema.type];
+    const types = new Set<SchemaContractJsonType>();
+    let malformed = candidates.length === 0;
+    for (const candidate of candidates) {
+      if (candidate === "integer" || candidate === "number") types.add("number");
+      else if (SCHEMA_CONTRACT_JSON_TYPES.some((type) => type === candidate)) {
+        types.add(candidate as SchemaContractJsonType);
+      } else {
+        malformed = true;
+      }
+    }
+    result = malformed ? unknownPathInspection() : possiblePathInspection(types);
+  }
+
+  if (Object.hasOwn(schema, "const")) {
+    const constType = jsonTypeOf(schema.const);
+    result = intersectPathInspections(
+      result,
+      constType === undefined ? unknownPathInspection() : possiblePathInspection([constType]),
+    );
+  }
+
+  if (Object.hasOwn(schema, "enum")) {
+    if (!Array.isArray(schema.enum)) {
+      result = intersectPathInspections(result, unknownPathInspection());
+    } else if (schema.enum.length === 0) {
+      result = intersectPathInspections(result, unknownPathInspection());
+    } else {
+      const enumCandidates = schema.enum.map((candidate) => {
+        const candidateType = jsonTypeOf(candidate);
+        return candidateType === undefined
+          ? unknownPathInspection()
+          : possiblePathInspection([candidateType]);
+      });
+      result = intersectPathInspections(result, unionPathInspections(enumCandidates));
+    }
+  }
+
+  return result;
+}
+
+function inspectLiteralPath(
+  value: unknown,
+  path: readonly string[],
+  startIndex: number,
+): PathInspectionAnalysis {
+  let current = value;
+  for (let index = startIndex; index < path.length; index += 1) {
+    if (!isObject(current)) return impossiblePathInspection();
+    const segment = path[index] as string;
+    if (!Object.hasOwn(current, segment)) return impossiblePathInspection();
+    current = current[segment];
+  }
+  const type = jsonTypeOf(current);
+  return type === undefined ? unknownPathInspection() : possiblePathInspection([type]);
+}
+
+function pathInspectionSchemaId(schema: SchemaObject, state: PathInspectionState): number {
+  const existing = state.schemaIds.get(schema);
+  if (existing !== undefined) return existing;
+  const assigned = state.nextSchemaId;
+  state.nextSchemaId += 1;
+  state.schemaIds.set(schema, assigned);
+  return assigned;
+}
+
+function inspectSchemaPath(
+  schema: JsonSchema,
+  inheritedResource: SchemaResource,
+  pathIndex: number,
+  state: PathInspectionState,
+): PathInspectionAnalysis {
+  state.steps += 1;
+  if (state.steps > MAX_SCHEMA_EVALUATION_STEPS) return unknownPathInspection();
+  if (schema === false) return impossiblePathInspection();
+  if (schema === true) return possiblePathInspection();
+
+  const activeKey = `${pathInspectionSchemaId(schema, state)}\u0000${pathIndex}`;
+  if (state.active.has(activeKey)) return unknownPathInspection();
+  state.active.add(activeKey);
+
+  try {
+    const resource = state.registry.resourceBySchema.get(schema) ?? inheritedResource;
+    let result =
+      pathIndex === state.path.length
+        ? schemaTypeKeywordInspection(schema)
+        : inspectDirectSchemaProperty(schema, resource, pathIndex, state);
+
+    if (Object.hasOwn(schema, "$ref")) {
+      if (typeof schema.$ref !== "string") {
+        result = withUnknownReachability(result);
+      } else {
+        const resolved = resolveReference(schema.$ref, resource, state.registry, false, [resource]);
+        result = intersectPathInspections(
+          result,
+          resolved === undefined
+            ? unknownPathInspection()
+            : inspectSchemaPath(resolved.schema, resolved.resource, pathIndex, state),
+        );
+      }
+    }
+
+    // A dynamic reference can resolve against an outer runtime scope not represented by this
+    // standalone query. Keeping its contribution unknown prevents a local target from becoming a
+    // false negative while ordinary `$ref` remains exactly inspectable.
+    if (Object.hasOwn(schema, "$dynamicRef")) result = withUnknownReachability(result);
+
+    if (Object.hasOwn(schema, "allOf")) {
+      if (!Array.isArray(schema.allOf)) {
+        result = withUnknownReachability(result);
+      } else if (schema.allOf.length === 0) {
+        result = withUnknownReachability(result);
+      } else {
+        for (const candidate of schema.allOf) {
+          const child = asSchema(candidate);
+          result = intersectPathInspections(
+            result,
+            child === undefined
+              ? unknownPathInspection()
+              : inspectSchemaPath(child, resource, pathIndex, state),
+          );
+        }
+      }
+    }
+
+    for (const keyword of ["anyOf", "oneOf"] as const) {
+      if (!Object.hasOwn(schema, keyword)) continue;
+      const candidates = schema[keyword];
+      if (!Array.isArray(candidates)) {
+        result = withUnknownReachability(result);
+        continue;
+      }
+      if (candidates.length === 0) {
+        result = withUnknownReachability(result);
+        continue;
+      }
+      const branches = candidates.map((candidate) => {
+        const child = asSchema(candidate);
+        return child === undefined
+          ? unknownPathInspection()
+          : inspectSchemaPath(child, resource, pathIndex, state);
+      });
+      let union = unionPathInspections(branches);
+      // `oneOf`'s exact-one rule may eliminate overlapping branches. Its union remains a sound
+      // type over-approximation, but more than one viable branch is not a complete proof.
+      if (
+        keyword === "oneOf" &&
+        branches.filter((branch) => branch.reachability !== "impossible").length > 1
+      ) {
+        union = withUnknownReachability(union);
+      }
+      result = intersectPathInspections(result, union);
+    }
+
+    const notSchema = asSchema(schema.not);
+    if (notSchema === true) result = impossiblePathInspection();
+    else if (notSchema !== undefined && notSchema !== false) {
+      result = withUnknownReachability(result);
+    } else if (Object.hasOwn(schema, "not") && notSchema === undefined) {
+      result = withUnknownReachability(result);
+    }
+
+    if (
+      Object.hasOwn(schema, "if") &&
+      (Object.hasOwn(schema, "then") || Object.hasOwn(schema, "else"))
+    ) {
+      result = withUnknownReachability(result);
+    }
+    if (isObject(schema.dependentSchemas)) result = withUnknownReachability(result);
+
+    return result;
+  } finally {
+    state.active.delete(activeKey);
+  }
+}
+
+function inspectDirectSchemaProperty(
+  schema: SchemaObject,
+  resource: SchemaResource,
+  pathIndex: number,
+  state: PathInspectionState,
+): PathInspectionAnalysis {
+  const currentType = schemaTypeKeywordInspection(schema);
+  if (currentType.reachability === "impossible" || !currentType.types.has("object")) {
+    return impossiblePathInspection();
+  }
+
+  const segment = state.path[pathIndex] as string;
+  let result =
+    currentType.reachability === "unknown" ? unknownPathInspection() : possiblePathInspection();
+
+  if (Object.hasOwn(schema, "const")) {
+    result = intersectPathInspections(
+      result,
+      inspectLiteralPath(schema.const, state.path, pathIndex),
+    );
+  }
+  if (Object.hasOwn(schema, "enum")) {
+    result = intersectPathInspections(
+      result,
+      Array.isArray(schema.enum) && schema.enum.length > 0
+        ? unionPathInspections(
+            schema.enum.map((candidate) => inspectLiteralPath(candidate, state.path, pathIndex)),
+          )
+        : unknownPathInspection(),
+    );
+  }
+
+  let matched = false;
+  if (Object.hasOwn(schema, "properties")) {
+    if (!isObject(schema.properties)) {
+      result = withUnknownReachability(result);
+    } else if (Object.hasOwn(schema.properties, segment)) {
+      matched = true;
+      const child = asSchema(schema.properties[segment]);
+      result = intersectPathInspections(
+        result,
+        child === undefined
+          ? unknownPathInspection()
+          : inspectSchemaPath(child, resource, pathIndex + 1, state),
+      );
+    }
+  }
+
+  if (Object.hasOwn(schema, "patternProperties")) {
+    if (!isObject(schema.patternProperties)) {
+      result = withUnknownReachability(result);
+    } else {
+      for (const patternText of sortedKeys(schema.patternProperties)) {
+        const pattern = safePattern(patternText);
+        if (pattern === undefined) {
+          result = withUnknownReachability(result);
+          continue;
+        }
+        if (!pattern.test(segment)) continue;
+        matched = true;
+        const child = asSchema(schema.patternProperties[patternText]);
+        result = intersectPathInspections(
+          result,
+          child === undefined
+            ? unknownPathInspection()
+            : inspectSchemaPath(child, resource, pathIndex + 1, state),
+        );
+      }
+    }
+  }
+
+  if (!matched) {
+    if (!Object.hasOwn(schema, "additionalProperties")) {
+      // Draft 2020-12 permits additional properties by default, so an unconstrained member can
+      // itself contain the remainder of the path.
+    } else {
+      const additional = asSchema(schema.additionalProperties);
+      result = intersectPathInspections(
+        result,
+        additional === undefined
+          ? unknownPathInspection()
+          : inspectSchemaPath(additional, resource, pathIndex + 1, state),
+      );
+    }
+  }
+
+  if (schema.maxProperties === 0) result = impossiblePathInspection();
+
+  // `required` controls absence, not the admissible type of a member that is present. Reading and
+  // validating its shape here is nevertheless important: malformed programmatic schemas cannot
+  // be promoted into a false static conclusion.
+  if (
+    Object.hasOwn(schema, "required") &&
+    (!Array.isArray(schema.required) ||
+      schema.required.some((candidate) => typeof candidate !== "string") ||
+      new Set(schema.required).size !== schema.required.length)
+  ) {
+    result = withUnknownReachability(result);
+  }
+
+  if (Object.hasOwn(schema, "propertyNames") || isObject(schema.dependentRequired)) {
+    result = withUnknownReachability(result);
+  }
+  if (!matched && Object.hasOwn(schema, "unevaluatedProperties")) {
+    result = withUnknownReachability(result);
+  }
+
+  return result;
+}
+
+/**
+ * Conservatively inspects one property path through a structurally safe JSON Schema contract.
+ *
+ * @remarks The path consists only of object-property names; crossing a schema-proven array or
+ * scalar is therefore impossible. The interpreter resolves ordinary local references and
+ * combines `allOf`, `anyOf`, and `oneOf` without compiling code. Unsupported conditional and
+ * dynamic constructs widen the answer to `unknown`, never to a false `impossible`. Inputs that do
+ * not pass {@link validateSchemaContractGraph}, paths beyond the graph-depth profile, and exhausted
+ * inspection budgets likewise fail open as `unknown` for this static query. The returned object and
+ * its deterministically sorted type list are frozen.
+ *
+ * @internal This helper is exported only from its source module for sibling validator layers. It is
+ * intentionally absent from the package root API.
+ */
+export function inspectSchemaContractPath(
+  schema: unknown,
+  segments: readonly string[],
+): SchemaContractPathInspection {
+  if (
+    !Array.isArray(segments) ||
+    segments.length > MAX_SCHEMA_GRAPH_DEPTH ||
+    segments.some((segment) => typeof segment !== "string") ||
+    validateSchemaContractGraph(schema).length > 0
+  ) {
+    return Object.freeze({
+      reachability: "unknown",
+      types: Object.freeze([...SCHEMA_CONTRACT_JSON_TYPES]),
+    });
+  }
+
+  const normalizedSchema = asSchema(schema);
+  if (normalizedSchema === undefined) {
+    return Object.freeze({
+      reachability: "unknown",
+      types: Object.freeze([...SCHEMA_CONTRACT_JSON_TYPES]),
+    });
+  }
+  const registry = buildSchemaRegistry(normalizedSchema);
+  const analysis = inspectSchemaPath(normalizedSchema, registry.root, 0, {
+    active: new Set<string>(),
+    path: segments,
+    registry,
+    schemaIds: new WeakMap<object, number>(),
+    nextSchemaId: 0,
+    steps: 0,
+  });
+  const types = Object.freeze([...analysis.types].sort(compareText));
+  return Object.freeze({ reachability: analysis.reachability, types });
 }
 
 function applyStringKeywords(

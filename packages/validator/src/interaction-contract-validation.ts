@@ -764,6 +764,40 @@ export function validateDesenInteractionCatalogSet(
   return catalogSetSuccess(value);
 }
 
+/**
+ * Returns one immutable event payload schema from the private T09 preparation boundary.
+ *
+ * @internal This module-only bridge lets later cumulative validator stages inspect a declared
+ * event shape without duplicating catalog indexes or weakening the nominal catalog-set brand. An
+ * object that merely resembles {@link DesenValidatedInteractionCatalogSet} has no `WeakMap`
+ * metadata and therefore cannot expose a schema through this function.
+ */
+export function getPreparedDesenEventPayloadSchema(
+  catalogSet: DesenValidatedInteractionCatalogSet,
+  capabilityKind: DesenEventCapabilityKind,
+  capabilityId: string,
+  eventName: string,
+): unknown | undefined {
+  if (
+    (capabilityKind !== "component" && capabilityKind !== "behavior") ||
+    typeof capabilityId !== "string" ||
+    typeof eventName !== "string"
+  ) {
+    return undefined;
+  }
+
+  const metadata = INTERACTION_CATALOG_METADATA.get(catalogSet);
+  if (metadata === undefined) return undefined;
+  const capability =
+    capabilityKind === "component"
+      ? metadata.components.get(capabilityId)?.contract
+      : metadata.behaviors.get(capabilityId)?.contract;
+  const events =
+    capability !== undefined && Object.hasOwn(capability, "events") ? capability.events : undefined;
+  if (events === undefined || !Object.hasOwn(events, eventName)) return undefined;
+  return events[eventName]?.payloadSchema;
+}
+
 function selectedInteractions(
   target: DesenInteractionContractTarget,
   document: DocumentSnapshot,
@@ -1743,17 +1777,13 @@ export function validateDesenEventPayload(
     ]);
   }
 
-  const capability =
-    reference.capabilityKind === "component"
-      ? metadata.components.get(reference.capabilityId)?.contract
-      : metadata.behaviors.get(reference.capabilityId)?.contract;
-  const events =
-    capability !== undefined && Object.hasOwn(capability, "events") ? capability.events : undefined;
-  if (events === undefined || !Object.hasOwn(events, reference.eventName)) {
-    return payloadFailure([unknownEventDiagnostic(reference)]);
-  }
-  const eventContract = events[reference.eventName];
-  if (eventContract === undefined) return payloadFailure([unknownEventDiagnostic(reference)]);
+  const payloadSchema = getPreparedDesenEventPayloadSchema(
+    catalogSet,
+    reference.capabilityKind,
+    reference.capabilityId,
+    reference.eventName,
+  );
+  if (payloadSchema === undefined) return payloadFailure([unknownEventDiagnostic(reference)]);
 
   const snapshot = inertBoundedJsonSnapshot(payload);
   if (snapshot === undefined) {
@@ -1762,12 +1792,7 @@ export function validateDesenEventPayload(
 
   let result: ReturnType<typeof applySchemaContract>;
   try {
-    result = applySchemaContract(
-      eventContract.payloadSchema,
-      snapshot,
-      "complete",
-      "resolved-value",
-    );
+    result = applySchemaContract(payloadSchema, snapshot, "complete", "resolved-value");
   } catch (error) {
     if (!(error instanceof RangeError)) throw error;
     return payloadFailure([eventPayloadDiagnostic(ROOT_POINTER, reference)]);

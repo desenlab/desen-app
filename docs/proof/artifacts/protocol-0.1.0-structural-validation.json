@@ -359,6 +359,10 @@
     },
     "distributionAudit": {
       "files": [
+        "binding-contract-validation.d.ts",
+        "binding-contract-validation.d.ts.map",
+        "binding-contract-validation.js",
+        "binding-contract-validation.js.map",
         "component-contract-validation.d.ts",
         "component-contract-validation.d.ts.map",
         "component-contract-validation.js",
@@ -413,6 +417,7 @@
         "validation-internals.js.map"
       ],
       "runtimeFiles": [
+        "binding-contract-validation.js",
         "component-contract-validation.js",
         "embedded-schema-validation.js",
         "generated/0.1.0/structural-validators.js",
@@ -451,8 +456,8 @@
     "trackedFiles": [
       {
         "path": "package.json",
-        "bytes": 5771,
-        "sha256": "b1769558f9d739760cc70c948068010556bb695a71c05e440b5ac82fdfcd987e"
+        "bytes": 6335,
+        "sha256": "592cc589e77353afcc1b13c3857699fcb26a66bab9b25b133f39a10479e9b024"
       },
       {
         "path": "pnpm-lock.yaml",
@@ -461,8 +466,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 2908,
-        "sha256": "1683e8759f25e4e74f70e61c607afb9888ea80574af836d4432684b704bc95cc"
+        "bytes": 3158,
+        "sha256": "d1bd0854dddd7bedff088a005a86c37c13e0cb5fa59760f2f67d477e82fd9b75"
       },
       {
         "path": "THIRD_PARTY_NOTICES.md",
@@ -496,8 +501,8 @@
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 1451,
-        "sha256": "a2a1371c19f254cd1c83a43f76a078a55dc949b32f98acbc52ab664fa049b85f"
+        "bytes": 1714,
+        "sha256": "d57234e6b4db40e3b2edc4437070d41e0e1ea8d3c90ed6f2fa99149b88703dfa"
       },
       {
         "path": "packages/validator/THIRD_PARTY_NOTICES.md",
@@ -516,8 +521,8 @@
       },
       {
         "path": "packages/validator/src/index.ts",
-        "bytes": 3010,
-        "sha256": "b68a3af191ba519e004e81f730d937c167c8476ed4a8614329c3d0df45fb3122"
+        "bytes": 3489,
+        "sha256": "1d585d3145960f5514d555f5604ff00823a28efd165abeeee8e7cf80089493fe"
       },
       {
         "path": "packages/validator/src/validation-internals.ts",
@@ -581,13 +586,13 @@
       },
       {
         "path": "packages/validator/README.md",
-        "bytes": 29024,
-        "sha256": "c6adbb3e07f373e89d53634c49e59a5d2aec0551b862e3dc4b9369d7db4550a8"
+        "bytes": 34877,
+        "sha256": "1d9e1d24f007117da4bbb31c967d0e10ebb92b2aa8b7b7195018b6e2c619a472"
       },
       {
         "path": "scripts/lib/protocol-structural-validation-proof.mjs",
-        "bytes": 39757,
-        "sha256": "1685f8d3b2e106ecb3d3097ffafdc0efe3b5abe0abb19ccc73c10555b88ff395"
+        "bytes": 39790,
+        "sha256": "d394c9f11b93b5025b8f6749a9835c223c850369d34114bbde2b1bb15091e32d"
       },
       {
         "path": "scripts/generate-protocol-structural-validation-proof.mjs",
@@ -601,8 +606,8 @@
       },
       {
         "path": "tests/protocol-structural-validation.test.mjs",
-        "bytes": 8494,
-        "sha256": "3e110f0f73579f84e65ff84b7732954c87f78df35f539b06ac1f9b950d829521"
+        "bytes": 8529,
+        "sha256": "ebef80dbceccf3dc07edc85a326199ed42b7b39330dce03001375455ec983f7b"
       }
     ]
   },

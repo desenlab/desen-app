@@ -163,6 +163,7 @@ test("built package validates all three frozen roots without source-only runtime
 
   const distRoot = fileURLToPath(new URL("../packages/validator/dist/", import.meta.url));
   const sourceModules = [
+    "binding-contract-validation",
     "component-contract-validation",
     "embedded-schema-validation",
     "generated/0.1.0/structural-validators",

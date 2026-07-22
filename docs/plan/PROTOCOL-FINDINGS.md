@@ -265,8 +265,145 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `/command` member. Target existence and kind, conditional/repeated liveness, resolved input, and
   `COMMAND_INPUT_INVALID` remain M02-T11 responsibilities. Behavior command schemas are prepared
   through the interaction-contract safety boundary, but `component.command` is never redirected to
-  a behavior and no `behavior.command` semantics are invented. Static `event.*` path and settlement
-  scope validation remains with M02-T10, and runtime lifetime behavior remains with M04-T14. Command
-  declaration validation alone does not complete the adapter-implementation obligation in `N-034`.
+  a behavior and no `behavior.command` semantics are invented. M02-T10 treats `event.*` as lexical
+  data available only during the immediate ordered action turn of the component or behavior handler
+  that declared the event. Guards and values in that immediate action array may use the event
+  payload. An `operation.invoke` action's `onSuccess` and `onFailure` arrays are new settlement turns,
+  so they cannot retain the originating `event.*` scope even though they are nested beneath the
+  original action in the document. A statically placed settlement reference fails with
+  `REFERENCE_UNRESOLVED` at its `$ref` member. This is a document-scope decision only; adapter
+  payload lifetime and runtime turn behavior remain with M04-T14. Command declaration validation
+  alone does not complete the adapter-implementation obligation in `N-034`.
 - Future action: Decide whether to add a behavior-command action and specify event-payload lifetime
   across asynchronous settlement turns in a future protocol revision.
+
+## PF-015 — Lexical references, fallbacks, and conservative schema-path proof are underspecified
+
+- Status: OPEN
+- Blocks proof: No; the validator can reject only definite failures and retain explicit runtime
+  obligations for values that cannot be proved statically.
+- Protocol location: SPEC Sections 10.4, 14.2–14.3, 17.2, and 25.1; Source and Bundle Schema
+  `$defs/refSpec` and `$defs/valueSpec`; Appendix B
+- Observation: The frozen schemas validate reference syntax and the seven namespace names, but do
+  not establish whether a referenced declaration or lexical alias exists, whether a deeper path is
+  permitted by an embedded schema, or how unions, open objects, and conditional JSON Schema
+  branches affect static path proof. The prose distinguishes a missing value from JSON `null` and
+  permits a type-valid fallback, but it does not say whether fallback may authorize an otherwise
+  invalid lexical scope or which diagnostic location represents a failed reference.
+- Implementation decision: M02-T10 validates only the namespaces whose lexical owners are available
+  at this stage: surface-local `state`, active repeat `item`, and the immediate-handler `event`
+  scope defined by `PF-014`. Resource and operation lifecycle paths remain M02-T11 work;
+  `context`, `env`, and token-provider results remain runtime inputs. A fallback may discharge a
+  missing value only after the reference itself is lexically legal. Where a T10-owned consumer has
+  a static type requirement, such as a predicate or repeat, that requirement also constrains the
+  fallback; general resolved-value compatibility remains M06/runtime work. Fallback cannot create
+  an inactive item alias, carry an event into a settlement turn, or legalize an unknown namespace.
+  JSON `null` is a resolved value and does not select fallback. Deep schema paths are rejected only
+  when every applicable, locally resolvable schema branch proves the path impossible. Open,
+  conditional, recursive, or otherwise ambiguous paths are accepted for later validation rather
+  than guessed successes or failures. T10 adds no new obligation kind; it preserves the four T09
+  resolved-value obligations unchanged. `REFERENCE_UNRESOLVED` points to the exact `$ref` member
+  for a definite missing or out-of-scope reference.
+- Future action: Define a normative static path-compatibility algorithm, fallback typing rules,
+  diagnostic pointers, and the boundary between publisher proof and runtime obligation.
+
+## PF-016 — Predicate argument categories and static type compatibility are underspecified
+
+- Status: OPEN
+- Blocks proof: No; M02-T10 can apply a conservative type lattice without executing predicates.
+- Protocol location: SPEC Sections 15–15.2; Source and Bundle Schema `$defs/predicateSpec`;
+  Appendix B
+- Observation: The schema permits each predicate argument to be either a `ValueSpec` or another
+  predicate. The operator table defines arity and result semantics but does not fully state which
+  operators accept nested predicates, whether `all`, `any`, and `not` implicitly truth-convert
+  ordinary values, whether `exists` accepts a non-reference value, or when a schema-derived type is
+  sufficiently certain to report a static mismatch.
+- Implementation decision: A nested predicate has boolean result type. `all`, `any`, and `not`
+  accept nested predicates or ValueSpecs that are statically boolean; they do not silently apply the
+  broader `truthy` conversion. `truthy` remains the explicit conversion operator. `exists` accepts
+  one reference and tests whether the original reference resolves, including to JSON `null`; a
+  fallback does not turn a missing original value into an existing one. `eq` and `neq` permit any
+  two resolved JSON values and use canonical JSON equality. Ordering is valid only for two numbers
+  or two strings. `in` and `contains` retain the exact array/string operand directions stated in the
+  operator table. M02-T10 reports `PREDICATE_TYPE_MISMATCH` only for a definite static
+  incompatibility and otherwise defers the dynamic decision to the publisher/runtime. It validates
+  structure, scope, and type compatibility but does not evaluate runtime truth, add a predicate
+  obligation kind, or perform host effects.
+- Future action: Specify a normative predicate type system, nested-predicate grammar, `exists`
+  fallback semantics, and diagnostic pointer rules.
+
+## PF-017 — Format placeholder grammar and matching rules are underspecified
+
+- Status: OPEN
+- Blocks proof: No; a small deterministic parser can implement the closed 0.1.0 format surface.
+- Protocol location: SPEC Section 14.5; Source and Bundle Schema `$defs/formatSpec`
+- Observation: DESEN 0.1.0 says placeholders use `{name}` and must match keys in `values`, but it
+  does not define escaping, unmatched or nested braces, repeated placeholders, unused value keys,
+  prototype-inherited keys, or a diagnostic location for a malformed template. A general-purpose
+  template engine would add semantics and executable surface that the protocol does not authorize.
+- Implementation decision: M02-T10 uses a single-pass linear parser. A placeholder is exactly an
+  ASCII identifier matching `[A-Za-z_][A-Za-z0-9_]*` between one `{` and the next `}`. Bare,
+  unmatched, empty, or nested braces are invalid; 0.1.0 invents no brace-escape syntax. Repeating a
+  valid placeholder is allowed. The set of placeholder names must exactly equal the own-property
+  keys of `values`: a missing value fails at the template and an unused value fails at that value
+  member. Each mapped value remains an ordinary recursively validated `ValueSpec`. Parsing performs
+  no expression evaluation, property-chain lookup, regex backtracking, code generation, locale
+  inference, or prototype lookup. A malformed or mismatched format uses
+  `run.desen.validator/INVALID_BINDING_CONTRACT`.
+- Future action: Standardize placeholder escaping, Unicode policy, duplicate and unused-key
+  behavior, and exact diagnostic locations in a future protocol version.
+
+## PF-018 — Repeat evaluation order, alias scope, key identity, and limit behavior are underspecified
+
+- Status: OPEN
+- Blocks proof: No; a lexical, type-sensitive profile can preserve deterministic behavior without
+  claiming runtime materialization.
+- Protocol location: SPEC Sections 14.2.6 and 17.6; Source and Bundle Schema `$defs/repeatSpec`;
+  Appendix B
+- Observation: DESEN 0.1.0 requires array items, an introduced alias, unique string or number keys,
+  and a limit, but it does not state whether `items` may see its own alias, the precise subtree in
+  which an alias is active, whether string and numeric keys with similar spelling collide, or what
+  static validation should do when a known item count exceeds an explicit limit. Runtime instance
+  encoding and asynchronous alias lifetime are also left open.
+- Implementation decision: `items` is evaluated in the incoming outer scope before the new alias
+  exists. The alias becomes active for `key` and for the repeated node's props, styles, conditions,
+  variants, behaviors, handlers, slots, and descendants. It does not leak to siblings or ancestors.
+  A nested repeat may see outer aliases but cannot reuse any active alias, and its own `items` cannot
+  refer to the alias it is about to introduce. A statically known non-array produces
+  `REPEAT_ITEMS_INVALID`. For statically enumerable items, each key must resolve to a string or
+  finite number and be unique under type-sensitive canonical JSON identity; a missing, non-scalar,
+  or duplicate key produces `REPEAT_KEY_INVALID`. Because Appendix B limits those two codes to item
+  type and key validity, an active-alias collision and a known direct array longer than an explicit
+  `limit` use `run.desen.validator/INVALID_BINDING_CONTRACT` at `as` and `limit`, respectively.
+  Dynamic item collections, keys, global repeat caps, runtime instance identity, and asynchronous
+  lifetime remain M04/M12 responsibilities rather than being guessed by T10.
+- Future action: Define repeat evaluation order, lexical extent, key canonicalization, overflow
+  behavior, default limits, instance identity, and asynchronous alias lifetime normatively.
+
+## PF-019 — State identifier, reference, and action-path grammars do not align
+
+- Status: OPEN
+- Blocks proof: No; the implementation can use the prose's first-segment rule without inventing a
+  longest-prefix lookup.
+- Protocol location: SPEC Sections 5.1, 14.2.1, 16.1, and 20.1–20.2; Source and Bundle Schema
+  `$defs/refSpec`, `$defs/stateSpec`, and the `state.set`/`state.toggle` action branches; Appendix B
+- Observation: State identifiers permit `.`, `:`, and `-`, reference segments use a narrower
+  grammar, and state action paths reuse the broad identifier pattern while prose says the first
+  segment names the state entry. A document may therefore declare a structurally valid state name
+  that cannot be addressed unambiguously, especially when both `profile` and `profile.name` exist.
+  Appendix B classifies `STATE_WRITE_INVALID` as a runtime write failure, while T10 owns only narrow
+  static target evidence and M02-T11 owns the complete state-action semantics.
+- Implementation decision: M02-T10 does not perform longest-prefix matching. In `state.<name>`, the
+  second reference segment is the complete state-entry name. In a `state.set` or `state.toggle`
+  path, the substring before the first `.` is the complete state-entry name and later segments are
+  a nested path. A valid declaration that cannot be represented by those segment rules remains
+  legal until addressed; an attempted ambiguous or absent target fails deterministically. State
+  `initial` is resolved inert JSON, not a `ValueSpec`, and is checked in complete mode against the
+  prepared state schema. An unsafe state schema or invalid initial value uses
+  `run.desen.validator/INVALID_BINDING_CONTRACT` at the applicable schema or initial-value pointer.
+  T10's only state-action check is that the first path segment names a declared state entry; failure
+  uses `STATE_WRITE_INVALID` at the action's `/path`. Nested-path compatibility, the resulting
+  complete `state.set` value, boolean-only `state.toggle`, runtime writes, and action execution
+  remain M02-T11/M04 responsibilities.
+- Future action: Align the identifier and path grammars, define an escaping or segment-array form,
+  distinguish invalid initial state from invalid runtime writes, and assign exact diagnostics.

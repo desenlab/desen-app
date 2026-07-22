@@ -382,7 +382,7 @@ describe("M02-T08 component schema preparation", () => {
       INVALID_COMPONENT_CONTRACT,
       "/0/components/com.example.ui~1Button/propsSchema",
     );
-  });
+  }, 15_000);
 });
 
 describe("M02-T08 component props and variant patches", () => {

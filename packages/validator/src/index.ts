@@ -37,8 +37,15 @@ export {
 } from "./interaction-contract-validation.js";
 
 export {
+  validateDesenBindingContracts,
+  validateDesenBundleBindingContracts,
+  validateDesenSourceBindingContracts,
+} from "./binding-contract-validation.js";
+
+export {
   CATALOG_REQUIREMENT_MISMATCH_CODE,
   INVALID_COMPONENT_CONTRACT_CODE,
+  INVALID_BINDING_CONTRACT_CODE,
   INVALID_INTERACTION_CONTRACT_CODE,
   INVALID_SEMVER_CODE,
 } from "./semantic-diagnostics.js";
@@ -100,3 +107,12 @@ export type {
   DesenResolvedJsonValue,
   DesenValidatedInteractionCatalogSet,
 } from "./interaction-contract-validation.js";
+
+export type {
+  DesenBindingContractObligation,
+  DesenBindingContractObligationKind,
+  DesenBindingContractTarget,
+  DesenBindingContractValidationFailure,
+  DesenBindingContractValidationResult,
+  DesenBindingContractValidationSuccess,
+} from "./binding-contract-validation.js";
