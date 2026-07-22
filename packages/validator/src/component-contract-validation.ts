@@ -332,7 +332,9 @@ function buildComponentMetadata(catalogs: DesenValidatedCatalogSet): ComponentCa
 }
 
 function effectiveMinimum(slot: SlotSnapshot): number {
-  return slot.minItems ?? (slot.required === true ? 1 : 0);
+  const minimum = Object.hasOwn(slot, "minItems") ? slot.minItems : undefined;
+  const required = Object.hasOwn(slot, "required") && slot.required === true;
+  return minimum ?? (required ? 1 : 0);
 }
 
 function addSchemaGraphDiagnostics(
@@ -378,7 +380,11 @@ function componentCatalogShapeDiagnostics(input: unknown): readonly DesenSemanti
 
   snapshot.forEach((catalogValue, catalogIndex) => {
     const catalog = rawObject(catalogValue);
-    const components = rawObject(catalog?.components);
+    const components = rawObject(
+      catalog !== undefined && Object.hasOwn(catalog, "components")
+        ? catalog.components
+        : undefined,
+    );
     if (components === undefined) return;
     for (const componentId of sortedKeys(components)) {
       const component = rawObject(components[componentId]);
@@ -389,7 +395,9 @@ function componentCatalogShapeDiagnostics(input: unknown): readonly DesenSemanti
         appendJsonPointer(componentPointer, "propsSchema"),
         componentId,
       );
-      const styleParts = rawObject(component.styleParts);
+      const styleParts = rawObject(
+        Object.hasOwn(component, "styleParts") ? component.styleParts : undefined,
+      );
       if (styleParts === undefined) continue;
       for (const partName of sortedKeys(styleParts)) {
         const part = rawObject(styleParts[partName]);
@@ -422,9 +430,10 @@ function componentCatalogDiagnostics(
         componentId,
         diagnostics,
       );
-      if (component.styleParts !== undefined) {
-        for (const partName of sortedKeys(component.styleParts)) {
-          const part = component.styleParts[partName];
+      const styleParts = Object.hasOwn(component, "styleParts") ? component.styleParts : undefined;
+      if (styleParts !== undefined) {
+        for (const partName of sortedKeys(styleParts)) {
+          const part = styleParts[partName];
           if (part !== undefined) {
             addSchemaGraphDiagnostics(
               part.propertiesSchema,
@@ -435,11 +444,13 @@ function componentCatalogDiagnostics(
           }
         }
       }
-      if (component.slots !== undefined) {
-        for (const slotName of sortedKeys(component.slots)) {
-          const slot = component.slots[slotName];
+      const slots = Object.hasOwn(component, "slots") ? component.slots : undefined;
+      if (slots !== undefined) {
+        for (const slotName of sortedKeys(slots)) {
+          const slot = slots[slotName];
           if (
             slot !== undefined &&
+            Object.hasOwn(slot, "maxItems") &&
             slot.maxItems !== undefined &&
             slot.maxItems < effectiveMinimum(slot)
           ) {
@@ -506,12 +517,12 @@ function selectedComponents(
       : (document as BundleSnapshot).requires.catalogs;
 
   requirements.forEach((requirement) => {
+    const requirementTarget = Object.hasOwn(requirement, "target") ? requirement.target : undefined;
     const matches =
-      target === "source" &&
-      (requirement as SourceSnapshot["catalogs"][number]).target === undefined
+      target === "source" && requirementTarget === undefined
         ? metadata.byIdVersion.get(identityKey(requirement.id, requirement.version))
         : metadata.byExactTuple.get(
-            identityKey(requirement.id, requirement.version, requirement.target ?? ""),
+            identityKey(requirement.id, requirement.version, requirementTarget ?? ""),
           );
     if (matches?.length === 1) selectedCatalogs.add(matches[0] as number);
   });
@@ -582,8 +593,10 @@ function validateStyle(
   obligations: DesenComponentContractObligation[],
 ): void {
   if (style === undefined) return;
-  const visualStates = new Set(component.visualStates ?? []);
-  const styleParts = component.styleParts ?? {};
+  const visualStates = new Set(
+    Object.hasOwn(component, "visualStates") ? (component.visualStates ?? []) : [],
+  );
+  const styleParts = Object.hasOwn(component, "styleParts") ? (component.styleParts ?? {}) : {};
 
   for (const stateName of sortedKeys(style)) {
     const statePointer = appendJsonPointer(stylePointer, stateName);
@@ -594,7 +607,7 @@ function validateStyle(
     if (parts === undefined) continue;
     for (const partName of sortedKeys(parts)) {
       const partPointer = appendJsonPointer(statePointer, partName);
-      const partContract = styleParts[partName];
+      const partContract = Object.hasOwn(styleParts, partName) ? styleParts[partName] : undefined;
       if (partContract === undefined) {
         addContractDiagnostic("UNKNOWN_PROP", partPointer, context, diagnostics);
         continue;
@@ -625,7 +638,7 @@ function pushBehaviorSlotChildren(
   if (behaviors === undefined) return;
   for (let behaviorIndex = behaviors.length - 1; behaviorIndex >= 0; behaviorIndex -= 1) {
     const behavior = behaviors[behaviorIndex] as BehaviorSnapshot;
-    if (behavior.slots === undefined) continue;
+    if (!Object.hasOwn(behavior, "slots") || behavior.slots === undefined) continue;
     const behaviorPointer = appendPath(nodePointer, "behaviors", behaviorIndex);
     const slotNames = sortedKeys(behavior.slots);
     for (let slotIndex = slotNames.length - 1; slotIndex >= 0; slotIndex -= 1) {
@@ -651,12 +664,17 @@ function validateSlots(
   context: Readonly<DesenDiagnosticContext>,
   diagnostics: DesenSemanticDiagnostic[],
 ): void {
-  const contracts = component.slots ?? {};
-  const slots = work.node.slots ?? {};
+  const contracts = Object.hasOwn(component, "slots") ? (component.slots ?? {}) : {};
+  const slots = Object.hasOwn(work.node, "slots") ? (work.node.slots ?? {}) : {};
 
   for (const slotName of sortedKeys(contracts)) {
-    const contract = contracts[slotName];
-    if (contract?.required === true && !Object.hasOwn(slots, slotName)) {
+    const contract = Object.hasOwn(contracts, slotName) ? contracts[slotName] : undefined;
+    if (
+      contract !== undefined &&
+      Object.hasOwn(contract, "required") &&
+      contract.required === true &&
+      !Object.hasOwn(slots, slotName)
+    ) {
       diagnostics.push(
         createCoreDiagnostic({
           code: "SLOT_CARDINALITY",
@@ -673,7 +691,7 @@ function validateSlots(
     const slotName = slotNames[slotIndex] as string;
     const children = slots[slotName] ?? [];
     const slotPointer = appendPath(work.pointer, "slots", slotName);
-    const contract = contracts[slotName];
+    const contract = Object.hasOwn(contracts, slotName) ? contracts[slotName] : undefined;
 
     if (contract === undefined) {
       diagnostics.push(
@@ -688,7 +706,9 @@ function validateSlots(
       const minimum = effectiveMinimum(contract);
       if (
         children.length < minimum ||
-        (contract.maxItems !== undefined && children.length > contract.maxItems)
+        (Object.hasOwn(contract, "maxItems") &&
+          contract.maxItems !== undefined &&
+          children.length > contract.maxItems)
       ) {
         diagnostics.push(
           createCoreDiagnostic({
@@ -703,12 +723,18 @@ function validateSlots(
       const constrainsChildren =
         Object.hasOwn(contract, "accepts") || Object.hasOwn(contract, "acceptsCategories");
       if (constrainsChildren) {
-        const acceptedIds = new Set(contract.accepts ?? []);
-        const acceptedCategories = new Set(contract.acceptsCategories ?? []);
+        const acceptedIds = new Set(
+          Object.hasOwn(contract, "accepts") ? (contract.accepts ?? []) : [],
+        );
+        const acceptedCategories = new Set(
+          Object.hasOwn(contract, "acceptsCategories") ? (contract.acceptsCategories ?? []) : [],
+        );
         children.forEach((child, childIndex) => {
           const childResolution = components.get(child.use);
           if (childResolution === undefined) return;
-          const category = childResolution.contract.category;
+          const category = Object.hasOwn(childResolution.contract, "category")
+            ? childResolution.contract.category
+            : undefined;
           if (
             !acceptedIds.has(child.use) &&
             (category === undefined || !acceptedCategories.has(category))
@@ -752,7 +778,9 @@ function validateNode(
 
   applyValueSchema(
     component.propsSchema as JsonObject,
-    (work.node.props ?? EMPTY_OBJECT) as JsonObject,
+    (Object.hasOwn(work.node, "props")
+      ? (work.node.props ?? EMPTY_OBJECT)
+      : EMPTY_OBJECT) as JsonObject,
     "complete",
     appendPath(work.pointer, "props"),
     "component-prop",
@@ -761,7 +789,7 @@ function validateNode(
     obligations,
   );
   validateStyle(
-    work.node.style,
+    Object.hasOwn(work.node, "style") ? work.node.style : undefined,
     "complete",
     appendPath(work.pointer, "style"),
     component,
@@ -770,10 +798,10 @@ function validateNode(
     obligations,
   );
 
-  const variants = work.node.variants ?? [];
+  const variants = Object.hasOwn(work.node, "variants") ? (work.node.variants ?? []) : [];
   variants.forEach((variant, variantIndex) => {
     const variantPointer = appendPath(work.pointer, "variants", variantIndex);
-    if (variant.props !== undefined) {
+    if (Object.hasOwn(variant, "props") && variant.props !== undefined) {
       applyValueSchema(
         component.propsSchema as JsonObject,
         variant.props as JsonObject,
@@ -786,7 +814,7 @@ function validateNode(
       );
     }
     validateStyle(
-      variant.style,
+      Object.hasOwn(variant, "style") ? variant.style : undefined,
       "patch",
       appendPath(variantPointer, "style"),
       component,
@@ -799,7 +827,7 @@ function validateNode(
   validateSlots(stack, work, component, components, context, diagnostics);
   pushBehaviorSlotChildren(
     stack,
-    work.node.behaviors,
+    Object.hasOwn(work.node, "behaviors") ? work.node.behaviors : undefined,
     work.pointer,
     work.documentId,
     work.surfaceId,

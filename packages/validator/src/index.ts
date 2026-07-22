@@ -28,8 +28,18 @@ export {
 } from "./component-contract-validation.js";
 
 export {
+  EVENT_PAYLOAD_SAFETY_LIMITS,
+  validateDesenBundleInteractionContracts,
+  validateDesenEventPayload,
+  validateDesenInteractionCatalogSet,
+  validateDesenInteractionContracts,
+  validateDesenSourceInteractionContracts,
+} from "./interaction-contract-validation.js";
+
+export {
   CATALOG_REQUIREMENT_MISMATCH_CODE,
   INVALID_COMPONENT_CONTRACT_CODE,
+  INVALID_INTERACTION_CONTRACT_CODE,
   INVALID_SEMVER_CODE,
 } from "./semantic-diagnostics.js";
 
@@ -71,3 +81,22 @@ export type {
   DesenComponentContractValidationSuccess,
   DesenValidatedComponentCatalogSet,
 } from "./component-contract-validation.js";
+
+export type {
+  DesenEventCapabilityKind,
+  DesenEventContractReference,
+  DesenEventPayloadValidationFailure,
+  DesenEventPayloadValidationResult,
+  DesenEventPayloadValidationSuccess,
+  DesenInteractionCatalogSetValidationFailure,
+  DesenInteractionCatalogSetValidationResult,
+  DesenInteractionCatalogSetValidationSuccess,
+  DesenInteractionContractObligation,
+  DesenInteractionContractObligationKind,
+  DesenInteractionContractTarget,
+  DesenInteractionContractValidationFailure,
+  DesenInteractionContractValidationResult,
+  DesenInteractionContractValidationSuccess,
+  DesenResolvedJsonValue,
+  DesenValidatedInteractionCatalogSet,
+} from "./interaction-contract-validation.js";

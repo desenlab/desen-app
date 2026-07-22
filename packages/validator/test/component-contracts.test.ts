@@ -541,6 +541,14 @@ describe("M02-T08 component slot contracts", () => {
       "/surfaces/main/root/slots/ghost",
     );
 
+    const inheritedUnknown = minimalSource(node("stack", STACK, { direction: "vertical" }));
+    writeAt(inheritedUnknown, ["surfaces", "main", "root", "slots"], { toString: [] });
+    expectOnlyDiagnostic(
+      validateSource(inheritedUnknown),
+      "UNKNOWN_SLOT",
+      "/surfaces/main/root/slots/toString",
+    );
+
     const leaf = minimalSource(node("button", BUTTON, { label: "Go" }));
     writeAt(leaf, ["surfaces", "main", "root", "slots"], {
       default: [node("text", TEXT, { text: "Child" })],
@@ -723,6 +731,16 @@ describe("M02-T08 visual-state and style-part contracts", () => {
       validateSource(unknownPart),
       "UNKNOWN_PROP",
       "/surfaces/main/root/style/base/ghost",
+    );
+
+    const inheritedPart = cloneFixture(passing);
+    writeAt(inheritedPart, ["surfaces", "main", "root", "style"], {
+      base: { toString: {} },
+    });
+    expectOnlyDiagnostic(
+      validateSource(inheritedPart),
+      "UNKNOWN_PROP",
+      "/surfaces/main/root/style/base/toString",
     );
   });
 

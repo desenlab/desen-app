@@ -255,6 +255,7 @@ const EXPECTED_DISTRIBUTION_MODULES = Object.freeze([
   "embedded-schema-validation",
   "generated/0.1.0/structural-validators",
   "index",
+  "interaction-contract-validation",
   "schema-instance-validation",
   "semantic-diagnostics",
   "semantic-validation",

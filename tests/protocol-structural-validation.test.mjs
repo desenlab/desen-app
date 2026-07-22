@@ -167,6 +167,7 @@ test("built package validates all three frozen roots without source-only runtime
     "embedded-schema-validation",
     "generated/0.1.0/structural-validators",
     "index",
+    "interaction-contract-validation",
     "schema-instance-validation",
     "semantic-diagnostics",
     "semantic-validation",

@@ -101,10 +101,15 @@ The M02-T08 component-contract stage now validates statically knowable component
 patches, slot declarations and children, visual states, style parts, and style properties. Dynamic
 ValueSpecs remain inert and become explicit later-validation obligations. Component schemas pass a
 documented host-safe preparation profile before the code-free interpreter can apply them.
-Behavior/event/command contracts, reference resolution, resource and operation contracts, digests,
-publication, and runtime values remain later tasks. The first product proof is still `web-react`,
-while the protocol and validator packages remain independent of React, DOM, and browser APIs so
-future iOS and Android runtimes can reuse the same contract.
+
+The M02-T09 interaction stage extends that boundary to behavior props, slots, styles, attachment
+and exclusive-channel conflicts; declared component and behavior events; and command names for
+already-known component targets. Its separate resolved-event API copies and freezes adapter
+payloads, applies explicit depth/size limits, and validates them as ordinary JSON rather than DESEN
+bindings. Event-reference resolution, command targets and inputs, resource and operation contracts,
+digests, publication, adapters, and runtime execution remain later tasks. The first product proof
+is still `web-react`, while the protocol and validator packages remain independent of React, DOM,
+and browser APIs so future iOS and Android runtimes can reuse the same contract.
 
 ## License
 

@@ -706,7 +706,12 @@ function findingSection(findings, id) {
   return findings.slice(start, end < 0 ? undefined : end);
 }
 
-function requireFindingAnchors(section, id, requiredAnchors) {
+function requireFindingAnchors(
+  section,
+  id,
+  requiredAnchors,
+  requiredImplementationDiagnostics = [],
+) {
   const normalizedSection = section.replace(/\s+/gu, " ");
   const missing = requiredAnchors.filter((anchor) => !normalizedSection.includes(anchor));
   if (missing.length > 0) {
@@ -717,39 +722,51 @@ function requireFindingAnchors(section, id, requiredAnchors) {
   const implementationDiagnostics = [...section.matchAll(/`(run\.desen\.validator\/[A-Z_]+)`/gu)]
     .map(([, code]) => code)
     .sort(compareText);
-  assertJsonEqual(
-    implementationDiagnostics,
-    ["run.desen.validator/INVALID_COMPONENT_CONTRACT"],
-    `${id} implementation diagnostics`,
-    "COMPONENT_FINDING_DRIFT",
+  const missingDiagnostics = requiredImplementationDiagnostics.filter(
+    (code) => !implementationDiagnostics.includes(code),
   );
+  if (missingDiagnostics.length > 0) {
+    fail("COMPONENT_FINDING_DRIFT", `${id} lost a required T08 implementation diagnostic.`, {
+      missingDiagnostics,
+    });
+  }
 }
 
 async function verifyImplementationFindings(findingsPath) {
   const findings = await readFile(findingsPath, "utf8");
   const slotSection = findingSection(findings, "PF-010");
-  requireFindingAnchors(slotSection, "PF-010", [
-    "- Status: OPEN",
-    "- Blocks proof: No;",
-    "effectiveMin = minItems ?? (required ? 1 : 0)",
-    "an explicitly empty union rejects every child",
-    "`run.desen.validator/INVALID_COMPONENT_CONTRACT`",
-    "Unknown visual states and style parts continue to use the core `UNKNOWN_PROP` code",
-  ]);
+  requireFindingAnchors(
+    slotSection,
+    "PF-010",
+    [
+      "- Status: OPEN",
+      "- Blocks proof: No;",
+      "effectiveMin = minItems ?? (required ? 1 : 0)",
+      "an explicitly empty union rejects every child",
+      "`run.desen.validator/INVALID_COMPONENT_CONTRACT`",
+      "Unknown visual states and style parts continue to use the core `UNKNOWN_PROP` code",
+    ],
+    ["run.desen.validator/INVALID_COMPONENT_CONTRACT"],
+  );
   const regexSection = findingSection(findings, "PF-011");
-  requireFindingAnchors(regexSection, "PF-011", [
-    "- Status: OPEN",
-    "- Blocks proof: No;",
-    "host-safe component-schema profile",
-    "An unanchored fixed-width pattern is limited to 16 expanded atoms.",
-    "it must be the final consuming atom; only the terminal `$` may follow.",
-    "pathological quantified prefixes followed by fixed suffixes",
-    "maximum traversal/evaluation depth of 128",
-    "a deterministic 50,000-step evaluation budget",
-    "`run.desen.validator/INVALID_COMPONENT_CONTRACT`",
-    "Unsafe patterns are never passed to native `RegExp`",
-    "T08 applies this profile only to component prop and style-part schemas",
-  ]);
+  requireFindingAnchors(
+    regexSection,
+    "PF-011",
+    [
+      "- Status: OPEN",
+      "- Blocks proof: No;",
+      "host-safe component-schema profile",
+      "An unanchored fixed-width pattern is limited to 16 expanded atoms.",
+      "it must be the final consuming atom; only the terminal `$` may follow.",
+      "pathological quantified prefixes followed by fixed suffixes",
+      "maximum traversal/evaluation depth of 128",
+      "a deterministic 50,000-step evaluation budget",
+      "`run.desen.validator/INVALID_COMPONENT_CONTRACT`",
+      "Unsafe patterns are never passed to native `RegExp`",
+      "T08 applies this profile only to component prop and style-part schemas",
+    ],
+    ["run.desen.validator/INVALID_COMPONENT_CONTRACT"],
+  );
   return Object.freeze({
     slotEdgeSemantics: Object.freeze({
       id: "PF-010",

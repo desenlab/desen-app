@@ -120,10 +120,10 @@ const EVALUATED_MAP_SCHEMA_KEYWORDS = Object.freeze([
   "properties",
 ] as const);
 
-/** Maximum embedded-schema nesting accepted before recursive T06/T08 work begins. */
+/** Maximum embedded-schema nesting accepted before recursive T06/T08/T09 work begins. */
 export const MAX_SCHEMA_GRAPH_DEPTH = 128;
 
-/** Deterministic resource limits for the internal T08 schema-contract host profile. */
+/** Deterministic resource limits for the internal T08/T09 schema-contract host profile. */
 export const SCHEMA_CONTRACT_SAFETY_LIMITS = Object.freeze({
   maxSchemaDepth: MAX_SCHEMA_GRAPH_DEPTH,
   maxSchemaNodes: 4_096,
@@ -153,6 +153,9 @@ const {
 
 /** Selects whether the supplied object is a complete value or a partial property patch. */
 export type SchemaContractMode = "complete" | "patch";
+
+/** Selects whether DESEN ValueSpec markers are unresolved bindings or ordinary resolved JSON. */
+export type SchemaContractValueMode = "desen-value" | "resolved-value";
 
 /** One deterministic, value-relative failure produced while applying a JSON Schema contract. */
 export interface SchemaContractIssue {
@@ -357,6 +360,13 @@ function analyzeDynamicValues(value: unknown): DynamicAnalysis {
   return {
     obligations: Object.freeze(normalized),
     subtreeContainsDynamic,
+  };
+}
+
+function noDynamicValues(): DynamicAnalysis {
+  return {
+    obligations: Object.freeze([]),
+    subtreeContainsDynamic: new WeakMap<object, boolean>(),
   };
 }
 
@@ -657,7 +667,7 @@ function compareDynamicInstance(
   expected: unknown,
   analysis: DynamicAnalysis,
 ): DynamicEquality {
-  if (isDynamicValueRoot(instance)) return "unknown";
+  if (isDynamicValueRoot(instance) && containsDynamic(instance, analysis)) return "unknown";
   if (
     instance === null ||
     expected === null ||
@@ -1660,7 +1670,7 @@ function evaluate(
     }
 
     applyCombinators(schema, value, pointer, resource, state, result, patchRoot);
-    if (isDynamicValueRoot(value)) {
+    if (isDynamicValueRoot(value) && containsDynamic(value, state.dynamics)) {
       result.unknown = true;
       return finishEvaluation(result);
     }
@@ -1739,14 +1749,16 @@ function normalizeIssues(issues: readonly SchemaContractIssue[]): readonly Schem
 }
 
 /**
- * Applies one structurally validated Draft 2020-12 schema to a DESEN literal object or patch.
+ * Applies one structurally validated Draft 2020-12 schema to a DESEN value or resolved payload.
  *
  * @remarks This internal, platform-neutral interpreter never compiles or evaluates generated code,
  * mutates input, applies defaults, coerces types, fetches references, or reads non-local schemas.
  * `complete` applies whole-value constraints. `patch` suppresses root-level completeness and
- * cross-value requirements while continuing to validate supplied names and values. DESEN `$ref`,
- * `$token`, and `$format` roots are treated as unresolved values: definite surrounding constraints
- * still run, while each dynamic root becomes one later-validation obligation.
+ * cross-value requirements while continuing to validate supplied names and values. In the default
+ * `desen-value` mode, DESEN `$ref`, `$token`, and `$format` roots are unresolved values: definite
+ * surrounding constraints still run, while each dynamic root becomes one later-validation
+ * obligation. `resolved-value` treats the same property names as ordinary JSON so an adapter event
+ * payload cannot bypass its schema merely by containing a ValueSpec-shaped object.
  *
  * The caller must first pass schemas and values through the validator package's inert structural
  * boundary. Invalid schemas, cyclic JavaScript objects, and non-JSON values are outside this
@@ -1756,13 +1768,17 @@ export function applySchemaContract(
   schema: unknown,
   value: unknown,
   mode: SchemaContractMode,
+  valueMode: SchemaContractValueMode = "desen-value",
 ): SchemaContractResult {
   if (mode !== "complete" && mode !== "patch") {
     throw new TypeError("Schema contract mode must be `complete` or `patch`.");
   }
+  if (valueMode !== "desen-value" && valueMode !== "resolved-value") {
+    throw new TypeError("Schema contract value mode must be `desen-value` or `resolved-value`.");
+  }
 
   const normalizedSchema = asSchema(schema);
-  const dynamics = analyzeDynamicValues(value);
+  const dynamics = valueMode === "desen-value" ? analyzeDynamicValues(value) : noDynamicValues();
   if (normalizedSchema === undefined) {
     return Object.freeze({
       issues: normalizeIssues([issue("mismatch", ROOT_POINTER, "schema")]),

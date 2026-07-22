@@ -337,6 +337,27 @@ describe("complete schema contracts", () => {
 });
 
 describe("dynamic values and patches", () => {
+  it("treats ValueSpec-shaped adapter data as ordinary JSON in resolved-value mode", () => {
+    const schema = {
+      type: "object",
+      required: ["$ref"],
+      properties: { $ref: { const: "literal-value" } },
+      additionalProperties: false,
+    };
+
+    expect(applySchemaContract(schema, { $ref: "wrong" }, "complete")).toEqual({
+      issues: [],
+      obligations: [{ pointer: "" }],
+    });
+    expect(applySchemaContract(schema, { $ref: "wrong" }, "complete", "resolved-value")).toEqual({
+      issues: [{ kind: "mismatch", pointer: "/$ref", keyword: "const" }],
+      obligations: [],
+    });
+    expect(
+      applySchemaContract(schema, { $ref: "literal-value" }, "complete", "resolved-value"),
+    ).toEqual({ issues: [], obligations: [] });
+  });
+
   it("records nested dynamic roots while retaining definite static failures", () => {
     const result = applySchemaContract(
       {

@@ -1,0 +1,1348 @@
+{
+  "schemaVersion": 1,
+  "task": "M02-T09",
+  "profile": "desen-interaction-contract-validation-v1",
+  "protocolVersion": "0.1.0",
+  "result": "PASS",
+  "frozenInput": {
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+    "catalogTuple": {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react",
+      "packageDigest": "sha256:c8e15513005c9f54d2fc35b60c01f9f7d187dabd3c5efba71cd4dc6db2542a1f"
+    }
+  },
+  "prerequisite": {
+    "componentContracts": {
+      "task": "M02-T08",
+      "profile": "desen-component-contract-validation-v1",
+      "result": "PASS",
+      "verifiedBy": "verifyProtocolComponentContracts",
+      "sha256": "75d6fad78b763ab74182f4bdfdac034d6dce382f5c842856dbedf1de1b6ce3b5",
+      "verificationSha256": "75d6fad78b763ab74182f4bdfdac034d6dce382f5c842856dbedf1de1b6ce3b5"
+    }
+  },
+  "traceability": {
+    "schemaFamilies": [
+      { "id": "SC-030", "expectedConstraints": 5 },
+      { "id": "SC-044", "expectedConstraints": 54 },
+      { "id": "SC-046", "expectedConstraints": 70 },
+      { "id": "SC-053", "expectedConstraints": 7 },
+      { "id": "SC-054", "expectedConstraints": 7 },
+      { "id": "SC-057", "expectedConstraints": 39 },
+      { "id": "SC-058", "expectedConstraints": 64 }
+    ],
+    "schemaFamilyCount": 7,
+    "schemaConstraints": 246,
+    "conformanceResponsibilities": [],
+    "proseRules": ["R-044", "R-062", "R-069", "R-070", "R-071", "R-080", "R-120"],
+    "mandatoryClauses": [
+      { "id": "N-033", "status": "PLANNED" },
+      { "id": "N-034", "status": "PLANNED" }
+    ],
+    "ownedCoreDiagnostics": [
+      { "id": "D-013", "code": "UNKNOWN_EVENT" },
+      { "id": "D-014", "code": "EVENT_PAYLOAD_INVALID" },
+      { "id": "D-015", "code": "UNKNOWN_COMMAND" },
+      { "id": "D-017", "code": "BEHAVIOR_ATTACHMENT_INVALID" },
+      { "id": "D-018", "code": "BEHAVIOR_CONFLICT" }
+    ],
+    "reusedComponentSurfaceDiagnostics": [
+      { "id": "D-008", "code": "UNKNOWN_PROP" },
+      { "id": "D-009", "code": "PROP_TYPE_MISMATCH" },
+      { "id": "D-010", "code": "UNKNOWN_SLOT" },
+      { "id": "D-011", "code": "SLOT_CARDINALITY" },
+      { "id": "D-012", "code": "SLOT_CHILD_REJECTED" }
+    ],
+    "excludedCommandInputDiagnostic": {
+      "id": "D-016",
+      "code": "COMMAND_INPUT_INVALID",
+      "owner": "M02-T11"
+    },
+    "implementationDiagnostic": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+    "implementationFindings": {
+      "slotProfile": "PF-010",
+      "schemaSafety": "PF-011",
+      "attachmentAndConflict": "PF-012",
+      "eventPayload": "PF-013",
+      "commandBoundary": "PF-014"
+    }
+  },
+  "publicApi": {
+    "exports": [
+      "EVENT_PAYLOAD_SAFETY_LIMITS",
+      "INVALID_INTERACTION_CONTRACT_CODE",
+      "validateDesenBundleInteractionContracts",
+      "validateDesenEventPayload",
+      "validateDesenInteractionCatalogSet",
+      "validateDesenInteractionContracts",
+      "validateDesenSourceInteractionContracts"
+    ],
+    "cumulativeBoundary": "T06→T07→T08→T09",
+    "successValue": "independent recursively frozen JSON snapshot",
+    "failureValue": "no trusted document or payload value",
+    "dynamicObligations": "deeply frozen deterministic inert JSON array"
+  },
+  "frozenValidation": {
+    "validConformance": [
+      { "file": "valid/web.catalog.json", "target": "catalog-set", "valid": true },
+      { "file": "valid/sign-in.source.json", "target": "source", "valid": true },
+      { "file": "valid/sign-in.bundle.json", "target": "bundle", "valid": true }
+    ],
+    "validExamples": [
+      { "file": "catalog.web.example.json", "target": "catalog-set", "valid": true },
+      { "file": "sign-in.source.desen.json", "target": "source", "valid": true },
+      { "file": "sign-in.bundle.desen.json", "target": "bundle", "valid": true },
+      { "file": "sortable-list.source.desen.json", "target": "source", "valid": true },
+      { "file": "store-map.source.desen.json", "target": "source", "valid": true }
+    ],
+    "officialT09Invalid": [
+      {
+        "file": "invalid/source-unknown-event.json",
+        "target": "source",
+        "diagnostics": [
+          { "code": "UNKNOWN_EVENT", "pointer": "/surfaces/home/root/slots/default/0/on/teleport" }
+        ]
+      }
+    ],
+    "predecessorFailures": [
+      {
+        "id": "unknown-core-field",
+        "diagnostics": [{ "code": "UNKNOWN_CORE_FIELD", "pointer": "/script" }]
+      },
+      {
+        "id": "duplicate-node-id",
+        "diagnostics": [
+          { "code": "DUPLICATE_NODE_ID", "pointer": "/surfaces/home/root/slots/default/1/id" }
+        ]
+      },
+      {
+        "id": "unknown-capability",
+        "diagnostics": [
+          { "code": "UNKNOWN_CAPABILITY", "pointer": "/surfaces/home/root/slots/default/0/use" }
+        ]
+      }
+    ],
+    "laterIntegrityAccepted": [
+      { "id": "bundle-revision", "owner": "M06-T09/M07-T02", "valid": true },
+      { "id": "catalog-digest", "owner": "M07-T03", "valid": true }
+    ]
+  },
+  "behaviorContracts": {
+    "props": [
+      {
+        "id": "unknown",
+        "diagnostics": [
+          { "code": "UNKNOWN_PROP", "pointer": "/surfaces/main/root/behaviors/0/props/ghost" }
+        ]
+      },
+      {
+        "id": "mismatch",
+        "diagnostics": [
+          { "code": "PROP_TYPE_MISMATCH", "pointer": "/surfaces/main/root/behaviors/0/props/axis" }
+        ]
+      },
+      {
+        "id": "dynamic",
+        "valid": true,
+        "obligations": [
+          {
+            "kind": "behavior-prop",
+            "pointer": "/surfaces/main/root/behaviors/0/props/axis",
+            "context": {
+              "documentId": "com.example.account-app",
+              "surfaceId": "main",
+              "subject": { "kind": "behavior", "id": "sort" },
+              "capabilityId": "com.example.interactions/Sortable"
+            }
+          }
+        ]
+      }
+    ],
+    "styles": [
+      {
+        "id": "mismatch",
+        "diagnostics": [
+          {
+            "code": "PROP_TYPE_MISMATCH",
+            "pointer": "/surfaces/main/root/behaviors/0/style/base/dropIndicator/color"
+          }
+        ]
+      },
+      {
+        "id": "dynamic",
+        "valid": true,
+        "obligations": [
+          {
+            "kind": "behavior-style-part-property",
+            "pointer": "/surfaces/main/root/behaviors/0/style/base/dropIndicator/color",
+            "context": {
+              "documentId": "com.example.account-app",
+              "surfaceId": "main",
+              "subject": { "kind": "behavior", "id": "sort" },
+              "capabilityId": "com.example.interactions/Sortable"
+            }
+          }
+        ]
+      },
+      {
+        "id": "unknown-state",
+        "diagnostics": [
+          { "code": "UNKNOWN_PROP", "pointer": "/surfaces/main/root/behaviors/0/style/ghost" }
+        ]
+      },
+      {
+        "id": "unknown-part",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_PROP",
+            "pointer": "/surfaces/main/root/behaviors/0/style/base/privatePart"
+          }
+        ]
+      },
+      {
+        "id": "inherited-part",
+        "diagnostics": [
+          {
+            "code": "UNKNOWN_PROP",
+            "pointer": "/surfaces/main/root/behaviors/0/style/base/toString"
+          }
+        ]
+      }
+    ],
+    "slots": [
+      {
+        "id": "unknown",
+        "diagnostics": [
+          { "code": "UNKNOWN_SLOT", "pointer": "/surfaces/main/root/behaviors/0/slots/ghost" }
+        ]
+      },
+      {
+        "id": "inherited",
+        "diagnostics": [
+          { "code": "UNKNOWN_SLOT", "pointer": "/surfaces/main/root/behaviors/0/slots/toString" }
+        ]
+      },
+      {
+        "id": "required",
+        "diagnostics": [
+          {
+            "code": "SLOT_CARDINALITY",
+            "pointer": "/surfaces/main/root/behaviors/0/slots/dragPreview"
+          }
+        ]
+      },
+      {
+        "id": "minimum",
+        "diagnostics": [
+          {
+            "code": "SLOT_CARDINALITY",
+            "pointer": "/surfaces/main/root/behaviors/0/slots/dragPreview"
+          }
+        ]
+      },
+      {
+        "id": "maximum",
+        "diagnostics": [
+          {
+            "code": "SLOT_CARDINALITY",
+            "pointer": "/surfaces/main/root/behaviors/0/slots/dragPreview"
+          }
+        ]
+      },
+      {
+        "id": "rejected-child",
+        "diagnostics": [
+          {
+            "code": "SLOT_CHILD_REJECTED",
+            "pointer": "/surfaces/main/root/behaviors/0/slots/dragPreview/0/use"
+          }
+        ]
+      },
+      {
+        "id": "impossible-range",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/behaviors/com.example.interactions~1Sortable/slots/dragPreview"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviorIdentity": {
+    "id": "node-behavior-id-collision",
+    "proseRule": "R-069",
+    "diagnostics": [
+      { "code": "DUPLICATE_NODE_ID", "pointer": "/surfaces/main/root/behaviors/0/id" }
+    ]
+  },
+  "attachments": [
+    { "id": "exact-capability", "valid": true },
+    { "id": "exact-category", "valid": true },
+    { "id": "or-union", "valid": true },
+    {
+      "id": "wrong-category",
+      "diagnostics": [
+        { "code": "BEHAVIOR_ATTACHMENT_INVALID", "pointer": "/surfaces/main/root/behaviors/0/use" }
+      ]
+    },
+    {
+      "id": "case-mismatched-capability",
+      "diagnostics": [
+        { "code": "BEHAVIOR_ATTACHMENT_INVALID", "pointer": "/surfaces/main/root/behaviors/0/use" }
+      ]
+    },
+    {
+      "id": "present-empty-union",
+      "diagnostics": [
+        { "code": "BEHAVIOR_ATTACHMENT_INVALID", "pointer": "/surfaces/main/root/behaviors/0/use" }
+      ]
+    }
+  ],
+  "conflicts": [
+    { "id": "disjoint", "valid": true },
+    {
+      "id": "shared",
+      "diagnostics": [
+        { "code": "BEHAVIOR_CONFLICT", "pointer": "/surfaces/main/root/behaviors/1/use" }
+      ]
+    },
+    {
+      "id": "unilateral",
+      "diagnostics": [
+        { "code": "BEHAVIOR_CONFLICT", "pointer": "/surfaces/main/root/behaviors/1/use" }
+      ]
+    },
+    { "id": "mutual", "valid": true },
+    {
+      "id": "self-unlisted",
+      "diagnostics": [
+        { "code": "BEHAVIOR_CONFLICT", "pointer": "/surfaces/main/root/behaviors/1/use" }
+      ]
+    },
+    { "id": "self-listed", "valid": true },
+    {
+      "id": "three-node-missing-edge",
+      "diagnostics": [
+        { "code": "BEHAVIOR_CONFLICT", "pointer": "/surfaces/main/root/behaviors/2/use" }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "component-case-sensitive",
+      "diagnostics": [{ "code": "UNKNOWN_EVENT", "pointer": "/surfaces/main/root/on/Change" }]
+    },
+    {
+      "id": "component-inherited-name",
+      "diagnostics": [{ "code": "UNKNOWN_EVENT", "pointer": "/surfaces/main/root/on/toString" }]
+    },
+    {
+      "id": "behavior-unknown",
+      "diagnostics": [
+        { "code": "UNKNOWN_EVENT", "pointer": "/surfaces/main/root/behaviors/0/on/teleport" }
+      ]
+    },
+    {
+      "id": "behavior-inherited-name",
+      "diagnostics": [
+        { "code": "UNKNOWN_EVENT", "pointer": "/surfaces/main/root/behaviors/0/on/toString" }
+      ]
+    },
+    {
+      "id": "component-inherited-map-document",
+      "diagnostics": [{ "code": "UNKNOWN_EVENT", "pointer": "/surfaces/main/root/on/ghost" }]
+    },
+    {
+      "id": "component-inherited-map-payload",
+      "diagnostics": [{ "code": "UNKNOWN_EVENT", "pointer": "" }]
+    }
+  ],
+  "commands": [
+    { "id": "known-target-declared", "valid": true },
+    {
+      "id": "known-target-unknown",
+      "diagnostics": [
+        {
+          "code": "UNKNOWN_COMMAND",
+          "pointer": "/surfaces/main/root/slots/default/0/on/press/0/command"
+        }
+      ]
+    },
+    {
+      "id": "known-target-inherited-name",
+      "diagnostics": [
+        {
+          "code": "UNKNOWN_COMMAND",
+          "pointer": "/surfaces/main/root/slots/default/0/on/press/0/command"
+        }
+      ]
+    },
+    {
+      "id": "known-target-inherited-map",
+      "diagnostics": [
+        {
+          "code": "UNKNOWN_COMMAND",
+          "pointer": "/surfaces/main/root/slots/default/0/on/press/0/command"
+        }
+      ]
+    }
+  ],
+  "payloadValidation": {
+    "component": {
+      "valid": true,
+      "invalid": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "/value" }]
+    },
+    "behavior": {
+      "valid": true,
+      "invalid": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "/toIndex" }]
+    },
+    "valueSpecShapedRefIsLiteral": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "/$ref" }],
+    "unknownEvent": [{ "code": "UNKNOWN_EVENT", "pointer": "" }]
+  },
+  "payloadSafety": {
+    "limits": { "maxDepth": 128, "maxJsonNodes": 4096, "maxStringCodeUnits": 1048576 },
+    "accepted": [
+      { "id": "maximum-depth", "valid": true },
+      { "id": "maximum-json-nodes", "valid": true },
+      { "id": "maximum-string-code-units", "valid": true },
+      { "id": "maximum-json-object-nodes", "valid": true }
+    ],
+    "rejected": [
+      {
+        "id": "above-maximum-depth",
+        "diagnostics": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "" }]
+      },
+      {
+        "id": "above-maximum-json-nodes",
+        "diagnostics": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "" }]
+      },
+      {
+        "id": "above-maximum-string-code-units",
+        "diagnostics": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "" }]
+      },
+      {
+        "id": "above-maximum-json-object-nodes",
+        "diagnostics": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "" }]
+      },
+      {
+        "id": "shared-container-dag-before-canonicalization",
+        "diagnostics": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "" }],
+        "ownKeyInspections": 2047,
+        "traversalBound": 4096
+      },
+      {
+        "id": "nested-wide-frontier-reservation",
+        "diagnostics": [{ "code": "EVENT_PAYLOAD_INVALID", "pointer": "" }],
+        "descriptorInspections": 4005,
+        "inspectionBound": 5000
+      }
+    ]
+  },
+  "schemaSafetyGoldens": {
+    "accepted": [{ "id": "maximum-schema-depth", "boundary": 128, "valid": true }],
+    "rejected": [
+      {
+        "id": "above-maximum-schema-depth",
+        "boundary": 129,
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/behaviors/com.example.interactions~1Sortable/propsSchema"
+          }
+        ]
+      },
+      {
+        "id": "component-event",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/components/com.example.ui~1TextField/events/change/payloadSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "component-command",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/components/com.example.ui~1TextField/commands/focus/inputSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "behavior-props",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/behaviors/com.example.interactions~1Sortable/propsSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "behavior-event",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/behaviors/com.example.interactions~1Sortable/events/reorder/payloadSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "behavior-command",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/behaviors/com.example.interactions~1Sortable/commands/probe/inputSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "behavior-style",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT",
+            "pointer": "/0/behaviors/com.example.interactions~1Sortable/styleParts/dropIndicator/propertiesSchema/properties/value/pattern"
+          }
+        ]
+      }
+    ]
+  },
+  "laterTaskScopeAccepted": [
+    { "id": "event-reference-path", "owner": "M02-T10", "valid": true },
+    { "id": "component-command-target", "owner": "M02-T11", "valid": true },
+    { "id": "component-command-input", "owner": "M02-T11", "valid": true },
+    { "id": "navigation-target", "owner": "M02-T11", "valid": true }
+  ],
+  "determinism": {
+    "objectPermutation": "all object members recursively reversed; array order preserved",
+    "diagnosticsEqual": true,
+    "obligationsEqual": true,
+    "dispatcherTargets": ["source", "bundle"]
+  },
+  "security": {
+    "rawDocuments": "re-enter the cumulative T06→T08 immutable trust boundary",
+    "resolvedPayloadBoundary": {
+      "detachedSnapshot": true,
+      "deepFrozen": true,
+      "getterInvocations": 0,
+      "cycleRejected": true,
+      "customPrototypeRejected": true,
+      "nonFiniteRejected": true
+    },
+    "payloadInterpretation": "resolved-value; ValueSpec-shaped members stay inert JSON",
+    "payloadLimits": { "maxDepth": 128, "maxJsonNodes": 4096, "maxStringCodeUnits": 1048576 },
+    "preCanonicalExpansionBound": true,
+    "queuedChildReservation": true,
+    "schemaProfile": {
+      "finding": "PF-011",
+      "inheritedFromVerifiedT08Artifact": "75d6fad78b763ab74182f4bdfdac034d6dce382f5c842856dbedf1de1b6ce3b5",
+      "evaluationBudget": 50000,
+      "unsafeNativePatternExecution": false
+    },
+    "platformAudit": {
+      "packages": {
+        "validator": {
+          "sourceFiles": [
+            "component-contract-validation.ts",
+            "embedded-schema-validation.ts",
+            "generated/0.1.0/structural-validators.ts",
+            "index.ts",
+            "interaction-contract-validation.ts",
+            "schema-instance-validation.ts",
+            "semantic-diagnostics.ts",
+            "semantic-validation.ts",
+            "standalone-runtime.ts",
+            "structural-diagnostics.ts",
+            "structural-validation.ts",
+            "uri-reference.ts",
+            "validation-internals.ts"
+          ],
+          "distributionFiles": [
+            "component-contract-validation.d.ts",
+            "component-contract-validation.d.ts.map",
+            "component-contract-validation.js",
+            "component-contract-validation.js.map",
+            "embedded-schema-validation.d.ts",
+            "embedded-schema-validation.d.ts.map",
+            "embedded-schema-validation.js",
+            "embedded-schema-validation.js.map",
+            "generated/0.1.0/structural-validators.d.ts",
+            "generated/0.1.0/structural-validators.d.ts.map",
+            "generated/0.1.0/structural-validators.js",
+            "generated/0.1.0/structural-validators.js.map",
+            "index.d.ts",
+            "index.d.ts.map",
+            "index.js",
+            "index.js.map",
+            "interaction-contract-validation.d.ts",
+            "interaction-contract-validation.d.ts.map",
+            "interaction-contract-validation.js",
+            "interaction-contract-validation.js.map",
+            "schema-instance-validation.d.ts",
+            "schema-instance-validation.d.ts.map",
+            "schema-instance-validation.js",
+            "schema-instance-validation.js.map",
+            "semantic-diagnostics.d.ts",
+            "semantic-diagnostics.d.ts.map",
+            "semantic-diagnostics.js",
+            "semantic-diagnostics.js.map",
+            "semantic-validation.d.ts",
+            "semantic-validation.d.ts.map",
+            "semantic-validation.js",
+            "semantic-validation.js.map",
+            "standalone-runtime.d.ts",
+            "standalone-runtime.d.ts.map",
+            "standalone-runtime.js",
+            "standalone-runtime.js.map",
+            "structural-diagnostics.d.ts",
+            "structural-diagnostics.d.ts.map",
+            "structural-diagnostics.js",
+            "structural-diagnostics.js.map",
+            "structural-validation.d.ts",
+            "structural-validation.d.ts.map",
+            "structural-validation.js",
+            "structural-validation.js.map",
+            "uri-reference.d.ts",
+            "uri-reference.d.ts.map",
+            "uri-reference.js",
+            "uri-reference.js.map",
+            "validation-internals.d.ts",
+            "validation-internals.d.ts.map",
+            "validation-internals.js",
+            "validation-internals.js.map"
+          ],
+          "auditedFiles": 39,
+          "allowedImports": ["relative", "@desen/protocol"]
+        },
+        "protocol": {
+          "sourceFiles": [
+            "canonicalization.ts",
+            "diagnostics.ts",
+            "generated/0.1.0/desen-bundle.generated.ts",
+            "generated/0.1.0/desen-catalog.generated.ts",
+            "generated/0.1.0/desen-source.generated.ts",
+            "index.ts",
+            "json-pointer.ts"
+          ],
+          "distributionFiles": [
+            "canonicalization.d.ts",
+            "canonicalization.d.ts.map",
+            "canonicalization.js",
+            "canonicalization.js.map",
+            "diagnostics.d.ts",
+            "diagnostics.d.ts.map",
+            "diagnostics.js",
+            "diagnostics.js.map",
+            "generated/0.1.0/desen-bundle.generated.d.ts",
+            "generated/0.1.0/desen-bundle.generated.d.ts.map",
+            "generated/0.1.0/desen-bundle.generated.js",
+            "generated/0.1.0/desen-bundle.generated.js.map",
+            "generated/0.1.0/desen-catalog.generated.d.ts",
+            "generated/0.1.0/desen-catalog.generated.d.ts.map",
+            "generated/0.1.0/desen-catalog.generated.js",
+            "generated/0.1.0/desen-catalog.generated.js.map",
+            "generated/0.1.0/desen-source.generated.d.ts",
+            "generated/0.1.0/desen-source.generated.d.ts.map",
+            "generated/0.1.0/desen-source.generated.js",
+            "generated/0.1.0/desen-source.generated.js.map",
+            "index.d.ts",
+            "index.d.ts.map",
+            "index.js",
+            "index.js.map",
+            "json-pointer.d.ts",
+            "json-pointer.d.ts.map",
+            "json-pointer.js",
+            "json-pointer.js.map"
+          ],
+          "auditedFiles": 21,
+          "allowedImports": ["relative"]
+        }
+      },
+      "runtimeSchemaCompilation": false,
+      "documentCodeExecution": false,
+      "remoteSchemaResolution": false,
+      "platform": "ECMAScript 2023; no Node, React, DOM, CSS, or browser API in production source"
+    }
+  },
+  "implementation": {
+    "package": "@desen/validator",
+    "platform": "ECMAScript 2023; no Node, React, DOM, CSS, or browser API in production source",
+    "runtimeDependencies": [
+      { "name": "@desen/protocol", "version": "workspace:*", "license": "Apache-2.0" }
+    ],
+    "transitiveRuntimeDependencies": [],
+    "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
+    "trackedFiles": [
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 18421,
+        "sha256": "5db59d7a629e9fdc7abe4a1887e9cdc2dea52a6226ad6852d3dc16864116a99e"
+      },
+      {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 25780,
+        "sha256": "3838dd09728cad5b7956bb44c409a88a97f9ec483cab45f3d0c3d4819ca39b23"
+      },
+      {
+        "path": "docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md",
+        "bytes": 10285,
+        "sha256": "b3a8822a55865fb7e9da6c1398fa7ea6a91b1ace4fedd0e3ac86590bb1c263e0"
+      },
+      {
+        "path": "docs/proof/protocol-0.1.0-traceability.json",
+        "bytes": 134870,
+        "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+      },
+      {
+        "path": "package.json",
+        "bytes": 5771,
+        "sha256": "b1769558f9d739760cc70c948068010556bb695a71c05e440b5ac82fdfcd987e"
+      },
+      {
+        "path": "packages/protocol/dist/canonicalization.d.ts",
+        "bytes": 3964,
+        "sha256": "61e8cdc0a14021bb967db4f476d31874ac8e30e3c633b876a60b9b7d4a0612fa"
+      },
+      {
+        "path": "packages/protocol/dist/canonicalization.d.ts.map",
+        "bytes": 770,
+        "sha256": "0ff6dae6c2b7ff56f7a5930806c69f9b77f365297cda95ad979739f15142dac1"
+      },
+      {
+        "path": "packages/protocol/dist/canonicalization.js",
+        "bytes": 17634,
+        "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+      },
+      {
+        "path": "packages/protocol/dist/canonicalization.js.map",
+        "bytes": 15519,
+        "sha256": "7de9f144f9fa8d2068ad298bc88f52990cda5b4e2f82f2d9e76473dab667b8be"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.d.ts",
+        "bytes": 9565,
+        "sha256": "fe2bf78fbe6eb6c28a60def9cd2e8d40d44e897fc853b18a58360693f06728c7"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.d.ts.map",
+        "bytes": 2463,
+        "sha256": "5efe5038005d1526374c27abc0e477729deb952f0b113bdd96c08940b15098a9"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.js",
+        "bytes": 8905,
+        "sha256": "0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.js.map",
+        "bytes": 6261,
+        "sha256": "6adcc4f5a945906f145ef543fb8f72b8b1d40a403b855391374763a863b39135"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-bundle.generated.d.ts",
+        "bytes": 7356,
+        "sha256": "c3c58047902e7f7d29fd35dccf190d52ce21385217db595ec77d244e295bb5d5"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-bundle.generated.d.ts.map",
+        "bytes": 6039,
+        "sha256": "9e0e1654f3821c69f9604dea25706fe99ae2faf9bdd54767a91cca0460b3122c"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-bundle.generated.js",
+        "bytes": 490,
+        "sha256": "286c61208581fc657dd74b2be8c18d612eca2289ab029b5d1eca53871db5699a"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-bundle.generated.js.map",
+        "bytes": 184,
+        "sha256": "15d46d36fa7c730479341796baadd145a5e7901437c8c15870fd36f4bda379a3"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-catalog.generated.d.ts",
+        "bytes": 6537,
+        "sha256": "9d85f575930bb132277cecd32db3e342da079fbf78e031bc18e3adb878df9bea"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-catalog.generated.d.ts.map",
+        "bytes": 5782,
+        "sha256": "d0400f15c63971e960bd454b56e2a820b3cd1867f8e66b3ea119a3a06db1c02b"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-catalog.generated.js",
+        "bytes": 491,
+        "sha256": "a8e57a1d2be228de8f0d0b68733be2404c83fd3fccf197e98fa11da3e6b92a37"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-catalog.generated.js.map",
+        "bytes": 186,
+        "sha256": "b1dbf0d4f4cd3d303e6d7163a94eb48a93dc874b40f234d4cd10012dc9241676"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-source.generated.d.ts",
+        "bytes": 7250,
+        "sha256": "338d8e25c6783da52c531a120539aba42b954eceb3df67924b6a45d57fc0c563"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-source.generated.d.ts.map",
+        "bytes": 5962,
+        "sha256": "28f6ba6928734f5512d809bf217123684001adf4ddacdd82eff21aab72154b68"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-source.generated.js",
+        "bytes": 490,
+        "sha256": "eb5397a94bef5e33f45a80f261080589e87aaf9c5f6165c7b517528173280e98"
+      },
+      {
+        "path": "packages/protocol/dist/generated/0.1.0/desen-source.generated.js.map",
+        "bytes": 184,
+        "sha256": "c37c9fcffad30f95fac75abf16817f07d715095596153d78c7dbf473ec029384"
+      },
+      {
+        "path": "packages/protocol/dist/index.d.ts",
+        "bytes": 3006,
+        "sha256": "4189219fb1e04665db85fa377660ecef385d4e66ce02a719f37249a70bc5b43b"
+      },
+      {
+        "path": "packages/protocol/dist/index.d.ts.map",
+        "bytes": 1435,
+        "sha256": "e0df6d27a56223ed0651f6c5a3d06d1d9e87d02371318b571684d521141137f7"
+      },
+      {
+        "path": "packages/protocol/dist/index.js",
+        "bytes": 679,
+        "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+      },
+      {
+        "path": "packages/protocol/dist/index.js.map",
+        "bytes": 444,
+        "sha256": "422350ee39e3d30c64f7badb98ad40517528cabe90b10fe67f86610f7d43cf84"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.d.ts",
+        "bytes": 3631,
+        "sha256": "a553edcb3642f5241f0a4a2ba69f6c1380eaa4d54eab3c84918d071e8225a171"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.d.ts.map",
+        "bytes": 816,
+        "sha256": "045a2ed5155bb45e083024bcf4aa805f6786c1cf0dd5096513554b4f84b54336"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.js",
+        "bytes": 6499,
+        "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.js.map",
+        "bytes": 4344,
+        "sha256": "762fc26ef5af285bc3d8a6dc7d3b1d0250cf2751ef0761e7e9ec11db519f5929"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/protocol/src/canonicalization.ts",
+        "bytes": 17820,
+        "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
+      },
+      {
+        "path": "packages/protocol/src/diagnostics.ts",
+        "bytes": 13831,
+        "sha256": "d9cffbaae026c1bf027624f8c21b14172cdcf52fc3e546708e7becb0973019a4"
+      },
+      {
+        "path": "packages/protocol/src/generated/0.1.0/desen-bundle.generated.ts",
+        "bytes": 7381,
+        "sha256": "17cc59994b4cc3e96f8061b13b75b67d07a83af087637928d617499d13044092"
+      },
+      {
+        "path": "packages/protocol/src/generated/0.1.0/desen-catalog.generated.ts",
+        "bytes": 6064,
+        "sha256": "03c1cbc5571661cb417f24d659fb431f1b35203ff41b23efa8b8286aa01fa867"
+      },
+      {
+        "path": "packages/protocol/src/generated/0.1.0/desen-source.generated.ts",
+        "bytes": 7291,
+        "sha256": "f66d89749bc6bc8bbd11f7f8e71bde2b883006535f0e388765d532b31ae9582a"
+      },
+      {
+        "path": "packages/protocol/src/index.ts",
+        "bytes": 3261,
+        "sha256": "e2ceeea8bd84d4d7e6e9431bc970cd8168478d8a7cad27f0f4909f71fabe8bcb"
+      },
+      {
+        "path": "packages/protocol/src/json-pointer.ts",
+        "bytes": 7460,
+        "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
+      },
+      {
+        "path": "packages/protocol/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/protocol/tsconfig.json",
+        "bytes": 252,
+        "sha256": "e85de556134485bf859e0721710907df3faef563a6204b615c01fbc54cab5201"
+      },
+      {
+        "path": "packages/validator/README.md",
+        "bytes": 29024,
+        "sha256": "c6adbb3e07f373e89d53634c49e59a5d2aec0551b862e3dc4b9369d7db4550a8"
+      },
+      {
+        "path": "packages/validator/THIRD_PARTY_NOTICES.md",
+        "bytes": 1216,
+        "sha256": "1e538937d6504807ab15280d8a821466a85a2a1949142305c81757eb9b86ae5b"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.d.ts",
+        "bytes": 7196,
+        "sha256": "ee4fefda11fc59a4d2ee59765e07380762ce236812a6b05a4d6b67c92abdfb16"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.d.ts.map",
+        "bytes": 2598,
+        "sha256": "146a8630df8818b141280cde63b6ba2f3270f980c4732672bd407466c692a468"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.js",
+        "bytes": 24587,
+        "sha256": "f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.js.map",
+        "bytes": 21975,
+        "sha256": "b4af047627d66aeddf10617644763229730ca629e72d539770b57ad18b84739a"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.d.ts",
+        "bytes": 493,
+        "sha256": "ab6bcfed464d994c1b2b65c7e284607561b72ea9a8551d3bd34613f7a247266c"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.d.ts.map",
+        "bytes": 402,
+        "sha256": "cc68499341a6c960af66c3d321bc5dccc46fb9f734a760ae6f7b0f08337ae25e"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.js",
+        "bytes": 8707,
+        "sha256": "240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.js.map",
+        "bytes": 7725,
+        "sha256": "2b97a1c47442999492f05604227eaaaf8d82f10e159488456dc620839b42cd44"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.d.ts",
+        "bytes": 3784,
+        "sha256": "9f91904e9f4e36dc124b6e985e23f4bc0b6f8264f3f2ee943cbe5e8327554148"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.d.ts.map",
+        "bytes": 820,
+        "sha256": "75c22a5c2d3603e0d8819483b9459c27695c0e963058210264461a08face238e"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+        "bytes": 1001830,
+        "sha256": "322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.js.map",
+        "bytes": 685237,
+        "sha256": "57e531a9ee0c7a16a2e40d3fbd67bb1933593f5720363dab15e8da1a17655e36"
+      },
+      {
+        "path": "packages/validator/dist/index.d.ts",
+        "bytes": 2901,
+        "sha256": "0083c2d439a89ed5c467a5c9234cb0168d88e09102f2a18ffdb85e1b49ebe388"
+      },
+      {
+        "path": "packages/validator/dist/index.d.ts.map",
+        "bytes": 1313,
+        "sha256": "dc41c26652389b7fd04546c0121119f60db45faa93a6176819ffe9008790f82a"
+      },
+      {
+        "path": "packages/validator/dist/index.js",
+        "bytes": 1143,
+        "sha256": "71f1ef21d6df278d796b30efc3511bb529a55210a1b5ad03e0119629fa2dcb15"
+      },
+      {
+        "path": "packages/validator/dist/index.js.map",
+        "bytes": 590,
+        "sha256": "c9497590dabc423f574ecfe2bf81442c9ee90ef18f84c890b6ec2b235ad7e761"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.d.ts",
+        "bytes": 9880,
+        "sha256": "a29029827ecb8543348a2525b93041f30d7d2617479a8004208a8a5b38af4f64"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.d.ts.map",
+        "bytes": 3769,
+        "sha256": "9d88eaccfb9c43cbe9be7b3625f1dc45d3ae1e2b79d74f6a7e3da856932e68e0"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.js",
+        "bytes": 48175,
+        "sha256": "11a2d759fe1ebf57f0db0355b875a30903e285e6686388351816d352d3ae8fcc"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.js.map",
+        "bytes": 42792,
+        "sha256": "326efee600ba0c0c028976ebe2a2bac9bfaeb52f8629324233c57fda6e2673f8"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.d.ts",
+        "bytes": 4669,
+        "sha256": "bbba2a0020dca3dba3ea8ee91620e97348313683f430f9e84d71be636a82adf3"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.d.ts.map",
+        "bytes": 1252,
+        "sha256": "80b2895a02a7df941e1a7b3ff642a93e2794137e1d14ed061f754cb4f49dd7a4"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js",
+        "bytes": 59950,
+        "sha256": "7e31066597e9307bed13b5597618d16ed2a7f8160a5f98e286b39035bb1181eb"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js.map",
+        "bytes": 57062,
+        "sha256": "6e97f7d0f56c623bce8c0d2716eef3f72fdb75b1c817d6b5f468f0f314648e50"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.d.ts",
+        "bytes": 3044,
+        "sha256": "48a1cb3abcdb58b5e6ceda6aab68b1fd9637178aeb36d5975dd669084a436f11"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.d.ts.map",
+        "bytes": 1448,
+        "sha256": "22bb09cdf43b9a4aeafe8674ce729576e6cf796b2dcc85d0cc4ce5f39f42b2d1"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js",
+        "bytes": 5221,
+        "sha256": "5053c6706cefac21e5c77fa0fa918e7dc1e16d72de05e693259350c9ae5e4cff"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js.map",
+        "bytes": 3940,
+        "sha256": "0fb408fe889eb3b8bcb2df700d4f2bac36a9fe669f8ae6e4061af4cd4a6ea9cc"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.d.ts",
+        "bytes": 6101,
+        "sha256": "6b2489b3566655edc317c4a815946d761fc8dbb6a961ca304e3a16aa81fd7c61"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.d.ts.map",
+        "bytes": 2262,
+        "sha256": "6fb6bd9037300b63224e87287f2cd307ec0dca0dd24c26c56e0f7dfa232c3730"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.js",
+        "bytes": 23365,
+        "sha256": "7d57f2ed44eb04606701896dbce5c2f5aa1c54e45cc43540caedb5aa790acdc1"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.js.map",
+        "bytes": 19834,
+        "sha256": "7ca7cb94ddfe5e24c385f90406393aa5901570e3241f47a6b895411c31cf58d5"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.d.ts",
+        "bytes": 905,
+        "sha256": "4b526c027034bb61a127d279fa2988112a780b732a931679575c16e7466a3f7c"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.d.ts.map",
+        "bytes": 286,
+        "sha256": "949952d08a0abac9494abce20653863ace38c19bafa656a487defa69a726e23a"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.js",
+        "bytes": 2004,
+        "sha256": "0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.js.map",
+        "bytes": 1631,
+        "sha256": "481ef0e4e69fb3105d108560a47dd3ceb5859ef30b054cf7a3b0a02c7e048e03"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.d.ts",
+        "bytes": 1406,
+        "sha256": "541373ad68813469ca9558f4460e275bdadfd8a2e99c4b3dc13696f16b02a546"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.d.ts.map",
+        "bytes": 824,
+        "sha256": "24b5e161bff55d6de0325eff391cfc97a9372c8e216777912c008797858a45c3"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.js",
+        "bytes": 2879,
+        "sha256": "118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.js.map",
+        "bytes": 2380,
+        "sha256": "916529b3e4e47418942a13c37bcd7ac079d1164ea899be17bb13b8eda5a283bd"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.d.ts",
+        "bytes": 3862,
+        "sha256": "9fbfcabfa0be525c45239cc105ee152573415e9f7ea54386fdbec2c2cbae0c21"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.d.ts.map",
+        "bytes": 1945,
+        "sha256": "4d49187e46722c20b1e6af24908b9d0f3d3c3824ac1bccb0a0ef29424e55e268"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.js",
+        "bytes": 5187,
+        "sha256": "f29c203e4e5648b1104395df50e4c9b844ac88dfc9871f958e49e8f19a2fc95a"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.js.map",
+        "bytes": 3958,
+        "sha256": "da3aa76c202725843c0be1f93ce81cdccc3075674b25dc9c2e57bcda3f42162b"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.d.ts",
+        "bytes": 924,
+        "sha256": "1d9cdc3b9e5a5327526f2eb33b709548889c3b5442ca9a898d5765004522a9f5"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.d.ts.map",
+        "bytes": 354,
+        "sha256": "d0f80c57856893932e837251e70922b1716cfa8ac2535ef54a24320e78737858"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.js",
+        "bytes": 10282,
+        "sha256": "342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.js.map",
+        "bytes": 10941,
+        "sha256": "a2f17fa3a283ca6cb5794757df48487c6f9d213830456e56d42ca05635d20ab0"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.d.ts",
+        "bytes": 1831,
+        "sha256": "e70485ae1dc7ca19184329dfabc34a984a55711a17ddbfa885866dca293b7944"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.d.ts.map",
+        "bytes": 1264,
+        "sha256": "fd5ad9af240c493d1ebd123d3d77b94e2cb92972314e4778d4d388a7b4c5fb23"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.js",
+        "bytes": 1381,
+        "sha256": "d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.js.map",
+        "bytes": 1287,
+        "sha256": "9ca50d90af0fc3691f61093af2079fcb7a17c2f6c5e16db4d93a20eccbd76fa0"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 1451,
+        "sha256": "a2a1371c19f254cd1c83a43f76a078a55dc949b32f98acbc52ab664fa049b85f"
+      },
+      {
+        "path": "packages/validator/scripts/clean-dist.mjs",
+        "bytes": 808,
+        "sha256": "e40927b824fdfce7f16a4698522bffc63d4f280f3bf9fe604034ea10d97c8adc"
+      },
+      {
+        "path": "packages/validator/src/component-contract-validation.ts",
+        "bytes": 33804,
+        "sha256": "f469bea2473639ec2ce9dde61d1390c9ce6dab3003998928922699c1bebb3e6d"
+      },
+      {
+        "path": "packages/validator/src/embedded-schema-validation.ts",
+        "bytes": 9807,
+        "sha256": "f3fa31f08989c991b4b896cb41e0765abe97c5cc171d197e2d8c1043dc24737b"
+      },
+      {
+        "path": "packages/validator/src/generated/0.1.0/structural-validators.ts",
+        "bytes": 761360,
+        "sha256": "d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd"
+      },
+      {
+        "path": "packages/validator/src/index.ts",
+        "bytes": 3010,
+        "sha256": "b68a3af191ba519e004e81f730d937c167c8476ed4a8614329c3d0df45fb3122"
+      },
+      {
+        "path": "packages/validator/src/interaction-contract-validation.ts",
+        "bytes": 61964,
+        "sha256": "38052ab7922d61c9afade13da71787cae61ceaa8b8671d446f56580a51500194"
+      },
+      {
+        "path": "packages/validator/src/schema-instance-validation.ts",
+        "bytes": 62560,
+        "sha256": "4784055c2e26da0ab71cc4233da648f976b0ddb209f11ee26d2b399674ca146c"
+      },
+      {
+        "path": "packages/validator/src/semantic-diagnostics.ts",
+        "bytes": 6637,
+        "sha256": "4093c601f9d49e478c7a15c3b6b2b6017d6905f4d65b5a0ce9d6fa566846a871"
+      },
+      {
+        "path": "packages/validator/src/semantic-validation.ts",
+        "bytes": 31291,
+        "sha256": "7aeb1ad014df92a11e6db7a69c34b187d50f20aa9abcb3ba4bf5df287c80e13f"
+      },
+      {
+        "path": "packages/validator/src/standalone-runtime.ts",
+        "bytes": 1963,
+        "sha256": "3fcba82ea37bf1027d67375bc51cb329b0bee4f76cb324232c9e40bf9aecb0cf"
+      },
+      {
+        "path": "packages/validator/src/structural-diagnostics.ts",
+        "bytes": 3574,
+        "sha256": "efdb86e5db349f8dee694a7d182ec24d0d0e8764618ad1108edc7a61b2c6b85a"
+      },
+      {
+        "path": "packages/validator/src/structural-validation.ts",
+        "bytes": 8591,
+        "sha256": "49c7b4a71e1c12c4641b7ce3a15b134d65e6c5f45fe92ec6c791b4be45f96b72"
+      },
+      {
+        "path": "packages/validator/src/uri-reference.ts",
+        "bytes": 10248,
+        "sha256": "f7e30daae65137377fbe8fef678101bc385d31f1d976e7cde0b048d434c4bdd6"
+      },
+      {
+        "path": "packages/validator/src/validation-internals.ts",
+        "bytes": 2396,
+        "sha256": "341e4cc2737afd8fa9047a274d9b9f8301f9346c50c9ea2b912b793970609392"
+      },
+      {
+        "path": "packages/validator/test/component-contracts.test.ts",
+        "bytes": 31962,
+        "sha256": "d7481084e65de3ce4520f8babe64dc4d7b241e88159df60d7b8ba44e37bd577a"
+      },
+      {
+        "path": "packages/validator/test/interaction-contracts.test.ts",
+        "bytes": 45845,
+        "sha256": "e09414c399ec4f8640c3925c1eecbc08e8c9d5d59a60567edcfd95ef16c5b18b"
+      },
+      {
+        "path": "packages/validator/test/schema-instance-validation.test.ts",
+        "bytes": 24231,
+        "sha256": "f6ecb788a392aca949da532be26faaddba34d57a29f1f9672c5baaabe03e8e4a"
+      },
+      {
+        "path": "packages/validator/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/validator/tsconfig.json",
+        "bytes": 167,
+        "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 93999,
+        "sha256": "cf6e969d99bcac203d13fab6defed006c47b656d37f77ab31bcfc9bd3ab5e252"
+      },
+      {
+        "path": "scripts/generate-protocol-interaction-contracts-proof.mjs",
+        "bytes": 843,
+        "sha256": "95819dfd6152afb40128862de0328b243a23a0e9e780cc2e654ab9d42f6dff8d"
+      },
+      {
+        "path": "scripts/lib/protocol-interaction-contracts-proof.mjs",
+        "bytes": 86341,
+        "sha256": "c895982c7d0e0629b5c6be46190c5bd26aaf29b84f60cf193405874b6a299882"
+      },
+      {
+        "path": "scripts/verify-protocol-interaction-contracts.mjs",
+        "bytes": 665,
+        "sha256": "39c182d12ec139db8f1bbc1bdd2decbe9fd9ae0ec28ef52a01a75eb7160a356c"
+      },
+      {
+        "path": "tests/protocol-interaction-contracts.test.mjs",
+        "bytes": 16137,
+        "sha256": "594d131322ba2949b80f64378b7151583274a1b3be6dcc2ce83bd5b3d49db59a"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "bytes": 852,
+        "sha256": "cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
+      },
+      {
+        "path": "turbo.json",
+        "bytes": 2908,
+        "sha256": "1683e8759f25e4e74f70e61c607afb9888ea80574af836d4432684b704bc95cc"
+      }
+    ]
+  },
+  "verification": {
+    "commands": [
+      "pnpm generate:protocol-interaction-contracts",
+      "pnpm verify:protocol-interaction-contracts",
+      "pnpm test:protocol-interaction-contracts",
+      "pnpm check"
+    ],
+    "commandWiring": {
+      "root": {
+        "generate:protocol-interaction-contracts": "pnpm --filter @desen/validator... build && node scripts/generate-protocol-interaction-contracts-proof.mjs",
+        "verify:protocol-interaction-contracts": "pnpm --filter @desen/validator... build && node scripts/verify-protocol-interaction-contracts.mjs",
+        "test:protocol-interaction-contracts": "pnpm --filter @desen/validator... build && pnpm --filter @desen/validator test:interaction-contracts && node --test tests/protocol-interaction-contracts.test.mjs"
+      },
+      "package": "vitest run test/schema-instance-validation.test.ts test/component-contracts.test.ts test/interaction-contracts.test.ts"
+    },
+    "artifactWriter": {
+      "parentResolution": "realpath",
+      "temporaryFile": "same-directory exclusive create",
+      "durabilityBeforeCommit": "file sync",
+      "commit": "atomic rename",
+      "failureCleanup": "temporary file removed",
+      "rejectedDestinations": ["symlink", "directory", "special file", "symlink parent"]
+    },
+    "independentAnchors": [
+      "complete M02-T08 verifier PASS plus exact prerequisite bytes",
+      "reviewed exact 7-family / 246-constraint T09 trace ownership",
+      "N-033 and N-034 remain PLANNED without an adapter-completion claim",
+      "PF-010 through PF-014 implementation decisions",
+      "one official unknown-event vector at its exact frozen pointer",
+      "project-owned behavior, attachment, mutual-conflict, event, known-target command, and payload goldens",
+      "resolved payload ValueSpec-shaped member regression, array/object payload limits, and pre-canonical shared-container/frontier bounds",
+      "six interaction schema-locator safety mutations",
+      "validator and transitive protocol source/distribution inventory and platform audit",
+      "same-directory exclusive temporary write followed by atomic rename"
+    ]
+  },
+  "limitations": [
+    "N-033 and N-034 remain PLANNED: this validator primitive does not prove adapter payload enforcement or command implementation parity.",
+    "Static event-reference paths and asynchronous event scope remain M02-T10 and M04-T14 responsibilities.",
+    "Command target existence, liveness, resolved input, COMMAND_INPUT_INVALID, resources, operations, navigation, and remaining action semantics remain M02-T11 and M04.",
+    "Behavior command schemas are prepared, but DESEN 0.1.0 defines no behavior.command action and this implementation invents none.",
+    "Official-suite parity and exhaustive diagnostic micro-vectors remain M02-T12 and M02-T13.",
+    "Document-wide finite ingress limits remain M02-T13; T09 records only schema evaluation and resolved event-payload boundaries.",
+    "This artifact does not claim publication, runtime adapter wiring, activation, G02, or any new Proof Matrix P-* result."
+  ]
+}

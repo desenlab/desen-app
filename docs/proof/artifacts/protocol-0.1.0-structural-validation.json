@@ -375,6 +375,10 @@
         "index.d.ts.map",
         "index.js",
         "index.js.map",
+        "interaction-contract-validation.d.ts",
+        "interaction-contract-validation.d.ts.map",
+        "interaction-contract-validation.js",
+        "interaction-contract-validation.js.map",
         "schema-instance-validation.d.ts",
         "schema-instance-validation.d.ts.map",
         "schema-instance-validation.js",
@@ -413,6 +417,7 @@
         "embedded-schema-validation.js",
         "generated/0.1.0/structural-validators.js",
         "index.js",
+        "interaction-contract-validation.js",
         "schema-instance-validation.js",
         "semantic-diagnostics.js",
         "semantic-validation.js",
@@ -446,8 +451,8 @@
     "trackedFiles": [
       {
         "path": "package.json",
-        "bytes": 5171,
-        "sha256": "9a38b29b6ad4193ed71cf0de8853d2e9fca0b1d1670e1d6aa3838ba07c6f4d91"
+        "bytes": 5771,
+        "sha256": "b1769558f9d739760cc70c948068010556bb695a71c05e440b5ac82fdfcd987e"
       },
       {
         "path": "pnpm-lock.yaml",
@@ -456,8 +461,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 2642,
-        "sha256": "df407b3e7dd15005395380be8e124b7c7dfa61ca4b57496fd9bd7fbaa4930d6e"
+        "bytes": 2908,
+        "sha256": "1683e8759f25e4e74f70e61c607afb9888ea80574af836d4432684b704bc95cc"
       },
       {
         "path": "THIRD_PARTY_NOTICES.md",
@@ -491,8 +496,8 @@
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 1295,
-        "sha256": "7159aacb2adb4884ddb088f7a79c9f93f31d019778ffb14a8cc91c6b239e16d9"
+        "bytes": 1451,
+        "sha256": "a2a1371c19f254cd1c83a43f76a078a55dc949b32f98acbc52ab664fa049b85f"
       },
       {
         "path": "packages/validator/THIRD_PARTY_NOTICES.md",
@@ -511,8 +516,8 @@
       },
       {
         "path": "packages/validator/src/index.ts",
-        "bytes": 2008,
-        "sha256": "0930f29ac3e9c3672b46e644341eb4d080f2cd8ea8e94cae8bfa43245bf40524"
+        "bytes": 3010,
+        "sha256": "b68a3af191ba519e004e81f730d937c167c8476ed4a8614329c3d0df45fb3122"
       },
       {
         "path": "packages/validator/src/validation-internals.ts",
@@ -576,13 +581,13 @@
       },
       {
         "path": "packages/validator/README.md",
-        "bytes": 20505,
-        "sha256": "48213df08a849d09c07325c5e794e5725f57af751d3d5bd768013240ffc51cab"
+        "bytes": 29024,
+        "sha256": "c6adbb3e07f373e89d53634c49e59a5d2aec0551b862e3dc4b9369d7db4550a8"
       },
       {
         "path": "scripts/lib/protocol-structural-validation-proof.mjs",
-        "bytes": 39720,
-        "sha256": "a96aa9b5da9a76b602d47dd8536619f70cf7796c12bf34efad74a3ffd7d87cb5"
+        "bytes": 39757,
+        "sha256": "1685f8d3b2e106ecb3d3097ffafdc0efe3b5abe0abb19ccc73c10555b88ff395"
       },
       {
         "path": "scripts/generate-protocol-structural-validation-proof.mjs",
@@ -596,8 +601,8 @@
       },
       {
         "path": "tests/protocol-structural-validation.test.mjs",
-        "bytes": 8455,
-        "sha256": "3ada8f68e13d129e0c5a2f8925f1df87e62c135e59618cf9ac516cf91b120895"
+        "bytes": 8494,
+        "sha256": "3e110f0f73579f84e65ff84b7732954c87f78df35f539b06ac1f9b950d829521"
       }
     ]
   },
