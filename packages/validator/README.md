@@ -115,6 +115,13 @@ validator with T04 Bundle-revision calculation and the frozen Catalog digest com
 the two official integrity cases. It does not expand T11's production responsibility or export a
 new package API.
 
+M02-T13 adds no production or public validator surface. Its shared, platform-neutral test harness
+runs against both source and built public APIs and proves one valid/invalid pair for all 28
+validator-owned Appendix B diagnostics plus all 6 current namespaced validator diagnostics. Every
+pair asserts exact code, core classification, pointer, available identity context, immutable
+output, caller-input isolation, and repeated-run equality. The evidence explicitly leaves 8
+runtime, publisher, integrity, and activation diagnostics with their later owners.
+
 The package remains private while the wider proof application is under construction. No npm
 package is published by these commands.
 
@@ -134,17 +141,36 @@ The 14 exact cases are:
 
 A valid manifest case requires zero diagnostics. An invalid case requires at least one diagnostic
 with the manifest's exact category and code. The frozen manifest does not make diagnostic pointer,
-message, multiplicity, or order part of this parity claim. Exhaustive project-owned diagnostic
-micro-vectors remain M02-T13, so P-02 stays `PARTIAL` and G02 stays `NOT_STARTED`.
+message, multiplicity, or order part of this parity claim. M02-T13 supplies that separate exhaustive
+validator-owned diagnostic evidence; the combined T12/T13 result closes P-02 and the internal G02
+validator baseline without changing the frozen manifest's contract.
+
+## Diagnostic micro-vector baseline
+
+The tracked report is
+`docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json`; its evidence contract
+is `docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md`.
+
+The baseline contains 34 positive and 34 negative vectors:
+
+- 28 core diagnostics assigned to M02-T13 by the reviewed trace ledger;
+- 6 `run.desen.validator/*` extensions without invented Appendix B classifications; and
+- 8 explicitly excluded core diagnostics retained for runtime, publisher, integrity, or activation
+  owners.
+
+The root proof composes the exact T08–T12 artifacts, 61 schema families, 989 enumerated schema
+constraints, and all other T13 trace responsibilities. Existing finite contract-schema and
+resolved-JSON bounds contribute only partial N-041/P-17 evidence; document materialization,
+action-turn, Bundle-ingress, and activation limits remain later work.
 
 This evidence exercises built package distributions. It is not a new conformance or validation
 entry point and is not exported from `@desen/validator`. The final boundary passes 4 focused
-package tests and 11 independent root proof and mutation tests.
+package tests and 9 independent root proof and mutation tests.
 
 ## Public entry point
 
-M02-T12 adds no public entry point. The APIs below remain the complete package surface established
-through M02-T11.
+M02-T12 and M02-T13 add no public entry point. The APIs below remain the complete package surface
+established through M02-T11.
 
 ### Structural and semantic APIs
 

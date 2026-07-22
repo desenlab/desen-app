@@ -32,7 +32,7 @@
       "task": "M02-T11",
       "profile": "desen-execution-contract-validation-v1",
       "result": "PASS",
-      "sha256": "badc93880d5e7b7119e4b6f51c1d6690376a9a92ca85335aa1152c134408efd2",
+      "sha256": "30a1c69430f316e90a2dcee1f12bdf4dec971b54edf6cfcacf975442479e352c",
       "verifiedBy": "verifyProtocolExecutionContracts"
     }
   },
@@ -285,8 +285,8 @@
     "trackedFiles": [
       {
         "path": "docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md",
-        "bytes": 10191,
-        "sha256": "3e9713d5a0c0512b797899ad4b796aebb2f4a6107fcb1e1aae62b7942e580082"
+        "bytes": 10297,
+        "sha256": "b13c14b388bbe2192ad232d01158da42d9d39ce8b66e48d78bf5e5e816c1f22d"
       },
       {
         "path": "docs/proof/baselines/protocol-0.1.0-checksums.txt",
@@ -305,8 +305,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 7517,
-        "sha256": "2a07bea0ca7524f0925b4e432575021e042f2419526d120ddff343825d9b8357"
+        "bytes": 8224,
+        "sha256": "1ad96276e2df578c29bb6afe0a90bd23be72ea8e2e90a51a378fa02191018306"
       },
       {
         "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/bundle-catalog-digest-mismatch.json",
@@ -385,8 +385,8 @@
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 2095,
-        "sha256": "c2ceb32db958b2e0f29eebf9ba38d3d68a7077cbfc2b10ab9980bdbc518f0e74"
+        "bytes": 2184,
+        "sha256": "6d45074ada3fea091e4ac3b5a93b41bc75d51cfa3eedcd389297bd0b4c8e062b"
       },
       {
         "path": "packages/validator/test/official-suite-parity.test.ts",
@@ -400,8 +400,8 @@
       },
       {
         "path": "scripts/lib/protocol-official-suite-parity-proof.mjs",
-        "bytes": 39677,
-        "sha256": "6583653fe5bd95250dc011fa0787f7c5ace0b3c8a435ae7f8c7d83f7b0528627"
+        "bytes": 39689,
+        "sha256": "11cef74b5df5fd70875e7e4515693b61234c52466e52713bb41dff8515bc6f15"
       },
       {
         "path": "scripts/verify-protocol-official-suite-parity.mjs",
@@ -411,12 +411,12 @@
       {
         "path": "tests/protocol-official-suite-parity.test.mjs",
         "bytes": 14984,
-        "sha256": "6510c998cdb3deebe78948cc74d8b407e517c525ffa2505801c4afade1868387"
+        "sha256": "6cfd7736c4596f63c70c23ce4268afe505b840377edc2eadf05b464531aa8495"
       },
       {
         "path": "turbo.json",
-        "bytes": 3682,
-        "sha256": "cc2d02c4baf6fed64c9110bf71e3a062b8f6c4f70781b44833c5023ba56d2ca6"
+        "bytes": 4000,
+        "sha256": "9c5de0a2b8e4511f06d3640e3e62bc0bc2209a89c3bf9b89e89f9ea37b66645b"
       }
     ]
   },
@@ -454,6 +454,6 @@
     "Negative parity claims only expected category/code presence, not diagnostic message, pointer, order, or multiplicity parity.",
     "Exhaustive diagnostic micro-vectors and exact portable diagnostic results remain M02-T13.",
     "The proof-only supplements are not production activation APIs and do not execute adapters or runtime behavior.",
-    "This artifact does not claim publication, package activation, G02 completion, or a new complete Proof Matrix result; P-02 remains PARTIAL pending M02-T13."
+    "This M02-T12 artifact alone does not claim publication, package activation, G02 completion, or a complete P-02 result; the separate M02-T13 evidence is also required."
   ]
 }

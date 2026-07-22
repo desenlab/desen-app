@@ -139,9 +139,10 @@ official-suite evidence to `SN-003`, `C-016`, `C-024`, `R-001`, `R-032`, `R-035`
 `R-142`, and `SR-001` through `SR-003`. No BCP 14 clause assigns M02-T12 sole implementation
 ownership.
 
-P-02 therefore remains `PARTIAL`. The official TypeScript suite report is now present, but P-02
-also names M02-T13 and still requires positive and negative project micro-vectors for every
-validator-owned diagnostic. G02 likewise remains `NOT_STARTED` until M02-T13 is complete.
+This M02-T12 artifact alone leaves P-02 `PARTIAL`: the official TypeScript suite report is present,
+while the separate M02-T13 evidence owns positive and negative project micro-vectors for every
+validator-owned diagnostic. M02-T13 now supplies that evidence, so the combined result closes P-02
+and G02; neither status is claimed from the T12 artifact by itself.
 
 ## Explicit non-claims
 
@@ -155,8 +156,8 @@ M02-T12 does not claim:
 - finite runtime transition limits; or
 - any iOS, Android, React, DOM, browser, filesystem, or network implementation.
 
-Those boundaries remain with M02-T13 and the later publisher, activation, runtime, adapter, and
-release tasks named in the trace ledger.
+Those boundaries remain with the separate M02-T13 evidence and the later publisher, activation,
+runtime, adapter, and release tasks named in the trace ledger.
 
 ## Deterministic artifact and commands
 

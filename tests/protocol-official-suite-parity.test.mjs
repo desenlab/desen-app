@@ -385,7 +385,7 @@ test("records exact composition, routing, categories, responsibilities, and non-
     ),
   );
   assert.ok(artifact.limitations.some((entry) => entry.includes("M02-T13")));
-  assert.ok(artifact.limitations.some((entry) => entry.includes("P-02 remains PARTIAL")));
+  assert.ok(artifact.limitations.some((entry) => entry.includes("complete P-02 result")));
 });
 
 test("writes atomically and rejects unsafe artifact destinations", async (context) => {

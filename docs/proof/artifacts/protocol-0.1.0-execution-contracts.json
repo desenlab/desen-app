@@ -21,8 +21,8 @@
       "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
       "verifiedBy": "verifyProtocolBindingContracts",
-      "sha256": "e627c16c67ecaf7ef13382c59295f5f523c4d1aa963283d0be294fef8d9dd1c7",
-      "verificationSha256": "e627c16c67ecaf7ef13382c59295f5f523c4d1aa963283d0be294fef8d9dd1c7"
+      "sha256": "33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae",
+      "verificationSha256": "33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae"
     }
   },
   "traceability": {
@@ -863,7 +863,7 @@
       }
     },
     "schemaProfile": {
-      "inheritedFromVerifiedT10Artifact": "e627c16c67ecaf7ef13382c59295f5f523c4d1aa963283d0be294fef8d9dd1c7",
+      "inheritedFromVerifiedT10Artifact": "33f83c126b5f8ae292997f11e0cf9e3ef4a52fb47c485a2f8700b39f198957ae",
       "unsafeNativePatternExecution": false
     },
     "platformAudit": {
@@ -1018,8 +1018,8 @@
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 25780,
-        "sha256": "3838dd09728cad5b7956bb44c409a88a97f9ec483cab45f3d0c3d4819ca39b23"
+        "bytes": 26218,
+        "sha256": "17fb11f0530e82200354f6f7e4989f842602b15b2130312e93ffbceff551d217"
       },
       {
         "path": "docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md",
@@ -1033,8 +1033,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 7517,
-        "sha256": "2a07bea0ca7524f0925b4e432575021e042f2419526d120ddff343825d9b8357"
+        "bytes": 8224,
+        "sha256": "1ad96276e2df578c29bb6afe0a90bd23be72ea8e2e90a51a378fa02191018306"
       },
       {
         "path": "packages/protocol/dist/canonicalization.d.ts",
@@ -1213,8 +1213,8 @@
       },
       {
         "path": "packages/validator/README.md",
-        "bytes": 50290,
-        "sha256": "2836671c1f7e47e3f561953f41bb5e6a59e769488762da61b399909f20873b8f"
+        "bytes": 51852,
+        "sha256": "dc8185c985a6199041ae7c9c1c7b7b625ca23f9d18abfb45ddb0ed42e6895a28"
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.d.ts",
@@ -1518,8 +1518,8 @@
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 2095,
-        "sha256": "c2ceb32db958b2e0f29eebf9ba38d3d68a7077cbfc2b10ab9980bdbc518f0e74"
+        "bytes": 2184,
+        "sha256": "6d45074ada3fea091e4ac3b5a93b41bc75d51cfa3eedcd389297bd0b4c8e062b"
       },
       {
         "path": "packages/validator/src/binding-contract-validation.ts",
@@ -1623,8 +1623,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 3682,
-        "sha256": "cc2d02c4baf6fed64c9110bf71e3a062b8f6c4f70781b44833c5023ba56d2ca6"
+        "bytes": 4000,
+        "sha256": "9c5de0a2b8e4511f06d3640e3e62bc0bc2209a89c3bf9b89e89f9ea37b66645b"
       }
     ]
   },

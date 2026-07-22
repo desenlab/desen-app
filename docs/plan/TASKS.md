@@ -39,22 +39,22 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 
 ## M02 — Protocol package and validator
 
-| ID      | Status      | Depends on      | Deliverable / evidence                                                                                                 |
-| ------- | ----------- | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| M02-T01 | DONE        | M01-T07         | Checksum-verified upstream 0.1.0 snapshot vendored read-only; P-01 evidence                                            |
-| M02-T02 | DONE        | M02-T01         | 269 prose traces and all 989 schema constraints assigned to exact owner/test tasks; deterministic checker and artifact |
-| M02-T03 | DONE        | M02-T01–M02-T02 | Types generated from or mechanically checked against JSON Schema                                                       |
-| M02-T04 | DONE        | M02-T01         | RFC 8785-compatible canonicalization and SHA-256 golden tests                                                          |
-| M02-T05 | DONE        | M02-T03         | Stable diagnostic model and JSON Pointer support                                                                       |
-| M02-T06 | DONE        | M02-T03–M02-T05 | Source, Bundle, Catalog, and embedded-schema structural validation                                                     |
-| M02-T07 | DONE        | M02-T06         | Identity, SemVer, entry, catalog namespace, extension, and reference validation                                        |
-| M02-T08 | DONE        | M02-T07         | Component prop, slot, style-part, and visual-state contract validation                                                 |
-| M02-T09 | DONE        | M02-T07         | Event, command, behavior attachment, conflict, and payload-contract validation                                         |
-| M02-T10 | DONE        | M02-T07         | State, predicate, repeat, alias, and static binding validation                                                         |
-| M02-T11 | DONE        | M02-T10         | Resource, operation, action, navigation, and command-target validation                                                 |
-| M02-T12 | DONE        | M02-T04–M02-T11 | TypeScript parity for official 14-case suite: 9 vectors + 5 examples                                                   |
-| M02-T13 | NOT_STARTED | M02-T08–M02-T12 | Positive and negative project micro-vectors for every validator-owned diagnostic                                       |
-| G02     | NOT_STARTED | M02-T01–M02-T13 | Validator baseline and declared validator-scope coverage pass                                                          |
+| ID      | Status | Depends on      | Deliverable / evidence                                                                                                 |
+| ------- | ------ | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| M02-T01 | DONE   | M01-T07         | Checksum-verified upstream 0.1.0 snapshot vendored read-only; P-01 evidence                                            |
+| M02-T02 | DONE   | M02-T01         | 269 prose traces and all 989 schema constraints assigned to exact owner/test tasks; deterministic checker and artifact |
+| M02-T03 | DONE   | M02-T01–M02-T02 | Types generated from or mechanically checked against JSON Schema                                                       |
+| M02-T04 | DONE   | M02-T01         | RFC 8785-compatible canonicalization and SHA-256 golden tests                                                          |
+| M02-T05 | DONE   | M02-T03         | Stable diagnostic model and JSON Pointer support                                                                       |
+| M02-T06 | DONE   | M02-T03–M02-T05 | Source, Bundle, Catalog, and embedded-schema structural validation                                                     |
+| M02-T07 | DONE   | M02-T06         | Identity, SemVer, entry, catalog namespace, extension, and reference validation                                        |
+| M02-T08 | DONE   | M02-T07         | Component prop, slot, style-part, and visual-state contract validation                                                 |
+| M02-T09 | DONE   | M02-T07         | Event, command, behavior attachment, conflict, and payload-contract validation                                         |
+| M02-T10 | DONE   | M02-T07         | State, predicate, repeat, alias, and static binding validation                                                         |
+| M02-T11 | DONE   | M02-T10         | Resource, operation, action, navigation, and command-target validation                                                 |
+| M02-T12 | DONE   | M02-T04–M02-T11 | TypeScript parity for official 14-case suite: 9 vectors + 5 examples                                                   |
+| M02-T13 | DONE   | M02-T08–M02-T12 | Positive and negative project micro-vectors for every validator-owned diagnostic                                       |
+| G02     | DONE   | M02-T01–M02-T13 | Validator baseline and declared validator-scope coverage pass                                                          |
 
 ## M03 — Catalog SDK and reference capability package
 

@@ -8,11 +8,11 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **26 / 144 tasks complete (18%)**
+**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **27 / 144 tasks complete (19%)**
 
-**Current milestone — M02:** `████████████░` **12 / 13 tasks complete (92%)**
+**M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**Proof gates:** **2 / 13 complete** · **Next:** `M02-T13`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -87,6 +87,7 @@ packages/
 - [Binding-contract proof](docs/proof/PROTOCOL-BINDING-CONTRACTS.md)
 - [Execution-contract proof](docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md)
 - [Official-suite parity proof](docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md)
+- [Validator diagnostic micro-vector proof](docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -147,12 +148,14 @@ operation/resource input or output as immutable inert JSON. This proves the vali
 host authorization, mounted-component liveness, adapter invocation, lifecycle settlement, or
 action-turn execution.
 
-M02-T12 now proves built TypeScript parity with the frozen DESEN 0.1.0 starter suite: all 9 official
+M02-T12 proves built TypeScript parity with the frozen DESEN 0.1.0 starter suite: all 9 official
 conformance vectors and all 5 public examples produce the outcomes required by the manifest, just
-as the archived Python baseline passes 14/14. The proof composes T04 canonicalization with the
-cumulative T11 validator and adds no public API. P-02 remains `PARTIAL` and G02 remains
-`NOT_STARTED` until M02-T13 supplies exhaustive project micro-vectors for every validator-owned
-diagnostic.
+as the archived Python baseline passes 14/14. M02-T13 closes the declared validator scope with one
+positive and one negative project micro-vector for each of 28 emitted core diagnostics and 6
+validator-namespaced extension diagnostics. All 68 executions pass with exact code,
+classification, pointer, and context checks where those fields apply, without adding a public API.
+P-02 is now `PROVEN` and G02 is `DONE`. P-17 advances only to `PARTIAL`: runtime materialization,
+action-turn, bundle, and activation limits remain assigned to later milestones.
 
 ## License
 

@@ -1020,7 +1020,7 @@ export async function buildProtocolOfficialSuiteParityEvidence({
       "Negative parity claims only expected category/code presence, not diagnostic message, pointer, order, or multiplicity parity.",
       "Exhaustive diagnostic micro-vectors and exact portable diagnostic results remain M02-T13.",
       "The proof-only supplements are not production activation APIs and do not execute adapters or runtime behavior.",
-      "This artifact does not claim publication, package activation, G02 completion, or a new complete Proof Matrix result; P-02 remains PARTIAL pending M02-T13.",
+      "This M02-T12 artifact alone does not claim publication, package activation, G02 completion, or a complete P-02 result; the separate M02-T13 evidence is also required.",
     ],
   };
   const artifactText = await format(JSON.stringify(artifact), {
