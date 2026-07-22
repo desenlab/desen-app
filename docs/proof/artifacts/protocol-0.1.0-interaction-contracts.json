@@ -21,8 +21,8 @@
       "profile": "desen-component-contract-validation-v1",
       "result": "PASS",
       "verifiedBy": "verifyProtocolComponentContracts",
-      "sha256": "41cb8c266bf5c3052597d5d35baa89e630fbc5000eaf97ad1769cbcb5f0096f0",
-      "verificationSha256": "41cb8c266bf5c3052597d5d35baa89e630fbc5000eaf97ad1769cbcb5f0096f0"
+      "sha256": "8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79",
+      "verificationSha256": "8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79"
     }
   },
   "traceability": {
@@ -540,7 +540,7 @@
     "queuedChildReservation": true,
     "schemaProfile": {
       "finding": "PF-011",
-      "inheritedFromVerifiedT08Artifact": "41cb8c266bf5c3052597d5d35baa89e630fbc5000eaf97ad1769cbcb5f0096f0",
+      "inheritedFromVerifiedT08Artifact": "8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79",
       "evaluationBudget": 50000,
       "unsafeNativePatternExecution": false
     },
@@ -551,6 +551,7 @@
             "binding-contract-validation.ts",
             "component-contract-validation.ts",
             "embedded-schema-validation.ts",
+            "execution-contract-validation.ts",
             "generated/0.1.0/structural-validators.ts",
             "index.ts",
             "interaction-contract-validation.ts",
@@ -576,6 +577,10 @@
             "embedded-schema-validation.d.ts.map",
             "embedded-schema-validation.js",
             "embedded-schema-validation.js.map",
+            "execution-contract-validation.d.ts",
+            "execution-contract-validation.d.ts.map",
+            "execution-contract-validation.js",
+            "execution-contract-validation.js.map",
             "generated/0.1.0/structural-validators.d.ts",
             "generated/0.1.0/structural-validators.d.ts.map",
             "generated/0.1.0/structural-validators.js",
@@ -621,7 +626,7 @@
             "validation-internals.js",
             "validation-internals.js.map"
           ],
-          "auditedFiles": 42,
+          "auditedFiles": 45,
           "allowedImports": ["relative", "@desen/protocol"]
         },
         "protocol": {
@@ -685,8 +690,8 @@
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 29431,
-        "sha256": "d0e6d128ad194890d1f8aa4dc9c8b56578f0eef1e59d8e63d0fac5157054f2a9"
+        "bytes": 37502,
+        "sha256": "be0a10a13fa16fcf116106c0bbc559ddaf9f1d8584da12765d2f32712f87a26d"
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
@@ -705,8 +710,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 6335,
-        "sha256": "592cc589e77353afcc1b13c3857699fcb26a66bab9b25b133f39a10479e9b024"
+        "bytes": 6917,
+        "sha256": "0a9293c5b238fb725447b3e0cc758d577e4222ff1884597ca8cb7d47ce714859"
       },
       {
         "path": "packages/protocol/dist/canonicalization.d.ts",
@@ -900,8 +905,8 @@
       },
       {
         "path": "packages/validator/README.md",
-        "bytes": 34877,
-        "sha256": "1d9e1d24f007117da4bbb31c967d0e10ebb92b2aa8b7b7195018b6e2c619a472"
+        "bytes": 48277,
+        "sha256": "eb5ea811dd8f4fbab954e57ce8f86c1820176790061ddbd88784df77a01935f6"
       },
       {
         "path": "packages/validator/THIRD_PARTY_NOTICES.md",
@@ -910,23 +915,23 @@
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.d.ts",
-        "bytes": 4065,
-        "sha256": "0eef603c98648a7c2310bf2137d2f961f34139e0075ba6761378abb0a7bc00bf"
+        "bytes": 7177,
+        "sha256": "7ff945f584132c0bdc561ec2f1fb2a9b044260ba27e3a510b1a266dc32e9ec6e"
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.d.ts.map",
-        "bytes": 1686,
-        "sha256": "56c1c2b2d2fd5465b49ffc5f7a105754ad6878e8d79f8466086f4eb87319692a"
+        "bytes": 2798,
+        "sha256": "97e7e1ddbd87352cd185d4fec79fc3c0e874a7234db27a874a328f56c734727d"
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.js",
-        "bytes": 41513,
-        "sha256": "65ad99dbe917ce8bb34aa94095038ae7595da3c7ba4908015fa1b10d61af17c0"
+        "bytes": 44581,
+        "sha256": "8d0f94f6dc7d3e343813bc1044216ff6f34a80897dbb6664045cb30517d9f9a5"
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.js.map",
-        "bytes": 42953,
-        "sha256": "7debdeda59a9fcde4b25b9d8c13c5e44bf27e024c28172ea5db4ae62332d920b"
+        "bytes": 45113,
+        "sha256": "7d01facd036bfadca08450620a494925ba74ccd1bd57950982394561e733609b"
       },
       {
         "path": "packages/validator/dist/component-contract-validation.d.ts",
@@ -969,6 +974,26 @@
         "sha256": "2b97a1c47442999492f05604227eaaaf8d82f10e159488456dc620839b42cd44"
       },
       {
+        "path": "packages/validator/dist/execution-contract-validation.d.ts",
+        "bytes": 8596,
+        "sha256": "559e14619eb83d21d8bdf5d2189f0453babe8b8bd2967c6fe3985a3f623a2085"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.d.ts.map",
+        "bytes": 3666,
+        "sha256": "532d1a70c3a9f5fa03de2580de0bd35829c0d7c6069c460a7f54c48cca62c1bf"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js",
+        "bytes": 40308,
+        "sha256": "2834aa27947f33d6ae4f2a1535eed9845996b78726096224ad2ce3ab6759bbf7"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js.map",
+        "bytes": 36239,
+        "sha256": "708bedbdc1e6dbd1d8ec89d615597c25a8ce1774ac919f7f88df652797014b5d"
+      },
+      {
         "path": "packages/validator/dist/generated/0.1.0/structural-validators.d.ts",
         "bytes": 3784,
         "sha256": "9f91904e9f4e36dc124b6e985e23f4bc0b6f8264f3f2ee943cbe5e8327554148"
@@ -990,43 +1015,43 @@
       },
       {
         "path": "packages/validator/dist/index.d.ts",
-        "bytes": 3358,
-        "sha256": "be094beee57e1906112c3c61a228e4900184ddf74b947ec0243ef2baa965e6ee"
+        "bytes": 4280,
+        "sha256": "bfacc3eeef911cfab4fb424f71a77060a4ba4193ab9901e15b34323a035fdc4b"
       },
       {
         "path": "packages/validator/dist/index.d.ts.map",
-        "bytes": 1509,
-        "sha256": "153140cc8461129165b1f91ebc6a64d8998cce2fbd34f11c23192b3e578ef57b"
+        "bytes": 1861,
+        "sha256": "442031b25b1bfe33065e06f79eae2d67d37bb2b2d3bcc7fb6a7d19a2121f558c"
       },
       {
         "path": "packages/validator/dist/index.js",
-        "bytes": 1331,
-        "sha256": "a07e71639f0a58b991adc95ecf2d5c03c95d949d6fd7dd9ffa6d8aa5ad7b7f9c"
+        "bytes": 1623,
+        "sha256": "761998bc3d0802ee7eeca7e8a486c734d9a2568a9006f3004cb8f635e11b9980"
       },
       {
         "path": "packages/validator/dist/index.js.map",
-        "bytes": 675,
-        "sha256": "b6c38ad0560336e78c0585c7d73da3cf688686d1af8b917b94849c1e988c595c"
+        "bytes": 799,
+        "sha256": "cb24304e286f2872ea4a1ed4c8a741831f8d91d95116477f67126b79dec7a2e4"
       },
       {
         "path": "packages/validator/dist/interaction-contract-validation.d.ts",
-        "bytes": 10551,
-        "sha256": "7c0503ace5ebbdceebf74cd6a6922172794256f6f34a686d12c1a993cd9f016f"
+        "bytes": 10949,
+        "sha256": "6d81901405c388d8004b950598eda740811d7d4b7dd859754e3bdaea16f7a2c2"
       },
       {
         "path": "packages/validator/dist/interaction-contract-validation.d.ts.map",
-        "bytes": 3920,
-        "sha256": "f9853e10c0e3eccff08ab9030638718400b99fca84a3ad227b53282d7aa27de5"
+        "bytes": 4002,
+        "sha256": "e583ccc166547f70509965a6bcfde3f39d0054e7d4783672f54c144bc26dd477"
       },
       {
         "path": "packages/validator/dist/interaction-contract-validation.js",
-        "bytes": 49091,
-        "sha256": "4d663a8d6655f328bf36844963ca15976982bb07b4494345050ff1603ce275ae"
+        "bytes": 49483,
+        "sha256": "aa31f1e614b606892a1eb0d4a1632bf12479704ff5f7403ab631aff691500833"
       },
       {
         "path": "packages/validator/dist/interaction-contract-validation.js.map",
-        "bytes": 43128,
-        "sha256": "f0cd7eb066f7108bfc7abdcf938b3cfda311f14e01193bcd616ebb29526c3d9a"
+        "bytes": 43224,
+        "sha256": "a993a86b0daa68e05e46b448a0a0e805a959debbaa0b7ebe983e698f1dd1d20c"
       },
       {
         "path": "packages/validator/dist/schema-instance-validation.d.ts",
@@ -1050,23 +1075,23 @@
       },
       {
         "path": "packages/validator/dist/semantic-diagnostics.d.ts",
-        "bytes": 3540,
-        "sha256": "3d18b995160d4694f187a75bf1b383ed16cb5922b59050811ea98c781817022f"
+        "bytes": 4057,
+        "sha256": "ee149a8a12ea9543bc9c8c625f0fdfcde8aafce77992fa17a3a5907a41deba76"
       },
       {
         "path": "packages/validator/dist/semantic-diagnostics.d.ts.map",
-        "bytes": 1655,
-        "sha256": "a740e3a90e5fb64935bc275723f341ada3841b131604b821fec4d56f3f77214b"
+        "bytes": 1862,
+        "sha256": "1e3cb24f154c9046ca59b16399c0a29218c19dd14510ece6ee121833d73f00a9"
       },
       {
         "path": "packages/validator/dist/semantic-diagnostics.js",
-        "bytes": 5723,
-        "sha256": "51441cf2233410e1656a386256da99f2faae7a8e32b9a09b2f896ba21612d440"
+        "bytes": 6253,
+        "sha256": "557b3d325200ac6c07906706bfc413979c16260d6ef9bf9a9c2550bf5f0fa44e"
       },
       {
         "path": "packages/validator/dist/semantic-diagnostics.js.map",
-        "bytes": 4143,
-        "sha256": "280d57b38bc8afee8a2f48c13682cc8aa3cc27ec88e256d52dd59396fda30311"
+        "bytes": 4347,
+        "sha256": "8a5c3dc3df79efdfdb0a747a405dea91685fda88b968b199b2021affeff5b26b"
       },
       {
         "path": "packages/validator/dist/semantic-validation.d.ts",
@@ -1190,8 +1215,8 @@
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 1714,
-        "sha256": "d57234e6b4db40e3b2edc4437070d41e0e1ea8d3c90ed6f2fa99149b88703dfa"
+        "bytes": 2012,
+        "sha256": "e0e23258ef3312fe4093a8207987221b5e43608e71ff49adc09f2833d493dd47"
       },
       {
         "path": "packages/validator/scripts/clean-dist.mjs",
@@ -1200,8 +1225,8 @@
       },
       {
         "path": "packages/validator/src/binding-contract-validation.ts",
-        "bytes": 51391,
-        "sha256": "20a2ad2443d7d03fe37c93f9732a74454f023ca910b5ee1dc52191b140953805"
+        "bytes": 56612,
+        "sha256": "a0df532ba41a1db352edd4bde93ea9f656104902a987c8789278c92b4a43cca8"
       },
       {
         "path": "packages/validator/src/component-contract-validation.ts",
@@ -1214,19 +1239,24 @@
         "sha256": "f3fa31f08989c991b4b896cb41e0765abe97c5cc171d197e2d8c1043dc24737b"
       },
       {
+        "path": "packages/validator/src/execution-contract-validation.ts",
+        "bytes": 53971,
+        "sha256": "9a12078d78d73fffd5f57882765afe6c25867514867bed32b000024734e79e07"
+      },
+      {
         "path": "packages/validator/src/generated/0.1.0/structural-validators.ts",
         "bytes": 761360,
         "sha256": "d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd"
       },
       {
         "path": "packages/validator/src/index.ts",
-        "bytes": 3489,
-        "sha256": "1d585d3145960f5514d555f5604ff00823a28efd165abeeee8e7cf80089493fe"
+        "bytes": 4457,
+        "sha256": "805297f7cf1c7db2ff56cdda7ee4dfc2ffc71fdff6d285c8aca673175b79e8f8"
       },
       {
         "path": "packages/validator/src/interaction-contract-validation.ts",
-        "bytes": 62959,
-        "sha256": "10c0d7218ebe5e56069b377b9ee2e2f8e3615a1c691e644706a467dbe6ad52d1"
+        "bytes": 63433,
+        "sha256": "82775ea143da99091bf6fe21c7e43993abd6653ea424b1497311fdf1afd60cd2"
       },
       {
         "path": "packages/validator/src/schema-instance-validation.ts",
@@ -1235,8 +1265,8 @@
       },
       {
         "path": "packages/validator/src/semantic-diagnostics.ts",
-        "bytes": 7322,
-        "sha256": "66268b5414011537e24741acc59514aa5ff90cfe14e16c8b9c165483458ab2ec"
+        "bytes": 8039,
+        "sha256": "9306355f7fe86d340ed8164601fa7a67527770a53bf5956035275e1703ab95b4"
       },
       {
         "path": "packages/validator/src/semantic-validation.ts",
@@ -1305,8 +1335,8 @@
       },
       {
         "path": "scripts/lib/protocol-interaction-contracts-proof.mjs",
-        "bytes": 86341,
-        "sha256": "c895982c7d0e0629b5c6be46190c5bd26aaf29b84f60cf193405874b6a299882"
+        "bytes": 86407,
+        "sha256": "f438a48fece63b47fb20e14fd38fc77e23baf1fbd2605188981d3524997b74fd"
       },
       {
         "path": "scripts/verify-protocol-interaction-contracts.mjs",
@@ -1325,8 +1355,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 3158,
-        "sha256": "d1bd0854dddd7bedff088a005a86c37c13e0cb5fa59760f2f67d477e82fd9b75"
+        "bytes": 3416,
+        "sha256": "14bba1af5f60aa2f32dc3d26749da8c8925bb68087811602f3f2f0de4a7f01bc"
       }
     ]
   },
@@ -1368,8 +1398,8 @@
   },
   "limitations": [
     "N-033 and N-034 remain PLANNED: this validator primitive does not prove adapter payload enforcement or command implementation parity.",
-    "Static event-reference paths and asynchronous event scope remain M02-T10 and M04-T14 responsibilities.",
-    "Command target existence, liveness, resolved input, COMMAND_INPUT_INVALID, resources, operations, navigation, and remaining action semantics remain M02-T11 and M04.",
+    "Static event-reference paths are enforced by cumulative T10; asynchronous event lifetime remains M04-T14 work.",
+    "Command targets and inputs, resources, operations, navigation, and static action contracts are enforced by cumulative T11; execution and liveness remain M04 work.",
     "Behavior command schemas are prepared, but DESEN 0.1.0 defines no behavior.command action and this implementation invents none.",
     "Official-suite parity and exhaustive diagnostic micro-vectors remain M02-T12 and M02-T13.",
     "Document-wide finite ingress limits remain M02-T13; T09 records only schema evaluation and resolved event-payload boundaries.",

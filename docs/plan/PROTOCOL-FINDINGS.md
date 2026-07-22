@@ -192,7 +192,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `run.desen.validator/INVALID_INTERACTION_CONTRACT`. The evaluator independently enforces the same
   step ceiling and fails closed at the relevant contract-value pointer if input-driven work
   exhausts it. Unsafe patterns are never passed to native `RegExp`. Extending the safe preparation
-  boundary does not by itself prove the adapter obligations in `N-033` or `N-034`.
+  boundary does not by itself prove the adapter obligations in `N-033` or `N-034`. M02-T11 extends
+  the identical profile to all operation and resource `inputSchema` and `outputSchema` locations;
+  those execution-owned preparation failures use
+  `run.desen.validator/INVALID_EXECUTION_CONTRACT`. The detached execution-value boundary applies
+  only schemas already admitted through this profile.
 - Future action: Standardize a portable linear-time regex and schema-resource-limit profile, or
   adopt a platform-neutral linear-time engine, then add official conformance vectors for safe and
   rejected schemas.
@@ -252,7 +256,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
 ## PF-014 — Behavior command reachability and asynchronous event scope are underspecified
 
 - Status: OPEN
-- Blocks proof: No; M02-T09 can preserve the closed boundary without inventing a new action.
+- Blocks proof: No; T09–T11 can preserve the closed boundary without inventing a new action or
+  claiming runtime liveness.
 - Protocol location: SPEC Sections 14.2.5, 19.4, 20.4, 20.6, and 21.5; Source and Bundle Schema
   `$defs/actionSpec` and Catalog Schema `$defs/behaviorCapability`; Appendix B
 - Observation: Behavior capabilities may declare commands, but DESEN 0.1.0 defines only the
@@ -262,18 +267,22 @@ This file records implementation discoveries without changing the frozen DESEN 0
   action turn, without stating whether the original event payload survives into that turn.
 - Implementation decision: M02-T09 validates a command name only after its target is already known
   to be a component node and reports an undeclared name with `UNKNOWN_COMMAND` at the action's
-  `/command` member. Target existence and kind, conditional/repeated liveness, resolved input, and
-  `COMMAND_INPUT_INVALID` remain M02-T11 responsibilities. Behavior command schemas are prepared
-  through the interaction-contract safety boundary, but `component.command` is never redirected to
-  a behavior and no `behavior.command` semantics are invented. M02-T10 treats `event.*` as lexical
-  data available only during the immediate ordered action turn of the component or behavior handler
-  that declared the event. Guards and values in that immediate action array may use the event
-  payload. An `operation.invoke` action's `onSuccess` and `onFailure` arrays are new settlement turns,
-  so they cannot retain the originating `event.*` scope even though they are nested beneath the
-  original action in the document. A statically placed settlement reference fails with
-  `REFERENCE_UNRESOLVED` at its `$ref` member. This is a document-scope decision only; adapter
-  payload lifetime and runtime turn behavior remain with M04-T14. Command declaration validation
-  alone does not complete the adapter-implementation obligation in `N-034`.
+  `/command` member. M02-T11 indexes component nodes per surface. A missing, behavior, or
+  cross-surface target reports `UNKNOWN_COMMAND` at `/target`; the action is never redirected to a
+  behavior and no `behavior.command` semantics are invented. A declared component remains a valid
+  static target even when its `when` or `repeat` means the runtime may not currently have a mounted
+  instance. M02-T11 applies the selected command's `inputSchema` to statically known input members
+  and emits `component-command-input` obligations for dynamic members. The runtime must resolve and
+  validate the final input and select a live repeated instance before adapter invocation.
+  M02-T10 treats `event.*` as lexical data available only during the immediate ordered action turn
+  of the component or behavior handler that declared the event. Guards and values in that immediate
+  action array may use the event payload. An `operation.invoke` action's `onSuccess` and `onFailure`
+  arrays are new settlement turns, so they cannot retain the originating `event.*` scope even though
+  they are nested beneath the original action in the document. A statically placed settlement
+  reference fails with `REFERENCE_UNRESOLVED` at its `$ref` member. These are static contract and
+  document-scope decisions only; adapter payload lifetime, mounted-instance liveness, and runtime
+  turn behavior remain with M04. Command validation alone does not complete the adapter
+  implementation obligation in `N-034`.
 - Future action: Decide whether to add a behavior-command action and specify event-payload lifetime
   across asynchronous settlement turns in a future protocol revision.
 
@@ -290,20 +299,24 @@ This file records implementation discoveries without changing the frozen DESEN 0
   branches affect static path proof. The prose distinguishes a missing value from JSON `null` and
   permits a type-valid fallback, but it does not say whether fallback may authorize an otherwise
   invalid lexical scope or which diagnostic location represents a failed reference.
-- Implementation decision: M02-T10 validates only the namespaces whose lexical owners are available
-  at this stage: surface-local `state`, active repeat `item`, and the immediate-handler `event`
-  scope defined by `PF-014`. Resource and operation lifecycle paths remain M02-T11 work;
-  `context`, `env`, and token-provider results remain runtime inputs. A fallback may discharge a
-  missing value only after the reference itself is lexically legal. Where a T10-owned consumer has
-  a static type requirement, such as a predicate or repeat, that requirement also constrains the
-  fallback; general resolved-value compatibility remains M06/runtime work. Fallback cannot create
-  an inactive item alias, carry an event into a settlement turn, or legalize an unknown namespace.
-  JSON `null` is a resolved value and does not select fallback. Deep schema paths are rejected only
-  when every applicable, locally resolvable schema branch proves the path impossible. Open,
-  conditional, recursive, or otherwise ambiguous paths are accepted for later validation rather
-  than guessed successes or failures. T10 adds no new obligation kind; it preserves the four T09
-  resolved-value obligations unchanged. `REFERENCE_UNRESOLVED` points to the exact `$ref` member
-  for a definite missing or out-of-scope reference.
+- Implementation decision: M02-T10 validates surface-local `state`, active repeat `item`, and the
+  immediate-handler `event` scope defined by `PF-014`. M02-T11 adds surface-declared `resource`
+  instances and surface-wide `operation` aliases. Both lifecycle namespaces admit only `status`,
+  `pending`, `value[.<path>...]`, and `error.code`; paths under `value` are inspected
+  conservatively against the selected output schema. Resource status/pending are statically
+  present; operation lifecycle fields and both value/error branches may be absent until the
+  applicable runtime transition. `context`, `env`, and token-provider results remain runtime
+  inputs. A fallback may discharge a missing value only after the reference root is lexically
+  legal. It cannot create an unknown resource, operation alias, inactive item alias, carry an event
+  into a settlement turn, or legalize an unknown namespace. Where a consumer has a static type
+  requirement, such as a predicate or repeat, that requirement also constrains the fallback;
+  general resolved-value compatibility remains runtime work. JSON `null` is a resolved value and
+  does not select fallback. Deep schema paths are rejected only when every applicable, locally
+  resolvable schema branch proves the path impossible. Open, conditional, recursive, or otherwise
+  ambiguous paths are accepted for later validation rather than guessed successes or failures.
+  T10 preserves the four T09 obligations; T11 adds command, operation, resource input, and state
+  write obligations. `REFERENCE_UNRESOLVED` points to the exact `$ref` member for a definite missing
+  or out-of-scope reference.
 - Future action: Define a normative static path-compatibility algorithm, fallback typing rules,
   diagnostic pointers, and the boundary between publisher proof and runtime obligation.
 
@@ -385,25 +398,119 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Status: OPEN
 - Blocks proof: No; the implementation can use the prose's first-segment rule without inventing a
   longest-prefix lookup.
-- Protocol location: SPEC Sections 5.1, 14.2.1, 16.1, and 20.1–20.2; Source and Bundle Schema
+- Protocol location: SPEC Sections 8.1, 14.2.1, 16.1, and 20.1–20.2; Source and Bundle Schema
   `$defs/refSpec`, `$defs/stateSpec`, and the `state.set`/`state.toggle` action branches; Appendix B
 - Observation: State identifiers permit `.`, `:`, and `-`, reference segments use a narrower
   grammar, and state action paths reuse the broad identifier pattern while prose says the first
   segment names the state entry. A document may therefore declare a structurally valid state name
   that cannot be addressed unambiguously, especially when both `profile` and `profile.name` exist.
-  Appendix B classifies `STATE_WRITE_INVALID` as a runtime write failure, while T10 owns only narrow
-  static target evidence and M02-T11 owns the complete state-action semantics.
-- Implementation decision: M02-T10 does not perform longest-prefix matching. In `state.<name>`, the
-  second reference segment is the complete state-entry name. In a `state.set` or `state.toggle`
-  path, the substring before the first `.` is the complete state-entry name and later segments are
-  a nested path. A valid declaration that cannot be represented by those segment rules remains
-  legal until addressed; an attempted ambiguous or absent target fails deterministically. State
-  `initial` is resolved inert JSON, not a `ValueSpec`, and is checked in complete mode against the
-  prepared state schema. An unsafe state schema or invalid initial value uses
-  `run.desen.validator/INVALID_BINDING_CONTRACT` at the applicable schema or initial-value pointer.
-  T10's only state-action check is that the first path segment names a declared state entry; failure
-  uses `STATE_WRITE_INVALID` at the action's `/path`. Nested-path compatibility, the resulting
-  complete `state.set` value, boolean-only `state.toggle`, runtime writes, and action execution
-  remain M02-T11/M04 responsibilities.
+  Appendix B classifies `STATE_WRITE_INVALID` as a runtime write failure, while T10/T11 can prove
+  only the subset decidable without the current runtime state.
+- Implementation decision: M02-T10 and M02-T11 do not perform longest-prefix matching. In
+  `state.<name>`, the second reference segment is the complete state-entry name. In a `state.set` or
+  `state.toggle` path, the substring before the first `.` is the complete state-entry name and later
+  segments are a nested path. A structurally valid dotted declaration therefore remains legal but
+  is not addressable as one state name; if a prefix state also exists, the same text addresses that
+  prefix's nested path. State `initial` is resolved inert JSON, not a `ValueSpec`, and is checked in
+  complete mode against the prepared state schema. An unsafe state schema or invalid initial value
+  uses `run.desen.validator/INVALID_BINDING_CONTRACT` at the applicable schema or initial-value
+  pointer. T10 establishes the declared first segment. T11 rejects a definitely missing nested path
+  and a statically incompatible `state.set` value, and rejects a `state.toggle` path whose only
+  possible type is non-boolean. Dynamic values become `state-write` obligations. Every accepted
+  toggle and nested patch also retains a `state-write` obligation when the complete post-write value
+  requires current runtime state or conditional-schema evaluation. M04 owns mutation, atomicity,
+  final post-write validation, and action execution.
 - Future action: Align the identifier and path grammars, define an escaping or segment-array form,
   distinguish invalid initial state from invalid runtime writes, and assign exact diagnostics.
+
+## PF-020 — Operation alias reuse and lifecycle ownership are underspecified
+
+- Status: OPEN
+- Blocks proof: No; a deterministic surface-local profile can reject only conflicting ownership.
+- Protocol location: SPEC Sections 14.2.4 and 20.4; Source and Bundle Schema
+  `$defs/actionSpec` `operation.invoke` branch
+- Observation: DESEN 0.1.0 says an operation alias owns one observable lifecycle and is scoped to
+  its surface, but neither prose nor schema requires alias uniqueness or defines whether two
+  invocations may intentionally share that lifecycle. It also does not say what happens when the
+  same alias names different operation capabilities in separate handlers or settlement turns.
+- Implementation decision: M02-T11 indexes aliases across every action in one surface before
+  validating lifecycle references, so textual order does not change reference validity. Reusing an
+  alias for the same exact operation shares one static lifecycle contract and is accepted. Reusing
+  it for a different operation is rejected at the later action's `/as` with
+  `run.desen.validator/INVALID_EXECUTION_CONTRACT`. Aliases in different surfaces remain isolated.
+  This establishes schema identity only; the runtime still owns concurrency, invocation identity,
+  stale settlement, queueing, cancellation, and lifecycle transitions.
+- Future action: Specify alias uniqueness or intentional sharing, collision diagnostics, and the
+  relationship between alias ownership, concurrency modes, nested settlement turns, and invocation
+  identity.
+
+## PF-021 — Several action failures have no action-specific diagnostic mapping
+
+- Status: OPEN
+- Blocks proof: No; the frozen starter mappings are deterministic and do not add new core codes.
+- Protocol location: SPEC Sections 16.2, 20.3, 20.5, and 20.6; Appendix B; frozen
+  `tools/validate.py`
+- Observation: Appendix B describes `ENTRY_NOT_FOUND` as an entry-surface error,
+  `REFERENCE_UNRESOLVED` as a required-value error, `UNKNOWN_COMMAND` as an undeclared command, and
+  `RESOURCE_INPUT_INVALID` as an input-schema error. DESEN 0.1.0 assigns no narrower code for a
+  missing navigation surface, missing refresh instance, missing/wrong-kind command target, or a
+  structurally valid resource policy unsupported by its capability.
+- Implementation decision: M02-T11 preserves the frozen starter behavior: an unsupported resource
+  policy uses `RESOURCE_INPUT_INVALID` at `/policy`; a missing core navigation target uses
+  `ENTRY_NOT_FOUND` at `/surface`; a missing `resource.refresh` instance uses
+  `REFERENCE_UNRESOLVED` at `/resource`; and a missing, behavior, or cross-surface
+  `component.command` target uses `UNKNOWN_COMMAND` at `/target`. A declared component with an
+  unknown command continues to use `UNKNOWN_COMMAND` at `/command`. No new core diagnostic identity
+  or classification is invented.
+- Future action: Add normative action-target and unsupported-policy diagnostics, or explicitly
+  standardize these reused codes and their exact pointer locations.
+
+## PF-022 — Resolved execution inputs and outputs have no normative detached-value boundary
+
+- Status: OPEN
+- Blocks proof: No; one inert boundary can be shared by publishers, runtimes, and adapters.
+- Protocol location: SPEC Sections 20.4, 20.6, 21.5, and 22.1–22.2; Catalog Schema
+  operation/resource `inputSchema` and `outputSchema` locations; Appendix B diagnostics
+  `COMMAND_INPUT_INVALID`, `OPERATION_INPUT_INVALID`, `OPERATION_OUTPUT_INVALID`,
+  `RESOURCE_INPUT_INVALID`, and `RESOURCE_OUTPUT_INVALID`
+- Observation: Dynamic command, operation, and resource inputs must be checked after ValueSpec
+  resolution, while operation/resource outputs do not exist inside the Source or Bundle and have no
+  document-relative JSON Pointer. The protocol requires output validation before exposure but does
+  not define a portable API envelope, safety limits, pointer base, or mandatory adapter/runtime
+  handoff.
+- Implementation decision: M02-T11 exposes `validateDesenExecutionValue` with five exact selector
+  kinds: component-command input, operation input/output, and resource input/output. Selector and
+  value are copied through the same bounded inert JSON snapshot used by event payloads, recursively
+  frozen, and checked in complete `resolved-value` mode against a T11-prepared schema. Diagnostic
+  pointers are relative to the detached value root, including `""` for a root failure. ValueSpec-like
+  property names remain ordinary data and create no obligation. Document validation emits input
+  obligations for unresolved members; it does not invent operation-output or resource-output
+  obligations for values that do not yet exist. The runtime must call the detached boundary before
+  invoking a command/capability or exposing a successful output. The API proves the primitive, not
+  that every production adapter uses it.
+- Future action: Standardize the external execution-value envelope, limits, pointer base, selector
+  identity, and mandatory pre-invocation/post-settlement validation points.
+
+## PF-023 — Lifecycle root identifier and reference-segment grammars do not align
+
+- Status: OPEN
+- Blocks proof: No; the validator can use the frozen segment rule without guessing an escape
+  convention.
+- Protocol location: SPEC Sections 8.1, 14.2.3–14.2.4, 16.2, and 20.4; Source and Bundle Schema
+  `$defs/refSpec`, surface `resources` property names, and `operation.invoke.as`
+- Observation: Resource-instance and operation-alias identifiers use the local-identifier grammar,
+  which permits `.` and `:`, while `$ref` encodes namespaces and paths as unescaped dot-separated
+  segments whose grammar excludes `:`. A structurally valid resource named `store.list` or alias
+  named `save.profile` therefore cannot be distinguished from root `store`/`save` followed by a
+  lifecycle path. A root such as `store:list` cannot appear in a structurally valid reference at
+  all. This is the same grammar mismatch recorded for state in `PF-019`.
+- Implementation decision: M02-T11 follows the frozen starter and `PF-019` profile: the second
+  segment after `resource` or `operation` is the complete root identifier. No longest-prefix
+  matching, backtracking, or implicit escaping is invented. Dotted and colon-bearing declarations
+  remain structurally legal but are unaddressable as one root through core lifecycle references;
+  when a dotted prefix declaration exists, the text addresses that prefix and the remaining
+  segments are interpreted as lifecycle/path segments. Refresh actions still name a resource
+  directly and are not parsed as `$ref` paths.
+- Future action: Align local-identifier and reference grammars, forbid dot/colon separators for
+  lifecycle roots, or add a normative escaped or segment-array reference form with unambiguous
+  diagnostic behavior.

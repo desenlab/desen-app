@@ -25,6 +25,7 @@
     "test": "vitest run",
     "test:binding-contracts": "vitest run test/schema-instance-validation.test.ts test/schema-path-inspection.test.ts test/component-contracts.test.ts test/interaction-contract-internals.test.ts test/interaction-contracts.test.ts test/binding-contracts.test.ts",
     "test:component-contracts": "vitest run test/schema-instance-validation.test.ts test/component-contracts.test.ts",
+    "test:execution-contracts": "vitest run test/schema-instance-validation.test.ts test/schema-path-inspection.test.ts test/component-contracts.test.ts test/interaction-contract-internals.test.ts test/interaction-contracts.test.ts test/binding-contracts.test.ts test/execution-contracts.test.ts",
     "test:interaction-contracts": "vitest run test/schema-instance-validation.test.ts test/component-contracts.test.ts test/interaction-contracts.test.ts",
     "test:semantic-foundation": "vitest run test/semantic-foundation.test.ts",
     "test:structural-validation": "vitest run test/structural-validation.test.ts",

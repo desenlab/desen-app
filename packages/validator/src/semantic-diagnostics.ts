@@ -29,13 +29,18 @@ export const INVALID_INTERACTION_CONTRACT_CODE =
 export const INVALID_BINDING_CONTRACT_CODE =
   "run.desen.validator/INVALID_BINDING_CONTRACT" as const;
 
+/** Project-owned code for an unusable resource, operation, or action execution contract. */
+export const INVALID_EXECUTION_CONTRACT_CODE =
+  "run.desen.validator/INVALID_EXECUTION_CONTRACT" as const;
+
 /** Namespaced diagnostics introduced by the cumulative semantic validation stages. */
 export type DesenSemanticExtensionDiagnosticCode =
   | typeof INVALID_SEMVER_CODE
   | typeof CATALOG_REQUIREMENT_MISMATCH_CODE
   | typeof INVALID_COMPONENT_CONTRACT_CODE
   | typeof INVALID_INTERACTION_CONTRACT_CODE
-  | typeof INVALID_BINDING_CONTRACT_CODE;
+  | typeof INVALID_BINDING_CONTRACT_CODE
+  | typeof INVALID_EXECUTION_CONTRACT_CODE;
 
 /** Any core or project-owned diagnostic returned by cumulative semantic validation stages. */
 export type DesenSemanticDiagnostic =
@@ -134,6 +139,19 @@ export function invalidBindingContractDiagnostic(
   return extensionDiagnostic(
     INVALID_BINDING_CONTRACT_CODE,
     "A state declaration or statically decidable binding contract is incoherent.",
+    pointer,
+    context,
+  );
+}
+
+/** Creates the safe project diagnostic used for incoherent executable capability contracts. */
+export function invalidExecutionContractDiagnostic(
+  pointer: JsonPointer,
+  context?: DesenDiagnosticContext,
+): Readonly<DesenDiagnostic<typeof INVALID_EXECUTION_CONTRACT_CODE>> {
+  return extensionDiagnostic(
+    INVALID_EXECUTION_CONTRACT_CODE,
+    "A resource, operation, or action contract cannot be validated safely and coherently.",
     pointer,
     context,
   );

@@ -92,9 +92,55 @@ export interface DesenBindingContractValidationFailure<Target extends DesenBindi
 export type DesenBindingContractValidationResult<Target extends DesenBindingContractTarget> =
   DesenBindingContractValidationSuccess<Target> | DesenBindingContractValidationFailure<Target>;
 
+/**
+ * Static information supplied by a later validator stage for one resource or operation reference.
+ *
+ * @internal This contract is exported only for sibling validator modules. `invalid` means the
+ * surface does not declare the requested root, while `missing` means the root is legal but the
+ * requested lifecycle or output path is definitely absent. `fixed` supplies a lifecycle field's
+ * JSON categories. `schema` delegates an output-relative path to the bounded schema inspector.
+ */
+export type DesenBindingExternalReferenceContract =
+  | Readonly<{ kind: "invalid" }>
+  | Readonly<{ kind: "missing" }>
+  | Readonly<{
+      kind: "fixed";
+      presence: "always" | "maybe";
+      types: readonly SchemaContractJsonType[];
+    }>
+  | Readonly<{
+      kind: "schema";
+      presence: "always" | "maybe";
+      schema: unknown;
+      path: readonly string[];
+    }>;
+
+/** One immutable resource or operation reference query made by the T10 binding walker. */
+export interface DesenBindingExternalReferenceRequest {
+  /** Stable document identity containing the reference. */
+  readonly documentId: string;
+  /** Surface whose resource instances and operation aliases own the external namespace. */
+  readonly surfaceId: string;
+  /** External namespace selected by the first reference segment. */
+  readonly namespace: "operation" | "resource";
+  /** Resource-instance name or operation-invocation alias selected by the second segment. */
+  readonly root: string;
+  /** Lifecycle or output path after the external root. */
+  readonly path: readonly string[];
+}
+
+/**
+ * Resolves static resource and operation contract information for the package-private T10 walker.
+ *
+ * @internal T10 intentionally supplies no resolver. A later cumulative stage may provide one
+ * after it has built trusted, surface-local execution metadata without creating an import cycle.
+ */
+export type DesenBindingExternalReferenceResolver = (
+  request: Readonly<DesenBindingExternalReferenceRequest>,
+) => DesenBindingExternalReferenceContract;
+
 type SourceSnapshot = ImmutableJson<DesenSource>;
 type BundleSnapshot = ImmutableJson<DesenBundle>;
-type DocumentSnapshot = SourceSnapshot | BundleSnapshot;
 
 interface StateContract {
   readonly schema: JsonValue;
@@ -112,6 +158,7 @@ interface BindingScope {
   readonly catalogSet: DesenValidatedInteractionCatalogSet;
   readonly context: Readonly<DesenDiagnosticContext>;
   readonly states: ReadonlyMap<string, StateContract>;
+  readonly externalReferenceResolver?: DesenBindingExternalReferenceResolver;
   readonly repeat?: RepeatAliasScope;
   readonly eventSchema?: JsonValue;
 }
@@ -296,6 +343,9 @@ function withEvent(scope: BindingScope, eventSchema: JsonValue | undefined): Bin
     catalogSet: scope.catalogSet,
     context: scope.context,
     states: scope.states,
+    ...(scope.externalReferenceResolver === undefined
+      ? {}
+      : { externalReferenceResolver: scope.externalReferenceResolver }),
     ...(scope.repeat === undefined ? {} : { repeat: scope.repeat }),
     eventSchema,
   });
@@ -306,6 +356,9 @@ function withoutEvent(scope: BindingScope): BindingScope {
     catalogSet: scope.catalogSet,
     context: scope.context,
     states: scope.states,
+    ...(scope.externalReferenceResolver === undefined
+      ? {}
+      : { externalReferenceResolver: scope.externalReferenceResolver }),
     ...(scope.repeat === undefined ? {} : { repeat: scope.repeat }),
   });
 }
@@ -500,7 +553,7 @@ function itemReferenceAnalysis(
 }
 
 function schemaReferenceAnalysis(
-  schema: JsonValue,
+  schema: unknown,
   path: readonly string[],
   fallback: JsonValue | undefined,
 ): ReferenceAnalysis {
@@ -520,6 +573,46 @@ function schemaReferenceAnalysis(
     presence,
     primary,
     ...(fallback === undefined ? {} : { fallback }),
+  });
+}
+
+function externalReferenceAnalysis(
+  contract: DesenBindingExternalReferenceContract,
+  fallback: JsonValue | undefined,
+): ReferenceAnalysis {
+  if (contract.kind === "invalid") {
+    // A fallback can replace a missing value, but it cannot authorize an undeclared external root.
+    return Object.freeze({ lexicalValid: false, presence: "missing", primary: EMPTY_KNOWLEDGE });
+  }
+  if (contract.kind === "missing") {
+    return Object.freeze({
+      lexicalValid: true,
+      presence: "missing",
+      primary: EMPTY_KNOWLEDGE,
+      ...(fallback === undefined ? {} : { fallback }),
+    });
+  }
+  if (contract.kind === "fixed") {
+    return Object.freeze({
+      lexicalValid: true,
+      presence: contract.presence,
+      primary: Object.freeze([typedKnowledge(contract.types)]),
+      ...(fallback === undefined ? {} : { fallback }),
+    });
+  }
+
+  const schemaAnalysis = schemaReferenceAnalysis(contract.schema, contract.path, fallback);
+  const presence: ReferencePresence =
+    schemaAnalysis.presence === "missing"
+      ? "missing"
+      : contract.presence === "maybe"
+        ? "maybe"
+        : schemaAnalysis.presence;
+  return Object.freeze({
+    lexicalValid: true,
+    presence,
+    primary: schemaAnalysis.primary,
+    ...(schemaAnalysis.fallback === undefined ? {} : { fallback: schemaAnalysis.fallback }),
   });
 }
 
@@ -558,6 +651,23 @@ function referenceAnalysis(
     return alias === undefined
       ? Object.freeze({ lexicalValid: false, presence: "missing", primary: EMPTY_KNOWLEDGE })
       : itemReferenceAnalysis(alias, segments.slice(2), scope, fallback, depth + 1);
+  }
+
+  if (
+    (namespace === "operation" || namespace === "resource") &&
+    scope.externalReferenceResolver !== undefined
+  ) {
+    const path = Object.freeze(segments.slice(2));
+    const contract = scope.externalReferenceResolver(
+      Object.freeze({
+        documentId: scope.context.documentId ?? "",
+        surfaceId: scope.context.surfaceId ?? "",
+        namespace,
+        root: segments[1] ?? "",
+        path,
+      }),
+    );
+    return externalReferenceAnalysis(contract, fallback);
   }
 
   // Resource and operation contracts belong to T11. Context and env are host/profile supplied.
@@ -1453,12 +1563,18 @@ function surfaceBindingDiagnostics(
   surface: JsonObject,
   catalogSet: DesenValidatedInteractionCatalogSet,
   diagnostics: DesenSemanticDiagnostic[],
+  externalReferenceResolver?: DesenBindingExternalReferenceResolver,
 ): void {
   const context = bindingContext(documentId, surfaceId);
   const statePointer = appendPath(ROOT_POINTER, "surfaces", surfaceId, "state");
   const stateObject = asObject(ownValue(surface, "state")) ?? Object.freeze({});
   const states = validateStateContracts(stateObject, statePointer, context, diagnostics);
-  const baseScope: BindingScope = Object.freeze({ catalogSet, context, states });
+  const baseScope: BindingScope = Object.freeze({
+    catalogSet,
+    context,
+    states,
+    ...(externalReferenceResolver === undefined ? {} : { externalReferenceResolver }),
+  });
   const nodeStack: NodeWork[] = [];
   const actionStack: ActionWork[] = [];
   const predicateStack: PredicateWork[] = [];
@@ -1520,9 +1636,21 @@ function surfaceBindingDiagnostics(
   }
 }
 
-function bindingDocumentDiagnostics(
-  document: DocumentSnapshot,
+/**
+ * Runs the T10 binding walker over one already trusted immutable Source or Bundle snapshot.
+ *
+ * @remarks Without a resolver this is the exact package-private path used by the public T10 API.
+ * A later cumulative validator may supply static resource and operation metadata so the same
+ * fallback, predicate, repeat, format, and ValueSpec logic can inspect those namespaces without
+ * duplicating traversal. The function performs no structural snapshotting and does not establish
+ * catalog trust; both arguments must already have crossed their respective earlier boundaries.
+ *
+ * @internal This bridge is intentionally absent from the package root API.
+ */
+export function validateDesenPreparedBindingSnapshot(
+  document: ImmutableJson<DesenSource> | ImmutableJson<DesenBundle>,
   catalogSet: DesenValidatedInteractionCatalogSet,
+  externalReferenceResolver?: DesenBindingExternalReferenceResolver,
 ): readonly DesenSemanticDiagnostic[] {
   const diagnostics: DesenSemanticDiagnostic[] = [];
   const snapshot = document as unknown as JsonObject;
@@ -1531,7 +1659,14 @@ function bindingDocumentDiagnostics(
   for (const surfaceId of sortedKeys(surfaces)) {
     const surface = asObject(surfaces[surfaceId]);
     if (surface !== undefined) {
-      surfaceBindingDiagnostics(document.id, surfaceId, surface, catalogSet, diagnostics);
+      surfaceBindingDiagnostics(
+        document.id,
+        surfaceId,
+        surface,
+        catalogSet,
+        diagnostics,
+        externalReferenceResolver,
+      );
     }
   }
   return normalizeSemanticDiagnostics(diagnostics);
@@ -1556,7 +1691,7 @@ export function validateDesenBindingContracts<Target extends DesenBindingContrac
   if (!interactions.valid) {
     return bindingFailure(target, interactions.diagnostics, interactions.obligations);
   }
-  const diagnostics = bindingDocumentDiagnostics(
+  const diagnostics = validateDesenPreparedBindingSnapshot(
     interactions.value as SourceSnapshot | BundleSnapshot,
     catalogSet,
   );

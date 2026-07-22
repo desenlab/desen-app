@@ -146,7 +146,7 @@ failure continues to short-circuit with the unchanged M02-T06 diagnostic.
 ## Deterministic evidence
 
 - Artifact: `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- Artifact SHA-256: `e5c08a222935905f9e664e1aa35739d37bd363de435f66f78cf998651209dcd8`
+- Artifact SHA-256: `cb121317d0c6cfcb9a3bdba3779a30b8b4cb5fa87c65074eff49bb9414531df0`
 - Prerequisite: exact tracked bytes and SHA-256 of the passing M02-T06 artifact
 - Frozen input: exact DESEN 0.1.0 commit, tree, and aggregate snapshot hash
 - Evidence inputs: trace ownership, BCP 14 ledger, `PF-009`, frozen vectors/examples, SemVer

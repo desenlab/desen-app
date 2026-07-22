@@ -8,11 +8,11 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████░░░░░░░░░░░░░░░░░░░░` **24 / 144 tasks complete (17%)**
+**Overall:** `████░░░░░░░░░░░░░░░░░░░░` **25 / 144 tasks complete (17%)**
 
-**Current milestone — M02:** `██████████░░░` **10 / 13 tasks complete (77%)**
+**Current milestone — M02:** `███████████░░` **11 / 13 tasks complete (85%)**
 
-**Proof gates:** **2 / 13 complete** · **Next:** `M02-T11`
+**Proof gates:** **2 / 13 complete** · **Next:** `M02-T12`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -85,6 +85,7 @@ packages/
 - [Component-contract proof](docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md)
 - [Interaction-contract proof](docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md)
 - [Binding-contract proof](docs/proof/PROTOCOL-BINDING-CONTRACTS.md)
+- [Execution-contract proof](docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -123,17 +124,27 @@ The M02-T09 interaction stage extends that boundary to behavior props, slots, st
 and exclusive-channel conflicts; declared component and behavior events; and command names for
 already-known component targets. Its separate resolved-event API copies and freezes adapter
 payloads, applies explicit depth/size limits, and validates them as ordinary JSON rather than DESEN
-bindings. Event-reference resolution, command targets and inputs, resource and operation contracts,
-digests, publication, adapters, and runtime execution remain later tasks. The first product proof
-is still `web-react`, while the protocol and validator packages remain independent of React, DOM,
-and browser APIs so future iOS and Android runtimes can reuse the same contract.
+bindings. Event-reference resolution, command targets and inputs, and resource/operation contracts
+are completed by the later T10/T11 validator boundaries; digests, publication, adapters, and
+runtime execution remain later tasks. The first product proof is still `web-react`, while the
+protocol and validator packages remain independent of React, DOM, and browser APIs so future iOS
+and Android runtimes can reuse the same contract.
 
 The M02-T10 binding stage now validates each surface's state schema and inert initial value,
 surface-local `state.*`, lexical `item.*`, and immediate-turn `event.*` references, exact `$format`
 placeholders, statically decidable predicate operand types, and repeat item/alias/key contracts. It
 preserves every unresolved component and behavior obligation from T09 instead of guessing dynamic
-host values. Resource and operation contracts, complete action semantics, runtime predicate
-evaluation, and dynamic repeat materialization remain deliberately assigned to later stages.
+host values. T11 now consumes that binding foundation; runtime predicate evaluation and dynamic
+repeat materialization remain deliberately assigned to the runtime.
+
+The M02-T11 execution-contract stage now prepares bounded operation/resource schemas; validates
+resource policies and inputs, operation inputs and surface-scoped aliases, lifecycle references,
+navigation and refresh targets, component-command targets and inputs, and statically decidable
+state writes; and preserves four new dynamic execution obligations alongside the four inherited
+binding obligations. Its detached five-kind resolved-value API checks command input and
+operation/resource input or output as immutable inert JSON. This proves the validator handoff, not
+host authorization, mounted-component liveness, adapter invocation, lifecycle settlement, or
+action-turn execution.
 
 ## License
 

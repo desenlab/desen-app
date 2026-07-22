@@ -43,9 +43,19 @@ export {
 } from "./binding-contract-validation.js";
 
 export {
+  EXECUTION_VALUE_SAFETY_LIMITS,
+  validateDesenBundleExecutionContracts,
+  validateDesenExecutionCatalogSet,
+  validateDesenExecutionContracts,
+  validateDesenExecutionValue,
+  validateDesenSourceExecutionContracts,
+} from "./execution-contract-validation.js";
+
+export {
   CATALOG_REQUIREMENT_MISMATCH_CODE,
   INVALID_COMPONENT_CONTRACT_CODE,
   INVALID_BINDING_CONTRACT_CODE,
+  INVALID_EXECUTION_CONTRACT_CODE,
   INVALID_INTERACTION_CONTRACT_CODE,
   INVALID_SEMVER_CODE,
 } from "./semantic-diagnostics.js";
@@ -116,3 +126,21 @@ export type {
   DesenBindingContractValidationResult,
   DesenBindingContractValidationSuccess,
 } from "./binding-contract-validation.js";
+
+export type {
+  DesenExecutionCatalogSetValidationFailure,
+  DesenExecutionCatalogSetValidationResult,
+  DesenExecutionCatalogSetValidationSuccess,
+  DesenExecutionContractObligation,
+  DesenExecutionContractObligationKind,
+  DesenExecutionContractTarget,
+  DesenExecutionContractValidationFailure,
+  DesenExecutionContractValidationResult,
+  DesenExecutionContractValidationSuccess,
+  DesenExecutionValueContractKind,
+  DesenExecutionValueContractReference,
+  DesenExecutionValueValidationFailure,
+  DesenExecutionValueValidationResult,
+  DesenExecutionValueValidationSuccess,
+  DesenValidatedExecutionCatalogSet,
+} from "./execution-contract-validation.js";

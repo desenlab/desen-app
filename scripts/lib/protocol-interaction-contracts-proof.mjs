@@ -482,9 +482,10 @@ async function verifyFindings(findingsPath) {
     ],
     "PF-014": [
       "target is already known to be a component node",
-      "COMMAND_INPUT_INVALID` remain M02-T11 responsibilities",
+      "M02-T11 indexes component nodes per surface",
+      "component-command-input` obligations",
       "no `behavior.command` semantics are invented",
-      "does not complete the adapter-implementation obligation",
+      "Command validation alone does not complete the adapter implementation obligation",
     ],
   };
   for (const [id, required] of Object.entries(anchors)) {
@@ -2351,8 +2352,8 @@ export async function buildProtocolInteractionContractsEvidence({
     },
     limitations: [
       "N-033 and N-034 remain PLANNED: this validator primitive does not prove adapter payload enforcement or command implementation parity.",
-      "Static event-reference paths and asynchronous event scope remain M02-T10 and M04-T14 responsibilities.",
-      "Command target existence, liveness, resolved input, COMMAND_INPUT_INVALID, resources, operations, navigation, and remaining action semantics remain M02-T11 and M04.",
+      "Static event-reference paths are enforced by cumulative T10; asynchronous event lifetime remains M04-T14 work.",
+      "Command targets and inputs, resources, operations, navigation, and static action contracts are enforced by cumulative T11; execution and liveness remain M04 work.",
       "Behavior command schemas are prepared, but DESEN 0.1.0 defines no behavior.command action and this implementation invents none.",
       "Official-suite parity and exhaustive diagnostic micro-vectors remain M02-T12 and M02-T13.",
       "Document-wide finite ingress limits remain M02-T13; T09 records only schema evaluation and resolved event-payload boundaries.",

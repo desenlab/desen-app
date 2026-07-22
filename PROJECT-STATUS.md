@@ -23,8 +23,10 @@ contracts, attachment and conflict rules, declared event and known-target comman
 bounded resolved-event-payload validator. M02-T10 now validates state schemas and initial values,
 lexical references and event turns, predicate operand types, formatting placeholders, repeat
 arrays, aliases, keys, direct limits, and narrow state-action roots while preserving all dynamic
-runtime responsibilities for their assigned later tasks. Runtime adapter execution has not started
-and is not claimed as proven.
+runtime responsibilities for their assigned later tasks. M02-T11 now validates resource and
+operation schemas, lifecycle value references, navigation and refresh actions, command targets and
+inputs, and state writes while preserving resolved-value checks as explicit bounded obligations.
+Runtime adapter execution has not started and is not claimed as proven.
 
 ## Current milestone
 
@@ -39,9 +41,10 @@ and is not claimed as proven.
   `M02-T07 — Identity, SemVer, entry, catalog namespace, extension, and reference validation`,
   `M02-T08 — Component prop, slot, style-part, and visual-state contract validation`,
   `M02-T09 — Event, command, behavior attachment, conflict, and payload-contract validation`,
-  `M02-T10 — State, predicate, repeat, alias, and static binding validation`
+  `M02-T10 — State, predicate, repeat, alias, and static binding validation`,
+  `M02-T11 — Resource, operation, action, navigation, and command-target validation`
 - Active task: None
-- Ready next task: `M02-T11 — Resource, operation, action, navigation, and command-target validation`
+- Ready next task: `M02-T12 — TypeScript parity for the official 14-case suite`
 - Status: `READY_TO_START`
 
 ## Completed preparation
@@ -97,6 +100,14 @@ and is not claimed as proven.
   narrow state-action roots, immutable results, dispatcher parity, all five frozen binding
   diagnostic identities, and byte-for-byte preservation of all four T09 obligation kinds. Two
   independent post-fix reviews found no remaining open source issue.
+- The cumulative execution-contract layer passes 220 focused package tests over 9 reviewed schema
+  families with 383 constraints, 11 prose rules, and 2 invariants. Its independent artifact covers
+  42 negative project mutations, 1 accepted and 5 rejected schema-safety cases, 4 accepted and 6
+  rejected bounded resolved-value safety cases, 4 separately executed hostile-value rejections, 3
+  forged lower-stage catalog entry-point rejections, all 5 frozen examples, 4 inherited plus 4 new
+  obligation kinds, and all 5 resolved-value selectors. It validates static operation/resource
+  inputs, lifecycle references, navigation, refresh, component commands, and state actions without
+  claiming runtime execution.
 - The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
   integrity tests, protocol traceability and type-generation tests, remaining scaffold test
   runners, and dependency-boundary checks.
@@ -110,9 +121,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Begin only `M02-T11`: validate resource, operation, action, navigation, and command targets without
-pulling publication, adapter execution, or runtime lifecycle work forward from their assigned later
-tasks.
+Begin only `M02-T12`: prove TypeScript parity for the official 14-case suite—9 validation vectors
+and 5 examples—without pulling project-owned micro-vectors from M02-T13 or runtime execution from
+later milestones forward.
 
 M02-T02 evidence:
 
@@ -135,38 +146,44 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `e3fd61109c574eb8e60b3daebb594f47fd507b2eb79c1d99671c86764a586b14`
+- artifact SHA-256: `5a6e45d12152d7788c479fcfb80793646110abaa13d59b36e5180ab6c48cae63`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `f5fa6918c76a9328fbd1700c2b1b434ff3966ce5e15235256dbbdddd1be815db`
+- artifact SHA-256: `8108abc465aebca4e6540cdef0f2ef726b1020214e2f28e301da2231708f1ad8`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `e5c08a222935905f9e664e1aa35739d37bd363de435f66f78cf998651209dcd8`
+- artifact SHA-256: `cb121317d0c6cfcb9a3bdba3779a30b8b4cb5fa87c65074eff49bb9414531df0`
 
 M02-T08 evidence:
 
 - `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
-- artifact SHA-256: `41cb8c266bf5c3052597d5d35baa89e630fbc5000eaf97ad1769cbcb5f0096f0`
+- artifact SHA-256: `8086a5132e7d04e998008d1cb635247cdaaac0f6c1490577f8f038f4f3db6f79`
 
 M02-T09 evidence:
 
 - `docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json`
-- artifact SHA-256: `68074a273c6d03b407b6e52e078ce57a92a8b50da5ef6335a7c92a305868cc4c`
+- artifact SHA-256: `776ac2162fe1a654ebf2fdce4fbb686fa596bf282a2b4f7a440533a010421ad8`
 
 M02-T10 evidence:
 
 - `docs/proof/PROTOCOL-BINDING-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-binding-contracts.json`
-- artifact SHA-256: `4ac15c6b9e7a34ea05aed96ac1ff3a3512dc810d8c4e1daa09efdd721936342f`
+- artifact SHA-256: `b3958de2d1004f6f9bcd28487fc3d9c7ca07adb29500df2a15df610ea5686016`
+
+M02-T11 evidence:
+
+- `docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md`
+- `docs/proof/artifacts/protocol-0.1.0-execution-contracts.json`
+- artifact SHA-256: `853a47075ad3e86cb649a2e88e1a178d7f87ca0f0945919b46ebc56d06f376fc`
 
 ## Status vocabulary
 

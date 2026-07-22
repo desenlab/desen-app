@@ -7,8 +7,8 @@
   "prerequisite": {
     "structuralValidation": {
       "path": "docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
-      "bytes": 22982,
-      "sha256": "f5fa6918c76a9328fbd1700c2b1b434ff3966ce5e15235256dbbdddd1be815db",
+      "bytes": 23214,
+      "sha256": "8108abc465aebca4e6540cdef0f2ef726b1020214e2f28e301da2231708f1ad8",
       "task": "M02-T06",
       "profile": "desen-structural-validation-v1"
     }
@@ -269,6 +269,7 @@
         "binding-contract-validation.ts",
         "component-contract-validation.ts",
         "embedded-schema-validation.ts",
+        "execution-contract-validation.ts",
         "generated/0.1.0/structural-validators.ts",
         "index.ts",
         "interaction-contract-validation.ts",
@@ -294,6 +295,10 @@
         "embedded-schema-validation.d.ts.map",
         "embedded-schema-validation.js",
         "embedded-schema-validation.js.map",
+        "execution-contract-validation.d.ts",
+        "execution-contract-validation.d.ts.map",
+        "execution-contract-validation.js",
+        "execution-contract-validation.js.map",
         "generated/0.1.0/structural-validators.d.ts",
         "generated/0.1.0/structural-validators.d.ts.map",
         "generated/0.1.0/structural-validators.js",
@@ -343,6 +348,7 @@
         "binding-contract-validation.js",
         "component-contract-validation.js",
         "embedded-schema-validation.js",
+        "execution-contract-validation.js",
         "generated/0.1.0/structural-validators.js",
         "index.js",
         "interaction-contract-validation.js",
@@ -378,8 +384,8 @@
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 29431,
-        "sha256": "d0e6d128ad194890d1f8aa4dc9c8b56578f0eef1e59d8e63d0fac5157054f2a9"
+        "bytes": 37502,
+        "sha256": "be0a10a13fa16fcf116106c0bbc559ddaf9f1d8584da12765d2f32712f87a26d"
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
@@ -393,8 +399,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 6335,
-        "sha256": "592cc589e77353afcc1b13c3857699fcb26a66bab9b25b133f39a10479e9b024"
+        "bytes": 6917,
+        "sha256": "0a9293c5b238fb725447b3e0cc758d577e4222ff1884597ca8cb7d47ce714859"
       },
       {
         "path": "packages/protocol/package.json",
@@ -423,13 +429,13 @@
       },
       {
         "path": "packages/validator/README.md",
-        "bytes": 34877,
-        "sha256": "1d9e1d24f007117da4bbb31c967d0e10ebb92b2aa8b7b7195018b6e2c619a472"
+        "bytes": 48277,
+        "sha256": "eb5ea811dd8f4fbab954e57ce8f86c1820176790061ddbd88784df77a01935f6"
       },
       {
         "path": "packages/validator/package.json",
-        "bytes": 1714,
-        "sha256": "d57234e6b4db40e3b2edc4437070d41e0e1ea8d3c90ed6f2fa99149b88703dfa"
+        "bytes": 2012,
+        "sha256": "e0e23258ef3312fe4093a8207987221b5e43608e71ff49adc09f2833d493dd47"
       },
       {
         "path": "packages/validator/scripts/clean-dist.mjs",
@@ -453,8 +459,8 @@
       },
       {
         "path": "packages/validator/src/binding-contract-validation.ts",
-        "bytes": 51391,
-        "sha256": "20a2ad2443d7d03fe37c93f9732a74454f023ca910b5ee1dc52191b140953805"
+        "bytes": 56612,
+        "sha256": "a0df532ba41a1db352edd4bde93ea9f656104902a987c8789278c92b4a43cca8"
       },
       {
         "path": "packages/validator/src/component-contract-validation.ts",
@@ -467,19 +473,24 @@
         "sha256": "f3fa31f08989c991b4b896cb41e0765abe97c5cc171d197e2d8c1043dc24737b"
       },
       {
+        "path": "packages/validator/src/execution-contract-validation.ts",
+        "bytes": 53971,
+        "sha256": "9a12078d78d73fffd5f57882765afe6c25867514867bed32b000024734e79e07"
+      },
+      {
         "path": "packages/validator/src/generated/0.1.0/structural-validators.ts",
         "bytes": 761360,
         "sha256": "d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd"
       },
       {
         "path": "packages/validator/src/index.ts",
-        "bytes": 3489,
-        "sha256": "1d585d3145960f5514d555f5604ff00823a28efd165abeeee8e7cf80089493fe"
+        "bytes": 4457,
+        "sha256": "805297f7cf1c7db2ff56cdda7ee4dfc2ffc71fdff6d285c8aca673175b79e8f8"
       },
       {
         "path": "packages/validator/src/interaction-contract-validation.ts",
-        "bytes": 62959,
-        "sha256": "10c0d7218ebe5e56069b377b9ee2e2f8e3615a1c691e644706a467dbe6ad52d1"
+        "bytes": 63433,
+        "sha256": "82775ea143da99091bf6fe21c7e43993abd6653ea424b1497311fdf1afd60cd2"
       },
       {
         "path": "packages/validator/src/schema-instance-validation.ts",
@@ -488,8 +499,8 @@
       },
       {
         "path": "packages/validator/src/semantic-diagnostics.ts",
-        "bytes": 7322,
-        "sha256": "66268b5414011537e24741acc59514aa5ff90cfe14e16c8b9c165483458ab2ec"
+        "bytes": 8039,
+        "sha256": "9306355f7fe86d340ed8164601fa7a67527770a53bf5956035275e1703ab95b4"
       },
       {
         "path": "packages/validator/src/semantic-validation.ts",
@@ -530,6 +541,11 @@
         "path": "packages/validator/test/component-contracts.test.ts",
         "bytes": 31970,
         "sha256": "17d7bf7503b7d3dbb88ffe44ab51b86015bfa8448a4c7ef5167beb1cb9d65ecc"
+      },
+      {
+        "path": "packages/validator/test/execution-contracts.test.ts",
+        "bytes": 43254,
+        "sha256": "690227886239c4b7e7ac71c9d431d735ed82a1281a79fbb7a4ab4dfc1c950d3f"
       },
       {
         "path": "packages/validator/test/interaction-contract-internals.test.ts",
@@ -598,8 +614,8 @@
       },
       {
         "path": "turbo.json",
-        "bytes": 3158,
-        "sha256": "d1bd0854dddd7bedff088a005a86c37c13e0cb5fa59760f2f67d477e82fd9b75"
+        "bytes": 3416,
+        "sha256": "14bba1af5f60aa2f32dc3d26749da8c8925bb68087811602f3f2f0de4a7f01bc"
       }
     ]
   },

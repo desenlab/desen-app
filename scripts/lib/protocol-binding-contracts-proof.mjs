@@ -424,9 +424,10 @@ async function verifyFindings(findingsPath) {
       "known direct array longer than an explicit `limit`",
     ],
     "PF-019": [
-      "does not perform longest-prefix matching",
+      "do not perform longest-prefix matching",
       "substring before the first `.` is the complete state-entry name",
-      "T10's only state-action check",
+      "T10 establishes the declared first segment",
+      "T11 rejects a definitely missing nested path",
     ],
   };
   for (const [id, required] of Object.entries(anchors)) {
@@ -2254,9 +2255,9 @@ export async function buildProtocolBindingContractsEvidence({
       ],
     },
     limitations: [
-      "Resource and operation declaration semantics, lifecycle references, policy, input, output, and aliases remain M02-T11/M04 responsibilities.",
+      "Resource and operation declaration contracts, lifecycle references, policies, inputs, outputs, and aliases are enforced by cumulative T11; execution remains M04 work.",
       "T10 adds no predicate/reference obligation kind; uncertain dynamic decisions remain deferred to their later consumer boundary.",
-      "Nested state writes, complete post-write validity, boolean toggle enforcement, and remaining action semantics remain M02-T11/M04 responsibilities.",
+      "T11 enforces statically decidable nested state paths, values, and toggle types; complete post-write mutation and action execution remain M04 responsibilities.",
       "Context, environment, token, resource, operation, and other host-value resolution remains M04 work.",
       "Runtime predicate truth, repeat materialization, dynamic keys, instance identity, event/item lifetime, and reactive reevaluation remain M04/M05 work.",
       "Publication-time obligation discharge and full static binding compatibility remain M06 work.",

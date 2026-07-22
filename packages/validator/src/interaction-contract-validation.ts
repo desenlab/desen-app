@@ -1707,6 +1707,16 @@ function inertBoundedJsonSnapshot(input: unknown): JsonValue | undefined {
   }
 }
 
+/**
+ * Creates the same detached, bounded, recursively immutable JSON snapshot used by event payloads.
+ *
+ * @internal Later cumulative validator stages reuse this boundary so resolved adapter values have
+ * one inert-data profile. It is intentionally omitted from the package root exports.
+ */
+export function snapshotResolvedJsonValue(input: unknown): DesenResolvedJsonValue | undefined {
+  return inertBoundedJsonSnapshot(input) as DesenResolvedJsonValue | undefined;
+}
+
 function eventReferenceSnapshot(input: unknown): Readonly<DesenEventContractReference> | undefined {
   const snapshot = inertBoundedJsonSnapshot(input);
   if (typeof snapshot !== "object" || snapshot === null || Array.isArray(snapshot))

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "task": "M02-T10",
-  "profile": "desen-binding-contract-validation-v1",
+  "task": "M02-T11",
+  "profile": "desen-execution-contract-validation-v1",
   "protocolVersion": "0.1.0",
   "result": "PASS",
   "frozenInput": {
@@ -16,103 +16,135 @@
     }
   },
   "prerequisite": {
-    "interactionContracts": {
-      "task": "M02-T09",
-      "profile": "desen-interaction-contract-validation-v1",
+    "bindingContracts": {
+      "task": "M02-T10",
+      "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
-      "verifiedBy": "verifyProtocolInteractionContracts",
-      "sha256": "776ac2162fe1a654ebf2fdce4fbb686fa596bf282a2b4f7a440533a010421ad8",
-      "verificationSha256": "776ac2162fe1a654ebf2fdce4fbb686fa596bf282a2b4f7a440533a010421ad8"
+      "verifiedBy": "verifyProtocolBindingContracts",
+      "sha256": "b3958de2d1004f6f9bcd28487fc3d9c7ca07adb29500df2a15df610ea5686016",
+      "verificationSha256": "b3958de2d1004f6f9bcd28487fc3d9c7ca07adb29500df2a15df610ea5686016"
     }
   },
   "traceability": {
     "schemaFamilies": [
-      { "id": "SC-035", "expectedConstraints": 12 },
-      { "id": "SC-036", "expectedConstraints": 14 },
-      { "id": "SC-037", "expectedConstraints": 12 },
-      { "id": "SC-038", "expectedConstraints": 28 },
-      { "id": "SC-039", "expectedConstraints": 18 },
-      { "id": "SC-040", "expectedConstraints": 76 },
-      { "id": "SC-045", "expectedConstraints": 22 },
+      { "id": "SC-031", "expectedConstraints": 5 },
+      { "id": "SC-032", "expectedConstraints": 5 },
+      { "id": "SC-041", "expectedConstraints": 178 },
       { "id": "SC-046", "expectedConstraints": 70 },
-      { "id": "SC-047", "expectedConstraints": 12 },
-      { "id": "SC-049", "expectedConstraints": 36 }
+      { "id": "SC-048", "expectedConstraints": 24 },
+      { "id": "SC-049", "expectedConstraints": 36 },
+      { "id": "SC-059", "expectedConstraints": 8 },
+      { "id": "SC-060", "expectedConstraints": 23 },
+      { "id": "SC-061", "expectedConstraints": 34 }
     ],
-    "schemaFamilyCount": 10,
-    "schemaConstraints": 300,
+    "schemaFamilyCount": 9,
+    "schemaConstraints": 383,
     "conformanceResponsibilities": [],
     "proseRules": [
-      "R-026",
-      "R-039",
-      "R-040",
-      "R-044",
-      "R-045",
-      "R-047",
-      "R-049",
-      "R-050",
-      "R-051",
-      "R-052",
-      "R-054",
-      "R-061"
+      "R-042",
+      "R-043",
+      "R-055",
+      "R-073",
+      "R-074",
+      "R-075",
+      "R-076",
+      "R-077",
+      "R-079",
+      "R-080",
+      "R-120"
     ],
+    "invariants": ["A-005", "A-011"],
     "mandatoryClauses": [],
     "ownedCoreDiagnostics": [
-      { "id": "D-019", "code": "STATE_WRITE_INVALID" },
-      { "id": "D-020", "code": "REFERENCE_UNRESOLVED" },
-      { "id": "D-021", "code": "PREDICATE_TYPE_MISMATCH" },
-      { "id": "D-022", "code": "REPEAT_ITEMS_INVALID" },
-      { "id": "D-023", "code": "REPEAT_KEY_INVALID" }
+      { "id": "D-016", "code": "COMMAND_INPUT_INVALID" },
+      { "id": "D-024", "code": "OPERATION_INPUT_INVALID" },
+      { "id": "D-025", "code": "OPERATION_OUTPUT_INVALID" },
+      { "id": "D-027", "code": "RESOURCE_INPUT_INVALID" },
+      { "id": "D-028", "code": "RESOURCE_OUTPUT_INVALID" }
     ],
-    "implementationDiagnostic": "run.desen.validator/INVALID_BINDING_CONTRACT",
+    "reusedCoreDiagnostics": [
+      { "id": "D-005", "code": "ENTRY_NOT_FOUND" },
+      { "id": "D-015", "code": "UNKNOWN_COMMAND" },
+      { "id": "D-019", "code": "STATE_WRITE_INVALID" },
+      { "id": "D-020", "code": "REFERENCE_UNRESOLVED" }
+    ],
+    "implementationDiagnostic": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
     "implementationFindings": {
-      "eventTurn": "PF-014",
-      "lexicalReferences": "PF-015",
-      "predicates": "PF-016",
-      "formats": "PF-017",
-      "repeats": "PF-018",
-      "statePaths": "PF-019"
+      "executionBoundary": "PF-020+",
+      "starterDiagnosticMappings": true,
+      "surfaceScopedAliases": true,
+      "runtimeLivenessDeferred": true
     }
   },
   "publicApi": {
     "exports": [
-      "INVALID_BINDING_CONTRACT_CODE",
-      "validateDesenBindingContracts",
-      "validateDesenBundleBindingContracts",
-      "validateDesenSourceBindingContracts"
+      "INVALID_EXECUTION_CONTRACT_CODE",
+      "validateDesenBundleExecutionContracts",
+      "validateDesenExecutionCatalogSet",
+      "validateDesenExecutionContracts",
+      "validateDesenExecutionValue",
+      "validateDesenSourceExecutionContracts"
     ],
-    "cumulativeBoundary": "T06→T07→T08→T09→T10",
-    "trustedCatalogSet": "DesenValidatedInteractionCatalogSet",
-    "parallelCatalogSetApi": false,
+    "cumulativeBoundary": "T06→T07→T08→T09→T10→T11",
+    "trustedCatalogSet": "DesenValidatedExecutionCatalogSet",
     "successValue": "independent recursively frozen JSON snapshot",
-    "failureValue": "no trusted document value",
+    "failureValue": "no trusted document or resolved value",
     "obligationKinds": [
+      "behavior-prop",
+      "behavior-style-part-property",
+      "component-command-input",
+      "component-prop",
+      "operation-input",
+      "resource-input",
+      "state-write",
+      "style-part-property"
+    ],
+    "inheritedObligationKinds": [
       "behavior-prop",
       "behavior-style-part-property",
       "component-prop",
       "style-part-property"
     ],
-    "newBindingObligationKinds": []
+    "newExecutionObligationKinds": [
+      "component-command-input",
+      "operation-input",
+      "resource-input",
+      "state-write"
+    ],
+    "resolvedValueSelectorKinds": [
+      "component-command-input",
+      "operation-input",
+      "operation-output",
+      "resource-input",
+      "resource-output"
+    ],
+    "resolvedValueMode": "complete resolved-value inert JSON"
   },
   "frozenValidation": {
     "validConformance": [
       { "file": "valid/web.catalog.json", "target": "catalog-set", "valid": true },
-      { "file": "valid/sign-in.source.json", "target": "source", "valid": true, "obligations": 3 },
-      { "file": "valid/sign-in.bundle.json", "target": "bundle", "valid": true, "obligations": 3 }
+      { "file": "valid/sign-in.source.json", "target": "source", "valid": true, "obligations": 7 },
+      { "file": "valid/sign-in.bundle.json", "target": "bundle", "valid": true, "obligations": 7 }
     ],
     "validExamples": [
       { "file": "catalog.web.example.json", "target": "catalog-set", "valid": true },
-      { "file": "sign-in.source.desen.json", "target": "source", "valid": true, "obligations": 3 },
-      { "file": "sign-in.bundle.desen.json", "target": "bundle", "valid": true, "obligations": 3 },
+      { "file": "sign-in.source.desen.json", "target": "source", "valid": true, "obligations": 7 },
       {
         "file": "sortable-list.source.desen.json",
         "target": "source",
         "valid": true,
-        "obligations": 1
+        "obligations": 4
       },
-      { "file": "store-map.source.desen.json", "target": "source", "valid": true, "obligations": 3 }
+      {
+        "file": "store-map.source.desen.json",
+        "target": "source",
+        "valid": true,
+        "obligations": 5
+      },
+      { "file": "sign-in.bundle.desen.json", "target": "bundle", "valid": true, "obligations": 7 }
     ],
-    "officialT10Invalid": [],
-    "inheritedT09Failure": {
+    "officialT11Invalid": [],
+    "inheritedT10Failure": {
       "file": "invalid/source-unknown-event.json",
       "diagnostics": [
         { "code": "UNKNOWN_EVENT", "pointer": "/surfaces/home/root/slots/default/0/on/teleport" }
@@ -165,433 +197,466 @@
       { "id": "catalog-digest", "owner": "M07-T03", "valid": true }
     ]
   },
-  "stateContracts": {
-    "accepted": [
-      { "id": "frozen-valid-initials", "mode": "complete resolved-value" },
-      { "id": "valuespec-shaped-initial-is-inert", "valid": true }
-    ],
+  "schemaSafety": {
+    "accepted": [{ "id": "maximum-schema-depth", "boundary": 128, "valid": true }],
     "rejected": [
       {
-        "id": "unsafe-state-schema",
+        "id": "above-maximum-schema-depth",
+        "boundary": 129,
         "diagnostics": [
           {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/sign-in/state/email/schema/pattern"
+            "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+            "pointer": "/0/operations/com.example.auth~1signIn/outputSchema"
           }
         ]
       },
       {
-        "id": "invalid-state-initial",
+        "id": "operation-input",
         "diagnostics": [
           {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/sign-in/state/email/initial"
+            "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+            "pointer": "/0/operations/com.example.auth~1signIn/inputSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "operation-output",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+            "pointer": "/0/operations/com.example.auth~1signIn/outputSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "resource-input",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+            "pointer": "/0/resources/com.example.stores~1list/inputSchema/properties/value/pattern"
+          }
+        ]
+      },
+      {
+        "id": "resource-output",
+        "diagnostics": [
+          {
+            "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+            "pointer": "/0/resources/com.example.stores~1list/outputSchema/properties/value/pattern"
           }
         ]
       }
     ]
   },
-  "references": {
+  "resources": {
     "accepted": [
-      { "id": "declared-state", "valid": true },
-      { "id": "open-state-path", "valid": true },
-      { "id": "ambiguous-state-path", "valid": true },
-      { "id": "closed-path-fallback", "valid": true },
-      { "id": "null-remains-resolved", "valid": true },
-      { "id": "active-item-alias", "valid": true }
+      { "id": "supported-static-input", "valid": true },
+      { "id": "dynamic-input-obligation", "valid": true }
     ],
     "rejected": [
       {
-        "id": "missing-state",
+        "id": "unsupported-policy",
         "diagnostics": [
-          { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/sign-in/root/props/gap/$ref" }
+          { "code": "RESOURCE_INPUT_INVALID", "pointer": "/surfaces/main/resources/search/policy" }
         ]
       },
       {
-        "id": "illegal-fallback-does-not-create-state",
-        "diagnostics": [
-          { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/sign-in/root/props/gap/$ref" }
-        ]
-      },
-      {
-        "id": "closed-state-path",
-        "diagnostics": [
-          { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/sign-in/root/props/gap/$ref" }
-        ]
-      },
-      {
-        "id": "event-outside-handler",
-        "diagnostics": [
-          { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/sign-in/root/props/gap/$ref" }
-        ]
-      },
-      {
-        "id": "unknown-event-payload-path",
+        "id": "unknown-static-input",
         "diagnostics": [
           {
-            "code": "REFERENCE_UNRESOLVED",
-            "pointer": "/surfaces/sign-in/root/slots/default/1/on/change/0/value/$ref"
+            "code": "RESOURCE_INPUT_INVALID",
+            "pointer": "/surfaces/main/resources/search/input/unexpected"
           }
         ]
       },
       {
-        "id": "success-settlement-turn",
+        "id": "missing-required-input",
         "diagnostics": [
           {
-            "code": "REFERENCE_UNRESOLVED",
-            "pointer": "/surfaces/sign-in/root/slots/default/4/on/press/0/onSuccess/0/params/bad/$ref"
+            "code": "RESOURCE_INPUT_INVALID",
+            "pointer": "/surfaces/main/resources/search/input/query"
           }
         ]
       },
       {
-        "id": "failure-settlement-turn",
+        "id": "wrong-type-input",
         "diagnostics": [
           {
-            "code": "REFERENCE_UNRESOLVED",
-            "pointer": "/surfaces/sign-in/root/slots/default/4/on/press/0/onFailure/0/params/bad/$ref"
+            "code": "RESOURCE_INPUT_INVALID",
+            "pointer": "/surfaces/main/resources/search/input/query"
+          }
+        ]
+      },
+      {
+        "id": "dynamic-peer-does-not-mask-static-input-error",
+        "diagnostics": [
+          {
+            "code": "RESOURCE_INPUT_INVALID",
+            "pointer": "/surfaces/main/resources/search/input/unexpected"
           }
         ]
       }
     ]
   },
-  "predicates": {
+  "lifecycleReferences": {
     "accepted": [
-      { "id": "all-booleans", "valid": true },
-      { "id": "any-nested", "valid": true },
-      { "id": "not-boolean", "valid": true },
-      { "id": "eq-canonical-json", "valid": true },
-      { "id": "neq-any-json", "valid": true },
-      { "id": "gt-numbers", "valid": true },
-      { "id": "gte-strings", "valid": true },
-      { "id": "lt-numbers", "valid": true },
-      { "id": "lte-strings", "valid": true },
-      { "id": "in-array", "valid": true },
-      { "id": "contains-array", "valid": true },
-      { "id": "contains-string", "valid": true },
-      { "id": "exists-reference", "valid": true },
-      { "id": "truthy-explicit", "valid": true },
-      { "id": "ordered-typed-fallback", "valid": true },
-      { "id": "exists-lexically-valid-missing-path", "valid": true }
+      { "id": "all-declared-lifecycle-fields", "valid": true },
+      { "id": "surface-wide-alias-before-declaration", "valid": true },
+      { "id": "closed-path-fallback", "valid": true }
     ],
     "rejected": [
       {
-        "id": "ordering-left-boolean",
+        "id": "unknown-resource-alias",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/0/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "ordering-mixed-types",
+        "id": "unknown-resource-alias-with-fallback",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/1" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/0/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "in-non-collection",
+        "id": "unknown-resource-field",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/1" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/0/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "in-string-non-string-member",
+        "id": "unknown-resource-error-field",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/0/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "contains-non-collection",
+        "id": "closed-resource-output-path",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/0/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "contains-string-non-string-member",
+        "id": "unknown-operation-alias",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/1" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/1/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "all-non-boolean",
+        "id": "unknown-operation-alias-with-fallback",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/1/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "any-non-boolean",
+        "id": "cross-surface-operation-alias",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/other/root/on/press/0/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "not-non-boolean",
+        "id": "unknown-operation-field",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/1/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "exists-non-reference",
+        "id": "unknown-operation-error-field",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/1/payload/value/$ref"
+          }
         ]
       },
       {
-        "id": "resolved-null-does-not-select-ordered-fallback",
+        "id": "closed-operation-output-path",
         "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
-        ]
-      },
-      {
-        "id": "dynamic-primary-does-not-mask-invalid-ordered-fallback",
-        "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
-        ]
-      },
-      {
-        "id": "typed-state-primary-does-not-mask-invalid-fallback",
-        "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
-        ]
-      },
-      {
-        "id": "exists-lexically-invalid-reference",
-        "diagnostics": [
-          { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/sign-in/root/when/args/0/$ref" }
-        ]
-      },
-      {
-        "id": "nested-item-invalid-ordered-fallback",
-        "diagnostics": [
-          { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+          {
+            "code": "REFERENCE_UNRESOLVED",
+            "pointer": "/surfaces/main/root/on/press/1/payload/value/$ref"
+          }
         ]
       }
     ]
   },
-  "formats": {
+  "operations": {
     "accepted": [
-      { "id": "frozen-store-map-format", "valid": true },
-      { "id": "repeated-placeholder", "valid": true }
+      { "id": "valid-static-input", "valid": true },
+      { "id": "same-alias-same-operation", "valid": true },
+      { "id": "dynamic-input-obligations", "valid": true },
+      { "id": "Bundle-relative-pointer-parity", "valid": true }
     ],
     "rejected": [
       {
-        "id": "missing-value",
+        "id": "wrong-static-input",
         "diagnostics": [
           {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text/$format/template"
+            "code": "OPERATION_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/on/press/0/input/password"
           }
         ]
       },
       {
-        "id": "unused-value",
+        "id": "missing-required-input",
         "diagnostics": [
           {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text/$format/values/extra"
+            "code": "OPERATION_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/on/press/0/input/password"
           }
         ]
       },
       {
-        "id": "unmatched-brace",
+        "id": "unknown-static-input",
         "diagnostics": [
           {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text/$format/template"
+            "code": "OPERATION_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/on/press/0/input/extra"
           }
         ]
       },
       {
-        "id": "nested-brace",
+        "id": "dynamic-peer-does-not-mask-static-input-error",
         "diagnostics": [
           {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text/$format/template"
+            "code": "OPERATION_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/on/press/0/input/extra"
           }
         ]
       },
       {
-        "id": "expression-like-placeholder",
+        "id": "conflicting-surface-alias",
         "diagnostics": [
           {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text/$format/template"
+            "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+            "pointer": "/surfaces/main/root/on/press/1/as"
           }
-        ]
-      },
-      {
-        "id": "inherited-value-is-not-own",
-        "diagnostics": [
-          {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text/$format/template"
-          }
-        ]
-      }
-    ],
-    "parser": "single-pass; exact ASCII names; no escape or expression language"
-  },
-  "repeats": {
-    "accepted": [
-      { "id": "frozen-dynamic-sortable", "owner": "M04-T07", "valid": true },
-      { "id": "nested-outer-inner-alias", "valid": true },
-      { "id": "type-sensitive-number-string-keys", "valid": true },
-      { "id": "empty-repeat-alias", "valid": true },
-      { "id": "typed-fallback-items", "valid": true },
-      { "id": "partial-dynamic-static-keys", "valid": true },
-      { "id": "dynamic-key-deferred", "owner": "M04-T07", "valid": true },
-      { "id": "dynamic-key-outer-fallback-deferred", "owner": "M04-T07", "valid": true }
-    ],
-    "rejected": [
-      {
-        "id": "non-array-items",
-        "diagnostics": [
-          { "code": "REPEAT_ITEMS_INVALID", "pointer": "/surfaces/sign-in/root/repeat/items" }
-        ]
-      },
-      {
-        "id": "explicit-limit-overflow",
-        "diagnostics": [
-          {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/sign-in/root/repeat/limit"
-          }
-        ]
-      },
-      {
-        "id": "self-reference-in-items",
-        "diagnostics": [
-          { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/sign-in/root/repeat/items/$ref" }
-        ]
-      },
-      {
-        "id": "missing-key",
-        "diagnostics": [
-          { "code": "REPEAT_KEY_INVALID", "pointer": "/surfaces/sign-in/root/repeat/key" }
-        ]
-      },
-      {
-        "id": "non-scalar-key",
-        "diagnostics": [
-          { "code": "REPEAT_KEY_INVALID", "pointer": "/surfaces/sign-in/root/repeat/key" }
-        ]
-      },
-      {
-        "id": "duplicate-key",
-        "diagnostics": [
-          { "code": "REPEAT_KEY_INVALID", "pointer": "/surfaces/sign-in/root/repeat/key" }
-        ]
-      },
-      {
-        "id": "nested-alias-shadow",
-        "diagnostics": [
-          {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/sign-in/root/slots/default/0/repeat/as"
-          }
-        ]
-      },
-      {
-        "id": "sibling-alias-leak",
-        "diagnostics": [
-          {
-            "code": "REFERENCE_UNRESOLVED",
-            "pointer": "/surfaces/sign-in/root/slots/default/1/props/value/$ref"
-          }
-        ]
-      },
-      {
-        "id": "resolved-null-items-do-not-select-fallback",
-        "diagnostics": [
-          { "code": "REPEAT_ITEMS_INVALID", "pointer": "/surfaces/sign-in/root/repeat/items" }
-        ]
-      },
-      {
-        "id": "non-array-repeat-fallback",
-        "diagnostics": [
-          { "code": "REPEAT_ITEMS_INVALID", "pointer": "/surfaces/sign-in/root/repeat/items" }
-        ]
-      },
-      {
-        "id": "partial-dynamic-duplicate-key",
-        "diagnostics": [
-          { "code": "REPEAT_KEY_INVALID", "pointer": "/surfaces/sign-in/root/repeat/key" }
-        ]
-      },
-      {
-        "id": "partial-dynamic-limit-overflow",
-        "diagnostics": [
-          {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/sign-in/root/repeat/limit"
-          }
-        ]
-      },
-      {
-        "id": "dynamic-primary-does-not-mask-non-array-fallback",
-        "diagnostics": [
-          { "code": "REPEAT_ITEMS_INVALID", "pointer": "/surfaces/sign-in/root/repeat/items" }
-        ]
-      },
-      {
-        "id": "literal-dynamic-members-still-have-static-length",
-        "diagnostics": [
-          {
-            "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
-            "pointer": "/surfaces/sign-in/root/repeat/limit"
-          }
-        ]
-      },
-      {
-        "id": "partially-missing-item-body-path",
-        "diagnostics": [
-          {
-            "code": "REFERENCE_UNRESOLVED",
-            "pointer": "/surfaces/sign-in/root/slots/default/0/props/text/$ref"
-          }
-        ]
-      },
-      {
-        "id": "nested-item-invalid-key-fallback",
-        "diagnostics": [
-          { "code": "REPEAT_KEY_INVALID", "pointer": "/surfaces/sign-in/root/repeat/key" }
         ]
       }
     ]
   },
   "actionTargets": {
-    "accepted": [
-      { "id": "declared-first-segment", "valid": true },
-      { "id": "nested-state-write-deferred", "owner": "M02-T11/M04-T06", "valid": true },
-      { "id": "toggle-type-deferred", "owner": "M02-T11/M04-T06", "valid": true }
-    ],
+    "accepted": [{ "id": "declared-navigation-and-refresh", "valid": true }],
     "rejected": [
       {
-        "id": "unknown-first-segment",
+        "id": "missing-navigation-surface",
+        "diagnostics": [
+          { "code": "ENTRY_NOT_FOUND", "pointer": "/surfaces/main/root/on/press/0/surface" }
+        ]
+      },
+      {
+        "id": "external-looking-navigation-surface",
+        "diagnostics": [
+          { "code": "ENTRY_NOT_FOUND", "pointer": "/surfaces/main/root/on/press/0/surface" }
+        ]
+      },
+      {
+        "id": "missing-refresh-resource",
+        "diagnostics": [
+          { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/main/root/on/press/0/resource" }
+        ]
+      },
+      {
+        "id": "missing-component-target",
         "diagnostics": [
           {
-            "code": "STATE_WRITE_INVALID",
-            "pointer": "/surfaces/sign-in/root/slots/default/1/on/change/0/path"
+            "code": "UNKNOWN_COMMAND",
+            "pointer": "/surfaces/main/root/slots/default/0/on/press/0/target"
           }
         ]
       },
       {
-        "id": "no-longest-prefix-for-dotted-declaration",
+        "id": "cross-surface-component-target",
+        "diagnostics": [
+          { "code": "UNKNOWN_COMMAND", "pointer": "/surfaces/main/root/on/press/0/target" }
+        ]
+      }
+    ],
+    "cumulativeCategoryFence": "component.command never redirects to a behavior command"
+  },
+  "commands": {
+    "accepted": [
+      { "id": "valid-static-input", "valid": true },
+      { "id": "dynamic-input-obligation", "valid": true },
+      { "id": "conditional-target-static-existence", "valid": true }
+    ],
+    "rejected": [
+      {
+        "id": "wrong-static-input",
         "diagnostics": [
           {
-            "code": "STATE_WRITE_INVALID",
-            "pointer": "/surfaces/sign-in/root/slots/default/1/on/change/0/path"
+            "code": "COMMAND_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/slots/default/0/on/press/0/input/selectAll"
+          }
+        ]
+      },
+      {
+        "id": "omitted-required-input",
+        "diagnostics": [
+          {
+            "code": "COMMAND_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/slots/default/0/on/press/0/input/selectAll"
+          }
+        ]
+      },
+      {
+        "id": "explicit-empty-required-input",
+        "diagnostics": [
+          {
+            "code": "COMMAND_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/slots/default/0/on/press/0/input/selectAll"
+          }
+        ]
+      },
+      {
+        "id": "unknown-static-input",
+        "diagnostics": [
+          {
+            "code": "COMMAND_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/slots/default/0/on/press/0/input/extra"
+          }
+        ]
+      },
+      {
+        "id": "dynamic-peer-does-not-mask-static-input-error",
+        "diagnostics": [
+          {
+            "code": "COMMAND_INPUT_INVALID",
+            "pointer": "/surfaces/main/root/slots/default/0/on/press/0/input/extra"
           }
         ]
       }
     ]
   },
-  "obligationCarryForward": {
+  "stateActions": {
+    "accepted": [{ "id": "root-nested-and-toggle", "valid": true }],
+    "rejected": [
+      {
+        "id": "root-state-set-type",
+        "diagnostics": [
+          { "code": "STATE_WRITE_INVALID", "pointer": "/surfaces/main/root/on/press/0/value" }
+        ]
+      },
+      {
+        "id": "root-state-set-required",
+        "diagnostics": [
+          { "code": "STATE_WRITE_INVALID", "pointer": "/surfaces/main/root/on/press/0/value/name" }
+        ]
+      },
+      {
+        "id": "missing-nested-state-path",
+        "diagnostics": [
+          { "code": "STATE_WRITE_INVALID", "pointer": "/surfaces/main/root/on/press/0/path" }
+        ]
+      },
+      {
+        "id": "nested-state-set-type",
+        "diagnostics": [
+          { "code": "STATE_WRITE_INVALID", "pointer": "/surfaces/main/root/on/press/0/value" }
+        ]
+      },
+      {
+        "id": "non-boolean-state-toggle",
+        "diagnostics": [
+          { "code": "STATE_WRITE_INVALID", "pointer": "/surfaces/main/root/on/press/0/path" }
+        ]
+      }
+    ]
+  },
+  "resolvedValues": {
+    "selectorKinds": [
+      "component-command-input",
+      "operation-input",
+      "operation-output",
+      "resource-input",
+      "resource-output"
+    ],
+    "accepted": [
+      { "id": "component-command-input", "valid": true },
+      { "id": "operation-input", "valid": true },
+      { "id": "operation-output", "valid": true },
+      { "id": "resource-input", "valid": true },
+      { "id": "resource-output", "valid": true },
+      { "id": "detached-deep-frozen-copy", "valid": true }
+    ],
+    "rejected": [
+      {
+        "id": "operation-input-invalid",
+        "diagnostics": [{ "code": "OPERATION_INPUT_INVALID", "pointer": "/password" }]
+      },
+      {
+        "id": "operation-output-invalid",
+        "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "/userId" }]
+      },
+      {
+        "id": "resource-input-invalid",
+        "diagnostics": [{ "code": "RESOURCE_INPUT_INVALID", "pointer": "/extra" }]
+      },
+      {
+        "id": "resource-output-invalid",
+        "diagnostics": [{ "code": "RESOURCE_OUTPUT_INVALID", "pointer": "/bounds" }]
+      },
+      {
+        "id": "component-command-input-invalid",
+        "diagnostics": [{ "code": "COMMAND_INPUT_INVALID", "pointer": "/selectAll" }]
+      },
+      {
+        "id": "ValueSpec-shaped-resolved-member-is-inert",
+        "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "/$ref" }]
+      }
+    ],
+    "lookupFences": ["UNKNOWN_CAPABILITY", "UNKNOWN_COMMAND"]
+  },
+  "obligations": {
     "kinds": [
+      "behavior-prop",
+      "behavior-style-part-property",
+      "component-command-input",
+      "component-prop",
+      "operation-input",
+      "resource-input",
+      "state-write",
+      "style-part-property"
+    ],
+    "inheritedKinds": [
       "behavior-prop",
       "behavior-style-part-property",
       "component-prop",
       "style-part-property"
     ],
-    "sortableOrder": [
+    "newExecutionKinds": [
+      "component-command-input",
+      "operation-input",
+      "resource-input",
+      "state-write"
+    ],
+    "samples": [
       {
         "kind": "behavior-prop",
         "pointer": "/surfaces/tasks/root/behaviors/0/props/axis",
@@ -613,6 +678,16 @@
         }
       },
       {
+        "kind": "component-command-input",
+        "pointer": "/surfaces/stores/root/slots/default/1/on/press/0/input/bounds",
+        "context": {
+          "documentId": "com.example.store-locator",
+          "surfaceId": "stores",
+          "subject": { "kind": "node", "id": "store-map" },
+          "capabilityId": "com.example.maps/Map"
+        }
+      },
+      {
         "kind": "component-prop",
         "pointer": "/surfaces/tasks/root/slots/default/0/props/text",
         "context": {
@@ -621,17 +696,34 @@
           "subject": { "kind": "node", "id": "tasks.item" },
           "capabilityId": "com.example.ui/Text"
         }
-      }
-    ],
-    "storeMapOrder": [
+      },
       {
-        "kind": "component-prop",
-        "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text",
+        "kind": "operation-input",
+        "pointer": "/surfaces/tasks/root/behaviors/0/on/reorder/0/input/fromIndex",
+        "context": {
+          "documentId": "com.example.task-list",
+          "surfaceId": "tasks",
+          "subject": { "kind": "behavior", "id": "tasks.sort" },
+          "capabilityId": "com.example.tasks/reorder"
+        }
+      },
+      {
+        "kind": "resource-input",
+        "pointer": "/surfaces/main/resources/search/input/query",
+        "context": {
+          "documentId": "com.example.account-app",
+          "surfaceId": "main",
+          "capabilityId": "com.example.search/obligations"
+        }
+      },
+      {
+        "kind": "state-write",
+        "pointer": "/surfaces/stores/root/slots/default/0/on/markerSelect/0/value",
         "context": {
           "documentId": "com.example.store-locator",
           "surfaceId": "stores",
-          "subject": { "kind": "node", "id": "store-map.popupText" },
-          "capabilityId": "com.example.ui/Text"
+          "subject": { "kind": "node", "id": "store-map" },
+          "capabilityId": "com.example.maps/Map"
         }
       },
       {
@@ -643,138 +735,135 @@
           "subject": { "kind": "node", "id": "store-map" },
           "capabilityId": "com.example.maps/Map"
         }
-      },
-      {
-        "kind": "style-part-property",
-        "pointer": "/surfaces/stores/root/slots/default/0/style/base/selectedMarker/fill",
-        "context": {
-          "documentId": "com.example.store-locator",
-          "surfaceId": "stores",
-          "subject": { "kind": "node", "id": "store-map" },
-          "capabilityId": "com.example.maps/Map"
-        }
       }
-    ],
-    "sourceFailure": {
-      "diagnostics": [
-        {
-          "code": "STATE_WRITE_INVALID",
-          "pointer": "/surfaces/sign-in/root/slots/default/1/on/change/0/path"
-        }
-      ],
-      "obligations": [
-        {
-          "kind": "component-prop",
-          "pointer": "/surfaces/sign-in/root/slots/default/1/props/value",
-          "context": {
-            "documentId": "com.example.account-app",
-            "surfaceId": "sign-in",
-            "subject": { "kind": "node", "id": "sign-in.email" },
-            "capabilityId": "com.example.ui/TextField"
-          }
-        },
-        {
-          "kind": "component-prop",
-          "pointer": "/surfaces/sign-in/root/slots/default/2/props/value",
-          "context": {
-            "documentId": "com.example.account-app",
-            "surfaceId": "sign-in",
-            "subject": { "kind": "node", "id": "sign-in.password" },
-            "capabilityId": "com.example.ui/TextField"
-          }
-        },
-        {
-          "kind": "component-prop",
-          "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading",
-          "context": {
-            "documentId": "com.example.account-app",
-            "surfaceId": "sign-in",
-            "subject": { "kind": "node", "id": "sign-in.submit" },
-            "capabilityId": "com.example.ui/Button"
-          }
-        }
-      ]
-    },
-    "bundleFailure": {
-      "diagnostics": [
-        {
-          "code": "STATE_WRITE_INVALID",
-          "pointer": "/surfaces/sign-in/root/slots/default/1/on/change/0/path"
-        }
-      ],
-      "obligations": [
-        {
-          "kind": "component-prop",
-          "pointer": "/surfaces/sign-in/root/slots/default/1/props/value",
-          "context": {
-            "documentId": "com.example.account-app",
-            "surfaceId": "sign-in",
-            "subject": { "kind": "node", "id": "sign-in.email" },
-            "capabilityId": "com.example.ui/TextField"
-          }
-        },
-        {
-          "kind": "component-prop",
-          "pointer": "/surfaces/sign-in/root/slots/default/2/props/value",
-          "context": {
-            "documentId": "com.example.account-app",
-            "surfaceId": "sign-in",
-            "subject": { "kind": "node", "id": "sign-in.password" },
-            "capabilityId": "com.example.ui/TextField"
-          }
-        },
-        {
-          "kind": "component-prop",
-          "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading",
-          "context": {
-            "documentId": "com.example.account-app",
-            "surfaceId": "sign-in",
-            "subject": { "kind": "node", "id": "sign-in.submit" },
-            "capabilityId": "com.example.ui/Button"
-          }
-        }
-      ]
-    }
+    ]
   },
   "laterTaskScopeAccepted": [
-    { "id": "resource-reference", "owner": "M02-T11/M04-T08", "valid": true },
-    { "id": "operation-reference", "owner": "M02-T11/M04-T09", "valid": true },
-    { "id": "context-reference", "owner": "M04-T01/M04-T02", "valid": true },
-    { "id": "environment-reference", "owner": "M04-T01/M04-T02", "valid": true },
-    { "id": "dynamic-repeat-materialization", "owner": "M04-T07/M05-T05", "valid": true }
+    { "id": "event-allowlist", "owner": "M04/runtime", "accepted": true },
+    { "id": "operation-concurrency", "owner": "M04/runtime", "accepted": true },
+    { "id": "action-turn-limit", "owner": "M04/runtime", "accepted": true },
+    { "id": "adapter-execution", "owner": "M04/M05", "executed": false }
   ],
   "determinism": {
     "objectPermutation": "all object members recursively reversed; array order preserved",
     "diagnostics": [
-      { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/sign-in/root/props/gap/$ref" },
-      { "code": "REPEAT_ITEMS_INVALID", "pointer": "/surfaces/sign-in/root/repeat/items" },
-      {
-        "code": "STATE_WRITE_INVALID",
-        "pointer": "/surfaces/sign-in/root/slots/default/1/on/change/0/path"
-      },
-      { "code": "PREDICATE_TYPE_MISMATCH", "pointer": "/surfaces/sign-in/root/when/args/0" }
+      { "code": "ENTRY_NOT_FOUND", "pointer": "/surfaces/main/root/on/press/0/surface" },
+      { "code": "REFERENCE_UNRESOLVED", "pointer": "/surfaces/main/root/on/press/2/resource" }
     ],
-    "obligationsEqual": true,
+    "obligations": [
+      {
+        "kind": "resource-input",
+        "pointer": "/surfaces/main/resources/search/input/query",
+        "context": {
+          "documentId": "com.example.account-app",
+          "surfaceId": "main",
+          "capabilityId": "com.example.search/determinism"
+        }
+      }
+    ],
     "dispatcherTargets": ["source", "bundle"]
   },
   "security": {
-    "rawDocuments": "re-enter the cumulative T06→T09 immutable trust boundary",
-    "rawDocumentBoundary": {
-      "detachedSnapshot": true,
-      "deepFrozen": true,
-      "cycleRejected": true,
-      "customPrototypeRejected": true,
-      "formatOwnPropertiesOnly": true,
-      "inheritedOptionalFieldsIgnored": true
+    "rawDocuments": "re-enter the cumulative T06→T10 immutable trust boundary",
+    "catalogTrustFence": {
+      "lowerStage": "DesenValidatedInteractionCatalogSet",
+      "requiredStage": "DesenValidatedExecutionCatalogSet",
+      "rejectedEntryPointCount": 3,
+      "rejectedEntryPoints": [
+        {
+          "id": "source",
+          "diagnostics": [
+            { "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT", "pointer": "/catalogs" }
+          ]
+        },
+        {
+          "id": "bundle",
+          "diagnostics": [
+            {
+              "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+              "pointer": "/requires/catalogs"
+            }
+          ]
+        },
+        {
+          "id": "execution-value",
+          "diagnostics": [
+            { "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT", "pointer": "" }
+          ]
+        }
+      ]
     },
-    "initialValueMode": "complete resolved-value inert JSON",
-    "formatParser": "single-pass ASCII placeholder scanner",
-    "repeatKeyIdentity": "type-sensitive RFC 8785 canonical JSON",
-    "eventScope": "immediate handler action turn only",
+    "catalogSchemas": "operation/resource input and output",
+    "resolvedValues": {
+      "mode": "complete resolved inert JSON; ValueSpec-shaped members are ordinary data",
+      "safety": {
+        "limits": { "maxDepth": 128, "maxJsonNodes": 4096, "maxStringCodeUnits": 1048576 },
+        "accepted": [
+          { "id": "maximum-depth", "valid": true },
+          { "id": "maximum-json-nodes", "valid": true },
+          { "id": "maximum-string-code-units", "valid": true },
+          { "id": "maximum-json-object-nodes", "valid": true }
+        ],
+        "rejected": [
+          {
+            "id": "above-maximum-depth",
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          },
+          {
+            "id": "above-maximum-json-nodes",
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          },
+          {
+            "id": "above-maximum-string-code-units",
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          },
+          {
+            "id": "above-maximum-json-object-nodes",
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          },
+          {
+            "id": "shared-container-dag-before-canonicalization",
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }],
+            "ownKeyInspections": 2047,
+            "traversalBound": 4096
+          },
+          {
+            "id": "nested-wide-frontier-reservation",
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }],
+            "descriptorInspections": 4005,
+            "inspectionBound": 5000
+          }
+        ]
+      },
+      "hostileBoundary": {
+        "rejectedCount": 4,
+        "rejected": [
+          {
+            "id": "accessor-without-invocation",
+            "rejected": true,
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          },
+          {
+            "id": "cyclic-value",
+            "rejected": true,
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          },
+          {
+            "id": "custom-prototype",
+            "rejected": true,
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          },
+          {
+            "id": "non-finite-number",
+            "rejected": true,
+            "diagnostics": [{ "code": "OPERATION_OUTPUT_INVALID", "pointer": "" }]
+          }
+        ],
+        "accessorInvoked": false
+      }
+    },
     "schemaProfile": {
-      "finding": "PF-011",
-      "inheritedFromVerifiedT09Artifact": "776ac2162fe1a654ebf2fdce4fbb686fa596bf282a2b4f7a440533a010421ad8",
-      "evaluationBudget": 50000,
+      "inheritedFromVerifiedT10Artifact": "b3958de2d1004f6f9bcd28487fc3d9c7ca07adb29500df2a15df610ea5686016",
       "unsafeNativePatternExecution": false
     },
     "platformAudit": {
@@ -908,8 +997,8 @@
       },
       "runtimeSchemaCompilation": false,
       "documentCodeExecution": false,
+      "adapterExecution": false,
       "remoteSchemaResolution": false,
-      "formatExpressionEvaluation": false,
       "platform": "ECMAScript 2023; no Node, React, DOM, CSS, or browser API in production source"
     }
   },
@@ -933,9 +1022,9 @@
         "sha256": "3838dd09728cad5b7956bb44c409a88a97f9ec483cab45f3d0c3d4819ca39b23"
       },
       {
-        "path": "docs/proof/PROTOCOL-BINDING-CONTRACTS.md",
-        "bytes": 19362,
-        "sha256": "89ae0675a333663d7515f8c16addb97e095984d74ae29630d1e9188a8f87fba8"
+        "path": "docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md",
+        "bytes": 13625,
+        "sha256": "bb4d3dce7e798e0a1c177754dbec81cf2de4698ab88d84c44d3153a2e078baba"
       },
       {
         "path": "docs/proof/protocol-0.1.0-traceability.json",
@@ -1088,11 +1177,6 @@
         "sha256": "762fc26ef5af285bc3d8a6dc7d3b1d0250cf2751ef0761e7e9ec11db519f5929"
       },
       {
-        "path": "packages/protocol/package.json",
-        "bytes": 923,
-        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
-      },
-      {
         "path": "packages/protocol/src/canonicalization.ts",
         "bytes": 17820,
         "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
@@ -1128,24 +1212,9 @@
         "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
       },
       {
-        "path": "packages/protocol/tsconfig.build.json",
-        "bytes": 310,
-        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
-      },
-      {
-        "path": "packages/protocol/tsconfig.json",
-        "bytes": 252,
-        "sha256": "e85de556134485bf859e0721710907df3faef563a6204b615c01fbc54cab5201"
-      },
-      {
         "path": "packages/validator/README.md",
         "bytes": 48277,
         "sha256": "eb5ea811dd8f4fbab954e57ce8f86c1820176790061ddbd88784df77a01935f6"
-      },
-      {
-        "path": "packages/validator/THIRD_PARTY_NOTICES.md",
-        "bytes": 1216,
-        "sha256": "1e538937d6504807ab15280d8a821466a85a2a1949142305c81757eb9b86ae5b"
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.d.ts",
@@ -1453,11 +1522,6 @@
         "sha256": "e0e23258ef3312fe4093a8207987221b5e43608e71ff49adc09f2833d493dd47"
       },
       {
-        "path": "packages/validator/scripts/clean-dist.mjs",
-        "bytes": 808,
-        "sha256": "e40927b824fdfce7f16a4698522bffc63d4f280f3bf9fe604034ea10d97c8adc"
-      },
-      {
         "path": "packages/validator/src/binding-contract-validation.ts",
         "bytes": 56612,
         "sha256": "a0df532ba41a1db352edd4bde93ea9f656104902a987c8789278c92b4a43cca8"
@@ -1533,59 +1597,29 @@
         "sha256": "341e4cc2737afd8fa9047a274d9b9f8301f9346c50c9ea2b912b793970609392"
       },
       {
-        "path": "packages/validator/test/binding-contracts.test.ts",
-        "bytes": 35403,
-        "sha256": "f943eb4e8285d294bb6f2e4719c1f48d13b33e872abc8ee82cb7592278d2d63a"
+        "path": "packages/validator/test/execution-contracts.test.ts",
+        "bytes": 43254,
+        "sha256": "690227886239c4b7e7ac71c9d431d735ed82a1281a79fbb7a4ab4dfc1c950d3f"
       },
       {
-        "path": "packages/validator/test/interaction-contract-internals.test.ts",
-        "bytes": 2354,
-        "sha256": "2588c5c7a3c000704902f2f1bdc23d38744310daa7a4a5d0372d3e7d642bac39"
+        "path": "scripts/generate-protocol-execution-contracts-proof.mjs",
+        "bytes": 831,
+        "sha256": "06564fbcc0eff8c1617a47e40581bd15e33888b7628b143862cdae09351bff16"
       },
       {
-        "path": "packages/validator/test/schema-path-inspection.test.ts",
-        "bytes": 4957,
-        "sha256": "129aad9f5c0fdf40cca71d5bb6cd5cff028a51d701c11320d0bc0b3ba792471f"
+        "path": "scripts/lib/protocol-execution-contracts-proof.mjs",
+        "bytes": 91781,
+        "sha256": "5f9df01afa6a5464514a537ecec759dd40b3549fdc37ac52c31fa4df90103cba"
       },
       {
-        "path": "packages/validator/tsconfig.build.json",
-        "bytes": 310,
-        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+        "path": "scripts/verify-protocol-execution-contracts.mjs",
+        "bytes": 655,
+        "sha256": "b8501ad23a572bad24d1092c74f80536acff30214bad2cb9aff4853628d615b5"
       },
       {
-        "path": "packages/validator/tsconfig.json",
-        "bytes": 167,
-        "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
-      },
-      {
-        "path": "pnpm-lock.yaml",
-        "bytes": 93999,
-        "sha256": "cf6e969d99bcac203d13fab6defed006c47b656d37f77ab31bcfc9bd3ab5e252"
-      },
-      {
-        "path": "scripts/generate-protocol-binding-contracts-proof.mjs",
-        "bytes": 819,
-        "sha256": "34e715bccc45d40dc276081995633a832b924694f13f827eb480f7f486607bb6"
-      },
-      {
-        "path": "scripts/lib/protocol-binding-contracts-proof.mjs",
-        "bytes": 82146,
-        "sha256": "f18d82b118090b2d39a3d61d29e61a26ca514fcaa2776e5940433261c927144c"
-      },
-      {
-        "path": "scripts/verify-protocol-binding-contracts.mjs",
-        "bytes": 645,
-        "sha256": "8ab5bf2f8f67bbdd94ec3cdab90e47ff8a4a827846766bd610d10a60535b950d"
-      },
-      {
-        "path": "tests/protocol-binding-contracts.test.mjs",
-        "bytes": 16916,
-        "sha256": "11d9060ba5d610a274d61ed3245ff9bc4cc7de0a77b4257e59ddefa6b3d55131"
-      },
-      {
-        "path": "tsconfig.base.json",
-        "bytes": 852,
-        "sha256": "cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
+        "path": "tests/protocol-execution-contracts.test.mjs",
+        "bytes": 17545,
+        "sha256": "f0898f486e5adb39a97f9ebb10b81c275214570d07dbcf5b72b8792675ce6846"
       },
       {
         "path": "turbo.json",
@@ -1596,19 +1630,22 @@
   },
   "verification": {
     "commands": [
-      "pnpm generate:protocol-binding-contracts",
-      "pnpm verify:protocol-binding-contracts",
-      "pnpm test:protocol-binding-contracts",
+      "pnpm generate:protocol-execution-contracts",
+      "pnpm verify:protocol-execution-contracts",
+      "pnpm test:protocol-execution-contracts",
       "pnpm check"
     ],
     "commandWiring": {
       "root": {
-        "generate:protocol-binding-contracts": "pnpm --filter @desen/validator... build && node scripts/generate-protocol-binding-contracts-proof.mjs",
-        "verify:protocol-binding-contracts": "pnpm --filter @desen/validator... build && node scripts/verify-protocol-binding-contracts.mjs",
-        "test:protocol-binding-contracts": "pnpm --filter @desen/validator... build && pnpm --filter @desen/validator test:binding-contracts && node --test tests/protocol-binding-contracts.test.mjs"
+        "generate:protocol-execution-contracts": "pnpm --filter @desen/validator... build && node scripts/generate-protocol-execution-contracts-proof.mjs",
+        "verify:protocol-execution-contracts": "pnpm --filter @desen/validator... build && node scripts/verify-protocol-execution-contracts.mjs",
+        "test:protocol-execution-contracts": "pnpm --filter @desen/validator... build && pnpm --filter @desen/validator test:execution-contracts && node --test tests/protocol-execution-contracts.test.mjs"
       },
-      "package": "vitest run test/schema-instance-validation.test.ts test/schema-path-inspection.test.ts test/component-contracts.test.ts test/interaction-contract-internals.test.ts test/interaction-contracts.test.ts test/binding-contracts.test.ts"
+      "package": "vitest run test/schema-instance-validation.test.ts test/schema-path-inspection.test.ts test/component-contracts.test.ts test/interaction-contract-internals.test.ts test/interaction-contracts.test.ts test/binding-contracts.test.ts test/execution-contracts.test.ts"
     },
+    "projectMutationGoldens": 42,
+    "forgedLowerStageCatalogEntryPoints": 3,
+    "resolvedValueHostileRejected": 4,
     "artifactWriter": {
       "parentResolution": "realpath",
       "temporaryFile": "same-directory exclusive create",
@@ -1618,24 +1655,25 @@
       "rejectedDestinations": ["symlink", "directory", "special file", "symlink parent"]
     },
     "independentAnchors": [
-      "complete M02-T09 verifier PASS plus exact prerequisite bytes",
-      "reviewed exact 10-family / 300-constraint T10 trace ownership",
-      "exact 12 prose rules, five core diagnostics, zero conformance rules, and zero BCP 14 clauses",
-      "PF-014 through PF-019 implementation decisions",
-      "zero official T10 invalid vectors and project-owned exact-pointer mutation goldens",
-      "inert state initial, lexical reference/event, predicate, format, repeat, and narrow state-target goldens",
-      "all four T09 obligation kinds carried forward without a new T10 obligation kind",
+      "complete M02-T10 verifier PASS plus exact prerequisite bytes",
+      "reviewed exact 9-family / 383-constraint T11 trace ownership",
+      "exact 11 prose rules, two invariants, five owned core diagnostics, zero conformance rules, and zero BCP 14 clauses",
+      "five frozen examples and zero official T11 invalid vectors",
+      "project-owned exact-code and exact-pointer execution mutation goldens",
+      "four inherited plus four new execution obligation kinds",
+      "five detached resolved-value selector channels with complete inert JSON validation",
+      "bounded schema preparation, resolved-value graph traversal, and four hostile-value rejections",
+      "forged lower-stage catalog brands rejected at Source, Bundle, and resolved-value entry points",
       "validator and transitive protocol source/distribution inventory and platform audit",
       "same-directory exclusive temporary write followed by atomic rename"
     ]
   },
   "limitations": [
-    "Resource and operation declaration contracts, lifecycle references, policies, inputs, outputs, and aliases are enforced by cumulative T11; execution remains M04 work.",
-    "T10 adds no predicate/reference obligation kind; uncertain dynamic decisions remain deferred to their later consumer boundary.",
-    "T11 enforces statically decidable nested state paths, values, and toggle types; complete post-write mutation and action execution remain M04 responsibilities.",
-    "Context, environment, token, resource, operation, and other host-value resolution remains M04 work.",
-    "Runtime predicate truth, repeat materialization, dynamic keys, instance identity, event/item lifetime, and reactive reevaluation remain M04/M05 work.",
-    "Publication-time obligation discharge and full static binding compatibility remain M06 work.",
+    "No operation, resource, command, navigation, state action, event, adapter, or host policy is executed by this evidence boundary.",
+    "Conditional or repeated component-target existence is checked statically; mounted runtime liveness remains M04/M05 work.",
+    "Dynamic document values remain obligations until their resolved execution-value or post-write boundary.",
+    "Operation/resource output production, transport, cancellation, caching, retries, concurrency, and reactive lifecycle remain M04 work.",
+    "Publication-time obligation discharge and full catalog-lock integrity remain M06/M07 work.",
     "Official-suite parity and exhaustive diagnostic micro-vectors remain M02-T12 and M02-T13.",
     "Document-wide and runtime finite-limit proof remains M02-T13/M04/M12.",
     "This artifact does not claim adapter execution, publication, activation, G02, a Validator conformance target, or any new Proof Matrix P-* result."

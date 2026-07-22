@@ -3,7 +3,7 @@
 ## Responsibility
 
 This platform-neutral package validates untrusted data against the exact frozen DESEN 0.1.0
-Source, Bundle, and Catalog JSON Schemas. After a root passes, the package can apply five ordered,
+Source, Bundle, and Catalog JSON Schemas. After a root passes, the package can apply six ordered,
 cumulative boundaries against an explicitly prepared catalog set:
 
 1. **T06 structural validation** checks the three frozen roots and all protocol-defined embedded
@@ -17,26 +17,33 @@ cumulative boundaries against an explicitly prepared catalog set:
    component-target command names.
 5. **T10 binding contracts** validates state schemas and initial values, lexical references,
    immediate event scope, format placeholders, predicate operand types, and repeat alias/key rules.
+6. **T11 execution contracts** validates operation and resource contract safety, resource policies
+   and inputs, operation inputs and aliases, lifecycle references, navigation and refresh targets,
+   component command targets and inputs, and statically decidable state writes.
 
-The dedicated T09 event-payload API also validates one resolved adapter payload against a declared
-component or behavior event contract. All of these paths interpret documents and schemas as inert
-data. They do not execute DESEN actions or capability implementations.
+The dedicated T09 event-payload API validates one resolved adapter payload. The T11 resolved-value
+API applies one of five exact command, operation, or resource input/output contracts after dynamic
+resolution or adapter settlement. All paths interpret documents and schemas as inert data. They do
+not execute DESEN actions or capability implementations.
 
 ## Explicit non-responsibilities
 
-A cumulative T10 success does not:
+A cumulative T11 success does not:
 
 - resolve profile/host-owned `context.*`, `env.*`, or `$token` values, execute predicates, or
   materialize dynamic repeats; publisher/runtime stages discharge those dynamic responsibilities;
-- carry an event payload into `operation.invoke` settlement handlers; T10 rejects `event.*` there,
-  while actual payload lifetime and action-turn execution belong to M04-T14;
-- fully validate nested `state.set`/`state.toggle` writes or resolve resource and operation paths;
-  those action and capability contracts belong to M02-T11;
-- reject an absent or ineligible `component.command` target, prove that a conditional/repeated
-  target is live, or apply a command `inputSchema`; those checks and `COMMAND_INPUT_INVALID` belong
-  to M02-T11, with actual mounted-component liveness enforced by the runtime;
-- implement action, navigation, resource, operation, refresh, command-input, or resource/operation
-  input/output semantics; M02-T11 owns that validator layer;
+- carry an event payload into `operation.invoke` settlement handlers; T10/T11 reject `event.*`
+  there, while actual payload lifetime and action-turn execution belong to M04-T14;
+- execute a state write, mount or reload a resource, invoke or settle an operation, navigate a host,
+  or call a component command;
+- authorize operation effects, apply host event allowlists, enforce operation concurrency, run
+  settlement handlers, or enforce the 64-action turn limit;
+- prove that a conditional component is currently mounted, choose one repeated component instance,
+  or guarantee command-target liveness at the moment of execution;
+- automatically validate a future operation/resource output. The runtime must pass each resolved
+  output through `validateDesenExecutionValue` before exposing it through a lifecycle reference;
+- prove complete post-write validity for a nested state patch without the prior runtime state. Such
+  writes remain explicit `state-write` obligations;
 - prove that a production adapter validates every emitted payload or implements every declared
   command. T09 supplies bounded contract primitives, but the adapter guarantees in `N-033` and
   `N-034` remain assigned to later capability and runtime tasks;
@@ -45,7 +52,8 @@ A cumulative T10 success does not:
 - render, publish, activate, store, or fetch a document; or
 - prove the full protocol prohibition on every possible executable-content representation.
 
-A binding-contract success is therefore not sufficient for publication or activation.
+An execution-contract success is therefore not sufficient for publication, activation, or runtime
+execution.
 
 ## Status
 
@@ -83,6 +91,21 @@ The M02-T10 binding layer is implemented cumulatively on top of T09. It:
 - reports only statically provable predicate type incompatibilities; and
 - checks repeat arrays, active-alias collisions, direct-array limits, statically decidable
   string/number keys, missing keys, and duplicates while leaving dynamic instances to the runtime.
+
+The M02-T11 execution layer is implemented cumulatively on top of T10. It:
+
+- prepares operation and resource input/output schemas through the same bounded, code-free schema
+  profile and stores their indexes behind a private T11 catalog brand;
+- validates declared resource policies and statically known resource/operation/component-command
+  inputs, preserving dynamic members as exact later-validation obligations;
+- resolves the closed resource and operation lifecycle paths `status`, `pending`, `value[.*]`, and
+  `error.code`, with `value` paths inspected conservatively against the declared output schema;
+- indexes operation aliases per surface, checks navigation and refresh targets, and requires a
+  component-command target to be a declared component node on that same surface;
+- checks statically decidable root and nested `state.set` values and boolean `state.toggle` targets,
+  preserving post-write checks that need runtime state; and
+- exposes one detached resolved-value API for component command input and operation/resource input
+  and output contracts.
 
 The package remains private while the wider proof application is under construction. No npm
 package is published by these commands.
@@ -133,41 +156,67 @@ package is published by these commands.
 | `validateDesenBindingContracts(target, input, catalogSet)` | Select the cumulative Source or Bundle binding target       |
 | `INVALID_BINDING_CONTRACT_CODE`                            | Identify a project-owned incoherent static binding contract |
 
+### Execution-contract and resolved-value APIs
+
+| API                                                          | Purpose                                                         |
+| ------------------------------------------------------------ | --------------------------------------------------------------- |
+| `validateDesenExecutionCatalogSet(input)`                    | Prepare the exact cumulative T11 catalog set                    |
+| `validateDesenSourceExecutionContracts(input, catalogSet)`   | Validate a Source cumulatively through T11                      |
+| `validateDesenBundleExecutionContracts(input, catalogSet)`   | Validate a Bundle cumulatively through T11                      |
+| `validateDesenExecutionContracts(target, input, catalogSet)` | Select the cumulative Source or Bundle execution target         |
+| `validateDesenExecutionValue(value, selector, catalogSet)`   | Validate one detached resolved execution value                  |
+| `EXECUTION_VALUE_SAFETY_LIMITS`                              | Expose the immutable limits used by the detached value boundary |
+| `INVALID_EXECUTION_CONTRACT_CODE`                            | Identify a project-owned incoherent execution contract          |
+
 T10 intentionally introduces no second catalog preparation API or nominal catalog brand. The
 binding APIs require the exact `DesenValidatedInteractionCatalogSet` returned by T09 and first run
 the complete T09 boundary. This preserves the private `WeakMap` trust check instead of duplicating
 catalog indexes.
 
+`validateDesenExecutionCatalogSet` first runs T06 through T09 catalog preparation, then prepares
+all operation and resource input/output schemas through the `PF-011` profile. Its nominal
+`DesenValidatedExecutionCatalogSet` brand is backed by private `WeakMap` metadata. A cast from a
+lower-stage catalog set cannot forge the indexes required by document or detached-value validation.
+
 The package root also exports the associated target, success, failure, result, obligation, event
-reference, resolved-JSON, and validated-catalog-set types. The central T09 types are:
+reference, resolved-JSON, and validated-catalog-set types. The central T09–T11 types are:
 
 - `DesenValidatedInteractionCatalogSet`;
 - `DesenInteractionCatalogSetValidationResult` and its success/failure variants;
 - `DesenInteractionContractValidationResult<Target>` and its success/failure variants;
 - `DesenInteractionContractObligation` and `DesenInteractionContractObligationKind`;
 - `DesenEventContractReference` and `DesenEventCapabilityKind`;
-- `DesenEventPayloadValidationResult` and its success/failure variants; and
+- `DesenEventPayloadValidationResult` and its success/failure variants;
 - `DesenResolvedJsonValue`;
-- `DesenBindingContractValidationResult<Target>` and its success/failure variants; and
-- `DesenBindingContractObligation` and `DesenBindingContractObligationKind`.
+- `DesenBindingContractValidationResult<Target>` and its success/failure variants;
+- `DesenBindingContractObligation` and `DesenBindingContractObligationKind`;
+- `DesenValidatedExecutionCatalogSet`, `DesenExecutionCatalogSetValidationSuccess`,
+  `DesenExecutionCatalogSetValidationFailure`, and `DesenExecutionCatalogSetValidationResult`;
+- `DesenExecutionContractTarget`, `DesenExecutionContractValidationSuccess<Target>`,
+  `DesenExecutionContractValidationFailure<Target>`, and
+  `DesenExecutionContractValidationResult<Target>`;
+- `DesenExecutionContractObligation` and `DesenExecutionContractObligationKind`;
+- `DesenExecutionValueContractKind` and `DesenExecutionValueContractReference`; and
+- `DesenExecutionValueValidationSuccess`, `DesenExecutionValueValidationFailure`, and
+  `DesenExecutionValueValidationResult`.
 
 Every public export has TSDoc.
 
-## Cumulative binding example
+## Cumulative execution example
 
 ```ts
 import {
-  validateDesenInteractionCatalogSet,
-  validateDesenSourceBindingContracts,
+  validateDesenExecutionCatalogSet,
+  validateDesenSourceExecutionContracts,
 } from "@desen/validator";
 
-const catalogs = validateDesenInteractionCatalogSet(JSON.parse(untrustedCatalogsText) as unknown);
+const catalogs = validateDesenExecutionCatalogSet(JSON.parse(untrustedCatalogsText) as unknown);
 if (!catalogs.valid) {
   handleDiagnostics(catalogs.diagnostics);
   throw new Error("Catalog validation failed.");
 }
 
-const result = validateDesenSourceBindingContracts(
+const result = validateDesenSourceExecutionContracts(
   JSON.parse(untrustedSourceText) as unknown,
   catalogs.value,
 );
@@ -175,33 +224,41 @@ const result = validateDesenSourceBindingContracts(
 if (!result.valid) {
   handleDiagnostics(result.diagnostics);
 } else {
-  // `value` passed the cumulative T06 → T07 → T08 → T09 → T10 boundary.
+  // `value` passed the cumulative T06 → T07 → T08 → T09 → T10 → T11 boundary.
   scheduleResolvedValueChecks(result.obligations);
   useValidatedSource(result.value);
 }
 ```
 
 Callers must branch on `valid` before using `value`. A success has an empty diagnostics array. A
-failure deliberately has no trusted `value` member. Source and Bundle binding results always
-contain the deterministic, immutable T09 `obligations` array, including on a T10 contract failure
-where independently discoverable obligations remain useful.
+failure deliberately has no trusted `value` member. Source and Bundle execution results always
+contain a deterministic, immutable `obligations` array, including on a contract failure where
+independently discoverable obligations remain useful.
 
-The interaction obligation kinds are:
+T11 inherits the four interaction obligation kinds:
 
 - `component-prop`;
 - `style-part-property`;
 - `behavior-prop`; and
 - `behavior-style-part-property`.
 
-Each obligation carries an RFC 6901 document pointer plus immutable document, surface,
-node-or-behavior, and capability context. An obligation means the static validator did not guess a
-resolved value; a later publisher or runtime still must resolve and validate it before executable
-capability code receives the data.
+It adds four execution obligation kinds, for eight total:
+
+- `component-command-input`;
+- `operation-input`;
+- `resource-input`; and
+- `state-write`.
+
+Each obligation carries an RFC 6901 document pointer plus the available immutable document,
+surface, node-or-behavior, and capability context. An obligation means the static validator did not
+guess a resolved value or complete post-write state. A later publisher or runtime still must
+resolve and validate it before executable capability code receives the data or the write becomes
+observable.
 
 Lower-stage APIs remain intentional escape hatches for callers that need only structural,
-semantic-foundation, component, or interaction guarantees. A caller needing T10 guarantees uses
-the exact same `.value` returned by `validateDesenInteractionCatalogSet`; casting a T07 or T08 set
-cannot forge the private runtime trust metadata.
+semantic-foundation, component, interaction, or binding guarantees. A caller needing T11
+guarantees uses the exact `.value` returned by `validateDesenExecutionCatalogSet`; casting a lower
+catalog brand cannot forge the private runtime trust metadata.
 
 ## Resolved event-payload example
 
@@ -250,10 +307,83 @@ deeply frozen and its accept/reject boundaries are exercised through `validateDe
 This API is a validation primitive for the later adapter boundary. Its existence does not prove
 that every production adapter actually calls it or independently guarantees equivalent behavior.
 
+## Resource and operation lifecycle paths
+
+T11 recognizes only these closed lifecycle shapes:
+
+| Reference shape                       | Static contract                                              |
+| ------------------------------------- | ------------------------------------------------------------ |
+| `resource.<name>.status`              | Present lifecycle string                                     |
+| `resource.<name>.pending`             | Present lifecycle boolean                                    |
+| `resource.<name>.value[.<path>...]`   | Optional value inspected against the resource output schema  |
+| `resource.<name>.error.code`          | Optional public error-code string                            |
+| `operation.<alias>.status`            | Optional lifecycle string                                    |
+| `operation.<alias>.pending`           | Optional lifecycle boolean                                   |
+| `operation.<alias>.value[.<path>...]` | Optional value inspected against the operation output schema |
+| `operation.<alias>.error.code`        | Optional public error-code string                            |
+
+A resource name must be declared in the current surface. An operation alias is collected from all
+`operation.invoke` actions in that surface before references are checked, so document order does
+not change visibility. Reusing one alias for the same exact operation shares one lifecycle;
+reusing it for a different operation fails execution validation at the later `/as`. Aliases never
+cross a surface boundary.
+
+Unknown roots and aliases fail even when a fallback is present. A fallback may cover a missing
+optional or definitely closed deeper path only after the root is valid. Open, conditional,
+recursive, or otherwise uncertain output-schema paths remain runtime decisions. No other lifecycle
+field is invented.
+
+The frozen local-identifier grammar permits `.` and `:`, but reference segments provide no dot
+escape and do not admit colons. Such resource names and operation aliases remain structurally legal
+but cannot be addressed as one lifecycle root; `PF-023` records the exact no-guess profile.
+
+## Resolved execution-value example
+
+```ts
+import { validateDesenExecutionValue } from "@desen/validator";
+
+const output = validateDesenExecutionValue(
+  adapterResult,
+  {
+    kind: "operation-output",
+    capabilityId: "com.example.auth/signIn",
+  },
+  catalogs.value,
+);
+
+if (!output.valid) {
+  handleDiagnostics(output.diagnostics);
+} else {
+  exposeLifecycleValue(output.value);
+}
+```
+
+The exact selector union has five kinds:
+
+- `{ kind: "component-command-input", capabilityId, commandName }`;
+- `{ kind: "operation-input", capabilityId }`;
+- `{ kind: "operation-output", capabilityId }`;
+- `{ kind: "resource-input", capabilityId }`; and
+- `{ kind: "resource-output", capabilityId }`.
+
+Both selector and value cross a detached JSON boundary. The value is copied, bounded by
+`EXECUTION_VALUE_SAFETY_LIMITS`, recursively frozen, and checked in complete `resolved-value`
+mode. The limits are the same 128-depth, 4,096-node, and 1,048,576-code-unit limits used for event
+payloads. ValueSpec-shaped property names are ordinary data and cannot create obligations. A
+success returns an independent `DesenResolvedJsonValue`; a failure exposes no value.
+
+Diagnostic pointers are relative to the detached value root, including `""` for a root snapshot,
+selector, safety-limit, or contract failure. Unknown capability and command selectors fail as
+diagnostic data and never call an adapter. This API is the runtime handoff for the three input
+obligation kinds and for operation/resource outputs that do not exist in the Source or Bundle. It
+does not itself prove that a production runtime calls the boundary at every required lifecycle
+transition.
+
 ## Validation flow
 
 Validation has ordered, non-skippable stages: **T06 structural → T07 semantic foundation → T08
-component contracts → T09 interaction contracts → T10 binding contracts**.
+component contracts → T09 interaction contracts → T10 binding contracts → T11 execution
+contracts**.
 
 1. Input is converted to RFC 8785-compatible canonical JSON, parsed into an independent plain-data
    tree, and recursively frozen. Unsupported JavaScript values, accessors, custom prototypes,
@@ -283,15 +413,22 @@ component contracts → T09 interaction contracts → T10 binding contracts**.
     predicates, actions, and values with explicit stacks and surface-local lexical scopes.
 13. T10 conservatively inspects prepared state/event schema paths. Only a definitely impossible
     path or type produces a static failure; unsupported or dynamic cases remain later work.
-14. The separate payload boundary copies a resolved adapter payload into a bounded immutable
-    snapshot before applying the prepared event schema in resolved-value mode.
+14. T11 prepares operation/resource input and output schemas and builds private component,
+    operation, resource, catalog-requirement, and surface-scope indexes.
+15. T11 validates resource policies/inputs and action contracts, then supplies resource/operation
+    lifecycle schemas back to the T10 lexical reference and predicate analysis.
+16. T11 checks static state writes while preserving dynamic and incomplete post-write work as
+    obligations. Inputs that contain dynamic ValueSpecs are inspected member-by-member instead of
+    being treated as wholly valid or invalid.
+17. The separate payload and execution-value boundaries copy resolved caller data into bounded
+    immutable snapshots before applying the selected schema in resolved-value mode.
 
 Diagnostics and obligations are sorted and de-duplicated independently of object insertion order.
 Caller-owned input is never mutated or retained.
 
 ## Documented edge and safety profiles
 
-The frozen DESEN 0.1.0 text leaves several edge cases open. `PF-010` through `PF-019` record the
+The frozen DESEN 0.1.0 text leaves several edge cases open. `PF-010` onward record the
 implementation profiles below without rewriting the frozen protocol.
 
 ### PF-010: component and behavior slots
@@ -311,10 +448,11 @@ An impossible component slot uses `INVALID_COMPONENT_CONTRACT`; an impossible be
 
 ### PF-011: bounded Draft 2020-12 contract application
 
-T06 validates embedded schema syntax. T08 through T10 additionally fail closed before applying a
+T06 validates embedded schema syntax. T08 through T11 additionally fail closed before applying a
 contract schema whose execution cannot be bounded portably. The same profile covers component
 props/styles, behavior props/styles, component/behavior event and command schemas, and state
-schemas before their initial values or paths are inspected.
+schemas before their initial values or paths are inspected. T11 extends it to operation and
+resource input/output schemas before they enter either document or detached-value validation.
 
 Each pattern is limited to 256 UTF-16 code units, 128 tokens, a maximum quantifier of 1,024, and an
 expanded fixed width of 4,096. An unanchored fixed-width pattern is limited to 16 expanded atoms.
@@ -359,11 +497,15 @@ Behavior command schemas are prepared, but DESEN 0.1.0 defines no behavior-comma
 not redirect `component.command` to a behavior or invent `behavior.command` semantics.
 
 For `component.command`, T09 reports `UNKNOWN_COMMAND` only when the action target is already known
-to be a component node and that component does not declare the name. Missing/wrong-kind target,
-conditional or repeated liveness, resolved input, and `COMMAND_INPUT_INVALID` remain T11 work.
-T10 accepts `event.*` only in the immediate declared component/behavior handler action turn and
-checks its path against the prepared payload schema. `onSuccess` and `onFailure` start a new turn,
-so `event.*` is rejected there. Runtime payload lifetime remains M04-T14 work.
+to be a component node and that component does not declare the name. T11 completes the static
+boundary by requiring the target ID to resolve to a component node on the same surface and by
+applying the command input schema. A missing, behavior, or cross-surface target uses
+`UNKNOWN_COMMAND` at `/target`; a dynamic input member becomes a `component-command-input`
+obligation. A declared conditional target remains statically legal because only the runtime knows
+whether it is currently mounted, and selecting one repeated instance remains runtime work. T10/T11
+accept `event.*` only in the immediate declared component/behavior handler action turn and check its
+path against the prepared payload schema. `onSuccess` and `onFailure` start a new turn, so `event.*`
+is rejected there. Runtime payload lifetime remains M04-T14 work.
 
 ### PF-015–PF-019: static binding decisions
 
@@ -373,6 +515,12 @@ under a valid root, but it is type-checked independently wherever it can become 
 value; a resolved primary, including `null`, never selects fallback. Schema-path inspection is
 conservative and rejects only proved impossibility. Inside predicates, a lexically valid missing
 argument follows the protocol's `false` rule instead of becoming an unresolved required value.
+
+T11 applies the same rule to declared surface resources and surface-wide operation aliases. It
+admits only `status`, `pending`, `value[.*]`, and `error.code`; output-schema paths below `value`
+are rejected only when definitely closed. A fallback cannot invent a resource instance or
+operation alias. Reusing an alias for the same exact operation is allowed; reusing it for a
+different capability is an incoherent execution contract.
 
 Nested `{ op, args }` objects in predicate arguments are predicates, and `exists` requires a direct
 reference. Ordering and collection operators reject only definite type incompatibility. `$format`
@@ -384,8 +532,26 @@ entire repeated node body. Reusing an active ancestor alias is invalid, while di
 reuse a name. Direct arrays permit deterministic length and independently inspectable
 missing/non-scalar/duplicate key proof even when unrelated item fields are dynamic; dynamic
 collection length and keys remain runtime work. Because state identifiers allow dots while action
-paths use dot segments, T10 checks only the first action path segment and records the ambiguity;
-complete write/toggle semantics remain T11.
+paths use dot segments, the first action path segment remains the complete state name. T11 rejects
+definitely missing nested paths and incompatible static `state.set` values, requires a definitely
+known `state.toggle` target to be boolean, and emits `state-write` obligations for dynamic values,
+every accepted toggle, and nested patches whose complete post-write state needs the runtime. A
+dotted declaration remains legal but cannot be addressed as one state name under 0.1.0's segment
+grammar; no longest-prefix interpretation is invented.
+
+### PF-020–PF-023: static execution decisions
+
+Operation aliases are surface-scoped and indexed before reference inspection. Reusing an alias for
+the same exact operation shares one static lifecycle contract; a different operation at the same
+alias uses `INVALID_EXECUTION_CONTRACT`. The frozen starter mappings are retained for unsupported
+resource policy (`RESOURCE_INPUT_INVALID`), missing core navigation (`ENTRY_NOT_FOUND`), missing
+refresh resource (`REFERENCE_UNRESOLVED`), and missing/wrong-kind/cross-surface command target
+(`UNKNOWN_COMMAND`).
+
+Resolved command/operation/resource values cross the detached five-kind boundary described above;
+outputs create no document obligation before they exist. Resource names and operation aliases that
+contain `.` or `:` remain structurally legal but cannot be addressed as one `$ref` lifecycle root.
+The validator does not invent escaping or longest-prefix matching.
 
 ## Embedded-schema coverage
 
@@ -419,8 +585,10 @@ T08 applies component prop and style-part schemas to statically decidable docume
 behavior prop and style-part application and safe preparation of component/behavior event and
 command schemas. `validateDesenEventPayload` applies an event schema to one resolved payload.
 T10 applies state schemas to resolved initial JSON and uses prepared state/event shapes for
-conservative static references. Command inputs, resources, operations, complete action semantics,
-and dynamic execution remain with T11 and later runtime stages.
+conservative static references. T11 prepares operation/resource schemas, applies statically
+decidable command, resource, operation, and state-action contracts, and exposes the detached
+resolved-value boundary. Host effects, complete lifecycle execution, mounted target liveness, and
+dynamic obligation discharge remain runtime responsibilities.
 
 ## Diagnostic contract
 
@@ -456,8 +624,8 @@ T09 additionally emits:
 | `BEHAVIOR_CONFLICT`           | Direct behaviors share a channel without mutual compatibility   |
 
 Unknown visual states and style parts intentionally use `UNKNOWN_PROP`, matching the frozen
-starter behavior rather than inventing narrower codes. `COMMAND_INPUT_INVALID` is not a T09
-diagnostic; it remains T11.
+starter behavior rather than inventing narrower codes. T11 emits `COMMAND_INPUT_INVALID` after a
+same-surface component target and declared command have selected one exact input schema.
 
 T10 adds the five Appendix B binding diagnostics at exact ValueSpec, predicate, repeat, or action
 pointers:
@@ -474,19 +642,39 @@ Static direct-array limit overflow and active-alias collisions use the project-o
 `run.desen.validator/INVALID_BINDING_CONTRACT` code because Appendix B does not assign either case
 to `REPEAT_ITEMS_INVALID` or `REPEAT_KEY_INVALID`.
 
+T11 adds or completes these execution mappings:
+
+| Core code                  | T11 meaning                                                               |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `COMMAND_INPUT_INVALID`    | A static or detached resolved component-command input violates its schema |
+| `OPERATION_INPUT_INVALID`  | A static or detached resolved operation input violates its schema         |
+| `OPERATION_OUTPUT_INVALID` | A detached resolved operation output violates its schema                  |
+| `RESOURCE_INPUT_INVALID`   | A policy or static/detached resource input violates its contract          |
+| `RESOURCE_OUTPUT_INVALID`  | A detached resolved resource output violates its schema                   |
+| `STATE_WRITE_INVALID`      | A definite state path, value, or toggle type is incompatible              |
+| `ENTRY_NOT_FOUND`          | A core navigation target is not a surface in the document                 |
+| `REFERENCE_UNRESOLVED`     | A lifecycle root/path or refresh resource is definitely unavailable       |
+| `UNKNOWN_COMMAND`          | A command target is missing, wrong-kind, or outside the current surface   |
+| `UNKNOWN_CAPABILITY`       | A detached selector names no capability of the required category          |
+
+The policy, navigation, refresh, and missing-command-target mappings follow the frozen starter
+validator where Appendix B does not define a narrower action-specific code. An operation alias
+reused for a different capability and an unsafe operation/resource schema use the project-owned
+`run.desen.validator/INVALID_EXECUTION_CONTRACT` code.
+
 The implementation also exports these project-owned namespaced codes:
 
-| Namespaced code                                    | Meaning                                                            |
-| -------------------------------------------------- | ------------------------------------------------------------------ |
-| `run.desen.validator/INVALID_SEMVER`               | A required exact version is not SemVer 2.0.0                       |
-| `run.desen.validator/CATALOG_REQUIREMENT_MISMATCH` | A requirement does not resolve exactly once                        |
-| `run.desen.validator/INVALID_COMPONENT_CONTRACT`   | A component schema/slot contract cannot enter its trusted set      |
-| `run.desen.validator/INVALID_INTERACTION_CONTRACT` | A behavior/event/command contract cannot enter the T09 trusted set |
-| `run.desen.validator/INVALID_BINDING_CONTRACT`     | A state schema/initial or static format contract is incoherent     |
+| Namespaced code                                    | Meaning                                                                |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| `run.desen.validator/INVALID_SEMVER`               | A required exact version is not SemVer 2.0.0                           |
+| `run.desen.validator/CATALOG_REQUIREMENT_MISMATCH` | A requirement does not resolve exactly once                            |
+| `run.desen.validator/INVALID_COMPONENT_CONTRACT`   | A component schema/slot contract cannot enter its trusted set          |
+| `run.desen.validator/INVALID_INTERACTION_CONTRACT` | A behavior/event/command contract cannot enter the T09 trusted set     |
+| `run.desen.validator/INVALID_BINDING_CONTRACT`     | A state schema/initial or static format contract is incoherent         |
+| `run.desen.validator/INVALID_EXECUTION_CONTRACT`   | A T11 schema, alias, selector, or catalog trust contract is incoherent |
 
 Namespaced diagnostics deliberately have no invented Appendix B classification. `PF-009` records
-the earlier SemVer/requirement diagnostic gap; `PF-010` through `PF-019` document the T08–T10 edge
-profiles.
+the earlier SemVer/requirement diagnostic gap; `PF-010` onward documents the T08–T11 edge profiles.
 
 Diagnostics are immutable, JSON-serializable, sorted, and de-duplicated independently of Ajv's
 internal error order. Their `code` and RFC 6901 `pointer` are the machine contract. Human-readable
@@ -497,7 +685,10 @@ For an owner pointer `P`, props use `P/props/{name}`, slots use `P/slots/{name}`
 use `P/slots/{name}/{index}/use`, styles use `P/style/{state}/{part}/{property}`, and handlers use
 `P/on/{event}`. Behavior attachment/conflict diagnostics point to the applicable behavior `/use`.
 Known-target command-name failures point to the action `/command`. Payload pointers are relative to
-the detached payload root.
+the detached payload root. Missing command targets point to `/target`; command, operation, and
+resource input diagnostics are relative to the document `/input` owner. State-path failures point
+to `/path`, while state value failures point within `/value`. Detached execution-value pointers are
+relative to their own root.
 
 Malformed programmatic document input is reported as `SCHEMA_INVALID` at the document root.
 Unsupported target strings passed directly to a generic dispatcher are API misuse and throw
@@ -511,9 +702,10 @@ data by the bounded platform-neutral path; they are never compiled into executab
 
 The shipped validation path contains no `eval`, `Function(`, CommonJS `require`, dynamic import,
 absolute workspace path, network access, or filesystem access. Unsafe patterns are rejected before
-native matching. Event payloads and selectors pass through independent inert JSON snapshots before
-their members are read. Accessors, custom prototypes, cycles, sparse arrays, invalid Unicode,
-non-finite numbers, and values beyond the documented payload limits fail closed.
+native matching. Event payloads, execution values, and their selectors pass through independent
+inert JSON snapshots before their members are read. Accessors, custom prototypes, cycles, sparse
+arrays, invalid Unicode, non-finite numbers, and values beyond the documented detached-data limits
+fail closed.
 
 The semantic and contract layers use own-property traversal, `Map`, `Set`, and private
 `WeakMap`/`WeakSet` trust metadata. They use fixed messages that never echo caller values, do not
@@ -554,6 +746,9 @@ pnpm test:protocol-interaction-contracts
 pnpm generate:protocol-binding-contracts
 pnpm verify:protocol-binding-contracts
 pnpm test:protocol-binding-contracts
+pnpm generate:protocol-execution-contracts
+pnpm verify:protocol-execution-contracts
+pnpm test:protocol-execution-contracts
 pnpm check
 ```
 
@@ -561,5 +756,5 @@ Generation commands are the only evidence/code writers. Verification regenerates
 in memory and rejects tool-version drift, schema-byte drift, trace ownership, SemVer goldens,
 unexpected code-loading constructs, non-deterministic bytes, changed tracked artifacts, or unsafe
 output paths. Tests cover public behavior, frozen vectors and examples, locator families, identity
-and catalog boundaries, interaction contracts, resolved payload limits, scope fences, hostile
-inputs, mutation resistance, and built-distribution loading.
+and catalog boundaries, interaction/binding/execution contracts, detached resolved-value limits,
+lifecycle scope fences, hostile inputs, mutation resistance, and built-distribution loading.
