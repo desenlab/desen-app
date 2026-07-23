@@ -5,6 +5,73 @@
 Target-specific Web–React capability packaging, followed by the accessible real components and
 exact capability manifests shared by Desen App and the reference host.
 
+## Reference sign-in operation
+
+M03-T08 exposes the frozen DESEN 0.1.0 sign-in contract as inert data at:
+
+```ts
+import {
+  SIGN_IN_OPERATION_ID,
+  signInOperationFixtures,
+  signInOperationRegistration,
+} from "@desen/reference-catalog-web/operations";
+```
+
+`signInOperationRegistration` exactly mirrors `com.example.auth/signIn` from the official Web
+Catalog example. Its input and successful-output types derive from the same literal schemas. Its
+public errors are `invalidCredentials` and `unavailable`; only `invalidCredentials` has an
+authoring fixture. `signInOperationFixtures` is the same recursively frozen object held inside the
+registration, so there is no parallel fixture authority.
+
+The inert operation surface and the executable host-operation surface are available only from
+their explicit subpaths; neither is re-exported from the package root.
+
+The schema-derived TypeScript types are structural authoring aids, not runtime validation. In
+particular, TypeScript cannot enforce `minLength`, and this validator profile treats
+`format: email` as an annotation. M04 must validate resolved input before invocation and successful
+output before exposure.
+
+The controlled fixture inventory is deliberately small:
+
+- success produces the synthetic output `{ userId: "user-1" }`;
+- failure exposes the declared `invalidCredentials` code with an empty inert payload; and
+- `unavailable` remains a declared error with no invented fixture.
+
+There is no email, password, endpoint, token, personal record, production response, or
+authorization decision in those fixtures. There is also no static `pending` fixture. Pending is a
+runtime lifecycle state that M04 will create while an invocation awaits its fixture or host
+result.
+
+### Separate trusted host binding
+
+Executable code is available only through a separate opt-in entry point:
+
+```ts
+import {
+  bindReferenceSignInHostOperation,
+  type SignInHostOperationHandler,
+} from "@desen/reference-catalog-web/host-operations";
+
+const handler: SignInHostOperationHandler = (input) => {
+  // The application composition root owns the actual implementation.
+  return applicationSignIn(input);
+};
+
+const binding = bindReferenceSignInHostOperation(handler);
+```
+
+The factory fixes the capability id, rejects non-functions, retains the handler by identity, and
+returns a frozen `{ operationId, invoke }` object. It does not call or wrap the handler, register
+global state, perform I/O, or accept a document-selected id, URL, SDK, database, credential, or
+authorization policy.
+
+The handler return type is deliberately `unknown`. M03-T08 does not invent a synchronous,
+asynchronous, success, or failure transport envelope before the framework-neutral host port
+exists. M04 must define that boundary, validate input and successful output, admit only declared
+public error codes, implement pending and concurrency semantics, ignore stale results, map
+settlements to lifecycle state, and prevent messages, stack traces, secrets, or raw responses from
+reaching a design.
+
 ## Reference tokens
 
 M03-T07 exposes the target-specific token contract at:
@@ -179,8 +246,13 @@ an independent Node.js framing and SHA-256 oracle.
 
 Private proof-phase package. The deterministic Web–React package digest profile, the accessible
 Stack, Text, TextField, Button, and Alert capabilities, and the DTCG-backed reference Web token
-provider are implemented. Concrete controlled sign-in fixtures, complete adapter parity, and the
-final package tuple remain assigned to M03-T08 through M03-T10 and M05.
+provider are implemented. The exact controlled sign-in fixtures and separately delegated trusted
+host binding are also implemented. Complete adapter parity and the final package tuple remain
+assigned to M03-T09, M03-T10, and M05.
+
+The M03-T07 evidence recorded that the controlled sign-in fixtures, complete adapter parity, and
+final package tuple remain assigned to M03-T08 through M03-T10 and M05. M03-T08 now completes only
+the first of those assignments.
 
 ## Protocol and target support
 
@@ -195,11 +267,14 @@ pnpm --filter @desen/reference-catalog-web typecheck
 pnpm --filter @desen/reference-catalog-web test:components
 pnpm --filter @desen/reference-catalog-web test:interactive-components
 pnpm --filter @desen/reference-catalog-web test:package-digest-profile
+pnpm --filter @desen/reference-catalog-web test:sign-in-operation
 pnpm --filter @desen/reference-catalog-web test:tokens
 pnpm verify:reference-catalog-web-components
 pnpm test:reference-catalog-web-components
 pnpm verify:reference-catalog-web-form-feedback
 pnpm test:reference-catalog-web-form-feedback
+pnpm verify:reference-sign-in-fixtures-and-host-binding
+pnpm test:reference-sign-in-fixtures-and-host-binding
 pnpm verify:web-react-package-digest
 pnpm test:web-react-package-digest
 pnpm check

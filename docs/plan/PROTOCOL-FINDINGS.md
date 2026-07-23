@@ -532,9 +532,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Implementation decision: `@desen/catalog-sdk` uses `registerComponent`, `registerBehavior`,
   `registerOperation`, and `registerResource` only for exact `{ id, manifest }` JSON snapshots.
   Executable component and behavior adapters remain renderer-owned, while operation and resource
-  implementations remain host-owned. M03-T08 and the M04/M05 tasks will define those trusted
-  executable registries separately; DESEN documents and Catalog manifests never select code,
-  endpoints, SDK calls, database queries, or authentication mechanisms.
+  implementations remain host-owned. M03-T08 exposes the exact inert sign-in contract only from
+  `@desen/reference-catalog-web/operations` and exposes its application-supplied executable
+  delegation only from the separate `@desen/reference-catalog-web/host-operations` subpath. The
+  binding factory fixes the capability id and retains a trusted handler without executing,
+  wrapping, or globally registering it. Generic host ports and runtime registries remain M04/M05
+  work; DESEN documents and Catalog manifests never select code, endpoints, SDK calls, database
+  queries, or authentication mechanisms.
 - Future action: Name manifest and host-binding APIs distinctly in a later implementation guide
   revision and standardize an inert application-supplied binding declaration if interoperability
   requires one.
@@ -596,3 +600,22 @@ This file records implementation discoveries without changing the frozen DESEN 0
   invented inside the Web–React component.
 - Future action: Correct the abbreviated prose example through a versioned erratum or later
   protocol release without rewriting the frozen DESEN 0.1.0 snapshot.
+
+## PF-028 — Pending is lifecycle state, not a static operation fixture payload
+
+- Status: OPEN
+- Blocks proof: No; the exact Catalog shape and normative lifecycle text support one conservative
+  implementation.
+- Protocol location: SPEC Sections 20.4, 22.3, and 23.3; Catalog Schema
+  `$defs/operationAuthoringSpec`; informative IMPLEMENTATION-GUIDE Section 9
+- Observation: The informative MVP checklist says operation fixtures cover pending, success, and
+  failure, while the normative Catalog fixture shape permits only `success` and error-code entries.
+  Section 20.4 separately says invocation enters `pending` synchronously before settlement. A
+  literal `pending` fixture would therefore violate the frozen Catalog schema and conflate
+  lifecycle state with a result payload.
+- Implementation decision: M03-T08 preserves the exact official sign-in fixtures:
+  `success: { userId: "user-1" }` and `errors.invalidCredentials: {}`. It does not invent a
+  `pending` fixture key. M04-T09 owns the runtime transition into pending, and later Run Mode
+  evidence must show that state while a controlled fixture or trusted host result is unresolved.
+- Future action: Clarify the implementation guide so “pending fixture coverage” means exercising
+  runtime pending state during fixture-backed execution, not adding a third static fixture shape.

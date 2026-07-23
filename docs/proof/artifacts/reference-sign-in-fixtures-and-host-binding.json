@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "task": "M03-T08",
+  "result": "PASS",
+  "claim": {
+    "summary": "The exact official sign-in fixtures remain inert authoring data, while one separately exported frozen host binding preserves a trusted handler by identity.",
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "proofMatrixStatusChanges": [
+      {
+        "id": "P-10",
+        "from": "NOT_PROVEN",
+        "to": "PARTIAL",
+        "note": "Local fixture-versus-code separation is proven; real reference-host execution remains M10-T04."
+      }
+    ],
+    "traceCoverage": {
+      "partial": ["C-018", "R-092", "R-100"],
+      "tested": [],
+      "note": "The single reference sign-in binding is local evidence only; package-wide parity, production host execution, authorization, context UI, and repository audits remain assigned to later owners."
+    },
+    "normativeStatusUnchanged": ["N-036", "N-040"]
+  },
+  "prerequisite": {
+    "task": "M03-T07",
+    "result": "PASS",
+    "verifiedBy": "verifyReferenceTokensAndSyntheticFixturesEvidence",
+    "artifactSha256": "cb0146bcec61bc3b64fe50f8d32c26d0bba91c46f0932000c8ad46385e2554be"
+  },
+  "operation": {
+    "operationId": "com.example.auth/signIn",
+    "registration": {
+      "id": "com.example.auth/signIn",
+      "manifest": {
+        "authoring": {
+          "fixtures": { "errors": { "invalidCredentials": {} }, "success": { "userId": "user-1" } }
+        },
+        "description": "Authenticate with email and password.",
+        "effect": "network",
+        "errors": [
+          { "code": "invalidCredentials", "description": "Credentials are not accepted." },
+          { "code": "unavailable", "description": "Authentication service unavailable." }
+        ],
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "additionalProperties": false,
+          "properties": {
+            "email": { "format": "email", "type": "string" },
+            "password": { "minLength": 1, "type": "string" }
+          },
+          "required": ["email", "password"],
+          "type": "object"
+        },
+        "outputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "additionalProperties": false,
+          "properties": { "userId": { "type": "string" } },
+          "required": ["userId"],
+          "type": "object"
+        }
+      }
+    },
+    "fixtures": { "errors": { "invalidCredentials": {} }, "success": { "userId": "user-1" } },
+    "snapshot": {
+      "context": { "kind": "synthetic-authoring-fixture", "source": "manifest.authoring.fixtures" },
+      "operations": {
+        "com.example.auth/signIn": {
+          "errors": { "invalidCredentials": {} },
+          "success": { "userId": "user-1" }
+        }
+      },
+      "resources": {}
+    },
+    "lookups": {
+      "success": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "found",
+        "value": { "userId": "user-1" }
+      },
+      "invalidCredentials": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "found",
+        "value": {}
+      },
+      "unavailable": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "missing"
+      }
+    },
+    "successOutputSchemaValid": true,
+    "successSelector": { "kind": "operation-output", "capabilityId": "com.example.auth/signIn" },
+    "pendingFixtureClaimed": false
+  },
+  "hostBinding": {
+    "operationId": "com.example.auth/signIn",
+    "wrapperFrozen": true,
+    "exactWrapperKeys": ["invoke", "operationId"],
+    "handlerIdentityPreserved": true,
+    "handlerInvokedDuringBinding": false,
+    "invocationForwardsExactInput": true,
+    "invocationPreservesOpaqueResultIdentity": true,
+    "returnValueContractClaimed": false,
+    "nonFunctionHandlersRejected": true,
+    "executableStoredInCatalogOrFixtures": false
+  },
+  "publicApi": {
+    "operationPackage": "@desen/reference-catalog-web/operations",
+    "hostOperationPackage": "@desen/reference-catalog-web/host-operations",
+    "operationRuntimeExports": [
+      "SIGN_IN_OPERATION_ID",
+      "signInOperationFixtures",
+      "signInOperationRegistration"
+    ],
+    "operationTypeExports": [
+      "SignInOperationErrorCode",
+      "SignInOperationFixtureErrorCode",
+      "SignInOperationInput",
+      "SignInOperationOutput"
+    ],
+    "hostRuntimeExports": ["bindReferenceSignInHostOperation"],
+    "hostTypeExports": ["SignInHostOperationBinding", "SignInHostOperationHandler"],
+    "packageRootRuntimeExports": [
+      "WEB_REACT_PACKAGE_DIGEST_PLACEHOLDER",
+      "WEB_REACT_PACKAGE_DIGEST_PROFILE",
+      "createWebReactPackageDigest",
+      "encodeWebReactPackageDigestPreimage",
+      "verifyWebReactPackageDigest"
+    ],
+    "packageRootTypeExports": [
+      "WebReactPackageArtifactInput",
+      "WebReactPackageDigest",
+      "WebReactPackageDigestCalculationInput",
+      "WebReactPackageDigestEntry",
+      "WebReactPackageDigestVerificationInput"
+    ],
+    "operationModuleGraph": {
+      "entry": "packages/reference-catalog-web/src/operations/index.ts",
+      "modules": [
+        "packages/reference-catalog-web/src/operations/index.ts",
+        "packages/reference-catalog-web/src/operations/sign-in.ts"
+      ],
+      "localEdges": ["packages/reference-catalog-web/src/operations/index.ts -> ./sign-in.js"],
+      "closed": true
+    },
+    "hostTypeContract": {
+      "handlerInput": "SignInOperationInput",
+      "handlerReturn": "unknown",
+      "bindingMembers": ["invoke", "operationId"],
+      "bindingMembersReadonly": true,
+      "resultEnvelopeDefined": false
+    }
+  },
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "officialInput": {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    "sourceAudit": [
+      {
+        "path": "packages/reference-catalog-web/src/operations/sign-in.ts",
+        "imports": ["@desen/catalog-sdk", "@desen/catalog-sdk"],
+        "platformGlobals": [],
+        "serviceSelectors": []
+      },
+      {
+        "path": "packages/reference-catalog-web/dist/operations/sign-in.js",
+        "imports": ["@desen/catalog-sdk"],
+        "platformGlobals": [],
+        "serviceSelectors": []
+      },
+      {
+        "path": "packages/reference-catalog-web/src/host-operations/sign-in.ts",
+        "imports": ["../operations/sign-in.js", "../operations/sign-in.js"],
+        "platformGlobals": [],
+        "serviceSelectors": []
+      },
+      {
+        "path": "packages/reference-catalog-web/dist/host-operations/sign-in.js",
+        "imports": ["../operations/sign-in.js"],
+        "platformGlobals": [],
+        "serviceSelectors": []
+      }
+    ],
+    "packageTests": {
+      "referenceCatalogWeb": [
+        "registers the exact inert sign-in contract and controlled authoring fixtures",
+        "binds the fixed capability to the exact handler without eager execution or wrapping",
+        "rejects non-functions and cannot pass an executable binding through manifest registration"
+      ],
+      "testkit": [
+        "projects the controlled success and invalid-credentials outcomes without host data",
+        "rejects the trusted host binding as synthetic operation data"
+      ]
+    },
+    "rootTests": [
+      "accepts the tracked deterministic M03-T08 evidence",
+      "builds byte-identical evidence twice",
+      "labels explicit build options as injected evidence",
+      "rejects inherited accessor-backed symbolic and unknown options",
+      "rejects stale or one-byte-tampered evidence",
+      "rejects missing mismatched or skipped M03-T07 prerequisite evidence",
+      "rejects official manifest or fixture drift",
+      "rejects host binding identity invocation or guardrail drift",
+      "rejects public export package and source-boundary drift",
+      "rejects package-test compiler-negative and root-test inventory drift",
+      "rejects inert or incomplete root command wiring",
+      "rejects tracked-artifact verification through a symlink alias",
+      "writes and verifies an injected artifact atomically and detects pre-rename tampering"
+    ],
+    "typeNegativeCases": [
+      "M03-T08-N01",
+      "M03-T08-N02",
+      "M03-T08-N03",
+      "M03-T08-N04",
+      "M03-T08-N05",
+      "M03-T08-N06",
+      "M03-T08-N07",
+      "M03-T08-N08",
+      "M03-T08-N09",
+      "M03-T08-N10"
+    ],
+    "trackedFiles": [
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 45351,
+        "sha256": "594fb8f0a7a0d38e984f4ffa32b4b6929d85329cf7bc615a2d3dcc0993c24541"
+      },
+      {
+        "path": "docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md",
+        "bytes": 9198,
+        "sha256": "4af36d64e5e91e62396d833faccea30208c7254a6dc443b0817d49e5ee91acc9"
+      },
+      {
+        "path": "packages/reference-catalog-web/README.md",
+        "bytes": 14442,
+        "sha256": "e4ad1ebb87f5f8678fb49a79e4cc6fd5af94d9cb38f82217c3d3d166a0c8282f"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 1919,
+        "sha256": "90db8f65645c30924dfd2f9b8430f3e4fca0920e06fad8ffc62c1392d74ab6cf"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/operations/sign-in.ts",
+        "bytes": 3321,
+        "sha256": "5797ecc9a59ed8e103655fa3903786bbaf6ec0c5d7bb10605a54f7708d87f837"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/operations/index.ts",
+        "bytes": 373,
+        "sha256": "3df76e2b180472c5a22bf4a41d93f6ff62d7c20e99c88c74af63bcfb5826ef6a"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/host-operations/sign-in.ts",
+        "bytes": 2234,
+        "sha256": "5a6e70e4a249f39a0c84e0441c9f0c113e4f3d939ea9e70ebe374bd48d3fe86b"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/host-operations/index.ts",
+        "bytes": 276,
+        "sha256": "82a89a269fa0ad583d9aba7e264266dd28c272d1aee9be0338d50a49cc03aaa1"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/sign-in-operation.test.ts",
+        "bytes": 4330,
+        "sha256": "9f71d8bd1a53f293f9fcf76fa0152d7f0e3f16b6563f22e95753ff2202852445"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/sign-in-operation.types.ts",
+        "bytes": 2860,
+        "sha256": "44bdc5bf16552f697fe87dc734e1cc21920d54ed21f108ba8a66a956b55d04be"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/operations-consumer.mjs",
+        "bytes": 141,
+        "sha256": "a26df8ead950ec6f35b783abf23018fe802ce2e690680e51570a5be14bcd5798"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/host-operations-consumer.mjs",
+        "bytes": 97,
+        "sha256": "a5d5c5a43c4c3f72ba4baa96f28efb2dc21d298b03463f7683f33f06d81ed8b1"
+      },
+      {
+        "path": "packages/testkit/README.md",
+        "bytes": 3944,
+        "sha256": "0ec476a6f9b38431b4905d9876b791c87d889575dd2a08efdc2d3926b3d4bc3c"
+      },
+      {
+        "path": "packages/testkit/package.json",
+        "bytes": 1007,
+        "sha256": "eedbf5ddb525f9827daaaa4260c5585b5801d7929f957c13fb9565c8d4359e67"
+      },
+      {
+        "path": "packages/testkit/test/reference-sign-in-fixtures.test.ts",
+        "bytes": 2894,
+        "sha256": "0d04576ddae47ebcf5fc502f971f345e57b0b6edd7f09a41422a4d56d74a2ff6"
+      },
+      {
+        "path": "scripts/generate-reference-sign-in-fixtures-and-host-binding-proof.mjs",
+        "bytes": 904,
+        "sha256": "1a29a220cc057ce84750adb1933a82198b90e5fe0fb8c3af183321aec4dbb722"
+      },
+      {
+        "path": "scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs",
+        "bytes": 730,
+        "sha256": "347362929202e75a823cfa27027d5a91794950db2e83e6ed2e86cfe531092c80"
+      },
+      {
+        "path": "scripts/lib/reference-sign-in-fixtures-and-host-binding-proof.mjs",
+        "bytes": 63489,
+        "sha256": "a645334564b489977e964afbe4a766573e80d6eee58da004dcd8bc552ebeaa1b"
+      },
+      {
+        "path": "tests/reference-sign-in-fixtures-and-host-binding.test.mjs",
+        "bytes": 22733,
+        "sha256": "494f9950186d1f3cc09b1146afd977a12bdb06a2737b2a107129de52606e8fbe"
+      },
+      {
+        "path": "package.json",
+        "bytes": 15601,
+        "sha256": "10d4403cf0e4e4d3a9533050368a4a712768d202053c75ae3b754130a979320a"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 111880,
+        "sha256": "47b550110d40dcd1cac097af3d24b7f23d0c99964c501f067e605063a6a13581"
+      }
+    ],
+    "commands": [
+      "generate:reference-sign-in-fixtures-and-host-binding",
+      "verify:reference-sign-in-fixtures-and-host-binding",
+      "test:reference-sign-in-fixtures-and-host-binding"
+    ]
+  },
+  "boundaries": [
+    "Catalog and fixture data contain no handler, endpoint, SDK, database, credential, authorization policy, or executable value.",
+    "The operations subpath is inert; the host-operations subpath is executable and explicit.",
+    "Binding does not invoke or wrap the host-owned handler and preserves its exact identity.",
+    "The handler return value remains opaque; no result envelope or settlement semantics are claimed before M04.",
+    "The synthetic success fixture satisfies the declared operation output schema.",
+    "No pending fixture is claimed; pending is an M04 operation-lifecycle state.",
+    "The proof uses no real authentication backend, credential, personal record, or network call."
+  ],
+  "deferred": [
+    "M03-T09 complete package-wide catalog-to-implementation and binding parity",
+    "M03-T10 final immutable package inventory and exact tuple",
+    "M04 operation ports, authorization handoff, schema enforcement, concurrency, and lifecycle",
+    "M09-T11 explicit integration-preview authorization and visible context labels",
+    "M10-T04 real reference-host operation execution",
+    "M12-T03 and M12-T04 repository-wide prohibited-content, secret, and personal-data audits"
+  ]
+}

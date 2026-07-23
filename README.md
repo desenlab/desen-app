@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **34 / 144 tasks complete (24%)**
+**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **35 / 144 tasks complete (24%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `███████░░░` **7 / 10 tasks complete (70%)**
+**M03 in progress:** `████████░░` **8 / 10 tasks complete (80%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T08`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T09`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -96,6 +96,7 @@ packages/
 - [Reference Web component proof](docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md)
 - [Reference Web form and feedback proof](docs/proof/REFERENCE-CATALOG-WEB-FORM-FEEDBACK.md)
 - [Reference token and synthetic fixture proof](docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md)
+- [Reference sign-in fixture and host-binding proof](docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -197,8 +198,19 @@ CSS custom properties without adding a DOM wrapper or generic runtime token poli
 projects only inert `manifest.authoring.fixtures`, enforces operation/resource category and
 bounded-data rules, and permits lookups only on factory-created snapshots. Its deterministic
 evidence covers exact component fallback parity, real React host-style application, 19 package
-tests, 20 compiler-negative cases, and 16 independent proof/mutation tests. Concrete sign-in
-fixtures and their separate trusted host binding remain M03-T08.
+tests, 20 compiler-negative cases, and 16 independent proof/mutation tests.
+
+M03-T08 now adds the exact official sign-in operation and controlled authoring outcomes. Its
+success fixture is `{ userId: "user-1" }`; `invalidCredentials` has an empty synthetic failure
+payload, while `unavailable` deliberately has no invented fixture. `pending` remains runtime
+lifecycle state, not static fixture data. Inert operation data and executable host code live behind
+separate package subpaths. The host binding fixes the operation id and preserves only an
+application-supplied callable by identity; its return stays opaque so M04 can define validation,
+settlement, concurrency, and diagnostics without an early result envelope. Five focused package
+tests, 10 compiler-negative cases, and 13 independent proof/mutation tests cover official-manifest
+equality, successful-output schema validation, immutable/detached fixtures, missing outcomes,
+binding exclusion, exact exports, source boundaries, and deterministic evidence. P-10 advances
+only to `PARTIAL`; real reference-host execution remains M10-T04.
 
 ## License
 

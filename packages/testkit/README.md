@@ -49,8 +49,10 @@ if (result.status === "found") {
 ```
 
 The operation and resource registrations in this example are created separately with
-`registerOperation` and `registerResource`. Actual sign-in values and trusted host bindings are not
-part of this infrastructure.
+`registerOperation` and `registerResource`. M03-T08 passes the exact reference sign-in registration
+through this same generic API and proves its synthetic success and `invalidCredentials` outcomes.
+There is no sign-in-specific production export or trusted host binding in `@desen/testkit`.
+Actual sign-in values and trusted host bindings are not part of this infrastructure.
 
 ## Explicit non-responsibilities
 
@@ -79,6 +81,7 @@ Run the focused checks with:
 
 ```bash
 pnpm --filter @desen/testkit typecheck
+pnpm --filter @desen/testkit test:reference-sign-in-fixtures
 pnpm --filter @desen/testkit test:synthetic-fixtures
 pnpm --filter @desen/testkit build
 ```

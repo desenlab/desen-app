@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-23
+Last updated: 2026-07-24
 
 ## Plain-language status
 
@@ -63,7 +63,15 @@ DTCG 2025.10 reference document and a DOM-free Web provider for the exact 26 CSS
 used by those components. Framework-neutral testkit infrastructure separately projects only inert
 synthetic operation/resource fixtures, rejects wrong categories and host bindings, enforces
 deterministic depth/node/byte bounds, and permits lookup only on factory-created snapshots. The
-evidence preserves the earlier component artifacts and changes no `P-*` status.
+evidence preserves the earlier component artifacts and changes no `P-*` status. M03-T08 now adds
+the exact official sign-in operation and its credential-free success and `invalidCredentials`
+fixtures. A separate opt-in host-operation subpath fixes the capability id and retains only an
+application-supplied callable; it never enters Catalog or fixture data. The callable's result stays
+opaque so M04 still owns the generic port, validation, settlement, lifecycle, concurrency, and
+diagnostics. Official-manifest equality, success-output schema compatibility, immutable detached
+fixture projection, missing `unavailable`, absent static `pending`, subpath separation, and
+handler identity are deterministic evidence. `PF-028` records that pending is runtime lifecycle
+state. P-10 advances only to `PARTIAL`; real host execution remains M10-T04.
 
 ## Current milestone
 
@@ -88,9 +96,10 @@ evidence preserves the earlier component artifacts and changes no `P-*` status.
   `M03-T04 — Deterministic Web–React package digest profile`,
   `M03-T05 — Accessible Stack and Text capabilities`,
   `M03-T06 — Accessible TextField, Button, and Alert capabilities`,
-  `M03-T07 — Reference tokens and synthetic fixture infrastructure`
+  `M03-T07 — Reference tokens and synthetic fixture infrastructure`,
+  `M03-T08 — Sign-in fixtures and separate trusted host operation binding`
 - Active task: None
-- Ready next task: `M03-T08 — Sign-in success/failure fixtures and separate host operation binding`
+- Ready next task: `M03-T09 — Catalog/implementation parity and adapter contract tests`
 - Status: `DONE`
 
 ## Completed preparation
@@ -223,6 +232,17 @@ evidence preserves the earlier component artifacts and changes no `P-*` status.
   snapshots, non-string lookup names, and inputs beyond the 64-level, 20,000-node, and
   1,048,576-byte limits. Its context records caller classification rather than claiming to detect
   secrets or personal data; N-036 and N-040 remain `PLANNED` for their later audits.
+- The reference sign-in slice passes 3 reference-package tests, 2 testkit tests, 10
+  compiler-negative cases, and 13 independent proof/mutation tests. Its registration equals the
+  exact official `com.example.auth/signIn` manifest; the synthetic success output satisfies the
+  declared schema, `invalidCredentials` is found, and the declared `unavailable` outcome remains
+  explicitly missing. Fixture snapshots are detached, deeply frozen inert JSON and reject the
+  executable binding. The separate host subpath fixes the capability id, rejects non-functions,
+  and retains one callable by identity without eager execution, wrapping, global registration, or
+  a premature result envelope. The Catalog declares the email/password input schema, but fixture
+  snapshots carry no credential values or secrets; neither surface selects an endpoint, SDK,
+  database, authorization policy, or executable code. P-10 is only `PARTIAL`; C-018, R-092, and
+  R-100 have local partial evidence, while N-036 and N-040 remain `PLANNED`.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -240,9 +260,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M03-T08`: add controlled sign-in success/failure fixtures and a separate trusted
-host operation binding without placing executable code, endpoints, credentials, or authorization
-inside Catalog or fixture data.
+Complete only `M03-T09`: add Catalog-to-implementation parity metadata and cumulative event
+payload, command, accessibility, and declared-public-contract tests without starting the runtime
+adapter registry assigned to M05.
 
 M02-T02 evidence:
 
@@ -345,7 +365,13 @@ M03-T07 evidence:
 
 - `docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md`
 - `docs/proof/artifacts/reference-tokens-and-synthetic-fixtures.json`
-- artifact SHA-256: `f6345186537abec56540f83156e01f0900f11e6aa1592c13517171c193bcb34f`
+- artifact SHA-256: `cb0146bcec61bc3b64fe50f8d32c26d0bba91c46f0932000c8ad46385e2554be`
+
+M03-T08 evidence:
+
+- `docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md`
+- `docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json`
+- artifact SHA-256: `d95271832b353d57fcd25d8dc5ca5ddd146e2031d3babbcdc427c7231860ad54`
 
 ## Status vocabulary
 

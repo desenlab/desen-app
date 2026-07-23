@@ -20,6 +20,7 @@
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:reference-sign-in-fixtures": "vitest run test/reference-sign-in-fixtures.test.ts",
     "test:synthetic-fixtures": "vitest run test/synthetic-fixtures.test.ts",
     "test:coverage": "vitest run --coverage"
   },
@@ -28,6 +29,7 @@
     "@desen/protocol": "workspace:*"
   },
   "devDependencies": {
+    "@desen/reference-catalog-web": "workspace:*",
     "vitest": "4.1.10"
   }
 }

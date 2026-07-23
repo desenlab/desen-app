@@ -613,13 +613,13 @@
       },
       {
         "path": "packages/reference-catalog-web/README.md",
-        "bytes": 10959,
-        "sha256": "01e736745de316961d6bffeddf6e3fc331ef5b8d76dffdfcf0dc31510b6b1437"
+        "bytes": 14442,
+        "sha256": "e4ad1ebb87f5f8678fb49a79e4cc6fd5af94d9cb38f82217c3d3d166a0c8282f"
       },
       {
         "path": "packages/reference-catalog-web/package.json",
-        "bytes": 1587,
-        "sha256": "5ec436c959679d449330e86f49724fc5a636c375c5e8cdc4d0b87d0b7d08c765"
+        "bytes": 1919,
+        "sha256": "90db8f65645c30924dfd2f9b8430f3e4fca0920e06fad8ffc62c1392d74ab6cf"
       },
       {
         "path": "packages/reference-catalog-web/src/tokens/reference-token-document.ts",
@@ -678,13 +678,13 @@
       },
       {
         "path": "packages/testkit/README.md",
-        "bytes": 3637,
-        "sha256": "2a8d26351a7e065acebc2afe0303892de09b03b359c68e76b7f3265aed76c957"
+        "bytes": 3944,
+        "sha256": "0ec476a6f9b38431b4905d9876b791c87d889575dd2a08efdc2d3926b3d4bc3c"
       },
       {
         "path": "packages/testkit/package.json",
-        "bytes": 863,
-        "sha256": "1efc95fab28321d375f08d59e2f1d318a8f8f00a0a8ce127049d0533309b0c8f"
+        "bytes": 1007,
+        "sha256": "eedbf5ddb525f9827daaaa4260c5585b5801d7929f957c13fb9565c8d4359e67"
       },
       {
         "path": "packages/testkit/src/synthetic-fixtures.ts",
