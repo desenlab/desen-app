@@ -192,3 +192,19 @@ controlled sign-in fixtures, final implementation parity, and the immutable pack
 M03-T07 through M03-T10; G03 remains open:
 `reference-catalog-web-form-feedback.json`
 `sha256:553a48cb95aa2a9e6c2ee4e860aea7aedea92499c977b093c1c515c0ad9d75f2`.
+
+M03-T07 adds the bounded reference-token and synthetic-fixture foundations without changing a
+`P-*` status. A strict DTCG 2025.10 subset supplies exactly 26 token paths, CSS custom properties,
+resolved Web values, and fallback-bearing CSS references. The independent evidence proves exact
+coverage and fallback parity for every current reference-component variable, a real React
+host-style application, explicit unknown-token failure, immutable public data, and no Web runtime
+import in the built provider. Framework-neutral testkit evidence separately proves canonical
+detached fixture projection, required operation errors, operation/resource category separation,
+cross-category uniqueness, binding exclusion, factory-only lookups, string-only lookup names, and
+the exact 64-level, 20,000-node, and 1,048,576-byte limits. The 19 package tests, 20
+compiler-negative cases, and 16 independent mutation tests preserve the exact M03-T06 artifact as
+a prerequisite. `N-036` and `N-040` receive only partial local evidence and remain `PLANNED`; the
+sign-in fixtures, trusted operation binding, complete parity, and final package tuple remain
+M03-T08 through M03-T10, so G03 remains open:
+`reference-tokens-and-synthetic-fixtures.json`
+`sha256:f6345186537abec56540f83156e01f0900f11e6aa1592c13517171c193bcb34f`.

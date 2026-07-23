@@ -5,6 +5,44 @@
 Target-specific Web–React capability packaging, followed by the accessible real components and
 exact capability manifests shared by Desen App and the reference host.
 
+## Reference tokens
+
+M03-T07 exposes the target-specific token contract at:
+
+```ts
+import {
+  REFERENCE_TOKEN_DOCUMENT,
+  REFERENCE_WEB_TOKEN_CSS_PROPERTIES,
+  REFERENCE_WEB_TOKEN_CSS_REFERENCES,
+  resolveReferenceWebToken,
+} from "@desen/reference-catalog-web/tokens";
+```
+
+`REFERENCE_TOKEN_DOCUMENT` is the single value authority. It uses a strict, documented subset of
+the stable DTCG 2025.10 format:
+
+- nested groups with inherited `color` or `dimension` types;
+- complete sRGB color values with matching lowercase six-digit hexadecimal fallbacks;
+- `px` or `rem` dimensions; and
+- whole-token curly-brace aliases whose targets have the same effective type.
+
+The Web provider validates the fixed document when its module initializes and derives immutable
+token-value, CSS-custom-property, and CSS-reference maps. Its exact 26 CSS custom properties cover
+every variable consumed by Stack, TextField, Button, and Alert. The M03-T07 evidence checks that
+each pinned component fallback equals the corresponding DTCG-derived provider value, so standalone
+rendering remains deterministic while a host can override the same property at its existing root.
+
+`REFERENCE_WEB_TOKEN_CSS_PROPERTIES` can be assigned to an existing host root's React `style`
+property. No provider component, extra DOM wrapper, global stylesheet mutation, network lookup, or
+runtime-selected code is created. `resolveReferenceWebToken` returns a frozen discriminated
+result; unknown names produce `{ ok: false, code: "UNKNOWN_TOKEN", token }` instead of a guessed
+replacement.
+
+This provider is the reference `web-react` package projection. It is not the framework-neutral
+DESEN `$token` resolver, does not validate a resolved value against its receiving capability
+schema, and does not define token storage for other projects or future native targets. Those
+runtime responsibilities remain assigned to M04.
+
 ## Accessible component entry point
 
 M03-T05 and M03-T06 expose the first five real Web–React capabilities at:
@@ -44,8 +82,7 @@ arbitrary DOM prop, raw HTML, or executable document value surface.
 - Stack renders a neutral `<div>` with no fabricated ARIA role, landmark, tab stop, reverse flex
   direction, or CSS ordering. Declared child order therefore remains DOM and reading order.
 - Stack maps only the declared direction, gap, maximum-width, and cross-axis alignment values.
-  Spacing uses `--desen-space-*` variables with fixed fallbacks so M03-T07 can provide tokens
-  without changing the contract.
+  Spacing uses `--desen-space-*` variables with pinned provider-compatible fallbacks.
 - Text maps `body` → `<p>`, `heading` → `<h2>` beneath the host application's top-level heading,
   and `caption` → `<small>`.
 - Text creates an ordinary React text node and never uses `dangerouslySetInnerHTML`, so
@@ -82,8 +119,7 @@ package rejects that spelling rather than widening the frozen contract.
 
 All declared style parts remain present in the exact manifests. Applying resolved style-part
 values while preserving accessibility is intentionally deferred to M03-T09 and the M05 React
-adapter. M03-T07 will replace the current CSS-variable fallback layer with the reference token
-contract without changing these component props.
+adapter. The reference token contract changes no component prop or style-part schema.
 
 ## Web–React package digest profile
 
@@ -133,6 +169,7 @@ an independent Node.js framing and SHA-256 oracle.
 ## Explicit non-responsibilities
 
 - Runtime-core changes, application screens, or protocol extensions
+- Generic DESEN `$token` resolution, receiving-schema validation, or project token storage
 - Tar, zip, npm archive, signature, authenticity, or remote-code-loading formats
 - Catalog/adapter parity or proof that a supplied artifact inventory is complete
 - Distributor immutability, exact-package retention, publication, resolution, or activation
@@ -140,10 +177,10 @@ an independent Node.js framing and SHA-256 oracle.
 
 ## Status
 
-Private proof-phase package. The deterministic Web–React package digest profile and the accessible
-Stack, Text, TextField, Button, and Alert capabilities are implemented. Reference tokens,
-controlled fixtures, complete adapter parity, and the final package tuple remain assigned to
-M03-T07 through M03-T10 and M05.
+Private proof-phase package. The deterministic Web–React package digest profile, the accessible
+Stack, Text, TextField, Button, and Alert capabilities, and the DTCG-backed reference Web token
+provider are implemented. Concrete controlled sign-in fixtures, complete adapter parity, and the
+final package tuple remain assigned to M03-T08 through M03-T10 and M05.
 
 ## Protocol and target support
 
@@ -158,6 +195,7 @@ pnpm --filter @desen/reference-catalog-web typecheck
 pnpm --filter @desen/reference-catalog-web test:components
 pnpm --filter @desen/reference-catalog-web test:interactive-components
 pnpm --filter @desen/reference-catalog-web test:package-digest-profile
+pnpm --filter @desen/reference-catalog-web test:tokens
 pnpm verify:reference-catalog-web-components
 pnpm test:reference-catalog-web-components
 pnpm verify:reference-catalog-web-form-feedback

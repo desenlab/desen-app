@@ -58,7 +58,12 @@ public-package boundaries, and mutation detection are now reproducible evidence.
 the official TextField, Button, and Alert manifests with schema-derived props, native accessible
 semantics, exact frozen event payloads, and a narrow focus-command handle that exposes no DOM node.
 Its cumulative proof exercises a controlled five-component Source through all six validator
-layers and executes real built-package render, event, and focus behavior.
+layers and executes real built-package render, event, and focus behavior. M03-T07 now adds one
+DTCG 2025.10 reference document and a DOM-free Web provider for the exact 26 CSS custom properties
+used by those components. Framework-neutral testkit infrastructure separately projects only inert
+synthetic operation/resource fixtures, rejects wrong categories and host bindings, enforces
+deterministic depth/node/byte bounds, and permits lookup only on factory-created snapshots. The
+evidence preserves the earlier component artifacts and changes no `P-*` status.
 
 ## Current milestone
 
@@ -82,9 +87,10 @@ layers and executes real built-package render, event, and focus behavior.
   `M03-T03 — Manifest-authoritative TypeScript and inspector-control derivation`,
   `M03-T04 — Deterministic Web–React package digest profile`,
   `M03-T05 — Accessible Stack and Text capabilities`,
-  `M03-T06 — Accessible TextField, Button, and Alert capabilities`
+  `M03-T06 — Accessible TextField, Button, and Alert capabilities`,
+  `M03-T07 — Reference tokens and synthetic fixture infrastructure`
 - Active task: None
-- Ready next task: `M03-T07 — Reference tokens and web token provider`
+- Ready next task: `M03-T08 — Sign-in success/failure fixtures and separate host operation binding`
 - Status: `DONE`
 
 ## Completed preparation
@@ -207,6 +213,16 @@ layers and executes real built-package render, event, and focus behavior.
   or return-value leakage. `PF-027` records the frozen abbreviated-prose Alert tone conflict.
   S-004 remains `PLANNED` only for M03-T09's final implementation-parity gate; no `P-*` status
   changes.
+- The reference token and synthetic fixture slice passes 19 package tests, 20 compiler-negative
+  cases, and 16 independent proof/mutation tests. One fixed DTCG 2025.10 subset resolves exactly 26
+  token paths to the 26 CSS custom properties already consumed by the reference components, with
+  exact fallback parity and a real React host-style check. The provider adds no wrapper, global
+  style mutation, or generic DESEN token policy. Testkit projects only
+  `manifest.authoring.fixtures`, preserves canonical detached immutable data, rejects missing
+  operation error declarations, wrong or duplicate categories, host-binding fields, forged
+  snapshots, non-string lookup names, and inputs beyond the 64-level, 20,000-node, and
+  1,048,576-byte limits. Its context records caller classification rather than claiming to detect
+  secrets or personal data; N-036 and N-040 remain `PLANNED` for their later audits.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -224,8 +240,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M03-T07`: add the reference token contract and Web token provider without moving
-React, DOM, CSS, or browser concerns into framework-neutral packages.
+Complete only `M03-T08`: add controlled sign-in success/failure fixtures and a separate trusted
+host operation binding without placing executable code, endpoints, credentials, or authorization
+inside Catalog or fixture data.
 
 M02-T02 evidence:
 
@@ -323,6 +340,12 @@ M03-T06 evidence:
 - `docs/proof/REFERENCE-CATALOG-WEB-FORM-FEEDBACK.md`
 - `docs/proof/artifacts/reference-catalog-web-form-feedback.json`
 - artifact SHA-256: `553a48cb95aa2a9e6c2ee4e860aea7aedea92499c977b093c1c515c0ad9d75f2`
+
+M03-T07 evidence:
+
+- `docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md`
+- `docs/proof/artifacts/reference-tokens-and-synthetic-fixtures.json`
+- artifact SHA-256: `f6345186537abec56540f83156e01f0900f11e6aa1592c13517171c193bcb34f`
 
 ## Status vocabulary
 

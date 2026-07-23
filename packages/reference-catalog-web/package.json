@@ -17,6 +17,10 @@
     "./components": {
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens/index.d.ts",
+      "import": "./dist/tokens/index.js"
     }
   },
   "scripts": {
@@ -27,6 +31,7 @@
     "test:components": "vitest run test/foundation-components.test.tsx",
     "test:interactive-components": "vitest run test/interactive-components.test.tsx",
     "test:package-digest-profile": "vitest run test/package-digest-profile.test.ts",
+    "test:tokens": "vitest run test/reference-tokens.test.ts",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

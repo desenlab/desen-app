@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **33 / 144 tasks complete (23%)**
+**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **34 / 144 tasks complete (24%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `██████░░░░` **6 / 10 tasks complete (60%)**
+**M03 in progress:** `███████░░░` **7 / 10 tasks complete (70%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T07`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T08`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -81,6 +81,7 @@ packages/
 - [Project status](PROJECT-STATUS.md)
 - [Master implementation plan](docs/plan/MASTER-PLAN.md)
 - [Task board](docs/plan/TASKS.md)
+- [Strategic validation checkpoints](docs/plan/STRATEGIC-VALIDATION.md)
 - [Proof matrix](docs/proof/PROOF-MATRIX.md)
 - [Structural-validation proof](docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md)
 - [Semantic-foundation proof](docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md)
@@ -94,6 +95,7 @@ packages/
 - [Web–React package digest proof](docs/proof/WEB-REACT-PACKAGE-DIGEST.md)
 - [Reference Web component proof](docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md)
 - [Reference Web form and feedback proof](docs/proof/REFERENCE-CATALOG-WEB-FORM-FEEDBACK.md)
+- [Reference token and synthetic fixture proof](docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -188,6 +190,15 @@ TextField focus handle exposes no DOM node. The cumulative evidence validates a 
 Catalog and controlled Source through all six validator layers, executes 256 server-rendered and
 23 real React interaction vectors, fixes 11 component tests, 22 compiler-negative cases, and 18
 independent mutation tests, and records the frozen prose/Catalog tone conflict as `PF-027`.
+
+M03-T07 now adds a DTCG 2025.10-backed reference Web token provider and framework-neutral
+synthetic fixture infrastructure. The provider resolves an exact 26-token inventory to 26 existing
+CSS custom properties without adding a DOM wrapper or generic runtime token policy. Testkit
+projects only inert `manifest.authoring.fixtures`, enforces operation/resource category and
+bounded-data rules, and permits lookups only on factory-created snapshots. Its deterministic
+evidence covers exact component fallback parity, real React host-style application, 19 package
+tests, 20 compiler-negative cases, and 16 independent proof/mutation tests. Concrete sign-in
+fixtures and their separate trusted host binding remain M03-T08.
 
 ## License
 

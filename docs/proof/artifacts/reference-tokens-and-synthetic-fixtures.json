@@ -1,0 +1,757 @@
+{
+  "schemaVersion": 1,
+  "task": "M03-T07",
+  "result": "PASS",
+  "claim": {
+    "summary": "One DTCG 2025.10 reference document supplies exactly 26 Web CSS tokens, while testkit projects only inert synthetic operation/resource fixtures.",
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "normativeCoverage": {
+      "partial": ["N-036", "N-040"],
+      "note": "The local synthetic fixture boundary is constrained; later authoring, publication, host, secret, and personal-data audits remain required."
+    },
+    "proofMatrixStatusChanges": []
+  },
+  "prerequisite": {
+    "task": "M03-T06",
+    "result": "PASS",
+    "verifiedBy": "verifyReferenceCatalogWebFormFeedbackEvidence",
+    "artifactSha256": "553a48cb95aa2a9e6c2ee4e860aea7aedea92499c977b093c1c515c0ad9d75f2"
+  },
+  "tokens": {
+    "format": "DTCG 2025.10 reference subset",
+    "count": 26,
+    "inventory": [
+      {
+        "token": "color.action.primary",
+        "value": "#1d4ed8",
+        "cssProperty": "--desen-color-action-primary",
+        "cssReference": "var(--desen-color-action-primary, #1d4ed8)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#1d4ed8" }
+      },
+      {
+        "token": "color.border.default",
+        "value": "#6b7280",
+        "cssProperty": "--desen-color-border",
+        "cssReference": "var(--desen-color-border, #6b7280)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#6b7280" }
+      },
+      {
+        "token": "color.border.strong",
+        "value": "#374151",
+        "cssProperty": "--desen-color-border-strong",
+        "cssReference": "var(--desen-color-border-strong, #374151)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#374151" }
+      },
+      {
+        "token": "color.content.onAction",
+        "value": "#ffffff",
+        "cssProperty": "--desen-color-on-action",
+        "cssReference": "var(--desen-color-on-action, #ffffff)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#ffffff" }
+      },
+      {
+        "token": "color.content.onCritical",
+        "value": "#ffffff",
+        "cssProperty": "--desen-color-on-critical",
+        "cssReference": "var(--desen-color-on-critical, #ffffff)",
+        "type": "color",
+        "alias": "{color.content.onAction}",
+        "source": { "kind": "alias", "alias": "{color.content.onAction}" }
+      },
+      {
+        "token": "color.critical.base",
+        "value": "#b91c1c",
+        "cssProperty": "--desen-color-critical",
+        "cssReference": "var(--desen-color-critical, #b91c1c)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#b91c1c" }
+      },
+      {
+        "token": "color.critical.surface",
+        "value": "#fef2f2",
+        "cssProperty": "--desen-color-critical-surface",
+        "cssReference": "var(--desen-color-critical-surface, #fef2f2)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#fef2f2" }
+      },
+      {
+        "token": "color.critical.text",
+        "value": "#7f1d1d",
+        "cssProperty": "--desen-color-critical-text",
+        "cssReference": "var(--desen-color-critical-text, #7f1d1d)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#7f1d1d" }
+      },
+      {
+        "token": "color.info.base",
+        "value": "#1d4ed8",
+        "cssProperty": "--desen-color-info",
+        "cssReference": "var(--desen-color-info, #1d4ed8)",
+        "type": "color",
+        "alias": "{color.action.primary}",
+        "source": { "kind": "alias", "alias": "{color.action.primary}" }
+      },
+      {
+        "token": "color.info.surface",
+        "value": "#eff6ff",
+        "cssProperty": "--desen-color-info-surface",
+        "cssReference": "var(--desen-color-info-surface, #eff6ff)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#eff6ff" }
+      },
+      {
+        "token": "color.info.text",
+        "value": "#1e3a8a",
+        "cssProperty": "--desen-color-info-text",
+        "cssReference": "var(--desen-color-info-text, #1e3a8a)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#1e3a8a" }
+      },
+      {
+        "token": "color.success.base",
+        "value": "#15803d",
+        "cssProperty": "--desen-color-success",
+        "cssReference": "var(--desen-color-success, #15803d)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#15803d" }
+      },
+      {
+        "token": "color.success.surface",
+        "value": "#f0fdf4",
+        "cssProperty": "--desen-color-success-surface",
+        "cssReference": "var(--desen-color-success-surface, #f0fdf4)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#f0fdf4" }
+      },
+      {
+        "token": "color.success.text",
+        "value": "#14532d",
+        "cssProperty": "--desen-color-success-text",
+        "cssReference": "var(--desen-color-success-text, #14532d)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#14532d" }
+      },
+      {
+        "token": "color.surface.default",
+        "value": "#ffffff",
+        "cssProperty": "--desen-color-surface",
+        "cssReference": "var(--desen-color-surface, #ffffff)",
+        "type": "color",
+        "alias": "{color.content.onAction}",
+        "source": { "kind": "alias", "alias": "{color.content.onAction}" }
+      },
+      {
+        "token": "color.surface.disabled",
+        "value": "#f3f4f6",
+        "cssProperty": "--desen-color-surface-disabled",
+        "cssReference": "var(--desen-color-surface-disabled, #f3f4f6)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#f3f4f6" }
+      },
+      {
+        "token": "color.text.default",
+        "value": "#111827",
+        "cssProperty": "--desen-color-text",
+        "cssReference": "var(--desen-color-text, #111827)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#111827" }
+      },
+      {
+        "token": "color.warning.base",
+        "value": "#a16207",
+        "cssProperty": "--desen-color-warning",
+        "cssReference": "var(--desen-color-warning, #a16207)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#a16207" }
+      },
+      {
+        "token": "color.warning.surface",
+        "value": "#fffbeb",
+        "cssProperty": "--desen-color-warning-surface",
+        "cssReference": "var(--desen-color-warning-surface, #fffbeb)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#fffbeb" }
+      },
+      {
+        "token": "color.warning.text",
+        "value": "#713f12",
+        "cssProperty": "--desen-color-warning-text",
+        "cssReference": "var(--desen-color-warning-text, #713f12)",
+        "type": "color",
+        "alias": null,
+        "source": { "kind": "color", "colorSpace": "srgb", "alpha": 1, "hex": "#713f12" }
+      },
+      {
+        "token": "radius.control",
+        "value": "0.375rem",
+        "cssProperty": "--desen-radius-control",
+        "cssReference": "var(--desen-radius-control, 0.375rem)",
+        "type": "dimension",
+        "alias": null,
+        "source": { "kind": "dimension", "unit": "rem", "value": 0.375 }
+      },
+      {
+        "token": "space.lg",
+        "value": "1.5rem",
+        "cssProperty": "--desen-space-lg",
+        "cssReference": "var(--desen-space-lg, 1.5rem)",
+        "type": "dimension",
+        "alias": null,
+        "source": { "kind": "dimension", "unit": "rem", "value": 1.5 }
+      },
+      {
+        "token": "space.md",
+        "value": "1rem",
+        "cssProperty": "--desen-space-md",
+        "cssReference": "var(--desen-space-md, 1rem)",
+        "type": "dimension",
+        "alias": null,
+        "source": { "kind": "dimension", "unit": "rem", "value": 1 }
+      },
+      {
+        "token": "space.sm",
+        "value": "0.5rem",
+        "cssProperty": "--desen-space-sm",
+        "cssReference": "var(--desen-space-sm, 0.5rem)",
+        "type": "dimension",
+        "alias": null,
+        "source": { "kind": "dimension", "unit": "rem", "value": 0.5 }
+      },
+      {
+        "token": "space.xl",
+        "value": "2rem",
+        "cssProperty": "--desen-space-xl",
+        "cssReference": "var(--desen-space-xl, 2rem)",
+        "type": "dimension",
+        "alias": null,
+        "source": { "kind": "dimension", "unit": "rem", "value": 2 }
+      },
+      {
+        "token": "space.xs",
+        "value": "0.25rem",
+        "cssProperty": "--desen-space-xs",
+        "cssReference": "var(--desen-space-xs, 0.25rem)",
+        "type": "dimension",
+        "alias": null,
+        "source": { "kind": "dimension", "unit": "rem", "value": 0.25 }
+      }
+    ],
+    "unknownCases": [
+      "",
+      "color",
+      "color.info",
+      "color.info.unknown",
+      "__proto__",
+      "prototype",
+      "constructor",
+      "toString",
+      "hasOwnProperty",
+      "{color.action.primary}"
+    ],
+    "componentCssCoverage": {
+      "files": [
+        {
+          "path": "alert.tsx",
+          "properties": [
+            "--desen-color-critical",
+            "--desen-color-critical-surface",
+            "--desen-color-critical-text",
+            "--desen-color-info",
+            "--desen-color-info-surface",
+            "--desen-color-info-text",
+            "--desen-color-success",
+            "--desen-color-success-surface",
+            "--desen-color-success-text",
+            "--desen-color-warning",
+            "--desen-color-warning-surface",
+            "--desen-color-warning-text",
+            "--desen-radius-control",
+            "--desen-space-md",
+            "--desen-space-sm"
+          ],
+          "occurrences": 15
+        },
+        {
+          "path": "button.tsx",
+          "properties": [
+            "--desen-color-action-primary",
+            "--desen-color-border-strong",
+            "--desen-color-critical",
+            "--desen-color-on-action",
+            "--desen-color-on-critical",
+            "--desen-color-surface",
+            "--desen-color-text",
+            "--desen-radius-control",
+            "--desen-space-md",
+            "--desen-space-sm"
+          ],
+          "occurrences": 12
+        },
+        {
+          "path": "stack.tsx",
+          "properties": [
+            "--desen-space-lg",
+            "--desen-space-md",
+            "--desen-space-sm",
+            "--desen-space-xl",
+            "--desen-space-xs"
+          ],
+          "occurrences": 5
+        },
+        {
+          "path": "text-field.tsx",
+          "properties": [
+            "--desen-color-border",
+            "--desen-color-critical",
+            "--desen-color-surface",
+            "--desen-color-surface-disabled",
+            "--desen-color-text",
+            "--desen-radius-control",
+            "--desen-space-sm",
+            "--desen-space-xs"
+          ],
+          "occurrences": 9
+        },
+        { "path": "text.tsx", "properties": [], "occurrences": 0 }
+      ],
+      "coveredProperties": [
+        "--desen-color-action-primary",
+        "--desen-color-border",
+        "--desen-color-border-strong",
+        "--desen-color-critical",
+        "--desen-color-critical-surface",
+        "--desen-color-critical-text",
+        "--desen-color-info",
+        "--desen-color-info-surface",
+        "--desen-color-info-text",
+        "--desen-color-on-action",
+        "--desen-color-on-critical",
+        "--desen-color-success",
+        "--desen-color-success-surface",
+        "--desen-color-success-text",
+        "--desen-color-surface",
+        "--desen-color-surface-disabled",
+        "--desen-color-text",
+        "--desen-color-warning",
+        "--desen-color-warning-surface",
+        "--desen-color-warning-text",
+        "--desen-radius-control",
+        "--desen-space-lg",
+        "--desen-space-md",
+        "--desen-space-sm",
+        "--desen-space-xl",
+        "--desen-space-xs"
+      ],
+      "occurrences": 41
+    },
+    "providerIsDomFree": true,
+    "genericDesenResolution": false
+  },
+  "fixtures": {
+    "context": { "kind": "synthetic-authoring-fixture", "source": "manifest.authoring.fixtures" },
+    "snapshot": {
+      "context": { "kind": "synthetic-authoring-fixture", "source": "manifest.authoring.fixtures" },
+      "operations": {
+        "com.example.proof/calculate": {
+          "errors": { "INVALID_INPUT": { "field": "synthetic-field" } },
+          "success": { "record": "synthetic-operation-result", "total": 42 }
+        }
+      },
+      "resources": {
+        "com.example.proof/items": { "empty": [], "populated": [{ "id": "synthetic-item" }] }
+      }
+    },
+    "found": {
+      "operationSuccess": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "found",
+        "value": { "record": "synthetic-operation-result", "total": 42 }
+      },
+      "operationError": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "found",
+        "value": { "field": "synthetic-field" }
+      },
+      "resource": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "found",
+        "value": [{ "id": "synthetic-item" }]
+      }
+    },
+    "missing": {
+      "operation": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "missing"
+      },
+      "error": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "missing"
+      },
+      "resource": {
+        "context": {
+          "kind": "synthetic-authoring-fixture",
+          "source": "manifest.authoring.fixtures"
+        },
+        "status": "missing"
+      }
+    },
+    "bindingDataExcluded": true,
+    "executableBindingRejected": true,
+    "guardrails": {
+      "requiredOperationErrors": true,
+      "capabilityCategories": ["operation", "resource"],
+      "crossCategoryCapabilityIdsRejected": true,
+      "limits": { "depth": 64, "nodes": 20000, "canonicalUtf8Bytes": 1048576 },
+      "factorySnapshotOnlyLookups": [
+        "lookupSyntheticOperationError",
+        "lookupSyntheticOperationSuccess",
+        "lookupSyntheticResourceFixture"
+      ],
+      "stringOnlyLookupNames": ["errorCode", "fixtureName", "operationId", "resourceId"]
+    }
+  },
+  "publicApi": {
+    "tokenPackage": "@desen/reference-catalog-web/tokens",
+    "testkitPackage": "@desen/testkit",
+    "tokenRuntimeExports": [
+      "REFERENCE_TOKEN_DOCUMENT",
+      "REFERENCE_WEB_TOKEN_CSS_PROPERTIES",
+      "REFERENCE_WEB_TOKEN_CSS_REFERENCES",
+      "REFERENCE_WEB_TOKEN_PROVIDER",
+      "REFERENCE_WEB_TOKEN_VALUES",
+      "resolveReferenceWebToken"
+    ],
+    "tokenTypeExports": [
+      "DtcgReferenceAlias",
+      "DtcgReferenceColorValue",
+      "DtcgReferenceDimensionValue",
+      "DtcgReferenceTokenValue",
+      "ReferenceWebTokenCssProperties",
+      "ReferenceWebTokenCssProperty",
+      "ReferenceWebTokenCssReference",
+      "ReferenceWebTokenPath",
+      "ReferenceWebTokenProvider",
+      "ReferenceWebTokenResolution",
+      "ReferenceWebTokenResolutionFailure",
+      "ReferenceWebTokenResolutionSuccess"
+    ],
+    "testkitRuntimeExports": [
+      "SYNTHETIC_FIXTURE_CONTEXT",
+      "createSyntheticFixtureSnapshot",
+      "lookupSyntheticOperationError",
+      "lookupSyntheticOperationSuccess",
+      "lookupSyntheticResourceFixture"
+    ],
+    "testkitTypeExports": [
+      "CreateSyntheticFixtureSnapshotInput",
+      "SyntheticFixtureContext",
+      "SyntheticFixtureLookupResult",
+      "SyntheticFixtureSnapshot",
+      "SyntheticFixtureValue",
+      "SyntheticOperationFixtures"
+    ]
+  },
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "sourceAudit": [
+      {
+        "path": "packages/reference-catalog-web/src/tokens/reference-token-document.ts",
+        "imports": []
+      },
+      {
+        "path": "packages/reference-catalog-web/src/tokens/web-token-provider.ts",
+        "imports": [
+          "runtime:./reference-token-document.js",
+          "type:./reference-token-document.js",
+          "type:react"
+        ]
+      },
+      {
+        "path": "packages/testkit/src/synthetic-fixtures.ts",
+        "imports": ["runtime:@desen/protocol", "type:@desen/catalog-sdk"]
+      },
+      {
+        "path": "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
+        "imports": ["runtime:./reference-token-document.js"]
+      },
+      {
+        "path": "packages/testkit/dist/synthetic-fixtures.js",
+        "imports": ["runtime:@desen/protocol"]
+      }
+    ],
+    "packageDocumentation": [
+      {
+        "path": "packages/reference-catalog-web/README.md",
+        "claims": [
+          "stable DTCG 2025.10 format",
+          "exact 26 CSS custom properties",
+          "runtime responsibilities remain assigned to M04",
+          "final package tuple remain assigned to M03-T08 through M03-T10 and M05"
+        ]
+      },
+      {
+        "path": "packages/testkit/README.md",
+        "claims": [
+          "caller's explicit classification; it is not a secret, credential, or personal-data detector",
+          "correct category. The same capability id cannot be projected in both maps",
+          "bounded to 64 nested levels, 20,000 traversed values, and 1,048,576 canonical UTF-8 bytes",
+          "Lookup helpers accept only snapshots created by this process",
+          "Actual sign-in values and trusted host bindings are not part of this infrastructure"
+        ]
+      }
+    ],
+    "packageTests": {
+      "tokens": [
+        "keeps the complete nested DTCG document recursively immutable",
+        "derives exactly the 26 component CSS custom properties without a wrapper",
+        "applies the exported custom-property map directly to an existing React host root",
+        "resolves direct colors, dimensions, and same-type aliases deterministically",
+        "returns an explicit immutable failure for every unknown spelling",
+        "exposes detached frozen maps that reject runtime mutation"
+      ],
+      "fixtures": [
+        "projects only authoring fixtures into detached canonical deeply frozen JSON",
+        "returns detached frozen found results for operation success and public errors",
+        "returns detached frozen found results for named resource outputs",
+        "represents every absent capability, path, or fixture with an explicit missing result",
+        "keeps registered capabilities with no authoring fixtures as explicit empty maps",
+        "rejects operation error fixtures whose codes are not publicly declared",
+        "rejects operations that omit their required public-error declaration",
+        "requires the exported context singleton and rejects duplicate capability ids",
+        "rejects wrong capability categories and ids reused across categories",
+        "rejects bounded-depth, node-count, and canonical-byte overflows as stable TypeErrors",
+        "rejects forged snapshots and non-string lookup paths before property coercion",
+        "rejects binding fields, unsupported operation fixture paths, and extra wrapper data",
+        "rejects accessors, cycles, exotic objects, and non-finite fixture numbers"
+      ]
+    },
+    "rootTests": [
+      "accepts the tracked deterministic M03-T07 evidence",
+      "builds byte-identical evidence twice",
+      "labels explicit build options as injected evidence",
+      "rejects inherited accessor-backed symbolic and unknown options",
+      "rejects stale or one-byte-tampered evidence",
+      "rejects missing mismatched or skipped M03-T06 prerequisite evidence",
+      "rejects token path value property and reference inventory drift",
+      "rejects malformed or mutable DTCG and provider surfaces",
+      "rejects a resolver that accepts unknown or prototype token names",
+      "rejects component CSS reference or fallback drift",
+      "rejects fixture projections that leak bindings endpoints or executable values",
+      "rejects public declaration package-export and platform-boundary drift",
+      "rejects package-test and compiler-negative inventory drift",
+      "rejects inert or incomplete root command wiring",
+      "rejects tracked-artifact verification through a symlink alias",
+      "writes and verifies an injected artifact atomically and detects pre-rename tampering"
+    ],
+    "typeNegativeCases": {
+      "tokens": [
+        "M03-T07-N01",
+        "M03-T07-N02",
+        "M03-T07-N03",
+        "M03-T07-N04",
+        "M03-T07-N05",
+        "M03-T07-N06",
+        "M03-T07-N07",
+        "M03-T07-N08",
+        "M03-T07-N09",
+        "M03-T07-N10"
+      ],
+      "fixtures": [
+        "M03-T07-N01",
+        "M03-T07-N02",
+        "M03-T07-N03",
+        "M03-T07-N04",
+        "M03-T07-N05",
+        "M03-T07-N06",
+        "M03-T07-N07",
+        "M03-T07-N08",
+        "M03-T07-N09",
+        "M03-T07-N10"
+      ]
+    },
+    "trackedFiles": [
+      {
+        "path": "docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md",
+        "bytes": 8093,
+        "sha256": "2171142ec98344dddf33621654417189a51e33ec2d6c44f9314b957fd15381c0"
+      },
+      {
+        "path": "packages/reference-catalog-web/README.md",
+        "bytes": 10959,
+        "sha256": "01e736745de316961d6bffeddf6e3fc331ef5b8d76dffdfcf0dc31510b6b1437"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 1587,
+        "sha256": "5ec436c959679d449330e86f49724fc5a636c375c5e8cdc4d0b87d0b7d08c765"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/tokens/reference-token-document.ts",
+        "bytes": 4897,
+        "sha256": "d20e599ebd5bd2e958ed77ed98b76dc5a13576166141e9b1620998b6050de05e"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/tokens/web-token-provider.ts",
+        "bytes": 14450,
+        "sha256": "3a9bc4f1fc48d9839d5fa663670df4612421e1d60cba734e636750d4df62676a"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/tokens/index.ts",
+        "bytes": 857,
+        "sha256": "03ae286043cc3c84eaf3fd33f187e86025f3bfdaed4a0151ef4660be9a17f22c"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/reference-tokens.test.ts",
+        "bytes": 5748,
+        "sha256": "68f0ddde33e2cfa71fff278afb85e8dd192aee6c421c64d9b19a7b4cb7c8fff0"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/reference-tokens.types.ts",
+        "bytes": 3268,
+        "sha256": "19708eeb54ba1e58743c5803bc44e611eec364315e2e3f063a4c73c72e65591c"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/tokens-consumer.mjs",
+        "bytes": 53,
+        "sha256": "8a39ae2c3183ea968ec235458269e8283fe46af3ffd1bb00c011bf3b1eecdee3"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/stack.tsx",
+        "bytes": 1827,
+        "sha256": "88b3cf3059253018e8865cbfa8e37b5c449b55d06430a9a046f4e1511b45f796"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text.tsx",
+        "bytes": 899,
+        "sha256": "c741c3ddba19d12120e793c9e93b19f3790e9ba93c7d579325a0d07e4cef8f17"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text-field.tsx",
+        "bytes": 3747,
+        "sha256": "80e5d6713c96cfd7e867879aa3c6251f9f2a71b5cb48dc5460acdfecad989eb5"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/button.tsx",
+        "bytes": 2893,
+        "sha256": "074edb6e4b8ce9c357fba77636a3e419ee278bc19b41f27ccebeb019d6e7ea72"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/alert.tsx",
+        "bytes": 2180,
+        "sha256": "c751592848922182c32e956954673a93288ffed78d670dd7085f90397982110f"
+      },
+      {
+        "path": "packages/testkit/README.md",
+        "bytes": 3637,
+        "sha256": "2a8d26351a7e065acebc2afe0303892de09b03b359c68e76b7f3265aed76c957"
+      },
+      {
+        "path": "packages/testkit/package.json",
+        "bytes": 863,
+        "sha256": "1efc95fab28321d375f08d59e2f1d318a8f8f00a0a8ce127049d0533309b0c8f"
+      },
+      {
+        "path": "packages/testkit/src/synthetic-fixtures.ts",
+        "bytes": 22250,
+        "sha256": "a9d6a7618ca07d164518c7240cb3ee305ec45bac49252701a74b59071e888755"
+      },
+      {
+        "path": "packages/testkit/src/index.ts",
+        "bytes": 579,
+        "sha256": "235ba9025906169d885a01ba3aa326876411ae99815fd9bd2bd53c53914ad6fb"
+      },
+      {
+        "path": "packages/testkit/test/synthetic-fixtures.test.ts",
+        "bytes": 14812,
+        "sha256": "0d344b5dfdf40c2525488129b11b88111217c7d1c52cda91e4015ae89bbb6fde"
+      },
+      {
+        "path": "packages/testkit/test/public-api.types.ts",
+        "bytes": 3278,
+        "sha256": "50ce019bdd3b3521b50f01553592810aa98a172478e7c1b4adfc103a56430ada"
+      },
+      {
+        "path": "packages/testkit/test/synthetic-fixtures-consumer.mjs",
+        "bytes": 199,
+        "sha256": "1ffdaedb78cd23e7a91b42c532f233fd8b06aba6f5b44c94e0aab93d89318be9"
+      },
+      {
+        "path": "scripts/generate-reference-tokens-and-synthetic-fixtures-proof.mjs",
+        "bytes": 897,
+        "sha256": "5a3ba5f3391e8001b2261c6c6ad20cf5ee5d33c8535a9d0b378a8d212a399ab2"
+      },
+      {
+        "path": "scripts/verify-reference-tokens-and-synthetic-fixtures.mjs",
+        "bytes": 718,
+        "sha256": "f89591cc7bd455266f3130a7a9b2626743d5b1c2ab733dddb6032fc84867fb82"
+      },
+      {
+        "path": "scripts/lib/reference-tokens-and-synthetic-fixtures-proof.mjs",
+        "bytes": 72038,
+        "sha256": "151f73d66d7d52083ae619ac737c6cef84ddaa3b4264865d7b45a676c255ed86"
+      },
+      {
+        "path": "tests/reference-tokens-and-synthetic-fixtures.test.mjs",
+        "bytes": 16667,
+        "sha256": "f9b3d054330035c7174850ec2b5bbaf5c1d1cfcdcba43887f91dae8d1268a4e5"
+      }
+    ],
+    "commands": [
+      "generate:reference-tokens-and-synthetic-fixtures",
+      "verify:reference-tokens-and-synthetic-fixtures",
+      "test:reference-tokens-and-synthetic-fixtures"
+    ]
+  },
+  "boundaries": [
+    "DESEN references host-owned tokens and does not define a competing token-file format.",
+    "The Web provider returns inert data and does not render a wrapper or mutate the DOM.",
+    "Existing component var() fallbacks remain byte-owned by M03-T05/M03-T06 and exactly match provider values.",
+    "Testkit snapshots include only manifest.authoring.fixtures and exclude host bindings.",
+    "Production packages do not depend on @desen/testkit.",
+    "The fixture sample is synthetic proof data, not a sign-in fixture or live user record."
+  ],
+  "deferred": [
+    "M03-T08 sign-in pending, success, and failure fixtures with separate host operation binding",
+    "M03-T09 complete catalog-to-implementation parity",
+    "M03-T10 final immutable package inventory and exact tuple",
+    "M04-T03 generic DESEN token lookup, fallback, receiving-schema validation, and runtime resolution",
+    "M06/M09/M10 authoring-only scenario handling, publication exclusion, and production-host fixture ignorance",
+    "M09-T11 and M12-T04 completion audits for N-036 and N-040"
+  ]
+}
