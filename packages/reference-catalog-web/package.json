@@ -25,6 +25,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:components": "vitest run test/foundation-components.test.tsx",
+    "test:interactive-components": "vitest run test/interactive-components.test.tsx",
     "test:package-digest-profile": "vitest run test/package-digest-profile.test.ts",
     "test:coverage": "vitest run --coverage"
   },

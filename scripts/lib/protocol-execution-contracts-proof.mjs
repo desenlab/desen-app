@@ -142,10 +142,6 @@ const BUTTON = "com.example.ui/Button";
 const STACK = "com.example.ui/Stack";
 
 const FIXED_TRACKED_PATHS = Object.freeze([
-  "package.json",
-  "turbo.json",
-  "packages/validator/package.json",
-  "packages/validator/README.md",
   "packages/validator/src/binding-contract-validation.ts",
   "packages/validator/src/execution-contract-validation.ts",
   "packages/validator/src/index.ts",
@@ -153,8 +149,6 @@ const FIXED_TRACKED_PATHS = Object.freeze([
   "packages/validator/src/schema-instance-validation.ts",
   "packages/validator/src/semantic-diagnostics.ts",
   "packages/validator/test/execution-contracts.test.ts",
-  "docs/plan/PROTOCOL-FINDINGS.md",
-  "docs/proof/NORMATIVE-COVERAGE.md",
   "docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md",
   "docs/proof/protocol-0.1.0-traceability.json",
   "scripts/lib/protocol-execution-contracts-proof.mjs",

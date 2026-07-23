@@ -21,8 +21,8 @@
       "profile": "desen-interaction-contract-validation-v1",
       "result": "PASS",
       "verifiedBy": "verifyProtocolInteractionContracts",
-      "sha256": "ecd6dd3f0dd848bce24242a6117d06dd86230c9edb519c2dc7561d5c262f6ffb",
-      "verificationSha256": "ecd6dd3f0dd848bce24242a6117d06dd86230c9edb519c2dc7561d5c262f6ffb"
+      "sha256": "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208",
+      "verificationSha256": "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208"
     }
   },
   "traceability": {
@@ -773,7 +773,7 @@
     "eventScope": "immediate handler action turn only",
     "schemaProfile": {
       "finding": "PF-011",
-      "inheritedFromVerifiedT09Artifact": "ecd6dd3f0dd848bce24242a6117d06dd86230c9edb519c2dc7561d5c262f6ffb",
+      "inheritedFromVerifiedT09Artifact": "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208",
       "evaluationBudget": 50000,
       "unsafeNativePatternExecution": false
     },
@@ -923,16 +923,6 @@
     "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
     "trackedFiles": [
       {
-        "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 42432,
-        "sha256": "c8d0363e26065bf743817e2b1890456ec973c682a248f5c7b933982dee078a90"
-      },
-      {
-        "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 26212,
-        "sha256": "a6adcb82432502b75fc89c898ffa917996ca2bc6c614c0130dc04a753c7e7126"
-      },
-      {
         "path": "docs/proof/PROTOCOL-BINDING-CONTRACTS.md",
         "bytes": 19362,
         "sha256": "89ae0675a333663d7515f8c16addb97e095984d74ae29630d1e9188a8f87fba8"
@@ -941,11 +931,6 @@
         "path": "docs/proof/protocol-0.1.0-traceability.json",
         "bytes": 134870,
         "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
-      },
-      {
-        "path": "package.json",
-        "bytes": 11233,
-        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
       },
       {
         "path": "packages/protocol/dist/canonicalization.d.ts",
@@ -1088,11 +1073,6 @@
         "sha256": "762fc26ef5af285bc3d8a6dc7d3b1d0250cf2751ef0761e7e9ec11db519f5929"
       },
       {
-        "path": "packages/protocol/package.json",
-        "bytes": 923,
-        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
-      },
-      {
         "path": "packages/protocol/src/canonicalization.ts",
         "bytes": 17820,
         "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
@@ -1136,16 +1116,6 @@
         "path": "packages/protocol/tsconfig.json",
         "bytes": 252,
         "sha256": "e85de556134485bf859e0721710907df3faef563a6204b615c01fbc54cab5201"
-      },
-      {
-        "path": "packages/validator/README.md",
-        "bytes": 51852,
-        "sha256": "dc8185c985a6199041ae7c9c1c7b7b625ca23f9d18abfb45ddb0ed42e6895a28"
-      },
-      {
-        "path": "packages/validator/THIRD_PARTY_NOTICES.md",
-        "bytes": 1216,
-        "sha256": "1e538937d6504807ab15280d8a821466a85a2a1949142305c81757eb9b86ae5b"
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.d.ts",
@@ -1448,11 +1418,6 @@
         "sha256": "9ca50d90af0fc3691f61093af2079fcb7a17c2f6c5e16db4d93a20eccbd76fa0"
       },
       {
-        "path": "packages/validator/package.json",
-        "bytes": 2184,
-        "sha256": "6d45074ada3fea091e4ac3b5a93b41bc75d51cfa3eedcd389297bd0b4c8e062b"
-      },
-      {
         "path": "packages/validator/scripts/clean-dist.mjs",
         "bytes": 808,
         "sha256": "e40927b824fdfce7f16a4698522bffc63d4f280f3bf9fe604034ea10d97c8adc"
@@ -1558,19 +1523,14 @@
         "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
       },
       {
-        "path": "pnpm-lock.yaml",
-        "bytes": 111382,
-        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
-      },
-      {
         "path": "scripts/generate-protocol-binding-contracts-proof.mjs",
         "bytes": 819,
         "sha256": "34e715bccc45d40dc276081995633a832b924694f13f827eb480f7f486607bb6"
       },
       {
         "path": "scripts/lib/protocol-binding-contracts-proof.mjs",
-        "bytes": 82146,
-        "sha256": "f18d82b118090b2d39a3d61d29e61a26ca514fcaa2776e5940433261c927144c"
+        "bytes": 81840,
+        "sha256": "a0104cf5ff65d9f3d3f2386013c30b9a84c674b6414c3481326af57326716de2"
       },
       {
         "path": "scripts/verify-protocol-binding-contracts.mjs",
@@ -1581,16 +1541,6 @@
         "path": "tests/protocol-binding-contracts.test.mjs",
         "bytes": 16916,
         "sha256": "11d9060ba5d610a274d61ed3245ff9bc4cc7de0a77b4257e59ddefa6b3d55131"
-      },
-      {
-        "path": "tsconfig.base.json",
-        "bytes": 852,
-        "sha256": "cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
-      },
-      {
-        "path": "turbo.json",
-        "bytes": 4262,
-        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
       }
     ]
   },

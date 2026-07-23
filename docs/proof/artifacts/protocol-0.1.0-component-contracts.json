@@ -7,8 +7,8 @@
   "prerequisites": {
     "diagnostics": {
       "path": "docs/proof/artifacts/protocol-0.1.0-diagnostics.json",
-      "bytes": 13710,
-      "sha256": "9edc4c8a9b8b7a1ed505dc4c6d0644f88df69c54f672fd542a8688f3f83e26b7",
+      "bytes": 13223,
+      "sha256": "e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b",
       "task": "M02-T05",
       "profile": "desen-diagnostics-json-pointer-v1",
       "verifiedBy": "verifyProtocolDiagnostics",
@@ -16,8 +16,8 @@
     },
     "semanticFoundation": {
       "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
-      "bytes": 25303,
-      "sha256": "dc9273eca610e3400b13370ac466e1dde30d0534897817b74e7242bfb16f337b",
+      "bytes": 23951,
+      "sha256": "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
       "task": "M02-T07",
       "profile": "desen-semantic-foundation-v1",
       "verifiedBy": "verifyProtocolSemanticFoundation",
@@ -905,16 +905,6 @@
     "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
     "trackedFiles": [
       {
-        "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 42432,
-        "sha256": "c8d0363e26065bf743817e2b1890456ec973c682a248f5c7b933982dee078a90"
-      },
-      {
-        "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 26212,
-        "sha256": "a6adcb82432502b75fc89c898ffa917996ca2bc6c614c0130dc04a753c7e7126"
-      },
-      {
         "path": "docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md",
         "bytes": 12280,
         "sha256": "d1141192130c70792c1729acd972f62e0c0e5eeb7c3c9d0cf7362f14c2e93cae"
@@ -923,11 +913,6 @@
         "path": "docs/proof/protocol-0.1.0-traceability.json",
         "bytes": 134870,
         "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
-      },
-      {
-        "path": "package.json",
-        "bytes": 11233,
-        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
       },
       {
         "path": "packages/protocol/dist/canonicalization.js",
@@ -950,11 +935,6 @@
         "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
       },
       {
-        "path": "packages/protocol/package.json",
-        "bytes": 923,
-        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
-      },
-      {
         "path": "packages/protocol/src/canonicalization.ts",
         "bytes": 17820,
         "sha256": "1fb51207d1a1935e270e9b31b6a3fdfca29a7ea4f63d9cf96cbbc982a7e33e1d"
@@ -973,21 +953,6 @@
         "path": "packages/protocol/src/json-pointer.ts",
         "bytes": 7460,
         "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
-      },
-      {
-        "path": "packages/validator/README.md",
-        "bytes": 51852,
-        "sha256": "dc8185c985a6199041ae7c9c1c7b7b625ca23f9d18abfb45ddb0ed42e6895a28"
-      },
-      {
-        "path": "packages/validator/THIRD_PARTY_NOTICES.md",
-        "bytes": 1216,
-        "sha256": "1e538937d6504807ab15280d8a821466a85a2a1949142305c81757eb9b86ae5b"
-      },
-      {
-        "path": "packages/validator/package.json",
-        "bytes": 2184,
-        "sha256": "6d45074ada3fea091e4ac3b5a93b41bc75d51cfa3eedcd389297bd0b4c8e062b"
       },
       {
         "path": "packages/validator/scripts/clean-dist.mjs",
@@ -1155,19 +1120,14 @@
         "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
       },
       {
-        "path": "pnpm-lock.yaml",
-        "bytes": 111382,
-        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
-      },
-      {
         "path": "scripts/generate-protocol-component-contracts-proof.mjs",
         "bytes": 831,
         "sha256": "c7806da68e58a54ad037de63cdc49a4cb44f8e0a90c25548df8911fb28b8d27b"
       },
       {
         "path": "scripts/lib/protocol-component-contracts-proof.mjs",
-        "bytes": 88834,
-        "sha256": "6e7830eb3a910142d71aae0a0cdd13d21cf757f59dd3a87da9fe7f0c1e3c8084"
+        "bytes": 88552,
+        "sha256": "4b3fc7433739bbdac33055a5d0ac91511682888be85f00c0b5342dbaa1c204a2"
       },
       {
         "path": "scripts/verify-protocol-component-contracts.mjs",
@@ -1176,13 +1136,8 @@
       },
       {
         "path": "tests/protocol-component-contracts.test.mjs",
-        "bytes": 26643,
-        "sha256": "eaaef9cc8b4a9359510312faac30443592c74ddd5ca75e53839407b0cf988ddf"
-      },
-      {
-        "path": "turbo.json",
-        "bytes": 4262,
-        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
+        "bytes": 26937,
+        "sha256": "b6016e14ffc1a5c583c711ae3ff78e14a3e686058c266fc73f1f1524805345bc"
       }
     ]
   },

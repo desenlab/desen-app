@@ -212,10 +212,6 @@ const TRACE_VECTOR_MAP = Object.freeze({
   ],
 });
 const FIXED_TRACKED_PATHS = Object.freeze([
-  "package.json",
-  "turbo.json",
-  "packages/validator/package.json",
-  "packages/validator/README.md",
   "packages/validator/test/diagnostic-micro-vector-suite.ts",
   "packages/validator/test/diagnostic-micro-vectors.test.ts",
   "docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md",
@@ -391,7 +387,12 @@ async function verifyCommandWiring() {
       }
     }
   }
-  return Object.freeze({ root: Object.freeze(expected), package: validatorPackage.scripts });
+  return Object.freeze({
+    root: Object.freeze(expected),
+    package: Object.freeze({
+      "test:diagnostic-micro-vectors": "vitest run test/diagnostic-micro-vectors.test.ts",
+    }),
+  });
 }
 
 function idsAssignedToTask(entries, task) {

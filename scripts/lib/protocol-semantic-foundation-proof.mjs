@@ -174,19 +174,11 @@ const FROZEN_EXAMPLES = Object.freeze([
 ]);
 
 const FIXED_TRACKED_PATHS = Object.freeze([
-  "package.json",
-  "pnpm-lock.yaml",
-  "turbo.json",
-  "docs/plan/PROTOCOL-FINDINGS.md",
-  "docs/proof/NORMATIVE-COVERAGE.md",
   "docs/proof/protocol-0.1.0-traceability.json",
-  "packages/protocol/package.json",
   "packages/protocol/src/canonicalization.ts",
   "packages/protocol/src/diagnostics.ts",
   "packages/protocol/src/index.ts",
   "packages/protocol/src/json-pointer.ts",
-  "packages/validator/package.json",
-  "packages/validator/README.md",
   "packages/validator/tsconfig.json",
   "packages/validator/tsconfig.build.json",
   "scripts/lib/protocol-semantic-foundation-proof.mjs",

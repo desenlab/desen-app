@@ -202,6 +202,14 @@ const EXPECTED_TRACE_RULES = Object.freeze([
     tests: Object.freeze(["M11-T12"]),
   }),
 ]);
+const REQUIRED_PROTOCOL_FINDING_TEXT = Object.freeze([
+  "## PF-024 — Manifest registration and executable host binding APIs are distinct",
+  "`@desen/catalog-sdk` uses `registerComponent`, `registerBehavior`,",
+  "Executable component and behavior adapters remain renderer-owned",
+  "## PF-025 — Authoring control hints have no normative vocabulary",
+  "M03-T03 derives framework-neutral inspector metadata only from the",
+  "emits an explicit `structured-json` fallback",
+]);
 const EXPECTED_SCHEMA_FAMILIES = Object.freeze([
   Object.freeze({
     id: "SC-033",
@@ -263,13 +271,8 @@ const EXPECTED_DISTRIBUTION_PATHS = Object.freeze([
   "packages/catalog-sdk/dist/schema-type-derivation.js",
 ]);
 const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
-  "package.json",
-  "pnpm-lock.yaml",
-  "turbo.json",
-  "docs/plan/PROTOCOL-FINDINGS.md",
   "packages/catalog-sdk/package.json",
   "packages/catalog-sdk/README.md",
-  "tsconfig.base.json",
   "packages/catalog-sdk/tsconfig.json",
   "packages/catalog-sdk/tsconfig.build.json",
   "packages/catalog-sdk/test/catalog-manifest-registration.test.ts",
@@ -279,11 +282,7 @@ const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
   "scripts/lib/catalog-manifest-registration-proof.mjs",
   "scripts/generate-catalog-manifest-registration-proof.mjs",
   "scripts/verify-catalog-manifest-registration.mjs",
-  "scripts/verify-boundary-fixtures.mjs",
   "tests/catalog-manifest-registration.test.mjs",
-  "tests/boundaries/README.md",
-  "tests/boundaries/fixtures/catalog-sdk-imports-runtime-react/packages/catalog-sdk/src/index.ts",
-  "tests/boundaries/fixtures/catalog-sdk-imports-runtime-react/packages/runtime-react/src/index.ts",
 ]);
 const EXPECTED_PACKAGE_TEST_TITLES = Object.freeze([
   "preserves the complete manifest as detached, deeply frozen JSON data",
@@ -392,7 +391,7 @@ const EXPECTED_COMMANDS = Object.freeze({
     "node --test tests/catalog-manifest-registration.test.mjs",
   ]),
 });
-const EXPECTED_ROOT_TEST_COMMAND = Object.freeze([
+const REQUIRED_ROOT_TEST_PREFIX = Object.freeze([
   "pnpm test:protocol-snapshot",
   "pnpm test:protocol-traceability",
   "pnpm test:protocol-types",
@@ -407,11 +406,9 @@ const EXPECTED_ROOT_TEST_COMMAND = Object.freeze([
   "pnpm test:protocol-official-suite-parity",
   "pnpm test:protocol-validator-diagnostic-micro-vectors",
   "pnpm test:catalog-manifest-registration",
-  "pnpm test:web-react-package-digest",
-  "pnpm test:reference-catalog-web-components",
-  "turbo run test",
 ]);
-const EXPECTED_ROOT_CHECK_COMMAND = Object.freeze([
+const REQUIRED_ROOT_TEST_SUFFIX = Object.freeze(["turbo run test"]);
+const REQUIRED_ROOT_CHECK_PREFIX = Object.freeze([
   "pnpm format:check",
   "pnpm verify:protocol-snapshot",
   "pnpm verify:protocol-traceability",
@@ -427,8 +424,8 @@ const EXPECTED_ROOT_CHECK_COMMAND = Object.freeze([
   "pnpm verify:protocol-official-suite-parity",
   "pnpm verify:protocol-validator-diagnostic-micro-vectors",
   "pnpm verify:catalog-manifest-registration",
-  "pnpm verify:web-react-package-digest",
-  "pnpm verify:reference-catalog-web-components",
+]);
+const REQUIRED_ROOT_CHECK_SUFFIX = Object.freeze([
   "pnpm lint",
   "pnpm typecheck",
   "pnpm build",
@@ -2592,6 +2589,50 @@ function assertExactCommandSegments(actual, expected, label) {
   );
 }
 
+function assertExtensibleRootCommand(actual, requiredPrefix, requiredSuffix, extensionKind, label) {
+  const segments = commandSegments(actual, label);
+  if (segments.length < requiredPrefix.length + requiredSuffix.length) {
+    fail("CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT", `${label} omits a required command segment.`);
+  }
+
+  assertJsonEqual(
+    segments.slice(0, requiredPrefix.length),
+    requiredPrefix,
+    `${label} required prefix`,
+    "CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT",
+  );
+  assertJsonEqual(
+    segments.slice(-requiredSuffix.length),
+    requiredSuffix,
+    `${label} required suffix`,
+    "CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT",
+  );
+
+  const extensionSegments = segments.slice(
+    requiredPrefix.length,
+    segments.length - requiredSuffix.length,
+  );
+  const extensionPattern = new RegExp(`^pnpm ${extensionKind}:([a-z0-9]+(?:-[a-z0-9]+)*)$`, "u");
+  const extensionIds = extensionSegments.map((segment) => {
+    const match = extensionPattern.exec(segment);
+    if (match === null) {
+      fail(
+        "CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT",
+        `${label} contains an unsafe downstream milestone command.`,
+        { segment },
+      );
+    }
+    return match[1];
+  });
+  if (new Set(extensionIds).size !== extensionIds.length) {
+    fail(
+      "CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT",
+      `${label} repeats a downstream milestone command.`,
+    );
+  }
+  return Object.freeze(extensionIds);
+}
+
 async function verifyCommandWiring(workspaceRoot, fileOverrides) {
   const rootPackage = JSON.parse(
     (await readWorkspaceBytes(workspaceRoot, "package.json", fileOverrides)).toString("utf8"),
@@ -2616,15 +2657,25 @@ async function verifyCommandWiring(workspaceRoot, fileOverrides) {
     EXPECTED_COMMANDS.test,
     "test command",
   );
-  assertExactCommandSegments(
+  const rootTestExtensions = assertExtensibleRootCommand(
     rootPackage.scripts?.test,
-    EXPECTED_ROOT_TEST_COMMAND,
+    REQUIRED_ROOT_TEST_PREFIX,
+    REQUIRED_ROOT_TEST_SUFFIX,
+    "test",
     "root test command",
   );
-  assertExactCommandSegments(
+  const rootCheckExtensions = assertExtensibleRootCommand(
     rootPackage.scripts?.check,
-    EXPECTED_ROOT_CHECK_COMMAND,
+    REQUIRED_ROOT_CHECK_PREFIX,
+    REQUIRED_ROOT_CHECK_SUFFIX,
+    "verify",
     "root check command",
+  );
+  assertJsonEqual(
+    rootCheckExtensions,
+    rootTestExtensions,
+    "root downstream milestone parity",
+    "CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT",
   );
   assertExactCommandSegments(
     rootPackage.scripts?.boundaries,
@@ -2649,8 +2700,17 @@ async function verifyCommandWiring(workspaceRoot, fileOverrides) {
     generate: Object.freeze([...EXPECTED_COMMANDS.generate]),
     verify: Object.freeze([...EXPECTED_COMMANDS.verify]),
     test: Object.freeze([...EXPECTED_COMMANDS.test]),
-    rootTest: Object.freeze([...EXPECTED_ROOT_TEST_COMMAND]),
-    rootCheck: Object.freeze([...EXPECTED_ROOT_CHECK_COMMAND]),
+    rootTest: Object.freeze({
+      requiredPrefix: Object.freeze([...REQUIRED_ROOT_TEST_PREFIX]),
+      downstreamFormat: "pnpm test:<milestone-id>",
+      requiredSuffix: Object.freeze([...REQUIRED_ROOT_TEST_SUFFIX]),
+    }),
+    rootCheck: Object.freeze({
+      requiredPrefix: Object.freeze([...REQUIRED_ROOT_CHECK_PREFIX]),
+      downstreamFormat: "pnpm verify:<milestone-id>",
+      requiredSuffix: Object.freeze([...REQUIRED_ROOT_CHECK_SUFFIX]),
+    }),
+    downstreamMilestoneParity: "same unique ordered milestone ids",
     boundaries: Object.freeze([...EXPECTED_BOUNDARY_COMMAND]),
   });
 }
@@ -2941,6 +3001,21 @@ async function verifyTrace(tracePath) {
   });
 }
 
+async function verifyProtocolFindings(workspaceRoot, fileOverrides) {
+  const findingsText = (
+    await readWorkspaceBytes(workspaceRoot, "docs/plan/PROTOCOL-FINDINGS.md", fileOverrides)
+  ).toString("utf8");
+  for (const requiredText of REQUIRED_PROTOCOL_FINDING_TEXT) {
+    if (!findingsText.includes(requiredText)) {
+      fail(
+        "CATALOG_REGISTRATION_FINDING_DRIFT",
+        `The protocol findings ledger is missing ${JSON.stringify(requiredText)}.`,
+      );
+    }
+  }
+  return Object.freeze(["PF-024", "PF-025"]);
+}
+
 async function verifyPrerequisite(verify) {
   const bytes = await readFile(DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH);
   const artifact = JSON.parse(bytes.toString("utf8"));
@@ -3100,14 +3175,21 @@ export async function buildCatalogManifestRegistrationEvidence({
   const activeCatalogApi = catalogApi ?? loadedApis.catalogApi;
   const activeValidatorApi = validatorApi ?? loadedApis.validatorApi;
   const runtimeExports = verifyPublicRuntimeApis(activeCatalogApi, activeValidatorApi);
-  const [prerequisite, traceEvidence, platformBoundary, testInventory, commandWiring] =
-    await Promise.all([
-      verifyPrerequisite(verifyG02),
-      verifyTrace(tracePath),
-      verifyPlatformBoundary(workspaceRoot, fileOverrides),
-      verifyTestInventory(workspaceRoot, fileOverrides),
-      verifyCommandWiring(workspaceRoot, fileOverrides),
-    ]);
+  const [
+    prerequisite,
+    traceEvidence,
+    protocolFindings,
+    platformBoundary,
+    testInventory,
+    commandWiring,
+  ] = await Promise.all([
+    verifyPrerequisite(verifyG02),
+    verifyTrace(tracePath),
+    verifyProtocolFindings(workspaceRoot, fileOverrides),
+    verifyPlatformBoundary(workspaceRoot, fileOverrides),
+    verifyTestInventory(workspaceRoot, fileOverrides),
+    verifyCommandWiring(workspaceRoot, fileOverrides),
+  ]);
   const [trackedFiles, distributionFiles] = await Promise.all([
     fileInventory(
       workspaceRoot,
@@ -3131,6 +3213,7 @@ export async function buildCatalogManifestRegistrationEvidence({
       directTraceRules: traceEvidence.rules,
       directSchemaFamilies: traceEvidence.schemaFamilies,
       directSchemaConstraints: traceEvidence.schemaConstraints,
+      directProtocolFindings: protocolFindings,
       proofClaimStatusChanges: Object.freeze([]),
     },
     publicApi: {

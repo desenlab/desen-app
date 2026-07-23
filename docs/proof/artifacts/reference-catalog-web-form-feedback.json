@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 1,
+  "task": "M03-T06",
+  "result": "PASS",
+  "claim": {
+    "summary": "The frozen TextField, Button, and Alert contracts resolve alongside Stack and Text to accessible Web-React components.",
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "normativeCoverage": {
+      "partial": ["S-004"],
+      "note": "All five public component prop schemas are closed; final adapter and style-part parity remains M03-T09."
+    },
+    "proofMatrixStatusChanges": []
+  },
+  "prerequisite": {
+    "task": "M03-T05",
+    "result": "PASS",
+    "verifiedBy": "verifyReferenceCatalogWebComponentsEvidence",
+    "artifactSha256": "788b68af9520ebf49fac1d39a505bc11e153f6a1d7a5ab89f57c9207b251cc51"
+  },
+  "publicApi": {
+    "package": "@desen/reference-catalog-web/components",
+    "runtimeExports": [
+      "ALERT_CAPABILITY_ID",
+      "Alert",
+      "BUTTON_CAPABILITY_ID",
+      "Button",
+      "STACK_CAPABILITY_ID",
+      "Stack",
+      "TEXT_CAPABILITY_ID",
+      "TEXT_FIELD_CAPABILITY_ID",
+      "Text",
+      "TextField",
+      "alertComponentRegistration",
+      "buttonComponentRegistration",
+      "stackComponentRegistration",
+      "textComponentRegistration",
+      "textFieldComponentRegistration"
+    ],
+    "typeExports": [
+      "AlertCatalogProps",
+      "AlertProps",
+      "AlertTone",
+      "ButtonCatalogProps",
+      "ButtonPressPayload",
+      "ButtonProps",
+      "ButtonVariant",
+      "StackAlignment",
+      "StackCatalogProps",
+      "StackDirection",
+      "StackGap",
+      "StackProps",
+      "TextCatalogProps",
+      "TextFieldCatalogProps",
+      "TextFieldChangePayload",
+      "TextFieldFocusInput",
+      "TextFieldHandle",
+      "TextFieldProps",
+      "TextProps",
+      "TextRole"
+    ],
+    "reactVersion": "19.2.8",
+    "componentIds": [
+      "com.example.ui/Alert",
+      "com.example.ui/Button",
+      "com.example.ui/Stack",
+      "com.example.ui/Text",
+      "com.example.ui/TextField"
+    ]
+  },
+  "components": [
+    {
+      "id": "com.example.ui/Alert",
+      "category": "feedback",
+      "manifestSha256": "0b03015f106cca63127f1563c0b40632dbe7bc38a0e3180b15b2abf87176ac7b",
+      "officialFixtureExact": true,
+      "publicPropsClosed": true,
+      "slots": [],
+      "styleParts": ["icon", "root", "text"],
+      "events": [],
+      "commands": []
+    },
+    {
+      "id": "com.example.ui/Button",
+      "category": "action",
+      "manifestSha256": "52005655ceced7d34066eb30a602dbff18051513adadedec2eea8260535fb2b6",
+      "officialFixtureExact": true,
+      "publicPropsClosed": true,
+      "slots": [],
+      "styleParts": ["label", "leadingIcon", "root"],
+      "events": ["press"],
+      "commands": []
+    },
+    {
+      "id": "com.example.ui/Stack",
+      "category": "layout",
+      "manifestSha256": "0f17ece82bada4eafe9ecb4d8e5e9876a405495ecd97ee16ddbb26d7bf718588",
+      "officialFixtureExact": true,
+      "publicPropsClosed": true,
+      "slots": ["default"],
+      "styleParts": ["root"],
+      "events": [],
+      "commands": []
+    },
+    {
+      "id": "com.example.ui/Text",
+      "category": "content",
+      "manifestSha256": "c8bd3a4e6e08078ec5b4328b29b5d990431c7e7cd18cb6194b4636331254676d",
+      "officialFixtureExact": true,
+      "publicPropsClosed": true,
+      "slots": [],
+      "styleParts": ["text"],
+      "events": [],
+      "commands": []
+    },
+    {
+      "id": "com.example.ui/TextField",
+      "category": "input",
+      "manifestSha256": "5fc94af976031daf8a23baab17c937b6772f051410bb3acd35aa036057feb235",
+      "officialFixtureExact": true,
+      "publicPropsClosed": true,
+      "slots": [],
+      "styleParts": ["control", "label", "message", "root"],
+      "events": ["change"],
+      "commands": ["focus"]
+    }
+  ],
+  "contracts": {
+    "catalog": {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react",
+      "structural": "PASS",
+      "semantic": "PASS",
+      "componentSet": "PASS",
+      "interactionSet": "PASS",
+      "executionSet": "PASS"
+    },
+    "source": {
+      "id": "com.example.form-feedback-proof",
+      "structural": "PASS",
+      "semantic": "PASS",
+      "componentContracts": "PASS",
+      "interactionContracts": "PASS",
+      "bindingContracts": "PASS",
+      "executionContracts": "PASS",
+      "staticObligations": 0,
+      "runtimeObligations": [
+        {
+          "kind": "state-write",
+          "pointer": "/surfaces/main/root/slots/default/1/on/change/0/value",
+          "reason": "event-derived state writes require runtime value validation"
+        }
+      ],
+      "changeBinding": "state.set(fieldValue <- event.value)",
+      "pressBinding": "component.command(main.field.focus, {})",
+      "closedSchemaDiagnostics": [
+        {
+          "id": "com.example.ui/Alert",
+          "code": "UNKNOWN_PROP",
+          "pointer": "/surfaces/main/root/slots/default/3/props/unknown"
+        },
+        {
+          "id": "com.example.ui/Button",
+          "code": "UNKNOWN_PROP",
+          "pointer": "/surfaces/main/root/slots/default/2/props/unknown"
+        },
+        {
+          "id": "com.example.ui/TextField",
+          "code": "UNKNOWN_PROP",
+          "pointer": "/surfaces/main/root/slots/default/1/props/unknown"
+        }
+      ],
+      "requiredDiagnostics": [
+        {
+          "id": "com.example.ui/TextField",
+          "property": "label",
+          "code": "PROP_TYPE_MISMATCH",
+          "pointer": "/surfaces/main/root/slots/default/1/props/label"
+        },
+        {
+          "id": "com.example.ui/TextField",
+          "property": "value",
+          "code": "PROP_TYPE_MISMATCH",
+          "pointer": "/surfaces/main/root/slots/default/1/props/value"
+        },
+        {
+          "id": "com.example.ui/Button",
+          "property": "label",
+          "code": "PROP_TYPE_MISMATCH",
+          "pointer": "/surfaces/main/root/slots/default/2/props/label"
+        },
+        {
+          "id": "com.example.ui/Alert",
+          "property": "tone",
+          "code": "PROP_TYPE_MISMATCH",
+          "pointer": "/surfaces/main/root/slots/default/3/props/tone"
+        },
+        {
+          "id": "com.example.ui/Alert",
+          "property": "text",
+          "code": "PROP_TYPE_MISMATCH",
+          "pointer": "/surfaces/main/root/slots/default/3/props/text"
+        }
+      ],
+      "proseOnlyDangerTone": {
+        "code": "PROP_TYPE_MISMATCH",
+        "pointer": "/surfaces/main/root/slots/default/3/props/tone"
+      }
+    },
+    "eventPayloads": {
+      "changeAccepted": true,
+      "changeExtraPropertyRejected": true,
+      "pressAccepted": true,
+      "pressExtraPropertyRejected": true
+    },
+    "commandInputs": {
+      "focusEmptyObjectAccepted": true,
+      "focusExtraPropertyRejected": true,
+      "rejection": { "code": "COMMAND_INPUT_INVALID", "pointer": "/unexpected" }
+    }
+  },
+  "accessibility": {
+    "textField": {
+      "nativeControl": "input",
+      "visibleLabel": true,
+      "labelAssociation": { "visible": true, "unique": true, "deterministic": true },
+      "secureType": "password",
+      "nativeDisabled": true,
+      "ariaInvalid": true,
+      "domEventExposed": false,
+      "disabledSuppressesChange": true,
+      "focusHandleExposesDom": false,
+      "focusHandle": {
+        "scenarios": 2,
+        "sha256": "cab62c91435907b2ce69b5695efc09d8aaea65401250d1229a54ec13cf759dce",
+        "exposesDom": false,
+        "returnsValue": false,
+        "disabledSuppressesFocus": true
+      },
+      "representativeHtml": "<div style=\"display:grid;gap:var(--desen-space-xs, 0.25rem)\"><label for=\"_R_0_\" style=\"color:var(--desen-color-text, #111827);font-weight:600\">Email</label><input id=\"_R_0_\" placeholder=\"name@example.test\" style=\"background:var(--desen-color-surface, #ffffff);border:1px solid var(--desen-color-border, #6b7280);border-radius:var(--desen-radius-control, 0.375rem);color:var(--desen-color-text, #111827);font:inherit;min-width:0;padding:var(--desen-space-sm, 0.5rem)\" type=\"text\" value=\"proof@example.test\"/></div>",
+      "stateMatrix": {
+        "vectors": 108,
+        "sha256": "734149e724f1797227b2fe074ab9b87f56f5f55e8db3e69401e3dfd1862e25c1"
+      },
+      "stringMatrix": {
+        "vectors": 42,
+        "sha256": "4da0c1b7e8db0cfcfe41bb7dd33666808072e0e173f42e815438e83b2f61eb62"
+      },
+      "changePayloadMatrix": {
+        "vectors": 14,
+        "sha256": "65c29a304f255d1d5d24e62239b0a9973d22048460bd1a62b1a57756e8b481cb",
+        "callbackArguments": 1,
+        "domEventExposed": false,
+        "disabledSuppressesChange": true
+      }
+    },
+    "button": {
+      "nativeControl": "button",
+      "type": "button",
+      "loadingPreservesFocus": true,
+      "loadingSuppressesPress": true,
+      "domEventExposed": false,
+      "representativeHtml": "<button data-variant=\"primary\" style=\"align-items:center;border-style:solid;border-width:1px;border-radius:var(--desen-radius-control, 0.375rem);display:inline-flex;font:inherit;font-weight:600;justify-content:center;min-height:2.5rem;padding:var(--desen-space-sm, 0.5rem) var(--desen-space-md, 1rem);background:var(--desen-color-action-primary, #1d4ed8);border-color:var(--desen-color-action-primary, #1d4ed8);color:var(--desen-color-on-action, #ffffff);cursor:pointer\" type=\"button\">Continue</button>",
+      "stateMatrix": {
+        "vectors": 36,
+        "sha256": "8a2c03128bd34caa28e3e51134ca58eb9fe33487b57bab6cd79d55127db7c2ca"
+      },
+      "stringMatrix": {
+        "vectors": 14,
+        "sha256": "bd8ac731ec48800369b19c6370fa8e156c54da0d4efafc89bad9caba3e0bbbd7"
+      },
+      "pressMatrix": {
+        "vectors": 9,
+        "sha256": "704a6847baf1f3861015b0ab01b797b635d66ddfe933654404028a04a00c1ac5",
+        "callbackArguments": 1,
+        "domEventExposed": false,
+        "loadingPreservesFocus": true,
+        "inactiveSuppressesPress": true
+      }
+    },
+    "alert": {
+      "ordinaryRole": "status",
+      "criticalRole": "alert",
+      "focusable": false,
+      "explicitAriaLive": false,
+      "representativeHtml": "<div data-tone=\"critical\" role=\"alert\" style=\"border-inline-start-style:solid;border-inline-start-width:4px;border-radius:var(--desen-radius-control, 0.375rem);padding:var(--desen-space-sm, 0.5rem) var(--desen-space-md, 1rem);background:var(--desen-color-critical-surface, #fef2f2);border-color:var(--desen-color-critical, #b91c1c);color:var(--desen-color-critical-text, #7f1d1d)\">Try again.</div>",
+      "hostileInput": "<img src=x onerror=\"bad()\"><script>bad()</script>",
+      "escapedHostileHtml": "<div data-tone=\"critical\" role=\"alert\" style=\"border-inline-start-style:solid;border-inline-start-width:4px;border-radius:var(--desen-radius-control, 0.375rem);padding:var(--desen-space-sm, 0.5rem) var(--desen-space-md, 1rem);background:var(--desen-color-critical-surface, #fef2f2);border-color:var(--desen-color-critical, #b91c1c);color:var(--desen-color-critical-text, #7f1d1d)\">&lt;img src=x onerror=&quot;bad()&quot;&gt;&lt;script&gt;bad()&lt;/script&gt;</div>",
+      "matrix": {
+        "vectors": 56,
+        "sha256": "79c5a644b5edf77a07e98d78ed19e1e393c59a2132cc39c984c167c8116dde11"
+      }
+    },
+    "matrixTotals": { "vectors": 279, "serverRendered": 256, "interactions": 23 }
+  },
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "sourceProfiles": {
+      "interactive-contracts.ts": "d0c1681f0e1d03de445a9d5d5e4551037b4af3eea071ebc67040df07b0d9b7a6",
+      "text-field.tsx": "4b68f1d11c1777cd4969006e7ca44ca972befc22123a79403721e98bf2ffed90",
+      "button.tsx": "0f577313ba16dc9cf689ca9468b591d26e12d2d3980a8db8e7f4b0685f492048",
+      "alert.tsx": "517acce59b0273b7531a23a8a5896721720f68f231210e0a9b8586a8687c06a9"
+    },
+    "packageTests": [
+      "registers the three exact closed interaction contracts as immutable data",
+      "associates every visible TextField label with one unique native input",
+      "maps TextField invalid and disabled states without inventing error content",
+      "emits a fresh frozen exact TextField change payload and no DOM event",
+      "suppresses TextField change and focus bridges while disabled",
+      "exposes only the narrow frozen TextField focus command handle",
+      "emits fresh frozen empty Button press payloads from native activation",
+      "suppresses Button press while preserving focus during loading",
+      "maps every Button variant without creating toggle or submit semantics",
+      "uses polite status roles for ordinary Alert tones and alert only for critical",
+      "keeps TextField, Button, and Alert strings inert"
+    ],
+    "rootTests": [
+      "accepts the tracked deterministic M03-T06 evidence",
+      "two independent form-feedback evidence builds are byte-identical",
+      "records every explicit build option as injected evidence",
+      "rejects inherited accessor-backed and unknown options",
+      "rejects stale or one-byte-tampered evidence",
+      "rejects a missing or mismatched M03-T05 prerequisite",
+      "rejects each new manifest when it differs from the frozen official Catalog",
+      "rejects mutable registrations and accessor-backed public APIs",
+      "rejects a TextField renderer that loses its visible native label",
+      "rejects a Button renderer that replaces native button semantics",
+      "rejects trusted interaction bridges that silently drop change press or focus behavior",
+      "rejects an Alert renderer that fabricates focusability",
+      "rejects hidden component source changes and raw HTML paths",
+      "rejects declaration test and type-negative inventory drift",
+      "rejects alternate package exports and React runtime duplication",
+      "rejects inert quality-gate command wiring",
+      "rejects nondefault verification through a symlink alias",
+      "rejects forged validation that bypasses closed component props"
+    ],
+    "typeNegativeCases": [
+      "M03-T06-N01",
+      "M03-T06-N02",
+      "M03-T06-N03",
+      "M03-T06-N04",
+      "M03-T06-N05",
+      "M03-T06-N06",
+      "M03-T06-N07",
+      "M03-T06-N08",
+      "M03-T06-N09",
+      "M03-T06-N10",
+      "M03-T06-N11",
+      "M03-T06-N12",
+      "M03-T06-N13",
+      "M03-T06-N14",
+      "M03-T06-N15",
+      "M03-T06-N16",
+      "M03-T06-N17",
+      "M03-T06-N18",
+      "M03-T06-N19",
+      "M03-T06-N20",
+      "M03-T06-N21",
+      "M03-T06-N22"
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/reference-catalog-web/src/components/interactive-contracts.ts",
+        "bytes": 8462,
+        "sha256": "8587f8622075958634bb5f705d711142106a8abba0f9a45a860ef3a0b736e650"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text-field.tsx",
+        "bytes": 3747,
+        "sha256": "80e5d6713c96cfd7e867879aa3c6251f9f2a71b5cb48dc5460acdfecad989eb5"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/button.tsx",
+        "bytes": 2893,
+        "sha256": "074edb6e4b8ce9c357fba77636a3e419ee278bc19b41f27ccebeb019d6e7ea72"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/alert.tsx",
+        "bytes": 2180,
+        "sha256": "c751592848922182c32e956954673a93288ffed78d670dd7085f90397982110f"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/interactive-components.test.tsx",
+        "bytes": 10542,
+        "sha256": "da697e2be5210fe83d600c7fed48a28644f7383d1c4a09da7c0dbedcd7f27b07"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/interactive-components.types.tsx",
+        "bytes": 5583,
+        "sha256": "73c3683b71463f2c1d6100167450b916667bdcace1d32587a124b942efe18baf"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/form-feedback-components-consumer.mjs",
+        "bytes": 382,
+        "sha256": "d4d6afbb2a49738b9114975bac9488daaebf6bd62400762a7927da80f31c9e14"
+      },
+      {
+        "path": "docs/proof/REFERENCE-CATALOG-WEB-FORM-FEEDBACK.md",
+        "bytes": 6797,
+        "sha256": "5d562be98251bcb2bc2ee94958107aa0ff4648dd877ee9a92312287f4a315063"
+      },
+      {
+        "path": "scripts/lib/reference-catalog-web-form-feedback-proof.mjs",
+        "bytes": 102070,
+        "sha256": "aafa9bbec3048e5a6cd15f7b1525a1bffae3eb27b1141095a56335086757d744"
+      },
+      {
+        "path": "scripts/generate-reference-catalog-web-form-feedback-proof.mjs",
+        "bytes": 867,
+        "sha256": "40aefd4f04b05a77f6c79add8229a7d2f7e6b43a1e8ef0cbb62b52ea6be4c5d0"
+      },
+      {
+        "path": "scripts/verify-reference-catalog-web-form-feedback.mjs",
+        "bytes": 698,
+        "sha256": "3fd70ce947d669d5b0266560a6b2a682e274a823d3a7b8d8da969e69c14d6ab3"
+      },
+      {
+        "path": "tests/reference-catalog-web-form-feedback.test.mjs",
+        "bytes": 23349,
+        "sha256": "6835346e9f62ef02c39d240c98dad2cc3e4b705ebaa6b6ef8339c6fd89b055fa"
+      }
+    ],
+    "commands": [
+      "generate:reference-catalog-web-form-feedback",
+      "verify:reference-catalog-web-form-feedback",
+      "test:reference-catalog-web-form-feedback"
+    ]
+  },
+  "boundaries": [
+    "Catalog props and event or command schemas remain inert manifest-derived JSON.",
+    "Trusted React callbacks and the narrow TextField focus handle never enter a DESEN document.",
+    "No native DOM event or input element crosses the trusted component boundary.",
+    "TextField invents no error message or autocomplete policy.",
+    "Button remains a native non-submit control and adds no custom keyboard activation.",
+    "Alert never moves focus and relies on the implicit semantics of status and alert roles.",
+    "React and DOM types remain outside the framework-neutral Catalog SDK."
+  ],
+  "deferred": [
+    "M03-T07 token provider and controlled fixture infrastructure",
+    "M03-T08 sign-in success and failure fixtures with separate host operation binding",
+    "M03-T09 complete manifest-to-implementation parity and accessibility contract tests",
+    "M03-T10 final immutable package inventory and exact tuple",
+    "M05 React adapter registration and runtime materialization"
+  ]
+}

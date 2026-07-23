@@ -88,6 +88,7 @@ document does not create a self-referential hash.
 ## Scope
 
 This task supplies two real components and their exact contracts. It does not complete G03,
-advance a `P-*` claim, or claim a final package tuple. TextField, Button, and Alert remain M03-T06;
-tokens and fixtures remain M03-T07/M03-T08; complete manifest/implementation parity remains
-M03-T09; and the immutable final package inventory remains M03-T10.
+advance a `P-*` claim, or claim a final package tuple. M03-T06 now extends this prerequisite
+through a separate cumulative proof for TextField, Button, and Alert. Tokens and fixtures remain
+M03-T07/M03-T08; complete manifest/implementation parity remains M03-T09; and the immutable final
+package inventory remains M03-T10.

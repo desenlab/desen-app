@@ -15,7 +15,7 @@
   "prerequisite": {
     "task": "M03-T04",
     "result": "PASS",
-    "artifactSha256": "baf677090de2b1fbab62937aa991a0fe4a0f4fa9c03ee9eece745f9dfe945800"
+    "artifactSha256": "e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716"
   },
   "publicApi": {
     "package": "@desen/reference-catalog-web/components",
@@ -136,7 +136,7 @@
       "rejects a Stack renderer that fabricates focusability for one schema value",
       "rejects a raw HTML execution path in the reviewed Text source",
       "rejects conditional Stack source behavior outside sampled numbers",
-      "rejects extra declaration exports and modified test calls",
+      "rejects missing foundational declaration exports and modified test calls",
       "rejects alternate web export conditions and React runtime duplication",
       "rejects inert quality-gate command wiring",
       "rejects nondefault verification through a symlink alias to the tracked artifact",
@@ -168,11 +168,6 @@
         "sha256": "c741c3ddba19d12120e793c9e93b19f3790e9ba93c7d579325a0d07e4cef8f17"
       },
       {
-        "path": "packages/reference-catalog-web/src/components/index.ts",
-        "bytes": 570,
-        "sha256": "307ef4d21c77c6028acdc19679bbb765e3d1bcb1f1aafb042764e075abfa7c9f"
-      },
-      {
         "path": "packages/reference-catalog-web/test/foundation-components.test.tsx",
         "bytes": 3780,
         "sha256": "2664a6e5de2221164dbbf8f7230bb2db38350aecb4172ee3adaddedb22fcfb44"
@@ -184,13 +179,8 @@
       },
       {
         "path": "packages/reference-catalog-web/test/components-consumer.mjs",
-        "bytes": 57,
-        "sha256": "8b40e4f1f368f533cca8bf45913a3ed279b7e3b18d89393624a52f22f0c91377"
-      },
-      {
-        "path": "packages/reference-catalog-web/package.json",
-        "bytes": 1329,
-        "sha256": "fed54f9357f42c0f1df53d56944c45082350d0d805047a1df1e99dbec96a2dfe"
+        "bytes": 180,
+        "sha256": "9df51bcffe5bbdf6d045db0104a7ae5ed54f1c25f782e6c4c70f98a6312bfdb7"
       },
       {
         "path": "packages/reference-catalog-web/tsconfig.json",
@@ -203,19 +193,14 @@
         "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
       },
       {
-        "path": "packages/reference-catalog-web/README.md",
-        "bytes": 6327,
-        "sha256": "c26edc6748950a857705c2542db0a8a39ea0f5670b99a23fed467630b2533c13"
-      },
-      {
         "path": "docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md",
-        "bytes": 4659,
-        "sha256": "3cad4b314f1eeefb46604ecdb55e1b4e45f99c9710100754346bdc62686896a7"
+        "bytes": 4722,
+        "sha256": "0a3a234c3c765d1c66a68080566c54cbd9ef6388ba9a23de21785172174edd4b"
       },
       {
         "path": "scripts/lib/reference-catalog-web-components-proof.mjs",
-        "bytes": 76599,
-        "sha256": "1ad0b105f60f335236bb3fe88a68f73ec591bcd408cb205dfdde7ed943e1a40e"
+        "bytes": 76888,
+        "sha256": "b5e9deb692c5c6c2b3c3859d7012de93c784808aa75f44c9a8c5a83afe2dcdbd"
       },
       {
         "path": "scripts/generate-reference-catalog-web-components-proof.mjs",
@@ -229,18 +214,8 @@
       },
       {
         "path": "tests/reference-catalog-web-components.test.mjs",
-        "bytes": 16604,
-        "sha256": "340ce99354cd8d25f4de8716cac2e87dc4769d0cbfa15a598644494582c22239"
-      },
-      {
-        "path": "package.json",
-        "bytes": 11233,
-        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
-      },
-      {
-        "path": "pnpm-lock.yaml",
-        "bytes": 111382,
-        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
+        "bytes": 16771,
+        "sha256": "fbd4ba890221830c36a4705fc7b024b1a6ac7989985b0872663f40dbfc260a79"
       }
     ],
     "commands": [

@@ -64,7 +64,7 @@ test("accepts the tracked deterministic M03-T04 evidence", async () => {
   assert.equal(result.directTraceRules, 5);
   assert.equal(result.goldenEntries, 5);
   assert.equal(result.mutationVectors, 269);
-  assert.equal(result.trackedFiles, 17);
+  assert.equal(result.trackedFiles, 15);
   assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 
@@ -446,8 +446,11 @@ test("rejects runtime and declaration public-surface drift", async (context) => 
   const declarationPath = await createVariant(
     context,
     "../packages/reference-catalog-web/dist/index.d.ts",
-    (source) =>
-      `${source}\nexport type { WebReactPackageDigestCalculationInput as HiddenType } from "./package-digest-profile.js";\n`,
+    (source) => {
+      const mutated = source.replace("verifyWebReactPackageDigest, ", "");
+      assert.notEqual(mutated, source);
+      return mutated;
+    },
     "desen-m03-t04-declaration-",
   );
   await assert.rejects(
@@ -455,8 +458,56 @@ test("rejects runtime and declaration public-surface drift", async (context) => 
       declarationPath,
       verifyPrerequisite: false,
     }),
-    hasEvidenceCode("WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT"),
+    hasEvidenceCode("WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT"),
   );
+
+  for (const [label, append] of [
+    ["ambient", "declare global { interface Window { __desenDigestBypass: true } }\nexport {};\n"],
+    ["default", "export default WEB_REACT_PACKAGE_DIGEST_PROFILE;\n"],
+    ["duplicate", 'export { verifyWebReactPackageDigest } from "./package-digest-profile.js";\n'],
+    ["wildcard", 'export * from "./package-digest-profile.js";\n'],
+    [
+      "alias",
+      'export type { WebReactPackageDigest as HiddenType } from "./package-digest-profile.js";\n',
+    ],
+  ]) {
+    const unsafeDeclarationPath = await createVariant(
+      context,
+      "../packages/reference-catalog-web/dist/index.d.ts",
+      (source) => `${source}\n${append}`,
+      `desen-m03-t04-${label}-`,
+    );
+    await assert.rejects(
+      buildWebReactPackageDigestEvidence({
+        declarationPath: unsafeDeclarationPath,
+        verifyPrerequisite: false,
+      }),
+      hasEvidenceCode("WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT"),
+    );
+  }
+
+  const futureTypeExport =
+    'export type { FutureTokenContract } from "./future-token-contract.js";\n';
+  const futureIndexPath = await createVariant(
+    context,
+    "../packages/reference-catalog-web/src/index.ts",
+    (source) => `${source}\n${futureTypeExport}`,
+    "desen-m03-t04-future-source-",
+  );
+  const futureDeclarationPath = await createVariant(
+    context,
+    "../packages/reference-catalog-web/dist/index.d.ts",
+    (source) => `${source}\n${futureTypeExport}`,
+    "desen-m03-t04-future-declaration-",
+  );
+  const futureResult = await buildWebReactPackageDigestEvidence({
+    indexPath: futureIndexPath,
+    declarationPath: futureDeclarationPath,
+    verifyPrerequisite: false,
+  });
+  assert.equal(futureResult.artifact.result, "PASS");
+  assert.equal(futureResult.artifact.evidence.trackedFiles.length, 15);
+  assert.equal(futureResult.artifact.publicApi.typeExports.includes("FutureTokenContract"), false);
 
   const packageManifestPath = await createVariant(
     context,

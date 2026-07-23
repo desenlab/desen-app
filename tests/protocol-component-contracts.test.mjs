@@ -618,7 +618,6 @@ test("records project mutation goldens, scope fences, commands, and code-free de
     artifact.implementation.trackedFiles.every(({ sha256 }) => /^[0-9a-f]{64}$/u.test(sha256)),
   );
   for (const trackedPath of [
-    "docs/plan/PROTOCOL-FINDINGS.md",
     "docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md",
     "packages/protocol/src/index.ts",
     "packages/protocol/src/canonicalization.ts",
@@ -632,6 +631,19 @@ test("records project mutation goldens, scope fences, commands, and code-free de
     assert.ok(
       artifact.implementation.trackedFiles.some(({ path: filePath }) => filePath === trackedPath),
       trackedPath,
+    );
+  }
+  for (const sharedPath of [
+    "package.json",
+    "pnpm-lock.yaml",
+    "turbo.json",
+    "docs/plan/PROTOCOL-FINDINGS.md",
+    "docs/proof/NORMATIVE-COVERAGE.md",
+  ]) {
+    assert.equal(
+      artifact.implementation.trackedFiles.some(({ path: filePath }) => filePath === sharedPath),
+      false,
+      sharedPath,
     );
   }
 });

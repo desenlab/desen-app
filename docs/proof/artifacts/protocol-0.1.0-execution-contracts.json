@@ -21,8 +21,8 @@
       "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
       "verifiedBy": "verifyProtocolBindingContracts",
-      "sha256": "2743abcfb549fe3d09146a2051e808d62cecb1fe2f723270f5a123930a7b80a4",
-      "verificationSha256": "2743abcfb549fe3d09146a2051e808d62cecb1fe2f723270f5a123930a7b80a4"
+      "sha256": "2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c",
+      "verificationSha256": "2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c"
     }
   },
   "traceability": {
@@ -863,7 +863,7 @@
       }
     },
     "schemaProfile": {
-      "inheritedFromVerifiedT10Artifact": "2743abcfb549fe3d09146a2051e808d62cecb1fe2f723270f5a123930a7b80a4",
+      "inheritedFromVerifiedT10Artifact": "2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c",
       "unsafeNativePatternExecution": false
     },
     "platformAudit": {
@@ -1012,16 +1012,6 @@
     "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
     "trackedFiles": [
       {
-        "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 42432,
-        "sha256": "c8d0363e26065bf743817e2b1890456ec973c682a248f5c7b933982dee078a90"
-      },
-      {
-        "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 26212,
-        "sha256": "a6adcb82432502b75fc89c898ffa917996ca2bc6c614c0130dc04a753c7e7126"
-      },
-      {
         "path": "docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md",
         "bytes": 13625,
         "sha256": "bb4d3dce7e798e0a1c177754dbec81cf2de4698ab88d84c44d3153a2e078baba"
@@ -1030,11 +1020,6 @@
         "path": "docs/proof/protocol-0.1.0-traceability.json",
         "bytes": 134870,
         "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
-      },
-      {
-        "path": "package.json",
-        "bytes": 11233,
-        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
       },
       {
         "path": "packages/protocol/dist/canonicalization.d.ts",
@@ -1210,11 +1195,6 @@
         "path": "packages/protocol/src/json-pointer.ts",
         "bytes": 7460,
         "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
-      },
-      {
-        "path": "packages/validator/README.md",
-        "bytes": 51852,
-        "sha256": "dc8185c985a6199041ae7c9c1c7b7b625ca23f9d18abfb45ddb0ed42e6895a28"
       },
       {
         "path": "packages/validator/dist/binding-contract-validation.d.ts",
@@ -1517,11 +1497,6 @@
         "sha256": "9ca50d90af0fc3691f61093af2079fcb7a17c2f6c5e16db4d93a20eccbd76fa0"
       },
       {
-        "path": "packages/validator/package.json",
-        "bytes": 2184,
-        "sha256": "6d45074ada3fea091e4ac3b5a93b41bc75d51cfa3eedcd389297bd0b4c8e062b"
-      },
-      {
         "path": "packages/validator/src/binding-contract-validation.ts",
         "bytes": 56612,
         "sha256": "a0df532ba41a1db352edd4bde93ea9f656104902a987c8789278c92b4a43cca8"
@@ -1608,8 +1583,8 @@
       },
       {
         "path": "scripts/lib/protocol-execution-contracts-proof.mjs",
-        "bytes": 91781,
-        "sha256": "5f9df01afa6a5464514a537ecec759dd40b3549fdc37ac52c31fa4df90103cba"
+        "bytes": 91602,
+        "sha256": "fe6c8a434097b1973f7acded9ac859f53b6e2d8d85c8c3f1badb29e7bb279a59"
       },
       {
         "path": "scripts/verify-protocol-execution-contracts.mjs",
@@ -1620,11 +1595,6 @@
         "path": "tests/protocol-execution-contracts.test.mjs",
         "bytes": 17545,
         "sha256": "f0898f486e5adb39a97f9ebb10b81c275214570d07dbcf5b72b8792675ce6846"
-      },
-      {
-        "path": "turbo.json",
-        "bytes": 4262,
-        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
       }
     ]
   },

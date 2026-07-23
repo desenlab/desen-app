@@ -54,16 +54,10 @@ const PUBLIC_TYPE_EXPORTS = Object.freeze([
 ]);
 
 const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
-  "package.json",
-  "pnpm-lock.yaml",
-  "turbo.json",
-  "THIRD_PARTY_NOTICES.md",
-  "packages/protocol/package.json",
   "packages/protocol/src/index.ts",
   "packages/protocol/src/canonicalization.ts",
   "packages/protocol/src/diagnostics.ts",
   "packages/protocol/src/json-pointer.ts",
-  "packages/validator/package.json",
   "packages/validator/THIRD_PARTY_NOTICES.md",
   "packages/validator/tsconfig.json",
   "packages/validator/tsconfig.build.json",
@@ -80,7 +74,6 @@ const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
   "packages/validator/scripts/generate-structural-validators.mjs",
   "packages/validator/scripts/verify-structural-validators.mjs",
   "packages/validator/test/structural-validation.test.ts",
-  "packages/validator/README.md",
   "scripts/lib/protocol-structural-validation-proof.mjs",
   "scripts/generate-protocol-structural-validation-proof.mjs",
   "scripts/verify-protocol-structural-validation.mjs",

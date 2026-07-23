@@ -9,10 +9,10 @@ the complete claim is not established. A visual demonstration alone cannot chang
 | ID   | Claim                                                                                             | Owner task(s)                      | Current status | Current evidence                                                                                                                                       | Required final evidence                                                                                               | Artifact / hash                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Last verified |
 | ---- | ------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
 | P-01 | The implementation consumes exact, immutable DESEN 0.1.0 bytes                                    | M02-T01                            | PROVEN         | Complete 31-file upstream Git tree is vendored; pinned manifest, inventory, bytes, aggregate, modes, and drift tests pass                              | Vendored-byte checksum test against exact upstream commit                                                             | `protocol-0.1.0-snapshot.json` `sha256:aaf58f79bc95924fbaa0c2b278cc06f3d28b3986e5d168b5468e6432c04cd5a9`                                                                                                                                                                                                                                                                                                                                                                       | 2026-07-21    |
-| P-02 | Official valid/negative cases and examples produce expected results                               | M02-T12, M02-T13                   | PROVEN         | Python and built TypeScript pass the exact 14-case starter suite; 34 positive/negative diagnostic pairs pass the complete declared validator scope     | Fulfilled: official parity plus one positive and one exact negative vector for every validator-emitted diagnostic     | `protocol-0.1.0-validation.txt` `sha256:d2c5e7e27a5a1f5ecc66f3aad4956451c81b420a60908be5c948071a7305aa86`; `protocol-0.1.0-checksums.txt` `sha256:6208ed37fa4da3b816e505c106be1801fcee504e1dde2ab4a4e4ceb5b0ca166f`; `protocol-0.1.0-official-suite-parity.json` `sha256:6263d4ef42dc04d4f7b15dc13cfa24b680c403550d057eb547ec5b5b2c3ba341`; `protocol-0.1.0-validator-diagnostic-micro-vectors.json` `sha256:b160d66ee5907f8d02b3c95708f872d379f6bc363ed553ee50e56c7b533e9839` | 2026-07-23    |
+| P-02 | Official valid/negative cases and examples produce expected results                               | M02-T12, M02-T13                   | PROVEN         | Python and built TypeScript pass the exact 14-case starter suite; 34 positive/negative diagnostic pairs pass the complete declared validator scope     | Fulfilled: official parity plus one positive and one exact negative vector for every validator-emitted diagnostic     | `protocol-0.1.0-validation.txt` `sha256:d2c5e7e27a5a1f5ecc66f3aad4956451c81b420a60908be5c948071a7305aa86`; `protocol-0.1.0-checksums.txt` `sha256:6208ed37fa4da3b816e505c106be1801fcee504e1dde2ab4a4e4ceb5b0ca166f`; `protocol-0.1.0-official-suite-parity.json` `sha256:efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae`; `protocol-0.1.0-validator-diagnostic-micro-vectors.json` `sha256:3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718` | 2026-07-23    |
 | P-03 | Publication is deterministic                                                                      | M06-T10                            | NOT_PROVEN     | —                                                                                                                                                      | Same source/catalog twice produces byte-identical semantic bundle and revision                                        | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | —             |
-| P-04 | Source and bundle documents are inert data and cannot select executable code                      | M02-T06, M12-T03                   | PARTIAL        | M02-T06 returns detached deep-frozen snapshots; ahead-of-time validators and source/distribution audits reject runtime code loading and network access | Exhaustive executable-content forms, markup interpretation, and remote code-selection proof under M12-T03             | `protocol-0.1.0-structural-validation.json` `sha256:694e7818e1898ab2cd61c8eb72c92173072f943d66863680abbd1d219d3df1f3`                                                                                                                                                                                                                                                                                                                                                          | 2026-07-23    |
-| P-05 | Capabilities are pinned by exact id/version/target/digest                                         | M03-T04, M03-T10, M06-T08, M07-T03 | PARTIAL        | M03-T04 defines and mutation-tests a versioned Web–React package byte/digest profile with published Catalog self-digest verification                   | Deterministic final artifact tuple plus package mismatch publication and activation tests                             | `reference-catalog-web-package-digest-v1.json` `sha256:baf677090de2b1fbab62937aa991a0fe4a0f4fa9c03ee9eece745f9dfe945800`                                                                                                                                                                                                                                                                                                                                                       | 2026-07-23    |
+| P-04 | Source and bundle documents are inert data and cannot select executable code                      | M02-T06, M12-T03                   | PARTIAL        | M02-T06 returns detached deep-frozen snapshots; ahead-of-time validators and source/distribution audits reject runtime code loading and network access | Exhaustive executable-content forms, markup interpretation, and remote code-selection proof under M12-T03             | `protocol-0.1.0-structural-validation.json` `sha256:7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536`                                                                                                                                                                                                                                                                                                                                                          | 2026-07-23    |
+| P-05 | Capabilities are pinned by exact id/version/target/digest                                         | M03-T04, M03-T10, M06-T08, M07-T03 | PARTIAL        | M03-T04 defines and mutation-tests a versioned Web–React package byte/digest profile with published Catalog self-digest verification                   | Deterministic final artifact tuple plus package mismatch publication and activation tests                             | `reference-catalog-web-package-digest-v1.json` `sha256:e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716`                                                                                                                                                                                                                                                                                                                                                       | 2026-07-23    |
 | P-06 | Desen App and the production-like host use the same real components                               | M03-T09, M09-T03                   | NOT_PROVEN     | —                                                                                                                                                      | Registry identity, package digest, and separately built host evidence                                                 | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | —             |
 | P-07 | Managed surfaces have no handwritten host component tree                                          | M05-T09, M10-T05                   | NOT_PROVEN     | —                                                                                                                                                      | Automated import/source audit and host E2E                                                                            | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | —             |
 | P-08 | A designer edits props, slots, state, bindings, and actions visually                              | M09-T05–M09-T09, M10-T01           | NOT_PROVEN     | —                                                                                                                                                      | Desen App browser E2E from an empty project                                                                           | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | —             |
@@ -24,7 +24,7 @@ the complete claim is not established. A visual demonstration alone cannot chang
 | P-14 | Sortable behavior integrates without changing runtime-core                                        | M10-T09, M11-T12                   | NOT_PROVEN     | —                                                                                                                                                      | Reorder E2E and runtime-core tree hash equal to frozen G10 baseline                                                   | Future `docs/proof/artifacts/runtime-core-baseline.json` and Sortable comparison                                                                                                                                                                                                                                                                                                                                                                                               | —             |
 | P-15 | Existing complex capabilities build a second surface without screen code                          | M11-T13                            | NOT_PROVEN     | —                                                                                                                                                      | Desen App runbook, published source/bundle, and host source audit                                                     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | —             |
 | P-16 | Runtime diagnostics trace to stable source-node identity                                          | M05-T05, M09-T13                   | NOT_PROVEN     | —                                                                                                                                                      | Runtime-node ↔ source-node diagnostic tests                                                                           | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | —             |
-| P-17 | Runtime bounds execution and never guesses unknown semantics                                      | M02-T13, M04-T13, M05-T06, M07-T04 | PARTIAL        | Validator micro-vectors cover unknown/unsupported semantics and bounded contract-schema and resolved-JSON validation; runtime execution is not built   | Runtime materialization, action-turn, Bundle-ingress, adapter, and activation finite-limit vectors                    | `protocol-0.1.0-validator-diagnostic-micro-vectors.json` `sha256:b160d66ee5907f8d02b3c95708f872d379f6bc363ed553ee50e56c7b533e9839`                                                                                                                                                                                                                                                                                                                                             | 2026-07-23    |
+| P-17 | Runtime bounds execution and never guesses unknown semantics                                      | M02-T13, M04-T13, M05-T06, M07-T04 | PARTIAL        | Validator micro-vectors cover unknown/unsupported semantics and bounded contract-schema and resolved-JSON validation; runtime execution is not built   | Runtime materialization, action-turn, Bundle-ingress, adapter, and activation finite-limit vectors                    | `protocol-0.1.0-validator-diagnostic-micro-vectors.json` `sha256:3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718`                                                                                                                                                                                                                                                                                                                                             | 2026-07-23    |
 | P-18 | Platform-neutral packages contain no React/Web dependencies and core traces are JSON-serializable | M01-T05, M04-T16, M08-T10          | PARTIAL        | Dependency rules and six boundary fixtures pass; functional JSON trace does not yet exist                                                              | Boundary tests over implemented packages plus JSON trace portability audit                                            | `tracked-foundation.json` `sha256:5c430da7e221dc37c9bdd4ca1c423f1a84d0aabe22cfe4465e40b67fa7d1529c`                                                                                                                                                                                                                                                                                                                                                                            | 2026-07-21    |
 
 The implementation report must preserve failed and partial results. `PROVEN` requires all owner
@@ -50,7 +50,7 @@ M02-T05's diagnostic artifact proves the exact Appendix B registry, shared porta
 data, and RFC 6901 JSON Pointer primitives. It does not prove that later validators, runtimes,
 publishers, activation code, or editor surfaces emit those diagnostics, so no `P-*` status changes:
 `protocol-0.1.0-diagnostics.json`
-`sha256:9edc4c8a9b8b7a1ed505dc4c6d0644f88df69c54f672fd542a8688f3f83e26b7`.
+`sha256:e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b`.
 
 M02-T06's structural-validation artifact proves the exact three frozen root validators, all 13
 embedded-schema locator families, an independent immutable input boundary, stable structural
@@ -58,7 +58,7 @@ diagnostics, deterministic standalone generation, and a production-source/distri
 no runtime compilation, dynamic loading, or network access. P-04 becomes `PARTIAL`, not `PROVEN`,
 because exhaustive prohibited-content and remote-selection coverage remains assigned to M12-T03:
 `protocol-0.1.0-structural-validation.json`
-`sha256:694e7818e1898ab2cd61c8eb72c92173072f943d66863680abbd1d219d3df1f3`.
+`sha256:7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536`.
 
 M02-T07's semantic-foundation artifact proves strict SemVer syntax, exact declared-catalog
 matching, entry and identity namespaces, set-wide capability uniqueness, category-aware component,
@@ -66,7 +66,7 @@ behavior, resource, and operation existence, extension opacity, and the two offi
 vectors. No claim changed at M02-T07: P-05 still requires publication/activation digest work, and
 P-17 required the later M02-T13 evidence plus runtime and activation bounds:
 `protocol-0.1.0-semantic-foundation.json`
-`sha256:dc9273eca610e3400b13370ac466e1dde30d0534897817b74e7242bfb16f337b`.
+`sha256:96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7`.
 
 M02-T08's component-contract artifact proves statically knowable base and Variant props,
 slot presence/cardinality/acceptance, visual states, style parts, dynamic validation obligations,
@@ -76,7 +76,7 @@ goldens. No official invalid vector is assigned specifically to T08, and no `P-*
 official-suite parity remains M02-T12/M02-T13 and complete bounded-runtime behavior remains later
 work:
 `protocol-0.1.0-component-contracts.json`
-`sha256:9187054848824badea880533a9d303ca81276b1a4014a92b9b96dff08aef6587`.
+`sha256:71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac`.
 
 M02-T09's interaction-contract artifact proves behavior props, slots, styles, attachment and
 exclusive-channel conflicts; declared component and behavior events; command names for statically
@@ -86,7 +86,7 @@ T09 unknown-event vector, 15 behavior goldens, 6 attachment goldens, 7 conflict 
 schema-safety goldens, and 10 payload-safety goldens. `N-033` and `N-034` remain `PLANNED` because
 production adapter enforcement and command parity belong to M03/M04; no `P-*` status changes:
 `protocol-0.1.0-interaction-contracts.json`
-`sha256:ecd6dd3f0dd848bce24242a6117d06dd86230c9edb519c2dc7561d5c262f6ffb`.
+`sha256:981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208`.
 
 M02-T10's binding-contract artifact proves inert state initialization, surface-local and lexical
 state/item/event references, fallback-versus-`null` behavior, statically decidable predicate
@@ -97,7 +97,7 @@ of all 4 T09 obligation kinds. No official invalid vector, BCP 14 clause, or con
 assigned directly to T10. No `P-*` status changes: complete official parity, runtime execution,
 finite runtime bounds, publication, and activation remain with their assigned later owners:
 `protocol-0.1.0-binding-contracts.json`
-`sha256:2743abcfb549fe3d09146a2051e808d62cecb1fe2f723270f5a123930a7b80a4`.
+`sha256:2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c`.
 
 M02-T11's execution-contract artifact proves statically knowable resource and operation inputs;
 resource and operation lifecycle references; navigation and refresh actions; component command
@@ -111,7 +111,7 @@ invalid vector, BCP 14 clause, or conformance responsibility is assigned directl
 `P-*` status changes: official-suite parity, runtime execution, finite runtime bounds, publication,
 and activation remain with their assigned later owners:
 `protocol-0.1.0-execution-contracts.json`
-`sha256:f3bea085e928f9f6da215fe52bcf8a39a7b818afbaef0c9dba188d1a8bfa1bc1`.
+`sha256:f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505`.
 
 M02-T12's official-suite artifact proves that the built TypeScript implementation and archived
 Python reference both pass all 14 exact frozen starter-suite cases: 9 official conformance vectors
@@ -119,7 +119,7 @@ and 5 public examples. The proof-only runner composes T04 canonicalization with 
 validator and adds no public API. Together with the completed M02-T13 exhaustive project vectors,
 this closes P-02 and G02:
 `protocol-0.1.0-official-suite-parity.json`
-`sha256:6263d4ef42dc04d4f7b15dc13cfa24b680c403550d057eb547ec5b5b2c3ba341`.
+`sha256:efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae`.
 
 M02-T13's diagnostic micro-vector artifact proves one valid zero-diagnostic case and one exact
 single-diagnostic case for all 28 core diagnostics emitted by the validator and all 6 current
@@ -132,7 +132,7 @@ tasks. P-02 becomes `PROVEN` and G02 becomes `DONE`; P-17 becomes only `PARTIAL`
 `PLANNED` until runtime materialization, action-turn, Bundle-ingress, adapter, and activation limits
 are implemented:
 `protocol-0.1.0-validator-diagnostic-micro-vectors.json`
-`sha256:b160d66ee5907f8d02b3c95708f872d379f6bc363ed553ee50e56c7b533e9839`.
+`sha256:3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718`.
 
 M03-T01 through M03-T03's cumulative Catalog SDK artifact proves a framework-neutral six-function
 JSON API for exact component, behavior, operation, and resource contract snapshots, complete
@@ -149,7 +149,7 @@ final immutable artifact tuple, concrete editor widgets, and renderer adapters r
 M03-T08, M03-T09, M03-T10, M09, and M05. Therefore this M03-T01–M03-T03 artifact itself changes no
 `P-*` status and G03 remains open:
 `catalog-sdk-0.1.0-manifest-registration.json`
-`sha256:d7dccc41ad65f3bd7b3f5da0af336c9bf67e8dcf124af55a28474c3f3fd8a829`.
+`sha256:062ec5656ca507c79fef0ce97e87931b54fa23a038a8862b2532b6e7e9ba3432`.
 
 M03-T04 defines the separately versioned `desen.web-react.package-digest` binary profile in
 `@desen/reference-catalog-web`. It frames a projected RFC 8785-compatible `catalog.json` entry and
@@ -162,7 +162,7 @@ fresh preimage bytes, frozen audit metadata, and published Catalog self-digest v
 manifest parity, final exact package tuple, distributor immutability, publication, resolution, and
 activation remain assigned to M03-T09/M03-T10, M06, and M07:
 `reference-catalog-web-package-digest-v1.json`
-`sha256:baf677090de2b1fbab62937aa991a0fe4a0f4fa9c03ee9eece745f9dfe945800`.
+`sha256:e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716`.
 
 M03-T05 adds the first real `web-react` component slice without changing a `P-*` status. The
 frozen official `com.example.ui/Stack` and `com.example.ui/Text` manifests now resolve to
@@ -172,8 +172,23 @@ validator-accepted Catalog and Source, exact unknown/missing-prop diagnostics, p
 reading order, Text semantic elements, escaped markup-like content, 420 pinned Stack cross-product
 vectors, 56 Text/escaping vectors, exact source-shape checks, 5 focused package tests, 7
 compiler-negative cases, and 18 independent proof/mutation tests. Strict tracked-default
-provenance rejects injected APIs, alternate web exports, and path aliases. S-004 remains `PLANNED`
-until M03-T06 and M03-T09 complete the remaining public schemas and parity work; G03 also remains
-open:
+provenance rejects injected APIs, alternate web exports, and path aliases. M03-T06 now verifies
+this artifact as its exact prerequisite; S-004 remains `PLANNED` only for M03-T09's final parity
+work, and G03 remains open:
 `reference-catalog-web-components.json`
-`sha256:a142281b63c34c7a21dacbddb5fb46d4602634f31bc188c551e42d007811e2e5`.
+`sha256:788b68af9520ebf49fac1d39a505bc11e153f6a1d7a5ab89f57c9207b251cc51`.
+
+M03-T06 extends the `web-react` reference slice with the frozen official TextField, Button, and
+Alert contracts without changing a `P-*` status. All five public component prop schemas are
+closed. The cumulative controlled Source connects `change` to a state write and `press` to the
+TextField `focus` command, passes all six validator layers, and preserves one exact dynamic
+state-write obligation. Evidence covers exact official manifests, deep immutability, 256
+independent server-render vectors, 23 real built-package event vectors, 2 focus scenarios, 11
+focused package tests, 22 compiler-negative cases, and 18 independent proof/mutation tests.
+Adversarial checks reject dropped or extra callback arguments, DOM event or focus-handle leakage,
+disabled focus redirection, inert tests, declaration injection, alternate exports, prerequisite
+tampering, and path aliases. `PF-027` records the abbreviated-prose Alert tone conflict. Tokens,
+controlled sign-in fixtures, final implementation parity, and the immutable package tuple remain
+M03-T07 through M03-T10; G03 remains open:
+`reference-catalog-web-form-feedback.json`
+`sha256:553a48cb95aa2a9e6c2ee4e860aea7aedea92499c977b093c1c515c0ad9d75f2`.

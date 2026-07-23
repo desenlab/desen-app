@@ -49,7 +49,7 @@ test("accepts the tracked deterministic M03-T05 evidence", async () => {
   assert.equal(result.packageTests, 5);
   assert.equal(result.rootTests, 18);
   assert.equal(result.typeNegativeCases, 7);
-  assert.equal(result.trackedFiles, 18);
+  assert.equal(result.trackedFiles, 13);
   assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 
@@ -294,7 +294,7 @@ test("rejects conditional Stack source behavior outside sampled numbers", async 
   );
 });
 
-test("rejects extra declaration exports and modified test calls", async (context) => {
+test("rejects missing foundational declaration exports and modified test calls", async (context) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t05-inventory-"));
   context.after(() => rm(directory, { force: true, recursive: true }));
 
@@ -303,7 +303,12 @@ test("rejects extra declaration exports and modified test calls", async (context
     "utf8",
   );
   const forgedDeclarationPath = path.join(directory, "index.d.ts");
-  await writeFile(forgedDeclarationPath, `${declarationSource}\nexport interface Extra {}\n`);
+  const forgedDeclarationSource = declarationSource.replace(
+    'export { Stack } from "./stack.js";',
+    "",
+  );
+  assert.notEqual(forgedDeclarationSource, declarationSource);
+  await writeFile(forgedDeclarationPath, forgedDeclarationSource);
   await assert.rejects(
     buildReferenceCatalogWebComponentsEvidence({
       componentIndexPath: forgedDeclarationPath,

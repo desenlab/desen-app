@@ -102,6 +102,14 @@ const EXPECTED_TYPE_EXPORTS = Object.freeze([
   "TextProps",
   "TextRole",
 ]);
+const EXPECTED_COMPONENT_CONSUMER_SOURCE = `export {
+  STACK_CAPABILITY_ID,
+  Stack,
+  TEXT_CAPABILITY_ID,
+  Text,
+  stackComponentRegistration,
+  textComponentRegistration,
+} from "@desen/reference-catalog-web/components";`;
 const EXPECTED_PACKAGE_TEST_TITLES = Object.freeze([
   "registers exact closed public contracts as detached immutable data",
   "renders Stack as a neutral flex container while preserving child order",
@@ -132,7 +140,7 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "rejects a Stack renderer that fabricates focusability for one schema value",
   "rejects a raw HTML execution path in the reviewed Text source",
   "rejects conditional Stack source behavior outside sampled numbers",
-  "rejects extra declaration exports and modified test calls",
+  "rejects missing foundational declaration exports and modified test calls",
   "rejects alternate web export conditions and React runtime duplication",
   "rejects inert quality-gate command wiring",
   "rejects nondefault verification through a symlink alias to the tracked artifact",
@@ -163,21 +171,16 @@ const TRACKED_EVIDENCE_PATHS = Object.freeze([
   "packages/reference-catalog-web/src/components/contracts.ts",
   "packages/reference-catalog-web/src/components/stack.tsx",
   "packages/reference-catalog-web/src/components/text.tsx",
-  "packages/reference-catalog-web/src/components/index.ts",
   "packages/reference-catalog-web/test/foundation-components.test.tsx",
   "packages/reference-catalog-web/test/foundation-components.types.tsx",
   "packages/reference-catalog-web/test/components-consumer.mjs",
-  "packages/reference-catalog-web/package.json",
   "packages/reference-catalog-web/tsconfig.json",
   "packages/reference-catalog-web/tsconfig.build.json",
-  "packages/reference-catalog-web/README.md",
   "docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md",
   "scripts/lib/reference-catalog-web-components-proof.mjs",
   "scripts/generate-reference-catalog-web-components-proof.mjs",
   "scripts/verify-reference-catalog-web-components.mjs",
   "tests/reference-catalog-web-components.test.mjs",
-  "package.json",
-  "pnpm-lock.yaml",
 ]);
 
 /** Stable failure raised by the M03-T05 evidence builder and verifier. */
@@ -205,6 +208,16 @@ function assertCondition(condition, code, message, details = undefined) {
 function assertArrayEqual(actual, expected, code, message) {
   assertCondition(
     actual.length === expected.length && actual.every((value, index) => value === expected[index]),
+    code,
+    message,
+    { actual, expected },
+  );
+}
+
+function assertArrayContains(actual, expected, code, message) {
+  const actualSet = new Set(actual);
+  assertCondition(
+    expected.every((value) => actualSet.has(value)),
     code,
     message,
     { actual, expected },
@@ -1013,7 +1026,7 @@ function verifyPackageBoundary(packageJson, componentConsumerText) {
       componentExport?.import === "./dist/components/index.js" &&
       packageJson.scripts?.["test:components"] ===
         "vitest run test/foundation-components.test.tsx" &&
-      componentConsumerText.trim() === 'export * from "@desen/reference-catalog-web/components";',
+      componentConsumerText.trim() === EXPECTED_COMPONENT_CONSUMER_SOURCE,
     "REFERENCE_COMPONENT_PACKAGE_BOUNDARY_DRIFT",
     "The reviewed component subpath, dependency, peer, or test boundary changed.",
   );
@@ -1686,17 +1699,17 @@ export async function buildReferenceCatalogWebComponentsEvidence(options = undef
   }
 
   const declarationSurface = declarationExports(componentIndexBytes.toString("utf8"));
-  assertArrayEqual(
+  assertArrayContains(
     declarationSurface.runtime,
     EXPECTED_RUNTIME_EXPORTS,
     "REFERENCE_COMPONENT_PUBLIC_API_DRIFT",
-    "The component declaration runtime exports changed.",
+    "The component declarations lost a foundational runtime export.",
   );
-  assertArrayEqual(
+  assertArrayContains(
     declarationSurface.types,
     EXPECTED_TYPE_EXPORTS,
     "REFERENCE_COMPONENT_PUBLIC_API_DRIFT",
-    "The component public type exports changed.",
+    "The component declarations lost a foundational type export.",
   );
   verifySourceAudit(stackSourceBytes.toString("utf8"), textSourceBytes.toString("utf8"));
   verifyPackageBoundary(

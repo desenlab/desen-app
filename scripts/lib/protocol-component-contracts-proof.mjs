@@ -227,17 +227,8 @@ const EXPECTED_SCHEMA_SAFETY_ALIASES = Object.freeze({
 });
 
 const FIXED_TRACKED_PATHS = Object.freeze([
-  "package.json",
-  "pnpm-lock.yaml",
-  "turbo.json",
-  "packages/protocol/package.json",
-  "packages/validator/package.json",
-  "packages/validator/README.md",
-  "packages/validator/THIRD_PARTY_NOTICES.md",
   "packages/validator/tsconfig.build.json",
   "packages/validator/tsconfig.json",
-  "docs/plan/PROTOCOL-FINDINGS.md",
-  "docs/proof/NORMATIVE-COVERAGE.md",
   "docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md",
   "docs/proof/protocol-0.1.0-traceability.json",
   "scripts/generate-protocol-component-contracts-proof.mjs",

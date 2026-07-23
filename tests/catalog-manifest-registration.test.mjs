@@ -68,15 +68,36 @@ test("accepts the tracked deterministic M03-T01 through M03-T03 evidence", async
   assert.equal(result.inspectorFallbacks, 24);
   assert.equal(result.packageTests, 33);
   assert.equal(result.schemaConstraints, 34);
+  assert.equal(result.trackedFiles, 22);
   assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 
 test("two independent Catalog registration evidence builds are byte-identical", async () => {
   const first = await buildCatalogManifestRegistrationEvidence({ verifyG02: false });
   const second = await buildCatalogManifestRegistrationEvidence({ verifyG02: false });
+  const rootPackage = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  );
+  rootPackage.scripts.test = rootPackage.scripts.test.replace(
+    " && turbo run test",
+    " && pnpm test:future-milestone-proof && turbo run test",
+  );
+  rootPackage.scripts.check = rootPackage.scripts.check.replace(
+    " && pnpm lint",
+    " && pnpm verify:future-milestone-proof && pnpm lint",
+  );
+  const withFutureMilestone = await buildCatalogManifestRegistrationEvidence({
+    verifyG02: false,
+    fileOverrides: { "package.json": `${JSON.stringify(rootPackage)}\n` },
+  });
 
   assert.equal(first.artifactBytes.toString("hex"), second.artifactBytes.toString("hex"));
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(
+    first.artifactBytes.toString("hex"),
+    withFutureMilestone.artifactBytes.toString("hex"),
+  );
+  assert.equal(first.artifactSha256, withFutureMilestone.artifactSha256);
 });
 
 test("rejects stale or one-byte-tampered evidence", async () => {
@@ -117,6 +138,21 @@ test("rejects direct prose and conformance trace ownership drift", async (contex
       hasEvidenceCode("CATALOG_REGISTRATION_TRACE_DRIFT"),
     );
   }
+
+  const findingsPath = "docs/plan/PROTOCOL-FINDINGS.md";
+  const findings = await readFile(new URL(`../${findingsPath}`, import.meta.url), "utf8");
+  const changedFindings = findings.replace(
+    "## PF-025 — Authoring control hints have no normative vocabulary",
+    "## PF-025 — Changed finding title",
+  );
+  assert.notEqual(changedFindings, findings);
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      verifyG02: false,
+      fileOverrides: { [findingsPath]: changedFindings },
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_FINDING_DRIFT"),
+  );
 });
 
 test("rejects a forged mutable registration implementation", async () => {
@@ -565,18 +601,46 @@ test("rejects fake negative-case labels outside compiler directives", async () =
 });
 
 test("rejects missing root command wiring", async () => {
-  const rootPackage = JSON.parse(
-    await readFile(new URL("../package.json", import.meta.url), "utf8"),
-  );
-  delete rootPackage.scripts["verify:catalog-manifest-registration"];
+  const baseline = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  const mutations = [
+    (rootPackage) => delete rootPackage.scripts["verify:catalog-manifest-registration"],
+    (rootPackage) => {
+      rootPackage.scripts.test = rootPackage.scripts.test.replace(
+        "pnpm test:catalog-manifest-registration && ",
+        "",
+      );
+    },
+    (rootPackage) => {
+      rootPackage.scripts.check = rootPackage.scripts.check.replace(
+        "pnpm verify:catalog-manifest-registration && ",
+        "",
+      );
+    },
+    (rootPackage) => {
+      rootPackage.scripts.test = rootPackage.scripts.test.replace(
+        "pnpm test:protocol-snapshot && pnpm test:protocol-traceability",
+        "pnpm test:protocol-traceability && pnpm test:protocol-snapshot",
+      );
+    },
+    (rootPackage) => {
+      rootPackage.scripts.check = rootPackage.scripts.check.replace(
+        "pnpm verify:protocol-snapshot && pnpm verify:protocol-traceability",
+        "pnpm verify:protocol-traceability && pnpm verify:protocol-snapshot",
+      );
+    },
+  ];
 
-  await assert.rejects(
-    buildCatalogManifestRegistrationEvidence({
-      verifyG02: false,
-      fileOverrides: { "package.json": `${JSON.stringify(rootPackage)}\n` },
-    }),
-    hasEvidenceCode("CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT"),
-  );
+  for (const mutate of mutations) {
+    const rootPackage = structuredClone(baseline);
+    mutate(rootPackage);
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({
+        verifyG02: false,
+        fileOverrides: { "package.json": `${JSON.stringify(rootPackage)}\n` },
+      }),
+      hasEvidenceCode("CATALOG_REGISTRATION_COMMAND_WIRING_DRIFT"),
+    );
+  }
 });
 
 test("rejects early-exit command wiring", async () => {

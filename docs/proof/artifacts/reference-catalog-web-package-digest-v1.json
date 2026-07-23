@@ -31,7 +31,7 @@
   "prerequisites": {
     "catalogManifestRegistration": {
       "result": "PASS",
-      "artifactSha256": "d7dccc41ad65f3bd7b3f5da0af336c9bf67e8dcf124af55a28474c3f3fd8a829"
+      "artifactSha256": "062ec5656ca507c79fef0ce97e87931b54fa23a038a8862b2532b6e7e9ba3432"
     },
     "protocolCanonicalization": {
       "primitive": "RFC 8785-compatible canonical JSON plus SHA-256",
@@ -191,11 +191,6 @@
         "sha256": "9003f6080f7d4512aa49702ac46990a82a301bc0723979ad0e8744d558dbb394"
       },
       {
-        "path": "packages/reference-catalog-web/src/index.ts",
-        "bytes": 599,
-        "sha256": "b845946fd8c453ed86d74ef41d60bb8ef309c3b33584b0d626b4396a69b40c64"
-      },
-      {
         "path": "packages/reference-catalog-web/test/package-digest-profile.test.ts",
         "bytes": 21217,
         "sha256": "fa72dbb2f30acada4fc51ffecbf9b36af72d1145c6a49345d94b91fad0e2712d"
@@ -209,11 +204,6 @@
         "path": "packages/reference-catalog-web/test/package-consumer.mjs",
         "bytes": 46,
         "sha256": "0a34029fce407ef54eac01127aa81f3be226edc15b242c1f1609fee102a48e2e"
-      },
-      {
-        "path": "packages/reference-catalog-web/package.json",
-        "bytes": 1329,
-        "sha256": "fed54f9357f42c0f1df53d56944c45082350d0d805047a1df1e99dbec96a2dfe"
       },
       {
         "path": "packages/reference-catalog-web/tsconfig.json",
@@ -252,8 +242,8 @@
       },
       {
         "path": "scripts/lib/web-react-package-digest-proof.mjs",
-        "bytes": 80614,
-        "sha256": "189eef486943a91e6c3e4c6df0e6ce48d413ae6e870e2c325a9c219ea90e00d2"
+        "bytes": 80851,
+        "sha256": "1f483e86f8f1470d85fb6918cb7afd5f053175d8d51b827fe6620da933d43bbd"
       },
       {
         "path": "scripts/generate-web-react-package-digest-proof.mjs",
@@ -267,8 +257,8 @@
       },
       {
         "path": "tests/web-react-package-digest.test.mjs",
-        "bytes": 19137,
-        "sha256": "16f4f12600d649cd545c5fa7c155dfdfba4733c00c2d33c46c5da1c453bd7b48"
+        "bytes": 21059,
+        "sha256": "0e16216b40346b28ead7182b388da67f249349ed507d8323fc28b122145ef625"
       }
     ],
     "profileDocument": {

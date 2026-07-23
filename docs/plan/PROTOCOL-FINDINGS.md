@@ -579,3 +579,20 @@ This file records implementation discoveries without changing the frozen DESEN 0
   0.1.0 core requirement.
 - Future action: A later portable package/distribution profile should normatively define the
   Catalog self-field projection, byte container, verification order, and signature relationship.
+
+## PF-027 — The abbreviated sign-in Alert tone conflicts with the authoritative Catalog
+
+- Status: OPEN
+- Blocks proof: No; the exact Catalog and complete sign-in fixtures agree on one spelling.
+- Protocol location: SPEC Section 33 abbreviated sign-in example; frozen example Catalog
+  `com.example.ui/Alert` props schema; complete sign-in Source and Bundle examples
+- Observation: The abbreviated prose example uses `tone: "danger"` for Alert, while the
+  authoritative Catalog schema and both complete sign-in fixtures use `tone: "critical"`.
+  `danger` is valid only as a Button variant in that Catalog. Accepting both spellings would widen
+  the closed Alert contract and make the reference capability disagree with the validator.
+- Implementation decision: M03-T06 copies the frozen Catalog manifest exactly, accepts
+  `info | success | warning | critical`, and rejects Alert `danger` at both compile-time and
+  validation boundaries. The complete fixtures remain unchanged and no alias or migration is
+  invented inside the Web–React component.
+- Future action: Correct the abbreviated prose example through a versioned erratum or later
+  protocol release without rewriting the frozen DESEN 0.1.0 snapshot.

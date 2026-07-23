@@ -54,7 +54,11 @@ implements the official Stack and Text manifests as real accessible Web–React 
 props derive from the closed Catalog schemas, Stack preserves declared child/reading order without
 fabricated ARIA semantics, and Text maps inert strings to native paragraph, heading, or caption
 elements. Exact fixture equality, validator acceptance, semantic rendering, hostile text escaping,
-public-package boundaries, and mutation detection are now reproducible evidence.
+public-package boundaries, and mutation detection are now reproducible evidence. M03-T06 now adds
+the official TextField, Button, and Alert manifests with schema-derived props, native accessible
+semantics, exact frozen event payloads, and a narrow focus-command handle that exposes no DOM node.
+Its cumulative proof exercises a controlled five-component Source through all six validator
+layers and executes real built-package render, event, and focus behavior.
 
 ## Current milestone
 
@@ -77,9 +81,10 @@ public-package boundaries, and mutation detection are now reproducible evidence.
   `M03-T02 — Behavior, operation, and resource registration APIs`,
   `M03-T03 — Manifest-authoritative TypeScript and inspector-control derivation`,
   `M03-T04 — Deterministic Web–React package digest profile`,
-  `M03-T05 — Accessible Stack and Text capabilities`
+  `M03-T05 — Accessible Stack and Text capabilities`,
+  `M03-T06 — Accessible TextField, Button, and Alert capabilities`
 - Active task: None
-- Ready next task: `M03-T06 — Accessible TextField, Button, and Alert capabilities`
+- Ready next task: `M03-T07 — Reference tokens and web token provider`
 - Status: `DONE`
 
 ## Completed preparation
@@ -177,7 +182,7 @@ public-package boundaries, and mutation detection are now reproducible evidence.
   all 269 pinned byte, path, Catalog, inventory, and declared-digest mutations are detected. The
   API remains browser-portable, returns detached immutable audit data, rejects shared memory and
   hostile structural inputs, and agrees with an independent Node.js cryptographic oracle. P-05 is
-  only `PARTIAL`; the remaining accessible capabilities and final complete package remain M03-T06
+  only `PARTIAL`; reference tokens, fixtures, complete parity, and the final package remain M03-T07
   through M03-T10.
 - The foundational reference component slice passes 5 focused component tests, 7 compiler-negative
   cases, and 18 independent evidence/mutation tests. Its Stack and Text registrations equal the
@@ -188,8 +193,24 @@ public-package boundaries, and mutation detection are now reproducible evidence.
   source-shape checks cover continuous width behavior. It confirms neutral Stack semantics,
   preserved child order, native `p`/`h2`/`small` Text elements, and inert hostile markup. Strict
   provenance prevents injected APIs, inherited options, alternate web exports, or symlink aliases
-  from claiming the tracked result. S-004 remains `PLANNED` until M03-T06/M03-T09 complete all
-  component schemas and adapter parity; no `P-*` status changes.
+  from claiming the tracked result. It remains the independently verified prerequisite for later
+  component slices.
+- The cumulative form-and-feedback slice passes 11 focused component tests, 22 compiler-negative
+  cases, and 18 independent evidence/mutation tests. TextField, Button, and Alert registrations
+  equal the frozen official Catalog entries and complete the five closed public component prop
+  schemas. A controlled Source binds `change` to a state write and `press` to the TextField
+  `focus` command, passing structural, semantic, component, interaction, binding, and execution
+  validation while preserving one exact runtime state-write obligation. Independent evidence
+  executes 256 server-rendered and 23 real React/JSDOM interaction vectors, including exact
+  single-argument frozen payloads, disabled/loading suppression, unique label association, native
+  button semantics, inert hostile strings, and enabled/disabled focus-handle behavior without DOM
+  or return-value leakage. `PF-027` records the frozen abbreviated-prose Alert tone conflict.
+  S-004 remains `PLANNED` only for M03-T09's final implementation-parity gate; no `P-*` status
+  changes.
+- Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
+  manifests, and later export barrels are checked semantically instead of being claimed as earlier
+  tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
+  prerequisite artifacts, and security mutations remain enforced.
 - The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
   integrity tests, protocol traceability and type-generation tests, remaining scaffold test
   runners, and dependency-boundary checks.
@@ -203,9 +224,8 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M03-T06`: build accessible TextField, Button, and Alert reference capabilities with
-Catalog contracts, extending the same component subpath and cumulative proof without weakening the
-framework-neutral SDK or future native boundaries.
+Complete only `M03-T07`: add the reference token contract and Web token provider without moving
+React, DOM, CSS, or browser concerns into framework-neutral packages.
 
 M02-T02 evidence:
 
@@ -228,75 +248,81 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `9edc4c8a9b8b7a1ed505dc4c6d0644f88df69c54f672fd542a8688f3f83e26b7`
+- artifact SHA-256: `e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `694e7818e1898ab2cd61c8eb72c92173072f943d66863680abbd1d219d3df1f3`
+- artifact SHA-256: `7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `dc9273eca610e3400b13370ac466e1dde30d0534897817b74e7242bfb16f337b`
+- artifact SHA-256: `96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7`
 
 M02-T08 evidence:
 
 - `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
-- artifact SHA-256: `9187054848824badea880533a9d303ca81276b1a4014a92b9b96dff08aef6587`
+- artifact SHA-256: `71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac`
 
 M02-T09 evidence:
 
 - `docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json`
-- artifact SHA-256: `ecd6dd3f0dd848bce24242a6117d06dd86230c9edb519c2dc7561d5c262f6ffb`
+- artifact SHA-256: `981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208`
 
 M02-T10 evidence:
 
 - `docs/proof/PROTOCOL-BINDING-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-binding-contracts.json`
-- artifact SHA-256: `2743abcfb549fe3d09146a2051e808d62cecb1fe2f723270f5a123930a7b80a4`
+- artifact SHA-256: `2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c`
 
 M02-T11 evidence:
 
 - `docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-execution-contracts.json`
-- artifact SHA-256: `f3bea085e928f9f6da215fe52bcf8a39a7b818afbaef0c9dba188d1a8bfa1bc1`
+- artifact SHA-256: `f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505`
 
 M02-T12 evidence:
 
 - `docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md`
 - `docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json`
-- artifact SHA-256: `6263d4ef42dc04d4f7b15dc13cfa24b680c403550d057eb547ec5b5b2c3ba341`
+- artifact SHA-256: `efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae`
 
 M02-T13 evidence:
 
 - `docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md`
 - `docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json`
-- artifact SHA-256: `b160d66ee5907f8d02b3c95708f872d379f6bc363ed553ee50e56c7b533e9839`
+- artifact SHA-256: `3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718`
 
 M03-T01 through M03-T03 cumulative evidence:
 
 - `docs/proof/CATALOG-MANIFEST-REGISTRATION.md`
 - `docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json`
-- artifact SHA-256: `d7dccc41ad65f3bd7b3f5da0af336c9bf67e8dcf124af55a28474c3f3fd8a829`
+- artifact SHA-256: `062ec5656ca507c79fef0ce97e87931b54fa23a038a8862b2532b6e7e9ba3432`
 
 M03-T04 evidence:
 
 - `docs/proof/WEB-REACT-PACKAGE-DIGEST.md`
 - `docs/profiles/WEB-REACT-PACKAGE-DIGEST-V1.md`
 - `docs/proof/artifacts/reference-catalog-web-package-digest-v1.json`
-- artifact SHA-256: `baf677090de2b1fbab62937aa991a0fe4a0f4fa9c03ee9eece745f9dfe945800`
+- artifact SHA-256: `e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716`
 
 M03-T05 evidence:
 
 - `docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md`
 - `docs/proof/artifacts/reference-catalog-web-components.json`
-- artifact SHA-256: `a142281b63c34c7a21dacbddb5fb46d4602634f31bc188c551e42d007811e2e5`
+- artifact SHA-256: `788b68af9520ebf49fac1d39a505bc11e153f6a1d7a5ab89f57c9207b251cc51`
+
+M03-T06 evidence:
+
+- `docs/proof/REFERENCE-CATALOG-WEB-FORM-FEEDBACK.md`
+- `docs/proof/artifacts/reference-catalog-web-form-feedback.json`
+- artifact SHA-256: `553a48cb95aa2a9e6c2ee4e860aea7aedea92499c977b093c1c515c0ad9d75f2`
 
 ## Status vocabulary
 

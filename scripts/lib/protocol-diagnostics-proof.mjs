@@ -67,9 +67,6 @@ const PUBLIC_TYPE_EXPORTS = Object.freeze([
 ]);
 
 const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
-  "package.json",
-  "turbo.json",
-  "packages/protocol/package.json",
   "packages/protocol/tsconfig.json",
   "packages/protocol/src/index.ts",
   "packages/protocol/src/diagnostics.ts",

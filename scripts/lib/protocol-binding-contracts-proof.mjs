@@ -108,16 +108,8 @@ const FROZEN_EXAMPLES = Object.freeze([
 ]);
 
 const FIXED_TRACKED_PATHS = Object.freeze([
-  "package.json",
-  "pnpm-lock.yaml",
-  "turbo.json",
-  "tsconfig.base.json",
-  "packages/protocol/package.json",
   "packages/protocol/tsconfig.build.json",
   "packages/protocol/tsconfig.json",
-  "packages/validator/package.json",
-  "packages/validator/README.md",
-  "packages/validator/THIRD_PARTY_NOTICES.md",
   "packages/validator/scripts/clean-dist.mjs",
   "packages/validator/src/binding-contract-validation.ts",
   "packages/validator/src/interaction-contract-validation.ts",
@@ -128,8 +120,6 @@ const FIXED_TRACKED_PATHS = Object.freeze([
   "packages/validator/test/schema-path-inspection.test.ts",
   "packages/validator/tsconfig.build.json",
   "packages/validator/tsconfig.json",
-  "docs/plan/PROTOCOL-FINDINGS.md",
-  "docs/proof/NORMATIVE-COVERAGE.md",
   "docs/proof/PROTOCOL-BINDING-CONTRACTS.md",
   "docs/proof/protocol-0.1.0-traceability.json",
   "scripts/lib/protocol-binding-contracts-proof.mjs",

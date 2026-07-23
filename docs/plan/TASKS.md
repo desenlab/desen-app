@@ -65,7 +65,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | M03-T03 | DONE        | M03-T01          | Manifest-authoritative TypeScript and inspector-control derivation                                                          |
 | M03-T04 | DONE        | M03-T02          | Documented deterministic Web–React package digest profile and immutability tests                                            |
 | M03-T05 | DONE        | M03-T01          | Accessible Stack and Text capabilities with catalog contracts                                                               |
-| M03-T06 | NOT_STARTED | M03-T01, M03-T05 | Accessible TextField, Button, and Alert capabilities with catalog contracts                                                 |
+| M03-T06 | DONE        | M03-T01, M03-T05 | Accessible TextField, Button, and Alert capabilities with catalog contracts                                                 |
 | M03-T07 | NOT_STARTED | M03-T02          | Token provider and synthetic fixture infrastructure                                                                         |
 | M03-T08 | NOT_STARTED | M03-T06–M03-T07  | Sign-in success/failure fixtures and separate host operation binding                                                        |
 | M03-T09 | NOT_STARTED | M03-T04–M03-T08  | Catalog/implementation parity metadata, event payload, command, and accessibility contract tests                            |

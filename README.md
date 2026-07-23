@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **32 / 144 tasks complete (22%)**
+**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **33 / 144 tasks complete (23%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `█████░░░░░` **5 / 10 tasks complete (50%)**
+**M03 in progress:** `██████░░░░` **6 / 10 tasks complete (60%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T06`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T07`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -93,6 +93,7 @@ packages/
 - [Catalog registration and derivation proof](docs/proof/CATALOG-MANIFEST-REGISTRATION.md)
 - [Web–React package digest proof](docs/proof/WEB-REACT-PACKAGE-DIGEST.md)
 - [Reference Web component proof](docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md)
+- [Reference Web form and feedback proof](docs/proof/REFERENCE-CATALOG-WEB-FORM-FEEDBACK.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -177,7 +178,16 @@ escapes markup-like strings as inert text. The deterministic evidence checks exa
 equality, closed public props, validator acceptance, negative contract cases, built-package
 semantics, 420 pinned Stack cross-product vectors, 56 Text/escaping vectors, exact source-shape
 checks, 5 focused component tests, 7 compiler-negative cases, and 18 independent proof/mutation
-tests. TextField, Button, and Alert remain next in M03-T06.
+tests. Its proof remains the verified prerequisite for the later component slices.
+
+M03-T06 now adds the official TextField, Button, and Alert capabilities without widening their
+closed Catalog contracts. TextField uses a real label/input relationship and exact frozen change
+payloads; Button preserves native non-submit activation and suppresses disabled/loading presses;
+Alert maps critical feedback to `role="alert"` and ordinary feedback to `role="status"`. A narrow
+TextField focus handle exposes no DOM node. The cumulative evidence validates a five-component
+Catalog and controlled Source through all six validator layers, executes 256 server-rendered and
+23 real React interaction vectors, fixes 11 component tests, 22 compiler-negative cases, and 18
+independent mutation tests, and records the frozen prose/Catalog tone conflict as `PF-027`.
 
 ## License
 

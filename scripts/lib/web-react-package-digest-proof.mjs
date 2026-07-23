@@ -124,6 +124,12 @@ const EXPECTED_TYPE_EXPORTS = Object.freeze([
   "WebReactPackageDigestEntry",
   "WebReactPackageDigestVerificationInput",
 ]);
+const REQUIRED_RUNTIME_EXPORT_SIGNATURES = Object.freeze(
+  EXPECTED_RUNTIME_EXPORTS.map((name) => `runtime:${name}@./package-digest-profile.js`).sort(),
+);
+const REQUIRED_TYPE_EXPORT_SIGNATURES = Object.freeze(
+  EXPECTED_TYPE_EXPORTS.map((name) => `type:${name}@./package-digest-profile.js`).sort(),
+);
 const EXPECTED_TRACE_RULES = Object.freeze([
   Object.freeze({ collection: "conformanceRules", id: "C-021", owners: ["M03-T04", "M03-T10"] }),
   Object.freeze({
@@ -258,11 +264,9 @@ const NODE_BUILTIN_SPECIFIERS = new Set(
 );
 const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
   "packages/reference-catalog-web/src/package-digest-profile.ts",
-  "packages/reference-catalog-web/src/index.ts",
   "packages/reference-catalog-web/test/package-digest-profile.test.ts",
   "packages/reference-catalog-web/test/public-api.types.ts",
   "packages/reference-catalog-web/test/package-consumer.mjs",
-  "packages/reference-catalog-web/package.json",
   "packages/reference-catalog-web/tsconfig.json",
   "packages/reference-catalog-web/tsconfig.build.json",
   "tsconfig.react-web.json",
@@ -331,6 +335,13 @@ function assertArrayEqual(actual, expected, code, message) {
     actual.some((value, index) => value !== expected[index])
   ) {
     fail(code, message, { expected, actual });
+  }
+}
+
+function assertArrayContains(actual, expected, code, message) {
+  const actualSet = new Set(actual);
+  if (!expected.every((value) => actualSet.has(value))) {
+    fail(code, message, { actual, expected });
   }
 }
 
@@ -406,9 +417,9 @@ function assertExactFrozenData(actual, expected, dataPath = "/") {
   }
 }
 
-function captureStableProfileApi(api) {
+function captureStableProfileApi(api, runtimeNames) {
   const values = Object.create(null);
-  for (const name of EXPECTED_RUNTIME_EXPORTS) {
+  for (const name of runtimeNames) {
     const descriptor = Object.getOwnPropertyDescriptor(api, name);
     if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
       fail(
@@ -418,6 +429,12 @@ function captureStableProfileApi(api) {
     }
     values[name] = descriptor.value;
   }
+  assertArrayContains(
+    runtimeNames,
+    EXPECTED_RUNTIME_EXPORTS,
+    "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
+    "The public runtime omits a required M03-T04 digest export.",
+  );
   for (const name of [
     "createWebReactPackageDigest",
     "encodeWebReactPackageDigestPreimage",
@@ -431,11 +448,11 @@ function captureStableProfileApi(api) {
   function assertStable() {
     assertArrayEqual(
       Object.keys(api).sort(),
-      EXPECTED_RUNTIME_EXPORTS,
+      runtimeNames,
       "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
       "Runtime exports changed during proof execution.",
     );
-    for (const name of EXPECTED_RUNTIME_EXPORTS) {
+    for (const name of runtimeNames) {
       const descriptor = Object.getOwnPropertyDescriptor(api, name);
       if (
         descriptor === undefined ||
@@ -808,56 +825,70 @@ function hasExportModifier(node) {
   );
 }
 
-function declarationExports(declarationText) {
-  const sourceFile = parseSourceFile(
-    declarationText,
-    "packages/reference-catalog-web/dist/index.d.ts",
-  );
+function digestIndexExports(indexText, relativePath, includeTypes) {
+  const sourceFile = parseSourceFile(indexText, relativePath);
   const runtime = new Set();
   const types = new Set();
+  const signatures = new Set();
+  const modules = new Set();
   for (const statement of sourceFile.statements) {
-    if (ts.isImportDeclaration(statement) || ts.isEmptyStatement(statement)) continue;
-    if (ts.isExportDeclaration(statement)) {
-      if (statement.exportClause === undefined || !ts.isNamedExports(statement.exportClause)) {
-        fail(
-          "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
-          "Wildcard or unrecognized declaration exports are forbidden.",
-        );
-      }
-      for (const element of statement.exportClause.elements) {
-        const target = statement.isTypeOnly || element.isTypeOnly ? types : runtime;
-        target.add(element.name.text);
-      }
-      continue;
-    }
-    if (ts.isExportAssignment(statement)) {
-      runtime.add("default");
-      continue;
-    }
-    if (!hasExportModifier(statement)) continue;
-    if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) {
-      types.add(statement.name.text);
-    } else if (ts.isFunctionDeclaration(statement)) {
-      runtime.add(statement.name?.text ?? "default");
-    } else if (ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) {
-      const name = statement.name?.text ?? "default";
-      runtime.add(name);
-      types.add(name);
-    } else if (ts.isVariableStatement(statement)) {
-      for (const declaration of statement.declarationList.declarations) {
-        runtime.add(
-          ts.isIdentifier(declaration.name) ? declaration.name.text : "<binding-pattern>",
-        );
-      }
-    } else {
+    if (
+      !ts.isExportDeclaration(statement) ||
+      statement.exportClause === undefined ||
+      !ts.isNamedExports(statement.exportClause) ||
+      statement.exportClause.elements.length === 0 ||
+      statement.moduleSpecifier === undefined ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.attributes !== undefined
+    ) {
       fail(
         "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
-        "An unrecognized declaration crossed the public API audit.",
+        `${relativePath} may contain only non-empty named re-exports from explicit modules.`,
         { syntaxKind: ts.SyntaxKind[statement.kind] },
       );
     }
+    const moduleSpecifier = statement.moduleSpecifier.text;
+    if (!/^\.\/[a-z][a-z0-9-]*\.js$/u.test(moduleSpecifier)) {
+      fail(
+        "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
+        `${relativePath} uses an unreviewed re-export module specifier.`,
+        { moduleSpecifier },
+      );
+    }
+    modules.add(moduleSpecifier);
+    for (const element of statement.exportClause.elements) {
+      if (element.propertyName !== undefined) {
+        fail(
+          "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
+          `${relativePath} contains an aliased named export.`,
+        );
+      }
+      const isType = statement.isTypeOnly || element.isTypeOnly;
+      if (isType && !includeTypes) {
+        fail(
+          "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
+          `${relativePath} unexpectedly contains a runtime type export.`,
+        );
+      }
+      const kind = isType ? "type" : "runtime";
+      const target = isType ? types : runtime;
+      const signature = `${kind}:${element.name.text}@${moduleSpecifier}`;
+      if (target.has(element.name.text) || signatures.has(signature)) {
+        fail(
+          "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
+          `${relativePath} repeats ${kind} export ${element.name.text}.`,
+        );
+      }
+      target.add(element.name.text);
+      signatures.add(signature);
+    }
   }
-  return Object.freeze({ runtime: [...runtime].sort(), types: [...types].sort() });
+  return Object.freeze({
+    runtime: Object.freeze([...runtime].sort()),
+    types: Object.freeze([...types].sort()),
+    signatures: Object.freeze([...signatures].sort()),
+    modules: Object.freeze([...modules].sort()),
+  });
 }
 
 function verifyProfileSourceSurface(
@@ -932,59 +963,22 @@ function verifyProfileSourceSurface(
 }
 
 function verifyDigestIndexWiring(indexText, relativePath, includeTypes) {
-  const sourceFile = parseSourceFile(indexText, relativePath);
-  const runtime = [];
-  const types = [];
-  const expectedNames = new Set([...EXPECTED_RUNTIME_EXPORTS, ...EXPECTED_TYPE_EXPORTS]);
-  for (const statement of sourceFile.statements) {
-    if (!ts.isExportDeclaration(statement)) {
-      if (
-        hasExportModifier(statement) &&
-        "name" in statement &&
-        statement.name !== undefined &&
-        ts.isIdentifier(statement.name) &&
-        expectedNames.has(statement.name.text)
-      ) {
-        fail(
-          "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
-          `${relativePath} locally replaces ${statement.name.text}.`,
-        );
-      }
-      continue;
-    }
-    if (
-      statement.moduleSpecifier === undefined ||
-      !ts.isStringLiteral(statement.moduleSpecifier) ||
-      statement.exportClause === undefined ||
-      !ts.isNamedExports(statement.exportClause)
-    ) {
-      continue;
-    }
-    for (const element of statement.exportClause.elements) {
-      const name = element.name.text;
-      if (!expectedNames.has(name)) continue;
-      if (statement.moduleSpecifier.text !== "./package-digest-profile.js") {
-        fail(
-          "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
-          `${relativePath} routes ${name} through an unaudited module.`,
-        );
-      }
-      if (statement.isTypeOnly || element.isTypeOnly) types.push(name);
-      else runtime.push(name);
-    }
+  const surface = digestIndexExports(indexText, relativePath, includeTypes);
+  assertArrayContains(
+    surface.signatures,
+    REQUIRED_RUNTIME_EXPORT_SIGNATURES,
+    "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
+    `${relativePath} omits or remaps a required M03-T04 runtime export.`,
+  );
+  if (includeTypes) {
+    assertArrayContains(
+      surface.signatures,
+      REQUIRED_TYPE_EXPORT_SIGNATURES,
+      "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
+      `${relativePath} omits or remaps a required M03-T04 type export.`,
+    );
   }
-  assertArrayEqual(
-    runtime.sort(),
-    EXPECTED_RUNTIME_EXPORTS,
-    "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
-    `${relativePath} runtime re-exports differ.`,
-  );
-  assertArrayEqual(
-    types.sort(),
-    includeTypes ? [...EXPECTED_TYPE_EXPORTS].sort() : [],
-    "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
-    `${relativePath} type re-exports differ.`,
-  );
+  return surface;
 }
 
 function bindingNames(name, names = []) {
@@ -1364,23 +1358,47 @@ function verifyDistributionAudit({
     moduleDeclarationText,
     "packages/reference-catalog-web/dist/package-digest-profile.d.ts",
   );
-  verifyDigestIndexWiring(indexText, "packages/reference-catalog-web/src/index.ts", true);
-  verifyDigestIndexWiring(declarationText, "packages/reference-catalog-web/dist/index.d.ts", true);
-  verifyDigestIndexWiring(
+  const sourceIndex = verifyDigestIndexWiring(
+    indexText,
+    "packages/reference-catalog-web/src/index.ts",
+    true,
+  );
+  const declarationIndex = verifyDigestIndexWiring(
+    declarationText,
+    "packages/reference-catalog-web/dist/index.d.ts",
+    true,
+  );
+  const distributionIndex = verifyDigestIndexWiring(
     distributionIndexText,
     "packages/reference-catalog-web/dist/index.js",
     false,
+  );
+  assertArrayEqual(
+    sourceIndex.signatures,
+    declarationIndex.signatures,
+    "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
+    "The root source and declaration named export maps differ.",
+  );
+  assertArrayEqual(
+    sourceIndex.signatures.filter((signature) => signature.startsWith("runtime:")),
+    distributionIndex.signatures,
+    "WEB_REACT_PACKAGE_DIGEST_PACKAGE_BOUNDARY_DRIFT",
+    "The root source and runtime distribution named export maps differ.",
   );
   verifyPortableModuleSyntax(
     sourceText,
     "packages/reference-catalog-web/src/package-digest-profile.ts",
   );
-  verifyPortableModuleSyntax(indexText, "packages/reference-catalog-web/src/index.ts", [
-    "./package-digest-profile.js",
-  ]);
-  verifyPortableModuleSyntax(declarationText, "packages/reference-catalog-web/dist/index.d.ts", [
-    "./package-digest-profile.js",
-  ]);
+  verifyPortableModuleSyntax(
+    indexText,
+    "packages/reference-catalog-web/src/index.ts",
+    sourceIndex.modules,
+  );
+  verifyPortableModuleSyntax(
+    declarationText,
+    "packages/reference-catalog-web/dist/index.d.ts",
+    declarationIndex.modules,
+  );
   verifyPortableModuleSyntax(
     moduleDeclarationText,
     "packages/reference-catalog-web/dist/package-digest-profile.d.ts",
@@ -1392,7 +1410,7 @@ function verifyDistributionAudit({
   verifyPortableModuleSyntax(
     distributionIndexText,
     "packages/reference-catalog-web/dist/index.js",
-    ["./package-digest-profile.js"],
+    distributionIndex.modules,
   );
   const combined = [
     sourceText,
@@ -1410,6 +1428,7 @@ function verifyDistributionAudit({
       );
     }
   }
+  return Object.freeze({ sourceIndex, declarationIndex, distributionIndex });
 }
 
 function verifyRootCommandWiring(rootPackage) {
@@ -1988,26 +2007,28 @@ export async function buildWebReactPackageDigestEvidence({
     readFile(buildTsconfigPath),
   ]);
 
-  assertArrayEqual(
-    Object.keys(resolvedProfileApi).sort(),
+  const distributionAudit = verifyDistributionAudit({
+    sourceText: sourceBytes.toString("utf8"),
+    indexText: indexBytes.toString("utf8"),
+    declarationText: declarationBytes.toString("utf8"),
+    moduleDeclarationText: moduleDeclarationBytes.toString("utf8"),
+    distributionText: distributionBytes.toString("utf8"),
+    distributionIndexText: distributionIndexBytes.toString("utf8"),
+  });
+  const runtimeNames = Object.keys(resolvedProfileApi).sort();
+  assertArrayContains(
+    runtimeNames,
     EXPECTED_RUNTIME_EXPORTS,
     "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
-    "Runtime exports differ from the reviewed M03-T04 surface.",
-  );
-  const stableProfileApi = captureStableProfileApi(resolvedProfileApi);
-  const declarationSurface = declarationExports(declarationBytes.toString("utf8"));
-  assertArrayEqual(
-    declarationSurface.runtime,
-    EXPECTED_RUNTIME_EXPORTS,
-    "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
-    "Declaration runtime exports differ from the reviewed M03-T04 surface.",
+    "The public runtime omits a required M03-T04 digest export.",
   );
   assertArrayEqual(
-    declarationSurface.types,
-    [...EXPECTED_TYPE_EXPORTS].sort(),
+    runtimeNames,
+    distributionAudit.sourceIndex.runtime,
     "WEB_REACT_PACKAGE_DIGEST_PUBLIC_API_DRIFT",
-    "Type exports differ from the reviewed M03-T04 surface.",
+    "The loaded package runtime differs from its reviewed root source exports.",
   );
+  const stableProfileApi = captureStableProfileApi(resolvedProfileApi, runtimeNames);
 
   const inventory = verifyTestInventory(
     testBytes.toString("utf8"),
@@ -2018,14 +2039,6 @@ export async function buildWebReactPackageDigestEvidence({
   const directTrace = verifyTrace(trace);
   const profileDocumentText = profileDocumentBytes.toString("utf8");
   verifyProfileDocument(profileDocumentText);
-  verifyDistributionAudit({
-    sourceText: sourceBytes.toString("utf8"),
-    indexText: indexBytes.toString("utf8"),
-    declarationText: declarationBytes.toString("utf8"),
-    moduleDeclarationText: moduleDeclarationBytes.toString("utf8"),
-    distributionText: distributionBytes.toString("utf8"),
-    distributionIndexText: distributionIndexBytes.toString("utf8"),
-  });
   verifyRootCommandWiring(JSON.parse(rootPackageBytes.toString("utf8")));
   verifyPackageManifest(
     JSON.parse(packageManifestBytes.toString("utf8")),

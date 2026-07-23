@@ -460,31 +460,6 @@
     "evidenceFormatter": { "name": "prettier", "version": "3.9.6" },
     "trackedFiles": [
       {
-        "path": "package.json",
-        "bytes": 11233,
-        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
-      },
-      {
-        "path": "pnpm-lock.yaml",
-        "bytes": 111382,
-        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
-      },
-      {
-        "path": "turbo.json",
-        "bytes": 4262,
-        "sha256": "2c77af7bd2277b422cbe1556f76c21834a1c62f4327d188b4bdf6fd449f84846"
-      },
-      {
-        "path": "THIRD_PARTY_NOTICES.md",
-        "bytes": 1428,
-        "sha256": "c72ad06f6c1479e31a6357417f377cbdb670e2d87d4e94dbb662d7e22288aec0"
-      },
-      {
-        "path": "packages/protocol/package.json",
-        "bytes": 923,
-        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
-      },
-      {
         "path": "packages/protocol/src/index.ts",
         "bytes": 3261,
         "sha256": "e2ceeea8bd84d4d7e6e9431bc970cd8168478d8a7cad27f0f4909f71fabe8bcb"
@@ -503,11 +478,6 @@
         "path": "packages/protocol/src/json-pointer.ts",
         "bytes": 7460,
         "sha256": "e8feaf06cb3f76af5052bf4710ec002ab77b811fa0489d13eff280bdc60cab6d"
-      },
-      {
-        "path": "packages/validator/package.json",
-        "bytes": 2184,
-        "sha256": "6d45074ada3fea091e4ac3b5a93b41bc75d51cfa3eedcd389297bd0b4c8e062b"
       },
       {
         "path": "packages/validator/THIRD_PARTY_NOTICES.md",
@@ -590,14 +560,9 @@
         "sha256": "25cb7fe4469ce64f91459c1679d1a61dda2b22751b65309b3d0cd41240e1285b"
       },
       {
-        "path": "packages/validator/README.md",
-        "bytes": 51852,
-        "sha256": "dc8185c985a6199041ae7c9c1c7b7b625ca23f9d18abfb45ddb0ed42e6895a28"
-      },
-      {
         "path": "scripts/lib/protocol-structural-validation-proof.mjs",
-        "bytes": 39825,
-        "sha256": "1141d4d6d57d66ab4ee9af2bdb847f1f307427b42533f89f60bbb42d9c231057"
+        "bytes": 39636,
+        "sha256": "17271f05499dca196035e193b7b2c0be981e385d3496a5237d787419675b4730"
       },
       {
         "path": "scripts/generate-protocol-structural-validation-proof.mjs",

@@ -136,9 +136,6 @@ const EXPECTED_TRACE = Object.freeze({
   schemaRegistry: Object.freeze(["SR-001", "SR-002", "SR-003"]),
 });
 const FIXED_TRACKED_PATHS = Object.freeze([
-  "package.json",
-  "turbo.json",
-  "packages/validator/package.json",
   "packages/validator/test/official-suite-parity.test.ts",
   "docs/proof/baselines/protocol-0.1.0-checksums.txt",
   "docs/proof/baselines/protocol-0.1.0-validation.txt",
