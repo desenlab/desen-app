@@ -514,3 +514,26 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Future action: Align local-identifier and reference grammars, forbid dot/colon separators for
   lifecycle roots, or add a normative escaped or segment-array reference form with unambiguous
   diagnostic behavior.
+
+## PF-024 — Manifest registration and executable host binding APIs are distinct
+
+- Status: OPEN
+- Blocks proof: No; the reference implementation can keep the data and executable boundaries
+  separate.
+- Protocol location: SPEC Sections 7.4 and 22.4; informative IMPLEMENTATION-GUIDE Section 3;
+  Catalog Schema behavior, operation, and resource capability definitions
+- Observation: The informative guide sketches one host registration API whose component entry
+  carries production and authoring adapters and whose operation/resource entries carry `execute`
+  and `read` functions. The normative Catalog schema contains only inert manifests and defines no
+  executable binding field. Section 7.4 also allows application-supplied bindings but defines no
+  Catalog marker for that choice. A single `register*` name can therefore ambiguously mean manifest
+  authoring or trusted host-code binding.
+- Implementation decision: `@desen/catalog-sdk` uses `registerComponent`, `registerBehavior`,
+  `registerOperation`, and `registerResource` only for exact `{ id, manifest }` JSON snapshots.
+  Executable component and behavior adapters remain renderer-owned, while operation and resource
+  implementations remain host-owned. M03-T08 and the M04/M05 tasks will define those trusted
+  executable registries separately; DESEN documents and Catalog manifests never select code,
+  endpoints, SDK calls, database queries, or authentication mechanisms.
+- Future action: Name manifest and host-binding APIs distinctly in a later implementation guide
+  revision and standardize an inert application-supplied binding declaration if interoperability
+  requires one.

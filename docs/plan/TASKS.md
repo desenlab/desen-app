@@ -61,7 +61,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | ID      | Status      | Depends on       | Deliverable / evidence                                                                                                      |
 | ------- | ----------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | M03-T01 | DONE        | G02              | Framework-neutral JSON manifest/contract registration API with no React or platform types                                   |
-| M03-T02 | NOT_STARTED | M03-T01          | Behavior, operation, and resource registration APIs                                                                         |
+| M03-T02 | DONE        | M03-T01          | Behavior, operation, and resource registration APIs                                                                         |
 | M03-T03 | NOT_STARTED | M03-T01          | Manifest-authoritative TypeScript and inspector-control derivation                                                          |
 | M03-T04 | NOT_STARTED | M03-T02          | Documented deterministic Web–React package digest profile and immutability tests                                            |
 | M03-T05 | NOT_STARTED | M03-T01          | Accessible Stack and Text capabilities with catalog contracts                                                               |

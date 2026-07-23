@@ -10,7 +10,7 @@ try {
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M03-T01 Catalog registration evidence.",
+        message: "Wrote cumulative deterministic M03-T01/M03-T02 Catalog registration evidence.",
       },
       null,
       2,

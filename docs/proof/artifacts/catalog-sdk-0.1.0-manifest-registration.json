@@ -1,20 +1,21 @@
 {
   "schemaVersion": 1,
-  "profile": "desen-catalog-manifest-registration-proof-v1",
-  "task": "M03-T01",
+  "profile": "desen-catalog-manifest-registration-proof-v2",
+  "task": "M03-T02",
   "result": "PASS",
   "protocol": { "version": "0.1.0", "documentKind": "desen.catalog" },
   "prerequisite": {
     "gate": "G02",
     "closingTask": "M02-T13",
     "artifact": "docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json",
-    "sha256": "104227f76404dabcd1d56b1b24c253226f24e08fa6054016ddb8e1840e1a357c",
+    "sha256": "3d306a1c071f30a21e033d53142a28731f89ba951fe74ddedb97d4d67a167c44",
     "result": "PASS"
   },
   "claim": {
-    "summary": "Component contracts register as detached, immutable, deterministic JSON and compose into a framework-neutral Catalog manifest.",
+    "summary": "Component, behavior, operation, and resource contracts register as detached, immutable, deterministic JSON and compose into a framework-neutral Catalog manifest.",
     "directTraceRules": [
       {
+        "collection": "proseRules",
         "id": "R-013",
         "section": "6.1.3",
         "summary": "A catalog declares one target package contract while executable code stays outside JSON",
@@ -22,30 +23,109 @@
         "finalTestOwners": ["M03-T09", "M03-T10"]
       },
       {
+        "collection": "conformanceRules",
+        "id": "C-018",
+        "section": "7.4",
+        "summary": "A Capability Package provides or explicitly delegates resource and operation bindings",
+        "owners": ["M03-T02", "M03-T08"],
+        "finalTestOwners": ["M03-T09", "M10-T04"]
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-071",
+        "section": "19.3",
+        "summary": "Exclusive behavior channels conflict unless contracts explicitly declare compatibility",
+        "owners": ["M02-T09", "M03-T02"],
+        "finalTestOwners": ["M02-T13", "M11-T14"]
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-072",
+        "section": "19.4",
+        "summary": "Behavior capabilities expose only the same declared public contract surfaces as components",
+        "owners": ["M03-T02", "M05-T04"],
+        "finalTestOwners": ["M03-T09", "M11-T12"]
+      },
+      {
+        "collection": "proseRules",
         "id": "R-084",
         "section": "21.2",
         "summary": "Component manifests declare their complete public property, composition, interaction, style, authoring, and deprecation contract",
         "owners": ["M03-T01", "M03-T03"],
         "finalTestOwners": ["M03-T09"]
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-089",
+        "section": "22.1",
+        "summary": "Operations declare schemas, public errors and effect class, while current host authorization governs execution",
+        "owners": ["M03-T02", "M04-T01", "M04-T09"],
+        "finalTestOwners": ["M03-T09", "M04-T16"]
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-090",
+        "section": "22.2",
+        "summary": "Resources are read-oriented schema contracts and domain mutation uses operations",
+        "owners": ["M03-T02", "M04-T08", "M12-T03"],
+        "finalTestOwners": ["M03-T09", "M12-T03"]
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-092",
+        "section": "22.4",
+        "summary": "The host binds capability IDs to trusted code rather than document-selected service details",
+        "owners": ["M03-T02", "M03-T08", "M12-T03"],
+        "finalTestOwners": ["M10-T04", "M12-T03"]
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-149",
+        "section": "19",
+        "summary": "Behavior mechanics remain capability implementations rather than new core primitives",
+        "owners": ["M03-T02", "M05-T04"],
+        "finalTestOwners": ["M11-T12"]
       }
     ],
     "proofClaimStatusChanges": []
   },
   "publicApi": {
-    "runtimeExports": ["createCatalogManifest", "registerComponent"],
+    "runtimeExports": [
+      "createCatalogManifest",
+      "registerBehavior",
+      "registerComponent",
+      "registerOperation",
+      "registerResource"
+    ],
     "typeExports": [
+      "BehaviorManifest",
       "ComponentManifest",
       "CreateCatalogManifestInput",
       "ImmutableJson",
       "JsonInput",
       "JsonPrimitive",
+      "OperationManifest",
+      "RegisterBehaviorInput",
       "RegisterComponentInput",
-      "RegisteredComponent"
+      "RegisterOperationInput",
+      "RegisterResourceInput",
+      "RegisteredBehavior",
+      "RegisteredComponent",
+      "RegisteredOperation",
+      "RegisteredResource",
+      "ResourceManifest"
     ],
-    "componentManifestAuthority": "DesenCatalog[\"components\"][string]",
-    "registryApiExported": false,
+    "manifestAuthorities": {
+      "component": "DesenCatalog[\"components\"][string]",
+      "behavior": "DesenCatalog[\"behaviors\"][string]",
+      "operation": "DesenCatalog[\"operations\"][string]",
+      "resource": "DesenCatalog[\"resources\"][string]"
+    },
+    "globalRegistryExported": false,
+    "executableBindingApiExported": false,
     "registrationWrapperFields": ["id", "manifest"],
     "manifestRuntimeValidation": "@desen/validator",
+    "hostOperationAndResourceBindings": "deferred to M03-T08 and runtime layers",
     "targetAdapters": "deferred to M05"
   },
   "vectors": {
@@ -63,65 +143,312 @@
       "styleParts",
       "visualStates"
     ],
+    "behaviorFields": [
+      "attachTo",
+      "authoring",
+      "category",
+      "commands",
+      "composition",
+      "deprecated",
+      "description",
+      "events",
+      "extensions",
+      "propsSchema",
+      "replacement",
+      "slots",
+      "styleParts",
+      "visualStates"
+    ],
+    "operationFields": [
+      "authoring",
+      "deprecated",
+      "description",
+      "effect",
+      "errors",
+      "extensions",
+      "inputSchema",
+      "outputSchema",
+      "replacement"
+    ],
+    "resourceFields": [
+      "authoring",
+      "cacheHints",
+      "deprecated",
+      "description",
+      "errors",
+      "extensions",
+      "inputSchema",
+      "outputSchema",
+      "policies",
+      "replacement"
+    ],
     "registrationCanonicalSha256": "74e7d7f6974dcbf5f3dcbb223708234f2827bed6ea27fd71518aa459fb9c8d7c",
-    "catalogCanonicalSha256": "df627cf210b9bb627c45c6a48d9d68ceb2a9e35fe8a2aa465a3991843ea6da74",
+    "behaviorCanonicalSha256": "d4dfc1a404b8ef466f6abdb7308cd2eb1f0528b1cef69ae2a9d39e3046abfa52",
+    "operationCanonicalSha256": "19be7f01384bd09ec0174c1d684384ee6c0a4ad01f8bee4615e028c4e110a6e0",
+    "resourceCanonicalSha256": "ad8d29c3d7a6f038e57744c7941c27ef605c4e93e5cd96dbb362f3bd30f44907",
+    "catalogCanonicalSha256": "1c747d266e60d8e162f0ab77148821102402593f544873a98c55938649859a99",
     "deterministicRuns": 2,
-    "successfulRegistrations": 8,
-    "successfulCatalogs": 3,
-    "callerInputsPreserved": 11,
-    "deeplyFrozenOutputs": 11,
-    "detachedOutputs": 11,
+    "successfulRegistrations": 26,
+    "successfulCatalogs": 7,
+    "callerInputsPreserved": 33,
+    "deeplyFrozenOutputs": 33,
+    "detachedOutputs": 33,
     "recognizedExoticOutputs": "REJECTED",
     "duplicateId": {
       "result": "REJECTED",
       "message": "Invalid Catalog manifest input at /components/1/id: duplicate component id \"com.example.ui/Button\""
     },
+    "categoryDuplicateIds": {
+      "behaviors": {
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /behaviors/1/id: duplicate behavior id \"com.example.interactions/Sortable\""
+      },
+      "operations": {
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /operations/1/id: duplicate operation id \"com.example.auth/signIn\""
+      },
+      "resources": {
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /resources/1/id: duplicate resource id \"com.example.stores/list\""
+      }
+    },
+    "crossCategoryDuplicateIds": [
+      {
+        "categories": ["components", "behaviors"],
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /behaviors/0/id: duplicate capability id \"com.example.shared/Collision\" already registered in components"
+      },
+      {
+        "categories": ["components", "operations"],
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /operations/0/id: duplicate capability id \"com.example.shared/Collision\" already registered in components"
+      },
+      {
+        "categories": ["components", "resources"],
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /resources/0/id: duplicate capability id \"com.example.shared/Collision\" already registered in components"
+      },
+      {
+        "categories": ["behaviors", "operations"],
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /operations/0/id: duplicate capability id \"com.example.shared/Collision\" already registered in behaviors"
+      },
+      {
+        "categories": ["behaviors", "resources"],
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /resources/0/id: duplicate capability id \"com.example.shared/Collision\" already registered in behaviors"
+      },
+      {
+        "categories": ["operations", "resources"],
+        "result": "REJECTED",
+        "message": "Invalid Catalog manifest input at /resources/0/id: duplicate capability id \"com.example.shared/Collision\" already registered in operations"
+      }
+    ],
     "accessor": { "result": "REJECTED", "invoked": false },
     "hostileValues": [
-      { "id": "undefined", "result": "REJECTED" },
-      { "id": "function", "result": "REJECTED" },
-      { "id": "symbol", "result": "REJECTED" },
-      { "id": "bigint", "result": "REJECTED" },
-      { "id": "nan", "result": "REJECTED" },
-      { "id": "infinity", "result": "REJECTED" },
-      { "id": "date", "result": "REJECTED" },
-      { "id": "map", "result": "REJECTED" },
-      { "id": "set", "result": "REJECTED" },
-      { "id": "regexp", "result": "REJECTED" },
-      { "id": "custom-class", "result": "REJECTED" },
-      { "id": "frozen-date", "result": "REJECTED" },
-      { "id": "frozen-map", "result": "REJECTED" },
-      { "id": "sparse-array", "result": "REJECTED" },
-      { "id": "extra-array-property", "result": "REJECTED" },
-      { "id": "cycle", "result": "REJECTED" },
-      { "id": "non-enumerable-property", "result": "REJECTED" },
-      { "id": "symbol-property", "result": "REJECTED" },
-      { "id": "laundered-date", "result": "REJECTED" },
-      { "id": "laundered-map", "result": "REJECTED" },
-      { "id": "laundered-set", "result": "REJECTED" },
-      { "id": "laundered-weak-map", "result": "REJECTED" },
-      { "id": "laundered-weak-set", "result": "REJECTED" },
-      { "id": "laundered-uint8-array", "result": "REJECTED" },
-      { "id": "laundered-array-buffer", "result": "REJECTED" },
-      { "id": "laundered-shared-array-buffer", "result": "REJECTED" },
-      { "id": "laundered-data-view", "result": "REJECTED" },
-      { "id": "laundered-boolean", "result": "REJECTED" },
-      { "id": "laundered-number", "result": "REJECTED" },
-      { "id": "laundered-string", "result": "REJECTED" },
-      { "id": "laundered-bigint", "result": "REJECTED" },
-      { "id": "laundered-symbol", "result": "REJECTED" },
-      { "id": "laundered-regexp", "result": "REJECTED" },
-      { "id": "laundered-weak-ref", "result": "REJECTED" },
-      { "id": "laundered-finalization-registry", "result": "REJECTED" }
+      { "category": "component", "id": "undefined", "result": "REJECTED" },
+      { "category": "component", "id": "function", "result": "REJECTED" },
+      { "category": "component", "id": "symbol", "result": "REJECTED" },
+      { "category": "component", "id": "bigint", "result": "REJECTED" },
+      { "category": "component", "id": "nan", "result": "REJECTED" },
+      { "category": "component", "id": "infinity", "result": "REJECTED" },
+      { "category": "component", "id": "date", "result": "REJECTED" },
+      { "category": "component", "id": "map", "result": "REJECTED" },
+      { "category": "component", "id": "set", "result": "REJECTED" },
+      { "category": "component", "id": "regexp", "result": "REJECTED" },
+      { "category": "component", "id": "custom-class", "result": "REJECTED" },
+      { "category": "component", "id": "frozen-date", "result": "REJECTED" },
+      { "category": "component", "id": "frozen-map", "result": "REJECTED" },
+      { "category": "component", "id": "sparse-array", "result": "REJECTED" },
+      { "category": "component", "id": "extra-array-property", "result": "REJECTED" },
+      { "category": "component", "id": "cycle", "result": "REJECTED" },
+      { "category": "component", "id": "non-enumerable-property", "result": "REJECTED" },
+      { "category": "component", "id": "symbol-property", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-date", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-map", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-set", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-weak-map", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-weak-set", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-uint8-array", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-array-buffer", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-shared-array-buffer", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-data-view", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-boolean", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-number", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-string", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-bigint", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-symbol", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-regexp", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-weak-ref", "result": "REJECTED" },
+      { "category": "component", "id": "laundered-finalization-registry", "result": "REJECTED" },
+      { "category": "behavior", "id": "undefined", "result": "REJECTED" },
+      { "category": "behavior", "id": "function", "result": "REJECTED" },
+      { "category": "behavior", "id": "symbol", "result": "REJECTED" },
+      { "category": "behavior", "id": "bigint", "result": "REJECTED" },
+      { "category": "behavior", "id": "nan", "result": "REJECTED" },
+      { "category": "behavior", "id": "infinity", "result": "REJECTED" },
+      { "category": "behavior", "id": "date", "result": "REJECTED" },
+      { "category": "behavior", "id": "map", "result": "REJECTED" },
+      { "category": "behavior", "id": "set", "result": "REJECTED" },
+      { "category": "behavior", "id": "regexp", "result": "REJECTED" },
+      { "category": "behavior", "id": "custom-class", "result": "REJECTED" },
+      { "category": "behavior", "id": "frozen-date", "result": "REJECTED" },
+      { "category": "behavior", "id": "frozen-map", "result": "REJECTED" },
+      { "category": "behavior", "id": "sparse-array", "result": "REJECTED" },
+      { "category": "behavior", "id": "extra-array-property", "result": "REJECTED" },
+      { "category": "behavior", "id": "cycle", "result": "REJECTED" },
+      { "category": "behavior", "id": "non-enumerable-property", "result": "REJECTED" },
+      { "category": "behavior", "id": "symbol-property", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-date", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-map", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-set", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-weak-map", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-weak-set", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-uint8-array", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-array-buffer", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-shared-array-buffer", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-data-view", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-boolean", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-number", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-string", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-bigint", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-symbol", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-regexp", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-weak-ref", "result": "REJECTED" },
+      { "category": "behavior", "id": "laundered-finalization-registry", "result": "REJECTED" },
+      { "category": "operation", "id": "undefined", "result": "REJECTED" },
+      { "category": "operation", "id": "function", "result": "REJECTED" },
+      { "category": "operation", "id": "symbol", "result": "REJECTED" },
+      { "category": "operation", "id": "bigint", "result": "REJECTED" },
+      { "category": "operation", "id": "nan", "result": "REJECTED" },
+      { "category": "operation", "id": "infinity", "result": "REJECTED" },
+      { "category": "operation", "id": "date", "result": "REJECTED" },
+      { "category": "operation", "id": "map", "result": "REJECTED" },
+      { "category": "operation", "id": "set", "result": "REJECTED" },
+      { "category": "operation", "id": "regexp", "result": "REJECTED" },
+      { "category": "operation", "id": "custom-class", "result": "REJECTED" },
+      { "category": "operation", "id": "frozen-date", "result": "REJECTED" },
+      { "category": "operation", "id": "frozen-map", "result": "REJECTED" },
+      { "category": "operation", "id": "sparse-array", "result": "REJECTED" },
+      { "category": "operation", "id": "extra-array-property", "result": "REJECTED" },
+      { "category": "operation", "id": "cycle", "result": "REJECTED" },
+      { "category": "operation", "id": "non-enumerable-property", "result": "REJECTED" },
+      { "category": "operation", "id": "symbol-property", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-date", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-map", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-set", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-weak-map", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-weak-set", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-uint8-array", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-array-buffer", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-shared-array-buffer", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-data-view", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-boolean", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-number", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-string", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-bigint", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-symbol", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-regexp", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-weak-ref", "result": "REJECTED" },
+      { "category": "operation", "id": "laundered-finalization-registry", "result": "REJECTED" },
+      { "category": "resource", "id": "undefined", "result": "REJECTED" },
+      { "category": "resource", "id": "function", "result": "REJECTED" },
+      { "category": "resource", "id": "symbol", "result": "REJECTED" },
+      { "category": "resource", "id": "bigint", "result": "REJECTED" },
+      { "category": "resource", "id": "nan", "result": "REJECTED" },
+      { "category": "resource", "id": "infinity", "result": "REJECTED" },
+      { "category": "resource", "id": "date", "result": "REJECTED" },
+      { "category": "resource", "id": "map", "result": "REJECTED" },
+      { "category": "resource", "id": "set", "result": "REJECTED" },
+      { "category": "resource", "id": "regexp", "result": "REJECTED" },
+      { "category": "resource", "id": "custom-class", "result": "REJECTED" },
+      { "category": "resource", "id": "frozen-date", "result": "REJECTED" },
+      { "category": "resource", "id": "frozen-map", "result": "REJECTED" },
+      { "category": "resource", "id": "sparse-array", "result": "REJECTED" },
+      { "category": "resource", "id": "extra-array-property", "result": "REJECTED" },
+      { "category": "resource", "id": "cycle", "result": "REJECTED" },
+      { "category": "resource", "id": "non-enumerable-property", "result": "REJECTED" },
+      { "category": "resource", "id": "symbol-property", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-date", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-map", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-set", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-weak-map", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-weak-set", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-uint8-array", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-array-buffer", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-shared-array-buffer", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-data-view", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-boolean", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-number", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-string", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-bigint", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-symbol", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-regexp", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-weak-ref", "result": "REJECTED" },
+      { "category": "resource", "id": "laundered-finalization-registry", "result": "REJECTED" }
     ],
+    "executableBindingFields": {
+      "behaviorProduction": "ABSENT",
+      "operationExecute": "ABSENT",
+      "resourceRead": "ABSENT"
+    },
     "opaquePrototypeKeys": ["__proto__", "constructor", "prototype"],
     "componentMapKeys": ["__proto__", "constructor"],
-    "caseSensitiveIds": ["com.example.ui/Text", "com.example.ui/text"],
+    "behaviorMapKeys": ["behavior.__proto__"],
+    "operationMapKeys": ["operation.constructor"],
+    "resourceMapKeys": ["resource.prototype"],
+    "caseSensitiveIds": {
+      "components": ["com.example.ui/Text", "com.example.ui/text"],
+      "behaviors": ["com.example.interactions/Sortable", "com.example.interactions/sortable"],
+      "operations": ["com.example.operations/Save", "com.example.operations/save"],
+      "resources": ["com.example.resources/Stores", "com.example.resources/stores"]
+    },
     "validator": { "valid": true, "diagnostics": 0 }
   },
   "catalogGolden": {
     "authoring": { "publisher": "proof" },
-    "behaviors": {},
+    "behaviors": {
+      "com.example.interactions/Sortable": {
+        "attachTo": { "capabilities": ["com.example.ui/Button"], "categories": ["action"] },
+        "authoring": {
+          "adapterFidelity": "equivalent",
+          "category": "Interaction",
+          "defaultProps": { "axis": "vertical" },
+          "displayName": "Sortable"
+        },
+        "category": "interaction",
+        "commands": {
+          "cancel": { "inputSchema": { "additionalProperties": false, "type": "object" } }
+        },
+        "composition": {
+          "compatibleWith": ["com.example.interactions/KeyboardSortable"],
+          "exclusiveChannels": ["pointer-drag"]
+        },
+        "deprecated": false,
+        "description": "Adds sortable interaction mechanics.",
+        "events": {
+          "reorder": {
+            "payloadSchema": {
+              "properties": { "ids": { "items": { "type": "string" }, "type": "array" } },
+              "required": ["ids"],
+              "type": "object"
+            }
+          }
+        },
+        "extensions": { "com.example.audit/owner": "interaction-team" },
+        "propsSchema": {
+          "additionalProperties": false,
+          "properties": { "axis": { "enum": ["vertical", "horizontal"] } },
+          "type": "object"
+        },
+        "replacement": "com.example.interactions/SortableV2",
+        "slots": { "preview": { "acceptsCategories": ["content"], "maxItems": 1 } },
+        "styleParts": {
+          "indicator": { "propertiesSchema": { "additionalProperties": false, "type": "object" } }
+        },
+        "visualStates": ["dragging", "invalid-target"]
+      }
+    },
     "components": {
       "com.example.ui/Button": {
         "authoring": {
@@ -154,33 +481,98 @@
         "visualStates": ["focus", "disabled"]
       }
     },
-    "description": "M03-T01 proof Catalog.",
+    "description": "M03-T02 proof Catalog.",
     "desen": "0.1.0",
     "extensions": { "com.example/proof": true },
     "id": "com.example.catalog",
     "kind": "desen.catalog",
-    "operations": {},
+    "operations": {
+      "com.example.auth/signIn": {
+        "authoring": {
+          "extensions": { "com.example/scenario": "sign-in" },
+          "fixtures": {
+            "invalid": { "code": "INVALID_CREDENTIALS" },
+            "success": { "userId": "synthetic-user" }
+          }
+        },
+        "deprecated": false,
+        "description": "Authenticates through a trusted host implementation.",
+        "effect": "network",
+        "errors": [
+          { "code": "INVALID_CREDENTIALS", "description": "Credentials were rejected." },
+          { "code": "UNAVAILABLE", "extensions": { "retryable": true } }
+        ],
+        "extensions": { "com.example.audit/owner": "identity-team" },
+        "inputSchema": {
+          "properties": { "email": { "type": "string" } },
+          "required": ["email"],
+          "type": "object"
+        },
+        "outputSchema": {
+          "properties": { "userId": { "type": "string" } },
+          "required": ["userId"],
+          "type": "object"
+        },
+        "replacement": "com.example.auth/signInV2"
+      }
+    },
     "packageDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-    "resources": {},
+    "resources": {
+      "com.example.stores/list": {
+        "authoring": {
+          "extensions": { "com.example/scenario": "store-list" },
+          "fixtures": { "default": [{ "id": "synthetic-store" }] }
+        },
+        "cacheHints": { "staleWhileRevalidateSeconds": 300, "ttlSeconds": 60 },
+        "deprecated": false,
+        "description": "Reads a host-provided store list.",
+        "errors": [
+          { "code": "OFFLINE", "description": "The host is offline." },
+          { "code": "UNAVAILABLE", "extensions": { "retryable": true } }
+        ],
+        "extensions": { "com.example.audit/owner": "store-team" },
+        "inputSchema": { "properties": { "region": { "type": "string" } }, "type": "object" },
+        "outputSchema": {
+          "items": {
+            "properties": { "id": { "type": "string" } },
+            "required": ["id"],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "policies": ["mount", "manual", "once"],
+        "replacement": "com.example.stores/listV2"
+      }
+    },
     "target": "web-react",
     "version": "1.0.0"
   },
   "platformBoundary": {
-    "sourceFiles": 4,
-    "declarationFiles": 4,
+    "sourceFiles": 8,
+    "declarationFiles": 8,
     "sourcePaths": [
+      "packages/catalog-sdk/src/behavior-registration.ts",
       "packages/catalog-sdk/src/catalog-manifest.ts",
       "packages/catalog-sdk/src/component-registration.ts",
       "packages/catalog-sdk/src/index.ts",
-      "packages/catalog-sdk/src/inert-json.ts"
+      "packages/catalog-sdk/src/inert-json.ts",
+      "packages/catalog-sdk/src/operation-registration.ts",
+      "packages/catalog-sdk/src/registration-core.ts",
+      "packages/catalog-sdk/src/resource-registration.ts"
     ],
     "declarationPaths": [
+      "packages/catalog-sdk/dist/behavior-registration.d.ts",
       "packages/catalog-sdk/dist/catalog-manifest.d.ts",
       "packages/catalog-sdk/dist/component-registration.d.ts",
       "packages/catalog-sdk/dist/index.d.ts",
-      "packages/catalog-sdk/dist/inert-json.d.ts"
+      "packages/catalog-sdk/dist/inert-json.d.ts",
+      "packages/catalog-sdk/dist/operation-registration.d.ts",
+      "packages/catalog-sdk/dist/registration-core.d.ts",
+      "packages/catalog-sdk/dist/resource-registration.d.ts"
     ],
     "distributionPaths": [
+      "packages/catalog-sdk/dist/behavior-registration.d.ts",
+      "packages/catalog-sdk/dist/behavior-registration.js",
       "packages/catalog-sdk/dist/catalog-manifest.d.ts",
       "packages/catalog-sdk/dist/catalog-manifest.js",
       "packages/catalog-sdk/dist/component-registration.d.ts",
@@ -188,17 +580,32 @@
       "packages/catalog-sdk/dist/index.d.ts",
       "packages/catalog-sdk/dist/index.js",
       "packages/catalog-sdk/dist/inert-json.d.ts",
-      "packages/catalog-sdk/dist/inert-json.js"
+      "packages/catalog-sdk/dist/inert-json.js",
+      "packages/catalog-sdk/dist/operation-registration.d.ts",
+      "packages/catalog-sdk/dist/operation-registration.js",
+      "packages/catalog-sdk/dist/registration-core.d.ts",
+      "packages/catalog-sdk/dist/registration-core.js",
+      "packages/catalog-sdk/dist/resource-registration.d.ts",
+      "packages/catalog-sdk/dist/resource-registration.js"
     ],
     "runtimeDependencies": ["@desen/protocol"],
     "typeExports": [
+      "BehaviorManifest",
       "ComponentManifest",
       "CreateCatalogManifestInput",
       "ImmutableJson",
       "JsonInput",
       "JsonPrimitive",
+      "OperationManifest",
+      "RegisterBehaviorInput",
       "RegisterComponentInput",
-      "RegisteredComponent"
+      "RegisterOperationInput",
+      "RegisterResourceInput",
+      "RegisteredBehavior",
+      "RegisteredComponent",
+      "RegisteredOperation",
+      "RegisteredResource",
+      "ResourceManifest"
     ],
     "ambientTypes": [],
     "forbiddenProfiles": [
@@ -210,10 +617,15 @@
     ]
   },
   "evidence": {
-    "packageTests": 8,
-    "compileTimeNegativeCases": 21,
-    "rootEvidenceTests": 29,
+    "packageTests": 17,
+    "compileTimeNegativeCases": 53,
+    "rootEvidenceTests": 33,
     "trackedFiles": [
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 39155,
+        "sha256": "2828d76a4b7127f73417d5524cd9ff9bf286fdbf355abc3d92815eabfb01afd4"
+      },
       {
         "path": "package.json",
         "bytes": 8953,
@@ -221,8 +633,8 @@
       },
       {
         "path": "packages/catalog-sdk/README.md",
-        "bytes": 5353,
-        "sha256": "4782e79c7d92f3c904edaf33528a652b898077decc568a990f5626e3371e535a"
+        "bytes": 8012,
+        "sha256": "a333c2d023ff23962dc6ca6996ac616856fff5f10d3ecb97a74d13ff7359ec1c"
       },
       {
         "path": "packages/catalog-sdk/package.json",
@@ -230,19 +642,24 @@
         "sha256": "d355be573afc71b3009ffe55b86b9b9365d98c97041ae022fb291e38bdbbd85a"
       },
       {
+        "path": "packages/catalog-sdk/src/behavior-registration.ts",
+        "bytes": 2568,
+        "sha256": "854864f0f4621c635a24050fe1b8a88485840798cb7f4684bd7f8462bd94d874"
+      },
+      {
         "path": "packages/catalog-sdk/src/catalog-manifest.ts",
-        "bytes": 6749,
-        "sha256": "c20b86cbf4b2a6688c67f3eed51f88bd40171b4f43f4af8e4484d8383d49ac1a"
+        "bytes": 9601,
+        "sha256": "319fb66d2f634dd5ef02fbaa04a65c1d6b70d0ce5eeb05f018b111d3c14a1499"
       },
       {
         "path": "packages/catalog-sdk/src/component-registration.ts",
-        "bytes": 4852,
-        "sha256": "b7e04e6bbd08ce315b06578873d487fe16d4c773a7b653443ebaec0d72f15c84"
+        "bytes": 2759,
+        "sha256": "899b0712d391b7107b4396a880b51ccd5cb540cdf37c623fe93d56ac47a07b73"
       },
       {
         "path": "packages/catalog-sdk/src/index.ts",
-        "bytes": 527,
-        "sha256": "4a549f2312348acc5608afafc7197ef3235093e59801e64461ac462d9de79109"
+        "bytes": 1076,
+        "sha256": "7b2b1661fc2b950d5fd070c94977183eaa68f94bb89c83da0806101acd947457"
       },
       {
         "path": "packages/catalog-sdk/src/inert-json.ts",
@@ -250,14 +667,29 @@
         "sha256": "3290a43ddbf6fe6e6c323757698154f0ef9d7f5afc63d9a6c1f3ccfd3af71c2d"
       },
       {
+        "path": "packages/catalog-sdk/src/operation-registration.ts",
+        "bytes": 2558,
+        "sha256": "9d254bcafc81f49ae090c91c42bda96dd181e9b2d6ee5568e57afe383825168a"
+      },
+      {
+        "path": "packages/catalog-sdk/src/registration-core.ts",
+        "bytes": 3493,
+        "sha256": "4442c8ec28d4376e7112061b41e0174724e463dd136817878981d1e84698afd8"
+      },
+      {
+        "path": "packages/catalog-sdk/src/resource-registration.ts",
+        "bytes": 2553,
+        "sha256": "6e5df207cb51c652e3d7b12285f7d83eee461d314460dc1a9399490eb870fee8"
+      },
+      {
         "path": "packages/catalog-sdk/test/catalog-manifest-registration.test.ts",
-        "bytes": 11831,
-        "sha256": "1f34e71da627c19a5a0169220b557e153d1b16b6e2102fa3c0a4f510898dac88"
+        "bytes": 31715,
+        "sha256": "7da68eae8fa0a70d112c83553f0f43e4b52644951f9650b2c08fbea8dd83af89"
       },
       {
         "path": "packages/catalog-sdk/test/public-api.types.ts",
-        "bytes": 8522,
-        "sha256": "03be6039b7342bd0337dc9d8d634ad944203b0831efa239f9a0337000ca6b9da"
+        "bytes": 20584,
+        "sha256": "2fde09dbd12446f061b9f5388344927ef956dda1324c7e4d3f51445da8560ce3"
       },
       {
         "path": "packages/catalog-sdk/tsconfig.build.json",
@@ -276,13 +708,13 @@
       },
       {
         "path": "scripts/generate-catalog-manifest-registration-proof.mjs",
-        "bytes": 838,
-        "sha256": "f81def14912a8843581b4015b356ec4930bd1607f8ca425ad9f857203548eeff"
+        "bytes": 857,
+        "sha256": "45bd841ed20eeb819db1b5236418b1c8f650b572235c413bb01fb451b0273d0a"
       },
       {
         "path": "scripts/lib/catalog-manifest-registration-proof.mjs",
-        "bytes": 67472,
-        "sha256": "bed7795827d042be63546b792f775511566b69813ab1fb42e59f444320552d57"
+        "bytes": 93527,
+        "sha256": "1dc4045e2a5e5dd55dc7090a178cf16e7dedfd5a8e299bac08c7261e29b0e88c"
       },
       {
         "path": "scripts/verify-boundary-fixtures.mjs",
@@ -311,8 +743,8 @@
       },
       {
         "path": "tests/catalog-manifest-registration.test.mjs",
-        "bytes": 19238,
-        "sha256": "a9c3981806ea772ed2080e5e2e314fb34761f514d67cea3d5c8993d62bd8a298"
+        "bytes": 23633,
+        "sha256": "1fc9930160d5b8b11235a39f77ae34d49856f4187aa506d935c62f46c17bcb4c"
       },
       {
         "path": "tsconfig.base.json",
@@ -327,34 +759,44 @@
     ],
     "distributionFiles": [
       {
+        "path": "packages/catalog-sdk/dist/behavior-registration.d.ts",
+        "bytes": 2422,
+        "sha256": "cb1aaa4cb3907a33aa3d1813887f5b7aface4690b9d405d8c6778b01e466f6ff"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/behavior-registration.js",
+        "bytes": 590,
+        "sha256": "6f022c2c4f59d9444444fc45bad25535a29f15b56e6f09ff466ab38a907fb3a1"
+      },
+      {
         "path": "packages/catalog-sdk/dist/catalog-manifest.d.ts",
-        "bytes": 3108,
-        "sha256": "8067ecbd37fad7177661a274d4e55378caf498f7997632dfa853eb4ab4680c76"
+        "bytes": 4678,
+        "sha256": "a7f9e24ebf1237e4683c9968538acf9d51e08d46598f0caac12e02af5e45bd04"
       },
       {
         "path": "packages/catalog-sdk/dist/catalog-manifest.js",
-        "bytes": 4168,
-        "sha256": "93da6db2d41ea830a8a9e48311b16a08433193bcd580cd313e838f72b4a9a699"
+        "bytes": 5210,
+        "sha256": "d4faf0e0e29eafd92a74fa675bac6846610ef497512f55258238730748d12b55"
       },
       {
         "path": "packages/catalog-sdk/dist/component-registration.d.ts",
-        "bytes": 3665,
-        "sha256": "0ec209af07e5c6d23c29bb1c300938faae9813900a3dde70d02b1cedd9ee401b"
+        "bytes": 2612,
+        "sha256": "5adb55b4c4b50d6a579bad24aa3e8abe3954d3e5adc569a3bfa595de7cffbd92"
       },
       {
         "path": "packages/catalog-sdk/dist/component-registration.js",
-        "bytes": 1509,
-        "sha256": "bd692eb37fbd8b36c415cde3b1fe9c6f938b7971c1f10b5cd54dd7a22f525416"
+        "bytes": 688,
+        "sha256": "0877891e7b2e0053d1c27ae6c355face1f28b4b11dc2a5c4b0a9072cd5dc4924"
       },
       {
         "path": "packages/catalog-sdk/dist/index.d.ts",
-        "bytes": 554,
-        "sha256": "5ddd1e2dc07b41b18ffea84748f606bc2970a14f838843c4ca717f268265411e"
+        "bytes": 1085,
+        "sha256": "ff0ba03d772231e81b2203ca9fdec63766b43c532ed679c528a783452020dc82"
       },
       {
         "path": "packages/catalog-sdk/dist/index.js",
-        "bytes": 283,
-        "sha256": "a2f8465ea4b41252b04d7ffa0e42e68c00db5f1b2e6b803f3d56733e12cc1c1c"
+        "bytes": 474,
+        "sha256": "fdefb0e24c515cfa7a512bca0299d1a01f56de705753e9a85720a93b810bf6cc"
       },
       {
         "path": "packages/catalog-sdk/dist/inert-json.d.ts",
@@ -365,6 +807,36 @@
         "path": "packages/catalog-sdk/dist/inert-json.js",
         "bytes": 4523,
         "sha256": "a2366a224fff48105d8f9c4b13d0e45905dd281285daa469880e68847529260f"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/operation-registration.d.ts",
+        "bytes": 2411,
+        "sha256": "a85a7e5193b6f246aeb7a8b8b50f5470d2afddd2592a10d90075bfb7a8a58dc6"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/operation-registration.js",
+        "bytes": 563,
+        "sha256": "1181d3903bd3b8bbeeb986853245e0fdc2c0ecc7ff1bbb080343e1da123c2786"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/registration-core.d.ts",
+        "bytes": 2470,
+        "sha256": "5f0fd917dbf1564471af53227abc75c5dbef58ab75994a4184a1ff17b4cb346e"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/registration-core.js",
+        "bytes": 1275,
+        "sha256": "5cf7dace77ae294c83ee5b310f84b8d53c10c5791105a8ef5d1128eac102c024"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/resource-registration.d.ts",
+        "bytes": 2407,
+        "sha256": "c0944f0c0b4f28478da1ace64d15ab0757d9c9766b5b24bff9867d2116cf0256"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/resource-registration.js",
+        "bytes": 569,
+        "sha256": "445d6a95506d43412c4efc8711cf94c38e69d226d83ca28eb49be32b96c7432f"
       }
     ],
     "commandWiring": {
@@ -441,16 +913,21 @@
   "scope": {
     "included": [
       "component manifest registration",
-      "complete Catalog root composition with empty later-category maps",
-      "duplicate component-id rejection",
+      "behavior manifest registration",
+      "operation manifest registration",
+      "resource manifest registration",
+      "complete four-category Catalog composition",
+      "component-only caller compatibility with empty optional-category maps",
+      "same-category and cross-category duplicate capability-id rejection",
       "detached canonical-key-ordered deep-frozen JSON snapshots",
+      "manifest-only API boundary without executable host bindings",
       "built declaration and production-source platform audit"
     ],
     "deferred": [
-      "M03-T02 behavior, operation, and resource registration",
       "M03-T03 schema-authoritative TypeScript and inspector-control derivation",
       "M03-T04 deterministic Web-React package digest profile",
       "M03-T05 and M03-T06 reference components",
+      "M03-T08 host operation binding and M04 host operation/resource ports",
       "M03-T09 manifest-to-implementation parity",
       "M03-T10 final package artifact and exact tuple",
       "M05 target renderer adapter registration"
@@ -460,10 +937,12 @@
     "The SDK accepts programmatic object input; duplicate members already lost by an external JSON parser cannot be detected here.",
     "A general JavaScript Proxy cannot be classified without allowing its traps to run; callers must not use proxies as authoring input.",
     "Promise, generator, iterator, and host-exotic internal slots have no universal side-effect-free ECMAScript brand probe; if their prototypes are deliberately replaced with Object.prototype, their observable enumerable data shape is what gets snapshotted.",
-    "TypeScript may erase extra-property information when a structural union member absorbs another member; runtime exact-key checks remain authoritative for that language-level edge case.",
+    "TypeScript may erase extra-property information when a structural union member absorbs another member; Catalog structural validation remains authoritative for nested manifest shape in that language-level edge case.",
     "The atomic writer assumes its real parent directory is not concurrently controlled by an attacker during the final verified rename window.",
     "TypeScript projections and inert snapshotting do not replace Catalog structural or semantic validation.",
     "packageDigest is caller-supplied until M03-T04 defines the deterministic Web-React package profile.",
+    "Manifest registration intentionally does not carry executable behavior production, operation execute, or resource read functions; host bindings remain a later runtime responsibility recorded by PF-024.",
+    "Direct trace ownership confirms the manifest-registration portion only; authorization, host execution, read-only resource behavior, adapter integration, and final parity remain assigned to later tasks.",
     "No P-* claim changes status and G03 remains open."
   ]
 }

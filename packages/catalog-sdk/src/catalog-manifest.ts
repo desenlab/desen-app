@@ -1,12 +1,16 @@
 import { createImmutableJsonSnapshot } from "./inert-json.js";
 
 import type { DesenCatalog } from "@desen/protocol";
-import type { ComponentManifestInput, ExactComponentManifest } from "./component-registration.js";
+import type { BehaviorManifestInput } from "./behavior-registration.js";
+import type { ComponentManifestInput } from "./component-registration.js";
 import type { ImmutableJson, JsonInput } from "./inert-json.js";
+import type { OperationManifestInput } from "./operation-registration.js";
+import type { ExactManifest } from "./registration-core.js";
+import type { ResourceManifestInput } from "./resource-registration.js";
 
-type ComponentRegistrationShape = Readonly<{
+type RegistrationShape<Manifest> = Readonly<{
   readonly id: string;
-  readonly manifest: ComponentManifestInput;
+  readonly manifest: Manifest;
 }>;
 
 /** Input accepted by {@link createCatalogManifest}. */
@@ -22,7 +26,13 @@ export interface CreateCatalogManifestInput {
   /** Optional package description. */
   readonly description?: NonNullable<DesenCatalog["description"]>;
   /** Component registrations to expose through the authoritative Catalog map. */
-  readonly components: readonly ComponentRegistrationShape[];
+  readonly components: readonly RegistrationShape<ComponentManifestInput>[];
+  /** Optional behavior registrations; omission preserves the component-only builder behavior. */
+  readonly behaviors?: readonly RegistrationShape<BehaviorManifestInput>[];
+  /** Optional operation registrations whose implementations remain host-owned. */
+  readonly operations?: readonly RegistrationShape<OperationManifestInput>[];
+  /** Optional resource registrations whose implementations remain host-owned. */
+  readonly resources?: readonly RegistrationShape<ResourceManifestInput>[];
   /** Optional open authoring metadata from the Catalog schema. */
   readonly authoring?: JsonInput<NonNullable<DesenCatalog["authoring"]>>;
   /** Optional opaque Catalog extensions. */
@@ -36,19 +46,43 @@ const REQUIRED_INPUT_KEYS = Object.freeze([
   "target",
   "version",
 ]);
-const OPTIONAL_INPUT_KEYS = Object.freeze(["authoring", "description", "extensions"]);
+const OPTIONAL_INPUT_KEYS = Object.freeze([
+  "authoring",
+  "behaviors",
+  "description",
+  "extensions",
+  "operations",
+  "resources",
+]);
 const REGISTRATION_KEYS = Object.freeze(["id", "manifest"]);
 
-type ExactComponentRegistration<Input extends ComponentRegistrationShape> =
-  Input extends ComponentRegistrationShape
+type ExactRegistration<Input, Manifest> =
+  Input extends RegistrationShape<Manifest>
     ? Input &
-        Record<Exclude<keyof Input, keyof ComponentRegistrationShape>, never> &
-        Readonly<{ manifest: ExactComponentManifest<Input["manifest"]> }>
+        Record<Exclude<keyof Input, keyof RegistrationShape<Manifest>>, never> &
+        Readonly<{ manifest: ExactManifest<Input["manifest"], Manifest> }>
     : never;
 
-type ExactComponentList<Input extends readonly ComponentRegistrationShape[]> = {
-  readonly [Key in keyof Input]: Input[Key] extends ComponentRegistrationShape
-    ? ExactComponentRegistration<Input[Key]>
+type ExactRegistrationList<Input, Manifest> = Input extends readonly RegistrationShape<Manifest>[]
+  ? {
+      readonly [Key in keyof Input]: Input[Key] extends RegistrationShape<Manifest>
+        ? ExactRegistration<Input[Key], Manifest>
+        : Input[Key];
+    }
+  : never;
+
+type PresentRegistrationConstraint<
+  Input,
+  Key extends "behaviors" | "operations" | "resources",
+  Manifest,
+> =
+  Input extends Readonly<Record<Key, infer List>>
+    ? Readonly<Record<Key, List & ExactRegistrationList<List, Manifest>>>
+    : unknown;
+
+type ExactComponentList<Input extends readonly RegistrationShape<ComponentManifestInput>[]> = {
+  readonly [Key in keyof Input]: Input[Key] extends RegistrationShape<ComponentManifestInput>
+    ? ExactRegistration<Input[Key], ComponentManifestInput>
     : Input[Key];
 };
 
@@ -58,7 +92,10 @@ type CatalogManifestConstraints<Input extends CreateCatalogManifestInput> =
         Record<Exclude<keyof Input, keyof CreateCatalogManifestInput>, never> &
         Readonly<{
           components: Input["components"] & ExactComponentList<Input["components"]>;
-        }>
+        }> &
+        PresentRegistrationConstraint<Input, "behaviors", BehaviorManifestInput> &
+        PresentRegistrationConstraint<Input, "operations", OperationManifestInput> &
+        PresentRegistrationConstraint<Input, "resources", ResourceManifestInput>
     : never;
 
 function fail(path: string, message: string): never {
@@ -93,9 +130,10 @@ function assertOptionalRecord(value: Record<string, unknown>, key: string): void
 
 function assertRegistration(
   value: unknown,
+  category: "components" | "behaviors" | "operations" | "resources",
   index: number,
 ): asserts value is { readonly id: string; readonly manifest: Record<string, unknown> } {
-  const path = `/components/${index}`;
+  const path = `/${category}/${index}`;
   assertJsonRecord(value, path);
   const keys = Object.keys(value);
   if (
@@ -108,16 +146,46 @@ function assertRegistration(
   assertJsonRecord(value.manifest, `${path}/manifest`);
 }
 
+function composeRegistrationMap(
+  input: Record<string, unknown>,
+  category: "components" | "behaviors" | "operations" | "resources",
+  capabilityOwners: Record<string, string>,
+): Record<string, unknown> {
+  const registrations = Object.hasOwn(input, category) ? input[category] : [];
+  if (!Array.isArray(registrations)) fail(`/${category}`, "expected an array");
+
+  const map: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
+  for (const [index, registration] of registrations.entries()) {
+    assertRegistration(registration, category, index);
+    if (Object.hasOwn(map, registration.id)) {
+      fail(
+        `/${category}/${index}/id`,
+        `duplicate ${category.slice(0, -1)} id ${JSON.stringify(registration.id)}`,
+      );
+    }
+    if (Object.hasOwn(capabilityOwners, registration.id)) {
+      fail(
+        `/${category}/${index}/id`,
+        `duplicate capability id ${JSON.stringify(registration.id)} already registered in ${capabilityOwners[registration.id]}`,
+      );
+    }
+    map[registration.id] = registration.manifest;
+    capabilityOwners[registration.id] = category;
+  }
+  return map;
+}
+
 /**
- * Builds one complete DESEN 0.1.0 Catalog manifest from component registrations.
+ * Builds one complete DESEN 0.1.0 Catalog manifest from inert capability registrations.
  *
- * @remarks Protocol identity constants are injected rather than caller-selected. Component ids are
- * composed into the Catalog map exactly once; duplicate ids fail instead of using last-write-wins.
- * Behavior, operation, and resource registration deliberately remain empty until M03-T02. The
- * result is detached, canonical-key-ordered, recursively frozen JSON data.
+ * @remarks Protocol identity constants are injected rather than caller-selected. Capability ids
+ * share one exact, case-sensitive namespace across all four maps, so duplicates fail instead of
+ * producing a Catalog that the semantic validator must reject. Omitted later-category lists
+ * preserve the M03-T01 component-only call shape and emit empty maps. The result is detached,
+ * canonical-key-ordered, recursively frozen JSON data.
  *
  * @throws TypeError when the input is non-JSON, has an unknown wrapper field, contains a malformed
- * registration record, or repeats a component identifier.
+ * registration record, or repeats a capability identifier.
  */
 export function createCatalogManifest<const Input extends CreateCatalogManifestInput>(
   input: Input & CatalogManifestConstraints<NoInfer<Input>>,
@@ -135,16 +203,11 @@ export function createCatalogManifest<const Input extends CreateCatalogManifestI
   }
   assertOptionalRecord(snapshot, "authoring");
   assertOptionalRecord(snapshot, "extensions");
-  if (!Array.isArray(snapshot.components)) fail("/components", "expected an array");
-
-  const componentMap: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
-  for (const [index, registration] of snapshot.components.entries()) {
-    assertRegistration(registration, index);
-    if (Object.hasOwn(componentMap, registration.id)) {
-      fail(`/components/${index}/id`, `duplicate component id ${JSON.stringify(registration.id)}`);
-    }
-    componentMap[registration.id] = registration.manifest;
-  }
+  const capabilityOwners: Record<string, string> = Object.create(null) as Record<string, string>;
+  const componentMap = composeRegistrationMap(snapshot, "components", capabilityOwners);
+  const behaviorMap = composeRegistrationMap(snapshot, "behaviors", capabilityOwners);
+  const operationMap = composeRegistrationMap(snapshot, "operations", capabilityOwners);
+  const resourceMap = composeRegistrationMap(snapshot, "resources", capabilityOwners);
 
   const catalog: Record<string, unknown> = {
     kind: "desen.catalog",
@@ -154,9 +217,9 @@ export function createCatalogManifest<const Input extends CreateCatalogManifestI
     target: snapshot.target,
     packageDigest: snapshot.packageDigest,
     components: componentMap,
-    behaviors: {},
-    operations: {},
-    resources: {},
+    behaviors: behaviorMap,
+    operations: operationMap,
+    resources: resourceMap,
   };
   if (Object.hasOwn(snapshot, "description")) catalog.description = snapshot.description;
   if (Object.hasOwn(snapshot, "authoring")) catalog.authoring = snapshot.authoring;

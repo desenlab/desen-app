@@ -28,13 +28,41 @@ function deepFreeze(value) {
   return Object.freeze(value);
 }
 
-test("accepts the tracked deterministic M03-T01 evidence", async () => {
+function catalogApiWith(overrides = {}) {
+  return {
+    createCatalogManifest: realCatalogApi.createCatalogManifest,
+    registerBehavior: realCatalogApi.registerBehavior,
+    registerComponent: realCatalogApi.registerComponent,
+    registerOperation: realCatalogApi.registerOperation,
+    registerResource: realCatalogApi.registerResource,
+    ...overrides,
+  };
+}
+
+const NEW_CATEGORY_REGISTRATIONS = Object.freeze([
+  Object.freeze({ catalogField: "behaviors", registerName: "registerBehavior" }),
+  Object.freeze({ catalogField: "operations", registerName: "registerOperation" }),
+  Object.freeze({ catalogField: "resources", registerName: "registerResource" }),
+]);
+const CATALOG_REGISTRATION_FIELDS = Object.freeze([
+  "components",
+  "behaviors",
+  "operations",
+  "resources",
+]);
+const CROSS_CATEGORY_PAIRS = Object.freeze(
+  CATALOG_REGISTRATION_FIELDS.flatMap((left, leftIndex) =>
+    CATALOG_REGISTRATION_FIELDS.slice(leftIndex + 1).map((right) => Object.freeze([left, right])),
+  ),
+);
+
+test("accepts the tracked deterministic M03-T01/M03-T02 evidence", async () => {
   const result = await verifyCatalogManifestRegistration();
 
   assert.equal(result.result, "PASS");
-  assert.equal(result.runtimeExports, 2);
-  assert.equal(result.typeExports, 7);
-  assert.equal(result.hostileValues, 35);
+  assert.equal(result.runtimeExports, 5);
+  assert.equal(result.typeExports, 16);
+  assert.equal(result.hostileValues, 140);
   assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 
@@ -57,27 +85,34 @@ test("rejects stale or one-byte-tampered evidence", async () => {
   );
 });
 
-test("rejects direct protocol trace ownership drift", async (context) => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t01-trace-"));
+test("rejects direct prose and conformance trace ownership drift", async (context) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t02-trace-"));
   context.after(() => rm(directory, { force: true, recursive: true }));
-  const trace = JSON.parse(
+  const baselineTrace = JSON.parse(
     await readFile(
       new URL("../docs/proof/protocol-0.1.0-traceability.json", import.meta.url),
       "utf8",
     ),
   );
-  trace.proseRules.find(({ id }) => id === "R-084").owners = ["M03-T03"];
-  const tracePath = path.join(directory, "trace.json");
-  await writeFile(tracePath, `${JSON.stringify(trace)}\n`);
 
-  await assert.rejects(
-    buildCatalogManifestRegistrationEvidence({ tracePath, verifyG02: false }),
-    hasEvidenceCode("CATALOG_REGISTRATION_TRACE_DRIFT"),
-  );
+  for (const { collection, id, owners } of [
+    { collection: "proseRules", id: "R-084", owners: ["M03-T03"] },
+    { collection: "conformanceRules", id: "C-018", owners: ["M03-T08"] },
+  ]) {
+    const trace = structuredClone(baselineTrace);
+    trace[collection].find((rule) => rule.id === id).owners = owners;
+    const tracePath = path.join(directory, `${id}.json`);
+    await writeFile(tracePath, `${JSON.stringify(trace)}\n`);
+
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({ tracePath, verifyG02: false }),
+      hasEvidenceCode("CATALOG_REGISTRATION_TRACE_DRIFT"),
+    );
+  }
 });
 
 test("rejects a forged mutable registration implementation", async () => {
-  const catalogApi = {
+  const catalogApi = catalogApiWith({
     createCatalogManifest(input) {
       return {
         kind: "desen.catalog",
@@ -92,7 +127,7 @@ test("rejects a forged mutable registration implementation", async () => {
     registerComponent(input) {
       return input;
     },
-  };
+  });
   const validatorApi = {
     validateDesenCatalogSemantics() {
       return { valid: true, diagnostics: [] };
@@ -107,14 +142,13 @@ test("rejects a forged mutable registration implementation", async () => {
 
 test("checks every successful registration output for deep immutability", async () => {
   let registrationCalls = 0;
-  const catalogApi = {
-    createCatalogManifest: realCatalogApi.createCatalogManifest,
+  const catalogApi = catalogApiWith({
     registerComponent(input) {
       const result = realCatalogApi.registerComponent(input);
       registrationCalls += 1;
       return registrationCalls === 2 ? JSON.parse(JSON.stringify(result)) : result;
     },
-  };
+  });
 
   await assert.rejects(
     buildCatalogManifestRegistrationEvidence({
@@ -126,16 +160,34 @@ test("checks every successful registration output for deep immutability", async 
   );
 });
 
+test("checks every new-category registration output for deep immutability", async () => {
+  for (const { registerName } of NEW_CATEGORY_REGISTRATIONS) {
+    const catalogApi = catalogApiWith({
+      [registerName](input) {
+        return JSON.parse(JSON.stringify(realCatalogApi[registerName](input)));
+      },
+    });
+
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({
+        catalogApi,
+        validatorApi: realValidatorApi,
+        verifyG02: false,
+      }),
+      hasEvidenceCode("CATALOG_REGISTRATION_OUTPUT_MUTABLE"),
+    );
+  }
+});
+
 test("rejects descriptor-only mutation of caller-owned nested input", async () => {
   let registrationCalls = 0;
-  const catalogApi = {
-    createCatalogManifest: realCatalogApi.createCatalogManifest,
+  const catalogApi = catalogApiWith({
     registerComponent(input) {
       registrationCalls += 1;
       if (registrationCalls === 1) Object.freeze(input.manifest.authoring);
       return realCatalogApi.registerComponent(input);
     },
-  };
+  });
 
   await assert.rejects(
     buildCatalogManifestRegistrationEvidence({
@@ -147,35 +199,116 @@ test("rejects descriptor-only mutation of caller-owned nested input", async () =
   );
 });
 
-test("rejects an implementation that accepts distinct objects with a duplicate id", async () => {
-  const catalogApi = {
-    createCatalogManifest(input) {
-      const [first, second] = input.components;
-      if (
-        input.components.length === 2 &&
-        first !== second &&
-        first?.id !== undefined &&
-        first.id === second?.id
-      ) {
-        return realCatalogApi.createCatalogManifest({ ...input, components: [second] });
-      }
-      return realCatalogApi.createCatalogManifest(input);
-    },
-    registerComponent: realCatalogApi.registerComponent,
-  };
+test("rejects caller-owned manifest aliases in every new category map", async () => {
+  for (const { catalogField } of NEW_CATEGORY_REGISTRATIONS) {
+    const catalogApi = catalogApiWith({
+      createCatalogManifest(input) {
+        const catalog = JSON.parse(JSON.stringify(realCatalogApi.createCatalogManifest(input)));
+        const registration = input[catalogField]?.[0];
+        if (registration !== undefined) {
+          catalog[catalogField][registration.id] = registration.manifest;
+        }
+        return deepFreeze(catalog);
+      },
+    });
 
-  await assert.rejects(
-    buildCatalogManifestRegistrationEvidence({
-      catalogApi,
-      validatorApi: realValidatorApi,
-      verifyG02: false,
-    }),
-    hasEvidenceCode("CATALOG_REGISTRATION_REJECTION_MISSING"),
-  );
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({
+        catalogApi,
+        validatorApi: realValidatorApi,
+        verifyG02: false,
+      }),
+      hasEvidenceCode("CATALOG_REGISTRATION_CALLER_ALIAS"),
+    );
+  }
+});
+
+test("rejects identity-based duplicate checks in every category", async () => {
+  for (const catalogField of CATALOG_REGISTRATION_FIELDS) {
+    const catalogApi = catalogApiWith({
+      createCatalogManifest(input) {
+        const [first, second] = input[catalogField] ?? [];
+        if (
+          input[catalogField]?.length === 2 &&
+          first !== second &&
+          first?.id !== undefined &&
+          first.id === second?.id
+        ) {
+          return realCatalogApi.createCatalogManifest({
+            ...input,
+            [catalogField]: [second],
+          });
+        }
+        return realCatalogApi.createCatalogManifest(input);
+      },
+    });
+
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({
+        catalogApi,
+        validatorApi: realValidatorApi,
+        verifyG02: false,
+      }),
+      hasEvidenceCode("CATALOG_REGISTRATION_REJECTION_MISSING"),
+    );
+  }
+});
+
+test("rejects a forged composer that drops any new category map", async () => {
+  for (const { catalogField } of NEW_CATEGORY_REGISTRATIONS) {
+    const catalogApi = catalogApiWith({
+      createCatalogManifest(input) {
+        const catalog = JSON.parse(JSON.stringify(realCatalogApi.createCatalogManifest(input)));
+        catalog[catalogField] = {};
+        return deepFreeze(catalog);
+      },
+    });
+
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({
+        catalogApi,
+        validatorApi: realValidatorApi,
+        verifyG02: false,
+      }),
+      hasEvidenceCode("CATALOG_REGISTRATION_GOLDEN_MISMATCH"),
+    );
+  }
+});
+
+test("rejects a forged composer that accepts cross-category duplicate ids", async () => {
+  for (const [leftField, rightField] of CROSS_CATEGORY_PAIRS) {
+    const catalogApi = catalogApiWith({
+      createCatalogManifest(input) {
+        const leftRegistration = input[leftField]?.[0];
+        const rightRegistration = input[rightField]?.[0];
+        if (
+          input[leftField]?.length === 1 &&
+          input[rightField]?.length === 1 &&
+          leftRegistration?.id !== undefined &&
+          leftRegistration.id === rightRegistration?.id
+        ) {
+          return realCatalogApi.createCatalogManifest({
+            ...input,
+            [leftField]: [],
+          });
+        }
+        return realCatalogApi.createCatalogManifest(input);
+      },
+    });
+
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({
+        catalogApi,
+        validatorApi: realValidatorApi,
+        verifyG02: false,
+      }),
+      hasEvidenceCode("CATALOG_REGISTRATION_REJECTION_MISSING"),
+    );
+  }
 });
 
 test("rejects Catalog field substitution by a forged composer", async () => {
-  const catalogApi = {
+  const catalogApi = catalogApiWith({
     createCatalogManifest(input) {
       return realCatalogApi.createCatalogManifest({
         ...input,
@@ -185,8 +318,7 @@ test("rejects Catalog field substitution by a forged composer", async () => {
         description: "Substituted",
       });
     },
-    registerComponent: realCatalogApi.registerComponent,
-  };
+  });
 
   await assert.rejects(
     buildCatalogManifestRegistrationEvidence({
@@ -199,13 +331,12 @@ test("rejects Catalog field substitution by a forged composer", async () => {
 });
 
 test("rejects noncanonical property storage order in registration output", async () => {
-  const catalogApi = {
-    createCatalogManifest: realCatalogApi.createCatalogManifest,
+  const catalogApi = catalogApiWith({
     registerComponent(input) {
       realCatalogApi.registerComponent(input);
       return deepFreeze(JSON.parse(JSON.stringify(input)));
     },
-  };
+  });
 
   await assert.rejects(
     buildCatalogManifestRegistrationEvidence({
@@ -219,8 +350,7 @@ test("rejects noncanonical property storage order in registration output", async
 
 test("rejects a prototype-laundered exotic registration output", async () => {
   let registrationCalls = 0;
-  const catalogApi = {
-    createCatalogManifest: realCatalogApi.createCatalogManifest,
+  const catalogApi = catalogApiWith({
     registerComponent(input) {
       registrationCalls += 1;
       if (registrationCalls !== 3) return realCatalogApi.registerComponent(input);
@@ -232,7 +362,7 @@ test("rejects a prototype-laundered exotic registration output", async () => {
         manifest: { ...input.manifest, propsSchema: exoticSchema },
       });
     },
-  };
+  });
 
   await assert.rejects(
     buildCatalogManifestRegistrationEvidence({
@@ -390,8 +520,8 @@ test("rejects option-skipped root tests in the test inventory", async () => {
   const relativePath = "tests/catalog-manifest-registration.test.mjs";
   const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
   const skipped = source.replace(
-    'test("accepts the tracked deterministic M03-T01 evidence", async () => {',
-    'test("accepts the tracked deterministic M03-T01 evidence", { skip: true }, async () => {',
+    'test("accepts the tracked deterministic M03-T01/M03-T02 evidence", async () => {',
+    'test("accepts the tracked deterministic M03-T01/M03-T02 evidence", { skip: true }, async () => {',
   );
 
   await assert.rejects(
@@ -404,10 +534,16 @@ test("rejects option-skipped root tests in the test inventory", async () => {
 });
 
 test("rejects fake negative-case labels outside compiler directives", async () => {
-  const labels = Array.from(
-    { length: 21 },
-    (_, index) => `@ts-expect-error M03-T01-N${String(index + 1).padStart(2, "0")}`,
-  );
+  const labels = [
+    ...Array.from(
+      { length: 21 },
+      (_, index) => `@ts-expect-error M03-T01-N${String(index + 1).padStart(2, "0")}`,
+    ),
+    ...Array.from(
+      { length: 32 },
+      (_, index) => `@ts-expect-error M03-T02-N${String(index + 1).padStart(2, "0")}`,
+    ),
+  ];
 
   await assert.rejects(
     buildCatalogManifestRegistrationEvidence({
@@ -451,7 +587,7 @@ test("rejects early-exit command wiring", async () => {
 });
 
 test("writes byte-identical evidence through the safe atomic writer", async (context) => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t01-writer-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t02-writer-"));
   context.after(() => rm(directory, { force: true, recursive: true }));
   const artifactPath = path.join(directory, "evidence.json");
 
@@ -463,7 +599,7 @@ test("writes byte-identical evidence through the safe atomic writer", async (con
 });
 
 test("rejects a symlinked evidence destination before writing", async (context) => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t01-symlink-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t02-symlink-"));
   context.after(() => rm(directory, { force: true, recursive: true }));
   const externalPath = path.join(directory, "external.json");
   const artifactPath = path.join(directory, "evidence.json");
@@ -481,7 +617,7 @@ test("rejects a symlinked evidence destination before writing", async (context) 
 });
 
 test("rejects replacement of the reserved temporary file", async (context) => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t01-temp-replace-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t02-temp-replace-"));
   context.after(() => rm(directory, { force: true, recursive: true }));
   const artifactPath = path.join(directory, "evidence.json");
   await writeFile(artifactPath, "original\n");
@@ -501,7 +637,7 @@ test("rejects replacement of the reserved temporary file", async (context) => {
 });
 
 test("rejects symlink replacement of the reserved temporary file", async (context) => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t01-temp-symlink-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t02-temp-symlink-"));
   context.after(() => rm(directory, { force: true, recursive: true }));
   const artifactPath = path.join(directory, "evidence.json");
   const externalPath = path.join(directory, "external.json");
@@ -524,7 +660,7 @@ test("rejects symlink replacement of the reserved temporary file", async (contex
 });
 
 test("rejects same-inode overwrite of the reserved temporary file", async (context) => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t01-temp-overwrite-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t02-temp-overwrite-"));
   context.after(() => rm(directory, { force: true, recursive: true }));
   const artifactPath = path.join(directory, "evidence.json");
   await writeFile(artifactPath, "original\n");

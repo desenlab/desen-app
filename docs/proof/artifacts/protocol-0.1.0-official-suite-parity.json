@@ -32,7 +32,7 @@
       "task": "M02-T11",
       "profile": "desen-execution-contract-validation-v1",
       "result": "PASS",
-      "sha256": "f0f6852e7ec9bc6a37dd3d31475a421454ca2a39ea473627038e1f053ccdb6b3",
+      "sha256": "d0129999c13ee5828b6e9dd20c82c315a4987280365ae738f3b25098c590e0d7",
       "verifiedBy": "verifyProtocolExecutionContracts"
     }
   },

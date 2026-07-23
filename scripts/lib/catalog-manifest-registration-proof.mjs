@@ -18,27 +18,42 @@ const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const CATALOG_API_URL = new URL("../../packages/catalog-sdk/dist/index.js", import.meta.url);
 const VALIDATOR_API_URL = new URL("../../packages/validator/dist/index.js", import.meta.url);
 
-/** Absolute path to the deterministic M03-T01 evidence artifact. */
+/** Absolute path to the cumulative deterministic M03-T01/M03-T02 evidence artifact. */
 export const DEFAULT_CATALOG_MANIFEST_REGISTRATION_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json",
 );
 
-/** Absolute path to the reviewed protocol trace ledger used by M03-T01. */
+/** Absolute path to the reviewed protocol trace ledger used by M03-T01/M03-T02. */
 export const DEFAULT_CATALOG_MANIFEST_REGISTRATION_TRACE_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/protocol-0.1.0-traceability.json",
 );
 
-const EXPECTED_RUNTIME_EXPORTS = Object.freeze(["createCatalogManifest", "registerComponent"]);
+const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
+  "createCatalogManifest",
+  "registerBehavior",
+  "registerComponent",
+  "registerOperation",
+  "registerResource",
+]);
 const EXPECTED_TYPE_EXPORTS = Object.freeze([
+  "BehaviorManifest",
   "ComponentManifest",
   "CreateCatalogManifestInput",
   "ImmutableJson",
   "JsonInput",
   "JsonPrimitive",
+  "OperationManifest",
+  "RegisterBehaviorInput",
   "RegisterComponentInput",
+  "RegisterOperationInput",
+  "RegisterResourceInput",
+  "RegisteredBehavior",
   "RegisteredComponent",
+  "RegisteredOperation",
+  "RegisteredResource",
+  "ResourceManifest",
 ]);
 const EXPECTED_COMPONENT_FIELDS = Object.freeze([
   "authoring",
@@ -54,33 +69,133 @@ const EXPECTED_COMPONENT_FIELDS = Object.freeze([
   "styleParts",
   "visualStates",
 ]);
+const EXPECTED_BEHAVIOR_FIELDS = Object.freeze([
+  "attachTo",
+  "authoring",
+  "category",
+  "commands",
+  "composition",
+  "deprecated",
+  "description",
+  "events",
+  "extensions",
+  "propsSchema",
+  "replacement",
+  "slots",
+  "styleParts",
+  "visualStates",
+]);
+const EXPECTED_OPERATION_FIELDS = Object.freeze([
+  "authoring",
+  "deprecated",
+  "description",
+  "effect",
+  "errors",
+  "extensions",
+  "inputSchema",
+  "outputSchema",
+  "replacement",
+]);
+const EXPECTED_RESOURCE_FIELDS = Object.freeze([
+  "authoring",
+  "cacheHints",
+  "deprecated",
+  "description",
+  "errors",
+  "extensions",
+  "inputSchema",
+  "outputSchema",
+  "policies",
+  "replacement",
+]);
 const EXPECTED_TRACE_RULES = Object.freeze([
   Object.freeze({
+    collection: "proseRules",
     id: "R-013",
     section: "6.1.3",
     owners: Object.freeze(["M03-T01", "M03-T10"]),
     tests: Object.freeze(["M03-T09", "M03-T10"]),
   }),
   Object.freeze({
+    collection: "conformanceRules",
+    id: "C-018",
+    section: "7.4",
+    owners: Object.freeze(["M03-T02", "M03-T08"]),
+    tests: Object.freeze(["M03-T09", "M10-T04"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
+    id: "R-071",
+    section: "19.3",
+    owners: Object.freeze(["M02-T09", "M03-T02"]),
+    tests: Object.freeze(["M02-T13", "M11-T14"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
+    id: "R-072",
+    section: "19.4",
+    owners: Object.freeze(["M03-T02", "M05-T04"]),
+    tests: Object.freeze(["M03-T09", "M11-T12"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
     id: "R-084",
     section: "21.2",
     owners: Object.freeze(["M03-T01", "M03-T03"]),
     tests: Object.freeze(["M03-T09"]),
   }),
+  Object.freeze({
+    collection: "proseRules",
+    id: "R-089",
+    section: "22.1",
+    owners: Object.freeze(["M03-T02", "M04-T01", "M04-T09"]),
+    tests: Object.freeze(["M03-T09", "M04-T16"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
+    id: "R-090",
+    section: "22.2",
+    owners: Object.freeze(["M03-T02", "M04-T08", "M12-T03"]),
+    tests: Object.freeze(["M03-T09", "M12-T03"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
+    id: "R-092",
+    section: "22.4",
+    owners: Object.freeze(["M03-T02", "M03-T08", "M12-T03"]),
+    tests: Object.freeze(["M10-T04", "M12-T03"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
+    id: "R-149",
+    section: "19",
+    owners: Object.freeze(["M03-T02", "M05-T04"]),
+    tests: Object.freeze(["M11-T12"]),
+  }),
 ]);
 const EXPECTED_SOURCE_PATHS = Object.freeze([
+  "packages/catalog-sdk/src/behavior-registration.ts",
   "packages/catalog-sdk/src/catalog-manifest.ts",
   "packages/catalog-sdk/src/component-registration.ts",
   "packages/catalog-sdk/src/index.ts",
   "packages/catalog-sdk/src/inert-json.ts",
+  "packages/catalog-sdk/src/operation-registration.ts",
+  "packages/catalog-sdk/src/registration-core.ts",
+  "packages/catalog-sdk/src/resource-registration.ts",
 ]);
 const EXPECTED_DECLARATION_PATHS = Object.freeze([
+  "packages/catalog-sdk/dist/behavior-registration.d.ts",
   "packages/catalog-sdk/dist/catalog-manifest.d.ts",
   "packages/catalog-sdk/dist/component-registration.d.ts",
   "packages/catalog-sdk/dist/index.d.ts",
   "packages/catalog-sdk/dist/inert-json.d.ts",
+  "packages/catalog-sdk/dist/operation-registration.d.ts",
+  "packages/catalog-sdk/dist/registration-core.d.ts",
+  "packages/catalog-sdk/dist/resource-registration.d.ts",
 ]);
 const EXPECTED_DISTRIBUTION_PATHS = Object.freeze([
+  "packages/catalog-sdk/dist/behavior-registration.d.ts",
+  "packages/catalog-sdk/dist/behavior-registration.js",
   "packages/catalog-sdk/dist/catalog-manifest.d.ts",
   "packages/catalog-sdk/dist/catalog-manifest.js",
   "packages/catalog-sdk/dist/component-registration.d.ts",
@@ -89,11 +204,18 @@ const EXPECTED_DISTRIBUTION_PATHS = Object.freeze([
   "packages/catalog-sdk/dist/index.js",
   "packages/catalog-sdk/dist/inert-json.d.ts",
   "packages/catalog-sdk/dist/inert-json.js",
+  "packages/catalog-sdk/dist/operation-registration.d.ts",
+  "packages/catalog-sdk/dist/operation-registration.js",
+  "packages/catalog-sdk/dist/registration-core.d.ts",
+  "packages/catalog-sdk/dist/registration-core.js",
+  "packages/catalog-sdk/dist/resource-registration.d.ts",
+  "packages/catalog-sdk/dist/resource-registration.js",
 ]);
 const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
   "package.json",
   "pnpm-lock.yaml",
   "turbo.json",
+  "docs/plan/PROTOCOL-FINDINGS.md",
   "packages/catalog-sdk/package.json",
   "packages/catalog-sdk/README.md",
   "tsconfig.base.json",
@@ -115,20 +237,33 @@ const EXPECTED_PACKAGE_TEST_TITLES = Object.freeze([
   "normalizes object key order deterministically while preserving array order",
   "rejects unknown wrapper fields and non-JSON values without invoking accessors",
   "preserves dangerous-looking extension keys as opaque JSON members",
-  "builds the exact protocol root with empty later-category maps",
+  "preserves every category contract as detached, deeply frozen JSON data",
+  "normalizes object key order while preserving behavior, error, and policy array order",
+  "rejects executable wrapper fields for every new manifest category",
+  "rejects non-JSON nested values without invoking accessors",
+  "preserves every schema-authoritative field without executable bindings",
+  "preserves the component-only call shape with empty optional-category maps",
+  "builds all four exact capability maps without retaining registrations",
   "rejects duplicate ids even when their manifests are identical",
+  "rejects duplicate ids within every new category",
+  "rejects capability ids reused across different Catalog categories",
   "treats capability ids as exact, case-sensitive strings",
+  "stores prototype-looking map keys as inert data in every category",
   "rejects unknown Catalog builder fields and forged registration records",
 ]);
 const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
-  "accepts the tracked deterministic M03-T01 evidence",
+  "accepts the tracked deterministic M03-T01/M03-T02 evidence",
   "two independent Catalog registration evidence builds are byte-identical",
   "rejects stale or one-byte-tampered evidence",
-  "rejects direct protocol trace ownership drift",
+  "rejects direct prose and conformance trace ownership drift",
   "rejects a forged mutable registration implementation",
   "checks every successful registration output for deep immutability",
+  "checks every new-category registration output for deep immutability",
   "rejects descriptor-only mutation of caller-owned nested input",
-  "rejects an implementation that accepts distinct objects with a duplicate id",
+  "rejects caller-owned manifest aliases in every new category map",
+  "rejects identity-based duplicate checks in every category",
+  "rejects a forged composer that drops any new category map",
+  "rejects a forged composer that accepts cross-category duplicate ids",
   "rejects Catalog field substitution by a forged composer",
   "rejects noncanonical property storage order in registration output",
   "rejects a prototype-laundered exotic registration output",
@@ -151,9 +286,10 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "rejects symlink replacement of the reserved temporary file",
   "rejects same-inode overwrite of the reserved temporary file",
 ]);
-const EXPECTED_TYPE_NEGATIVE_CASES = Object.freeze(
-  Array.from({ length: 21 }, (_, index) => `M03-T01-N${String(index + 1).padStart(2, "0")}`),
-);
+const EXPECTED_TYPE_NEGATIVE_CASES = Object.freeze([
+  ...Array.from({ length: 21 }, (_, index) => `M03-T01-N${String(index + 1).padStart(2, "0")}`),
+  ...Array.from({ length: 32 }, (_, index) => `M03-T02-N${String(index + 1).padStart(2, "0")}`),
+]);
 const EXPECTED_COMMANDS = Object.freeze({
   generate: Object.freeze([
     "pnpm --filter @desen/validator... build",
@@ -236,7 +372,7 @@ const PLATFORM_PATTERNS = Object.freeze([
   }),
 ]);
 
-/** Stable failure raised by M03-T01 evidence generation and verification. */
+/** Stable failure raised by cumulative M03-T01/M03-T02 evidence generation and verification. */
 export class CatalogManifestRegistrationEvidenceError extends Error {
   /**
    * @param {string} code stable evidence failure code
@@ -531,6 +667,138 @@ function reorderedComponentInput() {
   };
 }
 
+function richBehaviorInput() {
+  return {
+    id: "com.example.interactions/Sortable",
+    manifest: {
+      description: "Adds sortable interaction mechanics.",
+      category: "interaction",
+      propsSchema: {
+        type: "object",
+        additionalProperties: false,
+        properties: { axis: { enum: ["vertical", "horizontal"] } },
+      },
+      attachTo: {
+        capabilities: ["com.example.ui/Button"],
+        categories: ["action"],
+      },
+      slots: {
+        preview: { maxItems: 1, acceptsCategories: ["content"] },
+      },
+      events: {
+        reorder: {
+          payloadSchema: {
+            type: "object",
+            required: ["ids"],
+            properties: { ids: { type: "array", items: { type: "string" } } },
+          },
+        },
+      },
+      commands: {
+        cancel: { inputSchema: { type: "object", additionalProperties: false } },
+      },
+      styleParts: {
+        indicator: { propertiesSchema: { type: "object", additionalProperties: false } },
+      },
+      visualStates: ["dragging", "invalid-target"],
+      composition: {
+        exclusiveChannels: ["pointer-drag"],
+        compatibleWith: ["com.example.interactions/KeyboardSortable"],
+      },
+      authoring: {
+        displayName: "Sortable",
+        category: "Interaction",
+        defaultProps: { axis: "vertical" },
+        adapterFidelity: "equivalent",
+      },
+      deprecated: false,
+      replacement: "com.example.interactions/SortableV2",
+      extensions: { "com.example.audit/owner": "interaction-team" },
+    },
+  };
+}
+
+function richOperationInput() {
+  return {
+    id: "com.example.auth/signIn",
+    manifest: {
+      description: "Authenticates through a trusted host implementation.",
+      inputSchema: {
+        type: "object",
+        required: ["email"],
+        properties: { email: { type: "string" } },
+      },
+      outputSchema: {
+        type: "object",
+        required: ["userId"],
+        properties: { userId: { type: "string" } },
+      },
+      errors: [
+        { code: "INVALID_CREDENTIALS", description: "Credentials were rejected." },
+        { code: "UNAVAILABLE", extensions: { retryable: true } },
+      ],
+      effect: "network",
+      authoring: {
+        fixtures: {
+          success: { userId: "synthetic-user" },
+          invalid: { code: "INVALID_CREDENTIALS" },
+        },
+        extensions: { "com.example/scenario": "sign-in" },
+      },
+      deprecated: false,
+      replacement: "com.example.auth/signInV2",
+      extensions: { "com.example.audit/owner": "identity-team" },
+    },
+  };
+}
+
+function richResourceInput() {
+  return {
+    id: "com.example.stores/list",
+    manifest: {
+      description: "Reads a host-provided store list.",
+      inputSchema: {
+        type: "object",
+        properties: { region: { type: "string" } },
+      },
+      outputSchema: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["id"],
+          properties: { id: { type: "string" } },
+        },
+      },
+      errors: [
+        { code: "OFFLINE", description: "The host is offline." },
+        { code: "UNAVAILABLE", extensions: { retryable: true } },
+      ],
+      policies: ["mount", "manual", "once"],
+      cacheHints: {
+        ttlSeconds: 60,
+        staleWhileRevalidateSeconds: 300,
+      },
+      authoring: {
+        fixtures: { default: [{ id: "synthetic-store" }] },
+        extensions: { "com.example/scenario": "store-list" },
+      },
+      deprecated: false,
+      replacement: "com.example.stores/listV2",
+      extensions: { "com.example.audit/owner": "store-team" },
+    },
+  };
+}
+
+function reverseObjectStorageOrder(value) {
+  if (Array.isArray(value)) return value.map((entry) => reverseObjectStorageOrder(entry));
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .reverse()
+      .map(([key, nested]) => [key, reverseObjectStorageOrder(nested)]),
+  );
+}
+
 function runContractVectors(catalogApi, validatorApi) {
   const preservedInputs = [];
   const frozenOutputs = [];
@@ -538,10 +806,10 @@ function runContractVectors(catalogApi, validatorApi) {
   let successfulRegistrations = 0;
   let successfulCatalogs = 0;
 
-  function registerObserved(input, label) {
+  function observeRegistration(register, input, label) {
     const graphBefore = captureObjectGraph(input);
     const canonicalBefore = canonicalizeJson(input);
-    const output = catalogApi.registerComponent(input);
+    const output = register(input);
     assertEqual(canonicalizeJson(output), canonicalBefore, `${label} value preservation`);
     assertObjectGraphPreserved(graphBefore, `${label} caller input`);
     assertDeeplyFrozen(output, `${label} output`);
@@ -555,13 +823,26 @@ function runContractVectors(catalogApi, validatorApi) {
     return output;
   }
 
+  const registerObserved = (input, label) =>
+    observeRegistration(catalogApi.registerComponent, input, label);
+  const registerBehaviorObserved = (input, label) =>
+    observeRegistration(catalogApi.registerBehavior, input, label);
+  const registerOperationObserved = (input, label) =>
+    observeRegistration(catalogApi.registerOperation, input, label);
+  const registerResourceObserved = (input, label) =>
+    observeRegistration(catalogApi.registerResource, input, label);
+
   function composeObserved(input, label) {
     const graphBefore = captureObjectGraph(input);
     const canonicalBefore = canonicalizeJson(input);
     const output = catalogApi.createCatalogManifest(input);
-    const expectedComponents = Object.create(null);
-    for (const registration of input.components) {
-      expectedComponents[registration.id] = registration.manifest;
+    const expectedMaps = {};
+    for (const category of ["components", "behaviors", "operations", "resources"]) {
+      const expectedMap = Object.create(null);
+      for (const registration of input[category] ?? []) {
+        expectedMap[registration.id] = registration.manifest;
+      }
+      expectedMaps[category] = expectedMap;
     }
     const expected = {
       kind: "desen.catalog",
@@ -570,10 +851,10 @@ function runContractVectors(catalogApi, validatorApi) {
       version: input.version,
       target: input.target,
       packageDigest: input.packageDigest,
-      components: expectedComponents,
-      behaviors: {},
-      operations: {},
-      resources: {},
+      components: expectedMaps.components,
+      behaviors: expectedMaps.behaviors,
+      operations: expectedMaps.operations,
+      resources: expectedMaps.resources,
     };
     for (const optionalKey of ["description", "authoring", "extensions"]) {
       if (Object.hasOwn(input, optionalKey)) expected[optionalKey] = input[optionalKey];
@@ -595,27 +876,95 @@ function runContractVectors(catalogApi, validatorApi) {
   const mutableInput = richComponentInput();
   const first = registerObserved(mutableInput, "rich registration");
   const second = registerObserved(reorderedComponentInput(), "reordered registration");
+  const mutableBehaviorInput = richBehaviorInput();
+  const behavior = registerBehaviorObserved(mutableBehaviorInput, "rich behavior registration");
+  const reorderedBehavior = registerBehaviorObserved(
+    reverseObjectStorageOrder(richBehaviorInput()),
+    "reordered behavior registration",
+  );
+  const mutableOperationInput = richOperationInput();
+  const operation = registerOperationObserved(mutableOperationInput, "rich operation registration");
+  const reorderedOperation = registerOperationObserved(
+    reverseObjectStorageOrder(richOperationInput()),
+    "reordered operation registration",
+  );
+  const mutableResourceInput = richResourceInput();
+  const resource = registerResourceObserved(mutableResourceInput, "rich resource registration");
+  const reorderedResource = registerResourceObserved(
+    reverseObjectStorageOrder(richResourceInput()),
+    "reordered resource registration",
+  );
 
   assertEqual(canonicalizeJson(first), canonicalizeJson(second), "insertion-order normalization");
+  assertEqual(
+    canonicalizeJson(behavior),
+    canonicalizeJson(reorderedBehavior),
+    "behavior insertion-order normalization",
+  );
+  assertEqual(
+    canonicalizeJson(operation),
+    canonicalizeJson(reorderedOperation),
+    "operation insertion-order normalization",
+  );
+  assertEqual(
+    canonicalizeJson(resource),
+    canonicalizeJson(reorderedResource),
+    "resource insertion-order normalization",
+  );
   assertJsonEqual(
     Object.keys(first.manifest).sort(),
     EXPECTED_COMPONENT_FIELDS,
     "complete component contract fields",
   );
+  assertJsonEqual(
+    Object.keys(behavior.manifest).sort(),
+    EXPECTED_BEHAVIOR_FIELDS,
+    "complete behavior contract fields",
+  );
+  assertJsonEqual(
+    Object.keys(operation.manifest).sort(),
+    EXPECTED_OPERATION_FIELDS,
+    "complete operation contract fields",
+  );
+  assertJsonEqual(
+    Object.keys(resource.manifest).sort(),
+    EXPECTED_RESOURCE_FIELDS,
+    "complete resource contract fields",
+  );
 
-  const frozenRegistrationText = canonicalizeJson(first);
+  const frozenRegistrationTexts = [
+    canonicalizeJson(first),
+    canonicalizeJson(behavior),
+    canonicalizeJson(operation),
+    canonicalizeJson(resource),
+  ];
   mutableInput.manifest.description = "Caller mutation";
   mutableInput.manifest.propsSchema.properties.label.type = "number";
   mutableInput.manifest.visualStates.push("pressed");
-  assertEqual(canonicalizeJson(first), frozenRegistrationText, "post-registration isolation");
+  mutableBehaviorInput.manifest.description = "Caller mutation";
+  mutableBehaviorInput.manifest.visualStates.push("caller-state");
+  mutableOperationInput.manifest.errors[0].description = "Caller mutation";
+  mutableOperationInput.manifest.authoring.fixtures.success.userId = "caller-user";
+  mutableResourceInput.manifest.policies.reverse();
+  mutableResourceInput.manifest.cacheHints.ttlSeconds = 999;
+  for (const [index, registration] of [first, behavior, operation, resource].entries()) {
+    assertEqual(
+      canonicalizeJson(registration),
+      frozenRegistrationTexts[index],
+      `post-registration isolation ${index}`,
+    );
+  }
 
   const catalogInput = {
     id: "com.example.catalog",
     version: "1.0.0",
     target: "web-react",
     packageDigest: `sha256:${"0".repeat(64)}`,
-    description: "M03-T01 proof Catalog.",
+    description: "M03-T02 proof Catalog.",
     components: [first],
+    behaviors: [behavior],
+    operations: [operation],
+    resources: [resource],
     authoring: { publisher: "proof" },
     extensions: { "com.example/proof": true },
   };
@@ -639,15 +988,46 @@ function runContractVectors(catalogApi, validatorApi) {
     ],
     "Catalog root fields",
   );
-  assertJsonEqual(catalog.behaviors, {}, "M03-T02 behavior scope fence");
-  assertJsonEqual(catalog.operations, {}, "M03-T02 operation scope fence");
-  assertJsonEqual(catalog.resources, {}, "M03-T02 resource scope fence");
+  assertJsonEqual(catalog.components, { [first.id]: first.manifest }, "component Catalog map");
+  assertJsonEqual(catalog.behaviors, { [behavior.id]: behavior.manifest }, "behavior Catalog map");
+  assertJsonEqual(
+    catalog.operations,
+    { [operation.id]: operation.manifest },
+    "operation Catalog map",
+  );
+  assertJsonEqual(catalog.resources, { [resource.id]: resource.manifest }, "resource Catalog map");
+  if (
+    "production" in catalog.behaviors[behavior.id] ||
+    "execute" in catalog.operations[operation.id] ||
+    "read" in catalog.resources[resource.id]
+  ) {
+    fail(
+      "CATALOG_REGISTRATION_EXECUTABLE_BINDING_LEAK",
+      "A manifest registration exposed executable binding metadata.",
+    );
+  }
   const validation = validatorApi.validateDesenCatalogSemantics(catalog);
   if (validation.valid !== true || validation.diagnostics.length !== 0) {
     fail("CATALOG_REGISTRATION_VALIDATOR_REJECTED", "The proof Catalog failed G02 validation.", {
       diagnostics: validation.diagnostics,
     });
   }
+  const componentOnlyCatalog = composeObserved(
+    {
+      id: "com.example.component-only",
+      version: catalogInput.version,
+      target: catalogInput.target,
+      packageDigest: catalogInput.packageDigest,
+      description: "M03-T01 compatibility Catalog.",
+      components: [first],
+      authoring: catalogInput.authoring,
+      extensions: catalogInput.extensions,
+    },
+    "component-only Catalog",
+  );
+  assertJsonEqual(componentOnlyCatalog.behaviors, {}, "component-only behavior map");
+  assertJsonEqual(componentOnlyCatalog.operations, {}, "component-only operation map");
+  assertJsonEqual(componentOnlyCatalog.resources, {}, "component-only resource map");
 
   const differentDuplicate = registerObserved(
     {
@@ -665,28 +1045,211 @@ function runContractVectors(catalogApi, validatorApi) {
     "distinct duplicate component id",
     /duplicate component id/u,
   );
+  const distinctBehaviorDuplicateInput = richBehaviorInput();
+  distinctBehaviorDuplicateInput.manifest.description =
+    "A distinct behavior registration with the same id.";
+  const distinctBehaviorDuplicate = registerBehaviorObserved(
+    distinctBehaviorDuplicateInput,
+    "distinct duplicate behavior registration",
+  );
+  const distinctOperationDuplicateInput = richOperationInput();
+  distinctOperationDuplicateInput.manifest.description =
+    "A distinct operation registration with the same id.";
+  const distinctOperationDuplicate = registerOperationObserved(
+    distinctOperationDuplicateInput,
+    "distinct duplicate operation registration",
+  );
+  const distinctResourceDuplicateInput = richResourceInput();
+  distinctResourceDuplicateInput.manifest.description =
+    "A distinct resource registration with the same id.";
+  const distinctResourceDuplicate = registerResourceObserved(
+    distinctResourceDuplicateInput,
+    "distinct duplicate resource registration",
+  );
+  const categoryDuplicateMessages = {};
+  for (const [category, registration, duplicateRegistration] of [
+    ["behaviors", behavior, distinctBehaviorDuplicate],
+    ["operations", operation, distinctOperationDuplicate],
+    ["resources", resource, distinctResourceDuplicate],
+  ]) {
+    categoryDuplicateMessages[category] = expectTypeError(
+      () =>
+        catalogApi.createCatalogManifest({
+          ...catalogInput,
+          [category]: [registration, duplicateRegistration],
+        }),
+      `duplicate ${category} id`,
+      new RegExp(`duplicate ${category.slice(0, -1)} id`, "u"),
+    );
+  }
+  const sharedCapabilityId = "com.example.shared/Collision";
+  const collisionRegistrations = Object.freeze([
+    Object.freeze({
+      category: "components",
+      registration: Object.freeze({ id: sharedCapabilityId, manifest: first.manifest }),
+    }),
+    Object.freeze({
+      category: "behaviors",
+      registration: Object.freeze({ id: sharedCapabilityId, manifest: behavior.manifest }),
+    }),
+    Object.freeze({
+      category: "operations",
+      registration: Object.freeze({ id: sharedCapabilityId, manifest: operation.manifest }),
+    }),
+    Object.freeze({
+      category: "resources",
+      registration: Object.freeze({ id: sharedCapabilityId, manifest: resource.manifest }),
+    }),
+  ]);
+  const crossCategoryDuplicateMessages = [];
+  for (let leftIndex = 0; leftIndex < collisionRegistrations.length; leftIndex += 1) {
+    for (
+      let rightIndex = leftIndex + 1;
+      rightIndex < collisionRegistrations.length;
+      rightIndex += 1
+    ) {
+      const left = collisionRegistrations[leftIndex];
+      const right = collisionRegistrations[rightIndex];
+      const message = expectTypeError(
+        () =>
+          catalogApi.createCatalogManifest({
+            ...catalogInput,
+            components: [],
+            behaviors: [],
+            operations: [],
+            resources: [],
+            [left.category]: [left.registration],
+            [right.category]: [right.registration],
+          }),
+        `cross-category ${left.category}/${right.category} id`,
+        /duplicate capability id/u,
+      );
+      crossCategoryDuplicateMessages.push(
+        Object.freeze({
+          categories: Object.freeze([left.category, right.category]),
+          message,
+        }),
+      );
+    }
+  }
   expectTypeError(
     () => catalogApi.registerComponent({ ...richComponentInput(), production: null }),
-    "executable wrapper field",
+    "component executable wrapper field",
+    /expected only id, manifest/u,
+  );
+  expectTypeError(
+    () => catalogApi.registerBehavior({ ...richBehaviorInput(), production: null }),
+    "behavior executable wrapper field",
+    /expected only id, manifest/u,
+  );
+  expectTypeError(
+    () => catalogApi.registerOperation({ ...richOperationInput(), execute: null }),
+    "operation executable wrapper field",
+    /expected only id, manifest/u,
+  );
+  expectTypeError(
+    () => catalogApi.registerResource({ ...richResourceInput(), read: null }),
+    "resource executable wrapper field",
     /expected only id, manifest/u,
   );
 
   let accessorInvoked = false;
-  const accessor = Object.defineProperty({}, "danger", {
-    enumerable: true,
-    get() {
-      accessorInvoked = true;
-      return "changed";
-    },
-  });
-  expectTypeError(
-    () =>
-      catalogApi.registerComponent({
+  const createAccessor = () =>
+    Object.defineProperty({}, "danger", {
+      enumerable: true,
+      get() {
+        accessorInvoked = true;
+        return "changed";
+      },
+    });
+  const registrationProfiles = Object.freeze([
+    Object.freeze({
+      category: "component",
+      register: catalogApi.registerComponent,
+      hostileInput: (value) => ({
         id: "com.example.ui/Hostile",
-        manifest: { propsSchema: {}, extensions: accessor },
+        manifest: { propsSchema: {}, extensions: { value } },
       }),
-    "accessor value",
-  );
+      accessorInput: () => ({
+        id: "com.example.ui/Accessor",
+        manifest: { propsSchema: {}, extensions: createAccessor() },
+      }),
+    }),
+    Object.freeze({
+      category: "behavior",
+      register: catalogApi.registerBehavior,
+      hostileInput: (value) => ({
+        id: "com.example.interactions/Hostile",
+        manifest: {
+          propsSchema: {},
+          attachTo: { capabilities: [] },
+          extensions: { value },
+        },
+      }),
+      accessorInput: () => ({
+        id: "com.example.interactions/Accessor",
+        manifest: {
+          propsSchema: {},
+          attachTo: { capabilities: [] },
+          extensions: createAccessor(),
+        },
+      }),
+    }),
+    Object.freeze({
+      category: "operation",
+      register: catalogApi.registerOperation,
+      hostileInput: (value) => ({
+        id: "com.example.operations/Hostile",
+        manifest: {
+          inputSchema: {},
+          outputSchema: {},
+          errors: [],
+          effect: "none",
+          extensions: { value },
+        },
+      }),
+      accessorInput: () => ({
+        id: "com.example.operations/Accessor",
+        manifest: {
+          inputSchema: {},
+          outputSchema: {},
+          errors: [],
+          effect: "none",
+          extensions: createAccessor(),
+        },
+      }),
+    }),
+    Object.freeze({
+      category: "resource",
+      register: catalogApi.registerResource,
+      hostileInput: (value) => ({
+        id: "com.example.resources/Hostile",
+        manifest: {
+          inputSchema: {},
+          outputSchema: {},
+          errors: [],
+          policies: ["manual"],
+          extensions: { value },
+        },
+      }),
+      accessorInput: () => ({
+        id: "com.example.resources/Accessor",
+        manifest: {
+          inputSchema: {},
+          outputSchema: {},
+          errors: [],
+          policies: ["manual"],
+          extensions: createAccessor(),
+        },
+      }),
+    }),
+  ]);
+  for (const profile of registrationProfiles) {
+    expectTypeError(
+      () => profile.register(profile.accessorInput()),
+      `${profile.category} accessor value`,
+    );
+  }
   if (accessorInvoked) {
     fail("CATALOG_REGISTRATION_ACCESSOR_INVOKED", "Registration invoked a caller accessor.");
   }
@@ -746,17 +1309,15 @@ function runContractVectors(catalogApi, validatorApi) {
       launderPrototype(new FinalizationRegistry(() => undefined)),
     ],
   ];
-  const hostileResults = hostileValues.map(([id, value]) => {
-    expectTypeError(
-      () =>
-        catalogApi.registerComponent({
-          id: "com.example.ui/Hostile",
-          manifest: { propsSchema: {}, extensions: { value } },
-        }),
-      `hostile ${id}`,
-    );
-    return Object.freeze({ id, result: "REJECTED" });
-  });
+  const hostileResults = registrationProfiles.flatMap((profile) =>
+    hostileValues.map(([id, value]) => {
+      expectTypeError(
+        () => profile.register(profile.hostileInput(value)),
+        `${profile.category} hostile ${id}`,
+      );
+      return Object.freeze({ category: profile.category, id, result: "REJECTED" });
+    }),
+  );
 
   const opaqueExtensions = JSON.parse(
     '{"__proto__":{"polluted":false},"constructor":"data","prototype":"data"}',
@@ -772,22 +1333,119 @@ function runContractVectors(catalogApi, validatorApi) {
     fail("CATALOG_REGISTRATION_OPAQUE_EXTENSION_DRIFT", "Opaque extension keys were not safe.");
   }
 
-  const upper = registerObserved(
+  const componentUpper = registerObserved(
     { id: "com.example.ui/Text", manifest: { propsSchema: {} } },
-    "uppercase id registration",
+    "uppercase component id registration",
   );
-  const lower = registerObserved(
+  const componentLower = registerObserved(
     { id: "com.example.ui/text", manifest: { propsSchema: {} } },
-    "lowercase id registration",
+    "lowercase component id registration",
   );
-  const caseCatalog = composeObserved(
-    { ...catalogInput, id: "com.example.case-catalog", components: [upper, lower] },
-    "case-sensitive Catalog",
+  const behaviorUpper = registerBehaviorObserved(
+    {
+      id: "com.example.interactions/Sortable",
+      manifest: { propsSchema: {}, attachTo: { categories: ["content"] } },
+    },
+    "uppercase behavior id registration",
+  );
+  const behaviorLower = registerBehaviorObserved(
+    {
+      id: "com.example.interactions/sortable",
+      manifest: { propsSchema: {}, attachTo: { categories: ["content"] } },
+    },
+    "lowercase behavior id registration",
+  );
+  const operationUpper = registerOperationObserved(
+    {
+      id: "com.example.operations/Save",
+      manifest: { inputSchema: {}, outputSchema: {}, errors: [], effect: "none" },
+    },
+    "uppercase operation id registration",
+  );
+  const operationLower = registerOperationObserved(
+    {
+      id: "com.example.operations/save",
+      manifest: { inputSchema: {}, outputSchema: {}, errors: [], effect: "none" },
+    },
+    "lowercase operation id registration",
+  );
+  const resourceUpper = registerResourceObserved(
+    {
+      id: "com.example.resources/Stores",
+      manifest: { inputSchema: {}, outputSchema: {}, errors: [], policies: ["manual"] },
+    },
+    "uppercase resource id registration",
+  );
+  const resourceLower = registerResourceObserved(
+    {
+      id: "com.example.resources/stores",
+      manifest: { inputSchema: {}, outputSchema: {}, errors: [], policies: ["manual"] },
+    },
+    "lowercase resource id registration",
+  );
+  const componentCaseCatalog = composeObserved(
+    {
+      ...catalogInput,
+      id: "com.example.component-case-catalog",
+      components: [componentUpper, componentLower],
+      behaviors: [],
+      operations: [],
+      resources: [],
+    },
+    "case-sensitive component Catalog",
+  );
+  const behaviorCaseCatalog = composeObserved(
+    {
+      ...catalogInput,
+      id: "com.example.behavior-case-catalog",
+      components: [],
+      behaviors: [behaviorUpper, behaviorLower],
+      operations: [],
+      resources: [],
+    },
+    "case-sensitive behavior Catalog",
+  );
+  const operationCaseCatalog = composeObserved(
+    {
+      ...catalogInput,
+      id: "com.example.operation-case-catalog",
+      components: [],
+      behaviors: [],
+      operations: [operationUpper, operationLower],
+      resources: [],
+    },
+    "case-sensitive operation Catalog",
+  );
+  const resourceCaseCatalog = composeObserved(
+    {
+      ...catalogInput,
+      id: "com.example.resource-case-catalog",
+      components: [],
+      behaviors: [],
+      operations: [],
+      resources: [resourceUpper, resourceLower],
+    },
+    "case-sensitive resource Catalog",
   );
   assertJsonEqual(
-    Object.keys(caseCatalog.components),
+    Object.keys(componentCaseCatalog.components),
     ["com.example.ui/Text", "com.example.ui/text"],
     "case-sensitive component ids",
+  );
+  assertJsonEqual(
+    Object.keys(behaviorCaseCatalog.behaviors),
+    ["com.example.interactions/Sortable", "com.example.interactions/sortable"],
+    "case-sensitive behavior ids",
+  );
+  assertJsonEqual(
+    Object.keys(operationCaseCatalog.operations),
+    ["com.example.operations/Save", "com.example.operations/save"],
+    "case-sensitive operation ids",
+  );
+  assertJsonEqual(
+    Object.keys(resourceCaseCatalog.resources),
+    ["com.example.resources/Stores", "com.example.resources/stores"],
+    "case-sensitive resource ids",
   );
 
   const protoKey = registerObserved(
@@ -798,27 +1456,60 @@ function runContractVectors(catalogApi, validatorApi) {
     { id: "constructor", manifest: { propsSchema: {} } },
     "constructor-key registration",
   );
+  const behaviorProtoKey = registerBehaviorObserved(
+    {
+      id: "behavior.__proto__",
+      manifest: { propsSchema: {}, attachTo: { capabilities: [] } },
+    },
+    "behavior prototype-key registration",
+  );
+  const operationConstructorKey = registerOperationObserved(
+    {
+      id: "operation.constructor",
+      manifest: { inputSchema: {}, outputSchema: {}, errors: [], effect: "none" },
+    },
+    "operation constructor-key registration",
+  );
+  const resourcePrototypeKey = registerResourceObserved(
+    {
+      id: "resource.prototype",
+      manifest: { inputSchema: {}, outputSchema: {}, errors: [], policies: ["manual"] },
+    },
+    "resource prototype-key registration",
+  );
   const dangerousKeyCatalog = composeObserved(
     {
       ...catalogInput,
       id: "com.example.dangerous-key-catalog",
       components: [protoKey, constructorKey],
+      behaviors: [behaviorProtoKey],
+      operations: [operationConstructorKey],
+      resources: [resourcePrototypeKey],
     },
     "dangerous-key Catalog",
   );
   if (
     !Object.hasOwn(dangerousKeyCatalog.components, "__proto__") ||
     !Object.hasOwn(dangerousKeyCatalog.components, "constructor") ||
+    !Object.hasOwn(dangerousKeyCatalog.behaviors, "behavior.__proto__") ||
+    !Object.hasOwn(dangerousKeyCatalog.operations, "operation.constructor") ||
+    !Object.hasOwn(dangerousKeyCatalog.resources, "resource.prototype") ||
     {}.polluted !== undefined
   ) {
-    fail("CATALOG_REGISTRATION_COMPONENT_KEY_DRIFT", "Component map keys were not data-safe.");
+    fail("CATALOG_REGISTRATION_CAPABILITY_KEY_DRIFT", "Capability map keys were not data-safe.");
   }
 
   return Object.freeze({
     catalog,
     transcript: Object.freeze({
       componentFields: EXPECTED_COMPONENT_FIELDS,
+      behaviorFields: EXPECTED_BEHAVIOR_FIELDS,
+      operationFields: EXPECTED_OPERATION_FIELDS,
+      resourceFields: EXPECTED_RESOURCE_FIELDS,
       registrationCanonicalSha256: sha256(Buffer.from(canonicalizeJson(first))),
+      behaviorCanonicalSha256: sha256(Buffer.from(canonicalizeJson(behavior))),
+      operationCanonicalSha256: sha256(Buffer.from(canonicalizeJson(operation))),
+      resourceCanonicalSha256: sha256(Buffer.from(canonicalizeJson(resource))),
       catalogCanonicalSha256: sha256(Buffer.from(canonicalizeJson(catalog))),
       deterministicRuns: 2,
       successfulRegistrations,
@@ -828,11 +1519,46 @@ function runContractVectors(catalogApi, validatorApi) {
       detachedOutputs: detachedOutputs.length,
       recognizedExoticOutputs: "REJECTED",
       duplicateId: Object.freeze({ result: "REJECTED", message: duplicateMessage }),
+      categoryDuplicateIds: Object.freeze({
+        behaviors: Object.freeze({
+          result: "REJECTED",
+          message: categoryDuplicateMessages.behaviors,
+        }),
+        operations: Object.freeze({
+          result: "REJECTED",
+          message: categoryDuplicateMessages.operations,
+        }),
+        resources: Object.freeze({
+          result: "REJECTED",
+          message: categoryDuplicateMessages.resources,
+        }),
+      }),
+      crossCategoryDuplicateIds: Object.freeze(
+        crossCategoryDuplicateMessages.map(({ categories, message }) =>
+          Object.freeze({ categories, result: "REJECTED", message }),
+        ),
+      ),
       accessor: Object.freeze({ result: "REJECTED", invoked: accessorInvoked }),
       hostileValues: Object.freeze(hostileResults),
+      executableBindingFields: Object.freeze({
+        behaviorProduction: "ABSENT",
+        operationExecute: "ABSENT",
+        resourceRead: "ABSENT",
+      }),
       opaquePrototypeKeys: Object.freeze(["__proto__", "constructor", "prototype"]),
       componentMapKeys: Object.freeze(["__proto__", "constructor"]),
-      caseSensitiveIds: Object.freeze(["com.example.ui/Text", "com.example.ui/text"]),
+      behaviorMapKeys: Object.freeze(["behavior.__proto__"]),
+      operationMapKeys: Object.freeze(["operation.constructor"]),
+      resourceMapKeys: Object.freeze(["resource.prototype"]),
+      caseSensitiveIds: Object.freeze({
+        components: Object.freeze(["com.example.ui/Text", "com.example.ui/text"]),
+        behaviors: Object.freeze([
+          "com.example.interactions/Sortable",
+          "com.example.interactions/sortable",
+        ]),
+        operations: Object.freeze(["com.example.operations/Save", "com.example.operations/save"]),
+        resources: Object.freeze(["com.example.resources/Stores", "com.example.resources/stores"]),
+      }),
       validator: Object.freeze({ valid: true, diagnostics: 0 }),
     }),
   });
@@ -1132,11 +1858,11 @@ function negativeCaseLabels(text, relativePath) {
     .filter(({ type }) => type === ts.CommentDirectiveType.ExpectError)
     .map(({ range }) => {
       const directive = text.slice(range.pos, range.end);
-      const match = /@ts-expect-error\s+(M03-T01-N\d{2})\b/u.exec(directive);
+      const match = /@ts-expect-error\s+(M03-T0[12]-N\d{2})\b/u.exec(directive);
       if (match === null) {
         fail(
           "CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT",
-          "Every compiler-recognized expect-error directive needs a stable M03-T01 case id.",
+          "Every compiler-recognized expect-error directive needs a stable M03-T01/M03-T02 case id.",
           { path: relativePath },
         );
       }
@@ -1464,9 +2190,12 @@ async function verifyPlatformBoundary(workspaceRoot, fileOverrides) {
 async function verifyTrace(tracePath) {
   const trace = JSON.parse(await readFile(tracePath, "utf8"));
   const rules = EXPECTED_TRACE_RULES.map((expected) => {
-    const actual = trace.proseRules?.find(({ id }) => id === expected.id);
+    const actual = trace[expected.collection]?.find(({ id }) => id === expected.id);
     if (actual === undefined) {
-      fail("CATALOG_REGISTRATION_TRACE_DRIFT", `Trace rule ${expected.id} is missing.`);
+      fail(
+        "CATALOG_REGISTRATION_TRACE_DRIFT",
+        `Trace rule ${expected.id} is missing from ${expected.collection}.`,
+      );
     }
     assertEqual(
       actual.section,
@@ -1487,6 +2216,7 @@ async function verifyTrace(tracePath) {
       "CATALOG_REGISTRATION_TRACE_DRIFT",
     );
     return Object.freeze({
+      collection: expected.collection,
       id: actual.id,
       section: actual.section,
       summary: actual.summary,
@@ -1531,7 +2261,7 @@ async function assertArtifactDestinationEntry(artifactPath) {
     if (!entry.isFile() || entry.isSymbolicLink()) {
       fail(
         "CATALOG_REGISTRATION_ARTIFACT_UNSUPPORTED_ENTRY",
-        "The M03-T01 artifact destination must be absent or a regular file.",
+        "The M03-T01/M03-T02 artifact destination must be absent or a regular file.",
       );
     }
   } catch (error) {
@@ -1546,7 +2276,7 @@ async function resolveWritableArtifactPath(artifactPath) {
   if (parentEntry.isSymbolicLink() || !parentEntry.isDirectory()) {
     fail(
       "CATALOG_REGISTRATION_ARTIFACT_UNSUPPORTED_ENTRY",
-      "The M03-T01 artifact parent must be a real directory.",
+      "The M03-T01/M03-T02 artifact parent must be a real directory.",
     );
   }
   const resolvedParent = await realpath(parent);
@@ -1569,7 +2299,7 @@ async function openExclusiveTemporary(parent, basename) {
   }
   fail(
     "CATALOG_REGISTRATION_ARTIFACT_TEMPORARY_CREATE_FAILED",
-    "Could not reserve a temporary M03-T01 artifact.",
+    "Could not reserve a temporary M03-T01/M03-T02 artifact.",
   );
 }
 
@@ -1642,7 +2372,7 @@ async function removeTemporary(temporaryPath) {
   }
 }
 
-/** Builds deterministic M03-T01 component-registration evidence in memory. */
+/** Builds cumulative deterministic M03-T01/M03-T02 registration evidence in memory. */
 export async function buildCatalogManifestRegistrationEvidence({
   workspaceRoot = WORKSPACE_ROOT,
   tracePath = DEFAULT_CATALOG_MANIFEST_REGISTRATION_TRACE_PATH,
@@ -1676,24 +2406,31 @@ export async function buildCatalogManifestRegistrationEvidence({
 
   const artifact = {
     schemaVersion: 1,
-    profile: "desen-catalog-manifest-registration-proof-v1",
-    task: "M03-T01",
+    profile: "desen-catalog-manifest-registration-proof-v2",
+    task: "M03-T02",
     result: "PASS",
     protocol: Object.freeze({ version: "0.1.0", documentKind: "desen.catalog" }),
     prerequisite,
     claim: {
       summary:
-        "Component contracts register as detached, immutable, deterministic JSON and compose into a framework-neutral Catalog manifest.",
+        "Component, behavior, operation, and resource contracts register as detached, immutable, deterministic JSON and compose into a framework-neutral Catalog manifest.",
       directTraceRules: traceRules,
       proofClaimStatusChanges: Object.freeze([]),
     },
     publicApi: {
       runtimeExports: Object.freeze(runtimeExports),
       typeExports: platformBoundary.typeExports,
-      componentManifestAuthority: 'DesenCatalog["components"][string]',
-      registryApiExported: false,
+      manifestAuthorities: Object.freeze({
+        component: 'DesenCatalog["components"][string]',
+        behavior: 'DesenCatalog["behaviors"][string]',
+        operation: 'DesenCatalog["operations"][string]',
+        resource: 'DesenCatalog["resources"][string]',
+      }),
+      globalRegistryExported: false,
+      executableBindingApiExported: false,
       registrationWrapperFields: Object.freeze(["id", "manifest"]),
       manifestRuntimeValidation: "@desen/validator",
+      hostOperationAndResourceBindings: "deferred to M03-T08 and runtime layers",
       targetAdapters: "deferred to M05",
     },
     vectors: vectors.transcript,
@@ -1717,16 +2454,21 @@ export async function buildCatalogManifestRegistrationEvidence({
     scope: {
       included: Object.freeze([
         "component manifest registration",
-        "complete Catalog root composition with empty later-category maps",
-        "duplicate component-id rejection",
+        "behavior manifest registration",
+        "operation manifest registration",
+        "resource manifest registration",
+        "complete four-category Catalog composition",
+        "component-only caller compatibility with empty optional-category maps",
+        "same-category and cross-category duplicate capability-id rejection",
         "detached canonical-key-ordered deep-frozen JSON snapshots",
+        "manifest-only API boundary without executable host bindings",
         "built declaration and production-source platform audit",
       ]),
       deferred: Object.freeze([
-        "M03-T02 behavior, operation, and resource registration",
         "M03-T03 schema-authoritative TypeScript and inspector-control derivation",
         "M03-T04 deterministic Web-React package digest profile",
         "M03-T05 and M03-T06 reference components",
+        "M03-T08 host operation binding and M04 host operation/resource ports",
         "M03-T09 manifest-to-implementation parity",
         "M03-T10 final package artifact and exact tuple",
         "M05 target renderer adapter registration",
@@ -1736,10 +2478,12 @@ export async function buildCatalogManifestRegistrationEvidence({
       "The SDK accepts programmatic object input; duplicate members already lost by an external JSON parser cannot be detected here.",
       "A general JavaScript Proxy cannot be classified without allowing its traps to run; callers must not use proxies as authoring input.",
       "Promise, generator, iterator, and host-exotic internal slots have no universal side-effect-free ECMAScript brand probe; if their prototypes are deliberately replaced with Object.prototype, their observable enumerable data shape is what gets snapshotted.",
-      "TypeScript may erase extra-property information when a structural union member absorbs another member; runtime exact-key checks remain authoritative for that language-level edge case.",
+      "TypeScript may erase extra-property information when a structural union member absorbs another member; Catalog structural validation remains authoritative for nested manifest shape in that language-level edge case.",
       "The atomic writer assumes its real parent directory is not concurrently controlled by an attacker during the final verified rename window.",
       "TypeScript projections and inert snapshotting do not replace Catalog structural or semantic validation.",
       "packageDigest is caller-supplied until M03-T04 defines the deterministic Web-React package profile.",
+      "Manifest registration intentionally does not carry executable behavior production, operation execute, or resource read functions; host bindings remain a later runtime responsibility recorded by PF-024.",
+      "Direct trace ownership confirms the manifest-registration portion only; authorization, host execution, read-only resource behavior, adapter integration, and final parity remain assigned to later tasks.",
       "No P-* claim changes status and G03 remains open.",
     ]),
   };
@@ -1753,7 +2497,7 @@ export async function buildCatalogManifestRegistrationEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Verifies the tracked M03-T01 artifact against a fresh deterministic rebuild. */
+/** Verifies the tracked cumulative M03-T01/M03-T02 artifact against a fresh rebuild. */
 export async function verifyCatalogManifestRegistration({
   artifactPath = DEFAULT_CATALOG_MANIFEST_REGISTRATION_ARTIFACT_PATH,
   artifactBytes,
@@ -1764,7 +2508,7 @@ export async function verifyCatalogManifestRegistration({
   if (!Buffer.from(actualBytes).equals(expected.artifactBytes)) {
     fail(
       "CATALOG_REGISTRATION_ARTIFACT_DRIFT",
-      "The tracked M03-T01 artifact differs from a fresh evidence build.",
+      "The tracked M03-T01/M03-T02 artifact differs from a fresh evidence build.",
       { expectedSha256: expected.artifactSha256, actualSha256: sha256(actualBytes) },
     );
   }
@@ -1778,7 +2522,7 @@ export async function verifyCatalogManifestRegistration({
   });
 }
 
-/** Writes deterministic M03-T01 evidence through a same-directory atomic rename. */
+/** Writes cumulative M03-T01/M03-T02 evidence through a same-directory atomic rename. */
 export async function writeCatalogManifestRegistrationEvidence({
   artifactPath = DEFAULT_CATALOG_MANIFEST_REGISTRATION_ARTIFACT_PATH,
   beforeAtomicRename,
@@ -1823,7 +2567,7 @@ export async function writeCatalogManifestRegistrationEvidence({
     } catch (cleanupError) {
       fail(
         "CATALOG_REGISTRATION_ARTIFACT_TEMPORARY_CLEANUP_FAILED",
-        "M03-T01 evidence failed and its temporary file could not be removed.",
+        "M03-T01/M03-T02 evidence failed and its temporary file could not be removed.",
         {
           writerError: error instanceof Error ? error.message : String(error),
           cleanupError: cleanupError instanceof Error ? cleanupError.message : String(cleanupError),

@@ -19,7 +19,7 @@
       "profile": "desen-component-contract-validation-v1",
       "result": "PASS",
       "bytes": 44918,
-      "sha256": "f587375f0da3bf9ec061a2c67d39b8319487afb3387fe29363b2c9980201295a",
+      "sha256": "36534e11b59a745b24fb91820d4b29cb98fcb6a5f4d83509d48cc7a248e1d30b",
       "verifier": "verifyProtocolComponentContracts"
     },
     {
@@ -27,7 +27,7 @@
       "profile": "desen-interaction-contract-validation-v1",
       "result": "PASS",
       "bytes": 52824,
-      "sha256": "d3a3b5248475705b001c169bf8f62b0174c89c238a7a69f6a08aa888f8d90178",
+      "sha256": "6a3aad5d6396417a69d3ae371b95405d63858a5d20d4a44a7506dbd0f8538187",
       "verifier": "verifyProtocolInteractionContracts"
     },
     {
@@ -35,7 +35,7 @@
       "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
       "bytes": 61636,
-      "sha256": "acec8add9cd54ff0d8ec37174d1f06d494d9b818976f97d80ea722c6049b64f5",
+      "sha256": "64fef7c96ab4900c41fd9025ca9d2afe1b5aecaf014834b96c2ac03b5adccb5c",
       "verifier": "verifyProtocolBindingContracts"
     },
     {
@@ -43,7 +43,7 @@
       "profile": "desen-execution-contract-validation-v1",
       "result": "PASS",
       "bytes": 61091,
-      "sha256": "f0f6852e7ec9bc6a37dd3d31475a421454ca2a39ea473627038e1f053ccdb6b3",
+      "sha256": "d0129999c13ee5828b6e9dd20c82c315a4987280365ae738f3b25098c590e0d7",
       "verifier": "verifyProtocolExecutionContracts"
     },
     {
@@ -51,7 +51,7 @@
       "profile": "desen-official-suite-parity-v1",
       "result": "PASS",
       "bytes": 16902,
-      "sha256": "9fd6c647d3548dfd18430ab2b77110ac2a732e0afaa6b0c1f1aa58c92c8a16e7",
+      "sha256": "0a2ca2417185814fdc2bc40bc5814b5922ddea67ef80cb103ea907ca5e0f6e20",
       "verifier": "verifyProtocolOfficialSuiteParity"
     }
   ],

@@ -17,7 +17,7 @@
     "semanticFoundation": {
       "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
       "bytes": 25301,
-      "sha256": "565278a4c66a2d672eb3570f4df28adc8d45b8cacfdb01735ce94319d41b4d3b",
+      "sha256": "b5a3f186f9bc589030bb7909ad6e7108c3c97c21f9cace2d0e66fec9cd5c38fc",
       "task": "M02-T07",
       "profile": "desen-semantic-foundation-v1",
       "verifiedBy": "verifyProtocolSemanticFoundation",
@@ -906,8 +906,8 @@
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 37502,
-        "sha256": "be0a10a13fa16fcf116106c0bbc559ddaf9f1d8584da12765d2f32712f87a26d"
+        "bytes": 39155,
+        "sha256": "2828d76a4b7127f73417d5524cd9ff9bf286fdbf355abc3d92815eabfb01afd4"
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
