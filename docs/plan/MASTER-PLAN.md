@@ -17,6 +17,11 @@ claim universal interoperability, production security certification, or mobile s
 - Protocol ambiguities are recorded; the frozen upstream is never silently patched.
 - Public package and domain publishing remains disabled until `G12`.
 
+Product and interoperability assumptions are checked through the non-counted
+[Strategic Validation Checkpoints](STRATEGIC-VALIDATION.md). `SC-01` runs after `G03` and before
+`M04`; `SC-02` runs after `G10` and before `M11`. These checkpoints do not change task numbering or
+the README progress denominator.
+
 ## Milestones and gates
 
 ### M00 — Frozen protocol and proof contract
