@@ -32,7 +32,7 @@
       "task": "M02-T11",
       "profile": "desen-execution-contract-validation-v1",
       "result": "PASS",
-      "sha256": "d0129999c13ee5828b6e9dd20c82c315a4987280365ae738f3b25098c590e0d7",
+      "sha256": "6ce67f3273c971f62ebcb499cd24c9ce65264d24ced7909ff2b12407feab2243",
       "verifiedBy": "verifyProtocolExecutionContracts"
     }
   },
@@ -305,8 +305,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 8953,
-        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
+        "bytes": 9152,
+        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
       },
       {
         "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/bundle-catalog-digest-mismatch.json",

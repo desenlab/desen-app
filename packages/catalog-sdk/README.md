@@ -26,19 +26,22 @@ This package may compare registry keys and declared contracts through generic or
 but it never accepts `React.ComponentType`, `ReactNode`, native view classes, or executable values
 inside a catalog document.
 
-## M03-T01/M03-T02 API
+## M03-T01–M03-T03 API
 
-The first two functional slices register all four capability contract categories and compose a
-complete DESEN 0.1.0 Catalog root:
+The first three functional slices register all four capability contract categories, compose a
+complete DESEN 0.1.0 Catalog root, and derive TypeScript props plus platform-neutral inspector
+metadata from the same component `propsSchema`:
 
 ```ts
 import {
   createCatalogManifest,
+  deriveComponentInspectorControls,
   registerBehavior,
   registerComponent,
   registerOperation,
   registerResource,
 } from "@desen/catalog-sdk";
+import type { ComponentPropsOf } from "@desen/catalog-sdk";
 
 const button = registerComponent({
   id: "com.example.ui/Button",
@@ -46,12 +49,28 @@ const button = registerComponent({
     propsSchema: {
       type: "object",
       additionalProperties: false,
+      required: ["label"],
       properties: {
         label: { type: "string" },
+        tone: { enum: ["primary", "secondary"] },
+      },
+    },
+    authoring: {
+      controls: {
+        tone: { presentation: "segmented" },
       },
     },
   },
 });
+
+type ButtonProps = ComponentPropsOf<typeof button>;
+
+const props: ButtonProps = {
+  label: "Continue",
+  tone: "primary",
+};
+
+const inspectorPlan = deriveComponentInspectorControls(button);
 
 const sortable = registerBehavior({
   id: "com.example.interactions/Sortable",
@@ -128,6 +147,9 @@ const catalog = createCatalogManifest({
   operations: [signIn],
   resources: [stores],
 });
+
+void props;
+void inspectorPlan;
 ```
 
 Every `register*` helper is a pure data operation, not a global or executable registry. Each
@@ -162,6 +184,39 @@ separate APIs. `registerBehavior` does not install a renderer adapter, `register
 bind an endpoint or handler, and `registerResource` does not bind a service or reader. Catalog
 manifests remain inert data; trusted renderer and host packages supply executable bindings later.
 
+## Manifest-authoritative derivation
+
+`ComponentPropsOf<typeof registration>` and `JsonSchemaValue<typeof schema>` project literal JSON
+Schema information into readonly TypeScript values. Exact `const` and `enum` choices, primitive
+types, closed object properties, required names, homogeneous arrays, and safe
+`additionalProperties` forms are retained. Unsupported applicators, widened schemas, ambiguous
+open-object shapes, and subtrees deeper than 16 levels deliberately widen to the JSON-only
+`JsonValue` type. A boolean `false` schema produces `never`.
+
+This type projection is an authoring convenience, not a second validator. It cannot enforce every
+numeric, string, cross-field, reference, or runtime constraint. Publication-bound and untrusted
+values still pass through `@desen/validator`; adapters still validate resolved values at their
+assigned runtime boundary.
+
+`deriveComponentInspectorControls(registration)` accepts only a registered component snapshot. It
+returns a second detached, recursively frozen JSON plan containing:
+
+- the exact authoritative `propsSchema`;
+- the complete component `authoring` contract when present, including scenarios;
+- deterministic RFC 6901 pointers for each derived property; and
+- primitive, enum, closed-object group, or explicit `structured-json` descriptors.
+
+The reference profile derives control kind, requiredness, and enum options only from
+`propsSchema`. DESEN 0.1.0 does not define a control-hint vocabulary, so
+`authoring.controls[property]` is retained only as an opaque top-level sidecar. It cannot invent a
+property or change schema-derived facts. Nested hint semantics are intentionally not guessed.
+
+Arrays, open objects, references, combinators, conditionals, patterns, unknown keywords, and other
+unsupported schema forms remain visible through an honest structured-JSON fallback. A derivation
+deeper than 16 control levels or wider than 512 controls produces one root fallback instead of a
+partial plan. Actual widgets, validation messages, binding editors, and dynamic-value UI remain
+editor responsibilities under M09.
+
 ## Validation boundary
 
 These helpers enforce an inert, immutable authoring boundary; they do not duplicate the Catalog
@@ -191,10 +246,10 @@ JSON API.
 
 ## Status
 
-Private proof-phase package. M03-T01 component registration and M03-T02 behavior, operation, and
-resource registration are implemented. Type/control derivation, digest tooling, reference
-capabilities, executable host bindings, parity checks, and final artifact proof remain tracked by
-M03-T03 through M03-T10; renderer adapter registration remains deferred to M05.
+Private proof-phase package. M03-T01 component registration, M03-T02 behavior/operation/resource
+registration, and M03-T03 manifest-authoritative type/control derivation are implemented. Digest
+tooling, reference capabilities, executable host bindings, parity checks, and final artifact proof
+remain tracked by M03-T04 through M03-T10; renderer adapter registration remains deferred to M05.
 
 ## Protocol and target support
 
@@ -208,6 +263,7 @@ Use the root workspace quality gate and boundary fixture audit:
 ```bash
 pnpm --filter @desen/catalog-sdk typecheck
 pnpm --filter @desen/catalog-sdk test:manifest-registration
+pnpm --filter @desen/catalog-sdk test:manifest-derivation
 pnpm verify:catalog-manifest-registration
 pnpm check
 node scripts/verify-boundary-fixtures.mjs

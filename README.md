@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **29 / 144 tasks complete (20%)**
+**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **30 / 144 tasks complete (21%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `██░░░░░░░░` **2 / 10 tasks complete (20%)**
+**M03 in progress:** `███░░░░░░░` **3 / 10 tasks complete (30%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T03`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T04`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -90,6 +90,7 @@ packages/
 - [Execution-contract proof](docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md)
 - [Official-suite parity proof](docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md)
 - [Validator diagnostic micro-vector proof](docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md)
+- [Catalog registration and derivation proof](docs/proof/CATALOG-MANIFEST-REGISTRATION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)

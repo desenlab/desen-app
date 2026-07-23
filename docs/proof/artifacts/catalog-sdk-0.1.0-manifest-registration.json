@@ -1,19 +1,27 @@
 {
   "schemaVersion": 1,
-  "profile": "desen-catalog-manifest-registration-proof-v2",
-  "task": "M03-T02",
+  "profile": "desen-catalog-manifest-registration-proof-v3",
+  "task": "M03-T03",
   "result": "PASS",
   "protocol": { "version": "0.1.0", "documentKind": "desen.catalog" },
   "prerequisite": {
     "gate": "G02",
     "closingTask": "M02-T13",
     "artifact": "docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json",
-    "sha256": "3d306a1c071f30a21e033d53142a28731f89ba951fe74ddedb97d4d67a167c44",
+    "sha256": "e4c5929a94a80eaae490eaa7529015d41c817295408d84427da2f77de82aceec",
     "result": "PASS"
   },
   "claim": {
-    "summary": "Component, behavior, operation, and resource contracts register as detached, immutable, deterministic JSON and compose into a framework-neutral Catalog manifest.",
+    "summary": "Schema-authoritative capability manifests register as detached immutable JSON, component prop types derive from their literal schema, and deterministic inspector plans retain unsupported properties through explicit structured-JSON fallbacks.",
     "directTraceRules": [
+      {
+        "collection": "conformanceRules",
+        "id": "C-006",
+        "section": "7.2",
+        "summary": "An Editor resolves catalog authoring contracts",
+        "owners": ["M03-T03", "M09-T02"],
+        "finalTestOwners": ["M03-T09", "M10-T01"]
+      },
       {
         "collection": "proseRules",
         "id": "R-013",
@@ -56,6 +64,14 @@
       },
       {
         "collection": "proseRules",
+        "id": "R-087",
+        "section": "21.7",
+        "summary": "Authoring metadata guides controls and scenarios but never weakens the property schema",
+        "owners": ["M03-T03", "M09-T05", "M09-T06"],
+        "finalTestOwners": ["M03-T09", "M10-T06"]
+      },
+      {
+        "collection": "proseRules",
         "id": "R-089",
         "section": "22.1",
         "summary": "Operations declare schemas, public errors and effect class, while current host authorization governs execution",
@@ -80,6 +96,14 @@
       },
       {
         "collection": "proseRules",
+        "id": "R-096",
+        "section": "23.4",
+        "summary": "Property controls derive from schema and unsupported schema features remain editable through an honest fallback",
+        "owners": ["M03-T03", "M09-T05", "M09-T06"],
+        "finalTestOwners": ["M09-T06"]
+      },
+      {
+        "collection": "proseRules",
         "id": "R-149",
         "section": "19",
         "summary": "Behavior mechanics remain capability implementations rather than new core primitives",
@@ -87,11 +111,27 @@
         "finalTestOwners": ["M11-T12"]
       }
     ],
+    "directSchemaFamilies": [
+      {
+        "id": "SC-033",
+        "summary": "Catalog authoring metadata",
+        "expectedConstraints": 1,
+        "semanticOwners": ["M03-T03"]
+      },
+      {
+        "id": "SC-056",
+        "summary": "Catalog authoring contract",
+        "expectedConstraints": 33,
+        "semanticOwners": ["M03-T03"]
+      }
+    ],
+    "directSchemaConstraints": 34,
     "proofClaimStatusChanges": []
   },
   "publicApi": {
     "runtimeExports": [
       "createCatalogManifest",
+      "deriveComponentInspectorControls",
       "registerBehavior",
       "registerComponent",
       "registerOperation",
@@ -99,11 +139,18 @@
     ],
     "typeExports": [
       "BehaviorManifest",
+      "ComponentInspectorControl",
+      "ComponentInspectorControlKind",
+      "ComponentInspectorControlPlan",
+      "ComponentInspectorFallbackReason",
       "ComponentManifest",
+      "ComponentPropsOf",
       "CreateCatalogManifestInput",
       "ImmutableJson",
       "JsonInput",
       "JsonPrimitive",
+      "JsonSchemaValue",
+      "JsonValue",
       "OperationManifest",
       "RegisterBehaviorInput",
       "RegisterComponentInput",
@@ -121,6 +168,9 @@
       "operation": "DesenCatalog[\"operations\"][string]",
       "resource": "DesenCatalog[\"resources\"][string]"
     },
+    "componentPropsAuthority": "ComponentPropsOf<RegisteredComponent> derives from registration[\"manifest\"][\"propsSchema\"]",
+    "inspectorAuthority": "propsSchema selects control kind, requiredness, enum options, and honest fallback",
+    "authoringControlHints": "detached opaque sidecars without schema authority",
     "globalRegistryExported": false,
     "executableBindingApiExported": false,
     "registrationWrapperFields": ["id", "manifest"],
@@ -403,7 +453,124 @@
       "operations": ["com.example.operations/Save", "com.example.operations/save"],
       "resources": ["com.example.resources/Stores", "com.example.resources/stores"]
     },
-    "validator": { "valid": true, "diagnostics": 0 }
+    "validator": { "valid": true, "diagnostics": 0 },
+    "inspectorControls": {
+      "authoringFields": [
+        "adapterFidelity",
+        "category",
+        "controls",
+        "defaultProps",
+        "differences",
+        "displayName",
+        "extensions",
+        "icon",
+        "resize",
+        "scenarios"
+      ],
+      "scenarioFields": ["description", "extensions", "fixtures", "props", "state"],
+      "controlKinds": [
+        "boolean",
+        "enum",
+        "group",
+        "integer",
+        "number",
+        "string",
+        "structured-json"
+      ],
+      "canonicalSha256": "53e475815da9419de7306fc2e20893086f0fb1cc61eaac2b8ef42d5686c2144d",
+      "deterministicRuns": 2,
+      "propertyControls": 8,
+      "fallbackCases": [
+        { "id": "array", "reason": "array", "result": "STRUCTURED_JSON" },
+        { "id": "open-object", "reason": "open-object", "result": "STRUCTURED_JSON" },
+        { "id": "multi-type", "reason": "multi-type", "result": "STRUCTURED_JSON" },
+        { "id": "reference", "reason": "reference", "result": "STRUCTURED_JSON" },
+        { "id": "dynamic-reference", "reason": "reference", "result": "STRUCTURED_JSON" },
+        { "id": "recursive-reference", "reason": "reference", "result": "STRUCTURED_JSON" },
+        { "id": "all-of", "reason": "combinator", "result": "STRUCTURED_JSON" },
+        { "id": "any-of", "reason": "combinator", "result": "STRUCTURED_JSON" },
+        { "id": "one-of", "reason": "combinator", "result": "STRUCTURED_JSON" },
+        { "id": "not", "reason": "combinator", "result": "STRUCTURED_JSON" },
+        { "id": "conditional", "reason": "conditional", "result": "STRUCTURED_JSON" },
+        { "id": "dependent-schema", "reason": "conditional", "result": "STRUCTURED_JSON" },
+        { "id": "dependent-required", "reason": "conditional", "result": "STRUCTURED_JSON" },
+        { "id": "pattern", "reason": "pattern", "result": "STRUCTURED_JSON" },
+        { "id": "pattern-properties", "reason": "pattern", "result": "STRUCTURED_JSON" },
+        { "id": "empty-enum", "reason": "unsupported-schema", "result": "STRUCTURED_JSON" },
+        { "id": "structured-enum", "reason": "unsupported-schema", "result": "STRUCTURED_JSON" },
+        {
+          "id": "type-mismatched-enum",
+          "reason": "unsupported-schema",
+          "result": "STRUCTURED_JSON"
+        },
+        { "id": "unknown-keyword", "reason": "unsupported-schema", "result": "STRUCTURED_JSON" },
+        { "id": "untyped", "reason": "unsupported-schema", "result": "STRUCTURED_JSON" },
+        { "id": "boolean-schema", "reason": "unsupported-schema", "result": "STRUCTURED_JSON" },
+        {
+          "id": "undeclared-required-root",
+          "reason": "unsupported-schema",
+          "result": "STRUCTURED_JSON"
+        },
+        {
+          "id": "undeclared-required-subtree",
+          "reason": "unsupported-schema",
+          "result": "STRUCTURED_JSON"
+        },
+        { "id": "whole-object-enum", "reason": "unsupported-schema", "result": "STRUCTURED_JSON" }
+      ],
+      "hostileValues": [
+        { "id": "undefined", "result": "REJECTED" },
+        { "id": "function", "result": "REJECTED" },
+        { "id": "symbol", "result": "REJECTED" },
+        { "id": "bigint", "result": "REJECTED" },
+        { "id": "nan", "result": "REJECTED" },
+        { "id": "infinity", "result": "REJECTED" },
+        { "id": "date", "result": "REJECTED" },
+        { "id": "map", "result": "REJECTED" },
+        { "id": "set", "result": "REJECTED" },
+        { "id": "regexp", "result": "REJECTED" },
+        { "id": "custom-class", "result": "REJECTED" },
+        { "id": "frozen-date", "result": "REJECTED" },
+        { "id": "frozen-map", "result": "REJECTED" },
+        { "id": "sparse-array", "result": "REJECTED" },
+        { "id": "extra-array-property", "result": "REJECTED" },
+        { "id": "cycle", "result": "REJECTED" },
+        { "id": "non-enumerable-property", "result": "REJECTED" },
+        { "id": "symbol-property", "result": "REJECTED" },
+        { "id": "laundered-date", "result": "REJECTED" },
+        { "id": "laundered-map", "result": "REJECTED" },
+        { "id": "laundered-set", "result": "REJECTED" },
+        { "id": "laundered-weak-map", "result": "REJECTED" },
+        { "id": "laundered-weak-set", "result": "REJECTED" },
+        { "id": "laundered-uint8-array", "result": "REJECTED" },
+        { "id": "laundered-array-buffer", "result": "REJECTED" },
+        { "id": "laundered-shared-array-buffer", "result": "REJECTED" },
+        { "id": "laundered-data-view", "result": "REJECTED" },
+        { "id": "laundered-boolean", "result": "REJECTED" },
+        { "id": "laundered-number", "result": "REJECTED" },
+        { "id": "laundered-string", "result": "REJECTED" },
+        { "id": "laundered-bigint", "result": "REJECTED" },
+        { "id": "laundered-symbol", "result": "REJECTED" },
+        { "id": "laundered-regexp", "result": "REJECTED" },
+        { "id": "laundered-weak-ref", "result": "REJECTED" },
+        { "id": "laundered-finalization-registry", "result": "REJECTED" }
+      ],
+      "accessor": { "result": "REJECTED", "invoked": false },
+      "misleadingHintAuthority": {
+        "createsProperties": false,
+        "changesKind": false,
+        "changesRequiredness": false,
+        "changesOptions": false
+      },
+      "pointerProfile": "RFC 6901",
+      "limits": {
+        "maxDepth": 16,
+        "maxControls": 512,
+        "overLimit": "ROOT_STRUCTURED_JSON_FALLBACK"
+      },
+      "deeplyFrozen": true,
+      "detached": true
+    }
   },
   "catalogGolden": {
     "authoring": { "publisher": "proof" },
@@ -547,34 +714,177 @@
     "target": "web-react",
     "version": "1.0.0"
   },
+  "inspectorControlGolden": {
+    "authoring": {
+      "adapterFidelity": "approximate",
+      "category": "Evidence",
+      "controls": {
+        "phantom": { "kind": "boolean" },
+        "title": { "presentation": "multiline" },
+        "tone": {
+          "kind": "number",
+          "options": ["invented"],
+          "presentation": "segmented",
+          "required": false
+        }
+      },
+      "defaultProps": { "active": true, "count": 1, "title": "Evidence", "tone": "info" },
+      "differences": ["Animation is omitted."],
+      "displayName": "Proof component",
+      "extensions": { "com.example/owner": "proof" },
+      "icon": "proof",
+      "resize": { "horizontal": "fill", "vertical": "hug" },
+      "scenarios": {
+        "warning": {
+          "description": "Warning preview.",
+          "extensions": { "com.example/scenario": true },
+          "fixtures": { "message": "Synthetic warning" },
+          "props": { "tone": "warning" },
+          "state": { "expanded": true }
+        }
+      }
+    },
+    "controls": [
+      {
+        "kind": "boolean",
+        "property": "active",
+        "required": false,
+        "schemaPointer": "/propsSchema/properties/active",
+        "valuePointer": "/active"
+      },
+      {
+        "fallbackReason": "open-object",
+        "kind": "structured-json",
+        "property": "config",
+        "required": false,
+        "schemaPointer": "/propsSchema/properties/config",
+        "valuePointer": "/config"
+      },
+      {
+        "kind": "integer",
+        "property": "count",
+        "required": true,
+        "schemaPointer": "/propsSchema/properties/count",
+        "valuePointer": "/count"
+      },
+      {
+        "children": [
+          {
+            "kind": "string",
+            "property": "display/name~raw",
+            "required": true,
+            "schemaPointer": "/propsSchema/properties/profile~1name~0raw/properties/display~1name~0raw",
+            "valuePointer": "/profile~1name~0raw/display~1name~0raw"
+          },
+          {
+            "kind": "number",
+            "property": "score",
+            "required": false,
+            "schemaPointer": "/propsSchema/properties/profile~1name~0raw/properties/score",
+            "valuePointer": "/profile~1name~0raw/score"
+          }
+        ],
+        "kind": "group",
+        "property": "profile/name~raw",
+        "required": true,
+        "schemaPointer": "/propsSchema/properties/profile~1name~0raw",
+        "valuePointer": "/profile~1name~0raw"
+      },
+      {
+        "kind": "number",
+        "property": "ratio",
+        "required": false,
+        "schemaPointer": "/propsSchema/properties/ratio",
+        "valuePointer": "/ratio"
+      },
+      {
+        "fallbackReason": "array",
+        "kind": "structured-json",
+        "property": "tags",
+        "required": false,
+        "schemaPointer": "/propsSchema/properties/tags",
+        "valuePointer": "/tags"
+      },
+      {
+        "hint": { "presentation": "multiline" },
+        "hintPointer": "/authoring/controls/title",
+        "kind": "string",
+        "property": "title",
+        "required": false,
+        "schemaPointer": "/propsSchema/properties/title",
+        "valuePointer": "/title"
+      },
+      {
+        "hint": {
+          "kind": "number",
+          "options": ["invented"],
+          "presentation": "segmented",
+          "required": false
+        },
+        "hintPointer": "/authoring/controls/tone",
+        "kind": "enum",
+        "options": ["warning", "info"],
+        "property": "tone",
+        "required": true,
+        "schemaPointer": "/propsSchema/properties/tone",
+        "valuePointer": "/tone"
+      }
+    ],
+    "propsSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "active": { "type": "boolean" },
+        "config": { "properties": { "enabled": { "type": "boolean" } }, "type": "object" },
+        "count": { "type": "integer" },
+        "profile/name~raw": {
+          "additionalProperties": false,
+          "properties": { "display/name~raw": { "type": "string" }, "score": { "type": "number" } },
+          "required": ["display/name~raw"],
+          "type": "object"
+        },
+        "ratio": { "type": "number" },
+        "tags": { "items": { "type": "string" }, "type": "array" },
+        "title": { "type": "string" },
+        "tone": { "enum": ["warning", "info"], "type": "string" }
+      },
+      "required": ["tone", "profile/name~raw", "count"],
+      "type": "object"
+    }
+  },
   "platformBoundary": {
-    "sourceFiles": 8,
-    "declarationFiles": 8,
+    "sourceFiles": 10,
+    "declarationFiles": 10,
     "sourcePaths": [
       "packages/catalog-sdk/src/behavior-registration.ts",
       "packages/catalog-sdk/src/catalog-manifest.ts",
+      "packages/catalog-sdk/src/component-inspector-control.ts",
       "packages/catalog-sdk/src/component-registration.ts",
       "packages/catalog-sdk/src/index.ts",
       "packages/catalog-sdk/src/inert-json.ts",
       "packages/catalog-sdk/src/operation-registration.ts",
       "packages/catalog-sdk/src/registration-core.ts",
-      "packages/catalog-sdk/src/resource-registration.ts"
+      "packages/catalog-sdk/src/resource-registration.ts",
+      "packages/catalog-sdk/src/schema-type-derivation.ts"
     ],
     "declarationPaths": [
       "packages/catalog-sdk/dist/behavior-registration.d.ts",
       "packages/catalog-sdk/dist/catalog-manifest.d.ts",
+      "packages/catalog-sdk/dist/component-inspector-control.d.ts",
       "packages/catalog-sdk/dist/component-registration.d.ts",
       "packages/catalog-sdk/dist/index.d.ts",
       "packages/catalog-sdk/dist/inert-json.d.ts",
       "packages/catalog-sdk/dist/operation-registration.d.ts",
       "packages/catalog-sdk/dist/registration-core.d.ts",
-      "packages/catalog-sdk/dist/resource-registration.d.ts"
+      "packages/catalog-sdk/dist/resource-registration.d.ts",
+      "packages/catalog-sdk/dist/schema-type-derivation.d.ts"
     ],
     "distributionPaths": [
       "packages/catalog-sdk/dist/behavior-registration.d.ts",
       "packages/catalog-sdk/dist/behavior-registration.js",
       "packages/catalog-sdk/dist/catalog-manifest.d.ts",
       "packages/catalog-sdk/dist/catalog-manifest.js",
+      "packages/catalog-sdk/dist/component-inspector-control.d.ts",
+      "packages/catalog-sdk/dist/component-inspector-control.js",
       "packages/catalog-sdk/dist/component-registration.d.ts",
       "packages/catalog-sdk/dist/component-registration.js",
       "packages/catalog-sdk/dist/index.d.ts",
@@ -586,16 +896,25 @@
       "packages/catalog-sdk/dist/registration-core.d.ts",
       "packages/catalog-sdk/dist/registration-core.js",
       "packages/catalog-sdk/dist/resource-registration.d.ts",
-      "packages/catalog-sdk/dist/resource-registration.js"
+      "packages/catalog-sdk/dist/resource-registration.js",
+      "packages/catalog-sdk/dist/schema-type-derivation.d.ts",
+      "packages/catalog-sdk/dist/schema-type-derivation.js"
     ],
     "runtimeDependencies": ["@desen/protocol"],
     "typeExports": [
       "BehaviorManifest",
+      "ComponentInspectorControl",
+      "ComponentInspectorControlKind",
+      "ComponentInspectorControlPlan",
+      "ComponentInspectorFallbackReason",
       "ComponentManifest",
+      "ComponentPropsOf",
       "CreateCatalogManifestInput",
       "ImmutableJson",
       "JsonInput",
       "JsonPrimitive",
+      "JsonSchemaValue",
+      "JsonValue",
       "OperationManifest",
       "RegisterBehaviorInput",
       "RegisterComponentInput",
@@ -617,29 +936,29 @@
     ]
   },
   "evidence": {
-    "packageTests": 17,
-    "compileTimeNegativeCases": 53,
-    "rootEvidenceTests": 33,
+    "packageTests": 33,
+    "compileTimeNegativeCases": 71,
+    "rootEvidenceTests": 43,
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 39155,
-        "sha256": "2828d76a4b7127f73417d5524cd9ff9bf286fdbf355abc3d92815eabfb01afd4"
+        "bytes": 40728,
+        "sha256": "ffbc9e56ae2991fe3da2627e469bc2f9d180eeda56ae224b2032d05a6e5dd569"
       },
       {
         "path": "package.json",
-        "bytes": 8953,
-        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
+        "bytes": 9152,
+        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
       },
       {
         "path": "packages/catalog-sdk/README.md",
-        "bytes": 8012,
-        "sha256": "a333c2d023ff23962dc6ca6996ac616856fff5f10d3ecb97a74d13ff7359ec1c"
+        "bytes": 10788,
+        "sha256": "047aec57bfa05ba0a4e93a75a2ac418164c88a71963a1459d25a0bb46faf5a82"
       },
       {
         "path": "packages/catalog-sdk/package.json",
-        "bytes": 822,
-        "sha256": "d355be573afc71b3009ffe55b86b9b9365d98c97041ae022fb291e38bdbbd85a"
+        "bytes": 909,
+        "sha256": "90047248f786e34f4f5fa7e76102ef2ec64437f04cd273d3e7f1a8eba3984d3a"
       },
       {
         "path": "packages/catalog-sdk/src/behavior-registration.ts",
@@ -652,14 +971,19 @@
         "sha256": "319fb66d2f634dd5ef02fbaa04a65c1d6b70d0ce5eeb05f018b111d3c14a1499"
       },
       {
+        "path": "packages/catalog-sdk/src/component-inspector-control.ts",
+        "bytes": 17498,
+        "sha256": "32bc17ea4fb9dfc62837c9913731baa19bc30ead0c85f4c732fd01c5e25b2147"
+      },
+      {
         "path": "packages/catalog-sdk/src/component-registration.ts",
         "bytes": 2759,
         "sha256": "899b0712d391b7107b4396a880b51ccd5cb540cdf37c623fe93d56ac47a07b73"
       },
       {
         "path": "packages/catalog-sdk/src/index.ts",
-        "bytes": 1076,
-        "sha256": "7b2b1661fc2b950d5fd070c94977183eaa68f94bb89c83da0806101acd947457"
+        "bytes": 1446,
+        "sha256": "d123ebb596ee11f95992f47f38fa8c67bbd3dcb1cc37430eaf439c64d2489524"
       },
       {
         "path": "packages/catalog-sdk/src/inert-json.ts",
@@ -682,14 +1006,29 @@
         "sha256": "6e5df207cb51c652e3d7b12285f7d83eee461d314460dc1a9399490eb870fee8"
       },
       {
+        "path": "packages/catalog-sdk/src/schema-type-derivation.ts",
+        "bytes": 8706,
+        "sha256": "b9d2c7fb1ecf913069e46032f3fa9ef7c036dbde4c8132e352184e6f79db8e5f"
+      },
+      {
         "path": "packages/catalog-sdk/test/catalog-manifest-registration.test.ts",
         "bytes": 31715,
         "sha256": "7da68eae8fa0a70d112c83553f0f43e4b52644951f9650b2c08fbea8dd83af89"
       },
       {
+        "path": "packages/catalog-sdk/test/component-inspector-control.test.ts",
+        "bytes": 22065,
+        "sha256": "879c2994e53260df579313570b2d05e89ec20c4387d0afb74ca6e60492afe47e"
+      },
+      {
         "path": "packages/catalog-sdk/test/public-api.types.ts",
-        "bytes": 20584,
-        "sha256": "2fde09dbd12446f061b9f5388344927ef956dda1324c7e4d3f51445da8560ce3"
+        "bytes": 21292,
+        "sha256": "8bcbb69dbbd319e2f6eabf9fc44b6890ae024ce7e787a223f41e7eb56a15db99"
+      },
+      {
+        "path": "packages/catalog-sdk/test/schema-type-derivation.types.ts",
+        "bytes": 9940,
+        "sha256": "ac9f281d73be5637ba3fbfcef97ffce9b56ab3d699a303390ee623b6b4cae418"
       },
       {
         "path": "packages/catalog-sdk/tsconfig.build.json",
@@ -708,13 +1047,13 @@
       },
       {
         "path": "scripts/generate-catalog-manifest-registration-proof.mjs",
-        "bytes": 857,
-        "sha256": "45bd841ed20eeb819db1b5236418b1c8f650b572235c413bb01fb451b0273d0a"
+        "bytes": 856,
+        "sha256": "8d07f941db5cba2f2273eaa46b24c476e76288a8b4e1bc7b1fefaa139fabd85b"
       },
       {
         "path": "scripts/lib/catalog-manifest-registration-proof.mjs",
-        "bytes": 93527,
-        "sha256": "1dc4045e2a5e5dd55dc7090a178cf16e7dedfd5a8e299bac08c7261e29b0e88c"
+        "bytes": 118767,
+        "sha256": "f95cdffd61d92e68700fd82462d79d48c4a4d500986a6c55d0f543ba0c6db0af"
       },
       {
         "path": "scripts/verify-boundary-fixtures.mjs",
@@ -743,8 +1082,8 @@
       },
       {
         "path": "tests/catalog-manifest-registration.test.mjs",
-        "bytes": 23633,
-        "sha256": "1fc9930160d5b8b11235a39f77ae34d49856f4187aa506d935c62f46c17bcb4c"
+        "bytes": 31200,
+        "sha256": "f2eafd9650aa653ad56cba415bbb29d2b97786fba8cbb51db7dd40982571abed"
       },
       {
         "path": "tsconfig.base.json",
@@ -779,6 +1118,16 @@
         "sha256": "d4faf0e0e29eafd92a74fa675bac6846610ef497512f55258238730748d12b55"
       },
       {
+        "path": "packages/catalog-sdk/dist/component-inspector-control.d.ts",
+        "bytes": 4889,
+        "sha256": "4c6aae38271bbb5562a157a560fa3bd0dfc3a38075a2a9b06f12bb019cc64f65"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/component-inspector-control.js",
+        "bytes": 12887,
+        "sha256": "6760bcb2563792a2ce9e8e60548622697a4a97d5d55aa724e5b692755f00c867"
+      },
+      {
         "path": "packages/catalog-sdk/dist/component-registration.d.ts",
         "bytes": 2612,
         "sha256": "5adb55b4c4b50d6a579bad24aa3e8abe3954d3e5adc569a3bfa595de7cffbd92"
@@ -790,13 +1139,13 @@
       },
       {
         "path": "packages/catalog-sdk/dist/index.d.ts",
-        "bytes": 1085,
-        "sha256": "ff0ba03d772231e81b2203ca9fdec63766b43c532ed679c528a783452020dc82"
+        "bytes": 1447,
+        "sha256": "aa52e9d12f1526d0296be0af4993601bb085dd101bed27053e64afaaed32aabe"
       },
       {
         "path": "packages/catalog-sdk/dist/index.js",
-        "bytes": 474,
-        "sha256": "fdefb0e24c515cfa7a512bca0299d1a01f56de705753e9a85720a93b810bf6cc"
+        "bytes": 559,
+        "sha256": "35f7181ed34b4c8331867c9a5cde99980d507503d6a017989e79b8e879471365"
       },
       {
         "path": "packages/catalog-sdk/dist/inert-json.d.ts",
@@ -837,23 +1186,37 @@
         "path": "packages/catalog-sdk/dist/resource-registration.js",
         "bytes": 569,
         "sha256": "445d6a95506d43412c4efc8711cf94c38e69d226d83ca28eb49be32b96c7432f"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/schema-type-derivation.d.ts",
+        "bytes": 8087,
+        "sha256": "78d69301b856c1d659d1126468f1c2409e3e9049df3ae499a97bfe813f455eae"
+      },
+      {
+        "path": "packages/catalog-sdk/dist/schema-type-derivation.js",
+        "bytes": 61,
+        "sha256": "151cd09ce45e212575b8c90ec480a3aedf48c8ec7a4df1d410c3260d102fe410"
       }
     ],
     "commandWiring": {
       "generate": [
         "pnpm --filter @desen/validator... build",
         "pnpm --filter @desen/catalog-sdk... build",
+        "pnpm --filter @desen/catalog-sdk typecheck",
         "node scripts/generate-catalog-manifest-registration-proof.mjs"
       ],
       "verify": [
         "pnpm --filter @desen/validator... build",
         "pnpm --filter @desen/catalog-sdk... build",
+        "pnpm --filter @desen/catalog-sdk typecheck",
         "node scripts/verify-catalog-manifest-registration.mjs"
       ],
       "test": [
         "pnpm --filter @desen/validator... build",
         "pnpm --filter @desen/catalog-sdk... build",
+        "pnpm --filter @desen/catalog-sdk typecheck",
         "pnpm --filter @desen/catalog-sdk test:manifest-registration",
+        "pnpm --filter @desen/catalog-sdk test:manifest-derivation",
         "node --test tests/catalog-manifest-registration.test.mjs"
       ],
       "rootTest": [
@@ -921,16 +1284,21 @@
       "same-category and cross-category duplicate capability-id rejection",
       "detached canonical-key-ordered deep-frozen JSON snapshots",
       "manifest-only API boundary without executable host bindings",
+      "manifest-authoritative component prop TypeScript projection",
+      "deterministic platform-neutral component inspector-control derivation",
+      "RFC 6901 value, schema, and hint pointers",
+      "opaque non-authoritative authoring control hints",
+      "explicit structured-JSON fallback for unsupported or over-budget schema subtrees",
       "built declaration and production-source platform audit"
     ],
     "deferred": [
-      "M03-T03 schema-authoritative TypeScript and inspector-control derivation",
       "M03-T04 deterministic Web-React package digest profile",
       "M03-T05 and M03-T06 reference components",
       "M03-T08 host operation binding and M04 host operation/resource ports",
       "M03-T09 manifest-to-implementation parity",
       "M03-T10 final package artifact and exact tuple",
-      "M05 target renderer adapter registration"
+      "M05 target renderer adapter registration",
+      "M09 concrete inspector widgets, binding editors, and hint-profile interpretation"
     ]
   },
   "limitations": [
@@ -940,9 +1308,12 @@
     "TypeScript may erase extra-property information when a structural union member absorbs another member; Catalog structural validation remains authoritative for nested manifest shape in that language-level edge case.",
     "The atomic writer assumes its real parent directory is not concurrently controlled by an attacker during the final verified rename window.",
     "TypeScript projections and inert snapshotting do not replace Catalog structural or semantic validation.",
+    "JsonSchemaValue is a conservative TypeScript projection; unsupported Draft 2020-12 features fall back to JsonValue rather than pretending to be exact.",
+    "DESEN 0.1.0 defines no authoring.controls vocabulary; PF-025 keeps hints opaque and non-authoritative.",
+    "The component inspector plan is framework-neutral metadata, not a concrete editor widget tree.",
     "packageDigest is caller-supplied until M03-T04 defines the deterministic Web-React package profile.",
     "Manifest registration intentionally does not carry executable behavior production, operation execute, or resource read functions; host bindings remain a later runtime responsibility recorded by PF-024.",
-    "Direct trace ownership confirms the manifest-registration portion only; authorization, host execution, read-only resource behavior, adapter integration, and final parity remain assigned to later tasks.",
+    "Direct trace ownership confirms registration and derivation primitives only; concrete editor widgets, authorization, host execution, read-only resource behavior, adapter integration, and final parity remain assigned to later tasks.",
     "No P-* claim changes status and G03 remains open."
   ]
 }

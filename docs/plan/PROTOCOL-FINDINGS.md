@@ -537,3 +537,24 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Future action: Name manifest and host-binding APIs distinctly in a later implementation guide
   revision and standardize an inert application-supplied binding declaration if interoperability
   requires one.
+
+## PF-025 — Authoring control hints have no normative vocabulary
+
+- Status: OPEN
+- Blocks proof: No; a reference profile can derive conservative metadata from `propsSchema` while
+  preserving hints as opaque presentation data.
+- Protocol location: SPEC Sections 21.7 and 23.4; Catalog Schema
+  `$defs/authoringSpec/properties/controls`; informative IMPLEMENTATION-GUIDE Section 4.3
+- Observation: DESEN 0.1.0 defines `authoring.controls` only as an open JSON object. It does not
+  define hint keys, values, nesting, precedence, or a deterministic mapping from JSON Schema
+  features to editor widgets. The frozen example Catalog contains no `authoring.controls` example.
+  Treating an implementation-specific hint vocabulary as normative would create a second,
+  undocumented contract beside `propsSchema`.
+- Implementation decision: M03-T03 derives framework-neutral inspector metadata only from the
+  literal `propsSchema`. It preserves the complete authoring object, including control hints, as
+  detached opaque JSON, but hints cannot change property existence, required state, value type, or
+  enum options. The reference profile maps primitive and closed-object schemas conservatively and
+  emits an explicit `structured-json` fallback for every unsupported, open, ambiguous, or
+  over-budget subtree. Actual widgets and hint interpretation remain editor responsibilities.
+- Future action: Define a versioned control-hint vocabulary and deterministic precedence rules in
+  a later protocol or profile revision, with `propsSchema` remaining the validity authority.

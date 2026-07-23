@@ -1,11 +1,12 @@
-# Catalog Manifest Registration Evidence
+# Catalog Manifest Registration and Derivation Evidence
 
 ## Result
 
-`M03-T01` and `M03-T02` pass. `@desen/catalog-sdk` now exposes a framework-neutral JSON authoring
-API for component, behavior, operation, and resource contracts plus complete DESEN 0.1.0 Catalog
-roots. The Catalog schema remains the only contract authority. Executable renderer adapters,
-operation handlers, and resource readers remain outside this package.
+`M03-T01` through `M03-T03` pass. `@desen/catalog-sdk` now exposes a framework-neutral JSON
+authoring API for all four capability contracts and complete DESEN 0.1.0 Catalog roots, then
+derives component prop types and inspector metadata from the same literal `propsSchema`. The
+Catalog schema remains the only contract authority. Executable renderer adapters, concrete editor
+widgets, operation handlers, and resource readers remain outside this package.
 
 Last verified: 2026-07-23.
 
@@ -32,22 +33,41 @@ binding. The four public registration functions snapshot only inert `{ id, manif
 do not install React or native adapters, execute operations, read resources, select endpoints,
 choose SDK calls, perform database queries, or carry credentials and authorization mechanisms.
 
+`ComponentPropsOf<Registration>` projects readonly component props directly from the registered
+literal schema. Exact `const` and `enum` choices, primitive types, closed properties, required
+names, homogeneous arrays, and safe additional-property forms are retained. Widened, complex,
+unsupported, or over-depth schemas fall back to the JSON-only `JsonValue`; `false` becomes
+`never`. This is a compile-time convenience, not runtime validation.
+
+`deriveComponentInspectorControls` accepts the immutable result of `registerComponent` and returns
+a second detached, recursively frozen JSON plan. It preserves the complete `propsSchema` and
+authoring/scenario contract, derives deterministic RFC 6901 pointers, and emits primitive, enum,
+closed-object group, or explicit `structured-json` descriptors. Integer-like property names use
+the same canonical UTF-16 order as the protocol canonicalizer.
+
+`PF-025` records that DESEN 0.1.0 defines no `authoring.controls` vocabulary. Top-level hints are
+therefore copied only as opaque sidecars. They cannot create properties or change kind,
+requiredness, or enum options. Unsupported and unknown schema features remain visible through an
+honest fallback; a plan deeper than 16 control levels or wider than 512 controls becomes one root
+fallback rather than a partial result.
+
 The public runtime entrypoint exports only:
 
 - `createCatalogManifest`
+- `deriveComponentInspectorControls`
 - `registerBehavior`
 - `registerComponent`
 - `registerOperation`
 - `registerResource`
 
-The public type entrypoint exposes 16 JSON-focused types for the four schema-authoritative manifest
-families, exact registration inputs, immutable registration outputs, Catalog composition, and
-shared inert-JSON projections. Source, emitted declarations, and built JavaScript are audited for
-platform imports and types. The package has one runtime dependency: `@desen/protocol`.
+The public type entrypoint exposes 23 JSON-focused types, including `JsonValue`,
+`JsonSchemaValue`, `ComponentPropsOf`, and the inspector plan/control unions. Source, emitted
+declarations, and built JavaScript are audited for platform imports and types. The package has one
+runtime dependency: `@desen/protocol`.
 
 ## Deterministic and mutation evidence
 
-The evidence executes 17 package tests, 53 compile-time negative cases, and 33 independent root
+The evidence executes 33 package tests, 71 compile-time negative cases, and 43 independent root
 tests. Contract vectors verify:
 
 - all 12 component, 14 behavior, 9 operation, and 10 resource manifest fields through
@@ -62,6 +82,13 @@ tests. Contract vectors verify:
   `__proto__`/`constructor` map keys;
 - rejection of 140 hostile category/value combinations, including recognized
   prototype-laundered built-ins, through every registration category;
+- all 10 authoring and 5 scenario fields, 7 control kinds, 24 explicit fallback cases, 35 hostile
+  inspector values, and accessor rejection without getter invocation;
+- schema authority under misleading and nonexistent hints, canonical numeric-looking property
+  order, whole-object enum visibility, honest undeclared-required fallbacks, pointer escaping,
+  caller ownership, deep freezing, and exact 16-level/512-control limits;
+- 34 direct constraints from `SC-033` and `SC-056`, plus direct `C-006`, `R-084`, `R-087`, and
+  `R-096` ownership alongside the cumulative registration traces;
 - exact Catalog semantic acceptance through the completed G02 validator; and
 - exact source, declaration, distribution, test-inventory, command-wiring, and trace ownership.
 
@@ -69,7 +96,9 @@ Independent mutations prove that the verifier rejects substituted Catalog fields
 noncanonical registration outputs, omitted or substituted category maps, accepted cross-category
 collisions, caller descriptor changes, skipped tests, computed/dynamic implementation imports,
 undeclared public exports, missing or early-exit quality commands, source-inventory drift, artifact
-tampering, and temporary-file replacement during evidence writing.
+tampering, temporary-file replacement during evidence writing, schema-authority drift, omitted
+fallbacks, mutable or aliased plans, pointer substitution, partial over-limit output, hostile input
+acceptance, schema-family drift, and skipped or fabricated M03-T03 tests.
 
 ## Reproducible artifact
 
@@ -81,9 +110,10 @@ pnpm check
 ```
 
 - Artifact: `docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json`
-- Artifact SHA-256: `0823832e8a85a94d9a1f8e4dafa332e6ef53f29e6630a3039c2e895fa62fed00`
-- Direct trace rules: `C-018`, `R-013`, `R-071`, `R-072`, `R-084`, `R-089`, `R-090`, `R-092`,
-  `R-149`
+- Artifact SHA-256: `283a8fdd89e67769b83e58bc32f667b43920c5f137cbde3b1a4a2730d2245c61`
+- Direct schema families: `SC-033` (1 constraint), `SC-056` (33 constraints)
+- Direct trace rules: `C-006`, `C-018`, `R-013`, `R-071`, `R-072`, `R-084`, `R-087`, `R-089`,
+  `R-090`, `R-092`, `R-096`, `R-149`
 - Prerequisite gate: `G02`
 
 The writer uses a same-directory exclusive temporary file, syncs it, verifies its open-handle
@@ -92,7 +122,6 @@ identity and exact bytes, atomically renames it, and verifies the committed inod
 ## Boundaries and limitations
 
 - Full Catalog structural and semantic validation remains in `@desen/validator`.
-- Type and inspector-control derivation belongs to M03-T03.
 - Deterministic Web–React package digest construction belongs to M03-T04.
 - Reference capabilities and synthetic fixtures belong to M03-T05 through M03-T07.
 - Separate trusted-host operation binding belongs to M03-T08.
@@ -100,6 +129,8 @@ identity and exact bytes, atomically renames it, and verifies the committed inod
 - Final immutable artifact tuple proof belongs to M03-T10.
 - Executable component and behavior adapter registration remains renderer-owned and deferred to
   M05.
+- Concrete widgets, binding editors, validation messages, and hint interpretation remain assigned
+  to M09.
 - JavaScript cannot side-effect-freely identify every deliberately prototype-laundered exotic or
   general Proxy. These are excluded authoring inputs; recognized built-ins are rejected, and the
   package documents the remaining observable-shape limitation.
@@ -109,5 +140,5 @@ identity and exact bytes, atomically renames it, and verifies the committed inod
 - The artifact writer assumes its resolved parent directory is not concurrently attacker-owned in
   the final verified rename window.
 
-No `P-*` proof claim changes status at M03-T01 or M03-T02. `G03` remains open until M03-T01 through
-M03-T10 are complete.
+No `P-*` proof claim changes status at M03-T01 through M03-T03. `G03` remains open until M03-T01
+through M03-T10 are complete.

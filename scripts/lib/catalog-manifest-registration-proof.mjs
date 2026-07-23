@@ -18,13 +18,13 @@ const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const CATALOG_API_URL = new URL("../../packages/catalog-sdk/dist/index.js", import.meta.url);
 const VALIDATOR_API_URL = new URL("../../packages/validator/dist/index.js", import.meta.url);
 
-/** Absolute path to the cumulative deterministic M03-T01/M03-T02 evidence artifact. */
+/** Absolute path to the cumulative deterministic M03-T01 through M03-T03 evidence artifact. */
 export const DEFAULT_CATALOG_MANIFEST_REGISTRATION_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json",
 );
 
-/** Absolute path to the reviewed protocol trace ledger used by M03-T01/M03-T02. */
+/** Absolute path to the reviewed protocol trace ledger used by M03-T01 through M03-T03. */
 export const DEFAULT_CATALOG_MANIFEST_REGISTRATION_TRACE_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/protocol-0.1.0-traceability.json",
@@ -32,6 +32,7 @@ export const DEFAULT_CATALOG_MANIFEST_REGISTRATION_TRACE_PATH = path.join(
 
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
   "createCatalogManifest",
+  "deriveComponentInspectorControls",
   "registerBehavior",
   "registerComponent",
   "registerOperation",
@@ -39,11 +40,18 @@ const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
 ]);
 const EXPECTED_TYPE_EXPORTS = Object.freeze([
   "BehaviorManifest",
+  "ComponentInspectorControl",
+  "ComponentInspectorControlKind",
+  "ComponentInspectorControlPlan",
+  "ComponentInspectorFallbackReason",
   "ComponentManifest",
+  "ComponentPropsOf",
   "CreateCatalogManifestInput",
   "ImmutableJson",
   "JsonInput",
   "JsonPrimitive",
+  "JsonSchemaValue",
+  "JsonValue",
   "OperationManifest",
   "RegisterBehaviorInput",
   "RegisterComponentInput",
@@ -110,6 +118,13 @@ const EXPECTED_RESOURCE_FIELDS = Object.freeze([
 ]);
 const EXPECTED_TRACE_RULES = Object.freeze([
   Object.freeze({
+    collection: "conformanceRules",
+    id: "C-006",
+    section: "7.2",
+    owners: Object.freeze(["M03-T03", "M09-T02"]),
+    tests: Object.freeze(["M03-T09", "M10-T01"]),
+  }),
+  Object.freeze({
     collection: "proseRules",
     id: "R-013",
     section: "6.1.3",
@@ -146,6 +161,13 @@ const EXPECTED_TRACE_RULES = Object.freeze([
   }),
   Object.freeze({
     collection: "proseRules",
+    id: "R-087",
+    section: "21.7",
+    owners: Object.freeze(["M03-T03", "M09-T05", "M09-T06"]),
+    tests: Object.freeze(["M03-T09", "M10-T06"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
     id: "R-089",
     section: "22.1",
     owners: Object.freeze(["M03-T02", "M04-T01", "M04-T09"]),
@@ -167,37 +189,64 @@ const EXPECTED_TRACE_RULES = Object.freeze([
   }),
   Object.freeze({
     collection: "proseRules",
+    id: "R-096",
+    section: "23.4",
+    owners: Object.freeze(["M03-T03", "M09-T05", "M09-T06"]),
+    tests: Object.freeze(["M09-T06"]),
+  }),
+  Object.freeze({
+    collection: "proseRules",
     id: "R-149",
     section: "19",
     owners: Object.freeze(["M03-T02", "M05-T04"]),
     tests: Object.freeze(["M11-T12"]),
   }),
 ]);
+const EXPECTED_SCHEMA_FAMILIES = Object.freeze([
+  Object.freeze({
+    id: "SC-033",
+    summary: "Catalog authoring metadata",
+    expectedConstraints: 1,
+    semanticOwners: Object.freeze(["M03-T03"]),
+  }),
+  Object.freeze({
+    id: "SC-056",
+    summary: "Catalog authoring contract",
+    expectedConstraints: 33,
+    semanticOwners: Object.freeze(["M03-T03"]),
+  }),
+]);
 const EXPECTED_SOURCE_PATHS = Object.freeze([
   "packages/catalog-sdk/src/behavior-registration.ts",
   "packages/catalog-sdk/src/catalog-manifest.ts",
+  "packages/catalog-sdk/src/component-inspector-control.ts",
   "packages/catalog-sdk/src/component-registration.ts",
   "packages/catalog-sdk/src/index.ts",
   "packages/catalog-sdk/src/inert-json.ts",
   "packages/catalog-sdk/src/operation-registration.ts",
   "packages/catalog-sdk/src/registration-core.ts",
   "packages/catalog-sdk/src/resource-registration.ts",
+  "packages/catalog-sdk/src/schema-type-derivation.ts",
 ]);
 const EXPECTED_DECLARATION_PATHS = Object.freeze([
   "packages/catalog-sdk/dist/behavior-registration.d.ts",
   "packages/catalog-sdk/dist/catalog-manifest.d.ts",
+  "packages/catalog-sdk/dist/component-inspector-control.d.ts",
   "packages/catalog-sdk/dist/component-registration.d.ts",
   "packages/catalog-sdk/dist/index.d.ts",
   "packages/catalog-sdk/dist/inert-json.d.ts",
   "packages/catalog-sdk/dist/operation-registration.d.ts",
   "packages/catalog-sdk/dist/registration-core.d.ts",
   "packages/catalog-sdk/dist/resource-registration.d.ts",
+  "packages/catalog-sdk/dist/schema-type-derivation.d.ts",
 ]);
 const EXPECTED_DISTRIBUTION_PATHS = Object.freeze([
   "packages/catalog-sdk/dist/behavior-registration.d.ts",
   "packages/catalog-sdk/dist/behavior-registration.js",
   "packages/catalog-sdk/dist/catalog-manifest.d.ts",
   "packages/catalog-sdk/dist/catalog-manifest.js",
+  "packages/catalog-sdk/dist/component-inspector-control.d.ts",
+  "packages/catalog-sdk/dist/component-inspector-control.js",
   "packages/catalog-sdk/dist/component-registration.d.ts",
   "packages/catalog-sdk/dist/component-registration.js",
   "packages/catalog-sdk/dist/index.d.ts",
@@ -210,6 +259,8 @@ const EXPECTED_DISTRIBUTION_PATHS = Object.freeze([
   "packages/catalog-sdk/dist/registration-core.js",
   "packages/catalog-sdk/dist/resource-registration.d.ts",
   "packages/catalog-sdk/dist/resource-registration.js",
+  "packages/catalog-sdk/dist/schema-type-derivation.d.ts",
+  "packages/catalog-sdk/dist/schema-type-derivation.js",
 ]);
 const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
   "package.json",
@@ -222,7 +273,9 @@ const TRACKED_IMPLEMENTATION_PATHS = Object.freeze([
   "packages/catalog-sdk/tsconfig.json",
   "packages/catalog-sdk/tsconfig.build.json",
   "packages/catalog-sdk/test/catalog-manifest-registration.test.ts",
+  "packages/catalog-sdk/test/component-inspector-control.test.ts",
   "packages/catalog-sdk/test/public-api.types.ts",
+  "packages/catalog-sdk/test/schema-type-derivation.types.ts",
   "scripts/lib/catalog-manifest-registration-proof.mjs",
   "scripts/generate-catalog-manifest-registration-proof.mjs",
   "scripts/verify-catalog-manifest-registration.mjs",
@@ -250,9 +303,25 @@ const EXPECTED_PACKAGE_TEST_TITLES = Object.freeze([
   "treats capability ids as exact, case-sensitive strings",
   "stores prototype-looking map keys as inert data in every category",
   "rejects unknown Catalog builder fields and forged registration records",
+  "derives canonical primitive controls, requiredness, pointers, and enum order",
+  "derives recursively closed object groups and RFC 6901-escaped pointers",
+  "retains complete authoring data while treating misleading hints as opaque sidecars",
+  "keeps every unsupported schema subtree visible through a reasoned fallback",
+  "retains supported constraint metadata in the authoritative schema snapshot",
+  "does not drop supported siblings when one child requires structured JSON",
+  "uses canonical property order even for integer-like names",
+  "keeps a whole-object enum visible through the root fallback",
+  "falls back instead of hiding required names that have no declared property",
+  "uses one root fallback when the root schema is not an explicit closed object",
+  "accepts exactly 16 control levels and replaces deeper output with a root limit fallback",
+  "accepts exactly 512 controls and returns no partial output at 513",
+  "returns an exact detached and deeply frozen snapshot without changing the caller",
+  "rejects accessors and hostile non-JSON values without invoking getters",
+  "handles prototype-like property and hint names without prototype pollution",
+  "is deterministic across object insertion order while preserving semantic array order",
 ]);
 const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
-  "accepts the tracked deterministic M03-T01/M03-T02 evidence",
+  "accepts the tracked deterministic M03-T01 through M03-T03 evidence",
   "two independent Catalog registration evidence builds are byte-identical",
   "rejects stale or one-byte-tampered evidence",
   "rejects direct prose and conformance trace ownership drift",
@@ -285,26 +354,41 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "rejects replacement of the reserved temporary file",
   "rejects symlink replacement of the reserved temporary file",
   "rejects same-inode overwrite of the reserved temporary file",
+  "rejects schema-authority drift in inspector controls",
+  "rejects omission of structured-JSON inspector fallbacks",
+  "rejects mutable inspector plans",
+  "rejects inspector retention of caller-owned manifest aliases",
+  "rejects inspector pointer substitution",
+  "rejects partial inspector output beyond derivation limits",
+  "rejects hostile inspector input acceptance",
+  "rejects M03-T03 schema-family trace drift",
+  "rejects skipped inspector fallback matrix",
+  "rejects fake M03-T03 negative-case labels outside compiler directives",
 ]);
 const EXPECTED_TYPE_NEGATIVE_CASES = Object.freeze([
   ...Array.from({ length: 21 }, (_, index) => `M03-T01-N${String(index + 1).padStart(2, "0")}`),
   ...Array.from({ length: 32 }, (_, index) => `M03-T02-N${String(index + 1).padStart(2, "0")}`),
+  ...Array.from({ length: 18 }, (_, index) => `M03-T03-N${String(index + 1).padStart(2, "0")}`),
 ]);
 const EXPECTED_COMMANDS = Object.freeze({
   generate: Object.freeze([
     "pnpm --filter @desen/validator... build",
     "pnpm --filter @desen/catalog-sdk... build",
+    "pnpm --filter @desen/catalog-sdk typecheck",
     "node scripts/generate-catalog-manifest-registration-proof.mjs",
   ]),
   verify: Object.freeze([
     "pnpm --filter @desen/validator... build",
     "pnpm --filter @desen/catalog-sdk... build",
+    "pnpm --filter @desen/catalog-sdk typecheck",
     "node scripts/verify-catalog-manifest-registration.mjs",
   ]),
   test: Object.freeze([
     "pnpm --filter @desen/validator... build",
     "pnpm --filter @desen/catalog-sdk... build",
+    "pnpm --filter @desen/catalog-sdk typecheck",
     "pnpm --filter @desen/catalog-sdk test:manifest-registration",
+    "pnpm --filter @desen/catalog-sdk test:manifest-derivation",
     "node --test tests/catalog-manifest-registration.test.mjs",
   ]),
 });
@@ -372,7 +456,7 @@ const PLATFORM_PATTERNS = Object.freeze([
   }),
 ]);
 
-/** Stable failure raised by cumulative M03-T01/M03-T02 evidence generation and verification. */
+/** Stable failure raised by cumulative M03-T01 through M03-T03 evidence generation and verification. */
 export class CatalogManifestRegistrationEvidenceError extends Error {
   /**
    * @param {string} code stable evidence failure code
@@ -797,6 +881,527 @@ function reverseObjectStorageOrder(value) {
       .reverse()
       .map(([key, nested]) => [key, reverseObjectStorageOrder(nested)]),
   );
+}
+
+function createNestedControlSchema(depth) {
+  let schema = { type: "string" };
+  for (let index = 1; index < depth; index += 1) {
+    schema = {
+      type: "object",
+      additionalProperties: false,
+      properties: { child: schema },
+    };
+  }
+  return schema;
+}
+
+function runInspectorControlVectors(catalogApi, hostileValues) {
+  let registrationSequence = 0;
+  const registerForDerivation = (manifest) =>
+    catalogApi.registerComponent({
+      id: `com.example.ui/InspectorProof${registrationSequence++}`,
+      manifest,
+    });
+  const deriveManifest = (manifest) =>
+    catalogApi.deriveComponentInspectorControls(registerForDerivation(manifest));
+
+  const manifest = {
+    propsSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["tone", "profile/name~raw", "count"],
+      properties: {
+        tone: { type: "string", enum: ["warning", "info"] },
+        title: { type: "string" },
+        tags: { type: "array", items: { type: "string" } },
+        ratio: { type: "number" },
+        "profile/name~raw": {
+          type: "object",
+          additionalProperties: false,
+          required: ["display/name~raw"],
+          properties: {
+            score: { type: "number" },
+            "display/name~raw": { type: "string" },
+          },
+        },
+        count: { type: "integer" },
+        config: { type: "object", properties: { enabled: { type: "boolean" } } },
+        active: { type: "boolean" },
+      },
+    },
+    authoring: {
+      displayName: "Proof component",
+      category: "Evidence",
+      icon: "proof",
+      defaultProps: { active: true, count: 1, title: "Evidence", tone: "info" },
+      controls: {
+        tone: {
+          kind: "number",
+          options: ["invented"],
+          required: false,
+          presentation: "segmented",
+        },
+        title: { presentation: "multiline" },
+        phantom: { kind: "boolean" },
+      },
+      scenarios: {
+        warning: {
+          props: { tone: "warning" },
+          fixtures: { message: "Synthetic warning" },
+          state: { expanded: true },
+          description: "Warning preview.",
+          extensions: { "com.example/scenario": true },
+        },
+      },
+      resize: { horizontal: "fill", vertical: "hug" },
+      adapterFidelity: "approximate",
+      differences: ["Animation is omitted."],
+      extensions: { "com.example/owner": "proof" },
+    },
+  };
+  const registration = registerForDerivation(manifest);
+  const graphBefore = captureObjectGraph(registration);
+  const canonicalBefore = canonicalizeJson(registration);
+  const plan = catalogApi.deriveComponentInspectorControls(registration);
+  assertEqual(
+    canonicalizeJson(registration),
+    canonicalBefore,
+    "inspector derivation caller value",
+    "CATALOG_REGISTRATION_INSPECTOR_CALLER_MUTATED",
+  );
+  assertObjectGraphPreserved(graphBefore, "inspector derivation caller input");
+  assertDeeplyFrozen(plan, "inspector plan");
+  assertNoExoticOutput(plan, "inspector plan");
+  assertCanonicalStorageOrder(plan, "inspector plan");
+  assertDetachedGraph(plan, graphBefore, "inspector plan");
+  assertJsonEqual(
+    plan.propsSchema,
+    manifest.propsSchema,
+    "inspector authoritative props schema",
+    "CATALOG_REGISTRATION_INSPECTOR_GOLDEN_DRIFT",
+  );
+  assertJsonEqual(
+    plan.authoring,
+    manifest.authoring,
+    "inspector complete authoring sidecar",
+    "CATALOG_REGISTRATION_INSPECTOR_GOLDEN_DRIFT",
+  );
+
+  const expectedControls = [
+    {
+      kind: "boolean",
+      property: "active",
+      required: false,
+      schemaPointer: "/propsSchema/properties/active",
+      valuePointer: "/active",
+    },
+    {
+      fallbackReason: "open-object",
+      kind: "structured-json",
+      property: "config",
+      required: false,
+      schemaPointer: "/propsSchema/properties/config",
+      valuePointer: "/config",
+    },
+    {
+      kind: "integer",
+      property: "count",
+      required: true,
+      schemaPointer: "/propsSchema/properties/count",
+      valuePointer: "/count",
+    },
+    {
+      children: [
+        {
+          kind: "string",
+          property: "display/name~raw",
+          required: true,
+          schemaPointer: "/propsSchema/properties/profile~1name~0raw/properties/display~1name~0raw",
+          valuePointer: "/profile~1name~0raw/display~1name~0raw",
+        },
+        {
+          kind: "number",
+          property: "score",
+          required: false,
+          schemaPointer: "/propsSchema/properties/profile~1name~0raw/properties/score",
+          valuePointer: "/profile~1name~0raw/score",
+        },
+      ],
+      kind: "group",
+      property: "profile/name~raw",
+      required: true,
+      schemaPointer: "/propsSchema/properties/profile~1name~0raw",
+      valuePointer: "/profile~1name~0raw",
+    },
+    {
+      kind: "number",
+      property: "ratio",
+      required: false,
+      schemaPointer: "/propsSchema/properties/ratio",
+      valuePointer: "/ratio",
+    },
+    {
+      fallbackReason: "array",
+      kind: "structured-json",
+      property: "tags",
+      required: false,
+      schemaPointer: "/propsSchema/properties/tags",
+      valuePointer: "/tags",
+    },
+    {
+      hint: { presentation: "multiline" },
+      hintPointer: "/authoring/controls/title",
+      kind: "string",
+      property: "title",
+      required: false,
+      schemaPointer: "/propsSchema/properties/title",
+      valuePointer: "/title",
+    },
+    {
+      hint: {
+        kind: "number",
+        options: ["invented"],
+        presentation: "segmented",
+        required: false,
+      },
+      hintPointer: "/authoring/controls/tone",
+      kind: "enum",
+      options: ["warning", "info"],
+      property: "tone",
+      required: true,
+      schemaPointer: "/propsSchema/properties/tone",
+      valuePointer: "/tone",
+    },
+  ];
+  assertJsonEqual(
+    plan.controls,
+    expectedControls,
+    "schema-authoritative inspector controls",
+    "CATALOG_REGISTRATION_INSPECTOR_GOLDEN_DRIFT",
+  );
+
+  const reorderedPlan = deriveManifest(reverseObjectStorageOrder(manifest));
+  assertEqual(
+    canonicalizeJson(reorderedPlan),
+    canonicalizeJson(plan),
+    "inspector insertion-order determinism",
+    "CATALOG_REGISTRATION_INSPECTOR_ORDER_DRIFT",
+  );
+
+  const fallbackCases = [
+    ["array", { type: "array", items: { type: "string" } }, "array"],
+    ["open-object", { type: "object", properties: {} }, "open-object"],
+    ["multi-type", { type: ["string", "null"] }, "multi-type"],
+    ["reference", { $ref: "#/$defs/value" }, "reference"],
+    ["dynamic-reference", { $dynamicRef: "#value" }, "reference"],
+    ["recursive-reference", { $recursiveRef: "#" }, "reference"],
+    ["all-of", { allOf: [{ type: "string" }] }, "combinator"],
+    ["any-of", { anyOf: [{ type: "string" }] }, "combinator"],
+    ["one-of", { oneOf: [{ type: "string" }] }, "combinator"],
+    ["not", { not: { type: "string" } }, "combinator"],
+    ["conditional", { if: { type: "string" }, then: { minLength: 1 } }, "conditional"],
+    ["dependent-schema", { type: "object", dependentSchemas: {} }, "conditional"],
+    ["dependent-required", { type: "object", dependentRequired: {} }, "conditional"],
+    ["pattern", { type: "string", pattern: "^[a-z]+$" }, "pattern"],
+    [
+      "pattern-properties",
+      { type: "object", additionalProperties: false, properties: {}, patternProperties: {} },
+      "pattern",
+    ],
+    ["empty-enum", { type: "string", enum: [] }, "unsupported-schema"],
+    ["structured-enum", { enum: [{ mode: "fixed" }] }, "unsupported-schema"],
+    ["type-mismatched-enum", { type: "string", enum: ["valid", 1] }, "unsupported-schema"],
+    ["unknown-keyword", { type: "string", "x-example-control": true }, "unsupported-schema"],
+    ["untyped", { minLength: 1 }, "unsupported-schema"],
+    ["boolean-schema", false, "unsupported-schema"],
+  ];
+  const fallbackResults = fallbackCases.map(([id, schema, expectedReason]) => {
+    const fallbackPlan = deriveManifest({
+      propsSchema: {
+        type: "object",
+        additionalProperties: false,
+        properties: { value: schema },
+      },
+    });
+    const [control] = fallbackPlan.controls;
+    if (
+      fallbackPlan.controls.length !== 1 ||
+      control?.kind !== "structured-json" ||
+      control.fallbackReason !== expectedReason
+    ) {
+      fail(
+        "CATALOG_REGISTRATION_INSPECTOR_FALLBACK_DRIFT",
+        `${id} did not produce its honest structured-JSON fallback.`,
+        { expectedReason, control },
+      );
+    }
+    assertDeeplyFrozen(fallbackPlan, `inspector ${id} fallback`);
+    return Object.freeze({ id, reason: expectedReason, result: "STRUCTURED_JSON" });
+  });
+  const undeclaredRequiredRootPlan = deriveManifest({
+    propsSchema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["missing"],
+      properties: {},
+    },
+  });
+  assertJsonEqual(
+    undeclaredRequiredRootPlan.controls,
+    [
+      {
+        fallbackReason: "unsupported-schema",
+        kind: "structured-json",
+        property: null,
+        required: true,
+        schemaPointer: "/propsSchema",
+        valuePointer: "",
+      },
+    ],
+    "undeclared required root fallback",
+    "CATALOG_REGISTRATION_INSPECTOR_FALLBACK_DRIFT",
+  );
+  assertDeeplyFrozen(undeclaredRequiredRootPlan, "undeclared required root fallback");
+
+  const undeclaredRequiredSubtreePlan = deriveManifest({
+    propsSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        group: {
+          type: "object",
+          additionalProperties: false,
+          required: ["missing"],
+          properties: {},
+        },
+      },
+    },
+  });
+  assertJsonEqual(
+    undeclaredRequiredSubtreePlan.controls,
+    [
+      {
+        fallbackReason: "unsupported-schema",
+        kind: "structured-json",
+        property: "group",
+        required: false,
+        schemaPointer: "/propsSchema/properties/group",
+        valuePointer: "/group",
+      },
+    ],
+    "undeclared required subtree fallback",
+    "CATALOG_REGISTRATION_INSPECTOR_FALLBACK_DRIFT",
+  );
+  assertDeeplyFrozen(undeclaredRequiredSubtreePlan, "undeclared required subtree fallback");
+
+  const wholeObjectEnumPlan = deriveManifest({
+    propsSchema: {
+      type: "object",
+      additionalProperties: false,
+      enum: [{ mode: "fixed" }],
+      properties: { mode: { type: "string" } },
+    },
+  });
+  assertJsonEqual(
+    wholeObjectEnumPlan.controls,
+    [
+      {
+        fallbackReason: "unsupported-schema",
+        kind: "structured-json",
+        property: null,
+        required: true,
+        schemaPointer: "/propsSchema",
+        valuePointer: "",
+      },
+    ],
+    "whole-object enum root fallback",
+    "CATALOG_REGISTRATION_INSPECTOR_FALLBACK_DRIFT",
+  );
+  assertDeeplyFrozen(wholeObjectEnumPlan, "whole-object enum root fallback");
+
+  const integerLikePropertyPlan = deriveManifest({
+    propsSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        2: { type: "string" },
+        10: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            2: { type: "boolean" },
+            10: { type: "boolean" },
+          },
+        },
+      },
+    },
+  });
+  assertJsonEqual(
+    integerLikePropertyPlan.controls.map(({ property }) => property),
+    ["10", "2"],
+    "integer-like root property order",
+    "CATALOG_REGISTRATION_INSPECTOR_ORDER_DRIFT",
+  );
+  assertJsonEqual(
+    integerLikePropertyPlan.controls[0]?.children?.map(({ property }) => property),
+    ["10", "2"],
+    "integer-like nested property order",
+    "CATALOG_REGISTRATION_INSPECTOR_ORDER_DRIFT",
+  );
+
+  const completeFallbackResults = Object.freeze([
+    ...fallbackResults,
+    Object.freeze({
+      id: "undeclared-required-root",
+      reason: "unsupported-schema",
+      result: "STRUCTURED_JSON",
+    }),
+    Object.freeze({
+      id: "undeclared-required-subtree",
+      reason: "unsupported-schema",
+      result: "STRUCTURED_JSON",
+    }),
+    Object.freeze({
+      id: "whole-object-enum",
+      reason: "unsupported-schema",
+      result: "STRUCTURED_JSON",
+    }),
+  ]);
+
+  const acceptedDepth = deriveManifest({
+    propsSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: { root: createNestedControlSchema(16) },
+    },
+  });
+  const rejectedDepth = deriveManifest({
+    propsSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: { root: createNestedControlSchema(17) },
+    },
+  });
+  assertEqual(
+    acceptedDepth.controls[0]?.kind,
+    "group",
+    "inspector depth boundary accepted",
+    "CATALOG_REGISTRATION_INSPECTOR_LIMIT_DRIFT",
+  );
+  assertEqual(
+    rejectedDepth.controls[0]?.fallbackReason,
+    "derivation-limit",
+    "inspector depth boundary rejected",
+    "CATALOG_REGISTRATION_INSPECTOR_LIMIT_DRIFT",
+  );
+
+  const createWideManifest = (count) => {
+    const properties = {};
+    for (let index = 0; index < count; index += 1) {
+      properties[`property-${String(index).padStart(3, "0")}`] = { type: "string" };
+    }
+    return { propsSchema: { type: "object", additionalProperties: false, properties } };
+  };
+  const acceptedWidth = deriveManifest(createWideManifest(512));
+  const rejectedWidth = deriveManifest(createWideManifest(513));
+  assertEqual(
+    acceptedWidth.controls.length,
+    512,
+    "inspector control-count boundary accepted",
+    "CATALOG_REGISTRATION_INSPECTOR_LIMIT_DRIFT",
+  );
+  assertEqual(
+    rejectedWidth.controls[0]?.fallbackReason,
+    "derivation-limit",
+    "inspector control-count boundary rejected",
+    "CATALOG_REGISTRATION_INSPECTOR_LIMIT_DRIFT",
+  );
+
+  let accessorInvoked = false;
+  const accessorHint = Object.defineProperty({}, "danger", {
+    enumerable: true,
+    get() {
+      accessorInvoked = true;
+      return "changed";
+    },
+  });
+  expectTypeError(
+    () =>
+      catalogApi.deriveComponentInspectorControls({
+        id: "com.example.ui/InspectorAccessor",
+        manifest: {
+          propsSchema: {
+            type: "object",
+            additionalProperties: false,
+            properties: { value: { type: "string" } },
+          },
+          authoring: { controls: { value: accessorHint } },
+        },
+      }),
+    "inspector accessor hint",
+  );
+  if (accessorInvoked) {
+    fail(
+      "CATALOG_REGISTRATION_ACCESSOR_INVOKED",
+      "Inspector derivation invoked a caller accessor.",
+    );
+  }
+
+  const hostileResults = hostileValues.map(([id, value]) => {
+    expectTypeError(
+      () =>
+        catalogApi.deriveComponentInspectorControls({
+          id: "com.example.ui/InspectorHostile",
+          manifest: {
+            propsSchema: {
+              type: "object",
+              additionalProperties: false,
+              properties: { value: { type: "string" } },
+            },
+            authoring: { controls: { value } },
+          },
+        }),
+      `inspector hostile ${id}`,
+    );
+    return Object.freeze({ id, result: "REJECTED" });
+  });
+
+  return Object.freeze({
+    plan,
+    transcript: Object.freeze({
+      authoringFields: Object.freeze(Object.keys(manifest.authoring).sort()),
+      scenarioFields: Object.freeze(Object.keys(manifest.authoring.scenarios.warning).sort()),
+      controlKinds: Object.freeze([
+        "boolean",
+        "enum",
+        "group",
+        "integer",
+        "number",
+        "string",
+        "structured-json",
+      ]),
+      canonicalSha256: sha256(Buffer.from(canonicalizeJson(plan))),
+      deterministicRuns: 2,
+      propertyControls: plan.controls.length,
+      fallbackCases: completeFallbackResults,
+      hostileValues: Object.freeze(hostileResults),
+      accessor: Object.freeze({ result: "REJECTED", invoked: accessorInvoked }),
+      misleadingHintAuthority: Object.freeze({
+        createsProperties: false,
+        changesKind: false,
+        changesRequiredness: false,
+        changesOptions: false,
+      }),
+      pointerProfile: "RFC 6901",
+      limits: Object.freeze({
+        maxDepth: 16,
+        maxControls: 512,
+        overLimit: "ROOT_STRUCTURED_JSON_FALLBACK",
+      }),
+      deeplyFrozen: true,
+      detached: true,
+    }),
+  });
 }
 
 function runContractVectors(catalogApi, validatorApi) {
@@ -1318,6 +1923,7 @@ function runContractVectors(catalogApi, validatorApi) {
       return Object.freeze({ category: profile.category, id, result: "REJECTED" });
     }),
   );
+  const inspector = runInspectorControlVectors(catalogApi, hostileValues);
 
   const opaqueExtensions = JSON.parse(
     '{"__proto__":{"polluted":false},"constructor":"data","prototype":"data"}',
@@ -1501,6 +2107,7 @@ function runContractVectors(catalogApi, validatorApi) {
 
   return Object.freeze({
     catalog,
+    inspectorPlan: inspector.plan,
     transcript: Object.freeze({
       componentFields: EXPECTED_COMPONENT_FIELDS,
       behaviorFields: EXPECTED_BEHAVIOR_FIELDS,
@@ -1560,6 +2167,7 @@ function runContractVectors(catalogApi, validatorApi) {
         resources: Object.freeze(["com.example.resources/Stores", "com.example.resources/stores"]),
       }),
       validator: Object.freeze({ valid: true, diagnostics: 0 }),
+      inspectorControls: inspector.transcript,
     }),
   });
 }
@@ -1768,8 +2376,98 @@ function moduleSpecifiers(text, relativePath) {
 function testTitles(text, relativePath, functionName) {
   const sourceFile = parseTypescript(text, relativePath);
   const titles = [];
+
+  function assertPlacement(node, title) {
+    const statement = node.parent;
+    if (!ts.isExpressionStatement(statement)) {
+      fail("CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT", "A test is conditionally wrapped.", {
+        path: relativePath,
+        title,
+      });
+    }
+    if (functionName === "test") {
+      if (!ts.isSourceFile(statement.parent)) {
+        fail("CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT", "A root test is not top-level.", {
+          path: relativePath,
+          title,
+        });
+      }
+      return;
+    }
+
+    const block = statement.parent;
+    const suiteCallback = ts.isBlock(block) ? block.parent : undefined;
+    const describeCall =
+      suiteCallback !== undefined &&
+      (ts.isArrowFunction(suiteCallback) || ts.isFunctionExpression(suiteCallback))
+        ? suiteCallback.parent
+        : undefined;
+    const describeStatement =
+      describeCall !== undefined && ts.isCallExpression(describeCall)
+        ? describeCall.parent
+        : undefined;
+    if (
+      !ts.isBlock(block) ||
+      suiteCallback === undefined ||
+      (!ts.isArrowFunction(suiteCallback) && !ts.isFunctionExpression(suiteCallback)) ||
+      !ts.isCallExpression(describeCall) ||
+      !ts.isIdentifier(describeCall.expression) ||
+      describeCall.expression.text !== "describe" ||
+      describeCall.arguments.length !== 2 ||
+      !ts.isStringLiteral(describeCall.arguments[0]) ||
+      describeCall.arguments[1] !== suiteCallback ||
+      !ts.isExpressionStatement(describeStatement) ||
+      !ts.isSourceFile(describeStatement.parent)
+    ) {
+      fail(
+        "CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT",
+        "A package test is not a direct statement in a top-level describe callback.",
+        { path: relativePath, title },
+      );
+    }
+  }
+
   function visit(node) {
     if (ts.isCallExpression(node)) {
+      const eachFactory = ts.isCallExpression(node.expression) ? node.expression : undefined;
+      const eachAccess =
+        eachFactory !== undefined && ts.isPropertyAccessExpression(eachFactory.expression)
+          ? eachFactory.expression
+          : undefined;
+      if (
+        functionName === "it" &&
+        eachFactory !== undefined &&
+        eachAccess !== undefined &&
+        ts.isIdentifier(eachAccess.expression) &&
+        eachAccess.expression.text === "it" &&
+        eachAccess.name.text === "each"
+      ) {
+        const table = eachFactory.arguments[0];
+        const title = node.arguments[0];
+        const callback = node.arguments[1];
+        if (
+          eachFactory.arguments.length !== 1 ||
+          table === undefined ||
+          !ts.isArrayLiteralExpression(table) ||
+          node.arguments.length !== 2 ||
+          title === undefined ||
+          !ts.isStringLiteral(title) ||
+          callback === undefined ||
+          (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback)) ||
+          table.elements.some((row) => !ts.isArrayLiteralExpression(row))
+        ) {
+          fail(
+            "CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT",
+            "A parameterized package test must use one static array table.",
+            { path: relativePath },
+          );
+        }
+        assertPlacement(node, title.text);
+        table.elements.forEach((_row, index) => {
+          titles.push(`${title.text} [case ${index + 1}]`);
+        });
+        return;
+      }
       if (ts.isIdentifier(node.expression) && node.expression.text === functionName) {
         const title = node.arguments[0];
         const callback = node.arguments[1];
@@ -1784,52 +2482,7 @@ function testTitles(text, relativePath, functionName) {
             path: relativePath,
           });
         }
-        const statement = node.parent;
-        if (!ts.isExpressionStatement(statement)) {
-          fail("CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT", "A test is conditionally wrapped.", {
-            path: relativePath,
-            title: title.text,
-          });
-        }
-        if (functionName === "test") {
-          if (!ts.isSourceFile(statement.parent)) {
-            fail("CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT", "A root test is not top-level.", {
-              path: relativePath,
-              title: title.text,
-            });
-          }
-        } else {
-          const block = statement.parent;
-          const suiteCallback = ts.isBlock(block) ? block.parent : undefined;
-          const describeCall =
-            suiteCallback !== undefined &&
-            (ts.isArrowFunction(suiteCallback) || ts.isFunctionExpression(suiteCallback))
-              ? suiteCallback.parent
-              : undefined;
-          const describeStatement =
-            describeCall !== undefined && ts.isCallExpression(describeCall)
-              ? describeCall.parent
-              : undefined;
-          if (
-            !ts.isBlock(block) ||
-            suiteCallback === undefined ||
-            (!ts.isArrowFunction(suiteCallback) && !ts.isFunctionExpression(suiteCallback)) ||
-            !ts.isCallExpression(describeCall) ||
-            !ts.isIdentifier(describeCall.expression) ||
-            describeCall.expression.text !== "describe" ||
-            describeCall.arguments.length !== 2 ||
-            !ts.isStringLiteral(describeCall.arguments[0]) ||
-            describeCall.arguments[1] !== suiteCallback ||
-            !ts.isExpressionStatement(describeStatement) ||
-            !ts.isSourceFile(describeStatement.parent)
-          ) {
-            fail(
-              "CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT",
-              "A package test is not a direct statement in a top-level describe callback.",
-              { path: relativePath, title: title.text },
-            );
-          }
-        }
+        assertPlacement(node, title.text);
         titles.push(title.text);
       } else if (
         ts.isPropertyAccessExpression(node.expression) &&
@@ -1858,11 +2511,11 @@ function negativeCaseLabels(text, relativePath) {
     .filter(({ type }) => type === ts.CommentDirectiveType.ExpectError)
     .map(({ range }) => {
       const directive = text.slice(range.pos, range.end);
-      const match = /@ts-expect-error\s+(M03-T0[12]-N\d{2})\b/u.exec(directive);
+      const match = /@ts-expect-error\s+(M03-T0[123]-N\d{2})\b/u.exec(directive);
       if (match === null) {
         fail(
           "CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT",
-          "Every compiler-recognized expect-error directive needs a stable M03-T01/M03-T02 case id.",
+          "Every compiler-recognized expect-error directive needs a stable M03-T01, M03-T02, or M03-T03 case id.",
           { path: relativePath },
         );
       }
@@ -1871,17 +2524,29 @@ function negativeCaseLabels(text, relativePath) {
 }
 
 async function verifyTestInventory(workspaceRoot, fileOverrides) {
-  const packageTestPath = "packages/catalog-sdk/test/catalog-manifest-registration.test.ts";
-  const typeTestPath = "packages/catalog-sdk/test/public-api.types.ts";
+  const packageTestPaths = [
+    "packages/catalog-sdk/test/catalog-manifest-registration.test.ts",
+    "packages/catalog-sdk/test/component-inspector-control.test.ts",
+  ];
+  const typeTestPaths = [
+    "packages/catalog-sdk/test/public-api.types.ts",
+    "packages/catalog-sdk/test/schema-type-derivation.types.ts",
+  ];
   const rootTestPath = "tests/catalog-manifest-registration.test.mjs";
-  const [packageText, typeText, rootText] = await Promise.all(
-    [packageTestPath, typeTestPath, rootTestPath].map(async (relativePath) =>
+  const allPaths = [...packageTestPaths, ...typeTestPaths, rootTestPath];
+  const texts = await Promise.all(
+    allPaths.map(async (relativePath) =>
       (await readWorkspaceBytes(workspaceRoot, relativePath, fileOverrides)).toString("utf8"),
     ),
   );
-  const packageTitles = testTitles(packageText, packageTestPath, "it");
-  const rootTitles = testTitles(rootText, rootTestPath, "test");
-  const negativeCases = negativeCaseLabels(typeText, typeTestPath);
+  const textByPath = new Map(allPaths.map((relativePath, index) => [relativePath, texts[index]]));
+  const packageTitles = packageTestPaths.flatMap((relativePath) =>
+    testTitles(textByPath.get(relativePath), relativePath, "it"),
+  );
+  const rootTitles = testTitles(textByPath.get(rootTestPath), rootTestPath, "test");
+  const negativeCases = typeTestPaths.flatMap((relativePath) =>
+    negativeCaseLabels(textByPath.get(relativePath), relativePath),
+  );
   assertJsonEqual(
     packageTitles,
     EXPECTED_PACKAGE_TEST_TITLES,
@@ -1965,6 +2630,7 @@ async function verifyCommandWiring(workspaceRoot, fileOverrides) {
   const expectedPackageScripts = {
     build: "tsc -p tsconfig.build.json",
     typecheck: "tsc -p tsconfig.json --noEmit",
+    "test:manifest-derivation": "vitest run test/component-inspector-control.test.ts",
     "test:manifest-registration": "vitest run test/catalog-manifest-registration.test.ts",
   };
   for (const [name, expected] of Object.entries(expectedPackageScripts)) {
@@ -2224,7 +2890,51 @@ async function verifyTrace(tracePath) {
       finalTestOwners: Object.freeze([...actual.tests]),
     });
   });
-  return Object.freeze(rules);
+  const schemaFamilies = EXPECTED_SCHEMA_FAMILIES.map((expected) => {
+    const actual = trace.schemaFamilies?.find(({ id }) => id === expected.id);
+    if (actual === undefined) {
+      fail("CATALOG_REGISTRATION_TRACE_DRIFT", `Trace schema family ${expected.id} is missing.`);
+    }
+    assertEqual(
+      actual.summary,
+      expected.summary,
+      `${expected.id} summary`,
+      "CATALOG_REGISTRATION_TRACE_DRIFT",
+    );
+    assertEqual(
+      actual.expectedConstraints,
+      expected.expectedConstraints,
+      `${expected.id} constraint count`,
+      "CATALOG_REGISTRATION_TRACE_DRIFT",
+    );
+    assertJsonEqual(
+      actual.semanticOwners,
+      expected.semanticOwners,
+      `${expected.id} semantic owners`,
+      "CATALOG_REGISTRATION_TRACE_DRIFT",
+    );
+    return Object.freeze({
+      id: actual.id,
+      summary: actual.summary,
+      expectedConstraints: actual.expectedConstraints,
+      semanticOwners: Object.freeze([...actual.semanticOwners]),
+    });
+  });
+  const schemaConstraints = schemaFamilies.reduce(
+    (total, family) => total + family.expectedConstraints,
+    0,
+  );
+  assertEqual(
+    schemaConstraints,
+    34,
+    "M03-T03 schema constraint total",
+    "CATALOG_REGISTRATION_TRACE_DRIFT",
+  );
+  return Object.freeze({
+    rules: Object.freeze(rules),
+    schemaFamilies: Object.freeze(schemaFamilies),
+    schemaConstraints,
+  });
 }
 
 async function verifyPrerequisite(verify) {
@@ -2261,7 +2971,7 @@ async function assertArtifactDestinationEntry(artifactPath) {
     if (!entry.isFile() || entry.isSymbolicLink()) {
       fail(
         "CATALOG_REGISTRATION_ARTIFACT_UNSUPPORTED_ENTRY",
-        "The M03-T01/M03-T02 artifact destination must be absent or a regular file.",
+        "The cumulative M03-T01 through M03-T03 artifact destination must be absent or a regular file.",
       );
     }
   } catch (error) {
@@ -2276,7 +2986,7 @@ async function resolveWritableArtifactPath(artifactPath) {
   if (parentEntry.isSymbolicLink() || !parentEntry.isDirectory()) {
     fail(
       "CATALOG_REGISTRATION_ARTIFACT_UNSUPPORTED_ENTRY",
-      "The M03-T01/M03-T02 artifact parent must be a real directory.",
+      "The cumulative M03-T01 through M03-T03 artifact parent must be a real directory.",
     );
   }
   const resolvedParent = await realpath(parent);
@@ -2299,7 +3009,7 @@ async function openExclusiveTemporary(parent, basename) {
   }
   fail(
     "CATALOG_REGISTRATION_ARTIFACT_TEMPORARY_CREATE_FAILED",
-    "Could not reserve a temporary M03-T01/M03-T02 artifact.",
+    "Could not reserve a temporary cumulative M03-T01 through M03-T03 artifact.",
   );
 }
 
@@ -2372,7 +3082,7 @@ async function removeTemporary(temporaryPath) {
   }
 }
 
-/** Builds cumulative deterministic M03-T01/M03-T02 registration evidence in memory. */
+/** Builds cumulative deterministic M03-T01 through M03-T03 Catalog SDK evidence in memory. */
 export async function buildCatalogManifestRegistrationEvidence({
   workspaceRoot = WORKSPACE_ROOT,
   tracePath = DEFAULT_CATALOG_MANIFEST_REGISTRATION_TRACE_PATH,
@@ -2386,7 +3096,7 @@ export async function buildCatalogManifestRegistrationEvidence({
   const activeCatalogApi = catalogApi ?? loadedApis.catalogApi;
   const activeValidatorApi = validatorApi ?? loadedApis.validatorApi;
   const runtimeExports = verifyPublicRuntimeApis(activeCatalogApi, activeValidatorApi);
-  const [prerequisite, traceRules, platformBoundary, testInventory, commandWiring] =
+  const [prerequisite, traceEvidence, platformBoundary, testInventory, commandWiring] =
     await Promise.all([
       verifyPrerequisite(verifyG02),
       verifyTrace(tracePath),
@@ -2406,15 +3116,17 @@ export async function buildCatalogManifestRegistrationEvidence({
 
   const artifact = {
     schemaVersion: 1,
-    profile: "desen-catalog-manifest-registration-proof-v2",
-    task: "M03-T02",
+    profile: "desen-catalog-manifest-registration-proof-v3",
+    task: "M03-T03",
     result: "PASS",
     protocol: Object.freeze({ version: "0.1.0", documentKind: "desen.catalog" }),
     prerequisite,
     claim: {
       summary:
-        "Component, behavior, operation, and resource contracts register as detached, immutable, deterministic JSON and compose into a framework-neutral Catalog manifest.",
-      directTraceRules: traceRules,
+        "Schema-authoritative capability manifests register as detached immutable JSON, component prop types derive from their literal schema, and deterministic inspector plans retain unsupported properties through explicit structured-JSON fallbacks.",
+      directTraceRules: traceEvidence.rules,
+      directSchemaFamilies: traceEvidence.schemaFamilies,
+      directSchemaConstraints: traceEvidence.schemaConstraints,
       proofClaimStatusChanges: Object.freeze([]),
     },
     publicApi: {
@@ -2426,6 +3138,11 @@ export async function buildCatalogManifestRegistrationEvidence({
         operation: 'DesenCatalog["operations"][string]',
         resource: 'DesenCatalog["resources"][string]',
       }),
+      componentPropsAuthority:
+        'ComponentPropsOf<RegisteredComponent> derives from registration["manifest"]["propsSchema"]',
+      inspectorAuthority:
+        "propsSchema selects control kind, requiredness, enum options, and honest fallback",
+      authoringControlHints: "detached opaque sidecars without schema authority",
       globalRegistryExported: false,
       executableBindingApiExported: false,
       registrationWrapperFields: Object.freeze(["id", "manifest"]),
@@ -2435,6 +3152,7 @@ export async function buildCatalogManifestRegistrationEvidence({
     },
     vectors: vectors.transcript,
     catalogGolden: vectors.catalog,
+    inspectorControlGolden: vectors.inspectorPlan,
     platformBoundary,
     evidence: {
       ...testInventory,
@@ -2462,16 +3180,21 @@ export async function buildCatalogManifestRegistrationEvidence({
         "same-category and cross-category duplicate capability-id rejection",
         "detached canonical-key-ordered deep-frozen JSON snapshots",
         "manifest-only API boundary without executable host bindings",
+        "manifest-authoritative component prop TypeScript projection",
+        "deterministic platform-neutral component inspector-control derivation",
+        "RFC 6901 value, schema, and hint pointers",
+        "opaque non-authoritative authoring control hints",
+        "explicit structured-JSON fallback for unsupported or over-budget schema subtrees",
         "built declaration and production-source platform audit",
       ]),
       deferred: Object.freeze([
-        "M03-T03 schema-authoritative TypeScript and inspector-control derivation",
         "M03-T04 deterministic Web-React package digest profile",
         "M03-T05 and M03-T06 reference components",
         "M03-T08 host operation binding and M04 host operation/resource ports",
         "M03-T09 manifest-to-implementation parity",
         "M03-T10 final package artifact and exact tuple",
         "M05 target renderer adapter registration",
+        "M09 concrete inspector widgets, binding editors, and hint-profile interpretation",
       ]),
     },
     limitations: Object.freeze([
@@ -2481,9 +3204,12 @@ export async function buildCatalogManifestRegistrationEvidence({
       "TypeScript may erase extra-property information when a structural union member absorbs another member; Catalog structural validation remains authoritative for nested manifest shape in that language-level edge case.",
       "The atomic writer assumes its real parent directory is not concurrently controlled by an attacker during the final verified rename window.",
       "TypeScript projections and inert snapshotting do not replace Catalog structural or semantic validation.",
+      "JsonSchemaValue is a conservative TypeScript projection; unsupported Draft 2020-12 features fall back to JsonValue rather than pretending to be exact.",
+      "DESEN 0.1.0 defines no authoring.controls vocabulary; PF-025 keeps hints opaque and non-authoritative.",
+      "The component inspector plan is framework-neutral metadata, not a concrete editor widget tree.",
       "packageDigest is caller-supplied until M03-T04 defines the deterministic Web-React package profile.",
       "Manifest registration intentionally does not carry executable behavior production, operation execute, or resource read functions; host bindings remain a later runtime responsibility recorded by PF-024.",
-      "Direct trace ownership confirms the manifest-registration portion only; authorization, host execution, read-only resource behavior, adapter integration, and final parity remain assigned to later tasks.",
+      "Direct trace ownership confirms registration and derivation primitives only; concrete editor widgets, authorization, host execution, read-only resource behavior, adapter integration, and final parity remain assigned to later tasks.",
       "No P-* claim changes status and G03 remains open.",
     ]),
   };
@@ -2497,7 +3223,7 @@ export async function buildCatalogManifestRegistrationEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Verifies the tracked cumulative M03-T01/M03-T02 artifact against a fresh rebuild. */
+/** Verifies the tracked cumulative M03-T01 through M03-T03 artifact against a fresh rebuild. */
 export async function verifyCatalogManifestRegistration({
   artifactPath = DEFAULT_CATALOG_MANIFEST_REGISTRATION_ARTIFACT_PATH,
   artifactBytes,
@@ -2508,7 +3234,7 @@ export async function verifyCatalogManifestRegistration({
   if (!Buffer.from(actualBytes).equals(expected.artifactBytes)) {
     fail(
       "CATALOG_REGISTRATION_ARTIFACT_DRIFT",
-      "The tracked M03-T01/M03-T02 artifact differs from a fresh evidence build.",
+      "The tracked M03-T01 through M03-T03 artifact differs from a fresh evidence build.",
       { expectedSha256: expected.artifactSha256, actualSha256: sha256(actualBytes) },
     );
   }
@@ -2518,11 +3244,15 @@ export async function verifyCatalogManifestRegistration({
     runtimeExports: EXPECTED_RUNTIME_EXPORTS.length,
     typeExports: EXPECTED_TYPE_EXPORTS.length,
     hostileValues: expected.artifact.vectors.hostileValues.length,
+    inspectorHostileValues: expected.artifact.vectors.inspectorControls.hostileValues.length,
+    inspectorFallbacks: expected.artifact.vectors.inspectorControls.fallbackCases.length,
+    packageTests: expected.artifact.evidence.packageTests,
+    schemaConstraints: expected.artifact.claim.directSchemaConstraints,
     trackedFiles: expected.artifact.evidence.trackedFiles.length,
   });
 }
 
-/** Writes cumulative M03-T01/M03-T02 evidence through a same-directory atomic rename. */
+/** Writes cumulative M03-T01 through M03-T03 evidence through a same-directory atomic rename. */
 export async function writeCatalogManifestRegistrationEvidence({
   artifactPath = DEFAULT_CATALOG_MANIFEST_REGISTRATION_ARTIFACT_PATH,
   beforeAtomicRename,
@@ -2567,7 +3297,7 @@ export async function writeCatalogManifestRegistrationEvidence({
     } catch (cleanupError) {
       fail(
         "CATALOG_REGISTRATION_ARTIFACT_TEMPORARY_CLEANUP_FAILED",
-        "M03-T01/M03-T02 evidence failed and its temporary file could not be removed.",
+        "Cumulative M03-T01 through M03-T03 evidence failed and its temporary file could not be removed.",
         {
           writerError: error instanceof Error ? error.message : String(error),
           cleanupError: cleanupError instanceof Error ? cleanupError.message : String(cleanupError),

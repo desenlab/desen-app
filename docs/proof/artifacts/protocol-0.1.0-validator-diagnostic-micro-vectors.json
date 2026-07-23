@@ -19,7 +19,7 @@
       "profile": "desen-component-contract-validation-v1",
       "result": "PASS",
       "bytes": 44918,
-      "sha256": "36534e11b59a745b24fb91820d4b29cb98fcb6a5f4d83509d48cc7a248e1d30b",
+      "sha256": "f263985a285ef7b3a21ff5c58c80932398cf3482ff24c041903085e5096ceefd",
       "verifier": "verifyProtocolComponentContracts"
     },
     {
@@ -27,7 +27,7 @@
       "profile": "desen-interaction-contract-validation-v1",
       "result": "PASS",
       "bytes": 52824,
-      "sha256": "6a3aad5d6396417a69d3ae371b95405d63858a5d20d4a44a7506dbd0f8538187",
+      "sha256": "3072fca39e72f9b031846bfe191d4a0d343cdd886b4e0b704bc62f2207307dd5",
       "verifier": "verifyProtocolInteractionContracts"
     },
     {
@@ -35,7 +35,7 @@
       "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
       "bytes": 61636,
-      "sha256": "64fef7c96ab4900c41fd9025ca9d2afe1b5aecaf014834b96c2ac03b5adccb5c",
+      "sha256": "4085f93c283f1f1fa4718e346357153636490700296681e002333ae7bf5963d8",
       "verifier": "verifyProtocolBindingContracts"
     },
     {
@@ -43,7 +43,7 @@
       "profile": "desen-execution-contract-validation-v1",
       "result": "PASS",
       "bytes": 61091,
-      "sha256": "d0129999c13ee5828b6e9dd20c82c315a4987280365ae738f3b25098c590e0d7",
+      "sha256": "6ce67f3273c971f62ebcb499cd24c9ce65264d24ced7909ff2b12407feab2243",
       "verifier": "verifyProtocolExecutionContracts"
     },
     {
@@ -51,7 +51,7 @@
       "profile": "desen-official-suite-parity-v1",
       "result": "PASS",
       "bytes": 16902,
-      "sha256": "0a2ca2417185814fdc2bc40bc5814b5922ddea67ef80cb103ea907ca5e0f6e20",
+      "sha256": "d5315e8b1db71c1e1551421cfd3bb0306b9a2b11cfb14e807e29ef5b3a053aec",
       "verifier": "verifyProtocolOfficialSuiteParity"
     }
   ],
@@ -2060,8 +2060,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 8953,
-        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
+        "bytes": 9152,
+        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
       },
       {
         "path": "packages/validator/README.md",

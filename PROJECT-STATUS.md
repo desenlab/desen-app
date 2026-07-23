@@ -32,14 +32,18 @@ M02-T13 now proves one accepted and one exact rejected micro-vector for every di
 validator currently emits: 28 core codes and 6 validator-namespaced extension codes. The proof
 checks both runs, both caller inputs, complete inert-result equality, deep immutability, and exact
 diagnostic identity. This closes G02 without adding a public validator API. Runtime adapter
-execution has not started and is not claimed as proven. M03-T01 and M03-T02 now provide the
-cumulative Catalog SDK registration slice: component, behavior, operation, and resource contracts
-register as exact, detached, canonical-key-ordered, deeply frozen JSON and compose into one
-validator-accepted four-map Catalog. Its 17 package tests, 53 compile-time negative cases, and 33
+execution has not started and is not claimed as proven. M03-T01 through M03-T03 now provide the
+cumulative Catalog SDK registration and derivation slice: component, behavior, operation, and
+resource contracts register as exact, detached, canonical-key-ordered, deeply frozen JSON and
+compose into one validator-accepted four-map Catalog. Component prop types and inspector metadata
+derive from the same literal `propsSchema`; unsupported schema features remain visible through an
+explicit structured-JSON fallback. Its 33 package tests, 71 compile-time negative cases, and 43
 independent evidence tests cover 26 successful registrations, 7 Catalog compositions, all 6
-cross-category collision pairs, caller isolation, platform neutrality, exact public exports, and
-140 hostile category/value rejections. `PF-024` keeps inert manifest registration separate from
-trusted executable host bindings. No `P-*` status changes, and G03 remains open.
+cross-category collision pairs, 24 inspector fallback cases, exact depth/width limits, caller
+isolation, platform neutrality, exact public exports, 140 hostile registration combinations, and
+35 hostile inspector values. `PF-024` keeps inert manifest registration separate from trusted
+executable host bindings, while `PF-025` keeps undefined control hints opaque and
+non-authoritative. No `P-*` status changes, and G03 remains open.
 
 ## Current milestone
 
@@ -59,9 +63,10 @@ trusted executable host bindings. No `P-*` status changes, and G03 remains open.
   `M02-T12 — TypeScript parity for the official 14-case suite`,
   `M02-T13 — Validator diagnostic micro-vectors`,
   `M03-T01 — Framework-neutral catalog registration API`,
-  `M03-T02 — Behavior, operation, and resource registration APIs`
+  `M03-T02 — Behavior, operation, and resource registration APIs`,
+  `M03-T03 — Manifest-authoritative TypeScript and inspector-control derivation`
 - Active task: None
-- Ready next task: `M03-T03 — Manifest-authoritative TypeScript and inspector-control derivation`
+- Ready next task: `M03-T04 — Deterministic Web–React package digest profile`
 - Status: `DONE`
 
 ## Completed preparation
@@ -138,15 +143,19 @@ trusted executable host bindings. No `P-*` status changes, and G03 remains open.
   writes. Eight later-owner core diagnostics stay explicitly excluded. P-02 is `PROVEN`, G02 is
   `DONE`, and P-17 is only `PARTIAL`; N-041 remains `PLANNED` until runtime, Bundle-ingress, and
   activation limits are implemented.
-- The cumulative Catalog SDK slice passes 17 package tests, 53 compile-time negative cases, and 33
-  independent evidence/mutation tests. It preserves all 12 component, 14 behavior, 9 operation, and
-  10 resource manifest fields; readonly authoring inputs; literal inference; recursive exactness
-  for closed nested records and array items; canonical property order; caller ownership; deep
-  immutability; case-sensitive and prototype-like ids; distinct-object duplicate rejection in all
-  four categories; all 6 cross-category collision pairs; and 140 hostile category/value
-  rejections. Source, emitted declarations, and built JavaScript remain framework-neutral with only
-  `@desen/protocol` as a runtime dependency. Manifest registration carries no executable renderer
-  or host binding. The final post-fix review found no remaining P1/P2 issue.
+- The cumulative Catalog SDK slice passes 33 package tests, 71 compile-time negative cases, and 43
+  independent evidence/mutation tests. It preserves all 12 component, 14 behavior, 9 operation,
+  and 10 resource manifest fields; readonly authoring inputs; literal inference; recursive
+  exactness for closed nested records and array items; canonical property order; caller ownership;
+  deep immutability; case-sensitive and prototype-like ids; distinct-object duplicate rejection in
+  all four categories; all 6 cross-category collision pairs; and 140 hostile category/value
+  rejections. The same literal `propsSchema` now yields conservative readonly TypeScript props and
+  a detached inspector plan covering all 10 authoring fields, all 5 scenario fields, 7 control
+  kinds, 24 honest fallback cases, 35 hostile inspector values, RFC 6901 pointers, whole-object
+  enums, integer-like canonical key order, and exact 16-level/512-control limits. Source, emitted
+  declarations, and built JavaScript remain framework-neutral with only `@desen/protocol` as a
+  runtime dependency. Manifest registration carries no executable renderer or host binding.
+  Independent post-fix review found no remaining P1/P2 issue.
 - The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
   integrity tests, protocol traceability and type-generation tests, remaining scaffold test
   runners, and dependency-boundary checks.
@@ -160,8 +169,8 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M03-T03`: derive manifest-authoritative TypeScript and inspector-control metadata
-without introducing a second schema authority or weakening the framework-neutral Catalog boundary.
+Complete only `M03-T04`: define and prove the deterministic Web–React package byte/digest profile
+without moving executable adapters into the framework-neutral Catalog SDK.
 
 M02-T02 evidence:
 
@@ -184,62 +193,62 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `daaa4009d8e7a868f5cbe351b75d49fa7dbe4283f4eb60ad2fed2c56d89dd037`
+- artifact SHA-256: `33db5abe61bf1eee13136680b5471fe0fa95390cf0636d911f17e9abef6ac114`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `da9760dc361e640ddb2080bd599285f97570ebe22bda08def283f4cb9412288c`
+- artifact SHA-256: `c40c50498efc227f03c9c9ad5d6ce7b8f6ae452d973e036696a6a74c94b9f739`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `b5a3f186f9bc589030bb7909ad6e7108c3c97c21f9cace2d0e66fec9cd5c38fc`
+- artifact SHA-256: `d17e86caff9c1c8080a9b5570dcacd5df16dbc8d6fad069dd44400f6f9d43d19`
 
 M02-T08 evidence:
 
 - `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
-- artifact SHA-256: `36534e11b59a745b24fb91820d4b29cb98fcb6a5f4d83509d48cc7a248e1d30b`
+- artifact SHA-256: `f263985a285ef7b3a21ff5c58c80932398cf3482ff24c041903085e5096ceefd`
 
 M02-T09 evidence:
 
 - `docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json`
-- artifact SHA-256: `6a3aad5d6396417a69d3ae371b95405d63858a5d20d4a44a7506dbd0f8538187`
+- artifact SHA-256: `3072fca39e72f9b031846bfe191d4a0d343cdd886b4e0b704bc62f2207307dd5`
 
 M02-T10 evidence:
 
 - `docs/proof/PROTOCOL-BINDING-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-binding-contracts.json`
-- artifact SHA-256: `64fef7c96ab4900c41fd9025ca9d2afe1b5aecaf014834b96c2ac03b5adccb5c`
+- artifact SHA-256: `4085f93c283f1f1fa4718e346357153636490700296681e002333ae7bf5963d8`
 
 M02-T11 evidence:
 
 - `docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-execution-contracts.json`
-- artifact SHA-256: `d0129999c13ee5828b6e9dd20c82c315a4987280365ae738f3b25098c590e0d7`
+- artifact SHA-256: `6ce67f3273c971f62ebcb499cd24c9ce65264d24ced7909ff2b12407feab2243`
 
 M02-T12 evidence:
 
 - `docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md`
 - `docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json`
-- artifact SHA-256: `0a2ca2417185814fdc2bc40bc5814b5922ddea67ef80cb103ea907ca5e0f6e20`
+- artifact SHA-256: `d5315e8b1db71c1e1551421cfd3bb0306b9a2b11cfb14e807e29ef5b3a053aec`
 
 M02-T13 evidence:
 
 - `docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md`
 - `docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json`
-- artifact SHA-256: `3d306a1c071f30a21e033d53142a28731f89ba951fe74ddedb97d4d67a167c44`
+- artifact SHA-256: `e4c5929a94a80eaae490eaa7529015d41c817295408d84427da2f77de82aceec`
 
-M03-T01/M03-T02 cumulative evidence:
+M03-T01 through M03-T03 cumulative evidence:
 
 - `docs/proof/CATALOG-MANIFEST-REGISTRATION.md`
 - `docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json`
-- artifact SHA-256: `0823832e8a85a94d9a1f8e4dafa332e6ef53f29e6630a3039c2e895fa62fed00`
+- artifact SHA-256: `283a8fdd89e67769b83e58bc32f667b43920c5f137cbde3b1a4a2730d2245c61`
 
 ## Status vocabulary
 

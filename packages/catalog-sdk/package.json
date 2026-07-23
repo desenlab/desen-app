@@ -20,6 +20,7 @@
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:manifest-derivation": "vitest run test/component-inspector-control.test.ts",
     "test:manifest-registration": "vitest run test/catalog-manifest-registration.test.ts",
     "test:coverage": "vitest run --coverage"
   },

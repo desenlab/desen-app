@@ -1,5 +1,6 @@
 import {
   createCatalogManifest,
+  deriveComponentInspectorControls,
   registerBehavior,
   registerComponent,
   registerOperation,
@@ -8,7 +9,11 @@ import {
 
 import type {
   BehaviorManifest,
+  ComponentInspectorControlPlan,
   ComponentManifest,
+  ComponentPropsOf,
+  JsonSchemaValue,
+  JsonValue,
   OperationManifest,
   ResourceManifest,
 } from "../src/index.js";
@@ -18,6 +23,8 @@ const registration = registerComponent({
   manifest: {
     propsSchema: {
       type: "object",
+      additionalProperties: false,
+      required: ["tone"],
       properties: {
         tone: { type: "string", enum: ["primary", "secondary"] },
       },
@@ -29,9 +36,18 @@ const registration = registerComponent({
 const exactId: "com.example.ui/Button" = registration.id;
 const exactSchemaType: "object" = registration.manifest.propsSchema.type;
 const exactFirstState: "focus" = registration.manifest.visualStates[0];
+type RegisteredButtonProps = ComponentPropsOf<typeof registration>;
+type ExactTone = JsonSchemaValue<{ readonly enum: readonly ["primary", "secondary"] }>;
+const registeredButtonProps: RegisteredButtonProps = { tone: "primary" };
+const exactTone: ExactTone = registeredButtonProps.tone;
+const inspectorPlan: ComponentInspectorControlPlan = deriveComponentInspectorControls(registration);
+const inertMetadata: JsonValue = { controlCount: inspectorPlan.controls.length };
 void exactId;
 void exactSchemaType;
 void exactFirstState;
+void exactTone;
+void inspectorPlan;
+void inertMetadata;
 
 const schemaTypedManifest: ComponentManifest = {
   propsSchema: { type: "object" },

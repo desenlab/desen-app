@@ -31,6 +31,7 @@ function deepFreeze(value) {
 function catalogApiWith(overrides = {}) {
   return {
     createCatalogManifest: realCatalogApi.createCatalogManifest,
+    deriveComponentInspectorControls: realCatalogApi.deriveComponentInspectorControls,
     registerBehavior: realCatalogApi.registerBehavior,
     registerComponent: realCatalogApi.registerComponent,
     registerOperation: realCatalogApi.registerOperation,
@@ -56,13 +57,17 @@ const CROSS_CATEGORY_PAIRS = Object.freeze(
   ),
 );
 
-test("accepts the tracked deterministic M03-T01/M03-T02 evidence", async () => {
+test("accepts the tracked deterministic M03-T01 through M03-T03 evidence", async () => {
   const result = await verifyCatalogManifestRegistration();
 
   assert.equal(result.result, "PASS");
-  assert.equal(result.runtimeExports, 5);
-  assert.equal(result.typeExports, 16);
+  assert.equal(result.runtimeExports, 6);
+  assert.equal(result.typeExports, 23);
   assert.equal(result.hostileValues, 140);
+  assert.equal(result.inspectorHostileValues, 35);
+  assert.equal(result.inspectorFallbacks, 24);
+  assert.equal(result.packageTests, 33);
+  assert.equal(result.schemaConstraints, 34);
   assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 
@@ -96,7 +101,10 @@ test("rejects direct prose and conformance trace ownership drift", async (contex
   );
 
   for (const { collection, id, owners } of [
+    { collection: "conformanceRules", id: "C-006", owners: ["M09-T02"] },
     { collection: "proseRules", id: "R-084", owners: ["M03-T03"] },
+    { collection: "proseRules", id: "R-087", owners: ["M09-T05", "M09-T06"] },
+    { collection: "proseRules", id: "R-096", owners: ["M09-T05", "M09-T06"] },
     { collection: "conformanceRules", id: "C-018", owners: ["M03-T08"] },
   ]) {
     const trace = structuredClone(baselineTrace);
@@ -520,8 +528,8 @@ test("rejects option-skipped root tests in the test inventory", async () => {
   const relativePath = "tests/catalog-manifest-registration.test.mjs";
   const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
   const skipped = source.replace(
-    'test("accepts the tracked deterministic M03-T01/M03-T02 evidence", async () => {',
-    'test("accepts the tracked deterministic M03-T01/M03-T02 evidence", { skip: true }, async () => {',
+    'test("accepts the tracked deterministic M03-T01 through M03-T03 evidence", async () => {',
+    'test("accepts the tracked deterministic M03-T01 through M03-T03 evidence", { skip: true }, async () => {',
   );
 
   await assert.rejects(
@@ -676,4 +684,223 @@ test("rejects same-inode overwrite of the reserved temporary file", async (conte
     hasEvidenceCode("CATALOG_REGISTRATION_ARTIFACT_TEMPORARY_CHANGED"),
   );
   assert.equal(await readFile(artifactPath, "utf8"), "original\n");
+});
+
+test("rejects schema-authority drift in inspector controls", async () => {
+  const catalogApi = catalogApiWith({
+    deriveComponentInspectorControls(input) {
+      const plan = JSON.parse(
+        JSON.stringify(realCatalogApi.deriveComponentInspectorControls(input)),
+      );
+      const tone = plan.controls.find(({ property }) => property === "tone");
+      if (tone !== undefined) {
+        tone.kind = "number";
+        tone.required = false;
+        tone.options = ["invented"];
+      }
+      return deepFreeze(plan);
+    },
+  });
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      catalogApi,
+      validatorApi: realValidatorApi,
+      verifyG02: false,
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_INSPECTOR_GOLDEN_DRIFT"),
+  );
+});
+
+test("rejects omission of structured-JSON inspector fallbacks", async () => {
+  const catalogApi = catalogApiWith({
+    deriveComponentInspectorControls(input) {
+      const plan = JSON.parse(
+        JSON.stringify(realCatalogApi.deriveComponentInspectorControls(input)),
+      );
+      const properties = input.manifest.propsSchema.properties ?? {};
+      const hidesUndeclaredRequiredName = input.manifest.propsSchema.required?.some(
+        (name) => !Object.hasOwn(properties, name),
+      );
+      if (hidesUndeclaredRequiredName) plan.controls = [];
+      return deepFreeze(plan);
+    },
+  });
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      catalogApi,
+      validatorApi: realValidatorApi,
+      verifyG02: false,
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_INSPECTOR_FALLBACK_DRIFT"),
+  );
+});
+
+test("rejects mutable inspector plans", async () => {
+  const catalogApi = catalogApiWith({
+    deriveComponentInspectorControls(input) {
+      return JSON.parse(JSON.stringify(realCatalogApi.deriveComponentInspectorControls(input)));
+    },
+  });
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      catalogApi,
+      validatorApi: realValidatorApi,
+      verifyG02: false,
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_OUTPUT_MUTABLE"),
+  );
+});
+
+test("rejects inspector retention of caller-owned manifest aliases", async () => {
+  const catalogApi = catalogApiWith({
+    deriveComponentInspectorControls(input) {
+      const plan = JSON.parse(
+        JSON.stringify(realCatalogApi.deriveComponentInspectorControls(input)),
+      );
+      plan.propsSchema = input.manifest.propsSchema;
+      return deepFreeze(plan);
+    },
+  });
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      catalogApi,
+      validatorApi: realValidatorApi,
+      verifyG02: false,
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_CALLER_ALIAS"),
+  );
+});
+
+test("rejects inspector pointer substitution", async () => {
+  const catalogApi = catalogApiWith({
+    deriveComponentInspectorControls(input) {
+      const plan = JSON.parse(
+        JSON.stringify(realCatalogApi.deriveComponentInspectorControls(input)),
+      );
+      if (plan.controls[0] !== undefined) plan.controls[0].valuePointer = "/substituted";
+      return deepFreeze(plan);
+    },
+  });
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      catalogApi,
+      validatorApi: realValidatorApi,
+      verifyG02: false,
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_INSPECTOR_GOLDEN_DRIFT"),
+  );
+});
+
+test("rejects partial inspector output beyond derivation limits", async () => {
+  const catalogApi = catalogApiWith({
+    deriveComponentInspectorControls(input) {
+      const plan = JSON.parse(
+        JSON.stringify(realCatalogApi.deriveComponentInspectorControls(input)),
+      );
+      const [control] = plan.controls;
+      if (control?.fallbackReason === "derivation-limit") {
+        control.fallbackReason = "unsupported-schema";
+      }
+      return deepFreeze(plan);
+    },
+  });
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      catalogApi,
+      validatorApi: realValidatorApi,
+      verifyG02: false,
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_INSPECTOR_LIMIT_DRIFT"),
+  );
+});
+
+test("rejects hostile inspector input acceptance", async () => {
+  const catalogApi = catalogApiWith({
+    deriveComponentInspectorControls(input) {
+      if (input.manifest?.authoring?.controls?.value !== undefined) {
+        return deepFreeze({
+          controls: [],
+          propsSchema: {},
+        });
+      }
+      return realCatalogApi.deriveComponentInspectorControls(input);
+    },
+  });
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      catalogApi,
+      validatorApi: realValidatorApi,
+      verifyG02: false,
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_REJECTION_MISSING"),
+  );
+});
+
+test("rejects M03-T03 schema-family trace drift", async (context) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m03-t03-trace-"));
+  context.after(() => rm(directory, { force: true, recursive: true }));
+  const trackedTrace = JSON.parse(
+    await readFile(
+      new URL("../docs/proof/protocol-0.1.0-traceability.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const mutations = [
+    ["SC-033", (family) => (family.semanticOwners = [])],
+    ["SC-056", (family) => (family.expectedConstraints = 32)],
+  ];
+
+  for (const [id, mutate] of mutations) {
+    const trace = structuredClone(trackedTrace);
+    mutate(trace.schemaFamilies.find((family) => family.id === id));
+    const tracePath = path.join(directory, `${id}.json`);
+    await writeFile(tracePath, `${JSON.stringify(trace)}\n`);
+
+    await assert.rejects(
+      buildCatalogManifestRegistrationEvidence({ tracePath, verifyG02: false }),
+      hasEvidenceCode("CATALOG_REGISTRATION_TRACE_DRIFT"),
+    );
+  }
+});
+
+test("rejects skipped inspector fallback matrix", async () => {
+  const relativePath = "packages/catalog-sdk/test/component-inspector-control.test.ts";
+  const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
+  const skipped = source.replace(
+    'it("keeps every unsupported schema subtree visible through a reasoned fallback", () => {',
+    'it.skip("keeps every unsupported schema subtree visible through a reasoned fallback", () => {',
+  );
+
+  assert.notEqual(skipped, source);
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      verifyG02: false,
+      fileOverrides: { [relativePath]: skipped },
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT"),
+  );
+});
+
+test("rejects fake M03-T03 negative-case labels outside compiler directives", async () => {
+  const labels = Array.from(
+    { length: 18 },
+    (_, index) => `@ts-expect-error M03-T03-N${String(index + 1).padStart(2, "0")}`,
+  );
+
+  await assert.rejects(
+    buildCatalogManifestRegistrationEvidence({
+      verifyG02: false,
+      fileOverrides: {
+        "packages/catalog-sdk/test/schema-type-derivation.types.ts": `export const fakeEvidenceLabels = ${JSON.stringify(labels.join("\\n"))};\n`,
+      },
+    }),
+    hasEvidenceCode("CATALOG_REGISTRATION_TEST_INVENTORY_DRIFT"),
+  );
 });

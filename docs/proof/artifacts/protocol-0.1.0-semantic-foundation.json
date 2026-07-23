@@ -8,7 +8,7 @@
     "structuralValidation": {
       "path": "docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
       "bytes": 23214,
-      "sha256": "da9760dc361e640ddb2080bd599285f97570ebe22bda08def283f4cb9412288c",
+      "sha256": "c40c50498efc227f03c9c9ad5d6ce7b8f6ae452d973e036696a6a74c94b9f739",
       "task": "M02-T06",
       "profile": "desen-structural-validation-v1"
     }
@@ -384,8 +384,8 @@
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 39155,
-        "sha256": "2828d76a4b7127f73417d5524cd9ff9bf286fdbf355abc3d92815eabfb01afd4"
+        "bytes": 40728,
+        "sha256": "ffbc9e56ae2991fe3da2627e469bc2f9d180eeda56ae224b2032d05a6e5dd569"
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
@@ -399,8 +399,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 8953,
-        "sha256": "7368acb85e1aace09faca3fc5538681261e98aa39d4e33e40ec3abb7c02a9b8b"
+        "bytes": 9152,
+        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
       },
       {
         "path": "packages/protocol/package.json",

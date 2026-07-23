@@ -6,6 +6,7 @@
 
 export { registerBehavior } from "./behavior-registration.js";
 export { createCatalogManifest } from "./catalog-manifest.js";
+export { deriveComponentInspectorControls } from "./component-inspector-control.js";
 export { registerComponent } from "./component-registration.js";
 export { registerOperation } from "./operation-registration.js";
 export { registerResource } from "./resource-registration.js";
@@ -16,6 +17,12 @@ export type {
   RegisterBehaviorInput,
 } from "./behavior-registration.js";
 export type { CreateCatalogManifestInput } from "./catalog-manifest.js";
+export type {
+  ComponentInspectorControl,
+  ComponentInspectorControlKind,
+  ComponentInspectorControlPlan,
+  ComponentInspectorFallbackReason,
+} from "./component-inspector-control.js";
 export type {
   ComponentManifest,
   RegisteredComponent,
@@ -32,3 +39,4 @@ export type {
   RegisterResourceInput,
   ResourceManifest,
 } from "./resource-registration.js";
+export type { ComponentPropsOf, JsonSchemaValue, JsonValue } from "./schema-type-derivation.js";
