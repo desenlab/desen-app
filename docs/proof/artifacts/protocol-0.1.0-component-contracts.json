@@ -8,7 +8,7 @@
     "diagnostics": {
       "path": "docs/proof/artifacts/protocol-0.1.0-diagnostics.json",
       "bytes": 13710,
-      "sha256": "f553391215f967821ad73f497a51ae7fa9256df1e492b4215cb2292c7e8dbaac",
+      "sha256": "9edc4c8a9b8b7a1ed505dc4c6d0644f88df69c54f672fd542a8688f3f83e26b7",
       "task": "M02-T05",
       "profile": "desen-diagnostics-json-pointer-v1",
       "verifiedBy": "verifyProtocolDiagnostics",
@@ -16,8 +16,8 @@
     },
     "semanticFoundation": {
       "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
-      "bytes": 25302,
-      "sha256": "193939acdcf41bdd87965d1468216b665cb785faaef10d6f299040fa811e3b4f",
+      "bytes": 25303,
+      "sha256": "dc9273eca610e3400b13370ac466e1dde30d0534897817b74e7242bfb16f337b",
       "task": "M02-T07",
       "profile": "desen-semantic-foundation-v1",
       "verifiedBy": "verifyProtocolSemanticFoundation",
@@ -911,8 +911,8 @@
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 26214,
-        "sha256": "77f7bca950014da41b527ecaca8142e19f6acb2ab60d8171ff85a9c981458ecd"
+        "bytes": 26212,
+        "sha256": "a6adcb82432502b75fc89c898ffa917996ca2bc6c614c0130dc04a753c7e7126"
       },
       {
         "path": "docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md",
@@ -926,8 +926,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 10333,
-        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
+        "bytes": 11233,
+        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
       },
       {
         "path": "packages/protocol/dist/canonicalization.js",
@@ -1156,8 +1156,8 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 94543,
-        "sha256": "67bb30a8e109669c68565011ce435713ac41343d20a10c8a79ae2296acf9e2ff"
+        "bytes": 111382,
+        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
       },
       {
         "path": "scripts/generate-protocol-component-contracts-proof.mjs",

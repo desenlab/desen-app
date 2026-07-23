@@ -113,7 +113,7 @@ pnpm check
 ```
 
 - Artifact: `docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json`
-- Artifact SHA-256: `e02ffd79e307baea2aeda8230890b4ded903f62553d8a59d084ccd052c891b30`
+- Artifact SHA-256: `d7dccc41ad65f3bd7b3f5da0af336c9bf67e8dcf124af55a28474c3f3fd8a829`
 - Direct schema families: `SC-033` (1 constraint), `SC-056` (33 constraints)
 - Direct trace rules: `C-006`, `C-018`, `R-013`, `R-071`, `R-072`, `R-084`, `R-087`, `R-089`,
   `R-090`, `R-092`, `R-096`, `R-149`

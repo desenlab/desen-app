@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "task": "M03-T05",
+  "result": "PASS",
+  "claim": {
+    "summary": "The frozen Stack and Text contracts resolve to real accessible Web-React components.",
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "normativeCoverage": {
+      "partial": ["S-004"],
+      "note": "Stack and Text props are closed; M03-T06 and M03-T09 remain."
+    },
+    "proofMatrixStatusChanges": []
+  },
+  "prerequisite": {
+    "task": "M03-T04",
+    "result": "PASS",
+    "artifactSha256": "baf677090de2b1fbab62937aa991a0fe4a0f4fa9c03ee9eece745f9dfe945800"
+  },
+  "publicApi": {
+    "package": "@desen/reference-catalog-web/components",
+    "runtimeExports": [
+      "STACK_CAPABILITY_ID",
+      "Stack",
+      "TEXT_CAPABILITY_ID",
+      "Text",
+      "stackComponentRegistration",
+      "textComponentRegistration"
+    ],
+    "typeExports": [
+      "StackAlignment",
+      "StackCatalogProps",
+      "StackDirection",
+      "StackGap",
+      "StackProps",
+      "TextCatalogProps",
+      "TextProps",
+      "TextRole"
+    ],
+    "reactVersion": "19.2.8",
+    "componentIds": ["com.example.ui/Stack", "com.example.ui/Text"]
+  },
+  "components": [
+    {
+      "id": "com.example.ui/Stack",
+      "category": "layout",
+      "manifestSha256": "0f17ece82bada4eafe9ecb4d8e5e9876a405495ecd97ee16ddbb26d7bf718588",
+      "officialFixtureExact": true,
+      "publicPropsClosed": true,
+      "slots": ["default"],
+      "styleParts": ["root"],
+      "events": [],
+      "commands": []
+    },
+    {
+      "id": "com.example.ui/Text",
+      "category": "content",
+      "manifestSha256": "c8bd3a4e6e08078ec5b4328b29b5d990431c7e7cd18cb6194b4636331254676d",
+      "officialFixtureExact": true,
+      "publicPropsClosed": true,
+      "slots": [],
+      "styleParts": ["text"],
+      "events": [],
+      "commands": []
+    }
+  ],
+  "contracts": {
+    "catalog": {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react",
+      "structural": "PASS",
+      "semantic": "PASS",
+      "componentSet": "PASS"
+    },
+    "source": {
+      "id": "com.example.foundation-proof",
+      "valid": true,
+      "obligations": 0,
+      "negativeDiagnostics": {
+        "unknownProp": { "code": "UNKNOWN_PROP", "pointer": "/surfaces/main/root/props/unknown" },
+        "missingText": {
+          "code": "PROP_TYPE_MISMATCH",
+          "pointer": "/surfaces/main/root/slots/default/0/props/text"
+        }
+      }
+    }
+  },
+  "accessibility": {
+    "stack": {
+      "neutralContainer": true,
+      "fabricatedRole": false,
+      "focusable": false,
+      "childOrderPreserved": true,
+      "html": "<div style=\"display:flex;flex-direction:row;gap:var(--desen-space-md, 1rem);max-width:420px;align-items:center\"><p>First</p><small>Second</small></div>",
+      "matrix": {
+        "vectors": 420,
+        "sha256": "a9409daaa3ddacb111b9a31c1854756a0009567cbe12ec360faa8a4059b6330b"
+      }
+    },
+    "text": {
+      "semanticElements": {
+        "body": "<p>Body</p>",
+        "heading": "<h2>Heading</h2>",
+        "caption": "<small>Caption</small>"
+      },
+      "rawHtmlSurface": false,
+      "hostileInput": "<img src=x onerror=\"bad()\"><script>bad()</script>",
+      "escapedHtml": "<p>&lt;img src=x onerror=&quot;bad()&quot;&gt;&lt;script&gt;bad()&lt;/script&gt;</p>",
+      "matrix": {
+        "vectors": 56,
+        "sha256": "59783eeedc7508b5a8cc7f7dfcf7a46294f6a50bb0ed688ddc01765d68d5beec"
+      }
+    }
+  },
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "packageTests": [
+      "registers exact closed public contracts as detached immutable data",
+      "renders Stack as a neutral flex container while preserving child order",
+      "keeps Stack defaults deterministic and does not invent spacing",
+      "maps Text roles to native non-interactive semantics",
+      "renders hostile markup-like text as inert escaped content"
+    ],
+    "rootTests": [
+      "accepts the tracked deterministic M03-T05 evidence",
+      "two independent reference component evidence builds are byte-identical",
+      "records every explicit build option as injected evidence",
+      "rejects inherited, accessor-backed, or unknown build options",
+      "rejects stale or one-byte-tampered evidence",
+      "rejects a component manifest that differs from the frozen official Catalog",
+      "rejects mutable component registration data",
+      "rejects a getter-backed component public API",
+      "rejects a Text renderer that discards the declared native semantics",
+      "rejects a conditional Text renderer outside the original examples",
+      "rejects a Stack renderer that fabricates focusability for one schema value",
+      "rejects a raw HTML execution path in the reviewed Text source",
+      "rejects conditional Stack source behavior outside sampled numbers",
+      "rejects extra declaration exports and modified test calls",
+      "rejects alternate web export conditions and React runtime duplication",
+      "rejects inert quality-gate command wiring",
+      "rejects nondefault verification through a symlink alias to the tracked artifact",
+      "rejects forged validation that fails to enforce closed public props"
+    ],
+    "typeNegativeCases": [
+      "M03-T05-N01",
+      "M03-T05-N02",
+      "M03-T05-N03",
+      "M03-T05-N04",
+      "M03-T05-N05",
+      "M03-T05-N06",
+      "M03-T05-N07"
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/reference-catalog-web/src/components/contracts.ts",
+        "bytes": 4962,
+        "sha256": "1266f0f732d9530070c50275ae5fe4c17b07cfa6dc57128a6bf1141f81b3f49f"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/stack.tsx",
+        "bytes": 1827,
+        "sha256": "88b3cf3059253018e8865cbfa8e37b5c449b55d06430a9a046f4e1511b45f796"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text.tsx",
+        "bytes": 899,
+        "sha256": "c741c3ddba19d12120e793c9e93b19f3790e9ba93c7d579325a0d07e4cef8f17"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/index.ts",
+        "bytes": 570,
+        "sha256": "307ef4d21c77c6028acdc19679bbb765e3d1bcb1f1aafb042764e075abfa7c9f"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/foundation-components.test.tsx",
+        "bytes": 3780,
+        "sha256": "2664a6e5de2221164dbbf8f7230bb2db38350aecb4172ee3adaddedb22fcfb44"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/foundation-components.types.tsx",
+        "bytes": 1614,
+        "sha256": "910fb3674c1c799634c1ca99c75a38a38662748bde71d3d991b7e1021f21dc80"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/components-consumer.mjs",
+        "bytes": 57,
+        "sha256": "8b40e4f1f368f533cca8bf45913a3ed279b7e3b18d89393624a52f22f0c91377"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 1329,
+        "sha256": "fed54f9357f42c0f1df53d56944c45082350d0d805047a1df1e99dbec96a2dfe"
+      },
+      {
+        "path": "packages/reference-catalog-web/tsconfig.json",
+        "bytes": 172,
+        "sha256": "07fa9ea667348c72c2311ba2a6ebbb2a233e6e572b5977bb54d6cf177278152a"
+      },
+      {
+        "path": "packages/reference-catalog-web/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/reference-catalog-web/README.md",
+        "bytes": 6327,
+        "sha256": "c26edc6748950a857705c2542db0a8a39ea0f5670b99a23fed467630b2533c13"
+      },
+      {
+        "path": "docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md",
+        "bytes": 4659,
+        "sha256": "3cad4b314f1eeefb46604ecdb55e1b4e45f99c9710100754346bdc62686896a7"
+      },
+      {
+        "path": "scripts/lib/reference-catalog-web-components-proof.mjs",
+        "bytes": 76599,
+        "sha256": "1ad0b105f60f335236bb3fe88a68f73ec591bcd408cb205dfdde7ed943e1a40e"
+      },
+      {
+        "path": "scripts/generate-reference-catalog-web-components-proof.mjs",
+        "bytes": 852,
+        "sha256": "685044163800f18a33c9cb37870ead1d3324ccd882742489bf5f79edd53dbac6"
+      },
+      {
+        "path": "scripts/verify-reference-catalog-web-components.mjs",
+        "bytes": 687,
+        "sha256": "90b8d9197b2bdf4c609143fc628c1c6e0cc2eac233594ee40b259e302c42bf10"
+      },
+      {
+        "path": "tests/reference-catalog-web-components.test.mjs",
+        "bytes": 16604,
+        "sha256": "340ce99354cd8d25f4de8716cac2e87dc4769d0cbfa15a598644494582c22239"
+      },
+      {
+        "path": "package.json",
+        "bytes": 11233,
+        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 111382,
+        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
+      }
+    ],
+    "commands": [
+      "generate:reference-catalog-web-components",
+      "verify:reference-catalog-web-components",
+      "test:reference-catalog-web-components"
+    ]
+  },
+  "boundaries": [
+    "Catalog props remain inert JSON derived from propsSchema.",
+    "React children represent the materialized Stack default slot and are not Catalog props.",
+    "Text has no children, raw HTML, event, command, or DOM prop passthrough.",
+    "Stack does not reverse visual order or fabricate ARIA semantics.",
+    "React and DOM types do not cross into the framework-neutral Catalog SDK."
+  ],
+  "deferred": [
+    "M03-T06 TextField, Button, and Alert capabilities",
+    "M03-T07 token provider and controlled fixture infrastructure",
+    "M03-T09 complete manifest-to-implementation parity and accessibility contract tests",
+    "M03-T10 final immutable package inventory and exact tuple",
+    "M05 React adapter registration and runtime materialization"
+  ]
+}

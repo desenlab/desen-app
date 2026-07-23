@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **31 / 144 tasks complete (22%)**
+**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **32 / 144 tasks complete (22%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `████░░░░░░` **4 / 10 tasks complete (40%)**
+**M03 in progress:** `█████░░░░░` **5 / 10 tasks complete (50%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T05`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T06`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -92,6 +92,7 @@ packages/
 - [Validator diagnostic micro-vector proof](docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md)
 - [Catalog registration and derivation proof](docs/proof/CATALOG-MANIFEST-REGISTRATION.md)
 - [Web–React package digest proof](docs/proof/WEB-REACT-PACKAGE-DIGEST.md)
+- [Reference Web component proof](docs/proof/REFERENCE-CATALOG-WEB-COMPONENTS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -166,8 +167,17 @@ canonical Catalog and exact artifact bytes through versioned, length-delimited f
 that preimage with SHA-256. Its 18 package tests and 16 independent proof tests cover 269 pinned
 mutation vectors, Catalog self-reference verification, caller ownership, immutable audit output,
 portable paths, hostile inputs, and an independent cryptographic oracle. This makes P-05
-`PARTIAL`; the real reference components, complete artifact inventory, reproducible final tuple,
-distribution, and activation remain later tasks.
+`PARTIAL`; the complete artifact inventory, reproducible final tuple, distribution, and activation
+remain later tasks.
+
+M03-T05 now implements the first real reference capabilities. The frozen official Stack and Text
+manifests are exposed with schema-derived React props; Stack preserves slot/reading order without
+inventing ARIA semantics, while Text emits native paragraph, heading, or caption elements and
+escapes markup-like strings as inert text. The deterministic evidence checks exact manifest
+equality, closed public props, validator acceptance, negative contract cases, built-package
+semantics, 420 pinned Stack cross-product vectors, 56 Text/escaping vectors, exact source-shape
+checks, 5 focused component tests, 7 compiler-negative cases, and 18 independent proof/mutation
+tests. TextField, Button, and Alert remain next in M03-T06.
 
 ## License
 

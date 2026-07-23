@@ -61,8 +61,8 @@
     "trackedFiles": [
       {
         "path": "package.json",
-        "bytes": 10333,
-        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
+        "bytes": 11233,
+        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
       },
       {
         "path": "turbo.json",

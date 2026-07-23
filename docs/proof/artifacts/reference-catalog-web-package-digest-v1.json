@@ -31,7 +31,7 @@
   "prerequisites": {
     "catalogManifestRegistration": {
       "result": "PASS",
-      "artifactSha256": "e02ffd79e307baea2aeda8230890b4ded903f62553d8a59d084ccd052c891b30"
+      "artifactSha256": "d7dccc41ad65f3bd7b3f5da0af336c9bf67e8dcf124af55a28474c3f3fd8a829"
     },
     "protocolCanonicalization": {
       "primitive": "RFC 8785-compatible canonical JSON plus SHA-256",
@@ -212,8 +212,8 @@
       },
       {
         "path": "packages/reference-catalog-web/package.json",
-        "bytes": 855,
-        "sha256": "c82830415512e63d3a142b61da819b1683d497be1eeba46564651b2ce41abb19"
+        "bytes": 1329,
+        "sha256": "fed54f9357f42c0f1df53d56944c45082350d0d805047a1df1e99dbec96a2dfe"
       },
       {
         "path": "packages/reference-catalog-web/tsconfig.json",

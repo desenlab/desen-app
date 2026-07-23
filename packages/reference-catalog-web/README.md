@@ -5,6 +5,46 @@
 Target-specific Web–React capability packaging, followed by the accessible real components and
 exact capability manifests shared by Desen App and the reference host.
 
+## Foundational component entry point
+
+M03-T05 adds the first real component slice at:
+
+```ts
+import {
+  Stack,
+  Text,
+  stackComponentRegistration,
+  textComponentRegistration,
+} from "@desen/reference-catalog-web/components";
+```
+
+The exported registrations mirror the frozen official Web Catalog example exactly:
+
+- `com.example.ui/Stack` is a neutral linear layout container;
+- `com.example.ui/Text` is an inert semantic text leaf.
+
+Both public prop schemas are closed with `additionalProperties: false`. Their React prop types
+derive from those schemas through `@desen/catalog-sdk`; there is no parallel handwritten Catalog
+prop contract. Stack adds React `children` only as the target-specific materialization of its
+declared `default` slot. Text has no slot, does not accept children, and exposes no arbitrary DOM
+prop, raw HTML, or executable value surface.
+
+### Accessibility behavior
+
+- Stack renders a neutral `<div>` with no fabricated ARIA role, landmark, tab stop, reverse flex
+  direction, or CSS ordering. Declared child order therefore remains DOM and reading order.
+- Stack maps only the declared direction, gap, maximum-width, and cross-axis alignment values.
+  Spacing uses `--desen-space-*` variables with fixed fallbacks so M03-T07 can provide tokens
+  without changing the contract.
+- Text maps `body` → `<p>`, `heading` → `<h2>` beneath the host application's top-level heading,
+  and `caption` → `<small>`.
+- Text creates an ordinary React text node and never uses `dangerouslySetInnerHTML`, so
+  markup-like strings remain inert escaped content.
+
+The `root` and `text` style parts retain the official Catalog declarations. Applying resolved
+style-part values while preserving accessibility is intentionally deferred to M03-T09 and the
+M05 React adapter; M03-T05 does not claim complete adapter parity.
+
 ## Web–React package digest profile
 
 M03-T04 defines the versioned `desen.web-react.package-digest` profile here rather than in the
@@ -60,9 +100,9 @@ an independent Node.js framing and SHA-256 oracle.
 
 ## Status
 
-Private proof-phase package. The deterministic Web–React package digest profile is implemented.
-Real reference components, adapters, controlled fixtures, parity checks, and the final package
-tuple remain assigned to M03-T05 through M03-T10.
+Private proof-phase package. The deterministic Web–React package digest profile and the accessible
+Stack/Text foundation are implemented. TextField, Button, Alert, adapters, controlled fixtures,
+parity checks, and the final package tuple remain assigned to M03-T06 through M03-T10 and M05.
 
 ## Protocol and target support
 
@@ -74,7 +114,10 @@ tuple remain assigned to M03-T05 through M03-T10.
 
 ```bash
 pnpm --filter @desen/reference-catalog-web typecheck
+pnpm --filter @desen/reference-catalog-web test:components
 pnpm --filter @desen/reference-catalog-web test:package-digest-profile
+pnpm verify:reference-catalog-web-components
+pnpm test:reference-catalog-web-components
 pnpm verify:web-react-package-digest
 pnpm test:web-react-package-digest
 pnpm check

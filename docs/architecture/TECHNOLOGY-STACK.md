@@ -11,6 +11,8 @@ every dependency to have a documented responsibility.
 - Turborepo 2.10.5
 - ESLint 10.7.0 and Prettier 3.9.6
 - Vitest 4.1.10
+- React 19.2.8 and React DOM 19.2.8, currently confined to the Web reference component package
+- Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable component semantics
 - dependency-cruiser 18.1.0
 - Changesets 2.31.1, disabled for external publishing during the proof phase
 - json-schema-to-typescript 15.0.4, build-only and pinned for protocol type generation

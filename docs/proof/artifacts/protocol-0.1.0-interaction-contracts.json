@@ -21,8 +21,8 @@
       "profile": "desen-component-contract-validation-v1",
       "result": "PASS",
       "verifiedBy": "verifyProtocolComponentContracts",
-      "sha256": "387460ed25f3a5bac13b9f54f801136aacae5f8102bac3244abcfea823d76ca6",
-      "verificationSha256": "387460ed25f3a5bac13b9f54f801136aacae5f8102bac3244abcfea823d76ca6"
+      "sha256": "9187054848824badea880533a9d303ca81276b1a4014a92b9b96dff08aef6587",
+      "verificationSha256": "9187054848824badea880533a9d303ca81276b1a4014a92b9b96dff08aef6587"
     }
   },
   "traceability": {
@@ -540,7 +540,7 @@
     "queuedChildReservation": true,
     "schemaProfile": {
       "finding": "PF-011",
-      "inheritedFromVerifiedT08Artifact": "387460ed25f3a5bac13b9f54f801136aacae5f8102bac3244abcfea823d76ca6",
+      "inheritedFromVerifiedT08Artifact": "9187054848824badea880533a9d303ca81276b1a4014a92b9b96dff08aef6587",
       "evaluationBudget": 50000,
       "unsafeNativePatternExecution": false
     },
@@ -695,8 +695,8 @@
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 26214,
-        "sha256": "77f7bca950014da41b527ecaca8142e19f6acb2ab60d8171ff85a9c981458ecd"
+        "bytes": 26212,
+        "sha256": "a6adcb82432502b75fc89c898ffa917996ca2bc6c614c0130dc04a753c7e7126"
       },
       {
         "path": "docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md",
@@ -710,8 +710,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 10333,
-        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
+        "bytes": 11233,
+        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
       },
       {
         "path": "packages/protocol/dist/canonicalization.d.ts",
@@ -1325,8 +1325,8 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 94543,
-        "sha256": "67bb30a8e109669c68565011ce435713ac41343d20a10c8a79ae2296acf9e2ff"
+        "bytes": 111382,
+        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
       },
       {
         "path": "scripts/generate-protocol-interaction-contracts-proof.mjs",

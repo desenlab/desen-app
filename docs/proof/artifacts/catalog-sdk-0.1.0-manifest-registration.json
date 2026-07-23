@@ -8,7 +8,7 @@
     "gate": "G02",
     "closingTask": "M02-T13",
     "artifact": "docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json",
-    "sha256": "1364ad86b796ec66554381edc8459cc970b3827751d1e247c32487798bfcd7e1",
+    "sha256": "b160d66ee5907f8d02b3c95708f872d379f6bc363ed553ee50e56c7b533e9839",
     "result": "PASS"
   },
   "claim": {
@@ -947,8 +947,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 10333,
-        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
+        "bytes": 11233,
+        "sha256": "000d0eec0e9ac5d06ce27e36bfaf7d393ea0497dae25b559d2e3d16c49716535"
       },
       {
         "path": "packages/catalog-sdk/README.md",
@@ -1042,8 +1042,8 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 94543,
-        "sha256": "67bb30a8e109669c68565011ce435713ac41343d20a10c8a79ae2296acf9e2ff"
+        "bytes": 111382,
+        "sha256": "202818a327607474348f2b43b1ce5507e37105494b9a5f1faab4999379789e72"
       },
       {
         "path": "scripts/generate-catalog-manifest-registration-proof.mjs",
@@ -1052,8 +1052,8 @@
       },
       {
         "path": "scripts/lib/catalog-manifest-registration-proof.mjs",
-        "bytes": 118849,
-        "sha256": "145ec4981f9b2cd3069814eb790d88b6ff898ffda38442e2bc7d964cb5756c88"
+        "bytes": 118947,
+        "sha256": "9f6e98a6759327405258d38f50f5909f5606ca53b861c1f784a1eb6e0a871f01"
       },
       {
         "path": "scripts/verify-boundary-fixtures.mjs",
@@ -1235,6 +1235,7 @@
         "pnpm test:protocol-validator-diagnostic-micro-vectors",
         "pnpm test:catalog-manifest-registration",
         "pnpm test:web-react-package-digest",
+        "pnpm test:reference-catalog-web-components",
         "turbo run test"
       ],
       "rootCheck": [
@@ -1254,6 +1255,7 @@
         "pnpm verify:protocol-validator-diagnostic-micro-vectors",
         "pnpm verify:catalog-manifest-registration",
         "pnpm verify:web-react-package-digest",
+        "pnpm verify:reference-catalog-web-components",
         "pnpm lint",
         "pnpm typecheck",
         "pnpm build",
