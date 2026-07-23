@@ -27,6 +27,9 @@ maps, and rejects duplicate ids within or across categories. All four maps share
 single exact, case-sensitive capability namespace. The behavior, operation, and resource lists are
 optional, preserving the M03-T01 component-only input shape and emitting empty maps for omitted
 categories. The caller supplies the exact open `target` and provisional `packageDigest` values.
+The separate M03-T04 Web–React profile now consumes such a provisional Catalog plus target
+artifact bytes to calculate and verify a package digest; that target-specific byte API remains
+outside this framework-neutral evidence slice.
 
 `PF-024` records the deliberate distinction between manifest registration and trusted executable
 binding. The four public registration functions snapshot only inert `{ id, manifest }` data. They
@@ -110,7 +113,7 @@ pnpm check
 ```
 
 - Artifact: `docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json`
-- Artifact SHA-256: `283a8fdd89e67769b83e58bc32f667b43920c5f137cbde3b1a4a2730d2245c61`
+- Artifact SHA-256: `e02ffd79e307baea2aeda8230890b4ded903f62553d8a59d084ccd052c891b30`
 - Direct schema families: `SC-033` (1 constraint), `SC-056` (33 constraints)
 - Direct trace rules: `C-006`, `C-018`, `R-013`, `R-071`, `R-072`, `R-084`, `R-087`, `R-089`,
   `R-090`, `R-092`, `R-096`, `R-149`
@@ -122,7 +125,8 @@ identity and exact bytes, atomically renames it, and verifies the committed inod
 ## Boundaries and limitations
 
 - Full Catalog structural and semantic validation remains in `@desen/validator`.
-- Deterministic Web–React package digest construction belongs to M03-T04.
+- Deterministic Web–React package digest construction is separately implemented and evidenced by
+  M03-T04 in `@desen/reference-catalog-web`; it does not change this Catalog SDK API.
 - Reference capabilities and synthetic fixtures belong to M03-T05 through M03-T07.
 - Separate trusted-host operation binding belongs to M03-T08.
 - Catalog/implementation parity belongs to M03-T09.

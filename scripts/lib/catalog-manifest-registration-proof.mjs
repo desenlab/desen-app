@@ -407,6 +407,7 @@ const EXPECTED_ROOT_TEST_COMMAND = Object.freeze([
   "pnpm test:protocol-official-suite-parity",
   "pnpm test:protocol-validator-diagnostic-micro-vectors",
   "pnpm test:catalog-manifest-registration",
+  "pnpm test:web-react-package-digest",
   "turbo run test",
 ]);
 const EXPECTED_ROOT_CHECK_COMMAND = Object.freeze([
@@ -425,6 +426,7 @@ const EXPECTED_ROOT_CHECK_COMMAND = Object.freeze([
   "pnpm verify:protocol-official-suite-parity",
   "pnpm verify:protocol-validator-diagnostic-micro-vectors",
   "pnpm verify:catalog-manifest-registration",
+  "pnpm verify:web-react-package-digest",
   "pnpm lint",
   "pnpm typecheck",
   "pnpm build",

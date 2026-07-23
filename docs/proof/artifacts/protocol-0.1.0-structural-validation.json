@@ -461,13 +461,13 @@
     "trackedFiles": [
       {
         "path": "package.json",
-        "bytes": 9152,
-        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
+        "bytes": 10333,
+        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 94271,
-        "sha256": "0247d25583fee737a389cbce7b93207a38b57c1871818457995d35f1e962dcd8"
+        "bytes": 94543,
+        "sha256": "67bb30a8e109669c68565011ce435713ac41343d20a10c8a79ae2296acf9e2ff"
       },
       {
         "path": "turbo.json",

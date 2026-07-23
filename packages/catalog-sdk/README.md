@@ -229,8 +229,12 @@ host-exotic object. A deliberately prototype-laundered `Promise`, generator, ite
 or general `Proxy` is therefore outside this authoring boundary; do not supply those values. The
 SDK snapshots their observable enumerable data shape when they cannot be distinguished safely.
 
-`packageDigest` is caller-supplied in this slice. The deterministic Web–React package byte profile
-and digest calculation belong to M03-T04, while final artifact tuple proof belongs to M03-T10.
+`packageDigest` remains caller-supplied in this platform-neutral SDK. M03-T04 now defines the
+separate, versioned Web–React package byte profile and digest calculation in
+`@desen/reference-catalog-web`; it does not move target bytes, React types, or executable adapters
+into this package. The real final artifact inventory and exact tuple proof remain assigned to
+M03-T10.
+
 Executable production and authoring adapters remain target-renderer responsibilities. Operation
 handlers and resource readers remain trusted-host responsibilities. M03-T08, the M04 runtime
 tasks, and M05 will define those binding boundaries; executable values never enter this package's
@@ -248,8 +252,9 @@ JSON API.
 
 Private proof-phase package. M03-T01 component registration, M03-T02 behavior/operation/resource
 registration, and M03-T03 manifest-authoritative type/control derivation are implemented. Digest
-tooling, reference capabilities, executable host bindings, parity checks, and final artifact proof
-remain tracked by M03-T04 through M03-T10; renderer adapter registration remains deferred to M05.
+tooling is now implemented separately by the target-specific reference package. Reference
+capabilities, executable host bindings, parity checks, and final artifact proof remain tracked by
+M03-T05 through M03-T10; renderer adapter registration remains deferred to M05.
 
 ## Protocol and target support
 

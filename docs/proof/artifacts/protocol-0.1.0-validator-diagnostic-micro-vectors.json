@@ -18,40 +18,40 @@
       "task": "M02-T08",
       "profile": "desen-component-contract-validation-v1",
       "result": "PASS",
-      "bytes": 44918,
-      "sha256": "f263985a285ef7b3a21ff5c58c80932398cf3482ff24c041903085e5096ceefd",
+      "bytes": 44919,
+      "sha256": "387460ed25f3a5bac13b9f54f801136aacae5f8102bac3244abcfea823d76ca6",
       "verifier": "verifyProtocolComponentContracts"
     },
     {
       "task": "M02-T09",
       "profile": "desen-interaction-contract-validation-v1",
       "result": "PASS",
-      "bytes": 52824,
-      "sha256": "3072fca39e72f9b031846bfe191d4a0d343cdd886b4e0b704bc62f2207307dd5",
+      "bytes": 52825,
+      "sha256": "204550d04522247239b7cea0337c34c6323bd9a77f7377c27a44f7c7b46ef954",
       "verifier": "verifyProtocolInteractionContracts"
     },
     {
       "task": "M02-T10",
       "profile": "desen-binding-contract-validation-v1",
       "result": "PASS",
-      "bytes": 61636,
-      "sha256": "4085f93c283f1f1fa4718e346357153636490700296681e002333ae7bf5963d8",
+      "bytes": 61637,
+      "sha256": "232939fb54d276eeb7207e4b6bd3aa828953798b4327f80ff25105be1e108d78",
       "verifier": "verifyProtocolBindingContracts"
     },
     {
       "task": "M02-T11",
       "profile": "desen-execution-contract-validation-v1",
       "result": "PASS",
-      "bytes": 61091,
-      "sha256": "6ce67f3273c971f62ebcb499cd24c9ce65264d24ced7909ff2b12407feab2243",
+      "bytes": 61092,
+      "sha256": "2e5ed1c59dc6f636fe6fa10743c8d81351cd8616061409ccb1efbdcdc4dc9398",
       "verifier": "verifyProtocolExecutionContracts"
     },
     {
       "task": "M02-T12",
       "profile": "desen-official-suite-parity-v1",
       "result": "PASS",
-      "bytes": 16902,
-      "sha256": "d5315e8b1db71c1e1551421cfd3bb0306b9a2b11cfb14e807e29ef5b3a053aec",
+      "bytes": 16903,
+      "sha256": "b94e055da02dfe1156528a2759a44ca97473842c23ee19dc97f1a720b2f56fa6",
       "verifier": "verifyProtocolOfficialSuiteParity"
     }
   ],
@@ -2060,8 +2060,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 9152,
-        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
+        "bytes": 10333,
+        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
       },
       {
         "path": "packages/validator/README.md",

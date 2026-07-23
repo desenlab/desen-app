@@ -8,7 +8,7 @@
     "gate": "G02",
     "closingTask": "M02-T13",
     "artifact": "docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json",
-    "sha256": "e4c5929a94a80eaae490eaa7529015d41c817295408d84427da2f77de82aceec",
+    "sha256": "1364ad86b796ec66554381edc8459cc970b3827751d1e247c32487798bfcd7e1",
     "result": "PASS"
   },
   "claim": {
@@ -942,18 +942,18 @@
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 40728,
-        "sha256": "ffbc9e56ae2991fe3da2627e469bc2f9d180eeda56ae224b2032d05a6e5dd569"
+        "bytes": 42432,
+        "sha256": "c8d0363e26065bf743817e2b1890456ec973c682a248f5c7b933982dee078a90"
       },
       {
         "path": "package.json",
-        "bytes": 9152,
-        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
+        "bytes": 10333,
+        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
       },
       {
         "path": "packages/catalog-sdk/README.md",
-        "bytes": 10788,
-        "sha256": "047aec57bfa05ba0a4e93a75a2ac418164c88a71963a1459d25a0bb46faf5a82"
+        "bytes": 11039,
+        "sha256": "b3b09af4cfded866f57f0237be896c69cff2561f6a27795a3ec2a2725c4d5205"
       },
       {
         "path": "packages/catalog-sdk/package.json",
@@ -1042,8 +1042,8 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 94271,
-        "sha256": "0247d25583fee737a389cbce7b93207a38b57c1871818457995d35f1e962dcd8"
+        "bytes": 94543,
+        "sha256": "67bb30a8e109669c68565011ce435713ac41343d20a10c8a79ae2296acf9e2ff"
       },
       {
         "path": "scripts/generate-catalog-manifest-registration-proof.mjs",
@@ -1052,8 +1052,8 @@
       },
       {
         "path": "scripts/lib/catalog-manifest-registration-proof.mjs",
-        "bytes": 118767,
-        "sha256": "f95cdffd61d92e68700fd82462d79d48c4a4d500986a6c55d0f543ba0c6db0af"
+        "bytes": 118849,
+        "sha256": "145ec4981f9b2cd3069814eb790d88b6ff898ffda38442e2bc7d964cb5756c88"
       },
       {
         "path": "scripts/verify-boundary-fixtures.mjs",
@@ -1234,6 +1234,7 @@
         "pnpm test:protocol-official-suite-parity",
         "pnpm test:protocol-validator-diagnostic-micro-vectors",
         "pnpm test:catalog-manifest-registration",
+        "pnpm test:web-react-package-digest",
         "turbo run test"
       ],
       "rootCheck": [
@@ -1252,6 +1253,7 @@
         "pnpm verify:protocol-official-suite-parity",
         "pnpm verify:protocol-validator-diagnostic-micro-vectors",
         "pnpm verify:catalog-manifest-registration",
+        "pnpm verify:web-react-package-digest",
         "pnpm lint",
         "pnpm typecheck",
         "pnpm build",

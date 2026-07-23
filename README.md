@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **30 / 144 tasks complete (21%)**
+**Overall:** `█████░░░░░░░░░░░░░░░░░░░` **31 / 144 tasks complete (22%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `███░░░░░░░` **3 / 10 tasks complete (30%)**
+**M03 in progress:** `████░░░░░░` **4 / 10 tasks complete (40%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T04`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T05`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -91,6 +91,7 @@ packages/
 - [Official-suite parity proof](docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md)
 - [Validator diagnostic micro-vector proof](docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md)
 - [Catalog registration and derivation proof](docs/proof/CATALOG-MANIFEST-REGISTRATION.md)
+- [Web–React package digest proof](docs/proof/WEB-REACT-PACKAGE-DIGEST.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -159,6 +160,14 @@ validator-namespaced extension diagnostics. All 68 executions pass with exact co
 classification, pointer, and context checks where those fields apply, without adding a public API.
 P-02 is now `PROVEN` and G02 is `DONE`. P-17 advances only to `PARTIAL`: runtime materialization,
 action-turn, bundle, and activation limits remain assigned to later milestones.
+
+M03-T04 now defines the target-separated Web–React package digest profile. It commits a projected
+canonical Catalog and exact artifact bytes through versioned, length-delimited framing, then hashes
+that preimage with SHA-256. Its 18 package tests and 16 independent proof tests cover 269 pinned
+mutation vectors, Catalog self-reference verification, caller ownership, immutable audit output,
+portable paths, hostile inputs, and an independent cryptographic oracle. This makes P-05
+`PARTIAL`; the real reference components, complete artifact inventory, reproducible final tuple,
+distribution, and activation remain later tasks.
 
 ## License
 

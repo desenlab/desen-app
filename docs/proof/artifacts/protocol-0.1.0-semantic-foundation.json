@@ -7,8 +7,8 @@
   "prerequisite": {
     "structuralValidation": {
       "path": "docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
-      "bytes": 23214,
-      "sha256": "c40c50498efc227f03c9c9ad5d6ce7b8f6ae452d973e036696a6a74c94b9f739",
+      "bytes": 23215,
+      "sha256": "7a1595e65d5a3bcc03a4aeba3c3f4406815eb22161999493d5e6e28dab252753",
       "task": "M02-T06",
       "profile": "desen-structural-validation-v1"
     }
@@ -384,13 +384,13 @@
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 40728,
-        "sha256": "ffbc9e56ae2991fe3da2627e469bc2f9d180eeda56ae224b2032d05a6e5dd569"
+        "bytes": 42432,
+        "sha256": "c8d0363e26065bf743817e2b1890456ec973c682a248f5c7b933982dee078a90"
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 26218,
-        "sha256": "17fb11f0530e82200354f6f7e4989f842602b15b2130312e93ffbceff551d217"
+        "bytes": 26214,
+        "sha256": "77f7bca950014da41b527ecaca8142e19f6acb2ab60d8171ff85a9c981458ecd"
       },
       {
         "path": "docs/proof/protocol-0.1.0-traceability.json",
@@ -399,8 +399,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 9152,
-        "sha256": "756396aa28b209a0141b29c46648c0b4b30bae5a000437b400d512120ac0f00b"
+        "bytes": 10333,
+        "sha256": "1113a244da3102e3b4b8e0fb83a5005df0827aa4d74823791cf7e4413556c327"
       },
       {
         "path": "packages/protocol/package.json",
@@ -604,8 +604,8 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 94271,
-        "sha256": "0247d25583fee737a389cbce7b93207a38b57c1871818457995d35f1e962dcd8"
+        "bytes": 94543,
+        "sha256": "67bb30a8e109669c68565011ce435713ac41343d20a10c8a79ae2296acf9e2ff"
       },
       {
         "path": "scripts/generate-protocol-semantic-foundation-proof.mjs",

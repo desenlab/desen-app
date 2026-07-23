@@ -18,7 +18,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Observation: DESEN 0.1.0 requires exact package digests but does not standardize a universal
   package archive layout and digest procedure.
 - Implementation decision: Define and document a deterministic Web–React reference profile. Do
-  not present it as a universal 0.1.0 rule.
+  not present it as a universal 0.1.0 rule. M03-T04 implements the versioned binary framing and
+  exact verification procedure; `PF-026` records the necessary Catalog self-field projection.
 - Future action: Consider a signed package/distribution profile after implementation evidence.
 
 ## PF-002 — Canonical schema identifiers use `schemas.desen.dev`
@@ -558,3 +559,23 @@ This file records implementation discoveries without changing the frozen DESEN 0
   over-budget subtree. Actual widgets and hint interpretation remain editor responsibilities.
 - Future action: Define a versioned control-hint vocabulary and deterministic precedence rules in
   a later protocol or profile revision, with `propsSchema` remaining the validity authority.
+
+## PF-026 — A package digest cannot literally include its final Catalog self-field
+
+- Status: OPEN
+- Blocks proof: No; one explicit target-profile projection removes the circular definition.
+- Protocol location: SPEC Sections 7.4, 8.5, and 11.4; Catalog Schema `packageDigest`
+- Observation: Section 11.4 says the package digest includes its Catalog and target adapters, while
+  the Catalog itself requires that final `packageDigest`. Hashing the literal final Catalog would
+  require finding a SHA-256 fixed point and does not define an implementable packaging procedure.
+  DESEN 0.1.0 does not state which Catalog view participates in the digest.
+- Implementation decision: The Web–React v1 profile includes canonical Catalog bytes with only the
+  top-level `packageDigest` replaced by the reserved all-zero SHA-256 placeholder. Calculation
+  requires that template value. Verification projects a published Catalog in the same way and then
+  requires its declared digest to equal the calculated package digest. Changing only the published
+  self-field therefore invalidates the package instead of defining different valid bytes under the
+  same identity. All other Catalog fields and every exact target-artifact byte remain committed by
+  the versioned framing. This is explicitly a Web–React ecosystem rule, not a retroactive DESEN
+  0.1.0 core requirement.
+- Future action: A later portable package/distribution profile should normatively define the
+  Catalog self-field projection, byte container, verification order, and signature relationship.

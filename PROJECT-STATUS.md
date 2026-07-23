@@ -43,7 +43,13 @@ cross-category collision pairs, 24 inspector fallback cases, exact depth/width l
 isolation, platform neutrality, exact public exports, 140 hostile registration combinations, and
 35 hostile inspector values. `PF-024` keeps inert manifest registration separate from trusted
 executable host bindings, while `PF-025` keeps undefined control hints opaque and
-non-authoritative. No `P-*` status changes, and G03 remains open.
+non-authoritative. M03-T04 now adds the target-specific Web–React package digest profile without
+moving executable concerns into the framework-neutral Catalog SDK. Versioned length framing commits
+the projected canonical Catalog and exact artifact bytes; 18 package tests, 16 independent proof
+tests, 5 compiler-negative cases, and 269 pinned mutations cover deterministic identity,
+self-reference verification, path and byte boundaries, caller ownership, immutable output, and an
+independent Node.js SHA-256 oracle. `PF-026` records the explicit Catalog self-field projection.
+P-05 advances to `PARTIAL`, while the final real package tuple and G03 remain open.
 
 ## Current milestone
 
@@ -64,9 +70,10 @@ non-authoritative. No `P-*` status changes, and G03 remains open.
   `M02-T13 — Validator diagnostic micro-vectors`,
   `M03-T01 — Framework-neutral catalog registration API`,
   `M03-T02 — Behavior, operation, and resource registration APIs`,
-  `M03-T03 — Manifest-authoritative TypeScript and inspector-control derivation`
+  `M03-T03 — Manifest-authoritative TypeScript and inspector-control derivation`,
+  `M03-T04 — Deterministic Web–React package digest profile`
 - Active task: None
-- Ready next task: `M03-T04 — Deterministic Web–React package digest profile`
+- Ready next task: `M03-T05 — Accessible Stack and Text capabilities`
 - Status: `DONE`
 
 ## Completed preparation
@@ -156,6 +163,16 @@ non-authoritative. No `P-*` status changes, and G03 remains open.
   declarations, and built JavaScript remain framework-neutral with only `@desen/protocol` as a
   runtime dependency. Manifest registration carries no executable renderer or host binding.
   Independent post-fix review found no remaining P1/P2 issue.
+- The Web–React package digest profile passes 18 focused package tests, 5 compiler-negative cases,
+  and 16 independent proof/mutation tests. Its five-entry golden commits a projected RFC
+  8785-compatible Catalog plus exact authoring-adapter, production-adapter, host-binding, and token
+  bytes through a versioned big-endian frame. The fixed 1,640-byte preimage hashes to
+  `sha256:bb22ecc7a2849fe7466d9b5cba7d2c99dc7f8c3bd17b7c505244b2c308359589`;
+  all 269 pinned byte, path, Catalog, inventory, and declared-digest mutations are detected. The
+  API remains browser-portable, returns detached immutable audit data, rejects shared memory and
+  hostile structural inputs, and agrees with an independent Node.js cryptographic oracle. P-05 is
+  only `PARTIAL`; real accessible capabilities and the final complete package remain M03-T05
+  through M03-T10.
 - The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
   integrity tests, protocol traceability and type-generation tests, remaining scaffold test
   runners, and dependency-boundary checks.
@@ -169,8 +186,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M03-T04`: define and prove the deterministic Web–React package byte/digest profile
-without moving executable adapters into the framework-neutral Catalog SDK.
+Complete only `M03-T05`: build accessible Stack and Text reference capabilities with Catalog
+contracts, while keeping the digest profile, framework-neutral SDK, and future native boundaries
+intact.
 
 M02-T02 evidence:
 
@@ -193,62 +211,69 @@ M02-T05 evidence:
 
 - `docs/proof/PROTOCOL-DIAGNOSTICS.md`
 - `docs/proof/artifacts/protocol-0.1.0-diagnostics.json`
-- artifact SHA-256: `33db5abe61bf1eee13136680b5471fe0fa95390cf0636d911f17e9abef6ac114`
+- artifact SHA-256: `f553391215f967821ad73f497a51ae7fa9256df1e492b4215cb2292c7e8dbaac`
 
 M02-T06 evidence:
 
 - `docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-structural-validation.json`
-- artifact SHA-256: `c40c50498efc227f03c9c9ad5d6ce7b8f6ae452d973e036696a6a74c94b9f739`
+- artifact SHA-256: `7a1595e65d5a3bcc03a4aeba3c3f4406815eb22161999493d5e6e28dab252753`
 - generated validator SHA-256: `d608147be42cfcc683a4427212fe6714c6ff85fba07f031b61b418ddcba019cd`
 
 M02-T07 evidence:
 
 - `docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md`
 - `docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json`
-- artifact SHA-256: `d17e86caff9c1c8080a9b5570dcacd5df16dbc8d6fad069dd44400f6f9d43d19`
+- artifact SHA-256: `193939acdcf41bdd87965d1468216b665cb785faaef10d6f299040fa811e3b4f`
 
 M02-T08 evidence:
 
 - `docs/proof/PROTOCOL-COMPONENT-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-component-contracts.json`
-- artifact SHA-256: `f263985a285ef7b3a21ff5c58c80932398cf3482ff24c041903085e5096ceefd`
+- artifact SHA-256: `387460ed25f3a5bac13b9f54f801136aacae5f8102bac3244abcfea823d76ca6`
 
 M02-T09 evidence:
 
 - `docs/proof/PROTOCOL-INTERACTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json`
-- artifact SHA-256: `3072fca39e72f9b031846bfe191d4a0d343cdd886b4e0b704bc62f2207307dd5`
+- artifact SHA-256: `204550d04522247239b7cea0337c34c6323bd9a77f7377c27a44f7c7b46ef954`
 
 M02-T10 evidence:
 
 - `docs/proof/PROTOCOL-BINDING-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-binding-contracts.json`
-- artifact SHA-256: `4085f93c283f1f1fa4718e346357153636490700296681e002333ae7bf5963d8`
+- artifact SHA-256: `232939fb54d276eeb7207e4b6bd3aa828953798b4327f80ff25105be1e108d78`
 
 M02-T11 evidence:
 
 - `docs/proof/PROTOCOL-EXECUTION-CONTRACTS.md`
 - `docs/proof/artifacts/protocol-0.1.0-execution-contracts.json`
-- artifact SHA-256: `6ce67f3273c971f62ebcb499cd24c9ce65264d24ced7909ff2b12407feab2243`
+- artifact SHA-256: `2e5ed1c59dc6f636fe6fa10743c8d81351cd8616061409ccb1efbdcdc4dc9398`
 
 M02-T12 evidence:
 
 - `docs/proof/PROTOCOL-OFFICIAL-SUITE-PARITY.md`
 - `docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json`
-- artifact SHA-256: `d5315e8b1db71c1e1551421cfd3bb0306b9a2b11cfb14e807e29ef5b3a053aec`
+- artifact SHA-256: `b94e055da02dfe1156528a2759a44ca97473842c23ee19dc97f1a720b2f56fa6`
 
 M02-T13 evidence:
 
 - `docs/proof/PROTOCOL-VALIDATOR-DIAGNOSTIC-MICRO-VECTORS.md`
 - `docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json`
-- artifact SHA-256: `e4c5929a94a80eaae490eaa7529015d41c817295408d84427da2f77de82aceec`
+- artifact SHA-256: `1364ad86b796ec66554381edc8459cc970b3827751d1e247c32487798bfcd7e1`
 
 M03-T01 through M03-T03 cumulative evidence:
 
 - `docs/proof/CATALOG-MANIFEST-REGISTRATION.md`
 - `docs/proof/artifacts/catalog-sdk-0.1.0-manifest-registration.json`
-- artifact SHA-256: `283a8fdd89e67769b83e58bc32f667b43920c5f137cbde3b1a4a2730d2245c61`
+- artifact SHA-256: `e02ffd79e307baea2aeda8230890b4ded903f62553d8a59d084ccd052c891b30`
+
+M03-T04 evidence:
+
+- `docs/proof/WEB-REACT-PACKAGE-DIGEST.md`
+- `docs/profiles/WEB-REACT-PACKAGE-DIGEST-V1.md`
+- `docs/proof/artifacts/reference-catalog-web-package-digest-v1.json`
+- artifact SHA-256: `e60ac37012ff66bac677e80edc1f0f29e5d038c474e5716323e11ff9a7c7383f`
 
 ## Status vocabulary
 

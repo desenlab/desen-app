@@ -1,0 +1,344 @@
+{
+  "schemaVersion": 1,
+  "task": "M03-T04",
+  "result": "PASS",
+  "profile": {
+    "id": "desen.web-react.package-digest",
+    "version": 1,
+    "target": "web-react",
+    "catalogPath": "catalog.json",
+    "catalogDigestPlaceholder": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "catalogDigestProjection": "replace-top-level-packageDigest-with-placeholder",
+    "pathOrdering": "lowercase-ascii-ascending",
+    "framing": "magic + uint32be(entry-count) + repeated uint16be(path-bytes), path, uint32be(content-bytes), content",
+    "limits": {
+      "artifacts": 1024,
+      "catalogDepth": 128,
+      "catalogNodes": 100000,
+      "entryBytes": 16777216,
+      "pathBytes": 240,
+      "preimageBytes": 67108864
+    }
+  },
+  "claim": {
+    "summary": "The Web-React reference ecosystem has a documented deterministic package byte and digest profile.",
+    "target": "web-react",
+    "protocol": "0.1.0",
+    "directTraceRules": ["C-021", "R-018", "R-021", "R-030", "R-136"],
+    "normativeCoverage": { "tested": ["N-015"], "partial": ["N-010", "N-011"] },
+    "proofMatrix": { "claim": "P-05", "status": "PARTIAL" }
+  },
+  "prerequisites": {
+    "catalogManifestRegistration": {
+      "result": "PASS",
+      "artifactSha256": "e02ffd79e307baea2aeda8230890b4ded903f62553d8a59d084ccd052c891b30"
+    },
+    "protocolCanonicalization": {
+      "primitive": "RFC 8785-compatible canonical JSON plus SHA-256",
+      "task": "M02-T04"
+    }
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "WEB_REACT_PACKAGE_DIGEST_PLACEHOLDER",
+      "WEB_REACT_PACKAGE_DIGEST_PROFILE",
+      "createWebReactPackageDigest",
+      "encodeWebReactPackageDigestPreimage",
+      "verifyWebReactPackageDigest"
+    ],
+    "typeExports": [
+      "WebReactPackageArtifactInput",
+      "WebReactPackageDigestCalculationInput",
+      "WebReactPackageDigest",
+      "WebReactPackageDigestEntry",
+      "WebReactPackageDigestVerificationInput"
+    ],
+    "package": "@desen/reference-catalog-web",
+    "packageSpecifierConsumer": "packages/reference-catalog-web/test/package-consumer.mjs",
+    "catalogSdkRemainsFrameworkNeutral": true
+  },
+  "golden": {
+    "catalog": {
+      "id": "com.example.reference",
+      "version": "1.0.0",
+      "target": "web-react",
+      "digestProjection": "replace-top-level-packageDigest-with-placeholder",
+      "projectedBytes": 1220,
+      "projectedContentDigest": "sha256:605dbe783c83bff48363a5fc6a6c7a026f2e588bfcfe2fa3e429af9294ca60d6"
+    },
+    "entries": [
+      {
+        "path": "adapters/authoring.js",
+        "byteLength": 68,
+        "contentDigest": "sha256:04bfcd8392b1803c134fe07d828dca36ae2bb744d71c55ff62ee4cb18a3845a5"
+      },
+      {
+        "path": "adapters/production.js",
+        "byteLength": 70,
+        "contentDigest": "sha256:6ecbe14a946f6569eae4f10fb3829fcb23f0873efcaf8c15dd406986d0c39662"
+      },
+      {
+        "path": "catalog.json",
+        "byteLength": 1220,
+        "contentDigest": "sha256:605dbe783c83bff48363a5fc6a6c7a026f2e588bfcfe2fa3e429af9294ca60d6"
+      },
+      {
+        "path": "host/bindings.js",
+        "byteLength": 70,
+        "contentDigest": "sha256:90f6849b3016ef1fb49c9667d2390d01b6c6fbb6e40cd3d982a0b5a9cbbc4c1c"
+      },
+      {
+        "path": "tokens/provider.json",
+        "byteLength": 53,
+        "contentDigest": "sha256:f051d6fbdf73ff8576479e585614e72e701441202e4c058d272d3f002cd9060d"
+      }
+    ],
+    "preimageBytes": 1640,
+    "preimageSha256": "sha256:bb22ecc7a2849fe7466d9b5cba7d2c99dc7f8c3bd17b7c505244b2c308359589",
+    "packageDigest": "sha256:bb22ecc7a2849fe7466d9b5cba7d2c99dc7f8c3bd17b7c505244b2c308359589",
+    "independentNodeCryptoAgreement": true,
+    "publishedCatalogVerification": true
+  },
+  "vectors": {
+    "mutations": {
+      "singleArtifactByteMutations": 261,
+      "pathMutations": 4,
+      "catalogMutations": 1,
+      "inventoryMutations": 2,
+      "declaredDigestMismatches": 1,
+      "total": 269
+    },
+    "hostileProfileCategories": [
+      "Catalog identity and self-field",
+      "path portability, reservation, duplication, and limits",
+      "byte view brand, exact subview, size, detachment, and shared memory",
+      "wrapper, record, array density, descriptors, and unknown fields",
+      "caller ownership, output aliasing, and deep immutability"
+    ],
+    "callerOwnership": {
+      "inputsMutated": false,
+      "aliasesRetained": false,
+      "outputAuditDeepFrozen": true,
+      "freshPreimageBytes": true,
+      "sharedMemoryRejected": true
+    }
+  },
+  "trace": [
+    {
+      "id": "C-021",
+      "section": "7.4",
+      "line": 353,
+      "anchor": "is immutable for a given",
+      "summary": "A Capability Package is immutable for an exact package tuple",
+      "owners": ["M03-T04", "M03-T10"],
+      "tests": ["M03-T10"],
+      "evidence": "Same bytes retain a digest and any byte change changes the digest"
+    },
+    {
+      "id": "R-018",
+      "section": "8.5",
+      "line": 414,
+      "endLine": 418,
+      "anchor": "uniquely identifies a capability package",
+      "summary": "Package identity is the id, version, target, and packageDigest tuple",
+      "owners": ["M03-T04", "M06-T08", "M07-T03"],
+      "tests": ["M03-T10", "M10-T07"],
+      "evidence": "Tuple identity drives digest, publication, and activation tests"
+    },
+    {
+      "id": "R-021",
+      "section": "9.3",
+      "line": 461,
+      "anchor": "requires a major package version",
+      "summary": "Breaking contract changes require a major version and incompatible fallback is prohibited",
+      "owners": ["M03-T04", "M07-T03", "M12-T07"],
+      "tests": ["M03-T10", "M10-T07"],
+      "evidence": "Compatibility documentation and mismatch activation tests enforce major-version boundaries",
+      "bcp14": ["N-011"]
+    },
+    {
+      "id": "R-030",
+      "section": "11.4",
+      "line": 535,
+      "anchor": "including its catalog and target adapter artifacts",
+      "summary": "Package digest covers the immutable distributable catalog and target adapters",
+      "owners": ["M03-T04", "M03-T10"],
+      "tests": ["M03-T10"],
+      "evidence": "Package byte mutation changes the digest",
+      "bcp14": ["N-015"]
+    },
+    {
+      "id": "R-136",
+      "section": "30.2",
+      "line": 1615,
+      "endLine": 1621,
+      "anchor": "A package patch still produces a different digest",
+      "summary": "Package SemVer classifies contract change while every artifact change receives a new digest and explicit adoption",
+      "owners": ["M03-T04", "M03-T10", "M06-T08"],
+      "tests": ["M03-T10", "M06-T10"],
+      "evidence": "Version/digest compatibility matrix and exact bundle pinning agree"
+    }
+  ],
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "packageTests": 18,
+    "rootTests": 16,
+    "typeNegativeCases": 5,
+    "trackedFiles": [
+      {
+        "path": "packages/reference-catalog-web/src/package-digest-profile.ts",
+        "bytes": 32067,
+        "sha256": "9003f6080f7d4512aa49702ac46990a82a301bc0723979ad0e8744d558dbb394"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/index.ts",
+        "bytes": 599,
+        "sha256": "b845946fd8c453ed86d74ef41d60bb8ef309c3b33584b0d626b4396a69b40c64"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/package-digest-profile.test.ts",
+        "bytes": 21217,
+        "sha256": "fa72dbb2f30acada4fc51ffecbf9b36af72d1145c6a49345d94b91fad0e2712d"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/public-api.types.ts",
+        "bytes": 2554,
+        "sha256": "594f88e23e7854e2af8239cf49d3642ac8acc8d3de03b21b17cd2f7092d82b0d"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/package-consumer.mjs",
+        "bytes": 46,
+        "sha256": "0a34029fce407ef54eac01127aa81f3be226edc15b242c1f1609fee102a48e2e"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 855,
+        "sha256": "c82830415512e63d3a142b61da819b1683d497be1eeba46564651b2ce41abb19"
+      },
+      {
+        "path": "packages/reference-catalog-web/tsconfig.json",
+        "bytes": 172,
+        "sha256": "07fa9ea667348c72c2311ba2a6ebbb2a233e6e572b5977bb54d6cf177278152a"
+      },
+      {
+        "path": "packages/reference-catalog-web/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "tsconfig.react-web.json",
+        "bytes": 148,
+        "sha256": "4022c0c46b451a2783c0b8b612303981c65be843719fa19b8dda4f11754f3544"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "bytes": 852,
+        "sha256": "cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
+      },
+      {
+        "path": "docs/profiles/WEB-REACT-PACKAGE-DIGEST-V1.md",
+        "bytes": 7058,
+        "sha256": "ee6bd84a6d46d2b2ce452ad94254dc3fad39e74213de147c1da9b4bd5515e420"
+      },
+      {
+        "path": "docs/proof/WEB-REACT-PACKAGE-DIGEST.md",
+        "bytes": 2817,
+        "sha256": "1afd6ff272c4fbaf83423e05e5641335ac32b916368584aab1dad6c138695fdd"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/web-react-package-digest-proof.mjs",
+        "bytes": 80614,
+        "sha256": "189eef486943a91e6c3e4c6df0e6ce48d413ae6e870e2c325a9c219ea90e00d2"
+      },
+      {
+        "path": "scripts/generate-web-react-package-digest-proof.mjs",
+        "bytes": 813,
+        "sha256": "0e15c3c2aa7bea338d26394aae32fad7c29fd204fac43dde87302cc73c768ce7"
+      },
+      {
+        "path": "scripts/verify-web-react-package-digest.mjs",
+        "bytes": 647,
+        "sha256": "ce090f2105190a55bdd5bcccb988c3775e00c53ad8a01df7f4dfc20e16356dba"
+      },
+      {
+        "path": "tests/web-react-package-digest.test.mjs",
+        "bytes": 19137,
+        "sha256": "16f4f12600d649cd545c5fa7c155dfdfba4733c00c2d33c46c5da1c453bd7b48"
+      }
+    ],
+    "profileDocument": {
+      "path": "docs/profiles/WEB-REACT-PACKAGE-DIGEST-V1.md",
+      "bytes": 7058,
+      "sha256": "ee6bd84a6d46d2b2ce452ad94254dc3fad39e74213de147c1da9b4bd5515e420"
+    },
+    "commandWiring": [
+      "generate:web-react-package-digest",
+      "verify:web-react-package-digest",
+      "test:web-react-package-digest"
+    ],
+    "platformAudit": {
+      "source": "packages/reference-catalog-web/src/package-digest-profile.ts",
+      "distributions": [
+        {
+          "path": "packages/reference-catalog-web/dist/index.d.ts",
+          "bytes": 612,
+          "sha256": "21ac34b13f264acfb4cea01243ca6a676d2930683a6e68de22557566e63aadbc"
+        },
+        {
+          "path": "packages/reference-catalog-web/dist/package-digest-profile.d.ts",
+          "bytes": 7377,
+          "sha256": "8d0ed1c6854f46e7069341498bb3433455e357e87d769b988fb7fe1d1c496905"
+        },
+        {
+          "path": "packages/reference-catalog-web/dist/package-digest-profile.js",
+          "bytes": 28624,
+          "sha256": "c18595171b51be9037253dd61486393a727ecfd03867eb728bba9519b237acb1"
+        },
+        {
+          "path": "packages/reference-catalog-web/dist/index.js",
+          "bytes": 398,
+          "sha256": "8ff595081672ff63ffd2e2c15207964451cf29f5e810e65e5621b11f2a3e6ba7"
+        }
+      ],
+      "forbiddenPatterns": [
+        "node-builtins",
+        "non-protocol-bare-dependencies",
+        "dynamic-import",
+        "commonjs-require",
+        "node-buffer",
+        "network"
+      ]
+    }
+  },
+  "included": [
+    "versioned Web-React domain separation",
+    "projected canonical Catalog bytes",
+    "portable exact path validation and canonical ordering",
+    "unambiguous big-endian length framing",
+    "exact target artifact bytes",
+    "independent Node SHA-256 oracle",
+    "published Catalog self-digest verification",
+    "detached fresh bytes and immutable audit metadata"
+  ],
+  "deferred": [
+    "M03-T05 and M03-T06 real accessible reference components",
+    "M03-T08 host operation binding and synthetic fixtures",
+    "M03-T09 manifest-to-implementation parity",
+    "M03-T10 final reproducible artifact inventory and exact tuple",
+    "M06 publication and M07 distributor, retention, resolution, and activation",
+    "signatures, authenticity, release archives, npm publication, and native profiles"
+  ],
+  "limitations": [
+    "This project profile is not a universal DESEN 0.1.0 archive rule.",
+    "The digest preimage is not an executable npm, tar, or zip archive.",
+    "Catalog structural and semantic validity is independently checked by the validator.",
+    "An empty adapter inventory can be fingerprinted but is not a conforming complete package.",
+    "SHA-256 integrity does not establish publisher identity or authenticity.",
+    "P-05 remains PARTIAL and G03 remains open until the final package and lifecycle tasks."
+  ]
+}
