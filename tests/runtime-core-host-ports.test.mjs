@@ -31,7 +31,7 @@ test("accepts tracked deterministic M04-T01 host-port evidence", async () => {
   assert.equal(result.compilerNegativeCases, 9);
   assert.equal(result.rootMutationTests, 10);
   assert.equal(result.traceRules, 7);
-  assert.equal(result.trackedFiles, 16);
+  assert.equal(result.trackedFiles, 11);
   assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 
@@ -77,12 +77,6 @@ test("rejects missing, eager, mutable, or identity-changing factories", async ()
           ...input,
           navigation: Object.freeze({ navigate: (...args) => input.navigation.navigate(...args) }),
         });
-      },
-    },
-    {
-      unexpectedPublicRuntimeApi: true,
-      createRuntimeHostPorts(input) {
-        return input;
       },
     },
   ];

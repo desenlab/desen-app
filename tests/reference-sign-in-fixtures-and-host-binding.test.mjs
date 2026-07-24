@@ -133,9 +133,9 @@ test("accepts the tracked deterministic M03-T08 evidence", async () => {
   assert.equal(result.provenanceMode, "tracked-defaults");
   assert.equal(result.operationId, "com.example.auth/signIn");
   assert.equal(result.packageTests, 5);
-  assert.equal(result.rootTests, 13);
+  assert.equal(result.rootTests, 14);
   assert.equal(result.typeNegativeCases, 10);
-  assert.equal(result.trackedFiles, 21);
+  assert.equal(result.trackedFiles, 12);
   assert.equal(result.proofMatrixStatus, "P-10 PARTIAL");
 });
 
@@ -146,6 +146,97 @@ test("builds byte-identical evidence twice", async () => {
   assert.equal(first.artifact.evidence.provenance.mode, "injected-test");
   assert.equal(first.artifact.prerequisite.result, "SKIPPED");
   assert.equal(first.artifact.operation.pendingFixtureClaimed, false);
+});
+
+test("keeps later shared-ledger package and root growth outside task-owned evidence bytes", async () => {
+  const directory = await temporaryDirectory();
+  const { hostOperationsApi, operationsApi } = await loadApis();
+  const referencePackage = JSON.parse(
+    await readFile(
+      path.join(WORKSPACE_ROOT, "packages/reference-catalog-web/package.json"),
+      "utf8",
+    ),
+  );
+  const rootPackage = JSON.parse(await readFile(path.join(WORKSPACE_ROOT, "package.json"), "utf8"));
+  const operationIndex = await readFile(
+    path.join(WORKSPACE_ROOT, "packages/reference-catalog-web/src/operations/index.ts"),
+    "utf8",
+  );
+  const hostIndex = await readFile(
+    path.join(WORKSPACE_ROOT, "packages/reference-catalog-web/src/host-operations/index.ts"),
+    "utf8",
+  );
+  const baselineReferencePackagePath = path.join(directory, "reference-package-baseline.json");
+  const grownReferencePackagePath = path.join(directory, "reference-package-grown.json");
+  const baselineRootPackagePath = path.join(directory, "root-package-baseline.json");
+  const grownRootPackagePath = path.join(directory, "root-package-grown.json");
+  const baselineOperationIndexPath = path.join(directory, "operation-index-baseline.ts");
+  const grownOperationIndexPath = path.join(directory, "operation-index-grown.ts");
+  const baselineHostIndexPath = path.join(directory, "host-index-baseline.ts");
+  const grownHostIndexPath = path.join(directory, "host-index-grown.ts");
+  await Promise.all([
+    writeFile(baselineReferencePackagePath, `${JSON.stringify(referencePackage)}\n`),
+    writeFile(baselineRootPackagePath, `${JSON.stringify(rootPackage)}\n`),
+    writeFile(baselineOperationIndexPath, operationIndex),
+    writeFile(baselineHostIndexPath, hostIndex),
+  ]);
+  referencePackage.scripts["future:unrelated-package-task"] = "node future-package-task.mjs";
+  rootPackage.scripts["future:unrelated-root-task"] = "node future-root-task.mjs";
+  await Promise.all([
+    writeFile(grownReferencePackagePath, `${JSON.stringify(referencePackage)}\n`),
+    writeFile(grownRootPackagePath, `${JSON.stringify(rootPackage)}\n`),
+    writeFile(
+      grownOperationIndexPath,
+      `${operationIndex}\nexport { futureOperationRegistration } from "./future-operation.js";\n`,
+    ),
+    writeFile(
+      grownHostIndexPath,
+      `${hostIndex}\nexport { bindFutureHostOperation } from "./future-host-operation.js";\n`,
+    ),
+  ]);
+
+  const [baseline, grown] = await Promise.all([
+    injected({
+      hostIndexSourcePath: baselineHostIndexPath,
+      hostOperationsApi,
+      operationIndexSourcePath: baselineOperationIndexPath,
+      operationsApi,
+      referencePackagePath: baselineReferencePackagePath,
+      rootPackagePath: baselineRootPackagePath,
+    }),
+    injected({
+      hostIndexSourcePath: grownHostIndexPath,
+      hostOperationsApi: Object.freeze({
+        ...hostOperationsApi,
+        bindFutureHostOperation: () => undefined,
+      }),
+      operationIndexSourcePath: grownOperationIndexPath,
+      operationsApi: Object.freeze({
+        ...operationsApi,
+        futureOperationRegistration: Object.freeze({}),
+      }),
+      referencePackagePath: grownReferencePackagePath,
+      rootPackagePath: grownRootPackagePath,
+    }),
+  ]);
+  assert.deepEqual(grown.artifactBytes, baseline.artifactBytes);
+  assert.deepEqual(
+    baseline.artifact.evidence.trackedFiles.map(({ path: trackedPath }) => trackedPath),
+    [
+      "docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md",
+      "packages/reference-catalog-web/src/operations/sign-in.ts",
+      "packages/reference-catalog-web/src/host-operations/sign-in.ts",
+      "packages/reference-catalog-web/test/sign-in-operation.test.ts",
+      "packages/reference-catalog-web/test/sign-in-operation.types.ts",
+      "packages/reference-catalog-web/test/operations-consumer.mjs",
+      "packages/reference-catalog-web/test/host-operations-consumer.mjs",
+      "packages/testkit/test/reference-sign-in-fixtures.test.ts",
+      "scripts/generate-reference-sign-in-fixtures-and-host-binding-proof.mjs",
+      "scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs",
+      "scripts/lib/reference-sign-in-fixtures-and-host-binding-proof.mjs",
+      "tests/reference-sign-in-fixtures-and-host-binding.test.mjs",
+    ],
+  );
 });
 
 test("labels explicit build options as injected evidence", async () => {
@@ -401,15 +492,6 @@ test("rejects public export package and source-boundary drift", async () => {
     );
     await assert.rejects(injected({ operationsApi, operationsConsumerPath }), (error) =>
       expectEvidenceFailure(error, "SIGN_IN_BINDING_PACKAGE_CONSUMER_DRIFT"),
-    );
-  }
-
-  for (const operationsApiDrift of [
-    Object.freeze({ ...operationsApi, default: () => undefined }),
-    Object.freeze({ ...operationsApi, executableLeak: () => undefined }),
-  ]) {
-    await assert.rejects(injected({ operationsApi: operationsApiDrift }), (error) =>
-      expectEvidenceFailure(error, "SIGN_IN_BINDING_PUBLIC_API_DRIFT"),
     );
   }
 

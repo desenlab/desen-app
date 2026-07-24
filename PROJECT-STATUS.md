@@ -101,7 +101,12 @@ failure, policy denial, resolved values, and missing values distinct. Exact sour
 package-entry, TSDoc, platform, callback-receiver, test-registration, prerequisite, and atomic-write
 evidence passes without claiming resolution, lifecycle, action execution, storage behavior, or
 adapter implementation. This reference API records `PF-031`; it does not change frozen protocol,
-Proof Matrix, normative-coverage, or proof-gate status.
+Proof Matrix, normative-coverage, or proof-gate status. M04-T02 now adds one bounded read-only
+resolver over seven explicit immutable runtime namespaces. Missing, JSON null, falsy values,
+fallback, lifecycle envelopes, arrays, and resolved reference-shaped data remain distinct; hostile
+or over-budget data fails closed without a partial result. Token and format forms are fenced for
+M04-T03. This task records `PF-032` and likewise changes no `P-*`, `N-*`, `S-*`, or proof-gate
+status.
 
 ## Current milestone
 
@@ -130,9 +135,10 @@ Proof Matrix, normative-coverage, or proof-gate status.
   `M03-T08 — Sign-in fixtures and separate trusted host operation binding`,
   `M03-T09 — Catalog/implementation parity and component-side contract tests`,
   `M03-T10 — Final immutable capability artifact and exact tuple`,
-  `M04-T01 — Framework-neutral host ports`
+  `M04-T01 — Framework-neutral host ports`,
+  `M04-T02 — Literal/reference/fallback resolver`
 - Active task: None
-- Ready next task: `M04-T02 — Literal/reference/fallback resolver`
+- Ready next task: `M04-T03 — Token and deterministic string-format resolution`
 - Status: `DONE`
 
 ## Completed preparation
@@ -266,7 +272,7 @@ Proof Matrix, normative-coverage, or proof-gate status.
   1,048,576-byte limits. Its context records caller classification rather than claiming to detect
   secrets or personal data; N-036 and N-040 remain `PLANNED` for their later audits.
 - The reference sign-in slice passes 3 reference-package tests, 2 testkit tests, 10
-  compiler-negative cases, and 13 independent proof/mutation tests. Its registration equals the
+  compiler-negative cases, and 14 independent proof/mutation tests. Its registration equals the
   exact official `com.example.auth/signIn` manifest; the synthetic success output satisfies the
   declared schema, `invalidCredentials` is found, and the declared `unavailable` outcome remains
   explicitly missing. Fixture snapshots are detached, deeply frozen inert JSON and reject the
@@ -277,7 +283,7 @@ Proof Matrix, normative-coverage, or proof-gate status.
   database, authorization policy, or executable code. P-10 is only `PARTIAL`; C-018, R-092, and
   R-100 have local partial evidence, while N-036 and N-040 remain `PLANNED`.
 - The reference implementation-parity slice passes 26 cumulative package tests, 10
-  compiler-negative cases, and 13 independent proof/mutation tests. It covers exactly the five
+  compiler-negative cases, and 14 independent proof/mutation tests. It covers exactly the five
   selected official component entries plus the explicitly delegated sign-in operation, while a
   scope guard proves that Map, Sortable, additional operations, and resources are not being
   claimed. Every declared prop, slot, event, command, style part, and visual state has exact
@@ -287,7 +293,7 @@ Proof Matrix, normative-coverage, or proof-gate status.
   React value, endpoint, credential, or handler. Source and export audits prevent package-root
   leakage and transitive selection of the executable component barrel. S-004 is `TESTED`; P-06 is
   only `PARTIAL`, and N-030/N-033/N-034 remain `PLANNED` for their later runtime owners.
-- The final capability-artifact slice passes 18 independent root tests and six built Catalog
+- The final capability-artifact slice passes 19 independent root tests and six built Catalog
   validation stages. One snapshotted compiler input set produces two isolated builds that match
   the workspace distribution across all 76 regular files and 224,069 bytes. An independent frame
   parser and Node.js SHA-256 oracle reproduce the exact
@@ -312,9 +318,17 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   without eager execution or caller mutation. The evidence protects one runtime export, 30 public
   types, all 31 TSDoc declarations, exact source/distribution/package entry points, JSON-only
   observable data, policy-denial separation, immutable Bundle/CAS activation storage contracts,
-  platform/evaluation exclusions, direct test registration, 7 trace responsibilities, 16 tracked
+  platform/evaluation exclusions, direct test registration, 7 trace responsibilities, 11 tracked
   files, prerequisite integrity, and safe atomic writes. M04-T02–M04-T16 and M07 retain behavior
   and implementation ownership; no `P-*`, `N-*`, `S-*`, or proof-gate status changes.
+- The M04-T02 value-resolution boundary passes 34 focused package tests, 10 compiler-negative
+  cases, and 13 independent proof/mutation tests. Three runtime exports and 17 types define one
+  factory-branded immutable snapshot and one complete-outcome resolver across seven namespaces.
+  The evidence preserves missing-versus-null and fallback semantics, exact lifecycle envelopes,
+  no array traversal, no second-pass evaluation, no partial composite values, output budgets after
+  reference composition, hostile-input rejection, platform neutrality, 9 trace assignments, and
+  11 tracked files. Token and format execution remains M04-T03; consumer-schema and adapter
+  validation remain M05. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -332,10 +346,10 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Start `M04-T02 — Literal/reference/fallback resolver for state, context, resource, operation,
-event, item, and env`. Resolve only against explicit immutable runtime snapshots, preserve the
-protocol's missing-versus-null and fallback rules, validate hostile dynamic JSON at runtime, and
-keep the implementation independent of React, DOM, CSS, browser, and application code.
+Start `M04-T03 — Token and deterministic string-format resolution`. Consume the deferred token and
+format outcomes from M04-T02, resolve only through explicit trusted inputs, preserve the same
+bounded complete-outcome behavior, and keep the implementation independent of React, DOM, CSS,
+browser, and application code.
 
 M02-T02 evidence:
 
@@ -444,13 +458,13 @@ M03-T08 evidence:
 
 - `docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md`
 - `docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json`
-- artifact SHA-256: `cf52d3999313c5003b659de267bf8e84d8b9b08d45957c7f51d82583e45163ce`
+- artifact SHA-256: `b0413687bd907b71509db52d3e22b6eda5a4150509ac323bf51e5f8425f897e2`
 
 M03-T09 evidence:
 
 - `docs/proof/REFERENCE-CATALOG-WEB-PARITY.md`
 - `docs/proof/artifacts/reference-catalog-web-parity.json`
-- artifact SHA-256: `0cdf47acc951fb586d96fcf2a1005a04e3ac2ab0498bcf90eee399e8b22106ab`
+- artifact SHA-256: `6e350f2af71ac4e1f040afe7a3fcc3035de35b585f0121db6a2b35b4f3552a8a`
 
 M03-T10 and G03 evidence:
 
@@ -460,8 +474,8 @@ M03-T10 and G03 evidence:
 - exact tuple:
   `run.desen.reference.sign-in@0.1.0 / web-react / sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
 - Catalog SHA-256: `3113e299e0bec65f19b823a712378592a57806116b1eadd902c0390906772279`
-- artifact SHA-256: `247e90b57b673a079da2ea95fe168637ee7f09f2681005746f7a9ab76721bb45`
-- exhaustive target inventory: 76 files, 224,069 bytes, 236 mutation vectors
+- artifact SHA-256: `4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0`
+- exhaustive target inventory: 76 files, 224,069 bytes, 236 mutation vectors, 19 root tests
 
 SC-01 evidence:
 
@@ -486,11 +500,21 @@ M04-T01 evidence:
 
 - `docs/proof/RUNTIME-CORE-HOST-PORTS.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-host-ports.json`
-- artifact SHA-256: `ae53ba726dc2a0657e46ce7c4187211f0349d78f352d6bd4cb67feb1a0ac472f`
+- artifact SHA-256: `5a53cfc9698339a2e9da72c496c1b204e0da138da3d3c1efdc1fe0b5c0e4f190`
 - exact boundary: 9 ports, 14 callbacks, 1 runtime export, 30 type exports, and 31/31 public
   declarations with TSDoc
 - executable evidence: 10 package tests, 9 compiler-negative cases, 10 root proof/mutation tests,
-  7 contract-only trace assignments, and 16 byte-tracked files
+  7 contract-only trace assignments, and 11 byte-tracked files
+
+M04-T02 evidence:
+
+- `docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-value-resolution.json`
+- artifact SHA-256: `73e4c3d7640eaefd0b45b04b006df3211f0338fafa77293414d43c1052536fea`
+- exact boundary: 7 namespaces, 3 runtime exports, 17 type exports, and 20/20 public declarations
+  with TSDoc
+- executable evidence: 34 package tests, 10 compiler-negative cases, 13 root proof/mutation tests,
+  9 trace assignments, 10 resolution probes, 8 safety probes, and 11 byte-tracked files
 
 ## Status vocabulary
 

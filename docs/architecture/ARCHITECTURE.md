@@ -127,6 +127,24 @@ The core receives capabilities through explicit interfaces for:
 No core API accepts `ReactNode`, DOM events, selectors, class names, arbitrary HTML, or executable
 functions inside a DESEN document.
 
+## Runtime value boundary
+
+The runtime composes one factory-branded, detached, recursively frozen snapshot for `state`,
+`context`, `resource`, `operation`, `event`, `item`, and `env`. Those maps come from an already
+validated active surface and the current evaluation turn; the snapshot factory enforces inert
+data, exact lifecycle/event envelopes, and limits rather than reopening the Bundle or Catalog.
+
+Literal/reference/fallback resolution produces exactly one complete JSON candidate or an explicit
+unresolved, invalid, or deferred result. Missing differs from JSON `null`; fallback cannot invent
+an absent declaration root or revive an inactive event scope. References traverse own object
+properties but never arrays, never trigger writes or host effects, and never evaluate
+reference-shaped scope data a second time.
+
+Snapshot input, ValueSpec input, and the final composed output all share the same bounded profile.
+The output is detached and budgeted again so repeated references cannot amplify individually legal
+values past depth, node-occurrence, or string limits. Exact consumer-schema validation still runs
+after resolution and before any value reaches a target adapter.
+
 ## Activation sequence
 
 ```text

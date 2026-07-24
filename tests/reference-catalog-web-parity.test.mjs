@@ -108,9 +108,9 @@ test("accepts the tracked deterministic M03-T09 evidence", async () => {
   assert.equal(result.operations, 1);
   assert.equal(result.resolvedContractVectors, 3);
   assert.equal(result.packageTests, 26);
-  assert.equal(result.rootTests, 13);
+  assert.equal(result.rootTests, 14);
   assert.equal(result.typeNegativeCases, 10);
-  assert.equal(result.trackedFiles, 34);
+  assert.equal(result.trackedFiles, 23);
   assert.equal(result.proofMatrixStatus, "P-06 PARTIAL");
   assert.equal(result.normativeStatus, "S-004 TESTED");
 });
@@ -123,6 +123,103 @@ test("builds byte-identical injected evidence twice", async () => {
   assert.equal(first.artifact.prerequisite.packageDigest.result, "SKIPPED");
   assert.equal(first.artifact.prerequisite.signIn.result, "SKIPPED");
   assert.equal(first.artifact.catalogScope.officialCatalogRepublished, false);
+});
+
+test("keeps unrelated normative and root-script growth outside task-owned evidence bytes", async () => {
+  const directory = await temporaryDirectory();
+  const { parityApi, componentApi, operationsApi, hostOperationsApi, packageRootApi } =
+    await loadApis();
+  const normativeCoverage = await readFile(
+    path.join(WORKSPACE_ROOT, "docs/proof/NORMATIVE-COVERAGE.md"),
+    "utf8",
+  );
+  const rootPackage = JSON.parse(await readFile(path.join(WORKSPACE_ROOT, "package.json"), "utf8"));
+  const parityIndex = await readFile(
+    path.join(WORKSPACE_ROOT, "packages/reference-catalog-web/src/parity/index.ts"),
+    "utf8",
+  );
+  const baselineNormativePath = path.join(directory, "normative-baseline.md");
+  const grownNormativePath = path.join(directory, "normative-grown.md");
+  const baselineRootPackagePath = path.join(directory, "root-package-baseline.json");
+  const grownRootPackagePath = path.join(directory, "root-package-grown.json");
+  const baselineParityIndexPath = path.join(directory, "parity-index-baseline.ts");
+  const grownParityIndexPath = path.join(directory, "parity-index-grown.ts");
+  await Promise.all([
+    writeFile(baselineNormativePath, normativeCoverage),
+    writeFile(
+      grownNormativePath,
+      `${normativeCoverage}\n| N-999 | Future owner | PLANNED | M99-T99 |\n`,
+    ),
+    writeFile(baselineRootPackagePath, `${JSON.stringify(rootPackage)}\n`),
+    writeFile(baselineParityIndexPath, parityIndex),
+    writeFile(
+      grownParityIndexPath,
+      `${parityIndex}\nexport { FUTURE_PARITY_HELPER } from "./future-parity.js";\n`,
+    ),
+  ]);
+  rootPackage.scripts["future:unrelated-root-task"] = "node future-root-task.mjs";
+  await writeFile(grownRootPackagePath, `${JSON.stringify(rootPackage)}\n`);
+
+  const [baseline, grown] = await Promise.all([
+    injected({
+      componentApi,
+      hostOperationsApi,
+      normativeCoveragePath: baselineNormativePath,
+      operationsApi,
+      packageRootApi,
+      parityApi,
+      parityIndexSourcePath: baselineParityIndexPath,
+      rootPackagePath: baselineRootPackagePath,
+    }),
+    injected({
+      componentApi: Object.freeze({
+        ...componentApi,
+        futureComponentRegistration: Object.freeze({}),
+      }),
+      hostOperationsApi: Object.freeze({
+        ...hostOperationsApi,
+        bindFutureHostOperation: () => undefined,
+      }),
+      normativeCoveragePath: grownNormativePath,
+      operationsApi: Object.freeze({
+        ...operationsApi,
+        futureOperationRegistration: Object.freeze({}),
+      }),
+      packageRootApi: Object.freeze({
+        ...packageRootApi,
+        futurePackageHelper: () => undefined,
+      }),
+      parityApi: Object.freeze({
+        ...parityApi,
+        FUTURE_PARITY_HELPER: () => undefined,
+      }),
+      parityIndexSourcePath: grownParityIndexPath,
+      rootPackagePath: grownRootPackagePath,
+    }),
+  ]);
+  assert.deepEqual(grown.artifactBytes, baseline.artifactBytes);
+  assert.equal(
+    Object.hasOwn(baseline.artifact.evidence.claimDocuments, "normativeCoverage"),
+    false,
+  );
+  const trackedPaths = baseline.artifact.evidence.trackedFiles.map(
+    ({ path: trackedPath }) => trackedPath,
+  );
+  for (const excludedPath of [
+    "docs/architecture/ARCHITECTURE.md",
+    "docs/plan/PROTOCOL-FINDINGS.md",
+    "docs/proof/NORMATIVE-COVERAGE.md",
+    "packages/reference-catalog-web/README.md",
+    "packages/reference-catalog-web/package.json",
+    "packages/reference-catalog-web/src/components/index.ts",
+    "packages/reference-catalog-web/src/host-operations/index.ts",
+    "packages/reference-catalog-web/src/operations/index.ts",
+    "packages/reference-catalog-web/src/parity/index.ts",
+    "package.json",
+    "pnpm-lock.yaml",
+  ]) {
+    assert.equal(trackedPaths.includes(excludedPath), false);
+  }
 });
 
 test("rejects unsafe or unknown build options without invoking accessors", async () => {

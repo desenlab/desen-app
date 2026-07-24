@@ -19,10 +19,10 @@ settlement envelope, or the repository's activation generation record.
 
 ## Public boundary
 
-`@desen/runtime-core` exposes exactly one runtime value, `createRuntimeHostPorts`, and thirty
-public types. All thirty-one public declarations have TSDoc. The source entry point, built entry
-point, declarations, source maps, package export map, and actual runtime module export keys are
-checked as exact inventories rather than substring matches.
+The M04-T01 slice contributes exactly one runtime value, `createRuntimeHostPorts`, and thirty
+public types to `@desen/runtime-core`. All thirty-one declarations have TSDoc. The task-owned
+module, declarations, source maps, package entry point, and named root re-exports are checked
+exactly while later task-owned named exports may extend the package deliberately.
 
 | Port          | M04-T01 contract                                                                   |
 | ------------- | ---------------------------------------------------------------------------------- |
@@ -97,7 +97,7 @@ The deterministic evidence suite covers:
   drift, symlinks, and atomic-write substitution;
 - 7 trace responsibilities: `R-041`, `R-046`, `R-089`, `R-105`, `R-106`, `R-122`, and `D-026`;
   and
-- exact SHA-256 records for 16 task-owned source, test, distribution, and proof files.
+- exact SHA-256 records for 11 task-owned source, test, distribution, and proof files.
 
 Test inventory is derived from direct, unconditional test registrations. Removed, skipped,
 renamed, nested, or conditionally disabled registrations cannot retain the previous evidence
@@ -125,7 +125,7 @@ Verified prerequisite:
 
 ```text
 docs/proof/artifacts/reference-catalog-web-capability-artifact.json
-sha256:247e90b57b673a079da2ea95fe168637ee7f09f2681005746f7a9ab76721bb45
+sha256:4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0
 ```
 
 The verifier reports the M04-T01 receipt SHA-256. `PROJECT-STATUS.md` and `PROOF-MATRIX.md`
@@ -133,9 +133,11 @@ record that final value without duplicating task-owned file hashes here.
 
 ## Boundaries
 
-M04-T01 proves the host contracts and their stable composition. It does not yet prove:
+M04-T01 proves the host contracts and their stable composition. This receipt does not itself prove
+the later runtime behaviors. M04-T02 now separately proves bounded literal/reference/fallback
+resolution; the remaining boundaries are:
 
-- literal/reference/fallback or token-format resolution;
+- token and deterministic string-format resolution;
 - state, repeat, predicate, variant, or style evaluation;
 - resource and operation lifecycle, concurrency, or settlement actions;
 - navigation execution or diagnostic behavior;
@@ -144,7 +146,7 @@ M04-T01 proves the host contracts and their stable composition. It does not yet 
 - React, browser, iOS, or Android adapters; or
 - a complete framework-neutral sign-in runtime.
 
-Those responsibilities remain assigned to M04-T02 through M04-T16, M05, and M07. The exact
+Those responsibilities remain assigned to M04-T03 through M04-T16, M05, and M07. The exact
 nine-port aggregate is the M04-T01 slice; M04-T12/M04-T14 must make any event/command bridge
 extension intentional and reviewed. No Proof Matrix, normative-coverage, or proof-gate status
 changes in this task.

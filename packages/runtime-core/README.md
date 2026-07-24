@@ -78,6 +78,71 @@ runtime bridge already exists. Allowlisted `event.emit`, component commands, and
 adapter bridges remain explicitly assigned to M04-T12 and M04-T14. Adding a future trusted bridge
 there requires an intentional, versioned host-contract change rather than an untracked extra key.
 
+## M04-T02 value-resolution API
+
+`createRuntimeResolutionSnapshot` copies all seven reference namespaces as one bounded,
+recursively frozen value. The snapshot is factory-branded: a caller cannot substitute a mutable
+lookalike and bypass the atomic data boundary.
+
+The runtime must compose those maps from an already validated active surface and the current
+evaluation turn. The factory proves data safety, envelope shape, detachment, and map presence; it
+does not independently reopen the Bundle to prove that a supplied root was declared.
+
+| Namespace   | Runtime view                                                              |
+| ----------- | ------------------------------------------------------------------------- |
+| `state`     | Exact surface-local declaration roots and array-free nested object paths  |
+| `context`   | Explicit host-approved, non-secret JSON; never a platform-global fallback |
+| `resource`  | Declared roots exposing only `status`, `pending`, `value.*`, `error.code` |
+| `operation` | Declared aliases with the same public lifecycle allowlist                 |
+| `event`     | Payload only during the immediate handler turn                            |
+| `item`      | Exact currently active repeat aliases                                     |
+| `env`       | Explicit reserved and profile-defined environment paths                   |
+
+`resolveRuntimeValue` returns one explicit result:
+
+- `resolved` contains one complete immutable JSON value and records whether a fallback was used;
+- `unresolved` contains `REFERENCE_UNRESOLVED`, the exact `$ref` pointer, reference, and reason;
+- `invalid` rejects malformed, executable, accessor-backed, cyclic, or over-budget data; and
+- `deferred` fences `$token` and `$format` until M04-T03 rather than guessing their behavior.
+
+```ts
+import { createRuntimeResolutionSnapshot, resolveRuntimeValue } from "@desen/runtime-core";
+
+const snapshot = createRuntimeResolutionSnapshot({
+  state: { profile: { name: "Selman" } },
+  context: { route: { tenant: "desenlab" } },
+  resource: {},
+  operation: {},
+  event: { status: "unavailable" },
+  item: {},
+  env: { platform: "web" },
+});
+
+const title = resolveRuntimeValue({ $ref: "state.profile.name", fallback: "Untitled" }, snapshot);
+```
+
+JSON `null`, `false`, `0`, and an empty string are resolved values, so none selects a fallback.
+Fallback is evaluated only when a legal active root has a missing value. It cannot create an
+unknown state/resource/operation/item root, revive an unavailable event scope, or legalize an
+unlisted lifecycle path. Arrays may be returned whole but reference paths never traverse them.
+A value obtained from a scope stays inert even if its JSON shape resembles another `$ref`,
+`$token`, or `$format`.
+
+The factory and resolver use one shared safety profile: depth 128, 4,096 JSON occurrences, and
+1,048,576 combined UTF-16 code units. They copy only enumerable own data properties and reject
+accessors, functions, promises, symbols, non-plain class/prototype shapes, sparse or decorated
+arrays, cycles, non-finite numbers, and reflection failures. Accepted plain-record-compatible
+objects contribute only enumerable own data; inherited fields are never copied. Arbitrary `Proxy`
+traps cannot be prevented from running by JavaScript reflection; their exceptions are contained
+and the complete input is rejected. A failure or deferred child never exposes a partial composite
+value. The complete composed output is detached and checked again against all three limits, so
+repeating a legal large reference cannot amplify node, string, or depth cost past the same profile.
+
+Resolution produces a candidate JSON value. Capability prop/style schema validation and
+`PROP_TYPE_MISMATCH` still belong to the adapter composition boundary in M05; a later type
+mismatch must not retry a fallback. Lifecycle transitions, event lifetime production, context
+secret classification, tokens, and formatting remain with their named later tasks.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -111,9 +176,10 @@ there requires an intentional, versioned host-contract change rather than an unt
 
 ## Status
 
-Private proof package. M04-T01 defines only host contracts and stable callback composition.
-Resolution, state, resource/operation lifecycle, action execution, rendering, activation
-implementation, event/command bridges, and adapters remain assigned to their later tracked tasks.
+Private proof package. M04-T01 defines host contracts and stable callback composition; M04-T02
+defines bounded literal/reference/fallback materialization. Tokens, formatting, state writes,
+resource/operation transitions, action execution, rendering, activation implementation,
+event/command bridges, and adapters remain assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -122,10 +188,12 @@ implementation, event/command bridges, and adapters remain assigned to their lat
 
 ## Quality
 
-Use the focused host-port test and root workspace quality gate:
+Use the focused runtime tests and root workspace quality gate:
 
 ```bash
 pnpm --filter @desen/runtime-core test:host-ports
+pnpm --filter @desen/runtime-core test:value-resolution
 pnpm verify:runtime-core-host-ports
+pnpm verify:runtime-core-value-resolution
 pnpm check
 ```

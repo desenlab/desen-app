@@ -14,7 +14,7 @@
     "task": "M03-T10",
     "result": "PASS",
     "artifact": "reference-catalog-web-capability-artifact.json",
-    "artifactSha256": "247e90b57b673a079da2ea95fe168637ee7f09f2681005746f7a9ab76721bb45"
+    "artifactSha256": "4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0"
   },
   "publicApi": {
     "publicDeclarations": 31,
@@ -199,11 +199,6 @@
         "sha256": "2ce99b5623ed9ce59b91b9642ad9b190e31b890e83bff2d46f4d437eb8cefe3e"
       },
       {
-        "path": "packages/runtime-core/src/index.ts",
-        "bytes": 1015,
-        "sha256": "489eeda3039049028c5c88417c4dc8044099652a9a67d40786882f55b04a7309"
-      },
-      {
         "path": "packages/runtime-core/test/host-ports.test.ts",
         "bytes": 9921,
         "sha256": "f656605530aa21e2063e8db726aebc7835a6c7b20834eea78edfa1edf0528b44"
@@ -234,29 +229,9 @@
         "sha256": "a2f32ab22cb81e53e244e2bc531d6c4f8af21978888cdca1b259ff98ab15d031"
       },
       {
-        "path": "packages/runtime-core/dist/index.js",
-        "bytes": 239,
-        "sha256": "752e303602ce793bb90108b3f5d58fdc71c6deb04181a904ea0adc110ebab236"
-      },
-      {
-        "path": "packages/runtime-core/dist/index.js.map",
-        "bytes": 158,
-        "sha256": "914c45f3834c83cc79ffe48e2d641fc7b268e2dbf71ca51839318f4906cd8f67"
-      },
-      {
-        "path": "packages/runtime-core/dist/index.d.ts",
-        "bytes": 988,
-        "sha256": "4c444fe02b5192e5ac8e636bdae6c90227636db4bb89964f01a193bc2123f023"
-      },
-      {
-        "path": "packages/runtime-core/dist/index.d.ts.map",
-        "bytes": 583,
-        "sha256": "da31dd963612789a7fdb12fc9a934c483f43af28681843be90954e7551585989"
-      },
-      {
         "path": "scripts/lib/runtime-core-host-ports-proof.mjs",
-        "bytes": 35062,
-        "sha256": "58cdab33d00e58132b319f1a8f899aedbbd2c61b1ecb1f12a40a991e0bd759ae"
+        "bytes": 34916,
+        "sha256": "f27df18261f77d54a9728e1f6f573116d6f8eb4b9ec4fc02b4800190a7b2251b"
       },
       {
         "path": "scripts/generate-runtime-core-host-ports-proof.mjs",
@@ -270,8 +245,8 @@
       },
       {
         "path": "tests/runtime-core-host-ports.test.mjs",
-        "bytes": 11821,
-        "sha256": "e601dbf9e394dad3c598e9b1a66fbffc8d4e2a6ccd5557d7e8898b646a9f61a1"
+        "bytes": 11699,
+        "sha256": "07616aeba16a91b82aa31e501932ebe84698f86c1175737763a540d0065c7094"
       }
     ],
     "rootScripts": [

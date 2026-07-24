@@ -77,7 +77,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | ID      | Status      | Depends on       | Deliverable / evidence                                                                             |
 | ------- | ----------- | ---------------- | -------------------------------------------------------------------------------------------------- |
 | M04-T01 | DONE        | G03              | Host ports for navigation, storage, operations, resources, tokens, environment, clock, diagnostics |
-| M04-T02 | NOT_STARTED | M04-T01          | Literal/reference/fallback resolver for state, context, resource, operation, event, item, and env  |
+| M04-T02 | DONE        | M04-T01          | Literal/reference/fallback resolver for state, context, resource, operation, event, item, and env  |
 | M04-T03 | NOT_STARTED | M04-T02          | Token and deterministic string-format resolution                                                   |
 | M04-T04 | NOT_STARTED | M04-T02          | Predicate evaluation and conditional presence                                                      |
 | M04-T05 | NOT_STARTED | M04-T03–M04-T04  | Ordered variant and style override evaluation                                                      |

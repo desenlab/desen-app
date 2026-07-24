@@ -693,3 +693,54 @@ This file records implementation discoveries without changing the frozen DESEN 0
   technical failures, resource/navigation denial diagnostics, environment value types, clock and
   cache semantics, diagnostic ordering, and activation persistence independently of the frozen
   Source/Bundle/Catalog schemas.
+
+## PF-032 — Runtime value resolution uses a bounded atomic snapshot profile
+
+- Status: OPEN
+- Blocks proof: No; one narrow fail-closed runtime profile can resolve the frozen value forms
+  without claiming a universal JavaScript object or host-lifecycle model.
+- Protocol location: SPEC Sections 10.4, 14, 17.2, 20.4, 24.2, and 26.3; Appendix A read-only
+  bindings; Appendix B `PROP_TYPE_MISMATCH` and `REFERENCE_UNRESOLVED`
+- Observation: DESEN 0.1.0 defines seven read-only reference namespaces and distinguishes a missing
+  value from JSON `null`, but it does not define a runtime snapshot API, atomicity mechanism,
+  JavaScript hostile-object boundary, portable safety budgets, lifecycle observation envelope, or
+  result union. It also leaves context content and updates profile-defined, assigns
+  resource/operation transitions to later runtime behavior, and requires a fallback to be
+  target-valid without making reference resolution itself aware of every eventual consumer
+  schema. The protocol cannot guarantee that arbitrary caller-supplied strings contain no secrets,
+  and JavaScript reflection over an arbitrary `Proxy` may execute its traps.
+- Implementation decision: M04-T02 creates one detached, recursively frozen, factory-branded
+  snapshot containing exact `state`, `context`, `resource`, `operation`, `event`, `item`, and `env`
+  views before any namespace becomes observable. The snapshot and each ValueSpec share the
+  resolved-data limits of depth 128, 4,096 JSON nodes, and 1,048,576 UTF-16 string units. Accessors,
+  functions, promises, symbols, cycles, sparse or decorated arrays, non-finite numbers, reflection
+  exceptions, and over-budget data fail closed. Accepted records must have a null prototype or an
+  Object-constructor-compatible plain-record prototype. Ordinary prototype-bearing or class
+  instances are rejected, only enumerable own data properties are copied, and inherited data is
+  never observable; the profile does not claim that every adversarially spoofed custom prototype
+  is detectable. Accessors are rejected without invoking getters. Arbitrary Proxy traps may run
+  during necessary reflection, but thrown traps are contained and cannot expose a partial snapshot
+  or resolved value; this profile does not claim a no-code-execution membrane for Proxy inputs.
+  State, resource, operation, and item use exactly the second segment as the root; paths traverse
+  own object properties and never arrays. Scope values shaped like another ValueSpec remain inert
+  and are not evaluated again. The complete composed result is detached and checked again against
+  all three budgets, preventing repeated legal references from amplifying node, string, or depth
+  cost beyond the profile. Lifecycle views expose only exact idle, pending,
+  succeeded-with-value, or failed-with-public-code envelopes, and event scope uses an explicit
+  available/unavailable marker. Fallback is considered only for a missing path beneath a valid
+  active scope/root. A selected value is still only a candidate: the exact consumer schema must
+  validate it before adapter use, and a later `PROP_TYPE_MISMATCH` never causes fallback retry.
+  Context-secret classification and the repository-wide secret audit remain planned; consumer type
+  validation and adapter omission/failure composition remain M05; resource and operation
+  transitions, concurrency, and settlement remain M04-T08/M04-T09. The task proof anchors these
+  exact profile rules:
+  - JSON null remains resolved and never selects fallback
+  - unknown roots and inactive scopes cannot be legalized by fallback
+  - token and format materialization remains deferred to M04-T03
+    Snapshot map provenance is a runtime-composition precondition: the factory checks inert data,
+    exact envelopes, detachment, and map presence, but does not independently reopen a Bundle or
+    Catalog to prove declaration membership. M04-T16 retains that complete composition proof.
+- Future action: A later versioned runtime profile should standardize cross-language snapshot and
+  lifecycle envelopes, portable safety limits, cancellation/update atomicity, consumer-validation
+  composition, context classification and redaction, and whether executable-language proxy-like
+  inputs are categorically forbidden at public integration boundaries.

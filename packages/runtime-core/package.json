@@ -21,7 +21,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:host-ports": "vitest run test/host-ports.test.ts"
+    "test:host-ports": "vitest run test/host-ports.test.ts",
+    "test:value-resolution": "vitest run test/value-resolution.test.ts"
   },
   "dependencies": {
     "@desen/protocol": "workspace:*"

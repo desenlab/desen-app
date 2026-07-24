@@ -144,12 +144,10 @@
     ],
     "operationModuleGraph": {
       "entry": "packages/reference-catalog-web/src/operations/index.ts",
-      "modules": [
-        "packages/reference-catalog-web/src/operations/index.ts",
-        "packages/reference-catalog-web/src/operations/sign-in.ts"
-      ],
-      "localEdges": ["packages/reference-catalog-web/src/operations/index.ts -> ./sign-in.js"],
-      "closed": true
+      "taskOwnedModules": ["packages/reference-catalog-web/src/operations/sign-in.ts"],
+      "taskOwnedEdges": ["packages/reference-catalog-web/src/operations/index.ts -> ./sign-in.js"],
+      "taskOwnedEdgesExact": true,
+      "unrelatedNamedReExportsAllowed": true
     },
     "hostTypeContract": {
       "handlerInput": "SignInOperationInput",
@@ -206,6 +204,7 @@
     "rootTests": [
       "accepts the tracked deterministic M03-T08 evidence",
       "builds byte-identical evidence twice",
+      "keeps later shared-ledger package and root growth outside task-owned evidence bytes",
       "labels explicit build options as injected evidence",
       "rejects inherited accessor-backed symbolic and unknown options",
       "rejects stale or one-byte-tampered evidence",
@@ -232,24 +231,9 @@
     ],
     "trackedFiles": [
       {
-        "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 51128,
-        "sha256": "7a315b516bfd3e7310b68756bf6313e531d554e1696f39d84c806b58a83759a5"
-      },
-      {
         "path": "docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md",
         "bytes": 9198,
         "sha256": "4af36d64e5e91e62396d833faccea30208c7254a6dc443b0817d49e5ee91acc9"
-      },
-      {
-        "path": "packages/reference-catalog-web/README.md",
-        "bytes": 19145,
-        "sha256": "a6673c80548e7561e04423ea1a955cc3b186fda53fba94f44a94d0bff3a3dc6b"
-      },
-      {
-        "path": "packages/reference-catalog-web/package.json",
-        "bytes": 2254,
-        "sha256": "455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa"
       },
       {
         "path": "packages/reference-catalog-web/src/operations/sign-in.ts",
@@ -257,19 +241,9 @@
         "sha256": "5797ecc9a59ed8e103655fa3903786bbaf6ec0c5d7bb10605a54f7708d87f837"
       },
       {
-        "path": "packages/reference-catalog-web/src/operations/index.ts",
-        "bytes": 373,
-        "sha256": "3df76e2b180472c5a22bf4a41d93f6ff62d7c20e99c88c74af63bcfb5826ef6a"
-      },
-      {
         "path": "packages/reference-catalog-web/src/host-operations/sign-in.ts",
         "bytes": 2234,
         "sha256": "5a6e70e4a249f39a0c84e0441c9f0c113e4f3d939ea9e70ebe374bd48d3fe86b"
-      },
-      {
-        "path": "packages/reference-catalog-web/src/host-operations/index.ts",
-        "bytes": 276,
-        "sha256": "82a89a269fa0ad583d9aba7e264266dd28c272d1aee9be0338d50a49cc03aaa1"
       },
       {
         "path": "packages/reference-catalog-web/test/sign-in-operation.test.ts",
@@ -292,16 +266,6 @@
         "sha256": "a5d5c5a43c4c3f72ba4baa96f28efb2dc21d298b03463f7683f33f06d81ed8b1"
       },
       {
-        "path": "packages/testkit/README.md",
-        "bytes": 3944,
-        "sha256": "0ec476a6f9b38431b4905d9876b791c87d889575dd2a08efdc2d3926b3d4bc3c"
-      },
-      {
-        "path": "packages/testkit/package.json",
-        "bytes": 1007,
-        "sha256": "eedbf5ddb525f9827daaaa4260c5585b5801d7929f957c13fb9565c8d4359e67"
-      },
-      {
         "path": "packages/testkit/test/reference-sign-in-fixtures.test.ts",
         "bytes": 2894,
         "sha256": "0d04576ddae47ebcf5fc502f971f345e57b0b6edd7f09a41422a4d56d74a2ff6"
@@ -318,23 +282,13 @@
       },
       {
         "path": "scripts/lib/reference-sign-in-fixtures-and-host-binding-proof.mjs",
-        "bytes": 63489,
-        "sha256": "a645334564b489977e964afbe4a766573e80d6eee58da004dcd8bc552ebeaa1b"
+        "bytes": 63513,
+        "sha256": "6d3734ec1498256625cae1560bfd33e63763883339886a7bac21aee78ebd554a"
       },
       {
         "path": "tests/reference-sign-in-fixtures-and-host-binding.test.mjs",
-        "bytes": 22733,
-        "sha256": "494f9950186d1f3cc09b1146afd977a12bdb06a2737b2a107129de52606e8fbe"
-      },
-      {
-        "path": "package.json",
-        "bytes": 19696,
-        "sha256": "a14014681739a639e831b643b0ad00bda8b374bd689dd2a9d44f1f039950174b"
-      },
-      {
-        "path": "pnpm-lock.yaml",
-        "bytes": 112166,
-        "sha256": "af76727914bd45b50cf90f393b847b83ecf0a1ff1193c4f6f8680918fca5710b"
+        "bytes": 26667,
+        "sha256": "1687f098e6e5ba77ada4aec141768748c4fe37f97f64aab85ee67eb2bb8e477e"
       }
     ],
     "commands": [

@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████░░░░░░░░░░░░░░░░░░` **38 / 144 tasks complete (26%)**
+**Overall:** `███████░░░░░░░░░░░░░░░░░░` **39 / 144 tasks complete (27%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `█░░░░░░░░░░░░░░░` **1 / 16 tasks complete (6%)**
+**M04 progress:** `██░░░░░░░░░░░░░░` **2 / 16 tasks complete (13%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T02`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T03`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -109,6 +109,7 @@ packages/
 - [Reference Web implementation-parity proof](docs/proof/REFERENCE-CATALOG-WEB-PARITY.md)
 - [Reference Web capability-artifact proof](docs/proof/REFERENCE-CATALOG-WEB-CAPABILITY-ARTIFACT.md)
 - [Runtime core host-port proof](docs/proof/RUNTIME-CORE-HOST-PORTS.md)
+- [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -219,7 +220,7 @@ lifecycle state, not static fixture data. Inert operation data and executable ho
 separate package subpaths. The host binding fixes the operation id and preserves only an
 application-supplied callable by identity; its return stays opaque so M04 can define validation,
 settlement, concurrency, and diagnostics without an early result envelope. Five focused package
-tests, 10 compiler-negative cases, and 13 independent proof/mutation tests cover official-manifest
+tests, 10 compiler-negative cases, and 14 independent proof/mutation tests cover official-manifest
 equality, successful-output schema validation, immutable/detached fixtures, missing outcomes,
 binding exclusion, exact exports, source boundaries, and deterministic evidence. P-10 advances
 only to `PARTIAL`; real reference-host execution remains M10-T04.
@@ -229,7 +230,7 @@ reference slice: five exact official component entries and the explicitly delega
 operation. Canonical frozen metadata covers every declared prop, slot, event, command, style part,
 visual state, real component export, and trusted component-side binding without carrying a module
 selector, React value, or host handler. The cumulative suite passes 26 package tests, 10
-compiler-negative cases, and 13 independent proof/mutation tests, including exact event and focus
+compiler-negative cases, and 14 independent proof/mutation tests, including exact event and focus
 schemas, native accessibility semantics, hostile DOM-prop exclusion, same-identity authoring and
 production exports, public-subpath boundaries, and prerequisite drift. S-004 is `TESTED`; P-06 is
 only `PARTIAL`. Generic runtime bridging, resolved style application, Desen App, and the final
@@ -239,12 +240,23 @@ M04-T01 now defines the first framework-neutral runtime integration boundary: ni
 fourteen stable callbacks for navigation, immutable Bundle/activation storage, operations,
 resources, tokens, context, environment, clock, and diagnostics. The factory captures
 receiver-independent callables without executing or wrapping them, rejects accessor, inherited,
-extra, missing, and reflection-hostile shapes, and exposes exactly one runtime export plus thirty
-documented types. Ten focused package tests, nine compiler-negative cases, and ten independent
-proof/mutation tests protect exact source/distribution exports, platform neutrality, direct test
-registration, package entry points, prerequisite integrity, and safe atomic evidence writes. This
-is a reference implementation profile, not a new frozen-protocol transport; resolution and runtime
-behavior begin in M04-T02. No Proof Matrix, normative-coverage, or proof-gate status changes.
+extra, missing, and reflection-hostile shapes. Its task-scoped API contributes one runtime export
+and thirty documented types while allowing later runtime-core exports to grow deliberately. Ten
+focused package tests, nine compiler-negative cases, and ten independent proof/mutation tests
+protect the exact M04-T01 source/distribution subset, platform neutrality, direct test registration,
+package entry points, prerequisite integrity, and safe atomic evidence writes across eleven tracked
+files. This is a reference implementation profile, not a new frozen-protocol transport.
+
+M04-T02 now adds the bounded, read-only value resolver used by the future runtime. It takes one
+immutable snapshot of `state`, `context`, `resource`, `operation`, `event`, `item`, and `env`;
+keeps missing distinct from `null`, `false`, `0`, and empty text; applies fallback only when the
+primary reference is missing; and never executes host callbacks or reinterprets resolved data as a
+second reference. Hostile, cyclic, executable, accessor-backed, malformed, or over-budget values
+fail closed without exposing a partial result. Token and string-format forms are recognized but
+remain deliberately deferred to M04-T03. The task contributes three runtime exports and seventeen
+types with complete TSDoc. Its evidence passes 34 package tests, 10 compiler-negative cases, 13
+independent proof/mutation tests, 9 trace assignments, and 11 byte-tracked files. No Proof Matrix,
+normative-coverage, or proof-gate status changes.
 
 ## License
 

@@ -1173,7 +1173,7 @@ async function compilerInputHashes(snapshotRoot) {
   }));
 }
 
-async function trackedFileHashes({ compilerInputs, implementationSnapshots, rootPackageBytes }) {
+async function trackedFileHashes({ compilerInputs, implementationSnapshots }) {
   const fixedPaths = [...TRACKED_IMPLEMENTATION_PATHS];
   const records = [...compilerInputs];
   for (let index = 0; index < fixedPaths.length; index += 1) {
@@ -1185,11 +1185,6 @@ async function trackedFileHashes({ compilerInputs, implementationSnapshots, root
       sha256: sha256(bytes),
     });
   }
-  records.push({
-    path: "package.json",
-    bytes: rootPackageBytes.length,
-    sha256: sha256(rootPackageBytes),
-  });
   records.sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
   return records;
 }
@@ -1567,7 +1562,6 @@ export async function buildReferenceCatalogWebCapabilityArtifactEvidence(options
       trackedFiles: await trackedFileHashes({
         compilerInputs,
         implementationSnapshots,
-        rootPackageBytes,
       }),
       rootScripts: ROOT_SCRIPT_NAMES,
       packagePublication,

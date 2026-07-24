@@ -326,6 +326,34 @@ test("rejects incomplete root task and aggregate quality-gate wiring", async (t)
   }
 });
 
+test("keeps unrelated root-script growth outside the task-owned evidence bytes", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const rootPackage = JSON.parse(await readFile(path.join(WORKSPACE_ROOT, "package.json"), "utf8"));
+  const baselineRootPackagePath = path.join(directory, "root-package-baseline.json");
+  const grownRootPackagePath = path.join(directory, "root-package-grown.json");
+  await writeFile(baselineRootPackagePath, `${JSON.stringify(rootPackage)}\n`);
+  rootPackage.scripts["future:unrelated-root-task"] = "node future-root-task.mjs";
+  await writeFile(grownRootPackagePath, `${JSON.stringify(rootPackage)}\n`);
+
+  const [baseline, grown] = await Promise.all([
+    buildReferenceCatalogWebCapabilityArtifactEvidence({
+      rootPackagePath: baselineRootPackagePath,
+      verifyPrerequisite: false,
+    }),
+    buildReferenceCatalogWebCapabilityArtifactEvidence({
+      rootPackagePath: grownRootPackagePath,
+      verifyPrerequisite: false,
+    }),
+  ]);
+  assert.deepEqual(grown.artifactBytes, baseline.artifactBytes);
+  assert.equal(
+    baseline.artifact.evidence.trackedFiles.some(({ path: trackedPath }) => {
+      return trackedPath === "package.json";
+    }),
+    false,
+  );
+});
+
 test("rejects extra, missing, renamed, or symbolic-link dist output", async (t) => {
   const result = await baselinePromise;
   const cases = [

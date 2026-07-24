@@ -172,6 +172,7 @@ const EXPECTED_TYPE_NEGATIVE_CASES = Object.freeze(
 const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "accepts the tracked deterministic M03-T08 evidence",
   "builds byte-identical evidence twice",
+  "keeps later shared-ledger package and root growth outside task-owned evidence bytes",
   "labels explicit build options as injected evidence",
   "rejects inherited accessor-backed symbolic and unknown options",
   "rejects stale or one-byte-tampered evidence",
@@ -194,27 +195,18 @@ const EXPECTED_ROOT_SCRIPTS = Object.freeze({
 });
 
 const TRACKED_EVIDENCE_PATHS = Object.freeze([
-  "docs/plan/PROTOCOL-FINDINGS.md",
   "docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md",
-  "packages/reference-catalog-web/README.md",
-  "packages/reference-catalog-web/package.json",
   "packages/reference-catalog-web/src/operations/sign-in.ts",
-  "packages/reference-catalog-web/src/operations/index.ts",
   "packages/reference-catalog-web/src/host-operations/sign-in.ts",
-  "packages/reference-catalog-web/src/host-operations/index.ts",
   "packages/reference-catalog-web/test/sign-in-operation.test.ts",
   "packages/reference-catalog-web/test/sign-in-operation.types.ts",
   "packages/reference-catalog-web/test/operations-consumer.mjs",
   "packages/reference-catalog-web/test/host-operations-consumer.mjs",
-  "packages/testkit/README.md",
-  "packages/testkit/package.json",
   "packages/testkit/test/reference-sign-in-fixtures.test.ts",
   "scripts/generate-reference-sign-in-fixtures-and-host-binding-proof.mjs",
   "scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs",
   "scripts/lib/reference-sign-in-fixtures-and-host-binding-proof.mjs",
   "tests/reference-sign-in-fixtures-and-host-binding.test.mjs",
-  "package.json",
-  "pnpm-lock.yaml",
 ]);
 
 const FORBIDDEN_PLATFORM_IMPORTS = Object.freeze([
@@ -693,14 +685,13 @@ function inspectExactReExportSurface(
       ts.isExportDeclaration(statement) &&
         statement.moduleSpecifier !== undefined &&
         ts.isStringLiteral(statement.moduleSpecifier) &&
-        statement.moduleSpecifier.text === moduleSpecifier &&
         statement.exportClause !== undefined &&
         ts.isNamedExports(statement.exportClause) &&
         statement.exportClause.elements.length > 0 &&
         statement.attributes === undefined &&
         statement.assertClause === undefined,
       code,
-      `${relativePath} must contain only explicit named re-exports from ${moduleSpecifier}.`,
+      `${relativePath} must contain only explicit non-empty named re-exports.`,
     );
     for (const element of statement.exportClause.elements) {
       const imported = element.propertyName?.text ?? element.name.text;
@@ -709,6 +700,7 @@ function inspectExactReExportSurface(
         code,
         `${relativePath} may not alias re-export ${imported}.`,
       );
+      if (statement.moduleSpecifier.text !== moduleSpecifier) continue;
       (statement.isTypeOnly || element.isTypeOnly ? types : runtime).push(element.name.text);
     }
   }
@@ -886,6 +878,17 @@ function inspectPublicSurfaces({
     "SIGN_IN_BINDING_PACKAGE_CONSUMER_DRIFT",
   );
 
+  assertCondition(
+    [
+      ...OPERATIONS_RUNTIME_EXPORTS,
+      ...OPERATIONS_TYPE_EXPORTS,
+      ...HOST_RUNTIME_EXPORTS,
+      ...HOST_TYPE_EXPORTS,
+    ].every((name) => !packageRootIndexSource.includes(name)),
+    "SIGN_IN_BINDING_PACKAGE_ROOT_LEAK",
+    "The package root must not expose the task-owned operation or host-binding surface.",
+  );
+
   assertExactPackageExport(referencePackage, ".", {
     types: "./dist/index.d.ts",
     import: "./dist/index.js",
@@ -923,14 +926,12 @@ function inspectPublicSurfaces({
     packageRootTypeExports: PACKAGE_ROOT_TYPE_EXPORTS,
     operationModuleGraph: Object.freeze({
       entry: "packages/reference-catalog-web/src/operations/index.ts",
-      modules: Object.freeze([
-        "packages/reference-catalog-web/src/operations/index.ts",
-        "packages/reference-catalog-web/src/operations/sign-in.ts",
-      ]),
-      localEdges: Object.freeze([
+      taskOwnedModules: Object.freeze(["packages/reference-catalog-web/src/operations/sign-in.ts"]),
+      taskOwnedEdges: Object.freeze([
         "packages/reference-catalog-web/src/operations/index.ts -> ./sign-in.js",
       ]),
-      closed: true,
+      taskOwnedEdgesExact: true,
+      unrelatedNamedReExportsAllowed: true,
     }),
     hostTypeContract: inspectHostTypeContract(hostBindingSource),
   });
@@ -1393,13 +1394,11 @@ export async function buildReferenceSignInFixturesAndHostBindingEvidence(options
     loadedOperationsApi,
     OPERATIONS_RUNTIME_EXPORTS,
     "operation API",
-    { exact: true },
   );
   const hostCapture = captureApi(
     loadedHostOperationsApi,
     HOST_RUNTIME_EXPORTS,
     "host-operation API",
-    { exact: true },
   );
   const testkitCapture = captureApi(loadedTestkitApi, TESTKIT_RUNTIME_EXPORTS, "testkit API");
   const validatorCapture = captureApi(

@@ -175,17 +175,12 @@ const ROOT_SCRIPTS = Object.freeze({
 });
 const TRACKED_PATHS = Object.freeze([
   "packages/runtime-core/src/host-ports.ts",
-  "packages/runtime-core/src/index.ts",
   "packages/runtime-core/test/host-ports.test.ts",
   "packages/runtime-core/test/host-ports.types.ts",
   "packages/runtime-core/dist/host-ports.js",
   "packages/runtime-core/dist/host-ports.js.map",
   "packages/runtime-core/dist/host-ports.d.ts",
   "packages/runtime-core/dist/host-ports.d.ts.map",
-  "packages/runtime-core/dist/index.js",
-  "packages/runtime-core/dist/index.js.map",
-  "packages/runtime-core/dist/index.d.ts",
-  "packages/runtime-core/dist/index.d.ts.map",
   "scripts/lib/runtime-core-host-ports-proof.mjs",
   "scripts/generate-runtime-core-host-ports-proof.mjs",
   "scripts/verify-runtime-core-host-ports.mjs",
@@ -350,21 +345,29 @@ function indexExportInventory(sourceText, fileName) {
     if (
       !ts.isExportDeclaration(statement) ||
       !ts.isStringLiteral(statement.moduleSpecifier) ||
-      statement.moduleSpecifier.text !== "./host-ports.js" ||
       statement.exportClause === undefined ||
       !ts.isNamedExports(statement.exportClause)
     ) {
       fail(
         "HOST_PORTS_INDEX_EXPORT_DRIFT",
-        `${fileName} may contain only explicit named re-exports from ./host-ports.js.`,
+        `${fileName} may contain only explicit named re-exports.`,
       );
     }
+    const hostPortDeclaration = statement.moduleSpecifier.text === "./host-ports.js";
     for (const element of statement.exportClause.elements) {
-      if (element.propertyName !== undefined) {
-        fail("HOST_PORTS_INDEX_EXPORT_DRIFT", `${fileName} must not alias public exports.`);
+      const publicName = element.name.text;
+      if (
+        element.propertyName !== undefined ||
+        (!hostPortDeclaration && EXPECTED_HOST_PORT_SOURCE_EXPORTS.includes(publicName))
+      ) {
+        fail(
+          "HOST_PORTS_INDEX_EXPORT_DRIFT",
+          `${fileName} must not alias or duplicate M04-T01 public exports.`,
+        );
       }
+      if (!hostPortDeclaration) continue;
       const target = statement.isTypeOnly || element.isTypeOnly ? typeExports : runtimeExports;
-      target.push(element.name.text);
+      target.push(publicName);
     }
   }
 
@@ -655,13 +658,6 @@ function verifyFactory(runtimeApi) {
       "Built runtime-core does not expose createRuntimeHostPorts.",
     );
   }
-  assertArrayEqual(
-    Object.keys(runtimeApi).sort(),
-    EXPECTED_RUNTIME_EXPORTS,
-    "HOST_PORTS_RUNTIME_EXPORT_DRIFT",
-    "Built runtime-core module exports",
-  );
-
   const probe = createPortProbe();
   const ports = runtimeApi.createRuntimeHostPorts(probe.callbacks);
   if (probe.callCount() !== 0 || !Object.isFrozen(ports)) {

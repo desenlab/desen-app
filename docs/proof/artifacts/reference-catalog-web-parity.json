@@ -34,7 +34,7 @@
     "signIn": {
       "task": "M03-T08",
       "result": "PASS",
-      "artifactSha256": "cf52d3999313c5003b659de267bf8e84d8b9b08d45957c7f51d82583e45163ce"
+      "artifactSha256": "b0413687bd907b71509db52d3e22b6eda5a4150509ac323bf51e5f8425f897e2"
     }
   },
   "catalogScope": {
@@ -253,11 +253,6 @@
         "path": "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
         "bytes": 5943,
         "sha256": "d63dcf19370b314cd3e0a868f67714c821b5367afc5ec391b953ed9bb54d9194"
-      },
-      "normativeCoverage": {
-        "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 30812,
-        "sha256": "1089d85cb35f54a26e1799ee967dce96a4c0b5d5eac09d5a9c45773301462bc6"
       }
     },
     "packageTests": {
@@ -299,6 +294,7 @@
     "rootTests": [
       "accepts the tracked deterministic M03-T09 evidence",
       "builds byte-identical injected evidence twice",
+      "keeps unrelated normative and root-script growth outside task-owned evidence bytes",
       "rejects unsafe or unknown build options without invoking accessors",
       "rejects stale and one-byte-tampered evidence",
       "rejects missing mismatched and skipped prerequisites for tracked evidence",
@@ -330,34 +326,9 @@
         "sha256": "f9ab31924b66b4e21c625153673b94304b54c698d40b03a2957bad982a00c0a3"
       },
       {
-        "path": "docs/architecture/ARCHITECTURE.md",
-        "bytes": 8243,
-        "sha256": "97bb34820feda19b33af3f9b1c4188ed0da38fe440fd9b5d60ff5795f8595d62"
-      },
-      {
-        "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 51128,
-        "sha256": "7a315b516bfd3e7310b68756bf6313e531d554e1696f39d84c806b58a83759a5"
-      },
-      {
         "path": "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
         "bytes": 5943,
         "sha256": "d63dcf19370b314cd3e0a868f67714c821b5367afc5ec391b953ed9bb54d9194"
-      },
-      {
-        "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 30812,
-        "sha256": "1089d85cb35f54a26e1799ee967dce96a4c0b5d5eac09d5a9c45773301462bc6"
-      },
-      {
-        "path": "packages/reference-catalog-web/README.md",
-        "bytes": 19145,
-        "sha256": "a6673c80548e7561e04423ea1a955cc3b186fda53fba94f44a94d0bff3a3dc6b"
-      },
-      {
-        "path": "packages/reference-catalog-web/package.json",
-        "bytes": 2254,
-        "sha256": "455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa"
       },
       {
         "path": "packages/reference-catalog-web/src/components/alert.tsx",
@@ -373,11 +344,6 @@
         "path": "packages/reference-catalog-web/src/components/contracts.ts",
         "bytes": 4962,
         "sha256": "1266f0f732d9530070c50275ae5fe4c17b07cfa6dc57128a6bf1141f81b3f49f"
-      },
-      {
-        "path": "packages/reference-catalog-web/src/components/index.ts",
-        "bytes": 1291,
-        "sha256": "7f2a9dd393425ed535b87297058ed39f608ea794915777e51911f6f4f3328e91"
       },
       {
         "path": "packages/reference-catalog-web/src/components/interactive-contracts.ts",
@@ -400,29 +366,14 @@
         "sha256": "c741c3ddba19d12120e793c9e93b19f3790e9ba93c7d579325a0d07e4cef8f17"
       },
       {
-        "path": "packages/reference-catalog-web/src/host-operations/index.ts",
-        "bytes": 276,
-        "sha256": "82a89a269fa0ad583d9aba7e264266dd28c272d1aee9be0338d50a49cc03aaa1"
-      },
-      {
         "path": "packages/reference-catalog-web/src/host-operations/sign-in.ts",
         "bytes": 2234,
         "sha256": "5a6e70e4a249f39a0c84e0441c9f0c113e4f3d939ea9e70ebe374bd48d3fe86b"
       },
       {
-        "path": "packages/reference-catalog-web/src/operations/index.ts",
-        "bytes": 373,
-        "sha256": "3df76e2b180472c5a22bf4a41d93f6ff62d7c20e99c88c74af63bcfb5826ef6a"
-      },
-      {
         "path": "packages/reference-catalog-web/src/operations/sign-in.ts",
         "bytes": 3321,
         "sha256": "5797ecc9a59ed8e103655fa3903786bbaf6ec0c5d7bb10605a54f7708d87f837"
-      },
-      {
-        "path": "packages/reference-catalog-web/src/parity/index.ts",
-        "bytes": 605,
-        "sha256": "657d0d102252dd12acc05e8efc315d4ebca5267e186f0a32176b2a5023baa136"
       },
       {
         "path": "packages/reference-catalog-web/src/parity/reference-web-implementation-metadata.ts",
@@ -476,23 +427,13 @@
       },
       {
         "path": "scripts/lib/reference-catalog-web-parity-proof.mjs",
-        "bytes": 70508,
-        "sha256": "ab3defafdee24f1545fdf5057667b1e27d06c2502561a096f7e5c0945b8d895c"
+        "bytes": 69947,
+        "sha256": "499260f8df96c457562c36f52e45f01c8cc7bcf0d096844196253d99afa4d31d"
       },
       {
         "path": "tests/reference-catalog-web-parity.test.mjs",
-        "bytes": 22360,
-        "sha256": "cac38fa4f27b86ac36c52ae616d07f5df8706461e1662588ad188befad1ddb04"
-      },
-      {
-        "path": "package.json",
-        "bytes": 19696,
-        "sha256": "a14014681739a639e831b643b0ad00bda8b374bd689dd2a9d44f1f039950174b"
-      },
-      {
-        "path": "pnpm-lock.yaml",
-        "bytes": 112166,
-        "sha256": "af76727914bd45b50cf90f393b847b83ecf0a1ff1193c4f6f8680918fca5710b"
+        "bytes": 26148,
+        "sha256": "e5dfc582b0743522db9e7ed2fa29df0a41dade40890a8ed950a4a8b220e55951"
       }
     ],
     "commands": [

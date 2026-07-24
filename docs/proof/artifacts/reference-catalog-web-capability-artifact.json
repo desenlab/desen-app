@@ -497,7 +497,7 @@
   "prerequisite": {
     "task": "M03-T09",
     "result": "PASS",
-    "artifactSha256": "0cdf47acc951fb586d96fcf2a1005a04e3ac2ab0498bcf90eee399e8b22106ab"
+    "artifactSha256": "6e350f2af71ac4e1f040afe7a3fcc3035de35b585f0121db6a2b35b4f3552a8a"
   },
   "evidence": {
     "provenance": { "mode": "tracked-defaults", "overrides": [] },
@@ -1922,11 +1922,6 @@
         "sha256": "sha256:4022c0c46b451a2783c0b8b612303981c65be843719fa19b8dda4f11754f3544"
       },
       {
-        "path": "package.json",
-        "bytes": 19696,
-        "sha256": "sha256:a14014681739a639e831b643b0ad00bda8b374bd689dd2a9d44f1f039950174b"
-      },
-      {
         "path": "scripts/generate-reference-catalog-web-capability-artifact-proof.mjs",
         "bytes": 1104,
         "sha256": "sha256:a5853a7f521649abefac85e7416c732a1fcd887df5ff45e528c821a390654107"
@@ -1938,8 +1933,8 @@
       },
       {
         "path": "scripts/lib/reference-catalog-web-capability-artifact-proof.mjs",
-        "bytes": 63813,
-        "sha256": "sha256:25b942dfbcf720c452acd9123c33e446370895a158547bf9de16a6b65187a06c"
+        "bytes": 63646,
+        "sha256": "sha256:687f65058b4d68641ca34b4b0ca788dd399aa82bb1e35fc5753a3f1e69e983cc"
       },
       {
         "path": "scripts/verify-reference-catalog-web-capability-artifact.mjs",
@@ -1948,8 +1943,8 @@
       },
       {
         "path": "tests/reference-catalog-web-capability-artifact.test.mjs",
-        "bytes": 18458,
-        "sha256": "sha256:5cef32e5a31a1254059cd903300e61991be589eb92bfdabdcdbff8f405309619"
+        "bytes": 19687,
+        "sha256": "sha256:5195b54d349ad85687a135f5247bb07eb4a8963f7b209aed229dc5d346bbeb8f"
       }
     ],
     "rootScripts": [

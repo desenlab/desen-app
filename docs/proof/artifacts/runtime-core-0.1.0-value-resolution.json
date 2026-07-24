@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T02",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Literal and read-only reference values resolve deterministically against one bounded atomic snapshot; fallback distinguishes missing from JSON null and cannot legalize invalid scopes.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisite": {
+    "task": "M04-T01",
+    "result": "PASS",
+    "artifact": "runtime-core-0.1.0-host-ports.json",
+    "artifactSha256": "5a53cfc9698339a2e9da72c496c1b204e0da138da3d3c1efdc1fe0b5c0e4f190"
+  },
+  "publicApi": {
+    "publicDeclarations": 20,
+    "tsdocDeclarations": 20,
+    "runtimeExports": [
+      "RUNTIME_VALUE_SAFETY_LIMITS",
+      "createRuntimeResolutionSnapshot",
+      "resolveRuntimeValue"
+    ],
+    "typeExports": [
+      "RuntimeEventReferenceSnapshot",
+      "RuntimeFormatPayload",
+      "RuntimeFormatValue",
+      "RuntimeLifecycleReferenceSnapshot",
+      "RuntimeLiteralValue",
+      "RuntimeReferenceFailureReason",
+      "RuntimeReferenceValue",
+      "RuntimeResolutionSnapshot",
+      "RuntimeResolutionSnapshotInput",
+      "RuntimeTokenValue",
+      "RuntimeValueDeferred",
+      "RuntimeValueInvalid",
+      "RuntimeValueInvalidReason",
+      "RuntimeValueResolution",
+      "RuntimeValueResolved",
+      "RuntimeValueSpec",
+      "RuntimeValueUnresolved"
+    ],
+    "allowedSourceImports": [
+      {
+        "module": "@desen/protocol",
+        "typeOnly": false,
+        "names": ["appendJsonPointer", "canonicalizeJson", "createJsonPointer"]
+      },
+      { "module": "@desen/protocol", "typeOnly": true, "names": ["JsonPointer"] },
+      {
+        "module": "./host-ports.js",
+        "typeOnly": true,
+        "names": ["RuntimeJsonObject", "RuntimeJsonPrimitive", "RuntimeJsonValue"]
+      }
+    ]
+  },
+  "safetyProfile": {
+    "maxDepth": 128,
+    "maxJsonNodes": 4096,
+    "maxStringCodeUnits": 1048576,
+    "aggregateSnapshot": "all seven namespaces copied before exposure",
+    "callerMutationIsolation": true,
+    "recursiveFreeze": true,
+    "accessorsInvoked": false,
+    "promisesAwaited": false,
+    "reflectionFailuresContained": true,
+    "arbitraryProxyCodeExecutionPrevented": false,
+    "acceptedRecordPrototype": "null or Object-constructor-compatible; categorical spoof detection is not claimed",
+    "inheritedDataObservable": false
+  },
+  "runtime": {
+    "namespaces": 7,
+    "resolutionProbes": 10,
+    "safetyProbes": 8,
+    "fallbackOnlyOnMissing": true,
+    "nullIsResolved": true,
+    "arraysTraversed": false,
+    "secondPassEvaluation": false,
+    "partialCompositeValues": false,
+    "composedOutputBudgeted": true,
+    "hostCallbacksInvoked": 0,
+    "accessorCalls": 0,
+    "factoryBrandRequired": true,
+    "callerMutationIsolated": true
+  },
+  "referenceSemantics": {
+    "namespaces": ["state", "context", "resource", "operation", "event", "item", "env"],
+    "rootSelection": "exact second segment; no longest-prefix matching or escaping",
+    "arrayPolicy": "whole values may resolve; reference paths never traverse arrays",
+    "fallbackPolicy": "only a missing path under a legal active root; JSON null and invalid scope never select fallback",
+    "lifecycleSurface": ["status", "pending", "value", "value.*", "error.code"],
+    "eventLifetime": "explicitly available only for the immediate handler snapshot",
+    "secondPassEvaluation": false,
+    "returnedValues": "complete recursively frozen JSON or a no-value failure/deferred union"
+  },
+  "diagnosticBoundary": {
+    "unresolvedCode": "REFERENCE_UNRESOLVED",
+    "unresolvedPointer": "exact relative RFC 6901 pointer to $ref",
+    "propTypeMismatchProducedHere": false,
+    "optionalPropOmissionProducedHere": false
+  },
+  "portability": {
+    "sourceRuntimeDependencies": ["@desen/protocol"],
+    "typeOnlyDependencies": ["@desen/protocol", "./host-ports.js"],
+    "forbiddenPlatformsFound": [],
+    "hostCallbacksInvoked": 0,
+    "a2uiDependencies": []
+  },
+  "evidence": {
+    "packageTests": 34,
+    "compilerNegativeCases": 10,
+    "rootMutationTests": 13,
+    "traceRules": [
+      {
+        "collection": "proseRules",
+        "id": "R-026",
+        "section": "10.4",
+        "owners": ["M02-T10", "M04-T02"],
+        "status": "RUNTIME_PRIMITIVE"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-039",
+        "section": "14.2",
+        "owners": ["M02-T10", "M04-T02"],
+        "status": "RUNTIME_PRIMITIVE"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-040",
+        "section": "14.2.1",
+        "owners": ["M02-T10", "M04-T02"],
+        "status": "RUNTIME_PRIMITIVE"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-047",
+        "section": "14.3",
+        "owners": ["M02-T10", "M04-T02"],
+        "status": "PARTIAL_TARGET_VALIDATION_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-112",
+        "section": "26.3",
+        "owners": ["M04-T02", "M05-T02", "M05-T06"],
+        "status": "CONTRACT_ONLY_ADAPTER_COMPOSITION_DEFERRED"
+      },
+      {
+        "collection": "invariants",
+        "id": "A-006",
+        "section": "Appendix A",
+        "owners": ["M04-T02", "M04-T09"],
+        "status": "RUNTIME_PRIMITIVE"
+      },
+      {
+        "collection": "pipelineSteps",
+        "id": "PIPE-020",
+        "section": "24.2",
+        "owners": ["M04-T02"],
+        "status": "RUNTIME_PRIMITIVE"
+      },
+      {
+        "collection": "diagnostics",
+        "id": "D-009",
+        "section": "Appendix B",
+        "owners": ["M02-T05", "M02-T08", "M04-T02"],
+        "status": "CONTRACT_ONLY_ADAPTER_COMPOSITION_DEFERRED"
+      },
+      {
+        "collection": "diagnostics",
+        "id": "D-020",
+        "section": "Appendix B",
+        "owners": ["M02-T05", "M02-T10", "M04-T02"],
+        "status": "RUNTIME_PRIMITIVE"
+      }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/value-resolution.ts",
+        "bytes": 30364,
+        "sha256": "baf4c008ca19dddcc077a6bdeca3ddd1beef8bfa3ebec178e8435a86e0d35b58"
+      },
+      {
+        "path": "packages/runtime-core/test/value-resolution.test.ts",
+        "bytes": 18337,
+        "sha256": "db584b174922c4355eeaf461c5ba1b8babab86f85ef132682e1113f52d152269"
+      },
+      {
+        "path": "packages/runtime-core/test/value-resolution.types.ts",
+        "bytes": 3308,
+        "sha256": "082a130e2fff7e74a32b2f0b78a05f983ae921d8ae72ea25e61a174321ac72f8"
+      },
+      {
+        "path": "packages/runtime-core/dist/value-resolution.js",
+        "bytes": 21277,
+        "sha256": "c1f55f997c7e28017ee89f0e664f112577d3e2ea37ea47230a447b5dd2c98d9d"
+      },
+      {
+        "path": "packages/runtime-core/dist/value-resolution.js.map",
+        "bytes": 18765,
+        "sha256": "ee5bc38a352d65927eadf653e9cf42e0647edcbda13be24d42e2cb7489238a07"
+      },
+      {
+        "path": "packages/runtime-core/dist/value-resolution.d.ts",
+        "bytes": 10818,
+        "sha256": "f0ab2e3d7d2eb70fa83b0ca18a3c5eb026a6fa5a08abaa5790e6c1da8aa5e6f4"
+      },
+      {
+        "path": "packages/runtime-core/dist/value-resolution.d.ts.map",
+        "bytes": 4096,
+        "sha256": "4766cd49bbfde3123c4a02f3a58160be723e17a2fd287dac3083340ee5f1510e"
+      },
+      {
+        "path": "scripts/lib/runtime-core-value-resolution-proof.mjs",
+        "bytes": 42675,
+        "sha256": "d867bc932a56b6991497c2f3af2b54f3619683835550193edfffa3a4977ebba3"
+      },
+      {
+        "path": "scripts/generate-runtime-core-value-resolution-proof.mjs",
+        "bytes": 838,
+        "sha256": "613dad4243edf2313fcd2d43cd21fd9dd396946be4dab9d157acf81d48474941"
+      },
+      {
+        "path": "scripts/verify-runtime-core-value-resolution.mjs",
+        "bytes": 672,
+        "sha256": "a2e79ff550abeb5ef6a442f0d568fd7c28cee5ebb40c7890ebb8e81f5aad5853"
+      },
+      {
+        "path": "tests/runtime-core-value-resolution.test.mjs",
+        "bytes": 14003,
+        "sha256": "f81dfd3d9dae81d9b199700cc2f7dd1224063d82360a51f68d5f8fc4e72813bb"
+      }
+    ],
+    "rootScripts": [
+      "generate:runtime-core-value-resolution",
+      "verify:runtime-core-value-resolution",
+      "test:runtime-core-value-resolution"
+    ]
+  },
+  "deferred": [
+    "target-token resolution and deterministic formatting (M04-T03)",
+    "consumer prop/style schema validation and PROP_TYPE_MISMATCH composition (M05)",
+    "optional unresolved prop omission versus required node failure (M05)",
+    "resource and operation lifecycle transitions, concurrency, and settlement (M04-T08/M04-T09)",
+    "full runtime integration and conformance vectors (M04-T16)",
+    "context secret classification and host-profile schema standardization",
+    "React, browser, iOS, and Android adapters"
+  ]
+}

@@ -5,6 +5,11 @@
  */
 
 export { createRuntimeHostPorts } from "./host-ports.js";
+export {
+  createRuntimeResolutionSnapshot,
+  resolveRuntimeValue,
+  RUNTIME_VALUE_SAFETY_LIMITS,
+} from "./value-resolution.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -38,3 +43,23 @@ export type {
   RuntimeTokenRequest,
   RuntimeTokenResolution,
 } from "./host-ports.js";
+
+export type {
+  RuntimeEventReferenceSnapshot,
+  RuntimeFormatPayload,
+  RuntimeFormatValue,
+  RuntimeLifecycleReferenceSnapshot,
+  RuntimeLiteralValue,
+  RuntimeReferenceFailureReason,
+  RuntimeReferenceValue,
+  RuntimeResolutionSnapshot,
+  RuntimeResolutionSnapshotInput,
+  RuntimeTokenValue,
+  RuntimeValueDeferred,
+  RuntimeValueInvalid,
+  RuntimeValueInvalidReason,
+  RuntimeValueResolution,
+  RuntimeValueResolved,
+  RuntimeValueSpec,
+  RuntimeValueUnresolved,
+} from "./value-resolution.js";

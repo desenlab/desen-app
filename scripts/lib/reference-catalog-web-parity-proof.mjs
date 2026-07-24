@@ -291,6 +291,7 @@ const EXPECTED_TYPE_NEGATIVE_CASES = Object.freeze(
 const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "accepts the tracked deterministic M03-T09 evidence",
   "builds byte-identical injected evidence twice",
+  "keeps unrelated normative and root-script growth outside task-owned evidence bytes",
   "rejects unsafe or unknown build options without invoking accessors",
   "rejects stale and one-byte-tampered evidence",
   "rejects missing mismatched and skipped prerequisites for tracked evidence",
@@ -341,25 +342,16 @@ const PARTIAL_TRACE_IDS = Object.freeze([
 
 const TRACKED_EVIDENCE_PATHS = Object.freeze([
   "docs/adr/0007-inert-parity-metadata-before-runtime-registration.md",
-  "docs/architecture/ARCHITECTURE.md",
-  "docs/plan/PROTOCOL-FINDINGS.md",
   "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
-  "docs/proof/NORMATIVE-COVERAGE.md",
-  "packages/reference-catalog-web/README.md",
-  "packages/reference-catalog-web/package.json",
   "packages/reference-catalog-web/src/components/alert.tsx",
   "packages/reference-catalog-web/src/components/button.tsx",
   "packages/reference-catalog-web/src/components/contracts.ts",
-  "packages/reference-catalog-web/src/components/index.ts",
   "packages/reference-catalog-web/src/components/interactive-contracts.ts",
   "packages/reference-catalog-web/src/components/stack.tsx",
   "packages/reference-catalog-web/src/components/text-field.tsx",
   "packages/reference-catalog-web/src/components/text.tsx",
-  "packages/reference-catalog-web/src/host-operations/index.ts",
   "packages/reference-catalog-web/src/host-operations/sign-in.ts",
-  "packages/reference-catalog-web/src/operations/index.ts",
   "packages/reference-catalog-web/src/operations/sign-in.ts",
-  "packages/reference-catalog-web/src/parity/index.ts",
   "packages/reference-catalog-web/src/parity/reference-web-implementation-metadata.ts",
   "packages/reference-catalog-web/test/form-feedback-components-consumer.mjs",
   "packages/reference-catalog-web/test/foundation-components.test.tsx",
@@ -372,8 +364,6 @@ const TRACKED_EVIDENCE_PATHS = Object.freeze([
   "scripts/verify-reference-catalog-web-parity.mjs",
   "scripts/lib/reference-catalog-web-parity-proof.mjs",
   "tests/reference-catalog-web-parity.test.mjs",
-  "package.json",
-  "pnpm-lock.yaml",
 ]);
 
 const FORBIDDEN_METADATA_KEYS = new Set([
@@ -1212,16 +1202,17 @@ function namedExports(source, relativePath, expectedModuleSpecifier) {
       !ts.isNamedExports(statement.exportClause) ||
       statement.moduleSpecifier === undefined ||
       !ts.isStringLiteral(statement.moduleSpecifier) ||
-      statement.moduleSpecifier.text !== expectedModuleSpecifier
+      statement.exportClause.elements.length === 0
     ) {
       unsafe = true;
       continue;
     }
-    const target = statement.isTypeOnly ? types : runtime;
     for (const element of statement.exportClause.elements) {
       if (element.propertyName !== undefined && element.propertyName.text !== element.name.text) {
         unsafe = true;
       }
+      if (statement.moduleSpecifier.text !== expectedModuleSpecifier) continue;
+      const target = statement.isTypeOnly || element.isTypeOnly ? types : runtime;
       target.push(element.name.text);
     }
   }
@@ -1607,31 +1598,26 @@ export async function buildReferenceCatalogWebParityEvidence(options = undefined
     loadedParityApi,
     ["REFERENCE_WEB_IMPLEMENTATION_METADATA"],
     "parity API",
-    true,
   );
   const componentCapture = captureApi(
     loadedComponentApi,
     EXPECTED_COMPONENT_API_EXPORTS,
     "component API",
-    true,
   );
   const operationsCapture = captureApi(
     loadedOperationsApi,
     ["SIGN_IN_OPERATION_ID", "signInOperationFixtures", "signInOperationRegistration"],
     "operation API",
-    true,
   );
   const hostCapture = captureApi(
     loadedHostOperationsApi,
     ["bindReferenceSignInHostOperation"],
     "host-operation API",
-    true,
   );
   const rootCapture = captureApi(
     loadedPackageRootApi,
     EXPECTED_PACKAGE_ROOT_EXPORTS,
     "package-root API",
-    true,
   );
   const catalogSdkCapture = captureApi(
     loadedCatalogSdkApi,
@@ -1816,11 +1802,6 @@ export async function buildReferenceCatalogWebParityEvidence(options = undefined
           path: "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
           bytes: inputs.proofDocumentPath.length,
           sha256: sha256(inputs.proofDocumentPath),
-        },
-        normativeCoverage: {
-          path: "docs/proof/NORMATIVE-COVERAGE.md",
-          bytes: inputs.normativeCoveragePath.length,
-          sha256: sha256(inputs.normativeCoveragePath),
         },
       },
       packageTests: inventories.packageTests,
