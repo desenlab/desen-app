@@ -109,7 +109,13 @@ resolver over seven explicit immutable runtime namespaces. Missing, JSON null, f
 fallback, lifecycle envelopes, arrays, and resolved reference-shaped data remain distinct; hostile
 or over-budget data fails closed without a partial result. Token and format forms are fenced for
 M04-T03. This task records `PF-032` and likewise changes no `P-*`, `N-*`, `S-*`, or proof-gate
-status.
+status. M04-T03 now completes those two deferred forms through a separate additive materializer.
+Token lookup is host-owned, cached only within one top-level call, and keeps missing, resolved JSON
+`null`, and redacted provider failure distinct. The closed PF-017 `{name}` formatter inserts
+strings unchanged and canonicalizes every other JSON value without expression, locale, markup, or
+platform evaluation. Nested complete outcomes remain bounded and preserve exact pointers. This
+task records `PF-033`; receiving-schema validation remains M05, and no `P-*`, `N-*`, `S-*`, or
+proof-gate status changes.
 
 ## Current milestone
 
@@ -139,11 +145,12 @@ status.
   `M03-T09 — Catalog/implementation parity and component-side contract tests`,
   `M03-T10 — Final immutable capability artifact and exact tuple`,
   `M04-T01 — Framework-neutral host ports`,
-  `M04-T02 — Literal/reference/fallback resolver`
+  `M04-T02 — Literal/reference/fallback resolver`,
+  `M04-T03 — Token and deterministic string-format resolution`
 - Active task: None
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T03 — Token and deterministic string-format resolution`
-- Status: Ready to start M04-T03
+- Next implementation task: `M04-T04 — Predicate evaluation and conditional presence`
+- Status: Ready to start M04-T04
 
 ## Completed preparation
 
@@ -158,10 +165,11 @@ status.
 - GitHub private vulnerability reporting, secret scanning, secret push protection, and dependency
   vulnerability alerts are enabled. Weekly pinned GitHub Actions update pull requests are
   configured through Dependabot.
-- CI-01 replaces 547 repeated leaf-process launches with a fail-closed 58-step plan covering all 91
-  distinct workloads. Its clean hosted quality gate passed in 12 minutes 11 seconds versus 59
-  minutes 22 seconds before, a 79.48% reduction, while retaining all proof, mutation, negative, and
-  boundary checks.
+- CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
+  fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
+  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T03
+  inventory now expands to 649 legacy leaf launches but remains a reviewed 60-step single-pass gate
+  covering 94 distinct workloads, 26 proof verifiers, and 26 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -225,8 +233,8 @@ status.
   responsibilities, complete two-run inert-result equality, hidden-property and caller-input
   mutation, internal-slot rejection, prerequisite tampering, deterministic artifacts, and safe
   writes. Eight later-owner core diagnostics stay explicitly excluded. P-02 is `PROVEN`, G02 is
-  `DONE`, and P-17 is only `PARTIAL`; N-041 remains `PLANNED` until runtime, Bundle-ingress, and
-  activation limits are implemented.
+  `DONE`, and P-17 is only `PARTIAL`; N-041 remains `PLANNED` until the remaining runtime,
+  Bundle-ingress, and activation limits are implemented.
 - The cumulative Catalog SDK slice passes 33 package tests, 71 compile-time negative cases, and 43
   independent evidence/mutation tests. It preserves all 12 component, 14 behavior, 9 operation,
   and 10 resource manifest fields; readonly authoring inputs; literal inference; recursive
@@ -341,6 +349,15 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   reference composition, hostile-input rejection, platform neutrality, 9 trace assignments, and
   11 tracked files. Token and format execution remains M04-T03; consumer-schema and adapter
   validation remain M05. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
+- The M04-T03 materialization boundary passes 7 focused package tests, 7 compiler-negative cases,
+  and 13 independent proof/mutation tests. One runtime export and four types add explicit host token
+  lookup and the closed PF-017 string formatter without modifying the M04-T02 deferral primitive.
+  The evidence preserves one lookup per unique token per top-level call, missing-versus-null,
+  receiver-independent frozen requests, redacted provider failures, inert provider data, RFC 8785
+  non-string conversion, exact placeholder/value sets, nested fallback use, no partial values, and
+  final expansion bounds. Nineteen runtime probes, two direct trace assignments, and 11 tracked
+  files protect platform neutrality, prerequisite integrity, and safe atomic writes.
+  Consumer-schema validation remains M05. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -361,16 +378,20 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T03 — Token and deterministic string-format resolution`. Consume the deferred token and
-format outcomes from M04-T02, resolve only through explicit trusted inputs, preserve the same
-bounded complete-outcome behavior, and keep the implementation independent of React, DOM, CSS,
-browser, and application code.
+Start `M04-T04 — Predicate evaluation and conditional presence`. Build the protocol's closed
+predicate forms over the immutable M04-T02 snapshot and complete value outcomes, preserve exact
+missing and type behavior, and prove that conditional presence never becomes a general expression
+language. Keep the implementation independent of React, DOM, CSS, browser, and application code.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
 to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fell from 59 minutes
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
+
+M04-T03 extends the current reviewed CI inventory to 94 distinct workloads, 26 proof verifiers, 26
+root proof files, and a pinned 60-step plan. The archived CI-01 timing comparison remains historical
+evidence rather than a claim that the larger current inventory has identical timing.
 
 M02-T02 evidence:
 
@@ -536,6 +557,17 @@ M04-T02 evidence:
   with TSDoc
 - executable evidence: 34 package tests, 10 compiler-negative cases, 13 root proof/mutation tests,
   9 trace assignments, 10 resolution probes, 8 safety probes, and 11 byte-tracked files
+
+M04-T03 evidence:
+
+- `docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-token-format-resolution.json`
+- artifact SHA-256: `be2d07ae32537ef5c2aec04c783f2cfb30cbcc500a85020172e2b8715a98800f`
+- exact boundary: 1 runtime export, 4 type exports, host-owned token lookup, and closed PF-017
+  deterministic formatting
+- executable evidence: 7 package tests, 7 compiler-negative cases, 13 root proof/mutation tests, 2
+  direct trace assignments, 7 token probes, 8 format probes, 4 safety probes, and 11 byte-tracked
+  files
 
 ## Status vocabulary
 

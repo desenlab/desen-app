@@ -140,8 +140,63 @@ repeating a legal large reference cannot amplify node, string, or depth cost pas
 
 Resolution produces a candidate JSON value. Capability prop/style schema validation and
 `PROP_TYPE_MISMATCH` still belong to the adapter composition boundary in M05; a later type
-mismatch must not retry a fallback. Lifecycle transitions, event lifetime production, context
-secret classification, tokens, and formatting remain with their named later tasks.
+mismatch must not retry a fallback. The M04-T02 entry point deliberately retains its token and
+format `deferred` fence; M04-T03 completes those forms through the separate additive API below.
+Lifecycle transitions, event lifetime production, and context secret classification remain with
+their named later tasks.
+
+## M04-T03 token and format materialization API
+
+`materializeRuntimeValue` completes one `RuntimeValueSpec` without changing
+`resolveRuntimeValue`. It receives the same factory-created resolution snapshot and an explicit
+trusted token port plus request context. The core never looks up a global provider, owns a token
+document, or imports a target-specific token implementation.
+
+```ts
+const result = materializeRuntimeValue(spec, snapshot, {
+  requestContext,
+  tokens: hostPorts.tokens,
+});
+```
+
+`RuntimeValueMaterializationContext` has exactly those two members. An invalid context throws a
+`TypeError` before any token callback runs. The result union reuses the existing `resolved`,
+reference-`unresolved`, and `invalid` outcomes, then adds:
+
+- `RuntimeTokenUnresolved`, with `status: "unresolved"`, `REFERENCE_UNRESOLVED`, the exact pointer,
+  token name, and `reason: "missing-token"`; and
+- `RuntimeTokenProviderFailure`, with `status: "failed"`, redacted `ADAPTER_FAILURE`, the exact
+  pointer, and `adapter: "token-provider"`.
+
+For `$token`, the materializer sends the opaque non-empty token name and exact request context to
+the synchronous host port. A resolved JSON null is a successful value and remains distinct from
+`missing`. One top-level materialization performs at most one lookup for each unique token name;
+later occurrences reuse the first detached and immutable success, missing, or failure outcome. The
+cache is discarded after that top-level call. A missing token produces a token-specific
+`REFERENCE_UNRESOLVED` result. A thrown callback, malformed provider envelope, or unsafe provider
+value produces a redacted `ADAPTER_FAILURE` and exposes no raw error, provider response, or partial
+value.
+
+For `$format`, the materializer uses the PF-017 single-pass placeholder profile:
+
+- a placeholder is exactly `{name}`, with `name` matching `[A-Za-z_][A-Za-z0-9_]*`;
+- repeated placeholders are allowed, but bare, empty, nested, or unmatched braces are invalid;
+- DESEN 0.1.0 defines no brace-escape syntax;
+- placeholder names and own `values` keys must match exactly; and
+- template text never performs expression, property-chain, prototype, locale, markup, or code
+  evaluation.
+
+Every mapped value is materialized once in the same snapshot and token context. Repeated
+placeholders reuse that result. Raw strings are inserted unchanged; all other resolved JSON values
+use RFC 8785 canonical JSON. A nested reference, token, format, or fallback keeps its exact RFC 6901
+failure location and fallback flag. One failed child rejects the complete parent without exposing
+resolved siblings.
+
+Input, provider output, nested values, and final output share the M04-T02 safety profile. The
+materializer therefore detaches and freezes accepted data, preserves deterministic object and array
+ordering, and checks the fully expanded string against the same limits before returning it.
+Successful materialization still does not prove that the candidate matches its consumer. Exact
+prop, style-part, action-input, operation/resource, and adapter schema validation remains M05.
 
 ## Port invariants
 
@@ -153,7 +208,7 @@ secret classification, tokens, and formatting remain with their named later task
 - Navigation can target only an existing surface in the active Bundle. Denial cannot substitute a
   different surface, and external URL navigation is not part of the core port.
 - Token `missing` is distinct from a resolved JSON `null`. The core never guesses a replacement or
-  owns the host's token document.
+  owns the host's token document. Token technical failures are redacted `ADAPTER_FAILURE` outcomes.
 - Context and environment subscriptions are invalidation signals. The runtime rereads a complete
   snapshot so one action or predicate turn never observes a partial update.
 - Bundle storage is content-addressed. The same revision and bytes are idempotent; different bytes
@@ -177,7 +232,8 @@ secret classification, tokens, and formatting remain with their named later task
 ## Status
 
 Private proof package. M04-T01 defines host contracts and stable callback composition; M04-T02
-defines bounded literal/reference/fallback materialization. Tokens, formatting, state writes,
+defines bounded literal/reference/fallback resolution; and M04-T03 adds token and deterministic
+string-format materialization without changing the earlier deferral primitive. State writes,
 resource/operation transitions, action execution, rendering, activation implementation,
 event/command bridges, and adapters remain assigned to their later tracked tasks.
 
@@ -193,7 +249,9 @@ Use the focused runtime tests and root workspace quality gate:
 ```bash
 pnpm --filter @desen/runtime-core test:host-ports
 pnpm --filter @desen/runtime-core test:value-resolution
+pnpm --filter @desen/runtime-core test:token-format-resolution
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
+pnpm verify:runtime-core-token-format-resolution
 pnpm check
 ```
