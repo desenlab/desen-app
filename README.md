@@ -14,11 +14,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `SC-01`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
+
+**Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
+remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
+spike retained as evidence.
 
 ## Product boundaries
 
@@ -82,6 +86,9 @@ packages/
 - [Master implementation plan](docs/plan/MASTER-PLAN.md)
 - [Task board](docs/plan/TASKS.md)
 - [Strategic validation checkpoints](docs/plan/STRATEGIC-VALIDATION.md)
+- [SC-01 DESEN–A2UI comparison](docs/proof/SC-01-DESEN-A2UI-COMPARISON.md)
+- [DTCG 2025.10 compatibility profile](docs/profiles/DTCG-2025.10-COMPATIBILITY.md)
+- [ADR 0009: protocol positioning and interoperability](docs/adr/0009-sc-01-protocol-positioning-and-interoperability.md)
 - [Proof matrix](docs/proof/PROOF-MATRIX.md)
 - [Structural-validation proof](docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md)
 - [Semantic-foundation proof](docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md)

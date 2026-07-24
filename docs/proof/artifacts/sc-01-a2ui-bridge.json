@@ -1,0 +1,527 @@
+{
+  "proof": "SC-01",
+  "profileId": "SC01_STATIC_TEXT_V1",
+  "formatVersion": 3,
+  "result": "PASS",
+  "scope": {
+    "classification": "executable interoperability bridge spike",
+    "productionPackageApiChanged": false,
+    "publicPackageExportAdded": false,
+    "supportedSurfaceCount": 1,
+    "supportedRenderingTarget": "web-react",
+    "claim": "For every JSON value admitted by SC01_STATIC_TEXT_V1, the bridge preserves the profile's structural fields exactly in both directions.",
+    "proofBasis": {
+      "method": "bounded structural induction over the admitted rooted component tree, backed by deterministic executable coverage",
+      "invariants": [
+        "Base Text: id, literal safe text, and the body|heading|caption bijection are preserved exactly.",
+        "Base empty Stack: id, explicit direction, explicit align, and an empty ordered default slot are preserved exactly.",
+        "Inductive Stack step: if each ordered child roundtrips exactly, depth-first pre-order encoding preserves child ids and order, and reconstruction restores the same ordered child subtrees.",
+        "The inverse is restricted to canonical two-message A2UI streams whose ids form one rooted, reachable, acyclic tree with exactly one parent per non-root node.",
+        "All enum maps are bijections on strictly primitive string domains; values are never canonicalized through caller coercion.",
+        "Induction is finite with at most 256 components and deepest node depth 32 from root depth 0."
+      ]
+    },
+    "nonClaims": [
+      "general DESEN/A2UI equivalence",
+      "rendered pixels, HTML, DOM, CSS, or accessibility-tree parity",
+      "semantic typography parity because A2UI Text.variant is only a renderer hint",
+      "default-value parity across DESEN Catalog and A2UI renderers",
+      "A2UI justify parity; justify is outside this profile",
+      "dynamic state, resources, actions, conditions, repeat, behavior, authoring, or style semantics"
+    ]
+  },
+  "externalStandard": {
+    "name": "A2UI",
+    "release": "0.9.1",
+    "repository": "https://github.com/a2ui-project/a2ui",
+    "commit": "d4723f29254520e1214d5004cb555d83eaafb828",
+    "specificationTreeGitSha1": "c7bbfeea1e6d62b0f24af4c83231c2d9fd55aa89",
+    "specificationDirectory": "specification/v0_9_1",
+    "files": [
+      {
+        "localName": "server_to_client.json",
+        "upstreamPath": "specification/v0_9_1/json/server_to_client.json",
+        "url": "https://github.com/a2ui-project/a2ui/blob/d4723f29254520e1214d5004cb555d83eaafb828/specification/v0_9_1/json/server_to_client.json",
+        "rawUrl": "https://raw.githubusercontent.com/a2ui-project/a2ui/d4723f29254520e1214d5004cb555d83eaafb828/specification/v0_9_1/json/server_to_client.json",
+        "gitBlobSha1": "dcf138a1776b2039c8035aa263b7fa0ba244ab4e",
+        "sha256": "sha256:2ba29dbcb57611225c96d3e064d05cf97e9d8224b293c8b20d37b93922a2d30d",
+        "bytes": 5754
+      },
+      {
+        "localName": "common_types.json",
+        "upstreamPath": "specification/v0_9_1/json/common_types.json",
+        "url": "https://github.com/a2ui-project/a2ui/blob/d4723f29254520e1214d5004cb555d83eaafb828/specification/v0_9_1/json/common_types.json",
+        "rawUrl": "https://raw.githubusercontent.com/a2ui-project/a2ui/d4723f29254520e1214d5004cb555d83eaafb828/specification/v0_9_1/json/common_types.json",
+        "gitBlobSha1": "51c5b036bcba83631aad780f5b6b78dad6b552f8",
+        "sha256": "sha256:ac79788e95e5bdf0a39808953593a53c1bc9fcdcdb55480f4610613c6591e94c",
+        "bytes": 9086
+      },
+      {
+        "localName": "basic-catalog.json",
+        "upstreamPath": "specification/v0_9_1/catalogs/basic/catalog.json",
+        "url": "https://github.com/a2ui-project/a2ui/blob/d4723f29254520e1214d5004cb555d83eaafb828/specification/v0_9_1/catalogs/basic/catalog.json",
+        "rawUrl": "https://raw.githubusercontent.com/a2ui-project/a2ui/d4723f29254520e1214d5004cb555d83eaafb828/specification/v0_9_1/catalogs/basic/catalog.json",
+        "gitBlobSha1": "cefc2b98bb475d4399e1ebbcb5b81fa547ec5e1e",
+        "sha256": "sha256:4c694b68ee51e0e5716add4bcfddafb6311089df07314832f27decaca319c0d3",
+        "bytes": 46520
+      }
+    ],
+    "catalogIdentity": {
+      "emittedCatalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json",
+      "pinnedSchemaId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json",
+      "proseDirectorySpelling": "v0_9_1",
+      "schemaIdentitySpelling": "v0_9",
+      "inventedV091CatalogAliasAccepted": false,
+      "note": "The pinned 0.9.1 directory contains a Basic Catalog whose actual $id/catalogId remains under v0_9."
+    },
+    "schemaReferenceResolution": {
+      "mode": "official-runner-compatible in-memory $id alias",
+      "schemaOwnedCatalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json",
+      "resolverId": "https://a2ui.org/specification/v0_9/catalog.json",
+      "emittedCatalogIdChanged": false
+    },
+    "provenanceSha256": "sha256:057a68aaa70d892082401552b38290d5a22c863ce6a4ea817fba35cb551c43ac"
+  },
+  "desenProtocol": {
+    "version": "0.1.0",
+    "frozenSourceSchema": {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+      "id": "https://schemas.desen.dev/0.1/desen-source.schema.json",
+      "sha256": "sha256:5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3",
+      "checksumLedger": {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/SHA256SUMS",
+        "sha256": "sha256:92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd",
+        "sourceSchemaEntryMatched": true
+      }
+    },
+    "frozenExampleCatalog": {
+      "profileId": "SC01_STATIC_TEXT_V1",
+      "schema": {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-catalog.schema.json",
+        "id": "https://schemas.desen.dev/0.1/desen-catalog.schema.json",
+        "sha256": "sha256:51014ab088b6a483502fd6aee5eed9fc4451be55556b6bd6220a5a6a1b610555",
+        "bytes": 15654
+      },
+      "example": {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json",
+        "sha256": "sha256:7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d",
+        "bytes": 22084,
+        "identity": {
+          "kind": "desen.catalog",
+          "desen": "0.1.0",
+          "id": "com.example.web-catalog",
+          "version": "1.0.0",
+          "target": "web-react"
+        }
+      },
+      "checksumLedger": {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/SHA256SUMS",
+        "sha256": "sha256:92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd",
+        "catalogSchemaEntryMatched": true,
+        "catalogExampleEntryMatched": true
+      },
+      "contract": {
+        "result": "PASS",
+        "stackTextFieldsEnumsDefaultsExact": true,
+        "sampleStackPropsValid": true,
+        "sampleTextPropsValid": true,
+        "profileStricterThanCatalog": [
+          "Stack.direction is explicit despite the Catalog default",
+          "Stack.align is explicit despite being optional in the Catalog",
+          "Text.role is explicit despite being optional in the Catalog",
+          "Text.text is capped at 4096 UTF-16 code units",
+          "Stack.gap and Stack.maxWidth are rejected"
+        ]
+      }
+    }
+  },
+  "subset": {
+    "desen": { "kind": "desen.source", "version": "0.1.0" },
+    "identity": "source id = entry = sole surface key = surface id",
+    "catalogRequirement": {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react"
+    },
+    "requiredEmptyContainers": ["surface.state", "surface.resources"],
+    "rootId": "root",
+    "components": {
+      "Stack": {
+        "use": "com.example.ui/Stack",
+        "direction": { "vertical": "A2UI Column", "horizontal": "A2UI Row" },
+        "requiredExplicitAlign": ["start", "center", "end", "stretch"],
+        "forbiddenProps": ["gap", "maxWidth"],
+        "onlySlot": "default"
+      },
+      "Text": {
+        "use": "com.example.ui/Text",
+        "literalSafePlainTextOnly": true,
+        "maximumUtf16CodeUnits": 4096,
+        "roles": { "body": "A2UI body", "heading": "A2UI h2", "caption": "A2UI caption" }
+      }
+    },
+    "forbiddenSemantics": [
+      "non-empty state",
+      "non-empty resources",
+      "authoring",
+      "extensions",
+      "style",
+      "events/actions",
+      "conditions",
+      "repeat",
+      "variants",
+      "behaviors",
+      "dynamic values",
+      "dynamic children",
+      "theme"
+    ],
+    "finiteBounds": {
+      "maximumComponents": 256,
+      "maximumNodeDepthFromRoot": 32,
+      "rootDepth": 0,
+      "maximumTextUtf16CodeUnits": 4096
+    }
+  },
+  "streamContract": {
+    "messages": ["createSurface", "updateComponents"],
+    "version": "v0.9.1",
+    "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json",
+    "componentOrder": "depth-first pre-order with root first",
+    "rowColumnAlign": "explicit and required",
+    "justify": "outside profile and rejected"
+  },
+  "schemaValidation": {
+    "result": "PASS",
+    "mode": "offline exact pinned JSON Schema bytes",
+    "engine": "Ajv 8.20.0 Draft 2020-12 from existing validator dev dependency",
+    "messagesValidated": 2,
+    "negativeAdditionalPropertyControl": "PASS",
+    "desenSource": {
+      "sample": "PASS",
+      "decodedRoundtrip": "PASS",
+      "schemaSha256": "sha256:5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3"
+    },
+    "desenCatalog": {
+      "result": "PASS",
+      "schemaSha256": "sha256:51014ab088b6a483502fd6aee5eed9fc4451be55556b6bd6220a5a6a1b610555",
+      "exampleSha256": "sha256:7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d",
+      "stackTextContract": "PASS"
+    }
+  },
+  "roundtrips": {
+    "desenToA2uiToDesen": {
+      "result": "PASS",
+      "equality": "exact JSON structural fields via Node.js deep strict equality",
+      "components": 5
+    },
+    "a2uiToDesenToA2ui": {
+      "result": "PASS",
+      "equality": "exact JSON structural fields via Node.js deep strict equality",
+      "messages": 2
+    },
+    "sample": {
+      "sourceSha256": "sha256:96de28acf9eb12ac5d7d516c7f584b8e0615e721f3083cf4b2e49009e5af08f7",
+      "streamSha256": "sha256:ed5017a34c919b2c30ce20b97879fc27b93a02c0fd1245017929dab4d45e2e31"
+    }
+  },
+  "positiveCoverage": {
+    "result": "PASS",
+    "vectorCount": 1029,
+    "categoryCounts": {
+      "textRoot": 1,
+      "emptyStack": 1,
+      "mappingMatrix": 24,
+      "depthBoundary": 1,
+      "componentBoundary": 1,
+      "unicodeTextAndPrototypeNamedIds": 1,
+      "seededTrees": 1000
+    },
+    "deterministicCorpus": {
+      "generator": "Park-Miller minimal standard PRNG",
+      "seed": 20260724,
+      "seededTreeCount": 1000
+    },
+    "exactRoundtrips": { "desenToA2uiToDesen": 1029, "a2uiToDesenToA2ui": 1029 },
+    "schemaValidations": { "desenSources": 1029, "a2uiStreams": 1029, "a2uiMessages": 2058 },
+    "aggregateReceipt": {
+      "algorithm": "SHA-256",
+      "encoding": "UTF-8 JSON.stringify of ordered receipts with id, category, component/depth metrics, Source hash, and stream hash",
+      "bytes": 280837,
+      "sha256": "sha256:57b173a684633743c6ab1806e68b00f5b7143fed1f734c32bd7f5afedb7a614e"
+    },
+    "boundaries": {
+      "depth": {
+        "rootDepth": 0,
+        "maximumAcceptedDepthFromRoot": 32,
+        "acceptedLevelsIncludingRoot": 33,
+        "firstRejectedDepthFromRoot": 33,
+        "rejectionVectorIds": ["desen-depth-33", "a2ui-depth-33"]
+      },
+      "components": {
+        "maximumAccepted": 256,
+        "firstRejected": 257,
+        "rejectionVectorIds": ["desen-components-257", "a2ui-components-257"]
+      }
+    }
+  },
+  "rejections": {
+    "result": "PASS",
+    "count": 34,
+    "stableCodes": [
+      {
+        "id": "source-authoring",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_AUTHORING_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "source-extensions",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_EXTENSIONS_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "non-empty-state",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_STATE_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "non-empty-resources",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_RESOURCES_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "node-style",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_STYLE_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "node-events",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_EVENTS_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "node-condition",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_CONDITION_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "node-repeat",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_REPEAT_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "node-behaviors",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_BEHAVIOR_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "node-variants",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_VARIANTS_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "stack-gap",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_STACK_GAP_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "stack-max-width",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_STACK_MAX_WIDTH_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "stack-direction-non-string-json-object",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_STACK_DIRECTION_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "stack-missing-explicit-align",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_STACK_ALIGN_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "unsupported-component",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_COMPONENT_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "dynamic-text",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_TEXT_VALUE_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "text-role-non-string-json-object",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_TEXT_ROLE_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "unsafe-markdown-text",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_TEXT_PLAIN_UNSAFE",
+        "result": "PASS"
+      },
+      {
+        "id": "text-over-profile-limit",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_TEXT_LENGTH_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "wrong-root-id",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_ROOT_ID_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-v0.9-version",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_VERSION_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "invented-v0.9.1-catalog-alias",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_CATALOG_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-theme",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_THEME_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-data-model-message",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_STATE_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-dynamic-text",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_DYNAMIC_VALUE_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-variant-non-string-json-object",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_TEXT_ROLE_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-dynamic-children",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_CHILDREN_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-missing-explicit-align",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_STACK_ALIGN_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-action",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_ACTION_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-unsupported-component",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_COMPONENT_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "desen-depth-33",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_COMPONENT_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-depth-33",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_CHILDREN_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "desen-components-257",
+        "direction": "desen-to-a2ui",
+        "code": "SC01_COMPONENT_UNSUPPORTED",
+        "result": "PASS"
+      },
+      {
+        "id": "a2ui-components-257",
+        "direction": "a2ui-to-desen",
+        "code": "SC01_A2UI_STREAM_UNSUPPORTED",
+        "result": "PASS"
+      }
+    ]
+  },
+  "implementation": {
+    "result": "PASS",
+    "trackedFiles": [
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "sha256:4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/sc-01-a2ui-bridge-spike.mjs",
+        "bytes": 94414,
+        "sha256": "sha256:52c8dad4fc3833bbd52b443b0c0c360f001a345cfab29af802d69ee96ad86d4e"
+      },
+      {
+        "path": "scripts/generate-sc-01-a2ui-bridge-proof.mjs",
+        "bytes": 643,
+        "sha256": "sha256:1aac29ac92a69abf04d9df57b9e2409a8be7358b8a4d08e1c8cfffa1d0f3d094"
+      },
+      {
+        "path": "scripts/verify-sc-01-a2ui-bridge.mjs",
+        "bytes": 645,
+        "sha256": "sha256:02f2ab05ca55abc16636d259aada6f457a222e5ed28d7145e271de830c301f70"
+      },
+      {
+        "path": "tests/sc-01-a2ui-bridge-spike.test.mjs",
+        "bytes": 33835,
+        "sha256": "sha256:de61943d4e57984ac57f6c2c288fe7d5b5901ce0d1357fafe0f2e8d194266fb3"
+      },
+      {
+        "path": "tests/fixtures/standards/a2ui/0.9.1/PROVENANCE.md",
+        "bytes": 2189,
+        "sha256": "sha256:057a68aaa70d892082401552b38290d5a22c863ce6a4ea817fba35cb551c43ac"
+      },
+      {
+        "path": "tests/fixtures/standards/a2ui/0.9.1/server_to_client.json",
+        "bytes": 5754,
+        "sha256": "sha256:2ba29dbcb57611225c96d3e064d05cf97e9d8224b293c8b20d37b93922a2d30d"
+      },
+      {
+        "path": "tests/fixtures/standards/a2ui/0.9.1/common_types.json",
+        "bytes": 9086,
+        "sha256": "sha256:ac79788e95e5bdf0a39808953593a53c1bc9fcdcdb55480f4610613c6591e94c"
+      },
+      {
+        "path": "tests/fixtures/standards/a2ui/0.9.1/basic-catalog.json",
+        "bytes": 46520,
+        "sha256": "sha256:4c694b68ee51e0e5716add4bcfddafb6311089df07314832f27decaca319c0d3"
+      }
+    ]
+  }
+}

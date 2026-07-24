@@ -1,0 +1,819 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "SC-01",
+  "result": "PASS",
+  "classification": "DTCG_2025_10_COMPATIBLE_CLOSED_REFERENCE_PROFILE",
+  "claim": {
+    "summary": "The built 26-leaf reference document is a DTCG 2025.10-compatible closed color/dimension profile, with separately reviewed exact compatibility fixtures; no general DTCG input verdict is produced.",
+    "auditScope": "CURRENT_BUILT_REFERENCE_DOCUMENT_AND_REVIEWED_EXACT_FIXTURE_MATRIX",
+    "arbitraryInputConformanceVerdict": false,
+    "fullParserClaim": false,
+    "fullResolverClaim": false,
+    "protocol": "DESEN 0.1.0",
+    "target": "web-react"
+  },
+  "stableStandardPin": {
+    "organization": "Design Tokens Community Group",
+    "stableVersion": "2025.10",
+    "publicationDate": "2025-10-28",
+    "reportStatus": "FINAL_COMMUNITY_GROUP_REPORT",
+    "w3cStandardTrack": false,
+    "immutableReports": [
+      {
+        "module": "Format",
+        "url": "https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/"
+      },
+      {
+        "module": "Color",
+        "url": "https://www.w3.org/community/reports/design-tokens/CG-FINAL-color-20251028/"
+      },
+      {
+        "module": "Resolver",
+        "url": "https://www.w3.org/community/reports/design-tokens/CG-FINAL-resolver-20251028/"
+      }
+    ],
+    "publicationCommit": {
+      "repository": "https://github.com/design-tokens/community-group",
+      "sha": "f0f32a7dce0b51b36488be9cbbf7cad2763c6f29",
+      "url": "https://github.com/design-tokens/community-group/commit/f0f32a7dce0b51b36488be9cbbf7cad2763c6f29"
+    },
+    "upstreamInconsistencies": [
+      {
+        "id": "DTCG_RESOLVER_2025_10_VERSION_CONFLICT",
+        "report": "https://www.w3.org/community/reports/design-tokens/CG-FINAL-resolver-20251028/",
+        "rootPropertyTableValue": "2025-10-01",
+        "normativeSection": "4.1.2 Version",
+        "normativeMustValue": "2025-11-01",
+        "selectedFixtureInterpretation": "2025-11-01",
+        "note": "The immutable report conflicts internally. The executable fixture follows the normative MUST paragraph in section 4.1.2; no general Resolver conformance is claimed."
+      }
+    ]
+  },
+  "auditedReferenceDocument": {
+    "source": "built @desen/reference-catalog-web/tokens REFERENCE_TOKEN_DOCUMENT",
+    "canonicalJsonSha256": "sha256:e7f7f3692b57722a31991aae4768c32ad1e0f61dced84131f7629c29840ebbac",
+    "canonicalJsonBytes": 2902,
+    "recursivelyFrozen": true,
+    "classification": "DTCG_2025_10_COMPATIBLE_CLOSED_REFERENCE_PROFILE",
+    "leafCount": 26,
+    "groupCount": 13,
+    "tokenPaths": [
+      "color.action.primary",
+      "color.border.default",
+      "color.border.strong",
+      "color.content.onAction",
+      "color.content.onCritical",
+      "color.critical.base",
+      "color.critical.surface",
+      "color.critical.text",
+      "color.info.base",
+      "color.info.surface",
+      "color.info.text",
+      "color.success.base",
+      "color.success.surface",
+      "color.success.text",
+      "color.surface.default",
+      "color.surface.disabled",
+      "color.text.default",
+      "color.warning.base",
+      "color.warning.surface",
+      "color.warning.text",
+      "radius.control",
+      "space.lg",
+      "space.md",
+      "space.sm",
+      "space.xl",
+      "space.xs"
+    ],
+    "effectiveTypes": ["color", "dimension"],
+    "typeCounts": { "color": 20, "dimension": 6 },
+    "typeInheritance": { "inherited": 26, "explicitOnToken": 0 },
+    "colorProfile": {
+      "directValues": 17,
+      "observedColorSpaces": ["srgb"],
+      "acceptedColorSpaces": ["srgb"],
+      "alphaRequiredLocally": true,
+      "lowercaseSixDigitHexRequiredLocally": true,
+      "hexMustMatchRoundedSrgbComponents": true
+    },
+    "dimensionProfile": {
+      "directValues": 6,
+      "acceptedUnits": ["px", "rem"],
+      "observedUnits": ["rem"]
+    },
+    "aliases": {
+      "count": 3,
+      "syntax": "whole-token curly alias",
+      "sameDocumentOnly": true,
+      "chainResolutionAudited": true,
+      "cycleFree": true,
+      "maximumObservedChainDepth": 1,
+      "entries": [
+        {
+          "path": "color.content.onCritical",
+          "reference": "{color.content.onAction}",
+          "target": "color.content.onAction",
+          "terminal": "color.content.onAction",
+          "chainDepth": 1,
+          "effectiveType": "color"
+        },
+        {
+          "path": "color.info.base",
+          "reference": "{color.action.primary}",
+          "target": "color.action.primary",
+          "terminal": "color.action.primary",
+          "chainDepth": 1,
+          "effectiveType": "color"
+        },
+        {
+          "path": "color.surface.default",
+          "reference": "{color.content.onAction}",
+          "target": "color.content.onAction",
+          "terminal": "color.content.onAction",
+          "chainDepth": 1,
+          "effectiveType": "color"
+        }
+      ]
+    }
+  },
+  "compatibility": {
+    "currentReferenceProfileCompatibleSubset": [
+      "JSON token and nested-group structure identified by $value",
+      "Group $type inheritance",
+      "color and dimension token types",
+      "sRGB color values",
+      "px and rem dimension units",
+      "same-document whole-token dotted curly aliases",
+      "recursive alias chains with missing-target, cycle, and type-mismatch rejection"
+    ],
+    "locallyStricterProfile": [
+      "Color is limited to sRGB.",
+      "Color components are limited to finite numbers; the DTCG none component value is intentionally unsupported.",
+      "Color alpha is locally required although DTCG permits omission.",
+      "A lowercase six-digit hex fallback matching rounded sRGB components is locally required although DTCG permits omission.",
+      "Only color and dimension token types are accepted.",
+      "Only dotted whole-token curly aliases are accepted; a valid root alias such as {primary} is intentionally not accepted.",
+      "An alias must receive color or dimension from itself or a parent group; DTCG target-token type inference is intentionally unsupported."
+    ],
+    "reviewedValidButUnsupportedFeatures": [
+      {
+        "id": "ROOT_TOKEN_CURLY_ALIAS",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "A root token alias such as {primary}",
+        "examples": ["{primary}"],
+        "executableFixtures": [
+          {
+            "id": "root-token-curly-alias",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "ROOT_TOKEN_CURLY_ALIAS",
+            "canonicalJsonSha256": "sha256:620619cc3d2b721277d3ceadd50089d93ddc0688083115b8dd953aa6c2696f82",
+            "document": {
+              "alias": { "$type": "color", "$value": "{primary}" },
+              "primary": {
+                "$type": "color",
+                "$value": {
+                  "alpha": 1,
+                  "colorSpace": "srgb",
+                  "components": [0, 0, 0],
+                  "hex": "#000000"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "ALIAS_TARGET_TYPE_INFERENCE",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "A whole-token alias that inherits its type from the target token",
+        "examples": ["alias with no own or parent $type"],
+        "executableFixtures": [
+          {
+            "id": "alias-infers-target-type",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "ALIAS_TARGET_TYPE_INFERENCE",
+            "canonicalJsonSha256": "sha256:dff294153c8c235e5f4f9f36ca6056e363dee735e999bec2e2fa90cf5a057734",
+            "document": {
+              "alias": { "$value": "{palette.primary}" },
+              "palette": {
+                "primary": {
+                  "$type": "color",
+                  "$value": {
+                    "alpha": 1,
+                    "colorSpace": "srgb",
+                    "components": [0, 0, 0],
+                    "hex": "#000000"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "JSON_POINTER_REF",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "A whole-token JSON Pointer $ref",
+        "examples": [{ "$ref": "#/primary/$value" }],
+        "executableFixtures": [
+          {
+            "id": "whole-token-json-pointer",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "JSON_POINTER_REF",
+            "canonicalJsonSha256": "sha256:8c494f5c62580a1bdcd174190cbabce7d539083a09017ca217cf5edf3cc4c0e2",
+            "document": {
+              "alias": { "$ref": "#/primary/$value", "$type": "color" },
+              "primary": {
+                "$type": "color",
+                "$value": {
+                  "alpha": 1,
+                  "colorSpace": "srgb",
+                  "components": [0, 0, 0],
+                  "hex": "#000000"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "PROPERTY_LEVEL_REF",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "A property-level JSON Pointer reference",
+        "examples": ["#/base/$value/components/0"],
+        "executableFixtures": [
+          {
+            "id": "color-component-json-pointer",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "PROPERTY_LEVEL_REF",
+            "canonicalJsonSha256": "sha256:0b759e0947a0a8d7b9262cdbfebfd9e8dd366cff83a518e9975e3fbd7e50fa25",
+            "document": {
+              "base": {
+                "$type": "color",
+                "$value": {
+                  "alpha": 1,
+                  "colorSpace": "srgb",
+                  "components": [0, 0, 0],
+                  "hex": "#000000"
+                }
+              },
+              "derived": {
+                "$type": "color",
+                "$value": {
+                  "alpha": 1,
+                  "colorSpace": "srgb",
+                  "components": [{ "$ref": "#/base/$value/components/0" }, 0, 0],
+                  "hex": "#000000"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "ROOT_GROUP_TOKEN",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "The $root token member of a group",
+        "examples": ["$root"],
+        "executableFixtures": [
+          {
+            "id": "group-root-token",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "ROOT_GROUP_TOKEN",
+            "canonicalJsonSha256": "sha256:6f4ffb091f0aa9f4e8aa502149aca502fa30e61b6a8ff96ec72d1e4c4d4e1d3b",
+            "document": {
+              "semantic": {
+                "$root": {
+                  "$value": {
+                    "alpha": 1,
+                    "colorSpace": "srgb",
+                    "components": [0, 0, 0],
+                    "hex": "#000000"
+                  }
+                },
+                "$type": "color",
+                "accent": {
+                  "$value": {
+                    "alpha": 1,
+                    "colorSpace": "srgb",
+                    "components": [0, 0, 0],
+                    "hex": "#000000"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "GROUP_EXTENDS",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "Group inheritance through $extends",
+        "examples": ["$extends"],
+        "executableFixtures": [
+          {
+            "id": "group-extends",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "GROUP_EXTENDS",
+            "canonicalJsonSha256": "sha256:1b1cd03e686158f51b14bfd8fd9e8c84e46431f8bac07283233627dd525819ea",
+            "document": {
+              "base": {
+                "$type": "color",
+                "accent": {
+                  "$value": {
+                    "alpha": 1,
+                    "colorSpace": "srgb",
+                    "components": [0, 0, 0],
+                    "hex": "#000000"
+                  }
+                }
+              },
+              "derived": {
+                "$extends": "{base}",
+                "$type": "color",
+                "accent": {
+                  "$value": {
+                    "alpha": 1,
+                    "colorSpace": "srgb",
+                    "components": [0, 0, 0],
+                    "hex": "#000000"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "EMPTY_GROUP",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "An empty DTCG group",
+        "examples": ["empty group"],
+        "executableFixtures": [
+          {
+            "id": "empty-described-group",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "EMPTY_GROUP",
+            "canonicalJsonSha256": "sha256:8ad173592614a57db712e7e8a92af69a207af24a1789bccfdfbcdfde85198987",
+            "document": { "empty": { "$description": "A valid empty DTCG group." } }
+          }
+        ]
+      },
+      {
+        "id": "EXTENSIONS",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "Vendor metadata carried in $extensions",
+        "examples": ["$extensions"],
+        "executableFixtures": [
+          {
+            "id": "token-vendor-extension",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "EXTENSIONS",
+            "canonicalJsonSha256": "sha256:79a517e5b70e2be9f31d962620674dd1bf96759a90bc4cf458ad4314f18295bd",
+            "document": {
+              "primary": {
+                "$extensions": { "example.com": { "source": "fixture" } },
+                "$type": "color",
+                "$value": {
+                  "alpha": 1,
+                  "colorSpace": "srgb",
+                  "components": [0, 0, 0],
+                  "hex": "#000000"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "DEPRECATED",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "Token or group deprecation metadata",
+        "examples": ["$deprecated"],
+        "executableFixtures": [
+          {
+            "id": "deprecated-token",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "DEPRECATED",
+            "canonicalJsonSha256": "sha256:a3cdaaff4a5fed73c3d0057b980c8c8b490d15d79754408a2b51de8260abdfc9",
+            "document": {
+              "legacy": {
+                "$deprecated": "Use primary.",
+                "$type": "color",
+                "$value": {
+                  "alpha": 1,
+                  "colorSpace": "srgb",
+                  "components": [0, 0, 0],
+                  "hex": "#000000"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "ADDITIONAL_TOKEN_TYPES",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "DTCG token types outside color and dimension",
+        "examples": ["number", "typography"],
+        "executableFixtures": [
+          {
+            "id": "number-token",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "ADDITIONAL_TOKEN_TYPES",
+            "canonicalJsonSha256": "sha256:35f0d4ceb59ffebf87bac26a6d2ae1c2d604c2f79b8124f4362f90ee2986dfcb",
+            "document": { "opacity": { "$type": "number", "$value": 0.5 } }
+          },
+          {
+            "id": "typography-token",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "ADDITIONAL_TOKEN_TYPES",
+            "canonicalJsonSha256": "sha256:49d3771aadf5d1f9a0610525f21b5f13b51a92444df24dc10f52874f7cb8b229",
+            "document": {
+              "body": {
+                "$type": "typography",
+                "$value": {
+                  "fontFamily": "Inter",
+                  "fontSize": { "unit": "rem", "value": 1 },
+                  "fontWeight": 400,
+                  "letterSpacing": { "unit": "px", "value": 0 },
+                  "lineHeight": 1.5
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "ADDITIONAL_COLOR_SPACES",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "DTCG color spaces outside sRGB",
+        "examples": ["display-p3", "oklch"],
+        "executableFixtures": [
+          {
+            "id": "display-p3-color",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "ADDITIONAL_COLOR_SPACES",
+            "canonicalJsonSha256": "sha256:089fbddb9e8b8cd51dd9630e0b2087c59ae8af1c323479d5542c05b13e12d822",
+            "document": {
+              "accent": {
+                "$type": "color",
+                "$value": { "alpha": 1, "colorSpace": "display-p3", "components": [0.1, 0.2, 0.3] }
+              }
+            }
+          },
+          {
+            "id": "oklch-color",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "ADDITIONAL_COLOR_SPACES",
+            "canonicalJsonSha256": "sha256:b7e2d72fb2b3fa91e80a8b0b023b201f6b86781ba3a6323cc75ee9ddba193752",
+            "document": {
+              "accent": {
+                "$type": "color",
+                "$value": { "alpha": 1, "colorSpace": "oklch", "components": [0.5, 0.2, 180] }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "NONE_COLOR_COMPONENTS",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "A DTCG color using none for an intentionally missing component",
+        "examples": ["none"],
+        "executableFixtures": [
+          {
+            "id": "srgb-none-component",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "NONE_COLOR_COMPONENTS",
+            "canonicalJsonSha256": "sha256:474dc656110a766da2a45325a8fded84dc0ac93856b9490230f8a4686d8a75a5",
+            "document": {
+              "accent": {
+                "$type": "color",
+                "$value": { "alpha": 1, "colorSpace": "srgb", "components": ["none", 0.2, 0.3] }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "A valid DTCG sRGB color without the locally required alpha and hex members",
+        "examples": ["color without alpha", "color without hex"],
+        "executableFixtures": [
+          {
+            "id": "color-without-local-alpha-and-hex",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "OPTIONAL_COLOR_ALPHA_AND_HEX",
+            "canonicalJsonSha256": "sha256:052a4d184f64b795ff347bacf9af8f8051292b208fdaf6f99cb1694d538bf752",
+            "document": {
+              "accent": {
+                "$type": "color",
+                "$value": { "colorSpace": "srgb", "components": [0.1, 0.2, 0.3] }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "RESOLVER_THEMES_AND_MODES",
+        "dtcgStatus": "VALID_DTCG_2025_10",
+        "localStatus": "UNSUPPORTED",
+        "classification": "UNSUPPORTED_DTCG_FEATURE",
+        "feature": "DTCG Resolver sets, modifiers, contexts, and resolution order",
+        "examples": ["theme", "mode"],
+        "upstreamInconsistency": {
+          "id": "DTCG_RESOLVER_2025_10_VERSION_CONFLICT",
+          "report": "https://www.w3.org/community/reports/design-tokens/CG-FINAL-resolver-20251028/",
+          "rootPropertyTableValue": "2025-10-01",
+          "normativeSection": "4.1.2 Version",
+          "normativeMustValue": "2025-11-01",
+          "selectedFixtureInterpretation": "2025-11-01",
+          "note": "The immutable report conflicts internally. The executable fixture follows the normative MUST paragraph in section 4.1.2; no general Resolver conformance is claimed."
+        },
+        "executableFixtures": [
+          {
+            "id": "resolver-theme-modifier",
+            "classification": "UNSUPPORTED_DTCG_FEATURE",
+            "featureId": "RESOLVER_THEMES_AND_MODES",
+            "canonicalJsonSha256": "sha256:0797e53296453c1d461f30e046027eae488884f66e1178b120443c76c962aa7b",
+            "document": {
+              "modifiers": {
+                "theme": {
+                  "contexts": {
+                    "dark": [
+                      {
+                        "color": {
+                          "background": {
+                            "$type": "color",
+                            "$value": {
+                              "alpha": 1,
+                              "colorSpace": "srgb",
+                              "components": [0, 0, 0],
+                              "hex": "#000000"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "light": [
+                      {
+                        "color": {
+                          "background": {
+                            "$type": "color",
+                            "$value": {
+                              "alpha": 1,
+                              "colorSpace": "srgb",
+                              "components": [0, 0, 0],
+                              "hex": "#000000"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "default": "light"
+                }
+              },
+              "resolutionOrder": [{ "$ref": "#/modifiers/theme" }],
+              "version": "2025-11-01"
+            }
+          }
+        ]
+      }
+    ],
+    "reviewedInvalidFixtures": {
+      "reviewScope": "EXACT_EMBEDDED_FIXTURES_ONLY",
+      "expectedClassification": "INVALID_DTCG",
+      "fixtures": [
+        {
+          "id": "name-containing-dot",
+          "classification": "INVALID_DTCG",
+          "canonicalJsonSha256": "sha256:036b6a16ba8cd33ebc667a4800cf16ed5fa6b8a5b77ef47a72efa5b5dfde693e",
+          "document": {
+            "bad.name": {
+              "$type": "color",
+              "$value": {
+                "alpha": 1,
+                "colorSpace": "srgb",
+                "components": [0, 0, 0],
+                "hex": "#000000"
+              }
+            }
+          }
+        },
+        {
+          "id": "malformed-dimension-value",
+          "classification": "INVALID_DTCG",
+          "canonicalJsonSha256": "sha256:2cca2b284f5bc95ab9571ef778788ae0d949e4bb5181bade612b4e962dd59299",
+          "document": {
+            "space": { "$type": "dimension", "sm": { "$value": { "unit": "rem", "value": "1" } } }
+          }
+        },
+        {
+          "id": "alias-cycle",
+          "classification": "INVALID_DTCG",
+          "canonicalJsonSha256": "sha256:b093cf7ba216554225e9e580072d8bfb01d8f57a0ba3c5f913afc2e96bd464a9",
+          "document": {
+            "color": {
+              "$type": "color",
+              "a": { "$value": "{color.b}" },
+              "b": { "$value": "{color.a}" }
+            }
+          }
+        },
+        {
+          "id": "malformed-json-pointer",
+          "classification": "INVALID_DTCG",
+          "canonicalJsonSha256": "sha256:8f2b279ca7aa439bec451a52f68e1ef2515a9dd2ce9bcdb274f506897f2f2808",
+          "document": {
+            "alias": { "$ref": "primary/$value", "$type": "color" },
+            "primary": {
+              "$type": "color",
+              "$value": {
+                "alpha": 1,
+                "colorSpace": "srgb",
+                "components": [0, 0, 0],
+                "hex": "#000000"
+              }
+            }
+          }
+        },
+        {
+          "id": "missing-json-pointer-target",
+          "classification": "INVALID_DTCG",
+          "canonicalJsonSha256": "sha256:951c8a5b912007e41e49138043a18b54b29eff2415c863fe11f54fcc420405ff",
+          "document": { "alias": { "$ref": "#/missing/$value", "$type": "color" } }
+        },
+        {
+          "id": "misplaced-json-pointer-under-value",
+          "classification": "INVALID_DTCG",
+          "canonicalJsonSha256": "sha256:2b996cce79c3b94db3e2ad6e34c1552f636cfec9676c551df37e998455d377cb",
+          "document": {
+            "alias": { "$type": "color", "$value": { "$ref": "#/primary/$value" } },
+            "primary": {
+              "$type": "color",
+              "$value": {
+                "alpha": 1,
+                "colorSpace": "srgb",
+                "components": [0, 0, 0],
+                "hex": "#000000"
+              }
+            }
+          }
+        },
+        {
+          "id": "malformed-resolver-required-fields",
+          "classification": "INVALID_DTCG",
+          "canonicalJsonSha256": "sha256:1b3af90d2188dc5a32ec1e0654b092b1e60b0521da4959fffc68b6eec974ddef",
+          "document": { "modifiers": { "theme": {} }, "resolutionOrder": [], "version": "bogus" }
+        }
+      ]
+    }
+  },
+  "hostOwnedStorageBoundary": {
+    "owner": "host",
+    "frozenProtocol": "DESEN 0.1.0",
+    "protocolTokenShape": "{ \"$token\": \"color.action.primary\" }",
+    "protocolDefinesTokenStorage": false,
+    "protocolRole": "The host token provider resolves the opaque token name and the receiving capability schema determines the expected resolved type.",
+    "referenceProviderPersistence": "none",
+    "referenceProviderExternalLookup": "none",
+    "referenceProviderGlobalDomMutation": "none",
+    "auditedExecutedImplementations": [
+      "token index TypeScript source and exact built module",
+      "token document TypeScript source and exact built module",
+      "token provider TypeScript source and exact built module"
+    ],
+    "competingTokenFileFormatCreated": false
+  },
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "sourceFiles": [
+      {
+        "path": "packages/reference-catalog-web/test/tokens-consumer.mjs",
+        "sha256": "sha256:8a39ae2c3183ea968ec235458269e8283fe46af3ffd1bb00c011bf3b1eecdee3",
+        "bytes": 53
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "sha256": "sha256:455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa",
+        "bytes": 2254
+      },
+      {
+        "path": "packages/reference-catalog-web/dist/tokens/index.js",
+        "sha256": "sha256:4b47a66a77ddfb34a8ead7f62a35523c06aff94467f29183eeaba291f779eaf8",
+        "bytes": 409
+      },
+      {
+        "path": "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
+        "sha256": "sha256:9f566e8ca4d8ac065abd531ec30e9a8b01fa6557b44e46c1d03c0c1b163066b3",
+        "bytes": 3184
+      },
+      {
+        "path": "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
+        "sha256": "sha256:81c4897b946483672cb6b70d79b9ec05fad2f45e06dc14bea3dfb0cf7af7ffd5",
+        "bytes": 11116
+      },
+      {
+        "path": "packages/reference-catalog-web/src/tokens/index.ts",
+        "sha256": "sha256:03ae286043cc3c84eaf3fd33f187e86025f3bfdaed4a0151ef4660be9a17f22c",
+        "bytes": 857
+      },
+      {
+        "path": "packages/reference-catalog-web/src/tokens/reference-token-document.ts",
+        "sha256": "sha256:d20e599ebd5bd2e958ed77ed98b76dc5a13576166141e9b1620998b6050de05e",
+        "bytes": 4897
+      },
+      {
+        "path": "packages/reference-catalog-web/src/tokens/web-token-provider.ts",
+        "sha256": "sha256:3a9bc4f1fc48d9839d5fa663670df4612421e1d60cba734e636750d4df62676a",
+        "bytes": 14450
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/SPEC.md",
+        "sha256": "sha256:6443aed035cdced68e688402863ae3b7cc77f6dd75c8ad610831483d54b35d9c",
+        "bytes": 77981
+      }
+    ],
+    "builtTokenBinding": {
+      "consumerShim": {
+        "exactLine": "export * from \"@desen/reference-catalog-web/tokens\";",
+        "bytes": 53,
+        "sha256": "sha256:8a39ae2c3183ea968ec235458269e8283fe46af3ffd1bb00c011bf3b1eecdee3"
+      },
+      "packageSelfExport": {
+        "package": "@desen/reference-catalog-web",
+        "subpath": "./tokens",
+        "import": "./dist/tokens/index.js",
+        "manifestSha256": "sha256:455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa"
+      },
+      "resolvedBuiltEntry": {
+        "path": "packages/reference-catalog-web/dist/tokens/index.js",
+        "bytes": 409,
+        "sha256": "sha256:4b47a66a77ddfb34a8ead7f62a35523c06aff94467f29183eeaba291f779eaf8"
+      },
+      "resolvedBuiltDocument": {
+        "path": "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
+        "bytes": 3184,
+        "sha256": "sha256:9f566e8ca4d8ac065abd531ec30e9a8b01fa6557b44e46c1d03c0c1b163066b3"
+      },
+      "resolvedBuiltProvider": {
+        "path": "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
+        "bytes": 11116,
+        "sha256": "sha256:81c4897b946483672cb6b70d79b9ec05fad2f45e06dc14bea3dfb0cf7af7ffd5"
+      },
+      "sourceToBuiltTranspileParity": {
+        "tokenIndex": true,
+        "tokenDocument": true,
+        "tokenProvider": true
+      },
+      "runtimeModuleEdges": {
+        "tokenIndex": ["./reference-token-document.js", "./web-token-provider.js"],
+        "tokenDocument": [],
+        "tokenProvider": ["./reference-token-document.js"]
+      }
+    },
+    "compatibilityFixtureCounts": {
+      "reviewedUnsupportedFeatures": 14,
+      "reviewedUnsupportedFixtures": 16,
+      "reviewedInvalidFixtures": 7
+    }
+  },
+  "boundaries": [
+    "This evidence audits only the current built closed reference profile and the exact embedded fixture documents and hashes.",
+    "Evaluator outcomes for arbitrary inputs outside those audited bytes are not DTCG validity or conformance verdicts.",
+    "Within the reviewed matrix only, valid unsupported fixtures expect UNSUPPORTED_DTCG_FEATURE and reviewed negative fixtures expect INVALID_DTCG.",
+    "This evidence does not implement or claim a general DTCG parser or validator.",
+    "This evidence does not implement or claim DTCG Resolver sets, modifiers, contexts, themes, or modes.",
+    "The root-token alias gap is recorded but the existing provider public API and source are unchanged.",
+    "DESEN keeps token storage host-owned and does not define a competing token-file format."
+  ]
+}

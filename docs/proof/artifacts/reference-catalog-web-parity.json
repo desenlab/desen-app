@@ -34,7 +34,7 @@
     "signIn": {
       "task": "M03-T08",
       "result": "PASS",
-      "artifactSha256": "0cd25b3dfb22403f639e3480ae03f288d813d088e8e9c262f686b7e7f9b900bf"
+      "artifactSha256": "015ab201c65bec347efbff247b8720ddfdc1c7c027b133994a9f4322f8642b1c"
     }
   },
   "catalogScope": {
@@ -486,8 +486,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 17930,
-        "sha256": "a98310f474a74c0c5fdd10d85ea2d8a0be1a2fe47d0bbdf39373f8284e3b52f5"
+        "bytes": 18733,
+        "sha256": "82aafa7997c0784e35d04f00bd21c70f620465242238ddbe0dea07799ca29acc"
       },
       {
         "path": "pnpm-lock.yaml",

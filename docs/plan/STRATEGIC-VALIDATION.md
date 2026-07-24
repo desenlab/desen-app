@@ -1,6 +1,6 @@
 # Strategic Validation Checkpoints
 
-Last reviewed: 2026-07-23
+Last reviewed: 2026-07-24
 
 ## Purpose
 
@@ -34,9 +34,27 @@ and must not be duplicated:
 
 **When:** After `G03` and before `M04-T01`.
 
+**Status:** Complete on 2026-07-24. Recommendation: **`continue`**.
+
 **Why then:** `G03` provides a concrete DESEN Catalog, token contract, artifacts, and exact package
 tuple. That is enough evidence for a useful comparison, while the runtime architecture is still
 early enough to change without discarding a completed execution engine.
+
+### Decision
+
+DESEN remains an independent protocol and M04 proceeds unchanged. A2UI 0.9.1 is complementary:
+it owns agent/server-to-client streamed interfaces, while DESEN owns the human-authoritative
+source, deterministic publication, immutable target package identity, atomic activation,
+last-known-good behavior, and source-to-runtime traceability.
+
+A proof-only `SC01_STATIC_TEXT_V1` adapter demonstrates that one fixed Stack/Text subset can
+round-trip its admitted JSON fields exactly. It is not a renderer-semantic proof, public bridge,
+dependency, package-boundary change, or general-interoperability claim. Every field outside that
+exact subset fails explicitly.
+
+The current Web token document is recorded as a
+`DTCG_2025_10_COMPATIBLE_CLOSED_REFERENCE_PROFILE`, not as a complete DTCG parser or resolver.
+Token storage and resolution remain host-owned.
 
 ### Required study
 
@@ -81,11 +99,27 @@ unsupported feature explicitly.
 - a new ADR before any conclusion changes package boundaries, runtime responsibilities, or public
   APIs.
 
-Reference material as of this review:
+Completed evidence:
 
-- [A2UI specification](https://a2ui.org/specification/v0.9-a2ui/)
+- [Version-pinned DESEN–A2UI comparison](../proof/SC-01-DESEN-A2UI-COMPARISON.md)
+- [DTCG 2025.10 compatibility profile](../profiles/DTCG-2025.10-COMPATIBILITY.md)
+- [ADR 0009](../adr/0009-sc-01-protocol-positioning-and-interoperability.md)
+- `docs/proof/artifacts/sc-01-a2ui-bridge.json` —
+  `sha256:2f927afee4ec50d8191fd2d44db93e35ff89f64856d0ae7bbc4be14193588902`;
+  27 tests cover 1,029 deterministic positive vectors, 1,029 exact round-trips in each direction,
+  2,058 A2UI message schema validations, and 34 stable rejection cases.
+- `docs/proof/artifacts/sc-01-dtcg-compatibility.json` —
+  `sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6`;
+  16 tests audit 26 tokens, 14 unsupported feature families, 16 exact valid-but-unsupported
+  fixtures, and seven exact negative fixtures.
+
+Selected primary references:
+
+- [A2UI 0.9.1 specification](https://a2ui.org/specification/v0.9.1-a2ui/)
 - [A2UI roadmap](https://a2ui.org/roadmap/)
-- [DTCG technical reports](https://www.designtokens.org/technical-reports/)
+- [DTCG Format 2025.10](https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/)
+- [DTCG Color 2025.10](https://www.w3.org/community/reports/design-tokens/CG-FINAL-color-20251028/)
+- [DTCG Resolver 2025.10](https://www.w3.org/community/reports/design-tokens/CG-FINAL-resolver-20251028/)
 - [Figma Code Layers](https://www.figma.com/blog/code-on-the-figma-canvas/)
 
 ## SC-02 — Problem and pilot validation

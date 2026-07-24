@@ -88,13 +88,18 @@ and 224,069 bytes. Structural, semantic, component, interaction, and execution C
 an independent frame/SHA-256 oracle, self-reference exclusion, exact inert package exports, and 236
 mutation vectors protect the final tuple. This remains a logical capability artifact rather than
 an npm archive or runtime registry; P-05, P-06, and P-10 remain `PARTIAL`, and the M05 boundary is
-unchanged.
+unchanged. SC-01 now closes the mandatory pre-runtime positioning checkpoint with `continue`.
+DESEN remains independent from A2UI 0.9.1, while a proof-only fail-closed Stack/Text adapter records
+one exact JSON structural field round-trip without adding a runtime dependency or public API.
+Renderer and accessibility semantics remain explicit non-claims. The reference Web token document
+is now classified against stable DTCG 2025.10 as a compatible closed profile, not a complete parser
+or resolver. No `P-*` status, task count, or proof-gate count changes.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `SC-01 — Protocol-positioning and interoperability decision`
+- Current milestone: `M04 — Framework-neutral runtime core`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -117,8 +122,8 @@ unchanged.
   `M03-T08 — Sign-in fixtures and separate trusted host operation binding`,
   `M03-T09 — Catalog/implementation parity and component-side contract tests`,
   `M03-T10 — Final immutable capability artifact and exact tuple`
-- Active task: None; G03 is closed
-- Ready next task: `SC-01 — Protocol-positioning and interoperability decision`
+- Active task: None; SC-01 is closed
+- Ready next task: `M04-T01 — Host ports`
 - Status: `DONE`
 
 ## Completed preparation
@@ -284,6 +289,15 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   Catalog is inert package data with an exact export set and no loader. G03 is `DONE`; P-05, P-06,
   and P-10 remain `PARTIAL` for their later publication, runtime, Desen App, and independent-host
   owners.
+- SC-01 pins DESEN 0.1.0, A2UI 0.9.1, and DTCG 2025.10; records a field-level semantic matrix and
+  accepted `continue` ADR; proves one exact bidirectional JSON structural Stack/Text field subset;
+  and audits the current reference token document against supported, unsupported-valid, and invalid
+  DTCG fixtures. The A2UI receipt passes 27 focused tests across 1,029 deterministic positive
+  vectors, 1,029 exact round-trips in each direction, and 34 stable rejection cases. The DTCG
+  receipt passes 16 focused tests across 26 tokens, 14 unsupported feature families, 16 exact
+  valid-but-unsupported fixtures, and seven exact negative fixtures. Renderer semantics remain
+  outside the bridge claim. Both receipts are deterministic and fail closed. No frozen protocol
+  byte, production package boundary, public API, `P-*` status, counted task, or proof gate changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -301,11 +315,9 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete the mandatory `SC-01` strategic checkpoint before starting M04-T01. Compare DESEN with the
-then-current stable A2UI specification field by field, audit the reference token contract against
-the then-current stable DTCG format, and test a bridge only if a lossless subset appears credible.
-Record a version-pinned comparison, compatibility note, and `continue`, `adapt`, `bridge`, or
-`stop` recommendation in a new ADR. Do not start the M04 runtime core before that decision.
+Start `M04-T01 — Host ports for navigation, storage, operations, resources, tokens, environment,
+clock, and diagnostics`. Keep these ports framework-neutral and document every public export with
+TSDoc. Do not import React, DOM, CSS, browser, or application dependencies into `runtime-core`.
 
 M02-T02 evidence:
 
@@ -414,13 +426,13 @@ M03-T08 evidence:
 
 - `docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md`
 - `docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json`
-- artifact SHA-256: `0cd25b3dfb22403f639e3480ae03f288d813d088e8e9c262f686b7e7f9b900bf`
+- artifact SHA-256: `015ab201c65bec347efbff247b8720ddfdc1c7c027b133994a9f4322f8642b1c`
 
 M03-T09 evidence:
 
 - `docs/proof/REFERENCE-CATALOG-WEB-PARITY.md`
 - `docs/proof/artifacts/reference-catalog-web-parity.json`
-- artifact SHA-256: `eb51220dad78a8e692f624fa82e6f3db9ff38a5bbd532eb395e93f4b2b4ac4b1`
+- artifact SHA-256: `f26cb14eea6863b36892a365e72ff92063442424773e4b3c5efb1e5717b8b385`
 
 M03-T10 and G03 evidence:
 
@@ -430,8 +442,27 @@ M03-T10 and G03 evidence:
 - exact tuple:
   `run.desen.reference.sign-in@0.1.0 / web-react / sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
 - Catalog SHA-256: `3113e299e0bec65f19b823a712378592a57806116b1eadd902c0390906772279`
-- artifact SHA-256: `590ddde9ac399415cc3b48ff88df8b4a7b6428888464def58d092222e7ac56b2`
+- artifact SHA-256: `29dfe30d980efbbcce49e6305cd54a1159dc61d73584e20b44ecaefaadd4b05e`
 - exhaustive target inventory: 76 files, 224,069 bytes, 236 mutation vectors
+
+SC-01 evidence:
+
+- `docs/proof/SC-01-DESEN-A2UI-COMPARISON.md`
+- `docs/profiles/DTCG-2025.10-COMPATIBILITY.md`
+- `docs/adr/0009-sc-01-protocol-positioning-and-interoperability.md`
+- `docs/proof/artifacts/sc-01-a2ui-bridge.json`
+- A2UI artifact SHA-256:
+  `2f927afee4ec50d8191fd2d44db93e35ff89f64856d0ae7bbc4be14193588902`
+- A2UI executable result: 27 focused tests, 1,029 deterministic positive vectors, 1,029 exact
+  round-trips in each direction, 2,058 A2UI message schema validations, and 34 stable rejections
+- A2UI positive-corpus receipt SHA-256:
+  `57b173a684633743c6ab1806e68b00f5b7143fed1f734c32bd7f5afedb7a614e`
+- `docs/proof/artifacts/sc-01-dtcg-compatibility.json`
+- DTCG artifact SHA-256:
+  `1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6`
+- DTCG executable result: 16 focused tests, 26 tokens, 14 unsupported feature families, 16 exact
+  valid-but-unsupported fixtures, and seven exact negative fixtures
+- recommendation: `continue`; no `P-*` status, counted task, or proof-gate change
 
 ## Status vocabulary
 
