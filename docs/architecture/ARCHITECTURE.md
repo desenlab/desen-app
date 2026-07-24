@@ -62,6 +62,24 @@ component adapter types and registries. A catalog package may depend on both, bu
 cross the `catalog-sdk` public boundary. ADR 0007 records why parity metadata precedes, but never
 replaces, the M05 registry.
 
+## Reference capability artifact boundary
+
+M03-T10 packages the exact reference sign-in slice as
+`run.desen.reference.sign-in@0.1.0` for `web-react`. Its logical content-addressed artifact contains
+the projected canonical Catalog and every regular file in the target package's clean `dist/**`
+tree. JavaScript, declarations, and both source-map forms are included by path and exact bytes.
+Two isolated builds and the workspace build must expose the same complete inventory and bytes.
+
+The generated `catalog.json` is an inert, explicitly exported package data file. Its
+`packageDigest` is calculated over the Catalog projection and distribution inventory; the final
+digest and tuple are not embedded in a fingerprinted JavaScript file. The boundary deliberately
+does not claim an npm archive, dependency closure, signature, distributor, or activation policy.
+Those are later release and runtime responsibilities.
+
+This artifact proves a stable contract-to-bytes identity but does not perform component lookup.
+Executable registry construction, render-plan materialization, event bridging, command dispatch,
+and operation execution remain owned by M05 and the host composition roots.
+
 ## Applications
 
 ### Desen App

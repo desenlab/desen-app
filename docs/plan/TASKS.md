@@ -58,19 +58,19 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 
 ## M03 — Catalog SDK and reference capability package
 
-| ID      | Status      | Depends on       | Deliverable / evidence                                                                                                      |
-| ------- | ----------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| M03-T01 | DONE        | G02              | Framework-neutral JSON manifest/contract registration API with no React or platform types                                   |
-| M03-T02 | DONE        | M03-T01          | Behavior, operation, and resource registration APIs                                                                         |
-| M03-T03 | DONE        | M03-T01          | Manifest-authoritative TypeScript and inspector-control derivation                                                          |
-| M03-T04 | DONE        | M03-T02          | Documented deterministic Web–React package digest profile and immutability tests                                            |
-| M03-T05 | DONE        | M03-T01          | Accessible Stack and Text capabilities with catalog contracts                                                               |
-| M03-T06 | DONE        | M03-T01, M03-T05 | Accessible TextField, Button, and Alert capabilities with catalog contracts                                                 |
-| M03-T07 | DONE        | M03-T02          | Token provider and synthetic fixture infrastructure                                                                         |
-| M03-T08 | DONE        | M03-T06–M03-T07  | Sign-in success/failure fixtures and separate host operation binding                                                        |
-| M03-T09 | DONE        | M03-T04–M03-T08  | Catalog/implementation parity metadata, event payload, command, and accessibility contract tests                            |
-| M03-T10 | NOT_STARTED | M03-T03–M03-T09  | Build final capability artifact and exact tuple; same bytes yield same digest and any byte change yields a different digest |
-| G03     | NOT_STARTED | M03-T01–M03-T10  | Exact reference catalog and immutable artifact tuple resolve complete contracts; React adapter registration remains in M05  |
+| ID      | Status | Depends on       | Deliverable / evidence                                                                                                      |
+| ------- | ------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| M03-T01 | DONE   | G02              | Framework-neutral JSON manifest/contract registration API with no React or platform types                                   |
+| M03-T02 | DONE   | M03-T01          | Behavior, operation, and resource registration APIs                                                                         |
+| M03-T03 | DONE   | M03-T01          | Manifest-authoritative TypeScript and inspector-control derivation                                                          |
+| M03-T04 | DONE   | M03-T02          | Documented deterministic Web–React package digest profile and immutability tests                                            |
+| M03-T05 | DONE   | M03-T01          | Accessible Stack and Text capabilities with catalog contracts                                                               |
+| M03-T06 | DONE   | M03-T01, M03-T05 | Accessible TextField, Button, and Alert capabilities with catalog contracts                                                 |
+| M03-T07 | DONE   | M03-T02          | Token provider and synthetic fixture infrastructure                                                                         |
+| M03-T08 | DONE   | M03-T06–M03-T07  | Sign-in success/failure fixtures and separate host operation binding                                                        |
+| M03-T09 | DONE   | M03-T04–M03-T08  | Catalog/implementation parity metadata, event payload, command, and accessibility contract tests                            |
+| M03-T10 | DONE   | M03-T03–M03-T09  | Build final capability artifact and exact tuple; same bytes yield same digest and any byte change yields a different digest |
+| G03     | DONE   | M03-T01–M03-T10  | Exact reference catalog and immutable artifact tuple resolve complete contracts; React adapter registration remains in M05  |
 
 ## M04 — Framework-neutral runtime core
 

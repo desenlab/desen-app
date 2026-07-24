@@ -1,0 +1,240 @@
+{
+  "behaviors": {},
+  "components": {
+    "com.example.ui/Alert": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Feedback",
+        "defaultProps": { "text": "Message", "tone": "info" },
+        "displayName": "Alert",
+        "icon": "alert",
+        "resize": { "horizontal": "fill", "vertical": "hug" }
+      },
+      "category": "feedback",
+      "description": "Feedback message.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "text": { "type": "string" },
+          "tone": { "enum": ["info", "success", "warning", "critical"], "type": "string" }
+        },
+        "required": ["tone", "text"],
+        "type": "object"
+      },
+      "styleParts": {
+        "icon": { "propertiesSchema": { "type": "object" } },
+        "root": { "propertiesSchema": { "type": "object" } },
+        "text": { "propertiesSchema": { "type": "object" } }
+      }
+    },
+    "com.example.ui/Button": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Actions",
+        "defaultProps": { "label": "Button", "loading": false, "variant": "primary" },
+        "displayName": "Button",
+        "icon": "button",
+        "resize": { "horizontal": "hug", "vertical": "hug" },
+        "scenarios": {
+          "default": { "props": { "label": "Continue", "variant": "primary" } },
+          "loading": { "props": { "label": "Continue", "loading": true, "variant": "primary" } }
+        }
+      },
+      "category": "action",
+      "description": "Action button.",
+      "events": {
+        "press": {
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "disabled": { "type": "boolean" },
+          "label": { "type": "string" },
+          "loading": { "type": "boolean" },
+          "variant": { "enum": ["primary", "secondary", "danger"], "type": "string" }
+        },
+        "required": ["label"],
+        "type": "object"
+      },
+      "styleParts": {
+        "label": { "propertiesSchema": { "type": "object" } },
+        "leadingIcon": { "propertiesSchema": { "type": "object" } },
+        "root": { "propertiesSchema": { "type": "object" } }
+      },
+      "visualStates": ["hover", "focus", "pressed", "disabled", "loading"]
+    },
+    "com.example.ui/Stack": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Layout",
+        "defaultProps": { "direction": "vertical", "gap": "md" },
+        "displayName": "Stack",
+        "icon": "stack",
+        "resize": { "horizontal": "resizable", "vertical": "hug" }
+      },
+      "category": "layout",
+      "description": "Linear layout container.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "align": { "enum": ["start", "center", "end", "stretch"], "type": "string" },
+          "direction": {
+            "default": "vertical",
+            "enum": ["vertical", "horizontal"],
+            "type": "string"
+          },
+          "gap": { "enum": ["none", "xs", "sm", "md", "lg", "xl"], "type": "string" },
+          "maxWidth": { "exclusiveMinimum": 0, "type": "number" }
+        },
+        "type": "object"
+      },
+      "slots": {
+        "default": {
+          "acceptsCategories": ["layout", "content", "input", "action", "feedback", "complex"],
+          "minItems": 0,
+          "required": false
+        }
+      },
+      "styleParts": {
+        "root": {
+          "propertiesSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "background": { "type": ["string", "object"] },
+              "borderRadius": { "type": ["string", "number", "object"] },
+              "padding": { "type": ["string", "number", "object"] }
+            },
+            "type": "object"
+          }
+        }
+      }
+    },
+    "com.example.ui/Text": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Content",
+        "defaultProps": { "role": "body", "text": "Text" },
+        "displayName": "Text",
+        "icon": "text",
+        "resize": { "horizontal": "hug", "vertical": "hug" }
+      },
+      "category": "content",
+      "description": "Text content.",
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "role": { "enum": ["body", "heading", "caption"], "type": "string" },
+          "text": { "type": "string" }
+        },
+        "required": ["text"],
+        "type": "object"
+      },
+      "styleParts": { "text": { "propertiesSchema": { "type": "object" } } }
+    },
+    "com.example.ui/TextField": {
+      "authoring": {
+        "adapterFidelity": "same",
+        "category": "Inputs",
+        "defaultProps": { "label": "Label", "value": "" },
+        "displayName": "Text field",
+        "icon": "text-field",
+        "resize": { "horizontal": "fill", "vertical": "hug" },
+        "scenarios": {
+          "default": { "props": { "label": "Email", "value": "" } },
+          "invalid": { "props": { "invalid": true, "label": "Email", "value": "bad" } }
+        }
+      },
+      "category": "input",
+      "commands": {
+        "focus": {
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "type": "object"
+          }
+        }
+      },
+      "description": "Text input.",
+      "events": {
+        "change": {
+          "payloadSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": { "value": { "type": "string" } },
+            "required": ["value"],
+            "type": "object"
+          }
+        }
+      },
+      "propsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "disabled": { "type": "boolean" },
+          "invalid": { "type": "boolean" },
+          "label": { "type": "string" },
+          "placeholder": { "type": "string" },
+          "secure": { "type": "boolean" },
+          "value": { "type": "string" }
+        },
+        "required": ["label", "value"],
+        "type": "object"
+      },
+      "styleParts": {
+        "control": { "propertiesSchema": { "type": "object" } },
+        "label": { "propertiesSchema": { "type": "object" } },
+        "message": { "propertiesSchema": { "type": "object" } },
+        "root": { "propertiesSchema": { "type": "object" } }
+      },
+      "visualStates": ["focus", "disabled", "invalid"]
+    }
+  },
+  "desen": "0.1.0",
+  "id": "run.desen.reference.sign-in",
+  "kind": "desen.catalog",
+  "operations": {
+    "com.example.auth/signIn": {
+      "authoring": {
+        "fixtures": { "errors": { "invalidCredentials": {} }, "success": { "userId": "user-1" } }
+      },
+      "description": "Authenticate with email and password.",
+      "effect": "network",
+      "errors": [
+        { "code": "invalidCredentials", "description": "Credentials are not accepted." },
+        { "code": "unavailable", "description": "Authentication service unavailable." }
+      ],
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "email": { "format": "email", "type": "string" },
+          "password": { "minLength": 1, "type": "string" }
+        },
+        "required": ["email", "password"],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": { "userId": { "type": "string" } },
+        "required": ["userId"],
+        "type": "object"
+      }
+    }
+  },
+  "packageDigest": "sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e",
+  "resources": {},
+  "target": "web-react",
+  "version": "0.1.0"
+}

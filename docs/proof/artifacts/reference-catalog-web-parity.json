@@ -34,7 +34,7 @@
     "signIn": {
       "task": "M03-T08",
       "result": "PASS",
-      "artifactSha256": "c3c74b620d4b4a05486d3307641d6946f5f5047e6dd421349614f0bfb4f56d16"
+      "artifactSha256": "0cd25b3dfb22403f639e3480ae03f288d813d088e8e9c262f686b7e7f9b900bf"
     }
   },
   "catalogScope": {
@@ -257,7 +257,7 @@
       "normativeCoverage": {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
         "bytes": 30506,
-        "sha256": "6245c289a5028f63da73b65ece8ce32eec6d4793b347394aa3ebdaa33c7627d5"
+        "sha256": "5518b665bbbf2031ed649e9923af0846cf422bba3a19e01c3c6c2892d9a42640"
       }
     },
     "packageTests": {
@@ -331,13 +331,13 @@
       },
       {
         "path": "docs/architecture/ARCHITECTURE.md",
-        "bytes": 7059,
-        "sha256": "844fb8976705ec68821e637a5c6908ccc12b01b02071f29f17c267ce7adc92ef"
+        "bytes": 8243,
+        "sha256": "97bb34820feda19b33af3f9b1c4188ed0da38fe440fd9b5d60ff5795f8595d62"
       },
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 46765,
-        "sha256": "74689f6219828d02cbcb6a7712823c4234814a51682392442b259605d11c794c"
+        "bytes": 48201,
+        "sha256": "5b8f6a5cae38fc8fbae57f74bc0e90408a0ba1f8aa5d3b4134957d2fc241858e"
       },
       {
         "path": "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
@@ -347,17 +347,17 @@
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
         "bytes": 30506,
-        "sha256": "6245c289a5028f63da73b65ece8ce32eec6d4793b347394aa3ebdaa33c7627d5"
+        "sha256": "5518b665bbbf2031ed649e9923af0846cf422bba3a19e01c3c6c2892d9a42640"
       },
       {
         "path": "packages/reference-catalog-web/README.md",
-        "bytes": 16930,
-        "sha256": "fb01befd792c6114ca78ecd079f896aa74e5e798b8d30dabe3c79dd9a16a9a19"
+        "bytes": 19145,
+        "sha256": "a6673c80548e7561e04423ea1a955cc3b186fda53fba94f44a94d0bff3a3dc6b"
       },
       {
         "path": "packages/reference-catalog-web/package.json",
-        "bytes": 2194,
-        "sha256": "9e42a3254349ffd8ad6bf2235c72e543cfc582029f95789bc70390402d016f95"
+        "bytes": 2254,
+        "sha256": "455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa"
       },
       {
         "path": "packages/reference-catalog-web/src/components/alert.tsx",
@@ -486,8 +486,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 16679,
-        "sha256": "50eafb4951effd0d625b3837b832b78d5146c3e8ebc9461f768bac5c8c6c4f67"
+        "bytes": 17930,
+        "sha256": "a98310f474a74c0c5fdd10d85ea2d8a0be1a2fe47d0bbdf39373f8284e3b52f5"
       },
       {
         "path": "pnpm-lock.yaml",

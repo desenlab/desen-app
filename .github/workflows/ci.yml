@@ -13,7 +13,9 @@ jobs:
   quality:
     name: Quality gate
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # The cumulative proof gate intentionally replays every frozen protocol and
+    # reference-package verifier. Hosted runners need more headroom than local runs.
+    timeout-minutes: 60
 
     steps:
       - name: Check out repository

@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **36 / 144 tasks complete (25%)**
+**Overall:** `███████░░░░░░░░░░░░░░░░░░` **37 / 144 tasks complete (26%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `█████████░` **9 / 10 tasks complete (90%)**
+**M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T10`
+**Proof gates:** **4 / 13 complete** · **Next:** `SC-01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -98,6 +98,7 @@ packages/
 - [Reference token and synthetic fixture proof](docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md)
 - [Reference sign-in fixture and host-binding proof](docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md)
 - [Reference Web implementation-parity proof](docs/proof/REFERENCE-CATALOG-WEB-PARITY.md)
+- [Reference Web capability-artifact proof](docs/proof/REFERENCE-CATALOG-WEB-CAPABILITY-ARTIFACT.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)

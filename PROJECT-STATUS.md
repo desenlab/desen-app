@@ -48,9 +48,10 @@ moving executable concerns into the framework-neutral Catalog SDK. Versioned len
 the projected canonical Catalog and exact artifact bytes; 18 package tests, 16 independent proof
 tests, 5 compiler-negative cases, and 269 pinned mutations cover deterministic identity,
 self-reference verification, path and byte boundaries, caller ownership, immutable output, and an
-independent Node.js SHA-256 oracle. `PF-026` records the explicit Catalog self-field projection.
-P-05 advances to `PARTIAL`, while the final real package tuple and G03 remain open. M03-T05 now
-implements the official Stack and Text manifests as real accessible Web–React components. Their
+independent Node.js SHA-256 oracle. `PF-026` records the explicit Catalog self-field projection. At
+that checkpoint P-05 advanced to `PARTIAL`, while the final real package tuple and G03 were still
+open. M03-T05 now implements the official Stack and Text manifests as real accessible Web–React
+components. Their
 props derive from the closed Catalog schemas, Stack preserves declared child/reading order without
 fabricated ARIA semantics, and Text maps inert strings to native paragraph, heading, or caption
 elements. Exact fixture equality, validator acceptance, semantic rendering, hostile text escaping,
@@ -79,13 +80,21 @@ five real Web–React component exports for authoring and production. The sign-i
 explicitly application-supplied and carries no handler. Exact event and focus inputs pass their
 prepared Catalog schemas while closed-schema negatives fail. S-004 is now `TESTED`; P-06 advances
 only to `PARTIAL`. Resolved design styling, the generic runtime bridge, executable React registry,
-Desen App, separately built host, and final package tuple are not claimed.
+Desen App, and a separately built host are not claimed. M03-T10 now closes G03 with the distinct
+`run.desen.reference.sign-in@0.1.0` Catalog for `web-react` and the exact
+`sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e` package digest.
+Two isolated builds and the workspace distribution agree byte-for-byte across all 76 emitted files
+and 224,069 bytes. Structural, semantic, component, interaction, and execution Catalog validation,
+an independent frame/SHA-256 oracle, self-reference exclusion, exact inert package exports, and 236
+mutation vectors protect the final tuple. This remains a logical capability artifact rather than
+an npm archive or runtime registry; P-05, P-06, and P-10 remain `PARTIAL`, and the M05 boundary is
+unchanged.
 
 ## Current milestone
 
-- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`
+- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `M03 — Catalog SDK and reference capability package`
+- Current milestone: `SC-01 — Protocol-positioning and interoperability decision`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -106,9 +115,10 @@ Desen App, separately built host, and final package tuple are not claimed.
   `M03-T06 — Accessible TextField, Button, and Alert capabilities`,
   `M03-T07 — Reference tokens and synthetic fixture infrastructure`,
   `M03-T08 — Sign-in fixtures and separate trusted host operation binding`,
-  `M03-T09 — Catalog/implementation parity and component-side contract tests`
-- Active task: None
-- Ready next task: `M03-T10 — Final immutable capability artifact and exact tuple`
+  `M03-T09 — Catalog/implementation parity and component-side contract tests`,
+  `M03-T10 — Final immutable capability artifact and exact tuple`
+- Active task: None; G03 is closed
+- Ready next task: `SC-01 — Protocol-positioning and interoperability decision`
 - Status: `DONE`
 
 ## Completed preparation
@@ -205,9 +215,9 @@ Desen App, separately built host, and final package tuple are not claimed.
   `sha256:bb22ecc7a2849fe7466d9b5cba7d2c99dc7f8c3bd17b7c505244b2c308359589`;
   all 269 pinned byte, path, Catalog, inventory, and declared-digest mutations are detected. The
   API remains browser-portable, returns detached immutable audit data, rejects shared memory and
-  hostile structural inputs, and agrees with an independent Node.js cryptographic oracle. P-05 is
-  only `PARTIAL`; reference tokens, fixtures, complete parity, and the final package remain M03-T07
-  through M03-T10.
+  hostile structural inputs, and agrees with an independent Node.js cryptographic oracle. At that
+  checkpoint P-05 was only `PARTIAL`; reference tokens, fixtures, complete parity, and the final
+  package were still assigned to M03-T07 through M03-T10.
 - The foundational reference component slice passes 5 focused component tests, 7 compiler-negative
   cases, and 18 independent evidence/mutation tests. Its Stack and Text registrations equal the
   frozen official Web Catalog entries, are deeply immutable, and keep both public prop schemas
@@ -228,9 +238,9 @@ Desen App, separately built host, and final package tuple are not claimed.
   executes 256 server-rendered and 23 real React/JSDOM interaction vectors, including exact
   single-argument frozen payloads, disabled/loading suppression, unique label association, native
   button semantics, inert hostile strings, and enabled/disabled focus-handle behavior without DOM
-  or return-value leakage. `PF-027` records the frozen abbreviated-prose Alert tone conflict.
-  S-004 remains `PLANNED` only for M03-T09's final implementation-parity gate; no `P-*` status
-  changes.
+  or return-value leakage. `PF-027` records the frozen abbreviated-prose Alert tone conflict. At
+  that checkpoint S-004 remained `PLANNED` for M03-T09's final implementation-parity gate; the
+  component slice itself changed no `P-*` status.
 - The reference token and synthetic fixture slice passes 19 package tests, 20 compiler-negative
   cases, and 16 independent proof/mutation tests. One fixed DTCG 2025.10 subset resolves exactly 26
   token paths to the 26 CSS custom properties already consumed by the reference components, with
@@ -263,6 +273,17 @@ Desen App, separately built host, and final package tuple are not claimed.
   React value, endpoint, credential, or handler. Source and export audits prevent package-root
   leakage and transitive selection of the executable component barrel. S-004 is `TESTED`; P-06 is
   only `PARTIAL`, and N-030/N-033/N-034 remain `PLANNED` for their later runtime owners.
+- The final capability-artifact slice passes 18 independent root tests and six built Catalog
+  validation stages. One snapshotted compiler input set produces two isolated builds that match
+  the workspace distribution across all 76 regular files and 224,069 bytes. An independent frame
+  parser and Node.js SHA-256 oracle reproduce the exact
+  `run.desen.reference.sign-in@0.1.0 / web-react /
+sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
+  tuple, while 236 mutations cover every emitted file's bytes, path, and removal plus inventory
+  addition, unsafe paths, Catalog semantics, and published self-digest rejection. The generated
+  Catalog is inert package data with an exact export set and no loader. G03 is `DONE`; P-05, P-06,
+  and P-10 remain `PARTIAL` for their later publication, runtime, Desen App, and independent-host
+  owners.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -280,10 +301,11 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M03-T10`: construct the final distinct reference Catalog and immutable capability
-artifact from real build outputs, then prove the exact `{id, version, target, packageDigest}` tuple
-is reproducible and changes for every byte, path, inventory, or Catalog mutation. Do not start the
-React adapter registry assigned to M05.
+Complete the mandatory `SC-01` strategic checkpoint before starting M04-T01. Compare DESEN with the
+then-current stable A2UI specification field by field, audit the reference token contract against
+the then-current stable DTCG format, and test a bridge only if a lossless subset appears credible.
+Record a version-pinned comparison, compatibility note, and `continue`, `adapt`, `bridge`, or
+`stop` recommendation in a new ADR. Do not start the M04 runtime core before that decision.
 
 M02-T02 evidence:
 
@@ -386,19 +408,30 @@ M03-T07 evidence:
 
 - `docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md`
 - `docs/proof/artifacts/reference-tokens-and-synthetic-fixtures.json`
-- artifact SHA-256: `d351b712a1cbc9aee9482f44f574dca233281ef26df31a4e08373b60120d57e6`
+- artifact SHA-256: `5510336a4098af065e8e39ffc54b257cc3b0e024aef5967de056f9221025fe0f`
 
 M03-T08 evidence:
 
 - `docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md`
 - `docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json`
-- artifact SHA-256: `c3c74b620d4b4a05486d3307641d6946f5f5047e6dd421349614f0bfb4f56d16`
+- artifact SHA-256: `0cd25b3dfb22403f639e3480ae03f288d813d088e8e9c262f686b7e7f9b900bf`
 
 M03-T09 evidence:
 
 - `docs/proof/REFERENCE-CATALOG-WEB-PARITY.md`
 - `docs/proof/artifacts/reference-catalog-web-parity.json`
-- artifact SHA-256: `cb2bfc2ea4e19736d67173528098789febbbb8e86659c80c8450ba8da532817e`
+- artifact SHA-256: `eb51220dad78a8e692f624fa82e6f3db9ff38a5bbd532eb395e93f4b2b4ac4b1`
+
+M03-T10 and G03 evidence:
+
+- `docs/proof/REFERENCE-CATALOG-WEB-CAPABILITY-ARTIFACT.md`
+- `docs/proof/artifacts/reference-catalog-web-capability-artifact.json`
+- `packages/reference-catalog-web/catalog.json`
+- exact tuple:
+  `run.desen.reference.sign-in@0.1.0 / web-react / sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
+- Catalog SHA-256: `3113e299e0bec65f19b823a712378592a57806116b1eadd902c0390906772279`
+- artifact SHA-256: `590ddde9ac399415cc3b48ff88df8b4a7b6428888464def58d092222e7ac56b2`
+- exhaustive target inventory: 76 files, 224,069 bytes, 236 mutation vectors
 
 ## Status vocabulary
 

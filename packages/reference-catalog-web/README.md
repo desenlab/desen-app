@@ -5,6 +5,42 @@
 Target-specific Web–React capability packaging, followed by the accessible real components and
 exact capability manifests shared by Desen App and the reference host.
 
+## Final reference capability artifact
+
+M03-T10 ships the exact DESEN 0.1.0 reference sign-in slice as the data-only package subpath
+`@desen/reference-catalog-web/catalog.json`. It has this distinct Catalog identity:
+
+```text
+id      = run.desen.reference.sign-in
+version = 0.1.0
+target  = web-react
+```
+
+The fourth tuple member is the exact lowercase `sha256:` value in the shipped Catalog's
+`packageDigest` field. Together, `{ id, version, target, packageDigest }` is the immutable
+capability-package tuple. The generated
+`docs/proof/artifacts/reference-catalog-web-capability-artifact.json` record is the machine-readable
+audit authority for that tuple, its exhaustive inventory, and the result of rebuilding it; the
+companion `docs/proof/REFERENCE-CATALOG-WEB-CAPABILITY-ARTIFACT.md` explains the boundary and
+evidence for people.
+
+The logical artifact covered by that digest is exactly:
+
+1. the Catalog represented as RFC 8785-compatible canonical `catalog.json` bytes under the
+   documented self-digest projection; and
+2. every regular file beneath `dist/`, using its package-relative path and exact file bytes.
+
+No file in `dist/` may be silently omitted, and no file outside that boundary is silently added.
+The shipped `catalog.json` is inert data: this package adds no Catalog loader, executable registry,
+dynamic import route, or registration side effect. React adapter registration and runtime
+materialization remain assigned to M05.
+
+This logical digest does not claim that dependency packages, a workspace lockfile, source files,
+`package.json`, filesystem metadata, or npm/tar archive bytes are recursively covered or
+reproducible. The explicit JSON export makes the proved Catalog available to package consumers; it
+does not turn npm resolution, dependency integrity, publication, signature verification, remote
+retention, or activation policy into M03 responsibilities.
+
 ## Implementation parity metadata
 
 M03-T09 exposes the exact sign-in reference-slice contract at:
@@ -273,8 +309,9 @@ an independent Node.js framing and SHA-256 oracle.
 - Runtime-core changes, application screens, or protocol extensions
 - Generic DESEN `$token` resolution, receiving-schema validation, or project token storage
 - Tar, zip, npm archive, signature, authenticity, or remote-code-loading formats
-- Catalog/adapter parity or proof that a supplied artifact inventory is complete
+- Dependency-tree, source-tree, package-manager-metadata, or archive-byte reproducibility
 - Distributor immutability, exact-package retention, publication, resolution, or activation
+- Executable React adapter registration, lookup, materialization, or dispatch
 - Native package profiles
 
 ## Status
@@ -283,13 +320,14 @@ Private proof-phase package. The deterministic Web–React package digest profil
 Stack, Text, TextField, Button, and Alert capabilities, and the DTCG-backed reference Web token
 provider are implemented. The exact controlled sign-in fixtures and separately delegated trusted
 host binding are also implemented. Inert Catalog-to-implementation parity metadata and cumulative
-component-side contract tests are now implemented by M03-T09. The final immutable package tuple
-remains M03-T10, while executable React adapter registration remains M05.
+component-side contract tests are implemented by M03-T09. M03-T10 now ships the distinct
+`run.desen.reference.sign-in@0.1.0` Catalog, exhaustive logical artifact inventory, and exact
+immutable `web-react` tuple. Executable React adapter registration remains M05.
 
 The M03-T07 planning baseline recorded that the controlled sign-in fixtures, complete adapter
 parity, and final package tuple remain assigned to M03-T08 through M03-T10 and M05. M03-T08 and
-M03-T09 have now completed the first two scoped slices without moving runtime registration out of
-M05.
+M03-T09 completed the first two scoped slices; M03-T10 completes the inert capability artifact
+without moving runtime registration out of M05.
 
 ## Protocol and target support
 
@@ -315,6 +353,8 @@ pnpm verify:reference-sign-in-fixtures-and-host-binding
 pnpm test:reference-sign-in-fixtures-and-host-binding
 pnpm verify:reference-catalog-web-parity
 pnpm test:reference-catalog-web-parity
+pnpm verify:reference-catalog-web-capability-artifact
+pnpm test:reference-catalog-web-capability-artifact
 pnpm verify:web-react-package-digest
 pnpm test:web-react-package-digest
 pnpm check

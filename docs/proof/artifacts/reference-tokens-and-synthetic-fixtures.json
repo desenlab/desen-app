@@ -613,13 +613,13 @@
       },
       {
         "path": "packages/reference-catalog-web/README.md",
-        "bytes": 16930,
-        "sha256": "fb01befd792c6114ca78ecd079f896aa74e5e798b8d30dabe3c79dd9a16a9a19"
+        "bytes": 19145,
+        "sha256": "a6673c80548e7561e04423ea1a955cc3b186fda53fba94f44a94d0bff3a3dc6b"
       },
       {
         "path": "packages/reference-catalog-web/package.json",
-        "bytes": 2194,
-        "sha256": "9e42a3254349ffd8ad6bf2235c72e543cfc582029f95789bc70390402d016f95"
+        "bytes": 2254,
+        "sha256": "455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa"
       },
       {
         "path": "packages/reference-catalog-web/src/tokens/reference-token-document.ts",

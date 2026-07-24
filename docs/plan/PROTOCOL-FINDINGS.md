@@ -632,8 +632,28 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Implementation decision: M03-T09 proves exact entry-level equality only for Stack, Text,
   TextField, Button, Alert, and `com.example.auth/signIn`. Its parity metadata identifies the scope
   as `reference-sign-in-slice`, declares no behavior or resource, and contains no placeholder
-  implementation. M03-T10 must assign this slice a distinct reference Catalog identity, version,
-  and calculated digest before closing G03. Later controlled Source and Bundle fixtures must pin
-  that exact tuple rather than claiming the original example package.
+  implementation. M03-T10 assigns the slice the distinct
+  `run.desen.reference.sign-in@0.1.0` identity for `web-react`, composes only those six entries, and
+  calculates its digest from the complete clean distribution inventory. Later controlled Source
+  and Bundle fixtures must pin that exact tuple rather than claiming the original example package.
 - Future action: Keep Map and Sortable in their M11 extension packages and document how multiple
   exact catalogs compose without mutating or impersonating the frozen example Catalog.
+
+## PF-030 — The M03 tuple identifies a logical capability artifact, not an npm archive
+
+- Status: OPEN
+- Blocks proof: No; the M03-T04 profile already defines an exact deterministic logical file set.
+- Protocol location: SPEC Sections 7.4, 8.5, 11.4, and 28.2
+- Observation: DESEN 0.1.0 requires an immutable target-specific package tuple but deliberately
+  leaves ecosystem archive encoding, metadata, signatures, dependency closure, and transport to
+  the implementation. Claiming reproducible npm package bytes from only Catalog and adapter
+  outputs would silently widen the proven boundary.
+- Implementation decision: M03-T10 fingerprints the projected canonical `catalog.json` entry and
+  every regular file in the clean `packages/reference-catalog-web/dist/**` tree, including
+  JavaScript, declarations, and both source-map forms. It rejects stale, extra, missing,
+  non-regular, or byte-different outputs. The exported on-disk Catalog is verified separately.
+  `package.json`, source, dependency bytes, filesystem metadata, and npm/tar envelopes are explicit
+  non-claims.
+- Future action: Before public npm release, M12 must define and test the actual packed-file
+  inventory, dependency and integrity policy, provenance/signature model, and archive
+  reproducibility expectations without changing the meaning of this existing tuple.

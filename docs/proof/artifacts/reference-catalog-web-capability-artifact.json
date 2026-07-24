@@ -1,0 +1,1997 @@
+{
+  "schemaVersion": 1,
+  "task": "M03-T10",
+  "result": "PASS",
+  "identity": {
+    "id": "run.desen.reference.sign-in",
+    "version": "0.1.0",
+    "target": "web-react",
+    "protocol": "0.1.0"
+  },
+  "tuple": {
+    "id": "run.desen.reference.sign-in",
+    "version": "0.1.0",
+    "target": "web-react",
+    "packageDigest": "sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e"
+  },
+  "catalog": {
+    "path": "packages/reference-catalog-web/catalog.json",
+    "bytes": 8439,
+    "sha256": "sha256:3113e299e0bec65f19b823a712378592a57806116b1eadd902c0390906772279",
+    "canonicalBytes": 5873,
+    "canonicalSha256": "sha256:4793513956bb82bcc3f61506f597ed87c926650939ac6e9bacfc657affe47193",
+    "components": [
+      "com.example.ui/Alert",
+      "com.example.ui/Button",
+      "com.example.ui/Stack",
+      "com.example.ui/Text",
+      "com.example.ui/TextField"
+    ],
+    "operations": ["com.example.auth/signIn"],
+    "behaviors": [],
+    "resources": [],
+    "validationStages": [
+      "structural",
+      "semantic",
+      "catalog-set",
+      "component-catalog-set",
+      "interaction-catalog-set",
+      "execution-catalog-set"
+    ],
+    "placeholderValidationStages": [
+      "structural",
+      "semantic",
+      "catalog-set",
+      "component-catalog-set",
+      "interaction-catalog-set",
+      "execution-catalog-set"
+    ],
+    "digestProjection": "packageDigest is replaced by the M03-T04 placeholder before canonical framing"
+  },
+  "capabilityComposition": {
+    "source": "built inert registration APIs",
+    "componentRegistrations": [
+      { "id": "com.example.ui/Alert", "exportName": "alertComponentRegistration" },
+      { "id": "com.example.ui/Button", "exportName": "buttonComponentRegistration" },
+      { "id": "com.example.ui/Stack", "exportName": "stackComponentRegistration" },
+      { "id": "com.example.ui/Text", "exportName": "textComponentRegistration" },
+      { "id": "com.example.ui/TextField", "exportName": "textFieldComponentRegistration" }
+    ],
+    "operationRegistration": {
+      "id": "com.example.auth/signIn",
+      "exportName": "signInOperationRegistration",
+      "implementation": "trusted-host-supplied"
+    },
+    "executableRegistryCreated": false,
+    "runtimeAdapterRegistrationOwner": "M05"
+  },
+  "reproducibility": {
+    "isolatedBuilds": 2,
+    "byteIdentical": true,
+    "workspaceDistExactMatch": true,
+    "inventoryAggregateSha256": "sha256:181edc5be5ad68e1cb661b372106700dbb597249a2903635fafdd504cb8987dd",
+    "sourceMaps": { "sourceMaps": 38, "declarationMaps": 19 },
+    "selfReferenceExclusion": {
+      "packageDigestBytesAbsent": true,
+      "exactTupleBytesAbsent": true,
+      "reason": "the exact tuple necessarily contains the absent packageDigest"
+    }
+  },
+  "inventory": {
+    "root": "dist",
+    "files": 76,
+    "totalBytes": 224069,
+    "entries": [
+      {
+        "path": "dist/components/alert.d.ts",
+        "bytes": 653,
+        "sha256": "sha256:2ea6e413820b31a11610f2a3d983fd04b5f82ee626a79cbbabd40d8ddd7947b0"
+      },
+      {
+        "path": "dist/components/alert.d.ts.map",
+        "bytes": 299,
+        "sha256": "sha256:7c7f6cdfd5b7da75d5c780b7037205cc8dba35747859d7a0aae18d64bbd4522b"
+      },
+      {
+        "path": "dist/components/alert.js",
+        "bytes": 1951,
+        "sha256": "sha256:97e9d8a8b596a90905da2ff2ca9fa79c927e86abdc5c36223d82f007517c399f"
+      },
+      {
+        "path": "dist/components/alert.js.map",
+        "bytes": 1186,
+        "sha256": "sha256:64c459caee0b31320dc0c048d05d13fbc8845cc5f5d6cc023fe5a813890d123c"
+      },
+      {
+        "path": "dist/components/button.d.ts",
+        "bytes": 1032,
+        "sha256": "sha256:5421ed336b532ec0a852b2cee8171835ea3aa0b0150929b08e04a60252854544"
+      },
+      {
+        "path": "dist/components/button.d.ts.map",
+        "bytes": 465,
+        "sha256": "sha256:33bbbdf93cc7ad50604f96754fe0568f84b2bd2a6914d1a33fbd4f7505f5ec01"
+      },
+      {
+        "path": "dist/components/button.js",
+        "bytes": 2334,
+        "sha256": "sha256:d0f9e3734c5b0b7a795c1514d2310bb61f10532f5476290ffb8c9fd8456c8011"
+      },
+      {
+        "path": "dist/components/button.js.map",
+        "bytes": 1652,
+        "sha256": "sha256:ee3858a466ea91384b7425a9594254ec81132ef97b6dd651f1dc3596b394df00"
+      },
+      {
+        "path": "dist/components/contracts.d.ts",
+        "bytes": 6534,
+        "sha256": "sha256:30cd78650233a2f4de8c74b9ac49a9dcc98bcc3d62505d62cdc1959f50862489"
+      },
+      {
+        "path": "dist/components/contracts.d.ts.map",
+        "bytes": 954,
+        "sha256": "sha256:0e631d53744e42a4c29476e89051ac480090ea84939f6312aae921c9214acd69"
+      },
+      {
+        "path": "dist/components/contracts.js",
+        "bytes": 4697,
+        "sha256": "sha256:f9e205f65f0f28a29435c4d391b332afd1e75b6310135f076c0e53523336f34c"
+      },
+      {
+        "path": "dist/components/contracts.js.map",
+        "bytes": 2470,
+        "sha256": "sha256:855ed8b07124aff6b54adc869d7f5ee6e2c4ad396b70d7695a660b6e73fcf00e"
+      },
+      {
+        "path": "dist/components/index.d.ts",
+        "bytes": 1276,
+        "sha256": "sha256:fcca4cae682b68c76724de9087bb7ddaf0ccd282b2b9005a53662889afacdce9"
+      },
+      {
+        "path": "dist/components/index.d.ts.map",
+        "bytes": 979,
+        "sha256": "sha256:4c1c7b166440b7babf77696b1b4cc4f7cc6d371ab02e159cc7d2383db329dfeb"
+      },
+      {
+        "path": "dist/components/index.js",
+        "bytes": 686,
+        "sha256": "sha256:74252813b0e340cf1a79e6acef84cdf246cff0e5aa43a0551550ef33ba46d1e9"
+      },
+      {
+        "path": "dist/components/index.js.map",
+        "bytes": 530,
+        "sha256": "sha256:131642815b500f88de5276fe0a3765f0b99b04ba7bc1a664b552bdd9183fb4ed"
+      },
+      {
+        "path": "dist/components/interactive-contracts.d.ts",
+        "bytes": 11745,
+        "sha256": "sha256:b4ff272017befe8117363a3fcf34cc44ef64c7fbfdd857eb0bba0d71409fab66"
+      },
+      {
+        "path": "dist/components/interactive-contracts.d.ts.map",
+        "bytes": 1515,
+        "sha256": "sha256:ef5c9bb0177f042072ae0b54c58d69ec547096c9e22ca5249b40a8b59c9fc814"
+      },
+      {
+        "path": "dist/components/interactive-contracts.js",
+        "bytes": 8780,
+        "sha256": "sha256:bc0ff4a6556015fab67cc8549d134fb9c37e13a525c174adf2f0bcb38b29bcf8"
+      },
+      {
+        "path": "dist/components/interactive-contracts.js.map",
+        "bytes": 4390,
+        "sha256": "sha256:68c32f9884e39f989bba2f3e8d57719490562628cfab2956776c4c9a79bdaee5"
+      },
+      {
+        "path": "dist/components/stack.d.ts",
+        "bytes": 980,
+        "sha256": "sha256:57424edec480bf845855498cb6f3c618b7b2962640a84a890a77ffcb6276c37a"
+      },
+      {
+        "path": "dist/components/stack.d.ts.map",
+        "bytes": 446,
+        "sha256": "sha256:d0b6f4c08515c8f6467c736a230a626202e93d23d8d5c039cf5fdcbef715125b"
+      },
+      {
+        "path": "dist/components/stack.js",
+        "bytes": 1337,
+        "sha256": "sha256:cf2d55bb52885198eba4a055b1defdc5de2582c44c6da03cd09f01e391e154a1"
+      },
+      {
+        "path": "dist/components/stack.js.map",
+        "bytes": 1050,
+        "sha256": "sha256:8380fe119b5a86f793d949c1b80856fcbfb648e0eea6476acdcd8190d1f9c99c"
+      },
+      {
+        "path": "dist/components/text-field.d.ts",
+        "bytes": 1763,
+        "sha256": "sha256:2de7f34017b87cef6bee63075d4cc493f2940c8132e868c6125327296784f782"
+      },
+      {
+        "path": "dist/components/text-field.d.ts.map",
+        "bytes": 800,
+        "sha256": "sha256:74d6216d8087fe3861094639f922517ad81f05486d405930827d6f11d3b88326"
+      },
+      {
+        "path": "dist/components/text-field.js",
+        "bytes": 2437,
+        "sha256": "sha256:a9f662669e7975f8393f922e2fc5d25d54ca616fa607215b4329e0581cd6143e"
+      },
+      {
+        "path": "dist/components/text-field.js.map",
+        "bytes": 1950,
+        "sha256": "sha256:0a22cd226d5ab4ada24a4dc8609f144961fdae1a1559afabcf13e1116e2ab3c4"
+      },
+      {
+        "path": "dist/components/text.d.ts",
+        "bytes": 718,
+        "sha256": "sha256:eb268d82d5720985505e74582c763330b50c06c60a74c00c8a3adc22e5ee6046"
+      },
+      {
+        "path": "dist/components/text.d.ts.map",
+        "bytes": 297,
+        "sha256": "sha256:07cd9a51f431d6e89a90ac76d47e7cdcf727218caf580ee70c078ce990e25eb6"
+      },
+      {
+        "path": "dist/components/text.js",
+        "bytes": 606,
+        "sha256": "sha256:562ab4de0201f49cb385b0c4f4329fc803c6833dde2c21e1b07302551a1e0eae"
+      },
+      {
+        "path": "dist/components/text.js.map",
+        "bytes": 406,
+        "sha256": "sha256:ef7bbe50528bef3198279f272f907849195c658723b430682fd17e3d0c62ea14"
+      },
+      {
+        "path": "dist/host-operations/index.d.ts",
+        "bytes": 309,
+        "sha256": "sha256:c76cfe10c234e06d11dd926696e79c8555b73a2cf8693729f10031963ad840bc"
+      },
+      {
+        "path": "dist/host-operations/index.d.ts.map",
+        "bytes": 232,
+        "sha256": "sha256:9912c360b2dcebf2f73f86799a8af3e0614dcb28b25534735b2223ca26cebff8"
+      },
+      {
+        "path": "dist/host-operations/index.js",
+        "bytes": 215,
+        "sha256": "sha256:f41bb3432fc5fd3225109ef7150e642f3fed35d427fb05f7126d490b5856c05c"
+      },
+      {
+        "path": "dist/host-operations/index.js.map",
+        "bytes": 175,
+        "sha256": "sha256:c665639f3e53dc59f04755c37d072c180e582b653f337cae826c59ee0f996cc7"
+      },
+      {
+        "path": "dist/host-operations/sign-in.d.ts",
+        "bytes": 2052,
+        "sha256": "sha256:f72271fb07c36c301cf95ce7019f2ba3c88590ff3a108b7d126660d6f1185b2d"
+      },
+      {
+        "path": "dist/host-operations/sign-in.d.ts.map",
+        "bytes": 531,
+        "sha256": "sha256:377abb2f9e224e8181ccc596f0d3eab375bcfb6c1167ce50ca789fb0057f2b09"
+      },
+      {
+        "path": "dist/host-operations/sign-in.js",
+        "bytes": 926,
+        "sha256": "sha256:fbcd81c04fc398f5c15d2ec98945ebee047c5b274c6bdc5068fddc11d0745c1b"
+      },
+      {
+        "path": "dist/host-operations/sign-in.js.map",
+        "bytes": 417,
+        "sha256": "sha256:678b3ae31d9ec0d1b64668120446c86d6bd3c86f93a76a1a394850056d0638e0"
+      },
+      {
+        "path": "dist/index.d.ts",
+        "bytes": 612,
+        "sha256": "sha256:21ac34b13f264acfb4cea01243ca6a676d2930683a6e68de22557566e63aadbc"
+      },
+      {
+        "path": "dist/index.d.ts.map",
+        "bytes": 311,
+        "sha256": "sha256:d1dfddbf7f295cfa12b31fa0205a7baa52ff6852303856c6bc11fb42cb76ce9b"
+      },
+      {
+        "path": "dist/index.js",
+        "bytes": 398,
+        "sha256": "sha256:8ff595081672ff63ffd2e2c15207964451cf29f5e810e65e5621b11f2a3e6ba7"
+      },
+      {
+        "path": "dist/index.js.map",
+        "bytes": 211,
+        "sha256": "sha256:170c7305e7fbf5db523163d6363fc91eb890998352467b3c40f731d302179509"
+      },
+      {
+        "path": "dist/operations/index.d.ts",
+        "bytes": 392,
+        "sha256": "sha256:6b3f81923532b9b4033c75da8f6e7e68a5ccdc92b45cd9e231eb65e4a2fc6afb"
+      },
+      {
+        "path": "dist/operations/index.d.ts.map",
+        "bytes": 282,
+        "sha256": "sha256:fc8f4a40e95176d4acdbb6199686261d2a31a91f9f7302337d38f2142a9280c7"
+      },
+      {
+        "path": "dist/operations/index.js",
+        "bytes": 249,
+        "sha256": "sha256:fa9b7854d3f5fd690e2dec59b0813fcabad057e2d171811dcf0ec253a72f5c23"
+      },
+      {
+        "path": "dist/operations/index.js.map",
+        "bytes": 197,
+        "sha256": "sha256:c31f3f1eca511dcb5c7e48b4b6cc18dc2de3346bdbb94a17db54ec072ad6d000"
+      },
+      {
+        "path": "dist/operations/sign-in.d.ts",
+        "bytes": 3996,
+        "sha256": "sha256:8cf9b87ab9489ce25dc21e436ea6bccd3e1a553ccd1a2d43d4674357512eaa2d"
+      },
+      {
+        "path": "dist/operations/sign-in.d.ts.map",
+        "bytes": 751,
+        "sha256": "sha256:28f534ebc71ef9748433623a414f40704f868d51708ed684c1760fcc6258de58"
+      },
+      {
+        "path": "dist/operations/sign-in.js",
+        "bytes": 2841,
+        "sha256": "sha256:b5b5def58fc33ef8567edde42d605efa5a7d9583b3c153d5c670c32b530277de"
+      },
+      {
+        "path": "dist/operations/sign-in.js.map",
+        "bytes": 1195,
+        "sha256": "sha256:8d25b6aab4d9374f55481e33adc925b16dee0b676f1bbe0e1a8d3884682f7da0"
+      },
+      {
+        "path": "dist/package-digest-profile.d.ts",
+        "bytes": 7377,
+        "sha256": "sha256:8d0ed1c6854f46e7069341498bb3433455e357e87d769b988fb7fe1d1c496905"
+      },
+      {
+        "path": "dist/package-digest-profile.d.ts.map",
+        "bytes": 1638,
+        "sha256": "sha256:74b64288fe506a3ee62d340f01317cf457a7c22e1d4a714c91a3c66150c58a00"
+      },
+      {
+        "path": "dist/package-digest-profile.js",
+        "bytes": 28624,
+        "sha256": "sha256:c18595171b51be9037253dd61486393a727ecfd03867eb728bba9519b237acb1"
+      },
+      {
+        "path": "dist/package-digest-profile.js.map",
+        "bytes": 23392,
+        "sha256": "sha256:c7c03c202bf386e17fbe2f35a5fb3afbbeb3f5f8ed8409c782e2730893047e99"
+      },
+      {
+        "path": "dist/parity/index.d.ts",
+        "bytes": 622,
+        "sha256": "sha256:e9b26ae38e4bd85a8c0d5f6c5c46b8776467241188605484540bbf89d5da8ec9"
+      },
+      {
+        "path": "dist/parity/index.d.ts.map",
+        "bytes": 307,
+        "sha256": "sha256:6579259002044821bfef97f2160a78cfd373dbdcb0d10fe7be7ac8f4b4945447"
+      },
+      {
+        "path": "dist/parity/index.js",
+        "bytes": 253,
+        "sha256": "sha256:0a1a16021e6bfd1c79f2061468d56f639c46e2e6355e91dc2cf8d0d23cc5a06e"
+      },
+      {
+        "path": "dist/parity/index.js.map",
+        "bytes": 168,
+        "sha256": "sha256:08e2287322f1c55cfba3d9b27ffae44dcef830ca174b54d0c2096b89c4adf33d"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.d.ts",
+        "bytes": 6962,
+        "sha256": "sha256:a36d1c2797a6aee566e822df10ce2548d8faf9130614df469e51072db59853f9"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.d.ts.map",
+        "bytes": 2590,
+        "sha256": "sha256:c7c1e775162d61200e60e142663c5d13a426eeaf69375078c52d04b0cf0874f8"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.js",
+        "bytes": 10443,
+        "sha256": "sha256:8ff2b6e9e0c8e9ab7336592521a5b752fbdac562646c96676787ee5bbdfde9a5"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.js.map",
+        "bytes": 8446,
+        "sha256": "sha256:c4fe35e3dae073781ca39ae893e9728a635bf623a96ebe960f048c5b6d4ad016"
+      },
+      {
+        "path": "dist/tokens/index.d.ts",
+        "bytes": 856,
+        "sha256": "sha256:860dd43b11e8e3c6c7ffbde478d0ab5d69a98b2b29e2a5dd7c85570188c080a1"
+      },
+      {
+        "path": "dist/tokens/index.d.ts.map",
+        "bytes": 490,
+        "sha256": "sha256:d1ed92862a82bda22f763dc5057761af226bda59f118debdcacbddaa8ba2c949"
+      },
+      {
+        "path": "dist/tokens/index.js",
+        "bytes": 409,
+        "sha256": "sha256:4b47a66a77ddfb34a8ead7f62a35523c06aff94467f29183eeaba291f779eaf8"
+      },
+      {
+        "path": "dist/tokens/index.js.map",
+        "bytes": 266,
+        "sha256": "sha256:bf5437a754a9dca5659916eaec6b8c2bdc31fd0e48cbc0005cb6d36cdfd33a72"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.d.ts",
+        "bytes": 9415,
+        "sha256": "sha256:6776cf26ee60bfd5d775ec05fe4c3b81089d943ae8e7e5ef618cb5ac14e82466"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.d.ts.map",
+        "bytes": 2603,
+        "sha256": "sha256:1e67325ec9eb619480bfe3a0151dbc781df200200baf2cb138131135ce11ff6c"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.js",
+        "bytes": 3184,
+        "sha256": "sha256:9f566e8ca4d8ac065abd531ec30e9a8b01fa6557b44e46c1d03c0c1b163066b3"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.js.map",
+        "bytes": 2713,
+        "sha256": "sha256:dfbb29a9a7f43d61b5aefcba23b333150ff8aed4c1da93aca892f0a3a9c9a237"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.d.ts",
+        "bytes": 7734,
+        "sha256": "sha256:d8b30429cc0d7a337411e83c68fc7c4798645cc9ebd4b37bfaa7d317e37de432"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.d.ts.map",
+        "bytes": 1632,
+        "sha256": "sha256:8434fca2b5984d05e27ade889d7c1615aecfd91b9791f08080ec21966496717f"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.js",
+        "bytes": 11116,
+        "sha256": "sha256:81c4897b946483672cb6b70d79b9ec05fad2f45e06dc14bea3dfb0cf7af7ffd5"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.js.map",
+        "bytes": 9619,
+        "sha256": "sha256:8d4c3cf40953575c97ed1035344934ad695ed9c18f8dd42dfa15a05abd0a0d68"
+      }
+    ]
+  },
+  "digest": {
+    "profile": "desen.web-react.package-digest",
+    "profileVersion": 1,
+    "target": "web-react",
+    "packageDigest": "sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e",
+    "preimageBytes": 232818,
+    "entries": 77,
+    "independentNodeSha256Agreement": true,
+    "independentFrame": {
+      "entries": 77,
+      "bytes": 232818,
+      "sha256": "sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e"
+    },
+    "artifactOrderInvariant": true,
+    "publishedCatalogVerification": true,
+    "exactArtifactBytesIncluded": true
+  },
+  "mutations": {
+    "byteVectors": 76,
+    "pathVectors": 76,
+    "removalVectors": 76,
+    "additionVectors": 1,
+    "unsafePathRejections": 1,
+    "catalogSemanticVectors": 5,
+    "catalogDigestChanges": 4,
+    "catalogProfileRejections": 1,
+    "publishedSelfDigestRejections": 1,
+    "total": 236,
+    "coverage": "one byte mutation, one path mutation, and one removal per dist artifact, plus addition, unsafe-path, Catalog, and self-digest vectors"
+  },
+  "prerequisite": {
+    "task": "M03-T09",
+    "result": "PASS",
+    "artifactSha256": "eb51220dad78a8e692f624fa82e6f3db9ff38a5bbd532eb395e93f4b2b4ac4b1"
+  },
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "compilerInputSnapshot": {
+      "files": 283,
+      "aggregateSha256": "sha256:251fec3430d424d22293627dd7302cd75614b02ec0b00f28ae628ea14f4d482a"
+    },
+    "trackedFiles": [
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/behavior-registration.d.ts",
+        "bytes": 2422,
+        "sha256": "sha256:cb1aaa4cb3907a33aa3d1813887f5b7aface4690b9d405d8c6778b01e466f6ff"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/behavior-registration.d.ts.map",
+        "bytes": 1394,
+        "sha256": "sha256:fa2e152f05544546cc8cfe992627d2abca4e205e65191a4f005e8c184f96e561"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/behavior-registration.js",
+        "bytes": 590,
+        "sha256": "sha256:6f022c2c4f59d9444444fc45bad25535a29f15b56e6f09ff466ab38a907fb3a1"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/behavior-registration.js.map",
+        "bytes": 288,
+        "sha256": "sha256:2244421c222d47c37e3751f5ad6d1d5a1b28c0355340c4f6e3251b5348853f76"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/catalog-manifest.d.ts",
+        "bytes": 4678,
+        "sha256": "sha256:a7f9e24ebf1237e4683c9968538acf9d51e08d46598f0caac12e02af5e45bd04"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/catalog-manifest.d.ts.map",
+        "bytes": 3174,
+        "sha256": "sha256:5c5472fb7d936cb6677e70c87c17c24710956df20d630f86bbed020a0952a591"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/catalog-manifest.js",
+        "bytes": 5210,
+        "sha256": "sha256:d4faf0e0e29eafd92a74fa675bac6846610ef497512f55258238730748d12b55"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/catalog-manifest.js.map",
+        "bytes": 4713,
+        "sha256": "sha256:b829d8bd64e3e92dbf1782dbd2fde9f455cc9805b6a28f5db2489ac0188b8a80"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-inspector-control.d.ts",
+        "bytes": 4889,
+        "sha256": "sha256:4c6aae38271bbb5562a157a560fa3bd0dfc3a38075a2a9b06f12bb019cc64f65"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-inspector-control.d.ts.map",
+        "bytes": 1866,
+        "sha256": "sha256:537bf5a857dba3f03f511160a08f00bbd7fddea72e48459ad4a3182775b456b0"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-inspector-control.js",
+        "bytes": 12887,
+        "sha256": "sha256:6760bcb2563792a2ce9e8e60548622697a4a97d5d55aa724e5b692755f00c867"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-inspector-control.js.map",
+        "bytes": 10667,
+        "sha256": "sha256:0796aa54d82794560d220e7ed74b7ae7ff175803469371d8c89c52b647763d39"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-registration.d.ts",
+        "bytes": 2612,
+        "sha256": "sha256:5adb55b4c4b50d6a579bad24aa3e8abe3954d3e5adc569a3bfa595de7cffbd92"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-registration.d.ts.map",
+        "bytes": 1398,
+        "sha256": "sha256:118c34f402958ae2ad6c4f673edbaea0fbce39d4552ca2574350cef15683010d"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-registration.js",
+        "bytes": 688,
+        "sha256": "sha256:0877891e7b2e0053d1c27ae6c355face1f28b4b11dc2a5c4b0a9072cd5dc4924"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/component-registration.js.map",
+        "bytes": 291,
+        "sha256": "sha256:d1a9e5aa92e8dafee76f8de8e26674dc1f3ca41bae22ad65eb0b2cb10d64f308"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/index.d.ts",
+        "bytes": 1447,
+        "sha256": "sha256:aa52e9d12f1526d0296be0af4993601bb085dd101bed27053e64afaaed32aabe"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/index.d.ts.map",
+        "bytes": 931,
+        "sha256": "sha256:21d6b289bbfe40b2b4f998e80a58f4f4d48b027bd8c32951229766b2ee915d5b"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/index.js",
+        "bytes": 559,
+        "sha256": "sha256:35f7181ed34b4c8331867c9a5cde99980d507503d6a017989e79b8e879471365"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/index.js.map",
+        "bytes": 383,
+        "sha256": "sha256:ce9dde714fd859e4bfc151db54278f505692baafdbb685bad4925768fe117c7b"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/inert-json.d.ts",
+        "bytes": 2692,
+        "sha256": "sha256:3108b5a59b00d30832a8cfeb0bc49f1f214679c94ef5022d5d1a3e014ce82a72"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/inert-json.d.ts.map",
+        "bytes": 1735,
+        "sha256": "sha256:a3d37ed0ca76be760b77cf912a89dfa79620f42fc3361a3426bd9b83b1f01572"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/inert-json.js",
+        "bytes": 4523,
+        "sha256": "sha256:a2366a224fff48105d8f9c4b13d0e45905dd281285daa469880e68847529260f"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/inert-json.js.map",
+        "bytes": 4314,
+        "sha256": "sha256:063aea35a1a4ffaf6c84d23afda84b6c5a141bda926824469e4cb95193649fc4"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/operation-registration.d.ts",
+        "bytes": 2411,
+        "sha256": "sha256:a85a7e5193b6f246aeb7a8b8b50f5470d2afddd2592a10d90075bfb7a8a58dc6"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/operation-registration.d.ts.map",
+        "bytes": 1396,
+        "sha256": "sha256:05bdf1c5081e8849a996460c179c07f927635ddfcda3c689d1d0bb9dfaf0c641"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/operation-registration.js",
+        "bytes": 563,
+        "sha256": "sha256:1181d3903bd3b8bbeeb986853245e0fdc2c0ecc7ff1bbb080343e1da123c2786"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/operation-registration.js.map",
+        "bytes": 290,
+        "sha256": "sha256:dc3fc35806703001b2dcb7ae777b70f9c53ffe36400d1c256bb287262d1127c3"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/registration-core.d.ts",
+        "bytes": 2470,
+        "sha256": "sha256:5f0fd917dbf1564471af53227abc75c5dbef58ab75994a4184a1ff17b4cb346e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/registration-core.d.ts.map",
+        "bytes": 2052,
+        "sha256": "sha256:54400e591db884808cd7821cbd8654fa3cfde5709e9d0ac25939fdce3849f83a"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/registration-core.js",
+        "bytes": 1275,
+        "sha256": "sha256:5cf7dace77ae294c83ee5b310f84b8d53c10c5791105a8ef5d1128eac102c024"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/registration-core.js.map",
+        "bytes": 1123,
+        "sha256": "sha256:ac02bacccc1954e5d62bc5de00e5bf6a2049f688d0a6ceadb6ff7a6f44fc5f60"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/resource-registration.d.ts",
+        "bytes": 2407,
+        "sha256": "sha256:c0944f0c0b4f28478da1ace64d15ab0757d9c9766b5b24bff9867d2116cf0256"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/resource-registration.d.ts.map",
+        "bytes": 1394,
+        "sha256": "sha256:4f5e3448a01b6e35e54cf0056b7e3663e2cf5543636bae05f3ab4397e0442985"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/resource-registration.js",
+        "bytes": 569,
+        "sha256": "sha256:445d6a95506d43412c4efc8711cf94c38e69d226d83ca28eb49be32b96c7432f"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/resource-registration.js.map",
+        "bytes": 288,
+        "sha256": "sha256:d876c84b721ebc0d0501a463894c8203a6c94105239dbf9ff1af1d3804dbbe17"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/schema-type-derivation.d.ts",
+        "bytes": 8087,
+        "sha256": "sha256:78d69301b856c1d659d1126468f1c2409e3e9049df3ae499a97bfe813f455eae"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/schema-type-derivation.d.ts.map",
+        "bytes": 6257,
+        "sha256": "sha256:c25c91f1978cf51429a6e538fe427729a3ab6ac0c89802e2d64b7d067033a15a"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/schema-type-derivation.js",
+        "bytes": 61,
+        "sha256": "sha256:151cd09ce45e212575b8c90ec480a3aedf48c8ec7a4df1d410c3260d102fe410"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/dist/schema-type-derivation.js.map",
+        "bytes": 136,
+        "sha256": "sha256:871c570faf424291d32eb67e35c712155adf3b18909779839a56f553ca0d9a8e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/catalog-sdk/package.json",
+        "bytes": 909,
+        "sha256": "sha256:90047248f786e34f4f5fa7e76102ef2ec64437f04cd273d3e7f1a8eba3984d3a"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/canonicalization.d.ts",
+        "bytes": 3964,
+        "sha256": "sha256:61e8cdc0a14021bb967db4f476d31874ac8e30e3c633b876a60b9b7d4a0612fa"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/canonicalization.d.ts.map",
+        "bytes": 770,
+        "sha256": "sha256:0ff6dae6c2b7ff56f7a5930806c69f9b77f365297cda95ad979739f15142dac1"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/canonicalization.js",
+        "bytes": 17634,
+        "sha256": "sha256:64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/canonicalization.js.map",
+        "bytes": 15519,
+        "sha256": "sha256:7de9f144f9fa8d2068ad298bc88f52990cda5b4e2f82f2d9e76473dab667b8be"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/diagnostics.d.ts",
+        "bytes": 9565,
+        "sha256": "sha256:fe2bf78fbe6eb6c28a60def9cd2e8d40d44e897fc853b18a58360693f06728c7"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/diagnostics.d.ts.map",
+        "bytes": 2463,
+        "sha256": "sha256:5efe5038005d1526374c27abc0e477729deb952f0b113bdd96c08940b15098a9"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/diagnostics.js",
+        "bytes": 8905,
+        "sha256": "sha256:0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/diagnostics.js.map",
+        "bytes": 6261,
+        "sha256": "sha256:6adcc4f5a945906f145ef543fb8f72b8b1d40a403b855391374763a863b39135"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-bundle.generated.d.ts",
+        "bytes": 7356,
+        "sha256": "sha256:c3c58047902e7f7d29fd35dccf190d52ce21385217db595ec77d244e295bb5d5"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-bundle.generated.d.ts.map",
+        "bytes": 6039,
+        "sha256": "sha256:9e0e1654f3821c69f9604dea25706fe99ae2faf9bdd54767a91cca0460b3122c"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-bundle.generated.js",
+        "bytes": 490,
+        "sha256": "sha256:286c61208581fc657dd74b2be8c18d612eca2289ab029b5d1eca53871db5699a"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-bundle.generated.js.map",
+        "bytes": 184,
+        "sha256": "sha256:15d46d36fa7c730479341796baadd145a5e7901437c8c15870fd36f4bda379a3"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-catalog.generated.d.ts",
+        "bytes": 6537,
+        "sha256": "sha256:9d85f575930bb132277cecd32db3e342da079fbf78e031bc18e3adb878df9bea"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-catalog.generated.d.ts.map",
+        "bytes": 5782,
+        "sha256": "sha256:d0400f15c63971e960bd454b56e2a820b3cd1867f8e66b3ea119a3a06db1c02b"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-catalog.generated.js",
+        "bytes": 491,
+        "sha256": "sha256:a8e57a1d2be228de8f0d0b68733be2404c83fd3fccf197e98fa11da3e6b92a37"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-catalog.generated.js.map",
+        "bytes": 186,
+        "sha256": "sha256:b1dbf0d4f4cd3d303e6d7163a94eb48a93dc874b40f234d4cd10012dc9241676"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-source.generated.d.ts",
+        "bytes": 7250,
+        "sha256": "sha256:338d8e25c6783da52c531a120539aba42b954eceb3df67924b6a45d57fc0c563"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-source.generated.d.ts.map",
+        "bytes": 5962,
+        "sha256": "sha256:28f6ba6928734f5512d809bf217123684001adf4ddacdd82eff21aab72154b68"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-source.generated.js",
+        "bytes": 490,
+        "sha256": "sha256:eb5397a94bef5e33f45a80f261080589e87aaf9c5f6165c7b517528173280e98"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/generated/0.1.0/desen-source.generated.js.map",
+        "bytes": 184,
+        "sha256": "sha256:c37c9fcffad30f95fac75abf16817f07d715095596153d78c7dbf473ec029384"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/index.d.ts",
+        "bytes": 3006,
+        "sha256": "sha256:4189219fb1e04665db85fa377660ecef385d4e66ce02a719f37249a70bc5b43b"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/index.d.ts.map",
+        "bytes": 1435,
+        "sha256": "sha256:e0df6d27a56223ed0651f6c5a3d06d1d9e87d02371318b571684d521141137f7"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/index.js",
+        "bytes": 679,
+        "sha256": "sha256:a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/index.js.map",
+        "bytes": 444,
+        "sha256": "sha256:422350ee39e3d30c64f7badb98ad40517528cabe90b10fe67f86610f7d43cf84"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/json-pointer.d.ts",
+        "bytes": 3631,
+        "sha256": "sha256:a553edcb3642f5241f0a4a2ba69f6c1380eaa4d54eab3c84918d071e8225a171"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/json-pointer.d.ts.map",
+        "bytes": 816,
+        "sha256": "sha256:045a2ed5155bb45e083024bcf4aa805f6786c1cf0dd5096513554b4f84b54336"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/json-pointer.js",
+        "bytes": 6499,
+        "sha256": "sha256:7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/dist/json-pointer.js.map",
+        "bytes": 4344,
+        "sha256": "sha256:762fc26ef5af285bc3d8a6dc7d3b1d0250cf2751ef0761e7e9ec11db519f5929"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@desen/protocol/package.json",
+        "bytes": 923,
+        "sha256": "sha256:122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/LICENSE",
+        "bytes": 1141,
+        "sha256": "sha256:c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/README.md",
+        "bytes": 1750,
+        "sha256": "sha256:1296c693e78b1c9a71971b619f68a98213fee9f4e2f2d3b33bea6943f8df3fa0"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/canary.d.ts",
+        "bytes": 6278,
+        "sha256": "sha256:2beff543f6e9a9701df88daeee3cdd70a34b4a1c11cb4c734472195a5cb2af54"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/compiler-runtime.d.ts",
+        "bytes": 116,
+        "sha256": "sha256:20fa37b636fdcc1746ea0738f733d0aed17890d1cd7cb1b2f37010222c23f13e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/experimental.d.ts",
+        "bytes": 7255,
+        "sha256": "sha256:2e07abf27aa06353d46f4448c0bbac73431f6065eef7113128a5cd804d0c384d"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/global.d.ts",
+        "bytes": 7520,
+        "sha256": "sha256:7e29f41b158de217f94cb9676bf9cbd0cd9b5a46e1985141ed36e075c52bf6ad"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/index.d.ts",
+        "bytes": 177457,
+        "sha256": "sha256:dc782ff85b2cb10075ecffc158af7bfb27ff97bf8491c917efea0c3d622d5ac4"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/jsx-dev-runtime.d.ts",
+        "bytes": 740,
+        "sha256": "sha256:c30436b130b6218b7714314dc41d3f459590db4bdf099eecd51cb1bda32109a8"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/jsx-runtime.d.ts",
+        "bytes": 532,
+        "sha256": "sha256:b838d4c72740eb0afd284bf7575b74c624b105eff2e8c7b4aeead57e7ac320ff"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/package.json",
+        "bytes": 6109,
+        "sha256": "sha256:36496fc09a9dcf31b0ca969ce5677c9ce9ebb5c89da9bd6212e0c89b6fae3f88"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/ts5.0/canary.d.ts",
+        "bytes": 6278,
+        "sha256": "sha256:2beff543f6e9a9701df88daeee3cdd70a34b4a1c11cb4c734472195a5cb2af54"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/ts5.0/experimental.d.ts",
+        "bytes": 7255,
+        "sha256": "sha256:2e07abf27aa06353d46f4448c0bbac73431f6065eef7113128a5cd804d0c384d"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/ts5.0/global.d.ts",
+        "bytes": 7520,
+        "sha256": "sha256:7e29f41b158de217f94cb9676bf9cbd0cd9b5a46e1985141ed36e075c52bf6ad"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/ts5.0/index.d.ts",
+        "bytes": 176430,
+        "sha256": "sha256:2337a1929e2b8bb16e34d7c94776521a550a28b8bbb22bc06d9703e0963ec9f5"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/ts5.0/jsx-dev-runtime.d.ts",
+        "bytes": 740,
+        "sha256": "sha256:c30436b130b6218b7714314dc41d3f459590db4bdf099eecd51cb1bda32109a8"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/@types/react/ts5.0/jsx-runtime.d.ts",
+        "bytes": 532,
+        "sha256": "sha256:b838d4c72740eb0afd284bf7575b74c624b105eff2e8c7b4aeead57e7ac320ff"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/csstype/LICENSE",
+        "bytes": 1062,
+        "sha256": "sha256:11d55bd4541c75ee7879547ac49089c489163dae49551389713c3d026cab383e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/csstype/README.md",
+        "bytes": 10887,
+        "sha256": "sha256:25ad18f8910493055f30a9429da429c2a92a2d503829ef850c3bf40095fb2339"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/csstype/index.d.ts",
+        "bytes": 894969,
+        "sha256": "sha256:ac51dd7d31333793807a6abaa5ae168512b6131bd41d9c5b98477fc3b7800f9f"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/csstype/index.js.flow",
+        "bytes": 344546,
+        "sha256": "sha256:8d20689a1573ade72736a2516ebbe096982674e15bc04579cf4e89ed20ea8ded"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/csstype/package.json",
+        "bytes": 1985,
+        "sha256": "sha256:c818b74a9bc1556488b7ec2a65399224738f6619228f9a6491c5c02ca91f849e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/LICENSE",
+        "bytes": 1088,
+        "sha256": "sha256:da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/README.md",
+        "bytes": 1158,
+        "sha256": "sha256:faf7a5814bedadb9ecabcb8cf727a3477696bb0d3a5b57d5433110aa6094b85e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-compiler-runtime.development.js",
+        "bytes": 1090,
+        "sha256": "sha256:7ae8fa77a54c404572cba7065e14fe599a3d8cc0b68d34d649d8acc776e4e096"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-compiler-runtime.production.js",
+        "bytes": 463,
+        "sha256": "sha256:f7d518f5c043cd008514b4fd8c665a9d2fa5686bd36c6e7d44d78187c0438700"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-compiler-runtime.profiling.js",
+        "bytes": 462,
+        "sha256": "sha256:821fc2969277b5bc7814965e0ac07f815aafb3880d8bca31bcb53ce5d875edd3"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-dev-runtime.development.js",
+        "bytes": 12056,
+        "sha256": "sha256:5a36d0fbb3554be840e6367736f88ebafdb1873a4f40c13f499c3969fa918dd6"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-dev-runtime.production.js",
+        "bytes": 387,
+        "sha256": "sha256:ba9b367119971ed746925a600256d342eb4cc3f2389de013f61e36ff1f3594a5"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-dev-runtime.profiling.js",
+        "bytes": 386,
+        "sha256": "sha256:c89fe850b7e66b6e1a10496321ea9d778a64512960d01dccf49ff0fd5d256b20"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-dev-runtime.react-server.development.js",
+        "bytes": 13213,
+        "sha256": "sha256:020946778a8dc16d04209bd6ab003bbfb929c96c2d195bf689bf60d7baeabe8b"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-dev-runtime.react-server.production.js",
+        "bytes": 1316,
+        "sha256": "sha256:c56f744270c8cd4d733575757eaf48de91edfa04d0f5e01ef5043bf9848263b3"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-runtime.development.js",
+        "bytes": 12452,
+        "sha256": "sha256:dd50fd0db2fba44e0eee66243a45c81cfa3774cf41e4e6c0c080a601815c694d"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-runtime.production.js",
+        "bytes": 976,
+        "sha256": "sha256:1e46f15002696985e80c61d47aaa30dabb03c954270a690f5f7dfbbacfa9002b"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-runtime.profiling.js",
+        "bytes": 975,
+        "sha256": "sha256:27b2fb3d04f9878687ab58717172592650e256de727e910366340be87e0f8352"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-runtime.react-server.development.js",
+        "bytes": 13209,
+        "sha256": "sha256:2338d052c495176d4e996090cb07bff4831f2faf95b89ad116e4e31769a5ca78"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react-jsx-runtime.react-server.production.js",
+        "bytes": 1312,
+        "sha256": "sha256:44bdd0dbbf51d5d49ac46ece12e919151c7f27b7f5b174790c4ca6aef0b6a1eb"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react.development.js",
+        "bytes": 47219,
+        "sha256": "sha256:e7a035fea0b35de567a563966fdb5e05c01f01f8ff776770d3a44794990ba3d7"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react.production.js",
+        "bytes": 17217,
+        "sha256": "sha256:d348b80a78c8ea0bd02b1990c7b7b514f5c276f9e74fee6e3976297585385961"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react.react-server.development.js",
+        "bytes": 30389,
+        "sha256": "sha256:db0b3bdb71c5fd39a15f219a116b25c980c58bef26f54002dc3827fde596e79c"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/cjs/react.react-server.production.js",
+        "bytes": 13270,
+        "sha256": "sha256:e9a7a278f37772c63206c69a7fe0f9edfce65a3e89d859ca2ba6f2452c279b1e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/compiler-runtime.js",
+        "bytes": 412,
+        "sha256": "sha256:5c00456a0180b7b6b2366348f7218b0ea2c3a85c7fefe24c18533ed54126f601"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/index.js",
+        "bytes": 186,
+        "sha256": "sha256:60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/jsx-dev-runtime.js",
+        "bytes": 218,
+        "sha256": "sha256:486589120a962721c8281b5acec2f6d49e60ce5f9d908cc814ddfe71c6163ace"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/jsx-dev-runtime.react-server.js",
+        "bytes": 244,
+        "sha256": "sha256:29cbe21640848ed3e8aebfdc47af7ff24eddcaea57b29f98958dc2c3e8fd279d"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/jsx-runtime.js",
+        "bytes": 210,
+        "sha256": "sha256:b392951a77d0a2e6a6bd017e49d768481ae5b63c4109c6c31f622cf7b2433edc"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/jsx-runtime.react-server.js",
+        "bytes": 236,
+        "sha256": "sha256:47346212fa0ec5c7f3a9ab36c658cdce7bb02d4f66f00aa5e11cadc0ee258853"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/package.json",
+        "bytes": 1242,
+        "sha256": "sha256:e40c3ed9b633c9ecf188e09a4be309780a1ea0a9c068278a30ff6a27e7b2dbb6"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/node_modules/react/react.react-server.js",
+        "bytes": 212,
+        "sha256": "sha256:ced6f228807a193b8a0ec436304b96ca44492bae8899c3e84c2a88162843dc14"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/package.json",
+        "bytes": 2254,
+        "sha256": "sha256:455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/alert.tsx",
+        "bytes": 2180,
+        "sha256": "sha256:c751592848922182c32e956954673a93288ffed78d670dd7085f90397982110f"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/button.tsx",
+        "bytes": 2893,
+        "sha256": "sha256:074edb6e4b8ce9c357fba77636a3e419ee278bc19b41f27ccebeb019d6e7ea72"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/contracts.ts",
+        "bytes": 4962,
+        "sha256": "sha256:1266f0f732d9530070c50275ae5fe4c17b07cfa6dc57128a6bf1141f81b3f49f"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/index.ts",
+        "bytes": 1291,
+        "sha256": "sha256:7f2a9dd393425ed535b87297058ed39f608ea794915777e51911f6f4f3328e91"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/interactive-contracts.ts",
+        "bytes": 8462,
+        "sha256": "sha256:8587f8622075958634bb5f705d711142106a8abba0f9a45a860ef3a0b736e650"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/stack.tsx",
+        "bytes": 1827,
+        "sha256": "sha256:88b3cf3059253018e8865cbfa8e37b5c449b55d06430a9a046f4e1511b45f796"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/text-field.tsx",
+        "bytes": 3747,
+        "sha256": "sha256:80e5d6713c96cfd7e867879aa3c6251f9f2a71b5cb48dc5460acdfecad989eb5"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/components/text.tsx",
+        "bytes": 899,
+        "sha256": "sha256:c741c3ddba19d12120e793c9e93b19f3790e9ba93c7d579325a0d07e4cef8f17"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/host-operations/index.ts",
+        "bytes": 276,
+        "sha256": "sha256:82a89a269fa0ad583d9aba7e264266dd28c272d1aee9be0338d50a49cc03aaa1"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/host-operations/sign-in.ts",
+        "bytes": 2234,
+        "sha256": "sha256:5a6e70e4a249f39a0c84e0441c9f0c113e4f3d939ea9e70ebe374bd48d3fe86b"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/index.ts",
+        "bytes": 599,
+        "sha256": "sha256:b845946fd8c453ed86d74ef41d60bb8ef309c3b33584b0d626b4396a69b40c64"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/operations/index.ts",
+        "bytes": 373,
+        "sha256": "sha256:3df76e2b180472c5a22bf4a41d93f6ff62d7c20e99c88c74af63bcfb5826ef6a"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/operations/sign-in.ts",
+        "bytes": 3321,
+        "sha256": "sha256:5797ecc9a59ed8e103655fa3903786bbaf6ec0c5d7bb10605a54f7708d87f837"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/package-digest-profile.ts",
+        "bytes": 32067,
+        "sha256": "sha256:9003f6080f7d4512aa49702ac46990a82a301bc0723979ad0e8744d558dbb394"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/parity/index.ts",
+        "bytes": 605,
+        "sha256": "sha256:657d0d102252dd12acc05e8efc315d4ebca5267e186f0a32176b2a5023baa136"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/parity/reference-web-implementation-metadata.ts",
+        "bytes": 17237,
+        "sha256": "sha256:6b73ed15ded73fcbddd484a3145885854062361361c2f5879d8c44a531bec2e2"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/tokens/index.ts",
+        "bytes": 857,
+        "sha256": "sha256:03ae286043cc3c84eaf3fd33f187e86025f3bfdaed4a0151ef4660be9a17f22c"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/tokens/reference-token-document.ts",
+        "bytes": 4897,
+        "sha256": "sha256:d20e599ebd5bd2e958ed77ed98b76dc5a13576166141e9b1620998b6050de05e"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/src/tokens/web-token-provider.ts",
+        "bytes": 14450,
+        "sha256": "sha256:3a9bc4f1fc48d9839d5fa663670df4612421e1d60cba734e636750d4df62676a"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "sha256:f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "compiler-snapshot/packages/reference-catalog-web/tsconfig.json",
+        "bytes": 172,
+        "sha256": "sha256:07fa9ea667348c72c2311ba2a6ebbb2a233e6e572b5977bb54d6cf177278152a"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/LICENSE.txt",
+        "bytes": 9197,
+        "sha256": "sha256:a7d00bfd54525bc694b6e32f64c7ebcf5e6b7ae3657be5cc12767bce74654a47"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/README.md",
+        "bytes": 2842,
+        "sha256": "sha256:73147458477d90cd6236627cdd9b0871df12e6e8a21d2d0fda6d1ad2826bdc0e"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/SECURITY.md",
+        "bytes": 2577,
+        "sha256": "sha256:cec829e06ab53bb27e96fa6dcd8daa2b6cc4a6cc08b00ff5965fac1cbb54f7f1"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/ThirdPartyNoticeText.txt",
+        "bytes": 37824,
+        "sha256": "sha256:1af3c68039c57e539422da82a4faada506ce6d0ea6f90e0b699d02dbcdb7a90c"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/bin/tsc",
+        "bytes": 45,
+        "sha256": "sha256:8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/bin/tsserver",
+        "bytes": 50,
+        "sha256": "sha256:a088f0c3419bcb2f7b860ad42e4c9f25ead067eda70af6a10d0a7d453954aada"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/_tsc.js",
+        "bytes": 6239091,
+        "sha256": "sha256:1c59e77a54b186ec43fa7f3e0d3c4bb15ca5eb5ba43e96b1d3a267139eddd3e3"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/_tsserver.js",
+        "bytes": 27889,
+        "sha256": "sha256:1992fc3518a4aa5443638a25794281995ec3ce84820692713296262997d5443b"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/_typingsInstaller.js",
+        "bytes": 10364,
+        "sha256": "sha256:71515c1c1aa29c8616309f7dea4d3a32eed662df3a4dbcf4345e7522ece56ac1"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/cs/diagnosticMessages.generated.json",
+        "bytes": 322179,
+        "sha256": "sha256:a00a333cb5ae58c1b1163bd90b6897eb9a2695de9d31dc12fc4a19c98843b6a7"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/de/diagnosticMessages.generated.json",
+        "bytes": 345510,
+        "sha256": "sha256:1df64ca10607a09e7fdd217f06488ab0b107d557157cef81cc2c9496a4439099"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/es/diagnosticMessages.generated.json",
+        "bytes": 341947,
+        "sha256": "sha256:85ad4bf3b496a74f37345af5a11c794379902b8d1b0ee68e90a7189222ddedbe"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/fr/diagnosticMessages.generated.json",
+        "bytes": 347990,
+        "sha256": "sha256:843a7a314c2ce9b3212c373f2694b7b166a60b8c1881c6651816c547110ae44a"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/it/diagnosticMessages.generated.json",
+        "bytes": 340423,
+        "sha256": "sha256:018ff991423a0c2f27f6adabca0bd705ded5ca3406e9cf80b0357d454523e4e6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/ja/diagnosticMessages.generated.json",
+        "bytes": 383553,
+        "sha256": "sha256:8ceafe4cae6fbc9af735427557030269e5419eaed535c923d622967aee2c50f9"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/ko/diagnosticMessages.generated.json",
+        "bytes": 347991,
+        "sha256": "sha256:1287462fc976b79a02e82fe4af906004d7d58f7df37b8de54235b77dc5552674"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.d.ts",
+        "bytes": 953,
+        "sha256": "sha256:0e6477e5049e579cc5de741a70ac91235252edc0468b2e569f22de9db3357786"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.decorators.d.ts",
+        "bytes": 13153,
+        "sha256": "sha256:1ce14b81c5cc821994aa8ec1d42b220dd41b27fcc06373bce3958af7421b77d4"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.decorators.legacy.d.ts",
+        "bytes": 1287,
+        "sha256": "sha256:b3a048b3e9302ef9a34ef4ebb9aecfb28b66abb3bce577206a79fee559c230da"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.dom.asynciterable.d.ts",
+        "bytes": 933,
+        "sha256": "sha256:7f57fc4404ff020bc45b9c620aff2b40f700b95fe31164024c453a5e3c163c54"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.dom.d.ts",
+        "bytes": 2349483,
+        "sha256": "sha256:d6b1eba8496bdd0eed6fc8a685768fe01b2da4a0388b5fe7df558290bffcf32f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.dom.iterable.d.ts",
+        "bytes": 933,
+        "sha256": "sha256:7f57fc4404ff020bc45b9c620aff2b40f700b95fe31164024c453a5e3c163c54"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.collection.d.ts",
+        "bytes": 5305,
+        "sha256": "sha256:105ba8ff7ba746404fe1a2e189d1d3d2e0eb29a08c18dded791af02f29fb4711"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.core.d.ts",
+        "bytes": 22824,
+        "sha256": "sha256:eadcffda2aa84802c73938e589b9e58248d74c59cb7fcbca6474e3435ac15504"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.d.ts",
+        "bytes": 1202,
+        "sha256": "sha256:3f88bedbeb09c6f5a6645cb24c7c55f1aa22d19ae96c8e6959cbd8b85a707bc6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.generator.d.ts",
+        "bytes": 2518,
+        "sha256": "sha256:00343ca5b2e3d48fa5df1db6e32ea2a59afab09590274a6cccb1dbae82e60c7c"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.iterable.d.ts",
+        "bytes": 18185,
+        "sha256": "sha256:ebd9f816d4002697cb2864bea1f0b70a103124e18a8cd9645eeccc09bdf80ab4"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.promise.d.ts",
+        "bytes": 3161,
+        "sha256": "sha256:2c1afac30a01772cd2a9a298a7ce7706b5892e447bb46bdbeef720f7b5da77ad"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.proxy.d.ts",
+        "bytes": 5212,
+        "sha256": "sha256:7b0225f483e4fa685625ebe43dd584bb7973bbd84e66a6ba7bbe175ee1048b4f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.reflect.d.ts",
+        "bytes": 6454,
+        "sha256": "sha256:c0a4b8ac6ce74679c1da2b3795296f5896e31c38e888469a8e0f99dc3305de60"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.symbol.d.ts",
+        "bytes": 1610,
+        "sha256": "sha256:3084a7b5f569088e0146533a00830e206565de65cae2239509168b11434cd84f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+        "bytes": 10971,
+        "sha256": "sha256:c5079c53f0f141a0698faa903e76cb41cd664e3efb01cc17a5c46ec2eb0bef42"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2016.array.include.d.ts",
+        "bytes": 5165,
+        "sha256": "sha256:32cafbc484dea6b0ab62cf8473182bbcb23020d70845b406f80b7526f38ae862"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2016.d.ts",
+        "bytes": 926,
+        "sha256": "sha256:7fe93b39b810eadd916be8db880dd7f0f7012a5cc6ffb62de8f62a2117fa6f1f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2016.full.d.ts",
+        "bytes": 993,
+        "sha256": "sha256:19adadff5144f8f89fef0a10b299d7a96206f4913d4c17d4864171320e9edbd6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2016.intl.d.ts",
+        "bytes": 1445,
+        "sha256": "sha256:fca4cdcb6d6c5ef18a869003d02c9f0fd95df8cfaf6eb431cd3376bc034cad36"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.arraybuffer.d.ts",
+        "bytes": 876,
+        "sha256": "sha256:b93ec88115de9a9dc1b602291b85baf825c85666bf25985cc5f698073892b467"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.d.ts",
+        "bytes": 1123,
+        "sha256": "sha256:bb0074cc08b84a2374af33d8bf044b80851ccc9e719a5e202eacf40db2c31600"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.date.d.ts",
+        "bytes": 1877,
+        "sha256": "sha256:f5c06dcc3fe849fcb297c247865a161f995cc29de7aa823afdd75aaaddc1419b"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.full.d.ts",
+        "bytes": 993,
+        "sha256": "sha256:83635f912d414d0c5a855fba3e18418e9db7e73c2e0e170009c48275cc8c1a36"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.intl.d.ts",
+        "bytes": 1410,
+        "sha256": "sha256:c7b3542146734342e440a84b213384bfa188835537ddbda50d30766f0593aff9"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.object.d.ts",
+        "bytes": 2434,
+        "sha256": "sha256:b77e16112127a4b169ef0b8c3a4d730edf459c5f25fe52d5e436a6919206c4d7"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.sharedmemory.d.ts",
+        "bytes": 7170,
+        "sha256": "sha256:fbffd9337146eff822c7c00acbb78b01ea7ea23987f6c961eba689349e744f8c"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.string.d.ts",
+        "bytes": 2339,
+        "sha256": "sha256:a995c0e49b721312f74fdfb89e4ba29bd9824c770bbb4021d74d2bf560e4c6bd"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2017.typedarrays.d.ts",
+        "bytes": 1503,
+        "sha256": "sha256:ce6180fa19b1cccd07ee7f7dbb9a367ac19c0ed160573e4686425060b6df7f57"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2018.asyncgenerator.d.ts",
+        "bytes": 2653,
+        "sha256": "sha256:3f02e2476bccb9dbe21280d6090f0df17d2f66b74711489415a8aa4df73c9675"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2018.asynciterable.d.ts",
+        "bytes": 2218,
+        "sha256": "sha256:45e3ab34c1c013c8ab2dc1ba4c80c780744b13b5676800ae2e3be27ae862c40c"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2018.d.ts",
+        "bytes": 1049,
+        "sha256": "sha256:1a7daebe4f45fb03d9ec53d60008fbf9ac45a697fdc89e4ce218bc94b94f94d6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2018.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:63787dbe04141f5d3ebce2e08b64bc9bba589beb0a4d22e7994d3005af1e48a6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2018.intl.d.ts",
+        "bytes": 2982,
+        "sha256": "sha256:805c86f6cca8d7702a62a844856dbaa2a3fd2abef0536e65d48732441dde5b5b"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2018.promise.d.ts",
+        "bytes": 1314,
+        "sha256": "sha256:e42e397f1a5a77994f0185fd1466520691456c772d06bf843e5084ceb879a0ad"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2018.regexp.d.ts",
+        "bytes": 1193,
+        "sha256": "sha256:f4c2b41f90c95b1c532ecc874bd3c111865793b23aebcc1c3cbbabcd5d76ffb0"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2019.array.d.ts",
+        "bytes": 3124,
+        "sha256": "sha256:ab26191cfad5b66afa11b8bf935ef1cd88fabfcb28d30b2dfa6fad877d050332"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2019.d.ts",
+        "bytes": 1032,
+        "sha256": "sha256:f94b133a3cb14a288803be545ac2683e0d0ff6661bcd37e31aaaec54fc382aed"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2019.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:e3de8409485b0c198a5a075bd4a1d06d8f42dc52b377709d33b131b97de56456"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2019.intl.d.ts",
+        "bytes": 919,
+        "sha256": "sha256:689da16f46e647cef0d64b0def88910e818a5877ca5379ede156ca3afb780ac3"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2019.object.d.ts",
+        "bytes": 1434,
+        "sha256": "sha256:2088bc26531e38fb05eedac2951480db5309f6be3fa4a08d2221abb0f5b4200d"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2019.string.d.ts",
+        "bytes": 1489,
+        "sha256": "sha256:cb9d366c425fea79716a8fb3af0d78e6b22ebbab3bd64d25063b42dc9f531c1e"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2019.symbol.d.ts",
+        "bytes": 967,
+        "sha256": "sha256:500934a8089c26d57ebdb688fc9757389bb6207a3c8f0674d68efa900d2abb34"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.bigint.d.ts",
+        "bytes": 38258,
+        "sha256": "sha256:bc21cc8b6fee4f4c2440d08035b7ea3c06b3511314c8bab6bef7a92de58a2593"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.d.ts",
+        "bytes": 1162,
+        "sha256": "sha256:f59d0650799f8782fd74cf73c19223730c6d1b9198671b1c5b3a38e1188b5953"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.date.d.ts",
+        "bytes": 2917,
+        "sha256": "sha256:7ca53d13d2957003abb47922a71866ba7cb2068f8d154877c596d63c359fed25"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:577cc49be1979782a5a695b46049566d123e2a75382f10bb82f2e5c87e29059a"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.intl.d.ts",
+        "bytes": 22399,
+        "sha256": "sha256:48915f327cd1dea4d7bd358d9dc7732f58f9e1626a29cc0c05c8c692419d9bb7"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.number.d.ts",
+        "bytes": 1548,
+        "sha256": "sha256:b7bf9377723203b5a6a4b920164df22d56a43f593269ba6ae1fdc97774b68855"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.promise.d.ts",
+        "bytes": 1764,
+        "sha256": "sha256:54725f8c4df3d900cb4dac84b64689ce29548da0b4e9b7c2de61d41c79293611"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.sharedmemory.d.ts",
+        "bytes": 5089,
+        "sha256": "sha256:e5594bc3076ac29e6c1ebda77939bc4c8833de72f654b6e376862c0473199323"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.string.d.ts",
+        "bytes": 2451,
+        "sha256": "sha256:2f3eb332c2d73e729f3364fcc0c2b375e72a121e8157d25a82d67a138c83a95c"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2020.symbol.wellknown.d.ts",
+        "bytes": 1566,
+        "sha256": "sha256:6f4427f9642ce8d500970e4e69d1397f64072ab73b97e476b4002a646ac743b1"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2021.d.ts",
+        "bytes": 997,
+        "sha256": "sha256:8a15b4607d9a499e2dbeed9ec0d3c0d7372c850b2d5f1fb259e8f6d41d468a84"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2021.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:e4a70ead7fea07d9abe520cc9e30c04ac035ebceaab28f9e67211610006c65de"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2021.intl.d.ts",
+        "bytes": 8206,
+        "sha256": "sha256:a917a49ac94cd26b754ab84e113369a75d1a47a710661d7cd25e961cc797065f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2021.promise.d.ts",
+        "bytes": 2223,
+        "sha256": "sha256:db9709688f82c9e5f65a119c64d835f906efe5f559d08b11642d56eb85b79357"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2021.string.d.ts",
+        "bytes": 1553,
+        "sha256": "sha256:4b25b8c874acd1a4cf8444c3617e037d444d19080ac9f634b405583fd10ce1f7"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2021.weakref.d.ts",
+        "bytes": 3132,
+        "sha256": "sha256:37be57d7c90cf1f8112ee2636a068d8fd181289f82b744160ec56a7dc158a9f5"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.array.d.ts",
+        "bytes": 4637,
+        "sha256": "sha256:6d3261badeb7843d157ef3e6f5d1427d0eeb0af0cf9df84a62cfd29fd47ac86e"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.d.ts",
+        "bytes": 1069,
+        "sha256": "sha256:26e0fe14baee4e127f4365d1ae0b276f400562e45e19e35fd2d4c296684715e6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.error.d.ts",
+        "bytes": 2340,
+        "sha256": "sha256:195daca651dde22f2167ac0d0a05e215308119a3100f5e6268e8317d05a92526"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:01a30f9e8582b369075c0808df71121e6855cb06fd8d3d39511d9ebb66405205"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.intl.d.ts",
+        "bytes": 7653,
+        "sha256": "sha256:8b11e4285cd2bb164a4dc09248bdec69e9842517db4ca47c1ba913011e44ff2f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.object.d.ts",
+        "bytes": 1046,
+        "sha256": "sha256:0508571a52475e245b02bc50fa1394065a0a3d05277fbf5120c3784b85651799"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.regexp.d.ts",
+        "bytes": 1304,
+        "sha256": "sha256:fc611fea8d30ea72c6bbfb599c9b4d393ce22e2f5bfef2172534781e7d138104"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2022.string.d.ts",
+        "bytes": 1116,
+        "sha256": "sha256:8f9af488f510c3015af3cc8c267a9e9d96c4dd38a1fdff0e11dc5a544711415b"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2023.array.d.ts",
+        "bytes": 40197,
+        "sha256": "sha256:0bd714129fca875f7d4c477a1a392200b0bcd13fb2e80928cd334b63830ea047"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2023.collection.d.ts",
+        "bytes": 861,
+        "sha256": "sha256:e2c9037ae6cd2c52d80ceef0b3c5ffdb488627d71529cf4f63776daf11161c9a"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2023.d.ts",
+        "bytes": 960,
+        "sha256": "sha256:1e9332c23e9a907175e0ffc6a49e236f97b48838cc8aec9ce7e4cec21e544b65"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2023.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:821bd6049b8f96b9d24c9fbc49b542dcf7a80d76f9efb330b5ef32c373af83d4"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2023.intl.d.ts",
+        "bytes": 2854,
+        "sha256": "sha256:135d5cf4d345f59f1a9caadfafcd858d3d9cc68290db616cc85797224448cccc"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.arraybuffer.d.ts",
+        "bytes": 2598,
+        "sha256": "sha256:bc238c3f81c2984751932b6aab223cd5b830e0ac6cad76389e5e9d2ffc03287d"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.collection.d.ts",
+        "bytes": 1185,
+        "sha256": "sha256:4a07f9b76d361f572620927e5735b77d6d2101c23cdd94383eb5b706e7b36357"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.d.ts",
+        "bytes": 1127,
+        "sha256": "sha256:3753fbc1113dc511214802a2342280a8b284ab9094f6420e7aa171e868679f91"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:b9f65879de79a7647ad2e5b8089277c215911fa99d4b858d78014df6ba2852f3"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.object.d.ts",
+        "bytes": 1220,
+        "sha256": "sha256:7c4e8dc6ab834cc6baa0227e030606d29e3e8449a9f67cdf5605ea5493c4db29"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.promise.d.ts",
+        "bytes": 1350,
+        "sha256": "sha256:de7ba0fd02e06cd9a5bd4ab441ed0e122735786e67dde1e849cced1cd8b46b78"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.regexp.d.ts",
+        "bytes": 1034,
+        "sha256": "sha256:6148e4e88d720a06855071c3db02069434142a8332cf9c182cda551adedf3156"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.sharedmemory.d.ts",
+        "bytes": 3038,
+        "sha256": "sha256:d63dba625b108316a40c95a4425f8d4294e0deeccfd6c7e59d819efa19e23409"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2024.string.d.ts",
+        "bytes": 1155,
+        "sha256": "sha256:0568d6befee03dd435bed4fc25c4e46865b24bdcb8c563fdc21f580a2c301904"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.collection.d.ts",
+        "bytes": 3839,
+        "sha256": "sha256:30d62269b05b584741f19a5369852d5d34895aa2ac4fd948956f886d15f9cc0d"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.d.ts",
+        "bytes": 1079,
+        "sha256": "sha256:999ca32883495a866aa5737fe1babc764a469e4cde6ee6b136a4b9ae68853e4b"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.float16.d.ts",
+        "bytes": 20489,
+        "sha256": "sha256:f128dae7c44d8f35ee42e0a437000a57c9f06cc04f8b4fb42eebf44954d53dc8"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:e03da518b01b46a4c99a1f88cd727ee98ddf14492c43dae1ae7a63e992971bab"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.intl.d.ts",
+        "bytes": 9390,
+        "sha256": "sha256:ffbe6d7b295306b2ba88030f65b74c107d8d99bdcf596ea99c62a02f606108b0"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.iterator.d.ts",
+        "bytes": 8637,
+        "sha256": "sha256:996fb27b15277369c68a4ba46ed138b4e9e839a02fb4ec756f7997629242fd9f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.promise.d.ts",
+        "bytes": 1619,
+        "sha256": "sha256:79b712591b270d4778c89706ca2cfc56ddb8c3f895840e477388f1710dc5eda9"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es2025.regexp.d.ts",
+        "bytes": 1255,
+        "sha256": "sha256:20884846cef428b992b9bd032e70a4ef88e349263f63aeddf04dda837a7dba26"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es5.d.ts",
+        "bytes": 218972,
+        "sha256": "sha256:bcd24271a113971ba9eb71ff8cb01bc6b0f872a85c23fdbe5d93065b375933cd"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.es6.d.ts",
+        "bytes": 993,
+        "sha256": "sha256:174a0fa01bb60bcb80e09b0b7bdcdddf688891433d6030244df5b44eb9ebd210"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.array.d.ts",
+        "bytes": 1752,
+        "sha256": "sha256:5fcab789c73a97cd43828ee3cc94a61264cf24d4c44472ce64ced0e0f148bdb2"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.collection.d.ts",
+        "bytes": 2598,
+        "sha256": "sha256:db59a81f070c1880ad645b2c0275022baa6a0c4f0acdc58d29d349c6efcf0903"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.d.ts",
+        "bytes": 1244,
+        "sha256": "sha256:17f13ecb98cbc39243f2eee1f16d45cd8ec4706b03ee314f1915f1a8b42f6984"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.date.d.ts",
+        "bytes": 917,
+        "sha256": "sha256:673294292640f5722b700e7d814e17aaf7d93f83a48a2c9b38f33cbc940ad8b0"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.decorators.d.ts",
+        "bytes": 1031,
+        "sha256": "sha256:d786b48f934cbca483b3c6d0a798cb43bbb4ada283e76fb22c28e53ae05b9e69"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.disposable.d.ts",
+        "bytes": 6767,
+        "sha256": "sha256:1ecb8e347cb6b2a8927c09b86263663289418df375f5e68e11a0ae683776978f"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.error.d.ts",
+        "bytes": 990,
+        "sha256": "sha256:142efd4ce210576f777dc34df121777be89eda476942d6d6663b03dcb53be3ff"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.full.d.ts",
+        "bytes": 1035,
+        "sha256": "sha256:ef4a897cd2a3f91000c10264e400b3667c7e51e1b7365f03b62e8081dc53bde6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.intl.d.ts",
+        "bytes": 5305,
+        "sha256": "sha256:379bc41580c2d774f82e828c70308f24a005b490c25ba34d679d84bcf05c3d9d"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.sharedmemory.d.ts",
+        "bytes": 1028,
+        "sha256": "sha256:ed484fb2aa8a1a23d0277056ec3336e0a0b52f9b8d6a961f338a642faf43235d"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.temporal.d.ts",
+        "bytes": 22011,
+        "sha256": "sha256:4ffedae1d1c2d53fdbca1c96d3c7dda544281f7d262f99b6880634f8fd8d9820"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.esnext.typedarrays.d.ts",
+        "bytes": 3350,
+        "sha256": "sha256:83a730b125d477dd264df8ba479afab27a3dae7152b005c214ab94dc7ee44fd3"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.scripthost.d.ts",
+        "bytes": 9412,
+        "sha256": "sha256:f13f4b465c99041e912db5c44129a94588e1aafee35a50eab51044833f50b4ee"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.webworker.asynciterable.d.ts",
+        "bytes": 933,
+        "sha256": "sha256:7f57fc4404ff020bc45b9c620aff2b40f700b95fe31164024c453a5e3c163c54"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.webworker.d.ts",
+        "bytes": 787076,
+        "sha256": "sha256:d52ed68e7eb5881768a55713c9b5c7c443e6b46de15c04e348928b8efd20b110"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.webworker.importscripts.d.ts",
+        "bytes": 1002,
+        "sha256": "sha256:2a2de5b9459b3fc44decd9ce6100b72f1b002ef523126c1d3d8b2a4a63d74d78"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/lib.webworker.iterable.d.ts",
+        "bytes": 933,
+        "sha256": "sha256:7f57fc4404ff020bc45b9c620aff2b40f700b95fe31164024c453a5e3c163c54"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/pl/diagnosticMessages.generated.json",
+        "bytes": 343981,
+        "sha256": "sha256:6b01538b70a7b5198df4fd73bad0b73b2dc677612840b1e57b689889d1af675c"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/pt-br/diagnosticMessages.generated.json",
+        "bytes": 332413,
+        "sha256": "sha256:bbe1683efe1d0fa34397a19d89685925f58fd2aa44078bdd35dc4d8431b23b54"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/ru/diagnosticMessages.generated.json",
+        "bytes": 444708,
+        "sha256": "sha256:6d74ebb94f11a576ad58c7b798f3fd5d56af31ae96e5f8faeb34560ddb7f76a6"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/tr/diagnosticMessages.generated.json",
+        "bytes": 332492,
+        "sha256": "sha256:cfad8d7530b1b75f4724bd3fa2aeadff2b7b981e5e7211b1eaa606506745c237"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/tsc.js",
+        "bytes": 267,
+        "sha256": "sha256:2cffde0b8c6760dfb0b5b0382bbb7e00ba6a8b2d981b9205b256a700a481d983"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/tsserver.js",
+        "bytes": 272,
+        "sha256": "sha256:e3ccfeec65ec5c470b8ffc5611878a31182650c7e8a062c38a719f83b523edcb"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/tsserverlibrary.d.ts",
+        "bytes": 866,
+        "sha256": "sha256:cee9e9bf9a8f67388ee878afd5e172189421bae6625076b774d68563d036fbfd"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/tsserverlibrary.js",
+        "bytes": 1013,
+        "sha256": "sha256:6a0b343fa3a3f53cf198c83a18035c104b6990b2a260272654f9a6b2f2380fdf"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/typesMap.json",
+        "bytes": 16788,
+        "sha256": "sha256:4143fb8b1c5d4421dfa19a4b80ddf2da375fc0835a349c3b18519fda5955e1d9"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/typescript.d.ts",
+        "bytes": 588452,
+        "sha256": "sha256:c967e03c8dbb4770f7e2f0b71b5d13593de679a41cc2b60266c4b69f1342a263"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/typescript.js",
+        "bytes": 9144216,
+        "sha256": "sha256:569177652966bd528c319171c7dd22860dbf72bde116cbc4f644f1d02bb12e39"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/typingsInstaller.js",
+        "bytes": 280,
+        "sha256": "sha256:2d48a038523ea7c626fa2796a30fa5fdc07612ea5fab83544423009d7683a213"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/watchGuard.js",
+        "bytes": 2314,
+        "sha256": "sha256:008f2ceb504ee9b8c5d47054d43033e1ec3f2fef03f18d8aa1b2dd70cba6fc88"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/zh-cn/diagnosticMessages.generated.json",
+        "bytes": 297608,
+        "sha256": "sha256:2c30286e82999f53b4dd4f563bbb720d787b79d5f34b8cb404c5ebbb1b858cb5"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/lib/zh-tw/diagnosticMessages.generated.json",
+        "bytes": 293400,
+        "sha256": "sha256:166a9c81707df25d337216b1a7d196b268f247430773b832259d3ae8b306bb65"
+      },
+      {
+        "path": "compiler-snapshot/toolchain/typescript/package.json",
+        "bytes": 3527,
+        "sha256": "sha256:9332e97c30d3e53ed54910b89207ed657fb444066484df6e5b6965bf130865e9"
+      },
+      {
+        "path": "compiler-snapshot/tsconfig.base.json",
+        "bytes": 852,
+        "sha256": "sha256:cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
+      },
+      {
+        "path": "compiler-snapshot/tsconfig.browser.json",
+        "bytes": 184,
+        "sha256": "sha256:5013f4cc15815f695582bfd56f3ba03150e31b78fdfb53362f7e21d8cf5642d3"
+      },
+      {
+        "path": "compiler-snapshot/tsconfig.react-web.json",
+        "bytes": 148,
+        "sha256": "sha256:4022c0c46b451a2783c0b8b612303981c65be843719fa19b8dda4f11754f3544"
+      },
+      {
+        "path": "package.json",
+        "bytes": 17930,
+        "sha256": "sha256:a98310f474a74c0c5fdd10d85ea2d8a0be1a2fe47d0bbdf39373f8284e3b52f5"
+      },
+      {
+        "path": "scripts/generate-reference-catalog-web-capability-artifact-proof.mjs",
+        "bytes": 1104,
+        "sha256": "sha256:a5853a7f521649abefac85e7416c732a1fcd887df5ff45e528c821a390654107"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "sha256:4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/reference-catalog-web-capability-artifact-proof.mjs",
+        "bytes": 63813,
+        "sha256": "sha256:25b942dfbcf720c452acd9123c33e446370895a158547bf9de16a6b65187a06c"
+      },
+      {
+        "path": "scripts/verify-reference-catalog-web-capability-artifact.mjs",
+        "bytes": 777,
+        "sha256": "sha256:bd389c19f5dbaaad5fb89db48c6119012622464d8226fe248948d9f03d168a4d"
+      },
+      {
+        "path": "tests/reference-catalog-web-capability-artifact.test.mjs",
+        "bytes": 18458,
+        "sha256": "sha256:5cef32e5a31a1254059cd903300e61991be589eb92bfdabdcdbff8f405309619"
+      }
+    ],
+    "rootScripts": [
+      "generate:reference-catalog-web-capability-artifact",
+      "verify:reference-catalog-web-capability-artifact",
+      "test:reference-catalog-web-capability-artifact"
+    ],
+    "packagePublication": {
+      "files": ["catalog.json", "dist"],
+      "exports": [
+        ".",
+        "./catalog.json",
+        "./components",
+        "./host-operations",
+        "./operations",
+        "./parity",
+        "./tokens"
+      ],
+      "export": "./catalog.json",
+      "target": "./catalog.json",
+      "executableLoader": false
+    }
+  },
+  "included": [
+    "one exact distinct reference Catalog identity",
+    "five real Web-React component contracts and one host-supplied signIn contract",
+    "two isolated byte-identical TypeScript builds",
+    "exhaustive dist inventory including declaration and source-map bytes",
+    "exact workspace-dist equality",
+    "deterministic package digest and immutable id/version/target/digest tuple",
+    "published Catalog self-digest projection and validation",
+    "per-artifact byte, path, and inventory mutation sensitivity"
+  ],
+  "deferred": [
+    "M05 executable React adapter registry and runtime materialization",
+    "M06 publication service and M07 distribution, retention, resolution, and activation",
+    "npm archive bytes, signatures, authenticity, and native target profiles"
+  ],
+  "limitations": [
+    "The digest preimage is the versioned Web-React profile, not an npm tarball.",
+    "SHA-256 establishes integrity, not publisher authenticity.",
+    "The published Catalog file is canonicalized by the profile; its presentation whitespace is separately pinned by this proof artifact.",
+    "No executable handler, adapter registry, network endpoint, or authorization decision is embedded in the Catalog."
+  ]
+}
