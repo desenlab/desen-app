@@ -4,7 +4,11 @@
   "commit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
   "tree": "cd7afa57888095718c4ee82b69b5b282980763c8",
   "intendedTag": "v0.1.0",
-  "tagVerified": false,
+  "tagVerified": true,
+  "tagObject": "5ce0e4ab93cbd8bb5009a7664fddc5449edd359e",
+  "releaseUrl": "https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0",
+  "releasePublishedAt": "2026-07-24T19:40:37Z",
+  "releaseKind": "working-draft-prerelease",
   "snapshotPath": "packages/protocol/upstream/0.1.0/snapshot",
   "snapshotFiles": 31,
   "snapshotBytes": 306604,
@@ -23,6 +27,6 @@
   "notes": [
     "The snapshot is an opaque archive of the complete upstream Git tree and must not be formatted or edited.",
     "The root quality gate verifies the pinned manifest, all bytes, the exact inventory, and executable modes on POSIX.",
-    "The missing upstream Git tag is tracked as PF-004."
+    "The annotated upstream v0.1.0 tag targets the pinned source commit and is published as a Working Draft pre-release; PF-004 records the completed release hygiene."
   ]
 }
