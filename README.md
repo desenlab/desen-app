@@ -8,13 +8,13 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **35 / 144 tasks complete (24%)**
+**Overall:** `██████░░░░░░░░░░░░░░░░░░░` **36 / 144 tasks complete (25%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
-**M03 in progress:** `████████░░` **8 / 10 tasks complete (80%)**
+**M03 in progress:** `█████████░` **9 / 10 tasks complete (90%)**
 
-**Proof gates:** **3 / 13 complete** · **Next:** `M03-T09`
+**Proof gates:** **3 / 13 complete** · **Next:** `M03-T10`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -97,6 +97,7 @@ packages/
 - [Reference Web form and feedback proof](docs/proof/REFERENCE-CATALOG-WEB-FORM-FEEDBACK.md)
 - [Reference token and synthetic fixture proof](docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md)
 - [Reference sign-in fixture and host-binding proof](docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md)
+- [Reference Web implementation-parity proof](docs/proof/REFERENCE-CATALOG-WEB-PARITY.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -211,6 +212,17 @@ tests, 10 compiler-negative cases, and 13 independent proof/mutation tests cover
 equality, successful-output schema validation, immutable/detached fixtures, missing outcomes,
 binding exclusion, exact exports, source boundaries, and deterministic evidence. P-10 advances
 only to `PARTIAL`; real reference-host execution remains M10-T04.
+
+M03-T09 now proves complete Catalog-to-implementation parity for the deliberately narrow sign-in
+reference slice: five exact official component entries and the explicitly delegated sign-in
+operation. Canonical frozen metadata covers every declared prop, slot, event, command, style part,
+visual state, real component export, and trusted component-side binding without carrying a module
+selector, React value, or host handler. The cumulative suite passes 26 package tests, 10
+compiler-negative cases, and 13 independent proof/mutation tests, including exact event and focus
+schemas, native accessibility semantics, hostile DOM-prop exclusion, same-identity authoring and
+production exports, public-subpath boundaries, and prerequisite drift. S-004 is `TESTED`; P-06 is
+only `PARTIAL`. Generic runtime bridging, resolved style application, Desen App, and the final
+immutable tuple remain later work.
 
 ## License
 

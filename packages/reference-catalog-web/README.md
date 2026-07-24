@@ -5,6 +5,40 @@
 Target-specific Web–React capability packaging, followed by the accessible real components and
 exact capability manifests shared by Desen App and the reference host.
 
+## Implementation parity metadata
+
+M03-T09 exposes the exact sign-in reference-slice contract at:
+
+```ts
+import { REFERENCE_WEB_IMPLEMENTATION_METADATA } from "@desen/reference-catalog-web/parity";
+```
+
+This recursively frozen value is inert JSON. It covers exactly the five implemented UI
+capabilities plus `com.example.auth/signIn`; its behavior and resource maps are deliberately
+empty. The frozen official Web Catalog also contains Map, Sortable, additional operations, and
+resources, so this package claims exact equality only for the selected entries. `PF-029` prevents
+the partial slice from impersonating the complete example Catalog.
+
+For every component, the metadata derives the exact prop, slot, event, command, style-part, and
+visual-state names from the registered manifest. It separately records trusted component-side
+bindings such as `default → children`, `change → onChange`, `press → onPress`, and
+`focus → ref.focus`. Those binding names are not DESEN props.
+
+The production and authoring roles name the same statically exported component and agree with
+`adapterFidelity: "same"`. Export names are audit labels, not module specifiers or a dynamic code
+loader. The metadata carries no React value, callback, handler, URL, selector, endpoint, SDK,
+database operation, credential, or authorization policy.
+
+Every declared style part has stable semantic documentation. `message`, `leadingIcon`, and `icon`
+are conditional because no empty placeholder content is fabricated when their trusted content is
+absent. M03-T09 does not apply resolved design styles or visual states; M05-T03 remains responsible
+for that adapter behavior and for proving that styling cannot suppress host-enforced accessibility.
+
+The parity evidence resolves the named exports through static imports and exercises the real
+component-side event, command, and accessibility primitives. It does not create a component lookup
+map, render-plan renderer, generic event bridge, command dispatcher, style applicator, or React
+adapter registry. Those runtime responsibilities remain in M04 and M05 under ADR 0007.
+
 ## Reference sign-in operation
 
 M03-T08 exposes the frozen DESEN 0.1.0 sign-in contract as inert data at:
@@ -185,8 +219,9 @@ The exact Alert contract uses `critical`. `PF-027` records that the abbreviated 
 package rejects that spelling rather than widening the frozen contract.
 
 All declared style parts remain present in the exact manifests. Applying resolved style-part
-values while preserving accessibility is intentionally deferred to M03-T09 and the M05 React
-adapter. The reference token contract changes no component prop or style-part schema.
+values while preserving accessibility is intentionally deferred to the M05 React adapter.
+M03-T09 documents parity metadata but does not apply styles. The reference token contract changes
+no component prop or style-part schema.
 
 ## Web–React package digest profile
 
@@ -247,12 +282,14 @@ an independent Node.js framing and SHA-256 oracle.
 Private proof-phase package. The deterministic Web–React package digest profile, the accessible
 Stack, Text, TextField, Button, and Alert capabilities, and the DTCG-backed reference Web token
 provider are implemented. The exact controlled sign-in fixtures and separately delegated trusted
-host binding are also implemented. Complete adapter parity and the final package tuple remain
-assigned to M03-T09, M03-T10, and M05.
+host binding are also implemented. Inert Catalog-to-implementation parity metadata and cumulative
+component-side contract tests are now implemented by M03-T09. The final immutable package tuple
+remains M03-T10, while executable React adapter registration remains M05.
 
-The M03-T07 evidence recorded that the controlled sign-in fixtures, complete adapter parity, and
-final package tuple remain assigned to M03-T08 through M03-T10 and M05. M03-T08 now completes only
-the first of those assignments.
+The M03-T07 planning baseline recorded that the controlled sign-in fixtures, complete adapter
+parity, and final package tuple remain assigned to M03-T08 through M03-T10 and M05. M03-T08 and
+M03-T09 have now completed the first two scoped slices without moving runtime registration out of
+M05.
 
 ## Protocol and target support
 
@@ -266,6 +303,7 @@ the first of those assignments.
 pnpm --filter @desen/reference-catalog-web typecheck
 pnpm --filter @desen/reference-catalog-web test:components
 pnpm --filter @desen/reference-catalog-web test:interactive-components
+pnpm --filter @desen/reference-catalog-web test:parity
 pnpm --filter @desen/reference-catalog-web test:package-digest-profile
 pnpm --filter @desen/reference-catalog-web test:sign-in-operation
 pnpm --filter @desen/reference-catalog-web test:tokens
@@ -275,6 +313,8 @@ pnpm verify:reference-catalog-web-form-feedback
 pnpm test:reference-catalog-web-form-feedback
 pnpm verify:reference-sign-in-fixtures-and-host-binding
 pnpm test:reference-sign-in-fixtures-and-host-binding
+pnpm verify:reference-catalog-web-parity
+pnpm test:reference-catalog-web-parity
 pnpm verify:web-react-package-digest
 pnpm test:web-react-package-digest
 pnpm check

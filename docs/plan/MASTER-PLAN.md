@@ -53,7 +53,9 @@ features required by the proof.
 Register components, behaviors, operations, and resources from manifest authority. Build the
 accessible Stack, Text, TextField, Button, and Alert components and controlled sign-in fixtures.
 
-**Gate G03:** One exact `web-react` catalog resolves real authoring and production adapters.
+**Gate G03:** One exact `web-react` reference slice resolves real component implementations,
+inert authoring/production parity metadata, and explicit delegated bindings in an immutable tuple.
+Executable React adapter registration remains M05 work.
 
 ### M04 — Framework-neutral runtime core
 

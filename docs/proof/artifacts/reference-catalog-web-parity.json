@@ -1,0 +1,519 @@
+{
+  "schemaVersion": 1,
+  "task": "M03-T09",
+  "result": "PASS",
+  "claim": {
+    "summary": "Five exact official component entries have complete inert parity metadata and real same-identity Web-React implementations; the exact sign-in operation is explicitly application-supplied.",
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "scope": "reference-sign-in-slice",
+    "normativeEffects": [
+      {
+        "id": "S-004",
+        "from": "PLANNED",
+        "to": "TESTED",
+        "note": "All five selected public component prop schemas remain closed."
+      }
+    ],
+    "normativeUnchanged": ["S-001", "N-030", "N-033", "N-034"],
+    "proofMatrixEffects": [
+      {
+        "id": "P-06",
+        "from": "NOT_PROVEN",
+        "to": "PARTIAL",
+        "note": "Authoring and production roles resolve to the same real component exports; the executable registry and Desen App remain later work."
+      }
+    ]
+  },
+  "prerequisite": {
+    "packageDigest": {
+      "task": "M03-T04",
+      "result": "PASS",
+      "artifactSha256": "e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716"
+    },
+    "signIn": {
+      "task": "M03-T08",
+      "result": "PASS",
+      "artifactSha256": "c3c74b620d4b4a05486d3307641d6946f5f5047e6dd421349614f0bfb4f56d16"
+    }
+  },
+  "catalogScope": {
+    "identity": "run.desen.reference.sign-in-parity-proof@0.1.0",
+    "officialCatalogRepublished": false,
+    "components": [
+      "com.example.ui/Alert",
+      "com.example.ui/Button",
+      "com.example.ui/Stack",
+      "com.example.ui/Text",
+      "com.example.ui/TextField"
+    ],
+    "behaviors": [],
+    "operations": ["com.example.auth/signIn"],
+    "resources": []
+  },
+  "parity": {
+    "components": [
+      {
+        "capabilityId": "com.example.ui/Alert",
+        "implementationExport": "Alert",
+        "adapterFidelity": "same",
+        "props": ["text", "tone"],
+        "slots": [],
+        "events": [],
+        "commands": [],
+        "styleParts": ["icon", "root", "text"],
+        "visualStates": [],
+        "accessibilityContract": "native-feedback-live-region"
+      },
+      {
+        "capabilityId": "com.example.ui/Button",
+        "implementationExport": "Button",
+        "adapterFidelity": "same",
+        "props": ["disabled", "label", "loading", "variant"],
+        "slots": [],
+        "events": ["press"],
+        "commands": [],
+        "styleParts": ["label", "leadingIcon", "root"],
+        "visualStates": ["hover", "focus", "pressed", "disabled", "loading"],
+        "accessibilityContract": "native-non-submit-action"
+      },
+      {
+        "capabilityId": "com.example.ui/Stack",
+        "implementationExport": "Stack",
+        "adapterFidelity": "same",
+        "props": ["align", "direction", "gap", "maxWidth"],
+        "slots": ["default"],
+        "events": [],
+        "commands": [],
+        "styleParts": ["root"],
+        "visualStates": [],
+        "accessibilityContract": "neutral-layout-reading-order"
+      },
+      {
+        "capabilityId": "com.example.ui/Text",
+        "implementationExport": "Text",
+        "adapterFidelity": "same",
+        "props": ["role", "text"],
+        "slots": [],
+        "events": [],
+        "commands": [],
+        "styleParts": ["text"],
+        "visualStates": [],
+        "accessibilityContract": "native-semantic-text"
+      },
+      {
+        "capabilityId": "com.example.ui/TextField",
+        "implementationExport": "TextField",
+        "adapterFidelity": "same",
+        "props": ["disabled", "invalid", "label", "placeholder", "secure", "value"],
+        "slots": [],
+        "events": ["change"],
+        "commands": ["focus"],
+        "styleParts": ["control", "label", "message", "root"],
+        "visualStates": ["focus", "disabled", "invalid"],
+        "accessibilityContract": "native-labelled-text-input"
+      }
+    ],
+    "operation": {
+      "capabilityId": "com.example.auth/signIn",
+      "binding": "application-supplied",
+      "bindingFactoryExport": "bindReferenceSignInHostOperation",
+      "publicErrors": ["invalidCredentials", "unavailable"]
+    }
+  },
+  "resolvedContracts": [
+    { "channel": "TextField.change", "positiveAccepted": true, "negativeVectorsRejected": 2 },
+    { "channel": "Button.press", "positiveAccepted": true, "negativeVectorsRejected": 1 },
+    { "channel": "TextField.focus", "positiveAccepted": true, "negativeVectorsRejected": 1 }
+  ],
+  "publicApi": {
+    "subpath": "@desen/reference-catalog-web/parity",
+    "runtimeExports": ["REFERENCE_WEB_IMPLEMENTATION_METADATA"],
+    "typeExports": [
+      "ReferenceWebAccessibilityContract",
+      "ReferenceWebComponentImplementationContract",
+      "ReferenceWebDeclaredComponentSurfaces",
+      "ReferenceWebImplementationMetadata",
+      "ReferenceWebOperationImplementationContract",
+      "ReferenceWebStylePartContract",
+      "ReferenceWebStylePartPresence",
+      "ReferenceWebTrustedComponentBindings"
+    ],
+    "packageRootLeak": false,
+    "sideEffects": false
+  },
+  "traceCoverage": {
+    "strongLocal": ["A-005", "C-017", "C-019", "R-006", "R-020", "R-066", "R-084", "R-086"],
+    "partialOrLater": [
+      "A-011",
+      "A-013",
+      "C-006",
+      "C-018",
+      "C-020",
+      "R-004",
+      "R-013",
+      "R-068",
+      "R-072",
+      "R-087",
+      "R-088",
+      "R-089",
+      "R-090",
+      "R-131"
+    ],
+    "ledgerMutated": false
+  },
+  "evidence": {
+    "provenance": { "mode": "tracked-defaults", "overrides": [] },
+    "officialInput": {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    "sourceAudit": [
+      {
+        "path": "packages/reference-catalog-web/src/parity/reference-web-implementation-metadata.ts",
+        "imports": [
+          "@desen/protocol",
+          "../components/contracts.js",
+          "../components/interactive-contracts.js",
+          "../operations/sign-in.js"
+        ],
+        "assignmentCounts": { "components[capabilityId] =": 1 },
+        "callCounts": {
+          "Array.isArray": 3,
+          "isRecord": 2,
+          "fail": 9,
+          "Object.freeze": 43,
+          "Object.keys(requireRecord(value, label)).sort": 1,
+          "Object.keys": 2,
+          "requireRecord": 3,
+          "value.some": 1,
+          "Object.keys(implemented).sort": 1,
+          "declared.some": 1,
+          "JSON.stringify": 2,
+          "canonicalNames": 5,
+          "assertExactNames": 4,
+          "declaredVisualStates": 1,
+          "Object.values": 1,
+          "deepFreeze": 2,
+          "JSON.parse": 1,
+          "canonicalizeJson": 1,
+          "Object.create": 1,
+          "Object.hasOwn": 1,
+          "componentSurfaces": 1,
+          "errors.some": 1,
+          "errors.map": 1,
+          "codes.some": 1,
+          "immutableMetadata": 1,
+          "buildComponentContracts": 1,
+          "signInPublicErrors": 1
+        },
+        "newExpressionCounts": { "TypeError": 1, "Set": 1 }
+      },
+      {
+        "path": "packages/reference-catalog-web/src/parity/index.ts",
+        "imports": [],
+        "assignmentCounts": {},
+        "callCounts": {},
+        "newExpressionCounts": {}
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/contracts.ts",
+        "imports": ["@desen/catalog-sdk", "@desen/catalog-sdk"],
+        "assignmentCounts": {},
+        "callCounts": { "registerComponent": 2 },
+        "newExpressionCounts": {}
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/interactive-contracts.ts",
+        "imports": ["@desen/catalog-sdk", "@desen/catalog-sdk"],
+        "assignmentCounts": {},
+        "callCounts": { "registerComponent": 3 },
+        "newExpressionCounts": {}
+      },
+      {
+        "path": "packages/reference-catalog-web/src/operations/sign-in.ts",
+        "imports": ["@desen/catalog-sdk", "@desen/catalog-sdk"],
+        "assignmentCounts": {},
+        "callCounts": { "registerOperation": 1 },
+        "newExpressionCounts": {}
+      }
+    ],
+    "claimDocuments": {
+      "proofScopeBoundaries": 8,
+      "normativeStatuses": [
+        { "id": "N-030", "status": "PLANNED" },
+        { "id": "N-033", "status": "PLANNED" },
+        { "id": "N-034", "status": "PLANNED" },
+        { "id": "S-001", "status": "PLANNED" },
+        { "id": "S-004", "status": "TESTED" }
+      ],
+      "proofMatrixStatuses": [{ "id": "P-06", "owner": "M03-T09", "status": "PARTIAL" }],
+      "proof": {
+        "path": "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
+        "bytes": 5943,
+        "sha256": "d63dcf19370b314cd3e0a868f67714c821b5367afc5ec391b953ed9bb54d9194"
+      },
+      "normativeCoverage": {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 30506,
+        "sha256": "6245c289a5028f63da73b65ece8ce32eec6d4793b347394aa3ebdaa33c7627d5"
+      }
+    },
+    "packageTests": {
+      "foundation": [
+        "registers exact closed public contracts as detached immutable data",
+        "renders Stack as a neutral flex container while preserving child order",
+        "keeps Stack defaults deterministic and does not invent spacing",
+        "maps Text roles to native non-interactive semantics",
+        "renders hostile markup-like text as inert escaped content"
+      ],
+      "interaction": [
+        "registers the three exact closed interaction contracts as immutable data",
+        "associates every visible TextField label with one unique native input",
+        "maps TextField invalid and disabled states without inventing error content",
+        "emits a fresh frozen exact TextField change payload and no DOM event",
+        "suppresses TextField change and focus bridges while disabled",
+        "exposes only the narrow frozen TextField focus command handle",
+        "emits fresh frozen empty Button press payloads from native activation",
+        "suppresses Button press while preserving focus during loading",
+        "maps every Button variant without creating toggle or submit semantics",
+        "uses polite status roles for ordinary Alert tones and alert only for critical",
+        "keeps TextField, Button, and Alert strings inert"
+      ],
+      "metadata": [
+        "publishes frozen executable-free metadata for only the exact sign-in reference slice",
+        "matches every selected official component and operation entry without claiming the full example Catalog",
+        "covers every declared component surface and only that surface",
+        "binds same-fidelity authoring and production roles to the same real component export",
+        "documents every style part as a semantic hook without inventing always-present content",
+        "records the exact explicitly delegated sign-in binding without carrying a handler"
+      ],
+      "contracts": [
+        "guarantees exact fresh frozen event payloads without native-event leakage",
+        "implements only the declared focus command through a narrow frozen handle",
+        "preserves cumulative native accessibility semantics and declared content order",
+        "keeps undeclared DOM, raw-HTML, and executable values outside component output"
+      ]
+    },
+    "rootTests": [
+      "accepts the tracked deterministic M03-T09 evidence",
+      "builds byte-identical injected evidence twice",
+      "rejects unsafe or unknown build options without invoking accessors",
+      "rejects stale and one-byte-tampered evidence",
+      "rejects missing mismatched and skipped prerequisites for tracked evidence",
+      "rejects missing extra wrong-category and renamed component surfaces",
+      "rejects authoring-production identity and operation-binding drift",
+      "rejects executable or loader-bearing parity metadata",
+      "rejects official registration and validator-contract drift",
+      "rejects public export and transitive source-boundary drift",
+      "rejects package-test type-negative trace and command-wiring drift",
+      "rejects tracked-artifact verification through a symlink alias",
+      "writes injected evidence atomically and detects temporary-byte tampering"
+    ],
+    "typeNegativeCases": [
+      "M03-T09-N01",
+      "M03-T09-N02",
+      "M03-T09-N03",
+      "M03-T09-N04",
+      "M03-T09-N05",
+      "M03-T09-N06",
+      "M03-T09-N07",
+      "M03-T09-N08",
+      "M03-T09-N09",
+      "M03-T09-N10"
+    ],
+    "trackedFiles": [
+      {
+        "path": "docs/adr/0007-inert-parity-metadata-before-runtime-registration.md",
+        "bytes": 2065,
+        "sha256": "f9ab31924b66b4e21c625153673b94304b54c698d40b03a2957bad982a00c0a3"
+      },
+      {
+        "path": "docs/architecture/ARCHITECTURE.md",
+        "bytes": 7059,
+        "sha256": "844fb8976705ec68821e637a5c6908ccc12b01b02071f29f17c267ce7adc92ef"
+      },
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 46765,
+        "sha256": "74689f6219828d02cbcb6a7712823c4234814a51682392442b259605d11c794c"
+      },
+      {
+        "path": "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
+        "bytes": 5943,
+        "sha256": "d63dcf19370b314cd3e0a868f67714c821b5367afc5ec391b953ed9bb54d9194"
+      },
+      {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 30506,
+        "sha256": "6245c289a5028f63da73b65ece8ce32eec6d4793b347394aa3ebdaa33c7627d5"
+      },
+      {
+        "path": "packages/reference-catalog-web/README.md",
+        "bytes": 16930,
+        "sha256": "fb01befd792c6114ca78ecd079f896aa74e5e798b8d30dabe3c79dd9a16a9a19"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 2194,
+        "sha256": "9e42a3254349ffd8ad6bf2235c72e543cfc582029f95789bc70390402d016f95"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/alert.tsx",
+        "bytes": 2180,
+        "sha256": "c751592848922182c32e956954673a93288ffed78d670dd7085f90397982110f"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/button.tsx",
+        "bytes": 2893,
+        "sha256": "074edb6e4b8ce9c357fba77636a3e419ee278bc19b41f27ccebeb019d6e7ea72"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/contracts.ts",
+        "bytes": 4962,
+        "sha256": "1266f0f732d9530070c50275ae5fe4c17b07cfa6dc57128a6bf1141f81b3f49f"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/index.ts",
+        "bytes": 1291,
+        "sha256": "7f2a9dd393425ed535b87297058ed39f608ea794915777e51911f6f4f3328e91"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/interactive-contracts.ts",
+        "bytes": 8462,
+        "sha256": "8587f8622075958634bb5f705d711142106a8abba0f9a45a860ef3a0b736e650"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/stack.tsx",
+        "bytes": 1827,
+        "sha256": "88b3cf3059253018e8865cbfa8e37b5c449b55d06430a9a046f4e1511b45f796"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text-field.tsx",
+        "bytes": 3747,
+        "sha256": "80e5d6713c96cfd7e867879aa3c6251f9f2a71b5cb48dc5460acdfecad989eb5"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text.tsx",
+        "bytes": 899,
+        "sha256": "c741c3ddba19d12120e793c9e93b19f3790e9ba93c7d579325a0d07e4cef8f17"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/host-operations/index.ts",
+        "bytes": 276,
+        "sha256": "82a89a269fa0ad583d9aba7e264266dd28c272d1aee9be0338d50a49cc03aaa1"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/host-operations/sign-in.ts",
+        "bytes": 2234,
+        "sha256": "5a6e70e4a249f39a0c84e0441c9f0c113e4f3d939ea9e70ebe374bd48d3fe86b"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/operations/index.ts",
+        "bytes": 373,
+        "sha256": "3df76e2b180472c5a22bf4a41d93f6ff62d7c20e99c88c74af63bcfb5826ef6a"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/operations/sign-in.ts",
+        "bytes": 3321,
+        "sha256": "5797ecc9a59ed8e103655fa3903786bbaf6ec0c5d7bb10605a54f7708d87f837"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/parity/index.ts",
+        "bytes": 605,
+        "sha256": "657d0d102252dd12acc05e8efc315d4ebca5267e186f0a32176b2a5023baa136"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/parity/reference-web-implementation-metadata.ts",
+        "bytes": 17237,
+        "sha256": "6b73ed15ded73fcbddd484a3145885854062361361c2f5879d8c44a531bec2e2"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/form-feedback-components-consumer.mjs",
+        "bytes": 382,
+        "sha256": "d4d6afbb2a49738b9114975bac9488daaebf6bd62400762a7927da80f31c9e14"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/foundation-components.test.tsx",
+        "bytes": 3780,
+        "sha256": "2664a6e5de2221164dbbf8f7230bb2db38350aecb4172ee3adaddedb22fcfb44"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/interactive-components.test.tsx",
+        "bytes": 10542,
+        "sha256": "da697e2be5210fe83d600c7fed48a28644f7383d1c4a09da7c0dbedcd7f27b07"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/parity-consumer.mjs",
+        "bytes": 66,
+        "sha256": "11afd05bbab435f1d5770f731f31dde2e0d7c44068273f3cd0b75ee12b854247"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/parity-contracts.test.tsx",
+        "bytes": 6466,
+        "sha256": "1e07a8912800cbd0880359332c14a66920003fafc89adc5d0e050f51c5727582"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/parity-metadata.test.ts",
+        "bytes": 8011,
+        "sha256": "fe7096f8a8d9849211ace52b454906783fb558976fc642e541a0ca354e797183"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/parity-metadata.types.ts",
+        "bytes": 2481,
+        "sha256": "8126f83ae4722cb7a65cf4ed6e06c06fc0fecf9df33c8c47983a4ac4e3082a84"
+      },
+      {
+        "path": "scripts/generate-reference-catalog-web-parity-proof.mjs",
+        "bytes": 829,
+        "sha256": "c43c53c918bb0e8cfd6e212a21d47533275605db4abc290710561ff69bc763c3"
+      },
+      {
+        "path": "scripts/verify-reference-catalog-web-parity.mjs",
+        "bytes": 667,
+        "sha256": "45574ff6ddf8213b59e5021813f44fa6c43c54a7bd6ad431579e72f81c87264c"
+      },
+      {
+        "path": "scripts/lib/reference-catalog-web-parity-proof.mjs",
+        "bytes": 70508,
+        "sha256": "ab3defafdee24f1545fdf5057667b1e27d06c2502561a096f7e5c0945b8d895c"
+      },
+      {
+        "path": "tests/reference-catalog-web-parity.test.mjs",
+        "bytes": 22360,
+        "sha256": "cac38fa4f27b86ac36c52ae616d07f5df8706461e1662588ad188befad1ddb04"
+      },
+      {
+        "path": "package.json",
+        "bytes": 16679,
+        "sha256": "50eafb4951effd0d625b3837b832b78d5146c3e8ebc9461f768bac5c8c6c4f67"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 111880,
+        "sha256": "47b550110d40dcd1cac097af3d24b7f23d0c99964c501f067e605063a6a13581"
+      }
+    ],
+    "commands": [
+      "generate:reference-catalog-web-parity",
+      "verify:reference-catalog-web-parity",
+      "test:reference-catalog-web-parity"
+    ]
+  },
+  "boundaries": [
+    "The proof covers an exact sign-in reference slice, not the complete frozen example Catalog.",
+    "Parity metadata is inert, recursively frozen JSON and contains no executable selection or host handler.",
+    "Event and command evidence is component-side plus schema validation; generic runtime bridging remains M04/M05.",
+    "Style parts are documented semantic hooks; resolved style application remains M05.",
+    "Accessibility evidence is a narrow cumulative Web component contract, not universal certification.",
+    "The final Catalog identity, real package inventory, digest, and immutable tuple remain M03-T10."
+  ],
+  "deferred": [
+    "M03-T10 final distinct Catalog, real build inventory, package digest, and exact tuple",
+    "M04 generic event lifecycle and operation orchestration",
+    "M05 executable React registry, render bridge, commands, and resolved styles",
+    "M09 Desen App editor and preview evidence",
+    "M12 cross-platform and repository-wide hardening"
+  ]
+}

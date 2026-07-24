@@ -25,7 +25,7 @@
     "task": "M03-T07",
     "result": "PASS",
     "verifiedBy": "verifyReferenceTokensAndSyntheticFixturesEvidence",
-    "artifactSha256": "cb0146bcec61bc3b64fe50f8d32c26d0bba91c46f0932000c8ad46385e2554be"
+    "artifactSha256": "d351b712a1cbc9aee9482f44f574dca233281ef26df31a4e08373b60120d57e6"
   },
   "operation": {
     "operationId": "com.example.auth/signIn",
@@ -233,8 +233,8 @@
     "trackedFiles": [
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 45351,
-        "sha256": "594fb8f0a7a0d38e984f4ffa32b4b6929d85329cf7bc615a2d3dcc0993c24541"
+        "bytes": 46765,
+        "sha256": "74689f6219828d02cbcb6a7712823c4234814a51682392442b259605d11c794c"
       },
       {
         "path": "docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md",
@@ -243,13 +243,13 @@
       },
       {
         "path": "packages/reference-catalog-web/README.md",
-        "bytes": 14442,
-        "sha256": "e4ad1ebb87f5f8678fb49a79e4cc6fd5af94d9cb38f82217c3d3d166a0c8282f"
+        "bytes": 16930,
+        "sha256": "fb01befd792c6114ca78ecd079f896aa74e5e798b8d30dabe3c79dd9a16a9a19"
       },
       {
         "path": "packages/reference-catalog-web/package.json",
-        "bytes": 1919,
-        "sha256": "90db8f65645c30924dfd2f9b8430f3e4fca0920e06fad8ffc62c1392d74ab6cf"
+        "bytes": 2194,
+        "sha256": "9e42a3254349ffd8ad6bf2235c72e543cfc582029f95789bc70390402d016f95"
       },
       {
         "path": "packages/reference-catalog-web/src/operations/sign-in.ts",
@@ -328,8 +328,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 15601,
-        "sha256": "10d4403cf0e4e4d3a9533050368a4a712768d202053c75ae3b754130a979320a"
+        "bytes": 16679,
+        "sha256": "50eafb4951effd0d625b3837b832b78d5146c3e8ebc9461f768bac5c8c6c4f67"
       },
       {
         "path": "pnpm-lock.yaml",

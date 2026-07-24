@@ -72,6 +72,14 @@ diagnostics. Official-manifest equality, success-output schema compatibility, im
 fixture projection, missing `unavailable`, absent static `pending`, subpath separation, and
 handler identity are deterministic evidence. `PF-028` records that pending is runtime lifecycle
 state. P-10 advances only to `PARTIAL`; real host execution remains M10-T04.
+M03-T09 now closes the selected sign-in slice's Catalog-to-implementation parity boundary without
+claiming the complete frozen example Catalog. Canonical recursively frozen metadata binds every
+declared prop, slot, event, command, style part, visual state, and accessibility policy to the same
+five real Web–React component exports for authoring and production. The sign-in operation remains
+explicitly application-supplied and carries no handler. Exact event and focus inputs pass their
+prepared Catalog schemas while closed-schema negatives fail. S-004 is now `TESTED`; P-06 advances
+only to `PARTIAL`. Resolved design styling, the generic runtime bridge, executable React registry,
+Desen App, separately built host, and final package tuple are not claimed.
 
 ## Current milestone
 
@@ -97,9 +105,10 @@ state. P-10 advances only to `PARTIAL`; real host execution remains M10-T04.
   `M03-T05 — Accessible Stack and Text capabilities`,
   `M03-T06 — Accessible TextField, Button, and Alert capabilities`,
   `M03-T07 — Reference tokens and synthetic fixture infrastructure`,
-  `M03-T08 — Sign-in fixtures and separate trusted host operation binding`
+  `M03-T08 — Sign-in fixtures and separate trusted host operation binding`,
+  `M03-T09 — Catalog/implementation parity and component-side contract tests`
 - Active task: None
-- Ready next task: `M03-T09 — Catalog/implementation parity and adapter contract tests`
+- Ready next task: `M03-T10 — Final immutable capability artifact and exact tuple`
 - Status: `DONE`
 
 ## Completed preparation
@@ -243,6 +252,17 @@ state. P-10 advances only to `PARTIAL`; real host execution remains M10-T04.
   snapshots carry no credential values or secrets; neither surface selects an endpoint, SDK,
   database, authorization policy, or executable code. P-10 is only `PARTIAL`; C-018, R-092, and
   R-100 have local partial evidence, while N-036 and N-040 remain `PLANNED`.
+- The reference implementation-parity slice passes 26 cumulative package tests, 10
+  compiler-negative cases, and 13 independent proof/mutation tests. It covers exactly the five
+  selected official component entries plus the explicitly delegated sign-in operation, while a
+  scope guard proves that Map, Sortable, additional operations, and resources are not being
+  claimed. Every declared prop, slot, event, command, style part, and visual state has exact
+  metadata; authoring and production roles resolve to the same real component identity. Exact
+  TextField change, Button press, and TextField focus values pass prepared Catalog schemas and
+  closed-schema negatives fail. The metadata is deeply frozen inert JSON with no module selector,
+  React value, endpoint, credential, or handler. Source and export audits prevent package-root
+  leakage and transitive selection of the executable component barrel. S-004 is `TESTED`; P-06 is
+  only `PARTIAL`, and N-030/N-033/N-034 remain `PLANNED` for their later runtime owners.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -260,9 +280,10 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete only `M03-T09`: add Catalog-to-implementation parity metadata and cumulative event
-payload, command, accessibility, and declared-public-contract tests without starting the runtime
-adapter registry assigned to M05.
+Complete only `M03-T10`: construct the final distinct reference Catalog and immutable capability
+artifact from real build outputs, then prove the exact `{id, version, target, packageDigest}` tuple
+is reproducible and changes for every byte, path, inventory, or Catalog mutation. Do not start the
+React adapter registry assigned to M05.
 
 M02-T02 evidence:
 
@@ -365,13 +386,19 @@ M03-T07 evidence:
 
 - `docs/proof/REFERENCE-TOKENS-AND-SYNTHETIC-FIXTURES.md`
 - `docs/proof/artifacts/reference-tokens-and-synthetic-fixtures.json`
-- artifact SHA-256: `cb0146bcec61bc3b64fe50f8d32c26d0bba91c46f0932000c8ad46385e2554be`
+- artifact SHA-256: `d351b712a1cbc9aee9482f44f574dca233281ef26df31a4e08373b60120d57e6`
 
 M03-T08 evidence:
 
 - `docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md`
 - `docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json`
-- artifact SHA-256: `d95271832b353d57fcd25d8dc5ca5ddd146e2031d3babbcdc427c7231860ad54`
+- artifact SHA-256: `c3c74b620d4b4a05486d3307641d6946f5f5047e6dd421349614f0bfb4f56d16`
+
+M03-T09 evidence:
+
+- `docs/proof/REFERENCE-CATALOG-WEB-PARITY.md`
+- `docs/proof/artifacts/reference-catalog-web-parity.json`
+- artifact SHA-256: `cb2bfc2ea4e19736d67173528098789febbbb8e86659c80c8450ba8da532817e`
 
 ## Status vocabulary
 

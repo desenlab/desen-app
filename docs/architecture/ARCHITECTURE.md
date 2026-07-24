@@ -56,9 +56,11 @@ plans into registered React components. This keeps protocol execution semantics 
 future native renderer.
 
 `catalog-sdk` owns only framework-neutral catalog documents, manifest builders, schema-derived
-types, and contract-parity checks. A target renderer owns executable adapter registration;
-`runtime-react` therefore owns React component adapter types and registries. A catalog package may
-depend on both, but React types never cross the `catalog-sdk` public boundary.
+types, and contract derivation. A target capability package may publish inert parity metadata, but
+a target renderer owns executable adapter registration; `runtime-react` therefore owns React
+component adapter types and registries. A catalog package may depend on both, but React types never
+cross the `catalog-sdk` public boundary. ADR 0007 records why parity metadata precedes, but never
+replaces, the M05 registry.
 
 ## Applications
 

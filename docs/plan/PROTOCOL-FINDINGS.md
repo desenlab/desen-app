@@ -619,3 +619,21 @@ This file records implementation discoveries without changing the frozen DESEN 0
   evidence must show that state while a controlled fixture or trusted host result is unresolved.
 - Future action: Clarify the implementation guide so “pending fixture coverage” means exercising
   runtime pending state during fixture-backed execution, not adding a third static fixture shape.
+
+## PF-029 — The M03 sign-in package is an exact Catalog slice, not the complete example Catalog
+
+- Status: OPEN
+- Blocks proof: No; the reference package can use a distinct Catalog identity and exact digest.
+- Protocol location: Frozen Web Catalog example; SPEC Sections 7.4, 8.5, 11.4, and 22.4
+- Observation: The frozen Web Catalog contains Map, Sortable, two additional operations, and two
+  resources besides the five UI components and sign-in operation implemented by M03. Reusing
+  `com.example.web-catalog@1.0.0` for only the sign-in capabilities would make a partial package
+  look like the complete example contract and would conflict with the example's pinned digest.
+- Implementation decision: M03-T09 proves exact entry-level equality only for Stack, Text,
+  TextField, Button, Alert, and `com.example.auth/signIn`. Its parity metadata identifies the scope
+  as `reference-sign-in-slice`, declares no behavior or resource, and contains no placeholder
+  implementation. M03-T10 must assign this slice a distinct reference Catalog identity, version,
+  and calculated digest before closing G03. Later controlled Source and Bundle fixtures must pin
+  that exact tuple rather than claiming the original example package.
+- Future action: Keep Map and Sortable in their M11 extension packages and document how multiple
+  exact catalogs compose without mutating or impersonating the frozen example Catalog.

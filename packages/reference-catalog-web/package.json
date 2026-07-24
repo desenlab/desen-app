@@ -26,6 +26,10 @@
       "types": "./dist/operations/index.d.ts",
       "import": "./dist/operations/index.js"
     },
+    "./parity": {
+      "types": "./dist/parity/index.d.ts",
+      "import": "./dist/parity/index.js"
+    },
     "./tokens": {
       "types": "./dist/tokens/index.d.ts",
       "import": "./dist/tokens/index.js"
@@ -38,6 +42,7 @@
     "test": "vitest run",
     "test:components": "vitest run test/foundation-components.test.tsx",
     "test:interactive-components": "vitest run test/interactive-components.test.tsx",
+    "test:parity": "vitest run test/foundation-components.test.tsx test/interactive-components.test.tsx test/parity-metadata.test.ts test/parity-contracts.test.tsx",
     "test:sign-in-operation": "vitest run test/sign-in-operation.test.ts",
     "test:package-digest-profile": "vitest run test/package-digest-profile.test.ts",
     "test:tokens": "vitest run test/reference-tokens.test.ts",
