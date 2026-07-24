@@ -43,14 +43,19 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Implementation decision: Add a schema-defined semantic `markers` property to the reference Web
   catalog and bind it to the store resource. This is a capability decision, not a core change.
 
-## PF-004 — Upstream repository has no `v0.1.0` Git tag
+## PF-004 — Upstream `v0.1.0` release provenance
 
-- Status: OPEN
+- Status: RESOLVED on 2026-07-24
 - Blocks proof: No; the exact commit is recorded.
-- Observation: Commit `b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca` is clean and published,
-  but no version tag exists locally as of 2026-07-21.
-- Implementation decision: Pin the commit and SHA256 manifest now. Create the upstream tag during
-  release preparation without modifying content.
+- Observation: When the implementation baseline was frozen on 2026-07-21, commit
+  `b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca` was clean and published but had no version tag.
+- Resolution: Annotated tag `v0.1.0`, tag object
+  `5ce0e4ab93cbd8bb5009a7664fddc5449edd359e`, now points to that exact commit. The public
+  [DESEN Protocol 0.1.0 release](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0)
+  is marked as a pre-release because the frozen specification remains a Working Draft. Tagging
+  changed no protocol, schema, example, conformance, or checksum byte.
+- Future action: Publish later protocol versions under new immutable tags and sibling baseline
+  directories instead of rewriting 0.1.0.
 
 ## PF-005 — Existing npm history predates the frozen protocol
 

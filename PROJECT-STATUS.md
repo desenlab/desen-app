@@ -351,10 +351,13 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
 
 ## Current blocker
 
-No technical blocker. The following release-hygiene item remains and does not block implementation:
+No technical or protocol-release blocker.
 
-- The upstream repository still lacks a `v0.1.0` Git tag, but the exact commit and checksum are
-  sufficient for deterministic local work. Tag creation remains release hygiene under `PF-004`.
+The frozen upstream baseline now has an annotated
+[`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
+pre-release targeting exact commit `b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca`. It remains
+explicitly labeled as a Working Draft, and the release operation changed no frozen protocol byte.
+`PF-004` records the completed release hygiene.
 
 ## Next task
 
