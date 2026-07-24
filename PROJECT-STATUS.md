@@ -4,8 +4,11 @@ Last updated: 2026-07-24
 
 ## Plain-language status
 
-Local implementation preparation is complete and the private GitHub repository is active at
-`desenlab/desen-app`. M02-T01 proved that the implementation consumes an exact, checksum-enforced
+Local implementation preparation is complete and the public development repository is active at
+`desenlab/desen-app`. Private vulnerability reporting, secret scanning, push protection, and
+dependency-vulnerability alerts are enabled. The repository is public for development visibility;
+this does not claim public-alpha or production readiness. M02-T01 proved that the implementation
+consumes an exact, checksum-enforced
 DESEN 0.1.0 input snapshot. M02-T02 then assigned all 269 reviewed prose entries and all 989
 machine-enumerated JSON Schema constraints to future implementation and test owners. M02-T03 now
 derives the Source, Bundle, and Catalog TypeScript roots deterministically from those frozen
@@ -138,8 +141,9 @@ status.
   `M04-T01 — Framework-neutral host ports`,
   `M04-T02 — Literal/reference/fallback resolver`
 - Active task: None
-- Ready next task: `M04-T03 — Token and deterministic string-format resolution`
-- Status: `DONE`
+- Ready operational task: `CI-01 — Secure single-pass CI orchestration`
+- Next implementation task: `M04-T03 — Token and deterministic string-format resolution`
+- Status: Awaiting explicit user authorization to start `CI-01`
 
 ## Completed preparation
 
@@ -149,7 +153,11 @@ status.
 - The workspace quality toolchain, exact lockfile, and package boundaries work locally.
 - The local baseline commit is authored and committed only as Selman Ay, and a temporary clean clone
   passes the locked install and full quality gate.
-- The private `desenlab/desen-app` remote is configured and its first `main` CI run passed.
+- The public `desenlab/desen-app` remote is configured. Its history and current tree passed a
+  public-release secret and attribution preflight, and its first `main` CI run passed.
+- GitHub private vulnerability reporting, secret scanning, secret push protection, and dependency
+  vulnerability alerts are enabled. Automated dependency-update pull requests remain disabled
+  until their trust and review policy is decided.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -346,10 +354,24 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Start `M04-T03 — Token and deterministic string-format resolution`. Consume the deferred token and
-format outcomes from M04-T02, resolve only through explicit trusted inputs, preserve the same
-bounded complete-outcome behavior, and keep the implementation independent of React, DOM, CSS,
-browser, and application code.
+After explicit user authorization, complete `CI-01 — Secure single-pass CI orchestration` before
+starting more runtime work. The current quality gate spends almost all of its time recursively
+replaying prerequisites: one measured hosted run spent 49 minutes 26 seconds in `pnpm check` and
+about 4 seconds installing dependencies. The expanded gate invokes 135 root scripts and 547 leaf
+processes; among the repeated work, one package typecheck runs 84 times, one package build runs 70
+times, and the validator build runs 42 times.
+
+`CI-01` must preserve every existing proof and negative check while executing shared prerequisites
+once in a deterministic topological order. It must add section timings, immutable action pins,
+safe cancellation of superseded runs, and public-fork trust boundaries. Proof artifacts, frozen
+snapshot integrity, mutation tests, negative tests, and architecture boundaries cannot pass from
+cache or path-based skipping. The first target is a 10–15 minute clean hosted run; a later,
+evidence-backed split may target 6–10 minutes. No CI implementation change has started yet.
+
+After `CI-01` passes, start `M04-T03 — Token and deterministic string-format resolution`. Consume
+the deferred token and format outcomes from M04-T02, resolve only through explicit trusted inputs,
+preserve the same bounded complete-outcome behavior, and keep the implementation independent of
+React, DOM, CSS, browser, and application code.
 
 M02-T02 evidence:
 

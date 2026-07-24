@@ -43,6 +43,24 @@ Each proof claim records:
 
 Screenshots and videos are explanatory artifacts, never the sole proof.
 
+## Public build log
+
+Every completed-task report includes channel-specific drafts for the DESEN public build log:
+
+- X is English, at most 280 characters, and optimized for a concise question-led conversation.
+- LinkedIn contains `[EN]` and `[TR]` in the same post; Turkish is adapted naturally rather than
+  translated mechanically.
+- The primary audience is UI/UX and product designers, while the language remains precise enough
+  for developers.
+- Every claim comes from passed task evidence. Unfinished product, production, interoperability,
+  and platform capabilities remain explicit limitations.
+- Each entry connects the technical result to a design-handoff or product consequence and invites
+  informed feedback.
+- Drafts are review artifacts and are never published automatically.
+
+`Day 1` is anchored to the public-repository date, 2026-07-24. Later numbers advance only with a
+user-confirmed public entry; merely drafting a post does not advance the sequence.
+
 ## Style
 
 - Lead with the outcome and intended reader.

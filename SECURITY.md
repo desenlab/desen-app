@@ -16,10 +16,12 @@ certification and must not yet be used to process production secrets or sensitiv
 
 ## Reporting
 
-Do not open a public issue for a suspected vulnerability. A private reporting channel is not yet
-operational, so this repository must not be presented as public-alpha ready. Before any public
-release, the owner must either enable GitHub private vulnerability reporting or publish and test a
-monitored security address. The chosen channel must be recorded in the release checklist.
+Do not open a public issue for a suspected vulnerability. Use GitHub's private vulnerability
+reporting flow from this repository's **Security** tab instead. Private vulnerability reporting was
+enabled on 2026-07-24.
+
+The existence of a reporting channel does not make this working draft public-alpha or
+production-ready. Release readiness still requires the later security audit and release checklist.
 
 ## Supported versions
 
