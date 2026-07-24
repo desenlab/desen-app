@@ -17,9 +17,16 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src --max-warnings=0",
+    "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:coverage": "vitest run --coverage --passWithNoTests"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:host-ports": "vitest run test/host-ports.test.ts"
+  },
+  "dependencies": {
+    "@desen/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
   }
 }

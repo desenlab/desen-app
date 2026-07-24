@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T01",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Trusted navigation, storage, operation, resource, token, context, environment, clock, and diagnostic callbacks cross one explicit framework-neutral host boundary.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisite": {
+    "task": "M03-T10",
+    "result": "PASS",
+    "artifact": "reference-catalog-web-capability-artifact.json",
+    "artifactSha256": "247e90b57b673a079da2ea95fe168637ee7f09f2681005746f7a9ab76721bb45"
+  },
+  "publicApi": {
+    "publicDeclarations": 31,
+    "tsdocDeclarations": 31,
+    "runtimeExports": ["createRuntimeHostPorts"],
+    "typeExports": [
+      "RuntimeActivationCommitRequest",
+      "RuntimeActivationCommitResult",
+      "RuntimeActivationReadResult",
+      "RuntimeActivationRecord",
+      "RuntimeAwaitable",
+      "RuntimeBundleStorageEntry",
+      "RuntimeBundleStoragePutResult",
+      "RuntimeBundleStorageReadResult",
+      "RuntimeClockPort",
+      "RuntimeContextPort",
+      "RuntimeDiagnosticsPort",
+      "RuntimeEnvironmentPort",
+      "RuntimeHostCallResult",
+      "RuntimeHostPorts",
+      "RuntimeJsonObject",
+      "RuntimeJsonPrimitive",
+      "RuntimeJsonValue",
+      "RuntimeNavigationPort",
+      "RuntimeNavigationRequest",
+      "RuntimeNavigationResult",
+      "RuntimeOperationEffect",
+      "RuntimeOperationPort",
+      "RuntimeOperationRequest",
+      "RuntimeRequestContext",
+      "RuntimeResourcePort",
+      "RuntimeResourceRequest",
+      "RuntimeStoragePort",
+      "RuntimeTokenPort",
+      "RuntimeTokenRequest",
+      "RuntimeTokenResolution"
+    ],
+    "allowedSourceImports": ["type-only @desen/protocol"]
+  },
+  "factory": {
+    "ports": 9,
+    "callbacks": 14,
+    "rejectedShapes": 6,
+    "eagerCalls": 0,
+    "callbackIdentityPreserved": true,
+    "callerObjectsFrozen": false
+  },
+  "ports": [
+    {
+      "name": "navigation",
+      "callbacks": ["navigate"],
+      "settlement": "synchronous succeeded | denied"
+    },
+    {
+      "name": "storage",
+      "callbacks": ["getBundle", "putBundle", "readActivation", "commitActivation"],
+      "settlement": "sync-or-promise immutable bytes and activation CAS"
+    },
+    {
+      "name": "operations",
+      "callbacks": ["invoke"],
+      "settlement": "sync-or-promise succeeded | failed(public code) | denied"
+    },
+    {
+      "name": "resources",
+      "callbacks": ["load"],
+      "settlement": "sync-or-promise succeeded | failed(public code) | denied"
+    },
+    { "name": "tokens", "callbacks": ["resolve"], "settlement": "synchronous resolved | missing" },
+    {
+      "name": "context",
+      "callbacks": ["getSnapshot", "subscribe"],
+      "settlement": "synchronous JSON snapshot plus invalidation"
+    },
+    {
+      "name": "environment",
+      "callbacks": ["getSnapshot", "subscribe"],
+      "settlement": "synchronous JSON snapshot plus invalidation"
+    },
+    { "name": "clock", "callbacks": ["now"], "settlement": "synchronous Unix-epoch milliseconds" },
+    {
+      "name": "diagnostics",
+      "callbacks": ["report"],
+      "settlement": "synchronous safe inert diagnostic observation"
+    }
+  ],
+  "environment": {
+    "reservedPaths": [
+      "env.viewport.width",
+      "env.viewport.height",
+      "env.viewport.orientation",
+      "env.pointer",
+      "env.colorScheme",
+      "env.reducedMotion",
+      "env.locale",
+      "env.platform"
+    ],
+    "valueTypes": "profile-defined; no protocol enums invented"
+  },
+  "policyBoundary": {
+    "operationAndResourceOutcomes": ["succeeded", "failed(public error code)", "denied"],
+    "navigationOutcomes": ["succeeded", "denied"],
+    "tokenOutcomes": ["resolved", "missing"],
+    "hostDenialCanBecomeSuccess": false,
+    "rawErrorsCrossBoundary": false,
+    "successfulValuesRequireLaterRuntimeValidation": true
+  },
+  "persistenceBoundary": {
+    "bundleBytes": "content-addressed and never overwritten under one revision",
+    "activationRecord": ["activeRevision", "previousGoodRevision", "generation"],
+    "activationCommit": "single-record compare-and-swap",
+    "userInputPersistence": false,
+    "designSelectedKeys": false
+  },
+  "portability": {
+    "sourceRuntimeDependencies": [],
+    "typeOnlyDependencies": ["@desen/protocol"],
+    "forbiddenPlatformsFound": [],
+    "jsonObservableData": true,
+    "byteStorageIsTransportOnly": true,
+    "a2uiDependencies": []
+  },
+  "evidence": {
+    "packageTests": 10,
+    "compilerNegativeCases": 9,
+    "rootMutationTests": 10,
+    "traceRules": [
+      {
+        "collection": "proseRules",
+        "id": "R-041",
+        "section": "14.2.2",
+        "owners": ["M04-T01", "M12-T04"],
+        "status": "CONTRACT_ONLY"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-046",
+        "section": "14.2.7",
+        "owners": ["M04-T01", "M04-T15"],
+        "status": "CONTRACT_ONLY"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-089",
+        "section": "22.1",
+        "owners": ["M03-T02", "M04-T01", "M04-T09"],
+        "status": "CONTRACT_ONLY"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-105",
+        "section": "24.5",
+        "owners": ["M04-T01", "M04-T10", "M05-T07"],
+        "status": "CONTRACT_ONLY"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-106",
+        "section": "24.6",
+        "owners": ["M04-T01", "M04-T09", "M04-T12"],
+        "status": "CONTRACT_ONLY"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-122",
+        "section": "27.7",
+        "owners": ["M04-T01", "M04-T08", "M04-T09", "M04-T10", "M04-T12"],
+        "status": "CONTRACT_ONLY"
+      },
+      {
+        "collection": "diagnostics",
+        "id": "D-026",
+        "section": "Appendix B",
+        "owners": ["M02-T05", "M04-T01", "M04-T09"],
+        "status": "CONTRACT_ONLY"
+      }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/host-ports.ts",
+        "bytes": 19247,
+        "sha256": "2ce99b5623ed9ce59b91b9642ad9b190e31b890e83bff2d46f4d437eb8cefe3e"
+      },
+      {
+        "path": "packages/runtime-core/src/index.ts",
+        "bytes": 1015,
+        "sha256": "489eeda3039049028c5c88417c4dc8044099652a9a67d40786882f55b04a7309"
+      },
+      {
+        "path": "packages/runtime-core/test/host-ports.test.ts",
+        "bytes": 9921,
+        "sha256": "f656605530aa21e2063e8db726aebc7835a6c7b20834eea78edfa1edf0528b44"
+      },
+      {
+        "path": "packages/runtime-core/test/host-ports.types.ts",
+        "bytes": 2855,
+        "sha256": "33e58b516067061d264eea29e359ba3c4eb01f3d81055a00e6a1711f6110f497"
+      },
+      {
+        "path": "packages/runtime-core/dist/host-ports.js",
+        "bytes": 3793,
+        "sha256": "219c24fb3c0d8e0176a21f3c368d0d426449b702594f63e4bd5640ad8ba1c0af"
+      },
+      {
+        "path": "packages/runtime-core/dist/host-ports.js.map",
+        "bytes": 3241,
+        "sha256": "0d1529145bb270b9e080c8864e3d6f13a772f8d6d3e9fa1eed0e75901aa92719"
+      },
+      {
+        "path": "packages/runtime-core/dist/host-ports.d.ts",
+        "bytes": 16186,
+        "sha256": "fb8ea82503317c2bc6592b128380b68cbbefceb0f44152d990f77e35394b7fbe"
+      },
+      {
+        "path": "packages/runtime-core/dist/host-ports.d.ts.map",
+        "bytes": 6073,
+        "sha256": "a2f32ab22cb81e53e244e2bc531d6c4f8af21978888cdca1b259ff98ab15d031"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.js",
+        "bytes": 239,
+        "sha256": "752e303602ce793bb90108b3f5d58fdc71c6deb04181a904ea0adc110ebab236"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.js.map",
+        "bytes": 158,
+        "sha256": "914c45f3834c83cc79ffe48e2d641fc7b268e2dbf71ca51839318f4906cd8f67"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.d.ts",
+        "bytes": 988,
+        "sha256": "4c444fe02b5192e5ac8e636bdae6c90227636db4bb89964f01a193bc2123f023"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.d.ts.map",
+        "bytes": 583,
+        "sha256": "da31dd963612789a7fdb12fc9a934c483f43af28681843be90954e7551585989"
+      },
+      {
+        "path": "scripts/lib/runtime-core-host-ports-proof.mjs",
+        "bytes": 35062,
+        "sha256": "58cdab33d00e58132b319f1a8f899aedbbd2c61b1ecb1f12a40a991e0bd759ae"
+      },
+      {
+        "path": "scripts/generate-runtime-core-host-ports-proof.mjs",
+        "bytes": 801,
+        "sha256": "a3777e0a9e04af2f06b9045e1853d357eaf8d0efc4702a651d5434fa8495f954"
+      },
+      {
+        "path": "scripts/verify-runtime-core-host-ports.mjs",
+        "bytes": 642,
+        "sha256": "657e6a8537efa8e7cd65224f6682e84c4005403648dd7589d262dc957f82dd3b"
+      },
+      {
+        "path": "tests/runtime-core-host-ports.test.mjs",
+        "bytes": 11821,
+        "sha256": "e601dbf9e394dad3c598e9b1a66fbffc8d4e2a6ccd5557d7e8898b646a9f61a1"
+      }
+    ],
+    "rootScripts": [
+      "generate:runtime-core-host-ports",
+      "verify:runtime-core-host-ports",
+      "test:runtime-core-host-ports"
+    ]
+  },
+  "deferred": [
+    "reference, fallback, and value resolution (M04-T02)",
+    "token value validation and formatting (M04-T03)",
+    "resource lifecycle and refresh (M04-T08)",
+    "operation lifecycle, concurrency, and settlement (M04-T09/M04-T11)",
+    "navigation execution and denial diagnostics (M04-T10/M04-T16)",
+    "allowlisted event, command, and generic adapter bridges (M04-T12/M04-T14)",
+    "diagnostic sink exception containment in runtime transitions (later M04 execution tasks)",
+    "storage implementations, activation, fault injection, and restart recovery (M07)",
+    "React, browser, iOS, and Android adapters"
+  ]
+}

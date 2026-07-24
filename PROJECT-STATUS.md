@@ -93,7 +93,15 @@ DESEN remains independent from A2UI 0.9.1, while a proof-only fail-closed Stack/
 one exact JSON structural field round-trip without adding a runtime dependency or public API.
 Renderer and accessibility semantics remain explicit non-claims. The reference Web token document
 is now classified against stable DTCG 2025.10 as a compatible closed profile, not a complete parser
-or resolver. No `P-*` status, task count, or proof-gate count changes.
+or resolver. No `P-*` status, task count, or proof-gate count changes. M04-T01 now defines the
+first framework-neutral runtime integration slice: nine exact ports and fourteen stable callbacks
+for navigation, immutable Bundle/activation storage, operations, resources, tokens, context,
+environment, clock, and diagnostics. Its controlled envelopes keep success, declared public
+failure, policy denial, resolved values, and missing values distinct. Exact source, distribution,
+package-entry, TSDoc, platform, callback-receiver, test-registration, prerequisite, and atomic-write
+evidence passes without claiming resolution, lifecycle, action execution, storage behavior, or
+adapter implementation. This reference API records `PF-031`; it does not change frozen protocol,
+Proof Matrix, normative-coverage, or proof-gate status.
 
 ## Current milestone
 
@@ -121,9 +129,10 @@ or resolver. No `P-*` status, task count, or proof-gate count changes.
   `M03-T07 — Reference tokens and synthetic fixture infrastructure`,
   `M03-T08 — Sign-in fixtures and separate trusted host operation binding`,
   `M03-T09 — Catalog/implementation parity and component-side contract tests`,
-  `M03-T10 — Final immutable capability artifact and exact tuple`
-- Active task: None; SC-01 is closed
-- Ready next task: `M04-T01 — Host ports`
+  `M03-T10 — Final immutable capability artifact and exact tuple`,
+  `M04-T01 — Framework-neutral host ports`
+- Active task: None
+- Ready next task: `M04-T02 — Literal/reference/fallback resolver`
 - Status: `DONE`
 
 ## Completed preparation
@@ -298,6 +307,14 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   valid-but-unsupported fixtures, and seven exact negative fixtures. Renderer semantics remain
   outside the bridge claim. Both receipts are deterministic and fail closed. No frozen protocol
   byte, production package boundary, public API, `P-*` status, counted task, or proof gate changes.
+- The M04-T01 host boundary passes 10 focused package tests, 9 compiler-negative cases, and 10
+  independent proof/mutation tests. Nine exact ports capture 14 receiver-independent callbacks
+  without eager execution or caller mutation. The evidence protects one runtime export, 30 public
+  types, all 31 TSDoc declarations, exact source/distribution/package entry points, JSON-only
+  observable data, policy-denial separation, immutable Bundle/CAS activation storage contracts,
+  platform/evaluation exclusions, direct test registration, 7 trace responsibilities, 16 tracked
+  files, prerequisite integrity, and safe atomic writes. M04-T02–M04-T16 and M07 retain behavior
+  and implementation ownership; no `P-*`, `N-*`, `S-*`, or proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -315,9 +332,10 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Start `M04-T01 — Host ports for navigation, storage, operations, resources, tokens, environment,
-clock, and diagnostics`. Keep these ports framework-neutral and document every public export with
-TSDoc. Do not import React, DOM, CSS, browser, or application dependencies into `runtime-core`.
+Start `M04-T02 — Literal/reference/fallback resolver for state, context, resource, operation,
+event, item, and env`. Resolve only against explicit immutable runtime snapshots, preserve the
+protocol's missing-versus-null and fallback rules, validate hostile dynamic JSON at runtime, and
+keep the implementation independent of React, DOM, CSS, browser, and application code.
 
 M02-T02 evidence:
 
@@ -426,13 +444,13 @@ M03-T08 evidence:
 
 - `docs/proof/REFERENCE-SIGN-IN-FIXTURES-AND-HOST-BINDING.md`
 - `docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json`
-- artifact SHA-256: `015ab201c65bec347efbff247b8720ddfdc1c7c027b133994a9f4322f8642b1c`
+- artifact SHA-256: `cf52d3999313c5003b659de267bf8e84d8b9b08d45957c7f51d82583e45163ce`
 
 M03-T09 evidence:
 
 - `docs/proof/REFERENCE-CATALOG-WEB-PARITY.md`
 - `docs/proof/artifacts/reference-catalog-web-parity.json`
-- artifact SHA-256: `f26cb14eea6863b36892a365e72ff92063442424773e4b3c5efb1e5717b8b385`
+- artifact SHA-256: `0cdf47acc951fb586d96fcf2a1005a04e3ac2ab0498bcf90eee399e8b22106ab`
 
 M03-T10 and G03 evidence:
 
@@ -442,7 +460,7 @@ M03-T10 and G03 evidence:
 - exact tuple:
   `run.desen.reference.sign-in@0.1.0 / web-react / sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
 - Catalog SHA-256: `3113e299e0bec65f19b823a712378592a57806116b1eadd902c0390906772279`
-- artifact SHA-256: `29dfe30d980efbbcce49e6305cd54a1159dc61d73584e20b44ecaefaadd4b05e`
+- artifact SHA-256: `247e90b57b673a079da2ea95fe168637ee7f09f2681005746f7a9ab76721bb45`
 - exhaustive target inventory: 76 files, 224,069 bytes, 236 mutation vectors
 
 SC-01 evidence:
@@ -463,6 +481,16 @@ SC-01 evidence:
 - DTCG executable result: 16 focused tests, 26 tokens, 14 unsupported feature families, 16 exact
   valid-but-unsupported fixtures, and seven exact negative fixtures
 - recommendation: `continue`; no `P-*` status, counted task, or proof-gate change
+
+M04-T01 evidence:
+
+- `docs/proof/RUNTIME-CORE-HOST-PORTS.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-host-ports.json`
+- artifact SHA-256: `ae53ba726dc2a0657e46ce7c4187211f0349d78f352d6bd4cb67feb1a0ac472f`
+- exact boundary: 9 ports, 14 callbacks, 1 runtime export, 30 type exports, and 31/31 public
+  declarations with TSDoc
+- executable evidence: 10 package tests, 9 compiler-negative cases, 10 root proof/mutation tests,
+  7 contract-only trace assignments, and 16 byte-tracked files
 
 ## Status vocabulary
 

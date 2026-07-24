@@ -34,7 +34,7 @@
     "signIn": {
       "task": "M03-T08",
       "result": "PASS",
-      "artifactSha256": "015ab201c65bec347efbff247b8720ddfdc1c7c027b133994a9f4322f8642b1c"
+      "artifactSha256": "cf52d3999313c5003b659de267bf8e84d8b9b08d45957c7f51d82583e45163ce"
     }
   },
   "catalogScope": {
@@ -256,8 +256,8 @@
       },
       "normativeCoverage": {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 30506,
-        "sha256": "5518b665bbbf2031ed649e9923af0846cf422bba3a19e01c3c6c2892d9a42640"
+        "bytes": 30812,
+        "sha256": "1089d85cb35f54a26e1799ee967dce96a4c0b5d5eac09d5a9c45773301462bc6"
       }
     },
     "packageTests": {
@@ -336,8 +336,8 @@
       },
       {
         "path": "docs/plan/PROTOCOL-FINDINGS.md",
-        "bytes": 48201,
-        "sha256": "5b8f6a5cae38fc8fbae57f74bc0e90408a0ba1f8aa5d3b4134957d2fc241858e"
+        "bytes": 51128,
+        "sha256": "7a315b516bfd3e7310b68756bf6313e531d554e1696f39d84c806b58a83759a5"
       },
       {
         "path": "docs/proof/REFERENCE-CATALOG-WEB-PARITY.md",
@@ -346,8 +346,8 @@
       },
       {
         "path": "docs/proof/NORMATIVE-COVERAGE.md",
-        "bytes": 30506,
-        "sha256": "5518b665bbbf2031ed649e9923af0846cf422bba3a19e01c3c6c2892d9a42640"
+        "bytes": 30812,
+        "sha256": "1089d85cb35f54a26e1799ee967dce96a4c0b5d5eac09d5a9c45773301462bc6"
       },
       {
         "path": "packages/reference-catalog-web/README.md",
@@ -486,13 +486,13 @@
       },
       {
         "path": "package.json",
-        "bytes": 18733,
-        "sha256": "82aafa7997c0784e35d04f00bd21c70f620465242238ddbe0dea07799ca29acc"
+        "bytes": 19696,
+        "sha256": "a14014681739a639e831b643b0ad00bda8b374bd689dd2a9d44f1f039950174b"
       },
       {
         "path": "pnpm-lock.yaml",
-        "bytes": 111880,
-        "sha256": "47b550110d40dcd1cac097af3d24b7f23d0c99964c501f067e605063a6a13581"
+        "bytes": 112166,
+        "sha256": "af76727914bd45b50cf90f393b847b83ecf0a1ff1193c4f6f8680918fca5710b"
       }
     ],
     "commands": [

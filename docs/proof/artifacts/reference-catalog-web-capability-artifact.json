@@ -497,7 +497,7 @@
   "prerequisite": {
     "task": "M03-T09",
     "result": "PASS",
-    "artifactSha256": "f26cb14eea6863b36892a365e72ff92063442424773e4b3c5efb1e5717b8b385"
+    "artifactSha256": "0cdf47acc951fb586d96fcf2a1005a04e3ac2ab0498bcf90eee399e8b22106ab"
   },
   "evidence": {
     "provenance": { "mode": "tracked-defaults", "overrides": [] },
@@ -1923,8 +1923,8 @@
       },
       {
         "path": "package.json",
-        "bytes": 18733,
-        "sha256": "sha256:82aafa7997c0784e35d04f00bd21c70f620465242238ddbe0dea07799ca29acc"
+        "bytes": 19696,
+        "sha256": "sha256:a14014681739a639e831b643b0ad00bda8b374bd689dd2a9d44f1f039950174b"
       },
       {
         "path": "scripts/generate-reference-catalog-web-capability-artifact-proof.mjs",

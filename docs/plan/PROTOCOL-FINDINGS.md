@@ -657,3 +657,39 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Future action: Before public npm release, M12 must define and test the actual packed-file
   inventory, dependency and integrity policy, provenance/signature model, and archive
   reproducibility expectations without changing the meaning of this existing tuple.
+
+## PF-031 — Host-port transport and persistence envelopes are implementation profiles
+
+- Status: OPEN
+- Blocks proof: No; a narrow fail-closed reference profile keeps the transport outside frozen
+  document semantics.
+- Protocol location: SPEC Sections 14.2.2, 14.2.7, 14.4, 20.3–20.5, 22, 24.1, 24.3, 24.5–24.6,
+  27.6–27.7, and 28.2–28.3; Appendix B
+- Observation: DESEN 0.1.0 assigns context, environment, navigation, token, operation, resource,
+  authorization, diagnostics, immutable Bundle storage, and activation responsibilities to the
+  host, but it does not define a TypeScript port API or an external settlement transport. Context
+  schema/update policy and navigation-parameter lifecycle are explicitly profile-defined;
+  environment paths have no normative value types; clock and scheduling semantics are absent;
+  navigation/resource denial have no dedicated core diagnostics; and the repository's activation
+  generation guard is not a frozen Bundle field. `PF-006`, `PF-020`, `PF-022`, and `PF-023` retain
+  the related diagnostic, lifecycle, detached-value, and identifier ambiguities.
+- Implementation decision: M04-T01 defines a platform-neutral reference API, not new protocol
+  semantics. Operations and resources return only candidate success JSON, a candidate declared
+  public error code, or policy denial; thrown/rejected implementations remain adapter failures.
+  Navigation makes a synchronous accept/deny decision only after the runtime verifies a local
+  active-Bundle target. Token, context, environment, clock, and diagnostic ports remain
+  synchronous at their read/report boundaries. Token lookup distinguishes missing from resolved
+  JSON `null`; context and environment expose atomic snapshots plus invalidation callbacks without
+  inventing environment enums. Storage accepts only content-addressed immutable Bundle bytes and
+  one atomic `{activeRevision, previousGoodRevision, generation}` compare-and-swap record, never
+  arbitrary design-selected keys or user-input state. The host callback factory captures own data
+  properties without invoking them; adapters therefore supply receiver-independent or pre-bound
+  callables under an explicit `this: void` contract. The exact M04-T01 aggregate covers this
+  integration slice only: allowlisted `event.emit`, component commands, and their generic bridges
+  remain assigned to M04-T12/M04-T14 and require an intentional host-contract revision instead of
+  an untracked extra port. Later tasks must detach and validate every request and settlement at
+  runtime because TypeScript is not a trust boundary.
+- Future action: A later versioned runtime/host profile should standardize transport cancellation,
+  technical failures, resource/navigation denial diagnostics, environment value types, clock and
+  cache semantics, diagnostic ordering, and activation persistence independently of the frozen
+  Source/Bundle/Catalog schemas.
