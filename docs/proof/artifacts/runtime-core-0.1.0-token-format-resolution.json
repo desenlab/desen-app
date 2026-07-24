@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T03",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Host-provided target tokens and closed deterministic string formats materialize as bounded complete outcomes without expression evaluation or partial values.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisite": {
+    "task": "M04-T02",
+    "result": "PASS",
+    "artifact": "runtime-core-0.1.0-value-resolution.json",
+    "artifactSha256": "73e4c3d7640eaefd0b45b04b006df3211f0338fafa77293414d43c1052536fea"
+  },
+  "publicApi": {
+    "publicDeclarations": 5,
+    "tsdocDeclarations": 5,
+    "runtimeExports": ["materializeRuntimeValue"],
+    "typeExports": [
+      "RuntimeTokenProviderFailure",
+      "RuntimeTokenUnresolved",
+      "RuntimeValueMaterialization",
+      "RuntimeValueMaterializationContext"
+    ],
+    "allowedSourceImports": [
+      {
+        "module": "@desen/protocol",
+        "typeOnly": false,
+        "names": ["appendJsonPointer", "canonicalizeJson", "createJsonPointer"]
+      },
+      {
+        "module": "./value-resolution.js",
+        "typeOnly": false,
+        "names": ["RUNTIME_VALUE_SAFETY_LIMITS", "resolveRuntimeValue"]
+      },
+      {
+        "module": "@desen/protocol",
+        "typeOnly": true,
+        "names": ["JsonPointer"]
+      },
+      {
+        "module": "./host-ports.js",
+        "typeOnly": true,
+        "names": [
+          "RuntimeJsonPrimitive",
+          "RuntimeJsonValue",
+          "RuntimeRequestContext",
+          "RuntimeTokenPort"
+        ]
+      },
+      {
+        "module": "./value-resolution.js",
+        "typeOnly": true,
+        "names": [
+          "RuntimeResolutionSnapshot",
+          "RuntimeValueInvalid",
+          "RuntimeValueResolved",
+          "RuntimeValueSpec",
+          "RuntimeValueUnresolved"
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "tokenProbes": 7,
+    "formatProbes": 8,
+    "safetyProbes": 4,
+    "uniqueTokenLookupsInCacheProbe": 1,
+    "topLevelCacheIsolation": true,
+    "missingDistinctFromNull": true,
+    "providerFailureRedacted": true,
+    "resolvedTokenDataInert": true,
+    "rawStringsUnchanged": true,
+    "nonStringsUseCanonicalJson": true,
+    "nestedMaterialization": true,
+    "partialValues": false,
+    "amplifiedOutputRejected": true,
+    "invalidContextCallbacks": 0
+  },
+  "tokenSemantics": {
+    "storageOwnedByDesen": false,
+    "providerPort": "RuntimeTokenPort",
+    "requestContext": ["documentId", "revision", "surfaceId", "requestId"],
+    "cacheScope": "one top-level materialization",
+    "missingCode": "REFERENCE_UNRESOLVED",
+    "resolvedNullIsSuccess": true,
+    "providerFailureCode": "ADAPTER_FAILURE",
+    "providerFailureRedacted": true,
+    "resolvedDataSecondPassEvaluation": false,
+    "receivingSchemaValidation": "M05"
+  },
+  "formatSemantics": {
+    "parser": "single-pass ASCII placeholder scanner",
+    "placeholderPattern": "[A-Za-z_][A-Za-z0-9_]*",
+    "repeatedPlaceholders": true,
+    "exactOwnValueKeySet": true,
+    "escaping": false,
+    "expressions": false,
+    "localeInference": false,
+    "rawStringPolicy": "insert unchanged",
+    "otherJsonPolicy": "RFC 8785 canonical JSON",
+    "output": "string"
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "a2uiDependencies": []
+  },
+  "evidence": {
+    "packageTests": 7,
+    "compilerNegativeCases": 7,
+    "rootMutationTests": 13,
+    "traceRules": [
+      {
+        "collection": "proseRules",
+        "id": "R-048",
+        "section": "14.4",
+        "owners": ["M03-T07", "M04-T03"],
+        "status": "RUNTIME_PRIMITIVE_TARGET_VALIDATION_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-049",
+        "section": "14.5",
+        "owners": ["M02-T10", "M04-T03", "M12-T03"],
+        "status": "RUNTIME_PRIMITIVE_SECURITY_AUDIT_DEFERRED"
+      }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/token-format-resolution.ts",
+        "bytes": 33730,
+        "sha256": "771e6708b2d600af83f6a11322fd4ef3af18c593c8269fcfee6ca4b804f9bd6e"
+      },
+      {
+        "path": "packages/runtime-core/test/token-format-resolution.test.ts",
+        "bytes": 20764,
+        "sha256": "6e192f49b9de7047bbdd933b12949a42e0002d1c411686c7aa317eb9afb8e2e1"
+      },
+      {
+        "path": "packages/runtime-core/test/token-format-resolution.types.ts",
+        "bytes": 2886,
+        "sha256": "2f1ff33d9963d756328411507e130a7a0888de87457a6bfa9aff81dfdd576e24"
+      },
+      {
+        "path": "packages/runtime-core/dist/token-format-resolution.js",
+        "bytes": 28825,
+        "sha256": "8c442aa642c95fe41ef9de956c012309ecc710b815ed6eba24c74e42ce4403e4"
+      },
+      {
+        "path": "packages/runtime-core/dist/token-format-resolution.js.map",
+        "bytes": 26185,
+        "sha256": "17c643f3bfeec136b959394a1b9d2c08412ac2c5c99dd491a6f2a817ae1c62ab"
+      },
+      {
+        "path": "packages/runtime-core/dist/token-format-resolution.d.ts",
+        "bytes": 3932,
+        "sha256": "28c4dcb2dfe0a8b94b6f6988c9c45ea80376d0c28189abe8fac1e17bf26222da"
+      },
+      {
+        "path": "packages/runtime-core/dist/token-format-resolution.d.ts.map",
+        "bytes": 1271,
+        "sha256": "f1c6fb9ad13214daf9ef6900d2e2bc635d31b069ca943be5aab9c3ed0a691d45"
+      },
+      {
+        "path": "scripts/lib/runtime-core-token-format-resolution-proof.mjs",
+        "bytes": 45196,
+        "sha256": "47a5b64b1e62662062036cb58dc0727f403ea1ccd5a6941a6417a5b75f11ff04"
+      },
+      {
+        "path": "scripts/generate-runtime-core-token-format-resolution-proof.mjs",
+        "bytes": 865,
+        "sha256": "8d4301be7107da4ef64c56daaa0f3dca8820ffe665f7bcb3e3d72fb2a69e61b4"
+      },
+      {
+        "path": "scripts/verify-runtime-core-token-format-resolution.mjs",
+        "bytes": 703,
+        "sha256": "de51a69810fa0bb414651b7d3f0654231a1fa59e6f369c99a9b89297317db17a"
+      },
+      {
+        "path": "tests/runtime-core-token-format-resolution.test.mjs",
+        "bytes": 14960,
+        "sha256": "759ad44bc70548efbd80fc9999eacfb6f180b9925f5f3ded43c2f1741ab8dcd5"
+      }
+    ],
+    "rootScripts": [
+      "generate:runtime-core-token-format-resolution",
+      "verify:runtime-core-token-format-resolution",
+      "test:runtime-core-token-format-resolution"
+    ]
+  },
+  "deferred": [
+    "consumer prop/style schema validation and PROP_TYPE_MISMATCH composition (M05)",
+    "reactive token invalidation and stale-result protection (M04-T15)",
+    "complete headless runtime composition and observable trace (M04-T16)",
+    "general DTCG import, export, theme, and mode resolution",
+    "React, browser, iOS, and Android adapters"
+  ]
+}

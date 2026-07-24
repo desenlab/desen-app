@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████░░░░░░░░░░░░░░░░░░` **39 / 144 tasks complete (27%)**
+**Overall:** `███████░░░░░░░░░░░░░░░░░░` **40 / 144 tasks complete (28%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `██░░░░░░░░░░░░░░` **2 / 16 tasks complete (13%)**
+**M04 progress:** `███░░░░░░░░░░░░░` **3 / 16 tasks complete (19%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T03`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T04`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -110,6 +110,7 @@ packages/
 - [Reference Web capability-artifact proof](docs/proof/REFERENCE-CATALOG-WEB-CAPABILITY-ARTIFACT.md)
 - [Runtime core host-port proof](docs/proof/RUNTIME-CORE-HOST-PORTS.md)
 - [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
+- [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -176,8 +177,9 @@ as the archived Python baseline passes 14/14. M02-T13 closes the declared valida
 positive and one negative project micro-vector for each of 28 emitted core diagnostics and 6
 validator-namespaced extension diagnostics. All 68 executions pass with exact code,
 classification, pointer, and context checks where those fields apply, without adding a public API.
-P-02 is now `PROVEN` and G02 is `DONE`. P-17 advances only to `PARTIAL`: runtime materialization,
-action-turn, bundle, and activation limits remain assigned to later milestones.
+P-02 is now `PROVEN` and G02 is `DONE`. P-17 advances only to `PARTIAL`: the remaining runtime
+materialization stages, action-turn, bundle, and activation limits stay assigned to later
+milestones.
 
 M03-T04 now defines the target-separated Web–React package digest profile. It commits a projected
 canonical Catalog and exact artifact bytes through versioned, length-delimited framing, then hashes
@@ -257,6 +259,17 @@ remain deliberately deferred to M04-T03. The task contributes three runtime expo
 types with complete TSDoc. Its evidence passes 34 package tests, 10 compiler-negative cases, 13
 independent proof/mutation tests, 9 trace assignments, and 11 byte-tracked files. No Proof Matrix,
 normative-coverage, or proof-gate status changes.
+
+M04-T03 now completes the two value forms deliberately deferred by that primitive. Tokens resolve
+only through one explicit host port, with one lookup per unique token in each top-level call;
+missing, resolved JSON `null`, and redacted provider failure remain distinct. Formatting accepts
+only the closed PF-017 `{name}` grammar: strings are inserted unchanged and every other JSON value
+uses RFC 8785 canonical text, with no expression, locale, markup, or platform evaluation. Nested
+reference, fallback, token, and format values preserve exact pointers, complete-result behavior,
+and the same safety limits. The additive API contributes one runtime export and four types with
+complete TSDoc. Its evidence passes 7 focused package tests, 7 compiler-negative cases, 13
+independent proof/mutation tests, 2 direct trace assignments, and 11 byte-tracked files. Consumer
+schema validation remains M05; no Proof Matrix, normative-coverage, or proof-gate status changes.
 
 ## License
 

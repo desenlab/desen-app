@@ -10,6 +10,7 @@ export {
   resolveRuntimeValue,
   RUNTIME_VALUE_SAFETY_LIMITS,
 } from "./value-resolution.js";
+export { materializeRuntimeValue } from "./token-format-resolution.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -63,3 +64,10 @@ export type {
   RuntimeValueSpec,
   RuntimeValueUnresolved,
 } from "./value-resolution.js";
+
+export type {
+  RuntimeTokenProviderFailure,
+  RuntimeTokenUnresolved,
+  RuntimeValueMaterialization,
+  RuntimeValueMaterializationContext,
+} from "./token-format-resolution.js";

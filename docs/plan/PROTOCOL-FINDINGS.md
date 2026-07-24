@@ -749,3 +749,54 @@ This file records implementation discoveries without changing the frozen DESEN 0
   lifecycle envelopes, portable safety limits, cancellation/update atomicity, consumer-validation
   composition, context classification and redaction, and whether executable-language proxy-like
   inputs are categorically forbidden at public integration boundaries.
+
+## PF-033 — Token and string-format materialization require a deterministic runtime profile
+
+- Status: OPEN
+- Blocks proof: No; one additive fail-closed materialization layer can complete the frozen token and
+  format forms without changing the M04-T02 reference-resolution primitive or inventing a template
+  language.
+- Protocol location: SPEC Sections 14.4–14.5, 18.3–18.4, 26.3, and 27.2; Source and Bundle Schema
+  `$defs/tokenSpec` and `$defs/formatSpec`; Appendix B `PROP_TYPE_MISMATCH`,
+  `REFERENCE_UNRESOLVED`, and `ADAPTER_FAILURE`
+- Observation: DESEN 0.1.0 requires host-owned token resolution and deterministic placeholder
+  substitution, but it does not define a TypeScript materialization API, token-provider call
+  ordering or reuse, provider-failure envelope, missing-token result shape, or conversion from a
+  resolved non-string JSON value to placeholder text. The schema permits every format mapping to
+  contain any recursively valid `ValueSpec`, including numbers, booleans, null, arrays, objects,
+  nested formats, and tokens. JavaScript's implicit string conversion would introduce
+  implementation-dependent object/array behavior and is therefore not an acceptable protocol
+  profile.
+- Implementation decision: M04-T03 adds `materializeRuntimeValue` as a new layer over the preserved
+  M04-T02 `resolveRuntimeValue` API. The earlier API continues to return `deferred` for `$token` and
+  `$format`; the additive API consumes those forms using the same factory-branded resolution
+  snapshot plus an explicit trusted token port and request context. It reads no global provider and
+  does not own, parse, or normalize a token document. Token names remain non-empty opaque strings.
+  Object members use deterministic text order, arrays retain declared order, and format mappings use
+  deterministic name order. Within one top-level call, one host lookup occurs per unique token name
+  in one top-level materialization; later occurrences reuse the first detached, immutable outcome.
+  A resolved JSON null is a successful token value, while a missing token uses
+  `REFERENCE_UNRESOLVED` in a token-specific unresolved result and exposes no fallback or partial
+  value. A thrown callback, malformed provider envelope, or unsafe/unbounded provider value fails
+  closed; provider failures use a redacted `ADAPTER_FAILURE` without exposing the thrown value,
+  stack, provider response, or a partial result.
+
+  Formatting reuses the PF-017 single-pass ASCII placeholder grammar. Each distinct mapped
+  `ValueSpec` is materialized once in the same snapshot and trusted token context before
+  substitution. Repeated placeholders reuse that result. For substitution, raw strings are
+  inserted unchanged; all other resolved JSON values use RFC 8785 canonical JSON. There is no
+  locale inference, property lookup from template text, expression evaluation, markup execution,
+  brace escaping, or implicit platform formatting. Nested materialization propagates exact RFC 6901
+  pointers and fallback use; any unresolved, invalid, or adapter-failed child rejects the complete
+  enclosing value. The final output is detached, recursively immutable, and checked again against
+  the M04-T02 depth, JSON-occurrence, and UTF-16 string budgets.
+
+  A successfully materialized token or formatted string is still only a candidate value. The exact
+  target prop, style-part, command, operation, resource, or adapter schema must validate it before
+  use; consumer-schema validation remains M05, and a later `PROP_TYPE_MISMATCH` does not retry token
+  lookup, choose another value, or reinterpret formatting.
+
+- Future action: A later versioned runtime profile should standardize cross-language canonical
+  placeholder conversion, token-snapshot consistency and invalidation, provider technical-failure
+  taxonomy, cache lifetime, request-context allocation, and whether a future protocol adds explicit
+  locale-aware formatting capabilities.

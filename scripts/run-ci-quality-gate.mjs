@@ -129,6 +129,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-core-value-resolution.mjs",
       "tests/runtime-core-value-resolution.test.mjs",
     ],
+    [
+      "runtime-core-token-format-resolution",
+      "scripts/verify-runtime-core-token-format-resolution.mjs",
+      "tests/runtime-core-token-format-resolution.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -141,8 +146,8 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "c2c1ce8930141e97291cb52b4ae521f9c86b92a43dc82ff433ac0dd4edfc8b21";
-const QUALITY_GATE_PLAN_SHA256 = "c610190c4c6779be877f5547bf036e019213b4cfcfc8e7795291d3767ba21100";
+  "1ab460179e27fcf20864ab02244fc322dfe6702ee4667f110b34c65d4f3cb883";
+const QUALITY_GATE_PLAN_SHA256 = "3bb2d49b979bea1933b0fa494edab3cbed20e71ada99f9ecd242af9488bba890";
 const FORBIDDEN_COMMAND_PATTERN =
   /generate|writ(?:e|er)|--affected\b|--since\b|changed-files?|git-diff/i;
 const SHELL_METACHARACTER_PATTERN = /[\n\r;&|><`$()*?{}!]|\[|\]/;

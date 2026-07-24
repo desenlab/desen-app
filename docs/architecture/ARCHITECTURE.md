@@ -145,6 +145,21 @@ The output is detached and budgeted again so repeated references cannot amplify 
 values past depth, node-occurrence, or string limits. Exact consumer-schema validation still runs
 after resolution and before any value reaches a target adapter.
 
+Token and string-format materialization is an additive layer over that preserved reference
+primitive. It receives the branded snapshot together with an explicit trusted token port and
+request context; it never discovers a global provider or owns a token document. One top-level
+materialization performs one lookup per unique opaque token name in deterministic traversal order,
+then reuses the detached immutable outcome. Missing is reported as a token-specific
+`REFERENCE_UNRESOLVED`; thrown callbacks, malformed outcomes, and unsafe provider values fail with
+a redacted `ADAPTER_FAILURE`.
+
+Formatting uses the closed PF-017 single-pass `{name}` grammar. Nested values materialize in the
+same snapshot and token context, raw strings are inserted unchanged, and every other JSON value is
+encoded as RFC 8785 canonical JSON. Formatting performs no expression, prototype, locale, markup,
+or platform evaluation. Any child failure rejects the complete composite, and the expanded output
+is detached and checked against the same safety limits. It remains a candidate until the exact
+consumer schema is validated at the M05 adapter boundary.
+
 ## Activation sequence
 
 ```text
