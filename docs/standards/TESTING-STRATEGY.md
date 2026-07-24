@@ -34,3 +34,15 @@ transaction boundary. They cover transaction abort, storage quota failure, crash
 before commit, crash immediately after commit but before in-memory notification, competing stale
 writers, and restart recovery. The asserted state is always a complete activation record; tests
 must never accept an active pointer whose previous-good pointer was written separately.
+
+## Hosted CI contract
+
+GitHub Actions uses the fail-closed single-pass gate documented in
+`docs/standards/CI-QUALITY-GATE.md`. It must preserve every distinct workload in the cumulative
+task commands while avoiding orchestration-level replay. Proof builders may still repeat work
+internally when that repetition is itself the evidence, such as independent builds, byte
+comparison, mutation, or atomic-write checks.
+
+CI must never generate or repair tracked proof artifacts before verifying them. It must not trust
+changed-file filters, cached proof success, or timing output. A change to the legacy prerequisite
+inventory or exact execution plan requires an explicit reviewed pin update.

@@ -41,7 +41,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 
 | ID    | Status      | Depends on                           | Deliverable                                                                                        | Evidence                                                                                               |
 | ----- | ----------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| CI-01 | NOT_STARTED | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition | Full clean gate parity, fail-closed mutation checks, section timings, and before/after hosted-run data |
+| CI-01 | IN_PROGRESS | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition | Full clean gate parity, fail-closed mutation checks, section timings, and before/after hosted-run data |
 
 `CI-01` temporarily precedes `M04-T03` in the working order but does not change the protocol task
 dependency graph, milestone totals, or proof-gate counts. It must keep the existing task-specific

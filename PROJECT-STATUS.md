@@ -140,10 +140,10 @@ status.
   `M03-T10 — Final immutable capability artifact and exact tuple`,
   `M04-T01 — Framework-neutral host ports`,
   `M04-T02 — Literal/reference/fallback resolver`
-- Active task: None
+- Active task: `CI-01 — Secure single-pass CI orchestration`
 - Ready operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task: `M04-T03 — Token and deterministic string-format resolution`
-- Status: Awaiting explicit user authorization to start `CI-01`
+- Status: CI-01 implementation and local full-gate proof pass; hosted timing proof pending
 
 ## Completed preparation
 
@@ -354,19 +354,21 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-After explicit user authorization, complete `CI-01 — Secure single-pass CI orchestration` before
-starting more runtime work. The current quality gate spends almost all of its time recursively
-replaying prerequisites: one measured hosted run spent 49 minutes 26 seconds in `pnpm check` and
-about 4 seconds installing dependencies. The expanded gate invokes 135 root scripts and 547 leaf
-processes; among the repeated work, one package typecheck runs 84 times, one package build runs 70
-times, and the validator build runs 42 times.
+Complete the hosted proof for `CI-01 — Secure single-pass CI orchestration` before starting more
+runtime work. The old quality gate spent almost all of its time recursively replaying
+prerequisites: one measured hosted run spent 49 minutes 26 seconds in `pnpm check` and about 4
+seconds installing dependencies. Its expansion invoked 135 root scripts and 547 leaf processes
+for only 91 distinct workloads.
 
-`CI-01` must preserve every existing proof and negative check while executing shared prerequisites
-once in a deterministic topological order. It must add section timings, immutable action pins,
-safe cancellation of superseded runs, and public-fork trust boundaries. Proof artifacts, frozen
-snapshot integrity, mutation tests, negative tests, and architecture boundaries cannot pass from
-cache or path-based skipping. The first target is a 10–15 minute clean hosted run; a later,
-evidence-backed split may target 6–10 minutes. No CI implementation change has started yet.
+The CI-01 candidate preserves all 91 distinct workloads, all 25 proof verifiers, all 25 root
+proof/mutation files, both architecture-boundary checks, and every one of the 123 reviewed legacy
+prerequisite segments. It executes a pinned 58-step fail-fast plan, rejects generators, writers,
+filters, inventory drift, plan drift, and tracked workspace/index mutation, and safely cancels
+child process groups. The complete local gate passed in 8 minutes 52 seconds with all 358 root
+proof tests green. Immutable action pins, dependency-cache trust boundaries, section timings, and
+superseded-run cancellation are configured. The remaining acceptance item is a clean hosted run
+with archived before/after evidence; only then may CI-01 become `DONE` and its 30-minute
+measurement ceiling be reduced.
 
 After `CI-01` passes, start `M04-T03 — Token and deterministic string-format resolution`. Consume
 the deferred token and format outcomes from M04-T02, resolve only through explicit trusted inputs,

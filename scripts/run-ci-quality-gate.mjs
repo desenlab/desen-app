@@ -1,0 +1,1022 @@
+import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
+import { appendFile, lstat, readFile, readdir, readlink } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+
+const WORKSPACE_ROOT = resolve(import.meta.dirname, "..");
+
+const PROOF_ENTRIES = Object.freeze(
+  [
+    [
+      "protocol-snapshot",
+      "scripts/verify-protocol-snapshot.mjs",
+      "tests/protocol-snapshot-integrity.test.mjs",
+    ],
+    [
+      "protocol-traceability",
+      "scripts/verify-protocol-traceability.mjs",
+      "tests/protocol-traceability.test.mjs",
+    ],
+    ["protocol-types", "scripts/verify-protocol-types.mjs", "tests/protocol-types.test.mjs"],
+    [
+      "protocol-canonicalization",
+      "scripts/verify-protocol-canonicalization.mjs",
+      "tests/protocol-canonicalization.test.mjs",
+    ],
+    [
+      "protocol-diagnostics",
+      "scripts/verify-protocol-diagnostics.mjs",
+      "tests/protocol-diagnostics.test.mjs",
+    ],
+    [
+      "protocol-structural-validation",
+      "scripts/verify-protocol-structural-validation.mjs",
+      "tests/protocol-structural-validation.test.mjs",
+    ],
+    [
+      "protocol-semantic-foundation",
+      "scripts/verify-protocol-semantic-foundation.mjs",
+      "tests/protocol-semantic-foundation.test.mjs",
+    ],
+    [
+      "protocol-component-contracts",
+      "scripts/verify-protocol-component-contracts.mjs",
+      "tests/protocol-component-contracts.test.mjs",
+    ],
+    [
+      "protocol-interaction-contracts",
+      "scripts/verify-protocol-interaction-contracts.mjs",
+      "tests/protocol-interaction-contracts.test.mjs",
+    ],
+    [
+      "protocol-binding-contracts",
+      "scripts/verify-protocol-binding-contracts.mjs",
+      "tests/protocol-binding-contracts.test.mjs",
+    ],
+    [
+      "protocol-execution-contracts",
+      "scripts/verify-protocol-execution-contracts.mjs",
+      "tests/protocol-execution-contracts.test.mjs",
+    ],
+    [
+      "protocol-official-suite-parity",
+      "scripts/verify-protocol-official-suite-parity.mjs",
+      "tests/protocol-official-suite-parity.test.mjs",
+    ],
+    [
+      "protocol-validator-diagnostic-micro-vectors",
+      "scripts/verify-protocol-validator-diagnostic-micro-vectors.mjs",
+      "tests/protocol-validator-diagnostic-micro-vectors.test.mjs",
+    ],
+    [
+      "catalog-manifest-registration",
+      "scripts/verify-catalog-manifest-registration.mjs",
+      "tests/catalog-manifest-registration.test.mjs",
+    ],
+    [
+      "web-react-package-digest",
+      "scripts/verify-web-react-package-digest.mjs",
+      "tests/web-react-package-digest.test.mjs",
+    ],
+    [
+      "reference-catalog-web-components",
+      "scripts/verify-reference-catalog-web-components.mjs",
+      "tests/reference-catalog-web-components.test.mjs",
+    ],
+    [
+      "reference-catalog-web-form-feedback",
+      "scripts/verify-reference-catalog-web-form-feedback.mjs",
+      "tests/reference-catalog-web-form-feedback.test.mjs",
+    ],
+    [
+      "reference-tokens-and-synthetic-fixtures",
+      "scripts/verify-reference-tokens-and-synthetic-fixtures.mjs",
+      "tests/reference-tokens-and-synthetic-fixtures.test.mjs",
+    ],
+    [
+      "reference-sign-in-fixtures-and-host-binding",
+      "scripts/verify-reference-sign-in-fixtures-and-host-binding.mjs",
+      "tests/reference-sign-in-fixtures-and-host-binding.test.mjs",
+    ],
+    [
+      "reference-catalog-web-parity",
+      "scripts/verify-reference-catalog-web-parity.mjs",
+      "tests/reference-catalog-web-parity.test.mjs",
+    ],
+    [
+      "reference-catalog-web-capability-artifact",
+      "scripts/verify-reference-catalog-web-capability-artifact.mjs",
+      "tests/reference-catalog-web-capability-artifact.test.mjs",
+    ],
+    [
+      "sc-01-a2ui-bridge",
+      "scripts/verify-sc-01-a2ui-bridge.mjs",
+      "tests/sc-01-a2ui-bridge-spike.test.mjs",
+    ],
+    [
+      "sc-01-dtcg-compatibility",
+      "scripts/verify-sc-01-dtcg.mjs",
+      "tests/sc-01-dtcg-audit.test.mjs",
+    ],
+    [
+      "runtime-core-host-ports",
+      "scripts/verify-runtime-core-host-ports.mjs",
+      "tests/runtime-core-host-ports.test.mjs",
+    ],
+    [
+      "runtime-core-value-resolution",
+      "scripts/verify-runtime-core-value-resolution.mjs",
+      "tests/runtime-core-value-resolution.test.mjs",
+    ],
+  ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
+);
+
+const EXPECTED_CHECK_SUFFIX = Object.freeze([
+  "pnpm lint",
+  "pnpm typecheck",
+  "pnpm build",
+  "pnpm test",
+  "pnpm boundaries",
+]);
+
+const LEGACY_PREREQUISITE_SHA256 =
+  "c2c1ce8930141e97291cb52b4ae521f9c86b92a43dc82ff433ac0dd4edfc8b21";
+const QUALITY_GATE_PLAN_SHA256 = "c610190c4c6779be877f5547bf036e019213b4cfcfc8e7795291d3767ba21100";
+const FORBIDDEN_COMMAND_PATTERN =
+  /generate|writ(?:e|er)|--affected\b|--since\b|changed-files?|git-diff/i;
+const SHELL_METACHARACTER_PATTERN = /[\n\r;&|><`$()*?{}!]|\[|\]/;
+
+class QualityGateError extends Error {
+  constructor(message, details = {}) {
+    super(message);
+    this.name = "QualityGateError";
+    this.details = details;
+  }
+}
+
+class CommandError extends QualityGateError {
+  constructor(step, code, signal) {
+    super(`"${step.label}" failed.`, { stepId: step.id, code, signal });
+    this.name = "CommandError";
+    this.code = code;
+    this.signal = signal;
+  }
+}
+
+class CancellationError extends QualityGateError {
+  constructor(signal) {
+    super(`The quality gate was cancelled by ${signal}.`, { signal });
+    this.name = "CancellationError";
+    this.signal = signal;
+  }
+}
+
+function splitScript(script) {
+  return script.split(" && ").map((command) => command.trim());
+}
+
+function assertExactArray(actual, expected, label) {
+  if (
+    actual.length !== expected.length ||
+    actual.some((value, index) => value !== expected[index])
+  ) {
+    throw new QualityGateError(`${label} drifted from the frozen CI inventory.`, {
+      expected,
+      actual,
+    });
+  }
+}
+
+function assertUnique(values, label) {
+  const duplicates = values.filter((value, index) => values.indexOf(value) !== index);
+  if (duplicates.length > 0) {
+    throw new QualityGateError(`${label} contains duplicate entries.`, {
+      duplicates: [...new Set(duplicates)],
+    });
+  }
+}
+
+function parseVitestRun(script, label) {
+  const tokens = script.trim().split(/\s+/);
+  if (tokens[0] !== "vitest" || tokens[1] !== "run") {
+    throw new QualityGateError(`${label} is not a recognized exhaustive Vitest command.`, {
+      script,
+    });
+  }
+
+  const selectors = [];
+  for (const token of tokens.slice(2)) {
+    if (token === "--passWithNoTests") {
+      continue;
+    }
+    if (token.startsWith("-")) {
+      throw new QualityGateError(`${label} contains an unreviewed Vitest option.`, {
+        script,
+        option: token,
+      });
+    }
+    selectors.push(token);
+  }
+  return selectors;
+}
+
+function assertFocusedTestCovered(packageManifest, task) {
+  const fullTestScript = packageManifest.scripts?.test;
+  const focusedTestScript = packageManifest.scripts?.[task];
+  if (!fullTestScript || !focusedTestScript) {
+    throw new QualityGateError(
+      `${packageManifest.name} ${task} is not covered by an executable full package test.`,
+    );
+  }
+
+  const fullSelectors = parseVitestRun(fullTestScript, `${packageManifest.name} test`);
+  const focusedSelectors = parseVitestRun(focusedTestScript, `${packageManifest.name} ${task}`);
+  if (
+    fullSelectors.length > 0 &&
+    focusedSelectors.some((selector) => !fullSelectors.includes(selector))
+  ) {
+    throw new QualityGateError(
+      `${packageManifest.name} ${task} is not a subset of its full package test.`,
+      { fullSelectors, focusedSelectors },
+    );
+  }
+}
+
+function classifyLegacyPrerequisite({
+  command,
+  currentProofId,
+  currentProofIndex,
+  proofIndexById,
+  workspacePackageMap,
+}) {
+  const proofDependencyMatch = /^pnpm verify:([a-z0-9-]+)$/.exec(command);
+  if (proofDependencyMatch) {
+    const dependencyId = proofDependencyMatch[1];
+    const dependencyIndex = proofIndexById.get(dependencyId);
+    if (dependencyIndex === undefined || dependencyIndex >= currentProofIndex) {
+      throw new QualityGateError(
+        `${currentProofId} has an unknown or out-of-order proof prerequisite.`,
+        { command, dependencyId },
+      );
+    }
+    return "proof-verifier";
+  }
+
+  const parts = command.split(" ");
+  if (parts.length !== 4 || parts[0] !== "pnpm" || parts[1] !== "--filter") {
+    throw new QualityGateError(`${currentProofId} contains an unclassified legacy prerequisite.`, {
+      command,
+    });
+  }
+
+  const selectorToken = parts[2];
+  const packageName = selectorToken.endsWith("...") ? selectorToken.slice(0, -3) : selectorToken;
+  const task = parts[3];
+  if (!/^(?:@desen\/[a-z0-9-]+|desen)$/.test(packageName)) {
+    throw new QualityGateError(`${currentProofId} uses an unreviewed package selector.`, {
+      command,
+      packageName,
+    });
+  }
+
+  const packageManifest = workspacePackageMap.get(packageName);
+  if (!packageManifest) {
+    throw new QualityGateError(`${currentProofId} references an unknown workspace package.`, {
+      command,
+      packageName,
+    });
+  }
+
+  if (task === "build" || task === "typecheck") {
+    if (!packageManifest.scripts?.[task]) {
+      throw new QualityGateError(`${packageName} no longer defines ${task}.`, { command });
+    }
+    return `package-${task}`;
+  }
+
+  if (task === "verify:structural-validation") {
+    if (
+      packageName !== "@desen/validator" ||
+      packageManifest.scripts?.[task] !== "node scripts/verify-structural-validators.mjs"
+    ) {
+      throw new QualityGateError("The structural-validator prerequisite drifted.", {
+        command,
+        actual: packageManifest.scripts?.[task],
+      });
+    }
+    return "structural-validator-artifacts";
+  }
+
+  if (task === "test") {
+    if (!packageManifest.scripts?.test) {
+      throw new QualityGateError(`${packageName} no longer defines its full test suite.`, {
+        command,
+      });
+    }
+    return "package-test";
+  }
+
+  if (task.startsWith("test:")) {
+    assertFocusedTestCovered(packageManifest, task);
+    return "focused-package-test";
+  }
+
+  throw new QualityGateError(`${currentProofId} contains an unclassified package task.`, {
+    command,
+    packageName,
+    task,
+  });
+}
+
+export function validateProofInventory({
+  packageJson,
+  verifierFiles,
+  rootTestFiles,
+  workspacePackages,
+  proofEntries = PROOF_ENTRIES,
+}) {
+  const scripts = packageJson.scripts ?? {};
+  const proofIds = proofEntries.map(({ id }) => id);
+  const expectedVerifierFiles = proofEntries.map(({ verifierFile }) => verifierFile);
+  const expectedRootTestFiles = proofEntries.map(({ rootTestFile }) => rootTestFile);
+  const workspacePackageNames = workspacePackages.map(({ name }) => name);
+  const workspacePackageMap = new Map(
+    workspacePackages.map((packageManifest) => [packageManifest.name, packageManifest]),
+  );
+  const proofIndexById = new Map(proofIds.map((id, index) => [id, index]));
+  const legacyPrerequisiteInventory = [];
+
+  assertUnique(proofIds, "Proof ids");
+  assertUnique(expectedVerifierFiles, "Proof verifier files");
+  assertUnique(expectedRootTestFiles, "Root proof test files");
+  assertUnique(workspacePackageNames, "Workspace package names");
+
+  const expectedCheckCommands = [
+    "pnpm format:check",
+    ...proofIds.map((id) => `pnpm verify:${id}`),
+    ...EXPECTED_CHECK_SUFFIX,
+  ];
+  const expectedTestCommands = [...proofIds.map((id) => `pnpm test:${id}`), "turbo run test"];
+
+  assertExactArray(
+    splitScript(scripts.check ?? ""),
+    expectedCheckCommands,
+    "The root check script",
+  );
+  assertExactArray(splitScript(scripts.test ?? ""), expectedTestCommands, "The root test script");
+
+  for (const [proofIndex, { id, verifierFile, rootTestFile }] of proofEntries.entries()) {
+    const verifierCommands = splitScript(scripts[`verify:${id}`] ?? "");
+    const testCommands = splitScript(scripts[`test:${id}`] ?? "");
+
+    if (verifierCommands.at(-1) !== `node ${verifierFile}`) {
+      throw new QualityGateError(`verify:${id} no longer ends with its frozen verifier.`, {
+        expected: `node ${verifierFile}`,
+        actual: verifierCommands.at(-1),
+      });
+    }
+    if (testCommands.at(-1) !== `node --test ${rootTestFile}`) {
+      throw new QualityGateError(`test:${id} no longer ends with its frozen root test.`, {
+        expected: `node --test ${rootTestFile}`,
+        actual: testCommands.at(-1),
+      });
+    }
+
+    const verifierPrerequisites = verifierCommands.slice(0, -1);
+    const testPrerequisites = testCommands.slice(0, -1);
+    legacyPrerequisiteInventory.push({
+      id,
+      verify: verifierPrerequisites,
+      test: testPrerequisites,
+    });
+
+    for (const command of [...verifierPrerequisites, ...testPrerequisites]) {
+      classifyLegacyPrerequisite({
+        command,
+        currentProofId: id,
+        currentProofIndex: proofIndex,
+        proofIndexById,
+        workspacePackageMap,
+      });
+    }
+  }
+
+  const legacyPrerequisiteSha256 = createHash("sha256")
+    .update(JSON.stringify(legacyPrerequisiteInventory))
+    .digest("hex");
+  if (legacyPrerequisiteSha256 !== LEGACY_PREREQUISITE_SHA256) {
+    throw new QualityGateError("The reviewed legacy prerequisite inventory drifted.", {
+      expected: LEGACY_PREREQUISITE_SHA256,
+      actual: legacyPrerequisiteSha256,
+    });
+  }
+
+  assertExactArray(
+    [...verifierFiles].sort(),
+    [...expectedVerifierFiles].sort(),
+    "The proof verifier file set",
+  );
+  assertExactArray(
+    [...rootTestFiles].sort(),
+    [...expectedRootTestFiles].sort(),
+    "The root proof test file set",
+  );
+
+  return {
+    proofCount: proofIds.length,
+    verifierCount: verifierFiles.length,
+    rootTestCount: rootTestFiles.length,
+    legacyPrerequisiteCount: legacyPrerequisiteInventory.reduce(
+      (count, entry) => count + entry.verify.length + entry.test.length,
+      0,
+    ),
+    legacyPrerequisiteSha256,
+  };
+}
+
+export function assertSafeStep(step) {
+  if (!["node", "pnpm"].includes(step.command)) {
+    throw new QualityGateError(`Step "${step.id}" uses an unapproved executable.`, {
+      command: step.command,
+    });
+  }
+
+  const commandText = [step.command, ...step.args].join(" ");
+  if (SHELL_METACHARACTER_PATTERN.test(commandText)) {
+    throw new QualityGateError(`Step "${step.id}" contains a shell metacharacter.`, {
+      commandText,
+    });
+  }
+  if (FORBIDDEN_COMMAND_PATTERN.test(commandText)) {
+    throw new QualityGateError(`Step "${step.id}" contains a forbidden CI shortcut or writer.`, {
+      commandText,
+    });
+  }
+}
+
+function commandStep(id, label, command, args) {
+  const step = Object.freeze({ id, label, command, args: Object.freeze([...args]) });
+  assertSafeStep(step);
+  return step;
+}
+
+export function validateQualityGatePlan(steps) {
+  const stepIds = steps.map(({ id }) => id);
+  assertUnique(stepIds, "Quality-gate step ids");
+  for (const step of steps) {
+    assertSafeStep(step);
+  }
+
+  assertExactArray(
+    steps
+      .filter(({ id }) => id.startsWith("verify-"))
+      .map(({ id, command, args }) => `${id}\0${command}\0${args.join("\0")}`),
+    PROOF_ENTRIES.map(({ id, verifierFile }) => `verify-${id}\0node\0${verifierFile}`),
+    "The proof-verifier execution plan",
+  );
+  assertExactArray(
+    steps
+      .filter(({ id }) => id.startsWith("test-"))
+      .map(({ id, command, args }) => `${id}\0${command}\0${args.join("\0")}`),
+    PROOF_ENTRIES.map(
+      ({ id, rootTestFile }) => `test-${id}\0node\0--test\0--test-concurrency=1\0${rootTestFile}`,
+    ),
+    "The root proof-test execution plan",
+  );
+
+  const normalizedPlan = steps.map(({ id, command, args }) => ({
+    id,
+    command,
+    args,
+  }));
+  const planSha256 = createHash("sha256").update(JSON.stringify(normalizedPlan)).digest("hex");
+  if (planSha256 !== QUALITY_GATE_PLAN_SHA256) {
+    throw new QualityGateError("The reviewed single-pass quality-gate plan drifted.", {
+      expected: QUALITY_GATE_PLAN_SHA256,
+      actual: planSha256,
+    });
+  }
+  return { stepCount: steps.length, planSha256 };
+}
+
+export function createQualityGateSteps() {
+  const steps = [
+    commandStep("orchestrator-contracts", "CI orchestrator contract tests", "node", [
+      "--test",
+      "scripts/test/ci-quality-gate.test.mjs",
+    ]),
+    commandStep("format", "Formatting", "pnpm", ["exec", "prettier", ".", "--check"]),
+    commandStep("lint", "Lint", "pnpm", ["exec", "eslint", ".", "--max-warnings=0"]),
+    commandStep("structural-validator-artifacts", "Generated structural validator parity", "node", [
+      "packages/validator/scripts/verify-structural-validators.mjs",
+    ]),
+    commandStep("workspace-graph", "Fresh workspace build and typecheck", "pnpm", [
+      "exec",
+      "turbo",
+      "run",
+      "build",
+      "typecheck",
+      "--force",
+      "--ui=stream",
+    ]),
+    commandStep("package-tests", "Package tests with controlled concurrency", "pnpm", [
+      "--recursive",
+      "--workspace-concurrency=1",
+      "--if-present",
+      "run",
+      "test",
+    ]),
+    ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
+      commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),
+    ),
+    ...PROOF_ENTRIES.map(({ id, rootTestFile }) =>
+      commandStep(`test-${id}`, `Root proof and mutation test: ${id}`, "node", [
+        "--test",
+        "--test-concurrency=1",
+        rootTestFile,
+      ]),
+    ),
+    commandStep("dependency-boundaries", "Dependency boundaries", "pnpm", [
+      "exec",
+      "depcruise",
+      "--config",
+      "dependency-cruiser.config.cjs",
+      "apps",
+      "packages",
+    ]),
+    commandStep("boundary-fixtures", "Hostile dependency-boundary fixtures", "node", [
+      "scripts/verify-boundary-fixtures.mjs",
+    ]),
+  ];
+  validateQualityGatePlan(steps);
+  return Object.freeze(steps);
+}
+
+async function captureCommand(command, args, { cwd = WORKSPACE_ROOT } = {}) {
+  return await new Promise((resolvePromise, rejectPromise) => {
+    const child = spawn(command, args, {
+      cwd,
+      env: process.env,
+      shell: false,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const stdout = [];
+    const stderr = [];
+
+    child.stdout.on("data", (chunk) => stdout.push(chunk));
+    child.stderr.on("data", (chunk) => stderr.push(chunk));
+    child.on("error", rejectPromise);
+    child.on("close", (code, signal) => {
+      if (code !== 0) {
+        rejectPromise(
+          new QualityGateError(`${command} ${args.join(" ")} failed.`, {
+            code,
+            signal,
+            stderr: Buffer.concat(stderr).toString("utf8"),
+          }),
+        );
+        return;
+      }
+      resolvePromise({
+        stdout: Buffer.concat(stdout),
+        stderr: Buffer.concat(stderr),
+      });
+    });
+  });
+}
+
+async function readInventory(workspaceRoot = WORKSPACE_ROOT) {
+  const packageJson = JSON.parse(await readFile(resolve(workspaceRoot, "package.json"), "utf8"));
+  const scriptFiles = await readdir(resolve(workspaceRoot, "scripts"));
+  const testFiles = await readdir(resolve(workspaceRoot, "tests"));
+  const workspacePackages = [];
+  for (const workspaceDirectory of ["apps", "packages"]) {
+    const entries = await readdir(resolve(workspaceRoot, workspaceDirectory), {
+      withFileTypes: true,
+    });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+      const manifestPath = resolve(workspaceRoot, workspaceDirectory, entry.name, "package.json");
+      try {
+        workspacePackages.push(JSON.parse(await readFile(manifestPath, "utf8")));
+      } catch (error) {
+        if (error?.code !== "ENOENT") {
+          throw error;
+        }
+      }
+    }
+  }
+  const verifierFiles = scriptFiles
+    .filter((file) => file.startsWith("verify-") && file.endsWith(".mjs"))
+    .filter((file) => file !== "verify-boundary-fixtures.mjs")
+    .map((file) => `scripts/${file}`);
+  const rootTestFiles = testFiles
+    .filter((file) => file.endsWith(".test.mjs"))
+    .map((file) => `tests/${file}`);
+
+  return { packageJson, verifierFiles, rootTestFiles, workspacePackages };
+}
+
+function updateHashField(hash, value) {
+  const buffer = Buffer.isBuffer(value) ? value : Buffer.from(value);
+  hash.update(`${buffer.byteLength}:`);
+  hash.update(buffer);
+  hash.update("\0");
+}
+
+export async function snapshotTrackedWorkspace(workspaceRoot = WORKSPACE_ROOT) {
+  const { stdout } = await captureCommand("git", ["ls-files", "--stage", "-z"], {
+    cwd: workspaceRoot,
+  });
+  const records = stdout.toString("utf8").split("\0").filter(Boolean);
+  const hash = createHash("sha256");
+
+  for (const record of records) {
+    const separatorIndex = record.indexOf("\t");
+    if (separatorIndex === -1) {
+      throw new QualityGateError("Git returned an unreadable tracked-file record.", { record });
+    }
+
+    const metadata = record.slice(0, separatorIndex).split(" ");
+    const relativePath = record.slice(separatorIndex + 1);
+    const [indexMode, indexObjectId, stage] = metadata;
+    if (stage !== "0") {
+      throw new QualityGateError("The quality gate cannot run with an unmerged tracked file.", {
+        relativePath,
+        stage,
+      });
+    }
+
+    updateHashField(hash, relativePath);
+    updateHashField(hash, indexMode);
+    updateHashField(hash, indexObjectId);
+
+    try {
+      const filePath = resolve(workspaceRoot, relativePath);
+      const stat = await lstat(filePath);
+      updateHashField(hash, stat.isSymbolicLink() ? "symlink" : stat.isFile() ? "file" : "other");
+      updateHashField(hash, stat.mode & 0o111 ? "executable" : "not-executable");
+      updateHashField(
+        hash,
+        stat.isSymbolicLink() ? await readlink(filePath) : await readFile(filePath),
+      );
+    } catch (error) {
+      if (error?.code !== "ENOENT") {
+        throw error;
+      }
+      updateHashField(hash, "missing");
+    }
+  }
+
+  return Object.freeze({
+    digest: hash.digest("hex"),
+    trackedFileCount: records.length,
+  });
+}
+
+export function assertTrackedWorkspaceUnchanged(before, after) {
+  if (before.digest !== after.digest || before.trackedFileCount !== after.trackedFileCount) {
+    throw new QualityGateError("A quality-gate step changed tracked workspace bytes or modes.", {
+      before,
+      after,
+    });
+  }
+}
+
+function formatDuration(milliseconds) {
+  return `${(milliseconds / 1000).toFixed(2)}s`;
+}
+
+function openLogGroup(label) {
+  if (process.env.GITHUB_ACTIONS === "true") {
+    process.stdout.write(`::group::${label}\n`);
+  } else {
+    process.stdout.write(`\n▶ ${label}\n`);
+  }
+}
+
+function closeLogGroup() {
+  if (process.env.GITHUB_ACTIONS === "true") {
+    process.stdout.write("::endgroup::\n");
+  }
+}
+
+export async function runStepSequence(steps, runStep, onTiming, assertCanContinue) {
+  const timings = [];
+  for (const step of steps) {
+    const startedAt = performance.now();
+    try {
+      assertCanContinue?.();
+      await runStep(step);
+      assertCanContinue?.();
+      const timing = {
+        id: step.id,
+        label: step.label,
+        durationMs: performance.now() - startedAt,
+        status: "PASS",
+      };
+      timings.push(timing);
+      onTiming?.(timing);
+    } catch (error) {
+      const timing = {
+        id: step.id,
+        label: step.label,
+        durationMs: performance.now() - startedAt,
+        status: "FAIL",
+      };
+      timings.push(timing);
+      onTiming?.(timing);
+      throw error;
+    }
+  }
+  return timings;
+}
+
+function runCommandStep(step, signalState, workspaceRoot = WORKSPACE_ROOT) {
+  return new Promise((resolvePromise, rejectPromise) => {
+    openLogGroup(step.label);
+    process.stdout.write(`$ ${step.command} ${step.args.join(" ")}\n`);
+
+    const child = spawn(step.command, step.args, {
+      cwd: workspaceRoot,
+      env: process.env,
+      detached: process.platform !== "win32",
+      shell: false,
+      stdio: "inherit",
+    });
+    signalState.activeChild = child;
+    let settled = false;
+
+    child.on("error", (error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (signalState.activeChild === child) {
+        signalState.activeChild = undefined;
+      }
+      closeLogGroup();
+      rejectPromise(error);
+    });
+    child.on("close", (code, signal) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (signalState.activeChild === child) {
+        signalState.activeChild = undefined;
+      }
+      closeLogGroup();
+      if (code === 0 && signal === null) {
+        resolvePromise();
+        return;
+      }
+      rejectPromise(new CommandError(step, code, signal));
+    });
+  });
+}
+
+export function forwardSignal(signal, activeChild) {
+  if (!activeChild || activeChild.killed) {
+    return false;
+  }
+  if (
+    process.platform !== "win32" &&
+    Number.isSafeInteger(activeChild.pid) &&
+    activeChild.pid > 0
+  ) {
+    try {
+      process.kill(-activeChild.pid, signal);
+      return true;
+    } catch (error) {
+      if (error?.code !== "ESRCH") {
+        throw error;
+      }
+    }
+  }
+  return activeChild.kill(signal);
+}
+
+function installSignalForwarding(signalState) {
+  const handlers = new Map();
+  for (const signal of ["SIGINT", "SIGTERM"]) {
+    const handler = () => {
+      signalState.receivedSignal ??= signal;
+      forwardSignal(signal, signalState.activeChild);
+    };
+    handlers.set(signal, handler);
+    process.on(signal, handler);
+  }
+  return () => {
+    for (const [signal, handler] of handlers) {
+      process.off(signal, handler);
+    }
+  };
+}
+
+function createReceipt() {
+  return {
+    status: "RUNNING",
+    revision: process.env.GITHUB_SHA ?? "local-working-tree",
+    startedAt: new Date().toISOString(),
+    durationMs: 0,
+    inventory: undefined,
+    trackedFileCount: 0,
+    timings: [],
+    error: undefined,
+  };
+}
+
+export async function executeQualityGate({
+  workspaceRoot = WORKSPACE_ROOT,
+  readInventoryFunction = readInventory,
+  snapshotFunction = snapshotTrackedWorkspace,
+  steps = createQualityGateSteps(),
+  runStep,
+  assertCanContinue,
+} = {}) {
+  const receipt = createReceipt();
+  const gateStartedAt = performance.now();
+  let before;
+  let primaryError;
+
+  try {
+    assertCanContinue?.();
+    const inventoryStartedAt = performance.now();
+    receipt.inventory = validateProofInventory(await readInventoryFunction(workspaceRoot));
+    assertCanContinue?.();
+    receipt.timings.push({
+      id: "frozen-inventory",
+      label: "Frozen proof inventory",
+      durationMs: performance.now() - inventoryStartedAt,
+      status: "PASS",
+    });
+
+    before = await snapshotFunction(workspaceRoot);
+    assertCanContinue?.();
+    receipt.trackedFileCount = before.trackedFileCount;
+    await runStepSequence(
+      steps,
+      runStep,
+      (timing) => receipt.timings.push(timing),
+      assertCanContinue,
+    );
+    assertCanContinue?.();
+  } catch (error) {
+    primaryError = error;
+  }
+
+  if (before) {
+    try {
+      const after = await snapshotFunction(workspaceRoot);
+      assertCanContinue?.();
+      assertTrackedWorkspaceUnchanged(before, after);
+    } catch (error) {
+      if (primaryError) {
+        primaryError.details = {
+          ...primaryError.details,
+          trackedWorkspaceError: error.message,
+          trackedWorkspaceDetails: error.details,
+        };
+      } else {
+        primaryError = error;
+      }
+    }
+  }
+
+  receipt.durationMs = performance.now() - gateStartedAt;
+  receipt.status = primaryError ? "FAIL" : "PASS";
+  if (primaryError) {
+    receipt.error = {
+      name: primaryError.name,
+      message: primaryError.message,
+      details: primaryError.details,
+    };
+    primaryError.receipt = receipt;
+    throw primaryError;
+  }
+  return receipt;
+}
+
+function summaryCell(value) {
+  return String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+}
+
+export async function writeGitHubSummary(receipt, summaryPath = process.env.GITHUB_STEP_SUMMARY) {
+  if (!summaryPath) {
+    return;
+  }
+
+  const lines = [
+    "## DESEN quality gate",
+    "",
+    `**Status:** ${receipt.status}`,
+    `**Revision:** \`${summaryCell(receipt.revision)}\``,
+    `**Total:** ${formatDuration(receipt.durationMs)}`,
+    `**Frozen proofs:** ${receipt.inventory?.proofCount ?? "not validated"}`,
+    `**Tracked files guarded:** ${receipt.trackedFileCount}`,
+    "",
+    "| Section | Status | Time |",
+    "| --- | --- | ---: |",
+    ...receipt.timings.map(
+      (timing) =>
+        `| ${summaryCell(timing.label)} | ${timing.status} | ${formatDuration(timing.durationMs)} |`,
+    ),
+  ];
+
+  if (receipt.error) {
+    lines.push("", `**Failure:** ${summaryCell(receipt.error.message)}`);
+  }
+  await appendFile(summaryPath, `${lines.join("\n")}\n`, "utf8");
+}
+
+function printReceipt(receipt) {
+  process.stdout.write(
+    `\n${JSON.stringify(
+      {
+        status: receipt.status,
+        revision: receipt.revision,
+        proofs: receipt.inventory?.proofCount,
+        trackedFiles: receipt.trackedFileCount,
+        duration: formatDuration(receipt.durationMs),
+        sections: receipt.timings.map(({ id, durationMs, status }) => ({
+          id,
+          status,
+          duration: formatDuration(durationMs),
+        })),
+        error: receipt.error,
+      },
+      null,
+      2,
+    )}\n`,
+  );
+}
+
+async function main() {
+  const signalState = { activeChild: undefined, receivedSignal: undefined };
+  const removeSignalForwarding = installSignalForwarding(signalState);
+  let receipt;
+  let failure;
+
+  try {
+    const assertCanContinue = () => {
+      if (signalState.receivedSignal) {
+        throw new CancellationError(signalState.receivedSignal);
+      }
+    };
+    receipt = await executeQualityGate({
+      runStep: async (step) => {
+        await runCommandStep(step, signalState);
+      },
+      assertCanContinue,
+    });
+    assertCanContinue();
+  } catch (error) {
+    failure = error;
+    receipt =
+      error.receipt ??
+      Object.assign(createReceipt(), {
+        status: "FAIL",
+        error: { name: error.name, message: error.message, details: error.details },
+      });
+  } finally {
+    removeSignalForwarding();
+  }
+
+  if (!failure && signalState.receivedSignal) {
+    failure = new CancellationError(signalState.receivedSignal);
+    receipt.status = "FAIL";
+    receipt.error = {
+      name: failure.name,
+      message: failure.message,
+      details: failure.details,
+    };
+  }
+
+  printReceipt(receipt);
+  try {
+    await writeGitHubSummary(receipt);
+  } catch (summaryError) {
+    process.stderr.write(`Warning: GitHub summary could not be written: ${String(summaryError)}\n`);
+  }
+
+  if (failure) {
+    process.stderr.write(`${failure.stack ?? String(failure)}\n`);
+    process.exitCode =
+      signalState.receivedSignal === "SIGINT"
+        ? 130
+        : signalState.receivedSignal === "SIGTERM"
+          ? 143
+          : 1;
+  }
+}
+
+const entrypoint = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : undefined;
+if (import.meta.url === entrypoint) {
+  await main();
+}
+
+export { CancellationError, PROOF_ENTRIES, QualityGateError };

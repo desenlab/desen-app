@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -9,20 +11,28 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     name: Quality gate
-    runs-on: ubuntu-latest
-    # The cumulative proof gate intentionally replays every frozen protocol and
-    # reference-package verifier. Hosted runners need more headroom than local runs.
-    timeout-minutes: 60
+    runs-on: ubuntu-24.04
+    # CI-01 begins with a measured 30-minute ceiling. Lowering it requires a
+    # successful hosted-run baseline from this exact single-pass gate.
+    timeout-minutes: 30
+    env:
+      CI: "true"
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24.10.0
 
@@ -33,15 +43,25 @@ jobs:
         id: pnpm-store
         run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
-      - name: Cache pnpm store
-        uses: actions/cache@v5
+      - name: Restore trusted pnpm store
+        id: pnpm-cache
+        if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
+          key: ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-
 
       - name: Install exact dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run quality gate
-        run: pnpm check
+        run: node scripts/run-ci-quality-gate.mjs
+
+      - name: Save trusted pnpm store
+        if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ steps.pnpm-cache.outputs.cache-primary-key }}
