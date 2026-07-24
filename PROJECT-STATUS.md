@@ -140,10 +140,10 @@ status.
   `M03-T10 — Final immutable capability artifact and exact tuple`,
   `M04-T01 — Framework-neutral host ports`,
   `M04-T02 — Literal/reference/fallback resolver`
-- Active task: `CI-01 — Secure single-pass CI orchestration`
-- Ready operational task: `CI-01 — Secure single-pass CI orchestration`
+- Active task: None
+- Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task: `M04-T03 — Token and deterministic string-format resolution`
-- Status: CI-01 implementation and local full-gate proof pass; hosted timing proof pending
+- Status: Ready to start M04-T03
 
 ## Completed preparation
 
@@ -156,8 +156,12 @@ status.
 - The public `desenlab/desen-app` remote is configured. Its history and current tree passed a
   public-release secret and attribution preflight, and its first `main` CI run passed.
 - GitHub private vulnerability reporting, secret scanning, secret push protection, and dependency
-  vulnerability alerts are enabled. Automated dependency-update pull requests remain disabled
-  until their trust and review policy is decided.
+  vulnerability alerts are enabled. Weekly pinned GitHub Actions update pull requests are
+  configured through Dependabot.
+- CI-01 replaces 547 repeated leaf-process launches with a fail-closed 58-step plan covering all 91
+  distinct workloads. Its clean hosted quality gate passed in 12 minutes 11 seconds versus 59
+  minutes 22 seconds before, a 79.48% reduction, while retaining all proof, mutation, negative, and
+  boundary checks.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -354,26 +358,16 @@ No technical blocker. The following release-hygiene item remains and does not bl
 
 ## Next task
 
-Complete the hosted proof for `CI-01 — Secure single-pass CI orchestration` before starting more
-runtime work. The old quality gate spent almost all of its time recursively replaying
-prerequisites: one measured hosted run spent 49 minutes 26 seconds in `pnpm check` and about 4
-seconds installing dependencies. Its expansion invoked 135 root scripts and 547 leaf processes
-for only 91 distinct workloads.
+Start `M04-T03 — Token and deterministic string-format resolution`. Consume the deferred token and
+format outcomes from M04-T02, resolve only through explicit trusted inputs, preserve the same
+bounded complete-outcome behavior, and keep the implementation independent of React, DOM, CSS,
+browser, and application code.
 
-The CI-01 candidate preserves all 91 distinct workloads, all 25 proof verifiers, all 25 root
-proof/mutation files, both architecture-boundary checks, and every one of the 123 reviewed legacy
-prerequisite segments. It executes a pinned 58-step fail-fast plan, rejects generators, writers,
-filters, inventory drift, plan drift, and tracked workspace/index mutation, and safely cancels
-child process groups. The complete local gate passed in 8 minutes 52 seconds with all 358 root
-proof tests green. Immutable action pins, dependency-cache trust boundaries, section timings, and
-superseded-run cancellation are configured. The remaining acceptance item is a clean hosted run
-with archived before/after evidence; only then may CI-01 become `DONE` and its 30-minute
-measurement ceiling be reduced.
-
-After `CI-01` passes, start `M04-T03 — Token and deterministic string-format resolution`. Consume
-the deferred token and format outcomes from M04-T02, resolve only through explicit trusted inputs,
-preserve the same bounded complete-outcome behavior, and keep the implementation independent of
-React, DOM, CSS, browser, and application code.
+CI-01 is complete. The archived hosted comparison is
+`docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
+to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fell from 59 minutes
+45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
+files, 358 root tests, and both boundary layers remained green.
 
 M02-T02 evidence:
 

@@ -16,7 +16,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M04 progress:** `██░░░░░░░░░░░░░░` **2 / 16 tasks complete (13%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `CI-01` operational hardening, then `M04-T03`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T03`
 
 [View the detailed task board](docs/plan/TASKS.md)
 

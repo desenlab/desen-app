@@ -1,0 +1,75 @@
+{
+  "task": "CI-01",
+  "date": "2026-07-24",
+  "repository": "https://github.com/desenlab/desen-app",
+  "workflow": "CI",
+  "job": "Quality gate",
+  "legacy": {
+    "commit": "b415d89e7bab209ba69720fa05ea6f82ddebb091",
+    "runId": 30112708032,
+    "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30112708032",
+    "conclusion": "success",
+    "jobStartedAt": "2026-07-24T17:22:03Z",
+    "jobCompletedAt": "2026-07-24T18:21:48Z",
+    "jobDurationSeconds": 3585,
+    "qualityGateStartedAt": "2026-07-24T17:22:22Z",
+    "qualityGateCompletedAt": "2026-07-24T18:21:44Z",
+    "qualityGateDurationSeconds": 3562,
+    "installDurationSeconds": 4,
+    "command": "pnpm check"
+  },
+  "singlePass": {
+    "commit": "fcb90b1ff17bc63b1a175cd8f5ee796f7e3261a5",
+    "runId": 30117820749,
+    "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30117820749",
+    "conclusion": "success",
+    "jobStartedAt": "2026-07-24T18:40:10Z",
+    "jobCompletedAt": "2026-07-24T18:52:40Z",
+    "jobDurationSeconds": 750,
+    "qualityGateStartedAt": "2026-07-24T18:40:24Z",
+    "qualityGateCompletedAt": "2026-07-24T18:52:35Z",
+    "qualityGateDurationSeconds": 731.07,
+    "installDurationSeconds": 4,
+    "command": "node scripts/run-ci-quality-gate.mjs",
+    "status": "PASS",
+    "trackedFilesGuarded": 449
+  },
+  "comparison": {
+    "qualityGateSecondsSaved": 2830.93,
+    "qualityGateReductionPercent": 79.48,
+    "qualityGateSpeedup": 4.87,
+    "jobSecondsSaved": 2835,
+    "jobReductionPercent": 79.08,
+    "jobSpeedup": 4.78
+  },
+  "coverageParity": {
+    "legacyRootScriptExpansions": 135,
+    "legacyLeafProcesses": 547,
+    "distinctWorkloads": 91,
+    "distinctWorkloadsCovered": 91,
+    "legacyPrerequisiteSegments": 123,
+    "proofVerifiers": 25,
+    "rootProofAndMutationFiles": 25,
+    "rootProofTests": 358,
+    "singlePassSteps": 58,
+    "boundaryChecks": 2,
+    "orchestratorContractTests": 18
+  },
+  "security": {
+    "proofGeneratorsRun": false,
+    "proofWritersRun": false,
+    "proofCacheReads": false,
+    "changedFileFiltering": false,
+    "trackedWorkspaceAndIndexGuard": true,
+    "immutableActionPins": true,
+    "checkoutCredentialsPersisted": false,
+    "externalForkCacheAccess": false,
+    "supersededRunsCancelled": true,
+    "processGroupSignalForwarding": true
+  },
+  "limitations": [
+    "The timing comparison contains one successful legacy run and one successful single-pass run on GitHub-hosted Ubuntu runners; shared-runner variance remains possible.",
+    "The pnpm store is a dependency download cache only and is not proof evidence.",
+    "Repeated work inside proof builders remains intentional when independent builds, mutation, byte parity, or atomic-write behavior is the evidence."
+  ]
+}

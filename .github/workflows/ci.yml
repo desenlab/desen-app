@@ -19,9 +19,9 @@ jobs:
   quality:
     name: Quality gate
     runs-on: ubuntu-24.04
-    # CI-01 begins with a measured 30-minute ceiling. Lowering it requires a
-    # successful hosted-run baseline from this exact single-pass gate.
-    timeout-minutes: 30
+    # The clean hosted CI-01 baseline completed in 12m30s. This ceiling keeps
+    # measured variance headroom while stopping pathological regressions early.
+    timeout-minutes: 20
     env:
       CI: "true"
 
