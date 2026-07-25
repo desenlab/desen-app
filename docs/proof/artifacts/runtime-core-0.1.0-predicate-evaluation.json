@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T04",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "The closed predicate language evaluates deterministically over one immutable snapshot and yields explicit fail-closed conditional-presence decisions.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisite": {
+    "task": "M04-T02",
+    "result": "PASS",
+    "artifact": "runtime-core-0.1.0-value-resolution.json",
+    "artifactSha256": "73e4c3d7640eaefd0b45b04b006df3211f0338fafa77293414d43c1052536fea"
+  },
+  "publicApi": {
+    "sourceRuntimeExports": [
+      "evaluatePreparedRuntimePredicate",
+      "evaluateRuntimeConditionalPresence",
+      "evaluateRuntimePredicate",
+      "prepareRuntimePredicateEvaluation",
+      "resolveRuntimePredicateOperands"
+    ],
+    "runtimeExports": ["evaluateRuntimeConditionalPresence", "evaluateRuntimePredicate"],
+    "typeExports": [
+      "RuntimeConditionalPresence",
+      "RuntimePredicateArgument",
+      "RuntimePredicateDeferred",
+      "RuntimePredicateEvaluated",
+      "RuntimePredicateEvaluation",
+      "RuntimePredicateInvalid",
+      "RuntimePredicateInvalidReason",
+      "RuntimePredicateOperator",
+      "RuntimePredicateSpec",
+      "RuntimePredicateTypeMismatch"
+    ],
+    "internalRuntimeExports": [
+      "evaluatePreparedRuntimePredicate",
+      "prepareRuntimePredicateEvaluation",
+      "resolveRuntimePredicateOperands"
+    ],
+    "sourceImports": [
+      {
+        "module": "@desen/protocol",
+        "typeOnly": false,
+        "names": ["appendJsonPointer", "canonicalizeJson", "createJsonPointer"]
+      },
+      {
+        "module": "./value-resolution.js",
+        "typeOnly": false,
+        "names": ["RUNTIME_VALUE_SAFETY_LIMITS", "resolveRuntimeValue"]
+      },
+      { "module": "@desen/protocol", "typeOnly": true, "names": ["JsonPointer"] },
+      {
+        "module": "./host-ports.js",
+        "typeOnly": true,
+        "names": ["RuntimeJsonObject", "RuntimeJsonPrimitive", "RuntimeJsonValue"]
+      },
+      {
+        "module": "./value-resolution.js",
+        "typeOnly": true,
+        "names": [
+          "RuntimeLifecycleReferenceSnapshot",
+          "RuntimeReferenceFailureReason",
+          "RuntimeResolutionSnapshot",
+          "RuntimeValueInvalidReason",
+          "RuntimeValueResolution",
+          "RuntimeValueSpec"
+        ]
+      }
+    ],
+    "sequentialAggregateCutoff": true,
+    "rootLeaksInternalHelpers": false,
+    "tsdocDeclarations": 15
+  },
+  "runtime": {
+    "operators": 13,
+    "operatorProbes": 13,
+    "validArityProbes": 128,
+    "invalidArityProbes": 34,
+    "arityProbes": 162,
+    "truthyFalseProbes": 6,
+    "existenceProbes": 4,
+    "canonicalEqualityProbes": 3,
+    "utf16Probes": 5,
+    "unresolvedProbes": 2,
+    "deferredProbes": 2,
+    "invalidProbes": 2,
+    "mismatchDiagnostics": 2,
+    "noShortCircuit": true,
+    "presenceProbes": 5,
+    "limitProbes": 4,
+    "earlyCutoffProbes": 1,
+    "terminalPrecedenceProbes": 2,
+    "platformEffects": 0
+  },
+  "predicateSemantics": {
+    "operators": [
+      "all",
+      "any",
+      "not",
+      "eq",
+      "neq",
+      "gt",
+      "gte",
+      "lt",
+      "lte",
+      "in",
+      "contains",
+      "exists",
+      "truthy"
+    ],
+    "evaluationOrder": "depth-first left-to-right",
+    "shortCircuit": false,
+    "directUnresolved": false,
+    "nestedFalse": "resolved boolean",
+    "truthyFalse": ["null", "false", "zero", "empty-string", "empty-array", "empty-object"],
+    "equality": "RFC 8785 canonical JSON",
+    "arrayMembership": "RFC 8785 canonical JSON equality",
+    "stringOrder": "lexicographic UTF-16 code-unit order",
+    "stringMembership": "contiguous UTF-16 code-unit substring",
+    "localeInference": false,
+    "unicodeNormalization": false,
+    "caseFolding": false,
+    "exists": "original reference presence including JSON null; fallback bypassed",
+    "dynamicMismatch": {
+      "result": false,
+      "code": "PREDICATE_TYPE_MISMATCH",
+      "pointer": "exact incompatible argument"
+    },
+    "terminalPrecedence": "first depth-first terminal or aggregate overflow"
+  },
+  "presenceSemantics": {
+    "omitted": "present",
+    "true": "present",
+    "false": "absent",
+    "invalid": "prevent-instantiation-with-explicit-invalid",
+    "deferred": "prevent-instantiation-with-explicit-deferred",
+    "lifecycleComposition": "M04-T15/M04-T16"
+  },
+  "limits": {
+    "maxArgumentsPerOperator": 64,
+    "maxAggregateArguments": 4096,
+    "maxPredicateNodes": 64,
+    "maxValueDepth": 128,
+    "maxJsonNodes": 4096,
+    "maxStringCodeUnits": 1048576
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "dynamicRegularExpressions": false,
+    "staticRegularExpressionLiterals": true,
+    "globalMutationCalls": [],
+    "builtInPrototypeMutation": false,
+    "a2uiDependencies": []
+  },
+  "evidence": {
+    "packageTests": 53,
+    "compilerNegativeCases": 13,
+    "compilerNegativeLabels": [
+      "evaluated predicates do not expose deferred forms",
+      "deferred predicates never expose a guessed boolean",
+      "invalid predicates never expose partial diagnostics",
+      "fail-closed presence outcomes carry no partial diagnostics",
+      "the operator vocabulary is closed",
+      "root predicates cannot select arbitrary executable operators",
+      "functions are not inert predicate arguments",
+      "predicate specifications are immutable",
+      "predicate argument arrays are immutable",
+      "predicate evaluation requires an atomic snapshot",
+      "package-internal preparation is not a root public API",
+      "package-internal resolution is not a root public API",
+      "package-internal evaluation is not a root public API"
+    ],
+    "rootMutationTests": 14,
+    "traceRules": [
+      {
+        "collection": "pipelineSteps",
+        "id": "PIPE-021",
+        "section": "24.2",
+        "owners": ["M04-T04", "M04-T05", "M04-T07"],
+        "status": "PREDICATE_STAGE_ONLY_VARIANTS_AND_REPEATS_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-050",
+        "section": "15",
+        "owners": ["M02-T10", "M04-T04"],
+        "status": "RUNTIME_PRIMITIVE"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-051",
+        "section": "15.1",
+        "owners": ["M02-T10", "M04-T04"],
+        "status": "RUNTIME_PRIMITIVE"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-052",
+        "section": "15.1",
+        "owners": ["M02-T10", "M04-T04", "M06-T05"],
+        "status": "RUNTIME_DYNAMIC_DIAGNOSTIC_PUBLICATION_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-053",
+        "section": "15.2",
+        "owners": ["M04-T04", "M04-T15"],
+        "status": "SNAPSHOT_PRIMITIVE_REACTIVE_COMPOSITION_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-059",
+        "section": "17.4",
+        "owners": ["M04-T04", "M04-T15"],
+        "status": "PRESENCE_DECISION_ONLY_SUBTREE_LIFECYCLE_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-073",
+        "section": "20",
+        "owners": ["M02-T11", "M04-T04", "M08-T06"],
+        "status": "GUARD_DECISION_ONLY_ACTION_EXECUTION_DEFERRED"
+      },
+      {
+        "collection": "diagnostics",
+        "id": "D-021",
+        "section": "Appendix B",
+        "owners": ["M02-T05", "M02-T10", "M04-T04"],
+        "status": "RUNTIME_PRIMITIVE"
+      }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/predicate-evaluation.ts",
+        "bytes": 40617,
+        "sha256": "ae4fb26302bdf66292235242b5bb418c1cd8eb68b02b7e6d8191a5a021a02489"
+      },
+      {
+        "path": "packages/runtime-core/test/predicate-evaluation.test.ts",
+        "bytes": 22145,
+        "sha256": "d417385125a2bb33ba302643fd481fb80559fafe1bd08fa06601a4cd55704acb"
+      },
+      {
+        "path": "packages/runtime-core/test/predicate-evaluation.types.ts",
+        "bytes": 4031,
+        "sha256": "58d792ee674342bee5e760fc03490edbf41b13e75aa167ad02379ca510be9360"
+      },
+      {
+        "path": "packages/runtime-core/dist/predicate-evaluation.js",
+        "bytes": 32508,
+        "sha256": "1c456e267018977a4959a69d91ead748e2bc68d7cbde3ac1cbcf1655519052bc"
+      },
+      {
+        "path": "packages/runtime-core/dist/predicate-evaluation.js.map",
+        "bytes": 29500,
+        "sha256": "fefabb9f543b4e26f5aa57554bc7771428cae0e55f48b86826659375f0d5aa9f"
+      },
+      {
+        "path": "packages/runtime-core/dist/predicate-evaluation.d.ts",
+        "bytes": 8394,
+        "sha256": "e1238050a765095016d4a5f2d8a990362486478dcb3846437e9fcda23c4e04a8"
+      },
+      {
+        "path": "packages/runtime-core/dist/predicate-evaluation.d.ts.map",
+        "bytes": 3249,
+        "sha256": "f1686a94a4ae60574805870987e39781f5cb8eff4903b2cfbcec97ff4cf65678"
+      },
+      {
+        "path": "scripts/lib/runtime-core-predicate-evaluation-proof.mjs",
+        "bytes": 80815,
+        "sha256": "9c58aee469af0960aa129b22b425a353e46a92f1236789a8af62ffcaff339eda"
+      },
+      {
+        "path": "scripts/generate-runtime-core-predicate-evaluation-proof.mjs",
+        "bytes": 854,
+        "sha256": "d4f95f42611e761d6186665e77c6b79e441d1aae7d1efd9e75eb9679a89bc69d"
+      },
+      {
+        "path": "scripts/verify-runtime-core-predicate-evaluation.mjs",
+        "bytes": 692,
+        "sha256": "61be2465797e0598db7be5a40344876151d6001b04e0f5e3bbcc676427810b10"
+      },
+      {
+        "path": "tests/runtime-core-predicate-evaluation.test.mjs",
+        "bytes": 24885,
+        "sha256": "49510b8f69c0f3b8726060d1d380fc002a2c4b216fcfb7f534b0ff8c66b5758e"
+      }
+    ],
+    "rootScripts": [
+      "generate:runtime-core-predicate-evaluation",
+      "verify:runtime-core-predicate-evaluation",
+      "test:runtime-core-predicate-evaluation"
+    ]
+  },
+  "deferred": [
+    "token and format operand composition (M04-T05/M04-T16)",
+    "ordered variants and style overrides (M04-T05)",
+    "conditional subtree lifecycle and reactive reevaluation (M04-T15)",
+    "action execution and action-turn limits (M04-T10–M04-T13)",
+    "consumer schema validation and framework adapters (M05)",
+    "complete headless sign-in observable trace (M04-T16)"
+  ]
+}

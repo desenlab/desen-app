@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████░░░░░░░░░░░░░░░░░░` **40 / 144 tasks complete (28%)**
+**Overall:** `███████░░░░░░░░░░░░░░░░░░` **41 / 144 tasks complete (28%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `███░░░░░░░░░░░░░` **3 / 16 tasks complete (19%)**
+**M04 progress:** `████░░░░░░░░░░░░` **4 / 16 tasks complete (25%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T04`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T05`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -111,6 +111,7 @@ packages/
 - [Runtime core host-port proof](docs/proof/RUNTIME-CORE-HOST-PORTS.md)
 - [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
 - [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)
+- [Runtime core predicate-evaluation proof](docs/proof/RUNTIME-CORE-PREDICATE-EVALUATION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -270,6 +271,19 @@ and the same safety limits. The additive API contributes one runtime export and 
 complete TSDoc. Its evidence passes 7 focused package tests, 7 compiler-negative cases, 13
 independent proof/mutation tests, 2 direct trace assignments, and 11 byte-tracked files. Consumer
 schema validation remains M05; no Proof Matrix, normative-coverage, or proof-gate status changes.
+
+M04-T04 now evaluates the protocol's thirteen closed predicate operators over one immutable
+seven-namespace snapshot and converts an optional `when` into an explicit instantiation decision.
+It processes arguments left-to-right and never short-circuits a completed boolean evaluation,
+preserves ordered dynamic type diagnostics, uses RFC 8785 equality and exact UTF-16 string
+semantics, and keeps a direct unresolved operand distinct from a nested predicate that evaluated
+false. Resolved operands are charged to one shared budget immediately, so the first terminal keeps
+document order and later values cannot amplify retained copies. `exists` performs a status-only
+original-reference probe, including JSON `null`, without evaluating fallback or copying a large
+referenced value. Token and format operands remain deferred for M04-T05 composition. The public API
+adds two functions and ten types; 53 focused tests, 13 compiler-negative cases, and 14 independent
+proof/mutation tests protect exact arities, the 64-predicate-node bound, true conditional absence,
+platform neutrality, and eleven tracked files. P-17 remains `PARTIAL`; no proof-gate status changes.
 
 ## License
 

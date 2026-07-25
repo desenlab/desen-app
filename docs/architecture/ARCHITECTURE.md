@@ -160,6 +160,46 @@ or platform evaluation. Any child failure rejects the complete composite, and th
 is detached and checked against the same safety limits. It remains a candidate until the exact
 consumer schema is validated at the M05 adapter boundary.
 
+## Runtime predicate and presence boundary
+
+Predicate evaluation is a data-only layer over the same factory-branded resolution snapshot. The
+core recognizes exactly the thirteen DESEN 0.1.0 operators: `all`, `any`, `not`, `eq`, `neq`, `gt`,
+`gte`, `lt`, `lte`, `in`, `contains`, `exists`, and `truthy`. It accepts no expression text,
+callable resolver, property accessor, capability implementation, or platform object.
+
+Every predicate is detached and validated completely before evaluation. Its operands are then
+resolved against one immutable snapshot and evaluated depth-first from left to right without
+short-circuiting. This keeps dynamic type diagnostics complete and in stable document order even
+when an earlier `all` or `any` argument already determines the boolean result. A direct unresolved
+ValueSpec makes its current predicate false; a nested predicate that completed with false remains a
+normal boolean operand for its parent. Runtime type mismatches likewise make their current
+predicate false and emit `PREDICATE_TYPE_MISMATCH` at the exact argument pointer.
+
+`eq`, `neq`, and array membership use RFC 8785 canonical JSON identity. String ordering and
+substring membership use exact UTF-16 code-unit semantics without locale collation, normalization,
+or case folding. `exists` probes the original `$ref` without selecting its fallback and treats
+resolved JSON `null` as existing.
+
+The M04-T04 entry point remains deliberately T02-only. Token and format operands retain an exact
+`deferred` result; they are not coerced to false and they do not introduce an executable resolver
+callback. M04-T05 composes those prepared operand positions with the M04-T03 materializer through
+package-internal data outcomes.
+
+Conditional presence is an instantiation boundary, not a styling instruction. An omitted `when`
+is present, an evaluated false predicate is absent, and invalid or deferred input remains absent
+fail-closed under a distinct status. An absent node's descendants must not be mounted. Reactive
+reevaluation belongs to M04-T15, while M04-T16 proves that complete headless materialization leaves
+no descendant resource, behavior, event, or command active.
+
+Predicate input and the aggregate of resolved operand occurrences share the runtime depth,
+JSON-occurrence, and UTF-16 budgets. The tree adds a 64-predicate-node ceiling (root plus 63 nested
+nodes) and a 4,096-argument-occurrence ceiling while preserving the protocol's 64-argument
+per-operator maximum. Each resolved operand is charged immediately in document order; the first
+invalid/deferred terminal retains precedence, and a budget crossing stops before later values are
+copied. Results and diagnostics are recursively immutable and expose no partial boolean on
+malformed, hostile, deferred, or over-budget input. This layer remains independent of React, React
+Native, DOM, CSS, browser APIs, and application code.
+
 ## Activation sequence
 
 ```text

@@ -800,3 +800,84 @@ This file records implementation discoveries without changing the frozen DESEN 0
   placeholder conversion, token-snapshot consistency and invalidation, provider technical-failure
   taxonomy, cache lifetime, request-context allocation, and whether a future protocol adds explicit
   locale-aware formatting capabilities.
+
+## PF-034 — Runtime predicate and conditional-presence evaluation requires a deterministic profile
+
+- Status: OPEN
+- Blocks proof: No; one bounded, fail-closed evaluation profile can preserve the frozen operator
+  results and conditional-presence distinction without claiming complete subtree lifecycle
+  execution.
+- Protocol location: SPEC Sections 14, 15–15.2, 17.4, 24.2–24.3, 26.3, and 27.8; Source and Bundle
+  Schema `$defs/predicateSpec`, `$defs/valueSpec`, and `$defs/nodeSpec`; Appendix B
+  `REFERENCE_UNRESOLVED` and `PREDICATE_TYPE_MISMATCH`
+- Observation: DESEN 0.1.0 fixes thirteen predicate operators and their one-, two-, or 1–64-argument
+  arities, the explicit truth conversion, canonical JSON equality, a consistent read snapshot,
+  dynamic-mismatch-as-false behavior, and true conditional absence. It does not define nested
+  predicate recognition within the overlapping `ValueSpec | PredicateSpec` argument grammar,
+  short-circuit or diagnostic order, exact portable string comparison and membership algorithms,
+  the effect of direct unresolved values beneath boolean composition, an aggregate predicate-tree
+  budget, or a runtime result that distinguishes a valid false condition from invalid or deferred
+  evaluation. The prose also does not define an API that composes the M04-T02 snapshot with M04-T03
+  token and format materialization without creating a new snapshot or cache for each operand.
+- Implementation decision: M04-T04 uses the frozen operator set and arities without extension:
+  `all` and `any` accept 1–64 arguments; `not`, `exists`, and `truthy` accept one; and `eq`, `neq`,
+  `gt`, `gte`, `lt`, `lte`, `in`, and `contains` accept two. At a predicate-argument position, an
+  object is a nested predicate only when its own data properties form the exact closed
+  `PredicateSpec`, its `op` is one of those thirteen names, and its `args` satisfy that operator's
+  arity. An exact nested predicate has a resolved boolean result; another predicate-shaped JSON
+  object remains a ValueSpec when structurally permitted and is never partially interpreted as a
+  predicate.
+
+  Evaluation is recursive left-to-right by argument position and does not short-circuit. Every
+  argument is evaluated against the same snapshot, even after the operator's boolean result is
+  known, so dynamic diagnostics and materialization observations have one deterministic order. A
+  direct unresolved operand makes the current predicate false before that operator is applied. A
+  nested predicate that has already evaluated false is instead an ordinary resolved boolean
+  operand, so its parent may negate or combine that false value. A dynamically incompatible
+  operand likewise makes its current predicate false and emits `PREDICATE_TYPE_MISMATCH` (`D-021`)
+  at the exact incompatible argument pointer; complete left-to-right evaluation continues to
+  collect later diagnostics.
+
+  `truthy` is false exactly for JSON `null`, `false`, numeric zero, the empty string, an empty
+  array, and an empty object; every other resolved JSON value is true. `eq` compares complete RFC
+  8785 canonical JSON and `neq` is its inverse only after both operands resolve. Array forms of
+  `in` and `contains` compare members with the same canonical JSON equality. Ordered strings use
+  exact lexicographic UTF-16 code-unit order, while string membership uses an exact contiguous
+  UTF-16 code-unit substring with no locale inference or Unicode normalization. Ordered numbers
+  remain finite JSON numbers, and mixed string/number ordering is a dynamic mismatch.
+
+  `exists` accepts one original reference, bypasses and does not evaluate its fallback, returns
+  true when that reference resolves including to JSON `null`, and returns false when the otherwise
+  valid reference is missing. This requires a reference-presence probe distinct from ordinary
+  complete-value materialization.
+
+  One top-level predicate uses the same factory-branded M04-T02 snapshot and its depth-128,
+  4,096-JSON-occurrence, and 1,048,576-UTF-16-unit value limits. Because every nested predicate
+  contributes both an object and an `args` array to that raw JSON depth, the predicate tree
+  additionally permits at most 64 total predicate nodes (the root plus 63 nested nodes) and 4,096
+  aggregate argument occurrences while retaining the frozen per-operator maximum of 64 arguments.
+  A shared top-level complete-value resolution session preserves the snapshot, pointers, and
+  materialization observations across every operand; operand-local snapshot or session recreation
+  is forbidden. Resolution processes operands in document order and charges each completed value
+  to the shared budget immediately. The first invalid or deferred terminal keeps its exact ordered
+  precedence; otherwise a budget crossing returns before later operands can amplify retained
+  copies. Boolean no-short-circuit behavior applies only after operand resolution completes.
+  M04-T02 `deferred` token or format outcomes are not boolean false and are propagated as deferred
+  evaluation. M04-T03 remains the owner of token/provider and format truth tables; T03 and T04
+  composition is first consumed by M04-T05 and receives complete end-to-end proof in M04-T16. The
+  package-internal seam brands the prepared plan and checks the outcome count; M04-T05 must
+  additionally prove that every materialized outcome stays paired with its exact prepared operand
+  position.
+
+  Conditional presence returns only a decision. An omitted node `when` is present, evaluated true
+  is present, and evaluated false is absent. Invalid or deferred evaluation prevents
+  instantiation fail-closed but remains an explicit failure or deferred outcome, not a valid false
+  condition. M04-T04 does not instantiate, dispose, subscribe, or prove inactivity of descendant
+  resources, behaviors, events, commands, or adapters; reactive reevaluation and complete subtree
+  lifecycle equivalence remain M04-T15/M04-T16.
+
+- Future action: A later protocol revision should standardize nested-predicate disambiguation,
+  complete evaluation and diagnostic order, unresolved composition, canonical membership, string
+  ordering and substring behavior, aggregate predicate and raw-JSON depth limits, token-snapshot
+  composition, conditional result envelopes, and the exact lifecycle effects of an absent subtree
+  across platforms.

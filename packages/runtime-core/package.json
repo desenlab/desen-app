@@ -22,6 +22,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:host-ports": "vitest run test/host-ports.test.ts",
+    "test:predicate-evaluation": "vitest run test/predicate-evaluation.test.ts",
     "test:token-format-resolution": "vitest run test/token-format-resolution.test.ts",
     "test:value-resolution": "vitest run test/value-resolution.test.ts"
   },

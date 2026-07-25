@@ -26,7 +26,15 @@ const WORKSPACE_ROOT = resolve(import.meta.dirname, "../..");
 
 async function currentInventory() {
   const packageJson = JSON.parse(await readFile(resolve(WORKSPACE_ROOT, "package.json"), "utf8"));
+  const workspaceManifestText = await readFile(
+    resolve(WORKSPACE_ROOT, "pnpm-workspace.yaml"),
+    "utf8",
+  );
   const workspacePackages = [];
+  const configurationPattern = /^(?:vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
+  const testConfigurationFiles = (await readdir(WORKSPACE_ROOT))
+    .filter((file) => configurationPattern.test(file))
+    .map((file) => file);
   for (const workspaceDirectory of ["apps", "packages"]) {
     const entries = await readdir(resolve(WORKSPACE_ROOT, workspaceDirectory), {
       withFileTypes: true,
@@ -35,6 +43,12 @@ async function currentInventory() {
       if (!entry.isDirectory()) {
         continue;
       }
+      const packageFiles = await readdir(resolve(WORKSPACE_ROOT, workspaceDirectory, entry.name));
+      testConfigurationFiles.push(
+        ...packageFiles
+          .filter((file) => configurationPattern.test(file))
+          .map((file) => `${workspaceDirectory}/${entry.name}/${file}`),
+      );
       const manifestPath = resolve(WORKSPACE_ROOT, workspaceDirectory, entry.name, "package.json");
       try {
         workspacePackages.push(JSON.parse(await readFile(manifestPath, "utf8")));
@@ -52,7 +66,14 @@ async function currentInventory() {
   const rootTestFiles = (await readdir(resolve(WORKSPACE_ROOT, "tests")))
     .filter((file) => file.endsWith(".test.mjs"))
     .map((file) => `tests/${file}`);
-  return { packageJson, verifierFiles, rootTestFiles, workspacePackages };
+  return {
+    packageJson,
+    verifierFiles,
+    rootTestFiles,
+    workspacePackages,
+    testConfigurationFiles,
+    workspaceManifestText,
+  };
 }
 
 function clone(value) {
@@ -73,11 +94,16 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the frozen proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 26,
-    verifierCount: 26,
-    rootTestCount: 26,
-    legacyPrerequisiteCount: 131,
-    legacyPrerequisiteSha256: "1ab460179e27fcf20864ab02244fc322dfe6702ee4667f110b34c65d4f3cb883",
+    proofCount: 27,
+    verifierCount: 27,
+    rootTestCount: 27,
+    legacyPrerequisiteCount: 139,
+    legacyPrerequisiteSha256: "3eead5557e4f9d9edd402e526eab3cf9113e1d62d01cf63bdf14d13423e56c06",
+    testConfigurationFileCount: 0,
+    workspaceTestScriptCount: 12,
+    workspaceTestScriptSha256: "d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420",
+    workspaceManifestSha256: "c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba",
+    workspacePackageGlobs: ["apps/*", "packages/*"],
   });
 });
 
@@ -149,10 +175,66 @@ test("every focused prerequisite remains a subset of the full package test", asy
   assert.throws(() => validateProofInventory(inventory), QualityGateError);
 });
 
+test("inventory validation rejects hidden test configuration and manifest overrides", async () => {
+  const configInventory = await currentInventory();
+  configInventory.testConfigurationFiles.push("packages/runtime-core/vitest.config.ts");
+  assert.throws(() => validateProofInventory(configInventory), QualityGateError);
+
+  const rootFieldInventory = await currentInventory();
+  rootFieldInventory.packageJson = clone(rootFieldInventory.packageJson);
+  rootFieldInventory.packageJson.vitest = { test: { exclude: ["tests/**"] } };
+  assert.throws(() => validateProofInventory(rootFieldInventory), QualityGateError);
+
+  const packageFieldInventory = await currentInventory();
+  packageFieldInventory.workspacePackages = clone(packageFieldInventory.workspacePackages);
+  const runtimeCoreManifest = packageFieldInventory.workspacePackages.find(
+    ({ name }) => name === "@desen/runtime-core",
+  );
+  runtimeCoreManifest.vitest = { test: { exclude: ["test/predicate-evaluation.test.ts"] } };
+  assert.throws(() => validateProofInventory(packageFieldInventory), QualityGateError);
+});
+
+test("inventory validation pins every workspace package test command", async () => {
+  const inventory = await currentInventory();
+  inventory.workspacePackages = clone(inventory.workspacePackages);
+  const publisherManifest = inventory.workspacePackages.find(
+    ({ name }) => name === "@desen/publisher",
+  );
+  publisherManifest.scripts.test = "echo skipped";
+  assert.throws(() => validateProofInventory(inventory), QualityGateError);
+
+  const shellInventory = await currentInventory();
+  shellInventory.workspacePackages = clone(shellInventory.workspacePackages);
+  const shellPublisherManifest = shellInventory.workspacePackages.find(
+    ({ name }) => name === "@desen/publisher",
+  );
+  shellPublisherManifest.scripts.test = "vitest run || true";
+  assert.throws(
+    () => validateProofInventory(shellInventory),
+    (error) => error instanceof QualityGateError && /unsafe shell syntax/u.test(error.message),
+  );
+});
+
+test("inventory validation pins the exact pnpm workspace manifest and package globs", async () => {
+  const excludedPackage = await currentInventory();
+  excludedPackage.workspaceManifestText = excludedPackage.workspaceManifestText.replace(
+    '  - "packages/*"\n',
+    "",
+  );
+  assert.throws(() => validateProofInventory(excludedPackage), QualityGateError);
+
+  const addedRoot = await currentInventory();
+  addedRoot.workspaceManifestText = addedRoot.workspaceManifestText.replace(
+    '  - "packages/*"\n',
+    '  - "packages/*"\n  - "."\n',
+  );
+  assert.throws(() => validateProofInventory(addedRoot), QualityGateError);
+});
+
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 60);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 26);
+  assert.equal(steps.length, 62);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 27);
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -173,8 +255,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 60,
-    planSha256: "3bb2d49b979bea1933b0fa494edab3cbed20e71ada99f9ecd242af9488bba890",
+    stepCount: 62,
+    planSha256: "312067eb7445b5a2a8e36a1d7df78ea3cf6a0fb56c0ab2bcf429d65c6ed28f6b",
   });
 
   const missingTypecheck = clone(steps);

@@ -11,6 +11,10 @@ export {
   RUNTIME_VALUE_SAFETY_LIMITS,
 } from "./value-resolution.js";
 export { materializeRuntimeValue } from "./token-format-resolution.js";
+export {
+  evaluateRuntimeConditionalPresence,
+  evaluateRuntimePredicate,
+} from "./predicate-evaluation.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -71,3 +75,16 @@ export type {
   RuntimeValueMaterialization,
   RuntimeValueMaterializationContext,
 } from "./token-format-resolution.js";
+
+export type {
+  RuntimeConditionalPresence,
+  RuntimePredicateArgument,
+  RuntimePredicateDeferred,
+  RuntimePredicateEvaluated,
+  RuntimePredicateEvaluation,
+  RuntimePredicateInvalid,
+  RuntimePredicateInvalidReason,
+  RuntimePredicateOperator,
+  RuntimePredicateSpec,
+  RuntimePredicateTypeMismatch,
+} from "./predicate-evaluation.js";

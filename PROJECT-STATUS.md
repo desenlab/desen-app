@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-24
+Last updated: 2026-07-25
 
 ## Plain-language status
 
@@ -34,7 +34,7 @@ across the exact frozen 14-case starter suite: 9 conformance vectors and 5 publi
 M02-T13 now proves one accepted and one exact rejected micro-vector for every diagnostic the
 validator currently emits: 28 core codes and 6 validator-namespaced extension codes. The proof
 checks both runs, both caller inputs, complete inert-result equality, deep immutability, and exact
-diagnostic identity. This closes G02 without adding a public validator API. Runtime adapter
+diagnostic identity. This closes G02 without adding a public validator API. Framework-adapter
 execution has not started and is not claimed as proven. M03-T01 through M03-T03 now provide the
 cumulative Catalog SDK registration and derivation slice: component, behavior, operation, and
 resource contracts register as exact, detached, canonical-key-ordered, deeply frozen JSON and
@@ -115,7 +115,15 @@ Token lookup is host-owned, cached only within one top-level call, and keeps mis
 strings unchanged and canonicalizes every other JSON value without expression, locale, markup, or
 platform evaluation. Nested complete outcomes remain bounded and preserve exact pointers. This
 task records `PF-033`; receiving-schema validation remains M05, and no `P-*`, `N-*`, `S-*`, or
-proof-gate status changes.
+proof-gate status changes. M04-T04 now evaluates the thirteen closed predicate operators against
+one immutable seven-namespace snapshot and produces an explicit conditional-instantiation
+decision. Evaluation is depth-first and left-to-right without short-circuiting; RFC 8785 equality,
+exact UTF-16 string semantics, ordered dynamic mismatch diagnostics, direct unresolved operands,
+and nested false results remain distinct. `exists` performs a true status-only original-reference
+probe, bypasses fallback, and treats resolved JSON `null` as present without copying the referenced
+value graph. Hostile or over-budget input fails closed, token/format operands remain deferred for
+M04-T05, and a 64-predicate-node ceiling is explicit. This task records `PF-034`; reactive subtree
+lifecycle remains M04-T15/M04-T16, P-17 remains `PARTIAL`, and no proof-gate status changes.
 
 ## Current milestone
 
@@ -146,11 +154,12 @@ proof-gate status changes.
   `M03-T10 — Final immutable capability artifact and exact tuple`,
   `M04-T01 — Framework-neutral host ports`,
   `M04-T02 — Literal/reference/fallback resolver`,
-  `M04-T03 — Token and deterministic string-format resolution`
-- Active task: None
+  `M04-T03 — Token and deterministic string-format resolution`,
+  `M04-T04 — Predicate evaluation and conditional presence`
+- Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T04 — Predicate evaluation and conditional presence`
-- Status: Ready to start M04-T04
+- Next implementation task: `M04-T05 — Ordered variant and style override evaluation`
+- Status: M04-T04 complete; ready for M04-T05
 
 ## Completed preparation
 
@@ -167,9 +176,9 @@ proof-gate status changes.
   configured through Dependabot.
 - CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
   fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
-  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T03
-  inventory now expands to 649 legacy leaf launches but remains a reviewed 60-step single-pass gate
-  covering 94 distinct workloads, 26 proof verifiers, and 26 root proof files.
+  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T04
+  inventory now expands to 751 legacy leaf launches but remains a reviewed 62-step single-pass gate
+  covering 97 distinct workloads, 27 proof verifiers, and 27 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -358,6 +367,17 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   final expansion bounds. Nineteen runtime probes, two direct trace assignments, and 11 tracked
   files protect platform neutrality, prerequisite integrity, and safe atomic writes.
   Consumer-schema validation remains M05. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
+- The M04-T04 predicate boundary passes 53 focused package tests, 13 compiler-negative cases, and
+  14 independent proof/mutation tests. Two public runtime functions and ten types cover all
+  thirteen closed operators and explicit conditional presence over one factory-branded snapshot;
+  three data-only composition helpers remain internal. The evidence preserves no-short-circuit
+  diagnostic order, direct unresolved versus nested false behavior, RFC 8785 equality, exact
+  UTF-16 order and substring membership, all seven namespace presence paths, fallback-free
+  `exists`, ordered terminal precedence, early aggregate-budget cutoff, deferred token/format
+  outcomes, a 64-predicate-node bound, platform neutrality, eight direct trace assignments, and 11
+  tracked files. M04-T05 retains materialized-operand pairing and ordered variant/style
+  composition; M04-T15/M04-T16 retain reactive subtree lifecycle. P-17 remains `PARTIAL`; no
+  proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -378,10 +398,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T04 — Predicate evaluation and conditional presence`. Build the protocol's closed
-predicate forms over the immutable M04-T02 snapshot and complete value outcomes, preserve exact
-missing and type behavior, and prove that conditional presence never becomes a general expression
-language. Keep the implementation independent of React, DOM, CSS, browser, and application code.
+Start `M04-T05 — Ordered variant and style override evaluation`. Compose M04-T03 materialized
+values with the M04-T04 prepared predicate positions without refreshing the snapshot or token
+session, prove exact operand-position pairing, and apply every matching Variant in document order.
+Base props and style must apply first; later matching overrides may replace only their declared
+paths and may not add or remove children. Keep the implementation independent of React, DOM, CSS,
+browser, and application code.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -389,9 +411,13 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-M04-T03 extends the current reviewed CI inventory to 94 distinct workloads, 26 proof verifiers, 26
-root proof files, and a pinned 60-step plan. The archived CI-01 timing comparison remains historical
-evidence rather than a claim that the larger current inventory has identical timing.
+M04-T04 extends the current reviewed CI inventory to 97 distinct workloads, 27 proof verifiers, 27
+root proof files, and a pinned 62-step plan. Its equivalent legacy dependency expansion contains
+751 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
+repeating prerequisite chains. Twenty-one CI contract tests additionally pin the exact workspace
+roots, every workspace package test command, and the absence of hidden Vitest configuration. The
+archived CI-01 timing comparison remains historical evidence rather than a claim that the larger
+current inventory has identical timing.
 
 M02-T02 evidence:
 
@@ -568,6 +594,18 @@ M04-T03 evidence:
 - executable evidence: 7 package tests, 7 compiler-negative cases, 13 root proof/mutation tests, 2
   direct trace assignments, 7 token probes, 8 format probes, 4 safety probes, and 11 byte-tracked
   files
+
+M04-T04 evidence:
+
+- `docs/proof/RUNTIME-CORE-PREDICATE-EVALUATION.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-predicate-evaluation.json`
+- artifact SHA-256: `14b74cd4f0c35e76edd77858443edf8515b3a60a247afe75131095d5a0c3bcf1`
+- exact boundary: 13 closed operators, 2 public runtime exports, 10 type exports, 3 internal
+  composition helpers, and explicit fail-closed conditional presence
+- executable evidence: 53 package tests, 13 compiler-negative cases, 14 root proof/mutation tests,
+  8 direct trace assignments, 13 operator probes, 162 exact-arity probes, 4 existence probes, 5
+  UTF-16 probes, 4 limit probes, 1 early-cutoff probe, 2 terminal-precedence probes, 5 conditional
+  presence probes, and 11 byte-tracked files
 
 ## Status vocabulary
 

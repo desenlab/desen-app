@@ -134,6 +134,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-core-token-format-resolution.mjs",
       "tests/runtime-core-token-format-resolution.test.mjs",
     ],
+    [
+      "runtime-core-predicate-evaluation",
+      "scripts/verify-runtime-core-predicate-evaluation.mjs",
+      "tests/runtime-core-predicate-evaluation.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -146,11 +151,18 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "1ab460179e27fcf20864ab02244fc322dfe6702ee4667f110b34c65d4f3cb883";
-const QUALITY_GATE_PLAN_SHA256 = "3bb2d49b979bea1933b0fa494edab3cbed20e71ada99f9ecd242af9488bba890";
+  "3eead5557e4f9d9edd402e526eab3cf9113e1d62d01cf63bdf14d13423e56c06";
+const QUALITY_GATE_PLAN_SHA256 = "312067eb7445b5a2a8e36a1d7df78ea3cf6a0fb56c0ab2bcf429d65c6ed28f6b";
+const WORKSPACE_TEST_SCRIPT_SHA256 =
+  "d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420";
+const WORKSPACE_MANIFEST_SHA256 =
+  "c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba";
+const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
 const FORBIDDEN_COMMAND_PATTERN =
   /generate|writ(?:e|er)|--affected\b|--since\b|changed-files?|git-diff/i;
 const SHELL_METACHARACTER_PATTERN = /[\n\r;&|><`$()*?{}!]|\[|\]/;
+const TEST_CONFIGURATION_FILE_PATTERN =
+  /^(?:vite\.config|vitest\.config|vitest\.workspace)\.[^/]+$/u;
 
 class QualityGateError extends Error {
   constructor(message, details = {}) {
@@ -203,6 +215,9 @@ function assertUnique(values, label) {
 }
 
 function parseVitestRun(script, label) {
+  if (SHELL_METACHARACTER_PATTERN.test(script) || /['"\\]/u.test(script)) {
+    throw new QualityGateError(`${label} contains unsafe shell syntax.`, { script });
+  }
   const tokens = script.trim().split(/\s+/);
   if (tokens[0] !== "vitest" || tokens[1] !== "run") {
     throw new QualityGateError(`${label} is not a recognized exhaustive Vitest command.`, {
@@ -339,6 +354,8 @@ export function validateProofInventory({
   verifierFiles,
   rootTestFiles,
   workspacePackages,
+  testConfigurationFiles,
+  workspaceManifestText,
   proofEntries = PROOF_ENTRIES,
 }) {
   const scripts = packageJson.scripts ?? {};
@@ -356,6 +373,66 @@ export function validateProofInventory({
   assertUnique(expectedVerifierFiles, "Proof verifier files");
   assertUnique(expectedRootTestFiles, "Root proof test files");
   assertUnique(workspacePackageNames, "Workspace package names");
+  if (typeof workspaceManifestText !== "string") {
+    throw new QualityGateError("The pnpm workspace manifest inventory is missing.");
+  }
+  const workspaceManifestSha256 = createHash("sha256").update(workspaceManifestText).digest("hex");
+  if (workspaceManifestSha256 !== WORKSPACE_MANIFEST_SHA256) {
+    throw new QualityGateError("pnpm-workspace.yaml bytes drifted from the reviewed inventory.", {
+      expected: WORKSPACE_MANIFEST_SHA256,
+      actual: workspaceManifestSha256,
+    });
+  }
+  const packagesBlock = /^packages:\n((?:[ ]{2}- "[^"]+"\n)+)/u.exec(workspaceManifestText);
+  const workspacePackageGlobs = packagesBlock?.[1].match(/(?<=[ ]{2}- ")[^"]+(?="\n)/gu) ?? [];
+  assertExactArray(
+    workspacePackageGlobs,
+    EXPECTED_WORKSPACE_PACKAGE_GLOBS,
+    "The pnpm workspace package globs",
+  );
+  if (!Array.isArray(testConfigurationFiles)) {
+    throw new QualityGateError("The test-configuration file inventory is missing.");
+  }
+  assertExactArray(
+    [...testConfigurationFiles].sort(),
+    [],
+    "The root and workspace test-configuration file set",
+  );
+  if (Object.hasOwn(packageJson, "vitest")) {
+    throw new QualityGateError("The root package manifest contains an unreviewed vitest field.");
+  }
+
+  const workspaceTestScripts = workspacePackages
+    .map((packageManifest) => ({
+      name: packageManifest.name,
+      test: packageManifest.scripts?.test ?? null,
+    }))
+    .sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0));
+  for (const [index, entry] of workspaceTestScripts.entries()) {
+    const packageManifest = workspacePackageMap.get(entry.name);
+    if (Object.hasOwn(packageManifest, "vitest")) {
+      throw new QualityGateError(`${entry.name} contains an unreviewed vitest manifest field.`);
+    }
+    if (entry.test !== null) {
+      if (typeof entry.test !== "string") {
+        throw new QualityGateError(`${entry.name} has a non-string test command.`);
+      }
+      parseVitestRun(entry.test, `${entry.name} test`);
+    }
+    if (index > 0 && workspaceTestScripts[index - 1].name === entry.name) {
+      throw new QualityGateError(`Workspace test inventory duplicates ${entry.name}.`);
+    }
+  }
+  const workspaceTestScriptSha256 = createHash("sha256")
+    .update(JSON.stringify(workspaceTestScripts))
+    .digest("hex");
+  if (workspaceTestScriptSha256 !== WORKSPACE_TEST_SCRIPT_SHA256) {
+    throw new QualityGateError("The reviewed workspace package test-script inventory drifted.", {
+      expected: WORKSPACE_TEST_SCRIPT_SHA256,
+      actual: workspaceTestScriptSha256,
+      workspaceTestScripts,
+    });
+  }
 
   const expectedCheckCommands = [
     "pnpm format:check",
@@ -437,6 +514,11 @@ export function validateProofInventory({
       0,
     ),
     legacyPrerequisiteSha256,
+    testConfigurationFileCount: testConfigurationFiles.length,
+    workspaceTestScriptCount: workspaceTestScripts.filter(({ test }) => test !== null).length,
+    workspaceTestScriptSha256,
+    workspaceManifestSha256,
+    workspacePackageGlobs,
   };
 }
 
@@ -593,9 +675,17 @@ async function captureCommand(command, args, { cwd = WORKSPACE_ROOT } = {}) {
 
 async function readInventory(workspaceRoot = WORKSPACE_ROOT) {
   const packageJson = JSON.parse(await readFile(resolve(workspaceRoot, "package.json"), "utf8"));
+  const workspaceManifestText = await readFile(
+    resolve(workspaceRoot, "pnpm-workspace.yaml"),
+    "utf8",
+  );
+  const rootFiles = await readdir(workspaceRoot);
   const scriptFiles = await readdir(resolve(workspaceRoot, "scripts"));
   const testFiles = await readdir(resolve(workspaceRoot, "tests"));
   const workspacePackages = [];
+  const testConfigurationFiles = rootFiles
+    .filter((file) => TEST_CONFIGURATION_FILE_PATTERN.test(file))
+    .map((file) => file);
   for (const workspaceDirectory of ["apps", "packages"]) {
     const entries = await readdir(resolve(workspaceRoot, workspaceDirectory), {
       withFileTypes: true,
@@ -604,6 +694,13 @@ async function readInventory(workspaceRoot = WORKSPACE_ROOT) {
       if (!entry.isDirectory()) {
         continue;
       }
+      const packageDirectory = resolve(workspaceRoot, workspaceDirectory, entry.name);
+      const packageFiles = await readdir(packageDirectory);
+      testConfigurationFiles.push(
+        ...packageFiles
+          .filter((file) => TEST_CONFIGURATION_FILE_PATTERN.test(file))
+          .map((file) => `${workspaceDirectory}/${entry.name}/${file}`),
+      );
       const manifestPath = resolve(workspaceRoot, workspaceDirectory, entry.name, "package.json");
       try {
         workspacePackages.push(JSON.parse(await readFile(manifestPath, "utf8")));
@@ -622,7 +719,14 @@ async function readInventory(workspaceRoot = WORKSPACE_ROOT) {
     .filter((file) => file.endsWith(".test.mjs"))
     .map((file) => `tests/${file}`);
 
-  return { packageJson, verifierFiles, rootTestFiles, workspacePackages };
+  return {
+    packageJson,
+    verifierFiles,
+    rootTestFiles,
+    workspacePackages,
+    testConfigurationFiles,
+    workspaceManifestText,
+  };
 }
 
 function updateHashField(hash, value) {
