@@ -15,6 +15,7 @@ export {
   evaluateRuntimeConditionalPresence,
   evaluateRuntimePredicate,
 } from "./predicate-evaluation.js";
+export { evaluateRuntimeVariantOverrides } from "./variant-style-evaluation.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -88,3 +89,15 @@ export type {
   RuntimePredicateSpec,
   RuntimePredicateTypeMismatch,
 } from "./predicate-evaluation.js";
+
+export type {
+  RuntimePropValueSpecs,
+  RuntimeStyleValueSpecs,
+  RuntimeVariantEvaluationInput,
+  RuntimeVariantOverrideInvalidReason,
+  RuntimeVariantOverrideSpec,
+  RuntimeVariantOverridesEvaluated,
+  RuntimeVariantOverridesEvaluation,
+  RuntimeVariantOverridesInvalid,
+  RuntimeVariantValueSources,
+} from "./variant-style-evaluation.js";

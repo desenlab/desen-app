@@ -881,3 +881,72 @@ This file records implementation discoveries without changing the frozen DESEN 0
   ordering and substring behavior, aggregate predicate and raw-JSON depth limits, token-snapshot
   composition, conditional result envelopes, and the exact lifecycle effects of an absent subtree
   across platforms.
+
+## PF-035 — Ordered variants and style overrides require a deterministic merge profile
+
+- Status: OPEN
+- Blocks proof: No; a bounded data-only selection layer can preserve document order and exact
+  override precedence without materializing final component values or entering a framework
+  adapter.
+- Protocol location: SPEC Sections 5.6, 10.2, 10.5, 14–15.2, 17.5, 18–18.4, 24.2–24.3, 25.2, and
+  27.8; Source and Bundle Schema `$defs/nodeSpec`, `$defs/variantSpec`, `$defs/styleSpec`,
+  `$defs/predicateSpec`, and `$defs/valueSpec`; `N-014`, `PIPE-021`, and `R-060`
+- Observation: DESEN 0.1.0 requires base props and style to apply first, every matching Variant to
+  apply in array order, and the later matching value at one property path to win. It also fixes the
+  three-level style hierarchy and prohibits structural child changes through variants. The frozen
+  text does not define whether a prop's nested literal object is recursively merged, whether a
+  visual-state map cascades from `base`, how token and format operands share one observation
+  session across sibling conditions, how a failure in one condition affects the complete merge,
+  how source provenance survives later overrides, or a direct maximum variant count. The frozen
+  examples and conformance vectors contain no actual `variants` member, so runtime precedence
+  evidence must be identified as project goldens rather than official vectors.
+- Implementation decision: M04-T05 adds `evaluateRuntimeVariantOverrides`. It accepts only base
+  `props`, base `style`, and the ordered `variants` array; the closed variant members remain
+  `when`, `props`, `style`, and opaque `extensions`. The input is detached and checked against the
+  shared depth-128, 4,096-JSON-occurrence, and 1,048,576-UTF-16-unit safety profile before any
+  predicate or token callback runs. This finite aggregate input budget also bounds the otherwise
+  schema-unbounded number of variants. Unknown extension data is detached and checked by the
+  copied input boundary but receives no core meaning and does not enter the effective output.
+  Raw output candidates and predicate operands then pass the T02 structural grammar followed by
+  the T03 outer-first format-profile grammar without reading the runtime snapshot, invoking the
+  token provider, or constructing formatted output.
+
+  Variant predicates are prepared and evaluated in exact array order against one factory-created
+  resolution snapshot, one captured request context, and one turn-scoped token session. The session
+  caches the first detached resolved, missing, or failed observation for each unique opaque token
+  name across all sibling predicates. Every materialized operand remains paired with its exact
+  prepared position. Directly missing references or tokens make only their current predicate false;
+  dynamic type mismatches likewise make that predicate false and append
+  `PREDICATE_TYPE_MISMATCH` at its source-prefixed pointer. Malformed input, provider failure, or a
+  finite-budget crossing terminates the complete evaluation in document order without exposing
+  partial effective maps. `exists` retains the M04-T04 original-reference and fallback-bypass
+  behavior.
+
+  Base paths are selected first and every true variant then replaces only the paths it explicitly
+  carries. `/props/{name}` is one indivisible override leaf.
+  `/style/{state}/{part}/{property}` is one indivisible override leaf. Literal objects and arrays
+  inside either ValueSpec are replaced as a whole and are never recursively merged. JSON `null` is
+  a value, not a delete instruction; omitted paths leave the previous selection unchanged; and
+  style state maps never cascade into one another. Variants cannot add or remove children. The
+  accepted API has no capability, slot, child, behavior, repeat, handler, or other structural node
+  field through which it could do so.
+
+  A successful result contains detached, recursively immutable `effectiveProps` and
+  `effectiveStyle` maps, every matching zero-based variant index in document order, ordered
+  predicate diagnostics, and the exact winning Source/Bundle JSON Pointer for every leaf. JSON
+  object-member order carries no protocol meaning; callers that need canonical bytes use the
+  protocol's RFC 8785 serializer, including for legal integer-like prop names. The evaluator
+  returns effective raw ValueSpecs, not final materialized props or styles. A winning reference,
+  token, format, literal object, array, scalar, or JSON `null` therefore remains inert data with its
+  source provenance intact. Consumer-schema validation and adapter delivery remain M05. Active
+  visual-state selection also remains with the target adapter; M04-T05 neither materializes winning
+  style values nor interprets CSS, DOM state, selectors, or component internals.
+
+  M04-T05 proves the variant-order portion of `N-014`, but `N-014` remains `PLANNED` until its
+  action, publication, and editor-order owners are complete. Reactive reevaluation remains
+  M04-T15, and complete surface materialization remains M04-T16.
+
+- Future action: A later protocol revision should standardize override-leaf granularity, variant
+  failure and diagnostic order, cross-condition token-session lifetime, source provenance, an
+  explicit variant-count limit, visual-state composition, and whether a future version introduces
+  an explicit deletion form.

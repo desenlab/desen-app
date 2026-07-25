@@ -278,6 +278,90 @@ boolean result. Operands are resolved and charged sequentially: an earlier inval
 terminal keeps precedence, while an aggregate overflow stops before later values are copied. The
 implementation imports no React, React Native, DOM, CSS, browser, or application API.
 
+## M04-T05 ordered Variant and style-override API
+
+`evaluateRuntimeVariantOverrides` selects effective prop and style ValueSpecs from one base map and
+an ordered Variant array:
+
+```ts
+import { evaluateRuntimeVariantOverrides } from "@desen/runtime-core";
+
+const responsive = evaluateRuntimeVariantOverrides(
+  {
+    props: { direction: "horizontal", gap: 12 },
+    style: { base: { root: { padding: { $token: "space.container" } } } },
+    variants: [
+      {
+        when: {
+          op: "lt",
+          args: [{ $ref: "env.viewport.width" }, 640],
+        },
+        props: { direction: "vertical" },
+        style: { base: { root: { padding: 8 } } },
+      },
+    ],
+  },
+  snapshot,
+  {
+    requestContext,
+    tokens: hostPorts.tokens,
+  },
+);
+```
+
+Base paths are selected first. Every Variant predicate is then evaluated in original array order;
+all matching patches apply, and the later matching value at the same exact leaf wins. The merge
+leaves are:
+
+```text
+/props/{name}
+/style/{state}/{part}/{property}
+```
+
+`/props/{name}` is one indivisible override leaf.
+`/style/{state}/{part}/{property}` is one indivisible override leaf. Literal objects and arrays
+inside either ValueSpec are replaced as a whole and are never recursively merged. An omitted path
+preserves its previous selection, while JSON `null` is a value rather than a delete instruction.
+Visual-state maps remain independent and do not implicitly cascade from `base`. Variants cannot add
+or remove children because the accepted API contains no slots, children, capability, behavior,
+repeat, or event fields.
+
+Conditions reuse the M04-T04 prepared-predicate seam and complete token/format operands through
+M04-T03 against one factory-created snapshot, one captured request context, and one turn-scoped
+token session. Every prepared operand remains paired with its exact materialized position. The
+session performs at most one host lookup per unique opaque token name across all sibling Variant
+conditions. Directly missing references or tokens make their current predicate false; dynamic
+type mismatches likewise produce false plus an ordered source-prefixed
+`PREDICATE_TYPE_MISMATCH`. Invalid input, a redacted provider failure, or a finite-budget crossing
+fails the complete call without a partial effective map.
+
+An `evaluated` result contains:
+
+- `effectiveProps` and `effectiveStyle`, holding the winning raw ValueSpecs;
+- `sources`, holding the exact base or Variant JSON Pointer for every winning leaf;
+- `matchingVariantIndices`, preserving zero-based document order; and
+- ordered predicate `diagnostics`.
+
+The evaluator returns effective raw ValueSpecs, not final materialized props or styles. A winning
+reference, token, format, literal, or JSON `null` remains inert and recursively immutable for the
+next runtime stage. This also means an overwritten value cannot trigger an irrelevant token lookup
+or unresolved-value failure. Consumer-schema validation and adapter delivery remain M05; active
+visual-state selection likewise remains target-adapter work.
+
+Before any provider callback, all raw output candidates and condition operands pass the T02
+structural grammar followed by the T03 outer-first format-profile grammar. This two-pass check is
+data-only: it does not read referenced snapshot values, call the token provider, or construct a
+formatted output.
+
+The complete input, aggregate resolved condition operands, and retained unique token candidates
+are bounded. Input uses the shared depth-128, 4,096-JSON-occurrence, and
+1,048,576-UTF-16-unit profile; the latter two limits are also applied independently across all
+conditions and across the shared token cache. Each condition retains the 64-predicate-node and
+64-argument per-operator ceilings. Hostile or malformed shapes fail closed, accepted maps are
+detached and recursively immutable, and no React, React Native, DOM, CSS, browser, or application
+API enters the implementation. JSON object-member order is not semantic; callers that need stable
+bytes use the protocol's RFC 8785 canonicalizer.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -314,10 +398,11 @@ implementation imports no React, React Native, DOM, CSS, browser, or application
 Private proof package. M04-T01 defines host contracts and stable callback composition; M04-T02
 defines bounded literal/reference/fallback resolution; and M04-T03 adds token and deterministic
 string-format materialization without changing the earlier deferral primitive. M04-T04 adds the
-closed predicate evaluator and fail-closed conditional-presence decision while preserving explicit
-token/format deferral for M04-T05 composition. State writes, resource/operation transitions, action
-execution, rendering, activation implementation, event/command bridges, and adapters remain
-assigned to their later tracked tasks.
+closed predicate evaluator and fail-closed conditional-presence decision. M04-T05 now composes its
+prepared positions with M04-T03 for ordered Variant conditions, then returns effective raw prop and
+style ValueSpecs with exact winning provenance. State writes, resource/operation transitions,
+action execution, final value materialization, rendering, activation implementation, event/command
+bridges, and adapters remain assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -333,9 +418,11 @@ pnpm --filter @desen/runtime-core test:host-ports
 pnpm --filter @desen/runtime-core test:value-resolution
 pnpm --filter @desen/runtime-core test:token-format-resolution
 pnpm --filter @desen/runtime-core test:predicate-evaluation
+pnpm --filter @desen/runtime-core test:variant-style-evaluation
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
 pnpm verify:runtime-core-predicate-evaluation
+pnpm verify:runtime-core-variant-style-evaluation
 pnpm check
 ```
