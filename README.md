@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████░░░░░░░░░░░░░░░░░` **44 / 144 tasks complete (31%)**
+**Overall:** `████████░░░░░░░░░░░░░░░░░` **45 / 144 tasks complete (31%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `███████░░░░░░░░░` **7 / 16 tasks complete (44%)**
+**M04 progress:** `████████░░░░░░░░` **8 / 16 tasks complete (50%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T08`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T09`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -114,6 +114,8 @@ packages/
 - [Runtime core predicate-evaluation proof](docs/proof/RUNTIME-CORE-PREDICATE-EVALUATION.md)
 - [Runtime core Variant and style-override proof](docs/proof/RUNTIME-CORE-VARIANT-STYLE-EVALUATION.md)
 - [Runtime core local-state and base-identity proof](docs/proof/RUNTIME-CORE-LOCAL-STATE-IDENTITY.md)
+- [Runtime core repeat-materialization proof](docs/proof/RUNTIME-CORE-REPEAT-MATERIALIZATION.md)
+- [Runtime core resource-lifecycle proof](docs/proof/RUNTIME-CORE-RESOURCE-LIFECYCLE.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -324,6 +326,19 @@ Evidence passes 34 focused package tests, 7 compiler-negative cases, and 15 root
 tests across 11 task-owned files; the cumulative runtime-core suite passes 201/201. N-014 and
 N-041 gain executable repeat evidence but remain `PLANNED` for their other owners. P-17 stays
 `PARTIAL`, and no proof-gate status changes.
+
+M04-T08 now gives every declared resource one atomic, immutable lifecycle. `mount` and `once`
+requests start from one pre-start snapshot, `manual` waits for explicit refresh, and every input
+is materialized through the shared token/format resolver before exact Catalog schema validation.
+Refresh accepts only the current manager-issued snapshot, so stale, foreign, and structurally
+ABA-equal views fail closed. Output, public errors, adapter failures, policy denial, supersession,
+and disposal remain separated without exposing hostile values or raw exceptions. Terminal
+snapshot capacity is reserved before a request starts, active host transports are capped at 64,
+and later work waits in a bounded replacement queue. Evidence passes 52 focused package tests,
+9 compiler-negative cases, and 23 root proof/mutation tests across 11 task-owned files; the
+cumulative runtime-core suite passes 253/253. N-041 gains resource-limit evidence but remains
+`PLANNED`; full cross-manager snapshot provenance remains M04-T16. P-17 stays `PARTIAL`, and no
+proof-gate status changes.
 
 ## License
 
