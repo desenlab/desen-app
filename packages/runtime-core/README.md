@@ -429,6 +429,66 @@ promises, symbols, cycles, non-finite numbers, sparse or decorated arrays, refle
 forged authorities, and over-budget data fail closed without a partial state. No host callback,
 storage port, framework, DOM, CSS, browser, or native-platform API enters either primitive.
 
+## M04-T07 repeat materialization and repeated identity API
+
+`createRuntimeRepeatRootScope` starts a lexical repeat lifetime from a factory-created M04-T02
+snapshot whose `item` namespace is empty. `materializeRuntimeRepeat` then resolves `items` before
+introducing the new alias, evaluates every key inside an isolated child scope, and exposes
+instances only after the complete repeat passes.
+
+```ts
+import {
+  createRuntimeRepeatRootScope,
+  createRuntimeResolutionSnapshotForRepeatScope,
+  materializeRuntimeRepeat,
+} from "@desen/runtime-core";
+
+const rootScope = createRuntimeRepeatRootScope(snapshot);
+const repeated = materializeRuntimeRepeat(rootScope, {
+  items: { $ref: "resource.tasks.value" },
+  as: "task",
+  key: { $ref: "item.task.id" },
+  limit: 100,
+});
+
+if (repeated.status === "materialized") {
+  const first = repeated.instances[0];
+  if (first !== undefined) {
+    const childSnapshot = createRuntimeResolutionSnapshotForRepeatScope(first.scope);
+    // childSnapshot.item.task is active only for this isolated instance scope.
+    void childSnapshot;
+  }
+}
+```
+
+Nested scopes retain outer aliases and append keys outer-to-inner. Reusing an active alias fails,
+while disjoint sibling repeats may reuse the same name. Child scopes cannot mutate or leak into
+their parent or siblings. The successful result preserves original item order and never sorts by
+key.
+
+Keys must resolve to strings or finite numbers. Their identities use exact RFC 8785 canonical JSON:
+numeric `1` and string `"1"` remain distinct, while `-0` and `0` collide. A missing, non-scalar, or
+duplicate key rejects the whole subtree with no partial instances. A resolved non-array produces
+`REPEAT_ITEMS_INVALID`; an unresolved item reference retains `REFERENCE_UNRESOLVED`. Token and
+format items or keys remain explicit `deferred` outcomes for M04-T16 composition.
+
+The effective ceiling is `min(repeat.limit ?? 1_000, 1_000)`. Exact-boundary input succeeds and
+overflow returns `run.desen.runtime/REPEAT_LIMIT_EXCEEDED`; the runtime never truncates the
+subtree. The whole-surface 5,000-node limit requires full tree composition and remains M04-T16
+work.
+
+Repeat scopes retain one shared base snapshot plus only their active aliases and ordered key path.
+`createRuntimeResolutionSnapshotForRepeatScope` creates a full standard snapshot on demand, so a
+1,000-item result does not retain 1,000 copies of unrelated state, context, resource, operation,
+event, and environment data.
+
+`createRuntimeRepeatedNodeIdentity` and `reconcileRuntimeRepeatedNodeIdentity` compose the T06
+document/surface/source-node base with the complete repeat-key path. Alias names, array indexes,
+item contents, revision, props, and styles do not enter identity. Reordering equal keys preserves
+the exact prior identity; an own or ancestor key change requires replacement; and a capability
+change on the same path requires a remount generation. Platform-instance preservation remains
+M05-T05.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -468,10 +528,11 @@ string-format materialization without changing the earlier deferral primitive. M
 closed predicate evaluator and fail-closed conditional-presence decision. M04-T05 now composes its
 prepared positions with M04-T03 for ordered Variant conditions, then returns effective raw prop and
 style ValueSpecs with exact winning provenance. M04-T06 adds fresh atomic surface-local state,
-complete schema-safe writes, terminal disposal, and repeat-free base node identity. Repeat scopes,
-resource/operation transitions, action execution, final value materialization, rendering,
-activation implementation, event/command bridges, and adapters remain assigned to their later
-tracked tasks.
+complete schema-safe writes, terminal disposal, and repeat-free base node identity. M04-T07 adds
+lexically isolated repeat scopes, ordered atomic materialization, type-sensitive keys, bounded
+non-truncating overflow, and repeated instance identity. Resource/operation transitions, action
+execution, final value materialization, rendering, activation implementation, event/command
+bridges, and adapters remain assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -489,11 +550,13 @@ pnpm --filter @desen/runtime-core test:token-format-resolution
 pnpm --filter @desen/runtime-core test:predicate-evaluation
 pnpm --filter @desen/runtime-core test:variant-style-evaluation
 pnpm --filter @desen/runtime-core test:local-state-identity
+pnpm --filter @desen/runtime-core test:repeat-materialization
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
 pnpm verify:runtime-core-predicate-evaluation
 pnpm verify:runtime-core-variant-style-evaluation
 pnpm verify:runtime-core-local-state-identity
+pnpm verify:runtime-core-repeat-materialization
 pnpm check
 ```

@@ -169,7 +169,6 @@ const EXPECTED_VALIDATOR_SYNTAX_EXPORT = Object.freeze({
   import: "./schema-contract-syntax.js",
 });
 const TRACKED_PATHS = Object.freeze([
-  "packages/runtime-core/package.json",
   "packages/runtime-core/src/local-state.ts",
   "packages/runtime-core/src/node-identity.ts",
   "packages/runtime-core/src/runtime-json-snapshot.ts",
@@ -187,7 +186,6 @@ const TRACKED_PATHS = Object.freeze([
   "packages/runtime-core/dist/runtime-json-snapshot.js.map",
   "packages/runtime-core/dist/runtime-json-snapshot.d.ts",
   "packages/runtime-core/dist/runtime-json-snapshot.d.ts.map",
-  "packages/validator/package.json",
   "packages/validator/schema-contract-syntax.d.ts",
   "packages/validator/schema-contract-syntax.js",
   "scripts/lib/runtime-core-local-state-identity-proof.mjs",

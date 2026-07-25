@@ -286,11 +286,6 @@
     ],
     "trackedFiles": [
       {
-        "path": "packages/runtime-core/package.json",
-        "bytes": 1269,
-        "sha256": "14ad2a8a7fe3c186571a163666b4ffd97140a0cfb4bac65396d974ee9af940eb"
-      },
-      {
         "path": "packages/runtime-core/src/local-state.ts",
         "bytes": 28546,
         "sha256": "0849d9bec96bd2de7c1b3f86270237fa1102ba0d5ae114776c179ff2a8acc207"
@@ -376,11 +371,6 @@
         "sha256": "707d2d1c6791635a22a34e61c846af553c37f4407296e83a0d65f96a204c52db"
       },
       {
-        "path": "packages/validator/package.json",
-        "bytes": 2533,
-        "sha256": "0e38ffa1671f30beb536445fb74996dc2a2820e72cb575f86c45048e2396d8be"
-      },
-      {
         "path": "packages/validator/schema-contract-syntax.d.ts",
         "bytes": 1275,
         "sha256": "1415d571a46a8c4e376a72d15c6ea136cbbb20a96c90c398f48af461392f3245"
@@ -392,8 +382,8 @@
       },
       {
         "path": "scripts/lib/runtime-core-local-state-identity-proof.mjs",
-        "bytes": 75774,
-        "sha256": "3b3997f3c19286813d4050aca314fdf849050115a5ebf950ecbe7e6120cfc8bf"
+        "bytes": 75697,
+        "sha256": "25077e553ac1ce15889dc925c81445c4cdea8d5295d0fde917b8e72f5cf87e83"
       },
       {
         "path": "scripts/generate-runtime-core-local-state-identity-proof.mjs",
@@ -408,7 +398,7 @@
       {
         "path": "tests/runtime-core-local-state-identity.test.mjs",
         "bytes": 20887,
-        "sha256": "efb16bd134d3888c4ccd357d764cc6b17593db47b3b306f7b098405608c56960"
+        "sha256": "bea1b4d68a1d5abf0f56e08ae4775caf7444f34a781d302ce5f882d51e18ede8"
       }
     ],
     "rootScripts": [

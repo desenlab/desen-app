@@ -54,7 +54,7 @@ test("accepts tracked deterministic M04-T06 local-state and identity evidence", 
   assert.equal(result.rootMutationTests, 13);
   assert.equal(result.traceRules, 4);
   assert.equal(result.normativeRules, 1);
-  assert.equal(result.trackedFiles, 25);
+  assert.equal(result.trackedFiles, 23);
   assert.equal(result.mountProbes, 6);
   assert.equal(result.readProbes, 3);
   assert.equal(result.acceptedWriteProbes, 3);

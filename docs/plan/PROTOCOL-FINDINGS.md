@@ -1035,3 +1035,63 @@ This file records implementation discoveries without changing the frozen DESEN 0
   adapter-declared remount policy. Validator hardening must also replace direct execution of the
   frozen capability-ID regular expression with an equivalent linear matcher while preserving the
   frozen schema bytes and official validation language.
+
+## PF-037 — Runtime repeat materialization and instance identity require a deterministic fail-closed profile
+
+- Status: OPEN
+- Blocks proof: No; one lexical, type-sensitive, non-truncating runtime profile can make the
+  frozen repeat requirements executable without claiming full surface materialization or adapter
+  preservation.
+- Protocol location: SPEC Sections 14.2.6, 17.6, 24.2, 24.4, and 27.8; Source and Bundle Schema
+  `$defs/repeatSpec`; `PIPE-021`, `R-045`, `R-061`, `R-104`, `R-123`, `D-022`, `D-023`, and
+  `PF-018`
+- Observation: DESEN 0.1.0 requires array items, one lexical alias, unique string or number keys,
+  bounded materialization, stable repeated identity, and source-array order. It does not define a
+  runtime scope API, whether overflow truncates or rejects, whether alias names or indexes enter
+  instance identity, how nested key paths compose, or how a T02-only evaluator handles token and
+  format forms. Retaining one complete resolution snapshot for every accepted item would also
+  multiply unrelated state, context, resource, operation, event, and environment data by as many
+  as 1,000 instances.
+- Implementation decision: M04-T07 adds one factory-branded root repeat scope over a genuine
+  M04-T02 snapshot whose `item` namespace is empty. A scope retains one shared base snapshot plus
+  only its immutable active-alias map and ordered repeat-key path. A standard resolution snapshot
+  is created on demand, preventing the successful result from retaining 1,000 copies of the full
+  runtime snapshot.
+
+  `items` resolves against the incoming parent scope before the new alias exists. Each item then
+  receives an isolated child alias map for key evaluation and later node-body evaluation. Nested
+  repeats see outer aliases but cannot reuse any active alias; disjoint siblings may reuse an
+  alias because neither child scope mutates or leaks into its parent or sibling. Scalar items are
+  valid and can be addressed directly through `item.<alias>`.
+
+  Every key must resolve to a string or finite number. Its identity is exact RFC 8785 canonical
+  JSON, so numeric `1` and string `"1"` are distinct while negative zero and zero collide. Items
+  remain in original array order and are never key-sorted. One missing, non-scalar, or duplicate
+  key rejects the complete repeated subtree with `REPEAT_KEY_INVALID`; a resolved non-array rejects
+  it with `REPEAT_ITEMS_INVALID`. Unresolved item references preserve `REFERENCE_UNRESOLVED`, while
+  token or format work remains an explicit `deferred` outcome rather than being mislabeled as an
+  invalid repeat. M04-T16 owns composition with the already completed T03 materializer.
+
+  The effective per-repeat ceiling is
+  `min(repeat.limit ?? 1_000, 1_000)`. Exact-boundary materialization succeeds; overflow returns
+  the documented project-owned `run.desen.runtime/REPEAT_LIMIT_EXCEEDED` outcome and never silently
+  truncates. The global 5,000-node surface ceiling requires complete tree composition and remains
+  M04-T16/M12-T05 work, so M04-T07 does not close `N-041`.
+
+  Repeated identity is created from a fresh factory-authenticated T06 descriptor plus the complete
+  outer-to-inner key path. Its canonical key contains the exact document, surface, source-node,
+  and key-path tuple. Alias names, array indexes, item content, revision, props, and styles do not
+  enter identity. Reordering equal keys preserves the exact prior identity; changing an own or
+  ancestor key requires replacement; changing `use` on the same path requires a remount generation.
+  Actual platform-instance preservation remains M05-T05.
+
+  Repeat input crosses the existing bounded inert JSON boundary. Accessors, executable values,
+  promises, symbols, cycles, non-finite numbers, sparse or decorated arrays, unsupported
+  prototypes, forged scopes or identities, malformed closed objects, and over-budget input fail
+  closed without partial instances. The module imports no React, React Native, DOM, CSS, browser,
+  Node, application, locale, timer, random, or dynamic-evaluation dependency.
+
+- Future action: A later protocol revision should standardize repeat overflow behavior, the
+  token/format composition point, nested key-path encoding, whether aliases are diagnostic-only,
+  the relationship between per-repeat and whole-surface limits, and the exact adapter
+  preservation/remount contract.

@@ -23,6 +23,14 @@ export {
   writeRuntimeSurfaceState,
 } from "./local-state.js";
 export { createRuntimeNodeIdentity, reconcileRuntimeNodeIdentity } from "./node-identity.js";
+export {
+  createRuntimeRepeatRootScope,
+  createRuntimeRepeatedNodeIdentity,
+  createRuntimeResolutionSnapshotForRepeatScope,
+  materializeRuntimeRepeat,
+  reconcileRuntimeRepeatedNodeIdentity,
+  RUNTIME_REPEAT_LIMITS,
+} from "./repeat-materialization.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -134,3 +142,22 @@ export type {
   RuntimeNodeIdentityInvalidReason,
   RuntimeNodeIdentityReconciliation,
 } from "./node-identity.js";
+
+export type {
+  RuntimeRepeatDeferred,
+  RuntimeRepeatInvalid,
+  RuntimeRepeatInvalidCode,
+  RuntimeRepeatInvalidReason,
+  RuntimeRepeatKey,
+  RuntimeRepeatLimitExceeded,
+  RuntimeRepeatMaterialization,
+  RuntimeRepeatMaterialized,
+  RuntimeRepeatMaterializedInstance,
+  RuntimeRepeatScope,
+  RuntimeRepeatSpec,
+  RuntimeRepeatedNodeIdentity,
+  RuntimeRepeatedNodeIdentityCreationResult,
+  RuntimeRepeatedNodeIdentityInvalid,
+  RuntimeRepeatedNodeIdentityInvalidReason,
+  RuntimeRepeatedNodeIdentityReconciliation,
+} from "./repeat-materialization.js";
