@@ -92,7 +92,7 @@ check from fresh inputs, and must not trust path filters or cached proof success
 | M04-T03 | DONE        | M04-T02          | Token and deterministic string-format resolution                                                   |
 | M04-T04 | DONE        | M04-T02          | Predicate evaluation and conditional presence                                                      |
 | M04-T05 | DONE        | M04-T03–M04-T04  | Ordered variant and style override evaluation                                                      |
-| M04-T06 | NOT_STARTED | M04-T02          | Local state lifecycle, schema-safe writes, and stable node identity                                |
+| M04-T06 | DONE        | M04-T02          | Local state lifecycle, schema-safe writes, and stable node identity                                |
 | M04-T07 | NOT_STARTED | M04-T02, M04-T06 | Repeat scopes, aliases, keys, instance identity, and limits                                        |
 | M04-T08 | NOT_STARTED | M04-T02          | Resource mount/once/manual lifecycle and refresh                                                   |
 | M04-T09 | NOT_STARTED | M04-T02          | Operation lifecycle and reject/replace/queue concurrency                                           |

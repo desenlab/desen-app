@@ -1,0 +1,430 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T06",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Fresh surface-local state mounts, reads, complete schema-safe writes, disposal, and non-repeated base node identity reconcile deterministically without framework or host effects.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": [{ "id": "N-024", "from": "PLANNED", "to": "TESTED" }]
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T02",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-value-resolution.json",
+      "artifactSha256": "73e4c3d7640eaefd0b45b04b006df3211f0338fafa77293414d43c1052536fea"
+    },
+    {
+      "package": "@desen/validator",
+      "subpaths": {
+        "./schema-contract": {
+          "types": "./dist/schema-instance-validation.d.ts",
+          "import": "./dist/schema-instance-validation.js"
+        },
+        "./schema-contract-syntax": {
+          "types": "./schema-contract-syntax.d.ts",
+          "import": "./schema-contract-syntax.js"
+        }
+      },
+      "runtimeDependency": "workspace:*",
+      "manifestSha256": "0e38ffa1671f30beb536445fb74996dc2a2820e72cb575f86c45048e2396d8be",
+      "facade": {
+        "runtimeExports": ["validateDraft202012"],
+        "typeExports": ["Draft202012SyntaxError", "Draft202012SyntaxValidator"],
+        "tsdocDeclarations": 3,
+        "implementation": "./dist/generated/0.1.0/structural-validators.js#validateDraft202012"
+      }
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": [
+      "createRuntimeNodeIdentity",
+      "disposeRuntimeSurfaceState",
+      "mountRuntimeSurfaceState",
+      "readRuntimeSurfaceState",
+      "reconcileRuntimeNodeIdentity",
+      "writeRuntimeSurfaceState"
+    ],
+    "typeExports": [
+      "RuntimeNodeIdentity",
+      "RuntimeNodeIdentityCreationResult",
+      "RuntimeNodeIdentityDescriptor",
+      "RuntimeNodeIdentityInvalid",
+      "RuntimeNodeIdentityInvalidReason",
+      "RuntimeNodeIdentityReconciliation",
+      "RuntimeSurfaceStateDisposeResult",
+      "RuntimeSurfaceStateEntrySpec",
+      "RuntimeSurfaceStateHandle",
+      "RuntimeSurfaceStateIssue",
+      "RuntimeSurfaceStateMountInput",
+      "RuntimeSurfaceStateMountInvalid",
+      "RuntimeSurfaceStateMountInvalidReason",
+      "RuntimeSurfaceStateMountResult",
+      "RuntimeSurfaceStateReadResult",
+      "RuntimeSurfaceStateSnapshot",
+      "RuntimeSurfaceStateWriteInput",
+      "RuntimeSurfaceStateWriteRejected",
+      "RuntimeSurfaceStateWriteRejectedReason",
+      "RuntimeSurfaceStateWriteResult"
+    ],
+    "sourceExports": [
+      "RuntimeNodeIdentity",
+      "RuntimeNodeIdentityCreationResult",
+      "RuntimeNodeIdentityDescriptor",
+      "RuntimeNodeIdentityInvalid",
+      "RuntimeNodeIdentityInvalidReason",
+      "RuntimeNodeIdentityReconciliation",
+      "RuntimeSurfaceStateDisposeResult",
+      "RuntimeSurfaceStateEntrySpec",
+      "RuntimeSurfaceStateHandle",
+      "RuntimeSurfaceStateIssue",
+      "RuntimeSurfaceStateMountInput",
+      "RuntimeSurfaceStateMountInvalid",
+      "RuntimeSurfaceStateMountInvalidReason",
+      "RuntimeSurfaceStateMountResult",
+      "RuntimeSurfaceStateReadResult",
+      "RuntimeSurfaceStateSnapshot",
+      "RuntimeSurfaceStateWriteInput",
+      "RuntimeSurfaceStateWriteRejected",
+      "RuntimeSurfaceStateWriteRejectedReason",
+      "RuntimeSurfaceStateWriteResult",
+      "createRuntimeNodeIdentity",
+      "disposeRuntimeSurfaceState",
+      "mountRuntimeSurfaceState",
+      "readRuntimeSurfaceState",
+      "reconcileRuntimeNodeIdentity",
+      "writeRuntimeSurfaceState"
+    ],
+    "internalExports": ["isRuntimeJsonObject", "snapshotRuntimeJsonValue"],
+    "modules": [
+      {
+        "fileName": "local-state.ts",
+        "publicModule": true,
+        "runtimeExports": [
+          "disposeRuntimeSurfaceState",
+          "mountRuntimeSurfaceState",
+          "readRuntimeSurfaceState",
+          "writeRuntimeSurfaceState"
+        ],
+        "typeExports": [
+          "RuntimeSurfaceStateDisposeResult",
+          "RuntimeSurfaceStateEntrySpec",
+          "RuntimeSurfaceStateHandle",
+          "RuntimeSurfaceStateIssue",
+          "RuntimeSurfaceStateMountInput",
+          "RuntimeSurfaceStateMountInvalid",
+          "RuntimeSurfaceStateMountInvalidReason",
+          "RuntimeSurfaceStateMountResult",
+          "RuntimeSurfaceStateReadResult",
+          "RuntimeSurfaceStateSnapshot",
+          "RuntimeSurfaceStateWriteInput",
+          "RuntimeSurfaceStateWriteRejected",
+          "RuntimeSurfaceStateWriteRejectedReason",
+          "RuntimeSurfaceStateWriteResult"
+        ],
+        "sourceImports": [
+          "./host-ports.js",
+          "./runtime-json-snapshot.js",
+          "@desen/protocol",
+          "@desen/validator/schema-contract",
+          "@desen/validator/schema-contract-syntax"
+        ],
+        "tsdocDeclarations": 18
+      },
+      {
+        "fileName": "node-identity.ts",
+        "publicModule": true,
+        "runtimeExports": ["createRuntimeNodeIdentity", "reconcileRuntimeNodeIdentity"],
+        "typeExports": [
+          "RuntimeNodeIdentity",
+          "RuntimeNodeIdentityCreationResult",
+          "RuntimeNodeIdentityDescriptor",
+          "RuntimeNodeIdentityInvalid",
+          "RuntimeNodeIdentityInvalidReason",
+          "RuntimeNodeIdentityReconciliation"
+        ],
+        "sourceImports": ["./runtime-json-snapshot.js", "@desen/protocol"],
+        "tsdocDeclarations": 8
+      },
+      {
+        "fileName": "runtime-json-snapshot.ts",
+        "publicModule": false,
+        "runtimeExports": ["isRuntimeJsonObject", "snapshotRuntimeJsonValue"],
+        "typeExports": [],
+        "sourceImports": ["./host-ports.js", "./value-resolution.js"],
+        "tsdocDeclarations": 2
+      }
+    ],
+    "tsdocDeclarations": 28
+  },
+  "validatorFacade": {
+    "runtimeExports": ["validateDraft202012"],
+    "typeExports": ["Draft202012SyntaxError", "Draft202012SyntaxValidator"],
+    "tsdocDeclarations": 3,
+    "implementation": "./dist/generated/0.1.0/structural-validators.js#validateDraft202012"
+  },
+  "runtime": {
+    "mountProbes": 6,
+    "readProbes": 3,
+    "acceptedWriteProbes": 3,
+    "rejectedWriteProbes": 7,
+    "completeValidationProbes": 3,
+    "schemaSyntaxProbes": 1,
+    "schemaProfileProbes": 2,
+    "resolvedValueProbes": 1,
+    "pf019Probes": 2,
+    "noOpProbes": 1,
+    "atomicityProbes": 4,
+    "disposalProbes": 5,
+    "identityCreationProbes": 2,
+    "identityPreservationProbes": 1,
+    "identityRemountProbes": 1,
+    "identityReplacementProbes": 1,
+    "identityRejectionProbes": 3,
+    "capabilitySafetyProbes": 1,
+    "hostileInputProbes": 1,
+    "platformEffects": 0,
+    "sourceWriteBacks": 0,
+    "partialOutputs": false
+  },
+  "stateSemantics": {
+    "initialization": "all declarations and initials or no handle",
+    "locality": "one surface lifetime",
+    "persistence": false,
+    "sourceWriteBack": false,
+    "writeInput": "already-resolved inert JSON",
+    "schemaApplication": "complete resolved-value",
+    "schemaVocabularyDeclarations": "fail closed before mount because vocabulary-dependent assertions are unsupported",
+    "writeAddressing": "substring before first dot is the complete entry name",
+    "longestPrefixMatching": false,
+    "nestedParents": "existing objects only",
+    "arrayTraversal": false,
+    "finalPropertyCreation": "allowed only when complete candidate validates",
+    "diagnostic": "STATE_WRITE_INVALID",
+    "commit": "atomic immutable generation",
+    "noOp": "RFC 8785 canonical equality preserves generation and snapshot identity",
+    "disposal": "runtime authority revoked; retained historical snapshots are not securely erased"
+  },
+  "nodeIdentitySemantics": {
+    "scope": "non-repeated base source node",
+    "keyTuple": ["documentId", "surfaceId", "nodeId"],
+    "revisionInKey": false,
+    "capabilityInKey": false,
+    "compatibleResult": "preserve-eligible with exact prior identity",
+    "capabilityChangeResult": "remount-required with incremented generation",
+    "tupleChangeResult": "replace-required with fresh generation zero",
+    "repeatKey": "deferred to M04-T07",
+    "adapterRemountPolicy": "deferred to M05-T05",
+    "capabilityIdParser": "linear scan equivalent to the frozen accepted language"
+  },
+  "limits": {
+    "maxValueDepth": 128,
+    "maxJsonNodes": 4096,
+    "maxStringCodeUnits": 1048576,
+    "partialResults": false
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": { "normativeClause": "N-024", "normativeStatus": "TESTED", "finding": "PF-036" },
+  "evidence": {
+    "packageTests": 33,
+    "compilerNegativeCases": 7,
+    "compilerNegativeLabels": [
+      "snapshots are recursively readonly",
+      "state values are JSON, never executable callbacks",
+      "opaque handles cannot be constructed by shape",
+      "opaque node identities cannot be constructed by shape",
+      "node identities are immutable",
+      "revision is deliberately absent from base node identity",
+      "repeat-key discrimination belongs to M04-T07"
+    ],
+    "rootMutationTests": 13,
+    "traceRules": [
+      {
+        "collection": "pipelineSteps",
+        "id": "PIPE-018",
+        "section": "24.2",
+        "owners": ["M04-T06"],
+        "status": "LOCAL_STATE_PRIMITIVE_HEADLESS_TRACE_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-054",
+        "section": "16.1",
+        "owners": ["M02-T10", "M04-T06"],
+        "status": "RUNTIME_PRIMITIVE_HEADLESS_TRACE_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-104",
+        "section": "24.4",
+        "owners": ["M04-T06", "M04-T07", "M05-T05"],
+        "status": "BASE_IDENTITY_PRIMITIVE_REPEAT_AND_ADAPTER_COMPOSITION_DEFERRED"
+      },
+      {
+        "collection": "diagnostics",
+        "id": "D-019",
+        "section": "Appendix B",
+        "owners": ["M02-T05", "M02-T10", "M04-T06"],
+        "status": "RUNTIME_PRIMITIVE_HEADLESS_TRACE_DEFERRED"
+      }
+    ],
+    "normativeRules": [
+      {
+        "id": "N-024",
+        "status": "TESTED",
+        "evidence": "complete resolved-value post-write schema validation"
+      }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/package.json",
+        "bytes": 1269,
+        "sha256": "14ad2a8a7fe3c186571a163666b4ffd97140a0cfb4bac65396d974ee9af940eb"
+      },
+      {
+        "path": "packages/runtime-core/src/local-state.ts",
+        "bytes": 28546,
+        "sha256": "0849d9bec96bd2de7c1b3f86270237fa1102ba0d5ae114776c179ff2a8acc207"
+      },
+      {
+        "path": "packages/runtime-core/src/node-identity.ts",
+        "bytes": 10904,
+        "sha256": "f3a1710344319575612cfcf45f10a99419165be606d5f549860912acf9574645"
+      },
+      {
+        "path": "packages/runtime-core/src/runtime-json-snapshot.ts",
+        "bytes": 1479,
+        "sha256": "91312691b4ff9f205ad6d7dbe5102a8df54894be3e4b33b8ca04e695b88fac57"
+      },
+      {
+        "path": "packages/runtime-core/test/local-state-identity.test.ts",
+        "bytes": 23709,
+        "sha256": "781c7fd7d73af43391c3da02330adeb4ddf00e4b99d984d92d63ef07fe8a6a89"
+      },
+      {
+        "path": "packages/runtime-core/test/local-state-identity.types.ts",
+        "bytes": 2538,
+        "sha256": "63ac6b9c415dd1b6444ae0327845d5974b751adba1cda70011a3297425fb4569"
+      },
+      {
+        "path": "packages/runtime-core/dist/local-state.js",
+        "bytes": 18258,
+        "sha256": "15904738295fdd93b186c54823818c07fc704eb8d8f0d46ff9ae5e4b6025c2e6"
+      },
+      {
+        "path": "packages/runtime-core/dist/local-state.js.map",
+        "bytes": 17427,
+        "sha256": "78a6a08f6730ff240ed0bea2a25dcad6f2d7ed8cf209fd524b0f80acb08927e2"
+      },
+      {
+        "path": "packages/runtime-core/dist/local-state.d.ts",
+        "bytes": 10123,
+        "sha256": "9139f9e516ccf47e3f1c35988a45eb798f7a04830703d37982c7756fbb70436d"
+      },
+      {
+        "path": "packages/runtime-core/dist/local-state.d.ts.map",
+        "bytes": 4036,
+        "sha256": "b14a4e799befa912dedcc5118748e1f5f44d006006cd7196150fe8194caba1e6"
+      },
+      {
+        "path": "packages/runtime-core/dist/node-identity.js",
+        "bytes": 6433,
+        "sha256": "c0f3ecb35b5cb19414472454c08c35b756c88bce40dc38341daf325645b8d0f6"
+      },
+      {
+        "path": "packages/runtime-core/dist/node-identity.js.map",
+        "bytes": 5629,
+        "sha256": "43c977cb65bb46a0cc2b73e7ea1afb437d389058063158a090b82f550a9ff524"
+      },
+      {
+        "path": "packages/runtime-core/dist/node-identity.d.ts",
+        "bytes": 5012,
+        "sha256": "2170851fb727405f976458f148a3490feaa79af9b5be770ae028a555b4a84b6c"
+      },
+      {
+        "path": "packages/runtime-core/dist/node-identity.d.ts.map",
+        "bytes": 2023,
+        "sha256": "dc8e3541a9b3376e5cf72189fb76b377e163bd5f196712cf6689b97572b3d163"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.js",
+        "bytes": 1269,
+        "sha256": "e63639fdb72651712c69f23eacb6609f651914b7fed3725246bac4282e4f6578"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.js.map",
+        "bytes": 915,
+        "sha256": "a68f27dfc0c949ab7b4e4210f8486716d2bd05e76cd99a0628746a36ecf4eb14"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.d.ts",
+        "bytes": 690,
+        "sha256": "1f26be24a9e777d2bda3d11ead4747b6aa02a820943305eb99d392e6c1670418"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.d.ts.map",
+        "bytes": 358,
+        "sha256": "707d2d1c6791635a22a34e61c846af553c37f4407296e83a0d65f96a204c52db"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 2533,
+        "sha256": "0e38ffa1671f30beb536445fb74996dc2a2820e72cb575f86c45048e2396d8be"
+      },
+      {
+        "path": "packages/validator/schema-contract-syntax.d.ts",
+        "bytes": 1275,
+        "sha256": "1415d571a46a8c4e376a72d15c6ea136cbbb20a96c90c398f48af461392f3245"
+      },
+      {
+        "path": "packages/validator/schema-contract-syntax.js",
+        "bytes": 87,
+        "sha256": "8b68d387d6432fd70d44f96536bb3c5a7ba636927d805c55b5e6a29155487e84"
+      },
+      {
+        "path": "scripts/lib/runtime-core-local-state-identity-proof.mjs",
+        "bytes": 75774,
+        "sha256": "3b3997f3c19286813d4050aca314fdf849050115a5ebf950ecbe7e6120cfc8bf"
+      },
+      {
+        "path": "scripts/generate-runtime-core-local-state-identity-proof.mjs",
+        "bytes": 859,
+        "sha256": "b5f6a26ec87f3f43b1657b7673e1082a4a41cdb610a11270335d1f32bfe4143e"
+      },
+      {
+        "path": "scripts/verify-runtime-core-local-state-identity.mjs",
+        "bytes": 688,
+        "sha256": "e22173e791784408740dac6886cda2aabc9cf5f251b2b8311cf90755ea5a5a7b"
+      },
+      {
+        "path": "tests/runtime-core-local-state-identity.test.mjs",
+        "bytes": 20887,
+        "sha256": "efb16bd134d3888c4ccd357d764cc6b17593db47b3b306f7b098405608c56960"
+      }
+    ],
+    "rootScripts": [
+      "generate:runtime-core-local-state-identity",
+      "verify:runtime-core-local-state-identity",
+      "test:runtime-core-local-state-identity"
+    ]
+  },
+  "deferred": [
+    "state.toggle and complete action-turn execution (M04-T10)",
+    "repeat expansion, repeat keys, and repeated instance identity (M04-T07)",
+    "resource and operation lifecycle transitions (M04-T08/M04-T09)",
+    "reactive reevaluation and conditional subtree lifecycle (M04-T15)",
+    "complete headless sign-in observable trace (M04-T16)",
+    "adapter compatibility and declared remount-required prop policy (M05-T05)",
+    "cross-surface persistence profiles and secure memory erasure",
+    "React, browser, iOS, Android, SwiftUI, and Compose adapters"
+  ]
+}

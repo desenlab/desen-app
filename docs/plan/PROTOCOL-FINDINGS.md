@@ -950,3 +950,88 @@ This file records implementation discoveries without changing the frozen DESEN 0
   failure and diagnostic order, cross-condition token-session lifetime, source provenance, an
   explicit variant-count limit, visual-state composition, and whether a future version introduces
   an explicit deletion form.
+
+## PF-036 — Runtime local-state lifecycle and base node identity require a deterministic profile
+
+- Status: OPEN
+- Blocks proof: No; one bounded, handle-owned lifecycle and a repeat-free base identity can make
+  the frozen state invariant executable without claiming later action, repeat, reactivity, or
+  adapter behavior.
+- Protocol location: SPEC Sections 8.1, 14.2.1, 16.1, 17.8, 20.1–20.2, 24.2–24.5, and 27.8;
+  Source and Bundle Schema `$defs/stateSpec`, `$defs/actionSpec`, `$defs/nodeSpec`, and
+  `$defs/repeatSpec`; `N-024`, `R-054`, `R-104`, `PIPE-018`, `D-019`, and `PF-019`
+- Observation: DESEN 0.1.0 requires fresh surface-local ephemeral state, schema-valid initials,
+  complete post-write validity, disposal on navigation away unless a future profile preserves
+  state, and stable node identity across compatible reevaluation. It does not define a runtime
+  handle/snapshot API, whether canonically identical writes create a new generation, whether a
+  nested write may create containers or traverse arrays, the exact disposal visibility of a
+  previously returned snapshot, or the repeat-free portion of a node-instance key. The frozen
+  path grammar also admits dotted state declaration names and empty-looking dot boundaries that
+  conflict with the prose's first-segment rule recorded in `PF-019`.
+- Implementation decision: M04-T06 adds `mountRuntimeSurfaceState`,
+  `readRuntimeSurfaceState`, `writeRuntimeSurfaceState`, and `disposeRuntimeSurfaceState`.
+  Mount copies the complete declaration set through the M04-T02 bounded inert JSON boundary,
+  checks every prepared schema against the generated Draft 2020-12 meta-schema, graph-checks it,
+  and validates every initial with `complete` plus `resolved-value` semantics before exposing any
+  handle or snapshot. An explicit `$vocabulary` declaration fails closed because the current
+  interpreter does not claim vocabulary-dependent assertion support; otherwise a schema could
+  declare `format-assertion` while the interpreter correctly treats `format` only as an
+  annotation. One invalid declaration rejects the entire mount. Every successful mount is fresh,
+  starts at generation zero, shares no live authority with an earlier mount, reads no persistence
+  port, mutates no Source or Bundle byte, and retains state values only behind one factory-branded
+  handle.
+
+  A read returns one detached, recursively immutable complete value map that can directly become
+  the `state` namespace of the M04-T02 resolution snapshot. A handle itself exposes no values.
+  Dispose is terminal and idempotent: it removes the live schemas and current snapshot from the
+  handle and prevents later writes. A previously returned immutable snapshot may remain as a
+  historical caller-owned observation; secure erasure of an already returned JavaScript value is
+  not claimed. Reopening the same surface creates the exact declared initials again. Deciding
+  whether a successful or denied navigation triggers disposal belongs to M04-T10.
+
+  `writeRuntimeSurfaceState` accepts only one already resolved inert JSON value and one path. It
+  does not accept a guard, ValueSpec evaluator, toggle, navigation command, or action array. Per
+  `PF-019`, the substring before the first `.` is the complete state-entry name and no
+  longest-prefix or backtracking lookup occurs. A root-only path replaces the complete entry.
+  Nested paths traverse only existing own object properties: arrays are never indexed, and missing
+  intermediate containers are never invented. The final property may be absent and is created
+  only when the resulting complete entry validates against its exact schema. Empty segments are
+  rejected. Numeric-looking, colon, hyphen, `constructor`, and `__proto__` property names remain
+  ordinary inert data without prototype mutation.
+
+  Every candidate is detached and bounded before use. The runtime constructs it without changing
+  the current snapshot, applies the exact prepared schema to the complete candidate using
+  `complete` and `resolved-value`, rechecks the aggregate state budget, and swaps the current
+  snapshot only after every check passes. A rejection returns `STATE_WRITE_INVALID` with no
+  candidate or partial state; the current snapshot and generation remain identical. `$ref`,
+  `$token`, and `$format` property names inside resolved state are ordinary JSON. JSON `null`,
+  `false`, numeric zero, and the empty string remain values. A canonically identical candidate is
+  `unchanged` and does not advance generation; a different accepted candidate advances generation
+  exactly once.
+
+  M04-T06 also adds one repeat-free `RuntimeNodeIdentity` whose stable structured key is the exact
+  `{documentId, surfaceId, nodeId}` tuple. Revision, tree position, `use`, props, style, and adapter
+  state are not part of that base key. Strings are compared exactly without trimming, case
+  folding, or Unicode normalization. Reconciliation of the same tuple and same `use` returns the
+  exact prior identity as `preserve-eligible`; this is eligibility, not a promise that an adapter
+  can preserve its platform instance. The same tuple with a changed `use` is
+  `remount-required` with a new mount generation. A changed document, surface, or node tuple is
+  `replace-required` with a fresh base identity. Capability identifiers are checked by a bounded
+  linear parser that accepts the exact frozen pattern language without evaluating its
+  backtracking-prone redundant dotted group as a JavaScript regular expression. Repeat-key
+  discrimination remains exclusively M04-T07, adapter preservation and remount-required property
+  policy remain M05-T05, and reactive mount/unmount orchestration remains M04-T15.
+
+  The shared runtime limits remain depth 128, 4,096 JSON occurrences, and 1,048,576 UTF-16 code
+  units. Accessors, executable values, promises, symbols, cycles, non-finite numbers, sparse or
+  decorated arrays, unsupported prototypes, reflection failures, forged handles/identities, and
+  over-budget inputs fail closed. The implementation imports no React, React Native, DOM, CSS,
+  browser, Node, application, locale, or dynamic-evaluation dependency.
+
+- Future action: A later protocol revision should align state declaration and action-path
+  grammars; standardize nested property creation, array addressing, no-op generations, snapshot
+  retention, preservation profiles, and disposal timing; and define a cross-platform instance key
+  that composes source-node identity, repeat identity, capability compatibility, and
+  adapter-declared remount policy. Validator hardening must also replace direct execution of the
+  frozen capability-ID regular expression with an equivalent linear matcher while preserving the
+  frozen schema bytes and official validation language.
