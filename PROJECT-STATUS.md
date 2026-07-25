@@ -144,6 +144,15 @@ preserves a compatible identity by reference, and classifies capability or tuple
 claiming adapter-instance behavior. This task records `PF-036` and moves N-024 to `TESTED`; repeat
 keys, actions, reactivity, and adapter preservation remain assigned later. P-17 remains `PARTIAL`,
 and no proof-gate status changes.
+M04-T07 now evaluates repeat items in the incoming scope, creates isolated item scopes only after
+that evaluation, and extends nested scopes without allowing active-alias shadowing. Instances stay
+in source order and use type-sensitive RFC 8785 string/finite-number key identity. Missing,
+malformed, duplicate, hostile, or over-budget keys reject the complete subtree; overflow above the
+effective `min(limit ?? 1_000, 1_000)` ceiling never truncates. Repeated identities compose the
+complete outer-to-inner key path onto M04-T06's stable document/surface/node tuple, so reorder
+preserves identity, key changes replace, and capability changes remount. This task records
+`PF-037`; N-014 and N-041 gain repeat evidence but remain `PLANNED` for their remaining owners.
+P-17 remains `PARTIAL`, and no proof-gate status changes.
 
 ## Current milestone
 
@@ -177,11 +186,12 @@ and no proof-gate status changes.
   `M04-T03 — Token and deterministic string-format resolution`,
   `M04-T04 — Predicate evaluation and conditional presence`,
   `M04-T05 — Ordered variant and style override evaluation`,
-  `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`
+  `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`,
+  `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`
-- Status: M04-T06 complete; ready for M04-T07
+- Next implementation task: `M04-T08 — Resource mount/once/manual lifecycle and refresh`
+- Status: M04-T07 complete; ready for M04-T08
 
 ## Completed preparation
 
@@ -198,9 +208,9 @@ and no proof-gate status changes.
   configured through Dependabot.
 - CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
   fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
-  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T06
-  inventory now expands to 1,065 legacy leaf launches but remains a reviewed 66-step single-pass
-  gate covering 103 distinct workloads, 29 proof verifiers, and 29 root proof files.
+  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T07
+  inventory now expands to 1,175 legacy leaf launches but remains a reviewed 68-step single-pass
+  gate covering 106 distinct workloads, 30 proof verifiers, and 30 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -418,10 +428,17 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   `resolved-value` mode, preserve exact snapshots after rejection or canonical no-op, and dispose
   live authority terminally. A separate structured document/surface/node tuple makes repeat-free
   preservation, remount, and replacement eligibility explicit through a linear capability-ID
-  parser. Four direct trace assignments, 25 tracked source/distribution files, and the cumulative
+  parser. Four direct trace assignments, 23 task-owned source/distribution files, and the cumulative
   167/167 runtime-core suite protect the boundary. N-024 is `TESTED`; repeat identity, action
   execution, reactivity, and adapter preservation remain later work. P-17 stays `PARTIAL`, and no
   proof-gate status changes.
+- The M04-T07 repeat boundary passes 34 focused package tests, 7 compiler-negative cases, and 15
+  root proof/mutation tests. Six public runtime functions and 16 public types enforce lexical alias
+  timing, nested scope isolation, source order, type-sensitive canonical key identity, whole-subtree
+  failure, and the exact 1,000-instance Reference Profile ceiling. Repeated identity preserves
+  reorder-stable key paths and distinguishes replacement from capability remount. Seven direct
+  trace assignments, 11 task-owned files, and the cumulative 201/201 runtime-core suite protect the
+  boundary. N-014 and N-041 remain `PLANNED`, P-17 stays `PARTIAL`, and no proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -442,11 +459,11 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`. Compose repeat
-instance identity onto M04-T06's exact document/surface/node base without changing that stable key,
-and preserve the frozen alias, key, and item-scope semantics under deterministic duplicate and
-bounded-materialization rules. Keep action execution, reactivity, and actual adapter-instance
-preservation in their assigned later tasks.
+Start `M04-T08 — Resource mount/once/manual lifecycle and refresh`. Mount every declared resource
+atomically, start `mount` and `once` policies from one pre-start snapshot, keep `manual` resources
+idle until refresh, and reject stale asynchronous settlements without exposing host failures or
+partial lifecycle state. Keep operation concurrency, action execution, and reactive orchestration
+in their assigned later tasks.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -454,9 +471,9 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-M04-T06 extends the current reviewed CI inventory to 103 distinct workloads, 29 proof verifiers, 29
-root proof files, and a pinned 66-step plan. Its equivalent legacy dependency expansion contains
-1,065 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
+M04-T07 extends the current reviewed CI inventory to 106 distinct workloads, 30 proof verifiers, 30
+root proof files, and a pinned 68-step plan. Its equivalent legacy dependency expansion contains
+1,175 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
 repeating prerequisite chains. Twenty-one CI contract tests additionally pin the exact workspace
 roots, every workspace package test command, and the absence of hidden Vitest configuration. The
 archived CI-01 timing comparison remains historical evidence rather than a claim that the larger
@@ -665,12 +682,23 @@ M04-T06 evidence:
 
 - `docs/proof/RUNTIME-CORE-LOCAL-STATE-IDENTITY.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-local-state-identity.json`
-- artifact SHA-256: `61cea970d896b4f2278b449cb5564a5069cbc4271b7e8b5e517a186aa48a858b`
+- artifact SHA-256: `4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13`
 - exact boundary: 6 runtime exports, 20 runtime type exports, a narrow typed validator syntax seam,
   atomic complete-entry state validation, and repeat-free base node identity
 - executable evidence: 33 focused package tests, 7 compiler-negative cases, 13 root
-  proof/mutation tests, 4 direct trace assignments, 25 tracked source/distribution files, and a
+  proof/mutation tests, 4 direct trace assignments, 23 task-owned source/distribution files, and a
   cumulative 167/167 runtime-core package suite
+
+M04-T07 evidence:
+
+- `docs/proof/RUNTIME-CORE-REPEAT-MATERIALIZATION.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-repeat-materialization.json`
+- artifact SHA-256: `45ba72f21f936931d087982d8a52e6b4d226a33ed5693c2d3d6bf9158fddb02d`
+- exact boundary: 6 runtime exports, 16 type exports, lexical repeat scopes, type-sensitive
+  canonical keys, atomic bounded materialization, and stable repeated node identity
+- executable evidence: 34 focused package tests, 7 compiler-negative cases, 15 root
+  proof/mutation tests, 7 direct trace assignments, 11 task-owned files, and a cumulative 201/201
+  runtime-core package suite
 
 ## Status vocabulary
 

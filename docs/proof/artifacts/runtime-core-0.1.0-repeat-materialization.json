@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T07",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Repeats resolve in lexical scope, materialize atomically in source order, reject overflow without truncation, and reconcile type-sensitive key-path identity deterministically.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T02",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-value-resolution.json",
+      "artifactSha256": "73e4c3d7640eaefd0b45b04b006df3211f0338fafa77293414d43c1052536fea"
+    },
+    {
+      "task": "M04-T06",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-local-state-identity.json",
+      "artifactSha256": "4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_REPEAT_LIMITS",
+      "createRuntimeRepeatRootScope",
+      "createRuntimeRepeatedNodeIdentity",
+      "createRuntimeResolutionSnapshotForRepeatScope",
+      "materializeRuntimeRepeat",
+      "reconcileRuntimeRepeatedNodeIdentity"
+    ],
+    "typeExports": [
+      "RuntimeRepeatDeferred",
+      "RuntimeRepeatInvalid",
+      "RuntimeRepeatInvalidCode",
+      "RuntimeRepeatInvalidReason",
+      "RuntimeRepeatKey",
+      "RuntimeRepeatLimitExceeded",
+      "RuntimeRepeatMaterialization",
+      "RuntimeRepeatMaterialized",
+      "RuntimeRepeatMaterializedInstance",
+      "RuntimeRepeatScope",
+      "RuntimeRepeatSpec",
+      "RuntimeRepeatedNodeIdentity",
+      "RuntimeRepeatedNodeIdentityCreationResult",
+      "RuntimeRepeatedNodeIdentityInvalid",
+      "RuntimeRepeatedNodeIdentityInvalidReason",
+      "RuntimeRepeatedNodeIdentityReconciliation"
+    ],
+    "tsdocDeclarations": 22,
+    "sourceImports": [
+      "./host-ports.js",
+      "./node-identity.js",
+      "./runtime-json-snapshot.js",
+      "./value-resolution.js",
+      "@desen/protocol"
+    ]
+  },
+  "runtime": {
+    "aliasTimingProbes": 1,
+    "aliasScopeProbes": 2,
+    "orderingProbes": 1,
+    "keyIdentityProbes": 2,
+    "limitProbes": 2,
+    "atomicityProbes": 3,
+    "repeatedIdentityProbes": 3,
+    "platformEffects": 0,
+    "partialOutputs": false,
+    "truncation": false
+  },
+  "semantics": {
+    "itemsEvaluation": "incoming parent scope before own alias",
+    "aliasExtent": "child key and repeated subtree only",
+    "activeAliasShadowing": "invalid",
+    "siblingAliasReuse": "allowed",
+    "order": "source array",
+    "keyTypes": ["string", "finite-number"],
+    "keyIdentity": "RFC 8785 canonical JSON with JSON type retained",
+    "negativeZeroIdentity": "0",
+    "duplicateKeyResult": "REPEAT_KEY_INVALID",
+    "nonArrayResult": "REPEAT_ITEMS_INVALID",
+    "defaultLimit": 1000,
+    "overflow": "controlled failure without truncation",
+    "failurePublication": "no partial instances",
+    "instanceIdentity": "document, surface, source node, and complete outer-to-inner repeat-key path",
+    "excludedFromIdentity": [
+      "array index",
+      "alias name",
+      "item contents",
+      "revision",
+      "props",
+      "styles"
+    ]
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": {
+    "finding": "PF-018",
+    "findingStatus": "OPEN",
+    "proofDocument": "docs/proof/RUNTIME-CORE-REPEAT-MATERIALIZATION.md"
+  },
+  "evidence": {
+    "focusedTestRegistrations": 31,
+    "focusedTests": 34,
+    "focusedTestTitles": [
+      "creates a branded root only from a real snapshot with an empty item namespace",
+      "resolves items before introducing the repeat's own alias",
+      "preserves source-array order instead of sorting by key",
+      "exposes each alias only in its own child scope without sibling or root leakage",
+      "lets a nested repeat see outer aliases and extends the key path outer-to-inner",
+      "rejects active alias shadowing while disjoint siblings may reuse the alias",
+      "accepts scalar items and resolves the alias root directly",
+      "treats prototype-sensitive alias names as ordinary isolated data",
+      "materializes an empty repeat without evaluating its key",
+      "distinguishes non-array items from unresolved and deferred item values",
+      "does not let a fallback hide a resolved null items value",
+      "rejects a %s repeat key without partial instances",
+      "rejects a missing key at its exact item without exposing earlier successes",
+      "uses a valid fallback for a missing item key",
+      "keeps numeric and string keys distinct while canonicalizing negative zero",
+      "defers token and format keys at the exact key location",
+      "structurally rejects a malformed key even when the item array is empty",
+      "accepts the exact explicit limit and rejects limit plus one without truncation",
+      "enforces the exact 1,000-instance profile ceiling",
+      "rejects malformed, accessor-backed, sparse, cyclic, and decorated input",
+      "detaches caller input and recursively freezes successful output",
+      "rejects forged scopes without throwing or exposing a partial result",
+      "turns aggregate child-scope budget overflow into a controlled result",
+      "creates a canonical identity from the base tuple and complete key path",
+      "preserves exact identity across reorder and ignores array index",
+      "requires replacement when an own repeat key changes",
+      "resets mount generation when a key changes after an earlier capability remount",
+      "requires replacement when an ancestor repeat key changes",
+      "requires a remount on the same key path when capability changes",
+      "requires replacement when the document, surface, or source node changes",
+      "rejects root scopes, forged scopes, identities, and malformed descriptors"
+    ],
+    "compilerNegativeCases": 7,
+    "compilerNegativeLabels": [
+      "repeat key paths are immutable",
+      "repeated identities are immutable",
+      "opaque repeat scopes cannot be constructed by shape",
+      "opaque repeated identities cannot be constructed by shape",
+      "repeat items are inert ValueSpecs, never callbacks",
+      "aliases are strings",
+      "repeat keys come from the branded scope, not the base descriptor"
+    ],
+    "rootMutationTests": 15,
+    "rootMutationTestTitles": [
+      "accepts tracked deterministic M04-T07 repeat evidence",
+      "builds byte-identical repeat evidence twice",
+      "rejects stale or tampered repeat evidence",
+      "rejects stale M04-T02 prerequisite bytes",
+      "rejects stale M04-T06 prerequisite bytes",
+      "detects own-alias timing drift",
+      "detects active-alias shadowing drift",
+      "detects source-order drift",
+      "detects key coercion and negative-zero drift",
+      "detects repeat-limit truncation drift",
+      "detects partial-result drift",
+      "detects array-index identity drift",
+      "detects ancestor-key identity drift",
+      "detects public export, TSDoc, and platform drift",
+      "detects focused-test and compiler-negative inventory drift"
+    ],
+    "traceRules": [
+      { "id": "PIPE-021", "section": "24.2", "owners": ["M04-T04", "M04-T05", "M04-T07"] },
+      { "id": "R-045", "section": "14.2.6", "owners": ["M02-T10", "M04-T07"] },
+      { "id": "R-061", "section": "17.6", "owners": ["M02-T10", "M04-T07", "M05-T05"] },
+      { "id": "R-104", "section": "24.4", "owners": ["M04-T06", "M04-T07", "M05-T05"] },
+      { "id": "R-123", "section": "27.8", "owners": ["M02-T13", "M04-T07", "M04-T13", "M07-T04"] },
+      { "id": "D-022", "section": "Appendix B", "owners": ["M02-T05", "M02-T10", "M04-T07"] },
+      { "id": "D-023", "section": "Appendix B", "owners": ["M02-T05", "M02-T10", "M04-T07"] }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/repeat-materialization.ts",
+        "bytes": 25452,
+        "sha256": "bc61934d5515a7292e54b56506a72e8c4e29daf294f6477e9cf6fa1a2db9f0c2"
+      },
+      {
+        "path": "packages/runtime-core/test/repeat-materialization.test.ts",
+        "bytes": 26899,
+        "sha256": "0634e90987580fcac4c0effb033e2fd50af3288b8eac2a35d58c990ef9537d4a"
+      },
+      {
+        "path": "packages/runtime-core/test/repeat-materialization.types.ts",
+        "bytes": 2526,
+        "sha256": "fe7d489ae437017e0bc8c9338226d564ea947562c241791b9b005a2efdcc510a"
+      },
+      {
+        "path": "packages/runtime-core/dist/repeat-materialization.js",
+        "bytes": 14793,
+        "sha256": "f0df8bd5ea97cf048b65a4c41acba6ec5e4bed85a3bef574d1999f063ac6b7ec"
+      },
+      {
+        "path": "packages/runtime-core/dist/repeat-materialization.js.map",
+        "bytes": 11955,
+        "sha256": "b5b5c6265b97859ec6a12590aef69a28899e770a99b92b71319ac169fc0e5eee"
+      },
+      {
+        "path": "packages/runtime-core/dist/repeat-materialization.d.ts",
+        "bytes": 12023,
+        "sha256": "4cbab3992edcdb87b2fe89f39cef594a6f790a291034e9b14cc643874e6de722"
+      },
+      {
+        "path": "packages/runtime-core/dist/repeat-materialization.d.ts.map",
+        "bytes": 4646,
+        "sha256": "fa9fe8f9d3438f2d1dac4dcada863763d533c9f9974e1c90f536a2c3ce61c2d8"
+      },
+      {
+        "path": "scripts/lib/runtime-core-repeat-materialization-proof.mjs",
+        "bytes": 45038,
+        "sha256": "78f49260f69e728a5a920be6c4d681c17aabc39cc6131e3b910515cdf7b05415"
+      },
+      {
+        "path": "scripts/generate-runtime-core-repeat-materialization-proof.mjs",
+        "bytes": 866,
+        "sha256": "cbc41b01e4d05c15f13b52b3bfffa75d3cb67e8f42a0e7586356d1b90de68f19"
+      },
+      {
+        "path": "scripts/verify-runtime-core-repeat-materialization.mjs",
+        "bytes": 702,
+        "sha256": "c11372b179b6b0258a1c4edbe625d58299d80eb8a4bdad7a68b715c5c76d0d19"
+      },
+      {
+        "path": "tests/runtime-core-repeat-materialization.test.mjs",
+        "bytes": 10838,
+        "sha256": "52b213125c049b1c33e02b91538c7920d4dc218688d62af0b5ed7249e714685e"
+      }
+    ]
+  },
+  "deferred": [
+    "conditional repeated-subtree lifecycle and dependency reevaluation (M04-T15)",
+    "resource and operation lifecycles inside repeated scopes (M04-T08/M04-T09)",
+    "adapter instance preservation and declared prop remount policy (M05-T05)",
+    "complete observable sign-in trace (M04-T16)",
+    "cross-platform adapter implementations",
+    "future protocol clarification of PF-018"
+  ]
+}

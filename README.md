@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████░░░░░░░░░░░░░░░░░░` **43 / 144 tasks complete (30%)**
+**Overall:** `████████░░░░░░░░░░░░░░░░░` **44 / 144 tasks complete (31%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `██████░░░░░░░░░░` **6 / 16 tasks complete (38%)**
+**M04 progress:** `███████░░░░░░░░░` **7 / 16 tasks complete (44%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T07`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T08`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -309,9 +309,21 @@ generation. Explicit unsupported schema vocabularies fail closed. A separate rep
 identity primitive uses the exact document/surface/node tuple, preserves compatible identities by
 reference, and classifies capability changes as remounts and tuple changes as replacements.
 Evidence passes 33 focused package tests, 7 compiler-negative cases, and 13 root proof/mutation
-tests across 25 tracked source and distribution files; the cumulative runtime-core suite passes
+tests across 23 task-owned source and distribution files; the cumulative runtime-core suite passes
 167/167. N-024 is now `TESTED`; repeat keys, action execution, reactivity, and actual adapter
 instance preservation remain later work. P-17 stays `PARTIAL`, and no proof-gate status changes.
+
+M04-T07 now materializes repeats through lexical, isolated alias scopes without duplicating the
+complete runtime snapshot for every item. Items remain in source order; string and finite-number
+keys use type-sensitive RFC 8785 identity, with duplicate, missing, malformed, or over-budget
+inputs rejecting the whole repeated subtree without truncation or partial output. The Reference
+Profile's exact 1,000-instance limit is executable. Repeated node identity composes the complete
+outer-to-inner key path onto M04-T06's document/surface/node identity, preserving reorder-stable
+instances while classifying key changes as replacements and capability changes as remounts.
+Evidence passes 34 focused package tests, 7 compiler-negative cases, and 15 root proof/mutation
+tests across 11 task-owned files; the cumulative runtime-core suite passes 201/201. N-014 and
+N-041 gain executable repeat evidence but remain `PLANNED` for their other owners. P-17 stays
+`PARTIAL`, and no proof-gate status changes.
 
 ## License
 
