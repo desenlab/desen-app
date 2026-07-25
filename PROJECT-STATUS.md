@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-25
+Last updated: 2026-07-26
 
 ## Plain-language status
 
@@ -153,6 +153,18 @@ complete outer-to-inner key path onto M04-T06's stable document/surface/node tup
 preserves identity, key changes replace, and capability changes remount. This task records
 `PF-037`; N-014 and N-041 gain repeat evidence but remain `PLANNED` for their remaining owners.
 P-17 remains `PARTIAL`, and no proof-gate status changes.
+M04-T08 now mounts every declared resource atomically as idle, starts `mount` and `once` from one
+pre-start snapshot, and leaves `manual` instances idle until explicit refresh. Named inputs are
+materialized together through M04-T03 so token reads share one deterministic cache while
+dollar-prefixed parameter names remain data; exact Catalog input and output schemas gate every
+host call and public value. Refresh requires the exact current manager-issued resource snapshot,
+re-evaluates supplied state, and supersedes only after validation. ABA-equal, foreign, stale, and
+disposed settlements fail closed before hostile envelopes are inspected. Terminal snapshot
+capacity is reserved before pending publication, active host transports are capped at 64 with a
+bounded replacement queue, and host callbacks are receiver-independent and disposal-aware.
+`PF-038` records the deterministic profile and its trusted-compositor precondition; full
+cross-manager turn provenance remains M04-T16. N-041 gains resource-lifecycle limit evidence but
+remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status changes.
 
 ## Current milestone
 
@@ -187,11 +199,12 @@ P-17 remains `PARTIAL`, and no proof-gate status changes.
   `M04-T04 — Predicate evaluation and conditional presence`,
   `M04-T05 — Ordered variant and style override evaluation`,
   `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`,
-  `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`
+  `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`,
+  `M04-T08 — Resource mount/once/manual lifecycle and refresh`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T08 — Resource mount/once/manual lifecycle and refresh`
-- Status: M04-T07 complete; ready for M04-T08
+- Next implementation task: `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`
+- Status: M04-T08 complete; ready for M04-T09
 
 ## Completed preparation
 
@@ -209,8 +222,8 @@ P-17 remains `PARTIAL`, and no proof-gate status changes.
 - CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
   fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
   in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T07
-  inventory now expands to 1,175 legacy leaf launches but remains a reviewed 68-step single-pass
-  gate covering 106 distinct workloads, 30 proof verifiers, and 30 root proof files.
+  inventory now expands to 1,293 legacy leaf launches but remains a reviewed 70-step single-pass
+  gate covering 109 distinct workloads, 31 proof verifiers, and 31 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -439,6 +452,14 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   reorder-stable key paths and distinguishes replacement from capability remount. Seven direct
   trace assignments, 11 task-owned files, and the cumulative 201/201 runtime-core suite protect the
   boundary. N-014 and N-041 remain `PLANNED`, P-17 stays `PARTIAL`, and no proof-gate status changes.
+- The M04-T08 resource boundary passes 52 focused package tests, 9 compiler-negative cases, and 23
+  root proof/mutation tests. Six public runtime functions and 22 public types enforce atomic
+  mount/start, one input-wide token cache, exact Catalog input/output contracts, current
+  manager-issued snapshot identity, deterministic latest-wins refresh, stale-envelope containment,
+  terminal snapshot reservation, a maximum of 64 active transports, bounded queued replacement,
+  and terminal disposal. Ten direct trace assignments, 11 task-owned files, and the cumulative
+  253/253 runtime-core suite protect the boundary. N-041 remains `PLANNED`, full turn provenance
+  remains M04-T16, P-17 stays `PARTIAL`, and no proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -459,11 +480,11 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T08 — Resource mount/once/manual lifecycle and refresh`. Mount every declared resource
-atomically, start `mount` and `once` policies from one pre-start snapshot, keep `manual` resources
-idle until refresh, and reject stale asynchronous settlements without exposing host failures or
-partial lifecycle state. Keep operation concurrency, action execution, and reactive orchestration
-in their assigned later tasks.
+Start `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`. Validate every operation
+input and output against the authenticated Catalog contract, expose only declared public errors,
+and give each alias a deterministic `reject`, `replace`, or bounded FIFO `queue` policy. Preserve a
+settlement acknowledgement seam so M04-T11 and M04-T13 can defer queued host promotion until the
+terminal lifecycle and its action handler have completed one safe turn.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -471,9 +492,9 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-M04-T07 extends the current reviewed CI inventory to 106 distinct workloads, 30 proof verifiers, 30
-root proof files, and a pinned 68-step plan. Its equivalent legacy dependency expansion contains
-1,175 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
+M04-T08 extends the current reviewed CI inventory to 109 distinct workloads, 31 proof verifiers, 31
+root proof files, and a pinned 70-step plan. Its equivalent legacy dependency expansion contains
+1,293 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
 repeating prerequisite chains. Twenty-one CI contract tests additionally pin the exact workspace
 roots, every workspace package test command, and the absence of hidden Vitest configuration. The
 archived CI-01 timing comparison remains historical evidence rather than a claim that the larger
@@ -698,6 +719,18 @@ M04-T07 evidence:
   canonical keys, atomic bounded materialization, and stable repeated node identity
 - executable evidence: 34 focused package tests, 7 compiler-negative cases, 15 root
   proof/mutation tests, 7 direct trace assignments, 11 task-owned files, and a cumulative 201/201
+  runtime-core package suite
+
+M04-T08 evidence:
+
+- `docs/proof/RUNTIME-CORE-RESOURCE-LIFECYCLE.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-resource-lifecycle.json`
+- artifact SHA-256: `2d6ab2e5b6a480e922425faa109e13cc5d388a5de00b2604cbfec62345b01c82`
+- exact boundary: 6 runtime exports, 22 type exports, atomic policy-aware resource start,
+  schema-safe settlement, exact manager snapshot identity, bounded latest-wins refresh, and
+  terminal disposal
+- executable evidence: 52 focused package tests, 9 compiler-negative cases, 23 root
+  proof/mutation tests, 10 direct trace assignments, 11 task-owned files, and a cumulative 253/253
   runtime-core package suite
 
 ## Status vocabulary

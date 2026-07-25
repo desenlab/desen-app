@@ -31,6 +31,14 @@ export {
   reconcileRuntimeRepeatedNodeIdentity,
   RUNTIME_REPEAT_LIMITS,
 } from "./repeat-materialization.js";
+export {
+  disposeRuntimeSurfaceResources,
+  mountRuntimeSurfaceResources,
+  readRuntimeSurfaceResources,
+  refreshRuntimeSurfaceResource,
+  RUNTIME_RESOURCE_LIMITS,
+  startRuntimeSurfaceResources,
+} from "./resource-lifecycle.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -161,3 +169,28 @@ export type {
   RuntimeRepeatedNodeIdentityInvalidReason,
   RuntimeRepeatedNodeIdentityReconciliation,
 } from "./repeat-materialization.js";
+
+export type {
+  RuntimeResourceInitialStartEntry,
+  RuntimeResourceInputResolutionRejected,
+  RuntimeResourceInputSchemaRejected,
+  RuntimeResourceLimitProfile,
+  RuntimeResourceLoadStarted,
+  RuntimeResourceManualSkipped,
+  RuntimeResourcePolicy,
+  RuntimeResourceRefreshInput,
+  RuntimeResourceRefreshResult,
+  RuntimeResourceSettlement,
+  RuntimeResourceSnapshotLimitRejected,
+  RuntimeSurfaceResourceSpec,
+  RuntimeSurfaceResourcesDisposeResult,
+  RuntimeSurfaceResourcesHandle,
+  RuntimeSurfaceResourcesMounted,
+  RuntimeSurfaceResourcesMountInput,
+  RuntimeSurfaceResourcesMountInvalid,
+  RuntimeSurfaceResourcesMountInvalidReason,
+  RuntimeSurfaceResourcesMountResult,
+  RuntimeSurfaceResourcesReadResult,
+  RuntimeSurfaceResourcesSnapshot,
+  RuntimeSurfaceResourcesStartResult,
+} from "./resource-lifecycle.js";

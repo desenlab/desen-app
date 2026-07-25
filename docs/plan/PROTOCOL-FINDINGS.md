@@ -1095,3 +1095,79 @@ This file records implementation discoveries without changing the frozen DESEN 0
   token/format composition point, nested key-path encoding, whether aliases are diagnostic-only,
   the relationship between per-repeat and whole-surface limits, and the exact adapter
   preservation/remount contract.
+
+## PF-038 — Resource lifecycle start, refresh, technical failures, and stale settlement require a deterministic runtime profile
+
+- Status: OPEN
+- Blocks proof: No; one surface-local, validation-first, latest-wins profile can execute the frozen
+  lifecycle without inventing cache, retry, timeout, or transport-cancellation semantics.
+- Protocol location: SPEC Sections 16.2, 17.4, 17.6, 24.2, 24.6, and 27.8;
+  `PIPE-019`, `PIPE-024`, `R-042`, `R-055`, `R-079`, `R-090`, `R-114`, `R-122`, `D-027`, and
+  `D-028`
+- Observation: DESEN 0.1.0 defines surface-local resource declarations, `mount`, `once`, and
+  `manual` policies, a four-state public lifecycle, explicit refresh, input/output schema checks,
+  and Catalog-declared public errors. It does not define a framework-neutral manager API, whether
+  declarations become visible before automatic loading, whether automatic resources observe each
+  other's newly pending state, how request identities are allocated, what happens when refresh
+  overlaps a pending request, or how denial and adapter failure map into a lifecycle whose failed
+  state may expose only declared public error codes. Catalog cache hints likewise do not define a
+  normative runtime cache, retry, timeout, or stale-while-revalidate algorithm.
+- Implementation decision: M04-T08 atomically mounts the complete resource map as immutable
+  `idle` lifecycles without invoking the host. A separate one-shot start evaluates every `mount`
+  and `once` input against the same pre-start runtime snapshot, publishes all accepted requests as
+  one pending generation, leaves `manual` resources idle, and then invokes host bindings in exact
+  UTF-16 instance-ID order. A synchronous host result still settles through a Promise microtask,
+  making the pending state observable. `once` limits only this automatic start; explicit refresh
+  remains valid for every policy.
+
+  Resource input is a map of named ValueSpecs, not one literal-object ValueSpec. M04-T08 sorts the
+  parameter names, materializes their ValueSpecs as one synthetic array through M04-T03, then maps
+  the resolved members back to their exact names before the complete object passes
+  `validateDesenExecutionValue` in `resource-input` mode. This preserves protocol-legal parameter
+  names beginning with `$` as ordinary keys, gives the whole request one atomic token cache, and
+  subjects both the materialized array and reconstructed candidate to the shared depth-128,
+  4,096-occurrence, and 1,048,576-UTF-16-unit boundary. A candidate request ID is visible to token
+  lookup while input is prepared but is consumed only by an accepted resource attempt; a rejected
+  preparation may therefore reuse the same deterministic candidate ID on its next explicit
+  refresh.
+
+  Capability policy and public-error membership are copied only from the exact
+  factory-authenticated execution Catalog set. A caller cannot supply either. Successful host
+  output is detached and checked in `resource-output` mode before lifecycle exposure; a failed
+  envelope becomes public `failed` only when its code is an exact declared Catalog code.
+  Undeclared codes and malformed, thrown, or rejected host results become redacted
+  `ADAPTER_FAILURE` settlements. Host policy denial uses the documented project diagnostic
+  `run.desen.runtime/RESOURCE_DENIED`. Because neither technical outcome may invent a declared
+  public error, both return the public lifecycle to `idle` rather than exposing false success or a
+  fabricated `error.code`. `RESOURCE_OUTPUT_INVALID` likewise exposes no candidate value.
+
+  Each accepted request receives `resource:` plus RFC 8785 canonical JSON of
+  `[instanceId, zeroBasedAttemptGeneration]`. Invalid or unresolved input consumes no attempt
+  identity. Start and refresh require the exact current resource snapshot object issued by the
+  same manager, so stale, foreign, and structurally ABA-equal lifecycle views fail closed. The
+  broader state, context, operation, event, item, and environment namespaces still rely on a
+  trusted compositor until M04-T16 proves them inside one complete session turn; M04-T08 does not claim
+  cross-manager provenance for those namespaces. A valid overlapping refresh first materializes
+  and schema-validates its input; only then does it logically supersede the prior attempt and
+  publish a new pending generation. A stale or disposed settlement is rejected before its result
+  envelope is inspected, so accessors and undeclared codes cannot create diagnostics or state.
+  Disposal is terminal, replaces the retained handle authority with a small sentinel, and does not
+  claim physical transport cancellation or secure erasure.
+
+  Every immutable lifecycle map must itself fit the shared JSON boundary and remain directly
+  usable as M04-T02's `resource` namespace. An individually valid output that would overflow the
+  aggregate retained map is not exposed and produces
+  `run.desen.runtime/RESOURCE_RETAINED_LIMIT_EXCEEDED`; no value is truncated or partially
+  retained. The host may lower the exact attempt-generation, snapshot-generation, and active
+  transport ceilings. A pending transition is accepted only when a terminal snapshot slot is
+  reserved. At most 64 host loads are retained concurrently by default; later accepted attempts
+  wait in a canonical finite queue, and a newer refresh replaces an older queued attempt for the
+  same instance. Underlying transports that never settle remain uncancellable, but they cannot
+  create an unbounded number of retained settlement closures. Cache hints, TTL,
+  stale-while-revalidate, deduplication, retry, timeout, persistence, and cross-surface reuse are
+  deliberate non-claims.
+
+- Future action: A later protocol revision should standardize automatic-start snapshot timing,
+  request identity, overlapping-refresh and cancellation behavior, technical-failure lifecycle
+  visibility, aggregate retention and transport limits, full turn-snapshot provenance, and any
+  normative cache-hint execution profile.

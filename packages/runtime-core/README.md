@@ -489,11 +489,82 @@ the exact prior identity; an own or ancestor key change requires replacement; an
 change on the same path requires a remount generation. Platform-instance preservation remains
 M05-T05.
 
+## M04-T08 resource lifecycle and refresh API
+
+`mountRuntimeSurfaceResources` authenticates the prepared Catalog set, captures the host ports,
+and publishes every declared resource as one idle generation without calling the host. Initial
+`mount` and `once` policies start together; `manual` remains idle until an explicit refresh.
+
+```ts
+import {
+  createRuntimeResolutionSnapshot,
+  mountRuntimeSurfaceResources,
+  refreshRuntimeSurfaceResource,
+  startRuntimeSurfaceResources,
+} from "@desen/runtime-core";
+
+const mounted = mountRuntimeSurfaceResources({
+  documentId,
+  revision,
+  surfaceId,
+  resources,
+  catalogSet,
+  hostPorts,
+});
+
+if (mounted.status === "mounted") {
+  const resolution = createRuntimeResolutionSnapshot({
+    state,
+    context,
+    resource: mounted.snapshot.lifecycles,
+    operation,
+    event,
+    item,
+    env,
+  });
+  const started = startRuntimeSurfaceResources(mounted.handle, resolution, mounted.snapshot);
+
+  if (started.status === "started") {
+    refreshRuntimeSurfaceResource(mounted.handle, {
+      instanceId: "stores",
+      resourceSnapshot: started.snapshot,
+      snapshot: createRuntimeResolutionSnapshot({
+        state,
+        context,
+        resource: started.snapshot.lifecycles,
+        operation,
+        event,
+        item,
+        env,
+      }),
+    });
+  }
+}
+```
+
+The exact current manager-issued resource snapshot is an identity lease: stale, foreign, and
+structurally ABA-equal snapshots fail closed. M04-T16 still owns provenance across the other
+state/context/operation/event/item/environment managers.
+
+Input member names are sorted, their ValueSpecs are materialized as one array through M04-T03, and
+the resolved members are reconstructed before exact Catalog input validation. This keeps
+dollar-prefixed parameter names as data while sharing one atomic token cache across the whole
+request. Successful output is detached and validated before exposure. Undeclared failures,
+malformed envelopes, host exceptions, and policy denial expose only redacted controlled results;
+attacker-controlled output keys never enter public diagnostics.
+
+Request IDs are deterministic per instance and accepted generation. Invalid input consumes no
+generation. Refresh is latest-wins, stale settlements are ignored before envelope inspection, and
+disposal is terminal. Each accepted pending transition reserves room for its terminal snapshot.
+Hosts may lower the attempt, snapshot, and active-transport ceilings; at most 64 host loads run
+concurrently by default, with later attempts held in a bounded replacement queue. No retry,
+timeout, cache, persistence, or physical transport-cancellation policy is invented.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
-  schema validation. Returned success values and public error codes remain untrusted until a later
-  runtime stage detaches and validates them.
+  schema validation. M04-T08 now detaches and validates resource output and public error codes;
+  M04-T09 owns the equivalent operation lifecycle.
 - A policy denial is distinct from a declared public failure and can never be reported as success.
   Thrown or rejected host exceptions are adapter failures; raw errors never become lifecycle data.
 - Navigation can target only an existing surface in the active Bundle. Denial cannot substitute a
@@ -530,9 +601,11 @@ prepared positions with M04-T03 for ordered Variant conditions, then returns eff
 style ValueSpecs with exact winning provenance. M04-T06 adds fresh atomic surface-local state,
 complete schema-safe writes, terminal disposal, and repeat-free base node identity. M04-T07 adds
 lexically isolated repeat scopes, ordered atomic materialization, type-sensitive keys, bounded
-non-truncating overflow, and repeated instance identity. Resource/operation transitions, action
-execution, final value materialization, rendering, activation implementation, event/command
-bridges, and adapters remain assigned to their later tracked tasks.
+non-truncating overflow, and repeated instance identity. M04-T08 adds atomic resource mount/start,
+token-aware input materialization, schema-safe settlement, bounded transport scheduling,
+latest-wins refresh, and terminal disposal. Operation transitions, action execution, reactive
+composition, rendering, activation implementation, event/command bridges, and adapters remain
+assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -551,6 +624,7 @@ pnpm --filter @desen/runtime-core test:predicate-evaluation
 pnpm --filter @desen/runtime-core test:variant-style-evaluation
 pnpm --filter @desen/runtime-core test:local-state-identity
 pnpm --filter @desen/runtime-core test:repeat-materialization
+pnpm --filter @desen/runtime-core test:resource-lifecycle
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -558,5 +632,6 @@ pnpm verify:runtime-core-predicate-evaluation
 pnpm verify:runtime-core-variant-style-evaluation
 pnpm verify:runtime-core-local-state-identity
 pnpm verify:runtime-core-repeat-materialization
+pnpm verify:runtime-core-resource-lifecycle
 pnpm check
 ```

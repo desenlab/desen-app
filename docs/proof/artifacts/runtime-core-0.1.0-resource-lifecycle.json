@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T08",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Surface resources mount atomically, start and refresh from exact snapshots, validate Catalog inputs and outputs, contain technical failures, ignore stale settlements, and dispose terminally.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T03",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-token-format-resolution.json",
+      "artifactSha256": "be2d07ae32537ef5c2aec04c783f2cfb30cbcc500a85020172e2b8715a98800f"
+    },
+    {
+      "task": "M04-T07",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-repeat-materialization.json",
+      "artifactSha256": "45ba72f21f936931d087982d8a52e6b4d226a33ed5693c2d3d6bf9158fddb02d"
+    },
+    {
+      "task": "M02-T11",
+      "result": "PASS",
+      "artifact": "protocol-0.1.0-execution-contracts.json",
+      "artifactSha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_RESOURCE_LIMITS",
+      "disposeRuntimeSurfaceResources",
+      "mountRuntimeSurfaceResources",
+      "readRuntimeSurfaceResources",
+      "refreshRuntimeSurfaceResource",
+      "startRuntimeSurfaceResources"
+    ],
+    "typeExports": [
+      "RuntimeResourceInitialStartEntry",
+      "RuntimeResourceInputResolutionRejected",
+      "RuntimeResourceInputSchemaRejected",
+      "RuntimeResourceLimitProfile",
+      "RuntimeResourceLoadStarted",
+      "RuntimeResourceManualSkipped",
+      "RuntimeResourcePolicy",
+      "RuntimeResourceRefreshInput",
+      "RuntimeResourceRefreshResult",
+      "RuntimeResourceSettlement",
+      "RuntimeResourceSnapshotLimitRejected",
+      "RuntimeSurfaceResourceSpec",
+      "RuntimeSurfaceResourcesDisposeResult",
+      "RuntimeSurfaceResourcesHandle",
+      "RuntimeSurfaceResourcesMountInput",
+      "RuntimeSurfaceResourcesMountInvalid",
+      "RuntimeSurfaceResourcesMountInvalidReason",
+      "RuntimeSurfaceResourcesMountResult",
+      "RuntimeSurfaceResourcesMounted",
+      "RuntimeSurfaceResourcesReadResult",
+      "RuntimeSurfaceResourcesSnapshot",
+      "RuntimeSurfaceResourcesStartResult"
+    ],
+    "tsdocDeclarations": 28,
+    "sourceImports": [
+      "./host-ports.js",
+      "./runtime-json-snapshot.js",
+      "./token-format-resolution.js",
+      "./value-resolution.js",
+      "@desen/protocol",
+      "@desen/validator"
+    ]
+  },
+  "runtime": {
+    "mountProbes": 5,
+    "snapshotIdentityProbes": 4,
+    "policyAndOrderingProbes": 6,
+    "tokenMaterializationProbes": 7,
+    "inputBoundaryProbes": 5,
+    "reentrancyProbes": 4,
+    "settlementContainmentProbes": 8,
+    "refreshAndSupersessionProbes": 8,
+    "requestIdentityProbes": 6,
+    "finiteLimitProbes": 5,
+    "transportQueueProbes": 5,
+    "receiverIndependenceProbes": 3,
+    "disposalProbes": 6,
+    "hostileEnvelopeReads": 0,
+    "platformEffects": 0,
+    "rawHostFailuresExposed": false,
+    "transportCancellationClaimed": false
+  },
+  "semantics": {
+    "mountPublication": "atomic frozen idle generation without host calls",
+    "contractAuthority": "factory-authenticated M02-T11 execution Catalog set",
+    "initialPolicies": {
+      "manual": "idle until explicit refresh",
+      "mount": "automatic initial start",
+      "once": "automatic initial start"
+    },
+    "resourceSnapshotAuthority": "exact current manager-issued object identity; stale, foreign, and ABA-equal views rejected",
+    "resolutionSnapshotAuthority": "factory-authenticated snapshot whose resource namespace equals the manager snapshot",
+    "compositorPrecondition": "same-turn provenance for state, context, operation, event, item, and env is trusted until M04-T16",
+    "initialBatch": "canonical instance order from one exact current manager snapshot",
+    "pendingPublication": "before host and diagnostic callbacks",
+    "synchronousSettlement": "later Promise microtask",
+    "inputBoundary": "one M04-T03 synthetic-array materialization and token cache, reconstruction, then exact resource-input schema validation",
+    "candidateIdentity": "visible to token lookup but consumed only after complete accepted input preparation",
+    "outputBoundary": "exact resource-output schema validation, redacted frozen diagnostics, then detached bounded lifecycle publication",
+    "publicFailure": "exact declared Catalog error code only",
+    "technicalFailure": "idle lifecycle plus controlled diagnostic",
+    "refreshValidation": "before supersession",
+    "staleSettlement": "authority rejected before envelope inspection",
+    "requestIdentity": "resource: + RFC 8785 canonical [instanceId, attemptGeneration]",
+    "finiteLimits": {
+      "maxActiveTransports": 64,
+      "hostProfile": "may lower but never raise finite ceilings",
+      "snapshotCapacity": "terminal transition reserved before request acceptance",
+      "queue": "canonical promotion with queued same-instance replacement"
+    },
+    "hostCallbacks": "resource, token, and diagnostic callbacks invoked without a receiver",
+    "disposal": "terminal, idempotent, clears retained records and queue, replaces handle authority with sentinel",
+    "retry": null,
+    "timeout": null,
+    "cache": null,
+    "transportCancellation": null
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": {
+    "finding": "PF-038",
+    "findingStatus": "OPEN",
+    "proofDocument": "docs/proof/RUNTIME-CORE-RESOURCE-LIFECYCLE.md"
+  },
+  "evidence": {
+    "focusedTestRegistrations": 44,
+    "focusedTests": 52,
+    "focusedTestTitles": [
+      "mounts every declaration atomically as one frozen idle generation without calling the host",
+      "preserves every non-empty frozen-schema document id without applying a local-id grammar",
+      "applies the shared finite string budget to an otherwise unrestricted document id",
+      "rejects one malformed declaration without exposing a partial handle",
+      "rejects malformed or hostile limit profiles without throwing or retaining accessors",
+      "requires the exact factory-authenticated execution Catalog set",
+      "rejects unknown capabilities and policies absent from the exact capability contract",
+      "detaches declarations and captures host callbacks without retaining caller objects",
+      "supports an empty resource set as a complete inert lifetime",
+      "starts mount and once in canonical instance order from one pre-start snapshot",
+      "keeps a synchronous host result pending until a Promise microtask",
+      "starts only once and rejects a lifecycle map that is not the exact current pre-start view",
+      "publishes the one-shot start decision before a diagnostic sink can reenter it",
+      "stops later diagnostic callbacks after a reentrant terminal disposal",
+      "does not launch later batch entries after a host callback reentrantly disposes the surface",
+      "reconstructs named input members so protocol-legal dollar-prefixed parameters stay data",
+      "materializes token and format members atomically with one input-wide token cache",
+      "rejects token-provider reentry while one resource transition is being prepared",
+      "makes disposal stop later token-provider calls in the same atomic input",
+      "contains a token provider failure before resource identity allocation or host loading",
+      "does not call the host for a %s input",
+      "schema-validates the complete resolved input before allocating or calling the host",
+      "exposes only a schema-validated detached successful output",
+      "exposes an exact declared public failure code",
+      "contains %s without inventing public lifecycle data",
+      "classifies over-budget output as invalid output instead of an adapter envelope failure",
+      "redacts attacker-controlled output members from invalid-output diagnostics",
+      "redacts a host %s as ADAPTER_FAILURE and never rejects settlement",
+      "makes a throwing diagnostic sink observational only",
+      "invokes resource and diagnostic host callbacks without a receiver",
+      "rejects an individually valid output that would overflow the aggregate lifecycle map",
+      "reserves terminal snapshot capacity before accepting a pending request",
+      "applies a lowered inclusive attempt-generation ceiling without consuming rejected ids",
+      "queues host transports at the finite surface cap and promotes in source order",
+      "replaces a queued refresh instead of retaining an unbounded stale queue",
+      "refreshes the %s policy explicitly",
+      "re-evaluates refresh input from the newly supplied factory snapshot",
+      "valid refresh supersedes a pending attempt and ignores its stale settlement",
+      "does not supersede a live attempt when refresh input is invalid",
+      "allocates deterministic per-instance request ids only for accepted attempts",
+      "rejects stale snapshots and unknown instances without host effects",
+      "rejects ABA-equal and foreign resource snapshot objects by manager identity",
+      "disposes pending attempts terminally and ignores every later settlement",
+      "rejects forged handles and malformed refresh requests without throwing"
+    ],
+    "compilerNegativeCases": 9,
+    "compilerNegativeLabels": [
+      "resource limit profiles are immutable host policy",
+      "resource lifecycle maps are recursively readonly",
+      "refresh always requires the current factory-created resolution snapshot",
+      "resource inputs are inert ValueSpecs, never callbacks",
+      "resource policies use the frozen closed vocabulary",
+      "public errors come only from the authenticated Catalog contract",
+      "opaque resource handles cannot be constructed by shape",
+      "resource settlements are immutable",
+      "resource managers allocate request identifiers internally"
+    ],
+    "rootMutationTests": 23,
+    "rootMutationTestTitles": [
+      "accepts tracked deterministic M04-T08 resource evidence",
+      "builds byte-identical resource evidence twice",
+      "rejects stale or tampered resource evidence",
+      "rejects stale M04-T03 prerequisite bytes",
+      "rejects stale M04-T07 prerequisite bytes",
+      "rejects stale M02-T11 prerequisite bytes",
+      "detects mount atomicity and host-isolation drift",
+      "detects policy ordering and pending-publication drift",
+      "detects input-validation-before-host drift",
+      "detects manager snapshot identity and ABA drift",
+      "detects token-format atomicity and candidate-id drift",
+      "detects output validation and public-error drift",
+      "detects denial and adapter-failure containment drift",
+      "detects output-diagnostic redaction and freezing drift",
+      "detects refresh supersession and stale-envelope drift",
+      "detects deterministic request-identity drift",
+      "detects finite limits and terminal-reservation drift",
+      "detects active-transport queue and queued-replacement drift",
+      "detects receiver-dependent callback drift",
+      "detects disposal and late-settlement drift",
+      "detects disposal-sentinel source drift",
+      "detects public export, TSDoc, and platform drift",
+      "detects focused-test and compiler-negative inventory drift"
+    ],
+    "traceRules": [
+      { "id": "PIPE-019", "section": "24.2", "owners": ["M04-T08"] },
+      { "id": "PIPE-024", "section": "24.2", "owners": ["M04-T08"] },
+      { "id": "R-042", "section": "14.2.3", "owners": ["M02-T11", "M04-T08"] },
+      { "id": "R-055", "section": "16.2", "owners": ["M02-T11", "M04-T08"] },
+      { "id": "R-079", "section": "20.5", "owners": ["M02-T11", "M04-T08", "M04-T11"] },
+      { "id": "R-090", "section": "22.2", "owners": ["M03-T02", "M04-T08", "M12-T03"] },
+      { "id": "R-114", "section": "26.5", "owners": ["M04-T08", "M04-T09"] },
+      {
+        "id": "R-122",
+        "section": "27.7",
+        "owners": ["M04-T01", "M04-T08", "M04-T09", "M04-T10", "M04-T12"]
+      },
+      { "id": "D-027", "section": "Appendix B", "owners": ["M02-T05", "M02-T11", "M04-T08"] },
+      { "id": "D-028", "section": "Appendix B", "owners": ["M02-T05", "M02-T11", "M04-T08"] }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/resource-lifecycle.ts",
+        "bytes": 57297,
+        "sha256": "ecef2c350e79ec8fef04c69df55d4917580eb215be4b2ab96e5cdffef332704a"
+      },
+      {
+        "path": "packages/runtime-core/test/resource-lifecycle.test.ts",
+        "bytes": 61957,
+        "sha256": "89641b723f7491405835c2c3c393e391e20dc63e47e6a69d521e056a4be0a310"
+      },
+      {
+        "path": "packages/runtime-core/test/resource-lifecycle.types.ts",
+        "bytes": 2860,
+        "sha256": "49544ee37f3f18c259b222bc7a2c4fb535b431dbcef46289251b6f90bd5b5958"
+      },
+      {
+        "path": "packages/runtime-core/dist/resource-lifecycle.js",
+        "bytes": 41590,
+        "sha256": "4a80b3291ad449cc2ae61e1a2ac2dea80cb28c1c1b47bdce317b6b5af7aa97cb"
+      },
+      {
+        "path": "packages/runtime-core/dist/resource-lifecycle.js.map",
+        "bytes": 36319,
+        "sha256": "59b2ec0ddeed3c5bab41c0886f221d33f397271b752da66e511f6a8d0dc2487e"
+      },
+      {
+        "path": "packages/runtime-core/dist/resource-lifecycle.d.ts",
+        "bytes": 13667,
+        "sha256": "b1e755fa186f16807c986deaf20b0b3e7f854f0b5d4e70b7706e9d4b625183a7"
+      },
+      {
+        "path": "packages/runtime-core/dist/resource-lifecycle.d.ts.map",
+        "bytes": 7723,
+        "sha256": "c29ae6d1902d99581f5ec573c47db3b5d9e6a422d45e89c937d67a0a7bf8d987"
+      },
+      {
+        "path": "scripts/lib/runtime-core-resource-lifecycle-proof.mjs",
+        "bytes": 81616,
+        "sha256": "9f4aae8fe5ce6984c30222e996d6975b19462081ffeba4f2b87e99ecbd708d68"
+      },
+      {
+        "path": "scripts/generate-runtime-core-resource-lifecycle-proof.mjs",
+        "bytes": 842,
+        "sha256": "141561bb30a49d6e46e0a0ee571b10b11c82ae3e98c8757698f9dfe74dea4d27"
+      },
+      {
+        "path": "scripts/verify-runtime-core-resource-lifecycle.mjs",
+        "bytes": 682,
+        "sha256": "28f557386a743076a3dcb6bc80331d525e51d04da4900ce49cc4c3460b226728"
+      },
+      {
+        "path": "tests/runtime-core-resource-lifecycle.test.mjs",
+        "bytes": 16195,
+        "sha256": "bc015ef68149e4b23717220106c092e290ef4011e0f02678d6ea4f58d3e0f5fb"
+      }
+    ],
+    "semanticOnlySharedInputs": [
+      "packages/runtime-core/package.json",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/dist/index.js",
+      "packages/runtime-core/dist/index.d.ts",
+      "docs/proof/protocol-0.1.0-traceability.json",
+      "docs/plan/PROTOCOL-FINDINGS.md",
+      "docs/proof/RUNTIME-CORE-RESOURCE-LIFECYCLE.md",
+      "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json"
+    ]
+  },
+  "deferred": [
+    "operation lifecycle and settlement behavior (M04-T09)",
+    "resource.refresh action dispatch integration (M04-T11)",
+    "reactive dependency discovery and reevaluation (M04-T15)",
+    "same-turn provenance for non-resource snapshot namespaces and complete composition (M04-T16)",
+    "adapter rendering and platform lifecycle implementations",
+    "transport cancellation, retry, timeout, cache, persistence, and offline policy",
+    "future protocol clarification of PF-038"
+  ]
+}
