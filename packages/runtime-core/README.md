@@ -198,6 +198,86 @@ ordering, and checks the fully expanded string against the same limits before re
 Successful materialization still does not prove that the candidate matches its consumer. Exact
 prop, style-part, action-input, operation/resource, and adapter schema validation remains M05.
 
+## M04-T04 predicate and conditional-presence API
+
+`evaluateRuntimePredicate` evaluates the closed DESEN 0.1.0 predicate language against one
+factory-created `RuntimeResolutionSnapshot`. It accepts exactly thirteen operators:
+
+| Operators                | Runtime behavior                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `all`, `any`, `not`      | Compose nested predicates or resolved boolean ValueSpecs                         |
+| `eq`, `neq`              | Compare any two resolved JSON values by RFC 8785 canonical identity              |
+| `gt`, `gte`, `lt`, `lte` | Compare two numbers or two strings of the same type                              |
+| `in`, `contains`         | Apply the protocol's array-member or string-substring directions                 |
+| `exists`                 | Test whether the original reference resolves, including to JSON `null`           |
+| `truthy`                 | Apply DESEN's explicit truth conversion rather than JavaScript object truthiness |
+
+```ts
+import { evaluateRuntimeConditionalPresence, evaluateRuntimePredicate } from "@desen/runtime-core";
+
+const canSubmit = evaluateRuntimePredicate(
+  {
+    op: "all",
+    args: [
+      { op: "truthy", args: [{ $ref: "state.formValid" }] },
+      { op: "not", args: [{ $ref: "operation.signIn.pending" }] },
+    ],
+  },
+  snapshot,
+);
+
+const errorPresence = evaluateRuntimeConditionalPresence(
+  {
+    op: "eq",
+    args: [{ $ref: "operation.signIn.error.code" }, "invalidCredentials"],
+  },
+  snapshot,
+);
+```
+
+The evaluator first copies and validates the complete predicate, then resolves every operand
+against the same immutable snapshot. It evaluates depth-first from left to right without
+short-circuiting. `all` and `any` therefore still inspect later arguments after their boolean result
+is already known, so dynamic `PREDICATE_TYPE_MISMATCH` diagnostics remain complete and appear in
+stable document order. A mismatch makes its current predicate false and carries only its exact
+relative JSON Pointer; no resolved operand or partial composite is exposed.
+
+A directly unresolved ValueSpec makes its current predicate false. A nested predicate that
+evaluates false is instead an ordinary boolean input to its parent. For example,
+`not(missingBooleanReference)` is false because its direct argument is unresolved, while
+`not(truthy(missingReference))` is true because the nested `truthy` predicate completed with the
+boolean value false. `exists` is narrower still: it accepts a reference, tests the original lookup
+without selecting or evaluating its fallback, and returns true when that original value is JSON
+`null`.
+
+Equality and array membership use RFC 8785 canonical JSON, so object-member order is irrelevant,
+array order remains significant, and `-0` has the same canonical identity as `0`. String ordering
+and substring matching use exact UTF-16 code-unit semantics. They perform no locale collation,
+case folding, Unicode normalization, expression evaluation, property lookup, or implicit
+formatting.
+
+M04-T04 deliberately depends only on the M04-T02 resolver. A `$token` or `$format` operand returns
+an exact `deferred` outcome instead of being guessed false. M04-T05 owns the data-only composition
+of those operand positions with `materializeRuntimeValue`; the public predicate API accepts no
+executable resolver callback.
+
+`evaluateRuntimeConditionalPresence` converts an omitted `when` to `present: true` and a completed
+predicate to its exact presence decision. `present: false` means the node and its descendants are
+not instantiated; it does not mean that a mounted node should receive hidden CSS. Invalid or
+deferred predicates also remain non-instantiated fail-closed, while their distinct status prevents
+them from masquerading as a predicate that evaluated false. M04-T15 owns reactive reevaluation,
+and M04-T16 owns the complete proof that absent descendants expose no active resources, behaviors,
+events, or commands.
+
+Predicate input and all resolved operand occurrences share the runtime's bounded, detached,
+recursively immutable data profile. One predicate tree accepts at most 64 predicate nodes (the
+root plus 63 nested nodes) and 4,096 aggregate argument occurrences; each `all` or `any` remains
+limited to 64 arguments. Hostile objects, accessors, functions, promises, cycles, non-finite
+numbers, sparse arrays, reflection failures, and aggregate amplification fail without a partial
+boolean result. Operands are resolved and charged sequentially: an earlier invalid/deferred
+terminal keeps precedence, while an aggregate overflow stops before later values are copied. The
+implementation imports no React, React Native, DOM, CSS, browser, or application API.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -233,9 +313,11 @@ prop, style-part, action-input, operation/resource, and adapter schema validatio
 
 Private proof package. M04-T01 defines host contracts and stable callback composition; M04-T02
 defines bounded literal/reference/fallback resolution; and M04-T03 adds token and deterministic
-string-format materialization without changing the earlier deferral primitive. State writes,
-resource/operation transitions, action execution, rendering, activation implementation,
-event/command bridges, and adapters remain assigned to their later tracked tasks.
+string-format materialization without changing the earlier deferral primitive. M04-T04 adds the
+closed predicate evaluator and fail-closed conditional-presence decision while preserving explicit
+token/format deferral for M04-T05 composition. State writes, resource/operation transitions, action
+execution, rendering, activation implementation, event/command bridges, and adapters remain
+assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -250,8 +332,10 @@ Use the focused runtime tests and root workspace quality gate:
 pnpm --filter @desen/runtime-core test:host-ports
 pnpm --filter @desen/runtime-core test:value-resolution
 pnpm --filter @desen/runtime-core test:token-format-resolution
+pnpm --filter @desen/runtime-core test:predicate-evaluation
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
+pnpm verify:runtime-core-predicate-evaluation
 pnpm check
 ```
