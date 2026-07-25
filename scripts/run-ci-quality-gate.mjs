@@ -144,6 +144,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-core-variant-style-evaluation.mjs",
       "tests/runtime-core-variant-style-evaluation.test.mjs",
     ],
+    [
+      "runtime-core-local-state-identity",
+      "scripts/verify-runtime-core-local-state-identity.mjs",
+      "tests/runtime-core-local-state-identity.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -156,8 +161,8 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "198b31c1e6bab8ce128563f4a152c25962122b5c96b85317b653571ba8350e07";
-const QUALITY_GATE_PLAN_SHA256 = "5f14857707c079bc3d5f7ab96fe6feceac6bfd563e5b3bb555ac71e0f9e49f22";
+  "bad1fcac11c07c366e4d510b4be7ed762bba0bd28deb447b7692f50830127870";
+const QUALITY_GATE_PLAN_SHA256 = "e8bd44a5d246a73217e1bd4688bb545796e3180f0183f094683cf4772a45fdef";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420";
 const WORKSPACE_MANIFEST_SHA256 =

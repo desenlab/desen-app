@@ -25,10 +25,12 @@
     "test:predicate-evaluation": "vitest run test/predicate-evaluation.test.ts",
     "test:token-format-resolution": "vitest run test/token-format-resolution.test.ts",
     "test:value-resolution": "vitest run test/value-resolution.test.ts",
-    "test:variant-style-evaluation": "vitest run test/variant-style-evaluation.test.ts"
+    "test:variant-style-evaluation": "vitest run test/variant-style-evaluation.test.ts",
+    "test:local-state-identity": "vitest run test/local-state-identity.test.ts"
   },
   "dependencies": {
-    "@desen/protocol": "workspace:*"
+    "@desen/protocol": "workspace:*",
+    "@desen/validator": "workspace:*"
   },
   "devDependencies": {
     "vitest": "4.1.10"

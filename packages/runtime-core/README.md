@@ -362,6 +362,73 @@ detached and recursively immutable, and no React, React Native, DOM, CSS, browse
 API enters the implementation. JSON object-member order is not semantic; callers that need stable
 bytes use the protocol's RFC 8785 canonicalizer.
 
+## M04-T06 local state and base node identity API
+
+`mountRuntimeSurfaceState` creates one fresh surface-local state lifetime. It copies all state
+declarations through the shared inert JSON boundary, validates every schema graph, and applies each
+schema to its complete initial value before returning anything. One bad entry rejects the entire
+mount; no partial handle or value map escapes.
+
+```ts
+import { mountRuntimeSurfaceState, writeRuntimeSurfaceState } from "@desen/runtime-core";
+
+const mounted = mountRuntimeSurfaceState({
+  surfaceId: "sign-in",
+  state: {
+    email: {
+      schema: { type: "string" },
+      initial: "",
+    },
+  },
+});
+
+if (mounted.status === "mounted") {
+  const result = writeRuntimeSurfaceState(mounted.handle, {
+    path: "email",
+    value: "designer@example.com",
+  });
+  // result is updated, unchanged, rejected, disposed, or an invalid forged-handle outcome.
+  void result;
+}
+```
+
+The handle is factory-branded and contains no state values. `readRuntimeSurfaceState` returns the
+current detached, recursively immutable snapshot; its `values` map can be supplied directly as the
+M04-T02 `state` namespace. A different accepted write advances the zero-based generation exactly
+once. A canonically identical candidate returns `unchanged` without invalidation. A rejected write
+returns `STATE_WRITE_INVALID` and leaves the exact current snapshot and generation unchanged.
+
+The first substring before `.` is always the complete state entry name. There is no longest-prefix
+lookup for dotted declarations. Root paths replace a complete entry; nested paths traverse only
+existing own object properties. Missing intermediate containers and array indexing are rejected.
+The final property may be created only when the complete resulting entry validates against its
+exact schema. Validation uses `complete` plus `resolved-value`, so `$ref`, `$token`, and `$format`
+names inside state are ordinary inert JSON rather than executable bindings. The validator seam is
+exposed only through the first-party `@desen/validator/schema-contract-syntax` and
+`@desen/validator/schema-contract` package subpaths; M04 uses only the generated
+`validateDraft202012` named export from the narrow typed syntax seam, and the validator root API
+remains unchanged. Explicit `$vocabulary` declarations fail closed because this runtime does not
+claim vocabulary-dependent assertion support.
+
+`disposeRuntimeSurfaceState` ends the handle lifetime idempotently, releases its live schemas and
+current snapshot, and prevents later writes. A caller may still retain a previously returned
+immutable historical snapshot; secure erasure of caller-owned JavaScript data is not claimed. A
+new mount always starts from the exact declared initials and never reads persistence or writes back
+to the Source or Bundle.
+
+`createRuntimeNodeIdentity` and `reconcileRuntimeNodeIdentity` define the repeat-free headless
+identity base. The stable key is the exact structured document/surface/node tuple. Revision, tree
+position, capability, props, and style do not change that key. The same tuple and same `use` is
+`preserve-eligible`; a changed `use` is `remount-required`; and a changed document, surface, or
+node is `replace-required`. Actual adapter preservation, remount-required prop policy, repeat keys,
+reactive mount/unmount, and action dispatch remain M05-T05, M04-T07, M04-T15, and M04-T10.
+
+State declarations, candidates, snapshots, and identity descriptors use the shared depth-128,
+4,096-occurrence, and 1,048,576-UTF-16-unit safety boundary. Accessors, executable values,
+promises, symbols, cycles, non-finite numbers, sparse or decorated arrays, reflection failures,
+forged authorities, and over-budget data fail closed without a partial state. No host callback,
+storage port, framework, DOM, CSS, browser, or native-platform API enters either primitive.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -400,9 +467,11 @@ defines bounded literal/reference/fallback resolution; and M04-T03 adds token an
 string-format materialization without changing the earlier deferral primitive. M04-T04 adds the
 closed predicate evaluator and fail-closed conditional-presence decision. M04-T05 now composes its
 prepared positions with M04-T03 for ordered Variant conditions, then returns effective raw prop and
-style ValueSpecs with exact winning provenance. State writes, resource/operation transitions,
-action execution, final value materialization, rendering, activation implementation, event/command
-bridges, and adapters remain assigned to their later tracked tasks.
+style ValueSpecs with exact winning provenance. M04-T06 adds fresh atomic surface-local state,
+complete schema-safe writes, terminal disposal, and repeat-free base node identity. Repeat scopes,
+resource/operation transitions, action execution, final value materialization, rendering,
+activation implementation, event/command bridges, and adapters remain assigned to their later
+tracked tasks.
 
 ## Protocol and target support
 
@@ -419,10 +488,12 @@ pnpm --filter @desen/runtime-core test:value-resolution
 pnpm --filter @desen/runtime-core test:token-format-resolution
 pnpm --filter @desen/runtime-core test:predicate-evaluation
 pnpm --filter @desen/runtime-core test:variant-style-evaluation
+pnpm --filter @desen/runtime-core test:local-state-identity
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
 pnpm verify:runtime-core-predicate-evaluation
 pnpm verify:runtime-core-variant-style-evaluation
+pnpm verify:runtime-core-local-state-identity
 pnpm check
 ```

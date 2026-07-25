@@ -16,6 +16,13 @@ export {
   evaluateRuntimePredicate,
 } from "./predicate-evaluation.js";
 export { evaluateRuntimeVariantOverrides } from "./variant-style-evaluation.js";
+export {
+  disposeRuntimeSurfaceState,
+  mountRuntimeSurfaceState,
+  readRuntimeSurfaceState,
+  writeRuntimeSurfaceState,
+} from "./local-state.js";
+export { createRuntimeNodeIdentity, reconcileRuntimeNodeIdentity } from "./node-identity.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -101,3 +108,29 @@ export type {
   RuntimeVariantOverridesInvalid,
   RuntimeVariantValueSources,
 } from "./variant-style-evaluation.js";
+
+export type {
+  RuntimeSurfaceStateDisposeResult,
+  RuntimeSurfaceStateEntrySpec,
+  RuntimeSurfaceStateHandle,
+  RuntimeSurfaceStateIssue,
+  RuntimeSurfaceStateMountInput,
+  RuntimeSurfaceStateMountInvalid,
+  RuntimeSurfaceStateMountInvalidReason,
+  RuntimeSurfaceStateMountResult,
+  RuntimeSurfaceStateReadResult,
+  RuntimeSurfaceStateSnapshot,
+  RuntimeSurfaceStateWriteInput,
+  RuntimeSurfaceStateWriteRejected,
+  RuntimeSurfaceStateWriteRejectedReason,
+  RuntimeSurfaceStateWriteResult,
+} from "./local-state.js";
+
+export type {
+  RuntimeNodeIdentity,
+  RuntimeNodeIdentityCreationResult,
+  RuntimeNodeIdentityDescriptor,
+  RuntimeNodeIdentityInvalid,
+  RuntimeNodeIdentityInvalidReason,
+  RuntimeNodeIdentityReconciliation,
+} from "./node-identity.js";

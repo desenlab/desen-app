@@ -260,6 +260,30 @@ reference, resolved-JSON, and validated-catalog-set types. The central T09–T11
 - `DesenExecutionValueValidationSuccess`, `DesenExecutionValueValidationFailure`, and
   `DesenExecutionValueValidationResult`.
 
+### First-party runtime schema-contract subpath
+
+M04-T06 exposes the existing code-free schema interpreter to other DESEN workspace packages at
+`@desen/validator/schema-contract`. The companion
+`@desen/validator/schema-contract-syntax` subpath exposes only a typed
+`validateDraft202012` re-export from the existing generated module. These are first-party runtime
+integration seams, not general raw-input validation APIs. Their caller must already have copied
+the schema and candidate through an inert bounded JSON boundary, must pass the schema through the
+meta-schema, and must graph-check it before applying it. The two syntax wrapper files live outside
+the generated `dist` inventory so a later task cannot silently expand an earlier proof artifact's
+owned source/distribution set.
+
+The runtime uses:
+
+```ts
+applySchemaContract(schema, completeCandidate, "complete", "resolved-value");
+```
+
+`complete` checks the entire post-write state entry rather than only its changed leaf.
+`resolved-value` treats `$ref`, `$token`, and `$format` property names as ordinary JSON data. The
+subpath performs no coercion, default application, generated-code evaluation, reference fetching,
+or host effect. The package root intentionally does not export `applySchemaContract`; existing
+M02 public validator APIs and their evidence bytes remain unchanged.
+
 Every public export has TSDoc.
 
 ## Cumulative execution example

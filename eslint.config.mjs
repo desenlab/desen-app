@@ -99,6 +99,14 @@ export default tseslint.config(
     },
   },
   {
+    files: ["packages/validator/schema-contract-syntax.d.ts"],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+  },
+  {
     files: nodeFiles,
     languageOptions: {
       globals: globals.node,

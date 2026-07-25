@@ -8,12 +8,22 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "schema-contract-syntax.d.ts",
+    "schema-contract-syntax.js",
     "THIRD_PARTY_NOTICES.md"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./schema-contract": {
+      "types": "./dist/schema-instance-validation.d.ts",
+      "import": "./dist/schema-instance-validation.js"
+    },
+    "./schema-contract-syntax": {
+      "types": "./schema-contract-syntax.d.ts",
+      "import": "./schema-contract-syntax.js"
     }
   },
   "scripts": {

@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████░░░░░░░░░░░░░░░░░░` **42 / 144 tasks complete (29%)**
+**Overall:** `███████░░░░░░░░░░░░░░░░░░` **43 / 144 tasks complete (30%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `█████░░░░░░░░░░░` **5 / 16 tasks complete (31%)**
+**M04 progress:** `██████░░░░░░░░░░` **6 / 16 tasks complete (38%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T06`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T07`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -113,6 +113,7 @@ packages/
 - [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)
 - [Runtime core predicate-evaluation proof](docs/proof/RUNTIME-CORE-PREDICATE-EVALUATION.md)
 - [Runtime core Variant and style-override proof](docs/proof/RUNTIME-CORE-VARIANT-STYLE-EVALUATION.md)
+- [Runtime core local-state and base-identity proof](docs/proof/RUNTIME-CORE-LOCAL-STATE-IDENTITY.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -299,6 +300,18 @@ passes 30 focused package tests, 25 compiler-negative cases, and 14 root proof/m
 including 13 artifact-independent mutation checks, two direct trace assignments, and eleven
 tracked files; the cumulative runtime-core suite passes 134/134. P-17 remains `PARTIAL`, N-014
 remains `PLANNED`, and no proof-gate status changes.
+
+M04-T06 now mounts fresh surface-local state atomically, validates every initial and complete
+post-write entry against its prepared Draft 2020-12 schema, and exposes values only through
+immutable generation snapshots behind an opaque handle. Invalid writes return
+`STATE_WRITE_INVALID` without partial state; canonical no-ops keep the exact snapshot and
+generation. Explicit unsupported schema vocabularies fail closed. A separate repeat-free node
+identity primitive uses the exact document/surface/node tuple, preserves compatible identities by
+reference, and classifies capability changes as remounts and tuple changes as replacements.
+Evidence passes 33 focused package tests, 7 compiler-negative cases, and 13 root proof/mutation
+tests across 25 tracked source and distribution files; the cumulative runtime-core suite passes
+167/167. N-024 is now `TESTED`; repeat keys, action execution, reactivity, and actual adapter
+instance preservation remain later work. P-17 stays `PARTIAL`, and no proof-gate status changes.
 
 ## License
 

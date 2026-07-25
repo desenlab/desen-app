@@ -133,6 +133,17 @@ until M05, so this task does not claim receiving-schema validation or adapter de
 over-budget, malformed, or incompletely materialized conditions fail closed without partial maps.
 This task records `PF-035` and proves only M04-T05's Variant-order portion of N-014; N-014 remains
 `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status changes.
+M04-T06 now mounts every surface-local state declaration atomically from fresh initials and
+validates the complete entry after every accepted write. State values remain behind a
+factory-authenticated handle and are exposed only as immutable generation snapshots; invalid
+writes return `STATE_WRITE_INVALID` without partial state, and canonical no-ops do not advance the
+generation. Draft 2020-12 syntax, graph safety, complete `resolved-value` validation, and an
+explicit fail-closed `$vocabulary` profile prevent unsupported assertion semantics from being
+silently weakened. The repeat-free node identity uses the exact document/surface/node tuple,
+preserves a compatible identity by reference, and classifies capability or tuple changes without
+claiming adapter-instance behavior. This task records `PF-036` and moves N-024 to `TESTED`; repeat
+keys, actions, reactivity, and adapter preservation remain assigned later. P-17 remains `PARTIAL`,
+and no proof-gate status changes.
 
 ## Current milestone
 
@@ -165,11 +176,12 @@ This task records `PF-035` and proves only M04-T05's Variant-order portion of N-
   `M04-T02 — Literal/reference/fallback resolver`,
   `M04-T03 — Token and deterministic string-format resolution`,
   `M04-T04 — Predicate evaluation and conditional presence`,
-  `M04-T05 — Ordered variant and style override evaluation`
+  `M04-T05 — Ordered variant and style override evaluation`,
+  `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`
-- Status: M04-T05 complete; ready for M04-T06
+- Next implementation task: `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`
+- Status: M04-T06 complete; ready for M04-T07
 
 ## Completed preparation
 
@@ -186,9 +198,9 @@ This task records `PF-035` and proves only M04-T05's Variant-order portion of N-
   configured through Dependabot.
 - CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
   fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
-  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T05
-  inventory now expands to 963 legacy leaf launches but remains a reviewed 64-step single-pass gate
-  covering 100 distinct workloads, 28 proof verifiers, and 28 root proof files.
+  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T06
+  inventory now expands to 1,065 legacy leaf launches but remains a reviewed 66-step single-pass
+  gate covering 103 distinct workloads, 29 proof verifiers, and 29 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -399,6 +411,17 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   The cumulative runtime-core suite passes 134/134. Final selected-value materialization,
   receiving-schema validation, and adapter delivery remain M05. P-17 stays `PARTIAL`, N-014 stays
   `PLANNED`, and no proof-gate status changes.
+- The M04-T06 local-state and base-identity boundary passes 33 focused package tests, 7
+  compiler-negative cases, and 13 root proof/mutation tests. Six public runtime functions and 20
+  runtime type exports mount fresh state atomically, enforce Draft 2020-12 syntax plus a fail-closed
+  vocabulary profile, validate every full initial and post-write entry in `complete` and
+  `resolved-value` mode, preserve exact snapshots after rejection or canonical no-op, and dispose
+  live authority terminally. A separate structured document/surface/node tuple makes repeat-free
+  preservation, remount, and replacement eligibility explicit through a linear capability-ID
+  parser. Four direct trace assignments, 25 tracked source/distribution files, and the cumulative
+  167/167 runtime-core suite protect the boundary. N-024 is `TESTED`; repeat identity, action
+  execution, reactivity, and adapter preservation remain later work. P-17 stays `PARTIAL`, and no
+  proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -419,11 +442,11 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`. Build the
-next bounded framework-neutral runtime primitive on the M04-T02 snapshot boundary, prove that
-every accepted write leaves its complete state entry schema-valid, and retain stable node identity
-for later repeat, action, and diagnostic owners. Keep action-turn execution and adapter behavior in
-their assigned later tasks.
+Start `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`. Compose repeat
+instance identity onto M04-T06's exact document/surface/node base without changing that stable key,
+and preserve the frozen alias, key, and item-scope semantics under deterministic duplicate and
+bounded-materialization rules. Keep action execution, reactivity, and actual adapter-instance
+preservation in their assigned later tasks.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -431,9 +454,9 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-M04-T05 extends the current reviewed CI inventory to 100 distinct workloads, 28 proof verifiers, 28
-root proof files, and a pinned 64-step plan. Its equivalent legacy dependency expansion contains
-963 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
+M04-T06 extends the current reviewed CI inventory to 103 distinct workloads, 29 proof verifiers, 29
+root proof files, and a pinned 66-step plan. Its equivalent legacy dependency expansion contains
+1,065 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
 repeating prerequisite chains. Twenty-one CI contract tests additionally pin the exact workspace
 roots, every workspace package test command, and the absence of hidden Vitest configuration. The
 archived CI-01 timing comparison remains historical evidence rather than a claim that the larger
@@ -637,6 +660,17 @@ M04-T05 evidence:
 - executable evidence: 30 focused package tests, 25 compiler-negative cases, 14 root
   proof/mutation tests including 13 artifact-independent mutation checks, 2 direct trace
   assignments, 11 tracked files, and a cumulative 134/134 runtime-core package suite
+
+M04-T06 evidence:
+
+- `docs/proof/RUNTIME-CORE-LOCAL-STATE-IDENTITY.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-local-state-identity.json`
+- artifact SHA-256: `61cea970d896b4f2278b449cb5564a5069cbc4271b7e8b5e517a186aa48a858b`
+- exact boundary: 6 runtime exports, 20 runtime type exports, a narrow typed validator syntax seam,
+  atomic complete-entry state validation, and repeat-free base node identity
+- executable evidence: 33 focused package tests, 7 compiler-negative cases, 13 root
+  proof/mutation tests, 4 direct trace assignments, 25 tracked source/distribution files, and a
+  cumulative 167/167 runtime-core package suite
 
 ## Status vocabulary
 
