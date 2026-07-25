@@ -200,6 +200,35 @@ copied. Results and diagnostics are recursively immutable and expose no partial 
 malformed, hostile, deferred, or over-budget input. This layer remains independent of React, React
 Native, DOM, CSS, browser APIs, and application code.
 
+## Runtime Variant and style-override boundary
+
+Ordered Variant evaluation is a data-only selection layer over the same factory-created resolution
+snapshot. It accepts only base prop/style ValueSpecs and closed conditional patches; structural
+node fields are outside the API. Variants cannot add or remove children, replace capabilities,
+attach behaviors, alter repeats, or install event handlers.
+
+Conditions are prepared through the predicate data seam and completed through the token/format
+materializer against one snapshot, one captured request context, and one turn-scoped token session.
+The session caches one detached observation per unique opaque token name across all sibling
+conditions. Operand outcomes remain paired with their exact prepared positions, and evaluation
+retains Variant array order, source-prefixed predicate diagnostics, and first-terminal failure
+order. Aggregate condition results and retained token values remain independently bounded.
+
+Base paths are selected first and every matching Variant applies in document order. A later match
+can replace only `/props/{name}` or `/style/{state}/{part}/{property}` when it declares that leaf.
+Literal objects and arrays inside either ValueSpec are replaced whole rather than recursively
+merged; JSON `null` is not deletion; and visual-state maps never implicitly cascade from `base`.
+Every winning leaf retains its exact Source/Bundle JSON Pointer.
+
+The successful boundary returns detached, recursively immutable effective raw ValueSpecs, matching
+Variant indexes, winning provenance, and ordered predicate diagnostics. JSON object-member order
+has no runtime meaning; deterministic bytes use the protocol's RFC 8785 serializer. The boundary
+does not materialize the selected prop or style values. Consumer-schema validation and adapter
+delivery remain M05, as do active visual-state selection and target-specific styling. Reactive
+reevaluation remains M04-T15, while M04-T16 owns complete headless materialization. The
+Variant-order portion of N-014 is covered here, but N-014 remains `PLANNED` until its remaining
+array-order owners complete.
+
 ## Activation sequence
 
 ```text

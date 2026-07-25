@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T05",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Base prop/style ValueSpecs and every matching variant compose deterministically in document order through one immutable snapshot and one turn-scoped token session.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T03",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-token-format-resolution.json",
+      "artifactSha256": "be2d07ae32537ef5c2aec04c783f2cfb30cbcc500a85020172e2b8715a98800f"
+    },
+    {
+      "task": "M04-T04",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-predicate-evaluation.json",
+      "artifactSha256": "14b74cd4f0c35e76edd77858443edf8515b3a60a247afe75131095d5a0c3bcf1"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": ["evaluateRuntimeVariantOverrides"],
+    "typeExports": [
+      "RuntimePropValueSpecs",
+      "RuntimeStyleValueSpecs",
+      "RuntimeVariantEvaluationInput",
+      "RuntimeVariantOverrideInvalidReason",
+      "RuntimeVariantOverrideSpec",
+      "RuntimeVariantOverridesEvaluated",
+      "RuntimeVariantOverridesEvaluation",
+      "RuntimeVariantOverridesInvalid",
+      "RuntimeVariantValueSources"
+    ],
+    "sourceExports": [
+      "RuntimePropValueSpecs",
+      "RuntimeStyleValueSpecs",
+      "RuntimeVariantEvaluationInput",
+      "RuntimeVariantOverrideInvalidReason",
+      "RuntimeVariantOverrideSpec",
+      "RuntimeVariantOverridesEvaluated",
+      "RuntimeVariantOverridesEvaluation",
+      "RuntimeVariantOverridesInvalid",
+      "RuntimeVariantValueSources",
+      "evaluateRuntimeVariantOverrides"
+    ],
+    "sourceImports": [
+      "./host-ports.js",
+      "./predicate-evaluation.js",
+      "./token-format-resolution.js",
+      "./value-resolution.js",
+      "@desen/protocol"
+    ],
+    "tsdocDeclarations": 10
+  },
+  "runtime": {
+    "orderProbes": 2,
+    "mergeProbes": 8,
+    "tokenSessionProbes": 3,
+    "positionPairingProbes": 2,
+    "missingOperandProbes": 2,
+    "providerFailureProbes": 1,
+    "structuralRejectionProbes": 2,
+    "hostileInputProbes": 1,
+    "diagnosticProbes": 2,
+    "matchingVariantProbes": 3,
+    "rawValueSpecValidationProbes": 1,
+    "numericPropNameProbes": 1,
+    "canonicalSerializationProbes": 2,
+    "predicatePrevalidationProbes": 1,
+    "nestedFormatPrecedenceProbes": 1,
+    "tokenRequests": 1,
+    "platformEffects": 0,
+    "partialOutputs": false
+  },
+  "variantSemantics": {
+    "baseAppliedFirst": true,
+    "matchingVariantOrder": "document order",
+    "laterMatchingPathWins": true,
+    "propReplacementPath": "/props/{name}",
+    "propNestedMerge": false,
+    "styleReplacementPath": "/style/{state}/{part}/{property}",
+    "styleNestedMerge": false,
+    "nullDeletesPath": false,
+    "visualStateCascade": false,
+    "structuralMutation": false,
+    "extensionSemantics": false,
+    "output": "detached frozen effective raw ValueSpecs and exact winning source pointers",
+    "tokenSession": "one turn-scoped cache across every variant predicate",
+    "operandPairing": "exact prepared position"
+  },
+  "limits": {
+    "maxValueDepth": 128,
+    "maxJsonNodes": 4096,
+    "maxStringCodeUnits": 1048576,
+    "partialResults": false
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": {
+    "normativeClause": "N-014",
+    "normativeStatus": "PLANNED",
+    "finding": "PF-035"
+  },
+  "evidence": {
+    "packageTests": 30,
+    "compilerNegativeCases": 25,
+    "compilerNegativeLabels": [
+      "a selected ValueSpec can still be a dynamic token or format form",
+      "evaluated prop maps are immutable",
+      "evaluated style-state maps are immutable",
+      "evaluated style-part maps are immutable",
+      "evaluated style-property maps are immutable",
+      "winning prop source maps are immutable",
+      "matching indexes preserve immutable document order",
+      "ordered diagnostics are immutable",
+      "successful evaluation has no deferred form",
+      "invalid outcomes expose no partial effective props",
+      "invalid outcomes expose no partial diagnostics",
+      "provider failures redact raw errors",
+      "provider failures expose no partial effective style",
+      "every variant requires a predicate",
+      "every variant requires at least props or style",
+      "variants cannot mutate structural children or slots",
+      "predicate operators are a closed data-only vocabulary",
+      "style leaves must be inert ValueSpecs",
+      "the evaluator input intentionally excludes structural node fields",
+      "the variant array is immutable",
+      "base prop maps are immutable",
+      "the materialization context is mandatory",
+      "variant evaluation cannot omit the factory-created snapshot",
+      "token resolution remains synchronous during predicate evaluation",
+      "the public result has no unresolved or deferred terminal"
+    ],
+    "rootMutationTests": 14,
+    "traceRules": [
+      {
+        "collection": "pipelineSteps",
+        "id": "PIPE-021",
+        "section": "24.2",
+        "owners": ["M04-T04", "M04-T05", "M04-T07"],
+        "status": "PREDICATE_AND_VARIANT_STAGES_REPEAT_DEFERRED"
+      },
+      {
+        "collection": "proseRules",
+        "id": "R-060",
+        "section": "17.5",
+        "owners": ["M02-T08", "M04-T05"],
+        "status": "RUNTIME_PRIMITIVE_HEADLESS_INTEGRATION_DEFERRED"
+      }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/variant-style-evaluation.ts",
+        "bytes": 46683,
+        "sha256": "56341928243b091656d43e4b0b4db45550fe8f24f6ae7ded299bee52b06246a0"
+      },
+      {
+        "path": "packages/runtime-core/test/variant-style-evaluation.test.ts",
+        "bytes": 29991,
+        "sha256": "a8c8dce7d9d3f6176a230675d66b40f46aa60417c3067cdbd480ea39f33fbd08"
+      },
+      {
+        "path": "packages/runtime-core/test/variant-style-evaluation.types.ts",
+        "bytes": 6845,
+        "sha256": "80b7209aa297be7bdf43f3ab5cd9ea589609393d1cdcbff7df111585c0c329f4"
+      },
+      {
+        "path": "packages/runtime-core/dist/variant-style-evaluation.js",
+        "bytes": 37042,
+        "sha256": "16d37842958d1d6ef7b31b83ee080a97cf62174fa0564e9f481fc122b0dcf0cd"
+      },
+      {
+        "path": "packages/runtime-core/dist/variant-style-evaluation.js.map",
+        "bytes": 34346,
+        "sha256": "88e8c1fc6c45623639c378f22ece43d8db83254f9d13235774939adec8b1e8e4"
+      },
+      {
+        "path": "packages/runtime-core/dist/variant-style-evaluation.d.ts",
+        "bytes": 7164,
+        "sha256": "eaa3b4a04da34b6518b1988b806cc9d755cda41c0893bf42261d216743898a9c"
+      },
+      {
+        "path": "packages/runtime-core/dist/variant-style-evaluation.d.ts.map",
+        "bytes": 2635,
+        "sha256": "42749c4ca658ebe6fcea79a7d12895452b70a47303e80a9b8f26714c43a64fac"
+      },
+      {
+        "path": "scripts/lib/runtime-core-variant-style-evaluation-proof.mjs",
+        "bytes": 61661,
+        "sha256": "56f14f324219c6eca66a4f377dc03236de454eeef049756a9115c96b3d4d837d"
+      },
+      {
+        "path": "scripts/generate-runtime-core-variant-style-evaluation-proof.mjs",
+        "bytes": 874,
+        "sha256": "fb20e45cf4b1b9c9708af1731184f86566015fbdd667748664209f43125dfded"
+      },
+      {
+        "path": "scripts/verify-runtime-core-variant-style-evaluation.mjs",
+        "bytes": 708,
+        "sha256": "fa1bcb505ea03152da91e7378d05fab1dc0869e265e17794f8e799fe3e0201d4"
+      },
+      {
+        "path": "tests/runtime-core-variant-style-evaluation.test.mjs",
+        "bytes": 14498,
+        "sha256": "cd80ca9ba7b711f375fb8874ed03f379e14ef5df346db501da459bb35dec844d"
+      }
+    ],
+    "rootScripts": [
+      "generate:runtime-core-variant-style-evaluation",
+      "verify:runtime-core-variant-style-evaluation",
+      "test:runtime-core-variant-style-evaluation"
+    ]
+  },
+  "deferred": [
+    "effective prop and style ValueSpec materialization (M05-T02/M05-T03)",
+    "consumer capability-schema validation and adapter delivery (M05-T02/M05-T03)",
+    "active visual-state selection and framework styling (M05-T03)",
+    "repeat scopes and runtime instance identity (M04-T07)",
+    "reactive reevaluation and stale-result protection (M04-T15)",
+    "complete headless sign-in observable trace (M04-T16)",
+    "React, browser, iOS, Android, SwiftUI, and Compose adapters"
+  ]
+}

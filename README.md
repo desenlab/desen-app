@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████░░░░░░░░░░░░░░░░░░` **41 / 144 tasks complete (28%)**
+**Overall:** `███████░░░░░░░░░░░░░░░░░░` **42 / 144 tasks complete (29%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `████░░░░░░░░░░░░` **4 / 16 tasks complete (25%)**
+**M04 progress:** `█████░░░░░░░░░░░` **5 / 16 tasks complete (31%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T05`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T06`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -112,6 +112,7 @@ packages/
 - [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
 - [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)
 - [Runtime core predicate-evaluation proof](docs/proof/RUNTIME-CORE-PREDICATE-EVALUATION.md)
+- [Runtime core Variant and style-override proof](docs/proof/RUNTIME-CORE-VARIANT-STYLE-EVALUATION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -280,10 +281,24 @@ semantics, and keeps a direct unresolved operand distinct from a nested predicat
 false. Resolved operands are charged to one shared budget immediately, so the first terminal keeps
 document order and later values cannot amplify retained copies. `exists` performs a status-only
 original-reference probe, including JSON `null`, without evaluating fallback or copying a large
-referenced value. Token and format operands remain deferred for M04-T05 composition. The public API
-adds two functions and ten types; 53 focused tests, 13 compiler-negative cases, and 14 independent
-proof/mutation tests protect exact arities, the 64-predicate-node bound, true conditional absence,
-platform neutrality, and eleven tracked files. P-17 remains `PARTIAL`; no proof-gate status changes.
+referenced value. At the M04-T04 checkpoint, token and format operands were deferred for M04-T05
+composition. The public API adds two functions and ten types; 53 focused tests, 13 compiler-negative
+cases, and 14 independent proof/mutation tests protect exact arities, the 64-predicate-node bound,
+true conditional absence, platform neutrality, and eleven tracked files. P-17 remains `PARTIAL`;
+no proof-gate status changes.
+
+M04-T05 now applies base props and style first, evaluates every Variant condition in document
+order, and lets each later matching Variant replace only the exact prop or style-property leaf it
+declares. All sibling conditions share the same immutable snapshot and one turn-scoped token
+session, while matching indexes and winning source pointers preserve ordered provenance. The
+selected ValueSpecs remain raw and inert for M05 materialization and receiving-schema validation;
+M04-T05 does not claim adapter delivery, CSS behavior, or child-tree mutation. Hostile,
+over-budget, or incompletely materialized conditions fail closed without exposing partial maps.
+The public API adds one function and nine types with ten complete TSDoc declarations. Evidence
+passes 30 focused package tests, 25 compiler-negative cases, and 14 root proof/mutation tests,
+including 13 artifact-independent mutation checks, two direct trace assignments, and eleven
+tracked files; the cumulative runtime-core suite passes 134/134. P-17 remains `PARTIAL`, N-014
+remains `PLANNED`, and no proof-gate status changes.
 
 ## License
 
