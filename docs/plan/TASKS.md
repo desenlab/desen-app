@@ -97,7 +97,7 @@ check from fresh inputs, and must not trust path filters or cached proof success
 | M04-T08 | DONE        | M04-T02–M04-T03          | Resource mount/once/manual lifecycle and refresh                                                   |
 | M04-T09 | DONE        | M04-T02                  | Operation lifecycle and reject/replace/queue concurrency                                           |
 | M04-T10 | DONE        | M04-T03–M04-T04, M04-T06 | `state.set`, `state.toggle`, and `navigate` actions                                                |
-| M04-T11 | NOT_STARTED | M04-T08–M04-T10          | `operation.invoke` settlement actions and `resource.refresh`                                       |
+| M04-T11 | DONE        | M04-T08–M04-T10          | `operation.invoke` settlement actions and `resource.refresh`                                       |
 | M04-T12 | NOT_STARTED | M04-T10                  | `component.command` and allowlisted, schema-validated `event.emit`                                 |
 | M04-T13 | NOT_STARTED | M04-T10–M04-T12          | Action-turn, settlement-depth, and repeated-transition limits                                      |
 | M04-T14 | NOT_STARTED | M04-T07, M04-T12         | Generic component/behavior event and command bridges with payload validation                       |

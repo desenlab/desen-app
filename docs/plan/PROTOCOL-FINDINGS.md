@@ -1282,3 +1282,53 @@ This file records implementation discoveries without changing the frozen DESEN 0
   action-scoped token sessions, snapshot provenance, navigation request identity and parameter
   lifetime, denial/failure visibility, same-surface navigation, and the exact terminal disposal
   boundary.
+
+## PF-041 — Operation and resource actions require deterministic settlement ownership
+
+- Status: OPEN
+- Blocks proof: No; one bounded action-composition profile can preserve nonblocking operation
+  settlement, current-input resource refresh, and the later action-turn acknowledgement boundary.
+- Protocol location: SPEC Sections 14.2.3–14.2.4, 17.7, 20.4–20.5, 24.2, 26.3, and 27.7;
+  `R-078` and `R-079`; related findings `PF-014`, `PF-020`, `PF-022`, `PF-031`, `PF-039`, and
+  `PF-040`
+- Observation: DESEN 0.1.0 does not define when operation settlement handlers are detached,
+  which technical terminal outcomes select `onFailure`, whether an absent or empty handler still
+  crosses an acknowledgement safe point, whether a guard and operation input share token
+  observations, whether a resource refresh shares that cache, how exact resource and operation
+  manager snapshots prove one action observation, how much unsettled handler data may be retained,
+  or how disposal and late settlement interact with the queue gate.
+- Implementation decision: M04-T11 composes one exact current M04-T08 resource authority and one
+  exact current M04-T09 operation authority under a trusted exclusive-ownership profile. A
+  factory-issued compositor prevents those handles from being claimed by a second live M04-T11
+  compositor. JavaScript callers can still retain the independently public lower-level handles, so
+  exclusivity is a composition-root surrender rule rather than an unprovable revocation claim;
+  exact manager snapshots are re-read around hostile observation and direct lower-level mutation
+  makes the next composed action fail closed.
+
+  `when` is captured and evaluated before any discriminator or payload member. A true operation
+  guard and its named input ValueSpecs share one bounded action-local token session. Both
+  settlement branches are copied as inert frozen data before M04-T09 accepts the invocation, and
+  finite pending-settlement, retained-action, and retained-string ceilings are reserved before the
+  host boundary. The originating turn never awaits the transport. `succeeded` selects the captured
+  `onSuccess` array; declared `failed`, host `denied`, invalid output, and adapter failure select
+  `onFailure`; superseded or disposed attempts create no handler turn.
+
+  A lease-bearing terminal result exposes only an opaque M04-T11 settlement ticket, never the raw
+  M04-T09 lease. M04-T11 does not acknowledge that ticket. M04-T13 must start a new turn with
+  `event.*` unavailable and finalize the ticket from a `finally` path after success, failure,
+  navigation termination, or a limit. An absent or empty branch crosses the same safe point.
+  Handler execution cannot rewrite the already-published operation lifecycle, and same-alias
+  queued or staged host work cannot start before acknowledgement.
+
+  `resource.refresh` delegates the exact current resource instance and resolution snapshot to
+  M04-T08 without awaiting settlement or inventing handlers. Its declared current input uses the
+  independent M04-T08 resource request and token session; sharing the guard cache could otherwise
+  memoize stale input under the action request context. T11 disposal is terminal and disposes both
+  lower-level managers, invalidating their outstanding leases without leaving a live operation
+  gate behind. Physical cancellation, retry, timeout, cache, persistence, and full seven-namespace
+  turn provenance remain explicit non-claims.
+
+- Future action: A later protocol revision should standardize handler capture timing, technical
+  settlement branch mapping, token-cache scopes, cross-manager snapshot provenance, finite
+  settlement retention, private acknowledgement authority, disposal and late-settlement behavior,
+  and the exact safe point that promotes queued operation work.

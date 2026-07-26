@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████░░░░░░░░░░░░░░░░░` **47 / 144 tasks complete (33%)**
+**Overall:** `████████░░░░░░░░░░░░░░░░░` **48 / 144 tasks complete (33%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `██████████░░░░░░` **10 / 16 tasks complete (63%)**
+**M04 progress:** `███████████░░░░░` **11 / 16 tasks complete (69%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T11`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T12`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -118,6 +118,7 @@ packages/
 - [Runtime core resource-lifecycle proof](docs/proof/RUNTIME-CORE-RESOURCE-LIFECYCLE.md)
 - [Runtime core operation-lifecycle proof](docs/proof/RUNTIME-CORE-OPERATION-LIFECYCLE.md)
 - [Runtime core state and navigation-action proof](docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md)
+- [Runtime core operation and resource-action proof](docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)

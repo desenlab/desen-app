@@ -680,6 +680,77 @@ Successful navigation, including same-surface navigation, terminally disposes bo
 and its captured local-state lifetime; a minimal tombstone preserves deterministic late-call
 results without retaining live authority.
 
+## M04-T11 guarded operation and resource action API
+
+`mountRuntimeOperationResourceActions` composes one exact current M04-T08 resource manager and one
+exact current M04-T09 operation manager. The trusted composition root surrenders those lower-level
+handles to this lifetime; a second live compositor cannot claim either handle. Because JavaScript
+cannot revoke a lower-level handle already retained by a caller, every composed effect still
+rechecks both exact manager snapshots and fails closed after direct lower-level drift.
+
+```ts
+import {
+  executeRuntimeOperationResourceAction,
+  mountRuntimeOperationResourceActions,
+} from "@desen/runtime-core";
+
+const mounted = mountRuntimeOperationResourceActions({
+  documentId,
+  revision,
+  surfaceId,
+  operations: { signIn: { operation: "com.example.auth/signIn" } },
+  resourceHandle,
+  resourceSnapshot,
+  operationHandle,
+  operationSnapshot,
+  hostPorts,
+});
+
+if (mounted.status === "mounted") {
+  const result = executeRuntimeOperationResourceAction(
+    mounted.handle,
+    {
+      type: "operation.invoke",
+      operation: "com.example.auth/signIn",
+      as: "signIn",
+      input: {
+        email: { $ref: "state.email" },
+        password: { $ref: "state.password" },
+      },
+      concurrency: "replace",
+      onSuccess: [{ type: "navigate", surface: "home" }],
+    },
+    resolutionSnapshot,
+    resourceSnapshot,
+    operationSnapshot,
+  );
+  void result;
+}
+```
+
+The guard is completed before any discriminator or payload member is observed. A true operation
+guard and its input share one bounded action-local token cache. Alias and capability authorization
+precede input and settlement-handler capture. Handler arrays are detached, frozen, and charged
+against finite pending-settlement, retained-action, and retained-string budgets before M04-T09 may
+accept the invocation.
+
+Started, queued, and staged effects return synchronously; their mapped settlement remains a
+Promise and never blocks the originating action turn. Success selects the acceptance-time
+`onSuccess` snapshot. Declared failure, denial, invalid output, and adapter failure select
+`onFailure`; superseded and disposed attempts select no turn. A lease-bearing settlement exposes
+an opaque ticket rather than M04-T09's raw lease. Only the package-internal M04-T13 runner may
+finalize that ticket after its new event-unavailable action turn, from a `finally` path. Empty
+handlers cross the same safe point, and handler failure cannot rewrite the already-published
+operation lifecycle.
+
+`resource.refresh` authorizes the instance and delegates to M04-T08 using the exact current
+resource and resolution snapshots. The resource manager independently resolves the declaration's
+current input under its own request identity and token session; the action guard cannot memoize or
+poison refresh input. Disposal terminally closes the compositor plus both surrendered managers,
+invalidates settlement tickets, and leaves no live operation queue gate. Physical cancellation,
+retry, timeout, caching, and cross-manager provenance outside the two exact lifecycle namespaces
+remain later-profile work.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -727,9 +798,11 @@ latest-wins refresh, and terminal disposal. M04-T09 adds Catalog-authoritative o
 exact input/output validation, deterministic reject/replace/FIFO queue behavior, bounded
 transports, and settlement acknowledgement. M04-T10 adds guard-first one-action state mutation and
 same-Bundle navigation with shared token observation, exact snapshot authorization, hostile
-callback containment, and terminal navigation disposal. Multi-action turns, settlement dispatch,
-reactive composition, rendering, activation implementation, event/command bridges, and adapters
-remain assigned to their later tracked tasks.
+callback containment, and terminal navigation disposal. M04-T11 adds nonblocking guarded operation
+and resource actions, acceptance-time settlement branches, bounded handler retention, and opaque
+acknowledgement tickets without exposing raw leases. Multi-action turn execution, settlement
+ticket finalization, reactive composition, rendering, activation implementation, event/command
+bridges, and adapters remain assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -751,6 +824,7 @@ pnpm --filter @desen/runtime-core test:repeat-materialization
 pnpm --filter @desen/runtime-core test:resource-lifecycle
 pnpm --filter @desen/runtime-core test:operation-lifecycle
 pnpm --filter @desen/runtime-core test:state-navigation-actions
+pnpm --filter @desen/runtime-core test:operation-resource-actions
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -761,5 +835,6 @@ pnpm verify:runtime-core-repeat-materialization
 pnpm verify:runtime-core-resource-lifecycle
 pnpm verify:runtime-core-operation-lifecycle
 pnpm verify:runtime-core-state-navigation-actions
+pnpm verify:runtime-core-operation-resource-actions
 pnpm check
 ```

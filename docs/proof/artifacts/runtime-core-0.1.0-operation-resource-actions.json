@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T11",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Guarded operation invocation captures bounded settlement branches behind private acknowledgement authority, while guarded resource refresh delegates exact current lifecycle snapshots.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T08",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-resource-lifecycle.json",
+      "artifactSha256": "2d6ab2e5b6a480e922425faa109e13cc5d388a5de00b2604cbfec62345b01c82"
+    },
+    {
+      "task": "M04-T09",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-operation-lifecycle.json",
+      "artifactSha256": "7b2300a78bb9903abe1f182792362d374edb5b948ee9f8f69dc018ccf9cc8301"
+    },
+    {
+      "task": "M04-T10",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-state-navigation-actions.json",
+      "artifactSha256": "9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67"
+    },
+    {
+      "task": "M02-T11",
+      "result": "PASS",
+      "artifact": "protocol-0.1.0-execution-contracts.json",
+      "artifactSha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505"
+    }
+  ],
+  "publicApi": {
+    "moduleRuntimeExports": [
+      "RUNTIME_OPERATION_RESOURCE_ACTION_LIMITS",
+      "disposeRuntimeOperationResourceActions",
+      "executeRuntimeOperationResourceAction",
+      "finalizeRuntimeOperationActionSettlement",
+      "mountRuntimeOperationResourceActions"
+    ],
+    "moduleTypeExports": [
+      "RuntimeDeferredActionSpec",
+      "RuntimeOperationActionQueued",
+      "RuntimeOperationActionSettlementDescriptor",
+      "RuntimeOperationActionSettlementFinalizationResult",
+      "RuntimeOperationActionSettlementTicket",
+      "RuntimeOperationActionStaged",
+      "RuntimeOperationActionStarted",
+      "RuntimeOperationInvokeAction",
+      "RuntimeOperationResourceAction",
+      "RuntimeOperationResourceActionLimitProfile",
+      "RuntimeOperationResourceActionResult",
+      "RuntimeOperationResourceActionsDisposeResult",
+      "RuntimeOperationResourceActionsHandle",
+      "RuntimeOperationResourceActionsMountInput",
+      "RuntimeOperationResourceActionsMountInvalidReason",
+      "RuntimeOperationResourceActionsMountResult",
+      "RuntimeResourceRefreshAction",
+      "RuntimeResourceRefreshActionStarted"
+    ],
+    "runtimeExports": [
+      "RUNTIME_OPERATION_RESOURCE_ACTION_LIMITS",
+      "disposeRuntimeOperationResourceActions",
+      "executeRuntimeOperationResourceAction",
+      "mountRuntimeOperationResourceActions"
+    ],
+    "typeExports": [
+      "RuntimeDeferredActionSpec",
+      "RuntimeOperationActionQueued",
+      "RuntimeOperationActionSettlementDescriptor",
+      "RuntimeOperationActionStaged",
+      "RuntimeOperationActionStarted",
+      "RuntimeOperationInvokeAction",
+      "RuntimeOperationResourceAction",
+      "RuntimeOperationResourceActionLimitProfile",
+      "RuntimeOperationResourceActionResult",
+      "RuntimeOperationResourceActionsDisposeResult",
+      "RuntimeOperationResourceActionsHandle",
+      "RuntimeOperationResourceActionsMountInput",
+      "RuntimeOperationResourceActionsMountInvalidReason",
+      "RuntimeOperationResourceActionsMountResult",
+      "RuntimeResourceRefreshAction",
+      "RuntimeResourceRefreshActionStarted"
+    ],
+    "tsdocDeclarations": 23,
+    "sourceImports": [
+      "./action-evaluation.js",
+      "./host-ports.js",
+      "./operation-lifecycle.js",
+      "./predicate-evaluation.js",
+      "./resource-lifecycle.js",
+      "./runtime-json-snapshot.js",
+      "./state-navigation-actions.js",
+      "./token-format-resolution.js",
+      "./value-resolution.js",
+      "@desen/protocol"
+    ],
+    "internalRuntimeExports": ["finalizeRuntimeOperationActionSettlement"],
+    "internalTypeExports": [
+      "RuntimeOperationActionSettlementFinalizationResult",
+      "RuntimeOperationActionSettlementTicket"
+    ]
+  },
+  "runtime": {
+    "mountProbes": 3,
+    "guardFirstProbes": 9,
+    "tokenSessionProbes": 3,
+    "operationProbes": 4,
+    "settlementProbes": 18,
+    "resourceProbes": 5,
+    "snapshotProbes": 3,
+    "ownershipProbes": 1,
+    "retentionProbes": 14,
+    "disposalProbes": 4,
+    "receiverIndependenceProbes": 3,
+    "hostilePayloadReads": 0,
+    "falseGuardEffects": 0,
+    "falseGuardDiagnosticCalls": 0,
+    "rawHostFailuresExposed": false,
+    "platformEffects": 0
+  },
+  "semantics": {
+    "actionCardinality": "exactly one operation.invoke or resource.refresh action",
+    "guardOrdering": "guard before discriminator and every payload observation",
+    "falseGuard": "zero payload reads, payload-token calls, delegated effects, and diagnostic reports",
+    "operationTokenSession": "true guard and named operation input share one detached action-local M04-T10 cache",
+    "resourceTokenSession": "resource declaration input remains independently owned and materialized by M04-T08",
+    "operationInput": "canonical named synthetic array materialization before exact M04-T09 schema validation",
+    "handlerCapture": "both branches detached, bounded, and frozen before accepted invocation",
+    "settlementMapping": "succeeded selects onSuccess; public/technical failure selects onFailure; superseded/disposed selects none",
+    "acknowledgement": "raw lease hidden behind package-internal opaque one-shot authority; no auto-acknowledgement",
+    "resourceRefresh": "exact current M04-T08 snapshot plus factory resolution snapshot, returned nonblocking",
+    "exclusiveOwnership": "one live T11 compositor claim; trusted caller profile surrenders direct primitive use",
+    "disposal": "terminally disposes exclusively claimed T08/T09 managers and invalidates private tickets",
+    "actionTurnManager": null
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": {
+    "finding": "PF-041",
+    "findingStatus": "OPEN",
+    "relatedOpenFindings": ["PF-014", "PF-020", "PF-022", "PF-031", "PF-039", "PF-040"],
+    "proofDocument": "docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md"
+  },
+  "evidence": {
+    "focusedTestRegistrations": 59,
+    "focusedTests": 87,
+    "focusedTestTitles": [
+      "mounts exact T08/T09 snapshots without invoking any host callback",
+      "rejects an ABA-equal cloned %s snapshot",
+      "rejects a foreign %s handle paired with the local snapshot",
+      "rejects %s metadata mismatching both lower authorities",
+      "rejects forged lower handles without invoking diagnostics",
+      "rejects a missing, extra, or malformed operation inventory atomically",
+      "rolls back a failed mount so the same lower handles can be mounted correctly",
+      "prevents a second compositor from claiming either surrendered lower handle",
+      "rejects a %s limit profile without claiming authority",
+      "rejects accessor, symbol, and extra mount members without invoking getters",
+      "rejects an ABA-equal %s execution snapshot before reading when",
+      "rejects a factory snapshot with a mismatched %s namespace before action observation",
+      "detects direct lower-operation drift at the next action boundary",
+      "detects direct lower-resource drift at the next action boundary",
+      "a false guard observes none of the operation payload and invokes no callback",
+      "returns false-guard predicate diagnostics without reporting them",
+      "makes reflection reentry busy while the outer guard remains controlled",
+      "gives disposal during guard reflection precedence over the stale guard result",
+      "shares one detached token observation between a true guard and operation input",
+      "fails closed when a token callback mutates the lower operation manager",
+      "gives token-callback disposal precedence and never invokes the operation",
+      "rejects %s before observing input or settlement handlers",
+      "rejects guarded hostile action shape: %s",
+      "detaches and freezes both handler arrays at invocation acceptance",
+      "rejects unsafe %s before invoking the host",
+      "enforces the %s bound before token materialization",
+      "releases a provisional reservation after operation schema rejection",
+      "contains %s before operation invocation",
+      "materializes named operation input in canonical key order",
+      "returns started synchronously while even a synchronous host value settles later",
+      "returns queued immediately and preserves the first pending transport",
+      "returns staged during a settlement turn and launches it only after finalization",
+      "maps %s to the exact immutable settlement turn",
+      "does not acknowledge an empty settlement turn early",
+      "retains settlement capacity until the terminal ticket is explicitly finalized",
+      "enforces the aggregate retained settlement-action bound across live tickets",
+      "enforces the aggregate canonical handler-code-unit bound across live tickets",
+      "makes a settlement ticket one-shot",
+      "rejects forged and foreign settlement tickets without consuming the real ticket",
+      "returns disposed for a terminal ticket after owner disposal",
+      "preserves finalized identity across later owner disposal",
+      "suppresses a settlement turn when the surrendered T09 handle is directly disposed",
+      "returns an accepted handle even when the synchronous host callback disposes its owner",
+      "never inspects a late hostile settlement after terminal compositor disposal",
+      "releases rejected reservations before accepting a later replacement",
+      "gives peer-manager drift from a rejection diagnostic callback precedence",
+      "rejects an unknown resource before observing extensions or calling the host",
+      "rejects a resource action carrying an operation-only %s member",
+      "returns resource-started synchronously without awaiting a synchronous host value",
+      "uses separate deterministic token sessions for the action guard and declared resource input",
+      "re-evaluates the declaration's current resolved input on every refresh",
+      "returns a controlled resource input rejection without starting a transport",
+      "makes reentry from a synchronous resource host callback busy",
+      "returns an accepted resource handle when its synchronous callback disposes the owner",
+      "logically supersedes a pending refresh and ignores its stale settlement",
+      "reports direct lower-resource disposal as terminal on the next action",
+      "terminally disposes both surrendered managers and is idempotent",
+      "resolves pending operation and resource work as disposed",
+      "rejects forged compositor handles without touching live managers"
+    ],
+    "compilerNegativeCases": 24,
+    "compilerNegativeLabels": [
+      "compositor handles are opaque and cannot be forged structurally",
+      "settlement tickets are opaque and cannot be forged structurally",
+      "operation actions require the operation capability assertion",
+      "operation actions require a surface-scoped alias",
+      "operation actions require an explicit named input map",
+      "operation input values are data-only ValueSpecs",
+      "concurrency is the closed reject/replace/queue vocabulary",
+      "retained settlement actions are inert JSON, never callbacks",
+      "request identity is runtime-owned",
+      "arbitrary action fields must live inside extensions",
+      "resource.refresh requires an exact resource instance identifier",
+      "resource.refresh has no settlement handler members",
+      "resource.refresh always reuses the declaration's current resolved input",
+      "mount requires the exact current resource snapshot",
+      "an operation handle cannot occupy the resource-authority slot",
+      "a resource handle cannot occupy the operation-authority slot",
+      "limit profiles are closed and cannot invent a semantic ceiling",
+      "captured settlement action arrays are immutable",
+      "public action results are immutable",
+      "mapped settlements never expose the raw T09 lease",
+      "settlement descriptors are immutable",
+      "finalization accepts only the opaque T11 ticket",
+      "the primitive executes one action, never a caller-owned action array",
+      "internal settlement finalization is absent from the package root API"
+    ],
+    "rootMutationTests": 19,
+    "rootMutationTestTitles": [
+      "accepts tracked deterministic M04-T11 operation/resource evidence",
+      "builds byte-identical operation/resource evidence twice",
+      "rejects stale or tampered operation/resource evidence",
+      "rejects stale M04-T08 prerequisite bytes",
+      "rejects stale M04-T09 prerequisite bytes",
+      "rejects stale M04-T10 prerequisite bytes",
+      "rejects stale M02-T11 prerequisite bytes",
+      "detects guard-first hostile payload observation drift",
+      "detects false-guard effect and diagnostic drift",
+      "detects operation token-session and input drift",
+      "detects detached settlement-handler and mapping drift",
+      "detects raw host and private lease leakage",
+      "detects acknowledgement gate and ticket-finalization drift",
+      "detects resource refresh snapshot and nonblocking drift",
+      "detects exclusive ownership and disposal drift",
+      "detects task-owned byte drift",
+      "detects semantic source ordering drift",
+      "detects public export, TSDoc, internal non-leak, and platform drift",
+      "detects focused-test and compiler-negative inventory drift"
+    ],
+    "traceRules": [
+      { "id": "R-078", "section": "20.4", "owners": ["M04-T09", "M04-T11", "M04-T13"] },
+      { "id": "R-079", "section": "20.5", "owners": ["M02-T11", "M04-T08", "M04-T11"] }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/operation-resource-actions.ts",
+        "bytes": 64717,
+        "sha256": "80703b7a3704cfd6574cb6ef551aa50b412d8c612fe91503c1587168be102dcc"
+      },
+      {
+        "path": "packages/runtime-core/test/operation-resource-actions.test.ts",
+        "bytes": 58825,
+        "sha256": "9cf66c7a23d19fd5da807c775018f31b2f0bae065c25074bd6555d54c2c9b602"
+      },
+      {
+        "path": "packages/runtime-core/test/operation-resource-actions.types.ts",
+        "bytes": 7796,
+        "sha256": "91fdbd9b7b7f525e2c543b119099ff928950c0cd26a2e07a3db07ba1d710c605"
+      },
+      {
+        "path": "packages/runtime-core/dist/operation-resource-actions.js",
+        "bytes": 50088,
+        "sha256": "2a4712d5eafd74b09730956d6d8c698b18416d0a07f20931030d3b92e7b2d866"
+      },
+      {
+        "path": "packages/runtime-core/dist/operation-resource-actions.js.map",
+        "bytes": 40718,
+        "sha256": "f6d578f7db34b6389a0bf1bb0dabf986b4db82e9d89450fa2600f9f75da5d74e"
+      },
+      {
+        "path": "packages/runtime-core/dist/operation-resource-actions.d.ts",
+        "bytes": 13284,
+        "sha256": "7fc9caac671bc940594ed039af8fc0a91cce07d26b87f8de4ba7089b698aa392"
+      },
+      {
+        "path": "packages/runtime-core/dist/operation-resource-actions.d.ts.map",
+        "bytes": 9296,
+        "sha256": "f2dc9ecac8dd41cb565b1f26d6b78c44e4f587da870f58c40a29ab658609e344"
+      },
+      {
+        "path": "scripts/lib/runtime-core-operation-resource-actions-proof.mjs",
+        "bytes": 76595,
+        "sha256": "e6ace6f06ed425b6158b03236e7e6e44aabbba7453b1a84403ccfd179ef57b56"
+      },
+      {
+        "path": "scripts/generate-runtime-core-operation-resource-actions-proof.mjs",
+        "bytes": 885,
+        "sha256": "c63a96eeda9c8fe5d45b222e75b8ec61386d99dea8e2949b9338a0ae202fe357"
+      },
+      {
+        "path": "scripts/verify-runtime-core-operation-resource-actions.mjs",
+        "bytes": 718,
+        "sha256": "8659c7589d94f67e043599468d8f1fc379cd47c8bfba4b6d53400b333fbab521"
+      },
+      {
+        "path": "tests/runtime-core-operation-resource-actions.test.mjs",
+        "bytes": 13290,
+        "sha256": "df22a740f5d0fc4770f36279b38bafc5e611a05cc8e7ec2adb8bd10c6c3c1ff7"
+      }
+    ],
+    "semanticOnlySharedInputs": [
+      "packages/runtime-core/package.json",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/dist/index.js",
+      "packages/runtime-core/dist/index.d.ts",
+      "docs/proof/protocol-0.1.0-traceability.json",
+      "docs/plan/PROTOCOL-FINDINGS.md",
+      "docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md"
+    ]
+  },
+  "deferred": [
+    "component.command and allowlisted event.emit actions (M04-T12)",
+    "ordered handler arrays, 64-action turn limit, settlement depth, runner and finally (M04-T13)",
+    "generic component and behavior bridges plus event payload provenance (M04-T14)",
+    "reactive dependency discovery and stale asynchronous-result protection (M04-T15)",
+    "full seven-namespace provenance, composed disposal, sign-in session and trace (M04-T16)",
+    "physical cancellation, retry, timeout, cache, persistence, and offline policy",
+    "adapter rendering and platform lifecycle behavior",
+    "future protocol clarification of PF-041"
+  ]
+}

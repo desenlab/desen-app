@@ -18,21 +18,21 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 33 proof verifiers directly in the reviewed order;
-7. run all 33 root proof and mutation files as separate fail-fast processes; and
+6. run all 34 proof verifiers directly in the reviewed order;
+7. run all 34 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
-The current legacy expansion contains 1,553 leaf process invocations but only 115 distinct
-workloads. The optimized gate covers all 115 distinct workloads. Repeated prerequisite checks inside proof
-builders remain intact because those checks are evidence, not orchestration overhead.
+The current legacy expansion contains 1,695 leaf process invocations but only 118 distinct
+workloads. The optimized gate covers all 118 distinct workloads. Repeated prerequisite checks
+inside proof builders remain intact because those checks are evidence, not orchestration overhead.
 
 ## Fail-closed invariants
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 33 task IDs, verifier files, root test files, or their order;
-- any of the 189 legacy prerequisite command segments;
-- the exact 74-step normalized execution plan;
+- the 34 task IDs, verifier files, root test files, or their order;
+- any of the 197 legacy prerequisite command segments;
+- the exact 76-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;
@@ -49,6 +49,11 @@ The gate refuses to run when any of these conditions changes without an explicit
 
 Proof generators and evidence writers are never CI inputs. Proof output and success are never read
 from cache. Timing data is observational and cannot influence pass or fail.
+
+The reviewed legacy prerequisite inventory is pinned as
+`sha256:9a14c9366ddbc2e8a71e7b576e0ae0232d771f1469b731a61431280c3dcbc083`; the normalized
+single-pass plan is pinned as
+`sha256:a7f1abaedadf1e6ebf81fea7a824142497f8fefa84707a79c46273f6c0ffbf67`.
 
 The reviewed workspace package-test inventory contains 12 Vitest commands and is pinned as
 `sha256:d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420`. Four

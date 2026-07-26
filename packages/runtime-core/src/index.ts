@@ -53,6 +53,12 @@ export {
   mountRuntimeStateNavigationActions,
   RUNTIME_STATE_NAVIGATION_ACTION_LIMITS,
 } from "./state-navigation-actions.js";
+export {
+  disposeRuntimeOperationResourceActions,
+  executeRuntimeOperationResourceAction,
+  mountRuntimeOperationResourceActions,
+  RUNTIME_OPERATION_RESOURCE_ACTION_LIMITS,
+} from "./operation-resource-actions.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -254,3 +260,22 @@ export type {
   RuntimeStateSetAction,
   RuntimeStateToggleAction,
 } from "./state-navigation-actions.js";
+
+export type {
+  RuntimeDeferredActionSpec,
+  RuntimeOperationActionQueued,
+  RuntimeOperationActionSettlementDescriptor,
+  RuntimeOperationActionStaged,
+  RuntimeOperationActionStarted,
+  RuntimeOperationInvokeAction,
+  RuntimeOperationResourceAction,
+  RuntimeOperationResourceActionLimitProfile,
+  RuntimeOperationResourceActionResult,
+  RuntimeOperationResourceActionsDisposeResult,
+  RuntimeOperationResourceActionsHandle,
+  RuntimeOperationResourceActionsMountInput,
+  RuntimeOperationResourceActionsMountInvalidReason,
+  RuntimeOperationResourceActionsMountResult,
+  RuntimeResourceRefreshAction,
+  RuntimeResourceRefreshActionStarted,
+} from "./operation-resource-actions.js";
