@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T12",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Guarded component commands dispatch only to one exact live Catalog-authorized target with schema-valid input, while outbound host events cross distinct allowlist, validation, and emission stages.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": [{ "id": "N-031", "from": "PLANNED", "to": "TESTED" }]
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T10",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-state-navigation-actions.json",
+      "artifactSha256": "9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67"
+    },
+    {
+      "task": "M02-T09",
+      "result": "PASS",
+      "artifact": "protocol-0.1.0-interaction-contracts.json",
+      "artifactSha256": "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208"
+    },
+    {
+      "task": "M02-T11",
+      "result": "PASS",
+      "artifact": "protocol-0.1.0-execution-contracts.json",
+      "artifactSha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": [
+      "createRuntimeCommandEventHostPorts",
+      "RUNTIME_COMMAND_EVENT_ACTION_LIMITS",
+      "disposeRuntimeCommandEventActions",
+      "executeRuntimeCommandEventAction",
+      "mountRuntimeCommandEventActions",
+      "registerRuntimeComponentCommandTarget",
+      "unregisterRuntimeComponentCommandTarget"
+    ],
+    "typeExports": [
+      "RuntimeCommandEventHostPorts",
+      "RuntimeCommandEventHostPortsInput",
+      "RuntimeComponentCommandHostPort",
+      "RuntimeComponentCommandHostRequest",
+      "RuntimeComponentCommandHostResult",
+      "RuntimeHostEventEmissionResult",
+      "RuntimeHostEventPort",
+      "RuntimeHostEventRequest",
+      "RuntimeHostEventValidationResult",
+      "RuntimeCommandEventAction",
+      "RuntimeCommandEventActionLimitProfile",
+      "RuntimeCommandEventActionResult",
+      "RuntimeCommandEventActionsDisposeResult",
+      "RuntimeCommandEventActionsHandle",
+      "RuntimeCommandEventActionsMountInput",
+      "RuntimeCommandEventActionsMountResult",
+      "RuntimeCommandEventActionsSnapshot",
+      "RuntimeComponentCommandAction",
+      "RuntimeComponentCommandRegistrationTicket",
+      "RuntimeComponentCommandTargetRegistrationInput",
+      "RuntimeComponentCommandTargetRegistrationResult",
+      "RuntimeComponentCommandTargetUnregistrationInput",
+      "RuntimeComponentCommandTargetUnregistrationResult",
+      "RuntimeHostEventEmitAction",
+      "RuntimeRegisteredComponentCommandTargetSnapshot"
+    ],
+    "internalRuntimeExports": [
+      "emitRuntimeHostEventHostPort",
+      "invokeRuntimeComponentCommandHostPort",
+      "isRuntimeCommandEventHostPorts",
+      "validateRuntimeHostEventHostPort"
+    ],
+    "internalTypeExports": [
+      "RuntimeComponentCommandPortCallResult",
+      "RuntimeHostEventEmissionCallResult",
+      "RuntimeHostEventValidationCallResult"
+    ],
+    "tsdocDeclarations": 39,
+    "modules": {
+      "ports": {
+        "module": "packages/runtime-core/src/command-event-ports.ts",
+        "runtimeExports": [
+          "createRuntimeCommandEventHostPorts",
+          "emitRuntimeHostEventHostPort",
+          "invokeRuntimeComponentCommandHostPort",
+          "isRuntimeCommandEventHostPorts",
+          "validateRuntimeHostEventHostPort"
+        ],
+        "typeExports": [
+          "RuntimeCommandEventHostPorts",
+          "RuntimeCommandEventHostPortsInput",
+          "RuntimeComponentCommandHostPort",
+          "RuntimeComponentCommandHostRequest",
+          "RuntimeComponentCommandHostResult",
+          "RuntimeComponentCommandPortCallResult",
+          "RuntimeHostEventEmissionCallResult",
+          "RuntimeHostEventEmissionResult",
+          "RuntimeHostEventPort",
+          "RuntimeHostEventRequest",
+          "RuntimeHostEventValidationCallResult",
+          "RuntimeHostEventValidationResult"
+        ],
+        "imports": ["./host-ports.js", "./runtime-json-snapshot.js", "./value-resolution.js"]
+      },
+      "actions": {
+        "module": "packages/runtime-core/src/command-event-actions.ts",
+        "runtimeExports": [
+          "RUNTIME_COMMAND_EVENT_ACTION_LIMITS",
+          "disposeRuntimeCommandEventActions",
+          "executeRuntimeCommandEventAction",
+          "mountRuntimeCommandEventActions",
+          "registerRuntimeComponentCommandTarget",
+          "unregisterRuntimeComponentCommandTarget"
+        ],
+        "typeExports": [
+          "RuntimeCommandEventAction",
+          "RuntimeCommandEventActionLimitProfile",
+          "RuntimeCommandEventActionResult",
+          "RuntimeCommandEventActionsDisposeResult",
+          "RuntimeCommandEventActionsHandle",
+          "RuntimeCommandEventActionsMountInput",
+          "RuntimeCommandEventActionsMountResult",
+          "RuntimeCommandEventActionsSnapshot",
+          "RuntimeComponentCommandAction",
+          "RuntimeComponentCommandRegistrationTicket",
+          "RuntimeComponentCommandTargetRegistrationInput",
+          "RuntimeComponentCommandTargetRegistrationResult",
+          "RuntimeComponentCommandTargetUnregistrationInput",
+          "RuntimeComponentCommandTargetUnregistrationResult",
+          "RuntimeHostEventEmitAction",
+          "RuntimeRegisteredComponentCommandTargetSnapshot"
+        ],
+        "imports": [
+          "./action-evaluation.js",
+          "./command-event-ports.js",
+          "./host-ports.js",
+          "./predicate-evaluation.js",
+          "./runtime-json-snapshot.js",
+          "./state-navigation-actions.js",
+          "./token-format-resolution.js",
+          "./value-resolution.js",
+          "@desen/protocol",
+          "@desen/validator"
+        ]
+      }
+    }
+  },
+  "sourceInvariants": {
+    "ports": {
+      "authorityStore": "private WeakMap",
+      "receiver": null,
+      "inputCapture": "exact own enumerable data properties",
+      "requestCapture": "metadata/context and runtime-bounded input or payload detached independently",
+      "jsonNodeBudget": "one M04-T02 nine-node scope envelope; no second command/event request-envelope tax",
+      "resultGrammar": "closed synchronous envelopes"
+    },
+    "actions": {
+      "staticAuthority": "exact prepared Catalog component command inventory",
+      "targetAuthority": "opaque per-instance ticket and monotonic generation",
+      "targetCardinality": "dispatch iff exactly one instance is live",
+      "transitionLock": "before hostile request observation",
+      "mutationPreflight": "finite generations before tickets, counters, registries, or snapshots"
+    }
+  },
+  "ports": {
+    "probes": 24,
+    "callbackCalls": 6,
+    "receiverIndependenceProbes": 6,
+    "malformedResultProbes": 3,
+    "exactContextProbes": 1,
+    "standaloneJsonBoundaryProbes": 6,
+    "standaloneJsonAggregateNodes": { "accepted": 4096, "rejected": 4097, "scopeEnvelopeNodes": 9 },
+    "rawAdapterFailuresExposed": false
+  },
+  "runtime": {
+    "catalogParity": {
+      "textField": {
+        "capabilityId": "com.example.ui/TextField",
+        "commands": ["focus"],
+        "focusInput": "closed empty object"
+      },
+      "map": {
+        "capabilityId": "com.example.maps/Map",
+        "commands": ["fitBounds"],
+        "fitBoundsInput": "closed object requiring bounds"
+      }
+    },
+    "guardFirstProbes": 7,
+    "tokenSessionProbes": 5,
+    "commandAuthorizationProbes": 19,
+    "eventPolicyProbes": 18,
+    "targetAuthorityProbes": 13,
+    "reentryProbes": 14,
+    "finiteBoundProbes": 31,
+    "disposalProbes": 16,
+    "hostilePayloadReads": 0,
+    "falseGuardEffects": 0,
+    "falseGuardDiagnosticCalls": 0,
+    "rawHostFailuresExposed": false,
+    "platformEffects": 0
+  },
+  "semantics": {
+    "actionCardinality": "exactly one component.command or event.emit action",
+    "guardOrdering": "guard before discriminator and every action-specific observation",
+    "falseGuard": "zero target/payload reads, token lookups, bridge effects, and diagnostic reports",
+    "tokenSession": "true guard and named command input or event payload share one detached action-local cache",
+    "commandAuthority": "exact static node capability plus non-vacuous Catalog command declaration probe",
+    "targetLiveness": "zero or multiple instances unavailable; exactly one current generation dispatchable",
+    "registration": "opaque factory ticket, monotonic generation, foreign/stale/ABA rejection, atomic lock",
+    "commandInput": "canonical named materialization then exact component-command-input validation",
+    "hostEvents": "exact name-to-contract allowlist, detached payload validation, then emission",
+    "portGrammar": "receiver-independent own-data callbacks and closed synchronous redacted envelopes",
+    "bridgeJsonNodeBudget": "independent metadata/context/value capture; 4,086 null properties plus object and nine-node M04-T02 scope equals accepted 4,096, while one more is rejected",
+    "callbackLifetime": "current manager/snapshot rechecked after command, validation, emission, and diagnostics",
+    "finiteBounds": "lower-only action, registration, snapshot, registry, allowlist, and identifier ceilings",
+    "snapshotReservation": "each accepted live ticket reserves one later exact unregister transition",
+    "disposal": "terminal minimal manager and ticket tombstones",
+    "productionAdapterCommandParity": null,
+    "incomingAdapterEvents": null
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": {
+    "finding": "PF-042",
+    "findingStatus": "OPEN",
+    "relatedOpenFindings": ["PF-015", "PF-017", "PF-031", "PF-040", "PF-041"],
+    "proofDocument": "docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md"
+  },
+  "normative": { "tested": ["N-031"], "planned": ["N-034"] },
+  "evidence": {
+    "focusedTestRegistrations": 44,
+    "focusedTests": 53,
+    "focusedTestTitles": [
+      "invokes all callbacks receiver-free with detached frozen requests",
+      "rejects accessor-bearing factory shapes without invoking getters",
+      "normalizes %s command results into redacted adapter failure",
+      "rejects malformed nested request contexts before any callback",
+      "rejects top-level accessors, symbols, and extra keys without invoking getters",
+      "accepts the shared 4,096-node aggregate boundary with 4,086 payload properties and no bridge-envelope tax",
+      "accepts canonical metadata strings at their exact per-string ceiling",
+      "rejects the shared aggregate node ceiling plus one before any bridge callback",
+      "normalizes event validation and emission promises, throws, and malformed envelopes",
+      "mounts without observing any host callback and accepts Unicode event names",
+      "rejects forged Catalog and command/event authorities atomically",
+      "rejects every explicitly null limit instead of widening it to a default",
+      "accepts exactly 5,000 short static entries and rejects 5,001 before value observation",
+      "applies lowered entry and aggregate identifier ceilings before map value observation",
+      "registers inert identities and publishes frozen exact snapshots",
+      "supports repeated instances but makes their source target ambiguous until one leaves",
+      "rejects duplicate instance identity, static mismatch, stale snapshots, and foreign tickets",
+      "rejects non-JSON Unicode runtime identities without registry or snapshot drift",
+      "prevents ticket reuse and ABA removal after re-registration",
+      "enforces registry, registration, and snapshot generation ceilings without partial mutation",
+      "holds transition ownership during hostile registration reflection",
+      "lets reflection-time disposal win without publishing a partial registration",
+      "routes a declared schema-valid command only to the sole live runtime identity",
+      "proves required-input command declaration before materializing and accepts valid input",
+      "rejects unknown static targets, undeclared commands, and unavailable targets before input observation",
+      "rejects invalid resolved command input with COMMAND_INPUT_INVALID and no host call",
+      "rejects command input shared-node ceiling plus one during materialization with no bridge call",
+      "shares one token capture across a true guard and command input",
+      "keeps a false guard free of action payload, command, bridge, and diagnostic observations",
+      "returns controlled %s command outcome",
+      "validates the exact allowlisted contract before emitting one detached payload",
+      "rejects an unknown name before payload or host observation",
+      "rejects non-JSON Unicode event names without validation, emission, or unsafe result text",
+      "uses an empty object for an omitted payload",
+      "carries the exact shared aggregate payload boundary through materialization, validation, and emission",
+      "shares one token capture across a true event guard and payload",
+      "rejects event payload shared-node ceiling plus one during materialization with no host call",
+      "enforces the accepted action-generation ceiling",
+      "never emits after invalid, throwing, promised, or malformed validation",
+      "returns controlled %s emission outcome",
+      "stops after validator-time disposal and never reports emission success",
+      "makes command and emission callback reentry busy, and disposal wins after callbacks",
+      "turns diagnostic-time disposal into disposed without reviving the manager",
+      "disposes every registration ticket terminally and is idempotent"
+    ],
+    "compilerNegativeCases": 21,
+    "compilerNegativeLabels": [
+      "command/event host boundaries are opaque factory authorities",
+      "action manager handles are opaque factory authorities",
+      "registration tickets are opaque one-registration authorities",
+      "component.command requires a static source target",
+      "component.command requires a command name",
+      "command inputs contain data-only ValueSpecs, never callbacks",
+      "event payloads contain data-only ValueSpecs, never callbacks",
+      "deterministic request identity is runtime-owned",
+      "arbitrary action fields must live under extensions",
+      "this primitive's action vocabulary excludes operation/resource actions",
+      "registrations retain only inert identity, never a platform target",
+      "caller command inventories cannot add Catalog authority",
+      "command ports are strictly synchronous",
+      "host event contract validation is strictly synchronous",
+      "command result vocabulary is closed",
+      "event emission result vocabulary is closed",
+      "the host profile cannot invent an unproved semantic ceiling",
+      "public action results are immutable",
+      "registry snapshots are immutable",
+      "instance inventories are immutable",
+      "normalized bridge invokers remain package-internal"
+    ],
+    "rootMutationTests": 19,
+    "rootMutationTestTitles": [
+      "accepts tracked deterministic M04-T12 command/event evidence",
+      "builds byte-identical command/event evidence twice",
+      "rejects stale or tampered command/event evidence",
+      "rejects stale M04-T10 prerequisite bytes",
+      "rejects stale M02-T09 prerequisite bytes",
+      "rejects stale M02-T11 prerequisite bytes",
+      "detects guard-first hostile observation drift",
+      "detects shared token-session and command input drift",
+      "detects Catalog authorization-before-materialization drift",
+      "detects outbound allowlist and validation-before-emission drift",
+      "detects synchronous receiver-independent port drift",
+      "detects target-ticket generation, ambiguity, and ABA drift",
+      "detects command/event TOCTOU and reentry drift",
+      "detects diagnostics and adapter-redaction drift",
+      "detects finite registration and request bounds drift",
+      "detects terminal disposal and late-callback drift",
+      "detects task-owned byte drift",
+      "detects public export, TSDoc, internal non-leak, and platform drift",
+      "detects focused-test and compiler-negative inventory drift"
+    ],
+    "traceRules": [
+      { "id": "R-080", "section": "20.6", "owners": ["M02-T09", "M02-T11", "M04-T12"] },
+      { "id": "R-106", "section": "24.6", "owners": ["M04-T01", "M04-T09", "M04-T12"] },
+      { "id": "R-120", "section": "27.5", "owners": ["M02-T08", "M02-T09", "M02-T11", "M04-T12"] },
+      {
+        "id": "R-122",
+        "section": "27.7",
+        "owners": ["M04-T01", "M04-T08", "M04-T09", "M04-T10", "M04-T12"]
+      },
+      { "id": "D-015", "section": "Appendix B", "owners": ["M02-T05", "M02-T09", "M04-T12"] },
+      { "id": "D-016", "section": "Appendix B", "owners": ["M02-T05", "M02-T11", "M04-T12"] }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/command-event-ports.ts",
+        "bytes": 14212,
+        "sha256": "f681bbba09c435839f7ede8a9b57f8021a3ab116fd3700c6fe7b85dd97adefd0"
+      },
+      {
+        "path": "packages/runtime-core/src/command-event-actions.ts",
+        "bytes": 64249,
+        "sha256": "c168eb437f9ccb574578d38d8fa0ecbd0a1b39d3758e1bf59a6497b706b48f71"
+      },
+      {
+        "path": "packages/runtime-core/test/command-event-actions.test.ts",
+        "bytes": 48988,
+        "sha256": "898de60333d7e7d93c05d28bf6d27b09b495efd9d2441d905435601a70cff2c1"
+      },
+      {
+        "path": "packages/runtime-core/test/command-event-actions.types.ts",
+        "bytes": 8760,
+        "sha256": "aaecb889d5c0e576c8ceb3cac115ec126864159d5b78913dd0753b2e6e5cabee"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-ports.js",
+        "bytes": 10326,
+        "sha256": "e803429c51c40f407a82c9cf163d742e266db69b40848549ca1f31deea3b376d"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-ports.js.map",
+        "bytes": 9571,
+        "sha256": "10b55d86d7f9be74e408cb66fa33bddd4e61c777a1fe04452a6760f25d4b3c94"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-ports.d.ts",
+        "bytes": 4541,
+        "sha256": "6f156c98ae7873846dcbb5a77fdb14e06187651c17d1075e85a9db67442a0bca"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-ports.d.ts.map",
+        "bytes": 2699,
+        "sha256": "991162023b1c3832ce2bb0255f210fe61be1a9a7795cc911abbb11e92fa9422a"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-actions.js",
+        "bytes": 52089,
+        "sha256": "667c51383651816af13521c63f65a07315e107dc205d2151809cb7562e08c1a8"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-actions.js.map",
+        "bytes": 42576,
+        "sha256": "4a3d15cf3aecee0b55d7d146d6f37edd92d9c071a8d90648fbcdc2c7bf5869c8"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-actions.d.ts",
+        "bytes": 12096,
+        "sha256": "9d7a5a5dc69d7bd41e5daa52210f767e84b9823da15b22ff2a76b760fbd3f782"
+      },
+      {
+        "path": "packages/runtime-core/dist/command-event-actions.d.ts.map",
+        "bytes": 8557,
+        "sha256": "a95ba355aa4e0a08378fa607622661f7070bf6a2a370ef6fb7cc2f4d4a002178"
+      },
+      {
+        "path": "scripts/lib/runtime-core-command-event-actions-proof.mjs",
+        "bytes": 106939,
+        "sha256": "261f61ecc0b656f3bfc6c14958dab6b7ac1b64cca220e4fd9faf89d73fa0851c"
+      },
+      {
+        "path": "scripts/generate-runtime-core-command-event-actions-proof.mjs",
+        "bytes": 855,
+        "sha256": "701f05795f6e9510cf3c15c2e7a752ed4bdf763a7ef33ce82c2bc5712b2301c6"
+      },
+      {
+        "path": "scripts/verify-runtime-core-command-event-actions.mjs",
+        "bytes": 693,
+        "sha256": "0823e3c7c1e30d7d18122892ec590b456afd2d39a50ff24b63f2d04cfe5943f7"
+      },
+      {
+        "path": "tests/runtime-core-command-event-actions.test.mjs",
+        "bytes": 12928,
+        "sha256": "c3658b81f463b80f97fa46d6d03f82cd2054731956ddcb641ab1db35165f8422"
+      }
+    ],
+    "semanticOnlySharedInputs": [
+      "packages/runtime-core/package.json",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/dist/index.js",
+      "packages/runtime-core/dist/index.d.ts",
+      "docs/proof/protocol-0.1.0-traceability.json",
+      "docs/proof/NORMATIVE-COVERAGE.md",
+      "docs/plan/PROTOCOL-FINDINGS.md",
+      "docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md",
+      "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json"
+    ]
+  },
+  "deferred": [
+    "production-adapter implementation of every declared command and N-034 closure (M05)",
+    "incoming component and behavior events, adapter payload N-033, and D-014 (M04-T14)",
+    "repeated-instance selector semantics beyond fail-closed ambiguity (M04-T14/M04-T16)",
+    "ordered arrays, 64-action turn limit, settlement depth, and runner (M04-T13)",
+    "reactive target lifecycle and stale asynchronous-result protection (M04-T15)",
+    "full seven-namespace provenance, coordinated disposal, and trace (M04-T16)",
+    "asynchronous command/event ports, retry, timeout, persistence, telemetry, and offline policy",
+    "adapter rendering and platform lifecycle behavior",
+    "future protocol clarification of PF-042"
+  ]
+}

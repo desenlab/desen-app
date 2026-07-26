@@ -198,12 +198,27 @@ settlement fail closed without stranding the T09 queue gate. `PF-041` records th
 profiled capture, token-scope, retention, and ownership decisions. Full cross-manager joint-origin
 provenance remains M04-T16. N-041 remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate
 status changes.
+M04-T12 now dispatches guarded `component.command` and outbound `event.emit` actions through a
+separate synchronous bridge without widening M04-T01's frozen nine-port aggregate. The Catalog
+remains the sole command authority; exact command input schemas gate one uniquely live inert
+component registration, while zero or multiple live instances fail closed without first/last
+guessing. Outbound event names select an exact host allowlist contract before payload observation,
+then pass distinct validation and emission stages. Guards and payloads share one bounded action
+token session, all registrations, generations, retained identifiers, and bridge requests remain
+finite, and disposal is terminal. Exact request capture accepts the shared 4,096-node aggregate
+payload boundary without charging a second command/event envelope and rejects 4,097. `PF-042`
+records the deliberately profiled target-liveness, contract, and bridge decisions. N-031 becomes
+`TESTED` for this outbound shell-event boundary; N-034 remains `PLANNED` for production-adapter
+parity. P-17 remains `PARTIAL`, and no proof-gate status changes.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M04 — Framework-neutral runtime core`
+- Overall implementation progress: `49 / 144 tasks complete (34%)`
+- M04 progress: `12 / 16 tasks complete (75%)`
+- Proof-gate progress: `4 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -236,11 +251,12 @@ status changes.
   `M04-T08 — Resource mount/once/manual lifecycle and refresh`,
   `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`,
   `M04-T10 — state.set, state.toggle, and navigate actions`,
-  `M04-T11 — operation.invoke settlement actions and resource.refresh`
+  `M04-T11 — operation.invoke settlement actions and resource.refresh`,
+  `M04-T12 — component.command and allowlisted event.emit`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T12 — component.command and allowlisted event.emit`
-- Status: M04-T11 complete; ready for M04-T12
+- Next implementation task: `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`
+- Status: M04-T12 complete; ready for M04-T13
 
 ## Completed preparation
 
@@ -258,8 +274,9 @@ status changes.
 - CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
   fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
   in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T11
-  inventory now expands to 1,695 legacy leaf launches but remains a reviewed 76-step single-pass
-  gate covering 118 distinct workloads, 34 proof verifiers, and 34 root proof files.
+  inventory's 1,695 legacy leaf launches are reproducible under the same recursive measurement.
+  M04-T12 now expands that inventory to 1,845 legacy leaf launches but remains a reviewed 78-step
+  single-pass gate covering 121 distinct workloads, 35 proof verifiers, and 35 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -523,6 +540,17 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   runtime-core suite protect the boundary. Full action turns remain M04-T13 and full joint-origin
   provenance remains M04-T16. N-041 stays `PLANNED`, P-17 stays `PARTIAL`, and no proof-gate status
   changes.
+- The M04-T12 command/event action boundary passes 53 focused package tests, 21 compiler-negative
+  cases, and 19 root proof/mutation tests. Seven public runtime exports and 25 public types enforce
+  Catalog-authoritative command selection, exact input validation, unique live-target authority,
+  allowlist-then-validation-then-emission ordering, guard-first shared token observation, finite
+  registration and retained-identity bounds, exact 4,096-node aggregate request capture without a
+  second envelope tax, and terminal disposal. Twenty-four port probes, six direct trace
+  assignments, 16 task-owned files, 39/39 documented public declarations, and the cumulative
+  471/471 runtime-core suite protect the boundary. N-031 becomes `TESTED` for outbound shell
+  events; N-034 remains `PLANNED`. Ordered turns remain M04-T13, generic incoming bridges remain
+  M04-T14, and complete provenance remains M04-T16. P-17 stays `PARTIAL`, and no proof-gate status
+  changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -543,12 +571,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T12 — component.command and allowlisted event.emit`. Keep the frozen nine-port M04-T01
-aggregate unchanged; introduce a separate explicit command/event bridge, Catalog-authoritative live
-component target registration, command input validation, and a host-owned outbound event
-allowlist/contract boundary. Preserve guard-first observation and synchronous controlled outcomes
-without exposing component internals or treating outbound host events as incoming component
-events.
+Start `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`. Compose the
+single-action boundaries from M04-T10 through M04-T12 into deterministic ordered turns, enforce the
+64-action turn ceiling plus finite settlement-depth and repeated-transition limits, and finalize
+M04-T11's opaque settlement tickets from the new turn's `finally` path. Keep settlement actions in
+a distinct turn where the settled event is unavailable, and fail closed on recursive or repeated
+transition loops without stranding operation queue authority.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -556,13 +584,14 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-M04-T11 extends the current reviewed CI inventory to 118 distinct workloads, 34 proof verifiers, 34
-root proof files, and a pinned 76-step plan. Its equivalent legacy dependency expansion contains
-1,695 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
-repeating prerequisite chains. Twenty-one CI contract tests additionally pin the exact workspace
-roots, every workspace package test command, and the absence of hidden Vitest configuration. The
-archived CI-01 timing comparison remains historical evidence rather than a claim that the larger
-current inventory has identical timing.
+M04-T12 extends the current reviewed CI inventory to 121 distinct workloads, 35 proof verifiers, 35
+root proof files, and a pinned 78-step plan with 35 proof-test steps. Its equivalent legacy
+dependency expansion contains 1,845 leaf launches across 209 prerequisite segments, while the
+reviewed single-pass runner preserves every distinct workload without repeating prerequisite
+chains. Twenty-two CI contract tests additionally pin the exact workspace roots, every workspace
+package test command, and the absence of hidden Vitest configuration. The archived CI-01 timing
+comparison remains historical evidence rather than a claim that the larger current inventory has
+identical timing.
 
 M02-T02 evidence:
 
@@ -831,6 +860,18 @@ M04-T11 evidence:
 - executable evidence: 87 focused package tests, 24 compiler-negative cases, 19 root
   proof/mutation tests, 2 direct trace assignments, 11 task-owned files, and a cumulative 418/418
   runtime-core package suite
+
+M04-T12 evidence:
+
+- `docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-command-event-actions.json`
+- artifact SHA-256: `a00107d5b33d32b941a33c6ae308373be5a1ccfe1182f7fa4e93993bea2cba19`
+- exact boundary: 7 public runtime exports, 25 public types, 39/39 documented public declarations,
+  a separate synchronous command/event bridge, Catalog-authoritative ambiguity-safe live
+  registration, exact command-input validation, and allowlist-to-validation-to-emission ordering
+- executable evidence: 53 focused package tests, 21 compiler-negative cases, 19 root
+  proof/mutation tests, 24 port probes, 6 direct trace assignments, 16 task-owned files, and a
+  cumulative 471/471 runtime-core package suite
 
 ## Status vocabulary
 

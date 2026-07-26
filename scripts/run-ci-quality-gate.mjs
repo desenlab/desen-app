@@ -174,6 +174,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-core-operation-resource-actions.mjs",
       "tests/runtime-core-operation-resource-actions.test.mjs",
     ],
+    [
+      "runtime-core-command-event-actions",
+      "scripts/verify-runtime-core-command-event-actions.mjs",
+      "tests/runtime-core-command-event-actions.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -186,8 +191,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "9a14c9366ddbc2e8a71e7b576e0ae0232d771f1469b731a61431280c3dcbc083";
-const QUALITY_GATE_PLAN_SHA256 = "a7f1abaedadf1e6ebf81fea7a824142497f8fefa84707a79c46273f6c0ffbf67";
+  "c8e1a7b6db1fd0885fc24c9a4471e5f480d8d84443847fcd8fff07edfb3e5b05";
+const LEGACY_LEAF_INVOCATION_SHA256 =
+  "1c9d34a005583848c62fc2aca4a2dc2964711db79617380cd760ccc99ccec3a6";
+const DISTINCT_LEAF_WORKLOAD_SHA256 =
+  "eb2843a3a2b480dd60faf964e0420e7cebec2e28be1dca2b3e4c70092039bca7";
+const QUALITY_GATE_PLAN_SHA256 = "6e00df75427f30308f10ca1753e860183098cf22a0e3557af08e33b501a74abb";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420";
 const WORKSPACE_MANIFEST_SHA256 =
@@ -226,6 +235,40 @@ class CancellationError extends QualityGateError {
 
 function splitScript(script) {
   return script.split(" && ").map((command) => command.trim());
+}
+
+function expandLegacyRootScript(scripts, scriptName, ancestors = []) {
+  if (ancestors.includes(scriptName)) {
+    throw new QualityGateError("The legacy root script graph contains a cycle.", {
+      cycle: [...ancestors, scriptName],
+    });
+  }
+
+  const script = scripts[scriptName];
+  if (typeof script !== "string") {
+    throw new QualityGateError(`The legacy root script "${scriptName}" is missing.`);
+  }
+
+  return splitScript(script).flatMap((command) => {
+    const rootScriptReference = /^pnpm ([a-z0-9:-]+)$/u.exec(command)?.[1];
+    if (rootScriptReference && Object.hasOwn(scripts, rootScriptReference)) {
+      return expandLegacyRootScript(scripts, rootScriptReference, [...ancestors, scriptName]);
+    }
+    return [command];
+  });
+}
+
+function createLegacyLeafInventory(scripts) {
+  const invocations = expandLegacyRootScript(scripts, "check");
+  const distinctWorkloads = [...new Set(invocations)].sort();
+  return {
+    invocationCount: invocations.length,
+    invocationSha256: createHash("sha256").update(JSON.stringify(invocations)).digest("hex"),
+    distinctWorkloadCount: distinctWorkloads.length,
+    distinctWorkloadSha256: createHash("sha256")
+      .update(JSON.stringify(distinctWorkloads))
+      .digest("hex"),
+  };
 }
 
 function assertExactArray(actual, expected, label) {
@@ -529,6 +572,22 @@ export function validateProofInventory({
     });
   }
 
+  const legacyLeafInventory = createLegacyLeafInventory(scripts);
+  if (legacyLeafInventory.distinctWorkloadSha256 !== DISTINCT_LEAF_WORKLOAD_SHA256) {
+    throw new QualityGateError("The reviewed distinct legacy leaf workload inventory drifted.", {
+      expected: DISTINCT_LEAF_WORKLOAD_SHA256,
+      actual: legacyLeafInventory.distinctWorkloadSha256,
+      distinctWorkloadCount: legacyLeafInventory.distinctWorkloadCount,
+    });
+  }
+  if (legacyLeafInventory.invocationSha256 !== LEGACY_LEAF_INVOCATION_SHA256) {
+    throw new QualityGateError("The reviewed ordered legacy leaf invocation inventory drifted.", {
+      expected: LEGACY_LEAF_INVOCATION_SHA256,
+      actual: legacyLeafInventory.invocationSha256,
+      invocationCount: legacyLeafInventory.invocationCount,
+    });
+  }
+
   assertExactArray(
     [...verifierFiles].sort(),
     [...expectedVerifierFiles].sort(),
@@ -549,6 +608,10 @@ export function validateProofInventory({
       0,
     ),
     legacyPrerequisiteSha256,
+    legacyLeafInvocationCount: legacyLeafInventory.invocationCount,
+    legacyLeafInvocationSha256: legacyLeafInventory.invocationSha256,
+    distinctLeafWorkloadCount: legacyLeafInventory.distinctWorkloadCount,
+    distinctLeafWorkloadSha256: legacyLeafInventory.distinctWorkloadSha256,
     testConfigurationFileCount: testConfigurationFiles.length,
     workspaceTestScriptCount: workspaceTestScripts.filter(({ test }) => test !== null).length,
     workspaceTestScriptSha256,

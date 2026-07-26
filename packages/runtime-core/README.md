@@ -751,6 +751,99 @@ invalidates settlement tickets, and leaves no live operation queue gate. Physica
 retry, timeout, caching, and cross-manager provenance outside the two exact lifecycle namespaces
 remain later-profile work.
 
+## M04-T12 command and outbound host-event action API
+
+`createRuntimeCommandEventHostPorts` captures a separate synchronous, receiver-independent bridge
+for generic component commands and application-shell events. It does not change M04-T01's frozen
+nine-port host contract. Thrown, Promise-like, accessor-backed, or malformed results become a
+controlled adapter failure; requests and results contain no component object, ref, DOM node,
+framework value, error, or arbitrary method.
+
+`mountRuntimeCommandEventActions` binds one exact document, revision, surface, authenticated
+execution Catalog set, static source-node-to-component-capability inventory, host event allowlist,
+host ports, and command/event bridge. Component instances register only an inert runtime-instance
+identifier under an opaque generation ticket. Multiple bounded instances may coexist for one
+repeated source node, but `component.command` dispatches only when exactly one is live. Zero or
+multiple instances return a controlled unavailable result without choosing the first or last
+registration.
+
+```ts
+import {
+  createRuntimeCommandEventHostPorts,
+  executeRuntimeCommandEventAction,
+  mountRuntimeCommandEventActions,
+  registerRuntimeComponentCommandTarget,
+} from "@desen/runtime-core";
+
+const commandEventPorts = createRuntimeCommandEventHostPorts({
+  commands: {
+    invoke(request) {
+      return hostCommands.invoke(request);
+    },
+  },
+  events: {
+    validate(request) {
+      return hostEventContracts.validate(request);
+    },
+    emit(request) {
+      return hostEvents.emit(request);
+    },
+  },
+});
+
+const mounted = mountRuntimeCommandEventActions({
+  documentId,
+  revision,
+  surfaceId,
+  staticComponents: { email: "run.desen.reference.web/TextField" },
+  hostEvents: { "shell.signInSubmitted": "app.shell/sign-in-submitted@1" },
+  catalogSet,
+  hostPorts,
+  commandEventPorts,
+});
+
+if (mounted.status === "mounted") {
+  const registered = registerRuntimeComponentCommandTarget(mounted.handle, {
+    sourceNodeId: "email",
+    capabilityId: "run.desen.reference.web/TextField",
+    runtimeInstanceId: "component:email:0",
+    snapshot: mounted.snapshot,
+  });
+  if (registered.status === "registered") {
+    executeRuntimeCommandEventAction(
+      mounted.handle,
+      { type: "component.command", target: "email", command: "focus" },
+      resolutionSnapshot,
+      registered.snapshot,
+    );
+  }
+}
+```
+
+Every optional guard is completed before the action discriminator or any type-specific property is
+observed. A valid false guard therefore reads no target, command, event name, payload, token,
+effect, or diagnostic callback. For a true guard, command input or event payload shares the same
+bounded token session.
+
+The prepared Catalog remains the sole command authority. Static target and command declaration
+checks, plus exact live-target selection, happen before command input is inspected. Resolved input
+is detached and validated through the exact `component-command-input` contract before the generic
+dispatcher receives only inert identity and JSON data. Host denial is distinct from success, and
+an undeclared command can never become arbitrary method access.
+
+`event.emit` selects an exact allowlisted name and opaque application contract before payload
+observation. Omitted payload becomes `{}`. The bridge validates the detached payload under that
+contract before calling emit; invalid, denied, and adapter-failed outcomes never become success.
+These shell events are intentionally separate from Catalog-declared component and behavior events,
+which travel from an adapter into DESEN and remain M04-T14 work.
+
+Registration, action, and snapshot generations; total live targets; static components; host event
+contracts; and retained identifier lengths are finite and may only be lowered by a trusted host
+profile. Snapshot capacity is reserved so every accepted registration ticket retains a future
+unregister transition. Hostile reflection and every callback boundary recheck the exact manager
+snapshot and lifetime. Disposal wins over a callback result, revokes all tickets, and leaves only
+minimal tombstones.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -800,9 +893,11 @@ transports, and settlement acknowledgement. M04-T10 adds guard-first one-action 
 same-Bundle navigation with shared token observation, exact snapshot authorization, hostile
 callback containment, and terminal navigation disposal. M04-T11 adds nonblocking guarded operation
 and resource actions, acceptance-time settlement branches, bounded handler retention, and opaque
-acknowledgement tickets without exposing raw leases. Multi-action turn execution, settlement
-ticket finalization, reactive composition, rendering, activation implementation, event/command
-bridges, and adapters remain assigned to their later tracked tasks.
+acknowledgement tickets without exposing raw leases. M04-T12 adds Catalog-authorized generic
+component commands, ambiguity-safe live-target registration, and allowlisted application-event
+validation/emission through a separate synchronous bridge. Multi-action turn execution,
+settlement ticket finalization, incoming adapter events, reactive composition, rendering, and
+activation implementation remain assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -825,6 +920,7 @@ pnpm --filter @desen/runtime-core test:resource-lifecycle
 pnpm --filter @desen/runtime-core test:operation-lifecycle
 pnpm --filter @desen/runtime-core test:state-navigation-actions
 pnpm --filter @desen/runtime-core test:operation-resource-actions
+pnpm --filter @desen/runtime-core test:command-event-actions
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -836,5 +932,6 @@ pnpm verify:runtime-core-resource-lifecycle
 pnpm verify:runtime-core-operation-lifecycle
 pnpm verify:runtime-core-state-navigation-actions
 pnpm verify:runtime-core-operation-resource-actions
+pnpm verify:runtime-core-command-event-actions
 pnpm check
 ```

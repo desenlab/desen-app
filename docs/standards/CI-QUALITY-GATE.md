@@ -18,21 +18,24 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 34 proof verifiers directly in the reviewed order;
-7. run all 34 root proof and mutation files as separate fail-fast processes; and
+6. run all 35 proof verifiers directly in the reviewed order;
+7. run all 35 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
-The current legacy expansion contains 1,695 leaf process invocations but only 118 distinct
-workloads. The optimized gate covers all 118 distinct workloads. Repeated prerequisite checks
+The current legacy expansion contains 1,845 leaf process invocations but only 121 distinct
+workloads. The optimized gate covers all 121 distinct workloads. Repeated prerequisite checks
 inside proof builders remain intact because those checks are evidence, not orchestration overhead.
+The measurement recursively expands exact root-level `pnpm <script>` references beginning at
+`check`; commands with no further local root-script indirection are leaves, and the distinct
+inventory is sorted before hashing.
 
 ## Fail-closed invariants
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 34 task IDs, verifier files, root test files, or their order;
-- any of the 197 legacy prerequisite command segments;
-- the exact 76-step normalized execution plan;
+- the 35 task IDs, verifier files, root test files, or their order;
+- any of the 209 legacy prerequisite command segments;
+- the exact 78-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;
@@ -51,9 +54,13 @@ Proof generators and evidence writers are never CI inputs. Proof output and succ
 from cache. Timing data is observational and cannot influence pass or fail.
 
 The reviewed legacy prerequisite inventory is pinned as
-`sha256:9a14c9366ddbc2e8a71e7b576e0ae0232d771f1469b731a61431280c3dcbc083`; the normalized
+`sha256:c8e1a7b6db1fd0885fc24c9a4471e5f480d8d84443847fcd8fff07edfb3e5b05`.
+The ordered 1,845-entry legacy leaf-invocation inventory is pinned as
+`sha256:1c9d34a005583848c62fc2aca4a2dc2964711db79617380cd760ccc99ccec3a6`; its sorted
+121-entry distinct-workload inventory is pinned as
+`sha256:eb2843a3a2b480dd60faf964e0420e7cebec2e28be1dca2b3e4c70092039bca7`. The normalized
 single-pass plan is pinned as
-`sha256:a7f1abaedadf1e6ebf81fea7a824142497f8fefa84707a79c46273f6c0ffbf67`.
+`sha256:6e00df75427f30308f10ca1753e860183098cf22a0e3557af08e33b501a74abb`.
 
 The reviewed workspace package-test inventory contains 12 Vitest commands and is pinned as
 `sha256:d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420`. Four
@@ -92,7 +99,8 @@ When a proof task or prerequisite is added:
 3. classify every prerequisite and prove focused tests remain inside the full package suite;
 4. review every workspace package's exhaustive Vitest command and keep test configuration absent;
 5. review the normalized plan for generators, writers, filters, duplication, and missing work;
-6. intentionally update the prerequisite, workspace-test, and plan SHA-256 pins;
+6. intentionally update the prerequisite, leaf-invocation, distinct-workload, workspace-test, and
+   plan SHA-256 pins;
 7. run the orchestrator contract tests and the complete single-pass gate; and
 8. record the hosted run URL and timing before reducing the timeout.
 
