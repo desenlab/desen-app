@@ -63,8 +63,14 @@ export const RUNTIME_ADAPTER_BRIDGE_LIMITS = Object.freeze({
   maxEventGeneration: Number.MAX_SAFE_INTEGER,
   /** Aggregate retained identifier and handler-name UTF-16 code units. */
   maxRetainedIdentifierCodeUnits: RUNTIME_VALUE_SAFETY_LIMITS.maxStringCodeUnits,
-  /** Aggregate detached item/repeat-key JSON occurrences retained by live components. */
-  maxRetainedScopeJsonOccurrences: RUNTIME_VALUE_SAFETY_LIMITS.maxJsonNodes,
+  /**
+   * Aggregate detached item/repeat-key JSON occurrences retained by all live components.
+   *
+   * @remarks Each individual scope projection remains independently bounded by the runtime JSON
+   * snapshot limit (4,096 occurrences); this larger aggregate allows the full 5,000-binding
+   * profile to retain many independently small scopes.
+   */
+  maxRetainedScopeJsonOccurrences: 262_144,
   /** Aggregate canonical UTF-16 code units retained by live component scope projections. */
   maxRetainedScopeCodeUnits: RUNTIME_VALUE_SAFETY_LIMITS.maxStringCodeUnits,
   /** Maximum internally derived runtime-instance identifier length. */
@@ -79,6 +85,7 @@ export interface RuntimeAdapterBridgeLimitProfile {
   readonly maxSnapshotGeneration?: number;
   readonly maxEventGeneration?: number;
   readonly maxRetainedIdentifierCodeUnits?: number;
+  /** Lower aggregate occurrence budget across individually bounded live component scopes. */
   readonly maxRetainedScopeJsonOccurrences?: number;
   readonly maxRetainedScopeCodeUnits?: number;
   readonly maxRuntimeInstanceIdCodeUnits?: number;

@@ -85,25 +85,25 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 ## M04 — Framework-neutral runtime core
 
-| ID      | Status      | Depends on               | Deliverable / evidence                                                                             |
-| ------- | ----------- | ------------------------ | -------------------------------------------------------------------------------------------------- |
-| M04-T01 | DONE        | G03                      | Host ports for navigation, storage, operations, resources, tokens, environment, clock, diagnostics |
-| M04-T02 | DONE        | M04-T01                  | Literal/reference/fallback resolver for state, context, resource, operation, event, item, and env  |
-| M04-T03 | DONE        | M04-T02                  | Token and deterministic string-format resolution                                                   |
-| M04-T04 | DONE        | M04-T02                  | Predicate evaluation and conditional presence                                                      |
-| M04-T05 | DONE        | M04-T03–M04-T04          | Ordered variant and style override evaluation                                                      |
-| M04-T06 | DONE        | M04-T02                  | Local state lifecycle, schema-safe writes, and stable node identity                                |
-| M04-T07 | DONE        | M04-T02, M04-T06         | Repeat scopes, aliases, keys, instance identity, and limits                                        |
-| M04-T08 | DONE        | M04-T02–M04-T03          | Resource mount/once/manual lifecycle and refresh                                                   |
-| M04-T09 | DONE        | M04-T02                  | Operation lifecycle and reject/replace/queue concurrency                                           |
-| M04-T10 | DONE        | M04-T03–M04-T04, M04-T06 | `state.set`, `state.toggle`, and `navigate` actions                                                |
-| M04-T11 | DONE        | M04-T08–M04-T10          | `operation.invoke` settlement actions and `resource.refresh`                                       |
-| M04-T12 | DONE        | M04-T10                  | `component.command` and allowlisted, schema-validated `event.emit`                                 |
-| M04-T13 | DONE        | M04-T10–M04-T12          | Action-turn, settlement-depth, and repeated-transition limits                                      |
-| M04-T14 | DONE        | M04-T07, M04-T12         | Generic component/behavior event and command bridges with payload validation                       |
-| M04-T15 | DONE        | M04-T05–M04-T14          | Reactive re-evaluation and stale asynchronous-result protection                                    |
-| M04-T16 | NOT_STARTED | M04-T03–M04-T15          | Headless sign-in determinism and JSON-serializable observable trace tests                          |
-| G04     | NOT_STARTED | M04-T01–M04-T16          | Framework-neutral sign-in runtime passes                                                           |
+| ID      | Status | Depends on               | Deliverable / evidence                                                                             |
+| ------- | ------ | ------------------------ | -------------------------------------------------------------------------------------------------- |
+| M04-T01 | DONE   | G03                      | Host ports for navigation, storage, operations, resources, tokens, environment, clock, diagnostics |
+| M04-T02 | DONE   | M04-T01                  | Literal/reference/fallback resolver for state, context, resource, operation, event, item, and env  |
+| M04-T03 | DONE   | M04-T02                  | Token and deterministic string-format resolution                                                   |
+| M04-T04 | DONE   | M04-T02                  | Predicate evaluation and conditional presence                                                      |
+| M04-T05 | DONE   | M04-T03–M04-T04          | Ordered variant and style override evaluation                                                      |
+| M04-T06 | DONE   | M04-T02                  | Local state lifecycle, schema-safe writes, and stable node identity                                |
+| M04-T07 | DONE   | M04-T02, M04-T06         | Repeat scopes, aliases, keys, instance identity, and limits                                        |
+| M04-T08 | DONE   | M04-T02–M04-T03          | Resource mount/once/manual lifecycle and refresh                                                   |
+| M04-T09 | DONE   | M04-T02                  | Operation lifecycle and reject/replace/queue concurrency                                           |
+| M04-T10 | DONE   | M04-T03–M04-T04, M04-T06 | `state.set`, `state.toggle`, and `navigate` actions                                                |
+| M04-T11 | DONE   | M04-T08–M04-T10          | `operation.invoke` settlement actions and `resource.refresh`                                       |
+| M04-T12 | DONE   | M04-T10                  | `component.command` and allowlisted, schema-validated `event.emit`                                 |
+| M04-T13 | DONE   | M04-T10–M04-T12          | Action-turn, settlement-depth, and repeated-transition limits                                      |
+| M04-T14 | DONE   | M04-T07, M04-T12         | Generic component/behavior event and command bridges with payload validation                       |
+| M04-T15 | DONE   | M04-T05–M04-T14          | Reactive re-evaluation and stale asynchronous-result protection                                    |
+| M04-T16 | DONE   | M04-T03–M04-T15          | Headless sign-in determinism and JSON-serializable observable trace tests                          |
+| G04     | DONE   | M04-T01–M04-T16          | Framework-neutral sign-in runtime passes                                                           |
 
 ## M05 — React runtime and separate reference host
 

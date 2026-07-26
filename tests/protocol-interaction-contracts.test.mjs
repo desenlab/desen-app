@@ -85,7 +85,10 @@ test("rejects T09 trace, BCP 14, finding, and payload-limit source drift", async
     new URL("../docs/proof/NORMATIVE-COVERAGE.md", import.meta.url),
     "utf8",
   );
-  const changedNormative = normative.replace(/^(\| N-033 \|.*?\| )PLANNED(\s+\|)/mu, "$1TESTED$2");
+  const changedNormative = normative.replace(
+    /^(\| N-033 \|.*?\| )TESTED(\s+\|)/mu,
+    "$1NOT_STARTED$2",
+  );
   assert.notEqual(changedNormative, normative);
   const normativePath = path.join(directory, "normative.md");
   await writeFile(normativePath, changedNormative);

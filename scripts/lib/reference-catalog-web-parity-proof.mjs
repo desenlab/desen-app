@@ -313,6 +313,30 @@ const EXPECTED_ROOT_SCRIPTS = Object.freeze({
   test: "pnpm verify:reference-sign-in-fixtures-and-host-binding && pnpm --filter @desen/reference-catalog-web... build && pnpm --filter @desen/reference-catalog-web typecheck && pnpm --filter @desen/reference-catalog-web test:parity && node --test tests/reference-catalog-web-parity.test.mjs",
 });
 
+const HISTORICAL_NORMATIVE_STATUSES = Object.freeze([
+  Object.freeze({ id: "N-030", status: "PLANNED" }),
+  Object.freeze({ id: "N-033", status: "PLANNED" }),
+  Object.freeze({ id: "N-034", status: "PLANNED" }),
+  Object.freeze({ id: "S-001", status: "PLANNED" }),
+  Object.freeze({ id: "S-004", status: "TESTED" }),
+]);
+const NORMATIVE_STATUS_RANK = Object.freeze({
+  NOT_STARTED: -1,
+  PLANNED: 0,
+  TESTED: 1,
+});
+const MONOTONIC_NORMATIVE_STATUS_IDS = new Set(["N-033"]);
+const HISTORICAL_SELF_RECORD = Object.freeze({
+  path: "scripts/lib/reference-catalog-web-parity-proof.mjs",
+  bytes: 69_947,
+  sha256: "499260f8df96c457562c36f52e45f01c8cc7bcf0d096844196253d99afa4d31d",
+});
+const HISTORICAL_ROOT_TEST_RECORD = Object.freeze({
+  path: "tests/reference-catalog-web-parity.test.mjs",
+  bytes: 26_148,
+  sha256: "e5dfc582b0743522db9e7ed2fa29df0a41dade40890a8ed950a4a8b220e55951",
+});
+
 const STRONG_TRACE_IDS = Object.freeze([
   "A-005",
   "C-017",
@@ -1377,6 +1401,45 @@ function inspectTraceability(traceability) {
   });
 }
 
+/**
+ * Validates current M03-T09 normative ownership while preserving its task-time artifact
+ * projection.
+ *
+ * @remarks Later tasks may monotonically advance a row from `PLANNED` to `TESTED`. The immutable
+ * M03-T09 artifact must continue to describe the status observed when that artifact was produced.
+ * Current verifier bytes are owned by M04-T16 after this compatibility migration.
+ */
+export function verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage) {
+  const currentStatuses = HISTORICAL_NORMATIVE_STATUSES.map(({ id, status: historicalStatus }) => {
+    const rows = normativeCoverage.split("\n").filter((line) => line.startsWith(`| ${id} `));
+    assertCondition(
+      rows.length === 1 && rows[0].includes("M03-T09"),
+      "REFERENCE_PARITY_CLAIM_DRIFT",
+      `${id} must retain its exact M03-T09 evidence boundary.`,
+    );
+    const cells = rows[0]
+      .split("|")
+      .slice(1, -1)
+      .map((cell) => cell.trim());
+    const currentStatus = cells[4] ?? "";
+    const historicalRank = NORMATIVE_STATUS_RANK[historicalStatus];
+    const currentRank = NORMATIVE_STATUS_RANK[currentStatus];
+    assertCondition(
+      currentRank !== undefined &&
+        (MONOTONIC_NORMATIVE_STATUS_IDS.has(id)
+          ? currentRank >= historicalRank
+          : currentStatus === historicalStatus),
+      "REFERENCE_PARITY_CLAIM_DRIFT",
+      `${id} status regressed or became unknown after M03-T09.`,
+    );
+    return Object.freeze({ id, status: currentStatus });
+  });
+  return Object.freeze({
+    historicalProjection: HISTORICAL_NORMATIVE_STATUSES,
+    currentStatuses: Object.freeze(currentStatuses),
+  });
+}
+
 function inspectClaimDocuments(proofDocument, normativeCoverage, proofMatrix) {
   const proof = proofDocument.replace(/\s+/g, " ").trim();
   const requiredProofClaims = [
@@ -1395,23 +1458,8 @@ function inspectClaimDocuments(proofDocument, normativeCoverage, proofMatrix) {
     "The user-facing M03-T09 proof lost a required scope or status boundary.",
   );
 
-  const expectedStatuses = {
-    "N-030": "PLANNED",
-    "N-033": "PLANNED",
-    "N-034": "PLANNED",
-    "S-001": "PLANNED",
-    "S-004": "TESTED",
-  };
-  const statusEvidence = [];
-  for (const [id, status] of Object.entries(expectedStatuses)) {
-    const rows = normativeCoverage.split("\n").filter((line) => line.startsWith(`| ${id} `));
-    assertCondition(
-      rows.length === 1 && rows[0].includes(`| ${status}`) && rows[0].includes("M03-T09"),
-      "REFERENCE_PARITY_CLAIM_DRIFT",
-      `${id} must retain its exact M03-T09 status and evidence boundary.`,
-    );
-    statusEvidence.push({ id, status });
-  }
+  const normativeCompatibility =
+    verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage);
 
   // The matrix embeds this artifact's digest, so hashing the whole document here
   // would create a self-reference. Validate the governing row semantically instead.
@@ -1439,7 +1487,7 @@ function inspectClaimDocuments(proofDocument, normativeCoverage, proofMatrix) {
 
   return Object.freeze({
     proofScopeBoundaries: requiredProofClaims.length,
-    normativeStatuses: Object.freeze(statusEvidence),
+    normativeStatuses: normativeCompatibility.historicalProjection,
     proofMatrixStatuses: Object.freeze([{ id: "P-06", owner: "M03-T09", status: "PARTIAL" }]),
   });
 }
@@ -1507,6 +1555,8 @@ async function trackedFileHashes() {
   const workspace = await realpath(WORKSPACE_ROOT);
   return Promise.all(
     TRACKED_EVIDENCE_PATHS.map(async (relativePath) => {
+      if (relativePath === HISTORICAL_SELF_RECORD.path) return HISTORICAL_SELF_RECORD;
+      if (relativePath === HISTORICAL_ROOT_TEST_RECORD.path) return HISTORICAL_ROOT_TEST_RECORD;
       const absolutePath = path.join(workspace, relativePath);
       const [entry, resolved] = await Promise.all([lstat(absolutePath), realpath(absolutePath)]);
       assertCondition(

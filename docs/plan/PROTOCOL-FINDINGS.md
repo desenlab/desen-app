@@ -1583,10 +1583,117 @@ This file records implementation discoveries without changing the frozen DESEN 0
   and scheduling ownership, dependency-index equivalence, consistent host snapshot handshakes,
   stale-result reflection ordering, controlled inactive outcomes, and finite drain limits.
   T15 also cannot authenticate that separately mounted M04-T08/M04-T09 managers captured the same
-  wrapped aggregate; M04-T16 must prove that composed join together with complete validated-tree
+  wrapped aggregate. M04-T16 proves that composed join together with complete validated-tree
   materialization, selector-to-action-program joining, all seven namespace origins, conditional
-  descendant inactivity, coordinated session disposal, the whole-surface-versus-indexed observable
-  oracle, and the deterministic JSON sign-in trace. Dependency-index optimization and performance
-  comparison remain M12-T05. M05 still owns concrete React reconciliation, adapter-specific
-  remount-required properties, DOM behavior, accessibility, focus, and production Web–React
-  parity; future Android and iOS adapters must reuse the same observable contract.
+  descendant inactivity, coordinated session disposal, the whole-surface observable reference
+  oracle, and the deterministic JSON sign-in trace. Dependency-index equivalence, optimization,
+  and performance comparison remain M12-T05. M05 still owns concrete React reconciliation,
+  adapter-specific remount-required properties, DOM behavior, accessibility, focus, and production
+  Web–React parity; future Android and iOS adapters must reuse the same observable contract.
+
+## PF-046 — A complete headless session requires explicit plan, binding, and lifecycle ownership
+
+- Status: OPEN
+- Blocks proof: No; M04-T16 can define one bounded platform-neutral Reference Profile for the
+  frozen sign-in Bundle while keeping the plan, adapter bindings, and observable trace outside
+  protocol data.
+- Protocol location: SPEC Sections 5.1, 9, 14–17, 20, 24, 28.3, and 28.6; `PIPE-023`, `R-005`,
+  `R-046`, `R-053`, `R-059`, `R-079`, `R-103`, and `R-129`; related findings `PF-035` through
+  `PF-045`
+- Observation: DESEN 0.1.0 defines inert documents and protocol-observable behavior but does not
+  define a headless materialized-plan schema, selector-to-action-program index, evaluation-wide
+  token-cache owner, plan/binding transaction, global tree/depth/retained-plan limits, navigation
+  handoff order, settlement-turn completion notification, or JSON evidence-trace schema. The
+  protocol's permission to use whole-surface reevaluation also does not say how an implementation
+  may retain a complete 5,000-node logical plan when the shared hostile JSON return boundary has a
+  smaller 4,096-occurrence ceiling.
+- Implementation decision: M04-T16 treats the public headless plan and trace as implementation
+  evidence, never as a new DESEN document kind. One T15 evaluator produces only an immutable
+  commitment containing plan and binding digests. The corresponding complete immutable plan,
+  immediate item/repeat scope, stable identities, and desired adapter registrations remain in a
+  bounded private sidecar keyed by the evaluation id. A candidate commits only when the exact T15
+  publication repeats that evaluation id and both digests; stale or unmatched candidates are
+  discarded without registering a component, behavior, event, or command.
+
+  The session validates unknown Catalog and Bundle inputs cumulatively, verifies the Bundle
+  revision and exact Catalog requirements, creates one reactive host aggregate, and passes that
+  same object to resource, operation, and reactive managers. Event handlers are prepared once and
+  indexed by exact component/behavior selectors. A current T14 event ticket selects one program
+  and one retained repeat/item scope, constructs all seven runtime namespaces, admits one T13
+  turn, then requests one T15 invalidation after the complete synchronous turn. The official
+  sign-in operation's exposed settlement Promise provides the deterministic completion point for
+  failure, retry, success navigation, and reactive publication. T13 does not expose completion of
+  every internally nested settlement turn, so the G04 claim remains the official sign-in profile
+  rather than silently claiming generic nested-settlement notification.
+
+  Reconciliation computes the complete desired binding set before mutation, removes obsolete
+  children in reverse order, preserves compatible identities, registers new components in source
+  order and behaviors after their owners, and publishes only a complete result. Unexpected partial
+  failure terminally disposes the surface. A current non-active or terminal T15 result also
+  terminally disposes the session instead of presenting an indefinitely stale snapshot as live;
+  last-known-good revision preservation belongs to the later M07 activation boundary. Normal
+  disposal revokes T15 first, lets T14 remove its mirrored T12 targets while T12 remains live, then
+  lets T13 dispose its surrendered child managers. Navigation mounts the target surface as an
+  independent lifetime under the same public session handle.
+
+- Future action: A later protocol revision should standardize an optional observable-plan/trace
+  profile, selector provenance, settlement-completion notification, binding-transaction behavior,
+  navigation handoff, and measured global limits if cross-implementation interoperability needs
+  them. M05 still owns resolved prop/style validation at the concrete adapter boundary,
+  reconciliation with real framework instances, DOM/CSS/accessibility/focus behavior, and
+  production adapter parity. The frozen example Catalog's digest is explicitly illustrative, so
+  M04-T16 proves exact contract consumption rather than package-byte integrity or activation.
+
+## PF-047 — Frozen planning assignments require task-local applicability classification
+
+- Status: OPEN
+- Blocks proof: No; the M04-T16 verifier can preserve the byte-owned M02 planning baseline while
+  explicitly separating rules that this task proves from rules whose complete executable evidence
+  belongs to later milestones.
+- Protocol location: M02-T02 traceability baseline for DESEN 0.1.0; M04-T16 applicability review;
+  related findings `PF-045` and `PF-046`
+- Observation: The frozen M02 traceability ledger assigns M04-T16 to 6 owner entries and 70 test
+  entries, or 72 unique records. Five test assignments are broader than the actual G04 headless
+  boundary. `R-048` requires receiving-schema validation, `R-104` requires concrete adapter
+  preservation and remount behavior, `R-129` requires comparison with a dependency-indexed
+  strategy, `A-011` spans design-to-capability boundaries that are not all present at G04, and
+  `D-009` requires a resolved-property mismatch at a receiving boundary. Rewriting the historical
+  ledger would invalidate the byte-owned M02 evidence chain and every later artifact that
+  deliberately consumes it.
+- Implementation decision: The M02 ledger remains the immutable 72-record planning baseline.
+  M04-T16 inventories every assigned record, pins the five over-broad assignments as explicit
+  future-deferred corrections, and proves the remaining 6 owner entries plus 65 test entries, or
+  67 unique applicable records. The deterministic T16 artifact and verifier reject an omitted,
+  duplicated, renamed, or silently reclassified baseline entry, so preserving historical evidence
+  cannot be mistaken for claiming those five rules complete.
+- Future action: `R-048` remains with M05-T02; `R-104` with M05-T05; `R-129` with M12-T05;
+  `A-011` with M05-T08, M06-T11, and M12-T08; and `D-009` with M05-T06 and M06-T11. Each future
+  owner must replace the applicable deferred classification with executable evidence before its
+  own gate closes. A later traceability format should separate immutable assignment history from
+  current evidence applicability so corrections do not require rewriting prior proof artifacts.
+
+## PF-048 — Historical proof progression requires explicit verifier ownership transfer
+
+- Status: OPEN
+- Blocks proof: No; M04-T16 can preserve the immutable M02-T09 and M03-T09 artifacts while
+  explicitly owning and mutation-testing the compatibility verifiers and historical root tests
+  that read current normative status.
+- Protocol location: M02-T09 interaction-contract evidence, M03-T09 reference-parity evidence,
+  N-033 and N-034 normative coverage, M04-T14 N-033 completion, and M04-T16/G04
+  historical-verifier compatibility
+- Observation: The byte-owned M02-T09 and M03-T09 artifacts truthfully record N-033 as `PLANNED`
+  at their task-time boundaries; M02-T09 also records N-034 as `PLANNED`. M04-T14 later advanced
+  N-033 to `TESTED`. Re-running either historical verifier against only the latest status column
+  rejected that valid monotonic progression; simply regenerating either artifact would rewrite
+  history and cascade new hashes through every later artifact that consumes it.
+- Implementation decision: Both historical artifacts remain byte-identical. Their current
+  verifiers retain the exact historical ownership and scope boundaries, admit only the exact
+  N-033 `PLANNED` to `TESTED` progression, reject unknown or regressive status, and return their
+  task-time `PLANNED` projections when reconstructing the historical artifacts. Each artifact
+  retains its exact task-time verifier and root-test records. M04-T16 explicitly byte-owns both
+  current compatibility-verifier and historical-test pairs, pins both unchanged artifacts,
+  records all four ownership transfers in its evidence, and applies hostile mutations to their
+  boundaries.
+- Future action: A later proof format should store versioned task-time semantic inputs separately
+  from current monotonic completion state. Once that format exists, historical verifiers can
+  consume a declared snapshot without a task-local ownership transfer.

@@ -974,11 +974,58 @@ lower resource and operation managers must have been mounted with the same react
 and their state/settlement/action-turn changes must produce one explicit invalidation. T15 does not
 claim complete validated-tree materialization, event or item provenance, selector-to-program
 joining, conditional descendant cleanup, or coordinated session disposal. Observable
-whole-surface-versus-indexed oracle comparison remains M04-T16; dependency-index optimization and
-performance comparison remain M12-T05. Concrete React reconciliation, remount-required properties,
-DOM, focus, accessibility, and production adapter parity remain M05. The frozen 0.1.0 token port
-has no subscription, so token values refresh only when another admitted invalidation causes
-reevaluation.
+whole-surface execution is now the M04-T16 reference oracle; dependency-index equivalence,
+optimization, and performance comparison remain M12-T05. Concrete React reconciliation,
+remount-required properties, DOM, focus, accessibility, and production adapter parity remain M05.
+The frozen 0.1.0 token port has no subscription, so token values refresh only when another admitted
+invalidation causes reevaluation.
+
+## M04-T16 complete headless session API
+
+`materializeRuntimeHeadlessSurface` converts one execution-validated immutable surface into a
+complete framework-neutral plan. It applies conditional presence before descendant work, expands
+repeats through authenticated item scopes, evaluates ordered variants, materializes props and
+styles, and derives stable component and behavior identities. The plan contains JSON only and is
+bounded by lower-only node, depth, repeat, occurrence, and UTF-16 ceilings.
+
+The materializer returns canonical plan and binding digests together with an opaque private
+sidecar. Only the compact commitment crosses the M04-T15 evaluator boundary. The sidecar retains
+the exact evaluation id, item/repeat scope, and inert handler selectors needed by the trusted
+session compositor; its internal reader is deliberately absent from the package root.
+
+`mountRuntimeHeadlessSession` accepts unknown Bundle and Catalog values, performs cumulative
+execution validation, recalculates the Bundle revision, and mounts the entry surface through one
+shared reactive host aggregate. It prepares every handler as a bounded M04-T13 program before
+publishing adapter bindings. A plan becomes observable only after the exact T15 evaluation id and
+both commitment digests authenticate the sidecar and binding reconciliation succeeds.
+
+`dispatchRuntimeHeadlessSessionEvent` requires the exact current factory-created session snapshot
+and runtime binding. T14 validates the declared event payload and supplies the component or
+behavior origin; the session then selects one prepared program and constructs state, context,
+resource, operation, event, item, and environment namespaces from their current authenticated
+owners. The caller cannot inject any of those namespaces. The returned completion promise contains
+only a terminal JSON observation, never a lower-manager ticket or callback authority.
+
+`readRuntimeHeadlessSession` exposes one recursively immutable JSON snapshot with the verified
+revision, active surface, monotonic generation, evaluation id, plan/binding commitments, complete
+plan, lifecycle namespaces, and inert binding summaries. Equivalent frozen sign-in inputs and
+event sequences produce byte-identical canonical traces across independent sessions.
+`disposeRuntimeHeadlessSession` revokes reactive work, adapter bridges, the action coordinator, and
+its surrendered children in dependency order; repeated disposal and late settlements are inert.
+Disposal requested reentrantly from an adapter or host callback finishes T14-before-T13 cleanup
+after the callback unwinds. A current non-active or terminal T15 result also ends the complete
+session instead of leaving an indefinitely stale snapshot publicly marked live.
+
+The default complete-session profile separately bounds active component nodes, component-plus-
+behavior bindings, and handled-event declarations at 5,000 each. Tree depth, surface transitions,
+observable generations, retained plan occurrences, and retained plan code units have independent
+lower-only ceilings; a trusted host may lower but never widen any of them.
+
+The official sign-in profile covers editing, loading, declared failure, retry, stale replacement,
+success navigation, and independent home-surface materialization. Generic automatic publication
+after every possible future internally nested settlement remains explicitly deferred because T13
+does not expose a universal nested-completion observer. The API does not render React, DOM, CSS,
+accessibility, focus, or native UI; concrete adapter reconciliation remains M05.
 
 ## Port invariants
 
@@ -1040,8 +1087,10 @@ bounded scope retention, reentry containment, and terminal cross-manager cleanup
 composition now adds a stale-safe host settlement boundary, whole-surface consistent snapshots,
 explicit batched invalidation, pre/post-reflection generation checks, current-failure
 deactivation, finite synchronous draining, and exact-once subscription disposal in M04-T15.
-Complete headless materialization and its deterministic sign-in trace remain M04-T16; rendering
-and activation remain assigned to later tracked tasks.
+M04-T16 now composes those boundaries into one validated, bounded headless session with complete
+JSON-only materialization, authenticated selector-to-program dispatch, deterministic sign-in
+traces, independent surface navigation, and coordinated disposal. Rendering, concrete framework
+reconciliation, and activation remain assigned to later tracked tasks.
 
 ## Protocol and target support
 
@@ -1068,6 +1117,7 @@ pnpm --filter @desen/runtime-core test:command-event-actions
 pnpm --filter @desen/runtime-core test:action-turns
 pnpm --filter @desen/runtime-core test:adapter-bridges
 pnpm --filter @desen/runtime-core test:reactive-reevaluation
+pnpm --filter @desen/runtime-core test:headless-sign-in
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -1083,5 +1133,6 @@ pnpm verify:runtime-core-command-event-actions
 pnpm verify:runtime-core-action-turns
 pnpm verify:runtime-core-adapter-bridges
 pnpm verify:runtime-core-reactive-reevaluation
+pnpm verify:runtime-core-headless-sign-in
 pnpm check
 ```

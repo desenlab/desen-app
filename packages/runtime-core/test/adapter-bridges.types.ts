@@ -47,7 +47,7 @@ const created = createRuntimeAdapterBridgePorts({
     maxSnapshotGeneration: 20,
     maxEventGeneration: 30,
     maxRetainedIdentifierCodeUnits: 1_024,
-    maxRetainedScopeJsonOccurrences: 100,
+    maxRetainedScopeJsonOccurrences: 262_144,
     maxRetainedScopeCodeUnits: 1_024,
     maxRuntimeInstanceIdCodeUnits: 256,
   },
@@ -195,3 +195,11 @@ const commandWithContext: RuntimeAdapterComponentCommandPort = {
   },
 };
 void commandWithContext;
+
+createRuntimeAdapterBridgePorts({
+  eventTurns,
+  limits: {
+    // @ts-expect-error aggregate retained-scope occurrence ceilings are finite numbers
+    maxRetainedScopeJsonOccurrences: "262144",
+  },
+});

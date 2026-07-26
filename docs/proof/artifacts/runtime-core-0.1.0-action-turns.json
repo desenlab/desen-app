@@ -21,7 +21,7 @@
       "task": "M04-T11",
       "result": "PASS",
       "artifact": "runtime-core-0.1.0-operation-resource-actions.json",
-      "artifactSha256": "d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8"
+      "artifactSha256": "b955cc9f3399d2dbb1895036828c6ab01dbd78ac198c3be5824720f2802295a7"
     },
     {
       "task": "M04-T12",
@@ -262,7 +262,7 @@
       {
         "path": "scripts/lib/runtime-core-action-turns-proof.mjs",
         "bytes": 103662,
-        "sha256": "83fac97f0e84d26ef0d4f5d05c7be1caef8b4c7064051fe1be28d3d7db578ca6"
+        "sha256": "e66119328af1861b03f5dd7fc56bf9de64ed06b6f78a3a88034f65bf3643edb5"
       },
       {
         "path": "scripts/generate-runtime-core-action-turns-proof.mjs",

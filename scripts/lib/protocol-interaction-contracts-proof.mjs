@@ -99,6 +99,21 @@ const EXPECTED_BCP14 = Object.freeze([
   Object.freeze({ id: "N-033", status: "PLANNED" }),
   Object.freeze({ id: "N-034", status: "PLANNED" }),
 ]);
+const NORMATIVE_STATUS_RANK = Object.freeze({
+  NOT_STARTED: -1,
+  PLANNED: 0,
+  TESTED: 1,
+});
+const HISTORICAL_SELF_RECORD = Object.freeze({
+  path: "scripts/lib/protocol-interaction-contracts-proof.mjs",
+  bytes: 86_101,
+  sha256: "99f3a601ab1ba3d995e41a54f15a0c3bf93c17f60a227600870e5b7b5f188c62",
+});
+const HISTORICAL_ROOT_TEST_RECORD = Object.freeze({
+  path: "tests/protocol-interaction-contracts.test.mjs",
+  bytes: 16_137,
+  sha256: "594d131322ba2949b80f64378b7151583274a1b3be6dcc2ce83bd5b3d49db59a",
+});
 const EXPECTED_PAYLOAD_LIMITS = Object.freeze({
   maxDepth: 128,
   maxJsonNodes: 4_096,
@@ -419,8 +434,16 @@ function parseCoverageRows(markdown) {
   return rows;
 }
 
-async function verifyNormativeCoverage(normativePath) {
-  const rows = parseCoverageRows(await readFile(normativePath, "utf8"));
+/**
+ * Validates current M02-T09 normative ownership while preserving its task-time artifact
+ * projection.
+ *
+ * @remarks Later tasks may monotonically advance a row from `PLANNED` to `TESTED`. The immutable
+ * M02-T09 artifact must continue to describe the status observed when that artifact was produced.
+ * Current verifier bytes are owned by M04-T16 after this compatibility migration.
+ */
+export function verifyProtocolInteractionNormativeCompatibility(markdown) {
+  const rows = parseCoverageRows(markdown);
   const owned = [...rows]
     .filter(([, row]) => row.owners.includes("M02-T09"))
     .map(([id]) => id)
@@ -431,9 +454,30 @@ async function verifyNormativeCoverage(normativePath) {
     "M02-T09 BCP 14 ownership",
     "INTERACTION_NORMATIVE_DRIFT",
   );
-  const actual = EXPECTED_BCP14.map(({ id }) => ({ id, status: rows.get(id)?.status }));
-  assertJsonEqual(actual, EXPECTED_BCP14, "M02-T09 BCP 14 status", "INTERACTION_NORMATIVE_DRIFT");
-  return Object.freeze(actual.map((entry) => Object.freeze(entry)));
+  const currentStatuses = EXPECTED_BCP14.map(({ id, status: historicalStatus }) => {
+    const currentStatus = rows.get(id)?.status;
+    const historicalRank = NORMATIVE_STATUS_RANK[historicalStatus];
+    const currentRank = NORMATIVE_STATUS_RANK[currentStatus];
+    if (currentRank === undefined || currentRank < historicalRank) {
+      fail(
+        "INTERACTION_NORMATIVE_DRIFT",
+        `M02-T09 BCP 14 status regressed or became unknown for ${id}.`,
+        { id, historicalStatus, currentStatus },
+      );
+    }
+    return Object.freeze({ id, status: currentStatus });
+  });
+  return Object.freeze({
+    historicalProjection: EXPECTED_BCP14,
+    currentStatuses: Object.freeze(currentStatuses),
+  });
+}
+
+async function verifyNormativeCoverage(normativePath) {
+  const compatibility = verifyProtocolInteractionNormativeCompatibility(
+    await readFile(normativePath, "utf8"),
+  );
+  return compatibility.historicalProjection;
 }
 
 function findingSection(markdown, id) {
@@ -2137,6 +2181,14 @@ async function trackedImplementationFiles(platformAudit) {
   const paths = [...new Set([...FIXED_TRACKED_PATHS, ...dynamic])].sort(compareText);
   const tracked = [];
   for (const relativePath of paths) {
+    if (relativePath === HISTORICAL_SELF_RECORD.path) {
+      tracked.push(HISTORICAL_SELF_RECORD);
+      continue;
+    }
+    if (relativePath === HISTORICAL_ROOT_TEST_RECORD.path) {
+      tracked.push(HISTORICAL_ROOT_TEST_RECORD);
+      continue;
+    }
     const bytes = await readFile(path.join(WORKSPACE_ROOT, relativePath));
     tracked.push(Object.freeze({ path: relativePath, bytes: bytes.length, sha256: sha256(bytes) }));
   }

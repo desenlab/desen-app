@@ -90,7 +90,7 @@ synchronous evaluator.
 
 The deterministic artifact is
 `docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json`.
-Its SHA-256 is `0e56e25c34d023d17123e29b97fc3649938ff4e661435630a0833e9f5751e58f`.
+Its SHA-256 is `7e412daf9e2e8f08f40a4b093430775414aa1df4a9b14d690d2bf45966cbec67`.
 
 Generation refuses to run unless the reviewed M04-T05 through M04-T14 artifacts match their exact
 SHA-256 bytes. The artifact byte-owns both M04-T15 source modules, both focused runtime test files,
@@ -116,9 +116,10 @@ The evidence builder and verifier enforce:
   reentry rejection, byte-equal snapshot retention, failed-subscription graph cleanup, retained
   notice inertness, and terminal exact-once unsubscribe.
 
-M04-T15 changes no frozen protocol byte, Proof Matrix status, or normative status. `N-003`,
-`N-034`, and `N-041` remain `PLANNED`; P-17 and P-18 remain `PARTIAL`. The required implementation
-profile decision is recorded by `PF-045`.
+M04-T15 changes no frozen protocol byte, Proof Matrix status, or normative status. At its
+task-time boundary, `N-003`, `N-034`, and `N-041` were `PLANNED`; M04-T16 later advances N-003
+monotonically to `TESTED`, while N-034 and N-041 remain `PLANNED`. P-17 and P-18 remain `PARTIAL`.
+The required implementation profile decision is recorded by `PF-045`.
 
 ## Deferred composition
 
@@ -126,7 +127,8 @@ M04-T16 still owns complete validated surface traversal and materialization, the
 tree/session, the M04-T14 handler-selector to M04-T13 prepared-program join, seven-namespace
 event/item provenance, a public joint action-turn/reactive coordinator, complete descendant
 resource/behavior/event/command inactivity, deterministic JSON sign-in traces, session disposal,
-the whole-surface-versus-indexed observable oracle, and the remaining N-003/P-18/G04 closure.
+and the whole-surface observable reference oracle. Dependency-index equivalence and performance
+comparison remain M12-T05, together with the remaining P-18 optimization evidence.
 
 M05 owns React reconciliation, concrete component-instance preservation or remount behavior
 including `use`, key, and remount-required prop changes, DOM/CSS/accessibility/focus behavior, and

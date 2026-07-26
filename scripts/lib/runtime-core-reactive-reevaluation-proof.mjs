@@ -68,7 +68,7 @@ const PREREQUISITES = Object.freeze([
     task: "M04-T11",
     path: "docs/proof/artifacts/runtime-core-0.1.0-operation-resource-actions.json",
     artifact: "runtime-core-0.1.0-operation-resource-actions.json",
-    sha256: "d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8",
+    sha256: "b955cc9f3399d2dbb1895036828c6ab01dbd78ac198c3be5824720f2802295a7",
   }),
   Object.freeze({
     key: "commandEvent",
@@ -82,14 +82,14 @@ const PREREQUISITES = Object.freeze([
     task: "M04-T13",
     path: "docs/proof/artifacts/runtime-core-0.1.0-action-turns.json",
     artifact: "runtime-core-0.1.0-action-turns.json",
-    sha256: "e73604b678bdb35a12549e3a31fff628b9a83beb0ad735fb929aceba5885b240",
+    sha256: "5b2f95b897116fdd9ff5320d8720e104d7b93f148d28bfcaf067c838785f9d87",
   }),
   Object.freeze({
     key: "adapterBridges",
     task: "M04-T14",
     path: "docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json",
     artifact: "runtime-core-0.1.0-adapter-bridges.json",
-    sha256: "e22ac984c035bc8e5096338a437003f852f7daf67a1f12592bae00783dbd8123",
+    sha256: "bfdeddbffd458941464620e0af2013d374bf8e64068ca060d33651ddeb2660c7",
   }),
 ]);
 
@@ -1225,10 +1225,20 @@ function tableRow(markdown, id) {
   return markdown.split(/\r?\n/u).find((line) => line.startsWith(`| ${id} `));
 }
 
+function tableStatus(markdown, id) {
+  return tableRow(markdown, id)?.split("|")[5]?.trim();
+}
+
 function verifyDocumentation(normativeText, proofMatrixText, findingsText, proofText) {
-  for (const id of ["N-003", "N-034", "N-041"]) {
-    const row = tableRow(normativeText, id);
-    if (row === undefined || !row.includes("PLANNED")) {
+  const determinismStatus = tableStatus(normativeText, "N-003");
+  if (determinismStatus !== "PLANNED" && determinismStatus !== "TESTED") {
+    fail(
+      "REACTIVE_NORMATIVE_DRIFT",
+      "N-003 must retain its task-time PLANNED status or advance monotonically to TESTED.",
+    );
+  }
+  for (const id of ["N-034", "N-041"]) {
+    if (tableStatus(normativeText, id) !== "PLANNED") {
       fail("REACTIVE_NORMATIVE_DRIFT", `${id} must remain PLANNED at M04-T15.`);
     }
   }

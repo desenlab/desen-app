@@ -63,6 +63,7 @@ interface FixtureOptions {
   readonly eventDispatch?: (request: RuntimeAdapterEventTurnRequest) => unknown;
   readonly limits?: Parameters<typeof createRuntimeAdapterBridgePorts>[0]["limits"];
   readonly catalogSet?: DesenValidatedExecutionCatalogSet;
+  readonly staticComponents?: Readonly<Record<string, string>>;
 }
 
 interface Fixture {
@@ -136,7 +137,10 @@ function fixture(options: FixtureOptions = {}): Fixture {
     documentId: DOCUMENT_ID,
     revision: REVISION,
     surfaceId: SURFACE_ID,
-    staticComponents: { [FIELD_NODE]: TEXT_FIELD, [STACK_NODE]: STACK },
+    staticComponents: options.staticComponents ?? {
+      [FIELD_NODE]: TEXT_FIELD,
+      [STACK_NODE]: STACK,
+    },
     hostEvents: {},
     catalogSet,
     hostPorts,
@@ -1097,10 +1101,16 @@ describe("M04-T14 command containment, finite limits, and disposal", () => {
       maxSnapshotGeneration: Number.MAX_SAFE_INTEGER,
       maxEventGeneration: Number.MAX_SAFE_INTEGER,
       maxRetainedIdentifierCodeUnits: 1_048_576,
-      maxRetainedScopeJsonOccurrences: 4_096,
+      maxRetainedScopeJsonOccurrences: 262_144,
       maxRetainedScopeCodeUnits: 1_048_576,
       maxRuntimeInstanceIdCodeUnits: 1_024,
     });
+    expect(() =>
+      createRuntimeAdapterBridgePorts({
+        eventTurns: { dispatch: () => ({ status: "accepted" }) },
+        limits: { maxRetainedScopeJsonOccurrences: 262_145 },
+      }),
+    ).toThrow(TypeError);
     const target = fixture({ limits: { maxLiveBindings: 1 } });
     const component = registerStackComponent(target);
     expect(
@@ -1140,6 +1150,66 @@ describe("M04-T14 command containment, finite limits, and disposal", () => {
     });
   });
 
+  it("reaches all 5,000 empty-scope component bindings before rejecting binding 5,001", () => {
+    const staticComponents = Object.freeze(
+      Object.fromEntries(
+        Array.from({ length: 5_000 }, (_, index) => [
+          `field-${index.toString().padStart(4, "0")}`,
+          TEXT_FIELD,
+        ]),
+      ),
+    );
+    const target = fixture({ staticComponents });
+    const scope = createRuntimeRepeatRootScope(resolution());
+    let snapshot = target.bridgeSnapshot;
+    for (let index = 0; index < 5_000; index += 1) {
+      const nodeId = `field-${index.toString().padStart(4, "0")}`;
+      const identity = createRuntimeNodeIdentity({
+        documentId: DOCUMENT_ID,
+        surfaceId: SURFACE_ID,
+        nodeId,
+        use: TEXT_FIELD,
+      });
+      if (identity.status !== "created") {
+        throw new TypeError(`Expected identity ${index}.`);
+      }
+      const registered = registerRuntimeAdapterBinding(target.bridge.handle, {
+        kind: "component",
+        identity: identity.identity,
+        scope,
+        handledEvents: [],
+        snapshot,
+      });
+      if (registered.status !== "registered") {
+        throw new TypeError(`Expected registration ${index}: ${JSON.stringify(registered)}`);
+      }
+      snapshot = registered.snapshot;
+    }
+    expect(snapshot.bindings).toHaveLength(5_000);
+
+    const overflowIdentity = createRuntimeNodeIdentity({
+      documentId: DOCUMENT_ID,
+      surfaceId: SURFACE_ID,
+      nodeId: "field-overflow",
+      use: TEXT_FIELD,
+    });
+    expect(overflowIdentity.status).toBe("created");
+    if (overflowIdentity.status !== "created") throw new TypeError("Expected overflow identity.");
+    expect(
+      registerRuntimeAdapterBinding(target.bridge.handle, {
+        kind: "component",
+        identity: overflowIdentity.identity,
+        scope,
+        handledEvents: [],
+        snapshot,
+      }),
+    ).toEqual({ status: "invalid", reason: "registry-limit" });
+    expect(readRuntimeAdapterBridges(target.bridge.handle)).toEqual({
+      status: "read",
+      snapshot,
+    });
+  }, 120_000);
+
   it("reserves future snapshots and bounds detached scope projections without double charging behaviors", () => {
     const noFutureSnapshot = fixture({ limits: { maxSnapshotGeneration: 1 } });
     const stackParts = baseIdentityAndScope(STACK_NODE, STACK);
@@ -1169,6 +1239,26 @@ describe("M04-T14 command containment, finite limits, and disposal", () => {
     expect(removed.status).toBe("unregistered");
     if (removed.status !== "unregistered") throw new TypeError("Expected bounded cleanup.");
     expect(registerStackComponent(bounded, removed.snapshot).status).toBe("registered");
+
+    const aggregateBound = fixture({ limits: { maxRetainedScopeJsonOccurrences: 5 } });
+    const aggregateFirst = registerComponent(aggregateBound, aggregateBound.bridgeSnapshot, {
+      handledEvents: [],
+    });
+    const aggregateSecond = baseIdentityAndScope(STACK_NODE, STACK);
+    expect(
+      registerRuntimeAdapterBinding(aggregateBound.bridge.handle, {
+        kind: "component",
+        identity: aggregateSecond.identity,
+        scope: aggregateSecond.scope,
+        handledEvents: [],
+        snapshot: aggregateFirst.snapshot,
+      }),
+    ).toEqual({ status: "invalid", reason: "retained-limit" });
+    expect(readRuntimeAdapterBridges(aggregateBound.bridge.handle)).toEqual({
+      status: "read",
+      snapshot: aggregateFirst.snapshot,
+    });
+    expect(currentCommandSnapshot(aggregateBound).liveTargets[STACK_NODE]).toBeUndefined();
 
     const tooSmall = fixture({ limits: { maxRetainedScopeJsonOccurrences: 2 } });
     const tooSmallParts = baseIdentityAndScope(STACK_NODE, STACK);
