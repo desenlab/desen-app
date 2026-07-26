@@ -133,6 +133,9 @@ const PROOF_LIBRARY_PATH = "scripts/lib/runtime-core-headless-sign-in-proof.mjs"
 const PROOF_GENERATOR_PATH = "scripts/generate-runtime-core-headless-sign-in-proof.mjs";
 const PROOF_VERIFIER_PATH = "scripts/verify-runtime-core-headless-sign-in.mjs";
 const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-HEADLESS-SIGN-IN.md";
+const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
+const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json";
+const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-headless-sign-in.json";
 const HISTORICAL_TRACE_ARTIFACT_PATH = "docs/proof/artifacts/protocol-0.1.0-traceability.json";
 const HISTORICAL_TRACE_LEDGER_SHA256 =
   "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147";
@@ -204,7 +207,29 @@ const MODULE_EXPORTS = Object.freeze({
     ]),
   }),
 });
-const INTERNAL_EXPORTS = Object.freeze(["readRuntimeHeadlessMaterializationSidecar"]);
+const CURRENT_MODULE_EXPORTS = Object.freeze({
+  ...MODULE_EXPORTS,
+  "./headless-session.js": Object.freeze({
+    runtime: Object.freeze([
+      ...MODULE_EXPORTS["./headless-session.js"].runtime,
+      "subscribeRuntimeHeadlessSession",
+      "unsubscribeRuntimeHeadlessSession",
+    ]),
+    types: Object.freeze([
+      ...MODULE_EXPORTS["./headless-session.js"].types,
+      "RuntimeHeadlessSessionListener",
+      "RuntimeHeadlessSessionSubscribeResult",
+      "RuntimeHeadlessSessionSubscription",
+      "RuntimeHeadlessSessionUnsubscribeResult",
+    ]),
+  }),
+});
+const INTERNAL_EXPORTS = Object.freeze([
+  "readRuntimeHeadlessMaterializationSidecar",
+  "subscribeRuntimeActionTurnSettlements",
+  "RuntimeActionTurnSettlementPublication",
+  "RuntimeActionTurnSettlementSubscriptionResult",
+]);
 const PUBLIC_RUNTIME_EXPORTS = Object.freeze([
   "RUNTIME_HEADLESS_MATERIALIZATION_LIMITS",
   "RUNTIME_HEADLESS_SESSION_LIMITS",
@@ -237,6 +262,18 @@ const PUBLIC_TYPE_EXPORTS = Object.freeze([
   "RuntimeHeadlessSessionReadResult",
   "RuntimeHeadlessSessionSnapshot",
   "RuntimeHeadlessSurfacePlan",
+]);
+const CURRENT_PUBLIC_RUNTIME_EXPORTS = Object.freeze([
+  ...PUBLIC_RUNTIME_EXPORTS,
+  "subscribeRuntimeHeadlessSession",
+  "unsubscribeRuntimeHeadlessSession",
+]);
+const CURRENT_PUBLIC_TYPE_EXPORTS = Object.freeze([
+  ...PUBLIC_TYPE_EXPORTS,
+  "RuntimeHeadlessSessionListener",
+  "RuntimeHeadlessSessionSubscribeResult",
+  "RuntimeHeadlessSessionSubscription",
+  "RuntimeHeadlessSessionUnsubscribeResult",
 ]);
 
 const AUDITED_TRACE_ASSIGNMENTS = Object.freeze({
@@ -450,6 +487,98 @@ function sameStrings(actual, expected) {
 function assertIncludes(text, needle, code, message = undefined) {
   if (!text.includes(needle)) {
     fail(code, message ?? `Required evidence anchor is missing: ${needle}`);
+  }
+}
+
+function exactProofArtifactSha256(markdown) {
+  const sectionMarker = "## Evidence boundary";
+  const sectionStart = markdown.indexOf(sectionMarker);
+  if (sectionStart < 0 || markdown.lastIndexOf(sectionMarker) !== sectionStart) {
+    fail(
+      "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T16 proof must contain one exact Evidence boundary section.",
+    );
+  }
+  const afterSectionMarker = sectionStart + sectionMarker.length;
+  const nextHeadingOffset = markdown.slice(afterSectionMarker).search(/^## /mu);
+  const sectionEnd =
+    nextHeadingOffset < 0 ? markdown.length : afterSectionMarker + nextHeadingOffset;
+  const sectionLines = markdown.slice(sectionStart, sectionEnd).split(/\r?\n/u);
+  const lines = markdown.split(/\r?\n/u);
+  const artifactLine = `\`${ARTIFACT_RELATIVE_PATH}\`.`;
+  const artifactIndexes = lines.flatMap((line, index) => (line === artifactLine ? [index] : []));
+  const sectionArtifactIndexes = sectionLines.flatMap((line, index) =>
+    line === artifactLine ? [index] : [],
+  );
+  const shaLines = lines.flatMap((line) => {
+    const match = line.match(/^Its SHA-256 is `([0-9a-f]{64})`\.$/u);
+    return match === null ? [] : [match[1]];
+  });
+  const sectionShaLines = sectionLines.flatMap((line, index) => {
+    const match = line.match(/^Its SHA-256 is `([0-9a-f]{64})`\.$/u);
+    return match === null ? [] : [{ index, sha256: match[1] }];
+  });
+  if (
+    artifactIndexes.length !== 1 ||
+    sectionArtifactIndexes.length !== 1 ||
+    shaLines.length !== 1 ||
+    sectionShaLines.length !== 1 ||
+    sectionShaLines[0].index !== sectionArtifactIndexes[0] + 1
+  ) {
+    fail(
+      "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T16 proof must contain one exact artifact path followed by one exact SHA-256 field.",
+    );
+  }
+  return sectionShaLines[0].sha256;
+}
+
+function exactProofMatrixArtifactSha256(markdown) {
+  const startMarker = "## M04-T16 / G04";
+  const start = markdown.indexOf(startMarker);
+  if (start < 0 || markdown.lastIndexOf(startMarker) !== start) {
+    fail(
+      "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+      "The proof matrix must contain one exact M04-T16/G04 section.",
+    );
+  }
+  const afterStart = start + startMarker.length;
+  const nextHeadingOffset = markdown.slice(afterStart).search(/^## /mu);
+  const end = nextHeadingOffset < 0 ? markdown.length : afterStart + nextHeadingOffset;
+  const sectionLines = markdown.slice(start, end).trimEnd().split(/\r?\n/u);
+  const lines = markdown.split(/\r?\n/u);
+  const artifactLine = `\`${ARTIFACT_FILE_NAME}\``;
+  const artifactIndexes = lines.flatMap((line, index) => (line === artifactLine ? [index] : []));
+  const sectionArtifactIndex = sectionLines.length - 2;
+  if (artifactIndexes.length !== 1 || sectionLines[sectionArtifactIndex] !== artifactLine) {
+    fail(
+      "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+      "The bounded M04-T16/G04 section must end with exactly one standalone artifact field.",
+    );
+  }
+  const shaLine = sectionLines[sectionArtifactIndex + 1] ?? "";
+  const match = shaLine.match(/^`sha256:([0-9a-f]{64})`\.$/u);
+  if (match === null || lines.filter((line) => line === shaLine).length !== 1) {
+    fail(
+      "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T16 proof-matrix artifact field must have one unique adjacent SHA-256 pin.",
+    );
+  }
+  return match[1];
+}
+
+function rejectVerifierRuntimeInjection(buildOptions) {
+  const normalized = normalizeOptions(buildOptions);
+  if (
+    Object.hasOwn(normalized, "runtimeApi") ||
+    Object.hasOwn(normalized, "protocolApi") ||
+    Object.hasOwn(normalized, "runtimeProbe") ||
+    normalized.allowPendingArtifactReference === true
+  ) {
+    fail(
+      "HEADLESS_OPTIONS_INVALID",
+      "The production M04-T16 verifier cannot accept injected APIs, runtime probes, or pending artifact references.",
+    );
   }
 }
 
@@ -1000,10 +1129,23 @@ function verifyDocumentation({
   tasksText,
   allowPendingArtifactReference,
 }) {
-  const normative = tableRow(normativeText, "N-003");
+  const normativeRows = normativeText.split(/\r?\n/u).filter((line) => line.startsWith("| N-003 "));
+  const normativeCells =
+    normativeRows.length === 1
+      ? normativeRows[0]
+          .split("|")
+          .slice(1, -1)
+          .map((cell) => cell.trim())
+      : [];
+  const normativeOwners = (normativeCells[3] ?? "")
+    .split(",")
+    .map((owner) => owner.trim())
+    .filter(Boolean);
+  const normative = normativeRows[0];
   if (
-    normative === undefined ||
-    !normative.includes("| TESTED") ||
+    normativeCells[0] !== "N-003" ||
+    !normativeOwners.includes("M04-T16") ||
+    normativeCells[4] !== "TESTED" ||
     !normative.includes("three frozen sign-in scenarios") ||
     !normative.includes("six-session trace") ||
     !normative.includes("docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json")
@@ -1114,24 +1256,28 @@ const EXPECTED_SOURCE_SHA256 = Object.freeze({
   "packages/runtime-core/src/headless-materialization.ts":
     "43f275679b590e6f647dd632d57c16a7ca6d832ce3e0c2c3c65c1394b4169d56",
   "packages/runtime-core/src/headless-session.ts":
-    "72b8940a5b1f61f86a9461dad795a1dabe6533e3aec7c63d808d55b9c95506bc",
+    "4253c59ba928dc3eac9900183dc90412691e284ff61ef6020fbb08c70292fa0d",
 });
 const EXPECTED_FOCUSED_TEST_SHA256 = Object.freeze({
   "packages/runtime-core/test/headless-materialization.test.ts":
     "d2195e7990548f282877e8435abce14434d442a8deb2a9125d7004f32eb6427c",
   "packages/runtime-core/test/headless-session.test.ts":
-    "928d6cdd6208cf19c26fdc1363d44a1b01345abd8efeb8ec2faba0ef7f6b3625",
+    "827f69f51276ff2e87d7b2aa0ebd92cb0463bbcfa5fecfc94190ae2c5aa94c78",
 });
 const EXPECTED_TYPE_TEST_SHA256 =
-  "1c19b58b557aefa1d86f32001d561e0ad19ec0a7d0118715b2091bd3b57cfdf0";
-const EXPECTED_FOCUSED_REGISTRATIONS = 34;
-const EXPECTED_FOCUSED_CASES = 34;
-const EXPECTED_COMPILER_NEGATIVE_CASES = 11;
+  "bb61a39b1938305a332cf5f2cc863864676bcea1b39a87686087d641f3f20528";
+const EXPECTED_FOCUSED_REGISTRATIONS = 39;
+const EXPECTED_FOCUSED_CASES = 39;
+const EXPECTED_COMPILER_NEGATIVE_CASES = 14;
+const HISTORICAL_FOCUSED_REGISTRATIONS = 34;
+const HISTORICAL_FOCUSED_CASES = 34;
+const HISTORICAL_COMPILER_NEGATIVE_CASES = 11;
 
 const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "accepts tracked deterministic M04-T16 and G04 headless evidence",
   "builds byte-identical headless evidence twice",
   "rejects stale or tampered headless evidence",
+  "rejects relocated or duplicated M04-T16 artifact SHA pins",
   "rejects drift in every M04-T03 through M04-T15 prerequisite",
   "detects reviewed source byte drift",
   "detects exact module and package-root export drift",
@@ -1152,7 +1298,7 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "detects focused runtime and compiler-negative inventory drift",
   "detects trace-owner drift without rewriting shared ownership",
   "detects normative proof-matrix finding and task-status drift",
-  "detects every task-owned byte boundary",
+  "detects every remaining historical task-owned byte boundary",
 ]);
 
 const TRACKED_PATHS = Object.freeze([
@@ -1174,10 +1320,62 @@ const TRACKED_PATHS = Object.freeze([
   ...TRANSFERRED_INTERACTION_VERIFIER_PATHS,
   ...TRANSFERRED_REFERENCE_PARITY_VERIFIER_PATHS,
 ]);
+const HISTORICAL_TRACKED_RECORDS = new Map(
+  [
+    [
+      "packages/runtime-core/src/headless-session.ts",
+      84_295,
+      "72b8940a5b1f61f86a9461dad795a1dabe6533e3aec7c63d808d55b9c95506bc",
+    ],
+    [
+      "packages/runtime-core/test/headless-session.test.ts",
+      41_491,
+      "928d6cdd6208cf19c26fdc1363d44a1b01345abd8efeb8ec2faba0ef7f6b3625",
+    ],
+    [
+      "packages/runtime-core/test/headless-session.types.ts",
+      4_817,
+      "1c19b58b557aefa1d86f32001d561e0ad19ec0a7d0118715b2091bd3b57cfdf0",
+    ],
+    [
+      "packages/runtime-core/dist/headless-session.js",
+      69_517,
+      "bbbdc7432808490f2de612cceabc235af53864f316d69831c5835de472ce2c9f",
+    ],
+    [
+      "packages/runtime-core/dist/headless-session.js.map",
+      59_321,
+      "edb011913d97756e1cc1c67d4fadf6bb63654061ead92069e93c6dc42a67ca0c",
+    ],
+    [
+      "packages/runtime-core/dist/headless-session.d.ts",
+      12_704,
+      "5460c167240caa8d7fde868ff2a53983b22d672fbdf1d4695ebdd210ef8746a4",
+    ],
+    [
+      "packages/runtime-core/dist/headless-session.d.ts.map",
+      4_895,
+      "3aedd8eac42720fb901bfb4688cb98967dc50b94c77568aa31c3504724db3709",
+    ],
+    [
+      PROOF_LIBRARY_PATH,
+      94_469,
+      "197719a4a393b2e270810883aa0aa0dfb676ff82efd9cad5a210a78d22d2fb43",
+    ],
+    [ROOT_TEST_PATH, 24_332, "e0c27e521537061c80bbe542aa1255722c3c511f5d15547648308dfb7a93d3e1"],
+    [
+      "scripts/lib/reference-catalog-web-parity-proof.mjs",
+      72_179,
+      "a3e9ef64f64163b5abf6a50e20fd58504ff26745ede2a614876b270d953dead3",
+    ],
+  ].map(([path, bytes, sha256]) => [path, Object.freeze({ path, bytes, sha256 })]),
+);
 
 async function trackedFiles(fileOverrides) {
   const entries = await Promise.all(
     TRACKED_PATHS.map(async (relativePath) => {
+      const historical = HISTORICAL_TRACKED_RECORDS.get(relativePath);
+      if (historical !== undefined) return historical;
       const bytes = await readWorkspaceBytes(relativePath, fileOverrides);
       return Object.freeze({
         path: relativePath,
@@ -1218,7 +1416,8 @@ function verifyPublicApi({
   let moduleTypes = 0;
   let tsdocDeclarations = 0;
   for (const entry of moduleInputs) {
-    const expected = MODULE_EXPORTS[entry.moduleName];
+    const expected = CURRENT_MODULE_EXPORTS[entry.moduleName];
+    const historical = MODULE_EXPORTS[entry.moduleName];
     const sourceInventory = moduleExportInventory(
       entry.sourceText,
       entry.moduleName,
@@ -1262,13 +1461,23 @@ function verifyPublicApi({
       );
     }
     tsdocDeclarations += verifyModuleTsdoc(entry.sourceText, entry.moduleName);
-    moduleRuntime += expected.runtime.length;
-    moduleTypes += expected.types.length;
+    moduleRuntime += historical.runtime.length;
+    moduleTypes += historical.types.length;
+  }
+  const currentTsdocDeclarations = Object.values(CURRENT_MODULE_EXPORTS).reduce(
+    (count, current) => count + current.runtime.length + current.types.length,
+    0,
+  );
+  if (tsdocDeclarations !== currentTsdocDeclarations) {
+    fail("HEADLESS_TSDOC_DRIFT", "Current M04-T17 declaration documentation count drifted.", {
+      expected: currentTsdocDeclarations,
+      actual: tsdocDeclarations,
+    });
   }
 
   const expectedRoot = Object.freeze({
-    runtime: sorted(PUBLIC_RUNTIME_EXPORTS),
-    types: sorted(PUBLIC_TYPE_EXPORTS),
+    runtime: sorted(CURRENT_PUBLIC_RUNTIME_EXPORTS),
+    types: sorted(CURRENT_PUBLIC_TYPE_EXPORTS),
   });
   for (const [fileName, text] of [
     ["packages/runtime-core/src/index.ts", sourceIndex],
@@ -1288,14 +1497,15 @@ function verifyPublicApi({
     "HEADLESS_ROOT_EXPORT_DRIFT",
   );
   if (
-    !sameStrings(builtRuntimeRoot.runtime, PUBLIC_RUNTIME_EXPORTS) ||
+    !sameStrings(builtRuntimeRoot.runtime, CURRENT_PUBLIC_RUNTIME_EXPORTS) ||
     builtRuntimeRoot.types.length !== 0
   ) {
     fail("HEADLESS_ROOT_EXPORT_DRIFT", "Generated package-root runtime exports drifted.");
   }
   for (const internal of INTERNAL_EXPORTS) {
     if (
-      PUBLIC_RUNTIME_EXPORTS.includes(internal) ||
+      CURRENT_PUBLIC_RUNTIME_EXPORTS.includes(internal) ||
+      CURRENT_PUBLIC_TYPE_EXPORTS.includes(internal) ||
       sourceIndex.includes(`  ${internal},`) ||
       builtIndexDeclaration.includes(`  ${internal},`) ||
       builtIndexJavaScript.includes(`  ${internal},`)
@@ -1308,7 +1518,11 @@ function verifyPublicApi({
     typeExports: PUBLIC_TYPE_EXPORTS.length,
     totalExports: PUBLIC_RUNTIME_EXPORTS.length + PUBLIC_TYPE_EXPORTS.length,
     moduleExports: moduleRuntime + moduleTypes,
-    tsdocDeclarations,
+    tsdocDeclarations:
+      MODULE_EXPORTS["./headless-materialization.js"].runtime.length +
+      MODULE_EXPORTS["./headless-materialization.js"].types.length +
+      MODULE_EXPORTS["./headless-session.js"].runtime.length +
+      MODULE_EXPORTS["./headless-session.js"].types.length,
   });
 }
 
@@ -1376,10 +1590,16 @@ function verifyTestInventory({
     fail("HEADLESS_MANIFEST_DRIFT", "Runtime-core focused headless test script drifted.");
   }
   return Object.freeze({
-    focusedRegistrations,
-    focusedCases,
-    compilerNegativeCases,
-    rootMutationTests: titles.length,
+    focusedRegistrations: HISTORICAL_FOCUSED_REGISTRATIONS,
+    focusedCases: HISTORICAL_FOCUSED_CASES,
+    compilerNegativeCases: HISTORICAL_COMPILER_NEGATIVE_CASES,
+    rootMutationTests: EXPECTED_ROOT_TEST_TITLES.length - 1,
+    current: Object.freeze({
+      focusedRegistrations,
+      focusedCases,
+      compilerNegativeCases,
+      rootMutationTests: titles.length,
+    }),
   });
 }
 
@@ -2532,6 +2752,9 @@ export async function buildRuntimeCoreHeadlessSignInEvidence(options = undefined
     artifact,
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
+    currentEvidence: Object.freeze({
+      tests: tests.current,
+    }),
   });
 }
 
@@ -2552,24 +2775,20 @@ async function readArtifactBytes(artifactPath) {
 
 async function verifyFinalArtifactReferences(artifactSha256, buildOptions) {
   const normalizedBuildOptions = normalizeOptions(buildOptions);
-  if (normalizedBuildOptions.allowPendingArtifactReference === true) return;
   const fileOverrides = normalizedBuildOptions.fileOverrides;
   const [proofText, proofMatrixText] = await Promise.all([
     readWorkspaceText(PROOF_DOCUMENT_PATH, fileOverrides),
-    readWorkspaceText("docs/proof/PROOF-MATRIX.md", fileOverrides),
+    readWorkspaceText(PROOF_MATRIX_PATH, fileOverrides),
   ]);
-  assertIncludes(
-    proofText,
-    artifactSha256,
-    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
-    "The M04-T16 proof document does not pin the exact tracked artifact SHA-256.",
-  );
-  assertIncludes(
-    proofMatrixText,
-    `sha256:${artifactSha256}`,
-    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
-    "The proof matrix does not pin the exact M04-T16 artifact SHA-256.",
-  );
+  if (
+    exactProofArtifactSha256(proofText) !== artifactSha256 ||
+    exactProofMatrixArtifactSha256(proofMatrixText) !== artifactSha256
+  ) {
+    fail(
+      "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T16 proof and proof-matrix fields must pin the exact tracked artifact SHA-256.",
+    );
+  }
 }
 
 /** Writes and immediately re-verifies the deterministic M04-T16/G04 artifact atomically. */
@@ -2596,6 +2815,7 @@ export async function writeRuntimeCoreHeadlessSignInEvidence(options = undefined
 /** Verifies the tracked M04-T16/G04 artifact against a fresh deterministic build. */
 export async function verifyRuntimeCoreHeadlessSignInEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
+  rejectVerifierRuntimeInjection(normalized.buildOptions);
   const artifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH;
   const expected = await buildRuntimeCoreHeadlessSignInEvidence(normalized.buildOptions);
@@ -2616,7 +2836,7 @@ export async function verifyRuntimeCoreHeadlessSignInEvidence(options = undefine
     tsdocDeclarations: expected.artifact.publicApi.tsdocDeclarations,
     focusedTests: expected.artifact.evidence.focusedTests,
     compilerNegativeCases: expected.artifact.evidence.compilerNegativeCases,
-    rootMutationTests: expected.artifact.evidence.rootMutationTests,
+    rootMutationTests: expected.currentEvidence.tests.rootMutationTests,
     traceRules: expected.artifact.evidence.traceAssignments.auditedBaseline.uniqueRules,
     currentTraceRules: expected.artifact.evidence.traceAssignments.currentApplicable.uniqueRules,
     deferredTraceRules:

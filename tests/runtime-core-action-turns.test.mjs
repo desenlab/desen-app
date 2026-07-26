@@ -717,14 +717,14 @@ test("detects admission-time native completion resolution drift", async () => {
 
 test("detects task-owned byte, trace, normative, and proof-document drift", async () => {
   const evidence = await buildRuntimeCoreActionTurnsEvidence();
-  const source = await sourceText();
+  const typeTests = await readFile(TYPE_TESTS, "utf8");
   await rejectsCode(
     () =>
       verifyRuntimeCoreActionTurnsEvidence({
         artifactBytes: evidence.artifactBytes,
         buildOptions: {
           fileOverrides: {
-            "packages/runtime-core/src/action-turns.ts": `${source}\n`,
+            "packages/runtime-core/test/action-turns.types.ts": `${typeTests}\n`,
           },
         },
       }),

@@ -104,6 +104,8 @@ export {
   mountRuntimeHeadlessSession,
   readRuntimeHeadlessSession,
   RUNTIME_HEADLESS_SESSION_LIMITS,
+  subscribeRuntimeHeadlessSession,
+  unsubscribeRuntimeHeadlessSession,
 } from "./headless-session.js";
 
 export type {
@@ -181,11 +183,15 @@ export type {
   RuntimeHeadlessSessionEventResult,
   RuntimeHeadlessSessionHandle,
   RuntimeHeadlessSessionLimitProfile,
+  RuntimeHeadlessSessionListener,
   RuntimeHeadlessSessionMountInput,
   RuntimeHeadlessSessionMountInvalidReason,
   RuntimeHeadlessSessionMountResult,
   RuntimeHeadlessSessionReadResult,
   RuntimeHeadlessSessionSnapshot,
+  RuntimeHeadlessSessionSubscribeResult,
+  RuntimeHeadlessSessionSubscription,
+  RuntimeHeadlessSessionUnsubscribeResult,
 } from "./headless-session.js";
 
 export type {

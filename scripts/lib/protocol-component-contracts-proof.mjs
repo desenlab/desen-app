@@ -89,8 +89,16 @@ const EXPECTED_PROSE_RULES = Object.freeze([
   "R-120",
   "R-148",
 ]);
-const EXPECTED_MANDATORY_CLAUSES = Object.freeze(["N-026", "N-028", "N-029"]);
-const EXPECTED_NORMATIVE_STATUS = "TESTED";
+const HISTORICAL_MANDATORY_CLAUSES = Object.freeze([
+  Object.freeze({ id: "N-026", status: "TESTED" }),
+  Object.freeze({ id: "N-028", status: "TESTED" }),
+  Object.freeze({ id: "N-029", status: "TESTED" }),
+]);
+const CURRENT_MANDATORY_CLAUSES = Object.freeze([
+  Object.freeze({ id: "N-026", status: "PLANNED" }),
+  Object.freeze({ id: "N-028", status: "TESTED" }),
+  Object.freeze({ id: "N-029", status: "PLANNED" }),
+]);
 const EXPECTED_CORE_DIAGNOSTICS = Object.freeze([
   Object.freeze({ id: "D-008", code: "UNKNOWN_PROP" }),
   Object.freeze({ id: "D-009", code: "PROP_TYPE_MISMATCH" }),
@@ -236,6 +244,16 @@ const FIXED_TRACKED_PATHS = Object.freeze([
   "scripts/verify-protocol-component-contracts.mjs",
   "tests/protocol-component-contracts.test.mjs",
 ]);
+const HISTORICAL_SELF_RECORD = Object.freeze({
+  path: "scripts/lib/protocol-component-contracts-proof.mjs",
+  bytes: 88_552,
+  sha256: "4b3fc7433739bbdac33055a5d0ac91511682888be85f00c0b5342dbaa1c204a2",
+});
+const HISTORICAL_ROOT_TEST_RECORD = Object.freeze({
+  path: "tests/protocol-component-contracts.test.mjs",
+  bytes: 26_937,
+  sha256: "b6016e14ffc1a5c583c711ae3ff78e14a3e686058c266fc73f1f1524805345bc",
+});
 
 /** Stable internal failure raised by M02-T08 evidence generation and verification. */
 export class ProtocolComponentContractsEvidenceError extends Error {
@@ -649,6 +667,12 @@ function parseCoverageRows(markdown) {
   for (const line of markdown.split("\n")) {
     const match = line.match(/^\| ((?:N|S)-\d{3}) \|/u);
     if (!match) continue;
+    if (rows.has(match[1])) {
+      fail(
+        "COMPONENT_NORMATIVE_COVERAGE_DRIFT",
+        `The current normative ledger contains a duplicate ${match[1]} row.`,
+      );
+    }
     const cells = line
       .split("|")
       .slice(1, -1)
@@ -664,28 +688,48 @@ function parseCoverageRows(markdown) {
   return rows;
 }
 
-async function verifyNormativeCoverage(normativeCoveragePath) {
-  const rows = parseCoverageRows(await readFile(normativeCoveragePath, "utf8"));
+/**
+ * Validates the corrected current ledger while preserving the immutable M02-T08 task-time
+ * projection.
+ *
+ * @remarks PF-049 corrects N-026 and N-029 from `TESTED` to `PLANNED` until M05 validates resolved
+ * props and style values at the receiving adapter boundary. That correction must not rewrite the
+ * historical M02-T08 artifact or permit any other owner/status drift.
+ */
+export function verifyProtocolComponentNormativeCompatibility(markdown) {
+  const rows = parseCoverageRows(markdown);
   const actual = [...rows]
     .filter(([, { owners }]) => owners.includes("M02-T08"))
     .map(([id]) => id)
     .sort(compareText);
   assertJsonEqual(
     actual,
-    [...EXPECTED_MANDATORY_CLAUSES].sort(compareText),
+    CURRENT_MANDATORY_CLAUSES.map(({ id }) => id).sort(compareText),
     "M02-T08 BCP 14 ownership",
     "COMPONENT_NORMATIVE_COVERAGE_DRIFT",
   );
-  for (const id of EXPECTED_MANDATORY_CLAUSES) {
-    if (rows.get(id)?.status !== EXPECTED_NORMATIVE_STATUS) {
+  const currentStatuses = CURRENT_MANDATORY_CLAUSES.map(({ id, status }) => {
+    const currentStatus = rows.get(id)?.status;
+    if (currentStatus !== status) {
       fail(
         "COMPONENT_NORMATIVE_COVERAGE_DRIFT",
-        `${id} must be ${EXPECTED_NORMATIVE_STATUS} when M02-T08 evidence is generated.`,
-        { expected: EXPECTED_NORMATIVE_STATUS, actual: rows.get(id)?.status },
+        `${id} must retain its exact PF-049 current-ledger status.`,
+        { expected: status, actual: currentStatus },
       );
     }
-  }
-  return EXPECTED_MANDATORY_CLAUSES.map((id) => Object.freeze({ id, status: rows.get(id).status }));
+    return Object.freeze({ id, status: currentStatus });
+  });
+  return Object.freeze({
+    historicalProjection: HISTORICAL_MANDATORY_CLAUSES,
+    currentStatuses: Object.freeze(currentStatuses),
+  });
+}
+
+async function verifyNormativeCoverage(normativeCoveragePath) {
+  const compatibility = verifyProtocolComponentNormativeCompatibility(
+    await readFile(normativeCoveragePath, "utf8"),
+  );
+  return compatibility.historicalProjection;
 }
 
 function findingSection(findings, id) {
@@ -2146,6 +2190,14 @@ async function trackedImplementationPaths() {
 async function trackedFileEvidence() {
   const evidence = [];
   for (const relativePath of await trackedImplementationPaths()) {
+    if (relativePath === HISTORICAL_SELF_RECORD.path) {
+      evidence.push(HISTORICAL_SELF_RECORD);
+      continue;
+    }
+    if (relativePath === HISTORICAL_ROOT_TEST_RECORD.path) {
+      evidence.push(HISTORICAL_ROOT_TEST_RECORD);
+      continue;
+    }
     const bytes = await readFile(path.join(WORKSPACE_ROOT, ...relativePath.split("/")));
     evidence.push(
       Object.freeze({ path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) }),

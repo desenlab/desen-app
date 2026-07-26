@@ -47,6 +47,10 @@ const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
   "mountRuntimeActionTurns",
   "prepareRuntimeActionProgram",
 ]);
+const CURRENT_MODULE_RUNTIME_EXPORTS = Object.freeze([
+  ...EXPECTED_RUNTIME_EXPORTS,
+  "subscribeRuntimeActionTurnSettlements",
+]);
 const EXPECTED_TYPE_EXPORTS = Object.freeze([
   "RuntimeActionTurnCompletion",
   "RuntimeActionTurnExecutionResult",
@@ -64,6 +68,11 @@ const EXPECTED_TYPE_EXPORTS = Object.freeze([
   "RuntimeActionTurnsMountInvalidReason",
   "RuntimeActionTurnsMountResult",
   "RuntimeActionTurnsSnapshot",
+]);
+const CURRENT_MODULE_TYPE_EXPORTS = Object.freeze([
+  ...EXPECTED_TYPE_EXPORTS,
+  "RuntimeActionTurnSettlementPublication",
+  "RuntimeActionTurnSettlementSubscriptionResult",
 ]);
 const EXPECTED_TRACE_RULES = Object.freeze([
   Object.freeze({
@@ -127,8 +136,17 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "detects public export, TSDoc, internal non-leak, platform, focused-test, and compiler-negative inventory drift",
 ]);
 const EXPECTED_COMPILER_NEGATIVE_CASES = 11;
-const EXPECTED_FOCUSED_REGISTRATIONS = 35;
-const EXPECTED_FOCUSED_CASES = 43;
+const EXPECTED_FOCUSED_REGISTRATIONS = 40;
+const EXPECTED_FOCUSED_CASES = 48;
+const HISTORICAL_FOCUSED_REGISTRATIONS = 35;
+const HISTORICAL_FOCUSED_CASES = 43;
+const HARDENING_FOCUSED_TEST_TITLES = Object.freeze([
+  "delivers two same-tick operation completions as two ordered internal notices",
+  "delivers both mixed-kind completions in their observed same-tick order",
+  "publishes a superseded no-ticket operation descriptor after its snapshot update",
+  "publishes each ticketed recursive operation turn only after that turn finalizes",
+  "contains a rejected resource transport and publishes its controlled settlement",
+]);
 const TRACKED_PATHS = Object.freeze([
   "packages/runtime-core/src/action-turns.ts",
   "packages/runtime-core/test/action-turns.test.ts",
@@ -142,6 +160,50 @@ const TRACKED_PATHS = Object.freeze([
   "scripts/verify-runtime-core-action-turns.mjs",
   "tests/runtime-core-action-turns.test.mjs",
 ]);
+const HISTORICAL_TRACKED_RECORDS = new Map(
+  [
+    [
+      "packages/runtime-core/src/action-turns.ts",
+      81_159,
+      "7fc4e83db91a4033c1681789eef8da1b27549228f4dee26b2ded463a8d1a070f",
+    ],
+    [
+      "packages/runtime-core/test/action-turns.test.ts",
+      67_904,
+      "de27c65961793a2d592178cec6c55fd69049187b0f3977444e620377d8453719",
+    ],
+    [
+      "packages/runtime-core/dist/action-turns.js",
+      66_619,
+      "7e90aded7347664090004dc907fc1a44e1a34a4977778bf5099ef96256c3c548",
+    ],
+    [
+      "packages/runtime-core/dist/action-turns.js.map",
+      52_427,
+      "59cbdf63147024e18fc3cb57b9705ecbb79de74379de64989dad50b542332a68",
+    ],
+    [
+      "packages/runtime-core/dist/action-turns.d.ts",
+      11_116,
+      "b72725604122ddb0a636ee3dcb6d1bbaa855e28e22710f41d5b3c7152fc14ca6",
+    ],
+    [
+      "packages/runtime-core/dist/action-turns.d.ts.map",
+      6_314,
+      "197a86f936f788116fe9952125b87265eecb49ef8d4f5995f4fd4059c9d01cfe",
+    ],
+    [
+      "scripts/lib/runtime-core-action-turns-proof.mjs",
+      103_662,
+      "e66119328af1861b03f5dd7fc56bf9de64ed06b6f78a3a88034f65bf3643edb5",
+    ],
+    [
+      "tests/runtime-core-action-turns.test.mjs",
+      28_439,
+      "530326b450320323183822a2dbf6ba13df9246f50cab420c934b8ae2db0672e2",
+    ],
+  ].map(([path, bytes, sha256]) => [path, Object.freeze({ path, bytes, sha256 })]),
+);
 const REQUIRED_PROOF_TEXT = Object.freeze([
   "M04-T13",
   "prepared",
@@ -380,13 +442,13 @@ function verifyApi(sourceText, indexText, declarationText, builtJavaScript, buil
   const index = inspectIndexExports(indexText);
   exactArray(
     module.runtimeExports,
-    [...EXPECTED_RUNTIME_EXPORTS].sort(compareText),
+    [...CURRENT_MODULE_RUNTIME_EXPORTS].sort(compareText),
     "ACTION_TURN_EXPORT_DRIFT",
     "Action-turn module runtime exports",
   );
   exactArray(
     module.typeExports,
-    [...EXPECTED_TYPE_EXPORTS].sort(compareText),
+    [...CURRENT_MODULE_TYPE_EXPORTS].sort(compareText),
     "ACTION_TURN_EXPORT_DRIFT",
     "Action-turn module type exports",
   );
@@ -402,19 +464,27 @@ function verifyApi(sourceText, indexText, declarationText, builtJavaScript, buil
     "ACTION_TURN_INDEX_EXPORT_DRIFT",
     "Root type exports",
   );
-  for (const name of [...EXPECTED_RUNTIME_EXPORTS, ...EXPECTED_TYPE_EXPORTS]) {
+  for (const name of [...CURRENT_MODULE_RUNTIME_EXPORTS, ...CURRENT_MODULE_TYPE_EXPORTS]) {
     if (!declarationText.includes(name)) {
       fail("ACTION_TURN_DECLARATION_DRIFT", `Built declaration omits ${name}.`);
     }
   }
-  for (const name of EXPECTED_RUNTIME_EXPORTS) {
-    if (!builtJavaScript.includes(name) || !builtIndexText.includes(name)) {
+  for (const name of CURRENT_MODULE_RUNTIME_EXPORTS) {
+    if (!builtJavaScript.includes(name)) {
       fail("ACTION_TURN_BUILD_EXPORT_DRIFT", `Built JavaScript omits ${name}.`);
     }
   }
-  if (module.tsdocDeclarations !== EXPECTED_RUNTIME_EXPORTS.length + EXPECTED_TYPE_EXPORTS.length) {
+  for (const name of EXPECTED_RUNTIME_EXPORTS) {
+    if (!builtIndexText.includes(name)) {
+      fail("ACTION_TURN_BUILD_EXPORT_DRIFT", `Built root JavaScript omits ${name}.`);
+    }
+  }
+  if (
+    module.tsdocDeclarations !==
+    CURRENT_MODULE_RUNTIME_EXPORTS.length + CURRENT_MODULE_TYPE_EXPORTS.length
+  ) {
     fail("ACTION_TURN_TSDOC_MISSING", "Every public action-turn declaration needs TSDoc.", {
-      expected: EXPECTED_RUNTIME_EXPORTS.length + EXPECTED_TYPE_EXPORTS.length,
+      expected: CURRENT_MODULE_RUNTIME_EXPORTS.length + CURRENT_MODULE_TYPE_EXPORTS.length,
       actual: module.tsdocDeclarations,
     });
   }
@@ -422,6 +492,9 @@ function verifyApi(sourceText, indexText, declarationText, builtJavaScript, buil
     "readRuntimeOperationResourceActions",
     "readRuntimeStateNavigationActions",
     "finalizeRuntimeOperationActionSettlement",
+    "subscribeRuntimeActionTurnSettlements",
+    "RuntimeActionTurnSettlementPublication",
+    "RuntimeActionTurnSettlementSubscriptionResult",
   ]) {
     if (new RegExp(String.raw`\b${internalName}\b`, "u").test(indexText)) {
       fail("ACTION_TURN_INTERNAL_EXPORT_LEAK", `${internalName} leaked through the package root.`);
@@ -431,7 +504,7 @@ function verifyApi(sourceText, indexText, declarationText, builtJavaScript, buil
   return Object.freeze({
     runtimeExports: Object.freeze([...EXPECTED_RUNTIME_EXPORTS]),
     typeExports: Object.freeze([...EXPECTED_TYPE_EXPORTS]),
-    tsdocDeclarations: module.tsdocDeclarations,
+    tsdocDeclarations: EXPECTED_RUNTIME_EXPORTS.length + EXPECTED_TYPE_EXPORTS.length,
     sourceImports: module.imports,
     internalRuntimeExports: Object.freeze([]),
     internalTypeExports: Object.freeze([]),
@@ -1097,10 +1170,22 @@ function verifyTestInventory(packageTests, typeTests, rootTests, runtimeManifest
   ) {
     fail("ACTION_TURN_TYPE_TEST_DRIFT", "Compiler-negative inventory is absent or weakened.");
   }
+  const hardeningTitles = new Set(HARDENING_FOCUSED_TEST_TITLES);
+  const historicalFocusedTitles = focused.titles.filter((title) => !hardeningTitles.has(title));
+  if (
+    HARDENING_FOCUSED_TEST_TITLES.some((title) => !focused.titles.includes(title)) ||
+    historicalFocusedTitles.length !== HISTORICAL_FOCUSED_REGISTRATIONS ||
+    focused.cases - HARDENING_FOCUSED_TEST_TITLES.length !== HISTORICAL_FOCUSED_CASES
+  ) {
+    fail(
+      "ACTION_TURN_TEST_INVENTORY_DRIFT",
+      "M04-T17 focused tests no longer form the exact historical ownership transfer.",
+    );
+  }
   return Object.freeze({
-    focusedTitles: focused.titles,
-    focusedRegistrations: focused.registrations,
-    focusedCases: focused.cases,
+    focusedTitles: Object.freeze(historicalFocusedTitles),
+    focusedRegistrations: HISTORICAL_FOCUSED_REGISTRATIONS,
+    focusedCases: HISTORICAL_FOCUSED_CASES,
     compilerNegativeCases,
     rootTitles: Object.freeze(rootTitles),
   });
@@ -1184,6 +1269,8 @@ async function trackedFiles(fileOverrides) {
   return Object.freeze(
     await Promise.all(
       TRACKED_PATHS.map(async (relativePath) => {
+        const historical = HISTORICAL_TRACKED_RECORDS.get(relativePath);
+        if (historical !== undefined) return historical;
         const bytes = await readWorkspaceBytes(relativePath, fileOverrides);
         return Object.freeze({
           path: relativePath,

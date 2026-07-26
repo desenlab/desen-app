@@ -3,11 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import frozenSignInBundle from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.bundle.json";
 import frozenWebCatalog from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
+import * as adapterBridges from "../src/adapter-bridges.js";
 import {
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
   mountRuntimeHeadlessSession,
   readRuntimeHeadlessSession,
+  subscribeRuntimeHeadlessSession,
+  unsubscribeRuntimeHeadlessSession,
 } from "../src/headless-session.js";
 
 import type {
@@ -34,6 +37,7 @@ interface HostControl {
   readonly contextNotices: Set<() => void>;
   readonly environmentNotices: Set<() => void>;
   readonly operationAttempts: Deferred<RuntimeHostCallResult>[];
+  readonly resourceAttempts: Deferred<RuntimeHostCallResult>[];
   readonly navigationTargets: string[];
   readonly navigationContexts: RuntimeJsonObject[];
   navigationHook: (() => void) | undefined;
@@ -66,6 +70,7 @@ function control(): HostControl {
     contextNotices: new Set(),
     environmentNotices: new Set(),
     operationAttempts: [],
+    resourceAttempts: [],
     navigationTargets: [],
     navigationContexts: [],
     navigationHook: undefined,
@@ -104,7 +109,13 @@ function hostPorts(target: HostControl): RuntimeHostPorts {
         return attempt.promise;
       },
     },
-    resources: { load: () => ({ status: "denied" }) },
+    resources: {
+      load() {
+        const attempt = deferred<RuntimeHostCallResult>();
+        target.resourceAttempts.push(attempt);
+        return attempt.promise;
+      },
+    },
     tokens: { resolve: () => ({ status: "missing" }) },
     context: {
       getSnapshot: () => target.context,
@@ -145,7 +156,12 @@ function mount(
     hostPorts: hostPorts(target),
     ...(options.limits === undefined ? {} : { limits: options.limits }),
   });
-  expect(result.status).toBe("mounted");
+  expect(
+    result.status,
+    result.status === "invalid"
+      ? `mount failed: ${result.reason} ${JSON.stringify(result.diagnostics)}`
+      : undefined,
+  ).toBe("mounted");
   if (result.status !== "mounted") throw new TypeError(`Expected mount: ${result.reason}`);
   return { control: target, handle: result.handle, initial: result.snapshot };
 }
@@ -246,6 +262,89 @@ function expectPortableJson(value: unknown, seen = new WeakSet<object>()): void 
 }
 
 describe("M04-T16 exact ingress and initial headless materialization", () => {
+  it("provides a reentrancy-safe snapshot-store subscription with terminal fan-out", async () => {
+    const target = mount({ limits: { maxSubscriptions: 2 } });
+    const notices: string[] = [];
+    const firstSubscription = subscribeRuntimeHeadlessSession(target.handle, () => {
+      notices.push(readRuntimeHeadlessSession(target.handle).status);
+      if (firstSubscription?.status === "subscribed") {
+        unsubscribeRuntimeHeadlessSession(firstSubscription.subscription);
+      }
+      throw new Error("hostile store listener");
+    });
+    const secondSubscription = subscribeRuntimeHeadlessSession(target.handle, () => {
+      notices.push(`second:${readRuntimeHeadlessSession(target.handle).status}`);
+    });
+    expect(firstSubscription.status).toBe("subscribed");
+    expect(secondSubscription.status).toBe("subscribed");
+    expect(subscribeRuntimeHeadlessSession(target.handle, () => undefined)).toEqual({
+      status: "subscription-limit",
+    });
+    expect(notices).toEqual([]);
+
+    const changed = await dispatch(target, "sign-in.email", "change", {
+      value: "subscriber@example.com",
+    });
+    await flush();
+    expect(changed.state.email).toBe("subscriber@example.com");
+    expect(notices).toEqual(["read", "second:read"]);
+
+    expect(
+      firstSubscription.status === "subscribed"
+        ? unsubscribeRuntimeHeadlessSession(firstSubscription.subscription)
+        : undefined,
+    ).toEqual({ status: "already-unsubscribed" });
+    const reusedSubscription = subscribeRuntimeHeadlessSession(target.handle, () => {
+      notices.push(`reused:${readRuntimeHeadlessSession(target.handle).status}`);
+    });
+    expect(reusedSubscription.status).toBe("subscribed");
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+    await flush();
+    expect(notices).toEqual(["read", "second:read", "second:disposed", "reused:disposed"]);
+    expect(
+      secondSubscription.status === "subscribed"
+        ? unsubscribeRuntimeHeadlessSession(secondSubscription.subscription)
+        : undefined,
+    ).toEqual({ status: "already-unsubscribed" });
+    expect(
+      reusedSubscription.status === "subscribed"
+        ? unsubscribeRuntimeHeadlessSession(reusedSubscription.subscription)
+        : undefined,
+    ).toEqual({ status: "already-unsubscribed" });
+    expect(subscribeRuntimeHeadlessSession(target.handle, () => undefined)).toEqual({
+      status: "disposed",
+    });
+    expect(
+      subscribeRuntimeHeadlessSession({} as RuntimeHeadlessSessionHandle, () => undefined),
+    ).toEqual({ status: "invalid-handle" });
+    expect(subscribeRuntimeHeadlessSession(target.handle, undefined as never)).toEqual({
+      status: "invalid-listener",
+    });
+    expect(unsubscribeRuntimeHeadlessSession({} as never)).toEqual({
+      status: "invalid-subscription",
+    });
+  });
+
+  it("delivers one terminal notice to every live listener after listener-driven disposal", async () => {
+    const target = mount();
+    const notices: string[] = [];
+    const first = subscribeRuntimeHeadlessSession(target.handle, () => {
+      const status = readRuntimeHeadlessSession(target.handle).status;
+      notices.push(`first:${status}`);
+      if (status === "read") disposeRuntimeHeadlessSession(target.handle);
+    });
+    const second = subscribeRuntimeHeadlessSession(target.handle, () => {
+      notices.push(`second:${readRuntimeHeadlessSession(target.handle).status}`);
+    });
+    expect(first.status).toBe("subscribed");
+    expect(second.status).toBe("subscribed");
+
+    await dispatch(target, "sign-in.email", "change", { value: "dispose@example.com" });
+    await flush();
+    expect(notices).toEqual(["first:read", "second:disposed", "first:disposed"]);
+    expect(readRuntimeHeadlessSession(target.handle)).toEqual({ status: "disposed" });
+  });
+
   it("validates the frozen Bundle/Catalog, verifies its revision, and publishes only active nodes", () => {
     const target = mount();
     expect(target.initial).toMatchObject({
@@ -272,6 +371,41 @@ describe("M04-T16 exact ingress and initial headless materialization", () => {
     ]);
     expect(JSON.stringify(target.initial.plan)).toContain("Sign in");
     expect(JSON.parse(JSON.stringify(target.initial))).toEqual(target.initial);
+  });
+
+  it("really rolls back an already-added binding after an injected mid-transaction failure", () => {
+    const originalRegister = adapterBridges.registerRuntimeAdapterBinding;
+    const originalUnregister = adapterBridges.unregisterRuntimeAdapterBinding;
+    let registrationAttempts = 0;
+    let unregistrationAttempts = 0;
+    const register = vi
+      .spyOn(adapterBridges, "registerRuntimeAdapterBinding")
+      .mockImplementation((...arguments_: Parameters<typeof originalRegister>) => {
+        registrationAttempts += 1;
+        return registrationAttempts === 2
+          ? Object.freeze({ status: "invalid", reason: "retained-limit" })
+          : originalRegister(...arguments_);
+      });
+    const unregister = vi
+      .spyOn(adapterBridges, "unregisterRuntimeAdapterBinding")
+      .mockImplementation((...arguments_: Parameters<typeof originalUnregister>) => {
+        unregistrationAttempts += 1;
+        return originalUnregister(...arguments_);
+      });
+    try {
+      expect(
+        mountRuntimeHeadlessSession({
+          bundle: clone(frozenSignInBundle),
+          catalogs: [clone(frozenWebCatalog)],
+          hostPorts: hostPorts(control()),
+        }),
+      ).toMatchObject({ status: "invalid", reason: "materialization-failed" });
+    } finally {
+      register.mockRestore();
+      unregister.mockRestore();
+    }
+    expect(registrationAttempts).toBe(2);
+    expect(unregistrationAttempts).toBe(1);
   });
 
   it("rejects malformed ingress and an otherwise valid Bundle with a stale revision", () => {
@@ -345,6 +479,7 @@ describe("M04-T16 exact ingress and initial headless materialization", () => {
       { maxDepth: 129 },
       { maxBindingCandidates: 5_001 },
       { maxEventHandlerBindings: 5_001 },
+      { maxSubscriptions: 257 },
       { maxSurfaceTransitions: 65 },
       { maxSnapshotGeneration: Number.POSITIVE_INFINITY },
       { maxPlanJsonOccurrences: 262_145 },
@@ -397,6 +532,83 @@ describe("M04-T16 exact ingress and initial headless materialization", () => {
 });
 
 describe("M04-T16 official frozen sign-in trace", () => {
+  it("publishes a generic recursively nested operation settlement without polling", async () => {
+    const bundle = clone(frozenSignInBundle) as unknown as MutableRecord;
+    const signIn = (bundle.surfaces as MutableRecord)["sign-in"] as MutableRecord;
+    const root = signIn.root as MutableRecord;
+    const children = (root.slots as MutableRecord).default as MutableRecord[];
+    const error = children[3] as MutableRecord;
+    const errorWhen = error.when as MutableRecord;
+    const errorArguments = errorWhen.args as MutableRecord[];
+    errorArguments[0] = { $ref: "operation.reorder.status" };
+    const submit = children[4] as MutableRecord;
+    const submitProps = submit.props as MutableRecord;
+    submitProps.loading = { $ref: "operation.reorder.pending", fallback: false };
+    const handlers = submit.on as MutableRecord;
+    const press = handlers.press as MutableRecord[];
+    const parentOperation = press[0] as MutableRecord;
+    parentOperation.operation = "com.example.tasks/reorder";
+    parentOperation.as = "reorder";
+    parentOperation.input = { itemKey: "parent", fromIndex: 0, toIndex: 1 };
+    parentOperation.onSuccess = [
+      {
+        type: "operation.invoke",
+        operation: "com.example.tasks/reorder",
+        as: "nestedReorder",
+        input: { itemKey: "nested", fromIndex: 1, toIndex: 0 },
+        concurrency: "replace",
+        onSuccess: [
+          {
+            type: "state.set",
+            path: "email",
+            value: "nested-settlement@example.com",
+          },
+        ],
+      },
+    ];
+    bundle.revision = calculateDesenBundleRevision(bundle);
+    const target = mount({ bundle });
+    const published: RuntimeHeadlessSessionSnapshot[] = [];
+    const subscription = subscribeRuntimeHeadlessSession(target.handle, () => {
+      const read = readRuntimeHeadlessSession(target.handle);
+      if (read.status === "read") published.push(read.snapshot);
+    });
+    expect(subscription.status).toBe("subscribed");
+
+    await dispatch(target, "sign-in.submit", "press", {});
+    expect(target.control.operationAttempts).toHaveLength(1);
+
+    target.control.operationAttempts[0]?.resolve({
+      status: "succeeded",
+      value: {},
+    });
+    await flush();
+    expect(target.control.operationAttempts).toHaveLength(2);
+    expect(published.some((candidate) => operationStatus(candidate, "reorder") === "pending")).toBe(
+      true,
+    );
+
+    target.control.operationAttempts[1]?.resolve({
+      status: "succeeded",
+      value: {},
+    });
+    const terminal = await waitFor(
+      target,
+      (candidate) => candidate.state.email === "nested-settlement@example.com",
+    );
+    await flush();
+    expect(operationStatus(terminal, "nestedReorder")).toBe("succeeded");
+    expect(target.control.navigationTargets).toEqual([]);
+    expect(
+      published.some((candidate) => candidate.state.email === "nested-settlement@example.com"),
+    ).toBe(true);
+    if (subscription.status === "subscribed") {
+      expect(unsubscribeRuntimeHeadlessSession(subscription.subscription)).toEqual({
+        status: "unsubscribed",
+      });
+    }
+  });
+
   it("publishes edits, pending, failure, retry, success, and exact home handoff", async () => {
     const target = mount();
     const email = await dispatch(target, "sign-in.email", "change", {
@@ -497,6 +709,66 @@ describe("M04-T16 official frozen sign-in trace", () => {
 });
 
 describe("M04-T16 event authority, reactive hosts, and cleanup", () => {
+  it("terminally disposes the complete session after an injected T13 resource publication fault", async () => {
+    const bundle = clone(frozenSignInBundle) as unknown as MutableRecord;
+    const signIn = (bundle.surfaces as MutableRecord)["sign-in"] as MutableRecord;
+    signIn.resources = {
+      stores: {
+        use: "com.example.stores/list",
+        input: {},
+        policy: "manual",
+      },
+    };
+    const root = signIn.root as MutableRecord;
+    const children = (root.slots as MutableRecord).default as MutableRecord[];
+    const email = children[1] as MutableRecord;
+    email.on = {
+      change: [{ type: "resource.refresh", resource: "stores" }],
+    };
+    bundle.revision = calculateDesenBundleRevision(bundle);
+    const target = mount({ bundle });
+    await dispatch(target, "sign-in.email", "change", {
+      value: "ignored@example.com",
+    });
+    expect(target.control.resourceAttempts).toHaveLength(1);
+
+    const originalFreeze = Object.freeze;
+    let injectedFailures = 0;
+    const freeze = vi.spyOn(Object, "freeze").mockImplementation(((value: object) => {
+      const keys = typeof value === "object" && value !== null ? Reflect.ownKeys(value) : [];
+      const actionTurnSnapshotKeys = [
+        "commandEventSnapshot",
+        "documentId",
+        "generation",
+        "operationSnapshot",
+        "resourceSnapshot",
+        "revision",
+        "stateSnapshot",
+        "surfaceId",
+      ];
+      if (
+        injectedFailures === 0 &&
+        keys.length === actionTurnSnapshotKeys.length &&
+        actionTurnSnapshotKeys.every((key) => keys.includes(key))
+      ) {
+        injectedFailures += 1;
+        throw new Error("injected T13 resource publication fault");
+      }
+      return originalFreeze(value);
+    }) as typeof Object.freeze);
+    try {
+      target.control.resourceAttempts[0]?.resolve({
+        status: "succeeded",
+        value: { items: [], bounds: {} },
+      });
+      await flush(120);
+    } finally {
+      freeze.mockRestore();
+    }
+    expect(injectedFailures).toBe(1);
+    expect(readRuntimeHeadlessSession(target.handle)).toEqual({ status: "disposed" });
+  });
+
   it("rejects malformed payloads, stale snapshots, and unknown runtime instances", async () => {
     const target = mount();
     const initial = target.initial;

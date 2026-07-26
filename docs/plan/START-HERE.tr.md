@@ -28,7 +28,7 @@ kontrolden çıkmasını engeller.
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip
-görüşmesi ve iki pilot hedefi. Bunlar 144 görevlik ilerleme sayacını değiştirmez.
+görüşmesi ve iki pilot hedefi. Bunlar 145 görevlik ilerleme sayacını değiştirmez.
 
 ## Büyük aşamalar
 

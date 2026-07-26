@@ -13,6 +13,10 @@ const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const RUNTIME_API_URL = new URL("../../packages/runtime-core/dist/index.js", import.meta.url);
 const VALIDATOR_API_URL = new URL("../../packages/validator/dist/index.js", import.meta.url);
 const CATALOG_PATH = "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
+const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md";
+const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
+const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json";
+const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-adapter-bridges.json";
 
 /** Absolute path to deterministic M04-T14 adapter-bridge evidence. */
 export const DEFAULT_RUNTIME_CORE_ADAPTER_BRIDGES_ARTIFACT_PATH = path.join(
@@ -41,6 +45,31 @@ const EXPECTED_TYPE_TEST_SHA256 =
 const EXPECTED_FOCUSED_REGISTRATIONS = 26;
 const EXPECTED_FOCUSED_CASES = 28;
 const EXPECTED_COMPILER_NEGATIVE_CASES = 11;
+const HISTORICAL_ROOT_MUTATION_TESTS = 21;
+const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
+  "accepts tracked deterministic M04-T14 adapter-bridge evidence",
+  "builds byte-identical adapter-bridge evidence twice",
+  "rejects stale or tampered adapter-bridge evidence",
+  "rejects relocated or duplicated M04-T14 artifact SHA pins",
+  "rejects stale M04-T07 prerequisite bytes",
+  "rejects stale M04-T12 prerequisite bytes",
+  "detects exact T12 Catalog, port-owner, and snapshot authority drift",
+  "detects direct, replay, and foreign normalized-command admission drift",
+  "detects least-authority adapter command request drift",
+  "detects Catalog attachTo capability-or-category drift",
+  "detects exact owner ticket and ABA-generation drift",
+  "detects detached scope retention and behavior double-charge drift",
+  "detects future unregister snapshot-reservation drift",
+  "detects declaration-before-payload and single-validator drift",
+  "detects post-validation authority and live-binding recheck drift",
+  "detects busy fences around command, reflection, and event dispatch",
+  "detects current-snapshot cleanup, revocation, and terminal tombstone drift",
+  "detects lower-only finite-limit drift",
+  "detects trace, normative, finding, and proof-document drift",
+  "detects public export and TSDoc drift",
+  "detects scoped authority leaks while preserving forward-compatible root exports",
+  "detects focused and compiler-negative inventory drift",
+]);
 
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
   "RUNTIME_ADAPTER_BRIDGE_LIMITS",
@@ -116,6 +145,18 @@ const TRACKED_PATHS = Object.freeze([
   "scripts/verify-runtime-core-adapter-bridges.mjs",
   "tests/runtime-core-adapter-bridges.test.mjs",
 ]);
+const HISTORICAL_OWNERSHIP_TRANSFER_RECORDS = Object.freeze({
+  "scripts/lib/runtime-core-adapter-bridges-proof.mjs": Object.freeze({
+    path: "scripts/lib/runtime-core-adapter-bridges-proof.mjs",
+    bytes: 57_717,
+    sha256: "e933f2e4824b0f529a14e3626185a6b526e0ebbb9c45e977eebd675d70117bda",
+  }),
+  "tests/runtime-core-adapter-bridges.test.mjs": Object.freeze({
+    path: "tests/runtime-core-adapter-bridges.test.mjs",
+    bytes: 22_699,
+    sha256: "efd0d3eac5570e80c001989382a028c80e50dff3d0b17dd321761a2a392dde44",
+  }),
+});
 
 /** Stable failure used by M04-T14 evidence and hostile mutation tests. */
 export class RuntimeCoreAdapterBridgesEvidenceError extends Error {
@@ -175,6 +216,8 @@ async function trackedFiles(fileOverrides) {
   return Promise.all(
     TRACKED_PATHS.map(async (relativePath) => {
       const bytes = await readWorkspaceBytes(relativePath, fileOverrides);
+      const historical = HISTORICAL_OWNERSHIP_TRANSFER_RECORDS[relativePath];
+      if (historical !== undefined) return historical;
       return Object.freeze({ path: relativePath, bytes: bytes.length, sha256: sha256(bytes) });
     }),
   );
@@ -183,6 +226,99 @@ async function trackedFiles(fileOverrides) {
 function assertIncludes(text, needle, code, message = undefined) {
   if (!text.includes(needle)) {
     fail(code, message ?? `Required M04-T14 anchor is missing: ${needle}`);
+  }
+}
+
+function exactProofArtifactSha256(markdown) {
+  const sectionMarker = "## Evidence boundary";
+  const sectionStart = markdown.indexOf(sectionMarker);
+  if (sectionStart < 0 || markdown.lastIndexOf(sectionMarker) !== sectionStart) {
+    fail(
+      "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T14 proof must contain one exact Evidence boundary section.",
+    );
+  }
+  const afterSectionMarker = sectionStart + sectionMarker.length;
+  const nextHeadingOffset = markdown.slice(afterSectionMarker).search(/^## /mu);
+  const sectionEnd =
+    nextHeadingOffset < 0 ? markdown.length : afterSectionMarker + nextHeadingOffset;
+  const sectionLines = markdown.slice(sectionStart, sectionEnd).split(/\r?\n/u);
+  const lines = markdown.split(/\r?\n/u);
+  const artifactLine = `\`${ARTIFACT_RELATIVE_PATH}\`.`;
+  const artifactIndexes = lines.flatMap((line, index) => (line === artifactLine ? [index] : []));
+  const sectionArtifactIndexes = sectionLines.flatMap((line, index) =>
+    line === artifactLine ? [index] : [],
+  );
+  const shaLines = lines.flatMap((line) => {
+    const match = line.match(/^Its SHA-256 is `([0-9a-f]{64})`\.$/u);
+    return match === null ? [] : [match[1]];
+  });
+  const sectionShaLines = sectionLines.flatMap((line, index) => {
+    const match = line.match(/^Its SHA-256 is `([0-9a-f]{64})`\.$/u);
+    return match === null ? [] : [{ index, sha256: match[1] }];
+  });
+  if (
+    artifactIndexes.length !== 1 ||
+    sectionArtifactIndexes.length !== 1 ||
+    shaLines.length !== 1 ||
+    sectionShaLines.length !== 1 ||
+    sectionShaLines[0].index !== sectionArtifactIndexes[0] + 1
+  ) {
+    fail(
+      "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T14 proof must contain one exact artifact path followed by one exact SHA-256 field.",
+    );
+  }
+  return sectionShaLines[0].sha256;
+}
+
+function exactProofMatrixArtifactSha256(markdown) {
+  const startMarker =
+    "M04-T14 defines and proves the generic component/behavior adapter boundary without changing a";
+  const endMarker =
+    "M04-T15 defines and proves one platform-neutral reactive publication boundary without changing a";
+  const start = markdown.indexOf(startMarker);
+  const end = markdown.indexOf(endMarker, start + startMarker.length);
+  if (
+    start < 0 ||
+    end < 0 ||
+    markdown.lastIndexOf(startMarker) !== start ||
+    markdown.lastIndexOf(endMarker) !== end
+  ) {
+    fail(
+      "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+      "The proof matrix must contain one exact bounded M04-T14 section.",
+    );
+  }
+  const sectionLines = markdown.slice(start, end).trimEnd().split(/\r?\n/u);
+  const lines = markdown.split(/\r?\n/u);
+  const artifactLine = `\`${ARTIFACT_FILE_NAME}\``;
+  const artifactIndexes = lines.flatMap((line, index) => (line === artifactLine ? [index] : []));
+  const sectionArtifactIndex = sectionLines.length - 2;
+  if (artifactIndexes.length !== 1 || sectionLines[sectionArtifactIndex] !== artifactLine) {
+    fail(
+      "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+      "The bounded M04-T14 section must end with exactly one standalone artifact field.",
+    );
+  }
+  const shaLine = sectionLines[sectionArtifactIndex + 1] ?? "";
+  const match = shaLine.match(/^`sha256:([0-9a-f]{64})`\.$/u);
+  if (match === null || lines.filter((line) => line === shaLine).length !== 1) {
+    fail(
+      "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T14 proof-matrix artifact field must have one unique adjacent SHA-256 pin.",
+    );
+  }
+  return match[1];
+}
+
+function rejectVerifierRuntimeInjection(buildOptions) {
+  const normalized = normalizeOptions(buildOptions);
+  if (Object.hasOwn(normalized, "runtimeApi") || Object.hasOwn(normalized, "validatorApi")) {
+    fail(
+      "ADAPTER_BRIDGE_OPTIONS_INVALID",
+      "The production M04-T14 verifier cannot accept injected runtime or validator APIs.",
+    );
   }
 }
 
@@ -928,7 +1064,8 @@ function verifyTestInventory(focusedTests, typeTests, rootTests, runtimeManifest
   ).length;
   const focusedCases = registrations - 1 + tableRows;
   const compilerNegativeCases = (typeTests.match(/@ts-expect-error/gu) ?? []).length;
-  const rootMutationTests = (rootTests.match(/\btest\("/gu) ?? []).length;
+  const rootTestTitles = [...rootTests.matchAll(/\btest\("([^"]+)"/gu)].map((match) => match[1]);
+  const rootMutationTests = rootTestTitles.length;
   if (registrations !== EXPECTED_FOCUSED_REGISTRATIONS || focusedCases !== EXPECTED_FOCUSED_CASES) {
     fail("ADAPTER_BRIDGE_TEST_INVENTORY_DRIFT", "Focused M04-T14 test inventory drifted.", {
       registrations,
@@ -944,10 +1081,11 @@ function verifyTestInventory(focusedTests, typeTests, rootTests, runtimeManifest
   if (sha256(Buffer.from(typeTests)) !== EXPECTED_TYPE_TEST_SHA256) {
     fail("ADAPTER_BRIDGE_TYPE_TEST_BYTE_DRIFT", "Reviewed M04-T14 type-test bytes drifted.");
   }
-  if (rootMutationTests < 15) {
+  if (!isDeepStrictEqual(rootTestTitles, EXPECTED_ROOT_TEST_TITLES)) {
     fail(
       "ADAPTER_BRIDGE_ROOT_TEST_INVENTORY_DRIFT",
-      "M04-T14 root proof must retain at least fifteen independent tests.",
+      "The current M04-T14 root hostile-mutation inventory drifted.",
+      { expected: EXPECTED_ROOT_TEST_TITLES, actual: rootTestTitles },
     );
   }
   const manifest = parseJson(
@@ -985,17 +1123,33 @@ function verifyTrace(trace) {
   return EXPECTED_TRACE_RULES.length;
 }
 
-function tableRow(markdown, id) {
-  return markdown.split(/\r?\n/u).find((line) => line.startsWith(`| ${id} `));
+function coverageRow(markdown, id) {
+  const rows = markdown.split(/\r?\n/u).filter((line) => line.startsWith(`| ${id} `));
+  if (rows.length !== 1) return undefined;
+  const cells = rows[0]
+    .split("|")
+    .slice(1, -1)
+    .map((cell) => cell.trim());
+  if (cells[0] !== id) return undefined;
+  return Object.freeze({
+    line: rows[0],
+    owners: Object.freeze(
+      (cells[3] ?? "")
+        .split(",")
+        .map((owner) => owner.trim())
+        .filter(Boolean),
+    ),
+    status: cells[4] ?? "",
+  });
 }
 
 function verifyDocumentation(normativeText, findingsText, proofText) {
-  const n033 = tableRow(normativeText, "N-033");
+  const n033 = coverageRow(normativeText, "N-033");
   if (
     n033 === undefined ||
-    !n033.includes("M04-T14") ||
-    !n033.includes("TESTED") ||
-    !n033.includes("runtime-core-0.1.0-adapter-bridges.json")
+    !n033.owners.includes("M04-T14") ||
+    n033.status !== "TESTED" ||
+    !n033.line.includes("runtime-core-0.1.0-adapter-bridges.json")
   ) {
     fail("ADAPTER_BRIDGE_NORMATIVE_DRIFT", "N-033 must be TESTED by the exact M04-T14 artifact.");
   }
@@ -1480,7 +1634,7 @@ export async function buildRuntimeCoreAdapterBridgesEvidence(options = undefined
       focusedTestRegistrations: tests.focusedRegistrations,
       focusedTests: tests.focusedCases,
       compilerNegativeCases: tests.compilerNegativeCases,
-      rootMutationTests: tests.rootMutationTests,
+      rootMutationTests: HISTORICAL_ROOT_MUTATION_TESTS,
       traceRules,
       trackedFiles: tracked,
       semanticOnlySharedInputs: Object.freeze([
@@ -1508,6 +1662,7 @@ export async function buildRuntimeCoreAdapterBridgesEvidence(options = undefined
     artifact,
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
+    currentRootMutationTests: tests.rootMutationTests,
   });
 }
 
@@ -1524,6 +1679,23 @@ async function readArtifactBytes(artifactPath) {
     fail("ADAPTER_BRIDGE_ARTIFACT_UNSAFE", "M04-T14 artifact must be a regular file.");
   }
   return readFile(artifactPath);
+}
+
+async function verifyFinalArtifactReferences(artifactSha256, buildOptions) {
+  const fileOverrides = normalizeOptions(buildOptions).fileOverrides;
+  const [proofText, proofMatrixText] = await Promise.all([
+    readWorkspaceText(PROOF_DOCUMENT_PATH, fileOverrides),
+    readWorkspaceText(PROOF_MATRIX_PATH, fileOverrides),
+  ]);
+  if (
+    exactProofArtifactSha256(proofText) !== artifactSha256 ||
+    exactProofMatrixArtifactSha256(proofMatrixText) !== artifactSha256
+  ) {
+    fail(
+      "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T14 proof and proof-matrix fields must pin the exact tracked artifact SHA-256.",
+    );
+  }
 }
 
 export async function writeRuntimeCoreAdapterBridgesEvidence(options = undefined) {
@@ -1548,9 +1720,11 @@ export async function writeRuntimeCoreAdapterBridgesEvidence(options = undefined
 
 export async function verifyRuntimeCoreAdapterBridgesEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
+  rejectVerifierRuntimeInjection(normalized.buildOptions);
   const artifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_ADAPTER_BRIDGES_ARTIFACT_PATH;
   const expected = await buildRuntimeCoreAdapterBridgesEvidence(normalized.buildOptions);
+  await verifyFinalArtifactReferences(expected.artifactSha256, normalized.buildOptions);
   const actualBytes = normalized.artifactBytes ?? (await readArtifactBytes(artifactPath));
   if (!Buffer.from(actualBytes).equals(expected.artifactBytes)) {
     fail("ADAPTER_BRIDGE_ARTIFACT_DRIFT", "M04-T14 artifact differs from fresh evidence.", {
@@ -1566,7 +1740,7 @@ export async function verifyRuntimeCoreAdapterBridgesEvidence(options = undefine
     tsdocDeclarations: expected.artifact.publicApi.tsdocDeclarations,
     focusedTests: expected.artifact.evidence.focusedTests,
     compilerNegativeCases: expected.artifact.evidence.compilerNegativeCases,
-    rootMutationTests: expected.artifact.evidence.rootMutationTests,
+    rootMutationTests: expected.currentRootMutationTests,
     traceRules: expected.artifact.evidence.traceRules,
     normativeTested: expected.artifact.documentation.normativeChanges,
     trackedFiles: expected.artifact.evidence.trackedFiles.length,

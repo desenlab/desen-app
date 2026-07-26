@@ -1,0 +1,374 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T17",
+  "gate": "G04",
+  "result": "PASS",
+  "profile": "desen-runtime-core-audit-hardening-v1",
+  "claim": {
+    "summary": "Factory-authenticated settlement completion drives generic bounded headless-session publication while exact-location migration evidence preserves immutable historical artifacts.",
+    "taskStatus": "DONE",
+    "gateStatus": "DONE"
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T13",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-action-turns.json",
+      "sha256": "5b2f95b897116fdd9ff5320d8720e104d7b93f148d28bfcaf067c838785f9d87"
+    },
+    {
+      "task": "M04-T14",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json",
+      "sha256": "bfdeddbffd458941464620e0af2013d374bf8e64068ca060d33651ddeb2660c7"
+    },
+    {
+      "task": "M04-T15",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json",
+      "sha256": "7e412daf9e2e8f08f40a4b093430775414aa1df4a9b14d690d2bf45966cbec67"
+    },
+    {
+      "task": "M04-T16",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json",
+      "sha256": "bdda1b2d0c4630a1a6708b2e6bb9a9ecdca0c2efca3615ca4cf69cee871170a4"
+    },
+    {
+      "task": "M02-T08",
+      "path": "docs/proof/artifacts/protocol-0.1.0-component-contracts.json",
+      "sha256": "71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac"
+    }
+  ],
+  "runtime": {
+    "publicApi": {
+      "publicRuntimeExports": 2,
+      "publicTypeExports": 4,
+      "internalModuleExports": 3,
+      "tsdocDeclarations": 9,
+      "maxSubscriptions": 256
+    },
+    "probe": {
+      "internalModuleObserver": "function",
+      "internalRootLeaks": [],
+      "maxSubscriptions": 256,
+      "publicSessionFunctions": [
+        "subscribeRuntimeHeadlessSession",
+        "unsubscribeRuntimeHeadlessSession"
+      ]
+    },
+    "platformBoundary": {
+      "productionFiles": 23,
+      "modules": [
+        "./action-evaluation.js",
+        "./action-turns.js",
+        "./adapter-bridges.js",
+        "./command-event-actions.js",
+        "./command-event-ports.js",
+        "./headless-materialization.js",
+        "./host-ports.js",
+        "./local-state.js",
+        "./node-identity.js",
+        "./operation-lifecycle.js",
+        "./operation-resource-actions.js",
+        "./predicate-evaluation.js",
+        "./reactive-host-ports.js",
+        "./reactive-reevaluation.js",
+        "./repeat-materialization.js",
+        "./resource-lifecycle.js",
+        "./runtime-json-snapshot.js",
+        "./state-navigation-actions.js",
+        "./token-format-resolution.js",
+        "./value-resolution.js",
+        "./variant-style-evaluation.js",
+        "@desen/protocol",
+        "@desen/validator",
+        "@desen/validator/schema-contract",
+        "@desen/validator/schema-contract-syntax"
+      ],
+      "reactDomBrowserImports": 0
+    },
+    "settlementNotification": "finite pre-reserved FIFO; exactly once after finalization; no same-tick coalescing loss"
+  },
+  "migration": {
+    "taskLedger": {
+      "path": "docs/plan/TASKS.md",
+      "heading": "## M04 — Framework-neutral runtime core",
+      "rows": [
+        {
+          "id": "M04-T17",
+          "line": 106,
+          "cells": [
+            "M04-T17",
+            "DONE",
+            "M04-T16",
+            "G04 audit hardening: authenticated session-completion notification, generic nested-settlement publication, exact-location proof validation, N-026/N-029 correction migration, and deterministic fault injection"
+          ],
+          "sha256": "ff6129b6849409ac02a174fd77cb4e9746171003c3f8024adf4270904ef297ce"
+        },
+        {
+          "id": "G04",
+          "line": 107,
+          "cells": [
+            "G04",
+            "DONE",
+            "M04-T01–M04-T17",
+            "Framework-neutral sign-in runtime and post-audit hardening pass"
+          ],
+          "sha256": "18c2440d4dd5b732a4e01785c4e9361e19177bb803282d7b675dcfc746643735"
+        }
+      ]
+    },
+    "normative": {
+      "path": "docs/proof/NORMATIVE-COVERAGE.md",
+      "heading": "## Mandatory clauses",
+      "rows": [
+        {
+          "id": "N-026",
+          "line": 65,
+          "cells": [
+            "N-026",
+            "[874](https://github.com/desenlab/desen-protocol/blob/b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca/SPEC.md#L874)",
+            "Resolved props must validate against the capability schema.",
+            "M02-T08, M04-T02, M05-T02",
+            "PLANNED",
+            "**Current-ledger correction (2026-07-27, PF-049):** the earlier `TESTED` status described M02-T08's static-value checks too broadly. M04-T02 and M04-T16 materialize a complete dynamic candidate but do not validate the resolved prop object against the receiving capability schema. Exact consumer-schema validation, optional omission, required-node failure, and proof that no invalid prop reaches an adapter remain with M05-T02. Immutable task-time artifacts retain their historical status bytes; M04-T17 owns the explicit compatibility migration rather than rewriting them."
+          ],
+          "sha256": "cab59ebf0a8387e625931e5f178719027ecb043693420c2122abfbeb96d7c7a4",
+          "owners": "M02-T08, M04-T02, M05-T02",
+          "status": "PLANNED",
+          "correctionDate": "2026-07-27"
+        },
+        {
+          "id": "N-028",
+          "line": 67,
+          "cells": [
+            "N-028",
+            "[975](https://github.com/desenlab/desen-protocol/blob/b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca/SPEC.md#L975)",
+            "Non-base style states must be declared visual states.",
+            "M02-T08, M05-T03",
+            "TESTED",
+            "M02-T08 tests `base`, declared states, unknown states, and Variant state patches; capability-driven production state activation remains M05-T03."
+          ],
+          "sha256": "fd324729cd2f61c604a01c78ad7eb295b4ab97feb3438a39131c46a5d47ddca0",
+          "owners": "M02-T08, M05-T03",
+          "status": "TESTED",
+          "correctionDate": null
+        },
+        {
+          "id": "N-029",
+          "line": 68,
+          "cells": [
+            "N-029",
+            "[981](https://github.com/desenlab/desen-protocol/blob/b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca/SPEC.md#L981)",
+            "Style parts must be declared and resolved values schema-valid.",
+            "M02-T08, M05-T03",
+            "PLANNED",
+            "**Current-ledger correction (2026-07-27, PF-049):** the earlier `TESTED` status proved declared style parts and statically knowable property values but prematurely represented the complete post-resolution obligation. Dynamic style values are materialized without receiving `propertiesSchema` validation. That validation and proof of adapter delivery remain with M05-T03. Immutable task-time artifacts retain their historical status bytes; M04-T17 owns the explicit compatibility migration rather than rewriting them."
+          ],
+          "sha256": "980b38a99fc536ab20ccbbd41444d6c2b50de1a1818e720a82f718ca084870f8",
+          "owners": "M02-T08, M05-T03",
+          "status": "PLANNED",
+          "correctionDate": "2026-07-27"
+        }
+      ],
+      "historicalProjection": [
+        { "id": "N-026", "status": "TESTED" },
+        { "id": "N-028", "status": "TESTED" },
+        { "id": "N-029", "status": "TESTED" }
+      ],
+      "currentStatuses": [
+        { "id": "N-026", "status": "PLANNED" },
+        { "id": "N-028", "status": "TESTED" },
+        { "id": "N-029", "status": "PLANNED" }
+      ],
+      "corrections": ["N-026:TESTED->PLANNED", "N-029:TESTED->PLANNED"]
+    },
+    "finding": {
+      "path": "docs/plan/PROTOCOL-FINDINGS.md",
+      "heading": "## PF-049 — Post-G04 audit corrections require explicit runtime notification and proof migration",
+      "line": 1704,
+      "sha256": "04125b2eb2d3bb280b35e23c053c7fce822598e8dc0c058499b5d1f4b4a8b01b"
+    },
+    "transferredOwnership": [
+      {
+        "ownerTask": "M04-T17",
+        "path": "scripts/lib/runtime-core-action-turns-proof.mjs",
+        "sha256": "87fbf4fbe7d14cd78f722ab82cddc9947cfd4ceffd01ae4b7012d8651bd0b469"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "tests/runtime-core-action-turns.test.mjs",
+        "sha256": "9bcbab58b536064544192192ac8b7ef5d362736debbd04cede5ff29c18686f88"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "scripts/lib/runtime-core-adapter-bridges-proof.mjs",
+        "sha256": "bd20ad70b74462c1658aa778331fe467c386cec5f98be5d7c580b8144b11da33"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "tests/runtime-core-adapter-bridges.test.mjs",
+        "sha256": "1ff5c530e842709f074dea26eee57d17a8cebbc3fc445e0a15e5a653141b97fd"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+        "sha256": "b24b97db0d8f11581a6727512d33422aefa7c6626565be98075f78cfb89ecc50"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "tests/runtime-core-reactive-reevaluation.test.mjs",
+        "sha256": "969fb1d942840d1311b32b7212d0ea37ff056e7c18e0bd4f768a08e8bde74ff0"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "scripts/lib/runtime-core-headless-sign-in-proof.mjs",
+        "sha256": "53821a90176802d73f0aa5c39afbe079cfe6635dbfd2b8fbcb29738331ab7948"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "tests/runtime-core-headless-sign-in.test.mjs",
+        "sha256": "d01ac1d6cf82e315d49acadbbb403e19c1b70ad909d1cd42696d50cdfe8d4e7a"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "scripts/lib/reference-catalog-web-parity-proof.mjs",
+        "sha256": "5a95fa80171b44a905174d8c16d39b46ceced87759d6ffb2686e32988afbd93a"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "scripts/lib/protocol-component-contracts-proof.mjs",
+        "sha256": "c63fdce9bfb2a278b8772ea489cb6260852a0fde451ec736db383f3c9d161e3e"
+      },
+      {
+        "ownerTask": "M04-T17",
+        "path": "tests/protocol-component-contracts.test.mjs",
+        "sha256": "47f9c685d3bc936157c9f4e0746a996607233b7c5ec0f3cc96f1fffd19a0024f"
+      }
+    ]
+  },
+  "evidence": {
+    "tests": {
+      "focusedRegistrations": 69,
+      "focusedTests": 77,
+      "compilerNegativeCases": 14,
+      "rootMutationTests": 13,
+      "scripts": [
+        "generate:runtime-core-audit-hardening",
+        "verify:runtime-core-audit-hardening",
+        "test:runtime-core-audit-hardening"
+      ]
+    },
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/action-turns.ts",
+        "bytes": 89401,
+        "sha256": "cf956ed10a2cfa1c28a952dd00b0dd8dfae85b4606bfa72600686b4022b89dc5"
+      },
+      {
+        "path": "packages/runtime-core/src/headless-session.ts",
+        "bytes": 91227,
+        "sha256": "4253c59ba928dc3eac9900183dc90412691e284ff61ef6020fbb08c70292fa0d"
+      },
+      {
+        "path": "packages/runtime-core/src/index.ts",
+        "bytes": 14602,
+        "sha256": "193d21d7552d5cd4c0a26f7f08ab1ac9eaa21fac51130bf5a5b40fa33b41afaf"
+      },
+      {
+        "path": "packages/runtime-core/test/action-turns.test.ts",
+        "bytes": 75880,
+        "sha256": "eb20829ec1f551ff4ee512169a2882159215c791c0338d7b7a7d4bdb6ab21904"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.test.ts",
+        "bytes": 52516,
+        "sha256": "827f69f51276ff2e87d7b2aa0ebd92cb0463bbcfa5fecfc94190ae2c5aa94c78"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.types.ts",
+        "bytes": 6347,
+        "sha256": "bb61a39b1938305a332cf5f2cc863864676bcea1b39a87686087d641f3f20528"
+      },
+      {
+        "path": "scripts/lib/runtime-core-action-turns-proof.mjs",
+        "bytes": 107054,
+        "sha256": "87fbf4fbe7d14cd78f722ab82cddc9947cfd4ceffd01ae4b7012d8651bd0b469"
+      },
+      {
+        "path": "tests/runtime-core-action-turns.test.mjs",
+        "bytes": 28468,
+        "sha256": "9bcbab58b536064544192192ac8b7ef5d362736debbd04cede5ff29c18686f88"
+      },
+      {
+        "path": "scripts/lib/runtime-core-adapter-bridges-proof.mjs",
+        "bytes": 65447,
+        "sha256": "bd20ad70b74462c1658aa778331fe467c386cec5f98be5d7c580b8144b11da33"
+      },
+      {
+        "path": "tests/runtime-core-adapter-bridges.test.mjs",
+        "bytes": 28719,
+        "sha256": "1ff5c530e842709f074dea26eee57d17a8cebbc3fc445e0a15e5a653141b97fd"
+      },
+      {
+        "path": "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+        "bytes": 80418,
+        "sha256": "b24b97db0d8f11581a6727512d33422aefa7c6626565be98075f78cfb89ecc50"
+      },
+      {
+        "path": "tests/runtime-core-reactive-reevaluation.test.mjs",
+        "bytes": 30644,
+        "sha256": "969fb1d942840d1311b32b7212d0ea37ff056e7c18e0bd4f768a08e8bde74ff0"
+      },
+      {
+        "path": "scripts/lib/runtime-core-headless-sign-in-proof.mjs",
+        "bytes": 103143,
+        "sha256": "53821a90176802d73f0aa5c39afbe079cfe6635dbfd2b8fbcb29738331ab7948"
+      },
+      {
+        "path": "tests/runtime-core-headless-sign-in.test.mjs",
+        "bytes": 29045,
+        "sha256": "d01ac1d6cf82e315d49acadbbb403e19c1b70ad909d1cd42696d50cdfe8d4e7a"
+      },
+      {
+        "path": "scripts/lib/reference-catalog-web-parity-proof.mjs",
+        "bytes": 72367,
+        "sha256": "5a95fa80171b44a905174d8c16d39b46ceced87759d6ffb2686e32988afbd93a"
+      },
+      {
+        "path": "scripts/lib/protocol-component-contracts-proof.mjs",
+        "bytes": 90419,
+        "sha256": "c63fdce9bfb2a278b8772ea489cb6260852a0fde451ec736db383f3c9d161e3e"
+      },
+      {
+        "path": "tests/protocol-component-contracts.test.mjs",
+        "bytes": 28432,
+        "sha256": "47f9c685d3bc936157c9f4e0746a996607233b7c5ec0f3cc96f1fffd19a0024f"
+      },
+      {
+        "path": "scripts/lib/runtime-core-audit-hardening-proof.mjs",
+        "bytes": 51457,
+        "sha256": "9c277a6abc23a9c9bff30997f8f3b06489fd6230ca89a2509c0c64778a457d01"
+      },
+      {
+        "path": "scripts/generate-runtime-core-audit-hardening-proof.mjs",
+        "bytes": 665,
+        "sha256": "45ae637ac71b47b2a875a2063189c477c2775eb6654c107a18ed412aebe80384"
+      },
+      {
+        "path": "scripts/verify-runtime-core-audit-hardening.mjs",
+        "bytes": 667,
+        "sha256": "e6a4b32baffecdb4a465c3943cf211cd2bbd34385b89ef4962d637393aa21724"
+      },
+      {
+        "path": "tests/runtime-core-audit-hardening.test.mjs",
+        "bytes": 15927,
+        "sha256": "f12b04f01db3b7793cdc3bfb939b243841c022b1416890129ec42d8ef41731a2"
+      }
+    ],
+    "normalizedProofDocumentSha256": "1fb69696767bd6da65d7350b8c8fca5dda017f86d49fff45a46925ad2c0263e2",
+    "finalArtifactReferences": "normalized outside artifact bytes; exact proof and Proof Matrix sections are verified separately"
+  },
+  "deferred": [
+    "N-026 receiving prop-schema validation and adapter delivery remain M05-T02.",
+    "N-029 post-resolution style-schema validation and adapter delivery remain M05-T03.",
+    "React, DOM, accessibility, focus, and concrete framework reconciliation remain M05."
+  ]
+}

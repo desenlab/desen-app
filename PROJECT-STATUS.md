@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-26
+Last updated: 2026-07-27
 
 ## Plain-language status
 
@@ -249,10 +249,10 @@ records the explicit invalidation and scheduler profile. P-17 remains `PARTIAL`;
 N-041 remain `PLANNED`, while M04-T16 retains the authenticated same-wrapper join, complete
 materialization, selector-to-program composition, descendant inactivity, the whole-surface
 observable reference oracle, coordinated disposal, and deterministic JSON sign-in trace.
-M04-T16 now closes G04 with a complete platform-neutral headless session over the exact frozen
-sign-in Bundle and Catalog. Unknown ingress is cumulatively validated and the Bundle revision is
-recalculated before one reactive host aggregate mounts every lower manager. Complete bounded
-materialization applies conditional presence before descendants, expands repeat scopes, resolves
+M04-T16 produced the initial G04 pass with a complete platform-neutral headless session over the
+exact frozen sign-in Bundle and Catalog. Unknown ingress is cumulatively validated, and the Bundle
+revision is recalculated before one reactive host aggregate mounts every lower manager. Complete
+bounded materialization applies conditional presence before descendants, expands repeat scopes, resolves
 tokens and formats, applies ordered variants, and produces one immutable JSON plan with canonical
 plan and binding commitments. An evaluation-bound private sidecar retains exact item/repeat scope
 and inert handler selectors; only a matching T15 evaluation id and both digests may reconcile
@@ -266,14 +266,26 @@ sessions total; every pair and their combined trace have byte-identical canonica
 72-record planning baseline and classifies the 67 records applicable to this gate. N-003 becomes
 `TESTED`; P-17 and P-18 remain `PARTIAL`, while renderer, production adapter, React/DOM,
 accessibility, focus, activation, Android, and iOS work remains assigned to later milestones.
+The post-G04 audit confirmed that exact sign-in evidence but found five boundaries that must be
+hardened before React integration: a factory-authenticated completion notice for generic nested
+settlements, automatic session publication after those settlements, exact-location proof checks,
+explicit correction/migration of the prematurely `TESTED` N-026 and N-029 ledger rows, and
+deterministic fault injection across completion, reentry, stale-settlement, and disposal failures.
+M04-T17 now proves all five boundaries and recloses G04. The generic T13 completion channel drives
+the current T15 publication path without sign-in knowledge; the public session subscription is
+finite and factory-authenticated; proof parsers bind exact rows, owners, sections, and hashes;
+N-026 and N-029 correctly remain `PLANNED` for M05 receiving-boundary evidence; and deterministic
+fault injection covers rollback, publication failure, reentry, stale settlement, finalization,
+and disposal. The immutable M02-T08 and M04-T13 through M04-T16 task-time artifacts remain
+byte-identical.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `53 / 144 tasks complete (37%)`
-- M04 progress: `16 / 16 tasks complete (100%)`
+- Overall implementation progress: `54 / 145 tasks complete (37%)`
+- M04 progress: `17 / 17 tasks complete (100%)`
 - Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -312,11 +324,12 @@ accessibility, focus, activation, Android, and iOS work remains assigned to late
   `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`,
   `M04-T14 — Generic component/behavior event and command bridges`,
   `M04-T15 — Reactive re-evaluation and stale-result protection`,
-  `M04-T16 — Headless sign-in determinism and JSON trace`
+  `M04-T16 — Headless sign-in determinism and JSON trace`,
+  `M04-T17 — G04 audit hardening`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task: `M05-T01 — React adapter registry and render-plan renderer`
-- Status: G04 complete; ready for M05-T01
+- Status: G04 is closed; M05-T01 is ready to start
 
 ## Completed preparation
 
@@ -632,13 +645,17 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
   prerequisite artifacts, and security mutations remain enforced.
-- The cumulative implementation passes formatting, lint, strict typecheck, build, protocol
-  integrity tests, protocol traceability and type-generation tests, remaining scaffold test
-  runners, and dependency-boundary checks.
+- At the M04-T17 checkpoint, the cumulative implementation passes formatting, lint, strict
+  typecheck, build, protocol integrity tests, protocol traceability and type-generation tests,
+  remaining scaffold test runners, dependency-boundary checks, exact historical compatibility,
+  and the new audit-hardening proof. The current-ledger correction is explicit and the affected
+  historical artifacts remain byte-identical.
 
-## Current blocker
+## Current readiness
 
-No technical or protocol-release blocker.
+No implementation-proof blocker remains between G04 and M05-T01. The React adapter work must still
+preserve the framework-neutral runtime boundary and must not claim N-026 or N-029 complete until
+their exact receiving-schema validations pass in M05-T02 and M05-T03.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -648,10 +665,9 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M05-T01 — React adapter registry and render-plan renderer`. Consume only the public
-M04-T16 headless plan and adapter contracts, keep capability implementations outside protocol
-data, and establish the first concrete Web–React reconciliation boundary without moving React,
-DOM, CSS, browser, or application dependencies into `@desen/runtime-core`.
+Begin `M05-T01 — React adapter registry and render-plan renderer`. Build the first Web–React
+adapter boundary over the completed framework-neutral runtime without moving React, DOM, or CSS
+concerns into `@desen/runtime-core`.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -682,6 +698,12 @@ M04-T16 extends that reviewed inventory to 133 distinct workloads, 39 proof veri
 proof files, and a pinned 86-step plan with 39 proof-test steps. Its equivalent legacy dependency
 expansion contains 3,265 leaf launches across 247 prerequisite segments. The same 22 CI contract
 tests pin the expanded proof inventory and preserve one execution of each distinct workload.
+
+M04-T17 extends that reviewed inventory to 135 distinct workloads, 40 proof verifiers, 40 root
+proof files, and a pinned 88-step plan with 40 proof-test steps. Its equivalent legacy dependency
+expansion contains 3,275 leaf launches across 255 prerequisite segments. The complete local
+GitHub-Actions-equivalent run passed all 88 steps, both boundary layers, and closing tracked-byte
+parity in 699.01 seconds (11 minutes 39 seconds).
 
 M02-T02 evidence:
 
@@ -1019,7 +1041,7 @@ M04-T15 evidence:
   files, zero authority, request, or platform leaks, and a cumulative 605/605 runtime-core package
   suite
 
-M04-T16 / G04 evidence:
+M04-T16 initial G04 evidence:
 
 - `docs/proof/RUNTIME-CORE-HEADLESS-SIGN-IN.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json`
@@ -1036,6 +1058,23 @@ M04-T16 / G04 evidence:
   scenario pairs across 6 independent sessions, zero authority or platform leaks, exact 5,000
   binding admission with 5,001 atomic rejection, and a cumulative 639/639 runtime-core package
   suite
+
+M04-T17 final G04 audit-hardening evidence:
+
+- `docs/proof/RUNTIME-CORE-AUDIT-HARDENING.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-audit-hardening.json`
+- artifact SHA-256: `cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa`
+- exact boundary: one finite pre-reserved FIFO completion publication for every accepted T13
+  operation/resource settlement; a factory-authenticated public headless-session subscription;
+  generic T15 publication without sign-in-specific promise knowledge; exact unique proof
+  section/row/owner/hash validation; and explicit current-versus-historical N-026/N-029 migration
+- executable evidence: 77 focused cases from 69 registrations, 14 negative cases, 13 hostile root
+  proof/mutation tests, deterministic rollback and resource-publication fault injection,
+  same-tick operation and mixed resource/operation ordering, zero React/DOM/browser imports, and a
+  cumulative 649/649 runtime-core package suite
+- historical compatibility: M02-T08 and M04-T13 through M04-T16 artifacts remain byte-identical;
+  all five are independently pinned as T17 prerequisites, while current compatibility
+  verifier/test ownership transfers without retroactive artifact rewriting
 
 ## Status vocabulary
 

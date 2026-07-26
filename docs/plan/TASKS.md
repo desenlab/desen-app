@@ -37,7 +37,7 @@ explicitly parallel branches inside M11 may progress independently.
 external release hygiene and does not block local implementation. Until each task is complete, no
 document may claim the corresponding clean-checkout or remote-CI evidence.
 
-## Operational work — excluded from the 144 implementation-task count
+## Operational work — excluded from the 145 implementation-task count
 
 | ID    | Status | Depends on                           | Deliverable                                                                                        | Evidence                                      |
 | ----- | ------ | ------------------------------------ | -------------------------------------------------------------------------------------------------- | --------------------------------------------- |
@@ -85,25 +85,44 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 ## M04 — Framework-neutral runtime core
 
-| ID      | Status | Depends on               | Deliverable / evidence                                                                             |
-| ------- | ------ | ------------------------ | -------------------------------------------------------------------------------------------------- |
-| M04-T01 | DONE   | G03                      | Host ports for navigation, storage, operations, resources, tokens, environment, clock, diagnostics |
-| M04-T02 | DONE   | M04-T01                  | Literal/reference/fallback resolver for state, context, resource, operation, event, item, and env  |
-| M04-T03 | DONE   | M04-T02                  | Token and deterministic string-format resolution                                                   |
-| M04-T04 | DONE   | M04-T02                  | Predicate evaluation and conditional presence                                                      |
-| M04-T05 | DONE   | M04-T03–M04-T04          | Ordered variant and style override evaluation                                                      |
-| M04-T06 | DONE   | M04-T02                  | Local state lifecycle, schema-safe writes, and stable node identity                                |
-| M04-T07 | DONE   | M04-T02, M04-T06         | Repeat scopes, aliases, keys, instance identity, and limits                                        |
-| M04-T08 | DONE   | M04-T02–M04-T03          | Resource mount/once/manual lifecycle and refresh                                                   |
-| M04-T09 | DONE   | M04-T02                  | Operation lifecycle and reject/replace/queue concurrency                                           |
-| M04-T10 | DONE   | M04-T03–M04-T04, M04-T06 | `state.set`, `state.toggle`, and `navigate` actions                                                |
-| M04-T11 | DONE   | M04-T08–M04-T10          | `operation.invoke` settlement actions and `resource.refresh`                                       |
-| M04-T12 | DONE   | M04-T10                  | `component.command` and allowlisted, schema-validated `event.emit`                                 |
-| M04-T13 | DONE   | M04-T10–M04-T12          | Action-turn, settlement-depth, and repeated-transition limits                                      |
-| M04-T14 | DONE   | M04-T07, M04-T12         | Generic component/behavior event and command bridges with payload validation                       |
-| M04-T15 | DONE   | M04-T05–M04-T14          | Reactive re-evaluation and stale asynchronous-result protection                                    |
-| M04-T16 | DONE   | M04-T03–M04-T15          | Headless sign-in determinism and JSON-serializable observable trace tests                          |
-| G04     | DONE   | M04-T01–M04-T16          | Framework-neutral sign-in runtime passes                                                           |
+| ID      | Status | Depends on               | Deliverable / evidence                                                                                                                                                                                          |
+| ------- | ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M04-T01 | DONE   | G03                      | Host ports for navigation, storage, operations, resources, tokens, environment, clock, diagnostics                                                                                                              |
+| M04-T02 | DONE   | M04-T01                  | Literal/reference/fallback resolver for state, context, resource, operation, event, item, and env                                                                                                               |
+| M04-T03 | DONE   | M04-T02                  | Token and deterministic string-format resolution                                                                                                                                                                |
+| M04-T04 | DONE   | M04-T02                  | Predicate evaluation and conditional presence                                                                                                                                                                   |
+| M04-T05 | DONE   | M04-T03–M04-T04          | Ordered variant and style override evaluation                                                                                                                                                                   |
+| M04-T06 | DONE   | M04-T02                  | Local state lifecycle, schema-safe writes, and stable node identity                                                                                                                                             |
+| M04-T07 | DONE   | M04-T02, M04-T06         | Repeat scopes, aliases, keys, instance identity, and limits                                                                                                                                                     |
+| M04-T08 | DONE   | M04-T02–M04-T03          | Resource mount/once/manual lifecycle and refresh                                                                                                                                                                |
+| M04-T09 | DONE   | M04-T02                  | Operation lifecycle and reject/replace/queue concurrency                                                                                                                                                        |
+| M04-T10 | DONE   | M04-T03–M04-T04, M04-T06 | `state.set`, `state.toggle`, and `navigate` actions                                                                                                                                                             |
+| M04-T11 | DONE   | M04-T08–M04-T10          | `operation.invoke` settlement actions and `resource.refresh`                                                                                                                                                    |
+| M04-T12 | DONE   | M04-T10                  | `component.command` and allowlisted, schema-validated `event.emit`                                                                                                                                              |
+| M04-T13 | DONE   | M04-T10–M04-T12          | Action-turn, settlement-depth, and repeated-transition limits                                                                                                                                                   |
+| M04-T14 | DONE   | M04-T07, M04-T12         | Generic component/behavior event and command bridges with payload validation                                                                                                                                    |
+| M04-T15 | DONE   | M04-T05–M04-T14          | Reactive re-evaluation and stale asynchronous-result protection                                                                                                                                                 |
+| M04-T16 | DONE   | M04-T03–M04-T15          | Headless sign-in determinism and JSON-serializable observable trace tests                                                                                                                                       |
+| M04-T17 | DONE   | M04-T16                  | G04 audit hardening: authenticated session-completion notification, generic nested-settlement publication, exact-location proof validation, N-026/N-029 correction migration, and deterministic fault injection |
+| G04     | DONE   | M04-T01–M04-T17          | Framework-neutral sign-in runtime and post-audit hardening pass                                                                                                                                                 |
+
+`M04-T16` remains a valid historical proof of the exact frozen sign-in profile. `M04-T17` reclosed
+`G04` after the audit found that the initial profile observed its official operation promise
+directly and did not yet prove generic publication after every internally nested settlement. The
+gate returned to `DONE` after all of the following were proven:
+
+- one factory-authenticated internal completion notice covers every accepted T13 settlement turn,
+  and the session publishes the resulting current T15 observation without a sign-in-specific
+  promise hook;
+- proof checks bind each corrected status and completion claim to its exact file, heading, table
+  row, field, and task owner, rejecting duplicates, moved text, and substring-only matches;
+- the current `N-026` and `N-029` corrections remain distinct from immutable task-time artifacts,
+  while `M05-T02` and `M05-T03` retain final receiving-schema ownership; and
+- deterministic fault injection covers notification admission, nested success/failure,
+  replacement and stale settlement, callback reentry, finalization, disposal, and failed
+  publication without partial or duplicate observation.
+
+With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency order.
 
 ## M05 — React runtime and separate reference host
 

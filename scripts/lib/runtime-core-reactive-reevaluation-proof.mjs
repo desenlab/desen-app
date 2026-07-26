@@ -13,6 +13,10 @@ const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const RUNTIME_API_URL = new URL("../../packages/runtime-core/dist/index.js", import.meta.url);
 const VALIDATOR_API_URL = new URL("../../packages/validator/dist/index.js", import.meta.url);
 const CATALOG_PATH = "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
+const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md";
+const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
+const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json";
+const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-reactive-reevaluation.json";
 
 /** Absolute path to deterministic M04-T15 reactive-reevaluation evidence. */
 export const DEFAULT_RUNTIME_CORE_REACTIVE_REEVALUATION_ARTIFACT_PATH = path.join(
@@ -206,6 +210,7 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "accepts tracked deterministic M04-T15 reactive evidence",
   "builds byte-identical reactive evidence twice",
   "rejects stale or tampered reactive evidence",
+  "rejects relocated or duplicated M04-T15 artifact SHA pins",
   "rejects drift in every M04-T05 through M04-T14 prerequisite",
   "detects captured-host and receiver-independent invocation drift",
   "detects exact settlement-envelope and detachment drift",
@@ -237,6 +242,7 @@ const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
 const EXPECTED_FOCUSED_REGISTRATIONS = 39;
 const EXPECTED_FOCUSED_CASES = 54;
 const EXPECTED_COMPILER_NEGATIVE_CASES = 11;
+const HISTORICAL_ROOT_MUTATION_TESTS = 30;
 
 const TRACKED_PATHS = Object.freeze([
   "packages/runtime-core/src/reactive-host-ports.ts",
@@ -257,6 +263,18 @@ const TRACKED_PATHS = Object.freeze([
   "scripts/verify-runtime-core-reactive-reevaluation.mjs",
   "tests/runtime-core-reactive-reevaluation.test.mjs",
 ]);
+const HISTORICAL_OWNERSHIP_TRANSFER_RECORDS = Object.freeze({
+  "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs": Object.freeze({
+    path: "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+    bytes: 74_729,
+    sha256: "d30bc915dfc90435951a9ffdd277c2c63be9c9e42b98a82f77d25d3d412a254c",
+  }),
+  "tests/runtime-core-reactive-reevaluation.test.mjs": Object.freeze({
+    path: "tests/runtime-core-reactive-reevaluation.test.mjs",
+    bytes: 24_906,
+    sha256: "74aabe03536c20cbe76034c53b6d0c59b67d6543a17c3d1d59481d66ea574ff7",
+  }),
+});
 
 const FORBIDDEN_RUNTIME_IDENTIFIERS = Object.freeze([
   "window",
@@ -332,6 +350,8 @@ async function trackedFiles(fileOverrides) {
   return Promise.all(
     TRACKED_PATHS.map(async (relativePath) => {
       const bytes = await readWorkspaceBytes(relativePath, fileOverrides);
+      const historical = HISTORICAL_OWNERSHIP_TRANSFER_RECORDS[relativePath];
+      if (historical !== undefined) return historical;
       return Object.freeze({
         path: relativePath,
         bytes: bytes.length,
@@ -377,6 +397,98 @@ function sameStrings(actual, expected) {
 function assertIncludes(text, needle, code, message = undefined) {
   if (!text.includes(needle)) {
     fail(code, message ?? `Required M04-T15 anchor is missing: ${needle}`);
+  }
+}
+
+function exactProofArtifactSha256(markdown) {
+  const sectionMarker = "## Evidence boundary";
+  const sectionStart = markdown.indexOf(sectionMarker);
+  if (sectionStart < 0 || markdown.lastIndexOf(sectionMarker) !== sectionStart) {
+    fail(
+      "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T15 proof must contain one exact Evidence boundary section.",
+    );
+  }
+  const afterSectionMarker = sectionStart + sectionMarker.length;
+  const nextHeadingOffset = markdown.slice(afterSectionMarker).search(/^## /mu);
+  const sectionEnd =
+    nextHeadingOffset < 0 ? markdown.length : afterSectionMarker + nextHeadingOffset;
+  const sectionLines = markdown.slice(sectionStart, sectionEnd).split(/\r?\n/u);
+  const lines = markdown.split(/\r?\n/u);
+  const artifactLine = `\`${ARTIFACT_RELATIVE_PATH}\`.`;
+  const artifactIndexes = lines.flatMap((line, index) => (line === artifactLine ? [index] : []));
+  const sectionArtifactIndexes = sectionLines.flatMap((line, index) =>
+    line === artifactLine ? [index] : [],
+  );
+  const shaLines = lines.flatMap((line) => {
+    const match = line.match(/^Its SHA-256 is `([0-9a-f]{64})`\.$/u);
+    return match === null ? [] : [match[1]];
+  });
+  const sectionShaLines = sectionLines.flatMap((line, index) => {
+    const match = line.match(/^Its SHA-256 is `([0-9a-f]{64})`\.$/u);
+    return match === null ? [] : [{ index, sha256: match[1] }];
+  });
+  if (
+    artifactIndexes.length !== 1 ||
+    sectionArtifactIndexes.length !== 1 ||
+    shaLines.length !== 1 ||
+    sectionShaLines.length !== 1 ||
+    sectionShaLines[0].index !== sectionArtifactIndexes[0] + 1
+  ) {
+    fail(
+      "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T15 proof must contain one exact artifact path followed by one exact SHA-256 field.",
+    );
+  }
+  return sectionShaLines[0].sha256;
+}
+
+function exactProofMatrixArtifactSha256(markdown) {
+  const startMarker =
+    "M04-T15 defines and proves one platform-neutral reactive publication boundary without changing a";
+  const endMarker = "## M04-T16 / G04";
+  const start = markdown.indexOf(startMarker);
+  const end = markdown.indexOf(endMarker, start + startMarker.length);
+  if (
+    start < 0 ||
+    end < 0 ||
+    markdown.lastIndexOf(startMarker) !== start ||
+    markdown.lastIndexOf(endMarker) !== end
+  ) {
+    fail(
+      "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+      "The proof matrix must contain one exact bounded M04-T15 section.",
+    );
+  }
+  const sectionLines = markdown.slice(start, end).trimEnd().split(/\r?\n/u);
+  const lines = markdown.split(/\r?\n/u);
+  const artifactLine = `\`${ARTIFACT_FILE_NAME}\``;
+  const artifactIndexes = lines.flatMap((line, index) => (line === artifactLine ? [index] : []));
+  const sectionArtifactIndex = sectionLines.length - 2;
+  if (artifactIndexes.length !== 1 || sectionLines[sectionArtifactIndex] !== artifactLine) {
+    fail(
+      "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+      "The bounded M04-T15 section must end with exactly one standalone artifact field.",
+    );
+  }
+  const shaLine = sectionLines[sectionArtifactIndex + 1] ?? "";
+  const match = shaLine.match(/^`sha256:([0-9a-f]{64})`\.$/u);
+  if (match === null || lines.filter((line) => line === shaLine).length !== 1) {
+    fail(
+      "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T15 proof-matrix artifact field must have one unique adjacent SHA-256 pin.",
+    );
+  }
+  return match[1];
+}
+
+function rejectVerifierRuntimeInjection(buildOptions) {
+  const normalized = normalizeOptions(buildOptions);
+  if (Object.hasOwn(normalized, "runtimeApi") || Object.hasOwn(normalized, "validatorApi")) {
+    fail(
+      "REACTIVE_OPTIONS_INVALID",
+      "The production M04-T15 verifier cannot accept injected runtime or validator APIs.",
+    );
   }
 }
 
@@ -1919,7 +2031,7 @@ export async function buildRuntimeCoreReactiveReevaluationEvidence(options = und
       focusedTestRegistrations: tests.focusedRegistrations,
       focusedTests: tests.focusedCases,
       compilerNegativeCases: tests.compilerNegativeCases,
-      rootMutationTests: tests.rootMutationTests,
+      rootMutationTests: HISTORICAL_ROOT_MUTATION_TESTS,
       traceRules,
       trackedFiles: tracked,
       semanticOnlySharedInputs: Object.freeze([
@@ -1952,6 +2064,7 @@ export async function buildRuntimeCoreReactiveReevaluationEvidence(options = und
     artifact,
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
+    currentRootMutationTests: tests.rootMutationTests,
   });
 }
 
@@ -1968,6 +2081,23 @@ async function readArtifactBytes(artifactPath) {
     fail("REACTIVE_ARTIFACT_UNSAFE", "M04-T15 artifact must be a regular file.");
   }
   return readFile(artifactPath);
+}
+
+async function verifyFinalArtifactReferences(artifactSha256, buildOptions) {
+  const fileOverrides = normalizeOptions(buildOptions).fileOverrides;
+  const [proofText, proofMatrixText] = await Promise.all([
+    readWorkspaceText(PROOF_DOCUMENT_PATH, fileOverrides),
+    readWorkspaceText(PROOF_MATRIX_PATH, fileOverrides),
+  ]);
+  if (
+    exactProofArtifactSha256(proofText) !== artifactSha256 ||
+    exactProofMatrixArtifactSha256(proofMatrixText) !== artifactSha256
+  ) {
+    fail(
+      "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+      "The M04-T15 proof and proof-matrix fields must pin the exact tracked artifact SHA-256.",
+    );
+  }
 }
 
 /** Writes and immediately re-verifies the deterministic M04-T15 artifact atomically. */
@@ -1994,9 +2124,11 @@ export async function writeRuntimeCoreReactiveReevaluationEvidence(options = und
 /** Verifies the tracked M04-T15 artifact against a fresh deterministic build. */
 export async function verifyRuntimeCoreReactiveReevaluationEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
+  rejectVerifierRuntimeInjection(normalized.buildOptions);
   const artifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_REACTIVE_REEVALUATION_ARTIFACT_PATH;
   const expected = await buildRuntimeCoreReactiveReevaluationEvidence(normalized.buildOptions);
+  await verifyFinalArtifactReferences(expected.artifactSha256, normalized.buildOptions);
   const actualBytes = normalized.artifactBytes ?? (await readArtifactBytes(artifactPath));
   if (!Buffer.from(actualBytes).equals(expected.artifactBytes)) {
     fail("REACTIVE_ARTIFACT_DRIFT", "M04-T15 artifact differs from fresh evidence.", {
@@ -2013,7 +2145,7 @@ export async function verifyRuntimeCoreReactiveReevaluationEvidence(options = un
     tsdocDeclarations: expected.artifact.publicApi.tsdocDeclarations,
     focusedTests: expected.artifact.evidence.focusedTests,
     compilerNegativeCases: expected.artifact.evidence.compilerNegativeCases,
-    rootMutationTests: expected.artifact.evidence.rootMutationTests,
+    rootMutationTests: expected.currentRootMutationTests,
     traceRules: expected.artifact.evidence.traceRules,
     normativeStatusChanges: expected.artifact.documentation.normativeStatusChanges,
     proofMatrixStatusChanges: expected.artifact.documentation.proofMatrixStatusChanges,

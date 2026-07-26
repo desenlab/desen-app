@@ -8,6 +8,7 @@ import {
   mountRuntimeActionTurns,
   prepareRuntimeActionProgram,
   RUNTIME_ACTION_TURN_LIMITS,
+  subscribeRuntimeActionTurnSettlements,
 } from "../src/action-turns.js";
 import { createRuntimeCommandEventHostPorts } from "../src/command-event-ports.js";
 import {
@@ -68,6 +69,7 @@ const REVISION = `sha256:${"d".repeat(64)}`;
 const SURFACE_ID = "sign-in";
 const NEXT_SURFACE_ID = "home";
 const SIGN_IN = "com.example.auth/signIn";
+const REORDER = "com.example.tasks/reorder";
 const STORES = "com.example.stores/list";
 const TEXT_FIELD = "com.example.ui/TextField";
 const FIELD_NODE = "email-field";
@@ -271,7 +273,10 @@ function children(hooks: Hooks = {}): Children {
     documentId: DOCUMENT_ID,
     revision: REVISION,
     surfaceId: SURFACE_ID,
-    aliases: { signIn: { operation: SIGN_IN } },
+    aliases: {
+      reorder: { operation: REORDER },
+      signIn: { operation: SIGN_IN },
+    },
     catalogSet: catalogSet(),
     hostPorts: ports,
   });
@@ -282,7 +287,10 @@ function children(hooks: Hooks = {}): Children {
     documentId: DOCUMENT_ID,
     revision: REVISION,
     surfaceId: SURFACE_ID,
-    operations: { signIn: { operation: SIGN_IN } },
+    operations: {
+      reorder: { operation: REORDER },
+      signIn: { operation: SIGN_IN },
+    },
     resourceHandle: resources.handle,
     resourceSnapshot: resources.snapshot,
     operationHandle: operations.handle,
@@ -441,6 +449,16 @@ function operationAction(
     input: VALID_INPUT,
     ...overrides,
   } as RuntimeOperationInvokeAction;
+}
+
+function reorderAction(): RuntimeOperationInvokeAction {
+  return {
+    type: "operation.invoke",
+    operation: REORDER,
+    as: "reorder",
+    input: { itemKey: "task-1", fromIndex: 0, toIndex: 1 },
+    onSuccess: [],
+  };
 }
 
 function commandAction(): RuntimeComponentCommandAction {
@@ -1191,6 +1209,159 @@ describe("M04-T13 shared FIFO and retained limits", () => {
 });
 
 describe("M04-T13 operation settlement turns and mandatory finalization", () => {
+  it("delivers two same-tick operation completions as two ordered internal notices", async () => {
+    const transports = [deferred<unknown>(), deferred<unknown>()] as const;
+    const invokeOperation = vi
+      .fn<(request: RuntimeOperationRequest) => unknown>()
+      .mockImplementationOnce(() => transports[0].promise)
+      .mockImplementationOnce(() => transports[1].promise);
+    const target = mountedFixture({ hooks: { invokeOperation } });
+    const publications: string[] = [];
+    const subscription = subscribeRuntimeActionTurnSettlements(target.turns.handle, (publication) =>
+      publications.push(publication),
+    );
+    expect(subscription.status).toBe("subscribed");
+
+    const origin = await run(target, [operationAction({ onSuccess: [] }), reorderAction()]);
+    const firstResult = origin.steps[0]?.result;
+    const secondResult = origin.steps[1]?.result;
+    if (firstResult?.status !== "operation-started") {
+      throw new TypeError("Expected the first independent operation.");
+    }
+    if (secondResult?.status !== "operation-started") {
+      throw new TypeError("Expected the second independent operation.");
+    }
+    transports[0].resolve({ status: "succeeded", value: VALID_OUTPUT });
+    transports[1].resolve({ status: "succeeded", value: {} });
+    await Promise.all([firstResult.settlement, secondResult.settlement]);
+    await flushMicrotasks();
+    expect(publications).toEqual(["operation", "operation"]);
+
+    if (subscription.status === "subscribed") subscription.unsubscribe();
+  });
+
+  it("delivers both mixed-kind completions in their observed same-tick order", async () => {
+    const operationTransport = deferred<unknown>();
+    const resourceTransport = deferred<unknown>();
+    const target = mountedFixture({
+      hooks: {
+        invokeOperation: () => operationTransport.promise,
+        loadResource: () => resourceTransport.promise,
+      },
+    });
+    const publications: string[] = [];
+    const subscription = subscribeRuntimeActionTurnSettlements(target.turns.handle, (publication) =>
+      publications.push(publication),
+    );
+    expect(subscription.status).toBe("subscribed");
+
+    const origin = await run(target, [
+      operationAction({ onSuccess: [] }),
+      { type: "resource.refresh", resource: "stores" },
+    ]);
+    const operation = origin.steps[0]?.result;
+    const resource = origin.steps[1]?.result;
+    if (operation?.status !== "operation-started" || resource?.status !== "resource-started") {
+      throw new TypeError("Expected both asynchronous effects to start.");
+    }
+    operationTransport.resolve({ status: "succeeded", value: VALID_OUTPUT });
+    resourceTransport.resolve({ status: "succeeded", value: STORE_OUTPUT });
+    await Promise.all([operation.settlement, resource.settlement]);
+    await flushMicrotasks();
+    expect(publications).toEqual(["resource", "operation"]);
+    if (subscription.status === "subscribed") subscription.unsubscribe();
+  });
+
+  it("publishes a superseded no-ticket operation descriptor after its snapshot update", async () => {
+    const firstTransport = deferred<unknown>();
+    const replacementTransport = deferred<unknown>();
+    const invokeOperation = vi
+      .fn<(request: RuntimeOperationRequest) => unknown>()
+      .mockImplementationOnce(() => firstTransport.promise)
+      .mockImplementationOnce(() => replacementTransport.promise);
+    const target = mountedFixture({ hooks: { invokeOperation } });
+    const publications: string[] = [];
+    const subscription = subscribeRuntimeActionTurnSettlements(target.turns.handle, (publication) =>
+      publications.push(publication),
+    );
+    expect(subscription.status).toBe("subscribed");
+
+    const first = await run(target, [operationAction()]);
+    const firstResult = first.steps[0]?.result;
+    if (firstResult?.status !== "operation-started") {
+      throw new TypeError("Expected the replaceable operation.");
+    }
+    const replacement = await run(target, [operationAction({ concurrency: "replace" })]);
+    expect(replacement.steps[0]?.result.status).toBe("operation-started");
+    await expect(firstResult.settlement).resolves.toMatchObject({ status: "superseded" });
+    await flushMicrotasks();
+    expect(publications).toEqual(["operation"]);
+
+    if (subscription.status === "subscribed") subscription.unsubscribe();
+    replacementTransport.resolve({ status: "succeeded", value: VALID_OUTPUT });
+    firstTransport.resolve({ status: "succeeded", value: VALID_OUTPUT });
+    await flushMicrotasks();
+    expect(publications).toEqual(["operation"]);
+  });
+
+  it("publishes each ticketed recursive operation turn only after that turn finalizes", async () => {
+    const parentTransport = deferred<unknown>();
+    const nestedTransport = deferred<unknown>();
+    const invokeOperation = vi
+      .fn<(request: RuntimeOperationRequest) => unknown>()
+      .mockImplementationOnce(() => parentTransport.promise)
+      .mockImplementationOnce(() => nestedTransport.promise);
+    const target = mountedFixture({ hooks: { invokeOperation } });
+    const publications: string[] = [];
+    const subscription = subscribeRuntimeActionTurnSettlements(target.turns.handle, (publication) =>
+      publications.push(publication),
+    );
+    expect(subscription.status).toBe("subscribed");
+
+    const origin = await run(target, [
+      operationAction({ onSuccess: [operationAction({ onSuccess: [] })] }),
+    ]);
+    const result = origin.steps[0]?.result;
+    if (result?.status !== "operation-started") {
+      throw new TypeError("Expected a recursive parent operation.");
+    }
+    expect(publications).toEqual([]);
+    parentTransport.resolve({ status: "succeeded", value: VALID_OUTPUT });
+    await result.settlement;
+    await flushMicrotasks();
+    expect(invokeOperation).toHaveBeenCalledTimes(2);
+    expect(publications).toEqual(["operation"]);
+
+    nestedTransport.resolve({ status: "succeeded", value: VALID_OUTPUT });
+    await flushMicrotasks();
+    expect(publications).toEqual(["operation", "operation"]);
+    if (subscription.status === "subscribed") subscription.unsubscribe();
+  });
+
+  it("contains a rejected resource transport and publishes its controlled settlement", async () => {
+    const resourceTransport = deferred<unknown>();
+    const target = mountedFixture({
+      hooks: { loadResource: () => resourceTransport.promise },
+    });
+    const publications: string[] = [];
+    const subscription = subscribeRuntimeActionTurnSettlements(target.turns.handle, (publication) =>
+      publications.push(publication),
+    );
+    expect(subscription.status).toBe("subscribed");
+
+    const origin = await run(target, [{ type: "resource.refresh", resource: "stores" }]);
+    const result = origin.steps[0]?.result;
+    if (result?.status !== "resource-started") {
+      throw new TypeError("Expected a resource refresh settlement.");
+    }
+    resourceTransport.reject(new Error("injected resource transport failure"));
+    await expect(result.settlement).resolves.toMatchObject({ status: "adapter-failed" });
+    await flushMicrotasks();
+    expect(publications).toEqual(["resource"]);
+    await expect(admit(target, []).completion).resolves.toMatchObject({ status: "completed" });
+    if (subscription.status === "subscribed") subscription.unsubscribe();
+  });
+
   it("keeps the originating turn nonblocking and finalizes a successful handler turn", async () => {
     const transport = deferred<unknown>();
     const emitEvent = vi.fn(() => ({ status: "succeeded" as const }));
@@ -1283,6 +1454,11 @@ describe("M04-T13 operation settlement turns and mandatory finalization", () => 
         invokeOperation: () => transport.promise,
       },
     });
+    const publications: string[] = [];
+    const subscription = subscribeRuntimeActionTurnSettlements(target.turns.handle, (publication) =>
+      publications.push(publication),
+    );
+    expect(subscription.status).toBe("subscribed");
     const origin = await run(target, [
       operationAction({
         onSuccess: [{ type: "state.toggle", path: "enabled" }],
@@ -1320,6 +1496,7 @@ describe("M04-T13 operation settlement turns and mandatory finalization", () => 
     ).toBe("already-finalized");
     const state = readRuntimeSurfaceState(target.state.handle);
     expect(state.status).toBe("disposed");
+    expect(publications).toEqual(["disposed"]);
     expect(disposeRuntimeActionTurns(target.turns.handle).status).toBe("already-disposed");
   });
 

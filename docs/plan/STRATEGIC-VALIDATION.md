@@ -6,7 +6,7 @@ Last reviewed: 2026-07-24
 
 This document records product and interoperability decisions that must be tested at the point when
 the implementation can answer them with evidence. It is not a second implementation task board:
-the 144 tasks and 13 proof gates in `TASKS.md` remain the only items counted by the README progress
+the 145 tasks and 13 proof gates in `TASKS.md` remain the only items counted by the README progress
 bar.
 
 The working position is:

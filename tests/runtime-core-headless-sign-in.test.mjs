@@ -38,29 +38,23 @@ const PREREQUISITES = Object.freeze([
 ]);
 const OWNED_PATHS = Object.freeze([
   "packages/runtime-core/src/headless-materialization.ts",
-  "packages/runtime-core/src/headless-session.ts",
   "packages/runtime-core/test/headless-materialization.test.ts",
-  "packages/runtime-core/test/headless-session.test.ts",
-  "packages/runtime-core/test/headless-session.types.ts",
   "packages/runtime-core/dist/headless-materialization.js",
   "packages/runtime-core/dist/headless-materialization.js.map",
   "packages/runtime-core/dist/headless-materialization.d.ts",
   "packages/runtime-core/dist/headless-materialization.d.ts.map",
-  "packages/runtime-core/dist/headless-session.js",
-  "packages/runtime-core/dist/headless-session.js.map",
-  "packages/runtime-core/dist/headless-session.d.ts",
-  "packages/runtime-core/dist/headless-session.d.ts.map",
-  "scripts/lib/runtime-core-headless-sign-in-proof.mjs",
   "scripts/generate-runtime-core-headless-sign-in-proof.mjs",
   "scripts/verify-runtime-core-headless-sign-in.mjs",
-  "tests/runtime-core-headless-sign-in.test.mjs",
   "scripts/lib/protocol-interaction-contracts-proof.mjs",
   "tests/protocol-interaction-contracts.test.mjs",
-  "scripts/lib/reference-catalog-web-parity-proof.mjs",
   "tests/reference-catalog-web-parity.test.mjs",
 ]);
 const MATERIALIZATION_SOURCE = "packages/runtime-core/src/headless-materialization.ts";
 const SESSION_SOURCE = "packages/runtime-core/src/headless-session.ts";
+const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-HEADLESS-SIGN-IN.md";
+const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
+const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json";
+const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-headless-sign-in.json";
 
 let baselinePromise;
 
@@ -118,6 +112,38 @@ function mutateMarkdownRow(markdown, id, transform) {
   return mutated;
 }
 
+function removeMarkdownOwnerTask(row, task) {
+  const cells = row.split("|");
+  cells[4] = ` ${cells[4]
+    .split(",")
+    .map((owner) => owner.trim())
+    .filter((owner) => owner !== task)
+    .join(", ")} `;
+  return cells.join("|");
+}
+
+function pinArtifactReferences(proofText, proofMatrixText, artifactSha256) {
+  let proofPins = 0;
+  const proof = proofText
+    .split(/\r?\n/u)
+    .map((line) => {
+      if (!/^Its SHA-256 is `[0-9a-f]{64}`\.$/u.test(line)) return line;
+      proofPins += 1;
+      return `Its SHA-256 is \`${artifactSha256}\`.`;
+    })
+    .join("\n");
+  let matrixArtifacts = 0;
+  const matrixLines = proofMatrixText.split(/\r?\n/u);
+  for (let index = 0; index < matrixLines.length; index += 1) {
+    if (matrixLines[index] !== `\`${ARTIFACT_FILE_NAME}\``) continue;
+    matrixArtifacts += 1;
+    matrixLines[index + 1] = `\`sha256:${artifactSha256}\`.`;
+  }
+  assert.equal(proofPins, 1);
+  assert.equal(matrixArtifacts, 1);
+  return { proof, proofMatrix: matrixLines.join("\n") };
+}
+
 async function buildWithBaselineProbe(options = {}) {
   const evidence = await baseline();
   return buildRuntimeCoreHeadlessSignInEvidence({
@@ -136,7 +162,7 @@ test("accepts tracked deterministic M04-T16 and G04 headless evidence", async ()
   assert.equal(result.tsdocDeclarations, 35);
   assert.equal(result.focusedTests, 34);
   assert.equal(result.compilerNegativeCases, 11);
-  assert.equal(result.rootMutationTests, 24);
+  assert.equal(result.rootMutationTests, 25);
   assert.equal(result.traceRules, 72);
   assert.equal(result.currentTraceRules, 67);
   assert.equal(result.deferredTraceRules, 5);
@@ -170,15 +196,100 @@ test("rejects stale or tampered headless evidence", async () => {
   const bytes = Buffer.from(evidence.artifactBytes);
   bytes[bytes.length - 2] ^= 1;
   await rejectsCode(
+    () => verifyRuntimeCoreHeadlessSignInEvidence({ artifactBytes: bytes }),
+    "HEADLESS_ARTIFACT_DRIFT",
+  );
+});
+
+test("rejects relocated or duplicated M04-T16 artifact SHA pins", async () => {
+  await rejectsCode(
     () =>
       verifyRuntimeCoreHeadlessSignInEvidence({
-        artifactBytes: bytes,
-        buildOptions: {
-          allowPendingArtifactReference: true,
-          runtimeProbe: evidence.artifact.runtime,
-        },
+        buildOptions: { runtimeProbe: Object.freeze({}) },
       }),
-    "HEADLESS_ARTIFACT_DRIFT",
+    "HEADLESS_OPTIONS_INVALID",
+  );
+  await rejectsCode(
+    () =>
+      verifyRuntimeCoreHeadlessSignInEvidence({
+        buildOptions: { allowPendingArtifactReference: true },
+      }),
+    "HEADLESS_OPTIONS_INVALID",
+  );
+  const evidence = await baseline();
+  const [proofText, proofMatrixText] = await Promise.all([
+    readFile(new URL(`../${PROOF_DOCUMENT_PATH}`, import.meta.url), "utf8"),
+    readFile(new URL(`../${PROOF_MATRIX_PATH}`, import.meta.url), "utf8"),
+  ]);
+  const pinned = pinArtifactReferences(proofText, proofMatrixText, evidence.artifactSha256);
+  const verifyWith = (proof, proofMatrix) =>
+    verifyRuntimeCoreHeadlessSignInEvidence({
+      artifactBytes: evidence.artifactBytes,
+      buildOptions: {
+        fileOverrides: {
+          [PROOF_DOCUMENT_PATH]: proof,
+          [PROOF_MATRIX_PATH]: proofMatrix,
+        },
+      },
+    });
+  assert.equal((await verifyWith(pinned.proof, pinned.proofMatrix)).result, "PASS");
+
+  const wrongSha256 = "0".repeat(64);
+  const proofPair = `\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.`;
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.replace(proofPair, "")}\n## Relocated evidence\n\n${proofPair}\n`,
+        pinned.proofMatrix,
+      ),
+    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.replace(
+          `Its SHA-256 is \`${evidence.artifactSha256}\`.`,
+          `Its SHA-256 is \`${wrongSha256}\`.`,
+        )}\n<!-- relocated ${evidence.artifactSha256} -->\n`,
+        pinned.proofMatrix,
+      ),
+    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.trimEnd()}\n\n\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.\n`,
+        pinned.proofMatrix,
+      ),
+    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.replace(
+          `\`sha256:${evidence.artifactSha256}\`.`,
+          `\`sha256:${wrongSha256}\`.`,
+        )}\n<!-- relocated sha256:${evidence.artifactSha256} -->\n`,
+      ),
+    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+  );
+  const matrixPair = `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.`;
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.replace(matrixPair, "")}\n## Relocated matrix evidence\n\n${matrixPair}\n`,
+      ),
+    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.trimEnd()}\n\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.\n`,
+      ),
+    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
   );
 });
 
@@ -547,6 +658,21 @@ test("detects normative proof-matrix finding and task-status drift", async () =>
       }),
     "HEADLESS_DOCUMENTATION_DRIFT",
   );
+  const normativeWithoutT16Owner = mutateMarkdownRow(normative, "N-003", (row) =>
+    removeMarkdownOwnerTask(row, "M04-T16"),
+  );
+  assert.ok(
+    normativeWithoutT16Owner.includes("M04-T16 runs each of three frozen sign-in scenarios"),
+  );
+  await rejectsCode(
+    () =>
+      buildWithBaselineProbe({
+        fileOverrides: {
+          [normativePath]: normativeWithoutT16Owner,
+        },
+      }),
+    "HEADLESS_DOCUMENTATION_DRIFT",
+  );
   const compatibility = verifyProtocolInteractionNormativeCompatibility(normative);
   assert.deepEqual(compatibility.historicalProjection, [
     { id: "N-033", status: "PLANNED" },
@@ -600,6 +726,23 @@ test("detects normative proof-matrix finding and task-status drift", async () =>
   assert.equal(
     referenceParityCompatibility.currentStatuses.find(({ id }) => id === "N-033")?.status,
     "TESTED",
+  );
+  const normativeWithoutHistoricalParityOwner = mutateMarkdownRow(normative, "N-033", (row) =>
+    removeMarkdownOwnerTask(row, "M03-T09"),
+  );
+  assert.ok(
+    normativeWithoutHistoricalParityOwner.includes(
+      "M03-T09 proves exact fresh frozen TextField/Button payloads locally",
+    ),
+  );
+  assert.throws(
+    () =>
+      verifyReferenceCatalogWebParityNormativeCompatibility(normativeWithoutHistoricalParityOwner),
+    (error) => {
+      assert.ok(error instanceof ReferenceCatalogWebParityEvidenceError);
+      assert.equal(error.code, "REFERENCE_PARITY_CLAIM_DRIFT");
+      return true;
+    },
   );
   assert.doesNotThrow(() =>
     verifyReferenceCatalogWebParityNormativeCompatibility(historicalNormative),
@@ -661,7 +804,7 @@ test("detects normative proof-matrix finding and task-status drift", async () =>
   );
 });
 
-test("detects every task-owned byte boundary", async () => {
+test("detects every remaining historical task-owned byte boundary", async () => {
   const evidence = await baseline();
   for (const relativePath of OWNED_PATHS) {
     const original = await readFile(new URL(`../${relativePath}`, import.meta.url));

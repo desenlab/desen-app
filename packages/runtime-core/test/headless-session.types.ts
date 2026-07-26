@@ -4,6 +4,8 @@ import {
   mountRuntimeHeadlessSession,
   readRuntimeHeadlessSession,
   RUNTIME_HEADLESS_SESSION_LIMITS,
+  subscribeRuntimeHeadlessSession,
+  unsubscribeRuntimeHeadlessSession,
 } from "../src/index.js";
 
 import type {
@@ -14,10 +16,14 @@ import type {
   RuntimeHeadlessSessionEventResult,
   RuntimeHeadlessSessionHandle,
   RuntimeHeadlessSessionLimitProfile,
+  RuntimeHeadlessSessionListener,
   RuntimeHeadlessSessionMountInput,
   RuntimeHeadlessSessionMountResult,
   RuntimeHeadlessSessionReadResult,
   RuntimeHeadlessSessionSnapshot,
+  RuntimeHeadlessSessionSubscribeResult,
+  RuntimeHeadlessSessionSubscription,
+  RuntimeHeadlessSessionUnsubscribeResult,
   RuntimeHostPorts,
 } from "../src/index.js";
 
@@ -30,6 +36,7 @@ const limits: RuntimeHeadlessSessionLimitProfile = {
   maxDepth: 64,
   maxBindingCandidates: 32,
   maxEventHandlerBindings: 32,
+  maxSubscriptions: 16,
   maxSurfaceTransitions: 8,
   maxSnapshotGeneration: 1_000,
   maxPlanJsonOccurrences: 100_000,
@@ -78,9 +85,37 @@ const componentBinding: RuntimeHeadlessBindingSnapshot = {
 };
 void componentBinding;
 
+const listener: RuntimeHeadlessSessionListener = () => undefined;
+const subscribed: RuntimeHeadlessSessionSubscribeResult = subscribeRuntimeHeadlessSession(
+  handle,
+  listener,
+);
+if (subscribed.status === "subscribed") {
+  const subscription: RuntimeHeadlessSessionSubscription = subscribed.subscription;
+  const unsubscribed: RuntimeHeadlessSessionUnsubscribeResult =
+    unsubscribeRuntimeHeadlessSession(subscription);
+  void unsubscribed;
+}
+const useSyncExternalStoreSubscribe = (onStoreChange: () => void): (() => void) => {
+  const result = subscribeRuntimeHeadlessSession(handle, onStoreChange);
+  return result.status === "subscribed"
+    ? () => {
+        unsubscribeRuntimeHeadlessSession(result.subscription);
+      }
+    : () => undefined;
+};
+void useSyncExternalStoreSubscribe;
+
 // @ts-expect-error session handles carry factory-only authority
 const forgedHandle: RuntimeHeadlessSessionHandle = {};
 void forgedHandle;
+
+// @ts-expect-error subscription authorities are factory-created
+const forgedSubscription: RuntimeHeadlessSessionSubscription = {};
+void forgedSubscription;
+
+// @ts-expect-error listeners are receiver-independent callbacks, not arbitrary values
+subscribeRuntimeHeadlessSession(handle, "notice");
 
 // @ts-expect-error session limit values are numeric lower-only ceilings
 const stringLimit: RuntimeHeadlessSessionLimitProfile = { maxNodes: "5000" };
@@ -138,3 +173,7 @@ disposeRuntimeHeadlessSession({});
 // @ts-expect-error the private materialization sidecar reader is absent from the package root
 import { readRuntimeHeadlessMaterializationSidecar } from "../src/index.js";
 void readRuntimeHeadlessMaterializationSidecar;
+
+// @ts-expect-error the T13 settlement observer is package-internal
+import { subscribeRuntimeActionTurnSettlements } from "../src/index.js";
+void subscribeRuntimeActionTurnSettlements;
