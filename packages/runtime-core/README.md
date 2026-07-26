@@ -936,6 +936,50 @@ profiles may lower but cannot raise these limits. Transition, active-command, ev
 event-dispatch fences keep mutation and disposal busy around hostile callbacks while nested event
 admission remains available for M04-T16 FIFO composition.
 
+## M04-T15 reactive reevaluation and stale-settlement API
+
+`createRuntimeReactiveHostPorts` must be called before resource and operation managers mount. It
+captures the complete host aggregate, preserves every non-settlement callback by identity, and
+replaces only resource loading and operation invocation with a stale-safe settlement boundary.
+Synchronous and promise-like host outcomes are adopted into native Promises, copied through the
+shared bounded JSON profile, and reduced to one exact frozen success, candidate public-failure
+(`failed`), or denial envelope. Throws, rejections, malformed shapes, accessors, cycles, reflection
+failures, and unsafe values expose no raw reason. The wrapper does not decide whether a candidate
+error code is Catalog-declared; the M04-T08/M04-T09 lifecycle manager performs that validation. If
+a Proxy or thenable reenters and starts a refresh or replacement while an older result is being
+copied, the lower manager observes that newer attempt before the now-inert old envelope can arrive,
+so the old result cannot overwrite it.
+
+`mountRuntimeReactiveReevaluation` authenticates exact current state, resource, and operation
+snapshots and subscribes once to context and environment invalidation notices. It deliberately
+uses the whole-surface strategy permitted by DESEN 0.1.0. Every evaluation rereads and twice
+confirms complete host snapshots and lower-manager identities, creates one factory-authenticated
+seven-namespace resolution snapshot, and calls one synchronous evaluator. The evaluator receives
+immutable data plus the token-only materialization port; it receives no state handle, lifecycle
+handle, complete host aggregate, framework target, or platform object.
+
+`invalidateRuntimeReactiveReevaluation` represents one complete trusted mutation or action-turn
+batch and requires the exact current observable snapshot. Reentrant notices coalesce into a single
+dirty bit under a finite synchronous drain. Before inspecting an evaluator result and again after
+bounded detachment, the coordinator rechecks invalidation generation, lower snapshot identity, and
+context/environment bytes. Stale candidates are discarded; a current throw or invalid result
+publishes an inactive outcome instead of retaining an old subtree. Byte-identical output retains
+the exact existing snapshot. The final configured snapshot generation is reserved for a terminal
+limit outcome, so generations never wrap or represent two different observable states.
+`disposeRuntimeReactiveReevaluation` revokes first, unsubscribes both notices exactly once, clears
+retained authorities, and leaves late callbacks inert.
+
+This API has two explicit trusted-composition preconditions that M04-T16 proves end to end: the
+lower resource and operation managers must have been mounted with the same reactive host aggregate,
+and their state/settlement/action-turn changes must produce one explicit invalidation. T15 does not
+claim complete validated-tree materialization, event or item provenance, selector-to-program
+joining, conditional descendant cleanup, or coordinated session disposal. Observable
+whole-surface-versus-indexed oracle comparison remains M04-T16; dependency-index optimization and
+performance comparison remain M12-T05. Concrete React reconciliation, remount-required properties,
+DOM, focus, accessibility, and production adapter parity remain M05. The frozen 0.1.0 token port
+has no subscription, so token values refresh only when another admitted invalidation causes
+reevaluation.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -993,8 +1037,11 @@ settlement ancestry and one-shot finalization, and finite action, depth, transit
 retention, and generation bounds. M04-T14 adds exact T12-bound generic component/behavior
 registrations, one-shot command provenance, Catalog payload validation, owner-bound behaviors,
 bounded scope retention, reentry containment, and terminal cross-manager cleanup. Reactive
-composition, rendering, and activation implementation remain assigned to their later tracked
-tasks.
+composition now adds a stale-safe host settlement boundary, whole-surface consistent snapshots,
+explicit batched invalidation, pre/post-reflection generation checks, current-failure
+deactivation, finite synchronous draining, and exact-once subscription disposal in M04-T15.
+Complete headless materialization and its deterministic sign-in trace remain M04-T16; rendering
+and activation remain assigned to later tracked tasks.
 
 ## Protocol and target support
 
@@ -1020,6 +1067,7 @@ pnpm --filter @desen/runtime-core test:operation-resource-actions
 pnpm --filter @desen/runtime-core test:command-event-actions
 pnpm --filter @desen/runtime-core test:action-turns
 pnpm --filter @desen/runtime-core test:adapter-bridges
+pnpm --filter @desen/runtime-core test:reactive-reevaluation
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -1034,5 +1082,6 @@ pnpm verify:runtime-core-operation-resource-actions
 pnpm verify:runtime-core-command-event-actions
 pnpm verify:runtime-core-action-turns
 pnpm verify:runtime-core-adapter-bridges
+pnpm verify:runtime-core-reactive-reevaluation
 pnpm check
 ```

@@ -86,6 +86,14 @@ export {
   RUNTIME_ADAPTER_BRIDGE_LIMITS,
   unregisterRuntimeAdapterBinding,
 } from "./adapter-bridges.js";
+export { createRuntimeReactiveHostPorts } from "./reactive-host-ports.js";
+export {
+  disposeRuntimeReactiveReevaluation,
+  invalidateRuntimeReactiveReevaluation,
+  mountRuntimeReactiveReevaluation,
+  readRuntimeReactiveReevaluation,
+  RUNTIME_REACTIVE_REEVALUATION_LIMITS,
+} from "./reactive-reevaluation.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -119,6 +127,27 @@ export type {
   RuntimeTokenRequest,
   RuntimeTokenResolution,
 } from "./host-ports.js";
+
+export type { RuntimeReactiveHostPorts } from "./reactive-host-ports.js";
+
+export type {
+  RuntimeReactiveEvaluationOutcome,
+  RuntimeReactiveEvaluationRequest,
+  RuntimeReactiveEvaluator,
+  RuntimeReactiveInactiveReason,
+  RuntimeReactiveInvalidationInput,
+  RuntimeReactiveInvalidationReason,
+  RuntimeReactiveInvalidationResult,
+  RuntimeReactiveMaterializationContext,
+  RuntimeReactiveReevaluationDisposeResult,
+  RuntimeReactiveReevaluationHandle,
+  RuntimeReactiveReevaluationLimitProfile,
+  RuntimeReactiveReevaluationMountInput,
+  RuntimeReactiveReevaluationMountInvalidReason,
+  RuntimeReactiveReevaluationMountResult,
+  RuntimeReactiveReevaluationReadResult,
+  RuntimeReactiveReevaluationSnapshot,
+} from "./reactive-reevaluation.js";
 
 export type {
   RuntimeEventReferenceSnapshot,

@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████░░░░░░░░░░░░░░░░` **51 / 144 tasks complete (35%)**
+**Overall:** `█████████░░░░░░░░░░░░░░░░` **52 / 144 tasks complete (36%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `██████████████░░` **14 / 16 tasks complete (88%)**
+**M04 progress:** `███████████████░` **15 / 16 tasks complete (94%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T15`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T16`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -122,6 +122,7 @@ packages/
 - [Runtime core command and host-event action proof](docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md)
 - [Runtime core bounded action-turn proof](docs/proof/RUNTIME-CORE-ACTION-TURNS.md)
 - [Runtime core generic adapter-bridge proof](docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md)
+- [Runtime core reactive reevaluation proof](docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -431,6 +432,25 @@ Evidence passes 27 focused package tests, 10 compiler-negative cases, and 21 roo
 tests across 11 task-owned files; the cumulative runtime-core suite passes 550/550. N-033 is now
 `TESTED`; N-034 remains `PLANNED`, P-17 stays `PARTIAL`, M04-T15 owns reactive protection, and
 M04-T16 owns the exact selector-to-action-program join and full sign-in trace.
+
+M04-T15 now adds one framework-neutral whole-surface reactive publication boundary over exact
+current state/resource/operation generations plus complete context/environment snapshots. A
+separately branded host-port wrapper adopts operation and resource settlements into native
+Promises, detaches their closed envelopes before lower lifecycle managers can observe them, and
+lets those managers reject an older result after hostile reflection reentry starts a newer
+attempt. Reevaluation rereads all seven value namespaces, double-samples every lower authority,
+batches reentrant notices through a bounded synchronous dirty-bit drain, and discards stale
+candidates before and after hostile result reflection. Byte-identical output preserves the exact
+observable snapshot; current failures publish an explicit inactive result rather than leaving old
+output semantically active. Mount, invalidation, generation, transition, subscription, and
+disposal behavior are finite, factory-authenticated, and platform-neutral. Evidence passes 54
+focused package tests, 11 compiler-negative cases, and 30 root proof/mutation tests across 17
+task-owned files; the
+cumulative runtime-core suite passes 604/604. P-17 remains `PARTIAL`; N-003 and P-18 stay assigned
+to M04-T16, which must prove the same wrapped host aggregate across every manager, the exact
+selector-to-action-program join, full sign-in materialization, coordinated disposal, and a
+deterministic JSON trace. Indexed invalidation optimization and React/DOM instance behavior remain
+explicit later work.
 
 ## License
 

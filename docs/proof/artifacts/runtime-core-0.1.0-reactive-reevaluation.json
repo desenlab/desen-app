@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T15",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Exact current state, resource, and operation generations plus complete context and environment snapshots produce one bounded whole-surface result while detached pre-lifecycle host settlements and post-evaluator epoch checks prevent stale asynchronous or reentrant results from overwriting newer state.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T05",
+      "artifact": "runtime-core-0.1.0-variant-style-evaluation.json",
+      "sha256": "46fb343d6639998c1b75403271a0e765c214b32880385ebe30bd649bd60d369e"
+    },
+    {
+      "task": "M04-T06",
+      "artifact": "runtime-core-0.1.0-local-state-identity.json",
+      "sha256": "4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13"
+    },
+    {
+      "task": "M04-T07",
+      "artifact": "runtime-core-0.1.0-repeat-materialization.json",
+      "sha256": "45ba72f21f936931d087982d8a52e6b4d226a33ed5693c2d3d6bf9158fddb02d"
+    },
+    {
+      "task": "M04-T08",
+      "artifact": "runtime-core-0.1.0-resource-lifecycle.json",
+      "sha256": "2d6ab2e5b6a480e922425faa109e13cc5d388a5de00b2604cbfec62345b01c82"
+    },
+    {
+      "task": "M04-T09",
+      "artifact": "runtime-core-0.1.0-operation-lifecycle.json",
+      "sha256": "7b2300a78bb9903abe1f182792362d374edb5b948ee9f8f69dc018ccf9cc8301"
+    },
+    {
+      "task": "M04-T10",
+      "artifact": "runtime-core-0.1.0-state-navigation-actions.json",
+      "sha256": "f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140"
+    },
+    {
+      "task": "M04-T11",
+      "artifact": "runtime-core-0.1.0-operation-resource-actions.json",
+      "sha256": "d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8"
+    },
+    {
+      "task": "M04-T12",
+      "artifact": "runtime-core-0.1.0-command-event-actions.json",
+      "sha256": "8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4"
+    },
+    {
+      "task": "M04-T13",
+      "artifact": "runtime-core-0.1.0-action-turns.json",
+      "sha256": "e73604b678bdb35a12549e3a31fff628b9a83beb0ad735fb929aceba5885b240"
+    },
+    {
+      "task": "M04-T14",
+      "artifact": "runtime-core-0.1.0-adapter-bridges.json",
+      "sha256": "e22ac984c035bc8e5096338a437003f852f7daf67a1f12592bae00783dbd8123"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": 6,
+    "typeExports": 17,
+    "totalExports": 23,
+    "moduleExports": 24,
+    "tsdocDeclarations": 24
+  },
+  "sourceInvariants": {
+    "reactiveHostPorts": {
+      "captureChecks": 13,
+      "settlementFenceChecks": 7,
+      "revokedReflectionChecks": 6,
+      "envelopeChecks": 10,
+      "authorityChecks": 4,
+      "imports": 2,
+      "platformEffects": 0
+    },
+    "reactiveReevaluation": {
+      "revokedInputReflectionChecks": 6,
+      "mountAuthorityChecks": 16,
+      "consistentSnapshotChecks": 21,
+      "staleCandidateChecks": 22,
+      "evaluatorRequestLeaks": 0,
+      "batchingChecks": 11,
+      "publicationChecks": 6,
+      "subscriptionChecks": 13,
+      "invalidationAuthorityChecks": 17,
+      "revocationGraphChecks": 17,
+      "disposalChecks": 4,
+      "limitChecks": 5,
+      "wholeSurfaceProfileChecks": 4,
+      "imports": 8,
+      "platformEffects": 0
+    }
+  },
+  "runtime": {
+    "hostCaptureProbes": 12,
+    "settlementProbes": 9,
+    "revokedProxyRedactions": 1,
+    "authorityProbes": 11,
+    "revokedInputProbes": 2,
+    "batchingProbes": 7,
+    "hostSnapshotProbes": 5,
+    "staleCandidateProbes": 5,
+    "unchangedPublicationProbes": 3,
+    "failedSubscriptionCleanupProbes": 7,
+    "disposalProbes": 8,
+    "evaluatorCalls": 6,
+    "evaluatorAuthorityLeaks": 0,
+    "requestLeaks": 0,
+    "platformEffects": 0
+  },
+  "limits": {
+    "maxSynchronousTransitions": 64,
+    "maxEvaluationGeneration": 9007199254740991,
+    "maxSnapshotGeneration": 9007199254740991
+  },
+  "semantics": {
+    "settlementFence": "Resource and operation results cross a native-Promise, exact-envelope, detached JSON boundary before lifecycle managers inspect them; reentrant reflection completes before the lower current-attempt check, while revoked-Proxy reflection failures are rejected without their reason.",
+    "authority": "Mount requires one factory-authenticated host aggregate and exact current state, resource, and operation handle/snapshot identities for the same document lifetime.",
+    "consistentSnapshot": "Every evaluator attempt double-samples complete lower-manager identities plus detached context and environment bytes around construction of one seven-namespace resolution snapshot.",
+    "leastAuthority": "The synchronous evaluator receives only frozen identity metadata, the resolution snapshot, and token materialization authority.",
+    "batching": "Explicit action-turn invalidation and context/environment notices set one coalescing dirty bit drained synchronously under a finite transition ceiling without platform scheduling.",
+    "staleCandidates": "Invalidation epoch and all sampled authorities are authenticated before evaluator entry, after evaluator return, and after hostile result detachment; stale candidates never publish.",
+    "publication": "Canonical byte-equal output preserves the exact previous snapshot and generation; changed active or inactive output advances monotonically without wraparound.",
+    "strategy": "This reference slice deliberately uses permitted whole-surface reevaluation; M04-T16 owns its observable oracle against indexed evaluation, while dependency-index performance work remains M12-T05.",
+    "failedMount": "Central revocation clears the complete evaluator, host, manager, snapshot, and subscription graph before failed-mount cleanup; a notice retained by the failed subscription remains inert.",
+    "disposal": "Disposal crosses the same complete revocation boundary, installs a minimal private tombstone, then unsubscribes context and environment exactly once; late and reentrant notices remain inert."
+  },
+  "documentation": {
+    "normativeStatusChanges": 0,
+    "proofMatrixStatusChanges": 0,
+    "findings": 1
+  },
+  "evidence": {
+    "focusedTestRegistrations": 39,
+    "focusedTests": 54,
+    "compilerNegativeCases": 11,
+    "rootMutationTests": 30,
+    "traceRules": 6,
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/reactive-host-ports.ts",
+        "bytes": 7193,
+        "sha256": "1f12c4418a914c3517470880e64da0b54569d5f0142250b318c422325080d923"
+      },
+      {
+        "path": "packages/runtime-core/src/reactive-reevaluation.ts",
+        "bytes": 41267,
+        "sha256": "863391b677eef1d0641b9f721be3cfe21e116af99a8764b369467d9356e7a751"
+      },
+      {
+        "path": "packages/runtime-core/test/reactive-host-ports.test.ts",
+        "bytes": 25631,
+        "sha256": "02da7e3a2a25b8ef7d8c97d5269fddee133ba0a67e3f4e464dc6f5881ad2def8"
+      },
+      {
+        "path": "packages/runtime-core/test/reactive-reevaluation.test.ts",
+        "bytes": 31826,
+        "sha256": "4c8efa04741986dd6e38953e5973ca24c05341fa469f0a09bcb967186a134ba9"
+      },
+      {
+        "path": "packages/runtime-core/test/reactive-reevaluation.types.ts",
+        "bytes": 6075,
+        "sha256": "14d12891db92ef26db7b05baf1d0b36bb55533f6db3d11aa12076abda239f92b"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-host-ports.js",
+        "bytes": 6181,
+        "sha256": "56b9af13b550c901f6c995a4a7c55e2e56a07c60364ad8d55794150bb59fabfd"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-host-ports.js.map",
+        "bytes": 4673,
+        "sha256": "253a21330fb521301c5a1a130f06629c5e282e74f0475e1718382e59c9e0ce4b"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-host-ports.d.ts",
+        "bytes": 2570,
+        "sha256": "4f9c2bdca0d88fb4cbb8b7ea1d6daf4fc7aa56738c4b8cb5096150f37f83ba6f"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-host-ports.d.ts.map",
+        "bytes": 507,
+        "sha256": "36b1e2264bb0fc1b2c1fc0f3e18abe58e92861ca88c8735d2f88b157c9c7b5d6"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-reevaluation.js",
+        "bytes": 31354,
+        "sha256": "45fb6a7c57fd33e89b3661fb14b9eeed151a9149de06ec3fbfe6bdb8e28cd10a"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-reevaluation.js.map",
+        "bytes": 26213,
+        "sha256": "390b544d2cd0514dfc8916e2fe3e096fb82a1cc02136b5d21e45968700ccd38c"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-reevaluation.d.ts",
+        "bytes": 10452,
+        "sha256": "31bcf07d3ec8c9e5cf06c3542129e5a8c0e4bf1ce31d95222166b7b10af22f39"
+      },
+      {
+        "path": "packages/runtime-core/dist/reactive-reevaluation.d.ts.map",
+        "bytes": 4371,
+        "sha256": "5a607a4f69d0f88251c9ce384df9d6d61bc782a79b80c2a9b93e1c3c6f6eaae5"
+      },
+      {
+        "path": "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+        "bytes": 74401,
+        "sha256": "894ba447a30b5d1f2f2d82c7f6d806b0dee9203298938980ec2b7facaadab54c"
+      },
+      {
+        "path": "scripts/generate-runtime-core-reactive-reevaluation-proof.mjs",
+        "bytes": 695,
+        "sha256": "df7e94438cbf2eeda8f26906e22270f2d454c17d7e55e1a8714faa109e2cd3ec"
+      },
+      {
+        "path": "scripts/verify-runtime-core-reactive-reevaluation.mjs",
+        "bytes": 697,
+        "sha256": "2502da00a52ffd55e3679b4f699c7b138082405815c7acb87b45cef95caf7eec"
+      },
+      {
+        "path": "tests/runtime-core-reactive-reevaluation.test.mjs",
+        "bytes": 24355,
+        "sha256": "79739f8b07831b10a955e7820746b890cd603ee1ba0ab22e3b7ba72e08b69b36"
+      }
+    ],
+    "semanticOnlySharedInputs": [
+      "packages/runtime-core/package.json",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/dist/index.js",
+      "packages/runtime-core/dist/index.d.ts",
+      "docs/proof/protocol-0.1.0-traceability.json",
+      "docs/proof/NORMATIVE-COVERAGE.md",
+      "docs/proof/PROOF-MATRIX.md",
+      "docs/plan/PROTOCOL-FINDINGS.md",
+      "docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md",
+      "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json"
+    ]
+  },
+  "deferred": [
+    "complete validated surface traversal, conditional/repeat materialization, and descendant semantic inactivity (M04-T16)",
+    "M04-T14 selector to M04-T13 prepared-program composition and seven-namespace event/item provenance (M04-T16)",
+    "joint action-turn/reactive session coordinator, deterministic sign-in JSON trace, and complete session disposal (M04-T16)",
+    "whole-surface versus dependency-indexed observable oracle (M04-T16)",
+    "dependency-index optimization and cross-strategy performance comparison (M12-T05 when needed)",
+    "standalone token invalidation because the frozen 0.1.0 token port has no subscription",
+    "React reconciliation, concrete instance preservation/remount, DOM/CSS/accessibility/focus, and production adapter parity (M05)",
+    "Android and iOS adapter implementations",
+    "future protocol clarification recorded by PF-045"
+  ]
+}

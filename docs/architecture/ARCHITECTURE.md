@@ -188,8 +188,9 @@ package-internal data outcomes.
 Conditional presence is an instantiation boundary, not a styling instruction. An omitted `when`
 is present, an evaluated false predicate is absent, and invalid or deferred input remains absent
 fail-closed under a distinct status. An absent node's descendants must not be mounted. Reactive
-reevaluation belongs to M04-T15, while M04-T16 proves that complete headless materialization leaves
-no descendant resource, behavior, event, or command active.
+reevaluation now runs through the M04-T15 consistent-snapshot boundary, while M04-T16 proves that
+complete headless materialization leaves no descendant resource, behavior, event, or command
+active.
 
 Predicate input and the aggregate of resolved operand occurrences share the runtime depth,
 JSON-occurrence, and UTF-16 budgets. The tree adds a 64-predicate-node ceiling (root plus 63 nested
@@ -225,9 +226,45 @@ Variant indexes, winning provenance, and ordered predicate diagnostics. JSON obj
 has no runtime meaning; deterministic bytes use the protocol's RFC 8785 serializer. The boundary
 does not materialize the selected prop or style values. Consumer-schema validation and adapter
 delivery remain M05, as do active visual-state selection and target-specific styling. Reactive
-reevaluation remains M04-T15, while M04-T16 owns complete headless materialization. The
+reevaluation composes these pure evaluators through M04-T15, while M04-T16 owns complete headless
+materialization. The
 Variant-order portion of N-014 is covered here, but N-014 remains `PLANNED` until its remaining
 array-order owners complete.
+
+## Runtime reactive publication boundary
+
+Reactive execution has a pre-mount and post-mount phase. Before resource or operation authorities
+exist, the composition root creates one factory-authenticated reactive host aggregate. Only
+resource and operation settlement callbacks are wrapped. Raw synchronous, Promise-like, Proxy, or
+thenable outcomes are reduced to bounded immutable envelopes before a lifecycle manager can
+observe them. Reentry during that reduction therefore creates a newer attempt before the older
+inert envelope is delivered, allowing the manager's existing attempt identity to reject it.
+
+After state, resource, and operation authorities mount, one surface-local coordinator samples
+their exact snapshots together with complete detached context and environment values. It uses the
+whole-surface reevaluation strategy explicitly allowed by DESEN 0.1.0. Context and environment
+subscriptions carry no data; a trusted action/resource/operation composition root submits one
+exact-snapshot invalidation after its complete turn. Reentrant notices share one dirty bit and a
+bounded synchronous drain, so no browser task queue, framework scheduler, or timer gains
+publication authority.
+
+The T15 coordinator authenticates that its direct host input carries the reactive factory brand,
+but the earlier public resource and operation handles do not expose which aggregate they captured.
+The trusted composition root must therefore mount both managers with that same wrapped aggregate;
+M04-T16 proves this complete join. The frozen 0.1.0 token port also has no subscription, so token
+values refresh only when another admitted invalidation causes reevaluation. An indexed
+implementation must match the whole-surface observable oracle proved at M04-T16; optimization and
+performance comparison remain M12-T05.
+
+Each evaluator candidate passes two authority checks: once before any raw-result reflection and
+again after bounded JSON detachment. Both checks reread lower snapshot identity, complete host
+snapshot bytes, and invalidation generation, including any notice raised by the authentication
+callbacks themselves. A stale candidate is discarded. A current throw or invalid result replaces
+the older active output with a controlled inactive state. Observable result generations never
+wrap; the configured final generation is reserved for a terminal limit outcome. M04-T16 owns the
+authenticated join to validated tree materialization, immediate event/item scope, action programs,
+conditional descendant cleanup, and coordinated session disposal. M05 owns concrete component
+reconciliation and platform adapter behavior.
 
 ## Activation sequence
 
