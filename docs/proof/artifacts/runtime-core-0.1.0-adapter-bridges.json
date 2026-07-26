@@ -142,8 +142,8 @@
       },
       {
         "path": "tests/runtime-core-adapter-bridges.test.mjs",
-        "bytes": 22701,
-        "sha256": "c9be8e76339b28b4d4fd5cdd04539bd2b9bf4767d0d2e9a6dc26409f97be5fb0"
+        "bytes": 22699,
+        "sha256": "7b658a349212edd64277b20eb6b0952bc7ddabb805f558d5e4ef64feb10ad892"
       }
     ],
     "semanticOnlySharedInputs": [

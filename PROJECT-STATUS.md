@@ -234,14 +234,29 @@ busy reentry fences, same-origin lower cleanup, revocation, and terminal tombsto
 under finite lower-only limits. `PF-044` records the protocol profile. N-033 becomes `TESTED`;
 N-034 remains `PLANNED` for complete production-adapter parity, P-17 remains `PARTIAL`, and no
 proof-gate status changes.
+M04-T15 now inserts a stale-safe settlement boundary before resource and operation lifecycle
+managers and one bounded whole-surface reactive coordinator after state, resource, and operation
+mount. Candidate host settlements are receiver-independent, natively adopted, exactly shaped,
+detached, and redacted before lower managers observe them; hostile Proxy or thenable reentry
+cannot let an older result overwrite a newer attempt. Every reevaluation double-samples exact
+lower-manager generations and complete detached context/environment snapshots, constructs all
+seven value namespaces, grants the evaluator only token materialization authority, and rechecks
+authority before and after hostile output reflection. Reentrant notices coalesce into a bounded
+synchronous dirty-bit drain; equal bytes preserve snapshot identity, current failures publish an
+inactive result, generation capacity is reserved for terminal outcomes, and failed mount or
+disposal clears retained authority before host cleanup. Revoked Proxies fail closed. `PF-045`
+records the explicit invalidation and scheduler profile. P-17 remains `PARTIAL`; N-003, N-034, and
+N-041 remain `PLANNED`, while M04-T16 retains the authenticated same-wrapper join, complete
+materialization, selector-to-program composition, descendant inactivity, indexed observable
+oracle, coordinated disposal, and deterministic JSON sign-in trace.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M04 — Framework-neutral runtime core`
-- Overall implementation progress: `51 / 144 tasks complete (35%)`
-- M04 progress: `14 / 16 tasks complete (88%)`
+- Overall implementation progress: `52 / 144 tasks complete (36%)`
+- M04 progress: `15 / 16 tasks complete (94%)`
 - Proof-gate progress: `4 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -278,11 +293,12 @@ proof-gate status changes.
   `M04-T11 — operation.invoke settlement actions and resource.refresh`,
   `M04-T12 — component.command and allowlisted event.emit`,
   `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`,
-  `M04-T14 — Generic component/behavior event and command bridges`
+  `M04-T14 — Generic component/behavior event and command bridges`,
+  `M04-T15 — Reactive re-evaluation and stale-result protection`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T15 — Reactive re-evaluation and stale-result protection`
-- Status: M04-T14 complete; ready for M04-T15
+- Next implementation task: `M04-T16 — Headless sign-in determinism and JSON trace`
+- Status: M04-T15 complete; ready for M04-T16
 
 ## Completed preparation
 
@@ -614,11 +630,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T15 — Reactive re-evaluation and stale asynchronous-result protection`. Compose the
-already proved state, context, environment, resource, operation, Variant, presence, repeat, and
-adapter lifetimes without accepting a stale callback result or platform scheduler as protocol
-authority. Keep the exact selector-to-action-program join, complete cross-manager provenance,
-session disposal, and deterministic sign-in trace assigned to M04-T16.
+Start `M04-T16 — Headless sign-in determinism and JSON-serializable observable trace tests`.
+Compose the exact frozen sign-in Bundle and Catalog through the already proved state, resource,
+operation, action-turn, adapter-bridge, and reactive boundaries. Prove the same wrapped host
+aggregate, handler-selector-to-program join, immediate event/item provenance, conditional
+descendant inactivity, complete session disposal, and byte-identical success/failure traces
+without claiming React, DOM, CSS, accessibility, focus, or native-adapter behavior.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -638,6 +655,11 @@ identical timing.
 M04-T14 extends that reviewed inventory to 127 distinct workloads, 37 proof verifiers, 37 root
 proof files, and a pinned 82-step plan with 37 proof-test steps. Its equivalent legacy dependency
 expansion contains 2,547 leaf launches across 231 prerequisite segments. The same 22 CI contract
+tests pin the expanded proof inventory and preserve one execution of each distinct workload.
+
+M04-T15 extends that reviewed inventory to 130 distinct workloads, 38 proof verifiers, 38 root
+proof files, and a pinned 84-step plan with 38 proof-test steps. Its equivalent legacy dependency
+expansion contains 3,257 leaf launches across 241 prerequisite segments. The same 22 CI contract
 tests pin the expanded proof inventory and preserve one execution of each distinct workload.
 
 M02-T02 evidence:
@@ -946,7 +968,7 @@ M04-T14 evidence:
 
 - `docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json`
-- artifact SHA-256: `e33ac3667b083787496cc60927f3cc6526b79cdab82c743fd597040743c752d8`
+- artifact SHA-256: `e22ac984c035bc8e5096338a437003f852f7daf67a1f12592bae00783dbd8123`
 - exact boundary: 8 package-root runtime exports, 27 package-root types, 35/35 documented public
   declarations, exact hidden T12 Catalog/port/snapshot authority, owner-bound one-shot normalized
   commands, Catalog-declared component/behavior events, exact payload validation, inert handler
@@ -957,6 +979,24 @@ M04-T14 evidence:
   probes, 4 behavior-attachment probes, 8 disposal probes, 4 direct trace assignments, 11
   task-owned files, zero request leaks, zero platform effects, and a cumulative 550/550
   runtime-core package suite
+
+M04-T15 evidence:
+
+- `docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json`
+- artifact SHA-256: `0e56e25c34d023d17123e29b97fc3649938ff4e661435630a0833e9f5751e58f`
+- exact boundary: 6 package-root runtime exports, 17 package-root types, 24/24 documented module
+  declarations, one branded stale-safe host aggregate, complete double-sampled whole-surface
+  snapshots, explicit batched invalidation, pre/post-reflection stale checks, monotonic observable
+  publication, finite lower-only limits, revoked-Proxy containment, failed-mount graph cleanup,
+  and terminal exact-once subscription disposal
+- executable evidence: 54 focused package tests from 39 registrations, 11 compiler-negative cases,
+  30 root proof/mutation tests, 12 host-capture probes, 9 settlement probes including one revoked
+  Proxy redaction, 11 authority probes including two revoked inputs, 7 batching probes, 5
+  host-snapshot probes, 5 stale-candidate probes, 3 unchanged-publication probes, 7
+  failed-subscription cleanup probes, 8 disposal probes, 6 direct trace assignments, 17 task-owned
+  files, zero authority, request, or platform leaks, and a cumulative 604/604 runtime-core package
+  suite
 
 ## Status vocabulary
 

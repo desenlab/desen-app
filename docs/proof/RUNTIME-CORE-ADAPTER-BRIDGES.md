@@ -83,7 +83,7 @@ table, raw action program, or platform API.
 
 The deterministic artifact is
 `docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json`.
-Its SHA-256 is `e33ac3667b083787496cc60927f3cc6526b79cdab82c743fd597040743c752d8`.
+Its SHA-256 is `e22ac984c035bc8e5096338a437003f852f7daf67a1f12592bae00783dbd8123`.
 
 Generation refuses to run unless these reviewed prerequisite bytes match exactly:
 

@@ -1529,3 +1529,64 @@ This file records implementation discoveries without changing the frozen DESEN 0
   from the inert event selector to one prepared action program and immediate event scope. M05
   still owns concrete production Web–React adapter parity; Android and iOS adapters should reuse
   the same observable contract rather than platform objects entering protocol data.
+
+## PF-045 — Reactive invalidation requires explicit snapshot, generation, batching, and scheduler ownership
+
+- Status: OPEN
+- Blocks proof: No; one bounded whole-surface Reference Profile can produce the required
+  observable equivalence without inventing a dependency-index format or platform scheduler.
+- Protocol location: SPEC Sections 14.2.7, 15.2, 17.4, 24.3–24.4, and 28.6; `PIPE-023`, `R-046`,
+  `R-053`, `R-059`, `R-103`, and `R-129`; related findings `PF-035`, `PF-037`, `PF-038`,
+  `PF-039`, `PF-043`, and `PF-044`
+- Observation: DESEN 0.1.0 requires state, context, resource, operation, and environment changes
+  to invalidate dependent observable values; one action turn must expose a consistent snapshot;
+  and an older asynchronous generation must never overwrite a newer one. It deliberately permits
+  either dependency indexing or whole-surface reevaluation, but does not define the runtime
+  invalidation authority, subscription handshake, batching boundary, snapshot-generation
+  ownership, scheduler, reentry behavior, result-reflection ordering, or finite drain limits.
+  Checking an attempt only before reflecting a hostile host result is insufficient: a Proxy trap
+  can start a replacement while that result is being copied and make the earlier precheck stale.
+- Implementation decision: M04-T15 uses two explicit phases. Before resource and operation
+  managers mount, `createRuntimeReactiveHostPorts` captures the nine-port aggregate and replaces
+  only `resources.load` and `operations.invoke`. Synchronous and promise-like settlements are
+  adopted into native Promises, copied through the existing bounded JSON boundary, reduced to an
+  exact immutable success, candidate public-failure (`failed`), or denial envelope, and delivered
+  without any raw throw or rejection reason. Catalog declaration of a candidate error code remains
+  the M04-T08/M04-T09 lifecycle manager's job. If reflection reenters and starts a refresh or
+  replacement, the lower manager sees that newer attempt before it receives the now-inert earlier
+  envelope and drops the stale settlement. A private factory brand prevents a structurally cast
+  aggregate from claiming this boundary.
+
+  After the lower managers mount, one surface-local coordinator authenticates exact current state,
+  resource, and operation snapshots and subscribes once to context and environment. Subscription
+  callbacks are notices only; payloads are never trusted. An explicit exact-snapshot invalidation
+  represents the completion of one state, resource, operation, or whole action turn. Notices that
+  arrive during evaluation coalesce into one dirty bit and a bounded synchronous drain; no timer,
+  task queue, DOM primitive, framework scheduler, or platform global decides publication.
+
+  Each attempt rereads complete detached context and environment values, samples exact lower
+  snapshots twice, creates one factory-authenticated seven-namespace resolution snapshot with
+  `event` unavailable and `item` empty, and invokes a synchronous whole-surface evaluator. The
+  evaluator receives no mutation handle or general host aggregate—only the immutable resolution
+  view and the token-only materialization port under a deterministic request identity. Before
+  inspecting the raw result and again after bounded detachment, the coordinator rechecks the
+  invalidation generation, lower snapshot identities, and complete host snapshot bytes. Drift
+  discards the candidate; a current throw or invalid result publishes an inactive outcome rather
+  than retaining an older subtree as semantically active. Byte-identical output preserves the
+  exact observable snapshot. Evaluation, snapshot, and synchronous transition generations are
+  finite and lower-only. Disposal revokes first, unsubscribes both notices once, clears retained
+  authorities, and leaves a terminal tombstone. Because the frozen 0.1.0 token port has no
+  subscription, token changes alone cannot announce invalidation; token values refresh only on
+  another admitted reevaluation.
+
+- Future action: A later protocol revision should standardize invalidation provenance, batching
+  and scheduling ownership, dependency-index equivalence, consistent host snapshot handshakes,
+  stale-result reflection ordering, controlled inactive outcomes, and finite drain limits.
+  T15 also cannot authenticate that separately mounted M04-T08/M04-T09 managers captured the same
+  wrapped aggregate; M04-T16 must prove that composed join together with complete validated-tree
+  materialization, selector-to-action-program joining, all seven namespace origins, conditional
+  descendant inactivity, coordinated session disposal, the whole-surface-versus-indexed observable
+  oracle, and the deterministic JSON sign-in trace. Dependency-index optimization and performance
+  comparison remain M12-T05. M05 still owns concrete React reconciliation, adapter-specific
+  remount-required properties, DOM behavior, accessibility, focus, and production Web–React
+  parity; future Android and iOS adapters must reuse the same observable contract.

@@ -504,7 +504,7 @@ test("detects public export and TSDoc drift", async () => {
     () =>
       buildRuntimeCoreAdapterBridgesEvidence({
         fileOverrides: {
-          "packages/runtime-core/dist/adapter-bridges.js": `${builtAdapter}\nexport * from \"./command-event-actions.js\";\n`,
+          "packages/runtime-core/dist/adapter-bridges.js": `${builtAdapter}\nexport * from "./command-event-actions.js";\n`,
         },
       }),
     "ADAPTER_BRIDGE_DISTRIBUTION_DRIFT",
