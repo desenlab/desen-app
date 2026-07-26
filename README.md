@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████░░░░░░░░░░░░░░░░░` **46 / 144 tasks complete (32%)**
+**Overall:** `████████░░░░░░░░░░░░░░░░░` **47 / 144 tasks complete (33%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `█████████░░░░░░░` **9 / 16 tasks complete (56%)**
+**M04 progress:** `██████████░░░░░░` **10 / 16 tasks complete (63%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T10`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T11`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -117,6 +117,7 @@ packages/
 - [Runtime core repeat-materialization proof](docs/proof/RUNTIME-CORE-REPEAT-MATERIALIZATION.md)
 - [Runtime core resource-lifecycle proof](docs/proof/RUNTIME-CORE-RESOURCE-LIFECYCLE.md)
 - [Runtime core operation-lifecycle proof](docs/proof/RUNTIME-CORE-OPERATION-LIFECYCLE.md)
+- [Runtime core state and navigation-action proof](docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -353,6 +354,19 @@ compiler-negative cases, and 19 root proof/mutation tests across 11 task-owned f
 cumulative runtime-core suite passes 289/289. N-041 gains operation queue/transport evidence but
 remains `PLANNED`; action dispatch remains M04-T10–M04-T13, P-17 stays `PARTIAL`, and no proof-gate
 status changes.
+
+M04-T10 now executes one guarded state or managed-surface navigation action against the exact
+current M04-T06 state lifetime. The optional guard is evaluated before action-specific payload
+observation; a true guard and its payload share one detached, bounded token session. Every hostile
+reflection, token, diagnostic, and navigation boundary rechecks lifetime and exact state
+authority. Set and toggle reuse complete-entry schema validation, toggle accepts only an exact
+boolean, and unknown navigation targets fail before parameters. Host denial remains distinct from
+redacted adapter failure. Successful navigation, including same-surface success, terminally
+disposes the old executor and local state and leaves only a minimal tombstone. Evidence passes 42
+focused package tests, 11 compiler-negative cases, and 19 root proof/mutation tests across 16
+task-owned files; the cumulative runtime-core suite passes 331/331. N-041 remains `PLANNED`;
+ordered turns and settlement dispatch remain M04-T11–M04-T13, full provenance remains M04-T16,
+P-17 stays `PARTIAL`, and no proof-gate status changes.
 
 ## License
 

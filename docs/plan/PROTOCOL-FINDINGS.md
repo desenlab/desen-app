@@ -1232,3 +1232,53 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Future action: A later protocol revision should standardize alias ownership, request identity,
   replacement-versus-queue interaction, finite queue and transport limits, technical-failure
   lifecycle visibility, settlement acknowledgement, cancellation, and complete turn provenance.
+
+## PF-040 — State and navigation actions require a deterministic guard, snapshot, and terminal-lifetime profile
+
+- Status: OPEN
+- Blocks proof: No; one fail-closed action primitive can preserve the protocol's state and
+  same-Bundle navigation semantics without claiming the later multi-action turn.
+- Protocol location: SPEC Sections 17.7, 20, 20.1–20.3, 24.3, 24.5, 26.5, and 27.7; `R-073`,
+  `R-074`, `R-075`, `R-076`, `R-105`, and `R-122`; related findings `PF-017`, `PF-019`, `PF-031`,
+  and `PF-039`
+- Observation: DESEN 0.1.0 says a false `when` guard skips an action without error, state writes
+  leave their complete declared entry schema-valid, toggle accepts only a boolean target, and
+  navigation targets another surface in the same Bundle through host policy. It does not define
+  the runtime executor API, the exact observation order between a guard and hostile action
+  members, whether guard and payload token reads share one observation session, how state and
+  resolution snapshots prove same-turn authority, navigation request identity, the public shape of
+  denied or failed navigation, or which managers become terminal after successful navigation.
+- Implementation decision: M04-T10 executes exactly one `state.set`, `state.toggle`, or `navigate`
+  action. Ordered arrays, batching, repeated synchronous transition limits, and nested settlement
+  turns remain M04-T13. The executor captures one document, revision, current surface, complete
+  same-Bundle surface inventory, state authority, and host boundary. Each call requires the exact
+  current manager-issued state snapshot plus a factory snapshot whose state namespace is equal;
+  M04-T16 still owns full cross-manager turn provenance.
+
+  The executor reads and evaluates `when` before inspecting any type-specific payload. A false
+  guard therefore cannot observe a hostile path, value, target, params, extension, token,
+  navigation, or diagnostic callback. Predicate operands are prepared through M04-T04 and
+  materialized through M04-T03. One action-local memoizing token boundary is retained when a true
+  guard proceeds to its payload, so repeated token names have one deterministic observation while
+  a false guard still prevents payload inspection.
+
+  `state.set` materializes one candidate and delegates the complete schema-safe write to M04-T06.
+  `state.toggle` reads the exact current nested path, accepts only a boolean leaf, and delegates the
+  inverse through the same M04-T06 write boundary. Neither action invents partial state or bypasses
+  the complete entry schema.
+
+  `navigate` rejects an unknown, external, or non-local target before materializing parameters.
+  Parameter names are sorted, materialized as one synthetic array, reconstructed as inert JSON,
+  and detached into the host request. A host denial reports
+  `run.desen.runtime/NAVIGATION_DENIED` without substituting a target. A thrown, Promise-like, or
+  malformed result becomes a redacted `ADAPTER_FAILURE`. Success is terminal for this
+  surface-action executor and its local-state lifetime, including same-surface navigation. M04-T13
+  later composes the T10–T12 action, resource, operation, command, and event lifetimes into ordered
+  turns. Node and behavior bridges, reactive lifetimes, and complete session disposal remain
+  distributed across M04-T14–M04-T16, with the final coordinator owned by M04-T16. No external URL,
+  retry, redirect, history, persistence, animation, or platform routing policy is invented.
+
+- Future action: A later protocol revision should standardize guard/payload observation order,
+  action-scoped token sessions, snapshot provenance, navigation request identity and parameter
+  lifetime, denial/failure visibility, same-surface navigation, and the exact terminal disposal
+  boundary.

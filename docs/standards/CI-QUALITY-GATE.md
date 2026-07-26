@@ -18,21 +18,21 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 32 proof verifiers directly in the reviewed order;
-7. run all 32 root proof and mutation files as separate fail-fast processes; and
+6. run all 33 proof verifiers directly in the reviewed order;
+7. run all 33 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
-The current legacy expansion contains 1,419 leaf process invocations but only 112 distinct
-workloads. The optimized gate covers all 112 distinct workloads. Repeated prerequisite checks inside proof
+The current legacy expansion contains 1,553 leaf process invocations but only 115 distinct
+workloads. The optimized gate covers all 115 distinct workloads. Repeated prerequisite checks inside proof
 builders remain intact because those checks are evidence, not orchestration overhead.
 
 ## Fail-closed invariants
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 32 task IDs, verifier files, root test files, or their order;
-- any of the 181 legacy prerequisite command segments;
-- the exact 72-step normalized execution plan;
+- the 33 task IDs, verifier files, root test files, or their order;
+- any of the 189 legacy prerequisite command segments;
+- the exact 74-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;

@@ -47,6 +47,12 @@ export {
   readRuntimeSurfaceOperations,
   RUNTIME_OPERATION_LIMITS,
 } from "./operation-lifecycle.js";
+export {
+  disposeRuntimeStateNavigationActions,
+  executeRuntimeStateNavigationAction,
+  mountRuntimeStateNavigationActions,
+  RUNTIME_STATE_NAVIGATION_ACTION_LIMITS,
+} from "./state-navigation-actions.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -227,3 +233,24 @@ export type {
   RuntimeSurfaceOperationsReadResult,
   RuntimeSurfaceOperationsSnapshot,
 } from "./operation-lifecycle.js";
+
+export type {
+  RuntimeActionGuardRejected,
+  RuntimeActionPayloadRejected,
+  RuntimeActionSkipped,
+  RuntimeNavigateAction,
+  RuntimeNavigationAdapterFailed,
+  RuntimeNavigationDenied,
+  RuntimeNavigationSucceeded,
+  RuntimeStateActionApplied,
+  RuntimeStateActionRejected,
+  RuntimeStateNavigationAction,
+  RuntimeStateNavigationActionResult,
+  RuntimeStateNavigationActionsDisposeResult,
+  RuntimeStateNavigationActionsHandle,
+  RuntimeStateNavigationActionsMountInput,
+  RuntimeStateNavigationActionsMountInvalidReason,
+  RuntimeStateNavigationActionsMountResult,
+  RuntimeStateSetAction,
+  RuntimeStateToggleAction,
+} from "./state-navigation-actions.js";
