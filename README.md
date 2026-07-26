@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████░░░░░░░░░░░░░░░░░` **45 / 144 tasks complete (31%)**
+**Overall:** `████████░░░░░░░░░░░░░░░░░` **46 / 144 tasks complete (32%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `████████░░░░░░░░` **8 / 16 tasks complete (50%)**
+**M04 progress:** `█████████░░░░░░░` **9 / 16 tasks complete (56%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T09`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T10`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -116,6 +116,7 @@ packages/
 - [Runtime core local-state and base-identity proof](docs/proof/RUNTIME-CORE-LOCAL-STATE-IDENTITY.md)
 - [Runtime core repeat-materialization proof](docs/proof/RUNTIME-CORE-REPEAT-MATERIALIZATION.md)
 - [Runtime core resource-lifecycle proof](docs/proof/RUNTIME-CORE-RESOURCE-LIFECYCLE.md)
+- [Runtime core operation-lifecycle proof](docs/proof/RUNTIME-CORE-OPERATION-LIFECYCLE.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -339,6 +340,19 @@ and later work waits in a bounded replacement queue. Evidence passes 52 focused 
 cumulative runtime-core suite passes 253/253. N-041 gains resource-limit evidence but remains
 `PLANNED`; full cross-manager snapshot provenance remains M04-T16. P-17 stays `PARTIAL`, and no
 proof-gate status changes.
+
+M04-T09 now gives every predeclared operation alias one Catalog-authoritative lifecycle. Resolved
+input and successful output cross exact schema boundaries; only declared public error codes are
+exposed, and host denial uses the exact core `OPERATION_DENIED` diagnostic. Accepted identities are
+deterministic, omitted concurrency defaults to `reject`, replacement is validated before
+newest-wins supersession, and FIFO queueing is bounded across the whole surface. Terminal
+settlements publish before an opaque acknowledgement lease is issued. A settlement handler may
+start the same alias as a visible staged `pending` invocation, but its host transport cannot begin
+until the predecessor turn acknowledges the lease. Evidence passes 36 focused package tests, 10
+compiler-negative cases, and 19 root proof/mutation tests across 11 task-owned files; the
+cumulative runtime-core suite passes 289/289. N-041 gains operation queue/transport evidence but
+remains `PLANNED`; action dispatch remains M04-T10–M04-T13, P-17 stays `PARTIAL`, and no proof-gate
+status changes.
 
 ## License
 

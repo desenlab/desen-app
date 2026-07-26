@@ -1171,3 +1171,64 @@ This file records implementation discoveries without changing the frozen DESEN 0
   request identity, overlapping-refresh and cancellation behavior, technical-failure lifecycle
   visibility, aggregate retention and transport limits, full turn-snapshot provenance, and any
   normative cache-hint execution profile.
+
+## PF-039 — Operation concurrency and settlement acknowledgement require a deterministic runtime profile
+
+- Status: OPEN
+- Blocks proof: No; one bounded surface-local profile can preserve the protocol's observable
+  lifecycle and action-turn ordering without claiming physical transport cancellation.
+- Protocol location: SPEC Sections 14.2.4, 17.7, 20.4, 22.1, 24.6, 26.5, 26.7, and 27.7;
+  `SN-005`, `R-043`, `R-062`, `R-077`, `R-078`, `R-089`, `R-106`, `R-114`, `R-115`, `R-122`,
+  `A-006`, `D-024`, `D-025`, and `D-026`; related findings `PF-020`, `PF-022`, and `PF-031`
+- Observation: DESEN 0.1.0 gives one surface-scoped alias an observable lifecycle and defines
+  `reject`, `replace`, and `queue`, but it does not define a runtime manager API, request identity,
+  queue capacity, how queued work interacts with replacement, whether a completed transport may
+  promote the queue before settlement actions finish, or how technical failures appear when the
+  public lifecycle may expose only Catalog-declared error codes. Logical supersession is required
+  to ignore stale settlement, while physical cancellation is explicitly optional.
+- Implementation decision: M04-T09 atomically mounts the complete whole-surface alias inventory as
+  immutable `idle` lifecycles. Every alias is fixed to one exact operation capability from the
+  factory-authenticated execution Catalog set; invocation cannot create an alias or change that
+  capability. The invocation carries the protocol action's operation identifier only as an exact
+  assertion against that mounted alias; a mismatch consumes no identity or lifecycle generation
+  and cannot call the host. The mounted Catalog record remains the sole authority for capability,
+  effect, schemas, and public errors. The primitive accepts only a fully materialized inert input
+  object. M04-T11 owns ValueSpec, token, and format composition, while M04-T09 independently
+  detaches the candidate and applies the exact Catalog `operation-input` schema before any host
+  call.
+
+  An omitted concurrency member means `reject`. Invalid input and concurrency rejection consume no
+  attempt generation. Every accepted started or queued invocation receives `operation:` plus RFC
+  8785 canonical JSON of `[alias, zeroBasedAttemptGeneration]`. `reject` refuses a new invocation
+  while the alias is pending. `replace` validates the new input first, then logically supersedes
+  the active invocation and every accepted queued invocation for that alias before publishing the
+  replacement as pending. `queue` accepts work in request order and promotes one invocation at a
+  time. Stale and disposed transports are rejected before their result envelope is inspected.
+
+  Successful output is detached and checked against the exact Catalog `operation-output` schema;
+  only exact declared public error codes may enter a failed lifecycle. Host denial,
+  malformed/undeclared results, thrown or rejected adapters, and invalid output produce redacted
+  controlled settlements and return the public lifecycle to `idle` rather than fabricating a
+  declared error. The Catalog effect class is descriptive request data only and never bypasses
+  current host policy.
+
+  A terminal settlement publishes `succeeded`, declared `failed`, or the controlled technical
+  outcome before returning an opaque one-shot acknowledgement lease. A same-alias invocation
+  accepted from the settlement handler may publish its own `pending` lifecycle synchronously, but
+  its host transport remains staged behind the predecessor lease. Pre-existing FIFO work may
+  likewise become the staged logical head without crossing the host boundary. No staged or queued
+  host invocation starts until M04-T11/M04-T13 finishes the settlement handler's new action turn
+  and explicitly acknowledges that lease. Handler failure therefore cannot retroactively change
+  the operation result, and a synchronously returned host value still settles through a Promise
+  microtask. Superseded and disposed attempts have no settlement-action lease.
+
+  Attempt generations, snapshot generations, aggregate queued invocations, active underlying host
+  transports, and retained lifecycle data are finite and may be lowered by a trusted host profile.
+  Snapshot capacity for every future pending and terminal transition is reserved before an
+  invocation is accepted. Underlying replaced transports may remain uncancellable, but the active
+  transport ceiling bounds their retained settlement closures. Disposal is terminal, invalidates
+  outstanding leases, resolves unfinished attempts as disposed, and does not claim secure erasure.
+
+- Future action: A later protocol revision should standardize alias ownership, request identity,
+  replacement-versus-queue interaction, finite queue and transport limits, technical-failure
+  lifecycle visibility, settlement acknowledgement, cancellation, and complete turn provenance.

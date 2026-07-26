@@ -165,6 +165,18 @@ bounded replacement queue, and host callbacks are receiver-independent and dispo
 `PF-038` records the deterministic profile and its trusted-compositor precondition; full
 cross-manager turn provenance remains M04-T16. N-041 gains resource-lifecycle limit evidence but
 remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status changes.
+M04-T09 now mounts the complete operation alias inventory as immutable idle lifecycles while the
+authenticated Catalog remains the sole capability, effect, schema, and public-error authority.
+Each action operation identifier is only an exact assertion against its alias. Resolved input and
+successful output cross exact schema boundaries; denied, malformed, undeclared, thrown, rejected,
+and invalid-output results remain controlled and redacted. Accepted identities are deterministic,
+omitted concurrency defaults to reject, replace validates before newest-wins supersession, and
+queue preserves FIFO order under aggregate queue, snapshot, retained-data, and transport bounds.
+Terminal lifecycle publication precedes an opaque manager-bound acknowledgement lease. A
+settlement handler may publish a same-alias staged pending request, but its host transport cannot
+start before predecessor acknowledgement. `PF-039` records this deterministic profile. N-041 gains
+operation-limit evidence but remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status
+changes.
 
 ## Current milestone
 
@@ -200,11 +212,12 @@ remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status changes.
   `M04-T05 — Ordered variant and style override evaluation`,
   `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`,
   `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`,
-  `M04-T08 — Resource mount/once/manual lifecycle and refresh`
+  `M04-T08 — Resource mount/once/manual lifecycle and refresh`,
+  `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`
-- Status: M04-T08 complete; ready for M04-T09
+- Next implementation task: `M04-T10 — state.set, state.toggle, and navigate actions`
+- Status: M04-T09 complete; ready for M04-T10
 
 ## Completed preparation
 
@@ -221,9 +234,9 @@ remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status changes.
   configured through Dependabot.
 - CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
   fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
-  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T07
-  inventory now expands to 1,293 legacy leaf launches but remains a reviewed 70-step single-pass
-  gate covering 109 distinct workloads, 31 proof verifiers, and 31 root proof files.
+  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T09
+  inventory now expands to 1,419 legacy leaf launches but remains a reviewed 72-step single-pass
+  gate covering 112 distinct workloads, 32 proof verifiers, and 32 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -460,6 +473,14 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   and terminal disposal. Ten direct trace assignments, 11 task-owned files, and the cumulative
   253/253 runtime-core suite protect the boundary. N-041 remains `PLANNED`, full turn provenance
   remains M04-T16, P-17 stays `PARTIAL`, and no proof-gate status changes.
+- The M04-T09 operation boundary passes 36 focused package tests, 10 compiler-negative cases, and
+  19 root proof/mutation tests. Six public runtime exports and 22 public types enforce atomic alias
+  mount, Catalog-authoritative capability matching, exact input/output contracts,
+  accepted-only deterministic identity, reject/replace/FIFO queue behavior, bounded transports,
+  staged settlement-handler invocation, manager-bound acknowledgement, stale-envelope
+  containment, and terminal disposal. Fourteen direct trace assignments, 11 task-owned files, and
+  the cumulative 289/289 runtime-core suite protect the boundary. N-041 remains `PLANNED`, action
+  turns remain M04-T10–M04-T13, P-17 stays `PARTIAL`, and no proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -480,11 +501,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`. Validate every operation
-input and output against the authenticated Catalog contract, expose only declared public errors,
-and give each alias a deterministic `reject`, `replace`, or bounded FIFO `queue` policy. Preserve a
-settlement acknowledgement seam so M04-T11 and M04-T13 can defer queued host promotion until the
-terminal lifecycle and its action handler have completed one safe turn.
+Start `M04-T10 — state.set, state.toggle, and navigate actions`. Evaluate each optional guard before
+touching its action payload, route complete schema-safe state changes through M04-T06, and delegate
+only exact same-Bundle surface navigation to the host. Keep multi-action arrays, operation/resource
+settlement dispatch, command/event bridges, and action-turn limits in their assigned later tasks.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -492,9 +512,9 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-M04-T08 extends the current reviewed CI inventory to 109 distinct workloads, 31 proof verifiers, 31
-root proof files, and a pinned 70-step plan. Its equivalent legacy dependency expansion contains
-1,293 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
+M04-T09 extends the current reviewed CI inventory to 112 distinct workloads, 32 proof verifiers, 32
+root proof files, and a pinned 72-step plan. Its equivalent legacy dependency expansion contains
+1,419 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
 repeating prerequisite chains. Twenty-one CI contract tests additionally pin the exact workspace
 roots, every workspace package test command, and the absence of hidden Vitest configuration. The
 archived CI-01 timing comparison remains historical evidence rather than a claim that the larger
@@ -731,6 +751,17 @@ M04-T08 evidence:
   terminal disposal
 - executable evidence: 52 focused package tests, 9 compiler-negative cases, 23 root
   proof/mutation tests, 10 direct trace assignments, 11 task-owned files, and a cumulative 253/253
+  runtime-core package suite
+
+M04-T09 evidence:
+
+- `docs/proof/RUNTIME-CORE-OPERATION-LIFECYCLE.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-operation-lifecycle.json`
+- artifact SHA-256: `7b2300a78bb9903abe1f182792362d374edb5b948ee9f8f69dc018ccf9cc8301`
+- exact boundary: 6 runtime exports, 22 type exports, Catalog-authoritative alias matching, exact
+  reject/replace/FIFO queue behavior, bounded transports, and settlement acknowledgement
+- executable evidence: 36 focused package tests, 10 compiler-negative cases, 19 root
+  proof/mutation tests, 14 direct trace assignments, 11 task-owned files, and a cumulative 289/289
   runtime-core package suite
 
 ## Status vocabulary

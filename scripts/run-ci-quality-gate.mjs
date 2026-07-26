@@ -159,6 +159,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-core-resource-lifecycle.mjs",
       "tests/runtime-core-resource-lifecycle.test.mjs",
     ],
+    [
+      "runtime-core-operation-lifecycle",
+      "scripts/verify-runtime-core-operation-lifecycle.mjs",
+      "tests/runtime-core-operation-lifecycle.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -171,8 +176,8 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "05ba5d6013b73e455f6d0e6d04e2c8c66e8ff45b8a03bf9f704d9213e4c63c56";
-const QUALITY_GATE_PLAN_SHA256 = "a90c0a003de3edd17c94630b07e7c0f5dc740ba1e3a3d144b6bc1858b9051403";
+  "9d3011bfbd80f499d4bd5412eaf06338e1e2f93fba5535955bbc84c7437bdcb1";
+const QUALITY_GATE_PLAN_SHA256 = "d6ce68564094d9ef87e6ff0bb33a1ec2a1fa25aed5e526908117855a0408595c";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420";
 const WORKSPACE_MANIFEST_SHA256 =
