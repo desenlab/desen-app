@@ -12,6 +12,7 @@ import {
   disposeRuntimeStateNavigationActions,
   executeRuntimeStateNavigationAction,
   mountRuntimeStateNavigationActions,
+  readRuntimeStateNavigationActions,
 } from "../src/state-navigation-actions.js";
 
 import type { DesenDiagnostic } from "@desen/protocol";
@@ -193,6 +194,87 @@ describe("M04-T10 mount and authority boundary", () => {
     expect(token).not.toHaveBeenCalled();
     expect(report).not.toHaveBeenCalled();
     expectRecursivelyFrozen(fixture.actions);
+  });
+
+  it("reads exact identity and current lower state without callbacks, effects, or generation drift", () => {
+    const navigate = vi.fn(() => ({ status: "succeeded" as const }));
+    const token = vi.fn(() => ({ status: "missing" as const }));
+    const report = vi.fn();
+    const fixture = mountedFixture({ navigate, token, report });
+    const detachedRead = readRuntimeStateNavigationActions;
+
+    const initial = Reflect.apply(detachedRead, Object.freeze({ foreign: true }), [
+      fixture.actions.handle,
+    ]);
+    expect(initial).toEqual({
+      status: "read",
+      documentId: DOCUMENT_ID,
+      revision: REVISION,
+      surfaceId: SURFACE_ID,
+      stateSnapshot: fixture.state.snapshot,
+    });
+    if (initial.status !== "read") throw new TypeError("Expected initial executor read.");
+    expect(initial.stateSnapshot).toBe(fixture.state.snapshot);
+
+    const written = writeRuntimeSurfaceState(fixture.state.handle, {
+      path: "count",
+      value: 1,
+    });
+    if (written.status !== "updated") throw new TypeError("Expected direct state update.");
+    const current = readRuntimeStateNavigationActions(fixture.actions.handle);
+    expect(current).toEqual({
+      status: "read",
+      documentId: DOCUMENT_ID,
+      revision: REVISION,
+      surfaceId: SURFACE_ID,
+      stateSnapshot: written.snapshot,
+    });
+    if (current.status !== "read") throw new TypeError("Expected current executor read.");
+    expect(current.stateSnapshot).toBe(written.snapshot);
+    expect(current.stateSnapshot.generation).toBe(1);
+    expect(readRuntimeStateNavigationActions(fixture.actions.handle)).toEqual(current);
+
+    expect(navigate).not.toHaveBeenCalled();
+    expect(token).not.toHaveBeenCalled();
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("contains forged, foreign, externally revoked, disposed, and navigated read authorities", () => {
+    const left = mountedFixture();
+    const right = mountedFixture();
+    const forged = Object.freeze({}) as RuntimeStateNavigationActionsHandle;
+
+    expect(readRuntimeStateNavigationActions(forged)).toEqual({
+      status: "invalid-handle",
+    });
+    const foreign = readRuntimeStateNavigationActions(right.actions.handle);
+    expect(foreign).toMatchObject({
+      status: "read",
+      stateSnapshot: right.state.snapshot,
+    });
+    if (foreign.status !== "read") throw new TypeError("Expected foreign executor read.");
+    expect(foreign.stateSnapshot).not.toBe(left.state.snapshot);
+
+    disposeRuntimeSurfaceState(left.state.handle);
+    expect(readRuntimeStateNavigationActions(left.actions.handle)).toEqual({
+      status: "disposed",
+    });
+
+    const disposed = mountedFixture();
+    expect(disposeRuntimeStateNavigationActions(disposed.actions.handle)).toEqual({
+      status: "disposed",
+    });
+    expect(readRuntimeStateNavigationActions(disposed.actions.handle)).toEqual({
+      status: "disposed",
+    });
+
+    const navigated = mountedFixture();
+    expect(execute(navigated, { type: "navigate", surface: "settings" })).toMatchObject({
+      status: "navigated",
+    });
+    expect(readRuntimeStateNavigationActions(navigated.actions.handle)).toEqual({
+      status: "navigated",
+    });
   });
 
   it.each([

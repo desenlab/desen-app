@@ -12,6 +12,10 @@ import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const RUNTIME_API_URL = new URL("../../packages/runtime-core/dist/index.js", import.meta.url);
+const STATE_NAVIGATION_INTERNAL_API_URL = new URL(
+  "../../packages/runtime-core/dist/state-navigation-actions.js",
+  import.meta.url,
+);
 
 /** Absolute path to the deterministic M04-T10 state/navigation action artifact. */
 export const DEFAULT_RUNTIME_CORE_STATE_NAVIGATION_ACTIONS_ARTIFACT_PATH = path.join(
@@ -44,13 +48,41 @@ const EXECUTION_CONTRACT_PREREQUISITE = Object.freeze({
   sha256: "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
 });
 
-const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
+const EXPECTED_MODULE_RUNTIME_EXPORTS = Object.freeze([
+  "RUNTIME_STATE_NAVIGATION_ACTION_LIMITS",
+  "disposeRuntimeStateNavigationActions",
+  "executeRuntimeStateNavigationAction",
+  "mountRuntimeStateNavigationActions",
+  "readRuntimeStateNavigationActions",
+]);
+const EXPECTED_MODULE_TYPE_EXPORTS = Object.freeze([
+  "RuntimeActionGuardRejected",
+  "RuntimeActionPayloadRejected",
+  "RuntimeActionSkipped",
+  "RuntimeNavigateAction",
+  "RuntimeNavigationAdapterFailed",
+  "RuntimeNavigationDenied",
+  "RuntimeNavigationSucceeded",
+  "RuntimeStateActionApplied",
+  "RuntimeStateActionRejected",
+  "RuntimeStateNavigationAction",
+  "RuntimeStateNavigationActionResult",
+  "RuntimeStateNavigationActionsDisposeResult",
+  "RuntimeStateNavigationActionsHandle",
+  "RuntimeStateNavigationActionsMountInput",
+  "RuntimeStateNavigationActionsMountInvalidReason",
+  "RuntimeStateNavigationActionsMountResult",
+  "RuntimeStateNavigationActionsReadResult",
+  "RuntimeStateSetAction",
+  "RuntimeStateToggleAction",
+]);
+const EXPECTED_ROOT_RUNTIME_EXPORTS = Object.freeze([
   "RUNTIME_STATE_NAVIGATION_ACTION_LIMITS",
   "disposeRuntimeStateNavigationActions",
   "executeRuntimeStateNavigationAction",
   "mountRuntimeStateNavigationActions",
 ]);
-const EXPECTED_TYPE_EXPORTS = Object.freeze([
+const EXPECTED_ROOT_TYPE_EXPORTS = Object.freeze([
   "RuntimeActionGuardRejected",
   "RuntimeActionPayloadRejected",
   "RuntimeActionSkipped",
@@ -70,6 +102,8 @@ const EXPECTED_TYPE_EXPORTS = Object.freeze([
   "RuntimeStateSetAction",
   "RuntimeStateToggleAction",
 ]);
+const INTERNAL_RUNTIME_EXPORTS = Object.freeze(["readRuntimeStateNavigationActions"]);
+const INTERNAL_TYPE_EXPORTS = Object.freeze(["RuntimeStateNavigationActionsReadResult"]);
 const EXPECTED_SOURCE_IMPORTS = Object.freeze([
   "./action-evaluation.js",
   "./host-ports.js",
@@ -101,8 +135,8 @@ const EXPECTED_ACTION_EVALUATION_IMPORTS = Object.freeze([
   "./value-resolution.js",
   "@desen/protocol",
 ]);
-const EXPECTED_FOCUSED_TESTS = 42;
-const EXPECTED_COMPILER_NEGATIVE_CASES = 11;
+const EXPECTED_FOCUSED_TESTS = 44;
+const EXPECTED_COMPILER_NEGATIVE_CASES = 14;
 const EXPECTED_PACKAGE_TEST_SCRIPT = "vitest run test/state-navigation-actions.test.ts";
 const EXPECTED_TRACE_RULES = Object.freeze([
   Object.freeze({
@@ -154,6 +188,9 @@ const REQUIRED_PROOF_TEXT = Object.freeze([
   "same-surface",
   "terminal",
   "tombstone",
+  "readRuntimeStateNavigationActions",
+  "callback-free",
+  "package root",
   "M04-T13",
   "M04-T16",
   "PF-040",
@@ -177,6 +214,7 @@ const REQUIRED_ROOT_TEST_TITLES = Object.freeze([
   "detects explicit disposal and late-effect drift",
   "detects semantic source ordering drift",
   "detects public export, TSDoc, and platform drift",
+  "detects current-read seam and package-root non-leak drift",
   "detects focused-test and compiler-negative inventory drift",
 ]);
 const TRACKED_PATHS = Object.freeze([
@@ -874,6 +912,27 @@ function verifySourceInvariants(sourceText) {
     "Accepted state-write identity",
   );
 
+  const read = functionSource(
+    parsed,
+    "readRuntimeStateNavigationActions",
+    "STATE_ACTION_SOURCE_SEMANTIC_DRIFT",
+  );
+  assertOrder(
+    read,
+    [
+      'typeof handle !== "object" || handle === null',
+      "EXECUTOR_AUTHORITIES.get(handle)",
+      'authority.status !== "live"',
+      "currentStateSnapshot(authority)",
+      'status: "read"',
+      "documentId: authority.documentId",
+      "revision: authority.revision",
+      "surfaceId: authority.surfaceId",
+      "stateSnapshot: current.snapshot",
+    ],
+    "Callback-free exact-current state/navigation read",
+  );
+
   const dispose = functionSource(
     parsed,
     "disposeRuntimeStateNavigationActions",
@@ -902,13 +961,13 @@ function verifyPublicApi({
   assertDirectExports(source, "STATE_ACTION_SOURCE_EXPORT_DRIFT", "Action source");
   assertArrayEqual(
     source.runtimeExports,
-    EXPECTED_RUNTIME_EXPORTS,
+    EXPECTED_MODULE_RUNTIME_EXPORTS,
     "STATE_ACTION_SOURCE_EXPORT_DRIFT",
     "Action source runtime exports",
   );
   assertArrayEqual(
     source.typeExports,
-    EXPECTED_TYPE_EXPORTS,
+    EXPECTED_MODULE_TYPE_EXPORTS,
     "STATE_ACTION_SOURCE_EXPORT_DRIFT",
     "Action source type exports",
   );
@@ -934,13 +993,13 @@ function verifyPublicApi({
   assertDirectExports(declaration, "STATE_ACTION_DECLARATION_DRIFT", "Action declaration");
   assertArrayEqual(
     declaration.runtimeExports,
-    EXPECTED_RUNTIME_EXPORTS,
+    EXPECTED_MODULE_RUNTIME_EXPORTS,
     "STATE_ACTION_DECLARATION_DRIFT",
     "Built action runtime declarations",
   );
   assertArrayEqual(
     declaration.typeExports,
-    EXPECTED_TYPE_EXPORTS,
+    EXPECTED_MODULE_TYPE_EXPORTS,
     "STATE_ACTION_DECLARATION_DRIFT",
     "Built action type declarations",
   );
@@ -959,7 +1018,7 @@ function verifyPublicApi({
   assertDirectExports(built, "STATE_ACTION_DISTRIBUTION_DRIFT", "Built action JavaScript");
   assertArrayEqual(
     built.runtimeExports,
-    EXPECTED_RUNTIME_EXPORTS,
+    EXPECTED_MODULE_RUNTIME_EXPORTS,
     "STATE_ACTION_DISTRIBUTION_DRIFT",
     "Built action JavaScript exports",
   );
@@ -972,14 +1031,14 @@ function verifyPublicApi({
   verifyPlatformBoundary(built.sourceFile, "STATE_ACTION_DISTRIBUTION_DRIFT");
 
   for (const [text, fileName, expectedTypes] of [
-    [sourceIndexText, "src/index.ts", EXPECTED_TYPE_EXPORTS],
-    [builtIndexDeclarationText, "dist/index.d.ts", EXPECTED_TYPE_EXPORTS],
+    [sourceIndexText, "src/index.ts", EXPECTED_ROOT_TYPE_EXPORTS],
+    [builtIndexDeclarationText, "dist/index.d.ts", EXPECTED_ROOT_TYPE_EXPORTS],
     [builtIndexJavaScript, "dist/index.js", []],
   ]) {
     const exports = moduleIndexExports(text, fileName);
     assertArrayEqual(
       exports.runtimeExports,
-      EXPECTED_RUNTIME_EXPORTS,
+      EXPECTED_ROOT_RUNTIME_EXPORTS,
       "STATE_ACTION_INDEX_EXPORT_DRIFT",
       `${fileName} state/navigation runtime exports`,
     );
@@ -992,10 +1051,16 @@ function verifyPublicApi({
   }
 
   return Object.freeze({
-    runtimeExports: EXPECTED_RUNTIME_EXPORTS,
-    typeExports: EXPECTED_TYPE_EXPORTS,
+    runtimeExports: EXPECTED_ROOT_RUNTIME_EXPORTS,
+    typeExports: EXPECTED_ROOT_TYPE_EXPORTS,
+    internalRuntimeExports: INTERNAL_RUNTIME_EXPORTS,
+    internalTypeExports: INTERNAL_TYPE_EXPORTS,
     tsdocDeclarations: source.runtimeExports.length + source.typeExports.length,
     sourceImports: EXPECTED_SOURCE_IMPORTS,
+    module: Object.freeze({
+      runtimeExports: EXPECTED_MODULE_RUNTIME_EXPORTS,
+      typeExports: EXPECTED_MODULE_TYPE_EXPORTS,
+    }),
   });
 }
 
@@ -1410,7 +1475,7 @@ function actionRequestId(generation, surfaceId = "main") {
   return `action:${JSON.stringify([surfaceId, generation])}`;
 }
 
-async function probeRuntimeBehavior(api) {
+async function probeRuntimeBehavior(api, stateNavigationApi) {
   for (const name of [
     "createRuntimeHostPorts",
     "createRuntimeResolutionSnapshot",
@@ -1425,6 +1490,18 @@ async function probeRuntimeBehavior(api) {
     if (typeof api[name] !== "function") {
       fail("STATE_ACTION_RUNTIME_API_MISSING", `Runtime API is missing ${name}.`);
     }
+  }
+  if (Object.hasOwn(api, "readRuntimeStateNavigationActions")) {
+    fail(
+      "STATE_ACTION_RUNTIME_API_LEAK",
+      "The package root must not expose the trusted state/navigation read seam.",
+    );
+  }
+  if (typeof stateNavigationApi.readRuntimeStateNavigationActions !== "function") {
+    fail(
+      "STATE_ACTION_RUNTIME_API_MISSING",
+      "The internal state/navigation module is missing readRuntimeStateNavigationActions.",
+    );
   }
 
   const mountCalls = { navigation: 0, token: 0, diagnostic: 0 };
@@ -1443,6 +1520,53 @@ async function probeRuntimeBehavior(api) {
   });
   assertFrozenResult(mounted.mountResult, "Mounted executor envelope");
   assertDataEqual(mountCalls, { navigation: 0, token: 0, diagnostic: 0 }, "Mount host isolation");
+  const initialExecutorRead = Reflect.apply(
+    stateNavigationApi.readRuntimeStateNavigationActions,
+    Object.freeze({ foreignReceiver: true }),
+    [mounted.handle],
+  );
+  const repeatedExecutorRead = stateNavigationApi.readRuntimeStateNavigationActions(mounted.handle);
+  const forgedExecutorRead = stateNavigationApi.readRuntimeStateNavigationActions(
+    Object.freeze({}),
+  );
+  if (
+    initialExecutorRead.status !== "read" ||
+    initialExecutorRead.documentId !== "com.desen.proof" ||
+    initialExecutorRead.revision !== `sha256:${"a".repeat(64)}` ||
+    initialExecutorRead.surfaceId !== "main" ||
+    initialExecutorRead.stateSnapshot !== mounted.stateSnapshot ||
+    repeatedExecutorRead.status !== "read" ||
+    repeatedExecutorRead.stateSnapshot !== mounted.stateSnapshot ||
+    forgedExecutorRead.status !== "invalid-handle" ||
+    api.readRuntimeSurfaceState(mounted.state.handle).snapshot !== mounted.stateSnapshot
+  ) {
+    fail(
+      "STATE_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+      "Internal executor read did not preserve exact initial authority without effects.",
+    );
+  }
+  assertFrozenResult(initialExecutorRead, "Initial internal executor read");
+  assertFrozenResult(repeatedExecutorRead, "Repeated internal executor read");
+  assertFrozenResult(forgedExecutorRead, "Forged internal executor read");
+  const externalReadWrite = api.writeRuntimeSurfaceState(mounted.state.handle, {
+    path: "label",
+    value: "fresh-lower-state",
+  });
+  const freshExecutorRead = stateNavigationApi.readRuntimeStateNavigationActions(mounted.handle);
+  if (
+    externalReadWrite.status !== "updated" ||
+    freshExecutorRead.status !== "read" ||
+    freshExecutorRead.stateSnapshot !== externalReadWrite.snapshot ||
+    freshExecutorRead.stateSnapshot === mounted.stateSnapshot ||
+    api.readRuntimeSurfaceState(mounted.state.handle).snapshot !== externalReadWrite.snapshot ||
+    !isDeepStrictEqual(mountCalls, { navigation: 0, token: 0, diagnostic: 0 })
+  ) {
+    fail(
+      "STATE_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+      "Internal executor read did not read through to the exact current lower state.",
+    );
+  }
+  assertFrozenResult(freshExecutorRead, "Fresh internal executor read");
 
   const malformedMount = api.mountRuntimeStateNavigationActions({});
   if (malformedMount.status !== "invalid" || malformedMount.reason !== "malformed-input") {
@@ -2601,6 +2725,7 @@ async function probeRuntimeBehavior(api) {
     toctouProbes: 12,
     reentrancyProbes: 14,
     snapshotIdentityProbes: 5,
+    currentReadProbes: 14,
     disposalProbes: 8,
     receiverIndependenceProbes: 3,
     hostilePayloadReads:
@@ -2703,8 +2828,11 @@ export async function buildRuntimeCoreStateNavigationActionsEvidence(options = u
   const tests = verifyTestInventory(packageTests, typeTests, rootTests, runtimeManifest);
   const traceRules = verifyTrace(trace);
   const documentation = verifyDocumentation(findings, proofDocument);
-  const runtimeApi = normalized.runtimeApi ?? (await import(RUNTIME_API_URL.href));
-  const runtime = await probeRuntimeBehavior(runtimeApi);
+  const [runtimeApi, stateNavigationApi] = await Promise.all([
+    normalized.runtimeApi ?? import(RUNTIME_API_URL.href),
+    normalized.stateNavigationApi ?? import(STATE_NAVIGATION_INTERNAL_API_URL.href),
+  ]);
+  const runtime = await probeRuntimeBehavior(runtimeApi, stateNavigationApi);
 
   const artifact = Object.freeze({
     schemaVersion: 1,
@@ -2755,6 +2883,8 @@ export async function buildRuntimeCoreStateNavigationActionsEvidence(options = u
       navigationSuccess:
         "terminal for old executor and T06 state, including same-surface navigation",
       explicitDisposal: "terminal and idempotent for executor and owned T06 state",
+      currentRead:
+        "package-internal callback-free identity and exact-current lower-state observation; absent from the package root",
       retainedSnapshotProvenance:
         "state authority exact here; complete same-turn cross-manager provenance remains M04-T16",
       actionTurnManager: null,
@@ -2845,6 +2975,8 @@ export async function verifyRuntimeCoreStateNavigationActionsEvidence(options = 
     artifactSha256: expected.artifactSha256,
     runtimeExports: expected.artifact.publicApi.runtimeExports.length,
     typeExports: expected.artifact.publicApi.typeExports.length,
+    internalRuntimeExports: expected.artifact.publicApi.internalRuntimeExports.length,
+    internalTypeExports: expected.artifact.publicApi.internalTypeExports.length,
     tsdocDeclarations: expected.artifact.publicApi.tsdocDeclarations,
     focusedTests: expected.artifact.evidence.focusedTests,
     compilerNegativeCases: expected.artifact.evidence.compilerNegativeCases,

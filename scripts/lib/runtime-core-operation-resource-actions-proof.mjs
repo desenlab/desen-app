@@ -41,7 +41,7 @@ const STATE_NAVIGATION_PREREQUISITE = Object.freeze({
   task: "M04-T10",
   path: "docs/proof/artifacts/runtime-core-0.1.0-state-navigation-actions.json",
   artifact: "runtime-core-0.1.0-state-navigation-actions.json",
-  sha256: "9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67",
+  sha256: "f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140",
 });
 const EXECUTION_CONTRACT_PREREQUISITE = Object.freeze({
   task: "M02-T11",
@@ -56,6 +56,7 @@ const EXPECTED_MODULE_RUNTIME_EXPORTS = Object.freeze([
   "executeRuntimeOperationResourceAction",
   "finalizeRuntimeOperationActionSettlement",
   "mountRuntimeOperationResourceActions",
+  "readRuntimeOperationResourceActions",
 ]);
 const EXPECTED_MODULE_TYPE_EXPORTS = Object.freeze([
   "RuntimeDeferredActionSpec",
@@ -74,6 +75,7 @@ const EXPECTED_MODULE_TYPE_EXPORTS = Object.freeze([
   "RuntimeOperationResourceActionsMountInput",
   "RuntimeOperationResourceActionsMountInvalidReason",
   "RuntimeOperationResourceActionsMountResult",
+  "RuntimeOperationResourceActionsReadResult",
   "RuntimeResourceRefreshAction",
   "RuntimeResourceRefreshActionStarted",
 ]);
@@ -113,8 +115,8 @@ const EXPECTED_SOURCE_IMPORTS = Object.freeze([
   "./value-resolution.js",
   "@desen/protocol",
 ]);
-const EXPECTED_FOCUSED_TESTS = 87;
-const EXPECTED_COMPILER_NEGATIVE_CASES = 24;
+const EXPECTED_FOCUSED_TESTS = 89;
+const EXPECTED_COMPILER_NEGATIVE_CASES = 26;
 const EXPECTED_PACKAGE_TEST_SCRIPT = "vitest run test/operation-resource-actions.test.ts";
 const EXPECTED_TRACE_RULES = Object.freeze([
   Object.freeze({
@@ -163,6 +165,7 @@ const REQUIRED_ROOT_TEST_TITLES = Object.freeze([
   "detects raw host and private lease leakage",
   "detects acknowledgement gate and ticket-finalization drift",
   "detects resource refresh snapshot and nonblocking drift",
+  "detects callback-free compositor read drift",
   "detects exclusive ownership and disposal drift",
   "detects task-owned byte drift",
   "detects semantic source ordering drift",
@@ -780,6 +783,24 @@ function verifySourceInvariants(sourceText) {
     "Exclusive manager mount",
   );
 
+  const read = functionSource(parsed, "readRuntimeOperationResourceActions");
+  assertOrder(
+    read,
+    [
+      'typeof handle !== "object" || handle === null',
+      "ACTION_AUTHORITIES.get(handle)",
+      'authority.status !== "live"',
+      "authority.transitioning || authority.reporting",
+      "const current = currentSnapshots(authority);",
+      'status: "invalid-authority", boundary: current.boundary',
+      'status: "read"',
+      "documentId: authority.documentId",
+      "resourceSnapshot: current.resourceSnapshot",
+      "operationSnapshot: current.operationSnapshot",
+    ],
+    "Callback-free compositor authority read",
+  );
+
   const execute = functionSource(parsed, "executeRuntimeOperationResourceAction");
   assertOrder(
     execute,
@@ -1238,6 +1259,7 @@ async function probeRuntimeBehavior(api, internalApi, validatorApi, catalogText)
   let resourceProbes = 0;
   let snapshotProbes = 0;
   let ownershipProbes = 0;
+  let compositorReadProbes = 0;
   let retentionProbes = 0;
   let disposalProbes = 0;
   let receiverIndependenceProbes = 0;
@@ -1282,6 +1304,27 @@ async function probeRuntimeBehavior(api, internalApi, validatorApi, catalogText)
       { operation: 0, resource: 0, token: 0, diagnostic: 0 },
       "Mount effects",
     );
+    const currentRead = Reflect.apply(
+      internalApi.readRuntimeOperationResourceActions,
+      Object.freeze({ foreignReceiver: true }),
+      [fixture.composed.handle],
+    );
+    const forgedRead = internalApi.readRuntimeOperationResourceActions(Object.freeze({}));
+    if (
+      currentRead.status !== "read" ||
+      currentRead.documentId !== DOCUMENT_ID ||
+      currentRead.revision !== REVISION ||
+      currentRead.surfaceId !== SURFACE_ID ||
+      currentRead.resourceSnapshot !== fixture.resource.snapshot ||
+      currentRead.operationSnapshot !== fixture.operation.snapshot ||
+      forgedRead.status !== "invalid-handle"
+    ) {
+      fail(
+        "OPERATION_RESOURCE_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+        "Callback-free compositor read lost exact identity or current snapshot authority.",
+      );
+    }
+    compositorReadProbes += 3;
     const second = api.mountRuntimeOperationResourceActions({
       documentId: DOCUMENT_ID,
       revision: REVISION,
@@ -1303,6 +1346,15 @@ async function probeRuntimeBehavior(api, internalApi, validatorApi, catalogText)
     ownershipProbes += 1;
     assertDeepFrozen(fixture.composed, "Composed mount result");
     api.disposeRuntimeOperationResourceActions(fixture.composed.handle);
+    if (
+      internalApi.readRuntimeOperationResourceActions(fixture.composed.handle).status !== "disposed"
+    ) {
+      fail(
+        "OPERATION_RESOURCE_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+        "Disposed compositor remained readable as a live authority.",
+      );
+    }
+    compositorReadProbes += 1;
   }
 
   {
@@ -1946,6 +1998,7 @@ async function probeRuntimeBehavior(api, internalApi, validatorApi, catalogText)
     resourceProbes,
     snapshotProbes,
     ownershipProbes,
+    compositorReadProbes,
     retentionProbes,
     disposalProbes,
     receiverIndependenceProbes,

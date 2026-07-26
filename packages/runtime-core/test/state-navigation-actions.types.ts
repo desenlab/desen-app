@@ -3,6 +3,7 @@ import {
   executeRuntimeStateNavigationAction,
   mountRuntimeStateNavigationActions,
 } from "../src/index.js";
+import { readRuntimeStateNavigationActions } from "../src/state-navigation-actions.js";
 
 import type {
   RuntimeHostPorts,
@@ -16,6 +17,7 @@ import type {
   RuntimeSurfaceStateHandle,
   RuntimeSurfaceStateSnapshot,
 } from "../src/index.js";
+import type { RuntimeStateNavigationActionsReadResult } from "../src/state-navigation-actions.js";
 
 declare const hostPorts: RuntimeHostPorts;
 declare const stateHandle: RuntimeSurfaceStateHandle;
@@ -34,6 +36,11 @@ const mountInput: RuntimeStateNavigationActionsMountInput = {
 const mounted = mountRuntimeStateNavigationActions(mountInput);
 if (mounted.status === "mounted") {
   const handle: RuntimeStateNavigationActionsHandle = mounted.handle;
+  const read: RuntimeStateNavigationActionsReadResult = readRuntimeStateNavigationActions(handle);
+  if (read.status === "read") {
+    const currentSnapshot: RuntimeSurfaceStateSnapshot = read.stateSnapshot;
+    void [read.documentId, read.revision, read.surfaceId, currentSnapshot];
+  }
   const action: RuntimeStateNavigationAction = {
     type: "state.set",
     path: "count",
@@ -128,7 +135,18 @@ declare const immutableSnapshot: RuntimeSurfaceStateSnapshot;
 // @ts-expect-error state snapshots supplied to the executor remain recursively readonly
 immutableSnapshot.values.count = 2;
 
+// @ts-expect-error package-internal reads require the exact state/navigation executor authority
+readRuntimeStateNavigationActions(stateHandle);
+
+declare const immutableRead: RuntimeStateNavigationActionsReadResult;
+// @ts-expect-error package-internal read outcomes are immutable
+immutableRead.status = "disposed";
+
 // @ts-expect-error the common evaluation seam is package-internal and absent from the root API
 import type { RuntimeActionEvaluationSession } from "../src/index.js";
 declare const hiddenSession: RuntimeActionEvaluationSession;
 void hiddenSession;
+
+// @ts-expect-error the state/navigation authority read seam is absent from the root API
+import { readRuntimeStateNavigationActions as leakedStateNavigationRead } from "../src/index.js";
+void leakedStateNavigationRead;

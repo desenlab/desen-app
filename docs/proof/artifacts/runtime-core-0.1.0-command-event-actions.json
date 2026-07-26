@@ -15,7 +15,7 @@
       "task": "M04-T10",
       "result": "PASS",
       "artifact": "runtime-core-0.1.0-state-navigation-actions.json",
-      "artifactSha256": "9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67"
+      "artifactSha256": "f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140"
     },
     {
       "task": "M02-T09",
@@ -37,6 +37,7 @@
       "disposeRuntimeCommandEventActions",
       "executeRuntimeCommandEventAction",
       "mountRuntimeCommandEventActions",
+      "readRuntimeCommandEventActions",
       "registerRuntimeComponentCommandTarget",
       "unregisterRuntimeComponentCommandTarget"
     ],
@@ -57,6 +58,7 @@
       "RuntimeCommandEventActionsHandle",
       "RuntimeCommandEventActionsMountInput",
       "RuntimeCommandEventActionsMountResult",
+      "RuntimeCommandEventActionsReadResult",
       "RuntimeCommandEventActionsSnapshot",
       "RuntimeComponentCommandAction",
       "RuntimeComponentCommandRegistrationTicket",
@@ -68,25 +70,30 @@
       "RuntimeRegisteredComponentCommandTargetSnapshot"
     ],
     "internalRuntimeExports": [
+      "consumeRuntimeComponentCommandHostRequestForAdapterBridge",
       "emitRuntimeHostEventHostPort",
       "invokeRuntimeComponentCommandHostPort",
       "isRuntimeCommandEventHostPorts",
-      "validateRuntimeHostEventHostPort"
+      "isRuntimeCommandEventHostPortsForComponentCommandPort",
+      "validateRuntimeHostEventHostPort",
+      "readRuntimeCommandEventActionsForAdapterBridge"
     ],
     "internalTypeExports": [
       "RuntimeComponentCommandPortCallResult",
       "RuntimeHostEventEmissionCallResult",
       "RuntimeHostEventValidationCallResult"
     ],
-    "tsdocDeclarations": 39,
+    "tsdocDeclarations": 44,
     "modules": {
       "ports": {
         "module": "packages/runtime-core/src/command-event-ports.ts",
         "runtimeExports": [
+          "consumeRuntimeComponentCommandHostRequestForAdapterBridge",
           "createRuntimeCommandEventHostPorts",
           "emitRuntimeHostEventHostPort",
           "invokeRuntimeComponentCommandHostPort",
           "isRuntimeCommandEventHostPorts",
+          "isRuntimeCommandEventHostPortsForComponentCommandPort",
           "validateRuntimeHostEventHostPort"
         ],
         "typeExports": [
@@ -112,6 +119,8 @@
           "disposeRuntimeCommandEventActions",
           "executeRuntimeCommandEventAction",
           "mountRuntimeCommandEventActions",
+          "readRuntimeCommandEventActions",
+          "readRuntimeCommandEventActionsForAdapterBridge",
           "registerRuntimeComponentCommandTarget",
           "unregisterRuntimeComponentCommandTarget"
         ],
@@ -123,6 +132,7 @@
           "RuntimeCommandEventActionsHandle",
           "RuntimeCommandEventActionsMountInput",
           "RuntimeCommandEventActionsMountResult",
+          "RuntimeCommandEventActionsReadResult",
           "RuntimeCommandEventActionsSnapshot",
           "RuntimeComponentCommandAction",
           "RuntimeComponentCommandRegistrationTicket",
@@ -151,6 +161,8 @@
   "sourceInvariants": {
     "ports": {
       "authorityStore": "private WeakMap",
+      "normalizedCommandRequestAuthority": "private owner-bound one-shot WeakMap",
+      "componentCommandPortAuthority": "exact captured callback identity",
       "receiver": null,
       "inputCapture": "exact own enumerable data properties",
       "requestCapture": "metadata/context and runtime-bounded input or payload detached independently",
@@ -161,14 +173,17 @@
       "staticAuthority": "exact prepared Catalog component command inventory",
       "targetAuthority": "opaque per-instance ticket and monotonic generation",
       "targetCardinality": "dispatch iff exactly one instance is live",
+      "adapterBridgeRead": "package-internal callback-free exact Catalog, command-port, and current registry authorities",
       "transitionLock": "before hostile request observation",
       "mutationPreflight": "finite generations before tickets, counters, registries, or snapshots"
     }
   },
   "ports": {
-    "probes": 24,
+    "probes": 39,
     "callbackCalls": 6,
     "receiverIndependenceProbes": 6,
+    "componentCommandPortAuthorityProbes": 4,
+    "normalizedCommandAuthorityProbes": 11,
     "malformedResultProbes": 3,
     "exactContextProbes": 1,
     "standaloneJsonBoundaryProbes": 6,
@@ -193,6 +208,8 @@
     "commandAuthorizationProbes": 19,
     "eventPolicyProbes": 18,
     "targetAuthorityProbes": 13,
+    "registryReadProbes": 5,
+    "adapterBridgeReadProbes": 8,
     "reentryProbes": 14,
     "finiteBoundProbes": 31,
     "disposalProbes": 16,
@@ -236,10 +253,11 @@
   },
   "normative": { "tested": ["N-031"], "planned": ["N-034"] },
   "evidence": {
-    "focusedTestRegistrations": 44,
-    "focusedTests": 53,
+    "focusedTestRegistrations": 49,
+    "focusedTests": 58,
     "focusedTestTitles": [
       "invokes all callbacks receiver-free with detached frozen requests",
+      "brands each normalized command request for exactly one package-internal bridge consumption",
       "rejects accessor-bearing factory shapes without invoking getters",
       "normalizes %s command results into redacted adapter failure",
       "rejects malformed nested request contexts before any callback",
@@ -254,6 +272,10 @@
       "accepts exactly 5,000 short static entries and rejects 5,001 before value observation",
       "applies lowered entry and aggregate identifier ceilings before map value observation",
       "registers inert identities and publishes frozen exact snapshots",
+      "reads the exact current snapshot without callbacks, effects, receiver dependence, or generation drift",
+      "reads exact adapter-bridge Catalog and snapshot authorities without callbacks, effects, or generation drift",
+      "fails adapter-bridge reads closed for forged and disposed handles without cross-authority leakage",
+      "contains forged, foreign, and revoked read authorities without leaking another registry",
       "supports repeated instances but makes their source target ambiguous until one leaves",
       "rejects duplicate instance identity, static mismatch, stale snapshots, and foreign tickets",
       "rejects non-JSON Unicode runtime identities without registry or snapshot drift",
@@ -284,11 +306,13 @@
       "turns diagnostic-time disposal into disposed without reviving the manager",
       "disposes every registration ticket terminally and is idempotent"
     ],
-    "compilerNegativeCases": 21,
+    "compilerNegativeCases": 27,
     "compilerNegativeLabels": [
+      "package-internal command authority still requires the complete detached request",
       "command/event host boundaries are opaque factory authorities",
       "action manager handles are opaque factory authorities",
       "registration tickets are opaque one-registration authorities",
+      "registry reads accept only command/event manager authorities",
       "component.command requires a static source target",
       "component.command requires a command name",
       "command inputs contain data-only ValueSpecs, never callbacks",
@@ -303,12 +327,16 @@
       "command result vocabulary is closed",
       "event emission result vocabulary is closed",
       "the host profile cannot invent an unproved semantic ceiling",
+      "adapter-bridge Catalog authority reads remain package-internal",
       "public action results are immutable",
       "registry snapshots are immutable",
       "instance inventories are immutable",
-      "normalized bridge invokers remain package-internal"
+      "public registry read results are immutable",
+      "normalized bridge invokers remain package-internal",
+      "normalized request ownership consumers remain package-internal",
+      "exact component-port ownership probes remain package-internal"
     ],
-    "rootMutationTests": 19,
+    "rootMutationTests": 21,
     "rootMutationTestTitles": [
       "accepts tracked deterministic M04-T12 command/event evidence",
       "builds byte-identical command/event evidence twice",
@@ -322,12 +350,14 @@
       "detects outbound allowlist and validation-before-emission drift",
       "detects synchronous receiver-independent port drift",
       "detects target-ticket generation, ambiguity, and ABA drift",
+      "detects callback-free current registry read drift",
       "detects command/event TOCTOU and reentry drift",
       "detects diagnostics and adapter-redaction drift",
       "detects finite registration and request bounds drift",
       "detects terminal disposal and late-callback drift",
       "detects task-owned byte drift",
       "detects public export, TSDoc, internal non-leak, and platform drift",
+      "detects adapter-bridge Catalog, port, and package-root authority drift",
       "detects focused-test and compiler-negative inventory drift"
     ],
     "traceRules": [
@@ -345,68 +375,68 @@
     "trackedFiles": [
       {
         "path": "packages/runtime-core/src/command-event-ports.ts",
-        "bytes": 14212,
-        "sha256": "f681bbba09c435839f7ede8a9b57f8021a3ab116fd3700c6fe7b85dd97adefd0"
+        "bytes": 15821,
+        "sha256": "21f3d562a927f5b1bf131be999a00c9b85fbbede28acad81607261ee812f6b5c"
       },
       {
         "path": "packages/runtime-core/src/command-event-actions.ts",
-        "bytes": 64249,
-        "sha256": "c168eb437f9ccb574578d38d8fa0ecbd0a1b39d3758e1bf59a6497b706b48f71"
+        "bytes": 66762,
+        "sha256": "8e63472e7bac5e3fd17752c8470c46593f893b75c8d7bde752841bdcd5e71deb"
       },
       {
         "path": "packages/runtime-core/test/command-event-actions.test.ts",
-        "bytes": 48988,
-        "sha256": "898de60333d7e7d93c05d28bf6d27b09b495efd9d2441d905435601a70cff2c1"
+        "bytes": 59122,
+        "sha256": "947790bad2d8d7fa2cca0a06899cbf75da5ce8e9d71e883f97327b45e2396702"
       },
       {
         "path": "packages/runtime-core/test/command-event-actions.types.ts",
-        "bytes": 8760,
-        "sha256": "aaecb889d5c0e576c8ceb3cac115ec126864159d5b78913dd0753b2e6e5cabee"
+        "bytes": 11515,
+        "sha256": "a5ad3a9fc353edaffbc7102f99bfde3a27672c9b14dc006a73989092cb9ede09"
       },
       {
         "path": "packages/runtime-core/dist/command-event-ports.js",
-        "bytes": 10326,
-        "sha256": "e803429c51c40f407a82c9cf163d742e266db69b40848549ca1f31deea3b376d"
+        "bytes": 11766,
+        "sha256": "57992f04e6bf12002c6211d581cf4251818d22c76423dca33f55cdca2616ffc8"
       },
       {
         "path": "packages/runtime-core/dist/command-event-ports.js.map",
-        "bytes": 9571,
-        "sha256": "10b55d86d7f9be74e408cb66fa33bddd4e61c777a1fe04452a6760f25d4b3c94"
+        "bytes": 10348,
+        "sha256": "c595fd4cff55f74a20503ae1a0b841a4934def87b545aa82175505294293ecfc"
       },
       {
         "path": "packages/runtime-core/dist/command-event-ports.d.ts",
-        "bytes": 4541,
-        "sha256": "6f156c98ae7873846dcbb5a77fdb14e06187651c17d1075e85a9db67442a0bca"
+        "bytes": 5361,
+        "sha256": "28640b704a782d45bcadad368f9e77f017e1a898c6023ed1137290a4ab50edf3"
       },
       {
         "path": "packages/runtime-core/dist/command-event-ports.d.ts.map",
-        "bytes": 2699,
-        "sha256": "991162023b1c3832ce2bb0255f210fe61be1a9a7795cc911abbb11e92fa9422a"
+        "bytes": 2888,
+        "sha256": "dd942151f8d38f6927a22a2bfe928f4ef2eab73f871ac1a5c1a1142d1b5a6107"
       },
       {
         "path": "packages/runtime-core/dist/command-event-actions.js",
-        "bytes": 52089,
-        "sha256": "667c51383651816af13521c63f65a07315e107dc205d2151809cb7562e08c1a8"
+        "bytes": 53877,
+        "sha256": "336d211a0d56ffa2bd9686a94703eb770e17604ae1226089c5e2705a7c9e6f0f"
       },
       {
         "path": "packages/runtime-core/dist/command-event-actions.js.map",
-        "bytes": 42576,
-        "sha256": "4a3d15cf3aecee0b55d7d146d6f37edd92d9c071a8d90648fbcdc2c7bf5869c8"
+        "bytes": 43747,
+        "sha256": "b4cb5599bc92ba189ac2396079e0102a741c545b4016f6934a30322d6c6f90ed"
       },
       {
         "path": "packages/runtime-core/dist/command-event-actions.d.ts",
-        "bytes": 12096,
-        "sha256": "9d7a5a5dc69d7bd41e5daa52210f767e84b9823da15b22ff2a76b760fbd3f782"
+        "bytes": 13665,
+        "sha256": "0072d32f1675ef4b6bce73b8697b38ca4ba07bfd460028c8f0a03209865a9450"
       },
       {
         "path": "packages/runtime-core/dist/command-event-actions.d.ts.map",
-        "bytes": 8557,
-        "sha256": "a95ba355aa4e0a08378fa607622661f7070bf6a2a370ef6fb7cc2f4d4a002178"
+        "bytes": 9260,
+        "sha256": "3fe157f361fa4b2ea18b1607f635bc1890b66711dc849b3b59d43ed7c9948a49"
       },
       {
         "path": "scripts/lib/runtime-core-command-event-actions-proof.mjs",
-        "bytes": 106939,
-        "sha256": "261f61ecc0b656f3bfc6c14958dab6b7ac1b64cca220e4fd9faf89d73fa0851c"
+        "bytes": 119025,
+        "sha256": "bd86f68715eb1eb61372179ffda4a12ce51c69c981ffce44b4fb8d4fd4286ae1"
       },
       {
         "path": "scripts/generate-runtime-core-command-event-actions-proof.mjs",
@@ -420,8 +450,8 @@
       },
       {
         "path": "tests/runtime-core-command-event-actions.test.mjs",
-        "bytes": 12928,
-        "sha256": "c3658b81f463b80f97fa46d6d03f82cd2054731956ddcb641ab1db35165f8422"
+        "bytes": 19918,
+        "sha256": "3ec7171601b0bc4fdb3f10e58fee47fe378f25dfba40964feb2e076be10f9550"
       }
     ],
     "semanticOnlySharedInputs": [

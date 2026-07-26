@@ -625,7 +625,7 @@ before their envelopes are inspected.
 `mountRuntimeStateNavigationActions` binds exactly one active local-state lifetime to the trusted
 complete same-Bundle surface inventory and framework-neutral host boundary. The executor accepts
 one `state.set`, `state.toggle`, or managed-surface `navigate` action at a time; ordered action
-arrays and settlement turns remain the later M04-T13 composition boundary.
+arrays and settlement turns are composed by the later M04-T13 API documented below.
 
 ```ts
 import {
@@ -679,6 +679,12 @@ results become redacted `ADAPTER_FAILURE`. Accepted request identities are deter
 Successful navigation, including same-surface navigation, terminally disposes both this executor
 and its captured local-state lifetime; a minimal tombstone preserves deterministic late-call
 results without retaining live authority.
+
+The package-internal `readRuntimeStateNavigationActions` seam returns the executor's exact
+document, revision, surface, and currently published lower state snapshot without invoking host,
+token, diagnostic, navigation, or state-write code. It is deliberately absent from the package
+root: M04-T13 uses it only to authenticate surrendered child authority and obtain a fresh
+composition snapshot.
 
 ## M04-T11 guarded operation and resource action API
 
@@ -751,6 +757,12 @@ invalidates settlement tickets, and leaves no live operation queue gate. Physica
 retry, timeout, caching, and cross-manager provenance outside the two exact lifecycle namespaces
 remain later-profile work.
 
+The package-internal `readRuntimeOperationResourceActions` seam observes the compositor's exact
+document, revision, surface, and current lower resource and operation snapshots without host,
+token, diagnostic, action, effect, or generation work. Forged and disposed handles fail closed;
+reentrant observation returns `busy`. The seam is not exported from the package root before
+M04-T16's joint runtime contract.
+
 ## M04-T12 command and outbound host-event action API
 
 `createRuntimeCommandEventHostPorts` captures a separate synchronous, receiver-independent bridge
@@ -766,6 +778,20 @@ identifier under an opaque generation ticket. Multiple bounded instances may coe
 repeated source node, but `component.command` dispatches only when exactly one is live. Zero or
 multiple instances return a controlled unavailable result without choosing the first or last
 registration.
+
+`readRuntimeCommandEventActions` returns the exact current immutable registry snapshot by
+reference. It is callback-free, receiver-independent, and generation-neutral, so a composition
+root can observe registration changes before the first following command without invoking a host
+or deliberately failing one stale turn.
+
+Trusted adapter composition additionally uses package-internal, package-root-hidden seams. They
+read the manager's exact validated Catalog set, captured command/event port authority, and current
+registry snapshot; authenticate the aggregate port's exact component-command callback; and let an
+adapter consume exactly once the private factory marker attached to a normalized component-command
+request for that exact port owner. Replay, a foreign aggregate reusing the same callback, and
+authority retained beyond the synchronous callback all fail. Together these seams prevent a bridge
+from substituting Catalog or port authority, or calling its public structural command callback
+directly to bypass T12 command selection and input validation.
 
 ```ts
 import {
@@ -844,6 +870,41 @@ unregister transition. Hostile reflection and every callback boundary recheck th
 snapshot and lifetime. Disposal wins over a callback result, revokes all tickets, and leaves only
 minimal tombstones.
 
+## M04-T13 bounded action-turn API
+
+`prepareRuntimeActionProgram` detaches and recursively freezes the accepted action prefix before
+admission. A private route maps each prepared slot to exactly one M04-T10, M04-T11, or M04-T12
+child executor; callers cannot forge a runnable program or select a child through a structural
+lookalike. The preparation boundary observes at most 64 executable indices and records an overflow
+marker without touching the 65th entry or any later suffix.
+
+`mountRuntimeActionTurns` claims the exact current state, resource, operation, and command/event
+authorities for one surface-local coordinator. Child action executors are surrendered exclusively,
+so direct use or drift fails closed. `executeRuntimeActionTurn` admits a prepared depth-zero event
+turn and returns either a `started` or reentrant `queued` result with a native completion Promise
+that always fulfills with controlled immutable data. The coordinator refreshes all four current
+snapshots before every ordered slot while preserving the turn's lexical context, item,
+environment, and immediate event payload.
+
+Started turns, reentrant admissions, and asynchronous operation settlements share one finite FIFO.
+A false guard records `skipped` and continues; a controlled child failure stops before observing
+the next action. Successful navigation terminally ends the old surface and resolves queued
+old-surface work without dispatching it. Each operation settlement becomes a distinct turn at its
+captured ancestry depth with `event` unavailable. Its selected success or failure program cannot
+rewrite the already published operation result.
+
+Every observed M04-T11 settlement ticket crosses exactly one finalization attempt from a `finally`
+path, including empty handlers, controlled failure, overflow, navigation, disposal, and unexpected
+internal failure. A private ticket-keyed one-shot guard is recorded before the lower finalizer
+call. Native completion Promises and immutable emergency values are reserved at admission, while
+operation and resource settlement callbacks contain synchronous throws, returned-Promise
+rejections, and attachment failures. The default Reference Profile accepts the 64th action, 16th
+settlement level, and 64th synchronous transition; the next one stops with the stable
+`ACTION_LIMIT_EXCEEDED` diagnostic. Trusted profiles may lower queue, retained-action,
+retained-code-unit, generation, action, depth, and transition ceilings but cannot raise or remove
+them. `disposeRuntimeActionTurns` terminally closes the coordinator and every surrendered child
+authority while fulfilling all previously accepted event-turn completions.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -895,8 +956,10 @@ callback containment, and terminal navigation disposal. M04-T11 adds nonblocking
 and resource actions, acceptance-time settlement branches, bounded handler retention, and opaque
 acknowledgement tickets without exposing raw leases. M04-T12 adds Catalog-authorized generic
 component commands, ambiguity-safe live-target registration, and allowlisted application-event
-validation/emission through a separate synchronous bridge. Multi-action turn execution,
-settlement ticket finalization, incoming adapter events, reactive composition, rendering, and
+validation/emission through a separate synchronous bridge. M04-T13 adds immutable prepared
+programs, deterministic ordered action turns, reentrant and settlement FIFO admission, exact
+settlement ancestry and one-shot finalization, and finite action, depth, transition, queue,
+retention, and generation bounds. Incoming adapter events, reactive composition, rendering, and
 activation implementation remain assigned to their later tracked tasks.
 
 ## Protocol and target support
@@ -921,6 +984,7 @@ pnpm --filter @desen/runtime-core test:operation-lifecycle
 pnpm --filter @desen/runtime-core test:state-navigation-actions
 pnpm --filter @desen/runtime-core test:operation-resource-actions
 pnpm --filter @desen/runtime-core test:command-event-actions
+pnpm --filter @desen/runtime-core test:action-turns
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -933,5 +997,6 @@ pnpm verify:runtime-core-operation-lifecycle
 pnpm verify:runtime-core-state-navigation-actions
 pnpm verify:runtime-core-operation-resource-actions
 pnpm verify:runtime-core-command-event-actions
+pnpm verify:runtime-core-action-turns
 pnpm check
 ```

@@ -129,6 +129,23 @@ export type RuntimeStateNavigationActionsMountResult =
       readonly diagnostics: readonly DesenDiagnostic<string>[];
     }>;
 
+/**
+ * Current callback-free observation of one state/navigation executor lifetime.
+ *
+ * @internal This module export supports trusted package composition and is intentionally absent
+ * from the package root.
+ */
+export type RuntimeStateNavigationActionsReadResult =
+  | Readonly<{
+      readonly status: "read";
+      readonly documentId: string;
+      readonly revision: string;
+      readonly surfaceId: string;
+      readonly stateSnapshot: RuntimeSurfaceStateSnapshot;
+    }>
+  | Readonly<{ readonly status: "disposed" | "navigated" }>
+  | Readonly<{ readonly status: "invalid-handle" }>;
+
 /** A valid false guard that caused no payload read and no action effect. */
 export interface RuntimeActionSkipped {
   readonly status: "skipped";
@@ -780,6 +797,40 @@ export function mountRuntimeStateNavigationActions(
   const handle = Object.freeze({}) as RuntimeStateNavigationActionsHandle;
   EXECUTOR_AUTHORITIES.set(handle, authority);
   return Object.freeze({ status: "mounted", handle, stateSnapshot: authority.stateSnapshot });
+}
+
+/**
+ * Reads the exact identity and currently published state snapshot owned by this executor.
+ *
+ * @remarks The observation reads through to the lower state authority, so a newer valid state
+ * snapshot wins over the executor's cached reference. It is receiver-independent, invokes no
+ * host, token, diagnostic, navigation, or state-write callback, performs no effect, and advances
+ * no action or state generation.
+ *
+ * @internal This package-composition seam is intentionally absent from the package root.
+ */
+export function readRuntimeStateNavigationActions(
+  handle: RuntimeStateNavigationActionsHandle,
+): RuntimeStateNavigationActionsReadResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  const authority = EXECUTOR_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  if (authority.status !== "live") {
+    return Object.freeze({
+      status: authority.status === "navigated" ? "navigated" : "disposed",
+    });
+  }
+  const current = currentStateSnapshot(authority);
+  if (current.status !== "current") return Object.freeze({ status: "disposed" });
+  return Object.freeze({
+    status: "read",
+    documentId: authority.documentId,
+    revision: authority.revision,
+    surfaceId: authority.surfaceId,
+    stateSnapshot: current.snapshot,
+  });
 }
 
 /**

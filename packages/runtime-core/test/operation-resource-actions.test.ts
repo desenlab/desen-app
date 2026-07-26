@@ -14,6 +14,7 @@ import {
   executeRuntimeOperationResourceAction,
   finalizeRuntimeOperationActionSettlement,
   mountRuntimeOperationResourceActions,
+  readRuntimeOperationResourceActions,
 } from "../src/operation-resource-actions.js";
 import {
   disposeRuntimeSurfaceResources,
@@ -41,6 +42,7 @@ import type {
   RuntimeOperationActionSettlementTicket,
   RuntimeOperationResourceAction,
   RuntimeOperationResourceActionLimitProfile,
+  RuntimeOperationResourceActionsHandle,
 } from "../src/operation-resource-actions.js";
 import type {
   RuntimeSurfaceResourceSpec,
@@ -352,6 +354,63 @@ describe("M04-T11 mount and exclusive authority", () => {
     expect(token).not.toHaveBeenCalled();
     expect(report).not.toHaveBeenCalled();
     expect(Object.isFrozen(fixture.actions)).toBe(true);
+  });
+
+  it("reads exact compositor identity and current lower snapshots without callbacks or effects", () => {
+    const invoke = vi.fn(() => ({ status: "succeeded" as const, value: VALID_OUTPUT }));
+    const load = vi.fn(() => ({ status: "succeeded" as const, value: STORE_OUTPUT }));
+    const token = vi.fn(() => ({ status: "missing" as const }));
+    const report = vi.fn();
+    const fixture = mountedFixture({ invoke, load, token, report });
+    const detachedRead = readRuntimeOperationResourceActions;
+
+    const current = Reflect.apply(detachedRead, Object.freeze({ foreignReceiver: true }), [
+      fixture.actions.handle,
+    ]);
+    expect(current).toEqual({
+      status: "read",
+      documentId: DOCUMENT_ID,
+      revision: REVISION,
+      surfaceId: SURFACE_ID,
+      resourceSnapshot: fixture.resources.snapshot,
+      operationSnapshot: fixture.operations.snapshot,
+    });
+    expect(
+      readRuntimeOperationResourceActions(
+        Object.freeze({}) as RuntimeOperationResourceActionsHandle,
+      ),
+    ).toEqual({ status: "invalid-handle" });
+    expect(invoke).not.toHaveBeenCalled();
+    expect(load).not.toHaveBeenCalled();
+    expect(token).not.toHaveBeenCalled();
+    expect(report).not.toHaveBeenCalled();
+
+    disposeRuntimeOperationResourceActions(fixture.actions.handle);
+    expect(readRuntimeOperationResourceActions(fixture.actions.handle)).toEqual({
+      status: "disposed",
+    });
+  });
+
+  it("reports a reentrant read as busy without disturbing the active action", () => {
+    let nestedStatus = "";
+    const fixture = mountedFixture({
+      token() {
+        nestedStatus = readRuntimeOperationResourceActions(fixture.actions.handle).status;
+        return { status: "resolved", value: "secret" };
+      },
+    });
+
+    const result = execute(
+      fixture,
+      operationAction({
+        input: {
+          email: "person@example.com",
+          password: { $token: "shared" },
+        },
+      }),
+    );
+    expect(result.status).toBe("operation-started");
+    expect(nestedStatus).toBe("busy");
   });
 
   it.each([

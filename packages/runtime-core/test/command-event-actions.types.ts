@@ -2,10 +2,15 @@ import {
   disposeRuntimeCommandEventActions,
   executeRuntimeCommandEventAction,
   mountRuntimeCommandEventActions,
+  readRuntimeCommandEventActions,
+  readRuntimeCommandEventActionsForAdapterBridge,
   registerRuntimeComponentCommandTarget,
   unregisterRuntimeComponentCommandTarget,
 } from "../src/command-event-actions.js";
-import { createRuntimeCommandEventHostPorts } from "../src/command-event-ports.js";
+import {
+  consumeRuntimeComponentCommandHostRequestForAdapterBridge,
+  createRuntimeCommandEventHostPorts,
+} from "../src/command-event-ports.js";
 
 import type { DesenValidatedExecutionCatalogSet } from "@desen/validator";
 import type {
@@ -14,6 +19,7 @@ import type {
   RuntimeCommandEventActionResult,
   RuntimeCommandEventActionsHandle,
   RuntimeCommandEventActionsMountInput,
+  RuntimeCommandEventActionsReadResult,
   RuntimeCommandEventActionsSnapshot,
   RuntimeComponentCommandAction,
   RuntimeComponentCommandRegistrationTicket,
@@ -55,6 +61,35 @@ const portInput: RuntimeCommandEventHostPortsInput = {
   },
 };
 const commandEventPorts = createRuntimeCommandEventHostPorts(portInput);
+const callerCommandRequest: RuntimeComponentCommandHostRequest = {
+  context: {
+    documentId: "com.desen.types",
+    revision: `sha256:${"a".repeat(64)}`,
+    surfaceId: "sign-in",
+    requestId: "request-0",
+  },
+  sourceNodeId: "field",
+  runtimeInstanceId: "field-1",
+  capabilityId: "com.example.ui/TextField",
+  command: "focus",
+  input: {},
+};
+const callerCommandIsNormalized: boolean =
+  consumeRuntimeComponentCommandHostRequestForAdapterBridge(
+    callerCommandRequest,
+    commandEventPorts,
+  );
+void callerCommandIsNormalized;
+
+// @ts-expect-error package-internal command authority still requires the complete detached request
+const incompleteCommandRequest: RuntimeComponentCommandHostRequest = {
+  command: "focus",
+  input: {},
+};
+consumeRuntimeComponentCommandHostRequestForAdapterBridge(
+  incompleteCommandRequest,
+  commandEventPorts,
+);
 
 const mountInput: RuntimeCommandEventActionsMountInput = {
   documentId: "com.desen.types",
@@ -80,6 +115,18 @@ const mounted = mountRuntimeCommandEventActions(mountInput);
 if (mounted.status === "mounted") {
   const handle: RuntimeCommandEventActionsHandle = mounted.handle;
   const snapshot: RuntimeCommandEventActionsSnapshot = mounted.snapshot;
+  const read: RuntimeCommandEventActionsReadResult = readRuntimeCommandEventActions(handle);
+  if (read.status === "read") {
+    const currentSnapshot: RuntimeCommandEventActionsSnapshot = read.snapshot;
+    void currentSnapshot;
+  }
+  const bridgeRead = readRuntimeCommandEventActionsForAdapterBridge(handle);
+  if (bridgeRead.status === "read") {
+    const exactCatalogSet: DesenValidatedExecutionCatalogSet = bridgeRead.catalogSet;
+    const exactCommandEventPorts: RuntimeCommandEventHostPorts = bridgeRead.commandEventPorts;
+    const exactBridgeSnapshot: RuntimeCommandEventActionsSnapshot = bridgeRead.snapshot;
+    void [exactCatalogSet, exactCommandEventPorts, exactBridgeSnapshot];
+  }
   const registration = registerRuntimeComponentCommandTarget(handle, {
     sourceNodeId: "field",
     capabilityId: "com.example.ui/TextField",
@@ -122,6 +169,9 @@ void forgedHandle;
 // @ts-expect-error registration tickets are opaque one-registration authorities
 const forgedTicket: RuntimeComponentCommandRegistrationTicket = {};
 void forgedTicket;
+
+// @ts-expect-error registry reads accept only command/event manager authorities
+readRuntimeCommandEventActions({} as RuntimeComponentCommandRegistrationTicket);
 
 // @ts-expect-error component.command requires a static source target
 const commandWithoutTarget: RuntimeComponentCommandAction = {
@@ -248,6 +298,10 @@ const invalidLimits: RuntimeCommandEventActionLimitProfile = {
 };
 void invalidLimits;
 
+// @ts-expect-error adapter-bridge Catalog authority reads remain package-internal
+import { readRuntimeCommandEventActionsForAdapterBridge as leakedAdapterBridgeRead } from "../src/index.js";
+void leakedAdapterBridgeRead;
+
 declare const result: RuntimeCommandEventActionResult;
 // @ts-expect-error public action results are immutable
 result.status = "busy";
@@ -261,6 +315,18 @@ registrySnapshot.liveTargets.field?.instances.push({
   registrationGeneration: 2,
 });
 
+declare const registryRead: RuntimeCommandEventActionsReadResult;
+// @ts-expect-error public registry read results are immutable
+registryRead.status = "disposed";
+
 // @ts-expect-error normalized bridge invokers remain package-internal
 import { invokeRuntimeComponentCommandHostPort as leakedInvoker } from "../src/index.js";
 void leakedInvoker;
+
+// @ts-expect-error normalized request ownership consumers remain package-internal
+import { consumeRuntimeComponentCommandHostRequestForAdapterBridge as leakedNormalizedConsumer } from "../src/index.js";
+void leakedNormalizedConsumer;
+
+// @ts-expect-error exact component-port ownership probes remain package-internal
+import { isRuntimeCommandEventHostPortsForComponentCommandPort as leakedPortOwnerProbe } from "../src/index.js";
+void leakedPortOwnerProbe;

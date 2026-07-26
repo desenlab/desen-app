@@ -127,6 +127,23 @@ export interface RuntimeOperationResourceActionsHandle {
   readonly [RUNTIME_OPERATION_RESOURCE_ACTIONS_HANDLE_TYPE_BRAND]: true;
 }
 
+/** Package-internal callback-free observation used by the bounded turn coordinator. */
+export type RuntimeOperationResourceActionsReadResult =
+  | Readonly<{
+      readonly status: "read";
+      readonly documentId: string;
+      readonly revision: string;
+      readonly surfaceId: string;
+      readonly resourceSnapshot: RuntimeSurfaceResourcesSnapshot;
+      readonly operationSnapshot: RuntimeSurfaceOperationsSnapshot;
+    }>
+  | Readonly<{ readonly status: "resource-disposed" | "operation-disposed" | "busy" | "disposed" }>
+  | Readonly<{
+      readonly status: "invalid-authority";
+      readonly boundary: "operation" | "resource";
+    }>
+  | Readonly<{ readonly status: "invalid-handle" }>;
+
 /** Opaque one-shot ticket retained for M04-T13's settlement-turn `finally`. */
 export interface RuntimeOperationActionSettlementTicket {
   readonly [RUNTIME_OPERATION_ACTION_SETTLEMENT_TICKET_TYPE_BRAND]: true;
@@ -1225,6 +1242,40 @@ export function mountRuntimeOperationResourceActions(
     handle,
     resourceSnapshot: envelope.resourceSnapshot,
     operationSnapshot: envelope.operationSnapshot,
+  });
+}
+
+/**
+ * Reads the exact current child-manager authority without invoking a host or diagnostic callback.
+ *
+ * @remarks This package-internal composition seam performs no action, token lookup, effect, or
+ * generation transition. It is intentionally omitted from the package root until the complete
+ * M04-T16 runtime coordinator owns the public joint-snapshot contract.
+ */
+export function readRuntimeOperationResourceActions(
+  handle: RuntimeOperationResourceActionsHandle,
+): RuntimeOperationResourceActionsReadResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  const authority = ACTION_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  if (authority.status !== "live") return Object.freeze({ status: "disposed" });
+  if (authority.transitioning || authority.reporting) return Object.freeze({ status: "busy" });
+  const current = currentSnapshots(authority);
+  if (current.status === "resource-disposed" || current.status === "operation-disposed") {
+    return current;
+  }
+  if (current.status === "invalid") {
+    return Object.freeze({ status: "invalid-authority", boundary: current.boundary });
+  }
+  return Object.freeze({
+    status: "read",
+    documentId: authority.documentId,
+    revision: authority.revision,
+    surfaceId: authority.surfaceId,
+    resourceSnapshot: current.resourceSnapshot,
+    operationSnapshot: current.operationSnapshot,
   });
 }
 

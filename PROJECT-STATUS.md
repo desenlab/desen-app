@@ -210,14 +210,27 @@ payload boundary without charging a second command/event envelope and rejects 4,
 records the deliberately profiled target-liveness, contract, and bridge decisions. N-031 becomes
 `TESTED` for this outbound shell-event boundary; N-034 remains `PLANNED` for production-adapter
 parity. P-17 remains `PARTIAL`, and no proof-gate status changes.
+M04-T13 now composes the seven M04-T10–M04-T12 action kinds into one deterministic,
+surface-local turn coordinator without duplicating their guards, payload resolution, validation,
+or effects. Hostile input arrays become detached, immutable, factory-authenticated programs with
+private routes before admission. Started work, reentrant event turns, and asynchronous operation
+settlement turns share one bounded FIFO; current state, resource, operation, and command/event
+snapshots are refreshed before every ordered action while lexical context remains fixed. Every
+observed settlement ticket runs its selected event-free branch at the captured ancestry depth and
+crosses exactly one finalization attempt from a `finally` path. The 64th action, 16th settlement
+level, and 64th synchronous transition are accepted; the next one terminates with the stable
+`ACTION_LIMIT_EXCEEDED` diagnostic. Queue, retained-action, retained-code-unit, and generation
+limits are likewise finite and lower-only. `PF-043` records the frozen-text ownership gap without
+rewriting the protocol. N-032 becomes `TESTED`; N-014 and N-041 remain `PLANNED`, P-17 remains
+`PARTIAL`, and no proof-gate status changes.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M04 — Framework-neutral runtime core`
-- Overall implementation progress: `49 / 144 tasks complete (34%)`
-- M04 progress: `12 / 16 tasks complete (75%)`
+- Overall implementation progress: `50 / 144 tasks complete (35%)`
+- M04 progress: `13 / 16 tasks complete (81%)`
 - Proof-gate progress: `4 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -252,11 +265,12 @@ parity. P-17 remains `PARTIAL`, and no proof-gate status changes.
   `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`,
   `M04-T10 — state.set, state.toggle, and navigate actions`,
   `M04-T11 — operation.invoke settlement actions and resource.refresh`,
-  `M04-T12 — component.command and allowlisted event.emit`
+  `M04-T12 — component.command and allowlisted event.emit`,
+  `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`
-- Status: M04-T12 complete; ready for M04-T13
+- Next implementation task: `M04-T14 — Generic component/behavior event and command bridges`
+- Status: M04-T13 complete; ready for M04-T14
 
 ## Completed preparation
 
@@ -519,38 +533,55 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   accepted-only deterministic identity, reject/replace/FIFO queue behavior, bounded transports,
   staged settlement-handler invocation, manager-bound acknowledgement, stale-envelope
   containment, and terminal disposal. Fourteen direct trace assignments, 11 task-owned files, and
-  the cumulative 289/289 runtime-core suite protect the boundary. N-041 remains `PLANNED`, action
-  turns remain M04-T10–M04-T13, P-17 stays `PARTIAL`, and no proof-gate status changes.
-- The M04-T10 state/navigation boundary passes 42 focused package tests, 11 compiler-negative
-  cases, and 19 root proof/mutation tests. Four public runtime exports and 18 public types enforce
-  guard-first observation, action-local bounded token reuse, exact state authority, schema-safe
-  set/toggle, local-target-before-params navigation, deterministic accepted identity, host denial
-  and adapter containment, terminal same-surface success, and minimal late-call tombstones. Five
-  direct trace assignments, 16 task-owned files, and the cumulative 331/331 runtime-core suite
-  protect the boundary. Ordered turns and settlement dispatch remain M04-T11–M04-T13; full
-  cross-manager provenance remains M04-T16. N-041 stays `PLANNED`, P-17 stays `PARTIAL`, and no
+  the cumulative 289/289 runtime-core suite protect the boundary. N-041 remains `PLANNED`; action
+  dispatch and ordered turns are now proved through M04-T13. P-17 stays `PARTIAL`, and no
   proof-gate status changes.
-- The M04-T11 operation/resource action boundary passes 87 focused package tests, 24
-  compiler-negative cases, and 19 root proof/mutation tests. Four public runtime exports and 16
-  public types enforce guard-first alias and resource authorization, shared operation token
-  observation, separate refresh input scope, nonblocking acceptance, immutable settlement branch
-  capture, opaque acknowledgement tickets, and terminal disposal of both surrendered managers.
-  Pending tickets retain cumulative settlement, action, and handler-string capacity until explicit
-  finalization. Two direct trace assignments, 11 task-owned files, and the cumulative 418/418
-  runtime-core suite protect the boundary. Full action turns remain M04-T13 and full joint-origin
-  provenance remains M04-T16. N-041 stays `PLANNED`, P-17 stays `PARTIAL`, and no proof-gate status
-  changes.
-- The M04-T12 command/event action boundary passes 53 focused package tests, 21 compiler-negative
-  cases, and 19 root proof/mutation tests. Seven public runtime exports and 25 public types enforce
-  Catalog-authoritative command selection, exact input validation, unique live-target authority,
-  allowlist-then-validation-then-emission ordering, guard-first shared token observation, finite
-  registration and retained-identity bounds, exact 4,096-node aggregate request capture without a
-  second envelope tax, and terminal disposal. Twenty-four port probes, six direct trace
-  assignments, 16 task-owned files, 39/39 documented public declarations, and the cumulative
-  471/471 runtime-core suite protect the boundary. N-031 becomes `TESTED` for outbound shell
-  events; N-034 remains `PLANNED`. Ordered turns remain M04-T13, generic incoming bridges remain
-  M04-T14, and complete provenance remains M04-T16. P-17 stays `PARTIAL`, and no proof-gate status
-  changes.
+- The M04-T10 state/navigation boundary passes 44 focused package tests, 14 compiler-negative
+  cases, and 20 root proof/mutation tests. Four package-root runtime exports and 18 package-root
+  types enforce guard-first observation, action-local bounded token reuse, exact state authority,
+  schema-safe set/toggle, local-target-before-params navigation, deterministic accepted identity,
+  host denial, adapter containment, terminal same-surface success, and minimal late-call
+  tombstones. One internal runtime export and one internal type provide a callback-free
+  exact-current authority read without widening the package root. Five direct trace assignments, 16
+  task-owned files, and the cumulative 333/333 runtime-core suite protect the boundary. Ordered
+  turns and settlement dispatch are now composed by M04-T11–M04-T13; full cross-manager provenance
+  remains M04-T16. N-041 stays `PLANNED`, P-17 stays `PARTIAL`, and no proof-gate status changes.
+- The M04-T11 operation/resource action boundary passes 89 focused package tests, 26
+  compiler-negative cases, and 20 root proof/mutation tests. Four package-root runtime exports and
+  16 package-root types enforce guard-first alias and resource authorization, shared operation
+  token observation, separate refresh input scope, nonblocking acceptance, immutable settlement
+  branch capture, opaque acknowledgement tickets, and terminal disposal of both surrendered
+  managers. Two internal runtime exports and three internal types provide the callback-free current
+  compositor read and one-shot settlement finalizer. Pending tickets retain cumulative settlement,
+  action, and handler-string capacity until explicit finalization. Two direct trace assignments, 11
+  task-owned files, and the cumulative 422/422 runtime-core suite protect the boundary. M04-T13 now
+  proves full action turns and mandatory settlement finalization; full joint-origin provenance
+  remains M04-T16. N-041 stays `PLANNED`, P-17 stays `PARTIAL`, and no proof-gate status changes.
+- The M04-T12 command/event action boundary passes 58 focused package tests, 27 compiler-negative
+  cases, and 21 root proof/mutation tests. Eight package-root runtime exports and 26 package-root
+  types enforce Catalog-authoritative command selection, exact input validation, unique live-target
+  authority, allowlist-then-validation-then-emission ordering, guard-first shared token observation,
+  finite registration and retained-identity bounds, exact 4,096-node aggregate request capture
+  without a second envelope tax, terminal disposal, and a callback-free exact-current registry
+  read. Seven runtime exports and three types remain internal composition helpers; they bind the
+  exact manager Catalog, command/event ports, and registry snapshot to owner-specific one-shot
+  normalized command requests. Thirty-nine port probes, eight adapter-bridge read probes, six
+  direct trace assignments, 16 task-owned files, 44/44 documented module declarations, and the
+  cumulative 480/480 runtime-core suite protect the boundary. N-031 becomes `TESTED` for outbound
+  shell events; N-034 remains `PLANNED`. Ordered turns are now proved by M04-T13, generic incoming
+  bridges remain M04-T14, and complete provenance remains M04-T16. P-17 stays `PARTIAL`, and no
+  proof-gate status changes.
+- The M04-T13 action-turn boundary passes 43 focused package tests, 11 compiler-negative cases,
+  and 32 root proof/mutation tests. Five package-root runtime exports and 16 package-root types
+  enforce detached factory-authenticated programs, private single-child routing, guard-preserving
+  source order, current four-manager snapshots, reentrant and settlement FIFO work, event-free
+  settlement ancestry, ticket-keyed exactly-once finalization attempts, fulfillment-only native
+  completions, Promise callback containment, terminal navigation and disposal, and finite
+  lower-only action, depth, transition, queue, retention, and generation ceilings. Five direct
+  trace assignments, 11 task-owned files, 21/21 documented declarations, and the cumulative
+  523/523 runtime-core suite protect the boundary. N-032 becomes `TESTED`; N-014 and N-041 remain
+  `PLANNED`, P-17 stays `PARTIAL`, generic incoming bridges remain M04-T14, and no proof-gate
+  status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -571,12 +602,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`. Compose the
-single-action boundaries from M04-T10 through M04-T12 into deterministic ordered turns, enforce the
-64-action turn ceiling plus finite settlement-depth and repeated-transition limits, and finalize
-M04-T11's opaque settlement tickets from the new turn's `finally` path. Keep settlement actions in
-a distinct turn where the settled event is unavailable, and fail closed on recursive or repeated
-transition loops without stranding operation queue authority.
+Start `M04-T14 — Generic component/behavior event and command bridges with payload validation`.
+Connect incoming Catalog-declared component and behavior events to the bounded M04-T13 turn
+coordinator only after validating detached payloads against their exact contracts. Define the
+generic adapter-command registration boundary without exposing framework objects or guessing a
+repeated target. Keep reactive re-evaluation assigned to M04-T15 and complete cross-manager
+provenance and session tracing assigned to M04-T16.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -841,37 +872,59 @@ M04-T10 evidence:
 
 - `docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-state-navigation-actions.json`
-- artifact SHA-256: `9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67`
-- exact boundary: 4 runtime exports, 18 type exports, guard-first single-action observation, exact
-  state snapshot authority, schema-safe set/toggle, contained same-Bundle navigation, and terminal
-  disposal
-- executable evidence: 42 focused package tests, 11 compiler-negative cases, 19 root
-  proof/mutation tests, 5 direct trace assignments, 16 task-owned files, and a cumulative 331/331
+- artifact SHA-256: `f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140`
+- exact boundary: 4 package-root runtime exports, 18 package-root types, 1 internal runtime export
+  and 1 internal type for callback-free exact-current authority reads, guard-first single-action
+  observation, exact state snapshot authority, schema-safe set/toggle, contained same-Bundle
+  navigation, and terminal disposal
+- executable evidence: 44 focused package tests, 14 compiler-negative cases, 20 root
+  proof/mutation tests, 5 direct trace assignments, 16 task-owned files, and a cumulative 333/333
   runtime-core package suite
 
 M04-T11 evidence:
 
 - `docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-operation-resource-actions.json`
-- artifact SHA-256: `5315b174e4161f45eb69a2c5922dde6bddd175e8c467b62c244fd3dde2d669b5`
-- exact boundary: 4 public runtime exports, 16 public types, one internal settlement finalizer,
+- artifact SHA-256: `d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8`
+- exact boundary: 4 package-root runtime exports, 16 package-root types, 2 internal runtime exports
+  and 3 internal types for callback-free current compositor reads and one-shot finalization,
   guard-first operation/resource action dispatch, cumulative retained-handler bounds, opaque
   one-shot tickets, and terminal lower-manager ownership
-- executable evidence: 87 focused package tests, 24 compiler-negative cases, 19 root
-  proof/mutation tests, 2 direct trace assignments, 11 task-owned files, and a cumulative 418/418
+- executable evidence: 89 focused package tests, 26 compiler-negative cases, 20 root
+  proof/mutation tests, 2 direct trace assignments, 11 task-owned files, and a cumulative 422/422
   runtime-core package suite
 
 M04-T12 evidence:
 
 - `docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-command-event-actions.json`
-- artifact SHA-256: `a00107d5b33d32b941a33c6ae308373be5a1ccfe1182f7fa4e93993bea2cba19`
-- exact boundary: 7 public runtime exports, 25 public types, 39/39 documented public declarations,
-  a separate synchronous command/event bridge, Catalog-authoritative ambiguity-safe live
-  registration, exact command-input validation, and allowlist-to-validation-to-emission ordering
-- executable evidence: 53 focused package tests, 21 compiler-negative cases, 19 root
-  proof/mutation tests, 24 port probes, 6 direct trace assignments, 16 task-owned files, and a
-  cumulative 471/471 runtime-core package suite
+- artifact SHA-256: `8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4`
+- exact boundary: 8 package-root runtime exports, 26 package-root types, 7 internal runtime exports,
+  3 internal types, 44/44 documented module declarations, a callback-free exact-current registry
+  read, root-hidden exact Catalog/port/snapshot authority, owner-bound one-shot normalized command
+  authentication, a separate synchronous command/event bridge, Catalog-authoritative
+  ambiguity-safe live registration, exact command-input validation, and
+  allowlist-to-validation-to-emission ordering
+- executable evidence: 58 focused package tests, 27 compiler-negative cases, 21 root
+  proof/mutation tests, 39 port probes, 8 adapter-bridge read probes, 6 direct trace assignments, 16
+  task-owned files, and a cumulative 480/480 runtime-core package suite
+
+M04-T13 evidence:
+
+- `docs/proof/RUNTIME-CORE-ACTION-TURNS.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-action-turns.json`
+- artifact SHA-256: `e73604b678bdb35a12549e3a31fff628b9a83beb0ad735fb929aceba5885b240`
+- exact boundary: 5 package-root runtime exports, 16 package-root types, 21/21 documented
+  declarations, detached factory-authenticated programs, private child routing, deterministic
+  FIFO turns, current four-manager snapshots, settlement ancestry, ticket-keyed mandatory one-shot
+  finalization attempts, fulfillment-only accepted completion Promises, hostile settlement
+  callback containment, and finite lower-only action, depth, transition, queue, retention, and
+  generation limits
+- executable evidence: 43 focused package tests, 11 compiler-negative cases, 32 root
+  proof/mutation tests, 5 prepared-program probes, 7 mount probes, 9 dispatch probes, 11 order
+  probes, 15 snapshot probes, 27 queue probes, 32 settlement probes, 24 finalization probes,
+  15 limit probes, 12 disposal probes, 5 direct trace assignments, 11 task-owned files, and a
+  cumulative 523/523 runtime-core package suite
 
 ## Status vocabulary
 

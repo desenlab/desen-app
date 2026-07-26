@@ -27,7 +27,7 @@
       "task": "M04-T10",
       "result": "PASS",
       "artifact": "runtime-core-0.1.0-state-navigation-actions.json",
-      "artifactSha256": "9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67"
+      "artifactSha256": "f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140"
     },
     {
       "task": "M02-T11",
@@ -42,7 +42,8 @@
       "disposeRuntimeOperationResourceActions",
       "executeRuntimeOperationResourceAction",
       "finalizeRuntimeOperationActionSettlement",
-      "mountRuntimeOperationResourceActions"
+      "mountRuntimeOperationResourceActions",
+      "readRuntimeOperationResourceActions"
     ],
     "moduleTypeExports": [
       "RuntimeDeferredActionSpec",
@@ -61,6 +62,7 @@
       "RuntimeOperationResourceActionsMountInput",
       "RuntimeOperationResourceActionsMountInvalidReason",
       "RuntimeOperationResourceActionsMountResult",
+      "RuntimeOperationResourceActionsReadResult",
       "RuntimeResourceRefreshAction",
       "RuntimeResourceRefreshActionStarted"
     ],
@@ -88,7 +90,7 @@
       "RuntimeResourceRefreshAction",
       "RuntimeResourceRefreshActionStarted"
     ],
-    "tsdocDeclarations": 23,
+    "tsdocDeclarations": 25,
     "sourceImports": [
       "./action-evaluation.js",
       "./host-ports.js",
@@ -101,10 +103,14 @@
       "./value-resolution.js",
       "@desen/protocol"
     ],
-    "internalRuntimeExports": ["finalizeRuntimeOperationActionSettlement"],
+    "internalRuntimeExports": [
+      "finalizeRuntimeOperationActionSettlement",
+      "readRuntimeOperationResourceActions"
+    ],
     "internalTypeExports": [
       "RuntimeOperationActionSettlementFinalizationResult",
-      "RuntimeOperationActionSettlementTicket"
+      "RuntimeOperationActionSettlementTicket",
+      "RuntimeOperationResourceActionsReadResult"
     ]
   },
   "runtime": {
@@ -116,6 +122,7 @@
     "resourceProbes": 5,
     "snapshotProbes": 3,
     "ownershipProbes": 1,
+    "compositorReadProbes": 4,
     "retentionProbes": 14,
     "disposalProbes": 4,
     "receiverIndependenceProbes": 3,
@@ -154,10 +161,12 @@
     "proofDocument": "docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md"
   },
   "evidence": {
-    "focusedTestRegistrations": 59,
-    "focusedTests": 87,
+    "focusedTestRegistrations": 61,
+    "focusedTests": 89,
     "focusedTestTitles": [
       "mounts exact T08/T09 snapshots without invoking any host callback",
+      "reads exact compositor identity and current lower snapshots without callbacks or effects",
+      "reports a reentrant read as busy without disturbing the active action",
       "rejects an ABA-equal cloned %s snapshot",
       "rejects a foreign %s handle paired with the local snapshot",
       "rejects %s metadata mismatching both lower authorities",
@@ -217,9 +226,10 @@
       "resolves pending operation and resource work as disposed",
       "rejects forged compositor handles without touching live managers"
     ],
-    "compilerNegativeCases": 24,
+    "compilerNegativeCases": 26,
     "compilerNegativeLabels": [
       "compositor handles are opaque and cannot be forged structurally",
+      "compositor reads accept only their opaque action authority",
       "settlement tickets are opaque and cannot be forged structurally",
       "operation actions require the operation capability assertion",
       "operation actions require a surface-scoped alias",
@@ -242,9 +252,10 @@
       "settlement descriptors are immutable",
       "finalization accepts only the opaque T11 ticket",
       "the primitive executes one action, never a caller-owned action array",
-      "internal settlement finalization is absent from the package root API"
+      "internal settlement finalization is absent from the package root API",
+      "composition-root reads remain package-internal until M04-T16"
     ],
-    "rootMutationTests": 19,
+    "rootMutationTests": 20,
     "rootMutationTestTitles": [
       "accepts tracked deterministic M04-T11 operation/resource evidence",
       "builds byte-identical operation/resource evidence twice",
@@ -260,6 +271,7 @@
       "detects raw host and private lease leakage",
       "detects acknowledgement gate and ticket-finalization drift",
       "detects resource refresh snapshot and nonblocking drift",
+      "detects callback-free compositor read drift",
       "detects exclusive ownership and disposal drift",
       "detects task-owned byte drift",
       "detects semantic source ordering drift",
@@ -273,43 +285,43 @@
     "trackedFiles": [
       {
         "path": "packages/runtime-core/src/operation-resource-actions.ts",
-        "bytes": 64717,
-        "sha256": "80703b7a3704cfd6574cb6ef551aa50b412d8c612fe91503c1587168be102dcc"
+        "bytes": 66921,
+        "sha256": "b65524ae041998c7e7f098ae633875064a7cc5c158c1f1de56c22916682f6ed0"
       },
       {
         "path": "packages/runtime-core/test/operation-resource-actions.test.ts",
-        "bytes": 58825,
-        "sha256": "9cf66c7a23d19fd5da807c775018f31b2f0bae065c25074bd6555d54c2c9b602"
+        "bytes": 60974,
+        "sha256": "3a3a84ef0498435877756ef497ec816eede478461b11a668ba47424866853656"
       },
       {
         "path": "packages/runtime-core/test/operation-resource-actions.types.ts",
-        "bytes": 7796,
-        "sha256": "91fdbd9b7b7f525e2c543b119099ff928950c0cd26a2e07a3db07ba1d710c605"
+        "bytes": 8340,
+        "sha256": "6d7528da61dd1573a0e4dce5f8bfadcc6dccf2fb0d0a55253491a20e9d5c7720"
       },
       {
         "path": "packages/runtime-core/dist/operation-resource-actions.js",
-        "bytes": 50088,
-        "sha256": "2a4712d5eafd74b09730956d6d8c698b18416d0a07f20931030d3b92e7b2d866"
+        "bytes": 51586,
+        "sha256": "5c36151a954a2c85f45c178713580d7085d5dc6972de2a0be77d2fb1f1da6044"
       },
       {
         "path": "packages/runtime-core/dist/operation-resource-actions.js.map",
-        "bytes": 40718,
-        "sha256": "f6d578f7db34b6389a0bf1bb0dabf986b4db82e9d89450fa2600f9f75da5d74e"
+        "bytes": 41822,
+        "sha256": "16e0b85002dc71c5c7b6330d9a8abc4313e28fa6bf812dc155b5b1eea73c1886"
       },
       {
         "path": "packages/runtime-core/dist/operation-resource-actions.d.ts",
-        "bytes": 13284,
-        "sha256": "7fc9caac671bc940594ed039af8fc0a91cce07d26b87f8de4ba7089b698aa392"
+        "bytes": 14487,
+        "sha256": "3cef543d8885066f2a1259e7ff122fb3474a84f16cd36651c9fdca52c23ec006"
       },
       {
         "path": "packages/runtime-core/dist/operation-resource-actions.d.ts.map",
-        "bytes": 9296,
-        "sha256": "f2dc9ecac8dd41cb565b1f26d6b78c44e4f587da870f58c40a29ab658609e344"
+        "bytes": 9930,
+        "sha256": "14ddb8c3e3ecd9983f1ba39ad5d7188b40da4b62153eb5e755c4bedd42483cb4"
       },
       {
         "path": "scripts/lib/runtime-core-operation-resource-actions-proof.mjs",
-        "bytes": 76595,
-        "sha256": "e6ace6f06ed425b6158b03236e7e6e44aabbba7453b1a84403ccfd179ef57b56"
+        "bytes": 78603,
+        "sha256": "d51400e42e80a90d5f2ffa98c52941b988f5d21cbd447995a7b99c926d360b57"
       },
       {
         "path": "scripts/generate-runtime-core-operation-resource-actions-proof.mjs",
@@ -323,8 +335,8 @@
       },
       {
         "path": "tests/runtime-core-operation-resource-actions.test.mjs",
-        "bytes": 13290,
-        "sha256": "df22a740f5d0fc4770f36279b38bafc5e611a05cc8e7ec2adb8bd10c6c3c1ff7"
+        "bytes": 13899,
+        "sha256": "dc32295cafbb14adff11ef3ca03ec27754a17cbfc6e2103663dc5d30fdf75339"
       }
     ],
     "semanticOnlySharedInputs": [

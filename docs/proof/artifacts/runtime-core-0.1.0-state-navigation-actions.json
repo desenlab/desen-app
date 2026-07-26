@@ -63,7 +63,9 @@
       "RuntimeStateSetAction",
       "RuntimeStateToggleAction"
     ],
-    "tsdocDeclarations": 22,
+    "internalRuntimeExports": ["readRuntimeStateNavigationActions"],
+    "internalTypeExports": ["RuntimeStateNavigationActionsReadResult"],
+    "tsdocDeclarations": 24,
     "sourceImports": [
       "./action-evaluation.js",
       "./host-ports.js",
@@ -73,7 +75,37 @@
       "./token-format-resolution.js",
       "./value-resolution.js",
       "@desen/protocol"
-    ]
+    ],
+    "module": {
+      "runtimeExports": [
+        "RUNTIME_STATE_NAVIGATION_ACTION_LIMITS",
+        "disposeRuntimeStateNavigationActions",
+        "executeRuntimeStateNavigationAction",
+        "mountRuntimeStateNavigationActions",
+        "readRuntimeStateNavigationActions"
+      ],
+      "typeExports": [
+        "RuntimeActionGuardRejected",
+        "RuntimeActionPayloadRejected",
+        "RuntimeActionSkipped",
+        "RuntimeNavigateAction",
+        "RuntimeNavigationAdapterFailed",
+        "RuntimeNavigationDenied",
+        "RuntimeNavigationSucceeded",
+        "RuntimeStateActionApplied",
+        "RuntimeStateActionRejected",
+        "RuntimeStateNavigationAction",
+        "RuntimeStateNavigationActionResult",
+        "RuntimeStateNavigationActionsDisposeResult",
+        "RuntimeStateNavigationActionsHandle",
+        "RuntimeStateNavigationActionsMountInput",
+        "RuntimeStateNavigationActionsMountInvalidReason",
+        "RuntimeStateNavigationActionsMountResult",
+        "RuntimeStateNavigationActionsReadResult",
+        "RuntimeStateSetAction",
+        "RuntimeStateToggleAction"
+      ]
+    }
   },
   "internalActionEvaluation": {
     "runtimeExports": [
@@ -109,6 +141,7 @@
     "toctouProbes": 12,
     "reentrancyProbes": 14,
     "snapshotIdentityProbes": 5,
+    "currentReadProbes": 14,
     "disposalProbes": 8,
     "receiverIndependenceProbes": 3,
     "hostilePayloadReads": 0,
@@ -134,6 +167,7 @@
     "requestIdentity": "action: + RFC 8785 canonical [originSurfaceId, acceptedGeneration]",
     "navigationSuccess": "terminal for old executor and T06 state, including same-surface navigation",
     "explicitDisposal": "terminal and idempotent for executor and owned T06 state",
+    "currentRead": "package-internal callback-free identity and exact-current lower-state observation; absent from the package root",
     "retainedSnapshotProvenance": "state authority exact here; complete same-turn cross-manager provenance remains M04-T16",
     "actionTurnManager": null
   },
@@ -151,10 +185,12 @@
     "proofDocument": "docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md"
   },
   "evidence": {
-    "focusedTestRegistrations": 36,
-    "focusedTests": 42,
+    "focusedTestRegistrations": 38,
+    "focusedTests": 44,
     "focusedTestTitles": [
       "mounts an exact state lifetime and local surface inventory without invoking host callbacks",
+      "reads exact identity and current lower state without callbacks, effects, or generation drift",
+      "contains forged, foreign, externally revoked, disposed, and navigated read authorities",
       "rejects a %s local-surface inventory atomically",
       "rejects stale, foreign, disposed, and forged state authorities",
       "rechecks state after hostile host-port capture attempts to %s it",
@@ -191,7 +227,7 @@
       "rejects stale or foreign state/resolution snapshots before action inspection",
       "disposes idempotently, revokes owned state, and rejects forged handles"
     ],
-    "compilerNegativeCases": 11,
+    "compilerNegativeCases": 14,
     "compilerNegativeLabels": [
       "action executor handles are opaque and cannot be forged structurally",
       "action values are data-only ValueSpecs, never executable callbacks",
@@ -203,9 +239,12 @@
       "mount requires the exact current state snapshot",
       "public action results are immutable",
       "state snapshots supplied to the executor remain recursively readonly",
-      "the common evaluation seam is package-internal and absent from the root API"
+      "package-internal reads require the exact state/navigation executor authority",
+      "package-internal read outcomes are immutable",
+      "the common evaluation seam is package-internal and absent from the root API",
+      "the state/navigation authority read seam is absent from the root API"
     ],
-    "rootMutationTests": 19,
+    "rootMutationTests": 20,
     "rootMutationTestTitles": [
       "accepts tracked deterministic M04-T10 state/navigation evidence",
       "builds byte-identical state/navigation evidence twice",
@@ -225,6 +264,7 @@
       "detects explicit disposal and late-effect drift",
       "detects semantic source ordering drift",
       "detects public export, TSDoc, and platform drift",
+      "detects current-read seam and package-root non-leak drift",
       "detects focused-test and compiler-negative inventory drift"
     ],
     "traceRules": [
@@ -246,18 +286,18 @@
       },
       {
         "path": "packages/runtime-core/src/state-navigation-actions.ts",
-        "bytes": 41998,
-        "sha256": "ac046b82a6849928b457c3d74470851afb34f2877c679b15419a725d6bee9ec4"
+        "bytes": 43988,
+        "sha256": "89572aa16ee2922c6764c663aec63fe6ab38621b09ca7803c54c87bc3db14061"
       },
       {
         "path": "packages/runtime-core/test/state-navigation-actions.test.ts",
-        "bytes": 38450,
-        "sha256": "27aac8f9cd0e146e29b89de321f2e368359bb630502912d48bbb9c02805eff79"
+        "bytes": 41677,
+        "sha256": "bc2eb9fcde9bcec75b6cd1cc21566b285ef828ce99c9a5088c7a876a4a2fff7b"
       },
       {
         "path": "packages/runtime-core/test/state-navigation-actions.types.ts",
-        "bytes": 4136,
-        "sha256": "92b0cc6be31b65e7a5f3b5d2673616235cfbd95b1aeedf9a6c214f8de4508e6a"
+        "bytes": 5148,
+        "sha256": "dd123140200a5ad92638f46d037112cc56f53105f5b93ac6c6a98e98de8fe674"
       },
       {
         "path": "packages/runtime-core/dist/action-evaluation.js",
@@ -281,28 +321,28 @@
       },
       {
         "path": "packages/runtime-core/dist/state-navigation-actions.js",
-        "bytes": 31916,
-        "sha256": "eb2f11b270ad5c83db66bf803eee18bc75bfbaf3ec9232754e266ae2f175b0f4"
+        "bytes": 33300,
+        "sha256": "68beabcdd45fe83cca6d70cb337869b25bc410a20c6fc1f5b1b3eb61ff974dac"
       },
       {
         "path": "packages/runtime-core/dist/state-navigation-actions.js.map",
-        "bytes": 26638,
-        "sha256": "71375d19fb62c61a4ee1844d822f17eb40393b8c2e036fbb483adea135ece62b"
+        "bytes": 27513,
+        "sha256": "ee37d3b4e701ceafffa4277cadd467410dadc6da8bda74d32f5be670b5cfdc61"
       },
       {
         "path": "packages/runtime-core/dist/state-navigation-actions.d.ts",
-        "bytes": 8875,
-        "sha256": "5534b243b3dbdb53d3c72a681d45bb56831f2655a0279e1c18f7a27259184cc9"
+        "bytes": 10119,
+        "sha256": "3553feb87f8169ea237f26e1c881afd76c31404e530e064e03dd0ce2886d7038"
       },
       {
         "path": "packages/runtime-core/dist/state-navigation-actions.d.ts.map",
-        "bytes": 5357,
-        "sha256": "f5fddb82e9928c6f81c8bf3230efa7329f0f5ff07b5f238d11cf48ede4309b4d"
+        "bytes": 5820,
+        "sha256": "611390c31865b6975912ed8904c38b6fe8998e7652b7f1c33a14ff0869ec9a4e"
       },
       {
         "path": "scripts/lib/runtime-core-state-navigation-actions-proof.mjs",
-        "bytes": 97583,
-        "sha256": "28ab4a582c93fae9aad69a843832cc49e5ddbcb8bfde2435fc9f5c5a5b29a1db"
+        "bytes": 103112,
+        "sha256": "15b38256465916d13fe17e442f221f97397801dce5a46a5e7a6ab9298cb00f09"
       },
       {
         "path": "scripts/generate-runtime-core-state-navigation-actions-proof.mjs",
@@ -316,8 +356,8 @@
       },
       {
         "path": "tests/runtime-core-state-navigation-actions.test.mjs",
-        "bytes": 14509,
-        "sha256": "8ba98643792decc62d6a4601f11992212499c05f370a81eeae1bfc6cfd08d30b"
+        "bytes": 16676,
+        "sha256": "743e4280c2523e654820ebbb29ca260eb00d09431aca1b3508d9a90ecda546ec"
       }
     ],
     "semanticOnlySharedInputs": [

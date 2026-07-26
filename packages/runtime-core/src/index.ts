@@ -64,10 +64,18 @@ export {
   disposeRuntimeCommandEventActions,
   executeRuntimeCommandEventAction,
   mountRuntimeCommandEventActions,
+  readRuntimeCommandEventActions,
   registerRuntimeComponentCommandTarget,
   RUNTIME_COMMAND_EVENT_ACTION_LIMITS,
   unregisterRuntimeComponentCommandTarget,
 } from "./command-event-actions.js";
+export {
+  disposeRuntimeActionTurns,
+  executeRuntimeActionTurn,
+  mountRuntimeActionTurns,
+  prepareRuntimeActionProgram,
+  RUNTIME_ACTION_TURN_LIMITS,
+} from "./action-turns.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -309,6 +317,7 @@ export type {
   RuntimeCommandEventActionsHandle,
   RuntimeCommandEventActionsMountInput,
   RuntimeCommandEventActionsMountResult,
+  RuntimeCommandEventActionsReadResult,
   RuntimeCommandEventActionsSnapshot,
   RuntimeComponentCommandAction,
   RuntimeComponentCommandRegistrationTicket,
@@ -319,3 +328,22 @@ export type {
   RuntimeHostEventEmitAction,
   RuntimeRegisteredComponentCommandTargetSnapshot,
 } from "./command-event-actions.js";
+
+export type {
+  RuntimeActionTurnCompletion,
+  RuntimeActionTurnExecutionResult,
+  RuntimeActionTurnLimitProfile,
+  RuntimeActionTurnProgram,
+  RuntimeActionTurnProgramPreparationResult,
+  RuntimeActionTurnQueued,
+  RuntimeActionTurnRequest,
+  RuntimeActionTurnStarted,
+  RuntimeActionTurnStep,
+  RuntimeActionTurnTerminationReason,
+  RuntimeActionTurnsDisposeResult,
+  RuntimeActionTurnsHandle,
+  RuntimeActionTurnsMountInput,
+  RuntimeActionTurnsMountInvalidReason,
+  RuntimeActionTurnsMountResult,
+  RuntimeActionTurnsSnapshot,
+} from "./action-turns.js";

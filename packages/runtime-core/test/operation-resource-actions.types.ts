@@ -3,6 +3,7 @@ import {
   executeRuntimeOperationResourceAction,
   finalizeRuntimeOperationActionSettlement,
   mountRuntimeOperationResourceActions,
+  readRuntimeOperationResourceActions,
 } from "../src/operation-resource-actions.js";
 
 import type { RuntimeHostPorts } from "../src/host-ports.js";
@@ -20,6 +21,7 @@ import type {
   RuntimeOperationResourceActionResult,
   RuntimeOperationResourceActionsHandle,
   RuntimeOperationResourceActionsMountInput,
+  RuntimeOperationResourceActionsReadResult,
   RuntimeResourceRefreshAction,
 } from "../src/operation-resource-actions.js";
 import type {
@@ -68,12 +70,17 @@ if (mounted.status === "mounted") {
     resourceSnapshot,
     operationSnapshot,
   );
-  void [result, disposeRuntimeOperationResourceActions(handle)];
+  const read: RuntimeOperationResourceActionsReadResult =
+    readRuntimeOperationResourceActions(handle);
+  void [result, read, disposeRuntimeOperationResourceActions(handle)];
 }
 
 // @ts-expect-error compositor handles are opaque and cannot be forged structurally
 const forgedHandle: RuntimeOperationResourceActionsHandle = {};
 void forgedHandle;
+
+// @ts-expect-error compositor reads accept only their opaque action authority
+readRuntimeOperationResourceActions({} as RuntimeOperationActionSettlementTicket);
 
 // @ts-expect-error settlement tickets are opaque and cannot be forged structurally
 const forgedTicket: RuntimeOperationActionSettlementTicket = {};
@@ -241,3 +248,7 @@ executeRuntimeOperationResourceAction(
 // @ts-expect-error internal settlement finalization is absent from the package root API
 import { finalizeRuntimeOperationActionSettlement as leakedFinalizer } from "../src/index.js";
 void leakedFinalizer;
+
+// @ts-expect-error composition-root reads remain package-internal until M04-T16
+import { readRuntimeOperationResourceActions as leakedRead } from "../src/index.js";
+void leakedRead;

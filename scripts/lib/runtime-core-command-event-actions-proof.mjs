@@ -16,6 +16,10 @@ const RUNTIME_PORT_INTERNAL_API_URL = new URL(
   "../../packages/runtime-core/dist/command-event-ports.js",
   import.meta.url,
 );
+const RUNTIME_ACTION_INTERNAL_API_URL = new URL(
+  "../../packages/runtime-core/dist/command-event-actions.js",
+  import.meta.url,
+);
 const VALIDATOR_API_URL = new URL("../../packages/validator/dist/index.js", import.meta.url);
 const CATALOG_PATH = "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
 
@@ -29,7 +33,7 @@ const STATE_NAVIGATION_PREREQUISITE = Object.freeze({
   task: "M04-T10",
   path: "docs/proof/artifacts/runtime-core-0.1.0-state-navigation-actions.json",
   artifact: "runtime-core-0.1.0-state-navigation-actions.json",
-  sha256: "9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67",
+  sha256: "f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140",
 });
 const EXECUTION_CONTRACT_PREREQUISITE = Object.freeze({
   task: "M02-T11",
@@ -45,10 +49,12 @@ const INTERACTION_CONTRACT_PREREQUISITE = Object.freeze({
 });
 
 const EXPECTED_PORT_MODULE_RUNTIME_EXPORTS = Object.freeze([
+  "consumeRuntimeComponentCommandHostRequestForAdapterBridge",
   "createRuntimeCommandEventHostPorts",
   "emitRuntimeHostEventHostPort",
   "invokeRuntimeComponentCommandHostPort",
   "isRuntimeCommandEventHostPorts",
+  "isRuntimeCommandEventHostPortsForComponentCommandPort",
   "validateRuntimeHostEventHostPort",
 ]);
 const EXPECTED_PORT_MODULE_TYPE_EXPORTS = Object.freeze([
@@ -78,9 +84,11 @@ const EXPECTED_PORT_ROOT_TYPE_EXPORTS = Object.freeze([
   "RuntimeHostEventValidationResult",
 ]);
 const PORT_INTERNAL_RUNTIME_EXPORTS = Object.freeze([
+  "consumeRuntimeComponentCommandHostRequestForAdapterBridge",
   "emitRuntimeHostEventHostPort",
   "invokeRuntimeComponentCommandHostPort",
   "isRuntimeCommandEventHostPorts",
+  "isRuntimeCommandEventHostPortsForComponentCommandPort",
   "validateRuntimeHostEventHostPort",
 ]);
 const PORT_INTERNAL_TYPE_EXPORTS = Object.freeze([
@@ -93,6 +101,8 @@ const EXPECTED_ACTION_MODULE_RUNTIME_EXPORTS = Object.freeze([
   "disposeRuntimeCommandEventActions",
   "executeRuntimeCommandEventAction",
   "mountRuntimeCommandEventActions",
+  "readRuntimeCommandEventActions",
+  "readRuntimeCommandEventActionsForAdapterBridge",
   "registerRuntimeComponentCommandTarget",
   "unregisterRuntimeComponentCommandTarget",
 ]);
@@ -104,6 +114,7 @@ const EXPECTED_ACTION_MODULE_TYPE_EXPORTS = Object.freeze([
   "RuntimeCommandEventActionsHandle",
   "RuntimeCommandEventActionsMountInput",
   "RuntimeCommandEventActionsMountResult",
+  "RuntimeCommandEventActionsReadResult",
   "RuntimeCommandEventActionsSnapshot",
   "RuntimeComponentCommandAction",
   "RuntimeComponentCommandRegistrationTicket",
@@ -114,9 +125,19 @@ const EXPECTED_ACTION_MODULE_TYPE_EXPORTS = Object.freeze([
   "RuntimeHostEventEmitAction",
   "RuntimeRegisteredComponentCommandTargetSnapshot",
 ]);
-const EXPECTED_ACTION_ROOT_RUNTIME_EXPORTS = EXPECTED_ACTION_MODULE_RUNTIME_EXPORTS;
+const EXPECTED_ACTION_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  "RUNTIME_COMMAND_EVENT_ACTION_LIMITS",
+  "disposeRuntimeCommandEventActions",
+  "executeRuntimeCommandEventAction",
+  "mountRuntimeCommandEventActions",
+  "readRuntimeCommandEventActions",
+  "registerRuntimeComponentCommandTarget",
+  "unregisterRuntimeComponentCommandTarget",
+]);
 const EXPECTED_ACTION_ROOT_TYPE_EXPORTS = EXPECTED_ACTION_MODULE_TYPE_EXPORTS;
-const ACTION_INTERNAL_RUNTIME_EXPORTS = Object.freeze([]);
+const ACTION_INTERNAL_RUNTIME_EXPORTS = Object.freeze([
+  "readRuntimeCommandEventActionsForAdapterBridge",
+]);
 const ACTION_INTERNAL_TYPE_EXPORTS = Object.freeze([]);
 const EXPECTED_PORT_SOURCE_IMPORTS = Object.freeze([
   "./host-ports.js",
@@ -135,8 +156,8 @@ const EXPECTED_ACTION_SOURCE_IMPORTS = Object.freeze([
   "@desen/protocol",
   "@desen/validator",
 ]);
-const EXPECTED_FOCUSED_TESTS = 53;
-const EXPECTED_COMPILER_NEGATIVE_CASES = 21;
+const EXPECTED_FOCUSED_TESTS = 58;
+const EXPECTED_COMPILER_NEGATIVE_CASES = 27;
 
 const EXPECTED_TRACE_RULES = Object.freeze([
   Object.freeze({
@@ -185,6 +206,8 @@ const REQUIRED_PROOF_TEXT = Object.freeze([
   "allowlist",
   "validate",
   "receiver",
+  "factory-authenticated marker",
+  "foreign port aggregate",
   "opaque",
   "ABA",
   "exactly one",
@@ -209,12 +232,14 @@ const REQUIRED_ROOT_TEST_TITLES = Object.freeze([
   "detects outbound allowlist and validation-before-emission drift",
   "detects synchronous receiver-independent port drift",
   "detects target-ticket generation, ambiguity, and ABA drift",
+  "detects callback-free current registry read drift",
   "detects command/event TOCTOU and reentry drift",
   "detects diagnostics and adapter-redaction drift",
   "detects finite registration and request bounds drift",
   "detects terminal disposal and late-callback drift",
   "detects task-owned byte drift",
   "detects public export, TSDoc, internal non-leak, and platform drift",
+  "detects adapter-bridge Catalog, port, and package-root authority drift",
   "detects focused-test and compiler-negative inventory drift",
 ]);
 const TRACKED_PATHS = Object.freeze([
@@ -788,6 +813,7 @@ function verifyPortsSourceInvariants(sourceText) {
   const parsed = sourceFile(sourceText, "command-event-ports.ts");
   const normalized = normalizeSource(sourceText);
   positionOf(normalized, "const PORT_AUTHORITIES = new WeakMap");
+  positionOf(normalized, "const NORMALIZED_COMPONENT_COMMAND_REQUESTS = new WeakMap");
   positionOf(normalized, "Object.getOwnPropertyDescriptor");
   positionOf(normalized, "Reflect.ownKeys");
   positionOf(normalized, "snapshotRuntimeJsonValue");
@@ -898,6 +924,40 @@ function verifyPortsSourceInvariants(sourceText) {
     "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
   );
 
+  const consumeNormalizedCommand = functionSource(
+    parsed,
+    "consumeRuntimeComponentCommandHostRequestForAdapterBridge",
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
+  assertOrder(
+    consumeNormalizedCommand,
+    [
+      "NORMALIZED_COMPONENT_COMMAND_REQUESTS.get(request) === expectedPorts",
+      "if (normalized) NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(request);",
+      "return normalized;",
+    ],
+    "One-shot normalized command-request consumption",
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
+
+  const componentCommandPortAuthority = functionSource(
+    parsed,
+    "isRuntimeCommandEventHostPortsForComponentCommandPort",
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
+  assertOrder(
+    componentCommandPortAuthority,
+    [
+      "PORT_AUTHORITIES.get(ports)",
+      'captureCallback(commands, "invoke")',
+      "authority !== undefined",
+      "invokeCommand !== undefined",
+      "authority.invokeCommand === invokeCommand",
+    ],
+    "Exact captured component-command port authority",
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
+
   for (const [name, callback, statuses] of [
     [
       "invokeRuntimeComponentCommandHostPort",
@@ -933,9 +993,29 @@ function verifyPortsSourceInvariants(sourceText) {
       "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
     );
   }
+  const commandInvoke = functionSource(
+    parsed,
+    "invokeRuntimeComponentCommandHostPort",
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
+  assertOrder(
+    commandInvoke,
+    [
+      "const captured = capturedCommandRequest(request);",
+      "NORMALIZED_COMPONENT_COMMAND_REQUESTS.set(captured, ports);",
+      "Reflect.apply(authority.invokeCommand, undefined, [captured])",
+      "} finally {",
+      "NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(captured);",
+      'closedStatus(raw, ["succeeded", "denied"])',
+    ],
+    "Normalized command-request factory authority",
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
 
   return Object.freeze({
     authorityStore: "private WeakMap",
+    normalizedCommandRequestAuthority: "private owner-bound one-shot WeakMap",
+    componentCommandPortAuthority: "exact captured callback identity",
     receiver: null,
     inputCapture: "exact own enumerable data properties",
     requestCapture: "metadata/context and runtime-bounded input or payload detached independently",
@@ -1000,6 +1080,38 @@ function verifyActionsSourceInvariants(sourceText) {
       "ACTION_AUTHORITIES.set(handle, authority);",
     ],
     "Command/event mount authority",
+  );
+
+  const read = functionSource(parsed, "readRuntimeCommandEventActions");
+  assertOrder(
+    read,
+    [
+      'typeof handle !== "object" || handle === null',
+      "ACTION_AUTHORITIES.get(handle)",
+      'authority.status === "live"',
+      'status: "read", snapshot: authority.snapshot',
+      'status: "disposed"',
+    ],
+    "Callback-free current command/event registry read",
+  );
+
+  const adapterBridgeRead = functionSource(
+    parsed,
+    "readRuntimeCommandEventActionsForAdapterBridge",
+  );
+  assertOrder(
+    adapterBridgeRead,
+    [
+      'typeof handle !== "object" || handle === null',
+      "ACTION_AUTHORITIES.get(handle)",
+      'authority.status === "live"',
+      'status: "read"',
+      "catalogSet: authority.catalogSet",
+      "commandEventPorts: authority.commandEventPorts",
+      "snapshot: authority.snapshot",
+      'status: "disposed"',
+    ],
+    "Callback-free exact Catalog, command-port, and registry adapter-bridge read",
   );
 
   const register = functionSource(parsed, "registerRuntimeComponentCommandTarget");
@@ -1075,6 +1187,8 @@ function verifyActionsSourceInvariants(sourceText) {
     staticAuthority: "exact prepared Catalog component command inventory",
     targetAuthority: "opaque per-instance ticket and monotonic generation",
     targetCardinality: "dispatch iff exactly one instance is live",
+    adapterBridgeRead:
+      "package-internal callback-free exact Catalog, command-port, and current registry authorities",
     transitionLock: "before hostile request observation",
     mutationPreflight: "finite generations before tickets, counters, registries, or snapshots",
   });
@@ -1481,14 +1595,15 @@ function requestContext(requestId) {
 function probePortBehavior(api, portApi) {
   const calls = [];
   const receivers = [];
-  const ports = api.createRuntimeCommandEventHostPorts({
-    commands: {
-      invoke(request) {
-        receivers.push(this);
-        calls.push(["command", request]);
-        return { status: "succeeded" };
-      },
+  const componentCommandPort = Object.freeze({
+    invoke(request) {
+      receivers.push(this);
+      calls.push(["command", request]);
+      return { status: "succeeded" };
     },
+  });
+  const ports = api.createRuntimeCommandEventHostPorts({
+    commands: componentCommandPort,
     events: {
       validate(request) {
         receivers.push(this);
@@ -1703,10 +1818,162 @@ function probePortBehavior(api, portApi) {
       "Factory-authenticated port authority changed.",
     );
   }
+  let componentPortGetterReads = 0;
+  const accessorComponentPort = Object.defineProperty({}, "invoke", {
+    enumerable: true,
+    get() {
+      componentPortGetterReads += 1;
+      return componentCommandPort.invoke;
+    },
+  });
+  const exactComponentPort = portApi.isRuntimeCommandEventHostPortsForComponentCommandPort(
+    ports,
+    componentCommandPort,
+  );
+  const foreignComponentPort = portApi.isRuntimeCommandEventHostPortsForComponentCommandPort(
+    ports,
+    Object.freeze({ invoke: () => ({ status: "succeeded" }) }),
+  );
+  const accessorComponentPortResult = portApi.isRuntimeCommandEventHostPortsForComponentCommandPort(
+    ports,
+    accessorComponentPort,
+  );
+  if (
+    exactComponentPort !== true ||
+    foreignComponentPort !== false ||
+    accessorComponentPortResult !== false ||
+    componentPortGetterReads !== 0
+  ) {
+    fail(
+      "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
+      "Aggregate host-port authority no longer authenticates its exact component-command callback.",
+      {
+        exactComponentPort,
+        foreignComponentPort,
+        accessorComponentPortResult,
+        componentPortGetterReads,
+      },
+    );
+  }
+
+  const normalizedConsumption = [];
+  let normalizedPorts;
+  const sharedNormalizedCommandPort = Object.freeze({
+    invoke(request) {
+      normalizedConsumption.push(
+        portApi.consumeRuntimeComponentCommandHostRequestForAdapterBridge(request, normalizedPorts),
+        portApi.consumeRuntimeComponentCommandHostRequestForAdapterBridge(request, normalizedPorts),
+      );
+      return { status: "succeeded" };
+    },
+  });
+  normalizedPorts = api.createRuntimeCommandEventHostPorts({
+    commands: sharedNormalizedCommandPort,
+    events: {
+      validate: () => ({ status: "valid" }),
+      emit: () => ({ status: "succeeded" }),
+    },
+  });
+  const foreignNormalizedPorts = api.createRuntimeCommandEventHostPorts({
+    commands: sharedNormalizedCommandPort,
+    events: {
+      validate: () => ({ status: "valid" }),
+      emit: () => ({ status: "succeeded" }),
+    },
+  });
+  const callerConsumption = portApi.consumeRuntimeComponentCommandHostRequestForAdapterBridge(
+    commandRequest,
+    normalizedPorts,
+  );
+  const normalizedResult = portApi.invokeRuntimeComponentCommandHostPort(
+    normalizedPorts,
+    commandRequest,
+  );
+  const foreignNormalizedResult = portApi.invokeRuntimeComponentCommandHostPort(
+    foreignNormalizedPorts,
+    commandRequest,
+  );
+  if (
+    callerConsumption !== false ||
+    !isDeepStrictEqual(normalizedConsumption, [true, false, false, false]) ||
+    !isDeepStrictEqual(plainData(normalizedResult), { status: "succeeded" }) ||
+    !isDeepStrictEqual(plainData(foreignNormalizedResult), { status: "succeeded" })
+  ) {
+    fail(
+      "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
+      "Normalized command request did not carry one exact-owner factory authentication.",
+      {
+        callerConsumption,
+        normalizedConsumption,
+        normalizedResult: plainData(normalizedResult),
+        foreignNormalizedResult: plainData(foreignNormalizedResult),
+      },
+    );
+  }
+
+  let unconsumedNormalizedRequest;
+  const unconsumedPorts = api.createRuntimeCommandEventHostPorts({
+    commands: {
+      invoke(request) {
+        unconsumedNormalizedRequest = request;
+        return { status: "succeeded" };
+      },
+    },
+    events: {
+      validate: () => ({ status: "valid" }),
+      emit: () => ({ status: "succeeded" }),
+    },
+  });
+  const unconsumedResult = portApi.invokeRuntimeComponentCommandHostPort(
+    unconsumedPorts,
+    commandRequest,
+  );
+  const afterSuccessfulCallback = portApi.consumeRuntimeComponentCommandHostRequestForAdapterBridge(
+    unconsumedNormalizedRequest,
+    unconsumedPorts,
+  );
+
+  let thrownNormalizedRequest;
+  const throwingPorts = api.createRuntimeCommandEventHostPorts({
+    commands: {
+      invoke(request) {
+        thrownNormalizedRequest = request;
+        throw new Error("normalized-request-lifetime");
+      },
+    },
+    events: {
+      validate: () => ({ status: "valid" }),
+      emit: () => ({ status: "succeeded" }),
+    },
+  });
+  const thrownResult = portApi.invokeRuntimeComponentCommandHostPort(throwingPorts, commandRequest);
+  const afterThrowingCallback = portApi.consumeRuntimeComponentCommandHostRequestForAdapterBridge(
+    thrownNormalizedRequest,
+    throwingPorts,
+  );
+  if (
+    !isDeepStrictEqual(plainData(unconsumedResult), { status: "succeeded" }) ||
+    afterSuccessfulCallback !== false ||
+    !isDeepStrictEqual(plainData(thrownResult), { status: "adapter-failed" }) ||
+    afterThrowingCallback !== false
+  ) {
+    fail(
+      "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
+      "Normalized command authority escaped its synchronous callback lifetime.",
+      {
+        unconsumedResult: plainData(unconsumedResult),
+        afterSuccessfulCallback,
+        thrownResult: plainData(thrownResult),
+        afterThrowingCallback,
+      },
+    );
+  }
   return Object.freeze({
-    probes: 24,
+    probes: 39,
     callbackCalls: calls.length,
     receiverIndependenceProbes: receivers.length,
+    componentCommandPortAuthorityProbes: 4,
+    normalizedCommandAuthorityProbes: 11,
     malformedResultProbes: 3,
     exactContextProbes: 1,
     standaloneJsonBoundaryProbes: 6,
@@ -1779,6 +2046,7 @@ function mustMountCommandEventFixture(
     handle: mounted.handle,
     snapshot: mounted.snapshot,
     resolutionSnapshot: createResolutionSnapshot(api),
+    commandEventPorts,
   };
 }
 
@@ -1811,13 +2079,15 @@ function executeAction(api, fixture, action) {
   );
 }
 
-function probeRuntimeBehavior(api, validatorApi, catalogText) {
+function probeRuntimeBehavior(api, actionInternalApi, validatorApi, catalogText) {
   const prepared = prepareCatalog(validatorApi, catalogText);
   let guardFirstProbes = 0;
   let tokenSessionProbes = 0;
   let commandAuthorizationProbes = 0;
   let eventPolicyProbes = 0;
   let targetAuthorityProbes = 0;
+  let registryReadProbes = 0;
+  let adapterBridgeReadProbes = 0;
   let reentryProbes = 0;
   let finiteBoundProbes = 0;
   let disposalProbes = 0;
@@ -1949,6 +2219,38 @@ function probeRuntimeBehavior(api, validatorApi, catalogText) {
   {
     const fixture = mustMountCommandEventFixture(api, prepared.catalogSet);
     const initialSnapshot = fixture.snapshot;
+    const initialRead = Reflect.apply(
+      api.readRuntimeCommandEventActions,
+      Object.freeze({ foreignReceiver: true }),
+      [fixture.handle],
+    );
+    const initialBridgeRead = Reflect.apply(
+      actionInternalApi.readRuntimeCommandEventActionsForAdapterBridge,
+      Object.freeze({ foreignReceiver: true }),
+      [fixture.handle],
+    );
+    const forgedRead = api.readRuntimeCommandEventActions(Object.freeze({}));
+    const forgedBridgeRead = actionInternalApi.readRuntimeCommandEventActionsForAdapterBridge(
+      Object.freeze({}),
+    );
+    if (
+      initialRead.status !== "read" ||
+      initialRead.snapshot !== initialSnapshot ||
+      initialRead.snapshot.generation !== 0 ||
+      forgedRead.status !== "invalid-handle" ||
+      initialBridgeRead.status !== "read" ||
+      initialBridgeRead.catalogSet !== prepared.catalogSet ||
+      initialBridgeRead.commandEventPorts !== fixture.commandEventPorts ||
+      initialBridgeRead.snapshot !== initialSnapshot ||
+      !Object.isFrozen(initialBridgeRead) ||
+      forgedBridgeRead.status !== "invalid-handle"
+    ) {
+      fail(
+        "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+        "Callback-free registry or adapter-bridge read did not preserve exact initial authority.",
+      );
+    }
+    adapterBridgeReadProbes += 5;
     const invalidIdentity = registerTarget(api, fixture, "map", MAP_CAPABILITY, "\ud800");
     if (
       invalidIdentity.status !== "malformed-request" ||
@@ -1994,6 +2296,25 @@ function probeRuntimeBehavior(api, validatorApi, catalogText) {
       );
     }
     fixture.snapshot = first.snapshot;
+    const registeredRead = api.readRuntimeCommandEventActions(fixture.handle);
+    const registeredBridgeRead = actionInternalApi.readRuntimeCommandEventActionsForAdapterBridge(
+      fixture.handle,
+    );
+    if (
+      registeredRead.status !== "read" ||
+      registeredRead.snapshot !== first.snapshot ||
+      registeredRead.snapshot.generation !== 1 ||
+      registeredBridgeRead.status !== "read" ||
+      registeredBridgeRead.catalogSet !== prepared.catalogSet ||
+      registeredBridgeRead.commandEventPorts !== fixture.commandEventPorts ||
+      registeredBridgeRead.snapshot !== first.snapshot
+    ) {
+      fail(
+        "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+        "Registry or adapter-bridge read did not publish the exact current registration snapshot.",
+      );
+    }
+    adapterBridgeReadProbes += 2;
     const second = registerTarget(api, fixture, "map", MAP_CAPABILITY, "map-2");
     if (
       second.status !== "registered" ||
@@ -2094,8 +2415,21 @@ function probeRuntimeBehavior(api, validatorApi, catalogText) {
       );
     }
     targetAuthorityProbes += 13;
+    registryReadProbes += 4;
     reentryProbes += 1;
     api.disposeRuntimeCommandEventActions(fixture.handle);
+    if (
+      api.readRuntimeCommandEventActions(fixture.handle).status !== "disposed" ||
+      actionInternalApi.readRuntimeCommandEventActionsForAdapterBridge(fixture.handle).status !==
+        "disposed"
+    ) {
+      fail(
+        "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+        "Disposed registry or adapter-bridge authority remained readable as live.",
+      );
+    }
+    registryReadProbes += 1;
+    adapterBridgeReadProbes += 1;
     api.disposeRuntimeCommandEventActions(foreignFixture.handle);
   }
 
@@ -2774,6 +3108,8 @@ function probeRuntimeBehavior(api, validatorApi, catalogText) {
     commandAuthorizationProbes,
     eventPolicyProbes,
     targetAuthorityProbes,
+    registryReadProbes,
+    adapterBridgeReadProbes,
     reentryProbes,
     finiteBoundProbes,
     disposalProbes,
@@ -2961,13 +3297,19 @@ export async function buildRuntimeCoreCommandEventActionsEvidence(options = unde
   const traceRules = verifyTrace(trace);
   const normative = verifyNormativeCoverage(normativeText);
   const documentation = verifyDocumentation(findings, proofDocument);
-  const [runtimeApi, runtimePortApi, validatorApi] = await Promise.all([
+  const [runtimeApi, runtimePortApi, runtimeActionInternalApi, validatorApi] = await Promise.all([
     normalized.runtimeApi ?? import(RUNTIME_API_URL.href),
     normalized.runtimePortApi ?? import(RUNTIME_PORT_INTERNAL_API_URL.href),
+    normalized.runtimeActionInternalApi ?? import(RUNTIME_ACTION_INTERNAL_API_URL.href),
     normalized.validatorApi ?? import(VALIDATOR_API_URL.href),
   ]);
   const ports = probePortBehavior(runtimeApi, runtimePortApi);
-  const runtime = probeRuntimeBehavior(runtimeApi, validatorApi, catalogText);
+  const runtime = probeRuntimeBehavior(
+    runtimeApi,
+    runtimeActionInternalApi,
+    validatorApi,
+    catalogText,
+  );
 
   const artifact = Object.freeze({
     schemaVersion: 1,
