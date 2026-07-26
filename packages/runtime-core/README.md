@@ -560,11 +560,71 @@ Hosts may lower the attempt, snapshot, and active-transport ceilings; at most 64
 concurrently by default, with later attempts held in a bounded replacement queue. No retry,
 timeout, cache, persistence, or physical transport-cancellation policy is invented.
 
+## M04-T09 operation lifecycle and concurrency API
+
+`mountRuntimeSurfaceOperations` publishes the complete validated alias inventory as immutable
+`idle` lifecycles. Each alias is permanently bound to one Catalog operation. Invocation supplies
+the protocol action's operation identifier only as an assertion; it cannot select a different
+capability, effect, schema, or public-error contract.
+
+```ts
+import {
+  acknowledgeRuntimeOperationSettlement,
+  invokeRuntimeOperation,
+  mountRuntimeSurfaceOperations,
+} from "@desen/runtime-core";
+
+const mounted = mountRuntimeSurfaceOperations({
+  documentId,
+  revision,
+  surfaceId,
+  aliases: { signIn: { operation: "com.example.auth/signIn" } },
+  catalogSet,
+  hostPorts,
+});
+
+if (mounted.status === "mounted") {
+  const invocation = invokeRuntimeOperation(mounted.handle, {
+    alias: "signIn",
+    operation: "com.example.auth/signIn",
+    input: resolvedInput,
+    concurrency: "reject",
+    operationSnapshot: mounted.snapshot,
+  });
+
+  if (
+    invocation.status === "started" ||
+    invocation.status === "queued" ||
+    invocation.status === "staged"
+  ) {
+    const settlement = await invocation.settlement;
+    if ("lease" in settlement) {
+      acknowledgeRuntimeOperationSettlement(mounted.handle, settlement.lease);
+    }
+  }
+}
+```
+
+Input must already be fully materialized by the later action layer; this manager detaches it again
+and applies the exact Catalog input schema before accepting identity or host authority. Accepted
+request IDs are deterministic. Successful output is detached, schema-validated, and frozen;
+declared public errors are the only codes exposed through a failed lifecycle. Policy denial uses
+the exact core `OPERATION_DENIED` diagnostic, while malformed, thrown, rejected, undeclared, and
+invalid-output results remain redacted controlled settlements.
+
+Omitted concurrency defaults to `reject`. `replace` validates first and then supersedes the active
+attempt plus its alias backlog; `queue` preserves FIFO order under one surface-global bound. A
+terminal settlement returns an opaque manager-bound lease. A same-alias handler invocation may
+publish `pending` as `staged`, but neither it nor queued work reaches the host until the predecessor
+lease is acknowledged. Attempt, snapshot, aggregate queue, retained-data, and active-transport
+limits are finite and may only be lowered. Disposal is terminal, and stale results are rejected
+before their envelopes are inspected.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
-  schema validation. M04-T08 now detaches and validates resource output and public error codes;
-  M04-T09 owns the equivalent operation lifecycle.
+  schema validation. M04-T08 and M04-T09 detach and validate resource and operation output and
+  public error codes before exposure.
 - A policy denial is distinct from a declared public failure and can never be reported as success.
   Thrown or rejected host exceptions are adapter failures; raw errors never become lifecycle data.
 - Navigation can target only an existing surface in the active Bundle. Denial cannot substitute a
@@ -603,9 +663,11 @@ complete schema-safe writes, terminal disposal, and repeat-free base node identi
 lexically isolated repeat scopes, ordered atomic materialization, type-sensitive keys, bounded
 non-truncating overflow, and repeated instance identity. M04-T08 adds atomic resource mount/start,
 token-aware input materialization, schema-safe settlement, bounded transport scheduling,
-latest-wins refresh, and terminal disposal. Operation transitions, action execution, reactive
-composition, rendering, activation implementation, event/command bridges, and adapters remain
-assigned to their later tracked tasks.
+latest-wins refresh, and terminal disposal. M04-T09 adds Catalog-authoritative operation aliases,
+exact input/output validation, deterministic reject/replace/FIFO queue behavior, bounded
+transports, and settlement acknowledgement. Action execution, reactive composition, rendering,
+activation implementation, event/command bridges, and adapters remain assigned to their later
+tracked tasks.
 
 ## Protocol and target support
 
@@ -625,6 +687,7 @@ pnpm --filter @desen/runtime-core test:variant-style-evaluation
 pnpm --filter @desen/runtime-core test:local-state-identity
 pnpm --filter @desen/runtime-core test:repeat-materialization
 pnpm --filter @desen/runtime-core test:resource-lifecycle
+pnpm --filter @desen/runtime-core test:operation-lifecycle
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -633,5 +696,6 @@ pnpm verify:runtime-core-variant-style-evaluation
 pnpm verify:runtime-core-local-state-identity
 pnpm verify:runtime-core-repeat-materialization
 pnpm verify:runtime-core-resource-lifecycle
+pnpm verify:runtime-core-operation-lifecycle
 pnpm check
 ```

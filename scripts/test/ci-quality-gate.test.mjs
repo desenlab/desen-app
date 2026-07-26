@@ -94,11 +94,11 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the frozen proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 31,
-    verifierCount: 31,
-    rootTestCount: 31,
-    legacyPrerequisiteCount: 173,
-    legacyPrerequisiteSha256: "05ba5d6013b73e455f6d0e6d04e2c8c66e8ff45b8a03bf9f704d9213e4c63c56",
+    proofCount: 32,
+    verifierCount: 32,
+    rootTestCount: 32,
+    legacyPrerequisiteCount: 181,
+    legacyPrerequisiteSha256: "9d3011bfbd80f499d4bd5412eaf06338e1e2f93fba5535955bbc84c7437bdcb1",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 12,
     workspaceTestScriptSha256: "d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420",
@@ -233,8 +233,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 70);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 31);
+  assert.equal(steps.length, 72);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 32);
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -255,8 +255,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 70,
-    planSha256: "a90c0a003de3edd17c94630b07e7c0f5dc740ba1e3a3d144b6bc1858b9051403",
+    stepCount: 72,
+    planSha256: "d6ce68564094d9ef87e6ff0bb33a1ec2a1fa25aed5e526908117855a0408595c",
   });
 
   const missingTypecheck = clone(steps);

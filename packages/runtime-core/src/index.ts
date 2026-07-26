@@ -39,6 +39,14 @@ export {
   RUNTIME_RESOURCE_LIMITS,
   startRuntimeSurfaceResources,
 } from "./resource-lifecycle.js";
+export {
+  acknowledgeRuntimeOperationSettlement,
+  disposeRuntimeSurfaceOperations,
+  invokeRuntimeOperation,
+  mountRuntimeSurfaceOperations,
+  readRuntimeSurfaceOperations,
+  RUNTIME_OPERATION_LIMITS,
+} from "./operation-lifecycle.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -194,3 +202,28 @@ export type {
   RuntimeSurfaceResourcesSnapshot,
   RuntimeSurfaceResourcesStartResult,
 } from "./resource-lifecycle.js";
+
+export type {
+  RuntimeOperationConcurrency,
+  RuntimeOperationInputSchemaRejected,
+  RuntimeOperationInvocationQueued,
+  RuntimeOperationInvocationStaged,
+  RuntimeOperationInvocationStarted,
+  RuntimeOperationInvokeInput,
+  RuntimeOperationInvokeResult,
+  RuntimeOperationLimitProfile,
+  RuntimeOperationSettlement,
+  RuntimeOperationSettlementAcknowledgement,
+  RuntimeOperationSettlementLease,
+  RuntimeOperationTerminalSettlement,
+  RuntimeSurfaceOperationAliasSpec,
+  RuntimeSurfaceOperationsDisposeResult,
+  RuntimeSurfaceOperationsHandle,
+  RuntimeSurfaceOperationsMounted,
+  RuntimeSurfaceOperationsMountInput,
+  RuntimeSurfaceOperationsMountInvalid,
+  RuntimeSurfaceOperationsMountInvalidReason,
+  RuntimeSurfaceOperationsMountResult,
+  RuntimeSurfaceOperationsReadResult,
+  RuntimeSurfaceOperationsSnapshot,
+} from "./operation-lifecycle.js";
