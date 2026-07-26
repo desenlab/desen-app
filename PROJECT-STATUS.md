@@ -247,17 +247,34 @@ inactive result, generation capacity is reserved for terminal outcomes, and fail
 disposal clears retained authority before host cleanup. Revoked Proxies fail closed. `PF-045`
 records the explicit invalidation and scheduler profile. P-17 remains `PARTIAL`; N-003, N-034, and
 N-041 remain `PLANNED`, while M04-T16 retains the authenticated same-wrapper join, complete
-materialization, selector-to-program composition, descendant inactivity, indexed observable
-oracle, coordinated disposal, and deterministic JSON sign-in trace.
+materialization, selector-to-program composition, descendant inactivity, the whole-surface
+observable reference oracle, coordinated disposal, and deterministic JSON sign-in trace.
+M04-T16 now closes G04 with a complete platform-neutral headless session over the exact frozen
+sign-in Bundle and Catalog. Unknown ingress is cumulatively validated and the Bundle revision is
+recalculated before one reactive host aggregate mounts every lower manager. Complete bounded
+materialization applies conditional presence before descendants, expands repeat scopes, resolves
+tokens and formats, applies ordered variants, and produces one immutable JSON plan with canonical
+plan and binding commitments. An evaluation-bound private sidecar retains exact item/repeat scope
+and inert handler selectors; only a matching T15 evaluation id and both digests may reconcile
+current T14 bindings. Incoming component or behavior events select one prepared T13 program and
+derive all seven namespaces from current authenticated owners. The official sign-in trace proves
+edits, loading, declared failure, retry, stale replacement, success navigation, independent home
+materialization, deterministic disposal, and exact JSON round trips. Success/navigation,
+failure/retry, and stale-replacement scenarios each run in two independent sessions, for six
+sessions total; every pair and their combined trace have byte-identical canonical output.
+`PF-046` records the plan, binding, and lifecycle profile, while `PF-047` preserves the frozen
+72-record planning baseline and classifies the 67 records applicable to this gate. N-003 becomes
+`TESTED`; P-17 and P-18 remain `PARTIAL`, while renderer, production adapter, React/DOM,
+accessibility, focus, activation, Android, and iOS work remains assigned to later milestones.
 
 ## Current milestone
 
-- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`
+- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `M04 — Framework-neutral runtime core`
-- Overall implementation progress: `52 / 144 tasks complete (36%)`
-- M04 progress: `15 / 16 tasks complete (94%)`
-- Proof-gate progress: `4 / 13 complete`
+- Current milestone: `M05 — React runtime and separate reference host`
+- Overall implementation progress: `53 / 144 tasks complete (37%)`
+- M04 progress: `16 / 16 tasks complete (100%)`
+- Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -294,11 +311,12 @@ oracle, coordinated disposal, and deterministic JSON sign-in trace.
   `M04-T12 — component.command and allowlisted event.emit`,
   `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`,
   `M04-T14 — Generic component/behavior event and command bridges`,
-  `M04-T15 — Reactive re-evaluation and stale-result protection`
+  `M04-T15 — Reactive re-evaluation and stale-result protection`,
+  `M04-T16 — Headless sign-in determinism and JSON trace`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T16 — Headless sign-in determinism and JSON trace`
-- Status: M04-T15 complete; ready for M04-T16
+- Next implementation task: `M05-T01 — React adapter registry and render-plan renderer`
+- Status: G04 complete; ready for M05-T01
 
 ## Completed preparation
 
@@ -630,12 +648,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T16 — Headless sign-in determinism and JSON-serializable observable trace tests`.
-Compose the exact frozen sign-in Bundle and Catalog through the already proved state, resource,
-operation, action-turn, adapter-bridge, and reactive boundaries. Prove the same wrapped host
-aggregate, handler-selector-to-program join, immediate event/item provenance, conditional
-descendant inactivity, complete session disposal, and byte-identical success/failure traces
-without claiming React, DOM, CSS, accessibility, focus, or native-adapter behavior.
+Start `M05-T01 — React adapter registry and render-plan renderer`. Consume only the public
+M04-T16 headless plan and adapter contracts, keep capability implementations outside protocol
+data, and establish the first concrete Web–React reconciliation boundary without moving React,
+DOM, CSS, browser, or application dependencies into `@desen/runtime-core`.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -660,6 +676,11 @@ tests pin the expanded proof inventory and preserve one execution of each distin
 M04-T15 extends that reviewed inventory to 130 distinct workloads, 38 proof verifiers, 38 root
 proof files, and a pinned 84-step plan with 38 proof-test steps. Its equivalent legacy dependency
 expansion contains 3,257 leaf launches across 241 prerequisite segments. The same 22 CI contract
+tests pin the expanded proof inventory and preserve one execution of each distinct workload.
+
+M04-T16 extends that reviewed inventory to 133 distinct workloads, 39 proof verifiers, 39 root
+proof files, and a pinned 86-step plan with 39 proof-test steps. Its equivalent legacy dependency
+expansion contains 3,265 leaf launches across 247 prerequisite segments. The same 22 CI contract
 tests pin the expanded proof inventory and preserve one execution of each distinct workload.
 
 M02-T02 evidence:
@@ -923,7 +944,7 @@ M04-T11 evidence:
 
 - `docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-operation-resource-actions.json`
-- artifact SHA-256: `d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8`
+- artifact SHA-256: `b955cc9f3399d2dbb1895036828c6ab01dbd78ac198c3be5824720f2802295a7`
 - exact boundary: 4 package-root runtime exports, 16 package-root types, 2 internal runtime exports
   and 3 internal types for callback-free current compositor reads and one-shot finalization,
   guard-first operation/resource action dispatch, cumulative retained-handler bounds, opaque
@@ -951,7 +972,7 @@ M04-T13 evidence:
 
 - `docs/proof/RUNTIME-CORE-ACTION-TURNS.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-action-turns.json`
-- artifact SHA-256: `e73604b678bdb35a12549e3a31fff628b9a83beb0ad735fb929aceba5885b240`
+- artifact SHA-256: `5b2f95b897116fdd9ff5320d8720e104d7b93f148d28bfcaf067c838785f9d87`
 - exact boundary: 5 package-root runtime exports, 16 package-root types, 21/21 documented
   declarations, detached factory-authenticated programs, private child routing, deterministic
   FIFO turns, current four-manager snapshots, settlement ancestry, ticket-keyed mandatory one-shot
@@ -968,23 +989,23 @@ M04-T14 evidence:
 
 - `docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json`
-- artifact SHA-256: `e22ac984c035bc8e5096338a437003f852f7daf67a1f12592bae00783dbd8123`
+- artifact SHA-256: `bfdeddbffd458941464620e0af2013d374bf8e64068ca060d33651ddeb2660c7`
 - exact boundary: 8 package-root runtime exports, 27 package-root types, 35/35 documented public
   declarations, exact hidden T12 Catalog/port/snapshot authority, owner-bound one-shot normalized
   commands, Catalog-declared component/behavior events, exact payload validation, inert handler
   selectors, opaque generation tickets, behavior `attachTo`, bounded detached repeat scope,
   future-unregister snapshot reservation, reentry fences, and terminal cross-manager cleanup
-- executable evidence: 27 focused package tests, 10 compiler-negative cases, 21 root
+- executable evidence: 28 focused package tests, 11 compiler-negative cases, 21 root
   proof/mutation tests, 8 authority probes, 15 event probes, 7 command probes, 8 identity/ticket
   probes, 4 behavior-attachment probes, 8 disposal probes, 4 direct trace assignments, 11
-  task-owned files, zero request leaks, zero platform effects, and a cumulative 550/550
+  task-owned files, zero request leaks, zero platform effects, and a cumulative 551/551
   runtime-core package suite
 
 M04-T15 evidence:
 
 - `docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md`
 - `docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json`
-- artifact SHA-256: `0e56e25c34d023d17123e29b97fc3649938ff4e661435630a0833e9f5751e58f`
+- artifact SHA-256: `7e412daf9e2e8f08f40a4b093430775414aa1df4a9b14d690d2bf45966cbec67`
 - exact boundary: 6 package-root runtime exports, 17 package-root types, 24/24 documented module
   declarations, one branded stale-safe host aggregate, complete double-sampled whole-surface
   snapshots, explicit batched invalidation, pre/post-reflection stale checks, monotonic observable
@@ -995,7 +1016,25 @@ M04-T15 evidence:
   Proxy redaction, 11 authority probes including two revoked inputs, 7 batching probes, 5
   host-snapshot probes, 5 stale-candidate probes, 3 unchanged-publication probes, 7
   failed-subscription cleanup probes, 8 disposal probes, 6 direct trace assignments, 17 task-owned
-  files, zero authority, request, or platform leaks, and a cumulative 604/604 runtime-core package
+  files, zero authority, request, or platform leaks, and a cumulative 605/605 runtime-core package
+  suite
+
+M04-T16 / G04 evidence:
+
+- `docs/proof/RUNTIME-CORE-HEADLESS-SIGN-IN.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json`
+- artifact SHA-256: `bdda1b2d0c4630a1a6708b2e6bb9a9ecdca0c2efca3615ca4cf69cee871170a4`
+- exact boundary: 7 package-root runtime exports, 22 package-root types, 35/35 documented
+  source-module declarations, cumulative Bundle/Catalog ingress validation, exact revision and
+  shared-host authentication, complete conditional/repeat materialization, separate plan and
+  binding commitments, atomic source-ordered adapter reconciliation, exact selector-to-program
+  dispatch over seven namespaces, bounded terminal lifecycle ownership, and platform-neutral
+  callback-free JSON traces
+- executable evidence: 34 focused package tests, 11 compiler-negative cases, 24 root
+  proof/mutation tests, 72 frozen assignment records with 67 current-applicable classifications,
+  4 explicit historical-verifier ownership transfers, 21 task-owned files, 3 deterministic
+  scenario pairs across 6 independent sessions, zero authority or platform leaks, exact 5,000
+  binding admission with 5,001 atomic rejection, and a cumulative 639/639 runtime-core package
   suite
 
 ## Status vocabulary

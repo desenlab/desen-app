@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████░░░░░░░░░░░░░░░░` **52 / 144 tasks complete (36%)**
+**Overall:** `█████████░░░░░░░░░░░░░░░░` **53 / 144 tasks complete (37%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `███████████████░` **15 / 16 tasks complete (94%)**
+**M04 complete:** `████████████████` **16 / 16 tasks complete (100%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T16`
+**Proof gates:** **5 / 13 complete** · **Next:** `M05-T01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -123,6 +123,7 @@ packages/
 - [Runtime core bounded action-turn proof](docs/proof/RUNTIME-CORE-ACTION-TURNS.md)
 - [Runtime core generic adapter-bridge proof](docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md)
 - [Runtime core reactive reevaluation proof](docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md)
+- [Runtime core headless sign-in and G04 proof](docs/proof/RUNTIME-CORE-HEADLESS-SIGN-IN.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -428,8 +429,8 @@ turn coordinator. Behavior `attachTo`, repeat identity, ABA-safe ticket generati
 scope budgets, future-unregister snapshot reservation, busy reentry fences, same-origin lower
 cleanup, revocation, and terminal tombstones are executable under finite lower-only limits. The
 package root adds 8 runtime exports and 27 types with all 35 public declarations documented.
-Evidence passes 27 focused package tests, 10 compiler-negative cases, and 21 root proof/mutation
-tests across 11 task-owned files; the cumulative runtime-core suite passes 550/550. N-033 is now
+Evidence passes 28 focused package tests, 11 compiler-negative cases, and 21 root proof/mutation
+tests across 11 task-owned files; the cumulative runtime-core suite passes 551/551. N-033 is now
 `TESTED`; N-034 remains `PLANNED`, P-17 stays `PARTIAL`, M04-T15 owns reactive protection, and
 M04-T16 owns the exact selector-to-action-program join and full sign-in trace.
 
@@ -445,12 +446,29 @@ observable snapshot; current failures publish an explicit inactive result rather
 output semantically active. Mount, invalidation, generation, transition, subscription, and
 disposal behavior are finite, factory-authenticated, and platform-neutral. Evidence passes 54
 focused package tests, 11 compiler-negative cases, and 30 root proof/mutation tests across 17
-task-owned files; the
-cumulative runtime-core suite passes 604/604. P-17 remains `PARTIAL`; N-003 and P-18 stay assigned
-to M04-T16, which must prove the same wrapped host aggregate across every manager, the exact
-selector-to-action-program join, full sign-in materialization, coordinated disposal, and a
-deterministic JSON trace. Indexed invalidation optimization and React/DOM instance behavior remain
-explicit later work.
+task-owned files; the cumulative runtime-core suite passes 605/605. At the T15 boundary, P-17
+remained `PARTIAL`, while N-003 and P-18 stayed assigned to M04-T16. T16 now proves the same wrapped
+host aggregate across every manager, the exact selector-to-action-program join, full sign-in
+materialization, coordinated disposal, and a deterministic JSON trace. Indexed invalidation
+optimization and React/DOM instance behavior remain explicit later work.
+
+M04-T16 now closes G04 with a complete framework-neutral headless session over the frozen sign-in
+Bundle. Unknown Bundle and Catalog inputs cross cumulative execution validation and exact revision
+verification before one shared reactive host aggregate mounts state, resources, operations,
+actions, adapter bridges, and reevaluation. Complete bounded materialization applies conditional
+presence, repeats, tokens, formats, ordered variants, props, styles, behaviors, slots, and stable
+identities without activating descendants of an absent node. T15 publishes only canonical plan and
+binding commitments; an evaluation-bound private sidecar retains inert handler selectors and exact
+item/repeat scope. Current T14 tickets then join one selector to one prepared T13 program over all
+seven authenticated namespaces. The official trace proves edits, pending state, declared failure,
+retry, stale-replacement fencing, successful navigation, independent home materialization,
+coordinated disposal, and exact JSON round trips. Success/navigation, failure/retry, and
+stale-replacement scenarios each run in two independent sessions, for six sessions total; every
+pair and their combined trace have byte-identical canonical output. Evidence passes 34 focused
+tests, 11 compiler-negative cases, 24 root proof/mutation tests, and the cumulative 639/639
+runtime-core suite. N-003 is `TESTED`; P-17 and P-18 remain `PARTIAL`, because concrete production
+adapters, the M08 artifact round trip, React/DOM behavior, and future Android/iOS adapters are not
+yet proved.
 
 ## License
 

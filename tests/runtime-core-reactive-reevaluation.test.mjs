@@ -639,14 +639,26 @@ test("detects trace-owner drift without rewriting shared ownership", async () =>
 });
 
 test("detects normative, finding, and proof-document drift", async () => {
+  const normativePath = "docs/proof/NORMATIVE-COVERAGE.md";
+  const normative = await readFile(new URL(`../${normativePath}`, import.meta.url), "utf8");
+  const determinismRow = normative.split(/\r?\n/u).find((line) => line.startsWith("| N-003 "));
+  assert.ok(determinismRow?.includes("TESTED"));
   await rejectsCode(
     async () =>
       buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          "docs/proof/NORMATIVE-COVERAGE.md",
-          "| N-003 |",
-          "| N-003-removed |",
-        ),
+        fileOverrides: await sourceMutation(normativePath, "| N-003 |", "| N-003-removed |"),
+      }),
+    "REACTIVE_NORMATIVE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreReactiveReevaluationEvidence({
+        fileOverrides: {
+          [normativePath]: normative.replace(
+            determinismRow,
+            determinismRow.replace("TESTED", "IMPLEMENTED"),
+          ),
+        },
       }),
     "REACTIVE_NORMATIVE_DRIFT",
   );

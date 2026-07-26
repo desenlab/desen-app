@@ -194,6 +194,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-core-reactive-reevaluation.mjs",
       "tests/runtime-core-reactive-reevaluation.test.mjs",
     ],
+    [
+      "runtime-core-headless-sign-in",
+      "scripts/verify-runtime-core-headless-sign-in.mjs",
+      "tests/runtime-core-headless-sign-in.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -206,12 +211,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "15a74fd666eb3972e9f8c3ca8e00bb3f3e51830aa9b3d9f402695e940c4035e6";
+  "1cfce1aa816cb5ed3c75137be1c2355d7aad53c9e82244d74dbd58857d4f7bdc";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "15843ee5ed41d89d4c0bf3b86278f7cc778ae087e1032001b06c53203cebea10";
+  "1935e0cd7b8dc01304a0c5887c31b387290a8ed2120dd9772add7cc2b0f67969";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "a8bcd8621cc1478251a9c45add04b293f429a67b7d91352ee0d9829188042467";
-const QUALITY_GATE_PLAN_SHA256 = "ac59c74fd43f4943aeb31e96702102a84d84610140c28c0fe698ebf112d082f2";
+  "0418a2c707294fcc52bb7cbc127cc68024ab375af115133c60e44124290254e3";
+const QUALITY_GATE_PLAN_SHA256 = "a6b298aec8be7792370d39eac7da9ddbc1cd761f08449b9794d7fb6cd6a0c4ec";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "d037444714b699bd5502c808649e6b5ea0e3414ab05a1e238fd3b25b97405420";
 const WORKSPACE_MANIFEST_SHA256 =

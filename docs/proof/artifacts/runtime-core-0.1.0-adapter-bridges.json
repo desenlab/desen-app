@@ -33,7 +33,7 @@
     "typeExports": 27,
     "totalExports": 35,
     "tsdocDeclarations": 35,
-    "tsdocBlocks": 45
+    "tsdocBlocks": 46
   },
   "sourceInvariants": {
     "t12AuthorityChecks": 15,
@@ -64,7 +64,7 @@
     "maxSnapshotGeneration": 9007199254740991,
     "maxEventGeneration": 9007199254740991,
     "maxRetainedIdentifierCodeUnits": 1048576,
-    "maxRetainedScopeJsonOccurrences": 4096,
+    "maxRetainedScopeJsonOccurrences": 262144,
     "maxRetainedScopeCodeUnits": 1048576,
     "maxRuntimeInstanceIdCodeUnits": 1024
   },
@@ -84,51 +84,51 @@
     "findings": 1
   },
   "evidence": {
-    "focusedTestRegistrations": 25,
-    "focusedTests": 27,
-    "compilerNegativeCases": 10,
+    "focusedTestRegistrations": 26,
+    "focusedTests": 28,
+    "compilerNegativeCases": 11,
     "rootMutationTests": 21,
     "traceRules": 4,
     "trackedFiles": [
       {
         "path": "packages/runtime-core/src/adapter-bridges.ts",
-        "bytes": 76054,
-        "sha256": "5e422f44da09af0e0160f218626883db46bd35fd5cca8129170d2e5e11f1bdb8"
+        "bytes": 76378,
+        "sha256": "493d8bdf359e513d940430b7416d7e32294b6b81d2205f66a81fc5b9071c2243"
       },
       {
         "path": "packages/runtime-core/test/adapter-bridges.test.ts",
-        "bytes": 46935,
-        "sha256": "a40fc18a11d8894da23fcf11971b045b9ff560db79e1ed9f5db52bdc331465a8"
+        "bytes": 50204,
+        "sha256": "d16a77f5b8b6661c882792341ece47569d856aa47af63648f49a6f0ef47adf56"
       },
       {
         "path": "packages/runtime-core/test/adapter-bridges.types.ts",
-        "bytes": 6108,
-        "sha256": "e2bf6cc2cfd91b49881137a33b866f8bdf43998475cee5fa81044bfbb754ef11"
+        "bytes": 6317,
+        "sha256": "d4ae7e4d8dc56730d7931e7addb8b0aeb0b28650e1bfda756ed3fc1f75a68093"
       },
       {
         "path": "packages/runtime-core/dist/adapter-bridges.js",
-        "bytes": 60979,
-        "sha256": "d0b546cc48d2576d5fbc5ac8c474c6ba54042c517081a81bb2de3eacea3431b4"
+        "bytes": 61221,
+        "sha256": "646b2e074c4f9a19ccb17b45700f02bfd9af90c3d78606013d4d90229e7a20d3"
       },
       {
         "path": "packages/runtime-core/dist/adapter-bridges.js.map",
-        "bytes": 53738,
-        "sha256": "16197dada485dcfd3835d44f4dac6116155d428a6ebcc61cf2676b83e7eb320b"
+        "bytes": 53728,
+        "sha256": "aacf429ecf1581028fe163565222f4b90f091bb0fdfdd907ccac8939d5e6bc6a"
       },
       {
         "path": "packages/runtime-core/dist/adapter-bridges.d.ts",
-        "bytes": 15041,
-        "sha256": "e4bc579992c8032e5112b212f0cce5bc373d6bc14861c2609d658c3210691fb7"
+        "bytes": 15414,
+        "sha256": "a67e5039adde3f03b10ab5cec654d4a98726676a6570962d6f390dfa228bc844"
       },
       {
         "path": "packages/runtime-core/dist/adapter-bridges.d.ts.map",
-        "bytes": 9235,
-        "sha256": "e1c2eca50c30091006f060be47f9efca27fe091331d044cd5d1fac0bf857a1a1"
+        "bytes": 9250,
+        "sha256": "5fc2bdb1474f6622bb937d0d65e36366b741b589927b237a0b713937464ddd75"
       },
       {
         "path": "scripts/lib/runtime-core-adapter-bridges-proof.mjs",
-        "bytes": 57748,
-        "sha256": "aa7dff6bc806707964f0fdf32bfaafddd5a228ef215adb8202cef0a9bb14c704"
+        "bytes": 57717,
+        "sha256": "e933f2e4824b0f529a14e3626185a6b526e0ebbb9c45e977eebd675d70117bda"
       },
       {
         "path": "scripts/generate-runtime-core-adapter-bridges-proof.mjs",
@@ -143,7 +143,7 @@
       {
         "path": "tests/runtime-core-adapter-bridges.test.mjs",
         "bytes": 22699,
-        "sha256": "7b658a349212edd64277b20eb6b0952bc7ddabb805f558d5e4ef64feb10ad892"
+        "sha256": "efd0d3eac5570e80c001989382a028c80e50dff3d0b17dd321761a2a392dde44"
       }
     ],
     "semanticOnlySharedInputs": [

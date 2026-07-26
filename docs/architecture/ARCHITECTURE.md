@@ -266,6 +266,46 @@ authenticated join to validated tree materialization, immediate event/item scope
 conditional descendant cleanup, and coordinated session disposal. M05 owns concrete component
 reconciliation and platform adapter behavior.
 
+## Complete headless session composition
+
+The M04-T16 composition root accepts unknown Bundle and Catalog values, validates both through the
+cumulative execution-contract boundary, recalculates the exact Bundle revision, and prepares every
+managed surface before creating a live session. It creates one reactive host aggregate and passes
+that exact object to the resource, operation, action, and reactive managers. This establishes joint
+host provenance without adding a platform object, renderer, registry, or executable callback to
+protocol data.
+
+Complete materialization traverses the validated surface in source and repeat order. Conditional
+presence is decided before a node, its attached behaviors, its handlers, or any descendant can
+become active. Repeats reuse authenticated T07 scopes and stable identities; props, styles, tokens,
+formats, and ordered variants reuse the earlier pure evaluators. The public result is a bounded,
+immutable JSON plan. Receiving-schema validation and delivery to a concrete adapter remain M05.
+
+The reactive evaluator publishes only a compact canonical commitment containing the plan and
+binding digests. The complete plan, immediate item/repeat scope, and inert handler selectors remain
+in an evaluation-bound private sidecar. A session may reconcile bindings only when T15 publishes
+the exact evaluator id and both matching digests. Component bindings are reconciled before their
+owned behaviors, obsolete bindings are removed in reverse dependency order, and an unexpected
+partial failure ends the surface rather than exposing a partial registry.
+
+An incoming adapter event is accepted only through the exact current T14 ticket. Its component or
+behavior selector chooses one preprepared T13 program, while state, context, resource, operation,
+event, item, and environment namespaces are rebuilt from their authenticated current owners.
+Callers cannot provide an alternate namespace or claim an arbitrary runtime instance. The
+official sign-in operation settlement is observed through its exposed settlement promise so
+failure, retry, stale replacement, success navigation, and the new home lifetime publish in a
+deterministic order. Generic notification after every future internally nested settlement remains
+an explicit nonclaim because T13 does not expose that completion seam.
+
+Every public session observation is callback-free, recursively frozen JSON with a monotonic
+bounded generation, canonical plan and binding digests, and deterministic binding order. Session
+disposal revokes T15 first, then T14 while its mirrored command targets can still be removed, and
+finally T13 with its surrendered child managers. Reentrant disposal waits for the active bridge
+callback to unwind before completing that order, and a current terminal T15 outcome disposes the
+session rather than exposing an unrecoverable stale plan as live. The resulting headless contract
+is platform-neutral and is the observable reference that later Web–React, Android, and iOS
+adapters must preserve.
+
 ## Activation sequence
 
 ```text

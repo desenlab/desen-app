@@ -44,7 +44,7 @@
     {
       "task": "M04-T11",
       "artifact": "runtime-core-0.1.0-operation-resource-actions.json",
-      "sha256": "d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8"
+      "sha256": "b955cc9f3399d2dbb1895036828c6ab01dbd78ac198c3be5824720f2802295a7"
     },
     {
       "task": "M04-T12",
@@ -54,12 +54,12 @@
     {
       "task": "M04-T13",
       "artifact": "runtime-core-0.1.0-action-turns.json",
-      "sha256": "e73604b678bdb35a12549e3a31fff628b9a83beb0ad735fb929aceba5885b240"
+      "sha256": "5b2f95b897116fdd9ff5320d8720e104d7b93f148d28bfcaf067c838785f9d87"
     },
     {
       "task": "M04-T14",
       "artifact": "runtime-core-0.1.0-adapter-bridges.json",
-      "sha256": "e22ac984c035bc8e5096338a437003f852f7daf67a1f12592bae00783dbd8123"
+      "sha256": "bfdeddbffd458941464620e0af2013d374bf8e64068ca060d33651ddeb2660c7"
     }
   ],
   "publicApi": {
@@ -210,8 +210,8 @@
       },
       {
         "path": "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
-        "bytes": 74401,
-        "sha256": "894ba447a30b5d1f2f2d82c7f6d806b0dee9203298938980ec2b7facaadab54c"
+        "bytes": 74729,
+        "sha256": "d30bc915dfc90435951a9ffdd277c2c63be9c9e42b98a82f77d25d3d412a254c"
       },
       {
         "path": "scripts/generate-runtime-core-reactive-reevaluation-proof.mjs",
@@ -225,8 +225,8 @@
       },
       {
         "path": "tests/runtime-core-reactive-reevaluation.test.mjs",
-        "bytes": 24355,
-        "sha256": "79739f8b07831b10a955e7820746b890cd603ee1ba0ab22e3b7ba72e08b69b36"
+        "bytes": 24906,
+        "sha256": "74aabe03536c20cbe76034c53b6d0c59b67d6543a17c3d1d59481d66ea574ff7"
       }
     ],
     "semanticOnlySharedInputs": [

@@ -94,6 +94,17 @@ export {
   readRuntimeReactiveReevaluation,
   RUNTIME_REACTIVE_REEVALUATION_LIMITS,
 } from "./reactive-reevaluation.js";
+export {
+  materializeRuntimeHeadlessSurface,
+  RUNTIME_HEADLESS_MATERIALIZATION_LIMITS,
+} from "./headless-materialization.js";
+export {
+  dispatchRuntimeHeadlessSessionEvent,
+  disposeRuntimeHeadlessSession,
+  mountRuntimeHeadlessSession,
+  readRuntimeHeadlessSession,
+  RUNTIME_HEADLESS_SESSION_LIMITS,
+} from "./headless-session.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -148,6 +159,34 @@ export type {
   RuntimeReactiveReevaluationReadResult,
   RuntimeReactiveReevaluationSnapshot,
 } from "./reactive-reevaluation.js";
+
+export type {
+  RuntimeHeadlessBehaviorPlan,
+  RuntimeHeadlessMaterializationCommitment,
+  RuntimeHeadlessMaterializationInput,
+  RuntimeHeadlessMaterializationInvalidReason,
+  RuntimeHeadlessMaterializationLimitProfile,
+  RuntimeHeadlessMaterializationLimitReason,
+  RuntimeHeadlessMaterializationResult,
+  RuntimeHeadlessMaterializationSidecar,
+  RuntimeHeadlessNodePlan,
+  RuntimeHeadlessSurfacePlan,
+} from "./headless-materialization.js";
+
+export type {
+  RuntimeHeadlessBindingSnapshot,
+  RuntimeHeadlessSessionDisposeResult,
+  RuntimeHeadlessSessionEventCompletion,
+  RuntimeHeadlessSessionEventInput,
+  RuntimeHeadlessSessionEventResult,
+  RuntimeHeadlessSessionHandle,
+  RuntimeHeadlessSessionLimitProfile,
+  RuntimeHeadlessSessionMountInput,
+  RuntimeHeadlessSessionMountInvalidReason,
+  RuntimeHeadlessSessionMountResult,
+  RuntimeHeadlessSessionReadResult,
+  RuntimeHeadlessSessionSnapshot,
+} from "./headless-session.js";
 
 export type {
   RuntimeEventReferenceSnapshot,

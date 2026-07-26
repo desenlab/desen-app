@@ -57,8 +57,10 @@ table, raw action program, or platform API.
   owner's detached item and repeat-key projection and cannot float after the owner leaves.
 - Unregistering a component cascades every owned behavior before publishing the next snapshot.
 - Only item aliases and repeat keys are retained from a repeat scope. They are detached and charged
-  against aggregate JSON-occurrence and canonical-code-unit budgets. Behaviors share that frozen
-  projection without charging it a second time.
+  against aggregate JSON-occurrence and canonical-code-unit budgets. Each individual projection
+  remains inside the shared 4,096-occurrence JSON safety boundary, while the 262,144-occurrence
+  lifetime aggregate allows the public 5,000-binding ceiling to remain reachable for many small
+  scopes. Behaviors share their owner's frozen projection without charging it a second time.
 
 ### Finite admission and disposal
 
@@ -83,7 +85,7 @@ table, raw action program, or platform API.
 
 The deterministic artifact is
 `docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json`.
-Its SHA-256 is `e22ac984c035bc8e5096338a437003f852f7daf67a1f12592bae00783dbd8123`.
+Its SHA-256 is `bfdeddbffd458941464620e0af2013d374bf8e64068ca060d33651ddeb2660c7`.
 
 Generation refuses to run unless these reviewed prerequisite bytes match exactly:
 
@@ -99,7 +101,8 @@ the frozen reference Catalog are checked semantically rather than claimed as tas
 The evidence builder and verifier enforce:
 
 - 8 runtime exports, 27 type exports, and TSDoc on all 35 public declarations;
-- 27 focused runtime cases from 25 registrations and 10 compiler-negative cases;
+- 28 focused runtime cases from 26 registrations and 11 compiler-negative cases, including an
+  exact 5,000-binding success/5,001-binding rejection boundary;
 - 21 independent root proof and hostile-mutation tests;
 - exact source/test/type-test reviewed bytes and deterministic double generation;
 - exact M04-T14 trace ownership for `R-044`, `R-062`, `D-014`, and the declared-event half of

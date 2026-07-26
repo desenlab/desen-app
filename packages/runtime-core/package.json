@@ -35,7 +35,8 @@
     "test:command-event-actions": "vitest run test/command-event-actions.test.ts",
     "test:action-turns": "vitest run test/action-turns.test.ts",
     "test:adapter-bridges": "vitest run test/adapter-bridges.test.ts",
-    "test:reactive-reevaluation": "vitest run test/reactive-host-ports.test.ts test/reactive-reevaluation.test.ts"
+    "test:reactive-reevaluation": "vitest run test/reactive-host-ports.test.ts test/reactive-reevaluation.test.ts",
+    "test:headless-sign-in": "vitest run test/headless-materialization.test.ts test/headless-session.test.ts"
   },
   "dependencies": {
     "@desen/protocol": "workspace:*",

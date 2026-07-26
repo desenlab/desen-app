@@ -31,7 +31,7 @@ const OPERATION_RESOURCE_PREREQUISITE = Object.freeze({
   task: "M04-T11",
   path: "docs/proof/artifacts/runtime-core-0.1.0-operation-resource-actions.json",
   artifact: "runtime-core-0.1.0-operation-resource-actions.json",
-  sha256: "d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8",
+  sha256: "b955cc9f3399d2dbb1895036828c6ab01dbd78ac198c3be5824720f2802295a7",
 });
 const COMMAND_EVENT_PREREQUISITE = Object.freeze({
   task: "M04-T12",

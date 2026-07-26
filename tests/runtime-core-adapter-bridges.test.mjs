@@ -100,8 +100,8 @@ test("accepts tracked deterministic M04-T14 adapter-bridge evidence", async () =
   assert.equal(result.runtimeExports, 8);
   assert.equal(result.typeExports, 27);
   assert.equal(result.tsdocDeclarations, 35);
-  assert.equal(result.focusedTests, 27);
-  assert.equal(result.compilerNegativeCases, 10);
+  assert.equal(result.focusedTests, 28);
+  assert.equal(result.compilerNegativeCases, 11);
   assert.equal(result.rootMutationTests, 21);
   assert.equal(result.traceRules, 4);
   assert.equal(result.normativeTested, 1);

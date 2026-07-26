@@ -9,6 +9,7 @@ import {
   buildReferenceCatalogWebParityEvidence,
   DEFAULT_REFERENCE_CATALOG_WEB_PARITY_ARTIFACT_PATH,
   ReferenceCatalogWebParityEvidenceError,
+  verifyReferenceCatalogWebParityNormativeCompatibility,
   verifyReferenceCatalogWebParityEvidence,
   writeReferenceCatalogWebParityEvidence,
 } from "../scripts/lib/reference-catalog-web-parity-proof.mjs";
@@ -583,6 +584,38 @@ test("rejects public export and transitive source-boundary drift", async () => {
 
 test("rejects package-test type-negative trace and command-wiring drift", async () => {
   const directory = await temporaryDirectory();
+  const normativeCoverage = await readFile(
+    path.join(WORKSPACE_ROOT, "docs/proof/NORMATIVE-COVERAGE.md"),
+    "utf8",
+  );
+  const compatibility = verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage);
+  assert.deepEqual(compatibility.historicalProjection, [
+    { id: "N-030", status: "PLANNED" },
+    { id: "N-033", status: "PLANNED" },
+    { id: "N-034", status: "PLANNED" },
+    { id: "S-001", status: "PLANNED" },
+    { id: "S-004", status: "TESTED" },
+  ]);
+  assert.equal(compatibility.currentStatuses.find(({ id }) => id === "N-033")?.status, "TESTED");
+  const withN033Status = (status) =>
+    normativeCoverage
+      .split("\n")
+      .map((line) => {
+        if (!line.startsWith("| N-033 ")) return line;
+        const cells = line.split("|");
+        cells[5] = ` ${status} `;
+        return cells.join("|");
+      })
+      .join("\n");
+  assert.doesNotThrow(() =>
+    verifyReferenceCatalogWebParityNormativeCompatibility(withN033Status("PLANNED")),
+  );
+  for (const invalidStatus of ["NOT_STARTED", "IMPLEMENTED"]) {
+    assert.throws(
+      () => verifyReferenceCatalogWebParityNormativeCompatibility(withN033Status(invalidStatus)),
+      (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
+    );
+  }
   const foundationTestPath = await mutatedCopy(
     path.join(PACKAGE_TEST_DIRECTORY, "foundation-components.test.tsx"),
     directory,

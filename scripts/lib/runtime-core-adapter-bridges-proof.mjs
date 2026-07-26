@@ -33,14 +33,14 @@ const COMMAND_EVENT_PREREQUISITE = Object.freeze({
   sha256: "8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4",
 });
 
-const EXPECTED_SOURCE_SHA256 = "5e422f44da09af0e0160f218626883db46bd35fd5cca8129170d2e5e11f1bdb8";
+const EXPECTED_SOURCE_SHA256 = "493d8bdf359e513d940430b7416d7e32294b6b81d2205f66a81fc5b9071c2243";
 const EXPECTED_FOCUSED_TEST_SHA256 =
-  "a40fc18a11d8894da23fcf11971b045b9ff560db79e1ed9f5db52bdc331465a8";
+  "d16a77f5b8b6661c882792341ece47569d856aa47af63648f49a6f0ef47adf56";
 const EXPECTED_TYPE_TEST_SHA256 =
-  "e2bf6cc2cfd91b49881137a33b866f8bdf43998475cee5fa81044bfbb754ef11";
-const EXPECTED_FOCUSED_REGISTRATIONS = 25;
-const EXPECTED_FOCUSED_CASES = 27;
-const EXPECTED_COMPILER_NEGATIVE_CASES = 10;
+  "d4ae7e4d8dc56730d7931e7addb8b0aeb0b28650e1bfda756ed3fc1f75a68093";
+const EXPECTED_FOCUSED_REGISTRATIONS = 26;
+const EXPECTED_FOCUSED_CASES = 28;
+const EXPECTED_COMPILER_NEGATIVE_CASES = 11;
 
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
   "RUNTIME_ADAPTER_BRIDGE_LIMITS",
@@ -899,7 +899,7 @@ function verifySourceInvariants(sourceText) {
     "maxSnapshotGeneration: Number.MAX_SAFE_INTEGER",
     "maxEventGeneration: Number.MAX_SAFE_INTEGER",
     "maxRetainedIdentifierCodeUnits: RUNTIME_VALUE_SAFETY_LIMITS.maxStringCodeUnits",
-    "maxRetainedScopeJsonOccurrences: RUNTIME_VALUE_SAFETY_LIMITS.maxJsonNodes",
+    "maxRetainedScopeJsonOccurrences: 262_144",
     "maxRetainedScopeCodeUnits: RUNTIME_VALUE_SAFETY_LIMITS.maxStringCodeUnits",
     "maxRuntimeInstanceIdCodeUnits: 1_024",
     "value > RUNTIME_ADAPTER_BRIDGE_LIMITS[key]",
@@ -1451,7 +1451,7 @@ export async function buildRuntimeCoreAdapterBridgesEvidence(options = undefined
       maxSnapshotGeneration: Number.MAX_SAFE_INTEGER,
       maxEventGeneration: Number.MAX_SAFE_INTEGER,
       maxRetainedIdentifierCodeUnits: 1_048_576,
-      maxRetainedScopeJsonOccurrences: 4_096,
+      maxRetainedScopeJsonOccurrences: 262_144,
       maxRetainedScopeCodeUnits: 1_048_576,
       maxRuntimeInstanceIdCodeUnits: 1_024,
     }),
