@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T14",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Exact T12-owned component commands and Catalog-declared component or behavior events cross one bounded generic adapter bridge without exposing platform targets, callback authority, or unvalidated payloads.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": [
+      {
+        "id": "N-033",
+        "from": "PLANNED",
+        "to": "TESTED"
+      }
+    ]
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T07",
+      "artifact": "runtime-core-0.1.0-repeat-materialization.json",
+      "sha256": "45ba72f21f936931d087982d8a52e6b4d226a33ed5693c2d3d6bf9158fddb02d"
+    },
+    {
+      "task": "M04-T12",
+      "artifact": "runtime-core-0.1.0-command-event-actions.json",
+      "sha256": "8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": 8,
+    "typeExports": 27,
+    "totalExports": 35,
+    "tsdocDeclarations": 35,
+    "tsdocBlocks": 45
+  },
+  "sourceInvariants": {
+    "t12AuthorityChecks": 15,
+    "catalogAndEventChecks": 29,
+    "identityAndTicketChecks": 10,
+    "retentionAndReservationChecks": 16,
+    "reentryAndDisposalChecks": 25,
+    "limitChecks": 10,
+    "validatorCallsPerAdmission": 1,
+    "platformEffects": 0
+  },
+  "runtime": {
+    "authorityProbes": 8,
+    "eventProbes": 15,
+    "commandProbes": 7,
+    "identityAndTicketProbes": 8,
+    "behaviorAttachmentProbes": 4,
+    "disposalProbes": 8,
+    "adapterCommandCallbacks": 1,
+    "eventTurnCallbacks": 1,
+    "requestLeaks": 0,
+    "platformEffects": 0
+  },
+  "limits": {
+    "maxLiveBindings": 5000,
+    "maxEventHandlerBindings": 5000,
+    "maxRegistrationGeneration": 9007199254740991,
+    "maxSnapshotGeneration": 9007199254740991,
+    "maxEventGeneration": 9007199254740991,
+    "maxRetainedIdentifierCodeUnits": 1048576,
+    "maxRetainedScopeJsonOccurrences": 4096,
+    "maxRetainedScopeCodeUnits": 1048576,
+    "maxRuntimeInstanceIdCodeUnits": 1024
+  },
+  "semantics": {
+    "t12Authority": "Bind captures one exact Catalog, snapshot, command/event port owner, and component callback owner; normalized command admission is exact-owner and one-shot.",
+    "commands": "Direct, replayed, foreign-owner, stale-target, malformed, and reentrant command requests fail closed; adapters receive only command plus detached input.",
+    "events": "Current snapshot, exact ticket and owner, T12 authority, and Catalog event declaration are checked before one payload validation; authority is rechecked before a selector-only event-turn request.",
+    "behaviors": "Behavior capability and attachTo capability-or-category authority are Catalog-derived and remain owned by one exact current component ticket.",
+    "identity": "Factory identities and opaque ticket WeakMaps preserve exact generation and prevent foreign, stale, or ABA-equivalent authority.",
+    "retention": "Component scope aliases and repeat keys are detached under aggregate occurrence/code-unit budgets; behaviors share the owner projection without double charging it.",
+    "reservation": "Registration reserves both its publication snapshot and enough remaining snapshot capacity for every accepted live binding to unregister.",
+    "reentry": "Transition, command, event-reflection, and event-dispatch fences deny mutations and disposal while nested event admission remains FIFO-compatible.",
+    "disposal": "Disposal adopts current same-origin T12 cleanup authority, tolerates an already disposed lower manager, revokes old local authority, tombstones tickets, clears graphs, and publishes a minimal terminal bridge tombstone."
+  },
+  "documentation": {
+    "normativeChanges": 1,
+    "findings": 1
+  },
+  "evidence": {
+    "focusedTestRegistrations": 25,
+    "focusedTests": 27,
+    "compilerNegativeCases": 10,
+    "rootMutationTests": 21,
+    "traceRules": 4,
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/adapter-bridges.ts",
+        "bytes": 76054,
+        "sha256": "5e422f44da09af0e0160f218626883db46bd35fd5cca8129170d2e5e11f1bdb8"
+      },
+      {
+        "path": "packages/runtime-core/test/adapter-bridges.test.ts",
+        "bytes": 46935,
+        "sha256": "a40fc18a11d8894da23fcf11971b045b9ff560db79e1ed9f5db52bdc331465a8"
+      },
+      {
+        "path": "packages/runtime-core/test/adapter-bridges.types.ts",
+        "bytes": 6108,
+        "sha256": "e2bf6cc2cfd91b49881137a33b866f8bdf43998475cee5fa81044bfbb754ef11"
+      },
+      {
+        "path": "packages/runtime-core/dist/adapter-bridges.js",
+        "bytes": 60979,
+        "sha256": "d0b546cc48d2576d5fbc5ac8c474c6ba54042c517081a81bb2de3eacea3431b4"
+      },
+      {
+        "path": "packages/runtime-core/dist/adapter-bridges.js.map",
+        "bytes": 53738,
+        "sha256": "16197dada485dcfd3835d44f4dac6116155d428a6ebcc61cf2676b83e7eb320b"
+      },
+      {
+        "path": "packages/runtime-core/dist/adapter-bridges.d.ts",
+        "bytes": 15041,
+        "sha256": "e4bc579992c8032e5112b212f0cce5bc373d6bc14861c2609d658c3210691fb7"
+      },
+      {
+        "path": "packages/runtime-core/dist/adapter-bridges.d.ts.map",
+        "bytes": 9235,
+        "sha256": "e1c2eca50c30091006f060be47f9efca27fe091331d044cd5d1fac0bf857a1a1"
+      },
+      {
+        "path": "scripts/lib/runtime-core-adapter-bridges-proof.mjs",
+        "bytes": 57748,
+        "sha256": "aa7dff6bc806707964f0fdf32bfaafddd5a228ef215adb8202cef0a9bb14c704"
+      },
+      {
+        "path": "scripts/generate-runtime-core-adapter-bridges-proof.mjs",
+        "bytes": 665,
+        "sha256": "f5bb5389dd13514f5697582ceb2bf424070ae2ada6e50b66b6a338046b9ae111"
+      },
+      {
+        "path": "scripts/verify-runtime-core-adapter-bridges.mjs",
+        "bytes": 667,
+        "sha256": "f3eb3b2b40e2b94f6c1d9f5b11907215bb54b952ee1806f633aee685822d93b4"
+      },
+      {
+        "path": "tests/runtime-core-adapter-bridges.test.mjs",
+        "bytes": 22701,
+        "sha256": "c9be8e76339b28b4d4fd5cdd04539bd2b9bf4767d0d2e9a6dc26409f97be5fb0"
+      }
+    ],
+    "semanticOnlySharedInputs": [
+      "packages/runtime-core/package.json",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/dist/index.js",
+      "packages/runtime-core/dist/index.d.ts",
+      "docs/proof/protocol-0.1.0-traceability.json",
+      "docs/proof/NORMATIVE-COVERAGE.md",
+      "docs/plan/PROTOCOL-FINDINGS.md",
+      "docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md",
+      "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json"
+    ]
+  },
+  "deferred": [
+    "joining selector-only incoming events to prepared action programs and seven-namespace event scope (M04-T16)",
+    "reactive dependency discovery and stale asynchronous-result protection (M04-T15)",
+    "production web adapter implementation and complete declared-command parity (M05)",
+    "Android and iOS adapter lifecycle implementations",
+    "future protocol clarification recorded by PF-044"
+  ]
+}

@@ -76,6 +76,16 @@ export {
   prepareRuntimeActionProgram,
   RUNTIME_ACTION_TURN_LIMITS,
 } from "./action-turns.js";
+export {
+  bindRuntimeAdapterBridges,
+  createRuntimeAdapterBridgePorts,
+  disposeRuntimeAdapterBridges,
+  readRuntimeAdapterBridges,
+  receiveRuntimeAdapterEvent,
+  registerRuntimeAdapterBinding,
+  RUNTIME_ADAPTER_BRIDGE_LIMITS,
+  unregisterRuntimeAdapterBinding,
+} from "./adapter-bridges.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -347,3 +357,33 @@ export type {
   RuntimeActionTurnsMountResult,
   RuntimeActionTurnsSnapshot,
 } from "./action-turns.js";
+
+export type {
+  RuntimeAdapterBindingInput,
+  RuntimeAdapterBindingRegistrationResult,
+  RuntimeAdapterBindingSnapshot,
+  RuntimeAdapterBindingTicket,
+  RuntimeAdapterBindingUnregistrationInput,
+  RuntimeAdapterBindingUnregistrationResult,
+  RuntimeAdapterBridgeLimitProfile,
+  RuntimeAdapterBridgePorts,
+  RuntimeAdapterBridgePortsInput,
+  RuntimeAdapterBridgesBindInput,
+  RuntimeAdapterBridgesBindResult,
+  RuntimeAdapterBridgesDisposeResult,
+  RuntimeAdapterBridgesHandle,
+  RuntimeAdapterBridgesReadResult,
+  RuntimeAdapterBridgesSnapshot,
+  RuntimeAdapterComponentCommandPort,
+  RuntimeAdapterComponentCommandRequest,
+  RuntimeAdapterComponentCommandResult,
+  RuntimeAdapterEventHandlerSelector,
+  RuntimeAdapterEventInput,
+  RuntimeAdapterEventResult,
+  RuntimeAdapterEventTurnPort,
+  RuntimeAdapterEventTurnRequest,
+  RuntimeAdapterEventTurnResult,
+  RuntimeAdapterNodeIdentity,
+  RuntimeBehaviorAdapterBindingInput,
+  RuntimeComponentAdapterBindingInput,
+} from "./adapter-bridges.js";
