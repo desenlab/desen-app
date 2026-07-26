@@ -223,14 +223,25 @@ level, and 64th synchronous transition are accepted; the next one terminates wit
 limits are likewise finite and lower-only. `PF-043` records the frozen-text ownership gap without
 rewriting the protocol. N-032 becomes `TESTED`; N-014 and N-041 remain `PLANNED`, P-17 remains
 `PARTIAL`, and no proof-gate status changes.
+M04-T14 now provides the generic two-phase component/behavior adapter bridge. It binds only to the
+exact current M04-T12 Catalog, snapshot, port owner, and command callback owner; direct, replayed,
+foreign-port, stale, and reentrant command attempts fail closed while concrete adapters receive
+only a command and detached input. Incoming events require an exact opaque component/behavior
+ticket, live owner, current snapshot, declared Catalog event, and one successful payload
+validation before a selector-only event-turn request can cross the sink. Behavior `attachTo`,
+repeat identity, ticket generations, aggregate scope retention, unregister snapshot reservation,
+busy reentry fences, same-origin lower cleanup, revocation, and terminal tombstones are executable
+under finite lower-only limits. `PF-044` records the protocol profile. N-033 becomes `TESTED`;
+N-034 remains `PLANNED` for complete production-adapter parity, P-17 remains `PARTIAL`, and no
+proof-gate status changes.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M04 — Framework-neutral runtime core`
-- Overall implementation progress: `50 / 144 tasks complete (35%)`
-- M04 progress: `13 / 16 tasks complete (81%)`
+- Overall implementation progress: `51 / 144 tasks complete (35%)`
+- M04 progress: `14 / 16 tasks complete (88%)`
 - Proof-gate progress: `4 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -266,11 +277,12 @@ rewriting the protocol. N-032 becomes `TESTED`; N-014 and N-041 remain `PLANNED`
   `M04-T10 — state.set, state.toggle, and navigate actions`,
   `M04-T11 — operation.invoke settlement actions and resource.refresh`,
   `M04-T12 — component.command and allowlisted event.emit`,
-  `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`
+  `M04-T13 — Action-turn, settlement-depth, and repeated-transition limits`,
+  `M04-T14 — Generic component/behavior event and command bridges`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T14 — Generic component/behavior event and command bridges`
-- Status: M04-T13 complete; ready for M04-T14
+- Next implementation task: `M04-T15 — Reactive re-evaluation and stale-result protection`
+- Status: M04-T14 complete; ready for M04-T15
 
 ## Completed preparation
 
@@ -602,12 +614,11 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T14 — Generic component/behavior event and command bridges with payload validation`.
-Connect incoming Catalog-declared component and behavior events to the bounded M04-T13 turn
-coordinator only after validating detached payloads against their exact contracts. Define the
-generic adapter-command registration boundary without exposing framework objects or guessing a
-repeated target. Keep reactive re-evaluation assigned to M04-T15 and complete cross-manager
-provenance and session tracing assigned to M04-T16.
+Start `M04-T15 — Reactive re-evaluation and stale asynchronous-result protection`. Compose the
+already proved state, context, environment, resource, operation, Variant, presence, repeat, and
+adapter lifetimes without accepting a stale callback result or platform scheduler as protocol
+authority. Keep the exact selector-to-action-program join, complete cross-manager provenance,
+session disposal, and deterministic sign-in trace assigned to M04-T16.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -623,6 +634,11 @@ chains. Twenty-two CI contract tests additionally pin the exact workspace roots,
 package test command, and the absence of hidden Vitest configuration. The archived CI-01 timing
 comparison remains historical evidence rather than a claim that the larger current inventory has
 identical timing.
+
+M04-T14 extends that reviewed inventory to 127 distinct workloads, 37 proof verifiers, 37 root
+proof files, and a pinned 82-step plan with 37 proof-test steps. Its equivalent legacy dependency
+expansion contains 2,547 leaf launches across 231 prerequisite segments. The same 22 CI contract
+tests pin the expanded proof inventory and preserve one execution of each distinct workload.
 
 M02-T02 evidence:
 
@@ -925,6 +941,22 @@ M04-T13 evidence:
   probes, 15 snapshot probes, 27 queue probes, 32 settlement probes, 24 finalization probes,
   15 limit probes, 12 disposal probes, 5 direct trace assignments, 11 task-owned files, and a
   cumulative 523/523 runtime-core package suite
+
+M04-T14 evidence:
+
+- `docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json`
+- artifact SHA-256: `e33ac3667b083787496cc60927f3cc6526b79cdab82c743fd597040743c752d8`
+- exact boundary: 8 package-root runtime exports, 27 package-root types, 35/35 documented public
+  declarations, exact hidden T12 Catalog/port/snapshot authority, owner-bound one-shot normalized
+  commands, Catalog-declared component/behavior events, exact payload validation, inert handler
+  selectors, opaque generation tickets, behavior `attachTo`, bounded detached repeat scope,
+  future-unregister snapshot reservation, reentry fences, and terminal cross-manager cleanup
+- executable evidence: 27 focused package tests, 10 compiler-negative cases, 21 root
+  proof/mutation tests, 8 authority probes, 15 event probes, 7 command probes, 8 identity/ticket
+  probes, 4 behavior-attachment probes, 8 disposal probes, 4 direct trace assignments, 11
+  task-owned files, zero request leaks, zero platform effects, and a cumulative 550/550
+  runtime-core package suite
 
 ## Status vocabulary
 

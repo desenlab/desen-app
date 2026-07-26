@@ -861,7 +861,7 @@ an undeclared command can never become arbitrary method access.
 observation. Omitted payload becomes `{}`. The bridge validates the detached payload under that
 contract before calling emit; invalid, denied, and adapter-failed outcomes never become success.
 These shell events are intentionally separate from Catalog-declared component and behavior events,
-which travel from an adapter into DESEN and remain M04-T14 work.
+which now travel from an adapter into DESEN through the M04-T14 boundary below.
 
 Registration, action, and snapshot generations; total live targets; static components; host event
 contracts; and retained identifier lengths are finite and may only be lowered by a trusted host
@@ -904,6 +904,37 @@ settlement level, and 64th synchronous transition; the next one stops with the s
 retained-code-unit, generation, action, depth, and transition ceilings but cannot raise or remove
 them. `disposeRuntimeActionTurns` terminally closes the coordinator and every surrendered child
 authority while fulfilling all previously accepted event-turn completions.
+
+## M04-T14 generic adapter-bridge API
+
+`createRuntimeAdapterBridgePorts` creates an opaque bridge handle and one generic component-command
+port before M04-T12 mounts. `bindRuntimeAdapterBridges` then accepts only the exact current M04-T12
+Catalog, snapshot, port owner, callback owner, document, revision, and surface. The two phases
+prevent a caller from substituting a structurally equal Catalog or reusing the same callback under
+a foreign command/event port owner.
+
+`registerRuntimeAdapterBinding` registers either a component with its exact factory identity and
+repeat scope or a behavior attached to one exact current component ticket. Behaviors must satisfy
+their Catalog `attachTo` capability-or-category rule. Every ticket is opaque and generation-bound;
+forged, foreign, stale, and ABA-equivalent values fail closed. Scope aliases and repeat keys are
+detached under aggregate occurrence/code-unit budgets, and behaviors share their owner's immutable
+projection without double charging it. Registration also reserves enough snapshot capacity for
+all accepted live bindings to unregister.
+
+`receiveRuntimeAdapterEvent` proves current snapshot, ticket, behavior owner, M04-T12 authority,
+and Catalog event declaration before observing a payload. It invokes the exact Catalog payload
+validator once and rechecks every authority afterward. A handled event reaches the supplied turn
+port only as detached JSON plus an inert handler selector; raw action arrays, component targets,
+callbacks, and platform objects never enter the request. `unregisterRuntimeAdapterBinding`
+cascades owned behaviors, while `disposeRuntimeAdapterBridges` cleans current same-origin M04-T12
+targets, revokes the former authority, tombstones tickets, clears retained graphs, and publishes a
+minimal terminal handle tombstone.
+
+The default bridge profile bounds live bindings, handler names, generations, retained identifiers,
+retained scope occurrences and code units, and runtime-instance identifier length. Trusted
+profiles may lower but cannot raise these limits. Transition, active-command, event-reflection, and
+event-dispatch fences keep mutation and disposal busy around hostile callbacks while nested event
+admission remains available for M04-T16 FIFO composition.
 
 ## Port invariants
 
@@ -959,8 +990,11 @@ component commands, ambiguity-safe live-target registration, and allowlisted app
 validation/emission through a separate synchronous bridge. M04-T13 adds immutable prepared
 programs, deterministic ordered action turns, reentrant and settlement FIFO admission, exact
 settlement ancestry and one-shot finalization, and finite action, depth, transition, queue,
-retention, and generation bounds. Incoming adapter events, reactive composition, rendering, and
-activation implementation remain assigned to their later tracked tasks.
+retention, and generation bounds. M04-T14 adds exact T12-bound generic component/behavior
+registrations, one-shot command provenance, Catalog payload validation, owner-bound behaviors,
+bounded scope retention, reentry containment, and terminal cross-manager cleanup. Reactive
+composition, rendering, and activation implementation remain assigned to their later tracked
+tasks.
 
 ## Protocol and target support
 
@@ -985,6 +1019,7 @@ pnpm --filter @desen/runtime-core test:state-navigation-actions
 pnpm --filter @desen/runtime-core test:operation-resource-actions
 pnpm --filter @desen/runtime-core test:command-event-actions
 pnpm --filter @desen/runtime-core test:action-turns
+pnpm --filter @desen/runtime-core test:adapter-bridges
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -998,5 +1033,6 @@ pnpm verify:runtime-core-state-navigation-actions
 pnpm verify:runtime-core-operation-resource-actions
 pnpm verify:runtime-core-command-event-actions
 pnpm verify:runtime-core-action-turns
+pnpm verify:runtime-core-adapter-bridges
 pnpm check
 ```

@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████░░░░░░░░░░░░░░░░` **50 / 144 tasks complete (35%)**
+**Overall:** `█████████░░░░░░░░░░░░░░░░` **51 / 144 tasks complete (35%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `█████████████░░░` **13 / 16 tasks complete (81%)**
+**M04 progress:** `██████████████░░` **14 / 16 tasks complete (88%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T14`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T15`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -120,6 +120,8 @@ packages/
 - [Runtime core state and navigation-action proof](docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md)
 - [Runtime core operation and resource-action proof](docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md)
 - [Runtime core command and host-event action proof](docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md)
+- [Runtime core bounded action-turn proof](docs/proof/RUNTIME-CORE-ACTION-TURNS.md)
+- [Runtime core generic adapter-bridge proof](docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -415,6 +417,20 @@ documented declarations. Evidence passes 43 focused package tests, 11 compiler-n
 and 32 root proof/mutation tests across 11 task-owned files; the cumulative runtime-core suite
 passes 523/523. N-032 is now `TESTED`; N-014 and N-041 remain `PLANNED`, P-17 stays `PARTIAL`,
 incoming adapter events remain M04-T14, and no proof-gate status changes.
+
+M04-T14 now connects generic component and behavior adapters to the exact M04-T12 Catalog and
+command registry without exposing framework objects. Direct, replayed, foreign-port, stale, and
+reentrant command attempts fail closed; an adapter receives only the declared command and detached
+input. Incoming events require an exact current opaque ticket and owner, a declared Catalog event,
+and one successful payload validation before a detached selector-only request can reach the later
+turn coordinator. Behavior `attachTo`, repeat identity, ABA-safe ticket generations, aggregate
+scope budgets, future-unregister snapshot reservation, busy reentry fences, same-origin lower
+cleanup, revocation, and terminal tombstones are executable under finite lower-only limits. The
+package root adds 8 runtime exports and 27 types with all 35 public declarations documented.
+Evidence passes 27 focused package tests, 10 compiler-negative cases, and 21 root proof/mutation
+tests across 11 task-owned files; the cumulative runtime-core suite passes 550/550. N-033 is now
+`TESTED`; N-034 remains `PLANNED`, P-17 stays `PARTIAL`, M04-T15 owns reactive protection, and
+M04-T16 owns the exact selector-to-action-program join and full sign-in trace.
 
 ## License
 

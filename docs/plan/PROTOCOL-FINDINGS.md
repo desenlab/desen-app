@@ -1474,3 +1474,58 @@ This file records implementation discoveries without changing the frozen DESEN 0
   component and behavior bridges, M04-T15 owns reactive re-evaluation, and M04-T16 owns complete
   seven-namespace provenance, coordinated session disposal, and the deterministic end-to-end
   trace.
+
+## PF-044 — Adapter lifetimes require exact command provenance and bounded incoming-event ownership
+
+- Status: OPEN
+- Blocks proof: No; one bounded, fail-closed Reference Profile can connect generic adapters to the
+  already proved Catalog, repeat identity, command-target, and event-turn authorities without
+  introducing platform semantics.
+- Protocol location: SPEC Sections 14.2.5, 17.7, 20.6, 21.3–21.5, 24.2–24.6, and Appendix B;
+  `R-044`, `R-062`, `D-014`, `N-033`, and `N-034`; related findings `PF-031`, `PF-037`,
+  `PF-042`, and `PF-043`
+- Observation: DESEN 0.1.0 requires an adapter to validate or guarantee declared event payloads
+  and requires component commands to reach a currently instantiated component. It does not define
+  how a generic runtime proves that an incoming event belongs to an exact live component or
+  behavior generation, how behavior `attachTo` authority follows its component owner, how an
+  adapter command proves it originated from the exact normalized runtime port rather than a
+  direct, replayed, or foreign callback invocation, or how snapshots, retained repeat scope,
+  reentry, finite registries, and cross-manager disposal compose.
+- Implementation decision: M04-T14 uses a two-phase bridge. The factory runs before M04-T12 so one
+  command callback can be captured by the T12 port aggregate; bind succeeds afterward only for the
+  exact same Catalog object, current registry snapshot, port owner, callback owner, document,
+  revision, and surface. M04-T12 attaches a private request-to-port `WeakMap` marker immediately
+  around the synchronous normalized callback. M04-T14 consumes that marker exactly once for its
+  captured port owner. Direct calls, replay, a second port owner sharing the callback, and late use
+  after the producer's `finally` cleanup fail closed. The concrete adapter receives only the
+  declared command and detached input.
+
+  Component registration derives runtime identity from the exact M04-T06/M04-T07 factory identity
+  and scope. Each component or behavior generation owns an opaque ticket stored in a private
+  owner-and-generation `WeakMap`, so forged, foreign, stale, and structurally ABA-equivalent
+  tickets cannot act. Behavior registration requires the Catalog capability and an `attachTo`
+  match by exact owner capability or category; it shares its owner's detached item/repeat-key
+  projection and disappears when that owner leaves.
+
+  Incoming event admission checks the current bridge snapshot, exact ticket and owner, current T12
+  authority, and Catalog declaration before observing the payload. It invokes the Catalog payload
+  validator once, then rechecks authority, snapshots, binding identity, and behavior ownership
+  before passing a detached payload and inert handler selector to the event-turn sink. The request
+  is sink-only; public outcomes reveal no callback authority or retained scope. Nested event
+  admission remains available for M04-T16 FIFO composition, while mutations and disposal remain
+  busy throughout hostile reflection, validation, command invocation, and event dispatch.
+
+  Aggregate binding, handler, identifier, scope-occurrence, scope-code-unit, instance-identifier,
+  generation, and snapshot limits are finite and lower-only. Registration reserves its own
+  publication plus future unregister capacity. Disposal may adopt only a newer same-origin T12
+  snapshot for cleanup, tolerates an already disposed lower manager, marks the former local
+  authority revoked, tombstones all tickets, clears retained graphs, and replaces the handle entry
+  with a minimal terminal tombstone.
+
+- Future action: A later protocol revision should standardize adapter registration provenance,
+  normalized command authentication, repeated-instance command addressing, behavior-lifetime
+  ownership, incoming-event ticket identity, post-validation authority rechecks, public denial
+  envelopes, finite bridge budgets, and cross-manager disposal rules. M04-T16 still owns the join
+  from the inert event selector to one prepared action program and immediate event scope. M05
+  still owns concrete production Web–React adapter parity; Android and iOS adapters should reuse
+  the same observable contract rather than platform objects entering protocol data.

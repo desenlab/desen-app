@@ -33,7 +33,8 @@
     "test:state-navigation-actions": "vitest run test/state-navigation-actions.test.ts",
     "test:operation-resource-actions": "vitest run test/operation-resource-actions.test.ts",
     "test:command-event-actions": "vitest run test/command-event-actions.test.ts",
-    "test:action-turns": "vitest run test/action-turns.test.ts"
+    "test:action-turns": "vitest run test/action-turns.test.ts",
+    "test:adapter-bridges": "vitest run test/adapter-bridges.test.ts"
   },
   "dependencies": {
     "@desen/protocol": "workspace:*",
