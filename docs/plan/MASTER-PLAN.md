@@ -62,7 +62,9 @@ Executable React adapter registration remains M05 work.
 Implement resolution, predicates, state, repeats, resources, operations, actions, behaviors,
 limits, and protocol-observable traces without React, DOM, browser, or application imports.
 
-**Gate G04:** A headless sign-in surface behaves deterministically from a bundle and event trace.
+**Gate G04:** A headless sign-in surface behaves deterministically from a bundle and event trace,
+and post-audit hardening proves generic nested-settlement publication, exact evidence locations,
+and deterministic completion-fault containment before React integration begins.
 
 ### M05 — React runtime and separate reference host
 

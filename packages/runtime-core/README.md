@@ -1010,22 +1010,41 @@ only a terminal JSON observation, never a lower-manager ticket or callback autho
 revision, active surface, monotonic generation, evaluation id, plan/binding commitments, complete
 plan, lifecycle namespaces, and inert binding summaries. Equivalent frozen sign-in inputs and
 event sequences produce byte-identical canonical traces across independent sessions.
+`subscribeRuntimeHeadlessSession` adds a framework-neutral external-store notification boundary:
+it performs no initial callback, invokes argument-free listeners only after the publishing stack
+unwinds, and may coalesce synchronous changes because consumers always reread the exact snapshot.
+The factory-created subscription authority is revoked explicitly with
+`unsubscribeRuntimeHeadlessSession`; revocation is idempotent and safe inside a listener. A hostile
+listener cannot block another, and every still-live listener receives the terminal disposal
+change. This is directly compatible with React `useSyncExternalStore` while keeping the snapshot
+itself callback-free and independent of React.
 `disposeRuntimeHeadlessSession` revokes reactive work, adapter bridges, the action coordinator, and
 its surrendered children in dependency order; repeated disposal and late settlements are inert.
 Disposal requested reentrantly from an adapter or host callback finishes T14-before-T13 cleanup
 after the callback unwinds. A current non-active or terminal T15 result also ends the complete
 session instead of leaving an indefinitely stale snapshot publicly marked live.
 
+T13 publishes every generic operation and resource settlement to the trusted session compositor
+after recursive settlement work and mandatory ticket finalization leave the synchronous FIFO.
+Each asynchronous effect reserves finite publication capacity before it starts; completed
+settlements enter an ordered internal FIFO and produce exactly one internal notice each, including
+multiple same-kind completions observed in one tick. Only the public external-store layer may
+coalesce those notices because its consumers reread the exact latest snapshot.
+The compositor authenticates the still-current surface before reevaluation, so a late old-surface
+completion cannot publish into a replacement surface. An unexpected T13 self-disposal is also
+forwarded terminally; the complete session then fails closed instead of leaving an old public
+snapshot marked live.
+
 The default complete-session profile separately bounds active component nodes, component-plus-
-behavior bindings, and handled-event declarations at 5,000 each. Tree depth, surface transitions,
-observable generations, retained plan occurrences, and retained plan code units have independent
-lower-only ceilings; a trusted host may lower but never widen any of them.
+behavior bindings, and handled-event declarations at 5,000 each, plus 256 live external-store
+subscriptions. Tree depth, surface transitions, observable generations, retained plan occurrences,
+and retained plan code units have independent lower-only ceilings; a trusted host may lower but
+never widen any of them. An unsubscribe immediately releases its subscription slot.
 
 The official sign-in profile covers editing, loading, declared failure, retry, stale replacement,
-success navigation, and independent home-surface materialization. Generic automatic publication
-after every possible future internally nested settlement remains explicitly deferred because T13
-does not expose a universal nested-completion observer. The API does not render React, DOM, CSS,
-accessibility, focus, or native UI; concrete adapter reconciliation remains M05.
+success navigation, independent home-surface materialization, and a recursively nested generic
+operation settlement. The API does not render React, DOM, CSS, accessibility, focus, or native UI;
+concrete adapter reconciliation remains M05.
 
 ## Port invariants
 

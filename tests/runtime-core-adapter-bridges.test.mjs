@@ -38,6 +38,24 @@ const TRACE = new URL("../docs/proof/protocol-0.1.0-traceability.json", import.m
 const NORMATIVE = new URL("../docs/proof/NORMATIVE-COVERAGE.md", import.meta.url);
 const FINDINGS = new URL("../docs/plan/PROTOCOL-FINDINGS.md", import.meta.url);
 const PROOF_DOCUMENT = new URL("../docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md", import.meta.url);
+const PROOF_MATRIX = new URL("../docs/proof/PROOF-MATRIX.md", import.meta.url);
+const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-ADAPTER-BRIDGES.md";
+const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
+const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json";
+const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-adapter-bridges.json";
+const ROOT_TEST_PATH = "tests/runtime-core-adapter-bridges.test.mjs";
+const HISTORICAL_TRANSFER_RECORDS = Object.freeze({
+  "scripts/lib/runtime-core-adapter-bridges-proof.mjs": Object.freeze({
+    path: "scripts/lib/runtime-core-adapter-bridges-proof.mjs",
+    bytes: 57_717,
+    sha256: "e933f2e4824b0f529a14e3626185a6b526e0ebbb9c45e977eebd675d70117bda",
+  }),
+  [ROOT_TEST_PATH]: Object.freeze({
+    path: ROOT_TEST_PATH,
+    bytes: 22_699,
+    sha256: "efd0d3eac5570e80c001989382a028c80e50dff3d0b17dd321761a2a392dde44",
+  }),
+});
 
 async function rejectsCode(action, expectedCode) {
   await assert.rejects(action, (error) => {
@@ -94,6 +112,28 @@ function removeModuleExportDeclaration(moduleText, fileName, moduleName, isTypeO
   return `${moduleText.slice(0, declaration.getFullStart())}${moduleText.slice(declaration.end)}`;
 }
 
+function pinArtifactReferences(proofText, proofMatrixText, artifactSha256) {
+  let proofPins = 0;
+  const proof = proofText
+    .split(/\r?\n/u)
+    .map((line) => {
+      if (!/^Its SHA-256 is `[0-9a-f]{64}`\.$/u.test(line)) return line;
+      proofPins += 1;
+      return `Its SHA-256 is \`${artifactSha256}\`.`;
+    })
+    .join("\n");
+  let matrixArtifacts = 0;
+  const matrixLines = proofMatrixText.split(/\r?\n/u);
+  for (let index = 0; index < matrixLines.length; index += 1) {
+    if (matrixLines[index] !== `\`${ARTIFACT_FILE_NAME}\``) continue;
+    matrixArtifacts += 1;
+    matrixLines[index + 1] = `\`sha256:${artifactSha256}\`.`;
+  }
+  assert.equal(proofPins, 1);
+  assert.equal(matrixArtifacts, 1);
+  return { proof, proofMatrix: matrixLines.join("\n") };
+}
+
 test("accepts tracked deterministic M04-T14 adapter-bridge evidence", async () => {
   const result = await verifyRuntimeCoreAdapterBridgesEvidence();
   assert.equal(result.result, "PASS");
@@ -102,7 +142,7 @@ test("accepts tracked deterministic M04-T14 adapter-bridge evidence", async () =
   assert.equal(result.tsdocDeclarations, 35);
   assert.equal(result.focusedTests, 28);
   assert.equal(result.compilerNegativeCases, 11);
-  assert.equal(result.rootMutationTests, 21);
+  assert.equal(result.rootMutationTests, 22);
   assert.equal(result.traceRules, 4);
   assert.equal(result.normativeTested, 1);
   assert.equal(result.trackedFiles, 11);
@@ -115,6 +155,14 @@ test("builds byte-identical adapter-bridge evidence twice", async () => {
   const second = await buildRuntimeCoreAdapterBridgesEvidence();
   assert.equal(first.artifactSha256, second.artifactSha256);
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
+  assert.equal(first.artifact.evidence.rootMutationTests, 21);
+  assert.equal(first.currentRootMutationTests, 22);
+  const tracked = new Map(
+    first.artifact.evidence.trackedFiles.map((record) => [record.path, record]),
+  );
+  for (const [relativePath, historical] of Object.entries(HISTORICAL_TRANSFER_RECORDS)) {
+    assert.deepEqual(tracked.get(relativePath), historical);
+  }
 });
 
 test("rejects stale or tampered adapter-bridge evidence", async () => {
@@ -124,6 +172,91 @@ test("rejects stale or tampered adapter-bridge evidence", async () => {
   await rejectsCode(
     () => verifyRuntimeCoreAdapterBridgesEvidence({ artifactBytes: bytes }),
     "ADAPTER_BRIDGE_ARTIFACT_DRIFT",
+  );
+});
+
+test("rejects relocated or duplicated M04-T14 artifact SHA pins", async () => {
+  await rejectsCode(
+    () =>
+      verifyRuntimeCoreAdapterBridgesEvidence({
+        buildOptions: { runtimeApi: Object.freeze({}) },
+      }),
+    "ADAPTER_BRIDGE_OPTIONS_INVALID",
+  );
+  const evidence = await buildRuntimeCoreAdapterBridgesEvidence();
+  const [proofText, proofMatrixText] = await Promise.all([
+    readFile(PROOF_DOCUMENT, "utf8"),
+    readFile(PROOF_MATRIX, "utf8"),
+  ]);
+  const pinned = pinArtifactReferences(proofText, proofMatrixText, evidence.artifactSha256);
+  const verifyWith = (proof, proofMatrix) =>
+    verifyRuntimeCoreAdapterBridgesEvidence({
+      artifactBytes: evidence.artifactBytes,
+      buildOptions: {
+        fileOverrides: {
+          [PROOF_DOCUMENT_PATH]: proof,
+          [PROOF_MATRIX_PATH]: proofMatrix,
+        },
+      },
+    });
+  assert.equal((await verifyWith(pinned.proof, pinned.proofMatrix)).result, "PASS");
+
+  const wrongSha256 = "0".repeat(64);
+  const proofPair = `\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.`;
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.replace(proofPair, "")}\n## Relocated evidence\n\n${proofPair}\n`,
+        pinned.proofMatrix,
+      ),
+    "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.replace(
+          `Its SHA-256 is \`${evidence.artifactSha256}\`.`,
+          `Its SHA-256 is \`${wrongSha256}\`.`,
+        )}\n<!-- relocated ${evidence.artifactSha256} -->\n`,
+        pinned.proofMatrix,
+      ),
+    "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.trimEnd()}\n\n\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.\n`,
+        pinned.proofMatrix,
+      ),
+    "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.replace(
+          `\`sha256:${evidence.artifactSha256}\`.`,
+          `\`sha256:${wrongSha256}\`.`,
+        )}\n<!-- relocated sha256:${evidence.artifactSha256} -->\n`,
+      ),
+    "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  const matrixPair = `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.`;
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.replace(matrixPair, "")}\n## Relocated matrix evidence\n\n${matrixPair}\n`,
+      ),
+    "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.trimEnd()}\n\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.\n`,
+      ),
+    "ADAPTER_BRIDGE_ARTIFACT_REFERENCE_DRIFT",
   );
 });
 
@@ -389,6 +522,29 @@ test("detects trace, normative, finding, and proof-document drift", async () => 
       }),
     "ADAPTER_BRIDGE_NORMATIVE_DRIFT",
   );
+  const normativeWithoutT14Owner = normative
+    .split(/\r?\n/u)
+    .map((line) => {
+      if (!line.startsWith("| N-033 ")) return line;
+      const cells = line.split("|");
+      cells[4] = ` ${cells[4]
+        .split(",")
+        .map((owner) => owner.trim())
+        .filter((owner) => owner !== "M04-T14")
+        .join(", ")} `;
+      return cells.join("|");
+    })
+    .join("\n");
+  assert.ok(normativeWithoutT14Owner.includes("M04-T14 now admits"));
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreAdapterBridgesEvidence({
+        fileOverrides: {
+          "docs/proof/NORMATIVE-COVERAGE.md": normativeWithoutT14Owner,
+        },
+      }),
+    "ADAPTER_BRIDGE_NORMATIVE_DRIFT",
+  );
   const [findings, proof] = await Promise.all([
     readFile(FINDINGS, "utf8"),
     readFile(PROOF_DOCUMENT, "utf8"),
@@ -629,9 +785,10 @@ test("detects scoped authority leaks while preserving forward-compatible root ex
 });
 
 test("detects focused and compiler-negative inventory drift", async () => {
-  const [focused, types] = await Promise.all([
+  const [focused, types, rootTests] = await Promise.all([
     readFile(FOCUSED_TESTS, "utf8"),
     readFile(TYPE_TESTS, "utf8"),
+    readFile(new URL(import.meta.url), "utf8"),
   ]);
   await rejectsCode(
     () =>
@@ -656,5 +813,17 @@ test("detects focused and compiler-negative inventory drift", async () => {
         },
       }),
     "ADAPTER_BRIDGE_TYPE_TEST_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreAdapterBridgesEvidence({
+        fileOverrides: {
+          [ROOT_TEST_PATH]: rootTests.replace(
+            "rejects relocated or duplicated M04-T14 artifact SHA pins",
+            "accepts relocated M04-T14 artifact SHA pins",
+          ),
+        },
+      }),
+    "ADAPTER_BRIDGE_ROOT_TEST_INVENTORY_DRIFT",
   );
 });

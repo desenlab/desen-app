@@ -7,6 +7,7 @@ import test from "node:test";
 import {
   ProtocolComponentContractsEvidenceError,
   buildProtocolComponentContractsEvidence,
+  verifyProtocolComponentNormativeCompatibility,
   verifyProtocolComponentContracts,
   writeProtocolComponentContractsEvidence,
 } from "../scripts/lib/protocol-component-contracts-proof.mjs";
@@ -105,13 +106,49 @@ test("rejects reviewed M02-T08 trace, BCP 14, and finding mutations", async (con
     hasEvidenceCode("COMPONENT_NORMATIVE_COVERAGE_DRIFT"),
   );
 
-  const changedStatus = normative.replace(/^(\| N-026 \|.*?\| )TESTED(\s+\|)/mu, "$1PLANNED$2");
+  const compatibility = verifyProtocolComponentNormativeCompatibility(normative);
+  assert.deepEqual(compatibility.historicalProjection, [
+    { id: "N-026", status: "TESTED" },
+    { id: "N-028", status: "TESTED" },
+    { id: "N-029", status: "TESTED" },
+  ]);
+  assert.deepEqual(compatibility.currentStatuses, [
+    { id: "N-026", status: "PLANNED" },
+    { id: "N-028", status: "TESTED" },
+    { id: "N-029", status: "PLANNED" },
+  ]);
+
+  const changedStatus = normative.replace(/^(\| N-026 \|.*?\| )PLANNED(\s+\|)/mu, "$1TESTED$2");
   assert.notEqual(changedStatus, normative);
   const statusCoveragePath = path.join(directory, "normative-status.md");
   await writeFile(statusCoveragePath, changedStatus);
   await assert.rejects(
     buildProtocolComponentContractsEvidence({
       normativeCoveragePath: statusCoveragePath,
+      verifySnapshot: false,
+    }),
+    hasEvidenceCode("COMPONENT_NORMATIVE_COVERAGE_DRIFT"),
+  );
+
+  const unlistedDowngrade = normative.replace(/^(\| N-028 \|.*?\| )TESTED(\s+\|)/mu, "$1PLANNED$2");
+  assert.notEqual(unlistedDowngrade, normative);
+  const downgradeCoveragePath = path.join(directory, "normative-unlisted-downgrade.md");
+  await writeFile(downgradeCoveragePath, unlistedDowngrade);
+  await assert.rejects(
+    buildProtocolComponentContractsEvidence({
+      normativeCoveragePath: downgradeCoveragePath,
+      verifySnapshot: false,
+    }),
+    hasEvidenceCode("COMPONENT_NORMATIVE_COVERAGE_DRIFT"),
+  );
+
+  const duplicatedRow = normative.replace(/^(\| N-026 \|.*)$/mu, "$1\n$1");
+  assert.notEqual(duplicatedRow, normative);
+  const duplicateCoveragePath = path.join(directory, "normative-duplicate.md");
+  await writeFile(duplicateCoveragePath, duplicatedRow);
+  await assert.rejects(
+    buildProtocolComponentContractsEvidence({
+      normativeCoveragePath: duplicateCoveragePath,
       verifySnapshot: false,
     }),
     hasEvidenceCode("COMPONENT_NORMATIVE_COVERAGE_DRIFT"),

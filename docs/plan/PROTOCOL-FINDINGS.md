@@ -1636,10 +1636,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   lets T13 dispose its surrendered child managers. Navigation mounts the target surface as an
   independent lifetime under the same public session handle.
 
-- Future action: A later protocol revision should standardize an optional observable-plan/trace
-  profile, selector provenance, settlement-completion notification, binding-transaction behavior,
-  navigation handoff, and measured global limits if cross-implementation interoperability needs
-  them. M05 still owns resolved prop/style validation at the concrete adapter boundary,
+- Future action: M04-T17 owns the implementation-level authenticated settlement-completion notice
+  and generic session publication required to reclose G04; that project profile must not be
+  presented as new protocol text. A later protocol revision should standardize an optional
+  observable-plan/trace profile, selector provenance, settlement-completion notification,
+  binding-transaction behavior, navigation handoff, and measured global limits if
+  cross-implementation interoperability needs them. M05 still owns resolved prop/style validation
+  at the concrete adapter boundary,
   reconciliation with real framework instances, DOM/CSS/accessibility/focus behavior, and
   production adapter parity. The frozen example Catalog's digest is explicitly illustrative, so
   M04-T16 proves exact contract consumption rather than package-byte integrity or activation.
@@ -1697,3 +1700,57 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Future action: A later proof format should store versioned task-time semantic inputs separately
   from current monotonic completion state. Once that format exists, historical verifiers can
   consume a declared snapshot without a task-local ownership transfer.
+
+## PF-049 — Post-G04 audit corrections require explicit runtime notification and proof migration
+
+- Status: OPEN
+- Blocks proof: No; M04-T17 proved the hardened implementation boundary and reclosed G04. The
+  immutable M02-T08 and M04-T13 through M04-T16 artifacts remain valid evidence for their exact
+  task-time profiles and were not rewritten or retroactively relabeled.
+- Protocol location: SPEC Sections 17.2, 18.3, 20.4, 24, and 28.3; `N-026`, `N-029`, `R-048`,
+  `D-009`, `PF-046`, `PF-047`, and `PF-048`
+- Observation: M04-T16 observes the frozen sign-in operation's exposed settlement promise, while
+  T13 exposes no universal completion notice for action programs created by internally nested
+  settlement turns. The resulting trace is correct for the proved sign-in scenario but cannot
+  support a generic claim that every future nested settlement automatically triggers current
+  session publication.
+
+  The current BCP 14 ledger also marked N-026 and N-029 `TESTED` after M02-T08. That task proved
+  declared names, statically knowable values, and dynamic obligations; M04 later materialized
+  dynamic prop and style values. Neither boundary validates the complete resolved prop object or
+  resolved style-part property object against the receiving capability schema. The old statuses
+  therefore overstated the complete obligations. This is a ledger correction, not evidence that
+  previously working runtime behavior regressed.
+
+  Immutable task-time artifacts truthfully contain the status bytes accepted when they were
+  generated. Updating only the current ledger to `PLANNED` can consequently look like an
+  unexplained historical regression to compatibility verifiers. A safe migration must distinguish
+  task-time evidence from current completion truth and must bind every exception to its exact
+  location; accepting a nearby phrase, duplicate row, moved heading, or arbitrary status downgrade
+  would weaken the proof instead of correcting it.
+
+- Implementation decision: M04-T17 added a factory-authenticated, finite, exactly-once internal
+  completion notice after every accepted T13 settlement turn reaches finalization. The headless
+  session consumes that notice, requests the current T15 invalidation/publication path, and no
+  longer depends on knowledge of the official sign-in operation promise. The notice remains an
+  implementation authority and never enters a DESEN document or public JSON observation.
+
+  Its proof parser binds the completion claim and both corrected normative rows to exact files,
+  headings, table rows, columns, IDs, and owners. The migration record pins the exact
+  `N-026: TESTED -> PLANNED` and `N-029: TESTED -> PLANNED` corrections, their date, rationale,
+  historical artifact identities, and future owners; it rejects every unlisted downgrade or
+  relocation. M04-T17 owns the current compatibility verifiers and hostile tests for the affected
+  boundaries, while the M02-T08 and M04-T13 through M04-T16 task-time artifacts remain
+  byte-identical.
+
+  Deterministic fault injection covers completion notification before and after finalization,
+  nested success and declared failure, replacement and stale settlement, callback reentry,
+  duplicate/late notification, disposal, publication failure, and generation/retention limits.
+  The hardened cases expose no partial snapshot, publish no settlement twice, revive no disposed
+  authority, and strand no lower queue acknowledgement.
+
+- Future action: M05-T02 retains final validation and adapter-delivery ownership for N-026, and
+  M05-T03 retains final post-resolution style validation and adapter-delivery ownership for N-029.
+  Each row may return to `TESTED` only with its complete receiving-boundary evidence. A future
+  protocol revision may standardize settlement-completion notification and versioned evidence
+  snapshots; M04-T17 defines only the bounded 0.1.0 reference implementation profile.

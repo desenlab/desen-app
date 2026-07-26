@@ -20,6 +20,7 @@ import {
   executeRuntimeActionTurn,
   mountRuntimeActionTurns,
   prepareRuntimeActionProgram,
+  subscribeRuntimeActionTurnSettlements,
 } from "./action-turns.js";
 import { createRuntimeCommandEventHostPorts } from "./command-event-ports.js";
 import {
@@ -115,7 +116,9 @@ const SESSION_AUTHORITIES = new WeakMap<
   HeadlessSessionAuthority | HeadlessSessionTombstone
 >();
 const SESSION_SNAPSHOTS = new WeakMap<object, object>();
+const SESSION_SUBSCRIPTIONS = new WeakMap<object, SessionSubscriptionAuthority>();
 declare const RUNTIME_HEADLESS_SESSION_HANDLE_TYPE_BRAND: unique symbol;
+declare const RUNTIME_HEADLESS_SESSION_SUBSCRIPTION_TYPE_BRAND: unique symbol;
 
 /**
  * Finite framework-neutral ceilings for one complete headless Bundle session.
@@ -134,6 +137,8 @@ export const RUNTIME_HEADLESS_SESSION_LIMITS = Object.freeze({
   maxBindingCandidates: 5_000,
   /** Largest total handled-event declarations retained by live adapter bindings. */
   maxEventHandlerBindings: 5_000,
+  /** Largest number of live external-store listeners retained by one session. */
+  maxSubscriptions: 256,
   /** Largest number of successful managed-surface handoffs in one session. */
   maxSurfaceTransitions: 64,
   /** Largest zero-based public session generation represented exactly. */
@@ -154,6 +159,8 @@ export interface RuntimeHeadlessSessionLimitProfile {
   readonly maxBindingCandidates?: number;
   /** Lower total handled-event binding ceiling. */
   readonly maxEventHandlerBindings?: number;
+  /** Lower live external-store listener ceiling. */
+  readonly maxSubscriptions?: number;
   /** Lower successful managed-surface transition ceiling. */
   readonly maxSurfaceTransitions?: number;
   /** Lower inclusive public snapshot-generation ceiling. */
@@ -272,6 +279,40 @@ export type RuntimeHeadlessSessionReadResult =
       readonly status: "invalid-handle";
     }>;
 
+/** Receiver-independent invalidation notice used by framework snapshot-store adapters. */
+export type RuntimeHeadlessSessionListener = (this: void) => void;
+
+/**
+ * Opaque revocation authority for one headless-session listener.
+ *
+ * @remarks A structural cast cannot manufacture a subscription accepted by
+ * {@link unsubscribeRuntimeHeadlessSession}. The listener itself is never included in a public
+ * session snapshot.
+ */
+export interface RuntimeHeadlessSessionSubscription {
+  /** Compile-time-only marker paired with private `WeakMap` authority. */
+  readonly [RUNTIME_HEADLESS_SESSION_SUBSCRIPTION_TYPE_BRAND]: true;
+}
+
+/** Controlled result of attaching one asynchronous session invalidation listener. */
+export type RuntimeHeadlessSessionSubscribeResult =
+  | Readonly<{
+      /** The listener is registered and receives only future snapshot changes. */
+      readonly status: "subscribed";
+      /** Factory-authenticated authority used for explicit, idempotent revocation. */
+      readonly subscription: RuntimeHeadlessSessionSubscription;
+    }>
+  | Readonly<{
+      /** Stable closed classification; no listener was retained. */
+      readonly status: "disposed" | "invalid-handle" | "invalid-listener" | "subscription-limit";
+    }>;
+
+/** Controlled idempotent result of revoking one factory-created session subscription. */
+export type RuntimeHeadlessSessionUnsubscribeResult = Readonly<{
+  /** Whether this call revoked the listener or found an inert/foreign authority. */
+  readonly status: "unsubscribed" | "already-unsubscribed" | "invalid-subscription";
+}>;
+
 /** Caller-owned immediate component or behavior event request. */
 export interface RuntimeHeadlessSessionEventInput {
   /** Exact current session snapshot object returned by mount, read, or a prior event completion. */
@@ -385,6 +426,7 @@ interface SurfaceLifetime {
   readonly resourceHandle: RuntimeSurfaceResourcesHandle;
   readonly operationHandle: RuntimeSurfaceOperationsHandle;
   readonly turnsHandle: RuntimeActionTurnsHandle;
+  readonly unsubscribeSettlements: () => void;
   readonly bridgeHandle: RuntimeAdapterBridgesHandle;
   bridgeSnapshot: RuntimeAdapterBridgesSnapshot;
   readonly reactiveHandle: RuntimeReactiveReevaluationHandle;
@@ -425,11 +467,21 @@ interface HeadlessSessionAuthority {
   readonly cleanupPending: SurfaceLifetime[];
   cleanupScheduled: boolean;
   readonly observedSettlements: WeakSet<object>;
+  readonly subscriptions: Set<SessionSubscriptionAuthority>;
+  notificationScheduled: boolean;
 }
 
 interface HeadlessSessionTombstone {
   readonly status: "disposed";
   readonly activatedSurfaces: number;
+}
+
+interface SessionSubscriptionAuthority {
+  status: "live" | "revoked";
+  readonly owner: HeadlessSessionAuthority;
+  readonly subscription: RuntimeHeadlessSessionSubscription;
+  readonly listener: RuntimeHeadlessSessionListener;
+  observedSnapshot: RuntimeHeadlessSessionSnapshot | undefined;
 }
 
 interface CapturedMountInput {
@@ -454,6 +506,47 @@ interface OwnDataRead {
 
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function revokeSessionSubscription(subscription: SessionSubscriptionAuthority): void {
+  if (subscription.status === "revoked") return;
+  subscription.status = "revoked";
+  subscription.owner.subscriptions.delete(subscription);
+}
+
+function scheduleSessionNotification(authority: HeadlessSessionAuthority): void {
+  if (authority.notificationScheduled || authority.subscriptions.size === 0) return;
+  authority.notificationScheduled = true;
+  void Promise.resolve().then(() => {
+    authority.notificationScheduled = false;
+    const terminalAtStart = authority.status === "revoked";
+    const publishedSnapshot = authority.snapshot;
+    const subscriptions = [...authority.subscriptions];
+    for (const subscription of subscriptions) {
+      if (
+        subscription.status !== "live" ||
+        subscription.owner !== authority ||
+        !authority.subscriptions.has(subscription)
+      ) {
+        continue;
+      }
+      const terminal = authority.status === "revoked";
+      const currentSnapshot = terminal ? undefined : publishedSnapshot;
+      if (subscription.observedSnapshot === currentSnapshot) continue;
+      subscription.observedSnapshot = currentSnapshot;
+      try {
+        Reflect.apply(subscription.listener, undefined, []);
+      } catch {
+        // Store listeners are notification-only. One hostile consumer cannot block another or
+        // change the callback-free session snapshot that every consumer rereads independently.
+      }
+    }
+    if (terminalAtStart) {
+      for (const subscription of [...authority.subscriptions]) {
+        revokeSessionSubscription(subscription);
+      }
+    }
+  });
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -514,6 +607,7 @@ function captureLimits(input: unknown): Limits | undefined {
         "maxPlanCodeUnits",
         "maxPlanJsonOccurrences",
         "maxSnapshotGeneration",
+        "maxSubscriptions",
         "maxSurfaceTransitions",
       ],
     )
@@ -1408,6 +1502,7 @@ function commitPublishedReactive(
   authority.snapshot = snapshot;
   authority.nextSnapshotGeneration = generation + 1;
   lifetime.reactiveSnapshot = reactive;
+  if (authority.status === "live") scheduleSessionNotification(authority);
   return true;
 }
 
@@ -1433,6 +1528,7 @@ function disposeCompleteSurface(lifetime: SurfaceLifetime): boolean {
     // A deferred session retry must preserve T14-before-T13 disposal order.
   }
   if (!bridgeDisposed) return false;
+  lifetime.unsubscribeSettlements();
   let turnsDisposed = false;
   try {
     const turns = disposeRuntimeActionTurns(lifetime.turnsHandle);
@@ -1460,6 +1556,7 @@ function buildSurface(
   let commandActions: ReturnType<typeof mountRuntimeCommandEventActions> | undefined;
   let bridge: ReturnType<typeof createRuntimeAdapterBridgePorts> | undefined;
   let turns: ReturnType<typeof mountRuntimeActionTurns> | undefined;
+  let unsubscribeSettlements: (() => void) | undefined;
   let reactive: ReturnType<typeof mountRuntimeReactiveReevaluation> | undefined;
 
   const cleanupPartial = (): void => {
@@ -1478,6 +1575,7 @@ function buildSurface(
       }
     }
     if (turns?.status === "mounted") {
+      unsubscribeSettlements?.();
       try {
         disposeRuntimeActionTurns(turns.handle);
       } catch {
@@ -1693,6 +1791,32 @@ function buildSurface(
       return undefined;
     }
 
+    const publishedLifetime: { current: SurfaceLifetime | undefined } = { current: undefined };
+    const settlementSubscription = subscribeRuntimeActionTurnSettlements(turns.handle, (reason) => {
+      const lifetime = publishedLifetime.current;
+      if (lifetime === undefined || authority.status !== "live" || authority.current !== lifetime) {
+        return;
+      }
+      try {
+        if (reason === "disposed") {
+          disposeSessionAuthority(authority);
+          return;
+        }
+        if (authority.pendingNavigation !== undefined) {
+          transitionToPendingSurface(authority);
+        } else {
+          invalidateSurface(authority, lifetime, reason);
+        }
+      } catch {
+        disposeSessionAuthority(authority);
+      }
+    });
+    if (settlementSubscription.status !== "subscribed") {
+      cleanupPartial();
+      return undefined;
+    }
+    unsubscribeSettlements = settlementSubscription.unsubscribe;
+
     const candidates = new Map<string, CandidateMaterialization>();
     reactive = mountRuntimeReactiveReevaluation({
       documentId: graph.bundle.id,
@@ -1743,6 +1867,7 @@ function buildSurface(
       resourceHandle: resources.handle,
       operationHandle: operations.handle,
       turnsHandle: turns.handle,
+      unsubscribeSettlements: settlementSubscription.unsubscribe,
       bridgeHandle: bridge.handle,
       bridgeSnapshot: bound.snapshot,
       reactiveHandle: reactive.handle,
@@ -1750,6 +1875,7 @@ function buildSurface(
       candidates,
       bindings: new Map(),
     };
+    publishedLifetime.current = lifetime;
     authority.current = lifetime;
     if (!commitPublishedReactive(authority, lifetime, reactive.snapshot)) {
       if (authority.current === lifetime) {
@@ -1830,46 +1956,6 @@ function observeResourceSettlement(
   );
 }
 
-function observeActionSettlement(
-  authority: HeadlessSessionAuthority,
-  lifetime: SurfaceLifetime,
-  settlement: Promise<unknown>,
-  reason: "operation" | "resource",
-): void {
-  if (authority.observedSettlements.has(settlement)) return;
-  authority.observedSettlements.add(settlement);
-  void settlement.then(
-    () => {
-      if (authority.status !== "live" || authority.current !== lifetime) return;
-      if (authority.pendingNavigation !== undefined) {
-        transitionToPendingSurface(authority);
-      } else {
-        invalidateSurface(authority, lifetime, reason);
-      }
-    },
-    () => undefined,
-  );
-}
-
-function observeTurnSettlements(
-  authority: HeadlessSessionAuthority,
-  lifetime: SurfaceLifetime,
-  completion: RuntimeActionTurnCompletion,
-): void {
-  for (const step of completion.steps) {
-    const result = step.result;
-    if (
-      result.status === "operation-started" ||
-      result.status === "operation-queued" ||
-      result.status === "operation-staged"
-    ) {
-      observeActionSettlement(authority, lifetime, result.settlement, "operation");
-    } else if (result.status === "resource-started") {
-      observeActionSettlement(authority, lifetime, result.settlement, "resource");
-    }
-  }
-}
-
 function observedTurnCompletion(
   authority: HeadlessSessionAuthority,
   lifetime: SurfaceLifetime,
@@ -1880,7 +1966,6 @@ function observedTurnCompletion(
       if (authority.status !== "live" || authority.current !== lifetime) {
         return terminalCompletion(completed, authority.snapshot);
       }
-      observeTurnSettlements(authority, lifetime, completed);
       if (authority.pendingNavigation !== undefined || completed.status === "navigated") {
         transitionToPendingSurface(authority);
       } else {
@@ -2079,6 +2164,7 @@ function disposeSessionAuthority(authority: HeadlessSessionAuthority): void {
       activatedSurfaces: authority.activatedSurfaces,
     }),
   );
+  scheduleSessionNotification(authority);
   completeDeferredSessionCleanup(authority, true);
 }
 
@@ -2091,10 +2177,9 @@ function disposeSessionAuthority(authority: HeadlessSessionAuthority): void {
  * before the first adapter binding becomes live. A materialized plan is published only when T15's
  * evaluation identifier and both commitment digests authenticate its private sidecar.
  *
- * Generic operation handlers created by a nested settlement turn are intentionally outside this
- * version's automatic publication hook because T13 does not expose that nested completion. The
- * frozen sign-in operation's official settlement Promise, including its success navigation, is
- * observed and published completely.
+ * Every generic operation or resource settlement completed by T13 schedules a stale-safe
+ * whole-surface publication after the recursive settlement drain. No operation name, frozen
+ * example, or application-specific handler is privileged by the composition.
  */
 export function mountRuntimeHeadlessSession(
   input: RuntimeHeadlessSessionMountInput,
@@ -2178,6 +2263,8 @@ export function mountRuntimeHeadlessSession(
     cleanupPending: [],
     cleanupScheduled: false,
     observedSettlements: new WeakSet(),
+    subscriptions: new Set(),
+    notificationScheduled: false,
   };
   hostOwner.current = authority;
   SESSION_AUTHORITIES.set(handle, authority);
@@ -2215,6 +2302,68 @@ export function readRuntimeHeadlessSession(
     return Object.freeze({ status: "disposed" });
   }
   return Object.freeze({ status: "read", snapshot: authority.snapshot });
+}
+
+/**
+ * Subscribes to future headless-session snapshot changes without performing an initial callback.
+ *
+ * @remarks Notifications are receiver-independent, argument-free, and deferred until after the
+ * publishing runtime stack unwinds. A listener must call {@link readRuntimeHeadlessSession} to
+ * obtain the exact current snapshot. Multiple synchronous publications may coalesce into one
+ * notice, which matches React `useSyncExternalStore` semantics because the snapshot read, not the
+ * callback count, defines observable state. Listener exceptions are contained independently.
+ */
+export function subscribeRuntimeHeadlessSession(
+  handle: RuntimeHeadlessSessionHandle,
+  listener: RuntimeHeadlessSessionListener,
+): RuntimeHeadlessSessionSubscribeResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  if (typeof listener !== "function") return Object.freeze({ status: "invalid-listener" });
+  const authority = SESSION_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  if (authority.status === "disposed" || authority.status === "revoked") {
+    return Object.freeze({ status: "disposed" });
+  }
+  if (authority.status !== "live" || authority.snapshot === undefined) {
+    return Object.freeze({ status: "disposed" });
+  }
+  if (authority.subscriptions.size >= authority.limits.maxSubscriptions) {
+    return Object.freeze({ status: "subscription-limit" });
+  }
+  const subscription = Object.freeze({}) as RuntimeHeadlessSessionSubscription;
+  const subscriptionAuthority: SessionSubscriptionAuthority = {
+    status: "live",
+    owner: authority,
+    subscription,
+    listener,
+    observedSnapshot: authority.snapshot,
+  };
+  authority.subscriptions.add(subscriptionAuthority);
+  SESSION_SUBSCRIPTIONS.set(subscription, subscriptionAuthority);
+  return Object.freeze({ status: "subscribed", subscription });
+}
+
+/**
+ * Idempotently revokes one factory-created headless-session subscription.
+ *
+ * @remarks Revocation is safe from inside the listener itself and cancels a queued notification
+ * that has not yet selected the subscription. Foreign objects never affect a live session.
+ */
+export function unsubscribeRuntimeHeadlessSession(
+  subscription: RuntimeHeadlessSessionSubscription,
+): RuntimeHeadlessSessionUnsubscribeResult {
+  if (typeof subscription !== "object" || subscription === null) {
+    return Object.freeze({ status: "invalid-subscription" });
+  }
+  const authority = SESSION_SUBSCRIPTIONS.get(subscription);
+  if (authority === undefined) return Object.freeze({ status: "invalid-subscription" });
+  if (authority.status === "revoked") {
+    return Object.freeze({ status: "already-unsubscribed" });
+  }
+  revokeSessionSubscription(authority);
+  return Object.freeze({ status: "unsubscribed" });
 }
 
 /**

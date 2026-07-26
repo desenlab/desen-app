@@ -93,7 +93,10 @@ export const RUNTIME_ACTION_TURN_LIMITS = Object.freeze({
   maxActionsPerTurn: 64,
   /** Largest nested operation-settlement turn depth. */
   maxSettlementDepth: 16,
-  /** Shared queued-event, queued-settlement, and reserved-settlement capacity. */
+  /**
+   * Shared queued-event/settlement capacity and independent outstanding settlement-publication
+   * capacity.
+   */
   maxQueuedTurns: 64,
   /** Largest number of work items processed in one synchronous drain wave. */
   maxSynchronousTurnTransitions: 64,
@@ -314,6 +317,25 @@ export type RuntimeActionTurnsDisposeResult =
       readonly invalidatedLeases: 0;
     }>;
 
+/**
+ * Package-internal classification of a completed asynchronous lifecycle change.
+ *
+ * @remarks This type is deliberately not re-exported from the package root. It lets the trusted
+ * headless composition layer invalidate its callback-free public snapshot without exposing a
+ * lower-manager settlement Promise or ticket.
+ */
+export type RuntimeActionTurnSettlementPublication = "disposed" | "operation" | "resource";
+
+/** Package-internal result of attaching the single trusted settlement publication observer. */
+export type RuntimeActionTurnSettlementSubscriptionResult =
+  | Readonly<{
+      readonly status: "subscribed";
+      readonly unsubscribe: () => void;
+    }>
+  | Readonly<{
+      readonly status: "already-subscribed" | "disposed" | "invalid-handle" | "invalid-listener";
+    }>;
+
 type ActionRoute = RuntimeActionTurnStep["route"];
 
 interface PreparedActionEntry {
@@ -404,6 +426,15 @@ interface ActionTurnsAuthority {
   retainedQueuedCodeUnits: number;
   draining: boolean;
   reporting: boolean;
+  settlementObserver:
+    | {
+        active: boolean;
+        readonly listener: (publication: RuntimeActionTurnSettlementPublication) => void;
+      }
+    | undefined;
+  readonly pendingSettlementPublications: RuntimeActionTurnSettlementPublication[];
+  settlementPublicationReservations: number;
+  settlementPublicationScheduled: boolean;
 }
 
 interface ActionTurnsTombstone {
@@ -1015,6 +1046,10 @@ export function mountRuntimeActionTurns(
     retainedQueuedCodeUnits: 0,
     draining: false,
     reporting: false,
+    settlementObserver: undefined,
+    pendingSettlementPublications: [],
+    settlementPublicationReservations: 0,
+    settlementPublicationScheduled: false,
   } satisfies ActionTurnsAuthority;
   authority.snapshot = makeSnapshot(authority, 0);
   const handle = Object.freeze({}) as RuntimeActionTurnsHandle;
@@ -1023,6 +1058,110 @@ export function mountRuntimeActionTurns(
   CLAIMED_COMMAND_EVENT_ACTIONS.add(captured.commandEventActionsHandle);
   TURN_AUTHORITIES.set(handle, authority);
   return Object.freeze({ status: "mounted", handle, snapshot: authority.snapshot });
+}
+
+function reserveSettlementPublication(authority: ActionTurnsAuthority): boolean {
+  if (
+    authority.settlementPublicationReservations >= authority.limits.maxQueuedTurns ||
+    authority.pendingSettlementPublications.length >= authority.limits.maxQueuedTurns
+  ) {
+    return false;
+  }
+  authority.settlementPublicationReservations += 1;
+  return true;
+}
+
+function releaseSettlementPublication(authority: ActionTurnsAuthority): void {
+  if (authority.settlementPublicationReservations > 0) {
+    authority.settlementPublicationReservations -= 1;
+  }
+}
+
+function scheduleSettlementPublication(
+  handle: RuntimeActionTurnsHandle,
+  authority: ActionTurnsAuthority,
+  publication: RuntimeActionTurnSettlementPublication,
+): void {
+  if (authority.status !== "live") return;
+  if (authority.settlementPublicationReservations === 0) {
+    containCoordinatorFailure(handle, authority);
+    return;
+  }
+  if (authority.settlementObserver === undefined) {
+    releaseSettlementPublication(authority);
+    return;
+  }
+  if (authority.pendingSettlementPublications.length >= authority.limits.maxQueuedTurns) {
+    containCoordinatorFailure(handle, authority);
+    return;
+  }
+  authority.pendingSettlementPublications.push(publication);
+  if (authority.settlementPublicationScheduled) return;
+  authority.settlementPublicationScheduled = true;
+  void Promise.resolve().then(() => {
+    authority.settlementPublicationScheduled = false;
+    const pending = authority.pendingSettlementPublications.splice(0);
+    const observer = authority.settlementObserver;
+    for (const current of pending) {
+      releaseSettlementPublication(authority);
+      if (
+        authority.status !== "live" ||
+        observer === undefined ||
+        authority.settlementObserver !== observer ||
+        !observer.active
+      ) {
+        continue;
+      }
+      try {
+        Reflect.apply(observer.listener, undefined, [current]);
+      } catch {
+        // The trusted composition layer owns fail-closed session disposal. T13 contains the
+        // observer boundary and never lets one callback corrupt its FIFO or another publication.
+      }
+    }
+  });
+}
+
+/**
+ * Attaches the trusted composition layer's single asynchronous settlement publication observer.
+ *
+ * @remarks The listener is invoked only from a microtask after the corresponding coordinator
+ * update and recursive settlement work have left the synchronous FIFO drain. Operation and
+ * resource completions retain FIFO order and each accepted completion produces exactly one
+ * callback. The finite pending queue is pre-reserved before its asynchronous effect begins, the
+ * callback receives no lower authority, and the returned revoker is idempotent. This module-level
+ * seam is intentionally absent from the package root.
+ */
+export function subscribeRuntimeActionTurnSettlements(
+  handle: RuntimeActionTurnsHandle,
+  listener: (publication: RuntimeActionTurnSettlementPublication) => void,
+): RuntimeActionTurnSettlementSubscriptionResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  if (typeof listener !== "function") return Object.freeze({ status: "invalid-listener" });
+  const authority = TURN_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  if (authority.status !== "live") return Object.freeze({ status: "disposed" });
+  if (authority.settlementObserver !== undefined) {
+    return Object.freeze({ status: "already-subscribed" });
+  }
+  const observer = { active: true, listener };
+  authority.settlementObserver = observer;
+  return Object.freeze({
+    status: "subscribed",
+    unsubscribe: () => {
+      if (!observer.active) return;
+      observer.active = false;
+      if (authority.settlementObserver === observer) {
+        authority.settlementObserver = undefined;
+        const discarded = authority.pendingSettlementPublications.splice(0).length;
+        for (let index = 0; index < discarded; index += 1) {
+          releaseSettlementPublication(authority);
+        }
+      }
+    },
+  });
 }
 
 type FreshReadResult =
@@ -1291,6 +1430,7 @@ function reserveSettlement(
   if (emergencySnapshot === undefined) return undefined;
   const turnId = nextTurnId(authority);
   if (turnId === undefined) return undefined;
+  if (!reserveSettlementPublication(authority)) return undefined;
   authority.reservedSettlementSlots += 1;
   const reservation = {
     active: true,
@@ -1313,6 +1453,15 @@ function releaseSettlementReservation(
   reservation.active = false;
   authority.settlementReservations.delete(reservation);
   authority.reservedSettlementSlots -= 1;
+}
+
+function abandonSettlementReservation(
+  authority: ActionTurnsAuthority,
+  reservation: SettlementReservation,
+): void {
+  if (!reservation.active) return;
+  releaseSettlementReservation(authority, reservation);
+  releaseSettlementPublication(authority);
 }
 
 function isTicketDescriptor(
@@ -1384,6 +1533,7 @@ function enqueueSettlementDescriptor(
     }
     if (ticketDescriptor === undefined) {
       if (descriptor.status === "disposed") disposeRuntimeActionTurns(handle);
+      else scheduleSettlementPublication(handle, authority, "operation");
       return;
     }
 
@@ -1429,6 +1579,8 @@ function observeResourceSettlement(
   if ("snapshot" in settlement) {
     if (!updateResourceSnapshot(authority, settlement.snapshot)) {
       disposeRuntimeActionTurns(handle);
+    } else {
+      scheduleSettlementPublication(handle, authority, "resource");
     }
     return;
   }
@@ -1632,6 +1784,18 @@ function reserveOperationSettlementOrReport(
   return undefined;
 }
 
+function reserveResourceSettlementPublicationOrReport(authority: ActionTurnsAuthority): boolean {
+  if (reserveSettlementPublication(authority)) return true;
+  const diagnostics = Object.freeze([
+    actionLimitDiagnostic(
+      authority,
+      "The settlement publication queue cannot reserve a non-droppable resource completion.",
+    ),
+  ]);
+  safeReport(authority, diagnostics);
+  return false;
+}
+
 function makeEmergencyEventCompletion(
   authority: ActionTurnsAuthority,
   turnId: string,
@@ -1798,6 +1962,7 @@ function processWorkItem(
 
           let result: RuntimeActionTurnStep["result"];
           let settlementReservation: SettlementReservation | undefined;
+          let resourcePublicationReserved = false;
           if (entry.route === "unknown") {
             result = unknownActionResult(authority);
           } else if (entry.route === "state-navigation") {
@@ -1815,6 +1980,17 @@ function processWorkItem(
                 item.scope,
               );
               if (settlementReservation === undefined) {
+                if (authority.status === "live") {
+                  completionStatus = "terminated";
+                  terminationReason = "action-limit";
+                } else {
+                  completionStatus = "disposed";
+                }
+                break;
+              }
+            } else if (entry.type === "resource.refresh") {
+              resourcePublicationReserved = reserveResourceSettlementPublicationOrReport(authority);
+              if (!resourcePublicationReserved) {
                 if (authority.status === "live") {
                   completionStatus = "terminated";
                   terminationReason = "action-limit";
@@ -1855,7 +2031,15 @@ function processWorkItem(
                 );
                 disposeRuntimeActionTurns(handle);
               } else {
-                releaseSettlementReservation(authority, settlementReservation);
+                abandonSettlementReservation(authority, settlementReservation);
+              }
+            }
+            if (resourcePublicationReserved) {
+              if (result.status === "resource-started") {
+                attachResourceSettlement(handle, authority, result.settlement);
+                disposeRuntimeActionTurns(handle);
+              } else {
+                releaseSettlementPublication(authority);
               }
             }
             steps.push(Object.freeze({ index: used - 1, route: entry.route, result }));
@@ -1873,10 +2057,12 @@ function processWorkItem(
           ) {
             attachOperationSettlement(handle, authority, settlementReservation, result.settlement);
           } else if (settlementReservation !== undefined) {
-            releaseSettlementReservation(authority, settlementReservation);
+            abandonSettlementReservation(authority, settlementReservation);
           }
           if (result.status === "resource-started") {
             attachResourceSettlement(handle, authority, result.settlement);
+          } else if (resourcePublicationReserved) {
+            releaseSettlementPublication(authority);
           }
 
           const outcome = childTerminationReason(result);
@@ -2015,13 +2201,18 @@ function terminateTransitionOverflow(
         // The admission-time completion keeps this accepted Promise fulfilled.
       }
       item.resolve(completion);
-    } else if (!finalizeSettlementItem(authority, item)) {
-      try {
-        disposeRuntimeActionTurns(handle);
-      } catch {
-        // The settlement finalization attempt is already recorded.
+    } else {
+      if (!finalizeSettlementItem(authority, item)) {
+        try {
+          disposeRuntimeActionTurns(handle);
+        } catch {
+          // The settlement finalization attempt is already recorded.
+        }
+        return;
       }
-      return;
+      if (authority.status === "live") {
+        scheduleSettlementPublication(handle, authority, "operation");
+      }
     }
   }
 }
@@ -2079,6 +2270,9 @@ function drainQueue(handle: RuntimeActionTurnsHandle, authority: ActionTurnsAuth
         if (authority.status === "live") releaseQueuedItem(authority, item);
       }
       if (item.origin === "event") item.resolve(completion ?? item.emergencyCompletion);
+      else if (authority.status === "live") {
+        scheduleSettlementPublication(handle, authority, "operation");
+      }
       flushDeferredDisposedEvents(authority);
     }
   } catch {
@@ -2264,6 +2458,22 @@ function disposeAuthority(
   authority: ActionTurnsAuthority,
 ): Extract<RuntimeActionTurnsDisposeResult, { readonly status: "disposed" }> {
   authority.status = "revoked";
+  const settlementObserver = authority.settlementObserver;
+  authority.settlementObserver = undefined;
+  authority.pendingSettlementPublications.splice(0);
+  authority.settlementPublicationReservations = 0;
+  if (settlementObserver !== undefined && settlementObserver.active) {
+    void Promise.resolve().then(() => {
+      if (!settlementObserver.active) return;
+      try {
+        Reflect.apply(settlementObserver.listener, undefined, ["disposed"]);
+      } catch {
+        // The terminal lower authority is already revoked; callback failure cannot revive it.
+      } finally {
+        settlementObserver.active = false;
+      }
+    });
+  }
   const queued = authority.queue.splice(0);
   const discardedTurns = queued.length + authority.reservedSettlementSlots;
   for (const reservation of authority.settlementReservations) {

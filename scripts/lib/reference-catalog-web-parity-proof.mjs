@@ -1412,15 +1412,22 @@ function inspectTraceability(traceability) {
 export function verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage) {
   const currentStatuses = HISTORICAL_NORMATIVE_STATUSES.map(({ id, status: historicalStatus }) => {
     const rows = normativeCoverage.split("\n").filter((line) => line.startsWith(`| ${id} `));
+    const cells =
+      rows.length === 1
+        ? rows[0]
+            .split("|")
+            .slice(1, -1)
+            .map((cell) => cell.trim())
+        : [];
+    const ownerTasks = (cells[3] ?? "")
+      .split(",")
+      .map((owner) => owner.trim())
+      .filter(Boolean);
     assertCondition(
-      rows.length === 1 && rows[0].includes("M03-T09"),
+      cells[0] === id && ownerTasks.includes("M03-T09"),
       "REFERENCE_PARITY_CLAIM_DRIFT",
-      `${id} must retain its exact M03-T09 evidence boundary.`,
+      `${id} must retain M03-T09 in its exact Owner task(s) cell.`,
     );
-    const cells = rows[0]
-      .split("|")
-      .slice(1, -1)
-      .map((cell) => cell.trim());
     const currentStatus = cells[4] ?? "";
     const historicalRank = NORMATIVE_STATUS_RANK[historicalStatus];
     const currentRank = NORMATIVE_STATUS_RANK[currentStatus];

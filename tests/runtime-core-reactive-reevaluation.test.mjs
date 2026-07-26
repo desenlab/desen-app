@@ -46,6 +46,23 @@ const OWNED_PATHS = Object.freeze([
 ]);
 const HOST_SOURCE_PATH = "packages/runtime-core/src/reactive-host-ports.ts";
 const REEVALUATION_SOURCE_PATH = "packages/runtime-core/src/reactive-reevaluation.ts";
+const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md";
+const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
+const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json";
+const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-reactive-reevaluation.json";
+const ROOT_TEST_PATH = "tests/runtime-core-reactive-reevaluation.test.mjs";
+const HISTORICAL_TRANSFER_RECORDS = Object.freeze({
+  "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs": Object.freeze({
+    path: "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+    bytes: 74_729,
+    sha256: "d30bc915dfc90435951a9ffdd277c2c63be9c9e42b98a82f77d25d3d412a254c",
+  }),
+  [ROOT_TEST_PATH]: Object.freeze({
+    path: ROOT_TEST_PATH,
+    bytes: 24_906,
+    sha256: "74aabe03536c20cbe76034c53b6d0c59b67d6543a17c3d1d59481d66ea574ff7",
+  }),
+});
 
 async function rejectsCode(action, expectedCode) {
   await assert.rejects(action, (error) => {
@@ -94,6 +111,28 @@ function removeModuleExportDeclaration(moduleText, fileName, moduleName, isTypeO
   return `${moduleText.slice(0, declaration.getFullStart())}${moduleText.slice(declaration.end)}`;
 }
 
+function pinArtifactReferences(proofText, proofMatrixText, artifactSha256) {
+  let proofPins = 0;
+  const proof = proofText
+    .split(/\r?\n/u)
+    .map((line) => {
+      if (!/^Its SHA-256 is `[0-9a-f]{64}`\.$/u.test(line)) return line;
+      proofPins += 1;
+      return `Its SHA-256 is \`${artifactSha256}\`.`;
+    })
+    .join("\n");
+  let matrixArtifacts = 0;
+  const matrixLines = proofMatrixText.split(/\r?\n/u);
+  for (let index = 0; index < matrixLines.length; index += 1) {
+    if (matrixLines[index] !== `\`${ARTIFACT_FILE_NAME}\``) continue;
+    matrixArtifacts += 1;
+    matrixLines[index + 1] = `\`sha256:${artifactSha256}\`.`;
+  }
+  assert.equal(proofPins, 1);
+  assert.equal(matrixArtifacts, 1);
+  return { proof, proofMatrix: matrixLines.join("\n") };
+}
+
 test("accepts tracked deterministic M04-T15 reactive evidence", async () => {
   const result = await verifyRuntimeCoreReactiveReevaluationEvidence();
   assert.equal(result.result, "PASS");
@@ -103,7 +142,7 @@ test("accepts tracked deterministic M04-T15 reactive evidence", async () => {
   assert.equal(result.tsdocDeclarations, 24);
   assert.equal(result.focusedTests, 54);
   assert.equal(result.compilerNegativeCases, 11);
-  assert.equal(result.rootMutationTests, 30);
+  assert.equal(result.rootMutationTests, 31);
   assert.equal(result.revokedProxyRedactions, 1);
   assert.equal(result.revokedInputProbes, 2);
   assert.equal(result.failedSubscriptionCleanupProbes, 7);
@@ -121,6 +160,14 @@ test("builds byte-identical reactive evidence twice", async () => {
   const second = await buildRuntimeCoreReactiveReevaluationEvidence();
   assert.equal(first.artifactSha256, second.artifactSha256);
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
+  assert.equal(first.artifact.evidence.rootMutationTests, 30);
+  assert.equal(first.currentRootMutationTests, 31);
+  const tracked = new Map(
+    first.artifact.evidence.trackedFiles.map((record) => [record.path, record]),
+  );
+  for (const [relativePath, historical] of Object.entries(HISTORICAL_TRANSFER_RECORDS)) {
+    assert.deepEqual(tracked.get(relativePath), historical);
+  }
 });
 
 test("rejects stale or tampered reactive evidence", async () => {
@@ -130,6 +177,91 @@ test("rejects stale or tampered reactive evidence", async () => {
   await rejectsCode(
     () => verifyRuntimeCoreReactiveReevaluationEvidence({ artifactBytes: bytes }),
     "REACTIVE_ARTIFACT_DRIFT",
+  );
+});
+
+test("rejects relocated or duplicated M04-T15 artifact SHA pins", async () => {
+  await rejectsCode(
+    () =>
+      verifyRuntimeCoreReactiveReevaluationEvidence({
+        buildOptions: { validatorApi: Object.freeze({}) },
+      }),
+    "REACTIVE_OPTIONS_INVALID",
+  );
+  const evidence = await buildRuntimeCoreReactiveReevaluationEvidence();
+  const [proofText, proofMatrixText] = await Promise.all([
+    readFile(new URL(`../${PROOF_DOCUMENT_PATH}`, import.meta.url), "utf8"),
+    readFile(new URL(`../${PROOF_MATRIX_PATH}`, import.meta.url), "utf8"),
+  ]);
+  const pinned = pinArtifactReferences(proofText, proofMatrixText, evidence.artifactSha256);
+  const verifyWith = (proof, proofMatrix) =>
+    verifyRuntimeCoreReactiveReevaluationEvidence({
+      artifactBytes: evidence.artifactBytes,
+      buildOptions: {
+        fileOverrides: {
+          [PROOF_DOCUMENT_PATH]: proof,
+          [PROOF_MATRIX_PATH]: proofMatrix,
+        },
+      },
+    });
+  assert.equal((await verifyWith(pinned.proof, pinned.proofMatrix)).result, "PASS");
+
+  const wrongSha256 = "0".repeat(64);
+  const proofPair = `\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.`;
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.replace(proofPair, "")}\n## Relocated evidence\n\n${proofPair}\n`,
+        pinned.proofMatrix,
+      ),
+    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.replace(
+          `Its SHA-256 is \`${evidence.artifactSha256}\`.`,
+          `Its SHA-256 is \`${wrongSha256}\`.`,
+        )}\n<!-- relocated ${evidence.artifactSha256} -->\n`,
+        pinned.proofMatrix,
+      ),
+    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        `${pinned.proof.trimEnd()}\n\n\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.\n`,
+        pinned.proofMatrix,
+      ),
+    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.replace(
+          `\`sha256:${evidence.artifactSha256}\`.`,
+          `\`sha256:${wrongSha256}\`.`,
+        )}\n<!-- relocated sha256:${evidence.artifactSha256} -->\n`,
+      ),
+    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  const matrixPair = `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.`;
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.replace(matrixPair, "")}\n## Relocated matrix evidence\n\n${matrixPair}\n`,
+      ),
+    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      verifyWith(
+        pinned.proof,
+        `${pinned.proofMatrix.trimEnd()}\n\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.\n`,
+      ),
+    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
   );
 });
 
@@ -690,6 +822,14 @@ test("detects every task-owned byte boundary", async () => {
   for (const relativePath of OWNED_PATHS) {
     const bytes = Buffer.from(await readFile(new URL(`../${relativePath}`, import.meta.url)));
     bytes[0] ^= 1;
+    if (Object.hasOwn(HISTORICAL_TRANSFER_RECORDS, relativePath)) {
+      const baseline = await buildRuntimeCoreReactiveReevaluationEvidence();
+      const transferred = await buildRuntimeCoreReactiveReevaluationEvidence({
+        fileOverrides: { [relativePath]: bytes },
+      });
+      assert.deepEqual(transferred.artifactBytes, baseline.artifactBytes, relativePath);
+      continue;
+    }
     await assert.rejects(
       () =>
         verifyRuntimeCoreReactiveReevaluationEvidence({
@@ -699,4 +839,17 @@ test("detects every task-owned byte boundary", async () => {
       relativePath,
     );
   }
+  const rootTests = await readFile(new URL(import.meta.url), "utf8");
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreReactiveReevaluationEvidence({
+        fileOverrides: {
+          [ROOT_TEST_PATH]: rootTests.replace(
+            "rejects relocated or duplicated M04-T15 artifact SHA pins",
+            "accepts relocated M04-T15 artifact SHA pins",
+          ),
+        },
+      }),
+    "REACTIVE_ROOT_TEST_INVENTORY_DRIFT",
+  );
 });
