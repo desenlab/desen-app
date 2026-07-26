@@ -1332,3 +1332,65 @@ This file records implementation discoveries without changing the frozen DESEN 0
   settlement branch mapping, token-cache scopes, cross-manager snapshot provenance, finite
   settlement retention, private acknowledgement authority, disposal and late-settlement behavior,
   and the exact safe point that promotes queued operation work.
+
+## PF-042 — Command target liveness and outbound host-event contracts require a deterministic bridge profile
+
+- Status: OPEN
+- Blocks proof: No; one additive, fail-closed bridge can preserve declared component commands and
+  application-owned outbound event contracts without exposing platform objects or inventing
+  adapter event semantics.
+- Protocol location: SPEC Sections 17.7, 20.6–20.7, 24.6, and 27.5–27.7; `R-080`, `R-106`,
+  `R-120`, `R-122`, `D-015`, `D-016`, and `N-031`; related findings `PF-015`, `PF-017`,
+  `PF-031`, `PF-040`, and `PF-041`
+- Observation: DESEN 0.1.0 requires a component command to address a declared command on a
+  currently instantiated component and validate its resolved input, but it does not define how a
+  framework adapter proves that liveness without exposing a DOM node, component object, or
+  arbitrary method table. It also requires the host to allowlist outbound `event.emit` names and
+  validate their payloads under an application contract, while leaving that contract registry,
+  policy result envelopes, request identity, reentry behavior, and finite registry limits to the
+  host profile. Catalog-declared component and behavior events travel in the opposite direction
+  and therefore cannot safely be reused as shell-event contracts.
+- Implementation decision: M04-T12 adds a separate synchronous command/event host boundary rather
+  than changing M04-T01's frozen nine-port aggregate. Its factory captures receiver-independent
+  own-data callbacks and normalizes throws, Promise-like values, and malformed envelopes into a
+  redacted adapter failure. The outbound event profile has distinct validate and emit stages. A
+  host event crosses the effect boundary only after its exact allowlisted name and opaque
+  application contract identifier have been selected, its resolved payload has been detached and
+  accepted by the validator stage, and the lifetime still matches after every potentially
+  reentrant callback.
+
+  One mounted action manager binds an exact document, revision, surface, factory-authenticated
+  execution Catalog set, static source-node-to-component-capability inventory, host event
+  allowlist, token/diagnostic ports, and command/event boundary. A live component registration
+  carries only the exact source node, capability identifier, and an inert runtime-instance
+  identifier. It exposes no target object, ref, DOM node, callable, or command method. A
+  factory-issued opaque registration ticket plus monotonically advancing generation prevents
+  foreign, stale, and ABA-equivalent unregister operations. Multiple bounded live instances may
+  register for one repeated source node, but a source action is dispatchable only while exactly one
+  instance is live. Zero or multiple instances produce one controlled unavailable result without
+  selecting the first or last registration. An explicit repeated-instance addressing contract
+  remains M04-T14/M04-T16 rather than being guessed here.
+
+  The Catalog remains the sole command authority. Before reading a command input, the runtime
+  performs an inert empty-object selector probe that distinguishes `UNKNOWN_COMMAND` from a
+  declared command whose schema merely requires other input. It then materializes the real input
+  through the same action-local token session as a true guard, validates the detached value against
+  the exact `component-command-input` selector, rechecks the live target snapshot, and delegates
+  only the capability ID, command name, runtime-instance ID, and validated JSON. A missing live
+  target, host denial, invalid input, and adapter failure cannot be converted into success or
+  redirected to an arbitrary method.
+
+  `event.emit` selects its allowlisted name and contract before observing a hostile payload.
+  Omitted payload becomes an empty object; an unknown name observes no payload or host callback.
+  Guard evaluation always precedes either action-specific discriminator and payload. A false guard
+  therefore produces no target lookup, payload read, token observation, effect, or diagnostic
+  callback. Action identities, live registrations, host-event entries, retained identifiers, and
+  generation counters are finite and may only be lowered by the trusted host profile. Disposal is
+  terminal and leaves only minimal tombstones; no callback can revive the manager.
+
+- Future action: A later protocol revision should standardize command-target instance identity,
+  repeated-target addressing, adapter registration parity, shell-event contract discovery,
+  validate-versus-emit policy separation, controlled denial codes, finite bridge limits, and
+  cross-manager provenance. M04-T14 still owns generic incoming component/behavior events and
+  adapter command registration, while M04-T16 owns the complete coordinator and deterministic
+  trace.

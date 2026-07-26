@@ -31,7 +31,8 @@
     "test:local-state-identity": "vitest run test/local-state-identity.test.ts",
     "test:operation-lifecycle": "vitest run test/operation-lifecycle.test.ts",
     "test:state-navigation-actions": "vitest run test/state-navigation-actions.test.ts",
-    "test:operation-resource-actions": "vitest run test/operation-resource-actions.test.ts"
+    "test:operation-resource-actions": "vitest run test/operation-resource-actions.test.ts",
+    "test:command-event-actions": "vitest run test/command-event-actions.test.ts"
   },
   "dependencies": {
     "@desen/protocol": "workspace:*",

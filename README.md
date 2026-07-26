@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████░░░░░░░░░░░░░░░░░` **48 / 144 tasks complete (33%)**
+**Overall:** `█████████░░░░░░░░░░░░░░░░` **49 / 144 tasks complete (34%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `███████████░░░░░` **11 / 16 tasks complete (69%)**
+**M04 progress:** `████████████░░░░` **12 / 16 tasks complete (75%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T12`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T13`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -119,6 +119,7 @@ packages/
 - [Runtime core operation-lifecycle proof](docs/proof/RUNTIME-CORE-OPERATION-LIFECYCLE.md)
 - [Runtime core state and navigation-action proof](docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md)
 - [Runtime core operation and resource-action proof](docs/proof/RUNTIME-CORE-OPERATION-RESOURCE-ACTIONS.md)
+- [Runtime core command and host-event action proof](docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
@@ -368,6 +369,29 @@ focused package tests, 11 compiler-negative cases, and 19 root proof/mutation te
 task-owned files; the cumulative runtime-core suite passes 331/331. N-041 remains `PLANNED`;
 ordered turns and settlement dispatch remain M04-T11–M04-T13, full provenance remains M04-T16,
 P-17 stays `PARTIAL`, and no proof-gate status changes.
+
+M04-T11 now composes guarded `operation.invoke` and `resource.refresh` actions without blocking the
+originating turn. Operation success and declared-failure handlers are selected and detached at
+acceptance time, then exposed only through an immutable settlement descriptor and opaque one-shot
+finalization ticket; raw lifecycle leases never enter the public API. Resource refresh preserves
+the exact current lifecycle authority. False guards observe no action-specific payload, and true
+guards share one bounded token session with the selected input. Evidence passes 87 focused package
+tests, 24 compiler-negative cases, and 19 root proof/mutation tests across 11 task-owned files; the
+cumulative runtime-core suite passes 418/418. M04-T13 still owns ordered settlement turns and
+mandatory finalization, full joint provenance remains M04-T16, P-17 stays `PARTIAL`, and no
+proof-gate status changes.
+
+M04-T12 now routes Catalog-authorized component commands only to one unambiguous live runtime
+instance and validates allowlisted application-shell events before emission through a separate
+synchronous host bridge. Registration exposes only inert identity under opaque generation
+tickets—never a DOM node, component object, ref, method table, or callback. Unknown commands and
+events fail before hostile payload observation; valid command input and event payload are detached
+under the same bounded resolution rules, and adapter failures remain redacted. Exact finite
+registry, request, generation, reentry, disposal, and shared 4,096-node boundaries are executable.
+Evidence passes 53 focused package tests, 21 compiler-negative cases, and 19 root proof/mutation
+tests across 16 task-owned files; the cumulative runtime-core suite passes 471/471. N-031 is now
+`TESTED`; incoming adapter events remain M04-T14, ordered turns remain M04-T13, production adapter
+parity remains M05, P-17 stays `PARTIAL`, and no proof-gate status changes.
 
 ## License
 

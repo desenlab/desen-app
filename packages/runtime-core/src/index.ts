@@ -59,6 +59,15 @@ export {
   mountRuntimeOperationResourceActions,
   RUNTIME_OPERATION_RESOURCE_ACTION_LIMITS,
 } from "./operation-resource-actions.js";
+export { createRuntimeCommandEventHostPorts } from "./command-event-ports.js";
+export {
+  disposeRuntimeCommandEventActions,
+  executeRuntimeCommandEventAction,
+  mountRuntimeCommandEventActions,
+  registerRuntimeComponentCommandTarget,
+  RUNTIME_COMMAND_EVENT_ACTION_LIMITS,
+  unregisterRuntimeComponentCommandTarget,
+} from "./command-event-actions.js";
 
 export type {
   RuntimeActivationCommitRequest,
@@ -279,3 +288,34 @@ export type {
   RuntimeResourceRefreshAction,
   RuntimeResourceRefreshActionStarted,
 } from "./operation-resource-actions.js";
+
+export type {
+  RuntimeCommandEventHostPorts,
+  RuntimeCommandEventHostPortsInput,
+  RuntimeComponentCommandHostPort,
+  RuntimeComponentCommandHostRequest,
+  RuntimeComponentCommandHostResult,
+  RuntimeHostEventEmissionResult,
+  RuntimeHostEventPort,
+  RuntimeHostEventRequest,
+  RuntimeHostEventValidationResult,
+} from "./command-event-ports.js";
+
+export type {
+  RuntimeCommandEventAction,
+  RuntimeCommandEventActionLimitProfile,
+  RuntimeCommandEventActionResult,
+  RuntimeCommandEventActionsDisposeResult,
+  RuntimeCommandEventActionsHandle,
+  RuntimeCommandEventActionsMountInput,
+  RuntimeCommandEventActionsMountResult,
+  RuntimeCommandEventActionsSnapshot,
+  RuntimeComponentCommandAction,
+  RuntimeComponentCommandRegistrationTicket,
+  RuntimeComponentCommandTargetRegistrationInput,
+  RuntimeComponentCommandTargetRegistrationResult,
+  RuntimeComponentCommandTargetUnregistrationInput,
+  RuntimeComponentCommandTargetUnregistrationResult,
+  RuntimeHostEventEmitAction,
+  RuntimeRegisteredComponentCommandTargetSnapshot,
+} from "./command-event-actions.js";
