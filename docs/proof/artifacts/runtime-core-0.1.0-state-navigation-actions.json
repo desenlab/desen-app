@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T10",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Exactly one guarded state or same-Bundle navigation action executes from exact current snapshots, through one detached token session, with post-callback TOCTOU checks and terminal navigation lifetime.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": []
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T03",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-token-format-resolution.json",
+      "artifactSha256": "be2d07ae32537ef5c2aec04c783f2cfb30cbcc500a85020172e2b8715a98800f"
+    },
+    {
+      "task": "M04-T04",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-predicate-evaluation.json",
+      "artifactSha256": "14b74cd4f0c35e76edd77858443edf8515b3a60a247afe75131095d5a0c3bcf1"
+    },
+    {
+      "task": "M04-T06",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-local-state-identity.json",
+      "artifactSha256": "4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13"
+    },
+    {
+      "task": "M02-T11",
+      "result": "PASS",
+      "artifact": "protocol-0.1.0-execution-contracts.json",
+      "artifactSha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_STATE_NAVIGATION_ACTION_LIMITS",
+      "disposeRuntimeStateNavigationActions",
+      "executeRuntimeStateNavigationAction",
+      "mountRuntimeStateNavigationActions"
+    ],
+    "typeExports": [
+      "RuntimeActionGuardRejected",
+      "RuntimeActionPayloadRejected",
+      "RuntimeActionSkipped",
+      "RuntimeNavigateAction",
+      "RuntimeNavigationAdapterFailed",
+      "RuntimeNavigationDenied",
+      "RuntimeNavigationSucceeded",
+      "RuntimeStateActionApplied",
+      "RuntimeStateActionRejected",
+      "RuntimeStateNavigationAction",
+      "RuntimeStateNavigationActionResult",
+      "RuntimeStateNavigationActionsDisposeResult",
+      "RuntimeStateNavigationActionsHandle",
+      "RuntimeStateNavigationActionsMountInput",
+      "RuntimeStateNavigationActionsMountInvalidReason",
+      "RuntimeStateNavigationActionsMountResult",
+      "RuntimeStateSetAction",
+      "RuntimeStateToggleAction"
+    ],
+    "tsdocDeclarations": 22,
+    "sourceImports": [
+      "./action-evaluation.js",
+      "./host-ports.js",
+      "./local-state.js",
+      "./predicate-evaluation.js",
+      "./runtime-json-snapshot.js",
+      "./token-format-resolution.js",
+      "./value-resolution.js",
+      "@desen/protocol"
+    ]
+  },
+  "internalActionEvaluation": {
+    "runtimeExports": [
+      "captureRuntimeActionWhen",
+      "createRuntimeActionEvaluationSession",
+      "evaluateRuntimeActionGuard",
+      "materializeRuntimeActionNamedValues",
+      "materializeRuntimeActionValue"
+    ],
+    "typeExports": [
+      "RuntimeActionEvaluationSession",
+      "RuntimeActionEvaluationSessionInput",
+      "RuntimeActionGuardEvaluation",
+      "RuntimeActionWhenCapture"
+    ],
+    "tsdocDeclarations": 9,
+    "sourceImports": [
+      "./host-ports.js",
+      "./predicate-evaluation.js",
+      "./runtime-json-snapshot.js",
+      "./token-format-resolution.js",
+      "./value-resolution.js",
+      "@desen/protocol"
+    ],
+    "packageInternal": true
+  },
+  "runtime": {
+    "mountProbes": 10,
+    "guardFirstProbes": 18,
+    "tokenSessionProbes": 28,
+    "stateActionProbes": 10,
+    "navigationProbes": 27,
+    "toctouProbes": 12,
+    "reentrancyProbes": 14,
+    "snapshotIdentityProbes": 5,
+    "disposalProbes": 8,
+    "receiverIndependenceProbes": 3,
+    "hostilePayloadReads": 0,
+    "falseGuardDiagnosticCalls": 0,
+    "platformEffects": 0,
+    "rawHostFailuresExposed": false
+  },
+  "semantics": {
+    "actionCardinality": "exactly one state.set, state.toggle, or navigate action",
+    "guardOrdering": "guard preparation and evaluation before discriminator and payload observation",
+    "falseGuard": "zero payload reads, payload-token calls, diagnostic callback reports, state writes, or navigation calls; guard-token drift cannot be returned as skipped",
+    "tokenSession": "one action-local detached cache shared by guard and payload; callbacks receiver-free",
+    "tokenAggregateOverflow": "guard-rejected or payload-rejected invalid runtime-safety outcome depending phase; never reclassified as ADAPTER_FAILURE",
+    "individualProviderUnsafe": "frozen M04-T03 ADAPTER_FAILURE classification for malformed or individually over-budget provider results",
+    "snapshotAuthority": "exact current T06 state snapshot identity plus equal factory-authenticated resolution state",
+    "callbackToctou": "exact state rechecked after token and diagnostic callbacks and immediately before effect",
+    "stateSet": "complete-schema T06 write with rejected candidates not consuming request identity",
+    "stateToggle": "only an exact JSON boolean may be inverted",
+    "navigationTarget": "existing surface in the active same-Bundle inventory before params",
+    "navigationParams": "canonical key order, one synthetic-array materialization, detached JSON reconstruction",
+    "navigationDenial": "run.desen.runtime/NAVIGATION_DENIED",
+    "navigationAdapterFailure": "redacted ADAPTER_FAILURE for throw, Promise, or malformed result",
+    "requestIdentity": "action: + RFC 8785 canonical [originSurfaceId, acceptedGeneration]",
+    "navigationSuccess": "terminal for old executor and T06 state, including same-surface navigation",
+    "explicitDisposal": "terminal and idempotent for executor and owned T06 state",
+    "retainedSnapshotProvenance": "state authority exact here; complete same-turn cross-manager provenance remains M04-T16",
+    "actionTurnManager": null
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": {
+    "finding": "PF-040",
+    "findingStatus": "OPEN",
+    "relatedOpenFindings": ["PF-017", "PF-019", "PF-031", "PF-039"],
+    "proofDocument": "docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md"
+  },
+  "evidence": {
+    "focusedTestRegistrations": 36,
+    "focusedTests": 42,
+    "focusedTestTitles": [
+      "mounts an exact state lifetime and local surface inventory without invoking host callbacks",
+      "rejects a %s local-surface inventory atomically",
+      "rejects stale, foreign, disposed, and forged state authorities",
+      "rechecks state after hostile host-port capture attempts to %s it",
+      "skips a false guard without inspecting any payload field or invoking any callback",
+      "keeps false-with-type-mismatch diagnostics observable in the result but never reports them",
+      "rejects malformed guards before action-shape validation and reports a redacted diagnostic",
+      "holds the busy gate before a hostile when-descriptor trap can reenter",
+      "returns disposed when a hostile when-descriptor trap terminally revokes the executor",
+      "reports true-guard mismatch diagnostics before payload and stops on diagnostic-time state drift",
+      "keeps diagnostic-report reentry busy and turns diagnostic-time disposal into disposed",
+      "rechecks exact state before returning a token-backed false guard",
+      "captures one mutable token result once across a true guard, diagnostic callback, and payload",
+      "materializes references and applies complete-schema state.set updates and no-ops",
+      "rejects complete-schema violations without partial writes or request-id gaps",
+      "detects token-time state mutation immediately before state.set",
+      "stops token materialization and returns disposed when a token callback revokes state",
+      "toggles exact root and nested booleans but rejects missing and non-boolean targets",
+      "detects guard-token state mutation immediately before toggle",
+      "rejects extra and accessor action fields without invoking accessors",
+      "materializes one sorted detached parameter map, calls receiver-independently, and terminates",
+      "treats successful same-surface navigation as terminal",
+      "rejects unknown/non-local targets before params and extensions with exact core diagnostics",
+      "gives terminal disposal precedence when unknown-surface reflection revokes the executor",
+      "gives exact-state drift precedence over an early invalid action shape",
+      "rejects a known target with nested params accessors without invoking them",
+      "fails closed when action-wide distinct token retention exceeds the aggregate JSON budget",
+      "preserves T03 ADAPTER_FAILURE classification for individually unsafe token results",
+      "keeps malformed or thrown token providers classified as ADAPTER_FAILURE",
+      "detects params-token state mutation immediately before navigation",
+      "rechecks disposal after hostile navigation-result reflection",
+      "rechecks exact state after hostile denied-result reflection before interpreting denial",
+      "keeps denial live, emits namespaced NAVIGATION_DENIED, and consumes only accepted IDs",
+      "maps %s navigation adapter outcomes to redacted ADAPTER_FAILURE and stays live",
+      "rejects stale or foreign state/resolution snapshots before action inspection",
+      "disposes idempotently, revokes owned state, and rejects forged handles"
+    ],
+    "compilerNegativeCases": 11,
+    "compilerNegativeLabels": [
+      "action executor handles are opaque and cannot be forged structurally",
+      "action values are data-only ValueSpecs, never executable callbacks",
+      "navigation params are named ValueSpecs, never callbacks",
+      "request identities are runtime-owned and absent from action data",
+      "action shapes are closed except for the explicit extensions object",
+      "arbitrary expression operators are not part of the predicate union",
+      "action arrays belong to the later turn manager, not the one-action primitive",
+      "mount requires the exact current state snapshot",
+      "public action results are immutable",
+      "state snapshots supplied to the executor remain recursively readonly",
+      "the common evaluation seam is package-internal and absent from the root API"
+    ],
+    "rootMutationTests": 19,
+    "rootMutationTestTitles": [
+      "accepts tracked deterministic M04-T10 state/navigation evidence",
+      "builds byte-identical state/navigation evidence twice",
+      "rejects stale or tampered state/navigation evidence",
+      "rejects stale M04-T03 prerequisite bytes",
+      "rejects stale M04-T04 prerequisite bytes",
+      "rejects stale M04-T06 prerequisite bytes",
+      "rejects stale M02-T11 prerequisite bytes",
+      "detects guard-first hostile non-observation drift",
+      "detects shared token-session and post-token TOCTOU drift",
+      "detects state-set schema and exact-snapshot drift",
+      "detects exact-boolean toggle drift",
+      "detects local-target-before-params drift",
+      "detects navigation request and receiver drift",
+      "detects denial and adapter-failure containment drift",
+      "detects terminal navigation and state-disposal drift",
+      "detects explicit disposal and late-effect drift",
+      "detects semantic source ordering drift",
+      "detects public export, TSDoc, and platform drift",
+      "detects focused-test and compiler-negative inventory drift"
+    ],
+    "traceRules": [
+      { "id": "R-074", "section": "20.1", "owners": ["M02-T11", "M04-T10"] },
+      { "id": "R-075", "section": "20.2", "owners": ["M02-T11", "M04-T10"] },
+      { "id": "R-076", "section": "20.3", "owners": ["M02-T11", "M04-T10", "M12-T03"] },
+      { "id": "R-105", "section": "24.5", "owners": ["M04-T01", "M04-T10", "M05-T07"] },
+      {
+        "id": "R-122",
+        "section": "27.7",
+        "owners": ["M04-T01", "M04-T08", "M04-T09", "M04-T10", "M04-T12"]
+      }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/action-evaluation.ts",
+        "bytes": 18951,
+        "sha256": "11f0848c5e7583ade5cd6125c63ea508aa0884218c13660ea1d987414fcd62b5"
+      },
+      {
+        "path": "packages/runtime-core/src/state-navigation-actions.ts",
+        "bytes": 41998,
+        "sha256": "ac046b82a6849928b457c3d74470851afb34f2877c679b15419a725d6bee9ec4"
+      },
+      {
+        "path": "packages/runtime-core/test/state-navigation-actions.test.ts",
+        "bytes": 38450,
+        "sha256": "27aac8f9cd0e146e29b89de321f2e368359bb630502912d48bbb9c02805eff79"
+      },
+      {
+        "path": "packages/runtime-core/test/state-navigation-actions.types.ts",
+        "bytes": 4136,
+        "sha256": "92b0cc6be31b65e7a5f3b5d2673616235cfbd95b1aeedf9a6c214f8de4508e6a"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-evaluation.js",
+        "bytes": 15809,
+        "sha256": "fac5bdc2a386e83ed08ebf4b6e856d71f4b9f7c96b6c5dfdee11adcd92673746"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-evaluation.js.map",
+        "bytes": 14859,
+        "sha256": "4e9f865fdfff1e37a2326ea5c233f6f5be0e3d69e7daf668ed4712dc88bc349a"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-evaluation.d.ts",
+        "bytes": 3697,
+        "sha256": "691bc5a1cfa886f9f5e4ddb883c1d5b5cb9ab9a82f8138c352f5ea8d277ba14e"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-evaluation.d.ts.map",
+        "bytes": 1782,
+        "sha256": "5aa1faf3695b09d819618f755351653a3f3ba4d2ac82152608fd80b8f9306ac6"
+      },
+      {
+        "path": "packages/runtime-core/dist/state-navigation-actions.js",
+        "bytes": 31916,
+        "sha256": "eb2f11b270ad5c83db66bf803eee18bc75bfbaf3ec9232754e266ae2f175b0f4"
+      },
+      {
+        "path": "packages/runtime-core/dist/state-navigation-actions.js.map",
+        "bytes": 26638,
+        "sha256": "71375d19fb62c61a4ee1844d822f17eb40393b8c2e036fbb483adea135ece62b"
+      },
+      {
+        "path": "packages/runtime-core/dist/state-navigation-actions.d.ts",
+        "bytes": 8875,
+        "sha256": "5534b243b3dbdb53d3c72a681d45bb56831f2655a0279e1c18f7a27259184cc9"
+      },
+      {
+        "path": "packages/runtime-core/dist/state-navigation-actions.d.ts.map",
+        "bytes": 5357,
+        "sha256": "f5fddb82e9928c6f81c8bf3230efa7329f0f5ff07b5f238d11cf48ede4309b4d"
+      },
+      {
+        "path": "scripts/lib/runtime-core-state-navigation-actions-proof.mjs",
+        "bytes": 97583,
+        "sha256": "28ab4a582c93fae9aad69a843832cc49e5ddbcb8bfde2435fc9f5c5a5b29a1db"
+      },
+      {
+        "path": "scripts/generate-runtime-core-state-navigation-actions-proof.mjs",
+        "bytes": 873,
+        "sha256": "186ad0141ca1ece542f7619b9794218145ff6ae813020b715e84b0ee56688ce8"
+      },
+      {
+        "path": "scripts/verify-runtime-core-state-navigation-actions.mjs",
+        "bytes": 708,
+        "sha256": "4d06172848249574be7a37bfff5fe963a4925134b58deab30d3101bdca159b2d"
+      },
+      {
+        "path": "tests/runtime-core-state-navigation-actions.test.mjs",
+        "bytes": 14509,
+        "sha256": "8ba98643792decc62d6a4601f11992212499c05f370a81eeae1bfc6cfd08d30b"
+      }
+    ],
+    "semanticOnlySharedInputs": [
+      "packages/runtime-core/package.json",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/dist/index.js",
+      "packages/runtime-core/dist/index.d.ts",
+      "docs/proof/protocol-0.1.0-traceability.json",
+      "docs/plan/PROTOCOL-FINDINGS.md",
+      "docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md"
+    ]
+  },
+  "deferred": [
+    "resource.refresh, operation.invoke, and later action kinds (M04-T11)",
+    "multi-action turn ordering and settlement action dispatch (M04-T13)",
+    "node/behavior bridge, reactive, and complete session disposal coordination (M04-T14–T16)",
+    "reactive dependency discovery and reevaluation (M04-T15)",
+    "complete same-turn cross-manager snapshot provenance and composition (M04-T16)",
+    "adapter rendering and platform navigation implementations",
+    "deep-link, history, persistence, and cross-Bundle navigation policy",
+    "future protocol clarification of PF-040"
+  ]
+}

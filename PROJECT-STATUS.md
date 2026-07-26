@@ -177,6 +177,16 @@ settlement handler may publish a same-alias staged pending request, but its host
 start before predecessor acknowledgement. `PF-039` records this deterministic profile. N-041 gains
 operation-limit evidence but remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status
 changes.
+M04-T10 now executes exactly one guarded `state.set`, `state.toggle`, or managed-surface
+`navigate` action against the exact current M04-T06 state lifetime. Guard capture and evaluation
+precede action-specific payload observation; a true guard and its payload share one bounded,
+detached token session. Every hostile reflection, token, diagnostic, and navigation boundary
+rechecks terminal lifetime and exact state authority. State actions reuse complete-entry schema
+validation, unknown navigation targets fail before parameters, host denial and technical failure
+remain distinct, and successful navigation terminally disposes the old executor and local state,
+including same-surface success. `PF-040` records the deterministic profile. Ordered turns,
+settlement dispatch, bridge lifetimes, reactivity, and full cross-manager provenance remain
+M04-T11–M04-T16. N-041 remains `PLANNED`, P-17 remains `PARTIAL`, and no proof-gate status changes.
 
 ## Current milestone
 
@@ -213,11 +223,12 @@ changes.
   `M04-T06 — Local state lifecycle, schema-safe writes, and stable node identity`,
   `M04-T07 — Repeat scopes, aliases, keys, instance identity, and limits`,
   `M04-T08 — Resource mount/once/manual lifecycle and refresh`,
-  `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`
+  `M04-T09 — Operation lifecycle and reject/replace/queue concurrency`,
+  `M04-T10 — state.set, state.toggle, and navigate actions`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M04-T10 — state.set, state.toggle, and navigate actions`
-- Status: M04-T09 complete; ready for M04-T10
+- Next implementation task: `M04-T11 — operation.invoke settlement actions and resource.refresh`
+- Status: M04-T10 complete; ready for M04-T11
 
 ## Completed preparation
 
@@ -234,9 +245,9 @@ changes.
   configured through Dependabot.
 - CI-01's archived comparison replaced the then-current 547 repeated leaf-process launches with a
   fail-closed 58-step plan covering all 91 distinct workloads. Its clean hosted quality gate passed
-  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T09
-  inventory now expands to 1,419 legacy leaf launches but remains a reviewed 72-step single-pass
-  gate covering 112 distinct workloads, 32 proof verifiers, and 32 root proof files.
+  in 12 minutes 11 seconds versus 59 minutes 22 seconds before, a 79.48% reduction. The M04-T10
+  inventory now expands to 1,553 legacy leaf launches but remains a reviewed 74-step single-pass
+  gate covering 115 distinct workloads, 33 proof verifiers, and 33 root proof files.
 - The implementation milestones, exact `web-react` conformance targets, clause owners, and proof
   claims are defined.
 - The frozen protocol baseline was rerun with 14/14 suite cases passing: 9 vectors + 5 examples.
@@ -481,6 +492,15 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   containment, and terminal disposal. Fourteen direct trace assignments, 11 task-owned files, and
   the cumulative 289/289 runtime-core suite protect the boundary. N-041 remains `PLANNED`, action
   turns remain M04-T10–M04-T13, P-17 stays `PARTIAL`, and no proof-gate status changes.
+- The M04-T10 state/navigation boundary passes 42 focused package tests, 11 compiler-negative
+  cases, and 19 root proof/mutation tests. Four public runtime exports and 18 public types enforce
+  guard-first observation, action-local bounded token reuse, exact state authority, schema-safe
+  set/toggle, local-target-before-params navigation, deterministic accepted identity, host denial
+  and adapter containment, terminal same-surface success, and minimal late-call tombstones. Five
+  direct trace assignments, 16 task-owned files, and the cumulative 331/331 runtime-core suite
+  protect the boundary. Ordered turns and settlement dispatch remain M04-T11–M04-T13; full
+  cross-manager provenance remains M04-T16. N-041 stays `PLANNED`, P-17 stays `PARTIAL`, and no
+  proof-gate status changes.
 - Proof artifact ownership is now task-scoped: growing root orchestration, shared ledgers, package
   manifests, and later export barrels are checked semantically instead of being claimed as earlier
   tasks' byte-owned files. Required commands, dependencies, findings, clause rows, API subsets,
@@ -501,10 +521,11 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Start `M04-T10 — state.set, state.toggle, and navigate actions`. Evaluate each optional guard before
-touching its action payload, route complete schema-safe state changes through M04-T06, and delegate
-only exact same-Bundle surface navigation to the host. Keep multi-action arrays, operation/resource
-settlement dispatch, command/event bridges, and action-turn limits in their assigned later tasks.
+Start `M04-T11 — operation.invoke settlement actions and resource.refresh`. Reuse the guard-first
+action boundary for operation input materialization, delegate exact aliases and resource instances
+to the already proved T09/T08 managers, and publish settlement-handler work as a new frozen turn
+descriptor. Preserve the T09 acknowledgement lease so M04-T13 can always release it in `finally`
+after the selected `onSuccess` or `onFailure` action turn.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -512,9 +533,9 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-M04-T09 extends the current reviewed CI inventory to 112 distinct workloads, 32 proof verifiers, 32
-root proof files, and a pinned 72-step plan. Its equivalent legacy dependency expansion contains
-1,419 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
+M04-T10 extends the current reviewed CI inventory to 115 distinct workloads, 33 proof verifiers, 33
+root proof files, and a pinned 74-step plan. Its equivalent legacy dependency expansion contains
+1,553 leaf launches, while the reviewed single-pass runner preserves every distinct workload without
 repeating prerequisite chains. Twenty-one CI contract tests additionally pin the exact workspace
 roots, every workspace package test command, and the absence of hidden Vitest configuration. The
 archived CI-01 timing comparison remains historical evidence rather than a claim that the larger
@@ -762,6 +783,18 @@ M04-T09 evidence:
   reject/replace/FIFO queue behavior, bounded transports, and settlement acknowledgement
 - executable evidence: 36 focused package tests, 10 compiler-negative cases, 19 root
   proof/mutation tests, 14 direct trace assignments, 11 task-owned files, and a cumulative 289/289
+  runtime-core package suite
+
+M04-T10 evidence:
+
+- `docs/proof/RUNTIME-CORE-STATE-NAVIGATION-ACTIONS.md`
+- `docs/proof/artifacts/runtime-core-0.1.0-state-navigation-actions.json`
+- artifact SHA-256: `9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67`
+- exact boundary: 4 runtime exports, 18 type exports, guard-first single-action observation, exact
+  state snapshot authority, schema-safe set/toggle, contained same-Bundle navigation, and terminal
+  disposal
+- executable evidence: 42 focused package tests, 11 compiler-negative cases, 19 root
+  proof/mutation tests, 5 direct trace assignments, 16 task-owned files, and a cumulative 331/331
   runtime-core package suite
 
 ## Status vocabulary

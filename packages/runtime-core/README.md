@@ -620,6 +620,66 @@ lease is acknowledged. Attempt, snapshot, aggregate queue, retained-data, and ac
 limits are finite and may only be lowered. Disposal is terminal, and stale results are rejected
 before their envelopes are inspected.
 
+## M04-T10 guarded state and navigation action API
+
+`mountRuntimeStateNavigationActions` binds exactly one active local-state lifetime to the trusted
+complete same-Bundle surface inventory and framework-neutral host boundary. The executor accepts
+one `state.set`, `state.toggle`, or managed-surface `navigate` action at a time; ordered action
+arrays and settlement turns remain the later M04-T13 composition boundary.
+
+```ts
+import {
+  executeRuntimeStateNavigationAction,
+  mountRuntimeStateNavigationActions,
+} from "@desen/runtime-core";
+
+const mounted = mountRuntimeStateNavigationActions({
+  documentId,
+  revision,
+  surfaceId,
+  surfaceIds: ["signIn", "account"],
+  stateHandle,
+  stateSnapshot,
+  hostPorts,
+});
+
+if (mounted.status === "mounted") {
+  const result = executeRuntimeStateNavigationAction(
+    mounted.handle,
+    {
+      type: "state.set",
+      path: "email",
+      value: { $token: "form.email" },
+      when: { op: "truthy", args: [{ $ref: "state.enabled" }] },
+    },
+    resolutionSnapshot,
+    stateSnapshot,
+  );
+}
+```
+
+The optional guard is captured and fully evaluated before the action discriminator or any
+type-specific payload is inspected. A valid false guard therefore cannot observe a hostile path,
+value, target, parameter, extension, or payload token. Guard and payload share one detached,
+bounded token cache; individually unsafe provider values preserve M04-T03's redacted
+`ADAPTER_FAILURE`, while aggregate retention of otherwise valid results fails as a runtime-safety
+`invalid` outcome.
+
+Every hostile reflection, token, diagnostic, and navigation boundary is followed by a lifetime and
+exact-state check. A callback or Proxy that disposes the executor wins over an apparent success,
+and state drift returns `invalid-snapshot` before any stale effect. `state.set` and `state.toggle`
+delegate complete-entry validation and atomic publication to M04-T06; toggle accepts only an exact
+boolean leaf.
+
+Navigation authorizes the local target before parameter materialization. Parameters are sorted,
+materialized as one atomic named map, detached, and frozen before the host call. Unknown targets
+return core `ENTRY_NOT_FOUND` at `/surface`; current host-policy denial reports
+`run.desen.runtime/NAVIGATION_DENIED`; thrown, Promise-like, accessor-backed, or malformed host
+results become redacted `ADAPTER_FAILURE`. Accepted request identities are deterministic.
+Successful navigation, including same-surface navigation, terminally disposes both this executor
+and its captured local-state lifetime; a minimal tombstone preserves deterministic late-call
+results without retaining live authority.
+
 ## Port invariants
 
 - Operation and resource input reaches a host implementation only after runtime resolution and
@@ -665,9 +725,11 @@ non-truncating overflow, and repeated instance identity. M04-T08 adds atomic res
 token-aware input materialization, schema-safe settlement, bounded transport scheduling,
 latest-wins refresh, and terminal disposal. M04-T09 adds Catalog-authoritative operation aliases,
 exact input/output validation, deterministic reject/replace/FIFO queue behavior, bounded
-transports, and settlement acknowledgement. Action execution, reactive composition, rendering,
-activation implementation, event/command bridges, and adapters remain assigned to their later
-tracked tasks.
+transports, and settlement acknowledgement. M04-T10 adds guard-first one-action state mutation and
+same-Bundle navigation with shared token observation, exact snapshot authorization, hostile
+callback containment, and terminal navigation disposal. Multi-action turns, settlement dispatch,
+reactive composition, rendering, activation implementation, event/command bridges, and adapters
+remain assigned to their later tracked tasks.
 
 ## Protocol and target support
 
@@ -688,6 +750,7 @@ pnpm --filter @desen/runtime-core test:local-state-identity
 pnpm --filter @desen/runtime-core test:repeat-materialization
 pnpm --filter @desen/runtime-core test:resource-lifecycle
 pnpm --filter @desen/runtime-core test:operation-lifecycle
+pnpm --filter @desen/runtime-core test:state-navigation-actions
 pnpm verify:runtime-core-host-ports
 pnpm verify:runtime-core-value-resolution
 pnpm verify:runtime-core-token-format-resolution
@@ -697,5 +760,6 @@ pnpm verify:runtime-core-local-state-identity
 pnpm verify:runtime-core-repeat-materialization
 pnpm verify:runtime-core-resource-lifecycle
 pnpm verify:runtime-core-operation-lifecycle
+pnpm verify:runtime-core-state-navigation-actions
 pnpm check
 ```
