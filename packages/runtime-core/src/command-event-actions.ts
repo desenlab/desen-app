@@ -145,6 +145,15 @@ export interface RuntimeCommandEventActionsSnapshot {
   >;
 }
 
+/** Current callback-free observation of one command/event registry lifetime. */
+export type RuntimeCommandEventActionsReadResult =
+  | Readonly<{
+      readonly status: "read";
+      readonly snapshot: RuntimeCommandEventActionsSnapshot;
+    }>
+  | Readonly<{ readonly status: "disposed" }>
+  | Readonly<{ readonly status: "invalid-handle" }>;
+
 /** Complete atomic mount result. */
 export type RuntimeCommandEventActionsMountResult =
   | Readonly<{
@@ -1069,6 +1078,58 @@ export function mountRuntimeCommandEventActions(
   const handle = Object.freeze({}) as RuntimeCommandEventActionsHandle;
   ACTION_AUTHORITIES.set(handle, authority);
   return Object.freeze({ status: "mounted", handle, snapshot: authority.snapshot });
+}
+
+/**
+ * Reads the exact currently published live-target registry snapshot.
+ *
+ * @remarks This receiver-independent observation returns the manager's existing immutable snapshot
+ * by reference. It invokes no host, token, diagnostic, command, or event callback; performs no
+ * effect; and does not advance action, registration, or snapshot generations.
+ */
+export function readRuntimeCommandEventActions(
+  handle: RuntimeCommandEventActionsHandle,
+): RuntimeCommandEventActionsReadResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  const authority = ACTION_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  return authority.status === "live"
+    ? Object.freeze({ status: "read", snapshot: authority.snapshot })
+    : Object.freeze({ status: "disposed" });
+}
+
+/**
+ * Reads the exact Catalog authority and registry snapshot used by a trusted adapter bridge.
+ *
+ * @internal This callback-free package-composition seam is intentionally absent from the package
+ * root. It exists so the bridge cannot bind a different event Catalog to a command manager.
+ */
+export function readRuntimeCommandEventActionsForAdapterBridge(
+  handle: RuntimeCommandEventActionsHandle,
+):
+  | Readonly<{
+      readonly status: "read";
+      readonly catalogSet: DesenValidatedExecutionCatalogSet;
+      readonly commandEventPorts: RuntimeCommandEventHostPorts;
+      readonly snapshot: RuntimeCommandEventActionsSnapshot;
+    }>
+  | Readonly<{ readonly status: "disposed" }>
+  | Readonly<{ readonly status: "invalid-handle" }> {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  const authority = ACTION_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  return authority.status === "live"
+    ? Object.freeze({
+        status: "read",
+        catalogSet: authority.catalogSet,
+        commandEventPorts: authority.commandEventPorts,
+        snapshot: authority.snapshot,
+      })
+    : Object.freeze({ status: "disposed" });
 }
 
 /** Registers one live runtime instance without retaining a platform object or callback. */

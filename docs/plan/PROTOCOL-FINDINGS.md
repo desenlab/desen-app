@@ -1255,6 +1255,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   current manager-issued state snapshot plus a factory snapshot whose state namespace is equal;
   M04-T16 still owns full cross-manager turn provenance.
 
+  A package-internal callback-free executor read returns the exact document, revision, surface,
+  and currently published lower state snapshot without host, token, diagnostic, navigation,
+  state-write, effect, or generation work. It remains absent from the package root. M04-T13 uses
+  this seam only to authenticate the surrendered child handle and obtain a fresh turn snapshot;
+  full cross-namespace provenance remains M04-T16 work.
+
   The executor reads and evaluates `when` before inspecting any type-specific payload. A false
   guard therefore cannot observe a hostile path, value, target, params, extension, token,
   navigation, or diagnostic callback. Predicate operands are prepared through M04-T04 and
@@ -1304,6 +1310,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   exclusivity is a composition-root surrender rule rather than an unprovable revocation claim;
   exact manager snapshots are re-read around hostile observation and direct lower-level mutation
   makes the next composed action fail closed.
+
+  A package-internal callback-free compositor read returns the exact document, revision, surface,
+  and current resource and operation snapshots without invoking host, token, diagnostic, action,
+  or effect code and without advancing a generation. It remains absent from the package root until
+  M04-T16 owns the public joint-snapshot contract. M04-T13 uses the read only to authenticate the
+  surrendered child handle and take a fresh turn snapshot; it does not claim full handler,
+  source-instance, or cross-namespace origin provenance before M04-T16.
 
   `when` is captured and evaluated before any discriminator or payload member. A true operation
   guard and its named input ValueSpecs share one bounded action-local token session. Both
@@ -1371,6 +1384,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   selecting the first or last registration. An explicit repeated-instance addressing contract
   remains M04-T14/M04-T16 rather than being guessed here.
 
+  The manager also exposes one callback-free current-snapshot read. It returns the exact immutable
+  registry snapshot by reference without invoking host, token, diagnostic, command, or event code
+  and without consuming a generation. This additive observation boundary lets M04-T13 compose a
+  registration transition into the first following action turn; intentionally failing one command
+  merely to discover a stale snapshot would not be an acceptable integration contract.
+
   The Catalog remains the sole command authority. Before reading a command input, the runtime
   performs an inert empty-object selector probe that distinguishes `UNKNOWN_COMMAND` from a
   declared command whose schema merely requires other input. It then materializes the real input
@@ -1393,4 +1412,65 @@ This file records implementation discoveries without changing the frozen DESEN 0
   validate-versus-emit policy separation, controlled denial codes, finite bridge limits, and
   cross-manager provenance. M04-T14 still owns generic incoming component/behavior events and
   adapter command registration, while M04-T16 owns the complete coordinator and deterministic
+  trace.
+
+## PF-043 — Action turns require deterministic admission, queueing, depth, and finalization ownership
+
+- Status: OPEN
+- Blocks proof: No; one bounded, fail-closed Reference Profile can compose the already proved
+  single-action authorities without inventing platform event or rendering semantics.
+- Protocol location: SPEC Sections 17.7, 20, 20.8, 24.2–24.6, 26.3, and 27.7; `R-062`, `R-078`,
+  `R-081`, `R-123`, `D-029`, and `N-032`; related findings `PF-014`, `PF-031`, `PF-039`,
+  `PF-040`, `PF-041`, and `PF-042`
+- Observation: DESEN 0.1.0 fixes source-array order, asynchronous settlement turns, a default
+  action/depth bound, and `ACTION_LIMIT_EXCEEDED`, but it does not define an executable turn
+  authority, hostile-array capture, reentrant admission order, whether event and settlement work
+  share one queue, which child outcomes continue, how current manager snapshots are adopted,
+  whether an `invalid-snapshot` effect may be retried, when settlement capacity is reserved, or
+  which exit owns the mandatory one-shot operation finalization.
+- Implementation decision: M04-T13 prepares caller-owned action arrays into opaque programs before
+  admission. Preparation reads own data descriptors for indices 0 through 63 only, copies that
+  bounded prefix into recursively immutable JSON, and stores family routes in a private `WeakMap`.
+  A declared 65th entry is represented only by an overflow marker; its descriptor and every later
+  suffix remain unobserved. During execution the coordinator never re-reads a raw discriminator,
+  guard, or payload and delegates each reached slot exactly once to its one M04-T10, M04-T11, or
+  M04-T12 owner. `skipped` and true accepted outcomes continue; every controlled failure stops
+  without rolling back earlier accepted effects. Navigation is terminal.
+
+  Mount authenticates exact lower T06/T08/T09 snapshots and the exact T10/T11/T12 child
+  authorities twice around host-port capture, then claims the three surrendered child handles.
+  Before every reached slot it performs callback-free current reads, requires matching document,
+  revision, surface, child, and lower-snapshot identities, adopts only identical or monotonically
+  newer snapshots, and rebuilds the seven-namespace resolution view from current lifecycle data
+  plus the turn's lexical scope. An `invalid-snapshot` outcome is recorded once and never retried;
+  retry could duplicate an effect that crossed a hostile callback before drift became visible.
+  Full joint origin provenance for context, event, item, environment, source instances, and
+  settlement handlers remains M04-T16 work.
+
+  Event admissions and operation settlements use one finite FIFO. Idle admission returns
+  `started`; reentry returns `queued`; both expose a native Promise that always fulfills with a
+  controlled immutable completion. Active and queued programs remain charged against aggregate
+  action and canonical-code-unit retention until their work leaves the FIFO. An operation effect
+  cannot start until a non-droppable future settlement slot and turn generation have been
+  reserved. Ticket-bearing settlement descriptors retain their exact parent depth and create a
+  distinct turn with `event.*` unavailable. Depth 16 is executable; work that would require depth
+  17 crosses no operation effect and reports the core limit diagnostic.
+
+  Every observed operation ticket is finalized exactly once from a `finally`-owned path after an
+  empty, successful, skipped, failed, limited, navigated, or disposed handler turn. Settlement
+  navigation disposes M04-T11 before finalization so staged or queued old-surface operations cannot
+  promote. Late descriptors and queued settlement items still make one contained finalization
+  attempt after disposal. Child disposal happens synchronously, while accepted event completions
+  preserve FIFO observability: the active completion is fulfilled before discarded queued events.
+  Default limits are 64 actions, 16 settlement levels, 64 queued or reserved turns, 64 synchronous
+  drain transitions, 4,096 retained queued actions, 1,048,576 retained canonical code units, and a
+  largest exact turn generation of `Number.MAX_SAFE_INTEGER`; trusted profiles may only lower
+  them.
+
+- Future action: A later protocol revision should standardize prepared-program authority,
+  continuation outcomes, reentrant event and settlement FIFO semantics, snapshot adoption and
+  retry prohibition, settlement-capacity reservation, depth ancestry, exactly-once finalization,
+  terminal navigation ordering, and finite aggregate retention. M04-T14 still owns incoming
+  component and behavior bridges, M04-T15 owns reactive re-evaluation, and M04-T16 owns complete
+  seven-namespace provenance, coordinated session disposal, and the deterministic end-to-end
   trace.

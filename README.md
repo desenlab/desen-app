@@ -8,15 +8,15 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████░░░░░░░░░░░░░░░░` **49 / 144 tasks complete (34%)**
+**Overall:** `█████████░░░░░░░░░░░░░░░░` **50 / 144 tasks complete (35%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
 **M03 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**M04 progress:** `████████████░░░░` **12 / 16 tasks complete (75%)**
+**M04 progress:** `█████████████░░░` **13 / 16 tasks complete (81%)**
 
-**Proof gates:** **4 / 13 complete** · **Next:** `M04-T13`
+**Proof gates:** **4 / 13 complete** · **Next:** `M04-T14`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -186,9 +186,9 @@ as the archived Python baseline passes 14/14. M02-T13 closes the declared valida
 positive and one negative project micro-vector for each of 28 emitted core diagnostics and 6
 validator-namespaced extension diagnostics. All 68 executions pass with exact code,
 classification, pointer, and context checks where those fields apply, without adding a public API.
-P-02 is now `PROVEN` and G02 is `DONE`. P-17 advances only to `PARTIAL`: the remaining runtime
-materialization stages, action-turn, bundle, and activation limits stay assigned to later
-milestones.
+P-02 is now `PROVEN` and G02 is `DONE`. P-17 advances only to `PARTIAL`: M04-T13 now covers the
+action-turn slice, while remaining materialization, Bundle-ingress, adapter, and activation limits
+stay assigned to later milestones.
 
 M03-T04 now defines the target-separated Web–React package digest profile. It commits a projected
 canonical Catalog and exact artifact bytes through versioned, length-delimited framing, then hashes
@@ -354,8 +354,8 @@ start the same alias as a visible staged `pending` invocation, but its host tran
 until the predecessor turn acknowledges the lease. Evidence passes 36 focused package tests, 10
 compiler-negative cases, and 19 root proof/mutation tests across 11 task-owned files; the
 cumulative runtime-core suite passes 289/289. N-041 gains operation queue/transport evidence but
-remains `PLANNED`; action dispatch remains M04-T10–M04-T13, P-17 stays `PARTIAL`, and no proof-gate
-status changes.
+remains `PLANNED`; action dispatch and ordered turns are now proved through M04-T13, P-17 stays
+`PARTIAL`, and no proof-gate status changes.
 
 M04-T10 now executes one guarded state or managed-surface navigation action against the exact
 current M04-T06 state lifetime. The optional guard is evaluated before action-specific payload
@@ -364,22 +364,26 @@ reflection, token, diagnostic, and navigation boundary rechecks lifetime and exa
 authority. Set and toggle reuse complete-entry schema validation, toggle accepts only an exact
 boolean, and unknown navigation targets fail before parameters. Host denial remains distinct from
 redacted adapter failure. Successful navigation, including same-surface success, terminally
-disposes the old executor and local state and leaves only a minimal tombstone. Evidence passes 42
-focused package tests, 11 compiler-negative cases, and 19 root proof/mutation tests across 16
-task-owned files; the cumulative runtime-core suite passes 331/331. N-041 remains `PLANNED`;
-ordered turns and settlement dispatch remain M04-T11–M04-T13, full provenance remains M04-T16,
-P-17 stays `PARTIAL`, and no proof-gate status changes.
+disposes the old executor and local state and leaves only a minimal tombstone. A callback-free
+current-authority read remains package-internal: the package root stays at four runtime exports and
+eighteen types while one runtime export and one type support trusted composition. Evidence passes
+44 focused package tests, 14 compiler-negative cases, and 20 root proof/mutation tests across 16
+task-owned files; the cumulative runtime-core suite passes 333/333. N-041 remains `PLANNED`;
+ordered turns and settlement dispatch are now composed by M04-T11–M04-T13, full provenance remains
+M04-T16, P-17 stays `PARTIAL`, and no proof-gate status changes.
 
 M04-T11 now composes guarded `operation.invoke` and `resource.refresh` actions without blocking the
 originating turn. Operation success and declared-failure handlers are selected and detached at
 acceptance time, then exposed only through an immutable settlement descriptor and opaque one-shot
 finalization ticket; raw lifecycle leases never enter the public API. Resource refresh preserves
 the exact current lifecycle authority. False guards observe no action-specific payload, and true
-guards share one bounded token session with the selected input. Evidence passes 87 focused package
-tests, 24 compiler-negative cases, and 19 root proof/mutation tests across 11 task-owned files; the
-cumulative runtime-core suite passes 418/418. M04-T13 still owns ordered settlement turns and
-mandatory finalization, full joint provenance remains M04-T16, P-17 stays `PARTIAL`, and no
-proof-gate status changes.
+guards share one bounded token session with the selected input. The package root remains four
+runtime exports and sixteen types; two internal runtime exports and three internal types provide
+the callback-free current compositor read and one-shot settlement finalizer. Evidence passes 89
+focused package tests, 26 compiler-negative cases, and 20 root proof/mutation tests across 11
+task-owned files; the cumulative runtime-core suite passes 422/422. M04-T13 now proves ordered
+settlement turns and mandatory finalization; full joint provenance remains M04-T16, P-17 stays
+`PARTIAL`, and no proof-gate status changes.
 
 M04-T12 now routes Catalog-authorized component commands only to one unambiguous live runtime
 instance and validates allowlisted application-shell events before emission through a separate
@@ -388,10 +392,29 @@ tickets—never a DOM node, component object, ref, method table, or callback. Un
 events fail before hostile payload observation; valid command input and event payload are detached
 under the same bounded resolution rules, and adapter failures remain redacted. Exact finite
 registry, request, generation, reentry, disposal, and shared 4,096-node boundaries are executable.
-Evidence passes 53 focused package tests, 21 compiler-negative cases, and 19 root proof/mutation
-tests across 16 task-owned files; the cumulative runtime-core suite passes 471/471. N-031 is now
-`TESTED`; incoming adapter events remain M04-T14, ordered turns remain M04-T13, production adapter
-parity remains M05, P-17 stays `PARTIAL`, and no proof-gate status changes.
+The callback-free current registry read is part of the package root, which exposes eight runtime
+exports and twenty-six types. Seven runtime exports and three types remain internal composition
+helpers, including exact Catalog/port/snapshot authority reads and owner-bound, one-shot normalized
+command authentication. Direct, replayed, foreign-port, and post-callback command attempts fail
+closed. Evidence passes 58 focused package tests, 27 compiler-negative cases, and 21 root
+proof/mutation tests across 16 task-owned files; the cumulative runtime-core suite passes 480/480.
+N-031 is now `TESTED`; incoming adapter events remain M04-T14, production adapter parity remains
+M05, P-17 stays `PARTIAL`, and no proof-gate status changes.
+
+M04-T13 now composes those seven action kinds into deterministic, ordered runtime turns without
+reimplementing any child action authority. Prepared programs are detached, immutable, privately
+routed, and bounded before admission; reentrant turns and asynchronous operation-settlement work
+share one finite FIFO. Every accepted operation settlement runs as a distinct event-free turn and
+finalizes its opaque M04-T11 ticket through one ticket-keyed attempt from a `finally` path,
+including controlled failure, overflow, navigation, disposal, and unexpected internal failure.
+Native completion Promises always fulfill, and operation/resource Promise callbacks cannot leak an
+internal throw or rejection. The 64-action, 16-settlement-depth, and 64-repeated-transition
+Reference Profile limits are executable and report the stable `ACTION_LIMIT_EXCEEDED` diagnostic
+without silent truncation. The package root adds five runtime exports and sixteen types with 21/21
+documented declarations. Evidence passes 43 focused package tests, 11 compiler-negative cases,
+and 32 root proof/mutation tests across 11 task-owned files; the cumulative runtime-core suite
+passes 523/523. N-032 is now `TESTED`; N-014 and N-041 remain `PLANNED`, P-17 stays `PARTIAL`,
+incoming adapter events remain M04-T14, and no proof-gate status changes.
 
 ## License
 

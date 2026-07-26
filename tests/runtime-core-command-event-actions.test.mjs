@@ -8,6 +8,7 @@ import {
   verifyRuntimeCoreCommandEventActionsEvidence,
 } from "../scripts/lib/runtime-core-command-event-actions-proof.mjs";
 
+import * as runtimeActionInternalApi from "../packages/runtime-core/dist/command-event-actions.js";
 import * as runtimePortApi from "../packages/runtime-core/dist/command-event-ports.js";
 import * as runtimeApi from "../packages/runtime-core/dist/index.js";
 
@@ -54,19 +55,26 @@ function withPorts(overrides) {
   return Object.freeze({ ...runtimePortApi, ...overrides });
 }
 
+function withActionInternals(overrides) {
+  return Object.freeze({ ...runtimeActionInternalApi, ...overrides });
+}
+
 test("accepts tracked deterministic M04-T12 command/event evidence", async () => {
   const result = await verifyRuntimeCoreCommandEventActionsEvidence();
   assert.equal(result.result, "PASS");
-  assert.equal(result.runtimeExports, 7);
-  assert.equal(result.typeExports, 25);
-  assert.equal(result.internalRuntimeExports, 4);
+  assert.equal(result.runtimeExports, 8);
+  assert.equal(result.typeExports, 26);
+  assert.equal(result.internalRuntimeExports, 7);
   assert.equal(result.internalTypeExports, 3);
-  assert.equal(result.focusedTests, 53);
-  assert.equal(result.compilerNegativeCases, 21);
-  assert.equal(result.rootMutationTests, 19);
+  assert.equal(result.tsdocDeclarations, 44);
+  assert.equal(result.focusedTests, 58);
+  assert.equal(result.compilerNegativeCases, 27);
+  assert.equal(result.rootMutationTests, 21);
   assert.equal(result.traceRules, 6);
   assert.equal(result.normativeTested, 1);
   assert.equal(result.trackedFiles, 16);
+  assert.equal(result.portProbes, 39);
+  assert.equal(result.adapterBridgeReadProbes, 8);
   assert.equal(result.hostilePayloadReads, 0);
   assert.equal(result.falseGuardEffects, 0);
   assert.equal(result.falseGuardDiagnosticCalls, 0);
@@ -203,6 +211,30 @@ test("detects synchronous receiver-independent port drift", async () => {
     () => buildRuntimeCoreCommandEventActionsEvidence({ runtimePortApi: mutated }),
     "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
   );
+  const normalizedRequestMutation = withPorts({
+    consumeRuntimeComponentCommandHostRequestForAdapterBridge() {
+      return true;
+    },
+  });
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        runtimePortApi: normalizedRequestMutation,
+      }),
+    "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
+  );
+  const componentPortAuthorityMutation = withPorts({
+    isRuntimeCommandEventHostPortsForComponentCommandPort() {
+      return true;
+    },
+  });
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        runtimePortApi: componentPortAuthorityMutation,
+      }),
+    "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
+  );
   const source = await readFile(PORT_SOURCE, "utf8");
   const wholeEnvelope = source.replace(
     "snapshotRuntimeJsonValue(captured.input)",
@@ -218,6 +250,53 @@ test("detects synchronous receiver-independent port drift", async () => {
       }),
     "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
   );
+  const reusableNormalizedRequest = source.replace(
+    "if (normalized) NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(request);",
+    "if (normalized) void request;",
+  );
+  assert.notEqual(reusableNormalizedRequest, source);
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/command-event-ports.ts": reusableNormalizedRequest,
+        },
+      }),
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
+  const ownerlessNormalizedRequest = source.replace(
+    "NORMALIZED_COMPONENT_COMMAND_REQUESTS.get(request) === expectedPorts",
+    "NORMALIZED_COMPONENT_COMMAND_REQUESTS.has(request)",
+  );
+  assert.notEqual(ownerlessNormalizedRequest, source);
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/command-event-ports.ts": ownerlessNormalizedRequest,
+        },
+      }),
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
+  const escapedNormalizedRequestLifetime = source.replace(
+    [
+      "  } finally {",
+      "    NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(captured);",
+      "  }",
+      '  const status = closedStatus(raw, ["succeeded", "denied"]);',
+    ].join("\n"),
+    ["  }", '  const status = closedStatus(raw, ["succeeded", "denied"]);'].join("\n"),
+  );
+  assert.notEqual(escapedNormalizedRequestLifetime, source);
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/command-event-ports.ts": escapedNormalizedRequestLifetime,
+        },
+      }),
+    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  );
 });
 
 test("detects target-ticket generation, ambiguity, and ABA drift", async () => {
@@ -227,6 +306,23 @@ test("detects target-ticket generation, ambiguity, and ABA drift", async () => {
       return result.status === "stale-ticket"
         ? Object.freeze({ status: "unregistered", sourceNodeId: "map", snapshot: input.snapshot })
         : result;
+    },
+  });
+  await rejectsCode(
+    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
+    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+  );
+});
+
+test("detects callback-free current registry read drift", async () => {
+  const mutated = withRuntime({
+    readRuntimeCommandEventActions(handle) {
+      const result = runtimeApi.readRuntimeCommandEventActions(handle);
+      if (result.status !== "read") return result;
+      return Object.freeze({
+        status: "read",
+        snapshot: Object.freeze({ ...result.snapshot }),
+      });
     },
   });
   await rejectsCode(
@@ -338,6 +434,109 @@ test("detects public export, TSDoc, internal non-leak, and platform drift", asyn
             "createRuntimeCommandEventHostPorts",
             "createRuntimeCommandEventHostPortsAlias",
           ),
+        },
+      }),
+    "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",
+  );
+});
+
+test("detects adapter-bridge Catalog, port, and package-root authority drift", async () => {
+  const mutated = withActionInternals({
+    readRuntimeCommandEventActionsForAdapterBridge(handle) {
+      const result =
+        runtimeActionInternalApi.readRuntimeCommandEventActionsForAdapterBridge(handle);
+      if (result.status !== "read") return result;
+      return Object.freeze({
+        status: "read",
+        catalogSet: Object.freeze({ ...result.catalogSet }),
+        snapshot: result.snapshot,
+      });
+    },
+  });
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        runtimeActionInternalApi: mutated,
+      }),
+    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+  );
+  const portAuthorityMutation = withActionInternals({
+    readRuntimeCommandEventActionsForAdapterBridge(handle) {
+      const result =
+        runtimeActionInternalApi.readRuntimeCommandEventActionsForAdapterBridge(handle);
+      if (result.status !== "read") return result;
+      return Object.freeze({
+        ...result,
+        commandEventPorts: Object.freeze({ ...result.commandEventPorts }),
+      });
+    },
+  });
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        runtimeActionInternalApi: portAuthorityMutation,
+      }),
+    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+  );
+
+  const source = await readFile(ACTION_SOURCE, "utf8");
+  const catalogAuthorityDrift = source.replace(
+    "catalogSet: authority.catalogSet",
+    "catalogSet: Object.freeze({ ...authority.catalogSet })",
+  );
+  assert.notEqual(catalogAuthorityDrift, source);
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/command-event-actions.ts": catalogAuthorityDrift,
+        },
+      }),
+    "COMMAND_EVENT_ACTION_SOURCE_SEMANTIC_DRIFT",
+  );
+  const commandPortAuthorityDrift = source.replace(
+    "commandEventPorts: authority.commandEventPorts",
+    "commandEventPorts: Object.freeze({ ...authority.commandEventPorts })",
+  );
+  assert.notEqual(commandPortAuthorityDrift, source);
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/command-event-actions.ts": commandPortAuthorityDrift,
+        },
+      }),
+    "COMMAND_EVENT_ACTION_SOURCE_SEMANTIC_DRIFT",
+  );
+
+  const index = await readFile(SOURCE_INDEX, "utf8");
+  const leakedRootExport = `${index}\nexport { readRuntimeCommandEventActionsForAdapterBridge } from "./command-event-actions.js";\n`;
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/index.ts": leakedRootExport,
+        },
+      }),
+    "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",
+  );
+
+  const leakedNormalizedRequestExport = `${index}\nexport { consumeRuntimeComponentCommandHostRequestForAdapterBridge } from "./command-event-ports.js";\n`;
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/index.ts": leakedNormalizedRequestExport,
+        },
+      }),
+    "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",
+  );
+  const leakedComponentPortAuthorityExport = `${index}\nexport { isRuntimeCommandEventHostPortsForComponentCommandPort } from "./command-event-ports.js";\n`;
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreCommandEventActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/index.ts": leakedComponentPortAuthorityExport,
         },
       }),
     "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",

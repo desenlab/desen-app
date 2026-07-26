@@ -17,6 +17,11 @@ protocol-visible.
 
 - Command invocation and outbound host-event emission use a dedicated framework-neutral bridge.
   The already frozen M04-T01 nine-port aggregate is not silently widened.
+- Every detached command request receives a private factory-authenticated marker bound to the
+  exact normalized host-port owner immediately before the synchronous callback boundary. A trusted
+  adapter can consume that marker exactly once only for that owner; replay, direct invocation, or
+  reuse of the same callback in a foreign port aggregate fails. A `finally` fence removes every
+  unconsumed marker before the callback returns, so authority cannot escape its invocation.
 - Every bridge callback is captured from an exact own data property and invoked without a
   receiver.
 - Each request first captures its exact own-data envelope, then detaches context, identity strings,
@@ -59,6 +64,15 @@ protocol-visible.
   `component.command` dispatches only while exactly one instance is live. Zero or multiple live
   instances are controlled target-unavailable outcomes; the runtime never guesses the first or
   last registration.
+- A callback-free registry read returns the exact current immutable snapshot by reference without
+  invoking host, token, diagnostic, command, or event code and without advancing any generation.
+  Forged handles fail closed and disposed managers remain terminal. This read boundary lets the
+  later action-turn coordinator observe a registration transition before the first following
+  command rather than intentionally sacrificing one turn to stale-snapshot discovery.
+- A separate package-internal adapter-bridge read returns that same exact snapshot together with
+  the manager's exact validated Catalog set and captured command/event port authority by
+  reference. It cannot substitute, clone, or independently select Catalog or port authority, and
+  it is deliberately absent from the package-root API.
 - Removing the exact second-generation ticket restores the unique first target. Repeated-instance
   selector semantics remain explicit M04-T14/M04-T16 work.
 
@@ -141,7 +155,7 @@ The deterministic artifact is
 Generation refuses to proceed unless all reviewed prerequisites match their exact bytes:
 
 - M04-T10 state/navigation actions:
-  `9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67`
+  `f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140`
 - M02-T11 execution contracts:
   `f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505`
 - M02-T09 interaction contracts:
@@ -155,17 +169,20 @@ semantically but are not claimed as task-owned bytes.
 The evidence builder also checks:
 
 - exact source, declaration, distribution, and package-index exports;
-- TSDoc on every exported declaration and package-internal non-leakage of raw target authority;
+- TSDoc on every exported declaration and package-internal non-leakage of raw target authority or
+  the trusted adapter-bridge Catalog seam;
 - exact source imports and focused package-test wiring;
 - synthetic prepared-Catalog command authority plus semantic compatibility with the independently
   tracked M03-T09 reference-web adapter parity;
 - byte-identical artifact generation and atomic artifact replacement;
 - hostile live probes for guard-first non-observation, shared token sessions,
   authorization-before-materialization, exact command selector/schema validation, outbound event
-  allowlisting and validation-before-emission, receiver independence, target ticket generations,
-  ABA/foreign/stale behavior, exact 4,096-versus-4,097 standalone JSON boundaries without a second
-  request-envelope tax, TOCTOU and reentry, denial, adapter redaction, finite bounds, disposal, and
-  late callback containment;
+  allowlisting and validation-before-emission, receiver independence, owner-bound one-shot
+  normalized command request authority and synchronous lifetime cleanup, target ticket
+  generations, ABA/foreign/stale behavior, exact current callback-free registry reads, exact
+  Catalog, command/event-port, and snapshot identity at the package-internal adapter seam, exact
+  4,096-versus-4,097 standalone JSON boundaries without a second request-envelope tax, TOCTOU and
+  reentry, denial, adapter redaction, finite bounds, disposal, and late callback containment;
 - hostile source/runtime mutations of the same semantics, task-owned byte drift, prerequisite
   drift, and artifact tampering; and
 - absence of browser, Node-host, native-host, framework, clock, randomness, dynamic evaluation, or

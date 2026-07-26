@@ -6,10 +6,13 @@ import {
   disposeRuntimeCommandEventActions,
   executeRuntimeCommandEventAction,
   mountRuntimeCommandEventActions,
+  readRuntimeCommandEventActions,
+  readRuntimeCommandEventActionsForAdapterBridge,
   registerRuntimeComponentCommandTarget,
   unregisterRuntimeComponentCommandTarget,
 } from "../src/command-event-actions.js";
 import {
+  consumeRuntimeComponentCommandHostRequestForAdapterBridge,
   createRuntimeCommandEventHostPorts,
   emitRuntimeHostEventHostPort,
   invokeRuntimeComponentCommandHostPort,
@@ -26,6 +29,7 @@ import type { DesenValidatedExecutionCatalogSet } from "@desen/validator";
 import type {
   RuntimeCommandEventAction,
   RuntimeCommandEventActionLimitProfile,
+  RuntimeCommandEventActionsHandle,
   RuntimeCommandEventActionsSnapshot,
 } from "../src/command-event-actions.js";
 import type {
@@ -67,6 +71,7 @@ interface Options {
 
 interface Fixture {
   readonly mounted: Mounted;
+  readonly catalogSet: DesenValidatedExecutionCatalogSet;
   readonly hostPorts: RuntimeHostPorts;
   readonly commandEventPorts: RuntimeCommandEventHostPorts;
 }
@@ -139,6 +144,7 @@ function bridgePorts(options: Options = {}): RuntimeCommandEventHostPorts {
 function fixture(options: Options = {}): Fixture {
   const hostPorts = runtimeHostPorts(options);
   const commandEventPorts = bridgePorts(options);
+  const catalogSet = preparedCatalog();
   const mounted = mountRuntimeCommandEventActions({
     documentId: DOCUMENT_ID,
     revision: REVISION,
@@ -146,14 +152,14 @@ function fixture(options: Options = {}): Fixture {
     staticComponents:
       options.staticComponents ?? Object.freeze({ [FIELD_NODE]: TEXT_FIELD, [MAP_NODE]: MAP }),
     hostEvents: options.hostEvents ?? Object.freeze({ [HOST_EVENT]: CONTRACT_ID }),
-    catalogSet: preparedCatalog(),
+    catalogSet,
     hostPorts,
     commandEventPorts,
     ...(options.limits === undefined ? {} : { limits: options.limits }),
   });
   expect(mounted.status).toBe("mounted");
   if (mounted.status !== "mounted") throw new TypeError("Expected command/event mount.");
-  return Object.freeze({ mounted, hostPorts, commandEventPorts });
+  return Object.freeze({ mounted, catalogSet, hostPorts, commandEventPorts });
 }
 
 function resolution() {
@@ -273,6 +279,45 @@ describe("M04-T12 command/event synchronous port boundary", () => {
       expect(Object.isFrozen(request)).toBe(true);
       expect(Object.isFrozen((request as { context: object }).context)).toBe(true);
     }
+  });
+
+  it("brands each normalized command request for exactly one package-internal bridge consumption", () => {
+    const observed: boolean[] = [];
+    const invoke = (request: RuntimeComponentCommandHostRequest) => {
+      observed.push(
+        consumeRuntimeComponentCommandHostRequestForAdapterBridge(request, ports),
+        consumeRuntimeComponentCommandHostRequestForAdapterBridge(request, ports),
+      );
+      return { status: "succeeded" as const };
+    };
+    const ports = bridgePorts({ invoke });
+    const foreignPorts = bridgePorts({ invoke });
+    const callerRequest = commandRequest();
+    expect(consumeRuntimeComponentCommandHostRequestForAdapterBridge(callerRequest, ports)).toBe(
+      false,
+    );
+    expect(invokeRuntimeComponentCommandHostPort(ports, callerRequest)).toEqual({
+      status: "succeeded",
+    });
+    expect(invokeRuntimeComponentCommandHostPort(foreignPorts, callerRequest)).toEqual({
+      status: "succeeded",
+    });
+    expect(observed).toEqual([true, false, false, false]);
+
+    let retained: RuntimeComponentCommandHostRequest | undefined;
+    const unconsumedPorts = bridgePorts({
+      invoke(request) {
+        retained = request;
+        return { status: "succeeded" };
+      },
+    });
+    expect(invokeRuntimeComponentCommandHostPort(unconsumedPorts, callerRequest)).toEqual({
+      status: "succeeded",
+    });
+    if (retained === undefined) throw new TypeError("Expected normalized request capture.");
+    expect(
+      consumeRuntimeComponentCommandHostRequestForAdapterBridge(retained, unconsumedPorts),
+    ).toBe(false);
   });
 
   it("rejects accessor-bearing factory shapes without invoking getters", () => {
@@ -654,6 +699,187 @@ describe("M04-T12 mount and live-target authority", () => {
     });
     expect(Object.isFrozen(result.snapshot.liveTargets[FIELD_NODE]?.instances)).toBe(true);
     expect(JSON.stringify(result.snapshot)).not.toContain("invoke");
+  });
+
+  it("reads the exact current snapshot without callbacks, effects, receiver dependence, or generation drift", () => {
+    const invoke = vi.fn(() => ({ status: "succeeded" as const }));
+    const validate = vi.fn(() => ({ status: "valid" as const }));
+    const emit = vi.fn(() => ({ status: "succeeded" as const }));
+    const token = vi.fn(() => ({ status: "missing" as const }));
+    const report = vi.fn();
+    const target = fixture({ invoke, validate, emit, token, report });
+    const detachedRead = readRuntimeCommandEventActions;
+
+    const initial = Reflect.apply(detachedRead, Object.freeze({ foreign: true }), [
+      target.mounted.handle,
+    ]);
+    expect(initial).toEqual({ status: "read", snapshot: target.mounted.snapshot });
+    if (initial.status !== "read") throw new TypeError("Expected current registry read.");
+    expect(initial.snapshot).toBe(target.mounted.snapshot);
+    expect(initial.snapshot.generation).toBe(0);
+
+    const registered = register(target);
+    if (registered.status !== "registered") throw new TypeError("Expected registration.");
+    const current = readRuntimeCommandEventActions(target.mounted.handle);
+    expect(current).toEqual({ status: "read", snapshot: registered.snapshot });
+    if (current.status !== "read") throw new TypeError("Expected current registry read.");
+    expect(current.snapshot).toBe(registered.snapshot);
+    expect(current.snapshot.generation).toBe(1);
+
+    expect(invoke).not.toHaveBeenCalled();
+    expect(validate).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
+    expect(token).not.toHaveBeenCalled();
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("reads exact adapter-bridge Catalog and snapshot authorities without callbacks, effects, or generation drift", () => {
+    const invoke = vi.fn(() => ({ status: "succeeded" as const }));
+    const validate = vi.fn(() => ({ status: "valid" as const }));
+    const emit = vi.fn(() => ({ status: "succeeded" as const }));
+    const token = vi.fn(() => ({ status: "missing" as const }));
+    const report = vi.fn();
+    const target = fixture({ invoke, validate, emit, token, report });
+    const detachedRead = readRuntimeCommandEventActionsForAdapterBridge;
+
+    const initial = Reflect.apply(detachedRead, Object.freeze({ foreign: true }), [
+      target.mounted.handle,
+    ]);
+    expect(initial).toEqual({
+      status: "read",
+      catalogSet: target.catalogSet,
+      commandEventPorts: target.commandEventPorts,
+      snapshot: target.mounted.snapshot,
+    });
+    if (initial.status !== "read") throw new TypeError("Expected adapter-bridge authority read.");
+    expect(initial.catalogSet).toBe(target.catalogSet);
+    expect(initial.commandEventPorts).toBe(target.commandEventPorts);
+    expect(initial.snapshot).toBe(target.mounted.snapshot);
+    expect(Object.isFrozen(initial)).toBe(true);
+
+    const repeated = readRuntimeCommandEventActionsForAdapterBridge(target.mounted.handle);
+    expect(repeated).toEqual(initial);
+    if (repeated.status !== "read") throw new TypeError("Expected repeated adapter-bridge read.");
+    expect(repeated.catalogSet).toBe(initial.catalogSet);
+    expect(repeated.commandEventPorts).toBe(initial.commandEventPorts);
+    expect(repeated.snapshot).toBe(initial.snapshot);
+    expect(readRuntimeCommandEventActions(target.mounted.handle)).toEqual({
+      status: "read",
+      snapshot: initial.snapshot,
+    });
+    expect(
+      [invoke, validate, emit, token, report].every((mock) => mock.mock.calls.length === 0),
+    ).toBe(true);
+
+    const registered = register(target);
+    if (registered.status !== "registered") throw new TypeError("Expected registration.");
+    expect(registered.registrationGeneration).toBe(0);
+    expect(registered.snapshot.generation).toBe(1);
+    const current = readRuntimeCommandEventActionsForAdapterBridge(target.mounted.handle);
+    expect(current).toEqual({
+      status: "read",
+      catalogSet: target.catalogSet,
+      commandEventPorts: target.commandEventPorts,
+      snapshot: registered.snapshot,
+    });
+    if (current.status !== "read") throw new TypeError("Expected current adapter-bridge read.");
+    expect(current.catalogSet).toBe(target.catalogSet);
+    expect(current.commandEventPorts).toBe(target.commandEventPorts);
+    expect(current.snapshot).toBe(registered.snapshot);
+    expect(invoke).not.toHaveBeenCalled();
+
+    expect(
+      execute(
+        target,
+        { type: "component.command", target: FIELD_NODE, command: "focus" },
+        registered.snapshot,
+      ),
+    ).toMatchObject({
+      status: "command-succeeded",
+      requestId: 'command-event-action:["sign-in",0]',
+    });
+    expect(invoke).toHaveBeenCalledTimes(1);
+    expect(validate).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
+    expect(token).not.toHaveBeenCalled();
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("fails adapter-bridge reads closed for forged and disposed handles without cross-authority leakage", () => {
+    const left = fixture();
+    const right = fixture();
+    const rightRegistration = register(right, "right-bridge-instance");
+    if (rightRegistration.status !== "registered") {
+      throw new TypeError("Expected right adapter-bridge registration.");
+    }
+
+    expect(
+      readRuntimeCommandEventActionsForAdapterBridge(
+        Object.freeze({}) as RuntimeCommandEventActionsHandle,
+      ),
+    ).toEqual({ status: "invalid-handle" });
+    const foreign = readRuntimeCommandEventActionsForAdapterBridge(right.mounted.handle);
+    expect(foreign).toEqual({
+      status: "read",
+      catalogSet: right.catalogSet,
+      commandEventPorts: right.commandEventPorts,
+      snapshot: rightRegistration.snapshot,
+    });
+    if (foreign.status !== "read") throw new TypeError("Expected foreign adapter-bridge read.");
+    expect(foreign.catalogSet).toBe(right.catalogSet);
+    expect(foreign.commandEventPorts).toBe(right.commandEventPorts);
+    expect(foreign.commandEventPorts).not.toBe(left.commandEventPorts);
+    expect(foreign.catalogSet).not.toBe(left.catalogSet);
+    expect(foreign.snapshot).toBe(rightRegistration.snapshot);
+    expect(foreign.snapshot).not.toBe(left.mounted.snapshot);
+
+    expect(disposeRuntimeCommandEventActions(left.mounted.handle)).toEqual({
+      status: "disposed",
+      disposedTargets: 0,
+    });
+    expect(readRuntimeCommandEventActionsForAdapterBridge(left.mounted.handle)).toEqual({
+      status: "disposed",
+    });
+    const rightAfterLeftDisposal = readRuntimeCommandEventActionsForAdapterBridge(
+      right.mounted.handle,
+    );
+    expect(rightAfterLeftDisposal).toEqual(foreign);
+    if (rightAfterLeftDisposal.status !== "read") {
+      throw new TypeError("Expected independent live adapter-bridge authority.");
+    }
+    expect(rightAfterLeftDisposal.catalogSet).toBe(right.catalogSet);
+    expect(rightAfterLeftDisposal.commandEventPorts).toBe(right.commandEventPorts);
+    expect(rightAfterLeftDisposal.snapshot).toBe(rightRegistration.snapshot);
+  });
+
+  it("contains forged, foreign, and revoked read authorities without leaking another registry", () => {
+    const left = fixture();
+    const right = fixture();
+    const rightRegistration = register(right, "right-instance");
+    if (rightRegistration.status !== "registered") {
+      throw new TypeError("Expected right registration.");
+    }
+
+    expect(
+      readRuntimeCommandEventActions(Object.freeze({}) as RuntimeCommandEventActionsHandle),
+    ).toEqual({ status: "invalid-handle" });
+    const foreign = readRuntimeCommandEventActions(right.mounted.handle);
+    expect(foreign).toEqual({ status: "read", snapshot: rightRegistration.snapshot });
+    if (foreign.status !== "read") throw new TypeError("Expected foreign manager read.");
+    expect(foreign.snapshot).toBe(rightRegistration.snapshot);
+    expect(foreign.snapshot).not.toBe(left.mounted.snapshot);
+
+    expect(disposeRuntimeCommandEventActions(left.mounted.handle)).toEqual({
+      status: "disposed",
+      disposedTargets: 0,
+    });
+    expect(readRuntimeCommandEventActions(left.mounted.handle)).toEqual({
+      status: "disposed",
+    });
+    expect(readRuntimeCommandEventActions(right.mounted.handle)).toEqual({
+      status: "read",
+      snapshot: rightRegistration.snapshot,
+    });
   });
 
   it("supports repeated instances but makes their source target ambiguous until one leaves", () => {

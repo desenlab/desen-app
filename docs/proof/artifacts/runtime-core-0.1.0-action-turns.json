@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "task": "M04-T13",
+  "result": "PASS",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "Prepared hostile action arrays execute through one bounded FIFO coordinator with exact child dispatch, current manager snapshots, nested operation settlements, navigation terminality, and exactly-once finalization.",
+    "protocolStatusChanges": [],
+    "proofMatrixStatusChanges": [],
+    "normativeStatusChanges": [{ "id": "N-032", "from": "PLANNED", "to": "TESTED" }]
+  },
+  "prerequisites": [
+    {
+      "task": "M04-T10",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-state-navigation-actions.json",
+      "artifactSha256": "f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140"
+    },
+    {
+      "task": "M04-T11",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-operation-resource-actions.json",
+      "artifactSha256": "d57a023bd6e26e23fd32a8fda38745073227f2362af7b2de902f87ef1d6e39a8"
+    },
+    {
+      "task": "M04-T12",
+      "result": "PASS",
+      "artifact": "runtime-core-0.1.0-command-event-actions.json",
+      "artifactSha256": "8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4"
+    }
+  ],
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_ACTION_TURN_LIMITS",
+      "disposeRuntimeActionTurns",
+      "executeRuntimeActionTurn",
+      "mountRuntimeActionTurns",
+      "prepareRuntimeActionProgram"
+    ],
+    "typeExports": [
+      "RuntimeActionTurnCompletion",
+      "RuntimeActionTurnExecutionResult",
+      "RuntimeActionTurnLimitProfile",
+      "RuntimeActionTurnProgram",
+      "RuntimeActionTurnProgramPreparationResult",
+      "RuntimeActionTurnQueued",
+      "RuntimeActionTurnRequest",
+      "RuntimeActionTurnStarted",
+      "RuntimeActionTurnStep",
+      "RuntimeActionTurnTerminationReason",
+      "RuntimeActionTurnsDisposeResult",
+      "RuntimeActionTurnsHandle",
+      "RuntimeActionTurnsMountInput",
+      "RuntimeActionTurnsMountInvalidReason",
+      "RuntimeActionTurnsMountResult",
+      "RuntimeActionTurnsSnapshot"
+    ],
+    "tsdocDeclarations": 21,
+    "sourceImports": [
+      "./command-event-actions.js",
+      "./host-ports.js",
+      "./local-state.js",
+      "./operation-lifecycle.js",
+      "./operation-resource-actions.js",
+      "./resource-lifecycle.js",
+      "./runtime-json-snapshot.js",
+      "./state-navigation-actions.js",
+      "./value-resolution.js",
+      "@desen/protocol"
+    ],
+    "internalRuntimeExports": [],
+    "internalTypeExports": []
+  },
+  "sourceInvariants": {
+    "preparedProgramAuthority": "private WeakMap",
+    "coordinatorAuthority": "private WeakMap",
+    "childOwnership": "three private WeakSets",
+    "observedActionIndices": "0..63 only",
+    "routeAuthority": "detached private metadata",
+    "managerReads": 4,
+    "childAuthorityReads": 3,
+    "invalidSnapshotRetry": false,
+    "settlementFinalization": "finally",
+    "unexpectedProcessContainment": "try/catch/finally",
+    "settlementFinalizationAttempt": "private WeakSet",
+    "settlementFinalizationOwner": "process finally",
+    "operationSettlementCallbackFences": 4,
+    "resourceSettlementCallbackFences": 4,
+    "drainContainment": "catch plus admission emergency",
+    "acceptedCompletionResolutionPaths": 5
+  },
+  "runtime": {
+    "preparedProgramProbes": 5,
+    "mountProbes": 7,
+    "dispatchProbes": 9,
+    "orderProbes": 11,
+    "snapshotProbes": 15,
+    "queueProbes": 27,
+    "settlementProbes": 32,
+    "finalizationProbes": 24,
+    "limitProbes": 15,
+    "disposalProbes": 12,
+    "delegateCalls": 107,
+    "duplicateEffects": 0,
+    "platformEffects": 0
+  },
+  "limits": {
+    "maxActionsPerTurn": 64,
+    "maxSettlementDepth": 16,
+    "maxQueuedTurns": 64,
+    "maxSynchronousTurnTransitions": 64,
+    "maxTurnGeneration": 9007199254740991,
+    "maxRetainedQueuedActions": 4096,
+    "maxRetainedQueuedCodeUnits": 1048576
+  },
+  "semantics": {
+    "preparation": "only own descriptors 0..63 are detached, recursively frozen, and privately routed; index 64 and later suffixes remain unobserved",
+    "overflow": "a 65-entry program retains overflow, executes the first 64 entries in source order, then terminates with ACTION_LIMIT_EXCEEDED",
+    "dispatch": "the coordinator never re-reads raw type and delegates each known entry exactly once to its one owning child executor",
+    "continuation": "skipped and successful child outcomes continue; controlled child failure and unknown route stop",
+    "snapshots": "four current manager snapshots and all exact child authorities are read before admission and every action slot; invalid-snapshot is recorded once and never retried",
+    "queue": "reentrant events and reserved settlement turns share one bounded FIFO and one retained action/code-unit budget",
+    "settlement": "capacity is reserved before operation effect; parent acceptance depth is retained; settlement event scope is unavailable",
+    "finalization": "every observed operation ticket is finalized exactly once from finally on all completion, failure, limit, navigation, and disposal exits",
+    "navigation": "successful navigation terminally disposes the surrendered old-surface stack before completing and never promotes queued old-surface work",
+    "provenance": "full joint seven-namespace provenance remains deferred to M04-T16"
+  },
+  "portability": {
+    "framework": null,
+    "platformGlobals": [],
+    "dynamicEvaluation": false,
+    "nondeterministicCalls": [],
+    "a2uiDependencies": []
+  },
+  "documentation": {
+    "finding": "PF-043",
+    "findingStatus": "OPEN",
+    "relatedOpenFindings": ["PF-014", "PF-031", "PF-039", "PF-040", "PF-041", "PF-042"],
+    "proofDocument": "docs/proof/RUNTIME-CORE-ACTION-TURNS.md"
+  },
+  "normative": { "tested": ["N-032"], "planned": ["N-014", "N-041"] },
+  "evidence": {
+    "focusedTestRegistrations": 35,
+    "focusedTests": 43,
+    "focusedTestTitles": [
+      "captures only indices 0 through 63 and never observes the 65th action",
+      "detaches and recursively freezes the executable prefix before admission",
+      "rejects malformed prepared-program input: %s",
+      "rejects an accessor in the executable prefix without invoking it",
+      "mounts exact T10/T11/T12 authorities without invoking host callbacks",
+      "rejects forged and foreign T10/T11 child handles before claiming anything",
+      "rejects forged T12 authority, stale lower snapshots, and a second exclusive claim",
+      "rejects a widening or malformed limit profile: %s",
+      "keeps all exported operations receiver independent",
+      "runs in source order, continues after skipped, and stops at an unknown action",
+      "keeps earlier effects and does not inspect later slots after a controlled denial",
+      "adopts a registration before the first command of the next admission",
+      "rebuilds the current four-domain resolution before every ordered slot",
+      "never retries an invalid snapshot after a token callback advances lower state",
+      "executes exactly 64 actions and reports one core diagnostic for the 65th",
+      "blocks reporting-time reentry without queueing or executing another action",
+      "queues reentrant admissions in FIFO order without recursive dispatch",
+      "keeps the active program charged while bounding reentrant retained actions",
+      "reserves future settlement capacity before an operation effect",
+      "terminates only the excess synchronous transitions and fulfills every completion",
+      "accepts generation zero and rejects the next turn at a lowered generation ceiling",
+      "keeps the originating turn nonblocking and finalizes a successful handler turn",
+      "finalizes settlement after its initial current-resolution rebuild fails closed",
+      "contains an asynchronous settlement-enqueue throw without rejection or ticket loss",
+      "selects the failure handler and still finalizes after a controlled handler failure",
+      "makes the parent event unavailable inside an asynchronous settlement turn",
+      "finalizes an empty handler before promoting queued same-alias work",
+      "holds a nested staged operation until the parent settlement finally path",
+      "finalizes a ticket after a settlement handler reaches the 65-action limit",
+      "accepts sixteen nested operation effects and rejects the seventeenth before effect",
+      "disposes T11 before finalizing settlement navigation and never promotes queued work",
+      "contains a drain-level completion failure and fulfills reentrant queued work",
+      "resolves navigation before queued old-surface completion while disposing children first",
+      "disposes pending settlement reservations and contains late host completion",
+      "fulfills queued completions on explicit disposal and contains forged handles"
+    ],
+    "compilerNegativeCases": 11,
+    "rootMutationTests": 32,
+    "rootMutationTestTitles": [
+      "accepts tracked deterministic M04-T13 action-turn evidence",
+      "builds byte-identical action-turn evidence twice",
+      "rejects stale or tampered action-turn evidence",
+      "rejects stale M04-T10 prerequisite bytes",
+      "rejects stale M04-T11 prerequisite bytes",
+      "rejects stale M04-T12 prerequisite bytes",
+      "detects prepared-program brand, inert-copy, and deep-freeze drift",
+      "detects private route metadata and coordinator discriminator-read drift",
+      "detects duplicate child delegation and cross-family dispatch drift",
+      "detects source-order, skipped-continue, and failed-stop drift",
+      "detects the exact 64/65 action boundary and core diagnostic drift",
+      "detects the exact 16/17 settlement-depth and parent-depth drift",
+      "detects repeated synchronous-transition ceiling drift",
+      "detects reentrant FIFO and outer-turn completion-order drift",
+      "detects shared queue reservation and retained-action/code-unit drift",
+      "detects four fresh reads and current resolution-snapshot rebuild drift",
+      "detects invalid-snapshot retry and duplicate-effect drift",
+      "detects monotonic command-registry snapshot adoption drift",
+      "detects navigation terminality and queued old-surface cancellation drift",
+      "detects settlement branch, nonblocking, and event-scope fence drift",
+      "detects empty-handler and successful-handler finalization drift",
+      "detects failure, throw, limit, navigation, and disposal finalization drift",
+      "detects staged same-alias promotion and finalization safe-point drift",
+      "detects finite turn-generation and pending-settlement reservation drift",
+      "detects hostile admission, reporting reentry, and completion-promise drift",
+      "detects process initial-resolution and catch containment drift",
+      "detects one-shot settlement-finalizer containment drift",
+      "detects operation/resource settlement callback containment drift",
+      "detects drain emergency-completion containment drift",
+      "detects admission-time native completion resolution drift",
+      "detects task-owned byte, trace, normative, and proof-document drift",
+      "detects public export, TSDoc, internal non-leak, platform, focused-test, and compiler-negative inventory drift"
+    ],
+    "traceRules": [
+      { "id": "R-062", "section": "17.7", "owners": ["M02-T09", "M04-T09", "M04-T13", "M04-T14"] },
+      { "id": "R-078", "section": "20.4", "owners": ["M04-T09", "M04-T11", "M04-T13"] },
+      { "id": "R-081", "section": "20.8", "owners": ["M04-T13"] },
+      { "id": "R-123", "section": "27.8", "owners": ["M02-T13", "M04-T07", "M04-T13", "M07-T04"] },
+      { "id": "D-029", "section": "Appendix B", "owners": ["M02-T05", "M04-T13"] }
+    ],
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-core/src/action-turns.ts",
+        "bytes": 81159,
+        "sha256": "7fc4e83db91a4033c1681789eef8da1b27549228f4dee26b2ded463a8d1a070f"
+      },
+      {
+        "path": "packages/runtime-core/test/action-turns.test.ts",
+        "bytes": 67904,
+        "sha256": "de27c65961793a2d592178cec6c55fd69049187b0f3977444e620377d8453719"
+      },
+      {
+        "path": "packages/runtime-core/test/action-turns.types.ts",
+        "bytes": 6459,
+        "sha256": "0ffc9e7d0f443ca08b56987eb67ecba51474f54da56092fe20ffdf0e30737e56"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-turns.js",
+        "bytes": 66619,
+        "sha256": "7e90aded7347664090004dc907fc1a44e1a34a4977778bf5099ef96256c3c548"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-turns.js.map",
+        "bytes": 52427,
+        "sha256": "59cbdf63147024e18fc3cb57b9705ecbb79de74379de64989dad50b542332a68"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-turns.d.ts",
+        "bytes": 11116,
+        "sha256": "b72725604122ddb0a636ee3dcb6d1bbaa855e28e22710f41d5b3c7152fc14ca6"
+      },
+      {
+        "path": "packages/runtime-core/dist/action-turns.d.ts.map",
+        "bytes": 6314,
+        "sha256": "197a86f936f788116fe9952125b87265eecb49ef8d4f5995f4fd4059c9d01cfe"
+      },
+      {
+        "path": "scripts/lib/runtime-core-action-turns-proof.mjs",
+        "bytes": 103662,
+        "sha256": "83fac97f0e84d26ef0d4f5d05c7be1caef8b4c7064051fe1be28d3d7db578ca6"
+      },
+      {
+        "path": "scripts/generate-runtime-core-action-turns-proof.mjs",
+        "bytes": 805,
+        "sha256": "5359c7e26edcb348e7bb5140de39910f44168898d0ff25eb188b365671b7b95a"
+      },
+      {
+        "path": "scripts/verify-runtime-core-action-turns.mjs",
+        "bytes": 652,
+        "sha256": "c43413c8a18a5609198cf93fd1ba3a5a43fe0ca619d5ee0f276b1cfbf9c27057"
+      },
+      {
+        "path": "tests/runtime-core-action-turns.test.mjs",
+        "bytes": 28439,
+        "sha256": "530326b450320323183822a2dbf6ba13df9246f50cab420c934b8ae2db0672e2"
+      }
+    ],
+    "semanticOnlySharedInputs": [
+      "packages/runtime-core/package.json",
+      "packages/runtime-core/src/index.ts",
+      "packages/runtime-core/dist/index.js",
+      "packages/runtime-core/dist/index.d.ts",
+      "docs/proof/protocol-0.1.0-traceability.json",
+      "docs/proof/NORMATIVE-COVERAGE.md",
+      "docs/plan/PROTOCOL-FINDINGS.md",
+      "docs/proof/RUNTIME-CORE-ACTION-TURNS.md",
+      "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json"
+    ]
+  },
+  "deferred": [
+    "generic component and behavior bridges plus incoming event payload provenance (M04-T14)",
+    "reactive dependency discovery and stale asynchronous-result protection (M04-T15)",
+    "full seven-namespace joint provenance, sign-in session, composed disposal, and trace (M04-T16)",
+    "production adapter parity, physical cancellation, retry, timeout, persistence, and offline policy",
+    "Android and iOS adapter lifecycle behavior",
+    "future protocol clarification of N-014, N-041, and PF-043"
+  ]
+}

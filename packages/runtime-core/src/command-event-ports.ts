@@ -90,10 +90,48 @@ interface RuntimeCommandEventHostPortsAuthority {
 }
 
 const PORT_AUTHORITIES = new WeakMap<object, RuntimeCommandEventHostPortsAuthority>();
+const NORMALIZED_COMPONENT_COMMAND_REQUESTS = new WeakMap<object, RuntimeCommandEventHostPorts>();
 
 /** @internal Probes only factory authority and never invokes a host callback. */
 export function isRuntimeCommandEventHostPorts(ports: RuntimeCommandEventHostPorts): boolean {
   return typeof ports === "object" && ports !== null && PORT_AUTHORITIES.has(ports);
+}
+
+/**
+ * Tests whether a command request crossed the exact normalized T12 invocation boundary.
+ *
+ * @internal This one-call composition proof prevents a public structural host-port request from
+ * bypassing Catalog selection and resolved command-input validation.
+ */
+export function consumeRuntimeComponentCommandHostRequestForAdapterBridge(
+  request: RuntimeComponentCommandHostRequest,
+  expectedPorts: RuntimeCommandEventHostPorts,
+): boolean {
+  const normalized =
+    typeof request === "object" &&
+    request !== null &&
+    NORMALIZED_COMPONENT_COMMAND_REQUESTS.get(request) === expectedPorts;
+  if (normalized) NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(request);
+  return normalized;
+}
+
+/**
+ * Tests whether one aggregate host-port authority captured the exact generated component port.
+ *
+ * @internal This callback-free package-composition seam binds T14 to one exact T12 port owner.
+ */
+export function isRuntimeCommandEventHostPortsForComponentCommandPort(
+  ports: RuntimeCommandEventHostPorts,
+  commands: RuntimeComponentCommandHostPort,
+): boolean {
+  const authority =
+    typeof ports === "object" && ports !== null ? PORT_AUTHORITIES.get(ports) : undefined;
+  const invokeCommand = captureCallback(commands, "invoke");
+  return (
+    authority !== undefined &&
+    invokeCommand !== undefined &&
+    authority.invokeCommand === invokeCommand
+  );
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -327,11 +365,14 @@ export function invokeRuntimeComponentCommandHostPort(
   if (authority === undefined) return Object.freeze({ status: "invalid-ports" });
   const captured = capturedCommandRequest(request);
   if (captured === undefined) return Object.freeze({ status: "adapter-failed" });
+  NORMALIZED_COMPONENT_COMMAND_REQUESTS.set(captured, ports);
   let raw: unknown;
   try {
     raw = Reflect.apply(authority.invokeCommand, undefined, [captured]);
   } catch {
     return Object.freeze({ status: "adapter-failed" });
+  } finally {
+    NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(captured);
   }
   const status = closedStatus(raw, ["succeeded", "denied"]);
   return status === undefined

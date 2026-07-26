@@ -25,6 +25,16 @@ settlement dispatch, rendering, or a complete application session.
 - Every execution requires the exact current manager-issued state snapshot object and a
   factory-created resolution snapshot whose complete `state` namespace equals that snapshot.
 - Stale, foreign, and structurally ABA-equal state snapshots fail closed without action effects.
+- The package-internal `readRuntimeStateNavigationActions` seam is a callback-free observation of
+  the exact document, revision, surface, and current lower T06 state snapshot. It reads through to
+  T06 instead of trusting the executor's cached reference, so a valid state write performed outside
+  this manager is visible as the exact newly published snapshot object.
+- That read is receiver-independent, frozen, inert, and generation-neutral. Forged handles fail
+  closed, externally revoked lower state becomes `disposed`, and executor tombstones preserve the
+  distinct `disposed` and `navigated` observations.
+- The read result type and function are exports of the focused `state-navigation-actions` module
+  only. Both remain intentionally absent from the package root so this trusted coordinator seam
+  does not become a general public capability.
 - M04-T10 proves only the state authority it owns. M04-T16 retains responsibility for complete
   same-turn provenance across context, resource, operation, event, item, and environment.
 
@@ -160,11 +170,13 @@ outputs, three task proof scripts, and the root mutation suite. Shared manifests
 traceability ledgers, findings, and this explanatory document are verified semantically but
 deliberately are not byte-owned by M04-T10.
 
-The evidence builder derives focused cases from test syntax, including every `it.each` row, and
-derives compiler-negative cases from described `@ts-expect-error` directives. It also checks:
+The evidence builder derives all 44 focused cases from test syntax, including every `it.each` row,
+and derives all 14 compiler-negative cases from described `@ts-expect-error` directives. Its 20
+root mutation tests also check:
 
-- exact public runtime and type exports in source, declarations, distribution, and package
-  indexes, plus exact internal seam exports that never leak from the package root;
+- exact module runtime and type exports in source, declarations, and distribution, including the
+  internal read seam, while package indexes retain the smaller public surface and reject any
+  package-root leak;
 - TSDoc on every public declaration;
 - exact source imports and focused package command;
 - absence of framework, browser, Node-host, native-host, timer, randomness, network, and dynamic
@@ -173,7 +185,8 @@ derives compiler-negative cases from described `@ts-expect-error` directives. It
 - live hostile probes for mount authority, exact snapshot identity, guard-first non-observation,
   shared token memoization, schema-safe set, exact-boolean toggle, local-target-before-params,
   post-token TOCTOU revalidation, closed host requests, denial, adapter containment, receiver
-  independence, reentry, successful terminal navigation, explicit disposal, and late calls; and
+  independence, exact-current callback-free reads, reentry, successful terminal navigation,
+  explicit disposal, and late calls; and
 - root hostile mutations of semantic ordering, callbacks, exports, TSDoc, portability, and test
   inventory.
 

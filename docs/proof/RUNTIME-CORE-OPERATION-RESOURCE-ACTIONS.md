@@ -95,6 +95,11 @@ iOS, Android, SwiftUI, or Compose adapter.
 - The mounted action compositor exclusively claims exact M04-T08 and M04-T09 manager handles and
   captures their snapshots, plus the M04-T10 token and diagnostic ports needed for guard and
   operation-input evaluation.
+- One package-internal callback-free read returns the compositor's exact document, revision,
+  surface, and current lower-manager snapshots without performing an action, token lookup,
+  diagnostic report, effect, or generation transition. Forged and disposed handles fail closed,
+  and reentrant reads report `busy`. The seam remains absent from the package root until M04-T16
+  owns the public joint-snapshot contract.
 - Every payload observation, token callback, diagnostic callback, and delegated manager call is
   followed by authority and exact-snapshot checks before the next effect.
 - Once M04-T09 or M04-T08 accepts an effect, that controlled accepted result takes precedence over
@@ -131,7 +136,7 @@ Generation refuses to proceed unless all four reviewed prerequisites match their
 - M04-T09 operation lifecycle:
   `7b2300a78bb9903abe1f182792362d374edb5b948ee9f8f69dc018ccf9cc8301`
 - M04-T10 state/navigation actions:
-  `9ad1492a5eb9cc4916b5cadf02d2f45d009df261f9bdcd49b997d2af88dbdf67`
+  `f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140`
 - M02-T11 execution contracts:
   `f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505`
 
@@ -152,8 +157,8 @@ and derives compiler-negative cases from described `@ts-expect-error` directives
 - byte-identical artifact generation and atomic artifact replacement;
 - live hostile probes for guard-first non-observation, one shared operation token session,
   handler detachment, nonblocking invocation and refresh, exact settlement mapping, lease hiding,
-  explicit safe finalization, queue gating, snapshot drift, receiver independence, raw-host
-  redaction, disposal, and late settlement containment; and
+  explicit safe finalization, queue gating, callback-free current compositor reads, snapshot drift,
+  receiver independence, raw-host redaction, disposal, and late settlement containment; and
 - root hostile mutations of payload reads, false-guard effects, raw-host leakage, source ordering,
   task-owned bytes, artifact tampering, exports, portability, and test inventory.
 

@@ -62,7 +62,7 @@ test("accepts tracked deterministic M04-T11 operation/resource evidence", async 
   assert.equal(result.result, "PASS");
   assert.equal(result.traceRules, 2);
   assert.equal(result.trackedFiles, 11);
-  assert.equal(result.rootMutationTests, 19);
+  assert.equal(result.rootMutationTests, 20);
   assert.equal(result.hostilePayloadReads, 0);
   assert.equal(result.falseGuardEffects, 0);
   assert.equal(result.falseGuardDiagnosticCalls, 0);
@@ -249,6 +249,23 @@ test("detects resource refresh snapshot and nonblocking drift", async () => {
   });
   await rejectsCode(
     () => buildRuntimeCoreOperationResourceActionsEvidence({ runtimeApi: mutated }),
+    "OPERATION_RESOURCE_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+  );
+});
+
+test("detects callback-free compositor read drift", async () => {
+  const mutated = withInternal({
+    readRuntimeOperationResourceActions(handle) {
+      const result = runtimeInternalApi.readRuntimeOperationResourceActions(handle);
+      if (result.status !== "read") return result;
+      return Object.freeze({
+        ...result,
+        resourceSnapshot: Object.freeze({ ...result.resourceSnapshot }),
+      });
+    },
+  });
+  await rejectsCode(
+    () => buildRuntimeCoreOperationResourceActionsEvidence({ runtimeInternalApi: mutated }),
     "OPERATION_RESOURCE_ACTION_RUNTIME_BEHAVIOR_DRIFT",
   );
 });

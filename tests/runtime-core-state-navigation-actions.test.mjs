@@ -9,6 +9,7 @@ import {
 } from "../scripts/lib/runtime-core-state-navigation-actions-proof.mjs";
 
 import * as runtimeApi from "../packages/runtime-core/dist/index.js";
+import * as stateNavigationApi from "../packages/runtime-core/dist/state-navigation-actions.js";
 
 const TOKEN_FORMAT_ARTIFACT = new URL(
   "../docs/proof/artifacts/runtime-core-0.1.0-token-format-resolution.json",
@@ -56,14 +57,23 @@ function withRuntime(overrides) {
   return Object.freeze({ ...runtimeApi, ...overrides });
 }
 
+function withStateNavigationApi(overrides) {
+  return Object.freeze({ ...stateNavigationApi, ...overrides });
+}
+
 test("accepts tracked deterministic M04-T10 state/navigation evidence", async () => {
   const result = await verifyRuntimeCoreStateNavigationActionsEvidence();
   assert.equal(result.result, "PASS");
-  assert.equal(result.focusedTests, 42);
-  assert.equal(result.compilerNegativeCases, 11);
-  assert.equal(result.rootMutationTests, 19);
+  assert.equal(result.focusedTests, 44);
+  assert.equal(result.compilerNegativeCases, 14);
+  assert.equal(result.rootMutationTests, 20);
   assert.equal(result.traceRules, 5);
   assert.equal(result.trackedFiles, 16);
+  assert.equal(result.runtimeExports, 4);
+  assert.equal(result.typeExports, 18);
+  assert.equal(result.internalRuntimeExports, 1);
+  assert.equal(result.internalTypeExports, 1);
+  assert.equal(result.currentReadProbes, 14);
   assert.equal(result.hostilePayloadReads, 0);
   assert.equal(result.falseGuardDiagnosticCalls, 0);
   assert.equal(result.platformEffects, 0);
@@ -415,6 +425,57 @@ test("detects public export, TSDoc, and platform drift", async () => {
         },
       }),
     "ACTION_EVALUATION_PLATFORM_BOUNDARY_DRIFT",
+  );
+});
+
+test("detects current-read seam and package-root non-leak drift", async () => {
+  const [indexText, sourceText] = await Promise.all([
+    readFile(SOURCE_INDEX, "utf8"),
+    readFile(ACTION_SOURCE, "utf8"),
+  ]);
+  const mutatedRead = withStateNavigationApi({
+    readRuntimeStateNavigationActions(handle) {
+      const result = stateNavigationApi.readRuntimeStateNavigationActions(handle);
+      return result.status === "read"
+        ? Object.freeze({ ...result, documentId: "com.desen.mutated" })
+        : result;
+    },
+  });
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreStateNavigationActionsEvidence({
+        stateNavigationApi: mutatedRead,
+      }),
+    "STATE_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreStateNavigationActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/state-navigation-actions.ts": sourceText
+            .replace(
+              "export type RuntimeStateNavigationActionsReadResult =",
+              "type RuntimeStateNavigationActionsReadResult =",
+            )
+            .replace(
+              "export function readRuntimeStateNavigationActions(",
+              "function readRuntimeStateNavigationActions(",
+            ),
+        },
+      }),
+    "STATE_ACTION_SOURCE_EXPORT_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildRuntimeCoreStateNavigationActionsEvidence({
+        fileOverrides: {
+          "packages/runtime-core/src/index.ts": `${indexText}
+export { readRuntimeStateNavigationActions } from "./state-navigation-actions.js";
+export type { RuntimeStateNavigationActionsReadResult } from "./state-navigation-actions.js";
+`,
+        },
+      }),
+    "STATE_ACTION_INDEX_EXPORT_DRIFT",
   );
 });
 
