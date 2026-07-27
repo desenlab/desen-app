@@ -128,7 +128,7 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 
 | ID      | Status      | Depends on      | Deliverable / evidence                                                                             |
 | ------- | ----------- | --------------- | -------------------------------------------------------------------------------------------------- |
-| M05-T01 | NOT_STARTED | G04             | React adapter registry and render-plan renderer                                                    |
+| M05-T01 | DONE        | G04             | React adapter registry and render-plan renderer                                                    |
 | M05-T02 | NOT_STARTED | M05-T01         | Resolved props and named slots wired without private structure inspection                          |
 | M05-T03 | NOT_STARTED | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
 | M05-T04 | NOT_STARTED | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
@@ -138,6 +138,16 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 | M05-T08 | NOT_STARTED | M05-T04–M05-T07 | Official sign-in bundle running through real adapters                                              |
 | M05-T09 | NOT_STARTED | M05-T07–M05-T08 | Automated source/import audit preventing handwritten managed-screen composition                    |
 | G05     | NOT_STARTED | M05-T01–M05-T09 | Bundle-driven sign-in runs in separate host                                                        |
+
+`M05-T01` creates a finite, factory-authenticated static React adapter registry and an
+all-or-nothing public headless-plan renderer. Ordinary roots and descendants use the same exact
+capability lookup. The renderer resolves the complete node/slot/behavior graph before an adapter
+component executes; malformed own-data boundaries, forged handles, duplicate identities, unknown
+component or behavior capabilities, and lower-only limit crossings return explicit callback-free
+failures with no placeholder element. Adapter JSON is accessor-free, detached, deeply frozen, and
+aggregate-bounded; revoked proxies fail closed and every named slot consumes finite budget.
+Standalone plan provenance remains a host responsibility, while `M05-T02` now owns exact Catalog
+receiving-schema validation for resolved props and named-slot delivery.
 
 ## M06 — Deterministic publisher
 

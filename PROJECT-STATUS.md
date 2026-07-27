@@ -278,14 +278,29 @@ N-026 and N-029 correctly remain `PLANNED` for M05 receiving-boundary evidence; 
 fault injection covers rollback, publication failure, reentry, stale settlement, finalization,
 and disposal. The immutable M02-T08 and M04-T13 through M04-T16 task-time artifacts remain
 byte-identical.
+M05-T01 now opens the concrete Web–React runtime without moving React into `runtime-core`.
+`@desen/runtime-react` owns a finite factory-authenticated registry populated only by statically
+imported trusted component and behavior adapters. Bundle data can select an exact registered
+capability id but cannot name a module, export, loader, fallback, or executable callback. The
+renderer reflects only public headless-plan own data, preflights the complete root/slot/behavior
+graph before any adapter component executes, and returns an explicit callback-free failure for a
+forged handle, malformed plan, duplicate runtime identity, unknown capability, or lower-only
+limit crossing. Ordinary roots use the same lookup as descendants and failure creates no
+placeholder React element. Public JSON is captured from own data, detached, deeply frozen, and
+bounded together with named slots and retained strings; revoked proxies fail closed. The
+standalone renderer authenticates registry authority but truthfully leaves structural-plan
+provenance to the production host. `PF-050` records this implementation profile; exact
+receiving-schema validation remains M05-T02/M05-T03 and active events, commands, behavior
+lifecycle, committed adapter errors, and real-instance reconciliation remain M05-T04–M05-T06.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `54 / 145 tasks complete (37%)`
+- Overall implementation progress: `55 / 145 tasks complete (38%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
+- M05 progress: `1 / 9 tasks complete (11%)`
 - Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -325,11 +340,12 @@ byte-identical.
   `M04-T14 — Generic component/behavior event and command bridges`,
   `M04-T15 — Reactive re-evaluation and stale-result protection`,
   `M04-T16 — Headless sign-in determinism and JSON trace`,
-  `M04-T17 — G04 audit hardening`
+  `M04-T17 — G04 audit hardening`,
+  `M05-T01 — React adapter registry and render-plan renderer`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M05-T01 — React adapter registry and render-plan renderer`
-- Status: G04 is closed; M05-T01 is ready to start
+- Next implementation task: `M05-T02 — Resolved props and named slots`
+- Status: M05-T01 is complete; M05-T02 is ready to start
 
 ## Completed preparation
 
@@ -653,9 +669,10 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
 
 ## Current readiness
 
-No implementation-proof blocker remains between G04 and M05-T01. The React adapter work must still
-preserve the framework-neutral runtime boundary and must not claim N-026 or N-029 complete until
-their exact receiving-schema validations pass in M05-T02 and M05-T03.
+The static React registry and all-or-nothing public-plan preflight are complete. M05-T02 must now
+apply the exact authenticated Catalog receiving schema before resolved props and named slots reach
+an adapter. N-026 and N-029 remain `PLANNED` until M05-T02 and M05-T03 prove their respective
+complete receiving boundaries.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -665,9 +682,8 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M05-T01 — React adapter registry and render-plan renderer`. Build the first Web–React
-adapter boundary over the completed framework-neutral runtime without moving React, DOM, or CSS
-concerns into `@desen/runtime-core`.
+Begin `M05-T02 — Resolved props and named slots`. Wire the exact authenticated Catalog receiving
+schema and public named-slot contract without inspecting component, React, or DOM internals.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1075,6 +1091,19 @@ M04-T17 final G04 audit-hardening evidence:
 - historical compatibility: M02-T08 and M04-T13 through M04-T16 artifacts remain byte-identical;
   all five are independently pinned as T17 prerequisites, while current compatibility
   verifier/test ownership transfers without retroactive artifact rewriting
+
+M05-T01 evidence:
+
+- `docs/proof/RUNTIME-REACT-ADAPTER-REGISTRY.md`
+- `docs/proof/artifacts/runtime-react-0.1.0-adapter-registry.json`
+- artifact SHA-256: `b2e98f5e54471aa3ec227e672e2fa6b0f90a970b4c48046a0b8a8323f33b6b42`
+- exact boundary: 5 runtime exports, 28 type exports, 35/35 documented source declarations, one
+  factory-authenticated static component/behavior registry, exact root/descendant lookup, complete
+  all-or-nothing public-plan preflight, detached deeply frozen adapter JSON, opaque command
+  attachment identity, and finite lower-only registry/tree/slot/JSON/string ceilings
+- executable evidence: 10 focused package tests, 4 compiler-negative cases, 11 hostile root
+  proof/mutation tests, 12 explicit failure codes, 25 task-owned files, two deterministic builds,
+  no placeholder renderer, no executable loading, and no React/DOM authority in `runtime-core`
 
 ## Status vocabulary
 

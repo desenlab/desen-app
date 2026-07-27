@@ -626,3 +626,28 @@ artifacts remain byte-identical; M04-T17 transfers only their current compatibil
 verifier-and-hostile-test ownership. The frozen DESEN 0.1.0 protocol bytes are unchanged:
 `docs/proof/artifacts/runtime-core-0.1.0-audit-hardening.json`
 `sha256:cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa`.
+
+## M05-T01
+
+M05-T01 establishes the first Web–React adapter boundary without changing G04 or a protocol proof
+status. A factory-authenticated static registry retains only exact trusted component and behavior
+implementations while its public snapshot exposes sorted capability identifiers and no callback.
+The standalone renderer applies the same lookup to roots, descendants, and behaviors, and
+preflights the complete structural public plan before React executes an adapter.
+
+The preflight rejects malformed own-data boundaries, revoked proxies, unknown capabilities,
+duplicate runtime identities, forged registry handles, non-linear identifier inputs, and lower-only
+node, depth, slot, behavior, JSON-depth, JSON-occurrence, retained-string, and registry limits.
+Every adapter JSON input is detached and deeply frozen; slot names including `status` remain data
+rather than control flow. Declared behavior order is deterministic, no placeholder tree is
+created, and the command seam reserves an opaque attachment identity with controlled detachment
+instead of exposing a raw callback.
+
+Ten focused package tests, four compiler-negative cases, and eleven hostile root
+proof/mutation tests protect the implementation and its deterministic 25-file artifact. The
+standalone compiler authenticates registry authority but deliberately does not claim the
+provenance of an otherwise valid structural plan. M05-T02/M05-T04 add exact Catalog/session
+authority, and M05-T09 audits the independent production host path. N-026 and N-029 remain
+`PLANNED`; no P-claim or proof gate changes:
+`runtime-react-0.1.0-adapter-registry.json`
+`sha256:b2e98f5e54471aa3ec227e672e2fa6b0f90a970b4c48046a0b8a8323f33b6b42`.

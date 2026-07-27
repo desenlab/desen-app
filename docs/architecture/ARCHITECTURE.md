@@ -62,6 +62,15 @@ component adapter types and registries. A catalog package may depend on both, bu
 cross the `catalog-sdk` public boundary. ADR 0007 records why parity metadata precedes, but never
 replaces, the M05 registry.
 
+The M05 React boundary uses a finite factory-authenticated registry populated only by statically
+imported trusted adapters. Document data can select an exact registered capability id but cannot
+name a module, export, loader, callback, or fallback. The standalone plan compiler performs a
+complete bounded own-data preflight and detaches all JSON before it creates React elements. It
+authenticates registry authority, not the provenance of any otherwise valid structural plan; the
+production host must obtain that plan from its exact current headless session. ADR 0010 records
+the receiving-Catalog, session interaction, semantic style, reference package, and independent-host
+boundaries that complete M05.
+
 ## Reference capability artifact boundary
 
 M03-T10 packages the exact reference sign-in slice as
@@ -291,11 +300,13 @@ partial failure ends the surface rather than exposing a partial registry.
 An incoming adapter event is accepted only through the exact current T14 ticket. Its component or
 behavior selector chooses one preprepared T13 program, while state, context, resource, operation,
 event, item, and environment namespaces are rebuilt from their authenticated current owners.
-Callers cannot provide an alternate namespace or claim an arbitrary runtime instance. The
-official sign-in operation settlement is observed through its exposed settlement promise so
-failure, retry, stale replacement, success navigation, and the new home lifetime publish in a
-deterministic order. Generic notification after every future internally nested settlement remains
-an explicit nonclaim because T13 does not expose that completion seam.
+Callers cannot provide an alternate namespace or claim an arbitrary runtime instance. M04-T17 now
+adds one factory-authenticated package-internal completion notice after every accepted T13
+operation or resource settlement turn finalizes. The headless session consumes that notice through
+the existing T15 invalidation path, so failure, retry, stale replacement, nested settlement,
+success navigation, and the new surface lifetime publish without observing an
+application-specific promise. This notice is an implementation profile, never protocol data or a
+public callback authority.
 
 Every public session observation is callback-free, recursively frozen JSON with a monotonic
 bounded generation, canonical plan and binding digests, and deterministic binding order. Session
