@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "task": "M05-T01",
+  "result": "PASS",
+  "profile": "desen-runtime-react-adapter-registry-v1",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "summary": "A finite factory-authenticated static registry performs exact component and behavior lookup, and the React renderer completes fail-closed plan preflight before any adapter executes.",
+    "bundleCanSelectModule": false,
+    "unknownCapabilityFallback": false,
+    "nativeOrDomAuthorityExposed": false
+  },
+  "prerequisite": {
+    "task": "M04-T17",
+    "gate": "G04",
+    "path": "docs/proof/artifacts/runtime-core-0.1.0-audit-hardening.json",
+    "sha256": "cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa"
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS",
+      "RUNTIME_REACT_RENDER_LIMITS",
+      "createRuntimeReactAdapterRegistry",
+      "readRuntimeReactAdapterRegistry",
+      "renderRuntimeReactSurface"
+    ],
+    "typeExports": [
+      "RuntimeReactAdapterRegistryCreateInput",
+      "RuntimeReactAdapterRegistryCreateResult",
+      "RuntimeReactAdapterRegistryHandle",
+      "RuntimeReactAdapterRegistryInvalidReason",
+      "RuntimeReactAdapterRegistryLimitProfile",
+      "RuntimeReactAdapterRegistryReadResult",
+      "RuntimeReactAdapterRegistrySnapshot",
+      "RuntimeReactBehaviorAdapterComponent",
+      "RuntimeReactBehaviorAdapterProps",
+      "RuntimeReactBehaviorAdapterRegistration",
+      "RuntimeReactCommandAttachmentHandle",
+      "RuntimeReactCommandAttachmentResult",
+      "RuntimeReactCommandDetachmentResult",
+      "RuntimeReactComponentAdapterComponent",
+      "RuntimeReactComponentAdapterProps",
+      "RuntimeReactComponentAdapterRegistration",
+      "RuntimeReactComponentCommandPort",
+      "RuntimeReactDiagnosticIdentity",
+      "RuntimeReactEventDispatchResult",
+      "RuntimeReactInteractionPort",
+      "RuntimeReactNamedSlots",
+      "RuntimeReactRenderFailure",
+      "RuntimeReactRenderFailureCode",
+      "RuntimeReactRenderInput",
+      "RuntimeReactRenderLimitProfile",
+      "RuntimeReactRenderResult",
+      "RuntimeReactRenderedSurface",
+      "RuntimeReactSemanticStyle"
+    ],
+    "sourceDeclarations": 35,
+    "tsdocDeclarations": 35,
+    "internalRootLeaks": []
+  },
+  "registry": {
+    "limits": {
+      "maxComponentAdapters": 4096,
+      "maxBehaviorAdapters": 4096,
+      "maxIdentifierCodeUnits": 1048576
+    },
+    "snapshot": {
+      "componentCapabilityIds": ["run.desen.proof/Box", "run.desen.proof/Text"],
+      "behaviorCapabilityIds": ["run.desen.proof/Emphasis"]
+    },
+    "snapshotJson": "{\"componentCapabilityIds\":[\"run.desen.proof/Box\",\"run.desen.proof/Text\"],\"behaviorCapabilityIds\":[\"run.desen.proof/Emphasis\"]}",
+    "factoryAuthenticatedHandle": true,
+    "executableCallbacksInSnapshot": 0,
+    "adaptersInvokedDuringRegistration": 0,
+    "rejectionReasons": [
+      "duplicate-capability",
+      "identifier-limit",
+      "invalid-limits",
+      "malformed-registration",
+      "registry-limit"
+    ],
+    "capabilityMatcher": {
+      "profile": "DESEN 0.1.0 linear core capability identifier",
+      "pattern": "/^[A-Za-z0-9][A-Za-z0-9.-]*\\/[A-Za-z][A-Za-z0-9._:-]{0,127}$/u",
+      "identifierBudgetBeforeMatcher": true
+    },
+    "oversizedIdentifierRejectedBeforeMatcher": true
+  },
+  "renderer": {
+    "limits": {
+      "maxNodes": 5000,
+      "maxDepth": 128,
+      "maxSlotEntries": 20000,
+      "maxBehaviors": 20000,
+      "maxJsonDepth": 128,
+      "maxJsonOccurrences": 262144,
+      "maxStringCodeUnits": 4194304
+    },
+    "completePreflightBeforeAdapterExecution": true,
+    "adaptersInvokedDuringPreflight": 0,
+    "ordinaryRootUsesRegistryLookup": true,
+    "renderedHtml": "<section data-runtime-node=\"layout\"><strong data-behavior=\"emphasis\"><p data-source-node=\"first\">First</p></strong><p data-source-node=\"second\">Second</p><p data-source-node=\"status\">Ready</p></section>",
+    "renderedNodeCount": 4,
+    "renderedBehaviorCount": 1,
+    "adapterExecutionOrder": [
+      "box:layout",
+      "behavior:emphasis",
+      "text:first",
+      "text:second",
+      "text:status"
+    ],
+    "inertInteractionStatuses": [
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable",
+      "unavailable"
+    ],
+    "detachedJsonSnapshot": {
+      "html": "<span>Before:quiet</span>",
+      "propsFrozen": true,
+      "styleFrozen": true
+    },
+    "statusNamedSlotRendered": true,
+    "failureCodes": [
+      "BEHAVIOR_LIMIT_EXCEEDED",
+      "DEPTH_LIMIT_EXCEEDED",
+      "DUPLICATE_RUNTIME_IDENTITY",
+      "INVALID_REGISTRY",
+      "JSON_DEPTH_LIMIT_EXCEEDED",
+      "JSON_OCCURRENCE_LIMIT_EXCEEDED",
+      "MALFORMED_RENDER_PLAN",
+      "NODE_LIMIT_EXCEEDED",
+      "SLOT_LIMIT_EXCEEDED",
+      "STRING_LIMIT_EXCEEDED",
+      "UNKNOWN_BEHAVIOR_CAPABILITY",
+      "UNKNOWN_COMPONENT_CAPABILITY"
+    ],
+    "failureCodesExercised": [
+      "BEHAVIOR_LIMIT_EXCEEDED",
+      "DEPTH_LIMIT_EXCEEDED",
+      "DUPLICATE_RUNTIME_IDENTITY",
+      "INVALID_REGISTRY",
+      "JSON_DEPTH_LIMIT_EXCEEDED",
+      "JSON_OCCURRENCE_LIMIT_EXCEEDED",
+      "MALFORMED_RENDER_PLAN",
+      "NODE_LIMIT_EXCEEDED",
+      "SLOT_LIMIT_EXCEEDED",
+      "STRING_LIMIT_EXCEEDED",
+      "UNKNOWN_BEHAVIOR_CAPABILITY",
+      "UNKNOWN_COMPONENT_CAPABILITY"
+    ],
+    "placeholderElementsOnFailure": 0,
+    "hostileAccessorInvocations": 0
+  },
+  "boundary": {
+    "package": "@desen/runtime-react",
+    "exports": ["."],
+    "productionDependencies": ["@desen/runtime-core"],
+    "peerDependencies": ["react"],
+    "compilerProfile": "../../tsconfig.react.json",
+    "browserProfile": false,
+    "modules": ["./registry.js", "@desen/runtime-core", "react"],
+    "runtimeCoreImports": "type-only",
+    "browserOrDomImports": 0,
+    "dynamicExecutableLoading": 0,
+    "adapterContract": "public semantic JSON, stable diagnostic identity, named React slots, inert interactions",
+    "opaqueCommandAttachment": true,
+    "rawDetachCallbackExposed": false,
+    "forbiddenAuthorities": "DOM nodes, selectors, native events, component instances, remote modules, executable loaders"
+  },
+  "evidence": {
+    "packageTests": 10,
+    "compilerNegativeCases": 4,
+    "rootMutationTests": 11,
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-react/README.md",
+        "bytes": 4616,
+        "sha256": "c41befb961f58a31a30c8fca8d11097a8b18dfd487c65a8cdb38847cec691b7b"
+      },
+      {
+        "path": "packages/runtime-react/package.json",
+        "bytes": 992,
+        "sha256": "0da6b7a58c3dbe2542038ea31d639765611443a01313f611c8d84f24972af981"
+      },
+      {
+        "path": "packages/runtime-react/tsconfig.json",
+        "bytes": 168,
+        "sha256": "7798f188a10b671235b75c604becfde4daf8ae91f1f2c99065468b867f19d1f2"
+      },
+      {
+        "path": "packages/runtime-react/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/runtime-react/src/index.ts",
+        "bytes": 1465,
+        "sha256": "5b6575f8cff143330b1af4e8fc375b03b1ca6a53270cfabfeefd4e460c52fe5c"
+      },
+      {
+        "path": "packages/runtime-react/src/registry.ts",
+        "bytes": 16728,
+        "sha256": "99ed83038c481c9a071a265394972d4b6ded27dfa7fcfed12eb6fe36d5f1f2c6"
+      },
+      {
+        "path": "packages/runtime-react/src/render-plan.tsx",
+        "bytes": 27160,
+        "sha256": "fd37a8b346a61eafc0245746ed029faba7c690eee5e0d65840e759b24410a4ef"
+      },
+      {
+        "path": "packages/runtime-react/test/adapter-registry.test.tsx",
+        "bytes": 18730,
+        "sha256": "be3b147b8ecde2ac65657e14bc6372b58244f56f118c01ea6d66b7e50a5f8f7e"
+      },
+      {
+        "path": "packages/runtime-react/test/adapter-registry.types.ts",
+        "bytes": 1847,
+        "sha256": "45d9a33df342e6fc444180c8efbd5ec5430557a2096f04b93f271d6c79192ee6"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js",
+        "bytes": 391,
+        "sha256": "f880c202eddffe993f4af53d3519595395bb71bfc10ae13b83f28417867f9927"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js.map",
+        "bytes": 240,
+        "sha256": "deeea8e084fbdb6ab763a919074c4cba87cc495b73b13a8e32ea85291c661b40"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts",
+        "bytes": 1436,
+        "sha256": "89398b2bac73946a64b46b8217497273d4cb6c0f6d175337db9a544f74dccc50"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts.map",
+        "bytes": 670,
+        "sha256": "72237f5d65a75eaef6d812adc2442f7aa4e7af4481ae5c9f56633169f9bbc298"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js",
+        "bytes": 8630,
+        "sha256": "8ba998f8533d9a1047e56e1b9e0a5cd8ec6f569f92f9f396649d0d9e729b529d"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js.map",
+        "bytes": 7970,
+        "sha256": "56d8fd049d6d120474099699914f33e29bce00e1451871b775ed39d3ae14f989"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts",
+        "bytes": 8610,
+        "sha256": "1d9590b3e33b731ba44e06301682547e69f4acb5a939e51803151b62e38b0550"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts.map",
+        "bytes": 4512,
+        "sha256": "d7312aa9ead3927850a43d833e86ef679856989349c4431f57ae2864011e5f5d"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js",
+        "bytes": 22983,
+        "sha256": "be7d07bbf59ddcb1586de51d1c8bed83fa2eee437358e81c8cf4493c1e044a67"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js.map",
+        "bytes": 22675,
+        "sha256": "92e3903e90ee94531dbed916907d8d6ad3d788d6785e032a1b388e719bfc7328"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts",
+        "bytes": 3159,
+        "sha256": "9c39e4978da87e4787c1c4b7372b9d84f8989c24b582bb04c529acf382fd848a"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts.map",
+        "bytes": 1759,
+        "sha256": "e36c508eca99bbc38041a2aab8668c93558987c77e459fac433fb81e9ff9bfab"
+      },
+      {
+        "path": "scripts/lib/runtime-react-adapter-registry-proof.mjs",
+        "bytes": 59599,
+        "sha256": "98918ab8e5a5a554c9d92d6987496689a4bb48d13955c5e7dfb5e2fda9f8931b"
+      },
+      {
+        "path": "scripts/generate-runtime-react-adapter-registry-proof.mjs",
+        "bytes": 675,
+        "sha256": "12d7b970a7403254fecc324667de76f2cfe7123a9011a7236c58203bafc83a47"
+      },
+      {
+        "path": "scripts/verify-runtime-react-adapter-registry.mjs",
+        "bytes": 677,
+        "sha256": "13e52e8484579cd4add740c6a95fd8ace2adf29ecd8ec3c2b91d4753b56d304e"
+      },
+      {
+        "path": "tests/runtime-react-adapter-registry.test.mjs",
+        "bytes": 12543,
+        "sha256": "b50b15264f762d70d92c92c0594d0bdabb3eaa7f36bbefd1dd95d27dc9bfe060"
+      }
+    ]
+  },
+  "nonclaims": [
+    "No resolved receiving-schema validation claim; M05-T02 owns prop validation.",
+    "No capability-driven visual-state and style-part claim; M05-T03 owns it.",
+    "No live event, command, or behavior lifecycle claim; M05-T04 owns it.",
+    "No DOM reconciliation or production error-boundary claim.",
+    "No Android, iOS, or non-React renderer claim."
+  ]
+}

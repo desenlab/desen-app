@@ -1754,3 +1754,53 @@ This file records implementation discoveries without changing the frozen DESEN 0
   Each row may return to `TESTED` only with its complete receiving-boundary evidence. A future
   protocol revision may standardize settlement-completion notification and versioned evidence
   snapshots; M04-T17 defines only the bounded 0.1.0 reference implementation profile.
+
+## PF-050 — React adapter selection requires a static registry and bounded all-or-nothing preflight
+
+- Status: OPEN
+- Blocks proof: No; M05-T01 defines one Web–React implementation profile without changing the
+  frozen Bundle or headless-plan formats.
+- Protocol location: SPEC Sections 16.3, 17, 19, 24.2, and 26; `PIPE-022`, `R-056`, `R-147`, and
+  related findings `PF-024`, `PF-029`, `PF-044`, `PF-046`, and `PF-049`
+- Observation: DESEN requires ordinary surface roots and descendants to resolve through declared
+  capabilities, and prohibits silent substitution, but does not define a React registry API,
+  executable lookup authority, hostile public-plan reflection order, React tree preflight, or
+  renderer-wide node, depth, slot, behavior, and identifier ceilings. Treating a capability id as
+  a module/export selector would let inert Bundle data choose executable code. Rendering while
+  recursively discovering adapters would also allow a deep unknown capability to execute an
+  ancestor before the complete surface is known to be renderable.
+- Implementation decision: M05-T01 adds a factory-authenticated `runtime-react` registry populated
+  only with statically imported trusted component and behavior adapters. Registry creation captures
+  exact capability ids and executable identities without invoking them; the public immutable
+  snapshot exposes only canonical sorted id inventories. Duplicate cross-category ids, malformed
+  own-data registrations, invalid lower-only profiles, registry counts, and retained identifier
+  limits reject the entire factory call.
+
+  `renderRuntimeReactSurface` receives only the public M04 headless plan and opaque registry
+  handle. It reflects own data without invoking accessors, walks the complete root/slot/behavior
+  graph under finite limits, rejects duplicate runtime identities, and resolves every exact
+  component and behavior id before creating a React element. A surface root follows the same
+  registry lookup as a descendant. Any malformed plan, forged handle, missing adapter, or limit
+  crossing returns one callback-free identity-linked failure and no placeholder element; no
+  adapter component executes during preflight. Named-slot entries and names, JSON occurrences,
+  JSON depth, and retained string units consume aggregate lower-only budgets. All props, styles,
+  and inert behavior plans cross an accessor-free detached deeply frozen JSON snapshot before
+  entering a React element. A private result discriminator prevents any legal slot name from
+  colliding with renderer control flow. Revoked proxies produce controlled failures. React
+  elements receive only public semantic adapter inputs rather than DOM nodes, native events,
+  selectors, or private component structure. Behavior wrappers retain declared source order with
+  the first declared behavior as the outermost wrapper; two non-commutative wrappers prove the
+  observable profile.
+
+  The standalone renderer authenticates the registry, not the provenance of an otherwise valid
+  structural public plan. The G05 production host must obtain its plan from the exact current
+  authenticated headless session; M05-T04 binds interactions to that session and M05-T09 audits
+  the host source/import graph. This keeps the pure compiler reusable without overstating T01.
+
+- Future action: M05-T02 and M05-T03 must authenticate the exact Catalog and validate resolved props
+  and styles before those existing public semantic fields reach an adapter. M05-T04 activates the
+  deliberately unavailable event/command seams and proves behavior lifecycle. M05-T05 proves
+  concrete React instance reconciliation and source diagnostics, while M05-T06 owns committed
+  adapter exceptions and final production unknown-capability/error-boundary behavior. Future
+  SwiftUI and Compose renderers should reuse the observable headless vectors but define independent
+  static target registries rather than importing React concepts into `runtime-core`.

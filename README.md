@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████░░░░░░░░░░░░░░░░` **54 / 145 tasks complete (37%)**
+**Overall:** `██████████░░░░░░░░░░░░░░░` **55 / 145 tasks complete (38%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -16,7 +16,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M04 complete:** `█████████████████` **17 / 17 tasks complete (100%)**
 
-**Proof gates:** **5 / 13 complete** · **Next:** `M05-T01`
+**M05 in progress:** `█░░░░░░░░` **1 / 9 tasks complete (11%)**
+
+**Proof gates:** **5 / 13 complete** · **Next:** `M05-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -125,6 +127,8 @@ packages/
 - [Runtime core reactive reevaluation proof](docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md)
 - [Runtime core headless sign-in and G04 proof](docs/proof/RUNTIME-CORE-HEADLESS-SIGN-IN.md)
 - [Runtime core G04 audit-hardening proof](docs/proof/RUNTIME-CORE-AUDIT-HARDENING.md)
+- [React adapter registry and render-plan proof](docs/proof/RUNTIME-REACT-ADAPTER-REGISTRY.md)
+- [ADR 0010: React runtime and independent host boundaries](docs/adr/0010-m05-react-runtime-and-reference-host-boundaries.md)
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Technology stack](docs/architecture/TECHNOLOGY-STACK.md)
 - [Engineering standards](docs/standards/ENGINEERING-STANDARDS.md)
