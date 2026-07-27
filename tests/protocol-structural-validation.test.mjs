@@ -60,12 +60,16 @@ test("accepts exact deterministic M02-T06 evidence", async () => {
   const result = await verifyProtocolStructuralValidation();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.schemaRoots, 3);
   assert.equal(result.schemaFamilies, 61);
   assert.equal(result.schemaConstraints, 989);
   assert.equal(result.embeddedSchemas, 44);
   assert.equal(result.locatorFamilies, 13);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536",
+  );
 });
 
 test("two independent structural evidence builds are byte-identical", async () => {
@@ -76,14 +80,38 @@ test("two independent structural evidence builds are byte-identical", async () =
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects one-byte-tampered structural evidence", async () => {
-  const pristine = await buildProtocolStructuralValidationEvidence();
-  const tampered = Buffer.from(pristine.artifactBytes);
+test("rejects a current rebuild and one-byte-tampered historical structural evidence", async () => {
+  const current = await buildProtocolStructuralValidationEvidence();
+  await assert.rejects(
+    verifyProtocolStructuralValidation({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("STRUCTURAL_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
+    new URL("../docs/proof/artifacts/protocol-0.1.0-structural-validation.json", import.meta.url),
+  );
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(
     verifyProtocolStructuralValidation({ artifactBytes: tampered }),
     hasEvidenceCode("STRUCTURAL_ARTIFACT_DRIFT"),
+  );
+});
+
+test("default structural writer preserves exact immutable task-time bytes", async () => {
+  const artifactPath = new URL(
+    "../docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
+    import.meta.url,
+  );
+  const before = await readFile(artifactPath);
+  const result = await writeProtocolStructuralValidationEvidence();
+  const after = await readFile(artifactPath);
+
+  assert.deepEqual(after, before);
+  assert.equal(
+    result.artifactSha256,
+    "7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536",
   );
 });
 

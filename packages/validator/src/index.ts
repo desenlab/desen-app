@@ -44,14 +44,20 @@ export {
 
 export {
   EXECUTION_VALUE_SAFETY_LIMITS,
+  RESOLVED_ADAPTER_VALIDATION_LIMITS,
+  createDesenResolvedAdapterValidationScope,
   validateDesenBundleExecutionContracts,
   validateDesenExecutionCatalogSet,
   validateDesenExecutionContracts,
   validateDesenExecutionValue,
+  validateDesenResolvedAdapterProps,
+  validateDesenResolvedAdapterSlots,
+  validateDesenResolvedAdapterStyle,
   validateDesenSourceExecutionContracts,
 } from "./execution-contract-validation.js";
 
 export {
+  ADAPTER_VALIDATION_LIMIT_EXCEEDED_CODE,
   CATALOG_REQUIREMENT_MISMATCH_CODE,
   INVALID_COMPONENT_CONTRACT_CODE,
   INVALID_BINDING_CONTRACT_CODE,
@@ -128,6 +134,8 @@ export type {
 } from "./binding-contract-validation.js";
 
 export type {
+  DesenAdapterCapabilityKind,
+  DesenAdapterCapabilityReference,
   DesenExecutionCatalogSetValidationFailure,
   DesenExecutionCatalogSetValidationResult,
   DesenExecutionCatalogSetValidationSuccess,
@@ -142,5 +150,18 @@ export type {
   DesenExecutionValueValidationFailure,
   DesenExecutionValueValidationResult,
   DesenExecutionValueValidationSuccess,
+  DesenResolvedAdapterPropsValidationResult,
+  DesenResolvedAdapterSlotChildReference,
+  DesenResolvedAdapterSlotMap,
+  DesenResolvedAdapterSlotsValidationResult,
+  DesenResolvedAdapterStyleValidationResult,
+  DesenResolvedAdapterValidationLimitProfile,
+  DesenResolvedAdapterValidationScope,
+  DesenResolvedAdapterValidationScopeCreateResult,
+  DesenResolvedAdapterValidationScopeInvalidReason,
+  DesenResolvedAdapterValidationFailure,
+  DesenResolvedAdapterValidationSuccess,
+  DesenResolvedAdapterValidationTarget,
+  DesenResolvedAdapterValueMap,
   DesenValidatedExecutionCatalogSet,
 } from "./execution-contract-validation.js";

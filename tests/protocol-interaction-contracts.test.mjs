@@ -33,6 +33,7 @@ test("accepts exact deterministic M02-T09 interaction-contract evidence", async 
   const result = await verifyProtocolInteractionContracts();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.schemaFamilies, 7);
   assert.equal(result.schemaConstraints, 246);
   assert.equal(result.ownedCoreDiagnostics, 5);
@@ -41,7 +42,23 @@ test("accepts exact deterministic M02-T09 interaction-contract evidence", async 
   assert.equal(result.payloadSafetyGoldens, 10);
   assert.equal(result.scopeFenceAccepted, 4);
   assert.equal(result.examples, 5);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208",
+  );
+});
+
+test("default evidence writer preserves immutable task-time M02-T09 bytes", async () => {
+  const artifactPath = new URL(
+    "../docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json",
+    import.meta.url,
+  );
+  const before = await readFile(artifactPath);
+  const result = await writeProtocolInteractionContractsEvidence();
+  const after = await readFile(artifactPath);
+
+  assert.deepEqual(after, before);
+  assert.deepEqual(result.artifactBytes, before);
 });
 
 test("two independent interaction evidence builds are byte-identical", async () => {
@@ -52,9 +69,17 @@ test("two independent interaction evidence builds are byte-identical", async () 
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects one-byte-tampered interaction evidence", async () => {
-  const pristine = await buildProtocolInteractionContractsEvidence();
-  const tampered = Buffer.from(pristine.artifactBytes);
+test("rejects a current rebuild and one-byte-tampered historical interaction evidence", async () => {
+  const current = await buildProtocolInteractionContractsEvidence();
+  await assert.rejects(
+    verifyProtocolInteractionContracts({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("INTERACTION_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
+    new URL("../docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json", import.meta.url),
+  );
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(

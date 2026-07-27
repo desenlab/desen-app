@@ -23,8 +23,10 @@ cumulative boundaries against an explicitly prepared catalog set:
 
 The dedicated T09 event-payload API validates one resolved adapter payload. The T11 resolved-value
 API applies one of five exact command, operation, or resource input/output contracts after dynamic
-resolution or adapter settlement. All paths interpret documents and schemas as inert data. They do
-not execute DESEN actions or capability implementations.
+resolution or adapter settlement. The M05 receiving APIs validate complete resolved component or
+behavior props and the visual-state/style-part/property hierarchy immediately before adapter
+delivery. All paths interpret documents and schemas as inert data. They do not execute DESEN
+actions or capability implementations.
 
 ## Explicit non-responsibilities
 
@@ -44,9 +46,10 @@ A cumulative T11 success does not:
   output through `validateDesenExecutionValue` before exposing it through a lifecycle reference;
 - prove complete post-write validity for a nested state patch without the prior runtime state. Such
   writes remain explicit `state-write` obligations;
-- prove that a production adapter validates every emitted payload or implements every declared
-  command. T09 supplies bounded contract primitives, but the adapter guarantees in `N-033` and
-  `N-034` remain assigned to later capability and runtime tasks;
+- prove that a production adapter actually invokes the receiving APIs for every prop/style
+  delivery, validates every emitted payload, or implements every declared command. The validator
+  supplies bounded contract primitives, while concrete adapter parity remains a runtime/package
+  responsibility;
 - compare Source, Bundle, or package digests through the public validator API; M02-T12 performs
   only the two frozen-suite comparisons in a proof-only runner;
 - acquire, install, or trust catalog packages from `location` or any network/filesystem input;
@@ -107,6 +110,27 @@ The M02-T11 execution layer is implemented cumulatively on top of T10. It:
   preserving post-write checks that need runtime state; and
 - exposes one detached resolved-value API for component command input and operation/resource input
   and output contracts.
+
+The M05 receiving boundary reuses the exact factory-authenticated T11 Catalog set. It:
+
+- selects component and behavior capability categories without cross-category fallback;
+- creates one opaque Catalog-authenticated scope whose prop, slot, style, string, entry, and
+  schema-evaluation counters are shared monotonically across the complete receiving pass;
+- prepares immutable schema registries once with the Catalog instead of rebuilding them for every
+  materialized node;
+- validates a complete resolved prop map against the exact `propsSchema` in `complete` and
+  `resolved-value` mode;
+- validates final materialized component and behavior slot names, cardinality, and direct child
+  capability/category acceptance from a callback-free `{ capabilityId }` projection;
+- admits only `base` plus declared visual states, declared semantic style parts, and property maps
+  accepted by each exact `propertiesSchema`; and
+- returns only independent recursively frozen success values. Props and styles use the detached
+  event/execution JSON boundary; named slots use a dedicated 20,000-entry capture so the 5,000-node
+  renderer profile is not accidentally narrowed by the detached-value profile.
+
+These APIs never inspect React components, DOM structure, selectors, class names, or CSS and never
+invoke an adapter. Concrete registration, delivery, state activation, and error boundaries remain
+renderer responsibilities.
 
 M02-T12 proves built TypeScript parity with the frozen DESEN 0.1.0 starter suite. All 9 official
 conformance vectors and all 5 public examples pass their exact manifest outcomes, matching the
@@ -169,8 +193,8 @@ package tests and 9 independent root proof and mutation tests.
 
 ## Public entry point
 
-M02-T12 and M02-T13 add no public entry point. The APIs below remain the complete package surface
-established through M02-T11.
+M02-T12 and M02-T13 add no public entry point. The APIs below contain the cumulative M02 surface
+plus the later M05 resolved adapter receiving boundary.
 
 ### Structural and semantic APIs
 
@@ -218,15 +242,21 @@ established through M02-T11.
 
 ### Execution-contract and resolved-value APIs
 
-| API                                                          | Purpose                                                         |
-| ------------------------------------------------------------ | --------------------------------------------------------------- |
-| `validateDesenExecutionCatalogSet(input)`                    | Prepare the exact cumulative T11 catalog set                    |
-| `validateDesenSourceExecutionContracts(input, catalogSet)`   | Validate a Source cumulatively through T11                      |
-| `validateDesenBundleExecutionContracts(input, catalogSet)`   | Validate a Bundle cumulatively through T11                      |
-| `validateDesenExecutionContracts(target, input, catalogSet)` | Select the cumulative Source or Bundle execution target         |
-| `validateDesenExecutionValue(value, selector, catalogSet)`   | Validate one detached resolved execution value                  |
-| `EXECUTION_VALUE_SAFETY_LIMITS`                              | Expose the immutable limits used by the detached value boundary |
-| `INVALID_EXECUTION_CONTRACT_CODE`                            | Identify a project-owned incoherent execution contract          |
+| API                                                              | Purpose                                                         |
+| ---------------------------------------------------------------- | --------------------------------------------------------------- |
+| `validateDesenExecutionCatalogSet(input)`                        | Prepare the exact cumulative T11 catalog set                    |
+| `validateDesenSourceExecutionContracts(input, catalogSet)`       | Validate a Source cumulatively through T11                      |
+| `validateDesenBundleExecutionContracts(input, catalogSet)`       | Validate a Bundle cumulatively through T11                      |
+| `validateDesenExecutionContracts(target, input, catalogSet)`     | Select the cumulative Source or Bundle execution target         |
+| `validateDesenExecutionValue(value, selector, catalogSet)`       | Validate one detached resolved execution value                  |
+| `createDesenResolvedAdapterValidationScope(catalogSet, limits?)` | Create one exact finite receiving authority                     |
+| `validateDesenResolvedAdapterProps(props, capability, scope)`    | Validate complete resolved component/behavior props             |
+| `validateDesenResolvedAdapterSlots(slots, capability, scope)`    | Validate final named-slot shape and child acceptance            |
+| `validateDesenResolvedAdapterStyle(style, capability, scope)`    | Validate declared visual states, parts, and properties          |
+| `RESOLVED_ADAPTER_VALIDATION_LIMITS`                             | Expose lower-only aggregate receiving ceilings                  |
+| `EXECUTION_VALUE_SAFETY_LIMITS`                                  | Expose the immutable limits used by the detached value boundary |
+| `ADAPTER_VALIDATION_LIMIT_EXCEEDED_CODE`                         | Identify shared receiving-scope exhaustion                      |
+| `INVALID_EXECUTION_CONTRACT_CODE`                                | Identify a project-owned incoherent execution contract          |
 
 T10 intentionally introduces no second catalog preparation API or nominal catalog brand. The
 binding APIs require the exact `DesenValidatedInteractionCatalogSet` returned by T09 and first run
@@ -237,6 +267,14 @@ catalog indexes.
 all operation and resource input/output schemas through the `PF-011` profile. Its nominal
 `DesenValidatedExecutionCatalogSet` brand is backed by private `WeakMap` metadata. A cast from a
 lower-stage catalog set cannot forge the indexes required by document or detached-value validation.
+
+One resolved-adapter scope accounts for both received data and validation work. Schema evaluation
+charges recursive evaluations, enum candidates, deep equality/`uniqueItems` comparisons, required
+and dependent-required fan-out, and other object/array scans to the shared
+`maxSchemaEvaluationSteps` ceiling. Named-slot declarations and acceptance sets are prepared once;
+each required-slot check, contract lookup, and child-acceptance check then consumes the shared
+`maxSlotContractEvaluationSteps` ceiling. Exhaustion is monotonic, fail-closed, and reported as
+`ADAPTER_VALIDATION_LIMIT_EXCEEDED` without returning a partial value.
 
 The package root also exports the associated target, success, failure, result, obligation, event
 reference, resolved-JSON, and validated-catalog-set types. The central T09–T11 types are:
@@ -258,7 +296,14 @@ reference, resolved-JSON, and validated-catalog-set types. The central T09–T11
 - `DesenExecutionContractObligation` and `DesenExecutionContractObligationKind`;
 - `DesenExecutionValueContractKind` and `DesenExecutionValueContractReference`; and
 - `DesenExecutionValueValidationSuccess`, `DesenExecutionValueValidationFailure`, and
-  `DesenExecutionValueValidationResult`.
+  `DesenExecutionValueValidationResult`;
+- `DesenAdapterCapabilityReference`, `DesenAdapterCapabilityKind`,
+  `DesenResolvedAdapterValueMap`, `DesenResolvedAdapterSlotChildReference`, and
+  `DesenResolvedAdapterSlotMap`;
+- `DesenResolvedAdapterValidationScope`, its create result, invalid reason, and lower-only limit
+  profile; and
+- `DesenResolvedAdapterPropsValidationResult`, `DesenResolvedAdapterSlotsValidationResult`,
+  `DesenResolvedAdapterStyleValidationResult`, and their shared success/failure target types.
 
 ### First-party runtime schema-contract subpath
 
@@ -786,10 +831,11 @@ data by the bounded platform-neutral path; they are never compiled into executab
 
 The shipped validation path contains no `eval`, `Function(`, CommonJS `require`, dynamic import,
 absolute workspace path, network access, or filesystem access. Unsafe patterns are rejected before
-native matching. Event payloads, execution values, and their selectors pass through independent
-inert JSON snapshots before their members are read. Accessors, custom prototypes, cycles, sparse
-arrays, invalid Unicode, non-finite numbers, and values beyond the documented detached-data limits
-fail closed.
+native matching. Event payloads, execution values, resolved adapter props/styles, and their
+selectors pass through independent inert JSON snapshots before their members are read. Named-slot
+projections pass through a separate exact own-data capture with aggregate name, child, and string
+counters. Accessors, custom prototypes, cycles, sparse arrays, invalid Unicode, non-finite numbers,
+and values beyond the documented limits fail closed.
 
 The semantic and contract layers use own-property traversal, `Map`, `Set`, and private
 `WeakMap`/`WeakSet` trust metadata. They use fixed messages that never echo caller values, do not

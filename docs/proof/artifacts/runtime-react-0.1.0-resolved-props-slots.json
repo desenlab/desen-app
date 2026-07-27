@@ -1,0 +1,1131 @@
+{
+  "schemaVersion": 1,
+  "task": "M05-T02",
+  "result": "PASS",
+  "profile": "desen-runtime-react-resolved-props-slots-v1",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "summary": "The React renderer authenticates one exact live session/Catalog generation, validates final component and behavior props plus named slots through one bounded receiving scope, and exposes no raw plan or private implementation structure.",
+    "resolvedPropsReceivingBoundary": true,
+    "authenticatedNamedSlots": true,
+    "rawPlanAuthority": false,
+    "privateStructureInspection": false
+  },
+  "prerequisites": [
+    {
+      "task": "M02-T11",
+      "path": "docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
+      "sha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
+      "profile": "desen-execution-contract-validation-v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M04-T17",
+      "gate": "G04",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-audit-hardening.json",
+      "sha256": "cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa",
+      "profile": "desen-runtime-core-audit-hardening-v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M05-T01",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-adapter-registry.json",
+      "sha256": "b2e98f5e54471aa3ec227e672e2fa6b0f90a970b4c48046a0b8a8323f33b6b42",
+      "profile": "desen-runtime-react-adapter-registry-v1",
+      "result": "PASS"
+    }
+  ],
+  "historicalCompatibility": {
+    "immutableTaskTimeArtifact": "b2e98f5e54471aa3ec227e672e2fa6b0f90a970b4c48046a0b8a8323f33b6b42",
+    "historicalInventoryFiles": 25,
+    "compatibilityMode": "immutable-task-time-artifact",
+    "migratedHistoricalTasks": [
+      "M02-T06",
+      "M02-T07",
+      "M02-T08",
+      "M02-T09",
+      "M02-T10",
+      "M02-T11",
+      "M02-T12",
+      "M02-T13",
+      "M04-T06",
+      "M04-T16",
+      "M04-T17",
+      "M05-T01"
+    ],
+    "transferredOwnership": [
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/runtime-react-adapter-registry-proof.mjs",
+        "sha256": "4969f8fff21116a5d4b80ef535291567103f3fb28b27b1596acd0e4cbee000fe"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/runtime-react-adapter-registry.test.mjs",
+        "sha256": "612b10289e2dc111e53ad8ee3c3a548dfdaeecc2297d779187ce461053b19882"
+      },
+      {
+        "historicalOwnerTask": "M02-T06",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-structural-validation-proof.mjs",
+        "sha256": "bc3f9f65be0f8eea2c44e6b8a79c7a470eee78aa0ef66338b6758ed76dac5107"
+      },
+      {
+        "historicalOwnerTask": "M02-T06",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-structural-validation-proof.mjs",
+        "sha256": "a21b2cf0a4814445447c71343a0ae1c67130eddfa47e9ef4ac112cda470459f4"
+      },
+      {
+        "historicalOwnerTask": "M02-T06",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-structural-validation.test.mjs",
+        "sha256": "baeb888c255be9a6ee6aaed3dddd4b1a235f47af0ab9d4856b72540493f2024c"
+      },
+      {
+        "historicalOwnerTask": "M02-T07",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-semantic-foundation-proof.mjs",
+        "sha256": "940d6517d38e09fee3ae8b36e5cfbd846004fc11c46a5e2bbe8558faafb2de3b"
+      },
+      {
+        "historicalOwnerTask": "M02-T07",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-semantic-foundation-proof.mjs",
+        "sha256": "80fe4bde06dd19bcc8ae1d3c797d53e0026f54a223c9d2bb3cf8b966c3695655"
+      },
+      {
+        "historicalOwnerTask": "M02-T07",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-semantic-foundation.test.mjs",
+        "sha256": "75b97be42fce795cd2d778abe3bf78e20ae73b97bf842032a9211ff78bc56d8f"
+      },
+      {
+        "historicalOwnerTask": "M02-T08",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-component-contracts-proof.mjs",
+        "sha256": "d8bfb97ad25576716b7bfdbc81026711a3173b707ed698e6fe4f49764dd4c8aa"
+      },
+      {
+        "historicalOwnerTask": "M02-T08",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-component-contracts-proof.mjs",
+        "sha256": "426ca7f437a9db0f84de84e5bc43cb45c2f9eab01b1af2ad3a52c4926c654450"
+      },
+      {
+        "historicalOwnerTask": "M02-T08",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-component-contracts.test.mjs",
+        "sha256": "b60f6f770b3084045a61c85842d2d48cef0d46bb89e5b94faaa8c29d7a1cc1ed"
+      },
+      {
+        "historicalOwnerTask": "M02-T09",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-interaction-contracts-proof.mjs",
+        "sha256": "09f5398296d47b96deffd8c98d88a29407116ef0c56a0f62c578162c8b7246d2"
+      },
+      {
+        "historicalOwnerTask": "M02-T09",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-interaction-contracts-proof.mjs",
+        "sha256": "d53b780b2fa8fcaf24bd74fcaa18d4e7d169b8f88c34249adc9780126ed86387"
+      },
+      {
+        "historicalOwnerTask": "M02-T09",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-interaction-contracts.test.mjs",
+        "sha256": "11498279c375c6a2d040cc27333b1126f5a2aee20876aa28e0e6fa7d7bdfe184"
+      },
+      {
+        "historicalOwnerTask": "M02-T10",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-binding-contracts-proof.mjs",
+        "sha256": "5a9ff8a49c182a8bae7d04c6eec0aede6682919fde488bc6022256dde3b10bca"
+      },
+      {
+        "historicalOwnerTask": "M02-T10",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-binding-contracts-proof.mjs",
+        "sha256": "05929d3b5e546c7e1091449ce3a1a0f80730043010592598ed2088688b07da93"
+      },
+      {
+        "historicalOwnerTask": "M02-T10",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-binding-contracts.test.mjs",
+        "sha256": "3327b13814499fe9c6fde18c4c530f66377cfadcfffae3a176173aa6d503ee1d"
+      },
+      {
+        "historicalOwnerTask": "M02-T11",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-execution-contracts-proof.mjs",
+        "sha256": "d619b7a5f9660583703ab7a9cb7d8f4f92eef8c882f895177a2f2dce45c12b81"
+      },
+      {
+        "historicalOwnerTask": "M02-T11",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-execution-contracts-proof.mjs",
+        "sha256": "f45eeffa2c58483a58063f4c90773b40705abea139a8a39cf919ee82729d4cde"
+      },
+      {
+        "historicalOwnerTask": "M02-T11",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-execution-contracts.test.mjs",
+        "sha256": "14f38ee97e523c6a234b60663251d79691276589abab7fe7ccec309d1c6588dd"
+      },
+      {
+        "historicalOwnerTask": "M02-T12",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-official-suite-parity-proof.mjs",
+        "sha256": "0204e4b4b9fcb74a5cbc2efafcc93ac4f7ce6bc0bb300f5a9895debf3aa2be81"
+      },
+      {
+        "historicalOwnerTask": "M02-T12",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-official-suite-parity-proof.mjs",
+        "sha256": "1e08d1bc87a9dde31bfa91cd249deb45b5e19faa5cb5f87af024b16ad9141379"
+      },
+      {
+        "historicalOwnerTask": "M02-T12",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-official-suite-parity.test.mjs",
+        "sha256": "a1db4f9c7ec7663e6fcc547e7185d06a63984a69a5631547ca1f11e4b1937da6"
+      },
+      {
+        "historicalOwnerTask": "M02-T13",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/protocol-validator-diagnostic-micro-vectors-proof.mjs",
+        "sha256": "6c3f54c52dea56f1b1dbe9edb3a9e4a0f4b3955370d5de02cafbb6ed6953a2ff"
+      },
+      {
+        "historicalOwnerTask": "M02-T13",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-protocol-validator-diagnostic-micro-vectors-proof.mjs",
+        "sha256": "bb7415e3c64b861645e86f7bbdbf19e46ad15d89ebb60a449688b84ec41a951c"
+      },
+      {
+        "historicalOwnerTask": "M02-T13",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/protocol-validator-diagnostic-micro-vectors.test.mjs",
+        "sha256": "6acb71a1440c9ba55c8b22c0c3ce3fcb1c57acdd8b049e786ea445f6a48457c2"
+      },
+      {
+        "historicalOwnerTask": "M04-T06",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/runtime-core-local-state-identity-proof.mjs",
+        "sha256": "65b0bd48cb5aae44596e27def2cf9cb56278483afb2fe8e22a91b3791aad6e12"
+      },
+      {
+        "historicalOwnerTask": "M04-T06",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-runtime-core-local-state-identity-proof.mjs",
+        "sha256": "7d2e25b4cc0207509fe75e0296290620136fcfa2d53816d8251ea169692d7adf"
+      },
+      {
+        "historicalOwnerTask": "M04-T06",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/runtime-core-local-state-identity.test.mjs",
+        "sha256": "48c92081432f7d77cf94e193eb799e6f0d164db2f22e21de328c50d2d12d059e"
+      },
+      {
+        "historicalOwnerTask": "M04-T16",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/runtime-core-headless-sign-in-proof.mjs",
+        "sha256": "cf872a42f89b43c609f65b5093fef4234df4f36ea693af343a9830848d84021f"
+      },
+      {
+        "historicalOwnerTask": "M04-T16",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-runtime-core-headless-sign-in-proof.mjs",
+        "sha256": "7be0c634eb8c488c3f28b8ce4ad4d46f414b6459f3ac00deea8662737fb6d168"
+      },
+      {
+        "historicalOwnerTask": "M04-T16",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/runtime-core-headless-sign-in.test.mjs",
+        "sha256": "fffb569a49404ef2ce5a038efbb310c20a50e4769b4249d93ae4ff11d91340a2"
+      },
+      {
+        "historicalOwnerTask": "M04-T17",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/lib/runtime-core-audit-hardening-proof.mjs",
+        "sha256": "7ad14081839d5f3866f155a7725f1bdec9b2f01aa46cdf6cee13e3bca3994470"
+      },
+      {
+        "historicalOwnerTask": "M04-T17",
+        "currentOwnerTask": "M05-T02",
+        "path": "scripts/generate-runtime-core-audit-hardening-proof.mjs",
+        "sha256": "88d112598c16121c9a82f64d72c7f9929537de8b578e45bd9dbbe95aae7e2c24"
+      },
+      {
+        "historicalOwnerTask": "M04-T17",
+        "currentOwnerTask": "M05-T02",
+        "path": "tests/runtime-core-audit-hardening.test.mjs",
+        "sha256": "f5ea8a797c1f61f4682caf2f339afa53f92647628c82d0b8b71a09565fa458cb"
+      }
+    ],
+    "overlappingChangedPaths": [
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/README.md",
+        "taskTimeSha256": "c41befb961f58a31a30c8fca8d11097a8b18dfd487c65a8cdb38847cec691b7b",
+        "currentSha256": "b301edabac2c424e3b9552f4f534fd4ea5148cb40e723412be71937bb639d286"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/package.json",
+        "taskTimeSha256": "0da6b7a58c3dbe2542038ea31d639765611443a01313f611c8d84f24972af981",
+        "currentSha256": "7f9f5d452c8ae7de5c65952ecf413441c64b56e777cf0a70ef578fa7f0fc9083"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/src/index.ts",
+        "taskTimeSha256": "5b6575f8cff143330b1af4e8fc375b03b1ca6a53270cfabfeefd4e460c52fe5c",
+        "currentSha256": "81c0796a39838419e008775b4265be69f383e3e45b93c667cc6ffecfb5c68c20"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/src/registry.ts",
+        "taskTimeSha256": "99ed83038c481c9a071a265394972d4b6ded27dfa7fcfed12eb6fe36d5f1f2c6",
+        "currentSha256": "7902eacbebc0c600c4e46cc4031be20cf70e3dc201316e3c6c0b356da50ce474"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/src/render-plan.tsx",
+        "taskTimeSha256": "fd37a8b346a61eafc0245746ed029faba7c690eee5e0d65840e759b24410a4ef",
+        "currentSha256": "d675c9cac91806059ef01410da6239ca9296e53dc7adaf7920f2ac952ac7b3ae"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/test/adapter-registry.test.tsx",
+        "taskTimeSha256": "be3b147b8ecde2ac65657e14bc6372b58244f56f118c01ea6d66b7e50a5f8f7e",
+        "currentSha256": "fc3ad9f5683955cfa3c9c1a5c4acf48dab29cdba0135866b4b612edf81a2b58a"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/test/adapter-registry.types.ts",
+        "taskTimeSha256": "45d9a33df342e6fc444180c8efbd5ec5430557a2096f04b93f271d6c79192ee6",
+        "currentSha256": "e757db962fe011b1a4e8dbc732d9873d8e4103b3eda75770b79291290aa867f4"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/index.d.ts",
+        "taskTimeSha256": "89398b2bac73946a64b46b8217497273d4cb6c0f6d175337db9a544f74dccc50",
+        "currentSha256": "4bb78fcd54bb5e1e079da61522e7c7e6a6a54e13c41689ddc543ec8e0daddc0a"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/index.d.ts.map",
+        "taskTimeSha256": "72237f5d65a75eaef6d812adc2442f7aa4e7af4481ae5c9f56633169f9bbc298",
+        "currentSha256": "c721a2ec5abaa94a91ed6dd8725718ef7f94a16eec887b3cfeea8f8739a5413a"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/registry.js.map",
+        "taskTimeSha256": "56d8fd049d6d120474099699914f33e29bce00e1451871b775ed39d3ae14f989",
+        "currentSha256": "34fcda7da61fcf63903f143e00c279e3fc020492299c5e63ecf2d458db87f0ca"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/registry.d.ts",
+        "taskTimeSha256": "1d9590b3e33b731ba44e06301682547e69f4acb5a939e51803151b62e38b0550",
+        "currentSha256": "42c04e80582ac49f215883ac903e0dea82e7fb20f7316d3f5dfca52392c08f21"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/registry.d.ts.map",
+        "taskTimeSha256": "d7312aa9ead3927850a43d833e86ef679856989349c4431f57ae2864011e5f5d",
+        "currentSha256": "edfa565ec604b6703403b65c485abe87bd5f933618d2de81fc1eb856dbb5d2a6"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/render-plan.js",
+        "taskTimeSha256": "be7d07bbf59ddcb1586de51d1c8bed83fa2eee437358e81c8cf4493c1e044a67",
+        "currentSha256": "b5360d1562a30ae344f719397e9bc4b79494f1b939640debe2d5aa22cd3e6b82"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/render-plan.js.map",
+        "taskTimeSha256": "92e3903e90ee94531dbed916907d8d6ad3d788d6785e032a1b388e719bfc7328",
+        "currentSha256": "85176868397aeb6b62be44290ea83fa1e3c5946a76c66ad08762f93b5d3f9b7a"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/render-plan.d.ts",
+        "taskTimeSha256": "9c39e4978da87e4787c1c4b7372b9d84f8989c24b582bb04c529acf382fd848a",
+        "currentSha256": "dd90e51c29077f7ffc303e10119f726d9db05827641df4c89c05887bc14a21d7"
+      },
+      {
+        "historicalOwnerTask": "M05-T01",
+        "currentOwnerTask": "M05-T02",
+        "path": "packages/runtime-react/dist/render-plan.d.ts.map",
+        "taskTimeSha256": "e36c508eca99bbc38041a2aab8668c93558987c77e459fac433fb81e9ff9bfab",
+        "currentSha256": "448856e70645b83c268d6ed142c5b5f57eb4adb792ed728a753fb8b4697cd145"
+      }
+    ]
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS",
+      "RUNTIME_REACT_RENDER_LIMITS",
+      "createRuntimeReactAdapterRegistry",
+      "readRuntimeReactAdapterRegistry",
+      "renderRuntimeReactSurface"
+    ],
+    "typeExports": [
+      "RuntimeReactAdapterRegistryCreateInput",
+      "RuntimeReactAdapterRegistryCreateResult",
+      "RuntimeReactAdapterRegistryHandle",
+      "RuntimeReactAdapterRegistryInvalidReason",
+      "RuntimeReactAdapterRegistryLimitProfile",
+      "RuntimeReactAdapterRegistryReadResult",
+      "RuntimeReactAdapterRegistrySnapshot",
+      "RuntimeReactBehaviorAdapterComponent",
+      "RuntimeReactBehaviorAdapterProps",
+      "RuntimeReactBehaviorAdapterRegistration",
+      "RuntimeReactCommandAttachmentHandle",
+      "RuntimeReactCommandAttachmentResult",
+      "RuntimeReactCommandDetachmentResult",
+      "RuntimeReactComponentAdapterComponent",
+      "RuntimeReactComponentAdapterProps",
+      "RuntimeReactComponentAdapterRegistration",
+      "RuntimeReactComponentCommandPort",
+      "RuntimeReactDiagnosticIdentity",
+      "RuntimeReactEventDispatchResult",
+      "RuntimeReactInteractionPort",
+      "RuntimeReactNamedSlots",
+      "RuntimeReactRenderFailure",
+      "RuntimeReactRenderFailureChannel",
+      "RuntimeReactRenderFailureCode",
+      "RuntimeReactRenderInput",
+      "RuntimeReactRenderLimitProfile",
+      "RuntimeReactRenderResult",
+      "RuntimeReactRenderedSurface",
+      "RuntimeReactSemanticStyle"
+    ],
+    "sourceDeclarations": 36,
+    "tsdocDeclarations": 36
+  },
+  "catalogAuthority": {
+    "exactExecutionCatalogSetIdentity": true,
+    "rawMountReturnsExactRetainedCatalogSet": true,
+    "lowerStageCatalogAccepted": false,
+    "structurallyEqualCatalogAccepted": false,
+    "schemaMetadataExposedToAdapter": false,
+    "foreignCatalogFailure": "INVALID_CATALOG_SET"
+  },
+  "sessionAuthority": {
+    "exactLiveSnapshotIdentity": true,
+    "rawPlanInput": false,
+    "rawPlanFailure": "MALFORMED_RENDER_PLAN",
+    "reconstructedSnapshotFailure": "INVALID_SESSION_SNAPSHOT",
+    "planSource": "authenticated current RuntimeHeadlessSessionSnapshot"
+  },
+  "receivingBudget": {
+    "oneFactoryAuthenticatedScopePerRender": true,
+    "nonResettingPreparedSchemaBudget": true,
+    "actualSchemaInterpreterWorkBudgeted": true,
+    "preparedSlotContractsBudgeted": true,
+    "aggregatePropsSlotsAndJsonCounters": true,
+    "controlledLimitFailure": "RECEIVING_VALIDATION_LIMIT_EXCEEDED"
+  },
+  "props": {
+    "componentValidationMode": "complete/resolved-value",
+    "behaviorValidationMode": "complete/resolved-value",
+    "detachedAndRecursivelyFrozenSuccess": true,
+    "optionalOmissionPreserved": true,
+    "referenceShapedResolvedDataIsInert": true,
+    "componentFailure": {
+      "code": "INVALID_COMPONENT_PROPS",
+      "channel": "props",
+      "sourceNodeId": "sign-in.title",
+      "diagnosticPointers": ["/text"]
+    },
+    "invalidValueDeliveredToAdapter": false
+  },
+  "namedSlots": {
+    "source": "authenticated final materialized plan",
+    "componentSlots": ["default", "status"],
+    "behaviorSlots": ["dragPreview"],
+    "exactNamesAndOrderPreserved": true,
+    "frozenMapAndArrays": true,
+    "conditionAndRepeatAwareCardinality": true,
+    "failure": {
+      "code": "INVALID_COMPONENT_SLOTS",
+      "channel": "slots",
+      "sourceNodeId": "sign-in.layout",
+      "diagnosticPointers": ["/status"]
+    },
+    "fallbackGuessing": 0
+  },
+  "adapterIsolation": {
+    "componentKeys": ["identity", "interactions", "props", "slots", "style"],
+    "behaviorKeys": [
+      "behaviorId",
+      "children",
+      "identity",
+      "interactions",
+      "props",
+      "slots",
+      "style"
+    ],
+    "componentBehaviorPlanLeak": false,
+    "rawPlanLeak": false,
+    "catalogMetadataLeak": false,
+    "domOrNativeAuthorityLeak": false,
+    "privateReactInspection": 0
+  },
+  "failureModel": {
+    "codes": [
+      "BEHAVIOR_LIMIT_EXCEEDED",
+      "DEPTH_LIMIT_EXCEEDED",
+      "DUPLICATE_RUNTIME_IDENTITY",
+      "INVALID_BEHAVIOR_PROPS",
+      "INVALID_BEHAVIOR_SLOTS",
+      "INVALID_CATALOG_SET",
+      "INVALID_COMPONENT_PROPS",
+      "INVALID_COMPONENT_SLOTS",
+      "INVALID_REGISTRY",
+      "INVALID_SESSION",
+      "INVALID_SESSION_SNAPSHOT",
+      "JSON_DEPTH_LIMIT_EXCEEDED",
+      "JSON_OCCURRENCE_LIMIT_EXCEEDED",
+      "MALFORMED_RENDER_PLAN",
+      "NODE_LIMIT_EXCEEDED",
+      "RECEIVING_VALIDATION_LIMIT_EXCEEDED",
+      "SLOT_LIMIT_EXCEEDED",
+      "STRING_LIMIT_EXCEEDED",
+      "UNKNOWN_BEHAVIOR_CAPABILITY",
+      "UNKNOWN_COMPONENT_CAPABILITY"
+    ],
+    "diagnosticsPreserved": true,
+    "stableRuntimeSourceCapabilityIdentity": true,
+    "frozenCallbackFreeFailures": true,
+    "allOrNothingPreflight": true
+  },
+  "architecture": {
+    "package": "@desen/runtime-react",
+    "productionDependencies": ["@desen/runtime-core", "@desen/validator"],
+    "peerDependencies": ["react"],
+    "validatorDependencyExplicitlyAllowed": true,
+    "reverseValidatorDependencyRejected": true,
+    "modules": ["./registry.js", "@desen/runtime-core", "@desen/validator", "react"],
+    "browserDomNativeAuthorities": 0,
+    "dynamicExecutableLoading": 0,
+    "privateReactInspection": 0,
+    "frameworkNeutralAuthoritySeams": ["@desen/runtime-core", "@desen/validator"]
+  },
+  "traceability": {
+    "task": { "id": "M05-T02", "status": "DONE", "prerequisite": "M05-T01" },
+    "normative": [
+      { "id": "N-026", "status": "TESTED", "owners": "M02-T08, M04-T02, M05-T02" },
+      { "id": "N-027", "status": "PLANNED", "owners": "M06-T05, M04-T02, M05-T02" },
+      { "id": "N-029", "status": "PLANNED", "owners": "M02-T08, M05-T03" },
+      { "id": "N-034", "status": "PLANNED", "owners": "M02-T09, M03-T09, M04-T12, M05-T04" },
+      { "id": "N-042", "status": "PLANNED", "owners": "M05-T02, M09-T04" }
+    ],
+    "canonicalTrace": ["C-019", "R-006", "R-112"],
+    "findings": ["PF-050", "PF-051"],
+    "relatedCorrectiveTrace": {
+      "id": "R-048",
+      "canonicalOwners": ["M03-T07", "M04-T03"],
+      "relation": "PF-049/PF-050 receiving-schema correction"
+    }
+  },
+  "evidence": {
+    "tests": {
+      "runtimeReactTests": 12,
+      "validatorTests": 20,
+      "runtimeCoreTests": 6,
+      "runtimeCoreFileTests": 35,
+      "schemaEvaluatorTests": 37,
+      "compilerNegativeCases": 33,
+      "rootMutationTests": 14,
+      "directUniqueNonSkipped": true
+    },
+    "renderedHtml": "<strong><section data-source-node=\"sign-in.layout\"><p data-source-node=\"sign-in.title\">Sign in</p><label data-source-node=\"sign-in.email\">Email</label><label data-source-node=\"sign-in.password\">Password</label><button data-source-node=\"sign-in.submit\">Sign in</button><p data-source-node=\"sign-in.status\">Ready</p></section><p data-source-node=\"sign-in.preview\">Preview</p></strong>",
+    "renderedNodeCount": 7,
+    "renderedBehaviorCount": 1,
+    "adapterExecutionOrder": [
+      "behavior:sortable",
+      "stack:sign-in.layout",
+      "text:sign-in.title",
+      "field:sign-in.email",
+      "field:sign-in.password",
+      "button:sign-in.submit",
+      "text:sign-in.status",
+      "text:sign-in.preview"
+    ],
+    "trackedFiles": [
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 6675,
+        "sha256": "5e0faa1b62aa3cde80c10764c0190d1c1e60297ca26b41d06ce19eec32e0cf2f"
+      },
+      {
+        "path": "docs/architecture/ARCHITECTURE.md",
+        "bytes": 22150,
+        "sha256": "bb3b0a02a3da6737f03378642993304256d3118c93b0db633c205d6cdfa60c45"
+      },
+      {
+        "path": "package.json",
+        "bytes": 39407,
+        "sha256": "7d2c9cb1b31482b7756a7a9276cfde3b3f651012c2cf05a158962997289b5236"
+      },
+      {
+        "path": "packages/runtime-core/src/headless-session.ts",
+        "bytes": 97803,
+        "sha256": "a305897013654f18f5a1ab650e36213bf561263eddc6d69a6316072095831a42"
+      },
+      {
+        "path": "packages/runtime-core/src/index.ts",
+        "bytes": 14751,
+        "sha256": "43397bbd880441871d526704b41e0a47424b615f1853d32ad5fd66eeb9ec1723"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.test.ts",
+        "bytes": 64711,
+        "sha256": "e34af0fb9e9b7b30dd118cf26f9f8608f3b1c4a33f2263c27a725d24f1148d5b"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.types.ts",
+        "bytes": 8202,
+        "sha256": "16e11b563a3b7c31fec893da7c21d0763e1e1c97023340f4a08bf787a0d09f4a"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.js",
+        "bytes": 78172,
+        "sha256": "fe10b346e1c4cb94282b75c7afd9a4152e7bcbc1eaacf927eead4c8d3b5cf932"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.js.map",
+        "bytes": 65323,
+        "sha256": "1979abd25050f76d341b8b089761df1eabbf9a0dd71f242bfa4af50863714a90"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.d.ts",
+        "bytes": 19566,
+        "sha256": "a6220c39248eb9d24ed76a273c33de9d24390c8e24732a2e137c00c448a51937"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.d.ts.map",
+        "bytes": 6739,
+        "sha256": "dbe09f5dd6d271cae12fa1c0b911d262ff544a05cee4f4aaa95d7ba21e2edde4"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.js",
+        "bytes": 3534,
+        "sha256": "b1f3e5e712a3e2cc6e966ccebe34101be50d97c03fb5dd18d99014bfe5a99f75"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.js.map",
+        "bytes": 1767,
+        "sha256": "8041c59311dfc8dfcc3a60571fce2f84d69fe1791899cdba8dbdb81ec065c2ab"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.d.ts",
+        "bytes": 14031,
+        "sha256": "19f4c464150841fbc3dde78051aad32a1f9ce0b00f02c1c2640165d026841c1b"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.d.ts.map",
+        "bytes": 6302,
+        "sha256": "815ec729f766fe94f71b3c75da5c275be6737a8bd716eb6aa95b9da55cb33631"
+      },
+      {
+        "path": "packages/runtime-react/README.md",
+        "bytes": 5928,
+        "sha256": "b301edabac2c424e3b9552f4f534fd4ea5148cb40e723412be71937bb639d286"
+      },
+      {
+        "path": "packages/runtime-react/package.json",
+        "bytes": 1151,
+        "sha256": "7f9f5d452c8ae7de5c65952ecf413441c64b56e777cf0a70ef578fa7f0fc9083"
+      },
+      {
+        "path": "packages/runtime-react/src/index.ts",
+        "bytes": 1501,
+        "sha256": "81c0796a39838419e008775b4265be69f383e3e45b93c667cc6ffecfb5c68c20"
+      },
+      {
+        "path": "packages/runtime-react/src/registry.ts",
+        "bytes": 16630,
+        "sha256": "7902eacbebc0c600c4e46cc4031be20cf70e3dc201316e3c6c0b356da50ce474"
+      },
+      {
+        "path": "packages/runtime-react/src/render-plan.tsx",
+        "bytes": 34270,
+        "sha256": "d675c9cac91806059ef01410da6239ca9296e53dc7adaf7920f2ac952ac7b3ae"
+      },
+      {
+        "path": "packages/runtime-react/test/adapter-registry.test.tsx",
+        "bytes": 12046,
+        "sha256": "fc3ad9f5683955cfa3c9c1a5c4acf48dab29cdba0135866b4b612edf81a2b58a"
+      },
+      {
+        "path": "packages/runtime-react/test/adapter-registry.types.ts",
+        "bytes": 2205,
+        "sha256": "e757db962fe011b1a4e8dbc732d9873d8e4103b3eda75770b79291290aa867f4"
+      },
+      {
+        "path": "packages/runtime-react/test/resolved-props-slots.test.tsx",
+        "bytes": 21410,
+        "sha256": "0a10377fdf96ec590a119907c0160834ee2f8fdf9331be7ebb77c7263607588f"
+      },
+      {
+        "path": "packages/runtime-react/test/resolved-props-slots.types.ts",
+        "bytes": 1134,
+        "sha256": "ea256c0201b32a479831813c7d9963157c43c31325afd6471f86950f4f0f19c0"
+      },
+      {
+        "path": "packages/runtime-react/test/session-fixture.ts",
+        "bytes": 3719,
+        "sha256": "dc926c4381693e784b71fa51fea3f08821fbd40a988854a89e37b5f76bc45b2d"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js",
+        "bytes": 391,
+        "sha256": "f880c202eddffe993f4af53d3519595395bb71bfc10ae13b83f28417867f9927"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js.map",
+        "bytes": 240,
+        "sha256": "deeea8e084fbdb6ab763a919074c4cba87cc495b73b13a8e32ea85291c661b40"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts",
+        "bytes": 1470,
+        "sha256": "4bb78fcd54bb5e1e079da61522e7c7e6a6a54e13c41689ddc543ec8e0daddc0a"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts.map",
+        "bytes": 683,
+        "sha256": "c721a2ec5abaa94a91ed6dd8725718ef7f94a16eec887b3cfeea8f8739a5413a"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js",
+        "bytes": 8630,
+        "sha256": "8ba998f8533d9a1047e56e1b9e0a5cd8ec6f569f92f9f396649d0d9e729b529d"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js.map",
+        "bytes": 7970,
+        "sha256": "34fcda7da61fcf63903f143e00c279e3fc020492299c5e63ecf2d458db87f0ca"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts",
+        "bytes": 8517,
+        "sha256": "42c04e80582ac49f215883ac903e0dea82e7fb20f7316d3f5dfca52392c08f21"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts.map",
+        "bytes": 4449,
+        "sha256": "edfa565ec604b6703403b65c485abe87bd5f933618d2de81fc1eb856dbb5d2a6"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js",
+        "bytes": 27146,
+        "sha256": "b5360d1562a30ae344f719397e9bc4b79494f1b939640debe2d5aa22cd3e6b82"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js.map",
+        "bytes": 25665,
+        "sha256": "85176868397aeb6b62be44290ea83fa1e3c5946a76c66ad08762f93b5d3f9b7a"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts",
+        "bytes": 4613,
+        "sha256": "dd90e51c29077f7ffc303e10119f726d9db05827641df4c89c05887bc14a21d7"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts.map",
+        "bytes": 2203,
+        "sha256": "448856e70645b83c268d6ed142c5b5f57eb4adb792ed728a753fb8b4697cd145"
+      },
+      {
+        "path": "packages/validator/README.md",
+        "bytes": 56950,
+        "sha256": "b9e2f948e406ecec598ee0d0e53fe809d2d24aed340a9731f087088c145b990b"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 2666,
+        "sha256": "05f8672a36552e2b1782fd50b658b981323916662c0b9a661ebea0963cc84276"
+      },
+      {
+        "path": "packages/validator/src/execution-contract-validation.ts",
+        "bytes": 93215,
+        "sha256": "76a0e3eee3bd79e4136e794076e63a14e860ac78bde2b402a5c5ee6b3725b1a0"
+      },
+      {
+        "path": "packages/validator/src/index.ts",
+        "bytes": 5308,
+        "sha256": "a68349a35569f353addb416a8d62cd2f01ac42cd61a231bcbfbd6e565e4cc1f3"
+      },
+      {
+        "path": "packages/validator/src/schema-instance-validation.ts",
+        "bytes": 92152,
+        "sha256": "6b50f5bf66d47c04d5734c312ae3505e5c6c5aea53251f4bbd2559f02534f6ec"
+      },
+      {
+        "path": "packages/validator/src/semantic-diagnostics.ts",
+        "bytes": 8786,
+        "sha256": "0c5a405d2fe8655f8b2034f0eee4fc0782b2b3067bda6bbb7f5ad7da8c9eee1f"
+      },
+      {
+        "path": "packages/validator/test/resolved-adapter-contracts.test.ts",
+        "bytes": 24376,
+        "sha256": "1cf56dfc6223d7cda83ef24eebc982f3f091d51c86326b5a2f294fcf29b920b8"
+      },
+      {
+        "path": "packages/validator/test/resolved-adapter-contracts.types.ts",
+        "bytes": 2493,
+        "sha256": "c529c77f2a6e93429b3dc34bc257b1507c06c2e15d3ccc3bd605e65edce366a3"
+      },
+      {
+        "path": "packages/validator/test/schema-instance-validation.test.ts",
+        "bytes": 33160,
+        "sha256": "fdc8d418c3b02bf809f53d0ac9baf00f67e657d16292f47bacb3fdc78bec6daa"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js",
+        "bytes": 70869,
+        "sha256": "cff9d4df0a6e22cf8d50f276c1371cb92ff1b6b2fc4db74080a1ffc874c22547"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js.map",
+        "bytes": 60530,
+        "sha256": "fb4a8300501fc899f06a35bc3be7001be40cd449e55c318ef7e91329171244ca"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.d.ts",
+        "bytes": 18108,
+        "sha256": "06c4a5b32692fa17833884e7c6ab97c1fa1476594f0675b7f80b69f786a1515a"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.d.ts.map",
+        "bytes": 6616,
+        "sha256": "425547342a2d47c1067585656ca652d04646c26cc5c82a625b477fe5bbeb16f5"
+      },
+      {
+        "path": "packages/validator/dist/index.js",
+        "bytes": 1847,
+        "sha256": "bec613e9ec9c541f0f62d2e65e95b51ccc3e0eab61dddfdb32e8daa79c13d0ef"
+      },
+      {
+        "path": "packages/validator/dist/index.js.map",
+        "bytes": 877,
+        "sha256": "6d19f90394ad3d32ef92fa2d38e9af0226f4bff0abe836629eb4a09fcd5fdbf8"
+      },
+      {
+        "path": "packages/validator/dist/index.d.ts",
+        "bytes": 5089,
+        "sha256": "e7fb8016707c2bcdbd9712be3858653c3f5c5473df829b04412b1d08814ab19a"
+      },
+      {
+        "path": "packages/validator/dist/index.d.ts.map",
+        "bytes": 2134,
+        "sha256": "cc7189a0f520b75682d4204315b82b2d966b7b2256e42bfb46c62d10d559ef32"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js",
+        "bytes": 86247,
+        "sha256": "169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js.map",
+        "bytes": 78171,
+        "sha256": "972f8f0d26063ca2e1748233cdfea57adfc167f8734cec20d65c77083b2e5d83"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.d.ts",
+        "bytes": 10481,
+        "sha256": "2dc0339c14a9585d25d0ede5ddd5df72550b661a9e7f583459c168efefbf77cd"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.d.ts.map",
+        "bytes": 2346,
+        "sha256": "73f8b31a2289a1b6a85ce7d941d517de9adef339e365246d314e34f9c2ef8999"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js",
+        "bytes": 6799,
+        "sha256": "f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js.map",
+        "bytes": 4550,
+        "sha256": "3c88dc6aa7cc00b7360b41a0b8055baa8c7ef73cae7fb0c4e6287a0ba0582106"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.d.ts",
+        "bytes": 4598,
+        "sha256": "0ab4409d2348dd239bd4c801c0889783a4bc86a149c0f6a3ecabd93bb19b8a1f"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.d.ts.map",
+        "bytes": 2069,
+        "sha256": "53e63161a855da26772e8288c89d124d210526624da88a5a5d521d959ba9f07a"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 113050,
+        "sha256": "4a698fed0299e53c62183ee51029b2621d1988ad64a8221b6b963bcd18a89aaa"
+      },
+      {
+        "path": "scripts/generate-runtime-react-resolved-props-slots-proof.mjs",
+        "bytes": 691,
+        "sha256": "8e6d2faeb085732469ca5b7fab9544375eaabafba603784636a40c92359a4aa3"
+      },
+      {
+        "path": "scripts/lib/runtime-react-resolved-props-slots-proof.mjs",
+        "bytes": 76148,
+        "sha256": "5dd87f84b8f3e93ea4b2554aebcca2a523f3e2714e46fe1e928d774398aebae2"
+      },
+      {
+        "path": "scripts/run-ci-quality-gate.mjs",
+        "bytes": 40747,
+        "sha256": "4120dd03f112ba03fd75168756f3de99d59d5554c9859c4455059889f7aacdaa"
+      },
+      {
+        "path": "scripts/test/ci-quality-gate.test.mjs",
+        "bytes": 19662,
+        "sha256": "9e80f58593cec135b2277dd2646f13443c8d75e0d27bd7c4b528a6887600dbc8"
+      },
+      {
+        "path": "scripts/verify-runtime-react-resolved-props-slots.mjs",
+        "bytes": 693,
+        "sha256": "c60cb0a42898dd1b41c23ba59cea2fa188482c2baa69b60bd1643b01f3c8670f"
+      },
+      {
+        "path": "scripts/verify-boundary-fixtures.mjs",
+        "bytes": 3291,
+        "sha256": "2abae6cd70eba7a01db48676a0f21b39475cccc41f64299d11c982be0761f7b2"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-runtime-react-validator/packages/runtime-react/src/index.ts",
+        "bytes": 116,
+        "sha256": "ed48e053d1663dbc5c8657fd0e8256ac9bae7ec8ed64c3463ef5acf4b952e460"
+      },
+      {
+        "path": "tests/boundaries/fixtures/allowed-runtime-react-validator/packages/validator/src/index.ts",
+        "bytes": 42,
+        "sha256": "0e1c373692fef5dededd4ca71a384239915137cf6337d0d32e64e5daf868ffc3"
+      },
+      {
+        "path": "tests/boundaries/fixtures/validator-imports-runtime-react/packages/runtime-react/src/index.ts",
+        "bytes": 49,
+        "sha256": "696bed030fe4a87a2de8549fc39316512ebd72a118e377bd7656dbe1fafa2cc0"
+      },
+      {
+        "path": "tests/boundaries/fixtures/validator-imports-runtime-react/packages/validator/src/index.ts",
+        "bytes": 130,
+        "sha256": "0292499ac402262a43a0a337a4591da77ff0d3bb672c7bcdce759197f145bf71"
+      },
+      {
+        "path": "tests/runtime-react-resolved-props-slots.test.mjs",
+        "bytes": 12885,
+        "sha256": "31994c04076d5d551d52d086c41359b77985517f848c31d7ca9972cb4c29b109"
+      },
+      {
+        "path": "scripts/lib/runtime-react-adapter-registry-proof.mjs",
+        "bytes": 12068,
+        "sha256": "4969f8fff21116a5d4b80ef535291567103f3fb28b27b1596acd0e4cbee000fe"
+      },
+      {
+        "path": "tests/runtime-react-adapter-registry.test.mjs",
+        "bytes": 7542,
+        "sha256": "612b10289e2dc111e53ad8ee3c3a548dfdaeecc2297d779187ce461053b19882"
+      },
+      {
+        "path": "scripts/lib/protocol-structural-validation-proof.mjs",
+        "bytes": 42330,
+        "sha256": "bc3f9f65be0f8eea2c44e6b8a79c7a470eee78aa0ef66338b6758ed76dac5107"
+      },
+      {
+        "path": "scripts/generate-protocol-structural-validation-proof.mjs",
+        "bytes": 840,
+        "sha256": "a21b2cf0a4814445447c71343a0ae1c67130eddfa47e9ef4ac112cda470459f4"
+      },
+      {
+        "path": "tests/protocol-structural-validation.test.mjs",
+        "bytes": 9568,
+        "sha256": "baeb888c255be9a6ee6aaed3dddd4b1a235f47af0ab9d4856b72540493f2024c"
+      },
+      {
+        "path": "scripts/lib/protocol-semantic-foundation-proof.mjs",
+        "bytes": 46592,
+        "sha256": "940d6517d38e09fee3ae8b36e5cfbd846004fc11c46a5e2bbe8558faafb2de3b"
+      },
+      {
+        "path": "scripts/generate-protocol-semantic-foundation-proof.mjs",
+        "bytes": 828,
+        "sha256": "80fe4bde06dd19bcc8ae1d3c797d53e0026f54a223c9d2bb3cf8b966c3695655"
+      },
+      {
+        "path": "tests/protocol-semantic-foundation.test.mjs",
+        "bytes": 10883,
+        "sha256": "75b97be42fce795cd2d778abe3bf78e20ae73b97bf842032a9211ff78bc56d8f"
+      },
+      {
+        "path": "scripts/lib/protocol-component-contracts-proof.mjs",
+        "bytes": 93093,
+        "sha256": "d8bfb97ad25576716b7bfdbc81026711a3173b707ed698e6fe4f49764dd4c8aa"
+      },
+      {
+        "path": "scripts/generate-protocol-component-contracts-proof.mjs",
+        "bytes": 827,
+        "sha256": "426ca7f437a9db0f84de84e5bc43cb45c2f9eab01b1af2ad3a52c4926c654450"
+      },
+      {
+        "path": "tests/protocol-component-contracts.test.mjs",
+        "bytes": 29423,
+        "sha256": "b60f6f770b3084045a61c85842d2d48cef0d46bb89e5b94faaa8c29d7a1cc1ed"
+      },
+      {
+        "path": "scripts/lib/protocol-interaction-contracts-proof.mjs",
+        "bytes": 90952,
+        "sha256": "09f5398296d47b96deffd8c98d88a29407116ef0c56a0f62c578162c8b7246d2"
+      },
+      {
+        "path": "scripts/generate-protocol-interaction-contracts-proof.mjs",
+        "bytes": 839,
+        "sha256": "d53b780b2fa8fcaf24bd74fcaa18d4e7d169b8f88c34249adc9780126ed86387"
+      },
+      {
+        "path": "tests/protocol-interaction-contracts.test.mjs",
+        "bytes": 17087,
+        "sha256": "11498279c375c6a2d040cc27333b1126f5a2aee20876aa28e0e6fa7d7bdfe184"
+      },
+      {
+        "path": "scripts/lib/protocol-binding-contracts-proof.mjs",
+        "bytes": 84502,
+        "sha256": "5a9ff8a49c182a8bae7d04c6eec0aede6682919fde488bc6022256dde3b10bca"
+      },
+      {
+        "path": "scripts/generate-protocol-binding-contracts-proof.mjs",
+        "bytes": 815,
+        "sha256": "05929d3b5e546c7e1091449ce3a1a0f80730043010592598ed2088688b07da93"
+      },
+      {
+        "path": "tests/protocol-binding-contracts.test.mjs",
+        "bytes": 17829,
+        "sha256": "3327b13814499fe9c6fde18c4c530f66377cfadcfffae3a176173aa6d503ee1d"
+      },
+      {
+        "path": "scripts/lib/protocol-execution-contracts-proof.mjs",
+        "bytes": 94562,
+        "sha256": "d619b7a5f9660583703ab7a9cb7d8f4f92eef8c882f895177a2f2dce45c12b81"
+      },
+      {
+        "path": "scripts/generate-protocol-execution-contracts-proof.mjs",
+        "bytes": 827,
+        "sha256": "f45eeffa2c58483a58063f4c90773b40705abea139a8a39cf919ee82729d4cde"
+      },
+      {
+        "path": "tests/protocol-execution-contracts.test.mjs",
+        "bytes": 18468,
+        "sha256": "14f38ee97e523c6a234b60663251d79691276589abab7fe7ccec309d1c6588dd"
+      },
+      {
+        "path": "scripts/lib/protocol-official-suite-parity-proof.mjs",
+        "bytes": 41857,
+        "sha256": "0204e4b4b9fcb74a5cbc2efafcc93ac4f7ce6bc0bb300f5a9895debf3aa2be81"
+      },
+      {
+        "path": "scripts/generate-protocol-official-suite-parity-proof.mjs",
+        "bytes": 836,
+        "sha256": "1e08d1bc87a9dde31bfa91cd249deb45b5e19faa5cb5f87af024b16ad9141379"
+      },
+      {
+        "path": "tests/protocol-official-suite-parity.test.mjs",
+        "bytes": 15916,
+        "sha256": "a1db4f9c7ec7663e6fcc547e7185d06a63984a69a5631547ca1f11e4b1937da6"
+      },
+      {
+        "path": "scripts/lib/protocol-validator-diagnostic-micro-vectors-proof.mjs",
+        "bytes": 38618,
+        "sha256": "6c3f54c52dea56f1b1dbe9edb3a9e4a0f4b3955370d5de02cafbb6ed6953a2ff"
+      },
+      {
+        "path": "scripts/generate-protocol-validator-diagnostic-micro-vectors-proof.mjs",
+        "bytes": 919,
+        "sha256": "bb7415e3c64b861645e86f7bbdbf19e46ad15d89ebb60a449688b84ec41a951c"
+      },
+      {
+        "path": "tests/protocol-validator-diagnostic-micro-vectors.test.mjs",
+        "bytes": 17734,
+        "sha256": "6acb71a1440c9ba55c8b22c0c3ce3fcb1c57acdd8b049e786ea445f6a48457c2"
+      },
+      {
+        "path": "scripts/lib/runtime-core-local-state-identity-proof.mjs",
+        "bytes": 82391,
+        "sha256": "65b0bd48cb5aae44596e27def2cf9cb56278483afb2fe8e22a91b3791aad6e12"
+      },
+      {
+        "path": "scripts/generate-runtime-core-local-state-identity-proof.mjs",
+        "bytes": 871,
+        "sha256": "7d2e25b4cc0207509fe75e0296290620136fcfa2d53816d8251ea169692d7adf"
+      },
+      {
+        "path": "tests/runtime-core-local-state-identity.test.mjs",
+        "bytes": 25170,
+        "sha256": "48c92081432f7d77cf94e193eb799e6f0d164db2f22e21de328c50d2d12d059e"
+      },
+      {
+        "path": "scripts/lib/runtime-core-headless-sign-in-proof.mjs",
+        "bytes": 107562,
+        "sha256": "cf872a42f89b43c609f65b5093fef4234df4f36ea693af343a9830848d84021f"
+      },
+      {
+        "path": "scripts/generate-runtime-core-headless-sign-in-proof.mjs",
+        "bytes": 842,
+        "sha256": "7be0c634eb8c488c3f28b8ce4ad4d46f414b6459f3ac00deea8662737fb6d168"
+      },
+      {
+        "path": "tests/runtime-core-headless-sign-in.test.mjs",
+        "bytes": 31931,
+        "sha256": "fffb569a49404ef2ce5a038efbb310c20a50e4769b4249d93ae4ff11d91340a2"
+      },
+      {
+        "path": "scripts/lib/runtime-core-audit-hardening-proof.mjs",
+        "bytes": 58495,
+        "sha256": "7ad14081839d5f3866f155a7725f1bdec9b2f01aa46cdf6cee13e3bca3994470"
+      },
+      {
+        "path": "scripts/generate-runtime-core-audit-hardening-proof.mjs",
+        "bytes": 840,
+        "sha256": "88d112598c16121c9a82f64d72c7f9929537de8b578e45bd9dbbe95aae7e2c24"
+      },
+      {
+        "path": "tests/runtime-core-audit-hardening.test.mjs",
+        "bytes": 19577,
+        "sha256": "f5ea8a797c1f61f4682caf2f339afa53f92647628c82d0b8b71a09565fa458cb"
+      }
+    ]
+  },
+  "nonclaims": [
+    "No post-resolution style-part or visual-state validation claim; M05-T03 owns it.",
+    "No live event, command, or behavior lifecycle claim; M05-T04 owns it.",
+    "No React instance-preservation or production error-boundary claim.",
+    "No separate reference-host or managed-screen source-audit claim.",
+    "No Android, iOS, or non-React renderer claim."
+  ]
+}

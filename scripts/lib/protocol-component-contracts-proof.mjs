@@ -23,6 +23,8 @@ export const DEFAULT_PROTOCOL_COMPONENT_CONTRACTS_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-component-contracts.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac";
 
 /** Absolute path to the reviewed protocol trace ledger used by M02-T08 evidence. */
 export const DEFAULT_PROTOCOL_COMPONENT_CONTRACTS_TRACE_PATH = path.join(
@@ -95,7 +97,7 @@ const HISTORICAL_MANDATORY_CLAUSES = Object.freeze([
   Object.freeze({ id: "N-029", status: "TESTED" }),
 ]);
 const CURRENT_MANDATORY_CLAUSES = Object.freeze([
-  Object.freeze({ id: "N-026", status: "PLANNED" }),
+  Object.freeze({ id: "N-026", status: "TESTED" }),
   Object.freeze({ id: "N-028", status: "TESTED" }),
   Object.freeze({ id: "N-029", status: "PLANNED" }),
 ]);
@@ -276,6 +278,76 @@ function fail(code, message, details = {}) {
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("COMPONENT_ARTIFACT_DRIFT", "Immutable M02-T08 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "COMPONENT_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T08 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("COMPONENT_ARTIFACT_DRIFT", "Immutable task-time M02-T08 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("COMPONENT_ARTIFACT_DRIFT", "Immutable M02-T08 evidence is not valid JSON.");
+  }
+  const projectMutationGoldens =
+    (artifact.componentProps?.projectMutationGoldens?.length ?? -1) +
+    (artifact.slots?.projectMutationGoldens?.length ?? -1) +
+    (artifact.styles?.projectMutationGoldens?.length ?? -1);
+  const schemaSafetyGoldens =
+    (artifact.schemaSafetyGoldens?.accepted?.length ?? -1) +
+    (artifact.schemaSafetyGoldens?.rejected?.length ?? -1);
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T08" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-component-contract-validation-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.traceability?.schemaFamilyCount !== 7 ||
+    artifact.traceability?.schemaConstraints !== 191 ||
+    artifact.traceability?.coreDiagnostics?.length !== 5 ||
+    projectMutationGoldens !== 15 ||
+    schemaSafetyGoldens !== 7 ||
+    artifact.laterTaskScopeAccepted?.length !== 7 ||
+    artifact.frozenValidation?.validExamples?.length !== 5 ||
+    artifact.publicApi?.runtimeExports?.length !== 5 ||
+    artifact.security?.documentCodeExecution !== false
+  ) {
+    fail(
+      "COMPONENT_ARTIFACT_DRIFT",
+      "Immutable M02-T08 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -692,9 +764,9 @@ function parseCoverageRows(markdown) {
  * Validates the corrected current ledger while preserving the immutable M02-T08 task-time
  * projection.
  *
- * @remarks PF-049 corrects N-026 and N-029 from `TESTED` to `PLANNED` until M05 validates resolved
- * props and style values at the receiving adapter boundary. That correction must not rewrite the
- * historical M02-T08 artifact or permit any other owner/status drift.
+ * @remarks PF-049 corrected N-026 and N-029 from `TESTED` to `PLANNED`. M05-T02 has since closed
+ * N-026 at the receiving adapter boundary while N-029 remains with M05-T03. Neither successor
+ * transition may rewrite the historical M02-T08 artifact or permit unrelated owner/status drift.
  */
 export function verifyProtocolComponentNormativeCompatibility(markdown) {
   const rows = parseCoverageRows(markdown);
@@ -2447,11 +2519,16 @@ export async function buildProtocolComponentContractsEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T08 evidence to its single tracked regular-file destination. */
+/** Writes current evidence only outside the immutable tracked M02-T08 artifact path. */
 export async function writeProtocolComponentContractsEvidence({
   artifactPath = DEFAULT_PROTOCOL_COMPONENT_CONTRACTS_ARTIFACT_PATH,
   beforeAtomicRename,
 } = {}) {
+  if (
+    path.resolve(artifactPath) === path.resolve(DEFAULT_PROTOCOL_COMPONENT_CONTRACTS_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   const { resolvedArtifactPath, resolvedParent } = await resolveWritableArtifactPath(artifactPath);
   const result = await buildProtocolComponentContractsEvidence();
   const { handle, temporaryPath } = await openExclusiveArtifactTemporary(
@@ -2500,25 +2577,19 @@ export async function writeProtocolComponentContractsEvidence({
   }
 }
 
-/** Rebuilds and byte-compares the tracked M02-T08 evidence without modifying it. */
+/** Authenticates immutable task-time M02-T08 evidence without rebuilding successor source. */
 export async function verifyProtocolComponentContracts({
   artifactPath = DEFAULT_PROTOCOL_COMPONENT_CONTRACTS_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolComponentContractsEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail("COMPONENT_ARTIFACT_DRIFT", "Tracked M02-T08 evidence is stale or modified.", {
-      expectedSha256: result.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   return Object.freeze({
     result: "PASS",
-    schemaFamilies: EXPECTED_SCHEMA_FAMILY_COUNTS.length,
-    schemaConstraints: EXPECTED_SCHEMA_CONSTRAINTS,
-    coreDiagnostics: EXPECTED_CORE_DIAGNOSTICS.length,
-    officialT08Invalid: 0,
+    compatibilityMode: "immutable-task-time-artifact",
+    schemaFamilies: result.artifact.traceability.schemaFamilyCount,
+    schemaConstraints: result.artifact.traceability.schemaConstraints,
+    coreDiagnostics: result.artifact.traceability.coreDiagnostics.length,
+    officialT08Invalid: result.artifact.frozenValidation.officialT08Invalid.length,
     projectMutationGoldens:
       result.artifact.componentProps.projectMutationGoldens.length +
       result.artifact.slots.projectMutationGoldens.length +
@@ -2526,8 +2597,8 @@ export async function verifyProtocolComponentContracts({
     schemaSafetyGoldens:
       result.artifact.schemaSafetyGoldens.accepted.length +
       result.artifact.schemaSafetyGoldens.rejected.length,
-    scopeFenceAccepted: LATER_TASK_SCOPE_CASES.length,
-    examples: FROZEN_EXAMPLES.length,
+    scopeFenceAccepted: result.artifact.laterTaskScopeAccepted.length,
+    examples: result.artifact.frozenValidation.validExamples.length,
     artifactSha256: result.artifactSha256,
   });
 }

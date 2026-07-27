@@ -1,16 +1,16 @@
 import {
   ProtocolOfficialSuiteParityEvidenceError,
-  writeProtocolOfficialSuiteParityEvidence,
+  verifyProtocolOfficialSuiteParity,
 } from "./lib/protocol-official-suite-parity-proof.mjs";
 
 try {
-  const result = await writeProtocolOfficialSuiteParityEvidence();
+  const result = await verifyProtocolOfficialSuiteParity();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M02-T12 official-suite parity evidence.",
+        message: "Preserved immutable task-time M02-T12 official-suite parity evidence.",
       },
       null,
       2,

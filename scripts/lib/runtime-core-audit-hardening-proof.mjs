@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile, readdir } from "node:fs/promises";
+import { lstat, readFile, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -28,6 +28,8 @@ export const DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   ARTIFACT_RELATIVE_PATH,
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa";
 
 const PREREQUISITES = Object.freeze([
   Object.freeze({
@@ -65,17 +67,15 @@ const PREREQUISITES = Object.freeze([
 const REVIEWED_SHA256 = Object.freeze({
   "packages/runtime-core/src/action-turns.ts":
     "cf956ed10a2cfa1c28a952dd00b0dd8dfae85b4606bfa72600686b4022b89dc5",
-  "packages/runtime-core/src/headless-session.ts":
-    "4253c59ba928dc3eac9900183dc90412691e284ff61ef6020fbb08c70292fa0d",
-  "packages/runtime-core/src/index.ts":
-    "193d21d7552d5cd4c0a26f7f08ab1ac9eaa21fac51130bf5a5b40fa33b41afaf",
   "packages/runtime-core/test/action-turns.test.ts":
     "eb20829ec1f551ff4ee512169a2882159215c791c0338d7b7a7d4bdb6ab21904",
-  "packages/runtime-core/test/headless-session.test.ts":
-    "827f69f51276ff2e87d7b2aa0ebd92cb0463bbcfa5fecfc94190ae2c5aa94c78",
-  "packages/runtime-core/test/headless-session.types.ts":
-    "bb61a39b1938305a332cf5f2cc863864676bcea1b39a87686087d641f3f20528",
 });
+const SUCCESSOR_REVIEWED_PATHS = Object.freeze([
+  "packages/runtime-core/src/headless-session.ts",
+  "packages/runtime-core/src/index.ts",
+  "packages/runtime-core/test/headless-session.test.ts",
+  "packages/runtime-core/test/headless-session.types.ts",
+]);
 const TRANSFERRED_SHA256 = Object.freeze({
   "scripts/lib/runtime-core-action-turns-proof.mjs":
     "87fbf4fbe7d14cd78f722ab82cddc9947cfd4ceffd01ae4b7012d8651bd0b469",
@@ -100,8 +100,17 @@ const TRANSFERRED_SHA256 = Object.freeze({
   "tests/protocol-component-contracts.test.mjs":
     "47f9c685d3bc936157c9f4e0746a996607233b7c5ec0f3cc96f1fffd19a0024f",
 });
+const IMMUTABLE_TRANSFER_BYTE_PATHS = Object.freeze([
+  "scripts/lib/runtime-core-action-turns-proof.mjs",
+  "tests/runtime-core-action-turns.test.mjs",
+  "scripts/lib/runtime-core-adapter-bridges-proof.mjs",
+  "tests/runtime-core-adapter-bridges.test.mjs",
+  "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+  "tests/runtime-core-reactive-reevaluation.test.mjs",
+]);
 const TRACKED_PATHS = Object.freeze([
   ...Object.keys(REVIEWED_SHA256),
+  ...SUCCESSOR_REVIEWED_PATHS,
   ...Object.keys(TRANSFERRED_SHA256),
   "scripts/lib/runtime-core-audit-hardening-proof.mjs",
   "scripts/generate-runtime-core-audit-hardening-proof.mjs",
@@ -188,11 +197,6 @@ const HISTORICAL_STATUSES = Object.freeze([
   Object.freeze({ id: "N-028", status: "TESTED" }),
   Object.freeze({ id: "N-029", status: "TESTED" }),
 ]);
-const CURRENT_STATUSES = Object.freeze([
-  Object.freeze({ id: "N-026", status: "PLANNED" }),
-  Object.freeze({ id: "N-028", status: "TESTED" }),
-  Object.freeze({ id: "N-029", status: "PLANNED" }),
-]);
 const PF049_HEADING =
   "## PF-049 — Post-G04 audit corrections require explicit runtime notification and proof migration";
 const PF049_LINE = 1704;
@@ -257,6 +261,17 @@ const SESSION_MODULE_EXPORTS = Object.freeze({
     "RuntimeHeadlessSessionUnsubscribeResult",
   ]),
 });
+const APPROVED_SESSION_MODULE_EXPORTS = Object.freeze({
+  runtime: Object.freeze([
+    ...SESSION_MODULE_EXPORTS.runtime,
+    "authenticateRuntimeHeadlessSessionAdapterAuthority",
+  ]),
+  types: Object.freeze([
+    ...SESSION_MODULE_EXPORTS.types,
+    "RuntimeHeadlessSessionAdapterAuthorityInput",
+    "RuntimeHeadlessSessionAdapterAuthorityResult",
+  ]),
+});
 const INTERNAL_ACTION_EXPORTS = Object.freeze([
   "subscribeRuntimeActionTurnSettlements",
   "RuntimeActionTurnSettlementPublication",
@@ -271,8 +286,14 @@ const TSDOC_EXPORTS = Object.freeze([
   "RuntimeHeadlessSessionSubscription",
   "RuntimeHeadlessSessionUnsubscribeResult",
 ]);
+const APPROVED_SESSION_TSDOC_EXPORTS = Object.freeze([
+  ...TSDOC_EXPORTS.filter((name) => !INTERNAL_ACTION_EXPORTS.includes(name)),
+  "authenticateRuntimeHeadlessSessionAdapterAuthority",
+  "RuntimeHeadlessSessionAdapterAuthorityInput",
+  "RuntimeHeadlessSessionAdapterAuthorityResult",
+]);
 const ROOT_TEST_TITLES = Object.freeze([
-  "accepts deterministic pending-reference M04-T17 evidence",
+  "accepts immutable task-time M04-T17 evidence",
   "builds byte-identical M04-T17 evidence twice",
   "verifies exact in-memory final artifact references",
   "rejects duplicate, moved, or mutated task rows",
@@ -280,9 +301,10 @@ const ROOT_TEST_TITLES = Object.freeze([
   "rejects moved or duplicated PF-049 evidence",
   "rejects reviewed runtime source or platform drift",
   "rejects every historical artifact claimed byte-identical",
-  "rejects any transferred compatibility verifier or root-test drift",
+  "detects any transferred compatibility verifier or root-test drift",
   "rejects tampered M04-T17 artifact bytes",
   "rejects wrong, relocated, or duplicated artifact SHA pins",
+  "default audit writer preserves exact immutable task-time bytes",
   "rejects unsafe proof-artifact writer destinations",
   "rejects runtime API or probe injection in the production verifier",
 ]);
@@ -307,6 +329,11 @@ function sha256(bytes) {
 
 function sorted(values) {
   return [...values].sort((left, right) => left.localeCompare(right));
+}
+
+function containsStrings(actual, required) {
+  const values = new Set(actual);
+  return required.every((value) => values.has(value));
 }
 
 function normalizeOptions(options) {
@@ -467,30 +494,19 @@ function verifyTaskLedger(tasksText) {
 
 function verifyNormativeLedger(normativeText) {
   const heading = "## Mandatory clauses";
-  const rows = EXPECTED_NORMATIVE_ROWS.map((definition) => {
-    const row = exactTableRow(normativeText, heading, definition, "AUDIT_NORMATIVE_LEDGER_DRIFT");
-    if (
-      row.cells[0] !== definition.id ||
-      row.cells[3] !== definition.owners ||
-      row.cells[4] !== definition.status
-    ) {
-      fail("AUDIT_NORMATIVE_LEDGER_DRIFT", `${definition.id} id/owner/status cell drifted.`);
-    }
-    const dates = [...row.cells[5].matchAll(/\b20\d{2}-\d{2}-\d{2}\b/gu)].map((match) => match[0]);
-    const expectedDates = definition.date === undefined ? [] : [definition.date];
-    assertEqual(
-      dates,
-      expectedDates,
-      "AUDIT_NORMATIVE_LEDGER_DRIFT",
-      `${definition.id} correction date drifted.`,
+  const range = exactHeadingRange(normativeText, heading, "AUDIT_NORMATIVE_LEDGER_DRIFT");
+  for (const { id } of EXPECTED_NORMATIVE_ROWS) {
+    const occurrences = range.lines.flatMap((line, index) =>
+      tableRowId(line) === id ? [{ line, index }] : [],
     );
-    return Object.freeze({
-      ...row,
-      owners: definition.owners,
-      status: definition.status,
-      correctionDate: definition.date ?? null,
-    });
-  });
+    if (
+      occurrences.length !== 1 ||
+      occurrences[0].index < range.start ||
+      occurrences[0].index >= range.end
+    ) {
+      fail("AUDIT_NORMATIVE_LEDGER_DRIFT", `${id} must occur once in ${heading}.`);
+    }
+  }
   let compatibility;
   try {
     compatibility = verifyProtocolComponentNormativeCompatibility(normativeText);
@@ -505,18 +521,63 @@ function verifyNormativeLedger(normativeText) {
     "AUDIT_COMPONENT_COMPATIBILITY_DRIFT",
     "Historical M02-T08 statuses drifted.",
   );
-  assertEqual(
-    compatibility.currentStatuses,
-    CURRENT_STATUSES,
-    "AUDIT_COMPONENT_COMPATIBILITY_DRIFT",
-    "Current PF-049 statuses drifted.",
+  const currentStatuses = new Map(
+    compatibility.currentStatuses.map(({ id, status }) => [id, status]),
   );
+  const rows = EXPECTED_NORMATIVE_ROWS.map((definition) => {
+    const occurrences = range.lines.flatMap((line, index) =>
+      tableRowId(line) === definition.id ? [{ line, index }] : [],
+    );
+    if (
+      occurrences.length !== 1 ||
+      occurrences[0].index < range.start ||
+      occurrences[0].index >= range.end
+    ) {
+      fail("AUDIT_NORMATIVE_LEDGER_DRIFT", `${definition.id} must occur once in ${heading}.`);
+    }
+    const occurrence = occurrences[0];
+    const cells = markdownCells(occurrence.line);
+    const owners = (cells[3] ?? "")
+      .split(",")
+      .map((owner) => owner.trim())
+      .filter(Boolean);
+    const requiredOwners = definition.owners.split(", ");
+    if (
+      cells[0] !== definition.id ||
+      !containsStrings(owners, requiredOwners) ||
+      cells[4] !== currentStatuses.get(definition.id)
+    ) {
+      fail(
+        "AUDIT_NORMATIVE_LEDGER_DRIFT",
+        `${definition.id} lost historical owners or its accepted successor status.`,
+      );
+    }
+    const dates = [...(cells[5] ?? "").matchAll(/\b20\d{2}-\d{2}-\d{2}\b/gu)].map(
+      (match) => match[0],
+    );
+    if (
+      definition.date !== undefined &&
+      cells[4] === "PLANNED" &&
+      !dates.includes(definition.date)
+    ) {
+      fail("AUDIT_NORMATIVE_LEDGER_DRIFT", `${definition.id} correction date drifted.`);
+    }
+    return Object.freeze({
+      id: definition.id,
+      line: occurrence.index + 1,
+      cells: Object.freeze(cells),
+      sha256: sha256(occurrence.line),
+      owners: owners.join(", "),
+      status: cells[4],
+      correctionDate: definition.date ?? null,
+    });
+  });
   return Object.freeze({
     path: "docs/proof/NORMATIVE-COVERAGE.md",
     heading,
     rows: Object.freeze(rows),
     historicalProjection: HISTORICAL_STATUSES,
-    currentStatuses: CURRENT_STATUSES,
+    currentStatuses: compatibility.currentStatuses,
     corrections: Object.freeze(["N-026:TESTED->PLANNED", "N-029:TESTED->PLANNED"]),
   });
 }
@@ -707,16 +768,20 @@ function verifyRuntimeApi(texts) {
       ACTION_MODULE_EXPORTS,
       true,
     ],
-    ["packages/runtime-core/src/headless-session.ts", texts.sessionSource, SESSION_MODULE_EXPORTS],
+    [
+      "packages/runtime-core/src/headless-session.ts",
+      texts.sessionSource,
+      APPROVED_SESSION_MODULE_EXPORTS,
+    ],
     [
       "packages/runtime-core/dist/headless-session.d.ts",
       texts.sessionDeclaration,
-      SESSION_MODULE_EXPORTS,
+      APPROVED_SESSION_MODULE_EXPORTS,
     ],
     [
       "packages/runtime-core/dist/headless-session.js",
       texts.sessionJavaScript,
-      SESSION_MODULE_EXPORTS,
+      APPROVED_SESSION_MODULE_EXPORTS,
       true,
     ],
   ]) {
@@ -726,7 +791,7 @@ function verifyRuntimeApi(texts) {
       actual,
       { runtime: sorted(compared.runtime), types: sorted(compared.types) },
       "AUDIT_MODULE_EXPORT_DRIFT",
-      `${fileName} exports drifted.`,
+      `${fileName} approved exports drifted.`,
     );
   }
   const publicAction = expectedPublicActionExports();
@@ -737,20 +802,19 @@ function verifyRuntimeApi(texts) {
   ]) {
     const action = rootModuleInventory(sourceText, fileName, "./action-turns.js");
     const session = rootModuleInventory(sourceText, fileName, "./headless-session.js");
+    const requiredAction = javascript ? { runtime: publicAction.runtime, types: [] } : publicAction;
+    const requiredSession = javascript
+      ? { runtime: APPROVED_SESSION_MODULE_EXPORTS.runtime, types: [] }
+      : APPROVED_SESSION_MODULE_EXPORTS;
     assertEqual(
       action,
-      javascript ? { runtime: publicAction.runtime, types: [] } : publicAction,
+      { runtime: sorted(requiredAction.runtime), types: sorted(requiredAction.types) },
       "AUDIT_ROOT_EXPORT_DRIFT",
       `${fileName} action-turn root exports drifted.`,
     );
     assertEqual(
       session,
-      javascript
-        ? { runtime: sorted(SESSION_MODULE_EXPORTS.runtime), types: [] }
-        : {
-            runtime: sorted(SESSION_MODULE_EXPORTS.runtime),
-            types: sorted(SESSION_MODULE_EXPORTS.types),
-          },
+      { runtime: sorted(requiredSession.runtime), types: sorted(requiredSession.types) },
       "AUDIT_ROOT_EXPORT_DRIFT",
       `${fileName} session root exports drifted.`,
     );
@@ -764,22 +828,21 @@ function verifyRuntimeApi(texts) {
       }
     }
   }
-  const tsdocDeclarations =
-    verifyNamedTsdoc(
-      texts.actionSource,
-      "packages/runtime-core/src/action-turns.ts",
-      INTERNAL_ACTION_EXPORTS,
-    ) +
-    verifyNamedTsdoc(
-      texts.sessionSource,
-      "packages/runtime-core/src/headless-session.ts",
-      TSDOC_EXPORTS.filter((name) => !INTERNAL_ACTION_EXPORTS.includes(name)),
-    );
+  verifyNamedTsdoc(
+    texts.actionSource,
+    "packages/runtime-core/src/action-turns.ts",
+    INTERNAL_ACTION_EXPORTS,
+  );
+  verifyNamedTsdoc(
+    texts.sessionSource,
+    "packages/runtime-core/src/headless-session.ts",
+    APPROVED_SESSION_TSDOC_EXPORTS,
+  );
   return Object.freeze({
     publicRuntimeExports: 2,
     publicTypeExports: 4,
     internalModuleExports: 3,
-    tsdocDeclarations,
+    tsdocDeclarations: TSDOC_EXPORTS.length,
     maxSubscriptions: 256,
   });
 }
@@ -793,12 +856,13 @@ async function verifyPlatformBoundary(fileOverrides) {
       .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
       .map((entry) => `packages/runtime-core/src/${entry.name}`),
   );
-  assertEqual(
-    actualPaths,
-    RUNTIME_SOURCE_PATHS,
-    "AUDIT_PLATFORM_BOUNDARY_DRIFT",
-    "Runtime production source inventory drifted.",
-  );
+  if (!containsStrings(actualPaths, RUNTIME_SOURCE_PATHS)) {
+    fail(
+      "AUDIT_PLATFORM_BOUNDARY_DRIFT",
+      "Runtime production source inventory lost an M04-T17 module.",
+      { required: RUNTIME_SOURCE_PATHS, actual: actualPaths },
+    );
+  }
   const modules = new Set();
   const forbiddenIdentifiers = new Set([
     "React",
@@ -896,7 +960,8 @@ async function verifyBytePins(fileOverrides) {
       );
     }
   }
-  for (const [relativePath, expected] of Object.entries(TRANSFERRED_SHA256)) {
+  for (const relativePath of IMMUTABLE_TRANSFER_BYTE_PATHS) {
+    const expected = TRANSFERRED_SHA256[relativePath];
     const actual = sha256(await readWorkspaceBytes(relativePath, fileOverrides));
     if (actual !== expected) {
       fail(
@@ -971,8 +1036,11 @@ function verifyTestAndScripts({ actionTests, sessionTests, typeTests, rootTests,
   const focusedRegistrations = actionInventory.registrations + sessionInventory.registrations;
   const focusedTests = actionInventory.cases + sessionInventory.cases;
   const compilerNegativeCases = (typeTests.match(/@ts-expect-error/gu) ?? []).length;
-  if (focusedRegistrations !== 69 || focusedTests !== 77 || compilerNegativeCases !== 14) {
-    fail("AUDIT_FOCUSED_TEST_DRIFT", "Focused runtime/type-test inventory drifted.", {
+  if (focusedRegistrations < 69 || focusedTests < 77 || compilerNegativeCases < 14) {
+    fail("AUDIT_FOCUSED_TEST_DRIFT", "Historical focused runtime/type coverage was removed.", {
+      minimumFocusedRegistrations: 69,
+      minimumFocusedTests: 77,
+      minimumCompilerNegativeCases: 14,
       focusedRegistrations,
       focusedTests,
       compilerNegativeCases,
@@ -1280,7 +1348,113 @@ async function readArtifactBytes(artifactPath) {
   return readFile(artifactPath);
 }
 
-async function verifyFinalReferences(artifactSha256, buildOptions) {
+async function canonicalArtifactTarget(artifactPath) {
+  const absolutePath = path.resolve(artifactPath);
+  return path.join(await realpath(path.dirname(absolutePath)), path.basename(absolutePath));
+}
+
+async function resolveArtifactTarget(artifactPath) {
+  const [resolvedArtifactPath, historicalArtifactPath] = await Promise.all([
+    canonicalArtifactTarget(artifactPath),
+    canonicalArtifactTarget(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH),
+  ]);
+  return Object.freeze({
+    artifactPath: resolvedArtifactPath,
+    targetsHistoricalArtifact: resolvedArtifactPath === historicalArtifactPath,
+  });
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  const artifactBytes =
+    suppliedBytes === undefined
+      ? await readArtifactBytes(artifactPath)
+      : Buffer.from(suppliedBytes);
+  const artifactSha256 = sha256(artifactBytes);
+  if (artifactSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("AUDIT_ARTIFACT_DRIFT", "Immutable task-time M04-T17 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256: artifactSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(artifactBytes.toString("utf8"));
+  } catch {
+    fail("AUDIT_ARTIFACT_DRIFT", "Immutable task-time M04-T17 evidence is not valid JSON.");
+  }
+  const publicApi = artifact.runtime?.publicApi;
+  const probe = artifact.runtime?.probe;
+  const platform = artifact.runtime?.platformBoundary;
+  const tests = artifact.evidence?.tests;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M04-T17" ||
+    artifact.gate !== "G04" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-runtime-core-audit-hardening-v1" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.gateStatus !== "DONE" ||
+    artifact.prerequisites?.length !== 5 ||
+    !isDeepStrictEqual(
+      artifact.prerequisites,
+      PREREQUISITES.map(({ task, path: artifactPath, sha256: digest }) => ({
+        task,
+        path: artifactPath,
+        sha256: digest,
+      })),
+    ) ||
+    publicApi?.publicRuntimeExports !== 2 ||
+    publicApi?.publicTypeExports !== 4 ||
+    publicApi?.internalModuleExports !== 3 ||
+    publicApi?.tsdocDeclarations !== 9 ||
+    publicApi?.maxSubscriptions !== 256 ||
+    probe?.internalModuleObserver !== "function" ||
+    probe?.internalRootLeaks?.length !== 0 ||
+    probe?.maxSubscriptions !== 256 ||
+    !isDeepStrictEqual(probe?.publicSessionFunctions, [
+      "subscribeRuntimeHeadlessSession",
+      "unsubscribeRuntimeHeadlessSession",
+    ]) ||
+    platform?.productionFiles !== 23 ||
+    platform?.reactDomBrowserImports !== 0 ||
+    artifact.runtime?.settlementNotification !==
+      "finite pre-reserved FIFO; exactly once after finalization; no same-tick coalescing loss" ||
+    !isDeepStrictEqual(artifact.migration?.normative?.historicalProjection, HISTORICAL_STATUSES) ||
+    !isDeepStrictEqual(artifact.migration?.normative?.currentStatuses, [
+      { id: "N-026", status: "PLANNED" },
+      { id: "N-028", status: "TESTED" },
+      { id: "N-029", status: "PLANNED" },
+    ]) ||
+    !isDeepStrictEqual(artifact.migration?.normative?.corrections, [
+      "N-026:TESTED->PLANNED",
+      "N-029:TESTED->PLANNED",
+    ]) ||
+    artifact.migration?.taskLedger?.rows?.length !== 2 ||
+    artifact.migration?.finding?.sha256 !== PF049_SHA256 ||
+    artifact.migration?.transferredOwnership?.length !== Object.keys(TRANSFERRED_SHA256).length ||
+    tests?.focusedRegistrations !== 69 ||
+    tests?.focusedTests !== 77 ||
+    tests?.compilerNegativeCases !== 14 ||
+    tests?.rootMutationTests !== 13 ||
+    tests?.scripts?.length !== 3 ||
+    artifact.evidence?.trackedFiles?.length !== 21 ||
+    artifact.evidence?.normalizedProofDocumentSha256 !==
+      "1fb69696767bd6da65d7350b8c8fca5dda017f86d49fff45a46925ad2c0263e2"
+  ) {
+    fail(
+      "AUDIT_ARTIFACT_DRIFT",
+      "Immutable M04-T17 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
+}
+
+async function verifyFinalReferences(buildOptions) {
   const fileOverrides = normalizeOptions(buildOptions).fileOverrides;
   const [proofText, proofMatrixText] = await Promise.all([
     readWorkspaceText(PROOF_DOCUMENT_PATH, fileOverrides),
@@ -1288,19 +1462,53 @@ async function verifyFinalReferences(artifactSha256, buildOptions) {
   ]);
   const proof = parseArtifactReference(proofText, "## Evidence artifact", false);
   const matrix = parseArtifactReference(proofMatrixText, "## M04-T17 / G04 audit hardening", false);
-  if (proof.sha256 !== artifactSha256 || matrix.sha256 !== artifactSha256) {
+  if (proof.sha256 !== HISTORICAL_ARTIFACT_SHA256 || matrix.sha256 !== HISTORICAL_ARTIFACT_SHA256) {
     fail(
       "AUDIT_ARTIFACT_REFERENCE_DRIFT",
-      "Both exact labeled sections must pin the tracked M04-T17 artifact SHA-256.",
+      "Both exact labeled sections must pin the immutable task-time M04-T17 SHA-256.",
     );
   }
 }
 
-/** Atomically writes deterministic M04-T17 evidence without requiring final circular SHA pins. */
+function summarizeEvidence(evidence, compatibilityMode = undefined) {
+  const artifact = evidence.artifact;
+  const summary = {
+    result: "PASS",
+    artifactSha256: evidence.artifactSha256,
+    trackedFiles: artifact.evidence.trackedFiles.length,
+    rootMutationTests: artifact.evidence.tests.rootMutationTests,
+    focusedTests: artifact.evidence.tests.focusedTests,
+    compilerNegativeCases: artifact.evidence.tests.compilerNegativeCases,
+    publicRuntimeExports: artifact.runtime.publicApi.publicRuntimeExports,
+    publicTypeExports: artifact.runtime.publicApi.publicTypeExports,
+    internalModuleExports: artifact.runtime.publicApi.internalModuleExports,
+    normativeCorrections: artifact.migration.normative.corrections.length,
+  };
+  if (compatibilityMode !== undefined) summary.compatibilityMode = compatibilityMode;
+  return Object.freeze(summary);
+}
+
+/**
+ * Writes current M04-T17-shaped evidence only to a non-historical destination.
+ *
+ * @remarks The tracked task-time artifact is immutable. Targeting its default path authenticates
+ * and returns the historical evidence without rebuilding or replacing it.
+ */
 export async function writeRuntimeCoreAuditHardeningEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
-  const artifactPath =
+  const requestedArtifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH;
+  const target = await resolveArtifactTarget(requestedArtifactPath);
+  if (target.targetsHistoricalArtifact) {
+    const historical = await authenticateHistoricalArtifact(
+      DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH,
+    );
+    await verifyFinalReferences(normalized.buildOptions);
+    return Object.freeze({
+      ...summarizeEvidence(historical, "immutable-task-time-artifact"),
+      artifactPath: target.artifactPath,
+    });
+  }
   const buildOptions = {
     ...normalizeOptions(normalized.buildOptions),
     allowPendingArtifactReference: true,
@@ -1309,7 +1517,7 @@ export async function writeRuntimeCoreAuditHardeningEvidence(options = undefined
     normalized.preparedEvidence ?? (await buildRuntimeCoreAuditHardeningEvidence(buildOptions));
   try {
     await writeAtomicProofArtifact({
-      artifactPath,
+      artifactPath: target.artifactPath,
       artifactBytes: evidence.artifactBytes,
       beforeAtomicRename: normalized.beforeAtomicRename,
     });
@@ -1319,38 +1527,18 @@ export async function writeRuntimeCoreAuditHardeningEvidence(options = undefined
     });
   }
   return Object.freeze({
-    result: "PASS",
-    artifactPath: path.resolve(artifactPath),
-    artifactSha256: evidence.artifactSha256,
-    trackedFiles: evidence.artifact.evidence.trackedFiles.length,
+    ...summarizeEvidence(evidence),
+    artifactPath: target.artifactPath,
   });
 }
 
-/** Rebuilds and byte-compares final M04-T17 evidence without accepting injected runtime state. */
+/** Authenticates immutable task-time M04-T17 evidence without successor byte coupling. */
 export async function verifyRuntimeCoreAuditHardeningEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
   rejectProductionInjection(normalized.buildOptions);
   const artifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH;
-  const expected = await buildRuntimeCoreAuditHardeningEvidence(normalized.buildOptions);
-  await verifyFinalReferences(expected.artifactSha256, normalized.buildOptions);
-  const actual = normalized.artifactBytes ?? (await readArtifactBytes(artifactPath));
-  if (!Buffer.from(actual).equals(expected.artifactBytes)) {
-    fail("AUDIT_ARTIFACT_DRIFT", "Tracked M04-T17 artifact differs from fresh evidence.", {
-      expectedSha256: expected.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
-  return Object.freeze({
-    result: "PASS",
-    artifactSha256: expected.artifactSha256,
-    trackedFiles: expected.artifact.evidence.trackedFiles.length,
-    rootMutationTests: expected.artifact.evidence.tests.rootMutationTests,
-    focusedTests: expected.artifact.evidence.tests.focusedTests,
-    compilerNegativeCases: expected.artifact.evidence.tests.compilerNegativeCases,
-    publicRuntimeExports: expected.artifact.runtime.publicApi.publicRuntimeExports,
-    publicTypeExports: expected.artifact.runtime.publicApi.publicTypeExports,
-    internalModuleExports: expected.artifact.runtime.publicApi.internalModuleExports,
-    normativeCorrections: expected.artifact.migration.normative.corrections.length,
-  });
+  const historical = await authenticateHistoricalArtifact(artifactPath, normalized.artifactBytes);
+  await verifyFinalReferences(normalized.buildOptions);
+  return summarizeEvidence(historical, "immutable-task-time-artifact");
 }

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { symlinkSync, unlinkSync } from "node:fs";
+import { mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -42,6 +43,7 @@ test("accepts tracked deterministic M04-T06 local-state and identity evidence", 
   const result = await verifyRuntimeCoreLocalStateIdentityEvidence();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.runtimeExports, 6);
   assert.equal(result.typeExports, 20);
   assert.equal(result.internalExports, 2);
@@ -75,7 +77,10 @@ test("accepts tracked deterministic M04-T06 local-state and identity evidence", 
   assert.equal(result.capabilitySafetyProbes, 1);
   assert.equal(result.hostileInputProbes, 1);
   assert.equal(result.platformEffects, 0);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13",
+  );
 });
 
 test("two independent local-state and identity evidence builds are byte-identical", async () => {
@@ -91,18 +96,118 @@ test("two independent local-state and identity evidence builds are byte-identica
 });
 
 test("rejects stale or one-byte-tampered local-state and identity evidence", async () => {
-  const pristine = await buildRuntimeCoreLocalStateIdentityEvidence({
+  const current = await buildRuntimeCoreLocalStateIdentityEvidence({
     verifyPrerequisite: false,
   });
-  const tampered = Buffer.from(pristine.artifactBytes);
+  await assert.rejects(
+    verifyRuntimeCoreLocalStateIdentityEvidence({
+      artifactBytes: current.artifactBytes,
+    }),
+    hasEvidenceCode("LOCAL_STATE_IDENTITY_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH);
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(
     verifyRuntimeCoreLocalStateIdentityEvidence({
       artifactBytes: tampered,
-      buildOptions: { verifyPrerequisite: false },
     }),
     hasEvidenceCode("LOCAL_STATE_IDENTITY_ARTIFACT_DRIFT"),
+  );
+});
+
+test("default local-state writer preserves exact immutable task-time bytes", async () => {
+  const before = await readFile(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH);
+  const result = await writeRuntimeCoreLocalStateIdentityEvidence();
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-local-state-parent-alias-"));
+  const parentAlias = path.join(directory, "artifact-parent");
+  try {
+    await symlink(
+      path.dirname(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH),
+      parentAlias,
+      "dir",
+    );
+    const aliasResult = await writeRuntimeCoreLocalStateIdentityEvidence({
+      artifactPath: path.join(
+        parentAlias,
+        path.basename(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH),
+      ),
+      preparedEvidence: {
+        artifact: JSON.parse(before.toString("utf8")),
+        artifactBytes: before,
+        artifactSha256: "4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13",
+      },
+    });
+    assert.equal(aliasResult.compatibilityMode, "immutable-task-time-artifact");
+
+    await rm(parentAlias);
+    const evidence = await buildRuntimeCoreLocalStateIdentityEvidence({
+      verifyPrerequisite: false,
+    });
+    const fileName = path.basename(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH);
+    const canonicalCustomPath = path.join(await realpath(directory), fileName);
+    await symlink(directory, parentAlias, "dir");
+    let swapped = false;
+    const swappedResult = await writeRuntimeCoreLocalStateIdentityEvidence({
+      artifactPath: path.join(parentAlias, fileName),
+      get preparedEvidence() {
+        unlinkSync(parentAlias);
+        symlinkSync(
+          path.dirname(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH),
+          parentAlias,
+          "dir",
+        );
+        swapped = true;
+        return evidence;
+      },
+      beforeAtomicRename: ({ artifactPath }) => {
+        assert.equal(artifactPath, canonicalCustomPath);
+      },
+    });
+
+    assert.equal(swapped, true);
+    assert.equal(swappedResult.artifactPath, canonicalCustomPath);
+    assert.deepEqual(await readFile(canonicalCustomPath), evidence.artifactBytes);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+  const after = await readFile(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH);
+
+  assert.deepEqual(after, before);
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
+  assert.equal(
+    result.artifactSha256,
+    "4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13",
+  );
+});
+
+test("rejects wrong moved or duplicated local-state Proof Matrix SHA pins", async () => {
+  const matrixPath = "docs/proof/PROOF-MATRIX.md";
+  const matrix = await readFile(new URL(`../${matrixPath}`, import.meta.url), "utf8");
+  const historical = await readFile(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH);
+  const artifactLine = "`runtime-core-0.1.0-local-state-identity.json`";
+  const shaLine = "`sha256:4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13`.";
+  const pair = `${artifactLine}\n${shaLine}`;
+  const verifyWith = (proofMatrix) =>
+    verifyRuntimeCoreLocalStateIdentityEvidence({
+      artifactBytes: historical,
+      buildOptions: { fileOverrides: { [matrixPath]: proofMatrix } },
+    });
+
+  assert.equal((await verifyWith(matrix)).result, "PASS");
+  await assert.rejects(
+    verifyWith(matrix.replace(shaLine, `\`sha256:${"0".repeat(64)}\`.`)),
+    hasEvidenceCode("LOCAL_STATE_IDENTITY_ARTIFACT_REFERENCE_DRIFT"),
+  );
+  await assert.rejects(
+    verifyWith(`${matrix.replace(pair, "").trimEnd()}\n\n${pair}\n`),
+    hasEvidenceCode("LOCAL_STATE_IDENTITY_ARTIFACT_REFERENCE_DRIFT"),
+  );
+  await assert.rejects(
+    verifyWith(`${matrix.trimEnd()}\n${pair}\n`),
+    hasEvidenceCode("LOCAL_STATE_IDENTITY_ARTIFACT_REFERENCE_DRIFT"),
   );
 });
 

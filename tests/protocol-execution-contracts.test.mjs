@@ -30,6 +30,7 @@ test("accepts exact deterministic M02-T11 execution-contract evidence", async ()
   const result = await verifyProtocolExecutionContracts();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.schemaFamilies, 9);
   assert.equal(result.schemaConstraints, 383);
   assert.equal(result.proseRules, 11);
@@ -50,7 +51,23 @@ test("accepts exact deterministic M02-T11 execution-contract evidence", async ()
   assert.equal(result.obligationKinds, 8);
   assert.equal(result.resolvedValueSelectorKinds, 5);
   assert.equal(result.examples, 5);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
+  );
+});
+
+test("default evidence writer preserves immutable task-time M02-T11 bytes", async () => {
+  const artifactPath = new URL(
+    "../docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
+    import.meta.url,
+  );
+  const before = await readFile(artifactPath);
+  const result = await writeProtocolExecutionContractsEvidence();
+  const after = await readFile(artifactPath);
+
+  assert.deepEqual(after, before);
+  assert.deepEqual(result.artifactBytes, before);
 });
 
 test("two independent execution evidence builds are byte-identical", async () => {
@@ -61,9 +78,17 @@ test("two independent execution evidence builds are byte-identical", async () =>
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects one-byte-tampered execution evidence", async () => {
-  const pristine = await buildProtocolExecutionContractsEvidence();
-  const tampered = Buffer.from(pristine.artifactBytes);
+test("rejects a current rebuild and one-byte-tampered historical execution evidence", async () => {
+  const current = await buildProtocolExecutionContractsEvidence();
+  await assert.rejects(
+    verifyProtocolExecutionContracts({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("EXECUTION_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
+    new URL("../docs/proof/artifacts/protocol-0.1.0-execution-contracts.json", import.meta.url),
+  );
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(

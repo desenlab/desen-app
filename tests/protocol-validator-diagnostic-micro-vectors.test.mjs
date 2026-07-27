@@ -41,6 +41,7 @@ test("accepts exact deterministic M02-T13 validator diagnostic evidence", async 
 
   assert.deepEqual(result, {
     result: "PASS",
+    compatibilityMode: "immutable-task-time-artifact",
     diagnostics: 34,
     core: 28,
     extensions: 6,
@@ -51,7 +52,19 @@ test("accepts exact deterministic M02-T13 validator diagnostic evidence", async 
     schemaConstraints: 989,
     artifactSha256: result.artifactSha256,
   });
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718",
+  );
+});
+
+test("default evidence writer preserves immutable task-time M02-T13 bytes", async () => {
+  const before = await readFile(DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH);
+  const result = await writeProtocolValidatorDiagnosticMicroVectorsEvidence();
+  const after = await readFile(DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH);
+
+  assert.deepEqual(after, before);
+  assert.deepEqual(result.artifactBytes, before);
 });
 
 test("two independent diagnostic evidence builds are byte-identical", async () => {
@@ -62,11 +75,17 @@ test("two independent diagnostic evidence builds are byte-identical", async () =
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects a one-byte-tampered diagnostic artifact", async () => {
-  const pristine = await readFile(
+test("rejects a current rebuild and one-byte-tampered historical diagnostic artifact", async () => {
+  const current = await buildProtocolValidatorDiagnosticMicroVectorsEvidence();
+  await assert.rejects(
+    verifyProtocolValidatorDiagnosticMicroVectors({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("DIAGNOSTIC_VECTOR_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
     DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH,
   );
-  const tampered = Buffer.from(pristine);
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(

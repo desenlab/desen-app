@@ -18,35 +18,45 @@ The returned handle is factory-authenticated. Its public snapshot contains only 
 identifiers; executable React components remain private. Duplicate identifiers, malformed
 registrations, and lower-only limit violations reject the whole registry.
 
-`renderRuntimeReactSurface` preflights the complete public headless plan before any adapter
-component executes. Ordinary surface roots and descendants use the same exact lookup. Unknown
-component or behavior capabilities, duplicate runtime identities, hostile reflection, and finite
-tree-limit crossings return explicit callback-free failures and no placeholder React element.
-Every retained string, named slot, and JSON occurrence consumes a finite render budget. Resolved
-JSON is captured only through enumerable own-data properties, detached from the caller, and deeply
-frozen before it enters a React element. The first declared behavior is the outermost wrapper.
+`renderRuntimeReactSurface` accepts only the exact current snapshot and exact execution Catalog set
+retained by one live `runtime-core` session. It authenticates those references even for an empty
+root, creates one Catalog-authenticated receiving scope, and preflights the complete public
+headless plan before creating any React element. A copied plan, reconstructed snapshot,
+structurally equal Catalog set, stale generation, or forged session cannot authorize rendering.
+Applications obtain both exact references directly from a successful
+`mountRuntimeHeadlessSession` result as `snapshot` and `catalogSet`; this also works when mount
+received raw Catalog JSON.
 
-Adapter inputs contain only public semantic data: stable runtime/source identities, resolved JSON
-props, named slot nodes, semantic visual-state/style-part maps, inert behavior descriptions, and a
-least-authority interaction port. No DOM node, selector, native event, component instance, or
-private React structure crosses this contract.
+Ordinary surface roots and descendants use the same exact registry lookup. Resolved component and
+behavior props are checked as complete `resolved-value` maps against their exact Catalog schemas.
+Named slots are projected only as `{ capabilityId }` child identities, checked after runtime
+materialization, and converted to React nodes without inspecting React-private or DOM structure.
+Unknown adapters, invalid receiving values, hostile reflection, and finite tree or aggregate
+receiving-budget crossings return explicit callback-free failures and no placeholder React
+element. Every retained string, named slot, JSON occurrence, prop validation, slot validation, and
+schema evaluation consumes a finite shared render budget. Required-slot, slot-contract lookup, and
+child-acceptance work is independently capped by `maxSlotContractEvaluationSteps`. Values admitted
+to adapters are detached from their source and recursively immutable. The first declared behavior
+remains the outermost wrapper.
 
-The standalone renderer authenticates its registry but deliberately accepts a structurally valid
-public plan. It does not by itself prove which session produced that plan. A production host must
-read the plan from its exact current authenticated headless session; M05-T04 binds interactions to
-that session and M05-T09 audits the independent reference host's complete production import graph.
+Adapter inputs contain only public semantic data: stable runtime/source identities, validated
+resolved JSON props, validated named slot nodes, semantic visual-state/style-part maps, and a
+least-authority interaction port. A component adapter does not receive raw behavior plans. No raw
+headless plan, Catalog metadata, DOM node, selector, native event, component instance, or private
+React structure crosses this contract.
 
-M05-T01 establishes the registry and plan renderer. M05-T02 and M05-T03 add exact receiving-schema
-validation for props and styles; M05-T04 activates session events, component commands, and behavior
-lifecycle; M05-T05 proves real React instance reconciliation and diagnostic identity; M05-T06 adds
-the production error boundary.
+M05-T01 establishes the registry and bounded renderer. M05-T02 authenticates session/Catalog
+authority and adds exact receiving validation for props and materialized named slots. M05-T03 adds
+exact receiving validation for semantic styles; M05-T04 activates session events, component
+commands, and behavior lifecycle; M05-T05 proves real React instance reconciliation and diagnostic
+identity; M05-T06 adds the production error boundary.
 
 ## Public entry points
 
 - `createRuntimeReactAdapterRegistry` captures exact static component and behavior registrations.
 - `readRuntimeReactAdapterRegistry` exposes only the immutable callback-free id inventory.
-- `renderRuntimeReactSurface` compiles one complete public plan into a React element or one
-  identity-linked failure.
+- `renderRuntimeReactSurface` authenticates and compiles one exact current session snapshot into a
+  React element or one identity-linked failure with a receiving channel and immutable diagnostics.
 - `RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS` and `RUNTIME_REACT_RENDER_LIMITS` publish the reference
   ceilings that trusted callers may only lower.
 
@@ -70,7 +80,9 @@ const registry = createRuntimeReactAdapterRegistry({
 if (registry.status === "created") {
   const result = renderRuntimeReactSurface({
     registry: registry.handle,
-    plan: currentHeadlessSessionSnapshot.plan,
+    session: currentHeadlessSessionHandle,
+    snapshot: currentHeadlessSessionSnapshot,
+    catalogSet: exactSessionCatalogSet,
   });
   if (result.status === "rendered") {
     reactRoot.render(result.surface.element);
@@ -78,16 +90,19 @@ if (registry.status === "created") {
 }
 ```
 
-`currentHeadlessSessionSnapshot` and `reactRoot` are host-owned values. Bundle data never supplies
-the component function or an import path.
+`currentHeadlessSessionHandle`, `currentHeadlessSessionSnapshot`, and `exactSessionCatalogSet`
+correspond to the successful mount result's `handle`, `snapshot`, and `catalogSet`; `reactRoot` is
+host-owned. Bundle data never supplies the component function or an import path.
 
 ## Failure behavior
 
 Registry creation and rendering return discriminated results instead of guessing a fallback.
-Malformed data, revoked proxies, unknown capabilities, duplicate identities, forged handles, and
-limit crossings create no placeholder managed tree. The T01 interaction port returns
-`unavailable`; its command contract already reserves an opaque attachment identity and a
-controlled detach result for the authenticated M05-T04 implementation.
+Malformed data, revoked proxies, unknown capabilities, duplicate identities, forged or stale
+session authority, invalid resolved props or slots, and limit crossings create no placeholder
+managed tree. Receiving failures preserve the validator's exact frozen diagnostics and attach
+`props` or `slots` as their public channel. The interaction port still returns `unavailable`; its
+command contract already reserves an opaque attachment identity and a controlled detach result for
+the authenticated M05-T04 implementation.
 
 ## Protocol and target support
 
@@ -96,5 +111,6 @@ controlled detach result for the authenticated M05-T04 implementation.
 
 ## Quality
 
-Run `pnpm --filter @desen/runtime-react lint`, `typecheck`, `test`, and `build` for the focused
-package checks. Use the root workspace quality gate, `pnpm check`, for cumulative proof.
+Run `pnpm --filter @desen/runtime-react lint`, `typecheck`, `test:adapter-registry`,
+`test:resolved-props-slots`, and `build` for the focused package checks. Use the root workspace
+quality gate, `pnpm check`, for cumulative proof.

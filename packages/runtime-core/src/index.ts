@@ -99,6 +99,7 @@ export {
   RUNTIME_HEADLESS_MATERIALIZATION_LIMITS,
 } from "./headless-materialization.js";
 export {
+  authenticateRuntimeHeadlessSessionAdapterAuthority,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
   mountRuntimeHeadlessSession,
@@ -177,6 +178,8 @@ export type {
 
 export type {
   RuntimeHeadlessBindingSnapshot,
+  RuntimeHeadlessSessionAdapterAuthorityInput,
+  RuntimeHeadlessSessionAdapterAuthorityResult,
   RuntimeHeadlessSessionDisposeResult,
   RuntimeHeadlessSessionEventCompletion,
   RuntimeHeadlessSessionEventInput,

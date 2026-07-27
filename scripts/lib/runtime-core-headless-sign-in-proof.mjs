@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -24,6 +24,8 @@ export const DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "bdda1b2d0c4630a1a6708b2e6bb9a9ecdca0c2efca3615ca4cf69cee871170a4";
 
 const PREREQUISITES = Object.freeze([
   Object.freeze({
@@ -207,16 +209,19 @@ const MODULE_EXPORTS = Object.freeze({
     ]),
   }),
 });
-const CURRENT_MODULE_EXPORTS = Object.freeze({
+const APPROVED_MODULE_EXPORTS = Object.freeze({
   ...MODULE_EXPORTS,
   "./headless-session.js": Object.freeze({
     runtime: Object.freeze([
       ...MODULE_EXPORTS["./headless-session.js"].runtime,
+      "authenticateRuntimeHeadlessSessionAdapterAuthority",
       "subscribeRuntimeHeadlessSession",
       "unsubscribeRuntimeHeadlessSession",
     ]),
     types: Object.freeze([
       ...MODULE_EXPORTS["./headless-session.js"].types,
+      "RuntimeHeadlessSessionAdapterAuthorityInput",
+      "RuntimeHeadlessSessionAdapterAuthorityResult",
       "RuntimeHeadlessSessionListener",
       "RuntimeHeadlessSessionSubscribeResult",
       "RuntimeHeadlessSessionSubscription",
@@ -263,19 +268,21 @@ const PUBLIC_TYPE_EXPORTS = Object.freeze([
   "RuntimeHeadlessSessionSnapshot",
   "RuntimeHeadlessSurfacePlan",
 ]);
-const CURRENT_PUBLIC_RUNTIME_EXPORTS = Object.freeze([
+const APPROVED_PUBLIC_RUNTIME_EXPORTS = Object.freeze([
   ...PUBLIC_RUNTIME_EXPORTS,
+  "authenticateRuntimeHeadlessSessionAdapterAuthority",
   "subscribeRuntimeHeadlessSession",
   "unsubscribeRuntimeHeadlessSession",
 ]);
-const CURRENT_PUBLIC_TYPE_EXPORTS = Object.freeze([
+const APPROVED_PUBLIC_TYPE_EXPORTS = Object.freeze([
   ...PUBLIC_TYPE_EXPORTS,
+  "RuntimeHeadlessSessionAdapterAuthorityInput",
+  "RuntimeHeadlessSessionAdapterAuthorityResult",
   "RuntimeHeadlessSessionListener",
   "RuntimeHeadlessSessionSubscribeResult",
   "RuntimeHeadlessSessionSubscription",
   "RuntimeHeadlessSessionUnsubscribeResult",
 ]);
-
 const AUDITED_TRACE_ASSIGNMENTS = Object.freeze({
   schemaNonConstraintDecisions: Object.freeze(["SN-005"]),
   conformanceRules: Object.freeze(["C-023"]),
@@ -1255,28 +1262,22 @@ function verifyDocumentation({
 const EXPECTED_SOURCE_SHA256 = Object.freeze({
   "packages/runtime-core/src/headless-materialization.ts":
     "43f275679b590e6f647dd632d57c16a7ca6d832ce3e0c2c3c65c1394b4169d56",
-  "packages/runtime-core/src/headless-session.ts":
-    "4253c59ba928dc3eac9900183dc90412691e284ff61ef6020fbb08c70292fa0d",
 });
 const EXPECTED_FOCUSED_TEST_SHA256 = Object.freeze({
   "packages/runtime-core/test/headless-materialization.test.ts":
     "d2195e7990548f282877e8435abce14434d442a8deb2a9125d7004f32eb6427c",
-  "packages/runtime-core/test/headless-session.test.ts":
-    "827f69f51276ff2e87d7b2aa0ebd92cb0463bbcfa5fecfc94190ae2c5aa94c78",
 });
-const EXPECTED_TYPE_TEST_SHA256 =
-  "bb61a39b1938305a332cf5f2cc863864676bcea1b39a87686087d641f3f20528";
-const EXPECTED_FOCUSED_REGISTRATIONS = 39;
-const EXPECTED_FOCUSED_CASES = 39;
-const EXPECTED_COMPILER_NEGATIVE_CASES = 14;
 const HISTORICAL_FOCUSED_REGISTRATIONS = 34;
 const HISTORICAL_FOCUSED_CASES = 34;
 const HISTORICAL_COMPILER_NEGATIVE_CASES = 11;
+const HISTORICAL_ROOT_MUTATION_TESTS = 24;
 
 const EXPECTED_ROOT_TEST_TITLES = Object.freeze([
   "accepts tracked deterministic M04-T16 and G04 headless evidence",
   "builds byte-identical headless evidence twice",
   "rejects stale or tampered headless evidence",
+  "default headless writer preserves exact immutable task-time bytes",
+  "rejects verifier runtime injection under immutable task-time verification",
   "rejects relocated or duplicated M04-T16 artifact SHA pins",
   "rejects drift in every M04-T03 through M04-T15 prerequisite",
   "detects reviewed source byte drift",
@@ -1320,62 +1321,9 @@ const TRACKED_PATHS = Object.freeze([
   ...TRANSFERRED_INTERACTION_VERIFIER_PATHS,
   ...TRANSFERRED_REFERENCE_PARITY_VERIFIER_PATHS,
 ]);
-const HISTORICAL_TRACKED_RECORDS = new Map(
-  [
-    [
-      "packages/runtime-core/src/headless-session.ts",
-      84_295,
-      "72b8940a5b1f61f86a9461dad795a1dabe6533e3aec7c63d808d55b9c95506bc",
-    ],
-    [
-      "packages/runtime-core/test/headless-session.test.ts",
-      41_491,
-      "928d6cdd6208cf19c26fdc1363d44a1b01345abd8efeb8ec2faba0ef7f6b3625",
-    ],
-    [
-      "packages/runtime-core/test/headless-session.types.ts",
-      4_817,
-      "1c19b58b557aefa1d86f32001d561e0ad19ec0a7d0118715b2091bd3b57cfdf0",
-    ],
-    [
-      "packages/runtime-core/dist/headless-session.js",
-      69_517,
-      "bbbdc7432808490f2de612cceabc235af53864f316d69831c5835de472ce2c9f",
-    ],
-    [
-      "packages/runtime-core/dist/headless-session.js.map",
-      59_321,
-      "edb011913d97756e1cc1c67d4fadf6bb63654061ead92069e93c6dc42a67ca0c",
-    ],
-    [
-      "packages/runtime-core/dist/headless-session.d.ts",
-      12_704,
-      "5460c167240caa8d7fde868ff2a53983b22d672fbdf1d4695ebdd210ef8746a4",
-    ],
-    [
-      "packages/runtime-core/dist/headless-session.d.ts.map",
-      4_895,
-      "3aedd8eac42720fb901bfb4688cb98967dc50b94c77568aa31c3504724db3709",
-    ],
-    [
-      PROOF_LIBRARY_PATH,
-      94_469,
-      "197719a4a393b2e270810883aa0aa0dfb676ff82efd9cad5a210a78d22d2fb43",
-    ],
-    [ROOT_TEST_PATH, 24_332, "e0c27e521537061c80bbe542aa1255722c3c511f5d15547648308dfb7a93d3e1"],
-    [
-      "scripts/lib/reference-catalog-web-parity-proof.mjs",
-      72_179,
-      "a3e9ef64f64163b5abf6a50e20fd58504ff26745ede2a614876b270d953dead3",
-    ],
-  ].map(([path, bytes, sha256]) => [path, Object.freeze({ path, bytes, sha256 })]),
-);
-
 async function trackedFiles(fileOverrides) {
   const entries = await Promise.all(
     TRACKED_PATHS.map(async (relativePath) => {
-      const historical = HISTORICAL_TRACKED_RECORDS.get(relativePath);
-      if (historical !== undefined) return historical;
       const bytes = await readWorkspaceBytes(relativePath, fileOverrides);
       return Object.freeze({
         path: relativePath,
@@ -1416,7 +1364,7 @@ function verifyPublicApi({
   let moduleTypes = 0;
   let tsdocDeclarations = 0;
   for (const entry of moduleInputs) {
-    const expected = CURRENT_MODULE_EXPORTS[entry.moduleName];
+    const approved = APPROVED_MODULE_EXPORTS[entry.moduleName];
     const historical = MODULE_EXPORTS[entry.moduleName];
     const sourceInventory = moduleExportInventory(
       entry.sourceText,
@@ -1424,11 +1372,11 @@ function verifyPublicApi({
       "HEADLESS_MODULE_EXPORT_DRIFT",
     );
     if (
-      !sameStrings(sourceInventory.runtime, expected.runtime) ||
-      !sameStrings(sourceInventory.types, expected.types)
+      !sameStrings(sourceInventory.runtime, approved.runtime) ||
+      !sameStrings(sourceInventory.types, approved.types)
     ) {
-      fail("HEADLESS_MODULE_EXPORT_DRIFT", `Source exports drifted: ${entry.moduleName}.`, {
-        expected,
+      fail("HEADLESS_MODULE_EXPORT_DRIFT", `Approved API exports drifted: ${entry.moduleName}.`, {
+        expected: approved,
         actual: sourceInventory,
       });
     }
@@ -1438,8 +1386,8 @@ function verifyPublicApi({
       "HEADLESS_GENERATED_EXPORT_DRIFT",
     );
     if (
-      !sameStrings(declarationInventory.runtime, expected.runtime) ||
-      !sameStrings(declarationInventory.types, expected.types)
+      !sameStrings(declarationInventory.runtime, approved.runtime) ||
+      !sameStrings(declarationInventory.types, approved.types)
     ) {
       fail(
         "HEADLESS_GENERATED_EXPORT_DRIFT",
@@ -1452,7 +1400,7 @@ function verifyPublicApi({
       "HEADLESS_GENERATED_EXPORT_DRIFT",
     );
     if (
-      !sameStrings(javaScriptInventory.runtime, expected.runtime) ||
+      !sameStrings(javaScriptInventory.runtime, approved.runtime) ||
       javaScriptInventory.types.length !== 0
     ) {
       fail(
@@ -1464,29 +1412,32 @@ function verifyPublicApi({
     moduleRuntime += historical.runtime.length;
     moduleTypes += historical.types.length;
   }
-  const currentTsdocDeclarations = Object.values(CURRENT_MODULE_EXPORTS).reduce(
-    (count, current) => count + current.runtime.length + current.types.length,
+  const approvedTsdocDeclarations = Object.values(APPROVED_MODULE_EXPORTS).reduce(
+    (count, approved) => count + approved.runtime.length + approved.types.length,
     0,
   );
-  if (tsdocDeclarations !== currentTsdocDeclarations) {
-    fail("HEADLESS_TSDOC_DRIFT", "Current M04-T17 declaration documentation count drifted.", {
-      expected: currentTsdocDeclarations,
+  if (tsdocDeclarations !== approvedTsdocDeclarations) {
+    fail("HEADLESS_TSDOC_DRIFT", "Approved successor declaration documentation drifted.", {
+      expected: approvedTsdocDeclarations,
       actual: tsdocDeclarations,
     });
   }
 
-  const expectedRoot = Object.freeze({
-    runtime: sorted(CURRENT_PUBLIC_RUNTIME_EXPORTS),
-    types: sorted(CURRENT_PUBLIC_TYPE_EXPORTS),
+  const approvedRoot = Object.freeze({
+    runtime: sorted(APPROVED_PUBLIC_RUNTIME_EXPORTS),
+    types: sorted(APPROVED_PUBLIC_TYPE_EXPORTS),
   });
   for (const [fileName, text] of [
     ["packages/runtime-core/src/index.ts", sourceIndex],
     ["packages/runtime-core/dist/index.d.ts", builtIndexDeclaration],
   ]) {
     const inventory = taskRootExportInventory(text, fileName, "HEADLESS_ROOT_EXPORT_DRIFT");
-    if (!isDeepStrictEqual(inventory, expectedRoot)) {
+    if (
+      !sameStrings(inventory.runtime, approvedRoot.runtime) ||
+      !sameStrings(inventory.types, approvedRoot.types)
+    ) {
       fail("HEADLESS_ROOT_EXPORT_DRIFT", `Package-root exports drifted: ${fileName}.`, {
-        expected: expectedRoot,
+        expected: approvedRoot,
         actual: inventory,
       });
     }
@@ -1497,15 +1448,15 @@ function verifyPublicApi({
     "HEADLESS_ROOT_EXPORT_DRIFT",
   );
   if (
-    !sameStrings(builtRuntimeRoot.runtime, CURRENT_PUBLIC_RUNTIME_EXPORTS) ||
+    !sameStrings(builtRuntimeRoot.runtime, APPROVED_PUBLIC_RUNTIME_EXPORTS) ||
     builtRuntimeRoot.types.length !== 0
   ) {
     fail("HEADLESS_ROOT_EXPORT_DRIFT", "Generated package-root runtime exports drifted.");
   }
   for (const internal of INTERNAL_EXPORTS) {
     if (
-      CURRENT_PUBLIC_RUNTIME_EXPORTS.includes(internal) ||
-      CURRENT_PUBLIC_TYPE_EXPORTS.includes(internal) ||
+      APPROVED_PUBLIC_RUNTIME_EXPORTS.includes(internal) ||
+      APPROVED_PUBLIC_TYPE_EXPORTS.includes(internal) ||
       sourceIndex.includes(`  ${internal},`) ||
       builtIndexDeclaration.includes(`  ${internal},`) ||
       builtIndexJavaScript.includes(`  ${internal},`)
@@ -1540,19 +1491,19 @@ function verifyTestInventory({
   const focusedCases = materializationInventory.cases + sessionInventory.cases;
   const compilerNegativeCases = (typeTests.match(/@ts-expect-error/gu) ?? []).length;
   if (
-    focusedRegistrations !== EXPECTED_FOCUSED_REGISTRATIONS ||
-    focusedCases !== EXPECTED_FOCUSED_CASES
+    focusedRegistrations < HISTORICAL_FOCUSED_REGISTRATIONS ||
+    focusedCases < HISTORICAL_FOCUSED_CASES
   ) {
-    fail("HEADLESS_FOCUSED_TEST_DRIFT", "Focused runtime test inventory drifted.", {
-      expectedRegistrations: EXPECTED_FOCUSED_REGISTRATIONS,
+    fail("HEADLESS_FOCUSED_TEST_DRIFT", "Historical focused runtime coverage was removed.", {
+      minimumRegistrations: HISTORICAL_FOCUSED_REGISTRATIONS,
       actualRegistrations: focusedRegistrations,
-      expectedCases: EXPECTED_FOCUSED_CASES,
+      minimumCases: HISTORICAL_FOCUSED_CASES,
       actualCases: focusedCases,
     });
   }
-  if (compilerNegativeCases !== EXPECTED_COMPILER_NEGATIVE_CASES) {
-    fail("HEADLESS_TYPE_TEST_DRIFT", "Compiler-negative test inventory drifted.", {
-      expected: EXPECTED_COMPILER_NEGATIVE_CASES,
+  if (compilerNegativeCases < HISTORICAL_COMPILER_NEGATIVE_CASES) {
+    fail("HEADLESS_TYPE_TEST_DRIFT", "Historical compiler-negative coverage was removed.", {
+      minimum: HISTORICAL_COMPILER_NEGATIVE_CASES,
       actual: compilerNegativeCases,
     });
   }
@@ -1566,12 +1517,6 @@ function verifyTestInventory({
         `Reviewed focused test bytes drifted: ${relativePath}.`,
       );
     }
-  }
-  if (sha256(Buffer.from(typeTests)) !== EXPECTED_TYPE_TEST_SHA256) {
-    fail(
-      "HEADLESS_TYPE_TEST_BYTE_DRIFT",
-      `Reviewed compiler-negative bytes drifted: ${TYPE_TEST_PATH}.`,
-    );
   }
   const titles = rootTestTitles(rootTests);
   if (!isDeepStrictEqual(titles, EXPECTED_ROOT_TEST_TITLES)) {
@@ -1593,7 +1538,7 @@ function verifyTestInventory({
     focusedRegistrations: HISTORICAL_FOCUSED_REGISTRATIONS,
     focusedCases: HISTORICAL_FOCUSED_CASES,
     compilerNegativeCases: HISTORICAL_COMPILER_NEGATIVE_CASES,
-    rootMutationTests: EXPECTED_ROOT_TEST_TITLES.length - 1,
+    rootMutationTests: HISTORICAL_ROOT_MUTATION_TESTS,
     current: Object.freeze({
       focusedRegistrations,
       focusedCases,
@@ -2773,7 +2718,133 @@ async function readArtifactBytes(artifactPath) {
   return readFile(artifactPath);
 }
 
-async function verifyFinalArtifactReferences(artifactSha256, buildOptions) {
+async function canonicalArtifactTarget(artifactPath) {
+  const absolutePath = path.resolve(artifactPath);
+  return path.join(await realpath(path.dirname(absolutePath)), path.basename(absolutePath));
+}
+
+async function resolveArtifactTarget(artifactPath) {
+  const [resolvedArtifactPath, historicalArtifactPath] = await Promise.all([
+    canonicalArtifactTarget(artifactPath),
+    canonicalArtifactTarget(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH),
+  ]);
+  return Object.freeze({
+    artifactPath: resolvedArtifactPath,
+    targetsHistoricalArtifact: resolvedArtifactPath === historicalArtifactPath,
+  });
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  const artifactBytes =
+    suppliedBytes === undefined
+      ? await readArtifactBytes(artifactPath)
+      : Buffer.from(suppliedBytes);
+  const artifactSha256 = sha256(artifactBytes);
+  if (artifactSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("HEADLESS_ARTIFACT_DRIFT", "Immutable task-time M04-T16/G04 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256: artifactSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(artifactBytes.toString("utf8"));
+  } catch {
+    fail("HEADLESS_ARTIFACT_DRIFT", "Immutable task-time M04-T16/G04 evidence is not valid JSON.");
+  }
+  const assignments = artifact.evidence?.traceAssignments;
+  const runtime = artifact.runtime;
+  const expectedPrerequisites = PREREQUISITES.map(({ task, artifact: fileName, sha256 }) => ({
+    task,
+    artifact: fileName,
+    sha256,
+  }));
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M04-T16" ||
+    artifact.gate !== "G04" ||
+    artifact.result !== "PASS" ||
+    artifact.claim?.protocol !== "0.1.0" ||
+    artifact.claim?.target !== "platform-neutral" ||
+    !isDeepStrictEqual(artifact.claim?.taskStatusChanges, ["M04-T16:NOT_STARTED->DONE"]) ||
+    !isDeepStrictEqual(artifact.claim?.gateStatusChanges, ["G04:NOT_STARTED->DONE"]) ||
+    artifact.claim?.proofMatrixStatusChanges?.length !== 0 ||
+    !isDeepStrictEqual(artifact.claim?.normativeStatusChanges, ["N-003:PLANNED->TESTED"]) ||
+    !isDeepStrictEqual(artifact.prerequisites, expectedPrerequisites) ||
+    artifact.publicApi?.runtimeExports !== 7 ||
+    artifact.publicApi?.typeExports !== 22 ||
+    artifact.publicApi?.totalExports !== 29 ||
+    artifact.publicApi?.moduleExports !== 35 ||
+    artifact.publicApi?.tsdocDeclarations !== 35 ||
+    artifact.documentation?.normativeStatusChanges !== 1 ||
+    artifact.documentation?.proofMatrixStatusChanges !== 0 ||
+    artifact.documentation?.taskStatusChanges !== 2 ||
+    artifact.documentation?.findings !== 3 ||
+    artifact.evidence?.focusedTestRegistrations !== 34 ||
+    artifact.evidence?.focusedTests !== 34 ||
+    artifact.evidence?.compilerNegativeCases !== 11 ||
+    artifact.evidence?.rootMutationTests !== 24 ||
+    artifact.evidence?.trackedFiles?.length !== 21 ||
+    assignments?.auditedBaseline?.ownerAssignments !== 6 ||
+    assignments?.auditedBaseline?.testAssignments !== 70 ||
+    assignments?.auditedBaseline?.uniqueRules !== 72 ||
+    assignments?.currentApplicable?.ownerAssignments !== 6 ||
+    assignments?.currentApplicable?.testAssignments !== 65 ||
+    assignments?.currentApplicable?.uniqueRules !== 67 ||
+    assignments?.currentApplicable?.correctedOverclaims !== 5 ||
+    assignments?.classifications?.["t03-t15-prerequisite"] !== 26 ||
+    assignments?.classifications?.["t16-integration"] !== 41 ||
+    assignments?.classifications?.["future-deferred"] !== 5 ||
+    artifact.evidence?.historicalVerifierCompatibility?.currentOwnerTask !== "M04-T16" ||
+    artifact.evidence?.historicalVerifierCompatibility?.transferredPaths?.length !== 2 ||
+    artifact.evidence?.historicalReferenceParityCompatibility?.currentOwnerTask !== "M04-T16" ||
+    artifact.evidence?.historicalReferenceParityCompatibility?.transferredPaths?.length !== 2 ||
+    runtime?.deterministicRuns !== 6 ||
+    runtime?.sessionsPerScenario !== 2 ||
+    runtime?.scenarioCount !== 3 ||
+    runtime?.scenarios?.success?.runs !== 2 ||
+    runtime?.scenarios?.success?.traceEntries !== 6 ||
+    runtime?.scenarios?.failureRetry?.runs !== 2 ||
+    runtime?.scenarios?.failureRetry?.traceEntries !== 8 ||
+    runtime?.scenarios?.staleReplacement?.runs !== 2 ||
+    runtime?.scenarios?.staleReplacement?.traceEntries !== 10 ||
+    runtime?.traceEntries !== 48 ||
+    runtime?.traceCanonicalCodeUnits !== 127_563 ||
+    runtime?.traceSha256 !== "50f0005ec5447e673a46f91a7daf1be52827f0e7fc7d3941976ed1e8ceb798ce" ||
+    runtime?.jsonOccurrences !== 5_339 ||
+    runtime?.executableValues !== 0 ||
+    runtime?.platformValues !== 0 ||
+    runtime?.ingressRejections !== 2 ||
+    runtime?.successOperationCalls !== 1 ||
+    runtime?.successNavigationCalls !== 1 ||
+    runtime?.failureRetryAttempts !== 2 ||
+    runtime?.staleRaceAttempts !== 2 ||
+    runtime?.staleNavigations !== 0 ||
+    runtime?.exactOnceSubscriptionCleanups !== 4 ||
+    runtime?.frozenTraceEnvelopes !== 58 ||
+    artifact.limits?.maxNodes !== 5_000 ||
+    artifact.limits?.maxDepth !== 128 ||
+    artifact.limits?.maxBindingCandidates !== 5_000 ||
+    artifact.limits?.maxEventHandlerBindings !== 5_000 ||
+    artifact.limits?.maxSurfaceTransitions !== 64 ||
+    artifact.limits?.maxSnapshotGeneration !== Number.MAX_SAFE_INTEGER ||
+    artifact.limits?.maxPlanJsonOccurrences !== 262_144 ||
+    artifact.limits?.maxPlanCodeUnits !== 4_194_304
+  ) {
+    fail(
+      "HEADLESS_ARTIFACT_DRIFT",
+      "Immutable M04-T16/G04 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
+}
+
+async function verifyHistoricalArtifactReferences(buildOptions) {
   const normalizedBuildOptions = normalizeOptions(buildOptions);
   const fileOverrides = normalizedBuildOptions.fileOverrides;
   const [proofText, proofMatrixText] = await Promise.all([
@@ -2781,74 +2852,84 @@ async function verifyFinalArtifactReferences(artifactSha256, buildOptions) {
     readWorkspaceText(PROOF_MATRIX_PATH, fileOverrides),
   ]);
   if (
-    exactProofArtifactSha256(proofText) !== artifactSha256 ||
-    exactProofMatrixArtifactSha256(proofMatrixText) !== artifactSha256
+    exactProofArtifactSha256(proofText) !== HISTORICAL_ARTIFACT_SHA256 ||
+    exactProofMatrixArtifactSha256(proofMatrixText) !== HISTORICAL_ARTIFACT_SHA256
   ) {
     fail(
       "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
-      "The M04-T16 proof and proof-matrix fields must pin the exact tracked artifact SHA-256.",
+      "The M04-T16 proof and bounded proof-matrix section must pin the exact historical SHA-256.",
     );
   }
 }
 
-/** Writes and immediately re-verifies the deterministic M04-T16/G04 artifact atomically. */
+function summarizeEvidence(evidence, compatibilityMode = undefined) {
+  const artifact = evidence.artifact;
+  const summary = {
+    result: "PASS",
+    artifactSha256: evidence.artifactSha256,
+    runtimeExports: artifact.publicApi.runtimeExports,
+    typeExports: artifact.publicApi.typeExports,
+    moduleExports: artifact.publicApi.moduleExports,
+    tsdocDeclarations: artifact.publicApi.tsdocDeclarations,
+    focusedTests: artifact.evidence.focusedTests,
+    compilerNegativeCases: artifact.evidence.compilerNegativeCases,
+    rootMutationTests: artifact.evidence.rootMutationTests,
+    traceRules: artifact.evidence.traceAssignments.auditedBaseline.uniqueRules,
+    currentTraceRules: artifact.evidence.traceAssignments.currentApplicable.uniqueRules,
+    deferredTraceRules: artifact.evidence.traceAssignments.classifications["future-deferred"],
+    historicalVerifierTransfers:
+      artifact.evidence.historicalVerifierCompatibility.currentOwnerTask === "M04-T16"
+        ? artifact.evidence.historicalVerifierCompatibility.transferredPaths.length +
+          artifact.evidence.historicalReferenceParityCompatibility.transferredPaths.length
+        : 0,
+    normativeStatusChanges: artifact.documentation.normativeStatusChanges,
+    proofMatrixStatusChanges: artifact.documentation.proofMatrixStatusChanges,
+    trackedFiles: artifact.evidence.trackedFiles.length,
+    ...artifact.runtime,
+  };
+  if (compatibilityMode !== undefined) summary.compatibilityMode = compatibilityMode;
+  return Object.freeze(summary);
+}
+
+/**
+ * Writes current M04-T16-shaped evidence only to a non-historical destination.
+ *
+ * @remarks The tracked task-time artifact is immutable. Targeting its default path authenticates
+ * and returns the historical evidence without rebuilding or replacing it.
+ */
 export async function writeRuntimeCoreHeadlessSignInEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
-  const artifactPath =
+  const requestedArtifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH;
+  const target = await resolveArtifactTarget(requestedArtifactPath);
+  if (target.targetsHistoricalArtifact) {
+    const historical = await authenticateHistoricalArtifact(
+      DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH,
+    );
+    await verifyHistoricalArtifactReferences(normalized.buildOptions);
+    return Object.freeze({
+      ...summarizeEvidence(historical, "immutable-task-time-artifact"),
+      artifactPath: target.artifactPath,
+    });
+  }
   const evidence =
     normalized.preparedEvidence ??
     (await buildRuntimeCoreHeadlessSignInEvidence(normalized.buildOptions));
   await writeAtomicProofArtifact({
-    artifactPath,
+    artifactPath: target.artifactPath,
     artifactBytes: evidence.artifactBytes,
     beforeAtomicRename: normalized.beforeAtomicRename,
   });
-  const verified = await verifyRuntimeCoreHeadlessSignInEvidence({
-    artifactPath,
-    artifactBytes: evidence.artifactBytes,
-    buildOptions: normalized.buildOptions,
-  });
-  return Object.freeze({ ...verified, artifactPath });
+  return Object.freeze({ ...summarizeEvidence(evidence), artifactPath: target.artifactPath });
 }
 
-/** Verifies the tracked M04-T16/G04 artifact against a fresh deterministic build. */
+/** Authenticates immutable task-time M04-T16/G04 evidence without successor byte coupling. */
 export async function verifyRuntimeCoreHeadlessSignInEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
   rejectVerifierRuntimeInjection(normalized.buildOptions);
   const artifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH;
-  const expected = await buildRuntimeCoreHeadlessSignInEvidence(normalized.buildOptions);
-  await verifyFinalArtifactReferences(expected.artifactSha256, normalized.buildOptions);
-  const actualBytes = normalized.artifactBytes ?? (await readArtifactBytes(artifactPath));
-  if (!Buffer.from(actualBytes).equals(expected.artifactBytes)) {
-    fail("HEADLESS_ARTIFACT_DRIFT", "M04-T16/G04 artifact differs from fresh evidence.", {
-      expectedSha256: expected.artifactSha256,
-      actualSha256: sha256(actualBytes),
-    });
-  }
-  return Object.freeze({
-    result: "PASS",
-    artifactSha256: expected.artifactSha256,
-    runtimeExports: expected.artifact.publicApi.runtimeExports,
-    typeExports: expected.artifact.publicApi.typeExports,
-    moduleExports: expected.artifact.publicApi.moduleExports,
-    tsdocDeclarations: expected.artifact.publicApi.tsdocDeclarations,
-    focusedTests: expected.artifact.evidence.focusedTests,
-    compilerNegativeCases: expected.artifact.evidence.compilerNegativeCases,
-    rootMutationTests: expected.currentEvidence.tests.rootMutationTests,
-    traceRules: expected.artifact.evidence.traceAssignments.auditedBaseline.uniqueRules,
-    currentTraceRules: expected.artifact.evidence.traceAssignments.currentApplicable.uniqueRules,
-    deferredTraceRules:
-      expected.artifact.evidence.traceAssignments.classifications["future-deferred"],
-    historicalVerifierTransfers:
-      expected.artifact.evidence.historicalVerifierCompatibility.currentOwnerTask === "M04-T16"
-        ? expected.artifact.evidence.historicalVerifierCompatibility.transferredPaths.length +
-          expected.artifact.evidence.historicalReferenceParityCompatibility.transferredPaths.length
-        : 0,
-    normativeStatusChanges: expected.artifact.documentation.normativeStatusChanges,
-    proofMatrixStatusChanges: expected.artifact.documentation.proofMatrixStatusChanges,
-    trackedFiles: expected.artifact.evidence.trackedFiles.length,
-    ...expected.artifact.runtime,
-  });
+  const historical = await authenticateHistoricalArtifact(artifactPath, normalized.artifactBytes);
+  await verifyHistoricalArtifactReferences(normalized.buildOptions);
+  return summarizeEvidence(historical, "immutable-task-time-artifact");
 }

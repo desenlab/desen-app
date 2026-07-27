@@ -1,16 +1,16 @@
 import {
   ProtocolBindingContractsEvidenceError,
-  writeProtocolBindingContractsEvidence,
+  verifyProtocolBindingContracts,
 } from "./lib/protocol-binding-contracts-proof.mjs";
 
 try {
-  const result = await writeProtocolBindingContractsEvidence();
+  const result = await verifyProtocolBindingContracts();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M02-T10 binding-contract evidence.",
+        message: "Preserved immutable task-time M02-T10 binding-contract evidence.",
       },
       null,
       2,

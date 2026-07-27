@@ -1,5 +1,6 @@
 import {
   appendJsonPointer,
+  canonicalizeJson,
   createJsonPointer,
   isJsonPointer,
   parseJsonPointer,
@@ -68,9 +69,22 @@ interface EvaluationState {
   readonly activeEvaluations: Set<string>;
   readonly dynamicScope: SchemaResource[];
   readonly schemaIds: WeakMap<object, number>;
+  readonly aggregateBudget: SchemaContractEvaluationBudgetAuthority | undefined;
   evaluationSteps: number;
+  aggregateEvaluationBudgetIssue?: SchemaContractIssue;
   evaluationBudgetIssue?: SchemaContractIssue;
   nextSchemaId: number;
+}
+
+interface PreparedSchemaContractAuthority {
+  readonly issueKeyword?: string;
+  readonly registry?: SchemaRegistry;
+  readonly schema?: JsonSchema;
+}
+
+interface SchemaContractEvaluationBudgetAuthority {
+  readonly maxEvaluationSteps: number;
+  evaluationSteps: number;
 }
 
 interface ResolvedSchema {
@@ -119,11 +133,13 @@ const EVALUATED_MAP_SCHEMA_KEYWORDS = Object.freeze([
   "patternProperties",
   "properties",
 ] as const);
+declare const PREPARED_SCHEMA_CONTRACT_TYPE_BRAND: unique symbol;
+declare const SCHEMA_CONTRACT_EVALUATION_BUDGET_TYPE_BRAND: unique symbol;
 
 /** Maximum embedded-schema nesting accepted before recursive T06/T08/T09 work begins. */
 export const MAX_SCHEMA_GRAPH_DEPTH = 128;
 
-/** Deterministic resource limits for the internal T08/T09 schema-contract host profile. */
+/** Deterministic resource limits for the internal schema-contract host profile. */
 export const SCHEMA_CONTRACT_SAFETY_LIMITS = Object.freeze({
   maxSchemaDepth: MAX_SCHEMA_GRAPH_DEPTH,
   maxSchemaNodes: 4_096,
@@ -138,6 +154,9 @@ export const SCHEMA_CONTRACT_SAFETY_LIMITS = Object.freeze({
   maxEvaluationSteps: 50_000,
 } as const);
 
+/** Maximum steps shared by one prepared-schema aggregate evaluation authority. */
+export const SCHEMA_CONTRACT_AGGREGATE_EVALUATION_LIMIT = 1_000_000;
+
 const {
   maxSchemaNodes: MAX_SCHEMA_GRAPH_NODES,
   maxReferences: MAX_SCHEMA_GRAPH_REFERENCES,
@@ -150,12 +169,49 @@ const {
   maxAggregatePatternCodeUnits: MAX_SCHEMA_GRAPH_PATTERN_CODE_UNITS,
   maxEvaluationSteps: MAX_SCHEMA_EVALUATION_STEPS,
 } = SCHEMA_CONTRACT_SAFETY_LIMITS;
+const MAX_SCHEMA_AGGREGATE_EVALUATION_STEPS = SCHEMA_CONTRACT_AGGREGATE_EVALUATION_LIMIT;
+
+const PREPARED_SCHEMA_CONTRACT_AUTHORITIES = new WeakMap<object, PreparedSchemaContractAuthority>();
+const SCHEMA_CONTRACT_EVALUATION_BUDGET_AUTHORITIES = new WeakMap<
+  object,
+  SchemaContractEvaluationBudgetAuthority
+>();
 
 /** Selects whether the supplied object is a complete value or a partial property patch. */
 export type SchemaContractMode = "complete" | "patch";
 
 /** Selects whether DESEN ValueSpec markers are unresolved bindings or ordinary resolved JSON. */
 export type SchemaContractValueMode = "desen-value" | "resolved-value";
+
+/**
+ * Opaque prepared JSON Schema contract authenticated by this module's private authority registry.
+ *
+ * @internal The handle exposes neither source schema nor compiled code and is intentionally absent
+ * from the validator package root API.
+ */
+export interface PreparedSchemaContract {
+  readonly [PREPARED_SCHEMA_CONTRACT_TYPE_BRAND]: true;
+}
+
+/**
+ * Optional lower-only ceiling for one shared prepared-schema evaluation lifetime.
+ *
+ * @internal The exact own-data profile may only reduce the one-million-step aggregate default.
+ */
+export interface SchemaContractEvaluationBudgetLimitProfile {
+  /** Maximum evaluation steps consumed cumulatively by every use of the returned budget. */
+  readonly maxEvaluationSteps?: number;
+}
+
+/**
+ * Opaque, monotonically consumed aggregate evaluation authority.
+ *
+ * @internal Remaining capacity is private, cannot be reset through the handle, and is intentionally
+ * absent from the validator package root API.
+ */
+export interface SchemaContractEvaluationBudget {
+  readonly [SCHEMA_CONTRACT_EVALUATION_BUDGET_TYPE_BRAND]: true;
+}
 
 /** One deterministic, value-relative failure produced while applying a JSON Schema contract. */
 export interface SchemaContractIssue {
@@ -654,42 +710,65 @@ function schemaId(schema: object, state: EvaluationState): number {
   return assigned;
 }
 
-function jsonEqual(left: unknown, right: unknown): boolean {
-  if (left === right) return true;
-  if (left === null || right === null || typeof left !== "object" || typeof right !== "object") {
+function consumeEvaluationWork(
+  state: EvaluationState,
+  pointer: JsonPointer,
+  work = 1,
+  sharedWorkOnly = false,
+): boolean {
+  if (work <= 0) return true;
+  const consumesEvaluationBudget = !sharedWorkOnly || state.aggregateBudget === undefined;
+  const evaluationRemaining = consumesEvaluationBudget
+    ? MAX_SCHEMA_EVALUATION_STEPS - state.evaluationSteps
+    : Number.POSITIVE_INFINITY;
+  const aggregateRemaining =
+    state.aggregateBudget === undefined
+      ? Number.POSITIVE_INFINITY
+      : state.aggregateBudget.maxEvaluationSteps - state.aggregateBudget.evaluationSteps;
+  if (work > aggregateRemaining && aggregateRemaining <= evaluationRemaining) {
+    if (state.aggregateBudget !== undefined) {
+      state.aggregateBudget.evaluationSteps = state.aggregateBudget.maxEvaluationSteps;
+    }
+    state.aggregateEvaluationBudgetIssue ??= issue(
+      "mismatch",
+      pointer,
+      "aggregateEvaluationBudget",
+    );
     return false;
   }
-  if (Array.isArray(left)) {
-    return (
-      Array.isArray(right) &&
-      left.length === right.length &&
-      left.every((child, index) => jsonEqual(child, right[index]))
-    );
+  if (work > evaluationRemaining) {
+    state.evaluationSteps = MAX_SCHEMA_EVALUATION_STEPS;
+    state.evaluationBudgetIssue ??= issue("mismatch", pointer, "evaluationBudget");
+    return false;
   }
-  if (Array.isArray(right)) return false;
+  if (consumesEvaluationBudget) state.evaluationSteps += work;
+  if (state.aggregateBudget !== undefined) state.aggregateBudget.evaluationSteps += work;
+  return true;
+}
 
-  const leftObject = left as Readonly<Record<string, unknown>>;
-  const rightObject = right as Readonly<Record<string, unknown>>;
-  const leftKeys = sortedKeys(leftObject);
-  const rightKeys = sortedKeys(rightObject);
+function evaluationBudgetFailure(state: EvaluationState): Evaluation {
+  const result = accumulator();
+  const budgetIssue = state.evaluationBudgetIssue ?? state.aggregateEvaluationBudgetIssue;
+  if (budgetIssue !== undefined) result.issues.push(budgetIssue);
+  return finishEvaluation(result);
+}
+
+function evaluationBudgetExhausted(state: EvaluationState): boolean {
   return (
-    leftKeys.length === rightKeys.length &&
-    leftKeys.every(
-      (key, index) =>
-        key === rightKeys[index] &&
-        Object.hasOwn(rightObject, key) &&
-        jsonEqual(leftObject[key], rightObject[key]),
-    )
+    state.evaluationBudgetIssue !== undefined || state.aggregateEvaluationBudgetIssue !== undefined
   );
 }
 
-type DynamicEquality = "different" | "equal" | "unknown";
+type DynamicEquality = "budget-exhausted" | "different" | "equal" | "unknown";
 
 function compareDynamicInstance(
   instance: unknown,
   expected: unknown,
   analysis: DynamicAnalysis,
+  state: EvaluationState,
+  pointer: JsonPointer,
 ): DynamicEquality {
+  if (!consumeEvaluationWork(state, pointer, 1, true)) return "budget-exhausted";
   if (isDynamicValueRoot(instance) && containsDynamic(instance, analysis)) return "unknown";
   if (
     instance === null ||
@@ -703,7 +782,14 @@ function compareDynamicInstance(
     if (!Array.isArray(expected) || instance.length !== expected.length) return "different";
     let unknown = false;
     for (let index = 0; index < instance.length; index += 1) {
-      const child = compareDynamicInstance(instance[index], expected[index], analysis);
+      const child = compareDynamicInstance(
+        instance[index],
+        expected[index],
+        analysis,
+        state,
+        appendJsonPointer(pointer, index),
+      );
+      if (child === "budget-exhausted") return child;
       if (child === "different") return "different";
       if (child === "unknown") unknown = true;
     }
@@ -713,8 +799,13 @@ function compareDynamicInstance(
 
   const instanceObject = instance as Readonly<Record<string, unknown>>;
   const expectedObject = expected as Readonly<Record<string, unknown>>;
-  const instanceKeys = sortedKeys(instanceObject);
-  const expectedKeys = sortedKeys(expectedObject);
+  const instanceKeys = Object.keys(instanceObject);
+  const expectedKeys = Object.keys(expectedObject);
+  if (!consumeEvaluationWork(state, pointer, instanceKeys.length + expectedKeys.length, true)) {
+    return "budget-exhausted";
+  }
+  instanceKeys.sort(compareText);
+  expectedKeys.sort(compareText);
   if (
     instanceKeys.length !== expectedKeys.length ||
     instanceKeys.some((key, index) => key !== expectedKeys[index])
@@ -723,7 +814,14 @@ function compareDynamicInstance(
   }
   let unknown = false;
   for (const key of instanceKeys) {
-    const child = compareDynamicInstance(instanceObject[key], expectedObject[key], analysis);
+    const child = compareDynamicInstance(
+      instanceObject[key],
+      expectedObject[key],
+      analysis,
+      state,
+      appendJsonPointer(pointer, key),
+    );
+    if (child === "budget-exhausted") return child;
     if (child === "different") return "different";
     if (child === "unknown") unknown = true;
   }
@@ -1786,11 +1884,15 @@ function applyPropertyNames(
   state: EvaluationState,
   result: EvaluationAccumulator,
 ): void {
-  for (const name of sortedKeys(value)) {
+  const names = Object.keys(value);
+  if (!consumeEvaluationWork(state, pointer, names.length, true)) return;
+  names.sort(compareText);
+  for (const name of names) {
     const childPointer = appendJsonPointer(pointer, name);
     const nameResult = evaluate(schema, name, childPointer, resource, state);
     if (nameResult.status === "invalid") addMismatch(result, childPointer, "propertyNames");
     else if (nameResult.status === "unknown") result.unknown = true;
+    if (evaluationBudgetExhausted(state)) return;
   }
 }
 
@@ -1803,7 +1905,9 @@ function applyObjectKeywords(
   result: EvaluationAccumulator,
   patchRoot: boolean,
 ): void {
-  const keys = sortedKeys(value);
+  const keys = Object.keys(value);
+  if (!consumeEvaluationWork(state, pointer, keys.length, true)) return;
+  keys.sort(compareText);
   if (typeof schema.minProperties === "number" && keys.length < schema.minProperties) {
     if (patchRoot) result.unknown = true;
     else {
@@ -1818,6 +1922,7 @@ function applyObjectKeywords(
     }
   }
   if (Array.isArray(schema.required)) {
+    if (!consumeEvaluationWork(state, pointer, schema.required.length, true)) return;
     for (const requiredName of schema.required) {
       if (typeof requiredName === "string" && !Object.hasOwn(value, requiredName)) {
         if (patchRoot) result.unknown = true;
@@ -1828,12 +1933,25 @@ function applyObjectKeywords(
     }
   }
   if (isObject(schema.dependentRequired)) {
-    for (const trigger of sortedKeys(schema.dependentRequired)) {
+    const triggers = Object.keys(schema.dependentRequired);
+    if (!consumeEvaluationWork(state, pointer, triggers.length, true)) return;
+    triggers.sort(compareText);
+    for (const trigger of triggers) {
       const dependencies = schema.dependentRequired[trigger];
       if (!Array.isArray(dependencies)) continue;
       if (!Object.hasOwn(value, trigger)) {
         if (patchRoot && dependencies.length > 0) result.unknown = true;
         continue;
+      }
+      if (
+        !consumeEvaluationWork(
+          state,
+          appendJsonPointer(pointer, trigger),
+          dependencies.length,
+          true,
+        )
+      ) {
+        return;
       }
       for (const dependency of dependencies) {
         if (typeof dependency === "string" && !Object.hasOwn(value, dependency)) {
@@ -1849,12 +1967,16 @@ function applyObjectKeywords(
   const propertyNames = asSchema(schema.propertyNames);
   if (propertyNames !== undefined) {
     applyPropertyNames(propertyNames, value, pointer, resource, state, result);
+    if (evaluationBudgetExhausted(state)) return;
     if (patchRoot && propertyNames !== true) result.unknown = true;
   }
 
   const matched = new Set<string>();
   if (isObject(schema.properties)) {
-    for (const name of sortedKeys(schema.properties)) {
+    const names = Object.keys(schema.properties);
+    if (!consumeEvaluationWork(state, pointer, names.length, true)) return;
+    names.sort(compareText);
+    for (const name of names) {
       const childSchema = asSchema(schema.properties[name]);
       if (childSchema === undefined) continue;
       if (!Object.hasOwn(value, name)) {
@@ -1867,11 +1989,15 @@ function applyObjectKeywords(
         result,
         evaluate(childSchema, value[name], appendJsonPointer(pointer, name), resource, state),
       );
+      if (evaluationBudgetExhausted(state)) return;
     }
   }
 
   if (isObject(schema.patternProperties)) {
-    for (const patternText of sortedKeys(schema.patternProperties)) {
+    const patterns = Object.keys(schema.patternProperties);
+    if (!consumeEvaluationWork(state, pointer, patterns.length, true)) return;
+    patterns.sort(compareText);
+    for (const patternText of patterns) {
       const childSchema = asSchema(schema.patternProperties[patternText]);
       if (childSchema === undefined) continue;
       if (patchRoot && childSchema !== true) result.unknown = true;
@@ -1880,6 +2006,7 @@ function applyObjectKeywords(
         addMismatch(result, pointer, "patternProperties");
         continue;
       }
+      if (!consumeEvaluationWork(state, pointer, keys.length, true)) return;
       for (const name of keys) {
         if (!pattern.test(name)) continue;
         matched.add(name);
@@ -1888,6 +2015,7 @@ function applyObjectKeywords(
           result,
           evaluate(childSchema, value[name], appendJsonPointer(pointer, name), resource, state),
         );
+        if (evaluationBudgetExhausted(state)) return;
       }
     }
   }
@@ -1896,6 +2024,7 @@ function applyObjectKeywords(
     const additional = asSchema(schema.additionalProperties);
     if (additional !== undefined) {
       if (patchRoot && additional !== true) result.unknown = true;
+      if (!consumeEvaluationWork(state, pointer, keys.length, true)) return;
       for (const name of keys) {
         if (matched.has(name)) continue;
         result.evaluatedProperties.add(name);
@@ -1904,13 +2033,17 @@ function applyObjectKeywords(
           result.issues.push(issue("unknown-property", childPointer, "additionalProperties"));
         } else if (additional !== true) {
           mergeStatus(result, evaluate(additional, value[name], childPointer, resource, state));
+          if (evaluationBudgetExhausted(state)) return;
         }
       }
     }
   }
 
   if (isObject(schema.dependentSchemas)) {
-    for (const trigger of sortedKeys(schema.dependentSchemas)) {
+    const triggers = Object.keys(schema.dependentSchemas);
+    if (!consumeEvaluationWork(state, pointer, triggers.length, true)) return;
+    triggers.sort(compareText);
+    for (const trigger of triggers) {
       const dependent = asSchema(schema.dependentSchemas[trigger]);
       if (dependent === undefined) continue;
       if (!Object.hasOwn(value, trigger)) {
@@ -1918,6 +2051,7 @@ function applyObjectKeywords(
         continue;
       }
       mergeSameInstance(result, evaluate(dependent, value, pointer, resource, state));
+      if (evaluationBudgetExhausted(state)) return;
     }
   }
 }
@@ -1933,7 +2067,16 @@ function applyUniqueItems(
     if (containsDynamic(candidate, state.dynamics)) continue;
     for (let previous = 0; previous < index; previous += 1) {
       const prior = value[previous];
-      if (!containsDynamic(prior, state.dynamics) && jsonEqual(candidate, prior)) {
+      if (containsDynamic(prior, state.dynamics)) continue;
+      const comparison = compareDynamicInstance(
+        candidate,
+        prior,
+        state.dynamics,
+        state,
+        appendJsonPointer(pointer, index),
+      );
+      if (comparison === "budget-exhausted") return;
+      if (comparison === "equal") {
         addMismatch(result, appendJsonPointer(pointer, index), "uniqueItems");
         break;
       }
@@ -1952,7 +2095,9 @@ function applyContains(
 ): void {
   let validCount = 0;
   let unknownCount = 0;
-  value.forEach((item, index) => {
+  if (!consumeEvaluationWork(state, pointer, value.length, true)) return;
+  for (let index = 0; index < value.length; index += 1) {
+    const item = value[index];
     const candidate = evaluate(
       containsSchema,
       item,
@@ -1967,7 +2112,8 @@ function applyContains(
       unknownCount += 1;
       result.evaluatedItems.add(index);
     }
-  });
+    if (evaluationBudgetExhausted(state)) return;
+  }
 
   const minimum = typeof schema.minContains === "number" ? schema.minContains : 1;
   const maximum = typeof schema.maxContains === "number" ? schema.maxContains : undefined;
@@ -2005,27 +2151,34 @@ function applyArrayKeywords(
   let prefixLength = 0;
   if (Array.isArray(schema.prefixItems)) {
     prefixLength = schema.prefixItems.length;
-    schema.prefixItems.forEach((candidate, index) => {
-      if (index >= value.length) return;
+    if (!consumeEvaluationWork(state, pointer, schema.prefixItems.length, true)) return;
+    for (let index = 0; index < schema.prefixItems.length; index += 1) {
+      const candidate = schema.prefixItems[index];
+      if (index >= value.length) continue;
       const childSchema = asSchema(candidate);
-      if (childSchema === undefined) return;
+      if (childSchema === undefined) continue;
       result.evaluatedItems.add(index);
       mergeStatus(
         result,
         evaluate(childSchema, value[index], appendJsonPointer(pointer, index), resource, state),
       );
-    });
+      if (evaluationBudgetExhausted(state)) return;
+    }
   }
 
   if (Object.hasOwn(schema, "items")) {
     const itemSchema = asSchema(schema.items);
     if (itemSchema !== undefined) {
+      if (!consumeEvaluationWork(state, pointer, Math.max(0, value.length - prefixLength), true)) {
+        return;
+      }
       for (let index = prefixLength; index < value.length; index += 1) {
         result.evaluatedItems.add(index);
         const childPointer = appendJsonPointer(pointer, index);
         if (itemSchema === false) addMismatch(result, childPointer, "items");
         else if (itemSchema !== true) {
           mergeStatus(result, evaluate(itemSchema, value[index], childPointer, resource, state));
+          if (evaluationBudgetExhausted(state)) return;
         }
       }
     }
@@ -2045,7 +2198,10 @@ function applyUnevaluatedProperties(
   state: EvaluationState,
   result: EvaluationAccumulator,
 ): void {
-  for (const name of sortedKeys(value)) {
+  const names = Object.keys(value);
+  if (!consumeEvaluationWork(state, pointer, names.length, true)) return;
+  names.sort(compareText);
+  for (const name of names) {
     if (result.evaluatedProperties.has(name)) continue;
     result.evaluatedProperties.add(name);
     const childPointer = appendJsonPointer(pointer, name);
@@ -2053,6 +2209,7 @@ function applyUnevaluatedProperties(
       result.issues.push(issue("unknown-property", childPointer, "unevaluatedProperties"));
     } else if (schema !== true) {
       mergeStatus(result, evaluate(schema, value[name], childPointer, resource, state));
+      if (evaluationBudgetExhausted(state)) return;
     }
   }
 }
@@ -2065,15 +2222,18 @@ function applyUnevaluatedItems(
   state: EvaluationState,
   result: EvaluationAccumulator,
 ): void {
-  value.forEach((item, index) => {
-    if (result.evaluatedItems.has(index)) return;
+  if (!consumeEvaluationWork(state, pointer, value.length, true)) return;
+  for (let index = 0; index < value.length; index += 1) {
+    const item = value[index];
+    if (result.evaluatedItems.has(index)) continue;
     result.evaluatedItems.add(index);
     const childPointer = appendJsonPointer(pointer, index);
     if (schema === false) addMismatch(result, childPointer, "unevaluatedItems");
     else if (schema !== true) {
       mergeStatus(result, evaluate(schema, item, childPointer, resource, state));
+      if (evaluationBudgetExhausted(state)) return;
     }
-  });
+  }
 }
 
 function evaluate(
@@ -2083,13 +2243,7 @@ function evaluate(
   inheritedResource: SchemaResource,
   state: EvaluationState,
 ): Evaluation {
-  if (state.evaluationSteps >= MAX_SCHEMA_EVALUATION_STEPS) {
-    state.evaluationBudgetIssue ??= issue("mismatch", pointer, "evaluationBudget");
-    const budgetFailure = accumulator();
-    budgetFailure.issues.push(state.evaluationBudgetIssue);
-    return finishEvaluation(budgetFailure);
-  }
-  state.evaluationSteps += 1;
+  if (!consumeEvaluationWork(state, pointer)) return evaluationBudgetFailure(state);
   if (schema === true) return emptyEvaluation();
   if (schema === false) {
     const result = accumulator();
@@ -2124,6 +2278,7 @@ function evaluate(
     }
 
     applyCombinators(schema, value, pointer, resource, state, result, patchRoot);
+    if (evaluationBudgetExhausted(state)) return finishEvaluation(result);
     if (isDynamicValueRoot(value) && containsDynamic(value, state.dynamics)) {
       result.unknown = true;
       return finishEvaluation(result);
@@ -2132,16 +2287,37 @@ function evaluate(
 
     if (!patchRoot) {
       if (Object.hasOwn(schema, "const")) {
-        const comparison = compareDynamicInstance(value, schema.const, state.dynamics);
+        const comparison = compareDynamicInstance(
+          value,
+          schema.const,
+          state.dynamics,
+          state,
+          pointer,
+        );
+        if (comparison === "budget-exhausted") return finishEvaluation(result);
         if (comparison === "unknown") result.unknown = true;
         else if (comparison === "different") addMismatch(result, pointer, "const");
       }
       if (Array.isArray(schema.enum)) {
-        const comparisons = schema.enum.map((candidate) =>
-          compareDynamicInstance(value, candidate, state.dynamics),
-        );
-        if (!comparisons.includes("equal")) {
-          if (comparisons.includes("unknown")) result.unknown = true;
+        let equal = false;
+        let unknown = false;
+        for (const candidate of schema.enum) {
+          const comparison = compareDynamicInstance(
+            value,
+            candidate,
+            state.dynamics,
+            state,
+            pointer,
+          );
+          if (comparison === "budget-exhausted") return finishEvaluation(result);
+          if (comparison === "equal") {
+            equal = true;
+            break;
+          }
+          if (comparison === "unknown") unknown = true;
+        }
+        if (!equal) {
+          if (unknown) result.unknown = true;
           else addMismatch(result, pointer, "enum");
         }
       }
@@ -2158,6 +2334,7 @@ function evaluate(
     } else if (isObject(value)) {
       applyObjectKeywords(schema, value, pointer, resource, state, result, patchRoot);
     }
+    if (evaluationBudgetExhausted(state)) return finishEvaluation(result);
 
     if (isObject(value) && Object.hasOwn(schema, "unevaluatedProperties")) {
       const unevaluated = asSchema(schema.unevaluatedProperties);
@@ -2166,6 +2343,7 @@ function evaluate(
         applyUnevaluatedProperties(unevaluated, value, pointer, resource, state, result);
       }
     }
+    if (evaluationBudgetExhausted(state)) return finishEvaluation(result);
     if (Array.isArray(value) && Object.hasOwn(schema, "unevaluatedItems")) {
       const unevaluated = asSchema(schema.unevaluatedItems);
       if (unevaluated !== undefined) {
@@ -2202,6 +2380,203 @@ function normalizeIssues(issues: readonly SchemaContractIssue[]): readonly Schem
   return Object.freeze(unique);
 }
 
+function prepareSchemaContractAuthority(
+  schema: unknown,
+  detachSchema: boolean,
+): PreparedSchemaContractAuthority {
+  let candidate = schema;
+  if (detachSchema) {
+    try {
+      candidate = JSON.parse(canonicalizeJson(schema)) as unknown;
+    } catch {
+      return Object.freeze({ issueKeyword: "schema" });
+    }
+  }
+
+  const normalizedSchema = asSchema(candidate);
+  if (normalizedSchema === undefined) return Object.freeze({ issueKeyword: "schema" });
+  const shapeIssue = schemaShapeIssue(normalizedSchema);
+  if (shapeIssue !== undefined) {
+    return Object.freeze({ issueKeyword: shapeIssue.keyword });
+  }
+
+  const registry = buildSchemaRegistry(normalizedSchema);
+  const evaluationProfileIssue = schemaEvaluationProfileIssue(
+    normalizedSchema,
+    registry.root,
+    registry,
+  );
+  return evaluationProfileIssue === undefined
+    ? Object.freeze({ registry, schema: normalizedSchema })
+    : Object.freeze({ issueKeyword: evaluationProfileIssue.keyword });
+}
+
+function evaluateSchemaContractAuthority(
+  authority: PreparedSchemaContractAuthority,
+  value: unknown,
+  mode: SchemaContractMode,
+  valueMode: SchemaContractValueMode,
+  aggregateBudget: SchemaContractEvaluationBudgetAuthority | undefined,
+): SchemaContractResult {
+  const dynamics = valueMode === "desen-value" ? analyzeDynamicValues(value) : noDynamicValues();
+  if (authority.issueKeyword !== undefined) {
+    return Object.freeze({
+      issues: normalizeIssues([issue("mismatch", ROOT_POINTER, authority.issueKeyword)]),
+      obligations: dynamics.obligations,
+    });
+  }
+
+  const registry = authority.registry as SchemaRegistry;
+  const schema = authority.schema as JsonSchema;
+  const state: EvaluationState = {
+    mode,
+    registry,
+    dynamics,
+    activeEvaluations: new Set<string>(),
+    dynamicScope: [registry.root],
+    schemaIds: new WeakMap<object, number>(),
+    aggregateBudget,
+    evaluationSteps: 0,
+    nextSchemaId: 0,
+  };
+  const evaluation = evaluate(schema, value, ROOT_POINTER, registry.root, state);
+  const budgetIssues = [state.evaluationBudgetIssue, state.aggregateEvaluationBudgetIssue].filter(
+    (entry): entry is SchemaContractIssue => entry !== undefined,
+  );
+  return Object.freeze({
+    issues: normalizeIssues([...evaluation.issues, ...budgetIssues]),
+    obligations: dynamics.obligations,
+  });
+}
+
+function exactAggregateEvaluationLimit(input: unknown): number | undefined {
+  if (input === undefined) return MAX_SCHEMA_AGGREGATE_EVALUATION_STEPS;
+  if (typeof input !== "object" || input === null) return undefined;
+
+  try {
+    if (Array.isArray(input)) return undefined;
+    const prototype = Object.getPrototypeOf(input);
+    if (prototype !== Object.prototype && prototype !== null) return undefined;
+    const keys = Reflect.ownKeys(input);
+    if (
+      keys.some((key) => typeof key !== "string" || key !== "maxEvaluationSteps") ||
+      keys.length > 1
+    ) {
+      return undefined;
+    }
+    if (keys.length === 0) return MAX_SCHEMA_AGGREGATE_EVALUATION_STEPS;
+    const descriptor = Object.getOwnPropertyDescriptor(input, "maxEvaluationSteps");
+    if (descriptor === undefined || !Object.hasOwn(descriptor, "value")) return undefined;
+    const maximum = descriptor.value;
+    return typeof maximum === "number" &&
+      Number.isSafeInteger(maximum) &&
+      maximum >= 0 &&
+      maximum <= MAX_SCHEMA_AGGREGATE_EVALUATION_STEPS
+      ? maximum
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function authorityIdentity(value: unknown): object | undefined {
+  return (typeof value === "object" && value !== null) || typeof value === "function"
+    ? (value as object)
+    : undefined;
+}
+
+function invalidPreparedApplication(keyword: string): SchemaContractResult {
+  return Object.freeze({
+    issues: normalizeIssues([issue("mismatch", ROOT_POINTER, keyword)]),
+    obligations: Object.freeze([]),
+  });
+}
+
+/**
+ * Snapshots and prepares one structurally validated schema for repeated resolved-value checks.
+ *
+ * @remarks Registry construction and static evaluation-profile analysis run exactly once. The
+ * private snapshot prevents later caller mutation from changing the prepared contract. The handle
+ * carries no schema data or executable code and is accepted later only by exact WeakMap identity.
+ *
+ * @internal This primitive is exported only from the schema-contract subpath for sibling validator
+ * and runtime receiving-boundary layers.
+ */
+export function prepareSchemaContract(schema: unknown): PreparedSchemaContract {
+  const authority = prepareSchemaContractAuthority(schema, true);
+  const handle = Object.freeze({}) as PreparedSchemaContract;
+  PREPARED_SCHEMA_CONTRACT_AUTHORITIES.set(handle, authority);
+  return handle;
+}
+
+/**
+ * Creates one shared monotonically consumed prepared-schema evaluation budget.
+ *
+ * @remarks The optional profile must be a plain exact own-data record and may only lower the
+ * one-million-step aggregate ceiling. The empty frozen handle exposes no remaining-count field, so
+ * callers cannot replenish or reset the private authority between applications.
+ *
+ * @throws {TypeError} When the lower-only profile is malformed or exceeds the aggregate ceiling.
+ *
+ * @internal This primitive is exported only from the schema-contract subpath for sibling validator
+ * and runtime receiving-boundary layers.
+ */
+export function createSchemaContractEvaluationBudget(
+  limits?: SchemaContractEvaluationBudgetLimitProfile,
+): SchemaContractEvaluationBudget {
+  const maximum = exactAggregateEvaluationLimit(limits);
+  if (maximum === undefined) {
+    throw new TypeError("Invalid schema contract aggregate evaluation limits.");
+  }
+  const authority: SchemaContractEvaluationBudgetAuthority = {
+    maxEvaluationSteps: maximum,
+    evaluationSteps: 0,
+  };
+  const handle = Object.freeze({}) as SchemaContractEvaluationBudget;
+  SCHEMA_CONTRACT_EVALUATION_BUDGET_AUTHORITIES.set(handle, authority);
+  return handle;
+}
+
+/**
+ * Applies one authentic prepared schema as a complete resolved-value contract.
+ *
+ * @remarks Every interpreter step consumes both the unchanged 50,000-step per-value budget and
+ * the supplied shared aggregate authority. Aggregate capacity is never refunded, including when a
+ * value fails its contract. Exhaustion is reported with the exact
+ * `aggregateEvaluationBudget` keyword. Forged or hostile handles fail closed without property
+ * access using `preparedSchema` or `evaluationBudget`.
+ *
+ * @internal This primitive is exported only from the schema-contract subpath for sibling validator
+ * and runtime receiving-boundary layers.
+ */
+export function applyPreparedSchemaContract(
+  prepared: PreparedSchemaContract,
+  value: unknown,
+  budget: SchemaContractEvaluationBudget,
+): SchemaContractResult {
+  const preparedIdentity = authorityIdentity(prepared);
+  const preparedAuthority =
+    preparedIdentity === undefined
+      ? undefined
+      : PREPARED_SCHEMA_CONTRACT_AUTHORITIES.get(preparedIdentity);
+  if (preparedAuthority === undefined) return invalidPreparedApplication("preparedSchema");
+
+  const budgetIdentity = authorityIdentity(budget);
+  const budgetAuthority =
+    budgetIdentity === undefined
+      ? undefined
+      : SCHEMA_CONTRACT_EVALUATION_BUDGET_AUTHORITIES.get(budgetIdentity);
+  if (budgetAuthority === undefined) return invalidPreparedApplication("evaluationBudget");
+
+  return evaluateSchemaContractAuthority(
+    preparedAuthority,
+    value,
+    "complete",
+    "resolved-value",
+    budgetAuthority,
+  );
+}
+
 /**
  * Applies one structurally validated Draft 2020-12 schema to a DESEN value or resolved payload.
  *
@@ -2230,47 +2605,11 @@ export function applySchemaContract(
   if (valueMode !== "desen-value" && valueMode !== "resolved-value") {
     throw new TypeError("Schema contract value mode must be `desen-value` or `resolved-value`.");
   }
-
-  const normalizedSchema = asSchema(schema);
-  const dynamics = valueMode === "desen-value" ? analyzeDynamicValues(value) : noDynamicValues();
-  if (normalizedSchema === undefined) {
-    return Object.freeze({
-      issues: normalizeIssues([issue("mismatch", ROOT_POINTER, "schema")]),
-      obligations: dynamics.obligations,
-    });
-  }
-  const shapeIssue = schemaShapeIssue(normalizedSchema);
-  if (shapeIssue !== undefined) {
-    return Object.freeze({
-      issues: normalizeIssues([issue("mismatch", ROOT_POINTER, shapeIssue.keyword)]),
-      obligations: dynamics.obligations,
-    });
-  }
-
-  const registry = buildSchemaRegistry(normalizedSchema);
-  const evaluationProfileIssue = schemaEvaluationProfileIssue(
-    normalizedSchema,
-    registry.root,
-    registry,
-  );
-  if (evaluationProfileIssue !== undefined) {
-    return Object.freeze({
-      issues: normalizeIssues([issue("mismatch", ROOT_POINTER, evaluationProfileIssue.keyword)]),
-      obligations: dynamics.obligations,
-    });
-  }
-  const evaluation = evaluate(normalizedSchema, value, ROOT_POINTER, registry.root, {
+  return evaluateSchemaContractAuthority(
+    prepareSchemaContractAuthority(schema, false),
+    value,
     mode,
-    registry,
-    dynamics,
-    activeEvaluations: new Set<string>(),
-    dynamicScope: [registry.root],
-    schemaIds: new WeakMap<object, number>(),
-    evaluationSteps: 0,
-    nextSchemaId: 0,
-  });
-  return Object.freeze({
-    issues: normalizeIssues(evaluation.issues),
-    obligations: dynamics.obligations,
-  });
+    valueMode,
+    undefined,
+  );
 }

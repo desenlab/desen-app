@@ -999,6 +999,14 @@ shared reactive host aggregate. It prepares every handler as a bounded M04-T13 p
 publishing adapter bindings. A plan becomes observable only after the exact T15 evaluation id and
 both commitment digests authenticate the sidecar and binding reconciliation succeeds.
 
+A successful mount returns `handle`, the generation-zero JSON-only `snapshot`, and `catalogSet`.
+`catalogSet` is the exact validated execution-Catalog authority retained by the session: raw
+Catalog callers do not need to validate a second time, while callers that supplied an already
+validated set receive that same reference back. Framework adapters must use this returned reference
+because a separately revalidated byte-equal Catalog set is intentionally a different authority.
+The Catalog set never becomes part of the serializable session snapshot, and adapter
+authentication still returns only the current public snapshot.
+
 `dispatchRuntimeHeadlessSessionEvent` requires the exact current factory-created session snapshot
 and runtime binding. T14 validates the declared event payload and supplies the component or
 behavior origin; the session then selects one prepared program and constructs state, context,

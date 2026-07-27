@@ -1,16 +1,16 @@
 import {
   ProtocolExecutionContractsEvidenceError,
-  writeProtocolExecutionContractsEvidence,
+  verifyProtocolExecutionContracts,
 } from "./lib/protocol-execution-contracts-proof.mjs";
 
 try {
-  const result = await writeProtocolExecutionContractsEvidence();
+  const result = await verifyProtocolExecutionContracts();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M02-T11 execution-contract evidence.",
+        message: "Preserved immutable task-time M02-T11 execution-contract evidence.",
       },
       null,
       2,

@@ -1,10 +1,12 @@
 import { calculateDesenBundleRevision } from "@desen/protocol";
+import { validateDesenExecutionCatalogSet } from "@desen/validator";
 import { describe, expect, it, vi } from "vitest";
 
 import frozenSignInBundle from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.bundle.json";
 import frozenWebCatalog from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
 import * as adapterBridges from "../src/adapter-bridges.js";
 import {
+  authenticateRuntimeHeadlessSessionAdapterAuthority,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
   mountRuntimeHeadlessSession,
@@ -23,6 +25,7 @@ import type {
   RuntimeHeadlessSessionLimitProfile,
   RuntimeHeadlessSessionSnapshot,
 } from "../src/headless-session.js";
+import type { DesenValidatedExecutionCatalogSet } from "@desen/validator";
 
 type MutableRecord = Record<string, unknown>;
 
@@ -49,6 +52,7 @@ interface MountedFixture {
   readonly control: HostControl;
   readonly handle: RuntimeHeadlessSessionHandle;
   readonly initial: RuntimeHeadlessSessionSnapshot;
+  readonly catalogSet: DesenValidatedExecutionCatalogSet;
 }
 
 function deferred<Value>(): Deferred<Value> {
@@ -145,6 +149,7 @@ function hostPorts(target: HostControl): RuntimeHostPorts {
 function mount(
   options: {
     readonly bundle?: unknown;
+    readonly catalogs?: unknown;
     readonly target?: HostControl;
     readonly limits?: RuntimeHeadlessSessionLimitProfile;
   } = {},
@@ -152,7 +157,7 @@ function mount(
   const target = options.target ?? control();
   const result = mountRuntimeHeadlessSession({
     bundle: options.bundle ?? clone(frozenSignInBundle),
-    catalogs: [clone(frozenWebCatalog)],
+    catalogs: options.catalogs ?? [clone(frozenWebCatalog)],
     hostPorts: hostPorts(target),
     ...(options.limits === undefined ? {} : { limits: options.limits }),
   });
@@ -163,7 +168,32 @@ function mount(
       : undefined,
   ).toBe("mounted");
   if (result.status !== "mounted") throw new TypeError(`Expected mount: ${result.reason}`);
-  return { control: target, handle: result.handle, initial: result.snapshot };
+  return {
+    control: target,
+    handle: result.handle,
+    initial: result.snapshot,
+    catalogSet: result.catalogSet,
+  };
+}
+
+function validatedFrozenCatalogSet(): DesenValidatedExecutionCatalogSet {
+  const result = validateDesenExecutionCatalogSet([clone(frozenWebCatalog)]);
+  expect(result.valid, result.valid ? undefined : JSON.stringify(result.diagnostics)).toBe(true);
+  if (!result.valid) throw new TypeError("Expected the frozen web Catalog to validate.");
+  return result.value;
+}
+
+function mountAdapterAuthority(
+  options: {
+    readonly bundle?: unknown;
+    readonly target?: HostControl;
+  } = {},
+): MountedFixture {
+  return mount({
+    ...(options.bundle === undefined ? {} : { bundle: options.bundle }),
+    catalogs: validatedFrozenCatalogSet(),
+    ...(options.target === undefined ? {} : { target: options.target }),
+  });
 }
 
 function current(target: MountedFixture): RuntimeHeadlessSessionSnapshot {
@@ -260,6 +290,307 @@ function expectPortableJson(value: unknown, seen = new WeakSet<object>()): void 
     }
   }
 }
+
+describe("M05-T02 exact framework-adapter session authority", () => {
+  it("returns the exact retained Catalog authority for raw and prevalidated mount ingress", () => {
+    const rawCatalogs = [clone(frozenWebCatalog)];
+    const raw = mount({ catalogs: rawCatalogs });
+    expect(raw.catalogSet).not.toBe(rawCatalogs);
+    expectPortableJson(raw.initial);
+    expect("catalogSet" in raw.initial).toBe(false);
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(raw.handle, {
+        snapshot: raw.initial,
+        catalogSet: raw.catalogSet,
+      }),
+    ).toEqual({ status: "authenticated", snapshot: raw.initial });
+
+    const prevalidated = validatedFrozenCatalogSet();
+    const retained = mount({ catalogs: prevalidated });
+    expect(retained.catalogSet).toBe(prevalidated);
+  });
+
+  it("authenticates only the retained Catalog set and returns no lower authority", () => {
+    const target = mountAdapterAuthority();
+    const authenticated = authenticateRuntimeHeadlessSessionAdapterAuthority(target.handle, {
+      snapshot: target.initial,
+      catalogSet: target.catalogSet,
+    });
+    expect(authenticated).toEqual({
+      status: "authenticated",
+      snapshot: target.initial,
+    });
+    expect(Object.isFrozen(authenticated)).toBe(true);
+    expect(Reflect.ownKeys(authenticated).sort()).toEqual(["snapshot", "status"]);
+    if (authenticated.status !== "authenticated") {
+      throw new TypeError("Expected exact adapter authority.");
+    }
+    expect(authenticated.snapshot).toBe(target.initial);
+    expect("catalogSet" in authenticated).toBe(false);
+    expect("plan" in authenticated).toBe(false);
+    expect("hostPorts" in authenticated).toBe(false);
+
+    const byteEqualCatalogSet = validatedFrozenCatalogSet();
+    expect(byteEqualCatalogSet).not.toBe(target.catalogSet);
+    const catalogMismatch = authenticateRuntimeHeadlessSessionAdapterAuthority(target.handle, {
+      snapshot: target.initial,
+      catalogSet: byteEqualCatalogSet,
+    });
+    expect(catalogMismatch).toEqual({ status: "invalid-catalog-set" });
+    expect(Object.isFrozen(catalogMismatch)).toBe(true);
+    expect(Reflect.ownKeys(catalogMismatch)).toEqual(["status"]);
+
+    let catalogReflections = 0;
+    const hostileCatalog = new Proxy(
+      {},
+      {
+        get() {
+          catalogReflections += 1;
+          throw new Error("Catalog properties must remain private.");
+        },
+        getOwnPropertyDescriptor() {
+          catalogReflections += 1;
+          throw new Error("Catalog descriptors must remain private.");
+        },
+        ownKeys() {
+          catalogReflections += 1;
+          throw new Error("Catalog keys must remain private.");
+        },
+      },
+    ) as DesenValidatedExecutionCatalogSet;
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(target.handle, {
+        snapshot: target.initial,
+        catalogSet: hostileCatalog,
+      }),
+    ).toEqual({ status: "invalid-catalog-set" });
+    expect(catalogReflections).toBe(0);
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+  });
+
+  it("rejects stale, reconstructed, and foreign identities with deterministic precedence", async () => {
+    const left = mountAdapterAuthority();
+    const right = mountAdapterAuthority();
+    const next = await dispatch(left, "sign-in.email", "change", {
+      value: "adapter-authority@example.com",
+    });
+
+    const stale = authenticateRuntimeHeadlessSessionAdapterAuthority(left.handle, {
+      snapshot: left.initial,
+      catalogSet: left.catalogSet,
+    });
+    expect(stale).toEqual({ status: "invalid-snapshot", snapshot: next });
+    expect(Object.isFrozen(stale)).toBe(true);
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(left.handle, {
+        snapshot: clone(next),
+        catalogSet: left.catalogSet,
+      }),
+    ).toEqual({ status: "invalid-snapshot", snapshot: next });
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(left.handle, {
+        snapshot: right.initial,
+        catalogSet: right.catalogSet,
+      }),
+    ).toEqual({ status: "invalid-snapshot", snapshot: next });
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(left.handle, {
+        snapshot: next,
+        catalogSet: right.catalogSet,
+      }),
+    ).toEqual({ status: "invalid-catalog-set" });
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(right.handle, {
+        snapshot: right.initial,
+        catalogSet: right.catalogSet,
+      }),
+    ).toEqual({ status: "authenticated", snapshot: right.initial });
+
+    expect(disposeRuntimeHeadlessSession(left.handle).status).toBe("disposed");
+    expect(disposeRuntimeHeadlessSession(right.handle).status).toBe("disposed");
+  });
+
+  it("rejects hostile envelopes without invoking accessors or leaking reflection failures", () => {
+    const target = mountAdapterAuthority();
+    let accessorReads = 0;
+    const accessorRequest = { catalogSet: target.catalogSet };
+    Object.defineProperty(accessorRequest, "snapshot", {
+      enumerable: true,
+      get() {
+        accessorReads += 1;
+        return target.initial;
+      },
+    });
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(target.handle, accessorRequest as never),
+    ).toEqual({ status: "malformed-request" });
+    expect(accessorReads).toBe(0);
+
+    const nonEnumerableRequest = { catalogSet: target.catalogSet };
+    Object.defineProperty(nonEnumerableRequest, "snapshot", {
+      enumerable: false,
+      value: target.initial,
+    });
+    const symbol = Symbol("hidden");
+    const symbolRequest = {
+      snapshot: target.initial,
+      catalogSet: target.catalogSet,
+      [symbol]: true,
+    };
+    for (const request of [
+      [],
+      Object.assign(Object.create({}), {
+        snapshot: target.initial,
+        catalogSet: target.catalogSet,
+      }),
+      { snapshot: target.initial },
+      { snapshot: target.initial, catalogSet: target.catalogSet, plan: target.initial.plan },
+      nonEnumerableRequest,
+      symbolRequest,
+      new Proxy(
+        {},
+        {
+          ownKeys() {
+            throw new Error("reflection denied");
+          },
+        },
+      ),
+    ]) {
+      const result = authenticateRuntimeHeadlessSessionAdapterAuthority(
+        target.handle,
+        request as never,
+      );
+      expect(result).toEqual({ status: "malformed-request" });
+      expect(Object.isFrozen(result)).toBe(true);
+    }
+
+    const revocable = Proxy.revocable({}, {});
+    revocable.revoke();
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(target.handle, revocable.proxy as never),
+    ).toEqual({ status: "malformed-request" });
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(target.handle, {
+        snapshot: null,
+        catalogSet: target.catalogSet,
+      } as never),
+    ).toEqual({ status: "invalid-snapshot", snapshot: target.initial });
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+  });
+
+  it("short-circuits disposed and forged handles before reflecting over caller input", () => {
+    const target = mountAdapterAuthority();
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+    let reflections = 0;
+    const hostile = new Proxy(
+      {},
+      {
+        getPrototypeOf() {
+          reflections += 1;
+          throw new Error("must not reflect");
+        },
+        ownKeys() {
+          reflections += 1;
+          throw new Error("must not reflect");
+        },
+      },
+    );
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(target.handle, hostile as never),
+    ).toEqual({ status: "disposed" });
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(
+        {} as RuntimeHeadlessSessionHandle,
+        hostile as never,
+      ),
+    ).toEqual({ status: "invalid-handle" });
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(null as never, hostile as never),
+    ).toEqual({ status: "invalid-handle" });
+    expect(reflections).toBe(0);
+  });
+
+  it("rechecks authority after Proxy reflection disposes or republishes the session", () => {
+    const disposedTarget = mountAdapterAuthority();
+    const disposalRequest = new Proxy(
+      {
+        snapshot: disposedTarget.initial,
+        catalogSet: disposedTarget.catalogSet,
+      },
+      {
+        getPrototypeOf(request) {
+          expect(disposeRuntimeHeadlessSession(disposedTarget.handle).status).toBe("disposed");
+          return Reflect.getPrototypeOf(request);
+        },
+      },
+    );
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(disposedTarget.handle, disposalRequest),
+    ).toEqual({ status: "disposed" });
+
+    const throwingTarget = mountAdapterAuthority();
+    const throwingDisposalRequest = new Proxy(
+      {
+        snapshot: throwingTarget.initial,
+        catalogSet: throwingTarget.catalogSet,
+      },
+      {
+        ownKeys() {
+          expect(disposeRuntimeHeadlessSession(throwingTarget.handle).status).toBe("disposed");
+          throw new Error("reflection denied after disposal");
+        },
+      },
+    );
+    expect(
+      authenticateRuntimeHeadlessSessionAdapterAuthority(
+        throwingTarget.handle,
+        throwingDisposalRequest,
+      ),
+    ).toEqual({ status: "disposed" });
+
+    const bundle = clone(frozenSignInBundle) as unknown as MutableRecord;
+    const signIn = (bundle.surfaces as MutableRecord)["sign-in"] as MutableRecord;
+    const root = signIn.root as MutableRecord;
+    const children = (root.slots as MutableRecord).default as MutableRecord[];
+    const title = children[0] as MutableRecord;
+    (title.props as MutableRecord).text = { $ref: "context.title" };
+    bundle.revision = calculateDesenBundleRevision(bundle);
+    const publishedTarget = mountAdapterAuthority({ bundle });
+    publishedTarget.control.context = Object.freeze({
+      title: "Published during reflection",
+      tenant: "alpha",
+    });
+    let publications = 0;
+    const publicationRequest = new Proxy(
+      {
+        snapshot: publishedTarget.initial,
+        catalogSet: publishedTarget.catalogSet,
+      },
+      {
+        getPrototypeOf(request) {
+          publications += 1;
+          notify(publishedTarget.control.contextNotices);
+          return Reflect.getPrototypeOf(request);
+        },
+      },
+    );
+    const publicationResult = authenticateRuntimeHeadlessSessionAdapterAuthority(
+      publishedTarget.handle,
+      publicationRequest,
+    );
+    expect(publications).toBe(1);
+    expect(publicationResult.status).toBe("invalid-snapshot");
+    if (publicationResult.status !== "invalid-snapshot") {
+      throw new TypeError("Expected reentrant publication to stale the captured snapshot.");
+    }
+    expect(publicationResult.snapshot).toBe(current(publishedTarget));
+    expect(publicationResult.snapshot).not.toBe(publishedTarget.initial);
+    expect(JSON.stringify(publicationResult.snapshot.plan)).toContain(
+      "Published during reflection",
+    );
+    expect(disposeRuntimeHeadlessSession(publishedTarget.handle).status).toBe("disposed");
+  });
+});
 
 describe("M04-T16 exact ingress and initial headless materialization", () => {
   it("provides a reentrancy-safe snapshot-store subscription with terminal fan-out", async () => {

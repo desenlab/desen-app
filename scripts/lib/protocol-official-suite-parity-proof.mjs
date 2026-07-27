@@ -29,6 +29,8 @@ export const DEFAULT_PROTOCOL_OFFICIAL_SUITE_PARITY_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae";
 
 /** Frozen, human-readable output captured from the upstream Python suite runner. */
 export const DEFAULT_PROTOCOL_OFFICIAL_SUITE_BASELINE_PATH = path.join(
@@ -163,6 +165,71 @@ function fail(code, message, details = undefined) {
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("OFFICIAL_SUITE_ARTIFACT_DRIFT", "Immutable M02-T12 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "OFFICIAL_SUITE_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T12 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("OFFICIAL_SUITE_ARTIFACT_DRIFT", "Immutable task-time M02-T12 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("OFFICIAL_SUITE_ARTIFACT_DRIFT", "Immutable M02-T12 evidence is not valid JSON.");
+  }
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T12" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-official-suite-parity-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.suite?.composition?.cases !== 14 ||
+    artifact.suite?.composition?.conformanceVectors !== 9 ||
+    artifact.suite?.composition?.publicExamples !== 5 ||
+    artifact.suite?.composition?.valid !== 8 ||
+    artifact.suite?.composition?.invalid !== 6 ||
+    artifact.suite?.targets?.source !== 8 ||
+    artifact.suite?.targets?.bundle !== 4 ||
+    artifact.suite?.targets?.catalog !== 2 ||
+    artifact.suite?.semanticParity?.byteEqual !== true ||
+    artifact.suite?.transcriptParity?.byteEqual !== true ||
+    artifact.suite?.supplements?.length !== 2
+  ) {
+    fail(
+      "OFFICIAL_SUITE_ARTIFACT_DRIFT",
+      "Immutable M02-T12 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -1030,11 +1097,17 @@ export async function buildProtocolOfficialSuiteParityEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T12 evidence through a same-directory atomic rename. */
+/** Writes current evidence only outside the immutable tracked M02-T12 artifact path. */
 export async function writeProtocolOfficialSuiteParityEvidence({
   artifactPath = DEFAULT_PROTOCOL_OFFICIAL_SUITE_PARITY_ARTIFACT_PATH,
   beforeAtomicRename,
 } = {}) {
+  if (
+    path.resolve(artifactPath) ===
+    path.resolve(DEFAULT_PROTOCOL_OFFICIAL_SUITE_PARITY_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   const { resolvedArtifactPath, resolvedParent } = await resolveWritableArtifactPath(artifactPath);
   const result = await buildProtocolOfficialSuiteParityEvidence();
   const { handle, temporaryPath } = await openExclusiveTemporary(
@@ -1079,21 +1152,15 @@ export async function writeProtocolOfficialSuiteParityEvidence({
   }
 }
 
-/** Rebuilds and byte-compares tracked M02-T12 parity evidence without modifying it. */
+/** Authenticates immutable task-time M02-T12 evidence without rebuilding successor source. */
 export async function verifyProtocolOfficialSuiteParity({
   artifactPath = DEFAULT_PROTOCOL_OFFICIAL_SUITE_PARITY_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolOfficialSuiteParityEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail("OFFICIAL_SUITE_ARTIFACT_DRIFT", "Tracked M02-T12 parity evidence is stale or modified.", {
-      expectedSha256: result.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   return Object.freeze({
     result: "PASS",
+    compatibilityMode: "immutable-task-time-artifact",
     cases: result.artifact.suite.composition.cases,
     conformanceVectors: result.artifact.suite.composition.conformanceVectors,
     publicExamples: result.artifact.suite.composition.publicExamples,

@@ -33,6 +33,10 @@ export const INVALID_BINDING_CONTRACT_CODE =
 export const INVALID_EXECUTION_CONTRACT_CODE =
   "run.desen.validator/INVALID_EXECUTION_CONTRACT" as const;
 
+/** Project-owned code for a finite resolved-adapter receiving-scope exhaustion. */
+export const ADAPTER_VALIDATION_LIMIT_EXCEEDED_CODE =
+  "run.desen.validator/ADAPTER_VALIDATION_LIMIT_EXCEEDED" as const;
+
 /** Namespaced diagnostics introduced by the cumulative semantic validation stages. */
 export type DesenSemanticExtensionDiagnosticCode =
   | typeof INVALID_SEMVER_CODE
@@ -40,7 +44,8 @@ export type DesenSemanticExtensionDiagnosticCode =
   | typeof INVALID_COMPONENT_CONTRACT_CODE
   | typeof INVALID_INTERACTION_CONTRACT_CODE
   | typeof INVALID_BINDING_CONTRACT_CODE
-  | typeof INVALID_EXECUTION_CONTRACT_CODE;
+  | typeof INVALID_EXECUTION_CONTRACT_CODE
+  | typeof ADAPTER_VALIDATION_LIMIT_EXCEEDED_CODE;
 
 /** Any core or project-owned diagnostic returned by cumulative semantic validation stages. */
 export type DesenSemanticDiagnostic =
@@ -152,6 +157,19 @@ export function invalidExecutionContractDiagnostic(
   return extensionDiagnostic(
     INVALID_EXECUTION_CONTRACT_CODE,
     "A resource, operation, or action contract cannot be validated safely and coherently.",
+    pointer,
+    context,
+  );
+}
+
+/** Creates the safe project diagnostic used when one adapter receiving scope is exhausted. */
+export function adapterValidationLimitExceededDiagnostic(
+  pointer: JsonPointer,
+  context?: DesenDiagnosticContext,
+): Readonly<DesenDiagnostic<typeof ADAPTER_VALIDATION_LIMIT_EXCEEDED_CODE>> {
+  return extensionDiagnostic(
+    ADAPTER_VALIDATION_LIMIT_EXCEEDED_CODE,
+    "The resolved-adapter receiving scope exceeded a configured finite validation limit.",
     pointer,
     context,
   );

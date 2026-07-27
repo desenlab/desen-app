@@ -1,16 +1,17 @@
 import {
   ProtocolValidatorDiagnosticMicroVectorsEvidenceError,
-  writeProtocolValidatorDiagnosticMicroVectorsEvidence,
+  verifyProtocolValidatorDiagnosticMicroVectors,
 } from "./lib/protocol-validator-diagnostic-micro-vectors-proof.mjs";
 
 try {
-  const result = await writeProtocolValidatorDiagnosticMicroVectorsEvidence();
+  const result = await verifyProtocolValidatorDiagnosticMicroVectors();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M02-T13 validator diagnostic micro-vector evidence.",
+        message:
+          "Preserved immutable task-time M02-T13 validator diagnostic micro-vector evidence.",
       },
       null,
       2,

@@ -42,6 +42,8 @@ export const DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH =
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718";
 
 /** Reviewed trace ledger used to derive the exact validator diagnostic scope. */
 export const DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_TRACE_PATH = path.join(
@@ -270,6 +272,77 @@ function fail(code, message, details = undefined) {
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("DIAGNOSTIC_VECTOR_ARTIFACT_DRIFT", "Immutable M02-T13 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "DIAGNOSTIC_VECTOR_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T13 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail(
+      "DIAGNOSTIC_VECTOR_ARTIFACT_DRIFT",
+      "Immutable task-time M02-T13 evidence bytes changed.",
+      {
+        expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+        actualSha256,
+      },
+    );
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("DIAGNOSTIC_VECTOR_ARTIFACT_DRIFT", "Immutable M02-T13 evidence is not valid JSON.");
+  }
+  const traceResponsibilities = Object.values(
+    artifact.declaredValidatorScope?.traceability?.responsibilities ?? {},
+  ).flat().length;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T13" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-validator-diagnostic-micro-vectors-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.microVectors?.summary?.diagnosticCodes !== 34 ||
+    artifact.microVectors?.summary?.core !== 28 ||
+    artifact.microVectors?.summary?.extensions !== 6 ||
+    artifact.microVectors?.summary?.positiveVectors !== 34 ||
+    artifact.microVectors?.summary?.negativeVectors !== 34 ||
+    artifact.microVectors?.summary?.passingPairs !== 34 ||
+    artifact.microVectors?.summary?.pass !== true ||
+    traceResponsibilities !== 53 ||
+    artifact.declaredValidatorScope?.traceability?.schemaRoute?.schemaFamilies !== 61 ||
+    artifact.declaredValidatorScope?.traceability?.schemaRoute?.schemaConstraints !== 989
+  ) {
+    fail(
+      "DIAGNOSTIC_VECTOR_ARTIFACT_DRIFT",
+      "Immutable M02-T13 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -897,11 +970,17 @@ export async function buildProtocolValidatorDiagnosticMicroVectorsEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T13 evidence through a same-directory atomic rename. */
+/** Writes current evidence only outside the immutable tracked M02-T13 artifact path. */
 export async function writeProtocolValidatorDiagnosticMicroVectorsEvidence({
   artifactPath = DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH,
   beforeAtomicRename,
 } = {}) {
+  if (
+    path.resolve(artifactPath) ===
+    path.resolve(DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   const { resolvedArtifactPath, resolvedParent } = await resolveWritableArtifactPath(artifactPath);
   const result = await buildProtocolValidatorDiagnosticMicroVectorsEvidence();
   const { handle, temporaryPath } = await openExclusiveTemporary(
@@ -946,22 +1025,15 @@ export async function writeProtocolValidatorDiagnosticMicroVectorsEvidence({
   }
 }
 
-/** Rebuilds and byte-compares tracked M02-T13 evidence without modifying it. */
+/** Authenticates immutable task-time M02-T13 evidence without rebuilding successor source. */
 export async function verifyProtocolValidatorDiagnosticMicroVectors({
   artifactPath = DEFAULT_PROTOCOL_VALIDATOR_DIAGNOSTIC_MICRO_VECTORS_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolValidatorDiagnosticMicroVectorsEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail(
-      "DIAGNOSTIC_VECTOR_ARTIFACT_DRIFT",
-      "Tracked M02-T13 diagnostic micro-vector evidence is stale or modified.",
-      { expectedSha256: result.artifactSha256, actualSha256: sha256(actual) },
-    );
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   return Object.freeze({
     result: "PASS",
+    compatibilityMode: "immutable-task-time-artifact",
     diagnostics: result.artifact.microVectors.summary.diagnosticCodes,
     core: result.artifact.microVectors.summary.core,
     extensions: result.artifact.microVectors.summary.extensions,

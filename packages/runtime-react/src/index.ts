@@ -37,6 +37,7 @@ export type {
 } from "./registry.js";
 export type {
   RuntimeReactRenderFailure,
+  RuntimeReactRenderFailureChannel,
   RuntimeReactRenderFailureCode,
   RuntimeReactRenderInput,
   RuntimeReactRenderLimitProfile,
