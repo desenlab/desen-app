@@ -99,7 +99,7 @@ const HISTORICAL_MANDATORY_CLAUSES = Object.freeze([
 const CURRENT_MANDATORY_CLAUSES = Object.freeze([
   Object.freeze({ id: "N-026", status: "TESTED" }),
   Object.freeze({ id: "N-028", status: "TESTED" }),
-  Object.freeze({ id: "N-029", status: "PLANNED" }),
+  Object.freeze({ id: "N-029", status: "TESTED" }),
 ]);
 const EXPECTED_CORE_DIAGNOSTICS = Object.freeze([
   Object.freeze({ id: "D-008", code: "UNKNOWN_PROP" }),
@@ -765,8 +765,9 @@ function parseCoverageRows(markdown) {
  * projection.
  *
  * @remarks PF-049 corrected N-026 and N-029 from `TESTED` to `PLANNED`. M05-T02 has since closed
- * N-026 at the receiving adapter boundary while N-029 remains with M05-T03. Neither successor
- * transition may rewrite the historical M02-T08 artifact or permit unrelated owner/status drift.
+ * N-026 at the receiving adapter boundary, and M05-T03 has closed N-029 at the resolved-style
+ * boundary. Neither successor transition may rewrite the historical M02-T08 artifact or permit
+ * unrelated owner/status drift.
  */
 export function verifyProtocolComponentNormativeCompatibility(markdown) {
   const rows = parseCoverageRows(markdown);
@@ -785,7 +786,7 @@ export function verifyProtocolComponentNormativeCompatibility(markdown) {
     if (currentStatus !== status) {
       fail(
         "COMPONENT_NORMATIVE_COVERAGE_DRIFT",
-        `${id} must retain its exact PF-049 current-ledger status.`,
+        `${id} must retain its exact successor current-ledger status.`,
         { expected: status, actual: currentStatus },
       );
     }

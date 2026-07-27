@@ -202,6 +202,17 @@ export interface DesenAdapterCapabilityReference {
 /** Detached recursively immutable JSON object admitted to one adapter boundary. */
 export type DesenResolvedAdapterValueMap = Readonly<Record<string, DesenResolvedJsonValue>>;
 
+/** Complete resolved property map for one Catalog-declared semantic style part. */
+export type DesenResolvedAdapterStyleProperties = Readonly<Record<string, DesenResolvedJsonValue>>;
+
+/** Catalog-declared semantic style parts for one visual state. */
+export type DesenResolvedAdapterStyleParts = Readonly<
+  Record<string, DesenResolvedAdapterStyleProperties>
+>;
+
+/** Exact resolved visual-state → style-part → property → JSON adapter value. */
+export type DesenResolvedAdapterStyle = Readonly<Record<string, DesenResolvedAdapterStyleParts>>;
+
 /** One materialized child identity admitted to a named adapter slot. */
 export interface DesenResolvedAdapterSlotChildReference {
   /** Exact component capability selected by the authenticated headless plan. */
@@ -256,7 +267,7 @@ export type DesenResolvedAdapterSlotsValidationResult =
 
 /** Complete result of validating resolved component or behavior style maps. */
 export type DesenResolvedAdapterStyleValidationResult =
-  | DesenResolvedAdapterValidationSuccess<"adapter-style", DesenResolvedAdapterValueMap>
+  | DesenResolvedAdapterValidationSuccess<"adapter-style", DesenResolvedAdapterStyle>
   | DesenResolvedAdapterValidationFailure<"adapter-style">;
 
 /** Deterministic inert-data limits shared with resolved component and behavior event payloads. */
@@ -351,6 +362,7 @@ interface CapabilityResolution {
   readonly preparedPropsSchema?: PreparedSchemaContract;
   readonly preparedSlotContracts?: ReadonlyMap<string, PreparedAdapterSlotContract>;
   readonly requiredSlotNames?: readonly string[];
+  readonly preparedVisualStates?: ReadonlySet<string>;
   readonly preparedStylePartSchemas?: ReadonlyMap<string, PreparedSchemaContract>;
 }
 
@@ -836,12 +848,19 @@ function buildExecutionMetadata(
       const schema = part === undefined ? undefined : ownValue(part, "propertiesSchema");
       if (schema !== undefined) styleSchemas.set(partName, prepareSchemaContract(schema));
     }
+    const visualStatesValue = ownValue(contract, "visualStates");
+    const visualStates = new Set(
+      (Array.isArray(visualStatesValue) ? visualStatesValue : []).filter(
+        (state): state is string => typeof state === "string",
+      ),
+    );
     return Object.freeze({
       catalogIndex,
       contract,
       preparedPropsSchema: prepareSchemaContract(ownValue(contract, "propsSchema")),
       preparedSlotContracts: slotContracts,
       requiredSlotNames: Object.freeze(requiredSlotNames),
+      preparedVisualStates: visualStates,
       preparedStylePartSchemas: styleSchemas,
     });
   };
@@ -2010,6 +2029,19 @@ function captureResolvedAdapterMap(
     : Object.freeze({ status: "limit" });
 }
 
+function resolvedAdapterStyleShape(
+  value: DesenResolvedAdapterValueMap,
+): value is DesenResolvedAdapterStyle {
+  for (const state of Object.values(value)) {
+    const stateObject = asObject(state);
+    if (stateObject === undefined) return false;
+    for (const part of Object.values(stateObject)) {
+      if (asObject(part) === undefined) return false;
+    }
+  }
+  return true;
+}
+
 type ResolvedAdapterSlotCaptureResult =
   | Readonly<{ readonly status: "captured"; readonly value: DesenResolvedAdapterSlotMap }>
   | Readonly<{ readonly status: "invalid" }>
@@ -2422,14 +2454,15 @@ export function validateDesenResolvedAdapterStyle(
     ]);
   }
   const snapshot = captured.value;
-  const visualStatesValue = ownValue(prepared.contract, "visualStates");
-  const visualStates = new Set(
-    (Array.isArray(visualStatesValue) ? visualStatesValue : []).filter(
-      (state): state is string => typeof state === "string",
-    ),
-  );
-  const stylePartsValue = ownValue(prepared.contract, "styleParts");
-  const styleParts = asObject(stylePartsValue) ?? EMPTY_OBJECT;
+  const visualStates = prepared.resolution.preparedVisualStates;
+  const stylePartSchemas = prepared.resolution.preparedStylePartSchemas;
+  if (visualStates === undefined || stylePartSchemas === undefined) {
+    return adapterValidationFailure("adapter-style", [
+      invalidExecutionContractDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
   const diagnostics: DesenSemanticDiagnostic[] = [];
 
   for (const stateName of sortedKeys(snapshot as unknown as JsonObject)) {
@@ -2444,23 +2477,14 @@ export function validateDesenResolvedAdapterStyle(
     }
     for (const partName of sortedKeys(parts)) {
       const partPointer = appendJsonPointer(statePointer, partName);
-      const partContract = asObject(ownValue(styleParts, partName));
-      if (partContract === undefined) {
+      const propertiesSchema = stylePartSchemas.get(partName);
+      if (propertiesSchema === undefined) {
         diagnostics.push(adapterDiagnostic("UNKNOWN_PROP", partPointer, prepared.reference));
         continue;
       }
       const properties = asObject(ownValue(parts, partName));
       if (properties === undefined) {
         diagnostics.push(adapterDiagnostic("PROP_TYPE_MISMATCH", partPointer, prepared.reference));
-        continue;
-      }
-      const propertiesSchema = prepared.resolution.preparedStylePartSchemas?.get(partName);
-      if (propertiesSchema === undefined) {
-        diagnostics.push(
-          invalidExecutionContractDiagnostic(partPointer, {
-            capabilityId: prepared.reference.capabilityId,
-          }),
-        );
         continue;
       }
       diagnostics.push(
@@ -2475,7 +2499,12 @@ export function validateDesenResolvedAdapterStyle(
     }
   }
 
-  return diagnostics.length === 0
+  if (diagnostics.length !== 0) return adapterValidationFailure("adapter-style", diagnostics);
+  return resolvedAdapterStyleShape(snapshot)
     ? adapterValidationSuccess("adapter-style", snapshot)
-    : adapterValidationFailure("adapter-style", diagnostics);
+    : adapterValidationFailure("adapter-style", [
+        invalidExecutionContractDiagnostic(ROOT_POINTER, {
+          capabilityId: prepared.reference.capabilityId,
+        }),
+      ]);
 }

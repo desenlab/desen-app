@@ -143,7 +143,7 @@ test("rejects reviewed M02-T08 trace, BCP 14, and finding mutations", async (con
   assert.deepEqual(compatibility.currentStatuses, [
     { id: "N-026", status: "TESTED" },
     { id: "N-028", status: "TESTED" },
-    { id: "N-029", status: "PLANNED" },
+    { id: "N-029", status: "TESTED" },
   ]);
 
   const changedStatus = normative.replace(/^(\| N-026 \|.*?\| )TESTED(\s+\|)/mu, "$1PLANNED$2");
@@ -165,6 +165,21 @@ test("rejects reviewed M02-T08 trace, BCP 14, and finding mutations", async (con
   await assert.rejects(
     buildProtocolComponentContractsEvidence({
       normativeCoveragePath: downgradeCoveragePath,
+      verifySnapshot: false,
+    }),
+    hasEvidenceCode("COMPONENT_NORMATIVE_COVERAGE_DRIFT"),
+  );
+
+  const successorDowngrade = normative.replace(
+    /^(\| N-029 \|.*?\| )TESTED(\s+\|)/mu,
+    "$1PLANNED$2",
+  );
+  assert.notEqual(successorDowngrade, normative);
+  const successorDowngradeCoveragePath = path.join(directory, "normative-successor-downgrade.md");
+  await writeFile(successorDowngradeCoveragePath, successorDowngrade);
+  await assert.rejects(
+    buildProtocolComponentContractsEvidence({
+      normativeCoveragePath: successorDowngradeCoveragePath,
       verifySnapshot: false,
     }),
     hasEvidenceCode("COMPONENT_NORMATIVE_COVERAGE_DRIFT"),

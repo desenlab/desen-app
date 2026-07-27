@@ -684,3 +684,28 @@ N-026 advances to `TESTED`. N-027 and N-042 remain `PLANNED` for publisher/edito
 N-029 remains `PLANNED` for M05-T03 style delivery. No P-claim or proof gate changes:
 `runtime-react-0.1.0-resolved-props-slots.json`
 `sha256:f668dc0d3d0e9e8edb239323fd82037b8afc2004dbe8eace56dcd4c510ed22e0`.
+
+## M05-T03
+
+M05-T03 validates every final component and behavior style map through the same exact
+Catalog-authenticated receiving scope used by M05-T02 before any React element is created. The
+public successful value preserves the readonly visual-state → semantic-part → property → resolved
+JSON hierarchy. Component and behavior failures use distinct stable codes and the `style`
+receiving channel while preserving exact immutable validator diagnostics.
+
+Declared visual states and prepared style-part schemas are cached once with the authenticated
+execution Catalog. Style validation, detached JSON, retained strings, and schema evaluation share
+render-wide lower-only budgets. A deep mismatch or budget crossing executes no adapter and returns
+no partial tree.
+
+The renderer delivers the complete immutable map but never selects or merges a state, interprets a
+property, creates CSS, or inspects DOM/native/React-private structure. State activation and target
+translation remain inside the statically trusted capability adapter. N-029 becomes `TESTED`;
+N-030 remains `PLANNED`, and no P-claim or proof gate changes.
+
+The M02-T08, M04-T05, and M05-T02 artifacts remain byte-identical prerequisites. M05-T03 owns the
+strict M05-T02 compatibility-reader migration plus current renderer, validator, focused test,
+documentation, package, CI, and proof paths.
+
+`runtime-react-0.1.0-resolved-styles.json`
+`sha256:2b0e03e58116d161484cd3c309370ff1ee5003ee6158d4e941749faf0d6797eb`.

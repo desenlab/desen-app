@@ -46,8 +46,9 @@ headless plan, Catalog metadata, DOM node, selector, native event, component ins
 React structure crosses this contract.
 
 M05-T01 establishes the registry and bounded renderer. M05-T02 authenticates session/Catalog
-authority and adds exact receiving validation for props and materialized named slots. M05-T03 adds
-exact receiving validation for semantic styles; M05-T04 activates session events, component
+authority and adds exact receiving validation for props and materialized named slots. M05-T03
+adds exact receiving validation and immutable delivery for complete visual-state → semantic-part
+→ property style maps while leaving state activation inside each capability adapter. M05-T04 activates session events, component
 commands, and behavior lifecycle; M05-T05 proves real React instance reconciliation and diagnostic
 identity; M05-T06 adds the production error boundary.
 

@@ -34,6 +34,8 @@ export type {
   RuntimeReactInteractionPort,
   RuntimeReactNamedSlots,
   RuntimeReactSemanticStyle,
+  RuntimeReactStyleParts,
+  RuntimeReactStyleProperties,
 } from "./registry.js";
 export type {
   RuntimeReactRenderFailure,

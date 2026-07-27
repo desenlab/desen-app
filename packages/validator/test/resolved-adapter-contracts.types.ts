@@ -7,9 +7,13 @@ import {
 
 import type {
   DesenAdapterCapabilityReference,
+  DesenResolvedAdapterStyle,
+  DesenResolvedAdapterStyleParts,
+  DesenResolvedAdapterStyleProperties,
   DesenResolvedAdapterPropsValidationResult,
   DesenResolvedAdapterSlotsValidationResult,
   DesenResolvedAdapterStyleValidationResult,
+  DesenResolvedJsonValue,
 } from "../src/index.js";
 
 import type { DesenValidatedExecutionCatalogSet } from "../src/index.js";
@@ -57,8 +61,12 @@ if (props.valid) {
 }
 
 if (style.valid) {
-  const base: unknown = style.value.base;
+  const base: DesenResolvedAdapterStyleParts | undefined = style.value.base;
+  const root: DesenResolvedAdapterStyleProperties | undefined = base?.root;
+  const color: DesenResolvedJsonValue | undefined = root?.color;
   void base;
+  void root;
+  void color;
 
   // @ts-expect-error Successful style maps are readonly.
   style.value.base = {};
@@ -66,6 +74,11 @@ if (style.valid) {
   // @ts-expect-error Failures expose no partial style value.
   void style.value;
 }
+
+// @ts-expect-error A visual state must contain style parts, not a property value.
+const flatStyle: DesenResolvedAdapterStyle = { base: { color: "red" } };
+// @ts-expect-error A style part must contain a property map, not an array.
+const malformedStyle: DesenResolvedAdapterStyle = { base: { root: [] } };
 
 validateDesenResolvedAdapterProps(
   {},
@@ -77,6 +90,8 @@ validateDesenResolvedAdapterProps(
 void props;
 void slots;
 void style;
+void flatStyle;
+void malformedStyle;
 
 // @ts-expect-error A Catalog set is not a receiving scope.
 validateDesenResolvedAdapterProps({}, component, catalogs);

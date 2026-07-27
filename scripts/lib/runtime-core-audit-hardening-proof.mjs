@@ -201,6 +201,21 @@ const PF049_HEADING =
   "## PF-049 — Post-G04 audit corrections require explicit runtime notification and proof migration";
 const PF049_LINE = 1704;
 const PF049_SHA256 = "04125b2eb2d3bb280b35e23c053c7fce822598e8dc0c058499b5d1f4b4a8b01b";
+const PF049_FUTURE_ACTION_PREFIX = "- Future action:";
+const PF049_HISTORICAL_FUTURE_ACTION = Object.freeze([
+  "- Future action: M05-T02 retains final validation and adapter-delivery ownership for N-026, and",
+  "  M05-T03 retains final post-resolution style validation and adapter-delivery ownership for N-029.",
+  "  Each row may return to `TESTED` only with its complete receiving-boundary evidence. A future",
+  "  protocol revision may standardize settlement-completion notification and versioned evidence",
+  "  snapshots; M04-T17 defines only the bounded 0.1.0 reference implementation profile.",
+]).join("\n");
+const PF049_M05_T03_FUTURE_ACTION = Object.freeze([
+  "- Future action: M05-T02 supplied the complete receiving-boundary evidence for N-026 and M05-T03",
+  "  supplied the complete post-resolution style-validation and adapter-delivery evidence for N-029;",
+  "  both rows are now `TESTED`. A future protocol revision may standardize settlement-completion",
+  "  notification and versioned evidence snapshots; M04-T17 defines only the bounded 0.1.0 reference",
+  "  implementation profile.",
+]).join("\n");
 
 const ACTION_MODULE_EXPORTS = Object.freeze({
   runtime: Object.freeze([
@@ -582,7 +597,7 @@ function verifyNormativeLedger(normativeText) {
   });
 }
 
-function verifyPf049(findingsText) {
+function verifyPf049(findingsText, normativeMigration) {
   const range = exactHeadingRange(findingsText, PF049_HEADING, "AUDIT_PF049_DRIFT");
   const headings = range.lines.flatMap((line, index) =>
     /^## PF-\d{3} —/u.test(line) ? [{ line, index }] : [],
@@ -596,8 +611,34 @@ function verifyPf049(findingsText) {
     fail("AUDIT_PF049_DRIFT", "PF-049 moved from its exact reviewed ledger location.");
   }
   const section = range.lines.slice(range.start, range.end).join("\n").trimEnd();
-  if (sha256(section) !== PF049_SHA256) {
-    fail("AUDIT_PF049_DRIFT", "The exact PF-049 section bytes drifted.");
+  const futureActionOffsets = [
+    ...section.matchAll(new RegExp(`^${PF049_FUTURE_ACTION_PREFIX}`, "gmu")),
+  ].map((match) => match.index);
+  if (futureActionOffsets.length !== 1) {
+    fail("AUDIT_PF049_DRIFT", "PF-049 must contain one exact future-action boundary.");
+  }
+  const futureActionOffset = futureActionOffsets[0];
+  const currentFutureAction = section.slice(futureActionOffset);
+  const currentStatuses = new Map(
+    normativeMigration.currentStatuses.map(({ id, status }) => [id, status]),
+  );
+  const m05T03Closed =
+    currentStatuses.get("N-026") === "TESTED" && currentStatuses.get("N-029") === "TESTED";
+  const expectedFutureAction = m05T03Closed
+    ? PF049_M05_T03_FUTURE_ACTION
+    : PF049_HISTORICAL_FUTURE_ACTION;
+  if (currentFutureAction !== expectedFutureAction) {
+    fail(
+      "AUDIT_PF049_DRIFT",
+      m05T03Closed
+        ? "PF-049 lost or forged its exact M05-T03 normative closure."
+        : "PF-049 future ownership drifted before the M05-T03 normative closure.",
+    );
+  }
+  const historicalProjection =
+    section.slice(0, futureActionOffset) + PF049_HISTORICAL_FUTURE_ACTION;
+  if (sha256(historicalProjection) !== PF049_SHA256) {
+    fail("AUDIT_PF049_DRIFT", "The exact task-time PF-049 projection drifted.");
   }
   for (const anchor of [
     "- Status: OPEN",
@@ -608,13 +649,15 @@ function verifyPf049(findingsText) {
     "M05-T02 retains final validation and adapter-delivery ownership for N-026",
     "M05-T03 retains final post-resolution style validation and adapter-delivery ownership for N-029",
   ]) {
-    if (!section.includes(anchor)) fail("AUDIT_PF049_DRIFT", `PF-049 anchor is missing: ${anchor}`);
+    if (!historicalProjection.includes(anchor)) {
+      fail("AUDIT_PF049_DRIFT", `PF-049 task-time anchor is missing: ${anchor}`);
+    }
   }
   return Object.freeze({
     path: "docs/plan/PROTOCOL-FINDINGS.md",
     heading: PF049_HEADING,
     line: range.start + 1,
-    sha256: sha256(section),
+    sha256: PF049_SHA256,
   });
 }
 
@@ -1236,7 +1279,7 @@ export async function buildRuntimeCoreAuditHardeningEvidence(options = undefined
   await verifyBytePins(fileOverrides);
   const taskLedger = verifyTaskLedger(tasksText);
   const normativeMigration = verifyNormativeLedger(normativeText);
-  const finding = verifyPf049(findingsText);
+  const finding = verifyPf049(findingsText, normativeMigration);
   const publicApi = verifyRuntimeApi({
     actionSource,
     sessionSource,

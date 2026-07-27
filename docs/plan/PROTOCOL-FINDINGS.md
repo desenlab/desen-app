@@ -1749,11 +1749,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   The hardened cases expose no partial snapshot, publish no settlement twice, revive no disposed
   authority, and strand no lower queue acknowledgement.
 
-- Future action: M05-T02 retains final validation and adapter-delivery ownership for N-026, and
-  M05-T03 retains final post-resolution style validation and adapter-delivery ownership for N-029.
-  Each row may return to `TESTED` only with its complete receiving-boundary evidence. A future
-  protocol revision may standardize settlement-completion notification and versioned evidence
-  snapshots; M04-T17 defines only the bounded 0.1.0 reference implementation profile.
+- Future action: M05-T02 supplied the complete receiving-boundary evidence for N-026 and M05-T03
+  supplied the complete post-resolution style-validation and adapter-delivery evidence for N-029;
+  both rows are now `TESTED`. A future protocol revision may standardize settlement-completion
+  notification and versioned evidence snapshots; M04-T17 defines only the bounded 0.1.0 reference
+  implementation profile.
 
 ## PF-050 — React adapter selection requires a static registry and bounded all-or-nothing preflight
 
@@ -1797,10 +1797,10 @@ This file records implementation discoveries without changing the frozen DESEN 0
   authenticated headless session; M05-T04 binds interactions to that session and M05-T09 audits
   the host source/import graph. This keeps the pure compiler reusable without overstating T01.
 
-- Future action: M05-T02 now authenticates the exact session/Catalog pair and validates resolved
-  props and named slots through one bounded receiving scope; `PF-051` records that implementation
-  profile. M05-T03 must validate and deliver resolved styles before those semantic fields reach an
-  adapter. M05-T04 activates the deliberately unavailable event/command seams and proves behavior
+- Future action: M05-T02 authenticates the exact session/Catalog pair and validates resolved props
+  and named slots through one bounded receiving scope; `PF-051` records that implementation
+  profile. M05-T03 now validates and delivers resolved styles through that same scope; `PF-052`
+  records the semantic-style profile. M05-T04 activates the deliberately unavailable event/command seams and proves behavior
   lifecycle. M05-T05 proves concrete React instance reconciliation and source diagnostics, while
   M05-T06 owns committed adapter exceptions and final production
   unknown-capability/error-boundary behavior. Future SwiftUI and Compose renderers should reuse
@@ -1854,10 +1854,52 @@ This file records implementation discoveries without changing the frozen DESEN 0
   `children` fallback. This is a target-specific receiving profile; the shared validator and
   session authority remain framework-neutral.
 
-- Future action: M05-T03 must deliver only schema-valid resolved visual-state/style-part maps.
+- Future action: M05-T03 now delivers only schema-valid resolved visual-state/style-part maps.
   M05-T04 must bind event and command lifetimes to the exact current session generation. M05-T06
   must compose receiving failures and adapter exceptions into the production safe-boundary policy.
   M06-T05 still owns publisher-side recording of dynamic validation obligations, so `N-027`
   remains `PLANNED`. M09-T04 still owns editor overlay/private-structure isolation, so `N-042`
   remains `PLANNED`. A later protocol revision may standardize a target-neutral receiving-scope
   envelope and aggregate-budget terminology if independent runtimes need byte-level parity.
+
+## PF-052 — Semantic React style delivery preserves capability-owned state activation
+
+- Status: OPEN
+- Blocks proof: No; M05-T03 defines one exact Web–React semantic-style receiving profile without
+  adding CSS, DOM, selector, or active-state semantics to the frozen protocol.
+- Protocol location: SPEC Sections 17.2, 18.3, 24.2, and 26.3; `N-028`, `N-029`, `C-019`,
+  `R-006`, `R-064`, `R-065`, `R-066`, `R-148`, and related findings `PF-035`, `PF-049`,
+  `PF-050`, and `PF-051`
+- Observation: The headless runtime materializes the complete visual-state → style-part →
+  property hierarchy, and the validator can check that hierarchy against exact Catalog contracts.
+  M05-T02 deliberately stopped before calling the style receiving API. Passing its detached but
+  unchecked style map to a React adapter would leave dynamically resolved property values outside
+  their receiving `propertiesSchema`. Conversely, having the generic renderer choose or merge an
+  active visual state would move capability-owned platform behavior into a framework-wide policy
+  that the protocol never defines.
+- Implementation decision: M05-T03 calls `validateDesenResolvedAdapterStyle` for every component
+  and behavior after complete prop validation and before named-slot delivery or React element
+  creation. The call uses the same exact Catalog-authenticated, monotonically consumed scope as
+  props and slots. Catalog preparation caches declared visual-state identities and style-part
+  schemas once. Each final style map is detached, bounded, and checked as state → part → complete
+  resolved property object. Unknown states, parts, or properties and schema-invalid dynamic values
+  produce stable identity-linked style failures. A receiving-budget crossing retains the shared
+  limit classification. No adapter executes and no partial tree is returned after any failure.
+
+  Successful component and behavior adapters receive only an independent, recursively immutable
+  semantic hierarchy. The public type names the state, part, and property layers but gives no CSS
+  selector, class, DOM/native handle, ref, query API, or implementation option. `runtime-react`
+  neither selects a state nor merges `base` with another state, interprets property names, creates
+  CSS, or inspects the component implementation. A trusted capability adapter receives the same
+  complete map regardless of which production state it later decides is active.
+
+  The immutable M05-T02 artifact remains byte-identical. Its current verifier is transferred to a
+  strict task-time compatibility reader, while the M05-T03 successor artifact owns the current
+  renderer, validator, test, documentation, and migration paths.
+
+- Future action: M05-T04 must bind interactions without widening the semantic-style authority.
+  M05-T06 must contain committed adapter exceptions. N-030 remains `PLANNED`: real reference
+  adapter styling and hostile accessibility-preservation tests remain with M09/M12 rather than
+  being inferred from schema-valid delivery alone. A later multi-target revision may standardize
+  a renderer-neutral semantic-style receiving envelope, but target state activation remains
+  capability-owned.

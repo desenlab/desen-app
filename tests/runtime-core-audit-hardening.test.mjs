@@ -18,6 +18,7 @@ const HISTORICAL_ARTIFACT_SHA256 =
   "cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa";
 const PF049_HEADING =
   "## PF-049 — Post-G04 audit corrections require explicit runtime notification and proof migration";
+const PF049_HISTORICAL_SHA256 = "04125b2eb2d3bb280b35e23c053c7fce822598e8dc0c058499b5d1f4b4a8b01b";
 
 let baselinePromise;
 
@@ -97,6 +98,7 @@ test("builds byte-identical M04-T17 evidence twice", async () => {
   });
   assert.equal(first.artifactSha256, second.artifactSha256);
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
+  assert.equal(first.artifact.migration.finding.sha256, PF049_HISTORICAL_SHA256);
 });
 
 test("verifies exact in-memory final artifact references", async () => {
@@ -214,7 +216,7 @@ test("rejects duplicate, moved, or mutated normative rows", async () => {
         "docs/proof/NORMATIVE-COVERAGE.md": replaceOnce(
           normative,
           n029,
-          replaceOnce(n029, "2026-07-27", "2026-07-28"),
+          replaceOnce(n029, "M02-T08, M05-T03", "M02-T08"),
         ),
       }),
     "AUDIT_NORMATIVE_LEDGER_DRIFT",
@@ -255,6 +257,39 @@ test("rejects moved or duplicated PF-049 evidence", async () => {
   const moved = `${without.slice(0, pf048)}${section}\n\n${without.slice(pf048)}\n`;
   await rejectsCode(
     () => buildPending({ "docs/plan/PROTOCOL-FINDINGS.md": moved }),
+    "AUDIT_PF049_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildPending({
+        "docs/plan/PROTOCOL-FINDINGS.md": replaceOnce(
+          findings,
+          "  both rows are now `TESTED`. A future protocol revision may standardize settlement-completion",
+          "  A future protocol revision may standardize settlement-completion",
+        ),
+      }),
+    "AUDIT_PF049_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildPending({
+        "docs/plan/PROTOCOL-FINDINGS.md": replaceOnce(
+          findings,
+          "  both rows are now `TESTED`.",
+          "  both rows are now `PLANNED`.",
+        ),
+      }),
+    "AUDIT_PF049_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildPending({
+        "docs/plan/PROTOCOL-FINDINGS.md": replaceOnce(
+          findings,
+          "factory-authenticated, finite, exactly-once internal",
+          "factory-authenticated, unbounded, exactly-once internal",
+        ),
+      }),
     "AUDIT_PF049_DRIFT",
   );
 });

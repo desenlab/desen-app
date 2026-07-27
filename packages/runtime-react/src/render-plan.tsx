@@ -7,6 +7,7 @@ import {
   createDesenResolvedAdapterValidationScope,
   validateDesenResolvedAdapterProps,
   validateDesenResolvedAdapterSlots,
+  validateDesenResolvedAdapterStyle,
 } from "@desen/validator";
 
 import { readRuntimeReactAdapterRegistryAuthority } from "./registry.js";
@@ -32,6 +33,7 @@ import type {
   RuntimeReactDiagnosticIdentity,
   RuntimeReactInteractionPort,
   RuntimeReactNamedSlots,
+  RuntimeReactSemanticStyle,
 } from "./registry.js";
 
 /** Reference ceilings for one React render-plan compilation. */
@@ -71,7 +73,7 @@ export interface RuntimeReactRenderInput {
 }
 
 /** Public receiving channel associated with a renderer failure, when one exists. */
-export type RuntimeReactRenderFailureChannel = "props" | "slots" | null;
+export type RuntimeReactRenderFailureChannel = "props" | "slots" | "style" | null;
 
 /** Stable fail-closed renderer classification. */
 export type RuntimeReactRenderFailureCode =
@@ -80,9 +82,11 @@ export type RuntimeReactRenderFailureCode =
   | "DUPLICATE_RUNTIME_IDENTITY"
   | "INVALID_BEHAVIOR_PROPS"
   | "INVALID_BEHAVIOR_SLOTS"
+  | "INVALID_BEHAVIOR_STYLE"
   | "INVALID_CATALOG_SET"
   | "INVALID_COMPONENT_PROPS"
   | "INVALID_COMPONENT_SLOTS"
+  | "INVALID_COMPONENT_STYLE"
   | "INVALID_REGISTRY"
   | "INVALID_SESSION"
   | "INVALID_SESSION_SNAPSHOT"
@@ -146,7 +150,7 @@ interface PreparedBehavior {
   readonly capabilityId: string;
   readonly behaviorId: string;
   readonly props: RuntimeJsonObject;
-  readonly style: RuntimeJsonObject;
+  readonly style: RuntimeReactSemanticStyle;
   readonly component: RuntimeReactBehaviorAdapterComponent;
   readonly slots: Readonly<Record<string, readonly PreparedNode[]>>;
 }
@@ -156,7 +160,7 @@ interface PreparedNode {
   readonly sourceNodeId: string;
   readonly capabilityId: string;
   readonly props: RuntimeJsonObject;
-  readonly style: RuntimeJsonObject;
+  readonly style: RuntimeReactSemanticStyle;
   readonly component: RuntimeReactComponentAdapterComponent;
   readonly slots: Readonly<Record<string, readonly PreparedNode[]>>;
   readonly behaviors: readonly PreparedBehavior[];
@@ -390,8 +394,10 @@ function receivingFailure(
   ordinaryCode:
     | "INVALID_BEHAVIOR_PROPS"
     | "INVALID_BEHAVIOR_SLOTS"
+    | "INVALID_BEHAVIOR_STYLE"
     | "INVALID_COMPONENT_PROPS"
-    | "INVALID_COMPONENT_SLOTS",
+    | "INVALID_COMPONENT_SLOTS"
+    | "INVALID_COMPONENT_STYLE",
   identity: RuntimeReactDiagnosticIdentity,
   channel: Exclude<RuntimeReactRenderFailureChannel, null>,
   diagnostics: readonly DesenSemanticDiagnostic[],
@@ -681,6 +687,19 @@ function prepareBehavior(
   }
   const capturedStyle = captureJsonObject(ownData(raw, "style"), state, limits, behaviorIdentity);
   if (isRenderFailure(capturedStyle)) return capturedStyle;
+  const validatedStyle = validateDesenResolvedAdapterStyle(
+    capturedStyle,
+    { capabilityKind: "behavior", capabilityId },
+    state.validationScope,
+  );
+  if (!validatedStyle.valid) {
+    return receivingFailure(
+      "INVALID_BEHAVIOR_STYLE",
+      behaviorIdentity,
+      "style",
+      validatedStyle.diagnostics,
+    );
+  }
   const slots = prepareSlotMap(ownData(raw, "slots"), depth, state, limits, components, behaviors);
   if (isRenderFailure(slots)) return slots;
   const validatedSlots = validateDesenResolvedAdapterSlots(
@@ -702,7 +721,7 @@ function prepareBehavior(
     capabilityId,
     behaviorId,
     props: validatedProps.value as RuntimeJsonObject,
-    style: capturedStyle,
+    style: validatedStyle.value,
     component,
     slots,
   });
@@ -776,6 +795,19 @@ function prepareNode(
   }
   const capturedStyle = captureJsonObject(ownData(raw, "style"), state, limits, identity);
   if (isRenderFailure(capturedStyle)) return capturedStyle;
+  const validatedStyle = validateDesenResolvedAdapterStyle(
+    capturedStyle,
+    { capabilityKind: "component", capabilityId: identity.capabilityId },
+    state.validationScope,
+  );
+  if (!validatedStyle.valid) {
+    return receivingFailure(
+      "INVALID_COMPONENT_STYLE",
+      identity,
+      "style",
+      validatedStyle.diagnostics,
+    );
+  }
   const slots = prepareSlotMap(
     ownData(raw, "slots"),
     depth + 1,
@@ -818,7 +850,7 @@ function prepareNode(
     sourceNodeId: identity.sourceNodeId,
     capabilityId: identity.capabilityId,
     props: validatedProps.value as RuntimeJsonObject,
-    style: capturedStyle,
+    style: validatedStyle.value,
     component,
     slots,
     behaviors: Object.freeze(preparedBehaviors),
@@ -880,11 +912,12 @@ function authenticatedPlan(
  * the React element tree.
  *
  * @remarks Registry, session generation, exact Catalog set, complete resolved component and
- * behavior props, and materialized named slots all pass before the first React element is created.
- * Adapters receive only detached validated props, semantic style data, exact named React slots,
- * stable public identities, and the least-authority interaction seam. No raw plan, behavior plan,
- * React-private structure, DOM reference, fallback component, or dynamic loader crosses the
- * boundary.
+ * behavior props, semantic style maps, and materialized named slots all pass before the first
+ * React element is created. Adapters receive only detached validated props, complete
+ * state → part → property style data, exact named React slots, stable public identities, and the
+ * least-authority interaction seam. State activation and platform translation remain adapter
+ * responsibilities. No raw plan, behavior plan, React-private structure, DOM reference, fallback
+ * component, or dynamic loader crosses the boundary.
  */
 export function renderRuntimeReactSurface(
   input: RuntimeReactRenderInput,
