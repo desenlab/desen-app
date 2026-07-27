@@ -117,6 +117,11 @@ part behavior remains equivalent. Production visual-state activation is capabili
 authoring tool may later force only declared states under its separately disclosed preview
 contract.
 
+M05-T03 implements this decision by validating every final component and behavior style map
+through the exact prepared Catalog contract and the render-wide receiving budget before React
+element creation. The renderer preserves and freezes the complete state → part → property map;
+it does not collapse `base` with another state or infer which state is active.
+
 ### Shared reference React adapters and M03 compatibility migration
 
 `@desen/reference-catalog-web` publishes one explicit `./react-adapters` subpath. That subpath

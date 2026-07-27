@@ -1,0 +1,461 @@
+{
+  "schemaVersion": 1,
+  "task": "M05-T03",
+  "result": "PASS",
+  "profile": "desen-runtime-react-resolved-styles-v1",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "web-react",
+    "summary": "The React renderer validates every final component and behavior style through the exact Catalog receiving scope, preserves the semantic state-part-property hierarchy, and leaves state activation to the capability adapter.",
+    "resolvedStyleReceivingBoundary": true,
+    "stateActivationOwner": "capability-adapter",
+    "rendererStateSelection": false,
+    "rendererStateMerge": false,
+    "privatePlatformStructure": false
+  },
+  "prerequisites": [
+    {
+      "task": "M02-T08",
+      "path": "docs/proof/artifacts/protocol-0.1.0-component-contracts.json",
+      "sha256": "71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac",
+      "profile": "desen-component-contract-validation-v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M04-T05",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-variant-style-evaluation.json",
+      "sha256": "46fb343d6639998c1b75403271a0e765c214b32880385ebe30bd649bd60d369e",
+      "result": "PASS"
+    },
+    {
+      "task": "M05-T02",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-resolved-props-slots.json",
+      "sha256": "f668dc0d3d0e9e8edb239323fd82037b8afc2004dbe8eace56dcd4c510ed22e0",
+      "profile": "desen-runtime-react-resolved-props-slots-v1",
+      "result": "PASS"
+    }
+  ],
+  "historicalCompatibility": {
+    "immutableArtifactSha256": "f668dc0d3d0e9e8edb239323fd82037b8afc2004dbe8eace56dcd4c510ed22e0",
+    "compatibilityMode": "immutable-task-time-artifact",
+    "transferredOwnership": [
+      "scripts/lib/runtime-react-resolved-props-slots-proof.mjs",
+      "tests/runtime-react-resolved-props-slots.test.mjs"
+    ]
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS",
+      "RUNTIME_REACT_RENDER_LIMITS",
+      "createRuntimeReactAdapterRegistry",
+      "readRuntimeReactAdapterRegistry",
+      "renderRuntimeReactSurface"
+    ],
+    "typeExports": [
+      "RuntimeReactAdapterRegistryCreateInput",
+      "RuntimeReactAdapterRegistryCreateResult",
+      "RuntimeReactAdapterRegistryHandle",
+      "RuntimeReactAdapterRegistryInvalidReason",
+      "RuntimeReactAdapterRegistryLimitProfile",
+      "RuntimeReactAdapterRegistryReadResult",
+      "RuntimeReactAdapterRegistrySnapshot",
+      "RuntimeReactBehaviorAdapterComponent",
+      "RuntimeReactBehaviorAdapterProps",
+      "RuntimeReactBehaviorAdapterRegistration",
+      "RuntimeReactCommandAttachmentHandle",
+      "RuntimeReactCommandAttachmentResult",
+      "RuntimeReactCommandDetachmentResult",
+      "RuntimeReactComponentAdapterComponent",
+      "RuntimeReactComponentAdapterProps",
+      "RuntimeReactComponentAdapterRegistration",
+      "RuntimeReactComponentCommandPort",
+      "RuntimeReactDiagnosticIdentity",
+      "RuntimeReactEventDispatchResult",
+      "RuntimeReactInteractionPort",
+      "RuntimeReactNamedSlots",
+      "RuntimeReactRenderFailure",
+      "RuntimeReactRenderFailureChannel",
+      "RuntimeReactRenderFailureCode",
+      "RuntimeReactRenderInput",
+      "RuntimeReactRenderLimitProfile",
+      "RuntimeReactRenderResult",
+      "RuntimeReactRenderedSurface",
+      "RuntimeReactSemanticStyle",
+      "RuntimeReactStyleParts",
+      "RuntimeReactStyleProperties"
+    ],
+    "validatorStyleTypeExports": [
+      "DesenResolvedAdapterStyle",
+      "DesenResolvedAdapterStyleParts",
+      "DesenResolvedAdapterStyleProperties",
+      "DesenResolvedAdapterStyleValidationResult"
+    ],
+    "sourceDeclarations": 38,
+    "tsdocDeclarations": 38
+  },
+  "semanticStyle": {
+    "hierarchy": "visual-state/style-part/property/resolved-json",
+    "componentValidation": "exact prepared Catalog propertiesSchema",
+    "behaviorValidation": "exact prepared Catalog propertiesSchema",
+    "validatedValueDelivered": true,
+    "detachedAndRecursivelyImmutable": true,
+    "declaredStatesOnly": true,
+    "declaredPartsOnly": true,
+    "componentFailure": { "code": "INVALID_COMPONENT_STYLE", "channel": "style" },
+    "behaviorFailure": { "code": "INVALID_BEHAVIOR_STYLE", "channel": "style" },
+    "invalidStyleDeliveredToAdapter": false
+  },
+  "receivingBudget": {
+    "preparedVisualStates": true,
+    "preparedStylePartSchemas": true,
+    "oneSharedSchemaBudget": true,
+    "styleValidationCounter": "maxStyleValidations",
+    "controlledLimitFailure": "RECEIVING_VALIDATION_LIMIT_EXCEEDED"
+  },
+  "failureModel": {
+    "codes": [
+      "BEHAVIOR_LIMIT_EXCEEDED",
+      "DEPTH_LIMIT_EXCEEDED",
+      "DUPLICATE_RUNTIME_IDENTITY",
+      "INVALID_BEHAVIOR_PROPS",
+      "INVALID_BEHAVIOR_SLOTS",
+      "INVALID_BEHAVIOR_STYLE",
+      "INVALID_CATALOG_SET",
+      "INVALID_COMPONENT_PROPS",
+      "INVALID_COMPONENT_SLOTS",
+      "INVALID_COMPONENT_STYLE",
+      "INVALID_REGISTRY",
+      "INVALID_SESSION",
+      "INVALID_SESSION_SNAPSHOT",
+      "JSON_DEPTH_LIMIT_EXCEEDED",
+      "JSON_OCCURRENCE_LIMIT_EXCEEDED",
+      "MALFORMED_RENDER_PLAN",
+      "NODE_LIMIT_EXCEEDED",
+      "RECEIVING_VALIDATION_LIMIT_EXCEEDED",
+      "SLOT_LIMIT_EXCEEDED",
+      "STRING_LIMIT_EXCEEDED",
+      "UNKNOWN_BEHAVIOR_CAPABILITY",
+      "UNKNOWN_COMPONENT_CAPABILITY"
+    ],
+    "channels": ["null", "props", "slots", "style"],
+    "allOrNothingBeforeReactElementCreation": true,
+    "exactValidatorDiagnosticsPreserved": true
+  },
+  "architecture": {
+    "package": "@desen/runtime-react",
+    "productionDependencies": ["@desen/runtime-core", "@desen/validator"],
+    "peerDependencies": ["react"],
+    "focusedScript": "test:style-parts-states",
+    "modules": ["./registry.js", "@desen/runtime-core", "@desen/validator", "react"],
+    "dynamicExecutableLoading": 0,
+    "selectorClassDomRefAuthority": 0,
+    "stateActivationAuthorityExposedByRenderer": false
+  },
+  "traceability": {
+    "task": { "id": "M05-T03", "status": "DONE", "prerequisite": "M05-T01–M05-T02" },
+    "normative": [
+      { "id": "N-028", "status": "TESTED", "owners": "M02-T08, M05-T03" },
+      { "id": "N-029", "status": "TESTED", "owners": "M02-T08, M05-T03" },
+      { "id": "N-030", "status": "PLANNED", "owners": "M03-T09, M09-T05, M12-T08" }
+    ],
+    "canonicalTrace": ["C-019", "R-006", "R-064", "R-065", "R-066", "R-148"],
+    "finding": "PF-052"
+  },
+  "evidence": {
+    "tests": {
+      "runtimeReactTests": 8,
+      "validatorStyleTests": 3,
+      "runtimeReactCompilerNegativeCases": 6,
+      "validatorCompilerNegativeCases": 9,
+      "compilerNegativeCases": 15,
+      "rootMutationTests": 18,
+      "directUniqueNonSkipped": true
+    },
+    "trackedFiles": [
+      {
+        "path": "README.md",
+        "bytes": 37196,
+        "sha256": "9d6bef1b1e3da01162c108b5e0f33d7a37e51780a849bbd969dc5f70ebba49cc"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 6675,
+        "sha256": "5e0faa1b62aa3cde80c10764c0190d1c1e60297ca26b41d06ce19eec32e0cf2f"
+      },
+      {
+        "path": "docs/adr/0010-m05-react-runtime-and-reference-host-boundaries.md",
+        "bytes": 17094,
+        "sha256": "1c3d1ec4845274994ad7223a6bf5c0e3f4058662902f07fa7b9dcfa7aaf62ca2"
+      },
+      {
+        "path": "docs/architecture/ARCHITECTURE.md",
+        "bytes": 22638,
+        "sha256": "04f33b22c605760b6eda258195df4646fea202bbdd0d4ca6f763ec8928261db1"
+      },
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 145765,
+        "sha256": "1ed548c61029b4870f07a3a38ee759b7258f90e69a830798b74a92e14d2fdd33"
+      },
+      {
+        "path": "docs/plan/TASKS.md",
+        "bytes": 35842,
+        "sha256": "c631986fbdcae0b5086e8625598e86f2c6bbdd8604f010fa41b8196b7c3906de"
+      },
+      {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 65572,
+        "sha256": "80d6a2f4d12e2903d0910ab7f2454f627519d2adb068ee2e6d9cc3636d1440fb"
+      },
+      {
+        "path": "docs/proof/PROOF-MATRIX.md",
+        "bytes": 81798,
+        "sha256": "d4f7fc05839276e54c442678cd38a7188651610743a82c7de54daaa63bc11112",
+        "normalization": "self-artifact-pin-canonical-pending"
+      },
+      {
+        "path": "docs/proof/RUNTIME-REACT-RESOLVED-STYLES.md",
+        "bytes": 4987,
+        "sha256": "fa8fb2266f900aea6d6cbae5bdc8d864c7b7b1d80a72f4ceefa0503d0822b0e7",
+        "normalization": "self-artifact-pin-canonical-pending"
+      },
+      {
+        "path": "docs/proof/protocol-0.1.0-traceability.json",
+        "bytes": 134870,
+        "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+      },
+      {
+        "path": "package.json",
+        "bytes": 40478,
+        "sha256": "b1effdf675e5f840e3eeb496b20c3847bd36ea5a8909f75f6e6846ae62a14062"
+      },
+      {
+        "path": "packages/runtime-react/README.md",
+        "bytes": 6061,
+        "sha256": "21f120283af6319f1de89ca36be4503453ee9c460c2283eb8bfe2d3fd85d9dc9"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts",
+        "bytes": 1523,
+        "sha256": "78ba369843bbb1aac7ed26fd5b9c16f3238ecdb9ec2e50ff61ba7b1dcd76f6ca"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts.map",
+        "bytes": 709,
+        "sha256": "1b472941a9e21a88782eadaafa84024b651e22daf0662c372a197114458ee0b1"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js",
+        "bytes": 391,
+        "sha256": "f880c202eddffe993f4af53d3519595395bb71bfc10ae13b83f28417867f9927"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js.map",
+        "bytes": 240,
+        "sha256": "deeea8e084fbdb6ab763a919074c4cba87cc495b73b13a8e32ea85291c661b40"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts",
+        "bytes": 9211,
+        "sha256": "ef86821d3fc004b9bde93c1221d9b5084eea39f015dbe24ba4de29c624118712"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts.map",
+        "bytes": 4634,
+        "sha256": "eb2124d34e808228bf4e966bbef679faa7d78376053e0d27a3c7174e050ab2e3"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js",
+        "bytes": 8630,
+        "sha256": "8ba998f8533d9a1047e56e1b9e0a5cd8ec6f569f92f9f396649d0d9e729b529d"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js.map",
+        "bytes": 7970,
+        "sha256": "4795d52d8cf4ea3d26c4f7b341cd8f91da5b5f76dcb401e7ac8fda4c13b4f608"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts",
+        "bytes": 4805,
+        "sha256": "dac174dad28c8c7e60f1782b4082525c7c8b46094f9d7f21f540b7e8f8737dca"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts.map",
+        "bytes": 2240,
+        "sha256": "caa253f24cb10f4beb2b6c9a53ebeb869cb83b89cbfe640de252793cec8589f9"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js",
+        "bytes": 27937,
+        "sha256": "6dcb59545cc1954fb31a47054e49cf023a5f639fc5eefb8c92c9a311b7da4e41"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js.map",
+        "bytes": 26208,
+        "sha256": "7cf522d332c643f88d964cf6df53a46c778e57281e202b26e21444e273c61000"
+      },
+      {
+        "path": "packages/runtime-react/package.json",
+        "bytes": 1229,
+        "sha256": "a36028c04edb52a4dec42868234004f7033cbf5df25f43dc8aed0277357e72d7"
+      },
+      {
+        "path": "packages/runtime-react/src/index.ts",
+        "bytes": 1558,
+        "sha256": "45ab161d039ad57eaec901cf9eeec784f3f52c5364af834b83099a23f1d06013"
+      },
+      {
+        "path": "packages/runtime-react/src/registry.ts",
+        "bytes": 17333,
+        "sha256": "0a553e102a0a7a84341340d3dccdafc1c30d66979c6e4dccea7b7c7140186263"
+      },
+      {
+        "path": "packages/runtime-react/src/render-plan.tsx",
+        "bytes": 35316,
+        "sha256": "1153dc1c74a8a75444235ab820b937f85d033d51331d4fdbaf9552844df02bc3"
+      },
+      {
+        "path": "packages/runtime-react/test/session-fixture.ts",
+        "bytes": 3719,
+        "sha256": "dc926c4381693e784b71fa51fea3f08821fbd40a988854a89e37b5f76bc45b2d"
+      },
+      {
+        "path": "packages/runtime-react/test/style-parts-states.test.tsx",
+        "bytes": 13436,
+        "sha256": "90f80c94f15e6b91f584b1e7e21059a6e4d798577c104067b2e86bc0e6f6bf8f"
+      },
+      {
+        "path": "packages/runtime-react/test/style-parts-states.types.ts",
+        "bytes": 2072,
+        "sha256": "3807a1defca17b0d4fc56eb748655751f7a88e2da325884f635d0717beebce0a"
+      },
+      {
+        "path": "packages/validator/README.md",
+        "bytes": 57335,
+        "sha256": "7b302745acb590b21696f05345cdff42e8dac09b68bd466d0a179efc08165202"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.d.ts",
+        "bytes": 18649,
+        "sha256": "dad62e290879bd7d4ef580aa73f6d8b8f6e3fe528c5e5e98969cb261da6ee77b"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.d.ts.map",
+        "bytes": 6896,
+        "sha256": "cfa9f782b803d37ce8d28ef1db1f0a256d149b04b6a5e8a98af31ec1a1f9652d"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js",
+        "bytes": 71479,
+        "sha256": "051bab7b3b0d65198bb53c683133227bbde02fc207e5b1d9a5f9c535a4fa3802"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js.map",
+        "bytes": 60991,
+        "sha256": "656f4fb6c8edc0e84d140dbc27afb3247e64a17abcdbb90e354134e9fca2f053"
+      },
+      {
+        "path": "packages/validator/dist/index.d.ts",
+        "bytes": 5185,
+        "sha256": "af5810fceb48903bd22a874cad5b09523889af5a87e2a8ffc3513e3c2ab8a2d7"
+      },
+      {
+        "path": "packages/validator/dist/index.d.ts.map",
+        "bytes": 2173,
+        "sha256": "2ab21d18648ea17bd12ae4de085e22e6f489cd4ff73f794e568b394112418f31"
+      },
+      {
+        "path": "packages/validator/dist/index.js",
+        "bytes": 1847,
+        "sha256": "bec613e9ec9c541f0f62d2e65e95b51ccc3e0eab61dddfdb32e8daa79c13d0ef"
+      },
+      {
+        "path": "packages/validator/dist/index.js.map",
+        "bytes": 877,
+        "sha256": "6d19f90394ad3d32ef92fa2d38e9af0226f4bff0abe836629eb4a09fcd5fdbf8"
+      },
+      {
+        "path": "packages/validator/src/execution-contract-validation.ts",
+        "bytes": 94411,
+        "sha256": "556541a36f3af9b2a6667f60246a2244a759404ba436a68429d121d2d7295874"
+      },
+      {
+        "path": "packages/validator/src/index.ts",
+        "bytes": 5410,
+        "sha256": "6c3c41d80422e036dd2683570e6257138af739584ab6a2e6b90d8e57bb1e4d77"
+      },
+      {
+        "path": "packages/validator/test/resolved-adapter-contracts.test.ts",
+        "bytes": 24376,
+        "sha256": "1cf56dfc6223d7cda83ef24eebc982f3f091d51c86326b5a2f294fcf29b920b8"
+      },
+      {
+        "path": "packages/validator/test/resolved-adapter-contracts.types.ts",
+        "bytes": 3168,
+        "sha256": "685a1f382532f91b37f78ae59c29ae7a84a07f81f6517c4f7e8f23ce9c3fa129"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 113050,
+        "sha256": "4a698fed0299e53c62183ee51029b2621d1988ad64a8221b6b963bcd18a89aaa"
+      },
+      {
+        "path": "scripts/generate-runtime-react-resolved-styles-proof.mjs",
+        "bytes": 670,
+        "sha256": "03903be89b1d73bc554d272ba25686f4479357563479e14040b464ca6369b61e"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/runtime-react-resolved-props-slots-proof.mjs",
+        "bytes": 19241,
+        "sha256": "9d3d21e6be0cd06c12e09a2dc3ad2f0599ba7c7610937bba48c887770cc63fc3"
+      },
+      {
+        "path": "scripts/lib/runtime-react-resolved-styles-proof.mjs",
+        "bytes": 50342,
+        "sha256": "ff7ab774d2a2ad364aa7b2cc1c87ec7291d8fda09e28da5b7de0978429123394"
+      },
+      {
+        "path": "scripts/run-ci-quality-gate.mjs",
+        "bytes": 40911,
+        "sha256": "70bb0c0956a2a2034f5050f9c7e4c8b9a1d2abf0256d6cdc2a472057de3e8d17"
+      },
+      {
+        "path": "scripts/test/ci-quality-gate.test.mjs",
+        "bytes": 19662,
+        "sha256": "5bbf168cfedfc0a673b32d058a144bb3e4c8bba4878b807eb4515a768d4f0d21"
+      },
+      {
+        "path": "scripts/verify-boundary-fixtures.mjs",
+        "bytes": 3291,
+        "sha256": "2abae6cd70eba7a01db48676a0f21b39475cccc41f64299d11c982be0761f7b2"
+      },
+      {
+        "path": "scripts/verify-runtime-react-resolved-styles.mjs",
+        "bytes": 672,
+        "sha256": "c8ed59042d01609850db494750e840752fd58f2698b53149a8fbcf4c40f2958e"
+      },
+      {
+        "path": "tests/runtime-react-resolved-props-slots.test.mjs",
+        "bytes": 8313,
+        "sha256": "e5b350406adc4042b7e3874863ef52825e2a896023ecf6c22e4c4bdb97d9105c"
+      },
+      {
+        "path": "tests/runtime-react-resolved-styles.test.mjs",
+        "bytes": 11769,
+        "sha256": "b207651db02798d4198f497705961201a8471d26d41c922d750105eb37a5fc96"
+      }
+    ],
+    "verifierExecutionProfile": "static-evidence-only"
+  },
+  "nonclaims": [
+    "No CSS, DOM, selector, class-name, or platform style translation claim.",
+    "No host-enforced accessibility-preservation claim; N-030 remains PLANNED.",
+    "No live event, command, behavior-lifecycle, or React reconciliation claim.",
+    "No reference-host, Desen App, native, iOS, Android, SwiftUI, or Compose claim."
+  ]
+}

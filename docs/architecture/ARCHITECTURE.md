@@ -71,6 +71,12 @@ production host must obtain that plan from its exact current headless session. A
 the receiving-Catalog, session interaction, semantic style, reference package, and independent-host
 boundaries that complete M05.
 
+The M05-T03 semantic-style boundary validates every final component and behavior map through the
+same exact Catalog-authenticated receiving scope used for props and slots. React adapters receive
+the complete immutable visual-state → declared-part → property map. `runtime-react` does not select
+or merge active states, interpret property names, generate CSS, or expose DOM/component internals;
+those target-specific decisions remain inside the statically trusted capability adapter.
+
 ## Reference capability artifact boundary
 
 M03-T10 packages the exact reference sign-in slice as

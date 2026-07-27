@@ -214,6 +214,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-react-resolved-props-slots.mjs",
       "tests/runtime-react-resolved-props-slots.test.mjs",
     ],
+    [
+      "runtime-react-resolved-styles",
+      "scripts/verify-runtime-react-resolved-styles.mjs",
+      "tests/runtime-react-resolved-styles.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -226,12 +231,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "16ea37d8d9c9cd5997738ec3d033aee12cae0b1f54d995550de8722c95bc7340";
+  "c600a96011e6017f0d10f5a8dad9df17841967edffdc5057c6eded4eb45a3196";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "39a440a3ccdf96d50338a5d59046b5ad5ee50eb11d51329958d56bac124c5451";
+  "a1d36959b369c5e7f65147770f090ba169e846cd05f62d6e76f46776545415e9";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "66749e9ec566719be8458be1dedc1158971bc90bde7941ab36f1b138066adaee";
-const QUALITY_GATE_PLAN_SHA256 = "81757a68fe865d7ef61139ddf19dab27278f746c1c7a91a772258f5c3b368442";
+  "72aeab6ca7bfc7c83609f59a253f44ed7fc110d990b7b26a1265a2b44cc9df3b";
+const QUALITY_GATE_PLAN_SHA256 = "5a0d16c908c9ea6980cddfb6ac8c089e1446281b1567ab0d3c8ce30cd3677bdc";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "3ea2af6964a52fc0808675304559bf221e9ffe96953e09cd9fa2c5d3e74b5732";
 const WORKSPACE_MANIFEST_SHA256 =

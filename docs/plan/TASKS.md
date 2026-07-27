@@ -130,7 +130,7 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 | ------- | ----------- | --------------- | -------------------------------------------------------------------------------------------------- |
 | M05-T01 | DONE        | G04             | React adapter registry and render-plan renderer                                                    |
 | M05-T02 | DONE        | M05-T01         | Resolved props and named slots wired without private structure inspection                          |
-| M05-T03 | NOT_STARTED | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
+| M05-T03 | DONE        | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
 | M05-T04 | NOT_STARTED | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
 | M05-T05 | NOT_STARTED | M05-T02–M05-T04 | Stable keys and runtime-node ↔ source-node diagnostics                                             |
 | M05-T06 | NOT_STARTED | M05-T05         | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
@@ -148,6 +148,15 @@ failures with no placeholder element. Adapter JSON is accessor-free, detached, d
 aggregate-bounded; revoked proxies fail closed and every named slot consumes finite budget.
 Standalone plan provenance remains a host responsibility, while `M05-T02` now owns exact Catalog
 receiving-schema validation for resolved props and named-slot delivery.
+
+`M05-T03` applies the same exact Catalog-authenticated receiving scope to every final component
+and behavior style map before any React element is created. Adapters receive only a detached,
+recursively immutable visual-state → semantic-part → property map whose declared states, parts,
+and complete resolved property values pass their exact prepared Catalog schemas. Validation work
+shares the existing render-wide lower-only budgets. The runtime preserves the complete map but
+never selects or merges active states, creates CSS, inspects DOM/private component structure, or
+interprets property names; production state activation and target translation remain capability
+adapter responsibilities.
 
 ## M06 — Deterministic publisher
 

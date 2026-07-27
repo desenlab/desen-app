@@ -2,6 +2,11 @@
  * receiver-independent callback contract at the React adapter boundary. */
 import type { ComponentType, ReactNode } from "react";
 import type { RuntimeJsonObject, RuntimeJsonValue } from "@desen/runtime-core";
+import type {
+  DesenResolvedAdapterStyle,
+  DesenResolvedAdapterStyleParts,
+  DesenResolvedAdapterStyleProperties,
+} from "@desen/validator";
 
 const CAPABILITY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9.-]*\/[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
 const REGISTRY_AUTHORITIES = new WeakMap<
@@ -41,8 +46,20 @@ export interface RuntimeReactDiagnosticIdentity {
 /** Named React children produced only from public headless-plan slot entries. */
 export type RuntimeReactNamedSlots = Readonly<Record<string, readonly ReactNode[]>>;
 
-/** Resolved visual-state, style-part, and property data delivered semantically to an adapter. */
-export type RuntimeReactSemanticStyle = RuntimeJsonObject;
+/** Complete resolved property map for one semantic style part. */
+export type RuntimeReactStyleProperties = DesenResolvedAdapterStyleProperties;
+
+/** Declared semantic style parts for one visual state. */
+export type RuntimeReactStyleParts = DesenResolvedAdapterStyleParts;
+
+/**
+ * Resolved visual-state → style-part → property → JSON data delivered to an adapter.
+ *
+ * @remarks `base` is the default map; every other top-level key is a Catalog-declared visual
+ * state. The adapter alone decides which declared state is active. The runtime does not merge
+ * states, generate CSS, inspect platform structure, or interpret property names.
+ */
+export type RuntimeReactSemanticStyle = DesenResolvedAdapterStyle;
 
 /** Controlled event result exposed to a trusted adapter without DOM/native-event authority. */
 export type RuntimeReactEventDispatchResult =

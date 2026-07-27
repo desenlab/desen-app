@@ -129,8 +129,9 @@ The M05 receiving boundary reuses the exact factory-authenticated T11 Catalog se
   renderer profile is not accidentally narrowed by the detached-value profile.
 
 These APIs never inspect React components, DOM structure, selectors, class names, or CSS and never
-invoke an adapter. Concrete registration, delivery, state activation, and error boundaries remain
-renderer responsibilities.
+invoke an adapter. M05-T02 wires resolved props and named slots to the React receiving boundary;
+M05-T03 wires the complete validated semantic style hierarchy. Concrete registration, production
+state activation, target translation, and error boundaries remain renderer responsibilities.
 
 M02-T12 proves built TypeScript parity with the frozen DESEN 0.1.0 starter suite. All 9 official
 conformance vectors and all 5 public examples pass their exact manifest outcomes, matching the
@@ -300,6 +301,9 @@ reference, resolved-JSON, and validated-catalog-set types. The central T09–T11
 - `DesenAdapterCapabilityReference`, `DesenAdapterCapabilityKind`,
   `DesenResolvedAdapterValueMap`, `DesenResolvedAdapterSlotChildReference`, and
   `DesenResolvedAdapterSlotMap`;
+- `DesenResolvedAdapterStyleProperties`, `DesenResolvedAdapterStyleParts`, and
+  `DesenResolvedAdapterStyle`, which preserve the exact readonly visual-state → part → property
+  hierarchy on successful style validation;
 - `DesenResolvedAdapterValidationScope`, its create result, invalid reason, and lower-only limit
   profile; and
 - `DesenResolvedAdapterPropsValidationResult`, `DesenResolvedAdapterSlotsValidationResult`,
