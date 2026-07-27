@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type -- `this: void` is the deliberate
  * receiver-independent callback contract at the React adapter boundary. */
 import type { ComponentType, ReactNode } from "react";
-import type {
-  RuntimeHeadlessBehaviorPlan,
-  RuntimeJsonObject,
-  RuntimeJsonValue,
-} from "@desen/runtime-core";
+import type { RuntimeJsonObject, RuntimeJsonValue } from "@desen/runtime-core";
 
 const CAPABILITY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9.-]*\/[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
 const REGISTRY_AUTHORITIES = new WeakMap<
@@ -108,7 +104,6 @@ export interface RuntimeReactComponentAdapterProps {
   readonly props: RuntimeJsonObject;
   readonly slots: RuntimeReactNamedSlots;
   readonly style: RuntimeReactSemanticStyle;
-  readonly behaviors: readonly RuntimeHeadlessBehaviorPlan[];
   readonly interactions: RuntimeReactInteractionPort;
 }
 

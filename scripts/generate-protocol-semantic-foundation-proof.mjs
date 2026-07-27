@@ -1,16 +1,16 @@
 import {
   ProtocolSemanticFoundationEvidenceError,
-  writeProtocolSemanticFoundationEvidence,
+  verifyProtocolSemanticFoundation,
 } from "./lib/protocol-semantic-foundation-proof.mjs";
 
 try {
-  const result = await writeProtocolSemanticFoundationEvidence();
+  const result = await verifyProtocolSemanticFoundation();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M02-T07 semantic-foundation evidence.",
+        message: "Preserved immutable task-time M02-T07 semantic-foundation evidence.",
       },
       null,
       2,

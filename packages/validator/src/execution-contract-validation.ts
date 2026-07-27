@@ -15,11 +15,15 @@ import {
   validateDesenInteractionCatalogSet,
 } from "./interaction-contract-validation.js";
 import {
+  applyPreparedSchemaContract,
   applySchemaContract,
+  createSchemaContractEvaluationBudget,
   inspectSchemaContractPath,
+  prepareSchemaContract,
   validateSchemaContractGraph,
 } from "./schema-instance-validation.js";
 import {
+  adapterValidationLimitExceededDiagnostic,
   invalidExecutionContractDiagnostic,
   normalizeSemanticDiagnostics,
 } from "./semantic-diagnostics.js";
@@ -41,10 +45,15 @@ import type {
   DesenBindingExternalReferenceResolver,
 } from "./binding-contract-validation.js";
 import type {
+  DesenEventCapabilityKind,
   DesenResolvedJsonValue,
   DesenValidatedInteractionCatalogSet,
 } from "./interaction-contract-validation.js";
 import type { DesenSemanticDiagnostic } from "./semantic-diagnostics.js";
+import type {
+  PreparedSchemaContract,
+  SchemaContractEvaluationBudget,
+} from "./schema-instance-validation.js";
 import type { DesenDocumentForTarget, ImmutableJson } from "./structural-validation.js";
 import type { JsonObject, JsonValue } from "./validation-internals.js";
 
@@ -179,8 +188,141 @@ export interface DesenExecutionValueValidationFailure {
 export type DesenExecutionValueValidationResult =
   DesenExecutionValueValidationSuccess | DesenExecutionValueValidationFailure;
 
+/** Whether one receiving adapter contract belongs to a component or behavior capability. */
+export type DesenAdapterCapabilityKind = DesenEventCapabilityKind;
+
+/** Exact capability contract selected for resolved props or style validation. */
+export interface DesenAdapterCapabilityReference {
+  /** Capability category; cross-category lookup is never attempted. */
+  readonly capabilityKind: DesenAdapterCapabilityKind;
+  /** Exact fully qualified capability identifier. */
+  readonly capabilityId: string;
+}
+
+/** Detached recursively immutable JSON object admitted to one adapter boundary. */
+export type DesenResolvedAdapterValueMap = Readonly<Record<string, DesenResolvedJsonValue>>;
+
+/** One materialized child identity admitted to a named adapter slot. */
+export interface DesenResolvedAdapterSlotChildReference {
+  /** Exact component capability selected by the authenticated headless plan. */
+  readonly capabilityId: string;
+}
+
+/** Detached callback-free named-slot shape checked before React element creation. */
+export type DesenResolvedAdapterSlotMap = Readonly<
+  Record<string, readonly Readonly<DesenResolvedAdapterSlotChildReference>[]>
+>;
+
+/** Identifies which resolved adapter channel was validated. */
+export type DesenResolvedAdapterValidationTarget =
+  "adapter-props" | "adapter-slots" | "adapter-style";
+
+/** Successful resolved adapter validation with no retained caller value. */
+export interface DesenResolvedAdapterValidationSuccess<
+  Target extends DesenResolvedAdapterValidationTarget,
+  Value extends object = DesenResolvedAdapterValueMap,
+> {
+  /** Confirms that the exact receiving capability schema accepted the complete value. */
+  readonly valid: true;
+  /** Identifies the resolved props, named-slot, or style receiving boundary. */
+  readonly target: Target;
+  /** Independent bounded and recursively immutable receiving value. */
+  readonly value: Value;
+  /** Always empty on success. */
+  readonly diagnostics: readonly [];
+}
+
+/** Failed resolved adapter validation with no partial or caller-owned value. */
+export interface DesenResolvedAdapterValidationFailure<
+  Target extends DesenResolvedAdapterValidationTarget,
+> {
+  /** Confirms that no value is safe to deliver to the adapter. */
+  readonly valid: false;
+  /** Identifies the resolved props, named-slot, or style receiving boundary. */
+  readonly target: Target;
+  /** Deterministically ordered and recursively immutable diagnostics. */
+  readonly diagnostics: readonly DesenSemanticDiagnostic[];
+}
+
+/** Complete result of validating resolved component or behavior props. */
+export type DesenResolvedAdapterPropsValidationResult =
+  | DesenResolvedAdapterValidationSuccess<"adapter-props", DesenResolvedAdapterValueMap>
+  | DesenResolvedAdapterValidationFailure<"adapter-props">;
+
+/** Complete result of validating one materialized component or behavior named-slot map. */
+export type DesenResolvedAdapterSlotsValidationResult =
+  | DesenResolvedAdapterValidationSuccess<"adapter-slots", DesenResolvedAdapterSlotMap>
+  | DesenResolvedAdapterValidationFailure<"adapter-slots">;
+
+/** Complete result of validating resolved component or behavior style maps. */
+export type DesenResolvedAdapterStyleValidationResult =
+  | DesenResolvedAdapterValidationSuccess<"adapter-style", DesenResolvedAdapterValueMap>
+  | DesenResolvedAdapterValidationFailure<"adapter-style">;
+
 /** Deterministic inert-data limits shared with resolved component and behavior event payloads. */
 export const EXECUTION_VALUE_SAFETY_LIMITS = EVENT_PAYLOAD_SAFETY_LIMITS;
+
+/** Reference ceilings shared by one component, behavior, and style receiving pass. */
+export const RESOLVED_ADAPTER_VALIDATION_LIMITS = Object.freeze({
+  /** Maximum complete prop maps validated in one scope. */
+  maxPropValidations: 25_000,
+  /** Maximum named-slot maps validated in one scope. */
+  maxSlotValidations: 25_000,
+  /** Maximum style maps validated in one scope. */
+  maxStyleValidations: 25_000,
+  /** Maximum named-slot names plus child entries observed across one scope. */
+  maxSlotEntries: 20_000,
+  /** Maximum required-slot checks, contract lookups, and child-acceptance checks per scope. */
+  maxSlotContractEvaluationSteps: 1_000_000,
+  /** Maximum aggregate slot-name and child-identifier UTF-16 units across one scope. */
+  maxSlotStringCodeUnits: 4_194_304,
+  /** Maximum aggregate detached prop/style JSON occurrences across one scope. */
+  maxResolvedJsonOccurrences: 262_144,
+  /** Maximum aggregate detached prop/style JSON UTF-16 units across one scope. */
+  maxResolvedJsonStringCodeUnits: 4_194_304,
+  /** Maximum aggregate schema-evaluation steps across all receiving channels. */
+  maxSchemaEvaluationSteps: 1_000_000,
+} as const);
+
+/** Optional trusted profile that may only lower resolved-adapter receiving ceilings. */
+export interface DesenResolvedAdapterValidationLimitProfile {
+  readonly maxPropValidations?: number;
+  readonly maxSlotValidations?: number;
+  readonly maxStyleValidations?: number;
+  readonly maxSlotEntries?: number;
+  readonly maxSlotContractEvaluationSteps?: number;
+  readonly maxSlotStringCodeUnits?: number;
+  readonly maxResolvedJsonOccurrences?: number;
+  readonly maxResolvedJsonStringCodeUnits?: number;
+  readonly maxSchemaEvaluationSteps?: number;
+}
+
+declare const resolvedAdapterValidationScopeBrand: unique symbol;
+
+/**
+ * Opaque factory-authenticated authority for one all-or-nothing receiving pass.
+ *
+ * @remarks A scope belongs to one exact execution Catalog set, carries finite aggregate counters,
+ * and exposes no Catalog metadata or mutable budget state.
+ */
+export interface DesenResolvedAdapterValidationScope {
+  readonly [resolvedAdapterValidationScopeBrand]: "DesenResolvedAdapterValidationScope";
+}
+
+/** Stable reason why a resolved-adapter receiving scope was not created. */
+export type DesenResolvedAdapterValidationScopeInvalidReason =
+  "invalid-catalog-set" | "invalid-limits";
+
+/** Controlled result of creating one finite Catalog-authenticated receiving scope. */
+export type DesenResolvedAdapterValidationScopeCreateResult =
+  | Readonly<{
+      readonly status: "created";
+      readonly scope: DesenResolvedAdapterValidationScope;
+    }>
+  | Readonly<{
+      readonly status: "invalid";
+      readonly reason: DesenResolvedAdapterValidationScopeInvalidReason;
+    }>;
 
 type SourceSnapshot = ImmutableJson<DesenSource>;
 type BundleSnapshot = ImmutableJson<DesenBundle>;
@@ -194,19 +336,52 @@ interface CatalogIdentity {
   readonly target: string;
 }
 
+interface PreparedAdapterSlotContract {
+  readonly required: boolean;
+  readonly minimum: number;
+  readonly maximum?: number;
+  readonly constrainsChildren: boolean;
+  readonly acceptedIds: ReadonlySet<string>;
+  readonly acceptedCategories: ReadonlySet<string>;
+}
+
 interface CapabilityResolution {
   readonly catalogIndex: number;
   readonly contract: JsonObject;
+  readonly preparedPropsSchema?: PreparedSchemaContract;
+  readonly preparedSlotContracts?: ReadonlyMap<string, PreparedAdapterSlotContract>;
+  readonly requiredSlotNames?: readonly string[];
+  readonly preparedStylePartSchemas?: ReadonlyMap<string, PreparedSchemaContract>;
 }
 
 interface ExecutionCatalogMetadata {
   readonly catalogs: readonly CatalogIdentity[];
   readonly components: ReadonlyMap<string, CapabilityResolution>;
+  readonly behaviors: ReadonlyMap<string, CapabilityResolution>;
   readonly operations: ReadonlyMap<string, CapabilityResolution>;
   readonly resources: ReadonlyMap<string, CapabilityResolution>;
   readonly byIdVersion: ReadonlyMap<string, readonly number[]>;
   readonly byExactTuple: ReadonlyMap<string, readonly number[]>;
 }
+
+interface ResolvedAdapterValidationScopeAuthority {
+  readonly metadata: ExecutionCatalogMetadata;
+  readonly remaining: {
+    props: number;
+    slots: number;
+    style: number;
+    slotEntries: number;
+    slotContractEvaluationSteps: number;
+    slotStringCodeUnits: number;
+    resolvedJsonOccurrences: number;
+    resolvedJsonStringCodeUnits: number;
+  };
+  readonly schemaBudget: SchemaContractEvaluationBudget;
+}
+
+type ResolvedAdapterValidationLimits = Readonly<{
+  [Name in keyof typeof RESOLVED_ADAPTER_VALIDATION_LIMITS]: number;
+}>;
 
 interface SelectedExecutionContracts {
   readonly components: ReadonlyMap<string, CapabilityResolution>;
@@ -252,6 +427,10 @@ interface SurfaceIndex {
 }
 
 const EXECUTION_CATALOG_METADATA = new WeakMap<object, ExecutionCatalogMetadata>();
+const RESOLVED_ADAPTER_VALIDATION_SCOPES = new WeakMap<
+  object,
+  ResolvedAdapterValidationScopeAuthority
+>();
 
 function appendPath(pointer: JsonPointer, ...segments: readonly (number | string)[]): JsonPointer {
   return segments.reduce<JsonPointer>(
@@ -604,10 +783,68 @@ function buildExecutionMetadata(
 ): ExecutionCatalogMetadata {
   const identities: CatalogIdentity[] = [];
   const components = new Map<string, CapabilityResolution>();
+  const behaviors = new Map<string, CapabilityResolution>();
   const operations = new Map<string, CapabilityResolution>();
   const resources = new Map<string, CapabilityResolution>();
   const byIdVersion = new Map<string, number[]>();
   const byExactTuple = new Map<string, number[]>();
+
+  const preparedAdapterResolution = (
+    contractValue: unknown,
+    catalogIndex: number,
+  ): CapabilityResolution => {
+    const contract = contractValue as JsonObject;
+    const slotContracts = new Map<string, PreparedAdapterSlotContract>();
+    const requiredSlotNames: string[] = [];
+    const slots = asObject(ownValue(contract, "slots")) ?? EMPTY_OBJECT;
+    for (const slotName of sortedKeys(slots)) {
+      const slot = asObject(ownValue(slots, slotName));
+      if (slot === undefined) continue;
+      const required = ownValue(slot, "required") === true;
+      const minimumValue = ownValue(slot, "minItems");
+      const maximumValue = ownValue(slot, "maxItems");
+      const acceptedIdsValue = ownValue(slot, "accepts");
+      const acceptedCategoriesValue = ownValue(slot, "acceptsCategories");
+      if (required) requiredSlotNames.push(slotName);
+      slotContracts.set(
+        slotName,
+        Object.freeze({
+          required,
+          minimum: typeof minimumValue === "number" ? minimumValue : required ? 1 : 0,
+          ...(typeof maximumValue === "number" ? { maximum: maximumValue } : {}),
+          constrainsChildren:
+            Object.hasOwn(slot, "accepts") || Object.hasOwn(slot, "acceptsCategories"),
+          acceptedIds: new Set(
+            Array.isArray(acceptedIdsValue)
+              ? acceptedIdsValue.filter((value): value is string => typeof value === "string")
+              : [],
+          ),
+          acceptedCategories: new Set(
+            Array.isArray(acceptedCategoriesValue)
+              ? acceptedCategoriesValue.filter(
+                  (value): value is string => typeof value === "string",
+                )
+              : [],
+          ),
+        }),
+      );
+    }
+    const styleSchemas = new Map<string, PreparedSchemaContract>();
+    const styleParts = asObject(ownValue(contract, "styleParts")) ?? EMPTY_OBJECT;
+    for (const partName of sortedKeys(styleParts)) {
+      const part = asObject(ownValue(styleParts, partName));
+      const schema = part === undefined ? undefined : ownValue(part, "propertiesSchema");
+      if (schema !== undefined) styleSchemas.set(partName, prepareSchemaContract(schema));
+    }
+    return Object.freeze({
+      catalogIndex,
+      contract,
+      preparedPropsSchema: prepareSchemaContract(ownValue(contract, "propsSchema")),
+      preparedSlotContracts: slotContracts,
+      requiredSlotNames: Object.freeze(requiredSlotNames),
+      preparedStylePartSchemas: styleSchemas,
+    });
+  };
 
   (catalogs as readonly CatalogSnapshot[]).forEach((catalog, catalogIndex) => {
     identities.push(
@@ -622,6 +859,16 @@ function buildExecutionMetadata(
     addIndex(byExactTuple, identityKey(catalog.id, catalog.version, catalog.target), catalogIndex);
     for (const [destination, capabilityMap] of [
       [components, catalog.components],
+      [behaviors, catalog.behaviors],
+    ] as const) {
+      for (const capabilityId of sortedKeys(capabilityMap)) {
+        const contract = capabilityMap[capabilityId];
+        if (contract !== undefined) {
+          destination.set(capabilityId, preparedAdapterResolution(contract, catalogIndex));
+        }
+      }
+    }
+    for (const [destination, capabilityMap] of [
       [operations, catalog.operations],
       [resources, catalog.resources],
     ] as const) {
@@ -630,10 +877,7 @@ function buildExecutionMetadata(
         if (contract !== undefined) {
           destination.set(
             capabilityId,
-            Object.freeze({
-              catalogIndex,
-              contract: contract as unknown as JsonObject,
-            }),
+            Object.freeze({ catalogIndex, contract: contract as unknown as JsonObject }),
           );
         }
       }
@@ -642,6 +886,7 @@ function buildExecutionMetadata(
   return Object.freeze({
     catalogs: Object.freeze(identities),
     components,
+    behaviors,
     operations,
     resources,
     byIdVersion: freezeIndex(byIdVersion),
@@ -1493,4 +1738,744 @@ export function validateDesenExecutionValue(
     });
   }
   return executionValueFailure(diagnostics);
+}
+
+function adapterValidationSuccess<
+  Target extends DesenResolvedAdapterValidationTarget,
+  Value extends object,
+>(target: Target, value: Value): DesenResolvedAdapterValidationSuccess<Target, Value> {
+  return Object.freeze({
+    valid: true,
+    target,
+    value,
+    diagnostics: EMPTY_DIAGNOSTICS,
+  });
+}
+
+function lowerResolvedAdapterLimit(value: unknown, ceiling: number): number | undefined {
+  return Number.isSafeInteger(value) && (value as number) >= 0 && (value as number) <= ceiling
+    ? (value as number)
+    : undefined;
+}
+
+function resolvedAdapterValidationLimits(
+  input: unknown,
+): ResolvedAdapterValidationLimits | undefined {
+  if (input === undefined) return RESOLVED_ADAPTER_VALIDATION_LIMITS;
+  const snapshot = snapshotResolvedJsonValue(input);
+  if (typeof snapshot !== "object" || snapshot === null || Array.isArray(snapshot))
+    return undefined;
+  const names = Object.keys(snapshot).sort(compareText);
+  const allowed = Object.keys(RESOLVED_ADAPTER_VALIDATION_LIMITS).sort(compareText);
+  if (names.length !== new Set(names).size || names.some((name) => !allowed.includes(name))) {
+    return undefined;
+  }
+  const output: Record<string, number> = {};
+  for (const [name, ceiling] of Object.entries(RESOLVED_ADAPTER_VALIDATION_LIMITS)) {
+    const value = Object.hasOwn(snapshot, name)
+      ? (snapshot as Readonly<Record<string, DesenResolvedJsonValue>>)[name]
+      : ceiling;
+    const limit = lowerResolvedAdapterLimit(value, ceiling);
+    if (limit === undefined) return undefined;
+    output[name] = limit;
+  }
+  return Object.freeze(output) as ResolvedAdapterValidationLimits;
+}
+
+/**
+ * Creates one finite resolved-adapter receiving scope for an exact execution Catalog set.
+ *
+ * @remarks The scope is factory-authenticated through private `WeakMap` metadata. A lower validator
+ * brand, cast, structurally equal Catalog clone, forged scope, accessor-backed profile, or attempt
+ * to raise any ceiling is rejected. Counters are consumed monotonically and never refunded.
+ */
+export function createDesenResolvedAdapterValidationScope(
+  catalogSet: DesenValidatedExecutionCatalogSet,
+  limits?: DesenResolvedAdapterValidationLimitProfile,
+): DesenResolvedAdapterValidationScopeCreateResult {
+  if (typeof catalogSet !== "object" || catalogSet === null) {
+    return Object.freeze({ status: "invalid", reason: "invalid-catalog-set" });
+  }
+  const metadata = EXECUTION_CATALOG_METADATA.get(catalogSet);
+  if (metadata === undefined) {
+    return Object.freeze({ status: "invalid", reason: "invalid-catalog-set" });
+  }
+  const capturedLimits = resolvedAdapterValidationLimits(limits);
+  if (capturedLimits === undefined) {
+    return Object.freeze({ status: "invalid", reason: "invalid-limits" });
+  }
+  const scope = Object.freeze({}) as DesenResolvedAdapterValidationScope;
+  RESOLVED_ADAPTER_VALIDATION_SCOPES.set(scope, {
+    metadata,
+    remaining: {
+      props: capturedLimits.maxPropValidations,
+      slots: capturedLimits.maxSlotValidations,
+      style: capturedLimits.maxStyleValidations,
+      slotEntries: capturedLimits.maxSlotEntries,
+      slotContractEvaluationSteps: capturedLimits.maxSlotContractEvaluationSteps,
+      slotStringCodeUnits: capturedLimits.maxSlotStringCodeUnits,
+      resolvedJsonOccurrences: capturedLimits.maxResolvedJsonOccurrences,
+      resolvedJsonStringCodeUnits: capturedLimits.maxResolvedJsonStringCodeUnits,
+    },
+    schemaBudget: createSchemaContractEvaluationBudget({
+      maxEvaluationSteps: capturedLimits.maxSchemaEvaluationSteps,
+    }),
+  });
+  return Object.freeze({ status: "created", scope });
+}
+
+function adapterValidationFailure<Target extends DesenResolvedAdapterValidationTarget>(
+  target: Target,
+  diagnostics: readonly DesenSemanticDiagnostic[],
+): DesenResolvedAdapterValidationFailure<Target> {
+  return Object.freeze({
+    valid: false,
+    target,
+    diagnostics: normalizeSemanticDiagnostics(diagnostics),
+  });
+}
+
+function adapterScopeAuthority(
+  scope: unknown,
+): ResolvedAdapterValidationScopeAuthority | undefined {
+  return typeof scope === "object" && scope !== null
+    ? RESOLVED_ADAPTER_VALIDATION_SCOPES.get(scope)
+    : undefined;
+}
+
+function consumeAdapterValidation(
+  authority: ResolvedAdapterValidationScopeAuthority,
+  target: DesenResolvedAdapterValidationTarget,
+): boolean {
+  const counter =
+    target === "adapter-props" ? "props" : target === "adapter-slots" ? "slots" : "style";
+  if (authority.remaining[counter] <= 0) return false;
+  authority.remaining[counter] -= 1;
+  return true;
+}
+
+function consumeAdapterSlotContractWork(
+  authority: ResolvedAdapterValidationScopeAuthority,
+  work: number,
+): boolean {
+  if (work <= 0) return true;
+  if (work > authority.remaining.slotContractEvaluationSteps) {
+    authority.remaining.slotContractEvaluationSteps = 0;
+    return false;
+  }
+  authority.remaining.slotContractEvaluationSteps -= work;
+  return true;
+}
+
+function adapterReferenceSnapshot(
+  input: unknown,
+): Readonly<DesenAdapterCapabilityReference> | undefined {
+  const snapshot = snapshotResolvedJsonValue(input);
+  if (
+    typeof snapshot !== "object" ||
+    snapshot === null ||
+    Array.isArray(snapshot) ||
+    Object.keys(snapshot).sort(compareText).join("\u0000") !== "capabilityId\u0000capabilityKind"
+  ) {
+    return undefined;
+  }
+  const record = snapshot as DesenResolvedAdapterValueMap;
+  if (
+    (record.capabilityKind !== "component" && record.capabilityKind !== "behavior") ||
+    typeof record.capabilityId !== "string"
+  ) {
+    return undefined;
+  }
+  return Object.freeze({
+    capabilityKind: record.capabilityKind,
+    capabilityId: record.capabilityId,
+  });
+}
+
+function adapterContract(
+  reference: Readonly<DesenAdapterCapabilityReference>,
+  metadata: ExecutionCatalogMetadata,
+): CapabilityResolution | undefined {
+  return (reference.capabilityKind === "component" ? metadata.components : metadata.behaviors).get(
+    reference.capabilityId,
+  );
+}
+
+function adapterDiagnostic(
+  code: Extract<CoreDiagnosticCode, "PROP_TYPE_MISMATCH" | "UNKNOWN_CAPABILITY" | "UNKNOWN_PROP">,
+  pointer: JsonPointer,
+  reference: Readonly<DesenAdapterCapabilityReference>,
+): DesenSemanticDiagnostic {
+  const messages = {
+    PROP_TYPE_MISMATCH:
+      "A resolved adapter value does not satisfy its declared receiving capability schema.",
+    UNKNOWN_CAPABILITY:
+      "The requested adapter capability is not in the trusted execution catalog set.",
+    UNKNOWN_PROP:
+      "A resolved adapter value targets an undeclared property, visual state, or style part.",
+  } as const;
+  return createCoreDiagnostic({
+    code,
+    message: messages[code],
+    pointer,
+    context: { capabilityId: reference.capabilityId },
+  });
+}
+
+function adapterSlotDiagnostic(
+  code: Extract<
+    CoreDiagnosticCode,
+    "SLOT_CARDINALITY" | "SLOT_CHILD_REJECTED" | "UNKNOWN_CAPABILITY" | "UNKNOWN_SLOT"
+  >,
+  pointer: JsonPointer,
+  reference: Readonly<DesenAdapterCapabilityReference>,
+): DesenSemanticDiagnostic {
+  const messages = {
+    SLOT_CARDINALITY: "A materialized adapter slot contains a disallowed number of child nodes.",
+    SLOT_CHILD_REJECTED:
+      "A materialized slot child does not match an accepted component identity or category.",
+    UNKNOWN_CAPABILITY: "A materialized slot child is not in the trusted execution Catalog set.",
+    UNKNOWN_SLOT: "A materialized adapter slot is not declared by its receiving capability.",
+  } as const;
+  return createCoreDiagnostic({
+    code,
+    message: messages[code],
+    pointer,
+    context: { capabilityId: reference.capabilityId },
+  });
+}
+
+function resolvedAdapterMap(value: unknown): DesenResolvedAdapterValueMap | undefined {
+  const snapshot = snapshotResolvedJsonValue(value);
+  return typeof snapshot === "object" && snapshot !== null && !Array.isArray(snapshot)
+    ? (snapshot as DesenResolvedAdapterValueMap)
+    : undefined;
+}
+
+function consumeResolvedAdapterMapBudget(
+  value: DesenResolvedAdapterValueMap,
+  authority: ResolvedAdapterValidationScopeAuthority,
+): boolean {
+  const pending: DesenResolvedJsonValue[] = [value as DesenResolvedJsonValue];
+  let occurrences = 0;
+  let stringCodeUnits = 0;
+  while (pending.length > 0) {
+    const current = pending.pop() as DesenResolvedJsonValue;
+    occurrences += 1;
+    if (occurrences > authority.remaining.resolvedJsonOccurrences) {
+      authority.remaining.resolvedJsonOccurrences = 0;
+      return false;
+    }
+    if (typeof current === "string") {
+      stringCodeUnits += current.length;
+    } else if (Array.isArray(current)) {
+      for (let index = current.length - 1; index >= 0; index -= 1) {
+        pending.push(current[index] as DesenResolvedJsonValue);
+      }
+    } else if (typeof current === "object" && current !== null) {
+      const object = current as Readonly<Record<string, DesenResolvedJsonValue>>;
+      const keys = Object.keys(current).sort(compareText);
+      for (let index = keys.length - 1; index >= 0; index -= 1) {
+        const key = keys[index] as string;
+        stringCodeUnits += key.length;
+        pending.push(object[key] as DesenResolvedJsonValue);
+      }
+    }
+    if (stringCodeUnits > authority.remaining.resolvedJsonStringCodeUnits) {
+      authority.remaining.resolvedJsonStringCodeUnits = 0;
+      return false;
+    }
+  }
+  authority.remaining.resolvedJsonOccurrences -= occurrences;
+  authority.remaining.resolvedJsonStringCodeUnits -= stringCodeUnits;
+  return true;
+}
+
+type ResolvedAdapterMapCaptureResult =
+  | Readonly<{ readonly status: "captured"; readonly value: DesenResolvedAdapterValueMap }>
+  | Readonly<{ readonly status: "invalid" }>
+  | Readonly<{ readonly status: "limit" }>;
+
+function captureResolvedAdapterMap(
+  input: unknown,
+  authority: ResolvedAdapterValidationScopeAuthority,
+): ResolvedAdapterMapCaptureResult {
+  if (authority.remaining.resolvedJsonOccurrences <= 0) {
+    return Object.freeze({ status: "limit" });
+  }
+  const snapshot = resolvedAdapterMap(input);
+  if (snapshot === undefined) return Object.freeze({ status: "invalid" });
+  return consumeResolvedAdapterMapBudget(snapshot, authority)
+    ? Object.freeze({ status: "captured", value: snapshot })
+    : Object.freeze({ status: "limit" });
+}
+
+type ResolvedAdapterSlotCaptureResult =
+  | Readonly<{ readonly status: "captured"; readonly value: DesenResolvedAdapterSlotMap }>
+  | Readonly<{ readonly status: "invalid" }>
+  | Readonly<{ readonly status: "limit" }>;
+
+function exactOwnDataKeys(
+  value: object,
+  required: readonly string[],
+  optional: readonly string[] = [],
+): boolean {
+  try {
+    if (Object.getOwnPropertySymbols(value).length !== 0) return false;
+    const names = Object.getOwnPropertyNames(value);
+    const allowed = new Set([...required, ...optional]);
+    return (
+      required.every((name) => {
+        if (!names.includes(name)) return false;
+        const descriptor = Object.getOwnPropertyDescriptor(value, name);
+        return descriptor !== undefined && descriptor.enumerable && "value" in descriptor;
+      }) && names.every((name) => allowed.has(name))
+    );
+  } catch {
+    return false;
+  }
+}
+
+function plainOwnDataRecord(value: unknown): value is Record<string, unknown> {
+  try {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+    const prototype = Object.getPrototypeOf(value);
+    return prototype === Object.prototype || prototype === null;
+  } catch {
+    return false;
+  }
+}
+
+function ownDataMember(value: object, key: string): unknown | undefined {
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return descriptor !== undefined && "value" in descriptor ? descriptor.value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function captureResolvedAdapterSlots(
+  input: unknown,
+  authority: ResolvedAdapterValidationScopeAuthority,
+): ResolvedAdapterSlotCaptureResult {
+  try {
+    if (!plainOwnDataRecord(input) || Object.getOwnPropertySymbols(input).length !== 0) {
+      return Object.freeze({ status: "invalid" });
+    }
+    const names = Object.getOwnPropertyNames(input);
+    if (names.length > authority.remaining.slotEntries) {
+      authority.remaining.slotEntries = 0;
+      return Object.freeze({ status: "limit" });
+    }
+    authority.remaining.slotEntries -= names.length;
+    names.sort(compareText);
+    const nameCodeUnits = names.reduce((total, name) => total + name.length, 0);
+    if (nameCodeUnits > authority.remaining.slotStringCodeUnits) {
+      authority.remaining.slotStringCodeUnits = 0;
+      return Object.freeze({ status: "limit" });
+    }
+    authority.remaining.slotStringCodeUnits -= nameCodeUnits;
+
+    const output: Record<string, readonly Readonly<DesenResolvedAdapterSlotChildReference>[]> =
+      Object.create(null);
+    for (const name of names) {
+      const slotDescriptor = Object.getOwnPropertyDescriptor(input, name);
+      if (
+        slotDescriptor === undefined ||
+        !slotDescriptor.enumerable ||
+        !("value" in slotDescriptor)
+      ) {
+        return Object.freeze({ status: "invalid" });
+      }
+      const children = slotDescriptor.value;
+      if (!Array.isArray(children) || Object.getOwnPropertySymbols(children).length !== 0) {
+        return Object.freeze({ status: "invalid" });
+      }
+      const lengthDescriptor = Object.getOwnPropertyDescriptor(children, "length");
+      if (
+        lengthDescriptor === undefined ||
+        !("value" in lengthDescriptor) ||
+        !Number.isSafeInteger(lengthDescriptor.value) ||
+        lengthDescriptor.value < 0
+      ) {
+        return Object.freeze({ status: "invalid" });
+      }
+      const length = lengthDescriptor.value as number;
+      const childKeys = Object.getOwnPropertyNames(children);
+      if (
+        childKeys.length !== length + 1 ||
+        !childKeys.includes("length") ||
+        childKeys.some((key) => key !== "length" && !/^(?:0|[1-9][0-9]*)$/u.test(key))
+      ) {
+        return Object.freeze({ status: "invalid" });
+      }
+      if (length > authority.remaining.slotEntries) {
+        authority.remaining.slotEntries = 0;
+        return Object.freeze({ status: "limit" });
+      }
+      authority.remaining.slotEntries -= length;
+      const capturedChildren: Readonly<DesenResolvedAdapterSlotChildReference>[] = [];
+      for (let index = 0; index < length; index += 1) {
+        const descriptor = Object.getOwnPropertyDescriptor(children, String(index));
+        if (
+          descriptor === undefined ||
+          !descriptor.enumerable ||
+          !("value" in descriptor) ||
+          !plainOwnDataRecord(descriptor.value) ||
+          !exactOwnDataKeys(descriptor.value, ["capabilityId"])
+        ) {
+          return Object.freeze({ status: "invalid" });
+        }
+        const capabilityId = ownDataMember(descriptor.value, "capabilityId");
+        if (typeof capabilityId !== "string" || capabilityId.length === 0) {
+          return Object.freeze({ status: "invalid" });
+        }
+        if (capabilityId.length > authority.remaining.slotStringCodeUnits) {
+          authority.remaining.slotStringCodeUnits = 0;
+          return Object.freeze({ status: "limit" });
+        }
+        authority.remaining.slotStringCodeUnits -= capabilityId.length;
+        capturedChildren.push(Object.freeze({ capabilityId }));
+      }
+      output[name] = Object.freeze(capturedChildren);
+    }
+    return Object.freeze({
+      status: "captured",
+      value: Object.freeze(output) as DesenResolvedAdapterSlotMap,
+    });
+  } catch {
+    return Object.freeze({ status: "invalid" });
+  }
+}
+
+function resolvedAdapterSchemaDiagnostics(
+  schema: PreparedSchemaContract,
+  value: DesenResolvedAdapterValueMap,
+  basePointer: JsonPointer,
+  reference: Readonly<DesenAdapterCapabilityReference>,
+  budget: SchemaContractEvaluationBudget,
+): readonly DesenSemanticDiagnostic[] {
+  const result = applyPreparedSchemaContract(schema, value as unknown as JsonObject, budget);
+  return Object.freeze(
+    result.issues.map((issue) => {
+      const pointer = appendRelativePointer(basePointer, issue.pointer);
+      if (issue.keyword === "aggregateEvaluationBudget") {
+        return adapterValidationLimitExceededDiagnostic(pointer, {
+          capabilityId: reference.capabilityId,
+        });
+      }
+      if (issue.keyword === "evaluationBudget" || issue.keyword === "preparedSchema") {
+        return invalidExecutionContractDiagnostic(pointer, {
+          capabilityId: reference.capabilityId,
+        });
+      }
+      return adapterDiagnostic(
+        issue.kind === "unknown-property" ? "UNKNOWN_PROP" : "PROP_TYPE_MISMATCH",
+        pointer,
+        reference,
+      );
+    }),
+  );
+}
+
+function adapterValidationPreparation<Target extends DesenResolvedAdapterValidationTarget>(
+  target: Target,
+  capability: unknown,
+  scope: unknown,
+):
+  | Readonly<{
+      readonly valid: true;
+      readonly reference: Readonly<DesenAdapterCapabilityReference>;
+      readonly resolution: CapabilityResolution;
+      readonly contract: JsonObject;
+      readonly authority: ResolvedAdapterValidationScopeAuthority;
+    }>
+  | DesenResolvedAdapterValidationFailure<Target> {
+  const authority = adapterScopeAuthority(scope);
+  if (authority === undefined) {
+    return adapterValidationFailure(target, [invalidExecutionContractDiagnostic(ROOT_POINTER)]);
+  }
+  if (!consumeAdapterValidation(authority, target)) {
+    return adapterValidationFailure(target, [
+      adapterValidationLimitExceededDiagnostic(ROOT_POINTER),
+    ]);
+  }
+  const reference = adapterReferenceSnapshot(capability);
+  if (reference === undefined) {
+    return adapterValidationFailure(target, [invalidExecutionContractDiagnostic(ROOT_POINTER)]);
+  }
+  const resolution = adapterContract(reference, authority.metadata);
+  if (resolution === undefined) {
+    return adapterValidationFailure(target, [
+      adapterDiagnostic("UNKNOWN_CAPABILITY", ROOT_POINTER, reference),
+    ]);
+  }
+  return Object.freeze({
+    valid: true,
+    reference,
+    resolution,
+    contract: resolution.contract,
+    authority,
+  });
+}
+
+/**
+ * Validates one complete resolved prop map immediately before adapter delivery.
+ *
+ * @remarks The exact factory-authenticated execution Catalog set selects either a component or
+ * behavior `propsSchema`. The caller map is copied through the bounded inert-JSON boundary before
+ * `complete` and `resolved-value` schema evaluation. Accessors, hostile proxies, cycles, unsupported
+ * prototypes, non-finite numbers, and over-budget values fail without exposing a partial map. A
+ * successful result is detached and recursively immutable; no adapter is invoked or retained.
+ */
+export function validateDesenResolvedAdapterProps(
+  props: unknown,
+  capability: DesenAdapterCapabilityReference,
+  scope: DesenResolvedAdapterValidationScope,
+): DesenResolvedAdapterPropsValidationResult {
+  const prepared = adapterValidationPreparation("adapter-props", capability, scope);
+  if (!prepared.valid) return prepared;
+
+  const captured = captureResolvedAdapterMap(props, prepared.authority);
+  if (captured.status === "limit") {
+    return adapterValidationFailure("adapter-props", [
+      adapterValidationLimitExceededDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
+  if (captured.status === "invalid") {
+    return adapterValidationFailure("adapter-props", [
+      adapterDiagnostic("PROP_TYPE_MISMATCH", ROOT_POINTER, prepared.reference),
+    ]);
+  }
+  const schema = prepared.resolution.preparedPropsSchema;
+  if (schema === undefined) {
+    return adapterValidationFailure("adapter-props", [
+      invalidExecutionContractDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
+  const diagnostics = resolvedAdapterSchemaDiagnostics(
+    schema,
+    captured.value,
+    ROOT_POINTER,
+    prepared.reference,
+    prepared.authority.schemaBudget,
+  );
+  return diagnostics.length === 0
+    ? adapterValidationSuccess("adapter-props", captured.value)
+    : adapterValidationFailure("adapter-props", diagnostics);
+}
+
+/**
+ * Validates one final materialized named-slot projection before React element creation.
+ *
+ * @remarks The input contains only slot names and child component capability identities; it never
+ * accepts React nodes, elements, DOM references, runtime-private structures, or adapter callbacks.
+ * Validation uses the receiving component or behavior contract, applies required/effective
+ * min/max cardinality after conditional and repeat materialization, and checks every child against
+ * the declared exact-id/category union. Slot names plus child entries and all required-slot,
+ * contract-lookup, and child-acceptance work consume shared scope counters. Catalog-side slot
+ * contracts and acceptance sets are prepared once, so repeated instances never rebuild or sort
+ * the same declarations. Success returns a detached recursively immutable callback-free
+ * projection.
+ */
+export function validateDesenResolvedAdapterSlots(
+  slots: unknown,
+  capability: DesenAdapterCapabilityReference,
+  scope: DesenResolvedAdapterValidationScope,
+): DesenResolvedAdapterSlotsValidationResult {
+  const prepared = adapterValidationPreparation("adapter-slots", capability, scope);
+  if (!prepared.valid) return prepared;
+  const captured = captureResolvedAdapterSlots(slots, prepared.authority);
+  if (captured.status === "limit") {
+    return adapterValidationFailure("adapter-slots", [
+      adapterValidationLimitExceededDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
+  if (captured.status === "invalid") {
+    return adapterValidationFailure("adapter-slots", [
+      invalidExecutionContractDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
+
+  const contracts = prepared.resolution.preparedSlotContracts;
+  const requiredSlotNames = prepared.resolution.requiredSlotNames;
+  if (contracts === undefined || requiredSlotNames === undefined) {
+    return adapterValidationFailure("adapter-slots", [
+      invalidExecutionContractDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
+  const diagnostics: DesenSemanticDiagnostic[] = [];
+  if (!consumeAdapterSlotContractWork(prepared.authority, requiredSlotNames.length)) {
+    return adapterValidationFailure("adapter-slots", [
+      adapterValidationLimitExceededDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
+  for (const name of requiredSlotNames) {
+    if (!Object.hasOwn(captured.value, name)) {
+      diagnostics.push(
+        adapterSlotDiagnostic(
+          "SLOT_CARDINALITY",
+          appendJsonPointer(ROOT_POINTER, name),
+          prepared.reference,
+        ),
+      );
+    }
+  }
+
+  for (const name of Object.keys(captured.value)) {
+    if (!consumeAdapterSlotContractWork(prepared.authority, 1)) {
+      return adapterValidationFailure("adapter-slots", [
+        adapterValidationLimitExceededDiagnostic(ROOT_POINTER, {
+          capabilityId: prepared.reference.capabilityId,
+        }),
+      ]);
+    }
+    const pointer = appendJsonPointer(ROOT_POINTER, name);
+    const children = captured.value[name] ?? [];
+    const contract = contracts.get(name);
+    if (contract === undefined) {
+      diagnostics.push(adapterSlotDiagnostic("UNKNOWN_SLOT", pointer, prepared.reference));
+      continue;
+    }
+    if (
+      children.length < contract.minimum ||
+      (contract.maximum !== undefined && children.length > contract.maximum)
+    ) {
+      diagnostics.push(adapterSlotDiagnostic("SLOT_CARDINALITY", pointer, prepared.reference));
+    }
+
+    if (!consumeAdapterSlotContractWork(prepared.authority, children.length)) {
+      return adapterValidationFailure("adapter-slots", [
+        adapterValidationLimitExceededDiagnostic(ROOT_POINTER, {
+          capabilityId: prepared.reference.capabilityId,
+        }),
+      ]);
+    }
+    children.forEach((child, index) => {
+      const childPointer = appendPath(pointer, index, "capabilityId");
+      const resolution = prepared.authority.metadata.components.get(child.capabilityId);
+      if (resolution === undefined) {
+        diagnostics.push(
+          adapterSlotDiagnostic("UNKNOWN_CAPABILITY", childPointer, prepared.reference),
+        );
+        return;
+      }
+      if (!contract.constrainsChildren) return;
+      const category = ownValue(resolution.contract, "category");
+      if (
+        !contract.acceptedIds.has(child.capabilityId) &&
+        (typeof category !== "string" || !contract.acceptedCategories.has(category))
+      ) {
+        diagnostics.push(
+          adapterSlotDiagnostic("SLOT_CHILD_REJECTED", childPointer, prepared.reference),
+        );
+      }
+    });
+  }
+
+  return diagnostics.length === 0
+    ? adapterValidationSuccess("adapter-slots", captured.value)
+    : adapterValidationFailure("adapter-slots", diagnostics);
+}
+
+/**
+ * Validates one complete resolved visual-state/style-part map before adapter delivery.
+ *
+ * @remarks `base` is always admitted; every other state must be declared by the exact capability.
+ * Every part must likewise be declared, and its complete resolved property map is checked against
+ * that part's exact `propertiesSchema`. The API never interprets selectors, class names, DOM
+ * structure, CSS, or platform state. Success returns only a detached recursively immutable map;
+ * any malformed, hostile, unknown, schema-invalid, or over-budget input fails atomically.
+ */
+export function validateDesenResolvedAdapterStyle(
+  style: unknown,
+  capability: DesenAdapterCapabilityReference,
+  scope: DesenResolvedAdapterValidationScope,
+): DesenResolvedAdapterStyleValidationResult {
+  const prepared = adapterValidationPreparation("adapter-style", capability, scope);
+  if (!prepared.valid) return prepared;
+
+  const captured = captureResolvedAdapterMap(style, prepared.authority);
+  if (captured.status === "limit") {
+    return adapterValidationFailure("adapter-style", [
+      adapterValidationLimitExceededDiagnostic(ROOT_POINTER, {
+        capabilityId: prepared.reference.capabilityId,
+      }),
+    ]);
+  }
+  if (captured.status === "invalid") {
+    return adapterValidationFailure("adapter-style", [
+      adapterDiagnostic("PROP_TYPE_MISMATCH", ROOT_POINTER, prepared.reference),
+    ]);
+  }
+  const snapshot = captured.value;
+  const visualStatesValue = ownValue(prepared.contract, "visualStates");
+  const visualStates = new Set(
+    (Array.isArray(visualStatesValue) ? visualStatesValue : []).filter(
+      (state): state is string => typeof state === "string",
+    ),
+  );
+  const stylePartsValue = ownValue(prepared.contract, "styleParts");
+  const styleParts = asObject(stylePartsValue) ?? EMPTY_OBJECT;
+  const diagnostics: DesenSemanticDiagnostic[] = [];
+
+  for (const stateName of sortedKeys(snapshot as unknown as JsonObject)) {
+    const statePointer = appendJsonPointer(ROOT_POINTER, stateName);
+    if (stateName !== "base" && !visualStates.has(stateName)) {
+      diagnostics.push(adapterDiagnostic("UNKNOWN_PROP", statePointer, prepared.reference));
+    }
+    const parts = asObject((snapshot as unknown as JsonObject)[stateName]);
+    if (parts === undefined) {
+      diagnostics.push(adapterDiagnostic("PROP_TYPE_MISMATCH", statePointer, prepared.reference));
+      continue;
+    }
+    for (const partName of sortedKeys(parts)) {
+      const partPointer = appendJsonPointer(statePointer, partName);
+      const partContract = asObject(ownValue(styleParts, partName));
+      if (partContract === undefined) {
+        diagnostics.push(adapterDiagnostic("UNKNOWN_PROP", partPointer, prepared.reference));
+        continue;
+      }
+      const properties = asObject(ownValue(parts, partName));
+      if (properties === undefined) {
+        diagnostics.push(adapterDiagnostic("PROP_TYPE_MISMATCH", partPointer, prepared.reference));
+        continue;
+      }
+      const propertiesSchema = prepared.resolution.preparedStylePartSchemas?.get(partName);
+      if (propertiesSchema === undefined) {
+        diagnostics.push(
+          invalidExecutionContractDiagnostic(partPointer, {
+            capabilityId: prepared.reference.capabilityId,
+          }),
+        );
+        continue;
+      }
+      diagnostics.push(
+        ...resolvedAdapterSchemaDiagnostics(
+          propertiesSchema,
+          properties as unknown as DesenResolvedAdapterValueMap,
+          partPointer,
+          prepared.reference,
+          prepared.authority.schemaBudget,
+        ),
+      );
+    }
+  }
+
+  return diagnostics.length === 0
+    ? adapterValidationSuccess("adapter-style", snapshot)
+    : adapterValidationFailure("adapter-style", diagnostics);
 }

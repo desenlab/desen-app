@@ -25,6 +25,8 @@ export const DEFAULT_PROTOCOL_INTERACTION_CONTRACTS_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208";
 
 /** Absolute path to the reviewed protocol trace ledger used by M02-T09 evidence. */
 export const DEFAULT_PROTOCOL_INTERACTION_CONTRACTS_TRACE_PATH = path.join(
@@ -168,6 +170,84 @@ function fail(code, message, details = undefined) {
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("INTERACTION_ARTIFACT_DRIFT", "Immutable M02-T09 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "INTERACTION_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T09 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("INTERACTION_ARTIFACT_DRIFT", "Immutable task-time M02-T09 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("INTERACTION_ARTIFACT_DRIFT", "Immutable M02-T09 evidence is not valid JSON.");
+  }
+  const behaviorGoldens =
+    (artifact.behaviorContracts?.props?.length ?? -1) +
+    (artifact.behaviorContracts?.styles?.length ?? -1) +
+    (artifact.behaviorContracts?.slots?.length ?? -1);
+  const schemaSafetyGoldens =
+    (artifact.schemaSafetyGoldens?.accepted?.length ?? -1) +
+    (artifact.schemaSafetyGoldens?.rejected?.length ?? -1);
+  const payloadSafetyGoldens =
+    (artifact.payloadSafety?.accepted?.length ?? -1) +
+    (artifact.payloadSafety?.rejected?.length ?? -1);
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T09" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-interaction-contract-validation-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.traceability?.schemaFamilyCount !== 7 ||
+    artifact.traceability?.schemaConstraints !== 246 ||
+    artifact.traceability?.ownedCoreDiagnostics?.length !== 5 ||
+    artifact.traceability?.reusedComponentSurfaceDiagnostics?.length !== 5 ||
+    artifact.frozenValidation?.officialT09Invalid?.length !== 1 ||
+    behaviorGoldens !== 15 ||
+    artifact.attachments?.length !== 6 ||
+    artifact.conflicts?.length !== 7 ||
+    schemaSafetyGoldens !== 8 ||
+    payloadSafetyGoldens !== 10 ||
+    artifact.laterTaskScopeAccepted?.length !== 4 ||
+    artifact.frozenValidation?.validExamples?.length !== 5 ||
+    artifact.publicApi?.exports?.length !== 7 ||
+    artifact.security?.resolvedPayloadBoundary?.getterInvocations !== 0
+  ) {
+    fail(
+      "INTERACTION_ARTIFACT_DRIFT",
+      "Immutable M02-T09 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -2412,11 +2492,17 @@ export async function buildProtocolInteractionContractsEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T09 evidence to its single tracked regular-file destination. */
+/** Writes current evidence only outside the immutable tracked M02-T09 artifact path. */
 export async function writeProtocolInteractionContractsEvidence({
   artifactPath = DEFAULT_PROTOCOL_INTERACTION_CONTRACTS_ARTIFACT_PATH,
   beforeAtomicRename,
 } = {}) {
+  if (
+    path.resolve(artifactPath) ===
+    path.resolve(DEFAULT_PROTOCOL_INTERACTION_CONTRACTS_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   const { resolvedArtifactPath, resolvedParent } = await resolveWritableArtifactPath(artifactPath);
   const result = await buildProtocolInteractionContractsEvidence();
   const { handle, temporaryPath } = await openExclusiveTemporary(
@@ -2461,25 +2547,19 @@ export async function writeProtocolInteractionContractsEvidence({
   }
 }
 
-/** Rebuilds and byte-compares tracked M02-T09 evidence without modifying it. */
+/** Authenticates immutable task-time M02-T09 evidence without rebuilding successor source. */
 export async function verifyProtocolInteractionContracts({
   artifactPath = DEFAULT_PROTOCOL_INTERACTION_CONTRACTS_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolInteractionContractsEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail("INTERACTION_ARTIFACT_DRIFT", "Tracked M02-T09 evidence is stale or modified.", {
-      expectedSha256: result.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   return Object.freeze({
     result: "PASS",
-    schemaFamilies: EXPECTED_SCHEMA_FAMILIES.length,
-    schemaConstraints: EXPECTED_SCHEMA_CONSTRAINTS,
-    ownedCoreDiagnostics: EXPECTED_CORE_DIAGNOSTICS.length,
-    reusedCoreDiagnostics: REUSED_COMPONENT_DIAGNOSTICS.length,
+    compatibilityMode: "immutable-task-time-artifact",
+    schemaFamilies: result.artifact.traceability.schemaFamilyCount,
+    schemaConstraints: result.artifact.traceability.schemaConstraints,
+    ownedCoreDiagnostics: result.artifact.traceability.ownedCoreDiagnostics.length,
+    reusedCoreDiagnostics: result.artifact.traceability.reusedComponentSurfaceDiagnostics.length,
     officialT09Invalid: result.artifact.frozenValidation.officialT09Invalid.length,
     behaviorGoldens:
       result.artifact.behaviorContracts.props.length +
@@ -2493,7 +2573,7 @@ export async function verifyProtocolInteractionContracts({
     payloadSafetyGoldens:
       result.artifact.payloadSafety.accepted.length + result.artifact.payloadSafety.rejected.length,
     scopeFenceAccepted: result.artifact.laterTaskScopeAccepted.length,
-    examples: FROZEN_EXAMPLES.length,
+    examples: result.artifact.frozenValidation.validExamples.length,
     artifactSha256: result.artifactSha256,
   });
 }

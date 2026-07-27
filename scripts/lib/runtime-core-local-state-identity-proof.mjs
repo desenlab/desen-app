@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -13,12 +13,16 @@ import { DEFAULT_RUNTIME_CORE_VALUE_RESOLUTION_ARTIFACT_PATH } from "./runtime-c
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const RUNTIME_API_URL = new URL("../../packages/runtime-core/dist/index.js", import.meta.url);
+const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
+const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-local-state-identity.json";
 
 /** Absolute path to the deterministic M04-T06 local-state and node-identity artifact. */
 export const DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/runtime-core-0.1.0-local-state-identity.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13";
 
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
   "createRuntimeNodeIdentity",
@@ -241,6 +245,8 @@ const REQUIRED_ROOT_TEST_TITLES = Object.freeze([
   "accepts tracked deterministic M04-T06 local-state and identity evidence",
   "two independent local-state and identity evidence builds are byte-identical",
   "rejects stale or one-byte-tampered local-state and identity evidence",
+  "default local-state writer preserves exact immutable task-time bytes",
+  "rejects wrong moved or duplicated local-state Proof Matrix SHA pins",
   "rejects mount, read, write, dispose, no-op, PF-019, and atomicity semantic drift",
   "rejects stable headless node-identity semantic drift",
   "rejects complete resolved-value validation and source invariant drift",
@@ -2032,83 +2038,242 @@ async function readArtifactBytes(artifactPath) {
       cause: String(error),
     });
   }
-  if (!entry.isFile()) {
-    fail("LOCAL_STATE_IDENTITY_ARTIFACT_UNSAFE", "M04-T06 artifact must be a regular file.");
+  if (!entry.isFile() || entry.isSymbolicLink()) {
+    fail(
+      "LOCAL_STATE_IDENTITY_ARTIFACT_UNSAFE",
+      "M04-T06 artifact must be a regular non-symlink file.",
+    );
   }
   return readFile(artifactPath);
 }
 
-/** Verifies tracked or injected M04-T06 artifact bytes against a fresh deterministic build. */
+async function canonicalArtifactTarget(artifactPath) {
+  const absolutePath = path.resolve(artifactPath);
+  return path.join(await realpath(path.dirname(absolutePath)), path.basename(absolutePath));
+}
+
+async function resolveArtifactTarget(artifactPath) {
+  const [resolvedArtifactPath, historicalArtifactPath] = await Promise.all([
+    canonicalArtifactTarget(artifactPath),
+    canonicalArtifactTarget(DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH),
+  ]);
+  return Object.freeze({
+    artifactPath: resolvedArtifactPath,
+    targetsHistoricalArtifact: resolvedArtifactPath === historicalArtifactPath,
+  });
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  const artifactBytes =
+    suppliedBytes === undefined
+      ? await readArtifactBytes(artifactPath)
+      : Buffer.from(suppliedBytes);
+  const artifactSha256 = sha256(artifactBytes);
+  if (artifactSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail(
+      "LOCAL_STATE_IDENTITY_ARTIFACT_DRIFT",
+      "Immutable task-time M04-T06 evidence bytes changed.",
+      {
+        expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+        actualSha256: artifactSha256,
+      },
+    );
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(artifactBytes.toString("utf8"));
+  } catch {
+    fail(
+      "LOCAL_STATE_IDENTITY_ARTIFACT_DRIFT",
+      "Immutable task-time M04-T06 evidence is not valid JSON.",
+    );
+  }
+  const runtime = artifact.runtime;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M04-T06" ||
+    artifact.result !== "PASS" ||
+    artifact.claim?.protocol !== "0.1.0" ||
+    artifact.claim?.target !== "platform-neutral" ||
+    artifact.claim?.protocolStatusChanges?.length !== 0 ||
+    artifact.claim?.proofMatrixStatusChanges?.length !== 0 ||
+    JSON.stringify(artifact.claim?.normativeStatusChanges) !==
+      JSON.stringify([{ id: "N-024", from: "PLANNED", to: "TESTED" }]) ||
+    JSON.stringify(artifact.publicApi?.runtimeExports) !==
+      JSON.stringify(EXPECTED_RUNTIME_EXPORTS) ||
+    JSON.stringify(artifact.publicApi?.typeExports) !== JSON.stringify(EXPECTED_TYPE_EXPORTS) ||
+    artifact.publicApi?.internalExports?.length !== 2 ||
+    artifact.publicApi?.tsdocDeclarations !== 28 ||
+    artifact.validatorFacade?.runtimeExports?.length !== 1 ||
+    artifact.validatorFacade?.typeExports?.length !== 2 ||
+    artifact.validatorFacade?.tsdocDeclarations !== 3 ||
+    artifact.evidence?.packageTests !== 33 ||
+    artifact.evidence?.compilerNegativeCases !== 7 ||
+    artifact.evidence?.rootMutationTests !== 13 ||
+    artifact.evidence?.traceRules?.length !== 4 ||
+    artifact.evidence?.normativeRules?.length !== 1 ||
+    artifact.evidence?.trackedFiles?.length !== 23 ||
+    runtime?.mountProbes !== 6 ||
+    runtime?.readProbes !== 3 ||
+    runtime?.acceptedWriteProbes !== 3 ||
+    runtime?.rejectedWriteProbes !== 7 ||
+    runtime?.completeValidationProbes !== 3 ||
+    runtime?.schemaSyntaxProbes !== 1 ||
+    runtime?.schemaProfileProbes !== 2 ||
+    runtime?.resolvedValueProbes !== 1 ||
+    runtime?.pf019Probes !== 2 ||
+    runtime?.noOpProbes !== 1 ||
+    runtime?.atomicityProbes !== 4 ||
+    runtime?.disposalProbes !== 5 ||
+    runtime?.identityCreationProbes !== 2 ||
+    runtime?.identityPreservationProbes !== 1 ||
+    runtime?.identityRemountProbes !== 1 ||
+    runtime?.identityReplacementProbes !== 1 ||
+    runtime?.identityRejectionProbes !== 3 ||
+    runtime?.capabilitySafetyProbes !== 1 ||
+    runtime?.hostileInputProbes !== 1 ||
+    runtime?.platformEffects !== 0 ||
+    runtime?.sourceWriteBacks !== 0 ||
+    runtime?.partialOutputs !== false ||
+    artifact.portability?.framework !== null ||
+    artifact.portability?.platformGlobals?.length !== 0 ||
+    artifact.portability?.dynamicEvaluation !== false ||
+    artifact.portability?.nondeterministicCalls?.length !== 0 ||
+    artifact.portability?.a2uiDependencies?.length !== 0
+  ) {
+    fail(
+      "LOCAL_STATE_IDENTITY_ARTIFACT_DRIFT",
+      "Immutable M04-T06 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
+}
+
+async function verifyHistoricalProofMatrixReference(buildOptions) {
+  const normalizedBuildOptions = normalizeOptions(buildOptions);
+  const proofMatrix = await readWorkspaceText(
+    PROOF_MATRIX_PATH,
+    normalizedBuildOptions.fileOverrides,
+  );
+  const lines = proofMatrix.split(/\r?\n/u);
+  const sectionStartIndexes = lines.flatMap((line, index) =>
+    line.startsWith("M04-T06 defines and proves ") ? [index] : [],
+  );
+  const sectionEndIndexes = lines.flatMap((line, index) =>
+    line.startsWith("M04-T07 defines and proves ") ? [index] : [],
+  );
+  const artifactLine = `\`${ARTIFACT_FILE_NAME}\``;
+  const shaLine = `\`sha256:${HISTORICAL_ARTIFACT_SHA256}\`.`;
+  const artifactIndexes = lines.flatMap((line, index) =>
+    line.trim() === artifactLine ? [index] : [],
+  );
+  const shaIndexes = lines.flatMap((line, index) => (line.trim() === shaLine ? [index] : []));
+  if (
+    sectionStartIndexes.length !== 1 ||
+    sectionEndIndexes.length !== 1 ||
+    sectionStartIndexes[0] >= sectionEndIndexes[0] ||
+    artifactIndexes.length !== 1 ||
+    shaIndexes.length !== 1 ||
+    artifactIndexes[0] <= sectionStartIndexes[0] ||
+    artifactIndexes[0] >= sectionEndIndexes[0] ||
+    shaIndexes[0] !== artifactIndexes[0] + 1 ||
+    lines[artifactIndexes[0]] !== artifactLine ||
+    lines[shaIndexes[0]] !== shaLine
+  ) {
+    fail(
+      "LOCAL_STATE_IDENTITY_ARTIFACT_REFERENCE_DRIFT",
+      "The bounded M04-T06 Proof Matrix receipt must contain one unique adjacent historical path/SHA field.",
+    );
+  }
+}
+
+function summarizeEvidence(evidence, compatibilityMode = undefined) {
+  const result = {
+    result: "PASS",
+    artifactSha256: evidence.artifactSha256,
+    runtimeExports: evidence.artifact.publicApi.runtimeExports.length,
+    typeExports: evidence.artifact.publicApi.typeExports.length,
+    internalExports: evidence.artifact.publicApi.internalExports.length,
+    tsdocDeclarations: evidence.artifact.publicApi.tsdocDeclarations,
+    validatorFacadeRuntimeExports: evidence.artifact.validatorFacade.runtimeExports.length,
+    validatorFacadeTypeExports: evidence.artifact.validatorFacade.typeExports.length,
+    validatorFacadeTsdocDeclarations: evidence.artifact.validatorFacade.tsdocDeclarations,
+    packageTests: evidence.artifact.evidence.packageTests,
+    compilerNegativeCases: evidence.artifact.evidence.compilerNegativeCases,
+    rootMutationTests: evidence.artifact.evidence.rootMutationTests,
+    traceRules: evidence.artifact.evidence.traceRules.length,
+    normativeRules: evidence.artifact.evidence.normativeRules.length,
+    trackedFiles: evidence.artifact.evidence.trackedFiles.length,
+    mountProbes: evidence.artifact.runtime.mountProbes,
+    readProbes: evidence.artifact.runtime.readProbes,
+    acceptedWriteProbes: evidence.artifact.runtime.acceptedWriteProbes,
+    rejectedWriteProbes: evidence.artifact.runtime.rejectedWriteProbes,
+    completeValidationProbes: evidence.artifact.runtime.completeValidationProbes,
+    schemaSyntaxProbes: evidence.artifact.runtime.schemaSyntaxProbes,
+    schemaProfileProbes: evidence.artifact.runtime.schemaProfileProbes,
+    resolvedValueProbes: evidence.artifact.runtime.resolvedValueProbes,
+    pf019Probes: evidence.artifact.runtime.pf019Probes,
+    noOpProbes: evidence.artifact.runtime.noOpProbes,
+    atomicityProbes: evidence.artifact.runtime.atomicityProbes,
+    disposalProbes: evidence.artifact.runtime.disposalProbes,
+    identityCreationProbes: evidence.artifact.runtime.identityCreationProbes,
+    identityPreservationProbes: evidence.artifact.runtime.identityPreservationProbes,
+    identityRemountProbes: evidence.artifact.runtime.identityRemountProbes,
+    identityReplacementProbes: evidence.artifact.runtime.identityReplacementProbes,
+    identityRejectionProbes: evidence.artifact.runtime.identityRejectionProbes,
+    capabilitySafetyProbes: evidence.artifact.runtime.capabilitySafetyProbes,
+    hostileInputProbes: evidence.artifact.runtime.hostileInputProbes,
+    platformEffects: evidence.artifact.runtime.platformEffects,
+  };
+  if (compatibilityMode !== undefined) result.compatibilityMode = compatibilityMode;
+  return Object.freeze(result);
+}
+
+/** Authenticates immutable task-time M04-T06 evidence without reinterpreting successor source. */
 export async function verifyRuntimeCoreLocalStateIdentityEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
   const artifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH;
-  const expected = await buildRuntimeCoreLocalStateIdentityEvidence(normalized.buildOptions);
-  const actualBytes = normalized.artifactBytes ?? (await readArtifactBytes(artifactPath));
-  if (!byteEqual(actualBytes, expected.artifactBytes)) {
-    fail("LOCAL_STATE_IDENTITY_ARTIFACT_DRIFT", "M04-T06 artifact differs from fresh evidence.", {
-      expectedSha256: expected.artifactSha256,
-      actualSha256: sha256(actualBytes),
-    });
-  }
-  return Object.freeze({
-    result: "PASS",
-    artifactSha256: expected.artifactSha256,
-    runtimeExports: expected.artifact.publicApi.runtimeExports.length,
-    typeExports: expected.artifact.publicApi.typeExports.length,
-    internalExports: expected.artifact.publicApi.internalExports.length,
-    tsdocDeclarations: expected.artifact.publicApi.tsdocDeclarations,
-    validatorFacadeRuntimeExports: expected.artifact.validatorFacade.runtimeExports.length,
-    validatorFacadeTypeExports: expected.artifact.validatorFacade.typeExports.length,
-    validatorFacadeTsdocDeclarations: expected.artifact.validatorFacade.tsdocDeclarations,
-    packageTests: expected.artifact.evidence.packageTests,
-    compilerNegativeCases: expected.artifact.evidence.compilerNegativeCases,
-    rootMutationTests: expected.artifact.evidence.rootMutationTests,
-    traceRules: expected.artifact.evidence.traceRules.length,
-    normativeRules: expected.artifact.evidence.normativeRules.length,
-    trackedFiles: expected.artifact.evidence.trackedFiles.length,
-    mountProbes: expected.artifact.runtime.mountProbes,
-    readProbes: expected.artifact.runtime.readProbes,
-    acceptedWriteProbes: expected.artifact.runtime.acceptedWriteProbes,
-    rejectedWriteProbes: expected.artifact.runtime.rejectedWriteProbes,
-    completeValidationProbes: expected.artifact.runtime.completeValidationProbes,
-    schemaSyntaxProbes: expected.artifact.runtime.schemaSyntaxProbes,
-    schemaProfileProbes: expected.artifact.runtime.schemaProfileProbes,
-    resolvedValueProbes: expected.artifact.runtime.resolvedValueProbes,
-    pf019Probes: expected.artifact.runtime.pf019Probes,
-    noOpProbes: expected.artifact.runtime.noOpProbes,
-    atomicityProbes: expected.artifact.runtime.atomicityProbes,
-    disposalProbes: expected.artifact.runtime.disposalProbes,
-    identityCreationProbes: expected.artifact.runtime.identityCreationProbes,
-    identityPreservationProbes: expected.artifact.runtime.identityPreservationProbes,
-    identityRemountProbes: expected.artifact.runtime.identityRemountProbes,
-    identityReplacementProbes: expected.artifact.runtime.identityReplacementProbes,
-    identityRejectionProbes: expected.artifact.runtime.identityRejectionProbes,
-    capabilitySafetyProbes: expected.artifact.runtime.capabilitySafetyProbes,
-    hostileInputProbes: expected.artifact.runtime.hostileInputProbes,
-    platformEffects: expected.artifact.runtime.platformEffects,
-  });
+  const historical = await authenticateHistoricalArtifact(artifactPath, normalized.artifactBytes);
+  await verifyHistoricalProofMatrixReference(normalized.buildOptions);
+  return summarizeEvidence(historical, "immutable-task-time-artifact");
 }
 
-/** Atomically writes deterministic M04-T06 evidence after every proof check passes. */
+/**
+ * Writes current M04-T06-shaped evidence only to a non-historical destination.
+ *
+ * @remarks The tracked task-time artifact is immutable. Targeting its default path authenticates
+ * and returns the historical evidence without rebuilding or replacing it.
+ */
 export async function writeRuntimeCoreLocalStateIdentityEvidence(options = undefined) {
   const normalized = normalizeOptions(options);
-  const artifactPath =
+  const requestedArtifactPath =
     normalized.artifactPath ?? DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH;
+  const target = await resolveArtifactTarget(requestedArtifactPath);
+  if (target.targetsHistoricalArtifact) {
+    const historical = await authenticateHistoricalArtifact(
+      DEFAULT_RUNTIME_CORE_LOCAL_STATE_IDENTITY_ARTIFACT_PATH,
+    );
+    await verifyHistoricalProofMatrixReference(normalized.buildOptions);
+    return Object.freeze({
+      ...summarizeEvidence(historical, "immutable-task-time-artifact"),
+      artifactPath: target.artifactPath,
+    });
+  }
   const evidence =
     normalized.preparedEvidence ??
     (await buildRuntimeCoreLocalStateIdentityEvidence(normalized.buildOptions));
   await writeAtomicProofArtifact({
-    artifactPath,
+    artifactPath: target.artifactPath,
     artifactBytes: evidence.artifactBytes,
     beforeAtomicRename: normalized.beforeAtomicRename,
   });
-  const verified = await verifyRuntimeCoreLocalStateIdentityEvidence({
-    artifactPath,
-    artifactBytes: evidence.artifactBytes,
-    buildOptions: normalized.buildOptions,
-  });
-  return Object.freeze({ ...verified, artifactPath });
+  return Object.freeze({ ...summarizeEvidence(evidence), artifactPath: target.artifactPath });
 }
 
 /** Exact root command names owned by the M04-T06 evidence boundary. */

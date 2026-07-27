@@ -40,6 +40,7 @@ test("accepts exact deterministic M02-T10 binding-contract evidence", async () =
   const result = await verifyProtocolBindingContracts();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.schemaFamilies, 10);
   assert.equal(result.schemaConstraints, 300);
   assert.equal(result.proseRules, 12);
@@ -50,7 +51,23 @@ test("accepts exact deterministic M02-T10 binding-contract evidence", async () =
   assert.equal(result.projectMutationGoldens, 48);
   assert.equal(result.obligationKinds, 4);
   assert.equal(result.examples, 5);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c",
+  );
+});
+
+test("default evidence writer preserves immutable task-time M02-T10 bytes", async () => {
+  const artifactPath = new URL(
+    "../docs/proof/artifacts/protocol-0.1.0-binding-contracts.json",
+    import.meta.url,
+  );
+  const before = await readFile(artifactPath);
+  const result = await writeProtocolBindingContractsEvidence();
+  const after = await readFile(artifactPath);
+
+  assert.deepEqual(after, before);
+  assert.deepEqual(result.artifactBytes, before);
 });
 
 test("two independent binding evidence builds are byte-identical", async () => {
@@ -61,9 +78,17 @@ test("two independent binding evidence builds are byte-identical", async () => {
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects one-byte-tampered binding evidence", async () => {
-  const pristine = await buildProtocolBindingContractsEvidence();
-  const tampered = Buffer.from(pristine.artifactBytes);
+test("rejects a current rebuild and one-byte-tampered historical binding evidence", async () => {
+  const current = await buildProtocolBindingContractsEvidence();
+  await assert.rejects(
+    verifyProtocolBindingContracts({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("BINDING_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
+    new URL("../docs/proof/artifacts/protocol-0.1.0-binding-contracts.json", import.meta.url),
+  );
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(

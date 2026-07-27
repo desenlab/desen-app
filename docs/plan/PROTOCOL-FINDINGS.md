@@ -1797,10 +1797,67 @@ This file records implementation discoveries without changing the frozen DESEN 0
   authenticated headless session; M05-T04 binds interactions to that session and M05-T09 audits
   the host source/import graph. This keeps the pure compiler reusable without overstating T01.
 
-- Future action: M05-T02 and M05-T03 must authenticate the exact Catalog and validate resolved props
-  and styles before those existing public semantic fields reach an adapter. M05-T04 activates the
-  deliberately unavailable event/command seams and proves behavior lifecycle. M05-T05 proves
-  concrete React instance reconciliation and source diagnostics, while M05-T06 owns committed
-  adapter exceptions and final production unknown-capability/error-boundary behavior. Future
-  SwiftUI and Compose renderers should reuse the observable headless vectors but define independent
-  static target registries rather than importing React concepts into `runtime-core`.
+- Future action: M05-T02 now authenticates the exact session/Catalog pair and validates resolved
+  props and named slots through one bounded receiving scope; `PF-051` records that implementation
+  profile. M05-T03 must validate and deliver resolved styles before those semantic fields reach an
+  adapter. M05-T04 activates the deliberately unavailable event/command seams and proves behavior
+  lifecycle. M05-T05 proves concrete React instance reconciliation and source diagnostics, while
+  M05-T06 owns committed adapter exceptions and final production
+  unknown-capability/error-boundary behavior. Future SwiftUI and Compose renderers should reuse
+  the observable headless vectors but define independent static target registries rather than
+  importing React concepts into `runtime-core`.
+
+## PF-051 — Resolved adapter receiving requires exact Catalog authority and one shared finite scope
+
+- Status: OPEN
+- Blocks proof: No; M05-T02 defines a Web–React receiving profile without changing frozen Source,
+  Bundle, Catalog, or headless-plan formats.
+- Protocol location: SPEC Sections 17.2, 17.3, 18.3, 24.2, and 26.3; `N-026`, `N-027`, `N-042`,
+  `C-019`, `R-006`, `R-112`, and related findings `PF-010`, `PF-022`, `PF-046`, `PF-049`, and
+  `PF-050`
+- Observation: DESEN requires final resolved values to satisfy the receiving capability schema and
+  slot contract, but it does not define how a framework renderer proves that a public plan belongs
+  to the same live session and Catalog set, whether schemas may be prepared once, how repeated
+  adapter validations share a finite work budget, or which public projection represents final
+  materialized named slots without exposing React or DOM internals. A stateless validation helper
+  would let a wide tree reset its schema budget for every node; accepting a raw plan beside an
+  unrelated Catalog would permit structurally valid but unauthorized receiving contracts.
+- Implementation decision: M05-T02 adds one exact-reference authority check to the headless session.
+  The React renderer accepts only `{registry, session, snapshot, catalogSet, limits?}` and consumes
+  only the authenticated current snapshot's public plan. A copied/stale snapshot, lower validator
+  brand, structurally equal Catalog clone, forged handle, hostile own-data envelope, or disposed
+  generation fails before an adapter executes. Successful mount returns its exact retained
+  validated Catalog set outside the JSON-only snapshot, so both raw and prevalidated Catalog
+  ingress produce a usable real-host authority without revalidation guessing.
+
+  The execution validator prepares component and behavior prop schemas and style-part property
+  schemas once when it authenticates the Catalog set. Each render creates one opaque
+  factory-authenticated receiving scope with monotonically consumed prop, slot, style, slot-entry,
+  slot-contract-work, string, detached-JSON, and prepared-schema evaluation budgets. Schema
+  evaluation charges actual comparison and Catalog-controlled loop work, not merely recursive
+  interpreter entries. Slot metadata and acceptance sets are prepared once; required-slot,
+  contract-lookup, and child-acceptance work still consumes the shared scope. The profile may only
+  lower finite ceilings. Counters are not refunded after invalid attempts and no stateless Catalog
+  overload can reset them.
+
+  Complete component and behavior prop maps cross an accessor-free detached JSON boundary and are
+  evaluated in `complete` and `resolved-value` mode. Named slots cross a separate bounded projection
+  containing only slot names and child component capability identifiers. Required presence,
+  effective minimum and maximum cardinality, exact-id/category acceptance unions, explicit empty
+  reject-all unions, and unknown child capabilities are checked against the final materialized
+  owner instance. Exact names and child order are retained, and successful maps are recursively
+  immutable. A deep prop or slot failure produces an identity-linked frozen diagnostic result and
+  no React element, adapter call, fallback, or partial value.
+
+  Component adapters no longer receive raw behavior plans. Neither component nor behavior adapters
+  receive the session, Catalog, raw plan, DOM/native objects, private React fields, or a guessed
+  `children` fallback. This is a target-specific receiving profile; the shared validator and
+  session authority remain framework-neutral.
+
+- Future action: M05-T03 must deliver only schema-valid resolved visual-state/style-part maps.
+  M05-T04 must bind event and command lifetimes to the exact current session generation. M05-T06
+  must compose receiving failures and adapter exceptions into the production safe-boundary policy.
+  M06-T05 still owns publisher-side recording of dynamic validation obligations, so `N-027`
+  remains `PLANNED`. M09-T04 still owns editor overlay/private-structure isolation, so `N-042`
+  remains `PLANNED`. A later protocol revision may standardize a target-neutral receiving-scope
+  envelope and aggregate-budget terminology if independent runtimes need byte-level parity.

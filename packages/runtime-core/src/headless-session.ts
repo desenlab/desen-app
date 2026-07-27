@@ -252,6 +252,15 @@ export type RuntimeHeadlessSessionMountResult =
       readonly handle: RuntimeHeadlessSessionHandle;
       /** Generation-zero pure-JSON observation. */
       readonly snapshot: RuntimeHeadlessSessionSnapshot;
+      /**
+       * Exact validated execution Catalog set retained by this session.
+       *
+       * @remarks Raw Catalog ingress is validated once during mount. Framework adapters must pass
+       * this exact factory-authenticated reference to their receiving boundary; revalidating the
+       * same JSON produces a distinct authority. This member is intentionally outside the
+       * JSON-only session snapshot.
+       */
+      readonly catalogSet: DesenValidatedExecutionCatalogSet;
     }>
   | Readonly<{
       /** Confirms that no session authority or partial surface became observable. */
@@ -277,6 +286,58 @@ export type RuntimeHeadlessSessionReadResult =
   | Readonly<{
       /** The supplied handle was not created by the session factory. */
       readonly status: "invalid-handle";
+    }>;
+
+/**
+ * Exact caller-owned inputs for one framework-adapter authority preflight.
+ *
+ * @remarks Both members must be the same objects retained by the live session. Structural,
+ * canonical, or byte equality never substitutes for exact factory-authenticated identity.
+ */
+export interface RuntimeHeadlessSessionAdapterAuthorityInput {
+  /** Exact current snapshot returned by mount, read, or a prior authenticated result. */
+  readonly snapshot: RuntimeHeadlessSessionSnapshot;
+  /** Exact validated Catalog set supplied when this session was mounted. */
+  readonly catalogSet: DesenValidatedExecutionCatalogSet;
+}
+
+/**
+ * Closed result of authenticating a framework adapter against one live session generation.
+ *
+ * @remarks An authenticated result returns only the session's current public snapshot; it does
+ * not expose the retained Catalog set, host ports, callbacks, private materialization sidecar, or
+ * any lower runtime authority. `invalid-snapshot` returns the current public snapshot solely so a
+ * holder of the session handle can retry after a stale observation. All variants are frozen,
+ * callback-free own-data records.
+ */
+export type RuntimeHeadlessSessionAdapterAuthorityResult =
+  | Readonly<{
+      /** Both exact references belong to the current live session generation. */
+      readonly status: "authenticated";
+      /** The only snapshot this adapter preflight authorizes for synchronous consumption. */
+      readonly snapshot: RuntimeHeadlessSessionSnapshot;
+    }>
+  | Readonly<{
+      /** The supplied snapshot was stale, reconstructed, or owned by another session. */
+      readonly status: "invalid-snapshot";
+      /** Exact current public observation, supplied only for a bounded retry. */
+      readonly snapshot: RuntimeHeadlessSessionSnapshot;
+    }>
+  | Readonly<{
+      /** The supplied validated Catalog set is not the exact set retained by this session. */
+      readonly status: "invalid-catalog-set";
+    }>
+  | Readonly<{
+      /** The session has terminally ended. */
+      readonly status: "disposed";
+    }>
+  | Readonly<{
+      /** The supplied handle was not created by the session factory. */
+      readonly status: "invalid-handle";
+    }>
+  | Readonly<{
+      /** The request was not the exact enumerable own-data envelope. */
+      readonly status: "malformed-request";
     }>;
 
 /** Receiver-independent invalidation notice used by framework snapshot-store adapters. */
@@ -498,6 +559,11 @@ interface CapturedEventInput {
   readonly payload: unknown;
 }
 
+interface CapturedAdapterAuthorityInput {
+  readonly snapshot: unknown;
+  readonly catalogSet: unknown;
+}
+
 interface OwnDataRead {
   readonly valid: boolean;
   readonly present: boolean;
@@ -589,6 +655,41 @@ function exactOwnDataKeys(
     );
   } catch {
     return false;
+  }
+}
+
+function captureAdapterAuthorityInput(input: unknown): CapturedAdapterAuthorityInput | undefined {
+  try {
+    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;
+    const prototype = Reflect.getPrototypeOf(input);
+    if (prototype !== Object.prototype && prototype !== null) return undefined;
+    const keys = Reflect.ownKeys(input);
+    if (
+      keys.length !== 2 ||
+      !keys.includes("snapshot") ||
+      !keys.includes("catalogSet") ||
+      keys.some((key) => typeof key !== "string" || (key !== "snapshot" && key !== "catalogSet"))
+    ) {
+      return undefined;
+    }
+    const snapshot = Reflect.getOwnPropertyDescriptor(input, "snapshot");
+    const catalogSet = Reflect.getOwnPropertyDescriptor(input, "catalogSet");
+    if (
+      snapshot === undefined ||
+      !snapshot.enumerable ||
+      !("value" in snapshot) ||
+      catalogSet === undefined ||
+      !catalogSet.enumerable ||
+      !("value" in catalogSet)
+    ) {
+      return undefined;
+    }
+    return Object.freeze({
+      snapshot: snapshot.value,
+      catalogSet: catalogSet.value,
+    });
+  } catch {
+    return undefined;
   }
 }
 
@@ -2283,6 +2384,7 @@ export function mountRuntimeHeadlessSession(
     status: "mounted",
     handle,
     snapshot: authority.snapshot,
+    catalogSet: catalogs.value,
   });
 }
 
@@ -2302,6 +2404,63 @@ export function readRuntimeHeadlessSession(
     return Object.freeze({ status: "disposed" });
   }
   return Object.freeze({ status: "read", snapshot: authority.snapshot });
+}
+
+/**
+ * Authenticates an exact current session snapshot and its exact retained execution Catalog set for
+ * one synchronous framework-adapter preflight.
+ *
+ * @remarks Authentication is reference-based and intentionally narrower than session ownership:
+ * it neither validates receiving values nor grants event, command, attachment, or lower-manager
+ * authority. Consumers must authenticate again after a session notification and live operations
+ * must cross their own dedicated authority seams.
+ *
+ * A live/disposed handle check occurs before reflecting over caller input. The session authority
+ * is then rechecked after exact own-data capture so a hostile Proxy that disposes the session or
+ * publishes another snapshot during reflection cannot authenticate stale authority. No Catalog
+ * member, schema, metadata, or callback is read or returned.
+ */
+export function authenticateRuntimeHeadlessSessionAdapterAuthority(
+  handle: RuntimeHeadlessSessionHandle,
+  input: RuntimeHeadlessSessionAdapterAuthorityInput,
+): RuntimeHeadlessSessionAdapterAuthorityResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  const authority = SESSION_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  if (
+    authority.status !== "live" ||
+    authority.snapshot === undefined ||
+    authority.retainedGraph === undefined
+  ) {
+    return Object.freeze({ status: "disposed" });
+  }
+
+  const captured = captureAdapterAuthorityInput(input);
+  const current = SESSION_AUTHORITIES.get(handle);
+  if (
+    current !== authority ||
+    current.status !== "live" ||
+    current.snapshot === undefined ||
+    current.retainedGraph === undefined
+  ) {
+    return Object.freeze({ status: "disposed" });
+  }
+  if (captured === undefined) return Object.freeze({ status: "malformed-request" });
+  const currentSnapshot = current.snapshot;
+  if (
+    typeof captured.snapshot !== "object" ||
+    captured.snapshot === null ||
+    captured.snapshot !== currentSnapshot ||
+    SESSION_SNAPSHOTS.get(captured.snapshot) !== current.snapshotOwner
+  ) {
+    return Object.freeze({ status: "invalid-snapshot", snapshot: currentSnapshot });
+  }
+  if (captured.catalogSet !== current.retainedGraph.catalogSet) {
+    return Object.freeze({ status: "invalid-catalog-set" });
+  }
+  return Object.freeze({ status: "authenticated", snapshot: currentSnapshot });
 }
 
 /**

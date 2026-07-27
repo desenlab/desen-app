@@ -10,6 +10,7 @@ const configuration = path.join(workspaceRoot, "dependency-cruiser.config.cjs");
 
 const cases = [
   { name: "allowed-validator-protocol", expectedRule: null },
+  { name: "allowed-runtime-react-validator", expectedRule: null },
   {
     name: "protocol-imports-runtime",
     expectedRule: "package-protocol-allowed-dependencies",
@@ -29,6 +30,10 @@ const cases = [
   {
     name: "runtime-core-imports-testkit",
     expectedRule: "production-source-never-imports-testkit",
+  },
+  {
+    name: "validator-imports-runtime-react",
+    expectedRule: "package-validator-allowed-dependencies",
   },
   {
     name: "reference-host-imports-editor",

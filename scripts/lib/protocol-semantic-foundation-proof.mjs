@@ -21,6 +21,8 @@ export const DEFAULT_PROTOCOL_SEMANTIC_FOUNDATION_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7";
 
 /** Absolute path to the reviewed protocol trace ledger used by M02-T07 evidence. */
 export const DEFAULT_PROTOCOL_SEMANTIC_FOUNDATION_TRACE_PATH = path.join(
@@ -210,6 +212,69 @@ function fail(code, message, details = {}) {
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("SEMANTIC_ARTIFACT_DRIFT", "Immutable M02-T07 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "SEMANTIC_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T07 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("SEMANTIC_ARTIFACT_DRIFT", "Immutable task-time M02-T07 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("SEMANTIC_ARTIFACT_DRIFT", "Immutable M02-T07 evidence is not valid JSON.");
+  }
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T07" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-semantic-foundation-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.traceability?.schemaFamilyCount !== 19 ||
+    artifact.traceability?.schemaConstraints !== 201 ||
+    artifact.traceability?.coreDiagnostics?.length !== 5 ||
+    artifact.semanticVersioning?.goldens?.length !== 28 ||
+    artifact.frozenValidation?.officialSemanticInvalid?.length !== 2 ||
+    artifact.frozenValidation?.laterTaskScopeAccepted?.length !== 3 ||
+    artifact.frozenValidation?.validExamples?.length !== 5 ||
+    artifact.publicApi?.runtimeExports?.length !== 6 ||
+    artifact.security?.dynamicExecution !== false
+  ) {
+    fail(
+      "SEMANTIC_ARTIFACT_DRIFT",
+      "Immutable M02-T07 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -1179,37 +1244,36 @@ export async function buildProtocolSemanticFoundationEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T07 evidence to its single tracked regular-file destination. */
+/** Writes current evidence only outside the immutable tracked M02-T07 artifact path. */
 export async function writeProtocolSemanticFoundationEvidence({
   artifactPath = DEFAULT_PROTOCOL_SEMANTIC_FOUNDATION_ARTIFACT_PATH,
 } = {}) {
+  if (
+    path.resolve(artifactPath) === path.resolve(DEFAULT_PROTOCOL_SEMANTIC_FOUNDATION_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   await assertWritableArtifactPath(artifactPath);
   const result = await buildProtocolSemanticFoundationEvidence();
   await writeFile(artifactPath, result.artifactBytes);
   return result;
 }
 
-/** Rebuilds and byte-compares the tracked M02-T07 evidence without modifying it. */
+/** Authenticates immutable task-time M02-T07 evidence without rebuilding successor source. */
 export async function verifyProtocolSemanticFoundation({
   artifactPath = DEFAULT_PROTOCOL_SEMANTIC_FOUNDATION_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolSemanticFoundationEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail("SEMANTIC_ARTIFACT_DRIFT", "Tracked M02-T07 evidence is stale or modified.", {
-      expectedSha256: result.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   return Object.freeze({
     result: "PASS",
-    schemaFamilies: EXPECTED_SCHEMA_FAMILIES.length,
-    schemaConstraints: EXPECTED_SCHEMA_CONSTRAINTS,
-    semverGoldens: SEMVER_GOLDENS.accepted.length + SEMVER_GOLDENS.rejected.length,
-    officialSemanticInvalid: OFFICIAL_SEMANTIC_CASES.length,
-    scopeFenceAccepted: T07_SCOPE_FENCE_CASES.length,
-    examples: FROZEN_EXAMPLES.length,
+    compatibilityMode: "immutable-task-time-artifact",
+    schemaFamilies: result.artifact.traceability.schemaFamilyCount,
+    schemaConstraints: result.artifact.traceability.schemaConstraints,
+    semverGoldens: result.artifact.semanticVersioning.goldens.length,
+    officialSemanticInvalid: result.artifact.frozenValidation.officialSemanticInvalid.length,
+    scopeFenceAccepted: result.artifact.frozenValidation.laterTaskScopeAccepted.length,
+    examples: result.artifact.frozenValidation.validExamples.length,
     artifactSha256: result.artifactSha256,
   });
 }

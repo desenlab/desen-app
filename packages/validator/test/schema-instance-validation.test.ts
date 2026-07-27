@@ -2,8 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   MAX_SCHEMA_GRAPH_DEPTH,
+  SCHEMA_CONTRACT_AGGREGATE_EVALUATION_LIMIT,
+  applyPreparedSchemaContract,
   applySchemaContract,
+  createSchemaContractEvaluationBudget,
+  prepareSchemaContract,
   validateSchemaContractGraph,
+} from "../src/schema-instance-validation.js";
+import type {
+  PreparedSchemaContract,
+  SchemaContractEvaluationBudget,
 } from "../src/schema-instance-validation.js";
 import { resolveUriReference } from "../src/uri-reference.js";
 
@@ -688,6 +696,228 @@ describe("bounded schema graph preparation", () => {
     const result = applySchemaContract(nestedNotSchema(800), null, "complete");
     expect(result.issues).toEqual([{ kind: "mismatch", pointer: "", keyword: "schemaGraphDepth" }]);
     expectDeepFrozen(result);
+  });
+});
+
+describe("prepared schema contracts and shared evaluation budgets", () => {
+  it("snapshots one reusable complete resolved-value contract at preparation time", () => {
+    const schema = {
+      type: "object",
+      required: ["count"],
+      properties: { count: { type: "number" } },
+      additionalProperties: false,
+    };
+    const prepared = prepareSchemaContract(schema);
+    const budget = createSchemaContractEvaluationBudget({ maxEvaluationSteps: 20 });
+
+    (schema.properties.count as { type: string }).type = "string";
+    expect(applyPreparedSchemaContract(prepared, { count: 2 }, budget)).toEqual({
+      issues: [],
+      obligations: [],
+    });
+    expect(applyPreparedSchemaContract(prepared, { count: "two" }, budget)).toEqual({
+      issues: [{ kind: "mismatch", pointer: "/count", keyword: "type" }],
+      obligations: [],
+    });
+    expect(Object.isFrozen(prepared)).toBe(true);
+    expect(Reflect.ownKeys(prepared)).toEqual([]);
+  });
+
+  it("treats ValueSpec-shaped data as resolved JSON and applies completeness", () => {
+    const prepared = prepareSchemaContract({
+      type: "object",
+      required: ["$ref"],
+      properties: { $ref: { const: "literal" } },
+      additionalProperties: false,
+    });
+    const result = applyPreparedSchemaContract(
+      prepared,
+      { $ref: "state.value" },
+      createSchemaContractEvaluationBudget({ maxEvaluationSteps: 10 }),
+    );
+
+    expect(result).toEqual({
+      issues: [{ kind: "mismatch", pointer: "/$ref", keyword: "const" }],
+      obligations: [],
+    });
+    expectDeepFrozen(result);
+  });
+
+  it("admits exactly N evaluation steps and rejects N+1 cumulatively", () => {
+    const prepared = prepareSchemaContract(true);
+    const budget = createSchemaContractEvaluationBudget({ maxEvaluationSteps: 2 });
+
+    expect(applyPreparedSchemaContract(prepared, null, budget).issues).toEqual([]);
+    expect(applyPreparedSchemaContract(prepared, "second", budget).issues).toEqual([]);
+    expect(applyPreparedSchemaContract(prepared, false, budget).issues).toEqual([
+      { kind: "mismatch", pointer: "", keyword: "aggregateEvaluationBudget" },
+    ]);
+  });
+
+  it("retains the aggregate exhaustion signal across combinator result folding", () => {
+    const result = applyPreparedSchemaContract(
+      prepareSchemaContract({ anyOf: [true] }),
+      null,
+      createSchemaContractEvaluationBudget({ maxEvaluationSteps: 1 }),
+    );
+
+    expect(result.issues).toContainEqual({
+      kind: "mismatch",
+      pointer: "",
+      keyword: "aggregateEvaluationBudget",
+    });
+  });
+
+  it("charges enum candidates and unique-item comparisons to the shared budget", () => {
+    const enumResult = applyPreparedSchemaContract(
+      prepareSchemaContract({
+        enum: Array.from({ length: 20_000 }, (_, index) => `candidate-${index}`),
+      }),
+      "missing",
+      createSchemaContractEvaluationBudget({ maxEvaluationSteps: 2 }),
+    );
+    expect(enumResult.issues).toEqual([
+      { kind: "mismatch", pointer: "", keyword: "aggregateEvaluationBudget" },
+    ]);
+
+    const uniqueResult = applyPreparedSchemaContract(
+      prepareSchemaContract({ type: "array", uniqueItems: true }),
+      Array.from({ length: 4_000 }, (_, index) => index),
+      createSchemaContractEvaluationBudget({ maxEvaluationSteps: 3 }),
+    );
+    expect(uniqueResult.issues).toEqual([
+      { kind: "mismatch", pointer: "/2", keyword: "aggregateEvaluationBudget" },
+    ]);
+  });
+
+  it("charges required and dependent-required catalog fan-out before scanning it", () => {
+    const required = applyPreparedSchemaContract(
+      prepareSchemaContract({
+        type: "object",
+        required: ["first", "second", "third"],
+      }),
+      {},
+      createSchemaContractEvaluationBudget({ maxEvaluationSteps: 2 }),
+    );
+    expect(required.issues).toEqual([
+      { kind: "mismatch", pointer: "", keyword: "aggregateEvaluationBudget" },
+    ]);
+
+    const dependent = applyPreparedSchemaContract(
+      prepareSchemaContract({
+        type: "object",
+        dependentRequired: {
+          trigger: ["first", "second", "third"],
+        },
+      }),
+      { trigger: true },
+      createSchemaContractEvaluationBudget({ maxEvaluationSteps: 4 }),
+    );
+    expect(dependent.issues).toEqual([
+      { kind: "mismatch", pointer: "/trigger", keyword: "aggregateEvaluationBudget" },
+    ]);
+  });
+
+  it("does not reset or refund aggregate capacity across failed calls or handle mutation", () => {
+    const prepared = prepareSchemaContract({ type: "number" });
+    const budget = createSchemaContractEvaluationBudget({ maxEvaluationSteps: 2 });
+
+    expect(applyPreparedSchemaContract(prepared, "wrong", budget).issues).toEqual([
+      { kind: "mismatch", pointer: "", keyword: "type" },
+    ]);
+    expect(Reflect.set(budget, "evaluationSteps", 0)).toBe(false);
+    expect(Reflect.set(budget, "maxEvaluationSteps", 100)).toBe(false);
+    expect(applyPreparedSchemaContract(prepared, 1, budget).issues).toEqual([]);
+    expect(applyPreparedSchemaContract(prepared, 2, budget).issues).toEqual([
+      { kind: "mismatch", pointer: "", keyword: "aggregateEvaluationBudget" },
+    ]);
+  });
+
+  it("keeps fresh aggregate authorities independent", () => {
+    const prepared = prepareSchemaContract(true);
+    const first = createSchemaContractEvaluationBudget({ maxEvaluationSteps: 1 });
+    const second = createSchemaContractEvaluationBudget({ maxEvaluationSteps: 1 });
+
+    expect(applyPreparedSchemaContract(prepared, null, first).issues).toEqual([]);
+    expect(applyPreparedSchemaContract(prepared, null, first).issues).toEqual([
+      { kind: "mismatch", pointer: "", keyword: "aggregateEvaluationBudget" },
+    ]);
+    expect(applyPreparedSchemaContract(prepared, null, second).issues).toEqual([]);
+  });
+
+  it("accepts only an exact lower-only aggregate limit profile", () => {
+    const zeroBudget = createSchemaContractEvaluationBudget({ maxEvaluationSteps: 0 });
+    expect(
+      applyPreparedSchemaContract(prepareSchemaContract(true), null, zeroBudget).issues,
+    ).toEqual([{ kind: "mismatch", pointer: "", keyword: "aggregateEvaluationBudget" }]);
+    expect(() =>
+      createSchemaContractEvaluationBudget({
+        maxEvaluationSteps: SCHEMA_CONTRACT_AGGREGATE_EVALUATION_LIMIT,
+      }),
+    ).not.toThrow();
+    expect(() =>
+      createSchemaContractEvaluationBudget({
+        maxEvaluationSteps: SCHEMA_CONTRACT_AGGREGATE_EVALUATION_LIMIT + 1,
+      }),
+    ).toThrow(TypeError);
+    expect(() => createSchemaContractEvaluationBudget({ maxEvaluationSteps: -1 })).toThrow(
+      TypeError,
+    );
+    expect(() => createSchemaContractEvaluationBudget({ maxEvaluationSteps: 1.5 })).toThrow(
+      TypeError,
+    );
+    expect(() =>
+      createSchemaContractEvaluationBudget({
+        maxEvaluationSteps: 1,
+        extra: true,
+      } as never),
+    ).toThrow(TypeError);
+    expect(() =>
+      createSchemaContractEvaluationBudget(
+        Object.defineProperty({}, "maxEvaluationSteps", {
+          enumerable: true,
+          get: () => 1,
+        }),
+      ),
+    ).toThrow(TypeError);
+
+    const hostile = new Proxy(
+      {},
+      {
+        ownKeys(): never {
+          throw new Error("must be contained");
+        },
+      },
+    );
+    expect(() => createSchemaContractEvaluationBudget(hostile)).toThrow(TypeError);
+
+    const revoked = Proxy.revocable({}, {});
+    revoked.revoke();
+    expect(() => createSchemaContractEvaluationBudget(revoked.proxy)).toThrow(TypeError);
+  });
+
+  it("fails closed for forged and hostile prepared-schema or budget handles", () => {
+    const prepared = prepareSchemaContract(true);
+    const budget = createSchemaContractEvaluationBudget({ maxEvaluationSteps: 4 });
+    const forgedPrepared = Object.freeze({}) as PreparedSchemaContract;
+    const forgedBudget = Object.freeze({}) as SchemaContractEvaluationBudget;
+    const hostilePrepared = Proxy.revocable({}, {});
+    const hostileBudget = Proxy.revocable({}, {});
+    hostilePrepared.revoke();
+    hostileBudget.revoke();
+
+    for (const candidate of [forgedPrepared, hostilePrepared.proxy as PreparedSchemaContract]) {
+      const result = applyPreparedSchemaContract(candidate, null, budget);
+      expect(result.issues).toEqual([{ kind: "mismatch", pointer: "", keyword: "preparedSchema" }]);
+      expectDeepFrozen(result);
+    }
+    for (const candidate of [forgedBudget, hostileBudget.proxy as SchemaContractEvaluationBudget]) {
+      const result = applyPreparedSchemaContract(prepared, null, candidate);
+      expect(result.issues).toEqual([
+        { kind: "mismatch", pointer: "", keyword: "evaluationBudget" },
+      ]);
+      expectDeepFrozen(result);
+    }
   });
 });
 

@@ -4,7 +4,12 @@ import {
   renderRuntimeReactSurface,
 } from "../src/index.js";
 
-import type { RuntimeHeadlessSurfacePlan } from "@desen/runtime-core";
+import type {
+  RuntimeHeadlessSessionHandle,
+  RuntimeHeadlessSessionSnapshot,
+  RuntimeHeadlessSurfacePlan,
+} from "@desen/runtime-core";
+import type { DesenValidatedExecutionCatalogSet } from "@desen/validator";
 import type {
   RuntimeReactAdapterRegistryHandle,
   RuntimeReactComponentCommandPort,
@@ -13,6 +18,9 @@ import type {
 } from "../src/index.js";
 
 declare const plan: RuntimeHeadlessSurfacePlan;
+declare const session: RuntimeHeadlessSessionHandle;
+declare const snapshot: RuntimeHeadlessSessionSnapshot;
+declare const catalogSet: DesenValidatedExecutionCatalogSet;
 declare const foreignHandle: RuntimeReactAdapterRegistryHandle;
 declare const interactions: RuntimeReactInteractionPort;
 declare const commands: RuntimeReactComponentCommandPort;
@@ -27,7 +35,12 @@ const registry = createRuntimeReactAdapterRegistry({
 });
 if (registry.status === "created") {
   readRuntimeReactAdapterRegistry(registry.handle);
-  renderRuntimeReactSurface({ registry: registry.handle, plan });
+  renderRuntimeReactSurface({
+    registry: registry.handle,
+    session,
+    snapshot,
+    catalogSet,
+  });
 }
 readRuntimeReactAdapterRegistry(foreignHandle);
 const attachment = interactions.attachCommands(commands);

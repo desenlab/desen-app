@@ -34,7 +34,7 @@ only the internal packages listed below:
 | `publisher`             | `protocol`, `validator`                                                                |
 | `catalog-sdk`           | `protocol`                                                                             |
 | `runtime-core`          | `protocol`, `validator`                                                                |
-| `runtime-react`         | `protocol`, `runtime-core`                                                             |
+| `runtime-react`         | `protocol`, `validator`, `runtime-core`                                                |
 | `runtime-web`           | `protocol`, `validator`, `runtime-core`                                                |
 | `editor-core`           | `protocol`, `validator`                                                                |
 | `editor-web`            | `protocol`, `validator`, `catalog-sdk`, `editor-core`, `runtime-core`, `runtime-react` |

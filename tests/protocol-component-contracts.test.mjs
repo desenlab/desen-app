@@ -24,6 +24,7 @@ test("accepts exact deterministic M02-T08 component-contract evidence", async ()
   const result = await verifyProtocolComponentContracts();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.schemaFamilies, 7);
   assert.equal(result.schemaConstraints, 191);
   assert.equal(result.coreDiagnostics, 5);
@@ -32,7 +33,10 @@ test("accepts exact deterministic M02-T08 component-contract evidence", async ()
   assert.equal(result.schemaSafetyGoldens, 7);
   assert.equal(result.scopeFenceAccepted, 7);
   assert.equal(result.examples, 5);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac",
+  );
 });
 
 test("two independent component-contract evidence builds are byte-identical", async () => {
@@ -43,14 +47,38 @@ test("two independent component-contract evidence builds are byte-identical", as
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects one-byte-tampered component-contract evidence", async () => {
-  const pristine = await buildProtocolComponentContractsEvidence();
-  const tampered = Buffer.from(pristine.artifactBytes);
+test("rejects a current rebuild and one-byte-tampered historical component evidence", async () => {
+  const current = await buildProtocolComponentContractsEvidence();
+  await assert.rejects(
+    verifyProtocolComponentContracts({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("COMPONENT_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
+    new URL("../docs/proof/artifacts/protocol-0.1.0-component-contracts.json", import.meta.url),
+  );
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(
     verifyProtocolComponentContracts({ artifactBytes: tampered }),
     hasEvidenceCode("COMPONENT_ARTIFACT_DRIFT"),
+  );
+});
+
+test("default component-contract writer preserves exact immutable task-time bytes", async () => {
+  const artifactPath = new URL(
+    "../docs/proof/artifacts/protocol-0.1.0-component-contracts.json",
+    import.meta.url,
+  );
+  const before = await readFile(artifactPath);
+  const result = await writeProtocolComponentContractsEvidence();
+  const after = await readFile(artifactPath);
+
+  assert.deepEqual(after, before);
+  assert.equal(
+    result.artifactSha256,
+    "71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac",
   );
 });
 
@@ -113,12 +141,12 @@ test("rejects reviewed M02-T08 trace, BCP 14, and finding mutations", async (con
     { id: "N-029", status: "TESTED" },
   ]);
   assert.deepEqual(compatibility.currentStatuses, [
-    { id: "N-026", status: "PLANNED" },
+    { id: "N-026", status: "TESTED" },
     { id: "N-028", status: "TESTED" },
     { id: "N-029", status: "PLANNED" },
   ]);
 
-  const changedStatus = normative.replace(/^(\| N-026 \|.*?\| )PLANNED(\s+\|)/mu, "$1TESTED$2");
+  const changedStatus = normative.replace(/^(\| N-026 \|.*?\| )TESTED(\s+\|)/mu, "$1PLANNED$2");
   assert.notEqual(changedStatus, normative);
   const statusCoveragePath = path.join(directory, "normative-status.md");
   await writeFile(statusCoveragePath, changedStatus);

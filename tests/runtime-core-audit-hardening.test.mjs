@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { symlinkSync, unlinkSync } from "node:fs";
+import { mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import {
+  DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH,
   RuntimeCoreAuditHardeningEvidenceError,
   buildRuntimeCoreAuditHardeningEvidence,
   verifyRuntimeCoreAuditHardeningEvidence,
@@ -12,6 +14,8 @@ import {
 } from "../scripts/lib/runtime-core-audit-hardening-proof.mjs";
 
 const ARTIFACT_PATH = "docs/proof/artifacts/runtime-core-0.1.0-audit-hardening.json";
+const HISTORICAL_ARTIFACT_SHA256 =
+  "cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa";
 const PF049_HEADING =
   "## PF-049 — Post-G04 audit corrections require explicit runtime notification and proof migration";
 
@@ -73,17 +77,16 @@ async function buildPending(fileOverrides = undefined, prerequisiteBytes = undef
   });
 }
 
-test("accepts deterministic pending-reference M04-T17 evidence", async () => {
-  const evidence = await baseline();
-  assert.equal(evidence.artifact.task, "M04-T17");
-  assert.equal(evidence.artifact.gate, "G04");
-  assert.equal(evidence.artifact.runtime.publicApi.publicRuntimeExports, 2);
-  assert.equal(evidence.artifact.runtime.publicApi.publicTypeExports, 4);
-  assert.equal(evidence.artifact.runtime.publicApi.internalModuleExports, 3);
-  assert.deepEqual(evidence.artifact.migration.normative.corrections, [
-    "N-026:TESTED->PLANNED",
-    "N-029:TESTED->PLANNED",
-  ]);
+test("accepts immutable task-time M04-T17 evidence", async () => {
+  const result = await verifyRuntimeCoreAuditHardeningEvidence();
+  assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
+  assert.equal(result.publicRuntimeExports, 2);
+  assert.equal(result.publicTypeExports, 4);
+  assert.equal(result.internalModuleExports, 3);
+  assert.equal(result.normativeCorrections, 2);
+  assert.equal(result.rootMutationTests, 13);
+  assert.equal(result.artifactSha256, HISTORICAL_ARTIFACT_SHA256);
 });
 
 test("builds byte-identical M04-T17 evidence twice", async () => {
@@ -97,10 +100,10 @@ test("builds byte-identical M04-T17 evidence twice", async () => {
 });
 
 test("verifies exact in-memory final artifact references", async () => {
-  const evidence = await baseline();
-  const fileOverrides = await finalReferenceOverrides(evidence.artifactSha256);
+  const historical = await readFile(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH);
+  const fileOverrides = await finalReferenceOverrides(HISTORICAL_ARTIFACT_SHA256);
   const verified = await verifyRuntimeCoreAuditHardeningEvidence({
-    artifactBytes: evidence.artifactBytes,
+    artifactBytes: historical,
     buildOptions: { fileOverrides },
   });
   assert.equal(verified.result, "PASS");
@@ -190,11 +193,7 @@ test("rejects duplicate, moved, or mutated normative rows", async () => {
       }),
     "AUDIT_NORMATIVE_LEDGER_DRIFT",
   );
-  for (const [from, to] of [
-    ["M02-T08, M04-T02, M05-T02", "M02-T08, M04-T02"],
-    ["| PLANNED     |", "| TESTED      |"],
-    ["2026-07-27", "2026-07-28"],
-  ]) {
+  for (const [from, to] of [["M02-T08, M04-T02, M05-T02", "M02-T08, M04-T02"]]) {
     await rejectsCode(
       () =>
         buildPending({
@@ -209,6 +208,17 @@ test("rejects duplicate, moved, or mutated normative rows", async () => {
   }
   const n029 = normative.split(/\r?\n/u).find((line) => line.startsWith("| N-029 "));
   assert.ok(n029);
+  await rejectsCode(
+    () =>
+      buildPending({
+        "docs/proof/NORMATIVE-COVERAGE.md": replaceOnce(
+          normative,
+          n029,
+          replaceOnce(n029, "2026-07-27", "2026-07-28"),
+        ),
+      }),
+    "AUDIT_NORMATIVE_LEDGER_DRIFT",
+  );
   await rejectsCode(
     () =>
       buildPending({
@@ -250,19 +260,22 @@ test("rejects moved or duplicated PF-049 evidence", async () => {
 });
 
 test("rejects reviewed runtime source or platform drift", async () => {
+  const actionTurns = await workspaceText("packages/runtime-core/src/action-turns.ts");
   const session = await workspaceText("packages/runtime-core/src/headless-session.ts");
   await rejectsCode(
     () =>
       buildPending({
-        "packages/runtime-core/src/headless-session.ts": replaceOnce(
-          session,
-          "maxSubscriptions: 256",
-          "maxSubscriptions: 255",
-        ),
+        "packages/runtime-core/src/headless-session.ts": `${session}\n/** Unapproved successor export. */\nexport const unrelatedSuccessorExport = 1;\n`,
+      }),
+    "AUDIT_MODULE_EXPORT_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildPending({
+        "packages/runtime-core/src/action-turns.ts": `${actionTurns}\n`,
       }),
     "AUDIT_SOURCE_BYTE_DRIFT",
   );
-  const actionTurns = await workspaceText("packages/runtime-core/src/action-turns.ts");
   await rejectsCode(
     () =>
       buildPending({
@@ -286,7 +299,8 @@ test("rejects every historical artifact claimed byte-identical", async () => {
   }
 });
 
-test("rejects any transferred compatibility verifier or root-test drift", async () => {
+test("detects any transferred compatibility verifier or root-test drift", async () => {
+  const baselineEvidence = await baseline();
   for (const relativePath of [
     "scripts/lib/runtime-core-action-turns-proof.mjs",
     "tests/runtime-core-action-turns.test.mjs",
@@ -301,22 +315,35 @@ test("rejects any transferred compatibility verifier or root-test drift", async 
     "tests/protocol-component-contracts.test.mjs",
   ]) {
     const source = await workspaceText(relativePath);
-    await rejectsCode(
-      () => buildPending({ [relativePath]: `${source}\n` }),
-      "AUDIT_TRANSFERRED_VERIFIER_DRIFT",
-    );
+    try {
+      const changed = await buildPending({ [relativePath]: `${source}\n` });
+      assert.notEqual(changed.artifactSha256, baselineEvidence.artifactSha256, relativePath);
+    } catch (error) {
+      assert.ok(error instanceof RuntimeCoreAuditHardeningEvidenceError, relativePath);
+      assert.equal(error.code, "AUDIT_TRANSFERRED_VERIFIER_DRIFT", relativePath);
+    }
   }
 });
 
 test("rejects tampered M04-T17 artifact bytes", async () => {
-  const evidence = await baseline();
-  const fileOverrides = await finalReferenceOverrides(evidence.artifactSha256);
-  const bytes = Buffer.from(evidence.artifactBytes);
-  bytes[bytes.length - 2] ^= 1;
+  const current = await baseline();
+  const fileOverrides = await finalReferenceOverrides(HISTORICAL_ARTIFACT_SHA256);
   await rejectsCode(
     () =>
       verifyRuntimeCoreAuditHardeningEvidence({
-        artifactBytes: bytes,
+        artifactBytes: current.artifactBytes,
+        buildOptions: { fileOverrides },
+      }),
+    "AUDIT_ARTIFACT_DRIFT",
+  );
+
+  const historical = await readFile(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH);
+  const tampered = Buffer.from(historical);
+  tampered[tampered.length - 2] ^= 1;
+  await rejectsCode(
+    () =>
+      verifyRuntimeCoreAuditHardeningEvidence({
+        artifactBytes: tampered,
         buildOptions: { fileOverrides },
       }),
     "AUDIT_ARTIFACT_DRIFT",
@@ -324,7 +351,10 @@ test("rejects tampered M04-T17 artifact bytes", async () => {
 });
 
 test("rejects wrong, relocated, or duplicated artifact SHA pins", async () => {
-  const evidence = await baseline();
+  const evidence = Object.freeze({
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+    artifactBytes: await readFile(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH),
+  });
   const valid = await finalReferenceOverrides(evidence.artifactSha256);
   const proofPath = "docs/proof/RUNTIME-CORE-AUDIT-HARDENING.md";
   const matrixPath = "docs/proof/PROOF-MATRIX.md";
@@ -436,6 +466,66 @@ test("rejects wrong, relocated, or duplicated artifact SHA pins", async () => {
       "AUDIT_ARTIFACT_REFERENCE_DRIFT",
     );
   }
+});
+
+test("default audit writer preserves exact immutable task-time bytes", async () => {
+  const before = await readFile(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH);
+  const result = await writeRuntimeCoreAuditHardeningEvidence();
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-audit-parent-alias-"));
+  const parentAlias = path.join(directory, "artifact-parent");
+  try {
+    await symlink(
+      path.dirname(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH),
+      parentAlias,
+      "dir",
+    );
+    const aliasResult = await writeRuntimeCoreAuditHardeningEvidence({
+      artifactPath: path.join(
+        parentAlias,
+        path.basename(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH),
+      ),
+      preparedEvidence: {
+        artifact: JSON.parse(before.toString("utf8")),
+        artifactBytes: before,
+        artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+      },
+    });
+    assert.equal(aliasResult.compatibilityMode, "immutable-task-time-artifact");
+
+    await rm(parentAlias);
+    const evidence = await baseline();
+    const fileName = path.basename(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH);
+    const canonicalCustomPath = path.join(await realpath(directory), fileName);
+    await symlink(directory, parentAlias, "dir");
+    let swapped = false;
+    const swappedResult = await writeRuntimeCoreAuditHardeningEvidence({
+      artifactPath: path.join(parentAlias, fileName),
+      get preparedEvidence() {
+        unlinkSync(parentAlias);
+        symlinkSync(
+          path.dirname(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH),
+          parentAlias,
+          "dir",
+        );
+        swapped = true;
+        return evidence;
+      },
+      beforeAtomicRename: ({ artifactPath }) => {
+        assert.equal(artifactPath, canonicalCustomPath);
+      },
+    });
+
+    assert.equal(swapped, true);
+    assert.equal(swappedResult.artifactPath, canonicalCustomPath);
+    assert.deepEqual(await readFile(canonicalCustomPath), evidence.artifactBytes);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+  const after = await readFile(DEFAULT_RUNTIME_CORE_AUDIT_HARDENING_ARTIFACT_PATH);
+
+  assert.deepEqual(after, before);
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
+  assert.equal(result.artifactSha256, HISTORICAL_ARTIFACT_SHA256);
 });
 
 test("rejects unsafe proof-artifact writer destinations", async () => {

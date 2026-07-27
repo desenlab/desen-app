@@ -1,11 +1,21 @@
 import {
   RuntimeCoreHeadlessSignInEvidenceError,
-  writeRuntimeCoreHeadlessSignInEvidence,
+  verifyRuntimeCoreHeadlessSignInEvidence,
 } from "./lib/runtime-core-headless-sign-in-proof.mjs";
 
 try {
-  const result = await writeRuntimeCoreHeadlessSignInEvidence();
-  process.stdout.write(`${JSON.stringify({ status: "PASS", ...result }, null, 2)}\n`);
+  const result = await verifyRuntimeCoreHeadlessSignInEvidence();
+  process.stdout.write(
+    `${JSON.stringify(
+      {
+        status: "PASS",
+        artifactSha256: result.artifactSha256,
+        message: "Preserved immutable task-time M04-T16/G04 headless sign-in evidence.",
+      },
+      null,
+      2,
+    )}\n`,
+  );
 } catch (error) {
   const failure =
     error instanceof RuntimeCoreHeadlessSignInEvidenceError

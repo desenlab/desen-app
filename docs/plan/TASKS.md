@@ -129,7 +129,7 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 | ID      | Status      | Depends on      | Deliverable / evidence                                                                             |
 | ------- | ----------- | --------------- | -------------------------------------------------------------------------------------------------- |
 | M05-T01 | DONE        | G04             | React adapter registry and render-plan renderer                                                    |
-| M05-T02 | NOT_STARTED | M05-T01         | Resolved props and named slots wired without private structure inspection                          |
+| M05-T02 | DONE        | M05-T01         | Resolved props and named slots wired without private structure inspection                          |
 | M05-T03 | NOT_STARTED | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
 | M05-T04 | NOT_STARTED | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
 | M05-T05 | NOT_STARTED | M05-T02–M05-T04 | Stable keys and runtime-node ↔ source-node diagnostics                                             |

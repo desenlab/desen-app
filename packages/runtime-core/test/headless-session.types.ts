@@ -1,4 +1,5 @@
 import {
+  authenticateRuntimeHeadlessSessionAdapterAuthority,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
   mountRuntimeHeadlessSession,
@@ -10,6 +11,8 @@ import {
 
 import type {
   RuntimeHeadlessBindingSnapshot,
+  RuntimeHeadlessSessionAdapterAuthorityInput,
+  RuntimeHeadlessSessionAdapterAuthorityResult,
   RuntimeHeadlessSessionDisposeResult,
   RuntimeHeadlessSessionEventCompletion,
   RuntimeHeadlessSessionEventInput,
@@ -26,10 +29,47 @@ import type {
   RuntimeHeadlessSessionUnsubscribeResult,
   RuntimeHostPorts,
 } from "../src/index.js";
+import type { DesenValidatedExecutionCatalogSet } from "@desen/validator";
 
 declare const hostPorts: RuntimeHostPorts;
 declare const handle: RuntimeHeadlessSessionHandle;
 declare const snapshot: RuntimeHeadlessSessionSnapshot;
+declare const catalogSet: DesenValidatedExecutionCatalogSet;
+
+const adapterAuthorityInput: RuntimeHeadlessSessionAdapterAuthorityInput = {
+  snapshot,
+  catalogSet,
+};
+const adapterAuthority: RuntimeHeadlessSessionAdapterAuthorityResult =
+  authenticateRuntimeHeadlessSessionAdapterAuthority(handle, adapterAuthorityInput);
+if (adapterAuthority.status === "authenticated" || adapterAuthority.status === "invalid-snapshot") {
+  const currentAdapterSnapshot: RuntimeHeadlessSessionSnapshot = adapterAuthority.snapshot;
+  void currentAdapterSnapshot;
+}
+
+// @ts-expect-error adapter authority inputs are immutable
+adapterAuthorityInput.snapshot = snapshot;
+
+// @ts-expect-error adapter preflight always requires the exact validated Catalog set
+authenticateRuntimeHeadlessSessionAdapterAuthority(handle, { snapshot });
+
+authenticateRuntimeHeadlessSessionAdapterAuthority(handle, {
+  snapshot,
+  catalogSet,
+  // @ts-expect-error a raw plan cannot replace or accompany session adapter authority
+  plan: snapshot.plan,
+});
+
+// @ts-expect-error structurally reconstructed Catalog values carry no validator authority
+authenticateRuntimeHeadlessSessionAdapterAuthority(handle, { snapshot, catalogSet: {} });
+
+// @ts-expect-error a session snapshot is not an opaque session handle
+authenticateRuntimeHeadlessSessionAdapterAuthority(snapshot, adapterAuthorityInput);
+
+if (adapterAuthority.status === "authenticated") {
+  // @ts-expect-error authenticated results never expose retained Catalog authority
+  void adapterAuthority.catalogSet;
+}
 
 const limits: RuntimeHeadlessSessionLimitProfile = {
   maxNodes: RUNTIME_HEADLESS_SESSION_LIMITS.maxNodes,
@@ -52,10 +92,11 @@ const mounted: RuntimeHeadlessSessionMountResult = mountRuntimeHeadlessSession(m
 if (mounted.status === "mounted") {
   const mountedHandle: RuntimeHeadlessSessionHandle = mounted.handle;
   const mountedSnapshot: RuntimeHeadlessSessionSnapshot = mounted.snapshot;
+  const mountedCatalogSet: DesenValidatedExecutionCatalogSet = mounted.catalogSet;
   const read: RuntimeHeadlessSessionReadResult = readRuntimeHeadlessSession(mountedHandle);
   const disposed: RuntimeHeadlessSessionDisposeResult =
     disposeRuntimeHeadlessSession(mountedHandle);
-  void [mountedSnapshot, read, disposed];
+  void [mountedSnapshot, mountedCatalogSet, read, disposed];
 }
 
 const event: RuntimeHeadlessSessionEventInput = {

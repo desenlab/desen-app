@@ -651,3 +651,36 @@ authority, and M05-T09 audits the independent production host path. N-026 and N-
 `PLANNED`; no P-claim or proof gate changes:
 `runtime-react-0.1.0-adapter-registry.json`
 `sha256:b2e98f5e54471aa3ec227e672e2fa6b0f90a970b4c48046a0b8a8323f33b6b42`.
+
+## M05-T02
+
+M05-T02 binds the Web–React renderer to one exact live headless-session snapshot and the exact
+execution Catalog set retained by that session. A copied or stale snapshot, structurally equal or
+lower-stage Catalog value, forged handle, disposed generation, hostile input envelope, or
+reentrant disposal during limit reflection fails before an adapter executes. The renderer no
+longer accepts a raw plan.
+
+Every final component and behavior prop map is detached and validated in complete resolved-value
+mode against its exact prepared receiving schema. Final named slots are projected only as slot
+names plus child component capability identifiers, then checked for required presence,
+effective minimum and maximum cardinality, exact-id/category acceptance, explicit reject-all
+unions, and unknown capabilities. One factory-authenticated scope shares monotonically consumed
+prop, slot, detached-JSON, retained-string, and schema-evaluation budgets across the complete
+render. Successful adapter inputs are recursively immutable; any deep failure returns exact
+identity-linked diagnostics and creates no React element.
+
+Components receive no raw behavior plan, session, Catalog, DOM/native object, or React-private
+structure. The successor artifact also authenticates the unchanged M02-T06 through M02-T13 and
+M04-T06, M04-T16, M04-T17, and M05-T01 task-time artifacts while explicitly owning the
+compatibility verifier paths changed by the current validator, session, and renderer. Successful
+raw-Catalog mount returns the exact retained validated Catalog authority outside the JSON-only
+snapshot. Actual schema comparison/loop work and precomputed slot-contract evaluation now consume
+shared lower-only budgets. Fifty-seven focused schema/receiving tests, twelve focused React
+receiving tests, the cumulative 406-test validator, 655-test runtime-core, and 22-test runtime-react
+suites, compiler-negative cases, hostile root mutations, exact boundary fixtures, and
+deterministic 109-file artifact rebuilding protect the claim.
+
+N-026 advances to `TESTED`. N-027 and N-042 remain `PLANNED` for publisher/editor composition;
+N-029 remains `PLANNED` for M05-T03 style delivery. No P-claim or proof gate changes:
+`runtime-react-0.1.0-resolved-props-slots.json`
+`sha256:f668dc0d3d0e9e8edb239323fd82037b8afc2004dbe8eace56dcd4c510ed22e0`.

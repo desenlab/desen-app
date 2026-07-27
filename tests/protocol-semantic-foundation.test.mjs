@@ -44,13 +44,17 @@ test("accepts exact deterministic M02-T07 semantic-foundation evidence", async (
   const result = await verifyProtocolSemanticFoundation();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.schemaFamilies, 19);
   assert.equal(result.schemaConstraints, 201);
   assert.equal(result.semverGoldens, 28);
   assert.equal(result.officialSemanticInvalid, 2);
   assert.equal(result.scopeFenceAccepted, 3);
   assert.equal(result.examples, 5);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
+  );
 });
 
 test("two independent semantic-foundation evidence builds are byte-identical", async () => {
@@ -61,14 +65,38 @@ test("two independent semantic-foundation evidence builds are byte-identical", a
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects one-byte-tampered semantic-foundation evidence", async () => {
-  const pristine = await buildProtocolSemanticFoundationEvidence();
-  const tampered = Buffer.from(pristine.artifactBytes);
+test("rejects a current rebuild and one-byte-tampered historical semantic evidence", async () => {
+  const current = await buildProtocolSemanticFoundationEvidence();
+  await assert.rejects(
+    verifyProtocolSemanticFoundation({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("SEMANTIC_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
+    new URL("../docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json", import.meta.url),
+  );
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(
     verifyProtocolSemanticFoundation({ artifactBytes: tampered }),
     hasEvidenceCode("SEMANTIC_ARTIFACT_DRIFT"),
+  );
+});
+
+test("default semantic-foundation writer preserves exact immutable task-time bytes", async () => {
+  const artifactPath = new URL(
+    "../docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
+    import.meta.url,
+  );
+  const before = await readFile(artifactPath);
+  const result = await writeProtocolSemanticFoundationEvidence();
+  const after = await readFile(artifactPath);
+
+  assert.deepEqual(after, before);
+  assert.equal(
+    result.artifactSha256,
+    "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
   );
 });
 

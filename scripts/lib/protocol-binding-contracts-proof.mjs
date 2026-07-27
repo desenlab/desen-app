@@ -25,6 +25,8 @@ export const DEFAULT_PROTOCOL_BINDING_CONTRACTS_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-binding-contracts.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c";
 
 /** Absolute path to the reviewed protocol trace ledger used by M02-T10 evidence. */
 export const DEFAULT_PROTOCOL_BINDING_CONTRACTS_TRACE_PATH = path.join(
@@ -144,6 +146,76 @@ function fail(code, message, details = undefined) {
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("BINDING_ARTIFACT_DRIFT", "Immutable M02-T10 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "BINDING_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T10 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("BINDING_ARTIFACT_DRIFT", "Immutable task-time M02-T10 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("BINDING_ARTIFACT_DRIFT", "Immutable M02-T10 evidence is not valid JSON.");
+  }
+  const projectMutationGoldens =
+    (artifact.stateContracts?.rejected?.length ?? -1) +
+    (artifact.references?.rejected?.length ?? -1) +
+    (artifact.predicates?.rejected?.length ?? -1) +
+    (artifact.formats?.rejected?.length ?? -1) +
+    (artifact.repeats?.rejected?.length ?? -1) +
+    (artifact.actionTargets?.rejected?.length ?? -1);
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T10" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-binding-contract-validation-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.traceability?.schemaFamilies?.length !== 10 ||
+    artifact.traceability?.schemaConstraints !== 300 ||
+    artifact.traceability?.proseRules?.length !== 12 ||
+    artifact.traceability?.ownedCoreDiagnostics?.length !== 5 ||
+    artifact.frozenValidation?.officialT10Invalid?.length !== 0 ||
+    artifact.frozenValidation?.validExamples?.length !== 5 ||
+    projectMutationGoldens !== 48 ||
+    artifact.obligationCarryForward?.kinds?.length !== 4 ||
+    artifact.security?.platformAudit?.documentCodeExecution !== false
+  ) {
+    fail(
+      "BINDING_ARTIFACT_DRIFT",
+      "Immutable M02-T10 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -2266,11 +2338,16 @@ export async function buildProtocolBindingContractsEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T10 evidence to its single tracked regular-file destination. */
+/** Writes current evidence only outside the immutable tracked M02-T10 artifact path. */
 export async function writeProtocolBindingContractsEvidence({
   artifactPath = DEFAULT_PROTOCOL_BINDING_CONTRACTS_ARTIFACT_PATH,
   beforeAtomicRename,
 } = {}) {
+  if (
+    path.resolve(artifactPath) === path.resolve(DEFAULT_PROTOCOL_BINDING_CONTRACTS_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   const { resolvedArtifactPath, resolvedParent } = await resolveWritableArtifactPath(artifactPath);
   const result = await buildProtocolBindingContractsEvidence();
   const { handle, temporaryPath } = await openExclusiveTemporary(
@@ -2315,19 +2392,12 @@ export async function writeProtocolBindingContractsEvidence({
   }
 }
 
-/** Rebuilds and byte-compares tracked M02-T10 evidence without modifying it. */
+/** Authenticates immutable task-time M02-T10 evidence without rebuilding successor source. */
 export async function verifyProtocolBindingContracts({
   artifactPath = DEFAULT_PROTOCOL_BINDING_CONTRACTS_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolBindingContractsEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail("BINDING_ARTIFACT_DRIFT", "Tracked M02-T10 evidence is stale or modified.", {
-      expectedSha256: result.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   const projectMutationGoldens =
     result.artifact.stateContracts.rejected.length +
     result.artifact.references.rejected.length +
@@ -2337,16 +2407,17 @@ export async function verifyProtocolBindingContracts({
     result.artifact.actionTargets.rejected.length;
   return Object.freeze({
     result: "PASS",
-    schemaFamilies: EXPECTED_SCHEMA_FAMILIES.length,
-    schemaConstraints: EXPECTED_SCHEMA_CONSTRAINTS,
-    proseRules: EXPECTED_PROSE_RULES.length,
-    ownedCoreDiagnostics: EXPECTED_CORE_DIAGNOSTICS.length,
+    compatibilityMode: "immutable-task-time-artifact",
+    schemaFamilies: result.artifact.traceability.schemaFamilies.length,
+    schemaConstraints: result.artifact.traceability.schemaConstraints,
+    proseRules: result.artifact.traceability.proseRules.length,
+    ownedCoreDiagnostics: result.artifact.traceability.ownedCoreDiagnostics.length,
     conformanceResponsibilities: 0,
     mandatoryClauses: 0,
     officialT10Invalid: result.artifact.frozenValidation.officialT10Invalid.length,
     projectMutationGoldens,
-    obligationKinds: EXPECTED_OBLIGATION_KINDS.length,
-    examples: FROZEN_EXAMPLES.length,
+    obligationKinds: result.artifact.obligationCarryForward.kinds.length,
+    examples: result.artifact.frozenValidation.validExamples.length,
     artifactSha256: result.artifactSha256,
   });
 }

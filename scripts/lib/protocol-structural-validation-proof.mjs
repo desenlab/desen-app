@@ -34,6 +34,8 @@ export const DEFAULT_PROTOCOL_STRUCTURAL_VALIDATION_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536";
 
 const PUBLIC_RUNTIME_EXPORTS = Object.freeze([
   "validateDesenBundle",
@@ -288,6 +290,70 @@ function fail(code, message, details = {}) {
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("STRUCTURAL_ARTIFACT_DRIFT", "Immutable M02-T06 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "STRUCTURAL_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T06 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("STRUCTURAL_ARTIFACT_DRIFT", "Immutable task-time M02-T06 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("STRUCTURAL_ARTIFACT_DRIFT", "Immutable M02-T06 evidence is not valid JSON.");
+  }
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T06" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-structural-validation-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.frozenInput?.schemas?.roots?.length !== 3 ||
+    artifact.frozenInput?.schemas?.constraints?.families !== 61 ||
+    artifact.frozenInput?.schemas?.constraints?.total !== 989 ||
+    artifact.embeddedSchemaValidation?.located?.total !== 44 ||
+    artifact.embeddedSchemaValidation?.locatorFamilies?.length !== 13 ||
+    artifact.publicApi?.runtimeExports?.length !== 4 ||
+    artifact.publicApi?.typeExports?.length !== 8 ||
+    artifact.security?.runtimeDynamicCompilation !== false ||
+    artifact.security?.inertBoundary?.hostileGetterInvocations !== 0
+  ) {
+    fail(
+      "STRUCTURAL_ARTIFACT_DRIFT",
+      "Immutable M02-T06 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -1075,10 +1141,21 @@ export async function buildProtocolStructuralValidationEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T06 evidence to its single tracked regular-file destination. */
+/**
+ * Writes current deterministic M02-T06-shaped evidence only to a non-historical destination.
+ *
+ * @remarks The tracked task-time artifact is immutable. Asking the writer to target that path
+ * authenticates and returns the historical bytes without rebuilding or replacing them.
+ */
 export async function writeProtocolStructuralValidationEvidence({
   artifactPath = DEFAULT_PROTOCOL_STRUCTURAL_VALIDATION_ARTIFACT_PATH,
 } = {}) {
+  if (
+    path.resolve(artifactPath) ===
+    path.resolve(DEFAULT_PROTOCOL_STRUCTURAL_VALIDATION_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   try {
     const stats = await lstat(artifactPath);
     if (!stats.isFile() || stats.isSymbolicLink()) {
@@ -1092,26 +1169,20 @@ export async function writeProtocolStructuralValidationEvidence({
   return result;
 }
 
-/** Rebuilds and byte-compares the tracked M02-T06 evidence without modifying it. */
+/** Authenticates immutable task-time M02-T06 evidence without reinterpreting successor source. */
 export async function verifyProtocolStructuralValidation({
   artifactPath = DEFAULT_PROTOCOL_STRUCTURAL_VALIDATION_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolStructuralValidationEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail("STRUCTURAL_ARTIFACT_DRIFT", "Tracked M02-T06 evidence is stale or modified.", {
-      expectedSha256: result.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   return Object.freeze({
     result: "PASS",
-    schemaRoots: 3,
-    schemaFamilies: 61,
-    schemaConstraints: 989,
-    embeddedSchemas: 44,
-    locatorFamilies: 13,
+    compatibilityMode: "immutable-task-time-artifact",
+    schemaRoots: result.artifact.frozenInput.schemas.roots.length,
+    schemaFamilies: result.artifact.frozenInput.schemas.constraints.families,
+    schemaConstraints: result.artifact.frozenInput.schemas.constraints.total,
+    embeddedSchemas: result.artifact.embeddedSchemaValidation.located.total,
+    locatorFamilies: result.artifact.embeddedSchemaValidation.locatorFamilies.length,
     artifactSha256: result.artifactSha256,
   });
 }

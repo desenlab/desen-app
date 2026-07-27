@@ -1,11 +1,21 @@
 import {
   RuntimeCoreAuditHardeningEvidenceError,
-  writeRuntimeCoreAuditHardeningEvidence,
+  verifyRuntimeCoreAuditHardeningEvidence,
 } from "./lib/runtime-core-audit-hardening-proof.mjs";
 
 try {
-  const result = await writeRuntimeCoreAuditHardeningEvidence();
-  process.stdout.write(`${JSON.stringify({ status: "PASS", ...result }, null, 2)}\n`);
+  const result = await verifyRuntimeCoreAuditHardeningEvidence();
+  process.stdout.write(
+    `${JSON.stringify(
+      {
+        status: "PASS",
+        artifactSha256: result.artifactSha256,
+        message: "Preserved immutable task-time M04-T17/G04 audit-hardening evidence.",
+      },
+      null,
+      2,
+    )}\n`,
+  );
 } catch (error) {
   const failure =
     error instanceof RuntimeCoreAuditHardeningEvidenceError

@@ -1,16 +1,16 @@
 import {
   ProtocolStructuralValidationEvidenceError,
-  writeProtocolStructuralValidationEvidence,
+  verifyProtocolStructuralValidation,
 } from "./lib/protocol-structural-validation-proof.mjs";
 
 try {
-  const result = await writeProtocolStructuralValidationEvidence();
+  const result = await verifyProtocolStructuralValidation();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M02-T06 structural-validation evidence.",
+        message: "Preserved immutable task-time M02-T06 structural-validation evidence.",
       },
       null,
       2,

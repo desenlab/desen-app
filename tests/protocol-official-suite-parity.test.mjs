@@ -23,6 +23,7 @@ test("accepts exact deterministic M02-T12 official-suite parity evidence", async
   const result = await verifyProtocolOfficialSuiteParity();
 
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.cases, 14);
   assert.equal(result.conformanceVectors, 9);
   assert.equal(result.publicExamples, 5);
@@ -34,7 +35,23 @@ test("accepts exact deterministic M02-T12 official-suite parity evidence", async
   assert.equal(result.semanticByteEqual, true);
   assert.equal(result.transcriptByteEqual, true);
   assert.equal(result.supplements, 2);
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae",
+  );
+});
+
+test("default evidence writer preserves immutable task-time M02-T12 bytes", async () => {
+  const artifactPath = new URL(
+    "../docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json",
+    import.meta.url,
+  );
+  const before = await readFile(artifactPath);
+  const result = await writeProtocolOfficialSuiteParityEvidence();
+  const after = await readFile(artifactPath);
+
+  assert.deepEqual(after, before);
+  assert.deepEqual(result.artifactBytes, before);
 });
 
 test("two independent parity builds are byte-identical", async () => {
@@ -45,9 +62,17 @@ test("two independent parity builds are byte-identical", async () => {
   assert.equal(first.artifactSha256, second.artifactSha256);
 });
 
-test("rejects a one-byte-tampered parity artifact", async () => {
-  const pristine = await buildProtocolOfficialSuiteParityEvidence();
-  const tampered = Buffer.from(pristine.artifactBytes);
+test("rejects a current rebuild and one-byte-tampered historical parity artifact", async () => {
+  const current = await buildProtocolOfficialSuiteParityEvidence();
+  await assert.rejects(
+    verifyProtocolOfficialSuiteParity({ artifactBytes: current.artifactBytes }),
+    hasEvidenceCode("OFFICIAL_SUITE_ARTIFACT_DRIFT"),
+  );
+
+  const historical = await readFile(
+    new URL("../docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json", import.meta.url),
+  );
+  const tampered = Buffer.from(historical);
   tampered[tampered.length - 2] ^= 1;
 
   await assert.rejects(

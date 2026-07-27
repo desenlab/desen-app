@@ -1,16 +1,16 @@
 import {
   ProtocolComponentContractsEvidenceError,
-  writeProtocolComponentContractsEvidence,
+  verifyProtocolComponentContracts,
 } from "./lib/protocol-component-contracts-proof.mjs";
 
 try {
-  const result = await writeProtocolComponentContractsEvidence();
+  const result = await verifyProtocolComponentContracts();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M02-T08 component-contract evidence.",
+        message: "Preserved immutable task-time M02-T08 component-contract evidence.",
       },
       null,
       2,

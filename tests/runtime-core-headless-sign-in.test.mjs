@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { symlinkSync, unlinkSync } from "node:fs";
+import { mkdtemp, readFile, realpath, rm, symlink } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import ts from "typescript";
@@ -13,9 +16,11 @@ import {
   verifyReferenceCatalogWebParityNormativeCompatibility,
 } from "../scripts/lib/reference-catalog-web-parity-proof.mjs";
 import {
+  DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH,
   RuntimeCoreHeadlessSignInEvidenceError,
   buildRuntimeCoreHeadlessSignInEvidence,
   verifyRuntimeCoreHeadlessSignInEvidence,
+  writeRuntimeCoreHeadlessSignInEvidence,
 } from "../scripts/lib/runtime-core-headless-sign-in-proof.mjs";
 
 const PREREQUISITES = Object.freeze([
@@ -55,6 +60,8 @@ const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-HEADLESS-SIGN-IN.md";
 const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
 const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-headless-sign-in.json";
 const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-headless-sign-in.json";
+const HISTORICAL_ARTIFACT_SHA256 =
+  "bdda1b2d0c4630a1a6708b2e6bb9a9ecdca0c2efca3615ca4cf69cee871170a4";
 
 let baselinePromise;
 
@@ -156,13 +163,14 @@ async function buildWithBaselineProbe(options = {}) {
 test("accepts tracked deterministic M04-T16 and G04 headless evidence", async () => {
   const result = await verifyRuntimeCoreHeadlessSignInEvidence();
   assert.equal(result.result, "PASS");
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.runtimeExports, 7);
   assert.equal(result.typeExports, 22);
   assert.equal(result.moduleExports, 35);
   assert.equal(result.tsdocDeclarations, 35);
   assert.equal(result.focusedTests, 34);
   assert.equal(result.compilerNegativeCases, 11);
-  assert.equal(result.rootMutationTests, 25);
+  assert.equal(result.rootMutationTests, 24);
   assert.equal(result.traceRules, 72);
   assert.equal(result.currentTraceRules, 67);
   assert.equal(result.deferredTraceRules, 5);
@@ -177,6 +185,10 @@ test("accepts tracked deterministic M04-T16 and G04 headless evidence", async ()
   assert.equal(result.platformValues, 0);
   assert.equal(result.staleNavigations, 0);
   assert.equal(result.frozenTraceEnvelopes, result.traceEntries + 10);
+  assert.equal(
+    result.artifactSha256,
+    "bdda1b2d0c4630a1a6708b2e6bb9a9ecdca0c2efca3615ca4cf69cee871170a4",
+  );
 });
 
 test("builds byte-identical headless evidence twice", async () => {
@@ -192,16 +204,85 @@ test("builds byte-identical headless evidence twice", async () => {
 });
 
 test("rejects stale or tampered headless evidence", async () => {
-  const evidence = await baseline();
-  const bytes = Buffer.from(evidence.artifactBytes);
-  bytes[bytes.length - 2] ^= 1;
+  const current = await baseline();
   await rejectsCode(
-    () => verifyRuntimeCoreHeadlessSignInEvidence({ artifactBytes: bytes }),
+    () => verifyRuntimeCoreHeadlessSignInEvidence({ artifactBytes: current.artifactBytes }),
+    "HEADLESS_ARTIFACT_DRIFT",
+  );
+
+  const historical = await readFile(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH);
+  const tampered = Buffer.from(historical);
+  tampered[tampered.length - 2] ^= 1;
+  await rejectsCode(
+    () => verifyRuntimeCoreHeadlessSignInEvidence({ artifactBytes: tampered }),
     "HEADLESS_ARTIFACT_DRIFT",
   );
 });
 
-test("rejects relocated or duplicated M04-T16 artifact SHA pins", async () => {
+test("default headless writer preserves exact immutable task-time bytes", async () => {
+  const before = await readFile(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH);
+  const result = await writeRuntimeCoreHeadlessSignInEvidence();
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-headless-parent-alias-"));
+  const parentAlias = path.join(directory, "artifact-parent");
+  try {
+    await symlink(
+      path.dirname(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH),
+      parentAlias,
+      "dir",
+    );
+    const aliasResult = await writeRuntimeCoreHeadlessSignInEvidence({
+      artifactPath: path.join(
+        parentAlias,
+        path.basename(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH),
+      ),
+      preparedEvidence: {
+        artifact: JSON.parse(before.toString("utf8")),
+        artifactBytes: before,
+        artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+      },
+    });
+    assert.equal(aliasResult.compatibilityMode, "immutable-task-time-artifact");
+
+    await rm(parentAlias);
+    const evidence = await baseline();
+    const fileName = path.basename(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH);
+    const canonicalCustomPath = path.join(await realpath(directory), fileName);
+    await symlink(directory, parentAlias, "dir");
+    let swapped = false;
+    const swappedResult = await writeRuntimeCoreHeadlessSignInEvidence({
+      artifactPath: path.join(parentAlias, fileName),
+      get preparedEvidence() {
+        unlinkSync(parentAlias);
+        symlinkSync(
+          path.dirname(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH),
+          parentAlias,
+          "dir",
+        );
+        swapped = true;
+        return evidence;
+      },
+      beforeAtomicRename: ({ artifactPath }) => {
+        assert.equal(artifactPath, canonicalCustomPath);
+      },
+    });
+
+    assert.equal(swapped, true);
+    assert.equal(swappedResult.artifactPath, canonicalCustomPath);
+    assert.deepEqual(await readFile(canonicalCustomPath), evidence.artifactBytes);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+  const after = await readFile(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH);
+
+  assert.deepEqual(after, before);
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
+  assert.equal(
+    result.artifactSha256,
+    "bdda1b2d0c4630a1a6708b2e6bb9a9ecdca0c2efca3615ca4cf69cee871170a4",
+  );
+});
+
+test("rejects verifier runtime injection under immutable task-time verification", async () => {
   await rejectsCode(
     () =>
       verifyRuntimeCoreHeadlessSignInEvidence({
@@ -216,15 +297,18 @@ test("rejects relocated or duplicated M04-T16 artifact SHA pins", async () => {
       }),
     "HEADLESS_OPTIONS_INVALID",
   );
-  const evidence = await baseline();
+});
+
+test("rejects relocated or duplicated M04-T16 artifact SHA pins", async () => {
+  const historical = await readFile(DEFAULT_RUNTIME_CORE_HEADLESS_SIGN_IN_ARTIFACT_PATH);
   const [proofText, proofMatrixText] = await Promise.all([
     readFile(new URL(`../${PROOF_DOCUMENT_PATH}`, import.meta.url), "utf8"),
     readFile(new URL(`../${PROOF_MATRIX_PATH}`, import.meta.url), "utf8"),
   ]);
-  const pinned = pinArtifactReferences(proofText, proofMatrixText, evidence.artifactSha256);
+  const pinned = pinArtifactReferences(proofText, proofMatrixText, HISTORICAL_ARTIFACT_SHA256);
   const verifyWith = (proof, proofMatrix) =>
     verifyRuntimeCoreHeadlessSignInEvidence({
-      artifactBytes: evidence.artifactBytes,
+      artifactBytes: historical,
       buildOptions: {
         fileOverrides: {
           [PROOF_DOCUMENT_PATH]: proof,
@@ -234,8 +318,7 @@ test("rejects relocated or duplicated M04-T16 artifact SHA pins", async () => {
     });
   assert.equal((await verifyWith(pinned.proof, pinned.proofMatrix)).result, "PASS");
 
-  const wrongSha256 = "0".repeat(64);
-  const proofPair = `\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.`;
+  const proofPair = `\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${HISTORICAL_ARTIFACT_SHA256}\`.`;
   await rejectsCode(
     () =>
       verifyWith(
@@ -245,36 +328,11 @@ test("rejects relocated or duplicated M04-T16 artifact SHA pins", async () => {
     "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
   );
   await rejectsCode(
-    () =>
-      verifyWith(
-        `${pinned.proof.replace(
-          `Its SHA-256 is \`${evidence.artifactSha256}\`.`,
-          `Its SHA-256 is \`${wrongSha256}\`.`,
-        )}\n<!-- relocated ${evidence.artifactSha256} -->\n`,
-        pinned.proofMatrix,
-      ),
+    () => verifyWith(`${pinned.proof.trimEnd()}\n\n${proofPair}\n`, pinned.proofMatrix),
     "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
   );
-  await rejectsCode(
-    () =>
-      verifyWith(
-        `${pinned.proof.trimEnd()}\n\n\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.\n`,
-        pinned.proofMatrix,
-      ),
-    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      verifyWith(
-        pinned.proof,
-        `${pinned.proofMatrix.replace(
-          `\`sha256:${evidence.artifactSha256}\`.`,
-          `\`sha256:${wrongSha256}\`.`,
-        )}\n<!-- relocated sha256:${evidence.artifactSha256} -->\n`,
-      ),
-    "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
-  );
-  const matrixPair = `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.`;
+
+  const matrixPair = `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${HISTORICAL_ARTIFACT_SHA256}\`.`;
   await rejectsCode(
     () =>
       verifyWith(
@@ -284,11 +342,7 @@ test("rejects relocated or duplicated M04-T16 artifact SHA pins", async () => {
     "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
   );
   await rejectsCode(
-    () =>
-      verifyWith(
-        pinned.proof,
-        `${pinned.proofMatrix.trimEnd()}\n\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.\n`,
-      ),
+    () => verifyWith(pinned.proof, `${pinned.proofMatrix.trimEnd()}\n${matrixPair}\n`),
     "HEADLESS_ARTIFACT_REFERENCE_DRIFT",
   );
 });
@@ -312,9 +366,9 @@ test("detects reviewed source byte drift", async () => {
     async () =>
       buildWithBaselineProbe({
         fileOverrides: await sourceMutation(
-          SESSION_SOURCE,
-          "Validates unknown Catalog and Bundle ingress",
-          "Validates unknown Bundle and Catalog ingress",
+          MATERIALIZATION_SOURCE,
+          "Complete all-or-nothing materialization result",
+          "Complete deterministic materialization result",
         ),
       }),
     "HEADLESS_SOURCE_BYTE_DRIFT",
@@ -322,6 +376,16 @@ test("detects reviewed source byte drift", async () => {
 });
 
 test("detects exact module and package-root export drift", async () => {
+  const session = await readFile(new URL(`../${SESSION_SOURCE}`, import.meta.url), "utf8");
+  await rejectsCode(
+    () =>
+      buildWithBaselineProbe({
+        fileOverrides: {
+          [SESSION_SOURCE]: `${session}\n/** Unapproved successor export. */\nexport const unrelatedSuccessorExport = 1;\n`,
+        },
+      }),
+    "HEADLESS_MODULE_EXPORT_DRIFT",
+  );
   await rejectsCode(
     async () =>
       buildWithBaselineProbe({
@@ -576,14 +640,19 @@ test("detects hostile mutation containment drift", async () => {
 
 test("detects focused runtime and compiler-negative inventory drift", async () => {
   const testsPath = "packages/runtime-core/test/headless-session.test.ts";
-  const tests = await readFile(new URL(`../${testsPath}`, import.meta.url), "utf8");
-  assert.ok(tests.includes("it("));
   await rejectsCode(
     () =>
       buildWithBaselineProbe({
-        fileOverrides: { [testsPath]: tests.replace("it(", "it.skip(") },
+        fileOverrides: { [testsPath]: "" },
       }),
     "HEADLESS_FOCUSED_TEST_DRIFT",
+  );
+  await rejectsCode(
+    () =>
+      buildWithBaselineProbe({
+        fileOverrides: { "packages/runtime-core/test/headless-session.types.ts": "" },
+      }),
+    "HEADLESS_TYPE_TEST_DRIFT",
   );
 });
 

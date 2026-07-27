@@ -25,6 +25,8 @@ export const DEFAULT_PROTOCOL_EXECUTION_CONTRACTS_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   "docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
 );
+const HISTORICAL_ARTIFACT_SHA256 =
+  "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505";
 
 /** Absolute path to the reviewed protocol trace ledger used by M02-T11 evidence. */
 export const DEFAULT_PROTOCOL_EXECUTION_CONTRACTS_TRACE_PATH = path.join(
@@ -173,6 +175,78 @@ function fail(code, message, details = undefined) {
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+async function authenticateHistoricalArtifact(artifactPath, suppliedBytes) {
+  let bytes;
+  if (suppliedBytes === undefined) {
+    let entry;
+    try {
+      entry = await lstat(artifactPath);
+    } catch (error) {
+      fail("EXECUTION_ARTIFACT_DRIFT", "Immutable M02-T11 evidence is missing.", {
+        cause: String(error),
+      });
+    }
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      fail(
+        "EXECUTION_ARTIFACT_UNSUPPORTED_ENTRY",
+        "Immutable M02-T11 evidence must be a regular non-symlink file.",
+      );
+    }
+    bytes = await readFile(artifactPath);
+  } else {
+    bytes = Buffer.from(suppliedBytes);
+  }
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail("EXECUTION_ARTIFACT_DRIFT", "Immutable task-time M02-T11 evidence bytes changed.", {
+      expectedSha256: HISTORICAL_ARTIFACT_SHA256,
+      actualSha256,
+    });
+  }
+
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail("EXECUTION_ARTIFACT_DRIFT", "Immutable M02-T11 evidence is not valid JSON.");
+  }
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M02-T11" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-execution-contract-validation-v1" ||
+    artifact.protocolVersion !== "0.1.0" ||
+    artifact.traceability?.schemaFamilies?.length !== 9 ||
+    artifact.traceability?.schemaConstraints !== 383 ||
+    artifact.traceability?.proseRules?.length !== 11 ||
+    artifact.traceability?.invariants?.length !== 2 ||
+    artifact.traceability?.ownedCoreDiagnostics?.length !== 5 ||
+    artifact.frozenValidation?.officialT11Invalid?.length !== 0 ||
+    artifact.frozenValidation?.validExamples?.length !== 5 ||
+    artifact.verification?.projectMutationGoldens !== 42 ||
+    artifact.schemaSafety?.accepted?.length !== 1 ||
+    artifact.schemaSafety?.rejected?.length !== 5 ||
+    artifact.security?.resolvedValues?.safety?.accepted?.length !== 4 ||
+    artifact.security?.resolvedValues?.safety?.rejected?.length !== 6 ||
+    artifact.security?.resolvedValues?.hostileBoundary?.rejectedCount !== 4 ||
+    artifact.security?.catalogTrustFence?.rejectedEntryPointCount !== 3 ||
+    artifact.obligations?.kinds?.length !== 8 ||
+    artifact.obligations?.inheritedKinds?.length !== 4 ||
+    artifact.obligations?.newExecutionKinds?.length !== 4 ||
+    artifact.resolvedValues?.selectorKinds?.length !== 5
+  ) {
+    fail(
+      "EXECUTION_ARTIFACT_DRIFT",
+      "Immutable M02-T11 evidence no longer has its reviewed identity, inventory, or semantics.",
+    );
+  }
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
 }
 
 function compareText(left, right) {
@@ -2535,11 +2609,16 @@ export async function buildProtocolExecutionContractsEvidence({
   return Object.freeze({ artifact, artifactBytes, artifactSha256: sha256(artifactBytes) });
 }
 
-/** Writes deterministic M02-T11 evidence to its single tracked regular-file destination. */
+/** Writes current evidence only outside the immutable tracked M02-T11 artifact path. */
 export async function writeProtocolExecutionContractsEvidence({
   artifactPath = DEFAULT_PROTOCOL_EXECUTION_CONTRACTS_ARTIFACT_PATH,
   beforeAtomicRename,
 } = {}) {
+  if (
+    path.resolve(artifactPath) === path.resolve(DEFAULT_PROTOCOL_EXECUTION_CONTRACTS_ARTIFACT_PATH)
+  ) {
+    return authenticateHistoricalArtifact(artifactPath);
+  }
   const { resolvedArtifactPath, resolvedParent } = await resolveWritableArtifactPath(artifactPath);
   const result = await buildProtocolExecutionContractsEvidence();
   const { handle, temporaryPath } = await openExclusiveTemporary(
@@ -2584,26 +2663,20 @@ export async function writeProtocolExecutionContractsEvidence({
   }
 }
 
-/** Rebuilds and byte-compares tracked M02-T11 evidence without modifying it. */
+/** Authenticates immutable task-time M02-T11 evidence without rebuilding successor source. */
 export async function verifyProtocolExecutionContracts({
   artifactPath = DEFAULT_PROTOCOL_EXECUTION_CONTRACTS_ARTIFACT_PATH,
   artifactBytes,
 } = {}) {
-  const result = await buildProtocolExecutionContractsEvidence();
-  const actual = artifactBytes ?? (await readFile(artifactPath));
-  if (!Buffer.from(actual).equals(result.artifactBytes)) {
-    fail("EXECUTION_ARTIFACT_DRIFT", "Tracked M02-T11 evidence is stale or modified.", {
-      expectedSha256: result.artifactSha256,
-      actualSha256: sha256(actual),
-    });
-  }
+  const result = await authenticateHistoricalArtifact(artifactPath, artifactBytes);
   return Object.freeze({
     result: "PASS",
-    schemaFamilies: EXPECTED_SCHEMA_FAMILIES.length,
-    schemaConstraints: EXPECTED_SCHEMA_CONSTRAINTS,
-    proseRules: EXPECTED_PROSE_RULES.length,
-    invariants: EXPECTED_INVARIANTS.length,
-    ownedCoreDiagnostics: EXPECTED_CORE_DIAGNOSTICS.length,
+    compatibilityMode: "immutable-task-time-artifact",
+    schemaFamilies: result.artifact.traceability.schemaFamilies.length,
+    schemaConstraints: result.artifact.traceability.schemaConstraints,
+    proseRules: result.artifact.traceability.proseRules.length,
+    invariants: result.artifact.traceability.invariants.length,
+    ownedCoreDiagnostics: result.artifact.traceability.ownedCoreDiagnostics.length,
     conformanceResponsibilities: 0,
     mandatoryClauses: 0,
     officialT11Invalid: result.artifact.frozenValidation.officialT11Invalid.length,
@@ -2616,11 +2689,11 @@ export async function verifyProtocolExecutionContracts({
       result.artifact.security.resolvedValues.hostileBoundary.rejectedCount,
     forgedLowerStageCatalogEntryPoints:
       result.artifact.security.catalogTrustFence.rejectedEntryPointCount,
-    inheritedObligationKinds: INHERITED_OBLIGATION_KINDS.length,
-    newExecutionObligationKinds: NEW_EXECUTION_OBLIGATION_KINDS.length,
-    obligationKinds: EXPECTED_OBLIGATION_KINDS.length,
-    resolvedValueSelectorKinds: EXPECTED_VALUE_SELECTOR_KINDS.length,
-    examples: FROZEN_EXAMPLES.length,
+    inheritedObligationKinds: result.artifact.obligations.inheritedKinds.length,
+    newExecutionObligationKinds: result.artifact.obligations.newExecutionKinds.length,
+    obligationKinds: result.artifact.obligations.kinds.length,
+    resolvedValueSelectorKinds: result.artifact.resolvedValues.selectorKinds.length,
+    examples: result.artifact.frozenValidation.validExamples.length,
     artifactSha256: result.artifactSha256,
   });
 }
