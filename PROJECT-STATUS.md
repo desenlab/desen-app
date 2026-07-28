@@ -295,17 +295,20 @@ M05-T03 extends that boundary to complete semantic style maps without interpreti
 native targets. M05-T04 then proves exact binding parity and commit-scoped component/behavior
 interactions, including inert event payloads, opaque revocable component-command ownership, and
 the separately imported five-component reference adapter registry. `PF-051` through `PF-053`
-record these profiles. Stable real-instance reconciliation and source-linked diagnostics remain
-M05-T05, while committed adapter failures remain M05-T06.
+record these profiles. M05-T05 now observes live session publications through a commit-only React
+external-store seam, preserves compatible component/behavior/repeat instances under canonical
+trusted remount policy, isolates every exact session-and-registry lifetime, and exposes one
+bounded immutable runtime-node ↔ source-node diagnostic index. `PF-054` records this profile.
+Committed adapter failures remain M05-T06.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `58 / 145 tasks complete (40%)`
+- Overall implementation progress: `59 / 145 tasks complete (41%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
-- M05 progress: `4 / 9 tasks complete (44%)`
+- M05 progress: `5 / 9 tasks complete (56%)`
 - Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -349,11 +352,12 @@ M05-T05, while committed adapter failures remain M05-T06.
   `M05-T01 — React adapter registry and render-plan renderer`,
   `M05-T02 — Resolved props and named slots`,
   `M05-T03 — Style parts and visual states`,
-  `M05-T04 — Component events, commands, and behavior adapters`
+  `M05-T04 — Component events, commands, and behavior adapters`,
+  `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`
-- Status: M05-T04 is complete; M05-T05 is ready to start
+- Next implementation task: `M05-T06 — Error boundaries and explicit capability failure`
+- Status: M05-T05 is complete; M05-T06 is ready to start
 
 ## Completed preparation
 
@@ -681,12 +685,14 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
 
 The Web–React runtime now authenticates the live session, current snapshot, execution Catalog,
 complete prepared tree, resolved props, named slots, semantic styles, binding inventory, events,
-and component-command ownership before trusted adapter effects can act. The reference package
-exports one explicit five-component adapter registry without exposing arbitrary React props, DOM
-objects, native events, or dynamic loaders. N-026, N-029, N-033, and N-034 are `TESTED` for this
-selected Web–React profile. M05-T05 must now preserve stable React identity across publications and
-provide an immutable runtime-node ↔ source-node diagnostic index without widening adapter
-authority.
+component-command ownership, reconciliation policy, and diagnostic identity before trusted
+adapter effects can act. Compatible generations preserve local platform state; a session or
+executable-registry change remounts the complete managed tree and revokes old interaction ports.
+The callback-free immutable diagnostic index preserves repeated one-to-many source traceability
+without retaining React, platform, session, Catalog, registry, props, styles, slots, or callbacks.
+N-026, N-029, N-033, and N-034 are `TESTED`; P-16 is now `PARTIAL`, while N-021 remains `PLANNED`.
+M05-T06 must now contain trusted adapter exceptions and expose explicit failure without silently
+guessing an unknown-capability placeholder.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -696,9 +702,9 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`. Prove deterministic
-reconciliation identity and source-linked diagnostics over live session publications without
-inspecting component, React, DOM, or native internals.
+Begin `M05-T06 — Error boundaries and explicit failure for unknown capabilities`. Contain trusted
+adapter exceptions after commit and expose a host-visible controlled failure without substituting
+or guessing a production component.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1161,6 +1167,25 @@ M05-T04 evidence:
   runtime-core command-attachment tests, 20 compiler-negative cases, 18 root proof/mutation tests,
   the exact 80-file successor distribution digest, and immutable historical SC-01 DTCG, M04-T06,
   M04-T12, and M04-T15 evidence
+
+M05-T05 evidence:
+
+- `docs/proof/RUNTIME-REACT-RECONCILIATION-DIAGNOSTICS.md`
+- `docs/proof/artifacts/runtime-react-0.1.0-reconciliation-diagnostics.json`
+- artifact SHA-256:
+  `292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb`
+- exact boundary: commit-only exact-session observation; complete re-authentication on every
+  publication; one private renderer-root identity per exact session-and-registry pair; RFC
+  8785-canonical component and behavior keys over stable runtime identity, exact capability, and
+  presence-aware trusted `remountOnProps`; and a bounded deeply frozen callback-free forward plus
+  sorted one-to-many inverse diagnostic index
+- executable evidence: 53 focused reconciliation/diagnostic/lifecycle tests, 26 compiler-negative
+  cases, 35 semantic root mutation cases, 29 byte-pinned task files, exact M04-T06/M04-T07/M05-T04
+  prerequisite bytes, session and registry replacement cleanup, StrictMode/SSR/Suspense lifecycle,
+  repeat reorder/removal, hostile reflection, symlink rejection, and atomic artifact writing
+- coverage decision: selected Web–React R-104 adapter-instance work is complete; P-16 advances to
+  `PARTIAL`; N-021 remains `PLANNED`; M05-T06 still owns the explicit committed adapter error
+  boundary and unknown-capability non-substitution behavior
 
 ## Status vocabulary
 

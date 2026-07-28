@@ -14,6 +14,8 @@ import {
   createRuntimeReactBehaviorAdapterElement,
   createRuntimeReactComponentAdapterElement,
 } from "./interactions.js";
+import { buildRuntimeReactDiagnosticIndex } from "./diagnostic-index.js";
+import { createRuntimeReactReconciliationKey } from "./reconciliation.js";
 import { readRuntimeReactAdapterRegistryAuthority } from "./registry.js";
 
 import type { ReactElement, ReactNode } from "react";
@@ -32,9 +34,13 @@ import type {
   DesenValidatedExecutionCatalogSet,
 } from "@desen/validator";
 import type {
+  RuntimeReactDiagnosticIndex,
+  RuntimeReactDiagnosticIndexBinding,
+} from "./diagnostic-index.js";
+import type {
   RuntimeReactAdapterRegistryHandle,
-  RuntimeReactBehaviorAdapterComponent,
-  RuntimeReactComponentAdapterComponent,
+  RuntimeReactBehaviorAdapterDefinition,
+  RuntimeReactComponentAdapterDefinition,
   RuntimeReactDiagnosticIdentity,
   RuntimeReactNamedSlots,
   RuntimeReactSemanticStyle,
@@ -83,6 +89,7 @@ export type RuntimeReactRenderFailureChannel = "props" | "slots" | "style" | nul
 export type RuntimeReactRenderFailureCode =
   | "BEHAVIOR_LIMIT_EXCEEDED"
   | "DEPTH_LIMIT_EXCEEDED"
+  | "DIAGNOSTIC_INDEX_FAILED"
   | "DUPLICATE_RUNTIME_IDENTITY"
   | "INVALID_BEHAVIOR_PROPS"
   | "INVALID_BEHAVIOR_SLOTS"
@@ -99,6 +106,7 @@ export type RuntimeReactRenderFailureCode =
   | "MALFORMED_RENDER_PLAN"
   | "NODE_LIMIT_EXCEEDED"
   | "RECEIVING_VALIDATION_LIMIT_EXCEEDED"
+  | "RECONCILIATION_KEY_FAILED"
   | "RUNTIME_BINDING_MISMATCH"
   | "SLOT_LIMIT_EXCEEDED"
   | "STRING_LIMIT_EXCEEDED"
@@ -127,6 +135,14 @@ export interface RuntimeReactRenderedSurface {
   readonly element: ReactElement;
   readonly nodeCount: number;
   readonly behaviorCount: number;
+  /**
+   * Callback-free immutable runtime-node ↔ source-node lookup for diagnostics and selection.
+   *
+   * @remarks Repeated authoring nodes and behavior attachments are represented as one-to-many
+   * sorted inverse lists. The index retains no React value, platform authority, session, Catalog,
+   * registry, props, style, slots, or callback.
+   */
+  readonly diagnosticIndex: RuntimeReactDiagnosticIndex;
 }
 
 /** Complete controlled result of compiling one authenticated headless session snapshot. */
@@ -149,15 +165,53 @@ interface CapturedLimits {
   readonly receiving: DesenResolvedAdapterValidationLimitProfile;
 }
 
+interface RuntimeReactSessionBoundaryProps {
+  readonly children: ReactNode;
+}
+
+type RuntimeReactSessionBoundaryComponent = (
+  props: RuntimeReactSessionBoundaryProps,
+) => ReactElement;
+
+/**
+ * A component type is a React reconciliation boundary. Retaining one private type per exact
+ * authenticated session-and-registry pair preserves adapter state across generations using that
+ * trusted host configuration while making it impossible for another session or executable
+ * registry with coincidentally equal public identities to inherit local state, refs, effects,
+ * interaction ports, or platform instances.
+ */
+const SESSION_REGISTRY_BOUNDARIES = new WeakMap<
+  object,
+  WeakMap<object, RuntimeReactSessionBoundaryComponent>
+>();
+
+function sessionRegistryBoundary(
+  session: object,
+  registry: object,
+): RuntimeReactSessionBoundaryComponent {
+  let registryBoundaries = SESSION_REGISTRY_BOUNDARIES.get(session);
+  if (registryBoundaries === undefined) {
+    registryBoundaries = new WeakMap<object, RuntimeReactSessionBoundaryComponent>();
+    SESSION_REGISTRY_BOUNDARIES.set(session, registryBoundaries);
+  }
+  const existing = registryBoundaries.get(registry);
+  if (existing !== undefined) return existing;
+  const boundary: RuntimeReactSessionBoundaryComponent = ({ children }) =>
+    createElement(Fragment, null, children);
+  registryBoundaries.set(registry, boundary);
+  return boundary;
+}
+
 interface PreparedBehavior {
   readonly runtimeNodeId: string;
   readonly sourceNodeId: string;
   readonly capabilityId: string;
   readonly behaviorId: string;
-  readonly ownerRuntimeInstanceId: string;
+  readonly ownerRuntimeNodeId: string;
   readonly props: RuntimeJsonObject;
   readonly style: RuntimeReactSemanticStyle;
-  readonly component: RuntimeReactBehaviorAdapterComponent;
+  readonly definition: RuntimeReactBehaviorAdapterDefinition;
+  readonly reconciliationKey: string;
   readonly slots: Readonly<Record<string, readonly PreparedNode[]>>;
 }
 
@@ -167,7 +221,8 @@ interface PreparedNode {
   readonly capabilityId: string;
   readonly props: RuntimeJsonObject;
   readonly style: RuntimeReactSemanticStyle;
-  readonly component: RuntimeReactComponentAdapterComponent;
+  readonly definition: RuntimeReactComponentAdapterDefinition;
+  readonly reconciliationKey: string;
   readonly slots: Readonly<Record<string, readonly PreparedNode[]>>;
   readonly behaviors: readonly PreparedBehavior[];
 }
@@ -196,7 +251,7 @@ type PreparedBindingIdentity =
       readonly sourceNodeId: string;
       readonly capabilityId: string;
       readonly behaviorId: string;
-      readonly ownerRuntimeInstanceId: string;
+      readonly ownerRuntimeNodeId: string;
     }>;
 
 interface RuntimeReactRenderAuthority {
@@ -600,8 +655,8 @@ function prepareSlotMap(
   depth: number,
   state: PreparationState,
   limits: RenderLimits,
-  components: ReadonlyMap<string, RuntimeReactComponentAdapterComponent>,
-  behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterComponent>,
+  components: ReadonlyMap<string, RuntimeReactComponentAdapterDefinition>,
+  behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterDefinition>,
 ): Readonly<Record<string, readonly PreparedNode[]>> | RuntimeReactRenderResult {
   if (!isPlainRecord(raw)) return failure("MALFORMED_RENDER_PLAN");
   const slots: Record<string, readonly PreparedNode[]> = Object.create(null);
@@ -647,8 +702,8 @@ function prepareBehavior(
   depth: number,
   state: PreparationState,
   limits: RenderLimits,
-  components: ReadonlyMap<string, RuntimeReactComponentAdapterComponent>,
-  behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterComponent>,
+  components: ReadonlyMap<string, RuntimeReactComponentAdapterDefinition>,
+  behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterDefinition>,
 ): PreparedBehavior | RuntimeReactRenderResult {
   if (
     !isPlainRecord(raw) ||
@@ -689,8 +744,8 @@ function prepareBehavior(
   if (state.behaviorCount > limits.maxBehaviors) {
     return failure("BEHAVIOR_LIMIT_EXCEEDED", behaviorIdentity);
   }
-  const component = behaviors.get(capabilityId);
-  if (component === undefined) {
+  const definition = behaviors.get(capabilityId);
+  if (definition === undefined) {
     return failure("UNKNOWN_BEHAVIOR_CAPABILITY", behaviorIdentity);
   }
   state.bindings.set(
@@ -701,7 +756,7 @@ function prepareBehavior(
       sourceNodeId: owner.sourceNodeId,
       capabilityId,
       behaviorId,
-      ownerRuntimeInstanceId: owner.runtimeNodeId,
+      ownerRuntimeNodeId: owner.runtimeNodeId,
     }),
   );
   const capturedProps = captureJsonObject(ownData(raw, "props"), state, limits, behaviorIdentity);
@@ -718,6 +773,17 @@ function prepareBehavior(
       "props",
       validatedProps.diagnostics,
     );
+  }
+  let reconciliationKey: string;
+  try {
+    reconciliationKey = createRuntimeReactReconciliationKey({
+      runtimeNodeId: identity,
+      capabilityId,
+      props: validatedProps.value as RuntimeJsonObject,
+      remountOnProps: definition.remountOnProps,
+    });
+  } catch {
+    return failure("RECONCILIATION_KEY_FAILED", behaviorIdentity);
   }
   const capturedStyle = captureJsonObject(ownData(raw, "style"), state, limits, behaviorIdentity);
   if (isRenderFailure(capturedStyle)) return capturedStyle;
@@ -754,10 +820,11 @@ function prepareBehavior(
     sourceNodeId: owner.sourceNodeId,
     capabilityId,
     behaviorId,
-    ownerRuntimeInstanceId: owner.runtimeNodeId,
+    ownerRuntimeNodeId: owner.runtimeNodeId,
     props: validatedProps.value as RuntimeJsonObject,
     style: validatedStyle.value,
-    component,
+    definition,
+    reconciliationKey,
     slots,
   });
 }
@@ -767,8 +834,8 @@ function prepareNode(
   depth: number,
   state: PreparationState,
   limits: RenderLimits,
-  components: ReadonlyMap<string, RuntimeReactComponentAdapterComponent>,
-  behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterComponent>,
+  components: ReadonlyMap<string, RuntimeReactComponentAdapterDefinition>,
+  behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterDefinition>,
 ): PreparedNode | RuntimeReactRenderResult {
   const identity = nodeIdentity(raw);
   if (
@@ -800,8 +867,8 @@ function prepareNode(
   state.identities.add(identity.runtimeNodeId);
   state.nodeCount += 1;
   if (state.nodeCount > limits.maxNodes) return failure("NODE_LIMIT_EXCEEDED", identity);
-  const component = components.get(identity.capabilityId);
-  if (component === undefined) {
+  const definition = components.get(identity.capabilityId);
+  if (definition === undefined) {
     return failure("UNKNOWN_COMPONENT_CAPABILITY", identity);
   }
   state.bindings.set(
@@ -836,6 +903,17 @@ function prepareNode(
       "props",
       validatedProps.diagnostics,
     );
+  }
+  let reconciliationKey: string;
+  try {
+    reconciliationKey = createRuntimeReactReconciliationKey({
+      runtimeNodeId: identity.runtimeNodeId,
+      capabilityId: identity.capabilityId,
+      props: validatedProps.value as RuntimeJsonObject,
+      remountOnProps: definition.remountOnProps,
+    });
+  } catch {
+    return failure("RECONCILIATION_KEY_FAILED", identity);
   }
   const capturedStyle = captureJsonObject(ownData(raw, "style"), state, limits, identity);
   if (isRenderFailure(capturedStyle)) return capturedStyle;
@@ -895,7 +973,8 @@ function prepareNode(
     capabilityId: identity.capabilityId,
     props: validatedProps.value as RuntimeJsonObject,
     style: validatedStyle.value,
-    component,
+    definition,
+    reconciliationKey,
     slots,
     behaviors: Object.freeze(preparedBehaviors),
   });
@@ -927,7 +1006,7 @@ function matchesPreparedBinding(
     ? binding.kind === "component"
     : binding.kind === "behavior" &&
         prepared.behaviorId === binding.behaviorId &&
-        prepared.ownerRuntimeInstanceId === binding.ownerRuntimeInstanceId;
+        prepared.ownerRuntimeNodeId === binding.ownerRuntimeInstanceId;
 }
 
 function validateBindingParity(
@@ -958,6 +1037,30 @@ function validateBindingParity(
   return undefined;
 }
 
+function diagnosticBindings(
+  prepared: ReadonlyMap<string, PreparedBindingIdentity>,
+): readonly RuntimeReactDiagnosticIndexBinding[] {
+  return Object.freeze(
+    [...prepared.values()].map((binding): RuntimeReactDiagnosticIndexBinding =>
+      binding.kind === "component"
+        ? Object.freeze({
+            kind: "component",
+            runtimeNodeId: binding.runtimeInstanceId,
+            sourceNodeId: binding.sourceNodeId,
+            capabilityId: binding.capabilityId,
+          })
+        : Object.freeze({
+            kind: "behavior",
+            runtimeNodeId: binding.runtimeInstanceId,
+            sourceNodeId: binding.sourceNodeId,
+            capabilityId: binding.capabilityId,
+            behaviorId: binding.behaviorId,
+            ownerRuntimeNodeId: binding.ownerRuntimeNodeId,
+          }),
+    ),
+  );
+}
+
 function renderSlots(
   slots: Readonly<Record<string, readonly PreparedNode[]>>,
   authority: RuntimeReactRenderAuthority,
@@ -979,7 +1082,8 @@ function renderNode(node: PreparedNode, authority: RuntimeReactRenderAuthority):
     ...authority,
     kind: "component",
     runtimeInstanceId: node.runtimeNodeId,
-    component: node.component,
+    reconciliationKey: node.reconciliationKey,
+    component: node.definition.component,
     identity,
     props: node.props,
     slots: renderSlots(node.slots, authority),
@@ -990,7 +1094,8 @@ function renderNode(node: PreparedNode, authority: RuntimeReactRenderAuthority):
       ...authority,
       kind: "behavior",
       runtimeInstanceId: behavior.runtimeNodeId,
-      component: behavior.component,
+      reconciliationKey: behavior.reconciliationKey,
+      component: behavior.definition.component,
       identity: Object.freeze({
         runtimeNodeId: behavior.runtimeNodeId,
         sourceNodeId: behavior.sourceNodeId,
@@ -1126,15 +1231,29 @@ export function renderRuntimeReactSurface(
   const parityFailure = validateBindingParity(state.bindings, authenticated.snapshot.bindings);
   if (parityFailure !== undefined) return parityFailure;
 
+  const diagnosticIndex = buildRuntimeReactDiagnosticIndex(diagnosticBindings(state.bindings), {
+    maxBindings: state.nodeCount + state.behaviorCount,
+    maxIdentifierOccurrences: state.nodeCount * 3 + state.behaviorCount * 5,
+    maxIdentifierCodeUnits: limits.render.maxStringCodeUnits,
+  });
+  if (diagnosticIndex.status !== "built") {
+    return failure("DIAGNOSTIC_INDEX_FAILED");
+  }
+
   const authority: RuntimeReactRenderAuthority = Object.freeze({
     session: captured.session as RuntimeHeadlessSessionHandle,
     snapshot: authenticated.snapshot,
   });
-  const element = createElement(
+  const managedTree = createElement(
     Fragment,
     null,
     ...prepared.map((node) => renderNode(node, authority)),
   );
+  const SessionBoundary = sessionRegistryBoundary(
+    captured.session as object,
+    captured.registry as object,
+  );
+  const element = createElement(SessionBoundary, null, managedTree);
   return Object.freeze({
     status: "rendered",
     surface: Object.freeze({
@@ -1143,6 +1262,7 @@ export function renderRuntimeReactSurface(
       element,
       nodeCount: state.nodeCount,
       behaviorCount: state.behaviorCount,
+      diagnosticIndex: diagnosticIndex.index,
     }),
   });
 }

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type -- `this: void` is the deliberate
  * receiver-independent callback contract at the React adapter boundary. */
 import type { ComponentType, ReactNode } from "react";
+import { canonicalizeJson } from "@desen/protocol";
 import type { RuntimeJsonObject, RuntimeJsonValue } from "@desen/runtime-core";
 import type {
   DesenResolvedAdapterStyle,
@@ -24,6 +25,10 @@ export const RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS = Object.freeze({
   maxBehaviorAdapters: 4_096,
   /** Maximum combined UTF-16 units retained in capability identifiers. */
   maxIdentifierCodeUnits: 1_048_576,
+  /** Maximum remount-sensitive property names retained by one adapter. */
+  maxRemountPropsPerAdapter: 256,
+  /** Maximum combined UTF-16 units retained in remount-sensitive property names. */
+  maxRemountPropCodeUnits: 1_048_576,
 } as const);
 
 /** Optional trusted profile that may only lower adapter-registry ceilings. */
@@ -31,6 +36,8 @@ export interface RuntimeReactAdapterRegistryLimitProfile {
   readonly maxComponentAdapters?: number;
   readonly maxBehaviorAdapters?: number;
   readonly maxIdentifierCodeUnits?: number;
+  readonly maxRemountPropsPerAdapter?: number;
+  readonly maxRemountPropCodeUnits?: number;
 }
 
 /** Stable public identity carried to diagnostics without exposing React or platform instances. */
@@ -168,12 +175,28 @@ export type RuntimeReactBehaviorAdapterComponent = ComponentType<RuntimeReactBeh
 export interface RuntimeReactComponentAdapterRegistration {
   readonly capabilityId: string;
   readonly component: RuntimeReactComponentAdapterComponent;
+  /**
+   * Exact resolved prop names whose value or presence changes require a new React instance.
+   *
+   * @remarks The registry captures this static trusted policy as a detached, duplicate-free,
+   * UTF-16-code-unit-sorted immutable list. Catalogs and Bundles cannot supply or override it.
+   * When omitted, ordinary resolved prop changes preserve the existing adapter instance.
+   */
+  readonly remountOnProps?: readonly string[];
 }
 
 /** Static trusted registration for one behavior capability. */
 export interface RuntimeReactBehaviorAdapterRegistration {
   readonly capabilityId: string;
   readonly component: RuntimeReactBehaviorAdapterComponent;
+  /**
+   * Exact resolved prop names whose value or presence changes require a new React instance.
+   *
+   * @remarks The registry captures this static trusted policy as a detached, duplicate-free,
+   * UTF-16-code-unit-sorted immutable list. Catalogs and Bundles cannot supply or override it.
+   * When omitted, ordinary resolved prop changes preserve the existing behavior instance.
+   */
+  readonly remountOnProps?: readonly string[];
 }
 
 /** Complete trusted input used to create one finite adapter registry. */
@@ -188,18 +211,32 @@ export interface RuntimeReactAdapterRegistryHandle {
   readonly [RUNTIME_REACT_ADAPTER_REGISTRY_HANDLE_BRAND]: true;
 }
 
+/** Callback-free immutable reconciliation metadata for one registered adapter. */
+export interface RuntimeReactAdapterReconciliationPolicySnapshot {
+  /** Exact registered capability identity. */
+  readonly capabilityId: string;
+  /** Detached canonical property-name list selected only by trusted host registration. */
+  readonly remountOnProps: readonly string[];
+}
+
 /** Callback-free immutable registry observation. */
 export interface RuntimeReactAdapterRegistrySnapshot {
   readonly componentCapabilityIds: readonly string[];
   readonly behaviorCapabilityIds: readonly string[];
+  /** Canonically ordered component reconciliation policies without executable callbacks. */
+  readonly componentReconciliationPolicies: readonly RuntimeReactAdapterReconciliationPolicySnapshot[];
+  /** Canonically ordered behavior reconciliation policies without executable callbacks. */
+  readonly behaviorReconciliationPolicies: readonly RuntimeReactAdapterReconciliationPolicySnapshot[];
 }
 
 /** Stable reason why no registry authority was created. */
 export type RuntimeReactAdapterRegistryInvalidReason =
   | "duplicate-capability"
+  | "duplicate-remount-prop"
   | "identifier-limit"
   | "invalid-limits"
   | "malformed-registration"
+  | "remount-policy-limit"
   | "registry-limit";
 
 /** Controlled result of creating one registry. */
@@ -222,10 +259,26 @@ export type RuntimeReactAdapterRegistryReadResult =
     }>
   | Readonly<{ readonly status: "invalid-handle" }>;
 
+/** Private component adapter definition retained behind the opaque registry handle. */
+export interface RuntimeReactComponentAdapterDefinition {
+  /** Exact trusted React implementation. */
+  readonly component: RuntimeReactComponentAdapterComponent;
+  /** Detached static host policy used to derive the React reconciliation key. */
+  readonly remountOnProps: readonly string[];
+}
+
+/** Private behavior adapter definition retained behind the opaque registry handle. */
+export interface RuntimeReactBehaviorAdapterDefinition {
+  /** Exact trusted React implementation. */
+  readonly component: RuntimeReactBehaviorAdapterComponent;
+  /** Detached static host policy used to derive the React reconciliation key. */
+  readonly remountOnProps: readonly string[];
+}
+
 /** Exact executable registry authority retained behind the opaque handle. */
 export interface RuntimeReactAdapterRegistryAuthority {
-  readonly components: ReadonlyMap<string, RuntimeReactComponentAdapterComponent>;
-  readonly behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterComponent>;
+  readonly components: ReadonlyMap<string, RuntimeReactComponentAdapterDefinition>;
+  readonly behaviors: ReadonlyMap<string, RuntimeReactBehaviorAdapterDefinition>;
   readonly snapshot: RuntimeReactAdapterRegistrySnapshot;
 }
 
@@ -233,6 +286,8 @@ interface CapturedLimits {
   readonly maxComponentAdapters: number;
   readonly maxBehaviorAdapters: number;
   readonly maxIdentifierCodeUnits: number;
+  readonly maxRemountPropsPerAdapter: number;
+  readonly maxRemountPropCodeUnits: number;
 }
 
 interface OwnDataValue {
@@ -245,7 +300,9 @@ function ownDataValue(value: object, key: PropertyKey): OwnDataValue {
   try {
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (descriptor === undefined) return { valid: true, present: false };
-    if (!("value" in descriptor)) return { valid: false, present: true };
+    if (!("value" in descriptor) || descriptor.enumerable !== true) {
+      return { valid: false, present: true };
+    }
     return { valid: true, present: true, value: descriptor.value };
   } catch {
     return { valid: false, present: false };
@@ -288,11 +345,13 @@ function lowerLimit(value: unknown, ceiling: number): number | undefined {
 function captureDenseArray(value: unknown, maximum: number): readonly unknown[] | undefined {
   try {
     if (!Array.isArray(value)) return undefined;
+    if (Object.getPrototypeOf(value) !== Array.prototype) return undefined;
     if (Object.getOwnPropertySymbols(value).length !== 0) return undefined;
     const lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
     if (
       lengthDescriptor === undefined ||
       !("value" in lengthDescriptor) ||
+      lengthDescriptor.enumerable !== false ||
       !Number.isSafeInteger(lengthDescriptor.value) ||
       lengthDescriptor.value < 0 ||
       lengthDescriptor.value > maximum
@@ -311,7 +370,9 @@ function captureDenseArray(value: unknown, maximum: number): readonly unknown[] 
     const output: unknown[] = [];
     for (let index = 0; index < length; index += 1) {
       const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
-      if (descriptor === undefined || !("value" in descriptor)) return undefined;
+      if (descriptor === undefined || !("value" in descriptor) || descriptor.enumerable !== true) {
+        return undefined;
+      }
       output.push(descriptor.value);
     }
     return Object.freeze(output);
@@ -339,12 +400,61 @@ function captureLimits(value: unknown): CapturedLimits | undefined {
   return Object.freeze(captured) as unknown as CapturedLimits;
 }
 
+interface RemountPolicyBudget {
+  used: number;
+  readonly maximum: number;
+}
+
+interface CapturedRegistration<Component> {
+  readonly component: Component;
+  readonly remountOnProps: readonly string[];
+}
+
+function captureRemountPolicy(
+  value: unknown,
+  maximumProperties: number,
+  codeUnitBudget: RemountPolicyBudget,
+): readonly string[] | RuntimeReactAdapterRegistryInvalidReason {
+  const candidates = captureDenseArray(value, maximumProperties);
+  if (candidates === undefined) {
+    try {
+      if (
+        Array.isArray(value) &&
+        Object.getOwnPropertyDescriptor(value, "length")?.value > maximumProperties
+      ) {
+        return "remount-policy-limit";
+      }
+    } catch {
+      // A hostile value is classified as a malformed registration below.
+    }
+    return "malformed-registration";
+  }
+  const names = new Set<string>();
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string") return "malformed-registration";
+    if (names.has(candidate)) return "duplicate-remount-prop";
+    if (candidate.length > codeUnitBudget.maximum - codeUnitBudget.used) {
+      return "remount-policy-limit";
+    }
+    try {
+      canonicalizeJson(candidate);
+    } catch {
+      return "malformed-registration";
+    }
+    names.add(candidate);
+    codeUnitBudget.used += candidate.length;
+  }
+  return Object.freeze([...names].sort());
+}
+
 function captureRegistrations<Component>(
   value: unknown,
   maximum: number,
   identifiers: Set<string>,
   identifierBudget: { used: number; readonly maximum: number },
-): ReadonlyMap<string, Component> | RuntimeReactAdapterRegistryInvalidReason {
+  maximumRemountProperties: number,
+  remountCodeUnitBudget: RemountPolicyBudget,
+): ReadonlyMap<string, CapturedRegistration<Component>> | RuntimeReactAdapterRegistryInvalidReason {
   try {
     if (!Array.isArray(value)) return "malformed-registration";
     const length = Object.getOwnPropertyDescriptor(value, "length");
@@ -356,33 +466,48 @@ function captureRegistrations<Component>(
   }
   const candidates = captureDenseArray(value, maximum);
   if (candidates === undefined) return "malformed-registration";
-  const registrations = new Map<string, Component>();
+  const registrations = new Map<string, CapturedRegistration<Component>>();
   for (const candidate of candidates) {
-    if (!isPlainRecord(candidate) || !exactKeys(candidate, ["capabilityId", "component"])) {
+    if (
+      !isPlainRecord(candidate) ||
+      !exactKeys(candidate, ["capabilityId", "component"], ["remountOnProps"])
+    ) {
       return "malformed-registration";
     }
     const capabilityId = ownDataValue(candidate, "capabilityId");
     const component = ownDataValue(candidate, "component");
-    if (
-      !capabilityId.valid ||
-      !capabilityId.present ||
-      typeof capabilityId.value !== "string" ||
-      capabilityId.value.length > identifierBudget.maximum - identifierBudget.used
-    ) {
+    const remountOnProps = ownDataValue(candidate, "remountOnProps");
+    if (!capabilityId.valid || !capabilityId.present || typeof capabilityId.value !== "string") {
+      return "malformed-registration";
+    }
+    if (capabilityId.value.length > identifierBudget.maximum - identifierBudget.used) {
       return "identifier-limit";
     }
     if (
       !CAPABILITY_ID_PATTERN.test(capabilityId.value) ||
       !component.valid ||
       !component.present ||
-      typeof component.value !== "function"
+      typeof component.value !== "function" ||
+      !remountOnProps.valid
     ) {
       return "malformed-registration";
     }
     if (identifiers.has(capabilityId.value)) return "duplicate-capability";
+    const policy = captureRemountPolicy(
+      remountOnProps.present ? remountOnProps.value : [],
+      maximumRemountProperties,
+      remountCodeUnitBudget,
+    );
+    if (typeof policy === "string") return policy;
     identifiers.add(capabilityId.value);
     identifierBudget.used += capabilityId.value.length;
-    registrations.set(capabilityId.value, component.value as Component);
+    registrations.set(
+      capabilityId.value,
+      Object.freeze({
+        component: component.value as Component,
+        remountOnProps: policy,
+      }),
+    );
   }
   return registrations;
 }
@@ -421,11 +546,14 @@ export function createRuntimeReactAdapterRegistry(
   if (limits === undefined) return invalid("invalid-limits");
   const identifiers = new Set<string>();
   const identifierBudget = { used: 0, maximum: limits.maxIdentifierCodeUnits };
+  const remountCodeUnitBudget = { used: 0, maximum: limits.maxRemountPropCodeUnits };
   const components = captureRegistrations<RuntimeReactComponentAdapterComponent>(
     componentsValue.value,
     limits.maxComponentAdapters,
     identifiers,
     identifierBudget,
+    limits.maxRemountPropsPerAdapter,
+    remountCodeUnitBudget,
   );
   if (typeof components === "string") return invalid(components);
   const behaviors = captureRegistrations<RuntimeReactBehaviorAdapterComponent>(
@@ -433,12 +561,29 @@ export function createRuntimeReactAdapterRegistry(
     limits.maxBehaviorAdapters,
     identifiers,
     identifierBudget,
+    limits.maxRemountPropsPerAdapter,
+    remountCodeUnitBudget,
   );
   if (typeof behaviors === "string") return invalid(behaviors);
 
+  const reconciliationPolicies = <Component>(
+    registrations: ReadonlyMap<string, CapturedRegistration<Component>>,
+  ): readonly RuntimeReactAdapterReconciliationPolicySnapshot[] =>
+    Object.freeze(
+      [...registrations.entries()]
+        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+        .map(([capabilityId, registration]) =>
+          Object.freeze({
+            capabilityId,
+            remountOnProps: registration.remountOnProps,
+          }),
+        ),
+    );
   const snapshot = Object.freeze({
     componentCapabilityIds: Object.freeze([...components.keys()].sort()),
     behaviorCapabilityIds: Object.freeze([...behaviors.keys()].sort()),
+    componentReconciliationPolicies: reconciliationPolicies(components),
+    behaviorReconciliationPolicies: reconciliationPolicies(behaviors),
   });
   const handle = Object.freeze({}) as RuntimeReactAdapterRegistryHandle;
   REGISTRY_AUTHORITIES.set(handle, Object.freeze({ components, behaviors, snapshot }));

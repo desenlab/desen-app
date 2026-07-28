@@ -9,9 +9,17 @@ export {
   readRuntimeReactAdapterRegistry,
   RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS,
 } from "./registry.js";
+export {
+  buildRuntimeReactDiagnosticIndex,
+  RUNTIME_REACT_DIAGNOSTIC_INDEX_LIMITS,
+} from "./diagnostic-index.js";
+export { useRuntimeReactSurface } from "./live-surface.js";
+export { createRuntimeReactReconciliationKey } from "./reconciliation.js";
 export { renderRuntimeReactSurface, RUNTIME_REACT_RENDER_LIMITS } from "./render-plan.js";
+export { useRuntimeReactSessionSurface } from "./session-surface.js";
 
 export type {
+  RuntimeReactAdapterReconciliationPolicySnapshot,
   RuntimeReactAdapterRegistryCreateInput,
   RuntimeReactAdapterRegistryCreateResult,
   RuntimeReactAdapterRegistryHandle,
@@ -38,6 +46,24 @@ export type {
   RuntimeReactStyleProperties,
 } from "./registry.js";
 export type {
+  RuntimeReactBehaviorDiagnosticIndexBinding,
+  RuntimeReactBehaviorDiagnosticIndexEntry,
+  RuntimeReactComponentDiagnosticIndexBinding,
+  RuntimeReactComponentDiagnosticIndexEntry,
+  RuntimeReactDiagnosticIndex,
+  RuntimeReactDiagnosticIndexBinding,
+  RuntimeReactDiagnosticIndexBuildResult,
+  RuntimeReactDiagnosticIndexEntry,
+  RuntimeReactDiagnosticIndexInvalidReason,
+  RuntimeReactDiagnosticIndexLimitProfile,
+} from "./diagnostic-index.js";
+export type {
+  RuntimeReactLiveSurfaceFailure,
+  RuntimeReactLiveSurfaceInput,
+  RuntimeReactLiveSurfaceResult,
+} from "./live-surface.js";
+export type { RuntimeReactReconciliationKeyInput } from "./reconciliation.js";
+export type {
   RuntimeReactRenderFailure,
   RuntimeReactRenderFailureChannel,
   RuntimeReactRenderFailureCode,
@@ -46,3 +72,10 @@ export type {
   RuntimeReactRenderResult,
   RuntimeReactRenderedSurface,
 } from "./render-plan.js";
+export type {
+  RuntimeReactSessionSurfaceFailure,
+  RuntimeReactSessionSurfaceFailureReason,
+  RuntimeReactSessionSurfaceInput,
+  RuntimeReactSessionSurfaceReady,
+  RuntimeReactSessionSurfaceResult,
+} from "./session-surface.js";

@@ -2,10 +2,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS,
   createRuntimeReactAdapterRegistry,
   readRuntimeReactAdapterRegistry,
   renderRuntimeReactSurface,
 } from "../src/index.js";
+import { readRuntimeReactAdapterRegistryAuthority } from "../src/registry.js";
 import { createRuntimeReactSessionFixture } from "./session-fixture.js";
 
 import type {
@@ -86,6 +88,8 @@ describe("React adapter registry and authenticated render-plan renderer", () => 
     expect(created.snapshot).toEqual({
       componentCapabilityIds: [TEXT_ID],
       behaviorCapabilityIds: [],
+      componentReconciliationPolicies: [{ capabilityId: TEXT_ID, remountOnProps: [] }],
+      behaviorReconciliationPolicies: [],
     });
     expect(Object.isFrozen(created.snapshot)).toBe(true);
     expect(JSON.stringify(created.snapshot)).not.toContain("function");
@@ -94,6 +98,166 @@ describe("React adapter registry and authenticated render-plan renderer", () => 
       status: "read",
       snapshot: created.snapshot,
     });
+  });
+
+  it("captures bounded static remount policies as detached canonical callback-free metadata", () => {
+    const requestedPolicy = ["zeta", "alpha"];
+    const created = createRuntimeReactAdapterRegistry({
+      components: [
+        {
+          capabilityId: TEXT_ID,
+          component: Text,
+          remountOnProps: requestedPolicy,
+        },
+      ],
+      behaviors: [
+        {
+          capabilityId: "com.example.behavior/Tooltip",
+          component: ({ children }) => children,
+          remountOnProps: ["placement"],
+        },
+      ],
+    });
+
+    expect(created.status).toBe("created");
+    if (created.status !== "created") return;
+    requestedPolicy[0] = "mutated-after-capture";
+    expect(created.snapshot.componentReconciliationPolicies).toEqual([
+      { capabilityId: TEXT_ID, remountOnProps: ["alpha", "zeta"] },
+    ]);
+    expect(created.snapshot.behaviorReconciliationPolicies).toEqual([
+      {
+        capabilityId: "com.example.behavior/Tooltip",
+        remountOnProps: ["placement"],
+      },
+    ]);
+    expect(Object.isFrozen(created.snapshot.componentReconciliationPolicies)).toBe(true);
+    expect(Object.isFrozen(created.snapshot.componentReconciliationPolicies[0])).toBe(true);
+    expect(
+      Object.isFrozen(created.snapshot.componentReconciliationPolicies[0]?.remountOnProps),
+    ).toBe(true);
+    expect(JSON.stringify(created.snapshot)).not.toContain("function");
+    const authority = readRuntimeReactAdapterRegistryAuthority(created.handle);
+    expect(authority?.components.get(TEXT_ID)).toEqual({
+      component: Text,
+      remountOnProps: ["alpha", "zeta"],
+    });
+    expect(authority?.behaviors.get("com.example.behavior/Tooltip")?.remountOnProps).toEqual([
+      "placement",
+    ]);
+    expect(Object.isFrozen(authority?.components.get(TEXT_ID))).toBe(true);
+  });
+
+  it("rejects malformed, duplicate, accessor-backed, symbolic, sparse, and subclass policies", () => {
+    const component = { capabilityId: TEXT_ID, component: Text };
+    const accessorPolicy = ["safe"];
+    let getterCalls = 0;
+    Object.defineProperty(accessorPolicy, "0", {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return "unsafe";
+      },
+    });
+    const symbolicPolicy = ["safe"];
+    Object.defineProperty(symbolicPolicy, Symbol("hidden"), { value: "unsafe" });
+    const sparsePolicy = new Array<string>(1);
+    class PolicyArray extends Array<string> {}
+    const subclassPolicy = new PolicyArray("safe");
+    const hiddenIndexPolicy = ["safe"];
+    Object.defineProperty(hiddenIndexPolicy, "0", {
+      enumerable: false,
+      value: "safe",
+    });
+    const revoked = Proxy.revocable(["safe"], {});
+    revoked.revoke();
+
+    for (const remountOnProps of [
+      accessorPolicy,
+      symbolicPolicy,
+      sparsePolicy,
+      subclassPolicy,
+      hiddenIndexPolicy,
+      revoked.proxy,
+      ["safe", 1],
+      ["\ud800"],
+    ]) {
+      expect(
+        createRuntimeReactAdapterRegistry({
+          components: [{ ...component, remountOnProps } as never],
+        }),
+      ).toEqual({ status: "invalid", reason: "malformed-registration" });
+    }
+    expect(getterCalls).toBe(0);
+    expect(
+      createRuntimeReactAdapterRegistry({
+        components: [{ ...component, remountOnProps: ["same", "same"] }],
+      }),
+    ).toEqual({ status: "invalid", reason: "duplicate-remount-prop" });
+  });
+
+  it("rejects hostile registration records without invoking accessors", () => {
+    let getterCalls = 0;
+    const accessorRegistration = { component: Text };
+    Object.defineProperty(accessorRegistration, "capabilityId", {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return TEXT_ID;
+      },
+    });
+    const hiddenRegistration = { capabilityId: TEXT_ID, component: Text };
+    Object.defineProperty(hiddenRegistration, "component", {
+      enumerable: false,
+      value: Text,
+    });
+    const symbolicRegistration = { capabilityId: TEXT_ID, component: Text };
+    Object.defineProperty(symbolicRegistration, Symbol("hidden"), { value: true });
+    class Registration {
+      readonly capabilityId = TEXT_ID;
+      readonly component = Text;
+    }
+    const revoked = Proxy.revocable({ capabilityId: TEXT_ID, component: Text }, {});
+    revoked.revoke();
+
+    for (const registration of [
+      accessorRegistration,
+      hiddenRegistration,
+      symbolicRegistration,
+      new Registration(),
+      revoked.proxy,
+    ]) {
+      expect(
+        createRuntimeReactAdapterRegistry({
+          components: [registration as never],
+        }),
+      ).toEqual({ status: "invalid", reason: "malformed-registration" });
+    }
+    expect(getterCalls).toBe(0);
+  });
+
+  it("applies lower-only remount policy count and combined string ceilings", () => {
+    expect(
+      createRuntimeReactAdapterRegistry({
+        components: [{ capabilityId: TEXT_ID, component: Text, remountOnProps: ["a", "b"] }],
+        limits: { maxRemountPropsPerAdapter: 1 },
+      }),
+    ).toEqual({ status: "invalid", reason: "remount-policy-limit" });
+    expect(
+      createRuntimeReactAdapterRegistry({
+        components: [{ capabilityId: TEXT_ID, component: Text, remountOnProps: ["abc"] }],
+        limits: { maxRemountPropCodeUnits: 2 },
+      }),
+    ).toEqual({ status: "invalid", reason: "remount-policy-limit" });
+    expect(
+      createRuntimeReactAdapterRegistry({
+        components: [{ capabilityId: TEXT_ID, component: Text }],
+        limits: {
+          maxRemountPropsPerAdapter:
+            RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS.maxRemountPropsPerAdapter + 1,
+        },
+      }),
+    ).toEqual({ status: "invalid", reason: "invalid-limits" });
   });
 
   it("renders an authenticated ordinary root and descendants through exact registry lookup", () => {

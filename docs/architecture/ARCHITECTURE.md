@@ -88,6 +88,24 @@ command authority. Bounded payload snapshotting and exact commit-epoch rechecks 
 reflection/unmount races. Revoked core and React authorities become inert tombstones with no
 component callback or session/snapshot graph, and superseded controller entries are removed.
 
+The M05-T05 reconciliation boundary observes session publication only through the
+factory-authenticated runtime-core external-store seam. React subscribes after commit, cleans up
+the exact opaque ticket during replay, replacement, or unmount, and acquires no subscription
+during SSR or abandoned Suspense work. Every published exact snapshot passes the same complete
+renderer authentication again. The public renderer itself wraps every successful managed tree in
+a private component type that is stable for that exact session-and-registry pair and distinct when
+either authority changes; the live hook therefore cannot accidentally omit or double-apply the
+isolation boundary.
+Stable component and behavior keys combine runtime identity, exact capability id, and an RFC 8785
+canonical, presence-aware projection of only trusted
+registry-declared `remountOnProps`; Bundle and Catalog data cannot choose that policy. Compatible
+instances and repeated keys survive ordinary updates and reorder, while capability or declared
+remount-sensitive changes create a new instance. The same complete preflight builds a bounded,
+deeply frozen, callback-free runtime-node ↔ source-node diagnostic index with sorted one-to-many
+inverse lookups. It retains no props, styles, slots, React or platform objects, session, Catalog,
+registry, or callback. M05-T05 intentionally adds no adapter exception boundary, fallback
+component, or guessed placeholder; M05-T06 owns that explicit host-visible failure boundary.
+
 `@desen/reference-catalog-web/react-adapters` is the opt-in executable package boundary. Its five
 registrations statically import the real reference components, map validated fields explicitly,
 and implement the declared `focus`, `change`, and `press` interaction primitives without dynamic
