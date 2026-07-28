@@ -145,6 +145,36 @@ read, uses a finite nondecreasing epoch clock, and attempts every listener clean
 A failed or otherwise uncertain React unmount keeps a weak claim on the container so a second root
 cannot be attached to uncertain live state.
 
+The M05-T08 application composition imports the controlled official-derived sign-in Bundle, the
+exact current reference Catalog, and the public real five-adapter registry. It creates the
+browser's nine-port authority, mounts the Bundle through `runtime-core`, and transfers only the
+authenticated `RuntimeReactLiveSurfaceInput` plus its exact Web-host authority to the T07 root.
+The managed `surfaces` bytes are canonically identical to the frozen official example; the
+derived fixture changes only the Catalog tuple and the consequent Source and Bundle digests.
+
+The production operation adapter has one fixed transport shape: one same-origin
+`POST /api/sign-in` request with bounded snapshotted credentials. Only HTTP `401` maps to the
+declared `invalidCredentials` result. Other HTTP statuses and all network, response, parse,
+malformed-data, and response-budget failures map to the declared `unavailable` result without
+retries or raw-value forwarding. Successful bodies cross a 64 KiB and 1,024-non-empty-chunk
+streaming ceiling before JSON parsing; the resulting bounded JSON remains subject to runtime-core's
+exact output schema. Real reference adapters drive pending, declared failure, edited retry,
+success, and `/home` navigation. Their loading `Button` suppresses further presses while the
+operation is pending.
+
+Exact composition replacement creates a new session, registry, Catalog, and Web-host authority
+and transfers them atomically to the root. The root disposes the former owned session and host;
+events from its detached adapter instances and a late operation settlement cannot update or
+navigate the replacement surface. This is an authority and stale-settlement guarantee, not
+transport cancellation: an already-started fetch is not aborted. The immutable T07 artifact
+remains historical task-time evidence, while T08 owns the current composition and build
+verification. T09 owns the exhaustive AST and resolved-import audit.
+
+Page lifecycle disposal is BFCache-aware. Persisted `pagehide` keeps the active composition and
+listener intact for restoration; a non-persisted `pagehide` removes the listener and disposes the
+root, session, and host. This is covered in React/jsdom and does not claim real-browser BFCache
+conformance.
+
 `@desen/reference-catalog-web/react-adapters` is the opt-in executable package boundary. Its five
 registrations statically import the real reference components, map validated fields explicitly,
 and implement the declared `focus`, `change`, and `press` interaction primitives without dynamic
@@ -182,9 +212,11 @@ sources to the publisher.
 
 A separately built, Web-only production-like application. Its T07 shell owns explicit browser
 ports, a dedicated React root, redacted failure policy, and authority-bound recovery without
-authoring UI or Desen App dependencies. T08 adds the official-derived sign-in execution. T09 adds
-the final AST and resolved-import proof that the production graph contains no manual managed-screen
-composition. Channel fetching, verification, staging, and atomic activation remain M07 work.
+authoring UI or Desen App dependencies. T08 composes the official-derived sign-in Bundle with the
+exact Catalog, real adapters, and a fixed same-origin HTTP operation binding, then proves
+user-visible execution and stale-authority containment. T09 adds the final AST and resolved-import
+proof that the production graph contains no manual managed-screen composition. Channel fetching,
+verification, staging, and atomic activation remain M07 work.
 
 ### Control Plane API
 

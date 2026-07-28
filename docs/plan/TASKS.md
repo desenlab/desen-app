@@ -135,7 +135,7 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 | M05-T05 | DONE        | M05-T02–M05-T04  | Stable keys and runtime-node ↔ source-node diagnostics                                             |
 | M05-T06 | DONE        | M05-T05          | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
 | M05-T07 | DONE        | M05-T01, M05-T06 | Independently built reference-host shell with host ports                                           |
-| M05-T08 | NOT_STARTED | M05-T04–M05-T07  | Official sign-in bundle running through real adapters                                              |
+| M05-T08 | DONE        | M05-T04–M05-T07  | Official sign-in bundle running through real adapters                                              |
 | M05-T09 | NOT_STARTED | M05-T07–M05-T08  | Automated source/import audit preventing handwritten managed-screen composition                    |
 | G05     | NOT_STARTED | M05-T01–M05-T09  | Bundle-driven sign-in runs in separate host                                                        |
 
@@ -197,6 +197,20 @@ Recovery changes only for explicit retry or exact session, registry, Catalog, or
 Desen App, editor, publisher, testkit, and facade imports are forbidden. The task does not claim
 official sign-in execution or the final no-handwritten-tree audit; those remain M05-T08 and
 M05-T09.
+
+`M05-T08` derives a controlled Source and Bundle from the frozen official sign-in example by
+changing only the current exact reference-Catalog requirement and recalculating the Source digest
+and Bundle revision; managed surfaces remain canonically identical. The independent host mounts
+that Bundle with the shared five-component React registry and a fixed-capability same-origin
+`/api/sign-in` binding. Exact document/revision, source surface, capability, alias, effect,
+destination, and empty navigation params are fail-closed host policy. React/jsdom DOM integration
+tests prove controlled input, pending state, declared failure, edited retry, success, navigation,
+rapid pending-press suppression, rejected-handler redaction, disposal, and same-document
+session/host replacement with late-result containment. A persisted `pagehide` preserves the
+composition for BFCache restoration, while final page exit disposes it. Started transports are not
+claimed cancellable, the fixture is not claimed as M06 Publisher output, real-browser BFCache E2E
+is not claimed, and M05-T09 still owns the exhaustive no-handwritten-managed-tree AST and
+resolved-import audit.
 
 ## M06 — Deterministic publisher
 

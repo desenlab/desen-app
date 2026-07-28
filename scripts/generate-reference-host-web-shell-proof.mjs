@@ -10,7 +10,7 @@ try {
     `${JSON.stringify(
       {
         result: result.result,
-        message: "Wrote deterministic M05-T07 reference-host shell evidence.",
+        message: "Preserved immutable task-time M05-T07 reference-host shell evidence.",
         artifact: DEFAULT_REFERENCE_HOST_WEB_SHELL_ARTIFACT_PATH,
         sha256: result.artifactSha256,
         bytes: result.artifactBytes,
@@ -19,6 +19,8 @@ try {
         compilerNegativeCases: result.compilerNegativeCases,
         rootMutationTests: result.rootMutationTests,
         buildFiles: result.buildFiles,
+        compatibilityMode: result.compatibilityMode,
+        preserved: result.preserved === true,
       },
       null,
       2,

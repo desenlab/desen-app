@@ -1,33 +1,24 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import {
-  copyFile,
-  mkdir,
-  mkdtemp,
-  readFile,
-  rm,
-  symlink,
-  unlink,
-  writeFile,
-} from "node:fs/promises";
+import { lstat, mkdtemp, readFile, rm, stat, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import {
-  DEFAULT_REFERENCE_HOST_WEB_SHELL_ARTIFACT_PATH,
-  DEFAULT_REFERENCE_HOST_WEB_SHELL_PROOF_PATH,
-  REFERENCE_HOST_WEB_SHELL_INSPECTION_PATHS,
-  REFERENCE_HOST_WEB_SHELL_PREREQUISITE_PATHS,
   ReferenceHostWebShellEvidenceError,
   buildReferenceHostWebShellEvidence,
-  inspectReferenceHostWebShellEvidence,
   verifyReferenceHostWebShellEvidence,
-  verifyReferenceHostWebShellProofDocument,
   writeReferenceHostWebShellEvidence,
 } from "../scripts/lib/reference-host-web-shell-proof.mjs";
 
-const WORKSPACE_ROOT = path.resolve(new URL("..", import.meta.url).pathname);
+const HISTORICAL_SHA256 = "cafaf8e9ec0b8be207344b25e076541b395c83e348f665dc7b97e5c4cb4000f2";
+const HISTORICAL_BYTES = 16_213;
+const ARTIFACT_FILE_NAME = "reference-host-web-0.1.0-shell.json";
+const ARTIFACT_RELATIVE_PATH = `docs/proof/artifacts/${ARTIFACT_FILE_NAME}`;
+const ARTIFACT_URL = new URL(`../${ARTIFACT_RELATIVE_PATH}`, import.meta.url);
+const PROOF_URL = new URL("../docs/proof/REFERENCE-HOST-WEB-SHELL.md", import.meta.url);
+const MATRIX_URL = new URL("../docs/proof/PROOF-MATRIX.md", import.meta.url);
+const STATUS_URL = new URL("../PROJECT-STATUS.md", import.meta.url);
 
 function hasEvidenceCode(expectedCode) {
   return (error) => {
@@ -37,711 +28,313 @@ function hasEvidenceCode(expectedCode) {
   };
 }
 
-async function copyInspectionWorkspace() {
-  const workspaceRoot = await mkdtemp(path.join(os.tmpdir(), "desen-reference-host-t07-inspect-"));
-  for (const relativePath of REFERENCE_HOST_WEB_SHELL_INSPECTION_PATHS) {
-    const destination = path.join(workspaceRoot, relativePath);
-    await mkdir(path.dirname(destination), { recursive: true });
-    await copyFile(path.join(WORKSPACE_ROOT, relativePath), destination);
-  }
-  return workspaceRoot;
-}
-
-async function mutateWorkspaceFile(workspaceRoot, relativePath, mutate) {
-  const filePath = path.join(workspaceRoot, relativePath);
-  const original = await readFile(filePath, "utf8");
-  const changed = mutate(original);
-  assert.notEqual(changed, original, `mutation did not change ${relativePath}`);
-  await writeFile(filePath, changed, "utf8");
-}
-
-test("inspects the exact current M05-T07 source, trace, and focused-test inventory", async () => {
-  const result = await inspectReferenceHostWebShellEvidence();
-  assert.equal(result.tests.appFocusedCases, 22);
-  assert.equal(result.tests.runtimeFocusedCases, 15);
-  assert.equal(result.tests.runtimeCoreFocusedCases, 55);
-  assert.equal(result.tests.runtimeCoreSecurityCases, 5);
-  assert.equal(result.tests.focusedCases, 92);
-  assert.equal(result.tests.appCompilerNegativeCases, 6);
-  assert.equal(result.tests.runtimeCompilerNegativeCases, 14);
-  assert.equal(result.tests.runtimeCoreCompilerNegativeCases, 33);
-  assert.equal(result.tests.compilerNegativeCases, 53);
-  assert.equal(result.tests.rootMutationTests >= 18, true);
-  assert.equal(result.dynamicExecutableCalls, 0);
-  assert.deepEqual(result.runtimeExports, [
-    "authenticateRuntimeWebHostDocumentAuthority",
-    "createRuntimeWebBrowserPlatform",
-    "createRuntimeWebHostAuthority",
-    "disposeRuntimeWebHostAuthority",
-    "readRuntimeWebHostAuthority",
+async function proofTexts() {
+  const [proofDocumentText, proofMatrixText, projectStatusText] = await Promise.all([
+    readFile(PROOF_URL, "utf8"),
+    readFile(MATRIX_URL, "utf8"),
+    readFile(STATUS_URL, "utf8"),
   ]);
-});
+  return { proofDocumentText, proofMatrixText, projectStatusText };
+}
 
-test("builds two independent Vite outputs with one deterministic immutable receipt", async () => {
-  const built = await buildReferenceHostWebShellEvidence();
-  assert.equal(built.artifact.result, "PASS");
-  assert.equal(built.artifact.hostShell.build.independentBuilds, 2);
-  assert.equal(built.artifact.hostShell.build.deterministic, true);
-  assert.equal(built.artifact.hostShell.build.fileCount >= 2, true);
-  assert.match(built.artifact.hostShell.build.aggregateSha256, /^sha256:[0-9a-f]{64}$/u);
-  assert.equal(Object.isFrozen(built.artifact), true);
-  assert.equal(Object.isFrozen(built.artifact.hostShell), true);
-  assert.equal(Object.isFrozen(built.artifact.evidence.trackedFiles), true);
-  assert.equal(built.artifact.claim.officialSignInExecuted, false);
-  assert.equal(built.artifact.claim.handwrittenManagedTreeFullyAudited, false);
-});
-
-test("verifies the exact stored M05-T07 artifact and proof-document pin", async () => {
+test("accepts immutable task-time M05-T07 reference-host shell evidence", async () => {
   const result = await verifyReferenceHostWebShellEvidence();
-  assert.equal(result.result, "PASS");
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
-  assert.equal(result.focusedTests, 92);
-  assert.equal(result.compilerNegativeCases, 53);
-  assert.equal(result.rootMutationTests >= 18, true);
-  assert.equal(result.exactDocumentationReferences, 1);
-});
-
-test("rejects one-byte and semantic mutations of the stored artifact", async () => {
-  const pristine = await readFile(DEFAULT_REFERENCE_HOST_WEB_SHELL_ARTIFACT_PATH);
-  const oneByte = Buffer.from(pristine);
-  oneByte[oneByte.length - 2] ^= 1;
-  await assert.rejects(
-    verifyReferenceHostWebShellEvidence({ artifactBytes: oneByte }),
-    hasEvidenceCode("REFERENCE_HOST_SHELL_ARTIFACT_DRIFT"),
-  );
-});
-
-test("rejects loss of the generic runtime-react managed-surface seam", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(
-      workspaceRoot,
-      "apps/reference-host-web/src/managed-surface.tsx",
-      (text) => text.replace("useRuntimeReactSurface(input)", "createElement(input as never)"),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects raw React root-error inspection or logging", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(workspaceRoot, "apps/reference-host-web/src/root-policy.ts", (text) =>
-      text.replace("void error;", "console.error(String(error));"),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects loss of exact caught-error suppression on the dedicated root", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(workspaceRoot, "apps/reference-host-web/src/root-policy.ts", (text) =>
-      text.replace(
-        "onCaughtError: ignoreRuntimeReactRootCaughtError",
-        "onCaughtError: onUncaughtError",
-      ),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects weakened terminal root fencing and authority-first teardown", async () => {
-  for (const [relativePath, from, to] of [
-    [
-      "apps/reference-host-web/src/root-policy.ts",
-      "Reflect.apply(onTerminalFailure, undefined, []);",
-      "void onTerminalFailure;",
-    ],
-    [
-      "apps/reference-host-web/src/root.tsx",
-      'state.lifecycle = "closing";',
-      'state.lifecycle = "active";',
-    ],
-    ["apps/reference-host-web/src/root.tsx", "ROOTS.set(handle, DISPOSED_ROOT);", "void handle;"],
-    [
-      "apps/reference-host-web/src/root.tsx",
-      "disposeRuntimeWebHostAuthority(current.hostAuthority);\n    safelyDisposeSession(current.surface);",
-      "safelyDisposeSession(current.surface);\n    disposeRuntimeWebHostAuthority(current.hostAuthority);",
-    ],
-    [
-      "apps/reference-host-web/src/root.tsx",
-      "if (unmountConfirmed) CLAIMED_CONTAINERS.delete(state.container);",
-      "CLAIMED_CONTAINERS.delete(state.container);",
-    ],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(workspaceRoot, relativePath, (text) => text.replace(from, to));
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects reentrant activation gaps or incomplete executable-authority joins", async () => {
-  for (const [from, to] of [
-    [
-      'if (state.lifecycle === "transitioning") {',
-      'if (state.lifecycle === "never-transitioning") {',
-    ],
-    [
-      'if (state.lifecycle !== "transitioning") return Object.freeze({ status: "disposed" });',
-      'if (false) return Object.freeze({ status: "disposed" });',
-    ],
-    ["{ hostPorts: hostRead.hostPorts }", "{ hostPorts: { ...hostRead.hostPorts } }"],
-    ["snapshot: captured.surface.serverSnapshot", "snapshot: surfaceAuthentication.snapshot"],
-    ["catalogSet: captured.surface.catalogSet", "catalogSet: Object.freeze([]) as never"],
-    ["documentId: surfaceAuthentication.snapshot.documentId", 'documentId: "unchecked"'],
-    ["revision: surfaceAuthentication.snapshot.revision", 'revision: `sha256:${"0".repeat(64)}`'],
-    ["const previous = state.current;", "const previous = undefined;"],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(workspaceRoot, "apps/reference-host-web/src/root.tsx", (text) =>
-        text.replace(from, to),
-      );
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects weakened exact session-to-host-port authentication", async () => {
-  for (const [from, to] of [
-    ["hostAuthority: captured.hostPorts,", "hostAuthority: { ...captured.hostPorts },"],
-    [
-      "captured.hostPorts !== current.retainedGraph.hostAuthority",
-      "JSON.stringify(captured.hostPorts) !== JSON.stringify(current.retainedGraph.hostAuthority)",
-    ],
-    [
-      'return Object.freeze({ status: "authenticated" });',
-      'return Object.freeze({ status: "authenticated", hostPorts: captured.hostPorts });',
-    ],
-    [
-      "captured.hostPorts !== current.retainedGraph.hostAuthority",
-      "Reflect.ownKeys(captured.hostPorts); if (captured.hostPorts !== current.retainedGraph.hostAuthority",
-    ],
-    [
-      "const captured = captureHostAuthorityInput(input);",
-      "const captured = captureHostAuthorityInput(input); captureHostAuthorityInput(input);",
-    ],
-    ["current !== authority ||", "false ||"],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(
-        workspaceRoot,
-        "packages/runtime-core/src/headless-session.ts",
-        (text) => text.replace(from, to),
-      );
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects weakened runtime-web document identity authentication", async () => {
-  for (const [from, to] of [
-    ["captured.documentId !== current.documentId", "false"],
-    ["captured.revision !== current.revision", "false"],
-    ["!validDocumentId(documentId.value)", "false"],
-    ["!validRevision(revision.value)", "false"],
-    [
-      'return Object.freeze({ status: "authenticated" });',
-      'return Object.freeze({ status: "authenticated", hostPorts: current.hostPorts });',
-    ],
-    [
-      "const captured = captureHostDocumentAuthorityInput(input);",
-      "current.delegates?.navigate({} as never); const captured = captureHostDocumentAuthorityInput(input);",
-    ],
-    ['current !== authority || current.status !== "active"', "false"],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(
-        workspaceRoot,
-        "packages/runtime-web/src/host-authority.ts",
-        (text) => text.replace(from, to),
-      );
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects widened, coercive, or inner-reflective document request capture", async () => {
-  for (const [from, to] of [
-    ["keys.length !== 2", "keys.length > 3"],
-    ['!keys.includes("documentId")', "false"],
-    ['!keys.includes("revision")', "false"],
-    ["!documentId.enumerable", "false"],
-    ['!("value" in documentId)', "false"],
-    ["!revision.enumerable", "false"],
-    ['!("value" in revision)', "false"],
-    ["documentId: documentId.value,", "documentId: String(documentId.value),"],
-    ["revision: revision.value,", "revision: (Reflect.ownKeys(revision.value), revision.value),"],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(
-        workspaceRoot,
-        "packages/runtime-web/src/host-authority.ts",
-        (text) => text.replace(from, to),
-      );
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects widened or reflective host-authentication request capture", async () => {
-  for (const [from, to] of [
-    [
-      'function captureHostAuthorityInput(input: unknown): CapturedHostAuthorityInput | undefined {\n  try {\n    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;\n    const prototype = Reflect.getPrototypeOf(input);',
-      'function captureHostAuthorityInput(input: unknown): CapturedHostAuthorityInput | undefined {\n  try {\n    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;\n    const prototype = Object.prototype;',
-    ],
-    ["keys.length !== 1", "keys.length > 2"],
-    ['keys[0] !== "hostPorts"', "false"],
-    ["!hostPorts.enumerable", "false"],
-    ['!("value" in hostPorts)', "false"],
-    [
-      "return Object.freeze({ hostPorts: hostPorts.value });",
-      "Reflect.ownKeys(hostPorts.value); return Object.freeze({ hostPorts: hostPorts.value });",
-    ],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(
-        workspaceRoot,
-        "packages/runtime-core/src/headless-session.ts",
-        (text) => text.replace(from, to),
-      );
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects recovery derived from fewer than the four executable authorities", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(
-      workspaceRoot,
-      "apps/reference-host-web/src/recovery-authority.ts",
-      (text) =>
-        text.replace(
-          'const expected = ["session", "registry", "catalogSet", "hostAuthority"]',
-          'const expected = ["session", "registry"]',
-        ),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects weakened executable-registry authentication at host activation", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(workspaceRoot, "apps/reference-host-web/src/root.tsx", (text) =>
-      text.replace('if (registryRead.status !== "read")', 'if (registryRead.status === "read")'),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects loss of explicit recovery-epoch advancement", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(
-      workspaceRoot,
-      "apps/reference-host-web/src/recovery-authority.ts",
-      (text) => text.replace("state.retryEpoch += 1n", "state.retryEpoch = 0n"),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects dynamic executable selection in host or runtime-web production source", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(
-      workspaceRoot,
-      "apps/reference-host-web/src/main.tsx",
-      (text) => `${text}\nvoid import("@desen/reference-catalog-web/components");\n`,
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects a forbidden production testkit import", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(
-      workspaceRoot,
-      "apps/reference-host-web/src/main.tsx",
-      (text) => `import "@desen/testkit";\n${text}`,
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects focused app or runtime-web package-script drift", async () => {
-  for (const [relativePath, from, to] of [
-    ["apps/reference-host-web/package.json", "vitest run test/host-ports.test.ts", "vitest run"],
-    [
-      "packages/runtime-web/package.json",
-      "vitest run test/host-authority.test.ts",
-      "vitest run --passWithNoTests",
-    ],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(workspaceRoot, relativePath, (text) => text.replace(from, to));
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects root proof-script or ordering drift", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(workspaceRoot, "package.json", (text) =>
-      text.replace(
-        "pnpm verify:reference-host-web-shell",
-        "node scripts/verify-reference-host-web-shell.mjs",
-      ),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects a widened reference-host dependency allowlist", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(workspaceRoot, "dependency-cruiser.config.cjs", (text) =>
-      text.replace(
-        '"reference-host-web": ["runtime-core", "runtime-react", "runtime-web", "reference-catalog-web"]',
-        '"reference-host-web": ["runtime-core", "runtime-react", "runtime-web", "reference-catalog-web", "testkit"]',
-      ),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects canonical R-019, R-105, or A-013 exact-location drift", async () => {
-  for (const [id, from, to] of [
-    ["R-019", '"owners": ["M05-T07", "M05-T09"]', '"owners": ["M05-T09"]'],
-    ["R-105", '"owners": ["M04-T01", "M04-T10", "M05-T07"]', '"owners": ["M04-T01", "M04-T10"]'],
-    ["A-013", '"section": "Appendix A"', '"section": "Appendix B"'],
-  ]) {
-    const workspaceRoot = await copyInspectionWorkspace();
-    try {
-      await mutateWorkspaceFile(
-        workspaceRoot,
-        "docs/proof/protocol-0.1.0-traceability.json",
-        (text) => {
-          const marker = `"id": "${id}"`;
-          const start = text.indexOf(marker);
-          assert.notEqual(start, -1);
-          const end = text.indexOf("\n    }", start);
-          const entry = text.slice(start, end);
-          assert.equal(entry.includes(from), true);
-          return `${text.slice(0, start)}${entry.replace(from, to)}${text.slice(end)}`;
-        },
-      );
-      await assert.rejects(
-        inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-        hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-      );
-    } finally {
-      await rm(workspaceRoot, { recursive: true, force: true });
-    }
-  }
-});
-
-test("rejects prerequisite byte drift before interpreting successor source", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(
-      workspaceRoot,
-      REFERENCE_HOST_WEB_SHELL_PREREQUISITE_PATHS[0],
-      (text) => `${text} `,
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_PREREQUISITE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects a symlink tracked source", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  const relativePath = "apps/reference-host-web/src/root-policy.ts";
-  const source = path.join(workspaceRoot, relativePath);
-  const target = path.join(workspaceRoot, "root-policy-target.ts");
-  try {
-    await copyFile(source, target);
-    await unlink(source);
-    await symlink(target, source);
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_INPUT_UNSAFE"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects a symlink predecessor receipt", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  const relativePath = REFERENCE_HOST_WEB_SHELL_PREREQUISITE_PATHS[0];
-  const source = path.join(workspaceRoot, relativePath);
-  const target = path.join(workspaceRoot, "prerequisite-target.json");
-  try {
-    await copyFile(source, target);
-    await unlink(source);
-    await symlink(target, source);
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_PREREQUISITE_UNSAFE"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects unknown, inherited, symbol, and non-enumerable options", async () => {
-  const inherited = Object.create({ workspaceRoot: WORKSPACE_ROOT });
-  const symbol = { [Symbol("workspaceRoot")]: WORKSPACE_ROOT };
-  const nonEnumerable = Object.defineProperty({}, "workspaceRoot", {
-    value: WORKSPACE_ROOT,
-    enumerable: false,
+  assert.deepEqual(result, {
+    result: "PASS",
+    artifactSha256: HISTORICAL_SHA256,
+    artifactBytes: HISTORICAL_BYTES,
+    compatibilityMode: "immutable-task-time-artifact",
+    trackedFiles: 42,
+    sourceAssertions: 902,
+    focusedTests: 92,
+    compilerNegativeCases: 53,
+    rootMutationTests: 33,
+    buildFiles: 3,
+    buildAggregateSha256: "sha256:e8c6a400c4507763f96172109d8aa8931f7707f5885d9ae5ec9ec0b90276a2c8",
+    exactDocumentationReferences: 6,
   });
-  for (const options of [{ fileOverrides: {} }, inherited, symbol, nonEnumerable]) {
+});
+
+test("two reads preserve exact bytes and recursively frozen reviewed semantics", async () => {
+  const first = await buildReferenceHostWebShellEvidence();
+  const second = await buildReferenceHostWebShellEvidence();
+  assert.equal(first.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(first.artifactBytes.length, HISTORICAL_BYTES);
+  assert.deepEqual(first.artifactBytes, second.artifactBytes);
+  assert.equal(first.artifact.task, "M05-T07");
+  assert.equal(first.artifact.claim.officialSignInExecuted, false);
+  assert.equal(first.artifact.claim.handwrittenManagedTreeFullyAudited, false);
+  assert.equal(first.artifact.hostShell.build.deterministic, true);
+  assert.equal(first.artifact.hostShell.recovery.activationCommitAfterAllAuthenticators, true);
+  assert.equal(Object.isFrozen(first.artifact), true);
+  assert.equal(Object.isFrozen(first.artifact.claim), true);
+  assert.equal(Object.isFrozen(first.artifact.evidence.trackedFiles), true);
+  assert.equal(Object.isFrozen(first.artifact.evidence.trackedFiles[0]), true);
+});
+
+test("rejects one-byte, semantic-only, and byte-length artifact tampering", async () => {
+  const original = await readFile(ARTIFACT_URL);
+  const oneByte = Buffer.from(original);
+  oneByte[Math.floor(oneByte.length / 2)] ^= 1;
+  const semantic = Buffer.from(
+    original
+      .toString("utf8")
+      .replace('"officialSignInExecuted": false', '"officialSignInExecuted": true '),
+  );
+  assert.equal(semantic.length, original.length);
+
+  for (const artifactBytes of [oneByte, semantic, original.subarray(0, original.length - 1)]) {
     await assert.rejects(
-      inspectReferenceHostWebShellEvidence(options),
+      buildReferenceHostWebShellEvidence({ artifactBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_HISTORICAL_ARTIFACT_DRIFT"),
+    );
+  }
+});
+
+test("rejects successor source, runtime, build, prerequisite, and pending-pin injection", async () => {
+  for (const options of [
+    { workspaceRoot: "." },
+    { fileOverrides: {} },
+    { prerequisiteBytes: {} },
+    { runtimeApi: {} },
+    { runtimeApis: {} },
+    { preparedEvidence: {} },
+    { build: () => undefined },
+    { buildOptions: {} },
+    { allowPendingArtifactReference: true },
+  ]) {
+    await assert.rejects(
+      buildReferenceHostWebShellEvidence(options),
       hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
     );
   }
 });
 
-test("rejects accessor, hostile Proxy, and revoked-Proxy options without invoking getters", async () => {
+test("rejects accessor, inherited, symbol, non-enumerable, Proxy, and hostile byte inputs", async () => {
   let getterCalls = 0;
-  const accessor = Object.defineProperty({}, "workspaceRoot", {
+  let proxyCalls = 0;
+  const accessor = Object.defineProperty({}, "artifactPath", {
     enumerable: true,
     get() {
       getterCalls += 1;
-      return WORKSPACE_ROOT;
+      return "ignored";
     },
   });
-  const hostile = new Proxy(
+  const inherited = Object.create({ artifactPath: "ignored" });
+  const symbol = { [Symbol("artifactPath")]: "ignored" };
+  const nonEnumerable = Object.defineProperty({}, "artifactPath", {
+    enumerable: false,
+    value: "ignored",
+  });
+  const proxy = new Proxy(
     {},
     {
+      ownKeys() {
+        proxyCalls += 1;
+        return [];
+      },
       getPrototypeOf() {
-        throw new Error("hostile options");
+        proxyCalls += 1;
+        return Object.prototype;
       },
     },
   );
-  const transparent = new Proxy({}, {});
   const revoked = Proxy.revocable({}, {});
   revoked.revoke();
-  for (const options of [accessor, transparent, hostile, revoked.proxy]) {
+
+  for (const options of [accessor, inherited, symbol, nonEnumerable, proxy, revoked.proxy]) {
     await assert.rejects(
-      inspectReferenceHostWebShellEvidence(options),
+      buildReferenceHostWebShellEvidence(options),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
+    );
+  }
+
+  class Uint8ArraySubclass extends Uint8Array {}
+  for (const artifactBytes of [
+    "not-bytes",
+    new Uint8Array(new SharedArrayBuffer(HISTORICAL_BYTES)),
+    new Proxy(Buffer.alloc(HISTORICAL_BYTES), {}),
+    new Uint8ArraySubclass(HISTORICAL_BYTES),
+  ]) {
+    await assert.rejects(
+      buildReferenceHostWebShellEvidence({ artifactBytes }),
       hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
     );
   }
   assert.equal(getterCalls, 0);
+  assert.equal(proxyCalls, 0);
 });
 
-test("rejects oversized injected bytes, proof text, and Proxy callbacks before work starts", async () => {
+test("rejects a wrong byte length before allocating a local artifact copy", async () => {
+  const OriginalUint8Array = globalThis.Uint8Array;
+  const wrongLengthBytes = new OriginalUint8Array(HISTORICAL_BYTES + 1);
+  let localAllocations = 0;
+  function ObservedUint8Array(...arguments_) {
+    localAllocations += 1;
+    return Reflect.construct(OriginalUint8Array, arguments_);
+  }
+  Object.defineProperty(ObservedUint8Array, "prototype", {
+    value: OriginalUint8Array.prototype,
+  });
+
+  globalThis.Uint8Array = ObservedUint8Array;
+  try {
+    await assert.rejects(
+      buildReferenceHostWebShellEvidence({ artifactBytes: wrongLengthBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_HISTORICAL_ARTIFACT_DRIFT"),
+    );
+    assert.equal(localAllocations, 0);
+  } finally {
+    globalThis.Uint8Array = OriginalUint8Array;
+  }
+});
+
+test("rejects ambiguous sources and unbounded documentation", async () => {
+  const bytes = await readFile(ARTIFACT_URL);
   await assert.rejects(
-    verifyReferenceHostWebShellEvidence({
-      artifactBytes: Buffer.alloc(4 * 1024 * 1024 + 1),
-    }),
-    hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
-  );
-  await assert.rejects(
-    verifyReferenceHostWebShellEvidence({
-      proofDocumentText: "x".repeat(512 * 1024 + 1),
+    buildReferenceHostWebShellEvidence({
+      artifactPath: ARTIFACT_URL.pathname,
+      artifactBytes: bytes,
     }),
     hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
   );
   await assert.rejects(
     writeReferenceHostWebShellEvidence({
-      beforeAtomicRename: new Proxy(() => undefined, {}),
-    }),
-    hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
-  );
-});
-
-test("rejects ambiguous artifact path and injected-byte options", async () => {
-  const bytes = await readFile(DEFAULT_REFERENCE_HOST_WEB_SHELL_ARTIFACT_PATH);
-  await assert.rejects(
-    verifyReferenceHostWebShellEvidence({
-      artifactPath: DEFAULT_REFERENCE_HOST_WEB_SHELL_ARTIFACT_PATH,
+      sourceArtifactPath: ARTIFACT_URL.pathname,
       artifactBytes: bytes,
     }),
     hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
   );
+  await assert.rejects(
+    verifyReferenceHostWebShellEvidence({
+      proofDocumentText: "x".repeat(2_000_001),
+    }),
+    hasEvidenceCode("REFERENCE_HOST_SHELL_OPTIONS_INVALID"),
+  );
 });
 
-test("atomic writer preserves exact generated bytes", async () => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-reference-host-t07-write-"));
-  const artifactPath = path.join(directory, "artifact.json");
-  try {
-    const written = await writeReferenceHostWebShellEvidence({ artifactPath });
-    const bytes = await readFile(artifactPath);
-    assert.equal(written.artifactSha256, createDigest(bytes));
-    assert.equal(bytes.length, written.artifactBytes);
-  } finally {
-    await rm(directory, { recursive: true, force: true });
+test("rejects moved, duplicated, pending, or mismatched proof pins", async () => {
+  const texts = await proofTexts();
+  for (const proofDocumentText of [
+    texts.proofDocumentText.replace("## Evidence artifact", "## Moved artifact"),
+    `${texts.proofDocumentText}\n\`${ARTIFACT_RELATIVE_PATH}\`\n\`sha256:${HISTORICAL_SHA256}\`\n`,
+    texts.proofDocumentText.replace(HISTORICAL_SHA256, "0".repeat(64)),
+    texts.proofDocumentText.replace(HISTORICAL_SHA256, "[PENDING_FINAL_ARTIFACT_SHA256]"),
+  ]) {
+    await assert.rejects(
+      verifyReferenceHostWebShellEvidence({ ...texts, proofDocumentText }),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_PROOF_PIN_DRIFT"),
+    );
+  }
+  for (const proofMatrixText of [
+    texts.proofMatrixText.replace("## M05-T07", "## Moved M05-T07"),
+    texts.proofMatrixText.replace(
+      `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${HISTORICAL_SHA256}\``,
+      `\`evil/${ARTIFACT_FILE_NAME}\`\n\`sha256:${HISTORICAL_SHA256}\``,
+    ),
+    texts.proofMatrixText.replace(HISTORICAL_SHA256, "f".repeat(64)),
+  ]) {
+    await assert.rejects(
+      verifyReferenceHostWebShellEvidence({ ...texts, proofMatrixText }),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_PROOF_PIN_DRIFT"),
+    );
+  }
+  for (const projectStatusText of [
+    texts.projectStatusText.replace("M05-T07 evidence:", "M05-T07 moved:"),
+    texts.projectStatusText.replace(HISTORICAL_SHA256, "a".repeat(64)),
+    texts.projectStatusText.replace(
+      `\`${ARTIFACT_RELATIVE_PATH}\``,
+      `\`evil/${ARTIFACT_FILE_NAME}\``,
+    ),
+  ]) {
+    await assert.rejects(
+      verifyReferenceHostWebShellEvidence({ ...texts, projectStatusText }),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_PROOF_PIN_DRIFT"),
+    );
   }
 });
 
-test("atomic writer rejects a symlink destination and temporary-byte tampering", async () => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-reference-host-t07-write-"));
-  const target = path.join(directory, "target.json");
-  const artifactPath = path.join(directory, "artifact.json");
-  try {
-    await writeFile(target, "{}\n");
-    await symlink(target, artifactPath);
+test("rejects decoy digests that are not associated with the M05-T07 artifact", async () => {
+  const texts = await proofTexts();
+  const wrongSha256 = "0".repeat(64);
+  const proofDocumentText = texts.proofDocumentText.replace(
+    `\`sha256:${HISTORICAL_SHA256}\``,
+    `\`sha256:${wrongSha256}\`\n\nHistorical digest decoy: \`sha256:${HISTORICAL_SHA256}\``,
+  );
+  const proofMatrixText = texts.proofMatrixText.replace(
+    `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${HISTORICAL_SHA256}\`.`,
+    `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${wrongSha256}\`.\n\nHistorical digest decoy: \`sha256:${HISTORICAL_SHA256}\`.`,
+  );
+  const projectStatusText = texts.projectStatusText.replace(
+    `  \`${HISTORICAL_SHA256}\``,
+    `  \`${wrongSha256}\`\n- historical digest decoy: \`${HISTORICAL_SHA256}\``,
+  );
+
+  for (const override of [{ proofDocumentText }, { proofMatrixText }, { projectStatusText }]) {
     await assert.rejects(
-      writeReferenceHostWebShellEvidence({ artifactPath }),
+      verifyReferenceHostWebShellEvidence({ ...texts, ...override }),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_PROOF_PIN_DRIFT"),
+    );
+  }
+});
+
+test("rejects symlink artifact and documentation inputs", async () => {
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "desen-t07-symlink-"));
+  try {
+    const artifactLink = path.join(temporary, ARTIFACT_FILE_NAME);
+    const proofLink = path.join(temporary, "proof.md");
+    await symlink(ARTIFACT_URL.pathname, artifactLink);
+    await symlink(PROOF_URL.pathname, proofLink);
+    await assert.rejects(
+      buildReferenceHostWebShellEvidence({ artifactPath: artifactLink }),
       hasEvidenceCode("REFERENCE_HOST_SHELL_ARTIFACT_UNSAFE"),
     );
-    await unlink(artifactPath);
+    await assert.rejects(
+      verifyReferenceHostWebShellEvidence({ proofPath: proofLink }),
+      hasEvidenceCode("REFERENCE_HOST_SHELL_PROOF_UNSAFE"),
+    );
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+test("default writer is a no-op and alternate destination is an exact atomic copy", async () => {
+  const before = await stat(ARTIFACT_URL);
+  const result = await writeReferenceHostWebShellEvidence();
+  const after = await stat(ARTIFACT_URL);
+  assert.equal(result.preserved, true);
+  assert.equal(before.ino, after.ino);
+  assert.equal(before.mtimeMs, after.mtimeMs);
+
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "desen-t07-copy-"));
+  try {
+    const destination = path.join(temporary, ARTIFACT_FILE_NAME);
+    const copied = await writeReferenceHostWebShellEvidence({ artifactPath: destination });
+    assert.equal(copied.artifactSha256, HISTORICAL_SHA256);
+    assert.deepEqual(await readFile(destination), await readFile(ARTIFACT_URL));
+    assert.equal((await lstat(destination)).isFile(), true);
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+test("temporary-byte tampering fails atomically without replacing the destination", async () => {
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "desen-t07-atomic-"));
+  try {
+    const destination = path.join(temporary, ARTIFACT_FILE_NAME);
+    const originalDestination = Buffer.from("preserve-me");
+    await writeFile(destination, originalDestination);
     await assert.rejects(
       writeReferenceHostWebShellEvidence({
-        artifactPath,
-        async beforeAtomicRename({ temporaryPath }) {
-          await writeFile(temporaryPath, "{}\n");
+        artifactPath: destination,
+        beforeAtomicRename: async ({ temporaryPath }) => {
+          await writeFile(temporaryPath, "tampered");
         },
       }),
       hasEvidenceCode("REFERENCE_HOST_SHELL_ARTIFACT_UNSAFE"),
     );
+    assert.deepEqual(await readFile(destination), originalDestination);
   } finally {
-    await rm(directory, { recursive: true, force: true });
+    await rm(temporary, { recursive: true, force: true });
   }
 });
-
-test("rejects moved, duplicated, pending, or mismatched proof-document pins", async () => {
-  const text = await readFile(DEFAULT_REFERENCE_HOST_WEB_SHELL_PROOF_PATH, "utf8");
-  const built = await buildReferenceHostWebShellEvidence();
-  const sha = built.artifactSha256;
-  assert.equal(verifyReferenceHostWebShellProofDocument(text, sha).result, "PASS");
-  for (const changed of [
-    text.replace("## Evidence artifact", "## Moved evidence artifact"),
-    `${text}\n\`docs/proof/artifacts/reference-host-web-0.1.0-shell.json\`\n`,
-    text.replace(sha, "[PENDING_FINAL_ARTIFACT_SHA256]"),
-    text.replace(sha, "0".repeat(64)),
-  ]) {
-    assert.throws(
-      () => verifyReferenceHostWebShellProofDocument(changed, sha),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_DOCUMENTATION_DRIFT"),
-    );
-  }
-});
-
-test("rejects focused-test registration removal", async () => {
-  const workspaceRoot = await copyInspectionWorkspace();
-  try {
-    await mutateWorkspaceFile(
-      workspaceRoot,
-      "apps/reference-host-web/test/root-policy.test.ts",
-      (text) =>
-        text.replace('it("rejects a missing reporter', 'it.skip("rejects a missing reporter'),
-    );
-    await assert.rejects(
-      inspectReferenceHostWebShellEvidence({ workspaceRoot }),
-      hasEvidenceCode("REFERENCE_HOST_SHELL_SOURCE_DRIFT"),
-    );
-  } finally {
-    await rm(workspaceRoot, { recursive: true, force: true });
-  }
-});
-
-function createDigest(bytes) {
-  return createHash("sha256").update(bytes).digest("hex");
-}

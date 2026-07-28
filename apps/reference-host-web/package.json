@@ -11,9 +11,11 @@
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:sign-in": "vitest run test/sign-in-http-handler.test.ts test/official-sign-in.test.tsx test/main-lifecycle.test.tsx",
     "test:shell": "vitest run test/host-ports.test.ts test/root-policy.test.ts test/recovery-authority.test.ts test/root-lifecycle.test.tsx test/root-security.test.tsx"
   },
   "dependencies": {
+    "@desen/reference-catalog-web": "workspace:*",
     "@desen/runtime-core": "workspace:*",
     "@desen/runtime-react": "workspace:*",
     "@desen/runtime-web": "workspace:*",

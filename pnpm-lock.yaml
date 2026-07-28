@@ -59,6 +59,9 @@ importers:
 
   apps/reference-host-web:
     dependencies:
+      '@desen/reference-catalog-web':
+        specifier: workspace:*
+        version: link:../../packages/reference-catalog-web
       '@desen/runtime-core':
         specifier: workspace:*
         version: link:../../packages/runtime-core
