@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████░░░░░░░░░░░░░░░` **60 / 145 tasks complete (41%)**
+**Overall:** `███████████░░░░░░░░░░░░░░` **61 / 145 tasks complete (42%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -16,9 +16,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M04 complete:** `█████████████████` **17 / 17 tasks complete (100%)**
 
-**M05 in progress:** `██████░░░` **6 / 9 tasks complete (67%)**
+**M05 in progress:** `███████░░` **7 / 9 tasks complete (78%)**
 
-**Proof gates:** **5 / 13 complete** · **Next:** `M05-T07`
+**Proof gates:** **5 / 13 complete** · **Next:** `M05-T08`
 
 [View the detailed task board](docs/plan/TASKS.md)
 

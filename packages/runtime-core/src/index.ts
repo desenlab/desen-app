@@ -102,6 +102,7 @@ export { snapshotRuntimeJsonValue } from "./runtime-json-snapshot.js";
 export {
   attachRuntimeHeadlessSessionComponentCommands,
   authenticateRuntimeHeadlessSessionAdapterAuthority,
+  authenticateRuntimeHeadlessSessionHostAuthority,
   detachRuntimeHeadlessSessionComponentCommands,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
@@ -192,6 +193,8 @@ export type {
   RuntimeHeadlessSessionEventInput,
   RuntimeHeadlessSessionEventResult,
   RuntimeHeadlessSessionHandle,
+  RuntimeHeadlessSessionHostAuthorityInput,
+  RuntimeHeadlessSessionHostAuthorityResult,
   RuntimeHeadlessSessionLimitProfile,
   RuntimeHeadlessSessionListener,
   RuntimeHeadlessSessionMountInput,

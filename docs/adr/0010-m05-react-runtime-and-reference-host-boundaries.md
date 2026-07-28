@@ -211,13 +211,64 @@ authorizing a retry or replacing session/registry authority. React event-handler
 arbitrary asynchronous work, and SSR remain outside boundary semantics. Because React 19
 `onCaughtError` may observe the raw value before recovery, a dedicated DESEN root may opt into
 `ignoreRuntimeReactRootCaughtError`; shared-root telemetry plus uncaught and recoverable root
-errors remain separate host policy. M05-T07 owns the reference-host root wiring.
+errors remain separate host policy. M05-T07 wires that policy into the reference-host root.
 
 This component boundary accepts only trusted results returned by the runtime render/live APIs; it
 is not a validator for attacker-constructed React props. Nested surfaces in one React tree must
 resolve a single deduplicated `@desen/runtime-react` module instance because carrier provenance is
 intentionally private to that executable module. Omitting `recoveryKey` is the conservative
 never-retry configuration.
+
+### Dedicated browser host authority and React root
+
+M05-T07 establishes `apps/reference-host-web` as an independent, client-only Web application with
+React 19 and a zero-configuration Vite 8 build. It does not import Desen App, editor, publisher,
+testkit, the broad `desen` facade, or their production composition. The host is Web-only at this
+gate: future native targets reuse the framework-neutral headless semantics but own separate
+renderers, registries, platform ports, and lifecycle evidence.
+
+`@desen/runtime-web` captures exactly the nine `RuntimeHostPorts` and their fourteen callbacks
+through `createRuntimeHostPorts` without invoking caller code. The resulting opaque host authority
+has controlled read and idempotent terminal-disposal results. A root may activate a surface only
+after `runtime-core` authenticates by object identity that the exact factory-created host-port
+aggregate was used to mount the exact live headless session. This authentication API returns only
+a frozen status: it grants no callback, port, snapshot, Catalog, or lower runtime authority.
+Structurally equal ports and aggregates that reuse the same callback identities do not
+authenticate. The root separately authenticates the supplied current snapshot and Catalog set
+against that session, then asks `runtime-web` for a second status-only check that the snapshot's
+exact document id and revision equal the Web host authority's configured pair. Thus a session
+cannot be paired with either unrelated ports or correctly paired ports configured for a different
+Bundle identity. Before transferring ownership, the root also asks runtime-react's public
+callback-free registry reader to authenticate the exact factory-created executable registry
+handle; a cast or structurally similar object cannot enter recovery authority.
+
+The root activation seam captures only the closed `RuntimeReactLiveSurfaceInput` plus the opaque
+Web host authority. It cannot accept arbitrary React children, a component function, a
+caller-created managed tree, or a caller-selected recovery key. Activation, authority replacement,
+retry, and disposal share a transition fence; synchronous reentry observes
+`transition-in-progress` or the terminal state instead of interleaving two ownership changes.
+
+The dedicated root uses the exact no-inspection `ignoreRuntimeReactRootCaughtError` policy.
+Recoverable errors produce one fixed redacted diagnostic. An uncaught root error first terminally
+fences the current Web host authority and headless session and only then emits one fixed redacted
+diagnostic. None of these callbacks reads, stringifies, forwards, classifies, or retains the raw
+thrown value or React error information. Disposal reduces the live root, host, and session
+authorities to small inert tombstones and clears the recovery authority's retained identities,
+severing the executable graph. A confirmed unmount releases the container claim; if unmount throws
+or root state is uncertain, the weak container claim remains so another root cannot be attached
+unsafely.
+
+Sticky adapter recovery is controlled by a separate root-local authority. Its epoch changes only
+after an explicit host or user retry, or replacement of the exact session, registry, Catalog set,
+or Web host authority. Bundle identity, revision, URL, ordinary runtime snapshot publication,
+server snapshot, renderer result, and reconciliation key cannot advance that epoch.
+
+The browser profile retains its last valid bounded environment observation when a later read is
+temporarily hostile, exposes a finite nondecreasing epoch clock, and treats every registered
+browser or media-query listener as an independently attempted cleanup. One failing removal cannot
+strand the remaining cleanup attempts. M05-T08 still owns official-derived sign-in execution
+through these authorities, and M05-T09 still owns the final AST and resolved-import proof that the
+production graph contains no handwritten managed tree.
 
 ### Controlled official-derived sign-in fixture
 

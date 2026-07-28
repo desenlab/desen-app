@@ -8,6 +8,7 @@ import * as adapterBridges from "../src/adapter-bridges.js";
 import {
   attachRuntimeHeadlessSessionComponentCommands,
   authenticateRuntimeHeadlessSessionAdapterAuthority,
+  authenticateRuntimeHeadlessSessionHostAuthority,
   detachRuntimeHeadlessSessionComponentCommands,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
@@ -54,6 +55,7 @@ interface HostControl {
 interface MountedFixture {
   readonly control: HostControl;
   readonly handle: RuntimeHeadlessSessionHandle;
+  readonly hostPorts: RuntimeHostPorts;
   readonly initial: RuntimeHeadlessSessionSnapshot;
   readonly catalogSet: DesenValidatedExecutionCatalogSet;
 }
@@ -154,14 +156,16 @@ function mount(
     readonly bundle?: unknown;
     readonly catalogs?: unknown;
     readonly target?: HostControl;
+    readonly hostPorts?: RuntimeHostPorts;
     readonly limits?: RuntimeHeadlessSessionLimitProfile;
   } = {},
 ): MountedFixture {
   const target = options.target ?? control();
+  const mountedHostPorts = options.hostPorts ?? hostPorts(target);
   const result = mountRuntimeHeadlessSession({
     bundle: options.bundle ?? clone(frozenSignInBundle),
     catalogs: options.catalogs ?? [clone(frozenWebCatalog)],
-    hostPorts: hostPorts(target),
+    hostPorts: mountedHostPorts,
     ...(options.limits === undefined ? {} : { limits: options.limits }),
   });
   expect(
@@ -174,6 +178,7 @@ function mount(
   return {
     control: target,
     handle: result.handle,
+    hostPorts: mountedHostPorts,
     initial: result.snapshot,
     catalogSet: result.catalogSet,
   };
@@ -323,6 +328,243 @@ function expectPortableJson(value: unknown, seen = new WeakSet<object>()): void 
     }
   }
 }
+
+describe("M05-T07 exact headless-session host authority", () => {
+  it("authenticates only the exact mounted aggregate without exposing port authority", () => {
+    const left = mount();
+    const right = mount();
+
+    const authenticated = authenticateRuntimeHeadlessSessionHostAuthority(left.handle, {
+      hostPorts: left.hostPorts,
+    });
+    expect(authenticated).toEqual({ status: "authenticated" });
+    expect(Object.isFrozen(authenticated)).toBe(true);
+    expect(Reflect.ownKeys(authenticated)).toEqual(["status"]);
+    expect("hostPorts" in authenticated).toBe(false);
+
+    const sameChildren = { ...left.hostPorts };
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(left.handle, {
+        hostPorts: sameChildren,
+      }),
+    ).toEqual({ status: "mismatched-host-authority" });
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(left.handle, {
+        hostPorts: right.hostPorts,
+      }),
+    ).toEqual({ status: "mismatched-host-authority" });
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(right.handle, {
+        hostPorts: left.hostPorts,
+      }),
+    ).toEqual({ status: "mismatched-host-authority" });
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(right.handle, {
+        hostPorts: right.hostPorts,
+      }),
+    ).toEqual({ status: "authenticated" });
+
+    expect(disposeRuntimeHeadlessSession(left.handle).status).toBe("disposed");
+    expect(disposeRuntimeHeadlessSession(right.handle).status).toBe("disposed");
+  });
+
+  it("never reflects into exact or mismatched host-port aggregates", () => {
+    const target = control();
+    let exactPortReflections = 0;
+    const exactHostPorts = new Proxy(hostPorts(target), {
+      get(...parameters) {
+        exactPortReflections += 1;
+        return Reflect.get(...parameters);
+      },
+      getOwnPropertyDescriptor(...parameters) {
+        exactPortReflections += 1;
+        return Reflect.getOwnPropertyDescriptor(...parameters);
+      },
+      getPrototypeOf(...parameters) {
+        exactPortReflections += 1;
+        return Reflect.getPrototypeOf(...parameters);
+      },
+      ownKeys(...parameters) {
+        exactPortReflections += 1;
+        return Reflect.ownKeys(...parameters);
+      },
+    });
+    const mounted = mount({ target, hostPorts: exactHostPorts });
+    exactPortReflections = 0;
+
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(mounted.handle, {
+        hostPorts: exactHostPorts,
+      }),
+    ).toEqual({ status: "authenticated" });
+    expect(exactPortReflections).toBe(0);
+
+    let mismatchedPortReflections = 0;
+    const mismatchedHostPorts = new Proxy(
+      {},
+      {
+        get() {
+          mismatchedPortReflections += 1;
+          throw new Error("Host-port values are private.");
+        },
+        getOwnPropertyDescriptor() {
+          mismatchedPortReflections += 1;
+          throw new Error("Host-port descriptors are private.");
+        },
+        getPrototypeOf() {
+          mismatchedPortReflections += 1;
+          throw new Error("Host-port prototypes are private.");
+        },
+        ownKeys() {
+          mismatchedPortReflections += 1;
+          throw new Error("Host-port keys are private.");
+        },
+      },
+    ) as RuntimeHostPorts;
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(mounted.handle, {
+        hostPorts: mismatchedHostPorts,
+      }),
+    ).toEqual({ status: "mismatched-host-authority" });
+    expect(mismatchedPortReflections).toBe(0);
+    expect(disposeRuntimeHeadlessSession(mounted.handle).status).toBe("disposed");
+  });
+
+  it("rejects accessor-backed, inherited, extra, symbolic, and hostile request envelopes", () => {
+    const target = mount();
+    let accessorReads = 0;
+    const accessorRequest = {};
+    Object.defineProperty(accessorRequest, "hostPorts", {
+      enumerable: true,
+      get() {
+        accessorReads += 1;
+        return target.hostPorts;
+      },
+    });
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(target.handle, accessorRequest as never),
+    ).toEqual({ status: "malformed-request" });
+    expect(accessorReads).toBe(0);
+
+    const nonEnumerableRequest = {};
+    Object.defineProperty(nonEnumerableRequest, "hostPorts", {
+      enumerable: false,
+      value: target.hostPorts,
+    });
+    const symbolRequest = {
+      hostPorts: target.hostPorts,
+      [Symbol("hidden")]: true,
+    };
+    for (const request of [
+      [],
+      Object.assign(Object.create({}), { hostPorts: target.hostPorts }),
+      {},
+      { hostPorts: target.hostPorts, snapshot: target.initial },
+      nonEnumerableRequest,
+      symbolRequest,
+      new Proxy(
+        {},
+        {
+          ownKeys() {
+            throw new Error("reflection denied");
+          },
+        },
+      ),
+    ]) {
+      const result = authenticateRuntimeHeadlessSessionHostAuthority(
+        target.handle,
+        request as never,
+      );
+      expect(result).toEqual({ status: "malformed-request" });
+      expect(Object.isFrozen(result)).toBe(true);
+    }
+
+    const revoked = Proxy.revocable({}, {});
+    revoked.revoke();
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(target.handle, revoked.proxy as never),
+    ).toEqual({ status: "malformed-request" });
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(target.handle, {
+        hostPorts: null,
+      } as never),
+    ).toEqual({ status: "mismatched-host-authority" });
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+  });
+
+  it("short-circuits disposed and forged handles before reflecting over a request", () => {
+    const target = mount();
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+    let reflections = 0;
+    const hostile = new Proxy(
+      {},
+      {
+        getPrototypeOf() {
+          reflections += 1;
+          throw new Error("must not reflect");
+        },
+        ownKeys() {
+          reflections += 1;
+          throw new Error("must not reflect");
+        },
+      },
+    );
+
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(target.handle, hostile as never),
+    ).toEqual({ status: "disposed" });
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(
+        {} as RuntimeHeadlessSessionHandle,
+        hostile as never,
+      ),
+    ).toEqual({ status: "invalid-handle" });
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(null as never, hostile as never),
+    ).toEqual({ status: "invalid-handle" });
+    expect(reflections).toBe(0);
+  });
+
+  it("rechecks session authority after request reflection reenters disposal", () => {
+    const disposedDuringPrototype = mount();
+    const prototypeRequest = new Proxy(
+      { hostPorts: disposedDuringPrototype.hostPorts },
+      {
+        getPrototypeOf(request) {
+          expect(disposeRuntimeHeadlessSession(disposedDuringPrototype.handle).status).toBe(
+            "disposed",
+          );
+          return Reflect.getPrototypeOf(request);
+        },
+      },
+    );
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(
+        disposedDuringPrototype.handle,
+        prototypeRequest,
+      ),
+    ).toEqual({ status: "disposed" });
+
+    const disposedDuringDescriptor = mount();
+    const descriptorRequest = new Proxy(
+      { hostPorts: disposedDuringDescriptor.hostPorts },
+      {
+        getOwnPropertyDescriptor(request, key) {
+          expect(disposeRuntimeHeadlessSession(disposedDuringDescriptor.handle).status).toBe(
+            "disposed",
+          );
+          return Reflect.getOwnPropertyDescriptor(request, key);
+        },
+      },
+    );
+    expect(
+      authenticateRuntimeHeadlessSessionHostAuthority(
+        disposedDuringDescriptor.handle,
+        descriptorRequest,
+      ),
+    ).toEqual({ status: "disposed" });
+  });
+});
 
 describe("M05-T02 exact framework-adapter session authority", () => {
   it("returns the exact retained Catalog authority for raw and prevalidated mount ingress", () => {
@@ -807,6 +1049,8 @@ describe("M04-T16 exact ingress and initial headless materialization", () => {
     expect(JSON.stringify(target.initial.plan)).toContain("Welcome");
   });
 
+  // The deliberately wide vector normally completes near one second, but it can exceed Vitest's
+  // generic five-second budget when every runtime-core file competes for the same CI worker.
   it("mounts beyond the former 4,096 aggregate scope-occurrence bottleneck", () => {
     const bundle = clone(frozenSignInBundle) as unknown as MutableRecord;
     const signIn = (bundle.surfaces as MutableRecord)["sign-in"] as MutableRecord;
@@ -825,7 +1069,7 @@ describe("M04-T16 exact ingress and initial headless materialization", () => {
       status: "disposed",
       activatedSurfaces: 1,
     });
-  });
+  }, 15_000);
 
   it("rejects an untrusted Catalog set and every malformed or widening limit profile", () => {
     expect(

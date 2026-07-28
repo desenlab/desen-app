@@ -57,7 +57,42 @@ importers:
 
   apps/desen-run: {}
 
-  apps/reference-host-web: {}
+  apps/reference-host-web:
+    dependencies:
+      '@desen/runtime-core':
+        specifier: workspace:*
+        version: link:../../packages/runtime-core
+      '@desen/runtime-react':
+        specifier: workspace:*
+        version: link:../../packages/runtime-react
+      '@desen/runtime-web':
+        specifier: workspace:*
+        version: link:../../packages/runtime-web
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@testing-library/react':
+        specifier: 16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/react':
+        specifier: 19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      jsdom:
+        specifier: 29.1.1
+        version: 29.1.1
+      vite:
+        specifier: 8.1.5
+        version: 8.1.5(@types/node@24.13.3)
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))
 
   packages/catalog-sdk:
     dependencies:
@@ -164,7 +199,15 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))
 
-  packages/runtime-web: {}
+  packages/runtime-web:
+    dependencies:
+      '@desen/runtime-core':
+        specifier: workspace:*
+        version: link:../runtime-core
+    devDependencies:
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))
 
   packages/testkit:
     dependencies:
