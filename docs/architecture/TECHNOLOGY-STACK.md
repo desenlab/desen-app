@@ -13,7 +13,8 @@ every dependency to have a documented responsibility.
 - Vitest 4.1.10
 - React 19.2.8 and React DOM 19.2.8 for `runtime-react`, the Web reference adapters, and the
   independent reference host
-- Vite 8.1.5 for the independent reference host's zero-configuration production build
+- Vite 8.1.5 for the independent reference host's zero-configuration production build and
+  programmatic resolved-module-graph audit
 - Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable component semantics
 - the browser's injected `fetch` capability for the reference host's fixed same-origin
   `POST /api/sign-in` operation boundary; no transport client dependency is added
@@ -56,6 +57,10 @@ only by their owning tasks and require an ADR when they affect public capability
 - The reference host is Web-only and independently built with Vite's zero-configuration path;
   future native targets own separate renderers and platform hosts rather than importing its React
   root.
+- The no-handwritten-managed-tree gate uses TypeScript's semantic checker for source structure,
+  Vite's actual `moduleParsed` production graph for runtime resolution, and dependency-cruiser for
+  package boundaries. Declaration resolution or source-text substring checks cannot substitute
+  for the Vite graph.
 - The reference host production entry may compose only the committed official-derived Bundle,
   exact current Catalog, public real adapter registry, and explicit host ports. Its sign-in
   transport performs one request with no retry or credential persistence beyond that request's

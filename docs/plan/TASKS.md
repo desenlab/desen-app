@@ -126,18 +126,18 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 
 ## M05 — React runtime and separate reference host
 
-| ID      | Status      | Depends on       | Deliverable / evidence                                                                             |
-| ------- | ----------- | ---------------- | -------------------------------------------------------------------------------------------------- |
-| M05-T01 | DONE        | G04              | React adapter registry and render-plan renderer                                                    |
-| M05-T02 | DONE        | M05-T01          | Resolved props and named slots wired without private structure inspection                          |
-| M05-T03 | DONE        | M05-T01–M05-T02  | Style parts and visual states wired through public adapter contracts                               |
-| M05-T04 | DONE        | M05-T01–M05-T03  | Component events, commands, and behavior adapters wired                                            |
-| M05-T05 | DONE        | M05-T02–M05-T04  | Stable keys and runtime-node ↔ source-node diagnostics                                             |
-| M05-T06 | DONE        | M05-T05          | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
-| M05-T07 | DONE        | M05-T01, M05-T06 | Independently built reference-host shell with host ports                                           |
-| M05-T08 | DONE        | M05-T04–M05-T07  | Official sign-in bundle running through real adapters                                              |
-| M05-T09 | NOT_STARTED | M05-T07–M05-T08  | Automated source/import audit preventing handwritten managed-screen composition                    |
-| G05     | NOT_STARTED | M05-T01–M05-T09  | Bundle-driven sign-in runs in separate host                                                        |
+| ID      | Status | Depends on       | Deliverable / evidence                                                                             |
+| ------- | ------ | ---------------- | -------------------------------------------------------------------------------------------------- |
+| M05-T01 | DONE   | G04              | React adapter registry and render-plan renderer                                                    |
+| M05-T02 | DONE   | M05-T01          | Resolved props and named slots wired without private structure inspection                          |
+| M05-T03 | DONE   | M05-T01–M05-T02  | Style parts and visual states wired through public adapter contracts                               |
+| M05-T04 | DONE   | M05-T01–M05-T03  | Component events, commands, and behavior adapters wired                                            |
+| M05-T05 | DONE   | M05-T02–M05-T04  | Stable keys and runtime-node ↔ source-node diagnostics                                             |
+| M05-T06 | DONE   | M05-T05          | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
+| M05-T07 | DONE   | M05-T01, M05-T06 | Independently built reference-host shell with host ports                                           |
+| M05-T08 | DONE   | M05-T04–M05-T07  | Official sign-in bundle running through real adapters                                              |
+| M05-T09 | DONE   | M05-T07–M05-T08  | Automated source/import audit preventing handwritten managed-screen composition                    |
+| G05     | DONE   | M05-T01–M05-T09  | Bundle-driven sign-in runs in separate host                                                        |
 
 `M05-T01` creates a finite, factory-authenticated static React adapter registry and an
 all-or-nothing public headless-plan renderer. Ordinary roots and descendants use the same exact
@@ -209,8 +209,24 @@ rapid pending-press suppression, rejected-handler redaction, disposal, and same-
 session/host replacement with late-result containment. A persisted `pagehide` preserves the
 composition for BFCache restoration, while final page exit disposes it. Started transports are not
 claimed cancellable, the fixture is not claimed as M06 Publisher output, real-browser BFCache E2E
-is not claimed, and M05-T09 still owns the exhaustive no-handwritten-managed-tree AST and
-resolved-import audit.
+is not claimed, and, at M05-T08 task time, M05-T09 still owned the exhaustive
+no-handwritten-managed-tree AST and resolved-import audit.
+
+`M05-T09` closes G05 with three independent views of the current production boundary. A
+TypeScript parser/checker audit resolves JSX tags, import aliases, namespaces, and symbol origins
+across every dynamically discovered reference-host source file; the complete-source JSX policy
+and exact composition fingerprints reject helper-hidden trees. Two programmatic Vite 8
+production builds observe the real resolved module graph and require every host source to be
+reachable, while local graph backing files remain byte-and-identity stable and dependency-cruiser
+independently enforces one authenticated application/package rule. Exact host-infrastructure JSX
+and the current executable-call/property-write authority surface are allowlisted; direct or hidden
+reference-component trees, React factory bypasses, structural render plans,
+capability/source-node selection, indirect executable extraction, DOM replacement, HTML/PostCSS
+or stylesheet visual injection, private or forbidden transitive package paths, authoring Source
+data, orphan modules, symlinks, and unknown assets fail closed under hostile mutation. The managed
+path reaches only the public generic runtime renderer and shared public adapter factory. This
+advances P-07 to `PARTIAL` and strengthens P-06/P-10 without completing their later Desen App
+evidence.
 
 ## M06 — Deterministic publisher
 

@@ -270,8 +270,8 @@ strand the remaining cleanup attempts. M05-T08 now runs the official-derived sig
 through these authorities. The immutable M05-T07 artifact remains historical task-time evidence;
 its generator and verifier are compatibility readers for the pinned artifact rather than claims
 about the changed current source. T08 owns verification of the current composition and build
-rather than rewriting that artifact. M05-T09 still owns the final AST and resolved-import proof
-that the production graph contains no handwritten managed tree.
+rather than rewriting that artifact. M05-T09 now owns and passes the final AST and resolved-import
+proof that the current production graph contains no handwritten managed tree.
 
 ### Controlled official-derived sign-in fixture
 
@@ -353,8 +353,23 @@ edges. Mutation fixtures must prove that direct JSX, aliased imports, `createEle
 trees, dynamic loading, Desen App imports, and testkit/authoring imports are each detected.
 Substring searches or a fixed list of current filenames are not sufficient evidence.
 
+The implemented audit recursively discovers production sources and resolves source structure
+through TypeScript's parser and checker. Separately, two programmatic Vite 8 `write:false` builds
+observe the actual `moduleParsed` graph; TypeScript declaration resolution is not treated as
+runtime authority. Every discovered host source must be reachable. Exact root, application,
+managed-boundary, and controlled-failure JSX is allowlisted by resolved symbol origin, while all
+other production modules must contain no JSX. A separate semantic fingerprint closes the current
+executable-call and property-write authority surface. Canonical HTML, every PostCSS auto-discovery
+level, canonical host CSS, the transitive package graph, and observed local graph backing-file
+identity are checked independently. Hostile mutations cover aliases, namespaces, helpers, React
+element factories, plan-shaped values, indirect dynamic code and DOM setters, private and
+forbidden package edges, HTML/PostCSS/stylesheet visual injection, authoring data, orphan modules,
+symbolic links, and documentation-decoy pins. The dependency result is accepted only with the
+exact reviewed rule schema and installed tool version.
+
 The M05-T09 artifact pins the T07 host-build/port evidence and the T08 real sign-in execution
 evidence. It is the final G05 closure artifact; no separate uncounted gate proof is introduced.
+P-07 advances only to `PARTIAL` because Desen App host E2E remains M10-T05.
 
 ### Native-runtime direction
 
@@ -467,7 +482,7 @@ This decision does not claim:
 - that one same-surface pending operation is replaced by a second UI submission; the real loading
   `Button` suppresses the second press, while the tested replacement case changes the exact
   session and host authority;
-- the exhaustive AST and resolved-import graph result assigned to M05-T09;
+- an equivalent no-handwritten-tree result for Desen App or an unaudited future host revision;
 - channel fetching, exact package installation, atomic activation, persistence, restart recovery,
   or last-known-good behavior assigned to M07;
 - any external authentication service;
