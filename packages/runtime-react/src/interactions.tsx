@@ -7,6 +7,8 @@ import {
   snapshotRuntimeJsonValue,
 } from "@desen/runtime-core";
 
+import { RuntimeReactAdapterFailureBoundary } from "./adapter-error-boundary.js";
+
 import type { ReactElement, ReactNode } from "react";
 import type {
   RuntimeAdapterComponentCommandPort,
@@ -42,6 +44,7 @@ interface RuntimeReactInteractionAuthority {
 interface RuntimeReactComponentElementInput extends RuntimeReactInteractionAuthority {
   readonly kind: "component";
   readonly reconciliationKey: string;
+  readonly hasManagedDescendants: boolean;
   readonly component: RuntimeReactComponentAdapterComponent;
   readonly identity: RuntimeReactDiagnosticIdentity;
   readonly props: RuntimeReactComponentAdapterProps["props"];
@@ -330,16 +333,25 @@ function RuntimeReactComponentBoundary(input: RuntimeReactComponentElementInput)
   );
   const controller = useMemo(() => createInteractionController(), [authority]);
   return createElement(
-    Fragment,
-    null,
-    createElement(RuntimeReactInteractionCommit, { authority, controller }),
-    createElement(input.component, {
+    RuntimeReactAdapterFailureBoundary,
+    {
+      adapterKind: "component",
       identity: input.identity,
-      props: input.props,
-      slots: input.slots,
-      style: input.style,
-      interactions: controller.interactions,
-    }),
+      behaviorId: null,
+      canAttributeRawError: !input.hasManagedDescendants,
+    },
+    createElement(
+      Fragment,
+      null,
+      createElement(RuntimeReactInteractionCommit, { authority, controller }),
+      createElement(input.component, {
+        identity: input.identity,
+        props: input.props,
+        slots: input.slots,
+        style: input.style,
+        interactions: controller.interactions,
+      }),
+    ),
   );
 }
 
@@ -356,18 +368,27 @@ function RuntimeReactBehaviorBoundary(input: RuntimeReactBehaviorElementInput): 
   );
   const controller = useMemo(() => createInteractionController(), [authority]);
   return createElement(
-    Fragment,
-    null,
-    createElement(RuntimeReactInteractionCommit, { authority, controller }),
-    createElement(input.component, {
+    RuntimeReactAdapterFailureBoundary,
+    {
+      adapterKind: "behavior",
       identity: input.identity,
       behaviorId: input.behaviorId,
-      props: input.props,
-      slots: input.slots,
-      style: input.style,
-      interactions: controller.interactions,
-      children: input.children,
-    }),
+      canAttributeRawError: false,
+    },
+    createElement(
+      Fragment,
+      null,
+      createElement(RuntimeReactInteractionCommit, { authority, controller }),
+      createElement(input.component, {
+        identity: input.identity,
+        behaviorId: input.behaviorId,
+        props: input.props,
+        slots: input.slots,
+        style: input.style,
+        interactions: controller.interactions,
+        children: input.children,
+      }),
+    ),
   );
 }
 

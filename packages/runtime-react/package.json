@@ -25,6 +25,7 @@
     "test:style-parts-states": "vitest run test/style-parts-states.test.tsx",
     "test:interactions": "vitest run test/interaction-wiring.test.tsx test/binding-parity.test.tsx",
     "test:reconciliation-diagnostics": "vitest run test/adapter-registry.test.tsx test/reconciliation.test.ts test/reconciliation-render.test.tsx test/diagnostic-index.test.ts test/session-surface.test.tsx test/live-surface.test.tsx",
+    "test:failure-boundary": "vitest run test/failure-boundary.test.tsx",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

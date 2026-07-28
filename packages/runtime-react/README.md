@@ -55,8 +55,8 @@ adds exact receiving validation and immutable delivery for complete visual-state
 authenticates two-way plan-to-binding parity and activates commit-scoped session events, component
 commands, and behavior lifecycle. M05-T05 adds live external-store observation, trusted
 presence-aware remount policy, real React instance reconciliation, and immutable diagnostic
-identity. M05-T06 remains responsible for the production error boundary and explicit adapter
-exception surface.
+identity. M05-T06 adds the explicit production boundary, conservative whole-surface containment,
+redacted adapter diagnostics, and an opt-in raw-root-telemetry suppression policy.
 
 ## Live reconciliation and diagnostic identity
 
@@ -197,9 +197,38 @@ managed tree. Receiving failures preserve the validator's exact frozen diagnosti
 `props`, `slots`, or `style` as their public channel. Binding parity drift fails explicitly before
 React element creation. Interaction calls reject stale or malformed authority without upgrading
 the adapter to a newer snapshot; uncommitted lifetimes remain explicitly unavailable.
-Reconciliation-key or diagnostic-index construction failure is also all-or-nothing. This task
-does not catch exceptions thrown by adapter React components or invent a production error UI; that
-boundary remains M05-T06.
+Reconciliation-key or diagnostic-index construction failure is also all-or-nothing.
+
+`RuntimeReactSurfaceBoundary` composes both controlled preflight failures and committed adapter
+exceptions with one mandatory, statically host-owned `renderFailure` policy. The runtime never
+selects a generic component or placeholder. A safely attributable leaf-component failure produces
+one deeply frozen `ADAPTER_FAILURE` containing only its adapter kind and diagnostic identity.
+Behavior, non-leaf, and removal-cleanup failures use the same code with every identity field
+`null`: React does not expose a reliable public origin for those lifetimes, so the runtime refuses
+to blame the nearest live ancestor.
+
+Containment is deliberately whole-surface. Two always-mounted sibling provenance boundaries keep
+managed-tree cleanup separate from host failure-UI cleanup while switching branches. Once an
+adapter fails, the failure remains sticky until the host changes `recoveryKey`; ordinary
+publications, prop changes, reconciliation-key changes, or a structurally equivalent replacement
+registry cannot silently retry executable code. A host failure renderer that throws in render,
+effect, or branch-transition cleanup escapes as a fresh host-owned error carrier with the exact
+thrown value only as its `cause`; nested boundaries preserve that carrier rather than wrapping or
+relabeling it. Cleanup during removal of the complete React root has no surviving component
+boundary and remains a root-host policy.
+
+React event-handler exceptions, arbitrary asynchronous work, and SSR are outside error-boundary
+semantics and remain host responsibilities. React 19 root `onCaughtError` can observe the raw
+thrown value before boundary recovery. A dedicated DESEN root that must suppress that telemetry
+can pass `ignoreRuntimeReactRootCaughtError` to `createRoot` or `hydrateRoot`; redacted controlled
+diagnostics still arrive through `renderFailure`. Do not apply that policy to a shared application
+root that needs raw telemetry for non-DESEN code. `onUncaughtError` and `onRecoverableError` remain
+separate host policies; M05-T07 owns their concrete reference-host wiring.
+
+The boundary accepts trusted outputs produced by `renderRuntimeReactSurface` or
+`useRuntimeReactSurface`; it is not an untrusted-object parser. One React tree must resolve one
+deduplicated `@desen/runtime-react` module instance so private provenance carriers retain their
+identity across nested surfaces. Omitting `recoveryKey` is the safe never-retry policy.
 
 ## Protocol and target support
 
@@ -210,5 +239,5 @@ boundary remains M05-T06.
 
 Run `pnpm --filter @desen/runtime-react lint`, `typecheck`, `test:adapter-registry`,
 `test:resolved-props-slots`, `test:style-parts-states`, `test:interactions`,
-`test:reconciliation-diagnostics`, and `build` for the focused package checks. Use the root
-workspace quality gate, `pnpm check`, for cumulative proof.
+`test:reconciliation-diagnostics`, `test:failure-boundary`, and `build` for the focused package
+checks. Use the root workspace quality gate, `pnpm check`, for cumulative proof.

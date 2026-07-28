@@ -179,6 +179,46 @@ receipt, and controlled host fixture must agree on the successor exact
 `{ id, version, target, packageDigest }` tuple. This migration changes implementation-artifact
 identity, not the frozen DESEN protocol or the existing component contracts.
 
+### Whole-surface adapter failure containment
+
+`RuntimeReactSurfaceBoundary` accepts one compiled or live surface result plus a mandatory
+statically host-owned failure renderer. Unknown capabilities and every other preflight failure
+remain controlled all-or-nothing results; the runtime never creates a guessed placeholder.
+Committed adapter render, layout, passive-effect, and cleanup exceptions enter the same explicit
+host failure surface without exposing the raw thrown value, stack, cause, or React component
+stack.
+
+The Web–React profile contains a failed managed surface as one unit. React's public error-boundary
+API does not reliably identify whether a removal error belongs to a child adapter, an enclosing
+behavior, or a still-mounted ancestor, and cannot prove that arbitrary siblings are safe to keep
+running. The runtime therefore makes only two attribution claims:
+
+- a leaf DESEN component boundary with no managed descendants may emit exact immutable component
+  identity; and
+- behavior, non-leaf, descendant-removal, and otherwise ambiguous failures emit immutable
+  `ADAPTER_FAILURE` with every identity field set to `null`.
+
+Two always-mounted sibling boundaries preserve provenance while the managed branch and the
+host-owned failure branch replace each other. Managed cleanup is never mislabeled as host failure
+UI, and a host failure renderer that throws during render, effect, or cleanup escapes in a fresh
+private carrier with the exact host-thrown value only as its `cause`; it is never converted into
+`ADAPTER_FAILURE` while a containing boundary remains mounted. Removal of the complete React root
+leaves no component boundary to catch descendant cleanup and remains root-host policy.
+
+Adapter failure is sticky. Ordinary session publication, reconciliation-key change, or executable
+registry replacement does not retry it. The host must deliberately change `recoveryKey` after
+authorizing a retry or replacing session/registry authority. React event-handler errors,
+arbitrary asynchronous work, and SSR remain outside boundary semantics. Because React 19
+`onCaughtError` may observe the raw value before recovery, a dedicated DESEN root may opt into
+`ignoreRuntimeReactRootCaughtError`; shared-root telemetry plus uncaught and recoverable root
+errors remain separate host policy. M05-T07 owns the reference-host root wiring.
+
+This component boundary accepts only trusted results returned by the runtime render/live APIs; it
+is not a validator for attacker-constructed React props. Nested surfaces in one React tree must
+resolve a single deduplicated `@desen/runtime-react` module instance because carrier provenance is
+intentionally private to that executable module. Omitting `recoveryKey` is the conservative
+never-retry configuration.
+
 ### Controlled official-derived sign-in fixture
 
 M05 uses a committed, deterministic proof fixture derived from the frozen official sign-in Source
@@ -304,6 +344,7 @@ contradicting the Web-first, platform-neutral architecture.
 - Executable selection remains static, reviewed, and host-owned.
 - Resolved props and styles cross their exact Catalog schemas before reaching React.
 - Event and command lifetimes remain tied to authenticated runtime instances.
+- Adapter failures are redacted, fail closed, and never receive guessed identity or UI.
 - Reference host and Desen App can reuse one public adapter factory.
 - M03 historical evidence remains auditable while M05 truthfully records changed package bytes.
 - The G05 sign-in proof uses the real package tuple without mutating the frozen upstream example.
@@ -318,6 +359,8 @@ contradicting the Web-first, platform-neutral architecture.
 - The validator needs narrow public receiving-schema APIs rather than target packages reaching
   into validation internals.
 - Command attachment adds one carefully bounded API seam and lifecycle test matrix.
+- Whole-surface containment sacrifices unsafe sibling continuation and requires explicit retry
+  authority after an adapter failure.
 - Adding `./react-adapters` requires a new capability-artifact digest and compatibility-verifier
   migration.
 - The reference-host application adds its own independent build, package tests, proof entry, and

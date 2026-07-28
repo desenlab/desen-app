@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "task": "M05-T06",
+  "result": "PASS",
+  "profile": "desen-runtime-react-failure-boundary-v1",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M05-T05",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-reconciliation-diagnostics.json",
+      "sha256": "sha256:292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb",
+      "profile": "desen-runtime-react-reconciliation-diagnostics-v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M05-T02",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-resolved-props-slots.json",
+      "sha256": "sha256:f668dc0d3d0e9e8edb239323fd82037b8afc2004dbe8eace56dcd4c510ed22e0",
+      "profile": "desen-runtime-react-resolved-props-slots-v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M04-T09",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-operation-lifecycle.json",
+      "sha256": "sha256:7b2300a78bb9903abe1f182792362d374edb5b948ee9f8f69dc018ccf9cc8301",
+      "result": "PASS"
+    },
+    {
+      "task": "M02-T05",
+      "path": "docs/proof/artifacts/protocol-0.1.0-diagnostics.json",
+      "sha256": "sha256:e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b",
+      "profile": "desen-diagnostics-json-pointer-v1"
+    },
+    {
+      "task": "M02-T02",
+      "path": "docs/proof/artifacts/protocol-0.1.0-traceability.json",
+      "sha256": "sha256:749cbae719a5deb216e9ed3be171eb710b47fc547f4f270dbba21bb14c2af514",
+      "protocol": "0.1.0",
+      "result": "PASS"
+    }
+  ],
+  "claim": {
+    "wholeSurfaceFailClosed": true,
+    "safeNodeLocalSiblingContinuationClaimed": false,
+    "exactAttribution": "leaf-component-only",
+    "behaviorExactAttribution": false,
+    "nonLeafExactAttribution": false,
+    "cleanupExactAttribution": false,
+    "honestNullAttributionWhenOriginUnavailable": true,
+    "explicitUnknownCapabilityFailure": true,
+    "productionPlaceholderGuessing": false,
+    "rawAdapterPayloadExposed": false
+  },
+  "boundary": {
+    "package": "@desen/runtime-react",
+    "failureCode": "ADAPTER_FAILURE",
+    "containment": "whole-surface",
+    "publicVariants": ["component", "unattributed"],
+    "publicFailureFields": [
+      "adapterKind",
+      "behaviorId",
+      "capabilityId",
+      "code",
+      "runtimeNodeId",
+      "sourceNodeId"
+    ],
+    "rawPublicFields": [],
+    "identityPolicy": {
+      "exact": "leaf component with no managed DESEN descendants",
+      "unattributed": "behavior, non-leaf, descendant, removal, or other origin React cannot expose safely",
+      "unattributedIdentityValue": null
+    },
+    "provenanceBranches": {
+      "structure": "two-always-mounted-sibling-boundaries",
+      "managed": "RuntimeReactManagedBranchBoundary",
+      "host": "RuntimeReactHostBranchBoundary"
+    },
+    "hostFailureRenderer": {
+      "selectedBy": "trusted-static-host-code",
+      "bundleOrCatalogAuthority": false,
+      "privateFreshCarrier": true,
+      "cause": "exact-host-thrown-value",
+      "classifiedAsAdapterFailure": false
+    },
+    "recovery": {
+      "mode": "sticky-after-adapter-failure",
+      "authority": "explicit-host-recoveryKey",
+      "implicitResultRetry": false,
+      "implicitPublicationRetry": false,
+      "implicitReconciliationKeyRetry": false
+    },
+    "unknownCapability": {
+      "phase": "all-or-nothing-preflight",
+      "adapterExecutionBeforeFailure": false,
+      "placeholder": false,
+      "hostFailureSurfaceRequired": true
+    },
+    "rootCaughtError": {
+      "handler": "ignoreRuntimeReactRootCaughtError",
+      "handlerType": "RuntimeReactRootCaughtErrorHandler",
+      "scope": "dedicated-DESEN-root-only",
+      "rawPayloadInspection": false,
+      "rawPayloadForwarding": false,
+      "sharedRootPolicyClaimed": false,
+      "referenceHostWiringOwner": "M05-T07"
+    },
+    "integrationScope": {
+      "resultAuthority": "host-trusted-runtime-result",
+      "arbitraryUntrustedResultParser": false,
+      "moduleInstanceRequirement": "one-deduplicated-@desen/runtime-react-instance-per-React-tree",
+      "omittedRecoveryKey": "safe-never-retry",
+      "hostCleanupCarrier": "managed-to-failure-and-failure-to-managed-transitions-while-branch-boundary-mounted",
+      "fullRootUnmountCleanupOwner": "M05-T07-host-onUncaughtError-policy"
+    }
+  },
+  "publicApi": {
+    "runtimeExports": ["RuntimeReactSurfaceBoundary", "ignoreRuntimeReactRootCaughtError"],
+    "typeExports": [
+      "RuntimeReactAdapterFailure",
+      "RuntimeReactComponentAdapterFailure",
+      "RuntimeReactRootCaughtErrorHandler",
+      "RuntimeReactSurfaceBoundaryProps",
+      "RuntimeReactSurfaceBoundaryResult",
+      "RuntimeReactSurfaceFailure",
+      "RuntimeReactSurfaceFailureRenderer",
+      "RuntimeReactUnattributedAdapterFailure"
+    ]
+  },
+  "evidence": {
+    "focusedScript": "pnpm --filter @desen/runtime-react test:failure-boundary",
+    "tests": { "focusedCases": 22, "compilerNegativeCases": 9, "rootMutationTests": 25 },
+    "sourceAssertions": 64,
+    "dynamicExecutableImports": 0,
+    "trackedFiles": [
+      {
+        "path": "packages/runtime-react/package.json",
+        "bytes": 1702,
+        "sha256": "sha256:4e322819e2e329090808f677e695a85a206c29fa377f702df3471a824da45cea"
+      },
+      {
+        "path": "packages/runtime-react/src/adapter-error-boundary.tsx",
+        "bytes": 11788,
+        "sha256": "sha256:6cf37f8d50d4c0ec75b48d8c5114e90b70e9136af608a904c7e2dde58e617ce0"
+      },
+      {
+        "path": "packages/runtime-react/src/index.ts",
+        "bytes": 3423,
+        "sha256": "sha256:1421df9a152da774a200e1926aa0c24d210c52a582ad35fbfe3b53857ce6dee8"
+      },
+      {
+        "path": "packages/runtime-react/src/interactions.tsx",
+        "bytes": 14402,
+        "sha256": "sha256:f7285535d2593524f503b164a25370346a40c5162decd91fea7f67a8ca23dcb1"
+      },
+      {
+        "path": "packages/runtime-react/src/render-plan.tsx",
+        "bytes": 43763,
+        "sha256": "sha256:b457799ba76b12e4becb2ca111cf5d3d4ab3f4cfb23fff8579dc106d0127dbbd"
+      },
+      {
+        "path": "packages/runtime-react/src/root-error-policy.ts",
+        "bytes": 1158,
+        "sha256": "sha256:355fde99afc2a8b1781c3c860b32de2a6d3682a0e51fe02bb294c3271a575cbe"
+      },
+      {
+        "path": "packages/runtime-react/src/surface-boundary.tsx",
+        "bytes": 12844,
+        "sha256": "sha256:ddbf436a0c62b9924552fa8537cca24011b00007b8c50b2056e09b70973dc824"
+      },
+      {
+        "path": "packages/runtime-react/test/failure-boundary.test.tsx",
+        "bytes": 40114,
+        "sha256": "sha256:1b8644a29940aa6516ac0a6cc9347c27a550015e52cca63e5c8af49d0c9669c4"
+      },
+      {
+        "path": "packages/runtime-react/test/failure-boundary.types.ts",
+        "bytes": 3114,
+        "sha256": "sha256:af056b532dc14d6bbebba845a372d524fa92369e5d1737b557eb2825723f3046"
+      },
+      {
+        "path": "scripts/generate-runtime-react-failure-boundary-proof.mjs",
+        "bytes": 675,
+        "sha256": "sha256:a9249f1fe9ca62dd925ee0fd5916576d9f8bf961b66d14c9d9e79bcbadbb0234"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "sha256:4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+        "bytes": 40390,
+        "sha256": "sha256:96c26d8d9d8e1072beaf27fb26db73865a659a89126ae5680db84d67f6f37bc2"
+      },
+      {
+        "path": "scripts/lib/runtime-react-reconciliation-diagnostics-proof.mjs",
+        "bytes": 27508,
+        "sha256": "sha256:e8d5feb6f608ae7dab73e9615f005bdbb5f6edbd65f5fe71a09531832b7ee145"
+      },
+      {
+        "path": "scripts/verify-runtime-react-failure-boundary.mjs",
+        "bytes": 677,
+        "sha256": "sha256:8bed7f6e5e8e2d4bd2874b87a4ce2355b4e5bea880e7ecfaedfd35d9833968e3"
+      },
+      {
+        "path": "tests/runtime-react-failure-boundary.test.mjs",
+        "bytes": 18438,
+        "sha256": "sha256:3bc34cfc77d910cb049ce7916d3a1b43fe6d7e7f1bf5ebc328904888f86eec6d"
+      },
+      {
+        "path": "tests/runtime-react-reconciliation-diagnostics.test.mjs",
+        "bytes": 12583,
+        "sha256": "sha256:7d94ce686c4c9ea90f4bf8ab5cf1b13a2120e2298fbbf4cba66890d943f49308"
+      }
+    ],
+    "verifierExecutionProfile": "static-source-package-prerequisite-and-focused-test-inventory",
+    "historicalArtifactsRewritten": false,
+    "traceability": {
+      "canonicalTrace": ["R-112", "R-113", "R-115", "A-012", "D-036"],
+      "normative": { "id": "N-037", "status": "TESTED", "owners": "M05-T06" },
+      "proofClaim": { "id": "P-17", "status": "PARTIAL", "remainingOwner": "M07-T04" },
+      "taskLocalApplicability": { "id": "D-009", "status": "DEFERRED", "remainingOwner": "M06-T11" }
+    }
+  },
+  "nonclaims": [
+    "React event-handler exception containment",
+    "arbitrary asynchronous exception containment",
+    "server-render error-boundary containment",
+    "node-local sibling continuation when React cannot expose safe failure provenance",
+    "automatic retry after ordinary result, publication, or reconciliation-key changes",
+    "raw caught-error suppression for non-DESEN code in a shared React root",
+    "host onUncaughtError or onRecoverableError policy",
+    "failure-branch cleanup carrier classification during full React root unmount",
+    "validation of an arbitrary untrusted object passed as the boundary result",
+    "cross-copy private carrier recognition when multiple runtime-react module instances share one tree"
+  ]
+}
