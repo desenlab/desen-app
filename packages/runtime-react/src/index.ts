@@ -16,7 +16,15 @@ export {
 export { useRuntimeReactSurface } from "./live-surface.js";
 export { createRuntimeReactReconciliationKey } from "./reconciliation.js";
 export { renderRuntimeReactSurface, RUNTIME_REACT_RENDER_LIMITS } from "./render-plan.js";
+export { ignoreRuntimeReactRootCaughtError } from "./root-error-policy.js";
 export { useRuntimeReactSessionSurface } from "./session-surface.js";
+export { RuntimeReactSurfaceBoundary } from "./surface-boundary.js";
+
+export type {
+  RuntimeReactAdapterFailure,
+  RuntimeReactComponentAdapterFailure,
+  RuntimeReactUnattributedAdapterFailure,
+} from "./adapter-error-boundary.js";
 
 export type {
   RuntimeReactAdapterReconciliationPolicySnapshot,
@@ -63,6 +71,7 @@ export type {
   RuntimeReactLiveSurfaceResult,
 } from "./live-surface.js";
 export type { RuntimeReactReconciliationKeyInput } from "./reconciliation.js";
+export type { RuntimeReactRootCaughtErrorHandler } from "./root-error-policy.js";
 export type {
   RuntimeReactRenderFailure,
   RuntimeReactRenderFailureChannel,
@@ -79,3 +88,9 @@ export type {
   RuntimeReactSessionSurfaceReady,
   RuntimeReactSessionSurfaceResult,
 } from "./session-surface.js";
+export type {
+  RuntimeReactSurfaceBoundaryProps,
+  RuntimeReactSurfaceBoundaryResult,
+  RuntimeReactSurfaceFailure,
+  RuntimeReactSurfaceFailureRenderer,
+} from "./surface-boundary.js";

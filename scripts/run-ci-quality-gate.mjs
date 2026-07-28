@@ -229,6 +229,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-react-reconciliation-diagnostics.mjs",
       "tests/runtime-react-reconciliation-diagnostics.test.mjs",
     ],
+    [
+      "runtime-react-failure-boundary",
+      "scripts/verify-runtime-react-failure-boundary.mjs",
+      "tests/runtime-react-failure-boundary.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -236,6 +241,10 @@ const DIRECT_FOCUSED_TEST_PREREQUISITES = Object.freeze({
   "runtime-react-reconciliation-diagnostics": Object.freeze({
     packageName: "@desen/runtime-react",
     task: "test:reconciliation-diagnostics",
+  }),
+  "runtime-react-failure-boundary": Object.freeze({
+    packageName: "@desen/runtime-react",
+    task: "test:failure-boundary",
   }),
 });
 
@@ -248,12 +257,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "60f639de8fd2953b8ef7f4bf73e571256fc329566ea301b73481a4f18d731d55";
+  "80186fc5f3a5bae7c50d1cfdc65c42519ec3aa5bd0574e6cfff5896ee94bb1c0";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "2ad72bf3a49231136bb1d3ca9c6ba7f387a408288b77c173fad2fcd758c58ab5";
+  "d7c5127f455340460c3e2ea3704c7a1aebd127d66358fc1c475915e2e5052ded";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "cc02da64fee90249ef49939feed7c45288c4eaae4fff9ce7ea34ce936d0b9696";
-const QUALITY_GATE_PLAN_SHA256 = "5daff7a2229925c8881ae25c1e269be52854183d20f452bd4edb51cd00533d08";
+  "cb6d5acb4b691ec2ff51d0a4a50da35dc2ef8dfd645d25f9d96ddf2f93cf318f";
+const QUALITY_GATE_PLAN_SHA256 = "50ed54524add8181bac783417cb1923e109cb968c4c46ac671c9ef06ac39aa26";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "3ea2af6964a52fc0808675304559bf221e9ffe96953e09cd9fa2c5d3e74b5732";
 const WORKSPACE_MANIFEST_SHA256 =

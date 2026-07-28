@@ -103,8 +103,22 @@ instances and repeated keys survive ordinary updates and reorder, while capabili
 remount-sensitive changes create a new instance. The same complete preflight builds a bounded,
 deeply frozen, callback-free runtime-node ↔ source-node diagnostic index with sorted one-to-many
 inverse lookups. It retains no props, styles, slots, React or platform objects, session, Catalog,
-registry, or callback. M05-T05 intentionally adds no adapter exception boundary, fallback
-component, or guessed placeholder; M05-T06 owns that explicit host-visible failure boundary.
+registry, or callback.
+
+The M05-T06 production boundary composes controlled preflight failure and committed React adapter
+failure through one explicit host-owned renderer. It never guesses a placeholder. Safely isolated
+leaf-component exceptions retain only immutable diagnostic identity; behavior, non-leaf, and
+cleanup failures use a null-identity `ADAPTER_FAILURE` rather than falsely blaming a live ancestor.
+Containment removes the complete managed surface because React exposes no public origin that makes
+arbitrary sibling continuation safe. Two persistent sibling boundaries preserve provenance while
+switching between the managed tree and host failure UI. Recovery is sticky and requires an
+explicit host `recoveryKey`; normal publications never retry failed executable code. A dedicated
+React root may opt into `ignoreRuntimeReactRootCaughtError` so React 19 does not log raw caught
+adapter values before recovery. Event callbacks, arbitrary async work, SSR, uncaught root errors,
+recoverable root errors, and cleanup during complete root removal remain explicit host policies.
+The boundary consumes trusted runtime results, not arbitrary untrusted objects, and nested surfaces
+within one tree require one deduplicated `runtime-react` module instance for private carrier
+identity.
 
 `@desen/reference-catalog-web/react-adapters` is the opt-in executable package boundary. Its five
 registrations statically import the real reference components, map validated fields explicitly,

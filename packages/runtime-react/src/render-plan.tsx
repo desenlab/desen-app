@@ -1083,6 +1083,7 @@ function renderNode(node: PreparedNode, authority: RuntimeReactRenderAuthority):
     kind: "component",
     runtimeInstanceId: node.runtimeNodeId,
     reconciliationKey: node.reconciliationKey,
+    hasManagedDescendants: Object.values(node.slots).some((children) => children.length > 0),
     component: node.definition.component,
     identity,
     props: node.props,

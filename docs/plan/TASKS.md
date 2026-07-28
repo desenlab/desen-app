@@ -133,7 +133,7 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 | M05-T03 | DONE        | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
 | M05-T04 | DONE        | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
 | M05-T05 | DONE        | M05-T02–M05-T04 | Stable keys and runtime-node ↔ source-node diagnostics                                             |
-| M05-T06 | NOT_STARTED | M05-T05         | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
+| M05-T06 | DONE        | M05-T05         | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
 | M05-T07 | NOT_STARTED | M05-T01         | Independently built reference-host shell with host ports                                           |
 | M05-T08 | NOT_STARTED | M05-T04–M05-T07 | Official sign-in bundle running through real adapters                                              |
 | M05-T09 | NOT_STARTED | M05-T07–M05-T08 | Automated source/import audit preventing handwritten managed-screen composition                    |
@@ -168,6 +168,24 @@ subpath maps all five static components field by field, implements the Catalog's
 `focus` command, forwards only inert `change` and `press` payloads, and exposes no DOM, native
 event, arbitrary React prop, or dynamic loader. Its changed `dist/**` bytes produce a successor
 package digest while every M03 artifact remains byte-identical historical evidence.
+
+`M05-T05` observes authenticated headless-session publications through React's external-store
+lifecycle, then re-runs complete renderer authentication for every exact successor snapshot.
+Session-and-registry-scoped private roots prevent compatible public identities from leaking state
+between executable authorities. Trusted `remountOnProps` metadata produces presence-aware RFC 8785
+keys without letting Bundle or Catalog data control remount policy. The same all-or-nothing
+preflight builds a bounded, callback-free runtime/source/behavior diagnostic index with sorted
+one-to-many inverse lookups.
+
+`M05-T06` composes controlled preflight failures and committed adapter exceptions through a
+mandatory host-owned failure renderer. Unknown capabilities never execute an adapter or select a
+placeholder. Safely attributable leaf-component crashes retain only frozen diagnostic identity;
+behavior, non-leaf, descendant-removal, and otherwise ambiguous failures use null identity rather
+than blaming a live ancestor. Containment is whole-surface, retry requires an explicit host
+`recoveryKey`, and persistent managed/host sibling boundaries preserve cleanup provenance during
+branch transitions. A dedicated DESEN React root may suppress raw React 19 caught-error telemetry
+with the exported no-inspection policy; root unmount, event, async, and SSR error policy remains
+host-owned.
 
 ## M06 — Deterministic publisher
 

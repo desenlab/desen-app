@@ -299,16 +299,24 @@ record these profiles. M05-T05 now observes live session publications through a 
 external-store seam, preserves compatible component/behavior/repeat instances under canonical
 trusted remount policy, isolates every exact session-and-registry lifetime, and exposes one
 bounded immutable runtime-node ↔ source-node diagnostic index. `PF-054` records this profile.
-Committed adapter failures remain M05-T06.
+M05-T06 now composes controlled preflight failures and committed adapter exceptions through a
+mandatory host-owned failure renderer. Unknown capabilities still execute no adapter and select
+no placeholder. Safely attributable leaf-component failures retain only frozen diagnostic
+identity; ambiguous behavior, non-leaf, descendant-removal, and cleanup failures use null identity
+under a conservative whole-surface profile. Explicit `recoveryKey` authority controls retry, two
+persistent provenance branches distinguish managed cleanup from host failure UI, and a dedicated
+DESEN root can suppress raw React caught-error telemetry without inspecting it. `PF-055` records
+the target-specific boundary. N-037 becomes `TESTED`; P-17 remains `PARTIAL` with only M07-T04
+activation preflight outstanding.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `59 / 145 tasks complete (41%)`
+- Overall implementation progress: `60 / 145 tasks complete (41%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
-- M05 progress: `5 / 9 tasks complete (56%)`
+- M05 progress: `6 / 9 tasks complete (67%)`
 - Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -353,11 +361,12 @@ Committed adapter failures remain M05-T06.
   `M05-T02 — Resolved props and named slots`,
   `M05-T03 — Style parts and visual states`,
   `M05-T04 — Component events, commands, and behavior adapters`,
-  `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`
+  `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`,
+  `M05-T06 — Error boundaries and explicit capability failure`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M05-T06 — Error boundaries and explicit capability failure`
-- Status: M05-T05 is complete; M05-T06 is ready to start
+- Next implementation task: `M05-T07 — Independently built reference-host shell with host ports`
+- Status: M05-T06 is complete; M05-T07 is ready to start
 
 ## Completed preparation
 
@@ -690,9 +699,12 @@ adapter effects can act. Compatible generations preserve local platform state; a
 executable-registry change remounts the complete managed tree and revokes old interaction ports.
 The callback-free immutable diagnostic index preserves repeated one-to-many source traceability
 without retaining React, platform, session, Catalog, registry, props, styles, slots, or callbacks.
-N-026, N-029, N-033, and N-034 are `TESTED`; P-16 is now `PARTIAL`, while N-021 remains `PLANNED`.
-M05-T06 must now contain trusted adapter exceptions and expose explicit failure without silently
-guessing an unknown-capability placeholder.
+The production React boundary now rejects unknown capabilities without executing or guessing an
+adapter, contains committed adapter failures as one managed surface, redacts raw thrown values,
+refuses false cleanup attribution, revokes failed authority, and requires explicit host retry.
+N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-16 and P-17 remain `PARTIAL`, while N-021
+remains `PLANNED`. M05-T07 must now build the independent host shell and wire its dedicated React
+root, browser ports, and explicit recovery policy.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -702,9 +714,9 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M05-T06 — Error boundaries and explicit failure for unknown capabilities`. Contain trusted
-adapter exceptions after commit and expose a host-visible controlled failure without substituting
-or guessing a production component.
+Begin `M05-T07 — Independently built reference-host shell with host ports`. Create the separate
+application root, connect only explicit browser/host infrastructure, wire the dedicated React root
+error and recovery policies, and keep managed component composition outside host source.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1184,8 +1196,24 @@ M05-T05 evidence:
   prerequisite bytes, session and registry replacement cleanup, StrictMode/SSR/Suspense lifecycle,
   repeat reorder/removal, hostile reflection, symlink rejection, and atomic artifact writing
 - coverage decision: selected Web–React R-104 adapter-instance work is complete; P-16 advances to
-  `PARTIAL`; N-021 remains `PLANNED`; M05-T06 still owns the explicit committed adapter error
-  boundary and unknown-capability non-substitution behavior
+  `PARTIAL`; N-021 remains `PLANNED`; M05-T06 now owns the successor production failure boundary
+
+M05-T06 evidence:
+
+- `docs/proof/RUNTIME-REACT-FAILURE-BOUNDARY.md`
+- `docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json`
+- artifact SHA-256:
+  `3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723`
+- exact boundary: complete unknown-capability preflight with no placeholder; whole-surface
+  containment; exact leaf-component or honest null attribution; sticky explicit retry authority;
+  separate persistent managed/host provenance branches; nested host-carrier preservation; and a
+  dedicated-root raw caught-error suppression helper
+- executable evidence: 22 focused React cases, 9 compiler-negative cases, 25 root
+  proof/mutation tests, 64 source assertions, 16 byte-pinned task files, five immutable
+  prerequisites, hostile Proxy and cleanup provenance vectors, exact documentation pins, and
+  deterministic atomic artifact writing
+- coverage decision: N-037 becomes `TESTED`; P-17 remains `PARTIAL` with M07-T04 activation
+  finite-limit preflight outstanding; D-009 retains its M06-T11 invalid-publication slice
 
 ## Status vocabulary
 

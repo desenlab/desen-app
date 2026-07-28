@@ -1800,12 +1800,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Future action: M05-T02 authenticates the exact session/Catalog pair and validates resolved props
   and named slots through one bounded receiving scope; `PF-051` records that implementation
   profile. M05-T03 now validates and delivers resolved styles through that same scope; `PF-052`
-  records the semantic-style profile. M05-T04 activates the deliberately unavailable event/command seams and proves behavior
-  lifecycle. M05-T05 proves concrete React instance reconciliation and source diagnostics, while
-  M05-T06 owns committed adapter exceptions and final production
-  unknown-capability/error-boundary behavior. Future SwiftUI and Compose renderers should reuse
-  the observable headless vectors but define independent static target registries rather than
-  importing React concepts into `runtime-core`.
+  records the semantic-style profile. M05-T04 activates the deliberately unavailable event/command
+  seams and proves behavior lifecycle. M05-T05 proves concrete React instance reconciliation and
+  source diagnostics. M05-T06 now composes committed adapter exceptions and controlled preflight
+  failures without a guessed capability or placeholder; `PF-055` records that containment profile.
+  Future SwiftUI and Compose renderers should reuse the observable headless vectors but define
+  independent static target registries rather than importing React concepts into `runtime-core`.
 
 ## PF-051 — Resolved adapter receiving requires exact Catalog authority and one shared finite scope
 
@@ -1855,8 +1855,9 @@ This file records implementation discoveries without changing the frozen DESEN 0
   session authority remain framework-neutral.
 
 - Future action: M05-T03 now delivers only schema-valid resolved visual-state/style-part maps.
-  M05-T04 must bind event and command lifetimes to the exact current session generation. M05-T06
-  must compose receiving failures and adapter exceptions into the production safe-boundary policy.
+  M05-T04 binds event and command lifetimes to the exact current session generation. M05-T06 now
+  composes receiving failures and adapter exceptions into the production safe-boundary policy;
+  `PF-055` records its conservative attribution and recovery rules.
   M06-T05 still owns publisher-side recording of dynamic validation obligations, so `N-027`
   remains `PLANNED`. M09-T04 still owns editor overlay/private-structure isolation, so `N-042`
   remains `PLANNED`. A later protocol revision may standardize a target-neutral receiving-scope
@@ -1897,8 +1898,9 @@ This file records implementation discoveries without changing the frozen DESEN 0
   strict task-time compatibility reader, while the M05-T03 successor artifact owns the current
   renderer, validator, test, documentation, and migration paths.
 
-- Future action: M05-T04 must bind interactions without widening the semantic-style authority.
-  M05-T06 must contain committed adapter exceptions. N-030 remains `PLANNED`: real reference
+- Future action: M05-T04 binds interactions without widening the semantic-style authority.
+  M05-T06 contains committed adapter exceptions without exposing raw values or guessing identity.
+  N-030 remains `PLANNED`: real reference
   adapter styling and hostile accessibility-preservation tests remain with M09/M12 rather than
   being inferred from schema-valid delivery alone. A later multi-target revision may standardize
   a renderer-neutral semantic-style receiving envelope, but target state activation remains
@@ -1967,9 +1969,10 @@ This file records implementation discoveries without changing the frozen DESEN 0
   entries and 252,072 bytes. M03 proof bytes and their old tuple remain unchanged behind strict
   task-time compatibility readers; M05-T04 owns the current package inventory.
 
-- Future action: M05-T05 must prove stable React reconciliation keys and runtime-to-source
-  diagnostics without widening an adapter's authority. M05-T06 must contain committed adapter
-  exceptions. M05-T08 exercises the complete official-derived sign-in path through these exact
+- Future action: M05-T05 proves stable React reconciliation keys and runtime-to-source diagnostics
+  without widening an adapter's authority. M05-T06 contains committed adapter exceptions under
+  the whole-surface profile recorded by `PF-055`. M05-T08 exercises the complete official-derived
+  sign-in path through these exact
   reference adapters, while M05-T09 proves the separate production host cannot replace the
   bundle-driven tree or executable registry with handwritten composition. M09/M12 still own
   concrete semantic style application and accessibility preservation. Native renderers should
@@ -2022,9 +2025,59 @@ This file records implementation discoveries without changing the frozen DESEN 0
   registry, or callback. Any malformed ownership or lower-limit crossing returns
   `DIAGNOSTIC_INDEX_FAILED` before element creation.
 
-- Future action: M05-T06 must add the explicit production adapter error boundary without
-  converting unknown capabilities into guessed placeholders. M09-T13 must connect the immutable
+- Future action: M05-T06 now supplies the explicit production adapter error boundary without
+  converting unknown capabilities into guessed placeholders; `PF-055` records its honest
+  attribution limit. M09-T13 must connect the immutable
   index to end-to-end Desen App diagnostic selection before P-16 can become `PROVEN`. M06-T06 must
   prove that publication preserves the protocol behavior/source identity relationship before
   N-021 can become `TESTED`. Native renderers should reuse the observable identity rules but define
   their own platform instance-compatibility boundary rather than importing React keys.
+
+## PF-055 — React failure containment is whole-surface when exact origin is unavailable
+
+- Status: OPEN
+- Blocks proof: No; M05-T06 defines one conservative Web–React failure profile without changing
+  frozen protocol data or claiming unsafe node-local isolation.
+- Protocol location: SPEC Sections 24.2, 26.3, and 26.4; `R-112`, `R-113`, `R-115`, `A-012`,
+  `D-009`, `N-037`, proof claim `P-17`, and related findings `PF-047`, `PF-050`, `PF-051`,
+  `PF-053`, and `PF-054`
+- Observation: React error boundaries can contain render and commit-lifecycle exceptions, but the
+  public API does not reliably identify which removed child, behavior wrapper, or live ancestor
+  originated an arbitrary cleanup failure. Treating the nearest catching boundary as the exact
+  adapter would create false diagnostics. Keeping siblings alive would also overclaim safe
+  isolation when a failed adapter may have shared effects or command authority. React 19 root
+  `onCaughtError` may observe the original thrown value before boundary recovery.
+- Implementation decision: M05-T06 uses one explicit, statically host-owned
+  `RuntimeReactSurfaceBoundary` around a completely preflighted surface. Unknown component or
+  behavior capabilities remain controlled renderer failures and create no React element,
+  fallback, or guessed placeholder. A safely isolated leaf DESEN component failure emits a deeply
+  frozen redacted `ADAPTER_FAILURE` with exact diagnostic identity. Behavior, non-leaf,
+  descendant-removal, and other ambiguous failures emit the same code with every identity field
+  `null`; the public union exposes only variants that this implementation can actually produce.
+
+  Containment is whole-surface. Two always-mounted sibling boundaries distinguish managed-tree
+  lifecycle from host failure-UI lifecycle while switching branches. Cleanup revokes the failed
+  tree's event and command authority. Host failure UI that throws during render, effect, or removal
+  crosses outer and nested DESEN boundaries in a fresh private carrier with the exact host-thrown
+  value only as `cause` while a containing boundary remains mounted; it never becomes
+  `ADAPTER_FAILURE`. Private carriers are branded by
+  `WeakSet` rather than `instanceof`, so hostile thrown proxies cannot trigger prototype traps, and
+  reusing the same raw `Error` later in an adapter cannot inherit host provenance.
+
+  Adapter failure is sticky until the host changes an explicit `recoveryKey`. Bundle publication,
+  ordinary prop or reconciliation-key changes, and a structurally equivalent registry do not
+  silently retry executable code. A dedicated DESEN root may pass
+  `ignoreRuntimeReactRootCaughtError` to React root creation to suppress raw caught-error
+  telemetry; shared-root telemetry, `onUncaughtError`, and `onRecoverableError` remain host policy.
+  Event callbacks, arbitrary asynchronous failures, SSR, and cleanup during complete React-root
+  removal are explicit host-policy nonclaims. The boundary accepts trusted runtime results rather
+  than attacker-constructed props. Nested surfaces in one React tree require one deduplicated
+  `runtime-react` module instance; omitted `recoveryKey` deliberately means never retry.
+
+- Future action: M05-T07 must wire the dedicated reference-host root error policies and derive
+  recovery epochs only from explicit host/session authority. M05-T08 must exercise the official
+  sign-in path through the same boundary. M05-T09 must prove the host cannot bypass it with a
+  handwritten managed tree. M06-T11 still owns the remaining invalid-publication slice of `D-009`,
+  and M07-T04 owns activation-time finite preflight before P-17 can become `PROVEN`. Future native
+  runtimes must define their own platform-specific containment evidence rather than importing
+  React's boundary limitations.
