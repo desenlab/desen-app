@@ -6,11 +6,11 @@ App-independent integration path documented by the DESEN Developer Platform at `
 
 ## Status
 
-M05-T08 runs a controlled official-derived sign-in Source and Bundle through the independent
-client-only React 19 and zero-configuration Vite 8 host. Its managed `surfaces` remain canonically
-identical to the frozen official example; only the Catalog requirement and the resulting
-`sourceDigest` and Bundle `revision` differ. The fixture requires the exact current
-`run.desen.reference.sign-in@0.1.0` Catalog digest.
+G05 is complete. M05-T08 tracks a controlled official-derived sign-in Source and Bundle, but the
+independent client-only React 19 and zero-configuration Vite 8 host executes only the Bundle. Its
+managed `surfaces` remain canonically identical to the frozen official example; only the Catalog
+requirement and the resulting `sourceDigest` and Bundle `revision` differ. The fixture requires
+the exact current `run.desen.reference.sign-in@0.1.0` Catalog digest.
 
 The production entry constructs the real five-adapter registry exported by
 `@desen/reference-catalog-web/react-adapters`, mounts the exact Bundle and Catalog through
@@ -50,9 +50,17 @@ of an already-started HTTP request.
 The immutable M05-T07 artifact remains historical evidence for the shell as it existed at that
 task, and its generator/verifier now serves only as a compatibility reader for that pinned
 task-time evidence. M05-T08 owns verification of the current official-derived composition and
-build; it does not rewrite the T07 artifact. M05-T09 still owns the exhaustive TypeScript AST and
-resolved-import audit. This task does not claim a Publisher, authentication backend, channel
-activation, IndexedDB/last-known-good recovery, native runtime, or Desen App integration.
+build; it does not rewrite the T07 artifact. M05-T09 now discovers the complete production source
+set, resolves JSX and aliases with the TypeScript checker, and observes the actual Vite production
+graph. It proves that exact host-owned boot/failure infrastructure is the only handwritten JSX
+and that the managed branch reaches components only through the public generic runtime renderer
+and shared public adapter factory. Direct or hidden component trees, plan-shaped substitutes,
+dynamic code selection, private package paths, forbidden packages, authoring Source data, orphan
+modules, symbolic links, and unreviewed assets fail closed. This closes G05 and advances P-07 only
+to `PARTIAL`; Desen App E2E remains M10-T05.
+
+The completed gate does not claim a Publisher, authentication backend, channel activation,
+IndexedDB/last-known-good recovery, native runtime, real-browser E2E, or Desen App integration.
 
 ## Local commands
 
@@ -61,4 +69,5 @@ pnpm --filter @desen/reference-host-web typecheck
 pnpm --filter @desen/reference-host-web test:shell
 pnpm --filter @desen/reference-host-web test:sign-in
 pnpm --filter @desen/reference-host-web build
+pnpm verify:reference-host-web-source-audit
 ```

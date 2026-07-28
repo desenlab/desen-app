@@ -9,8 +9,9 @@ React adapter registry, and activates the `sign-in` surface through the host bou
 by M05-T07.
 
 This is executable proof that the frozen Desen protocol can drive the official sign-in example
-without the application hand-authoring that managed screen as React JSX. It is not yet the final
-source/import absence proof; M05-T09 owns that wider AST and resolved-import audit.
+without the application hand-authoring that managed screen as React JSX. At M05-T08 task time,
+this was not yet the final source/import absence proof; M05-T09 owned that wider AST and
+resolved-import audit.
 
 ## Controlled fixture
 
@@ -71,9 +72,9 @@ immutable task-time M05-T07 host-shell receipt before it interprets successor so
 
 ## Scope decisions
 
-The evidence strengthens P-06 and P-10 but leaves both `PARTIAL`. P-07 remains `NOT_PROVEN`
-pending M05-T09, and P-17 remains `PARTIAL`. N-036 remains `PLANNED`; no normative status changes
-are claimed. G05 remains open pending M05-T09.
+At M05-T08 task time, the evidence strengthened P-06 and P-10 but left both `PARTIAL`. P-07
+remained `NOT_PROVEN` pending M05-T09, and P-17 remained `PARTIAL`. N-036 remained `PLANNED`; no
+normative status changes were claimed. G05 remained open pending M05-T09.
 
 This task does not claim M06 Publisher output, a real authentication backend, credential storage,
 authorization/session policy, timeout, automatic retry, fetch-level transport cancellation,
@@ -86,6 +87,11 @@ runtime support.
 M05-T07 remains an immutable task-time artifact. Its generator, verifier, library, and hostile
 test suite now read and authenticate those exact historical bytes; they do not silently rebuild
 the old shell claim from M05-T08 successor source.
+
+With M05-T09 taking ownership of the current source/import graph, this M05-T08 receipt is also an
+immutable task-time artifact. Its compatibility generator, verifier, library, and hostile suite
+authenticate the exact bytes and reviewed semantics below without rebuilding the historical
+sign-in claim from successor source.
 
 ## Evidence artifact
 

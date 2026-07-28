@@ -168,7 +168,20 @@ events from its detached adapter instances and a late operation settlement canno
 navigate the replacement surface. This is an authority and stale-settlement guarantee, not
 transport cancellation: an already-started fetch is not aborted. The immutable T07 artifact
 remains historical task-time evidence, while T08 owns the current composition and build
-verification. T09 owns the exhaustive AST and resolved-import audit.
+verification.
+
+The M05-T09 gate audits every dynamically discovered reference-host production source with the
+TypeScript parser/checker and observes the real Vite 8 `write:false` production graph twice.
+TypeScript resolves JSX, import aliases, namespaces, and symbol origins while the complete-source
+policy and exact composition fingerprints reject helper-hidden trees; Vite is the authority for
+the modules and static edges resolved by the actual production build. Exact root, application,
+managed-boundary, and controlled-failure JSX is the only host-authored tree. Every managed
+component path crosses the public `@desen/runtime-react` renderer and public
+`@desen/reference-catalog-web/react-adapters` factory. Orphan source, direct or hidden component
+composition, React factory bypasses, plan-shaped substitutes, dynamic loading, private package
+paths, forbidden applications, authoring Source data, symbolic links, and unreviewed assets fail
+closed. Dependency-cruiser remains an independent package-boundary authority. This completes the
+separate-host claim required by G05 without claiming the later Desen App E2E slice.
 
 Page lifecycle disposal is BFCache-aware. Persisted `pagehide` keeps the active composition and
 listener intact for restoration; a non-persisted `pagehide` removes the listener and disposes the

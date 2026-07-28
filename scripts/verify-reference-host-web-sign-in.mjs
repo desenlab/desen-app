@@ -10,7 +10,7 @@ try {
     `${JSON.stringify(
       {
         result: result.result,
-        message: "Verified deterministic M05-T08 reference-host sign-in evidence.",
+        message: "Verified immutable task-time M05-T08 reference-host sign-in evidence.",
         artifact: DEFAULT_REFERENCE_HOST_WEB_SIGN_IN_ARTIFACT_PATH,
         sha256: result.artifactSha256,
         bytes: result.artifactBytes,
@@ -24,6 +24,7 @@ try {
         buildFiles: result.buildFiles,
         buildAggregateSha256: result.buildAggregateSha256,
         exactDocumentationReferences: result.exactDocumentationReferences,
+        compatibilityMode: result.compatibilityMode,
       },
       null,
       2,

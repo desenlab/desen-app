@@ -316,8 +316,9 @@ uncaught root failure revokes session and host authority before fixed redacted o
 sticky recovery changes only after explicit retry or exact executable-authority replacement.
 Forbidden application, authoring, publisher, test-support, and facade imports are enforced by
 negative dependency fixtures. `PF-056` records this profile; `PF-057` records the explicit wide
-test budget and assigns binding-scaling measurement to M12-T05. P-06 remains `PARTIAL`, P-07
-remains `NOT_PROVEN`, and P-17 remains `PARTIAL`; M05-T08 and M05-T09 own those remaining slices.
+test budget and assigns binding-scaling measurement to M12-T05. At M05-T07 task time, P-06
+remained `PARTIAL`, P-07 remained `NOT_PROVEN`, P-17 remained `PARTIAL`, and M05-T08 and M05-T09
+owned the remaining slices.
 M05-T08 now runs the official-derived sign-in Bundle in that separate host through the exact
 five-component registry and a fixed-capability same-origin `/api/sign-in` binding. The controlled
 fixtures differ from the frozen official example only by the current exact Catalog requirement
@@ -329,19 +330,30 @@ suppression, redacted rejected handlers, disposal, and same-document session/hos
 with stale settlement containment. Persisted `pagehide` preserves the live composition for
 BFCache restoration; final page exit disposes it. `PF-058` records the composition profile. The
 task deliberately does not claim transport cancellation, real-browser BFCache E2E, M06 Publisher
-output, or the final no-handwritten-managed-tree audit. P-06 and P-10 gain stronger executable
-evidence but remain `PARTIAL`; P-07 remains
-`NOT_PROVEN`, P-17 remains `PARTIAL`, and M05-T09 still owns the gate-closing source/import audit.
+output, or the final no-handwritten-managed-tree audit. At M05-T08 task time, P-06 and P-10 had
+gained stronger executable evidence but remained `PARTIAL`; P-07 remained `NOT_PROVEN`, P-17
+remained `PARTIAL`, and M05-T09 still owned the gate-closing source/import audit.
+M05-T09 now closes that gap across the complete dynamically discovered reference-host production
+source and the real Vite 8 resolved graph. TypeScript checker authority identifies JSX and symbol
+origins through import aliases and namespaces; complete-source JSX policy plus exact composition
+fingerprints reject helper-hidden trees. Vite authority proves the modules and static edges that
+the actual production build resolves; dependency-cruiser independently protects package
+boundaries. Exact
+host-infrastructure JSX remains allowed, but a direct or hidden reference-component tree, React
+factory bypass, structural render plan, capability/source-node selection, dynamic loader, private
+package path, forbidden application edge, authoring Source input, orphan source, symlink, or
+unknown asset fails closed. `PF-059` records this audit profile. P-07 advances to `PARTIAL`;
+P-06/P-10 remain `PARTIAL` for their later Desen App slices; and G05 is `DONE`.
 
 ## Current milestone
 
-- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
+- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `62 / 145 tasks complete (43%)`
+- Current milestone: `M06 — Deterministic publisher`
+- Overall implementation progress: `63 / 145 tasks complete (43%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
-- M05 progress: `8 / 9 tasks complete (89%)`
-- Proof-gate progress: `5 / 13 complete`
+- M05 progress: `9 / 9 tasks complete (100%)`
+- Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -388,12 +400,12 @@ evidence but remain `PARTIAL`; P-07 remains
   `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`,
   `M05-T06 — Error boundaries and explicit capability failure`,
   `M05-T07 — Independently built reference-host shell with host ports`,
-  `M05-T08 — Official sign-in bundle running through real adapters`
+  `M05-T08 — Official sign-in bundle running through real adapters`,
+  `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task:
-  `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`
-- Status: M05-T08 is complete; M05-T09 is ready to start
+- Next implementation task: `M06-T01 — Staged PublishResult and diagnostics API`
+- Status: M05 and G05 are complete; M06-T01 is ready to start
 
 ## Completed preparation
 
@@ -738,9 +750,11 @@ stack through the real reference adapters and trusted operation boundary, exerci
 declared failure, retry, success, navigation, replacement, disposal, and stale-result containment
 without accepting a caller-selected Bundle, Catalog, capability, registry, route, managed React
 tree, or recovery key. N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-06, P-10, P-16, and
-P-17 remain `PARTIAL`, P-07 remains `NOT_PROVEN`, and N-021 remains `PLANNED`. M05-T09 must now
-prove that the production managed screen cannot be handwritten or reached through a forbidden
-resolved import.
+P-17 remain `PARTIAL`, and N-021 remains `PLANNED`. The M05-T09 TypeScript semantic audit and real
+Vite graph now prove that every discovered production source is reachable, exact
+host-infrastructure JSX is the only handwritten tree, and the managed branch crosses the public
+generic renderer and shared adapter factory without an alternate executable path. P-07 is now
+`PARTIAL` pending Desen App E2E; G05 is complete.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -750,10 +764,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M05-T09 — Automated source/import audit preventing handwritten managed-screen
-composition`. Prove across the complete resolved production graph that the independent host
-accepts only the controlled Bundle/runtime path and cannot recreate the managed sign-in screen as
-a handwritten React tree; then close G05 only if the cumulative M05 evidence remains green.
+Begin `M06-T01 — Staged PublishResult and diagnostics API`. Define the deterministic Publisher's
+closed success/failure result boundary and stable diagnostics without emitting a Bundle yet;
+M06-T02 and later tasks will add exact Catalog resolution, semantic preflight, authoring removal,
+and deterministic publication in dependency order.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1267,9 +1281,9 @@ M05-T07 evidence:
 - executable evidence: two byte-identical three-file production builds, 42 tracked files, 92
   focused runtime cases, 53 compiler-negative cases, 33 hostile root mutations, 902 source
   assertions, 113 production imports, and 10 negative plus 2 allowed dependency fixtures
-- coverage decision: R-019, R-105, and A-013 host-profile evidence advances without a normative
-  status change; P-06 remains `PARTIAL`, P-07 remains `NOT_PROVEN`, P-17 remains `PARTIAL`, and
-  G05 remains open for M05-T08 and M05-T09
+- task-time coverage decision: R-019, R-105, and A-013 host-profile evidence advanced without a
+  normative status change; P-06 remained `PARTIAL`, P-07 remained `NOT_PROVEN`, P-17 remained
+  `PARTIAL`, and G05 remained open for M05-T08 and M05-T09
 
 M05-T08 evidence:
 
@@ -1290,12 +1304,39 @@ M05-T08 evidence:
   navigation; session/host replacement; stale-result containment; and terminal disposal
 - page lifecycle evidence: persisted `pagehide` preserves the production composition and listener
   for BFCache restoration; final non-persisted `pagehide` removes the listener and disposes
-- coverage decision: P-06 and P-10 gain production-like host evidence but remain `PARTIAL`; P-07
-  remains `NOT_PROVEN`, P-17 remains `PARTIAL`, N-036 remains `PLANNED`, and G05 remains open for
-  the M05-T09 AST and resolved-import audit
+- task-time coverage decision: P-06 and P-10 gained production-like host evidence but remained
+  `PARTIAL`; P-07 remained `NOT_PROVEN`, P-17 remained `PARTIAL`, N-036 remained `PLANNED`, and
+  G05 remained open for the M05-T09 AST and resolved-import audit
 - honest limits: no M06 Publisher provenance, real authentication backend, long-lived credential
   store, automatic retry, timeout, fetch-level cancellation, real-browser or BFCache E2E, Desen
   App parity, deployment-security, or native-runtime claim
+
+M05-T09 evidence:
+
+- `docs/proof/REFERENCE-HOST-WEB-SOURCE-AUDIT.md`
+- `docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json`
+- artifact SHA-256:
+  `cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89`
+- source authority: recursive production-source discovery with no fixed complete inventory; exact
+  regular-file and symlink policy; TypeScript parser/checker resolution of JSX, aliases,
+  namespaces, imports, and symbol origins; complete-source JSX policy and exact fingerprints for
+  approved composition sites reject helper-hidden trees; a separate closed semantic fingerprint
+  pins executable calls and property writes
+- runtime-graph authority: two deterministic Vite 8 `write:false` production builds; every
+  discovered host source reachable; exact public runtime-react and reference-adapter package
+  crossings; stable local graph backing-file bytes and identities; no dynamic edge, orphan source,
+  unresolved import, forbidden transitive package path, or unreviewed data asset
+- negative evidence: direct, aliased, namespace, and helper-hidden component trees; React element
+  factories/runtime helpers; forged element and plan objects; capability/source-node selection;
+  indirect dynamic code and DOM-setter paths; forbidden packages and authoring Source; canonical
+  HTML, canonical host CSS, and three-level PostCSS build-envelope injection; graph containment,
+  hostile option, symlink, and documentation-decoy mutations all fail closed
+- coverage decision: M05-T09 and G05 become `DONE`; P-07 advances to `PARTIAL`; P-06 and P-10
+  remain `PARTIAL` with stronger independent-host evidence; P-17 remains `PARTIAL`; N-036 remains
+  `PLANNED`; no normative status changes
+- honest limits: no M06 Publisher provenance, dynamic capability installation, browser E2E, Desen
+  App registry/Run Mode parity, deployment-security, channel activation, persistent recovery, or
+  native-runtime claim
 
 ## Status vocabulary
 

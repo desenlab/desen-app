@@ -2078,8 +2078,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
   epochs only from explicit retry or exact session, registry, Catalog, and host-authority
   replacement; `PF-056` records that browser-host boundary. M05-T08 now exercises the official
   sign-in path and exact authority replacement through that boundary; `PF-058` records the
-  distinction between stale containment and transport cancellation. M05-T09 must prove the host
-  cannot bypass it with a handwritten managed tree. M06-T11 still owns the remaining
+  distinction between stale containment and transport cancellation. M05-T09 now proves the
+  current independent host cannot bypass it with a handwritten managed tree. M06-T11 still owns the remaining
   invalid-publication slice of `D-009`, and M07-T04 owns activation-time finite preflight before
   P-17 can become `PROVEN`. Future native runtimes must define their own platform-specific
   containment evidence rather than importing React's boundary limitations.
@@ -2127,8 +2127,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
 
 - Future action: M05-T08 now runs the official-derived sign-in path through this exact host,
   operation, adapter, failure, and recovery composition; `PF-058` records its precise
-  stale-settlement nonclaim. M05-T09 must complete the TypeScript AST and resolved-import audit
-  before the no-handwritten-tree claim or G05 can close. M07 still owns channel retrieval,
+  stale-settlement nonclaim. M05-T09 now completes the TypeScript AST and resolved-import audit
+  and closes the independent-host slice of G05. M07 still owns channel retrieval,
   persistent activation, restart recovery, and last-known-good behavior. Future native targets
   must define independent registries, renderers, platform hosts, and lifecycle evidence while
   reusing only framework-neutral protocol and headless semantics.
@@ -2189,8 +2189,47 @@ This file records implementation discoveries without changing the frozen DESEN 0
   The immutable T07 proof remains historical task-time evidence; T08 owns the changed current
   composition and build verification.
 
-- Future action: M05-T09 must perform the exhaustive TypeScript AST and resolved-import audit
-  before the no-handwritten-managed-tree claim and G05 can close. M06 still owns Publisher
-  provenance, M07 owns channel retrieval and persistent atomic activation, and future backend,
+- Future action: M05-T09 now supplies the exhaustive TypeScript AST and real Vite resolved-import
+  audit for the current independent host, closing G05 and advancing P-07 only to `PARTIAL`. M06
+  still owns Publisher provenance, M07 owns channel retrieval and persistent atomic activation,
+  M10-T05 owns the corresponding Desen App host E2E slice, and future backend,
   timeout/cancellation, and native-host policies require their own explicit contracts and
   evidence.
+
+## PF-059 — Runtime module resolution is distinct from TypeScript declaration resolution
+
+- Status: OPEN
+- Blocks proof: No; M05-T09 resolves the mismatch for the current independent Web–React host and
+  closes G05 without changing protocol semantics.
+- Protocol location: SPEC Sections 9.1 and 24.5 and Appendix A; proof claims `P-06`, `P-07`, and
+  `P-10`; ADR 0010
+- Observation: TypeScript commonly resolves a workspace package import to its declaration entry,
+  while the browser build resolves the same specifier to executable JavaScript and its transitive
+  dependencies. Treating the TypeScript graph as the shipped runtime graph could therefore miss a
+  forbidden executable edge. Plain source-text searches are also insufficient because aliases,
+  namespaces, helper modules, React factories, and generated JSX-runtime calls can express the
+  same handwritten tree without the expected spelling.
+- Implementation decision: M05-T09 uses three non-substitutable authorities. TypeScript's parser
+  and checker resolve JSX, import aliases, namespace access, and symbol origins. A
+  complete-source JSX policy and exact approved-composition fingerprints reject helper-hidden
+  trees.
+  Two programmatic Vite 8 `write:false` production builds observe and compare the real
+  `moduleParsed` graph. Dependency-cruiser separately enforces package-level application
+  boundaries. The source inventory is discovered recursively; every production file must be a
+  regular reachable module, and symbolic links, orphans, unresolved imports, unknown assets, and
+  unreviewed data edges fail closed.
+
+  The allowed handwritten JSX is limited to exact host boot, notice, failure, recovery, and
+  managed-boundary infrastructure. The managed branch must cross the public
+  `@desen/runtime-react` renderer and public
+  `@desen/reference-catalog-web/react-adapters` factory. Direct, aliased, namespace, helper-hidden,
+  factory-created, plan-shaped, capability/source-node-selected, or dynamically loaded managed
+  alternatives are hostile mutation cases. The exact admitted data edges are the controlled
+  official-derived Bundle, current Catalog, and host CSS; the authoring Source is not a production
+  dependency.
+
+- Future action: M09-T03 and M10-T05 must apply corresponding registry-identity, source/import, and
+  browser E2E evidence to Desen App before P-06 or P-07 can become `PROVEN`. Any legitimate future
+  reference-host infrastructure change must update the semantic allowlist and mutation suite.
+  Native hosts require target-specific executable registries and graph audits rather than
+  inheriting this Web–React proof.
