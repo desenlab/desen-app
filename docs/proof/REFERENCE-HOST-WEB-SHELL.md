@@ -52,12 +52,15 @@ node --test tests/reference-host-web-shell.test.mjs
 node scripts/verify-reference-host-web-shell.mjs
 ```
 
-The root hostile suite mutation-tests exact production seams, terminal root fencing, reentrant
-replacement, all four executable-authority joins, raw-error redaction, recovery authority,
-document and host-port identity authentication, dynamic loading, forbidden imports, dependency
-allowlists, test and script inventory, canonical trace locations, immutable prerequisites,
-symlinks, bounded hostile inputs, deterministic artifact bytes, atomic writing, and the unique
-human-readable digest location.
+At task time, the root hostile suite mutation-tested the production seams, terminal root fencing,
+reentrant replacement, all four executable-authority joins, raw-error redaction, recovery
+authority, document and host-port identity authentication, dynamic loading, forbidden imports,
+dependency allowlists, test and script inventory, canonical trace locations, immutable
+prerequisites, symlinks, bounded hostile inputs, deterministic artifact bytes, atomic writing, and
+the unique human-readable digest location. The current compatibility verifier intentionally reads
+only the immutable M05-T07 artifact, checks its reviewed semantics and inventory, validates bounded
+inputs and safe atomic copying, and pins the artifact to its exact documentation locations.
+Successor production-seam mutation coverage belongs to M05-T08 and later evidence.
 
 ## Scope boundary
 

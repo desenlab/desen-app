@@ -266,9 +266,12 @@ server snapshot, renderer result, and reconciliation key cannot advance that epo
 The browser profile retains its last valid bounded environment observation when a later read is
 temporarily hostile, exposes a finite nondecreasing epoch clock, and treats every registered
 browser or media-query listener as an independently attempted cleanup. One failing removal cannot
-strand the remaining cleanup attempts. M05-T08 still owns official-derived sign-in execution
-through these authorities, and M05-T09 still owns the final AST and resolved-import proof that the
-production graph contains no handwritten managed tree.
+strand the remaining cleanup attempts. M05-T08 now runs the official-derived sign-in execution
+through these authorities. The immutable M05-T07 artifact remains historical task-time evidence;
+its generator and verifier are compatibility readers for the pinned artifact rather than claims
+about the changed current source. T08 owns verification of the current composition and build
+rather than rewriting that artifact. M05-T09 still owns the final AST and resolved-import proof
+that the production graph contains no handwritten managed tree.
 
 ### Controlled official-derived sign-in fixture
 
@@ -286,11 +289,44 @@ recalculated with the existing DESEN 0.1.0 projection functions. Independent evi
 - absence of top-level authoring state from the Bundle; and
 - deterministic fixture bytes, Source digest, and Bundle revision.
 
+The committed fixture has Source digest
+`sha256:b8e2d6bac855fb307aaeb0636becf93834f6faeda5464bdbfbc1e8d52f379635`, Bundle revision
+`sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb`, and exact Catalog tuple
+`run.desen.reference.sign-in@0.1.0` with package digest
+`sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0`.
+
 This is an `official-derived` M05 integration fixture, not a claim that the M06 Publisher produced
 it and not a replacement for the frozen upstream example. Production host source does not import
-authoring fixtures or use synthetic operation results. T08 supplies a controlled trusted sign-in
-handler through the host-operation boundary and exercises pending, declared failure, retry, stale
-replacement protection, success, and navigation through real adapters.
+an upstream or derived Source document, an authoring-fixture export, or a synthetic operation
+result. It does import the complete inert Catalog JSON, whose authoring metadata remains present;
+the host never reads that metadata as an operation result, and T08 does not claim build-time
+tree-shaking of it. T08 composes the derived Bundle, exact current Catalog, public five-adapter
+registry, browser host, headless session, and React live surface through their real public
+boundaries.
+
+The production sign-in handler snapshots exact bounded own-data credentials and issues one fixed
+same-origin `POST /api/sign-in` request. Only HTTP `401` maps to `invalidCredentials`; every other
+HTTP status and all network, response, JSON parse, malformed-data, and response-budget failures
+map to `unavailable`. It neither retries nor persists credentials beyond the request lifetime nor
+forwards raw failures. A successful response is streamed through a 64 KiB and 1,024-non-empty-chunk
+ceiling before JSON parsing, and the resulting bounded JSON value remains subject to
+runtime-core's exact declared output-schema validation.
+The host tests drive pending, declared failure, edited retry, success, and `/home` navigation
+through the real adapters. While pending, the real `Button` deliberately suppresses repeated
+presses.
+
+The stale-authority scenario is intentionally different from a pending double-submit scenario.
+The host replaces the exact session, executable registry, Catalog, and browser-host authorities
+while an old operation is pending. Root ownership transfer disposes the former session and host,
+and neither its detached component events nor its late settlement can alter or navigate the new
+surface. This proves logical revocation and stale-settlement containment. It does not claim that an
+already-started HTTP request is cancelled; no transport cancellation mechanism is installed.
+
+The production entry also distinguishes BFCache entry from final page exit. A `pagehide` event
+with `persisted === true` keeps the current root, session, host authority, and listener alive for
+restoration. The first non-persisted `pagehide` removes the listener and disposes the owned
+composition. React/jsdom integration verifies both branches; real-browser BFCache E2E remains a
+later claim.
 
 ### Independent host and source audit
 
@@ -425,10 +461,16 @@ This decision does not claim:
 
 - that M05 implements the M06 deterministic Publisher;
 - that the controlled official-derived fixture is Publisher output;
+- that M05-T08 supplies an authentication backend, deployed `/api/sign-in` service, credential
+  store, production authorization policy, retry policy, timeout policy, or cancellation of an
+  already-started HTTP request;
+- that one same-surface pending operation is replaced by a second UI submission; the real loading
+  `Button` suppresses the second press, while the tested replacement case changes the exact
+  session and host authority;
+- the exhaustive AST and resolved-import graph result assigned to M05-T09;
 - channel fetching, exact package installation, atomic activation, persistence, restart recovery,
   or last-known-good behavior assigned to M07;
-- a real authentication backend, credential store, production authorization policy, or external
-  service;
+- any external authentication service;
 - arbitrary runtime installation or remote loading of capability packages;
 - Desen App authoring, preview, publishing, or host-parity completion assigned to M08–M10;
 - complete browser E2E evidence assigned to G10;

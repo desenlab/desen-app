@@ -318,15 +318,29 @@ Forbidden application, authoring, publisher, test-support, and facade imports ar
 negative dependency fixtures. `PF-056` records this profile; `PF-057` records the explicit wide
 test budget and assigns binding-scaling measurement to M12-T05. P-06 remains `PARTIAL`, P-07
 remains `NOT_PROVEN`, and P-17 remains `PARTIAL`; M05-T08 and M05-T09 own those remaining slices.
+M05-T08 now runs the official-derived sign-in Bundle in that separate host through the exact
+five-component registry and a fixed-capability same-origin `/api/sign-in` binding. The controlled
+fixtures differ from the frozen official example only by the current exact Catalog requirement
+and recalculated Source/Bundle identities; their managed surfaces remain canonically identical.
+Exact document/revision, surface, capability, alias, effect, destination, and empty navigation
+parameters are fail-closed host policy. React/jsdom DOM integration covers controlled input,
+pending state, declared failure, edited retry, successful navigation, rapid pending-press
+suppression, redacted rejected handlers, disposal, and same-document session/host replacement
+with stale settlement containment. Persisted `pagehide` preserves the live composition for
+BFCache restoration; final page exit disposes it. `PF-058` records the composition profile. The
+task deliberately does not claim transport cancellation, real-browser BFCache E2E, M06 Publisher
+output, or the final no-handwritten-managed-tree audit. P-06 and P-10 gain stronger executable
+evidence but remain `PARTIAL`; P-07 remains
+`NOT_PROVEN`, P-17 remains `PARTIAL`, and M05-T09 still owns the gate-closing source/import audit.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `61 / 145 tasks complete (42%)`
+- Overall implementation progress: `62 / 145 tasks complete (43%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
-- M05 progress: `7 / 9 tasks complete (78%)`
+- M05 progress: `8 / 9 tasks complete (89%)`
 - Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -373,11 +387,13 @@ remains `NOT_PROVEN`, and P-17 remains `PARTIAL`; M05-T08 and M05-T09 own those 
   `M05-T04 — Component events, commands, and behavior adapters`,
   `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`,
   `M05-T06 — Error boundaries and explicit capability failure`,
-  `M05-T07 — Independently built reference-host shell with host ports`
+  `M05-T07 — Independently built reference-host shell with host ports`,
+  `M05-T08 — Official sign-in bundle running through real adapters`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M05-T08 — Official sign-in bundle running through real adapters`
-- Status: M05-T07 is complete; M05-T08 is ready to start
+- Next implementation task:
+  `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`
+- Status: M05-T08 is complete; M05-T09 is ready to start
 
 ## Completed preparation
 
@@ -717,10 +733,14 @@ The independent Web host now adds exact session-to-host-port, current snapshot/C
 document/revision joins before it accepts runtime ownership. Its dedicated React root, browser
 environment and clock, transaction fence, terminal tombstones, redacted root diagnostics, and
 explicit recovery authority are production-wired without a Desen App, editor, publisher,
-test-support, or facade dependency. N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-16,
-P-17, and P-06 remain `PARTIAL`, P-07 remains `NOT_PROVEN`, and N-021 remains `PLANNED`. M05-T08
-must now run the official-derived sign-in Bundle through the real reference adapters and trusted
-operation boundary.
+test-support, or facade dependency. The official-derived sign-in application now mounts this exact
+stack through the real reference adapters and trusted operation boundary, exercising pending,
+declared failure, retry, success, navigation, replacement, disposal, and stale-result containment
+without accepting a caller-selected Bundle, Catalog, capability, registry, route, managed React
+tree, or recovery key. N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-06, P-10, P-16, and
+P-17 remain `PARTIAL`, P-07 remains `NOT_PROVEN`, and N-021 remains `PLANNED`. M05-T09 must now
+prove that the production managed screen cannot be handwritten or reached through a forbidden
+resolved import.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -730,10 +750,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M05-T08 — Official sign-in bundle running through real adapters`. Compose the
-official-derived fixture with the exact reference registry and trusted sign-in operation, then
-prove pending, declared failure, explicit retry, stale replacement protection, success, and
-navigation through the independent host.
+Begin `M05-T09 — Automated source/import audit preventing handwritten managed-screen
+composition`. Prove across the complete resolved production graph that the independent host
+accepts only the controlled Bundle/runtime path and cannot recreate the managed sign-in screen as
+a handwritten React tree; then close G05 only if the cumulative M05 evidence remains green.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1250,6 +1270,32 @@ M05-T07 evidence:
 - coverage decision: R-019, R-105, and A-013 host-profile evidence advances without a normative
   status change; P-06 remains `PARTIAL`, P-07 remains `NOT_PROVEN`, P-17 remains `PARTIAL`, and
   G05 remains open for M05-T08 and M05-T09
+
+M05-T08 evidence:
+
+- `docs/proof/REFERENCE-HOST-WEB-SIGN-IN.md`
+- `docs/proof/artifacts/reference-host-web-0.1.0-sign-in.json`
+- artifact SHA-256:
+  `a7c83d438190ee45dae4714bd092e56282cb3db4c69c72eeaca44e2647683adb`
+- exact boundary: controlled official-derived Source/Bundle identity; canonical official managed
+  surfaces; exact current Catalog and public five-component registry; fixed document/revision,
+  operation, alias, effect, input, destination, and navigation policy; one same-origin HTTP
+  attempt; 64 KiB and 1,024-non-empty-chunk response ceilings; intrinsic cross-realm byte-brand
+  capture; and redacted application observability
+- executable evidence: two byte-identical three-file production builds, 46 tracked files, 408
+  source assertions, 18 focused integration cases, 40 complete reference-host cases, 13
+  compiler-negative cases, 14 hostile root mutations, and 13 exact trace assignments
+- user-visible evidence: real adapter input and pending state; initial-burst submission
+  suppression; declared HTTP failure; edited retry; successful output validation; `/home`
+  navigation; session/host replacement; stale-result containment; and terminal disposal
+- page lifecycle evidence: persisted `pagehide` preserves the production composition and listener
+  for BFCache restoration; final non-persisted `pagehide` removes the listener and disposes
+- coverage decision: P-06 and P-10 gain production-like host evidence but remain `PARTIAL`; P-07
+  remains `NOT_PROVEN`, P-17 remains `PARTIAL`, N-036 remains `PLANNED`, and G05 remains open for
+  the M05-T09 AST and resolved-import audit
+- honest limits: no M06 Publisher provenance, real authentication backend, long-lived credential
+  store, automatic retry, timeout, fetch-level cancellation, real-browser or BFCache E2E, Desen
+  App parity, deployment-security, or native-runtime claim
 
 ## Status vocabulary
 

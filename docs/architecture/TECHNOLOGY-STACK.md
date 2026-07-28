@@ -15,6 +15,8 @@ every dependency to have a documented responsibility.
   independent reference host
 - Vite 8.1.5 for the independent reference host's zero-configuration production build
 - Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable component semantics
+- the browser's injected `fetch` capability for the reference host's fixed same-origin
+  `POST /api/sign-in` operation boundary; no transport client dependency is added
 - dependency-cruiser 18.1.0
 - Changesets 2.31.1, disabled for external publishing during the proof phase
 - json-schema-to-typescript 15.0.4, build-only and pinned for protocol type generation
@@ -54,5 +56,15 @@ only by their owning tasks and require an ADR when they affect public capability
 - The reference host is Web-only and independently built with Vite's zero-configuration path;
   future native targets own separate renderers and platform hosts rather than importing its React
   root.
+- The reference host production entry may compose only the committed official-derived Bundle,
+  exact current Catalog, public real adapter registry, and explicit host ports. Its sign-in
+  transport performs one request with no retry or credential persistence beyond that request's
+  lifetime. A 64 KiB and 1,024-non-empty-chunk streaming ceiling applies before JSON parsing.
+  HTTP and transport details collapse into declared operation results before they reach runtime
+  semantics.
+- Replacement revokes and disposes the exact old session and browser-host authorities so their
+  late settlement cannot affect the new surface. This is logical stale containment; the current
+  transport does not cancel an already-started fetch, and its loading `Button` suppresses
+  same-surface repeated submission while pending.
 - The browser activation store commits active and previous-good revision pointers in one IndexedDB
   transaction before notifying renderers.

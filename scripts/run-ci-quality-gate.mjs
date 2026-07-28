@@ -239,6 +239,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-reference-host-web-shell.mjs",
       "tests/reference-host-web-shell.test.mjs",
     ],
+    [
+      "reference-host-web-sign-in",
+      "scripts/verify-reference-host-web-sign-in.mjs",
+      "tests/reference-host-web-sign-in.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -262,12 +267,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "17c007bf93f77bf338998630aec9fd0de7a50f9d68bf6d75b02d78f43e5a0fef";
+  "fe2bc2e8da9e216507e77b07d65a71a06d4acdd12e57af6d923bbe4be55181f5";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "dfac0e073a88c5c93fa65fbb785887c48b5e511081ae92d3830df30f4d979d77";
+  "17da1c8e762fba1dd07ddcb7e633aaa9964300dff9a81fd9af4dbcff16c81a96";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "50d5cc8d100d2e4aa23f51034c7c012694eccb2c8c8a83f89910c01cec337331";
-const QUALITY_GATE_PLAN_SHA256 = "8bda756069cda3d07f2d7bf8607442a7d9a606c014b4fecef8b5a8ca16f24ee0";
+  "548dbe56dfc0475fb5673d5a7c69a9e1d654e183511a3ec60a18d9cfee82877b";
+const QUALITY_GATE_PLAN_SHA256 = "883cacb0d9b3ca7377c75d7b53a2d9699962e8bb1ab763fdff2415da7ff7cafa";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "ef2070b02ea05fe7523f78e77ae99846670f608b52dec7a5c79cdf9ec45fe194";
 const WORKSPACE_MANIFEST_SHA256 =

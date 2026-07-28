@@ -2076,12 +2076,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
 
 - Future action: M05-T07 now wires the dedicated reference-host root policy and derives recovery
   epochs only from explicit retry or exact session, registry, Catalog, and host-authority
-  replacement; `PF-056` records that browser-host boundary. M05-T08 must exercise the official
-  sign-in path through the same boundary. M05-T09 must prove the host cannot bypass it with a
-  handwritten managed tree. M06-T11 still owns the remaining invalid-publication slice of `D-009`,
-  and M07-T04 owns activation-time finite preflight before P-17 can become `PROVEN`. Future native
-  runtimes must define their own platform-specific containment evidence rather than importing
-  React's boundary limitations.
+  replacement; `PF-056` records that browser-host boundary. M05-T08 now exercises the official
+  sign-in path and exact authority replacement through that boundary; `PF-058` records the
+  distinction between stale containment and transport cancellation. M05-T09 must prove the host
+  cannot bypass it with a handwritten managed tree. M06-T11 still owns the remaining
+  invalid-publication slice of `D-009`, and M07-T04 owns activation-time finite preflight before
+  P-17 can become `PROVEN`. Future native runtimes must define their own platform-specific
+  containment evidence rather than importing React's boundary limitations.
 
 ## PF-056 — Reference-host recovery follows executable authority, not document publication
 
@@ -2124,12 +2125,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   releases its container; an exception or otherwise uncertain unmount keeps a weak container claim
   and prevents unsafe root reuse.
 
-- Future action: M05-T08 must run the official-derived sign-in path through this exact host,
-  operation, adapter, failure, and recovery composition. M05-T09 must complete the TypeScript AST
-  and resolved-import audit before the no-handwritten-tree claim or G05 can close. M07 still owns
-  channel retrieval, persistent activation, restart recovery, and last-known-good behavior.
-  Future native targets must define independent registries, renderers, platform hosts, and
-  lifecycle evidence while reusing only framework-neutral protocol and headless semantics.
+- Future action: M05-T08 now runs the official-derived sign-in path through this exact host,
+  operation, adapter, failure, and recovery composition; `PF-058` records its precise
+  stale-settlement nonclaim. M05-T09 must complete the TypeScript AST and resolved-import audit
+  before the no-handwritten-tree claim or G05 can close. M07 still owns channel retrieval,
+  persistent activation, restart recovery, and last-known-good behavior. Future native targets
+  must define independent registries, renderers, platform hosts, and lifecycle evidence while
+  reusing only framework-neutral protocol and headless semantics.
 
 ## PF-057 — Wide binding materialization needs an explicit performance benchmark
 
@@ -2153,3 +2155,42 @@ This file records implementation discoveries without changing the frozen DESEN 0
   If the repeated-snapshot cost is confirmed, optimize it behind the existing exact authority,
   rollback, publication, and immutable-snapshot contracts, then rerun the M04-T14/M04-T16 evidence
   before claiming the improvement.
+
+## PF-058 — Logical stale-authority containment is distinct from transport cancellation
+
+- Status: OPEN
+- Blocks proof: No; M05-T08 proves the official-derived Web–React execution profile without
+  changing frozen protocol data or claiming a general transport-cancellation rule.
+- Protocol location: SPEC Sections 9.1, 15, 20, and 24.5 and Appendix A; `R-019`, `R-071`,
+  `R-105`, `A-011`, `A-013`, and related findings `PF-039`, `PF-041`, `PF-053`, and `PF-056`
+- Observation: The official sign-in composition needs two different pending-operation guarantees
+  to remain explicit. In one live surface, the real loading `Button` suppresses repeated presses,
+  so its UI does not create a second pending submission. Separately, replacing the complete host
+  composition while an operation is pending must revoke the old session's authority even if its
+  underlying transport later settles. A late result that cannot affect current state or
+  navigation does not imply that the already-started network request was physically cancelled.
+- Implementation decision: M05-T08 keeps the frozen official managed `surfaces` canonically exact
+  in committed official-derived Source and Bundle fixtures, changing only the Catalog requirement
+  and consequent digests. The independent reference host composes that Bundle with the exact
+  current Catalog, the public real five-adapter registry, and a fixed same-origin
+  `POST /api/sign-in` binding. The binding snapshots bounded own-data credentials, performs one
+  request without retry or persistence beyond the request lifetime, maps only HTTP `401` to
+  `invalidCredentials`, maps all other HTTP/transport/parse/response-budget failures to
+  `unavailable`, streams successful bodies through a 64 KiB and 1,024-non-empty-chunk ceiling
+  before parsing, and leaves the resulting JSON to runtime-core's exact output-schema validation.
+
+  Tests drive pending, declared failure, edited retry, success, and navigation through the real
+  adapters. A separate case replaces the exact session, registry, Catalog, and Web-host authority.
+  T07 root ownership transfer disposes the old session and host, and detached events plus the late
+  old settlement cannot alter or navigate the replacement surface. No `AbortController` or other
+  started-transport cancellation is claimed. The production entry also preserves the composition
+  and listener on persisted `pagehide` for BFCache restoration, then disposes on the first final
+  non-persisted `pagehide`; this is React/jsdom evidence rather than a real-browser BFCache claim.
+  The immutable T07 proof remains historical task-time evidence; T08 owns the changed current
+  composition and build verification.
+
+- Future action: M05-T09 must perform the exhaustive TypeScript AST and resolved-import audit
+  before the no-handwritten-managed-tree claim and G05 can close. M06 still owns Publisher
+  provenance, M07 owns channel retrieval and persistent atomic activation, and future backend,
+  timeout/cancellation, and native-host policies require their own explicit contracts and
+  evidence.
