@@ -289,18 +289,23 @@ limit crossing. Ordinary roots use the same lookup as descendants and failure cr
 placeholder React element. Public JSON is captured from own data, detached, deeply frozen, and
 bounded together with named slots and retained strings; revoked proxies fail closed. The
 standalone renderer authenticates registry authority but truthfully leaves structural-plan
-provenance to the production host. `PF-050` records this implementation profile; exact
-receiving-schema validation remains M05-T02/M05-T03 and active events, commands, behavior
-lifecycle, committed adapter errors, and real-instance reconciliation remain M05-T04–M05-T06.
+provenance to the production host. `PF-050` records this implementation profile.
+M05-T02 adds the exact live session/Catalog receiving boundary for resolved props and named slots;
+M05-T03 extends that boundary to complete semantic style maps without interpreting CSS, DOM, or
+native targets. M05-T04 then proves exact binding parity and commit-scoped component/behavior
+interactions, including inert event payloads, opaque revocable component-command ownership, and
+the separately imported five-component reference adapter registry. `PF-051` through `PF-053`
+record these profiles. Stable real-instance reconciliation and source-linked diagnostics remain
+M05-T05, while committed adapter failures remain M05-T06.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `55 / 145 tasks complete (38%)`
+- Overall implementation progress: `58 / 145 tasks complete (40%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
-- M05 progress: `1 / 9 tasks complete (11%)`
+- M05 progress: `4 / 9 tasks complete (44%)`
 - Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -341,11 +346,14 @@ lifecycle, committed adapter errors, and real-instance reconciliation remain M05
   `M04-T15 — Reactive re-evaluation and stale-result protection`,
   `M04-T16 — Headless sign-in determinism and JSON trace`,
   `M04-T17 — G04 audit hardening`,
-  `M05-T01 — React adapter registry and render-plan renderer`
+  `M05-T01 — React adapter registry and render-plan renderer`,
+  `M05-T02 — Resolved props and named slots`,
+  `M05-T03 — Style parts and visual states`,
+  `M05-T04 — Component events, commands, and behavior adapters`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M05-T02 — Resolved props and named slots`
-- Status: M05-T01 is complete; M05-T02 is ready to start
+- Next implementation task: `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`
+- Status: M05-T04 is complete; M05-T05 is ready to start
 
 ## Completed preparation
 
@@ -522,13 +530,15 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
   owners.
 - SC-01 pins DESEN 0.1.0, A2UI 0.9.1, and DTCG 2025.10; records a field-level semantic matrix and
   accepted `continue` ADR; proves one exact bidirectional JSON structural Stack/Text field subset;
-  and audits the current reference token document against supported, unsupported-valid, and invalid
+  and audits the task-time reference token document against supported, unsupported-valid, and invalid
   DTCG fixtures. The A2UI receipt passes 27 focused tests across 1,029 deterministic positive
   vectors, 1,029 exact round-trips in each direction, and 34 stable rejection cases. The DTCG
-  receipt passes 16 focused tests across 26 tokens, 14 unsupported feature families, 16 exact
-  valid-but-unsupported fixtures, and seven exact negative fixtures. Renderer semantics remain
-  outside the bridge claim. Both receipts are deterministic and fail closed. No frozen protocol
-  byte, production package boundary, public API, `P-*` status, counted task, or proof gate changes.
+  receipt passes 20 focused tests across 26 tokens, 14 unsupported feature families, 16 exact
+  valid-but-unsupported fixtures, seven exact negative fixtures, proof-pin integrity, hostile
+  inputs, symlinks, and atomic-copy safety. Its immutable reader never consults current successor
+  package bytes. Renderer semantics remain outside the bridge claim. Both receipts are
+  deterministic and fail closed. No frozen protocol byte, production package boundary, public API,
+  `P-*` status, counted task, or proof gate changes.
 - The M04-T01 host boundary passes 10 focused package tests, 9 compiler-negative cases, and 10
   independent proof/mutation tests. Nine exact ports capture 14 receiver-independent callbacks
   without eager execution or caller mutation. The evidence protects one runtime export, 30 public
@@ -669,10 +679,14 @@ sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
 
 ## Current readiness
 
-The static React registry and all-or-nothing public-plan preflight are complete. M05-T02 must now
-apply the exact authenticated Catalog receiving schema before resolved props and named slots reach
-an adapter. N-026 and N-029 remain `PLANNED` until M05-T02 and M05-T03 prove their respective
-complete receiving boundaries.
+The Web–React runtime now authenticates the live session, current snapshot, execution Catalog,
+complete prepared tree, resolved props, named slots, semantic styles, binding inventory, events,
+and component-command ownership before trusted adapter effects can act. The reference package
+exports one explicit five-component adapter registry without exposing arbitrary React props, DOM
+objects, native events, or dynamic loaders. N-026, N-029, N-033, and N-034 are `TESTED` for this
+selected Web–React profile. M05-T05 must now preserve stable React identity across publications and
+provide an immutable runtime-node ↔ source-node diagnostic index without widening adapter
+authority.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -682,8 +696,9 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M05-T02 — Resolved props and named slots`. Wire the exact authenticated Catalog receiving
-schema and public named-slot contract without inspecting component, React, or DOM internals.
+Begin `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`. Prove deterministic
+reconciliation identity and source-linked diagnostics over live session publications without
+inspecting component, React, DOM, or native internals.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -862,8 +877,9 @@ SC-01 evidence:
 - `docs/proof/artifacts/sc-01-dtcg-compatibility.json`
 - DTCG artifact SHA-256:
   `1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6`
-- DTCG executable result: 16 focused tests, 26 tokens, 14 unsupported feature families, 16 exact
-  valid-but-unsupported fixtures, and seven exact negative fixtures
+- DTCG executable result: 20 focused tests preserve the immutable task-time receipt and cover 26
+  tokens, 14 unsupported feature families, 16 exact valid-but-unsupported fixtures, seven exact
+  negative fixtures, proof pins, hostile inputs, symlinks, and atomic-copy safety
 - recommendation: `continue`; no `P-*` status, counted task, or proof-gate change
 
 M04-T01 evidence:
@@ -1104,6 +1120,47 @@ M05-T01 evidence:
 - executable evidence: 10 focused package tests, 4 compiler-negative cases, 11 hostile root
   proof/mutation tests, 12 explicit failure codes, 25 task-owned files, two deterministic builds,
   no placeholder renderer, no executable loading, and no React/DOM authority in `runtime-core`
+
+M05-T02 evidence:
+
+- `docs/proof/RUNTIME-REACT-RESOLVED-PROPS-SLOTS.md`
+- `docs/proof/artifacts/runtime-react-0.1.0-resolved-props-slots.json`
+- artifact SHA-256: `f668dc0d3d0e9e8edb239323fd82037b8afc2004dbe8eace56dcd4c510ed22e0`
+- exact boundary: one live session/Catalog authority; complete resolved-value prop validation;
+  explicit named-slot projection and cardinality/capability validation; immutable adapter values;
+  shared lower-only receiving, schema-evaluation, slot, JSON, and retained-string budgets; and no
+  raw plan, Catalog metadata, private React structure, DOM, or component-instance ingress
+- executable evidence: 57 focused schema/receiving tests, 12 focused React receiving tests, 33
+  compiler-negative cases, 14 hostile root proof/mutation tests, deterministic 109-file evidence,
+  and strict immutable compatibility readers for every changed predecessor path
+
+M05-T03 evidence:
+
+- `docs/proof/RUNTIME-REACT-RESOLVED-STYLES.md`
+- `docs/proof/artifacts/runtime-react-0.1.0-resolved-styles.json`
+- artifact SHA-256: `2b0e03e58116d161484cd3c309370ff1ee5003ee6158d4e941749faf0d6797eb`
+- exact boundary: complete immutable visual-state → semantic-part → property → resolved-JSON maps;
+  exact component/behavior capability selection; shared receiving limits; stable style-channel
+  diagnostics; and capability-owned state activation without CSS, DOM, native, or React-private
+  interpretation
+- executable evidence: 8 focused React style tests, 3 validator style tests, 15
+  compiler-negative cases, 18 hostile root proof/mutation tests, and strict immutable M05-T02
+  compatibility migration
+
+M05-T04 evidence:
+
+- `docs/proof/RUNTIME-REACT-INTERACTIONS.md`
+- `docs/proof/artifacts/runtime-react-0.1.0-interactions.json`
+- exact artifact SHA-256 is self-pinned by the proof document, Proof Matrix, and Normative Coverage
+  rows; this byte-owned status ledger deliberately does not create a circular sixth self-pin
+- exact boundary: complete two-way binding parity before element creation; commit-scoped component
+  and behavior events; component-only opaque command ownership; generation-safe supersession and
+  deterministic revocation; inert tombstones; and one separately imported frozen five-component
+  reference adapter registry with exact `focus`, `change`, and `press` mappings
+- executable evidence: 23 focused React interaction/binding cases, 10 reference-adapter tests, 5
+  runtime-core command-attachment tests, 20 compiler-negative cases, 18 root proof/mutation tests,
+  the exact 80-file successor distribution digest, and immutable historical SC-01 DTCG, M04-T06,
+  M04-T12, and M04-T15 evidence
 
 ## Status vocabulary
 

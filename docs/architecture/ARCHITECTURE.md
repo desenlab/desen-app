@@ -77,6 +77,24 @@ the complete immutable visual-state → declared-part → property map. `runtime
 or merge active states, interpret property names, generate CSS, or expose DOM/component internals;
 those target-specific decisions remain inside the statically trusted capability adapter.
 
+The M05-T04 interaction boundary first requires exact two-way parity between that prepared tree and
+the authenticated session's complete component/behavior binding inventory. It then commit-gates a
+least-authority port per adapter instance. Events retain the captured session, snapshot, runtime
+identity, and inert payload; they never carry React or native event objects. Only a committed
+component may attach an opaque command owner to its exact current binding. Supersession, binding
+replacement, navigation, unmount, and disposal revoke the owner without changing the lower
+adapter-binding identity. Behavior adapters use the same event surface but receive no component
+command authority. Bounded payload snapshotting and exact commit-epoch rechecks close hostile
+reflection/unmount races. Revoked core and React authorities become inert tombstones with no
+component callback or session/snapshot graph, and superseded controller entries are removed.
+
+`@desen/reference-catalog-web/react-adapters` is the opt-in executable package boundary. Its five
+registrations statically import the real reference components, map validated fields explicitly,
+and implement the declared `focus`, `change`, and `press` interaction primitives without dynamic
+loading, arbitrary prop spread, DOM handles, or native-event leakage. Adding this subpath changes
+the package's complete logical `dist/**` inventory, so the current Catalog carries the successor
+digest while the M03 tuple remains immutable historical evidence.
+
 ## Reference capability artifact boundary
 
 M03-T10 packages the exact reference sign-in slice as

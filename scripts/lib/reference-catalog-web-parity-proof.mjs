@@ -325,7 +325,7 @@ const NORMATIVE_STATUS_RANK = Object.freeze({
   PLANNED: 0,
   TESTED: 1,
 });
-const MONOTONIC_NORMATIVE_STATUS_IDS = new Set(["N-033"]);
+const MONOTONIC_NORMATIVE_STATUS_IDS = new Set(["N-033", "N-034"]);
 const HISTORICAL_SELF_RECORD = Object.freeze({
   path: "scripts/lib/reference-catalog-web-parity-proof.mjs",
   bytes: 69_947,
@@ -1407,7 +1407,7 @@ function inspectTraceability(traceability) {
  *
  * @remarks Later tasks may monotonically advance a row from `PLANNED` to `TESTED`. The immutable
  * M03-T09 artifact must continue to describe the status observed when that artifact was produced.
- * Current verifier bytes are owned by M04-T16 after this compatibility migration.
+ * N-033 advanced under M04 and N-034 advances under M05 without rewriting historical evidence.
  */
 export function verifyReferenceCatalogWebParityNormativeCompatibility(normativeCoverage) {
   const currentStatuses = HISTORICAL_NORMATIVE_STATUSES.map(({ id, status: historicalStatus }) => {

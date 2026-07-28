@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 import {
   auditSc01ExecutedSourceFixture,
@@ -21,29 +21,17 @@ import {
 
 const TEST_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(TEST_DIRECTORY, "..");
-const PROVIDER_SOURCE_PATH = path.join(
-  WORKSPACE_ROOT,
-  "packages/reference-catalog-web/src/tokens/web-token-provider.ts",
-);
-const TOKEN_CONSUMER_PATH = path.join(
-  WORKSPACE_ROOT,
-  "packages/reference-catalog-web/test/tokens-consumer.mjs",
-);
 const FROZEN_SPEC_PATH = path.join(
   WORKSPACE_ROOT,
   "packages/protocol/upstream/0.1.0/snapshot/SPEC.md",
 );
+const PROOF_MATRIX_PATH = path.join(WORKSPACE_ROOT, "docs/proof/PROOF-MATRIX.md");
+const HISTORICAL_SHA256 = "sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6";
 
 function expectAuditFailure(error, code) {
   assert.ok(error instanceof Sc01DtcgAuditError);
   if (code !== undefined) assert.equal(error.code, code);
   return true;
-}
-
-function deepFreeze(value) {
-  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return value;
-  for (const nested of Object.values(value)) deepFreeze(nested);
-  return Object.freeze(value);
 }
 
 async function temporaryDirectory() {
@@ -61,15 +49,18 @@ test("accepts the tracked deterministic SC-01 DTCG compatibility evidence", asyn
     reviewedUnsupportedFixtures: 16,
     reviewedInvalidFixtures: 7,
     provenanceMode: "tracked-defaults",
+    compatibilityMode: "immutable-task-time-artifact",
   });
-  assert.match(result.artifactSha256, /^sha256:[0-9a-f]{64}$/u);
+  assert.equal(result.artifactSha256, HISTORICAL_SHA256);
 });
 
-test("builds byte-identical evidence twice", async () => {
+test("reads byte-identical immutable task-time evidence twice", async () => {
   const [first, second] = await Promise.all([buildSc01DtcgEvidence(), buildSc01DtcgEvidence()]);
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
-  assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(first.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(second.artifactSha256, HISTORICAL_SHA256);
   assert.equal(first.artifact.evidence.provenance.mode, "tracked-defaults");
+  assert.equal(first.compatibilityMode, "immutable-task-time-artifact");
 });
 
 test("pins the three immutable DTCG 2025.10 reports and publication commit", async () => {
@@ -163,6 +154,9 @@ test("executes every reviewed valid-but-unsupported fixture with a stable featur
     for (const fixture of entry.executableFixtures) {
       assert.equal(fixture.classification, SC01_UNSUPPORTED_DTCG_CLASSIFICATION);
       assert.equal(fixture.featureId, entry.id);
+      const outcome = evaluateSc01DtcgFixture(fixture.document);
+      assert.equal(outcome.classification, SC01_UNSUPPORTED_DTCG_CLASSIFICATION);
+      assert.equal(outcome.featureId, entry.id);
     }
   }
   const resolver = matrix.find(({ id }) => id === "RESOLVER_THEMES_AND_MODES");
@@ -209,6 +203,12 @@ test("keeps the exact reviewed negative fixtures separate from reviewed unsuppor
       },
     ],
   );
+  for (const fixture of artifact.compatibility.reviewedInvalidFixtures.fixtures) {
+    assert.equal(
+      evaluateSc01DtcgFixture(fixture.document).classification,
+      SC01_INVALID_DTCG_CLASSIFICATION,
+    );
+  }
 
   const malformedAlias = evaluateSc01DtcgFixture({
     color: {
@@ -330,36 +330,56 @@ test("accepts recursive dotted alias chains and rejects cycles", () => {
   assert.equal(cycle.classification, SC01_INVALID_DTCG_CLASSIFICATION);
 });
 
-test("rejects current-reference leaf, color-space, and value mutations", async () => {
-  const tokenModule = await import(
-    `${pathToFileURL(TOKEN_CONSUMER_PATH).href}?sc01-test=${Date.now()}`
-  );
-  const source = JSON.parse(JSON.stringify(tokenModule.REFERENCE_TOKEN_DOCUMENT));
-
-  const missingLeaf = structuredClone(source);
-  delete missingLeaf.space.xs;
-  const p3Color = structuredClone(source);
-  p3Color.color.action.primary.$value.colorSpace = "display-p3";
-  delete p3Color.color.action.primary.$value.hex;
-  const malformedDimension = structuredClone(source);
-  malformedDimension.space.md.$value.value = "1";
-
-  for (const document of [missingLeaf, p3Color, malformedDimension]) {
-    deepFreeze(document);
-    await assert.rejects(buildSc01DtcgEvidence({ tokenDocument: document }), (error) =>
-      expectAuditFailure(error, "SC01_DTCG_REFERENCE_PROFILE_DRIFT"),
+test("rejects every current-successor source build or API injection", async () => {
+  for (const options of [
+    { tokenDocument: {} },
+    { tokenConsumerPath: "ignored" },
+    { referencePackagePath: "ignored" },
+    { builtTokenEntryPath: "ignored" },
+    { tokenSourcePath: "ignored" },
+    { providerSourcePath: "ignored" },
+    { frozenSpecPath: "ignored" },
+  ]) {
+    await assert.rejects(buildSc01DtcgEvidence(options), (error) =>
+      expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
     );
   }
 });
 
-test("rejects provider source and built-module drift before loading the token API", async () => {
-  const directory = await temporaryDirectory();
-  const providerSource = await readFile(PROVIDER_SOURCE_PATH, "utf8");
-  const mutatedPath = path.join(directory, "web-token-provider.ts");
-  await writeFile(mutatedPath, `${providerSource}\nvoid globalThis.localStorage;\n`);
-  await assert.rejects(buildSc01DtcgEvidence({ providerSourcePath: mutatedPath }), (error) =>
-    expectAuditFailure(error, "SC01_DTCG_BUILT_BINDING_DRIFT"),
+test("rejects Proxy accessor and hidden DTCG fixture data without invoking traps", () => {
+  let proxyCalls = 0;
+  let getterCalls = 0;
+  const proxy = new Proxy(
+    {},
+    {
+      getPrototypeOf() {
+        proxyCalls += 1;
+        return Object.prototype;
+      },
+      ownKeys() {
+        proxyCalls += 1;
+        return [];
+      },
+    },
   );
+  const accessor = Object.defineProperty({}, "token", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return {};
+    },
+  });
+  const hidden = Object.defineProperty({}, "token", {
+    enumerable: false,
+    value: {},
+  });
+  const sparse = [];
+  sparse.length = 1;
+  for (const value of [proxy, accessor, hidden, sparse]) {
+    assert.equal(evaluateSc01DtcgFixture(value).classification, SC01_INVALID_DTCG_CLASSIFICATION);
+  }
+  assert.equal(proxyCalls, 0);
+  assert.equal(getterCalls, 0);
 });
 
 test("rejects storage network or global DOM ownership in every executed-source fixture", async () => {
@@ -379,16 +399,30 @@ test("rejects storage network or global DOM ownership in every executed-source f
       (error) => expectAuditFailure(error, "SC01_DTCG_HOST_BOUNDARY_DRIFT"),
     );
   }
-});
 
-test("rejects a mutated consumer shim before loading the built token document", async () => {
-  const directory = await temporaryDirectory();
-  const consumer = await readFile(TOKEN_CONSUMER_PATH, "utf8");
-  const mutatedPath = path.join(directory, "tokens-consumer.mjs");
-  await writeFile(mutatedPath, `${consumer}// redirected consumer\n`);
-  await assert.rejects(buildSc01DtcgEvidence({ tokenConsumerPath: mutatedPath }), (error) =>
-    expectAuditFailure(error, "SC01_DTCG_BUILT_BINDING_DRIFT"),
-  );
+  let proxyCalls = 0;
+  let getterCalls = 0;
+  const proxy = new Proxy([], {
+    getPrototypeOf() {
+      proxyCalls += 1;
+      return Array.prototype;
+    },
+  });
+  const accessorEntry = Object.defineProperty({}, "source", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "";
+    },
+  });
+  for (const sources of [proxy, [accessorEntry]]) {
+    assert.throws(
+      () => auditSc01ExecutedSourceFixture(sources, frozenSpec),
+      (error) => expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
+    );
+  }
+  assert.equal(proxyCalls, 0);
+  assert.equal(getterCalls, 0);
 });
 
 test("rejects extra static and dynamic side-effect edges outside the built module allowlist", () => {
@@ -420,26 +454,121 @@ test("rejects extra static and dynamic side-effect edges outside the built modul
       (error) => expectAuditFailure(error, "SC01_DTCG_BUILT_BINDING_DRIFT"),
     );
   }
+
+  let proxyCalls = 0;
+  const optionProxy = new Proxy(
+    {},
+    {
+      ownKeys() {
+        proxyCalls += 1;
+        return [];
+      },
+    },
+  );
+  const specifierProxy = new Proxy([], {
+    getPrototypeOf() {
+      proxyCalls += 1;
+      return Array.prototype;
+    },
+  });
+  assert.throws(
+    () => auditSc01RuntimeModuleFixture(optionProxy),
+    (error) => expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
+  );
+  assert.throws(
+    () =>
+      auditSc01RuntimeModuleFixture({
+        source: "",
+        expectedSpecifiers: specifierProxy,
+      }),
+    (error) => expectAuditFailure(error, "SC01_DTCG_BUILT_BINDING_DRIFT"),
+  );
+  assert.equal(proxyCalls, 0);
 });
 
-test("rejects accessor-backed symbolic inherited and unknown options without invoking getters", async () => {
+test("rejects Proxy accessor hidden symbolic inherited and unknown options without traps", async () => {
   let getterCalls = 0;
+  let proxyCalls = 0;
   const accessor = {};
-  Object.defineProperty(accessor, "tokenDocument", {
+  Object.defineProperty(accessor, "artifactPath", {
     enumerable: true,
     get() {
       getterCalls += 1;
-      return {};
+      return "ignored";
     },
   });
-  const inherited = Object.create({ tokenDocument: {} });
-  const symbolic = { [Symbol("tokenDocument")]: {} };
-  for (const options of [accessor, inherited, symbolic, { unknown: true }]) {
+  const hidden = Object.defineProperty({}, "artifactPath", {
+    enumerable: false,
+    value: "ignored",
+  });
+  const inherited = Object.create({ artifactPath: "ignored" });
+  const symbolic = { [Symbol("artifactPath")]: "ignored" };
+  const proxy = new Proxy(
+    {},
+    {
+      getPrototypeOf() {
+        proxyCalls += 1;
+        return Object.prototype;
+      },
+      ownKeys() {
+        proxyCalls += 1;
+        return [];
+      },
+    },
+  );
+  for (const options of [accessor, hidden, inherited, symbolic, proxy, { unknown: true }]) {
     await assert.rejects(buildSc01DtcgEvidence(options), (error) =>
       expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
     );
   }
   assert.equal(getterCalls, 0);
+  assert.equal(proxyCalls, 0);
+});
+
+test("rejects Proxy and shared artifact bytes before parsing", async () => {
+  const proxied = new Proxy(new Uint8Array([1, 2, 3]), {});
+  await assert.rejects(buildSc01DtcgEvidence({ artifactBytes: proxied }), (error) =>
+    expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
+  );
+  const historicalBytes = await readFile(DEFAULT_SC01_DTCG_ARTIFACT_PATH);
+  assert.equal(
+    (
+      await buildSc01DtcgEvidence({
+        artifactBytes: new Uint8Array(historicalBytes),
+      })
+    ).artifactSha256,
+    HISTORICAL_SHA256,
+  );
+
+  let accessorCalls = 0;
+  class HostileBytes extends Uint8Array {
+    get buffer() {
+      accessorCalls += 1;
+      throw new Error("hostile buffer accessor");
+    }
+
+    get byteLength() {
+      accessorCalls += 1;
+      throw new Error("hostile byteLength accessor");
+    }
+
+    get byteOffset() {
+      accessorCalls += 1;
+      throw new Error("hostile byteOffset accessor");
+    }
+  }
+  await assert.rejects(
+    buildSc01DtcgEvidence({ artifactBytes: new HostileBytes(historicalBytes) }),
+    (error) => expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
+  );
+  assert.equal(accessorCalls, 0);
+
+  if (typeof SharedArrayBuffer === "function") {
+    await assert.rejects(
+      buildSc01DtcgEvidence({ artifactBytes: new Uint8Array(new SharedArrayBuffer(8)) }),
+      (error) => expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
+    );
+  }
 });
 
 test("rejects stale or one-byte-tampered evidence", async () => {
@@ -447,27 +576,123 @@ test("rejects stale or one-byte-tampered evidence", async () => {
   const tampered = Buffer.from(result.artifactBytes);
   tampered[tampered.length - 2] ^= 1;
   await assert.rejects(verifySc01DtcgEvidence({ artifactBytes: tampered }), (error) =>
-    expectAuditFailure(error, "SC01_DTCG_ARTIFACT_DRIFT"),
+    expectAuditFailure(error, "SC01_DTCG_HISTORICAL_ARTIFACT_DRIFT"),
   );
 });
 
-test("writes and verifies an injected artifact atomically and detects pre-rename tampering", async () => {
+test("rejects moved duplicated or mismatched Proof Matrix pins", async () => {
+  const matrix = await readFile(PROOF_MATRIX_PATH, "utf8");
+  const exactReference = `\`sc-01-dtcg-compatibility.json\`\n\`${HISTORICAL_SHA256}\`.`;
+  for (const proofMatrixText of [
+    matrix.replace("`sc-01-dtcg-compatibility.json`", "`moved.json`"),
+    `${matrix}\n\`sc-01-dtcg-compatibility.json\`\n`,
+    matrix.replace(HISTORICAL_SHA256, `sha256:${"0".repeat(64)}`),
+    `${matrix.replace(exactReference, "")}\n${exactReference}\n`,
+  ]) {
+    await assert.rejects(verifySc01DtcgEvidence({ proofMatrixText }), (error) =>
+      expectAuditFailure(error, "SC01_DTCG_PROOF_PIN_DRIFT"),
+    );
+  }
+  await assert.rejects(
+    verifySc01DtcgEvidence({ proofMatrixText: "x".repeat(2_000_001) }),
+    (error) => expectAuditFailure(error, "SC01_DTCG_OPTIONS_INVALID"),
+  );
+});
+
+test("rejects a symlink historical artifact source", async () => {
+  const directory = await temporaryDirectory();
+  const target = path.join(directory, "target.json");
+  const source = path.join(directory, "artifact.json");
+  try {
+    await writeFile(target, await readFile(DEFAULT_SC01_DTCG_ARTIFACT_PATH));
+    await symlink(target, source);
+    await assert.rejects(buildSc01DtcgEvidence({ artifactPath: source }), (error) =>
+      expectAuditFailure(error, "SC01_DTCG_ARTIFACT_UNSAFE"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("writes and verifies an exact alternate copy and detects pre-rename tampering", async () => {
   const directory = await temporaryDirectory();
   const artifactPath = path.join(directory, "sc-01-dtcg.json");
-  const written = await writeSc01DtcgEvidence({ artifactPath });
-  const verified = await verifySc01DtcgEvidence({ artifactPath });
-  assert.equal(verified.artifactSha256, written.artifactSha256);
+  try {
+    const written = await writeSc01DtcgEvidence({ artifactPath });
+    const verified = await verifySc01DtcgEvidence({ artifactPath });
+    assert.equal(written.preserved, false);
+    assert.equal(verified.artifactSha256, HISTORICAL_SHA256);
+    assert.equal(verified.artifactSha256, written.artifactSha256);
+    assert.deepEqual(await readFile(artifactPath), await readFile(DEFAULT_SC01_DTCG_ARTIFACT_PATH));
 
-  const tamperedPath = path.join(directory, "tampered.json");
-  await assert.rejects(
-    writeSc01DtcgEvidence({
-      artifactPath: tamperedPath,
-      beforeAtomicRename: async ({ temporaryPath }) => {
-        await writeFile(temporaryPath, "{}\n");
-      },
-    }),
-    (error) => expectAuditFailure(error, "SC01_DTCG_ARTIFACT_WRITE_FAILED"),
-  );
+    const tamperedPath = path.join(directory, "tampered.json");
+    await assert.rejects(
+      writeSc01DtcgEvidence({
+        artifactPath: tamperedPath,
+        beforeAtomicRename: async ({ temporaryPath }) => {
+          await writeFile(temporaryPath, "{}\n");
+        },
+      }),
+      (error) => expectAuditFailure(error, "SC01_DTCG_ARTIFACT_WRITE_FAILED"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects symlink destinations without changing their targets", async () => {
+  const directory = await temporaryDirectory();
+  const target = path.join(directory, "target.json");
+  const destination = path.join(directory, "artifact.json");
+  try {
+    await writeFile(target, "{}\n");
+    await symlink(target, destination);
+    await assert.rejects(writeSc01DtcgEvidence({ artifactPath: destination }), (error) =>
+      expectAuditFailure(error, "SC01_DTCG_ARTIFACT_WRITE_FAILED"),
+    );
+    assert.equal(await readFile(target, "utf8"), "{}\n");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("preserves the tracked inode through the default and symlink-parent alias no-op", async () => {
+  const directory = await temporaryDirectory();
+  const aliasParent = path.join(directory, "artifacts");
+  const aliasPath = path.join(aliasParent, path.basename(DEFAULT_SC01_DTCG_ARTIFACT_PATH));
+  try {
+    await symlink(path.dirname(DEFAULT_SC01_DTCG_ARTIFACT_PATH), aliasParent, "dir");
+    const before = await lstat(DEFAULT_SC01_DTCG_ARTIFACT_PATH, { bigint: true });
+    const defaultResult = await writeSc01DtcgEvidence();
+    const aliasResult = await writeSc01DtcgEvidence({ artifactPath: aliasPath });
+    const after = await lstat(DEFAULT_SC01_DTCG_ARTIFACT_PATH, { bigint: true });
+    assert.equal(defaultResult.preserved, true);
+    assert.equal(aliasResult.preserved, true);
+    assert.equal(after.dev, before.dev);
+    assert.equal(after.ino, before.ino);
+    assert.equal(after.mtimeNs, before.mtimeNs);
+
+    let hookCalls = 0;
+    await assert.rejects(
+      writeSc01DtcgEvidence({
+        artifactPath: aliasPath,
+        beforeAtomicRename() {
+          hookCalls += 1;
+        },
+      }),
+      (error) => expectAuditFailure(error, "SC01_DTCG_NONDEFAULT_TRACKED_WRITE"),
+    );
+    await assert.rejects(
+      writeSc01DtcgEvidence({
+        artifactPath: aliasPath,
+        buildOptions: {},
+      }),
+      (error) => expectAuditFailure(error, "SC01_DTCG_NONDEFAULT_TRACKED_WRITE"),
+    );
+    assert.equal(hookCalls, 0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test("keeps the host-owned storage boundary and explicit non-claims in the artifact", async () => {

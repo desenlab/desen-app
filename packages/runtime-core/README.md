@@ -1014,6 +1014,21 @@ resource, operation, event, item, and environment namespaces from their current 
 owners. The caller cannot inject any of those namespaces. The returned completion promise contains
 only a terminal JSON observation, never a lower-manager ticket or callback authority.
 
+M05-T04 adds `attachRuntimeHeadlessSessionComponentCommands` and its idempotent detach seam. The
+session authenticates the exact current snapshot and component runtime binding, then changes only
+the stable private command holder created with that binding. It never unregisters the lower
+adapter ticket. A newer opaque attachment supersedes the old owner; binding replacement,
+navigation, and disposal revoke it automatically. Reentrant ownership changes—including hostile
+result reflection—exceptions, and malformed callback results are denied. Revocation clears the
+retained callback, binding, lifetime, and session graph so a caller retaining an inert old handle
+does not retain live command authority or its implementation closure.
+
+`snapshotRuntimeJsonValue` exposes the existing pure, bounded M04-T02 inert snapshot boundary to
+target adapters. It copies no executable or accessor-backed value, invokes no user accessor,
+rejects hostile reflection and limit crossings, and returns only recursively frozen JSON. The
+React adapter uses it before event admission so a Proxy cannot cross a commit/unmount epoch while
+the session is reflecting over payload data.
+
 `readRuntimeHeadlessSession` exposes one recursively immutable JSON snapshot with the verified
 revision, active surface, monotonic generation, evaluation id, plan/binding commitments, complete
 plan, lifecycle namespaces, and inert binding summaries. Equivalent frozen sign-in inputs and
@@ -1117,7 +1132,9 @@ deactivation, finite synchronous draining, and exact-once subscription disposal 
 M04-T16 now composes those boundaries into one validated, bounded headless session with complete
 JSON-only materialization, authenticated selector-to-program dispatch, deterministic sign-in
 traces, independent surface navigation, and coordinated disposal. Rendering, concrete framework
-reconciliation, and activation remain assigned to later tracked tasks.
+reconciliation, and activation remain assigned to later tracked tasks. M05-T04 adds only the
+narrow authenticated component-command attachment and public inert JSON snapshot seams required
+by a framework adapter; React lifecycle and executable registrations remain outside this package.
 
 ## Protocol and target support
 

@@ -4,6 +4,12 @@
 
 M04-T12 is **PASS** for the framework-neutral DESEN 0.1.0 runtime slice.
 
+This is an immutable task-time receipt. Its exact artifact is
+`docs/proof/artifacts/runtime-core-0.1.0-command-event-actions.json`
+(`sha256:8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4`).
+The receipt preserves M04-T12's historical `N-034: PLANNED` status; M05-T04 owns the later
+selected Web–React `N-034: TESTED` evidence without rewriting this artifact.
+
 The proof establishes one deterministic bridge for guarded `component.command` and outbound
 `event.emit` actions. Commands can reach only an exact currently registered component instance
 through a Catalog-declared, schema-validated command. Events can cross the host boundary only
@@ -201,9 +207,11 @@ M04-T12 directly verifies exactly:
 - `D-016` — `COMMAND_INPUT_INVALID` for a resolved input that fails its exact command schema; and
 - `N-031` — the host allowlists outbound event names and validates payloads before emission.
 
-`N-031` becomes **TESTED** only for this outbound shell-event action boundary. `N-034` remains
-**PLANNED** because complete production-adapter implementation of every declared command still
-requires M05 and later adapter parity evidence.
+At the M04-T12 task-time boundary, `N-031` became **TESTED** only for this outbound shell-event
+action boundary and `N-034` remained **PLANNED** because complete production-adapter
+implementation parity was still deferred. M05-T04 later advances `N-034` to **TESTED** for the
+selected Web–React profile through a separate current proof receipt; that monotonic successor
+claim does not alter this historical artifact.
 
 PF-042 remains **OPEN** because DESEN 0.1.0 does not normatively define command-target instance
 identity, opaque registration authority, repeated-target addressing, outbound application contract
@@ -222,7 +230,8 @@ This proof does not establish:
 - reactive target/subtree lifecycle and stale asynchronous-result protection owned by M04-T15;
 - full seven-namespace same-turn provenance, complete coordinated disposal, sign-in execution, or
   observable deterministic trace owned by M04-T16;
-- complete production-adapter implementation of every Catalog command (`N-034`);
+- complete production-adapter implementation of every Catalog command at the M04-T12 task-time
+  boundary (the selected Web–React profile is proved separately by M05-T04);
 - event analytics, telemetry, persistence, retry, timeout, offline, external URL, or cross-Bundle
   policy;
 - DOM, React, browser, iOS, Android, SwiftUI, Compose, focus, animation, or accessibility adapter

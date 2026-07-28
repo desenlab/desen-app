@@ -535,7 +535,7 @@ test("detects trace, normative, finding, and proof-document drift", async () => 
       return cells.join("|");
     })
     .join("\n");
-  assert.ok(normativeWithoutT14Owner.includes("M04-T14 now admits"));
+  assert.ok(normativeWithoutT14Owner.includes("M04-T14 admits"));
   await rejectsCode(
     () =>
       buildRuntimeCoreAdapterBridgesEvidence({

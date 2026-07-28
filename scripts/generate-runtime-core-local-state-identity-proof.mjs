@@ -1,15 +1,17 @@
 import {
   RuntimeCoreLocalStateIdentityEvidenceError,
-  verifyRuntimeCoreLocalStateIdentityEvidence,
+  writeRuntimeCoreLocalStateIdentityEvidence,
 } from "./lib/runtime-core-local-state-identity-proof.mjs";
 
 try {
-  const result = await verifyRuntimeCoreLocalStateIdentityEvidence();
+  const result = await writeRuntimeCoreLocalStateIdentityEvidence();
   process.stdout.write(
     `${JSON.stringify(
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
+        compatibilityMode: result.compatibilityMode,
+        preserved: result.preserved,
         message: "Preserved immutable task-time M04-T06 local-state and node-identity evidence.",
       },
       null,

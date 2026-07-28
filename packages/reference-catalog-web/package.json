@@ -32,6 +32,10 @@
       "types": "./dist/parity/index.d.ts",
       "import": "./dist/parity/index.js"
     },
+    "./react-adapters": {
+      "types": "./dist/react-adapters/index.d.ts",
+      "import": "./dist/react-adapters/index.js"
+    },
     "./tokens": {
       "types": "./dist/tokens/index.d.ts",
       "import": "./dist/tokens/index.js"
@@ -45,6 +49,7 @@
     "test:components": "vitest run test/foundation-components.test.tsx",
     "test:interactive-components": "vitest run test/interactive-components.test.tsx",
     "test:parity": "vitest run test/foundation-components.test.tsx test/interactive-components.test.tsx test/parity-metadata.test.ts test/parity-contracts.test.tsx",
+    "test:react-adapters": "vitest run test/react-adapters.test.tsx test/react-adapters-consumer.test.mjs",
     "test:sign-in-operation": "vitest run test/sign-in-operation.test.ts",
     "test:package-digest-profile": "vitest run test/package-digest-profile.test.ts",
     "test:tokens": "vitest run test/reference-tokens.test.ts",
@@ -52,7 +57,8 @@
   },
   "dependencies": {
     "@desen/catalog-sdk": "workspace:*",
-    "@desen/protocol": "workspace:*"
+    "@desen/protocol": "workspace:*",
+    "@desen/runtime-react": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=19.0.0 <20.0.0"

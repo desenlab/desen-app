@@ -98,8 +98,11 @@ export {
   materializeRuntimeHeadlessSurface,
   RUNTIME_HEADLESS_MATERIALIZATION_LIMITS,
 } from "./headless-materialization.js";
+export { snapshotRuntimeJsonValue } from "./runtime-json-snapshot.js";
 export {
+  attachRuntimeHeadlessSessionComponentCommands,
   authenticateRuntimeHeadlessSessionAdapterAuthority,
+  detachRuntimeHeadlessSessionComponentCommands,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
   mountRuntimeHeadlessSession,
@@ -180,6 +183,10 @@ export type {
   RuntimeHeadlessBindingSnapshot,
   RuntimeHeadlessSessionAdapterAuthorityInput,
   RuntimeHeadlessSessionAdapterAuthorityResult,
+  RuntimeHeadlessSessionComponentCommandsAttachResult,
+  RuntimeHeadlessSessionComponentCommandsAttachment,
+  RuntimeHeadlessSessionComponentCommandsDetachResult,
+  RuntimeHeadlessSessionComponentCommandsInput,
   RuntimeHeadlessSessionDisposeResult,
   RuntimeHeadlessSessionEventCompletion,
   RuntimeHeadlessSessionEventInput,

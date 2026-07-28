@@ -10,8 +10,11 @@ const UNAVAILABLE_EVENT = Object.freeze({ status: "unavailable" } as const);
 /**
  * Copies one unknown value through the existing bounded, data-only runtime snapshot boundary.
  *
- * @remarks This internal seam deliberately reuses the M04-T02 safety profile instead of creating
- * a second JSON copier. The small scope envelope is counted against the same aggregate limits.
+ * @remarks Target adapters use this pure seam to detach a hostile value before crossing a
+ * framework lifecycle boundary. It deliberately reuses the M04-T02 safety profile instead of
+ * creating a second JSON copier. The small scope envelope is counted against the same aggregate
+ * limits, invokes no accessors, rejects Proxy/reflection failure, and returns only recursively
+ * frozen inert JSON.
  */
 export function snapshotRuntimeJsonValue(input: unknown): RuntimeJsonValue | undefined {
   try {

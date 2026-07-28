@@ -1,15 +1,35 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile, realpath } from "node:fs/promises";
+import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { types as utilTypes } from "node:util";
+import { fileURLToPath } from "node:url";
 
-import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
+const ARTIFACT_NAME = "sc-01-dtcg-compatibility.json";
+const ARTIFACT_SHA256 = "1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6";
+const PROOF_MATRIX_PATH = path.join(WORKSPACE_ROOT, "docs/proof/PROOF-MATRIX.md");
+const HISTORICAL_PACKAGE_MANIFEST_SHA256 =
+  "sha256:455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa";
+const HISTORICAL_TOKEN_DOCUMENT_SHA256 =
+  "sha256:e7f7f3692b57722a31991aae4768c32ad1e0f61dced84131f7629c29840ebbac";
+const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "buffer",
+).get;
+const TYPED_ARRAY_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteLength",
+).get;
+const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteOffset",
+).get;
 
 /** Exact classification assigned to the supported reference-token surface. */
 export const SC01_DTCG_PROFILE_CLASSIFICATION = "DTCG_2025_10_COMPATIBLE_CLOSED_REFERENCE_PROFILE";
@@ -20,46 +40,13 @@ export const SC01_UNSUPPORTED_DTCG_CLASSIFICATION = "UNSUPPORTED_DTCG_FEATURE";
 /** Expected outcome label for the reviewed negative fixture matrix. */
 export const SC01_INVALID_DTCG_CLASSIFICATION = "INVALID_DTCG";
 
-/** Absolute path to the deterministic SC-01 DTCG compatibility artifact. */
+/** Absolute path to the immutable task-time SC-01 DTCG compatibility artifact. */
 export const DEFAULT_SC01_DTCG_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
-  "docs/proof/artifacts/sc-01-dtcg-compatibility.json",
+  "docs/proof/artifacts",
+  ARTIFACT_NAME,
 );
 
-const DEFAULT_PATHS = Object.freeze({
-  tokenConsumerPath: path.join(
-    WORKSPACE_ROOT,
-    "packages/reference-catalog-web/test/tokens-consumer.mjs",
-  ),
-  builtTokenEntryPath: path.join(
-    WORKSPACE_ROOT,
-    "packages/reference-catalog-web/dist/tokens/index.js",
-  ),
-  builtTokenDocumentPath: path.join(
-    WORKSPACE_ROOT,
-    "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
-  ),
-  builtTokenProviderPath: path.join(
-    WORKSPACE_ROOT,
-    "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
-  ),
-  referencePackagePath: path.join(WORKSPACE_ROOT, "packages/reference-catalog-web/package.json"),
-  tokenSourcePath: path.join(
-    WORKSPACE_ROOT,
-    "packages/reference-catalog-web/src/tokens/reference-token-document.ts",
-  ),
-  tokenIndexSourcePath: path.join(
-    WORKSPACE_ROOT,
-    "packages/reference-catalog-web/src/tokens/index.ts",
-  ),
-  providerSourcePath: path.join(
-    WORKSPACE_ROOT,
-    "packages/reference-catalog-web/src/tokens/web-token-provider.ts",
-  ),
-  frozenSpecPath: path.join(WORKSPACE_ROOT, "packages/protocol/upstream/0.1.0/snapshot/SPEC.md"),
-});
-
-const BUILD_OPTION_NAMES = Object.freeze(["tokenDocument", ...Object.keys(DEFAULT_PATHS)]);
 const FORMAT_REPORT_URL =
   "https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/";
 const COLOR_REPORT_URL =
@@ -68,18 +55,6 @@ const RESOLVER_REPORT_URL =
   "https://www.w3.org/community/reports/design-tokens/CG-FINAL-resolver-20251028/";
 const PUBLICATION_COMMIT = "f0f32a7dce0b51b36488be9cbbf7cad2763c6f29";
 const PUBLICATION_COMMIT_URL = `https://github.com/design-tokens/community-group/commit/${PUBLICATION_COMMIT}`;
-const EXACT_TOKEN_CONSUMER_BYTES = Buffer.from(
-  'export * from "@desen/reference-catalog-web/tokens";\n',
-);
-const RESOLVER_VERSION_INCONSISTENCY = Object.freeze({
-  id: "DTCG_RESOLVER_2025_10_VERSION_CONFLICT",
-  report: RESOLVER_REPORT_URL,
-  rootPropertyTableValue: "2025-10-01",
-  normativeSection: "4.1.2 Version",
-  normativeMustValue: "2025-11-01",
-  selectedFixtureInterpretation: "2025-11-01",
-  note: "The immutable report conflicts internally. The executable fixture follows the normative MUST paragraph in section 4.1.2; no general Resolver conformance is claimed.",
-});
 const WHOLE_TOKEN_ALIAS = /^\{[^.{}]+(?:\.[^.{}]+)*\}$/u;
 const LOCAL_WHOLE_TOKEN_ALIAS = /^\{[^.{}]+(?:\.[^.{}]+)+\}$/u;
 const HEX_COLOR = /^#[0-9a-f]{6}$/u;
@@ -119,375 +94,6 @@ const DTCG_COLOR_SPACES = new Set([
   "xyz-d65",
 ]);
 
-const BASE_BLACK = Object.freeze({
-  colorSpace: "srgb",
-  components: Object.freeze([0, 0, 0]),
-  alpha: 1,
-  hex: "#000000",
-});
-
-const clone = (value) => JSON.parse(JSON.stringify(value));
-
-const UNSUPPORTED_FIXTURE_GROUPS = Object.freeze([
-  Object.freeze({
-    id: "ROOT_TOKEN_CURLY_ALIAS",
-    feature: "A root token alias such as {primary}",
-    examples: Object.freeze(["{primary}"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "root-token-curly-alias",
-        document: Object.freeze({
-          primary: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-          alias: Object.freeze({ $type: "color", $value: "{primary}" }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "ALIAS_TARGET_TYPE_INFERENCE",
-    feature: "A whole-token alias that inherits its type from the target token",
-    examples: Object.freeze(["alias with no own or parent $type"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "alias-infers-target-type",
-        document: Object.freeze({
-          palette: Object.freeze({
-            primary: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-          }),
-          alias: Object.freeze({ $value: "{palette.primary}" }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "JSON_POINTER_REF",
-    feature: "A whole-token JSON Pointer $ref",
-    examples: Object.freeze([{ $ref: "#/primary/$value" }]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "whole-token-json-pointer",
-        document: Object.freeze({
-          primary: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-          alias: Object.freeze({
-            $type: "color",
-            $ref: "#/primary/$value",
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "PROPERTY_LEVEL_REF",
-    feature: "A property-level JSON Pointer reference",
-    examples: Object.freeze(["#/base/$value/components/0"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "color-component-json-pointer",
-        document: Object.freeze({
-          base: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-          derived: Object.freeze({
-            $type: "color",
-            $value: Object.freeze({
-              colorSpace: "srgb",
-              components: Object.freeze([
-                Object.freeze({ $ref: "#/base/$value/components/0" }),
-                0,
-                0,
-              ]),
-              alpha: 1,
-              hex: "#000000",
-            }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "ROOT_GROUP_TOKEN",
-    feature: "The $root token member of a group",
-    examples: Object.freeze(["$root"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "group-root-token",
-        document: Object.freeze({
-          semantic: Object.freeze({
-            $type: "color",
-            $root: Object.freeze({ $value: BASE_BLACK }),
-            accent: Object.freeze({ $value: BASE_BLACK }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "GROUP_EXTENDS",
-    feature: "Group inheritance through $extends",
-    examples: Object.freeze(["$extends"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "group-extends",
-        document: Object.freeze({
-          base: Object.freeze({
-            $type: "color",
-            accent: Object.freeze({ $value: BASE_BLACK }),
-          }),
-          derived: Object.freeze({
-            $type: "color",
-            $extends: "{base}",
-            accent: Object.freeze({ $value: BASE_BLACK }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "EMPTY_GROUP",
-    feature: "An empty DTCG group",
-    examples: Object.freeze(["empty group"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "empty-described-group",
-        document: Object.freeze({
-          empty: Object.freeze({ $description: "A valid empty DTCG group." }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "EXTENSIONS",
-    feature: "Vendor metadata carried in $extensions",
-    examples: Object.freeze(["$extensions"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "token-vendor-extension",
-        document: Object.freeze({
-          primary: Object.freeze({
-            $type: "color",
-            $value: BASE_BLACK,
-            $extensions: Object.freeze({
-              "example.com": Object.freeze({ source: "fixture" }),
-            }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "DEPRECATED",
-    feature: "Token or group deprecation metadata",
-    examples: Object.freeze(["$deprecated"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "deprecated-token",
-        document: Object.freeze({
-          legacy: Object.freeze({
-            $type: "color",
-            $value: BASE_BLACK,
-            $deprecated: "Use primary.",
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "ADDITIONAL_TOKEN_TYPES",
-    feature: "DTCG token types outside color and dimension",
-    examples: Object.freeze(["number", "typography"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "number-token",
-        document: Object.freeze({
-          opacity: Object.freeze({ $type: "number", $value: 0.5 }),
-        }),
-      }),
-      Object.freeze({
-        id: "typography-token",
-        document: Object.freeze({
-          body: Object.freeze({
-            $type: "typography",
-            $value: Object.freeze({
-              fontFamily: "Inter",
-              fontSize: Object.freeze({ value: 1, unit: "rem" }),
-              fontWeight: 400,
-              letterSpacing: Object.freeze({ value: 0, unit: "px" }),
-              lineHeight: 1.5,
-            }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "ADDITIONAL_COLOR_SPACES",
-    feature: "DTCG color spaces outside sRGB",
-    examples: Object.freeze(["display-p3", "oklch"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "display-p3-color",
-        document: Object.freeze({
-          accent: Object.freeze({
-            $type: "color",
-            $value: Object.freeze({
-              colorSpace: "display-p3",
-              components: Object.freeze([0.1, 0.2, 0.3]),
-              alpha: 1,
-            }),
-          }),
-        }),
-      }),
-      Object.freeze({
-        id: "oklch-color",
-        document: Object.freeze({
-          accent: Object.freeze({
-            $type: "color",
-            $value: Object.freeze({
-              colorSpace: "oklch",
-              components: Object.freeze([0.5, 0.2, 180]),
-              alpha: 1,
-            }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "NONE_COLOR_COMPONENTS",
-    feature: "A DTCG color using none for an intentionally missing component",
-    examples: Object.freeze(["none"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "srgb-none-component",
-        document: Object.freeze({
-          accent: Object.freeze({
-            $type: "color",
-            $value: Object.freeze({
-              colorSpace: "srgb",
-              components: Object.freeze(["none", 0.2, 0.3]),
-              alpha: 1,
-            }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "OPTIONAL_COLOR_ALPHA_AND_HEX",
-    feature: "A valid DTCG sRGB color without the locally required alpha and hex members",
-    examples: Object.freeze(["color without alpha", "color without hex"]),
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "color-without-local-alpha-and-hex",
-        document: Object.freeze({
-          accent: Object.freeze({
-            $type: "color",
-            $value: Object.freeze({
-              colorSpace: "srgb",
-              components: Object.freeze([0.1, 0.2, 0.3]),
-            }),
-          }),
-        }),
-      }),
-    ]),
-  }),
-  Object.freeze({
-    id: "RESOLVER_THEMES_AND_MODES",
-    feature: "DTCG Resolver sets, modifiers, contexts, and resolution order",
-    examples: Object.freeze(["theme", "mode"]),
-    upstreamInconsistency: RESOLVER_VERSION_INCONSISTENCY,
-    fixtures: Object.freeze([
-      Object.freeze({
-        id: "resolver-theme-modifier",
-        document: Object.freeze({
-          version: "2025-11-01",
-          modifiers: Object.freeze({
-            theme: Object.freeze({
-              contexts: Object.freeze({
-                light: Object.freeze([
-                  Object.freeze({
-                    color: Object.freeze({
-                      background: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-                    }),
-                  }),
-                ]),
-                dark: Object.freeze([
-                  Object.freeze({
-                    color: Object.freeze({
-                      background: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-                    }),
-                  }),
-                ]),
-              }),
-              default: "light",
-            }),
-          }),
-          resolutionOrder: Object.freeze([Object.freeze({ $ref: "#/modifiers/theme" })]),
-        }),
-      }),
-    ]),
-  }),
-]);
-
-const INVALID_FIXTURES = Object.freeze([
-  Object.freeze({
-    id: "name-containing-dot",
-    document: Object.freeze({
-      "bad.name": Object.freeze({ $type: "color", $value: BASE_BLACK }),
-    }),
-  }),
-  Object.freeze({
-    id: "malformed-dimension-value",
-    document: Object.freeze({
-      space: Object.freeze({
-        $type: "dimension",
-        sm: Object.freeze({
-          $value: Object.freeze({ value: "1", unit: "rem" }),
-        }),
-      }),
-    }),
-  }),
-  Object.freeze({
-    id: "alias-cycle",
-    document: Object.freeze({
-      color: Object.freeze({
-        $type: "color",
-        a: Object.freeze({ $value: "{color.b}" }),
-        b: Object.freeze({ $value: "{color.a}" }),
-      }),
-    }),
-  }),
-  Object.freeze({
-    id: "malformed-json-pointer",
-    document: Object.freeze({
-      primary: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-      alias: Object.freeze({ $type: "color", $ref: "primary/$value" }),
-    }),
-  }),
-  Object.freeze({
-    id: "missing-json-pointer-target",
-    document: Object.freeze({
-      alias: Object.freeze({ $type: "color", $ref: "#/missing/$value" }),
-    }),
-  }),
-  Object.freeze({
-    id: "misplaced-json-pointer-under-value",
-    document: Object.freeze({
-      primary: Object.freeze({ $type: "color", $value: BASE_BLACK }),
-      alias: Object.freeze({
-        $type: "color",
-        $value: Object.freeze({ $ref: "#/primary/$value" }),
-      }),
-    }),
-  }),
-  Object.freeze({
-    id: "malformed-resolver-required-fields",
-    document: Object.freeze({
-      version: "bogus",
-      modifiers: Object.freeze({ theme: Object.freeze({}) }),
-      resolutionOrder: Object.freeze([]),
-    }),
-  }),
-]);
-
 /**
  * Stable error emitted when SC-01 evidence cannot be built or verified.
  */
@@ -520,52 +126,59 @@ function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function stableJsonValue(value) {
-  if (Array.isArray(value)) return value.map(stableJsonValue);
-  if (!isRecord(value)) return value;
-  return Object.fromEntries(
-    sorted(Object.keys(value)).map((key) => [key, stableJsonValue(value[key])]),
-  );
-}
-
-function canonicalJsonBytes(value) {
-  return Buffer.from(JSON.stringify(stableJsonValue(value)));
-}
-
 function deepFreeze(value) {
   if (value === null || typeof value !== "object" || Object.isFrozen(value)) return value;
   for (const nested of Object.values(value)) deepFreeze(nested);
   return Object.freeze(value);
 }
 
-function isDeeplyFrozen(value, active = new Set()) {
-  if (value === null || typeof value !== "object") return true;
-  if (active.has(value) || !Object.isFrozen(value)) return false;
-  active.add(value);
-  const result = Object.values(value).every((nested) => isDeeplyFrozen(nested, active));
-  active.delete(value);
-  return result;
-}
-
 function normalizeOptions(options, allowedNames, operation) {
   if (options === undefined) return Object.freeze({});
-  assertCondition(
-    isRecord(options) &&
-      (Object.getPrototypeOf(options) === Object.prototype ||
-        Object.getPrototypeOf(options) === null) &&
-      Object.getOwnPropertySymbols(options).length === 0,
-    "SC01_DTCG_OPTIONS_INVALID",
-    `${operation} options must be a plain string-keyed record.`,
-  );
-  const descriptors = Object.getOwnPropertyDescriptors(options);
-  const output = Object.create(null);
-  for (const name of sorted(Object.keys(descriptors))) {
-    const descriptor = descriptors[name];
-    assertCondition(
-      Object.hasOwn(descriptor, "value") && allowedNames.includes(name),
+  if (
+    options === null ||
+    typeof options !== "object" ||
+    Array.isArray(options) ||
+    utilTypes.isProxy(options)
+  ) {
+    fail(
       "SC01_DTCG_OPTIONS_INVALID",
-      `${operation} option ${JSON.stringify(name)} is unknown or accessor-backed.`,
+      `${operation} options must be a non-Proxy plain own-data object.`,
     );
+  }
+  let prototype;
+  let keys;
+  try {
+    prototype = Object.getPrototypeOf(options);
+    keys = Reflect.ownKeys(options);
+  } catch {
+    fail("SC01_DTCG_OPTIONS_INVALID", `${operation} options could not be captured safely.`);
+  }
+  if (
+    (prototype !== Object.prototype && prototype !== null) ||
+    keys.some((key) => typeof key !== "string" || !allowedNames.includes(key))
+  ) {
+    fail(
+      "SC01_DTCG_OPTIONS_INVALID",
+      `${operation} options contain unknown, inherited, or symbolic fields.`,
+    );
+  }
+  const output = Object.create(null);
+  for (const name of sorted(keys)) {
+    let descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(options, name);
+    } catch {
+      fail(
+        "SC01_DTCG_OPTIONS_INVALID",
+        `${operation} option ${JSON.stringify(name)} could not be captured safely.`,
+      );
+    }
+    if (descriptor === undefined || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+      fail(
+        "SC01_DTCG_OPTIONS_INVALID",
+        `${operation} option ${JSON.stringify(name)} must be an enumerable own data property.`,
+      );
+    }
     output[name] = descriptor.value;
   }
   return Object.freeze(output);
@@ -593,29 +206,56 @@ function assertJsonData(value, pathLabel = "/", state = undefined, depth = 0) {
     return;
   }
   assertCondition(
-    typeof value === "object",
+    typeof value === "object" && !utilTypes.isProxy(value),
     SC01_INVALID_DTCG_CLASSIFICATION,
-    `DTCG data must be JSON-compatible at ${pathLabel}.`,
+    `DTCG data must be JSON-compatible non-Proxy data at ${pathLabel}.`,
   );
-  const prototype = Object.getPrototypeOf(value);
+  let prototype;
+  let keys;
+  let descriptors;
+  try {
+    prototype = Object.getPrototypeOf(value);
+    keys = Reflect.ownKeys(value);
+    descriptors = Object.getOwnPropertyDescriptors(value);
+  } catch {
+    fail(
+      SC01_INVALID_DTCG_CLASSIFICATION,
+      `DTCG data could not be inspected safely at ${pathLabel}.`,
+    );
+  }
   assertCondition(
     Array.isArray(value) || prototype === Object.prototype || prototype === null,
     SC01_INVALID_DTCG_CLASSIFICATION,
     `DTCG data must use arrays or plain records at ${pathLabel}.`,
   );
+  if (Array.isArray(value)) {
+    const lengthDescriptor = descriptors.length;
+    assertCondition(
+      lengthDescriptor !== undefined &&
+        Object.hasOwn(lengthDescriptor, "value") &&
+        Number.isSafeInteger(lengthDescriptor.value) &&
+        lengthDescriptor.value <= MAX_JSON_NODES &&
+        keys.length === lengthDescriptor.value + 1 &&
+        keys.at(-1) === "length" &&
+        keys.slice(0, -1).every((key, index) => typeof key === "string" && key === String(index)),
+      SC01_INVALID_DTCG_CLASSIFICATION,
+      `DTCG arrays must be dense own-data arrays at ${pathLabel}.`,
+    );
+  }
   assertCondition(
-    !traversal.active.has(value) && Object.getOwnPropertySymbols(value).length === 0,
+    !traversal.active.has(value) && keys.every((key) => typeof key === "string"),
     SC01_INVALID_DTCG_CLASSIFICATION,
     `DTCG data must be acyclic and string-keyed at ${pathLabel}.`,
   );
   traversal.active.add(value);
-  const descriptors = Object.getOwnPropertyDescriptors(value);
   for (const key of sorted(Object.keys(descriptors))) {
     const descriptor = descriptors[key];
     assertCondition(
-      Object.hasOwn(descriptor, "value") && descriptor.value !== undefined,
+      Object.hasOwn(descriptor, "value") &&
+        descriptor.value !== undefined &&
+        (key === "length" || descriptor.enumerable),
       SC01_INVALID_DTCG_CLASSIFICATION,
-      `DTCG data cannot contain accessors or undefined at ${pathLabel}.`,
+      `DTCG data cannot contain accessors, hidden fields, or undefined at ${pathLabel}.`,
     );
     assertJsonData(descriptor.value, `${pathLabel}/${key}`, traversal, depth + 1);
   }
@@ -1230,61 +870,46 @@ export function evaluateSc01DtcgFixture(document) {
   }
 }
 
-function buildUnsupportedMatrix() {
-  return UNSUPPORTED_FIXTURE_GROUPS.map((group) => {
-    const fixtureResults = group.fixtures.map((fixture) => {
-      const document = stableJsonValue(clone(fixture.document));
-      const outcome = evaluateSc01DtcgFixture(document);
-      assertCondition(
-        outcome.classification === SC01_UNSUPPORTED_DTCG_CLASSIFICATION &&
-          outcome.featureId === group.id,
-        "SC01_DTCG_MATRIX_DRIFT",
-        `Unsupported fixture ${fixture.id} did not retain its exact classification.`,
-        { expectedFeatureId: group.id, outcome },
-      );
-      return Object.freeze({
-        id: fixture.id,
-        classification: outcome.classification,
-        featureId: outcome.featureId,
-        canonicalJsonSha256: sha256(canonicalJsonBytes(document)),
-        document,
-      });
-    });
-    return Object.freeze({
-      id: group.id,
-      dtcgStatus: "VALID_DTCG_2025_10",
-      localStatus: "UNSUPPORTED",
-      classification: SC01_UNSUPPORTED_DTCG_CLASSIFICATION,
-      feature: group.feature,
-      examples: group.examples,
-      ...(group.upstreamInconsistency === undefined
-        ? {}
-        : { upstreamInconsistency: group.upstreamInconsistency }),
-      executableFixtures: fixtureResults,
-    });
-  });
-}
-
-function buildInvalidMatrix() {
-  return INVALID_FIXTURES.map((fixture) => {
-    const document = stableJsonValue(clone(fixture.document));
-    const outcome = evaluateSc01DtcgFixture(document);
-    assertCondition(
-      outcome.classification === SC01_INVALID_DTCG_CLASSIFICATION,
-      "SC01_DTCG_MATRIX_DRIFT",
-      `Reviewed negative fixture ${fixture.id} did not retain its expected INVALID_DTCG outcome.`,
-      { outcome },
-    );
-    return Object.freeze({
-      id: fixture.id,
-      classification: outcome.classification,
-      canonicalJsonSha256: sha256(canonicalJsonBytes(document)),
-      document,
-    });
-  });
-}
-
 function auditHostOwnedBoundary(executedSources, frozenSpec) {
+  assertCondition(
+    Array.isArray(executedSources) &&
+      !utilTypes.isProxy(executedSources) &&
+      Object.getPrototypeOf(executedSources) === Array.prototype &&
+      typeof frozenSpec === "string",
+    "SC01_DTCG_OPTIONS_INVALID",
+    "Executed-source fixtures must be a plain array and the frozen specification must be text.",
+  );
+  const executedSourceKeys = Reflect.ownKeys(executedSources);
+  assertCondition(
+    executedSources.length <= MAX_JSON_NODES &&
+      executedSourceKeys.length === executedSources.length + 1 &&
+      executedSourceKeys.at(-1) === "length" &&
+      executedSourceKeys
+        .slice(0, -1)
+        .every((key, index) => typeof key === "string" && key === String(index)),
+    "SC01_DTCG_OPTIONS_INVALID",
+    "Executed-source fixtures must be a bounded dense own-data array.",
+  );
+  const capturedSources = [];
+  for (let index = 0; index < executedSources.length; index += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(executedSources, String(index));
+    assertCondition(
+      descriptor !== undefined && descriptor.enumerable && Object.hasOwn(descriptor, "value"),
+      "SC01_DTCG_OPTIONS_INVALID",
+      "Executed-source fixtures must be a dense own-data array.",
+    );
+    const entry = normalizeOptions(
+      descriptor.value,
+      ["label", "source"],
+      `Executed-source fixture ${index}`,
+    );
+    assertCondition(
+      typeof entry.label === "string" && typeof entry.source === "string",
+      "SC01_DTCG_OPTIONS_INVALID",
+      "Executed-source fixture labels and source values must be strings.",
+    );
+    capturedSources.push(Object.freeze({ label: entry.label, source: entry.source }));
+  }
   const requiredSpecSentence =
     "A token reference is resolved by the host's token provider. DESEN does not redefine token storage.";
   assertCondition(
@@ -1311,7 +936,7 @@ function auditHostOwnedBoundary(executedSources, frozenSpec) {
     ],
     ["window", /\bwindow\s*\.\s*(?:document|localStorage|sessionStorage|fetch|location)\b/u],
   ]);
-  const findings = executedSources.flatMap(({ label, source }) =>
+  const findings = capturedSources.flatMap(({ label, source }) =>
     bannedProviderPatterns
       .filter(([, pattern]) => pattern.test(source))
       .map(([name]) => `${label}:${name}`),
@@ -1350,41 +975,26 @@ export function auditSc01ExecutedSourceFixture(executedSources, frozenSpec) {
   return auditHostOwnedBoundary(executedSources, frozenSpec);
 }
 
-async function readRegularFile(filePath, label) {
-  const [entry, resolved] = await Promise.all([lstat(filePath), realpath(filePath)]);
-  assertCondition(
-    entry.isFile() && !entry.isSymbolicLink(),
-    "SC01_DTCG_SOURCE_UNSAFE",
-    `${label} must be a regular non-symlink file.`,
-  );
-  return Object.freeze({ bytes: await readFile(resolved), resolved });
-}
-
-function assertTypeScriptBuildParity(sourceFile, builtFile, label) {
-  const transpiledSource = ts.transpileModule(sourceFile.bytes.toString("utf8"), {
-    compilerOptions: {
-      module: ts.ModuleKind.ESNext,
-      target: ts.ScriptTarget.ES2023,
-      verbatimModuleSyntax: true,
-    },
-  }).outputText;
-  const builtWithoutSourceMap = builtFile.bytes
-    .toString("utf8")
-    .replace(/\/\/# sourceMappingURL=.*\n?$/u, "");
-  assertCondition(
-    transpiledSource === builtWithoutSourceMap,
-    "SC01_DTCG_BUILT_BINDING_DRIFT",
-    `${label} is stale or does not compile exactly from its tracked TypeScript source.`,
-  );
-}
-
 function inspectRuntimeModuleEdges(source, label, expectedSpecifiers, exportOnly) {
   assertCondition(
     typeof source === "string" &&
       Array.isArray(expectedSpecifiers) &&
+      !utilTypes.isProxy(expectedSpecifiers) &&
+      Object.getPrototypeOf(expectedSpecifiers) === Array.prototype &&
       expectedSpecifiers.every((specifier) => typeof specifier === "string"),
     "SC01_DTCG_BUILT_BINDING_DRIFT",
     `${label} module-edge audit received invalid input.`,
+  );
+  const expectedSpecifierKeys = Reflect.ownKeys(expectedSpecifiers);
+  assertCondition(
+    expectedSpecifiers.length <= MAX_JSON_NODES &&
+      expectedSpecifierKeys.length === expectedSpecifiers.length + 1 &&
+      expectedSpecifierKeys.at(-1) === "length" &&
+      expectedSpecifierKeys
+        .slice(0, -1)
+        .every((key, index) => typeof key === "string" && key === String(index)),
+    "SC01_DTCG_BUILT_BINDING_DRIFT",
+    `${label} expected module edges must be a bounded dense own-data array.`,
   );
   const syntax = ts.createSourceFile(
     `${label}.js`,
@@ -1449,586 +1059,454 @@ function inspectRuntimeModuleEdges(source, label, expectedSpecifiers, exportOnly
  *
  * @remarks This export exists only so root mutation tests can exercise the fail-closed module graph.
  */
-export function auditSc01RuntimeModuleFixture({
-  source,
-  label = "injected-runtime-module",
-  expectedSpecifiers,
-  exportOnly = false,
-}) {
+export function auditSc01RuntimeModuleFixture(rawOptions) {
+  const options = normalizeOptions(
+    rawOptions,
+    ["source", "label", "expectedSpecifiers", "exportOnly"],
+    "Runtime module fixture",
+  );
+  const source = options.source;
+  const label = options.label ?? "injected-runtime-module";
+  const expectedSpecifiers = options.expectedSpecifiers;
+  const exportOnly = options.exportOnly ?? false;
+  assertCondition(
+    typeof label === "string" && typeof exportOnly === "boolean",
+    "SC01_DTCG_OPTIONS_INVALID",
+    "Runtime module fixture label and exportOnly values are invalid.",
+  );
   return inspectRuntimeModuleEdges(source, label, expectedSpecifiers, exportOnly);
 }
 
-async function auditBuiltTokenBinding({
-  tokenConsumerFile,
-  referencePackageFile,
-  builtTokenEntryFile,
-  builtTokenDocumentFile,
-  builtTokenProviderFile,
-  tokenIndexSourceFile,
-  tokenSourceFile,
-  providerSourceFile,
-}) {
-  assertCondition(
-    tokenConsumerFile.bytes.equals(EXACT_TOKEN_CONSUMER_BYTES),
-    "SC01_DTCG_BUILT_BINDING_DRIFT",
-    "The token consumer shim must remain the exact one-line package self-export.",
-  );
+const HISTORICAL_ARTIFACT_BYTES = 31_286;
+const MAX_PROOF_MATRIX_BYTES = 2_000_000;
+const SC01_PROOF_MATRIX_CONTEXT = [
+  "SC-01 is complete with recommendation `continue`. The proof-only `SC01_STATIC_TEXT_V1` bridge",
+  "passes 27 focused tests across 1,029 deterministic positive vectors, 1,029 exact JSON structural",
+  "round-trips in each direction, 2,058 A2UI message schema validations, and 34 stable rejection cases:",
+  "`sc-01-a2ui-bridge.json`",
+  "`sha256:2f927afee4ec50d8191fd2d44db93e35ff89f64856d0ae7bbc4be14193588902`.",
+  "The DTCG audit passes 20 focused tests that preserve the immutable task-time receipt and cover its",
+  "26-token built reference document, 14 unsupported feature families, 16 exact",
+  "valid-but-unsupported fixtures, seven exact negative fixtures, proof-pin integrity, hostile inputs,",
+  "symlinks, and atomic-copy safety:",
+  "`sc-01-dtcg-compatibility.json`",
+  "`sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6`.",
+  "Its strict compatibility reader never consults current successor package source or build output.",
+  "These are strategic compatibility receipts, not runtime or renderer conformance evidence; no",
+  "`P-*`, `N-*`, or `S-*` status changes.",
+  "",
+  "M04-T01 defines and proves the first framework-neutral runtime integration slice without changing",
+].join("\n");
+const HISTORICAL_SOURCE_FILES = Object.freeze([
+  Object.freeze({
+    path: "packages/reference-catalog-web/test/tokens-consumer.mjs",
+    sha256: "sha256:8a39ae2c3183ea968ec235458269e8283fe46af3ffd1bb00c011bf3b1eecdee3",
+    bytes: 53,
+  }),
+  Object.freeze({
+    path: "packages/reference-catalog-web/package.json",
+    sha256: HISTORICAL_PACKAGE_MANIFEST_SHA256,
+    bytes: 2_254,
+  }),
+  Object.freeze({
+    path: "packages/reference-catalog-web/dist/tokens/index.js",
+    sha256: "sha256:4b47a66a77ddfb34a8ead7f62a35523c06aff94467f29183eeaba291f779eaf8",
+    bytes: 409,
+  }),
+  Object.freeze({
+    path: "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
+    sha256: "sha256:9f566e8ca4d8ac065abd531ec30e9a8b01fa6557b44e46c1d03c0c1b163066b3",
+    bytes: 3_184,
+  }),
+  Object.freeze({
+    path: "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
+    sha256: "sha256:81c4897b946483672cb6b70d79b9ec05fad2f45e06dc14bea3dfb0cf7af7ffd5",
+    bytes: 11_116,
+  }),
+  Object.freeze({
+    path: "packages/reference-catalog-web/src/tokens/index.ts",
+    sha256: "sha256:03ae286043cc3c84eaf3fd33f187e86025f3bfdaed4a0151ef4660be9a17f22c",
+    bytes: 857,
+  }),
+  Object.freeze({
+    path: "packages/reference-catalog-web/src/tokens/reference-token-document.ts",
+    sha256: "sha256:d20e599ebd5bd2e958ed77ed98b76dc5a13576166141e9b1620998b6050de05e",
+    bytes: 4_897,
+  }),
+  Object.freeze({
+    path: "packages/reference-catalog-web/src/tokens/web-token-provider.ts",
+    sha256: "sha256:3a9bc4f1fc48d9839d5fa663670df4612421e1d60cba734e636750d4df62676a",
+    bytes: 14_450,
+  }),
+  Object.freeze({
+    path: "packages/protocol/upstream/0.1.0/snapshot/SPEC.md",
+    sha256: "sha256:6443aed035cdced68e688402863ae3b7cc77f6dd75c8ad610831483d54b35d9c",
+    bytes: 77_981,
+  }),
+]);
 
-  let packageManifest;
-  try {
-    packageManifest = JSON.parse(referencePackageFile.bytes.toString("utf8"));
-  } catch {
-    fail("SC01_DTCG_BUILT_BINDING_DRIFT", "The reference package manifest must remain valid JSON.");
+function optionalString(value, label) {
+  if (value !== undefined && (typeof value !== "string" || value.length === 0)) {
+    fail("SC01_DTCG_OPTIONS_INVALID", `${label} must be a non-empty string.`);
   }
-  const tokenExport = packageManifest.exports?.["./tokens"]?.import;
-  assertCondition(
-    packageManifest.name === "@desen/reference-catalog-web" &&
-      tokenExport === "./dist/tokens/index.js",
-    "SC01_DTCG_BUILT_BINDING_DRIFT",
-    "The package self-export no longer resolves ./tokens to the built token entry.",
-  );
-  const packageRoot = path.dirname(referencePackageFile.resolved);
-  const expectedConsumer = await realpath(path.join(packageRoot, "test/tokens-consumer.mjs"));
-  const resolvedExport = await realpath(path.resolve(packageRoot, tokenExport));
-  assertCondition(
-    tokenConsumerFile.resolved === expectedConsumer &&
-      resolvedExport === builtTokenEntryFile.resolved,
-    "SC01_DTCG_BUILT_BINDING_DRIFT",
-    "The consumer or package export no longer resolves through the tracked built token entry.",
-  );
-
-  const builtEntryText = builtTokenEntryFile.bytes.toString("utf8");
-  const exactDocumentExport =
-    'export { REFERENCE_TOKEN_DOCUMENT } from "./reference-token-document.js";';
-  const exactProviderExport =
-    'export { REFERENCE_WEB_TOKEN_CSS_PROPERTIES, REFERENCE_WEB_TOKEN_CSS_REFERENCES, REFERENCE_WEB_TOKEN_PROVIDER, REFERENCE_WEB_TOKEN_VALUES, resolveReferenceWebToken, } from "./web-token-provider.js";';
-  assertCondition(
-    builtEntryText.includes(exactDocumentExport) && builtEntryText.includes(exactProviderExport),
-    "SC01_DTCG_BUILT_BINDING_DRIFT",
-    "The built token entry no longer has the exact document and provider module edges.",
-  );
-  const [resolvedBuiltDocument, resolvedBuiltProvider] = await Promise.all([
-    realpath(path.join(path.dirname(builtTokenEntryFile.resolved), "reference-token-document.js")),
-    realpath(path.join(path.dirname(builtTokenEntryFile.resolved), "web-token-provider.js")),
-  ]);
-  assertCondition(
-    resolvedBuiltDocument === builtTokenDocumentFile.resolved &&
-      resolvedBuiltProvider === builtTokenProviderFile.resolved,
-    "SC01_DTCG_BUILT_BINDING_DRIFT",
-    "A built entry document or provider target changed.",
-  );
-  const resolvedProviderDocument = await realpath(
-    path.join(path.dirname(builtTokenProviderFile.resolved), "reference-token-document.js"),
-  );
-  assertCondition(
-    resolvedProviderDocument === builtTokenDocumentFile.resolved,
-    "SC01_DTCG_BUILT_BINDING_DRIFT",
-    "The built provider no longer imports the tracked built token document.",
-  );
-  assertTypeScriptBuildParity(tokenIndexSourceFile, builtTokenEntryFile, "The built token index");
-  assertTypeScriptBuildParity(tokenSourceFile, builtTokenDocumentFile, "The built token document");
-  assertTypeScriptBuildParity(
-    providerSourceFile,
-    builtTokenProviderFile,
-    "The built token provider",
-  );
-  const runtimeModuleEdges = {
-    tokenIndex: inspectRuntimeModuleEdges(
-      builtEntryText,
-      "The built token index",
-      ["./reference-token-document.js", "./web-token-provider.js"],
-      true,
-    ),
-    tokenDocument: inspectRuntimeModuleEdges(
-      builtTokenDocumentFile.bytes.toString("utf8"),
-      "The built token document",
-      [],
-      false,
-    ),
-    tokenProvider: inspectRuntimeModuleEdges(
-      builtTokenProviderFile.bytes.toString("utf8"),
-      "The built token provider",
-      ["./reference-token-document.js"],
-      false,
-    ),
-  };
-
-  return deepFreeze({
-    consumerShim: {
-      exactLine: EXACT_TOKEN_CONSUMER_BYTES.toString("utf8").trimEnd(),
-      bytes: tokenConsumerFile.bytes.length,
-      sha256: sha256(tokenConsumerFile.bytes),
-    },
-    packageSelfExport: {
-      package: "@desen/reference-catalog-web",
-      subpath: "./tokens",
-      import: tokenExport,
-      manifestSha256: sha256(referencePackageFile.bytes),
-    },
-    resolvedBuiltEntry: {
-      path: "packages/reference-catalog-web/dist/tokens/index.js",
-      bytes: builtTokenEntryFile.bytes.length,
-      sha256: sha256(builtTokenEntryFile.bytes),
-    },
-    resolvedBuiltDocument: {
-      path: "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
-      bytes: builtTokenDocumentFile.bytes.length,
-      sha256: sha256(builtTokenDocumentFile.bytes),
-    },
-    resolvedBuiltProvider: {
-      path: "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
-      bytes: builtTokenProviderFile.bytes.length,
-      sha256: sha256(builtTokenProviderFile.bytes),
-    },
-    sourceToBuiltTranspileParity: {
-      tokenIndex: true,
-      tokenDocument: true,
-      tokenProvider: true,
-    },
-    runtimeModuleEdges,
-  });
+  return value;
 }
 
-async function loadBuiltTokenDocument(tokenConsumerPath) {
-  const module = await import(
-    `${pathToFileURL(tokenConsumerPath).href}?sc-01-dtcg=${Date.now()}-${Math.random()}`
-  );
-  assertCondition(
-    Object.hasOwn(module, "REFERENCE_TOKEN_DOCUMENT"),
-    "SC01_DTCG_BUILT_API_DRIFT",
-    "The built token API does not expose REFERENCE_TOKEN_DOCUMENT.",
-  );
-  return module.REFERENCE_TOKEN_DOCUMENT;
-}
-
-function assertCurrentReferenceProfile(audit, tokenDocument) {
-  assertCondition(
-    audit.classification === SC01_DTCG_PROFILE_CLASSIFICATION,
-    "SC01_DTCG_REFERENCE_PROFILE_DRIFT",
-    "The current built token document no longer fits the closed DTCG reference profile.",
-    { outcome: audit },
-  );
-  assertCondition(
-    isDeeplyFrozen(tokenDocument),
-    "SC01_DTCG_REFERENCE_PROFILE_DRIFT",
-    "The current built REFERENCE_TOKEN_DOCUMENT must remain recursively frozen.",
-  );
-  assertCondition(
-    audit.leafCount === 26 &&
-      audit.typeCounts.color === 20 &&
-      audit.typeCounts.dimension === 6 &&
-      audit.effectiveTypes.join(",") === "color,dimension" &&
-      audit.typeInheritance.inherited === 26 &&
-      audit.typeInheritance.explicitOnToken === 0,
-    "SC01_DTCG_REFERENCE_PROFILE_DRIFT",
-    "The exact 26-leaf color/dimension inheritance profile changed.",
-    { audit },
-  );
-  assertCondition(
-    audit.colorProfile.directValues === 17 &&
-      audit.colorProfile.observedColorSpaces.join(",") === "srgb" &&
-      audit.dimensionProfile.directValues === 6 &&
-      audit.dimensionProfile.observedUnits.join(",") === "rem",
-    "SC01_DTCG_REFERENCE_PROFILE_DRIFT",
-    "The exact direct color or dimension profile changed.",
-    { audit },
-  );
-  assertCondition(
-    audit.aliases.count === 3 &&
-      audit.aliases.maximumObservedChainDepth === 1 &&
-      audit.aliases.entries.every((entry) => entry.effectiveType === "color"),
-    "SC01_DTCG_REFERENCE_PROFILE_DRIFT",
-    "The exact whole-token alias profile changed.",
-    { aliases: audit.aliases },
-  );
-}
-
-async function canonicalArtifactTarget(artifactPath) {
-  const absolute = path.resolve(artifactPath);
+function optionalBytes(value, label) {
+  if (value === undefined) return undefined;
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    !utilTypes.isUint8Array(value)
+  ) {
+    fail("SC01_DTCG_OPTIONS_INVALID", `${label} must be non-shared non-Proxy bytes.`);
+  }
+  let prototype;
+  let backingBuffer;
+  let byteLength;
+  let byteOffset;
   try {
-    return await realpath(absolute);
+    prototype = Object.getPrototypeOf(value);
+    if (prototype !== Uint8Array.prototype && prototype !== Buffer.prototype) {
+      fail(
+        "SC01_DTCG_OPTIONS_INVALID",
+        `${label} must use the exact Buffer or Uint8Array prototype.`,
+      );
+    }
+    backingBuffer = Reflect.apply(TYPED_ARRAY_BUFFER_GETTER, value, []);
+    byteLength = Reflect.apply(TYPED_ARRAY_BYTE_LENGTH_GETTER, value, []);
+    byteOffset = Reflect.apply(TYPED_ARRAY_BYTE_OFFSET_GETTER, value, []);
   } catch (error) {
-    if (error?.code !== "ENOENT") throw error;
-    return path.join(await realpath(path.dirname(absolute)), path.basename(absolute));
+    if (error instanceof Sc01DtcgAuditError) throw error;
+    fail("SC01_DTCG_OPTIONS_INVALID", `${label} could not be captured safely.`);
+  }
+  if (utilTypes.isSharedArrayBuffer(backingBuffer)) {
+    fail("SC01_DTCG_OPTIONS_INVALID", `${label} must not use shared backing memory.`);
+  }
+  try {
+    const captured = new Uint8Array(byteLength);
+    captured.set(new Uint8Array(backingBuffer, byteOffset, byteLength));
+    return Buffer.from(captured);
+  } catch {
+    fail("SC01_DTCG_OPTIONS_INVALID", `${label} backing memory is detached or invalid.`);
   }
 }
 
-async function targetsTrackedArtifact(artifactPath) {
-  const [actual, expected] = await Promise.all([
-    canonicalArtifactTarget(artifactPath),
-    canonicalArtifactTarget(DEFAULT_SC01_DTCG_ARTIFACT_PATH),
-  ]);
-  return actual === expected;
+function optionalCallback(value, label) {
+  if (value !== undefined && (typeof value !== "function" || utilTypes.isProxy(value))) {
+    fail("SC01_DTCG_OPTIONS_INVALID", `${label} must be a non-Proxy function.`);
+  }
+  return value;
 }
 
-function assertCanonicalTrackedSpelling(artifactPath) {
-  assertCondition(
-    path.resolve(artifactPath) === path.resolve(DEFAULT_SC01_DTCG_ARTIFACT_PATH),
-    "SC01_DTCG_TRACKED_ALIAS_REJECTED",
-    "The tracked SC-01 artifact may not be accessed through an alternate path.",
-  );
+async function readRegularBytes(filePath, label, maximumBytes = undefined) {
+  let entry;
+  try {
+    entry = await lstat(filePath);
+  } catch (error) {
+    fail("SC01_DTCG_ARTIFACT_MISSING", `${label} is missing or inaccessible.`, {
+      cause: String(error),
+    });
+  }
+  if (!entry.isFile() || entry.isSymbolicLink()) {
+    fail("SC01_DTCG_ARTIFACT_UNSAFE", `${label} must be a regular non-symlink file.`);
+  }
+  if (maximumBytes !== undefined && entry.size > maximumBytes) {
+    fail("SC01_DTCG_ARTIFACT_UNSAFE", `${label} exceeds its bounded byte limit.`);
+  }
+
+  let handle;
+  try {
+    handle = await open(filePath, "r");
+    const [openedEntry, currentEntry] = await Promise.all([handle.stat(), lstat(filePath)]);
+    if (
+      !openedEntry.isFile() ||
+      !currentEntry.isFile() ||
+      currentEntry.isSymbolicLink() ||
+      openedEntry.dev !== currentEntry.dev ||
+      openedEntry.ino !== currentEntry.ino
+    ) {
+      fail("SC01_DTCG_ARTIFACT_UNSAFE", `${label} changed identity while it was being opened.`);
+    }
+    const bytes = await handle.readFile();
+    if (maximumBytes !== undefined && bytes.length > maximumBytes) {
+      fail("SC01_DTCG_ARTIFACT_UNSAFE", `${label} exceeds its bounded byte limit.`);
+    }
+    return bytes;
+  } catch (error) {
+    if (error instanceof Sc01DtcgAuditError) throw error;
+    fail("SC01_DTCG_ARTIFACT_UNSAFE", `${label} could not be read safely.`, {
+      cause: String(error),
+    });
+  } finally {
+    await handle?.close();
+  }
 }
 
-/**
- * Builds deterministic executable evidence for the SC-01 DTCG compatibility decision.
- */
-export async function buildSc01DtcgEvidence(options = undefined) {
-  const normalized = normalizeOptions(options, BUILD_OPTION_NAMES, "Build");
-  const overrides = sorted(Object.keys(normalized));
-  const paths = Object.freeze(
-    Object.fromEntries(
-      Object.entries(DEFAULT_PATHS).map(([name, defaultPath]) => [
-        name,
-        normalized[name] ?? defaultPath,
-      ]),
-    ),
-  );
-  for (const [name, filePath] of Object.entries(paths)) {
-    assertCondition(
-      typeof filePath === "string" && filePath.length > 0,
-      "SC01_DTCG_OPTIONS_INVALID",
-      `${name} must be a non-empty path string.`,
+async function canonicalDestinationPath(filePath) {
+  const absolutePath = path.resolve(filePath);
+  const canonicalParent = await realpath(path.dirname(absolutePath));
+  return path.join(canonicalParent, path.basename(absolutePath));
+}
+
+function assertHistoricalSourceLedger(sourceFiles) {
+  if (!Array.isArray(sourceFiles) || sourceFiles.length !== HISTORICAL_SOURCE_FILES.length) {
+    fail("SC01_DTCG_HISTORICAL_ARTIFACT_DRIFT", "The immutable SC-01 source ledger changed.");
+  }
+  for (let index = 0; index < HISTORICAL_SOURCE_FILES.length; index += 1) {
+    const expected = HISTORICAL_SOURCE_FILES[index];
+    const actual = sourceFiles[index];
+    if (
+      actual?.path !== expected.path ||
+      actual?.sha256 !== expected.sha256 ||
+      actual?.bytes !== expected.bytes
+    ) {
+      fail("SC01_DTCG_HISTORICAL_ARTIFACT_DRIFT", "The immutable SC-01 source ledger changed.", {
+        index,
+        expected,
+        actual,
+      });
+    }
+  }
+}
+
+function assertHistoricalSemantics(artifact) {
+  const unsupported = artifact.compatibility?.reviewedValidButUnsupportedFeatures;
+  const invalid = artifact.compatibility?.reviewedInvalidFixtures?.fixtures;
+  const fixtureCounts = artifact.evidence?.compatibilityFixtureCounts;
+  const standard = artifact.stableStandardPin;
+  const builtBinding = artifact.evidence?.builtTokenBinding;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.checkpoint !== "SC-01" ||
+    artifact.result !== "PASS" ||
+    artifact.classification !== SC01_DTCG_PROFILE_CLASSIFICATION ||
+    artifact.claim?.auditScope !==
+      "CURRENT_BUILT_REFERENCE_DOCUMENT_AND_REVIEWED_EXACT_FIXTURE_MATRIX" ||
+    artifact.claim?.arbitraryInputConformanceVerdict !== false ||
+    artifact.claim?.fullParserClaim !== false ||
+    artifact.claim?.fullResolverClaim !== false ||
+    artifact.claim?.protocol !== "DESEN 0.1.0" ||
+    artifact.claim?.target !== "web-react" ||
+    standard?.stableVersion !== "2025.10" ||
+    standard?.publicationDate !== "2025-10-28" ||
+    standard?.publicationCommit?.sha !== PUBLICATION_COMMIT ||
+    standard?.publicationCommit?.url !== PUBLICATION_COMMIT_URL ||
+    standard?.immutableReports?.length !== 3 ||
+    standard.immutableReports[0]?.url !== FORMAT_REPORT_URL ||
+    standard.immutableReports[1]?.url !== COLOR_REPORT_URL ||
+    standard.immutableReports[2]?.url !== RESOLVER_REPORT_URL ||
+    artifact.auditedReferenceDocument?.canonicalJsonSha256 !== HISTORICAL_TOKEN_DOCUMENT_SHA256 ||
+    artifact.auditedReferenceDocument?.canonicalJsonBytes !== 2_902 ||
+    artifact.auditedReferenceDocument?.leafCount !== 26 ||
+    artifact.auditedReferenceDocument?.typeCounts?.color !== 20 ||
+    artifact.auditedReferenceDocument?.typeCounts?.dimension !== 6 ||
+    artifact.auditedReferenceDocument?.aliases?.count !== 3 ||
+    artifact.auditedReferenceDocument?.recursivelyFrozen !== true ||
+    !Array.isArray(unsupported) ||
+    unsupported.length !== 14 ||
+    unsupported.reduce(
+      (count, feature) =>
+        count + (Array.isArray(feature.executableFixtures) ? feature.executableFixtures.length : 0),
+      0,
+    ) !== 16 ||
+    !Array.isArray(invalid) ||
+    invalid.length !== 7 ||
+    artifact.compatibility?.reviewedInvalidFixtures?.reviewScope !==
+      "EXACT_EMBEDDED_FIXTURES_ONLY" ||
+    artifact.hostOwnedStorageBoundary?.owner !== "host" ||
+    artifact.hostOwnedStorageBoundary?.protocolDefinesTokenStorage !== false ||
+    artifact.hostOwnedStorageBoundary?.competingTokenFileFormatCreated !== false ||
+    artifact.evidence?.provenance?.mode !== "tracked-defaults" ||
+    artifact.evidence?.provenance?.overrides?.length !== 0 ||
+    fixtureCounts?.reviewedUnsupportedFeatures !== 14 ||
+    fixtureCounts?.reviewedUnsupportedFixtures !== 16 ||
+    fixtureCounts?.reviewedInvalidFixtures !== 7 ||
+    builtBinding?.packageSelfExport?.manifestSha256 !== HISTORICAL_PACKAGE_MANIFEST_SHA256 ||
+    builtBinding?.packageSelfExport?.subpath !== "./tokens" ||
+    builtBinding?.packageSelfExport?.import !== "./dist/tokens/index.js" ||
+    builtBinding?.sourceToBuiltTranspileParity?.tokenIndex !== true ||
+    builtBinding?.sourceToBuiltTranspileParity?.tokenDocument !== true ||
+    builtBinding?.sourceToBuiltTranspileParity?.tokenProvider !== true
+  ) {
+    fail(
+      "SC01_DTCG_HISTORICAL_ARTIFACT_DRIFT",
+      "The immutable SC-01 DTCG artifact lost its task-time semantics.",
     );
   }
+  assertHistoricalSourceLedger(artifact.evidence?.sourceFiles);
+}
 
-  const [
-    tokenConsumerFile,
-    referencePackageFile,
-    builtTokenEntryFile,
-    builtTokenDocumentFile,
-    builtTokenProviderFile,
-    tokenIndexSourceFile,
-    tokenSourceFile,
-    providerSourceFile,
-    frozenSpecFile,
-  ] = await Promise.all([
-    readRegularFile(paths.tokenConsumerPath, "Token consumer shim"),
-    readRegularFile(paths.referencePackagePath, "Reference package manifest"),
-    readRegularFile(paths.builtTokenEntryPath, "Built token entry"),
-    readRegularFile(paths.builtTokenDocumentPath, "Built token document"),
-    readRegularFile(paths.builtTokenProviderPath, "Built token provider"),
-    readRegularFile(paths.tokenIndexSourcePath, "Token index source"),
-    readRegularFile(paths.tokenSourcePath, "Reference token source"),
-    readRegularFile(paths.providerSourcePath, "Reference token provider source"),
-    readRegularFile(paths.frozenSpecPath, "Frozen DESEN specification"),
-  ]);
-  const builtTokenBinding = await auditBuiltTokenBinding({
-    tokenConsumerFile,
-    referencePackageFile,
-    builtTokenEntryFile,
-    builtTokenDocumentFile,
-    builtTokenProviderFile,
-    tokenIndexSourceFile,
-    tokenSourceFile,
-    providerSourceFile,
-  });
-  const tokenDocument =
-    normalized.tokenDocument ?? (await loadBuiltTokenDocument(paths.tokenConsumerPath));
-  const audit = evaluateSc01DtcgFixture(tokenDocument);
-  assertCurrentReferenceProfile(audit, tokenDocument);
-  const unsupported = buildUnsupportedMatrix();
-  const invalid = buildInvalidMatrix();
-  const hostOwnedStorageBoundary = auditHostOwnedBoundary(
-    [
+function parseHistoricalArtifact(bytes) {
+  const actualSha256 = sha256(bytes);
+  const expectedSha256 = `sha256:${ARTIFACT_SHA256}`;
+  if (bytes.length !== HISTORICAL_ARTIFACT_BYTES || actualSha256 !== expectedSha256) {
+    fail(
+      "SC01_DTCG_HISTORICAL_ARTIFACT_DRIFT",
+      "The immutable SC-01 DTCG artifact bytes changed.",
       {
-        label: "token-index-source",
-        source: tokenIndexSourceFile.bytes.toString("utf8"),
+        expectedBytes: HISTORICAL_ARTIFACT_BYTES,
+        actualBytes: bytes.length,
+        expectedSha256,
+        actualSha256,
       },
-      {
-        label: "token-index-built",
-        source: builtTokenEntryFile.bytes.toString("utf8"),
-      },
-      {
-        label: "token-document-source",
-        source: tokenSourceFile.bytes.toString("utf8"),
-      },
-      {
-        label: "token-document-built",
-        source: builtTokenDocumentFile.bytes.toString("utf8"),
-      },
-      {
-        label: "token-provider-source",
-        source: providerSourceFile.bytes.toString("utf8"),
-      },
-      {
-        label: "token-provider-built",
-        source: builtTokenProviderFile.bytes.toString("utf8"),
-      },
-    ],
-    frozenSpecFile.bytes.toString("utf8"),
-  );
-  const canonicalDocument = canonicalJsonBytes(tokenDocument);
+    );
+  }
+  let artifact;
+  try {
+    artifact = JSON.parse(bytes.toString("utf8"));
+  } catch {
+    fail(
+      "SC01_DTCG_HISTORICAL_ARTIFACT_DRIFT",
+      "The immutable SC-01 DTCG artifact is not valid JSON.",
+    );
+  }
+  assertHistoricalSemantics(artifact);
+  return deepFreeze(artifact);
+}
 
-  const artifact = {
-    schemaVersion: 1,
-    checkpoint: "SC-01",
-    result: "PASS",
-    classification: SC01_DTCG_PROFILE_CLASSIFICATION,
-    claim: {
-      summary:
-        "The built 26-leaf reference document is a DTCG 2025.10-compatible closed color/dimension profile, with separately reviewed exact compatibility fixtures; no general DTCG input verdict is produced.",
-      auditScope: "CURRENT_BUILT_REFERENCE_DOCUMENT_AND_REVIEWED_EXACT_FIXTURE_MATRIX",
-      arbitraryInputConformanceVerdict: false,
-      fullParserClaim: false,
-      fullResolverClaim: false,
-      protocol: "DESEN 0.1.0",
-      target: "web-react",
-    },
-    stableStandardPin: {
-      organization: "Design Tokens Community Group",
-      stableVersion: "2025.10",
-      publicationDate: "2025-10-28",
-      reportStatus: "FINAL_COMMUNITY_GROUP_REPORT",
-      w3cStandardTrack: false,
-      immutableReports: [
-        { module: "Format", url: FORMAT_REPORT_URL },
-        { module: "Color", url: COLOR_REPORT_URL },
-        { module: "Resolver", url: RESOLVER_REPORT_URL },
-      ],
-      publicationCommit: {
-        repository: "https://github.com/design-tokens/community-group",
-        sha: PUBLICATION_COMMIT,
-        url: PUBLICATION_COMMIT_URL,
-      },
-      upstreamInconsistencies: [RESOLVER_VERSION_INCONSISTENCY],
-    },
-    auditedReferenceDocument: {
-      source: "built @desen/reference-catalog-web/tokens REFERENCE_TOKEN_DOCUMENT",
-      canonicalJsonSha256: sha256(canonicalDocument),
-      canonicalJsonBytes: canonicalDocument.length,
-      recursivelyFrozen: true,
-      ...audit,
-    },
-    compatibility: {
-      currentReferenceProfileCompatibleSubset: [
-        "JSON token and nested-group structure identified by $value",
-        "Group $type inheritance",
-        "color and dimension token types",
-        "sRGB color values",
-        "px and rem dimension units",
-        "same-document whole-token dotted curly aliases",
-        "recursive alias chains with missing-target, cycle, and type-mismatch rejection",
-      ],
-      locallyStricterProfile: [
-        "Color is limited to sRGB.",
-        "Color components are limited to finite numbers; the DTCG none component value is intentionally unsupported.",
-        "Color alpha is locally required although DTCG permits omission.",
-        "A lowercase six-digit hex fallback matching rounded sRGB components is locally required although DTCG permits omission.",
-        "Only color and dimension token types are accepted.",
-        "Only dotted whole-token curly aliases are accepted; a valid root alias such as {primary} is intentionally not accepted.",
-        "An alias must receive color or dimension from itself or a parent group; DTCG target-token type inference is intentionally unsupported.",
-      ],
-      reviewedValidButUnsupportedFeatures: unsupported,
-      reviewedInvalidFixtures: {
-        reviewScope: "EXACT_EMBEDDED_FIXTURES_ONLY",
-        expectedClassification: SC01_INVALID_DTCG_CLASSIFICATION,
-        fixtures: invalid,
-      },
-    },
-    hostOwnedStorageBoundary,
-    evidence: {
-      provenance: {
-        mode: overrides.length === 0 ? "tracked-defaults" : "injected-test",
-        overrides,
-      },
-      sourceFiles: [
-        {
-          path: "packages/reference-catalog-web/test/tokens-consumer.mjs",
-          sha256: sha256(tokenConsumerFile.bytes),
-          bytes: tokenConsumerFile.bytes.length,
-        },
-        {
-          path: "packages/reference-catalog-web/package.json",
-          sha256: sha256(referencePackageFile.bytes),
-          bytes: referencePackageFile.bytes.length,
-        },
-        {
-          path: "packages/reference-catalog-web/dist/tokens/index.js",
-          sha256: sha256(builtTokenEntryFile.bytes),
-          bytes: builtTokenEntryFile.bytes.length,
-        },
-        {
-          path: "packages/reference-catalog-web/dist/tokens/reference-token-document.js",
-          sha256: sha256(builtTokenDocumentFile.bytes),
-          bytes: builtTokenDocumentFile.bytes.length,
-        },
-        {
-          path: "packages/reference-catalog-web/dist/tokens/web-token-provider.js",
-          sha256: sha256(builtTokenProviderFile.bytes),
-          bytes: builtTokenProviderFile.bytes.length,
-        },
-        {
-          path: "packages/reference-catalog-web/src/tokens/index.ts",
-          sha256: sha256(tokenIndexSourceFile.bytes),
-          bytes: tokenIndexSourceFile.bytes.length,
-        },
-        {
-          path: "packages/reference-catalog-web/src/tokens/reference-token-document.ts",
-          sha256: sha256(tokenSourceFile.bytes),
-          bytes: tokenSourceFile.bytes.length,
-        },
-        {
-          path: "packages/reference-catalog-web/src/tokens/web-token-provider.ts",
-          sha256: sha256(providerSourceFile.bytes),
-          bytes: providerSourceFile.bytes.length,
-        },
-        {
-          path: "packages/protocol/upstream/0.1.0/snapshot/SPEC.md",
-          sha256: sha256(frozenSpecFile.bytes),
-          bytes: frozenSpecFile.bytes.length,
-        },
-      ],
-      builtTokenBinding,
-      compatibilityFixtureCounts: {
-        reviewedUnsupportedFeatures: unsupported.length,
-        reviewedUnsupportedFixtures: unsupported.reduce(
-          (count, feature) => count + feature.executableFixtures.length,
-          0,
-        ),
-        reviewedInvalidFixtures: invalid.length,
-      },
-    },
-    boundaries: [
-      "This evidence audits only the current built closed reference profile and the exact embedded fixture documents and hashes.",
-      "Evaluator outcomes for arbitrary inputs outside those audited bytes are not DTCG validity or conformance verdicts.",
-      "Within the reviewed matrix only, valid unsupported fixtures expect UNSUPPORTED_DTCG_FEATURE and reviewed negative fixtures expect INVALID_DTCG.",
-      "This evidence does not implement or claim a general DTCG parser or validator.",
-      "This evidence does not implement or claim DTCG Resolver sets, modifiers, contexts, themes, or modes.",
-      "The root-token alias gap is recorded but the existing provider public API and source are unchanged.",
-      "DESEN keeps token storage host-owned and does not define a competing token-file format.",
-    ],
-  };
-  const artifactBytes = Buffer.from(
-    await format(JSON.stringify(artifact), {
-      parser: "json",
-      endOfLine: "lf",
-      printWidth: 100,
-      tabWidth: 2,
-    }),
-  );
+function verifyProofMatrixPin(matrixText) {
+  const exactReference = `\`${ARTIFACT_NAME}\`\n\`sha256:${ARTIFACT_SHA256}\`.`;
+  if (
+    matrixText.split(exactReference).length !== 2 ||
+    matrixText.split(`\`${ARTIFACT_NAME}\``).length !== 2 ||
+    matrixText.split(SC01_PROOF_MATRIX_CONTEXT).length !== 2
+  ) {
+    fail(
+      "SC01_DTCG_PROOF_PIN_DRIFT",
+      "Proof Matrix must retain one exact adjacent immutable SC-01 DTCG artifact pin.",
+    );
+  }
+}
+
+async function readHistoricalArtifact(options) {
+  const artifactPath =
+    optionalString(options.artifactPath, "artifactPath") ?? DEFAULT_SC01_DTCG_ARTIFACT_PATH;
+  const artifactBytes =
+    optionalBytes(options.artifactBytes, "artifactBytes") ??
+    (await readRegularBytes(
+      path.resolve(artifactPath),
+      "Immutable SC-01 DTCG artifact",
+      HISTORICAL_ARTIFACT_BYTES,
+    ));
+  const artifact = parseHistoricalArtifact(artifactBytes);
   return Object.freeze({
-    artifact: deepFreeze(artifact),
+    artifact,
     artifactBytes,
-    artifactSha256: sha256(artifactBytes),
+    artifactSha256: `sha256:${ARTIFACT_SHA256}`,
+    compatibilityMode: "immutable-task-time-artifact",
   });
 }
 
 /**
- * Verifies tracked or supplied SC-01 evidence against a fresh deterministic build.
+ * Reads exact SC-01 task-time evidence without consulting successor package source or build output.
  */
-export async function verifySc01DtcgEvidence(options = undefined) {
-  const normalized = normalizeOptions(
-    options,
-    ["artifactPath", "artifactBytes", ...BUILD_OPTION_NAMES],
+export async function buildSc01DtcgEvidence(rawOptions = undefined) {
+  const options = normalizeOptions(rawOptions, ["artifactPath", "artifactBytes"], "Build");
+  return readHistoricalArtifact(options);
+}
+
+/** Verifies exact SC-01 bytes, task-time semantics, and the immutable Proof Matrix pin. */
+export async function verifySc01DtcgEvidence(rawOptions = undefined) {
+  const options = normalizeOptions(
+    rawOptions,
+    ["artifactPath", "artifactBytes", "proofMatrixText"],
     "Verify",
   );
-  const artifactPath = normalized.artifactPath ?? DEFAULT_SC01_DTCG_ARTIFACT_PATH;
-  assertCondition(
-    typeof artifactPath === "string" && artifactPath.length > 0,
-    "SC01_DTCG_OPTIONS_INVALID",
-    "Verify artifactPath must be a non-empty path string.",
-  );
-  if (Object.hasOwn(normalized, "artifactBytes")) {
-    assertCondition(
-      normalized.artifactBytes instanceof Uint8Array &&
-        !(
-          typeof SharedArrayBuffer === "function" &&
-          normalized.artifactBytes.buffer instanceof SharedArrayBuffer
-        ),
+  const proofMatrixText = optionalString(options.proofMatrixText, "proofMatrixText");
+  if (
+    proofMatrixText !== undefined &&
+    Buffer.byteLength(proofMatrixText, "utf8") > MAX_PROOF_MATRIX_BYTES
+  ) {
+    fail(
       "SC01_DTCG_OPTIONS_INVALID",
-      "Verify artifactBytes must be a non-shared byte array.",
+      "proofMatrixText exceeds the bounded Proof Matrix byte limit.",
     );
   }
-  const buildOptions = Object.create(null);
-  for (const name of BUILD_OPTION_NAMES) {
-    if (Object.hasOwn(normalized, name)) buildOptions[name] = normalized[name];
-  }
-  const tracked =
-    normalized.artifactBytes === undefined && (await targetsTrackedArtifact(artifactPath));
-  if (tracked) {
-    assertCanonicalTrackedSpelling(artifactPath);
-    assertCondition(
-      Object.keys(buildOptions).length === 0,
-      "SC01_DTCG_NONDEFAULT_TRACKED_VERIFY",
-      "The tracked SC-01 artifact can only be verified from fixed defaults.",
-    );
-  }
-  const expected = await buildSc01DtcgEvidence(buildOptions);
-  const actualBytes = Buffer.from(normalized.artifactBytes ?? (await readFile(artifactPath)));
-  assertCondition(
-    actualBytes.equals(expected.artifactBytes),
-    "SC01_DTCG_ARTIFACT_DRIFT",
-    "The SC-01 DTCG artifact differs from a fresh deterministic build.",
-    {
-      expectedSha256: expected.artifactSha256,
-      actualSha256: sha256(actualBytes),
-    },
+  const built = await readHistoricalArtifact(options);
+  verifyProofMatrixPin(
+    proofMatrixText ??
+      (await readRegularBytes(PROOF_MATRIX_PATH, "Proof Matrix", MAX_PROOF_MATRIX_BYTES)).toString(
+        "utf8",
+      ),
   );
   return Object.freeze({
-    result: "PASS",
-    classification: expected.artifact.classification,
-    artifactSha256: expected.artifactSha256,
-    tokens: expected.artifact.auditedReferenceDocument.leafCount,
+    result: built.artifact.result,
+    classification: built.artifact.classification,
+    artifactSha256: built.artifactSha256,
+    tokens: built.artifact.auditedReferenceDocument.leafCount,
     reviewedUnsupportedFeatures:
-      expected.artifact.evidence.compatibilityFixtureCounts.reviewedUnsupportedFeatures,
+      built.artifact.evidence.compatibilityFixtureCounts.reviewedUnsupportedFeatures,
     reviewedUnsupportedFixtures:
-      expected.artifact.evidence.compatibilityFixtureCounts.reviewedUnsupportedFixtures,
+      built.artifact.evidence.compatibilityFixtureCounts.reviewedUnsupportedFixtures,
     reviewedInvalidFixtures:
-      expected.artifact.evidence.compatibilityFixtureCounts.reviewedInvalidFixtures,
-    provenanceMode: expected.artifact.evidence.provenance.mode,
+      built.artifact.evidence.compatibilityFixtureCounts.reviewedInvalidFixtures,
+    provenanceMode: built.artifact.evidence.provenance.mode,
+    compatibilityMode: built.compatibilityMode,
   });
 }
 
 /**
- * Writes deterministic SC-01 DTCG evidence through the shared atomic proof writer.
+ * Preserves the tracked SC-01 artifact or copies its exact bytes to an alternate safe target.
  */
-export async function writeSc01DtcgEvidence(options = undefined) {
-  const normalized = normalizeOptions(
-    options,
+export async function writeSc01DtcgEvidence(rawOptions = undefined) {
+  const options = normalizeOptions(
+    rawOptions,
     ["artifactPath", "beforeAtomicRename", "buildOptions"],
     "Write",
   );
-  const artifactPath = normalized.artifactPath ?? DEFAULT_SC01_DTCG_ARTIFACT_PATH;
-  assertCondition(
-    typeof artifactPath === "string" && artifactPath.length > 0,
-    "SC01_DTCG_OPTIONS_INVALID",
-    "Write artifactPath must be a non-empty path string.",
-  );
-  if (Object.hasOwn(normalized, "beforeAtomicRename")) {
-    assertCondition(
-      typeof normalized.beforeAtomicRename === "function",
-      "SC01_DTCG_OPTIONS_INVALID",
-      "Write beforeAtomicRename must be a function.",
+  const artifactPath =
+    optionalString(options.artifactPath, "artifactPath") ?? DEFAULT_SC01_DTCG_ARTIFACT_PATH;
+  const beforeAtomicRename = optionalCallback(options.beforeAtomicRename, "beforeAtomicRename");
+  const buildOptions =
+    options.buildOptions === undefined
+      ? undefined
+      : normalizeOptions(options.buildOptions, ["artifactPath", "artifactBytes"], "buildOptions");
+
+  let canonicalArtifactPath;
+  let canonicalTrackedPath;
+  try {
+    [canonicalArtifactPath, canonicalTrackedPath] = await Promise.all([
+      canonicalDestinationPath(artifactPath),
+      canonicalDestinationPath(DEFAULT_SC01_DTCG_ARTIFACT_PATH),
+    ]);
+  } catch (error) {
+    fail(
+      "SC01_DTCG_ARTIFACT_WRITE_FAILED",
+      "The immutable SC-01 artifact destination could not be resolved safely.",
+      { cause: String(error) },
     );
   }
-  if (Object.hasOwn(normalized, "buildOptions")) {
-    assertCondition(
-      isRecord(normalized.buildOptions),
-      "SC01_DTCG_OPTIONS_INVALID",
-      "Write buildOptions must be a record.",
-    );
+
+  if (canonicalArtifactPath === canonicalTrackedPath) {
+    if (beforeAtomicRename !== undefined || buildOptions !== undefined) {
+      fail(
+        "SC01_DTCG_NONDEFAULT_TRACKED_WRITE",
+        "The immutable tracked SC-01 artifact cannot be rebuilt or hooked.",
+      );
+    }
+    const built = await readHistoricalArtifact(Object.freeze({}));
+    return Object.freeze({ ...built, preserved: true });
   }
-  const tracked = await targetsTrackedArtifact(artifactPath);
-  if (tracked) {
-    assertCanonicalTrackedSpelling(artifactPath);
-    assertCondition(
-      !Object.hasOwn(normalized, "beforeAtomicRename") &&
-        !Object.hasOwn(normalized, "buildOptions"),
-      "SC01_DTCG_NONDEFAULT_TRACKED_WRITE",
-      "The tracked SC-01 artifact can only be generated from fixed defaults.",
-    );
-  }
-  const result = await buildSc01DtcgEvidence(normalized.buildOptions);
+
+  const built = await readHistoricalArtifact(buildOptions ?? Object.freeze({}));
   try {
     await writeAtomicProofArtifact({
-      artifactPath,
-      artifactBytes: result.artifactBytes,
-      beforeAtomicRename: normalized.beforeAtomicRename,
+      artifactPath: canonicalArtifactPath,
+      artifactBytes: built.artifactBytes,
+      beforeAtomicRename,
     });
   } catch (error) {
-    fail("SC01_DTCG_ARTIFACT_WRITE_FAILED", "The SC-01 artifact could not be written safely.", {
-      cause: error instanceof Error ? error.message : String(error),
-    });
+    fail(
+      "SC01_DTCG_ARTIFACT_WRITE_FAILED",
+      "The immutable SC-01 artifact could not be copied safely.",
+      { cause: String(error) },
+    );
   }
-  return result;
+  return Object.freeze({
+    ...built,
+    artifactPath: canonicalArtifactPath,
+    preserved: false,
+  });
 }

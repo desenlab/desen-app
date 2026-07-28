@@ -99,6 +99,33 @@ proof trace. React does not receive the lower M04 adapter-bridge authority or co
 Events continue to enter through the authenticated session event API and carry only detached,
 schema-validated inert payloads.
 
+M05-T04 implements the seam with a stable private command holder created alongside each lower
+component binding. Attaching a React owner never unregisters or re-registers that binding, so its
+event ticket and registration generation remain unchanged. The session authenticates the exact
+current snapshot and component runtime instance, grants one opaque attachment generation, and
+atomically revokes the previous owner. Old cleanup cannot clear a replacement. Binding removal,
+navigation, and terminal session disposal revoke the holder automatically; callback exceptions,
+malformed results, reentry, or ownership changes while executing return `denied`.
+
+The React renderer also proves two-way equality between every prepared component/behavior identity
+and the authenticated binding snapshot before it creates an element. A private controller exposes
+no usable interaction authority until React commits. Layout activation precedes trusted passive
+attachment effects; pre-commit calls, server rendering, never-committed Suspense work, and cleanup
+all remain unavailable. Behavior controllers dispatch declared events through their exact session
+identity but cannot attach component commands. Because React has no supported generic signal for a
+child-local render of an already committed component, trusted adapter conformance explicitly
+forbids side-effecting interaction calls from render bodies; only committed effects and platform
+event callbacks may use the port. Reference adapter source and lifecycle tests enforce this rule
+without relying on React internals.
+
+Event payloads first cross the bounded runtime JSON snapshot boundary and then recheck the exact
+commit epoch, preventing hostile reflection from carrying a call across synchronous unmount.
+Command capture checks the epoch before and after lower attachment and immediately detaches a lower
+owner created across cleanup. Revocation reduces both core and React authorities to small inert
+tombstones: callbacks, component bindings, session/snapshot references, and superseded controller
+entries are cleared. Retaining an old opaque handle or interaction port therefore cannot retain a
+live component closure or complete session graph.
+
 ### Semantic style-part boundary
 
 React adapters expose semantic style-part contracts, not DOM structure. A style adapter may map a
@@ -136,6 +163,16 @@ rewritten to pretend the executable registry existed at G03. M05 creates a succe
 logical capability artifact after the adapter subpath is complete, records its new exact digest,
 and explicitly transfers current package-verifier ownership while pinning the M03 artifact as a
 prerequisite.
+
+M05-T04 records that successor as
+`run.desen.reference.sign-in@0.1.0`, target `web-react`, package digest
+`sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0`.
+The profile frames the projected Catalog plus 80 regular `dist/**` files: 81 total entries and
+252,072 bytes. The only command declared by this exact Catalog is TextField `focus`; its static
+adapter owns a narrow `TextFieldHandle`, attaches only after commit, accepts exact empty input, and
+detaches the exact returned authority. Button `press` and TextField `change` forward fresh inert
+payloads without native-event or DOM authority. The other three component adapters expose no
+undeclared interaction.
 
 The old digest is never used to identify the new bytes. The current `catalog.json`, M05 proof
 receipt, and controlled host fixture must agree on the successor exact

@@ -1903,3 +1903,75 @@ This file records implementation discoveries without changing the frozen DESEN 0
   being inferred from schema-valid delivery alone. A later multi-target revision may standardize
   a renderer-neutral semantic-style receiving envelope, but target state activation remains
   capability-owned.
+
+## PF-053 — React interaction authority is commit-scoped and package executables require a successor digest
+
+- Status: OPEN
+- Blocks proof: No; M05-T04 defines one Web–React interaction and package-migration profile without
+  changing the frozen DESEN protocol, Source, Bundle, Catalog schema, or framework-neutral render
+  plan.
+- Protocol location: SPEC Sections 7.4, 17.3, 19.4, 22, 23.4, 24.2, and 26.3; `C-017`, `C-019`,
+  `PIPE-022`, `R-006`, `R-072`, `R-149`, `N-033`, `N-034`, and related findings `PF-026`,
+  `PF-029`, `PF-046`, `PF-050`, `PF-051`, and `PF-052`
+- Observation: M04 authenticates and validates generic event and command routing, while M05-T03
+  produces schema-valid React adapter values. Neither boundary defines when a concrete React
+  instance may acquire imperative command authority, how an abandoned or replayed React lifetime
+  loses it, or how the public render plan is proven equal to the session binding inventory before
+  executable adapters are instantiated. Registering the concrete callback directly in render
+  would authorize SSR and abandoned Suspense work. Re-registering the lower adapter binding on
+  every mount would also change event tickets and command generations. Finally, adding executable
+  reference adapters changes bytes covered by the M03 logical package digest; retaining the old
+  tuple would falsely identify new code as the historical inert artifact.
+- Implementation decision: M05-T04 creates a stable private component-command holder when the
+  headless session first registers a component binding. The public attach call accepts only an
+  exact current factory-authenticated session snapshot, runtime component identity, and
+  receiver-independent own-data callback. It returns one opaque owner-bound attachment. A new
+  owner atomically supersedes the previous generation, while cleanup for an old generation cannot
+  clear its replacement. Binding replacement, navigation, session disposal, callback reentry,
+  callback failure, malformed output, or an authority change while invoking all fail closed. The
+  lower binding is never unregistered merely to attach React, preserving its event ticket and
+  registration identity. Behavior bindings cannot use this component-command seam.
+
+  Before React element creation, the renderer compares every prepared component and behavior with
+  the authenticated snapshot bindings in both directions, including behavior capability, id, and
+  exact owner identity. Missing, duplicated, extra, or mismatched bindings return
+  `RUNTIME_BINDING_MISMATCH` with no adapter execution. Each adapter element then owns a private
+  controller activated only by a committed layout effect. Pre-commit, SSR, never-committed
+  Suspense, stale-snapshot, and unmounted calls remain unavailable. React has no supported generic
+  render-phase signal for a child-local rerender of an already committed trusted adapter, so
+  conformance forbids side-effecting interaction calls from render bodies and permits them only in
+  committed effects or platform callbacks. Reference source and lifecycle tests enforce this rule
+  without React internals. Events use the exact captured session, snapshot, runtime identity, name,
+  and inert JSON payload. Their public completion resolves only to `void` and exposes no newer
+  snapshot or lower action-turn result.
+
+  Payloads first cross the bounded runtime JSON snapshot boundary and the exact commit epoch is
+  rechecked after hostile reflection. Command capture performs the same epoch check before and
+  after lower attachment; a lower owner created across cleanup is immediately detached and never
+  exposed. Core revocation clears its callback, binding, lifetime, and session references. React
+  cleanup tombstones lower attachments, removes superseded controller entries, and drops current
+  session/snapshot authority. Retained stale handles or ports therefore do not retain a live
+  component closure or complete session graph.
+
+  The reference package exposes a separate, opt-in `./react-adapters` subpath containing exactly
+  five frozen, statically imported registrations. Explicit field and slot mappings prevent
+  arbitrary React prop, style-map, native-event, and DOM leakage. TextField implements the exact
+  declared `focus` command through its narrow private handle; TextField `change` and Button
+  `press` forward fresh inert payloads. The other adapters add no undeclared interaction.
+
+  The current reference Catalog therefore moves from the immutable M03 package digest
+  `sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e`
+  to the successor digest
+  `sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0`.
+  The successor frames the projected Catalog plus every one of 80 regular `dist/**` files, for 81
+  entries and 252,072 bytes. M03 proof bytes and their old tuple remain unchanged behind strict
+  task-time compatibility readers; M05-T04 owns the current package inventory.
+
+- Future action: M05-T05 must prove stable React reconciliation keys and runtime-to-source
+  diagnostics without widening an adapter's authority. M05-T06 must contain committed adapter
+  exceptions. M05-T08 exercises the complete official-derived sign-in path through these exact
+  reference adapters, while M05-T09 proves the separate production host cannot replace the
+  bundle-driven tree or executable registry with handwritten composition. M09/M12 still own
+  concrete semantic style application and accessibility preservation. Native renderers should
+  reuse the observable event/command vectors but define independent lifecycle attachment
+  profiles instead of importing React effects into `runtime-core`.

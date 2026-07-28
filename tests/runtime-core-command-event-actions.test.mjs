@@ -1,67 +1,44 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { lstat, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
-  RuntimeCoreCommandEventActionsEvidenceError,
   buildRuntimeCoreCommandEventActionsEvidence,
+  DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH,
+  RuntimeCoreCommandEventActionsEvidenceError,
   verifyRuntimeCoreCommandEventActionsEvidence,
+  writeRuntimeCoreCommandEventActionsEvidence,
 } from "../scripts/lib/runtime-core-command-event-actions-proof.mjs";
 
-import * as runtimeActionInternalApi from "../packages/runtime-core/dist/command-event-actions.js";
-import * as runtimePortApi from "../packages/runtime-core/dist/command-event-ports.js";
-import * as runtimeApi from "../packages/runtime-core/dist/index.js";
+const TEST_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
+const WORKSPACE_ROOT = path.resolve(TEST_DIRECTORY, "..");
+const PROOF_MATRIX_PATH = path.join(WORKSPACE_ROOT, "docs/proof/PROOF-MATRIX.md");
+const PROOF_DOCUMENT_PATH = path.join(
+  WORKSPACE_ROOT,
+  "docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md",
+);
+const ROOT_MANIFEST_PATH = path.join(WORKSPACE_ROOT, "package.json");
+const HISTORICAL_SHA256 = "sha256:8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4";
+const ARTIFACT_NAME = "runtime-core-0.1.0-command-event-actions.json";
 
-const STATE_NAVIGATION_ARTIFACT = new URL(
-  "../docs/proof/artifacts/runtime-core-0.1.0-state-navigation-actions.json",
-  import.meta.url,
-);
-const INTERACTION_CONTRACT_ARTIFACT = new URL(
-  "../docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json",
-  import.meta.url,
-);
-const EXECUTION_CONTRACT_ARTIFACT = new URL(
-  "../docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
-  import.meta.url,
-);
-const PORT_SOURCE = new URL("../packages/runtime-core/src/command-event-ports.ts", import.meta.url);
-const ACTION_SOURCE = new URL(
-  "../packages/runtime-core/src/command-event-actions.ts",
-  import.meta.url,
-);
-const SOURCE_INDEX = new URL("../packages/runtime-core/src/index.ts", import.meta.url);
-const PACKAGE_TESTS = new URL(
-  "../packages/runtime-core/test/command-event-actions.test.ts",
-  import.meta.url,
-);
-const TYPE_TESTS = new URL(
-  "../packages/runtime-core/test/command-event-actions.types.ts",
-  import.meta.url,
-);
-
-async function rejectsCode(action, expectedCode) {
-  await assert.rejects(action, (error) => {
-    assert.ok(error instanceof RuntimeCoreCommandEventActionsEvidenceError);
-    assert.equal(error.code, expectedCode);
-    return true;
-  });
+function expectEvidenceFailure(error, code) {
+  assert.ok(error instanceof RuntimeCoreCommandEventActionsEvidenceError);
+  if (code !== undefined) assert.equal(error.code, code);
+  return true;
 }
 
-function withRuntime(overrides) {
-  return Object.freeze({ ...runtimeApi, ...overrides });
+async function temporaryDirectory() {
+  return mkdtemp(path.join(os.tmpdir(), "desen-command-event-compat-"));
 }
 
-function withPorts(overrides) {
-  return Object.freeze({ ...runtimePortApi, ...overrides });
-}
-
-function withActionInternals(overrides) {
-  return Object.freeze({ ...runtimeActionInternalApi, ...overrides });
-}
-
-test("accepts tracked deterministic M04-T12 command/event evidence", async () => {
+test("accepts the tracked immutable M04-T12 command/event evidence", async () => {
   const result = await verifyRuntimeCoreCommandEventActionsEvidence();
   assert.equal(result.result, "PASS");
+  assert.equal(result.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.runtimeExports, 8);
   assert.equal(result.typeExports, 26);
   assert.equal(result.internalRuntimeExports, 7);
@@ -72,6 +49,7 @@ test("accepts tracked deterministic M04-T12 command/event evidence", async () =>
   assert.equal(result.rootMutationTests, 21);
   assert.equal(result.traceRules, 6);
   assert.equal(result.normativeTested, 1);
+  assert.equal(result.normativePlannedAtTaskTime, 1);
   assert.equal(result.trackedFiles, 16);
   assert.equal(result.portProbes, 39);
   assert.equal(result.adapterBridgeReadProbes, 8);
@@ -82,492 +60,366 @@ test("accepts tracked deterministic M04-T12 command/event evidence", async () =>
   assert.equal(result.platformEffects, 0);
 });
 
-test("builds byte-identical command/event evidence twice", async () => {
-  const first = await buildRuntimeCoreCommandEventActionsEvidence();
-  const second = await buildRuntimeCoreCommandEventActionsEvidence();
-  assert.equal(first.artifactSha256, second.artifactSha256);
+test("reads byte-identical immutable task-time evidence twice", async () => {
+  const [first, second] = await Promise.all([
+    buildRuntimeCoreCommandEventActionsEvidence(),
+    buildRuntimeCoreCommandEventActionsEvidence(),
+  ]);
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
+  assert.equal(first.artifactBytes.length, 23_466);
+  assert.equal(first.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(second.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(first.compatibilityMode, "immutable-task-time-artifact");
 });
 
-test("rejects stale or tampered command/event evidence", async () => {
-  const evidence = await buildRuntimeCoreCommandEventActionsEvidence();
-  const tampered = Buffer.from(evidence.artifactBytes);
+test("preserves historical N-034 semantics without consulting current coverage", async () => {
+  const { artifact } = await buildRuntimeCoreCommandEventActionsEvidence();
+  assert.deepEqual(artifact.normative, { tested: ["N-031"], planned: ["N-034"] });
+  assert.deepEqual(artifact.claim.normativeStatusChanges, [
+    { id: "N-031", from: "PLANNED", to: "TESTED" },
+  ]);
+  assert.equal(artifact.semantics.productionAdapterCommandParity, null);
+  assert.equal(
+    artifact.deferred[0],
+    "production-adapter implementation of every declared command and N-034 closure (M05)",
+  );
+  assert.equal(
+    artifact.evidence.trackedFiles.some(
+      ({ path: trackedPath }) =>
+        trackedPath === "docs/proof/NORMATIVE-COVERAGE.md" ||
+        trackedPath === "packages/runtime-core/src/index.ts",
+    ),
+    false,
+  );
+});
+
+test("rejects every current source build prerequisite or runtime injection", async () => {
+  for (const options of [
+    { fileOverrides: {} },
+    { buildOptions: {} },
+    { prerequisiteBytes: {} },
+    { runtimeApi: {} },
+    { runtimePortApi: {} },
+    { runtimeActionInternalApi: {} },
+    { validatorApi: {} },
+    { proofDocumentPath: "ignored" },
+  ]) {
+    await assert.rejects(buildRuntimeCoreCommandEventActionsEvidence(options), (error) =>
+      expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_OPTIONS_INVALID"),
+    );
+  }
+});
+
+test("rejects Proxy accessor hidden symbolic inherited and unknown options without traps", async () => {
+  let getterCalls = 0;
+  let proxyCalls = 0;
+  const accessor = {};
+  Object.defineProperty(accessor, "artifactPath", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "ignored";
+    },
+  });
+  const hidden = Object.defineProperty({}, "artifactPath", {
+    enumerable: false,
+    value: "ignored",
+  });
+  const inherited = Object.create({ artifactPath: "ignored" });
+  const symbolic = { [Symbol("artifactPath")]: "ignored" };
+  const proxy = new Proxy(
+    {},
+    {
+      getPrototypeOf() {
+        proxyCalls += 1;
+        return Object.prototype;
+      },
+      ownKeys() {
+        proxyCalls += 1;
+        return [];
+      },
+    },
+  );
+  for (const options of [accessor, hidden, inherited, symbolic, proxy, { unknown: true }]) {
+    await assert.rejects(buildRuntimeCoreCommandEventActionsEvidence(options), (error) =>
+      expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_OPTIONS_INVALID"),
+    );
+  }
+  assert.equal(getterCalls, 0);
+  assert.equal(proxyCalls, 0);
+});
+
+test("rejects Proxy shared and accessor-subclass artifact bytes without traps", async () => {
+  const proxied = new Proxy(new Uint8Array([1, 2, 3]), {});
+  await assert.rejects(
+    buildRuntimeCoreCommandEventActionsEvidence({ artifactBytes: proxied }),
+    (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_OPTIONS_INVALID"),
+  );
+
+  const historicalBytes = await readFile(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH);
+  assert.equal(
+    (
+      await buildRuntimeCoreCommandEventActionsEvidence({
+        artifactBytes: new Uint8Array(historicalBytes),
+      })
+    ).artifactSha256,
+    HISTORICAL_SHA256,
+  );
+
+  let accessorCalls = 0;
+  class HostileBytes extends Uint8Array {
+    get buffer() {
+      accessorCalls += 1;
+      throw new Error("hostile buffer accessor");
+    }
+
+    get byteLength() {
+      accessorCalls += 1;
+      throw new Error("hostile byteLength accessor");
+    }
+
+    get byteOffset() {
+      accessorCalls += 1;
+      throw new Error("hostile byteOffset accessor");
+    }
+  }
+  await assert.rejects(
+    buildRuntimeCoreCommandEventActionsEvidence({
+      artifactBytes: new HostileBytes(historicalBytes),
+    }),
+    (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_OPTIONS_INVALID"),
+  );
+  assert.equal(accessorCalls, 0);
+
+  if (typeof SharedArrayBuffer === "function") {
+    await assert.rejects(
+      buildRuntimeCoreCommandEventActionsEvidence({
+        artifactBytes: new Uint8Array(new SharedArrayBuffer(8)),
+      }),
+      (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_OPTIONS_INVALID"),
+    );
+  }
+});
+
+test("rejects stale or one-byte-tampered immutable evidence", async () => {
+  const result = await buildRuntimeCoreCommandEventActionsEvidence();
+  const tampered = Buffer.from(result.artifactBytes);
   tampered[tampered.length - 2] ^= 1;
-  await rejectsCode(
-    () => verifyRuntimeCoreCommandEventActionsEvidence({ artifactBytes: tampered }),
-    "COMMAND_EVENT_ACTION_ARTIFACT_DRIFT",
+  await assert.rejects(
+    verifyRuntimeCoreCommandEventActionsEvidence({ artifactBytes: tampered }),
+    (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_HISTORICAL_ARTIFACT_DRIFT"),
   );
 });
 
-test("rejects stale M04-T10 prerequisite bytes", async () => {
-  const bytes = Buffer.from(await readFile(STATE_NAVIGATION_ARTIFACT));
-  bytes[0] ^= 1;
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        prerequisiteBytes: { stateNavigation: bytes },
-      }),
-    "COMMAND_EVENT_ACTION_PREREQUISITE_DRIFT",
+test("rejects moved duplicated mismatched or over-budget historical proof pins", async () => {
+  const [matrix, proof] = await Promise.all([
+    readFile(PROOF_MATRIX_PATH, "utf8"),
+    readFile(PROOF_DOCUMENT_PATH, "utf8"),
+  ]);
+  const matrixReference = `\`${ARTIFACT_NAME}\`\n\`${HISTORICAL_SHA256}\`.`;
+  const proofReference =
+    `\`docs/proof/artifacts/${ARTIFACT_NAME}\`\n` + `(\`${HISTORICAL_SHA256}\`).`;
+  for (const options of [
+    { proofMatrixText: matrix.replace(`\`${ARTIFACT_NAME}\``, "`moved.json`") },
+    { proofMatrixText: `${matrix}\n\`${ARTIFACT_NAME}\`\n` },
+    { proofMatrixText: matrix.replace(HISTORICAL_SHA256, `sha256:${"0".repeat(64)}`) },
+    { proofMatrixText: `${matrix.replace(matrixReference, "")}\n${matrixReference}\n` },
+    { proofDocumentText: proof.replace(proofReference, `${proofReference}\n${proofReference}`) },
+    { proofDocumentText: `${proof.replace(proofReference, "")}\n${proofReference}\n` },
+  ]) {
+    await assert.rejects(verifyRuntimeCoreCommandEventActionsEvidence(options), (error) =>
+      expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_PROOF_PIN_DRIFT"),
+    );
+  }
+  await assert.rejects(
+    verifyRuntimeCoreCommandEventActionsEvidence({
+      proofMatrixText: "x".repeat(2_000_001),
+    }),
+    (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_OPTIONS_INVALID"),
+  );
+  await assert.rejects(
+    verifyRuntimeCoreCommandEventActionsEvidence({
+      proofDocumentText: "x".repeat(500_001),
+    }),
+    (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_OPTIONS_INVALID"),
   );
 });
 
-test("rejects stale M02-T09 prerequisite bytes", async () => {
-  const bytes = Buffer.from(await readFile(INTERACTION_CONTRACT_ARTIFACT));
-  bytes[0] ^= 1;
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        prerequisiteBytes: { interactionContracts: bytes },
-      }),
-    "COMMAND_EVENT_ACTION_PREREQUISITE_DRIFT",
-  );
+test("rejects a symlink historical artifact source", async () => {
+  const directory = await temporaryDirectory();
+  const target = path.join(directory, "target.json");
+  const source = path.join(directory, "artifact.json");
+  try {
+    await writeFile(
+      target,
+      await readFile(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH),
+    );
+    await symlink(target, source);
+    await assert.rejects(
+      buildRuntimeCoreCommandEventActionsEvidence({ artifactPath: source }),
+      (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_ARTIFACT_UNSAFE"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
-test("rejects stale M02-T11 prerequisite bytes", async () => {
-  const bytes = Buffer.from(await readFile(EXECUTION_CONTRACT_ARTIFACT));
-  bytes[0] ^= 1;
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        prerequisiteBytes: { executionContracts: bytes },
-      }),
-    "COMMAND_EVENT_ACTION_PREREQUISITE_DRIFT",
-  );
+test("writes and verifies an exact alternate copy", async () => {
+  const directory = await temporaryDirectory();
+  const artifactPath = path.join(directory, "command-event-actions.json");
+  try {
+    const written = await writeRuntimeCoreCommandEventActionsEvidence({ artifactPath });
+    const verified = await verifyRuntimeCoreCommandEventActionsEvidence({ artifactPath });
+    assert.equal(written.preserved, false);
+    assert.equal(written.compatibilityMode, "immutable-task-time-artifact");
+    assert.equal(verified.artifactSha256, HISTORICAL_SHA256);
+    assert.equal(verified.artifactSha256, written.artifactSha256);
+    assert.deepEqual(
+      await readFile(artifactPath),
+      await readFile(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
-test("detects guard-first hostile observation drift", async () => {
-  const mutated = withRuntime({
-    executeRuntimeCommandEventAction(handle, action, ...rest) {
-      Reflect.get(action, "type");
-      return runtimeApi.executeRuntimeCommandEventAction(handle, action, ...rest);
-    },
-  });
-  await assert.rejects(() => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }));
-});
-
-test("detects shared token-session and command input drift", async () => {
-  const mutated = withRuntime({
-    createRuntimeHostPorts(input) {
-      return runtimeApi.createRuntimeHostPorts({
-        ...input,
-        tokens: {
-          resolve(request) {
-            const result = Reflect.apply(input.tokens.resolve, undefined, [request]);
-            Reflect.apply(input.tokens.resolve, undefined, [request]);
-            return result;
-          },
-        },
-      });
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
-});
-
-test("detects Catalog authorization-before-materialization drift", async () => {
-  const mutated = withRuntime({
-    executeRuntimeCommandEventAction(handle, action, ...rest) {
-      const result = runtimeApi.executeRuntimeCommandEventAction(handle, action, ...rest);
-      if (result.status === "unknown-command") Reflect.get(action, "input");
-      return result;
-    },
-  });
-  await assert.rejects(() => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }));
-});
-
-test("detects outbound allowlist and validation-before-emission drift", async () => {
-  const mutated = withRuntime({
-    createRuntimeCommandEventHostPorts(input) {
-      return runtimeApi.createRuntimeCommandEventHostPorts({
-        commands: input.commands,
-        events: {
-          validate(request) {
-            Reflect.apply(input.events.emit, undefined, [request]);
-            return { status: "valid" };
-          },
-          emit(request) {
-            Reflect.apply(input.events.validate, undefined, [request]);
-            return { status: "succeeded" };
-          },
-        },
-      });
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
-});
-
-test("detects synchronous receiver-independent port drift", async () => {
-  const mutated = withPorts({
-    invokeRuntimeComponentCommandHostPort() {
-      return Object.freeze({ status: "succeeded" });
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimePortApi: mutated }),
-    "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
-  );
-  const normalizedRequestMutation = withPorts({
-    consumeRuntimeComponentCommandHostRequestForAdapterBridge() {
-      return true;
-    },
-  });
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        runtimePortApi: normalizedRequestMutation,
-      }),
-    "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
-  );
-  const componentPortAuthorityMutation = withPorts({
-    isRuntimeCommandEventHostPortsForComponentCommandPort() {
-      return true;
-    },
-  });
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        runtimePortApi: componentPortAuthorityMutation,
-      }),
-    "COMMAND_EVENT_ACTION_PORT_BEHAVIOR_DRIFT",
-  );
-  const source = await readFile(PORT_SOURCE, "utf8");
-  const wholeEnvelope = source.replace(
-    "snapshotRuntimeJsonValue(captured.input)",
-    "snapshotRuntimeJsonValue(input)",
-  );
-  assert.notEqual(wholeEnvelope, source);
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/command-event-ports.ts": wholeEnvelope,
+test("detects alternate-copy temporary-byte substitution", async () => {
+  const directory = await temporaryDirectory();
+  const artifactPath = path.join(directory, "command-event-actions.json");
+  try {
+    await assert.rejects(
+      writeRuntimeCoreCommandEventActionsEvidence({
+        artifactPath,
+        beforeAtomicRename: async ({ temporaryPath }) => {
+          await writeFile(temporaryPath, "{}\n");
         },
       }),
-    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
-  );
-  const reusableNormalizedRequest = source.replace(
-    "if (normalized) NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(request);",
-    "if (normalized) void request;",
-  );
-  assert.notEqual(reusableNormalizedRequest, source);
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/command-event-ports.ts": reusableNormalizedRequest,
+      (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_ARTIFACT_WRITE_FAILED"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects symlink destinations without changing their targets", async () => {
+  const directory = await temporaryDirectory();
+  const target = path.join(directory, "target.json");
+  const destination = path.join(directory, "artifact.json");
+  try {
+    await writeFile(target, "{}\n");
+    await symlink(target, destination);
+    await assert.rejects(
+      writeRuntimeCoreCommandEventActionsEvidence({ artifactPath: destination }),
+      (error) => expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_ARTIFACT_WRITE_FAILED"),
+    );
+    assert.equal(await readFile(target, "utf8"), "{}\n");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("preserves the tracked inode and mtime through default generation", async () => {
+  const before = await lstat(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH, {
+    bigint: true,
+  });
+  const result = await writeRuntimeCoreCommandEventActionsEvidence();
+  const after = await lstat(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH, {
+    bigint: true,
+  });
+  assert.equal(result.preserved, true);
+  assert.equal(result.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(after.dev, before.dev);
+  assert.equal(after.ino, before.ino);
+  assert.equal(after.mtimeNs, before.mtimeNs);
+});
+
+test("preserves a symlink-parent alias to the tracked artifact without hooks", async () => {
+  const directory = await temporaryDirectory();
+  const aliasParent = path.join(directory, "artifacts");
+  const aliasPath = path.join(aliasParent, ARTIFACT_NAME);
+  try {
+    await symlink(
+      path.dirname(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH),
+      aliasParent,
+      "dir",
+    );
+    const before = await lstat(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH, {
+      bigint: true,
+    });
+    const result = await writeRuntimeCoreCommandEventActionsEvidence({
+      artifactPath: aliasPath,
+    });
+    const after = await lstat(DEFAULT_RUNTIME_CORE_COMMAND_EVENT_ACTIONS_ARTIFACT_PATH, {
+      bigint: true,
+    });
+    assert.equal(result.preserved, true);
+    assert.equal(after.ino, before.ino);
+    assert.equal(after.mtimeNs, before.mtimeNs);
+
+    let hookCalls = 0;
+    for (const options of [
+      {
+        artifactPath: aliasPath,
+        beforeAtomicRename() {
+          hookCalls += 1;
         },
-      }),
-    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
-  );
-  const ownerlessNormalizedRequest = source.replace(
-    "NORMALIZED_COMPONENT_COMMAND_REQUESTS.get(request) === expectedPorts",
-    "NORMALIZED_COMPONENT_COMMAND_REQUESTS.has(request)",
-  );
-  assert.notEqual(ownerlessNormalizedRequest, source);
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/command-event-ports.ts": ownerlessNormalizedRequest,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
-  );
-  const escapedNormalizedRequestLifetime = source.replace(
+      },
+      { artifactPath: aliasPath, buildOptions: {} },
+    ]) {
+      await assert.rejects(writeRuntimeCoreCommandEventActionsEvidence(options), (error) =>
+        expectEvidenceFailure(error, "COMMAND_EVENT_ACTION_NONDEFAULT_TRACKED_WRITE"),
+      );
+    }
+    assert.equal(hookCalls, 0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("pins the exact historical prerequisite trace and tracked-file ledgers", async () => {
+  const { artifact } = await buildRuntimeCoreCommandEventActionsEvidence();
+  assert.equal(artifact.prerequisites.length, 3);
+  assert.deepEqual(
+    artifact.prerequisites.map(({ task, artifactSha256 }) => ({ task, artifactSha256 })),
     [
-      "  } finally {",
-      "    NORMALIZED_COMPONENT_COMMAND_REQUESTS.delete(captured);",
-      "  }",
-      '  const status = closedStatus(raw, ["succeeded", "denied"]);',
-    ].join("\n"),
-    ["  }", '  const status = closedStatus(raw, ["succeeded", "denied"]);'].join("\n"),
+      {
+        task: "M04-T10",
+        artifactSha256: "f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140",
+      },
+      {
+        task: "M02-T09",
+        artifactSha256: "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208",
+      },
+      {
+        task: "M02-T11",
+        artifactSha256: "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
+      },
+    ],
   );
-  assert.notEqual(escapedNormalizedRequestLifetime, source);
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/command-event-ports.ts": escapedNormalizedRequestLifetime,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_PORT_SOURCE_DRIFT",
+  assert.deepEqual(
+    artifact.evidence.traceRules.map(({ id }) => id),
+    ["R-080", "R-106", "R-120", "R-122", "D-015", "D-016"],
   );
-});
-
-test("detects target-ticket generation, ambiguity, and ABA drift", async () => {
-  const mutated = withRuntime({
-    unregisterRuntimeComponentCommandTarget(handle, input) {
-      const result = runtimeApi.unregisterRuntimeComponentCommandTarget(handle, input);
-      return result.status === "stale-ticket"
-        ? Object.freeze({ status: "unregistered", sourceNodeId: "map", snapshot: input.snapshot })
-        : result;
-    },
+  assert.equal(artifact.evidence.trackedFiles.length, 16);
+  assert.deepEqual(artifact.evidence.trackedFiles.at(-1), {
+    path: "tests/runtime-core-command-event-actions.test.mjs",
+    bytes: 19_918,
+    sha256: "3ec7171601b0bc4fdb3f10e58fee47fe378f25dfba40964feb2e076be10f9550",
   });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
 });
 
-test("detects callback-free current registry read drift", async () => {
-  const mutated = withRuntime({
-    readRuntimeCommandEventActions(handle) {
-      const result = runtimeApi.readRuntimeCommandEventActions(handle);
-      if (result.status !== "read") return result;
-      return Object.freeze({
-        status: "read",
-        snapshot: Object.freeze({ ...result.snapshot }),
-      });
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+test("keeps root command/event scripts independent of current source and builds", async () => {
+  const manifest = JSON.parse(await readFile(ROOT_MANIFEST_PATH, "utf8"));
+  assert.equal(
+    manifest.scripts["generate:runtime-core-command-event-actions"],
+    "node scripts/generate-runtime-core-command-event-actions-proof.mjs",
   );
-});
-
-test("detects command/event TOCTOU and reentry drift", async () => {
-  const mutated = withRuntime({
-    executeRuntimeCommandEventAction(handle, action, ...rest) {
-      const first = runtimeApi.executeRuntimeCommandEventAction(handle, action, ...rest);
-      if (first.status === "command-succeeded" || first.status === "event-emitted") {
-        runtimeApi.executeRuntimeCommandEventAction(handle, action, ...rest);
-      }
-      return first;
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
+  assert.equal(
+    manifest.scripts["verify:runtime-core-command-event-actions"],
+    "node scripts/verify-runtime-core-command-event-actions.mjs",
   );
-});
-
-test("detects diagnostics and adapter-redaction drift", async () => {
-  const mutated = withRuntime({
-    executeRuntimeCommandEventAction(handle, action, ...rest) {
-      const result = runtimeApi.executeRuntimeCommandEventAction(handle, action, ...rest);
-      return result.status === "adapter-failed"
-        ? Object.freeze({
-            ...result,
-            rawHostFailure: "private-command-adapter-stack",
-          })
-        : result;
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
-});
-
-test("detects finite registration and request bounds drift", async () => {
-  const mutated = withRuntime({
-    registerRuntimeComponentCommandTarget(handle, input) {
-      const result = runtimeApi.registerRuntimeComponentCommandTarget(handle, input);
-      return result.status === "snapshot-limit"
-        ? Object.freeze({
-            status: "registered",
-            sourceNodeId: input.sourceNodeId,
-            runtimeInstanceId: input.runtimeInstanceId,
-            registrationGeneration: 0,
-            ticket: Object.freeze({}),
-            snapshot: input.snapshot,
-          })
-        : result;
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
-});
-
-test("detects terminal disposal and late-callback drift", async () => {
-  const mutated = withRuntime({
-    disposeRuntimeCommandEventActions() {
-      return Object.freeze({ status: "already-disposed", disposedTargets: 0 });
-    },
-  });
-  await rejectsCode(
-    () => buildRuntimeCoreCommandEventActionsEvidence({ runtimeApi: mutated }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
-});
-
-test("detects task-owned byte drift", async () => {
-  const source = await readFile(PORT_SOURCE, "utf8");
-  await rejectsCode(
-    () =>
-      verifyRuntimeCoreCommandEventActionsEvidence({
-        buildOptions: {
-          fileOverrides: {
-            "packages/runtime-core/src/command-event-ports.ts": `${source}\n// byte drift\n`,
-          },
-        },
-      }),
-    "COMMAND_EVENT_ACTION_ARTIFACT_DRIFT",
-  );
-});
-
-test("detects public export, TSDoc, internal non-leak, and platform drift", async () => {
-  const source = await readFile(ACTION_SOURCE, "utf8");
-  const index = await readFile(SOURCE_INDEX, "utf8");
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/command-event-actions.ts": `${source}\nwindow;\n`,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_PLATFORM_BOUNDARY_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/index.ts": index.replace(
-            "createRuntimeCommandEventHostPorts",
-            "createRuntimeCommandEventHostPortsAlias",
-          ),
-        },
-      }),
-    "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",
-  );
-});
-
-test("detects adapter-bridge Catalog, port, and package-root authority drift", async () => {
-  const mutated = withActionInternals({
-    readRuntimeCommandEventActionsForAdapterBridge(handle) {
-      const result =
-        runtimeActionInternalApi.readRuntimeCommandEventActionsForAdapterBridge(handle);
-      if (result.status !== "read") return result;
-      return Object.freeze({
-        status: "read",
-        catalogSet: Object.freeze({ ...result.catalogSet }),
-        snapshot: result.snapshot,
-      });
-    },
-  });
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        runtimeActionInternalApi: mutated,
-      }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
-  const portAuthorityMutation = withActionInternals({
-    readRuntimeCommandEventActionsForAdapterBridge(handle) {
-      const result =
-        runtimeActionInternalApi.readRuntimeCommandEventActionsForAdapterBridge(handle);
-      if (result.status !== "read") return result;
-      return Object.freeze({
-        ...result,
-        commandEventPorts: Object.freeze({ ...result.commandEventPorts }),
-      });
-    },
-  });
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        runtimeActionInternalApi: portAuthorityMutation,
-      }),
-    "COMMAND_EVENT_ACTION_RUNTIME_BEHAVIOR_DRIFT",
-  );
-
-  const source = await readFile(ACTION_SOURCE, "utf8");
-  const catalogAuthorityDrift = source.replace(
-    "catalogSet: authority.catalogSet",
-    "catalogSet: Object.freeze({ ...authority.catalogSet })",
-  );
-  assert.notEqual(catalogAuthorityDrift, source);
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/command-event-actions.ts": catalogAuthorityDrift,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_SOURCE_SEMANTIC_DRIFT",
-  );
-  const commandPortAuthorityDrift = source.replace(
-    "commandEventPorts: authority.commandEventPorts",
-    "commandEventPorts: Object.freeze({ ...authority.commandEventPorts })",
-  );
-  assert.notEqual(commandPortAuthorityDrift, source);
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/command-event-actions.ts": commandPortAuthorityDrift,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_SOURCE_SEMANTIC_DRIFT",
-  );
-
-  const index = await readFile(SOURCE_INDEX, "utf8");
-  const leakedRootExport = `${index}\nexport { readRuntimeCommandEventActionsForAdapterBridge } from "./command-event-actions.js";\n`;
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/index.ts": leakedRootExport,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",
-  );
-
-  const leakedNormalizedRequestExport = `${index}\nexport { consumeRuntimeComponentCommandHostRequestForAdapterBridge } from "./command-event-ports.js";\n`;
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/index.ts": leakedNormalizedRequestExport,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",
-  );
-  const leakedComponentPortAuthorityExport = `${index}\nexport { isRuntimeCommandEventHostPortsForComponentCommandPort } from "./command-event-ports.js";\n`;
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/index.ts": leakedComponentPortAuthorityExport,
-        },
-      }),
-    "COMMAND_EVENT_ACTION_INDEX_EXPORT_DRIFT",
-  );
-});
-
-test("detects focused-test and compiler-negative inventory drift", async () => {
-  const packageTests = await readFile(PACKAGE_TESTS, "utf8");
-  const typeTests = await readFile(TYPE_TESTS, "utf8");
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/test/command-event-actions.test.ts": packageTests.replace(
-            "it(",
-            "it.skip(",
-          ),
-        },
-      }),
-    "COMMAND_EVENT_ACTION_TEST_INVENTORY_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreCommandEventActionsEvidence({
-        fileOverrides: {
-          "packages/runtime-core/test/command-event-actions.types.ts": typeTests.replace(
-            "@ts-expect-error",
-            "@ts-ignore",
-          ),
-        },
-      }),
-    "COMMAND_EVENT_ACTION_TYPE_TEST_DRIFT",
+  assert.equal(
+    manifest.scripts["test:runtime-core-command-event-actions"],
+    "node --test tests/runtime-core-command-event-actions.test.mjs",
   );
 });

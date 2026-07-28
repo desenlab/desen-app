@@ -10,7 +10,9 @@ try {
       {
         status: "PASS",
         artifactSha256: result.artifactSha256,
-        message: "Wrote deterministic M04-T12 command/event action evidence.",
+        compatibilityMode: result.compatibilityMode,
+        preserved: result.preserved,
+        message: "Preserved the immutable task-time M04-T12 command/event action proof.",
       },
       null,
       2,

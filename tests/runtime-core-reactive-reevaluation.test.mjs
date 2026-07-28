@@ -1,855 +1,456 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { lstat, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
-
-import ts from "typescript";
 
 import {
   RuntimeCoreReactiveReevaluationEvidenceError,
   buildRuntimeCoreReactiveReevaluationEvidence,
   verifyRuntimeCoreReactiveReevaluationEvidence,
+  writeRuntimeCoreReactiveReevaluationEvidence,
 } from "../scripts/lib/runtime-core-reactive-reevaluation-proof.mjs";
 
-const PREREQUISITES = Object.freeze([
-  ["variantStyle", "../docs/proof/artifacts/runtime-core-0.1.0-variant-style-evaluation.json"],
-  ["localState", "../docs/proof/artifacts/runtime-core-0.1.0-local-state-identity.json"],
-  ["repeat", "../docs/proof/artifacts/runtime-core-0.1.0-repeat-materialization.json"],
-  ["resource", "../docs/proof/artifacts/runtime-core-0.1.0-resource-lifecycle.json"],
-  ["operation", "../docs/proof/artifacts/runtime-core-0.1.0-operation-lifecycle.json"],
-  ["stateNavigation", "../docs/proof/artifacts/runtime-core-0.1.0-state-navigation-actions.json"],
-  [
-    "operationResource",
-    "../docs/proof/artifacts/runtime-core-0.1.0-operation-resource-actions.json",
-  ],
-  ["commandEvent", "../docs/proof/artifacts/runtime-core-0.1.0-command-event-actions.json"],
-  ["actionTurns", "../docs/proof/artifacts/runtime-core-0.1.0-action-turns.json"],
-  ["adapterBridges", "../docs/proof/artifacts/runtime-core-0.1.0-adapter-bridges.json"],
-]);
-const OWNED_PATHS = Object.freeze([
-  "packages/runtime-core/src/reactive-host-ports.ts",
-  "packages/runtime-core/src/reactive-reevaluation.ts",
-  "packages/runtime-core/test/reactive-host-ports.test.ts",
-  "packages/runtime-core/test/reactive-reevaluation.test.ts",
-  "packages/runtime-core/test/reactive-reevaluation.types.ts",
-  "packages/runtime-core/dist/reactive-host-ports.js",
-  "packages/runtime-core/dist/reactive-host-ports.js.map",
-  "packages/runtime-core/dist/reactive-host-ports.d.ts",
-  "packages/runtime-core/dist/reactive-host-ports.d.ts.map",
-  "packages/runtime-core/dist/reactive-reevaluation.js",
-  "packages/runtime-core/dist/reactive-reevaluation.js.map",
-  "packages/runtime-core/dist/reactive-reevaluation.d.ts",
-  "packages/runtime-core/dist/reactive-reevaluation.d.ts.map",
-  "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
-  "scripts/generate-runtime-core-reactive-reevaluation-proof.mjs",
-  "scripts/verify-runtime-core-reactive-reevaluation.mjs",
-  "tests/runtime-core-reactive-reevaluation.test.mjs",
-]);
-const HOST_SOURCE_PATH = "packages/runtime-core/src/reactive-host-ports.ts";
-const REEVALUATION_SOURCE_PATH = "packages/runtime-core/src/reactive-reevaluation.ts";
-const PROOF_DOCUMENT_PATH = "docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md";
-const PROOF_MATRIX_PATH = "docs/proof/PROOF-MATRIX.md";
-const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json";
-const ARTIFACT_FILE_NAME = "runtime-core-0.1.0-reactive-reevaluation.json";
-const ROOT_TEST_PATH = "tests/runtime-core-reactive-reevaluation.test.mjs";
-const HISTORICAL_TRANSFER_RECORDS = Object.freeze({
-  "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs": Object.freeze({
-    path: "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
-    bytes: 74_729,
-    sha256: "d30bc915dfc90435951a9ffdd277c2c63be9c9e42b98a82f77d25d3d412a254c",
-  }),
-  [ROOT_TEST_PATH]: Object.freeze({
-    path: ROOT_TEST_PATH,
-    bytes: 24_906,
-    sha256: "74aabe03536c20cbe76034c53b6d0c59b67d6543a17c3d1d59481d66ea574ff7",
-  }),
-});
+const HISTORICAL_SHA256 = "7e412daf9e2e8f08f40a4b093430775414aa1df4a9b14d690d2bf45966cbec67";
+const ARTIFACT_URL = new URL(
+  "../docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json",
+  import.meta.url,
+);
+const PROOF_URL = new URL("../docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md", import.meta.url);
+const MATRIX_URL = new URL("../docs/proof/PROOF-MATRIX.md", import.meta.url);
 
-async function rejectsCode(action, expectedCode) {
-  await assert.rejects(action, (error) => {
+function hasEvidenceCode(expectedCode) {
+  return (error) => {
     assert.ok(error instanceof RuntimeCoreReactiveReevaluationEvidenceError);
     assert.equal(error.code, expectedCode);
     return true;
-  });
-}
-
-async function sourceMutation(relativePath, from, to = "") {
-  const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
-  assert.ok(source.includes(from), `Mutation anchor is missing: ${from}`);
-  return { [relativePath]: source.replace(from, to) };
-}
-
-async function sourceFunctionMutation(relativePath, functionName, transform) {
-  const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
-  const parsed = ts.createSourceFile(relativePath, source, ts.ScriptTarget.Latest, true);
-  const declaration = parsed.statements.find(
-    (statement) =>
-      ts.isFunctionDeclaration(statement) &&
-      statement.name?.text === functionName &&
-      statement.body,
-  );
-  assert.ok(declaration, `Function mutation target is missing: ${functionName}`);
-  const start = declaration.getStart(parsed);
-  const original = source.slice(start, declaration.end);
-  const mutated = transform(original);
-  assert.notEqual(mutated, original, `Function mutation made no change: ${functionName}`);
-  return {
-    [relativePath]: `${source.slice(0, start)}${mutated}${source.slice(declaration.end)}`,
   };
 }
 
-function removeModuleExportDeclaration(moduleText, fileName, moduleName, isTypeOnly) {
-  const parsed = ts.createSourceFile(fileName, moduleText, ts.ScriptTarget.Latest, true);
-  const declaration = parsed.statements.find(
-    (statement) =>
-      ts.isExportDeclaration(statement) &&
-      statement.moduleSpecifier !== undefined &&
-      ts.isStringLiteral(statement.moduleSpecifier) &&
-      statement.moduleSpecifier.text === moduleName &&
-      statement.isTypeOnly === isTypeOnly,
-  );
-  assert.ok(declaration, `Export mutation target is missing: ${fileName} ${moduleName}`);
-  return `${moduleText.slice(0, declaration.getFullStart())}${moduleText.slice(declaration.end)}`;
+async function proofTexts() {
+  const [proofDocumentText, proofMatrixText] = await Promise.all([
+    readFile(PROOF_URL, "utf8"),
+    readFile(MATRIX_URL, "utf8"),
+  ]);
+  return { proofDocumentText, proofMatrixText };
 }
 
-function pinArtifactReferences(proofText, proofMatrixText, artifactSha256) {
-  let proofPins = 0;
-  const proof = proofText
-    .split(/\r?\n/u)
-    .map((line) => {
-      if (!/^Its SHA-256 is `[0-9a-f]{64}`\.$/u.test(line)) return line;
-      proofPins += 1;
-      return `Its SHA-256 is \`${artifactSha256}\`.`;
-    })
-    .join("\n");
-  let matrixArtifacts = 0;
-  const matrixLines = proofMatrixText.split(/\r?\n/u);
-  for (let index = 0; index < matrixLines.length; index += 1) {
-    if (matrixLines[index] !== `\`${ARTIFACT_FILE_NAME}\``) continue;
-    matrixArtifacts += 1;
-    matrixLines[index + 1] = `\`sha256:${artifactSha256}\`.`;
-  }
-  assert.equal(proofPins, 1);
-  assert.equal(matrixArtifacts, 1);
-  return { proof, proofMatrix: matrixLines.join("\n") };
-}
-
-test("accepts tracked deterministic M04-T15 reactive evidence", async () => {
+test("accepts immutable task-time M04-T15 reactive reevaluation evidence", async () => {
   const result = await verifyRuntimeCoreReactiveReevaluationEvidence();
-  assert.equal(result.result, "PASS");
-  assert.equal(result.runtimeExports, 6);
-  assert.equal(result.typeExports, 17);
-  assert.equal(result.moduleExports, 24);
-  assert.equal(result.tsdocDeclarations, 24);
-  assert.equal(result.focusedTests, 54);
-  assert.equal(result.compilerNegativeCases, 11);
-  assert.equal(result.rootMutationTests, 31);
-  assert.equal(result.revokedProxyRedactions, 1);
-  assert.equal(result.revokedInputProbes, 2);
-  assert.equal(result.failedSubscriptionCleanupProbes, 7);
-  assert.equal(result.traceRules, 6);
-  assert.equal(result.normativeStatusChanges, 0);
-  assert.equal(result.proofMatrixStatusChanges, 0);
-  assert.equal(result.trackedFiles, 17);
-  assert.equal(result.evaluatorAuthorityLeaks, 0);
-  assert.equal(result.requestLeaks, 0);
-  assert.equal(result.platformEffects, 0);
+  assert.deepEqual(result, {
+    result: "PASS",
+    artifactSha256: HISTORICAL_SHA256,
+    compatibilityMode: "immutable-task-time-artifact",
+    runtimeExports: 6,
+    typeExports: 17,
+    moduleExports: 24,
+    tsdocDeclarations: 24,
+    focusedTests: 54,
+    compilerNegativeCases: 11,
+    rootMutationTests: 30,
+    trackedFiles: 17,
+    traceRules: 6,
+    evaluatorAuthorityLeaks: 0,
+    requestLeaks: 0,
+    platformEffects: 0,
+  });
 });
 
-test("builds byte-identical reactive evidence twice", async () => {
+test("two independent historical reactive builds preserve exact bytes and semantics", async () => {
   const first = await buildRuntimeCoreReactiveReevaluationEvidence();
   const second = await buildRuntimeCoreReactiveReevaluationEvidence();
-  assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(first.artifactSha256, HISTORICAL_SHA256);
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
+  assert.equal(first.artifact.task, "M04-T15");
+  assert.equal(first.artifact.claim.target, "platform-neutral");
   assert.equal(first.artifact.evidence.rootMutationTests, 30);
-  assert.equal(first.currentRootMutationTests, 31);
-  const tracked = new Map(
-    first.artifact.evidence.trackedFiles.map((record) => [record.path, record]),
+  assert.equal(first.artifact.runtime.evaluatorAuthorityLeaks, 0);
+  assert.equal(Object.isFrozen(first.artifact), true);
+  assert.equal(Object.isFrozen(first.artifact.evidence), true);
+  assert.equal(Object.isFrozen(first.artifact.evidence.trackedFiles), true);
+  assert.equal(Object.isFrozen(first.artifact.evidence.trackedFiles[0]), true);
+});
+
+test("rejects one-byte task-time reactive artifact tampering", async () => {
+  const tampered = Buffer.from(await readFile(ARTIFACT_URL));
+  tampered[tampered.length - 2] ^= 1;
+  await assert.rejects(
+    buildRuntimeCoreReactiveReevaluationEvidence({ artifactBytes: tampered }),
+    hasEvidenceCode("REACTIVE_HISTORICAL_ARTIFACT_DRIFT"),
   );
-  for (const [relativePath, historical] of Object.entries(HISTORICAL_TRANSFER_RECORDS)) {
-    assert.deepEqual(tracked.get(relativePath), historical);
+  await assert.rejects(
+    buildRuntimeCoreReactiveReevaluationEvidence({
+      artifactBytes: tampered.subarray(0, tampered.length - 1),
+    }),
+    hasEvidenceCode("REACTIVE_HISTORICAL_ARTIFACT_DRIFT"),
+  );
+});
+
+test("rejects successor source, runtime, prerequisite, probe, or build injection", async () => {
+  for (const options of [
+    { fileOverrides: {} },
+    { runtimeApi: {} },
+    { validatorApi: {} },
+    { runtimeApis: {} },
+    { runtimeProbe: {} },
+    { prerequisiteBytes: {} },
+    { preparedEvidence: {} },
+    { buildOptions: {} },
+    { allowPendingArtifactReference: true },
+  ]) {
+    await assert.rejects(
+      buildRuntimeCoreReactiveReevaluationEvidence(options),
+      hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+    );
   }
 });
 
-test("rejects stale or tampered reactive evidence", async () => {
-  const evidence = await buildRuntimeCoreReactiveReevaluationEvidence();
-  const bytes = Buffer.from(evidence.artifactBytes);
-  bytes[bytes.length - 2] ^= 1;
-  await rejectsCode(
-    () => verifyRuntimeCoreReactiveReevaluationEvidence({ artifactBytes: bytes }),
-    "REACTIVE_ARTIFACT_DRIFT",
+test("rejects successor build or prerequisite verifier injection", async () => {
+  for (const options of [
+    { fileOverrides: {} },
+    { runtimeApi: {} },
+    { prerequisiteBytes: {} },
+    { buildOptions: {} },
+    { preparedEvidence: {} },
+  ]) {
+    await assert.rejects(
+      verifyRuntimeCoreReactiveReevaluationEvidence(options),
+      hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+    );
+  }
+});
+
+test("rejects successor build and prerequisite writer injection", async () => {
+  for (const options of [{ fileOverrides: {} }, { prerequisiteBytes: {} }, { buildOptions: {} }]) {
+    await assert.rejects(
+      writeRuntimeCoreReactiveReevaluationEvidence(options),
+      hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+    );
+  }
+});
+
+test("rejects ambiguous artifact byte and source path options", async () => {
+  const bytes = await readFile(ARTIFACT_URL);
+  await assert.rejects(
+    buildRuntimeCoreReactiveReevaluationEvidence({
+      artifactPath: ARTIFACT_URL.pathname,
+      artifactBytes: bytes,
+    }),
+    hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+  );
+  await assert.rejects(
+    writeRuntimeCoreReactiveReevaluationEvidence({
+      sourceArtifactPath: ARTIFACT_URL.pathname,
+      artifactBytes: bytes,
+    }),
+    hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
   );
 });
 
-test("rejects relocated or duplicated M04-T15 artifact SHA pins", async () => {
-  await rejectsCode(
-    () =>
-      verifyRuntimeCoreReactiveReevaluationEvidence({
-        buildOptions: { validatorApi: Object.freeze({}) },
-      }),
-    "REACTIVE_OPTIONS_INVALID",
+test("rejects accessor, inherited, symbol, and Proxy options without invoking hooks", async () => {
+  let getterCalls = 0;
+  let proxyCalls = 0;
+  const accessor = Object.defineProperty({}, "artifactPath", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "ignored";
+    },
+  });
+  const inherited = Object.create({ artifactPath: "ignored" });
+  const symbol = { [Symbol("artifactPath")]: "ignored" };
+  const revoked = Proxy.revocable({}, {});
+  revoked.revoke();
+  const proxy = new Proxy(
+    {},
+    {
+      ownKeys() {
+        proxyCalls += 1;
+        return [];
+      },
+      getPrototypeOf() {
+        proxyCalls += 1;
+        return Object.prototype;
+      },
+    },
   );
-  const evidence = await buildRuntimeCoreReactiveReevaluationEvidence();
-  const [proofText, proofMatrixText] = await Promise.all([
-    readFile(new URL(`../${PROOF_DOCUMENT_PATH}`, import.meta.url), "utf8"),
-    readFile(new URL(`../${PROOF_MATRIX_PATH}`, import.meta.url), "utf8"),
-  ]);
-  const pinned = pinArtifactReferences(proofText, proofMatrixText, evidence.artifactSha256);
-  const verifyWith = (proof, proofMatrix) =>
+  for (const options of [accessor, inherited, symbol, proxy, revoked.proxy]) {
+    await assert.rejects(
+      buildRuntimeCoreReactiveReevaluationEvidence(options),
+      hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+    );
+  }
+  assert.equal(getterCalls, 0);
+  assert.equal(proxyCalls, 0);
+});
+
+test("captures exact Buffer or Uint8Array bytes and rejects hostile byte views or hooks", async () => {
+  const artifactBytes = await readFile(ARTIFACT_URL);
+  const fromUint8Array = await buildRuntimeCoreReactiveReevaluationEvidence({
+    artifactBytes: new Uint8Array(artifactBytes),
+  });
+  assert.equal(fromUint8Array.artifactSha256, HISTORICAL_SHA256);
+
+  let subclassGetterCalls = 0;
+  class HostileBytes extends Uint8Array {
+    get byteLength() {
+      subclassGetterCalls += 1;
+      return super.byteLength;
+    }
+  }
+  const sharedBytes = new Uint8Array(new SharedArrayBuffer(artifactBytes.length));
+  sharedBytes.set(artifactBytes);
+  for (const artifactBytesInput of [
+    "{}",
+    new HostileBytes(artifactBytes),
+    sharedBytes,
+    new Proxy(new Uint8Array(artifactBytes), {}),
+  ]) {
+    await assert.rejects(
+      buildRuntimeCoreReactiveReevaluationEvidence({ artifactBytes: artifactBytesInput }),
+      hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+    );
+  }
+  assert.equal(subclassGetterCalls, 0);
+  await assert.rejects(
     verifyRuntimeCoreReactiveReevaluationEvidence({
-      artifactBytes: evidence.artifactBytes,
-      buildOptions: {
-        fileOverrides: {
-          [PROOF_DOCUMENT_PATH]: proof,
-          [PROOF_MATRIX_PATH]: proofMatrix,
+      proofDocumentText: "x".repeat(500_001),
+    }),
+    hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+  );
+  await assert.rejects(
+    verifyRuntimeCoreReactiveReevaluationEvidence({
+      proofMatrixText: "x".repeat(2_000_001),
+    }),
+    hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+  );
+  await assert.rejects(
+    writeRuntimeCoreReactiveReevaluationEvidence({
+      beforeAtomicRename: new Proxy(() => undefined, {}),
+    }),
+    hasEvidenceCode("REACTIVE_OPTIONS_INVALID"),
+  );
+});
+
+test("rejects moved, duplicated, pending, or mismatched reactive proof pins", async () => {
+  const texts = await proofTexts();
+  const exactPath = "`docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json`.";
+  const exactSha = `Its SHA-256 is \`${HISTORICAL_SHA256}\`.`;
+  for (const proofDocumentText of [
+    texts.proofDocumentText.replace("## Evidence boundary", "## Moved evidence boundary"),
+    `${texts.proofDocumentText}\n${exactPath}\n${exactSha}\n`,
+    texts.proofDocumentText.replace(HISTORICAL_SHA256, "[PENDING_FINAL_ARTIFACT_SHA256]"),
+    texts.proofDocumentText.replace(HISTORICAL_SHA256, "0".repeat(64)),
+    texts.proofDocumentText.replace(
+      "task-time boundary, `N-003`, `N-034`, and `N-041` were `PLANNED`",
+      "task-time boundary, `N-003` and `N-041` were `PLANNED`",
+    ),
+  ]) {
+    await assert.rejects(
+      verifyRuntimeCoreReactiveReevaluationEvidence({
+        proofDocumentText,
+        proofMatrixText: texts.proofMatrixText,
+      }),
+      hasEvidenceCode("REACTIVE_PROOF_PIN_DRIFT"),
+    );
+  }
+});
+
+test("rejects moved, duplicated, pending, or mismatched reactive Proof Matrix pins", async () => {
+  const texts = await proofTexts();
+  const exactPair =
+    "`runtime-core-0.1.0-reactive-reevaluation.json`\n" + `\`sha256:${HISTORICAL_SHA256}\`.`;
+  for (const proofMatrixText of [
+    texts.proofMatrixText.replace(
+      "M04-T15 defines and proves one platform-neutral reactive publication boundary without changing a",
+      "Moved M04-T15 reactive publication boundary",
+    ),
+    `${texts.proofMatrixText}\n${exactPair}\n`,
+    texts.proofMatrixText.replace(HISTORICAL_SHA256, "[PENDING_FINAL_ARTIFACT_SHA256]"),
+    texts.proofMatrixText.replace(HISTORICAL_SHA256, "0".repeat(64)),
+    texts.proofMatrixText.replace(
+      "N-003, N-034, and N-041 remained\n`PLANNED`",
+      "N-003 and N-041 remained\n`PLANNED`",
+    ),
+  ]) {
+    await assert.rejects(
+      verifyRuntimeCoreReactiveReevaluationEvidence({
+        proofDocumentText: texts.proofDocumentText,
+        proofMatrixText,
+      }),
+      hasEvidenceCode("REACTIVE_PROOF_PIN_DRIFT"),
+    );
+  }
+});
+
+test("rejects a symlink reactive proof-document source", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-proof-"));
+  const target = path.join(directory, "proof.md");
+  const source = path.join(directory, "proof-link.md");
+  const oversized = path.join(directory, "oversized-proof.md");
+  try {
+    await writeFile(target, await readFile(PROOF_URL));
+    await symlink(target, source);
+    await assert.rejects(
+      verifyRuntimeCoreReactiveReevaluationEvidence({ proofPath: source }),
+      hasEvidenceCode("REACTIVE_PROOF_UNSAFE"),
+    );
+    await writeFile(oversized, "x".repeat(500_001));
+    await assert.rejects(
+      verifyRuntimeCoreReactiveReevaluationEvidence({ proofPath: oversized }),
+      hasEvidenceCode("REACTIVE_PROOF_UNSAFE"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects a symlink reactive Proof Matrix source", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-matrix-"));
+  const target = path.join(directory, "matrix.md");
+  const source = path.join(directory, "matrix-link.md");
+  try {
+    await writeFile(target, await readFile(MATRIX_URL));
+    await symlink(target, source);
+    await assert.rejects(
+      verifyRuntimeCoreReactiveReevaluationEvidence({ proofMatrixPath: source }),
+      hasEvidenceCode("REACTIVE_PROOF_UNSAFE"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects a symlink task-time reactive artifact source", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-source-"));
+  const target = path.join(directory, "target.json");
+  const source = path.join(directory, "artifact.json");
+  try {
+    await writeFile(target, await readFile(ARTIFACT_URL));
+    await symlink(target, source);
+    await assert.rejects(
+      buildRuntimeCoreReactiveReevaluationEvidence({ artifactPath: source }),
+      hasEvidenceCode("REACTIVE_ARTIFACT_UNSAFE"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("atomic reactive compatibility writer rejects an existing symlink destination", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-write-"));
+  const target = path.join(directory, "target.json");
+  const destination = path.join(directory, "artifact.json");
+  try {
+    await writeFile(target, "{}\n");
+    await symlink(target, destination);
+    await assert.rejects(
+      writeRuntimeCoreReactiveReevaluationEvidence({ artifactPath: destination }),
+      hasEvidenceCode("REACTIVE_ARTIFACT_UNSAFE"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("atomic reactive compatibility writer rejects temporary-byte tampering", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-write-"));
+  const destination = path.join(directory, "artifact.json");
+  try {
+    await assert.rejects(
+      writeRuntimeCoreReactiveReevaluationEvidence({
+        artifactPath: destination,
+        async beforeAtomicRename({ temporaryPath }) {
+          await writeFile(temporaryPath, "{}\n");
         },
+      }),
+      hasEvidenceCode("REACTIVE_ARTIFACT_UNSAFE"),
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("atomic reactive compatibility writer preserves exact historical bytes", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-write-"));
+  const destination = path.join(directory, "artifact.json");
+  try {
+    const written = await writeRuntimeCoreReactiveReevaluationEvidence({
+      artifactPath: destination,
+    });
+    const rebuilt = await buildRuntimeCoreReactiveReevaluationEvidence({
+      artifactPath: destination,
+    });
+    assert.equal(written.artifactSha256, HISTORICAL_SHA256);
+    assert.equal(rebuilt.artifactSha256, HISTORICAL_SHA256);
+    assert.deepEqual(await readFile(destination), await readFile(ARTIFACT_URL));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("default reactive compatibility write is a byte and inode preserving no-op", async () => {
+  const before = await lstat(ARTIFACT_URL);
+  const beforeBytes = await readFile(ARTIFACT_URL);
+  let renameAttempted = false;
+  const preserved = await writeRuntimeCoreReactiveReevaluationEvidence({
+    async beforeAtomicRename() {
+      renameAttempted = true;
+    },
+  });
+  const after = await lstat(ARTIFACT_URL);
+  assert.equal(preserved.preserved, true);
+  assert.equal(preserved.artifactSha256, HISTORICAL_SHA256);
+  assert.equal(renameAttempted, false);
+  assert.equal(after.dev, before.dev);
+  assert.equal(after.ino, before.ino);
+  assert.equal(after.mtimeMs, before.mtimeMs);
+  assert.deepEqual(await readFile(ARTIFACT_URL), beforeBytes);
+});
+
+test("symlink-parent alias to the tracked reactive artifact remains a no-op", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-alias-"));
+  const alias = path.join(directory, "artifact-parent");
+  const trackedPath = ARTIFACT_URL.pathname;
+  try {
+    await symlink(path.dirname(trackedPath), alias, "dir");
+    const aliasedPath = path.join(alias, path.basename(trackedPath));
+    const before = await lstat(ARTIFACT_URL);
+    let renameAttempted = false;
+    const preserved = await writeRuntimeCoreReactiveReevaluationEvidence({
+      artifactPath: aliasedPath,
+      async beforeAtomicRename() {
+        renameAttempted = true;
       },
     });
-  assert.equal((await verifyWith(pinned.proof, pinned.proofMatrix)).result, "PASS");
-
-  const wrongSha256 = "0".repeat(64);
-  const proofPair = `\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.`;
-  await rejectsCode(
-    () =>
-      verifyWith(
-        `${pinned.proof.replace(proofPair, "")}\n## Relocated evidence\n\n${proofPair}\n`,
-        pinned.proofMatrix,
-      ),
-    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      verifyWith(
-        `${pinned.proof.replace(
-          `Its SHA-256 is \`${evidence.artifactSha256}\`.`,
-          `Its SHA-256 is \`${wrongSha256}\`.`,
-        )}\n<!-- relocated ${evidence.artifactSha256} -->\n`,
-        pinned.proofMatrix,
-      ),
-    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      verifyWith(
-        `${pinned.proof.trimEnd()}\n\n\`${ARTIFACT_RELATIVE_PATH}\`.\nIts SHA-256 is \`${evidence.artifactSha256}\`.\n`,
-        pinned.proofMatrix,
-      ),
-    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      verifyWith(
-        pinned.proof,
-        `${pinned.proofMatrix.replace(
-          `\`sha256:${evidence.artifactSha256}\`.`,
-          `\`sha256:${wrongSha256}\`.`,
-        )}\n<!-- relocated sha256:${evidence.artifactSha256} -->\n`,
-      ),
-    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
-  );
-  const matrixPair = `\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.`;
-  await rejectsCode(
-    () =>
-      verifyWith(
-        pinned.proof,
-        `${pinned.proofMatrix.replace(matrixPair, "")}\n## Relocated matrix evidence\n\n${matrixPair}\n`,
-      ),
-    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      verifyWith(
-        pinned.proof,
-        `${pinned.proofMatrix.trimEnd()}\n\`${ARTIFACT_FILE_NAME}\`\n\`sha256:${evidence.artifactSha256}\`.\n`,
-      ),
-    "REACTIVE_ARTIFACT_REFERENCE_DRIFT",
-  );
-});
-
-test("rejects drift in every M04-T05 through M04-T14 prerequisite", async () => {
-  for (const [key, relativePath] of PREREQUISITES) {
-    const bytes = Buffer.from(await readFile(new URL(relativePath, import.meta.url)));
-    bytes[0] ^= 1;
-    await rejectsCode(
-      () =>
-        buildRuntimeCoreReactiveReevaluationEvidence({
-          prerequisiteBytes: { [key]: bytes },
-        }),
-      "REACTIVE_PREREQUISITE_DRIFT",
-    );
+    const after = await lstat(ARTIFACT_URL);
+    assert.equal(preserved.preserved, true);
+    assert.equal(renameAttempted, false);
+    assert.equal(after.dev, before.dev);
+    assert.equal(after.ino, before.ino);
+    assert.equal(after.mtimeMs, before.mtimeMs);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
   }
 });
 
-test("detects captured-host and receiver-independent invocation drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          HOST_SOURCE_PATH,
-          "createRuntimeReactiveHostPorts",
-          (source) =>
-            source.replace("navigation: captured.navigation", "navigation: input.navigation"),
-        ),
-      }),
-    "REACTIVE_HOST_CAPTURE_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          HOST_SOURCE_PATH,
-          "sanitizedSettlement",
-          (source) =>
-            source.replace(
-              "Reflect.apply(callback, undefined, [request])",
-              "Reflect.apply(callback, callback, [request])",
-            ),
-        ),
-      }),
-    "REACTIVE_HOST_SETTLEMENT_FENCE_DRIFT",
-  );
-});
-
-test("detects exact settlement-envelope and detachment drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          HOST_SOURCE_PATH,
-          "sanitizeSettlement",
-          (source) => source.replace('hasExactOwnKeys(candidate, ["status", "value"])', "true"),
-        ),
-      }),
-    "REACTIVE_HOST_ENVELOPE_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          HOST_SOURCE_PATH,
-          "sanitizeSettlement",
-          (source) => source.replace("snapshotRuntimeJsonValue(value.value)", "value.value"),
-        ),
-      }),
-    "REACTIVE_HOST_ENVELOPE_DRIFT",
-  );
-});
-
-test("detects revoked settlement-Proxy redaction drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          HOST_SOURCE_PATH,
-          "sanitizedSettlement",
-          (source) =>
-            source.replace(
-              "} catch {\n        return Promise.reject();\n      }",
-              "} catch (error) {\n        return Promise.reject(error);\n      }",
-            ),
-        ),
-      }),
-    "REACTIVE_HOST_SETTLEMENT_FENCE_DRIFT",
-  );
-});
-
-test("detects pre-lifecycle stale-settlement fencing drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          HOST_SOURCE_PATH,
-          "sanitizedSettlement",
-          (source) =>
-            source.replace(
-              "Promise.resolve(candidate).then(",
-              "Promise.resolve(sanitizeSettlement(candidate)).then(",
-            ),
-        ),
-      }),
-    "REACTIVE_HOST_SETTLEMENT_FENCE_DRIFT",
-  );
-});
-
-test("detects reactive-host authenticity and package-root containment drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          REEVALUATION_SOURCE_PATH,
-          "isRuntimeReactiveHostPorts(values.hostPorts)",
-          'typeof values.hostPorts === "object"',
-        ),
-      }),
-    "REACTIVE_MOUNT_AUTHORITY_DRIFT",
-  );
-  const indexPath = new URL("../packages/runtime-core/src/index.ts", import.meta.url);
-  const indexText = await readFile(indexPath, "utf8");
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          "packages/runtime-core/src/index.ts": `${indexText}\nexport { isRuntimeReactiveHostPorts } from "./reactive-host-ports.js";\n`,
-        },
-      }),
-    "REACTIVE_INTERNAL_EXPORT_LEAK",
-  );
-});
-
-test("detects revoked mount and invalidation reflection containment drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "isPlainRecord",
-          (source) =>
-            source.replace(
-              "try {\n    if (Array.isArray(value)) return false;",
-              "if (Array.isArray(value)) return false;\n  try {",
-            ),
-        ),
-      }),
-    "REACTIVE_REFLECTION_CONTAINMENT_DRIFT",
-  );
-});
-
-test("detects exact lower-authority mount drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "initialAuthoritiesAreCurrent",
-          (source) =>
-            source.replace("state.snapshot === input.stateSnapshot", 'state.status === "active"'),
-        ),
-      }),
-    "REACTIVE_MOUNT_AUTHORITY_DRIFT",
-  );
-});
-
-test("detects complete double-sampled snapshot drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "captureResolution",
-          (source) => source.replace("confirmedContext?.canonical !== context.canonical", "false"),
-        ),
-      }),
-    "REACTIVE_CONSISTENT_SNAPSHOT_DRIFT",
-  );
-});
-
-test("detects seven-namespace whole-surface resolution drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "captureResolution",
-          (source) => source.replace("event: UNAVAILABLE_EVENT", "event: EMPTY_OBJECT"),
-        ),
-      }),
-    "REACTIVE_CONSISTENT_SNAPSHOT_DRIFT",
-  );
-});
-
-test("detects least-authority evaluator request drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "evaluateCurrent",
-          (source) =>
-            source.replace(
-              "resolutionSnapshot: captured.resolutionSnapshot,",
-              "resolutionSnapshot: captured.resolutionSnapshot,\n    hostPorts: hostPorts,",
-            ),
-        ),
-      }),
-    "REACTIVE_EVALUATOR_AUTHORITY_LEAK",
-  );
-});
-
-test("detects pre-reflection and post-reflection stale checks", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "evaluateCurrent",
-          (source) => {
-            const anchor = "!resolutionRemainsCurrent(authority, captured, capturedEpoch)";
-            const position = source.lastIndexOf(anchor);
-            assert.ok(position >= 0);
-            return `${source.slice(0, position)}false${source.slice(position + anchor.length)}`;
-          },
-        ),
-      }),
-    "REACTIVE_STALE_CANDIDATE_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "resolutionRemainsCurrent",
-          (source) => source.replace("authenticateResolution(authority, captured)", "true"),
-        ),
-      }),
-    "REACTIVE_POST_AUTHORITY_RECHECK_DRIFT",
-  );
-});
-
-test("detects dirty-bit batching and synchronous drain drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "markDirty",
-          (source) => source.replace("authority.dirty = true", "authority.dirty = false"),
-        ),
-      }),
-    "REACTIVE_BATCHING_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(REEVALUATION_SOURCE_PATH, "drain", (source) =>
-          source.replace("if (authority.draining) return", "if (false) return"),
-        ),
-      }),
-    "REACTIVE_BATCHING_DRIFT",
-  );
-});
-
-test("detects byte-equal publication and monotonic generation drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "publishOutcome",
-          (source) => source.replace("authority.outcomeKey === key", "false"),
-        ),
-      }),
-    "REACTIVE_PUBLICATION_DRIFT",
-  );
-});
-
-test("detects finite lower-only generation limits", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          REEVALUATION_SOURCE_PATH,
-          "maxSynchronousTransitions: 64",
-          "maxSynchronousTransitions: Number.POSITIVE_INFINITY",
-        ),
-      }),
-    "REACTIVE_LIMIT_DRIFT",
-  );
-});
-
-test("detects invalidation reflection, subscription, and failed-mount cleanup drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "invalidateRuntimeReactiveReevaluation",
-          (source) =>
-            source.replace(
-              "const currentEntry = REACTIVE_AUTHORITIES.get(handle)",
-              "const currentEntry = entry",
-            ),
-        ),
-      }),
-    "REACTIVE_INVALIDATION_AUTHORITY_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "mountRuntimeReactiveReevaluation",
-          (source) =>
-            source.replace(
-              "const subscriptions = revokeAuthority(authority);",
-              "const subscriptions = Object.freeze({ context: authority.contextUnsubscribe, environment: authority.environmentUnsubscribe });",
-            ),
-        ),
-      }),
-    "REACTIVE_SUBSCRIPTION_DRIFT",
-  );
-});
-
-test("detects centralized revocation graph cleanup drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "revokeAuthority",
-          (source) => source.replace("authority.hostPorts = undefined", "void authority.hostPorts"),
-        ),
-      }),
-    "REACTIVE_REVOCATION_DRIFT",
-  );
-});
-
-test("detects revocation, tombstone, and exact-once disposal drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceFunctionMutation(
-          REEVALUATION_SOURCE_PATH,
-          "disposeRuntimeReactiveReevaluation",
-          (source) =>
-            source.replace(
-              "const subscriptions = revokeAuthority(entry);",
-              "const subscriptions = Object.freeze({ context: entry.contextUnsubscribe, environment: entry.environmentUnsubscribe });",
-            ),
-        ),
-      }),
-    "REACTIVE_DISPOSAL_DRIFT",
-  );
-});
-
-test("detects source module export and TSDoc drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          HOST_SOURCE_PATH,
-          "export function isRuntimeReactiveHostPorts",
-          "function isRuntimeReactiveHostPorts",
-        ),
-      }),
-    "REACTIVE_PUBLIC_API_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          REEVALUATION_SOURCE_PATH,
-          "/** Reference-profile ceilings for one whole-surface reactive coordinator. */",
-          "",
-        ),
-      }),
-    "REACTIVE_TSDOC_MISSING",
-  );
-});
-
-test("detects source package-root export parity drift", async () => {
-  const relativePath = "packages/runtime-core/src/index.ts";
-  const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [relativePath]: removeModuleExportDeclaration(
-            source,
-            "src/index.ts",
-            "./reactive-reevaluation.js",
-            false,
-          ),
-        },
-      }),
-    "REACTIVE_INDEX_EXPORT_DRIFT",
-  );
-});
-
-test("detects generated module export parity drift", async () => {
-  const relativePath = "packages/runtime-core/dist/reactive-reevaluation.js";
-  const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
-  assert.ok(source.includes("export function readRuntimeReactiveReevaluation"));
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [relativePath]: source.replace(
-            "export function readRuntimeReactiveReevaluation",
-            "function readRuntimeReactiveReevaluation",
-          ),
-        },
-      }),
-    "REACTIVE_DISTRIBUTION_DRIFT",
-  );
-});
-
-test("detects generated package-root export parity drift", async () => {
-  const relativePath = "packages/runtime-core/dist/index.d.ts";
-  const source = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [relativePath]: removeModuleExportDeclaration(
-            source,
-            "dist/index.d.ts",
-            "./reactive-host-ports.js",
-            true,
-          ),
-        },
-      }),
-    "REACTIVE_DISTRIBUTION_DRIFT",
-  );
-});
-
-test("detects focused runtime and compiler-negative inventory drift", async () => {
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          "packages/runtime-core/test/reactive-reevaluation.test.ts",
-          '  it("mounts one atomic whole-surface result with least-authority evaluator inputs"',
-          '  it.skip("mounts one atomic whole-surface result with least-authority evaluator inputs"',
-        ),
-      }),
-    "REACTIVE_TEST_INVENTORY_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          "packages/runtime-core/test/reactive-reevaluation.types.ts",
-          "@ts-expect-error stale-safe host aggregates carry factory-only authority",
-          "stale-safe host aggregates carry factory-only authority",
-        ),
-      }),
-    "REACTIVE_TYPE_TEST_DRIFT",
-  );
-});
-
-test("detects exact import allowlists and platform-boundary drift", async () => {
-  const hostSource = await readFile(
-    new URL("../packages/runtime-core/src/reactive-host-ports.ts", import.meta.url),
-    "utf8",
-  );
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [HOST_SOURCE_PATH]: `${hostSource}\nimport "./unexpected.js";\n`,
-        },
-      }),
-    "REACTIVE_PLATFORM_BOUNDARY_DRIFT",
-  );
-  const reevaluationSource = await readFile(
-    new URL("../packages/runtime-core/src/reactive-reevaluation.ts", import.meta.url),
-    "utf8",
-  );
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [REEVALUATION_SOURCE_PATH]: `${reevaluationSource}\nvoid setTimeout;\n`,
-        },
-      }),
-    "REACTIVE_PLATFORM_BOUNDARY_DRIFT",
-  );
-});
-
-test("detects trace-owner drift without rewriting shared ownership", async () => {
-  const relativePath = "docs/proof/protocol-0.1.0-traceability.json";
-  const trace = await readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
-  assert.ok(trace.includes('"owners": ["M04-T15"]'));
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [relativePath]: trace.replace('"owners": ["M04-T15"]', '"owners": ["M04-T16"]'),
-        },
-      }),
-    "REACTIVE_TRACE_DRIFT",
-  );
-});
-
-test("detects normative, finding, and proof-document drift", async () => {
-  const normativePath = "docs/proof/NORMATIVE-COVERAGE.md";
-  const normative = await readFile(new URL(`../${normativePath}`, import.meta.url), "utf8");
-  const determinismRow = normative.split(/\r?\n/u).find((line) => line.startsWith("| N-003 "));
-  assert.ok(determinismRow?.includes("TESTED"));
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(normativePath, "| N-003 |", "| N-003-removed |"),
-      }),
-    "REACTIVE_NORMATIVE_DRIFT",
-  );
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [normativePath]: normative.replace(
-            determinismRow,
-            determinismRow.replace("TESTED", "IMPLEMENTED"),
-          ),
-        },
-      }),
-    "REACTIVE_NORMATIVE_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          "docs/plan/PROTOCOL-FINDINGS.md",
-          "## PF-045 —",
-          "## PF-045-removed —",
-        ),
-      }),
-    "REACTIVE_DOCUMENTATION_DRIFT",
-  );
-  await rejectsCode(
-    async () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: await sourceMutation(
-          "docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md",
-          "M04-T15 is **PASS**",
-          "M04-T15 is pending",
-        ),
-      }),
-    "REACTIVE_DOCUMENTATION_DRIFT",
-  );
-});
-
-test("detects every task-owned byte boundary", async () => {
-  for (const relativePath of OWNED_PATHS) {
-    const bytes = Buffer.from(await readFile(new URL(`../${relativePath}`, import.meta.url)));
-    bytes[0] ^= 1;
-    if (Object.hasOwn(HISTORICAL_TRANSFER_RECORDS, relativePath)) {
-      const baseline = await buildRuntimeCoreReactiveReevaluationEvidence();
-      const transferred = await buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: { [relativePath]: bytes },
-      });
-      assert.deepEqual(transferred.artifactBytes, baseline.artifactBytes, relativePath);
-      continue;
-    }
+test("writer rejects a tampered reactive source before creating a destination", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-core-t15-write-"));
+  const source = path.join(directory, "source.json");
+  const destination = path.join(directory, "destination.json");
+  const tampered = Buffer.from(await readFile(ARTIFACT_URL));
+  tampered[0] ^= 1;
+  try {
+    await writeFile(source, tampered);
     await assert.rejects(
-      () =>
-        verifyRuntimeCoreReactiveReevaluationEvidence({
-          buildOptions: { fileOverrides: { [relativePath]: bytes } },
-        }),
-      RuntimeCoreReactiveReevaluationEvidenceError,
-      relativePath,
-    );
-  }
-  const rootTests = await readFile(new URL(import.meta.url), "utf8");
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreReactiveReevaluationEvidence({
-        fileOverrides: {
-          [ROOT_TEST_PATH]: rootTests.replace(
-            "rejects relocated or duplicated M04-T15 artifact SHA pins",
-            "accepts relocated M04-T15 artifact SHA pins",
-          ),
-        },
+      writeRuntimeCoreReactiveReevaluationEvidence({
+        sourceArtifactPath: source,
+        artifactPath: destination,
       }),
-    "REACTIVE_ROOT_TEST_INVENTORY_DRIFT",
-  );
+      hasEvidenceCode("REACTIVE_HISTORICAL_ARTIFACT_DRIFT"),
+    );
+    await assert.rejects(readFile(destination));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
