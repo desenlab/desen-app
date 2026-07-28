@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "task": "M05-T05",
+  "result": "PASS",
+  "profile": "desen-runtime-react-reconciliation-diagnostics-v1",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M04-T06",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-local-state-identity.json",
+      "sha256": "sha256:4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13",
+      "target": "platform-neutral",
+      "result": "PASS"
+    },
+    {
+      "task": "M04-T07",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-repeat-materialization.json",
+      "sha256": "sha256:45ba72f21f936931d087982d8a52e6b4d226a33ed5693c2d3d6bf9158fddb02d",
+      "target": "platform-neutral",
+      "result": "PASS"
+    },
+    {
+      "task": "M05-T04",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+      "sha256": "sha256:9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0",
+      "profile": "desen-runtime-react-interactions-v1",
+      "target": "web-react",
+      "result": "PASS"
+    }
+  ],
+  "claim": {
+    "liveSessionSubscriptionCommitOnly": true,
+    "stableSnapshotAndCompatibleAdapterReferences": true,
+    "reconciliationIdentityIncludesRuntimeNodeAndCapability": true,
+    "trustedRemountPolicyPresenceAware": true,
+    "rfc8785CanonicalRemountProjection": true,
+    "realComponentBehaviorAndRepeatReconciliation": true,
+    "boundedCallbackFreeImmutableDiagnosticIndex": true,
+    "staleManagedSurfaceRetainedOnFailure": false,
+    "unknownCapabilityOrRenderFallback": false,
+    "committedAdapterErrorBoundaryImplemented": false
+  },
+  "reconciliation": {
+    "profile": "desen.runtime-react/reconciliation-key@0.1.0",
+    "identityFields": ["runtimeNodeId", "capabilityId"],
+    "remountPolicyOwner": "trusted-static-adapter-registry",
+    "remountProjection": "selected-property-presence-and-rfc8785-value",
+    "missingAndPresentNullAreDistinct": true,
+    "ordinaryPropStyleAndSlotChangesPreserveInstance": true,
+    "capabilityChangeRemounts": true,
+    "behaviorPolicyParity": true,
+    "repeatReorderPreservesMaterializedRuntimeIdentity": true,
+    "sessionSwitchRemountsManagedRoot": true,
+    "canonicalizationCalls": 2,
+    "rendererKeyCallSites": 2,
+    "reactKeyCallSites": 2
+  },
+  "liveSurface": {
+    "observation": "React.useSyncExternalStore",
+    "subscriptionAdmission": "commit-only",
+    "preCommitAuthority": false,
+    "serverRenderSubscriptionAuthority": false,
+    "abandonedSuspenseSubscriptionAuthority": false,
+    "exactSnapshotObjectPreserved": true,
+    "equalSnapshotWrapperReferencePreserved": true,
+    "postAdmissionReadClosesMissedUpdateRace": true,
+    "exactSubscriptionCleanup": true,
+    "oldSessionNoticeCanPublishAfterSwitch": false,
+    "previousSurfaceRetainedOnTerminalOrRenderFailure": false,
+    "sessionAndRegistryRootIsolation": "nested-weakly-keyed-stable-boundary-component",
+    "sourceCalls": { "useSyncExternalStore": 1, "read": 1, "subscribe": 1, "unsubscribe": 1 },
+    "liveCalls": { "observe": 1, "compile": 1 }
+  },
+  "diagnostics": {
+    "limits": {
+      "maxBindings": 25000,
+      "maxIdentifierOccurrences": 115000,
+      "maxIdentifierCodeUnits": 4194304
+    },
+    "forwardLookup": "runtimeNodeId-to-minimal-identity",
+    "inverseLookups": [
+      "sourceNodeId-to-sorted-runtimeNodeIds",
+      "behaviorId-to-sorted-runtimeNodeIds"
+    ],
+    "repeatedSourceIdentityOneToMany": true,
+    "nullPrototypeRecords": true,
+    "recursivelyImmutable": true,
+    "callbackFields": 0,
+    "propsStyleSlotsReactSessionCatalogRegistryFields": 0,
+    "partialIndexOnFailure": false,
+    "buildCallSites": 1,
+    "failureReasons": [
+      "behavior-owner-mismatch",
+      "binding-limit",
+      "duplicate-runtime-node",
+      "identifier-code-unit-limit",
+      "identifier-occurrence-limit",
+      "invalid-input",
+      "invalid-limits",
+      "unknown-behavior-owner"
+    ]
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS",
+      "RUNTIME_REACT_DIAGNOSTIC_INDEX_LIMITS",
+      "RUNTIME_REACT_RENDER_LIMITS",
+      "buildRuntimeReactDiagnosticIndex",
+      "createRuntimeReactAdapterRegistry",
+      "createRuntimeReactReconciliationKey",
+      "readRuntimeReactAdapterRegistry",
+      "renderRuntimeReactSurface",
+      "useRuntimeReactSessionSurface",
+      "useRuntimeReactSurface"
+    ],
+    "typeExports": [
+      "RuntimeReactAdapterReconciliationPolicySnapshot",
+      "RuntimeReactAdapterRegistryCreateInput",
+      "RuntimeReactAdapterRegistryCreateResult",
+      "RuntimeReactAdapterRegistryHandle",
+      "RuntimeReactAdapterRegistryInvalidReason",
+      "RuntimeReactAdapterRegistryLimitProfile",
+      "RuntimeReactAdapterRegistryReadResult",
+      "RuntimeReactAdapterRegistrySnapshot",
+      "RuntimeReactBehaviorAdapterComponent",
+      "RuntimeReactBehaviorAdapterProps",
+      "RuntimeReactBehaviorAdapterRegistration",
+      "RuntimeReactBehaviorDiagnosticIndexBinding",
+      "RuntimeReactBehaviorDiagnosticIndexEntry",
+      "RuntimeReactCommandAttachmentHandle",
+      "RuntimeReactCommandAttachmentResult",
+      "RuntimeReactCommandDetachmentResult",
+      "RuntimeReactComponentAdapterComponent",
+      "RuntimeReactComponentAdapterProps",
+      "RuntimeReactComponentAdapterRegistration",
+      "RuntimeReactComponentCommandPort",
+      "RuntimeReactComponentDiagnosticIndexBinding",
+      "RuntimeReactComponentDiagnosticIndexEntry",
+      "RuntimeReactDiagnosticIdentity",
+      "RuntimeReactDiagnosticIndex",
+      "RuntimeReactDiagnosticIndexBinding",
+      "RuntimeReactDiagnosticIndexBuildResult",
+      "RuntimeReactDiagnosticIndexEntry",
+      "RuntimeReactDiagnosticIndexInvalidReason",
+      "RuntimeReactDiagnosticIndexLimitProfile",
+      "RuntimeReactEventDispatchResult",
+      "RuntimeReactInteractionPort",
+      "RuntimeReactLiveSurfaceFailure",
+      "RuntimeReactLiveSurfaceInput",
+      "RuntimeReactLiveSurfaceResult",
+      "RuntimeReactNamedSlots",
+      "RuntimeReactReconciliationKeyInput",
+      "RuntimeReactRenderFailure",
+      "RuntimeReactRenderFailureChannel",
+      "RuntimeReactRenderFailureCode",
+      "RuntimeReactRenderInput",
+      "RuntimeReactRenderLimitProfile",
+      "RuntimeReactRenderResult",
+      "RuntimeReactRenderedSurface",
+      "RuntimeReactSemanticStyle",
+      "RuntimeReactSessionSurfaceFailure",
+      "RuntimeReactSessionSurfaceFailureReason",
+      "RuntimeReactSessionSurfaceInput",
+      "RuntimeReactSessionSurfaceReady",
+      "RuntimeReactSessionSurfaceResult",
+      "RuntimeReactStyleParts",
+      "RuntimeReactStyleProperties"
+    ],
+    "publicRootDeclarations": 61,
+    "sourceDeclarations": 67,
+    "tsdocDeclarations": 67,
+    "moduleOnlyExports": [
+      "RuntimeReactAdapterRegistryAuthority",
+      "RuntimeReactBehaviorAdapterDefinition",
+      "RuntimeReactComponentAdapterDefinition",
+      "createRuntimeReactBehaviorAdapterElement",
+      "createRuntimeReactComponentAdapterElement",
+      "readRuntimeReactAdapterRegistryAuthority"
+    ]
+  },
+  "failureBoundary": {
+    "renderFailureCodes": [
+      "BEHAVIOR_LIMIT_EXCEEDED",
+      "DEPTH_LIMIT_EXCEEDED",
+      "DIAGNOSTIC_INDEX_FAILED",
+      "DUPLICATE_RUNTIME_IDENTITY",
+      "INVALID_BEHAVIOR_PROPS",
+      "INVALID_BEHAVIOR_SLOTS",
+      "INVALID_BEHAVIOR_STYLE",
+      "INVALID_CATALOG_SET",
+      "INVALID_COMPONENT_PROPS",
+      "INVALID_COMPONENT_SLOTS",
+      "INVALID_COMPONENT_STYLE",
+      "INVALID_REGISTRY",
+      "INVALID_SESSION",
+      "INVALID_SESSION_SNAPSHOT",
+      "JSON_DEPTH_LIMIT_EXCEEDED",
+      "JSON_OCCURRENCE_LIMIT_EXCEEDED",
+      "MALFORMED_RENDER_PLAN",
+      "NODE_LIMIT_EXCEEDED",
+      "RECEIVING_VALIDATION_LIMIT_EXCEEDED",
+      "RECONCILIATION_KEY_FAILED",
+      "RUNTIME_BINDING_MISMATCH",
+      "SLOT_LIMIT_EXCEEDED",
+      "STRING_LIMIT_EXCEEDED",
+      "UNKNOWN_BEHAVIOR_CAPABILITY",
+      "UNKNOWN_COMPONENT_CAPABILITY"
+    ],
+    "unknownCapabilityPlaceholderGuessing": false,
+    "previousSurfaceFallback": false,
+    "committedAdapterExceptionContainment": false,
+    "committedAdapterExceptionContainmentOwner": "M05-T06"
+  },
+  "boundary": {
+    "package": "@desen/runtime-react",
+    "productionDependencies": ["@desen/protocol", "@desen/runtime-core", "@desen/validator"],
+    "peerDependencies": ["react"],
+    "reactPeerRange": ">=19.0.0 <20.0.0",
+    "sideEffects": false,
+    "publicSubpaths": ["."],
+    "rootScripts": {
+      "generate:runtime-react-reconciliation-diagnostics": "pnpm --filter @desen/runtime-react... build && pnpm --filter @desen/runtime-react typecheck && pnpm --filter @desen/runtime-react exec vitest run test/adapter-registry.test.tsx test/reconciliation.test.ts test/reconciliation-render.test.tsx test/diagnostic-index.test.ts test/session-surface.test.tsx test/live-surface.test.tsx && node scripts/generate-runtime-react-reconciliation-diagnostics-proof.mjs",
+      "verify:runtime-react-reconciliation-diagnostics": "pnpm --filter @desen/runtime-react... build && pnpm --filter @desen/runtime-react typecheck && pnpm --filter @desen/runtime-react exec vitest run test/adapter-registry.test.tsx test/reconciliation.test.ts test/reconciliation-render.test.tsx test/diagnostic-index.test.ts test/session-surface.test.tsx test/live-surface.test.tsx && node scripts/verify-runtime-react-reconciliation-diagnostics.mjs",
+      "test:runtime-react-reconciliation-diagnostics": "pnpm --filter @desen/runtime-react... build && pnpm --filter @desen/runtime-react typecheck && pnpm --filter @desen/runtime-react exec vitest run test/adapter-registry.test.tsx test/reconciliation.test.ts test/reconciliation-render.test.tsx test/diagnostic-index.test.ts test/session-surface.test.tsx test/live-surface.test.tsx && node --test tests/runtime-react-reconciliation-diagnostics.test.mjs"
+    },
+    "protocolCanonicalizationDependency": "production",
+    "lockfileImporterVerified": true
+  },
+  "evidence": {
+    "tests": {
+      "packageFiles": [
+        { "path": "packages/runtime-react/test/adapter-registry.test.tsx", "registrations": 14 },
+        { "path": "packages/runtime-react/test/reconciliation.test.ts", "registrations": 8 },
+        {
+          "path": "packages/runtime-react/test/reconciliation-render.test.tsx",
+          "registrations": 7
+        },
+        { "path": "packages/runtime-react/test/diagnostic-index.test.ts", "registrations": 8 },
+        { "path": "packages/runtime-react/test/session-surface.test.tsx", "registrations": 11 },
+        { "path": "packages/runtime-react/test/live-surface.test.tsx", "registrations": 5 }
+      ],
+      "packageRegistrations": 53,
+      "compilerFiles": [
+        { "path": "packages/runtime-react/test/adapter-registry.types.ts", "negativeCases": 4 },
+        { "path": "packages/runtime-react/test/reconciliation.types.ts", "negativeCases": 5 },
+        { "path": "packages/runtime-react/test/diagnostic-index.types.ts", "negativeCases": 6 },
+        { "path": "packages/runtime-react/test/session-surface.types.ts", "negativeCases": 7 },
+        { "path": "packages/runtime-react/test/live-surface.types.ts", "negativeCases": 4 }
+      ],
+      "compilerNegativeCases": 26,
+      "rootMutationCases": 35,
+      "focusedCommand": "pnpm --filter @desen/runtime-react exec vitest run test/adapter-registry.test.tsx test/reconciliation.test.ts test/reconciliation-render.test.tsx test/diagnostic-index.test.ts test/session-surface.test.tsx test/live-surface.test.tsx",
+      "typecheckCommand": "pnpm --filter @desen/runtime-react typecheck",
+      "rootCommand": "node --test tests/runtime-react-reconciliation-diagnostics.test.mjs"
+    },
+    "sourceImports": [
+      "./diagnostic-index.js",
+      "./interactions.js",
+      "./reconciliation.js",
+      "./registry.js",
+      "./render-plan.js",
+      "./session-surface.js",
+      "@desen/protocol",
+      "@desen/runtime-core",
+      "@desen/validator",
+      "react"
+    ],
+    "dynamicExecutableImports": 0,
+    "trackedFiles": [
+      {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 65543,
+        "sha256": "sha256:6177feb6833ed82409ccfbe8e3826437cce5788d3eedb664a282267d64d06c9e",
+        "selfPinNormalizedTo": "sha256:[PENDING_FINAL_ARTIFACT_SHA256]"
+      },
+      {
+        "path": "docs/proof/PROOF-MATRIX.md",
+        "bytes": 87026,
+        "sha256": "sha256:ca33347cc594c87965037e922cfbd326f7513f1afc9829b2f642ae06532b04ac",
+        "selfPinNormalizedTo": "sha256:[PENDING_FINAL_ARTIFACT_SHA256]"
+      },
+      {
+        "path": "docs/proof/RUNTIME-REACT-RECONCILIATION-DIAGNOSTICS.md",
+        "bytes": 7565,
+        "sha256": "sha256:3d647852a6c83f622af704b4e5373d432fe529c2cab993d28a5760a4494c3f79",
+        "selfPinNormalizedTo": "sha256:[PENDING_FINAL_ARTIFACT_SHA256]"
+      },
+      {
+        "path": "package.json",
+        "bytes": 41385,
+        "sha256": "sha256:58177766b8281e2f8b0a6a8068e0b97e9913cffc80a994f21f4218e56624fc8f"
+      },
+      {
+        "path": "packages/runtime-react/package.json",
+        "bytes": 1628,
+        "sha256": "sha256:3a7974d953f21f3b98360ebc7aaae5e6f73bb96eba410d924ae0789110654f57"
+      },
+      {
+        "path": "packages/runtime-react/src/diagnostic-index.ts",
+        "bytes": 16056,
+        "sha256": "sha256:b007cebc590cbef2f12da1ecae1386d3ab91d82a66bbe461eb5cb63f050af3c1"
+      },
+      {
+        "path": "packages/runtime-react/src/index.ts",
+        "bytes": 2845,
+        "sha256": "sha256:f2b99f5197c70f64c3dbcf6a5d74f2f47b9e3365fb694d8130d7f836aff1c190"
+      },
+      {
+        "path": "packages/runtime-react/src/interactions.tsx",
+        "bytes": 13794,
+        "sha256": "sha256:45f8353af7080ba1b7801abd421ab068f9d2926d0ff8b956320e4846944a2605"
+      },
+      {
+        "path": "packages/runtime-react/src/live-surface.tsx",
+        "bytes": 6388,
+        "sha256": "sha256:3dc4ba73f9c2bc93c924e4f1947a492f573a9523f3adef6b44820f7501333f0e"
+      },
+      {
+        "path": "packages/runtime-react/src/reconciliation.ts",
+        "bytes": 7929,
+        "sha256": "sha256:6c128414af3f7995f981faab7d4bb84d4ce22a3bdaf84740a35b1ddb3df7b04f"
+      },
+      {
+        "path": "packages/runtime-react/src/registry.ts",
+        "bytes": 24346,
+        "sha256": "sha256:5d582f44b5a83cbc3316631144883d51e90c2e1aca08c911347e1ec536b9f4e5"
+      },
+      {
+        "path": "packages/runtime-react/src/render-plan.tsx",
+        "bytes": 43669,
+        "sha256": "sha256:ad314a914a4025ae0532760f96cb413783ed80fe586380caba1ec56a8674714c"
+      },
+      {
+        "path": "packages/runtime-react/src/session-surface.tsx",
+        "bytes": 10512,
+        "sha256": "sha256:de33e794ae7a1cce9cb0a539ffa0d00d14a9ea9b32f63db228e7c0900630069d"
+      },
+      {
+        "path": "packages/runtime-react/test/adapter-registry.test.tsx",
+        "bytes": 17961,
+        "sha256": "sha256:2513e3469ce96bee1eb8f03669867f55111952f3848cb462e4ae9aef1b1e847e"
+      },
+      {
+        "path": "packages/runtime-react/test/adapter-registry.types.ts",
+        "bytes": 2205,
+        "sha256": "sha256:e757db962fe011b1a4e8dbc732d9873d8e4103b3eda75770b79291290aa867f4"
+      },
+      {
+        "path": "packages/runtime-react/test/diagnostic-index.test.ts",
+        "bytes": 10051,
+        "sha256": "sha256:21e974a1357f84175c76af903b1a88f6eb2978e1b1565bec874ff177afd973fa"
+      },
+      {
+        "path": "packages/runtime-react/test/diagnostic-index.types.ts",
+        "bytes": 2266,
+        "sha256": "sha256:19bad78dc86cc7f854fdffed3fbf91350d876b08d2868498dbe33196b8bdf6ac"
+      },
+      {
+        "path": "packages/runtime-react/test/live-surface.test.tsx",
+        "bytes": 11521,
+        "sha256": "sha256:4f2ad3aa8974afd2dbe5c1f42e5fea338bc960e5504ea0aadddaad9cfd59f34d"
+      },
+      {
+        "path": "packages/runtime-react/test/live-surface.types.ts",
+        "bytes": 979,
+        "sha256": "sha256:1077650f7297613c890325920e523e693b4de756194b9262663abbd460316032"
+      },
+      {
+        "path": "packages/runtime-react/test/reconciliation-render.test.tsx",
+        "bytes": 19241,
+        "sha256": "sha256:d7a103117babb08baaa41056e2ded07857e272fe5ff524cb8ad32476fe441442"
+      },
+      {
+        "path": "packages/runtime-react/test/reconciliation.test.ts",
+        "bytes": 6094,
+        "sha256": "sha256:77982b4dd12ecc16976f9e19a71ca0cf57588f028d63e2f90676822a7f633ea9"
+      },
+      {
+        "path": "packages/runtime-react/test/reconciliation.types.ts",
+        "bytes": 1826,
+        "sha256": "sha256:4b4f73dbdc474beb49392ade4f9bd400dc80a9c981c2e9ba648a74379ba2e71b"
+      },
+      {
+        "path": "packages/runtime-react/test/session-surface.test.tsx",
+        "bytes": 17768,
+        "sha256": "sha256:7fcf75ad762773af48603627864a40bbc9358c5679cd2ec706c88e2f49d8bc2c"
+      },
+      {
+        "path": "packages/runtime-react/test/session-surface.types.ts",
+        "bytes": 2643,
+        "sha256": "sha256:f4c205ce2c9646476111f3499a1bb7e345507ef192c920c512e78956335567aa"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 113439,
+        "sha256": "sha256:68e2cce8d788b91ee73293447a2d475eecc8f0556b4a290ad47115fe472c75ed"
+      },
+      {
+        "path": "scripts/generate-runtime-react-reconciliation-diagnostics-proof.mjs",
+        "bytes": 725,
+        "sha256": "sha256:ee2519b694f850a484d4806bad253d35a882f3ab5472ce38bc9aecc3fbf1cdfe"
+      },
+      {
+        "path": "scripts/lib/runtime-react-reconciliation-diagnostics-proof.mjs",
+        "bytes": 63539,
+        "sha256": "sha256:05a2bd7b4b55c52f62873b9ffdc7832327b7ca4ef37d3782073c2eaee9dd0e1a"
+      },
+      {
+        "path": "scripts/verify-runtime-react-reconciliation-diagnostics.mjs",
+        "bytes": 727,
+        "sha256": "sha256:79bceacf0e957d65e2b672b5a0b423eed0c93d5fbad90dabd8d3e7dcc1988dbc"
+      },
+      {
+        "path": "tests/runtime-react-reconciliation-diagnostics.test.mjs",
+        "bytes": 29472,
+        "sha256": "sha256:1eb5856f35046f48182b7ae180406a0331ffd7f7694da40a10653564a9107fbd"
+      }
+    ],
+    "proofPinNormalization": {
+      "token": "[PENDING_FINAL_ARTIFACT_SHA256]",
+      "allowlistedDocuments": [
+        "docs/proof/RUNTIME-REACT-RECONCILIATION-DIAGNOSTICS.md",
+        "docs/proof/PROOF-MATRIX.md",
+        "docs/proof/NORMATIVE-COVERAGE.md"
+      ],
+      "exactReferenceCount": 4,
+      "productionVerifierAcceptsPending": false
+    },
+    "traceability": {
+      "proofClaim": { "id": "P-16", "historicalStatus": "NOT_PROVEN", "currentStatus": "PARTIAL" },
+      "normative": {
+        "id": "N-021",
+        "historicalStatus": "PLANNED",
+        "currentStatus": "PLANNED",
+        "remainingOwner": "M06-T06"
+      },
+      "requirement": "R-104",
+      "selection": "stable-runtime-and-capability-key-with-trusted-remount-policy"
+    },
+    "verifierExecutionProfile": "static-source-api-package-and-focused-test-inventory"
+  },
+  "nonclaims": [
+    "No committed React adapter exception boundary; M05-T06 owns containment.",
+    "No fallback component, placeholder guessing, or unknown-capability substitution.",
+    "No claim that N-021 is complete before publisher-side M06-T06 evidence.",
+    "No independently built reference host or complete sign-in execution claim.",
+    "No CSS, accessibility-preservation, iOS, Android, SwiftUI, or Compose renderer claim."
+  ]
+}

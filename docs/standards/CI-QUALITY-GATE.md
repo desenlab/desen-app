@@ -71,6 +71,14 @@ The workspace manifest itself is pinned as
 `sha256:c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba`; this
 prevents an otherwise valid package manifest from being omitted from pnpm and Turbo discovery.
 
+The figures above remain the historical CI-01 baseline. At the M05-T05 checkpoint, the current
+frozen inventory contains 45 proofs, 271 prerequisite segments, 1,279 ordered leaf invocations,
+151 distinct leaf workloads, and 98 normalized single-pass steps. Their reviewed digests are,
+respectively, `sha256:60f639de8fd2953b8ef7f4bf73e571256fc329566ea301b73481a4f18d731d55`,
+`sha256:2ad72bf3a49231136bb1d3ca9c6ba7f387a408288b77c173fad2fcd758c58ab5`,
+`sha256:cc02da64fee90249ef49939feed7c45288c4eaae4fff9ce7ea34ce936d0b9696`, and
+`sha256:5daff7a2229925c8881ae25c1e269be52854183d20f452bd4edb51cd00533d08`.
+
 `SIGINT` and `SIGTERM` become permanent cancellation state, are forwarded to the active process
 group, stop later steps, and preserve exit codes 130 and 143. This prevents a superseded workflow
 from leaving child or grandchild processes behind or turning cancellation into success.

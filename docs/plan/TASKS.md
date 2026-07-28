@@ -132,7 +132,7 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 | M05-T02 | DONE        | M05-T01         | Resolved props and named slots wired without private structure inspection                          |
 | M05-T03 | DONE        | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
 | M05-T04 | DONE        | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
-| M05-T05 | NOT_STARTED | M05-T02–M05-T04 | Stable keys and runtime-node ↔ source-node diagnostics                                             |
+| M05-T05 | DONE        | M05-T02–M05-T04 | Stable keys and runtime-node ↔ source-node diagnostics                                             |
 | M05-T06 | NOT_STARTED | M05-T05         | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
 | M05-T07 | NOT_STARTED | M05-T01         | Independently built reference-host shell with host ports                                           |
 | M05-T08 | NOT_STARTED | M05-T04–M05-T07 | Official sign-in bundle running through real adapters                                              |

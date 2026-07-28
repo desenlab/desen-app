@@ -1975,3 +1975,56 @@ This file records implementation discoveries without changing the frozen DESEN 0
   concrete semantic style application and accessibility preservation. Native renderers should
   reuse the observable event/command vectors but define independent lifecycle attachment
   profiles instead of importing React effects into `runtime-core`.
+
+## PF-054 — Stable adapter identity is session-scoped and source diagnostics are one-to-many
+
+- Status: OPEN
+- Blocks proof: No; M05-T05 defines the selected Web–React reconciliation and diagnostic profile
+  without changing frozen protocol data or moving React policy into `runtime-core`.
+- Protocol location: SPEC Sections 17.6, 24.4, and 25.2; `R-061`, `R-104`, `N-021`, proof claim
+  `P-16`, and related findings `PF-035`, `PF-050`, `PF-051`, and `PF-053`
+- Observation: Stable runtime ids and repeat keys are necessary but insufficient to preserve a
+  real React instance safely. Using only a source id collapses repeated nodes. Using every prop
+  remounts on ordinary resolved-value changes and destroys local platform state. Ignoring
+  capability compatibility or a small adapter-owned set of constructor-like props can preserve an
+  incompatible instance. A key that survives a factory-created session switch can also leak
+  adapter `useState`, refs, effects, or platform instances between otherwise separate runtime
+  authorities. Separately, an error carrying only one source id cannot select all materialized
+  repeat or behavior instances, while exposing props, React elements, the registry, or session
+  callbacks through a diagnostic index would widen authority and retention.
+- Implementation decision: M05-T05 gives each trusted component and behavior registration an
+  optional `remountOnProps` list. Registry creation captures it as dense enumerable own data,
+  rejects duplicates and invalid Unicode, sorts it by exact UTF-16 code units, freezes it, and
+  applies explicit per-adapter and aggregate limits. Bundle and Catalog data cannot provide or
+  override this metadata. After exact receiving validation, the renderer creates an RFC 8785
+  canonical key from the runtime id, exact capability id, and a presence-aware projection of only
+  those declared prop names. Missing differs from explicit `null`; semantic object member order
+  does not. Ordinary props, styles, and slots remain outside the key. Components, behavior
+  wrappers, capability changes, repeat reorder, and removal are exercised with real React state
+  and mount lifecycles.
+
+  `useRuntimeReactSessionSurface` observes the headless runtime only through its
+  factory-authenticated read/subscribe/unsubscribe API. Snapshot result references are stable,
+  subscriptions begin after commit, exact tickets are cleaned up under StrictMode, and SSR or
+  abandoned Suspense work acquires no subscription. `useRuntimeReactSurface` re-authenticates every
+  exact publication with the same host registry and Catalog set. The public renderer allocates a
+  private stable root-boundary type per exact session-and-registry pair, so direct and live
+  renderer consumers share the same isolation without double wrapping: generations inside one
+  trusted host configuration preserve compatible adapters, while a handle or executable-registry
+  change remounts the complete managed tree. Old ports and queued notices cannot restore or act
+  through the replaced authority.
+
+  After complete preparation and exact two-way binding parity, the renderer atomically builds a
+  null-prototype, recursively frozen index from runtime ids to component/behavior identity and
+  from source or behavior ids to sorted one-to-many runtime-id lists. Its 25,000-binding and
+  115,000-identifier-occurrence ceilings cover the renderer maximum. It retains only immutable
+  identity strings: no props, style, slots, React value, platform object, session, Catalog,
+  registry, or callback. Any malformed ownership or lower-limit crossing returns
+  `DIAGNOSTIC_INDEX_FAILED` before element creation.
+
+- Future action: M05-T06 must add the explicit production adapter error boundary without
+  converting unknown capabilities into guessed placeholders. M09-T13 must connect the immutable
+  index to end-to-end Desen App diagnostic selection before P-16 can become `PROVEN`. M06-T06 must
+  prove that publication preserves the protocol behavior/source identity relationship before
+  N-021 can become `TESTED`. Native renderers should reuse the observable identity rules but define
+  their own platform instance-compatibility boundary rather than importing React keys.

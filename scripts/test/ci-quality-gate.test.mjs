@@ -94,15 +94,15 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the frozen proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 44,
-    verifierCount: 44,
-    rootTestCount: 44,
-    legacyPrerequisiteCount: 265,
-    legacyPrerequisiteSha256: "83ee009421857b0ae7820dbfc0414cb92890a860d8f78cfb3237d5da925e0692",
-    legacyLeafInvocationCount: 1271,
-    legacyLeafInvocationSha256: "e93f7220484fa7f541938961c59a5cce856ab87765187a87bd28bb851c261785",
-    distinctLeafWorkloadCount: 148,
-    distinctLeafWorkloadSha256: "720dcea32eb6ec1d80716e1786ff33b4f8598123d17f967822c620249a6297a4",
+    proofCount: 45,
+    verifierCount: 45,
+    rootTestCount: 45,
+    legacyPrerequisiteCount: 271,
+    legacyPrerequisiteSha256: "60f639de8fd2953b8ef7f4bf73e571256fc329566ea301b73481a4f18d731d55",
+    legacyLeafInvocationCount: 1279,
+    legacyLeafInvocationSha256: "2ad72bf3a49231136bb1d3ca9c6ba7f387a408288b77c173fad2fcd758c58ab5",
+    distinctLeafWorkloadCount: 151,
+    distinctLeafWorkloadSha256: "cc02da64fee90249ef49939feed7c45288c4eaae4fff9ce7ea34ce936d0b9696",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 12,
     workspaceTestScriptSha256: "3ea2af6964a52fc0808675304559bf221e9ffe96953e09cd9fa2c5d3e74b5732",
@@ -237,6 +237,55 @@ test("every focused prerequisite remains a subset of the full package test", asy
   assert.throws(() => validateProofInventory(inventory), QualityGateError);
 });
 
+test("direct focused-package prerequisites require their exact reviewed proof and command", async () => {
+  const selectorInventory = await currentInventory();
+  selectorInventory.packageJson = clone(selectorInventory.packageJson);
+  selectorInventory.packageJson.scripts["verify:runtime-react-reconciliation-diagnostics"] =
+    selectorInventory.packageJson.scripts[
+      "verify:runtime-react-reconciliation-diagnostics"
+    ].replace(
+      "pnpm --filter @desen/runtime-react exec vitest run",
+      "pnpm --filter @desen/runtime-react... exec vitest run",
+    );
+  assert.throws(
+    () => validateProofInventory(selectorInventory),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed direct focused-package test command/u.test(error.message),
+  );
+
+  const proofInventory = await currentInventory();
+  proofInventory.packageJson = clone(proofInventory.packageJson);
+  const directCommand = proofInventory.packageJson.scripts[
+    "verify:runtime-react-reconciliation-diagnostics"
+  ]
+    .split(" && ")
+    .at(-2);
+  proofInventory.packageJson.scripts["verify:runtime-react-interactions"] = `${directCommand} && ${
+    proofInventory.packageJson.scripts["verify:runtime-react-interactions"]
+  }`;
+  assert.throws(
+    () => validateProofInventory(proofInventory),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed direct focused-package test command/u.test(error.message),
+  );
+
+  const scriptInventory = await currentInventory();
+  scriptInventory.workspacePackages = clone(scriptInventory.workspacePackages);
+  const runtimeReactManifest = scriptInventory.workspacePackages.find(
+    ({ name }) => name === "@desen/runtime-react",
+  );
+  runtimeReactManifest.scripts["test:reconciliation-diagnostics"] =
+    "vitest run test/reconciliation.test.ts";
+  assert.throws(
+    () => validateProofInventory(scriptInventory),
+    (error) =>
+      error instanceof QualityGateError &&
+      /unreviewed direct focused-package test command/u.test(error.message),
+  );
+});
+
 test("inventory validation rejects hidden test configuration and manifest overrides", async () => {
   const configInventory = await currentInventory();
   configInventory.testConfigurationFiles.push("packages/runtime-core/vitest.config.ts");
@@ -295,8 +344,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 96);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 44);
+  assert.equal(steps.length, 98);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 45);
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -317,8 +366,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 96,
-    planSha256: "7b8f93c11c49de2e0c195ac85b794ac54750363d146b7531807f2f22ff810f2e",
+    stepCount: 98,
+    planSha256: "5daff7a2229925c8881ae25c1e269be52854183d20f452bd4edb51cd00533d08",
   });
 
   const missingTypecheck = clone(steps);

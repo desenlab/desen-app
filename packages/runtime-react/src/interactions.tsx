@@ -41,6 +41,7 @@ interface RuntimeReactInteractionAuthority {
 
 interface RuntimeReactComponentElementInput extends RuntimeReactInteractionAuthority {
   readonly kind: "component";
+  readonly reconciliationKey: string;
   readonly component: RuntimeReactComponentAdapterComponent;
   readonly identity: RuntimeReactDiagnosticIdentity;
   readonly props: RuntimeReactComponentAdapterProps["props"];
@@ -50,6 +51,7 @@ interface RuntimeReactComponentElementInput extends RuntimeReactInteractionAutho
 
 interface RuntimeReactBehaviorElementInput extends RuntimeReactInteractionAuthority {
   readonly kind: "behavior";
+  readonly reconciliationKey: string;
   readonly component: RuntimeReactBehaviorAdapterComponent;
   readonly identity: RuntimeReactDiagnosticIdentity;
   readonly behaviorId: string;
@@ -373,12 +375,18 @@ function RuntimeReactBehaviorBoundary(input: RuntimeReactBehaviorElementInput): 
 export function createRuntimeReactComponentAdapterElement(
   input: RuntimeReactComponentElementInput,
 ): ReactElement {
-  return createElement(RuntimeReactComponentBoundary, input);
+  return createElement(RuntimeReactComponentBoundary, {
+    ...input,
+    key: input.reconciliationKey,
+  });
 }
 
 /** Creates one commit-gated behavior adapter element after complete renderer preflight. */
 export function createRuntimeReactBehaviorAdapterElement(
   input: RuntimeReactBehaviorElementInput,
 ): ReactElement {
-  return createElement(RuntimeReactBehaviorBoundary, input);
+  return createElement(RuntimeReactBehaviorBoundary, {
+    ...input,
+    key: input.reconciliationKey,
+  });
 }

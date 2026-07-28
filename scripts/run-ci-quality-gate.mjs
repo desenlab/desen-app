@@ -224,8 +224,20 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-runtime-react-interactions.mjs",
       "tests/runtime-react-interactions.test.mjs",
     ],
+    [
+      "runtime-react-reconciliation-diagnostics",
+      "scripts/verify-runtime-react-reconciliation-diagnostics.mjs",
+      "tests/runtime-react-reconciliation-diagnostics.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
+
+const DIRECT_FOCUSED_TEST_PREREQUISITES = Object.freeze({
+  "runtime-react-reconciliation-diagnostics": Object.freeze({
+    packageName: "@desen/runtime-react",
+    task: "test:reconciliation-diagnostics",
+  }),
+});
 
 const EXPECTED_CHECK_SUFFIX = Object.freeze([
   "pnpm lint",
@@ -236,12 +248,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "83ee009421857b0ae7820dbfc0414cb92890a860d8f78cfb3237d5da925e0692";
+  "60f639de8fd2953b8ef7f4bf73e571256fc329566ea301b73481a4f18d731d55";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "e93f7220484fa7f541938961c59a5cce856ab87765187a87bd28bb851c261785";
+  "2ad72bf3a49231136bb1d3ca9c6ba7f387a408288b77c173fad2fcd758c58ab5";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "720dcea32eb6ec1d80716e1786ff33b4f8598123d17f967822c620249a6297a4";
-const QUALITY_GATE_PLAN_SHA256 = "7b8f93c11c49de2e0c195ac85b794ac54750363d146b7531807f2f22ff810f2e";
+  "cc02da64fee90249ef49939feed7c45288c4eaae4fff9ce7ea34ce936d0b9696";
+const QUALITY_GATE_PLAN_SHA256 = "5daff7a2229925c8881ae25c1e269be52854183d20f452bd4edb51cd00533d08";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "3ea2af6964a52fc0808675304559bf221e9ffe96953e09cd9fa2c5d3e74b5732";
 const WORKSPACE_MANIFEST_SHA256 =
@@ -407,6 +419,42 @@ function classifyLegacyPrerequisite({
   }
 
   const parts = command.split(" ");
+  if (
+    parts.length >= 7 &&
+    parts[0] === "pnpm" &&
+    parts[1] === "--filter" &&
+    parts[3] === "exec" &&
+    parts[4] === "vitest" &&
+    parts[5] === "run"
+  ) {
+    const reviewedPrerequisite = Object.hasOwn(DIRECT_FOCUSED_TEST_PREREQUISITES, currentProofId)
+      ? DIRECT_FOCUSED_TEST_PREREQUISITES[currentProofId]
+      : undefined;
+    if (!reviewedPrerequisite) {
+      throw new QualityGateError(
+        `${currentProofId} uses an unreviewed direct focused-package test command.`,
+        { command },
+      );
+    }
+    const packageManifest = workspacePackageMap.get(reviewedPrerequisite.packageName);
+    if (!packageManifest) {
+      throw new QualityGateError(`${currentProofId} references an unknown workspace package.`, {
+        command,
+        packageName: reviewedPrerequisite.packageName,
+      });
+    }
+    const focusedScript = packageManifest.scripts?.[reviewedPrerequisite.task];
+    const expectedCommand = `pnpm --filter ${reviewedPrerequisite.packageName} exec ${focusedScript}`;
+    if (command !== expectedCommand) {
+      throw new QualityGateError(
+        `${currentProofId} uses an unreviewed direct focused-package test command.`,
+        { command, expectedCommand },
+      );
+    }
+    assertFocusedTestCovered(packageManifest, reviewedPrerequisite.task);
+    return "direct-focused-package-test";
+  }
+
   if (parts.length !== 4 || parts[0] !== "pnpm" || parts[1] !== "--filter") {
     throw new QualityGateError(`${currentProofId} contains an unclassified legacy prerequisite.`, {
       command,
