@@ -69,6 +69,12 @@ The semantic foundation implements strict SemVer, exact catalog requirements, ca
 surface-local identity namespaces, entry validation, extension opacity, and exact capability
 existence for component, behavior, resource, and operation categories.
 
+M06-T03 adds an orchestration seam over that same authority. It prepares root, embedded-schema,
+exact-version, entry, surface, and local identity checks before Catalog observation, then finalizes
+the exact Source-to-Catalog relation and category-aware static references only against a
+runtime-authenticated Catalog set. Existing structural and cumulative semantic results remain
+unchanged.
+
 The M02-T08 component layer preserves dynamic ValueSpecs as explicit later-validation obligations
 and prepares component prop and style schemas through the documented `PF-011` host-safe boundary.
 Its public APIs remain available when a caller intentionally needs only the lower component stage.
@@ -195,7 +201,8 @@ package tests and 9 independent root proof and mutation tests.
 ## Public entry point
 
 M02-T12 and M02-T13 add no public entry point. The APIs below contain the cumulative M02 surface
-plus the later M05 resolved adapter receiving boundary.
+plus the later M05 resolved adapter receiving boundary and the additive M06-T03
+Source-foundation seam.
 
 ### Structural and semantic APIs
 
@@ -208,9 +215,36 @@ plus the later M05 resolved adapter receiving boundary.
 | `isExactSemanticVersion(value)`                               | Guard exact Semantic Versioning 2.0.0 syntax               |
 | `validateDesenCatalogSet(input)`                              | Build a trusted immutable T07 catalog set                  |
 | `validateDesenCatalogSemantics(input)`                        | Validate Catalog version and namespace semantics           |
+| `prepareDesenSourceFoundation(input)`                         | Prepare Source-local structure and identity authority      |
+| `validatePreparedDesenSourceReferences(source, catalogSet)`   | Finalize exact Catalog relation and static references      |
 | `validateDesenSourceSemantics(input, catalogSet)`             | Validate Source identity and declared capabilities         |
 | `validateDesenBundleSemantics(input, catalogSet)`             | Validate Bundle identity and exact requirements            |
 | `validateDesenSemanticFoundation(target, input, catalogSet?)` | Select the semantic target explicitly                      |
+
+### Publisher Source-foundation seam
+
+`prepareDesenSourceFoundation` reuses the generated Source-root validator, embedded-schema
+validation, exact SemVer checks, and the existing identity walker. A success returns one detached,
+recursively frozen `DesenPreparedSourceFoundation`. The exact returned Source object is registered
+in module-private runtime trust metadata; its nominal TypeScript brand is not serialized into
+DESEN JSON. A clone, serialization round trip, structurally equal object, or TypeScript cast cannot
+reproduce that authority.
+
+`validatePreparedDesenSourceReferences` accepts only that exact prepared Source and an exact
+Validator-authenticated Catalog set. It validates the Source requirements and category-aware
+component, behavior, resource, and nested-operation references without duplicating the semantic
+walker inside the Publisher. A forged Source fails as `SCHEMA_INVALID`; a forged Catalog set fails
+with the established catalog-requirement diagnostic. Neither function validates later prop, slot,
+style, event, command, behavior, binding, state, predicate, repeat, or action contracts, and
+neither emits a Bundle.
+
+The phase-specific internal structural helper remains unexported. The two Source-specific
+orchestration functions are additive primitives rather than a new terminal Publisher or a
+replacement for the cumulative Validator APIs.
+
+Publisher integration evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
 
 ### Component-contract APIs
 
@@ -517,6 +551,12 @@ transition.
 Validation has ordered, non-skippable stages: **T06 structural → T07 semantic foundation → T08
 component contracts → T09 interaction contracts → T10 binding contracts → T11 execution
 contracts**.
+
+The M06-T03 Publisher seam preserves those authorities while exposing exact stopped subphases:
+Source root → embedded schemas → Source-local identity precede any Catalog-candidate observation;
+exact Catalog authority then precedes Catalog-backed static-reference existence. This is a causal
+orchestration split, not a new lower-level validation rule or a change to the established
+cumulative results.
 
 1. Input is converted to RFC 8785-compatible canonical JSON, parsed into an independent plain-data
    tree, and recursively frozen. Unsupported JavaScript values, accessors, custom prototypes,
@@ -843,7 +883,9 @@ and values beyond the documented limits fail closed.
 
 The semantic and contract layers use own-property traversal, `Map`, `Set`, and private
 `WeakMap`/`WeakSet` trust metadata. They use fixed messages that never echo caller values, do not
-inspect extension payloads for invented meaning, and never use Source `location` for I/O.
+inspect extension payloads for invented meaning, and never use Source `location` for I/O. Prepared
+Source authority and Catalog-set authority are tied to the exact factory-returned objects; copying
+their JSON does not copy runtime trust.
 
 Development-time generation uses Node, but the runtime API does not depend on Node, React, DOM,
 CSS, browser globals, or application code. Validation does not render a UI, invoke an adapter,

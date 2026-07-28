@@ -938,7 +938,7 @@ slice; later modules remain owned by their successor proofs. No `P-*`, normative
 status changes; M06-T02 owns exact Catalog resolution next.
 
 `docs/proof/artifacts/publisher-0.1.0-publish-result.json`
-`sha256:ae047fb886f11e06398e2cae1b7b71a6f62f3c59f8f727cb7f6128fe3dd81ad6`.
+`sha256:07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06`.
 
 ## M06-T02
 
@@ -962,4 +962,30 @@ and the unique proof-document hash. No `P-*`, normative status, or gate changes;
 complete Source preflight next.
 
 `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
-`sha256:0493a4ca032ae89b5396eb894162fbb20f49919fc8906ba0e0e08582a144d8b7`.
+`sha256:0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5`.
+
+## M06-T03
+
+M06-T03 composes strict raw Source JSON ingress, Source-root and embedded-schema validation,
+intrinsic identity and entry semantics, M06-T02 Catalog authority, and category-aware static
+capability references into one package-private nonterminal preflight. Success preserves the exact
+immutable Source, Catalog set, selected package tuples, and requirement alignment without exposing
+a public `publish` function or emitting a Bundle. Failure retains the M06-T01 closed shell and
+exposes no partial Source, Catalog, package, alignment, or Bundle authority.
+
+Source-local checks stop before any Catalog candidate observation. Catalog-dependent component,
+behavior, resource, and nested-operation references run only after exact trusted Catalog
+preparation; unknown and wrong-category references stop at `source-semantics` with
+`UNKNOWN_CAPABILITY`, while invalid Catalog authority retains the earlier M06-T02 stopped stage.
+The task-owned finite diagnostic wrapper also preserves under-budget inherited T01/T02 failures
+and replaces over-budget reports with one redacted failure at the same stage.
+
+The evidence contains 9 focused Publisher runtime cases, 16 compiler-negative cases, 4 Validator
+foundation cases, and 10 independent proof/mutation cases. It pins four prerequisites, the current
+official-derived Source and Web–React Catalog tuple, phase ordering, complete failure atomicity,
+recursive immutability, repeated-byte determinism, package-root privacy, platform neutrality, and
+the unique proof-document hash. No `P-*`, normative, or gate status changes; M06-T04 owns prop,
+slot, style, event, command, and behavior contracts next.
+
+`docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.

@@ -61,6 +61,10 @@ export type PublisherExtensionDiagnosticCode =
 export type CatalogResolutionExtensionDiagnosticCode =
   "run.desen.publisher/INVALID_CATALOG_INPUT" | "run.desen.publisher/CATALOG_LIMIT_EXCEEDED";
 
+/** Project diagnostic introduced by the package-private M06-T03 Source-preflight boundary. */
+export type SourcePreflightExtensionDiagnosticCode =
+  "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED";
+
 /** Stable diagnostic code owned by the DESEN Publisher implementation. */
 export type PublisherDiagnosticCode = PublisherExtensionDiagnosticCode;
 
@@ -80,7 +84,8 @@ export interface PublisherDiagnosticDefinition {
 export type PublishExtensionDiagnosticCode =
   | DesenSemanticExtensionDiagnosticCode
   | PublisherExtensionDiagnosticCode
-  | CatalogResolutionExtensionDiagnosticCode;
+  | CatalogResolutionExtensionDiagnosticCode
+  | SourcePreflightExtensionDiagnosticCode;
 
 /** Whether a publication diagnostic blocks Bundle emission. */
 export type PublishDiagnosticSeverity = "error" | "warning";

@@ -5,7 +5,9 @@
 Pure, deterministic DESEN Source-to-immutable-Bundle publication orchestration. M06-T01 establishes
 the terminal result, staged diagnostic, and strict raw-Source parsing boundaries used by the later
 publication stages. M06-T02 adds package-private exact Catalog resolution, Catalog integrity, and
-single-namespace gates without exposing an unfinished Publisher.
+single-namespace gates. M06-T03 composes those boundaries with phased Source validation and
+category-aware static references into one package-private nonterminal preflight without exposing
+an unfinished Publisher.
 
 ## Explicit non-responsibilities
 
@@ -18,9 +20,9 @@ Node.js, a host application, or target-specific capability implementations.
 Private and under tracked implementation. The public root currently exposes the stable
 `PublishResult` contract, publication-stage vocabulary, Publisher diagnostic registry, and the
 finite Source-ingress profile. It intentionally does not expose a partial parser or an unfinished
-`publish` function. Exact Catalog resolution is likewise package-private. The real terminal
-publication entry point is added only when it can either return a fully validated immutable Bundle
-or reject with no Bundle.
+`publish` function. Exact Catalog resolution and the complete M06-T03 Source preflight are likewise
+package-private. The real terminal publication entry point is added only when it can either return
+a fully validated immutable Bundle or reject with no Bundle.
 
 ## Public entry point
 
@@ -111,10 +113,60 @@ These ceilings are project-owned and platform-neutral. Resolution performs no fi
 network, registry, loader, or callback operation. A failure exposes no Catalog authority,
 candidate index, observed package data, partial Source, or Bundle.
 
+## Phased Source preflight
+
+M06-T03 composes the existing strict boundaries in causal order:
+
+1. raw JSON ingress stops at `json-parse`;
+2. the frozen Source root stops at `source-schema`;
+3. embedded Draft 2020-12 state schemas stop at `embedded-schema`;
+4. exact requirement SemVer, entry, surface identity, and the surface-local node/behavior identity
+   namespace stop at `source-semantics`;
+5. M06-T02 exact selection, Catalog integrity, and namespace checks retain
+   `catalog-resolution`, `catalog-integrity`, or `namespace-conflicts`; and
+6. the exact Source-to-Catalog relation plus category-aware component, behavior, resource, and
+   nested-operation references stop at `source-semantics`.
+
+Catalog candidates are completely unobserved through step 4. Catalog-backed reference existence
+runs only after a structurally valid, digest-consistent, namespace-clean Catalog authority exists.
+Consequently an invalid Catalog wins over a still-indeterminate reference, while a valid Catalog
+plus an unknown or wrong-category reference reports `UNKNOWN_CAPABILITY` at the exact Source
+pointer. `PF-062` records why the protocol's source-level validation step needs this internal
+authority split.
+
+A success contains the exact Validator-prepared Source, exact M06-T02 Catalog set, immutable
+selected package tuples, requirement-to-package indexes, and an empty diagnostics array. It is a
+nonterminal intermediate with neither `ok` nor `bundle`. A failure contains only `ok: false`, its
+stopped stage, and immutable diagnostics; it exposes no parsed or prepared Source, Catalog set,
+package tuple, alignment array, partial value, or Bundle.
+
+The common stopped-stage report profile is:
+
+| Budget                                               |     Limit |
+| ---------------------------------------------------- | --------: |
+| Diagnostics from one stopped preflight stage         |     1,024 |
+| UTF-16 code units in one diagnostic JSON Pointer     |     4,096 |
+| Aggregate diagnostic and identity-context code units | 1,048,576 |
+
+Under-budget M06-T01 and M06-T02 failures pass through unchanged. If an inherited or task-owned
+report exceeds this common profile, it is replaced by one redacted
+`run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED` error at the same stopped stage. The
+underlying raw-JSON and Catalog processing limits remain independently enforced.
+
+This preflight does not validate prop, slot, style, event, command, behavior, dynamic binding,
+state, predicate, repeat, or action contracts; normalize Source data; calculate digests or a
+revision; pin a Bundle; or emit a Bundle. It performs no package discovery, download, activation,
+rendering, signing, npm publication, or deployment.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+
 ## Dependencies
 
 - `@desen/protocol` supplies frozen Bundle types, core diagnostics, and RFC 6901 pointers.
-- `@desen/validator` supplies recursively immutable document typing and semantic diagnostic codes.
+- `@desen/validator` supplies recursively immutable document typing, runtime-authenticated Source
+  and Catalog authorities, and semantic diagnostic codes.
 
 The dependency direction remains `publisher → validator → protocol`; no runtime or editor package
 is reachable.
@@ -126,8 +178,10 @@ is reachable.
 - A parser-budget crossing emits `run.desen.publisher/SOURCE_LIMIT_EXCEEDED`.
 - Neither path exposes a parsed value, partial Bundle, native exception text, stack, cause, or
   caller Source fragment.
-- Schema, Catalog, semantic, normalization, digest, and final-Bundle failures are added by their
-  assigned M06 tasks and must relay stable diagnostics through the same closed result.
+- Root, embedded-schema, intrinsic Source, Catalog, and static-reference failures now retain the
+  causal stages documented above and the same closed no-partial result.
+- Normalization, digest, and final-Bundle failures remain assigned to later M06 tasks and must
+  relay stable diagnostics through that result.
 
 ## Protocol and target support
 
@@ -144,8 +198,10 @@ pnpm --filter @desen/publisher typecheck
 pnpm --filter @desen/publisher lint
 pnpm --filter @desen/publisher test:publish-result
 pnpm --filter @desen/publisher test:catalog-resolution
+pnpm --filter @desen/publisher test:source-preflight
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
+pnpm test:publisher-source-preflight
 pnpm check
 ```

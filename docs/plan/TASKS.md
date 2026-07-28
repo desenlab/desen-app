@@ -234,7 +234,7 @@ evidence.
 | ------- | ----------- | ---------------- | --------------------------------------------------------------------------------------- |
 | M06-T01 | DONE        | G05              | Staged `PublishResult` and diagnostics API                                              |
 | M06-T02 | DONE        | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
-| M06-T03 | NOT_STARTED | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
+| M06-T03 | DONE        | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
 | M06-T04 | NOT_STARTED | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
 | M06-T05 | NOT_STARTED | M06-T03          | Dynamic binding compatibility and recorded runtime validation obligations               |
 | M06-T06 | NOT_STARTED | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
@@ -270,6 +270,20 @@ focused runtime cases, ten compiler-negative cases, eight independent proof/muta
 pinned prerequisites, and the reviewed single-pass CI inventory protect the boundary. `PF-061`
 records the trust and target-omission profile. No Proof Matrix claim, normative status, or gate
 changes; M06-T03 owns complete Source preflight next.
+
+M06-T03 now composes strict raw JSON ingress, exact Source-root validation, all embedded state
+schemas, catalog-independent Source identity and entry semantics, M06-T02 Catalog authority, and
+category-aware component, behavior, resource, and nested-operation references into one immutable
+package-private preflight result. Root, embedded, and intrinsic semantic failures retain distinct
+stopped stages; Catalog candidates remain unobserved until Source-local checks pass. Catalog-backed
+references run only after a valid, digest-consistent, namespace-clean Catalog authority exists.
+Under-budget T01/T02 failures pass through unchanged, while the common diagnostic ceiling replaces
+an inherited over-budget report with one redacted error at the same stage. Every failure exposes no
+Source, Catalog set, package, alignment, partial value, or Bundle. Nine focused Publisher cases,
+sixteen compiler-negative cases, four Validator-foundation cases, ten independent proof/mutation
+cases, four prerequisite pins, twenty tracked files, and the reviewed single-pass CI inventory
+protect the boundary. `PF-062` records the phase and authority ordering. No Proof Matrix claim,
+normative status, or gate changes; M06-T04 owns capability contracts next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

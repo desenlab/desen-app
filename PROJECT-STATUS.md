@@ -360,16 +360,26 @@ consistency, and one immutable set-wide capability namespace. Missing, ambiguous
 inconsistent, over-budget, or conflicting input returns the M06-T01 no-Bundle failure shell with
 no partial Catalog authority. `PF-061` records that the resolver compares a preverified
 target-profile digest observation rather than claiming to hash arbitrary package bytes itself.
+M06-T03 now prepares one complete immutable Source authority before any later Publisher
+transformation. Strict raw JSON, the exact Source root, every embedded state schema, exact
+requirement SemVer, entry and surface identity, and the shared node/behavior namespace run before
+Catalog candidate observation. M06-T02 then establishes the exact Catalog authority before
+category-aware component, behavior, resource, and nested-operation references are finalized.
+Root, embedded, Source-local, Catalog, and Catalog-backed reference failures retain their exact
+stopped stages and expose no partial Source, Catalog set, package tuple, alignment, or Bundle.
+Under-budget inherited T01/T02 failures remain byte-identical; an over-budget inherited report is
+replaced by one redacted diagnostic at the same stage. `PF-062` records this causal ordering and
+private runtime-authentication boundary.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `65 / 145 tasks complete (45%)`
+- Overall implementation progress: `66 / 145 tasks complete (46%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `2 / 11 tasks complete (18%)`
+- M06 progress: `3 / 11 tasks complete (27%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -420,12 +430,13 @@ target-profile digest observation rather than claiming to hash arbitrary package
   `M05-T08 — Official sign-in bundle running through real adapters`,
   `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`,
   `M06-T01 — Staged PublishResult and diagnostics API`,
-  `M06-T02 — Exact Catalog resolution, package immutability, and namespace-conflict checks`
+  `M06-T02 — Exact Catalog resolution, package immutability, and namespace-conflict checks`,
+  `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`
-- Status: M05 and G05 are complete; M06-T01 and M06-T02 are complete; M06-T03 is ready
+  `M06-T04 — Prop, slot, style, event, command, and behavior preflight`
+- Status: M05 and G05 are complete; M06-T01 through M06-T03 are complete; M06-T04 is ready
 
 ## Completed preparation
 
@@ -784,10 +795,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`.
-Run the parsed Source through the frozen root and embedded-schema boundaries, then prove its
-identity, entry, surface/node namespaces, declared Catalog requirements, and statically knowable
-references before any capability-contract or dynamic-binding stage can proceed.
+Begin `M06-T04 — Prop, slot, style, event, command, and behavior preflight`.
+Consume only the exact M06-T03 prepared Source and Catalog authority, then apply the existing
+component and interaction contract validators without absorbing M06-T05 dynamic-binding or runtime
+obligations.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1362,7 +1373,7 @@ M06-T01 evidence:
 
 - `docs/proof/PUBLISHER-PUBLISH-RESULT.md`
 - `docs/proof/artifacts/publisher-0.1.0-publish-result.json`
-- artifact SHA-256: `ae047fb886f11e06398e2cae1b7b71a6f62f3c59f8f727cb7f6128fe3dd81ad6`
+- artifact SHA-256: `07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06`
 - exact boundary: one closed `PublishResult`; immutable complete-Bundle success with warnings;
   error-first no-Bundle failure; sixteen ordered stages; separate severity/classification; and a
   package-private strict raw Source JSON stage
@@ -1379,7 +1390,7 @@ M06-T02 evidence:
 
 - `docs/proof/PUBLISHER-CATALOG-RESOLUTION.md`
 - `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
-- artifact SHA-256: `0493a4ca032ae89b5396eb894162fbb20f49919fc8906ba0e0e08582a144d8b7`
+- artifact SHA-256: `0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5`
 - exact boundary: code-unit-equal `id`/`version`/optional-`target` resolution from one closed
   package-observation inventory; no location, range, normalization, newest, or first-candidate
   authority; bounded inert Catalog capture; exact candidate/Catalog identity and preobserved
@@ -1396,6 +1407,29 @@ M06-T02 evidence:
 - coverage decision: M06-T02 becomes `DONE`; N-007 and N-025 retain `TESTED` with completed
   Publisher integration evidence; no `P-*` or gate status changes; M06-T03 owns complete Source
   preflight next
+
+M06-T03 evidence:
+
+- `docs/proof/PUBLISHER-SOURCE-PREFLIGHT.md`
+- `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+- artifact SHA-256: `f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`
+- exact boundary: strict raw Source ingress; distinct Source-root and embedded-schema phases;
+  catalog-independent SemVer, entry, surface, and node/behavior identity checks before candidate
+  observation; exact M06-T02 Catalog authority before category-aware component, behavior,
+  resource, and nested-operation references; one runtime-authenticated immutable nonterminal
+  result; and no partial authority or Bundle on any failure
+- finite report profile: 1,024 diagnostics per stopped stage, 4,096 UTF-16 code units per
+  diagnostic pointer, and 1,048,576 aggregate diagnostic/context code units; the same ceiling
+  preserves under-budget inherited T01/T02 failures and replaces only an over-budget report with
+  one redacted same-stage diagnostic
+- executable evidence: 9 focused Publisher cases, 16 compiler-negative cases, 4
+  Validator-foundation cases, 10 independent proof/mutation cases, 4 exact prerequisite pins, 20
+  byte-tracked files, deterministic artifact regeneration, phase-order and candidate-nonobservation
+  mutations, static-reference bypass rejection, package-root privacy, target neutrality,
+  no-partial failure, and atomic-write protection
+- coverage decision: M06-T03 becomes `DONE`; N-013, N-017, and N-025 retain `TESTED` with completed
+  Publisher integration evidence; no `P-*` or gate status changes; M06-T04 owns capability
+  contracts next
 
 ## Status vocabulary
 

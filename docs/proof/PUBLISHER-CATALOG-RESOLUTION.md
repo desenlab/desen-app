@@ -114,7 +114,7 @@ The tracked report is:
 
 `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
 
-`sha256:0493a4ca032ae89b5396eb894162fbb20f49919fc8906ba0e0e08582a144d8b7`
+`sha256:0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5`
 
 ## Scope limits
 

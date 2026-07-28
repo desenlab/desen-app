@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.source-preflight-proof.v1",
+  "task": "M06-T03",
+  "result": "PASS",
+  "summary": "The built package-private Publisher preflight composes strict raw JSON, phased Source and embedded-schema validation, intrinsic identity checks, exact Catalog authority, and category-aware static references without emitting a Bundle.",
+  "prerequisites": [
+    {
+      "task": "M02-T06",
+      "path": "docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
+      "sha256": "7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536",
+      "claim": "frozen Source-root and embedded-schema validation",
+      "verifiedSha256": "7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536",
+      "matchesPin": true
+    },
+    {
+      "task": "M02-T07",
+      "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
+      "sha256": "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
+      "claim": "Source identity, exact Catalog relationship, and static-reference semantics",
+      "verifiedSha256": "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
+      "matchesPin": true
+    },
+    {
+      "task": "M06-T01",
+      "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+      "sha256": "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
+      "claim": "strict raw Source ingress and closed no-partial failure shell",
+      "verifiedSha256": "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
+      "matchesPin": true
+    },
+    {
+      "task": "M06-T02",
+      "path": "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
+      "sha256": "0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5",
+      "claim": "exact Catalog package resolution and immutable trusted namespace",
+      "verifiedSha256": "0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5",
+      "matchesPin": true
+    }
+  ],
+  "fixture": {
+    "sourcePath": "examples/sign-in/official-derived.source.desen.json",
+    "catalogPath": "packages/reference-catalog-web/catalog.json",
+    "sourceId": "com.example.account-app",
+    "exactTuple": {
+      "id": "run.desen.reference.sign-in",
+      "version": "0.1.0",
+      "target": "web-react",
+      "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0"
+    }
+  },
+  "claims": {
+    "completeNonterminalAuthority": {
+      "sourceId": "com.example.account-app",
+      "exactTuple": {
+        "id": "run.desen.reference.sign-in",
+        "version": "0.1.0",
+        "target": "web-react",
+        "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0"
+      },
+      "requirementPackageIndexes": [0],
+      "sourceDetached": true,
+      "catalogAuthorityPreserved": true,
+      "deeplyFrozen": true,
+      "repeatedJsonByteIdentical": true,
+      "terminalOkAbsent": true,
+      "bundleAbsent": true
+    },
+    "exactStoppedStages": {
+      "root": {
+        "stage": "source-schema",
+        "code": "UNKNOWN_CORE_FIELD",
+        "pointer": "/unexpectedT03",
+        "classification": "schema",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "embedded": {
+        "stage": "embedded-schema",
+        "code": "SCHEMA_INVALID",
+        "pointer": "/surfaces/sign-in/state/email/schema/type",
+        "classification": "schema",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "identity": {
+        "stage": "source-semantics",
+        "code": "ENTRY_NOT_FOUND",
+        "pointer": "/entry",
+        "classification": "semantic",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "semver": {
+        "stage": "source-semantics",
+        "code": "run.desen.validator/INVALID_SEMVER",
+        "pointer": "/catalogs/0/version",
+        "noPartial": true,
+        "deeplyFrozen": true
+      }
+    },
+    "earlyCandidateNonObservation": {
+      "sourceStoppedStage": "source-semantics",
+      "candidateObservations": 0,
+      "catalogAuthorityConstructed": false
+    },
+    "catalogAndStaticReferenceOrdering": {
+      "missingResolution": {
+        "stage": "catalog-resolution",
+        "code": "CATALOG_VERSION_UNAVAILABLE",
+        "pointer": "/catalogs/0",
+        "classification": "activation",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "catalogIntegrity": {
+        "stage": "catalog-integrity",
+        "code": "CATALOG_DIGEST_MISMATCH",
+        "pointer": "/catalogs/0",
+        "classification": "activation",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "catalogBackedStaticReference": {
+        "stage": "source-semantics",
+        "code": "UNKNOWN_CAPABILITY",
+        "pointer": "/surfaces/sign-in/root/use",
+        "classification": "catalog",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "invalidCatalogAuthorityPrecedesIndeterminateReference": true
+    },
+    "laterStageScopeFences": {
+      "unknownPropDeferredTo": "M06-T04",
+      "incompatibleStateInitialDeferredTo": "M06-T05",
+      "bothPassM06T03": true
+    },
+    "finiteDiagnosticProfile": {
+      "defaults": {
+        "maxDiagnosticsPerStoppedStage": 1024,
+        "maxDiagnosticPointerCodeUnits": 4096,
+        "maxAggregateDiagnosticCodeUnits": 1048576
+      },
+      "exercisedLimit": "maxDiagnosticPointerCodeUnits",
+      "exercisedMaximum": 1,
+      "genericRedactedFailure": {
+        "stage": "source-semantics",
+        "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED",
+        "pointer": "",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "inheritedJsonFailure": {
+        "stage": "json-parse",
+        "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED",
+        "pointer": "",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "inheritedCatalogFailure": {
+        "stage": "catalog-resolution",
+        "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED",
+        "pointer": "",
+        "noPartial": true,
+        "deeplyFrozen": true
+      },
+      "inheritedFailureStagesRemainExact": true
+    },
+    "terminalFailuresExposeNoPartialAuthorityOrBundle": true,
+    "rootApiPrivacy": {
+      "rootRuntimeExports": [
+        "INVALID_SOURCE_JSON_CODE",
+        "PUBLISHER_DIAGNOSTIC_REGISTRY",
+        "PUBLISH_PIPELINE_STAGES",
+        "PUBLISH_SOURCE_JSON_LIMITS",
+        "SOURCE_LIMIT_EXCEEDED_CODE",
+        "getPublisherDiagnosticDefinition",
+        "isPublisherDiagnosticCode"
+      ],
+      "preflightRuntimeExported": false,
+      "preflightTypeExported": false,
+      "preflightSubpathExported": false,
+      "packagePrivateDistImportUsedByProof": "packages/publisher/dist/source-preflight.js"
+    },
+    "targetNeutralDependencyBoundary": {
+      "imports": [
+        "./catalog-resolution.js",
+        "./catalog-resolution.js",
+        "./publish-diagnostics.js",
+        "./publish-result.js",
+        "./source-json.js",
+        "@desen/protocol",
+        "@desen/protocol",
+        "@desen/validator",
+        "@desen/validator"
+      ],
+      "productionDependencies": ["@desen/protocol", "@desen/validator"],
+      "nodeBuiltins": false,
+      "browserGlobals": false,
+      "frameworkDependencies": false,
+      "productionAdapterDependencies": false
+    }
+  },
+  "orderingDecision": {
+    "intrinsicSourceChecksBeforeCatalogCandidates": true,
+    "catalogAuthorityBeforeCatalogBackedReferenceExistence": true,
+    "invalidCatalogPrecedesIndeterminateReference": true,
+    "staticReferenceDiagnosticStage": "source-semantics",
+    "rationale": "An invalid Catalog cannot safely establish whether a Source capability reference exists or has the expected category."
+  },
+  "nonclaims": [
+    "M06-T03 returns package-private nonterminal authority and does not expose a public publish function.",
+    "This task does not validate prop, slot, style, event, command, or behavior contracts assigned to M06-T04.",
+    "This task does not discharge dynamic binding, state, predicate, repeat, action, or runtime obligations assigned to M06-T05.",
+    "This task does not normalize Source data, calculate digests, pin Bundle tuples, validate a Bundle, calculate a revision, or emit a Bundle.",
+    "This task performs no network discovery, package download, activation, rendering, signing, npm publication, or deployment."
+  ],
+  "tests": {
+    "publisherRuntimeCases": 9,
+    "compilerNegativeCases": 16,
+    "validatorFoundationCases": 4,
+    "rootMutationCases": 10
+  },
+  "trackedFiles": [
+    {
+      "path": "examples/sign-in/official-derived.source.desen.json",
+      "bytes": 4724,
+      "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "bytes": 874,
+      "sha256": "c77caf532b9d820f716358086cef548bcc2d84eca8a1be0c1bd51094807b8be6"
+    },
+    {
+      "path": "packages/publisher/dist/source-preflight.d.ts",
+      "bytes": 2793,
+      "sha256": "63a16709676efdc42f15de73f6028f1e47a90d5df54ed1d99afc7e47b63bcd1d"
+    },
+    {
+      "path": "packages/publisher/dist/source-preflight.js",
+      "bytes": 7128,
+      "sha256": "fc035ca15260da78d25df3cc2a73db6e987039189854d4d19320c14955b33b16"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 984,
+      "sha256": "630e00657737a671c14d29ba40408d44b12ec020b3bfcd15386ee324ac62247d"
+    },
+    {
+      "path": "packages/publisher/src/index.ts",
+      "bytes": 881,
+      "sha256": "84dc5aac8367f5d886dfe83e57fa7e0057e25494d870ae37749c0dfb705f125a"
+    },
+    {
+      "path": "packages/publisher/src/publish-result.ts",
+      "bytes": 8917,
+      "sha256": "ec06abb5d00825fda138fc09a70d2a7a3845784a0e60b7afdfcbe6b541e4af39"
+    },
+    {
+      "path": "packages/publisher/src/source-preflight.ts",
+      "bytes": 9543,
+      "sha256": "c3cee14b37bbaf46e15bccff991624d5b8e567e1358e37f41ca04d6ad1f548ef"
+    },
+    {
+      "path": "packages/publisher/test/source-preflight.test.ts",
+      "bytes": 20989,
+      "sha256": "7bf10503869cfd953219d64ae24c08f07d71fa1fbe3304b0b4af4187944f2b5c"
+    },
+    {
+      "path": "packages/publisher/test/source-preflight.types.ts",
+      "bytes": 4495,
+      "sha256": "4fbdecbeb35f226f192e3fb409883acd96c420d99c6cfe5d7a3f6bfd49a6b7ec"
+    },
+    {
+      "path": "packages/reference-catalog-web/catalog.json",
+      "bytes": 8439,
+      "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+    },
+    {
+      "path": "packages/validator/src/index.ts",
+      "bytes": 5674,
+      "sha256": "18237d74c0978bee4f743c17ab57f36d37d297dcbb1677f28c252ce45b510872"
+    },
+    {
+      "path": "packages/validator/src/semantic-validation.ts",
+      "bytes": 36273,
+      "sha256": "65443cccb32d35ab3db547d2a3877f0c44a158defbe0cdf6e48af8c7673531fd"
+    },
+    {
+      "path": "packages/validator/src/structural-validation.ts",
+      "bytes": 10705,
+      "sha256": "8e7d4fb3a69b31bb8f4e3da050088058f53218d4ee4c440b8f631c0c475a1fc8"
+    },
+    {
+      "path": "packages/validator/test/semantic-foundation.test.ts",
+      "bytes": 36219,
+      "sha256": "fce3c700d132c96a5f2fe13f2b5d68a69aa067030a180f6882dfe6dd794e64d2"
+    },
+    {
+      "path": "scripts/generate-publisher-source-preflight-proof.mjs",
+      "bytes": 829,
+      "sha256": "e05e369f693e8840dee0d34ea313f1e647713db2b66203844f69dfcbae7d4a7d"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/publisher-source-preflight-proof.mjs",
+      "bytes": 34338,
+      "sha256": "f80ae80fe03f3c50e89000c2f5f1d441ff06e84b7ee68c39f0544cbb02d14ca8"
+    },
+    {
+      "path": "scripts/verify-publisher-source-preflight.mjs",
+      "bytes": 661,
+      "sha256": "802873965484edc093d9bc5cee4afc4e5a02331cbccc34066214194859c678f8"
+    },
+    {
+      "path": "tests/publisher-source-preflight.test.mjs",
+      "bytes": 7488,
+      "sha256": "3c4b3635388dc1c83696b482b9330c04dcdd424f7c42ba9574636b1b2c8864c1"
+    }
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/validator build",
+    "pnpm --filter @desen/publisher build",
+    "node scripts/generate-publisher-source-preflight-proof.mjs",
+    "node scripts/verify-publisher-source-preflight.mjs",
+    "node --test tests/publisher-source-preflight.test.mjs"
+  ]
+}

@@ -229,6 +229,50 @@ applicable deterministic package-byte profile; M07 independently verifies instal
 bytes before activation. A failure exposes no partial Catalog set, selected package authority, or
 Bundle.
 
+## Publisher phased Source preflight boundary
+
+M06-T03 keeps the terminal Publisher private and composes one nonterminal, platform-neutral
+preflight in causal order:
+
+1. strict raw Source JSON;
+2. frozen Source-root structure;
+3. every embedded Draft 2020-12 state schema;
+4. exact requirement versions, entry, surface identity, and surface-local node/behavior identity;
+5. M06-T02 Catalog selection, integrity, and namespace authority; and
+6. the exact Source-to-Catalog relation plus component, behavior, resource, and nested-operation
+   static references.
+
+Catalog candidates remain completely unobserved through step 4. The split is intentional:
+Catalog-independent Source errors must win without touching candidate input, but capability
+existence and category cannot be decided until a trusted Catalog set exists. An invalid Catalog
+therefore precedes an indeterminate static-reference error; once Catalog authority is valid, an
+unknown or wrong-category reference retains its exact Source pointer and the `source-semantics`
+stage. `PF-062` records this distinction between logical stage ownership and causal authority
+order.
+
+The Validator authenticates the exact prepared Source and Catalog set with module-private runtime
+metadata. The Publisher success carries those authorities, selected immutable package tuples, and
+requirement alignment, but remains package-private, nonterminal, and contains neither `ok` nor a
+Bundle. Its outer `PublishSourcePreflightSuccess` object is frozen but is not itself runtime
+branded. Immediate in-package composition is therefore the current safety boundary. A later
+Publisher stage must not accept a caller-supplied or reconstructed outer shell; it must
+authenticate the exact preflight result identity or independently revalidate coherence among the
+Source, Catalog set, packages, and alignment.
+
+Every rejection uses the M06-T01 failure shell and exposes no Source, Catalog set, selected
+package, alignment, partial value, or Bundle. One common diagnostic profile bounds task-owned
+reports and inherited M06-T01/M06-T02 reports; under-budget inherited failures remain unchanged,
+while an over-budget report becomes one redacted
+`run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED` error at the original stopped stage.
+
+This boundary does not validate the M06-T04 capability contracts or M06-T05 dynamic obligations,
+normalize or hash Source data, pin or validate a Bundle, calculate a revision, emit a Bundle, or
+perform discovery, download, activation, rendering, signing, publication, or deployment.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+
 ## Applications
 
 ### Desen App

@@ -2328,3 +2328,62 @@ This file records implementation discoveries without changing the frozen DESEN 0
   target-omission ambiguity policy, diagnostic pointer profile, and package-observation
   authentication boundary. Signing, distributor immutability, and publisher identity remain M12
   responsibilities.
+
+## PF-062 — Source-local checks and Catalog-backed references require distinct causal authority
+
+- Status: OPEN
+- Blocks proof: No; M06-T03 defines and proves one deterministic local ordering without changing
+  frozen protocol bytes or claiming that its project-owned diagnostic limits are universal DESEN
+  constants.
+- Protocol location: SPEC Sections 8.1–8.5, 16–21, and 25.1; `PIPE-004`,
+  `PIPE-026`–`PIPE-031`, `R-025`, and related findings `PF-009`, `PF-060`, and `PF-061`
+- Observation: Publication step 4 groups source-level identifier and reference validation before
+  steps 5–7 resolve, validate, and deconflict Catalogs. Entry existence, surface identity,
+  exact requirement SemVer, and the surface-local node/behavior identity namespace are
+  Catalog-independent. Whether a component, behavior, resource, or nested operation exists exactly
+  once in the expected category is not: deciding that fact requires a structurally valid,
+  digest-consistent, namespace-clean Catalog authority. DESEN 0.1.0 does not state whether an
+  invalid Catalog or an otherwise unknown Source capability should win, whether package candidates
+  may be observed before Source-local failure, or how a Publisher should preserve the logical
+  `source-semantics` diagnostic stage when reference finalization causally follows Catalog stages.
+- Implementation decision: M06-T03 splits the logical source-level step without duplicating
+  Validator semantics. Strict JSON, the Source root, embedded state schemas, exact requirement
+  versions, entry, surface identity, and the shared surface-local node/behavior identity namespace
+  complete before any Catalog-candidate observation. The package-private Publisher then obtains
+  M06-T02 exact Catalog authority. Only that exact runtime-authenticated Catalog set may finalize
+  the Source-to-Catalog relation and category-aware component, behavior, resource, and nested
+  operation references. A Catalog resolution, integrity, or namespace failure therefore wins over
+  an indeterminate reference; with valid Catalog authority, an unknown or wrong-category reference
+  reports `UNKNOWN_CAPABILITY` at its Source pointer and retains the `source-semantics` stage.
+
+  The Validator seam authenticates the exact recursively frozen prepared Source through
+  module-private runtime metadata and requires the existing trusted Catalog-set authority. A
+  clone, serialization round trip, structural lookalike, or TypeScript cast cannot recreate either
+  authority. The Publisher success is a frozen package-private immediate-composition shell
+  containing those authorities, selected packages, and requirement alignment; the outer shell is
+  not itself runtime branded. Later stages must not accept a caller-supplied or reconstructed shell.
+  They must authenticate exact result identity or revalidate the coherence of every carried
+  authority before relying on it.
+
+  One task-owned report profile permits 1,024 diagnostics per stopped stage, 4,096 UTF-16 code
+  units in one pointer, and 1,048,576 aggregate diagnostic and identity-context code units.
+  Under-budget M06-T01 and M06-T02 failures pass through unchanged. An inherited or task-owned
+  over-budget report becomes one redacted
+  `run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED` error at the same stopped stage. Every
+  failure exposes no Source, Catalog set, selected package, alignment, partial value, or Bundle.
+
+  M06-T03 remains nonterminal and package-private. It does not validate M06-T04 prop, slot, style,
+  event, command, or behavior contracts; discharge M06-T05 dynamic binding, state, predicate,
+  repeat, action, or runtime obligations; normalize or hash Source data; pin, validate, revise, or
+  emit a Bundle; or claim discovery, download, activation, rendering, native-runtime behavior,
+  signing, npm publication, or deployment.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+  `sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+
+- Future action: A later protocol revision should separate Catalog-independent Source validation
+  from Catalog-backed reference finalization, define their diagnostic-stage and failure-precedence
+  rules, and add conformance vectors for candidate non-observation plus simultaneous Catalog and
+  reference failure. M06-T04 and M06-T05 must consume only the exact in-process preflight authority
+  under the guardrail above; M06-T11 must prove the complete invalid-source matrix still emits no
+  Bundle.

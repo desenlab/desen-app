@@ -13,9 +13,11 @@ export {
 
 export {
   isExactSemanticVersion,
+  prepareDesenSourceFoundation,
   validateDesenBundleSemantics,
   validateDesenCatalogSemantics,
   validateDesenCatalogSet,
+  validatePreparedDesenSourceReferences,
   validateDesenSemanticFoundation,
   validateDesenSourceSemantics,
 } from "./semantic-validation.js";
@@ -81,9 +83,14 @@ export type {
   DesenCatalogSetValidationFailure,
   DesenCatalogSetValidationResult,
   DesenCatalogSetValidationSuccess,
+  DesenPreparedSourceFoundation,
   DesenSemanticValidationFailure,
   DesenSemanticValidationResult,
   DesenSemanticValidationSuccess,
+  DesenSourceFoundationPhase,
+  DesenSourceFoundationPreparationFailure,
+  DesenSourceFoundationPreparationResult,
+  DesenSourceFoundationPreparationSuccess,
   DesenValidatedCatalogSet,
 } from "./semantic-validation.js";
 

@@ -33,6 +33,7 @@ import {
   verifyReferenceHostWebPostCssBuildEnvelopePolicy,
   verifyReferenceHostWebCurrentCoordinationPolicy,
   verifyReferenceHostWebCurrentEvidencePolicy,
+  verifyReferenceHostWebValidatorSuccessorSources,
   verifyReferenceHostWebSourceAuditDocumentation,
   verifyReferenceHostWebSourceAuditEvidence,
   verifyReferenceHostWebSourceAuditProofDocument,
@@ -49,6 +50,11 @@ const APPLICATION_SOURCE = `${SOURCE_ROOT}/application.tsx`;
 const BROWSER_PROFILE_SOURCE = `${SOURCE_ROOT}/browser-profile.ts`;
 const OFFICIAL_SOURCE = `${SOURCE_ROOT}/official-sign-in.ts`;
 const MAIN_SOURCE = `${SOURCE_ROOT}/main.tsx`;
+const VALIDATOR_SUCCESSOR_SOURCE_PATHS = Object.freeze([
+  "packages/validator/src/index.ts",
+  "packages/validator/src/semantic-validation.ts",
+  "packages/validator/src/structural-validation.ts",
+]);
 
 function hasEvidenceCode(...expectedCodes) {
   return (error) => {
@@ -60,6 +66,14 @@ function hasEvidenceCode(...expectedCodes) {
 
 async function sourceText(relativePath) {
   return readFile(path.join(WORKSPACE_ROOT, relativePath), "utf8");
+}
+
+async function validatorSuccessorSourceBytes() {
+  return Promise.all(
+    VALIDATOR_SUCCESSOR_SOURCE_PATHS.map((relativePath) =>
+      readFile(path.join(WORKSPACE_ROOT, relativePath)),
+    ),
+  );
 }
 
 function bindTrackedBytes(artifact, relativePath, bytes) {
@@ -197,6 +211,36 @@ test("runs the full current host audit while comparing every enduring M05 input"
   );
   assert.equal(result.trackedFiles, 24);
   assert.equal(result.comparedTrackedFiles, 18);
+  assert.deepEqual(result.admittedSuccessor, {
+    task: "M06-T03",
+    sourceFiles: VALIDATOR_SUCCESSOR_SOURCE_PATHS,
+    modules: [
+      "packages/validator/dist/index.js",
+      "packages/validator/dist/semantic-validation.js",
+      "packages/validator/dist/structural-validation.js",
+    ],
+  });
+  assert.deepEqual(result.successorSources, {
+    result: "PASS",
+    task: "M06-T03",
+    sources: [
+      {
+        path: "packages/validator/src/index.ts",
+        bytes: 5_674,
+        sha256: "18237d74c0978bee4f743c17ab57f36d37d297dcbb1677f28c252ce45b510872",
+      },
+      {
+        path: "packages/validator/src/semantic-validation.ts",
+        bytes: 36_273,
+        sha256: "65443cccb32d35ab3db547d2a3877f0c44a158defbe0cdf6e48af8c7673531fd",
+      },
+      {
+        path: "packages/validator/src/structural-validation.ts",
+        bytes: 10_705,
+        sha256: "8e7d4fb3a69b31bb8f4e3da050088058f53218d4ee4c440b8f631c0c475a1fc8",
+      },
+    ],
+  });
   assert.deepEqual(result.excludedCoordinationPaths, [
     "package.json",
     "pnpm-lock.yaml",
@@ -223,10 +267,10 @@ test("runs the full current host audit while comparing every enduring M05 input"
 test("current-evidence policy excludes only coordination bytes and rejects all enduring drift", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
-  assert.equal(
-    verifyReferenceHostWebCurrentEvidencePolicy(historical, current).comparedTrackedFiles,
-    18,
-  );
+  const successorSourceBytes = await validatorSuccessorSourceBytes();
+  const verifyPolicy = (candidate) =>
+    verifyReferenceHostWebCurrentEvidencePolicy(historical, candidate, successorSourceBytes);
+  assert.equal(verifyPolicy(current).comparedTrackedFiles, 18);
 
   const coordinationOnly = structuredClone(current);
   for (const relativePath of [
@@ -240,24 +284,21 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
     entry.bytes += 1;
     entry.sha256 = `sha256:${"f".repeat(64)}`;
   }
-  assert.equal(
-    verifyReferenceHostWebCurrentEvidencePolicy(historical, coordinationOnly).result,
-    "PASS",
-  );
+  assert.equal(verifyPolicy(coordinationOnly).result, "PASS");
 
   const hostSourceDrift = structuredClone(current);
   hostSourceDrift.evidence.trackedFiles.find(
     ({ path: candidate }) => candidate === "apps/reference-host-web/src/main.tsx",
   ).sha256 = `sha256:${"e".repeat(64)}`;
   assert.throws(
-    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, hostSourceDrift),
+    () => verifyPolicy(hostSourceDrift),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
 
   const graphDrift = structuredClone(current);
   graphDrift.runtimeResolution.graphSha256 = `sha256:${"d".repeat(64)}`;
   assert.throws(
-    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, graphDrift),
+    () => verifyPolicy(graphDrift),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
 
@@ -268,7 +309,7 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
     sha256: `sha256:${"c".repeat(64)}`,
   });
   assert.throws(
-    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, disguisedCoordinationPath),
+    () => verifyPolicy(disguisedCoordinationPath),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
 
@@ -277,7 +318,7 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
     ({ path: candidate }) => candidate === "package.json",
   ).unexpected = true;
   assert.throws(
-    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, decoratedExcludedRecord),
+    () => verifyPolicy(decoratedExcludedRecord),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
 
@@ -289,7 +330,7 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
     value: { polluted: true },
   });
   assert.throws(
-    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, protoDrift),
+    () => verifyPolicy(protoDrift),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
   assert.equal(Object.prototype.polluted, undefined);
@@ -297,14 +338,84 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
   const primitiveArrayBudget = structuredClone(current);
   primitiveArrayBudget.nonclaims = Array.from({ length: 65_537 }, () => 0);
   assert.throws(
-    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, primitiveArrayBudget),
+    () => verifyPolicy(primitiveArrayBudget),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
 
   assert.throws(
-    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, new Proxy(current, {})),
+    () => verifyPolicy(new Proxy(current, {})),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
+});
+
+test("admits only the source-pinned M06-T03 Validator runtime successor", async () => {
+  const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
+  const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
+  const successorSourceBytes = await validatorSuccessorSourceBytes();
+  const verifyPolicy = (candidate, sources = successorSourceBytes) =>
+    verifyReferenceHostWebCurrentEvidencePolicy(historical, candidate, sources);
+  const policy = verifyPolicy(current);
+  assert.equal(policy.admittedSuccessor.task, "M06-T03");
+  assert.equal(policy.admittedSuccessor.modules.length, 3);
+  assert.equal(policy.successorSources.result, "PASS");
+  assert.equal(
+    verifyReferenceHostWebValidatorSuccessorSources(successorSourceBytes).result,
+    "PASS",
+  );
+  const tamperedSources = successorSourceBytes.map((bytes) => Buffer.from(bytes));
+  tamperedSources[1][tamperedSources[1].length - 2] ^= 1;
+  assert.throws(
+    () => verifyReferenceHostWebValidatorSuccessorSources(tamperedSources),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+  assert.throws(
+    () => verifyPolicy(current, tamperedSources),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+  assert.throws(
+    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, current),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID"),
+  );
+
+  const validatorIndex = "packages/validator/dist/index.js";
+  const mutateModule = (mutate) => {
+    const mutated = structuredClone(current);
+    const module = mutated.runtimeResolution.modules.find(({ id }) => id === validatorIndex);
+    assert.ok(module);
+    mutate(module, mutated);
+    return mutated;
+  };
+  for (const mutated of [
+    mutateModule((module) => {
+      module.codeBytes += 1;
+    }),
+    mutateModule((module) => {
+      module.codeSha256 = `sha256:${"a".repeat(64)}`;
+    }),
+    mutateModule((module) => {
+      module.imports.push("packages/validator/dist/unreviewed.js");
+    }),
+    mutateModule((module) => {
+      module.id = "packages/validator/dist/unreviewed.js";
+    }),
+    mutateModule((_module, artifact) => {
+      artifact.runtimeResolution.modules.push({
+        id: "packages/validator/dist/unreviewed.js",
+        imports: [],
+        dynamicImports: [],
+        codeBytes: 1,
+        codeSha256: `sha256:${"b".repeat(64)}`,
+      });
+    }),
+    mutateModule((_module, artifact) => {
+      artifact.runtimeResolution.backingSnapshotSha256 = `sha256:${"c".repeat(64)}`;
+    }),
+  ]) {
+    assert.throws(
+      () => verifyPolicy(mutated),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  }
 });
 
 test("Publisher-only coordination preserves root toolchain and complete lockfile provenance", async () => {

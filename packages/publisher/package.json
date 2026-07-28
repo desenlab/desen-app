@@ -22,6 +22,7 @@
     "test": "vitest run",
     "test:catalog-resolution": "vitest run test/catalog-resolution.test.ts",
     "test:publish-result": "vitest run test/publish-result.test.ts",
+    "test:source-preflight": "vitest run test/source-preflight.test.ts",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

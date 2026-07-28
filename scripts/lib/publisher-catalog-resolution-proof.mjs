@@ -36,7 +36,7 @@ const PREREQUISITES = Object.freeze([
   Object.freeze({
     task: "M06-T01",
     path: "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
-    sha256: "ae047fb886f11e06398e2cae1b7b71a6f62f3c59f8f727cb7f6128fe3dd81ad6",
+    sha256: "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
     claim: "closed Publisher result, staged diagnostics, and no-partial-Bundle boundary",
   }),
   Object.freeze({
