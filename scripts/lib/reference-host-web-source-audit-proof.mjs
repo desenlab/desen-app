@@ -17,7 +17,14 @@ const MAX_FILE_BYTES = 4 * 1024 * 1024;
 const MAX_ARTIFACT_BYTES = 4 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 512 * 1024;
 const MAX_SOURCE_FILES = 64;
+const MAX_CURRENT_EVIDENCE_NODES = 65_536;
+const MAX_CURRENT_EVIDENCE_SCALARS = 65_536;
+const MAX_CURRENT_EVIDENCE_KEYS = 65_536;
+const MAX_CURRENT_EVIDENCE_STRING_BYTES = MAX_ARTIFACT_BYTES;
 const PENDING_SHA256 = "[PENDING_FINAL_ARTIFACT_SHA256]";
+const HISTORICAL_ARTIFACT_SHA256 =
+  "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89";
+const HISTORICAL_ARTIFACT_BYTES = 59_871;
 const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
 const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
   TYPED_ARRAY_PROTOTYPE,
@@ -38,12 +45,32 @@ const PROOF_MATRIX_RELATIVE_PATH = "docs/proof/PROOF-MATRIX.md";
 const PROJECT_STATUS_RELATIVE_PATH = "PROJECT-STATUS.md";
 const APPLICATION_SOURCE_DIRECTORY = "apps/reference-host-web/src";
 const APPLICATION_ENTRY = `${APPLICATION_SOURCE_DIRECTORY}/main.tsx`;
+const HISTORICAL_SOURCE_PATHS = Object.freeze([
+  "apps/reference-host-web/src/application.tsx",
+  "apps/reference-host-web/src/browser-profile.ts",
+  "apps/reference-host-web/src/failure-view.tsx",
+  "apps/reference-host-web/src/host-ports.ts",
+  "apps/reference-host-web/src/main.tsx",
+  "apps/reference-host-web/src/managed-surface.tsx",
+  "apps/reference-host-web/src/official-sign-in.ts",
+  "apps/reference-host-web/src/recovery-authority.ts",
+  "apps/reference-host-web/src/root-policy.ts",
+  "apps/reference-host-web/src/root.tsx",
+  "apps/reference-host-web/src/sign-in-http-handler.ts",
+  "apps/reference-host-web/src/styles.css",
+]);
 const T09_PROOF_PATHS = Object.freeze([
   "scripts/generate-reference-host-web-source-audit-proof.mjs",
   "scripts/lib/reference-host-web-source-audit-proof.mjs",
   "scripts/verify-reference-host-web-source-audit.mjs",
   "tests/reference-host-web-source-audit.test.mjs",
 ]);
+const CURRENT_AUDIT_COORDINATION_PATHS = Object.freeze([
+  "package.json",
+  "pnpm-lock.yaml",
+  ...T09_PROOF_PATHS,
+]);
+const CURRENT_AUDIT_COORDINATION_PATH_SET = new Set(CURRENT_AUDIT_COORDINATION_PATHS);
 const STATIC_TRACKED_PATHS = Object.freeze([
   "apps/reference-host-web/index.html",
   "apps/reference-host-web/package.json",
@@ -71,6 +98,48 @@ const PREREQUISITES = Object.freeze([
     profile: "desen-reference-host-web-sign-in-v1",
     result: "PASS",
   }),
+]);
+const HISTORICAL_PREREQUISITES = Object.freeze([
+  Object.freeze({
+    ...PREREQUISITES[0],
+    bytes: 16_213,
+    immutable: true,
+  }),
+  Object.freeze({
+    ...PREREQUISITES[1],
+    bytes: 21_847,
+    immutable: true,
+  }),
+]);
+const HISTORICAL_CLAIM = Object.freeze({
+  productionSourceInventoryClosed: true,
+  productionSourceSymlinksRejected: true,
+  everyProductionSourceFileReachableFromRealEntry: true,
+  semanticTypeScriptCheckerUsed: true,
+  realViteRuntimeResolutionObserved: true,
+  dependencyCruiserUsedOnlyForPackageBoundary: true,
+  exactJsxOwnershipAllowlistEnforced: true,
+  directOrHiddenHandwrittenManagedTreesRejected: true,
+  publicReferenceReactAdaptersReached: true,
+  publicRuntimeReactRenderPlanReached: true,
+  sourceOrAuthoringAssetsInRuntimeGraph: false,
+  additionalDataAssetsInRuntimeGraph: false,
+  dynamicExecutableEdges: false,
+  p06Status: "PARTIAL",
+  p07Status: "PARTIAL",
+  p10Status: "PARTIAL",
+  g05Closed: true,
+  publisherProducedFixture: false,
+  browserE2eClaimed: false,
+  nativeRuntimeClaimed: false,
+});
+const HISTORICAL_NONCLAIMS = Object.freeze([
+  "M06 Publisher output or reproducible publication",
+  "general proof that arbitrary future host code cannot handwrite managed UI",
+  "real-browser end-to-end conformance",
+  "channel fetching, package installation, or remote capability loading",
+  "Desen App authoring, preview, publishing, or host parity",
+  "native, iOS, Android, SwiftUI, or Compose runtime support",
 ]);
 
 const ALLOWED_EXTERNAL_IMPORTS = new Set([
@@ -3922,28 +3991,7 @@ function createArtifact({
     protocol: "0.1.0",
     target: "web-react",
     prerequisites,
-    claim: {
-      productionSourceInventoryClosed: true,
-      productionSourceSymlinksRejected: true,
-      everyProductionSourceFileReachableFromRealEntry: true,
-      semanticTypeScriptCheckerUsed: true,
-      realViteRuntimeResolutionObserved: true,
-      dependencyCruiserUsedOnlyForPackageBoundary: true,
-      exactJsxOwnershipAllowlistEnforced: true,
-      directOrHiddenHandwrittenManagedTreesRejected: true,
-      publicReferenceReactAdaptersReached: true,
-      publicRuntimeReactRenderPlanReached: true,
-      sourceOrAuthoringAssetsInRuntimeGraph: false,
-      additionalDataAssetsInRuntimeGraph: false,
-      dynamicExecutableEdges: false,
-      p06Status: "PARTIAL",
-      p07Status: "PARTIAL",
-      p10Status: "PARTIAL",
-      g05Closed: true,
-      publisherProducedFixture: false,
-      browserE2eClaimed: false,
-      nativeRuntimeClaimed: false,
-    },
+    claim: HISTORICAL_CLAIM,
     sourceAudit: semantic,
     buildEnvelope,
     runtimeResolution: viteGraph,
@@ -3965,14 +4013,7 @@ function createArtifact({
       gate: "G05_DONE",
       historicalArtifactsRewritten: false,
     },
-    nonclaims: [
-      "M06 Publisher output or reproducible publication",
-      "general proof that arbitrary future host code cannot handwrite managed UI",
-      "real-browser end-to-end conformance",
-      "channel fetching, package installation, or remote capability loading",
-      "Desen App authoring, preview, publishing, or host parity",
-      "native, iOS, Android, SwiftUI, or Compose runtime support",
-    ],
+    nonclaims: HISTORICAL_NONCLAIMS,
   });
 }
 
@@ -3992,9 +4033,15 @@ export async function inspectReferenceHostWebSourceAudit(rawOptions = undefined)
   return auditSemanticSource(workspaceRoot, sourcePaths, files);
 }
 
-/** Builds complete deterministic M05-T09 evidence using two real observed Vite builds. */
-export async function buildReferenceHostWebSourceAuditEvidence(rawOptions = undefined) {
-  const options = captureOptions(rawOptions, ["workspaceRoot"], "build");
+/**
+ * Builds a current-state host observation using the complete M05 semantic, Vite, build-envelope,
+ * and dependency-boundary audit.
+ *
+ * @remarks This is deliberately separate from the immutable M05-T09 task-time receipt reader.
+ * It may observe successor workspace coordination files, but those files never redefine history.
+ */
+export async function buildCurrentReferenceHostWebSourceAuditEvidence(rawOptions = undefined) {
+  const options = captureOptions(rawOptions, ["workspaceRoot"], "current audit build");
   const workspaceRoot = await resolveWorkspaceRoot(
     optionalString(options.workspaceRoot, "workspaceRoot"),
   );
@@ -4061,6 +4108,1319 @@ export async function buildReferenceHostWebSourceAuditEvidence(rawOptions = unde
     artifact,
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
+  });
+}
+
+function exactKeySet(value, expectedKeys, label) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    !isDeepStrictEqual(Object.keys(value).sort(), [...expectedKeys].sort())
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      `Immutable M05-T09 ${label} key inventory drifted.`,
+    );
+  }
+}
+
+function inspectHistoricalTrackedFiles(artifact) {
+  const trackedFiles = artifact.evidence?.trackedFiles;
+  const expectedPaths = [...new Set([...HISTORICAL_SOURCE_PATHS, ...STATIC_TRACKED_PATHS])].sort();
+  if (
+    !Array.isArray(trackedFiles) ||
+    trackedFiles.length !== expectedPaths.length ||
+    !isDeepStrictEqual(
+      trackedFiles.map(({ path: relativePath }) => relativePath),
+      expectedPaths,
+    ) ||
+    new Set(trackedFiles.map(({ path: relativePath }) => relativePath)).size !== trackedFiles.length
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 tracked-file inventory drifted.",
+    );
+  }
+  for (const entry of trackedFiles) {
+    exactKeySet(entry, ["path", "bytes", "sha256"], `tracked file ${String(entry?.path)}`);
+    if (
+      typeof entry.path !== "string" ||
+      !validateRelativePath(entry.path) ||
+      !Number.isSafeInteger(entry.bytes) ||
+      entry.bytes <= 0 ||
+      typeof entry.sha256 !== "string" ||
+      !/^sha256:[0-9a-f]{64}$/u.test(entry.sha256)
+    ) {
+      fail(
+        "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+        `Immutable M05-T09 tracked file ${String(entry?.path)} is malformed.`,
+      );
+    }
+  }
+  return trackedFiles;
+}
+
+function inspectHistoricalArtifact(rawBytes) {
+  const bytes = Buffer.from(rawBytes);
+  const actualSha256 = sha256(bytes);
+  if (bytes.length !== HISTORICAL_ARTIFACT_BYTES || actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 task-time artifact bytes changed.",
+      {
+        expected: HISTORICAL_ARTIFACT_SHA256,
+        actual: actualSha256,
+        expectedBytes: HISTORICAL_ARTIFACT_BYTES,
+        actualBytes: bytes.length,
+      },
+    );
+  }
+  const artifact = parseJson(
+    bytes,
+    "immutable M05-T09 task-time artifact",
+    "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+  );
+  exactKeySet(
+    artifact,
+    [
+      "schemaVersion",
+      "task",
+      "result",
+      "profile",
+      "protocol",
+      "target",
+      "prerequisites",
+      "claim",
+      "sourceAudit",
+      "buildEnvelope",
+      "runtimeResolution",
+      "packageBoundary",
+      "evidence",
+      "nonclaims",
+    ],
+    "top-level artifact",
+  );
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.task !== "M05-T09" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-reference-host-web-source-audit-v1" ||
+    artifact.protocol !== "0.1.0" ||
+    artifact.target !== "web-react" ||
+    !isDeepStrictEqual(artifact.prerequisites, HISTORICAL_PREREQUISITES) ||
+    !isDeepStrictEqual(artifact.claim, HISTORICAL_CLAIM) ||
+    !isDeepStrictEqual(artifact.nonclaims, HISTORICAL_NONCLAIMS)
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 identity, prerequisites, claim, or nonclaims drifted.",
+    );
+  }
+
+  exactKeySet(
+    artifact.sourceAudit,
+    [
+      "compiler",
+      "compilerAuthority",
+      "sourceFiles",
+      "executableSourceFiles",
+      "importDeclarations",
+      "jsxElements",
+      "publicReactRootCalls",
+      "publicHeadlessMountCalls",
+      "publicAdapterRegistryCalls",
+      "publicRuntimeReactSurfaceCalls",
+      "compositionFunctions",
+      "executableAuthoritySurface",
+      "dataImports",
+      "jsxByFile",
+      "css",
+      "assertions",
+    ],
+    "source-audit",
+  );
+  if (
+    artifact.sourceAudit.compiler !== "typescript@6.0.3" ||
+    artifact.sourceAudit.compilerAuthority !== "TypeScript Program and TypeChecker" ||
+    artifact.sourceAudit.sourceFiles !== 12 ||
+    artifact.sourceAudit.executableSourceFiles !== 11 ||
+    artifact.sourceAudit.importDeclarations !== 52 ||
+    artifact.sourceAudit.jsxElements !== 18 ||
+    artifact.sourceAudit.publicReactRootCalls !== 1 ||
+    artifact.sourceAudit.publicHeadlessMountCalls !== 1 ||
+    artifact.sourceAudit.publicAdapterRegistryCalls !== 1 ||
+    artifact.sourceAudit.publicRuntimeReactSurfaceCalls !== 1 ||
+    artifact.sourceAudit.compositionFunctions?.length !== 5 ||
+    artifact.sourceAudit.executableAuthoritySurface?.descriptors !== 413 ||
+    artifact.sourceAudit.executableAuthoritySurface?.sha256 !==
+      "sha256:25d2f89263aca58e14f1328f0b12cb49225624afee69a577b116f72cb286ff8a" ||
+    artifact.sourceAudit.dataImports?.length !== 3 ||
+    Object.keys(artifact.sourceAudit.jsxByFile ?? {}).length !== 11 ||
+    artifact.sourceAudit.css?.sha256 !==
+      "sha256:6d82529e07969d9033232aaa72924ec57eae0dd86736ebecdf700680046a7738" ||
+    artifact.sourceAudit.assertions !== 3_719
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 semantic source-audit slice drifted.",
+    );
+  }
+
+  exactKeySet(
+    artifact.buildEnvelope,
+    [
+      "viteConfigFile",
+      "htmlParser",
+      "localViteOrRollupConfigs",
+      "postCssSearchRoots",
+      "workspacePostCssConfigs",
+      "htmlEntry",
+      "htmlRoot",
+      "visibleStaticText",
+      "productionDependencies",
+      "assertions",
+    ],
+    "build-envelope",
+  );
+  if (
+    artifact.buildEnvelope.viteConfigFile !== false ||
+    artifact.buildEnvelope.htmlParser !== "jsdom@29.1.1 exact canonical AST" ||
+    artifact.buildEnvelope.htmlEntry !== "/src/main.tsx" ||
+    artifact.buildEnvelope.htmlRoot !== "desen-reference-host-root" ||
+    artifact.buildEnvelope.visibleStaticText !== "DESEN Reference Host" ||
+    !isDeepStrictEqual(artifact.buildEnvelope.localViteOrRollupConfigs, []) ||
+    !isDeepStrictEqual(artifact.buildEnvelope.workspacePostCssConfigs, []) ||
+    !isDeepStrictEqual(artifact.buildEnvelope.postCssSearchRoots, [
+      "apps/reference-host-web",
+      "apps",
+      ".",
+    ]) ||
+    !isDeepStrictEqual(artifact.buildEnvelope.productionDependencies, [
+      "@desen/reference-catalog-web",
+      "@desen/runtime-core",
+      "@desen/runtime-react",
+      "@desen/runtime-web",
+      "react",
+      "react-dom",
+    ]) ||
+    artifact.buildEnvelope.assertions !== 45
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 build-envelope slice drifted.",
+    );
+  }
+
+  exactKeySet(
+    artifact.runtimeResolution,
+    [
+      "tool",
+      "authority",
+      "observer",
+      "write",
+      "independentBuilds",
+      "deterministic",
+      "moduleCount",
+      "staticEdges",
+      "dynamicEdges",
+      "unresolvedEdges",
+      "reachableProductionSourceFiles",
+      "dataModules",
+      "modules",
+      "graphSha256",
+      "backingFiles",
+      "backingSnapshotSha256",
+      "backingModulesStableAcrossSecondObservation",
+      "backingSnapshotObservations",
+      "finalBackingReauthenticatedAfterDependencyBoundary",
+      "assertions",
+    ],
+    "runtime-resolution",
+  );
+  if (
+    artifact.runtimeResolution.tool !== "vite@8.1.5" ||
+    artifact.runtimeResolution.authority !==
+      "programmatic build({ write: false }) Plugin.moduleParsed" ||
+    artifact.runtimeResolution.observer !== "moduleParsed" ||
+    artifact.runtimeResolution.write !== false ||
+    artifact.runtimeResolution.independentBuilds !== 2 ||
+    artifact.runtimeResolution.deterministic !== true ||
+    artifact.runtimeResolution.moduleCount !== 103 ||
+    artifact.runtimeResolution.modules?.length !== 103 ||
+    artifact.runtimeResolution.staticEdges !== 297 ||
+    artifact.runtimeResolution.dynamicEdges !== 0 ||
+    artifact.runtimeResolution.unresolvedEdges !== 0 ||
+    artifact.runtimeResolution.reachableProductionSourceFiles !== 12 ||
+    !isDeepStrictEqual(artifact.runtimeResolution.dataModules, [
+      "apps/reference-host-web/src/styles.css",
+      "examples/sign-in/official-derived.bundle.desen.json",
+      "packages/reference-catalog-web/catalog.json",
+    ]) ||
+    artifact.runtimeResolution.graphSha256 !==
+      "sha256:243fa72ceee35d624beb9f0444abf73c0224512e5722846b934dd2de1cb1810d" ||
+    artifact.runtimeResolution.backingFiles !== 102 ||
+    artifact.runtimeResolution.backingSnapshotSha256 !==
+      "sha256:0eff527a4ac86d86f24f86fbd833d94241daccfe18e2aef13eaf69751249ab8f" ||
+    artifact.runtimeResolution.backingModulesStableAcrossSecondObservation !== true ||
+    artifact.runtimeResolution.backingSnapshotObservations !== 3 ||
+    artifact.runtimeResolution.finalBackingReauthenticatedAfterDependencyBoundary !== true ||
+    artifact.runtimeResolution.assertions !== 411
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 real-build resolution slice drifted.",
+    );
+  }
+
+  exactKeySet(
+    artifact.packageBoundary,
+    [
+      "tool",
+      "authority",
+      "rule",
+      "ruleSchema",
+      "modules",
+      "dependencies",
+      "violations",
+      "unresolvedDeclarationsIgnoredForRuntimeResolution",
+    ],
+    "package-boundary",
+  );
+  if (
+    artifact.packageBoundary.tool !== "dependency-cruiser@18.1.0" ||
+    artifact.packageBoundary.authority !==
+      "package-boundary evidence only; not runtime resolution authority" ||
+    artifact.packageBoundary.rule !== "application-reference-host-web-allowed-dependencies" ||
+    !isDeepStrictEqual(
+      artifact.packageBoundary.ruleSchema,
+      EXPECTED_REFERENCE_HOST_BOUNDARY_RULE,
+    ) ||
+    artifact.packageBoundary.modules !== 19 ||
+    artifact.packageBoundary.dependencies !== 27 ||
+    artifact.packageBoundary.violations !== 0 ||
+    artifact.packageBoundary.unresolvedDeclarationsIgnoredForRuntimeResolution !== 13
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 dependency-boundary slice drifted.",
+    );
+  }
+
+  exactKeySet(
+    artifact.evidence,
+    [
+      "trackedFiles",
+      "snapshotConsistency",
+      "hostileMutationPolicies",
+      "hostileMutationPolicyCount",
+      "proofClaims",
+      "proofClaimStatusChanges",
+      "normativeStatusChanges",
+      "gate",
+      "historicalArtifactsRewritten",
+    ],
+    "evidence",
+  );
+  inspectHistoricalTrackedFiles(artifact);
+  if (
+    !isDeepStrictEqual(artifact.evidence.snapshotConsistency, {
+      checkedPaths: 32,
+      prePostIdentityMatched: true,
+      sourceAndEnvelopeStableAcrossAudit: true,
+    }) ||
+    !isDeepStrictEqual(artifact.evidence.hostileMutationPolicies, HOSTILE_MUTATION_POLICIES) ||
+    artifact.evidence.hostileMutationPolicyCount !== HOSTILE_MUTATION_POLICIES.length ||
+    !isDeepStrictEqual(artifact.evidence.proofClaims, {
+      "P-06": "PARTIAL",
+      "P-07": "PARTIAL",
+      "P-10": "PARTIAL",
+    }) ||
+    !isDeepStrictEqual(artifact.evidence.proofClaimStatusChanges, [
+      { claim: "P-07", from: "NOT_PROVEN", to: "PARTIAL" },
+    ]) ||
+    !isDeepStrictEqual(artifact.evidence.normativeStatusChanges, []) ||
+    artifact.evidence.gate !== "G05_DONE" ||
+    artifact.evidence.historicalArtifactsRewritten !== false
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
+      "Immutable M05-T09 evidence and claim-status slice drifted.",
+    );
+  }
+  return deepFreeze(artifact);
+}
+
+function resolveHistoricalArtifactPath(candidate) {
+  if (candidate === undefined) return DEFAULT_REFERENCE_HOST_WEB_SOURCE_AUDIT_ARTIFACT_PATH;
+  return path.isAbsolute(candidate)
+    ? path.resolve(candidate)
+    : path.resolve(WORKSPACE_ROOT, candidate);
+}
+
+/**
+ * Reads only the exact immutable M05-T09/G05 task-time artifact and its reviewed semantic slice.
+ *
+ * @remarks Current workspace builds, source overrides, and successor inputs are intentionally
+ * rejected. Use `buildCurrentReferenceHostWebSourceAuditEvidence` for a live host observation.
+ */
+export async function buildReferenceHostWebSourceAuditEvidence(rawOptions = undefined) {
+  const options = captureOptions(rawOptions, ["artifactPath", "artifactBytes"], "historical build");
+  const artifactPath = optionalString(options.artifactPath, "artifactPath");
+  const injectedArtifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
+  if (artifactPath !== undefined && injectedArtifactBytes !== undefined) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID",
+      "Historical M05-T09 build accepts either artifactPath or artifactBytes, not both.",
+    );
+  }
+  const artifactBytes =
+    injectedArtifactBytes ??
+    (await readAbsoluteRegularFile(
+      resolveHistoricalArtifactPath(artifactPath),
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_MISSING",
+      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_UNSAFE",
+      MAX_ARTIFACT_BYTES,
+    ));
+  const artifact = inspectHistoricalArtifact(artifactBytes);
+  return Object.freeze({
+    artifact,
+    artifactBytes: Buffer.from(artifactBytes),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+  });
+}
+
+function consumeCurrentEvidenceBudget(state, kind, amount = 1) {
+  state[kind] += amount;
+  const limit =
+    kind === "nodes"
+      ? MAX_CURRENT_EVIDENCE_NODES
+      : kind === "scalars"
+        ? MAX_CURRENT_EVIDENCE_SCALARS
+        : kind === "keys"
+          ? MAX_CURRENT_EVIDENCE_KEYS
+          : MAX_CURRENT_EVIDENCE_STRING_BYTES;
+  if (state[kind] > limit) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      `Current M05 host evidence exceeds its aggregate ${kind} budget.`,
+    );
+  }
+}
+
+function normalizeAuditedJsonDomain(
+  value,
+  state = {
+    nodes: 0,
+    scalars: 0,
+    keys: 0,
+    stringBytes: 0,
+    active: new WeakSet(),
+  },
+  depth = 0,
+) {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
+    consumeCurrentEvidenceBudget(state, "scalars");
+    if (typeof value === "string") {
+      consumeCurrentEvidenceBudget(state, "stringBytes", Buffer.byteLength(value, "utf8"));
+    }
+    return value;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    consumeCurrentEvidenceBudget(state, "scalars");
+    return value;
+  }
+  if (
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    depth > 256 ||
+    state.active.has(value)
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current M05 host evidence left the bounded acyclic JSON domain.",
+    );
+  }
+  consumeCurrentEvidenceBudget(state, "nodes");
+  state.active.add(value);
+  try {
+    if (Array.isArray(value)) {
+      if (Object.getPrototypeOf(value) !== Array.prototype) {
+        fail(
+          "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+          "Current M05 host evidence contains a hostile array prototype.",
+        );
+      }
+      const keys = Reflect.ownKeys(value);
+      if (
+        keys.some((key) => typeof key !== "string") ||
+        keys.filter((key) => key !== "length").length !== value.length
+      ) {
+        fail(
+          "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+          "Current M05 host evidence contains a sparse or decorated array.",
+        );
+      }
+      consumeCurrentEvidenceBudget(state, "keys", value.length);
+      return Array.from({ length: value.length }, (_, index) => {
+        const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+        if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+          fail(
+            "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+            "Current M05 host evidence contains a non-data array entry.",
+          );
+        }
+        return normalizeAuditedJsonDomain(descriptor.value, state, depth + 1);
+      });
+    }
+    const prototype = Object.getPrototypeOf(value);
+    const keys = Reflect.ownKeys(value);
+    if (
+      (prototype !== Object.prototype && prototype !== null) ||
+      keys.some((key) => typeof key !== "string")
+    ) {
+      fail(
+        "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+        "Current M05 host evidence contains a hostile object shape.",
+      );
+    }
+    consumeCurrentEvidenceBudget(state, "keys", keys.length);
+    const normalized = {};
+    for (const key of keys) {
+      consumeCurrentEvidenceBudget(state, "stringBytes", Buffer.byteLength(key, "utf8"));
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+        fail(
+          "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+          "Current M05 host evidence contains a non-data object property.",
+        );
+      }
+      Object.defineProperty(normalized, key, {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: normalizeAuditedJsonDomain(descriptor.value, state, depth + 1),
+      });
+    }
+    return normalized;
+  } finally {
+    state.active.delete(value);
+  }
+}
+
+function validateCurrentTrackedFiles(trackedFiles) {
+  if (!Array.isArray(trackedFiles)) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current M05 host observation lost its tracked-file inventory.",
+    );
+  }
+  for (const entry of trackedFiles) {
+    if (
+      entry === null ||
+      typeof entry !== "object" ||
+      Array.isArray(entry) ||
+      !isDeepStrictEqual(Object.keys(entry).sort(), ["bytes", "path", "sha256"]) ||
+      typeof entry.path !== "string" ||
+      !validateRelativePath(entry.path) ||
+      !Number.isSafeInteger(entry.bytes) ||
+      entry.bytes <= 0 ||
+      typeof entry.sha256 !== "string" ||
+      !/^sha256:[0-9a-f]{64}$/u.test(entry.sha256)
+    ) {
+      fail(
+        "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+        "Current M05 host observation contains a malformed tracked-file record.",
+      );
+    }
+  }
+  const paths = trackedFiles.map(({ path: relativePath }) => relativePath);
+  if (new Set(paths).size !== paths.length) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current M05 host observation contains duplicate tracked paths.",
+    );
+  }
+  return paths;
+}
+
+function currentEnduringEvidenceProjection(rawArtifact) {
+  const artifact = normalizeAuditedJsonDomain(rawArtifact);
+  const trackedFiles = artifact?.evidence?.trackedFiles;
+  const paths = validateCurrentTrackedFiles(trackedFiles);
+  for (const relativePath of CURRENT_AUDIT_COORDINATION_PATHS) {
+    if (paths.filter((candidate) => candidate === relativePath).length !== 1) {
+      fail(
+        "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+        `Current M05 host observation must contain one coordination path: ${relativePath}.`,
+      );
+    }
+  }
+  return deepFreeze({
+    ...artifact,
+    evidence: {
+      ...artifact.evidence,
+      trackedFiles: trackedFiles.filter(
+        ({ path: relativePath }) => !CURRENT_AUDIT_COORDINATION_PATH_SET.has(relativePath),
+      ),
+    },
+  });
+}
+
+/**
+ * Compares two already-audited observations across every enduring M05 host claim and input.
+ *
+ * @remarks Only root package coordination, the workspace lockfile, and the four migrated M05
+ * proof implementation paths are excluded from raw-byte equality. They remain race-snapshotted
+ * during the live build, and every semantic effect they can have on the host remains compared.
+ */
+export function verifyReferenceHostWebCurrentEvidencePolicy(historicalArtifact, currentArtifact) {
+  const historical = currentEnduringEvidenceProjection(historicalArtifact);
+  const current = currentEnduringEvidenceProjection(currentArtifact);
+  if (!isDeepStrictEqual(historical, current)) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current reference-host evidence differs from the enduring M05 host evidence.",
+    );
+  }
+  return Object.freeze({
+    result: "PASS",
+    comparedTrackedFiles: historical.evidence.trackedFiles.length,
+    excludedCoordinationPaths: CURRENT_AUDIT_COORDINATION_PATHS,
+  });
+}
+
+function strictUtf8(bytes, label) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    fail("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT", `Current M05 ${label} is not strict UTF-8.`);
+  }
+}
+
+async function formatCanonicalJson(value) {
+  return Buffer.from(
+    await format(JSON.stringify(value), {
+      endOfLine: "lf",
+      parser: "json-stringify",
+      printWidth: 100,
+      tabWidth: 2,
+    }),
+    "utf8",
+  );
+}
+
+async function normalizeCurrentRootPackageBytes(rawBytes) {
+  const bytes = Buffer.from(rawBytes);
+  const text = strictUtf8(bytes, "root package manifest");
+  const manifest = parseJson(
+    bytes,
+    "current root package manifest",
+    "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+  );
+  if (
+    manifest === null ||
+    typeof manifest !== "object" ||
+    Array.isArray(manifest) ||
+    manifest.scripts === null ||
+    typeof manifest.scripts !== "object" ||
+    Array.isArray(manifest.scripts)
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current M05 root package manifest lost its object and scripts shape.",
+    );
+  }
+  const canonicalCurrent = await formatCanonicalJson(manifest);
+  if (!canonicalCurrent.equals(bytes) || canonicalCurrent.toString("utf8") !== text) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current M05 root package manifest is not canonical JSON.",
+    );
+  }
+  const normalizedScripts = {};
+  for (const [scriptName, command] of Object.entries(manifest.scripts)) {
+    if (!/^(?:generate|test|verify):publisher(?:-[a-z0-9]+)*$/u.test(scriptName)) {
+      Object.defineProperty(normalizedScripts, scriptName, {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: command,
+      });
+    }
+  }
+  manifest.scripts = normalizedScripts;
+  for (const [scriptName, commandKind] of [
+    ["check", "verify"],
+    ["test", "test"],
+  ]) {
+    const command = manifest.scripts[scriptName];
+    if (typeof command !== "string") {
+      fail(
+        "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+        `Current M05 root ${scriptName} coordination script is missing.`,
+      );
+    }
+    const segments = command.split(" && ");
+    if (segments.some((segment) => segment.length === 0)) {
+      fail(
+        "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+        `Current M05 root ${scriptName} coordination script is malformed.`,
+      );
+    }
+    const publisherSegment = new RegExp(`^pnpm ${commandKind}:publisher(?:-[a-z0-9]+)*$`, "u");
+    manifest.scripts[scriptName] = segments
+      .filter((segment) => !publisherSegment.test(segment))
+      .join(" && ");
+  }
+  return formatCanonicalJson(manifest);
+}
+
+function failCurrentLockfile(message) {
+  fail("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT", `Current M05 lockfile ${message}.`);
+}
+
+function scanYamlToken(text, label) {
+  const stack = [];
+  let quote;
+  let escaped = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (quote === "'") {
+      if (character === "'" && text[index + 1] === "'") {
+        index += 1;
+      } else if (character === "'") {
+        quote = undefined;
+      }
+      continue;
+    }
+    if (quote === '"') {
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === '"') {
+        quote = undefined;
+      }
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    const previous = index === 0 ? undefined : text[index - 1];
+    const tokenBoundary =
+      index === 0 || previous === " " || previous === "\t" || previous === "[" || previous === "{";
+    if ((character === "&" || character === "!" || character === "*") && tokenBoundary) {
+      failCurrentLockfile(`${label} uses a forbidden YAML anchor, alias, or tag`);
+    }
+    if (character === "#" && (index === 0 || previous === " ")) {
+      failCurrentLockfile(`${label} uses an unquoted YAML comment`);
+    }
+    if (character === "[" || character === "{") {
+      stack.push(character);
+    } else if (character === "]" || character === "}") {
+      const expected = character === "]" ? "[" : "{";
+      if (stack.pop() !== expected) {
+        failCurrentLockfile(`${label} has an unbalanced flow collection`);
+      }
+    }
+  }
+  if (quote !== undefined || escaped || stack.length !== 0) {
+    failCurrentLockfile(`${label} has an unterminated quote or flow collection`);
+  }
+}
+
+function splitYamlFlowEntries(text, label) {
+  const entries = [];
+  let start = 0;
+  const stack = [];
+  let quote;
+  let escaped = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (quote === "'") {
+      if (character === "'" && text[index + 1] === "'") {
+        index += 1;
+      } else if (character === "'") {
+        quote = undefined;
+      }
+      continue;
+    }
+    if (quote === '"') {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === '"') quote = undefined;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+    } else if (character === "[" || character === "{") {
+      stack.push(character);
+    } else if (character === "]" || character === "}") {
+      stack.pop();
+    } else if (character === "," && stack.length === 0) {
+      entries.push(text.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  entries.push(text.slice(start).trim());
+  if (entries.some((entry) => entry.length === 0)) {
+    failCurrentLockfile(`${label} has an empty flow entry`);
+  }
+  return entries;
+}
+
+function findYamlMappingColon(text) {
+  const stack = [];
+  let quote;
+  let escaped = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (quote === "'") {
+      if (character === "'" && text[index + 1] === "'") index += 1;
+      else if (character === "'") quote = undefined;
+      continue;
+    }
+    if (quote === '"') {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === '"') quote = undefined;
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+    } else if (character === "[" || character === "{") {
+      stack.push(character);
+    } else if (character === "]" || character === "}") {
+      stack.pop();
+    } else if (
+      character === ":" &&
+      stack.length === 0 &&
+      (index === text.length - 1 || text[index + 1] === " ")
+    ) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function decodeYamlKey(rawKey, label) {
+  const key = rawKey.trim();
+  if (key.length === 0 || key === "<<" || /^[&*!?[\]{},#|>@`]/u.test(key)) {
+    failCurrentLockfile(`${label} has an unsafe mapping key`);
+  }
+  scanYamlToken(key, `${label} key`);
+  if (key.startsWith("'")) {
+    if (!key.endsWith("'") || key.length < 2) {
+      failCurrentLockfile(`${label} has an invalid single-quoted key`);
+    }
+    return key.slice(1, -1).replaceAll("''", "'");
+  }
+  if (key.startsWith('"')) {
+    try {
+      const decoded = JSON.parse(key);
+      if (typeof decoded !== "string") throw new TypeError("not a string");
+      return decoded;
+    } catch {
+      failCurrentLockfile(`${label} has an invalid double-quoted key`);
+    }
+  }
+  if (key.includes(": ")) {
+    failCurrentLockfile(`${label} has an ambiguous plain mapping key`);
+  }
+  validateYamlPlainScalar(key, `${label} key`);
+  return key;
+}
+
+function validateYamlPlainScalar(value, label) {
+  const first = value[0];
+  if ([",", "]", "}", "#", "&", "*", "!", "|", ">", "%", "@", "`"].includes(first)) {
+    failCurrentLockfile(`${label} begins with a forbidden plain-scalar indicator`);
+  }
+  if (
+    ["-", "?", ":"].includes(first) &&
+    (value.length === 1 || value[1] === " " || value[1] === "\t")
+  ) {
+    failCurrentLockfile(`${label} begins with an ambiguous plain-scalar indicator`);
+  }
+  if (value.endsWith(":") || value.includes(": ") || value.includes(" #")) {
+    failCurrentLockfile(`${label} has an ambiguous plain scalar`);
+  }
+}
+
+const PNPM_YAML_FLOAT_PATTERN =
+  /^(?:[-+]?(?:0|[1-9][0-9_]*)(?:\.[0-9_]*)?(?:[eE][-+]?[0-9]+)?|\.[0-9_]+(?:[eE][-+]?[0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN))$/u;
+const PNPM_YAML_DATE_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/u;
+const PNPM_YAML_TIMESTAMP_PATTERN =
+  /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}(?:[Tt]|[ \t]+)[0-9]{1,2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]*)?(?:[ \t]*(?:Z|[-+][0-9]{1,2}(?::[0-9]{2})?))?$/u;
+
+function isPnpmYamlImplicitNonString(value) {
+  if (/^(?:~|null|Null|NULL|true|True|TRUE|false|False|FALSE)$/u.test(value)) return true;
+  if (
+    /^[-+]?0b[01_]+$/u.test(value) ||
+    /^[-+]?0x[0-9a-fA-F_]+$/u.test(value) ||
+    /^[-+]?0[0-7_]+$/u.test(value) ||
+    /^[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+$/u.test(value) ||
+    /^[-+]?0o[0-7_]+$/u.test(value)
+  ) {
+    return !value.endsWith("_");
+  }
+  return (
+    (PNPM_YAML_FLOAT_PATTERN.test(value) && !value.endsWith("_")) ||
+    PNPM_YAML_DATE_PATTERN.test(value) ||
+    PNPM_YAML_TIMESTAMP_PATTERN.test(value)
+  );
+}
+
+function validatePublisherStringScalar(value, label) {
+  let decoded;
+  if (value.startsWith("'")) {
+    decoded = value.slice(1, -1).replaceAll("''", "'");
+  } else if (value.startsWith('"')) {
+    decoded = JSON.parse(value);
+  } else {
+    if (isPnpmYamlImplicitNonString(value)) {
+      failCurrentLockfile(`${label} must not resolve to a non-string YAML scalar`);
+    }
+    decoded = value;
+  }
+  if (
+    decoded.length === 0 ||
+    decoded.length > 4_096 ||
+    decoded !== decoded.trim() ||
+    !decoded.isWellFormed() ||
+    containsForbiddenYamlControl(decoded, false)
+  ) {
+    failCurrentLockfile(`${label} must be a bounded control-free string scalar`);
+  }
+}
+
+function validatePublisherDependencyName(value) {
+  if (
+    value.length > 214 ||
+    !/^(?:@[a-z0-9][a-z0-9._~-]*\/)?[a-z0-9][a-z0-9._~-]*$/u.test(value) ||
+    value === "node_modules" ||
+    value === "favicon.ico"
+  ) {
+    failCurrentLockfile("has an invalid Publisher dependency name");
+  }
+}
+
+function validateYamlScalar(rawValue, label) {
+  const value = rawValue.trim();
+  if (
+    value.length === 0 ||
+    value === "-" ||
+    value === "?" ||
+    value === ":" ||
+    value.startsWith("|") ||
+    value.startsWith(">") ||
+    value.startsWith("%") ||
+    value === "---" ||
+    value === "..."
+  ) {
+    failCurrentLockfile(`${label} has an unsafe or empty scalar`);
+  }
+  scanYamlToken(value, label);
+  if (value.startsWith("'")) {
+    if (!value.endsWith("'") || value.length < 2) {
+      failCurrentLockfile(`${label} has an invalid single-quoted scalar`);
+    }
+    return "scalar";
+  } else if (value.startsWith('"')) {
+    try {
+      if (typeof JSON.parse(value) !== "string") throw new TypeError("not a string");
+    } catch {
+      failCurrentLockfile(`${label} has an invalid double-quoted scalar`);
+    }
+    return "scalar";
+  } else if (value.startsWith("{")) {
+    if (!value.endsWith("}")) failCurrentLockfile(`${label} has an invalid flow mapping`);
+    const inner = value.slice(1, -1).trim();
+    if (inner.length > 0) {
+      const keys = new Set();
+      for (const entry of splitYamlFlowEntries(inner, label)) {
+        const colon = findYamlMappingColon(entry);
+        if (colon < 0) failCurrentLockfile(`${label} has a malformed flow mapping entry`);
+        const key = decodeYamlKey(entry.slice(0, colon), label);
+        if (keys.has(key)) failCurrentLockfile(`${label} has a duplicate flow mapping key`);
+        keys.add(key);
+        validateYamlScalar(entry.slice(colon + 1), label);
+      }
+    }
+    return "flow-mapping";
+  } else if (value.startsWith("[")) {
+    if (!value.endsWith("]")) failCurrentLockfile(`${label} has an invalid flow sequence`);
+    const inner = value.slice(1, -1).trim();
+    if (inner.length > 0) {
+      for (const entry of splitYamlFlowEntries(inner, label)) {
+        validateYamlScalar(entry, label);
+      }
+    }
+    return "flow-sequence";
+  }
+  validateYamlPlainScalar(value, label);
+  return "scalar";
+}
+
+function parseYamlMappingLine(content, label) {
+  const colon = findYamlMappingColon(content);
+  if (colon < 0) failCurrentLockfile(`${label} is not a mapping entry`);
+  const key = decodeYamlKey(content.slice(0, colon), label);
+  const rawValue = content.slice(colon + 1);
+  if (rawValue.length > 0 && !rawValue.startsWith(" ")) {
+    failCurrentLockfile(`${label} lacks canonical mapping whitespace`);
+  }
+  const value = rawValue.trim();
+  const valueKind = value.length > 0 ? validateYamlScalar(value, `${label} value`) : "empty";
+  return Object.freeze({
+    key,
+    opensContainer: value.length === 0,
+    value,
+    valueKind,
+  });
+}
+
+function validateCompletePnpmLockfileYaml(lines) {
+  if (lines.length > 100_000) failCurrentLockfile("exceeds its line budget");
+  const contexts = new Map([[0, { type: "mapping", keys: new Set(), path: [] }]]);
+  const topLevelKeys = [];
+  let previous;
+  let tokens = 0;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line.length > 65_536) failCurrentLockfile("exceeds its line-length budget");
+    if (line.includes("\t") || line.endsWith(" ")) {
+      failCurrentLockfile("contains tabs or trailing whitespace");
+    }
+    if (line.length === 0) continue;
+    const indentation = line.length - line.trimStart().length;
+    if (indentation % 2 !== 0 || indentation > 64) {
+      failCurrentLockfile("contains invalid or excessive indentation");
+    }
+    const content = line.slice(indentation);
+    if (previous === undefined && indentation !== 0) {
+      failCurrentLockfile("does not begin with a root mapping");
+    }
+    if (previous !== undefined && indentation > previous.indentation) {
+      if (indentation !== previous.indentation + 2 || !previous.opensContainer) {
+        failCurrentLockfile("contains an invalid indentation transition");
+      }
+      contexts.set(indentation, {
+        type: content.startsWith("- ") ? "sequence" : "mapping",
+        keys: new Set(),
+        path: previous.childPath,
+      });
+    } else {
+      for (const depth of [...contexts.keys()]) {
+        if (depth > indentation) contexts.delete(depth);
+      }
+    }
+    const context = contexts.get(indentation);
+    if (context === undefined) failCurrentLockfile("contains an orphan indentation level");
+    tokens += 1;
+    if (tokens > 200_000) failCurrentLockfile("exceeds its token budget");
+    if (content.startsWith("- ")) {
+      if (context.type !== "sequence") failCurrentLockfile("mixes sequence and mapping entries");
+      validateYamlScalar(content.slice(2), `line ${index + 1}`);
+      previous = {
+        indentation,
+        opensContainer: false,
+        childPath: context.path,
+      };
+      continue;
+    }
+    if (context.type !== "mapping") failCurrentLockfile("mixes mapping and sequence entries");
+    const entry = parseYamlMappingLine(content, `line ${index + 1}`);
+    if (context.keys.has(entry.key)) failCurrentLockfile(`has duplicate key at line ${index + 1}`);
+    context.keys.add(entry.key);
+    if (indentation === 0) topLevelKeys.push(entry.key);
+    previous = {
+      indentation,
+      opensContainer: entry.opensContainer,
+      childPath: [...context.path, entry.key],
+    };
+  }
+  if (previous?.opensContainer === true) failCurrentLockfile("ends with an empty container");
+  if (
+    !isDeepStrictEqual(topLevelKeys, [
+      "lockfileVersion",
+      "settings",
+      "importers",
+      "packages",
+      "snapshots",
+    ])
+  ) {
+    failCurrentLockfile("has an unexpected root section inventory");
+  }
+}
+
+function validatePublisherImporterShape(lines, start, end) {
+  const header = lines[start];
+  const body = lines.slice(start + 1, end).filter((line) => line.length > 0);
+  if (header === "  packages/publisher: {}") {
+    if (body.length !== 0) failCurrentLockfile("has content after an empty Publisher importer");
+    return;
+  }
+  if (header !== "  packages/publisher:" || body.length === 0) {
+    failCurrentLockfile("has an invalid Publisher importer shape");
+  }
+  const allowedGroups = new Set([
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+    "peerDependencies",
+  ]);
+  const groups = new Set();
+  let index = 0;
+  while (index < body.length) {
+    const groupLine = body[index];
+    if (!groupLine.startsWith("    ") || groupLine.startsWith("      ")) {
+      failCurrentLockfile("has an invalid Publisher dependency group");
+    }
+    const group = parseYamlMappingLine(groupLine.slice(4), "Publisher dependency group");
+    if (!group.opensContainer || !allowedGroups.has(group.key) || groups.has(group.key)) {
+      failCurrentLockfile("has an unknown or duplicate Publisher dependency group");
+    }
+    groups.add(group.key);
+    index += 1;
+    let packages = 0;
+    while (index < body.length && body[index].startsWith("      ")) {
+      if (body[index].startsWith("        ")) {
+        failCurrentLockfile("has an orphan Publisher dependency field");
+      }
+      const dependency = parseYamlMappingLine(body[index].slice(6), "Publisher dependency");
+      if (!dependency.opensContainer) {
+        failCurrentLockfile("has a non-mapping Publisher dependency");
+      }
+      validatePublisherDependencyName(dependency.key);
+      packages += 1;
+      index += 1;
+      const fields = [];
+      while (index < body.length && body[index].startsWith("        ")) {
+        const field = parseYamlMappingLine(body[index].slice(8), "Publisher dependency field");
+        if (
+          field.opensContainer ||
+          field.valueKind !== "scalar" ||
+          !["specifier", "version"].includes(field.key)
+        ) {
+          failCurrentLockfile("has an invalid Publisher dependency field");
+        }
+        validatePublisherStringScalar(field.value, `Publisher ${field.key}`);
+        fields.push(field.key);
+        index += 1;
+      }
+      if (!isDeepStrictEqual(fields, ["specifier", "version"])) {
+        failCurrentLockfile("must pin Publisher specifier and version exactly once");
+      }
+    }
+    if (packages === 0) failCurrentLockfile("has an empty Publisher dependency group");
+  }
+}
+
+function containsForbiddenYamlControl(text, allowLineFeed = true) {
+  for (const character of text) {
+    const codePoint = character.codePointAt(0);
+    if (
+      (codePoint >= 0x00 && codePoint <= 0x1f && (!allowLineFeed || codePoint !== 0x0a)) ||
+      (codePoint >= 0x7f && codePoint <= 0x9f)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function normalizeCurrentLockfileBytes(rawBytes) {
+  const bytes = Buffer.from(rawBytes);
+  const text = strictUtf8(bytes, "workspace lockfile");
+  if (containsForbiddenYamlControl(text) || !text.endsWith("\n")) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current M05 workspace lockfile must retain canonical control-free LF framing.",
+    );
+  }
+  const lines = text.split("\n");
+  validateCompletePnpmLockfileYaml(lines);
+  const publisherLines = lines.flatMap((line, index) =>
+    /^ {2}packages\/publisher:(?: \{\})?$/u.test(line) ? [index] : [],
+  );
+  const importersIndex = lines.indexOf("importers:");
+  const packagesIndex = lines.findIndex(
+    (line, index) => index > importersIndex && line === "packages:",
+  );
+  if (
+    publisherLines.length !== 1 ||
+    importersIndex < 0 ||
+    packagesIndex < 0 ||
+    publisherLines[0] <= importersIndex ||
+    publisherLines[0] >= packagesIndex
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current M05 workspace lockfile lost its unique Publisher importer.",
+    );
+  }
+  const start = publisherLines[0];
+  let end = start + 1;
+  while (end < lines.length && (lines[end].length === 0 || lines[end].startsWith("    "))) {
+    end += 1;
+  }
+  validatePublisherImporterShape(lines, start, end);
+  return Buffer.from(
+    [...lines.slice(0, start), "  packages/publisher: {}", "", ...lines.slice(end)].join("\n"),
+    "utf8",
+  );
+}
+
+function uniqueCurrentTrackedRecord(artifact, relativePath) {
+  const trackedFiles = artifact?.evidence?.trackedFiles;
+  validateCurrentTrackedFiles(trackedFiles);
+  const matches = trackedFiles.filter(({ path: candidate }) => candidate === relativePath);
+  if (matches.length !== 1) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      `Current M05 evidence must contain one tracked record for ${relativePath}.`,
+    );
+  }
+  return matches[0];
+}
+
+function assertCurrentRawRecord(record, bytes) {
+  const actualSha256 = `sha256:${sha256(bytes)}`;
+  if (record.bytes !== bytes.length || record.sha256 !== actualSha256) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      `Current M05 tracked bytes do not match ${record.path}.`,
+      {
+        path: record.path,
+        expectedBytes: record.bytes,
+        actualBytes: bytes.length,
+        expectedSha256: record.sha256,
+        actualSha256,
+      },
+    );
+  }
+}
+
+function assertHistoricalCoordinationProjection(record, normalizedBytes) {
+  const actualSha256 = `sha256:${sha256(normalizedBytes)}`;
+  if (record.bytes !== normalizedBytes.length || record.sha256 !== actualSha256) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      `Current M05 ${record.path} changed outside the Publisher successor projection.`,
+      {
+        path: record.path,
+        expectedBytes: record.bytes,
+        actualBytes: normalizedBytes.length,
+        expectedSha256: record.sha256,
+        actualSha256,
+      },
+    );
+  }
+}
+
+/**
+ * Preserves root toolchain and lockfile provenance while admitting Publisher-only coordination.
+ */
+export async function verifyReferenceHostWebCurrentCoordinationPolicy(rawOptions = undefined) {
+  const options = captureOptions(
+    rawOptions,
+    ["historicalArtifact", "currentArtifact", "rootPackageBytes", "lockfileBytes"],
+    "current coordination policy",
+  );
+  if (options.historicalArtifact === undefined || options.currentArtifact === undefined) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID",
+      "Current M05 coordination policy requires historical and current audited artifacts.",
+    );
+  }
+  const rootPackageBytes = optionalBytes(options.rootPackageBytes, "rootPackageBytes");
+  const lockfileBytes = optionalBytes(options.lockfileBytes, "lockfileBytes");
+  if (rootPackageBytes === undefined || lockfileBytes === undefined) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID",
+      "Current M05 coordination policy requires bounded root package and lockfile bytes.",
+    );
+  }
+  const historicalArtifact = normalizeAuditedJsonDomain(options.historicalArtifact);
+  const currentArtifact = normalizeAuditedJsonDomain(options.currentArtifact);
+  const historicalRootRecord = uniqueCurrentTrackedRecord(historicalArtifact, "package.json");
+  const historicalLockRecord = uniqueCurrentTrackedRecord(historicalArtifact, "pnpm-lock.yaml");
+  const currentRootRecord = uniqueCurrentTrackedRecord(currentArtifact, "package.json");
+  const currentLockRecord = uniqueCurrentTrackedRecord(currentArtifact, "pnpm-lock.yaml");
+  assertCurrentRawRecord(currentRootRecord, rootPackageBytes);
+  assertCurrentRawRecord(currentLockRecord, lockfileBytes);
+  const normalizedRootPackage = await normalizeCurrentRootPackageBytes(rootPackageBytes);
+  const normalizedLockfile = normalizeCurrentLockfileBytes(lockfileBytes);
+  assertHistoricalCoordinationProjection(historicalRootRecord, normalizedRootPackage);
+  assertHistoricalCoordinationProjection(historicalLockRecord, normalizedLockfile);
+  return Object.freeze({
+    result: "PASS",
+    rootPackageRawSha256: currentRootRecord.sha256,
+    lockfileRawSha256: currentLockRecord.sha256,
+    rootPackageHistoricalSha256: historicalRootRecord.sha256,
+    lockfileHistoricalSha256: historicalLockRecord.sha256,
+    normalizedPublisherScriptKeys: true,
+    normalizedPublisherPipelineSegments: true,
+    normalizedPublisherLockfileImporter: true,
+  });
+}
+
+/**
+ * Runs the full current semantic/Vite/build/boundary audit and compares all enduring M05 evidence.
+ */
+export async function verifyCurrentReferenceHostWebSourceAuditEvidence(rawOptions = undefined) {
+  const options = captureOptions(
+    rawOptions,
+    ["workspaceRoot", "artifactPath", "artifactBytes"],
+    "current audit verify",
+  );
+  const workspaceRoot = optionalString(options.workspaceRoot, "workspaceRoot");
+  const artifactPath = optionalString(options.artifactPath, "artifactPath");
+  const artifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
+  if (artifactPath !== undefined && artifactBytes !== undefined) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID",
+      "Current M05 host verification accepts either artifactPath or artifactBytes, not both.",
+    );
+  }
+  const historical = await buildReferenceHostWebSourceAuditEvidence({
+    ...(artifactPath === undefined ? {} : { artifactPath }),
+    ...(artifactBytes === undefined ? {} : { artifactBytes }),
+  });
+  const resolvedWorkspaceRoot = await resolveWorkspaceRoot(workspaceRoot);
+  const current = await buildCurrentReferenceHostWebSourceAuditEvidence({
+    workspaceRoot: resolvedWorkspaceRoot,
+  });
+  const policy = verifyReferenceHostWebCurrentEvidencePolicy(historical.artifact, current.artifact);
+  const [rootPackageBytes, lockfileBytes] = await Promise.all([
+    readRegularFile(resolvedWorkspaceRoot, "package.json"),
+    readRegularFile(resolvedWorkspaceRoot, "pnpm-lock.yaml"),
+  ]);
+  const coordination = await verifyReferenceHostWebCurrentCoordinationPolicy({
+    historicalArtifact: historical.artifact,
+    currentArtifact: current.artifact,
+    rootPackageBytes,
+    lockfileBytes,
+  });
+  return Object.freeze({
+    result: "PASS",
+    historicalArtifactSha256: historical.artifactSha256,
+    currentObservationSha256: current.artifactSha256,
+    trackedFiles: current.artifact.evidence.trackedFiles.length,
+    comparedTrackedFiles: policy.comparedTrackedFiles,
+    excludedCoordinationPaths: policy.excludedCoordinationPaths,
+    coordination,
+    sourceFiles: current.artifact.sourceAudit.sourceFiles,
+    sourceAssertions: current.artifact.sourceAudit.assertions,
+    jsxElements: current.artifact.sourceAudit.jsxElements,
+    graphModules: current.artifact.runtimeResolution.moduleCount,
+    graphStaticEdges: current.artifact.runtimeResolution.staticEdges,
+    graphDynamicEdges: current.artifact.runtimeResolution.dynamicEdges,
+    graphSha256: current.artifact.runtimeResolution.graphSha256,
+    packageBoundaryViolations: current.artifact.packageBoundary.violations,
   });
 }
 
@@ -4511,12 +5871,40 @@ async function writeWorkspaceScopedAtomicArtifact({
   }
 }
 
-/** Verifies stored M05-T09 bytes against a fresh semantic and real-build audit. */
+function historicalEvidenceSummary(built, exactDocumentationReferences = undefined) {
+  const summary = {
+    result: built.artifact.result,
+    artifactSha256: built.artifactSha256,
+    artifactBytes: built.artifactBytes.length,
+    trackedFiles: built.artifact.evidence.trackedFiles.length,
+    sourceFiles: built.artifact.sourceAudit.sourceFiles,
+    sourceAssertions: built.artifact.sourceAudit.assertions,
+    jsxElements: built.artifact.sourceAudit.jsxElements,
+    graphModules: built.artifact.runtimeResolution.moduleCount,
+    graphStaticEdges: built.artifact.runtimeResolution.staticEdges,
+    graphDynamicEdges: built.artifact.runtimeResolution.dynamicEdges,
+    graphSha256: built.artifact.runtimeResolution.graphSha256,
+    packageBoundaryViolations: built.artifact.packageBoundary.violations,
+    compatibilityMode: "immutable-task-time-artifact",
+  };
+  if (exactDocumentationReferences !== undefined) {
+    summary.exactDocumentationReferences = exactDocumentationReferences;
+  }
+  return Object.freeze(summary);
+}
+
+function resolveCompatibilityDocumentPath(candidate, defaultPath) {
+  if (candidate === undefined) return defaultPath;
+  return path.isAbsolute(candidate)
+    ? path.resolve(candidate)
+    : path.resolve(WORKSPACE_ROOT, candidate);
+}
+
+/** Verifies exact immutable M05-T09/G05 bytes, semantics, inventory, and documentation pins. */
 export async function verifyReferenceHostWebSourceAuditEvidence(rawOptions = undefined) {
   const options = captureOptions(
     rawOptions,
     [
-      "workspaceRoot",
       "artifactPath",
       "artifactBytes",
       "proofPath",
@@ -4526,9 +5914,8 @@ export async function verifyReferenceHostWebSourceAuditEvidence(rawOptions = und
       "projectStatusPath",
       "projectStatusText",
     ],
-    "verify",
+    "historical verify",
   );
-  const workspaceRoot = optionalString(options.workspaceRoot, "workspaceRoot");
   const artifactPath = optionalString(options.artifactPath, "artifactPath");
   const injectedArtifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
   const proofPath = optionalString(options.proofPath, "proofPath");
@@ -4555,65 +5942,37 @@ export async function verifyReferenceHostWebSourceAuditEvidence(rawOptions = und
       );
     }
   }
-  const resolvedWorkspaceRoot = await resolveWorkspaceRoot(workspaceRoot);
-  const evidencePaths = resolveWorkspaceEvidencePaths(resolvedWorkspaceRoot, {
-    ...(artifactPath === undefined ? {} : { artifactPath }),
-    ...(proofPath === undefined ? {} : { proofPath }),
-    ...(proofMatrixPath === undefined ? {} : { proofMatrixPath }),
-    ...(projectStatusPath === undefined ? {} : { projectStatusPath }),
-  });
   const built = await buildReferenceHostWebSourceAuditEvidence({
-    workspaceRoot: resolvedWorkspaceRoot,
+    ...(artifactPath === undefined ? {} : { artifactPath }),
+    ...(injectedArtifactBytes === undefined ? {} : { artifactBytes: injectedArtifactBytes }),
   });
-  const stored =
-    injectedArtifactBytes ??
-    (await readAbsoluteRegularFile(
-      evidencePaths.artifactPath,
-      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_MISSING",
-      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_UNSAFE",
-      MAX_ARTIFACT_BYTES,
-    ));
-  if (stored.length > MAX_ARTIFACT_BYTES || !Buffer.from(stored).equals(built.artifactBytes)) {
-    fail(
-      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
-      "M05-T09 artifact bytes differ from the current deterministic audit.",
-      { expected: built.artifactSha256, actual: sha256(stored) },
-    );
-  }
-  const storedArtifact = parseJson(
-    stored,
-    "M05-T09 artifact",
-    "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
-  );
-  const canonicalBuiltArtifact = parseJson(
-    built.artifactBytes,
-    "fresh canonical M05-T09 artifact",
-    "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
-  );
-  if (!isDeepStrictEqual(storedArtifact, canonicalBuiltArtifact)) {
-    fail(
-      "REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT",
-      "M05-T09 artifact semantics differ in the canonical persisted JSON domain.",
-    );
-  }
   const [proofText, matrixText, statusText] = await Promise.all([
     proofDocumentText ??
       readAbsoluteRegularFile(
-        evidencePaths.proofPath,
+        resolveCompatibilityDocumentPath(
+          proofPath,
+          DEFAULT_REFERENCE_HOST_WEB_SOURCE_AUDIT_PROOF_PATH,
+        ),
         "REFERENCE_HOST_SOURCE_AUDIT_DOCUMENTATION_MISSING",
         "REFERENCE_HOST_SOURCE_AUDIT_DOCUMENTATION_UNSAFE",
         MAX_DOCUMENT_BYTES,
       ).then((bytes) => bytes.toString("utf8")),
     proofMatrixText ??
       readAbsoluteRegularFile(
-        evidencePaths.proofMatrixPath,
+        resolveCompatibilityDocumentPath(
+          proofMatrixPath,
+          DEFAULT_REFERENCE_HOST_WEB_SOURCE_AUDIT_PROOF_MATRIX_PATH,
+        ),
         "REFERENCE_HOST_SOURCE_AUDIT_DOCUMENTATION_MISSING",
         "REFERENCE_HOST_SOURCE_AUDIT_DOCUMENTATION_UNSAFE",
         MAX_DOCUMENT_BYTES,
       ).then((bytes) => bytes.toString("utf8")),
     projectStatusText ??
       readAbsoluteRegularFile(
-        evidencePaths.projectStatusPath,
+        resolveCompatibilityDocumentPath(
+          projectStatusPath,
+          DEFAULT_REFERENCE_HOST_WEB_SOURCE_AUDIT_PROJECT_STATUS_PATH,
+        ),
         "REFERENCE_HOST_SOURCE_AUDIT_DOCUMENTATION_MISSING",
         "REFERENCE_HOST_SOURCE_AUDIT_DOCUMENTATION_UNSAFE",
         MAX_DOCUMENT_BYTES,
@@ -4625,55 +5984,57 @@ export async function verifyReferenceHostWebSourceAuditEvidence(rawOptions = und
       "M05-T09 documentation could not be read.",
     );
   });
-  verifyDocumentation(proofText, matrixText, statusText, built.artifactSha256);
-  return Object.freeze({
-    result: built.artifact.result,
-    artifactSha256: built.artifactSha256,
-    artifactBytes: built.artifactBytes.length,
-    trackedFiles: built.artifact.evidence.trackedFiles.length,
-    sourceFiles: built.artifact.sourceAudit.sourceFiles,
-    sourceAssertions: built.artifact.sourceAudit.assertions,
-    jsxElements: built.artifact.sourceAudit.jsxElements,
-    graphModules: built.artifact.runtimeResolution.moduleCount,
-    graphStaticEdges: built.artifact.runtimeResolution.staticEdges,
-    graphDynamicEdges: built.artifact.runtimeResolution.dynamicEdges,
-    graphSha256: built.artifact.runtimeResolution.graphSha256,
-    packageBoundaryViolations: built.artifact.packageBoundary.violations,
-    exactDocumentationReferences: 12,
-  });
+  verifyDocumentation(proofText, matrixText, statusText, HISTORICAL_ARTIFACT_SHA256);
+  return historicalEvidenceSummary(built, 12);
 }
 
-/** Atomically writes exact freshly rebuilt deterministic M05-T09 evidence. */
+/**
+ * Preserves the default immutable receipt or atomically copies its exact authenticated bytes.
+ *
+ * @remarks The committed task-time artifact is never regenerated from successor source.
+ */
 export async function writeReferenceHostWebSourceAuditEvidence(rawOptions = undefined) {
   const options = captureOptions(
     rawOptions,
-    ["workspaceRoot", "artifactPath", "beforeAtomicRename", "proofDocumentText"],
-    "write",
+    ["sourceArtifactPath", "artifactBytes", "artifactPath", "beforeAtomicRename"],
+    "historical write",
   );
-  const workspaceRoot = optionalString(options.workspaceRoot, "workspaceRoot");
+  const sourceArtifactPath = optionalString(options.sourceArtifactPath, "sourceArtifactPath");
+  const injectedArtifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
   const requestedArtifactPath = optionalString(options.artifactPath, "artifactPath");
   const beforeAtomicRename = optionalCallback(options.beforeAtomicRename, "beforeAtomicRename");
-  const proofDocumentText = optionalText(options.proofDocumentText, "proofDocumentText");
-  const resolvedWorkspaceRoot = await resolveWorkspaceRoot(workspaceRoot);
-  const artifactPath = resolveWorkspaceEvidencePaths(resolvedWorkspaceRoot, {
-    ...(requestedArtifactPath === undefined ? {} : { artifactPath: requestedArtifactPath }),
-  }).artifactPath;
-  await assertSafeScopedArtifactOutput(resolvedWorkspaceRoot, artifactPath);
-  const built = await buildReferenceHostWebSourceAuditEvidence({
-    workspaceRoot: resolvedWorkspaceRoot,
-  });
-  if (proofDocumentText !== undefined) {
-    const pending = proofDocumentText.includes(PENDING_SHA256);
-    verifyReferenceHostWebSourceAuditProofDocument(
-      proofDocumentText,
-      pending ? PENDING_SHA256 : built.artifactSha256,
-      pending ? { allowPending: true } : undefined,
+  if (sourceArtifactPath !== undefined && injectedArtifactBytes !== undefined) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID",
+      "Historical M05-T09 write accepts either sourceArtifactPath or artifactBytes, not both.",
     );
   }
+  const built = await buildReferenceHostWebSourceAuditEvidence({
+    ...(sourceArtifactPath === undefined ? {} : { artifactPath: sourceArtifactPath }),
+    ...(injectedArtifactBytes === undefined ? {} : { artifactBytes: injectedArtifactBytes }),
+  });
+  const artifactPath =
+    requestedArtifactPath === undefined
+      ? DEFAULT_REFERENCE_HOST_WEB_SOURCE_AUDIT_ARTIFACT_PATH
+      : scopedWorkspacePath(
+          WORKSPACE_ROOT,
+          requestedArtifactPath,
+          ARTIFACT_RELATIVE_PATH,
+          "artifactPath",
+        );
+  if (artifactPath === DEFAULT_REFERENCE_HOST_WEB_SOURCE_AUDIT_ARTIFACT_PATH) {
+    await buildReferenceHostWebSourceAuditEvidence();
+    return Object.freeze({
+      ...historicalEvidenceSummary(built),
+      artifactPath,
+      preserved: true,
+    });
+  }
+  await assertSafeScopedArtifactOutput(WORKSPACE_ROOT, artifactPath);
   let committed;
   try {
     committed = await writeWorkspaceScopedAtomicArtifact({
-      workspaceRoot: resolvedWorkspaceRoot,
+      workspaceRoot: WORKSPACE_ROOT,
       artifactPath,
       artifactBytes: built.artifactBytes,
       beforeAtomicRename,
@@ -4686,18 +6047,8 @@ export async function writeReferenceHostWebSourceAuditEvidence(rawOptions = unde
     );
   }
   return Object.freeze({
-    result: built.artifact.result,
+    ...historicalEvidenceSummary(built),
     artifactPath: committed.artifactPath,
-    artifactSha256: built.artifactSha256,
-    artifactBytes: built.artifactBytes.length,
-    trackedFiles: built.artifact.evidence.trackedFiles.length,
-    sourceFiles: built.artifact.sourceAudit.sourceFiles,
-    sourceAssertions: built.artifact.sourceAudit.assertions,
-    jsxElements: built.artifact.sourceAudit.jsxElements,
-    graphModules: built.artifact.runtimeResolution.moduleCount,
-    graphStaticEdges: built.artifact.runtimeResolution.staticEdges,
-    graphDynamicEdges: built.artifact.runtimeResolution.dynamicEdges,
-    graphSha256: built.artifact.runtimeResolution.graphSha256,
-    packageBoundaryViolations: built.artifact.packageBoundary.violations,
+    preserved: false,
   });
 }

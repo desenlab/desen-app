@@ -110,6 +110,54 @@ M05-T07 and M05-T08 remain immutable task-time artifacts. Their compatibility re
 the exact historical bytes and reviewed semantics without rebuilding those prior claims from
 M05-T09 successor source.
 
+At the M05→M06 boundary, M05-T09 follows the same rule. Its committed G05 receipt is now read as an
+immutable task-time record: verification authenticates its exact byte digest, byte length,
+identity, predecessor receipts, claim and nonclaim inventory, semantic TypeScript slice, build
+envelope, real Vite graph, dependency boundary, tracked-file inventory, mutation-policy inventory,
+claim-status transitions, and documentation pins. Historical build and write APIs reject
+workspace roots, source overrides, proof-text regeneration, and other successor-state injection.
+The default writer performs no write; an alternate in-workspace destination receives only an
+atomic copy of the already authenticated historical bytes.
+
+Current host safety remains independently executable. A separately named current audit reruns the
+complete source inventory, semantic checker, two observed Vite builds with backing-file
+reauthentication, build-envelope checks, and dependency-cruiser boundary. It then compares every
+enduring M05 field with the historical receipt. The four migrated M05 proof implementation/test
+paths are the only records excluded outright from successor raw-byte equality.
+
+The root `package.json` and `pnpm-lock.yaml` instead use narrow coordination projections. Their
+current raw byte lengths and hashes must first equal the tracked records produced by the live
+audit. The canonical root manifest may then remove only Publisher-namespaced
+generate/verify/test script keys and exact Publisher verify/test pipeline segments; the complete
+remaining bytes must equal the historical length and hash. The lockfile may replace only its
+unique `packages/publisher` importer block with the historical empty importer; every other byte
+must equal the historical length and hash. Root tool versions and scripts, package snapshots,
+integrity and patch metadata, lock settings, and every non-Publisher importer therefore retain
+task-time provenance.
+
+Before that projection, the complete current lockfile must pass a bounded parser for pnpm's
+canonical lockfile YAML subset. It requires strict UTF-8 and LF framing, canonical indentation,
+rejection of YAML-forbidden C0/C1 control code points, one exact root-section inventory,
+structurally valid mappings/sequences and balanced flow collections, and unique mapping keys. YAML
+aliases, anchors, tags, merge keys, block scalars, directives, comments, duplicate block or flow
+keys, ambiguous plain scalars, and excessive line/nesting/token input fail closed. The unique
+Publisher importer must be either the exact empty mapping or dependency groups whose entries each
+contain exactly one genuine plain or quoted `specifier` and `version`. Each field must resolve
+under pnpm's YAML schema to a bounded, non-empty, control-free, well-formed string rather than a
+null, boolean, number, timestamp, flow mapping, or sequence. Decoded dependency names must also
+match the bounded npm package-name domain. Unquoted values and mapping keys reject YAML-reserved
+leading indicators—including `%`, `@`, and backtick—while properly quoted string equivalents
+remain valid. Malformed Publisher bytes cannot disappear through projection, and diagnostics
+expose only controlled classifications rather than rejected lockfile content.
+
+All six coordination paths are still captured before and after the live audit, and every
+host-relevant semantic effect remains in the compared build envelope, tool-version checks,
+resolved graph, backing snapshots, boundary, claims, and nonclaims. Current-evidence normalization
+also preserves hostile `__proto__` keys, requires exact tracked-record fields, rejects decorated or
+duplicate records, and applies aggregate node, scalar, key, and string-byte budgets. No host
+source, host manifest, Catalog/Bundle data, configuration, graph module, semantic result, toolchain
+input, lockfile input outside the Publisher importer, or unlisted tracked path can drift silently.
+
 ## Evidence artifact
 
 - path: `docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json`
