@@ -2233,3 +2233,46 @@ This file records implementation discoveries without changing the frozen DESEN 0
   reference-host infrastructure change must update the semantic allowlist and mutation suite.
   Native hosts require target-specific executable registries and graph audits rather than
   inheriting this Web–React proof.
+
+## PF-060 — Raw Source parsing needs an explicit interoperable JSON and finite-ingress profile
+
+- Status: OPEN
+- Blocks proof: No; M06-T01 can close the first publication stage without changing frozen protocol
+  bytes or claiming that its project-owned ceilings are universal DESEN constants.
+- Protocol location: SPEC Sections 11, 25.1, 26.1, and 27.8; Appendix B; IMPLEMENTATION-GUIDE
+  Section 5; related findings `PF-006` and `PF-007`
+- Observation: DESEN 0.1.0 requires JSON parsing before schema validation and later hashes parsed
+  values through RFC 8785 canonicalization. A value-based canonicalizer cannot recover duplicate
+  object member names that a permissive parser already discarded. The frozen protocol does not
+  assign a raw-JSON diagnostic code, a Source-ingress size ceiling, decoded-string or value-count
+  budgets, or a diagnostic severity field. Appendix B `SCHEMA_INVALID` describes a parsed document
+  failing its normative schema, not bytes that never became an interoperable document. The
+  Reference Profile's 2 MiB limit applies to a final Bundle rather than an authoring Source.
+- Implementation decision: M06-T01 keeps raw parsing package-private and exposes no incomplete
+  public publisher. Before any value reaches schema validation or hashing, a deterministic
+  platform-neutral scanner rejects malformed syntax, duplicate member names after JSON escape
+  decoding, unpaired Unicode surrogates, non-finite numeric outcomes, and finite-budget
+  exhaustion. Duplicate diagnostics point to the decoded RFC 6901 member path when available;
+  native parser messages and Source fragments never cross the boundary. Accepted values are
+  detached and recursively frozen.
+
+  The local profile permits at most 8,388,608 UTF-8 Source bytes, 256 JSON container levels,
+  262,144 JSON value occurrences, 4,194,304 aggregate decoded string code units, and 1,024 code
+  units in one numeric token. The Source ceiling is four times the Reference Profile's final
+  Bundle ceiling so authoring and discovery data have bounded room before removal. Publisher-owned
+  codes `run.desen.publisher/INVALID_SOURCE_JSON` and
+  `run.desen.publisher/SOURCE_LIMIT_EXCEEDED` distinguish raw ingress from normative schema
+  diagnostics. The Publisher result adds a local `error`/`warning` severity while preserving an
+  Appendix B core diagnostic's independent `classification`.
+
+  The public terminal contract follows the frozen guide's `ok` union: success contains only a
+  fully validated immutable Bundle plus warnings; failure contains a first blocking error, its
+  stage, and structurally no `bundle` member. The sixteen required Section 25.1 stages have stable
+  local identifiers. Optional signing and publication metadata remain outside M06 and retain their
+  existing M12 ownership.
+
+- Future action: M06-T11 must exercise malformed, duplicate, non-interoperable, and finite-limit
+  failures through the complete public Publisher and prove that none emits a Bundle. Later
+  protocol work should define interoperable raw-JSON requirements, Source-ingress limits,
+  diagnostic severity, and standard codes. G06 must remain conservative about full Publisher
+  conformance until all Section 27.8 limits relevant to the complete pipeline are evidenced.

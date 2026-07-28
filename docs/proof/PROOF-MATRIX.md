@@ -916,3 +916,26 @@ deployment-security evidence, or a native-runtime claim.
 
 `reference-host-web-0.1.0-source-audit.json`
 `sha256:cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89`.
+
+## M06-T01
+
+M06-T01 establishes the deterministic Publisher's closed terminal result and strict raw Source
+boundary without exposing a partial publisher or emitting a Bundle. Success is reserved for a
+fully validated immutable Bundle plus warnings; failure identifies the first blocking stage,
+starts with an error diagnostic, and structurally contains no `bundle` member.
+
+Before schema validation or hashing, the package-private parser rejects malformed input,
+duplicate decoded member names, invalid Unicode, non-finite numeric outcomes, and explicit finite
+budget crossings. Accepted JSON becomes a detached recursively frozen snapshot. Diagnostics retain
+no caller Source fragment or native exception detail. Lazy pointer paths and hostile-profile
+vectors cover long-path CPU behavior, accessors, non-finite limits, and revoked Proxies.
+
+The evidence checks the exact sixteen-stage order, two task-owned diagnostic definitions, stable
+classification/severity separation, source and built declaration exports, package entry metadata,
+platform neutrality, derived test inventory, deterministic artifact bytes, and fail-closed
+mutation behavior. Its export and diagnostic inventory is explicitly the historical M06-T01
+slice; later modules remain owned by their successor proofs. No `P-*`, normative-coverage, or gate
+status changes; M06-T02 owns exact Catalog resolution next.
+
+`docs/proof/artifacts/publisher-0.1.0-publish-result.json`
+`sha256:ae047fb886f11e06398e2cae1b7b71a6f62f3c59f8f727cb7f6128fe3dd81ad6`.

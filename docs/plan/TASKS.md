@@ -232,7 +232,7 @@ evidence.
 
 | ID      | Status      | Depends on       | Deliverable / evidence                                                                  |
 | ------- | ----------- | ---------------- | --------------------------------------------------------------------------------------- |
-| M06-T01 | NOT_STARTED | G05              | Staged `PublishResult` and diagnostics API                                              |
+| M06-T01 | DONE        | G05              | Staged `PublishResult` and diagnostics API                                              |
 | M06-T02 | NOT_STARTED | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
 | M06-T03 | NOT_STARTED | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
 | M06-T04 | NOT_STARTED | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
@@ -244,6 +244,17 @@ evidence.
 | M06-T10 | NOT_STARTED | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
 | M06-T11 | NOT_STARTED | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
 | G06     | NOT_STARTED | M06-T01–M06-T11  | Valid source publishes; invalid source emits no bundle                                  |
+
+M06-T01 defines the Publisher's closed terminal success/failure union, exact sixteen-stage
+vocabulary, stable task-owned diagnostic definitions, and strict package-private raw Source JSON
+boundary. Success is reserved for a complete immutable Bundle plus warnings; failure starts with a
+blocking error, identifies the stopped stage, and structurally exposes no Bundle or partial parsed
+value. Duplicate decoded names, invalid Unicode, non-finite numbers, malformed syntax, and bounded
+ingress exhaustion fail with controlled redacted diagnostics. Lazy JSON Pointer paths, hostile
+limit profiles, source and built declaration checks, package-entry verification, derived test
+inventory, deterministic evidence, and atomic-write mutations protect the boundary. This task
+emits no Bundle and changes no Proof Matrix claim, normative status, or gate; M06-T02 owns exact
+Catalog resolution next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

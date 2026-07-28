@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27
+Last updated: 2026-07-28
 
 ## Plain-language status
 
@@ -344,15 +344,23 @@ factory bypass, structural render plan, capability/source-node selection, dynami
 package path, forbidden application edge, authoring Source input, orphan source, symlink, or
 unknown asset fails closed. `PF-059` records this audit profile. P-07 advances to `PARTIAL`;
 P-06/P-10 remain `PARTIAL` for their later Desen App slices; and G05 is `DONE`.
+M06-T01 now establishes the Publisher's closed terminal result, exact sixteen-stage vocabulary,
+stable raw-ingress diagnostics, and package-private strict JSON boundary. Successful publication
+is reserved for a complete immutable Bundle plus warnings; every controlled failure starts with a
+blocking error and structurally contains no Bundle or partial parsed value. Malformed JSON,
+duplicate decoded names, invalid Unicode, non-finite numeric outcomes, finite-budget crossings,
+hostile limit profiles, revoked Proxies, and long-path CPU regressions have executable coverage.
+This task intentionally emits no Bundle and changes no proof claim, normative status, or gate.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `63 / 145 tasks complete (43%)`
+- Overall implementation progress: `64 / 145 tasks complete (44%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
+- M06 progress: `1 / 11 tasks complete (9%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -401,11 +409,13 @@ P-06/P-10 remain `PARTIAL` for their later Desen App slices; and G05 is `DONE`.
   `M05-T06 — Error boundaries and explicit capability failure`,
   `M05-T07 — Independently built reference-host shell with host ports`,
   `M05-T08 — Official sign-in bundle running through real adapters`,
-  `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`
+  `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`,
+  `M06-T01 — Staged PublishResult and diagnostics API`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M06-T01 — Staged PublishResult and diagnostics API`
-- Status: M05 and G05 are complete; M06-T01 is ready to start
+- Next implementation task:
+  `M06-T02 — Exact catalog resolution, package immutability, and namespace-conflict checks`
+- Status: M05 and G05 are complete; M06-T01 is complete and M06-T02 is ready
 
 ## Completed preparation
 
@@ -764,10 +774,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T01 — Staged PublishResult and diagnostics API`. Define the deterministic Publisher's
-closed success/failure result boundary and stable diagnostics without emitting a Bundle yet;
-M06-T02 and later tasks will add exact Catalog resolution, semantic preflight, authoring removal,
-and deterministic publication in dependency order.
+Begin `M06-T02 — Exact catalog resolution, package immutability, and namespace-conflict checks`.
+Resolve only exact Source requirements from a caller-supplied inert Catalog set, authenticate each
+package tuple and immutable package identity, reject missing, extra, mismatched, or conflicting
+namespaces deterministically, and feed no untrusted Catalog into later publication stages.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1337,6 +1347,23 @@ M05-T09 evidence:
 - honest limits: no M06 Publisher provenance, dynamic capability installation, browser E2E, Desen
   App registry/Run Mode parity, deployment-security, channel activation, persistent recovery, or
   native-runtime claim
+
+M06-T01 evidence:
+
+- `docs/proof/PUBLISHER-PUBLISH-RESULT.md`
+- `docs/proof/artifacts/publisher-0.1.0-publish-result.json`
+- artifact SHA-256: `ae047fb886f11e06398e2cae1b7b71a6f62f3c59f8f727cb7f6128fe3dd81ad6`
+- exact boundary: one closed `PublishResult`; immutable complete-Bundle success with warnings;
+  error-first no-Bundle failure; sixteen ordered stages; separate severity/classification; and a
+  package-private strict raw Source JSON stage
+- ingress profile: 8,388,608 UTF-8 bytes, 256 container levels, 262,144 value occurrences,
+  4,194,304 decoded string code units, and 1,024 code units per number token
+- executable evidence: 13 focused package cases, 9 compiler-negative cases, 12 root proof/mutation
+  cases, 10 byte-tracked evidence and G05 compatibility-ownership files, exact source and built
+  declaration exports, exact package entry, deterministic artifact rebuilds, hostile-profile and
+  long-path regressions, no partial output, and atomic-write protection
+- coverage decision: M06-T01 becomes `DONE`; no `P-*`, `N-*`, `S-*`, or gate status changes;
+  M06-T02 owns exact Catalog resolution next
 
 ## Status vocabulary
 

@@ -17,9 +17,17 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src --max-warnings=0",
+    "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:coverage": "vitest run --coverage --passWithNoTests"
+    "test": "vitest run",
+    "test:publish-result": "vitest run test/publish-result.test.ts",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@desen/protocol": "workspace:*",
+    "@desen/validator": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
   }
 }
