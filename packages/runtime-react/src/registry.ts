@@ -61,12 +61,23 @@ export type RuntimeReactStyleParts = DesenResolvedAdapterStyleParts;
  */
 export type RuntimeReactSemanticStyle = DesenResolvedAdapterStyle;
 
-/** Controlled event result exposed to a trusted adapter without DOM/native-event authority. */
+/**
+ * Controlled event result exposed to a trusted adapter without DOM/native-event authority.
+ *
+ * @remarks An admitted completion always resolves to `void`; session snapshots and lower
+ * action-turn details remain behind the authenticated runtime boundary.
+ */
 export type RuntimeReactEventDispatchResult =
   | Readonly<{ readonly status: "dispatched"; readonly completion: Promise<void> }>
   | Readonly<{ readonly status: "unavailable" | "rejected" }>;
 
-/** Component command implementation registered by one live platform instance. */
+/**
+ * Component command implementation registered by one committed live platform instance.
+ *
+ * @remarks The runtime supplies only the Catalog-declared command name and detached immutable
+ * JSON input. Native instances, refs, DOM nodes, and lower command registries never cross this
+ * callback.
+ */
 export interface RuntimeReactComponentCommandPort {
   readonly invoke: (
     this: void,
@@ -75,7 +86,13 @@ export interface RuntimeReactComponentCommandPort {
   ) => Readonly<{ readonly status: "succeeded" | "denied" }>;
 }
 
-/** Opaque owner-bound identity for one authenticated live command attachment. */
+/**
+ * Opaque owner-bound identity for one authenticated live command attachment.
+ *
+ * @remarks The handle is valid only through the exact component interaction port that issued it.
+ * Unmount, supersession, binding replacement, navigation, or session disposal revokes its
+ * underlying authority.
+ */
 export interface RuntimeReactCommandAttachmentHandle {
   readonly [RUNTIME_REACT_COMMAND_ATTACHMENT_HANDLE_BRAND]: true;
 }
@@ -96,8 +113,13 @@ export type RuntimeReactCommandDetachmentResult = Readonly<{
 /**
  * Least-authority interaction seam supplied to each adapter instance.
  *
- * @remarks The base renderer returns explicit `unavailable` outcomes. M05-T04 replaces that inert
- * seam with exact current-session event dispatch and factory-authenticated command attachment.
+ * @remarks Before an instance's first commit, during server rendering or never-committed Suspense
+ * work, and after cleanup, calls return explicit `unavailable` outcomes. After commit, events use
+ * the exact captured session snapshot and runtime identity without upgrading stale UI. Trusted
+ * adapters call side-effecting methods only from committed effects or platform event callbacks;
+ * React exposes no supported generic render-phase probe for a later child-local rerender.
+ * Component adapters may attach factory-authenticated command callbacks; behavior adapters never
+ * receive command authority.
  */
 export interface RuntimeReactInteractionPort {
   readonly dispatchEvent: (

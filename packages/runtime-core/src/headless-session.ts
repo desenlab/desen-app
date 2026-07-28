@@ -73,6 +73,9 @@ import type {
   RuntimeAdapterBindingTicket,
   RuntimeAdapterBridgesHandle,
   RuntimeAdapterBridgesSnapshot,
+  RuntimeAdapterComponentCommandPort,
+  RuntimeAdapterComponentCommandRequest,
+  RuntimeAdapterComponentCommandResult,
   RuntimeAdapterEventTurnRequest,
 } from "./adapter-bridges.js";
 import type {
@@ -117,8 +120,13 @@ const SESSION_AUTHORITIES = new WeakMap<
 >();
 const SESSION_SNAPSHOTS = new WeakMap<object, object>();
 const SESSION_SUBSCRIPTIONS = new WeakMap<object, SessionSubscriptionAuthority>();
+const SESSION_COMPONENT_COMMAND_ATTACHMENTS = new WeakMap<
+  object,
+  SessionComponentCommandsAttachmentAuthority
+>();
 declare const RUNTIME_HEADLESS_SESSION_HANDLE_TYPE_BRAND: unique symbol;
 declare const RUNTIME_HEADLESS_SESSION_SUBSCRIPTION_TYPE_BRAND: unique symbol;
+declare const RUNTIME_HEADLESS_SESSION_COMPONENT_COMMANDS_ATTACHMENT_TYPE_BRAND: unique symbol;
 
 /**
  * Finite framework-neutral ceilings for one complete headless Bundle session.
@@ -340,6 +348,70 @@ export type RuntimeHeadlessSessionAdapterAuthorityResult =
       readonly status: "malformed-request";
     }>;
 
+/**
+ * Exact caller-owned input for attaching a framework component's imperative command port.
+ *
+ * @remarks The snapshot and runtime instance must identify one exact current component binding.
+ * Behavior bindings never receive component command authority.
+ */
+export interface RuntimeHeadlessSessionComponentCommandsInput {
+  /** Exact current session snapshot returned by the headless-session factory. */
+  readonly snapshot: RuntimeHeadlessSessionSnapshot;
+  /** Exact runtime instance identifier of one current component binding. */
+  readonly runtimeInstanceId: string;
+  /** Receiver-independent adapter command callback retained behind the private binding holder. */
+  readonly commands: RuntimeAdapterComponentCommandPort;
+}
+
+/**
+ * Opaque authority for one component-command attachment generation.
+ *
+ * @remarks A structural cast cannot manufacture an attachment accepted by
+ * {@link detachRuntimeHeadlessSessionComponentCommands}. Supersession, binding replacement,
+ * navigation, and session disposal revoke this authority automatically.
+ */
+export interface RuntimeHeadlessSessionComponentCommandsAttachment {
+  /** Compile-time-only marker paired with private `WeakMap` authority. */
+  readonly [RUNTIME_HEADLESS_SESSION_COMPONENT_COMMANDS_ATTACHMENT_TYPE_BRAND]: true;
+}
+
+/** Closed synchronous result of attaching one exact component command owner. */
+export type RuntimeHeadlessSessionComponentCommandsAttachResult =
+  | Readonly<{
+      /** The callback now exclusively owns the exact current component binding generation. */
+      readonly status: "attached";
+      /** Opaque authority for explicit idempotent detachment. */
+      readonly attachment: RuntimeHeadlessSessionComponentCommandsAttachment;
+    }>
+  | Readonly<{
+      /** The supplied snapshot was stale, copied, reconstructed, or owned by another session. */
+      readonly status: "invalid-snapshot";
+      /** Exact current snapshot supplied for a bounded adapter retry. */
+      readonly snapshot: RuntimeHeadlessSessionSnapshot;
+    }>
+  | Readonly<{
+      /** No current component binding has the supplied runtime instance identifier. */
+      readonly status: "unknown-component";
+    }>
+  | Readonly<{
+      /** The session has terminally ended. */
+      readonly status: "disposed";
+    }>
+  | Readonly<{
+      /** The supplied handle was not created by the headless-session factory. */
+      readonly status: "invalid-handle";
+    }>
+  | Readonly<{
+      /** The request or command callback was not the exact enumerable own-data shape. */
+      readonly status: "malformed-request";
+    }>;
+
+/** Controlled idempotent result of revoking one factory-created command attachment. */
+export type RuntimeHeadlessSessionComponentCommandsDetachResult = Readonly<{
+  /** Whether this call revoked the owner or found an already inert/foreign authority. */
+  readonly status: "detached" | "already-detached" | "invalid-attachment";
+}>;
+
 /** Receiver-independent invalidation notice used by framework snapshot-store adapters. */
 export type RuntimeHeadlessSessionListener = (this: void) => void;
 
@@ -479,6 +551,14 @@ interface ActiveBinding {
   readonly intent: RuntimeHeadlessBindingIntent;
   readonly ticket: RuntimeAdapterBindingTicket;
   readonly snapshot: RuntimeAdapterBindingSnapshot;
+  readonly commandHolder: ComponentCommandHolder | undefined;
+}
+
+interface ComponentCommandHolder {
+  binding: ActiveBinding | undefined;
+  current: SessionComponentCommandsAttachmentAuthority | undefined;
+  activeInvocation: object | undefined;
+  readonly port: RuntimeAdapterComponentCommandPort;
 }
 
 interface SurfaceLifetime {
@@ -530,6 +610,7 @@ interface HeadlessSessionAuthority {
   readonly observedSettlements: WeakSet<object>;
   readonly subscriptions: Set<SessionSubscriptionAuthority>;
   notificationScheduled: boolean;
+  componentCommandsMutation: object;
 }
 
 interface HeadlessSessionTombstone {
@@ -543,6 +624,15 @@ interface SessionSubscriptionAuthority {
   readonly subscription: RuntimeHeadlessSessionSubscription;
   readonly listener: RuntimeHeadlessSessionListener;
   observedSnapshot: RuntimeHeadlessSessionSnapshot | undefined;
+}
+
+interface SessionComponentCommandsAttachmentAuthority {
+  status: "live" | "revoked";
+  owner: HeadlessSessionAuthority | undefined;
+  lifetime: SurfaceLifetime | undefined;
+  binding: ActiveBinding | undefined;
+  holder: ComponentCommandHolder | undefined;
+  invoke: RuntimeAdapterComponentCommandPort["invoke"] | undefined;
 }
 
 interface CapturedMountInput {
@@ -562,6 +652,12 @@ interface CapturedEventInput {
 interface CapturedAdapterAuthorityInput {
   readonly snapshot: unknown;
   readonly catalogSet: unknown;
+}
+
+interface CapturedComponentCommandsInput {
+  readonly snapshot: unknown;
+  readonly runtimeInstanceId: string;
+  readonly invoke: RuntimeAdapterComponentCommandPort["invoke"];
 }
 
 interface OwnDataRead {
@@ -688,6 +784,77 @@ function captureAdapterAuthorityInput(input: unknown): CapturedAdapterAuthorityI
       snapshot: snapshot.value,
       catalogSet: catalogSet.value,
     });
+  } catch {
+    return undefined;
+  }
+}
+
+function captureComponentCommandPort(
+  input: unknown,
+): RuntimeAdapterComponentCommandPort["invoke"] | undefined {
+  try {
+    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;
+    const prototype = Reflect.getPrototypeOf(input);
+    if (prototype !== Object.prototype && prototype !== null) return undefined;
+    const keys = Reflect.ownKeys(input);
+    if (keys.length !== 1 || keys[0] !== "invoke") return undefined;
+    const invoke = Reflect.getOwnPropertyDescriptor(input, "invoke");
+    return invoke !== undefined &&
+      invoke.enumerable &&
+      "value" in invoke &&
+      typeof invoke.value === "function"
+      ? (invoke.value as RuntimeAdapterComponentCommandPort["invoke"])
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function captureComponentCommandsInput(input: unknown): CapturedComponentCommandsInput | undefined {
+  try {
+    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;
+    const prototype = Reflect.getPrototypeOf(input);
+    if (prototype !== Object.prototype && prototype !== null) return undefined;
+    const keys = Reflect.ownKeys(input);
+    if (
+      keys.length !== 3 ||
+      !keys.includes("commands") ||
+      !keys.includes("runtimeInstanceId") ||
+      !keys.includes("snapshot") ||
+      keys.some(
+        (key) =>
+          typeof key !== "string" ||
+          (key !== "commands" && key !== "runtimeInstanceId" && key !== "snapshot"),
+      )
+    ) {
+      return undefined;
+    }
+    const commands = Reflect.getOwnPropertyDescriptor(input, "commands");
+    const runtimeInstanceId = Reflect.getOwnPropertyDescriptor(input, "runtimeInstanceId");
+    const snapshot = Reflect.getOwnPropertyDescriptor(input, "snapshot");
+    if (
+      commands === undefined ||
+      !commands.enumerable ||
+      !("value" in commands) ||
+      runtimeInstanceId === undefined ||
+      !runtimeInstanceId.enumerable ||
+      !("value" in runtimeInstanceId) ||
+      typeof runtimeInstanceId.value !== "string" ||
+      runtimeInstanceId.value.length === 0 ||
+      snapshot === undefined ||
+      !snapshot.enumerable ||
+      !("value" in snapshot)
+    ) {
+      return undefined;
+    }
+    const invoke = captureComponentCommandPort(commands.value);
+    return invoke === undefined
+      ? undefined
+      : Object.freeze({
+          snapshot: snapshot.value,
+          runtimeInstanceId: runtimeInstanceId.value,
+          invoke,
+        });
   } catch {
     return undefined;
   }
@@ -1261,12 +1428,126 @@ function handlersHavePreparedPrograms(
   );
 }
 
+function captureComponentCommandResult(
+  value: unknown,
+): RuntimeAdapterComponentCommandResult | undefined {
+  try {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+    const prototype = Reflect.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) return undefined;
+    const keys = Reflect.ownKeys(value);
+    if (keys.length !== 1 || keys[0] !== "status") return undefined;
+    const status = Reflect.getOwnPropertyDescriptor(value, "status");
+    return status !== undefined &&
+      status.enumerable &&
+      "value" in status &&
+      (status.value === "succeeded" || status.value === "denied")
+      ? Object.freeze({ status: status.value })
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function attachmentOwnsCurrentComponent(
+  attachment: SessionComponentCommandsAttachmentAuthority,
+): boolean {
+  const { binding, holder, lifetime, owner } = attachment;
+  return (
+    attachment.status === "live" &&
+    binding !== undefined &&
+    holder !== undefined &&
+    lifetime !== undefined &&
+    owner !== undefined &&
+    holder.current === attachment &&
+    holder.binding === binding &&
+    binding.commandHolder === holder &&
+    owner.status === "live" &&
+    owner.retainedGraph !== undefined &&
+    owner.current === lifetime &&
+    lifetime.bindings.get(binding.snapshot.runtimeInstanceId) === binding &&
+    binding.intent.kind === "component"
+  );
+}
+
+function revokeComponentCommandsAttachment(
+  attachment: SessionComponentCommandsAttachmentAuthority,
+): void {
+  if (attachment.status === "revoked") return;
+  const owner = attachment.owner;
+  const holder = attachment.holder;
+  attachment.status = "revoked";
+  if (owner !== undefined) owner.componentCommandsMutation = Object.freeze({});
+  if (holder?.current === attachment) holder.current = undefined;
+  attachment.owner = undefined;
+  attachment.lifetime = undefined;
+  attachment.binding = undefined;
+  attachment.holder = undefined;
+  attachment.invoke = undefined;
+}
+
+function revokeActiveBindingComponentCommands(active: ActiveBinding): void {
+  const holder = active.commandHolder;
+  if (holder === undefined) return;
+  const attachment = holder.current;
+  if (attachment !== undefined) revokeComponentCommandsAttachment(attachment);
+  holder.binding = undefined;
+}
+
+function createComponentCommandHolder(): ComponentCommandHolder {
+  function invoke(
+    request: RuntimeAdapterComponentCommandRequest,
+  ): RuntimeAdapterComponentCommandResult {
+    const attachment = holder.current;
+    if (
+      attachment === undefined ||
+      holder.activeInvocation !== undefined ||
+      !attachmentOwnsCurrentComponent(attachment)
+    ) {
+      return Object.freeze({ status: "denied" });
+    }
+    const invocation = Object.freeze({});
+    const invoke = attachment.invoke;
+    if (invoke === undefined) return Object.freeze({ status: "denied" });
+    holder.activeInvocation = invocation;
+    try {
+      let result: unknown;
+      try {
+        result = Reflect.apply(invoke, undefined, [request]);
+      } catch {
+        return Object.freeze({ status: "denied" });
+      }
+      if (holder.activeInvocation !== invocation || !attachmentOwnsCurrentComponent(attachment)) {
+        return Object.freeze({ status: "denied" });
+      }
+      const capturedResult = captureComponentCommandResult(result);
+      if (holder.activeInvocation !== invocation || !attachmentOwnsCurrentComponent(attachment)) {
+        return Object.freeze({ status: "denied" });
+      }
+      return capturedResult ?? Object.freeze({ status: "denied" });
+    } finally {
+      if (holder.activeInvocation === invocation) holder.activeInvocation = undefined;
+    }
+  }
+  const port: RuntimeAdapterComponentCommandPort = Object.freeze({
+    invoke,
+  });
+  const holder: ComponentCommandHolder = {
+    binding: undefined,
+    current: undefined,
+    activeInvocation: undefined,
+    port,
+  };
+  return holder;
+}
+
 function unregisterActiveBinding(lifetime: SurfaceLifetime, active: ActiveBinding): boolean {
   const removed = unregisterRuntimeAdapterBinding(lifetime.bridgeHandle, {
     ticket: active.ticket,
     snapshot: lifetime.bridgeSnapshot,
   });
   if (removed.status !== "unregistered") return false;
+  revokeActiveBindingComponentCommands(active);
   lifetime.bridgeSnapshot = removed.snapshot;
   return true;
 }
@@ -1276,6 +1557,7 @@ function registerIntent(
   intent: RuntimeHeadlessBindingIntent,
   current: Map<string, ActiveBinding>,
 ): ActiveBinding | undefined {
+  const commandHolder = intent.kind === "component" ? createComponentCommandHolder() : undefined;
   const registered =
     intent.kind === "component"
       ? registerRuntimeAdapterBinding(lifetime.bridgeHandle, {
@@ -1283,6 +1565,7 @@ function registerIntent(
           identity: intent.identity,
           scope: intent.scope,
           handledEvents: intent.handledEvents,
+          commands: (commandHolder as ComponentCommandHolder).port,
           snapshot: lifetime.bridgeSnapshot,
         })
       : (() => {
@@ -1299,11 +1582,14 @@ function registerIntent(
         })();
   if (registered === undefined || registered.status !== "registered") return undefined;
   lifetime.bridgeSnapshot = registered.snapshot;
-  return Object.freeze({
+  const active = Object.freeze({
     intent,
     ticket: registered.ticket,
     snapshot: registered.binding,
+    commandHolder,
   });
+  if (commandHolder !== undefined) commandHolder.binding = active;
+  return active;
 }
 
 function restoreBindings(
@@ -1613,6 +1899,9 @@ interface BuiltSurface {
 }
 
 function disposeCompleteSurface(lifetime: SurfaceLifetime): boolean {
+  for (const active of lifetime.bindings.values()) {
+    revokeActiveBindingComponentCommands(active);
+  }
   let reactiveDisposed = false;
   try {
     const reactive = disposeRuntimeReactiveReevaluation(lifetime.reactiveHandle);
@@ -2366,6 +2655,7 @@ export function mountRuntimeHeadlessSession(
     observedSettlements: new WeakSet(),
     subscriptions: new Set(),
     notificationScheduled: false,
+    componentCommandsMutation: Object.freeze({}),
   };
   hostOwner.current = authority;
   SESSION_AUTHORITIES.set(handle, authority);
@@ -2461,6 +2751,115 @@ export function authenticateRuntimeHeadlessSessionAdapterAuthority(
     return Object.freeze({ status: "invalid-catalog-set" });
   }
   return Object.freeze({ status: "authenticated", snapshot: currentSnapshot });
+}
+
+/**
+ * Attaches one framework component command callback to an exact current binding generation.
+ *
+ * @remarks This seam mutates only the private callback holder created when T14 first registered
+ * the component. It never unregisters or re-registers the adapter binding, so event ticket
+ * identity and registration generation remain stable. A newer attachment atomically supersedes
+ * the previous owner. The callback is invoked with an undefined receiver, and exceptions,
+ * malformed results, reentrant supersession, and authority changes all fail closed as `denied`.
+ */
+export function attachRuntimeHeadlessSessionComponentCommands(
+  handle: RuntimeHeadlessSessionHandle,
+  input: RuntimeHeadlessSessionComponentCommandsInput,
+): RuntimeHeadlessSessionComponentCommandsAttachResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  const authority = SESSION_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  if (
+    authority.status !== "live" ||
+    authority.snapshot === undefined ||
+    authority.current === undefined ||
+    authority.retainedGraph === undefined
+  ) {
+    return Object.freeze({ status: "disposed" });
+  }
+
+  const observedMutation = authority.componentCommandsMutation;
+  const captured = captureComponentCommandsInput(input);
+  const current = SESSION_AUTHORITIES.get(handle);
+  if (
+    current !== authority ||
+    current.status !== "live" ||
+    current.snapshot === undefined ||
+    current.current === undefined ||
+    current.retainedGraph === undefined
+  ) {
+    return Object.freeze({ status: "disposed" });
+  }
+  if (current.componentCommandsMutation !== observedMutation) {
+    return Object.freeze({ status: "malformed-request" });
+  }
+  if (captured === undefined) return Object.freeze({ status: "malformed-request" });
+  const currentSnapshot = current.snapshot;
+  if (
+    typeof captured.snapshot !== "object" ||
+    captured.snapshot === null ||
+    captured.snapshot !== currentSnapshot ||
+    SESSION_SNAPSHOTS.get(captured.snapshot) !== current.snapshotOwner
+  ) {
+    return Object.freeze({ status: "invalid-snapshot", snapshot: currentSnapshot });
+  }
+
+  const lifetime = current.current;
+  const binding = lifetime.bindings.get(captured.runtimeInstanceId);
+  if (
+    binding === undefined ||
+    binding.intent.kind !== "component" ||
+    binding.snapshot.kind !== "component" ||
+    binding.snapshot.runtimeInstanceId !== captured.runtimeInstanceId ||
+    binding.commandHolder === undefined ||
+    binding.commandHolder.binding !== binding
+  ) {
+    return Object.freeze({ status: "unknown-component" });
+  }
+  const holder = binding.commandHolder;
+  const previous = holder.current;
+  if (previous !== undefined) revokeComponentCommandsAttachment(previous);
+
+  const attachment = Object.freeze({}) as RuntimeHeadlessSessionComponentCommandsAttachment;
+  const attachmentAuthority: SessionComponentCommandsAttachmentAuthority = {
+    status: "live",
+    owner: current,
+    lifetime,
+    binding,
+    holder,
+    invoke: captured.invoke,
+  };
+  holder.current = attachmentAuthority;
+  current.componentCommandsMutation = Object.freeze({});
+  SESSION_COMPONENT_COMMAND_ATTACHMENTS.set(attachment, attachmentAuthority);
+  return Object.freeze({ status: "attached", attachment });
+}
+
+/**
+ * Idempotently detaches one factory-created component command owner.
+ *
+ * @remarks Cleanup for an older superseded owner cannot revoke its replacement because every
+ * attachment is checked against the holder's exact current authority before it is cleared.
+ */
+export function detachRuntimeHeadlessSessionComponentCommands(
+  attachment: RuntimeHeadlessSessionComponentCommandsAttachment,
+): RuntimeHeadlessSessionComponentCommandsDetachResult {
+  if (typeof attachment !== "object" || attachment === null) {
+    return Object.freeze({ status: "invalid-attachment" });
+  }
+  const authority = SESSION_COMPONENT_COMMAND_ATTACHMENTS.get(attachment);
+  if (authority === undefined) return Object.freeze({ status: "invalid-attachment" });
+  if (authority.status === "revoked") {
+    return Object.freeze({ status: "already-detached" });
+  }
+  if (!attachmentOwnsCurrentComponent(authority)) {
+    revokeComponentCommandsAttachment(authority);
+    return Object.freeze({ status: "already-detached" });
+  }
+  revokeComponentCommandsAttachment(authority);
+  return Object.freeze({ status: "detached" });
 }
 
 /**

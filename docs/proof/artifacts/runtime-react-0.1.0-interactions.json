@@ -1,0 +1,1331 @@
+{
+  "schemaVersion": 1,
+  "task": "M05-T04",
+  "result": "PASS",
+  "profile": "desen-runtime-react-interactions-v1",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M03-T10",
+      "path": "docs/proof/artifacts/reference-catalog-web-capability-artifact.json",
+      "sha256": "sha256:4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0",
+      "result": "PASS"
+    },
+    {
+      "task": "M04-T17",
+      "gate": "G04",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-audit-hardening.json",
+      "sha256": "sha256:cd37e7721f7b89a983a92c405a4c7491cdaf84354a0ae0ab60adbdac815bb5fa",
+      "profile": "desen-runtime-core-audit-hardening-v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M05-T03",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-resolved-styles.json",
+      "sha256": "sha256:2b0e03e58116d161484cd3c309370ff1ee5003ee6158d4e941749faf0d6797eb",
+      "profile": "desen-runtime-react-resolved-styles-v1",
+      "result": "PASS"
+    }
+  ],
+  "claim": {
+    "exactTwoWayBindingParityBeforeElementCreation": true,
+    "interactionAuthorityCommitScoped": true,
+    "exactCapturedSessionSnapshotAndRuntimeIdentity": true,
+    "behaviorEventsSupported": true,
+    "behaviorComponentCommandAuthority": false,
+    "componentCommandOwnershipOpaqueAndRevocable": true,
+    "nativeOrDomAuthorityExposed": false,
+    "referenceDeclaredCommandsImplemented": true
+  },
+  "componentCommands": {
+    "functions": [
+      "attachRuntimeHeadlessSessionComponentCommands",
+      "detachRuntimeHeadlessSessionComponentCommands"
+    ],
+    "types": [
+      "RuntimeHeadlessSessionComponentCommandsInput",
+      "RuntimeHeadlessSessionComponentCommandsAttachment",
+      "RuntimeHeadlessSessionComponentCommandsAttachResult",
+      "RuntimeHeadlessSessionComponentCommandsDetachResult"
+    ],
+    "stableLowerBindingTicket": true,
+    "supersession": "newest-owner-wins",
+    "staleCleanupRevokesReplacement": false,
+    "automaticRevocation": [
+      "binding-replacement",
+      "navigation",
+      "react-unmount",
+      "session-disposal"
+    ],
+    "hostileOutcomes": "fail-closed-denied-or-controlled-status"
+  },
+  "runtimeReact": {
+    "exports": [
+      "RUNTIME_REACT_ADAPTER_REGISTRY_LIMITS",
+      "RUNTIME_REACT_RENDER_LIMITS",
+      "createRuntimeReactAdapterRegistry",
+      "readRuntimeReactAdapterRegistry",
+      "renderRuntimeReactSurface"
+    ],
+    "typeExports": [
+      "RuntimeReactAdapterRegistryCreateInput",
+      "RuntimeReactAdapterRegistryCreateResult",
+      "RuntimeReactAdapterRegistryHandle",
+      "RuntimeReactAdapterRegistryInvalidReason",
+      "RuntimeReactAdapterRegistryLimitProfile",
+      "RuntimeReactAdapterRegistryReadResult",
+      "RuntimeReactAdapterRegistrySnapshot",
+      "RuntimeReactBehaviorAdapterComponent",
+      "RuntimeReactBehaviorAdapterProps",
+      "RuntimeReactBehaviorAdapterRegistration",
+      "RuntimeReactCommandAttachmentHandle",
+      "RuntimeReactCommandAttachmentResult",
+      "RuntimeReactCommandDetachmentResult",
+      "RuntimeReactComponentAdapterComponent",
+      "RuntimeReactComponentAdapterProps",
+      "RuntimeReactComponentAdapterRegistration",
+      "RuntimeReactComponentCommandPort",
+      "RuntimeReactDiagnosticIdentity",
+      "RuntimeReactEventDispatchResult",
+      "RuntimeReactInteractionPort",
+      "RuntimeReactNamedSlots",
+      "RuntimeReactRenderFailure",
+      "RuntimeReactRenderFailureChannel",
+      "RuntimeReactRenderFailureCode",
+      "RuntimeReactRenderInput",
+      "RuntimeReactRenderLimitProfile",
+      "RuntimeReactRenderResult",
+      "RuntimeReactRenderedSurface",
+      "RuntimeReactSemanticStyle",
+      "RuntimeReactStyleParts",
+      "RuntimeReactStyleProperties"
+    ],
+    "imports": {
+      "interactions": ["./registry.js", "@desen/runtime-core", "react"],
+      "renderer": [
+        "./interactions.js",
+        "./registry.js",
+        "@desen/runtime-core",
+        "@desen/validator",
+        "react"
+      ]
+    },
+    "commitMechanism": "private-layout-effect-controller",
+    "preFirstCommitAuthority": "unavailable",
+    "serverRenderAuthority": "unavailable",
+    "neverCommittedSuspenseAuthority": "unavailable",
+    "cleanupAuthority": "unavailable",
+    "postCommitRenderPhasePubliclyDistinguishable": false,
+    "trustedAdapterUsageRule": "side-effecting ports are called only from committed effects or platform callbacks",
+    "eventCompletionExposure": "void-only",
+    "bindingParityFailure": "RUNTIME_BINDING_MISMATCH"
+  },
+  "referenceAdapters": {
+    "subpath": "@desen/reference-catalog-web/react-adapters",
+    "staticComponentRegistrations": 5,
+    "exports": [
+      "AlertReactAdapter",
+      "ButtonReactAdapter",
+      "REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT",
+      "REFERENCE_WEB_REACT_COMPONENT_ADAPTER_REGISTRATIONS",
+      "StackReactAdapter",
+      "TextFieldReactAdapter",
+      "TextReactAdapter",
+      "alertReactAdapterRegistration",
+      "buttonReactAdapterRegistration",
+      "stackReactAdapterRegistration",
+      "textFieldReactAdapterRegistration",
+      "textReactAdapterRegistration"
+    ],
+    "packageExports": [
+      ".",
+      "./catalog.json",
+      "./components",
+      "./host-operations",
+      "./operations",
+      "./parity",
+      "./react-adapters",
+      "./tokens"
+    ],
+    "consumerExports": [
+      "AlertReactAdapter",
+      "ButtonReactAdapter",
+      "REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT",
+      "REFERENCE_WEB_REACT_COMPONENT_ADAPTER_REGISTRATIONS",
+      "StackReactAdapter",
+      "TextFieldReactAdapter",
+      "TextReactAdapter",
+      "alertReactAdapterRegistration",
+      "buttonReactAdapterRegistration",
+      "stackReactAdapterRegistration",
+      "textFieldReactAdapterRegistration",
+      "textReactAdapterRegistration"
+    ],
+    "builtPublicSubpathExecuted": true,
+    "declaredCommandImplementations": [
+      {
+        "capabilityId": "com.example.ui/TextField",
+        "command": "focus",
+        "privatePrimitive": "TextFieldHandle.focus"
+      }
+    ],
+    "forwardedEvents": [
+      { "capabilityId": "com.example.ui/TextField", "event": "change" },
+      { "capabilityId": "com.example.ui/Button", "event": "press" }
+    ],
+    "commandAttachmentCallSite": "committed-useEffect",
+    "eventDispatchCallSites": ["onChange", "onPress"],
+    "arbitraryPropOrSemanticStyleSpread": false,
+    "domOrNativeHandleLeak": false,
+    "dynamicExecutableLoading": false
+  },
+  "successorPackage": {
+    "identity": {
+      "id": "run.desen.reference.sign-in",
+      "version": "0.1.0",
+      "target": "web-react",
+      "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0"
+    },
+    "profile": "desen.web-react.package-digest",
+    "profileVersion": 1,
+    "distributionFiles": 80,
+    "distributionBytes": 243175,
+    "framedEntries": 81,
+    "framedBytes": 252072,
+    "entries": [
+      {
+        "path": "catalog.json",
+        "byteLength": 5873,
+        "contentDigest": "sha256:033445d7d0862c8b5a0de5cce8c6c73417d6c1e637404bfd23133026c29ebdfa"
+      },
+      {
+        "path": "dist/components/alert.d.ts",
+        "byteLength": 653,
+        "contentDigest": "sha256:2ea6e413820b31a11610f2a3d983fd04b5f82ee626a79cbbabd40d8ddd7947b0"
+      },
+      {
+        "path": "dist/components/alert.d.ts.map",
+        "byteLength": 299,
+        "contentDigest": "sha256:7c7f6cdfd5b7da75d5c780b7037205cc8dba35747859d7a0aae18d64bbd4522b"
+      },
+      {
+        "path": "dist/components/alert.js",
+        "byteLength": 1951,
+        "contentDigest": "sha256:97e9d8a8b596a90905da2ff2ca9fa79c927e86abdc5c36223d82f007517c399f"
+      },
+      {
+        "path": "dist/components/alert.js.map",
+        "byteLength": 1186,
+        "contentDigest": "sha256:64c459caee0b31320dc0c048d05d13fbc8845cc5f5d6cc023fe5a813890d123c"
+      },
+      {
+        "path": "dist/components/button.d.ts",
+        "byteLength": 1032,
+        "contentDigest": "sha256:5421ed336b532ec0a852b2cee8171835ea3aa0b0150929b08e04a60252854544"
+      },
+      {
+        "path": "dist/components/button.d.ts.map",
+        "byteLength": 465,
+        "contentDigest": "sha256:33bbbdf93cc7ad50604f96754fe0568f84b2bd2a6914d1a33fbd4f7505f5ec01"
+      },
+      {
+        "path": "dist/components/button.js",
+        "byteLength": 2334,
+        "contentDigest": "sha256:d0f9e3734c5b0b7a795c1514d2310bb61f10532f5476290ffb8c9fd8456c8011"
+      },
+      {
+        "path": "dist/components/button.js.map",
+        "byteLength": 1652,
+        "contentDigest": "sha256:ee3858a466ea91384b7425a9594254ec81132ef97b6dd651f1dc3596b394df00"
+      },
+      {
+        "path": "dist/components/contracts.d.ts",
+        "byteLength": 6534,
+        "contentDigest": "sha256:30cd78650233a2f4de8c74b9ac49a9dcc98bcc3d62505d62cdc1959f50862489"
+      },
+      {
+        "path": "dist/components/contracts.d.ts.map",
+        "byteLength": 954,
+        "contentDigest": "sha256:0e631d53744e42a4c29476e89051ac480090ea84939f6312aae921c9214acd69"
+      },
+      {
+        "path": "dist/components/contracts.js",
+        "byteLength": 4697,
+        "contentDigest": "sha256:f9e205f65f0f28a29435c4d391b332afd1e75b6310135f076c0e53523336f34c"
+      },
+      {
+        "path": "dist/components/contracts.js.map",
+        "byteLength": 2470,
+        "contentDigest": "sha256:855ed8b07124aff6b54adc869d7f5ee6e2c4ad396b70d7695a660b6e73fcf00e"
+      },
+      {
+        "path": "dist/components/index.d.ts",
+        "byteLength": 1276,
+        "contentDigest": "sha256:fcca4cae682b68c76724de9087bb7ddaf0ccd282b2b9005a53662889afacdce9"
+      },
+      {
+        "path": "dist/components/index.d.ts.map",
+        "byteLength": 979,
+        "contentDigest": "sha256:4c1c7b166440b7babf77696b1b4cc4f7cc6d371ab02e159cc7d2383db329dfeb"
+      },
+      {
+        "path": "dist/components/index.js",
+        "byteLength": 686,
+        "contentDigest": "sha256:74252813b0e340cf1a79e6acef84cdf246cff0e5aa43a0551550ef33ba46d1e9"
+      },
+      {
+        "path": "dist/components/index.js.map",
+        "byteLength": 530,
+        "contentDigest": "sha256:131642815b500f88de5276fe0a3765f0b99b04ba7bc1a664b552bdd9183fb4ed"
+      },
+      {
+        "path": "dist/components/interactive-contracts.d.ts",
+        "byteLength": 11745,
+        "contentDigest": "sha256:b4ff272017befe8117363a3fcf34cc44ef64c7fbfdd857eb0bba0d71409fab66"
+      },
+      {
+        "path": "dist/components/interactive-contracts.d.ts.map",
+        "byteLength": 1515,
+        "contentDigest": "sha256:ef5c9bb0177f042072ae0b54c58d69ec547096c9e22ca5249b40a8b59c9fc814"
+      },
+      {
+        "path": "dist/components/interactive-contracts.js",
+        "byteLength": 8780,
+        "contentDigest": "sha256:bc0ff4a6556015fab67cc8549d134fb9c37e13a525c174adf2f0bcb38b29bcf8"
+      },
+      {
+        "path": "dist/components/interactive-contracts.js.map",
+        "byteLength": 4390,
+        "contentDigest": "sha256:68c32f9884e39f989bba2f3e8d57719490562628cfab2956776c4c9a79bdaee5"
+      },
+      {
+        "path": "dist/components/stack.d.ts",
+        "byteLength": 980,
+        "contentDigest": "sha256:57424edec480bf845855498cb6f3c618b7b2962640a84a890a77ffcb6276c37a"
+      },
+      {
+        "path": "dist/components/stack.d.ts.map",
+        "byteLength": 446,
+        "contentDigest": "sha256:d0b6f4c08515c8f6467c736a230a626202e93d23d8d5c039cf5fdcbef715125b"
+      },
+      {
+        "path": "dist/components/stack.js",
+        "byteLength": 1337,
+        "contentDigest": "sha256:cf2d55bb52885198eba4a055b1defdc5de2582c44c6da03cd09f01e391e154a1"
+      },
+      {
+        "path": "dist/components/stack.js.map",
+        "byteLength": 1050,
+        "contentDigest": "sha256:8380fe119b5a86f793d949c1b80856fcbfb648e0eea6476acdcd8190d1f9c99c"
+      },
+      {
+        "path": "dist/components/text-field.d.ts",
+        "byteLength": 1763,
+        "contentDigest": "sha256:2de7f34017b87cef6bee63075d4cc493f2940c8132e868c6125327296784f782"
+      },
+      {
+        "path": "dist/components/text-field.d.ts.map",
+        "byteLength": 800,
+        "contentDigest": "sha256:74d6216d8087fe3861094639f922517ad81f05486d405930827d6f11d3b88326"
+      },
+      {
+        "path": "dist/components/text-field.js",
+        "byteLength": 2437,
+        "contentDigest": "sha256:a9f662669e7975f8393f922e2fc5d25d54ca616fa607215b4329e0581cd6143e"
+      },
+      {
+        "path": "dist/components/text-field.js.map",
+        "byteLength": 1950,
+        "contentDigest": "sha256:0a22cd226d5ab4ada24a4dc8609f144961fdae1a1559afabcf13e1116e2ab3c4"
+      },
+      {
+        "path": "dist/components/text.d.ts",
+        "byteLength": 718,
+        "contentDigest": "sha256:eb268d82d5720985505e74582c763330b50c06c60a74c00c8a3adc22e5ee6046"
+      },
+      {
+        "path": "dist/components/text.d.ts.map",
+        "byteLength": 297,
+        "contentDigest": "sha256:07cd9a51f431d6e89a90ac76d47e7cdcf727218caf580ee70c078ce990e25eb6"
+      },
+      {
+        "path": "dist/components/text.js",
+        "byteLength": 606,
+        "contentDigest": "sha256:562ab4de0201f49cb385b0c4f4329fc803c6833dde2c21e1b07302551a1e0eae"
+      },
+      {
+        "path": "dist/components/text.js.map",
+        "byteLength": 406,
+        "contentDigest": "sha256:ef7bbe50528bef3198279f272f907849195c658723b430682fd17e3d0c62ea14"
+      },
+      {
+        "path": "dist/host-operations/index.d.ts",
+        "byteLength": 309,
+        "contentDigest": "sha256:c76cfe10c234e06d11dd926696e79c8555b73a2cf8693729f10031963ad840bc"
+      },
+      {
+        "path": "dist/host-operations/index.d.ts.map",
+        "byteLength": 232,
+        "contentDigest": "sha256:9912c360b2dcebf2f73f86799a8af3e0614dcb28b25534735b2223ca26cebff8"
+      },
+      {
+        "path": "dist/host-operations/index.js",
+        "byteLength": 215,
+        "contentDigest": "sha256:f41bb3432fc5fd3225109ef7150e642f3fed35d427fb05f7126d490b5856c05c"
+      },
+      {
+        "path": "dist/host-operations/index.js.map",
+        "byteLength": 175,
+        "contentDigest": "sha256:c665639f3e53dc59f04755c37d072c180e582b653f337cae826c59ee0f996cc7"
+      },
+      {
+        "path": "dist/host-operations/sign-in.d.ts",
+        "byteLength": 2052,
+        "contentDigest": "sha256:f72271fb07c36c301cf95ce7019f2ba3c88590ff3a108b7d126660d6f1185b2d"
+      },
+      {
+        "path": "dist/host-operations/sign-in.d.ts.map",
+        "byteLength": 531,
+        "contentDigest": "sha256:377abb2f9e224e8181ccc596f0d3eab375bcfb6c1167ce50ca789fb0057f2b09"
+      },
+      {
+        "path": "dist/host-operations/sign-in.js",
+        "byteLength": 926,
+        "contentDigest": "sha256:fbcd81c04fc398f5c15d2ec98945ebee047c5b274c6bdc5068fddc11d0745c1b"
+      },
+      {
+        "path": "dist/host-operations/sign-in.js.map",
+        "byteLength": 417,
+        "contentDigest": "sha256:678b3ae31d9ec0d1b64668120446c86d6bd3c86f93a76a1a394850056d0638e0"
+      },
+      {
+        "path": "dist/index.d.ts",
+        "byteLength": 612,
+        "contentDigest": "sha256:21ac34b13f264acfb4cea01243ca6a676d2930683a6e68de22557566e63aadbc"
+      },
+      {
+        "path": "dist/index.d.ts.map",
+        "byteLength": 311,
+        "contentDigest": "sha256:d1dfddbf7f295cfa12b31fa0205a7baa52ff6852303856c6bc11fb42cb76ce9b"
+      },
+      {
+        "path": "dist/index.js",
+        "byteLength": 398,
+        "contentDigest": "sha256:8ff595081672ff63ffd2e2c15207964451cf29f5e810e65e5621b11f2a3e6ba7"
+      },
+      {
+        "path": "dist/index.js.map",
+        "byteLength": 211,
+        "contentDigest": "sha256:170c7305e7fbf5db523163d6363fc91eb890998352467b3c40f731d302179509"
+      },
+      {
+        "path": "dist/operations/index.d.ts",
+        "byteLength": 392,
+        "contentDigest": "sha256:6b3f81923532b9b4033c75da8f6e7e68a5ccdc92b45cd9e231eb65e4a2fc6afb"
+      },
+      {
+        "path": "dist/operations/index.d.ts.map",
+        "byteLength": 282,
+        "contentDigest": "sha256:fc8f4a40e95176d4acdbb6199686261d2a31a91f9f7302337d38f2142a9280c7"
+      },
+      {
+        "path": "dist/operations/index.js",
+        "byteLength": 249,
+        "contentDigest": "sha256:fa9b7854d3f5fd690e2dec59b0813fcabad057e2d171811dcf0ec253a72f5c23"
+      },
+      {
+        "path": "dist/operations/index.js.map",
+        "byteLength": 197,
+        "contentDigest": "sha256:c31f3f1eca511dcb5c7e48b4b6cc18dc2de3346bdbb94a17db54ec072ad6d000"
+      },
+      {
+        "path": "dist/operations/sign-in.d.ts",
+        "byteLength": 3996,
+        "contentDigest": "sha256:8cf9b87ab9489ce25dc21e436ea6bccd3e1a553ccd1a2d43d4674357512eaa2d"
+      },
+      {
+        "path": "dist/operations/sign-in.d.ts.map",
+        "byteLength": 751,
+        "contentDigest": "sha256:28f534ebc71ef9748433623a414f40704f868d51708ed684c1760fcc6258de58"
+      },
+      {
+        "path": "dist/operations/sign-in.js",
+        "byteLength": 2841,
+        "contentDigest": "sha256:b5b5def58fc33ef8567edde42d605efa5a7d9583b3c153d5c670c32b530277de"
+      },
+      {
+        "path": "dist/operations/sign-in.js.map",
+        "byteLength": 1195,
+        "contentDigest": "sha256:8d25b6aab4d9374f55481e33adc925b16dee0b676f1bbe0e1a8d3884682f7da0"
+      },
+      {
+        "path": "dist/package-digest-profile.d.ts",
+        "byteLength": 7377,
+        "contentDigest": "sha256:8d0ed1c6854f46e7069341498bb3433455e357e87d769b988fb7fe1d1c496905"
+      },
+      {
+        "path": "dist/package-digest-profile.d.ts.map",
+        "byteLength": 1638,
+        "contentDigest": "sha256:74b64288fe506a3ee62d340f01317cf457a7c22e1d4a714c91a3c66150c58a00"
+      },
+      {
+        "path": "dist/package-digest-profile.js",
+        "byteLength": 28624,
+        "contentDigest": "sha256:c18595171b51be9037253dd61486393a727ecfd03867eb728bba9519b237acb1"
+      },
+      {
+        "path": "dist/package-digest-profile.js.map",
+        "byteLength": 23392,
+        "contentDigest": "sha256:c7c03c202bf386e17fbe2f35a5fb3afbbeb3f5f8ed8409c782e2730893047e99"
+      },
+      {
+        "path": "dist/parity/index.d.ts",
+        "byteLength": 622,
+        "contentDigest": "sha256:e9b26ae38e4bd85a8c0d5f6c5c46b8776467241188605484540bbf89d5da8ec9"
+      },
+      {
+        "path": "dist/parity/index.d.ts.map",
+        "byteLength": 307,
+        "contentDigest": "sha256:6579259002044821bfef97f2160a78cfd373dbdcb0d10fe7be7ac8f4b4945447"
+      },
+      {
+        "path": "dist/parity/index.js",
+        "byteLength": 253,
+        "contentDigest": "sha256:0a1a16021e6bfd1c79f2061468d56f639c46e2e6355e91dc2cf8d0d23cc5a06e"
+      },
+      {
+        "path": "dist/parity/index.js.map",
+        "byteLength": 168,
+        "contentDigest": "sha256:08e2287322f1c55cfba3d9b27ffae44dcef830ca174b54d0c2096b89c4adf33d"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.d.ts",
+        "byteLength": 6962,
+        "contentDigest": "sha256:a36d1c2797a6aee566e822df10ce2548d8faf9130614df469e51072db59853f9"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.d.ts.map",
+        "byteLength": 2590,
+        "contentDigest": "sha256:c7c1e775162d61200e60e142663c5d13a426eeaf69375078c52d04b0cf0874f8"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.js",
+        "byteLength": 10443,
+        "contentDigest": "sha256:8ff2b6e9e0c8e9ab7336592521a5b752fbdac562646c96676787ee5bbdfde9a5"
+      },
+      {
+        "path": "dist/parity/reference-web-implementation-metadata.js.map",
+        "byteLength": 8446,
+        "contentDigest": "sha256:c4fe35e3dae073781ca39ae893e9728a635bf623a96ebe960f048c5b6d4ad016"
+      },
+      {
+        "path": "dist/react-adapters/index.d.ts",
+        "byteLength": 5432,
+        "contentDigest": "sha256:9a4d39bbb039b03f533eaa0171282caa92b383c4a57f345a7767fbd81250e23b"
+      },
+      {
+        "path": "dist/react-adapters/index.d.ts.map",
+        "byteLength": 935,
+        "contentDigest": "sha256:25148bee11672958e67af4bf4d4e79fe7233817770f5aba9bd15699d68f558e8"
+      },
+      {
+        "path": "dist/react-adapters/index.js",
+        "byteLength": 7521,
+        "contentDigest": "sha256:31834b57d0e9c43e68f4ca23b3dabebeb7093040fe631ab718063bbc6112ed99"
+      },
+      {
+        "path": "dist/react-adapters/index.js.map",
+        "byteLength": 5218,
+        "contentDigest": "sha256:5f00a4223be3679ff085cb0ef123298c6c004e3c6c69659e35349f1a9ad16a35"
+      },
+      {
+        "path": "dist/tokens/index.d.ts",
+        "byteLength": 856,
+        "contentDigest": "sha256:860dd43b11e8e3c6c7ffbde478d0ab5d69a98b2b29e2a5dd7c85570188c080a1"
+      },
+      {
+        "path": "dist/tokens/index.d.ts.map",
+        "byteLength": 490,
+        "contentDigest": "sha256:d1ed92862a82bda22f763dc5057761af226bda59f118debdcacbddaa8ba2c949"
+      },
+      {
+        "path": "dist/tokens/index.js",
+        "byteLength": 409,
+        "contentDigest": "sha256:4b47a66a77ddfb34a8ead7f62a35523c06aff94467f29183eeaba291f779eaf8"
+      },
+      {
+        "path": "dist/tokens/index.js.map",
+        "byteLength": 266,
+        "contentDigest": "sha256:bf5437a754a9dca5659916eaec6b8c2bdc31fd0e48cbc0005cb6d36cdfd33a72"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.d.ts",
+        "byteLength": 9415,
+        "contentDigest": "sha256:6776cf26ee60bfd5d775ec05fe4c3b81089d943ae8e7e5ef618cb5ac14e82466"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.d.ts.map",
+        "byteLength": 2603,
+        "contentDigest": "sha256:1e67325ec9eb619480bfe3a0151dbc781df200200baf2cb138131135ce11ff6c"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.js",
+        "byteLength": 3184,
+        "contentDigest": "sha256:9f566e8ca4d8ac065abd531ec30e9a8b01fa6557b44e46c1d03c0c1b163066b3"
+      },
+      {
+        "path": "dist/tokens/reference-token-document.js.map",
+        "byteLength": 2713,
+        "contentDigest": "sha256:dfbb29a9a7f43d61b5aefcba23b333150ff8aed4c1da93aca892f0a3a9c9a237"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.d.ts",
+        "byteLength": 7734,
+        "contentDigest": "sha256:d8b30429cc0d7a337411e83c68fc7c4798645cc9ebd4b37bfaa7d317e37de432"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.d.ts.map",
+        "byteLength": 1632,
+        "contentDigest": "sha256:8434fca2b5984d05e27ade889d7c1615aecfd91b9791f08080ec21966496717f"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.js",
+        "byteLength": 11116,
+        "contentDigest": "sha256:81c4897b946483672cb6b70d79b9ec05fad2f45e06dc14bea3dfb0cf7af7ffd5"
+      },
+      {
+        "path": "dist/tokens/web-token-provider.js.map",
+        "byteLength": 9619,
+        "contentDigest": "sha256:8d4c3cf40953575c97ed1035344934ad695ed9c18f8dd42dfa15a05abd0a0d68"
+      }
+    ],
+    "interpretations": {
+      "independentFrame": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+      "publicCalculation": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+      "publicVerification": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0"
+    },
+    "catalogAdapterParity": {
+      "direction": "exact-two-way",
+      "catalogComponents": [
+        "com.example.ui/Alert",
+        "com.example.ui/Button",
+        "com.example.ui/Stack",
+        "com.example.ui/Text",
+        "com.example.ui/TextField"
+      ],
+      "registrationComponents": [
+        "com.example.ui/Alert",
+        "com.example.ui/Button",
+        "com.example.ui/Stack",
+        "com.example.ui/Text",
+        "com.example.ui/TextField"
+      ],
+      "behaviors": [],
+      "interactions": [
+        { "capabilityId": "com.example.ui/Alert", "commands": [], "events": [] },
+        { "capabilityId": "com.example.ui/Button", "commands": [], "events": ["press"] },
+        { "capabilityId": "com.example.ui/Stack", "commands": [], "events": [] },
+        { "capabilityId": "com.example.ui/Text", "commands": [], "events": [] },
+        { "capabilityId": "com.example.ui/TextField", "commands": ["focus"], "events": ["change"] }
+      ]
+    }
+  },
+  "evidence": {
+    "tests": {
+      "runtimeReactDeclarations": 11,
+      "runtimeReactExecutedCases": 23,
+      "referenceAdapterTests": 10,
+      "runtimeCoreCommandTests": 5,
+      "rootMutationTests": 18,
+      "compilerNegativeCases": {
+        "runtimeReact": 3,
+        "referenceAdapters": 10,
+        "runtimeCoreCommandAttachment": 7,
+        "total": 20
+      }
+    },
+    "trackedFiles": [
+      {
+        "path": "PROJECT-STATUS.md",
+        "bytes": 87502,
+        "sha256": "sha256:b75a6f1a05c6788421b83b5457f84b1d22634dee073a2840a9bb6bd849217ff7"
+      },
+      {
+        "path": "README.md",
+        "bytes": 37196,
+        "sha256": "sha256:6a92627c7622b759013fbd905fccf275d2dd12c7f563d6d251a542b2c49a2ae7"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 6675,
+        "sha256": "sha256:5e0faa1b62aa3cde80c10764c0190d1c1e60297ca26b41d06ce19eec32e0cf2f"
+      },
+      {
+        "path": "docs/adr/0010-m05-react-runtime-and-reference-host-boundaries.md",
+        "bytes": 19983,
+        "sha256": "sha256:d4a27550d10719606e4991a0432a5316e346f194f9cb68dbf1c347fb5a76d09a"
+      },
+      {
+        "path": "docs/architecture/ARCHITECTURE.md",
+        "bytes": 24145,
+        "sha256": "sha256:6f9e55f8659b28ebc36bfd131fa038100d8bfaa68dd4bebf6cdeca1958513061"
+      },
+      {
+        "path": "docs/plan/PROTOCOL-FINDINGS.md",
+        "bytes": 151452,
+        "sha256": "sha256:5d66c65a97ccf75b8e343213441c1494d1471d5e4360544e7bff220b1a33a864"
+      },
+      {
+        "path": "docs/plan/STRATEGIC-VALIDATION.md",
+        "bytes": 8295,
+        "sha256": "sha256:e7b9d8db3d192d105b54749cd49a61c9e3882e40bc184e80bc2276e399258e73"
+      },
+      {
+        "path": "docs/plan/TASKS.md",
+        "bytes": 36781,
+        "sha256": "sha256:3afa62502528c625a4d9297ca7a9dd194b3d40aa165dfb77652aee3910d3da71"
+      },
+      {
+        "path": "docs/profiles/DTCG-2025.10-COMPATIBILITY.md",
+        "bytes": 16234,
+        "sha256": "sha256:5c1b929e2ea0397d3fd4a4412aca3b7b043b4bd3cf1a7b348c4e1432a71e92aa"
+      },
+      {
+        "path": "docs/proof/NORMATIVE-COVERAGE.md",
+        "bytes": 65543,
+        "sha256": "sha256:96455eaa9712df185d25e306bfa8a2625279031803a64a04c5e17782c62e7fe6",
+        "selfPinNormalizedTo": "sha256:[PENDING_FINAL_ARTIFACT_SHA256]"
+      },
+      {
+        "path": "docs/proof/PROOF-MATRIX.md",
+        "bytes": 85141,
+        "sha256": "sha256:727936df3b5179e6b193ac0dd5e39a2bd4ac6747e8bcd0bf67b5ed372e08b39d",
+        "selfPinNormalizedTo": "sha256:[PENDING_FINAL_ARTIFACT_SHA256]"
+      },
+      {
+        "path": "docs/proof/RUNTIME-CORE-COMMAND-EVENT-ACTIONS.md",
+        "bytes": 15753,
+        "sha256": "sha256:41633b0878229598359cea093e97ad4ee578a07246a54118e5adfaed42da271f"
+      },
+      {
+        "path": "docs/proof/RUNTIME-CORE-LOCAL-STATE-IDENTITY.md",
+        "bytes": 11798,
+        "sha256": "sha256:68d79466fd7458e217e2a256536cfce48b697efd3dab0ced5c08943d5c7f4eaa"
+      },
+      {
+        "path": "docs/proof/RUNTIME-CORE-REACTIVE-REEVALUATION.md",
+        "bytes": 9280,
+        "sha256": "sha256:a4349ec079ffa85d2ac3f332f35bf21c7fa131d41f8236ac87c01659f53c98d6"
+      },
+      {
+        "path": "docs/proof/RUNTIME-REACT-INTERACTIONS.md",
+        "bytes": 9631,
+        "sha256": "sha256:33fb774f3375f15c1252b12eb3fa4222c789c166b3390e33c8b316e6e2acd10e",
+        "selfPinNormalizedTo": "sha256:[PENDING_FINAL_ARTIFACT_SHA256]"
+      },
+      {
+        "path": "docs/proof/SC-01-DESEN-A2UI-COMPARISON.md",
+        "bytes": 36691,
+        "sha256": "sha256:798359cdd8ff3da4e31e0f1e006d648c731b164c4e5529b5507a5a6c860dc727"
+      },
+      {
+        "path": "docs/proof/artifacts/runtime-core-0.1.0-command-event-actions.json",
+        "bytes": 23466,
+        "sha256": "sha256:8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4"
+      },
+      {
+        "path": "docs/proof/artifacts/runtime-core-0.1.0-local-state-identity.json",
+        "bytes": 15575,
+        "sha256": "sha256:4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13"
+      },
+      {
+        "path": "docs/proof/artifacts/runtime-core-0.1.0-reactive-reevaluation.json",
+        "bytes": 11212,
+        "sha256": "sha256:7e412daf9e2e8f08f40a4b093430775414aa1df4a9b14d690d2bf45966cbec67"
+      },
+      {
+        "path": "docs/proof/artifacts/sc-01-dtcg-compatibility.json",
+        "bytes": 31286,
+        "sha256": "sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6"
+      },
+      {
+        "path": "package.json",
+        "bytes": 39902,
+        "sha256": "sha256:1f6456bf938689d2ebc8e62d72dfc8401d0f9434a2ed9f0f34d53ebf6f1f0280"
+      },
+      {
+        "path": "packages/reference-catalog-web/README.md",
+        "bytes": 21633,
+        "sha256": "sha256:052a09e51882611fa2d5095e81ad35b092f89f88b9753ec1de2d061bf8dde064"
+      },
+      {
+        "path": "packages/reference-catalog-web/catalog.json",
+        "bytes": 8439,
+        "sha256": "sha256:71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+      },
+      {
+        "path": "packages/reference-catalog-web/package.json",
+        "bytes": 2538,
+        "sha256": "sha256:b2ef0d08e23edcec2df4c78de9eb08c985382a34b8661cb4016843b0fa183ad7"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/button.tsx",
+        "bytes": 2893,
+        "sha256": "sha256:074edb6e4b8ce9c357fba77636a3e419ee278bc19b41f27ccebeb019d6e7ea72"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/components/text-field.tsx",
+        "bytes": 3747,
+        "sha256": "sha256:80e5d6713c96cfd7e867879aa3c6251f9f2a71b5cb48dc5460acdfecad989eb5"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/index.ts",
+        "bytes": 599,
+        "sha256": "sha256:b845946fd8c453ed86d74ef41d60bb8ef309c3b33584b0d626b4396a69b40c64"
+      },
+      {
+        "path": "packages/reference-catalog-web/src/react-adapters/index.tsx",
+        "bytes": 8748,
+        "sha256": "sha256:1fedfe263a911fd91183a3c732ea575604a4f1d979f0b01be6281113d5744a2e"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/react-adapters-consumer.mjs",
+        "bytes": 442,
+        "sha256": "sha256:36cbfb4e18282f48fe1b9c0ff9f51dcecb5c16e52fde8eebd91a12e0c0bed7d8"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/react-adapters-consumer.test.mjs",
+        "bytes": 1265,
+        "sha256": "sha256:a6334380ed1aedce6303838eada0788e89a9cc9d62be271ccc865eab80cdac3b"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/react-adapters.test.tsx",
+        "bytes": 17684,
+        "sha256": "sha256:d25cbd10b1c1762d74fcc4ecf0c55d94e7786743fbd13870e0523731b57f05ec"
+      },
+      {
+        "path": "packages/reference-catalog-web/test/react-adapters.types.tsx",
+        "bytes": 4171,
+        "sha256": "sha256:569ff5ca02f31bf1ac793cf3a568322e70458d663305a7060968f188328e656d"
+      },
+      {
+        "path": "packages/runtime-core/README.md",
+        "bytes": 66634,
+        "sha256": "sha256:1547eb7262f9ce0a815fa98a3200e1b530934aa653b40acff50bccd0717ac1d5"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.d.ts",
+        "bytes": 23813,
+        "sha256": "sha256:5a30c8fd5a3dc883de2b3f5dd5a3f8b1e76cbc939767e5083c7a37423aa1fac6"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.d.ts.map",
+        "bytes": 8010,
+        "sha256": "sha256:df4b05477801d753d7cd426f774fd5f0bb2b579a01c350d8a500e41ea0414e41"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.js",
+        "bytes": 89709,
+        "sha256": "sha256:d23bc16fcb26962e60d7521c37a6e244ae1fc90345cd018cff9c04b585c6c608"
+      },
+      {
+        "path": "packages/runtime-core/dist/headless-session.js.map",
+        "bytes": 74967,
+        "sha256": "sha256:3d8e25bebdfb56a5709c133c3717d5f7efff28f1661d2e327bd8addc052cf379"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.d.ts",
+        "bytes": 14399,
+        "sha256": "sha256:71537dbf899d2981e379c8e94d81a96da15e17fd42abf9e754d655f66b39da2f"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.d.ts.map",
+        "bytes": 6425,
+        "sha256": "sha256:e32d231c4bd27dff4cec643ad9eaa247f34580a2809bacc638e9f0d7c2d7428e"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.js",
+        "bytes": 3699,
+        "sha256": "sha256:ede8675847efccc9c1e191c77a2c365c445ebeb26783a90fe9d33e0da36cce7a"
+      },
+      {
+        "path": "packages/runtime-core/dist/index.js.map",
+        "bytes": 1838,
+        "sha256": "sha256:a76e9a8659a27da1873deb1a801c7c34cb3ea496cb885a037f7a5e9a2e8f6b7f"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.d.ts",
+        "bytes": 896,
+        "sha256": "sha256:530d08f356aae29e2b3abea519a96834e711837ceb3236ce6f61d286443cae0b"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.d.ts.map",
+        "bytes": 361,
+        "sha256": "sha256:9829905c28152c0d98213ab0e5ec25ecd87368cdc4521ada1a42ceec09fcc3c2"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.js",
+        "bytes": 1475,
+        "sha256": "sha256:cbba03055cece8b86718a16b6d0cc190eb243fff826ab7635f1537703bb6a4a9"
+      },
+      {
+        "path": "packages/runtime-core/dist/runtime-json-snapshot.js.map",
+        "bytes": 918,
+        "sha256": "sha256:1d1cc0bfaf460c754f56ce99a928e3e50ce4fd81d136e69087c12d2d62ddd1b1"
+      },
+      {
+        "path": "packages/runtime-core/package.json",
+        "bytes": 2138,
+        "sha256": "sha256:196c2d8d69d56415283535647657ccbda786d3e7600e3c1d3f1d41e34f7dd67e"
+      },
+      {
+        "path": "packages/runtime-core/src/headless-session.ts",
+        "bytes": 113345,
+        "sha256": "sha256:17c2e5887be81858123d7b8ffbc49d38f10637f46a7fd60651eb6ea19fc704c1"
+      },
+      {
+        "path": "packages/runtime-core/src/index.ts",
+        "bytes": 15131,
+        "sha256": "sha256:9781f1b563b5827cf4447bab787a2c7bbf4b1e5eedcec7cedca4ad394e58bcfe"
+      },
+      {
+        "path": "packages/runtime-core/src/runtime-json-snapshot.ts",
+        "bytes": 1685,
+        "sha256": "sha256:d83f79819a7f0762bbe22104e2686578d1aa9cc88fe67fc0695e008362820c25"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.test.ts",
+        "bytes": 86008,
+        "sha256": "sha256:11c7247e7dc9774ff05a64253b1837475f78e76033aafcaf10fccef67a7c5017"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.types.ts",
+        "bytes": 10969,
+        "sha256": "sha256:f559119e1b97c86760a60349114abd3d7520a33a0fbe1312ec45bc3543028db5"
+      },
+      {
+        "path": "packages/runtime-react/README.md",
+        "bytes": 8860,
+        "sha256": "sha256:cdf44842ecff7d48107c7640dde41e042445c172cf06053bfe3fd508897e67d0"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts",
+        "bytes": 1523,
+        "sha256": "sha256:78ba369843bbb1aac7ed26fd5b9c16f3238ecdb9ec2e50ff61ba7b1dcd76f6ca"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.d.ts.map",
+        "bytes": 709,
+        "sha256": "sha256:1b472941a9e21a88782eadaafa84024b651e22daf0662c372a197114458ee0b1"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js",
+        "bytes": 391,
+        "sha256": "sha256:f880c202eddffe993f4af53d3519595395bb71bfc10ae13b83f28417867f9927"
+      },
+      {
+        "path": "packages/runtime-react/dist/index.js.map",
+        "bytes": 240,
+        "sha256": "sha256:deeea8e084fbdb6ab763a919074c4cba87cc495b73b13a8e32ea85291c661b40"
+      },
+      {
+        "path": "packages/runtime-react/dist/interactions.d.ts",
+        "bytes": 1997,
+        "sha256": "sha256:1845a8b80db8f6bf368215899fe3b0d0df8b984dac456cca1f8ff7384968103b"
+      },
+      {
+        "path": "packages/runtime-react/dist/interactions.d.ts.map",
+        "bytes": 1315,
+        "sha256": "sha256:1e7b0b36e4aca91ecc3fd0e7e454c3e0fd392104286e760a31eb73ec78041d90"
+      },
+      {
+        "path": "packages/runtime-react/dist/interactions.js",
+        "bytes": 10025,
+        "sha256": "sha256:d81e0af9112b56771c37e5f768236e1314d7745c57dd4a2c9eb15ce34f0f230e"
+      },
+      {
+        "path": "packages/runtime-react/dist/interactions.js.map",
+        "bytes": 8530,
+        "sha256": "sha256:b502fde37271bcfd984d9605047c8208c8408e6d807c24e13643d48657eda450"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts",
+        "bytes": 10238,
+        "sha256": "sha256:144240abe4bde6a048fab7f344b701003169573156d938c7cbc1cdc7814f0d1c"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.d.ts.map",
+        "bytes": 4644,
+        "sha256": "sha256:6e2245203eff41d9ee7546098bf81b6e6f7c5d92ceadc04a4a9871d241fff98d"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js",
+        "bytes": 8630,
+        "sha256": "sha256:8ba998f8533d9a1047e56e1b9e0a5cd8ec6f569f92f9f396649d0d9e729b529d"
+      },
+      {
+        "path": "packages/runtime-react/dist/registry.js.map",
+        "bytes": 7970,
+        "sha256": "sha256:aa2ebe3171b2761922d1fa6842974139587cb1c1777896784d2c0c7d6809df35"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts",
+        "bytes": 4992,
+        "sha256": "sha256:b5fd799580ae25f3d4b59e1c5b13eb38035004652749d6139a980cad191ae04a"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.d.ts.map",
+        "bytes": 2256,
+        "sha256": "sha256:0f851006b234d23e704cbbfec773c55a408f0b63599f1d8db56f3d8d4b3af4db"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js",
+        "bytes": 30729,
+        "sha256": "sha256:8c591c131caa0c51a45af0ac13678bd632bc35b442cb52d29597fde76d2bac65"
+      },
+      {
+        "path": "packages/runtime-react/dist/render-plan.js.map",
+        "bytes": 28297,
+        "sha256": "sha256:47d8bd7c7809ec62e8b98ba6c3e240d5fc4b43578390a8485c4253f2b54d7c86"
+      },
+      {
+        "path": "packages/runtime-react/package.json",
+        "bytes": 1393,
+        "sha256": "sha256:65832903010b9bfaa2905c8ef78776fcee1502fe7a212e50218f628d5e68e474"
+      },
+      {
+        "path": "packages/runtime-react/src/index.ts",
+        "bytes": 1558,
+        "sha256": "sha256:45ab161d039ad57eaec901cf9eeec784f3f52c5364af834b83099a23f1d06013"
+      },
+      {
+        "path": "packages/runtime-react/src/interactions.tsx",
+        "bytes": 13622,
+        "sha256": "sha256:c1346e1a432e529519a2b2bfd93e0b3960d4f68385b7785050f234dc895ed76f"
+      },
+      {
+        "path": "packages/runtime-react/src/registry.ts",
+        "bytes": 18360,
+        "sha256": "sha256:63391e3bf80b72980e3b0fd7e28cd07b21d114d0fa2676b11f17ec201bf00caf"
+      },
+      {
+        "path": "packages/runtime-react/src/render-plan.tsx",
+        "bytes": 39080,
+        "sha256": "sha256:f0a764ebda96bed17ec328f90b499aaa8af27a7b72114f1ecaa9ef436dda61f1"
+      },
+      {
+        "path": "packages/runtime-react/test/adapter-registry.test.tsx",
+        "bytes": 12050,
+        "sha256": "sha256:56aeec73b90085c7aae7f876427c1b269db215a544d637896625d7510e5d640e"
+      },
+      {
+        "path": "packages/runtime-react/test/binding-parity.test.tsx",
+        "bytes": 8150,
+        "sha256": "sha256:b61ee7af23cd681cb0c4dbe3b807ea8f78191aecb5b5ad9f123101f3fd91eb5b"
+      },
+      {
+        "path": "packages/runtime-react/test/interaction-wiring.test.tsx",
+        "bytes": 21587,
+        "sha256": "sha256:2145f60385265f09913b52f46e028253fbfd3472c63d80e1b03a9460fd707296"
+      },
+      {
+        "path": "packages/runtime-react/test/interaction-wiring.types.ts",
+        "bytes": 1097,
+        "sha256": "sha256:89445d67b26e0afdeb0388720779cdd5298fb3d8898e43f0f640811eab45521b"
+      },
+      {
+        "path": "packages/runtime-react/test/session-fixture.ts",
+        "bytes": 3719,
+        "sha256": "sha256:dc926c4381693e784b71fa51fea3f08821fbd40a988854a89e37b5f76bc45b2d"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "bytes": 113439,
+        "sha256": "sha256:a67586121def0b537c5cf3de3dc065ef1fd8a02dfda2bbf04d9af87f14e66ddd"
+      },
+      {
+        "path": "scripts/generate-runtime-core-command-event-actions-proof.mjs",
+        "bytes": 956,
+        "sha256": "sha256:3e7522fe5aa52724692fb5925d4bdee3a5016266ca34029f3f55369fbfdc8ff5"
+      },
+      {
+        "path": "scripts/generate-runtime-core-local-state-identity-proof.mjs",
+        "bytes": 959,
+        "sha256": "sha256:0595f103cd3cb02d9d004e0caeaac43ef56074ea31828a7bd2f704c645849a93"
+      },
+      {
+        "path": "scripts/generate-runtime-core-reactive-reevaluation-proof.mjs",
+        "bytes": 695,
+        "sha256": "sha256:df7e94438cbf2eeda8f26906e22270f2d454c17d7e55e1a8714faa109e2cd3ec"
+      },
+      {
+        "path": "scripts/generate-runtime-react-interactions-proof.mjs",
+        "bytes": 659,
+        "sha256": "sha256:b552fa46eddda622b0a8a2c2631d8a6ecf7807b6913bca29bc1a5c23c5c99d7f"
+      },
+      {
+        "path": "scripts/generate-sc-01-dtcg-proof.mjs",
+        "bytes": 1130,
+        "sha256": "sha256:4666952c6e327279ef41d1ce3dad67ef1a95a05422ef33c2fc585832fed22bc9"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "sha256:4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/reference-catalog-web-capability-artifact-proof.mjs",
+        "bytes": 24785,
+        "sha256": "sha256:944d9564f31780a5b9208e5d1d0071c4cbd068d4bb8c5a51593429b863517aaf"
+      },
+      {
+        "path": "scripts/lib/reference-catalog-web-parity-proof.mjs",
+        "bytes": 72389,
+        "sha256": "sha256:596eb4fc6c5e0bc53499ba41171cdc1f22705f0bb9bf03cbfe8a2908039b2bd5"
+      },
+      {
+        "path": "scripts/lib/reference-tokens-and-synthetic-fixtures-proof.mjs",
+        "bytes": 11832,
+        "sha256": "sha256:67518558ee9f6760288e338960a88841203703aba6ec198fbaf5d5921c640318"
+      },
+      {
+        "path": "scripts/lib/runtime-core-audit-hardening-proof.mjs",
+        "bytes": 19394,
+        "sha256": "sha256:932bf6cd220d9c03799b1ac1b7503834d4a0720d83fdf7c64dccf711886abbd6"
+      },
+      {
+        "path": "scripts/lib/runtime-core-command-event-actions-proof.mjs",
+        "bytes": 26347,
+        "sha256": "sha256:970004b9fd14768032f9e3a203f91ab28270cfe3bef25a7da871687041a6fb0f"
+      },
+      {
+        "path": "scripts/lib/runtime-core-headless-sign-in-proof.mjs",
+        "bytes": 21858,
+        "sha256": "sha256:2d8e14461aa83b3503dc1729c64782574cbcbd8fce40f2c5a30de1383a8966ae"
+      },
+      {
+        "path": "scripts/lib/runtime-core-local-state-identity-proof.mjs",
+        "bytes": 31353,
+        "sha256": "sha256:80cd44eeb6bcfd1039e1a0b8a5f02813648ea23457f76981bdf74c0cb241cd6f"
+      },
+      {
+        "path": "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+        "bytes": 32106,
+        "sha256": "sha256:6a5fea50bc73c1bb9ad263251855574bb37488d8c2f3db4844959d64e46af94f"
+      },
+      {
+        "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+        "bytes": 183961,
+        "sha256": "sha256:be8d5f35ac888b7518957eae3d026120d825aa980f92717b7a6cdd3a31af92c8"
+      },
+      {
+        "path": "scripts/lib/runtime-react-resolved-styles-proof.mjs",
+        "bytes": 21757,
+        "sha256": "sha256:13994ac760ff769c8ef755f89eb612d6f2e162416dc2dbf805fca2100c51613e"
+      },
+      {
+        "path": "scripts/lib/sc-01-dtcg-audit.mjs",
+        "bytes": 54353,
+        "sha256": "sha256:5c9c4e41bbdb0ca620f7849e8de588065f345c82febbd59539505548c2ca38ef"
+      },
+      {
+        "path": "scripts/run-ci-quality-gate.mjs",
+        "bytes": 41066,
+        "sha256": "sha256:08784b14d2bdd9e6c95dfd6a27e878382a627723ef33b54b5a0e3709c24f0583"
+      },
+      {
+        "path": "scripts/test/ci-quality-gate.test.mjs",
+        "bytes": 21370,
+        "sha256": "sha256:7b622c4e068376d39bc8454c575d2d61f479e8ed0af48cbd28f6e06927dff268"
+      },
+      {
+        "path": "scripts/verify-runtime-core-command-event-actions.mjs",
+        "bytes": 693,
+        "sha256": "sha256:0823e3c7c1e30d7d18122892ec590b456afd2d39a50ff24b63f2d04cfe5943f7"
+      },
+      {
+        "path": "scripts/verify-runtime-core-local-state-identity.mjs",
+        "bytes": 688,
+        "sha256": "sha256:e22173e791784408740dac6886cda2aabc9cf5f251b2b8311cf90755ea5a5a7b"
+      },
+      {
+        "path": "scripts/verify-runtime-core-reactive-reevaluation.mjs",
+        "bytes": 697,
+        "sha256": "sha256:2502da00a52ffd55e3679b4f699c7b138082405815c7acb87b45cef95caf7eec"
+      },
+      {
+        "path": "scripts/verify-runtime-react-interactions.mjs",
+        "bytes": 661,
+        "sha256": "sha256:4b85d9b2c6dff71eb77c9474678ef817247a6c05231b2643851254286f6feb41"
+      },
+      {
+        "path": "scripts/verify-sc-01-dtcg.mjs",
+        "bytes": 619,
+        "sha256": "sha256:0e479bc39d2818ad35e4f9f21335476090fd9fb575ccd15a06ecc7dc579f0b01"
+      },
+      {
+        "path": "tests/reference-catalog-web-capability-artifact.test.mjs",
+        "bytes": 17983,
+        "sha256": "sha256:0bf9c721fd24d98fc3b2b7af10ba884600b6d7c4f72144782d0a8586574e0a76"
+      },
+      {
+        "path": "tests/reference-catalog-web-parity.test.mjs",
+        "bytes": 27693,
+        "sha256": "sha256:b7c202d19d76189f6e001bb923680c1f7ca2f4532fe686c359b3025681e56913"
+      },
+      {
+        "path": "tests/reference-tokens-and-synthetic-fixtures.test.mjs",
+        "bytes": 8852,
+        "sha256": "sha256:111e817aecfeb468839de5d35ebb3dc7c179758b6be43bf5925bcf31b6baca7d"
+      },
+      {
+        "path": "tests/runtime-core-audit-hardening.test.mjs",
+        "bytes": 8261,
+        "sha256": "sha256:22dede584596c33d8b2deacf1f5c8d18b3f992afeef3d91fe249293d8f9a8168"
+      },
+      {
+        "path": "tests/runtime-core-command-event-actions.test.mjs",
+        "bytes": 15980,
+        "sha256": "sha256:4fc5fb843b1897b31a153ffa292b47cbb6c24a88c1af5dbfa3c0fbd74afaee1a"
+      },
+      {
+        "path": "tests/runtime-core-headless-sign-in.test.mjs",
+        "bytes": 8779,
+        "sha256": "sha256:359cfe8a575e7061ea949185bfa30bfa21a02c7fbe5d9cf985f55c5828a20f98"
+      },
+      {
+        "path": "tests/runtime-core-local-state-identity.test.mjs",
+        "bytes": 21771,
+        "sha256": "sha256:131d72b4827bc0ef24e580174fd6c4fe209108ba0b17bafd148e8d9b2b34cebe"
+      },
+      {
+        "path": "tests/runtime-core-reactive-reevaluation.test.mjs",
+        "bytes": 16607,
+        "sha256": "sha256:f17b41cf1a79d9d674c9cde0ddc6088c57a0ec6595acb929ab1d91a09d8012f5"
+      },
+      {
+        "path": "tests/runtime-react-interactions.test.mjs",
+        "bytes": 43900,
+        "sha256": "sha256:79c03946c054b7ee911e8453f3fc88efbfd32ebfebc72bca897e84af56f264c6"
+      },
+      {
+        "path": "tests/runtime-react-resolved-styles.test.mjs",
+        "bytes": 11852,
+        "sha256": "sha256:a7eaa0dfdfae06092c8b260c8a419f2019a08fbb5545450296234f8c58a8cac5"
+      },
+      {
+        "path": "tests/sc-01-dtcg-audit.test.mjs",
+        "bytes": 27334,
+        "sha256": "sha256:a87d0de8a0b5241dbde9ecf8a07f13ced55122225f3119f1d0ed0cf9305cdd64"
+      }
+    ],
+    "compatibilityPaths": [
+      "scripts/lib/reference-catalog-web-parity-proof.mjs",
+      "scripts/lib/reference-catalog-web-capability-artifact-proof.mjs",
+      "scripts/lib/reference-tokens-and-synthetic-fixtures-proof.mjs",
+      "scripts/lib/runtime-core-headless-sign-in-proof.mjs",
+      "scripts/lib/runtime-core-audit-hardening-proof.mjs",
+      "scripts/lib/runtime-react-resolved-styles-proof.mjs",
+      "scripts/lib/sc-01-dtcg-audit.mjs",
+      "scripts/generate-sc-01-dtcg-proof.mjs",
+      "scripts/verify-sc-01-dtcg.mjs",
+      "scripts/lib/runtime-core-local-state-identity-proof.mjs",
+      "scripts/generate-runtime-core-local-state-identity-proof.mjs",
+      "scripts/verify-runtime-core-local-state-identity.mjs",
+      "scripts/lib/runtime-core-command-event-actions-proof.mjs",
+      "scripts/generate-runtime-core-command-event-actions-proof.mjs",
+      "scripts/verify-runtime-core-command-event-actions.mjs",
+      "scripts/lib/runtime-core-reactive-reevaluation-proof.mjs",
+      "scripts/generate-runtime-core-reactive-reevaluation-proof.mjs",
+      "scripts/verify-runtime-core-reactive-reevaluation.mjs",
+      "tests/reference-catalog-web-capability-artifact.test.mjs",
+      "tests/reference-catalog-web-parity.test.mjs",
+      "tests/reference-tokens-and-synthetic-fixtures.test.mjs",
+      "tests/runtime-core-headless-sign-in.test.mjs",
+      "tests/runtime-core-audit-hardening.test.mjs",
+      "tests/runtime-react-resolved-styles.test.mjs",
+      "tests/sc-01-dtcg-audit.test.mjs",
+      "tests/runtime-core-local-state-identity.test.mjs",
+      "tests/runtime-core-command-event-actions.test.mjs",
+      "tests/runtime-core-reactive-reevaluation.test.mjs"
+    ],
+    "normativeCompatibilityTransfer": {
+      "id": "N-034",
+      "historicalStatus": "PLANNED",
+      "currentStatus": "TESTED",
+      "monotonicIds": ["N-033", "N-034"]
+    },
+    "sc01DtcgCompatibility": {
+      "artifactSha256": "sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6",
+      "taskTimeManifestSha256": "sha256:455025526691234369626b96281ba6522a0d90340adcfcd67ffea2d53be167fa",
+      "compatibilityMode": "immutable-task-time-artifact",
+      "currentSuccessorSourceInputs": false,
+      "rootScripts": {
+        "generate": "node scripts/generate-sc-01-dtcg-proof.mjs",
+        "verify": "node scripts/verify-sc-01-dtcg.mjs",
+        "test": "node --test tests/sc-01-dtcg-audit.test.mjs"
+      },
+      "focusedTests": 20
+    },
+    "localStateIdentityCompatibility": {
+      "artifactSha256": "sha256:4183404aa991af06740a22bc62ff42028ed584edd6feb158095408904a764b13",
+      "artifactBytes": 15575,
+      "compatibilityMode": "immutable-task-time-artifact",
+      "currentRuntimeSourceInputs": false,
+      "rootScripts": {
+        "generate": "node scripts/generate-runtime-core-local-state-identity-proof.mjs",
+        "verify": "node scripts/verify-runtime-core-local-state-identity.mjs",
+        "test": "node --test tests/runtime-core-local-state-identity.test.mjs"
+      },
+      "focusedTests": 20
+    },
+    "commandEventCompatibility": {
+      "artifactSha256": "sha256:8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4",
+      "artifactBytes": 23466,
+      "compatibilityMode": "immutable-task-time-artifact",
+      "currentRuntimeSourceInputs": false,
+      "historicalN034Status": "PLANNED",
+      "currentSelectedWebReactN034Status": "TESTED",
+      "rootScripts": {
+        "generate": "node scripts/generate-runtime-core-command-event-actions-proof.mjs",
+        "verify": "node scripts/verify-runtime-core-command-event-actions.mjs",
+        "test": "node --test tests/runtime-core-command-event-actions.test.mjs"
+      },
+      "focusedTests": 16
+    },
+    "reactiveReevaluationCompatibility": {
+      "artifactSha256": "sha256:7e412daf9e2e8f08f40a4b093430775414aa1df4a9b14d690d2bf45966cbec67",
+      "artifactBytes": 11212,
+      "compatibilityMode": "immutable-task-time-artifact",
+      "currentRuntimeSourceInputs": false,
+      "historicalN034Status": "PLANNED",
+      "currentSelectedWebReactN034Status": "TESTED",
+      "rootScripts": {
+        "generate": "node scripts/generate-runtime-core-reactive-reevaluation-proof.mjs",
+        "verify": "node scripts/verify-runtime-core-reactive-reevaluation.mjs",
+        "test": "node --test tests/runtime-core-reactive-reevaluation.test.mjs"
+      },
+      "focusedTests": 20
+    },
+    "proofPinNormalization": {
+      "token": "[PENDING_FINAL_ARTIFACT_SHA256]",
+      "allowlistedDocuments": [
+        "docs/proof/RUNTIME-REACT-INTERACTIONS.md",
+        "docs/proof/PROOF-MATRIX.md",
+        "docs/proof/NORMATIVE-COVERAGE.md"
+      ],
+      "exactReferenceCount": 5,
+      "productionVerifierAcceptsPending": false
+    },
+    "verifierExecutionProfile": "static-evidence-and-built-package-tuple"
+  },
+  "nonclaims": [
+    "No stable React reconciliation or runtime-to-source lookup API claim.",
+    "No public detector that distinguishes a post-commit trusted child render phase.",
+    "No committed adapter exception-containment claim.",
+    "No concrete semantic-style, CSS, or accessibility-preservation claim.",
+    "No independently built reference host or complete sign-in execution claim.",
+    "No iOS, Android, SwiftUI, Compose, or other native renderer claim."
+  ]
+}

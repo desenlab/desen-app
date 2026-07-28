@@ -94,15 +94,15 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the frozen proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 43,
-    verifierCount: 43,
-    rootTestCount: 43,
-    legacyPrerequisiteCount: 279,
-    legacyPrerequisiteSha256: "c600a96011e6017f0d10f5a8dad9df17841967edffdc5057c6eded4eb45a3196",
-    legacyLeafInvocationCount: 3305,
-    legacyLeafInvocationSha256: "a1d36959b369c5e7f65147770f090ba169e846cd05f62d6e76f46776545415e9",
-    distinctLeafWorkloadCount: 147,
-    distinctLeafWorkloadSha256: "72aeab6ca7bfc7c83609f59a253f44ed7fc110d990b7b26a1265a2b44cc9df3b",
+    proofCount: 44,
+    verifierCount: 44,
+    rootTestCount: 44,
+    legacyPrerequisiteCount: 265,
+    legacyPrerequisiteSha256: "83ee009421857b0ae7820dbfc0414cb92890a860d8f78cfb3237d5da925e0692",
+    legacyLeafInvocationCount: 1271,
+    legacyLeafInvocationSha256: "e93f7220484fa7f541938961c59a5cce856ab87765187a87bd28bb851c261785",
+    distinctLeafWorkloadCount: 148,
+    distinctLeafWorkloadSha256: "720dcea32eb6ec1d80716e1786ff33b4f8598123d17f967822c620249a6297a4",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 12,
     workspaceTestScriptSha256: "3ea2af6964a52fc0808675304559bf221e9ffe96953e09cd9fa2c5d3e74b5732",
@@ -156,6 +156,39 @@ test("inventory validation rejects verifier and test wiring drift", async () => 
 });
 
 test("inventory validation rejects added, removed, or unclassified legacy prerequisites", async () => {
+  const classifiedAddedInventory = await currentInventory();
+  classifiedAddedInventory.packageJson = clone(classifiedAddedInventory.packageJson);
+  classifiedAddedInventory.packageJson.scripts["verify:sc-01-dtcg-compatibility"] =
+    "pnpm --filter @desen/reference-catalog-web... build && node scripts/verify-sc-01-dtcg.mjs";
+  assert.throws(
+    () => validateProofInventory(classifiedAddedInventory),
+    (error) =>
+      error instanceof QualityGateError &&
+      /reviewed legacy prerequisite inventory drifted/u.test(error.message),
+  );
+
+  const commandEventRebuildInventory = await currentInventory();
+  commandEventRebuildInventory.packageJson = clone(commandEventRebuildInventory.packageJson);
+  commandEventRebuildInventory.packageJson.scripts["verify:runtime-core-command-event-actions"] =
+    "pnpm --filter @desen/runtime-core... build && node scripts/verify-runtime-core-command-event-actions.mjs";
+  assert.throws(
+    () => validateProofInventory(commandEventRebuildInventory),
+    (error) =>
+      error instanceof QualityGateError &&
+      /reviewed legacy prerequisite inventory drifted/u.test(error.message),
+  );
+
+  const reactiveRebuildInventory = await currentInventory();
+  reactiveRebuildInventory.packageJson = clone(reactiveRebuildInventory.packageJson);
+  reactiveRebuildInventory.packageJson.scripts["verify:runtime-core-reactive-reevaluation"] =
+    "pnpm --filter @desen/runtime-core... build && node scripts/verify-runtime-core-reactive-reevaluation.mjs";
+  assert.throws(
+    () => validateProofInventory(reactiveRebuildInventory),
+    (error) =>
+      error instanceof QualityGateError &&
+      /reviewed legacy prerequisite inventory drifted/u.test(error.message),
+  );
+
   const addedInventory = await currentInventory();
   addedInventory.packageJson = clone(addedInventory.packageJson);
   addedInventory.packageJson.scripts["verify:protocol-types"] =
@@ -262,8 +295,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 94);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 43);
+  assert.equal(steps.length, 96);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 44);
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -284,8 +317,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 94,
-    planSha256: "5a0d16c908c9ea6980cddfb6ac8c089e1446281b1567ab0d3c8ce30cd3677bdc",
+    stepCount: 96,
+    planSha256: "7b8f93c11c49de2e0c195ac85b794ac54750363d146b7531807f2f22ff810f2e",
   });
 
   const missingTypecheck = clone(steps);

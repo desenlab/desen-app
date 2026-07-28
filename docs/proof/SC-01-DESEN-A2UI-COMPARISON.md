@@ -29,8 +29,10 @@ The executable receipts are:
   `sha256:57b173a684633743c6ab1806e68b00f5b7143fed1f734c32bd7f5afedb7a614e`.
 - `docs/proof/artifacts/sc-01-dtcg-compatibility.json` —
   `sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6`;
-  16 focused tests audit the 26-token reference document, 14 unsupported feature families, 16
-  exact valid-but-unsupported fixtures, and seven exact negative fixtures.
+  20 focused tests preserve the immutable task-time receipt and cover its 26-token reference
+  document, 14 unsupported feature families, 16 exact valid-but-unsupported fixtures, seven exact
+  negative fixtures, proof-pin integrity, hostile inputs, symlinks, and atomic-copy safety. Current
+  successor package bytes are owned independently by M05.
 
 This checkpoint changes no `P-*` status. It proves a positioning and compatibility decision, not a
 production runtime, publisher, activation system, or general interoperability layer.
@@ -289,4 +291,4 @@ exists. Before that package can be public it must:
 - A2UI 1.0 was not stable at the review date and is not evaluated as the selected comparison
   target.
 
-Last verified: 2026-07-24.
+Checkpoint created: 2026-07-24. Immutable DTCG compatibility reader last verified: 2026-07-28.

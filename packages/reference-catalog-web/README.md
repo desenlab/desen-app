@@ -31,9 +31,10 @@ The logical artifact covered by that digest is exactly:
 2. every regular file beneath `dist/`, using its package-relative path and exact file bytes.
 
 No file in `dist/` may be silently omitted, and no file outside that boundary is silently added.
-The shipped `catalog.json` is inert data: this package adds no Catalog loader, executable registry,
-dynamic import route, or registration side effect. React adapter registration and runtime
-materialization remain assigned to M05.
+The shipped `catalog.json` is inert data: importing it adds no Catalog loader, dynamic import
+route, executable selection, or registration side effect. M05-T04 now supplies a separate,
+explicitly imported static React-adapter subpath; runtime materialization and authority still
+remain outside the inert Catalog.
 
 This logical digest does not claim that dependency packages, a workspace lockfile, source files,
 `package.json`, filesystem metadata, or npm/tar archive bytes are recursively covered or
@@ -67,13 +68,15 @@ database operation, credential, or authorization policy.
 
 Every declared style part has stable semantic documentation. `message`, `leadingIcon`, and `icon`
 are conditional because no empty placeholder content is fabricated when their trusted content is
-absent. M03-T09 does not apply resolved design styles or visual states; M05-T03 remains responsible
-for that adapter behavior and for proving that styling cannot suppress host-enforced accessibility.
+absent. M03-T09 does not apply resolved design styles or visual states. M05-T03 owns exact semantic
+delivery, while concrete allowlisted style application and proof that it preserves host-enforced
+accessibility remain future work.
 
 The parity evidence resolves the named exports through static imports and exercises the real
-component-side event, command, and accessibility primitives. It does not create a component lookup
-map, render-plan renderer, generic event bridge, command dispatcher, style applicator, or React
-adapter registry. Those runtime responsibilities remain in M04 and M05 under ADR 0007.
+component-side event, command, and accessibility primitives. That M03 artifact remains inert and
+does not create a component lookup map, render-plan renderer, generic event bridge, command
+dispatcher, style applicator, or React adapter registry. M05-T04 adds the separately imported,
+finite adapter input described below without changing the historical parity artifact.
 
 ## Reference sign-in operation
 
@@ -246,18 +249,54 @@ activation creates a fresh frozen payload containing only the declared inert dat
 `change` and `{}` for `press`. Native React events and DOM nodes never cross this boundary.
 
 TextField exposes a narrow, frozen `TextFieldHandle` for the declared `focus` command. It contains
-only `focus()` and is nominally separated from `HTMLInputElement`; a future renderer adapter must
-still validate the schema-derived empty command input before calling it. M03-T06 proves this
-component-side primitive, not a complete runtime adapter.
+only `focus()` and is nominally separated from `HTMLInputElement`. M03-T06 proves this
+component-side primitive; the M05-T04 adapter below is its only runtime-facing owner.
 
 The exact Alert contract uses `critical`. `PF-027` records that the abbreviated prose example's
 `danger` spelling conflicts with the authoritative Catalog and complete sign-in fixtures; this
 package rejects that spelling rather than widening the frozen contract.
 
-All declared style parts remain present in the exact manifests. Applying resolved style-part
-values while preserving accessibility is intentionally deferred to the M05 React adapter.
-M03-T09 documents parity metadata but does not apply styles. The reference token contract changes
-no component prop or style-part schema.
+All declared style parts remain present in the exact manifests. M05-T03 delivers their semantic
+maps to adapters, but this M05-T04 interaction slice deliberately does not spread those maps onto
+DOM elements or interpret property names as React CSS. Concrete allowlisted reference styling and
+its accessibility-preservation proof remain separate future work. The reference token contract
+changes no component prop or style-part schema.
+
+## Runtime React adapter entry point
+
+M05-T04 exposes the opt-in executable boundary at:
+
+```ts
+import { createRuntimeReactAdapterRegistry } from "@desen/runtime-react";
+import {
+  REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT,
+  REFERENCE_WEB_REACT_COMPONENT_ADAPTER_REGISTRATIONS,
+} from "@desen/reference-catalog-web/react-adapters";
+
+const registry = createRuntimeReactAdapterRegistry(REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT);
+```
+
+The inventory contains exactly five frozen registrations for Stack, Text, TextField, Button, and
+Alert. Each registration wraps the statically imported real component. The Catalog cannot select
+a module, replace a function, extend this list, or trigger registration as an import side effect.
+The subpath is deliberately not re-exported from the package root.
+
+Every wrapper maps schema-validated properties field by field. Only Stack's declared `default`
+slot becomes React children. Undeclared properties, semantic style maps, raw HTML, native events,
+DOM nodes, selectors, and arbitrary React props are never spread onto native elements.
+
+Button forwards the real component's fresh frozen `{}` payload as `press`; TextField forwards its
+fresh frozen `{ value }` payload as `change`. Neither bridge receives or exposes a native event.
+TextField retains its nominal `TextFieldHandle` in a private ref and creates the focus command port
+inside a passive effect, after commit. The port accepts only `focus` with an exact empty inert
+input. Cleanup marks the old port inactive and detaches the exact opaque attachment returned by
+the same interaction port on dependency supersession, StrictMode replay, and unmount. Server
+rendering and abandoned rendering run no effect and therefore create no command authority.
+
+This entry point supplies factory-ready component registrations, not a global registry, dynamic
+loader, behavior adapter, DOM/style interpreter, session authority, or application composition
+root. The runtime owns event validation/dispatch and authenticated command attachment; the host
+continues to own platform behavior and policy.
 
 ## Web–React package digest profile
 
@@ -311,7 +350,7 @@ an independent Node.js framing and SHA-256 oracle.
 - Tar, zip, npm archive, signature, authenticity, or remote-code-loading formats
 - Dependency-tree, source-tree, package-manager-metadata, or archive-byte reproducibility
 - Distributor immutability, exact-package retention, publication, resolution, or activation
-- Executable React adapter registration, lookup, materialization, or dispatch
+- Global React adapter registration, dynamic lookup, render-plan materialization, or host dispatch
 - Native package profiles
 
 ## Status
@@ -322,7 +361,8 @@ provider are implemented. The exact controlled sign-in fixtures and separately d
 host binding are also implemented. Inert Catalog-to-implementation parity metadata and cumulative
 component-side contract tests are implemented by M03-T09. M03-T10 now ships the distinct
 `run.desen.reference.sign-in@0.1.0` Catalog, exhaustive logical artifact inventory, and exact
-immutable `web-react` tuple. Executable React adapter registration remains M05.
+immutable `web-react` tuple. M05-T04 adds the explicit static five-component React adapter input
+without changing the inert package artifact's activation model.
 
 The M03-T07 planning baseline recorded that the controlled sign-in fixtures, complete adapter
 parity, and final package tuple remain assigned to M03-T08 through M03-T10 and M05. M03-T08 and
@@ -342,6 +382,7 @@ pnpm --filter @desen/reference-catalog-web typecheck
 pnpm --filter @desen/reference-catalog-web test:components
 pnpm --filter @desen/reference-catalog-web test:interactive-components
 pnpm --filter @desen/reference-catalog-web test:parity
+pnpm --filter @desen/reference-catalog-web test:react-adapters
 pnpm --filter @desen/reference-catalog-web test:package-digest-profile
 pnpm --filter @desen/reference-catalog-web test:sign-in-operation
 pnpm --filter @desen/reference-catalog-web test:tokens

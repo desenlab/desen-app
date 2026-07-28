@@ -6,7 +6,9 @@ import frozenSignInBundle from "../../protocol/upstream/0.1.0/snapshot/conforman
 import frozenWebCatalog from "../../protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
 import * as adapterBridges from "../src/adapter-bridges.js";
 import {
+  attachRuntimeHeadlessSessionComponentCommands,
   authenticateRuntimeHeadlessSessionAdapterAuthority,
+  detachRuntimeHeadlessSessionComponentCommands,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
   mountRuntimeHeadlessSession,
@@ -21,6 +23,7 @@ import type {
   RuntimeJsonObject,
 } from "../src/host-ports.js";
 import type {
+  RuntimeHeadlessSessionComponentCommandsAttachment,
   RuntimeHeadlessSessionHandle,
   RuntimeHeadlessSessionLimitProfile,
   RuntimeHeadlessSessionSnapshot,
@@ -272,6 +275,36 @@ async function waitFor(
 
 function notify(notices: Set<() => void>): void {
   for (const notice of [...notices]) notice();
+}
+
+function componentCommandBundle(): MutableRecord {
+  const bundle = clone(frozenSignInBundle) as unknown as MutableRecord;
+  const signIn = (bundle.surfaces as MutableRecord)["sign-in"] as MutableRecord;
+  const root = signIn.root as MutableRecord;
+  const children = (root.slots as MutableRecord).default as MutableRecord[];
+  const submit = children[4] as MutableRecord;
+  const handlers = submit.on as MutableRecord;
+  const press = handlers.press as unknown[];
+  press.unshift({
+    type: "component.command",
+    target: "sign-in.password",
+    command: "focus",
+    input: {},
+  });
+  bundle.revision = calculateDesenBundleRevision(bundle);
+  return bundle;
+}
+
+async function dispatchSubmit(target: MountedFixture, snapshot: RuntimeHeadlessSessionSnapshot) {
+  const result = dispatchRuntimeHeadlessSessionEvent(target.handle, {
+    snapshot,
+    runtimeInstanceId: runtimeInstance(snapshot, "sign-in.submit"),
+    eventName: "press",
+    payload: {},
+  });
+  expect(result.status).toBe("dispatched");
+  if (result.status !== "dispatched") throw new TypeError(`Expected dispatch: ${result.status}`);
+  return result.completion;
 }
 
 function expectPortableJson(value: unknown, seen = new WeakSet<object>()): void {
@@ -1664,5 +1697,488 @@ describe("M04-T16 deterministic portable trace", () => {
     const second = await deterministicTrace();
     expect(JSON.stringify(first)).toBe(JSON.stringify(second));
     expectPortableJson(first);
+  });
+});
+
+describe("M05-T04 component command attachment authority", () => {
+  it("retains one stable T14 binding while snapshots publish and detaches idempotently", async () => {
+    const target = mount({ bundle: componentCommandBundle() });
+    const passwordId = runtimeInstance(target.initial, "sign-in.password");
+    const initialBinding = target.initial.bindings.find(
+      (binding) => binding.runtimeInstanceId === passwordId,
+    );
+    const requests: unknown[] = [];
+    const attached = attachRuntimeHeadlessSessionComponentCommands(target.handle, {
+      snapshot: target.initial,
+      runtimeInstanceId: passwordId,
+      commands: {
+        invoke(request) {
+          expect(this).toBeUndefined();
+          requests.push(request);
+          expect(Object.isFrozen(request)).toBe(true);
+          expect(Object.isFrozen(request.input)).toBe(true);
+          return Object.freeze({ status: "succeeded" });
+        },
+      },
+    });
+    expect(attached.status).toBe("attached");
+    if (attached.status !== "attached") throw new TypeError("Expected command attachment.");
+    expect(Object.isFrozen(attached.attachment)).toBe(true);
+    expect(Reflect.ownKeys(attached.attachment)).toEqual([]);
+    expect(current(target)).toBe(target.initial);
+
+    let snapshot = await dispatch(target, "sign-in.email", "change", {
+      value: "person@example.com",
+    });
+    snapshot = await dispatch(target, "sign-in.password", "change", { value: "secret" }, snapshot);
+    const retainedBinding = snapshot.bindings.find(
+      (binding) => binding.runtimeInstanceId === passwordId,
+    );
+    expect(snapshot).not.toBe(target.initial);
+    expect(snapshot.bindings).toBe(target.initial.bindings);
+    expect(retainedBinding?.registrationGeneration).toBe(initialBinding?.registrationGeneration);
+
+    const completion = await dispatchSubmit(target, snapshot);
+    expect((await completion).status).toBe("completed");
+    expect(requests).toEqual([{ command: "focus", input: {} }]);
+
+    expect(detachRuntimeHeadlessSessionComponentCommands(attached.attachment)).toEqual({
+      status: "detached",
+    });
+    expect(detachRuntimeHeadlessSessionComponentCommands(attached.attachment)).toEqual({
+      status: "already-detached",
+    });
+    const detachedCompletion = await dispatchSubmit(target, current(target));
+    expect((await detachedCompletion).status).toBe("terminated");
+    expect(requests).toHaveLength(1);
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+  });
+
+  it("rejects copied, foreign, stale, behavior, unknown, and malformed authorities", async () => {
+    const left = mount({ bundle: componentCommandBundle() });
+    const right = mount({ bundle: componentCommandBundle() });
+    const passwordId = runtimeInstance(left.initial, "sign-in.password");
+    const commands = Object.freeze({
+      invoke: () => Object.freeze({ status: "succeeded" as const }),
+    });
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(left.handle, {
+        snapshot: right.initial,
+        runtimeInstanceId: passwordId,
+        commands,
+      }),
+    ).toEqual({ status: "invalid-snapshot", snapshot: left.initial });
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(left.handle, {
+        snapshot: clone(left.initial),
+        runtimeInstanceId: passwordId,
+        commands,
+      }),
+    ).toEqual({ status: "invalid-snapshot", snapshot: left.initial });
+
+    const currentSnapshot = await dispatch(left, "sign-in.password", "change", {
+      value: "secret",
+    });
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(left.handle, {
+        snapshot: left.initial,
+        runtimeInstanceId: passwordId,
+        commands,
+      }),
+    ).toEqual({ status: "invalid-snapshot", snapshot: currentSnapshot });
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(left.handle, {
+        snapshot: currentSnapshot,
+        runtimeInstanceId: "missing",
+        commands,
+      }),
+    ).toEqual({ status: "unknown-component" });
+
+    const behaviorBundle = componentCommandBundle();
+    const signIn = (behaviorBundle.surfaces as MutableRecord)["sign-in"] as MutableRecord;
+    const root = signIn.root as MutableRecord;
+    root.behaviors = [
+      {
+        id: "sign-in.sort",
+        use: "com.example.interactions/Sortable",
+        props: { axis: "vertical", handle: "item" },
+        on: {},
+      },
+    ];
+    behaviorBundle.revision = calculateDesenBundleRevision(behaviorBundle);
+    const behaviorTarget = mount({ bundle: behaviorBundle });
+    const behavior = behaviorTarget.initial.bindings.find((binding) => binding.kind === "behavior");
+    expect(behavior).toBeDefined();
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(behaviorTarget.handle, {
+        snapshot: behaviorTarget.initial,
+        runtimeInstanceId: behavior?.runtimeInstanceId ?? "missing",
+        commands,
+      }),
+    ).toEqual({ status: "unknown-component" });
+
+    const guarded = attachRuntimeHeadlessSessionComponentCommands(left.handle, {
+      snapshot: currentSnapshot,
+      runtimeInstanceId: passwordId,
+      commands,
+    });
+    expect(guarded.status).toBe("attached");
+    if (guarded.status !== "attached") throw new TypeError("Expected guarded attachment.");
+    const reentrantDetachmentInput = new Proxy(
+      {
+        snapshot: currentSnapshot,
+        runtimeInstanceId: passwordId,
+        commands,
+      },
+      {
+        getPrototypeOf(value) {
+          expect(detachRuntimeHeadlessSessionComponentCommands(guarded.attachment)).toEqual({
+            status: "detached",
+          });
+          return Reflect.getPrototypeOf(value);
+        },
+      },
+    );
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(left.handle, reentrantDetachmentInput),
+    ).toEqual({ status: "malformed-request" });
+
+    const malformedPort = Object.freeze({
+      invoke: commands.invoke,
+      extra: true,
+    });
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(left.handle, {
+        snapshot: currentSnapshot,
+        runtimeInstanceId: passwordId,
+        commands: malformedPort,
+      }),
+    ).toEqual({ status: "malformed-request" });
+    const accessor = Object.defineProperty(
+      {
+        snapshot: currentSnapshot,
+        runtimeInstanceId: passwordId,
+      },
+      "commands",
+      {
+        enumerable: true,
+        get: () => commands,
+      },
+    );
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(
+        left.handle,
+        accessor as unknown as Parameters<typeof attachRuntimeHeadlessSessionComponentCommands>[1],
+      ),
+    ).toEqual({ status: "malformed-request" });
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands({} as RuntimeHeadlessSessionHandle, {
+        snapshot: currentSnapshot,
+        runtimeInstanceId: passwordId,
+        commands,
+      }),
+    ).toEqual({ status: "invalid-handle" });
+    expect(
+      detachRuntimeHeadlessSessionComponentCommands(
+        {} as RuntimeHeadlessSessionComponentCommandsAttachment,
+      ),
+    ).toEqual({ status: "invalid-attachment" });
+
+    const reentrant = mount({ bundle: componentCommandBundle() });
+    const disposalInput = new Proxy(
+      {
+        snapshot: reentrant.initial,
+        runtimeInstanceId: runtimeInstance(reentrant.initial, "sign-in.password"),
+        commands,
+      },
+      {
+        getPrototypeOf(value) {
+          expect(disposeRuntimeHeadlessSession(reentrant.handle).status).toBe("disposed");
+          return Reflect.getPrototypeOf(value);
+        },
+      },
+    );
+    expect(attachRuntimeHeadlessSessionComponentCommands(reentrant.handle, disposalInput)).toEqual({
+      status: "disposed",
+    });
+    expect(disposeRuntimeHeadlessSession(left.handle).status).toBe("disposed");
+    expect(disposeRuntimeHeadlessSession(right.handle).status).toBe("disposed");
+    expect(disposeRuntimeHeadlessSession(behaviorTarget.handle).status).toBe("disposed");
+  });
+
+  it("supersedes atomically and makes reentrant ownership changes fail the active call closed", async () => {
+    const target = mount({ bundle: componentCommandBundle() });
+    let snapshot = await dispatch(target, "sign-in.email", "change", {
+      value: "person@example.com",
+    });
+    snapshot = await dispatch(target, "sign-in.password", "change", { value: "secret" }, snapshot);
+    const passwordId = runtimeInstance(snapshot, "sign-in.password");
+    const first = attachRuntimeHeadlessSessionComponentCommands(target.handle, {
+      snapshot,
+      runtimeInstanceId: passwordId,
+      commands: { invoke: () => Object.freeze({ status: "succeeded" }) },
+    });
+    expect(first.status).toBe("attached");
+    if (first.status !== "attached") throw new TypeError("Expected first attachment.");
+    const replacementInvocations = vi.fn(() => Object.freeze({ status: "succeeded" as const }));
+    const second = attachRuntimeHeadlessSessionComponentCommands(target.handle, {
+      snapshot,
+      runtimeInstanceId: passwordId,
+      commands: { invoke: replacementInvocations },
+    });
+    expect(second.status).toBe("attached");
+    if (second.status !== "attached") throw new TypeError("Expected replacement attachment.");
+    expect(detachRuntimeHeadlessSessionComponentCommands(first.attachment)).toEqual({
+      status: "already-detached",
+    });
+    expect((await dispatchSubmit(target, snapshot)).status).toBe("completed");
+    expect(replacementInvocations).toHaveBeenCalledTimes(1);
+
+    const reentrantTarget = mount({ bundle: componentCommandBundle() });
+    let reentrantSnapshot = await dispatch(reentrantTarget, "sign-in.email", "change", {
+      value: "person@example.com",
+    });
+    reentrantSnapshot = await dispatch(
+      reentrantTarget,
+      "sign-in.password",
+      "change",
+      { value: "secret" },
+      reentrantSnapshot,
+    );
+    const reentrantPasswordId = runtimeInstance(reentrantSnapshot, "sign-in.password");
+    const successorInvocations = vi.fn(() => Object.freeze({ status: "succeeded" as const }));
+    let successor: ReturnType<typeof attachRuntimeHeadlessSessionComponentCommands> | undefined;
+    const reentrantOwner = attachRuntimeHeadlessSessionComponentCommands(reentrantTarget.handle, {
+      snapshot: reentrantSnapshot,
+      runtimeInstanceId: reentrantPasswordId,
+      commands: {
+        invoke() {
+          successor = attachRuntimeHeadlessSessionComponentCommands(reentrantTarget.handle, {
+            snapshot: current(reentrantTarget),
+            runtimeInstanceId: reentrantPasswordId,
+            commands: { invoke: successorInvocations },
+          });
+          return Object.freeze({ status: "succeeded" });
+        },
+      },
+    });
+    expect(reentrantOwner.status).toBe("attached");
+    if (reentrantOwner.status !== "attached") throw new TypeError("Expected reentrant owner.");
+    expect((await dispatchSubmit(reentrantTarget, reentrantSnapshot)).status).toBe("terminated");
+    expect(successor?.status).toBe("attached");
+    expect(detachRuntimeHeadlessSessionComponentCommands(reentrantOwner.attachment)).toEqual({
+      status: "already-detached",
+    });
+    expect((await dispatchSubmit(reentrantTarget, current(reentrantTarget))).status).toBe(
+      "completed",
+    );
+    expect(successorInvocations).toHaveBeenCalledTimes(1);
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+    expect(disposeRuntimeHeadlessSession(reentrantTarget.handle).status).toBe("disposed");
+  });
+
+  it("contains throwing callbacks and rejects executable or malformed callback results", async () => {
+    const target = mount({ bundle: componentCommandBundle() });
+    let snapshot = await dispatch(target, "sign-in.email", "change", {
+      value: "person@example.com",
+    });
+    snapshot = await dispatch(target, "sign-in.password", "change", { value: "secret" }, snapshot);
+    const passwordId = runtimeInstance(snapshot, "sign-in.password");
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(target.handle, {
+        snapshot,
+        runtimeInstanceId: passwordId,
+        commands: {
+          invoke() {
+            throw new Error("hostile adapter callback");
+          },
+        },
+      }).status,
+    ).toBe("attached");
+    expect((await dispatchSubmit(target, snapshot)).status).toBe("terminated");
+    expect(readRuntimeHeadlessSession(target.handle).status).toBe("read");
+
+    const statusGetter = vi.fn(() => "succeeded");
+    expect(
+      attachRuntimeHeadlessSessionComponentCommands(target.handle, {
+        snapshot: current(target),
+        runtimeInstanceId: passwordId,
+        commands: {
+          invoke() {
+            return Object.defineProperty({}, "status", {
+              enumerable: true,
+              get: statusGetter,
+            }) as unknown as { readonly status: "succeeded" };
+          },
+        },
+      }).status,
+    ).toBe("attached");
+    expect((await dispatchSubmit(target, current(target))).status).toBe("terminated");
+    expect(statusGetter).not.toHaveBeenCalled();
+    expect(readRuntimeHeadlessSession(target.handle).status).toBe("read");
+
+    const resultOwnerState: {
+      attachment?: RuntimeHeadlessSessionComponentCommandsAttachment;
+    } = {};
+    let resultTrapCalls = 0;
+    const reentrantResultOwner = attachRuntimeHeadlessSessionComponentCommands(target.handle, {
+      snapshot: current(target),
+      runtimeInstanceId: passwordId,
+      commands: {
+        invoke() {
+          return new Proxy(
+            { status: "succeeded" as const },
+            {
+              getPrototypeOf(subject) {
+                resultTrapCalls += 1;
+                if (resultOwnerState.attachment !== undefined) {
+                  detachRuntimeHeadlessSessionComponentCommands(resultOwnerState.attachment);
+                }
+                return Reflect.getPrototypeOf(subject);
+              },
+            },
+          );
+        },
+      },
+    });
+    expect(reentrantResultOwner.status).toBe("attached");
+    if (reentrantResultOwner.status !== "attached") {
+      throw new TypeError("Expected hostile-result attachment.");
+    }
+    resultOwnerState.attachment = reentrantResultOwner.attachment;
+    expect((await dispatchSubmit(target, current(target))).status).toBe("terminated");
+    expect(resultTrapCalls).toBeGreaterThan(0);
+    expect(detachRuntimeHeadlessSessionComponentCommands(reentrantResultOwner.attachment)).toEqual({
+      status: "already-detached",
+    });
+    expect(disposeRuntimeHeadlessSession(target.handle).status).toBe("disposed");
+  });
+
+  it("revokes attachments on binding replacement, navigation, and terminal disposal", async () => {
+    const replacementBundle = componentCommandBundle();
+    const signIn = (replacementBundle.surfaces as MutableRecord)["sign-in"] as MutableRecord;
+    const root = signIn.root as MutableRecord;
+    const children = (root.slots as MutableRecord).default as MutableRecord[];
+    const password = children[2] as MutableRecord;
+    password.when = {
+      op: "truthy",
+      args: [{ $ref: "context.showPassword" }],
+    };
+    replacementBundle.revision = calculateDesenBundleRevision(replacementBundle);
+    const replacementControl = control();
+    replacementControl.context = Object.freeze({
+      title: "Sign in",
+      tenant: "alpha",
+      showPassword: true,
+    });
+    const replacementTarget = mount({
+      bundle: replacementBundle,
+      target: replacementControl,
+    });
+    const originalId = runtimeInstance(replacementTarget.initial, "sign-in.password");
+    const originalBinding = replacementTarget.initial.bindings.find(
+      (binding) => binding.runtimeInstanceId === originalId,
+    );
+    const original = attachRuntimeHeadlessSessionComponentCommands(replacementTarget.handle, {
+      snapshot: replacementTarget.initial,
+      runtimeInstanceId: originalId,
+      commands: { invoke: () => Object.freeze({ status: "succeeded" }) },
+    });
+    expect(original.status).toBe("attached");
+    if (original.status !== "attached") throw new TypeError("Expected original attachment.");
+    replacementControl.context = Object.freeze({
+      title: "Sign in",
+      tenant: "alpha",
+      showPassword: false,
+    });
+    notify(replacementControl.contextNotices);
+    expect(
+      current(replacementTarget).bindings.some(
+        (binding) => binding.sourceNodeId === "sign-in.password",
+      ),
+    ).toBe(false);
+    expect(detachRuntimeHeadlessSessionComponentCommands(original.attachment)).toEqual({
+      status: "already-detached",
+    });
+    replacementControl.context = Object.freeze({
+      title: "Sign in",
+      tenant: "alpha",
+      showPassword: true,
+    });
+    notify(replacementControl.contextNotices);
+    const restoredSnapshot = current(replacementTarget);
+    const restoredBinding = restoredSnapshot.bindings.find(
+      (binding) => binding.sourceNodeId === "sign-in.password",
+    );
+    expect(restoredBinding?.registrationGeneration).toBeGreaterThan(
+      originalBinding?.registrationGeneration ?? -1,
+    );
+    const restored = attachRuntimeHeadlessSessionComponentCommands(replacementTarget.handle, {
+      snapshot: restoredSnapshot,
+      runtimeInstanceId: restoredBinding?.runtimeInstanceId ?? "missing",
+      commands: { invoke: () => Object.freeze({ status: "succeeded" }) },
+    });
+    expect(restored.status).toBe("attached");
+    if (restored.status !== "attached") throw new TypeError("Expected restored attachment.");
+    expect(detachRuntimeHeadlessSessionComponentCommands(original.attachment)).toEqual({
+      status: "already-detached",
+    });
+    expect(detachRuntimeHeadlessSessionComponentCommands(restored.attachment)).toEqual({
+      status: "detached",
+    });
+
+    const navigationTarget = mount({ bundle: componentCommandBundle() });
+    let navigationSnapshot = await dispatch(navigationTarget, "sign-in.email", "change", {
+      value: "person@example.com",
+    });
+    navigationSnapshot = await dispatch(
+      navigationTarget,
+      "sign-in.password",
+      "change",
+      { value: "secret" },
+      navigationSnapshot,
+    );
+    const navigationAttachment = attachRuntimeHeadlessSessionComponentCommands(
+      navigationTarget.handle,
+      {
+        snapshot: navigationSnapshot,
+        runtimeInstanceId: runtimeInstance(navigationSnapshot, "sign-in.password"),
+        commands: { invoke: () => Object.freeze({ status: "succeeded" }) },
+      },
+    );
+    expect(navigationAttachment.status).toBe("attached");
+    if (navigationAttachment.status !== "attached") {
+      throw new TypeError("Expected navigation attachment.");
+    }
+    expect((await dispatchSubmit(navigationTarget, navigationSnapshot)).status).toBe("completed");
+    navigationTarget.control.operationAttempts[0]?.resolve({
+      status: "succeeded",
+      value: { userId: "user-1" },
+    });
+    await flush();
+    expect(current(navigationTarget).surfaceId).toBe("home");
+    expect(detachRuntimeHeadlessSessionComponentCommands(navigationAttachment.attachment)).toEqual({
+      status: "already-detached",
+    });
+
+    const disposedTarget = mount({ bundle: componentCommandBundle() });
+    const disposedAttachment = attachRuntimeHeadlessSessionComponentCommands(
+      disposedTarget.handle,
+      {
+        snapshot: disposedTarget.initial,
+        runtimeInstanceId: runtimeInstance(disposedTarget.initial, "sign-in.password"),
+        commands: { invoke: () => Object.freeze({ status: "succeeded" }) },
+      },
+    );
+    expect(disposedAttachment.status).toBe("attached");
+    if (disposedAttachment.status !== "attached") {
+      throw new TypeError("Expected disposal attachment.");
+    }
+    expect(disposeRuntimeHeadlessSession(disposedTarget.handle).status).toBe("disposed");
+    expect(detachRuntimeHeadlessSessionComponentCommands(disposedAttachment.attachment)).toEqual({
+      status: "already-detached",
+    });
+    expect(disposeRuntimeHeadlessSession(replacementTarget.handle).status).toBe("disposed");
+    expect(disposeRuntimeHeadlessSession(navigationTarget.handle).status).toBe("disposed");
   });
 });

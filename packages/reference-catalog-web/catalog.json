@@ -233,7 +233,7 @@
       }
     }
   },
-  "packageDigest": "sha256:4ebfc6209d4874f3798009c72c634d2f65e60f8b59d4a517f269380a8cec6d9e",
+  "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
   "resources": {},
   "target": "web-react",
   "version": "0.1.0"

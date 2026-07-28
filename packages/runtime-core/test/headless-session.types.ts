@@ -1,10 +1,13 @@
 import {
+  attachRuntimeHeadlessSessionComponentCommands,
   authenticateRuntimeHeadlessSessionAdapterAuthority,
+  detachRuntimeHeadlessSessionComponentCommands,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
   mountRuntimeHeadlessSession,
   readRuntimeHeadlessSession,
   RUNTIME_HEADLESS_SESSION_LIMITS,
+  snapshotRuntimeJsonValue,
   subscribeRuntimeHeadlessSession,
   unsubscribeRuntimeHeadlessSession,
 } from "../src/index.js";
@@ -13,6 +16,10 @@ import type {
   RuntimeHeadlessBindingSnapshot,
   RuntimeHeadlessSessionAdapterAuthorityInput,
   RuntimeHeadlessSessionAdapterAuthorityResult,
+  RuntimeHeadlessSessionComponentCommandsAttachResult,
+  RuntimeHeadlessSessionComponentCommandsAttachment,
+  RuntimeHeadlessSessionComponentCommandsDetachResult,
+  RuntimeHeadlessSessionComponentCommandsInput,
   RuntimeHeadlessSessionDisposeResult,
   RuntimeHeadlessSessionEventCompletion,
   RuntimeHeadlessSessionEventInput,
@@ -28,6 +35,7 @@ import type {
   RuntimeHeadlessSessionSubscription,
   RuntimeHeadlessSessionUnsubscribeResult,
   RuntimeHostPorts,
+  RuntimeJsonValue,
 } from "../src/index.js";
 import type { DesenValidatedExecutionCatalogSet } from "@desen/validator";
 
@@ -35,6 +43,12 @@ declare const hostPorts: RuntimeHostPorts;
 declare const handle: RuntimeHeadlessSessionHandle;
 declare const snapshot: RuntimeHeadlessSessionSnapshot;
 declare const catalogSet: DesenValidatedExecutionCatalogSet;
+
+const detachedRuntimeJson = snapshotRuntimeJsonValue({ nested: ["inert", 1, true, null] });
+if (detachedRuntimeJson !== undefined) {
+  const inertValue: RuntimeJsonValue = detachedRuntimeJson;
+  void inertValue;
+}
 
 const adapterAuthorityInput: RuntimeHeadlessSessionAdapterAuthorityInput = {
   snapshot,
@@ -70,6 +84,67 @@ if (adapterAuthority.status === "authenticated") {
   // @ts-expect-error authenticated results never expose retained Catalog authority
   void adapterAuthority.catalogSet;
 }
+
+const componentCommandsInput: RuntimeHeadlessSessionComponentCommandsInput = {
+  snapshot,
+  runtimeInstanceId: '["document","surface","password"]',
+  commands: {
+    invoke(request) {
+      void request.command;
+      void request.input;
+      return { status: "succeeded" };
+    },
+  },
+};
+const componentCommandsAttachment: RuntimeHeadlessSessionComponentCommandsAttachResult =
+  attachRuntimeHeadlessSessionComponentCommands(handle, componentCommandsInput);
+if (componentCommandsAttachment.status === "attached") {
+  const attachment: RuntimeHeadlessSessionComponentCommandsAttachment =
+    componentCommandsAttachment.attachment;
+  const detached: RuntimeHeadlessSessionComponentCommandsDetachResult =
+    detachRuntimeHeadlessSessionComponentCommands(attachment);
+  void detached;
+}
+
+// @ts-expect-error command attachment inputs are immutable
+componentCommandsInput.runtimeInstanceId = "replacement";
+
+// @ts-expect-error an attachment requires the exact current snapshot
+attachRuntimeHeadlessSessionComponentCommands(handle, {
+  runtimeInstanceId: "password",
+  commands: { invoke: () => ({ status: "succeeded" }) },
+});
+
+attachRuntimeHeadlessSessionComponentCommands(handle, {
+  snapshot,
+  runtimeInstanceId: "password",
+  // @ts-expect-error a callback is required; inert metadata cannot become command authority
+  commands: {},
+});
+
+attachRuntimeHeadlessSessionComponentCommands(handle, {
+  snapshot,
+  runtimeInstanceId: "password",
+  commands: {
+    // @ts-expect-error command results are a closed succeeded/denied classification
+    invoke: () => ({ status: "pending" }),
+  },
+});
+
+attachRuntimeHeadlessSessionComponentCommands(handle, {
+  snapshot,
+  runtimeInstanceId: "password",
+  commands: { invoke: () => ({ status: "denied" }) },
+  // @ts-expect-error executable attachment envelopes accept no extra authority
+  catalogSet,
+});
+
+// @ts-expect-error command attachments carry factory-only authority
+const forgedComponentCommandsAttachment: RuntimeHeadlessSessionComponentCommandsAttachment = {};
+void forgedComponentCommandsAttachment;
+
+// @ts-expect-error a session handle cannot be detached as a command attachment
+detachRuntimeHeadlessSessionComponentCommands(handle);
 
 const limits: RuntimeHeadlessSessionLimitProfile = {
   maxNodes: RUNTIME_HEADLESS_SESSION_LIMITS.maxNodes,

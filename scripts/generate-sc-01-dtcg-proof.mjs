@@ -11,7 +11,9 @@ try {
         tokens: result.artifact.auditedReferenceDocument.leafCount,
         reviewedUnsupportedFeatures:
           result.artifact.evidence.compatibilityFixtureCounts.reviewedUnsupportedFeatures,
-        message: "Wrote the deterministic SC-01 DTCG compatibility proof.",
+        compatibilityMode: result.compatibilityMode,
+        preserved: result.preserved,
+        message: "Preserved the immutable task-time SC-01 DTCG compatibility proof.",
       },
       null,
       2,

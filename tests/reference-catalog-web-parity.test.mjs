@@ -597,24 +597,30 @@ test("rejects package-test type-negative trace and command-wiring drift", async 
     { id: "S-004", status: "TESTED" },
   ]);
   assert.equal(compatibility.currentStatuses.find(({ id }) => id === "N-033")?.status, "TESTED");
-  const withN033Status = (status) =>
+  assert.equal(compatibility.currentStatuses.find(({ id }) => id === "N-034")?.status, "TESTED");
+  const withNormativeStatus = (id, status) =>
     normativeCoverage
       .split("\n")
       .map((line) => {
-        if (!line.startsWith("| N-033 ")) return line;
+        if (!line.startsWith(`| ${id} `)) return line;
         const cells = line.split("|");
         cells[5] = ` ${status} `;
         return cells.join("|");
       })
       .join("\n");
-  assert.doesNotThrow(() =>
-    verifyReferenceCatalogWebParityNormativeCompatibility(withN033Status("PLANNED")),
-  );
-  for (const invalidStatus of ["NOT_STARTED", "IMPLEMENTED"]) {
-    assert.throws(
-      () => verifyReferenceCatalogWebParityNormativeCompatibility(withN033Status(invalidStatus)),
-      (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
+  for (const id of ["N-033", "N-034"]) {
+    assert.doesNotThrow(() =>
+      verifyReferenceCatalogWebParityNormativeCompatibility(withNormativeStatus(id, "PLANNED")),
     );
+    for (const invalidStatus of ["NOT_STARTED", "IMPLEMENTED"]) {
+      assert.throws(
+        () =>
+          verifyReferenceCatalogWebParityNormativeCompatibility(
+            withNormativeStatus(id, invalidStatus),
+          ),
+        (error) => expectEvidenceFailure(error, "REFERENCE_PARITY_CLAIM_DRIFT"),
+      );
+    }
   }
   const foundationTestPath = await mutatedCopy(
     path.join(PACKAGE_TEST_DIRECTORY, "foundation-components.test.tsx"),

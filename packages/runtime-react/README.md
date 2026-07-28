@@ -48,9 +48,46 @@ React structure crosses this contract.
 M05-T01 establishes the registry and bounded renderer. M05-T02 authenticates session/Catalog
 authority and adds exact receiving validation for props and materialized named slots. M05-T03
 adds exact receiving validation and immutable delivery for complete visual-state → semantic-part
-→ property style maps while leaving state activation inside each capability adapter. M05-T04 activates session events, component
-commands, and behavior lifecycle; M05-T05 proves real React instance reconciliation and diagnostic
+→ property style maps while leaving state activation inside each capability adapter. M05-T04
+authenticates two-way plan-to-binding parity and activates commit-scoped session events, component
+commands, and behavior lifecycle. M05-T05 proves real React instance reconciliation and diagnostic
 identity; M05-T06 adds the production error boundary.
+
+## Interaction lifetime
+
+The renderer compares every prepared component and behavior identity with the exact current
+headless-session binding inventory in both directions. A missing, duplicated, mismatched, or
+foreign binding returns `RUNTIME_BINDING_MISMATCH` before any React element or adapter executes.
+
+Each successful adapter element owns a private interaction controller. Rendering alone grants no
+authority to a new instance: calls before its first commit, server rendering, never-committed
+Suspense work, and calls after cleanup return `unavailable`. A layout commit activates the
+controller before trusted adapter passive effects. Component and behavior events first copy their
+payload through the bounded inert runtime-core snapshot boundary and recheck the exact commit
+epoch, then use only the captured session, snapshot, runtime instance, event name, and detached
+JSON. Admission returns a `Promise<void>` that reveals no snapshot or lower action-turn result and
+never propagates a rejected session completion.
+
+React has no supported public API that tells a generic callback whether a previously committed
+child is currently performing a child-local rerender. Static trusted adapters therefore have one
+explicit conformance rule: side-effecting interaction methods are called only from committed
+effects or platform event callbacks, never from a component render body. The reference adapters
+follow and test this rule. Untrusted DESEN data cannot provide or replace adapter code.
+
+Only a committed component adapter may attach a command callback. The headless session
+authenticates the exact component binding and returns an opaque owner-bound attachment. A newer
+owner atomically supersedes the old one; stale cleanup cannot detach its replacement. Unmount
+cleanup, binding replacement, navigation, and session disposal revoke surviving authority.
+Callbacks are receiver-independent and fail closed when they throw, return a malformed result,
+reenter, or lose ownership while running. Behavior adapters can dispatch declared behavior events
+but always receive `unavailable` for component command attachment.
+
+Cleanup replaces each command attachment with a minimal inert tombstone, clears superseded
+controller entries, and removes the current session/snapshot authority from the controller. A
+stale opaque handle or interaction port retained by adapter code therefore cannot keep a live
+component callback or complete session graph reachable after unmount. Reflection-time unmount is
+also guarded before and after command capture; a lower attachment created across such a boundary
+is detached immediately and is never returned.
 
 ## Public entry points
 
@@ -101,9 +138,9 @@ Registry creation and rendering return discriminated results instead of guessing
 Malformed data, revoked proxies, unknown capabilities, duplicate identities, forged or stale
 session authority, invalid resolved props or slots, and limit crossings create no placeholder
 managed tree. Receiving failures preserve the validator's exact frozen diagnostics and attach
-`props` or `slots` as their public channel. The interaction port still returns `unavailable`; its
-command contract already reserves an opaque attachment identity and a controlled detach result for
-the authenticated M05-T04 implementation.
+`props`, `slots`, or `style` as their public channel. Binding parity drift fails explicitly before
+React element creation. Interaction calls reject stale or malformed authority without upgrading
+the adapter to a newer snapshot; uncommitted lifetimes remain explicitly unavailable.
 
 ## Protocol and target support
 
@@ -113,5 +150,5 @@ the authenticated M05-T04 implementation.
 ## Quality
 
 Run `pnpm --filter @desen/runtime-react lint`, `typecheck`, `test:adapter-registry`,
-`test:resolved-props-slots`, and `build` for the focused package checks. Use the root workspace
-quality gate, `pnpm check`, for cumulative proof.
+`test:resolved-props-slots`, `test:style-parts-states`, `test:interactions`, and `build` for the
+focused package checks. Use the root workspace quality gate, `pnpm check`, for cumulative proof.

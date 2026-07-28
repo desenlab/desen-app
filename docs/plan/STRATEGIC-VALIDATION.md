@@ -110,8 +110,10 @@ Completed evidence:
   2,058 A2UI message schema validations, and 34 stable rejection cases.
 - `docs/proof/artifacts/sc-01-dtcg-compatibility.json` —
   `sha256:1df806e0b56d66e27558bbc2bb2f17e0e261b0103c90ed2658ad1eba4c3bdbc6`;
-  16 tests audit 26 tokens, 14 unsupported feature families, 16 exact valid-but-unsupported
-  fixtures, and seven exact negative fixtures.
+  20 tests preserve the immutable task-time receipt and cover 26 tokens, 14 unsupported feature
+  families, 16 exact valid-but-unsupported fixtures, seven exact negative fixtures, proof pins,
+  hostile inputs, symlinks, and atomic-copy safety. Successor package bytes are not inputs to this
+  historical checkpoint.
 
 Selected primary references:
 

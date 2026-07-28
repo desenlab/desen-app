@@ -290,7 +290,7 @@ describe("React adapter registry and authenticated render-plan renderer", () => 
     expect(getterCalls).toBe(0);
   });
 
-  it("keeps interaction authority inert until the dedicated event and command task", () => {
+  it("keeps interaction authority unavailable during server rendering without a commit", () => {
     const seen: RuntimeReactComponentAdapterProps[] = [];
     const Inspect = (props: RuntimeReactComponentAdapterProps) => {
       seen.push(props);

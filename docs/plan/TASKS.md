@@ -131,7 +131,7 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 | M05-T01 | DONE        | G04             | React adapter registry and render-plan renderer                                                    |
 | M05-T02 | DONE        | M05-T01         | Resolved props and named slots wired without private structure inspection                          |
 | M05-T03 | DONE        | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
-| M05-T04 | NOT_STARTED | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
+| M05-T04 | DONE        | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
 | M05-T05 | NOT_STARTED | M05-T02–M05-T04 | Stable keys and runtime-node ↔ source-node diagnostics                                             |
 | M05-T06 | NOT_STARTED | M05-T05         | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
 | M05-T07 | NOT_STARTED | M05-T01         | Independently built reference-host shell with host ports                                           |
@@ -157,6 +157,17 @@ shares the existing render-wide lower-only budgets. The runtime preserves the co
 never selects or merges active states, creates CSS, inspects DOM/private component structure, or
 interprets property names; production state activation and target translation remain capability
 adapter responsibilities.
+
+`M05-T04` authenticates the complete render plan against the exact current session binding
+inventory before creating React elements, then commit-gates each adapter's interaction port.
+Component and behavior events enter only through the exact captured session, snapshot, and runtime
+identity. A committed component may attach one opaque command owner to its current binding;
+supersession, binding replacement, navigation, unmount, and disposal revoke that authority, while
+behaviors never receive component-command authority. The separately imported reference adapter
+subpath maps all five static components field by field, implements the Catalog's only declared
+`focus` command, forwards only inert `change` and `press` payloads, and exposes no DOM, native
+event, arbitrary React prop, or dynamic loader. Its changed `dist/**` bytes produce a successor
+package digest while every M03 artifact remains byte-identical historical evidence.
 
 ## M06 — Deterministic publisher
 

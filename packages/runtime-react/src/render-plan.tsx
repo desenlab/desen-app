@@ -10,10 +10,15 @@ import {
   validateDesenResolvedAdapterStyle,
 } from "@desen/validator";
 
+import {
+  createRuntimeReactBehaviorAdapterElement,
+  createRuntimeReactComponentAdapterElement,
+} from "./interactions.js";
 import { readRuntimeReactAdapterRegistryAuthority } from "./registry.js";
 
 import type { ReactElement, ReactNode } from "react";
 import type {
+  RuntimeHeadlessBindingSnapshot,
   RuntimeHeadlessSessionHandle,
   RuntimeHeadlessSessionSnapshot,
   RuntimeHeadlessSurfacePlan,
@@ -31,7 +36,6 @@ import type {
   RuntimeReactBehaviorAdapterComponent,
   RuntimeReactComponentAdapterComponent,
   RuntimeReactDiagnosticIdentity,
-  RuntimeReactInteractionPort,
   RuntimeReactNamedSlots,
   RuntimeReactSemanticStyle,
 } from "./registry.js";
@@ -95,6 +99,7 @@ export type RuntimeReactRenderFailureCode =
   | "MALFORMED_RENDER_PLAN"
   | "NODE_LIMIT_EXCEEDED"
   | "RECEIVING_VALIDATION_LIMIT_EXCEEDED"
+  | "RUNTIME_BINDING_MISMATCH"
   | "SLOT_LIMIT_EXCEEDED"
   | "STRING_LIMIT_EXCEEDED"
   | "UNKNOWN_BEHAVIOR_CAPABILITY"
@@ -149,6 +154,7 @@ interface PreparedBehavior {
   readonly sourceNodeId: string;
   readonly capabilityId: string;
   readonly behaviorId: string;
+  readonly ownerRuntimeInstanceId: string;
   readonly props: RuntimeJsonObject;
   readonly style: RuntimeReactSemanticStyle;
   readonly component: RuntimeReactBehaviorAdapterComponent;
@@ -168,12 +174,34 @@ interface PreparedNode {
 
 interface PreparationState {
   readonly identities: Set<string>;
+  readonly bindings: Map<string, PreparedBindingIdentity>;
   readonly validationScope: DesenResolvedAdapterValidationScope;
   nodeCount: number;
   behaviorCount: number;
   slotEntries: number;
   jsonOccurrences: number;
   stringCodeUnits: number;
+}
+
+type PreparedBindingIdentity =
+  | Readonly<{
+      readonly kind: "component";
+      readonly runtimeInstanceId: string;
+      readonly sourceNodeId: string;
+      readonly capabilityId: string;
+    }>
+  | Readonly<{
+      readonly kind: "behavior";
+      readonly runtimeInstanceId: string;
+      readonly sourceNodeId: string;
+      readonly capabilityId: string;
+      readonly behaviorId: string;
+      readonly ownerRuntimeInstanceId: string;
+    }>;
+
+interface RuntimeReactRenderAuthority {
+  readonly session: RuntimeHeadlessSessionHandle;
+  readonly snapshot: RuntimeHeadlessSessionSnapshot;
 }
 
 type JsonCaptureFailureCode =
@@ -197,11 +225,6 @@ interface CapturedRenderInput {
 const INVALID = Symbol("invalid-own-data");
 const EMPTY_DIAGNOSTICS = Object.freeze([]) as readonly DesenSemanticDiagnostic[];
 const RENDER_FAILURE_RESULTS = new WeakSet<object>();
-const UNAVAILABLE_INTERACTIONS: RuntimeReactInteractionPort = Object.freeze({
-  dispatchEvent: () => Object.freeze({ status: "unavailable" }),
-  attachCommands: () => Object.freeze({ status: "unavailable" }),
-  detachCommands: () => Object.freeze({ status: "unavailable" }),
-});
 
 function isRenderFailure(value: object): value is RuntimeReactRenderResult {
   return RENDER_FAILURE_RESULTS.has(value);
@@ -670,6 +693,17 @@ function prepareBehavior(
   if (component === undefined) {
     return failure("UNKNOWN_BEHAVIOR_CAPABILITY", behaviorIdentity);
   }
+  state.bindings.set(
+    identity,
+    Object.freeze({
+      kind: "behavior",
+      runtimeInstanceId: identity,
+      sourceNodeId: owner.sourceNodeId,
+      capabilityId,
+      behaviorId,
+      ownerRuntimeInstanceId: owner.runtimeNodeId,
+    }),
+  );
   const capturedProps = captureJsonObject(ownData(raw, "props"), state, limits, behaviorIdentity);
   if (isRenderFailure(capturedProps)) return capturedProps;
   const validatedProps = validateDesenResolvedAdapterProps(
@@ -720,6 +754,7 @@ function prepareBehavior(
     sourceNodeId: owner.sourceNodeId,
     capabilityId,
     behaviorId,
+    ownerRuntimeInstanceId: owner.runtimeNodeId,
     props: validatedProps.value as RuntimeJsonObject,
     style: validatedStyle.value,
     component,
@@ -769,6 +804,15 @@ function prepareNode(
   if (component === undefined) {
     return failure("UNKNOWN_COMPONENT_CAPABILITY", identity);
   }
+  state.bindings.set(
+    identity.runtimeNodeId,
+    Object.freeze({
+      kind: "component",
+      runtimeInstanceId: identity.runtimeNodeId,
+      sourceNodeId: identity.sourceNodeId,
+      capabilityId: identity.capabilityId,
+    }),
+  );
 
   const rawBehaviors = ownData(raw, "behaviors");
   const behaviorLength = arrayLength(rawBehaviors);
@@ -857,31 +901,96 @@ function prepareNode(
   });
 }
 
+function bindingIdentity(
+  binding: RuntimeHeadlessBindingSnapshot,
+): Partial<RuntimeReactDiagnosticIdentity> {
+  return {
+    runtimeNodeId: binding.runtimeInstanceId,
+    sourceNodeId: binding.sourceNodeId,
+    capabilityId: binding.capabilityId,
+  };
+}
+
+function matchesPreparedBinding(
+  prepared: PreparedBindingIdentity,
+  binding: RuntimeHeadlessBindingSnapshot,
+): boolean {
+  if (
+    prepared.kind !== binding.kind ||
+    prepared.runtimeInstanceId !== binding.runtimeInstanceId ||
+    prepared.sourceNodeId !== binding.sourceNodeId ||
+    prepared.capabilityId !== binding.capabilityId
+  ) {
+    return false;
+  }
+  return prepared.kind === "component"
+    ? binding.kind === "component"
+    : binding.kind === "behavior" &&
+        prepared.behaviorId === binding.behaviorId &&
+        prepared.ownerRuntimeInstanceId === binding.ownerRuntimeInstanceId;
+}
+
+function validateBindingParity(
+  prepared: ReadonlyMap<string, PreparedBindingIdentity>,
+  bindings: readonly RuntimeHeadlessBindingSnapshot[],
+): RuntimeReactRenderResult | undefined {
+  const matched = new Set<string>();
+  for (const binding of bindings) {
+    const expected = prepared.get(binding.runtimeInstanceId);
+    if (
+      expected === undefined ||
+      matched.has(binding.runtimeInstanceId) ||
+      !matchesPreparedBinding(expected, binding)
+    ) {
+      return failure("RUNTIME_BINDING_MISMATCH", bindingIdentity(binding));
+    }
+    matched.add(binding.runtimeInstanceId);
+  }
+  for (const expected of prepared.values()) {
+    if (!matched.has(expected.runtimeInstanceId)) {
+      return failure("RUNTIME_BINDING_MISMATCH", {
+        runtimeNodeId: expected.runtimeInstanceId,
+        sourceNodeId: expected.sourceNodeId,
+        capabilityId: expected.capabilityId,
+      });
+    }
+  }
+  return undefined;
+}
+
 function renderSlots(
   slots: Readonly<Record<string, readonly PreparedNode[]>>,
+  authority: RuntimeReactRenderAuthority,
 ): RuntimeReactNamedSlots {
   const output: Record<string, readonly ReactNode[]> = Object.create(null);
   for (const name of Object.keys(slots)) {
-    output[name] = Object.freeze((slots[name] ?? []).map((child) => renderNode(child)));
+    output[name] = Object.freeze((slots[name] ?? []).map((child) => renderNode(child, authority)));
   }
   return Object.freeze(output);
 }
 
-function renderNode(node: PreparedNode): ReactElement {
+function renderNode(node: PreparedNode, authority: RuntimeReactRenderAuthority): ReactElement {
   const identity = Object.freeze({
     runtimeNodeId: node.runtimeNodeId,
     sourceNodeId: node.sourceNodeId,
     capabilityId: node.capabilityId,
   });
-  let rendered: ReactNode = createElement(node.component, {
+  let rendered: ReactNode = createRuntimeReactComponentAdapterElement({
+    ...authority,
+    kind: "component",
+    runtimeInstanceId: node.runtimeNodeId,
+    component: node.component,
     identity,
     props: node.props,
-    slots: renderSlots(node.slots),
+    slots: renderSlots(node.slots, authority),
     style: node.style,
-    interactions: UNAVAILABLE_INTERACTIONS,
   });
   for (const behavior of [...node.behaviors].reverse()) {
-    rendered = createElement(behavior.component, {
+    rendered = createRuntimeReactBehaviorAdapterElement({
+      ...authority,
+      kind: "behavior",
+      runtimeInstanceId: behavior.runtimeNodeId,
+      component: behavior.component,
       identity: Object.freeze({
         runtimeNodeId: behavior.runtimeNodeId,
         sourceNodeId: behavior.sourceNodeId,
@@ -889,9 +998,8 @@ function renderNode(node: PreparedNode): ReactElement {
       }),
       behaviorId: behavior.behaviorId,
       props: behavior.props,
-      slots: renderSlots(behavior.slots),
+      slots: renderSlots(behavior.slots, authority),
       style: behavior.style,
-      interactions: UNAVAILABLE_INTERACTIONS,
       children: rendered,
     });
   }
@@ -913,11 +1021,13 @@ function authenticatedPlan(
  *
  * @remarks Registry, session generation, exact Catalog set, complete resolved component and
  * behavior props, semantic style maps, and materialized named slots all pass before the first
- * React element is created. Adapters receive only detached validated props, complete
- * state → part → property style data, exact named React slots, stable public identities, and the
- * least-authority interaction seam. State activation and platform translation remain adapter
- * responsibilities. No raw plan, behavior plan, React-private structure, DOM reference, fallback
- * component, or dynamic loader crosses the boundary.
+ * React element is created. The prepared component and behavior inventory must also match the
+ * authenticated session's current bindings in both directions. Adapters receive only detached
+ * validated props, complete state → part → property style data, exact named React slots, stable
+ * public identities, and a commit-gated least-authority interaction seam. State activation and
+ * platform translation remain adapter responsibilities. No raw plan, behavior plan, lower bridge,
+ * React-private structure, DOM reference, fallback component, or dynamic loader crosses the
+ * boundary.
  */
 export function renderRuntimeReactSurface(
   input: RuntimeReactRenderInput,
@@ -985,6 +1095,7 @@ export function renderRuntimeReactSurface(
 
   const state: PreparationState = {
     identities: new Set(),
+    bindings: new Map(),
     validationScope: scope.scope,
     nodeCount: 0,
     behaviorCount: 0,
@@ -1012,7 +1123,18 @@ export function renderRuntimeReactSurface(
     prepared.push(result);
   }
 
-  const element = createElement(Fragment, null, ...prepared.map((node) => renderNode(node)));
+  const parityFailure = validateBindingParity(state.bindings, authenticated.snapshot.bindings);
+  if (parityFailure !== undefined) return parityFailure;
+
+  const authority: RuntimeReactRenderAuthority = Object.freeze({
+    session: captured.session as RuntimeHeadlessSessionHandle,
+    snapshot: authenticated.snapshot,
+  });
+  const element = createElement(
+    Fragment,
+    null,
+    ...prepared.map((node) => renderNode(node, authority)),
+  );
   return Object.freeze({
     status: "rendered",
     surface: Object.freeze({
