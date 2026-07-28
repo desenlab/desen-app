@@ -213,6 +213,22 @@ This artifact proves a stable contract-to-bytes identity but does not perform co
 Executable registry construction, render-plan materialization, event bridging, command dispatch,
 and operation execution remain owned by M05 and the host composition roots.
 
+## Publisher Catalog authority boundary
+
+The M06 Publisher resolves a Source Catalog requirement only against a closed, caller-supplied
+inventory of target-profile package observations. Matching is exact for `id`, `version`, and the
+optional `target`; `location` remains a discovery hint, and candidate order, version ranges,
+Unicode normalization, or equal Catalog JSON never establish authority. Zero or multiple matches
+fail before a Catalog can enter later publication stages.
+
+One unique selection is captured as bounded inert data, structurally validated, checked against
+its candidate tuple and preobserved package digest, and admitted into one immutable Catalog
+namespace. The resolver itself performs no filesystem, network, registry, loader, or target
+adapter operation. The caller remains responsible for obtaining `observedPackageDigest` from the
+applicable deterministic package-byte profile; M07 independently verifies installed package
+bytes before activation. A failure exposes no partial Catalog set, selected package authority, or
+Bundle.
+
 ## Applications
 
 ### Desen App

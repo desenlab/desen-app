@@ -2276,3 +2276,55 @@ This file records implementation discoveries without changing the frozen DESEN 0
   protocol work should define interoperable raw-JSON requirements, Source-ingress limits,
   diagnostic severity, and standard codes. G06 must remain conservative about full Publisher
   conformance until all Section 27.8 limits relevant to the complete pipeline are evidenced.
+
+## PF-061 — Catalog discovery hints do not authenticate package observations
+
+- Status: OPEN
+- Blocks proof: No; M06-T02 can prove exact, deterministic Catalog selection and tuple consistency
+  without claiming that a data-only resolver independently authenticated target-specific package
+  bytes.
+- Protocol location: SPEC Sections 8.3–8.5, 11.4, 25.1, and 27.3; `PIPE-029`–`PIPE-031`,
+  `R-033`, `R-083`, `R-143`, `D-032`, and `D-033`; related findings `PF-007` and `PF-026`
+- Observation: A Source Catalog requirement contains exact `id` and `version`, an optional exact
+  `target`, and an optional `location` discovery hint. It contains no package digest. Multiple
+  targets or package observations may therefore satisfy the same target-omitted requirement.
+  The frozen protocol does not define a registry API, authenticated package-observation handle,
+  or a cross-document JSON Pointer convention for reporting a resolved Catalog failure against
+  its Source requirement. Equal canonical Catalog JSON also does not prove equal capability
+  package artifact bytes: the target-specific package digest profile includes the projected
+  Catalog plus exact implementation artifacts.
+- Implementation decision: M06-T02 keeps resolution package-private and data-only. The caller
+  supplies a closed array of package observations whose `observedPackageDigest` must already have
+  been calculated by the applicable target profile. The resolver performs no filesystem, network,
+  registry, loader, or callback operation. It compares strings by exact code-unit equality only;
+  it never trims, normalizes Unicode, folds case, resolves a SemVer range, prefers a newer version,
+  follows `location`, or selects the first candidate.
+
+  A requirement succeeds only when exactly one candidate matches `id`, `version`, and the optional
+  exact `target`. Multiple candidates are ambiguous even if their tuple and canonical Catalog JSON
+  are identical, because Catalog equality cannot authenticate one physical package authority.
+  Duplicate Source requirements preserve a one-to-one requirement-index projection while sharing
+  the one uniquely selected package. Selected Catalogs pass an inert bounded snapshot, the frozen
+  Catalog root and embedded-schema validator, exact envelope/Catalog identity comparison, exact
+  lowercase SHA-256 digest consistency, and the trusted single-namespace Catalog-set validator in
+  that order. Resolution, integrity, and namespace failures stop at their first normative stage
+  and expose no Catalog authority or Bundle. Catalog diagnostics are mapped to the corresponding
+  Source `/catalogs/{index}` requirement; namespace diagnostics also retain the stable
+  `capabilityId`.
+
+  The local profile admits at most 256 Source requirements, 1,024 candidates, 16 MiB canonical
+  bytes per selected Catalog, 64 MiB in aggregate, 128 container levels, 100,000 JSON values,
+  4,194,304 decoded string code units per Catalog, and 100,000 selected capability declarations.
+  One identity field is limited to 4,096 code units and one stopped Catalog stage to 1,024
+  diagnostics. These are project limits rather than universal DESEN constants. JavaScript
+  reflection failures are contained and accessors are never invoked, but a general `Proxy` may
+  run a reflection trap before throwing; no impossible side-effect-free Proxy-detection claim is
+  made.
+
+- Future action: M06-T08 must pin the exact selected tuples into the Bundle and M06-T11 must drive
+  missing, ambiguous, malformed, digest-mismatched, namespace-conflicting, and finite-limit cases
+  through the complete public Publisher. M07-T03 must verify installed package bytes and exact
+  tuples before activation. A later protocol revision should standardize the resolver authority,
+  target-omission ambiguity policy, diagnostic pointer profile, and package-observation
+  authentication boundary. Signing, distributor immutability, and publisher identity remain M12
+  responsibilities.

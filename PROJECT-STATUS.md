@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-28
+Last updated: 2026-07-29
 
 ## Plain-language status
 
@@ -351,16 +351,25 @@ blocking error and structurally contains no Bundle or partial parsed value. Malf
 duplicate decoded names, invalid Unicode, non-finite numeric outcomes, finite-budget crossings,
 hostile limit profiles, revoked Proxies, and long-path CPU regressions have executable coverage.
 This task intentionally emits no Bundle and changes no proof claim, normative status, or gate.
+M06-T02 now resolves already validated Source Catalog requirements only against a closed,
+caller-supplied package-observation inventory. Exact `id`, `version`, and optional `target`
+matching admits one candidate; discovery locations, candidate order, SemVer ranges, Unicode
+normalization, and equal Catalog JSON never create authority. Every unique Catalog crosses bounded
+inert capture, frozen structural validation, exact candidate/Catalog identity and observed-digest
+consistency, and one immutable set-wide capability namespace. Missing, ambiguous, malformed,
+inconsistent, over-budget, or conflicting input returns the M06-T01 no-Bundle failure shell with
+no partial Catalog authority. `PF-061` records that the resolver compares a preverified
+target-profile digest observation rather than claiming to hash arbitrary package bytes itself.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `64 / 145 tasks complete (44%)`
+- Overall implementation progress: `65 / 145 tasks complete (45%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `1 / 11 tasks complete (9%)`
+- M06 progress: `2 / 11 tasks complete (18%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -410,12 +419,13 @@ This task intentionally emits no Bundle and changes no proof claim, normative st
   `M05-T07 — Independently built reference-host shell with host ports`,
   `M05-T08 — Official sign-in bundle running through real adapters`,
   `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`,
-  `M06-T01 — Staged PublishResult and diagnostics API`
+  `M06-T01 — Staged PublishResult and diagnostics API`,
+  `M06-T02 — Exact Catalog resolution, package immutability, and namespace-conflict checks`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T02 — Exact catalog resolution, package immutability, and namespace-conflict checks`
-- Status: M05 and G05 are complete; M06-T01 is complete and M06-T02 is ready
+  `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`
+- Status: M05 and G05 are complete; M06-T01 and M06-T02 are complete; M06-T03 is ready
 
 ## Completed preparation
 
@@ -774,10 +784,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T02 — Exact catalog resolution, package immutability, and namespace-conflict checks`.
-Resolve only exact Source requirements from a caller-supplied inert Catalog set, authenticate each
-package tuple and immutable package identity, reject missing, extra, mismatched, or conflicting
-namespaces deterministically, and feed no untrusted Catalog into later publication stages.
+Begin `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`.
+Run the parsed Source through the frozen root and embedded-schema boundaries, then prove its
+identity, entry, surface/node namespaces, declared Catalog requirements, and statically knowable
+references before any capability-contract or dynamic-binding stage can proceed.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1364,6 +1374,28 @@ M06-T01 evidence:
   long-path regressions, no partial output, and atomic-write protection
 - coverage decision: M06-T01 becomes `DONE`; no `P-*`, `N-*`, `S-*`, or gate status changes;
   M06-T02 owns exact Catalog resolution next
+
+M06-T02 evidence:
+
+- `docs/proof/PUBLISHER-CATALOG-RESOLUTION.md`
+- `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
+- artifact SHA-256: `0493a4ca032ae89b5396eb894162fbb20f49919fc8906ba0e0e08582a144d8b7`
+- exact boundary: code-unit-equal `id`/`version`/optional-`target` resolution from one closed
+  package-observation inventory; no location, range, normalization, newest, or first-candidate
+  authority; bounded inert Catalog capture; exact candidate/Catalog identity and preobserved
+  package-digest consistency; immutable single-namespace Catalog set; and no partial authority or
+  Bundle on failure
+- finite profile: 256 Source requirements, 1,024 candidates, 16 MiB per canonical Catalog, 64 MiB
+  aggregate canonical Catalog bytes, 128 container levels, 100,000 JSON values, 4,194,304 decoded
+  string code units, 100,000 capability declarations, 4,096 code units per identity field, and
+  1,024 diagnostics per stopped Catalog stage
+- executable evidence: 22 focused runtime cases, 10 compiler-negative cases, 8 independent
+  proof/mutation cases, 4 exact prerequisite pins, 15 byte-tracked task files, deterministic
+  artifact regeneration, unique proof-document pinning, package-root privacy, target neutrality,
+  hostile input containment, and reviewed single-pass CI registration
+- coverage decision: M06-T02 becomes `DONE`; N-007 and N-025 retain `TESTED` with completed
+  Publisher integration evidence; no `P-*` or gate status changes; M06-T03 owns complete Source
+  preflight next
 
 ## Status vocabulary
 

@@ -57,6 +57,10 @@ export type PublishPipelineStage = (typeof PUBLISH_PIPELINE_STAGES)[number];
 export type PublisherExtensionDiagnosticCode =
   typeof INVALID_SOURCE_JSON_CODE | typeof SOURCE_LIMIT_EXCEEDED_CODE;
 
+/** Project diagnostic codes introduced by the package-private M06-T02 Catalog boundary. */
+export type CatalogResolutionExtensionDiagnosticCode =
+  "run.desen.publisher/INVALID_CATALOG_INPUT" | "run.desen.publisher/CATALOG_LIMIT_EXCEEDED";
+
 /** Stable diagnostic code owned by the DESEN Publisher implementation. */
 export type PublisherDiagnosticCode = PublisherExtensionDiagnosticCode;
 
@@ -74,7 +78,9 @@ export interface PublisherDiagnosticDefinition {
 
 /** Every non-core diagnostic code that the Publisher may currently relay or emit. */
 export type PublishExtensionDiagnosticCode =
-  DesenSemanticExtensionDiagnosticCode | PublisherExtensionDiagnosticCode;
+  | DesenSemanticExtensionDiagnosticCode
+  | PublisherExtensionDiagnosticCode
+  | CatalogResolutionExtensionDiagnosticCode;
 
 /** Whether a publication diagnostic blocks Bundle emission. */
 export type PublishDiagnosticSeverity = "error" | "warning";

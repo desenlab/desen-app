@@ -939,3 +939,27 @@ status changes; M06-T02 owns exact Catalog resolution next.
 
 `docs/proof/artifacts/publisher-0.1.0-publish-result.json`
 `sha256:ae047fb886f11e06398e2cae1b7b71a6f62f3c59f8f727cb7f6128fe3dd81ad6`.
+
+## M06-T02
+
+M06-T02 adds package-private exact Catalog resolution without exposing an unfinished public
+Publisher or emitting a Bundle. Each already validated Source requirement matches exactly one
+closed package observation by code-unit-equal `id`, `version`, and optional `target`; locations,
+candidate order, ranges, normalization, and equal Catalog JSON remain non-authoritative. Duplicate
+Source requirements preserve index alignment while sharing one uniquely selected package.
+
+Selected Catalogs cross bounded inert capture, frozen structural validation, exact
+candidate/Catalog identity and observed-digest consistency, and the Validator's immutable
+single-namespace gate. Missing, ambiguous, malformed, inconsistent, over-budget, and conflicting
+inputs return the M06-T01 terminal failure shell with no Bundle or partial Catalog authority. The
+data-only stage compares a target-profile package observation but does not claim to authenticate
+arbitrary package bytes itself.
+
+The evidence contains 22 focused runtime cases, 10 compiler-negative cases, and 8 independent
+proof/mutation cases. It pins four prerequisites, the current official-derived Source and current
+Web–React Catalog tuple, package-root privacy, target neutrality, deterministic artifact bytes,
+and the unique proof-document hash. No `P-*`, normative status, or gate changes; M06-T03 owns
+complete Source preflight next.
+
+`docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
+`sha256:0493a4ca032ae89b5396eb894162fbb20f49919fc8906ba0e0e08582a144d8b7`.

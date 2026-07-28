@@ -233,7 +233,7 @@ evidence.
 | ID      | Status      | Depends on       | Deliverable / evidence                                                                  |
 | ------- | ----------- | ---------------- | --------------------------------------------------------------------------------------- |
 | M06-T01 | DONE        | G05              | Staged `PublishResult` and diagnostics API                                              |
-| M06-T02 | NOT_STARTED | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
+| M06-T02 | DONE        | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
 | M06-T03 | NOT_STARTED | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
 | M06-T04 | NOT_STARTED | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
 | M06-T05 | NOT_STARTED | M06-T03          | Dynamic binding compatibility and recorded runtime validation obligations               |
@@ -255,6 +255,21 @@ limit profiles, source and built declaration checks, package-entry verification,
 inventory, deterministic evidence, and atomic-write mutations protect the boundary. This task
 emits no Bundle and changes no Proof Matrix claim, normative status, or gate; M06-T02 owns exact
 Catalog resolution next.
+
+M06-T02 now resolves every already validated Source Catalog requirement against one closed,
+caller-supplied package-observation inventory by exact `id`, `version`, and optional `target`.
+Discovery locations, candidate order, SemVer ranges, Unicode normalization, and equal Catalog JSON
+cannot create authority. Missing or ambiguous requirements fail before Catalog inspection; every
+unique selection then crosses bounded inert capture, frozen structural validation, exact
+candidate/Catalog tuple and observed-digest consistency, and one immutable set-wide capability
+namespace. Duplicate Source requirements retain their own positions while sharing one uniquely
+selected package. All failures use the M06-T01 no-Bundle shell and expose no candidate index,
+partial Catalog set, selected tuple, or Bundle. The package observation is explicitly preverified
+input rather than a claim that this data-only stage hashed arbitrary package bytes. Twenty-two
+focused runtime cases, ten compiler-negative cases, eight independent proof/mutation cases, four
+pinned prerequisites, and the reviewed single-pass CI inventory protect the boundary. `PF-061`
+records the trust and target-omission profile. No Proof Matrix claim, normative status, or gate
+changes; M06-T03 owns complete Source preflight next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 
