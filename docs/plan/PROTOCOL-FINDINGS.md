@@ -2074,10 +2074,82 @@ This file records implementation discoveries without changing the frozen DESEN 0
   than attacker-constructed props. Nested surfaces in one React tree require one deduplicated
   `runtime-react` module instance; omitted `recoveryKey` deliberately means never retry.
 
-- Future action: M05-T07 must wire the dedicated reference-host root error policies and derive
-  recovery epochs only from explicit host/session authority. M05-T08 must exercise the official
+- Future action: M05-T07 now wires the dedicated reference-host root policy and derives recovery
+  epochs only from explicit retry or exact session, registry, Catalog, and host-authority
+  replacement; `PF-056` records that browser-host boundary. M05-T08 must exercise the official
   sign-in path through the same boundary. M05-T09 must prove the host cannot bypass it with a
   handwritten managed tree. M06-T11 still owns the remaining invalid-publication slice of `D-009`,
   and M07-T04 owns activation-time finite preflight before P-17 can become `PROVEN`. Future native
   runtimes must define their own platform-specific containment evidence rather than importing
   React's boundary limitations.
+
+## PF-056 — Reference-host recovery follows executable authority, not document publication
+
+- Status: OPEN
+- Blocks proof: No; M05-T07 defines one conservative Web–React host composition profile without
+  changing frozen protocol data or advancing a normative or proof-claim status.
+- Protocol location: SPEC Sections 9.1 and 24.5 and Appendix A; `R-019`, `R-105`, `A-013`, and
+  related finding `PF-055`
+- Observation: A dedicated browser root needs stronger ownership than structurally compatible
+  host callbacks. Pairing a live session with reconstructed ports could cross application
+  authority, while deriving adapter recovery from a Bundle revision, snapshot, or render result
+  would let ordinary or hostile publication retry failed executable code. React root callbacks
+  can also expose raw failures unless the host selects an explicit no-inspection policy, and a
+  failed root unmount leaves the container's actual React ownership uncertain.
+- Implementation decision: M05-T07 builds `apps/reference-host-web` independently with React 19
+  and zero-configuration Vite 8. Its dependency boundary has no Desen App, editor, publisher,
+  `testkit`, or broad `desen` facade production import, and its root input cannot carry arbitrary
+  React or a caller-created managed tree. `@desen/runtime-web` captures exactly nine ports and
+  fourteen callbacks through `createRuntimeHostPorts` without invocation, wraps them in one opaque
+  terminal authority, applies the active document/revision assertion to navigation, preserves the
+  last valid bounded browser environment observation, supplies a finite nondecreasing epoch clock,
+  and attempts every subscription cleanup independently.
+
+  Root activation accepts only the closed `RuntimeReactLiveSurfaceInput` and an opaque Web host
+  authority. `runtime-core` authenticates by exact object identity that this headless session was
+  mounted with this factory-created host-port aggregate and returns only a frozen status. A
+  separate core check authenticates the exact current snapshot and Catalog set, and a status-only
+  `runtime-web` check requires its document id and revision to match the host authority's configured
+  pair. A transition fence rejects synchronous activation, replacement, retry, or disposal
+  reentry. The root uses `ignoreRuntimeReactRootCaughtError`; recoverable failures emit only a
+  fixed redacted diagnostic, while uncaught failure first terminally fences the session and host
+  and then emits its fixed diagnostic. Raw thrown values and React error information are never
+  inspected, forwarded, or retained.
+
+  Recovery advances only after an explicit host/user retry or replacement of the exact session,
+  executable registry, Catalog set, or host authority. Bundle identity, revision, URL,
+  server/current snapshot, renderer result, and ordinary session publication are absent from that
+  authority. Terminal disposal reduces the root, host, and session authorities to inert tombstones
+  and clears retained recovery identities, severing the executable graph. A confirmed root unmount
+  releases its container; an exception or otherwise uncertain unmount keeps a weak container claim
+  and prevents unsafe root reuse.
+
+- Future action: M05-T08 must run the official-derived sign-in path through this exact host,
+  operation, adapter, failure, and recovery composition. M05-T09 must complete the TypeScript AST
+  and resolved-import audit before the no-handwritten-tree claim or G05 can close. M07 still owns
+  channel retrieval, persistent activation, restart recovery, and last-known-good behavior.
+  Future native targets must define independent registries, renderers, platform hosts, and
+  lifecycle evidence while reusing only framework-neutral protocol and headless semantics.
+
+## PF-057 — Wide binding materialization needs an explicit performance benchmark
+
+- Status: OPEN
+- Blocks proof: No; the existing M04 capacity vector still passes and this finding does not change
+  a protocol rule, runtime limit, or current proof status.
+- Protocol location: M04-T14/M04-T16 binding reconciliation and headless activation evidence;
+  proof claim `P-17`; future measurement owner M12-T05
+- Observation: The 1,365-node regression vector intentionally crosses the former 4,096 aggregate
+  scope-occurrence bottleneck. It normally completes in about one to two seconds, but concurrent
+  CPU pressure can push it beyond Vitest's generic five-second default. Inspection also identified
+  a possible production optimization: wide binding registration repeatedly materializes complete
+  adapter-registry snapshots, so the current construction cost may approach quadratic growth.
+  The existing test is a semantic capacity proof, not a declared performance SLA.
+- Implementation decision: Keep the complete 1,365-node vector and give only that test an explicit,
+  finite 15-second budget. Do not raise the global timeout, reduce the vector, change workspace
+  test coverage, or patch production reconciliation behavior without a benchmark and preserved
+  atomicity evidence.
+- Future action: M12-T05 must measure binding materialization across increasing node and binding
+  counts, publish a reproducible time/memory profile, and define an explicit regression budget.
+  If the repeated-snapshot cost is confirmed, optimize it behind the existing exact authority,
+  rollback, publication, and immutable-snapshot contracts, then rerun the M04-T14/M04-T16 evidence
+  before claiming the improvement.

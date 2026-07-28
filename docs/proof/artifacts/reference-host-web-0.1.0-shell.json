@@ -1,0 +1,435 @@
+{
+  "schemaVersion": 1,
+  "task": "M05-T07",
+  "result": "PASS",
+  "profile": "desen-reference-host-web-shell-v1",
+  "protocol": "0.1.0",
+  "target": "web-react",
+  "prerequisites": [
+    {
+      "task": "M05-T06",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+      "sha256": "sha256:3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723",
+      "profile": "desen-runtime-react-failure-boundary-v1",
+      "result": "PASS"
+    },
+    {
+      "task": "M04-T01",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-host-ports.json",
+      "sha256": "sha256:5a53cfc9698339a2e9da72c496c1b204e0da138da3d3c1efdc1fe0b5c0e4f190",
+      "result": "PASS"
+    },
+    {
+      "task": "M04-T10",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-state-navigation-actions.json",
+      "sha256": "sha256:f9eddfdf915ace33d77df6491de39ad84e9d60d56e2269433c223a79696ad140",
+      "result": "PASS"
+    },
+    {
+      "task": "M02-T02",
+      "path": "docs/proof/artifacts/protocol-0.1.0-traceability.json",
+      "sha256": "sha256:749cbae719a5deb216e9ed3be171eb710b47fc547f4f270dbba21bb14c2af514",
+      "result": "PASS"
+    }
+  ],
+  "claim": {
+    "independentlyBuiltApplication": true,
+    "dedicatedDesenReactRoot": true,
+    "explicitNinePortHostBoundary": true,
+    "staticHostFailureSurface": true,
+    "rawRootErrorTelemetry": false,
+    "arbitraryManagedReactTreeInput": false,
+    "handwrittenManagedTreeFullyAudited": false,
+    "officialSignInExecuted": false
+  },
+  "hostShell": {
+    "package": "@desen/reference-host-web",
+    "build": {
+      "tool": "vite@8.1.5",
+      "independentBuilds": 2,
+      "deterministic": true,
+      "fileCount": 3,
+      "aggregateSha256": "sha256:e8c6a400c4507763f96172109d8aa8931f7707f5885d9ae5ec9ec0b90276a2c8",
+      "files": [
+        {
+          "path": "assets/index-BOcgSXd_.js",
+          "bytes": 339777,
+          "sha256": "sha256:c6c5a47f41ff68762a67a818ff4a9cc46112a784772e3a2b6cdfcda6d86f6ad6"
+        },
+        {
+          "path": "assets/index-ClMarVVR.css",
+          "bytes": 1637,
+          "sha256": "sha256:bbfe758b463bca14d58440da1cd0b7c60b3ac4f427ba4c8b41ac7744e2cd1672"
+        },
+        {
+          "path": "index.html",
+          "bytes": 480,
+          "sha256": "sha256:9913a1c8445d26c48f4160665db8151b19c254852abbc62e60c152854986491e"
+        }
+      ]
+    },
+    "composition": {
+      "applicationStates": ["booting", "surface", "unavailable"],
+      "managedInput": "RuntimeReactLiveSurfaceInput",
+      "liveRenderer": "useRuntimeReactSurface",
+      "productionBoundary": "RuntimeReactSurfaceBoundary",
+      "arbitraryReactChildren": false,
+      "capabilitySpecificComposition": false,
+      "finalSourceImportAuditOwner": "M05-T09"
+    },
+    "rootPolicy": {
+      "dedicatedClientRoot": true,
+      "onCaughtError": "ignoreRuntimeReactRootCaughtError",
+      "onUncaughtError": "fixed-redacted-host-diagnostic",
+      "onRecoverableError": "fixed-redacted-host-diagnostic",
+      "rawErrorInspected": false,
+      "rawErrorForwarded": false,
+      "uncaughtFailureTerminallyRevokesAuthorities": true,
+      "terminalFencePrecedesObservability": true,
+      "fullRootUnmountFailure": "fixed-redacted-host-diagnostic",
+      "failedUnmountRetainsContainerClaim": true,
+      "idempotentDisposal": true
+    },
+    "recovery": {
+      "authorityInputs": ["session", "registry", "catalogSet", "hostAuthority"],
+      "hostAuthorityAuthentication": "exact-session-handle-and-original-host-port-aggregate-identity",
+      "hostAuthorityAuthenticationReturnsPorts": false,
+      "hostAuthorityAuthenticationReflectsIntoPorts": false,
+      "adapterAuthorityAuthentication": "exact-current-snapshot-and-catalog-set",
+      "documentAuthorityAuthentication": "exact-active-runtime-web-authority-and-session-document-revision",
+      "registryAuthorityAuthentication": "factory-authenticated-runtime-react-registry-handle",
+      "activationCommitAfterAllAuthenticators": true,
+      "replacementReentryFence": true,
+      "ordinaryPublicationChangesKey": false,
+      "explicitRetryChangesKey": true,
+      "authorityReplacementChangesKey": true,
+      "bundleOrRevisionInputChannel": false,
+      "rootLocalIsolation": true
+    }
+  },
+  "browserHostAuthority": {
+    "package": "@desen/runtime-web",
+    "ports": [
+      "navigation",
+      "storage",
+      "operations",
+      "resources",
+      "tokens",
+      "context",
+      "environment",
+      "clock",
+      "diagnostics"
+    ],
+    "callbackCount": 14,
+    "capturedBy": "createRuntimeHostPorts",
+    "constructionInvokesCallbacks": false,
+    "navigationIdentity": "exact-document-and-revision",
+    "documentAuthorityAuthentication": "exact-active-authority-document-and-revision-pair",
+    "documentAuthorityAuthenticationReturnsExecutableAuthority": false,
+    "environmentBoundary": "bounded-detached-frozen-json",
+    "clockBoundary": "nondecreasing-finite-epoch-milliseconds",
+    "terminalCallbackFence": true,
+    "channelFetchingClaimed": false,
+    "indexedDbActivationClaimed": false,
+    "lastKnownGoodClaimed": false
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "authenticateRuntimeWebHostDocumentAuthority",
+      "createRuntimeWebBrowserPlatform",
+      "createRuntimeWebHostAuthority",
+      "disposeRuntimeWebHostAuthority",
+      "readRuntimeWebHostAuthority"
+    ],
+    "typeExports": [
+      "RuntimeWebBrowserPlatformCreateInput",
+      "RuntimeWebBrowserPlatformCreateResult",
+      "RuntimeWebBrowserPlatformHandle",
+      "RuntimeWebHostAuthorityCreateInput",
+      "RuntimeWebHostAuthorityCreateResult",
+      "RuntimeWebHostAuthorityDisposeResult",
+      "RuntimeWebHostAuthorityHandle",
+      "RuntimeWebHostAuthorityReadResult",
+      "RuntimeWebHostDocumentAuthorityInput",
+      "RuntimeWebHostDocumentAuthorityResult"
+    ]
+  },
+  "evidence": {
+    "focusedScripts": [
+      "pnpm --filter @desen/runtime-core typecheck",
+      "pnpm --filter @desen/runtime-core test:headless-sign-in",
+      "pnpm --filter @desen/runtime-web test:host-authority",
+      "pnpm --filter @desen/reference-host-web test:shell"
+    ],
+    "tests": {
+      "appFocusedCases": 22,
+      "runtimeFocusedCases": 15,
+      "runtimeCoreFocusedCases": 55,
+      "runtimeCoreSecurityCases": 5,
+      "focusedCases": 92,
+      "appCompilerNegativeCases": 6,
+      "runtimeCompilerNegativeCases": 14,
+      "runtimeCoreCompilerNegativeCases": 33,
+      "compilerNegativeCases": 53,
+      "rootMutationTests": 33
+    },
+    "sourceAssertions": 902,
+    "productionImports": 113,
+    "dynamicExecutableImports": 0,
+    "trackedFiles": [
+      {
+        "path": "apps/reference-host-web/index.html",
+        "bytes": 382,
+        "sha256": "sha256:c76fe461f9dace6a40924b5af592eb80287944444d16c62c4be57627584be6ce"
+      },
+      {
+        "path": "apps/reference-host-web/package.json",
+        "bytes": 938,
+        "sha256": "sha256:419b9a6218f849ada352a630afec12aeede79cb72f8493e4b238d36cc62b4dbb"
+      },
+      {
+        "path": "apps/reference-host-web/README.md",
+        "bytes": 1722,
+        "sha256": "sha256:efa26c5990c16ce3afa16fc77cb5dbbce404e73a76c9d5cf1b526731838b7682"
+      },
+      {
+        "path": "apps/reference-host-web/tsconfig.json",
+        "bytes": 185,
+        "sha256": "sha256:99eaed090e363413adb250a8c295388847287d412f6dceedc613d13037a62066"
+      },
+      {
+        "path": "apps/reference-host-web/src/application.tsx",
+        "bytes": 2115,
+        "sha256": "sha256:47a3acebca2cbab40c5bfa6c5569910fefed6bc277483cf9197d7918729650e1"
+      },
+      {
+        "path": "apps/reference-host-web/src/browser-profile.ts",
+        "bytes": 4876,
+        "sha256": "sha256:8d09a43225303b0f5e4157a33852842e0a642a6694232e97ecc6e3ce41d7a140"
+      },
+      {
+        "path": "apps/reference-host-web/src/failure-view.tsx",
+        "bytes": 1727,
+        "sha256": "sha256:a303557ac0d55d8e637b6e5a9660f7b5cb8a8cdd5b62b70132198f78d2c53200"
+      },
+      {
+        "path": "apps/reference-host-web/src/host-ports.ts",
+        "bytes": 4498,
+        "sha256": "sha256:429bbb4f9efc651de3f7c6689b93e0224f5f66c4a0a71769a2e3f75e223df886"
+      },
+      {
+        "path": "apps/reference-host-web/src/main.tsx",
+        "bytes": 395,
+        "sha256": "sha256:33982ade69a1dd4132bec4265ed926f33ffb759d9f8937f5769710e8c4d8074d"
+      },
+      {
+        "path": "apps/reference-host-web/src/managed-surface.tsx",
+        "bytes": 1463,
+        "sha256": "sha256:a3a4010bea578afaaaf03ee69f0f6f68ff2e4e08bfd5d6aacda1bea1d9d3b83e"
+      },
+      {
+        "path": "apps/reference-host-web/src/recovery-authority.ts",
+        "bytes": 6708,
+        "sha256": "sha256:7be82151b7f8de8e4def12041071f5e5f8ab0dead6c3eacad94d17919337913c"
+      },
+      {
+        "path": "apps/reference-host-web/src/root-policy.ts",
+        "bytes": 3760,
+        "sha256": "sha256:276ff9c4776c493f1c532e137c8a7f15bd1fba2388e213915e03db3d7f13026e"
+      },
+      {
+        "path": "apps/reference-host-web/src/root.tsx",
+        "bytes": 18979,
+        "sha256": "sha256:13b33d9314aa3501b81abf8b1ddb0a0937ec36188bd5b172b487dce7dd2ee7db"
+      },
+      {
+        "path": "apps/reference-host-web/src/styles.css",
+        "bytes": 2082,
+        "sha256": "sha256:6d82529e07969d9033232aaa72924ec57eae0dd86736ebecdf700680046a7738"
+      },
+      {
+        "path": "apps/reference-host-web/test/host-ports.test.ts",
+        "bytes": 12026,
+        "sha256": "sha256:2e2cc50ca2f97116127da4c3ce0f458dddd61036bc0f78acb1452ac9c3910e03"
+      },
+      {
+        "path": "apps/reference-host-web/test/public-api.types.ts",
+        "bytes": 2167,
+        "sha256": "sha256:bea1e53944eb390284d23275fe9585592f194372337bf8a958b16050d5275da6"
+      },
+      {
+        "path": "apps/reference-host-web/test/recovery-authority.test.ts",
+        "bytes": 5690,
+        "sha256": "sha256:debf70d9836208b710f06d86296b12172948ab3b330884d9cc5d8d369871b8de"
+      },
+      {
+        "path": "apps/reference-host-web/test/root-lifecycle.test.tsx",
+        "bytes": 10089,
+        "sha256": "sha256:93e97ad0815d8986f5653d8fa6c4695ee3a72e51e17cbdbddd1751a6ec15c2cd"
+      },
+      {
+        "path": "apps/reference-host-web/test/root-policy.test.ts",
+        "bytes": 3181,
+        "sha256": "sha256:e6ea37ee74dfa8b8a0afc7350f132d6de3fe20a9e820406f71ca9006605c5f8a"
+      },
+      {
+        "path": "apps/reference-host-web/test/root-security.test.tsx",
+        "bytes": 14520,
+        "sha256": "sha256:3ef2c0b6a03909ea8c97e8f816ed73ec88eebe4af0454bd12b12f21a16eecd1d"
+      },
+      {
+        "path": "packages/runtime-core/package.json",
+        "bytes": 2138,
+        "sha256": "sha256:196c2d8d69d56415283535647657ccbda786d3e7600e3c1d3f1d41e34f7dd67e"
+      },
+      {
+        "path": "packages/runtime-core/src/headless-session.ts",
+        "bytes": 117333,
+        "sha256": "sha256:6e3c6db80572c7929d810d8da56267f414e6e9e66f773a55826b20af6f22d1ab"
+      },
+      {
+        "path": "packages/runtime-core/src/index.ts",
+        "bytes": 15271,
+        "sha256": "sha256:d2fc9c00fd5147226276a797386c1be6b55b6c4c240d83b9db7481ef1a753a74"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-materialization.test.ts",
+        "bytes": 24660,
+        "sha256": "sha256:d2195e7990548f282877e8435abce14434d442a8deb2a9125d7004f32eb6427c"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.test.ts",
+        "bytes": 94278,
+        "sha256": "sha256:f7453d9ece6002e6e6c1f38b89b126293ba36f868a9a5c0f57e2b3520a2cb0c7"
+      },
+      {
+        "path": "packages/runtime-core/test/headless-session.types.ts",
+        "bytes": 12376,
+        "sha256": "sha256:dc42840aeb34337121d143dbbc0472934e97a17bc78ee4cca453b52cd75332bc"
+      },
+      {
+        "path": "packages/runtime-web/package.json",
+        "bytes": 821,
+        "sha256": "sha256:34288bf7ef3151718fa3725d564dd9b76f3e9da8938ef0c957ae9b75fd86033e"
+      },
+      {
+        "path": "packages/runtime-web/README.md",
+        "bytes": 6553,
+        "sha256": "sha256:90ff47a907200e6af28b95660eb89e07887e7bfa5275d13a225019c20a892f3c"
+      },
+      {
+        "path": "packages/runtime-web/tsconfig.json",
+        "bytes": 170,
+        "sha256": "sha256:e3fb3f616ba226ec2db97c6c548d95353a407cf53ae0b6593840219df4f5e55a"
+      },
+      {
+        "path": "packages/runtime-web/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "sha256:f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/runtime-web/src/browser-platform.ts",
+        "bytes": 12929,
+        "sha256": "sha256:cc429a0ea638698f2ffd51559c3b80efcb7782c32234d940ea02d1801d70e644"
+      },
+      {
+        "path": "packages/runtime-web/src/host-authority.ts",
+        "bytes": 29256,
+        "sha256": "sha256:01e249e1fb438b2165888cc73c424230582d4c09ff85f3a224ac6eef08edf12e"
+      },
+      {
+        "path": "packages/runtime-web/src/index.ts",
+        "bytes": 872,
+        "sha256": "sha256:10f8e454aab8a72e889e8b88427ad9e616629ef28576d7e7109282ff92e8da57"
+      },
+      {
+        "path": "packages/runtime-web/test/host-authority.test.ts",
+        "bytes": 30345,
+        "sha256": "sha256:c10c8ccc17d952c1fab1de6f803dd3ee839c9298ed7046ac63e11c74e0b3883a"
+      },
+      {
+        "path": "packages/runtime-web/test/host-authority.types.ts",
+        "bytes": 5050,
+        "sha256": "sha256:60eb2ae6d4b448da668800f0f77abe0f4616ab661b0f8474dd19531210335d99"
+      },
+      {
+        "path": "dependency-cruiser.config.cjs",
+        "bytes": 7246,
+        "sha256": "sha256:ecce08e926a85df2465ebc3caa9dfdb80e700fe1508b0b32403907b7e245714e"
+      },
+      {
+        "path": "package.json",
+        "bytes": 43996,
+        "sha256": "sha256:d16f0ce0becffd726928d7cfe425d9b78bc661e6693087859671ffefb46eb0a0"
+      },
+      {
+        "path": "scripts/generate-reference-host-web-shell-proof.mjs",
+        "bytes": 1111,
+        "sha256": "sha256:7017e53235af380f07246d78b35dade71296439315d7e65cf50b15d535f96e5b"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "sha256:4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/reference-host-web-shell-proof.mjs",
+        "bytes": 70155,
+        "sha256": "sha256:a27c6768333233988c851d69493b62fb300b0813ca572a32b7ec3c28d8910e51"
+      },
+      {
+        "path": "scripts/verify-reference-host-web-shell.mjs",
+        "bytes": 1230,
+        "sha256": "sha256:f9342af871537557cd65d341ce0633eb0e72a2e1cb0b487b034245ef4f34767c"
+      },
+      {
+        "path": "tests/reference-host-web-shell.test.mjs",
+        "bytes": 28250,
+        "sha256": "sha256:a85113a3e77db296dc84e169fa7e7e491d88dd19a4d45dd93ce36bad71188a59"
+      }
+    ],
+    "traceability": {
+      "canonicalTrace": [
+        {
+          "collection": "proseRules",
+          "id": "R-019",
+          "section": "9.1",
+          "disposition": "partial-host-wrapper-evidence"
+        },
+        {
+          "collection": "proseRules",
+          "id": "R-105",
+          "section": "24.5",
+          "disposition": "explicit-host-navigation-port-wired"
+        },
+        {
+          "collection": "invariants",
+          "id": "A-013",
+          "section": "Appendix A",
+          "disposition": "host-owned-integration-profile"
+        }
+      ],
+      "normativeStatusChanges": [],
+      "proofClaimStatusChanges": [],
+      "productionRuntimeConformance": "PLANNED",
+      "proofClaims": {
+        "P-06": "PARTIAL",
+        "P-07": "NOT_PROVEN",
+        "P-17": "PARTIAL"
+      }
+    },
+    "historicalArtifactsRewritten": false
+  },
+  "nonclaims": [
+    "official-derived sign-in Bundle execution",
+    "reference React adapter registry execution",
+    "real sign-in operation, pending, failure, retry, success, or navigation flow",
+    "final AST and resolved-import proof of no handwritten managed-screen composition",
+    "G05 closure",
+    "channel fetching or exact package installation",
+    "IndexedDB activation, atomic commit, restart recovery, or last-known-good behavior",
+    "Desen App parity",
+    "browser end-to-end conformance",
+    "native, iOS, Android, SwiftUI, or Compose runtime support"
+  ]
+}

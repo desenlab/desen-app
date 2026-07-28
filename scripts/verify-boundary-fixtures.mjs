@@ -39,6 +39,18 @@ const cases = [
     name: "reference-host-imports-editor",
     expectedRule: "reference-host-has-no-authoring-or-publisher",
   },
+  {
+    name: "reference-host-imports-testkit",
+    expectedRule: "reference-host-has-no-test-support-or-facade",
+  },
+  {
+    name: "reference-host-imports-facade",
+    expectedRule: "reference-host-has-no-test-support-or-facade",
+  },
+  {
+    name: "reference-host-imports-desen-app",
+    expectedRule: "reference-host-has-no-application-dependencies",
+  },
 ];
 
 let failed = false;

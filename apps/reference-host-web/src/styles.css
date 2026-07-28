@@ -1,0 +1,113 @@
+:root {
+  color: #151515;
+  background: #f4f2ec;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 20rem;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.reference-host {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem;
+}
+
+.reference-host__notice {
+  width: min(100%, 40rem);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, Canvas 94%, transparent);
+  box-shadow: 0 1.25rem 4rem color-mix(in srgb, #000 10%, transparent);
+}
+
+.reference-host__notice--failure {
+  border-color: color-mix(in srgb, #b42318 48%, transparent);
+}
+
+.reference-host__eyebrow {
+  margin: 0 0 0.75rem;
+  color: #645f55;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.reference-host__notice h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 6vw, 3rem);
+  line-height: 1.05;
+}
+
+.reference-host__notice p:not(.reference-host__eyebrow) {
+  max-width: 34rem;
+  margin: 1rem 0 0;
+  color: #514d45;
+  line-height: 1.6;
+}
+
+.reference-host__code {
+  display: block;
+  width: fit-content;
+  margin-top: 1.25rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  font-size: 0.8rem;
+}
+
+.reference-host__action {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  color: white;
+  background: #20201e;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.reference-host__action:focus-visible {
+  outline: 3px solid #6d5dfc;
+  outline-offset: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f5f2ea;
+    background: #151515;
+  }
+
+  .reference-host__eyebrow,
+  .reference-host__notice p:not(.reference-host__eyebrow) {
+    color: #c8c2b7;
+  }
+
+  .reference-host__action {
+    color: #151515;
+    background: #f5f2ea;
+  }
+}

@@ -1,4 +1,7 @@
 {
   "extends": "../../tsconfig.react-web.json",
-  "files": []
+  "compilerOptions": {
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx"]
 }

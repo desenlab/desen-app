@@ -1,6 +1,7 @@
 import {
   attachRuntimeHeadlessSessionComponentCommands,
   authenticateRuntimeHeadlessSessionAdapterAuthority,
+  authenticateRuntimeHeadlessSessionHostAuthority,
   detachRuntimeHeadlessSessionComponentCommands,
   dispatchRuntimeHeadlessSessionEvent,
   disposeRuntimeHeadlessSession,
@@ -25,6 +26,8 @@ import type {
   RuntimeHeadlessSessionEventInput,
   RuntimeHeadlessSessionEventResult,
   RuntimeHeadlessSessionHandle,
+  RuntimeHeadlessSessionHostAuthorityInput,
+  RuntimeHeadlessSessionHostAuthorityResult,
   RuntimeHeadlessSessionLimitProfile,
   RuntimeHeadlessSessionListener,
   RuntimeHeadlessSessionMountInput,
@@ -40,9 +43,38 @@ import type {
 import type { DesenValidatedExecutionCatalogSet } from "@desen/validator";
 
 declare const hostPorts: RuntimeHostPorts;
+declare const otherHostPorts: RuntimeHostPorts;
 declare const handle: RuntimeHeadlessSessionHandle;
 declare const snapshot: RuntimeHeadlessSessionSnapshot;
 declare const catalogSet: DesenValidatedExecutionCatalogSet;
+
+const hostAuthorityInput: RuntimeHeadlessSessionHostAuthorityInput = { hostPorts };
+const hostAuthority: RuntimeHeadlessSessionHostAuthorityResult =
+  authenticateRuntimeHeadlessSessionHostAuthority(handle, hostAuthorityInput);
+if (hostAuthority.status === "authenticated") {
+  // @ts-expect-error authentication never exposes the retained host-port aggregate
+  void hostAuthority.hostPorts;
+}
+
+authenticateRuntimeHeadlessSessionHostAuthority(handle, { hostPorts: otherHostPorts });
+
+// @ts-expect-error host authority inputs are immutable
+hostAuthorityInput.hostPorts = otherHostPorts;
+
+// @ts-expect-error host authentication requires a host-port aggregate
+authenticateRuntimeHeadlessSessionHostAuthority(handle, {});
+
+authenticateRuntimeHeadlessSessionHostAuthority(handle, {
+  hostPorts,
+  // @ts-expect-error no snapshot, Catalog, or other authority may accompany the host aggregate
+  snapshot,
+});
+
+// @ts-expect-error a structural object is not the complete RuntimeHostPorts contract
+authenticateRuntimeHeadlessSessionHostAuthority(handle, { hostPorts: {} });
+
+// @ts-expect-error a session snapshot is not an opaque session handle
+authenticateRuntimeHeadlessSessionHostAuthority(snapshot, hostAuthorityInput);
 
 const detachedRuntimeJson = snapshotRuntimeJsonValue({ nested: ["inert", 1, true, null] });
 if (detachedRuntimeJson !== undefined) {

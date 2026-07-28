@@ -126,18 +126,18 @@ With `M04-T17` complete and `G04` closed again, M05 may now begin in dependency 
 
 ## M05 — React runtime and separate reference host
 
-| ID      | Status      | Depends on      | Deliverable / evidence                                                                             |
-| ------- | ----------- | --------------- | -------------------------------------------------------------------------------------------------- |
-| M05-T01 | DONE        | G04             | React adapter registry and render-plan renderer                                                    |
-| M05-T02 | DONE        | M05-T01         | Resolved props and named slots wired without private structure inspection                          |
-| M05-T03 | DONE        | M05-T01–M05-T02 | Style parts and visual states wired through public adapter contracts                               |
-| M05-T04 | DONE        | M05-T01–M05-T03 | Component events, commands, and behavior adapters wired                                            |
-| M05-T05 | DONE        | M05-T02–M05-T04 | Stable keys and runtime-node ↔ source-node diagnostics                                             |
-| M05-T06 | DONE        | M05-T05         | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
-| M05-T07 | NOT_STARTED | M05-T01         | Independently built reference-host shell with host ports                                           |
-| M05-T08 | NOT_STARTED | M05-T04–M05-T07 | Official sign-in bundle running through real adapters                                              |
-| M05-T09 | NOT_STARTED | M05-T07–M05-T08 | Automated source/import audit preventing handwritten managed-screen composition                    |
-| G05     | NOT_STARTED | M05-T01–M05-T09 | Bundle-driven sign-in runs in separate host                                                        |
+| ID      | Status      | Depends on       | Deliverable / evidence                                                                             |
+| ------- | ----------- | ---------------- | -------------------------------------------------------------------------------------------------- |
+| M05-T01 | DONE        | G04              | React adapter registry and render-plan renderer                                                    |
+| M05-T02 | DONE        | M05-T01          | Resolved props and named slots wired without private structure inspection                          |
+| M05-T03 | DONE        | M05-T01–M05-T02  | Style parts and visual states wired through public adapter contracts                               |
+| M05-T04 | DONE        | M05-T01–M05-T03  | Component events, commands, and behavior adapters wired                                            |
+| M05-T05 | DONE        | M05-T02–M05-T04  | Stable keys and runtime-node ↔ source-node diagnostics                                             |
+| M05-T06 | DONE        | M05-T05          | Error boundaries and explicit failure for unknown capabilities; no production placeholder guessing |
+| M05-T07 | DONE        | M05-T01, M05-T06 | Independently built reference-host shell with host ports                                           |
+| M05-T08 | NOT_STARTED | M05-T04–M05-T07  | Official sign-in bundle running through real adapters                                              |
+| M05-T09 | NOT_STARTED | M05-T07–M05-T08  | Automated source/import audit preventing handwritten managed-screen composition                    |
+| G05     | NOT_STARTED | M05-T01–M05-T09  | Bundle-driven sign-in runs in separate host                                                        |
 
 `M05-T01` creates a finite, factory-authenticated static React adapter registry and an
 all-or-nothing public headless-plan renderer. Ordinary roots and descendants use the same exact
@@ -186,6 +186,17 @@ than blaming a live ancestor. Containment is whole-surface, retry requires an ex
 branch transitions. A dedicated DESEN React root may suppress raw React 19 caught-error telemetry
 with the exported no-inspection policy; root unmount, event, async, and SSR error policy remains
 host-owned.
+
+`M05-T07` builds the Web-only reference host independently with React 19 and zero-configuration
+Vite 8. Its browser authority captures all nine host ports and fourteen callbacks without
+invocation. Root activation succeeds only after exact session-to-host-port identity, exact current
+snapshot/Catalog authority, matching Web-host document/revision authority, and the factory-created
+executable registry all authenticate. One transaction fence closes replacement, retry, and disposal reentry; an uncaught root failure
+terminally revokes session and host authority before emitting only a fixed redacted diagnostic.
+Recovery changes only for explicit retry or exact session, registry, Catalog, or host replacement.
+Desen App, editor, publisher, testkit, and facade imports are forbidden. The task does not claim
+official sign-in execution or the final no-handwritten-tree audit; those remain M05-T08 and
+M05-T09.
 
 ## M06 — Deterministic publisher
 

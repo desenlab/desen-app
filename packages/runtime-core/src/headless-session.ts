@@ -297,6 +297,46 @@ export type RuntimeHeadlessSessionReadResult =
     }>;
 
 /**
+ * Exact caller-owned host authority to authenticate against one mounted headless session.
+ *
+ * @remarks The aggregate must be the same object supplied to
+ * {@link mountRuntimeHeadlessSession}. A structurally equal aggregate or one containing the same
+ * callback identities does not belong to the session.
+ */
+export interface RuntimeHeadlessSessionHostAuthorityInput {
+  /** Exact host-port aggregate supplied when the session was mounted. */
+  readonly hostPorts: RuntimeHostPorts;
+}
+
+/**
+ * Closed result of joining one session handle to its exact mounted host-port aggregate.
+ *
+ * @remarks Authentication returns no port, callback, snapshot, Catalog, or lower runtime
+ * authority. Every variant is a frozen callback-free own-data record.
+ */
+export type RuntimeHeadlessSessionHostAuthorityResult =
+  | Readonly<{
+      /** The exact host-port aggregate belongs to this live session. */
+      readonly status: "authenticated";
+    }>
+  | Readonly<{
+      /** The supplied aggregate is not the exact object retained by this session. */
+      readonly status: "mismatched-host-authority";
+    }>
+  | Readonly<{
+      /** The session has terminally ended. */
+      readonly status: "disposed";
+    }>
+  | Readonly<{
+      /** The supplied handle was not created by the session factory. */
+      readonly status: "invalid-handle";
+    }>
+  | Readonly<{
+      /** The request was not the exact enumerable own-data envelope. */
+      readonly status: "malformed-request";
+    }>;
+
+/**
  * Exact caller-owned inputs for one framework-adapter authority preflight.
  *
  * @remarks Both members must be the same objects retained by the live session. Structural,
@@ -586,6 +626,7 @@ interface PendingDispatch {
 interface HeadlessSessionRetainedGraph {
   readonly bundle: BundleSnapshot;
   readonly catalogSet: DesenValidatedExecutionCatalogSet;
+  readonly hostAuthority: RuntimeHostPorts;
   readonly hostPorts: RuntimeReactiveHostPorts;
   readonly definitions: ReadonlyMap<string, SurfaceDefinition>;
 }
@@ -652,6 +693,10 @@ interface CapturedEventInput {
 interface CapturedAdapterAuthorityInput {
   readonly snapshot: unknown;
   readonly catalogSet: unknown;
+}
+
+interface CapturedHostAuthorityInput {
+  readonly hostPorts: unknown;
 }
 
 interface CapturedComponentCommandsInput {
@@ -784,6 +829,23 @@ function captureAdapterAuthorityInput(input: unknown): CapturedAdapterAuthorityI
       snapshot: snapshot.value,
       catalogSet: catalogSet.value,
     });
+  } catch {
+    return undefined;
+  }
+}
+
+function captureHostAuthorityInput(input: unknown): CapturedHostAuthorityInput | undefined {
+  try {
+    if (typeof input !== "object" || input === null || Array.isArray(input)) return undefined;
+    const prototype = Reflect.getPrototypeOf(input);
+    if (prototype !== Object.prototype && prototype !== null) return undefined;
+    const keys = Reflect.ownKeys(input);
+    if (keys.length !== 1 || keys[0] !== "hostPorts") return undefined;
+    const hostPorts = Reflect.getOwnPropertyDescriptor(input, "hostPorts");
+    if (hostPorts === undefined || !hostPorts.enumerable || !("value" in hostPorts)) {
+      return undefined;
+    }
+    return Object.freeze({ hostPorts: hostPorts.value });
   } catch {
     return undefined;
   }
@@ -2635,6 +2697,7 @@ export function mountRuntimeHeadlessSession(
     retainedGraph: Object.freeze({
       bundle,
       catalogSet: catalogs.value,
+      hostAuthority: captured.hostPorts,
       hostPorts,
       definitions,
     }),
@@ -2694,6 +2757,39 @@ export function readRuntimeHeadlessSession(
     return Object.freeze({ status: "disposed" });
   }
   return Object.freeze({ status: "read", snapshot: authority.snapshot });
+}
+
+/**
+ * Authenticates that one live headless session was mounted with an exact host-port aggregate.
+ *
+ * @remarks A live/disposed handle check occurs before reflecting over caller input. Reflection is
+ * restricted to capturing the exact one-member own-data envelope and never enters the supplied
+ * host-port aggregate or invokes a callback. The session authority is rechecked afterward so
+ * disposal triggered reentrantly by a hostile request Proxy wins over an apparent match.
+ */
+export function authenticateRuntimeHeadlessSessionHostAuthority(
+  handle: RuntimeHeadlessSessionHandle,
+  input: RuntimeHeadlessSessionHostAuthorityInput,
+): RuntimeHeadlessSessionHostAuthorityResult {
+  if (typeof handle !== "object" || handle === null) {
+    return Object.freeze({ status: "invalid-handle" });
+  }
+  const authority = SESSION_AUTHORITIES.get(handle);
+  if (authority === undefined) return Object.freeze({ status: "invalid-handle" });
+  if (authority.status !== "live" || authority.retainedGraph === undefined) {
+    return Object.freeze({ status: "disposed" });
+  }
+
+  const captured = captureHostAuthorityInput(input);
+  const current = SESSION_AUTHORITIES.get(handle);
+  if (current !== authority || current.status !== "live" || current.retainedGraph === undefined) {
+    return Object.freeze({ status: "disposed" });
+  }
+  if (captured === undefined) return Object.freeze({ status: "malformed-request" });
+  if (captured.hostPorts !== current.retainedGraph.hostAuthority) {
+    return Object.freeze({ status: "mismatched-host-authority" });
+  }
+  return Object.freeze({ status: "authenticated" });
 }
 
 /**

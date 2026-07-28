@@ -4,5 +4,28 @@
   "private": true,
   "description": "Reference Host Web workspace",
   "license": "Apache-2.0",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "lint": "eslint src test --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:shell": "vitest run test/host-ports.test.ts test/root-policy.test.ts test/recovery-authority.test.ts test/root-lifecycle.test.tsx test/root-security.test.tsx"
+  },
+  "dependencies": {
+    "@desen/runtime-core": "workspace:*",
+    "@desen/runtime-react": "workspace:*",
+    "@desen/runtime-web": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@testing-library/react": "16.3.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "jsdom": "29.1.1",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
+  }
 }

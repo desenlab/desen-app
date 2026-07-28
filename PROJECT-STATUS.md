@@ -308,15 +308,25 @@ persistent provenance branches distinguish managed cleanup from host failure UI,
 DESEN root can suppress raw React caught-error telemetry without inspecting it. `PF-055` records
 the target-specific boundary. N-037 becomes `TESTED`; P-17 remains `PARTIAL` with only M07-T04
 activation preflight outstanding.
+M05-T07 now supplies the independent Web-only React 19/Vite 8 host shell. Its nine-port,
+fourteen-callback browser authority is joined to the exact session, current snapshot/Catalog,
+configured document/revision, and factory-created executable registry before activation.
+Replacement and cleanup are reentry-fenced;
+uncaught root failure revokes session and host authority before fixed redacted observability; and
+sticky recovery changes only after explicit retry or exact executable-authority replacement.
+Forbidden application, authoring, publisher, test-support, and facade imports are enforced by
+negative dependency fixtures. `PF-056` records this profile; `PF-057` records the explicit wide
+test budget and assigns binding-scaling measurement to M12-T05. P-06 remains `PARTIAL`, P-07
+remains `NOT_PROVEN`, and P-17 remains `PARTIAL`; M05-T08 and M05-T09 own those remaining slices.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M05 — React runtime and separate reference host`
-- Overall implementation progress: `60 / 145 tasks complete (41%)`
+- Overall implementation progress: `61 / 145 tasks complete (42%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
-- M05 progress: `6 / 9 tasks complete (67%)`
+- M05 progress: `7 / 9 tasks complete (78%)`
 - Proof-gate progress: `5 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -362,11 +372,12 @@ activation preflight outstanding.
   `M05-T03 — Style parts and visual states`,
   `M05-T04 — Component events, commands, and behavior adapters`,
   `M05-T05 — Stable keys and runtime-node ↔ source-node diagnostics`,
-  `M05-T06 — Error boundaries and explicit capability failure`
+  `M05-T06 — Error boundaries and explicit capability failure`,
+  `M05-T07 — Independently built reference-host shell with host ports`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M05-T07 — Independently built reference-host shell with host ports`
-- Status: M05-T06 is complete; M05-T07 is ready to start
+- Next implementation task: `M05-T08 — Official sign-in bundle running through real adapters`
+- Status: M05-T07 is complete; M05-T08 is ready to start
 
 ## Completed preparation
 
@@ -702,9 +713,14 @@ without retaining React, platform, session, Catalog, registry, props, styles, sl
 The production React boundary now rejects unknown capabilities without executing or guessing an
 adapter, contains committed adapter failures as one managed surface, redacts raw thrown values,
 refuses false cleanup attribution, revokes failed authority, and requires explicit host retry.
-N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-16 and P-17 remain `PARTIAL`, while N-021
-remains `PLANNED`. M05-T07 must now build the independent host shell and wire its dedicated React
-root, browser ports, and explicit recovery policy.
+The independent Web host now adds exact session-to-host-port, current snapshot/Catalog, and
+document/revision joins before it accepts runtime ownership. Its dedicated React root, browser
+environment and clock, transaction fence, terminal tombstones, redacted root diagnostics, and
+explicit recovery authority are production-wired without a Desen App, editor, publisher,
+test-support, or facade dependency. N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-16,
+P-17, and P-06 remain `PARTIAL`, P-07 remains `NOT_PROVEN`, and N-021 remains `PLANNED`. M05-T08
+must now run the official-derived sign-in Bundle through the real reference adapters and trusted
+operation boundary.
 
 The frozen upstream baseline now has an annotated
 [`v0.1.0`](https://github.com/desenlab/desen-protocol/releases/tag/v0.1.0) tag and published GitHub
@@ -714,9 +730,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M05-T07 — Independently built reference-host shell with host ports`. Create the separate
-application root, connect only explicit browser/host infrastructure, wire the dedicated React root
-error and recovery policies, and keep managed component composition outside host source.
+Begin `M05-T08 — Official sign-in bundle running through real adapters`. Compose the
+official-derived fixture with the exact reference registry and trusted sign-in operation, then
+prove pending, declared failure, explicit retry, stale replacement protection, success, and
+navigation through the independent host.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1214,6 +1231,25 @@ M05-T06 evidence:
   deterministic atomic artifact writing
 - coverage decision: N-037 becomes `TESTED`; P-17 remains `PARTIAL` with M07-T04 activation
   finite-limit preflight outstanding; D-009 retains its M06-T11 invalid-publication slice
+
+M05-T07 evidence:
+
+- `docs/proof/REFERENCE-HOST-WEB-SHELL.md`
+- `docs/proof/artifacts/reference-host-web-0.1.0-shell.json`
+- artifact SHA-256:
+  `cafaf8e9ec0b8be207344b25e076541b395c83e348f665dc7b97e5c4cb4000f2`
+- exact boundary: independent zero-configuration Vite 8 host; nine ports and fourteen callbacks;
+  exact session-to-host-port, snapshot/Catalog, document/revision, and executable-registry
+  authority joins; dedicated
+  React root with terminal-before-observability failure policy; transition/reentry fence;
+  authority-only sticky recovery; exhaustive browser-listener cleanup; last-valid environment
+  retention; and inert root/session/host tombstones
+- executable evidence: two byte-identical three-file production builds, 42 tracked files, 92
+  focused runtime cases, 53 compiler-negative cases, 33 hostile root mutations, 902 source
+  assertions, 113 production imports, and 10 negative plus 2 allowed dependency fixtures
+- coverage decision: R-019, R-105, and A-013 host-profile evidence advances without a normative
+  status change; P-06 remains `PARTIAL`, P-07 remains `NOT_PROVEN`, P-17 remains `PARTIAL`, and
+  G05 remains open for M05-T08 and M05-T09
 
 ## Status vocabulary
 

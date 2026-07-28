@@ -58,17 +58,7 @@ const allowedApplicationDependencies = {
     "desen",
   ],
   "desen-run": ["protocol", "validator", "testkit", "desen"],
-  "reference-host-web": [
-    "protocol",
-    "validator",
-    "catalog-sdk",
-    "runtime-core",
-    "runtime-react",
-    "runtime-web",
-    "reference-catalog-web",
-    "testkit",
-    "desen",
-  ],
+  "reference-host-web": ["runtime-core", "runtime-react", "runtime-web", "reference-catalog-web"],
 };
 
 const neutralProductionSourcePath =
@@ -198,6 +188,22 @@ module.exports = {
         "The proof host executes bundles and must not acquire editor code or source-to-bundle publication behavior.",
       from: { path: "^apps/reference-host-web/(?:src|app)/" },
       to: { path: "^packages/(?:editor-core|editor-web|publisher)/" },
+    },
+    {
+      name: "reference-host-has-no-test-support-or-facade",
+      severity: "error",
+      comment:
+        "The production proof host cannot acquire fixtures, synthetic outcomes, or the broad public facade.",
+      from: { path: "^apps/reference-host-web/(?:src|app)/" },
+      to: { path: "^packages/(?:testkit|desen)/" },
+    },
+    {
+      name: "reference-host-has-no-application-dependencies",
+      severity: "error",
+      comment:
+        "The independent proof host cannot import Desen App or another application composition root.",
+      from: { path: "^apps/reference-host-web/(?:src|app)/" },
+      to: { path: "^apps/(?!reference-host-web/)" },
     },
   ],
   options: {

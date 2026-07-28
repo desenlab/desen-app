@@ -43,9 +43,10 @@ only the internal packages listed below:
 | `desen`                 | protocol, validation, publication, runtime, catalog, and dedicated test APIs           |
 
 Applications are composition roots but still have explicit allowlists. The reference host cannot
-import editor or publisher packages, and the control plane cannot import renderer or editor
-packages. Packages never import applications. Production package source never imports `testkit`;
-only test code and the future dedicated `desen/test` facade may expose it.
+import Desen App, editor, publisher, `testkit`, or the broad `desen` facade, and the control plane
+cannot import renderer or editor packages. Packages never import applications. Production package
+source never imports `testkit`; only test code and the future dedicated `desen/test` facade may
+expose it.
 
 `dependency-cruiser.config.cjs` is the executable authority for this table. Any new edge requires
 an architecture review, a matching documentation change, and a negative boundary fixture.
@@ -120,6 +121,30 @@ The boundary consumes trusted runtime results, not arbitrary untrusted objects, 
 within one tree require one deduplicated `runtime-react` module instance for private carrier
 identity.
 
+The M05-T07 reference-host boundary is a separately built, client-only React 19 application using
+zero-configuration Vite 8. `runtime-web` factory-captures all nine host ports and fourteen
+callbacks without invocation. The reference root reads that exact aggregate from the opaque Web
+host authority and asks `runtime-core` to authenticate its object-identity join with the live
+headless session; the authentication result is status-only and exposes no port or callback.
+Structurally equal aggregates do not pass. The root also authenticates the exact current session
+snapshot and Catalog set, then uses a second status-only `runtime-web` authority check to require
+that snapshot's document id and revision to equal the host's configured pair. The root accepts
+only a closed `RuntimeReactLiveSurfaceInput` and authenticates its factory-created executable
+registry through runtime-react's callback-free public reader before ownership transfer. It serializes
+activation/replacement/retry/disposal through one transition fence, and cannot receive arbitrary
+React composition or a caller-selected recovery key.
+
+The dedicated root ignores caught-error telemetry through the exact runtime-react policy.
+Recoverable errors emit only a fixed redacted signal. Uncaught errors terminally fence the
+session and host before that fixed signal is reported; raw errors and React error information are
+never inspected or forwarded. Explicit retry or replacement of the exact session, registry,
+Catalog set, or host authority advances the sticky recovery epoch. Bundle/revision values,
+snapshots, renderer results, and ordinary publication cannot. Terminal tombstones sever the heavy
+authority graph. The browser profile preserves its last valid bounded environment after a hostile
+read, uses a finite nondecreasing epoch clock, and attempts every listener cleanup independently.
+A failed or otherwise uncertain React unmount keeps a weak claim on the container so a second root
+cannot be attached to uncertain live state.
+
 `@desen/reference-catalog-web/react-adapters` is the opt-in executable package boundary. Its five
 registrations statically import the real reference components, map validated fields explicitly,
 and implement the declared `focus`, `change`, and `press` interaction primitives without dynamic
@@ -155,9 +180,11 @@ sources to the publisher.
 
 ### Reference Host Web
 
-A separately built production-like application. It knows no authoring UI and contains no manual
-managed-screen composition. It fetches a channel, verifies and stages a bundle, resolves exact
-capabilities, then atomically activates it.
+A separately built, Web-only production-like application. Its T07 shell owns explicit browser
+ports, a dedicated React root, redacted failure policy, and authority-bound recovery without
+authoring UI or Desen App dependencies. T08 adds the official-derived sign-in execution. T09 adds
+the final AST and resolved-import proof that the production graph contains no manual managed-screen
+composition. Channel fetching, verification, staging, and atomic activation remain M07 work.
 
 ### Control Plane API
 

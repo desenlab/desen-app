@@ -814,3 +814,40 @@ its M06-T11 invalid-publication slice.
 
 `runtime-react-0.1.0-failure-boundary.json`
 `sha256:3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723`.
+
+## M05-T07
+
+M05-T07 establishes `apps/reference-host-web` as a separately built, client-only React 19
+application with a zero-configuration Vite 8 production build. Its production dependency graph
+cannot import Desen App, editor, publisher, `testkit`, or the broad `desen` facade. The host
+accepts only a closed `RuntimeReactLiveSurfaceInput`; it cannot receive an arbitrary React tree,
+component implementation, capability-selected loader, or caller-selected recovery key.
+
+Activation joins four independent factory authorities before ownership changes: runtime-core
+proves that the exact original host-port aggregate mounted the session; it authenticates the exact
+current snapshot and Catalog set; and runtime-web proves that the same Web host was configured for
+that snapshot's document id and revision; runtime-react also recognizes the exact
+factory-created executable registry handle. Every join result is closed and callback-free:
+registry and session authentication may return immutable metadata snapshots, but no result exposes
+an executable callback or host port. The root transition fence prevents cleanup-triggered
+activation, retry, replacement, or disposal reentry from interleaving authority changes.
+
+The dedicated root uses the exact no-inspection caught-error policy. Recoverable failures emit
+only fixed frozen diagnostics; uncaught failures first tombstone the root and terminally revoke
+the session and host, then report a fixed diagnostic without reading or forwarding raw React
+values. Sticky recovery advances only for explicit retry or exact session, registry, Catalog, or
+host-authority replacement. Ordinary publication, Bundle/revision data, snapshots, renderer
+results, and reconciliation keys cannot select it. Browser environment reads preserve the last
+valid bounded snapshot, every registered listener receives an independent cleanup attempt, and an
+uncertain unmount retains the weak container claim.
+
+The deterministic evidence covers two identical independent Vite builds, 42 tracked files, 92
+focused runtime cases, 53 compiler-negative cases, 33 hostile root mutations, 902 source
+assertions, and 113 production imports. It authenticates the existing `R-019`, `R-105`, and
+`A-013` assignments without changing a BCP14 row or proof-claim status. P-06 remains `PARTIAL`
+until the real reference adapters run in the separate host, P-07 remains `NOT_PROVEN` until the
+M05-T09 AST/resolved-import audit, and P-17 remains `PARTIAL`. M05-T08 still owns the
+official-derived sign-in execution, so G05 remains open.
+
+`reference-host-web-0.1.0-shell.json`
+`sha256:cafaf8e9ec0b8be207344b25e076541b395c83e348f665dc7b97e5c4cb4000f2`.
