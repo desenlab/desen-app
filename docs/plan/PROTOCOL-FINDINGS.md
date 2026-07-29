@@ -2379,7 +2379,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   signing, npm publication, or deployment.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-  `sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+  `sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
 
 - Future action: A later protocol revision should separate Catalog-independent Source validation
   from Catalog-backed reference finalization, define their diagnostic-stage and failure-precedence
@@ -2391,9 +2391,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
 ## PF-063 — Static component contracts and dynamic execution contracts need separate Publisher seams
 
 - Status: OPEN
-- Blocks proof: No; M06-T04 can prove the complete statically knowable component and interaction
-  slice while M06-T05 retains the inseparable resource/operation, dynamic-compatibility, and
-  runtime-obligation slice.
+- Blocks proof: No; M06-T04 and M06-T05 now prove the two deliberately separated static and
+  cumulative execution slices without misrepresenting either task boundary.
 - Protocol location: SPEC Sections 17–21, 25.1, and 26.3; `PIPE-032`, `N-026`, `N-027`, `R-057`,
   `R-058`, `R-060`, `R-064`, `R-085`, `R-120`, and `R-148`; related findings `PF-010`, `PF-051`,
   and `PF-062`
@@ -2433,12 +2432,70 @@ This file records implementation discoveries without changing the frozen DESEN 0
   detected without any observable reflection.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-  `sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
+  `sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
 
-- Future action: M06-T05 must consume only the exact M06-T04 authority, prepare and prove resource
-  and operation receiving contracts, determine static-versus-dynamic compatibility without
-  evaluating runtime values, and record the complete bounded runtime-obligation set. Only then may
-  `PIPE-032` be considered complete for the Publisher. M06-T11 must drive both slices through the
-  terminal public Publisher and prove every invalid case emits no Bundle. A future Validator API
-  may expose a narrower resource/operation preparation seam if independent publishers need the
-  same split without composing execution semantics.
+  M06-T05 now runs M06-T04 internally, re-authenticates the exact prepared Source and execution
+  Catalog set, prepares resource and operation input/output schemas, checks all statically
+  decidable resource, operation, state, predicate, repeat, navigation, refresh, command-target,
+  lifecycle, and binding contracts, and records the complete normalized dynamic-obligation set.
+  It never evaluates a runtime value. Capability, state/control-flow, and binding diagnostics
+  retain emission-site phase ownership and fail in that exact order. A failure exposes no Source,
+  Catalog, selected package, alignment, warning, obligation, partial value, or Bundle. Success
+  preserves the exact upstream authorities and warnings, adds only the exact execution Catalog
+  authority and bounded obligations, and remains package-private and nonterminal.
+
+  The local finite envelope admits at most 4,096 obligations, 4,096 UTF-16 code units in one
+  obligation pointer, and 1,048,576 aggregate obligation/identity-context units. A crossing rejects
+  the complete intermediate at `binding-compatibility`; it never truncates obligations. This
+  completes the Publisher's `PIPE-032` resource/operation and dynamic-obligation slice and supplies
+  the missing publisher-side part of the composed `N-027` evidence.
+
+  The M02 traceability artifact remains an immutable historical ownership ledger: its `PIPE-032`
+  row names M06-T04 as the primary implementation owner and M06-T11 as the terminal matrix owner.
+  It does not encode every successor subtask needed to complete that broad step. This finding and
+  the T05 receipt record the required completion dependency without retroactively rewriting the
+  already-proven M02 artifact.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
+  `sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
+
+- Future action: M06-T11 must drive both T04/T05 slices through the terminal public Publisher and
+  prove every invalid case emits no Bundle. A future protocol revision should expose explicit
+  publication substage ownership and a standard aggregate runtime-obligation envelope if
+  independent publishers require byte-identical failure behavior.
+
+## PF-064 — Publication stage provenance belongs at diagnostic emission sites
+
+- Status: OPEN
+- Blocks proof: No; M06-T05 defines a deterministic project-owned stage profile without changing
+  DESEN 0.1.0 diagnostic identities.
+- Protocol location: SPEC Sections 25.1 and 26.3; publication steps 8–10; `PIPE-032`, `PIPE-033`,
+  `PIPE-034`, `R-052`, and `R-057`; related findings `PF-010`, `PF-051`, and `PF-063`
+- Observation: The cumulative M02-T10/T11 Validator correctly returns all static execution
+  diagnostics, but a Publisher must stop separately at capability contracts, state/control flow,
+  and binding compatibility. Several diagnostic codes can arise in more than one conceptual
+  phase, and JSON Pointer shape is not normative phase metadata. Running the cumulative API once
+  per Publisher stage repeats prerequisite work and can change simultaneous-error precedence;
+  classifying the final array by code or pointer is brittle and not justified by the frozen
+  protocol.
+- Implementation decision: Validator emission sites now attach private phase provenance to each
+  T10/T11 diagnostic. `validateDesenPreparedSourcePublicationContracts` authenticates the exact
+  prepared Source and exact execution Catalog authority, performs one document analysis, and
+  returns only the earliest non-empty phase in the order `capability-contracts`,
+  `state-and-control-flow`, then `binding-compatibility`. Existing cumulative Validator APIs keep
+  their previous normalized diagnostics. Publisher consumes this phase-aware result directly and
+  never reconstructs a T04 shell or infers stage ownership.
+
+  Lower-stage deprecation warnings cross only a complete T05 success. A later blocking failure is
+  error-only, because warnings from an unpublished intermediate are not terminal publication
+  output. Runtime obligations may be discovered internally during a failed analysis, but Publisher
+  exposes them only after every blocking phase and the complete finite envelope pass. The envelope
+  is an output admission bound; it does not claim incremental Validator allocation accounting.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
+  `sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
+
+- Future action: A future DESEN revision should standardize explicit diagnostic-to-publication-stage
+  ownership, simultaneous-error precedence, whether nonblocking warnings survive a later blocking
+  phase, and an interoperable obligation-report limit. M06-T11 must preserve the same precedence
+  through terminal `publish` failures.

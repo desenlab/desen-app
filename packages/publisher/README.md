@@ -9,6 +9,8 @@ single-namespace gates. M06-T03 composes those boundaries with phased Source val
 category-aware static references into one package-private nonterminal preflight without exposing
 an unfinished Publisher. M06-T04 adds complete static component and interaction contract
 preflight plus safe deprecated-capability warnings while preserving that nonterminal boundary.
+M06-T05 completes static execution preflight for resource/operation contracts, state and
+control-flow rules, binding compatibility, and the finite runtime-obligation handoff.
 
 ## Explicit non-responsibilities
 
@@ -24,6 +26,7 @@ finite Source-ingress profile. It intentionally does not expose a partial parser
 `publish` function. Exact Catalog resolution and the complete M06-T03 Source preflight are likewise
 package-private, as is M06-T04 capability preflight. The real terminal publication entry point is
 added only when it can either return a fully validated immutable Bundle or reject with no Bundle.
+M06-T05 execution preflight also remains package-private and nonterminal.
 
 ## Public entry point
 
@@ -161,7 +164,7 @@ rendering, signing, npm publication, or deployment.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+`sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
 
 ## Static capability preflight
 
@@ -195,7 +198,61 @@ validation obligations.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
+`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
+
+## Execution preflight and runtime obligations
+
+M06-T05 runs M06-T04 internally and upgrades its exact Source and selected Catalog authority
+through the Validator's execution-contract boundary. Unsafe resource and operation input/output
+schemas, unsupported resource policies, and statically invalid resource, operation, or component
+command inputs stop at `capability-contracts`. Predicate, repeat, state-write, navigation, refresh,
+operation-alias, and command-target failures stop at `state-and-control-flow`. Lexical reference,
+format, and lifecycle incompatibilities stop at `binding-compatibility`.
+
+The Validator assigns those phases where each diagnostic is emitted. Publisher does not infer a
+stage from a diagnostic code or JSON Pointer. When independent errors coexist, the exact blocking
+order is:
+
+1. `capability-contracts`;
+2. `state-and-control-flow`; and
+3. `binding-compatibility`.
+
+Only a complete success preserves the exact M06-T04 Source, package selection,
+requirement-to-package alignment, and warnings. Its Catalog array additionally carries the
+Validator's authenticated execution metadata. Values that cannot be proved statically are
+recorded as immutable, sorted, de-duplicated obligations of exactly these kinds:
+
+- `behavior-prop`;
+- `behavior-style-part-property`;
+- `component-command-input`;
+- `component-prop`;
+- `operation-input`;
+- `resource-input`;
+- `state-write`; and
+- `style-part-property`.
+
+Operation and resource outputs are not publication obligations: each resolved output must later
+cross `validateDesenExecutionValue` before lifecycle exposure. M06-T05 does not resolve dynamic
+values, execute actions, normalize Source data, calculate a digest or revision, pin a package
+tuple into a Bundle, or emit a Bundle.
+
+The complete obligation handoff is fail-closed under this project-owned platform-neutral profile:
+
+| Budget                                           |     Limit |
+| ------------------------------------------------ | --------: |
+| Runtime-validation obligations                   |     4,096 |
+| UTF-16 code units in one obligation JSON Pointer |     4,096 |
+| Aggregate obligation and identity-context units  | 1,048,576 |
+
+Crossing any ceiling returns one redacted
+`run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED` error at
+`binding-compatibility`; obligations are never truncated. Every T05 failure uses the same closed
+no-partial shell and exposes no Source, Catalog, package tuple, alignment, obligation, partial
+value, or Bundle. Successful M06-T04 warnings are carried byte-for-byte only after every T05
+blocking phase and obligation bound passes.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`.
 
 ## Dependencies
 
@@ -217,6 +274,8 @@ is reachable.
   causal stages documented above and the same closed no-partial result.
 - Static component and interaction contract failures stop at `capability-contracts`; deprecation
   warnings are emitted only after a complete static success.
+- Execution-contract failures retain their exact capability, state/control-flow, or binding stage;
+  no T05 failure exposes runtime obligations or any lower-stage authority.
 - Normalization, digest, and final-Bundle failures remain assigned to later M06 tasks and must
   relay stable diagnostics through that result.
 
@@ -237,10 +296,12 @@ pnpm --filter @desen/publisher test:publish-result
 pnpm --filter @desen/publisher test:catalog-resolution
 pnpm --filter @desen/publisher test:source-preflight
 pnpm --filter @desen/publisher test:capability-preflight
+pnpm --filter @desen/publisher test:execution-preflight
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
 pnpm test:publisher-source-preflight
 pnpm test:publisher-capability-preflight
+pnpm test:publisher-execution-preflight
 pnpm check
 ```

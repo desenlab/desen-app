@@ -280,8 +280,8 @@
       },
       {
         "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
-        "bytes": 225110,
-        "sha256": "df88d8872964467553d006e144f17b172ad4285d08b9db311cafd881ed930cd3"
+        "bytes": 228873,
+        "sha256": "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1"
       },
       {
         "path": "scripts/verify-reference-host-web-source-audit.mjs",
@@ -290,8 +290,8 @@
       },
       {
         "path": "tests/reference-host-web-source-audit.test.mjs",
-        "bytes": 69157,
-        "sha256": "d2b217e1bddf0d38547c9e1c3524de4df0221800b59ea5596dcc80d946a62f02"
+        "bytes": 70344,
+        "sha256": "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f"
       },
       {
         "path": "scripts/lib/publisher-publish-result-proof.mjs",

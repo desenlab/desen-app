@@ -52,6 +52,7 @@ export {
   validateDesenExecutionCatalogSet,
   validateDesenExecutionContracts,
   validateDesenExecutionValue,
+  validateDesenPreparedSourcePublicationContracts,
   validateDesenResolvedAdapterProps,
   validateDesenResolvedAdapterSlots,
   validateDesenResolvedAdapterStyle,
@@ -173,5 +174,9 @@ export type {
   DesenResolvedAdapterValidationSuccess,
   DesenResolvedAdapterValidationTarget,
   DesenResolvedAdapterValueMap,
+  DesenSourcePublicationContractPhase,
+  DesenSourcePublicationContractValidationFailure,
+  DesenSourcePublicationContractValidationResult,
+  DesenSourcePublicationContractValidationSuccess,
   DesenValidatedExecutionCatalogSet,
 } from "./execution-contract-validation.js";

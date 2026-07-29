@@ -82,6 +82,14 @@ the selected Catalog set through `validateDesenInteractionCatalogSet`, then appl
 than accepting the Validator's cloned result or dynamic-obligation projection. Inherited optional
 Source fields are now consistently ignored by the semantic and interaction walkers.
 
+M06-T05 adds `validateDesenPreparedSourcePublicationContracts` for the exact prepared Source and
+execution Catalog authority. It performs one cumulative T10/T11 document walk while retaining
+each diagnostic's emission-site publication phase. A failure returns only the earliest blocking
+phase in the order `capability-contracts`, `state-and-control-flow`, then
+`binding-compatibility`; it never derives that phase from a code or pointer. Success returns the
+same authenticated Source object and the complete normalized runtime-obligation set. The existing
+cumulative validation APIs and diagnostic output remain unchanged.
+
 The M02-T08 component layer preserves dynamic ValueSpecs as explicit later-validation obligations
 and prepares component prop and style schemas through the documented `PF-011` host-safe boundary.
 Its public APIs remain available when a caller intentionally needs only the lower component stage.
@@ -123,6 +131,12 @@ The M02-T11 execution layer is implemented cumulatively on top of T10. It:
   preserving post-write checks that need runtime state; and
 - exposes one detached resolved-value API for component command input and operation/resource input
   and output contracts.
+
+The M06-T05 prepared-publication seam reuses that same analysis. It first authenticates the exact
+prepared Source and exact T11 Catalog set, then separates capability, state/control-flow, and
+binding diagnostics by private emission-site provenance. It is an orchestration API for a
+Publisher that must retain protocol publication stages; it does not authorize execution,
+materialize dynamic values, or replace the receiving and resolved-value APIs.
 
 The M05 receiving boundary reuses the exact factory-authenticated T11 Catalog set. It:
 
@@ -251,7 +265,7 @@ replacement for the cumulative Validator APIs.
 
 Publisher integration evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+`sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
 
 ### Publisher capability-contract seam
 
@@ -270,7 +284,7 @@ data from fabricating identities, actions, or capability uses.
 
 Publisher integration evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
+`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
 
 ### Component-contract APIs
 

@@ -236,7 +236,7 @@ evidence.
 | M06-T02 | DONE        | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
 | M06-T03 | DONE        | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
 | M06-T04 | DONE        | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
-| M06-T05 | NOT_STARTED | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
+| M06-T05 | DONE        | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
 | M06-T06 | NOT_STARTED | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
 | M06-T07 | NOT_STARTED | M06-T06          | Authoring removal and deterministic normalization                                       |
 | M06-T08 | NOT_STARTED | M06-T02, M06-T07 | Source digest and exact package tuple pinning                                           |
@@ -301,6 +301,27 @@ the boundary. `PF-063` records why M06-T04 completes only the static component/i
 publication step 8. No Proof Matrix claim, normative status, or gate changes; M06-T05 owns
 resource/operation receiving contracts, dynamic binding compatibility, and recorded runtime
 obligations next.
+
+M06-T05 now runs M06-T04 internally and upgrades only its exact authenticated Source, selected
+package, Catalog, requirement-alignment, and warning authorities. Resource and operation schemas,
+resource policies, and statically known resource/operation/component-command inputs stop at
+`capability-contracts`; predicate, repeat, state-write, navigation, refresh, operation-alias, and
+command-target failures stop at `state-and-control-flow`; lexical, format, lifecycle, and other
+provable binding failures stop at `binding-compatibility`. Validator assigns that phase at each
+diagnostic emission site, so Publisher neither repeats the cumulative walk nor guesses a stage
+from a code or pointer. Simultaneous failures retain the exact 8 → 9 → 10 precedence.
+
+A complete success preserves the exact T04 authorities and warnings while adding the exact
+execution Catalog authority plus all normalized dynamic obligations. The eight-kind vocabulary is
+closed, sorted, deduplicated, deeply frozen, and excludes future operation/resource outputs. The
+project-owned envelope admits 4,096 obligations, 4,096 UTF-16 units in one pointer, and 1,048,576
+aggregate obligation/context units; a crossing rejects at `binding-compatibility` without
+truncation or partial authority. Fourteen focused Publisher cases, twenty-eight compiler-negative
+cases, one hundred focused Validator cases, fifteen independent proof/mutation cases, three
+prerequisite pins, and thirty-five tracked files protect the boundary. `PF-063` records the
+completed T04/T05 step-8 split, while `PF-064` records emission-site phase provenance and warning
+suppression. The Publisher-side runtime-obligation part completes the composed `N-027` evidence.
+M06-T06 owns extension/order preservation and source-node traceability next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

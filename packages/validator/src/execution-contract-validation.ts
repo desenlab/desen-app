@@ -7,12 +7,13 @@ import {
 
 import {
   validateDesenBindingContracts,
-  validateDesenPreparedBindingSnapshot,
+  validateDesenPreparedBindingSnapshotForPublication,
 } from "./binding-contract-validation.js";
 import {
   EVENT_PAYLOAD_SAFETY_LIMITS,
   snapshotResolvedJsonValue,
   validateDesenInteractionCatalogSet,
+  validateDesenSourceInteractionContracts,
 } from "./interaction-contract-validation.js";
 import {
   applyPreparedSchemaContract,
@@ -27,6 +28,7 @@ import {
   invalidExecutionContractDiagnostic,
   normalizeSemanticDiagnostics,
 } from "./semantic-diagnostics.js";
+import { validatePreparedDesenSourceReferences } from "./semantic-validation.js";
 import { compareText, isJsonObject, ROOT_POINTER } from "./validation-internals.js";
 
 import type {
@@ -50,6 +52,7 @@ import type {
   DesenValidatedInteractionCatalogSet,
 } from "./interaction-contract-validation.js";
 import type { DesenSemanticDiagnostic } from "./semantic-diagnostics.js";
+import type { DesenPreparedSourceFoundation } from "./semantic-validation.js";
 import type {
   PreparedSchemaContract,
   SchemaContractEvaluationBudget,
@@ -137,6 +140,40 @@ export interface DesenExecutionContractValidationFailure<
 /** Result of cumulative Source or Bundle execution-contract validation. */
 export type DesenExecutionContractValidationResult<Target extends DesenExecutionContractTarget> =
   DesenExecutionContractValidationSuccess<Target> | DesenExecutionContractValidationFailure<Target>;
+
+/** Exact DESEN publication stage that rejected prepared Source execution contracts. */
+export type DesenSourcePublicationContractPhase =
+  "binding-compatibility" | "capability-contracts" | "state-and-control-flow";
+
+/**
+ * Successful publication-phase analysis over one exact prepared Source authority.
+ *
+ * @remarks `value` is the same runtime-authenticated Source object supplied by the caller. The
+ * Validator never replaces it with the independent cumulative-validation clone used internally.
+ */
+export interface DesenSourcePublicationContractValidationSuccess {
+  readonly valid: true;
+  readonly target: "source-publication-contracts";
+  readonly value: DesenPreparedSourceFoundation;
+  readonly diagnostics: readonly [];
+  readonly obligations: readonly DesenExecutionContractObligation[];
+}
+
+/** Failed publication-phase analysis with no trusted Source value. */
+export interface DesenSourcePublicationContractValidationFailure {
+  readonly valid: false;
+  readonly target: "source-publication-contracts";
+  /** Earliest publication phase with one or more blocking diagnostics. */
+  readonly phase: DesenSourcePublicationContractPhase;
+  /** Sorted and de-duplicated diagnostics owned only by the stopped phase. */
+  readonly diagnostics: readonly DesenSemanticDiagnostic[];
+  /** Independently discovered obligations; a Publisher must not expose them on failure. */
+  readonly obligations: readonly DesenExecutionContractObligation[];
+}
+
+/** Result of phase-aware execution analysis for one prepared DESEN Source. */
+export type DesenSourcePublicationContractValidationResult =
+  DesenSourcePublicationContractValidationSuccess | DesenSourcePublicationContractValidationFailure;
 
 declare const validatedExecutionCatalogSetBrand: unique symbol;
 
@@ -438,11 +475,30 @@ interface SurfaceIndex {
   readonly operations: ReadonlyMap<string, OperationReferenceContract>;
 }
 
+interface ExecutionPublicationDiagnostics {
+  readonly capabilityContractDiagnostics: readonly DesenSemanticDiagnostic[];
+  readonly stateAndControlFlowDiagnostics: readonly DesenSemanticDiagnostic[];
+  readonly bindingCompatibilityDiagnostics: readonly DesenSemanticDiagnostic[];
+}
+
 const EXECUTION_CATALOG_METADATA = new WeakMap<object, ExecutionCatalogMetadata>();
 const RESOLVED_ADAPTER_VALIDATION_SCOPES = new WeakMap<
   object,
   ResolvedAdapterValidationScopeAuthority
 >();
+const EXECUTION_DIAGNOSTIC_PUBLICATION_PHASE = new WeakMap<
+  object,
+  DesenSourcePublicationContractPhase
+>();
+
+function pushExecutionDiagnostic(
+  diagnostics: DesenSemanticDiagnostic[],
+  diagnostic: DesenSemanticDiagnostic,
+  phase?: DesenSourcePublicationContractPhase,
+): void {
+  if (phase !== undefined) EXECUTION_DIAGNOSTIC_PUBLICATION_PHASE.set(diagnostic, phase);
+  diagnostics.push(diagnostic);
+}
 
 function appendPath(pointer: JsonPointer, ...segments: readonly (number | string)[]): JsonPointer {
   return segments.reduce<JsonPointer>(
@@ -625,6 +681,35 @@ function executionFailure<Target extends DesenExecutionContractTarget>(
   });
 }
 
+function sourcePublicationSuccess(
+  value: DesenPreparedSourceFoundation,
+  obligations: readonly (DesenBindingContractObligation | DesenExecutionContractObligation)[],
+): DesenSourcePublicationContractValidationSuccess {
+  return Object.freeze({
+    valid: true,
+    target: "source-publication-contracts",
+    value,
+    diagnostics: EMPTY_DIAGNOSTICS,
+    obligations: normalizeObligations(obligations),
+  });
+}
+
+function sourcePublicationFailure(
+  phase: DesenSourcePublicationContractPhase,
+  diagnostics: readonly DesenSemanticDiagnostic[],
+  obligations: readonly (
+    DesenBindingContractObligation | DesenExecutionContractObligation
+  )[] = EMPTY_OBLIGATIONS,
+): DesenSourcePublicationContractValidationFailure {
+  return Object.freeze({
+    valid: false,
+    target: "source-publication-contracts",
+    phase,
+    diagnostics: normalizeSemanticDiagnostics(diagnostics),
+    obligations: normalizeObligations(obligations),
+  });
+}
+
 function catalogSuccess(
   value: DesenValidatedExecutionCatalogSet,
 ): DesenExecutionCatalogSetValidationSuccess {
@@ -684,6 +769,7 @@ function addExecutionCoreDiagnostic(
   >,
   pointer: JsonPointer,
   context?: Readonly<DesenDiagnosticContext>,
+  publicationPhase?: DesenSourcePublicationContractPhase,
 ): void {
   const messages = {
     COMMAND_INPUT_INVALID: "A component command input does not satisfy its declared schema.",
@@ -697,13 +783,15 @@ function addExecutionCoreDiagnostic(
     UNKNOWN_CAPABILITY: "The requested execution capability is not in the trusted catalog set.",
     UNKNOWN_COMMAND: "The requested component command or target is not declared.",
   } as const;
-  diagnostics.push(
+  pushExecutionDiagnostic(
+    diagnostics,
     createCoreDiagnostic({
       code,
       message: messages[code],
       pointer,
       ...(context === undefined ? {} : { context }),
     }),
+    publicationPhase,
   );
 }
 
@@ -1125,11 +1213,13 @@ function collectSurfaceActionsAndTargets(
     if (existing === undefined) {
       operations.set(alias, Object.freeze({ capabilityId, contract: resolution.contract }));
     } else if (existing.capabilityId !== capabilityId) {
-      diagnostics.push(
+      pushExecutionDiagnostic(
+        diagnostics,
         invalidExecutionContractDiagnostic(
           appendJsonPointer(work.pointer, "as"),
           contextWithCapability(work.context, capabilityId),
         ),
+        "state-and-control-flow",
       );
     }
   }
@@ -1165,7 +1255,7 @@ function applyDocumentExecutionSchema(
     result = applySchemaContract(schema, value, "complete");
   } catch (error) {
     if (!(error instanceof RangeError)) throw error;
-    addExecutionCoreDiagnostic(diagnostics, code, basePointer, context);
+    addExecutionCoreDiagnostic(diagnostics, code, basePointer, context, "capability-contracts");
     return;
   }
   for (const issue of result.issues) {
@@ -1174,6 +1264,7 @@ function applyDocumentExecutionSchema(
       code,
       appendRelativePointer(basePointer, issue.pointer),
       context,
+      "capability-contracts",
     );
   }
   for (const obligation of result.obligations) {
@@ -1214,6 +1305,7 @@ function validateSurfaceResources(
         "RESOURCE_INPUT_INVALID",
         appendJsonPointer(pointer, "policy"),
         context,
+        "capability-contracts",
       );
     }
     applyDocumentExecutionSchema(
@@ -1271,7 +1363,13 @@ function validateStateAction(
       inspection.reachability === "impossible" ||
       (inspection.reachability === "possible" && !inspection.types.includes("boolean"))
     ) {
-      addExecutionCoreDiagnostic(diagnostics, "STATE_WRITE_INVALID", pathPointer, context);
+      addExecutionCoreDiagnostic(
+        diagnostics,
+        "STATE_WRITE_INVALID",
+        pathPointer,
+        context,
+        "state-and-control-flow",
+      );
       return;
     }
     addExecutionObligation(obligations, "state-write", pathPointer, context);
@@ -1283,7 +1381,13 @@ function validateStateAction(
   if (nestedPath.length > 0) {
     const inspection = inspectSchemaContractPath(schema, nestedPath);
     if (inspection.reachability === "impossible") {
-      addExecutionCoreDiagnostic(diagnostics, "STATE_WRITE_INVALID", pathPointer, context);
+      addExecutionCoreDiagnostic(
+        diagnostics,
+        "STATE_WRITE_INVALID",
+        pathPointer,
+        context,
+        "state-and-control-flow",
+      );
       return;
     }
     const staticType = staticJsonValueType(value);
@@ -1292,7 +1396,13 @@ function validateStateAction(
       staticType !== undefined &&
       !inspection.types.includes(staticType)
     ) {
-      addExecutionCoreDiagnostic(diagnostics, "STATE_WRITE_INVALID", valuePointer, context);
+      addExecutionCoreDiagnostic(
+        diagnostics,
+        "STATE_WRITE_INVALID",
+        valuePointer,
+        context,
+        "state-and-control-flow",
+      );
       return;
     }
     // Existing sibling values participate in nested `required`, dependent, and conditional rules.
@@ -1307,7 +1417,13 @@ function validateStateAction(
     result = applySchemaContract(schema, value, "complete");
   } catch (error) {
     if (!(error instanceof RangeError)) throw error;
-    addExecutionCoreDiagnostic(diagnostics, "STATE_WRITE_INVALID", valuePointer, context);
+    addExecutionCoreDiagnostic(
+      diagnostics,
+      "STATE_WRITE_INVALID",
+      valuePointer,
+      context,
+      "state-and-control-flow",
+    );
     return;
   }
   for (const issue of result.issues) {
@@ -1316,6 +1432,7 @@ function validateStateAction(
       "STATE_WRITE_INVALID",
       appendRelativePointer(valuePointer, issue.pointer),
       context,
+      "state-and-control-flow",
     );
   }
   for (const obligation of result.obligations) {
@@ -1353,6 +1470,7 @@ function validateSurfaceActions(
             "ENTRY_NOT_FOUND",
             appendJsonPointer(work.pointer, "surface"),
             work.context,
+            "state-and-control-flow",
           );
         }
         break;
@@ -1382,6 +1500,7 @@ function validateSurfaceActions(
             "REFERENCE_UNRESOLVED",
             appendJsonPointer(work.pointer, "resource"),
             work.context,
+            "state-and-control-flow",
           );
         }
         break;
@@ -1395,6 +1514,7 @@ function validateSurfaceActions(
             "UNKNOWN_COMMAND",
             appendJsonPointer(work.pointer, "target"),
             work.context,
+            "state-and-control-flow",
           );
           break;
         }
@@ -1498,6 +1618,7 @@ function executionDocumentAnalysis(
 ): Readonly<{
   diagnostics: readonly DesenSemanticDiagnostic[];
   obligations: readonly DesenExecutionContractObligation[];
+  publicationDiagnostics: ExecutionPublicationDiagnostics;
 }> {
   const diagnostics: DesenSemanticDiagnostic[] = [];
   const obligations: DesenExecutionContractObligation[] = [];
@@ -1538,16 +1659,47 @@ function executionDocumentAnalysis(
     environments.set(surfaceId, Object.freeze({ resources, operations: index.operations }));
   }
 
-  diagnostics.push(
-    ...validateDesenPreparedBindingSnapshot(
-      document,
-      catalogSet,
-      executionReferenceResolver(environments),
-    ),
+  const capabilityContractDiagnostics: DesenSemanticDiagnostic[] = [];
+  const executionStateAndControlFlowDiagnostics: DesenSemanticDiagnostic[] = [];
+  const executionBindingCompatibilityDiagnostics: DesenSemanticDiagnostic[] = [];
+  for (const diagnostic of diagnostics) {
+    const phase = EXECUTION_DIAGNOSTIC_PUBLICATION_PHASE.get(diagnostic);
+    if (phase === undefined) {
+      throw new TypeError("An execution diagnostic has no publication-phase owner.");
+    }
+    if (phase === "capability-contracts") {
+      capabilityContractDiagnostics.push(diagnostic);
+    } else if (phase === "state-and-control-flow") {
+      executionStateAndControlFlowDiagnostics.push(diagnostic);
+    } else {
+      executionBindingCompatibilityDiagnostics.push(diagnostic);
+    }
+  }
+
+  const bindingDiagnostics = validateDesenPreparedBindingSnapshotForPublication(
+    document,
+    catalogSet,
+    executionReferenceResolver(environments),
   );
+  const publicationDiagnostics = Object.freeze({
+    capabilityContractDiagnostics: normalizeSemanticDiagnostics(capabilityContractDiagnostics),
+    stateAndControlFlowDiagnostics: normalizeSemanticDiagnostics([
+      ...executionStateAndControlFlowDiagnostics,
+      ...bindingDiagnostics.stateAndControlFlowDiagnostics,
+    ]),
+    bindingCompatibilityDiagnostics: normalizeSemanticDiagnostics([
+      ...executionBindingCompatibilityDiagnostics,
+      ...bindingDiagnostics.bindingCompatibilityDiagnostics,
+    ]),
+  });
   return Object.freeze({
-    diagnostics: normalizeSemanticDiagnostics(diagnostics),
+    diagnostics: normalizeSemanticDiagnostics([
+      ...diagnostics,
+      ...bindingDiagnostics.stateAndControlFlowDiagnostics,
+      ...bindingDiagnostics.bindingCompatibilityDiagnostics,
+    ]),
     obligations: normalizeObligations(obligations),
+    publicationDiagnostics,
   });
 }
 
@@ -1597,6 +1749,78 @@ export function validateDesenSourceExecutionContracts(
   catalogSet: DesenValidatedExecutionCatalogSet,
 ): DesenExecutionContractValidationResult<"source"> {
   return validateDesenExecutionContracts("source", input, catalogSet);
+}
+
+/**
+ * Analyzes publication-owned capability, state/control-flow, and binding phases for one Source.
+ *
+ * @remarks The caller must supply the exact runtime-authenticated Source returned by
+ * {@link prepareDesenSourceFoundation} and the exact Catalog array returned by
+ * {@link validateDesenExecutionCatalogSet}. The T10/T11 document walk runs once, diagnostics retain
+ * their emission-site phase ownership, and failure reports only the earliest blocking phase.
+ * Success preserves the caller's exact prepared Source object as `value`.
+ */
+export function validateDesenPreparedSourcePublicationContracts(
+  source: DesenPreparedSourceFoundation,
+  catalogSet: DesenValidatedExecutionCatalogSet,
+): DesenSourcePublicationContractValidationResult {
+  const references = validatePreparedDesenSourceReferences(source, catalogSet);
+  if (!references.valid) {
+    return sourcePublicationFailure("capability-contracts", references.diagnostics);
+  }
+  if (references.value !== source) {
+    return sourcePublicationFailure("capability-contracts", [
+      invalidExecutionContractDiagnostic(ROOT_POINTER, { documentId: source.id }),
+    ]);
+  }
+
+  const interactions = validateDesenSourceInteractionContracts(source, catalogSet);
+  if (!interactions.valid) {
+    return sourcePublicationFailure(
+      "capability-contracts",
+      interactions.diagnostics,
+      interactions.obligations,
+    );
+  }
+
+  const metadata = EXECUTION_CATALOG_METADATA.get(catalogSet);
+  if (metadata === undefined) {
+    return sourcePublicationFailure(
+      "capability-contracts",
+      [
+        invalidExecutionContractDiagnostic(appendJsonPointer(ROOT_POINTER, "catalogs"), {
+          documentId: source.id,
+        }),
+      ],
+      interactions.obligations,
+    );
+  }
+
+  const execution = executionDocumentAnalysis("source", source, catalogSet, metadata);
+  const obligations = [...interactions.obligations, ...execution.obligations];
+  const phases = execution.publicationDiagnostics;
+  if (phases.capabilityContractDiagnostics.length > 0) {
+    return sourcePublicationFailure(
+      "capability-contracts",
+      phases.capabilityContractDiagnostics,
+      obligations,
+    );
+  }
+  if (phases.stateAndControlFlowDiagnostics.length > 0) {
+    return sourcePublicationFailure(
+      "state-and-control-flow",
+      phases.stateAndControlFlowDiagnostics,
+      obligations,
+    );
+  }
+  if (phases.bindingCompatibilityDiagnostics.length > 0) {
+    return sourcePublicationFailure(
+      "binding-compatibility",
+      phases.bindingCompatibilityDiagnostics,
+      obligations,
+    );
+  }
+  return sourcePublicationSuccess(source, obligations);
 }
 
 /** Validates a Bundle cumulatively through the M02-T11 execution-contract boundary. */

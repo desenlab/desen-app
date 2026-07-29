@@ -71,13 +71,23 @@ const CURRENT_AUDIT_COORDINATION_PATHS = Object.freeze([
   ...T09_PROOF_PATHS,
 ]);
 const CURRENT_AUDIT_COORDINATION_PATH_SET = new Set(CURRENT_AUDIT_COORDINATION_PATHS);
-const M06_T04_VALIDATOR_SUCCESSOR = Object.freeze({
-  task: "M06-T04",
+const M06_T05_VALIDATOR_SUCCESSOR = Object.freeze({
+  task: "M06-T05",
   sourceFiles: Object.freeze([
     Object.freeze({
       path: "packages/validator/src/index.ts",
-      bytes: 5_674,
-      sha256: "18237d74c0978bee4f743c17ab57f36d37d297dcbb1677f28c252ce45b510872",
+      bytes: 5_916,
+      sha256: "8fb565cd1276386510bef53be5de6bb48803b8d4f6048757e261e6849adfba92",
+    }),
+    Object.freeze({
+      path: "packages/validator/src/binding-contract-validation.ts",
+      bytes: 60_596,
+      sha256: "a30578fd38c5662b1fdcdd510f7cfa1a07dd7e190df908db2cc18b7be339ea1a",
+    }),
+    Object.freeze({
+      path: "packages/validator/src/execution-contract-validation.ts",
+      bytes: 102_812,
+      sha256: "000933db59b168dbb27983a8a0d55bb4aa30c6ec3946fb6000ea03dd1ce3a176",
     }),
     Object.freeze({
       path: "packages/validator/src/interaction-contract-validation.ts",
@@ -99,13 +109,58 @@ const M06_T04_VALIDATOR_SUCCESSOR = Object.freeze({
     graphSha256: "sha256:243fa72ceee35d624beb9f0444abf73c0224512e5722846b934dd2de1cb1810d",
     backingSnapshotSha256:
       "sha256:0eff527a4ac86d86f24f86fbd833d94241daccfe18e2aef13eaf69751249ab8f",
+    staticEdges: 297,
+    assertions: 411,
   }),
   successorRuntimeResolution: Object.freeze({
-    graphSha256: "sha256:c191f508dbb5d823c4415c51a17e38cfe35b39856b08457f8a4eedf6f03584f1",
+    graphSha256: "sha256:898f4ec8efffdd0c300ba7957b70f2ebd45f10945dae4ba90145ace5f92c241f",
     backingSnapshotSha256:
-      "sha256:2ab0d84c16c7b8c57c48ac0ae327c5108d63692548ee2f1ce6d2233065d87a4e",
+      "sha256:b4a06b4d18c8d8529effec8f1933986771862c10a49245cba6fa540dbce87c42",
+    staticEdges: 298,
+    assertions: 412,
   }),
   modules: Object.freeze([
+    Object.freeze({
+      index: 86,
+      id: "packages/validator/dist/binding-contract-validation.js",
+      historical: Object.freeze({
+        codeBytes: 44_581,
+        codeSha256: "sha256:8d0f94f6dc7d3e343813bc1044216ff6f34a80897dbb6664045cb30517d9f9a5",
+      }),
+      successor: Object.freeze({
+        codeBytes: 46_895,
+        codeSha256: "sha256:82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19",
+      }),
+    }),
+    Object.freeze({
+      index: 89,
+      id: "packages/validator/dist/execution-contract-validation.js",
+      historicalImports: Object.freeze([
+        "packages/protocol/dist/index.js",
+        "packages/validator/dist/binding-contract-validation.js",
+        "packages/validator/dist/interaction-contract-validation.js",
+        "packages/validator/dist/schema-instance-validation.js",
+        "packages/validator/dist/semantic-diagnostics.js",
+        "packages/validator/dist/validation-internals.js",
+      ]),
+      successorImports: Object.freeze([
+        "packages/protocol/dist/index.js",
+        "packages/validator/dist/binding-contract-validation.js",
+        "packages/validator/dist/interaction-contract-validation.js",
+        "packages/validator/dist/schema-instance-validation.js",
+        "packages/validator/dist/semantic-diagnostics.js",
+        "packages/validator/dist/semantic-validation.js",
+        "packages/validator/dist/validation-internals.js",
+      ]),
+      historical: Object.freeze({
+        codeBytes: 71_479,
+        codeSha256: "sha256:051bab7b3b0d65198bb53c683133227bbde02fc207e5b1d9a5f9c535a4fa3802",
+      }),
+      successor: Object.freeze({
+        codeBytes: 76_906,
+        codeSha256: "sha256:2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f",
+      }),
+    }),
     Object.freeze({
       index: 91,
       id: "packages/validator/dist/index.js",
@@ -114,8 +169,8 @@ const M06_T04_VALIDATOR_SUCCESSOR = Object.freeze({
         codeSha256: "sha256:bec613e9ec9c541f0f62d2e65e95b51ccc3e0eab61dddfdb32e8daa79c13d0ef",
       }),
       successor: Object.freeze({
-        codeBytes: 1_916,
-        codeSha256: "sha256:c52fcab3715c315bcc7def5d29e6754e7e9675c1ec28f204bc3d0b0baa9de9e0",
+        codeBytes: 1_965,
+        codeSha256: "sha256:5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8",
       }),
     }),
     Object.freeze({
@@ -4787,7 +4842,7 @@ function assertPinnedRuntimeResolutionDigest(runtimeResolution, expected, observ
   ) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-      `The ${observation} M05 runtime observation is outside the reviewed M06-T04 successor.`,
+      `The ${observation} M05 runtime observation is outside the reviewed M06-T05 successor.`,
     );
   }
 }
@@ -4795,21 +4850,38 @@ function assertPinnedRuntimeResolutionDigest(runtimeResolution, expected, observ
 function normalizeReviewedValidatorSuccessor(historical, current) {
   assertPinnedRuntimeResolutionDigest(
     historical.runtimeResolution,
-    M06_T04_VALIDATOR_SUCCESSOR.historicalRuntimeResolution,
+    M06_T05_VALIDATOR_SUCCESSOR.historicalRuntimeResolution,
     "historical",
   );
   assertPinnedRuntimeResolutionDigest(
     current.runtimeResolution,
-    M06_T04_VALIDATOR_SUCCESSOR.successorRuntimeResolution,
+    M06_T05_VALIDATOR_SUCCESSOR.successorRuntimeResolution,
     "current",
   );
 
   const normalized = normalizeAuditedJsonDomain(current);
+  if (
+    historical.runtimeResolution.staticEdges !==
+      M06_T05_VALIDATOR_SUCCESSOR.historicalRuntimeResolution.staticEdges ||
+    historical.runtimeResolution.assertions !==
+      M06_T05_VALIDATOR_SUCCESSOR.historicalRuntimeResolution.assertions ||
+    current.runtimeResolution.staticEdges !==
+      M06_T05_VALIDATOR_SUCCESSOR.successorRuntimeResolution.staticEdges ||
+    current.runtimeResolution.assertions !==
+      M06_T05_VALIDATOR_SUCCESSOR.successorRuntimeResolution.assertions
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "The reviewed M06-T05 Validator runtime graph counters drifted.",
+    );
+  }
   normalized.runtimeResolution.graphSha256 = historical.runtimeResolution.graphSha256;
   normalized.runtimeResolution.backingSnapshotSha256 =
     historical.runtimeResolution.backingSnapshotSha256;
+  normalized.runtimeResolution.staticEdges = historical.runtimeResolution.staticEdges;
+  normalized.runtimeResolution.assertions = historical.runtimeResolution.assertions;
 
-  for (const reviewed of M06_T04_VALIDATOR_SUCCESSOR.modules) {
+  for (const reviewed of M06_T05_VALIDATOR_SUCCESSOR.modules) {
     const historicalModule = uniqueRuntimeResolutionModule(
       historical.runtimeResolution,
       reviewed.id,
@@ -4830,7 +4902,7 @@ function normalizeReviewedValidatorSuccessor(historical, current) {
     ) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        `The reviewed M06-T04 Validator module bytes drifted: ${reviewed.id}.`,
+        `The reviewed M06-T05 Validator module bytes drifted: ${reviewed.id}.`,
       );
     }
     const normalizedModule = uniqueRuntimeResolutionModule(
@@ -4841,17 +4913,30 @@ function normalizeReviewedValidatorSuccessor(historical, current) {
     if (normalized.runtimeResolution.modules[reviewed.index] !== normalizedModule) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        `The reviewed M06-T04 Validator module index drifted: ${reviewed.id}.`,
+        `The reviewed M06-T05 Validator module index drifted: ${reviewed.id}.`,
       );
     }
     normalizedModule.codeBytes = historicalModule.codeBytes;
     normalizedModule.codeSha256 = historicalModule.codeSha256;
+    if (
+      reviewed.historicalImports !== undefined &&
+      (!isDeepStrictEqual(historicalModule.imports, reviewed.historicalImports) ||
+        !isDeepStrictEqual(currentModule.imports, reviewed.successorImports))
+    ) {
+      fail(
+        "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+        `The reviewed M06-T05 Validator module imports drifted: ${reviewed.id}.`,
+      );
+    }
+    if (reviewed.historicalImports !== undefined) {
+      normalizedModule.imports = normalizeAuditedJsonDomain(historicalModule.imports);
+    }
   }
   return deepFreeze(normalized);
 }
 
 /**
- * Authenticates the exact M06-T04 Validator sources that produced the reviewed runtime successor.
+ * Authenticates the exact M06-T05 Validator sources that produced the reviewed runtime successor.
  *
  * @remarks Direct source pins avoid a circular proof dependency: this enduring M05 verifier is
  * itself tracked by earlier Publisher receipts. The current Vite graph and backing snapshot are
@@ -4860,32 +4945,32 @@ function normalizeReviewedValidatorSuccessor(historical, current) {
 export function verifyReferenceHostWebValidatorSuccessorSources(rawSourceBytes) {
   const captured = captureDenseArray(
     rawSourceBytes,
-    "M06-T04 Validator successor sources",
-    M06_T04_VALIDATOR_SUCCESSOR.sourceFiles.length,
+    "M06-T05 Validator successor sources",
+    M06_T05_VALIDATOR_SUCCESSOR.sourceFiles.length,
     (entry, index) => {
-      const bytes = optionalBytes(entry, `M06-T04 Validator source ${index}`);
+      const bytes = optionalBytes(entry, `M06-T05 Validator source ${index}`);
       if (bytes === undefined) {
         fail(
           "REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID",
-          "M05-T09 current compatibility requires every M06-T04 Validator source.",
+          "M05-T09 current compatibility requires every M06-T05 Validator source.",
         );
       }
       return bytes;
     },
   );
-  if (captured.length !== M06_T04_VALIDATOR_SUCCESSOR.sourceFiles.length) {
+  if (captured.length !== M06_T05_VALIDATOR_SUCCESSOR.sourceFiles.length) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID",
-      "M05-T09 current compatibility requires the exact M06-T04 Validator source inventory.",
+      "M05-T09 current compatibility requires the exact M06-T05 Validator source inventory.",
     );
   }
   const sources = captured.map((bytes, index) => {
-    const expected = M06_T04_VALIDATOR_SUCCESSOR.sourceFiles[index];
+    const expected = M06_T05_VALIDATOR_SUCCESSOR.sourceFiles[index];
     const actualSha256 = sha256(bytes);
     if (bytes.length !== expected.bytes || actualSha256 !== expected.sha256) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        `The reviewed M06-T04 Validator source drifted: ${expected.path}.`,
+        `The reviewed M06-T05 Validator source drifted: ${expected.path}.`,
         {
           path: expected.path,
           expectedBytes: expected.bytes,
@@ -4903,7 +4988,7 @@ export function verifyReferenceHostWebValidatorSuccessorSources(rawSourceBytes) 
   });
   return Object.freeze({
     result: "PASS",
-    task: M06_T04_VALIDATOR_SUCCESSOR.task,
+    task: M06_T05_VALIDATOR_SUCCESSOR.task,
     sources: Object.freeze(sources),
   });
 }
@@ -4913,10 +4998,11 @@ export function verifyReferenceHostWebValidatorSuccessorSources(rawSourceBytes) 
  *
  * @remarks Only root package coordination, the workspace lockfile, and the four migrated M05
  * proof implementation paths are excluded from raw-byte equality. The sole runtime successor is
- * the exact four-module Validator build proven through M06-T04; its source bytes, module bytes,
- * complete graph digest, and complete backing snapshot are all independently pinned. Imports,
- * module identity, every other module byte, and every enduring host claim remain byte-for-byte
- * equal.
+ * the exact six-module Validator build proven through M06-T05; its source bytes, module bytes,
+ * complete graph digest, and complete backing snapshot are all independently pinned. The one
+ * execution-to-semantic authority import and its two derived graph counters are separately
+ * exact-pinned and normalized for historical comparison; every other import, module identity,
+ * module byte, and enduring host claim remains byte-for-byte equal.
  */
 export function verifyReferenceHostWebCurrentEvidencePolicy(
   historicalArtifact,
@@ -4946,11 +5032,11 @@ export function verifyReferenceHostWebCurrentEvidencePolicy(
     admittedSuccessor: alreadyHistorical
       ? null
       : Object.freeze({
-          task: M06_T04_VALIDATOR_SUCCESSOR.task,
+          task: M06_T05_VALIDATOR_SUCCESSOR.task,
           sourceFiles: Object.freeze(
-            M06_T04_VALIDATOR_SUCCESSOR.sourceFiles.map(({ path: relativePath }) => relativePath),
+            M06_T05_VALIDATOR_SUCCESSOR.sourceFiles.map(({ path: relativePath }) => relativePath),
           ),
-          modules: Object.freeze(M06_T04_VALIDATOR_SUCCESSOR.modules.map(({ id }) => id)),
+          modules: Object.freeze(M06_T05_VALIDATOR_SUCCESSOR.modules.map(({ id }) => id)),
         }),
   });
 }
@@ -5660,7 +5746,7 @@ export async function verifyCurrentReferenceHostWebSourceAuditEvidence(rawOption
     workspaceRoot: resolvedWorkspaceRoot,
   });
   const successorSourceBytes = await Promise.all(
-    M06_T04_VALIDATOR_SUCCESSOR.sourceFiles.map(({ path: relativePath }) =>
+    M06_T05_VALIDATOR_SUCCESSOR.sourceFiles.map(({ path: relativePath }) =>
       readRegularFile(resolvedWorkspaceRoot, relativePath),
     ),
   );

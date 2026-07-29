@@ -62,7 +62,7 @@ const PREREQUISITES = Object.freeze([
   Object.freeze({
     task: "M06-T03",
     path: "docs/proof/artifacts/publisher-0.1.0-source-preflight.json",
-    sha256: "cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd",
+    sha256: "cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211",
     claim: "exact prepared Source, Catalog package, and requirement-alignment authority",
   }),
 ]);

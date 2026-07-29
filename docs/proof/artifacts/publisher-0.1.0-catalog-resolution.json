@@ -8,9 +8,9 @@
     {
       "task": "M06-T01",
       "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
-      "sha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
+      "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63",
       "claim": "closed Publisher result, staged diagnostics, and no-partial-Bundle boundary",
-      "verifiedSha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
+      "verifiedSha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63",
       "matchesPin": true
     },
     {
@@ -229,8 +229,8 @@
     },
     {
       "path": "packages/publisher/package.json",
-      "bytes": 1065,
-      "sha256": "97a675c4aae1cd353942aea5e9489428b859c44fc3421d3167244f38af52c009"
+      "bytes": 1144,
+      "sha256": "d95cf883fb3cf3df5d2c9217bccefd92c90a14e413d565cb1be2e4c3eafa9632"
     },
     {
       "path": "packages/publisher/src/catalog-resolution.ts",
@@ -270,7 +270,7 @@
     {
       "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
       "bytes": 30623,
-      "sha256": "c154a5af563cf4f0d14f6be50f916311a91464b5a3bf9617e42dfe4251bcff4f"
+      "sha256": "70d244db9f6b07cd793fb94995d3d89b23b335610da40611325b32f3b6d1bf08"
     },
     {
       "path": "scripts/verify-publisher-catalog-resolution.mjs",

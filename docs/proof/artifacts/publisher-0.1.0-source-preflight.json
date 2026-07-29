@@ -24,17 +24,17 @@
     {
       "task": "M06-T01",
       "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
-      "sha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
+      "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63",
       "claim": "strict raw Source ingress and closed no-partial failure shell",
-      "verifiedSha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
+      "verifiedSha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63",
       "matchesPin": true
     },
     {
       "task": "M06-T02",
       "path": "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
-      "sha256": "ce367d80b90f2cf6d5e543666686904f22f890fb5a36bbcac22dd0b271a2cfbf",
+      "sha256": "9e84cff4d8e2e31c412d21a0969ffcc6f2c20e7ca6806800f172a03021d13f7f",
       "claim": "exact Catalog package resolution and immutable trusted namespace",
-      "verifiedSha256": "ce367d80b90f2cf6d5e543666686904f22f890fb5a36bbcac22dd0b271a2cfbf",
+      "verifiedSha256": "9e84cff4d8e2e31c412d21a0969ffcc6f2c20e7ca6806800f172a03021d13f7f",
       "matchesPin": true
     }
   ],
@@ -246,8 +246,8 @@
     },
     {
       "path": "packages/publisher/package.json",
-      "bytes": 1065,
-      "sha256": "97a675c4aae1cd353942aea5e9489428b859c44fc3421d3167244f38af52c009"
+      "bytes": 1144,
+      "sha256": "d95cf883fb3cf3df5d2c9217bccefd92c90a14e413d565cb1be2e4c3eafa9632"
     },
     {
       "path": "packages/publisher/src/index.ts",
@@ -256,8 +256,8 @@
     },
     {
       "path": "packages/publisher/src/publish-result.ts",
-      "bytes": 9690,
-      "sha256": "f19fd2e794688766146e84169f48183047a0e4c1842950266005a324df2e6b57"
+      "bytes": 10018,
+      "sha256": "41e3612c3bacdf656376d49e8be153600df1aa3d6adae609fd5254d212663597"
     },
     {
       "path": "packages/publisher/src/source-preflight.ts",
@@ -281,8 +281,8 @@
     },
     {
       "path": "packages/validator/src/index.ts",
-      "bytes": 5674,
-      "sha256": "18237d74c0978bee4f743c17ab57f36d37d297dcbb1677f28c252ce45b510872"
+      "bytes": 5916,
+      "sha256": "8fb565cd1276386510bef53be5de6bb48803b8d4f6048757e261e6849adfba92"
     },
     {
       "path": "packages/validator/src/semantic-validation.ts",
@@ -312,7 +312,7 @@
     {
       "path": "scripts/lib/publisher-source-preflight-proof.mjs",
       "bytes": 34338,
-      "sha256": "7e3d612bff8cba9776ec868c31831e2d9c18f97b423e47354100d6286e776fee"
+      "sha256": "3b5eeb0c1b0d78c9365ad512510a2c14eee062182ed41737567744cb987d20e2"
     },
     {
       "path": "scripts/verify-publisher-source-preflight.mjs",

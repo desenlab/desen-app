@@ -121,7 +121,7 @@ Validator component cases, 49 Validator interaction cases, 4 diagnostic micro-ve
 
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
 
-`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`
+`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`
 
 ## Scope limits
 

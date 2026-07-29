@@ -52,6 +52,8 @@ const OFFICIAL_SOURCE = `${SOURCE_ROOT}/official-sign-in.ts`;
 const MAIN_SOURCE = `${SOURCE_ROOT}/main.tsx`;
 const VALIDATOR_SUCCESSOR_SOURCE_PATHS = Object.freeze([
   "packages/validator/src/index.ts",
+  "packages/validator/src/binding-contract-validation.ts",
+  "packages/validator/src/execution-contract-validation.ts",
   "packages/validator/src/interaction-contract-validation.ts",
   "packages/validator/src/semantic-validation.ts",
   "packages/validator/src/structural-validation.ts",
@@ -213,9 +215,11 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.trackedFiles, 24);
   assert.equal(result.comparedTrackedFiles, 18);
   assert.deepEqual(result.admittedSuccessor, {
-    task: "M06-T04",
+    task: "M06-T05",
     sourceFiles: VALIDATOR_SUCCESSOR_SOURCE_PATHS,
     modules: [
+      "packages/validator/dist/binding-contract-validation.js",
+      "packages/validator/dist/execution-contract-validation.js",
       "packages/validator/dist/index.js",
       "packages/validator/dist/interaction-contract-validation.js",
       "packages/validator/dist/semantic-validation.js",
@@ -224,12 +228,22 @@ test("runs the full current host audit while comparing every enduring M05 input"
   });
   assert.deepEqual(result.successorSources, {
     result: "PASS",
-    task: "M06-T04",
+    task: "M06-T05",
     sources: [
       {
         path: "packages/validator/src/index.ts",
-        bytes: 5_674,
-        sha256: "18237d74c0978bee4f743c17ab57f36d37d297dcbb1677f28c252ce45b510872",
+        bytes: 5_916,
+        sha256: "8fb565cd1276386510bef53be5de6bb48803b8d4f6048757e261e6849adfba92",
+      },
+      {
+        path: "packages/validator/src/binding-contract-validation.ts",
+        bytes: 60_596,
+        sha256: "a30578fd38c5662b1fdcdd510f7cfa1a07dd7e190df908db2cc18b7be339ea1a",
+      },
+      {
+        path: "packages/validator/src/execution-contract-validation.ts",
+        bytes: 102_812,
+        sha256: "000933db59b168dbb27983a8a0d55bb4aa30c6ec3946fb6000ea03dd1ce3a176",
       },
       {
         path: "packages/validator/src/interaction-contract-validation.ts",
@@ -355,15 +369,15 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
   );
 });
 
-test("admits only the source-pinned M06-T04 Validator runtime successor", async () => {
+test("admits only the source-pinned M06-T05 Validator runtime successor", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
   const successorSourceBytes = await validatorSuccessorSourceBytes();
   const verifyPolicy = (candidate, sources = successorSourceBytes) =>
     verifyReferenceHostWebCurrentEvidencePolicy(historical, candidate, sources);
   const policy = verifyPolicy(current);
-  assert.equal(policy.admittedSuccessor.task, "M06-T04");
-  assert.equal(policy.admittedSuccessor.modules.length, 4);
+  assert.equal(policy.admittedSuccessor.task, "M06-T05");
+  assert.equal(policy.admittedSuccessor.modules.length, 6);
   assert.equal(policy.successorSources.result, "PASS");
   assert.equal(
     verifyReferenceHostWebValidatorSuccessorSources(successorSourceBytes).result,
@@ -387,6 +401,8 @@ test("admits only the source-pinned M06-T04 Validator runtime successor", async 
   );
 
   const validatorModules = [
+    "packages/validator/dist/binding-contract-validation.js",
+    "packages/validator/dist/execution-contract-validation.js",
     "packages/validator/dist/index.js",
     "packages/validator/dist/interaction-contract-validation.js",
     "packages/validator/dist/semantic-validation.js",
@@ -414,8 +430,17 @@ test("admits only the source-pinned M06-T04 Validator runtime successor", async 
       );
     }
   }
-  const validatorIndex = validatorModules[0];
+  const validatorIndex = "packages/validator/dist/index.js";
+  const validatorExecution = "packages/validator/dist/execution-contract-validation.js";
   for (const mutated of [
+    mutateModule(validatorExecution, (module) => {
+      module.imports = module.imports.filter(
+        (id) => id !== "packages/validator/dist/semantic-validation.js",
+      );
+    }),
+    mutateModule(validatorExecution, (module) => {
+      module.imports.push("packages/validator/dist/unreviewed.js");
+    }),
     mutateModule(validatorIndex, (module) => {
       module.imports.push("packages/validator/dist/unreviewed.js");
     }),

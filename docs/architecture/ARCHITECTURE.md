@@ -271,7 +271,7 @@ perform discovery, download, activation, rendering, signing, publication, or dep
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+`sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
 
 ## Publisher static capability preflight boundary
 
@@ -303,7 +303,43 @@ dependencies.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
+`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
+
+## Publisher execution preflight boundary
+
+M06-T05 composes M06-T04 internally and accepts no caller-reconstructed intermediate. It
+re-authenticates the exact prepared Source and upgrades the exact selected Catalog array through
+the Validator's execution-contract authority. The same selected packages, requirement alignment,
+and safe deprecation warnings remain attached to that authority; no structurally equal clone or
+serialization round trip can substitute for an authenticated object.
+
+One cumulative Validator analysis records publication-phase provenance at each diagnostic
+emission site. Resource and operation schema, policy, and statically known receiving-input
+failures stop at `capability-contracts`; state, predicate, repeat, action-target, and control-flow
+failures stop at `state-and-control-flow`; lexical, lifecycle, format, and statically decidable
+binding failures stop at `binding-compatibility`. Only the earliest non-empty phase is returned,
+so simultaneous defects preserve exact publication-step 8 → 9 → 10 precedence without repeating
+the cumulative walk or classifying diagnostics from their codes or pointers.
+
+A complete success adds one normalized runtime-obligation handoff with the closed kinds
+`behavior-prop`, `behavior-style-part-property`, `component-command-input`, `component-prop`,
+`operation-input`, `resource-input`, `state-write`, and `style-part-property`. The handoff is
+sorted, de-duplicated, deeply frozen, and bounded by 4,096 obligations, 4,096 UTF-16 code units in
+one pointer, and 1,048,576 aggregate obligation and identity-context code units. A crossing rejects
+the complete intermediate at `binding-compatibility`; obligations are never truncated.
+Operation/resource outputs remain exact runtime receiving checks and are not fabricated as Source
+obligations.
+
+The success remains package-private and nonterminal. It emits no Bundle, performs no normalization
+or hashing, and owns no runtime value, target adapter, filesystem, network, registry, activation,
+rendering, signing, or deployment authority. A later blocking phase suppresses inherited warnings,
+and every failure exposes no Source, Catalog, selected package, alignment, warning, obligation,
+partial value, or Bundle. M06-T06 may inspect only this exact authority while proving extension,
+semantic-order, and source-node identity preservation.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
+`sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
 
 ## Applications
 

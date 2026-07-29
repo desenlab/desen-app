@@ -938,7 +938,7 @@ slice; later modules remain owned by their successor proofs. No `P-*`, normative
 status changes; M06-T02 owns exact Catalog resolution next.
 
 `docs/proof/artifacts/publisher-0.1.0-publish-result.json`
-`sha256:1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714`.
+`sha256:aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63`.
 
 ## M06-T02
 
@@ -962,7 +962,7 @@ and the unique proof-document hash. No `P-*`, normative status, or gate changes;
 complete Source preflight next.
 
 `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
-`sha256:ce367d80b90f2cf6d5e543666686904f22f890fb5a36bbcac22dd0b271a2cfbf`.
+`sha256:9e84cff4d8e2e31c412d21a0969ffcc6f2c20e7ca6806800f172a03021d13f7f`.
 
 ## M06-T03
 
@@ -988,7 +988,7 @@ the unique proof-document hash. No `P-*`, normative, or gate status changes; M06
 slot, style, event, command, and behavior contracts next.
 
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+`sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
 
 ## M06-T04
 
@@ -1017,4 +1017,41 @@ M06-T05 owns resource/operation receiving contracts, dynamic compatibility, and 
 obligations. No `P-*`, normative, or gate status changes.
 
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
+`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
+
+## M06-T05
+
+M06-T05 composes M06-T04 internally and upgrades only its exact prepared Source, selected package,
+Catalog, requirement-alignment, and safe-warning authorities. The exact Catalog array crosses the
+Validator's execution-contract preparation, and one cumulative analysis retains diagnostic phase
+ownership at each emission site. Resource/operation schema, policy, and statically known receiving
+input failures stop at `capability-contracts`; predicate, repeat, state-write, navigation, refresh,
+operation-alias, and command-target failures stop at `state-and-control-flow`; lexical, format,
+lifecycle, and static binding failures stop at `binding-compatibility`. Independent simultaneous
+defects prove exact stage 8 → 9 → 10 precedence without code/pointer reclassification or repeated
+cumulative walks.
+
+A complete package-private nonterminal success preserves all exact T04 authorities and warnings,
+adds the runtime-authenticated execution Catalog authority, and records every unresolved receiving
+check in one closed eight-kind vocabulary. Obligations are sorted, de-duplicated, deeply frozen,
+and bounded by 4,096 entries, 4,096 UTF-16 units in one pointer, and 1,048,576 aggregate
+kind/pointer/context units. Exact boundaries pass; one-below profiles reject the whole
+intermediate at `binding-compatibility` with one redacted diagnostic. No failure exposes a Source,
+Catalog, package, alignment, warning, obligation, partial value, or Bundle. Operation/resource
+outputs remain runtime receiving checks rather than publication obligations.
+
+Evidence includes 14 focused Publisher cases, 28 compiler-negative cases, 50 binding cases, 50
+execution cases, 15 independent proof/mutation cases, 3 exact prerequisite pins, and 35
+byte-tracked files. It also authenticates package-root privacy, source/declaration target
+neutrality, deterministic artifact rebuilds, proof-document uniqueness, prerequisite and fixture
+drift, exact authority, stage mapping, complete obligations, finite limits, atomic writing, and the
+six-module Validator successor admitted by the immutable M05 host evidence.
+
+The Publisher's resource/operation and dynamic-obligation portion completes `PIPE-032`;
+`PIPE-033` and `PIPE-034` gain direct publication evidence. Together with M04-T02 safe dynamic
+resolution and M05-T02 final receiving validation, this advances N-027 to `TESTED`. No `P-*`,
+`S-*`, or gate status changes. M06-T06 owns extension/order preservation and source-node
+traceability next.
+
+`docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
+`sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
