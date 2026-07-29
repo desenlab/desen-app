@@ -52,4 +52,4 @@ dynamically load or execute adapter code.
 
 `docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json`
 
-`sha256:3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723`
+`sha256:f6dbb1adb38cf2d6a3f13532424c2ed8422b29f1a7d28a0f31a9ec9b66eb9abc`

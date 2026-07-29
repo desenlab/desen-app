@@ -271,7 +271,7 @@ perform discovery, download, activation, rendering, signing, publication, or dep
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
+`sha256:4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`.
 
 ## Publisher static capability preflight boundary
 
@@ -303,7 +303,7 @@ dependencies.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
+`sha256:c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`.
 
 ## Publisher execution preflight boundary
 
@@ -339,7 +339,45 @@ semantic-order, and source-node identity preservation.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-`sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
+`sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`.
+
+## Publisher Source-preservation boundary
+
+M06-T06 composes the exact M06-T05 function internally from raw Source JSON and closed package
+candidates. It does not accept a caller-created execution-preflight shell. The authenticated
+Source, execution Catalog set, selected packages, requirement indexes, safe warnings, and runtime
+obligations cross by exact identity.
+
+The task prepares two deliberately separate views:
+
+1. the exact authenticated Source, which still contains top-level `authoring`; and
+2. a shallow frozen production-field projection containing `desen`, `id`, `entry`, `surfaces`, and
+   optional root `extensions`, with ordered Source Catalog requirements retained separately.
+
+Every nested value in that projection is the exact parsed Source value. Unknown extensions stay
+opaque, and semantic arrays are neither sorted, deduplicated, rebuilt, nor materialized. This is
+parsed-value preservation, not preservation of raw JSON whitespace or object-member lexical
+order. Actual authoring removal and deterministic normalization remain M06-T07.
+
+An iterative schema-edge walk builds one bounded immutable trace entry for every reachable
+component node. Each entry contains exactly the document id, owning surface id, unchanged Source
+node id, capability id, and RFC 6901 Source pointer. Surface and slot maps use deterministic UTF-16
+key order while node and behavior arrays keep their Source index order. Identity is
+surface-scoped, so equal node ids on different surfaces remain legal and separately traceable.
+Behavior ids remain in the preserved Source graph rather than being mislabeled as component
+nodes. Node-shaped values under extensions or authoring remain opaque and never enter the trace.
+
+The trace admits at most 25,000 records, 4,096 UTF-16 code units in one pointer, and 4,194,304
+aggregate identity/pointer units. A crossing rejects the complete intermediate at `normalization`
+with no truncation, inherited warning, partial authority, or Bundle. Inherited Source and execution
+profiles continue to bound input data. The boundary remains package-private, platform-neutral, and
+nonterminal; it performs no authoring mutation, normalization, digest, exact Bundle tuple pinning,
+Bundle validation, revision calculation, runtime execution, activation, rendering, signing, or
+deployment.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
+`sha256:d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8`.
 
 ## Applications
 

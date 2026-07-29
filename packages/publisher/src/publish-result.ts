@@ -87,6 +87,11 @@ export type ExecutionPreflightExtensionDiagnosticCode =
   | "run.desen.publisher/EXECUTION_PREFLIGHT_AUTHORITY_INVALID"
   | "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED";
 
+/** Project diagnostics introduced by the package-private M06-T06 preservation boundary. */
+export type SourcePreservationExtensionDiagnosticCode =
+  | "run.desen.publisher/SOURCE_PRESERVATION_AUTHORITY_INVALID"
+  | "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED";
+
 /** Stable diagnostic code owned by the DESEN Publisher implementation. */
 export type PublisherDiagnosticCode = PublisherExtensionDiagnosticCode;
 
@@ -109,7 +114,8 @@ export type PublishExtensionDiagnosticCode =
   | CatalogResolutionExtensionDiagnosticCode
   | SourcePreflightExtensionDiagnosticCode
   | CapabilityPreflightExtensionDiagnosticCode
-  | ExecutionPreflightExtensionDiagnosticCode;
+  | ExecutionPreflightExtensionDiagnosticCode
+  | SourcePreservationExtensionDiagnosticCode;
 
 /** Whether a publication diagnostic blocks Bundle emission. */
 export type PublishDiagnosticSeverity = "error" | "warning";

@@ -10,7 +10,9 @@ category-aware static references into one package-private nonterminal preflight 
 an unfinished Publisher. M06-T04 adds complete static component and interaction contract
 preflight plus safe deprecated-capability warnings while preserving that nonterminal boundary.
 M06-T05 completes static execution preflight for resource/operation contracts, state and
-control-flow rules, binding compatibility, and the finite runtime-obligation handoff.
+control-flow rules, binding compatibility, and the finite runtime-obligation handoff. M06-T06
+then preserves the exact parsed Source fields, semantic array order, opaque extensions, and
+surface-scoped source-node identity trace needed by later normalization.
 
 ## Explicit non-responsibilities
 
@@ -26,7 +28,8 @@ finite Source-ingress profile. It intentionally does not expose a partial parser
 `publish` function. Exact Catalog resolution and the complete M06-T03 Source preflight are likewise
 package-private, as is M06-T04 capability preflight. The real terminal publication entry point is
 added only when it can either return a fully validated immutable Bundle or reject with no Bundle.
-M06-T05 execution preflight also remains package-private and nonterminal.
+M06-T05 execution preflight and M06-T06 Source preservation also remain package-private and
+nonterminal.
 
 ## Public entry point
 
@@ -164,7 +167,7 @@ rendering, signing, npm publication, or deployment.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
+`sha256:4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`.
 
 ## Static capability preflight
 
@@ -198,7 +201,7 @@ validation obligations.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
+`sha256:c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`.
 
 ## Execution preflight and runtime obligations
 
@@ -254,6 +257,50 @@ blocking phase and obligation bound passes.
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`.
 
+## Source preservation and identity trace
+
+M06-T06 runs the complete M06-T05 boundary internally and carries its authenticated Source,
+execution Catalog, selected packages, requirement alignment, warnings, and runtime obligations by
+exact object identity. It exposes a separate frozen projection containing only `desen`, `id`,
+`entry`, `surfaces`, and optional root `extensions`; ordered Source Catalog requirements remain
+separate for the later exact-tuple replacement step.
+
+No parsed Source value is sorted, deduplicated, reconstructed, or assigned new meaning. Every
+Source-reachable extension remains an opaque exact parsed JSON value, and semantic arrays retain
+their Source order. Raw JSON whitespace and object-member lexical order are outside this parsed
+authority and are not claimed to survive. Top-level `authoring` remains present on the
+authenticated Source but is absent from the production-field projection; M06-T07 owns its actual
+removal and deterministic normalization.
+
+The task also builds one complete immutable component-node trace. Each record contains only the
+document id, surface id, unchanged Source node id, capability id, and exact RFC 6901 Source
+pointer. Node identities are surface-scoped: the same node id may legally occur on different
+surfaces, while each `(surfaceId, sourceNodeId)` pair and Source pointer remains unambiguous.
+Behavior ids stay preserved in the Source graph and are not misrepresented as component nodes.
+Schema-shaped values inside extension or authoring payloads remain opaque and create no trace
+records.
+
+The additional project-owned trace profile is:
+
+| Budget                                            |     Limit |
+| ------------------------------------------------- | --------: |
+| Complete component-node trace records             |    25,000 |
+| UTF-16 code units in one source-node JSON Pointer |     4,096 |
+| Aggregate trace identity and pointer UTF-16 units | 4,194,304 |
+
+Crossing any trace ceiling rejects the complete intermediate at `normalization` with one redacted
+`run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED` error. Records are never truncated, and a
+failure exposes no Source, Catalog, package, alignment, warning, obligation, trace, partial value,
+or Bundle. The inherited raw-Source and execution-preflight ceilings continue to bound Source
+content; T06 does not invent a separate extension-payload budget.
+
+M06-T06 does not remove authoring data, normalize Source content, calculate a Source digest, pin
+exact Bundle package tuples, validate or emit a Bundle, calculate a revision, or prove
+double-publish determinism.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preservation.json`.
+
 ## Dependencies
 
 - `@desen/protocol` supplies frozen Bundle types, core diagnostics, and RFC 6901 pointers.
@@ -276,6 +323,8 @@ is reachable.
   warnings are emitted only after a complete static success.
 - Execution-contract failures retain their exact capability, state/control-flow, or binding stage;
   no T05 failure exposes runtime obligations or any lower-stage authority.
+- Source-preservation authority or trace-limit failures stop at `normalization`; no T06 failure
+  exposes a partial projection, trace, inherited warning, or lower-stage authority.
 - Normalization, digest, and final-Bundle failures remain assigned to later M06 tasks and must
   relay stable diagnostics through that result.
 
@@ -297,11 +346,13 @@ pnpm --filter @desen/publisher test:catalog-resolution
 pnpm --filter @desen/publisher test:source-preflight
 pnpm --filter @desen/publisher test:capability-preflight
 pnpm --filter @desen/publisher test:execution-preflight
+pnpm --filter @desen/publisher test:source-preservation
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
 pnpm test:publisher-source-preflight
 pnpm test:publisher-capability-preflight
 pnpm test:publisher-execution-preflight
+pnpm test:publisher-source-preservation
 pnpm check
 ```

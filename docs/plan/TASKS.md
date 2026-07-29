@@ -237,7 +237,7 @@ evidence.
 | M06-T03 | DONE        | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
 | M06-T04 | DONE        | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
 | M06-T05 | DONE        | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
-| M06-T06 | NOT_STARTED | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
+| M06-T06 | DONE        | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
 | M06-T07 | NOT_STARTED | M06-T06          | Authoring removal and deterministic normalization                                       |
 | M06-T08 | NOT_STARTED | M06-T02, M06-T07 | Source digest and exact package tuple pinning                                           |
 | M06-T09 | NOT_STARTED | M06-T08          | Bundle validation and revision calculation                                              |
@@ -321,7 +321,27 @@ cases, one hundred focused Validator cases, fifteen independent proof/mutation c
 prerequisite pins, and thirty-five tracked files protect the boundary. `PF-063` records the
 completed T04/T05 step-8 split, while `PF-064` records emission-site phase provenance and warning
 suppression. The Publisher-side runtime-obligation part completes the composed `N-027` evidence.
-M06-T06 owns extension/order preservation and source-node traceability next.
+
+M06-T06 now composes M06-T05 internally and carries its exact Source, execution Catalog, package
+selection, requirement alignment, warning, and obligation authorities without accepting a
+caller-reconstructed intermediate. A separate frozen production-field projection preserves every
+Source-reachable opaque extension and semantic Source array by exact parsed runtime reference while
+leaving top-level authoring intact on the authenticated Source for the next task. The complete
+component-node trace uses unchanged identifiers and exact RFC 6901 pointers, treats identity as
+surface-scoped, and grants no behavior, extension, authoring, Catalog, executable, runtime, host, or
+platform authority. The same node id may therefore remain traceable on different surfaces without
+being falsely rejected.
+
+The additional finite envelope admits 25,000 trace records, 4,096 UTF-16 units in one pointer, and
+4,194,304 aggregate identity/pointer units; exact boundaries pass and a one-below crossing rejects
+the whole intermediate at `normalization` without truncation, inherited warnings, partial
+authority, or a Bundle. Fifteen focused Publisher cases, forty-six compiler-negative cases,
+eighteen independent proof/mutation cases, three exact prerequisite pins, twenty byte-tracked
+files, all sixteen Source-reachable extension kinds, eight semantic-array classes, and the reviewed
+single-pass CI registration protect the boundary. `PF-065` records the exact parsed-value versus
+raw lexical-byte scope and the broader preservation surface required by `R-107`/`N-021`. The
+Publisher half completes `N-021`, which advances to `TESTED`; `N-014` and `N-012` remain open for
+their editor owners. M06-T07 owns actual authoring removal and deterministic normalization next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

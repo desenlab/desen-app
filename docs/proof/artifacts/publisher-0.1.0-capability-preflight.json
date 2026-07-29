@@ -32,9 +32,9 @@
     {
       "task": "M06-T03",
       "path": "docs/proof/artifacts/publisher-0.1.0-source-preflight.json",
-      "sha256": "cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211",
+      "sha256": "4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c",
       "claim": "exact prepared Source, Catalog package, and requirement-alignment authority",
-      "verifiedSha256": "cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211",
+      "verifiedSha256": "4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c",
       "matchesPin": true
     }
   ],
@@ -331,8 +331,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 49306,
-      "sha256": "00d4215ef9bc621f8fe2d8ca731f0c549221ce2d7374766232fa9be31a991905"
+      "bytes": 50281,
+      "sha256": "b388f98430d88ae1bf12e14e952a25a4944b70c8cff9040edef47d564ed440e9"
     },
     {
       "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
@@ -381,8 +381,8 @@
     },
     {
       "path": "packages/publisher/package.json",
-      "bytes": 1144,
-      "sha256": "d95cf883fb3cf3df5d2c9217bccefd92c90a14e413d565cb1be2e4c3eafa9632"
+      "bytes": 1223,
+      "sha256": "9bed08a373540dcc175ba911a2bb4d19a22744e306a847f57a9e296e9c74d8ee"
     },
     {
       "path": "packages/publisher/src/capability-preflight.ts",
@@ -401,8 +401,8 @@
     },
     {
       "path": "packages/publisher/src/publish-result.ts",
-      "bytes": 10018,
-      "sha256": "41e3612c3bacdf656376d49e8be153600df1aa3d6adae609fd5254d212663597"
+      "bytes": 10339,
+      "sha256": "06e0cf3bf1a639f054445db4a37d3181ba5b842ca5094575cd4aa922086d81dc"
     },
     {
       "path": "packages/publisher/src/source-preflight.ts",
@@ -467,17 +467,17 @@
     {
       "path": "scripts/lib/publisher-capability-preflight-proof.mjs",
       "bytes": 62137,
-      "sha256": "60ee8bfb1453a2a2904e67951b7deeb8a1230f944d762256057e8d40499a5836"
+      "sha256": "4ab762e73c85cbfdce95936f2d8174c4b746d5396502db50b857f0505a3eacfc"
     },
     {
       "path": "scripts/run-ci-quality-gate.mjs",
-      "bytes": 44404,
-      "sha256": "76759df98f2b3b2bdba2fa475fe981f402358e7c26564f413f6d3756d19a8a2a"
+      "bytes": 44568,
+      "sha256": "4402a53cc5a8c8fd504de8128ac0ccee8c81efde8e4b620d91bfacafaffd38ed"
     },
     {
       "path": "scripts/test/ci-quality-gate.test.mjs",
       "bytes": 23395,
-      "sha256": "0e9744e2453dc25d515ea3738aab0e9bf2b3a584270c22be3b265f0331b680ff"
+      "sha256": "8a7c1e2dd8b7c837e3125f2337f1a421f5dc934fae5aabbc1fed39bcd47e6fb5"
     },
     {
       "path": "scripts/verify-publisher-capability-preflight.mjs",

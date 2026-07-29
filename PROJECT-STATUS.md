@@ -390,16 +390,24 @@ phase-aware Validator analysis. Resource/operation schema and input failures sto
 authority and the closed eight-kind runtime-obligation handoff. Count, pointer, and aggregate
 limits reject without truncation or partial authority. `PF-064` records the phase-provenance
 decision, and the composed M04-T02/M05-T02/M06-T05 evidence advances N-027 to `TESTED`.
+M06-T06 now preserves the exact parsed Source production fields, all Source-reachable opaque
+extensions, every semantic Source array, and one complete surface-scoped component-node trace
+without removing authoring or emitting a Bundle. The trace retains unchanged node identifiers and
+exact RFC 6901 pointers while granting no extension, behavior, runtime, executable, host, or
+platform authority. Exact count, pointer, and aggregate ceilings pass; a one-below crossing rejects
+atomically at `normalization`. `PF-065` records the parsed-value versus raw lexical-byte boundary.
+The composed M05-T05/M06-T06 evidence advances N-021 to `TESTED`; N-012 and N-014 remain
+`PLANNED` for their editor owners.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `68 / 145 tasks complete (47%)`
+- Overall implementation progress: `69 / 145 tasks complete (48%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `5 / 11 tasks complete (45%)`
+- M06 progress: `6 / 11 tasks complete (55%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -453,12 +461,13 @@ decision, and the composed M04-T02/M05-T02/M06-T05 evidence advances N-027 to `T
   `M06-T02 — Exact Catalog resolution, package immutability, and namespace-conflict checks`,
   `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`,
   `M06-T04 — Prop, slot, style, event, command, and behavior preflight`,
-  `M06-T05 — Resource/operation contracts, dynamic compatibility, and runtime obligations`
+  `M06-T05 — Resource/operation contracts, dynamic compatibility, and runtime obligations`,
+  `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`
-- Status: M05 and G05 are complete; M06-T01 through M06-T05 are complete; M06-T06 is ready
+  `M06-T07 — Authoring removal and deterministic normalization`
+- Status: M05 and G05 are complete; M06-T01 through M06-T06 are complete; M06-T07 is ready
 
 ## Completed preparation
 
@@ -802,9 +811,9 @@ test-support, or facade dependency. The official-derived sign-in application now
 stack through the real reference adapters and trusted operation boundary, exercising pending,
 declared failure, retry, success, navigation, replacement, disposal, and stale-result containment
 without accepting a caller-selected Bundle, Catalog, capability, registry, route, managed React
-tree, or recovery key. N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-06, P-10, P-16, and
-P-17 remain `PARTIAL`, and N-021 remains `PLANNED`. The M05-T09 TypeScript semantic audit and real
-Vite graph now prove that every discovered production source is reachable, exact
+tree, or recovery key. N-021, N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-06, P-10,
+P-16, and P-17 remain `PARTIAL`. The M05-T09 TypeScript semantic audit and real Vite graph now
+prove that every discovered production source is reachable, exact
 host-infrastructure JSX is the only handwritten tree, and the managed branch crosses the public
 generic renderer and shared adapter factory without an alternate executable path. P-07 is now
 `PARTIAL` pending Desen App E2E; G05 is complete.
@@ -817,10 +826,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T06 — Extension preservation, array-order preservation, and source-node identity
-traceability`. Preserve every protocol extension and semantically ordered array byte-for-byte
-through publication preparation, and prove the source-node identity relation needed by diagnostics
-before authoring removal or normalization begins.
+Begin `M06-T07 — Authoring removal and deterministic normalization`. Consume only the exact
+M06-T06 preservation authority, remove the top-level authoring member without inspecting or
+retaining it in production content, and produce one deterministic normalized document projection
+without changing opaque extensions, semantic array order, source-node identifiers, or traceability.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1307,7 +1316,7 @@ M05-T06 evidence:
 - `docs/proof/RUNTIME-REACT-FAILURE-BOUNDARY.md`
 - `docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json`
 - artifact SHA-256:
-  `3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723`
+  `f6dbb1adb38cf2d6a3f13532424c2ed8422b29f1a7d28a0f31a9ec9b66eb9abc`
 - exact boundary: complete unknown-capability preflight with no placeholder; whole-surface
   containment; exact leaf-component or honest null attribution; sticky explicit retry authority;
   separate persistent managed/host provenance branches; nested host-carrier preservation; and a
@@ -1412,7 +1421,7 @@ M06-T02 evidence:
 
 - `docs/proof/PUBLISHER-CATALOG-RESOLUTION.md`
 - `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
-- artifact SHA-256: `9e84cff4d8e2e31c412d21a0969ffcc6f2c20e7ca6806800f172a03021d13f7f`
+- artifact SHA-256: `4ee7754e5e658be5b7cda8c5ce6875d6f0a32f20d500bc9079ac79e5ed5142d9`
 - exact boundary: code-unit-equal `id`/`version`/optional-`target` resolution from one closed
   package-observation inventory; no location, range, normalization, newest, or first-candidate
   authority; bounded inert Catalog capture; exact candidate/Catalog identity and preobserved
@@ -1434,7 +1443,7 @@ M06-T03 evidence:
 
 - `docs/proof/PUBLISHER-SOURCE-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-- artifact SHA-256: `cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`
+- artifact SHA-256: `4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`
 - exact boundary: strict raw Source ingress; distinct Source-root and embedded-schema phases;
   catalog-independent SemVer, entry, surface, and node/behavior identity checks before candidate
   observation; exact M06-T02 Catalog authority before category-aware component, behavior,
@@ -1457,7 +1466,7 @@ M06-T04 evidence:
 
 - `docs/proof/PUBLISHER-CAPABILITY-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-- artifact SHA-256: `fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`
+- artifact SHA-256: `c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`
 - exact boundary: the exact M06-T03 Source, selected packages, Catalogs, and requirement alignment
   cross safe interaction-schema preparation and complete static component/behavior contract
   validation; success stays package-private and nonterminal with no dynamic obligations or Bundle
@@ -1482,7 +1491,7 @@ M06-T05 evidence:
 
 - `docs/proof/PUBLISHER-EXECUTION-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-- artifact SHA-256: `40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`
+- artifact SHA-256: `7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`
 - exact boundary: internal M06-T04 composition; exact prepared Source, execution Catalog, selected
   package, requirement-alignment, and warning authority; one emission-site phase-aware T10/T11
   analysis; exact stage 8 → 9 → 10 precedence; and one package-private nonterminal success
@@ -1499,6 +1508,32 @@ M06-T05 evidence:
   `PIPE-033` and `PIPE-034` have direct publication evidence; composed M04-T02/M05-T02/M06-T05
   evidence advances N-027 to `TESTED`; no `P-*`, `S-*`, or gate status changes; M06-T06 owns
   extension/order preservation and source-node identity traceability next
+
+M06-T06 evidence:
+
+- `docs/proof/PUBLISHER-SOURCE-PRESERVATION.md`
+- `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
+- artifact SHA-256: `d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8`
+- exact boundary: internal M06-T05 composition; exact Source, execution Catalog, selected package,
+  requirement-alignment, warning, and obligation identity; one separate frozen production-field
+  projection; and one package-private nonterminal preservation success
+- preservation scope: all 17 shared Source/Bundle extension declarations are derived from the
+  frozen schemas, all 16 Source-reachable kinds are exercised, eight semantic-array classes retain
+  exact parsed Source references and order, and raw JSON lexical spelling remains explicitly
+  outside the claim
+- trace profile: one exact five-string record per schema-reachable component node under unchanged
+  identifiers; unique Source pointers and surface-scoped `(surfaceId, sourceNodeId)` pairs; equal
+  node ids on different surfaces remain valid; behavior, extension, and authoring node shapes gain
+  no trace authority
+- finite envelope: 25,000 records, 4,096 UTF-16 units in one pointer, and 4,194,304 aggregate
+  identity/pointer units; three exact boundaries pass and three one-below crossings reject at
+  `normalization` without truncation, inherited warnings, partial authority, or a Bundle
+- executable evidence: 15 focused Publisher cases, 46 compiler-negative cases, 18 independent
+  proof/mutation cases, 3 exact prerequisite pins, and 20 byte-tracked files; the CI inventory now
+  contains 55 proofs and a reviewed 118-step single-pass plan
+- coverage decision: M06-T06 becomes `DONE`; the composed M05-T05/M06-T06 evidence advances N-021
+  to `TESTED`; N-012 and N-014 remain `PLANNED` for M08-T07 and M08-T03; no `P-*`, `S-*`, or gate
+  status changes; M06-T07 owns actual authoring removal and deterministic normalization next
 
 ## Status vocabulary
 

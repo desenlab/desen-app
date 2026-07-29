@@ -17,6 +17,18 @@ const NORMATIVE_COVERAGE_PATH = "docs/proof/NORMATIVE-COVERAGE.md";
 const HISTORICAL_ARTIFACT_SHA256 =
   "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb";
 const HISTORICAL_ARTIFACT_BYTES = 19_234;
+const SUCCESSOR_ARTIFACT_RELATIVE_PATH =
+  "docs/proof/artifacts/publisher-0.1.0-source-preservation.json";
+const SUCCESSOR_ARTIFACT_SHA256 =
+  "d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8";
+const N021_CURRENT_OWNERS = "M05-T05, M06-T06";
+const N021_CURRENT_STATUS = "TESTED";
+const N021_CURRENT_EVIDENCE = [
+  "M05-T05 proves the selected Web–React runtime side: exact live publications retain stable runtime/source identity, repeated authoring nodes remain one-to-many traceable, and a bounded immutable diagnostic index exposes no executable or platform authority.",
+  "M06-T06 completes the Publisher side by retaining the exact prepared Source behavior, all opaque extensions and semantic arrays, and one complete bounded five-string component-node trace under unchanged identifiers.",
+  "Trace identity is surface-scoped, exact RFC 6901 pointers remain unique, behavior ids are not mislabeled as component nodes, and extension/authoring node shapes stay opaque.",
+  `Evidence: \`${ARTIFACT_RELATIVE_PATH}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\`; \`${SUCCESSOR_ARTIFACT_RELATIVE_PATH}\` \`sha256:${SUCCESSOR_ARTIFACT_SHA256}\`.`,
+].join(" ");
 const COMPATIBILITY_MODE = "immutable-task-time-artifact";
 const MAX_PROOF_DOCUMENT_BYTES = 500_000;
 const MAX_LEDGER_BYTES = 2_000_000;
@@ -489,14 +501,14 @@ function exactRow(markdown, id, code) {
   return rows[0];
 }
 
-function verifyLocationPin(lines, artifactPath, code) {
+function verifyLocationPin(lines, artifactPath, artifactSha256, code) {
   const section = lines.join("\n");
   const pathToken = `\`${artifactPath}\``;
-  const shaToken = `\`sha256:${HISTORICAL_ARTIFACT_SHA256}\``;
+  const shaToken = `\`sha256:${artifactSha256}\``;
   const pathReferences = section.split(pathToken).length - 1;
   const shaReferences = section.split(shaToken).length - 1;
   if (pathReferences !== 1 || shaReferences !== 1) {
-    fail(code, `M05-T05 artifact path or SHA moved, changed, or became ambiguous.`);
+    fail(code, `${artifactPath} or its exact SHA moved, changed, or became ambiguous.`);
   }
 }
 
@@ -504,11 +516,13 @@ function verifyDocumentation(proofText, matrixText, normativeText) {
   verifyLocationPin(
     sectionLines(proofText, "## Evidence artifact", "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT"),
     ARTIFACT_RELATIVE_PATH,
+    HISTORICAL_ARTIFACT_SHA256,
     "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
   );
   verifyLocationPin(
     sectionLines(matrixText, "## M05-T05", "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT"),
     ARTIFACT_FILE_NAME,
+    HISTORICAL_ARTIFACT_SHA256,
     "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
   );
   const p16 = exactRow(matrixText, "P-16", "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT");
@@ -519,20 +533,41 @@ function verifyDocumentation(proofText, matrixText, normativeText) {
       "P-16 lost its exact M05-T05 partial-proof status.",
     );
   }
-  verifyLocationPin([p16], ARTIFACT_FILE_NAME, "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT");
+  verifyLocationPin(
+    [p16],
+    ARTIFACT_FILE_NAME,
+    HISTORICAL_ARTIFACT_SHA256,
+    "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
+  );
   const n021 = exactRow(normativeText, "N-021", "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT");
   const n021Cells = n021.split("|").map((cell) => cell.trim());
+  const historicalStatus = EXPECTED_SEMANTICS.normative.currentStatus;
+  const statusRank = Object.freeze({ PLANNED: 0, TESTED: 1 });
+  const currentRank = statusRank[n021Cells[5]];
   if (
-    n021Cells[4] !== "M05-T05, M06-T06" ||
-    n021Cells[5] !== "PLANNED" ||
-    !n021.includes("Publisher preservation remains M06-T06")
+    n021Cells[4] !== N021_CURRENT_OWNERS ||
+    currentRank === undefined ||
+    currentRank < statusRank[historicalStatus] ||
+    n021Cells[5] !== N021_CURRENT_STATUS ||
+    n021Cells[6] !== N021_CURRENT_EVIDENCE
   ) {
     fail(
       "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
-      "N-021 lost its exact M05-T05 task-time ownership or status.",
+      "N-021 lost its exact monotonic M05-T05/M06-T06 successor closure.",
     );
   }
-  verifyLocationPin([n021], ARTIFACT_RELATIVE_PATH, "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT");
+  verifyLocationPin(
+    [n021],
+    ARTIFACT_RELATIVE_PATH,
+    HISTORICAL_ARTIFACT_SHA256,
+    "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
+  );
+  verifyLocationPin(
+    [n021],
+    SUCCESSOR_ARTIFACT_RELATIVE_PATH,
+    SUCCESSOR_ARTIFACT_SHA256,
+    "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
+  );
 }
 
 /**
@@ -656,8 +691,11 @@ export async function verifyRuntimeReactReconciliationDiagnosticsEvidence(rawOpt
     compilerNegativeCases: EXPECTED_SEMANTICS.compilerNegativeCases,
     rootMutationCases: EXPECTED_SEMANTICS.rootMutationCases,
     p16Status: EXPECTED_SEMANTICS.proofClaim.currentStatus,
-    n021Status: EXPECTED_SEMANTICS.normative.currentStatus,
+    n021HistoricalStatus: EXPECTED_SEMANTICS.normative.currentStatus,
+    n021CurrentStatus: N021_CURRENT_STATUS,
+    n021SuccessorArtifactSha256: SUCCESSOR_ARTIFACT_SHA256,
     exactDocumentationReferences: 4,
+    exactSuccessorDocumentationReferences: 1,
   });
 }
 

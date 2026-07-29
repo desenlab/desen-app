@@ -13,6 +13,11 @@ import {
 
 const HISTORICAL_SHA256 = "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb";
 const HISTORICAL_BYTES = 19_234;
+const SUCCESSOR_SHA256 = "d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8";
+const SUCCESSOR_ARTIFACT_RELATIVE_PATH =
+  "docs/proof/artifacts/publisher-0.1.0-source-preservation.json";
+const SUCCESSOR_EVIDENCE_TEXT =
+  "M06-T06 completes the Publisher side by retaining the exact prepared Source behavior, all opaque extensions and semantic arrays, and one complete bounded five-string component-node trace under unchanged identifiers.";
 const ARTIFACT_FILE_NAME = "runtime-react-0.1.0-reconciliation-diagnostics.json";
 const ARTIFACT_RELATIVE_PATH = `docs/proof/artifacts/${ARTIFACT_FILE_NAME}`;
 const ARTIFACT_URL = new URL(`../${ARTIFACT_RELATIVE_PATH}`, import.meta.url);
@@ -48,6 +53,11 @@ function replaceRow(markdown, id, replace) {
   return lines.join("\n");
 }
 
+function replaceExactOnce(text, search, replacement) {
+  assert.equal(text.split(search).length - 1, 1);
+  return text.replace(search, replacement);
+}
+
 test("accepts immutable task-time M05-T05 reconciliation and diagnostic evidence", async () => {
   const result = await verifyRuntimeReactReconciliationDiagnosticsEvidence();
   assert.deepEqual(result, {
@@ -64,8 +74,11 @@ test("accepts immutable task-time M05-T05 reconciliation and diagnostic evidence
     compilerNegativeCases: 26,
     rootMutationCases: 35,
     p16Status: "PARTIAL",
-    n021Status: "PLANNED",
+    n021HistoricalStatus: "PLANNED",
+    n021CurrentStatus: "TESTED",
+    n021SuccessorArtifactSha256: SUCCESSOR_SHA256,
     exactDocumentationReferences: 4,
+    exactSuccessorDocumentationReferences: 1,
   });
 });
 
@@ -79,6 +92,8 @@ test("two independent historical reads preserve exact bytes and recursively froz
   assert.equal(first.artifact.claim.committedAdapterErrorBoundaryImplemented, false);
   assert.equal(first.artifact.diagnostics.recursivelyImmutable, true);
   assert.equal(first.artifact.evidence.tests.rootMutationCases, 35);
+  assert.equal(first.artifact.evidence.traceability.normative.currentStatus, "PLANNED");
+  assert.equal(first.artifact.evidence.traceability.normative.remainingOwner, "M06-T06");
   assert.equal(Object.isFrozen(first.artifact), true);
   assert.equal(Object.isFrozen(first.artifact.claim), true);
   assert.equal(Object.isFrozen(first.artifact.evidence.trackedFiles), true);
@@ -233,7 +248,7 @@ test("rejects moved, duplicated, pending, or mismatched proof and M05-T05 sectio
   }
 });
 
-test("rejects exact P-16 and N-021 task-time pin, owner, or status drift", async () => {
+test("rejects exact P-16 pin or N-021 monotonic successor-closure drift", async () => {
   const texts = await proofTexts();
   for (const proofMatrixText of [
     replaceRow(texts.proofMatrixText, "P-16", (row) => row.replace("| PARTIAL ", "| PROVEN  ")),
@@ -252,11 +267,32 @@ test("rejects exact P-16 and N-021 task-time pin, owner, or status drift", async
   }
   for (const normativeCoverageText of [
     replaceRow(texts.normativeCoverageText, "N-021", (row) =>
-      row.replace("| PLANNED ", "| TESTED  "),
+      replaceExactOnce(row, "| TESTED      |", "| PLANNED     |"),
     ),
-    replaceRow(texts.normativeCoverageText, "N-021", (row) => row.replace("M06-T06", "M06-T99")),
     replaceRow(texts.normativeCoverageText, "N-021", (row) =>
-      row.replace(HISTORICAL_SHA256, "b".repeat(64)),
+      replaceExactOnce(row, "| TESTED      |", "| UNKNOWN     |"),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(row, "M05-T05, M06-T06", "M05-T05, M06-T99"),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(row, "M05-T05, M06-T06", "M05-T99, M06-T06"),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(row, HISTORICAL_SHA256, "b".repeat(64)),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(row, SUCCESSOR_SHA256, "c".repeat(64)),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(
+        row,
+        SUCCESSOR_ARTIFACT_RELATIVE_PATH,
+        `moved/${SUCCESSOR_ARTIFACT_RELATIVE_PATH}`,
+      ),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(row, SUCCESSOR_EVIDENCE_TEXT, ""),
     ),
   ]) {
     await assert.rejects(

@@ -131,7 +131,7 @@ proof/mutation cases.
 
 `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
 
-`sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`
+`sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`
 
 ## Scope limits
 

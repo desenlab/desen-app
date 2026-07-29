@@ -24,7 +24,7 @@ the complete claim is not established. A visual demonstration alone cannot chang
 | P-14 | Sortable behavior integrates without changing runtime-core                                        | M10-T09, M11-T12                            | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Reorder E2E and runtime-core tree hash equal to frozen G10 baseline                                                   | Future `docs/proof/artifacts/runtime-core-baseline.json` and Sortable comparison                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | —             |
 | P-15 | Existing complex capabilities build a second surface without screen code                          | M11-T13                                     | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Desen App runbook, published source/bundle, and host source audit                                                     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | —             |
 | P-16 | Runtime diagnostics trace to stable source-node identity                                          | M05-T05, M09-T13                            | PARTIAL        | M05-T05 adds a bounded, deeply frozen, callback-free forward and one-to-many inverse identity index after exact renderer binding parity; repeated component and behavior instances remain traceable to their authoring source nodes across live publications                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | M09-T13 must prove end-to-end diagnostic selection in Desen App                                                       | `runtime-react-0.1.0-reconciliation-diagnostics.json` `sha256:292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb`                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 2026-07-28    |
-| P-17 | Runtime bounds execution and never guesses unknown semantics                                      | M02-T13, M04-T13–M04-T17, M05-T06, M07-T04  | PARTIAL        | Validator micro-vectors cover unknown and unsupported semantics; M04-T02–M04-T15 prove bounded fail-closed resolution, lifecycle, action, adapter-bridge, and reactive behavior. M04-T16 adds validated Bundle/Catalog ingress, exact revision verification, complete conditional/repeat materialization, plan and binding commitments, atomic binding reconciliation, coherent tree/binding/handler/trace ceilings, and terminal session disposal. M04-T17 adds generic operation/resource settlement notification, factory-authenticated bounded snapshot subscriptions, exact migration-ledger proof, and deterministic rollback/publication fault containment. M05-T06 proves finite all-or-nothing React capability preflight, no placeholder guessing, redacted whole-surface adapter containment, honest null attribution where React cannot expose origin, explicit retry authority, and host/managed failure provenance. | Activation finite-limit vectors remain with M07-T04.                                                                  | Prior M02–M04 artifacts listed below; `runtime-core-0.1.0-headless-sign-in.json` (M04-T16 initial G04 sign-in evidence); `runtime-core-0.1.0-audit-hardening.json` (M04-T17/G04 final audit evidence); `runtime-react-0.1.0-failure-boundary.json` `sha256:3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723`                                                                                                                                                                                                                                                                            | 2026-07-28    |
+| P-17 | Runtime bounds execution and never guesses unknown semantics                                      | M02-T13, M04-T13–M04-T17, M05-T06, M07-T04  | PARTIAL        | Validator micro-vectors cover unknown and unsupported semantics; M04-T02–M04-T15 prove bounded fail-closed resolution, lifecycle, action, adapter-bridge, and reactive behavior. M04-T16 adds validated Bundle/Catalog ingress, exact revision verification, complete conditional/repeat materialization, plan and binding commitments, atomic binding reconciliation, coherent tree/binding/handler/trace ceilings, and terminal session disposal. M04-T17 adds generic operation/resource settlement notification, factory-authenticated bounded snapshot subscriptions, exact migration-ledger proof, and deterministic rollback/publication fault containment. M05-T06 proves finite all-or-nothing React capability preflight, no placeholder guessing, redacted whole-surface adapter containment, honest null attribution where React cannot expose origin, explicit retry authority, and host/managed failure provenance. | Activation finite-limit vectors remain with M07-T04.                                                                  | Prior M02–M04 artifacts listed below; `runtime-core-0.1.0-headless-sign-in.json` (M04-T16 initial G04 sign-in evidence); `runtime-core-0.1.0-audit-hardening.json` (M04-T17/G04 final audit evidence); `runtime-react-0.1.0-failure-boundary.json` `sha256:f6dbb1adb38cf2d6a3f13532424c2ed8422b29f1a7d28a0f31a9ec9b66eb9abc`                                                                                                                                                                                                                                                                            | 2026-07-28    |
 | P-18 | Platform-neutral packages contain no React/Web dependencies and core traces are JSON-serializable | M01-T05, M04-T16–M04-T17, M08-T10           | PARTIAL        | Dependency rules and six boundary fixtures pass. M04-T16 source and distribution audits contain no React, DOM, CSS, browser, or application imports. Success/navigation, failure/retry, and stale-replacement scenarios each run in two independent sessions; every callback-free JSON pair and the combined six-session trace pass exact JSON round-trip, RFC 8785 canonicalization, and SHA-256 equality. M04-T17 re-audits the complete runtime source boundary after adding the generic settlement and public session-subscription APIs.                                                                                                                                                                                                                                                                                                                                                                                      | M08-T10 must still prove the independent editor-core artifact and React/DOM boundary before P-18 can become `PROVEN`. | `tracked-foundation.json` `sha256:5c430da7e221dc37c9bdd4ca1c423f1a84d0aabe22cfe4465e40b67fa7d1529c`; `runtime-core-0.1.0-headless-sign-in.json` (M04-T16 initial G04 sign-in evidence); `runtime-core-0.1.0-audit-hardening.json` (M04-T17/G04 final audit evidence)                                                                                                                                                                                                                                                                                                                                    | 2026-07-27    |
 
 The implementation report must preserve failed and partial results. `PROVEN` requires all owner
@@ -778,9 +778,10 @@ lookups retain no props, styles, slots, React/platform values, session, Catalog,
 callback. Explicit ceilings, hostile reflection vectors, lifecycle tests, source-boundary pins,
 and byte-exact prerequisite verification close the selected Web–React slice.
 
-P-16 advances to `PARTIAL`; M09-T13 still owns end-to-end Desen App diagnostic selection. N-021
-remains `PLANNED` because M06-T06 must prove that publication preserves protocol behavior and
-source-node traceability. R-104's selected Web–React adapter-instance portion is complete.
+P-16 advances to `PARTIAL`; M09-T13 still owns end-to-end Desen App diagnostic selection. At the
+M05-T05 checkpoint N-021 remained `PLANNED`; M06-T06 now supplies the Publisher-side preservation
+evidence and advances it to `TESTED`. R-104's selected Web–React adapter-instance portion is
+complete.
 
 `runtime-react-0.1.0-reconciliation-diagnostics.json`
 `sha256:292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb`.
@@ -813,7 +814,7 @@ outstanding. PF-055 records the conservative target-specific containment decisio
 its M06-T11 invalid-publication slice.
 
 `runtime-react-0.1.0-failure-boundary.json`
-`sha256:3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723`.
+`sha256:f6dbb1adb38cf2d6a3f13532424c2ed8422b29f1a7d28a0f31a9ec9b66eb9abc`.
 
 ## M05-T07
 
@@ -962,7 +963,7 @@ and the unique proof-document hash. No `P-*`, normative status, or gate changes;
 complete Source preflight next.
 
 `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
-`sha256:9e84cff4d8e2e31c412d21a0969ffcc6f2c20e7ca6806800f172a03021d13f7f`.
+`sha256:4ee7754e5e658be5b7cda8c5ce6875d6f0a32f20d500bc9079ac79e5ed5142d9`.
 
 ## M06-T03
 
@@ -988,7 +989,7 @@ the unique proof-document hash. No `P-*`, normative, or gate status changes; M06
 slot, style, event, command, and behavior contracts next.
 
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
+`sha256:4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`.
 
 ## M06-T04
 
@@ -1017,7 +1018,7 @@ M06-T05 owns resource/operation receiving contracts, dynamic compatibility, and 
 obligations. No `P-*`, normative, or gate status changes.
 
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
+`sha256:c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`.
 
 ## M06-T05
 
@@ -1054,4 +1055,39 @@ resolution and M05-T02 final receiving validation, this advances N-027 to `TESTE
 traceability next.
 
 `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-`sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
+`sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`.
+
+## M06-T06
+
+M06-T06 composes the exact M06-T05 boundary internally from raw Source JSON and closed package
+candidates. Its package-private nonterminal success preserves the authenticated Source, execution
+Catalog set, selected packages, requirement alignment, warnings, and runtime obligations by exact
+identity. A separate frozen production-field projection retains every Source-reachable opaque
+extension and semantic Source array by exact parsed runtime reference while leaving actual
+top-level authoring removal to M06-T07. Raw whitespace, escape spelling, number-token spelling, and
+object-member lexical order are explicitly outside the parsed preservation claim.
+
+One complete immutable trace records every schema-reachable component node through the document
+id, surface id, unchanged Source node id, capability id, and exact RFC 6901 pointer. Identity is
+surface-scoped, so equal node ids on different surfaces remain valid and independently traceable.
+Behavior identities remain in the Source graph without being mislabeled as component nodes, and
+node-shaped values inside extensions or authoring remain opaque.
+
+The trace envelope admits 25,000 records, 4,096 UTF-16 units in one pointer, and 4,194,304
+aggregate identity/pointer units. Three exact ceilings pass; three one-below crossings reject the
+whole intermediate at `normalization` without truncation, inherited warnings, partial authority,
+or a Bundle. The evidence derives 17 shared Source/Bundle extension declarations and 16 reachable
+locations per document from the frozen schemas, exercises all 16 Source-reachable kinds and eight
+semantic-array classes, and authenticates three exact prerequisites plus 20 byte-tracked files.
+Fifteen focused Publisher cases, 46 compiler-negative cases, and 18 independent proof/mutation
+cases pass. Package-root privacy, platform neutrality, deterministic evidence bytes, finite
+limits, artifact tampering, proof-pin drift, authority cloning, extension loss, order drift,
+trace loss, partial leakage, and selected successor-tolerant CI registration are mutation-tested.
+
+This completes the Publisher side of the M05-T05 runtime/source relation and advances N-021 to
+`TESTED`. N-012 remains `PLANNED` for the M08-T07 editor save/open round trip, and N-014 remains
+`PLANNED` for M08-T03 editor reorder coverage. No `P-*`, `S-*`, or gate status changes. M06-T07
+owns actual authoring removal and deterministic normalization next.
+
+`docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
+`sha256:d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8`.

@@ -2028,10 +2028,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
 - Future action: M05-T06 now supplies the explicit production adapter error boundary without
   converting unknown capabilities into guessed placeholders; `PF-055` records its honest
   attribution limit. M09-T13 must connect the immutable
-  index to end-to-end Desen App diagnostic selection before P-16 can become `PROVEN`. M06-T06 must
-  prove that publication preserves the protocol behavior/source identity relationship before
-  N-021 can become `TESTED`. Native renderers should reuse the observable identity rules but define
-  their own platform instance-compatibility boundary rather than importing React keys.
+  index to end-to-end Desen App diagnostic selection before P-16 can become `PROVEN`. M06-T06 now
+  proves the Publisher-side protocol behavior/source identity relationship recorded by `PF-065`,
+  so the composed evidence advances N-021 to `TESTED`. Native renderers should reuse the observable
+  identity rules but define their own platform instance-compatibility boundary rather than
+  importing React keys.
 
 ## PF-055 — React failure containment is whole-surface when exact origin is unavailable
 
@@ -2379,7 +2380,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   signing, npm publication, or deployment.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-  `sha256:cb28628b6d39cfa170a34763ea2937e3018048863239ab15d48938ee3e0c2211`.
+  `sha256:4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`.
 
 - Future action: A later protocol revision should separate Catalog-independent Source validation
   from Catalog-backed reference finalization, define their diagnostic-stage and failure-precedence
@@ -2432,7 +2433,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   detected without any observable reflection.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-  `sha256:fc70cb8c8cd442aace11651236459cd567a52eda9451b05656a44d3b4a11e6cc`.
+  `sha256:c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`.
 
   M06-T05 now runs M06-T04 internally, re-authenticates the exact prepared Source and execution
   Catalog set, prepares resource and operation input/output schemas, checks all statically
@@ -2457,7 +2458,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   already-proven M02 artifact.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-  `sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
+  `sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`.
 
 - Future action: M06-T11 must drive both T04/T05 slices through the terminal public Publisher and
   prove every invalid case emits no Bundle. A future protocol revision should expose explicit
@@ -2493,9 +2494,63 @@ This file records implementation discoveries without changing the frozen DESEN 0
   is an output admission bound; it does not claim incremental Validator allocation accounting.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-  `sha256:40585a946da551c4d00d641191988ad8e71ab3cc5e65cc74522840e3445ec1bd`.
+  `sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`.
 
 - Future action: A future DESEN revision should standardize explicit diagnostic-to-publication-stage
   ownership, simultaneous-error precedence, whether nonblocking warnings survive a later blocking
   phase, and an interoperable obligation-report limit. M06-T11 must preserve the same precedence
   through terminal `publish` failures.
+
+## PF-065 — Publication preservation is parsed-value exact and broader than the named array list
+
+- Status: OPEN
+- Blocks proof: No; M06-T06 defines and proves one bounded lossless intermediate without changing
+  frozen protocol bytes or claiming that raw JSON lexical spelling survives parsing.
+- Protocol location: SPEC Sections 10.2, 10.5, 13.5, and 25.1; `R-037`, `R-107`, `N-012`,
+  `N-014`, and `N-021`; related findings `PF-054`, `PF-060`, `PF-062`, and `PF-064`
+- Observation: Section 10.5 explicitly names slots, actions, variants, Catalog requirements, and
+  repeated output as semantically ordered arrays. The complete Source graph also contains ordered
+  behavior attachments, predicate arguments, nested settlement actions, ValueSpec arrays, and
+  extension-owned arrays whose order cannot be reconstructed safely once discarded. Separately,
+  unknown-extension preservation applies to the parsed source document; DESEN 0.1.0 does not
+  require preservation of raw whitespace, escape spelling, number-token spelling, or object-member
+  lexical order after JSON parsing. Finally, node ids are unique only within a surface, so a
+  publication trace that incorrectly requires global node-id uniqueness would reject valid
+  multi-surface Sources.
+- Implementation decision: M06-T06 invokes M06-T05 internally from raw Source JSON and closed
+  package candidates. It accepts no caller-created predecessor shell. The exact authenticated
+  Source, execution Catalog, selected packages, requirement indexes, warnings, and obligations
+  cross by runtime identity. A separate frozen projection retains `desen`, `id`, `entry`,
+  `surfaces`, and optional root `extensions`; ordered Source Catalog requirements remain separate
+  for M06-T08 exact-tuple pinning. Every nested production value, every Source-reachable extension,
+  and every semantic array therefore remains the exact parsed Source reference. Extension payloads
+  stay opaque even when they contain core-looking keys or node-shaped values.
+
+  Top-level `authoring` remains present on the authenticated Source and is absent only from the
+  separate projection. This is not yet authoring removal or normalization. M06-T07 owns those
+  transformations and must consume only this exact T06 authority.
+
+  One iterative schema-edge walk emits a complete immutable five-string record for each reachable
+  component node: document id, surface id, unchanged Source node id, capability id, and exact RFC
+  6901 pointer. Map traversal uses deterministic UTF-16 key order and arrays retain Source index
+  order. Trace identity is the surface-scoped `(surfaceId, sourceNodeId)` relation plus its exact
+  pointer; equal node ids on different surfaces remain valid. Behavior ids remain preserved in the
+  Source graph but are not falsely reclassified as component nodes. Extension and authoring
+  payloads never create trace records.
+
+  The project-owned output envelope admits 25,000 trace records, 4,096 UTF-16 code units in one
+  pointer, and 4,194,304 aggregate identity/pointer units. Exact ceilings pass; a one-below
+  crossing rejects the complete intermediate at `normalization` with one redacted error and no
+  inherited warning, partial authority, or Bundle. Opaque extension and state-schema content remain
+  bounded by the inherited raw-Source profile rather than a new T06 payload limit.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
+  `sha256:d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8`.
+
+- Future action: M06-T07 must remove only top-level `authoring` and normalize without dropping,
+  reordering, or interpreting preserved values. M06-T08 through M06-T10 must carry the same
+  observable data and unchanged node ids into a valid deterministic Bundle, while M06-T11 must
+  prove all invalid preservation cases emit no Bundle. M08-T03 and M08-T07 retain editor reorder
+  and save/open round-trip ownership. A later protocol revision should state the complete semantic
+  array inventory, the parsed-value versus raw-lexical preservation boundary, and the
+  surface-scoped node-identity rule directly.
