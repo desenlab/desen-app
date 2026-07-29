@@ -48,13 +48,13 @@ const PREREQUISITES = Object.freeze([
   Object.freeze({
     task: "M06-T01",
     path: "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
-    sha256: "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
+    sha256: "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
     claim: "strict raw Source ingress and closed no-partial failure shell",
   }),
   Object.freeze({
     task: "M06-T02",
     path: "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
-    sha256: "0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5",
+    sha256: "ce367d80b90f2cf6d5e543666686904f22f890fb5a36bbcac22dd0b271a2cfbf",
     claim: "exact Catalog package resolution and immutable trusted namespace",
   }),
 ]);

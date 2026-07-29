@@ -15,6 +15,14 @@ export const INVALID_SOURCE_JSON_CODE = "run.desen.publisher/INVALID_SOURCE_JSON
  */
 export const SOURCE_LIMIT_EXCEEDED_CODE = "run.desen.publisher/SOURCE_LIMIT_EXCEEDED" as const;
 
+/**
+ * Stable project diagnostic emitted when Source data uses a deprecated Catalog capability.
+ *
+ * @remarks Deprecation remains non-blocking while the exact package is available. The diagnostic
+ * never authorizes replacement selection and never repeats caller-controlled Catalog prose.
+ */
+export const DEPRECATED_CAPABILITY_CODE = "run.desen.publisher/DEPRECATED_CAPABILITY" as const;
+
 const PUBLISHER_DIAGNOSTIC_DATA = [
   [INVALID_SOURCE_JSON_CODE, "Raw Source input is not interoperable JSON.", "json-parse", "error"],
   [
@@ -22,6 +30,12 @@ const PUBLISHER_DIAGNOSTIC_DATA = [
     "Raw Source parsing exceeded the finite Publisher profile.",
     "json-parse",
     "error",
+  ],
+  [
+    DEPRECATED_CAPABILITY_CODE,
+    "Source data uses a deprecated Catalog capability.",
+    "capability-contracts",
+    "warning",
   ],
 ] as const;
 
@@ -54,8 +68,7 @@ export const PUBLISH_PIPELINE_STAGES = Object.freeze([
 export type PublishPipelineStage = (typeof PUBLISH_PIPELINE_STAGES)[number];
 
 /** Project diagnostic codes owned by the platform-neutral Publisher. */
-export type PublisherExtensionDiagnosticCode =
-  typeof INVALID_SOURCE_JSON_CODE | typeof SOURCE_LIMIT_EXCEEDED_CODE;
+export type PublisherExtensionDiagnosticCode = (typeof PUBLISHER_DIAGNOSTIC_DATA)[number][0];
 
 /** Project diagnostic codes introduced by the package-private M06-T02 Catalog boundary. */
 export type CatalogResolutionExtensionDiagnosticCode =
@@ -64,6 +77,10 @@ export type CatalogResolutionExtensionDiagnosticCode =
 /** Project diagnostic introduced by the package-private M06-T03 Source-preflight boundary. */
 export type SourcePreflightExtensionDiagnosticCode =
   "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED";
+
+/** Project diagnostic introduced by the package-private M06-T04 capability-preflight boundary. */
+export type CapabilityPreflightExtensionDiagnosticCode =
+  "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED";
 
 /** Stable diagnostic code owned by the DESEN Publisher implementation. */
 export type PublisherDiagnosticCode = PublisherExtensionDiagnosticCode;
@@ -85,7 +102,8 @@ export type PublishExtensionDiagnosticCode =
   | DesenSemanticExtensionDiagnosticCode
   | PublisherExtensionDiagnosticCode
   | CatalogResolutionExtensionDiagnosticCode
-  | SourcePreflightExtensionDiagnosticCode;
+  | SourcePreflightExtensionDiagnosticCode
+  | CapabilityPreflightExtensionDiagnosticCode;
 
 /** Whether a publication diagnostic blocks Bundle emission. */
 export type PublishDiagnosticSeverity = "error" | "warning";

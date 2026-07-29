@@ -104,7 +104,7 @@ The deterministic evidence runner authenticates:
 - artifact mutation, phase-order mutation, reference-bypass mutation, partial leakage,
   documentation drift, and atomic-write attacks.
 
-The focused Publisher suite contains 9 cases, including table-driven phase, capability-category,
+The focused Publisher suite contains 10 cases, including table-driven phase, capability-category,
 and budget matrices. The Validator adds 4 Source-foundation cases, the compiler-negative suite has
 16 cases, and the independent built-distribution suite has 10 proof/mutation cases.
 
@@ -112,7 +112,7 @@ and budget matrices. The Validator adds 4 Source-foundation cases, the compiler-
 
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
 
-`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`
+`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`
 
 ## Scope limits
 

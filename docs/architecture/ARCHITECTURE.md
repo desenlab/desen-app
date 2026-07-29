@@ -271,7 +271,39 @@ perform discovery, download, activation, rendering, signing, publication, or dep
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+
+## Publisher static capability preflight boundary
+
+M06-T04 immediately composes the exact M06-T03 authority rather than accepting a caller-created
+stage shell. The exact selected Catalog array first crosses the Validator's interaction-contract
+preparation authority; only then may the exact prepared Source be checked for statically knowable
+component props and Variants, slots and accepted children, styles and visual states, events and
+commands, behavior props and slots, behavior styles and events, attachment, and conflicts.
+Unsafe Catalog contract schemas therefore fail before Source capability values are observed.
+
+The Publisher retains the exact M06-T03 Source, packages, Catalogs, and requirement alignment. It
+does not accept the Validator's cloned Source output or expose dynamic obligations at this
+boundary. Success is still package-private and nonterminal, with neither `ok` nor `bundle`; every
+blocking failure uses the M06-T01 shell and exposes no partial authority.
+
+Deprecation discovery runs only after static success. Exact component, behavior, resource, and
+operation use sites may emit the public fixed
+`run.desen.publisher/DEPRECATED_CAPABILITY` warning, but Catalog-controlled prose and replacement
+hints are never copied or followed. Warning order and finite budgets are deterministic. Optional
+traversal fields and lower-stage discriminators must be own data properties, preventing inherited
+prototype data from fabricating structure or authority.
+
+Publication step 8 also contains resource and operation receiving contracts plus dynamic
+compatibility work. The current public Validator execution entry point intentionally composes
+those concerns with state, binding, action, and runtime obligations. M06-T04 therefore completes
+only the static component/interaction slice; M06-T05 depends on it and closes the remaining
+resource/operation and dynamic-obligation slice without importing runtime or target-framework
+dependencies.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
 
 ## Applications
 

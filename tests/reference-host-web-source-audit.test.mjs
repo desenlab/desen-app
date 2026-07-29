@@ -52,6 +52,7 @@ const OFFICIAL_SOURCE = `${SOURCE_ROOT}/official-sign-in.ts`;
 const MAIN_SOURCE = `${SOURCE_ROOT}/main.tsx`;
 const VALIDATOR_SUCCESSOR_SOURCE_PATHS = Object.freeze([
   "packages/validator/src/index.ts",
+  "packages/validator/src/interaction-contract-validation.ts",
   "packages/validator/src/semantic-validation.ts",
   "packages/validator/src/structural-validation.ts",
 ]);
@@ -212,17 +213,18 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.trackedFiles, 24);
   assert.equal(result.comparedTrackedFiles, 18);
   assert.deepEqual(result.admittedSuccessor, {
-    task: "M06-T03",
+    task: "M06-T04",
     sourceFiles: VALIDATOR_SUCCESSOR_SOURCE_PATHS,
     modules: [
       "packages/validator/dist/index.js",
+      "packages/validator/dist/interaction-contract-validation.js",
       "packages/validator/dist/semantic-validation.js",
       "packages/validator/dist/structural-validation.js",
     ],
   });
   assert.deepEqual(result.successorSources, {
     result: "PASS",
-    task: "M06-T03",
+    task: "M06-T04",
     sources: [
       {
         path: "packages/validator/src/index.ts",
@@ -230,9 +232,14 @@ test("runs the full current host audit while comparing every enduring M05 input"
         sha256: "18237d74c0978bee4f743c17ab57f36d37d297dcbb1677f28c252ce45b510872",
       },
       {
+        path: "packages/validator/src/interaction-contract-validation.ts",
+        bytes: 63_591,
+        sha256: "559de34751c6ea52716926fffd031e147ed0785abf31708376aa838276172031",
+      },
+      {
         path: "packages/validator/src/semantic-validation.ts",
-        bytes: 36_273,
-        sha256: "65443cccb32d35ab3db547d2a3877f0c44a158defbe0cdf6e48af8c7673531fd",
+        bytes: 36_879,
+        sha256: "b5ae0899b4202b313c6fe864e6a46189ffc3e45fd1fe659e3f2285fd84d1c463",
       },
       {
         path: "packages/validator/src/structural-validation.ts",
@@ -348,57 +355,74 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
   );
 });
 
-test("admits only the source-pinned M06-T03 Validator runtime successor", async () => {
+test("admits only the source-pinned M06-T04 Validator runtime successor", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
   const successorSourceBytes = await validatorSuccessorSourceBytes();
   const verifyPolicy = (candidate, sources = successorSourceBytes) =>
     verifyReferenceHostWebCurrentEvidencePolicy(historical, candidate, sources);
   const policy = verifyPolicy(current);
-  assert.equal(policy.admittedSuccessor.task, "M06-T03");
-  assert.equal(policy.admittedSuccessor.modules.length, 3);
+  assert.equal(policy.admittedSuccessor.task, "M06-T04");
+  assert.equal(policy.admittedSuccessor.modules.length, 4);
   assert.equal(policy.successorSources.result, "PASS");
   assert.equal(
     verifyReferenceHostWebValidatorSuccessorSources(successorSourceBytes).result,
     "PASS",
   );
-  const tamperedSources = successorSourceBytes.map((bytes) => Buffer.from(bytes));
-  tamperedSources[1][tamperedSources[1].length - 2] ^= 1;
-  assert.throws(
-    () => verifyReferenceHostWebValidatorSuccessorSources(tamperedSources),
-    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
-  );
-  assert.throws(
-    () => verifyPolicy(current, tamperedSources),
-    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
-  );
+  for (const sourceIndex of successorSourceBytes.keys()) {
+    const tamperedSources = successorSourceBytes.map((bytes) => Buffer.from(bytes));
+    tamperedSources[sourceIndex][tamperedSources[sourceIndex].length - 2] ^= 1;
+    assert.throws(
+      () => verifyReferenceHostWebValidatorSuccessorSources(tamperedSources),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+    assert.throws(
+      () => verifyPolicy(current, tamperedSources),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  }
   assert.throws(
     () => verifyReferenceHostWebCurrentEvidencePolicy(historical, current),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID"),
   );
 
-  const validatorIndex = "packages/validator/dist/index.js";
-  const mutateModule = (mutate) => {
+  const validatorModules = [
+    "packages/validator/dist/index.js",
+    "packages/validator/dist/interaction-contract-validation.js",
+    "packages/validator/dist/semantic-validation.js",
+    "packages/validator/dist/structural-validation.js",
+  ];
+  const mutateModule = (moduleId, mutate) => {
     const mutated = structuredClone(current);
-    const module = mutated.runtimeResolution.modules.find(({ id }) => id === validatorIndex);
+    const module = mutated.runtimeResolution.modules.find(({ id }) => id === moduleId);
     assert.ok(module);
     mutate(module, mutated);
     return mutated;
   };
+  for (const moduleId of validatorModules) {
+    for (const mutated of [
+      mutateModule(moduleId, (module) => {
+        module.codeBytes += 1;
+      }),
+      mutateModule(moduleId, (module) => {
+        module.codeSha256 = `sha256:${"a".repeat(64)}`;
+      }),
+    ]) {
+      assert.throws(
+        () => verifyPolicy(mutated),
+        hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+      );
+    }
+  }
+  const validatorIndex = validatorModules[0];
   for (const mutated of [
-    mutateModule((module) => {
-      module.codeBytes += 1;
-    }),
-    mutateModule((module) => {
-      module.codeSha256 = `sha256:${"a".repeat(64)}`;
-    }),
-    mutateModule((module) => {
+    mutateModule(validatorIndex, (module) => {
       module.imports.push("packages/validator/dist/unreviewed.js");
     }),
-    mutateModule((module) => {
+    mutateModule(validatorIndex, (module) => {
       module.id = "packages/validator/dist/unreviewed.js";
     }),
-    mutateModule((_module, artifact) => {
+    mutateModule(validatorIndex, (_module, artifact) => {
       artifact.runtimeResolution.modules.push({
         id: "packages/validator/dist/unreviewed.js",
         imports: [],
@@ -407,7 +431,7 @@ test("admits only the source-pinned M06-T03 Validator runtime successor", async 
         codeSha256: `sha256:${"b".repeat(64)}`,
       });
     }),
-    mutateModule((_module, artifact) => {
+    mutateModule(validatorIndex, (_module, artifact) => {
       artifact.runtimeResolution.backingSnapshotSha256 = `sha256:${"c".repeat(64)}`;
     }),
   ]) {

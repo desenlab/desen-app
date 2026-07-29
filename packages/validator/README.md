@@ -75,6 +75,13 @@ the exact Source-to-Catalog relation and category-aware static references only a
 runtime-authenticated Catalog set. Existing structural and cumulative semantic results remain
 unchanged.
 
+M06-T04 composes the existing public component and interaction APIs over that exact prepared
+Source and Catalog authority. It does not add or weaken a Validator rule: the Publisher prepares
+the selected Catalog set through `validateDesenInteractionCatalogSet`, then applies
+`validateDesenSourceInteractionContracts` and retains the exact upstream Source identity rather
+than accepting the Validator's cloned result or dynamic-obligation projection. Inherited optional
+Source fields are now consistently ignored by the semantic and interaction walkers.
+
 The M02-T08 component layer preserves dynamic ValueSpecs as explicit later-validation obligations
 and prepares component prop and style schemas through the documented `PF-011` host-safe boundary.
 Its public APIs remain available when a caller intentionally needs only the lower component stage.
@@ -244,7 +251,26 @@ replacement for the cumulative Validator APIs.
 
 Publisher integration evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+
+### Publisher capability-contract seam
+
+M06-T04 uses the public cumulative interaction authority to prepare safe component, behavior,
+event, command, and style schemas before observing Source contract values. Static component and
+behavior prop, slot, style, visual-state, event, command, attachment, and conflict failures retain
+their exact Validator code and pointer while the Publisher assigns the
+`capability-contracts` stopped stage. The exact M06-T03 Source, Catalog, package, and requirement
+alignment remain the downstream authority; dynamic obligations are deliberately not exposed.
+
+The Publisher's deprecated-capability scan is separate from Validator correctness. Deprecation is
+non-blocking package policy, never a Validator error and never a reason to select a replacement.
+The shared semantic and interaction traversal now reads optional `target`, `behaviors`, `on`,
+`slots`, `onSuccess`, and `onFailure` only as own data properties, preventing inherited prototype
+data from fabricating identities, actions, or capability uses.
+
+Publisher integration evidence:
+`docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
 
 ### Component-contract APIs
 
@@ -557,6 +583,10 @@ Source root → embedded schemas → Source-local identity precede any Catalog-c
 exact Catalog authority then precedes Catalog-backed static-reference existence. This is a causal
 orchestration split, not a new lower-level validation rule or a change to the established
 cumulative results.
+
+The M06-T04 Publisher seam then applies the exact T08/T09 authorities without advancing into
+T10/T11. Resource and operation receiving contracts, dynamic compatibility, and recorded runtime
+obligations remain M06-T05.
 
 1. Input is converted to RFC 8785-compatible canonical JSON, parsed into an independent plain-data
    tree, and recursively frozen. Unsupported JavaScript values, accessors, custom prototypes,

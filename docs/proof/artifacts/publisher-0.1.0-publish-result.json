@@ -265,8 +265,8 @@
     "trackedFiles": [
       {
         "path": "packages/publisher/test/publish-result.test.ts",
-        "bytes": 13773,
-        "sha256": "1783ab0d982a7f46265acc144af8a59fec60ecbc5a813aa3e7996cb55db68f74"
+        "bytes": 14217,
+        "sha256": "270398e495f933f14d79c1c02a197a5acc243842d4a4699569f34f8e362ea29d"
       },
       {
         "path": "packages/publisher/test/publish-result.types.ts",
@@ -280,8 +280,8 @@
       },
       {
         "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
-        "bytes": 224454,
-        "sha256": "6862eaff4fb874558e3555514aaf4686020666b4ec26cf734aafb5a004149a75"
+        "bytes": 225110,
+        "sha256": "df88d8872964467553d006e144f17b172ad4285d08b9db311cafd881ed930cd3"
       },
       {
         "path": "scripts/verify-reference-host-web-source-audit.mjs",
@@ -290,8 +290,8 @@
       },
       {
         "path": "tests/reference-host-web-source-audit.test.mjs",
-        "bytes": 68160,
-        "sha256": "b8f9c2dcaa7d74ccb7ad2149ed4a09716bf16afe76c34ee458adfc48abe5ae56"
+        "bytes": 69157,
+        "sha256": "d2b217e1bddf0d38547c9e1c3524de4df0221800b59ea5596dcc80d946a62f02"
       },
       {
         "path": "scripts/lib/publisher-publish-result-proof.mjs",

@@ -235,8 +235,8 @@ evidence.
 | M06-T01 | DONE        | G05              | Staged `PublishResult` and diagnostics API                                              |
 | M06-T02 | DONE        | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
 | M06-T03 | DONE        | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
-| M06-T04 | NOT_STARTED | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
-| M06-T05 | NOT_STARTED | M06-T03          | Dynamic binding compatibility and recorded runtime validation obligations               |
+| M06-T04 | DONE        | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
+| M06-T05 | NOT_STARTED | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
 | M06-T06 | NOT_STARTED | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
 | M06-T07 | NOT_STARTED | M06-T06          | Authoring removal and deterministic normalization                                       |
 | M06-T08 | NOT_STARTED | M06-T02, M06-T07 | Source digest and exact package tuple pinning                                           |
@@ -279,11 +279,28 @@ stopped stages; Catalog candidates remain unobserved until Source-local checks p
 references run only after a valid, digest-consistent, namespace-clean Catalog authority exists.
 Under-budget T01/T02 failures pass through unchanged, while the common diagnostic ceiling replaces
 an inherited over-budget report with one redacted error at the same stage. Every failure exposes no
-Source, Catalog set, package, alignment, partial value, or Bundle. Nine focused Publisher cases,
+Source, Catalog set, package, alignment, partial value, or Bundle. Ten focused Publisher cases,
 sixteen compiler-negative cases, four Validator-foundation cases, ten independent proof/mutation
 cases, four prerequisite pins, twenty tracked files, and the reviewed single-pass CI inventory
 protect the boundary. `PF-062` records the phase and authority ordering. No Proof Matrix claim,
 normative status, or gate changes; M06-T04 owns capability contracts next.
+
+M06-T04 now upgrades the exact M06-T03 authorities through the Validator's component and
+interaction contract preparation before checking every statically knowable component prop,
+Variant prop, slot, accepted child, style, visual state, event, command, behavior prop, behavior
+slot, behavior style, attachment, and conflict rule. Static failures stop at
+`capability-contracts`, suppress warning discovery, retain exact Validator diagnostics, and expose
+no Source, Catalog, package, alignment, dynamic obligation, partial value, or Bundle. Successful
+preflight preserves the exact authenticated Source and selected package authority, carries only
+safe deterministic deprecated-capability warnings, and remains package-private and nonterminal.
+Inherited optional data and success discriminators cannot fabricate traversal or authority, and
+the shared finite report profile fails closed without truncating warnings. Fourteen focused
+Publisher cases, twenty compiler-negative cases, eighty-five focused Validator cases, fifteen
+independent proof/mutation cases, four prerequisite pins, and thirty-three tracked files protect
+the boundary. `PF-063` records why M06-T04 completes only the static component/interaction slice of
+publication step 8. No Proof Matrix claim, normative status, or gate changes; M06-T05 owns
+resource/operation receiving contracts, dynamic binding compatibility, and recorded runtime
+obligations next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

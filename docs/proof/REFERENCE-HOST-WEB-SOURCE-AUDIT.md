@@ -158,16 +158,18 @@ duplicate records, and applies aggregate node, scalar, key, and string-byte budg
 source, host manifest, Catalog/Bundle data, configuration, graph module, semantic result, toolchain
 input, lockfile input outside the Publisher importer, or unlisted tracked path can drift silently.
 
-M06-T03 legitimately extends three Validator modules that are already present in the reference
-host's transitive Vite graph. Current compatibility admits only that reviewed successor: the exact
-bytes of the three owning Validator source files, their fixed module indexes and IDs, the exact
-historical-to-successor code byte/hash tuples, the recomputed full graph digest, and the complete
-backing snapshot digest must all match. The final comparison then normalizes only those three code
-tuples and the two aggregate successor digests back to their historical values; imports, dynamic
-imports, ordering, every other module, and all enduring host evidence remain equal. The source
-pins deliberately avoid descendant Publisher artifact hashes because earlier Publisher receipts
-track this verifier; this keeps the evidence graph acyclic while the independent M06 verifiers
-continue to authenticate their own complete artifacts.
+By M06-T04, the cumulative Publisher-era Validator successor differs from the immutable M05 graph
+in four already-present modules. M06-T03 introduced the index, semantic, and structural successor;
+M06-T04 further updates semantic validation and interaction-contract validation. Current
+compatibility admits only that cumulative successor: the exact bytes of the four owning Validator
+source files, their fixed module indexes and IDs, the exact historical-to-successor code byte/hash
+tuples, the recomputed full graph digest, and the complete backing snapshot digest must all match.
+The final comparison then normalizes only those four code tuples and the two aggregate successor
+digests back to their historical values; imports, dynamic imports, ordering, every other module,
+and all enduring host evidence remain equal. The source pins deliberately avoid descendant
+Publisher artifact hashes because earlier Publisher receipts track this verifier; this keeps the
+evidence graph acyclic while the independent M06 verifiers continue to authenticate their own
+complete artifacts.
 
 ## Evidence artifact
 

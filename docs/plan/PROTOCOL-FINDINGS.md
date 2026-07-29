@@ -2379,7 +2379,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   signing, npm publication, or deployment.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-  `sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+  `sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
 
 - Future action: A later protocol revision should separate Catalog-independent Source validation
   from Catalog-backed reference finalization, define their diagnostic-stage and failure-precedence
@@ -2387,3 +2387,58 @@ This file records implementation discoveries without changing the frozen DESEN 0
   reference failure. M06-T04 and M06-T05 must consume only the exact in-process preflight authority
   under the guardrail above; M06-T11 must prove the complete invalid-source matrix still emits no
   Bundle.
+
+## PF-063 — Static component contracts and dynamic execution contracts need separate Publisher seams
+
+- Status: OPEN
+- Blocks proof: No; M06-T04 can prove the complete statically knowable component and interaction
+  slice while M06-T05 retains the inseparable resource/operation, dynamic-compatibility, and
+  runtime-obligation slice.
+- Protocol location: SPEC Sections 17–21, 25.1, and 26.3; `PIPE-032`, `N-026`, `N-027`, `R-057`,
+  `R-058`, `R-060`, `R-064`, `R-085`, `R-120`, and `R-148`; related findings `PF-010`, `PF-051`,
+  and `PF-062`
+- Observation: Publication step 8 requires capability contract validation for components,
+  behaviors, resources, operations, props, slots, events, commands, styles, and related schemas.
+  The implementation plan deliberately assigns statically knowable component and interaction
+  contracts to M06-T04, then dynamic binding compatibility and recorded runtime validation
+  obligations to M06-T05. The current Validator interaction seam cleanly proves the first slice.
+  Its cumulative execution seam also prepares resource and operation schemas, but necessarily
+  composes state, binding, predicate, action, lifecycle, and runtime obligations. Calling that
+  cumulative seam in M06-T04 would silently absorb M06-T05 and make the task boundary and evidence
+  false; omitting resource and operation contracts without recording the split would overclaim
+  complete publication-step coverage.
+- Implementation decision: M06-T04 runs M06-T03 internally and accepts no reconstructed stage
+  shell. It upgrades the exact selected Catalog array through the public interaction-contract
+  preparation authority, then validates the exact prepared Source for component props and Variant
+  props, slot presence/cardinality/accepted children, style parts and visual states, component and
+  behavior events, statically known commands, behavior props/slots/styles, attachment, and
+  conflicts. Unsafe Catalog contract schemas fail before Source capability values are observed.
+  The Validator's cloned Source and dynamic-obligation projection are not accepted or exposed.
+
+  Blocking failures retain exact Validator identity and stop at `capability-contracts`; they expose
+  no Source, Catalog, selected package, requirement alignment, obligation, partial value, or
+  Bundle. Static success retains the exact M06-T03 authority and may emit only fixed, deterministic
+  `run.desen.publisher/DEPRECATED_CAPABILITY` warnings for exact Source use sites whose selected
+  Catalog declaration has an own `deprecated` value of `true` or a string. Catalog prose and
+  replacement hints are never disclosed or selected. The common finite report profile permits
+  1,024 diagnostics, 4,096 pointer code units, and 1,048,576 aggregate diagnostic/context code
+  units; a crossing becomes one redacted error rather than a truncated warning set.
+
+  Review also found that inherited optional Source fields and success discriminators could be read
+  through JavaScript's prototype chain in the shared semantic/interaction traversal. The Publisher
+  and Validator now require own data properties for the affected optional fields and stage
+  discriminators. Focused regressions cover inherited target, behaviors, event maps, slots,
+  settlement handlers, deprecation flags, and lower-stage success markers one at a time. This is
+  an inert-data guarantee, not a claim that an arbitrary Proxy or inherited accessor can be
+  detected without any observable reflection.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+  `sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
+
+- Future action: M06-T05 must consume only the exact M06-T04 authority, prepare and prove resource
+  and operation receiving contracts, determine static-versus-dynamic compatibility without
+  evaluating runtime values, and record the complete bounded runtime-obligation set. Only then may
+  `PIPE-032` be considered complete for the Publisher. M06-T11 must drive both slices through the
+  terminal public Publisher and prove every invalid case emits no Bundle. A future Validator API
+  may expose a narrower resource/operation preparation seam if independent publishers need the
+  same split without composing execution semantics.

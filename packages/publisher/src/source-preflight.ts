@@ -8,13 +8,17 @@ import { resolvePublishCatalogs } from "./catalog-resolution.js";
 import { annotatePublishErrorDiagnostic, createPublishFailure } from "./publish-diagnostics.js";
 import { parseSourceJson } from "./source-json.js";
 
-import type { DesenDiagnostic } from "@desen/protocol";
+import type { DesenDiagnostic, DesenDiagnosticContext } from "@desen/protocol";
 import type {
   DesenPreparedSourceFoundation,
   DesenSemanticDiagnostic,
   DesenValidatedCatalogSet,
 } from "@desen/validator";
-import type { PublishResolvedCatalogPackage } from "./catalog-resolution.js";
+import type {
+  PublishCatalogResolutionResult,
+  PublishCatalogResolutionSuccess,
+  PublishResolvedCatalogPackage,
+} from "./catalog-resolution.js";
 import type {
   PublishErrorDiagnostic,
   PublishDiagnostic,
@@ -86,7 +90,28 @@ function hasOrdinaryObjectPrototype(value: object): boolean {
   );
 }
 
-function normalizeLimits(input: unknown): Readonly<PublishSourcePreflightLimits> {
+function ownDataValue<Value>(object: object, key: PropertyKey): Value | undefined {
+  const descriptor = Object.getOwnPropertyDescriptor(object, key);
+  return descriptor !== undefined && "value" in descriptor
+    ? (descriptor.value as Value)
+    : undefined;
+}
+
+function isCatalogResolutionSuccess(
+  result: PublishCatalogResolutionResult,
+): result is PublishCatalogResolutionSuccess {
+  return ownDataValue(result, "resolved") === true;
+}
+
+/**
+ * Captures the exact finite diagnostic profile shared by package-private preflight stages.
+ *
+ * @internal This helper is not exported from the package root. It rejects inherited properties,
+ * accessors, symbols, extra keys, and non-positive or unsafe integers before Source observation.
+ */
+export function normalizePublishSourcePreflightLimits(
+  input: unknown,
+): Readonly<PublishSourcePreflightLimits> {
   try {
     if (typeof input !== "object" || input === null || Array.isArray(input)) throw new TypeError();
     if (!hasOrdinaryObjectPrototype(input)) throw new TypeError();
@@ -124,17 +149,30 @@ function normalizeLimits(input: unknown): Readonly<PublishSourcePreflightLimits>
   }
 }
 
-function diagnosticCodeUnits(diagnostic: DesenSemanticDiagnostic | PublishDiagnostic): number {
-  const context = diagnostic.context;
+/**
+ * Counts the exact diagnostic and identity-context code units charged by the preflight profile.
+ *
+ * @internal Later package-private stages use this primitive to maintain linear-time incremental
+ * budgets while preserving the same accounting as whole-report validation.
+ */
+export function publishDiagnosticCodeUnits(
+  diagnostic: DesenSemanticDiagnostic | PublishDiagnostic,
+): number {
+  const pointer = ownDataValue<string>(diagnostic, "pointer");
+  const context = ownDataValue<Readonly<DesenDiagnosticContext>>(diagnostic, "context");
+  const subject =
+    context === undefined
+      ? undefined
+      : ownDataValue<NonNullable<DesenDiagnosticContext["subject"]>>(context, "subject");
   return (
     diagnostic.code.length +
     diagnostic.message.length +
-    (diagnostic.pointer?.length ?? 0) +
-    (context?.documentId?.length ?? 0) +
-    (context?.surfaceId?.length ?? 0) +
-    (context?.subject?.kind.length ?? 0) +
-    (context?.subject?.id.length ?? 0) +
-    (context?.capabilityId?.length ?? 0)
+    (pointer?.length ?? 0) +
+    (ownDataValue<string>(context ?? {}, "documentId")?.length ?? 0) +
+    (ownDataValue<string>(context ?? {}, "surfaceId")?.length ?? 0) +
+    (ownDataValue<string>(subject ?? {}, "kind")?.length ?? 0) +
+    (ownDataValue<string>(subject ?? {}, "id")?.length ?? 0) +
+    (ownDataValue<string>(context ?? {}, "capabilityId")?.length ?? 0)
   );
 }
 
@@ -147,14 +185,22 @@ function preflightLimitFailure(stage: PublishPipelineStage): PublishFailure {
   return createPublishFailure([annotatePublishErrorDiagnostic(diagnostic, stage)]);
 }
 
-function diagnosticsExceedLimits(
+/**
+ * Tests one normalized diagnostic report against the common Source-preflight output ceiling.
+ *
+ * @internal Callers must replace an over-budget report with one redacted same-stage error rather
+ * than truncate it or expose a partial authority.
+ */
+export function publishDiagnosticsExceedSourcePreflightLimits(
   diagnostics: readonly (DesenSemanticDiagnostic | PublishDiagnostic)[],
   limits: Readonly<PublishSourcePreflightLimits>,
 ): boolean {
   if (
     diagnostics.length > limits.maxDiagnosticsPerStoppedStage ||
     diagnostics.some(
-      (diagnostic) => (diagnostic.pointer?.length ?? 0) > limits.maxDiagnosticPointerCodeUnits,
+      (diagnostic) =>
+        (ownDataValue<string>(diagnostic, "pointer")?.length ?? 0) >
+        limits.maxDiagnosticPointerCodeUnits,
     )
   ) {
     return true;
@@ -162,7 +208,7 @@ function diagnosticsExceedLimits(
 
   let aggregateCodeUnits = 0;
   for (const diagnostic of diagnostics) {
-    aggregateCodeUnits += diagnosticCodeUnits(diagnostic);
+    aggregateCodeUnits += publishDiagnosticCodeUnits(diagnostic);
     if (aggregateCodeUnits > limits.maxAggregateDiagnosticCodeUnits) {
       return true;
     }
@@ -174,7 +220,7 @@ function boundedExistingFailure(
   failure: PublishFailure,
   limits: Readonly<PublishSourcePreflightLimits>,
 ): PublishFailure {
-  return diagnosticsExceedLimits(failure.diagnostics, limits)
+  return publishDiagnosticsExceedSourcePreflightLimits(failure.diagnostics, limits)
     ? preflightLimitFailure(failure.stage)
     : failure;
 }
@@ -184,7 +230,9 @@ function stoppedStageFailure(
   diagnostics: readonly DesenSemanticDiagnostic[],
   limits: Readonly<PublishSourcePreflightLimits>,
 ): PublishFailure {
-  if (diagnosticsExceedLimits(diagnostics, limits)) return preflightLimitFailure(stage);
+  if (publishDiagnosticsExceedSourcePreflightLimits(diagnostics, limits)) {
+    return preflightLimitFailure(stage);
+  }
 
   const annotated: PublishErrorDiagnostic[] = [];
   for (const diagnostic of diagnostics) {
@@ -220,7 +268,7 @@ export function preflightPublishSource(
   catalogPackageCandidatesInput: unknown,
   limitInput: Readonly<PublishSourcePreflightLimits> = PUBLISH_SOURCE_PREFLIGHT_LIMITS,
 ): PublishSourcePreflightResult {
-  const limits = normalizeLimits(limitInput);
+  const limits = normalizePublishSourcePreflightLimits(limitInput);
   const parsed = parseSourceJson(rawSourceInput);
   if (!parsed.ok) return boundedExistingFailure(parsed, limits);
 
@@ -238,7 +286,7 @@ export function preflightPublishSource(
     catalogPackageCandidatesInput,
     foundation.value.id,
   );
-  if (!("resolved" in resolution)) return boundedExistingFailure(resolution, limits);
+  if (!isCatalogResolutionSuccess(resolution)) return boundedExistingFailure(resolution, limits);
 
   const references = validatePreparedDesenSourceReferences(foundation.value, resolution.catalogSet);
   if (!references.valid) {

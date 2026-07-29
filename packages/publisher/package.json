@@ -20,6 +20,7 @@
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:capability-preflight": "vitest run test/capability-preflight.test.ts",
     "test:catalog-resolution": "vitest run test/catalog-resolution.test.ts",
     "test:publish-result": "vitest run test/publish-result.test.ts",
     "test:source-preflight": "vitest run test/source-preflight.test.ts",

@@ -540,11 +540,12 @@ function sourceRequirementDiagnostics(
 
   document.catalogs.forEach((requirement, requirementIndex) => {
     // `location` is deliberately never read: DESEN 0.1.0 makes it an inert discovery hint.
+    const requirementTarget = Object.hasOwn(requirement, "target") ? requirement.target : undefined;
     const matches =
-      (requirement.target === undefined
+      (requirementTarget === undefined
         ? metadata.byIdVersion.get(catalogIdentityKey(requirement.id, requirement.version))
         : metadata.byExactTuple.get(
-            catalogIdentityKey(requirement.id, requirement.version, requirement.target),
+            catalogIdentityKey(requirement.id, requirement.version, requirementTarget),
           )) ?? [];
     if (matches.length !== 1) {
       diagnostics.push(
@@ -694,8 +695,8 @@ function inspectActions(
     );
 
     const nestedGroups = [
-      ["onFailure", action.onFailure],
-      ["onSuccess", action.onSuccess],
+      ["onFailure", Object.hasOwn(action, "onFailure") ? action.onFailure : undefined],
+      ["onSuccess", Object.hasOwn(action, "onSuccess") ? action.onSuccess : undefined],
     ] as const;
     for (const [field, nested] of nestedGroups) {
       if (nested === undefined) continue;
@@ -781,8 +782,18 @@ function inspectSurface(
         metadata,
         diagnostics,
       );
-      inspectHandlers(current.value.on, current.pointer, context, metadata, diagnostics);
-      pushSlotChildren(stack, current.value.slots, current.pointer);
+      inspectHandlers(
+        Object.hasOwn(current.value, "on") ? current.value.on : undefined,
+        current.pointer,
+        context,
+        metadata,
+        diagnostics,
+      );
+      pushSlotChildren(
+        stack,
+        Object.hasOwn(current.value, "slots") ? current.value.slots : undefined,
+        current.pointer,
+      );
       continue;
     }
 
@@ -794,11 +805,23 @@ function inspectSurface(
       metadata,
       diagnostics,
     );
-    inspectHandlers(current.value.on, current.pointer, context, metadata, diagnostics);
+    inspectHandlers(
+      Object.hasOwn(current.value, "on") ? current.value.on : undefined,
+      current.pointer,
+      context,
+      metadata,
+      diagnostics,
+    );
 
     // Node-owned slot children execute after behavior identities and their nested slot trees.
-    pushSlotChildren(stack, current.value.slots, current.pointer);
-    const behaviors = current.value.behaviors ?? [];
+    pushSlotChildren(
+      stack,
+      Object.hasOwn(current.value, "slots") ? current.value.slots : undefined,
+      current.pointer,
+    );
+    const behaviors = Object.hasOwn(current.value, "behaviors")
+      ? (current.value.behaviors ?? [])
+      : [];
     for (let behaviorIndex = behaviors.length - 1; behaviorIndex >= 0; behaviorIndex -= 1) {
       stack.push({
         kind: "behavior",

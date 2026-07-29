@@ -57,7 +57,7 @@ describe("Publisher result and diagnostics contract", () => {
   });
 
   it("exposes a frozen, collision-resistant Publisher diagnostic registry", () => {
-    expect(PUBLISHER_DIAGNOSTIC_REGISTRY).toEqual([
+    expect(PUBLISHER_DIAGNOSTIC_REGISTRY.slice(0, 2)).toEqual([
       {
         code: INVALID_SOURCE_JSON_CODE,
         meaning: "Raw Source input is not interoperable JSON.",
@@ -71,13 +71,21 @@ describe("Publisher result and diagnostics contract", () => {
         defaultSeverity: "error",
       },
     ]);
+    expect(PUBLISHER_DIAGNOSTIC_REGISTRY.length).toBeGreaterThanOrEqual(2);
     expect(Object.isFrozen(PUBLISHER_DIAGNOSTIC_REGISTRY)).toBe(true);
     PUBLISHER_DIAGNOSTIC_REGISTRY.forEach((definition) =>
       expect(Object.isFrozen(definition)).toBe(true),
     );
+    expect(new Set(PUBLISHER_DIAGNOSTIC_REGISTRY.map(({ code }) => code)).size).toBe(
+      PUBLISHER_DIAGNOSTIC_REGISTRY.length,
+    );
 
     expect(isPublisherDiagnosticCode(INVALID_SOURCE_JSON_CODE)).toBe(true);
     expect(isPublisherDiagnosticCode(SOURCE_LIMIT_EXCEEDED_CODE)).toBe(true);
+    PUBLISHER_DIAGNOSTIC_REGISTRY.forEach((definition) => {
+      expect(isPublisherDiagnosticCode(definition.code)).toBe(true);
+      expect(getPublisherDiagnosticDefinition(definition.code)).toBe(definition);
+    });
     expect(isPublisherDiagnosticCode("SCHEMA_INVALID")).toBe(false);
     expect(isPublisherDiagnosticCode("run.desen.publisher/UNKNOWN")).toBe(false);
     expect(getPublisherDiagnosticDefinition(INVALID_SOURCE_JSON_CODE)).toBe(

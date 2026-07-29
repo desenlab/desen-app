@@ -938,7 +938,7 @@ slice; later modules remain owned by their successor proofs. No `P-*`, normative
 status changes; M06-T02 owns exact Catalog resolution next.
 
 `docs/proof/artifacts/publisher-0.1.0-publish-result.json`
-`sha256:07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06`.
+`sha256:1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714`.
 
 ## M06-T02
 
@@ -962,7 +962,7 @@ and the unique proof-document hash. No `P-*`, normative status, or gate changes;
 complete Source preflight next.
 
 `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
-`sha256:0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5`.
+`sha256:ce367d80b90f2cf6d5e543666686904f22f890fb5a36bbcac22dd0b271a2cfbf`.
 
 ## M06-T03
 
@@ -980,7 +980,7 @@ preparation; unknown and wrong-category references stop at `source-semantics` wi
 The task-owned finite diagnostic wrapper also preserves under-budget inherited T01/T02 failures
 and replaces over-budget reports with one redacted failure at the same stage.
 
-The evidence contains 9 focused Publisher runtime cases, 16 compiler-negative cases, 4 Validator
+The evidence contains 10 focused Publisher runtime cases, 16 compiler-negative cases, 4 Validator
 foundation cases, and 10 independent proof/mutation cases. It pins four prerequisites, the current
 official-derived Source and Web–React Catalog tuple, phase ordering, complete failure atomicity,
 recursive immutability, repeated-byte determinism, package-root privacy, platform neutrality, and
@@ -988,4 +988,33 @@ the unique proof-document hash. No `P-*`, normative, or gate status changes; M06
 slot, style, event, command, and behavior contracts next.
 
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+
+## M06-T04
+
+M06-T04 composes the exact M06-T03 authority with the Validator's component and interaction
+contract preparation. It blocks statically knowable component prop and Variant, slot and accepted
+child, style and visual-state, event and command, behavior prop/slot/style/event, attachment, and
+conflict violations at `capability-contracts`. Unsafe Catalog contract schemas fail before Source
+capability values are observed. Success remains package-private and nonterminal, preserves exact
+Source, Catalog, package, and requirement alignment identities, and exposes no dynamic obligations
+or Bundle.
+
+Only a complete static success may produce fixed deprecated-capability warnings at exact Source
+use sites. Catalog deprecation prose and replacement hints remain non-authoritative and are never
+disclosed or followed. The common finite diagnostic profile rejects an over-budget report rather
+than truncating warnings. Own-data traversal and lower-stage discriminator checks prevent
+inherited prototype values from fabricating Source structure, warning sites, or success.
+
+The evidence contains 14 focused Publisher runtime cases, 20 compiler-negative cases, 32
+component cases, 49 interaction cases, 4 diagnostic micro-vector cases, and 15 independent
+proof/mutation cases. It pins four prerequisites and 33 current files, including exact authority
+identity, static failure parity, warning safety, budget boundaries, package-root privacy, target
+neutral static dependency edges, an enumerated direct-form source audit, deterministic generation,
+and atomic-write behavior. The source audit is not a JavaScript sandbox and makes no exhaustive
+metaprogramming or runtime-code-generation claim. `PIPE-032` remains partial:
+M06-T05 owns resource/operation receiving contracts, dynamic compatibility, and recorded runtime
+obligations. No `P-*`, normative, or gate status changes.
+
+`docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.

@@ -24,17 +24,17 @@
     {
       "task": "M06-T01",
       "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
-      "sha256": "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
+      "sha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
       "claim": "strict raw Source ingress and closed no-partial failure shell",
-      "verifiedSha256": "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
+      "verifiedSha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
       "matchesPin": true
     },
     {
       "task": "M06-T02",
       "path": "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
-      "sha256": "0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5",
+      "sha256": "ce367d80b90f2cf6d5e543666686904f22f890fb5a36bbcac22dd0b271a2cfbf",
       "claim": "exact Catalog package resolution and immutable trusted namespace",
-      "verifiedSha256": "0ad7d3cf0563bb2c44070b59aed682df27ce9f0a1e96032ddeb9a6a4ba0016c5",
+      "verifiedSha256": "ce367d80b90f2cf6d5e543666686904f22f890fb5a36bbcac22dd0b271a2cfbf",
       "matchesPin": true
     }
   ],
@@ -170,6 +170,7 @@
     "terminalFailuresExposeNoPartialAuthorityOrBundle": true,
     "rootApiPrivacy": {
       "rootRuntimeExports": [
+        "DEPRECATED_CAPABILITY_CODE",
         "INVALID_SOURCE_JSON_CODE",
         "PUBLISHER_DIAGNOSTIC_REGISTRY",
         "PUBLISH_PIPELINE_STAGES",
@@ -217,7 +218,7 @@
     "This task performs no network discovery, package download, activation, rendering, signing, npm publication, or deployment."
   ],
   "tests": {
-    "publisherRuntimeCases": 9,
+    "publisherRuntimeCases": 10,
     "compilerNegativeCases": 16,
     "validatorFoundationCases": 4,
     "rootMutationCases": 10
@@ -230,43 +231,43 @@
     },
     {
       "path": "packages/publisher/dist/index.d.ts",
-      "bytes": 874,
-      "sha256": "c77caf532b9d820f716358086cef548bcc2d84eca8a1be0c1bd51094807b8be6"
+      "bytes": 902,
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
     },
     {
       "path": "packages/publisher/dist/source-preflight.d.ts",
-      "bytes": 2793,
-      "sha256": "63a16709676efdc42f15de73f6028f1e47a90d5df54ed1d99afc7e47b63bcd1d"
+      "bytes": 4105,
+      "sha256": "5172339a320bfdf8c951cb41582be9be5b7a93bf123b00300755621f17acd652"
     },
     {
       "path": "packages/publisher/dist/source-preflight.js",
-      "bytes": 7128,
-      "sha256": "fc035ca15260da78d25df3cc2a73db6e987039189854d4d19320c14955b33b16"
+      "bytes": 8737,
+      "sha256": "df459b95b87122fc2c1b85500ea8061ae2206bff8082e21c11b5595f5f9186e2"
     },
     {
       "path": "packages/publisher/package.json",
-      "bytes": 984,
-      "sha256": "630e00657737a671c14d29ba40408d44b12ec020b3bfcd15386ee324ac62247d"
+      "bytes": 1065,
+      "sha256": "97a675c4aae1cd353942aea5e9489428b859c44fc3421d3167244f38af52c009"
     },
     {
       "path": "packages/publisher/src/index.ts",
-      "bytes": 881,
-      "sha256": "84dc5aac8367f5d886dfe83e57fa7e0057e25494d870ae37749c0dfb705f125a"
+      "bytes": 911,
+      "sha256": "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30"
     },
     {
       "path": "packages/publisher/src/publish-result.ts",
-      "bytes": 8917,
-      "sha256": "ec06abb5d00825fda138fc09a70d2a7a3845784a0e60b7afdfcbe6b541e4af39"
+      "bytes": 9690,
+      "sha256": "f19fd2e794688766146e84169f48183047a0e4c1842950266005a324df2e6b57"
     },
     {
       "path": "packages/publisher/src/source-preflight.ts",
-      "bytes": 9543,
-      "sha256": "c3cee14b37bbaf46e15bccff991624d5b8e567e1358e37f41ca04d6ad1f548ef"
+      "bytes": 11524,
+      "sha256": "af26af6c01b0e93eca8acbc52de1645556a3606ca072f8c18715af0ce67d4321"
     },
     {
       "path": "packages/publisher/test/source-preflight.test.ts",
-      "bytes": 20989,
-      "sha256": "7bf10503869cfd953219d64ae24c08f07d71fa1fbe3304b0b4af4187944f2b5c"
+      "bytes": 21813,
+      "sha256": "df40fac3bb30d001ced95a8b52af933b0fd0705856e1d7be8e4a0c3c1019c2a4"
     },
     {
       "path": "packages/publisher/test/source-preflight.types.ts",
@@ -285,8 +286,8 @@
     },
     {
       "path": "packages/validator/src/semantic-validation.ts",
-      "bytes": 36273,
-      "sha256": "65443cccb32d35ab3db547d2a3877f0c44a158defbe0cdf6e48af8c7673531fd"
+      "bytes": 36879,
+      "sha256": "b5ae0899b4202b313c6fe864e6a46189ffc3e45fd1fe659e3f2285fd84d1c463"
     },
     {
       "path": "packages/validator/src/structural-validation.ts",
@@ -295,8 +296,8 @@
     },
     {
       "path": "packages/validator/test/semantic-foundation.test.ts",
-      "bytes": 36219,
-      "sha256": "fce3c700d132c96a5f2fe13f2b5d68a69aa067030a180f6882dfe6dd794e64d2"
+      "bytes": 38480,
+      "sha256": "bf7ed46e05252b8e7c88e3951c0863486be5c7f05c9d5be8ea041f2d5da5c0d5"
     },
     {
       "path": "scripts/generate-publisher-source-preflight-proof.mjs",
@@ -311,7 +312,7 @@
     {
       "path": "scripts/lib/publisher-source-preflight-proof.mjs",
       "bytes": 34338,
-      "sha256": "f80ae80fe03f3c50e89000c2f5f1d441ff06e84b7ee68c39f0544cbb02d14ca8"
+      "sha256": "7e3d612bff8cba9776ec868c31831e2d9c18f97b423e47354100d6286e776fee"
     },
     {
       "path": "scripts/verify-publisher-source-preflight.mjs",
@@ -320,8 +321,8 @@
     },
     {
       "path": "tests/publisher-source-preflight.test.mjs",
-      "bytes": 7488,
-      "sha256": "3c4b3635388dc1c83696b482b9330c04dcdd424f7c42ba9574636b1b2c8864c1"
+      "bytes": 7489,
+      "sha256": "f9778809d04b623ee086848dd87da86fd458799fbfbf0db2a8aa6e7bf3651963"
     }
   ],
   "reproduction": [

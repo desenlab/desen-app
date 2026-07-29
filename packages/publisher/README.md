@@ -7,7 +7,8 @@ the terminal result, staged diagnostic, and strict raw-Source parsing boundaries
 publication stages. M06-T02 adds package-private exact Catalog resolution, Catalog integrity, and
 single-namespace gates. M06-T03 composes those boundaries with phased Source validation and
 category-aware static references into one package-private nonterminal preflight without exposing
-an unfinished Publisher.
+an unfinished Publisher. M06-T04 adds complete static component and interaction contract
+preflight plus safe deprecated-capability warnings while preserving that nonterminal boundary.
 
 ## Explicit non-responsibilities
 
@@ -21,8 +22,8 @@ Private and under tracked implementation. The public root currently exposes the 
 `PublishResult` contract, publication-stage vocabulary, Publisher diagnostic registry, and the
 finite Source-ingress profile. It intentionally does not expose a partial parser or an unfinished
 `publish` function. Exact Catalog resolution and the complete M06-T03 Source preflight are likewise
-package-private. The real terminal publication entry point is added only when it can either return
-a fully validated immutable Bundle or reject with no Bundle.
+package-private, as is M06-T04 capability preflight. The real terminal publication entry point is
+added only when it can either return a fully validated immutable Bundle or reject with no Bundle.
 
 ## Public entry point
 
@@ -160,7 +161,41 @@ rendering, signing, npm publication, or deployment.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:f6ed99860f2b00d9402687d457b90c3824788920768e563a2ca472dbe7fd40c3`.
+`sha256:cc4f7010b38243d8395ebe833e09ec5fce6709a3d8dc31ebc5cdd5dedc3f83fd`.
+
+## Static capability preflight
+
+M06-T04 runs M06-T03 internally, then prepares the exact selected Catalog array through the
+Validator's interaction-contract authority before checking the exact prepared Source. It blocks
+statically knowable violations for component props and Variants, slots and accepted children,
+styles and visual states, events and commands, behavior props and slots, behavior styles and
+events, attachment, and conflicts. Unsafe component, behavior, event, command, or style schemas
+fail before Source capability values are observed.
+
+Every blocking diagnostic stops at `capability-contracts`, retains its Validator identity and
+pointer, and returns the same closed no-partial failure shell. A successful intermediate preserves
+the exact Source, Catalog, package, and requirement-alignment authorities, but contains neither
+terminal `ok`, `bundle`, nor dynamic `obligations`.
+
+After static success only, exact uses of Catalog capabilities whose own `deprecated` field is
+`true` or a string emit `run.desen.publisher/DEPRECATED_CAPABILITY`. The warning points to the
+Source `use` or operation field, uses fixed Publisher text, never copies Catalog deprecation prose,
+and never follows a `replacement`. Warnings are immutable, sorted, deduplicated, deterministic,
+and non-blocking.
+
+The stage shares the M06-T03 finite diagnostic profile. Crossing its count, pointer, or aggregate
+ceiling returns one redacted
+`run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED` error instead of a truncated warning set.
+Optional traversal fields and lower-stage discriminators are accepted only as own data
+properties, so inherited prototype data cannot fabricate Source structure, warnings, or success.
+
+M06-T04 completes only the static component/interaction slice of publication step 8. M06-T05 owns
+resource and operation receiving contracts, dynamic binding compatibility, and explicit runtime
+validation obligations.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+`sha256:05636f61dfdea2984ac96238da1eb47e8c36118383293aaecb7f5d385803485d`.
 
 ## Dependencies
 
@@ -180,6 +215,8 @@ is reachable.
   caller Source fragment.
 - Root, embedded-schema, intrinsic Source, Catalog, and static-reference failures now retain the
   causal stages documented above and the same closed no-partial result.
+- Static component and interaction contract failures stop at `capability-contracts`; deprecation
+  warnings are emitted only after a complete static success.
 - Normalization, digest, and final-Bundle failures remain assigned to later M06 tasks and must
   relay stable diagnostics through that result.
 
@@ -199,9 +236,11 @@ pnpm --filter @desen/publisher lint
 pnpm --filter @desen/publisher test:publish-result
 pnpm --filter @desen/publisher test:catalog-resolution
 pnpm --filter @desen/publisher test:source-preflight
+pnpm --filter @desen/publisher test:capability-preflight
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
 pnpm test:publisher-source-preflight
+pnpm test:publisher-capability-preflight
 pnpm check
 ```

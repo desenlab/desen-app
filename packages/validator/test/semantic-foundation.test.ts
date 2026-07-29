@@ -776,6 +776,87 @@ describe("inert trust boundary and immutable semantic results", () => {
     expect(getterInvocations).toBe(0);
   });
 
+  it("ignores inherited optional Source fields throughout semantic traversal", () => {
+    const operationAction = {
+      type: "operation.invoke",
+      operation: UNKNOWN_OPERATION_ID,
+      as: "prototype.operation",
+      input: {},
+    } as const;
+    const sourceWithoutTarget = cloneFixture(validSource);
+    deleteAt(sourceWithoutTarget, ["catalogs", 0, "target"]);
+    const cases = [
+      {
+        key: "target",
+        value: "prototype-target",
+        source: sourceWithoutTarget,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "behaviors",
+        value: [
+          {
+            id: "prototype.behavior",
+            use: UNKNOWN_BEHAVIOR_ID,
+            props: {},
+          },
+        ],
+        source: validSource,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "on",
+        value: { polluted: [operationAction] },
+        source: validSource,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "slots",
+        value: {
+          polluted: [
+            {
+              id: "prototype.node",
+              use: UNKNOWN_COMPONENT_ID,
+              props: {},
+            },
+          ],
+        },
+        source: validSource,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "onSuccess",
+        value: [operationAction],
+        source: exampleSortableSource,
+        catalogs: [exampleCatalog],
+      },
+      {
+        key: "onFailure",
+        value: [operationAction],
+        source: exampleSortableSource,
+        catalogs: [exampleCatalog],
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const prior = Object.getOwnPropertyDescriptor(Object.prototype, testCase.key);
+      let result: ReturnType<typeof validateSource>;
+      Object.defineProperty(Object.prototype, testCase.key, {
+        configurable: true,
+        value: testCase.value,
+        writable: true,
+      });
+      try {
+        result = validateSource(testCase.source, testCase.catalogs);
+      } finally {
+        if (prior === undefined) Reflect.deleteProperty(Object.prototype, testCase.key);
+        else Object.defineProperty(Object.prototype, testCase.key, prior);
+      }
+
+      expect(result, testCase.key).toMatchObject({ valid: true, diagnostics: [] });
+    }
+  });
+
   it("rejects cyclic Source and catalog inputs", () => {
     const cyclicSource: MutableRecord = {};
     cyclicSource.self = cyclicSource;

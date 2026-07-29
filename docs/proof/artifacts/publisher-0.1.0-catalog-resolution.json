@@ -8,9 +8,9 @@
     {
       "task": "M06-T01",
       "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
-      "sha256": "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
+      "sha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
       "claim": "closed Publisher result, staged diagnostics, and no-partial-Bundle boundary",
-      "verifiedSha256": "07fcb98a28cee0063147c3834c12d3fa0a7f8ab8d4ed25ac5dbcb19591f2ae06",
+      "verifiedSha256": "1e3df6b4723f33f54b041445470354dbb1cb0acc5f6d1f8b486fb7bd11862714",
       "matchesPin": true
     },
     {
@@ -162,6 +162,7 @@
     "terminalFailuresExposeNoBundleOrCatalogAuthority": true,
     "rootApiPrivacy": {
       "rootRuntimeExports": [
+        "DEPRECATED_CAPABILITY_CODE",
         "INVALID_SOURCE_JSON_CODE",
         "PUBLISHER_DIAGNOSTIC_REGISTRY",
         "PUBLISH_PIPELINE_STAGES",
@@ -223,13 +224,13 @@
     },
     {
       "path": "packages/publisher/dist/index.d.ts",
-      "bytes": 874,
-      "sha256": "c77caf532b9d820f716358086cef548bcc2d84eca8a1be0c1bd51094807b8be6"
+      "bytes": 902,
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
     },
     {
       "path": "packages/publisher/package.json",
-      "bytes": 984,
-      "sha256": "630e00657737a671c14d29ba40408d44b12ec020b3bfcd15386ee324ac62247d"
+      "bytes": 1065,
+      "sha256": "97a675c4aae1cd353942aea5e9489428b859c44fc3421d3167244f38af52c009"
     },
     {
       "path": "packages/publisher/src/catalog-resolution.ts",
@@ -238,8 +239,8 @@
     },
     {
       "path": "packages/publisher/src/index.ts",
-      "bytes": 881,
-      "sha256": "84dc5aac8367f5d886dfe83e57fa7e0057e25494d870ae37749c0dfb705f125a"
+      "bytes": 911,
+      "sha256": "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30"
     },
     {
       "path": "packages/publisher/test/catalog-resolution.test.ts",
@@ -269,7 +270,7 @@
     {
       "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
       "bytes": 30623,
-      "sha256": "647ef3ad1e7ec0bef33a0f88d80805f8dec3baa7a0d727884a58b110f6a2a20e"
+      "sha256": "c154a5af563cf4f0d14f6be50f916311a91464b5a3bf9617e42dfe4251bcff4f"
     },
     {
       "path": "scripts/verify-publisher-catalog-resolution.mjs",

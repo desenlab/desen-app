@@ -34,7 +34,7 @@ test("accepts real deterministic M06-T03 Source-preflight evidence", async () =>
   assert.equal(result.proofDocumentPinned, true);
   assert.equal(result.sourceId, "com.example.account-app");
   assert.deepEqual(result.tests, {
-    publisherRuntimeCases: 9,
+    publisherRuntimeCases: 10,
     compilerNegativeCases: 16,
     validatorFoundationCases: 4,
     rootMutationCases: 10,

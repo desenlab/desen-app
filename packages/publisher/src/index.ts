@@ -5,6 +5,7 @@
  */
 
 export {
+  DEPRECATED_CAPABILITY_CODE,
   getPublisherDiagnosticDefinition,
   INVALID_SOURCE_JSON_CODE,
   isPublisherDiagnosticCode,

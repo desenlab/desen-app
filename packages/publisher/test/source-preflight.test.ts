@@ -358,6 +358,30 @@ describe("package-private Source preflight", () => {
     }
   });
 
+  it("does not accept an inherited Catalog-resolution success discriminator", () => {
+    const baseline = preflight(validSource, []);
+    const prior = Object.getOwnPropertyDescriptor(Object.prototype, "resolved");
+    let polluted: PublishSourcePreflightResult;
+    Object.defineProperty(Object.prototype, "resolved", {
+      configurable: true,
+      value: true,
+      writable: true,
+    });
+    try {
+      polluted = preflight(validSource, []);
+    } finally {
+      if (prior === undefined) Reflect.deleteProperty(Object.prototype, "resolved");
+      else Object.defineProperty(Object.prototype, "resolved", prior);
+    }
+
+    expect(polluted).toEqual(baseline);
+    expectFailure(polluted, {
+      stage: "catalog-resolution",
+      code: "CATALOG_VERSION_UNAVAILABLE",
+      pointer: "/catalogs/0",
+    });
+  });
+
   it("runs Catalog integrity before Catalog-backed static-reference validation", () => {
     const unavailable = preflight(sourceUnknownCapability, []);
     expectFailure(unavailable, {
