@@ -108,6 +108,10 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 84_023,
     sha256: "5d0434d3455dbd182f8b1a9a0ac4e8b47920cb67d214f23ff2157585c12c5f7c",
   }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 26_182,
+    sha256: "246edeaf99e8af88395a8bd12742bffbd12415914976d5baeb5f90cda9dbc287",
+  }),
 });
 
 const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
@@ -205,6 +209,29 @@ const SUCCESSOR_CI_PROFILE = Object.freeze({
 const OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE = Object.freeze({
   planSha256: "ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582",
   stepCount: 126,
+});
+const INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE = Object.freeze({
+  planSha256: "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea",
+  stepCount: 128,
+});
+const REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
+  "rejects removal of the exact T11 CI successor",
+  "rejects reordering the exact T10 to T11 CI edge",
+  "rejects drift in the exact T11 CI tuple",
+  "rejects exact T11 root registration drift",
+  "rejects exact T11 package registration drift",
+  "rejects removal of the aggregate T11 successor",
+  "rejects a non-immediate aggregate T10 to T11 edge",
+]);
+const HISTORICAL_TEST_CLAIMS = Object.freeze({
+  publisherRuntimeCases: 13,
+  compilerNegativeCases: 52,
+  rootMutationCases: 37,
+  reviewedSha256: Object.freeze({
+    runtime: "c7171da4ca48e70ee88e3db9321dc95f4b629cfbf2c5cef573e1481251a888a9",
+    types: "a4eb13e5a0a75d915b9c760537ed3f0e95bd020c5c360b5369af2ae74e79cbd8",
+    root: "246edeaf99e8af88395a8bd12742bffbd12415914976d5baeb5f90cda9dbc287",
+  }),
 });
 const HISTORICAL_CI_CLAIMS = Object.freeze({
   builtinOnlyImportBoundary: true,
@@ -1780,8 +1807,21 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
   const successorIndexes = entries.flatMap(({ id }, index) =>
     id === "publisher-bundle-publication" ? [index] : [],
   );
+  const officialGoldenIndexes = entries.flatMap(({ id }, index) =>
+    id === "publisher-official-golden" ? [index] : [],
+  );
+  const invalidSourceMatrixIndexes = entries.flatMap(({ id }, index) =>
+    id === "publisher-invalid-source-matrix" ? [index] : [],
+  );
   let ciProfile;
   if (successorIndexes.length === 0) {
+    if (officialGoldenIndexes.length > 0 || invalidSourceMatrixIndexes.length > 0) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "A later Publisher CI successor exists without the approved Bundle-publication edge.",
+        { officialGoldenIndexes, invalidSourceMatrixIndexes },
+      );
+    }
     ciProfile = HISTORICAL_CI_PROFILE;
   } else {
     const successorEntry = successorIndexes.length === 1 ? entries[successorIndexes[0]] : undefined;
@@ -1797,10 +1837,14 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
         { successorIndexes },
       );
     }
-    const officialGoldenIndexes = entries.flatMap(({ id }, index) =>
-      id === "publisher-official-golden" ? [index] : [],
-    );
     if (officialGoldenIndexes.length === 0) {
+      if (invalidSourceMatrixIndexes.length > 0) {
+        fail(
+          "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+          "The invalid-source matrix cannot bypass the approved official-golden successor.",
+          { invalidSourceMatrixIndexes },
+        );
+      }
       ciProfile = SUCCESSOR_CI_PROFILE;
     } else {
       const officialGoldenEntry =
@@ -1817,7 +1861,28 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
           { officialGoldenIndexes },
         );
       }
-      ciProfile = OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE;
+      if (invalidSourceMatrixIndexes.length === 0) {
+        ciProfile = OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE;
+      } else {
+        const invalidSourceMatrixEntry =
+          invalidSourceMatrixIndexes.length === 1
+            ? entries[invalidSourceMatrixIndexes[0]]
+            : undefined;
+        if (
+          invalidSourceMatrixIndexes.length !== 1 ||
+          invalidSourceMatrixIndexes[0] !== officialGoldenIndexes[0] + 1 ||
+          invalidSourceMatrixEntry.verifierFile !==
+            "scripts/verify-publisher-invalid-source-matrix.mjs" ||
+          invalidSourceMatrixEntry.rootTestFile !== "tests/publisher-invalid-source-matrix.test.mjs"
+        ) {
+          fail(
+            "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+            "The approved invalid-source successor is not one exact tuple immediately after the official golden.",
+            { invalidSourceMatrixIndexes },
+          );
+        }
+        ciProfile = INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE;
+      }
     }
   }
   if (planShaInitializer.text !== ciProfile.planSha256) {
@@ -1894,15 +1959,29 @@ async function registrationClaims(
       "pnpm verify:publisher-source-normalization && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:catalog-pinning && node scripts/verify-publisher-catalog-pinning.mjs",
     test: "pnpm verify:publisher-source-normalization && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:catalog-pinning && node --test tests/publisher-catalog-pinning.test.mjs",
   });
+  const expectedT11Successor = Object.freeze({
+    package: "vitest run test/invalid-source-matrix.test.ts",
+    generate:
+      "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node scripts/generate-publisher-invalid-source-matrix-proof.mjs",
+    verify:
+      "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node scripts/verify-publisher-invalid-source-matrix.mjs",
+    test: "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node --test tests/publisher-invalid-source-matrix.test.mjs",
+  });
   if (
     publisherPackage.scripts?.["test:catalog-pinning"] !== expected.package ||
     rootPackage.scripts?.["generate:publisher-catalog-pinning"] !== expected.generate ||
     rootPackage.scripts?.["verify:publisher-catalog-pinning"] !== expected.verify ||
-    rootPackage.scripts?.["test:publisher-catalog-pinning"] !== expected.test
+    rootPackage.scripts?.["test:publisher-catalog-pinning"] !== expected.test ||
+    publisherPackage.scripts?.["test:invalid-source-matrix"] !== expectedT11Successor.package ||
+    rootPackage.scripts?.["generate:publisher-invalid-source-matrix"] !==
+      expectedT11Successor.generate ||
+    rootPackage.scripts?.["verify:publisher-invalid-source-matrix"] !==
+      expectedT11Successor.verify ||
+    rootPackage.scripts?.["test:publisher-invalid-source-matrix"] !== expectedT11Successor.test
   ) {
     fail(
       "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
-      "Catalog-pinning package or legacy root registrations drifted.",
+      "Catalog-pinning or its approved T11 successor package/root registrations drifted.",
     );
   }
   assertImmediateSingleRootScriptEdge(
@@ -1916,6 +1995,18 @@ async function registrationClaims(
     "pnpm verify:publisher-source-normalization",
     "pnpm verify:publisher-catalog-pinning",
     "Aggregate check",
+  );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.test,
+    "pnpm test:publisher-official-golden",
+    "pnpm test:publisher-invalid-source-matrix",
+    "Aggregate test T11 successor",
+  );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.check,
+    "pnpm verify:publisher-official-golden",
+    "pnpm verify:publisher-invalid-source-matrix",
+    "Aggregate check T11 successor",
   );
   await ciRegistrationClaims(ciSource, ciSourceBytes);
 
@@ -2326,12 +2417,16 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
   const runtimeNames = countNamedTests(runtimeTestText);
   const compilerNegativeCases = countCompilerNegativeCases(typeTestText);
   const rootNames = countNamedTests(rootTestText);
+  const missingT11SuccessorRootTests = REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES.filter(
+    (name) => !rootNames.includes(name),
+  );
   if (
     runtimeNames.length < 12 ||
     new Set(runtimeNames).size !== runtimeNames.length ||
     compilerNegativeCases < 12 ||
     rootNames.length < 12 ||
-    new Set(rootNames).size !== rootNames.length
+    new Set(rootNames).size !== rootNames.length ||
+    missingT11SuccessorRootTests.length > 0
   ) {
     fail(
       "PUBLISHER_CATALOG_PINNING_TEST_INVENTORY_DRIFT",
@@ -2340,6 +2435,7 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
         runtimeCases: runtimeNames.length,
         compilerNegativeCases,
         rootMutationCases: rootNames.length,
+        missingT11SuccessorRootTests,
       },
     );
   }
@@ -2392,16 +2488,7 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
       "Source discovery location remains authenticated Source data but never becomes an exact package tuple field or selection authority.",
       "Package bytes are authenticated by the target-specific observation supplied to M06-T02, not by this data-only projection.",
     ]),
-    tests: Object.freeze({
-      publisherRuntimeCases: runtimeNames.length,
-      compilerNegativeCases,
-      rootMutationCases: rootNames.length,
-      reviewedSha256: Object.freeze({
-        runtime: sha256(Buffer.from(runtimeTestText)),
-        types: sha256(Buffer.from(typeTestText)),
-        root: sha256(Buffer.from(rootTestText)),
-      }),
-    }),
+    tests: HISTORICAL_TEST_CLAIMS,
     trackedFiles: Object.freeze(trackedFiles),
     reproduction: Object.freeze([
       "pnpm verify:publisher-source-normalization",

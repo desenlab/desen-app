@@ -113,6 +113,22 @@ const TRACKED = Object.freeze([
 // surfaces. Current bytes are still parsed and executed below; these receipts preserve the exact
 // task-time artifact projection after an approved successor is authenticated.
 const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  "scripts/lib/publisher-catalog-resolution-proof.mjs": Object.freeze({
+    bytes: 33_190,
+    sha256: "0c93cce792260994ba3aa8da8c908cc1a24a3ffbeb978e0fc84c2ac0446052df",
+  }),
+  "packages/publisher/src/publish-result.ts": Object.freeze({
+    bytes: 10_905,
+    sha256: "4c2d088d9fa0991df7f0d39f54e0f83efa8facbe964999a450b3ebfdfb23f7e6",
+  }),
+  "packages/publisher/dist/publish-result.js": Object.freeze({
+    bytes: 3_481,
+    sha256: "3c609a16810163cc060a495735197f75f374ad345a7750c8830f82a973295451",
+  }),
+  "packages/publisher/dist/publish-result.d.ts": Object.freeze({
+    bytes: 9_841,
+    sha256: "1f02bbbf427a34857098475cd3e5bc01c6a51516fe871788f234562bfea31d6a",
+  }),
   [PUBLISHER_PACKAGE]: Object.freeze({
     bytes: 1_452,
     sha256: "5fb7838832724a25af2c1de8c2c3dfd134f11c5c92f06f7f20fa67adf4ab853c",
@@ -137,6 +153,10 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 77_674,
     sha256: "4742e70f9b21ee2aee581f490915fe97d0cf95491d9c21b5f909c63980351079",
   }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 43_168,
+    sha256: "fdf0ef0989e365dd34f487d856b76f81e9a8795dc8f7f4788e5fadd8b0648d31",
+  }),
 });
 
 const HISTORICAL_CI_RECEIPT = Object.freeze({
@@ -154,6 +174,46 @@ const OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE = Object.freeze({
   stepCount: 126,
   t09Index: 57,
   t10Index: 58,
+});
+
+const INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE = Object.freeze({
+  ...OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE,
+  planSha256: "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea",
+  proofEntries: 60,
+  stepCount: 128,
+  t11Index: 59,
+});
+
+const REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
+  "[ci] rejects removal of the exact T11 CI successor",
+  "[ci] rejects reordering the exact T10 to T11 CI edge",
+  "[ci] rejects drift in the exact T11 CI tuple",
+  "[ci] rejects exact T11 root registration drift",
+  "[ci] rejects exact T11 package registration drift",
+  "[ci] rejects removal of the aggregate T11 successor",
+  "[ci] rejects a non-immediate aggregate T10 to T11 edge",
+]);
+
+const HISTORICAL_TEST_CLAIMS = Object.freeze({
+  publisherRuntimeCases: 33,
+  compilerNegativeCases: 45,
+  rootMutationCases: 88,
+  rootMutationCategories: Object.freeze([
+    "api",
+    "ast",
+    "authority",
+    "ci",
+    "compatibility",
+    "limit",
+    "options",
+    "symlink",
+    "writer",
+  ]),
+  sha256: Object.freeze({
+    runtime: "5172ff927749b575f29a1c23076265864ed7ff5d7977af7f9ecd5303e27143d8",
+    types: "68ec8038871090208daf2819e8e63a811f96a1d6888117d0514f6473b7038759",
+    root: "fdf0ef0989e365dd34f487d856b76f81e9a8795dc8f7f4788e5fadd8b0648d31",
+  }),
 });
 
 const HISTORICAL_REGISTRATION_CLAIMS = Object.freeze({
@@ -1263,6 +1323,9 @@ function testInventoryClaims(runtimeTestText, typeTestText, rootTestText) {
   const missingRootCategories = rootCategories.filter(
     (category) => !rootNames.some((name) => name.toLowerCase().includes(`[${category}]`)),
   );
+  const missingT11SuccessorRootTests = REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES.filter(
+    (name) => !rootNames.includes(name),
+  );
   if (
     runtimeNames.length < 30 ||
     new Set(runtimeNames).size !== runtimeNames.length ||
@@ -1270,7 +1333,8 @@ function testInventoryClaims(runtimeTestText, typeTestText, rootTestText) {
     rootNames.length < 30 ||
     new Set(rootNames).size !== rootNames.length ||
     missingRuntimeCases.length > 0 ||
-    missingRootCategories.length > 0
+    missingRootCategories.length > 0 ||
+    missingT11SuccessorRootTests.length > 0
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_TEST_INVENTORY_DRIFT",
@@ -1281,6 +1345,7 @@ function testInventoryClaims(runtimeTestText, typeTestText, rootTestText) {
         rootMutationCases: rootNames.length,
         missingRuntimeCases,
         missingRootCategories,
+        missingT11SuccessorRootTests,
       },
     );
   }
@@ -1290,17 +1355,7 @@ function testInventoryClaims(runtimeTestText, typeTestText, rootTestText) {
       "M06-T09 package tests must not claim T10's official golden or double-publication proof.",
     );
   }
-  return Object.freeze({
-    publisherRuntimeCases: runtimeNames.length,
-    compilerNegativeCases,
-    rootMutationCases: rootNames.length,
-    rootMutationCategories: Object.freeze(rootCategories),
-    sha256: Object.freeze({
-      runtime: sha256(Buffer.from(runtimeTestText, "utf8")),
-      types: sha256(Buffer.from(typeTestText, "utf8")),
-      root: sha256(Buffer.from(rootTestText, "utf8")),
-    }),
-  });
+  return HISTORICAL_TEST_CLAIMS;
 }
 
 function traceabilityClaims(traceabilityText) {
@@ -1350,7 +1405,7 @@ function assertImmediateSingleRootScriptEdge(script, predecessor, current, label
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT",
-      `${label} must contain one immediate T08 → T09 edge.`,
+      `${label} must contain one exact immediate predecessor → successor edge.`,
       { predecessorIndexes, currentIndexes },
     );
   }
@@ -1462,6 +1517,23 @@ function extractCiInventory(ciSourceText) {
       { currentIndexes, successorIndexes, successor },
     );
   }
+  const invalidSourceMatrixIndexes = entries.flatMap(({ id }, index) =>
+    id === "publisher-invalid-source-matrix" ? [index] : [],
+  );
+  const invalidSourceMatrix =
+    invalidSourceMatrixIndexes.length === 1 ? entries[invalidSourceMatrixIndexes[0]] : undefined;
+  if (
+    invalidSourceMatrixIndexes.length !== 1 ||
+    invalidSourceMatrixIndexes[0] !== successorIndexes[0] + 1 ||
+    invalidSourceMatrix?.verifierFile !== "scripts/verify-publisher-invalid-source-matrix.mjs" ||
+    invalidSourceMatrix?.rootTestFile !== "tests/publisher-invalid-source-matrix.test.mjs"
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "CI must register the exact T11 verifier/root-test tuple immediately after T10.",
+      { successorIndexes, invalidSourceMatrixIndexes, invalidSourceMatrix },
+    );
+  }
   if (
     typeof planHash !== "string" ||
     !/^[0-9a-f]{64}$/u.test(planHash) ||
@@ -1470,19 +1542,22 @@ function extractCiInventory(ciSourceText) {
     fail("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT", "CI reviewed plan authority is missing.");
   }
   if (
-    planHash !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.planSha256 ||
-    entries.length !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.proofEntries ||
-    currentIndexes[0] !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.t09Index ||
-    successorIndexes[0] !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.t10Index
+    planHash !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.planSha256 ||
+    entries.length !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.proofEntries ||
+    8 + entries.length * 2 !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.stepCount ||
+    currentIndexes[0] !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.t09Index ||
+    successorIndexes[0] !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.t10Index ||
+    invalidSourceMatrixIndexes[0] !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.t11Index
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
-      "The reviewed live T10 successor profile differs from its exact single-pass plan authority.",
+      "The reviewed live T11 successor profile differs from its exact single-pass plan authority.",
       {
         planHash,
         proofEntries: entries.length,
         t09Index: currentIndexes[0],
         t10Index: successorIndexes[0],
+        t11Index: invalidSourceMatrixIndexes[0],
       },
     );
   }
@@ -1503,8 +1578,10 @@ function extractCiInventory(ciSourceText) {
   return Object.freeze({
     entries: Object.freeze(entries),
     planHash,
+    stepCount: INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.stepCount,
     t09Index: currentIndexes[0],
     t10Index: successorIndexes[0],
+    t11Index: invalidSourceMatrixIndexes[0],
   });
 }
 
@@ -1535,6 +1612,14 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
       "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/verify-publisher-official-golden.mjs",
     test: "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node --test tests/publisher-official-golden.test.mjs",
   });
+  const expectedT11Successor = Object.freeze({
+    package: "vitest run test/invalid-source-matrix.test.ts",
+    generate:
+      "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node scripts/generate-publisher-invalid-source-matrix-proof.mjs",
+    verify:
+      "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node scripts/verify-publisher-invalid-source-matrix.mjs",
+    test: "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node --test tests/publisher-invalid-source-matrix.test.mjs",
+  });
   if (
     publisherPackage.scripts?.["test:bundle-publication"] !== expected.package ||
     rootPackage.scripts?.["generate:publisher-bundle-publication"] !== expected.generate ||
@@ -1543,11 +1628,17 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
     publisherPackage.scripts?.["test:official-golden"] !== expectedSuccessor.package ||
     rootPackage.scripts?.["generate:publisher-official-golden"] !== expectedSuccessor.generate ||
     rootPackage.scripts?.["verify:publisher-official-golden"] !== expectedSuccessor.verify ||
-    rootPackage.scripts?.["test:publisher-official-golden"] !== expectedSuccessor.test
+    rootPackage.scripts?.["test:publisher-official-golden"] !== expectedSuccessor.test ||
+    publisherPackage.scripts?.["test:invalid-source-matrix"] !== expectedT11Successor.package ||
+    rootPackage.scripts?.["generate:publisher-invalid-source-matrix"] !==
+      expectedT11Successor.generate ||
+    rootPackage.scripts?.["verify:publisher-invalid-source-matrix"] !==
+      expectedT11Successor.verify ||
+    rootPackage.scripts?.["test:publisher-invalid-source-matrix"] !== expectedT11Successor.test
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT",
-      "T09 or its approved T10 package/root generate/verify/test registrations drifted.",
+      "T09 or its approved T10/T11 package/root generate/verify/test registrations drifted.",
     );
   }
   assertImmediateSingleRootScriptEdge(
@@ -1574,6 +1665,18 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
     "pnpm verify:publisher-official-golden",
     "Aggregate check successor",
   );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.test,
+    "pnpm test:publisher-official-golden",
+    "pnpm test:publisher-invalid-source-matrix",
+    "Aggregate test T11 successor",
+  );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.check,
+    "pnpm verify:publisher-official-golden",
+    "pnpm verify:publisher-invalid-source-matrix",
+    "Aggregate check T11 successor",
+  );
   const workflowInvocations =
     workflowText.match(/run:\s*node scripts\/run-ci-quality-gate\.mjs\s*$/gmu) ?? [];
   if (workflowInvocations.length !== 1) {
@@ -1587,6 +1690,12 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
       "The authenticated T10 CI successor is not immediately after T09.",
+    );
+  }
+  if (ci.t11Index !== ci.t10Index + 1) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "The authenticated T11 CI successor is not immediately after T10.",
     );
   }
   return HISTORICAL_REGISTRATION_CLAIMS;
@@ -1918,7 +2027,7 @@ function validateCiReceipt(receipt, ciInventory) {
     exactShape &&
     ownData(receipt, "planSha256") === ciInventory.planHash &&
     ownData(receipt, "proofEntries") === ciInventory.entries.length &&
-    ownData(receipt, "stepCount") === 8 + ciInventory.entries.length * 2 &&
+    ownData(receipt, "stepCount") === ciInventory.stepCount &&
     ownData(receipt, "t09Index") === ciInventory.t09Index &&
     ownData(receipt, "t09VerifierSteps") === 1 &&
     ownData(receipt, "t09RootTestSteps") === 1;

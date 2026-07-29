@@ -37,6 +37,72 @@ const PUBLISHER_DIAGNOSTIC_DATA = [
     "capability-contracts",
     "warning",
   ],
+  [
+    "run.desen.publisher/INVALID_CATALOG_INPUT",
+    "Catalog package input is not inert interoperable data.",
+    "catalog-resolution",
+    "error",
+  ],
+  [
+    "run.desen.publisher/CATALOG_LIMIT_EXCEEDED",
+    "Catalog processing exceeded the finite Publisher profile.",
+    "catalog-integrity",
+    "error",
+  ],
+  [
+    "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED",
+    "Source preflight diagnostics exceeded the finite Publisher profile.",
+    "source-semantics",
+    "error",
+  ],
+  [
+    "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED",
+    "Capability preflight diagnostics exceeded the finite Publisher profile.",
+    "capability-contracts",
+    "error",
+  ],
+  [
+    "run.desen.publisher/EXECUTION_PREFLIGHT_AUTHORITY_INVALID",
+    "Execution preflight could not authenticate its cumulative publication authority.",
+    "capability-contracts",
+    "error",
+  ],
+  [
+    "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED",
+    "Execution preflight output exceeded the finite Publisher profile.",
+    "binding-compatibility",
+    "error",
+  ],
+  [
+    "run.desen.publisher/SOURCE_PRESERVATION_AUTHORITY_INVALID",
+    "Source preservation could not authenticate its cumulative publication authority.",
+    "normalization",
+    "error",
+  ],
+  [
+    "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED",
+    "Source preservation trace output exceeded the finite Publisher profile.",
+    "normalization",
+    "error",
+  ],
+  [
+    "run.desen.publisher/SOURCE_NORMALIZATION_AUTHORITY_INVALID",
+    "Source normalization could not authenticate its complete publication authority.",
+    "source-digest",
+    "error",
+  ],
+  [
+    "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED",
+    "The normalized production document exceeded the finite Publisher profile.",
+    "normalization",
+    "error",
+  ],
+  [
+    "run.desen.publisher/BUNDLE_VALIDATION_AUTHORITY_INVALID",
+    "Bundle validation could not authenticate its complete publication authority.",
+    "bundle-validation",
+    "error",
+  ],
 ] as const;
 
 /**
@@ -72,34 +138,59 @@ export type PublisherExtensionDiagnosticCode = (typeof PUBLISHER_DIAGNOSTIC_DATA
 
 /** Project diagnostic codes introduced by the package-private M06-T02 Catalog boundary. */
 export type CatalogResolutionExtensionDiagnosticCode =
-  "run.desen.publisher/INVALID_CATALOG_INPUT" | "run.desen.publisher/CATALOG_LIMIT_EXCEEDED";
+  | Extract<PublisherExtensionDiagnosticCode, "run.desen.publisher/INVALID_CATALOG_INPUT">
+  | Extract<PublisherExtensionDiagnosticCode, "run.desen.publisher/CATALOG_LIMIT_EXCEEDED">;
 
 /** Project diagnostic introduced by the package-private M06-T03 Source-preflight boundary. */
-export type SourcePreflightExtensionDiagnosticCode =
-  "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED";
+export type SourcePreflightExtensionDiagnosticCode = Extract<
+  PublisherExtensionDiagnosticCode,
+  "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+>;
 
 /** Project diagnostic introduced by the package-private M06-T04 capability-preflight boundary. */
-export type CapabilityPreflightExtensionDiagnosticCode =
-  "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED";
+export type CapabilityPreflightExtensionDiagnosticCode = Extract<
+  PublisherExtensionDiagnosticCode,
+  "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+>;
 
 /** Project diagnostics introduced by the package-private M06-T05 execution-preflight boundary. */
 export type ExecutionPreflightExtensionDiagnosticCode =
-  | "run.desen.publisher/EXECUTION_PREFLIGHT_AUTHORITY_INVALID"
-  | "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED";
+  | Extract<
+      PublisherExtensionDiagnosticCode,
+      "run.desen.publisher/EXECUTION_PREFLIGHT_AUTHORITY_INVALID"
+    >
+  | Extract<
+      PublisherExtensionDiagnosticCode,
+      "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+    >;
 
 /** Project diagnostics introduced by the package-private M06-T06 preservation boundary. */
 export type SourcePreservationExtensionDiagnosticCode =
-  | "run.desen.publisher/SOURCE_PRESERVATION_AUTHORITY_INVALID"
-  | "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED";
+  | Extract<
+      PublisherExtensionDiagnosticCode,
+      "run.desen.publisher/SOURCE_PRESERVATION_AUTHORITY_INVALID"
+    >
+  | Extract<
+      PublisherExtensionDiagnosticCode,
+      "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED"
+    >;
 
 /** Project diagnostics introduced by the package-private M06-T07 normalization boundary. */
 export type SourceNormalizationExtensionDiagnosticCode =
-  | "run.desen.publisher/SOURCE_NORMALIZATION_AUTHORITY_INVALID"
-  | "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED";
+  | Extract<
+      PublisherExtensionDiagnosticCode,
+      "run.desen.publisher/SOURCE_NORMALIZATION_AUTHORITY_INVALID"
+    >
+  | Extract<
+      PublisherExtensionDiagnosticCode,
+      "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED"
+    >;
 
 /** Project diagnostic introduced by the terminal M06-T09 Bundle boundary. */
-export type BundlePublicationExtensionDiagnosticCode =
-  "run.desen.publisher/BUNDLE_VALIDATION_AUTHORITY_INVALID";
+export type BundlePublicationExtensionDiagnosticCode = Extract<
+  PublisherExtensionDiagnosticCode,
+  "run.desen.publisher/BUNDLE_VALIDATION_AUTHORITY_INVALID"
+>;
 
 /** Stable diagnostic code owned by the DESEN Publisher implementation. */
 export type PublisherDiagnosticCode = PublisherExtensionDiagnosticCode;
@@ -110,7 +201,12 @@ export interface PublisherDiagnosticDefinition {
   readonly code: PublisherDiagnosticCode;
   /** Safe canonical meaning; instance messages may add non-sensitive context. */
   readonly meaning: string;
-  /** Publication stage that owns this diagnostic in the current implementation profile. */
+  /**
+   * Representative stage for documentation and default construction.
+   *
+   * @remarks Some bounded report codes can be emitted by more than one real pipeline stage. The
+   * `stage` on an emitted `PublishDiagnostic` is authoritative for that publication event.
+   */
   readonly defaultStage: PublishPipelineStage;
   /** Default blocking category for this diagnostic. */
   readonly defaultSeverity: PublishDiagnosticSeverity;

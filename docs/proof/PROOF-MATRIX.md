@@ -1198,3 +1198,36 @@ remains open only for M06-T11's complete invalid-source/no-Bundle matrix.
 
 `docs/proof/artifacts/publisher-0.1.0-official-golden.json`
 `sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
+
+## M06-T11 and G06 — Public invalid-Source/no-Bundle closure
+
+M06-T11 imports the built public Publisher root in one isolated process. All 127 reviewed
+task-owned invalid cases invoke only `publishDesenSource(rawSource, catalogPackages)`, stop at their
+exact earliest naturally reachable pipeline stage, and return a recursively immutable exact
+`{ diagnostics, ok, stage }` shell. Every report is nonempty and error-first, its first diagnostic
+stage equals the result stage, and no failure contains a Bundle or any partial Source, Catalog,
+package, obligation, trace, normalized document, digest, revision, or publication authority.
+
+Eight positive guards bring the focused matrix to 135 cases. They preserve the official golden,
+dynamic `context.runtimeTitle`, the exact obligation count/pointer/aggregate boundaries, the exact
+final-Bundle admission boundary, sanitized warnings, and deterministic replay. The invalid table
+proves stage 8 → 9 → 10 precedence and independently crosses inherited parse/Catalog report
+budgets; capability error and warning report budgets; execution error and obligation budgets;
+Source-trace count, pointer, and aggregate budgets; and the naturally reachable normalization and
+complete-Bundle byte limits. Discovery `location` cannot establish trust.
+
+The evidence pins the ordered complete 14-code Publisher registry, 67 independent hostile root
+cases, 31 exact task-applicability records, two task-local PF-047 applicability records, 12 trace
+rows, frozen fixtures and prerequisites, built public files, and one-way successor hashes. The
+complete Publisher package suite passes 292/292. No public negative is fabricated for
+`source-digest`, `authoring-removal`, `catalog-pinning`, or `bundle-revision`; these deterministic
+stages retain the exact successful M06-T07 through M06-T10 evidence.
+
+M06-T11 and G06 are `DONE`. P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`.
+N-016, N-018, N-041, and the Publisher conformance target remain `PLANNED` for their later owners.
+The gate proves reviewed deterministic valid publication plus atomic invalid rejection, not
+signing, storage, activation, deployment, runtime execution, host, adapter, editor, network, or
+control-plane behavior.
+
+`docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+`sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.

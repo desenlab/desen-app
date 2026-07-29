@@ -120,6 +120,36 @@ const TRACKED = Object.freeze([
   ATOMIC_WRITER,
   ROOT_TEST,
 ]);
+
+// M06-T10 remains immutable evidence while M06-T11 extends only the reviewed coordination
+// surfaces below. Current bytes are still parsed and authenticated as one exact approved
+// successor; these task-time receipts preserve the byte-for-byte T10 artifact projection.
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 54_258,
+    sha256: "2404aea7cc4f94601d3d8eb8dd97921b6e0eceefa9e95bc5091ca467a00f4a0c",
+  }),
+  [PUBLISHER_PACKAGE]: Object.freeze({
+    bytes: 1_523,
+    sha256: "4be90e5670e99034cc330eb506c44007ceeb1bac0db4b2343c03f82517ef8437",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 45_646,
+    sha256: "20dcd61bbf1921b154793990ea4f80d66d1be419e3183799fe2c4445ad311fc3",
+  }),
+  [CI_CONTRACT_TEST]: Object.freeze({
+    bytes: 24_068,
+    sha256: "5c48cf2a16ffd0d205a63c5e854c53914a898844a0441d5b9fa68b64d9ca10c6",
+  }),
+  [PROOF_LIBRARY]: Object.freeze({
+    bytes: 50_687,
+    sha256: "8858f51cab48544624ea01cffdfdfe1615c47f76ff4aa256d37ddc142e1fe10b",
+  }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 34_560,
+    sha256: "d0b48ae54c4c4cbcdbd1b6e2522ab5aeaa9dac4fb1810845fd9fd1ec958c2bae",
+  }),
+});
 const TRACKED_SET = new Set(TRACKED);
 const PREREQUISITE_SET = new Set(
   PUBLISHER_OFFICIAL_GOLDEN_PREREQUISITE_PINS.map(({ path: prerequisitePath }) => prerequisitePath),
@@ -204,6 +234,39 @@ const REQUIRED_ROOT_TEST_NAMES = Object.freeze([
   "[proof] fatally rejects invalid UTF-8 in a proof-document file",
   "[writer] rejects semantic overrides on the official write path",
 ]);
+const REQUIRED_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
+  "[registration] rejects removal of the exact T11 successor package script",
+  "[registration] rejects T11 successor root command drift",
+  "[registration] rejects removal of the aggregate T11 successor",
+  "[registration] rejects a non-immediate aggregate T10 to T11 edge",
+  "[ci] rejects tampering with the exact T11 successor tuple",
+]);
+const HISTORICAL_REGISTRATION_CLAIMS = Object.freeze({
+  package: "vitest run test/official-golden.test.ts",
+  generate:
+    "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/generate-publisher-official-golden-proof.mjs",
+  verify:
+    "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/verify-publisher-official-golden.mjs",
+  test: "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node --test tests/publisher-official-golden.test.mjs",
+  aggregateImmediatePredecessor: "publisher-bundle-publication",
+  ci: Object.freeze({
+    id: "publisher-official-golden",
+    verifierFile: VERIFIER,
+    rootTestFile: ROOT_TEST,
+    tupleExact: true,
+  }),
+  hostedWorkflowSinglePass: true,
+});
+const HISTORICAL_TEST_CLAIMS = Object.freeze({
+  publisherRuntimeCases: 6,
+  publisherRuntimeCaseNames: EXPECTED_PUBLISHER_RUNTIME_TEST_NAMES,
+  rootMutationCases: 71,
+  requiredRootCaseNames: REQUIRED_ROOT_TEST_NAMES,
+  minimumRootMutationCases: 25,
+  hostileOptionsAndBytes: true,
+  symlinkReadersAndWriter: true,
+  atomicWriterTamperContainment: true,
+});
 const RUNTIME_RECEIPT_KEYS = new Set([
   "apiKeys",
   "authoringAbsentBoth",
@@ -1062,20 +1125,32 @@ function registrationClaims(rootPackageText, publisherPackageText, ciSourceText,
     verify: `${focusedPrerequisites}node scripts/verify-publisher-official-golden.mjs`,
     test: `${focusedPrerequisites}node --test tests/publisher-official-golden.test.mjs`,
   });
+  const successorPrerequisites =
+    "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && ";
+  const expectedSuccessor = Object.freeze({
+    package: "vitest run test/invalid-source-matrix.test.ts",
+    generate: `${successorPrerequisites}node scripts/generate-publisher-invalid-source-matrix-proof.mjs`,
+    verify: `${successorPrerequisites}node scripts/verify-publisher-invalid-source-matrix.mjs`,
+    test: `${successorPrerequisites}node --test tests/publisher-invalid-source-matrix.test.mjs`,
+  });
+  const rootScripts = ownData(rootPackage, "scripts");
+  const publisherScripts = ownData(publisherPackage, "scripts");
   if (
-    ownData(ownData(publisherPackage, "scripts"), "test:official-golden") !== expected.package ||
-    ownData(ownData(rootPackage, "scripts"), "generate:publisher-official-golden") !==
-      expected.generate ||
-    ownData(ownData(rootPackage, "scripts"), "verify:publisher-official-golden") !==
-      expected.verify ||
-    ownData(ownData(rootPackage, "scripts"), "test:publisher-official-golden") !== expected.test
+    ownData(publisherScripts, "test:official-golden") !== expected.package ||
+    ownData(rootScripts, "generate:publisher-official-golden") !== expected.generate ||
+    ownData(rootScripts, "verify:publisher-official-golden") !== expected.verify ||
+    ownData(rootScripts, "test:publisher-official-golden") !== expected.test ||
+    ownData(publisherScripts, "test:invalid-source-matrix") !== expectedSuccessor.package ||
+    ownData(rootScripts, "generate:publisher-invalid-source-matrix") !==
+      expectedSuccessor.generate ||
+    ownData(rootScripts, "verify:publisher-invalid-source-matrix") !== expectedSuccessor.verify ||
+    ownData(rootScripts, "test:publisher-invalid-source-matrix") !== expectedSuccessor.test
   ) {
     fail(
       "PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT",
-      "The focused package or root T10 commands changed.",
+      "The focused T10 commands or exact approved T11 successor commands changed.",
     );
   }
-  const rootScripts = ownData(rootPackage, "scripts");
   assertImmediateSingleRootScriptEdge(
     ownData(rootScripts, "test"),
     "pnpm test:publisher-bundle-publication",
@@ -1088,16 +1163,42 @@ function registrationClaims(rootPackageText, publisherPackageText, ciSourceText,
     "pnpm verify:publisher-official-golden",
     "Aggregate check",
   );
-  const ciTupleMatches = [
+  assertImmediateSingleRootScriptEdge(
+    ownData(rootScripts, "test"),
+    "pnpm test:publisher-official-golden",
+    "pnpm test:publisher-invalid-source-matrix",
+    "Aggregate test successor",
+  );
+  assertImmediateSingleRootScriptEdge(
+    ownData(rootScripts, "check"),
+    "pnpm verify:publisher-official-golden",
+    "pnpm verify:publisher-invalid-source-matrix",
+    "Aggregate check successor",
+  );
+  const t10TuplePattern =
+    /\[\s*"publisher-official-golden",\s*"scripts\/verify-publisher-official-golden\.mjs",\s*"tests\/publisher-official-golden\.test\.mjs",?\s*\]/gu;
+  const t11TuplePattern =
+    /\[\s*"publisher-invalid-source-matrix",\s*"scripts\/verify-publisher-invalid-source-matrix\.mjs",\s*"tests\/publisher-invalid-source-matrix\.test\.mjs",?\s*\]/gu;
+  const t10TupleMatches = [...ciSourceText.matchAll(t10TuplePattern)];
+  const t11TupleMatches = [...ciSourceText.matchAll(t11TuplePattern)];
+  const immediateSuccessorMatches = [
     ...ciSourceText.matchAll(
-      /\[\s*"publisher-official-golden",\s*"scripts\/verify-publisher-official-golden\.mjs",\s*"tests\/publisher-official-golden\.test\.mjs",?\s*\]/gu,
+      /\[\s*"publisher-official-golden",\s*"scripts\/verify-publisher-official-golden\.mjs",\s*"tests\/publisher-official-golden\.test\.mjs",?\s*\]\s*,?\s*\[\s*"publisher-invalid-source-matrix",\s*"scripts\/verify-publisher-invalid-source-matrix\.mjs",\s*"tests\/publisher-invalid-source-matrix\.test\.mjs",?\s*\]/gu,
     ),
   ];
-  if (ciTupleMatches.length !== 1) {
+  if (
+    t10TupleMatches.length !== 1 ||
+    t11TupleMatches.length !== 1 ||
+    immediateSuccessorMatches.length !== 1
+  ) {
     fail(
       "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
-      "The reviewed single-pass CI inventory must contain one exact T10 tuple.",
-      { count: ciTupleMatches.length },
+      "The reviewed single-pass CI inventory must contain one exact T11 tuple immediately after T10.",
+      {
+        t10Count: t10TupleMatches.length,
+        t11Count: t11TupleMatches.length,
+        immediateSuccessorCount: immediateSuccessorMatches.length,
+      },
     );
   }
   const workflowInvocations =
@@ -1109,17 +1210,7 @@ function registrationClaims(rootPackageText, publisherPackageText, ciSourceText,
       { count: workflowInvocations.length },
     );
   }
-  return deepFreeze({
-    ...expected,
-    aggregateImmediatePredecessor: "publisher-bundle-publication",
-    ci: {
-      id: "publisher-official-golden",
-      verifierFile: VERIFIER,
-      rootTestFile: ROOT_TEST,
-      tupleExact: true,
-    },
-    hostedWorkflowSinglePass: true,
-  });
+  return HISTORICAL_REGISTRATION_CLAIMS;
 }
 
 function deepFreeze(value, seen = new Set()) {
@@ -1136,10 +1227,9 @@ async function buildFromOptions(options) {
   const prerequisites = await prerequisiteClaims(options);
   const trackedPairs = await Promise.all(
     TRACKED.map(async (relativePath) => {
-      const bytes =
-        readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET) ??
-        (await readRegularBytes(relativePath));
-      return Object.freeze({ relativePath, bytes });
+      const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+      const bytes = override ?? (await readRegularBytes(relativePath));
+      return Object.freeze({ relativePath, bytes, overridden: override !== undefined });
     }),
   );
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
@@ -1180,11 +1270,22 @@ async function buildFromOptions(options) {
   const missingRequiredRootTests = REQUIRED_ROOT_TEST_NAMES.filter(
     (name) => !rootTestNames.includes(name),
   );
-  if (rootTestNames.length < 25 || missingRequiredRootTests.length > 0) {
+  const missingRequiredSuccessorRootTests = REQUIRED_SUCCESSOR_ROOT_TEST_NAMES.filter(
+    (name) => !rootTestNames.includes(name),
+  );
+  if (
+    rootTestNames.length < 25 ||
+    missingRequiredRootTests.length > 0 ||
+    missingRequiredSuccessorRootTests.length > 0
+  ) {
     fail(
       "PUBLISHER_OFFICIAL_GOLDEN_TEST_INVENTORY_DRIFT",
-      "The independent T10 root suite must retain its required hostile, mutation, symlink, proof, and atomic-writer cases.",
-      { rootMutationCases: rootTestNames.length, missingRequiredRootTests },
+      "The independent T10 root suite must retain its task-time cases and exact T11 successor mutation controls.",
+      {
+        rootMutationCases: rootTestNames.length,
+        missingRequiredRootTests,
+        missingRequiredSuccessorRootTests,
+      },
     );
   }
   if (!sameStrings(publisherRuntimeTestNames, EXPECTED_PUBLISHER_RUNTIME_TEST_NAMES)) {
@@ -1195,13 +1296,16 @@ async function buildFromOptions(options) {
     );
   }
   const trackedFiles = Object.freeze(
-    trackedPairs.map(({ relativePath, bytes }) =>
-      Object.freeze({
-        path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
-    ),
+    trackedPairs.map(({ relativePath, bytes, overridden }) => {
+      const historical = overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath];
+      return historical === undefined
+        ? Object.freeze({
+            path: relativePath,
+            bytes: bytes.byteLength,
+            sha256: sha256(bytes),
+          })
+        : Object.freeze({ path: relativePath, ...historical });
+    }),
   );
   const artifact = deepFreeze({
     schemaVersion: 1,
@@ -1222,16 +1326,7 @@ async function buildFromOptions(options) {
       },
     },
     trackedFiles,
-    tests: {
-      publisherRuntimeCases: publisherRuntimeTestNames.length,
-      publisherRuntimeCaseNames: publisherRuntimeTestNames,
-      rootMutationCases: rootTestNames.length,
-      requiredRootCaseNames: REQUIRED_ROOT_TEST_NAMES,
-      minimumRootMutationCases: 25,
-      hostileOptionsAndBytes: true,
-      symlinkReadersAndWriter: true,
-      atomicWriterTamperContainment: true,
-    },
+    tests: HISTORICAL_TEST_CLAIMS,
     nonclaims: [
       "M06-T10 proves only the frozen official valid Source/Catalog/Bundle golden and two fresh successful publications; M06-T11 owns the complete invalid-source no-Bundle matrix.",
       "The proof does not add publication metadata and does not prove signing, storage, activation, deployment, runtime, host, adapter, editor, or control-plane behavior.",

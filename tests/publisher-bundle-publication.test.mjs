@@ -729,6 +729,110 @@ test("[ci] rejects T09 CI verifier-path drift", async () => {
   );
 });
 
+test("[ci] rejects removal of the exact T11 CI successor", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace('"publisher-invalid-source-matrix"', '"publisher-invalid-source-matrix-removed"'),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects reordering the exact T10 to T11 CI edge", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) => {
+    const t10Tuple = [
+      "    [",
+      '      "publisher-official-golden",',
+      '      "scripts/verify-publisher-official-golden.mjs",',
+      '      "tests/publisher-official-golden.test.mjs",',
+      "    ],",
+      "",
+    ].join("\n");
+    const t11Tuple = [
+      "    [",
+      '      "publisher-invalid-source-matrix",',
+      '      "scripts/verify-publisher-invalid-source-matrix.mjs",',
+      '      "tests/publisher-invalid-source-matrix.test.mjs",',
+      "    ],",
+      "",
+    ].join("\n");
+    return text.replace(`${t10Tuple}${t11Tuple}`, `${t11Tuple}${t10Tuple}`);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects drift in the exact T11 CI tuple", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace(
+      '"scripts/verify-publisher-invalid-source-matrix.mjs"',
+      '"scripts/verify-publisher-official-golden.mjs"',
+    ),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects exact T11 root registration drift", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts["verify:publisher-invalid-source-matrix"] =
+      "node scripts/verify-publisher-invalid-source-matrix.mjs";
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[ci] rejects exact T11 package registration drift", async () => {
+  const options = await trackedMutation(PUBLISHER_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts["test:invalid-source-matrix"] = "vitest run";
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[ci] rejects removal of the aggregate T11 successor", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts.test = manifest.scripts.test.replace(
+      " && pnpm test:publisher-invalid-source-matrix",
+      "",
+    );
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[ci] rejects a non-immediate aggregate T10 to T11 edge", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts.check = manifest.scripts.check.replace(
+      "pnpm verify:publisher-official-golden && pnpm verify:publisher-invalid-source-matrix",
+      "pnpm verify:publisher-invalid-source-matrix && pnpm verify:publisher-official-golden",
+    );
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT"),
+  );
+});
+
 test("[ci] rejects drift in the independently observed CI plan digest", async () => {
   const options = await trackedMutation(CI_SOURCE, (text) =>
     text.replace(

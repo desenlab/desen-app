@@ -511,6 +511,40 @@ Evidence:
 `docs/proof/artifacts/publisher-0.1.0-official-golden.json`
 `sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
 
+## Publisher public invalid-Source and G06 boundary
+
+M06-T11 tests only the built public Publisher root and its fixed two-argument
+`publishDesenSource` operation. It adds no private publication route, injectable stage, or
+case-specific production behavior. The reviewed task-owned matrix contains 127 invalid inputs and
+eight positive guards. Every invalid input stops at its exact earliest naturally reachable stage
+and returns only a recursively immutable, nonempty, error-first
+`{ diagnostics, ok, stage }` result. A failure never exposes a Bundle or any lower Source, Catalog,
+package, obligation, trace, normalization, digest, revision, or publication authority.
+
+The boundary makes causal precedence explicit. A stage-eight capability failure wins over
+simultaneous stage-nine and stage-ten defects; stage nine wins over stage ten; and stage-ten
+binding failure suppresses every earlier deprecation warning. Blocking errors therefore cannot be
+reclassified from their code or pointer after the fact. Dynamic obligations remain valid
+successful publication work and never become fabricated static errors.
+
+The same public matrix independently crosses each reachable default report and data envelope:
+inherited parse and Catalog reports; capability and execution error reports; deprecation-warning
+reports; runtime obligations; Source-node trace output; normalized-document bytes; and complete
+Bundle bytes. The ordered 14-code Publisher registry records every project-owned code with its
+default stage and severity. Discovery `location` remains authenticated, digest-significant Source
+data but supplies no Catalog or package trust.
+
+The deterministic `source-digest`, `authoring-removal`, `catalog-pinning`, and `bundle-revision`
+stages have no natural invalid data input once their authenticated predecessors succeed. M06-T11
+does not create fake public negatives for them; the exact successful M06-T07 through M06-T10
+evidence remains authoritative. This boundary closes G06 for reviewed valid publication and atomic
+invalid rejection only. Signing, storage, activation, deployment, runtime execution, host,
+adapter, editor, network, and control-plane behavior remain later authorities.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+`sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
+
 ## Applications
 
 ### Desen App

@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-29
+Last updated: 2026-07-30
 
 ## Plain-language status
 
@@ -431,19 +431,31 @@ second production path. Two fresh official Source/Catalog candidate graphs publi
 canonical output, revision, and Source digest. Those bytes exactly equal the frozen official
 Bundle after removing only its own root `publication` member; root `authoring` remains excluded
 while nested semantic content remains significant. P-03 and P-11 are now `PROVEN`; P-05 remains
-`PARTIAL`, N-016 and N-018 remain `PLANNED` for later runtime/editor owners, and G06 remains open
-for M06-T11's invalid-source matrix.
+`PARTIAL`, N-016 and N-018 remain `PLANNED` for later runtime/editor owners, and at that checkpoint
+G06 remained open for M06-T11's invalid-source matrix.
+M06-T11 now closes that final Publisher gap through the built public two-argument
+`publishDesenSource` root. Its 127 invalid cases stop at the exact earliest naturally reachable
+stage with immutable error-first diagnostics and no Bundle or partial publication authority; eight
+positive guards retain the official golden, dynamic obligations, exact boundaries, sanitized
+warnings, and deterministic replay. The matrix covers stage 8 → 9 → 10 precedence, every reachable
+default-limit branch, the complete 14-code Publisher registry, exact fixture and successor bytes,
+31 task-applicability records, two task-local PF-047 records, and 12 trace rows. It does not invent
+failures for deterministic stages that have no invalid two-argument data input. The complete
+Publisher suite passes 292/292, M06-T11 and G06 are `DONE`, and immutable storage begins at M07-T01.
+P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the
+Publisher conformance target remain `PLANNED`.
 
 ## Current milestone
 
-- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
+- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
+  `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `73 / 145 tasks complete (50%)`
+- Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
+- Overall implementation progress: `74 / 145 tasks complete (51%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `10 / 11 tasks complete (91%)`
-- Proof-gate progress: `6 / 13 complete`
+- M06 progress: `11 / 11 tasks complete (100%)`
+- Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -501,12 +513,13 @@ for M06-T11's invalid-source matrix.
   `M06-T07 — Source digest, authoring removal, and deterministic normalization`,
   `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`,
   `M06-T09 — Bundle validation and revision calculation`,
-  `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`
+  `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
+  `M06-T11 — Invalid-source matrix proves no bundle is emitted`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T11 — Invalid-source matrix proves no bundle is emitted`
-- Status: M05 and G05 are complete; M06-T01 through M06-T10 are complete; M06-T11 is ready
+  `M07-T01 — Content-addressed bundle store with immutable revision entries`
+- Status: M06 and G06 are complete; M07-T01 is ready
 
 ## Completed preparation
 
@@ -865,10 +878,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T11 — Invalid-source matrix proves no bundle is emitted`. Exercise the public
-M06-T09 operation across the complete task-owned invalid-source and precedence matrix, require
-every case to stop at its exact earliest public stage with a nonempty error-first diagnostic list,
-and prove that no failure exposes a Bundle or partial publication authority.
+Begin `M07-T01 — Content-addressed bundle store with immutable revision entries`. Persist only
+already validated, revision-closed Bundle bytes under their exact revision identity; reject
+overwrite, collision, partial-write, path, and mutable-alias failure modes before any channel or
+activation authority exists. This task starts storage evidence only. Digest re-verification,
+installed-package verification, channel mutation, last-known-good activation, crash recovery, and
+control-plane APIs remain with their later M07 owners.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1669,6 +1684,37 @@ M06-T10 evidence:
 - coverage decision: M06-T10 becomes `DONE`; P-03 and P-11 become `PROVEN`; P-05 remains
   `PARTIAL`, N-016 and N-018 remain `PLANNED`, and G06 remains open only for M06-T11's complete
   invalid-source/no-Bundle matrix
+
+M06-T11 and G06 evidence:
+
+- `docs/proof/PUBLISHER-INVALID-SOURCE-MATRIX.md`
+- `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+- artifact SHA-256:
+  `a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`
+- exact boundary: one isolated built public Publisher root; every publication case calls only
+  `publishDesenSource(rawSource, catalogPackages)`; 127 invalid cases stop at their exact earliest
+  naturally reachable stage; every failure is an immutable exact `{ diagnostics, ok, stage }`
+  shell with a nonempty error-first report and no Bundle or partial publication authority
+- positive guard boundary: eight deterministic guards preserve the official golden, dynamic
+  `context.runtimeTitle` obligations, exact obligation count/pointer/aggregate limits, exact final
+  Bundle admission, sanitized deprecation warnings, and repeated-result equality
+- causal and limit coverage: exact stage 8 → 9 → 10 precedence; inherited parse and Catalog report
+  ceilings; blocking capability and execution report count/pointer/aggregate ceilings;
+  deprecation-warning count/pointer/aggregate ceilings; complete Source-trace
+  count/pointer/aggregate ceilings; and naturally reachable normalization/final-Bundle limits
+- public diagnostic authority: complete ordered 14-code Publisher registry with exact stage and
+  severity metadata; every matrix-emitted Publisher code is registered; discovery `location`
+  remains Source-only, digest-significant data and never establishes package trust
+- executable evidence: 135 focused cases, 292/292 full Publisher tests, 67 independent hostile
+  root proof/mutation cases, 31 exact task-applicability records, two task-local PF-047 records,
+  12 trace rows, exact frozen fixtures, built public files, prerequisite artifacts, one-way
+  successor hashes, deterministic generation, no-follow reads, and atomic writes
+- honest boundary: no fake public negative is created for `source-digest`, `authoring-removal`,
+  `catalog-pinning`, or `bundle-revision`; signing, storage, activation, deployment, runtime,
+  host, adapter, editor, network, and control-plane behavior remain outside M06
+- coverage decision: M06-T11 and G06 become `DONE`; P-03 and P-11 remain `PROVEN`; P-05 and P-17
+  remain `PARTIAL`; N-016, N-018, N-041, and the Publisher conformance target remain `PLANNED`;
+  M07-T01 owns the immutable content-addressed Bundle store next
 
 ## Status vocabulary
 

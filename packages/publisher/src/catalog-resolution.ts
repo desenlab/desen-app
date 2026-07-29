@@ -121,10 +121,15 @@ export const PUBLISH_CATALOG_RESOLUTION_LIMITS: Readonly<PublishCatalogResolutio
  * authenticate package-artifact identity.
  */
 export interface PublishCatalogPackageCandidate {
+  /** Exact package identifier offered for one Source Catalog requirement. */
   readonly id: string;
+  /** Exact semantic package version offered for the requirement. */
   readonly version: string;
+  /** Exact target profile implemented by the offered package. */
   readonly target: string;
+  /** SHA-256 digest observed from the target-specific package-byte verifier. */
   readonly observedPackageDigest: string;
+  /** Inert Catalog JSON claimed by the offered package. */
   readonly catalog: unknown;
 }
 

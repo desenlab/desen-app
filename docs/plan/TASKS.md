@@ -230,20 +230,20 @@ evidence.
 
 ## M06 — Deterministic publisher
 
-| ID      | Status      | Depends on       | Deliverable / evidence                                                                  |
-| ------- | ----------- | ---------------- | --------------------------------------------------------------------------------------- |
-| M06-T01 | DONE        | G05              | Staged `PublishResult` and diagnostics API                                              |
-| M06-T02 | DONE        | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
-| M06-T03 | DONE        | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
-| M06-T04 | DONE        | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
-| M06-T05 | DONE        | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
-| M06-T06 | DONE        | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
-| M06-T07 | DONE        | M06-T06          | Source digest, authoring removal, and deterministic normalization                       |
-| M06-T08 | DONE        | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
-| M06-T09 | DONE        | M06-T08          | Bundle validation and revision calculation                                              |
-| M06-T10 | DONE        | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
-| M06-T11 | NOT_STARTED | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
-| G06     | NOT_STARTED | M06-T01–M06-T11  | Valid source publishes; invalid source emits no bundle                                  |
+| ID      | Status | Depends on       | Deliverable / evidence                                                                  |
+| ------- | ------ | ---------------- | --------------------------------------------------------------------------------------- |
+| M06-T01 | DONE   | G05              | Staged `PublishResult` and diagnostics API                                              |
+| M06-T02 | DONE   | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
+| M06-T03 | DONE   | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
+| M06-T04 | DONE   | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
+| M06-T05 | DONE   | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
+| M06-T06 | DONE   | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
+| M06-T07 | DONE   | M06-T06          | Source digest, authoring removal, and deterministic normalization                       |
+| M06-T08 | DONE   | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
+| M06-T09 | DONE   | M06-T08          | Bundle validation and revision calculation                                              |
+| M06-T10 | DONE   | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
+| M06-T11 | DONE   | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
+| G06     | DONE   | M06-T01–M06-T11  | Valid source publishes; invalid source emits no bundle                                  |
 
 M06-T01 defines the Publisher's closed terminal success/failure union, exact sixteen-stage
 vocabulary, stable task-owned diagnostic definitions, and strict package-private raw Source JSON
@@ -416,6 +416,33 @@ invalid-source/no-Bundle matrix.
 
 `docs/proof/artifacts/publisher-0.1.0-official-golden.json`
 `sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
+
+M06-T11 closes the public rejection side of publication without adding an alternate Publisher or
+private test-only entry point. All 127 reviewed invalid cases call only the built public
+two-argument `publishDesenSource` root and stop at their exact earliest naturally reachable stage.
+Every failure is a recursively immutable, nonempty, error-first
+`{ diagnostics, ok, stage }` result with no Bundle or partial Source, Catalog, package,
+normalization, obligation, trace, digest, revision, or publication authority.
+
+The 135 focused cases include eight positive guards for the official golden, dynamic obligations,
+exact obligation and final-size boundaries, sanitized deprecation warnings, and deterministic
+replay. They prove stage 8 → 9 → 10 precedence, all three blocking-report budgets at the execution
+boundary, all three deprecation-warning budgets, inherited parse and Catalog report limits, the
+complete Source-trace profile, and the naturally reachable normalization and final-Bundle limits.
+The public Publisher registry is now a complete ordered 14-code inventory. Discovery `location`
+remains digest-significant Source data but never establishes package trust.
+
+The artifact authenticates 67 independent root proof/mutation cases, 31 exact
+task-applicability records, two task-local PF-047 applicability records, 12 trace rows, frozen
+fixtures, built public files, and one-way successor hashes. It deliberately invents no public
+negative for deterministic `source-digest`, `authoring-removal`, `catalog-pinning`, or
+`bundle-revision` stages. The full Publisher suite passes 292/292. P-03 and P-11 remain `PROVEN`;
+P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the Publisher conformance target remain
+`PLANNED` for their later owners. M06-T11 and G06 are `DONE`; M07-T01 owns immutable
+content-addressed Bundle storage next.
+
+`docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+`sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

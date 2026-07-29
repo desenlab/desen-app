@@ -338,6 +338,131 @@ test("rejects single-pass CI registration drift", async () => {
   );
 });
 
+test("rejects removal of the exact T11 CI successor", async () => {
+  const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
+  const mutated = ci.replace(
+    '"publisher-invalid-source-matrix"',
+    '"publisher-invalid-source-matrix-removed"',
+  );
+  assert.notEqual(mutated, ci);
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "scripts/run-ci-quality-gate.mjs": Buffer.from(mutated),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects reordering the exact T10 to T11 CI edge", async () => {
+  const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
+  const t10Tuple = [
+    "    [",
+    '      "publisher-official-golden",',
+    '      "scripts/verify-publisher-official-golden.mjs",',
+    '      "tests/publisher-official-golden.test.mjs",',
+    "    ],",
+    "",
+  ].join("\n");
+  const t11Tuple = [
+    "    [",
+    '      "publisher-invalid-source-matrix",',
+    '      "scripts/verify-publisher-invalid-source-matrix.mjs",',
+    '      "tests/publisher-invalid-source-matrix.test.mjs",',
+    "    ],",
+    "",
+  ].join("\n");
+  const mutated = ci.replace(`${t10Tuple}${t11Tuple}`, `${t11Tuple}${t10Tuple}`);
+  assert.notEqual(mutated, ci);
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "scripts/run-ci-quality-gate.mjs": Buffer.from(mutated),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects drift in the exact T11 CI tuple", async () => {
+  const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
+  const mutated = ci.replace(
+    '"scripts/verify-publisher-invalid-source-matrix.mjs"',
+    '"scripts/verify-publisher-official-golden.mjs"',
+  );
+  assert.notEqual(mutated, ci);
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "scripts/run-ci-quality-gate.mjs": Buffer.from(mutated),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects exact T11 root registration drift", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  manifest.scripts["verify:publisher-invalid-source-matrix"] =
+    "node scripts/verify-publisher-invalid-source-matrix.mjs";
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "package.json": Buffer.from(JSON.stringify(manifest)),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects exact T11 package registration drift", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("../packages/publisher/package.json", import.meta.url), "utf8"),
+  );
+  manifest.scripts["test:invalid-source-matrix"] = "vitest run";
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "packages/publisher/package.json": Buffer.from(JSON.stringify(manifest)),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects removal of the aggregate T11 successor", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  manifest.scripts.test = manifest.scripts.test.replace(
+    " && pnpm test:publisher-invalid-source-matrix",
+    "",
+  );
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "package.json": Buffer.from(JSON.stringify(manifest)),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects a non-immediate aggregate T10 to T11 edge", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  manifest.scripts.check = manifest.scripts.check.replace(
+    "pnpm verify:publisher-official-golden && pnpm verify:publisher-invalid-source-matrix",
+    "pnpm verify:publisher-invalid-source-matrix && pnpm verify:publisher-official-golden",
+  );
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "package.json": Buffer.from(JSON.stringify(manifest)),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
 test("rejects dead CI proof steps that are absent from the executed plan", async () => {
   const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
   const filtered = ci.replaceAll(

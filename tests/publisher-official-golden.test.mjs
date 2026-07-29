@@ -754,9 +754,76 @@ test("[registration] rejects a non-immediate aggregate T09 to T10 edge", async (
   );
 });
 
+test("[registration] rejects removal of the exact T11 successor package script", async () => {
+  const options = await trackedMutation(PUBLISHER_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    delete manifest.scripts["test:invalid-source-matrix"];
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherOfficialGoldenEvidence(options),
+    expectCode("PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[registration] rejects T11 successor root command drift", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts["verify:publisher-invalid-source-matrix"] = "echo skipped";
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherOfficialGoldenEvidence(options),
+    expectCode("PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[registration] rejects removal of the aggregate T11 successor", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts.test = manifest.scripts.test.replace(
+      " && pnpm test:publisher-invalid-source-matrix",
+      "",
+    );
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherOfficialGoldenEvidence(options),
+    expectCode("PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[registration] rejects a non-immediate aggregate T10 to T11 edge", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts.test = manifest.scripts.test.replace(
+      "pnpm test:publisher-official-golden && pnpm test:publisher-invalid-source-matrix",
+      "pnpm test:publisher-invalid-source-matrix && pnpm test:publisher-official-golden",
+    );
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherOfficialGoldenEvidence(options),
+    expectCode("PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT"),
+  );
+});
+
 test("[ci] rejects removal of the exact T10 single-pass inventory id", async () => {
   const options = await trackedMutation(CI_SOURCE, (text) =>
     text.replace('"publisher-official-golden"', '"publisher-official-golden-changed"'),
+  );
+  await assert.rejects(
+    buildPublisherOfficialGoldenEvidence(options),
+    expectCode("PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects tampering with the exact T11 successor tuple", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace(
+      '"scripts/verify-publisher-invalid-source-matrix.mjs"',
+      '"scripts/verify-publisher-invalid-source-matrix-changed.mjs"',
+    ),
   );
   await assert.rejects(
     buildPublisherOfficialGoldenEvidence(options),

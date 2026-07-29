@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████░░░░░░░░░░░░` **73 / 145 tasks complete (50%)**
+**Overall:** `█████████████░░░░░░░░░░░░` **74 / 145 tasks complete (51%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -18,13 +18,19 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M05 complete:** `█████████` **9 / 9 tasks complete (100%)**
 
-**M06:** `██████████░` **10 / 11 tasks complete (91%)**
+**M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**Proof gates:** **6 / 13 complete** · **Next:** `M06-T11`
+**Proof gates:** **7 / 13 complete** · **Next:** `M07-T01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
 <!-- task-progress:end -->
+
+**G06 checkpoint:** the built public Publisher deterministically publishes the official valid
+Source and rejects all 127 reviewed task-owned invalid cases at their exact earliest stage with no
+Bundle or partial authority. The [public invalid-Source proof](docs/proof/PUBLISHER-INVALID-SOURCE-MATRIX.md)
+is pinned by `sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
+Signing, storage, activation, runtime, and deployment remain later milestones.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
@@ -120,6 +126,9 @@ packages/
 - [Publisher Source-preservation proof](docs/proof/PUBLISHER-SOURCE-PRESERVATION.md)
 - [Publisher Source-digest and normalization proof](docs/proof/PUBLISHER-SOURCE-NORMALIZATION.md)
 - [Publisher Source-digest authentication and Catalog-pinning proof](docs/proof/PUBLISHER-CATALOG-PINNING.md)
+- [Publisher complete Bundle publication proof](docs/proof/PUBLISHER-BUNDLE-PUBLICATION.md)
+- [Publisher official Source-to-Bundle golden](docs/proof/PUBLISHER-OFFICIAL-GOLDEN.md)
+- [Publisher public invalid-Source no-Bundle matrix](docs/proof/PUBLISHER-INVALID-SOURCE-MATRIX.md)
 - [Runtime core host-port proof](docs/proof/RUNTIME-CORE-HOST-PORTS.md)
 - [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
 - [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)

@@ -18,7 +18,9 @@ protocol's required order. M06-T08 independently authenticates that digest and p
 every Source requirement to its exact selected package tuple. M06-T09 is the terminal boundary: it
 adds the provisional revision, validates the complete Bundle against the exact Catalog authority,
 enforces the final byte envelope, closes the revision, and exposes the public two-argument
-`publishDesenSource` operation.
+`publishDesenSource` operation. M06-T10 proves two fresh public publications equal each other and
+the frozen official projection. M06-T11 closes G06 with the complete reviewed public invalid-input,
+causal-precedence, finite-limit, and no-Bundle matrix.
 
 ## Explicit non-responsibilities
 
@@ -28,7 +30,7 @@ Node.js, a host application, or target-specific capability implementations.
 
 ## Status
 
-Under tracked implementation. The public root exposes the stable
+G06 is complete. The public root exposes the stable
 `PublishResult` contract, publication-stage vocabulary, Publisher diagnostic registry, and the
 finite Source-ingress profile. It also exposes `publishDesenSource` and the immutable
 `PublishCatalogPackageCandidate` input type now that the operation can either return a fully
@@ -37,7 +39,9 @@ parser nor any nonterminal stage. Exact Catalog resolution and the complete M06-
 preflight are package-private, as is M06-T04 capability preflight.
 M06-T05 execution preflight and M06-T06 Source preservation also remain package-private and
 nonterminal. M06-T07 Source normalization and M06-T08 exact Catalog pinning have the same private,
-nonterminal status; the caller-adjustable M06-T09 limit seam is private as well.
+nonterminal status; the caller-adjustable M06-T09 limit seam is private as well. The ordered public
+diagnostic registry now documents all 14 Publisher-owned codes while core and Validator codes
+retain their own registries.
 
 ## Public entry point
 
@@ -444,6 +448,40 @@ unchanged; neither root `authoring` nor root `publication` appears in the termin
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-official-golden.json`.
 
+## Public invalid-Source matrix and G06 closure
+
+M06-T11 adds no alternate production implementation. An isolated process imports the built public
+`packages/publisher/dist/index.js` root, and every publication case calls only
+`publishDesenSource(rawSource, catalogPackages)`. All 127 reviewed invalid cases stop at their exact
+earliest naturally reachable stage. Each rejection is a recursively immutable exact
+`{ diagnostics, ok, stage }` shell with a nonempty error-first report whose first diagnostic stage
+matches the result stage. No failure contains a Bundle or partial Source, Catalog, selected
+package, obligation, trace, normalized document, digest, revision, or publication authority.
+
+The 135-case focused suite includes eight positive guards. They preserve the official golden,
+dynamic `context.runtimeTitle` and exact 4,096-obligation successes, exact pointer and aggregate
+obligation boundaries, exact final-Bundle admission, fixed sanitized deprecation warnings, and
+deterministic repeated results. Invalid cases prove stage 8 → 9 → 10 precedence; blocking-report,
+warning-report, obligation, Source-trace, normalization, and complete-Bundle limits; all reviewed
+component, behavior, resource, operation, state, control-flow, binding, Catalog, and Source
+branches; and the rule that discovery `location` cannot establish package trust.
+
+The proof authenticates the complete ordered 14-code Publisher registry, 67 independent hostile
+root cases, 31 exact task-applicability records, two task-local PF-047 records, 12 frozen trace
+rows, exact fixture and built-public-file bytes, and one-way successor hashes. The full Publisher
+suite passes 292/292.
+
+No public negative is fabricated for `source-digest`, `authoring-removal`, `catalog-pinning`, or
+`bundle-revision`: after their authenticated predecessors succeed, those deterministic stages have
+no natural invalid input at the fixed two-argument boundary. Their successful behavior remains
+covered by M06-T07 through M06-T10. This closure proves deterministic valid publication and atomic
+invalid rejection, not signing, storage, activation, deployment, runtime execution, host, adapter,
+editor, network, or control-plane behavior.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+`sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
+
 ## Dependencies
 
 - `@desen/protocol` supplies frozen Bundle types, core diagnostics, and RFC 6901 pointers.
@@ -477,6 +515,9 @@ is reachable.
 - Complete-Bundle schema, semantic, authority, and byte failures stop at `bundle-validation`;
   revision calculation or closure failures stop at `bundle-revision`. Neither path exposes a
   Bundle, warnings, or predecessor authority.
+- The public invalid matrix requires exact earliest-stage failure, error-first immutable
+  diagnostics, warning suppression after any blocking stage, and no Bundle or partial authority
+  across every reviewed naturally reachable branch.
 
 ## Protocol and target support
 
@@ -501,6 +542,7 @@ pnpm --filter @desen/publisher test:source-normalization
 pnpm --filter @desen/publisher test:catalog-pinning
 pnpm --filter @desen/publisher test:bundle-publication
 pnpm --filter @desen/publisher test:official-golden
+pnpm --filter @desen/publisher test:invalid-source-matrix
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
@@ -512,5 +554,6 @@ pnpm test:publisher-source-normalization
 pnpm test:publisher-catalog-pinning
 pnpm test:publisher-bundle-publication
 pnpm test:publisher-official-golden
+pnpm test:publisher-invalid-source-matrix
 pnpm check
 ```

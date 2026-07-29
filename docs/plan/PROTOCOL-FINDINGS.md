@@ -2722,3 +2722,65 @@ This file records implementation discoveries without changing the frozen DESEN 0
   and final bytes before activation. A later protocol revision should standardize both the
   provisional-to-closure procedure and the precise byte metric if cross-implementation byte-limit
   parity is required.
+
+## PF-069 — Public rejection completeness is causal, not one negative per named stage
+
+- Status: OPEN
+- Blocks proof: No; M06-T11 defines and proves one conservative task-owned public rejection
+  profile without changing frozen protocol bytes or manufacturing unreachable failures.
+- Protocol location: SPEC Sections 7.3, 10.2, 11.2–11.5, 24.1, 25.1, 25.2, and 27.8; `C-011`,
+  `C-012`, `PIPE-004`, `PIPE-025`–`PIPE-041`, `R-018`, `R-028`, `R-034`, `R-035`, `R-036`,
+  `R-123`, `A-011`, `D-009`, `N-016`, `N-018`, and `N-041`; related findings `PF-047`,
+  `PF-060`–`PF-068`
+- Observation: the frozen publication pipeline names deterministic transformation and closure
+  stages alongside input-validation stages, but it does not imply that every stage has a natural
+  invalid value at the fixed public two-argument boundary. Once an authenticated predecessor has
+  succeeded, `source-digest`, `authoring-removal`, exact Catalog pinning, and revision closure are
+  deterministic internal work. Inventing a public failure for each name would require a private
+  seam, forged authority, or case-specific implementation branch and would weaken rather than
+  strengthen the public proof.
+
+  Rejection completeness is instead causal: each reviewed invalid input must stop at the earliest
+  stage that can decide it, blocking diagnostics must precede warnings, and no stopped path may
+  expose a Bundle or lower publication authority. The same rule applies to finite limits. A broad
+  count-limit example cannot stand in for independently enforced pointer, aggregate, warning,
+  obligation, trace, normalized-byte, and final-Bundle envelopes. Discovery `location` also cannot
+  turn a missing or digest-inconsistent package observation into trusted Catalog authority.
+
+- Implementation decision: M06-T11 imports only the built public
+  `packages/publisher/dist/index.js` root in an isolated process. Its 127 task-owned invalid cases
+  call only `publishDesenSource(rawSource, catalogPackages)`. Every failure has exactly
+  `{ diagnostics, ok, stage }`, is recursively immutable, begins with an error, reports the same
+  stage on its first diagnostic, and exposes no Bundle, Source, Catalog, selected package,
+  requirement index, obligation, trace, normalized document, digest, revision, publication, or
+  other partial authority.
+
+  Stage-eight capability errors outrank simultaneous stage-nine and stage-ten errors; stage nine
+  outranks stage ten; and a stage-ten error suppresses an already discoverable deprecation warning.
+  Dynamic runtime obligations remain valid publication successes at their exact public count,
+  pointer, and aggregate boundaries. The remaining five positive guards preserve the official
+  golden, exact complete-Bundle admission, sanitized warnings, and deterministic repeated output,
+  for 135 focused cases total.
+
+  The matrix independently crosses every reviewed naturally reachable default-limit branch across
+  raw Source parsing, Catalog resolution/integrity, inherited and task-owned error reports,
+  deprecation-warning reports, execution obligations, Source-node trace output, normalized bytes,
+  and final Bundle bytes. The complete ordered Publisher registry contains all 14 project-owned
+  diagnostic codes with exact default stage and severity metadata.
+
+  Evidence authority is one-way. The receipt pins exact frozen fixtures, M06-T03 through M06-T10
+  prerequisites, built public files, 12 trace rows, 31 exact task-applicability records, two
+  task-local PF-047 applicability records, and the current successor surfaces that register T11.
+  Earlier historical receipts do not depend back on this task and are not rewritten. Sixty-seven
+  independent root proof/mutation cases protect the artifact, and the complete Publisher suite
+  passes 292/292.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+  `sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
+
+- Future action: M07 must independently verify stored Bundle bytes, installed package tuples, and
+  activation authority rather than treating Publisher success as storage or runtime trust. M12-T01
+  and M12-T08 must retain the task-owned qualifier, measure the remaining whole-system limits, and
+  keep Publisher conformance `PLANNED` until all assigned evidence is complete. A later protocol
+  revision should state causal diagnostic precedence and distinguish total deterministic stages
+  from stages that admit public invalid-data vectors.

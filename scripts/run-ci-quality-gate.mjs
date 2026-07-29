@@ -299,6 +299,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-publisher-official-golden.mjs",
       "tests/publisher-official-golden.test.mjs",
     ],
+    [
+      "publisher-invalid-source-matrix",
+      "scripts/verify-publisher-invalid-source-matrix.mjs",
+      "tests/publisher-invalid-source-matrix.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -322,16 +327,18 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "1ef739cd28f9c0586d1a2c7e5d86faf6cf449e14810123b87551638deb7b7b67";
+  "611a1f73611839d1c65648157702bce366df85d2e777a2275b19f0e219d4ee01";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "dfb8e2e15a20ef568f631aee9fb9c6ab02ee3464b52a5cc6c68891dcb8a9de4e";
+  "4b008198730a6beeeeec4f47527f8ef870d8d566ac07f4708e27e8f7969dda41";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "c5b2c1c831f7eba1ee934509cbe006bb901ad5fb7c3e50aeddacc08c31007360";
-const QUALITY_GATE_PLAN_SHA256 = "ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582";
+  "d1ef3faec732ad9dbabc28414fdc158ca07f2fcb05de5d3134a2a09cb954e47c";
+const QUALITY_GATE_PLAN_SHA256 = "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
 // 3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c
+// Historical M06-T10 plan pin retained for its frozen compatibility reader:
+// ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "6dc7cae96692feb13650a06f3b8733da6f6c431a0cad777e08a8d0d567880c3d";
 const WORKSPACE_MANIFEST_SHA256 =

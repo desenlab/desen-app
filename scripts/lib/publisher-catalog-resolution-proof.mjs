@@ -94,6 +94,14 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 1_304,
     sha256: "27946cfda1b8d883795b292dba3f2b093c37eafbbd5e709fb0d82be4a1ad5fcc",
   }),
+  [RESOLVER_SOURCE_RELATIVE_PATH]: Object.freeze({
+    bytes: 37_492,
+    sha256: "ec922db9ba6c1c42759b03757e59375966c428fe571eddaef4850cb2ad69ead1",
+  }),
+  [RESOLVER_DECLARATION_RELATIVE_PATH]: Object.freeze({
+    bytes: 5_409,
+    sha256: "b9e3d9d719cce52b23b86ee256ee26f5e638bdfaef7a22fa8577b8afe74da7a0",
+  }),
   "packages/publisher/src/index.ts": Object.freeze({
     bytes: 911,
     sha256: "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30",
