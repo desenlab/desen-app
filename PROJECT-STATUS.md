@@ -404,19 +404,28 @@ minimally normalize one detached production-document base. Root authoring change
 the digest nor normalized bytes; nested extension data remains semantic. No default, empty-member
 deletion, index, array sort, or deduplication is introduced. The nonterminal success keeps the
 digest separate from the incomplete document, and exact 2 MiB intermediate limits fail closed.
-`PF-066` records the profile and ordering correction. P-11 advances only to `PARTIAL`; final exact
-tuple pinning, Bundle validation/revision, official determinism, and the invalid-source matrix
-remain M06-T08 through M06-T11.
+`PF-066` records the profile and ordering correction. At that checkpoint P-11 advanced only to
+`PARTIAL`; exact tuple pinning remained M06-T08, while Bundle validation/revision, official
+determinism, and the invalid-source matrix remained M06-T09 through M06-T11.
+M06-T08 now independently authenticates that carried Source digest before mapping every loose
+requirement position through the exact selected-package index. The resulting package-private
+document preserves order, duplicates, and opaque extensions while taking
+`id`/`version`/`target`/`digest` only from the authenticated package tuple. Discovery `location`
+remains Source-only digest input and never becomes production selection authority. The pinned
+document is recursively immutable and still contains no revision, publication metadata, terminal
+Bundle success, signing, runtime, host, adapter, activation, or deployment authority. `PF-067`
+records this boundary. P-05 and P-11 remain `PARTIAL`, P-03 remains `NOT_PROVEN`, and M06-T09
+owns final Bundle validation and revision closure.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `70 / 145 tasks complete (48%)`
+- Overall implementation progress: `71 / 145 tasks complete (49%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `7 / 11 tasks complete (64%)`
+- M06 progress: `8 / 11 tasks complete (73%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -472,12 +481,13 @@ remain M06-T08 through M06-T11.
   `M06-T04 — Prop, slot, style, event, command, and behavior preflight`,
   `M06-T05 — Resource/operation contracts, dynamic compatibility, and runtime obligations`,
   `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`,
-  `M06-T07 — Source digest, authoring removal, and deterministic normalization`
+  `M06-T07 — Source digest, authoring removal, and deterministic normalization`,
+  `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`
-- Status: M05 and G05 are complete; M06-T01 through M06-T07 are complete; M06-T08 is ready
+  `M06-T09 — Bundle validation and revision calculation`
+- Status: M05 and G05 are complete; M06-T01 through M06-T08 are complete; M06-T09 is ready
 
 ## Completed preparation
 
@@ -836,11 +846,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`. Consume only
-the complete M06-T07 authority, prove its `sourceDigest` is the exact already calculated
-pre-normalization digest, replace every loose Source Catalog requirement with the exact selected
-`id`/`version`/`target`/`digest` tuple in Source order, and expose no terminal Bundle or partial
-authority.
+Begin `M06-T09 — Bundle validation and revision calculation`. Consume only the complete M06-T08
+authority, construct the complete candidate Bundle, enforce the final Reference Profile byte
+ceiling, validate the exact Bundle structure and semantics, and close the revision through the
+normative revision-exclusion projection. A failure must expose no Bundle or partial authority.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1454,7 +1463,7 @@ M06-T03 evidence:
 
 - `docs/proof/PUBLISHER-SOURCE-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-- artifact SHA-256: `46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`
+- artifact SHA-256: `07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`
 - exact boundary: strict raw Source ingress; distinct Source-root and embedded-schema phases;
   catalog-independent SemVer, entry, surface, and node/behavior identity checks before candidate
   observation; exact M06-T02 Catalog authority before category-aware component, behavior,
@@ -1477,7 +1486,7 @@ M06-T04 evidence:
 
 - `docs/proof/PUBLISHER-CAPABILITY-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-- artifact SHA-256: `cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`
+- artifact SHA-256: `2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`
 - exact boundary: the exact M06-T03 Source, selected packages, Catalogs, and requirement alignment
   cross safe interaction-schema preparation and complete static component/behavior contract
   validation; success stays package-private and nonterminal with no dynamic obligations or Bundle
@@ -1502,7 +1511,7 @@ M06-T05 evidence:
 
 - `docs/proof/PUBLISHER-EXECUTION-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-- artifact SHA-256: `33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`
+- artifact SHA-256: `6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67`
 - exact boundary: internal M06-T04 composition; exact prepared Source, execution Catalog, selected
   package, requirement-alignment, and warning authority; one emission-site phase-aware T10/T11
   analysis; exact stage 8 → 9 → 10 precedence; and one package-private nonterminal success
@@ -1524,7 +1533,7 @@ M06-T06 evidence:
 
 - `docs/proof/PUBLISHER-SOURCE-PRESERVATION.md`
 - `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
-- artifact SHA-256: `481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004`
+- artifact SHA-256: `261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff`
 - exact boundary: internal M06-T05 composition; exact Source, execution Catalog, selected package,
   requirement-alignment, warning, and obligation identity; one separate frozen production-field
   projection; and one package-private nonterminal preservation success
@@ -1550,7 +1559,7 @@ M06-T07 evidence:
 
 - `docs/proof/PUBLISHER-SOURCE-NORMALIZATION.md`
 - `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
-- artifact SHA-256: `f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c`
+- artifact SHA-256: `59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`
 - exact boundary: one internal M06-T06 composition; Source digest from the exact authenticated
   pre-normalization Source; root-only authoring removal; one detached RFC 8785-normalized
   production-document base; and one package-private nonterminal success
@@ -1569,6 +1578,31 @@ M06-T07 evidence:
 - coverage decision: M06-T07 becomes `DONE`; P-11 advances to `PARTIAL`; P-03 and P-05 remain open,
   N-018 remains `PLANNED` for the terminal Bundle/editor owners, and G06 remains open; M06-T08 owns
   digest authentication/carry and exact Catalog tuple pinning next
+
+M06-T08 evidence:
+
+- `docs/proof/PUBLISHER-CATALOG-PINNING.md`
+- `docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`
+- artifact SHA-256: `de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`
+- exact boundary: one internal M06-T07 composition; independent authentication of its exact
+  pre-normalization Source digest; positional mapping through the exact M06-T02 requirement-package
+  indexes; exact selected `id`/`version`/`target`/`digest` tuples; and one package-private
+  nonterminal pinned document
+- requirement semantics: Source order and duplicate positions remain unchanged; omitted target is
+  filled only from the selected package; optional extensions cross by exact immutable identity;
+  top-level discovery `location` remains digest-significant Source data but never enters the exact
+  tuple, while nested extension fields with that spelling remain opaque
+- failure and authority profile: malformed, thrown, or unequal digest authority stops at
+  `source-digest`; tuple-authority drift stops at `catalog-pinning`; neither exposes inherited
+  warnings, partial Source/Catalog/package authority, a pinned document, or a Bundle
+- executable evidence: 13 focused Publisher cases, 52 compiler-negative cases, 37 independent
+  proof/mutation cases, 2 exact prerequisite pins, 21 tracked files, 12 immutable trace-ownership
+  rows, package-root privacy, deterministic artifact regeneration, single-pass CI registration,
+  hostile authority rejection, and atomic-write protection
+- coverage decision: M06-T08 becomes `DONE`; P-05 and P-11 remain `PARTIAL`, P-03 remains
+  `NOT_PROVEN`, N-016/N-018/N-020 remain `PLANNED` for their terminal Publisher, runtime, and
+  editor owners, and G06 remains open; M06-T09 owns complete Bundle validation, final-size
+  enforcement, and revision closure next
 
 ## Status vocabulary
 

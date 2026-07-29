@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████░░░░░░░░░░░░░` **70 / 145 tasks complete (48%)**
+**Overall:** `████████████░░░░░░░░░░░░░` **71 / 145 tasks complete (49%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -18,9 +18,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M05 complete:** `█████████` **9 / 9 tasks complete (100%)**
 
-**M06:** `███████░░░░` **7 / 11 tasks complete (64%)**
+**M06:** `████████░░░` **8 / 11 tasks complete (73%)**
 
-**Proof gates:** **6 / 13 complete** · **Next:** `M06-T08`
+**Proof gates:** **6 / 13 complete** · **Next:** `M06-T09`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -119,6 +119,7 @@ packages/
 - [Publisher execution-preflight proof](docs/proof/PUBLISHER-EXECUTION-PREFLIGHT.md)
 - [Publisher Source-preservation proof](docs/proof/PUBLISHER-SOURCE-PRESERVATION.md)
 - [Publisher Source-digest and normalization proof](docs/proof/PUBLISHER-SOURCE-NORMALIZATION.md)
+- [Publisher Source-digest authentication and Catalog-pinning proof](docs/proof/PUBLISHER-CATALOG-PINNING.md)
 - [Runtime core host-port proof](docs/proof/RUNTIME-CORE-HOST-PORTS.md)
 - [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
 - [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)

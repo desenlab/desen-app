@@ -78,6 +78,26 @@ const TRACKED_PATHS = Object.freeze([
   "tests/publisher-catalog-resolution.test.mjs",
 ]);
 
+/**
+ * Task-time byte receipts for the two files that must evolve as later Publisher stages are added.
+ *
+ * The current package manifest is still parsed and semantically audited below for root-only exports
+ * and the exact target-neutral dependency set. Keeping its M06-T02 receipt here prevents an
+ * unrelated successor test script from rewriting historical evidence. The proof-reader receipt is
+ * explicitly the reviewed M06-T02 byte state rather than a claim about this successor reader; the
+ * current compatibility reader is externally anchored by the next Publisher evidence task.
+ */
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [PUBLISHER_PACKAGE_RELATIVE_PATH]: Object.freeze({
+    bytes: 1_304,
+    sha256: "27946cfda1b8d883795b292dba3f2b093c37eafbbd5e709fb0d82be4a1ad5fcc",
+  }),
+  "scripts/lib/publisher-catalog-resolution-proof.mjs": Object.freeze({
+    bytes: 30_623,
+    sha256: "70d244db9f6b07cd793fb94995d3d89b23b335610da40611325b32f3b6d1bf08",
+  }),
+});
+
 const ALLOWED_RESOLVER_IMPORTS = Object.freeze([
   "@desen/protocol",
   "@desen/validator",
@@ -663,6 +683,11 @@ async function verifyPrerequisitePins(enabled) {
 async function fileInventory() {
   const inventory = [];
   for (const relativePath of [...TRACKED_PATHS].sort()) {
+    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    if (historical !== undefined) {
+      inventory.push(Object.freeze({ path: relativePath, ...historical }));
+      continue;
+    }
     const bytes = await readRegularBytes(relativePath);
     inventory.push(
       Object.freeze({

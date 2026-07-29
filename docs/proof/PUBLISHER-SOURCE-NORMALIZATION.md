@@ -121,7 +121,7 @@ proof/mutation cases protect the boundary.
 
 `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
 
-`sha256:f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c`
+`sha256:59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`
 
 ## Scope limits
 

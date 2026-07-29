@@ -246,8 +246,8 @@
     },
     {
       "path": "packages/publisher/package.json",
-      "bytes": 1304,
-      "sha256": "27946cfda1b8d883795b292dba3f2b093c37eafbbd5e709fb0d82be4a1ad5fcc"
+      "bytes": 1375,
+      "sha256": "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7"
     },
     {
       "path": "packages/publisher/src/index.ts",

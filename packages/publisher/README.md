@@ -14,7 +14,8 @@ control-flow rules, binding compatibility, and the finite runtime-obligation han
 then preserves the exact parsed Source fields, semantic array order, opaque extensions, and
 surface-scoped source-node identity trace. M06-T07 calculates the exact Source digest, removes only
 root authoring state, and produces the detached deterministic production-document base in the
-protocol's required order.
+protocol's required order. M06-T08 independently authenticates that digest and positionally pins
+every Source requirement to its exact selected package tuple without exposing a terminal Bundle.
 
 ## Explicit non-responsibilities
 
@@ -31,7 +32,8 @@ finite Source-ingress profile. It intentionally does not expose a partial parser
 package-private, as is M06-T04 capability preflight. The real terminal publication entry point is
 added only when it can either return a fully validated immutable Bundle or reject with no Bundle.
 M06-T05 execution preflight and M06-T06 Source preservation also remain package-private and
-nonterminal. M06-T07 Source normalization has the same private, nonterminal status.
+nonterminal. M06-T07 Source normalization and M06-T08 exact Catalog pinning have the same private,
+nonterminal status.
 
 ## Public entry point
 
@@ -169,7 +171,7 @@ rendering, signing, npm publication, or deployment.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`.
+`sha256:07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`.
 
 ## Static capability preflight
 
@@ -203,7 +205,7 @@ validation obligations.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`.
+`sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
 
 ## Execution preflight and runtime obligations
 
@@ -310,8 +312,8 @@ caller-created preservation shell. The authenticated Source, execution Catalog, 
 requirement alignment, warnings, obligations, preservation projection, Source Catalog
 requirements, and source-node trace cross by exact runtime identity. The original authenticated
 Source remains available without mutation. T07 calculates `sourceDigest` from that exact value
-before authoring removal and normalization; M06-T08 must authenticate and carry the same digest
-while pinning exact Catalog tuples.
+before authoring removal and normalization; M06-T08 subsequently authenticates and carries that
+same digest while pinning exact Catalog tuples.
 
 Only `normalizedDocument` is new. It is a detached, recursively frozen RFC 8785 round trip whose
 root contains exactly `kind: "desen.bundle"`, `desen`, `id`, `entry`, `surfaces`, and optional
@@ -342,6 +344,33 @@ revision, and grants no runtime, host, adapter, storage, signing, or publication
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`.
 
+## Source-digest authentication and exact Catalog pinning
+
+M06-T08 runs M06-T07 internally exactly once from the raw Source and closed package inventory. It
+accepts no caller-created normalization shell. Before building a requirement tuple, it
+independently recalculates the digest from the same authenticated pre-normalization Source,
+requires exact lowercase SHA-256 syntax, and compares that value byte-for-byte with the M06-T07
+authority. A malformed, thrown, or mismatched digest stops at `source-digest`; the new value is
+never substituted silently.
+
+Each Source requirement position maps through M06-T02's exact
+`requirementPackageIndexes`. The selected immutable package supplies `id`, `version`, `target`,
+and `packageDigest`, which becomes tuple `digest`. Source order and duplicate positions remain
+unchanged, and each position retains its exact optional opaque extensions. An omitted target is
+filled only from that selected package. No range, newest-version, candidate-order, location,
+case-folding, trimming, Unicode normalization, sorting, or deduplication rule can select or alter
+a tuple.
+
+Top-level Source requirement `location` remains part of the authenticated Source and therefore
+affects `sourceDigest`, but it is never copied into `requires.catalogs`. A nested extension member
+named `location` remains opaque data. The recursively immutable `pinnedDocument` adds only the
+authenticated Source digest and exact requirements to the normalized production base. It remains
+package-private and has no `revision`, `publication`, terminal success, signing, runtime, host,
+adapter, activation, storage, or deployment authority.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`.
+
 ## Dependencies
 
 - `@desen/protocol` supplies frozen Bundle types, core diagnostics, and RFC 6901 pointers.
@@ -369,8 +398,11 @@ is reachable.
 - Source-digest authority failures stop at `source-digest`; normalization-authority or
   canonical-byte-limit failures stop at `normalization`. No T07 failure exposes a digest,
   normalized document, inherited warning, or lower-stage authority.
-- Exact-tuple pinning and final-Bundle failures remain assigned to later M06 tasks and must relay
-  stable diagnostics through that result.
+- M06-T08 digest reauthentication failures stop at `source-digest`; requirement/package authority
+  drift stops at `catalog-pinning`. Neither path exposes inherited warnings, a pinned document, or
+  lower-stage authority.
+- Final-Bundle validation and revision failures remain assigned to M06-T09 and must relay stable
+  diagnostics through the closed result.
 
 ## Protocol and target support
 
@@ -392,6 +424,7 @@ pnpm --filter @desen/publisher test:capability-preflight
 pnpm --filter @desen/publisher test:execution-preflight
 pnpm --filter @desen/publisher test:source-preservation
 pnpm --filter @desen/publisher test:source-normalization
+pnpm --filter @desen/publisher test:catalog-pinning
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
@@ -400,5 +433,6 @@ pnpm test:publisher-capability-preflight
 pnpm test:publisher-execution-preflight
 pnpm test:publisher-source-preservation
 pnpm test:publisher-source-normalization
+pnpm test:publisher-catalog-pinning
 pnpm check
 ```

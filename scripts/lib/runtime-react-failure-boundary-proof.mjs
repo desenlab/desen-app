@@ -28,12 +28,12 @@ const EXPECTED_DOCUMENT_DIGESTS = Object.freeze({
     sha256: "4b405518d29c43aa8b6d83986368ff57d5fce0b7c6e770e9185c573dba976ab1",
   }),
   matrixRow: Object.freeze({
-    bytes: 1_822,
-    sha256: "888656cfd9918480872fa6a3f053833bbf26596ee70761748313328dd95233d8",
+    bytes: 1_419,
+    sha256: "450bea9a186791336402acb16b16e97653a55b1c2ff74a396f4d9b94eb0a3cb5",
   }),
   normativeRow: Object.freeze({
-    bytes: 1_300,
-    sha256: "18405bc8a389a32a98f1600b00244f8b461f0e47d708057e7f5d2cc4d3ccb49d",
+    bytes: 894,
+    sha256: "9d77f73cebc4c585dfb9122449936fa9ed488f342407ad4a927bbf1c6c6aaa86",
   }),
   findingSection: Object.freeze({
     bytes: 4_045,
@@ -959,6 +959,22 @@ function exactRow(markdown, id) {
   return rows[0];
 }
 
+function canonicalizeExactTableRow(row, expectedCellCount, label) {
+  const fields = row.split("|");
+  if (fields.length !== expectedCellCount + 2 || fields[0] !== "" || fields.at(-1) !== "") {
+    fail(
+      "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
+      `${label} no longer has its exact table-cell structure.`,
+      { expectedCellCount, actualCellCount: Math.max(0, fields.length - 2) },
+    );
+  }
+  const cells = fields.slice(1, -1).map((field) => field.replace(/^[ \t]+|[ \t]+$/gu, ""));
+  if (cells.some((cell) => cell.length === 0)) {
+    fail("FAILURE_BOUNDARY_DOCUMENTATION_DRIFT", `${label} contains an empty semantic table cell.`);
+  }
+  return `| ${cells.join(" | ")} |`;
+}
+
 function verifyLocationPin(lines, artifactPath, artifactSha256, label) {
   const section = lines.join("\n");
   const pathToken = `\`${artifactPath}\``;
@@ -1041,8 +1057,16 @@ function verifyDocumentation(proofText, matrixText, normativeText, findingsText)
     EXPECTED_DOCUMENT_DIGESTS.matrixSection,
     "Proof Matrix M05-T06 section",
   );
-  verifyExactTextDigest(p17, EXPECTED_DOCUMENT_DIGESTS.matrixRow, "Proof Matrix P-17 row");
-  verifyExactTextDigest(n037, EXPECTED_DOCUMENT_DIGESTS.normativeRow, "N-037 row");
+  verifyExactTextDigest(
+    canonicalizeExactTableRow(p17, 8, "Proof Matrix P-17 row"),
+    EXPECTED_DOCUMENT_DIGESTS.matrixRow,
+    "Proof Matrix P-17 row",
+  );
+  verifyExactTextDigest(
+    canonicalizeExactTableRow(n037, 6, "N-037 row"),
+    EXPECTED_DOCUMENT_DIGESTS.normativeRow,
+    "N-037 row",
+  );
   verifyExactTextDigest(
     findingSection.join("\n"),
     EXPECTED_DOCUMENT_DIGESTS.findingSection,

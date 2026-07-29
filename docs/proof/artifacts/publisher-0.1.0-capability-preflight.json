@@ -32,9 +32,9 @@
     {
       "task": "M06-T03",
       "path": "docs/proof/artifacts/publisher-0.1.0-source-preflight.json",
-      "sha256": "46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528",
+      "sha256": "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387",
       "claim": "exact prepared Source, Catalog package, and requirement-alignment authority",
-      "verifiedSha256": "46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528",
+      "verifiedSha256": "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387",
       "matchesPin": true
     }
   ],
@@ -331,8 +331,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 51267,
-      "sha256": "865ec88eb3a8b1f3dda6f7844c5e3d91cb205a64b08b63de25b37e2093b89139"
+      "bytes": 52201,
+      "sha256": "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a"
     },
     {
       "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
@@ -381,8 +381,8 @@
     },
     {
       "path": "packages/publisher/package.json",
-      "bytes": 1304,
-      "sha256": "27946cfda1b8d883795b292dba3f2b093c37eafbbd5e709fb0d82be4a1ad5fcc"
+      "bytes": 1375,
+      "sha256": "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7"
     },
     {
       "path": "packages/publisher/src/capability-preflight.ts",
@@ -467,17 +467,17 @@
     {
       "path": "scripts/lib/publisher-capability-preflight-proof.mjs",
       "bytes": 62137,
-      "sha256": "f88f99777430efe70ff24c4b1a0d2a277c47c18c9a8a55cc2decf688ea177438"
+      "sha256": "5aa8c82170b93d5c3eca9c7801c5a562d706b2f59ed2af956c998893aef3479d"
     },
     {
       "path": "scripts/run-ci-quality-gate.mjs",
-      "bytes": 44735,
-      "sha256": "0adafadc62fa84ddf2e8cb634d1b9aa8ff0c83eeef2ab2515bb2c43cb091f82a"
+      "bytes": 45050,
+      "sha256": "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360"
     },
     {
       "path": "scripts/test/ci-quality-gate.test.mjs",
-      "bytes": 23395,
-      "sha256": "03c0f20a953c7b3f17e683072a0640ec2d83057d9c2c2c1e74a1dd62a79449f1"
+      "bytes": 24068,
+      "sha256": "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf"
     },
     {
       "path": "scripts/verify-publisher-capability-preflight.mjs",

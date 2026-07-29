@@ -2322,10 +2322,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   run a reflection trap before throwing; no impossible side-effect-free Proxy-detection claim is
   made.
 
-- Future action: M06-T08 must pin the exact selected tuples into the Bundle and M06-T11 must drive
-  missing, ambiguous, malformed, digest-mismatched, namespace-conflicting, and finite-limit cases
-  through the complete public Publisher. M07-T03 must verify installed package bytes and exact
-  tuples before activation. A later protocol revision should standardize the resolver authority,
+- Future action: M06-T08 now pins every selected tuple positionally into its nonterminal
+  production document without adopting discovery hints. M06-T11 must still drive missing,
+  ambiguous, malformed, digest-mismatched, namespace-conflicting, and finite-limit cases through
+  the complete public Publisher. M07-T03 must verify installed package bytes and exact tuples
+  before activation. A later protocol revision should standardize the resolver authority,
   target-omission ambiguity policy, diagnostic pointer profile, and package-observation
   authentication boundary. Signing, distributor immutability, and publisher identity remain M12
   responsibilities.
@@ -2380,7 +2381,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   signing, npm publication, or deployment.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-  `sha256:46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`.
+  `sha256:07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`.
 
 - Future action: A later protocol revision should separate Catalog-independent Source validation
   from Catalog-backed reference finalization, define their diagnostic-stage and failure-precedence
@@ -2433,7 +2434,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   detected without any observable reflection.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-  `sha256:cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`.
+  `sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
 
   M06-T05 now runs M06-T04 internally, re-authenticates the exact prepared Source and execution
   Catalog set, prepares resource and operation input/output schemas, checks all statically
@@ -2458,7 +2459,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   already-proven M02 artifact.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-  `sha256:33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`.
+  `sha256:6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67`.
 
 - Future action: M06-T11 must drive both T04/T05 slices through the terminal public Publisher and
   prove every invalid case emits no Bundle. A future protocol revision should expose explicit
@@ -2494,7 +2495,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   is an output admission bound; it does not claim incremental Validator allocation accounting.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-  `sha256:33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`.
+  `sha256:6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67`.
 
 - Future action: A future DESEN revision should standardize explicit diagnostic-to-publication-stage
   ownership, simultaneous-error precedence, whether nonblocking warnings survive a later blocking
@@ -2545,15 +2546,16 @@ This file records implementation discoveries without changing the frozen DESEN 0
   bounded by the inherited raw-Source profile rather than a new T06 payload limit.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
-  `sha256:481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004`.
+  `sha256:261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff`.
 
 - Future action: M06-T07 now calculates the Source digest first, removes only top-level
   `authoring`, and normalizes without dropping, reordering, or interpreting preserved values.
-  M06-T08 through M06-T10 must carry the same digest, observable data, and unchanged node ids into
-  a valid deterministic Bundle, while M06-T11 must prove all invalid preservation cases emit no
-  Bundle. M08-T03 and M08-T07 retain editor reorder and save/open round-trip ownership. A later
-  protocol revision should state the complete semantic array inventory, the parsed-value versus
-  raw-lexical preservation boundary, and the surface-scoped node-identity rule directly.
+  M06-T08 now authenticates and carries the same digest, observable data, and unchanged node ids
+  into its exact pinned document. M06-T09 and M06-T10 must carry them through a valid deterministic
+  Bundle, while M06-T11 must prove all invalid preservation cases emit no Bundle. M08-T03 and
+  M08-T07 retain editor reorder and save/open round-trip ownership. A later protocol revision
+  should state the complete semantic array inventory, the parsed-value versus raw-lexical
+  preservation boundary, and the surface-scoped node-identity rule directly.
 
 ## PF-066 — Deterministic normalization requires one explicit minimal Publisher profile
 
@@ -2580,8 +2582,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
   exact runtime identity. T07 calculates `sourceDigest` from that exact unchanged Source through
   the frozen Section 11.2 helper before any authoring removal or normalization. Root authoring
   changes leave the digest unchanged, while nested extension changes remain digest-significant.
-  M06-T08 retains integration ownership for authenticating and carrying this value into exact
-  Catalog pinning; it must not recompute a post-normalization digest.
+  M06-T08 now independently authenticates and carries this value into exact Catalog pinning
+  without recomputing a post-normalization digest.
 
   A new detached, recursively frozen production-document base contains exactly Bundle `kind`,
   `desen`, `id`, `entry`, `surfaces`, and optional root `extensions`. Producing this base completes
@@ -2608,11 +2610,63 @@ This file records implementation discoveries without changing the frozen DESEN 0
   are added.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
-  `sha256:f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c`.
+  `sha256:59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`.
 
-- Future action: M06-T08 must authenticate and carry T07's exact `sourceDigest` while pinning exact
-  Catalog tuples. M06-T09 must validate the complete Bundle, enforce the final Reference Profile
-  byte limit, and calculate revision from the exact normative projection. M06-T10 must prove
-  official golden and double-publish determinism; M06-T11 must prove every invalid case emits no
-  Bundle. A later protocol revision should either standardize a canonical normalization profile
-  or make byte-level interoperability expectations explicitly profile-scoped.
+- Future action: M06-T08 now authenticates and carries T07's exact `sourceDigest` while pinning
+  exact Catalog tuples. M06-T09 must validate the complete Bundle, enforce the final Reference
+  Profile byte limit, and calculate revision from the exact normative projection. M06-T10 must
+  prove official golden and double-publish determinism; M06-T11 must prove every invalid case
+  emits no Bundle. A later protocol revision should either standardize a canonical normalization
+  profile or make byte-level interoperability expectations explicitly profile-scoped.
+
+## PF-067 — Exact Catalog pinning is positional and discovery hints remain Source-only authority
+
+- Status: OPEN
+- Blocks proof: No; M06-T08 defines and proves one conservative exact-pinning boundary without
+  changing frozen protocol bytes or assigning runtime activation authority.
+- Protocol location: SPEC Sections 8.4, 8.5, 11.2, 11.5, 12.2, 13.3, and 25.1; `C-013`, `C-014`,
+  `PIPE-035`, `PIPE-038`, `R-018`, `R-028`, `R-033`, `R-034`, `R-136`, `R-139`, `A-004`,
+  `D-031`, `N-016`, and `N-020`; related findings `PF-060`, `PF-061`, `PF-065`, and `PF-066`
+- Observation: M06-T02 deliberately deduplicates selected packages while preserving a positional
+  `requirementPackageIndexes` array. Building Bundle requirements from `packages[i]`, a map keyed
+  only by package identity, or a `Set` would therefore lose repeated Source positions and their
+  distinct extensions. Source requirement `location` creates a second subtle boundary: it is an
+  authenticated Source field and correctly affects the Source digest, but the protocol assigns it
+  discovery—not production-selection—semantics. Recursively deleting every `location` would also
+  corrupt opaque extensions.
+- Implementation decision: M06-T08 invokes M06-T07 internally exactly once from raw Source JSON
+  and the closed package-candidate inventory. It accepts no caller-created T07 result. The exact
+  Source digest is independently recalculated from the same authenticated pre-normalization
+  Source, checked for SHA-256 syntax, and compared byte-for-byte with T07's carried value before
+  any tuple is constructed. A mismatch or digest-helper failure returns the closed
+  `source-digest` failure and never silently substitutes the new value.
+
+  Each Source requirement position then resolves through
+  `requirementPackageIndexes[requirementIndex]`. The exact selected package supplies `id`,
+  `version`, `target`, and `packageDigest`; output renames the final field to `digest`. A Source
+  target, when present, must already match exactly. When absent, only the selected package target
+  fills it. The implementation applies no range, newest-version, best-match, trimming, case-folding,
+  Unicode-normalization, candidate-order, sorting, or deduplication policy.
+
+  Requirement `extensions` cross by exact frozen identity and remain opaque. Top-level
+  requirement `location` is never read or copied into the tuple, while nested extension fields
+  with that spelling remain data. The proof exercises `A, B, A` requirements with positional
+  indexes `0, 1, 0`, reversed candidate allocation, omitted target, two discovery locations,
+  duplicate package adoption, package-digest change, root-authoring independence, and hostile
+  authority shells.
+
+  The package-private result carries all T07 authority by runtime identity and adds only one
+  recursively immutable pinned document. That document remains nonterminal: it has no revision,
+  final Bundle validation, publication metadata, signing, runtime, host, adapter, activation,
+  storage, or deployment authority.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`
+  `sha256:de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`.
+
+- Future action: M06-T09 must enforce the complete Bundle schema, semantic validation, final
+  Reference Profile byte ceiling, and exact revision closure over this pinned document. M06-T10
+  must prove the official source-to-bundle golden and double-publication determinism. M06-T11 must
+  drive location, duplicate, digest, tuple, and all predecessor failures through the public
+  Publisher and prove that none emits a Bundle. M07-T03 must independently verify installed package
+  bytes against these exact tuples before activation. A later protocol revision should standardize
+  the target-omission ambiguity policy and make positional requirement-to-package evidence explicit.

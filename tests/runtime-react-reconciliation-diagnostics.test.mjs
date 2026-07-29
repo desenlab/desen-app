@@ -13,10 +13,10 @@ import {
 
 const HISTORICAL_SHA256 = "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb";
 const HISTORICAL_BYTES = 19_234;
-const SUCCESSOR_SHA256 = "481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004";
+const SUCCESSOR_SHA256 = "261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff";
 const SUCCESSOR_ARTIFACT_RELATIVE_PATH =
   "docs/proof/artifacts/publisher-0.1.0-source-preservation.json";
-const LATEST_SUCCESSOR_SHA256 = "f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c";
+const LATEST_SUCCESSOR_SHA256 = "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e";
 const LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH =
   "docs/proof/artifacts/publisher-0.1.0-source-normalization.json";
 const SUCCESSOR_EVIDENCE_TEXT =

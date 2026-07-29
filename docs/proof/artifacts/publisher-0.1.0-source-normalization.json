@@ -14,8 +14,8 @@
     {
       "task": "M06-T06",
       "path": "docs/proof/artifacts/publisher-0.1.0-source-preservation.json",
-      "sha256": "481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004",
-      "verifiedSha256": "481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004"
+      "sha256": "261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff",
+      "verifiedSha256": "261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff"
     }
   ],
   "claims": {
@@ -192,7 +192,7 @@
     },
     {
       "path": "scripts/lib/publisher-source-normalization-proof.mjs",
-      "sha256": "964e427a72745746607dbba960f65dffc4327d0bef308462506fe9a4cfa080e2"
+      "sha256": "088c89780561a3ed2c20f2a76e60b4009e80a880efdf3ed4e05fb8e51c19504d"
     },
     {
       "path": "scripts/verify-publisher-source-normalization.mjs",

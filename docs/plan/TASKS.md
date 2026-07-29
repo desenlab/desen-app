@@ -239,7 +239,7 @@ evidence.
 | M06-T05 | DONE        | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
 | M06-T06 | DONE        | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
 | M06-T07 | DONE        | M06-T06          | Source digest, authoring removal, and deterministic normalization                       |
-| M06-T08 | NOT_STARTED | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
+| M06-T08 | DONE        | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
 | M06-T09 | NOT_STARTED | M06-T08          | Bundle validation and revision calculation                                              |
 | M06-T10 | NOT_STARTED | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
 | M06-T11 | NOT_STARTED | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
@@ -358,9 +358,28 @@ Digest failures stop at `source-digest`; projection and byte-limit failures stop
 Publisher cases, fifty-two compiler-negative cases, twenty-six independently authenticated
 proof/mutation cases, two exact prerequisites, eighteen byte-tracked files, and the reviewed
 single-pass CI registration protect the boundary. `PF-066` records the minimal profile and the
-required digest → authoring-removal → normalization order. P-11 advances only to `PARTIAL`; P-03,
-P-05, and G06 remain open. M06-T08 owns authenticating and carrying this exact digest while
-pinning exact Catalog tuples next.
+required digest → authoring-removal → normalization order. At the T07 checkpoint, P-11 advanced
+only to `PARTIAL`; P-03, P-05, and G06 remained open, and M06-T08 retained the next integration
+ownership for authenticating the digest and pinning exact Catalog tuples.
+
+M06-T08 now composes M06-T07 exactly once, recalculates the digest from the same authenticated
+pre-normalization Source, and refuses malformed, thrown, or unequal digest authority at
+`source-digest` without silently replacing it. Only after that check does it map every loose
+Source requirement position through M06-T02's exact `requirementPackageIndexes` authority.
+`id`, `version`, `target`, and `digest` come from the selected immutable package; an omitted Source
+target is filled only from that package. Requirement order and duplicates remain positional, so
+the independently exercised `A, B, A` input produces indexes `0, 1, 0` and three output tuples.
+Discovery `location` remains digest-significant Source data but never becomes tuple or selection
+authority; optional requirement extensions cross by exact opaque identity.
+
+The new `pinnedDocument` is recursively immutable and remains package-private and nonterminal. It
+adds only `sourceDigest` and exact `requires.catalogs` to the T07 normalized base; `revision`,
+`publication`, terminal Bundle success, signing, runtime, host, adapter, activation, and deployment
+remain absent. Thirteen focused Publisher cases, fifty-two compiler-negative cases, thirty-seven
+independent proof/mutation cases, two exact prerequisite pins, twenty-one tracked files, and twelve
+trace-ownership rows protect the boundary. `PF-067` records the positional and discovery-hint
+rules. P-05 and P-11 remain `PARTIAL`, P-03 remains `NOT_PROVEN`, and G06 remains open. M06-T09
+owns complete Bundle validation, final-size enforcement, and revision closure next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

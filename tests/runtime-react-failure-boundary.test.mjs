@@ -63,6 +63,14 @@ function replaceExactOnce(text, search, replacement) {
   return text.replace(search, replacement);
 }
 
+function varyTablePadding(row) {
+  const cells = row
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
+  return `| ${cells[0]} |   ${cells.slice(1).join("    |  ")}   |`;
+}
+
 test("accepts immutable task-time M05-T06 failure-boundary evidence", async () => {
   const result = await verifyRuntimeReactFailureBoundaryEvidence();
   assert.deepEqual(result, {
@@ -366,6 +374,18 @@ test("rejects moved, duplicated, pending, or mismatched proof and M05-T06 matrix
       hasEvidenceCode("FAILURE_BOUNDARY_DOCUMENTATION_DRIFT"),
     );
   }
+});
+
+test("accepts formatter-only P-17 and N-037 column-padding changes", async () => {
+  const texts = await documentationTexts();
+  const result = await verifyRuntimeReactFailureBoundaryEvidence({
+    ...texts,
+    proofMatrixText: replaceRow(texts.proofMatrixText, "P-17", varyTablePadding),
+    normativeCoverageText: replaceRow(texts.normativeCoverageText, "N-037", varyTablePadding),
+  });
+  assert.equal(result.result, "PASS");
+  assert.equal(result.proofStatus, "P-17:PARTIAL");
+  assert.equal(result.normativeStatus, "N-037:TESTED");
 });
 
 test("rejects N-037, P-17, and PF-055 current-closure drift", async () => {

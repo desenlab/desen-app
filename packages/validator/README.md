@@ -265,7 +265,7 @@ replacement for the cumulative Validator APIs.
 
 Publisher integration evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`.
+`sha256:07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`.
 
 ### Publisher capability-contract seam
 
@@ -284,7 +284,7 @@ data from fabricating identities, actions, or capability uses.
 
 Publisher integration evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`.
+`sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
 
 ### Component-contract APIs
 

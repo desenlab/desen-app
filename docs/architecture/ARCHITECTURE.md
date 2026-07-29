@@ -271,7 +271,7 @@ perform discovery, download, activation, rendering, signing, publication, or dep
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`.
+`sha256:07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`.
 
 ## Publisher static capability preflight boundary
 
@@ -303,7 +303,7 @@ dependencies.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`.
+`sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
 
 ## Publisher execution preflight boundary
 
@@ -339,7 +339,7 @@ semantic-order, and source-node identity preservation.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-`sha256:33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`.
+`sha256:6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67`.
 
 ## Publisher Source-preservation boundary
 
@@ -377,7 +377,7 @@ deployment.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
-`sha256:481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004`.
+`sha256:261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff`.
 
 ## Publisher Source-digest, authoring-removal, and normalization boundary
 
@@ -396,7 +396,7 @@ deterministic normalization—and keeps three authorities deliberately separate:
 3. one detached, recursively frozen production-document base containing only Bundle `kind`,
    protocol version, document id, entry surface, surfaces, and optional root extensions.
 
-Producing the second value performs actual top-level authoring removal. It never recursively
+Producing the third value performs actual top-level authoring removal. It never recursively
 deletes a field named `authoring`, so opaque extension payloads retain such fields unchanged.
 Loose Catalog requirements and discovery locations remain attached to the authenticated Source
 authority for the next exact-pinning step; neither enters the normalized document. M06-T08
@@ -421,7 +421,36 @@ runtime value, target adapter, activation, storage, or signing authority.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
-`sha256:f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c`.
+`sha256:59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`.
+
+## Publisher Source-digest authentication and exact Catalog-pinning boundary
+
+M06-T08 invokes the complete M06-T07 boundary exactly once from raw inputs and accepts no
+caller-created normalization shell. It independently recalculates `sourceDigest` from the exact
+authenticated Source, requires valid SHA-256 syntax, and compares the value byte-for-byte with the
+T07 authority before constructing a tuple. A failed calculation or mismatch stops at
+`source-digest`; the recalculated value is never substituted into output.
+
+Every loose Source requirement is then mapped positionally through the exact
+`requirementPackageIndexes` produced by M06-T02. Tuple `id`, `version`, `target`, and `digest` come
+only from the selected package and its execution Catalog. An omitted Source target is filled from
+that one selected package. Requirements are neither sorted nor deduplicated: duplicate positions
+retain separate tuple entries and their distinct opaque extensions.
+
+Source `location` remains part of the authenticated Source and therefore affects the Source digest,
+but it is never selection authority and never enters `requires.catalogs`. A nested `location` inside
+an extension remains opaque data. This prevents both blanket recursive key deletion and accidental
+whole-requirement spreading.
+
+The result carries every T07 authority by exact runtime identity and adds one recursively immutable
+`pinnedDocument`. That document contains the normalized production fields, authenticated
+`sourceDigest`, and exact `requires.catalogs`; it still has no `revision`, `publication`, terminal
+Bundle success, signature, runtime, host, adapter, activation, or storage authority. Complete
+Bundle validation, the final 2 MiB limit, and two-stage revision closure remain M06-T09.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`
+`sha256:de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`.
 
 ## Applications
 

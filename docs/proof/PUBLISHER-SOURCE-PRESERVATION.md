@@ -117,7 +117,7 @@ The evidence builder:
 
 `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
 
-`sha256:481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004`
+`sha256:261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff`
 
 ## Scope limits
 

@@ -284,6 +284,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-publisher-source-normalization.mjs",
       "tests/publisher-source-normalization.test.mjs",
     ],
+    [
+      "publisher-catalog-pinning",
+      "scripts/verify-publisher-catalog-pinning.mjs",
+      "tests/publisher-catalog-pinning.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -307,12 +312,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "2641d5cd0ca845316c344cf1674fb4a1ae7c2d5812551be38d0da1ed700076c3";
+  "21adfb76cd424b47787dbce4f1db65b63cee5a3cc8f52c60ec5eaceec0f75a19";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "f133b1d75e9a074a2f0073352e156d33cc36ac3c40e8064b8acd8bebeb58c4f6";
+  "054ecc24f331d94f8247e2da6f38df4a157cc23b8eaea309517ecc0511931c0d";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "f273610732eed8703c5971b091afc9edf69011468bebf85b5197ef6a52dcbdb4";
-const QUALITY_GATE_PLAN_SHA256 = "236710a34dc70d65ba5b5488105ae61e1be0930a489365037065d4a4f106c12d";
+  "24c274d93d7954cc9559e50b2a4b95aa5573c1de5c50533387fda7551448bebd";
+const QUALITY_GATE_PLAN_SHA256 = "2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0";
 const WORKSPACE_TEST_SCRIPT_SHA256 =
   "6dc7cae96692feb13650a06f3b8733da6f6c431a0cad777e08a8d0d567880c3d";
 const WORKSPACE_MANIFEST_SHA256 =
@@ -1260,6 +1265,13 @@ export async function executeQualityGate({
   return receipt;
 }
 
+export async function executeDefaultQualityGate(options = {}) {
+  return executeQualityGate({
+    ...options,
+    steps: createQualityGateSteps(),
+  });
+}
+
 function summaryCell(value) {
   return String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
 }
@@ -1326,7 +1338,7 @@ async function main() {
         throw new CancellationError(signalState.receivedSignal);
       }
     };
-    receipt = await executeQualityGate({
+    receipt = await executeDefaultQualityGate({
       runStep: async (step) => {
         await runCommandStep(step, signalState);
       },
