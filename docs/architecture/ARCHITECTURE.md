@@ -452,6 +452,38 @@ Evidence:
 `docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`
 `sha256:de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`.
 
+## Publisher complete-Bundle validation and revision-closure boundary
+
+M06-T09 is the first public terminal Publisher boundary. `publishDesenSource` accepts only raw
+Source JSON and a closed array of immutable package observations; caller-adjustable limits and all
+M06-T01–T08 intermediates remain package-private. It invokes the complete M06-T08 boundary exactly
+once and accepts no reconstructed stage result.
+
+Revision creation uses a deliberate bootstrap-and-closure profile. The Publisher calculates a
+provisional revision over the pinned document, adds only that `revision`, and measures the
+candidate's RFC 8785 canonical UTF-8 bytes. It then invokes the cumulative Bundle execution
+Validator exactly once with the exact M06-T08 Catalog set. The Validator must return an independent,
+recursively immutable graph whose canonical bytes equal the candidate. The Publisher remeasures
+that snapshot and recalculates its revision. Provisional, embedded, and closed revisions must all
+match. This resolves the schema/revision circularity without hashing a placeholder or allowing
+`revision` to hash itself.
+
+The project interprets the Reference Profile's “2 MiB uncompressed” terminal limit as at most
+2,097,152 RFC 8785 canonical UTF-8 bytes for the complete M06 Bundle. The ceiling is checked before
+and after Validator snapshotting. Optional future `publication` metadata is absent; its later owner
+must remeasure after adding it.
+
+Success returns only the exact Validator Bundle snapshot and the exact authenticated M06-T08
+warning array. Every inherited or terminal failure returns the closed no-Bundle shell. Malformed
+stage authority, mutable or shared Validator graphs, byte-authority drift, final-size overflow,
+and revision failure cannot expose a candidate, partial Bundle, Source, Catalog set, obligation,
+or warning. The operation is synchronous, deterministic, platform-neutral, and has no filesystem,
+network, clock, signing, storage, activation, host, adapter, editor, or deployment authority.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
+`sha256:2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`.
+
 ## Applications
 
 ### Desen App

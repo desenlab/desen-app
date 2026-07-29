@@ -76,6 +76,31 @@ const TRACKED = Object.freeze([
   "scripts/verify-publisher-source-normalization.mjs",
   ROOT_TEST,
 ]);
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  "packages/publisher/src/publish-result.ts": Object.freeze({
+    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
+  }),
+  [PUBLIC_DECLARATION]: Object.freeze({
+    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
+  }),
+  "scripts/lib/publisher-source-normalization-proof.mjs": Object.freeze({
+    sha256: "088c89780561a3ed2c20f2a76e60b4009e80a880efdf3ed4e05fb8e51c19504d",
+  }),
+});
+const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  "DEPRECATED_CAPABILITY_CODE",
+  "INVALID_SOURCE_JSON_CODE",
+  "PUBLISHER_DIAGNOSTIC_REGISTRY",
+  "PUBLISH_PIPELINE_STAGES",
+  "PUBLISH_SOURCE_JSON_LIMITS",
+  "SOURCE_LIMIT_EXCEEDED_CODE",
+  "getPublisherDiagnosticDefinition",
+  "isPublisherDiagnosticCode",
+]);
+const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
+  "publishDesenSource",
+]);
 const PARTIALS = Object.freeze([
   "bundle",
   "value",
@@ -1077,8 +1102,11 @@ function staticBoundary(
   const exportKeys = Object.keys(publisherPackage.exports ?? {});
   const rootExport = publisherPackage.exports?.["."];
   const dependencies = Object.keys(publisherPackage.dependencies ?? {}).sort();
+  const runtimeExports = Object.keys(publicApi).sort();
   if (
     leaked.length > 0 ||
+    (canonicalizeJson(runtimeExports) !== canonicalizeJson(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
+      canonicalizeJson(runtimeExports) !== canonicalizeJson(SUCCESSOR_ROOT_RUNTIME_EXPORTS)) ||
     canonicalizeJson(exportKeys) !== canonicalizeJson(["."]) ||
     !ordinaryDataObject(rootExport) ||
     canonicalizeJson(rootExport) !==
@@ -1087,6 +1115,7 @@ function staticBoundary(
   ) {
     fail("PUBLISHER_NORMALIZATION_BOUNDARY_DRIFT", "Package-root privacy drifted.", {
       leaked,
+      runtimeExports,
       exportKeys,
       rootExport,
       dependencies,
@@ -1170,12 +1199,16 @@ async function inventory() {
     fail("PUBLISHER_NORMALIZATION_TRACKED_FILE_DRIFT", "Tracked paths contain duplicates.");
   }
   return Promise.all(
-    sorted.map(async (relative) =>
-      Object.freeze({
+    sorted.map(async (relative) => {
+      const historical = HISTORICAL_TRACKED_RECEIPTS[relative];
+      if (historical !== undefined) {
+        return Object.freeze({ path: relative, ...historical });
+      }
+      return Object.freeze({
         path: relative,
         sha256: hash(await bytes(relative)),
-      }),
-    ),
+      });
+    }),
   );
 }
 

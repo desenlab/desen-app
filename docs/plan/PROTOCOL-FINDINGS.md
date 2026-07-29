@@ -2670,3 +2670,55 @@ This file records implementation discoveries without changing the frozen DESEN 0
   Publisher and prove that none emits a Bundle. M07-T03 must independently verify installed package
   bytes against these exact tuples before activation. A later protocol revision should standardize
   the target-omission ambiguity policy and make positional requirement-to-package evidence explicit.
+
+## PF-068 — Terminal revision closure needs a bootstrap profile and a concrete byte metric
+
+- Status: OPEN
+- Blocks proof: No; M06-T09 defines one deterministic local profile without changing frozen
+  protocol bytes, signing policy, or activation authority.
+- Protocol location: SPEC Sections 11.2, 11.3, 11.5, 13.1–13.3, 24.1, and 25.1; `SC-019`,
+  `C-012`, `C-014`, `PIPE-005`, `PIPE-039`, `PIPE-040`, `R-007`, `R-012`, `R-029`, `R-031`,
+  `R-035`, `R-036`, `D-030`, `D-035`, `R-123`, `N-016`, `N-018`, and `N-041`; related findings
+  `PF-060`, `PF-066`, and `PF-067`
+- Observation: the frozen Bundle schema requires `revision`, while the normative revision
+  projection excludes `revision` itself. A Validator cannot accept the otherwise complete Bundle
+  before some revision is present, but hashing a placeholder and trusting it would leave no
+  closure proof. The Reference Profile separately limits an uncompressed Bundle to 2 MiB without
+  naming a transport encoding or defining whether an implementation should count an in-memory
+  object, source text, or canonical bytes.
+- Implementation decision: M06-T09 consumes only the exact M06-T08 authority. It first calculates
+  a provisional revision over the pinned revision-free document through the frozen protocol
+  helper. It constructs a candidate by explicitly copying the permitted Bundle members and adding
+  only that revision; no object spread, default, `publication`, authoring state, or task-local
+  metadata can enter.
+
+  The Publisher interprets “2 MiB uncompressed” for this deterministic 0.1.0 profile as at most
+  2,097,152 bytes of RFC 8785 canonical UTF-8 for the complete Bundle represented at the current
+  boundary. It measures the candidate before Validator work and the Validator snapshot afterward.
+  Exact capacity passes; a one-byte crossing rejects atomically at `bundle-validation`. If a later
+  owner adds optional `publication` metadata, that owner must repeat the complete measurement.
+
+  The exact candidate and exact M06-T08 Catalog set cross
+  `validateDesenBundleExecutionContracts` once. A valid result may retain unresolved runtime
+  obligations; those do not invalidate a structurally and semantically publishable Bundle and do
+  not cross the public result. The result must be an authenticated ordinary frozen shell whose
+  `value` is an independent recursively immutable graph. Its canonical bytes must equal the
+  candidate byte-for-byte. The Publisher then recalculates revision over that exact snapshot and
+  requires provisional, embedded, and closing values to match.
+
+  Public success returns only the Validator's exact Bundle snapshot plus M06-T08's exact warnings.
+  Every inherited or task-owned failure retains the closed no-Bundle result. Malformed predecessor
+  or Validator shells, mutable or shared graphs, forged diagnostics, non-byte canonicalization
+  output, helper throws, byte divergence, overflow, and revision mismatch expose no Source,
+  Catalog set, obligation, warning, candidate, partial value, or Bundle.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
+  `sha256:2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`.
+
+- Future action: M06-T10 must compare two independent public publishes with each other and with the
+  official publication-free Bundle bytes, making P-03 and P-11 terminally provable. M06-T11 must
+  drive the complete invalid-source matrix only through the public entry point and prove exact
+  no-Bundle precedence. M07-T02 must independently verify stored Bundle revision, Source digest,
+  and final bytes before activation. A later protocol revision should standardize both the
+  provisional-to-closure procedure and the precise byte metric if cross-implementation byte-limit
+  parity is required.

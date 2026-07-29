@@ -416,16 +416,25 @@ document is recursively immutable and still contains no revision, publication me
 Bundle success, signing, runtime, host, adapter, activation, or deployment authority. `PF-067`
 records this boundary. P-05 and P-11 remain `PARTIAL`, P-03 remains `NOT_PROVEN`, and M06-T09
 owns final Bundle validation and revision closure.
+M06-T09 now exposes `publishDesenSource` only after composing M06-T08 once, adding a provisional
+revision, enforcing the complete 2 MiB canonical UTF-8 envelope, and validating the exact
+candidate against the exact authenticated Catalog set. The Validator must return an independent
+frozen byte-equal Bundle snapshot; the Publisher remeasures it and requires provisional,
+embedded, and freshly calculated revisions to close. Success returns only that exact snapshot and
+the exact predecessor warnings. Every malformed authority, Validator, byte, limit, or revision
+path remains an atomic no-Bundle failure. `PF-068` records the bootstrap/closure and byte-metric
+profile. P-03 remains `NOT_PROVEN` until M06-T10's official double-publication golden; P-05 and
+P-11 remain `PARTIAL`; G06 remains open.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `71 / 145 tasks complete (49%)`
+- Overall implementation progress: `72 / 145 tasks complete (50%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `8 / 11 tasks complete (73%)`
+- M06 progress: `9 / 11 tasks complete (82%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -482,12 +491,13 @@ owns final Bundle validation and revision closure.
   `M06-T05 — Resource/operation contracts, dynamic compatibility, and runtime obligations`,
   `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`,
   `M06-T07 — Source digest, authoring removal, and deterministic normalization`,
-  `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`
+  `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`,
+  `M06-T09 — Bundle validation and revision calculation`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T09 — Bundle validation and revision calculation`
-- Status: M05 and G05 are complete; M06-T01 through M06-T08 are complete; M06-T09 is ready
+  `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`
+- Status: M05 and G05 are complete; M06-T01 through M06-T09 are complete; M06-T10 is ready
 
 ## Completed preparation
 
@@ -846,10 +856,11 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T09 — Bundle validation and revision calculation`. Consume only the complete M06-T08
-authority, construct the complete candidate Bundle, enforce the final Reference Profile byte
-ceiling, validate the exact Bundle structure and semantics, and close the revision through the
-normative revision-exclusion projection. A failure must expose no Bundle or partial authority.
+Begin `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`. Invoke
+only the public M06-T09 operation from two fresh input identities, require byte-identical immutable
+results and revisions, and compare the output byte-for-byte with the frozen official Bundle after
+removing only optional `publication` metadata. This task must not add a second production path or
+weaken the public boundary.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1603,6 +1614,31 @@ M06-T08 evidence:
   `NOT_PROVEN`, N-016/N-018/N-020 remain `PLANNED` for their terminal Publisher, runtime, and
   editor owners, and G06 remains open; M06-T09 owns complete Bundle validation, final-size
   enforcement, and revision closure next
+
+M06-T09 evidence:
+
+- `docs/proof/PUBLISHER-BUNDLE-PUBLICATION.md`
+- `docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
+- artifact SHA-256: `2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`
+- exact boundary: one internal M06-T08 composition; provisional revision over the exact pinned
+  document; explicit revision-only candidate construction; complete canonical-byte measurement;
+  one cumulative Bundle Validator call with the exact authenticated Catalog set; independent
+  byte-equal Validator snapshot; second complete measurement; and three-way revision closure
+- terminal contract: public `publishDesenSource(rawSource, catalogPackages)` exposes only the exact
+  immutable Validator Bundle plus exact predecessor warnings on success; limits, intermediates,
+  authority diagnostics, publication metadata, and private stage entry points remain absent from
+  the package root
+- failure and authority profile: every inherited failure passes through only when its frozen
+  diagnostic shell is authentic; malformed predecessor/Validator data, mutable or shared graphs,
+  non-byte canonicalization, byte drift, overflow, helper throws, and revision mismatch return an
+  atomic no-Bundle failure
+- evidence boundary: T09 proves complete validation, final-size enforcement, revision closure,
+  source/distribution parity, public/private API shape, and current compatibility readers; the
+  official golden/double-publish claim remains exclusively M06-T10 and the invalid-source matrix
+  remains M06-T11
+- coverage decision: M06-T09 becomes `DONE`; P-03 remains `NOT_PROVEN`, P-05 and P-11 remain
+  `PARTIAL`, N-016/N-018/N-041 remain `PLANNED` for later owners, and G06 remains open; M06-T10
+  owns the official source-to-bundle golden and double-publication determinism next
 
 ## Status vocabulary
 

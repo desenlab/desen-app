@@ -15,7 +15,10 @@ then preserves the exact parsed Source fields, semantic array order, opaque exte
 surface-scoped source-node identity trace. M06-T07 calculates the exact Source digest, removes only
 root authoring state, and produces the detached deterministic production-document base in the
 protocol's required order. M06-T08 independently authenticates that digest and positionally pins
-every Source requirement to its exact selected package tuple without exposing a terminal Bundle.
+every Source requirement to its exact selected package tuple. M06-T09 is the terminal boundary: it
+adds the provisional revision, validates the complete Bundle against the exact Catalog authority,
+enforces the final byte envelope, closes the revision, and exposes the public two-argument
+`publishDesenSource` operation.
 
 ## Explicit non-responsibilities
 
@@ -25,25 +28,35 @@ Node.js, a host application, or target-specific capability implementations.
 
 ## Status
 
-Private and under tracked implementation. The public root currently exposes the stable
+Under tracked implementation. The public root exposes the stable
 `PublishResult` contract, publication-stage vocabulary, Publisher diagnostic registry, and the
-finite Source-ingress profile. It intentionally does not expose a partial parser or an unfinished
-`publish` function. Exact Catalog resolution and the complete M06-T03 Source preflight are likewise
-package-private, as is M06-T04 capability preflight. The real terminal publication entry point is
-added only when it can either return a fully validated immutable Bundle or reject with no Bundle.
+finite Source-ingress profile. It also exposes `publishDesenSource` and the immutable
+`PublishCatalogPackageCandidate` input type now that the operation can either return a fully
+validated immutable Bundle or reject with no Bundle. It intentionally exposes neither a partial
+parser nor any nonterminal stage. Exact Catalog resolution and the complete M06-T03 Source
+preflight are package-private, as is M06-T04 capability preflight.
 M06-T05 execution preflight and M06-T06 Source preservation also remain package-private and
 nonterminal. M06-T07 Source normalization and M06-T08 exact Catalog pinning have the same private,
-nonterminal status.
+nonterminal status; the caller-adjustable M06-T09 limit seam is private as well.
 
 ## Public entry point
 
 Import only from `@desen/publisher`. Private stage modules are implementation details.
 
 ```ts
-import { getPublisherDiagnosticDefinition, PUBLISH_PIPELINE_STAGES } from "@desen/publisher";
+import {
+  getPublisherDiagnosticDefinition,
+  PUBLISH_PIPELINE_STAGES,
+  publishDesenSource,
+} from "@desen/publisher";
+import type { PublishCatalogPackageCandidate } from "@desen/publisher";
 
 const firstStage = PUBLISH_PIPELINE_STAGES[0]; // "json-parse"
 const definition = getPublisherDiagnosticDefinition("run.desen.publisher/INVALID_SOURCE_JSON");
+
+declare const rawSource: string;
+declare const packages: readonly PublishCatalogPackageCandidate[];
+const result = publishDesenSource(rawSource, packages);
 ```
 
 `PublishResult` follows the frozen implementation guide:
@@ -371,6 +384,45 @@ adapter, activation, storage, or deployment authority.
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`.
 
+## Complete Bundle publication and revision closure
+
+M06-T09 invokes M06-T08 exactly once and accepts no caller-created intermediate. It calculates a
+provisional revision from the exact pinned document, constructs a candidate by adding only that
+`revision`, and measures the candidate as RFC 8785 canonical UTF-8. The complete Bundle limit is
+2,097,152 bytes; the limit is applied once before Validator work and again to the Validator's
+independent snapshot.
+
+The exact candidate and exact M06-T08 Catalog set then cross
+`validateDesenBundleExecutionContracts` once. A terminal success requires an ordinary, recursively
+frozen Validator result; an independently allocated Bundle graph; canonical byte equality with the
+candidate; and equality between the provisional revision, the snapshot's revision, and a fresh
+revision calculation over that snapshot. The revision helper follows the protocol's exclusion
+projection, so `revision` does not hash itself. Optional `publication` metadata is not added by
+M06 and remains outside this byte claim.
+
+Only the Validator's exact immutable Bundle snapshot and M06-T08's exact warning array cross the
+public success boundary. Every inherited or terminal failure exposes only `ok: false`, its stopped
+stage, and controlled immutable diagnostics. Malformed predecessor or Validator authority,
+non-byte canonicalization output, mutable or shared snapshots, byte drift, and thrown internal
+helpers all fail closed with no Bundle or intermediate data. Core limit failures stop at
+`bundle-validation`; revision calculation or closure failures stop at `bundle-revision`.
+
+The public operation is deliberately fixed:
+
+```ts
+publishDesenSource(
+  rawSource: string,
+  catalogPackages: readonly PublishCatalogPackageCandidate[],
+): PublishResult;
+```
+
+It is synchronous, deterministic, platform-neutral, and side-effect-free. It performs no
+filesystem, network, clock, signing, storage, activation, runtime, host, adapter, editor, or
+deployment work.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`.
+
 ## Dependencies
 
 - `@desen/protocol` supplies frozen Bundle types, core diagnostics, and RFC 6901 pointers.
@@ -401,8 +453,9 @@ is reachable.
 - M06-T08 digest reauthentication failures stop at `source-digest`; requirement/package authority
   drift stops at `catalog-pinning`. Neither path exposes inherited warnings, a pinned document, or
   lower-stage authority.
-- Final-Bundle validation and revision failures remain assigned to M06-T09 and must relay stable
-  diagnostics through the closed result.
+- Complete-Bundle schema, semantic, authority, and byte failures stop at `bundle-validation`;
+  revision calculation or closure failures stop at `bundle-revision`. Neither path exposes a
+  Bundle, warnings, or predecessor authority.
 
 ## Protocol and target support
 
@@ -425,6 +478,7 @@ pnpm --filter @desen/publisher test:execution-preflight
 pnpm --filter @desen/publisher test:source-preservation
 pnpm --filter @desen/publisher test:source-normalization
 pnpm --filter @desen/publisher test:catalog-pinning
+pnpm --filter @desen/publisher test:bundle-publication
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
@@ -434,5 +488,6 @@ pnpm test:publisher-execution-preflight
 pnpm test:publisher-source-preservation
 pnpm test:publisher-source-normalization
 pnpm test:publisher-catalog-pinning
+pnpm test:publisher-bundle-publication
 pnpm check
 ```

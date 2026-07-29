@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.bundle-publication-proof.v1",
+  "task": "M06-T09",
+  "result": "PASS",
+  "summary": "The built public Publisher composes T08 exactly once, validates one revision-only complete Bundle through the exact Catalog set and twice-enforced 2 MiB canonical-byte envelope, and returns only a revision-closed immutable Validator snapshot or an atomic failure shell.",
+  "prerequisites": [
+    {
+      "task": "M06-T08",
+      "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+      "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f",
+      "verifiedSha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+    },
+    {
+      "task": "M02-T04",
+      "path": "docs/proof/artifacts/protocol-0.1.0-canonicalization.json",
+      "sha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6",
+      "verifiedSha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6"
+    },
+    {
+      "task": "M02-T11",
+      "path": "docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
+      "sha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
+      "verifiedSha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505"
+    }
+  ],
+  "claims": {
+    "implementation": {
+      "sourceAndDistributionAgree": true,
+      "callCounts": { "catalogPinning": 1, "canonicalBytes": 2, "revision": 2, "validator": 1 },
+      "callOrder": [
+        "preflightPublishCatalogPinning",
+        "calculateDesenBundleRevision",
+        "canonicalizeJsonBytes",
+        "validateDesenBundleExecutionContracts",
+        "jsonGraphsAreDisjoint",
+        "canonicalizeJsonBytes",
+        "byteEqual",
+        "calculateDesenBundleRevision"
+      ],
+      "validatorReceivesExactCatalogSet": true,
+      "validatorSnapshotMustBeIndependent": true,
+      "validatorSnapshotCanonicalBytesMustEqualCandidate": true,
+      "completeBundleLimitChecks": ["candidateBytes.byteLength", "validatedBytes.byteLength"],
+      "maximumCanonicalBytes": 2097152,
+      "revisionClosure": ["provisionalRevision", "validatedRevision", "closedRevision"],
+      "exactFrozenSuccessKeys": ["bundle", "diagnostics", "ok"],
+      "exactAtomicFailureKeys": ["diagnostics", "ok", "stage"],
+      "candidate": {
+        "candidateObjectBranches": 2,
+        "revisionOnly": true,
+        "publicationAbsent": true,
+        "optionalExtensionsOnly": true
+      },
+      "publicWrapperArguments": 2
+    },
+    "publicApi": {
+      "sourceExports": ["publishDesenSource"],
+      "distributionExports": ["publishDesenSource"],
+      "declarationExports": ["publishDesenSource"],
+      "catalogCandidateTypeExport": {
+        "sourceExports": ["PublishCatalogPackageCandidate"],
+        "declarationExports": ["PublishCatalogPackageCandidate"],
+        "runtimeValueExportAbsent": true
+      },
+      "signature": "publishDesenSource(string, readonly PublishCatalogPackageCandidate[]): PublishResult",
+      "privateLimitSeamsHidden": true,
+      "exactRootPackageExport": true
+    },
+    "singleOfficialInputPublicRuntimeProbe": {
+      "apiKeys": [
+        "DEPRECATED_CAPABILITY_CODE",
+        "INVALID_SOURCE_JSON_CODE",
+        "PUBLISHER_DIAGNOSTIC_REGISTRY",
+        "PUBLISH_PIPELINE_STAGES",
+        "PUBLISH_SOURCE_JSON_LIMITS",
+        "SOURCE_LIMIT_EXCEEDED_CODE",
+        "getPublisherDiagnosticDefinition",
+        "isPublisherDiagnosticCode",
+        "publishDesenSource"
+      ],
+      "successKeys": ["bundle", "diagnostics", "ok"],
+      "failureKeys": ["diagnostics", "ok", "stage"],
+      "bundleKeys": [
+        "desen",
+        "entry",
+        "extensions",
+        "id",
+        "kind",
+        "requires",
+        "revision",
+        "sourceDigest",
+        "surfaces"
+      ],
+      "successInvocations": 1,
+      "controlledFailureInvocations": 1,
+      "catalogTupleCount": 1,
+      "failureStage": "source-schema",
+      "revisionFormat": true,
+      "sourceDigestFormat": true,
+      "revisionClosed": true,
+      "terminalByteEnvelope": true,
+      "successDeepFrozen": true,
+      "failureDeepFrozen": true,
+      "failureAtomic": true,
+      "failureDiagnosticsNonEmpty": true,
+      "failureFirstDiagnosticError": true,
+      "failureFirstDiagnosticStageMatchesResult": true,
+      "publicationAbsent": true,
+      "authoringAbsent": true,
+      "inputUnchanged": true,
+      "bundleDetachedFromCandidate": true,
+      "independentCloneGraph": true,
+      "independentCloneByteEqual": true,
+      "privateSeamsAbsent": true
+    },
+    "registrations": {
+      "package": "vitest run test/bundle-publication.test.ts",
+      "generate": "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node scripts/generate-publisher-bundle-publication-proof.mjs",
+      "verify": "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node scripts/verify-publisher-bundle-publication.mjs",
+      "test": "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node --test tests/publisher-bundle-publication.test.mjs",
+      "aggregateImmediatePredecessor": "publisher-catalog-pinning",
+      "ci": {
+        "planSha256": "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
+        "proofEntries": 58,
+        "sourceTupleExact": true,
+        "t09Index": 57
+      },
+      "hostedWorkflowSinglePass": true,
+      "executableSinglePassCi": {
+        "planSha256": "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
+        "proofEntries": 58,
+        "stepCount": 124,
+        "t09Index": 57,
+        "t09VerifierSteps": 1,
+        "t09RootTestSteps": 1
+      }
+    },
+    "traceabilityOwnership": {
+      "task": "M06-T09",
+      "rows": [
+        { "collection": "schemaFamilies", "id": "SC-019", "ownerField": "semanticOwners" },
+        { "collection": "conformanceRules", "id": "C-012", "ownerField": "owners" },
+        { "collection": "conformanceRules", "id": "C-014", "ownerField": "owners" },
+        { "collection": "pipelineSteps", "id": "PIPE-005", "ownerField": "owners" },
+        { "collection": "pipelineSteps", "id": "PIPE-039", "ownerField": "owners" },
+        { "collection": "pipelineSteps", "id": "PIPE-040", "ownerField": "owners" },
+        { "collection": "proseRules", "id": "R-007", "ownerField": "owners" },
+        { "collection": "proseRules", "id": "R-012", "ownerField": "owners" },
+        { "collection": "proseRules", "id": "R-029", "ownerField": "owners" },
+        { "collection": "proseRules", "id": "R-031", "ownerField": "owners" },
+        { "collection": "proseRules", "id": "R-035", "ownerField": "owners" },
+        { "collection": "proseRules", "id": "R-036", "ownerField": "owners" }
+      ]
+    },
+    "compatibilityReaders": [
+      {
+        "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+        "sha256": "0c93cce792260994ba3aa8da8c908cc1a24a3ffbeb978e0fc84c2ac0446052df"
+      },
+      {
+        "path": "scripts/lib/publisher-source-preflight-proof.mjs",
+        "sha256": "a669af45d3b87a9e55b1ac69ccf70dba351e82c31f126bdd45ca78f12ddd237b"
+      },
+      {
+        "path": "scripts/lib/publisher-capability-preflight-proof.mjs",
+        "sha256": "4734ff4ba00100ae3ff8e3860e5ec524016f5df01466dd0a6930f174c0919f37"
+      },
+      {
+        "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+        "sha256": "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db"
+      },
+      {
+        "path": "scripts/lib/publisher-source-preservation-proof.mjs",
+        "sha256": "f61880424d9d38ead77731ff2548d3fc5cc4976c6447319ab087acc87c69b02b"
+      },
+      {
+        "path": "scripts/lib/publisher-source-normalization-proof.mjs",
+        "sha256": "6d228a99ec0ceeabbbed505e90f7bbd1fe5c86556ee77bda652ce3fbf0e3599c"
+      },
+      {
+        "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+        "sha256": "d3ec245fd3adc5f594b7da1bb79e486cc4b6d7238f7a42319cfc840783acac3e"
+      }
+    ],
+    "terminalBoundary": {
+      "predecessorInvocations": 1,
+      "provisionalRevisionInvocations": 1,
+      "closureRevisionInvocations": 1,
+      "completeCanonicalByteMeasurements": 2,
+      "validatorInvocations": 1,
+      "maximumCompleteBundleCanonicalUtf8Bytes": 2097152,
+      "candidateContainsOnlyRevisionAsTerminalAddition": true,
+      "publicationMetadataAbsent": true,
+      "validatorReceivesExactCatalogSet": true,
+      "validatorSnapshotGraphIndependenceRequired": true,
+      "validatorSnapshotCanonicalByteEqualityRequired": true,
+      "revisionClosureRequired": true,
+      "exactImmutableSuccess": { "keys": ["bundle", "diagnostics", "ok"] },
+      "exactAtomicFailure": { "keys": ["diagnostics", "ok", "stage"], "partialBundleAbsent": true }
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "docs/proof/protocol-0.1.0-traceability.json",
+      "bytes": 134870,
+      "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+      "bytes": 20001,
+      "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1"
+    },
+    {
+      "path": "packages/protocol/dist/index.js",
+      "bytes": 679,
+      "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+    },
+    {
+      "path": "packages/protocol/dist/canonicalization.js",
+      "bytes": 17634,
+      "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+    },
+    {
+      "path": "packages/validator/dist/index.js",
+      "bytes": 1965,
+      "sha256": "5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+    },
+    {
+      "path": "packages/validator/dist/execution-contract-validation.js",
+      "bytes": 76906,
+      "sha256": "2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+    },
+    {
+      "path": "packages/publisher/src/publish-result.ts",
+      "bytes": 10905,
+      "sha256": "4c2d088d9fa0991df7f0d39f54e0f83efa8facbe964999a450b3ebfdfb23f7e6"
+    },
+    {
+      "path": "packages/publisher/dist/publish-result.js",
+      "bytes": 3481,
+      "sha256": "3c609a16810163cc060a495735197f75f374ad345a7750c8830f82a973295451"
+    },
+    {
+      "path": "packages/publisher/dist/publish-result.d.ts",
+      "bytes": 9841,
+      "sha256": "1f02bbbf427a34857098475cd3e5bc01c6a51516fe871788f234562bfea31d6a"
+    },
+    {
+      "path": "packages/publisher/src/bundle-publication.ts",
+      "bytes": 31049,
+      "sha256": "2661d449c348b8af37f396de51c55a98cae958330d4a17dddf79882f57deeba9"
+    },
+    {
+      "path": "packages/publisher/dist/bundle-publication.js",
+      "bytes": 29627,
+      "sha256": "9b66656ad1ef353c9741629e713067ec194653b41b2b879797f82830c67b0d07"
+    },
+    {
+      "path": "packages/publisher/dist/bundle-publication.d.ts",
+      "bytes": 2556,
+      "sha256": "d4b09b21ec0caa23fea3eaa34b05f9293c7895cde060cda573e0e392c835a597"
+    },
+    {
+      "path": "packages/publisher/src/index.ts",
+      "bytes": 1052,
+      "sha256": "ee8c2968fa06dc764c27fbd22e6a34985bf3071dbf48e72410517167070acefa"
+    },
+    {
+      "path": "packages/publisher/dist/index.js",
+      "bytes": 515,
+      "sha256": "536274c355b47020d0620d5548a3674ba3b229f1665a21907d0be16efa154250"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "bytes": 1043,
+      "sha256": "ce036b2cec5d9bb91afcdbe4f42c1899157291a65786dd0b72189ea8ec577405"
+    },
+    {
+      "path": "packages/publisher/test/bundle-publication.test.ts",
+      "bytes": 30699,
+      "sha256": "5172ff927749b575f29a1c23076265864ed7ff5d7977af7f9ecd5303e27143d8"
+    },
+    {
+      "path": "packages/publisher/test/bundle-publication.types.ts",
+      "bytes": 7806,
+      "sha256": "68ec8038871090208daf2819e8e63a811f96a1d6888117d0514f6473b7038759"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 1452,
+      "sha256": "5fb7838832724a25af2c1de8c2c3dfd134f11c5c92f06f7f20fa67adf4ab853c"
+    },
+    {
+      "path": "package.json",
+      "bytes": 53330,
+      "sha256": "ed0def5f79eaa6cb9f58334a4bced0ea3b6e2cba83baee7d2f211a69647f38df"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 45349,
+      "sha256": "08c509ab0735de604b6e241513fc6f93177ec8323082a066851deef1eceb33c9"
+    },
+    {
+      "path": "scripts/test/ci-quality-gate.test.mjs",
+      "bytes": 24068,
+      "sha256": "7358443014ef4161b9c2e18117d40a5c7f5b3103a31dc9048ac396c2bcd37ac9"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 2168,
+      "sha256": "d94e840ac09f8166ff62d1fe43be0045457a23b6b1155fbe5a1df13ddf91797e"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+      "bytes": 33190,
+      "sha256": "0c93cce792260994ba3aa8da8c908cc1a24a3ffbeb978e0fc84c2ac0446052df"
+    },
+    {
+      "path": "scripts/lib/publisher-source-preflight-proof.mjs",
+      "bytes": 36369,
+      "sha256": "a669af45d3b87a9e55b1ac69ccf70dba351e82c31f126bdd45ca78f12ddd237b"
+    },
+    {
+      "path": "scripts/lib/publisher-capability-preflight-proof.mjs",
+      "bytes": 64634,
+      "sha256": "4734ff4ba00100ae3ff8e3860e5ec524016f5df01466dd0a6930f174c0919f37"
+    },
+    {
+      "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+      "bytes": 62112,
+      "sha256": "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db"
+    },
+    {
+      "path": "scripts/lib/publisher-source-preservation-proof.mjs",
+      "bytes": 69715,
+      "sha256": "f61880424d9d38ead77731ff2548d3fc5cc4976c6447319ab087acc87c69b02b"
+    },
+    {
+      "path": "scripts/lib/publisher-source-normalization-proof.mjs",
+      "bytes": 61816,
+      "sha256": "6d228a99ec0ceeabbbed505e90f7bbd1fe5c86556ee77bda652ce3fbf0e3599c"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+      "bytes": 88341,
+      "sha256": "d3ec245fd3adc5f594b7da1bb79e486cc4b6d7238f7a42319cfc840783acac3e"
+    },
+    {
+      "path": "scripts/generate-publisher-bundle-publication-proof.mjs",
+      "bytes": 841,
+      "sha256": "1e941d779e11a611410cad675e7b81a59399d5a848308e347b356b69fa1f40a4"
+    },
+    {
+      "path": "scripts/verify-publisher-bundle-publication.mjs",
+      "bytes": 671,
+      "sha256": "e576446de1a570d1acd6d5e0fa09930c08f3376a11c9fad5783c1d5dbd9dd1b5"
+    },
+    {
+      "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+      "bytes": 77674,
+      "sha256": "4742e70f9b21ee2aee581f490915fe97d0cf95491d9c21b5f909c63980351079"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/publisher-bundle-publication.test.mjs",
+      "bytes": 43168,
+      "sha256": "fdf0ef0989e365dd34f487d856b76f81e9a8795dc8f7f4788e5fadd8b0648d31"
+    }
+  ],
+  "tests": {
+    "publisherRuntimeCases": 33,
+    "compilerNegativeCases": 45,
+    "rootMutationCases": 88,
+    "rootMutationCategories": [
+      "api",
+      "ast",
+      "authority",
+      "ci",
+      "compatibility",
+      "limit",
+      "options",
+      "symlink",
+      "writer"
+    ],
+    "sha256": {
+      "runtime": "5172ff927749b575f29a1c23076265864ed7ff5d7977af7f9ecd5303e27143d8",
+      "types": "68ec8038871090208daf2819e8e63a811f96a1d6888117d0514f6473b7038759",
+      "root": "fdf0ef0989e365dd34f487d856b76f81e9a8795dc8f7f4788e5fadd8b0648d31"
+    }
+  },
+  "nonclaims": [
+    "M06-T09 does not compare against an official frozen Bundle golden and does not prove repeated-publication byte equality; M06-T10 owns both claims.",
+    "M06-T09 exercises one controlled failure shell but does not prove the invalid-source matrix or the no-emission gate; M06-T11 owns that matrix.",
+    "No publication metadata, signing, storage, activation, deployment, runtime, host, or adapter authority is produced."
+  ],
+  "reproduction": [
+    "pnpm verify:publisher-catalog-pinning",
+    "pnpm --filter @desen/publisher... build",
+    "pnpm --filter @desen/validator test:execution-contracts",
+    "pnpm --filter @desen/publisher typecheck",
+    "pnpm --filter @desen/publisher test:bundle-publication",
+    "node scripts/generate-publisher-bundle-publication-proof.mjs",
+    "node scripts/verify-publisher-bundle-publication.mjs",
+    "node --test tests/publisher-bundle-publication.test.mjs"
+  ]
+}

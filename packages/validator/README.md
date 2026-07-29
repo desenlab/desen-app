@@ -90,6 +90,14 @@ phase in the order `capability-contracts`, `state-and-control-flow`, then
 same authenticated Source object and the complete normalized runtime-obligation set. The existing
 cumulative validation APIs and diagnostic output remain unchanged.
 
+M06-T09 uses `validateDesenBundleExecutionContracts` as the single cumulative terminal
+Bundle-validation authority. The Publisher supplies only its exact revision-bearing candidate and
+the exact M06-T08 Catalog set. Validator returns an independently allocated, recursively immutable
+Bundle snapshot plus any unresolved runtime obligations; the Publisher authenticates that shell,
+requires byte equality with the candidate, remeasures it, and closes the revision before exposing
+success. The Validator does not calculate the revision, apply Publisher byte policy, add
+publication metadata, or authorize storage, activation, rendering, or execution.
+
 The M02-T08 component layer preserves dynamic ValueSpecs as explicit later-validation obligations
 and prepares component prop and style schemas through the documented `PF-011` host-safe boundary.
 Its public APIs remain available when a caller intentionally needs only the lower component stage.
@@ -285,6 +293,29 @@ data from fabricating identities, actions, or capability uses.
 Publisher integration evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
 `sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
+
+### Publisher terminal Bundle seam
+
+M06-T09 calls `validateDesenBundleExecutionContracts` exactly once after M06-T08 has authenticated
+the Source digest, pinned every exact Catalog tuple, calculated a provisional revision, and
+enforced the first complete-Bundle byte measurement. The Validator receives the candidate and the
+same runtime-authenticated execution Catalog set; a structurally equal reconstructed Catalog set
+does not gain authority.
+
+A Validator success may legitimately contain unresolved runtime obligations. They remain
+Validator-internal evidence at this boundary and are not a reason to reject a publishable Bundle.
+The Publisher instead authenticates the exact success discriminator, target, empty diagnostic
+array, frozen obligation array, and independent frozen `value` snapshot. It requires canonical
+byte equality with the candidate and returns that exact Validator snapshot rather than the
+candidate or a Publisher clone. A Validator failure keeps its established code and pointer and is
+annotated only with the `bundle-validation` publication stage.
+
+This seam deliberately keeps responsibilities separate: Validator proves cumulative Bundle
+structure and semantics; Publisher owns the final canonical-byte envelope, revision bootstrap and
+closure, warning carry, and no-Bundle failure shell.
+
+Publisher integration evidence:
+`docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`.
 
 ### Component-contract APIs
 

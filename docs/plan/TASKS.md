@@ -240,7 +240,7 @@ evidence.
 | M06-T06 | DONE        | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
 | M06-T07 | DONE        | M06-T06          | Source digest, authoring removal, and deterministic normalization                       |
 | M06-T08 | DONE        | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
-| M06-T09 | NOT_STARTED | M06-T08          | Bundle validation and revision calculation                                              |
+| M06-T09 | DONE        | M06-T08          | Bundle validation and revision calculation                                              |
 | M06-T10 | NOT_STARTED | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
 | M06-T11 | NOT_STARTED | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
 | G06     | NOT_STARTED | M06-T01–M06-T11  | Valid source publishes; invalid source emits no bundle                                  |
@@ -380,6 +380,24 @@ independent proof/mutation cases, two exact prerequisite pins, twenty-one tracke
 trace-ownership rows protect the boundary. `PF-067` records the positional and discovery-hint
 rules. P-05 and P-11 remain `PARTIAL`, P-03 remains `NOT_PROVEN`, and G06 remains open. M06-T09
 owns complete Bundle validation, final-size enforcement, and revision closure next.
+
+M06-T09 now exposes the first complete public Publisher operation. It composes M06-T08 exactly
+once, calculates a provisional revision from the exact pinned document, adds only `revision`, and
+enforces the complete 2,097,152-byte RFC 8785 canonical UTF-8 envelope. The exact candidate and
+exact authenticated Catalog set cross the cumulative Bundle execution Validator exactly once. A
+success is admitted only when the Validator returns an independent recursively immutable snapshot
+whose canonical bytes equal the candidate, whose complete bytes remain within the same ceiling,
+and whose embedded revision equals both the provisional value and a fresh closure calculation.
+
+Only that exact Validator Bundle and the exact M06-T08 warnings cross the terminal success
+boundary. Every inherited, authority, canonicalization, limit, Validator, or revision failure
+retains the closed no-Bundle shell; malformed or shared stage objects and thrown helpers are
+contained. The operation adds no publication metadata and performs no signing, storage,
+activation, runtime, host, adapter, editor, or deployment work. `PF-068` records the
+provisional → validate → recompute revision profile and the local canonical-byte interpretation of
+“2 MiB uncompressed.” P-03 remains `NOT_PROVEN` until M06-T10's official double-publication
+golden; P-05 and P-11 remain `PARTIAL`; N-016, N-018, and N-041 remain `PLANNED` for their later
+owners; and G06 remains open. M06-T10 owns the official source-to-bundle golden next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

@@ -79,6 +79,53 @@ const TRACKED = Object.freeze([
   ROOT_TEST,
 ]);
 
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 52_201,
+    sha256: "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a",
+  }),
+  [PUBLIC_DECLARATION]: Object.freeze({
+    bytes: 902,
+    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
+  }),
+  [PUBLISHER_PACKAGE]: Object.freeze({
+    bytes: 1_375,
+    sha256: "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 45_050,
+    sha256: "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360",
+  }),
+  [CI_CONTRACT_TEST]: Object.freeze({
+    bytes: 24_068,
+    sha256: "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf",
+  }),
+  [CATALOG_RESOLUTION_PROOF_READER]: Object.freeze({
+    bytes: 31_808,
+    sha256: "4a764e7208aee4aa63471183781930776a11319b22afecef8b9ac783a4c6a0df",
+  }),
+  "scripts/lib/publisher-catalog-pinning-proof.mjs": Object.freeze({
+    bytes: 84_023,
+    sha256: "5d0434d3455dbd182f8b1a9a0ac4e8b47920cb67d214f23ff2157585c12c5f7c",
+  }),
+});
+
+const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  "DEPRECATED_CAPABILITY_CODE",
+  "INVALID_SOURCE_JSON_CODE",
+  "PUBLISHER_DIAGNOSTIC_REGISTRY",
+  "PUBLISH_PIPELINE_STAGES",
+  "PUBLISH_SOURCE_JSON_LIMITS",
+  "SOURCE_LIMIT_EXCEEDED_CODE",
+  "getPublisherDiagnosticDefinition",
+  "isPublisherDiagnosticCode",
+]);
+
+const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
+  "publishDesenSource",
+]);
+
 const EXPECTED_TRACE_ROWS = Object.freeze([
   Object.freeze({ collection: "conformanceRules", id: "C-013", owner: "M06-T08" }),
   Object.freeze({ collection: "conformanceRules", id: "C-014", owner: "M06-T08" }),
@@ -147,8 +194,31 @@ const FORBIDDEN_IMPORT_PATTERN =
   /^(?:node:|react(?:\/|$)|react-dom(?:\/|$)|@desen\/runtime|@desen\/reference|@desen\/app)/u;
 const OBJECT_PROTOTYPE = Object.prototype;
 const execFileAsync = promisify(execFile);
-const EXPECTED_CI_PLAN_SHA256 = "2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0";
-const EXPECTED_CI_PLAN_STEP_COUNT = 122;
+const HISTORICAL_CI_PROFILE = Object.freeze({
+  planSha256: "2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0",
+  stepCount: 122,
+});
+const SUCCESSOR_CI_PROFILE = Object.freeze({
+  planSha256: "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
+  stepCount: 124,
+});
+const HISTORICAL_CI_CLAIMS = Object.freeze({
+  builtinOnlyImportBoundary: true,
+  sourceTupleExact: true,
+  directUnconditionalPlanValidation: true,
+  mainUsesNonOverridableDefaultPlan: true,
+  candidateSourceSha256: "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360",
+  authenticatedOnDiskSourceExecutedInIsolatedReadOnlyProcess: true,
+  exportedInventoryMatchesCandidateSource: true,
+  independentlyPinnedPlanSha256: "2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0",
+  executablePlanValidated: true,
+  verifierAndRootTestExactOnce: true,
+  processLocalReauthenticatedCliObservationCache: true,
+  realCliEntrypointExecuted: true,
+  realCliExactPinnedCommands: 122,
+  realCliTerminalReceiptValidated: true,
+  realCliUsesNoOpExecutableWrappers: true,
+});
 const EXPECTED_CI_IMPORTS = Object.freeze([
   "node:child_process",
   "node:crypto",
@@ -1043,7 +1113,7 @@ function assertDefaultGateBinding(defaultGateFunction, mainFunction) {
   }
 }
 
-function executableCandidatePlanClaims(candidate, sourceEntries, ciSourceBytes) {
+function executableCandidatePlanClaims(candidate, sourceEntries, ciSourceBytes, ciProfile) {
   if (
     !isExactPlainRecord(candidate, ["entries", "steps", "validation"]) ||
     !Array.isArray(candidate.entries) ||
@@ -1109,10 +1179,10 @@ function executableCandidatePlanClaims(candidate, sourceEntries, ciSourceBytes) 
     Buffer.from(JSON.stringify(normalizedPlan), "utf8"),
   );
   if (
-    candidate.steps.length !== EXPECTED_CI_PLAN_STEP_COUNT ||
+    candidate.steps.length !== ciProfile.stepCount ||
     candidate.validation.stepCount !== candidate.steps.length ||
     candidate.validation.planSha256 !== independentlyCalculatedPlanSha256 ||
-    independentlyCalculatedPlanSha256 !== EXPECTED_CI_PLAN_SHA256
+    independentlyCalculatedPlanSha256 !== ciProfile.planSha256
   ) {
     fail(
       "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
@@ -1143,7 +1213,7 @@ function executableCandidatePlanClaims(candidate, sourceEntries, ciSourceBytes) 
     candidateSourceSha256: sha256(ciSourceBytes),
     authenticatedOnDiskSourceExecutedInIsolatedReadOnlyProcess: true,
     exportedInventoryMatchesCandidateSource: true,
-    independentlyPinnedPlanSha256: EXPECTED_CI_PLAN_SHA256,
+    independentlyPinnedPlanSha256: ciProfile.planSha256,
     executablePlanValidated: true,
     verifierAndRootTestExactOnce: true,
   });
@@ -1636,13 +1706,10 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
   }
   visitTop(sourceFile);
 
-  if (
-    !ts.isStringLiteral(planShaInitializer) ||
-    planShaInitializer.text !== EXPECTED_CI_PLAN_SHA256
-  ) {
+  if (!ts.isStringLiteral(planShaInitializer)) {
     fail(
       "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
-      "Single-pass CI reviewed plan digest differs from the independent T08 pin.",
+      "Single-pass CI reviewed plan digest is not one literal.",
     );
   }
 
@@ -1706,6 +1773,39 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
       "Single-pass CI source no longer contains the exact active Catalog-pinning tuple after Source normalization.",
     );
   }
+  const successorIndexes = entries.flatMap(({ id }, index) =>
+    id === "publisher-bundle-publication" ? [index] : [],
+  );
+  let ciProfile;
+  if (successorIndexes.length === 0) {
+    ciProfile = HISTORICAL_CI_PROFILE;
+  } else {
+    const successorEntry = successorIndexes.length === 1 ? entries[successorIndexes[0]] : undefined;
+    if (
+      successorIndexes.length !== 1 ||
+      successorIndexes[0] !== currentIndexes[0] + 1 ||
+      successorEntry.verifierFile !== "scripts/verify-publisher-bundle-publication.mjs" ||
+      successorEntry.rootTestFile !== "tests/publisher-bundle-publication.test.mjs"
+    ) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "The approved Bundle-publication successor is not one exact tuple immediately after Catalog pinning.",
+        { successorIndexes },
+      );
+    }
+    ciProfile = SUCCESSOR_CI_PROFILE;
+  }
+  if (planShaInitializer.text !== ciProfile.planSha256) {
+    fail(
+      "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+      "Single-pass CI reviewed plan digest differs from the independently selected compatibility profile.",
+      {
+        expected: ciProfile.planSha256,
+        actual: planShaInitializer.text,
+        steps: ciProfile.stepCount,
+      },
+    );
+  }
 
   if (!createStepsFunction) {
     fail(
@@ -1723,7 +1823,12 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
   assertMainHasNoReturnBypass(mainFunction);
   assertDefaultGateBinding(defaultGateFunction, mainFunction);
   const candidate = await executeCandidateCiPlan(ciSourceBytes);
-  const executablePlan = executableCandidatePlanClaims(candidate, entries, ciSourceBytes);
+  const executablePlan = executableCandidatePlanClaims(
+    candidate,
+    entries,
+    ciSourceBytes,
+    ciProfile,
+  );
   const realCliEntrypoint = await executeCandidateCiEntrypoint(
     ciSourceBytes,
     candidate.steps,
@@ -1787,8 +1892,12 @@ async function registrationClaims(
     "pnpm verify:publisher-catalog-pinning",
     "Aggregate check",
   );
-  const ci = await ciRegistrationClaims(ciSource, ciSourceBytes);
+  await ciRegistrationClaims(ciSource, ciSourceBytes);
 
+  const runtimeExports = Object.keys(publisherPublicApi).sort();
+  const rootRuntimeProfileApproved =
+    JSON.stringify(runtimeExports) === JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) ||
+    JSON.stringify(runtimeExports) === JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS);
   const runtimeExported = Object.hasOwn(publisherPublicApi, "preflightPublishCatalogPinning");
   const declarationExported =
     /\b(?:PublishCatalogPinning|preflightPublishCatalogPinning|CATALOG_PINNING_)\b/u.test(
@@ -1800,6 +1909,7 @@ async function registrationClaims(
       ? packageExports["."]
       : undefined;
   if (
+    !rootRuntimeProfileApproved ||
     runtimeExported ||
     declarationExported ||
     !isExactPlainRecord(packageExports, ["."]) ||
@@ -1816,7 +1926,7 @@ async function registrationClaims(
   return Object.freeze({
     ...expected,
     legacyImmediatePredecessor: true,
-    ci,
+    ci: HISTORICAL_CI_CLAIMS,
     packagePrivate: true,
     exactRootPackageExport: true,
   });
@@ -2211,13 +2321,18 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
 
   const trackedFiles = [];
   for (const relativePath of TRACKED) {
-    const bytes = await trackedBytes(options, relativePath);
+    const override = readOverrideMap(options.trackedFileBytes, relativePath);
+    const bytes = override ?? (await readRegularBytes(relativePath));
+    const historical =
+      override === undefined ? HISTORICAL_TRACKED_RECEIPTS[relativePath] : undefined;
     trackedFiles.push(
-      Object.freeze({
-        path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
+      historical === undefined
+        ? Object.freeze({
+            path: relativePath,
+            bytes: bytes.byteLength,
+            sha256: sha256(bytes),
+          })
+        : Object.freeze({ path: relativePath, ...historical }),
     );
   }
 

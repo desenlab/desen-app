@@ -97,6 +97,10 @@ export type SourceNormalizationExtensionDiagnosticCode =
   | "run.desen.publisher/SOURCE_NORMALIZATION_AUTHORITY_INVALID"
   | "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED";
 
+/** Project diagnostic introduced by the terminal M06-T09 Bundle boundary. */
+export type BundlePublicationExtensionDiagnosticCode =
+  "run.desen.publisher/BUNDLE_VALIDATION_AUTHORITY_INVALID";
+
 /** Stable diagnostic code owned by the DESEN Publisher implementation. */
 export type PublisherDiagnosticCode = PublisherExtensionDiagnosticCode;
 
@@ -121,7 +125,8 @@ export type PublishExtensionDiagnosticCode =
   | CapabilityPreflightExtensionDiagnosticCode
   | ExecutionPreflightExtensionDiagnosticCode
   | SourcePreservationExtensionDiagnosticCode
-  | SourceNormalizationExtensionDiagnosticCode;
+  | SourceNormalizationExtensionDiagnosticCode
+  | BundlePublicationExtensionDiagnosticCode;
 
 /** Whether a publication diagnostic blocks Bundle emission. */
 export type PublishDiagnosticSeverity = "error" | "warning";

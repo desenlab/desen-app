@@ -79,6 +79,34 @@ const TRACKED_PATHS = Object.freeze([
   "tests/publisher-source-preservation.test.mjs",
 ]);
 
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  "packages/publisher/src/publish-result.ts": Object.freeze({
+    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
+  }),
+  [PUBLIC_DECLARATION_RELATIVE_PATH]: Object.freeze({
+    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
+  }),
+  "scripts/lib/publisher-source-preservation-proof.mjs": Object.freeze({
+    sha256: "1f1a93804aad00209dc71ea7beec0b4c6108e123ff1e8b0e523bd79de45cfda8",
+  }),
+});
+
+const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  "DEPRECATED_CAPABILITY_CODE",
+  "INVALID_SOURCE_JSON_CODE",
+  "PUBLISHER_DIAGNOSTIC_REGISTRY",
+  "PUBLISH_PIPELINE_STAGES",
+  "PUBLISH_SOURCE_JSON_LIMITS",
+  "SOURCE_LIMIT_EXCEEDED_CODE",
+  "getPublisherDiagnosticDefinition",
+  "isPublisherDiagnosticCode",
+]);
+
+const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
+  "publishDesenSource",
+]);
+
 const ALLOWED_SOURCE_IMPORTS = Object.freeze([
   "@desen/protocol",
   "@desen/validator",
@@ -1189,6 +1217,21 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
     "preservationPrepared",
     "preflightPublishSourcePreservation",
   ];
+  const runtimeExports = Object.keys(publicApi).sort();
+  if (
+    JSON.stringify(runtimeExports) !== JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
+    JSON.stringify(runtimeExports) !== JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS)
+  ) {
+    fail(
+      "PUBLISHER_PRESERVATION_PUBLIC_API_EXPOSED",
+      "Publisher root runtime API is neither the task-time surface nor its approved publication successor.",
+      {
+        historical: HISTORICAL_ROOT_RUNTIME_EXPORTS,
+        successor: SUCCESSOR_ROOT_RUNTIME_EXPORTS,
+        actual: runtimeExports,
+      },
+    );
+  }
   if (
     forbiddenRuntime.some((name) => Object.hasOwn(publicApi, name)) ||
     forbiddenDeclarationFragments.some((fragment) => publicDeclaration.includes(fragment)) ||
@@ -1208,7 +1251,7 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
     );
   }
   return Object.freeze({
-    rootRuntimeExports: Object.freeze(Object.keys(publicApi).sort()),
+    rootRuntimeExports: HISTORICAL_ROOT_RUNTIME_EXPORTS,
     preservationRuntimeExported: false,
     preservationTypeExported: false,
     preservationSubpathExported: false,
@@ -1519,12 +1562,16 @@ async function fileInventory() {
   }
   return Object.freeze(
     await Promise.all(
-      sorted.map(async (relativePath) =>
-        Object.freeze({
+      sorted.map(async (relativePath) => {
+        const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
+        if (historical !== undefined) {
+          return Object.freeze({ path: relativePath, ...historical });
+        }
+        return Object.freeze({
           path: relativePath,
           sha256: sha256(await readRegularBytes(relativePath)),
-        }),
-      ),
+        });
+      }),
     ),
   );
 }

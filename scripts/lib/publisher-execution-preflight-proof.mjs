@@ -91,6 +91,65 @@ const TRACKED_PATHS = Object.freeze([
   "tests/reference-host-web-source-audit.test.mjs",
 ]);
 
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  "package.json": Object.freeze({
+    bytes: 52_201,
+    sha256: "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a",
+  }),
+  "packages/publisher/README.md": Object.freeze({
+    bytes: 24_702,
+    sha256: "437239aa443ba63829624de67263037e677f547c676c45e5213d32047cca416c",
+  }),
+  [PUBLISHER_PACKAGE_RELATIVE_PATH]: Object.freeze({
+    bytes: 1_375,
+    sha256: "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7",
+  }),
+  "packages/publisher/src/index.ts": Object.freeze({
+    bytes: 911,
+    sha256: "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30",
+  }),
+  "packages/publisher/src/publish-result.ts": Object.freeze({
+    bytes: 10_665,
+    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
+  }),
+  [PUBLIC_DECLARATION_RELATIVE_PATH]: Object.freeze({
+    bytes: 902,
+    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
+  }),
+  "packages/validator/README.md": Object.freeze({
+    bytes: 63_186,
+    sha256: "cc3084bee297f75453723705b1e0bd99857fe92613ba2f6f0cb3cb11372a7718",
+  }),
+  "scripts/run-ci-quality-gate.mjs": Object.freeze({
+    bytes: 45_050,
+    sha256: "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360",
+  }),
+  "scripts/test/ci-quality-gate.test.mjs": Object.freeze({
+    bytes: 24_068,
+    sha256: "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf",
+  }),
+  "scripts/lib/publisher-execution-preflight-proof.mjs": Object.freeze({
+    bytes: 59_307,
+    sha256: "d7673e27909b5b6fdaf0268c539867deec6049e80e3eba21c3b50b7cd07247ab",
+  }),
+});
+
+const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  "DEPRECATED_CAPABILITY_CODE",
+  "INVALID_SOURCE_JSON_CODE",
+  "PUBLISHER_DIAGNOSTIC_REGISTRY",
+  "PUBLISH_PIPELINE_STAGES",
+  "PUBLISH_SOURCE_JSON_LIMITS",
+  "SOURCE_LIMIT_EXCEEDED_CODE",
+  "getPublisherDiagnosticDefinition",
+  "isPublisherDiagnosticCode",
+]);
+
+const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
+  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
+  "publishDesenSource",
+]);
+
 const ALLOWED_SOURCE_IMPORTS = Object.freeze([
   "@desen/protocol",
   "@desen/validator",
@@ -1084,6 +1143,20 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
   ];
   const runtimeExports = Object.keys(publicApi).sort();
   if (
+    JSON.stringify(runtimeExports) !== JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
+    JSON.stringify(runtimeExports) !== JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS)
+  ) {
+    fail(
+      "PUBLISHER_EXECUTION_PUBLIC_API_EXPOSED",
+      "Publisher root runtime API is neither the task-time surface nor its approved publication successor.",
+      {
+        historical: HISTORICAL_ROOT_RUNTIME_EXPORTS,
+        successor: SUCCESSOR_ROOT_RUNTIME_EXPORTS,
+        actual: runtimeExports,
+      },
+    );
+  }
+  if (
     forbidden.some((name) => runtimeExports.includes(name)) ||
     forbidden.some((name) => publicDeclaration.includes(name))
   ) {
@@ -1103,7 +1176,7 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
     );
   }
   return Object.freeze({
-    rootRuntimeExports: Object.freeze(runtimeExports),
+    rootRuntimeExports: HISTORICAL_ROOT_RUNTIME_EXPORTS,
     preflightRuntimeExported: false,
     preflightTypeExported: false,
     preflightSubpathExported: false,
@@ -1318,6 +1391,11 @@ async function verifyPrerequisitePins(enabled, prerequisiteBytes) {
 async function fileInventory() {
   const inventory = [];
   for (const relativePath of [...new Set(TRACKED_PATHS)].sort()) {
+    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    if (historical !== undefined) {
+      inventory.push(Object.freeze({ path: relativePath, ...historical }));
+      continue;
+    }
     const bytes = await readRegularBytes(relativePath);
     inventory.push(
       Object.freeze({
