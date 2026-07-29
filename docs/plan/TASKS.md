@@ -241,7 +241,7 @@ evidence.
 | M06-T07 | DONE        | M06-T06          | Source digest, authoring removal, and deterministic normalization                       |
 | M06-T08 | DONE        | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
 | M06-T09 | DONE        | M06-T08          | Bundle validation and revision calculation                                              |
-| M06-T10 | NOT_STARTED | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
+| M06-T10 | DONE        | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
 | M06-T11 | NOT_STARTED | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
 | G06     | NOT_STARTED | M06-T01–M06-T11  | Valid source publishes; invalid source emits no bundle                                  |
 
@@ -398,6 +398,24 @@ provisional → validate → recompute revision profile and the local canonical-
 “2 MiB uncompressed.” P-03 remains `NOT_PROVEN` until M06-T10's official double-publication
 golden; P-05 and P-11 remain `PARTIAL`; N-016, N-018, and N-041 remain `PLANNED` for their later
 owners; and G06 remains open. M06-T10 owns the official source-to-bundle golden next.
+
+M06-T10 adds no production path. It invokes only the public `publishDesenSource` root with two
+fresh copies of the frozen official sign-in Source and web Catalog candidate. Both calls produce
+separate recursively immutable result graphs with identical 2,173-byte RFC 8785 canonical Bundle
+output, revision, and Source digest. Those bytes exactly equal the frozen official Bundle after
+removing only its own root `publication` member; every other root and nested member remains part
+of the golden.
+
+The proof pins the exact official fixture/vector bytes and direct T09, snapshot,
+canonicalization, and official-suite artifacts. It also authenticates the six-case public package
+test and rejects shared identities, private-path substitution, extra projection, fixture or
+prerequisite drift, canonical-byte mismatch, malformed receipts, unsafe filesystem authority, and
+non-atomic evidence output. P-03 and P-11 become `PROVEN`; P-05 remains `PARTIAL`; N-016 and N-018
+remain `PLANNED` for their later runtime/editor owners; and G06 remains open for M06-T11's complete
+invalid-source/no-Bundle matrix.
+
+`docs/proof/artifacts/publisher-0.1.0-official-golden.json`
+`sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

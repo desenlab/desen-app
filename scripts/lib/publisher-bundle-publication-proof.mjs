@@ -109,6 +109,71 @@ const TRACKED = Object.freeze([
   ROOT_TEST,
 ]);
 
+// M06-T09 remains immutable evidence while later Publisher tasks extend only coordination
+// surfaces. Current bytes are still parsed and executed below; these receipts preserve the exact
+// task-time artifact projection after an approved successor is authenticated.
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [PUBLISHER_PACKAGE]: Object.freeze({
+    bytes: 1_452,
+    sha256: "5fb7838832724a25af2c1de8c2c3dfd134f11c5c92f06f7f20fa67adf4ab853c",
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 53_330,
+    sha256: "ed0def5f79eaa6cb9f58334a4bced0ea3b6e2cba83baee7d2f211a69647f38df",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 45_349,
+    sha256: "08c509ab0735de604b6e241513fc6f93177ec8323082a066851deef1eceb33c9",
+  }),
+  [CI_CONTRACT_TEST]: Object.freeze({
+    bytes: 24_068,
+    sha256: "7358443014ef4161b9c2e18117d40a5c7f5b3103a31dc9048ac396c2bcd37ac9",
+  }),
+  "scripts/lib/publisher-catalog-pinning-proof.mjs": Object.freeze({
+    bytes: 88_341,
+    sha256: "d3ec245fd3adc5f594b7da1bb79e486cc4b6d7238f7a42319cfc840783acac3e",
+  }),
+  [PROOF_LIBRARY]: Object.freeze({
+    bytes: 77_674,
+    sha256: "4742e70f9b21ee2aee581f490915fe97d0cf95491d9c21b5f909c63980351079",
+  }),
+});
+
+const HISTORICAL_CI_RECEIPT = Object.freeze({
+  planSha256: "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
+  proofEntries: 58,
+  stepCount: 124,
+  t09Index: 57,
+  t09VerifierSteps: 1,
+  t09RootTestSteps: 1,
+});
+
+const OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE = Object.freeze({
+  planSha256: "ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582",
+  proofEntries: 59,
+  stepCount: 126,
+  t09Index: 57,
+  t10Index: 58,
+});
+
+const HISTORICAL_REGISTRATION_CLAIMS = Object.freeze({
+  package: "vitest run test/bundle-publication.test.ts",
+  generate:
+    "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node scripts/generate-publisher-bundle-publication-proof.mjs",
+  verify:
+    "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node scripts/verify-publisher-bundle-publication.mjs",
+  test: "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node --test tests/publisher-bundle-publication.test.mjs",
+  aggregateImmediatePredecessor: "publisher-catalog-pinning",
+  ci: Object.freeze({
+    planSha256: "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
+    proofEntries: 58,
+    sourceTupleExact: true,
+    t09Index: 57,
+  }),
+  hostedWorkflowSinglePass: true,
+  executableSinglePassCi: HISTORICAL_CI_RECEIPT,
+});
+
 const EXPECTED_TRACE_ROWS = Object.freeze([
   Object.freeze({ collection: "schemaFamilies", id: "SC-019", ownerField: "semanticOwners" }),
   Object.freeze({ collection: "conformanceRules", id: "C-012", ownerField: "owners" }),
@@ -486,11 +551,12 @@ const PREREQUISITE_SET = new Set(
   ),
 );
 
-async function trackedBytes(options, relativePath) {
-  return (
-    readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET) ??
-    readRegularBytes(relativePath)
-  );
+async function trackedInput(options, relativePath) {
+  const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+  return Object.freeze({
+    bytes: override ?? (await readRegularBytes(relativePath)),
+    overridden: override !== undefined,
+  });
 }
 
 async function prerequisiteClaims(options) {
@@ -1380,12 +1446,45 @@ function extractCiInventory(ciSourceText) {
       { predecessorIndexes, currentIndexes, current },
     );
   }
+  const successorIndexes = entries.flatMap(({ id }, index) =>
+    id === "publisher-official-golden" ? [index] : [],
+  );
+  const successor = successorIndexes.length === 1 ? entries[successorIndexes[0]] : undefined;
+  if (
+    successorIndexes.length !== 1 ||
+    successorIndexes[0] !== currentIndexes[0] + 1 ||
+    successor?.verifierFile !== "scripts/verify-publisher-official-golden.mjs" ||
+    successor?.rootTestFile !== "tests/publisher-official-golden.test.mjs"
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "CI must register the exact T10 verifier/root-test tuple immediately after T09.",
+      { currentIndexes, successorIndexes, successor },
+    );
+  }
   if (
     typeof planHash !== "string" ||
     !/^[0-9a-f]{64}$/u.test(planHash) ||
     createStepsFunction?.body === undefined
   ) {
     fail("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT", "CI reviewed plan authority is missing.");
+  }
+  if (
+    planHash !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.planSha256 ||
+    entries.length !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.proofEntries ||
+    currentIndexes[0] !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.t09Index ||
+    successorIndexes[0] !== OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE.t10Index
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The reviewed live T10 successor profile differs from its exact single-pass plan authority.",
+      {
+        planHash,
+        proofEntries: entries.length,
+        t09Index: currentIndexes[0],
+        t10Index: successorIndexes[0],
+      },
+    );
   }
   const stepCalls = collectCalls(createStepsFunction.body);
   const proofEntryReferences = (
@@ -1405,6 +1504,7 @@ function extractCiInventory(ciSourceText) {
     entries: Object.freeze(entries),
     planHash,
     t09Index: currentIndexes[0],
+    t10Index: successorIndexes[0],
   });
 }
 
@@ -1427,15 +1527,27 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
       "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node scripts/verify-publisher-bundle-publication.mjs",
     test: "pnpm verify:publisher-catalog-pinning && pnpm --filter @desen/publisher... build && pnpm --filter @desen/validator test:execution-contracts && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:bundle-publication && node --test tests/publisher-bundle-publication.test.mjs",
   });
+  const expectedSuccessor = Object.freeze({
+    package: "vitest run test/official-golden.test.ts",
+    generate:
+      "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/generate-publisher-official-golden-proof.mjs",
+    verify:
+      "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/verify-publisher-official-golden.mjs",
+    test: "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node --test tests/publisher-official-golden.test.mjs",
+  });
   if (
     publisherPackage.scripts?.["test:bundle-publication"] !== expected.package ||
     rootPackage.scripts?.["generate:publisher-bundle-publication"] !== expected.generate ||
     rootPackage.scripts?.["verify:publisher-bundle-publication"] !== expected.verify ||
-    rootPackage.scripts?.["test:publisher-bundle-publication"] !== expected.test
+    rootPackage.scripts?.["test:publisher-bundle-publication"] !== expected.test ||
+    publisherPackage.scripts?.["test:official-golden"] !== expectedSuccessor.package ||
+    rootPackage.scripts?.["generate:publisher-official-golden"] !== expectedSuccessor.generate ||
+    rootPackage.scripts?.["verify:publisher-official-golden"] !== expectedSuccessor.verify ||
+    rootPackage.scripts?.["test:publisher-official-golden"] !== expectedSuccessor.test
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT",
-      "T09 package or root generate/verify/test registrations drifted.",
+      "T09 or its approved T10 package/root generate/verify/test registrations drifted.",
     );
   }
   assertImmediateSingleRootScriptEdge(
@@ -1450,6 +1562,18 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
     "pnpm verify:publisher-bundle-publication",
     "Aggregate check",
   );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.test,
+    "pnpm test:publisher-bundle-publication",
+    "pnpm test:publisher-official-golden",
+    "Aggregate test successor",
+  );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.check,
+    "pnpm verify:publisher-bundle-publication",
+    "pnpm verify:publisher-official-golden",
+    "Aggregate check successor",
+  );
   const workflowInvocations =
     workflowText.match(/run:\s*node scripts\/run-ci-quality-gate\.mjs\s*$/gmu) ?? [];
   if (workflowInvocations.length !== 1) {
@@ -1459,17 +1583,13 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
       { count: workflowInvocations.length },
     );
   }
-  return Object.freeze({
-    ...expected,
-    aggregateImmediatePredecessor: "publisher-catalog-pinning",
-    ci: Object.freeze({
-      planSha256: ci.planHash,
-      proofEntries: ci.entries.length,
-      sourceTupleExact: true,
-      t09Index: ci.t09Index,
-    }),
-    hostedWorkflowSinglePass: true,
-  });
+  if (ci.t10Index !== ci.t09Index + 1) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "The authenticated T10 CI successor is not immediately after T09.",
+    );
+  }
+  return HISTORICAL_REGISTRATION_CLAIMS;
 }
 
 const RUNTIME_RECEIPT_KEYS = new Set([
@@ -1785,20 +1905,30 @@ const CI_RECEIPT_KEYS = new Set([
 ]);
 
 function validateCiReceipt(receipt, ciInventory) {
-  if (
-    !exactPlainRecord(receipt, CI_RECEIPT_KEYS) ||
-    ownData(receipt, "planSha256") !== ciInventory.planHash ||
-    ownData(receipt, "proofEntries") !== ciInventory.entries.length ||
-    ownData(receipt, "stepCount") !== 8 + ciInventory.entries.length * 2 ||
-    ownData(receipt, "t09Index") !== ciInventory.t09Index ||
-    ownData(receipt, "t09VerifierSteps") !== 1 ||
-    ownData(receipt, "t09RootTestSteps") !== 1
-  ) {
+  const exactShape = exactPlainRecord(receipt, CI_RECEIPT_KEYS);
+  const historical =
+    exactShape &&
+    ownData(receipt, "planSha256") === HISTORICAL_CI_RECEIPT.planSha256 &&
+    ownData(receipt, "proofEntries") === HISTORICAL_CI_RECEIPT.proofEntries &&
+    ownData(receipt, "stepCount") === HISTORICAL_CI_RECEIPT.stepCount &&
+    ownData(receipt, "t09Index") === HISTORICAL_CI_RECEIPT.t09Index &&
+    ownData(receipt, "t09VerifierSteps") === HISTORICAL_CI_RECEIPT.t09VerifierSteps &&
+    ownData(receipt, "t09RootTestSteps") === HISTORICAL_CI_RECEIPT.t09RootTestSteps;
+  const current =
+    exactShape &&
+    ownData(receipt, "planSha256") === ciInventory.planHash &&
+    ownData(receipt, "proofEntries") === ciInventory.entries.length &&
+    ownData(receipt, "stepCount") === 8 + ciInventory.entries.length * 2 &&
+    ownData(receipt, "t09Index") === ciInventory.t09Index &&
+    ownData(receipt, "t09VerifierSteps") === 1 &&
+    ownData(receipt, "t09RootTestSteps") === 1;
+  if (!historical && !current) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
-      "The live single-pass CI plan does not match its authenticated T09 source inventory.",
+      "The single-pass CI receipt matches neither frozen T09 evidence nor its authenticated live successor inventory.",
     );
   }
+  if (historical) return HISTORICAL_CI_RECEIPT;
   return Object.freeze({
     planSha256: ownData(receipt, "planSha256"),
     proofEntries: ownData(receipt, "proofEntries"),
@@ -1903,9 +2033,10 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
   const options = exactOwnDataOptions(rawOptions);
   const prerequisites = await prerequisiteClaims(options);
   const trackedPairs = await Promise.all(
-    TRACKED.map(async (relativePath) =>
-      Object.freeze({ relativePath, bytes: await trackedBytes(options, relativePath) }),
-    ),
+    TRACKED.map(async (relativePath) => {
+      const input = await trackedInput(options, relativePath);
+      return Object.freeze({ relativePath, ...input });
+    }),
   );
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
   const text = (relativePath) => {
@@ -1940,10 +2071,7 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
     text(CI_WORKFLOW),
     ciInventory,
   );
-  const ciReceipt = validateCiReceipt(
-    options.ciReceipt ?? (await executeLiveCiProbe()),
-    ciInventory,
-  );
+  validateCiReceipt(options.ciReceipt ?? (await executeLiveCiProbe()), ciInventory);
   const runtimeReceipt = validateRuntimeReceipt(
     options.runtimeReceipt ??
       (await executeOfficialPublicRuntimeProbe(text(SOURCE_FIXTURE), text(CATALOG_FIXTURE))),
@@ -1951,13 +2079,16 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
   const tests = testInventoryClaims(text(RUNTIME_TEST), text(TYPE_TEST), text(ROOT_TEST));
   const traceabilityOwnership = traceabilityClaims(text(TRACEABILITY));
   const trackedFiles = Object.freeze(
-    trackedPairs.map(({ relativePath, bytes }) =>
-      Object.freeze({
-        path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
-    ),
+    trackedPairs.map(({ relativePath, bytes, overridden }) => {
+      const historical = overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath];
+      return historical === undefined
+        ? Object.freeze({
+            path: relativePath,
+            bytes: bytes.byteLength,
+            sha256: sha256(bytes),
+          })
+        : Object.freeze({ path: relativePath, ...historical });
+    }),
   );
   const compatibilityReaders = Object.freeze(
     PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS.map((readerPath) => {
@@ -1985,10 +2116,7 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
       implementation,
       publicApi,
       singleOfficialInputPublicRuntimeProbe: runtimeReceipt,
-      registrations: Object.freeze({
-        ...registrations,
-        executableSinglePassCi: ciReceipt,
-      }),
+      registrations,
       traceabilityOwnership,
       compatibilityReaders,
       terminalBoundary: Object.freeze({

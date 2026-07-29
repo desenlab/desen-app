@@ -202,6 +202,10 @@ const SUCCESSOR_CI_PROFILE = Object.freeze({
   planSha256: "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
   stepCount: 124,
 });
+const OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE = Object.freeze({
+  planSha256: "ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582",
+  stepCount: 126,
+});
 const HISTORICAL_CI_CLAIMS = Object.freeze({
   builtinOnlyImportBoundary: true,
   sourceTupleExact: true,
@@ -1793,7 +1797,28 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
         { successorIndexes },
       );
     }
-    ciProfile = SUCCESSOR_CI_PROFILE;
+    const officialGoldenIndexes = entries.flatMap(({ id }, index) =>
+      id === "publisher-official-golden" ? [index] : [],
+    );
+    if (officialGoldenIndexes.length === 0) {
+      ciProfile = SUCCESSOR_CI_PROFILE;
+    } else {
+      const officialGoldenEntry =
+        officialGoldenIndexes.length === 1 ? entries[officialGoldenIndexes[0]] : undefined;
+      if (
+        officialGoldenIndexes.length !== 1 ||
+        officialGoldenIndexes[0] !== successorIndexes[0] + 1 ||
+        officialGoldenEntry.verifierFile !== "scripts/verify-publisher-official-golden.mjs" ||
+        officialGoldenEntry.rootTestFile !== "tests/publisher-official-golden.test.mjs"
+      ) {
+        fail(
+          "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+          "The approved official-golden successor is not one exact tuple immediately after Bundle publication.",
+          { officialGoldenIndexes },
+        );
+      }
+      ciProfile = OFFICIAL_GOLDEN_SUCCESSOR_CI_PROFILE;
+    }
   }
   if (planShaInitializer.text !== ciProfile.planSha256) {
     fail(

@@ -423,6 +423,27 @@ deployment work.
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`.
 
+## Official Source-to-Bundle golden
+
+M06-T10 adds no production export or alternate publisher. It calls only `publishDesenSource` with
+two independently cloned copies of the frozen official sign-in Source and web Catalog package.
+Both calls return separate recursively immutable result graphs whose RFC 8785 canonical Bundle
+bytes, revision, and Source digest are identical.
+
+The oracle is the frozen official Bundle after removing exactly its own root `publication`
+member. Every other root and nested member remains semantic. The public output equals that
+projection at 2,173 canonical UTF-8 bytes with SHA-256
+`fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247`,
+revision
+`sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601`,
+and Source digest
+`sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878`.
+Changing only root object-member allocation order or root `authoring` state leaves the result
+unchanged; neither root `authoring` nor root `publication` appears in the terminal Bundle.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-official-golden.json`.
+
 ## Dependencies
 
 - `@desen/protocol` supplies frozen Bundle types, core diagnostics, and RFC 6901 pointers.
@@ -479,6 +500,7 @@ pnpm --filter @desen/publisher test:source-preservation
 pnpm --filter @desen/publisher test:source-normalization
 pnpm --filter @desen/publisher test:catalog-pinning
 pnpm --filter @desen/publisher test:bundle-publication
+pnpm --filter @desen/publisher test:official-golden
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
@@ -489,5 +511,6 @@ pnpm test:publisher-source-preservation
 pnpm test:publisher-source-normalization
 pnpm test:publisher-catalog-pinning
 pnpm test:publisher-bundle-publication
+pnpm test:publisher-official-golden
 pnpm check
 ```

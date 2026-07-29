@@ -425,16 +425,24 @@ the exact predecessor warnings. Every malformed authority, Validator, byte, limi
 path remains an atomic no-Bundle failure. `PF-068` records the bootstrap/closure and byte-metric
 profile. P-03 remains `NOT_PROVEN` until M06-T10's official double-publication golden; P-05 and
 P-11 remain `PARTIAL`; G06 remains open.
+M06-T10 now freezes the public Publisher's official Source-to-Bundle golden without adding a
+second production path. Two fresh official Source/Catalog candidate graphs published through
+`publishDesenSource` produce separate immutable Bundle graphs with identical 2,173-byte RFC 8785
+canonical output, revision, and Source digest. Those bytes exactly equal the frozen official
+Bundle after removing only its own root `publication` member; root `authoring` remains excluded
+while nested semantic content remains significant. P-03 and P-11 are now `PROVEN`; P-05 remains
+`PARTIAL`, N-016 and N-018 remain `PLANNED` for later runtime/editor owners, and G06 remains open
+for M06-T11's invalid-source matrix.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `72 / 145 tasks complete (50%)`
+- Overall implementation progress: `73 / 145 tasks complete (50%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `9 / 11 tasks complete (82%)`
+- M06 progress: `10 / 11 tasks complete (91%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -492,12 +500,13 @@ P-11 remain `PARTIAL`; G06 remains open.
   `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`,
   `M06-T07 — Source digest, authoring removal, and deterministic normalization`,
   `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`,
-  `M06-T09 — Bundle validation and revision calculation`
+  `M06-T09 — Bundle validation and revision calculation`,
+  `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`
-- Status: M05 and G05 are complete; M06-T01 through M06-T09 are complete; M06-T10 is ready
+  `M06-T11 — Invalid-source matrix proves no bundle is emitted`
+- Status: M05 and G05 are complete; M06-T01 through M06-T10 are complete; M06-T11 is ready
 
 ## Completed preparation
 
@@ -856,11 +865,10 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`. Invoke
-only the public M06-T09 operation from two fresh input identities, require byte-identical immutable
-results and revisions, and compare the output byte-for-byte with the frozen official Bundle after
-removing only optional `publication` metadata. This task must not add a second production path or
-weaken the public boundary.
+Begin `M06-T11 — Invalid-source matrix proves no bundle is emitted`. Exercise the public
+M06-T09 operation across the complete task-owned invalid-source and precedence matrix, require
+every case to stop at its exact earliest public stage with a nonempty error-first diagnostic list,
+and prove that no failure exposes a Bundle or partial publication authority.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1639,6 +1647,28 @@ M06-T09 evidence:
 - coverage decision: M06-T09 becomes `DONE`; P-03 remains `NOT_PROVEN`, P-05 and P-11 remain
   `PARTIAL`, N-016/N-018/N-041 remain `PLANNED` for later owners, and G06 remains open; M06-T10
   owns the official source-to-bundle golden and double-publication determinism next
+
+M06-T10 evidence:
+
+- `docs/proof/PUBLISHER-OFFICIAL-GOLDEN.md`
+- `docs/proof/artifacts/publisher-0.1.0-official-golden.json`
+- artifact SHA-256: `a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`
+- exact golden: two fresh official Source/Catalog candidate graphs cross only the public
+  `publishDesenSource` root and produce separate recursively immutable results whose 2,173 RFC
+  8785 canonical Bundle bytes, revision, and Source digest are identical
+- external oracle: both public outputs equal the frozen official sign-in Bundle after removing
+  exactly its own root `publication`; no other root or nested member is projected away
+- deterministic constants: canonical SHA-256
+  `fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247`,
+  revision `sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601`,
+  and Source digest
+  `sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878`
+- evidence boundary: exact T09/snapshot/canonicalization/official-suite pins, 19 tracked files,
+  six focused Publisher cases, 71 hostile root mutation cases, no-follow reads, strict inert
+  authority capture, and atomic writes; no alternate production implementation was added
+- coverage decision: M06-T10 becomes `DONE`; P-03 and P-11 become `PROVEN`; P-05 remains
+  `PARTIAL`, N-016 and N-018 remain `PLANNED`, and G06 remains open only for M06-T11's complete
+  invalid-source/no-Bundle matrix
 
 ## Status vocabulary
 

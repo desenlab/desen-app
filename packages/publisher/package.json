@@ -21,6 +21,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:bundle-publication": "vitest run test/bundle-publication.test.ts",
+    "test:official-golden": "vitest run test/official-golden.test.ts",
     "test:capability-preflight": "vitest run test/capability-preflight.test.ts",
     "test:catalog-pinning": "vitest run test/catalog-pinning.test.ts",
     "test:catalog-resolution": "vitest run test/catalog-resolution.test.ts",

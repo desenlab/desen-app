@@ -484,6 +484,33 @@ Evidence:
 `docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
 `sha256:2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`.
 
+## Publisher official golden and deterministic replay boundary
+
+M06-T10 adds no Publisher implementation path. It treats the M06-T09 public package root as the
+only executable publication authority and uses frozen upstream conformance documents as external
+oracles. Two separately parsed Source objects and two separately cloned Catalog-package
+candidates are published independently; their input, result, Bundle, and diagnostic graphs remain
+identity-disjoint.
+
+The comparison oracle removes exactly the official Bundle's own root `publication` member. It
+does not omit `revision`, `extensions`, or any nested member with the same name. Both public
+outputs must equal that projection as RFC 8785 canonical UTF-8 bytes and must equal one another.
+The frozen sign-in golden is 2,173 canonical bytes with SHA-256
+`fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247`,
+revision
+`sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601`,
+and Source digest
+`sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878`.
+
+Root object allocation order and root-only authoring changes have no publication authority.
+Semantic nested data remains significant. The golden proves deterministic valid publication and
+authoring exclusion; it does not stand in for M06-T11's invalid-source precedence and no-Bundle
+matrix.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-official-golden.json`
+`sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
+
 ## Applications
 
 ### Desen App
