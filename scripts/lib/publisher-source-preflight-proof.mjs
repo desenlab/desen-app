@@ -54,7 +54,7 @@ const PREREQUISITES = Object.freeze([
   Object.freeze({
     task: "M06-T02",
     path: "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
-    sha256: "4ee7754e5e658be5b7cda8c5ce6875d6f0a32f20d500bc9079ac79e5ed5142d9",
+    sha256: "02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6",
     claim: "exact Catalog package resolution and immutable trusted namespace",
   }),
 ]);

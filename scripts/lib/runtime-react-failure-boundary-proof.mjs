@@ -1,74 +1,95 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { constants } from "node:fs";
-import { lstat, open, realpath } from "node:fs/promises";
+import { lstat, open, realpath, rename, unlink } from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual, types as utilTypes } from "node:util";
 import { fileURLToPath } from "node:url";
 
-import { format } from "prettier";
-
-import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
-
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json";
+const ARTIFACT_FILE_NAME = path.basename(ARTIFACT_RELATIVE_PATH);
 const PROOF_DOCUMENT_RELATIVE_PATH = "docs/proof/RUNTIME-REACT-FAILURE-BOUNDARY.md";
 const PROOF_MATRIX_RELATIVE_PATH = "docs/proof/PROOF-MATRIX.md";
 const NORMATIVE_COVERAGE_RELATIVE_PATH = "docs/proof/NORMATIVE-COVERAGE.md";
 const PROTOCOL_FINDINGS_RELATIVE_PATH = "docs/plan/PROTOCOL-FINDINGS.md";
-const MAX_INPUT_BYTES = 4_000_000;
-const MAX_ARTIFACT_BYTES = 2_000_000;
+const HISTORICAL_ARTIFACT_SHA256 =
+  "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723";
+const HISTORICAL_ARTIFACT_BYTES = 9_534;
+const COMPATIBILITY_MODE = "immutable-task-time-artifact";
 const MAX_DOCUMENT_BYTES = 2_000_000;
+const EXPECTED_DOCUMENT_DIGESTS = Object.freeze({
+  proof: Object.freeze({
+    bytes: 3_694,
+    sha256: "dfe2253457b06dfbd486d139686714230c4dd6caaf87dfe7303b0c3ab98b665a",
+  }),
+  matrixSection: Object.freeze({
+    bytes: 1_920,
+    sha256: "4b405518d29c43aa8b6d83986368ff57d5fce0b7c6e770e9185c573dba976ab1",
+  }),
+  matrixRow: Object.freeze({
+    bytes: 1_822,
+    sha256: "888656cfd9918480872fa6a3f053833bbf26596ee70761748313328dd95233d8",
+  }),
+  normativeRow: Object.freeze({
+    bytes: 1_300,
+    sha256: "18405bc8a389a32a98f1600b00244f8b461f0e47d708057e7f5d2cc4d3ccb49d",
+  }),
+  findingSection: Object.freeze({
+    bytes: 4_045,
+    sha256: "1fec6a3da881bf6926d8091e1f79dc47b5aec044452c95fb88d16a16c9cadeb4",
+  }),
+});
+const BUFFER_CONSTRUCTOR = Buffer;
+const BUFFER_ALLOC = Buffer.alloc;
+const BUFFER_BYTE_LENGTH = Buffer.byteLength;
+const BUFFER_FROM = Buffer.from;
+const OBJECT_HAS_OWN = Object.hasOwn;
+const UINT8_ARRAY_CONSTRUCTOR = Uint8Array;
+const UINT8_ARRAY_SET = Uint8Array.prototype.set;
+const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(UINT8_ARRAY_CONSTRUCTOR.prototype);
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "buffer",
+).get;
+const TYPED_ARRAY_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteLength",
+).get;
+const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteOffset",
+).get;
 
-/** Absolute path to the current deterministic M05-T06 failure-boundary artifact. */
+/** Absolute path to the immutable task-time M05-T06 proof artifact. */
 export const DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   ARTIFACT_RELATIVE_PATH,
 );
 
-/** Absolute path to the human-readable M05-T06 proof. */
+/** Absolute path to the immutable M05-T06 human-readable proof. */
 export const DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_PROOF_PATH = path.join(
   WORKSPACE_ROOT,
   PROOF_DOCUMENT_RELATIVE_PATH,
 );
 
-/** Absolute path to the M05-T06 Proof Matrix projection. */
+/** Absolute path to the exact M05-T06 Proof Matrix pins. */
 export const DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_PROOF_MATRIX_PATH = path.join(
   WORKSPACE_ROOT,
   PROOF_MATRIX_RELATIVE_PATH,
 );
 
-/** Absolute path to the N-037 normative projection. */
+/** Absolute path to the exact current N-037 projection. */
 export const DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_NORMATIVE_COVERAGE_PATH = path.join(
   WORKSPACE_ROOT,
   NORMATIVE_COVERAGE_RELATIVE_PATH,
 );
 
-/** Absolute path to the PF-055 implementation finding. */
+/** Absolute path to the current PF-055 successor-ownership projection. */
 export const DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_FINDINGS_PATH = path.join(
   WORKSPACE_ROOT,
   PROTOCOL_FINDINGS_RELATIVE_PATH,
 );
-
-/** Files whose exact bytes make up the current M05-T06 implementation claim. */
-export const RUNTIME_REACT_FAILURE_BOUNDARY_TRACKED_PATHS = Object.freeze([
-  "packages/runtime-react/package.json",
-  "packages/runtime-react/src/adapter-error-boundary.tsx",
-  "packages/runtime-react/src/index.ts",
-  "packages/runtime-react/src/interactions.tsx",
-  "packages/runtime-react/src/render-plan.tsx",
-  "packages/runtime-react/src/root-error-policy.ts",
-  "packages/runtime-react/src/surface-boundary.tsx",
-  "packages/runtime-react/test/failure-boundary.test.tsx",
-  "packages/runtime-react/test/failure-boundary.types.ts",
-  "scripts/generate-runtime-react-failure-boundary-proof.mjs",
-  "scripts/lib/atomic-proof-artifact.mjs",
-  "scripts/lib/runtime-react-failure-boundary-proof.mjs",
-  "scripts/lib/runtime-react-reconciliation-diagnostics-proof.mjs",
-  "scripts/verify-runtime-react-failure-boundary.mjs",
-  "tests/runtime-react-failure-boundary.test.mjs",
-  "tests/runtime-react-reconciliation-diagnostics.test.mjs",
-]);
 
 const EXPECTED_PREREQUISITES = Object.freeze([
   Object.freeze({
@@ -106,37 +127,140 @@ const EXPECTED_PREREQUISITES = Object.freeze([
   }),
 ]);
 
-/** Prerequisite paths exported for isolated mutation-test workspaces. */
-export const RUNTIME_REACT_FAILURE_BOUNDARY_PREREQUISITE_PATHS = Object.freeze(
-  EXPECTED_PREREQUISITES.map((entry) => entry.path),
-);
+const EXPECTED_CLAIM = Object.freeze({
+  wholeSurfaceFailClosed: true,
+  safeNodeLocalSiblingContinuationClaimed: false,
+  exactAttribution: "leaf-component-only",
+  behaviorExactAttribution: false,
+  nonLeafExactAttribution: false,
+  cleanupExactAttribution: false,
+  honestNullAttributionWhenOriginUnavailable: true,
+  explicitUnknownCapabilityFailure: true,
+  productionPlaceholderGuessing: false,
+  rawAdapterPayloadExposed: false,
+});
 
-const PUBLIC_RUNTIME_EXPORTS = Object.freeze([
-  "RuntimeReactSurfaceBoundary",
-  "ignoreRuntimeReactRootCaughtError",
+const EXPECTED_BOUNDARY = Object.freeze({
+  package: "@desen/runtime-react",
+  failureCode: "ADAPTER_FAILURE",
+  containment: "whole-surface",
+  publicVariants: Object.freeze(["component", "unattributed"]),
+  publicFailureFields: Object.freeze([
+    "adapterKind",
+    "behaviorId",
+    "capabilityId",
+    "code",
+    "runtimeNodeId",
+    "sourceNodeId",
+  ]),
+  rawPublicFields: Object.freeze([]),
+  identityPolicy: Object.freeze({
+    exact: "leaf component with no managed DESEN descendants",
+    unattributed:
+      "behavior, non-leaf, descendant, removal, or other origin React cannot expose safely",
+    unattributedIdentityValue: null,
+  }),
+  provenanceBranches: Object.freeze({
+    structure: "two-always-mounted-sibling-boundaries",
+    managed: "RuntimeReactManagedBranchBoundary",
+    host: "RuntimeReactHostBranchBoundary",
+  }),
+  hostFailureRenderer: Object.freeze({
+    selectedBy: "trusted-static-host-code",
+    bundleOrCatalogAuthority: false,
+    privateFreshCarrier: true,
+    cause: "exact-host-thrown-value",
+    classifiedAsAdapterFailure: false,
+  }),
+  recovery: Object.freeze({
+    mode: "sticky-after-adapter-failure",
+    authority: "explicit-host-recoveryKey",
+    implicitResultRetry: false,
+    implicitPublicationRetry: false,
+    implicitReconciliationKeyRetry: false,
+  }),
+  unknownCapability: Object.freeze({
+    phase: "all-or-nothing-preflight",
+    adapterExecutionBeforeFailure: false,
+    placeholder: false,
+    hostFailureSurfaceRequired: true,
+  }),
+  rootCaughtError: Object.freeze({
+    handler: "ignoreRuntimeReactRootCaughtError",
+    handlerType: "RuntimeReactRootCaughtErrorHandler",
+    scope: "dedicated-DESEN-root-only",
+    rawPayloadInspection: false,
+    rawPayloadForwarding: false,
+    sharedRootPolicyClaimed: false,
+    referenceHostWiringOwner: "M05-T07",
+  }),
+  integrationScope: Object.freeze({
+    resultAuthority: "host-trusted-runtime-result",
+    arbitraryUntrustedResultParser: false,
+    moduleInstanceRequirement: "one-deduplicated-@desen/runtime-react-instance-per-React-tree",
+    omittedRecoveryKey: "safe-never-retry",
+    hostCleanupCarrier:
+      "managed-to-failure-and-failure-to-managed-transitions-while-branch-boundary-mounted",
+    fullRootUnmountCleanupOwner: "M05-T07-host-onUncaughtError-policy",
+  }),
+});
+
+const EXPECTED_PUBLIC_API = Object.freeze({
+  runtimeExports: Object.freeze([
+    "RuntimeReactSurfaceBoundary",
+    "ignoreRuntimeReactRootCaughtError",
+  ]),
+  typeExports: Object.freeze([
+    "RuntimeReactAdapterFailure",
+    "RuntimeReactComponentAdapterFailure",
+    "RuntimeReactRootCaughtErrorHandler",
+    "RuntimeReactSurfaceBoundaryProps",
+    "RuntimeReactSurfaceBoundaryResult",
+    "RuntimeReactSurfaceFailure",
+    "RuntimeReactSurfaceFailureRenderer",
+    "RuntimeReactUnattributedAdapterFailure",
+  ]),
+});
+
+const EXPECTED_TRACKED_PATHS = Object.freeze([
+  "packages/runtime-react/package.json",
+  "packages/runtime-react/src/adapter-error-boundary.tsx",
+  "packages/runtime-react/src/index.ts",
+  "packages/runtime-react/src/interactions.tsx",
+  "packages/runtime-react/src/render-plan.tsx",
+  "packages/runtime-react/src/root-error-policy.ts",
+  "packages/runtime-react/src/surface-boundary.tsx",
+  "packages/runtime-react/test/failure-boundary.test.tsx",
+  "packages/runtime-react/test/failure-boundary.types.ts",
+  "scripts/generate-runtime-react-failure-boundary-proof.mjs",
+  "scripts/lib/atomic-proof-artifact.mjs",
+  "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+  "scripts/lib/runtime-react-reconciliation-diagnostics-proof.mjs",
+  "scripts/verify-runtime-react-failure-boundary.mjs",
+  "tests/runtime-react-failure-boundary.test.mjs",
+  "tests/runtime-react-reconciliation-diagnostics.test.mjs",
 ]);
 
-const PUBLIC_TYPE_EXPORTS = Object.freeze([
-  "RuntimeReactAdapterFailure",
-  "RuntimeReactComponentAdapterFailure",
-  "RuntimeReactRootCaughtErrorHandler",
-  "RuntimeReactSurfaceBoundaryProps",
-  "RuntimeReactSurfaceBoundaryResult",
-  "RuntimeReactSurfaceFailure",
-  "RuntimeReactSurfaceFailureRenderer",
-  "RuntimeReactUnattributedAdapterFailure",
-]);
+const EXPECTED_TRACEABILITY = Object.freeze({
+  canonicalTrace: Object.freeze(["R-112", "R-113", "R-115", "A-012", "D-036"]),
+  normative: Object.freeze({
+    id: "N-037",
+    status: "TESTED",
+    owners: "M05-T06",
+  }),
+  proofClaim: Object.freeze({
+    id: "P-17",
+    status: "PARTIAL",
+    remainingOwner: "M07-T04",
+  }),
+  taskLocalApplicability: Object.freeze({
+    id: "D-009",
+    status: "DEFERRED",
+    remainingOwner: "M06-T11",
+  }),
+});
 
-const PUBLIC_FAILURE_FIELDS = Object.freeze([
-  "adapterKind",
-  "behaviorId",
-  "capabilityId",
-  "code",
-  "runtimeNodeId",
-  "sourceNodeId",
-]);
-
-const NONCLAIMS = Object.freeze([
+const EXPECTED_NONCLAIMS = Object.freeze([
   "React event-handler exception containment",
   "arbitrary asynchronous exception containment",
   "server-render error-boundary containment",
@@ -149,7 +273,32 @@ const NONCLAIMS = Object.freeze([
   "cross-copy private carrier recognition when multiple runtime-react module instances share one tree",
 ]);
 
-/** Controlled deterministic-evidence failure for M05-T06. */
+const EXPECTED_SEMANTICS = Object.freeze({
+  schemaVersion: 1,
+  task: "M05-T06",
+  result: "PASS",
+  profile: "desen-runtime-react-failure-boundary-v1",
+  protocol: "0.1.0",
+  target: "web-react",
+  claim: EXPECTED_CLAIM,
+  boundary: EXPECTED_BOUNDARY,
+  publicApi: EXPECTED_PUBLIC_API,
+  focusedScript: "pnpm --filter @desen/runtime-react test:failure-boundary",
+  tests: Object.freeze({
+    focusedCases: 22,
+    compilerNegativeCases: 9,
+    rootMutationTests: 25,
+  }),
+  sourceAssertions: 64,
+  dynamicExecutableImports: 0,
+  trackedPaths: EXPECTED_TRACKED_PATHS,
+  verifierExecutionProfile: "static-source-package-prerequisite-and-focused-test-inventory",
+  historicalArtifactsRewritten: false,
+  traceability: EXPECTED_TRACEABILITY,
+  nonclaims: EXPECTED_NONCLAIMS,
+});
+
+/** Controlled compatibility-reader failure for immutable M05-T06 evidence. */
 export class RuntimeReactFailureBoundaryEvidenceError extends Error {
   constructor(code, message, details = undefined) {
     super(message);
@@ -167,16 +316,6 @@ function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
-function freezeJson(value) {
-  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return value;
-  if (Array.isArray(value)) {
-    for (const member of value) freezeJson(member);
-    return Object.freeze(value);
-  }
-  for (const member of Object.values(value)) freezeJson(member);
-  return Object.freeze(value);
-}
-
 function captureOptions(value, allowedKeys, label) {
   if (value === undefined) return Object.freeze({});
   if (
@@ -187,7 +326,7 @@ function captureOptions(value, allowedKeys, label) {
   ) {
     fail(
       "FAILURE_BOUNDARY_OPTIONS_INVALID",
-      `M05-T06 ${label} options must be a non-Proxy plain own-data object.`,
+      `Historical M05-T06 ${label} options must be a plain own-data object.`,
     );
   }
 
@@ -199,7 +338,7 @@ function captureOptions(value, allowedKeys, label) {
   } catch {
     fail(
       "FAILURE_BOUNDARY_OPTIONS_INVALID",
-      `M05-T06 ${label} options could not be captured safely.`,
+      `Historical M05-T06 ${label} options could not be captured safely.`,
     );
   }
   if (
@@ -208,7 +347,7 @@ function captureOptions(value, allowedKeys, label) {
   ) {
     fail(
       "FAILURE_BOUNDARY_OPTIONS_INVALID",
-      `M05-T06 ${label} options contain unknown, inherited, or symbol keys.`,
+      `Historical M05-T06 ${label} options contain unknown, inherited, or symbol keys.`,
     );
   }
 
@@ -220,13 +359,13 @@ function captureOptions(value, allowedKeys, label) {
     } catch {
       fail(
         "FAILURE_BOUNDARY_OPTIONS_INVALID",
-        `M05-T06 ${label} option ${key} could not be captured safely.`,
+        `Historical M05-T06 ${label} option ${key} could not be captured safely.`,
       );
     }
     if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
       fail(
         "FAILURE_BOUNDARY_OPTIONS_INVALID",
-        `M05-T06 ${label} option ${key} must be enumerable own data.`,
+        `Historical M05-T06 ${label} option ${key} must be enumerable own data.`,
       );
     }
     captured[key] = descriptor.value;
@@ -236,55 +375,136 @@ function captureOptions(value, allowedKeys, label) {
 
 function optionalString(value, label) {
   if (value !== undefined && (typeof value !== "string" || value.length === 0)) {
-    fail("FAILURE_BOUNDARY_OPTIONS_INVALID", `M05-T06 ${label} must be a non-empty string.`);
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} must be a non-empty string.`,
+    );
   }
   return value;
 }
 
-function optionalBuffer(value, label) {
-  if (value === undefined) return undefined;
-  if (utilTypes.isProxy(value) || !Buffer.isBuffer(value) || value.length > MAX_ARTIFACT_BYTES) {
+function optionalPath(value, label) {
+  const candidate = optionalString(value, label);
+  if (
+    candidate !== undefined &&
+    (candidate.includes("\0") ||
+      !path.isAbsolute(candidate) ||
+      path.resolve(candidate) !== candidate)
+  ) {
     fail(
       "FAILURE_BOUNDARY_OPTIONS_INVALID",
-      `M05-T06 ${label} must be a bounded non-Proxy Buffer.`,
+      `Historical M05-T06 ${label} must be an exact absolute path without dot segments.`,
     );
   }
-  return Buffer.from(value);
+  return candidate;
+}
+
+function optionalText(value, label) {
+  const text = optionalString(value, label);
+  if (
+    text !== undefined &&
+    Reflect.apply(BUFFER_BYTE_LENGTH, BUFFER_CONSTRUCTOR, [text, "utf8"]) > MAX_DOCUMENT_BYTES
+  ) {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} exceeds its bounded UTF-8 byte limit.`,
+    );
+  }
+  return text;
 }
 
 function optionalCallback(value, label) {
   if (value !== undefined && (typeof value !== "function" || utilTypes.isProxy(value))) {
-    fail("FAILURE_BOUNDARY_OPTIONS_INVALID", `M05-T06 ${label} must be a non-Proxy function.`);
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} must be a non-Proxy function.`,
+    );
   }
   return value;
 }
 
-function optionalText(value, label) {
+function hasOwn(value, key) {
+  return Reflect.apply(OBJECT_HAS_OWN, Object, [value, key]);
+}
+
+function assertExclusivePair(left, right, label) {
+  if (left !== undefined && right !== undefined) {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} accepts exactly one explicit source, not both.`,
+    );
+  }
+}
+
+function optionalBytes(value, label) {
+  if (value === undefined) return undefined;
   if (
-    value !== undefined &&
-    (typeof value !== "string" || Buffer.byteLength(value, "utf8") > MAX_DOCUMENT_BYTES)
+    value === null ||
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    !utilTypes.isUint8Array(value)
   ) {
-    fail("FAILURE_BOUNDARY_OPTIONS_INVALID", `M05-T06 ${label} must be bounded UTF-8 text.`);
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} must be non-shared non-Proxy bytes.`,
+    );
   }
-  return value;
-}
 
-async function resolveWorkspaceRoot(value) {
-  const candidate = path.resolve(value ?? WORKSPACE_ROOT);
+  let prototype;
+  let backingBuffer;
+  let byteLength;
+  let byteOffset;
   try {
-    const entry = await lstat(candidate, { bigint: true });
-    if (!entry.isDirectory() || entry.isSymbolicLink()) {
+    prototype = Object.getPrototypeOf(value);
+    if (prototype !== Uint8Array.prototype && prototype !== Buffer.prototype) {
       fail(
-        "FAILURE_BOUNDARY_INPUT_UNSAFE",
-        `M05-T06 workspace root must be a real directory: ${candidate}.`,
+        "FAILURE_BOUNDARY_OPTIONS_INVALID",
+        `Historical M05-T06 ${label} must use the exact Buffer or Uint8Array prototype.`,
       );
     }
-    return await realpath(candidate);
+    backingBuffer = Reflect.apply(TYPED_ARRAY_BUFFER_GETTER, value, []);
+    byteLength = Reflect.apply(TYPED_ARRAY_BYTE_LENGTH_GETTER, value, []);
+    byteOffset = Reflect.apply(TYPED_ARRAY_BYTE_OFFSET_GETTER, value, []);
   } catch (error) {
     if (error instanceof RuntimeReactFailureBoundaryEvidenceError) throw error;
-    fail("FAILURE_BOUNDARY_INPUT_MISSING", `M05-T06 workspace root is unavailable: ${candidate}.`, {
-      cause: String(error),
-    });
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} could not be captured safely.`,
+    );
+  }
+  if (utilTypes.isSharedArrayBuffer(backingBuffer)) {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} must not use shared backing memory.`,
+    );
+  }
+  let source;
+  try {
+    // Creating a view performs a detached-buffer check without copying attacker-sized input.
+    source = new UINT8_ARRAY_CONSTRUCTOR(backingBuffer, byteOffset, byteLength);
+  } catch {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} backing memory is detached or invalid.`,
+    );
+  }
+  if (byteLength !== HISTORICAL_ARTIFACT_BYTES) {
+    fail(
+      "FAILURE_BOUNDARY_HISTORICAL_ARTIFACT_DRIFT",
+      `Historical M05-T06 ${label} must contain exactly ${HISTORICAL_ARTIFACT_BYTES} bytes.`,
+      { expected: HISTORICAL_ARTIFACT_BYTES, actual: byteLength },
+    );
+  }
+
+  try {
+    const captured = new UINT8_ARRAY_CONSTRUCTOR(byteLength);
+    Reflect.apply(UINT8_ARRAY_SET, captured, [source]);
+    return Reflect.apply(BUFFER_FROM, BUFFER_CONSTRUCTOR, [captured]);
+  } catch {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      `Historical M05-T06 ${label} backing memory is detached or invalid.`,
+    );
   }
 }
 
@@ -298,449 +518,448 @@ function sameFileState(left, right) {
   );
 }
 
-async function readRegularFile(filePath, missingCode, unsafeCode, maximumBytes = MAX_INPUT_BYTES) {
-  let pathEntry;
+function sameFileIdentity(left, right) {
+  return left.dev === right.dev && left.ino === right.ino;
+}
+
+async function assertSafeParentIdentity(safePath, unsafeCode) {
+  let parentEntry;
+  let canonicalParent;
   try {
-    pathEntry = await lstat(filePath, { bigint: true });
+    [parentEntry, canonicalParent] = await Promise.all([
+      lstat(safePath.parentPath, { bigint: true }),
+      realpath(safePath.parentPath),
+    ]);
   } catch (error) {
-    fail(missingCode, `M05-T06 evidence input is missing: ${filePath}.`, {
+    fail(unsafeCode, "Historical M05-T06 evidence parent changed unsafely.", {
       cause: String(error),
     });
   }
-  if (!pathEntry.isFile() || pathEntry.isSymbolicLink()) {
-    fail(unsafeCode, `M05-T06 evidence input must be a regular non-symlink file: ${filePath}.`);
+  if (
+    !parentEntry.isDirectory() ||
+    parentEntry.isSymbolicLink() ||
+    !sameFileIdentity(safePath.parentEntry, parentEntry) ||
+    canonicalParent !== safePath.parentPath
+  ) {
+    fail(unsafeCode, "Historical M05-T06 evidence parent changed identity.");
   }
-  if (pathEntry.size > BigInt(maximumBytes)) {
-    fail(unsafeCode, `M05-T06 evidence input exceeds its byte limit: ${filePath}.`);
+}
+
+async function canonicalSafePath(filePath, unsafeCode) {
+  const absolutePath = path.resolve(filePath);
+  const parentPath = path.dirname(absolutePath);
+  if (absolutePath !== filePath) {
+    fail(unsafeCode, `Historical M05-T06 evidence path is not exact: ${filePath}.`);
+  }
+
+  let parentBefore;
+  let parentAfter;
+  let canonicalParent;
+  try {
+    [parentBefore, canonicalParent] = await Promise.all([
+      lstat(parentPath, { bigint: true }),
+      realpath(parentPath),
+    ]);
+    parentAfter = await lstat(parentPath, { bigint: true });
+  } catch (error) {
+    fail(unsafeCode, `Historical M05-T06 evidence parent is unsafe: ${filePath}.`, {
+      cause: String(error),
+    });
+  }
+  if (
+    !parentBefore.isDirectory() ||
+    parentBefore.isSymbolicLink() ||
+    !parentAfter.isDirectory() ||
+    parentAfter.isSymbolicLink() ||
+    !sameFileIdentity(parentBefore, parentAfter) ||
+    canonicalParent !== parentPath
+  ) {
+    fail(unsafeCode, `Historical M05-T06 evidence crosses a symlink parent: ${filePath}.`);
+  }
+  return Object.freeze({ absolutePath, parentPath, parentEntry: parentAfter });
+}
+
+async function readExactOpenHandleBytes(handle, expectedLength) {
+  const bytes = Reflect.apply(BUFFER_ALLOC, BUFFER_CONSTRUCTOR, [expectedLength]);
+  let offset = 0;
+  while (offset < expectedLength) {
+    const { bytesRead } = await handle.read(bytes, offset, expectedLength - offset, offset);
+    if (bytesRead === 0) break;
+    offset += bytesRead;
+  }
+  const trailing = Reflect.apply(BUFFER_ALLOC, BUFFER_CONSTRUCTOR, [1]);
+  const { bytesRead: trailingBytes } = await handle.read(trailing, 0, 1, expectedLength);
+  if (offset !== expectedLength || trailingBytes !== 0) {
+    throw new TypeError("Historical M05-T06 open file byte length changed.");
+  }
+  return bytes;
+}
+
+async function readRegularFile(
+  filePath,
+  missingCode,
+  unsafeCode,
+  maximumBytes,
+  exactBytes = undefined,
+) {
+  const safePath = await canonicalSafePath(filePath, unsafeCode);
+  let entry;
+  let canonicalBefore;
+  try {
+    [entry, canonicalBefore] = await Promise.all([
+      lstat(safePath.absolutePath, { bigint: true }),
+      realpath(safePath.absolutePath),
+    ]);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      fail(missingCode, `Historical M05-T06 evidence file is missing: ${filePath}.`);
+    }
+    fail(unsafeCode, `Historical M05-T06 evidence file is unsafe: ${filePath}.`, {
+      cause: String(error),
+    });
+  }
+  if (
+    !entry.isFile() ||
+    entry.isSymbolicLink() ||
+    canonicalBefore !== safePath.absolutePath ||
+    entry.size > BigInt(maximumBytes) ||
+    (exactBytes !== undefined && entry.size !== BigInt(exactBytes))
+  ) {
+    fail(unsafeCode, `Historical M05-T06 evidence is not a safe bounded file: ${filePath}.`);
   }
 
   let handle;
   try {
-    handle = await open(filePath, constants.O_RDONLY | constants.O_NOFOLLOW);
+    handle = await open(
+      safePath.absolutePath,
+      constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0),
+    );
     const before = await handle.stat({ bigint: true });
-    if (!before.isFile() || !sameFileState(pathEntry, before)) {
-      fail(unsafeCode, `M05-T06 evidence input changed before its safe read: ${filePath}.`);
+    if (
+      !before.isFile() ||
+      !sameFileState(entry, before) ||
+      before.size > BigInt(maximumBytes) ||
+      (exactBytes !== undefined && before.size !== BigInt(exactBytes))
+    ) {
+      fail(unsafeCode, `Historical M05-T06 evidence changed before reading: ${filePath}.`);
     }
-    const bytes = await handle.readFile();
-    const after = await handle.stat({ bigint: true });
+    const bytes = await readExactOpenHandleBytes(handle, Number(before.size));
+    const [after, currentEntry, canonicalAfter] = await Promise.all([
+      handle.stat({ bigint: true }),
+      lstat(safePath.absolutePath, { bigint: true }),
+      realpath(safePath.absolutePath),
+    ]);
+    await assertSafeParentIdentity(safePath, unsafeCode);
     if (
       bytes.length !== Number(before.size) ||
+      bytes.length > maximumBytes ||
+      (exactBytes !== undefined && bytes.length !== exactBytes) ||
       !sameFileState(before, after) ||
-      after.size > BigInt(maximumBytes)
+      !sameFileState(after, currentEntry) ||
+      currentEntry.isSymbolicLink() ||
+      canonicalAfter !== safePath.absolutePath
     ) {
-      fail(unsafeCode, `M05-T06 evidence input changed during its safe read: ${filePath}.`);
+      fail(unsafeCode, `Historical M05-T06 evidence changed during reading: ${filePath}.`);
     }
     return bytes;
   } catch (error) {
     if (error instanceof RuntimeReactFailureBoundaryEvidenceError) throw error;
-    fail(unsafeCode, `M05-T06 evidence input could not be read safely: ${filePath}.`, {
+    fail(unsafeCode, `Historical M05-T06 evidence could not be read safely: ${filePath}.`, {
       cause: String(error),
     });
   } finally {
-    if (handle !== undefined) {
+    try {
+      await handle?.close();
+    } catch {
+      // Preserve the controlled read result or primary failure.
+    }
+  }
+}
+
+async function inspectAtomicParent(parentPath, expectedIdentity = undefined) {
+  if (!path.isAbsolute(parentPath) || path.resolve(parentPath) !== parentPath) {
+    throw new TypeError("Historical M05-T06 atomic parent path is not exact.");
+  }
+  const before = await lstat(parentPath, { bigint: true });
+  const canonical = await realpath(parentPath);
+  const after = await lstat(parentPath, { bigint: true });
+  if (
+    !before.isDirectory() ||
+    before.isSymbolicLink() ||
+    !after.isDirectory() ||
+    after.isSymbolicLink() ||
+    canonical !== parentPath ||
+    !sameFileIdentity(before, after) ||
+    (expectedIdentity !== undefined && !sameFileIdentity(expectedIdentity, after))
+  ) {
+    throw new TypeError("Historical M05-T06 atomic parent identity or canonical path changed.");
+  }
+  return after;
+}
+
+async function inspectOptionalAtomicDestination(artifactPath) {
+  let entry;
+  try {
+    entry = await lstat(artifactPath, { bigint: true });
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw error;
+  }
+  if (!entry.isFile() || entry.isSymbolicLink()) {
+    throw new TypeError(
+      "Historical M05-T06 atomic destination must be absent or a regular non-symlink file.",
+    );
+  }
+  if ((await realpath(artifactPath)) !== artifactPath) {
+    throw new TypeError("Historical M05-T06 atomic destination path is not canonical.");
+  }
+  return entry;
+}
+
+async function removeTrustedAtomicTemporary({
+  parentPath,
+  parentIdentity,
+  temporaryPath,
+  temporaryIdentity,
+}) {
+  try {
+    await inspectAtomicParent(parentPath, parentIdentity);
+  } catch {
+    // Never unlink through a replaced, symlinked, or identity-lost parent.
+    return;
+  }
+  let entry;
+  try {
+    entry = await lstat(temporaryPath, { bigint: true });
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    return;
+  }
+  if (!entry.isFile() || entry.isSymbolicLink() || !sameFileIdentity(entry, temporaryIdentity)) {
+    return;
+  }
+  try {
+    await unlink(temporaryPath);
+  } catch {
+    // Cleanup is best-effort after the primary controlled failure.
+  }
+}
+
+async function writeAuthenticatedAtomicCopy({ artifactPath, artifactBytes, beforeAtomicRename }) {
+  const parentPath = path.dirname(artifactPath);
+  const parentIdentity = await inspectAtomicParent(parentPath);
+  await inspectOptionalAtomicDestination(artifactPath);
+  const temporaryPath = path.join(
+    parentPath,
+    `.${path.basename(artifactPath)}.${randomBytes(12).toString("hex")}.tmp`,
+  );
+  const expectedBytes = Reflect.apply(BUFFER_FROM, BUFFER_CONSTRUCTOR, [artifactBytes]);
+  const handle = await open(
+    temporaryPath,
+    constants.O_CREAT |
+      constants.O_EXCL |
+      constants.O_RDWR |
+      (constants.O_NOFOLLOW ?? 0) |
+      (constants.O_NONBLOCK ?? 0),
+    0o600,
+  );
+  let handleOpen = true;
+  let temporaryIdentity;
+  try {
+    temporaryIdentity = await handle.stat({ bigint: true });
+    if (!temporaryIdentity.isFile()) {
+      throw new TypeError("Historical M05-T06 atomic temporary is not a regular file.");
+    }
+    await handle.writeFile(expectedBytes);
+    await handle.sync();
+    if (beforeAtomicRename !== undefined) {
+      await beforeAtomicRename(Object.freeze({ artifactPath, temporaryPath }));
+    }
+
+    await inspectAtomicParent(parentPath, parentIdentity);
+    const [handleEntry, pathEntry, temporaryBytes] = await Promise.all([
+      handle.stat({ bigint: true }),
+      lstat(temporaryPath, { bigint: true }),
+      readExactOpenHandleBytes(handle, expectedBytes.length),
+    ]);
+    if (
+      !handleEntry.isFile() ||
+      !pathEntry.isFile() ||
+      pathEntry.isSymbolicLink() ||
+      !sameFileIdentity(temporaryIdentity, handleEntry) ||
+      !sameFileIdentity(handleEntry, pathEntry) ||
+      handleEntry.size !== BigInt(expectedBytes.length) ||
+      sha256(temporaryBytes) !== HISTORICAL_ARTIFACT_SHA256
+    ) {
+      throw new TypeError(
+        "Historical M05-T06 atomic temporary identity or bytes changed before rename.",
+      );
+    }
+    await inspectAtomicParent(parentPath, parentIdentity);
+    await inspectOptionalAtomicDestination(artifactPath);
+    await inspectAtomicParent(parentPath, parentIdentity);
+    await handle.close();
+    handleOpen = false;
+    await rename(temporaryPath, artifactPath);
+
+    await inspectAtomicParent(parentPath, parentIdentity);
+    const [committedEntry, committedCanonical] = await Promise.all([
+      lstat(artifactPath, { bigint: true }),
+      realpath(artifactPath),
+    ]);
+    if (
+      !committedEntry.isFile() ||
+      committedEntry.isSymbolicLink() ||
+      !sameFileIdentity(temporaryIdentity, committedEntry) ||
+      committedEntry.size !== BigInt(expectedBytes.length) ||
+      committedCanonical !== artifactPath
+    ) {
+      throw new TypeError(
+        "Historical M05-T06 committed artifact identity or canonical path changed.",
+      );
+    }
+    const committedBytes = await readRegularFile(
+      artifactPath,
+      "FAILURE_BOUNDARY_ARTIFACT_MISSING",
+      "FAILURE_BOUNDARY_ARTIFACT_UNSAFE",
+      HISTORICAL_ARTIFACT_BYTES,
+      HISTORICAL_ARTIFACT_BYTES,
+    );
+    if (sha256(committedBytes) !== HISTORICAL_ARTIFACT_SHA256) {
+      throw new TypeError("Historical M05-T06 committed artifact bytes differ from input.");
+    }
+    return Object.freeze({ artifactPath: committedCanonical });
+  } catch (error) {
+    if (handleOpen) {
       try {
         await handle.close();
       } catch {
-        // A primary controlled read error remains authoritative.
+        // Preserve the primary atomic-write failure.
       }
     }
+    if (temporaryIdentity !== undefined) {
+      await removeTrustedAtomicTemporary({
+        parentPath,
+        parentIdentity,
+        temporaryPath,
+        temporaryIdentity,
+      });
+    }
+    throw error;
   }
 }
 
-function parseJson(bytes, label, code = "FAILURE_BOUNDARY_INPUT_INVALID") {
-  try {
-    return JSON.parse(bytes.toString("utf8"));
-  } catch {
-    fail(code, `M05-T06 ${label} is not valid JSON.`);
-  }
+function freezeJson(value) {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return value;
+  for (const member of Object.values(value)) freezeJson(member);
+  return Object.freeze(value);
 }
 
-function countMatches(text, expression) {
-  return [...text.matchAll(expression)].length;
+function artifactSemantics(artifact) {
+  const trackedFiles = Array.isArray(artifact.evidence?.trackedFiles)
+    ? artifact.evidence.trackedFiles
+    : [];
+  return {
+    schemaVersion: artifact.schemaVersion,
+    task: artifact.task,
+    result: artifact.result,
+    profile: artifact.profile,
+    protocol: artifact.protocol,
+    target: artifact.target,
+    claim: artifact.claim,
+    boundary: artifact.boundary,
+    publicApi: artifact.publicApi,
+    focusedScript: artifact.evidence?.focusedScript,
+    tests: artifact.evidence?.tests,
+    sourceAssertions: artifact.evidence?.sourceAssertions,
+    dynamicExecutableImports: artifact.evidence?.dynamicExecutableImports,
+    trackedPaths: trackedFiles.map((entry) => entry?.path),
+    verifierExecutionProfile: artifact.evidence?.verifierExecutionProfile,
+    historicalArtifactsRewritten: artifact.evidence?.historicalArtifactsRewritten,
+    traceability: artifact.evidence?.traceability,
+    nonclaims: artifact.nonclaims,
+  };
 }
 
-function requireNeedle(text, needle, label, counter) {
-  counter.value += 1;
-  if (!text.includes(needle)) {
-    fail("FAILURE_BOUNDARY_SOURCE_DRIFT", `M05-T06 ${label} lost required reviewed semantics.`, {
-      needle,
-    });
-  }
-}
-
-function forbidNeedle(text, needle, label, counter) {
-  counter.value += 1;
-  if (text.includes(needle)) {
+function inspectHistoricalArtifact(bytes) {
+  if (bytes.length !== HISTORICAL_ARTIFACT_BYTES) {
     fail(
-      "FAILURE_BOUNDARY_SOURCE_DRIFT",
-      `M05-T06 ${label} gained forbidden or overclaimed semantics.`,
-      { needle },
+      "FAILURE_BOUNDARY_HISTORICAL_ARTIFACT_DRIFT",
+      "Immutable task-time M05-T06 artifact byte length changed.",
+      { expected: HISTORICAL_ARTIFACT_BYTES, actual: bytes.length },
     );
   }
-}
-
-function assertImplementationSemantics(files) {
-  const adapter = files.get("packages/runtime-react/src/adapter-error-boundary.tsx");
-  const surface = files.get("packages/runtime-react/src/surface-boundary.tsx");
-  const rootPolicy = files.get("packages/runtime-react/src/root-error-policy.ts");
-  const interactions = files.get("packages/runtime-react/src/interactions.tsx");
-  const renderPlan = files.get("packages/runtime-react/src/render-plan.tsx");
-  const index = files.get("packages/runtime-react/src/index.ts");
-  const focusedTests = files.get("packages/runtime-react/test/failure-boundary.test.tsx");
-  const typeTests = files.get("packages/runtime-react/test/failure-boundary.types.ts");
-  const packageJsonText = files.get("packages/runtime-react/package.json");
-  const counter = { value: 0 };
-
-  requireNeedle(
-    adapter,
-    "export interface RuntimeReactComponentAdapterFailure",
-    "adapter failure contract",
-    counter,
-  );
-  requireNeedle(
-    adapter,
-    "export interface RuntimeReactUnattributedAdapterFailure",
-    "unattributed failure contract",
-    counter,
-  );
-  requireNeedle(
-    adapter,
-    "RuntimeReactComponentAdapterFailure | RuntimeReactUnattributedAdapterFailure",
-    "closed public failure union",
-    counter,
-  );
-  forbidNeedle(
-    adapter,
-    "RuntimeReactBehaviorAdapterFailure",
-    "closed public failure union",
-    counter,
-  );
-  requireNeedle(
-    adapter,
-    "const CLASSIFIED_ADAPTER_THROWS = new WeakSet",
-    "carrier branding",
-    counter,
-  );
-  requireNeedle(adapter, "const FAILURE_RENDERER_THROWS = new WeakSet", "host branding", counter);
-  requireNeedle(
-    adapter,
-    "const UNATTRIBUTED_MANAGED_TREE_THROWS = new WeakSet",
-    "unattributed branding",
-    counter,
-  );
-  requireNeedle(
-    adapter,
-    'this.props.canAttributeRawError && this.props.adapterKind === "component"',
-    "leaf-only exact attribution",
-    counter,
-  );
-  requireNeedle(
-    adapter,
-    "RUNTIME_REACT_UNATTRIBUTED_ADAPTER_FAILURE",
-    "frozen null identity",
-    counter,
-  );
-  forbidNeedle(adapter, "instanceof RuntimeReact", "hostile thrown-value handling", counter);
-
-  requireNeedle(
-    surface,
-    "class RuntimeReactManagedBranchBoundary",
-    "persistent managed branch",
-    counter,
-  );
-  requireNeedle(surface, "class RuntimeReactHostBranchBoundary", "persistent host branch", counter);
-  requireNeedle(
-    surface,
-    "class RuntimeReactSurfaceCoordinator",
-    "whole-surface coordinator",
-    counter,
-  );
-  requireNeedle(
-    surface,
-    "whole-surface profile refuses to blame",
-    "honest whole-surface policy",
-    counter,
-  );
-  requireNeedle(surface, "readonly recoveryKey?: string;", "explicit recovery authority", counter);
-  requireNeedle(
-    surface,
-    "state.observedRecoveryKey === props.recoveryKey",
-    "sticky recovery comparison",
-    counter,
-  );
-  requireNeedle(
-    surface,
-    "readRuntimeReactClassifiedAdapterFailure(error) ??",
-    "exact-or-null classification",
-    counter,
-  );
-  requireNeedle(
-    surface,
-    "createRuntimeReactFailureRendererThrow(error)",
-    "host cleanup provenance",
-    counter,
-  );
-  requireNeedle(
-    surface,
-    "No generic component or placeholder is ever guessed.",
-    "no placeholder policy",
-    counter,
-  );
-  requireNeedle(
-    surface,
-    "Event-handler exceptions, arbitrary asynchronous work, and server rendering remain outside",
-    "React boundary nonclaims",
-    counter,
-  );
-  requireNeedle(
-    surface,
-    "redacting `onCaughtError` handler",
-    "root integration limitation",
-    counter,
-  );
-  requireNeedle(
-    surface,
-    "containing boundary remains mounted",
-    "host cleanup carrier scope",
-    counter,
-  );
-
-  requireNeedle(
-    rootPolicy,
-    "export type RuntimeReactRootCaughtErrorHandler",
-    "root callback type",
-    counter,
-  );
-  requireNeedle(
-    rootPolicy,
-    "export const ignoreRuntimeReactRootCaughtError",
-    "root callback implementation",
-    counter,
-  );
-  requireNeedle(rootPolicy, "void error;", "raw error non-inspection", counter);
-  requireNeedle(rootPolicy, "void errorInfo;", "component stack non-inspection", counter);
-  requireNeedle(rootPolicy, "dedicated DESEN-managed root", "root scope", counter);
-  requireNeedle(
-    rootPolicy,
-    "Do not use this policy on a shared root",
-    "shared-root nonclaim",
-    counter,
-  );
-
-  requireNeedle(
-    interactions,
-    "canAttributeRawError: !input.hasManagedDescendants",
-    "leaf-component classifier gate",
-    counter,
-  );
-  requireNeedle(interactions, 'adapterKind: "behavior"', "behavior boundary presence", counter);
-  requireNeedle(
-    interactions,
-    "canAttributeRawError: false",
-    "behavior attribution refusal",
-    counter,
-  );
-  requireNeedle(
-    renderPlan,
-    "hasManagedDescendants: Object.values(node.slots).some",
-    "managed-descendant classification",
-    counter,
-  );
-
-  for (const name of PUBLIC_RUNTIME_EXPORTS) {
-    requireNeedle(index, name, `public runtime export ${name}`, counter);
+  const actualSha256 = sha256(bytes);
+  if (actualSha256 !== HISTORICAL_ARTIFACT_SHA256) {
+    fail(
+      "FAILURE_BOUNDARY_HISTORICAL_ARTIFACT_DRIFT",
+      "Immutable task-time M05-T06 artifact bytes changed.",
+      { expected: HISTORICAL_ARTIFACT_SHA256, actual: actualSha256 },
+    );
   }
-  for (const name of PUBLIC_TYPE_EXPORTS) {
-    requireNeedle(index, name, `public type export ${name}`, counter);
-  }
-  forbidNeedle(index, "RuntimeReactBehaviorAdapterFailure", "public root type exports", counter);
 
-  for (const title of [
-    "offers a dedicated-root caught-error policy that never inspects raw React payloads",
-    "keeps unknown component capability as an explicit all-or-nothing preflight failure",
-    "keeps unknown behavior capability outside adapters and outside ADAPTER_FAILURE",
-    "contains an exact leaf-component exception at the whole surface with frozen redacted data",
-    "does not guess behavior identity when a wrapper and its managed child share one boundary",
-    "does not blame a live parent when a conditional child throws during removal",
-    "preserves host provenance when failure UI throws while being removed",
-    "classifies a hostile thrown Proxy without invoking its prototype trap",
-    "keeps a failure sticky until the host explicitly authorizes recovery",
-    "does not turn a reconciliation-key change into an implicit crash retry",
-    "does not classify Suspense thenables as adapter failures",
-    "propagates a host failure-renderer exception without blaming an ancestor adapter",
-    "does not wrap a nested host-failure carrier again inside outer failure UI",
-    "documents the React SSR boundary by propagating adapter errors to the server host",
-  ]) {
-    requireNeedle(focusedTests, `it("${title}"`, `focused case ${title}`, counter);
-  }
-  requireNeedle(
-    focusedTests,
-    "Reflect.ownKeys(failures[0].failure).sort()",
-    "closed redacted payload",
-    counter,
-  );
-  requireNeedle(
-    focusedTests,
-    "not.toMatch(/error|stack|cause|componentStack/u)",
-    "raw payload exclusion",
-    counter,
-  );
-  requireNeedle(
-    focusedTests,
-    "expect((propagated as { readonly cause?: unknown }).cause).toBe(hostError);",
-    "host cause preservation",
-    counter,
-  );
-  requireNeedle(typeTests, 'const kind: "component" | null', "public type narrowing", counter);
-  forbidNeedle(typeTests, "RuntimeReactBehaviorAdapterFailure", "public type narrowing", counter);
-
-  let packageJson;
+  let artifact;
   try {
-    packageJson = JSON.parse(packageJsonText);
+    artifact = JSON.parse(Buffer.from(bytes).toString("utf8"));
   } catch {
-    fail("FAILURE_BOUNDARY_SOURCE_DRIFT", "M05-T06 runtime-react package metadata is invalid.");
+    fail(
+      "FAILURE_BOUNDARY_HISTORICAL_SEMANTIC_DRIFT",
+      "Immutable task-time M05-T06 artifact is not valid JSON.",
+    );
   }
-  counter.value += 1;
+
+  const trackedFiles = Array.isArray(artifact.evidence?.trackedFiles)
+    ? artifact.evidence.trackedFiles
+    : [];
+  const trackedPaths = trackedFiles.map((entry) => entry?.path);
+  const trackedInventoryValid =
+    trackedFiles.length === EXPECTED_TRACKED_PATHS.length &&
+    new Set(trackedPaths).size === trackedPaths.length &&
+    trackedFiles.every(
+      (entry) =>
+        entry !== null &&
+        typeof entry === "object" &&
+        Object.getPrototypeOf(entry) === Object.prototype &&
+        typeof entry.path === "string" &&
+        Number.isSafeInteger(entry.bytes) &&
+        entry.bytes >= 0 &&
+        /^sha256:[0-9a-f]{64}$/u.test(entry.sha256),
+    );
+  const actual = artifactSemantics(artifact);
   if (
-    packageJson?.name !== "@desen/runtime-react" ||
-    packageJson?.scripts?.["test:failure-boundary"] !== "vitest run test/failure-boundary.test.tsx"
+    !isDeepStrictEqual(actual, EXPECTED_SEMANTICS) ||
+    !isDeepStrictEqual(artifact.prerequisites, EXPECTED_PREREQUISITES) ||
+    !trackedInventoryValid
   ) {
     fail(
-      "FAILURE_BOUNDARY_SOURCE_DRIFT",
-      "M05-T06 focused package script moved, changed, or became ambiguous.",
+      "FAILURE_BOUNDARY_HISTORICAL_SEMANTIC_DRIFT",
+      "Immutable task-time M05-T06 artifact lost its reviewed semantics or inventory.",
+      { expected: EXPECTED_SEMANTICS, actual },
     );
   }
-
-  const productionFiles = [adapter, surface, rootPolicy, interactions, renderPlan, index];
-  const dynamicExecutableImports = productionFiles.reduce(
-    (total, text) => total + countMatches(text, /\bimport\s*\(/gu),
-    0,
-  );
-  counter.value += 1;
-  if (dynamicExecutableImports !== 0) {
-    fail(
-      "FAILURE_BOUNDARY_SOURCE_DRIFT",
-      "M05-T06 production failure path gained dynamic executable loading.",
-      { dynamicExecutableImports },
-    );
-  }
-
-  const focusedTestCases = countMatches(focusedTests, /\bit\("/gu);
-  const compilerNegativeCases = countMatches(typeTests, /@ts-expect-error/gu);
-  const rootMutationTests = countMatches(
-    files.get("tests/runtime-react-failure-boundary.test.mjs"),
-    /\btest\("/gu,
-  );
-  if (focusedTestCases < 20 || compilerNegativeCases < 9 || rootMutationTests < 15) {
-    fail(
-      "FAILURE_BOUNDARY_SOURCE_DRIFT",
-      "M05-T06 focused, compiler-negative, or root mutation inventory regressed.",
-      { focusedTestCases, compilerNegativeCases, rootMutationTests },
-    );
-  }
-
-  return Object.freeze({
-    sourceAssertions: counter.value,
-    dynamicExecutableImports,
-    focusedTestCases,
-    compilerNegativeCases,
-    rootMutationTests,
-  });
+  return freezeJson(artifact);
 }
 
-function assertPrerequisiteSemantics(prerequisite, artifact) {
-  const valid =
-    prerequisite.task === "M05-T05"
-      ? artifact?.task === "M05-T05" &&
-        artifact?.result === "PASS" &&
-        artifact?.profile === "desen-runtime-react-reconciliation-diagnostics-v1"
-      : prerequisite.task === "M05-T02"
-        ? artifact?.task === "M05-T02" &&
-          artifact?.result === "PASS" &&
-          artifact?.profile === "desen-runtime-react-resolved-props-slots-v1"
-        : prerequisite.task === "M04-T09"
-          ? artifact?.task === "M04-T09" && artifact?.result === "PASS"
-          : prerequisite.task === "M02-T05"
-            ? artifact?.task === "M02-T05" &&
-              artifact?.profile === "desen-diagnostics-json-pointer-v1"
-            : artifact?.result === "PASS" && artifact?.protocol === "0.1.0";
-  if (!valid) {
-    fail(
-      "FAILURE_BOUNDARY_PREREQUISITE_DRIFT",
-      `M05-T06 prerequisite ${prerequisite.task} lost its reviewed semantics.`,
-    );
-  }
-}
-
-async function readPrerequisites(workspaceRoot) {
-  for (const prerequisite of EXPECTED_PREREQUISITES) {
-    const bytes = await readRegularFile(
-      path.join(workspaceRoot, prerequisite.path),
-      "FAILURE_BOUNDARY_PREREQUISITE_MISSING",
-      "FAILURE_BOUNDARY_PREREQUISITE_UNSAFE",
-      MAX_ARTIFACT_BYTES,
-    );
-    const actualSha256 = `sha256:${sha256(bytes)}`;
-    if (actualSha256 !== prerequisite.sha256) {
-      fail(
-        "FAILURE_BOUNDARY_PREREQUISITE_DRIFT",
-        `M05-T06 prerequisite ${prerequisite.task} bytes changed.`,
-        { expected: prerequisite.sha256, actual: actualSha256 },
-      );
-    }
-    assertPrerequisiteSemantics(
-      prerequisite,
-      parseJson(bytes, `prerequisite ${prerequisite.task}`),
-    );
-  }
-}
-
-async function readTrackedFiles(workspaceRoot) {
-  const entries = await Promise.all(
-    RUNTIME_REACT_FAILURE_BOUNDARY_TRACKED_PATHS.map(async (relativePath) => {
-      const bytes = await readRegularFile(
-        path.join(workspaceRoot, relativePath),
-        "FAILURE_BOUNDARY_INPUT_MISSING",
-        "FAILURE_BOUNDARY_INPUT_UNSAFE",
-      );
-      return Object.freeze({
-        relativePath,
-        bytes,
-        text: bytes.toString("utf8"),
-      });
-    }),
-  );
-  return entries;
-}
-
-async function artifactBytes(artifact) {
-  const formatted = await format(JSON.stringify(artifact), {
-    endOfLine: "lf",
-    parser: "json",
-    printWidth: 100,
-    tabWidth: 2,
-  });
-  return Buffer.from(formatted, "utf8");
-}
-
-function sectionLines(markdown, heading, code) {
+function sectionLines(markdown, heading) {
   const lines = markdown.split(/\r?\n/u);
   const indexes = lines.flatMap((line, index) => (line === heading ? [index] : []));
   if (indexes.length !== 1) {
-    fail(code, `M05-T06 expected one exact ${heading} section.`);
+    fail("FAILURE_BOUNDARY_DOCUMENTATION_DRIFT", `Expected one exact ${heading} section.`);
   }
   const start = indexes[0];
   const end = lines.findIndex((line, index) => index > start && line.startsWith("## "));
   return lines.slice(start, end === -1 ? lines.length : end);
 }
 
-function exactRow(markdown, id, code) {
+function exactRow(markdown, id) {
   const rows = markdown.split(/\r?\n/u).filter((line) => line.startsWith(`| ${id} |`));
-  if (rows.length !== 1) fail(code, `M05-T06 expected one exact ${id} row.`);
+  if (rows.length !== 1) {
+    fail("FAILURE_BOUNDARY_DOCUMENTATION_DRIFT", `Expected one exact ${id} row.`);
+  }
   return rows[0];
 }
 
-function assertExactArtifactPin(lines, artifactPath, artifactSha256, label) {
+function verifyLocationPin(lines, artifactPath, artifactSha256, label) {
   const section = lines.join("\n");
   const pathToken = `\`${artifactPath}\``;
   const shaToken = `\`sha256:${artifactSha256}\``;
@@ -751,44 +970,96 @@ function assertExactArtifactPin(lines, artifactPath, artifactSha256, label) {
   ) {
     fail(
       "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
-      `M05-T06 ${label} artifact path or SHA moved, changed, or became ambiguous.`,
+      `${label} artifact path or SHA moved, changed, or became ambiguous.`,
     );
   }
 }
 
-function assertSectionNeedles(lines, needles, label) {
-  const section = lines.join("\n");
+function verifyNeedles(lines, needles, label) {
+  const section = lines.join("\n").replace(/\s+/gu, " ");
   for (const needle of needles) {
-    if (!section.includes(needle)) {
-      fail(
-        "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
-        `M05-T06 ${label} lost required reviewed semantics.`,
-        { needle },
-      );
+    if (!section.includes(needle.replace(/\s+/gu, " "))) {
+      fail("FAILURE_BOUNDARY_DOCUMENTATION_DRIFT", `${label} lost reviewed semantics.`, {
+        needle,
+      });
     }
   }
 }
 
-function verifyDocumentation({
-  proofDocumentText,
-  proofMatrixText,
-  normativeCoverageText,
-  findingsText,
-  artifactSha256,
-}) {
-  const proofArtifactSection = sectionLines(
-    proofDocumentText,
-    "## Evidence artifact",
-    "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
+function countToken(text, token) {
+  return text.split(token).length - 1;
+}
+
+function verifyExactTextDigest(text, expected, label) {
+  const actual = {
+    bytes: Reflect.apply(BUFFER_BYTE_LENGTH, BUFFER_CONSTRUCTOR, [text, "utf8"]),
+    sha256: sha256(text),
+  };
+  if (!isDeepStrictEqual(actual, expected)) {
+    fail(
+      "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
+      `${label} changed outside its exact reviewed semantic body.`,
+      { expected, actual },
+    );
+  }
+}
+
+function verifyGlobalPinCounts(text, artifactPath, expectedPathCount, expectedShaCount, label) {
+  const actualPathCount = countToken(text, artifactPath);
+  const actualShaCount = countToken(text, HISTORICAL_ARTIFACT_SHA256);
+  if (
+    actualPathCount !== expectedPathCount ||
+    actualShaCount !== expectedShaCount ||
+    text.includes("[PENDING_FINAL_ARTIFACT_SHA256]")
+  ) {
+    fail(
+      "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
+      `${label} contains missing, duplicate, pending, or displaced historical pins.`,
+      {
+        expectedPathCount,
+        actualPathCount,
+        expectedShaCount,
+        actualShaCount,
+      },
+    );
+  }
+}
+
+function verifyDocumentation(proofText, matrixText, normativeText, findingsText) {
+  const proofEvidenceSection = sectionLines(proofText, "## Evidence artifact");
+  const matrixSection = sectionLines(matrixText, "## M05-T06");
+  const findingSection = sectionLines(
+    findingsText,
+    "## PF-055 — React failure containment is whole-surface when exact origin is unavailable",
   );
-  assertExactArtifactPin(
-    proofArtifactSection,
+  const p17 = exactRow(matrixText, "P-17");
+  const n037 = exactRow(normativeText, "N-037");
+
+  verifyExactTextDigest(proofText, EXPECTED_DOCUMENT_DIGESTS.proof, "Human-readable proof");
+  verifyExactTextDigest(
+    matrixSection.join("\n"),
+    EXPECTED_DOCUMENT_DIGESTS.matrixSection,
+    "Proof Matrix M05-T06 section",
+  );
+  verifyExactTextDigest(p17, EXPECTED_DOCUMENT_DIGESTS.matrixRow, "Proof Matrix P-17 row");
+  verifyExactTextDigest(n037, EXPECTED_DOCUMENT_DIGESTS.normativeRow, "N-037 row");
+  verifyExactTextDigest(
+    findingSection.join("\n"),
+    EXPECTED_DOCUMENT_DIGESTS.findingSection,
+    "PF-055 section",
+  );
+  verifyGlobalPinCounts(proofText, ARTIFACT_RELATIVE_PATH, 1, 1, "Human-readable proof");
+  verifyGlobalPinCounts(matrixText, ARTIFACT_FILE_NAME, 2, 2, "Proof Matrix");
+  verifyGlobalPinCounts(normativeText, ARTIFACT_RELATIVE_PATH, 1, 1, "Normative coverage");
+
+  verifyLocationPin(
+    proofEvidenceSection,
     ARTIFACT_RELATIVE_PATH,
-    artifactSha256,
-    "human-readable proof",
+    HISTORICAL_ARTIFACT_SHA256,
+    "Human-readable proof",
   );
-  assertSectionNeedles(
-    proofDocumentText.split(/\r?\n/u),
+  verifyNeedles(
+    proofText.split(/\r?\n/u),
     [
       "whole-surface fail-closed",
       "leaf component",
@@ -798,58 +1069,40 @@ function verifyDocumentation({
       "no placeholder",
       "`ignoreRuntimeReactRootCaughtError`",
       "full React-root unmount",
+      "immutable task-time M05-T06 artifact",
+      "does not rebuild evidence from current successor source",
     ],
-    "human-readable proof",
+    "Human-readable proof",
   );
 
-  const matrixSection = sectionLines(
-    proofMatrixText,
-    "## M05-T06",
-    "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
-  );
-  assertExactArtifactPin(
+  verifyLocationPin(
     matrixSection,
-    path.basename(ARTIFACT_RELATIVE_PATH),
-    artifactSha256,
+    ARTIFACT_FILE_NAME,
+    HISTORICAL_ARTIFACT_SHA256,
     "Proof Matrix section",
   );
 
-  const p17 = exactRow(proofMatrixText, "P-17", "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT");
   const p17Cells = p17.split("|").map((cell) => cell.trim());
   if (
     p17Cells[3] !== "M02-T13, M04-T13–M04-T17, M05-T06, M07-T04" ||
     p17Cells[4] !== "PARTIAL" ||
     !p17Cells[6]?.includes("M07-T04") ||
-    p17Cells[6]?.includes("M05-T06") ||
-    !p17.includes(path.basename(ARTIFACT_RELATIVE_PATH)) ||
-    !p17.includes(`sha256:${artifactSha256}`)
+    p17Cells[6]?.includes("M05-T06")
   ) {
     fail(
       "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
-      "M05-T06 P-17 lost its exact PARTIAL status, remaining owner, artifact, or SHA.",
+      "P-17 lost its exact M05-T06 partial-proof state or M07-T04 remainder.",
     );
   }
+  verifyLocationPin([p17], ARTIFACT_FILE_NAME, HISTORICAL_ARTIFACT_SHA256, "P-17");
 
-  const n037 = exactRow(normativeCoverageText, "N-037", "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT");
   const n037Cells = n037.split("|").map((cell) => cell.trim());
-  if (
-    n037Cells[4] !== "M05-T06" ||
-    n037Cells[5] !== "TESTED" ||
-    !n037.includes(ARTIFACT_RELATIVE_PATH) ||
-    !n037.includes(`sha256:${artifactSha256}`)
-  ) {
-    fail(
-      "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
-      "M05-T06 N-037 lost its exact TESTED owner, artifact, or SHA.",
-    );
+  if (n037Cells[4] !== "M05-T06" || n037Cells[5] !== "TESTED") {
+    fail("FAILURE_BOUNDARY_DOCUMENTATION_DRIFT", "N-037 lost its exact M05-T06 tested state.");
   }
+  verifyLocationPin([n037], ARTIFACT_RELATIVE_PATH, HISTORICAL_ARTIFACT_SHA256, "N-037");
 
-  const findingSection = sectionLines(
-    findingsText,
-    "## PF-055 — React failure containment is whole-surface when exact origin is unavailable",
-    "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
-  );
-  assertSectionNeedles(
+  verifyNeedles(
     findingSection,
     [
       "- Status: OPEN",
@@ -859,167 +1112,47 @@ function verifyDocumentation({
       "one deduplicated",
       "omitted `recoveryKey` deliberately means never retry",
       "cleanup during complete React-root",
-      "M07-T04",
+      "M05-T07 now wires",
+      "M05-T08 now exercises",
+      "M05-T09 now proves",
+      "M06-T11 still owns",
+      "M07-T04 owns",
     ],
     "PF-055",
   );
 }
 
-function createArtifact(entries, inventory) {
-  const files = entries.map((entry) =>
-    Object.freeze({
-      path: entry.relativePath,
-      bytes: entry.bytes.length,
-      sha256: `sha256:${sha256(entry.bytes)}`,
-    }),
-  );
-  return freezeJson({
-    schemaVersion: 1,
-    task: "M05-T06",
-    result: "PASS",
-    profile: "desen-runtime-react-failure-boundary-v1",
-    protocol: "0.1.0",
-    target: "web-react",
-    prerequisites: EXPECTED_PREREQUISITES,
-    claim: {
-      wholeSurfaceFailClosed: true,
-      safeNodeLocalSiblingContinuationClaimed: false,
-      exactAttribution: "leaf-component-only",
-      behaviorExactAttribution: false,
-      nonLeafExactAttribution: false,
-      cleanupExactAttribution: false,
-      honestNullAttributionWhenOriginUnavailable: true,
-      explicitUnknownCapabilityFailure: true,
-      productionPlaceholderGuessing: false,
-      rawAdapterPayloadExposed: false,
-    },
-    boundary: {
-      package: "@desen/runtime-react",
-      failureCode: "ADAPTER_FAILURE",
-      containment: "whole-surface",
-      publicVariants: ["component", "unattributed"],
-      publicFailureFields: PUBLIC_FAILURE_FIELDS,
-      rawPublicFields: [],
-      identityPolicy: {
-        exact: "leaf component with no managed DESEN descendants",
-        unattributed:
-          "behavior, non-leaf, descendant, removal, or other origin React cannot expose safely",
-        unattributedIdentityValue: null,
-      },
-      provenanceBranches: {
-        structure: "two-always-mounted-sibling-boundaries",
-        managed: "RuntimeReactManagedBranchBoundary",
-        host: "RuntimeReactHostBranchBoundary",
-      },
-      hostFailureRenderer: {
-        selectedBy: "trusted-static-host-code",
-        bundleOrCatalogAuthority: false,
-        privateFreshCarrier: true,
-        cause: "exact-host-thrown-value",
-        classifiedAsAdapterFailure: false,
-      },
-      recovery: {
-        mode: "sticky-after-adapter-failure",
-        authority: "explicit-host-recoveryKey",
-        implicitResultRetry: false,
-        implicitPublicationRetry: false,
-        implicitReconciliationKeyRetry: false,
-      },
-      unknownCapability: {
-        phase: "all-or-nothing-preflight",
-        adapterExecutionBeforeFailure: false,
-        placeholder: false,
-        hostFailureSurfaceRequired: true,
-      },
-      rootCaughtError: {
-        handler: "ignoreRuntimeReactRootCaughtError",
-        handlerType: "RuntimeReactRootCaughtErrorHandler",
-        scope: "dedicated-DESEN-root-only",
-        rawPayloadInspection: false,
-        rawPayloadForwarding: false,
-        sharedRootPolicyClaimed: false,
-        referenceHostWiringOwner: "M05-T07",
-      },
-      integrationScope: {
-        resultAuthority: "host-trusted-runtime-result",
-        arbitraryUntrustedResultParser: false,
-        moduleInstanceRequirement: "one-deduplicated-@desen/runtime-react-instance-per-React-tree",
-        omittedRecoveryKey: "safe-never-retry",
-        hostCleanupCarrier:
-          "managed-to-failure-and-failure-to-managed-transitions-while-branch-boundary-mounted",
-        fullRootUnmountCleanupOwner: "M05-T07-host-onUncaughtError-policy",
-      },
-    },
-    publicApi: {
-      runtimeExports: PUBLIC_RUNTIME_EXPORTS,
-      typeExports: PUBLIC_TYPE_EXPORTS,
-    },
-    evidence: {
-      focusedScript: "pnpm --filter @desen/runtime-react test:failure-boundary",
-      tests: {
-        focusedCases: inventory.focusedTestCases,
-        compilerNegativeCases: inventory.compilerNegativeCases,
-        rootMutationTests: inventory.rootMutationTests,
-      },
-      sourceAssertions: inventory.sourceAssertions,
-      dynamicExecutableImports: inventory.dynamicExecutableImports,
-      trackedFiles: files,
-      verifierExecutionProfile: "static-source-package-prerequisite-and-focused-test-inventory",
-      historicalArtifactsRewritten: false,
-      traceability: {
-        canonicalTrace: ["R-112", "R-113", "R-115", "A-012", "D-036"],
-        normative: {
-          id: "N-037",
-          status: "TESTED",
-          owners: "M05-T06",
-        },
-        proofClaim: {
-          id: "P-17",
-          status: "PARTIAL",
-          remainingOwner: "M07-T04",
-        },
-        taskLocalApplicability: {
-          id: "D-009",
-          status: "DEFERRED",
-          remainingOwner: "M06-T11",
-        },
-      },
-    },
-    nonclaims: NONCLAIMS,
-  });
-}
-
 /**
- * Builds current M05-T06 evidence from exact source, test, package, and prerequisite bytes.
- *
- * @remarks The builder performs no dynamic import and executes no production adapter or test
- * callback. Focused tests are a separate quality-gate step; this artifact owns their exact source
- * and registration inventory.
+ * Reads exact immutable M05-T06 evidence without consulting current successor source or tests.
  */
 export async function buildRuntimeReactFailureBoundaryEvidence(rawOptions = undefined) {
-  const options = captureOptions(rawOptions, ["workspaceRoot"], "build");
-  const workspaceRoot = await resolveWorkspaceRoot(
-    optionalString(options.workspaceRoot, "workspaceRoot"),
-  );
-  const entries = await readTrackedFiles(workspaceRoot);
-  const files = new Map(entries.map((entry) => [entry.relativePath, entry.text]));
-  const inventory = assertImplementationSemantics(files);
-  await readPrerequisites(workspaceRoot);
-  const artifact = createArtifact(entries, inventory);
-  const bytes = await artifactBytes(artifact);
+  const options = captureOptions(rawOptions, ["artifactPath", "artifactBytes"], "build");
+  const artifactPath = optionalPath(options.artifactPath, "artifactPath");
+  assertExclusivePair(artifactPath, options.artifactBytes, "build artifactPath/artifactBytes");
+  const artifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
+  const historicalBytes =
+    artifactBytes ??
+    (await readRegularFile(
+      artifactPath ?? DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_ARTIFACT_PATH,
+      "FAILURE_BOUNDARY_ARTIFACT_MISSING",
+      "FAILURE_BOUNDARY_ARTIFACT_UNSAFE",
+      HISTORICAL_ARTIFACT_BYTES,
+      HISTORICAL_ARTIFACT_BYTES,
+    ));
+  const artifact = inspectHistoricalArtifact(historicalBytes);
   return Object.freeze({
     artifact,
-    artifactBytes: bytes,
-    artifactSha256: sha256(bytes),
+    artifactBytes: Reflect.apply(BUFFER_FROM, BUFFER_CONSTRUCTOR, [historicalBytes]),
+    artifactSha256: HISTORICAL_ARTIFACT_SHA256,
+    compatibilityMode: COMPATIBILITY_MODE,
   });
 }
 
-/** Verifies exact current M05-T06 artifact bytes against a fresh deterministic build. */
+/** Verifies immutable M05-T06 bytes, reviewed semantics, inventory, and exact current proof pins. */
 export async function verifyRuntimeReactFailureBoundaryEvidence(rawOptions = undefined) {
   const options = captureOptions(
     rawOptions,
     [
-      "workspaceRoot",
       "artifactPath",
       "artifactBytes",
       "proofPath",
@@ -1033,14 +1166,20 @@ export async function verifyRuntimeReactFailureBoundaryEvidence(rawOptions = und
     ],
     "verify",
   );
-  const workspaceRoot = optionalString(options.workspaceRoot, "workspaceRoot");
-  const injectedArtifactPath = optionalString(options.artifactPath, "artifactPath");
-  const injectedArtifactBytes = optionalBuffer(options.artifactBytes, "artifactBytes");
-  const proofPath = optionalString(options.proofPath, "proofPath");
+  const artifactPath = optionalPath(options.artifactPath, "artifactPath");
+  assertExclusivePair(
+    artifactPath,
+    options.artifactBytes,
+    "verification artifactPath/artifactBytes",
+  );
+  const artifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
+  const proofPath = optionalPath(options.proofPath, "proofPath");
   const proofDocumentText = optionalText(options.proofDocumentText, "proofDocumentText");
-  const proofMatrixPath = optionalString(options.proofMatrixPath, "proofMatrixPath");
+  assertExclusivePair(proofPath, proofDocumentText, "proofPath/proofDocumentText");
+  const proofMatrixPath = optionalPath(options.proofMatrixPath, "proofMatrixPath");
   const proofMatrixText = optionalText(options.proofMatrixText, "proofMatrixText");
-  const normativeCoveragePath = optionalString(
+  assertExclusivePair(proofMatrixPath, proofMatrixText, "proofMatrixPath/proofMatrixText");
+  const normativeCoveragePath = optionalPath(
     options.normativeCoveragePath,
     "normativeCoveragePath",
   );
@@ -1048,43 +1187,18 @@ export async function verifyRuntimeReactFailureBoundaryEvidence(rawOptions = und
     options.normativeCoverageText,
     "normativeCoverageText",
   );
-  const findingsPath = optionalString(options.findingsPath, "findingsPath");
-  const findingsText = optionalText(options.findingsText, "findingsText");
-  if (injectedArtifactPath !== undefined && injectedArtifactBytes !== undefined) {
-    fail(
-      "FAILURE_BOUNDARY_OPTIONS_INVALID",
-      "M05-T06 verification accepts either artifactPath or artifactBytes, not both.",
-    );
-  }
-  const built = await buildRuntimeReactFailureBoundaryEvidence({
-    ...(workspaceRoot === undefined ? {} : { workspaceRoot }),
-  });
-  const currentArtifactBytes =
-    injectedArtifactBytes ??
-    (await readRegularFile(
-      injectedArtifactPath ?? DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_ARTIFACT_PATH,
-      "FAILURE_BOUNDARY_ARTIFACT_MISSING",
-      "FAILURE_BOUNDARY_ARTIFACT_UNSAFE",
-      MAX_ARTIFACT_BYTES,
-    ));
-  const currentArtifact = parseJson(
-    currentArtifactBytes,
-    "artifact",
-    "FAILURE_BOUNDARY_ARTIFACT_DRIFT",
+  assertExclusivePair(
+    normativeCoveragePath,
+    normativeCoverageText,
+    "normativeCoveragePath/normativeCoverageText",
   );
-  if (
-    !currentArtifactBytes.equals(built.artifactBytes) ||
-    !isDeepStrictEqual(currentArtifact, built.artifact)
-  ) {
-    fail(
-      "FAILURE_BOUNDARY_ARTIFACT_DRIFT",
-      "M05-T06 artifact bytes or semantics do not match the current deterministic build.",
-      {
-        expected: built.artifactSha256,
-        actual: sha256(currentArtifactBytes),
-      },
-    );
-  }
+  const findingsPath = optionalPath(options.findingsPath, "findingsPath");
+  const findingsText = optionalText(options.findingsText, "findingsText");
+  assertExclusivePair(findingsPath, findingsText, "findingsPath/findingsText");
+  const built = await buildRuntimeReactFailureBoundaryEvidence({
+    ...(artifactPath === undefined ? {} : { artifactPath }),
+    ...(artifactBytes === undefined ? {} : { artifactBytes }),
+  });
   const [proofText, matrixText, normativeText, findingText] = await Promise.all([
     proofDocumentText ??
       readRegularFile(
@@ -1115,64 +1229,116 @@ export async function verifyRuntimeReactFailureBoundaryEvidence(rawOptions = und
         MAX_DOCUMENT_BYTES,
       ).then((bytes) => bytes.toString("utf8")),
   ]);
-  verifyDocumentation({
-    proofDocumentText: proofText,
-    proofMatrixText: matrixText,
-    normativeCoverageText: normativeText,
-    findingsText: findingText,
-    artifactSha256: built.artifactSha256,
-  });
+  verifyDocumentation(proofText, matrixText, normativeText, findingText);
   return Object.freeze({
     result: built.artifact.result,
     artifactSha256: built.artifactSha256,
     artifactBytes: built.artifactBytes.length,
-    trackedFiles: built.artifact.evidence.trackedFiles.length,
-    sourceAssertions: built.artifact.evidence.sourceAssertions,
-    focusedTests: built.artifact.evidence.tests.focusedCases,
-    compilerNegativeCases: built.artifact.evidence.tests.compilerNegativeCases,
-    rootMutationTests: built.artifact.evidence.tests.rootMutationTests,
-    publicRuntimeExports: built.artifact.publicApi.runtimeExports.length,
-    publicTypeExports: built.artifact.publicApi.typeExports.length,
+    compatibilityMode: COMPATIBILITY_MODE,
+    prerequisitePins: EXPECTED_PREREQUISITES.length,
+    trackedFiles: EXPECTED_TRACKED_PATHS.length,
+    sourceAssertions: EXPECTED_SEMANTICS.sourceAssertions,
+    focusedTests: EXPECTED_SEMANTICS.tests.focusedCases,
+    compilerNegativeCases: EXPECTED_SEMANTICS.tests.compilerNegativeCases,
+    rootMutationTests: EXPECTED_SEMANTICS.tests.rootMutationTests,
+    publicRuntimeExports: EXPECTED_PUBLIC_API.runtimeExports.length,
+    publicTypeExports: EXPECTED_PUBLIC_API.typeExports.length,
+    nonclaims: EXPECTED_NONCLAIMS.length,
     normativeStatus: "N-037:TESTED",
     proofStatus: "P-17:PARTIAL",
+    taskLocalApplicabilityStatus: "D-009:DEFERRED",
     exactDocumentationReferences: 4,
   });
 }
 
-/** Atomically writes the exact current deterministic M05-T06 artifact. */
+/** Atomically copies only exact already-authenticated immutable M05-T06 task-time bytes. */
 export async function writeRuntimeReactFailureBoundaryEvidence(rawOptions = undefined) {
   const options = captureOptions(
     rawOptions,
-    ["workspaceRoot", "artifactPath", "beforeAtomicRename"],
+    ["sourceArtifactPath", "artifactBytes", "artifactPath", "beforeAtomicRename"],
     "write",
   );
-  const workspaceRoot = optionalString(options.workspaceRoot, "workspaceRoot");
+  const sourceArtifactPath = optionalPath(options.sourceArtifactPath, "sourceArtifactPath");
+  assertExclusivePair(
+    sourceArtifactPath,
+    options.artifactBytes,
+    "writer sourceArtifactPath/artifactBytes",
+  );
+  const artifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
+  const destinationWasExplicit = hasOwn(options, "artifactPath");
+  if (destinationWasExplicit && options.artifactPath === undefined) {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      "Historical M05-T06 explicit artifactPath must not be undefined.",
+    );
+  }
   const destinationPath =
-    optionalString(options.artifactPath, "artifactPath") ??
+    optionalPath(options.artifactPath, "artifactPath") ??
     DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_ARTIFACT_PATH;
   const beforeAtomicRename = optionalCallback(options.beforeAtomicRename, "beforeAtomicRename");
+  if (!destinationWasExplicit && beforeAtomicRename !== undefined) {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      "Historical M05-T06 no-op default writer does not accept an atomic-rename callback.",
+    );
+  }
+  if (
+    !destinationWasExplicit &&
+    (sourceArtifactPath !== undefined || artifactBytes !== undefined)
+  ) {
+    fail(
+      "FAILURE_BOUNDARY_OPTIONS_INVALID",
+      "Historical M05-T06 no-op default writer does not accept a source override.",
+    );
+  }
+  if (
+    destinationWasExplicit &&
+    destinationPath === DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_ARTIFACT_PATH
+  ) {
+    fail(
+      "FAILURE_BOUNDARY_ARTIFACT_UNSAFE",
+      "Immutable task-time M05-T06 artifact cannot be an explicit write destination.",
+    );
+  }
   const built = await buildRuntimeReactFailureBoundaryEvidence({
-    ...(workspaceRoot === undefined ? {} : { workspaceRoot }),
+    ...(sourceArtifactPath === undefined ? {} : { artifactPath: sourceArtifactPath }),
+    ...(artifactBytes === undefined ? {} : { artifactBytes }),
   });
+  if (!destinationWasExplicit) {
+    return Object.freeze({
+      result: built.artifact.result,
+      artifactPath: DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_ARTIFACT_PATH,
+      artifactSha256: built.artifactSha256,
+      artifactBytes: built.artifactBytes.length,
+      trackedFiles: EXPECTED_TRACKED_PATHS.length,
+      focusedTests: EXPECTED_SEMANTICS.tests.focusedCases,
+      compilerNegativeCases: EXPECTED_SEMANTICS.tests.compilerNegativeCases,
+      rootMutationTests: EXPECTED_SEMANTICS.tests.rootMutationTests,
+      compatibilityMode: COMPATIBILITY_MODE,
+      preserved: true,
+    });
+  }
+  let atomicResult;
   try {
-    await writeAtomicProofArtifact({
+    atomicResult = await writeAuthenticatedAtomicCopy({
       artifactPath: destinationPath,
       artifactBytes: built.artifactBytes,
       beforeAtomicRename,
     });
   } catch (error) {
-    fail("FAILURE_BOUNDARY_ARTIFACT_UNSAFE", "Atomic M05-T06 artifact write failed safely.", {
+    fail("FAILURE_BOUNDARY_ARTIFACT_UNSAFE", "Atomic M05-T06 compatibility write failed safely.", {
       cause: String(error),
     });
   }
   return Object.freeze({
     result: built.artifact.result,
-    artifactPath: path.resolve(destinationPath),
+    artifactPath: atomicResult.artifactPath,
     artifactSha256: built.artifactSha256,
     artifactBytes: built.artifactBytes.length,
-    trackedFiles: built.artifact.evidence.trackedFiles.length,
-    focusedTests: built.artifact.evidence.tests.focusedCases,
-    compilerNegativeCases: built.artifact.evidence.tests.compilerNegativeCases,
-    rootMutationTests: built.artifact.evidence.tests.rootMutationTests,
+    trackedFiles: EXPECTED_TRACKED_PATHS.length,
+    focusedTests: EXPECTED_SEMANTICS.tests.focusedCases,
+    compilerNegativeCases: EXPECTED_SEMANTICS.tests.compilerNegativeCases,
+    rootMutationTests: EXPECTED_SEMANTICS.tests.rootMutationTests,
+    compatibilityMode: COMPATIBILITY_MODE,
   });
 }

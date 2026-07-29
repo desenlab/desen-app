@@ -398,16 +398,25 @@ platform authority. Exact count, pointer, and aggregate ceilings pass; a one-bel
 atomically at `normalization`. `PF-065` records the parsed-value versus raw lexical-byte boundary.
 The composed M05-T05/M06-T06 evidence advances N-021 to `TESTED`; N-012 and N-014 remain
 `PLANNED` for their editor owners.
+M06-T07 now executes the frozen publication order that the earlier task split had obscured:
+calculate `sourceDigest` from the exact authenticated Source, remove only root `authoring`, then
+minimally normalize one detached production-document base. Root authoring changes affect neither
+the digest nor normalized bytes; nested extension data remains semantic. No default, empty-member
+deletion, index, array sort, or deduplication is introduced. The nonterminal success keeps the
+digest separate from the incomplete document, and exact 2 MiB intermediate limits fail closed.
+`PF-066` records the profile and ordering correction. P-11 advances only to `PARTIAL`; final exact
+tuple pinning, Bundle validation/revision, official determinism, and the invalid-source matrix
+remain M06-T08 through M06-T11.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `69 / 145 tasks complete (48%)`
+- Overall implementation progress: `70 / 145 tasks complete (48%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- M06 progress: `6 / 11 tasks complete (55%)`
+- M06 progress: `7 / 11 tasks complete (64%)`
 - Proof-gate progress: `6 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -462,12 +471,13 @@ The composed M05-T05/M06-T06 evidence advances N-021 to `TESTED`; N-012 and N-01
   `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`,
   `M06-T04 — Prop, slot, style, event, command, and behavior preflight`,
   `M06-T05 — Resource/operation contracts, dynamic compatibility, and runtime obligations`,
-  `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`
+  `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`,
+  `M06-T07 — Source digest, authoring removal, and deterministic normalization`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M06-T07 — Authoring removal and deterministic normalization`
-- Status: M05 and G05 are complete; M06-T01 through M06-T06 are complete; M06-T07 is ready
+  `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`
+- Status: M05 and G05 are complete; M06-T01 through M06-T07 are complete; M06-T08 is ready
 
 ## Completed preparation
 
@@ -826,10 +836,11 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T07 — Authoring removal and deterministic normalization`. Consume only the exact
-M06-T06 preservation authority, remove the top-level authoring member without inspecting or
-retaining it in production content, and produce one deterministic normalized document projection
-without changing opaque extensions, semantic array order, source-node identifiers, or traceability.
+Begin `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`. Consume only
+the complete M06-T07 authority, prove its `sourceDigest` is the exact already calculated
+pre-normalization digest, replace every loose Source Catalog requirement with the exact selected
+`id`/`version`/`target`/`digest` tuple in Source order, and expose no terminal Bundle or partial
+authority.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1316,7 +1327,7 @@ M05-T06 evidence:
 - `docs/proof/RUNTIME-REACT-FAILURE-BOUNDARY.md`
 - `docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json`
 - artifact SHA-256:
-  `f6dbb1adb38cf2d6a3f13532424c2ed8422b29f1a7d28a0f31a9ec9b66eb9abc`
+  `3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723`
 - exact boundary: complete unknown-capability preflight with no placeholder; whole-surface
   containment; exact leaf-component or honest null attribution; sticky explicit retry authority;
   separate persistent managed/host provenance branches; nested host-carrier preservation; and a
@@ -1421,7 +1432,7 @@ M06-T02 evidence:
 
 - `docs/proof/PUBLISHER-CATALOG-RESOLUTION.md`
 - `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
-- artifact SHA-256: `4ee7754e5e658be5b7cda8c5ce6875d6f0a32f20d500bc9079ac79e5ed5142d9`
+- artifact SHA-256: `02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6`
 - exact boundary: code-unit-equal `id`/`version`/optional-`target` resolution from one closed
   package-observation inventory; no location, range, normalization, newest, or first-candidate
   authority; bounded inert Catalog capture; exact candidate/Catalog identity and preobserved
@@ -1443,7 +1454,7 @@ M06-T03 evidence:
 
 - `docs/proof/PUBLISHER-SOURCE-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-- artifact SHA-256: `4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`
+- artifact SHA-256: `46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`
 - exact boundary: strict raw Source ingress; distinct Source-root and embedded-schema phases;
   catalog-independent SemVer, entry, surface, and node/behavior identity checks before candidate
   observation; exact M06-T02 Catalog authority before category-aware component, behavior,
@@ -1466,7 +1477,7 @@ M06-T04 evidence:
 
 - `docs/proof/PUBLISHER-CAPABILITY-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-- artifact SHA-256: `c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`
+- artifact SHA-256: `cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`
 - exact boundary: the exact M06-T03 Source, selected packages, Catalogs, and requirement alignment
   cross safe interaction-schema preparation and complete static component/behavior contract
   validation; success stays package-private and nonterminal with no dynamic obligations or Bundle
@@ -1491,7 +1502,7 @@ M06-T05 evidence:
 
 - `docs/proof/PUBLISHER-EXECUTION-PREFLIGHT.md`
 - `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-- artifact SHA-256: `7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`
+- artifact SHA-256: `33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`
 - exact boundary: internal M06-T04 composition; exact prepared Source, execution Catalog, selected
   package, requirement-alignment, and warning authority; one emission-site phase-aware T10/T11
   analysis; exact stage 8 → 9 → 10 precedence; and one package-private nonterminal success
@@ -1513,7 +1524,7 @@ M06-T06 evidence:
 
 - `docs/proof/PUBLISHER-SOURCE-PRESERVATION.md`
 - `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
-- artifact SHA-256: `d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8`
+- artifact SHA-256: `481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004`
 - exact boundary: internal M06-T05 composition; exact Source, execution Catalog, selected package,
   requirement-alignment, warning, and obligation identity; one separate frozen production-field
   projection; and one package-private nonterminal preservation success
@@ -1533,7 +1544,31 @@ M06-T06 evidence:
   contains 55 proofs and a reviewed 118-step single-pass plan
 - coverage decision: M06-T06 becomes `DONE`; the composed M05-T05/M06-T06 evidence advances N-021
   to `TESTED`; N-012 and N-014 remain `PLANNED` for M08-T07 and M08-T03; no `P-*`, `S-*`, or gate
-  status changes; M06-T07 owns actual authoring removal and deterministic normalization next
+  status changes; at that checkpoint M06-T07 owned the next publication slice
+
+M06-T07 evidence:
+
+- `docs/proof/PUBLISHER-SOURCE-NORMALIZATION.md`
+- `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
+- artifact SHA-256: `f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c`
+- exact boundary: one internal M06-T06 composition; Source digest from the exact authenticated
+  pre-normalization Source; root-only authoring removal; one detached RFC 8785-normalized
+  production-document base; and one package-private nonterminal success
+- ordering and preservation: digest → authoring removal → normalization; root authoring changes
+  affect neither digest nor normalized bytes; nested authoring and every opaque extension remain
+  semantic; array order, identifiers, conditions, literals, capability ids, and trace pointers
+  remain unchanged
+- normalization profile: no defaults, empty-member deletion, hidden index, semantic-array sorting,
+  or deduplication; object insertion order has no canonical-byte authority
+- finite envelope: 2,097,152 canonical UTF-8 bytes for the intermediate; exact and zero boundaries
+  plus one-byte crossings; `source-digest` and `normalization` failures expose no warning, partial
+  authority, or Bundle
+- executable evidence: 17 focused Publisher cases, 52 compiler-negative cases, 26 exact named
+  independent proof/mutation cases, 2 exact prerequisite pins, 18 byte-tracked files, source and
+  built-distribution order audits, and 9 immutable trace-ownership rows
+- coverage decision: M06-T07 becomes `DONE`; P-11 advances to `PARTIAL`; P-03 and P-05 remain open,
+  N-018 remains `PLANNED` for the terminal Bundle/editor owners, and G06 remains open; M06-T08 owns
+  digest authentication/carry and exact Catalog tuple pinning next
 
 ## Status vocabulary
 

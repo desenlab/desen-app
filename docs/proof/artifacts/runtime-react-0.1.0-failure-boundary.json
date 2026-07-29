@@ -195,8 +195,8 @@
       },
       {
         "path": "scripts/lib/runtime-react-reconciliation-diagnostics-proof.mjs",
-        "bytes": 29433,
-        "sha256": "sha256:5adb30c5fe8ccf247c7354eef96182b93a35f7e1ef8a2f30dd591593b1ace398"
+        "bytes": 27508,
+        "sha256": "sha256:e8d5feb6f608ae7dab73e9615f005bdbb5f6edbd65f5fe71a09531832b7ee145"
       },
       {
         "path": "scripts/verify-runtime-react-failure-boundary.mjs",
@@ -210,8 +210,8 @@
       },
       {
         "path": "tests/runtime-react-reconciliation-diagnostics.test.mjs",
-        "bytes": 14320,
-        "sha256": "sha256:0f6a305b88771c3a6ee2dc1e221ae28893f5828597e5a8a9bc03f11b18dc8eeb"
+        "bytes": 12583,
+        "sha256": "sha256:7d94ce686c4c9ea90f4bf8ab5cf1b13a2120e2298fbbf4cba66890d943f49308"
       }
     ],
     "verifierExecutionProfile": "static-source-package-prerequisite-and-focused-test-inventory",

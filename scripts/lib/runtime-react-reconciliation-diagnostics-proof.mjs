@@ -20,14 +20,18 @@ const HISTORICAL_ARTIFACT_BYTES = 19_234;
 const SUCCESSOR_ARTIFACT_RELATIVE_PATH =
   "docs/proof/artifacts/publisher-0.1.0-source-preservation.json";
 const SUCCESSOR_ARTIFACT_SHA256 =
-  "d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8";
-const N021_CURRENT_OWNERS = "M05-T05, M06-T06";
+  "481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004";
+const LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH =
+  "docs/proof/artifacts/publisher-0.1.0-source-normalization.json";
+const LATEST_SUCCESSOR_ARTIFACT_SHA256 =
+  "f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c";
+const N021_CURRENT_OWNERS = "M05-T05, M06-T06–M06-T07";
 const N021_CURRENT_STATUS = "TESTED";
 const N021_CURRENT_EVIDENCE = [
-  "M05-T05 proves the selected Web–React runtime side: exact live publications retain stable runtime/source identity, repeated authoring nodes remain one-to-many traceable, and a bounded immutable diagnostic index exposes no executable or platform authority.",
-  "M06-T06 completes the Publisher side by retaining the exact prepared Source behavior, all opaque extensions and semantic arrays, and one complete bounded five-string component-node trace under unchanged identifiers.",
-  "Trace identity is surface-scoped, exact RFC 6901 pointers remain unique, behavior ids are not mislabeled as component nodes, and extension/authoring node shapes stay opaque.",
-  `Evidence: \`${ARTIFACT_RELATIVE_PATH}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\`; \`${SUCCESSOR_ARTIFACT_RELATIVE_PATH}\` \`sha256:${SUCCESSOR_ARTIFACT_SHA256}\`.`,
+  "M05-T05 proves the selected Web–React runtime side.",
+  "M06-T06 completes the Publisher preservation slice with unchanged prepared behavior and one complete bounded five-string component-node trace.",
+  "M06-T07 carries that exact behavior and every trace record unchanged through digest calculation, root-authoring removal, and deterministic normalization; exact pointers remain resolvable in the normalized document and no extension or authoring node gains trace authority.",
+  `Evidence: \`${ARTIFACT_RELATIVE_PATH}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\`; \`${SUCCESSOR_ARTIFACT_RELATIVE_PATH}\` \`sha256:${SUCCESSOR_ARTIFACT_SHA256}\`; \`${LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH}\` \`sha256:${LATEST_SUCCESSOR_ARTIFACT_SHA256}\`.`,
 ].join(" ");
 const COMPATIBILITY_MODE = "immutable-task-time-artifact";
 const MAX_PROOF_DOCUMENT_BYTES = 500_000;
@@ -553,7 +557,7 @@ function verifyDocumentation(proofText, matrixText, normativeText) {
   ) {
     fail(
       "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
-      "N-021 lost its exact monotonic M05-T05/M06-T06 successor closure.",
+      "N-021 lost its exact monotonic M05-T05/M06-T07 successor closure.",
     );
   }
   verifyLocationPin(
@@ -566,6 +570,12 @@ function verifyDocumentation(proofText, matrixText, normativeText) {
     [n021],
     SUCCESSOR_ARTIFACT_RELATIVE_PATH,
     SUCCESSOR_ARTIFACT_SHA256,
+    "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
+  );
+  verifyLocationPin(
+    [n021],
+    LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH,
+    LATEST_SUCCESSOR_ARTIFACT_SHA256,
     "RECONCILIATION_DIAGNOSTICS_PROOF_PIN_DRIFT",
   );
 }
@@ -694,8 +704,9 @@ export async function verifyRuntimeReactReconciliationDiagnosticsEvidence(rawOpt
     n021HistoricalStatus: EXPECTED_SEMANTICS.normative.currentStatus,
     n021CurrentStatus: N021_CURRENT_STATUS,
     n021SuccessorArtifactSha256: SUCCESSOR_ARTIFACT_SHA256,
+    n021LatestArtifactSha256: LATEST_SUCCESSOR_ARTIFACT_SHA256,
     exactDocumentationReferences: 4,
-    exactSuccessorDocumentationReferences: 1,
+    exactSuccessorDocumentationReferences: 2,
   });
 }
 

@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.source-normalization-proof.v1",
+  "task": "M06-T07",
+  "result": "PASS",
+  "summary": "The exact Source digest is calculated before root authoring removal; production JSON is then minimally normalized into a detached RFC 8785-stable, finite, package-private nonterminal document.",
+  "prerequisites": [
+    {
+      "task": "M02-T04",
+      "path": "docs/proof/artifacts/protocol-0.1.0-canonicalization.json",
+      "sha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6",
+      "verifiedSha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6"
+    },
+    {
+      "task": "M06-T06",
+      "path": "docs/proof/artifacts/publisher-0.1.0-source-preservation.json",
+      "sha256": "481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004",
+      "verifiedSha256": "481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004"
+    }
+  ],
+  "claims": {
+    "exactT06AuthorityCarry": [
+      "source",
+      "catalogSet",
+      "packages",
+      "requirementPackageIndexes",
+      "diagnostics",
+      "obligations",
+      "preservedDocument",
+      "sourceCatalogRequirements",
+      "traceability"
+    ],
+    "sourceDigestCalculatedBeforeNormalization": true,
+    "sourceDigestMatchesExactAuthenticatedSourceProjection": true,
+    "rootAuthoringIndependent": true,
+    "nestedAuthoringPreserved": true,
+    "integerLikeExtensionKeysPreserved": true,
+    "rfc8785EquivalentObjectOrders": true,
+    "minimalNormalizationWithoutDefaultsOrEmptyDeletion": true,
+    "tracePointersResolved": 8,
+    "canonicalUtf8Limits": {
+      "observedExact": 1969,
+      "observedMinusOneRejected": true,
+      "zeroRejected": true,
+      "defaultExactBytes": 2097152,
+      "defaultOverByOneRejected": true
+    },
+    "representativeInheritedFailureUnchangedAndPartialFree": true,
+    "laterFailureSuppressesInheritedWarnings": true,
+    "completeSuccessDeeplyFrozen": true,
+    "frozenSchemaAuthoringScope": true,
+    "officialArtifactUsesExactProductionImplementation": true,
+    "privatePlatformNeutralBoundary": {
+      "sourceImports": [
+        "./catalog-resolution.js",
+        "./publish-diagnostics.js",
+        "./publish-result.js",
+        "./source-preservation.js",
+        "./source-preservation.js",
+        "@desen/protocol",
+        "@desen/protocol",
+        "@desen/validator"
+      ],
+      "distributionImports": [
+        "./publish-diagnostics.js",
+        "./source-preservation.js",
+        "@desen/protocol"
+      ],
+      "declarationImports": [
+        "./catalog-resolution.js",
+        "./publish-result.js",
+        "./source-preservation.js",
+        "@desen/validator"
+      ],
+      "platformNeutral": true,
+      "oneT06Call": true,
+      "sourceDigestBeforeNormalization": true,
+      "exactT06AuthorityCarry": true,
+      "builtDistributionAuthority": {
+        "oneT06Call": true,
+        "sourceDigestBeforeNormalization": true,
+        "exactT06AuthorityCarry": true
+      },
+      "noAuthoringPropertyRead": true,
+      "packagePrivate": true,
+      "exactRootPackageExport": true,
+      "exactProductionDependencies": ["@desen/protocol", "@desen/validator"]
+    },
+    "semanticRegistrations": {
+      "package": "vitest run test/source-normalization.test.ts",
+      "generate": "pnpm verify:publisher-source-preservation && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:source-normalization && node scripts/generate-publisher-source-normalization-proof.mjs",
+      "verify": "pnpm verify:publisher-source-preservation && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:source-normalization && node scripts/verify-publisher-source-normalization.mjs",
+      "test": "pnpm verify:publisher-source-preservation && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:source-normalization && node --test tests/publisher-source-normalization.test.mjs",
+      "predecessorAndCurrentRegisteredExactlyOnce": true,
+      "checkAndTestImmediateSuccessor": true,
+      "ciTupleExact": true
+    },
+    "traceabilityOwnership": {
+      "rows": [
+        "SN-005",
+        "C-005",
+        "C-015",
+        "PIPE-036",
+        "PIPE-037",
+        "R-034",
+        "R-099",
+        "R-107",
+        "R-124"
+      ],
+      "normativeClause": "N-018"
+    }
+  },
+  "nonclaims": [
+    "No exact Catalog tuple, Bundle revision, terminal Bundle, signature, runtime, host, or adapter authority is produced.",
+    "Object member enumeration order is not assigned semantic meaning."
+  ],
+  "tests": {
+    "publisherRuntimeCases": 17,
+    "compilerNegativeCases": 52,
+    "rootMutationCases": 26,
+    "reviewedSha256": {
+      "runtime": "9648619beda688c7598b0d68a5773e0c7ff4063a64b1656c4a897fd5c134de02",
+      "types": "a91afdc1c8ad1b7518e5eda138321b7bf1e3734342e5b4ff219ab4bb3edb5213",
+      "root": "f4a69cb9f7c21d9499fe0c1ce3000b18eb0199a8752c70511318ba4c2ba4378a"
+    },
+    "rootSemantics": {
+      "exactNamedCases": 26,
+      "everyCaseContainsAnAssertion": true,
+      "rejectionCasesContainAssertRejects": true
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "docs/proof/protocol-0.1.0-traceability.json",
+      "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+      "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+      "sha256": "5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
+    },
+    {
+      "path": "packages/publisher/dist/source-normalization.d.ts",
+      "sha256": "6aac2be1ef36cb736e0983cd132b19b2bdfd6634cde8411d87c5c73f05c35494"
+    },
+    {
+      "path": "packages/publisher/dist/source-normalization.js",
+      "sha256": "b8f67dbeef2d7d909d8e715fdc5c3f448e8b06f96c98c85ebc12b4ce7021567c"
+    },
+    {
+      "path": "packages/publisher/src/publish-result.ts",
+      "sha256": "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00"
+    },
+    {
+      "path": "packages/publisher/src/source-normalization.ts",
+      "sha256": "777b210b1d1b2e8f9a95b6107915aa02869e4f71e620f7693981a22d9513c584"
+    },
+    {
+      "path": "packages/publisher/src/source-preservation.ts",
+      "sha256": "e84f40671f2e219b759c02700db28a8f79aa5647e0dc4331b72d2d3c22d2ec22"
+    },
+    {
+      "path": "packages/publisher/test/source-normalization.test.ts",
+      "sha256": "9648619beda688c7598b0d68a5773e0c7ff4063a64b1656c4a897fd5c134de02"
+    },
+    {
+      "path": "packages/publisher/test/source-normalization.types.ts",
+      "sha256": "a91afdc1c8ad1b7518e5eda138321b7bf1e3734342e5b4ff219ab4bb3edb5213"
+    },
+    {
+      "path": "scripts/generate-publisher-source-normalization-proof.mjs",
+      "sha256": "c30137d3ba5a97fcfd11f3d55dcc184c3a2f98e15146ea27a232f439a0ea909c"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/publisher-source-normalization-proof.mjs",
+      "sha256": "964e427a72745746607dbba960f65dffc4327d0bef308462506fe9a4cfa080e2"
+    },
+    {
+      "path": "scripts/verify-publisher-source-normalization.mjs",
+      "sha256": "0864bd707eeccbb2bc7007d512203068ffc211eeb3c8f0e99edaca4a45872a92"
+    },
+    {
+      "path": "tests/publisher-source-normalization.test.mjs",
+      "sha256": "f4a69cb9f7c21d9499fe0c1ce3000b18eb0199a8752c70511318ba4c2ba4378a"
+    }
+  ],
+  "reproduction": [
+    "pnpm verify:publisher-source-preservation",
+    "pnpm --filter @desen/publisher build",
+    "pnpm --filter @desen/publisher typecheck",
+    "pnpm --filter @desen/publisher test:source-normalization",
+    "node scripts/generate-publisher-source-normalization-proof.mjs",
+    "node scripts/verify-publisher-source-normalization.mjs",
+    "node --test tests/publisher-source-normalization.test.mjs"
+  ]
+}

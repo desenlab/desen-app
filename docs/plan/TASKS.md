@@ -238,8 +238,8 @@ evidence.
 | M06-T04 | DONE        | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
 | M06-T05 | DONE        | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
 | M06-T06 | DONE        | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
-| M06-T07 | NOT_STARTED | M06-T06          | Authoring removal and deterministic normalization                                       |
-| M06-T08 | NOT_STARTED | M06-T02, M06-T07 | Source digest and exact package tuple pinning                                           |
+| M06-T07 | DONE        | M06-T06          | Source digest, authoring removal, and deterministic normalization                       |
+| M06-T08 | NOT_STARTED | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
 | M06-T09 | NOT_STARTED | M06-T08          | Bundle validation and revision calculation                                              |
 | M06-T10 | NOT_STARTED | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
 | M06-T11 | NOT_STARTED | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
@@ -341,7 +341,26 @@ files, all sixteen Source-reachable extension kinds, eight semantic-array classe
 single-pass CI registration protect the boundary. `PF-065` records the exact parsed-value versus
 raw lexical-byte scope and the broader preservation surface required by `R-107`/`N-021`. The
 Publisher half completes `N-021`, which advances to `TESTED`; `N-014` and `N-012` remain open for
-their editor owners. M06-T07 owns actual authoring removal and deterministic normalization next.
+their editor owners.
+
+M06-T07 now composes M06-T06 exactly once, calculates `sourceDigest` from the exact authenticated
+Source before any publication-specific transformation, removes only the root `authoring` member,
+and minimally normalizes one detached production-document base through RFC 8785. The digest helper
+omits only root authoring, so authoring-only changes leave both digest and normalized bytes
+unchanged while nested extension data remains semantic. Every T06 authority crosses by exact
+identity; `sourceDigest` remains a separate success field and never enters the normalized document.
+
+The selected profile inserts no default, removes no empty optional member, creates no hidden
+index, and never sorts or deduplicates a semantic array. A 2,097,152-canonical-UTF-8-byte
+intermediate envelope accepts the exact boundary and rejects a one-byte crossing atomically.
+Digest failures stop at `source-digest`; projection and byte-limit failures stop at
+`normalization`; neither exposes warnings, partial authority, or a Bundle. Seventeen focused
+Publisher cases, fifty-two compiler-negative cases, twenty-six independently authenticated
+proof/mutation cases, two exact prerequisites, eighteen byte-tracked files, and the reviewed
+single-pass CI registration protect the boundary. `PF-066` records the minimal profile and the
+required digest → authoring-removal → normalization order. P-11 advances only to `PARTIAL`; P-03,
+P-05, and G06 remain open. M06-T08 owns authenticating and carrying this exact digest while
+pinning exact Catalog tuples next.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

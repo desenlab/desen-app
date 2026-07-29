@@ -271,7 +271,7 @@ perform discovery, download, activation, rendering, signing, publication, or dep
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`.
+`sha256:46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`.
 
 ## Publisher static capability preflight boundary
 
@@ -303,7 +303,7 @@ dependencies.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`.
+`sha256:cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`.
 
 ## Publisher execution preflight boundary
 
@@ -339,7 +339,7 @@ semantic-order, and source-node identity preservation.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-`sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`.
+`sha256:33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`.
 
 ## Publisher Source-preservation boundary
 
@@ -377,7 +377,51 @@ deployment.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
-`sha256:d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8`.
+`sha256:481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004`.
+
+## Publisher Source-digest, authoring-removal, and normalization boundary
+
+M06-T07 composes M06-T06 internally from raw Source JSON and the closed package-candidate
+inventory. It accepts no caller-reconstructed preservation result. The exact authenticated Source,
+execution Catalog set, selected packages, requirement alignment, safe warnings, runtime
+obligations, preservation projection, loose Source requirements, and source-node trace cross the
+boundary by runtime identity.
+
+The boundary executes the protocol's required order—Source digest, root authoring removal, then
+deterministic normalization—and keeps three authorities deliberately separate:
+
+1. the exact authenticated pre-normalization Source;
+2. its DESEN Source digest, calculated before any publication-specific transformation and retained
+   as a separate nonterminal result field; and
+3. one detached, recursively frozen production-document base containing only Bundle `kind`,
+   protocol version, document id, entry surface, surfaces, and optional root extensions.
+
+Producing the second value performs actual top-level authoring removal. It never recursively
+deletes a field named `authoring`, so opaque extension payloads retain such fields unchanged.
+Loose Catalog requirements and discovery locations remain attached to the authenticated Source
+authority for the next exact-pinning step; neither enters the normalized document. M06-T08
+authenticates and carries the already calculated digest while replacing loose requirements with
+exact tuples.
+
+The selected DESEN 0.1.0 Publisher profile uses a minimal RFC 8785 round trip. It applies no schema
+defaults, removes no empty optional member, constructs no hidden dependency index, and never sorts
+or deduplicates semantic arrays. Identifiers, conditions, literals, capability ids, array order,
+opaque extension values, and the T06 source-node trace therefore retain their parsed semantics.
+Canonical serialization is stable across object insertion order; JavaScript in-memory own-key
+enumeration is not treated as an interoperable ordering guarantee.
+
+The production-document base is limited to 2,097,152 canonical UTF-8 bytes. Exact capacity passes;
+a crossing rejects the whole intermediate at `normalization` with a redacted error and no
+inherited warning or partial authority. Invalid digest authority rejects earlier at
+`source-digest` under the same no-partial rule. This is an intermediate envelope, not proof that
+the later complete Bundle fits the Reference Profile after exact requirements and digest fields
+are added. M06-T09 must enforce that final bound again. The T07 success remains package-private
+and nonterminal: it emits no exact requirement set, revision, publication metadata, Bundle,
+runtime value, target adapter, activation, storage, or signing authority.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
+`sha256:f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c`.
 
 ## Applications
 

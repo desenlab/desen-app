@@ -12,7 +12,9 @@ preflight plus safe deprecated-capability warnings while preserving that nonterm
 M06-T05 completes static execution preflight for resource/operation contracts, state and
 control-flow rules, binding compatibility, and the finite runtime-obligation handoff. M06-T06
 then preserves the exact parsed Source fields, semantic array order, opaque extensions, and
-surface-scoped source-node identity trace needed by later normalization.
+surface-scoped source-node identity trace. M06-T07 calculates the exact Source digest, removes only
+root authoring state, and produces the detached deterministic production-document base in the
+protocol's required order.
 
 ## Explicit non-responsibilities
 
@@ -29,7 +31,7 @@ finite Source-ingress profile. It intentionally does not expose a partial parser
 package-private, as is M06-T04 capability preflight. The real terminal publication entry point is
 added only when it can either return a fully validated immutable Bundle or reject with no Bundle.
 M06-T05 execution preflight and M06-T06 Source preservation also remain package-private and
-nonterminal.
+nonterminal. M06-T07 Source normalization has the same private, nonterminal status.
 
 ## Public entry point
 
@@ -167,7 +169,7 @@ rendering, signing, npm publication, or deployment.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-`sha256:4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`.
+`sha256:46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`.
 
 ## Static capability preflight
 
@@ -201,7 +203,7 @@ validation obligations.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-`sha256:c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`.
+`sha256:cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`.
 
 ## Execution preflight and runtime obligations
 
@@ -269,8 +271,8 @@ No parsed Source value is sorted, deduplicated, reconstructed, or assigned new m
 Source-reachable extension remains an opaque exact parsed JSON value, and semantic arrays retain
 their Source order. Raw JSON whitespace and object-member lexical order are outside this parsed
 authority and are not claimed to survive. Top-level `authoring` remains present on the
-authenticated Source but is absent from the production-field projection; M06-T07 owns its actual
-removal and deterministic normalization.
+authenticated Source but is absent from the production-field projection. M06-T07 consumes only
+this exact authority to perform actual production-document removal and normalization.
 
 The task also builds one complete immutable component-node trace. Each record contains only the
 document id, surface id, unchanged Source node id, capability id, and exact RFC 6901 Source
@@ -301,6 +303,45 @@ double-publish determinism.
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`.
 
+## Authoring removal and deterministic normalization
+
+M06-T07 runs M06-T06 internally from the raw Source and closed package candidates; it accepts no
+caller-created preservation shell. The authenticated Source, execution Catalog, selected packages,
+requirement alignment, warnings, obligations, preservation projection, Source Catalog
+requirements, and source-node trace cross by exact runtime identity. The original authenticated
+Source remains available without mutation. T07 calculates `sourceDigest` from that exact value
+before authoring removal and normalization; M06-T08 must authenticate and carry the same digest
+while pinning exact Catalog tuples.
+
+Only `normalizedDocument` is new. It is a detached, recursively frozen RFC 8785 round trip whose
+root contains exactly `kind: "desen.bundle"`, `desen`, `id`, `entry`, `surfaces`, and optional
+`extensions`. Root `authoring`, Source `kind`, loose `catalogs`, discovery `location`, exact
+`requires`, `sourceDigest`, `revision`, and `publication` are absent. A nested extension field
+named `authoring` remains opaque data and is preserved; removal is never a recursive key-name
+filter. `sourceDigest` is a separate immutable field on the nonterminal T07 success rather than a
+member of this incomplete production document.
+
+The local 0.1.0 normalization profile deliberately performs only the transformations needed at
+this boundary. It applies no schema defaults, removes no empty optional member, builds no hidden
+index, sorts or deduplicates no semantic array, and changes no identifier, condition, literal, or
+capability id. RFC 8785 makes the serialized representation deterministic; JavaScript object
+enumeration order is not promoted to protocol semantics, including for integer-like extension
+keys.
+
+The detached document is bounded by 2,097,152 canonical UTF-8 bytes. The exact ceiling passes; a
+crossing rejects the whole intermediate at `normalization` with one redacted
+`run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED` error. A zero-byte ceiling is valid
+profile input and deterministically rejects every nonempty normalized document. Later Bundle
+fields still consume bytes, so M06-T09 must enforce the complete final-Bundle limit again. No T07
+failure exposes inherited warnings, Source, Catalog, package, alignment, obligation, projection,
+trace, normalized document, partial value, or Bundle.
+
+M06-T07 pins no exact Bundle requirement, validates or emits no complete Bundle, calculates no
+revision, and grants no runtime, host, adapter, storage, signing, or publication authority.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-normalization.json`.
+
 ## Dependencies
 
 - `@desen/protocol` supplies frozen Bundle types, core diagnostics, and RFC 6901 pointers.
@@ -325,8 +366,11 @@ is reachable.
   no T05 failure exposes runtime obligations or any lower-stage authority.
 - Source-preservation authority or trace-limit failures stop at `normalization`; no T06 failure
   exposes a partial projection, trace, inherited warning, or lower-stage authority.
-- Normalization, digest, and final-Bundle failures remain assigned to later M06 tasks and must
-  relay stable diagnostics through that result.
+- Source-digest authority failures stop at `source-digest`; normalization-authority or
+  canonical-byte-limit failures stop at `normalization`. No T07 failure exposes a digest,
+  normalized document, inherited warning, or lower-stage authority.
+- Exact-tuple pinning and final-Bundle failures remain assigned to later M06 tasks and must relay
+  stable diagnostics through that result.
 
 ## Protocol and target support
 
@@ -347,6 +391,7 @@ pnpm --filter @desen/publisher test:source-preflight
 pnpm --filter @desen/publisher test:capability-preflight
 pnpm --filter @desen/publisher test:execution-preflight
 pnpm --filter @desen/publisher test:source-preservation
+pnpm --filter @desen/publisher test:source-normalization
 pnpm --filter @desen/publisher build
 pnpm test:publisher-publish-result
 pnpm test:publisher-catalog-resolution
@@ -354,5 +399,6 @@ pnpm test:publisher-source-preflight
 pnpm test:publisher-capability-preflight
 pnpm test:publisher-execution-preflight
 pnpm test:publisher-source-preservation
+pnpm test:publisher-source-normalization
 pnpm check
 ```

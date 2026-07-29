@@ -18,13 +18,13 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 53 proof verifiers directly in the reviewed order, ending with the M06-T04 capability
-   preflight proof;
-7. run all 53 root proof and mutation files as separate fail-fast processes; and
+6. run all 56 proof verifiers directly in the reviewed order, ending with the M06-T07 source
+   normalization proof;
+7. run all 56 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
-The current legacy expansion contains 1,341 leaf process invocations but only 176 distinct
-workloads. The optimized gate covers all 176 distinct workloads. Repeated prerequisite checks
+The current legacy expansion contains 1,443 leaf process invocations but only 185 distinct
+workloads. The optimized gate covers all 185 distinct workloads. Repeated prerequisite checks
 inside proof builders remain intact because those checks are evidence, not orchestration overhead.
 The measurement recursively expands exact root-level `pnpm <script>` references beginning at
 `check`; commands with no further local root-script indirection are leaves, and the distinct
@@ -34,9 +34,9 @@ inventory is sorted before hashing.
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 53 task IDs, verifier files, root test files, or their order;
-- any of the 317 legacy prerequisite command segments;
-- the exact 114-step normalized execution plan;
+- the 56 task IDs, verifier files, root test files, or their order;
+- any of the 345 legacy prerequisite command segments;
+- the exact 120-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;
@@ -55,13 +55,13 @@ Proof generators and evidence writers are never CI inputs. Proof output and succ
 from cache. Timing data is observational and cannot influence pass or fail.
 
 The reviewed legacy prerequisite inventory is pinned as
-`sha256:318e508dab738daf3ef81454b9d6b9a1560ea5b240f252b02d9a4168e3e2796d`.
-The ordered 1,341-entry legacy leaf-invocation inventory is pinned as
-`sha256:426597d01eab3ecf58379cbd68913794bdce4426312d9d7b83fe823d6d7dbd76e`; its sorted
-176-entry distinct-workload inventory is pinned as
-`sha256:3512d56970ab68aaec7dbbf0286f01526e0355ae908909ba1e70ad0caa33a08e`. The normalized
+`sha256:2641d5cd0ca845316c344cf1674fb4a1ae7c2d5812551be38d0da1ed700076c3`.
+The ordered 1,443-entry legacy leaf-invocation inventory is pinned as
+`sha256:f133b1d75e9a074a2f0073352e156d33cc36ac3c40e8064b8acd8bebeb58c4f6`; its sorted
+185-entry distinct-workload inventory is pinned as
+`sha256:f273610732eed8703c5971b091afc9edf69011468bebf85b5197ef6a52dcbdb4`. The normalized
 single-pass plan is pinned as
-`sha256:cd4baca6775c0b57664ea98d4a22aa514b87a52ea200d0b6ed07b3b110b74de4`.
+`sha256:236710a34dc70d65ba5b5488105ae61e1be0930a489365037065d4a4f106c12d`.
 
 The reviewed workspace package-test inventory contains 13 Vitest commands and is pinned as
 `sha256:6dc7cae96692feb13650a06f3b8733da6f6c431a0cad777e08a8d0d567880c3d`. Three
@@ -72,10 +72,11 @@ The workspace manifest itself is pinned as
 `sha256:c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba`; this
 prevents an otherwise valid package manifest from being omitted from pnpm and Turbo discovery.
 
-At the M06-T04 checkpoint, the frozen inventory contains 53 proofs, 317 prerequisite segments,
-1,341 ordered leaf invocations, 176 distinct leaf workloads, and 114 normalized single-pass
-steps. The prerequisite inventory is pinned as
-`sha256:318e508dab738daf3ef81454b9d6b9a1560ea5b240f252b02d9a4168e3e2796d`; the other
+At the M06-T07 checkpoint, the frozen inventory contains 56 proofs, 345 prerequisite segments,
+1,443 ordered leaf invocations, 185 distinct leaf workloads, and 120 normalized single-pass
+steps. Twenty-three independent orchestrator contract tests protect that exact profile. The
+prerequisite inventory is pinned as
+`sha256:2641d5cd0ca845316c344cf1674fb4a1ae7c2d5812551be38d0da1ed700076c3`; the other
 three digests are recorded above.
 
 `SIGINT` and `SIGTERM` become permanent cancellation state, are forwarded to the active process

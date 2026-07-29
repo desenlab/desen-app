@@ -92,6 +92,11 @@ export type SourcePreservationExtensionDiagnosticCode =
   | "run.desen.publisher/SOURCE_PRESERVATION_AUTHORITY_INVALID"
   | "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED";
 
+/** Project diagnostics introduced by the package-private M06-T07 normalization boundary. */
+export type SourceNormalizationExtensionDiagnosticCode =
+  | "run.desen.publisher/SOURCE_NORMALIZATION_AUTHORITY_INVALID"
+  | "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED";
+
 /** Stable diagnostic code owned by the DESEN Publisher implementation. */
 export type PublisherDiagnosticCode = PublisherExtensionDiagnosticCode;
 
@@ -115,7 +120,8 @@ export type PublishExtensionDiagnosticCode =
   | SourcePreflightExtensionDiagnosticCode
   | CapabilityPreflightExtensionDiagnosticCode
   | ExecutionPreflightExtensionDiagnosticCode
-  | SourcePreservationExtensionDiagnosticCode;
+  | SourcePreservationExtensionDiagnosticCode
+  | SourceNormalizationExtensionDiagnosticCode;
 
 /** Whether a publication diagnostic blocks Bundle emission. */
 export type PublishDiagnosticSeverity = "error" | "warning";

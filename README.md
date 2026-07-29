@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████░░░░░░░░░░░░░` **69 / 145 tasks complete (48%)**
+**Overall:** `████████████░░░░░░░░░░░░░` **70 / 145 tasks complete (48%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -18,9 +18,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M05 complete:** `█████████` **9 / 9 tasks complete (100%)**
 
-**M06:** `██████░░░░░` **6 / 11 tasks complete (55%)**
+**M06:** `███████░░░░` **7 / 11 tasks complete (64%)**
 
-**Proof gates:** **6 / 13 complete** · **Next:** `M06-T07`
+**Proof gates:** **6 / 13 complete** · **Next:** `M06-T08`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -115,6 +115,10 @@ packages/
 - [Publisher result and strict Source-ingress proof](docs/proof/PUBLISHER-PUBLISH-RESULT.md)
 - [Publisher exact Catalog-resolution proof](docs/proof/PUBLISHER-CATALOG-RESOLUTION.md)
 - [Publisher Source-preflight proof](docs/proof/PUBLISHER-SOURCE-PREFLIGHT.md)
+- [Publisher capability-preflight proof](docs/proof/PUBLISHER-CAPABILITY-PREFLIGHT.md)
+- [Publisher execution-preflight proof](docs/proof/PUBLISHER-EXECUTION-PREFLIGHT.md)
+- [Publisher Source-preservation proof](docs/proof/PUBLISHER-SOURCE-PRESERVATION.md)
+- [Publisher Source-digest and normalization proof](docs/proof/PUBLISHER-SOURCE-NORMALIZATION.md)
 - [Runtime core host-port proof](docs/proof/RUNTIME-CORE-HOST-PORTS.md)
 - [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
 - [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)

@@ -13,11 +13,16 @@ import {
 
 const HISTORICAL_SHA256 = "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb";
 const HISTORICAL_BYTES = 19_234;
-const SUCCESSOR_SHA256 = "d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8";
+const SUCCESSOR_SHA256 = "481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004";
 const SUCCESSOR_ARTIFACT_RELATIVE_PATH =
   "docs/proof/artifacts/publisher-0.1.0-source-preservation.json";
+const LATEST_SUCCESSOR_SHA256 = "f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c";
+const LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH =
+  "docs/proof/artifacts/publisher-0.1.0-source-normalization.json";
 const SUCCESSOR_EVIDENCE_TEXT =
-  "M06-T06 completes the Publisher side by retaining the exact prepared Source behavior, all opaque extensions and semantic arrays, and one complete bounded five-string component-node trace under unchanged identifiers.";
+  "M06-T06 completes the Publisher preservation slice with unchanged prepared behavior and one complete bounded five-string component-node trace.";
+const LATEST_SUCCESSOR_EVIDENCE_TEXT =
+  "M06-T07 carries that exact behavior and every trace record unchanged through digest calculation, root-authoring removal, and deterministic normalization; exact pointers remain resolvable in the normalized document and no extension or authoring node gains trace authority.";
 const ARTIFACT_FILE_NAME = "runtime-react-0.1.0-reconciliation-diagnostics.json";
 const ARTIFACT_RELATIVE_PATH = `docs/proof/artifacts/${ARTIFACT_FILE_NAME}`;
 const ARTIFACT_URL = new URL(`../${ARTIFACT_RELATIVE_PATH}`, import.meta.url);
@@ -77,8 +82,9 @@ test("accepts immutable task-time M05-T05 reconciliation and diagnostic evidence
     n021HistoricalStatus: "PLANNED",
     n021CurrentStatus: "TESTED",
     n021SuccessorArtifactSha256: SUCCESSOR_SHA256,
+    n021LatestArtifactSha256: LATEST_SUCCESSOR_SHA256,
     exactDocumentationReferences: 4,
-    exactSuccessorDocumentationReferences: 1,
+    exactSuccessorDocumentationReferences: 2,
   });
 });
 
@@ -273,10 +279,10 @@ test("rejects exact P-16 pin or N-021 monotonic successor-closure drift", async 
       replaceExactOnce(row, "| TESTED      |", "| UNKNOWN     |"),
     ),
     replaceRow(texts.normativeCoverageText, "N-021", (row) =>
-      replaceExactOnce(row, "M05-T05, M06-T06", "M05-T05, M06-T99"),
+      replaceExactOnce(row, "M05-T05, M06-T06–M06-T07", "M05-T05, M06-T06–M06-T99"),
     ),
     replaceRow(texts.normativeCoverageText, "N-021", (row) =>
-      replaceExactOnce(row, "M05-T05, M06-T06", "M05-T99, M06-T06"),
+      replaceExactOnce(row, "M05-T05, M06-T06–M06-T07", "M05-T99, M06-T06–M06-T07"),
     ),
     replaceRow(texts.normativeCoverageText, "N-021", (row) =>
       replaceExactOnce(row, HISTORICAL_SHA256, "b".repeat(64)),
@@ -293,6 +299,19 @@ test("rejects exact P-16 pin or N-021 monotonic successor-closure drift", async 
     ),
     replaceRow(texts.normativeCoverageText, "N-021", (row) =>
       replaceExactOnce(row, SUCCESSOR_EVIDENCE_TEXT, ""),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(row, LATEST_SUCCESSOR_SHA256, "d".repeat(64)),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(
+        row,
+        LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH,
+        `moved/${LATEST_SUCCESSOR_ARTIFACT_RELATIVE_PATH}`,
+      ),
+    ),
+    replaceRow(texts.normativeCoverageText, "N-021", (row) =>
+      replaceExactOnce(row, LATEST_SUCCESSOR_EVIDENCE_TEXT, ""),
     ),
   ]) {
     await assert.rejects(

@@ -2380,7 +2380,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   signing, npm publication, or deployment.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
-  `sha256:4c8324f87a2da70e2e6c9254b3fd8498a6546093891d008678c7e646e185457c`.
+  `sha256:46d63b6e39eaa1b507b6c26dac8a917aa3a7d3165227d3ed3fb7468cb4bfc528`.
 
 - Future action: A later protocol revision should separate Catalog-independent Source validation
   from Catalog-backed reference finalization, define their diagnostic-stage and failure-precedence
@@ -2433,7 +2433,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   detected without any observable reflection.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
-  `sha256:c3fa32564cd8c4928132ca6877bcb3fa2ae379aa4ba6909f47ce7a2b2cc5a9e3`.
+  `sha256:cc2afd9769281bb0153fb6d57b8530ee1d477c7cb0ad150570c8a8d64174d7ad`.
 
   M06-T05 now runs M06-T04 internally, re-authenticates the exact prepared Source and execution
   Catalog set, prepares resource and operation input/output schemas, checks all statically
@@ -2458,7 +2458,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   already-proven M02 artifact.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-  `sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`.
+  `sha256:33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`.
 
 - Future action: M06-T11 must drive both T04/T05 slices through the terminal public Publisher and
   prove every invalid case emits no Bundle. A future protocol revision should expose explicit
@@ -2494,7 +2494,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   is an output admission bound; it does not claim incremental Validator allocation accounting.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
-  `sha256:7acad13e8479bc0bc4a9da6c4fa7e9a30b0ec1128eaab9df634eed58acc3e16f`.
+  `sha256:33432ad1b1fef33963b64f26ef707a78b381d719a210be51b2124186d8191d9d`.
 
 - Future action: A future DESEN revision should standardize explicit diagnostic-to-publication-stage
   ownership, simultaneous-error precedence, whether nonblocking warnings survive a later blocking
@@ -2545,12 +2545,74 @@ This file records implementation discoveries without changing the frozen DESEN 0
   bounded by the inherited raw-Source profile rather than a new T06 payload limit.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
-  `sha256:d419403cd0c64fd4db29e8c75d5d705f7120c7e0857363ed71cc17c09dda7ab8`.
+  `sha256:481e6c07fc6c27070385b69ad39d601412f80398eab99b1f8e9b575cca319004`.
 
-- Future action: M06-T07 must remove only top-level `authoring` and normalize without dropping,
-  reordering, or interpreting preserved values. M06-T08 through M06-T10 must carry the same
-  observable data and unchanged node ids into a valid deterministic Bundle, while M06-T11 must
-  prove all invalid preservation cases emit no Bundle. M08-T03 and M08-T07 retain editor reorder
-  and save/open round-trip ownership. A later protocol revision should state the complete semantic
-  array inventory, the parsed-value versus raw-lexical preservation boundary, and the
-  surface-scoped node-identity rule directly.
+- Future action: M06-T07 now calculates the Source digest first, removes only top-level
+  `authoring`, and normalizes without dropping, reordering, or interpreting preserved values.
+  M06-T08 through M06-T10 must carry the same digest, observable data, and unchanged node ids into
+  a valid deterministic Bundle, while M06-T11 must prove all invalid preservation cases emit no
+  Bundle. M08-T03 and M08-T07 retain editor reorder and save/open round-trip ownership. A later
+  protocol revision should state the complete semantic array inventory, the parsed-value versus
+  raw-lexical preservation boundary, and the surface-scoped node-identity rule directly.
+
+## PF-066 — Deterministic normalization requires one explicit minimal Publisher profile
+
+- Status: OPEN
+- Blocks proof: No; M06-T07 defines and proves one conservative deterministic profile without
+  changing frozen protocol bytes or claiming that every conforming Publisher must choose the same
+  optional transformations.
+- Protocol location: SPEC Sections 10.2, 10.5, 11.2, 12.4, 13.5, 25.1, 25.2, and 27.8;
+  `SN-005`, `C-005`, `C-015`, `PIPE-036`, `PIPE-037`, `R-034`, `R-099`, `R-107`, `R-124`, and
+  `N-018`; related findings `PF-060`, `PF-062`, `PF-064`, and `PF-065`
+- Observation: Section 25.2 permits schema-default application, redundant-empty removal,
+  canonical non-semantic map ordering, dependency pre-indexing, discovery-to-exact requirement
+  resolution, and post-revision publication metadata, but it does not require any one optional
+  transform or define a single interoperable normalized byte representation. Section 11.2 also
+  requires the Source digest before publication-specific normalization. An implementation that
+  hashes the normalized projection, recursively deletes every key named `authoring`, treats
+  JavaScript object enumeration as RFC 8785 order, or spends the complete final-Bundle byte budget
+  before later tuple and digest fields are added would silently strengthen or violate the frozen
+  protocol.
+- Implementation decision: M06-T07 invokes M06-T06 internally from raw Source JSON and closed
+  package candidates. It accepts no caller-created preservation shell. The authenticated
+  pre-normalization Source, execution Catalog set, selected packages, requirement alignment,
+  warnings, obligations, preservation projection, loose requirements, and node trace cross by
+  exact runtime identity. T07 calculates `sourceDigest` from that exact unchanged Source through
+  the frozen Section 11.2 helper before any authoring removal or normalization. Root authoring
+  changes leave the digest unchanged, while nested extension changes remain digest-significant.
+  M06-T08 retains integration ownership for authenticating and carrying this value into exact
+  Catalog pinning; it must not recompute a post-normalization digest.
+
+  A new detached, recursively frozen production-document base contains exactly Bundle `kind`,
+  `desen`, `id`, `entry`, `surfaces`, and optional root `extensions`. Producing this base completes
+  actual top-level authoring removal. Source `kind`, loose Catalog requirements, discovery
+  locations, exact `requires`, `sourceDigest`, `revision`, and `publication` remain absent from
+  this document. `sourceDigest` is instead a separate immutable field on the nonterminal success.
+  A nested extension member named `authoring` is preserved as opaque data; no substring or
+  recursive name filter is used.
+
+  The local 0.1.0 profile chooses the smallest permitted normalization: one RFC 8785
+  serialization/parse round trip. It applies no schema default, removes no empty optional member,
+  builds no hidden index, and never sorts or deduplicates a semantic array. Identifiers,
+  conditions, literals, capability ids, extension values, and trace relations retain their parsed
+  meaning. Repeated and differently inserted object members produce equal canonical bytes, while
+  in-memory JavaScript own-key enumeration—especially for integer-like keys—is explicitly
+  non-authoritative.
+
+  The normalized base admits at most 2,097,152 canonical UTF-8 bytes. Exact capacity passes and a
+  one-byte crossing rejects the complete intermediate at `normalization` with one redacted error,
+  no inherited warning, and no partial authority. Invalid digest authority rejects earlier at
+  `source-digest` under the same rule. Zero is valid for this new output ceiling and
+  deterministically rejects any nonempty normalized document. The limit is an early Publisher
+  envelope, not proof that the final Bundle fits after exact requirements, digests, and revision
+  are added.
+
+  Evidence: `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
+  `sha256:f9859ead492b1b24b99b7bdd324c2a0b4dab60aef3cd43e60a2240d1f6418b4c`.
+
+- Future action: M06-T08 must authenticate and carry T07's exact `sourceDigest` while pinning exact
+  Catalog tuples. M06-T09 must validate the complete Bundle, enforce the final Reference Profile
+  byte limit, and calculate revision from the exact normative projection. M06-T10 must prove
+  official golden and double-publish determinism; M06-T11 must prove every invalid case emits no
+  Bundle. A later protocol revision should either standardize a canonical normalization profile
+  or make byte-level interoperability expectations explicitly profile-scoped.
