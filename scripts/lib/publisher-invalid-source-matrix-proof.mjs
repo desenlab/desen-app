@@ -1,10 +1,10 @@
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
 import { lstat, open } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import { promisify, types as utilTypes } from "node:util";
+import { fileURLToPath } from "node:url";
+import { types as utilTypes } from "node:util";
 
 import { format } from "prettier";
 import ts from "typescript";
@@ -61,7 +61,6 @@ const PUBLISH_RESULT_DISTRIBUTION = "packages/publisher/dist/publish-result.js";
 const PUBLISH_RESULT_DECLARATION = "packages/publisher/dist/publish-result.d.ts";
 const CATALOG_RESOLUTION_DISTRIBUTION = "packages/publisher/dist/catalog-resolution.js";
 const CATALOG_RESOLUTION_DECLARATION = "packages/publisher/dist/catalog-resolution.d.ts";
-const execFileAsync = promisify(execFile);
 const OBJECT_PROTOTYPE = Object.prototype;
 const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
 const TYPED_ARRAY_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
@@ -73,6 +72,12 @@ const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
   "buffer",
 )?.get;
 const UINT8_ARRAY_SET = Uint8Array.prototype.set;
+const RUNTIME_PROBE_NODE_ARGUMENTS = Object.freeze(["--no-warnings", "--input-type=module", "-"]);
+const RUNTIME_PROBE_PROGRAM_LIMIT_BYTES = 2 * 1024 * 1024;
+const RUNTIME_PROBE_STDOUT_LIMIT_BYTES = 8 * 1024 * 1024;
+const RUNTIME_PROBE_STDERR_LIMIT_BYTES = 256 * 1024;
+const RUNTIME_PROBE_TIMEOUT_MILLISECONDS = 180_000;
+const RUNTIME_PROBE_ERROR_TAIL_BYTES = 4_096;
 
 export const PUBLISHER_INVALID_SOURCE_MATRIX_FIXTURE_PINS = Object.freeze([
   Object.freeze({
@@ -2091,15 +2096,14 @@ function validateRuntimeReceipt(receipt, matrixCases) {
 }
 
 function programmaticRuntimeProbeSource(packageTestText, matrixCases) {
-  const publisherUrl = pathToFileURL(path.join(ROOT, PUBLISHER_DISTRIBUTION_INDEX)).href;
-  const packageTestPath = path.join(ROOT, PACKAGE_TEST);
-  const publisherDistPath = path.join(ROOT, PUBLISHER_DISTRIBUTION_INDEX);
   return `
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { startVitest } from "vitest/node";
-const publisher = await import(${JSON.stringify(publisherUrl)});
-const packageTestPath = ${JSON.stringify(packageTestPath)};
-const publisherDistPath = ${JSON.stringify(publisherDistPath)};
+const proofRoot = process.cwd();
+const packageTestPath = path.join(proofRoot, ${JSON.stringify(PACKAGE_TEST)});
+const publisherDistPath = path.join(proofRoot, ${JSON.stringify(PUBLISHER_DISTRIBUTION_INDEX)});
+const publisher = await import(pathToFileURL(publisherDistPath).href);
 const packageTestText = ${JSON.stringify(packageTestText)};
 const MATRIX = ${JSON.stringify(matrixCases)};
 const GUARD_NAMES = ${JSON.stringify(EXPECTED_PACKAGE_TEST_NAMES)};
@@ -2172,7 +2176,7 @@ try {
       reporters: [{}],
       passWithNoTests: false,
     },
-    { root: ${JSON.stringify(ROOT)}, plugins: [plugin] },
+    { root: proofRoot, plugins: [plugin] },
   );
 } finally {
   process.stdout.write = stdoutWrite;
@@ -2325,25 +2329,272 @@ process.stdout.write(JSON.stringify(receipt));
 `;
 }
 
-async function executeProgrammaticRuntimeProbe(packageTestText, matrixCases) {
-  try {
-    const { stdout, stderr } = await execFileAsync(
-      process.execPath,
-      [
-        "--input-type=module",
-        "--eval",
-        programmaticRuntimeProbeSource(packageTestText, matrixCases),
-      ],
-      { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 },
+function runtimeProbeTransportClaim(programBytes) {
+  if (programBytes.byteLength > RUNTIME_PROBE_PROGRAM_LIMIT_BYTES) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
+      "The isolated built-root matrix program exceeded its finite stdin envelope.",
+      {
+        actualBytes: programBytes.byteLength,
+        maximumBytes: RUNTIME_PROBE_PROGRAM_LIMIT_BYTES,
+      },
     );
-    if (stderr !== "") {
+  }
+  return Object.freeze({
+    transport: "stdin",
+    nodeArguments: RUNTIME_PROBE_NODE_ARGUMENTS,
+    programBytes: programBytes.byteLength,
+    maximumProgramBytes: RUNTIME_PROBE_PROGRAM_LIMIT_BYTES,
+    maximumStdoutBytes: RUNTIME_PROBE_STDOUT_LIMIT_BYTES,
+    maximumStderrBytes: RUNTIME_PROBE_STDERR_LIMIT_BYTES,
+    timeoutMilliseconds: RUNTIME_PROBE_TIMEOUT_MILLISECONDS,
+    executableSourceArgumentBytes: 0,
+    inheritedNodeOptions: false,
+    inheritedNodePath: false,
+    settlesOnClose: true,
+    shell: false,
+    temporaryFiles: false,
+  });
+}
+
+function runtimeProbeEnvironment() {
+  const environment = {
+    ...process.env,
+    NODE_NO_WARNINGS: "1",
+    NODE_OPTIONS: "",
+    NO_COLOR: "1",
+  };
+  delete environment.NODE_PATH;
+  return environment;
+}
+
+function runtimeProbeFailure(message, details) {
+  return new PublisherInvalidSourceMatrixEvidenceError(
+    "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
+    message,
+    details,
+  );
+}
+
+function runtimeProbeTail(bytes) {
+  return bytes
+    .subarray(Math.max(0, bytes.byteLength - RUNTIME_PROBE_ERROR_TAIL_BYTES))
+    .toString("utf8");
+}
+
+function runNodeModuleFromStdin(programBytes) {
+  return new Promise((resolve, reject) => {
+    let child;
+    try {
+      child = spawn(process.execPath, RUNTIME_PROBE_NODE_ARGUMENTS, {
+        cwd: ROOT,
+        detached: false,
+        env: runtimeProbeEnvironment(),
+        shell: false,
+        stdio: ["pipe", "pipe", "pipe"],
+        windowsHide: true,
+      });
+    } catch (error) {
+      reject(
+        runtimeProbeFailure("The isolated built-root matrix process could not be created.", {
+          spawnCode:
+            typeof error === "object" && error !== null && "code" in error
+              ? String(error.code)
+              : "unknown",
+          terminationReason: "spawn-throw",
+        }),
+      );
+      return;
+    }
+
+    const stdout = { bytes: 0, chunks: [] };
+    const stderr = { bytes: 0, chunks: [] };
+    let terminalFailure;
+    let stdinFailure;
+    let closed = false;
+
+    const stop = (terminationReason, message, details = {}) => {
+      if (terminalFailure === undefined) {
+        terminalFailure = { terminationReason, message, details };
+      }
+      if (child.exitCode === null && child.signalCode === null) {
+        try {
+          child.kill("SIGKILL");
+        } catch {
+          // The close event remains the single completion authority even if termination races.
+        }
+      }
+    };
+
+    const collect = (stream, state, maximumBytes, chunk) => {
+      if (terminalFailure !== undefined) return;
+      const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      const nextBytes = state.bytes + bytes.byteLength;
+      if (nextBytes > maximumBytes) {
+        stop(
+          `${stream}-overflow`,
+          `The isolated built-root matrix ${stream} exceeded its finite envelope.`,
+          {
+            stream,
+            actualBytesAtLeast: nextBytes,
+            maximumBytes,
+          },
+        );
+        return;
+      }
+      state.bytes = nextBytes;
+      state.chunks.push(bytes);
+    };
+
+    child.stdout.on("data", (chunk) =>
+      collect("stdout", stdout, RUNTIME_PROBE_STDOUT_LIMIT_BYTES, chunk),
+    );
+    child.stderr.on("data", (chunk) =>
+      collect("stderr", stderr, RUNTIME_PROBE_STDERR_LIMIT_BYTES, chunk),
+    );
+    child.stdout.once("error", (error) =>
+      stop("stdout-error", "The isolated built-root matrix stdout stream failed.", {
+        stream: "stdout",
+        streamCode:
+          typeof error === "object" && error !== null && "code" in error
+            ? String(error.code)
+            : "unknown",
+      }),
+    );
+    child.stderr.once("error", (error) =>
+      stop("stderr-error", "The isolated built-root matrix stderr stream failed.", {
+        stream: "stderr",
+        streamCode:
+          typeof error === "object" && error !== null && "code" in error
+            ? String(error.code)
+            : "unknown",
+      }),
+    );
+    child.stdin.once("error", (error) => {
+      stdinFailure = {
+        stream: "stdin",
+        streamCode:
+          typeof error === "object" && error !== null && "code" in error
+            ? String(error.code)
+            : "unknown",
+      };
+      if (stdinFailure.streamCode !== "EPIPE") {
+        stop("stdin-error", "The isolated built-root matrix stdin stream failed.", stdinFailure);
+      }
+    });
+    child.once("error", (error) =>
+      stop("spawn-error", "The isolated built-root matrix process failed before completion.", {
+        spawnCode:
+          typeof error === "object" && error !== null && "code" in error
+            ? String(error.code)
+            : "unknown",
+      }),
+    );
+
+    const timeout = setTimeout(
+      () =>
+        stop("timeout", "The isolated built-root matrix process exceeded its time limit.", {
+          timeoutMilliseconds: RUNTIME_PROBE_TIMEOUT_MILLISECONDS,
+        }),
+      RUNTIME_PROBE_TIMEOUT_MILLISECONDS,
+    );
+
+    child.once("close", (exitCode, signal) => {
+      if (closed) return;
+      closed = true;
+      clearTimeout(timeout);
+      const stdoutBytes = Buffer.concat(stdout.chunks, stdout.bytes);
+      const stderrBytes = Buffer.concat(stderr.chunks, stderr.bytes);
+      if (terminalFailure !== undefined) {
+        reject(
+          runtimeProbeFailure(terminalFailure.message, {
+            ...terminalFailure.details,
+            childStdout: runtimeProbeTail(stdoutBytes),
+            childStderr: runtimeProbeTail(stderrBytes),
+            exitCode,
+            signal,
+            terminationReason: terminalFailure.terminationReason,
+          }),
+        );
+        return;
+      }
+      resolve(
+        Object.freeze({
+          stderrBytes,
+          exitCode,
+          signal,
+          stdinFailure: stdinFailure === undefined ? undefined : Object.freeze({ ...stdinFailure }),
+          stdoutBytes,
+        }),
+      );
+    });
+
+    try {
+      child.stdin.end(programBytes);
+    } catch (error) {
+      stop("stdin-throw", "The isolated built-root matrix program could not be written to stdin.", {
+        stream: "stdin",
+        streamCode:
+          typeof error === "object" && error !== null && "code" in error
+            ? String(error.code)
+            : "unknown",
+      });
+    }
+  });
+}
+
+async function executeProgrammaticRuntimeProbe(programBytes) {
+  try {
+    const { stderrBytes, exitCode, signal, stdinFailure, stdoutBytes } =
+      await runNodeModuleFromStdin(programBytes);
+    const childStderr = decodeUtf8(
+      stderrBytes,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
+      "Isolated built-root matrix stderr",
+    );
+    const childStdout = decodeUtf8(
+      stdoutBytes,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
+      "Isolated built-root matrix stdout",
+    );
+    if (exitCode !== 0 || signal !== null) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
+        "The isolated built public Publisher focused matrix exited unsuccessfully.",
+        {
+          childStderr: childStderr.slice(-RUNTIME_PROBE_ERROR_TAIL_BYTES),
+          childStdout: childStdout.slice(-RUNTIME_PROBE_ERROR_TAIL_BYTES),
+          exitCode,
+          signal,
+          stdinFailure,
+          terminationReason: signal === null ? "nonzero-exit" : "signal",
+        },
+      );
+    }
+    if (stdinFailure !== undefined) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
+        "The isolated built-root matrix stdin stream failed before successful completion.",
+        {
+          ...stdinFailure,
+          exitCode,
+          signal,
+          terminationReason: "stdin-error",
+        },
+      );
+    }
+    if (childStderr !== "") {
       fail(
         "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
         "The isolated built-root matrix wrote unexpected stderr.",
+        {
+          childStderr: childStderr.slice(-RUNTIME_PROBE_ERROR_TAIL_BYTES),
+          terminationReason: "unexpected-stderr",
+        },
       );
     }
     return parseJson(
-      stdout,
+      childStdout,
       "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_AUTHORITY_INVALID",
       "Isolated built-root focused matrix receipt",
     );
@@ -2414,9 +2665,13 @@ async function buildFromOptions(options) {
   const packageTestText = text(PACKAGE_TEST, "Focused Publisher invalid-source test");
   const packageTests = packageTestClaims(packageTestText, bytesByPath.get(PACKAGE_TEST));
   const taskApplicability = taskApplicabilityClaims(traceText, packageTests.caseInventory);
+  const runtimeProgramBytes = Buffer.from(
+    programmaticRuntimeProbeSource(packageTestText, packageTests.caseInventory),
+    "utf8",
+  );
+  const runtimeProbeTransport = runtimeProbeTransportClaim(runtimeProgramBytes);
   const runtime = validateRuntimeReceipt(
-    options.runtimeReceipt ??
-      (await executeProgrammaticRuntimeProbe(packageTestText, packageTests.caseInventory)),
+    options.runtimeReceipt ?? (await executeProgrammaticRuntimeProbe(runtimeProgramBytes)),
     packageTests.caseInventory,
   );
   const rootTestNames = countNamedTests(text(ROOT_TEST, "Invalid-source root evidence test"));
@@ -2460,6 +2715,7 @@ async function buildFromOptions(options) {
     prerequisites,
     claims: {
       publicInvalidSourceMatrix: runtime.claim,
+      runtimeProbeTransport,
       traceability,
       taskApplicability,
       packageTests,

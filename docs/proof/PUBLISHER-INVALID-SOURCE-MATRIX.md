@@ -48,6 +48,14 @@ bounded inert byte snapshots, proxy rejection, fatal UTF-8 decoding, and no-foll
 reads. The generator accepts no semantic override and commits deterministic bytes through the
 shared same-directory atomic writer.
 
+The isolated runtime authority is itself transport-bounded and checkout-path independent. Its
+generated module is larger than 128 KiB, but zero source bytes enter an executable argument:
+Node receives the module through stdin with a 2 MiB program ceiling, 8 MiB stdout ceiling,
+256 KiB stderr ceiling, and 180-second deadline. The child runs without a shell or temporary
+file, with inherited `NODE_OPTIONS` neutralized and `NODE_PATH` removed; overflow, timeout,
+stream failure, signal, nonzero exit, malformed UTF-8, unexpected stderr, or malformed receipt
+all fail closed after the child `close` event.
+
 The receipt also classifies exactly 31 frozen conformance, pipeline, prose, and diagnostic rows for
 this task. `PIPE-035`, `PIPE-036`, `PIPE-038`, and `PIPE-040` retain their exact successful
 prerequisite proofs; `PIPE-041` remains a `JUSTIFIED_NA` unsigned-publication non-claim. PF-047 is
@@ -56,7 +64,7 @@ frozen-ledger reassignment.
 
 `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
 
-`sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`
+`sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`
 
 ## Explicit non-claims
 

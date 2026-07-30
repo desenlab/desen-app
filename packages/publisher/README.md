@@ -471,6 +471,12 @@ root cases, 31 exact task-applicability records, two task-local PF-047 records, 
 rows, exact fixture and built-public-file bytes, and one-way successor hashes. The full Publisher
 suite passes 292/292.
 
+The isolated proof program is larger than 128 KiB and is therefore transported through bounded
+stdin rather than one platform-sensitive executable argument. The proof records a 2 MiB program
+ceiling, 8 MiB stdout ceiling, 256 KiB stderr ceiling, and 180-second deadline; it uses neither a
+shell nor a temporary file, neutralizes inherited Node injection settings, and fails closed on
+transport or receipt drift.
+
 No public negative is fabricated for `source-digest`, `authoring-removal`, `catalog-pinning`, or
 `bundle-revision`: after their authenticated predecessors succeed, those deterministic stages have
 no natural invalid input at the fixed two-argument boundary. Their successful behavior remains
@@ -480,7 +486,7 @@ editor, network, or control-plane behavior.
 
 Evidence:
 `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
-`sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
+`sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
 
 ## Dependencies
 

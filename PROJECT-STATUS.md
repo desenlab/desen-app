@@ -1690,7 +1690,7 @@ M06-T11 and G06 evidence:
 - `docs/proof/PUBLISHER-INVALID-SOURCE-MATRIX.md`
 - `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
 - artifact SHA-256:
-  `a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`
+  `fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`
 - exact boundary: one isolated built public Publisher root; every publication case calls only
   `publishDesenSource(rawSource, catalogPackages)`; 127 invalid cases stop at their exact earliest
   naturally reachable stage; every failure is an immutable exact `{ diagnostics, ok, stage }`

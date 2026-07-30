@@ -2776,7 +2776,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   passes 292/292.
 
   Evidence: `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
-  `sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
+  `sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
 
 - Future action: M07 must independently verify stored Bundle bytes, installed package tuples, and
   activation authority rather than treating Publisher success as storage or runtime trust. M12-T01

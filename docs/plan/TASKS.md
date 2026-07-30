@@ -442,7 +442,7 @@ P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the Publisher conforman
 content-addressed Bundle storage next.
 
 `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
-`sha256:a05937fe698b6922fae01fe059f12fe1a83d77facdfd24a59d31a8ed7835b897`.
+`sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

@@ -91,7 +91,7 @@ function deeplyFrozen(root) {
   return true;
 }
 
-test("[authority] builds the exact versioned M06-T11 artifact root", () => {
+test("[authority] builds the exact versioned M06-T11 artifact root", async () => {
   assert.deepEqual(Object.keys(baseline.artifact), [
     "schemaVersion",
     "profile",
@@ -111,6 +111,36 @@ test("[authority] builds the exact versioned M06-T11 artifact root", () => {
   assert.equal(baseline.artifact.result, "PASS");
   assert.equal(baseline.artifact.summary.length > 0, true);
   assert.equal(Object.hasOwn(baseline.artifact, "nonClaims"), false);
+
+  const { programBytes, ...transport } = baseline.artifact.claims.runtimeProbeTransport;
+  assert.equal(programBytes > 128 * 1024, true);
+  assert.deepEqual(transport, {
+    transport: "stdin",
+    nodeArguments: ["--no-warnings", "--input-type=module", "-"],
+    maximumProgramBytes: 2 * 1024 * 1024,
+    maximumStdoutBytes: 8 * 1024 * 1024,
+    maximumStderrBytes: 256 * 1024,
+    timeoutMilliseconds: 180_000,
+    executableSourceArgumentBytes: 0,
+    inheritedNodeOptions: false,
+    inheritedNodePath: false,
+    settlesOnClose: true,
+    shell: false,
+    temporaryFiles: false,
+  });
+  assert.equal(programBytes <= transport.maximumProgramBytes, true);
+  assert.equal(Object.isFrozen(transport.nodeArguments), true);
+
+  const proofLibrary = await sourceText(PROOF_LIBRARY);
+  assert.equal(proofLibrary.includes(["exec", "File"].join("")), false);
+  assert.equal(proofLibrary.includes(["--", "eval"].join("")), false);
+  assert.match(proofLibrary, /child\.stdin\.end\(programBytes\)/u);
+  assert.match(proofLibrary, /child\.once\("close"/u);
+  assert.match(proofLibrary, /setTimeout\(/u);
+  assert.match(proofLibrary, /child\.kill\("SIGKILL"\)/u);
+  assert.match(proofLibrary, /nextBytes > maximumBytes/u);
+  assert.match(proofLibrary, /NODE_OPTIONS: ""/u);
+  assert.match(proofLibrary, /delete environment\.NODE_PATH/u);
 });
 
 test("[authority] pins exactly M06-T03 through M06-T10", () => {

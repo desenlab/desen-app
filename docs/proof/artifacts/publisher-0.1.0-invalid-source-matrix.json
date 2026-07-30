@@ -230,6 +230,21 @@
         "bundle-revision"
       ]
     },
+    "runtimeProbeTransport": {
+      "transport": "stdin",
+      "nodeArguments": ["--no-warnings", "--input-type=module", "-"],
+      "programBytes": 134816,
+      "maximumProgramBytes": 2097152,
+      "maximumStdoutBytes": 8388608,
+      "maximumStderrBytes": 262144,
+      "timeoutMilliseconds": 180000,
+      "executableSourceArgumentBytes": 0,
+      "inheritedNodeOptions": false,
+      "inheritedNodePath": false,
+      "settlesOnClose": true,
+      "shell": false,
+      "temporaryFiles": false
+    },
     "traceability": [
       { "id": "PIPE-025", "owners": ["M06-T01"], "tests": ["M06-T11"] },
       { "id": "PIPE-026", "owners": ["M06-T03"], "tests": ["M06-T11"] },
@@ -2301,8 +2316,8 @@
     },
     {
       "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
-      "bytes": 95076,
-      "sha256": "228c3fee55c27dae42aa6e94ccf02a793635cbd5e7c3fce3804aa269525031f0"
+      "bytes": 103404,
+      "sha256": "95b3ecb5e2f9ec98bd689e3d5fa1be4e5e6fc75627fcfd4a67301f5ffcfbda46"
     },
     {
       "path": "scripts/lib/atomic-proof-artifact.mjs",
@@ -2311,8 +2326,8 @@
     },
     {
       "path": "tests/publisher-invalid-source-matrix.test.mjs",
-      "bytes": 43644,
-      "sha256": "a82b22fa1580942f81497711a4714b2f8d5409ceeac7012fcb65913145ea8525"
+      "bytes": 44979,
+      "sha256": "84c95f15747d461225918fca3ff590babbb8d1bc30288be4044d96929e0ef247"
     },
     {
       "path": "package.json",
