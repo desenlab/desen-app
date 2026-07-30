@@ -2,7 +2,34 @@
   "name": "@desen/control-plane-api",
   "version": "0.0.0",
   "private": true,
-  "description": "Control Plane API workspace",
+  "description": "Local control-plane infrastructure and immutable DESEN Bundle storage.",
   "license": "Apache-2.0",
-  "type": "module"
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src test --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:bundle-store": "vitest run test/bundle-store.test.ts"
+  },
+  "dependencies": {
+    "@desen/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@desen/publisher": "workspace:*",
+    "vitest": "4.1.10"
+  }
 }

@@ -2784,3 +2784,49 @@ This file records implementation discoveries without changing the frozen DESEN 0
   keep Publisher conformance `PLANNED` until all assigned evidence is complete. A later protocol
   revision should state causal diagnostic precedence and distinguish total deterministic stages
   from stages that admit public invalid-data vectors.
+
+## PF-070 — One protocol revision may describe multiple publication byte sequences
+
+- Status: OPEN
+- Blocks proof: No; M07-T01 defines a conservative exact-byte ownership rule for the local POSIX
+  repository without changing the frozen revision projection or granting activation authority.
+- Protocol location: SPEC Sections 11.3, 13.2, 24.1, and 28.2; `PIPE-005`, `PIPE-009`, `R-012`,
+  `R-125`, `A-007`, and `N-019`; related findings `PF-068` and `PF-069`
+- Observation: DESEN 0.1.0 excludes root `publication` from the Bundle revision projection, while
+  its immutability rules prohibit replacing the bytes or content associated with a revision.
+  Consequently, two complete Bundles may have the same normative revision while differing in
+  exact canonical bytes only because of publication metadata. Treating revision equality as
+  permission to rewrite the stored artifact would violate immutability; treating semantic JSON
+  equality as storage identity would also invent a non-normative equivalence rule.
+- Implementation decision: M07-T01 gives the first successfully committed complete byte sequence
+  exclusive ownership of its revision path. A byte-identical retry returns `unchanged` without
+  replacing the inode; any different sequence, including the proven publication-only variant,
+  returns `conflict` and preserves the winner. Mutable publication metadata therefore belongs
+  outside this immutable entry in the local profile.
+
+  The POSIX implementation snapshots the caller's exact `Uint8Array` before asynchronous work,
+  writes an exclusive same-shard temporary, changes it to mode `0400`, flushes and re-reads it,
+  and commits with a no-clobber hard link. Every writer flushes the algorithm parent and
+  revalidates the shard before use, even when a concurrent writer created that shard. It flushes
+  newly established parent-directory entries and the final shard before reporting `stored`.
+  Readers accept only one read-only regular-file link, flush the shard before returning, remove
+  only an exact owned committed-temporary alias, return fresh copies, and reject unowned hard
+  links, symbolic links, special files, replaced identities, and mutable modes. Commit-aware
+  cleanup flushes the shard again after a post-link failure, so explicit uncertainty remains
+  retry-safe.
+
+  This is a local storage profile, not a new protocol digest. It assumes an application-owned
+  POSIX root and does not claim defense against hostile same-UID or privileged mutation between
+  Node.js path operations. An abrupt pre-link death may leave an unaddressed temporary with no
+  revision authority; later recovery/maintenance work owns its lifecycle. M07-T02 still must
+  parse stored bytes and independently verify protocol version, revision, available Source
+  digest, and complete size before any activation path can trust them.
+
+  Evidence: `docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
+  `sha256:698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`.
+
+- Future action: M07-T05 must keep mutable channel metadata outside revision artifacts, and
+  M07-T06 through M07-T10 must preserve the same first-writer and retry semantics through staging,
+  activation, crash recovery, and fault injection. A later protocol revision should decide
+  whether publication metadata receives a separate artifact identifier, is always stored outside
+  the revision-closed Bundle, or becomes part of a newly specified complete-byte identity.

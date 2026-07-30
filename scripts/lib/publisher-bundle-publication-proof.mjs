@@ -1,7 +1,18 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { constants as fileConstants } from "node:fs";
-import { lstat, open } from "node:fs/promises";
+import {
+  chmod,
+  lstat,
+  mkdir,
+  mkdtemp,
+  open,
+  realpath,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify, types as utilTypes } from "node:util";
@@ -11,6 +22,7 @@ import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
+const safeObjectFreeze = Object.freeze;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ARTIFACT = "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json";
 const PROOF_DOCUMENT = "docs/proof/PUBLISHER-BUNDLE-PUBLICATION.md";
@@ -38,11 +50,16 @@ const PROTOCOL_DISTRIBUTION_INDEX = "packages/protocol/dist/index.js";
 const PROTOCOL_CANONICALIZATION_DISTRIBUTION = "packages/protocol/dist/canonicalization.js";
 const VALIDATOR_DISTRIBUTION_INDEX = "packages/validator/dist/index.js";
 const VALIDATOR_EXECUTION_DISTRIBUTION = "packages/validator/dist/execution-contract-validation.js";
+const DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES = 512 * 1024;
+const DETACHED_CI_ENTRYPOINT_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024;
+const DETACHED_CI_ENTRYPOINT_TIMEOUT_MILLISECONDS = 30_000;
 
 const GENERATOR = "scripts/generate-publisher-bundle-publication-proof.mjs";
 const VERIFIER = "scripts/verify-publisher-bundle-publication.mjs";
 const PROOF_LIBRARY = "scripts/lib/publisher-bundle-publication-proof.mjs";
 const ATOMIC_WRITER = "scripts/lib/atomic-proof-artifact.mjs";
+const EXECUTION_PREFLIGHT_COMPATIBILITY_READER =
+  "scripts/lib/publisher-execution-preflight-proof.mjs";
 
 export const PUBLISHER_BUNDLE_PUBLICATION_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
@@ -66,7 +83,7 @@ export const PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS = Object.freeze(
   "scripts/lib/publisher-catalog-resolution-proof.mjs",
   "scripts/lib/publisher-source-preflight-proof.mjs",
   "scripts/lib/publisher-capability-preflight-proof.mjs",
-  "scripts/lib/publisher-execution-preflight-proof.mjs",
+  EXECUTION_PREFLIGHT_COMPATIBILITY_READER,
   "scripts/lib/publisher-source-preservation-proof.mjs",
   "scripts/lib/publisher-source-normalization-proof.mjs",
   "scripts/lib/publisher-catalog-pinning-proof.mjs",
@@ -149,6 +166,10 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 88_341,
     sha256: "d3ec245fd3adc5f594b7da1bb79e486cc4b6d7238f7a42319cfc840783acac3e",
   }),
+  [EXECUTION_PREFLIGHT_COMPATIBILITY_READER]: Object.freeze({
+    bytes: 62_112,
+    sha256: "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db",
+  }),
   [PROOF_LIBRARY]: Object.freeze({
     bytes: 77_674,
     sha256: "4742e70f9b21ee2aee581f490915fe97d0cf95491d9c21b5f909c63980351079",
@@ -158,6 +179,16 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     sha256: "fdf0ef0989e365dd34f487d856b76f81e9a8795dc8f7f4788e5fadd8b0648d31",
   }),
 });
+
+const APPROVED_CURRENT_COMPATIBILITY_RECEIPTS = Object.freeze({
+  [EXECUTION_PREFLIGHT_COMPATIBILITY_READER]: Object.freeze({
+    bytes: 70_038,
+    sha256: "29332971e7a9c0e45e66d145c073dbd1a3b1b7d29dfa021a03a917e6b539a69d",
+  }),
+});
+const APPROVED_CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  EXECUTION_PREFLIGHT_COMPATIBILITY_READER,
+]);
 
 const HISTORICAL_CI_RECEIPT = Object.freeze({
   planSha256: "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
@@ -184,6 +215,15 @@ const INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE = Object.freeze({
   t11Index: 59,
 });
 
+const CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE = Object.freeze({
+  ...INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE,
+  prefixSha256: "28dce22a08998f1a4bb199094ba081afccf074ab21aafecd10182d1c73d97d0e",
+  planSha256: "448102bdfc5e0ed331f09038a2c554dcb930300ec560d35ac94469fc89d5897f",
+  proofEntries: 61,
+  stepCount: 130,
+  m07T01Index: 60,
+});
+
 const REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
   "[ci] rejects removal of the exact T11 CI successor",
   "[ci] rejects reordering the exact T10 to T11 CI edge",
@@ -192,6 +232,16 @@ const REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
   "[ci] rejects exact T11 package registration drift",
   "[ci] rejects removal of the aggregate T11 successor",
   "[ci] rejects a non-immediate aggregate T10 to T11 edge",
+]);
+
+const REQUIRED_M07_T01_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
+  "[ci] rejects removal of the exact M07-T01 CI successor",
+  "[ci] rejects reordering the exact T11 to M07-T01 CI edge",
+  "[ci] rejects drift in the exact M07-T01 CI tuple",
+  "[ci] rejects exact M07-T01 root registration drift",
+  "[ci] rejects removal of the aggregate M07-T01 successor",
+  "[ci] rejects a non-immediate aggregate T11 to M07-T01 edge",
+  "[ci] rejects verifier-command drift despite a trusted historical receipt",
 ]);
 
 const HISTORICAL_TEST_CLAIMS = Object.freeze({
@@ -341,7 +391,7 @@ function ownData(object, key) {
 }
 
 function exactOwnDataOptions(rawOptions) {
-  if (rawOptions === undefined) return Object.freeze({});
+  if (rawOptions === undefined) return safeObjectFreeze({});
   try {
     if (
       typeof rawOptions !== "object" ||
@@ -361,7 +411,7 @@ function exactOwnDataOptions(rawOptions) {
       }
       captured[key] = descriptor.value;
     }
-    return Object.freeze(captured);
+    return safeObjectFreeze(captured);
   } catch {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_OPTIONS_INVALID",
@@ -613,10 +663,87 @@ const PREREQUISITE_SET = new Set(
 
 async function trackedInput(options, relativePath) {
   const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
-  return Object.freeze({
+  return safeObjectFreeze({
     bytes: override ?? (await readRegularBytes(relativePath)),
     overridden: override !== undefined,
   });
+}
+
+function assertApprovedCurrentCompatibilityBytes(bytes, approved, relativePath, authority) {
+  const actualBytes = bytes.byteLength;
+  const actualSha256 = sha256(bytes);
+  if (actualBytes !== approved.bytes || actualSha256 !== approved.sha256) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
+      "A current predecessor compatibility reader differs from its exact approved receipt.",
+      {
+        relativePath,
+        authority,
+        expectedBytes: approved.bytes,
+        expectedSha256: approved.sha256,
+        actualBytes,
+        actualSha256,
+      },
+    );
+  }
+}
+
+async function authenticateCurrentCompatibilityReaders(trackedPairs, options) {
+  const historicalProjections = new Map();
+  let approvedIndex = 0;
+  while (approvedIndex < APPROVED_CURRENT_COMPATIBILITY_PATHS.length) {
+    const relativePath = APPROVED_CURRENT_COMPATIBILITY_PATHS[approvedIndex];
+    const approved = APPROVED_CURRENT_COMPATIBILITY_RECEIPTS[relativePath];
+    let matched;
+    let matches = 0;
+    let trackedIndex = 0;
+    while (trackedIndex < trackedPairs.length) {
+      const tracked = trackedPairs[trackedIndex];
+      if (tracked.relativePath === relativePath) {
+        matched = tracked;
+        matches += 1;
+      }
+      trackedIndex += 1;
+    }
+    if (approved === undefined || matched === undefined || matches !== 1) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
+        "A reviewed current compatibility reader is missing or ambiguous.",
+        { relativePath, matches },
+      );
+    }
+    const liveBytes = await readRegularBytes(
+      relativePath,
+      "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
+    );
+    assertApprovedCurrentCompatibilityBytes(liveBytes, approved, relativePath, "live-worktree");
+    const overrideBytes = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+    if (overrideBytes !== undefined) {
+      assertApprovedCurrentCompatibilityBytes(
+        overrideBytes,
+        approved,
+        relativePath,
+        "tracked-byte-override",
+      );
+    }
+    assertApprovedCurrentCompatibilityBytes(
+      matched.bytes,
+      approved,
+      relativePath,
+      "tracked-candidate",
+    );
+    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    if (historical === undefined) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
+        "An approved current compatibility reader lost its task-time historical projection.",
+        { relativePath },
+      );
+    }
+    historicalProjections.set(relativePath, historical);
+    approvedIndex += 1;
+  }
+  return historicalProjections;
 }
 
 async function prerequisiteClaims(options) {
@@ -1326,6 +1453,9 @@ function testInventoryClaims(runtimeTestText, typeTestText, rootTestText) {
   const missingT11SuccessorRootTests = REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES.filter(
     (name) => !rootNames.includes(name),
   );
+  const missingM07T01SuccessorRootTests = REQUIRED_M07_T01_SUCCESSOR_ROOT_TEST_NAMES.filter(
+    (name) => !rootNames.includes(name),
+  );
   if (
     runtimeNames.length < 30 ||
     new Set(runtimeNames).size !== runtimeNames.length ||
@@ -1334,7 +1464,8 @@ function testInventoryClaims(runtimeTestText, typeTestText, rootTestText) {
     new Set(rootNames).size !== rootNames.length ||
     missingRuntimeCases.length > 0 ||
     missingRootCategories.length > 0 ||
-    missingT11SuccessorRootTests.length > 0
+    missingT11SuccessorRootTests.length > 0 ||
+    missingM07T01SuccessorRootTests.length > 0
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_TEST_INVENTORY_DRIFT",
@@ -1346,6 +1477,7 @@ function testInventoryClaims(runtimeTestText, typeTestText, rootTestText) {
         missingRuntimeCases,
         missingRootCategories,
         missingT11SuccessorRootTests,
+        missingM07T01SuccessorRootTests,
       },
     );
   }
@@ -1411,6 +1543,277 @@ function assertImmediateSingleRootScriptEdge(script, predecessor, current, label
   }
 }
 
+const CI_EXECUTION_AUTHORITY_BINDINGS = new Set([
+  "PROOF_ENTRIES",
+  "QUALITY_GATE_PLAN_SHA256",
+  "commandStep",
+  "createQualityGateSteps",
+  "executeDefaultQualityGate",
+  "executeQualityGate",
+  "main",
+  "runCommandStep",
+  "runStepSequence",
+  "validateQualityGatePlan",
+]);
+
+function collectAssignedCiIdentifiers(node, names = []) {
+  if (ts.isIdentifier(node)) {
+    names.push(node.text);
+    return names;
+  }
+  if (ts.isParenthesizedExpression(node)) {
+    return collectAssignedCiIdentifiers(node.expression, names);
+  }
+  if (ts.isBinaryExpression(node) && ts.isAssignmentOperator(node.operatorToken.kind)) {
+    return collectAssignedCiIdentifiers(node.left, names);
+  }
+  if (ts.isArrayLiteralExpression(node)) {
+    for (const element of node.elements) {
+      if (ts.isOmittedExpression(element)) continue;
+      collectAssignedCiIdentifiers(
+        ts.isSpreadElement(element) ? element.expression : element,
+        names,
+      );
+    }
+    return names;
+  }
+  if (ts.isObjectLiteralExpression(node)) {
+    for (const property of node.properties) {
+      if (ts.isShorthandPropertyAssignment(property)) {
+        names.push(property.name.text);
+      } else if (ts.isPropertyAssignment(property)) {
+        collectAssignedCiIdentifiers(property.initializer, names);
+      } else if (ts.isSpreadAssignment(property)) {
+        collectAssignedCiIdentifiers(property.expression, names);
+      }
+    }
+  }
+  return names;
+}
+
+function assertNoCiExecutionAuthorityRebinding(sourceFile) {
+  const writes = [];
+  let directEvalCalls = 0;
+
+  function recordTarget(target, kind) {
+    for (const name of collectAssignedCiIdentifiers(target)) {
+      if (CI_EXECUTION_AUTHORITY_BINDINGS.has(name)) {
+        writes.push(Object.freeze({ name, kind, position: target.getStart(sourceFile) }));
+      }
+    }
+  }
+
+  function visit(node) {
+    if (ts.isBinaryExpression(node) && ts.isAssignmentOperator(node.operatorToken.kind)) {
+      recordTarget(node.left, ts.tokenToString(node.operatorToken.kind) ?? "assignment");
+    } else if (
+      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+      [ts.SyntaxKind.PlusPlusToken, ts.SyntaxKind.MinusMinusToken].includes(node.operator)
+    ) {
+      recordTarget(node.operand, ts.tokenToString(node.operator) ?? "update");
+    } else if (
+      (ts.isForInStatement(node) || ts.isForOfStatement(node)) &&
+      !ts.isVariableDeclarationList(node.initializer)
+    ) {
+      recordTarget(node.initializer, ts.isForInStatement(node) ? "for-in" : "for-of");
+    }
+    if (ts.isCallExpression(node)) {
+      let callee = node.expression;
+      while (ts.isParenthesizedExpression(callee)) callee = callee.expression;
+      if (ts.isIdentifier(callee) && callee.text === "eval") directEvalCalls += 1;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+
+  if (writes.length > 0 || directEvalCalls > 0) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "CI must not reassign an authoritative execution binding or use direct eval.",
+      { writes, directEvalCalls },
+    );
+  }
+}
+
+function assertExactCiPlanConstruction(createStepsFunction) {
+  const statements = createStepsFunction.body?.statements;
+  const declaration = statements?.[0];
+  const validation = statements?.[1];
+  const returned = statements?.[2];
+  const declarationEntry =
+    declaration && ts.isVariableStatement(declaration)
+      ? declaration.declarationList.declarations[0]
+      : undefined;
+  const validationCall =
+    validation && ts.isExpressionStatement(validation) && ts.isCallExpression(validation.expression)
+      ? validation.expression
+      : undefined;
+  const returnCall =
+    returned && ts.isReturnStatement(returned) && ts.isCallExpression(returned.expression)
+      ? returned.expression
+      : undefined;
+
+  if (
+    statements?.length !== 3 ||
+    declarationEntry === undefined ||
+    !ts.isIdentifier(declarationEntry.name) ||
+    declarationEntry.name.text !== "steps" ||
+    declaration?.declarationList.declarations.length !== 1 ||
+    !ts.isArrayLiteralExpression(declarationEntry.initializer) ||
+    validationCall === undefined ||
+    !ts.isIdentifier(validationCall.expression) ||
+    validationCall.expression.text !== "validateQualityGatePlan" ||
+    validationCall.arguments.length !== 1 ||
+    !ts.isIdentifier(validationCall.arguments[0]) ||
+    validationCall.arguments[0].text !== "steps" ||
+    returnCall === undefined ||
+    !ts.isPropertyAccessExpression(returnCall.expression) ||
+    !ts.isIdentifier(returnCall.expression.expression) ||
+    returnCall.expression.expression.text !== "Object" ||
+    returnCall.expression.name.text !== "freeze" ||
+    returnCall.arguments.length !== 1 ||
+    !ts.isIdentifier(returnCall.arguments[0]) ||
+    returnCall.arguments[0].text !== "steps"
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "CI plan construction must validate its exact steps unconditionally before returning them.",
+    );
+  }
+}
+
+function assertCiMainHasNoReturnBypass(mainFunction) {
+  const returns = [];
+  function visit(node) {
+    if (node !== mainFunction && ts.isFunctionLike(node)) return;
+    if (ts.isReturnStatement(node)) {
+      returns.push(node.getStart());
+      return;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(mainFunction);
+  if (returns.length > 0) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "CI main must not contain an early-return path around default-plan execution.",
+      { returns },
+    );
+  }
+}
+
+function assertExactCiDefaultExecution(defaultGateFunction, mainFunction) {
+  const parameter = defaultGateFunction.parameters[0];
+  const statements = defaultGateFunction.body?.statements;
+  const returned = statements?.[0];
+  const call =
+    returned && ts.isReturnStatement(returned) && ts.isCallExpression(returned.expression)
+      ? returned.expression
+      : undefined;
+  const optionsObject = call?.arguments[0];
+  const properties = ts.isObjectLiteralExpression(optionsObject) ? optionsObject.properties : [];
+  const spread = properties[0];
+  const steps = properties[1];
+  const stepsInitializer = steps && ts.isPropertyAssignment(steps) ? steps.initializer : undefined;
+  const isExported = defaultGateFunction.modifiers?.some(
+    ({ kind }) => kind === ts.SyntaxKind.ExportKeyword,
+  );
+
+  if (
+    !isExported ||
+    defaultGateFunction.parameters.length !== 1 ||
+    !ts.isIdentifier(parameter?.name) ||
+    parameter.name.text !== "options" ||
+    statements?.length !== 1 ||
+    call === undefined ||
+    !ts.isIdentifier(call.expression) ||
+    call.expression.text !== "executeQualityGate" ||
+    call.arguments.length !== 1 ||
+    !ts.isObjectLiteralExpression(optionsObject) ||
+    properties.length !== 2 ||
+    !ts.isSpreadAssignment(spread) ||
+    !ts.isIdentifier(spread.expression) ||
+    spread.expression.text !== "options" ||
+    !ts.isIdentifier(steps?.name) ||
+    steps.name.text !== "steps" ||
+    !ts.isCallExpression(stepsInitializer) ||
+    !ts.isIdentifier(stepsInitializer.expression) ||
+    stepsInitializer.expression.text !== "createQualityGateSteps" ||
+    stepsInitializer.arguments.length !== 0
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "Default CI execution must place its validated plan after all caller options.",
+    );
+  }
+
+  const tryStatements = mainFunction.body?.statements.filter((statement) =>
+    ts.isTryStatement(statement),
+  );
+  const directReceiptAssignments = (tryStatements ?? []).flatMap((tryStatement) =>
+    tryStatement.tryBlock.statements.filter((statement) => {
+      if (!ts.isExpressionStatement(statement) || !ts.isBinaryExpression(statement.expression)) {
+        return false;
+      }
+      const assignment = statement.expression;
+      const awaited = assignment.right;
+      const defaultCall =
+        ts.isAwaitExpression(awaited) && ts.isCallExpression(awaited.expression)
+          ? awaited.expression
+          : undefined;
+      const callOptions = defaultCall?.arguments[0];
+      const optionNames = ts.isObjectLiteralExpression(callOptions)
+        ? callOptions.properties.map((property) => {
+            if (ts.isSpreadAssignment(property)) return "...";
+            if (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) {
+              return property.name.text;
+            }
+            return "";
+          })
+        : [];
+      return (
+        assignment.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+        ts.isIdentifier(assignment.left) &&
+        assignment.left.text === "receipt" &&
+        defaultCall !== undefined &&
+        ts.isIdentifier(defaultCall.expression) &&
+        defaultCall.expression.text === "executeDefaultQualityGate" &&
+        defaultCall.arguments.length === 1 &&
+        JSON.stringify(optionNames) === JSON.stringify(["runStep", "assertCanContinue"])
+      );
+    }),
+  );
+  let defaultReferences = 0;
+  let forbiddenExecutionReferences = 0;
+  let forbiddenPlanReferences = 0;
+  function visitMain(node) {
+    if (ts.isIdentifier(node)) {
+      if (node.text === "executeDefaultQualityGate") defaultReferences += 1;
+      if (node.text === "executeQualityGate") forbiddenExecutionReferences += 1;
+      if (node.text === "createQualityGateSteps") forbiddenPlanReferences += 1;
+    }
+    ts.forEachChild(node, visitMain);
+  }
+  visitMain(mainFunction);
+  if (
+    directReceiptAssignments.length !== 1 ||
+    defaultReferences !== 1 ||
+    forbiddenExecutionReferences !== 0 ||
+    forbiddenPlanReferences !== 0
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "CI main must assign its receipt through one direct default-plan execution.",
+      {
+        directReceiptAssignments: directReceiptAssignments.length,
+        defaultReferences,
+        forbiddenExecutionReferences,
+        forbiddenPlanReferences,
+      },
+    );
+  }
+}
+
 function extractCiInventory(ciSourceText) {
   const sourceFile = parseTypeScript(
     ciSourceText,
@@ -1421,6 +1824,8 @@ function extractCiInventory(ciSourceText) {
   let proofInitializer;
   let planHash;
   let createStepsFunction;
+  let defaultGateFunction;
+  let mainFunction;
   function visit(node) {
     if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
       if (node.name.text === "PROOF_ENTRIES") {
@@ -1439,8 +1844,31 @@ function extractCiInventory(ciSourceText) {
         planHash = node.initializer.text;
       }
     }
-    if (ts.isFunctionDeclaration(node) && node.name?.text === "createQualityGateSteps") {
-      createStepsFunction = node;
+    if (ts.isFunctionDeclaration(node)) {
+      if (node.name?.text === "createQualityGateSteps") {
+        if (createStepsFunction !== undefined) {
+          fail(
+            "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+            "CI defines createQualityGateSteps more than once.",
+          );
+        }
+        createStepsFunction = node;
+      }
+      if (node.name?.text === "executeDefaultQualityGate") {
+        if (defaultGateFunction !== undefined) {
+          fail(
+            "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+            "CI defines executeDefaultQualityGate more than once.",
+          );
+        }
+        defaultGateFunction = node;
+      }
+      if (node.name?.text === "main") {
+        if (mainFunction !== undefined) {
+          fail("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT", "CI defines main more than once.");
+        }
+        mainFunction = node;
+      }
     }
     ts.forEachChild(node, visit);
   }
@@ -1461,10 +1889,54 @@ function extractCiInventory(ciSourceText) {
     mapped.expression.name.text === "map"
       ? unwrapExpression(mapped.expression.expression)
       : undefined;
-  if (!ts.isArrayLiteralExpression(tupleArray)) {
+  const tupleProjection =
+    mapped !== undefined && ts.isCallExpression(mapped) && mapped.arguments.length === 1
+      ? unwrapExpression(mapped.arguments[0])
+      : undefined;
+  const projectionParameter =
+    tupleProjection !== undefined &&
+    ts.isArrowFunction(tupleProjection) &&
+    tupleProjection.parameters.length === 1
+      ? tupleProjection.parameters[0]
+      : undefined;
+  const projectionBindings =
+    projectionParameter !== undefined && ts.isArrayBindingPattern(projectionParameter.name)
+      ? projectionParameter.name.elements.map((element) =>
+          ts.isBindingElement(element) &&
+          element.dotDotDotToken === undefined &&
+          element.initializer === undefined &&
+          ts.isIdentifier(element.name)
+            ? element.name.text
+            : undefined,
+        )
+      : undefined;
+  const projectionBody =
+    tupleProjection !== undefined && ts.isArrowFunction(tupleProjection)
+      ? unwrapExpression(tupleProjection.body)
+      : undefined;
+  const projectionObject =
+    projectionBody !== undefined &&
+    ts.isCallExpression(projectionBody) &&
+    ts.isPropertyAccessExpression(projectionBody.expression) &&
+    ts.isIdentifier(projectionBody.expression.expression) &&
+    projectionBody.expression.expression.text === "Object" &&
+    projectionBody.expression.name.text === "freeze" &&
+    projectionBody.arguments.length === 1
+      ? unwrapExpression(projectionBody.arguments[0])
+      : undefined;
+  const projectionProperties = ts.isObjectLiteralExpression(projectionObject)
+    ? projectionObject.properties.map((property) =>
+        ts.isShorthandPropertyAssignment(property) ? property.name.text : undefined,
+      )
+    : undefined;
+  if (
+    !ts.isArrayLiteralExpression(tupleArray) ||
+    JSON.stringify(projectionBindings) !== JSON.stringify(["id", "verifierFile", "rootTestFile"]) ||
+    JSON.stringify(projectionProperties) !== JSON.stringify(["id", "verifierFile", "rootTestFile"])
+  ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
-      "CI PROOF_ENTRIES is no longer one frozen mapped literal inventory.",
+      "CI PROOF_ENTRIES is no longer one exact frozen literal tuple projection.",
     );
   }
   const entries = tupleArray.elements.map((element) => {
@@ -1534,32 +2006,74 @@ function extractCiInventory(ciSourceText) {
       { successorIndexes, invalidSourceMatrixIndexes, invalidSourceMatrix },
     );
   }
+  const bundleStoreIndexes = entries.flatMap(({ id }, index) =>
+    id === "control-plane-bundle-store" ? [index] : [],
+  );
+  const bundleStore = bundleStoreIndexes.length === 1 ? entries[bundleStoreIndexes[0]] : undefined;
+  if (
+    bundleStoreIndexes.length !== 1 ||
+    bundleStoreIndexes[0] !== invalidSourceMatrixIndexes[0] + 1 ||
+    bundleStore?.verifierFile !== "scripts/verify-control-plane-bundle-store.mjs" ||
+    bundleStore?.rootTestFile !== "tests/control-plane-bundle-store.test.mjs"
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "CI must register the exact M07-T01 verifier/root-test tuple immediately after T11.",
+      { invalidSourceMatrixIndexes, bundleStoreIndexes, bundleStore },
+    );
+  }
   if (
     typeof planHash !== "string" ||
     !/^[0-9a-f]{64}$/u.test(planHash) ||
-    createStepsFunction?.body === undefined
+    createStepsFunction?.body === undefined ||
+    defaultGateFunction?.body === undefined ||
+    mainFunction?.body === undefined
   ) {
     fail("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT", "CI reviewed plan authority is missing.");
   }
+  assertNoCiExecutionAuthorityRebinding(sourceFile);
+  assertExactCiPlanConstruction(createStepsFunction);
+  assertCiMainHasNoReturnBypass(mainFunction);
+  assertExactCiDefaultExecution(defaultGateFunction, mainFunction);
+  const prefixSha256 = sha256(
+    Buffer.from(
+      JSON.stringify(
+        entries.slice(0, CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries),
+      ),
+      "utf8",
+    ),
+  );
   if (
-    planHash !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.planSha256 ||
-    entries.length !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.proofEntries ||
-    8 + entries.length * 2 !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.stepCount ||
-    currentIndexes[0] !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.t09Index ||
-    successorIndexes[0] !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.t10Index ||
-    invalidSourceMatrixIndexes[0] !== INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.t11Index
+    entries.length < CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries ||
+    prefixSha256 !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.prefixSha256 ||
+    currentIndexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t09Index ||
+    successorIndexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t10Index ||
+    invalidSourceMatrixIndexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t11Index ||
+    bundleStoreIndexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.m07T01Index
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
-      "The reviewed live T11 successor profile differs from its exact single-pass plan authority.",
+      "The reviewed live M07-T01 successor profile differs from its exact single-pass plan authority.",
       {
         planHash,
+        prefixSha256,
         proofEntries: entries.length,
         t09Index: currentIndexes[0],
         t10Index: successorIndexes[0],
         t11Index: invalidSourceMatrixIndexes[0],
+        m07T01Index: bundleStoreIndexes[0],
       },
     );
+  }
+  for (const field of ["id", "verifierFile", "rootTestFile"]) {
+    const values = entries.map((entry) => entry[field]);
+    if (new Set(values).size !== values.length) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "The append-only CI suffix contains duplicate proof authority.",
+        { field },
+      );
+    }
   }
   const stepCalls = collectCalls(createStepsFunction.body);
   const proofEntryReferences = (
@@ -1578,10 +2092,11 @@ function extractCiInventory(ciSourceText) {
   return Object.freeze({
     entries: Object.freeze(entries),
     planHash,
-    stepCount: INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE.stepCount,
+    stepCount: 8 + entries.length * 2,
     t09Index: currentIndexes[0],
     t10Index: successorIndexes[0],
     t11Index: invalidSourceMatrixIndexes[0],
+    m07T01Index: bundleStoreIndexes[0],
   });
 }
 
@@ -1620,6 +2135,13 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
       "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node scripts/verify-publisher-invalid-source-matrix.mjs",
     test: "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node --test tests/publisher-invalid-source-matrix.test.mjs",
   });
+  const expectedM07T01Successor = Object.freeze({
+    generate:
+      "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/generate-control-plane-bundle-store-proof.mjs",
+    verify:
+      "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/verify-control-plane-bundle-store.mjs",
+    test: "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node --test tests/control-plane-bundle-store.test.mjs",
+  });
   if (
     publisherPackage.scripts?.["test:bundle-publication"] !== expected.package ||
     rootPackage.scripts?.["generate:publisher-bundle-publication"] !== expected.generate ||
@@ -1634,11 +2156,15 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
       expectedT11Successor.generate ||
     rootPackage.scripts?.["verify:publisher-invalid-source-matrix"] !==
       expectedT11Successor.verify ||
-    rootPackage.scripts?.["test:publisher-invalid-source-matrix"] !== expectedT11Successor.test
+    rootPackage.scripts?.["test:publisher-invalid-source-matrix"] !== expectedT11Successor.test ||
+    rootPackage.scripts?.["generate:control-plane-bundle-store"] !==
+      expectedM07T01Successor.generate ||
+    rootPackage.scripts?.["verify:control-plane-bundle-store"] !== expectedM07T01Successor.verify ||
+    rootPackage.scripts?.["test:control-plane-bundle-store"] !== expectedM07T01Successor.test
   ) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT",
-      "T09 or its approved T10/T11 package/root generate/verify/test registrations drifted.",
+      "T09 or its approved T10/T11/M07-T01 package/root generate/verify/test registrations drifted.",
     );
   }
   assertImmediateSingleRootScriptEdge(
@@ -1677,6 +2203,18 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
     "pnpm verify:publisher-invalid-source-matrix",
     "Aggregate check T11 successor",
   );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.test,
+    "pnpm test:publisher-invalid-source-matrix",
+    "pnpm test:control-plane-bundle-store",
+    "Aggregate test M07-T01 successor",
+  );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.check,
+    "pnpm verify:publisher-invalid-source-matrix",
+    "pnpm verify:control-plane-bundle-store",
+    "Aggregate check M07-T01 successor",
+  );
   const workflowInvocations =
     workflowText.match(/run:\s*node scripts\/run-ci-quality-gate\.mjs\s*$/gmu) ?? [];
   if (workflowInvocations.length !== 1) {
@@ -1696,6 +2234,12 @@ function registrationClaims(rootPackageText, publisherPackageText, workflowText,
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
       "The authenticated T11 CI successor is not immediately after T10.",
+    );
+  }
+  if (ci.m07T01Index !== ci.t11Index + 1) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "The authenticated M07-T01 CI successor is not immediately after T11.",
     );
   }
   return HISTORICAL_REGISTRATION_CLAIMS;
@@ -2013,10 +2557,659 @@ const CI_RECEIPT_KEYS = new Set([
   "t09VerifierSteps",
 ]);
 
+const DETACHED_CI_PLAN_PROBE_PREFIX = "DESEN_T09_CANDIDATE_CI_PLAN:";
+const DETACHED_CI_PLAN_PROBE_SOURCE = [
+  "const candidate = await import(process.argv[2]);",
+  "const steps = candidate.createQualityGateSteps();",
+  "const validation = candidate.validateQualityGatePlan(steps);",
+  "const payload = JSON.stringify({ entries: candidate.PROOF_ENTRIES, steps, validation });",
+  `process.stdout.write(${JSON.stringify(DETACHED_CI_PLAN_PROBE_PREFIX)} + Buffer.from(payload, "utf8").toString("base64"));`,
+].join("\n");
+
+function validateDetachedCandidateCiPlan(candidate, ciInventory) {
+  const candidateKeys = new Set(["entries", "steps", "validation"]);
+  const validationKeys = new Set(["planSha256", "stepCount"]);
+  const stepKeys = new Set(["args", "command", "id", "label"]);
+  if (
+    !exactPlainRecord(candidate, candidateKeys) ||
+    !Array.isArray(candidate.entries) ||
+    !Array.isArray(candidate.steps) ||
+    !exactPlainRecord(candidate.validation, validationKeys) ||
+    JSON.stringify(candidate.entries) !== JSON.stringify(ciInventory.entries)
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached CI candidate returned a malformed or mismatched executable-plan receipt.",
+    );
+  }
+  if (
+    !candidate.steps.every(
+      (step) =>
+        exactPlainRecord(step, stepKeys) &&
+        typeof step.id === "string" &&
+        typeof step.label === "string" &&
+        typeof step.command === "string" &&
+        Array.isArray(step.args) &&
+        step.args.every((argument) => typeof argument === "string"),
+    )
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached CI candidate produced a malformed executable step.",
+    );
+  }
+
+  const actualVerifierSteps = candidate.steps
+    .filter(({ id }) => id.startsWith("verify-"))
+    .map(({ id, command, args }) => `${id}\0${command}\0${args.join("\0")}`);
+  const expectedVerifierSteps = ciInventory.entries.map(
+    ({ id, verifierFile }) => `verify-${id}\0node\0${verifierFile}`,
+  );
+  const actualRootTestSteps = candidate.steps
+    .filter(({ id }) => id.startsWith("test-"))
+    .map(({ id, command, args }) => `${id}\0${command}\0${args.join("\0")}`);
+  const expectedRootTestSteps = ciInventory.entries.map(
+    ({ id, rootTestFile }) => `test-${id}\0node\0--test\0--test-concurrency=1\0${rootTestFile}`,
+  );
+  const normalizedPlan = candidate.steps.map(({ id, command, args }) => ({
+    id,
+    command,
+    args,
+  }));
+  const independentlyCalculatedPlanSha256 = sha256(
+    Buffer.from(JSON.stringify(normalizedPlan), "utf8"),
+  );
+  if (
+    JSON.stringify(actualVerifierSteps) !== JSON.stringify(expectedVerifierSteps) ||
+    JSON.stringify(actualRootTestSteps) !== JSON.stringify(expectedRootTestSteps) ||
+    candidate.steps.length !== ciInventory.stepCount ||
+    ownData(candidate.validation, "stepCount") !== candidate.steps.length ||
+    ownData(candidate.validation, "planSha256") !== independentlyCalculatedPlanSha256 ||
+    independentlyCalculatedPlanSha256 !== ciInventory.planHash
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached CI candidate does not commit and execute the exact append-only proof plan.",
+    );
+  }
+
+  return Object.freeze({
+    planSha256: independentlyCalculatedPlanSha256,
+    proofEntries: ciInventory.entries.length,
+    stepCount: candidate.steps.length,
+    t09Index: ciInventory.t09Index,
+    t09RootTestSteps: 1,
+    t09VerifierSteps: 1,
+  });
+}
+
+function detachedCiInventoryPath(relativePath, kind) {
+  const pattern =
+    kind === "verifier" ? /^scripts\/verify-[a-z0-9-]+\.mjs$/u : /^tests\/[a-z0-9-]+\.test\.mjs$/u;
+  if (typeof relativePath !== "string" || !pattern.test(relativePath)) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      `Detached CI ${kind} inventory contains an unsafe path.`,
+      { relativePath },
+    );
+  }
+  return relativePath;
+}
+
+async function writeAuthenticatedDetachedCiFile(filePath, bytes, label, mode = 0o600) {
+  await writeFile(filePath, bytes, { flag: "wx", mode });
+  const authenticated = await readRegularAbsoluteBytes(
+    filePath,
+    "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+    label,
+  );
+  if (!byteEqual(Buffer.from(bytes), authenticated)) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      `${label} bytes changed while the detached CI workspace was prepared.`,
+    );
+  }
+}
+
+async function createDetachedCiShadowWorkspace(
+  generatedDirectory,
+  ciSourceBytes,
+  rootPackageBytes,
+  ciInventory,
+) {
+  const workspaceRoot = path.join(generatedDirectory, "workspace");
+  await mkdir(workspaceRoot, { mode: 0o700 });
+  for (const directory of ["apps", "packages", "scripts", "tests"]) {
+    await mkdir(path.join(workspaceRoot, directory), { mode: 0o700 });
+  }
+
+  await writeAuthenticatedDetachedCiFile(
+    path.join(workspaceRoot, ROOT_PACKAGE),
+    rootPackageBytes,
+    "Detached CI root package manifest",
+  );
+  await writeAuthenticatedDetachedCiFile(
+    path.join(workspaceRoot, "pnpm-workspace.yaml"),
+    await readRegularBytes("pnpm-workspace.yaml"),
+    "Detached CI workspace manifest",
+  );
+
+  for (const workspaceDirectory of ["apps", "packages"]) {
+    const actualDirectory = path.join(ROOT, workspaceDirectory);
+    const entries = await readdir(actualDirectory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const manifestPath = path.join(actualDirectory, entry.name, "package.json");
+      let manifestStats;
+      try {
+        manifestStats = await lstat(manifestPath);
+      } catch (error) {
+        if (error?.code === "ENOENT") continue;
+        throw error;
+      }
+      if (!manifestStats.isFile() || manifestStats.isSymbolicLink()) {
+        fail(
+          "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+          "Detached CI encountered a non-regular workspace package manifest.",
+          { workspaceDirectory, packageDirectory: entry.name },
+        );
+      }
+      const shadowPackageDirectory = path.join(workspaceRoot, workspaceDirectory, entry.name);
+      await mkdir(shadowPackageDirectory, { mode: 0o700 });
+      await writeAuthenticatedDetachedCiFile(
+        path.join(shadowPackageDirectory, "package.json"),
+        await readRegularAbsoluteBytes(
+          manifestPath,
+          "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+          "Detached CI workspace package manifest",
+          { workspaceDirectory, packageDirectory: entry.name },
+        ),
+        "Detached CI shadow package manifest",
+      );
+    }
+  }
+
+  for (const entry of ciInventory.entries) {
+    const verifierFile = detachedCiInventoryPath(entry.verifierFile, "verifier");
+    const rootTestFile = detachedCiInventoryPath(entry.rootTestFile, "root test");
+    await writeAuthenticatedDetachedCiFile(
+      path.join(workspaceRoot, verifierFile),
+      Buffer.alloc(0),
+      "Detached CI verifier inventory placeholder",
+    );
+    await writeAuthenticatedDetachedCiFile(
+      path.join(workspaceRoot, rootTestFile),
+      Buffer.alloc(0),
+      "Detached CI root-test inventory placeholder",
+    );
+  }
+
+  const candidatePath = path.join(workspaceRoot, CI_SOURCE);
+  await writeAuthenticatedDetachedCiFile(
+    candidatePath,
+    ciSourceBytes,
+    "Detached single-pass CI candidate",
+  );
+  const canonicalCandidatePath = await realpath(candidatePath);
+  if (canonicalCandidatePath !== candidatePath) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "Detached single-pass CI candidate must not resolve through a path alias.",
+    );
+  }
+  return Object.freeze({ candidatePath, canonicalCandidatePath, workspaceRoot });
+}
+
+function createDetachedCiEntrypointWrapper(command, logPath, nodePath) {
+  const gitArguments = ["ls-files", "--stage", "-z"];
+  const gitRecord = `100644 ${"0".repeat(40)} 0\tpackage.json\0`;
+  return [
+    `#!${nodePath} --allow-fs-write=${logPath}`,
+    '"use strict";',
+    'const fs = require("node:fs");',
+    `const logPath = ${JSON.stringify(logPath)};`,
+    `const command = ${JSON.stringify(command)};`,
+    "const args = process.argv.slice(2);",
+    'const bytes = Buffer.from(`${JSON.stringify({ command, args })}\\n`, "utf8");',
+    "const descriptor = fs.openSync(",
+    "  logPath,",
+    "  fs.constants.O_WRONLY | fs.constants.O_APPEND | (fs.constants.O_NOFOLLOW ?? 0),",
+    ");",
+    "try {",
+    "  let offset = 0;",
+    "  while (offset < bytes.byteLength) {",
+    "    offset += fs.writeSync(descriptor, bytes, offset, bytes.byteLength - offset);",
+    "  }",
+    "} finally {",
+    "  fs.closeSync(descriptor);",
+    "}",
+    ...(command === "git"
+      ? [
+          `if (JSON.stringify(args) !== ${JSON.stringify(JSON.stringify(gitArguments))}) {`,
+          "  process.exit(64);",
+          "}",
+          `process.stdout.write(Buffer.from(${JSON.stringify(gitRecord)}, "utf8"));`,
+        ]
+      : []),
+    "",
+  ].join("\n");
+}
+
+function parseDetachedCiEntrypointReceipt(stdout, expectedSteps, expectedProofCount) {
+  const receiptStart = stdout.lastIndexOf('\n{\n  "status":');
+  if (receiptStart < 0) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached CI real entrypoint did not print its terminal receipt.",
+    );
+  }
+  const receipt = parseJson(
+    stdout.slice(receiptStart + 1),
+    "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+    "Detached CI real-entrypoint receipt",
+  );
+  const receiptKeys = new Set([
+    "duration",
+    "proofs",
+    "revision",
+    "sections",
+    "status",
+    "trackedFiles",
+  ]);
+  const sectionKeys = new Set(["duration", "id", "status"]);
+  const expectedSectionIds = ["frozen-inventory", ...expectedSteps.map(({ id }) => id)];
+  const actualSectionIds = Array.isArray(receipt.sections)
+    ? receipt.sections.map((section) =>
+        exactPlainRecord(section, sectionKeys) && section.status === "PASS"
+          ? section.id
+          : undefined,
+      )
+    : [];
+  if (
+    !exactPlainRecord(receipt, receiptKeys) ||
+    receipt.status !== "PASS" ||
+    receipt.proofs !== expectedProofCount ||
+    receipt.trackedFiles !== 1 ||
+    JSON.stringify(actualSectionIds) !== JSON.stringify(expectedSectionIds)
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached CI real entrypoint did not complete the exact validated default plan.",
+      {
+        status: receipt?.status,
+        proofCount: receipt?.proofs,
+        sectionIds: actualSectionIds,
+      },
+    );
+  }
+}
+
+async function executeDetachedCandidateCiEntrypoint(
+  shadow,
+  generatedDirectory,
+  authenticatedSourceBytes,
+  expectedSteps,
+  expectedProofCount,
+) {
+  if (process.platform === "win32") {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached exact-CI entrypoint probe requires POSIX executable wrappers.",
+    );
+  }
+  const inheritedPath = process.env.PATH;
+  if (typeof inheritedPath !== "string" || inheritedPath.length === 0) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached exact-CI entrypoint probe requires the reviewed host executable path.",
+    );
+  }
+  const nodePath = await realpath(process.execPath);
+  const logPath = path.join(generatedDirectory, "commands.log");
+  if (/\s/u.test(nodePath) || /\s/u.test(logPath)) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached exact-CI entrypoint probe requires whitespace-free executable and log paths.",
+      { logPath, nodePath },
+    );
+  }
+
+  let stdout;
+  let stderr;
+  let executionError;
+  let logBytes;
+  const wrapperBytesByPath = new Map();
+  {
+    await writeAuthenticatedDetachedCiFile(
+      logPath,
+      Buffer.alloc(0),
+      "Detached exact-CI command log",
+    );
+    const logStats = await lstat(logPath);
+    if (!logStats.isFile() || logStats.isSymbolicLink() || logStats.nlink !== 1) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "The detached exact-CI command log is not one private regular file.",
+      );
+    }
+    for (const command of ["git", "node", "pnpm"]) {
+      const wrapperPath = path.join(generatedDirectory, command);
+      const wrapperBytes = Buffer.from(
+        createDetachedCiEntrypointWrapper(command, logPath, nodePath),
+        "utf8",
+      );
+      await writeAuthenticatedDetachedCiFile(
+        wrapperPath,
+        wrapperBytes,
+        "Detached exact-CI executable wrapper",
+        0o700,
+      );
+      await chmod(wrapperPath, 0o700);
+      const wrapperStats = await lstat(wrapperPath);
+      if (
+        !wrapperStats.isFile() ||
+        wrapperStats.isSymbolicLink() ||
+        wrapperStats.nlink !== 1 ||
+        (wrapperStats.mode & 0o111) === 0
+      ) {
+        fail(
+          "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+          "A detached exact-CI wrapper is not one executable private regular file.",
+          { command },
+        );
+      }
+      const authenticatedWrapper = await readRegularAbsoluteBytes(
+        wrapperPath,
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "Detached exact-CI executable wrapper",
+      );
+      if (!byteEqual(wrapperBytes, authenticatedWrapper)) {
+        fail(
+          "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+          "A detached exact-CI wrapper changed before execution.",
+          { command },
+        );
+      }
+      wrapperBytesByPath.set(wrapperPath, wrapperBytes);
+    }
+
+    try {
+      const childEnvironment = {
+        ...process.env,
+        GITHUB_ACTIONS: "false",
+        NODE_NO_WARNINGS: "1",
+        NODE_OPTIONS: "",
+        NO_COLOR: "1",
+        PATH: `${generatedDirectory}${path.delimiter}${inheritedPath}`,
+      };
+      delete childEnvironment.GITHUB_STEP_SUMMARY;
+      delete childEnvironment.NODE_PATH;
+      ({ stdout, stderr } = await execFileAsync(
+        process.execPath,
+        [
+          "--max-old-space-size=128",
+          "--no-warnings",
+          "--permission",
+          `--allow-fs-read=${shadow.workspaceRoot}`,
+          `--allow-fs-read=${generatedDirectory}`,
+          "--allow-child-process",
+          shadow.canonicalCandidatePath,
+        ],
+        {
+          cwd: shadow.workspaceRoot,
+          detached: false,
+          encoding: "utf8",
+          env: childEnvironment,
+          killSignal: "SIGKILL",
+          maxBuffer: DETACHED_CI_ENTRYPOINT_OUTPUT_LIMIT_BYTES,
+          timeout: DETACHED_CI_ENTRYPOINT_TIMEOUT_MILLISECONDS,
+        },
+      ));
+    } catch (error) {
+      executionError = error;
+    }
+
+    const candidateAfter = await readRegularAbsoluteBytes(
+      shadow.candidatePath,
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "Detached real-entrypoint CI candidate",
+    );
+    if (!byteEqual(authenticatedSourceBytes, candidateAfter)) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "The detached exact-CI candidate bytes changed during real-entrypoint execution.",
+      );
+    }
+    for (const [wrapperPath, expectedBytes] of wrapperBytesByPath) {
+      const afterBytes = await readRegularAbsoluteBytes(
+        wrapperPath,
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "Detached exact-CI executable wrapper",
+      );
+      if (!byteEqual(expectedBytes, afterBytes)) {
+        fail(
+          "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+          "A detached exact-CI wrapper changed during execution.",
+          { wrapperPath },
+        );
+      }
+    }
+    const finalLogStats = await lstat(logPath);
+    if (
+      !finalLogStats.isFile() ||
+      finalLogStats.isSymbolicLink() ||
+      finalLogStats.size > DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES
+    ) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "The detached exact-CI command log exceeded its bounded regular-file profile.",
+        {
+          actualBytes: finalLogStats.size,
+          maximumBytes: DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES,
+        },
+      );
+    }
+    logBytes = await readRegularAbsoluteBytes(
+      logPath,
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "Detached exact-CI command log",
+    );
+  }
+
+  if (executionError !== undefined) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached exact-CI candidate could not execute its real CLI entrypoint.",
+      {
+        exitCode:
+          typeof executionError === "object" &&
+          executionError !== null &&
+          Object.hasOwn(executionError, "code")
+            ? String(executionError.code)
+            : "unknown",
+        signal:
+          typeof executionError === "object" &&
+          executionError !== null &&
+          Object.hasOwn(executionError, "signal")
+            ? String(executionError.signal)
+            : "none",
+      },
+    );
+  }
+  if (typeof stdout !== "string" || typeof stderr !== "string" || stderr !== "") {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached exact-CI real entrypoint emitted an unexpected process stream.",
+    );
+  }
+
+  const logText = decodeUtf8(
+    logBytes,
+    "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+    "Detached exact-CI command log",
+  );
+  const lines = logText.endsWith("\n") ? logText.slice(0, -1).split("\n") : [];
+  const actualCommands = lines.map((line) =>
+    parseJson(
+      line,
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "Detached exact-CI command record",
+    ),
+  );
+  const commandRecordKeys = new Set(["args", "command"]);
+  const gitCommand = Object.freeze({
+    command: "git",
+    args: Object.freeze(["ls-files", "--stage", "-z"]),
+  });
+  const expectedCommands = [
+    gitCommand,
+    ...expectedSteps.map(({ command, args }) => ({
+      command,
+      args: [...args],
+    })),
+    gitCommand,
+  ];
+  if (
+    lines.some((line) => line.length === 0) ||
+    !actualCommands.every(
+      (record) =>
+        exactPlainRecord(record, commandRecordKeys) &&
+        ["git", "node", "pnpm"].includes(record.command) &&
+        Array.isArray(record.args) &&
+        record.args.every((argument) => typeof argument === "string"),
+    ) ||
+    JSON.stringify(actualCommands) !== JSON.stringify(expectedCommands)
+  ) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "The detached exact-CI real entrypoint did not spawn every validated command once.",
+      {
+        expectedCount: expectedCommands.length,
+        actualCount: actualCommands.length,
+      },
+    );
+  }
+  parseDetachedCiEntrypointReceipt(stdout, expectedSteps, expectedProofCount);
+}
+
+async function executeDetachedCandidateCiPlan(ciSourceBytes, rootPackageBytes, ciInventory) {
+  const generatedTemporaryDirectory = await mkdtemp(
+    path.join(os.tmpdir(), "desen-t09-ci-candidate-"),
+  );
+  const generatedDirectory = await realpath(generatedTemporaryDirectory);
+  try {
+    const shadow = await createDetachedCiShadowWorkspace(
+      generatedDirectory,
+      ciSourceBytes,
+      rootPackageBytes,
+      ciInventory,
+    );
+    const authenticatedBytes = await readRegularAbsoluteBytes(
+      shadow.canonicalCandidatePath,
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "Detached single-pass CI candidate",
+    );
+    if (!byteEqual(ciSourceBytes, authenticatedBytes)) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "Detached single-pass CI candidate bytes changed before executable observation.",
+      );
+    }
+
+    const candidateUrl = pathToFileURL(shadow.canonicalCandidatePath);
+    candidateUrl.searchParams.set("desen-proof-sha256", sha256(authenticatedBytes));
+    let stdout;
+    try {
+      ({ stdout } = await execFileAsync(
+        process.execPath,
+        [
+          "--max-old-space-size=128",
+          "--permission",
+          `--allow-fs-read=${shadow.canonicalCandidatePath}`,
+          "--input-type=module",
+          "--eval",
+          DETACHED_CI_PLAN_PROBE_SOURCE,
+          "desen-t09-ci-plan-probe",
+          candidateUrl.href,
+        ],
+        {
+          cwd: ROOT,
+          detached: process.platform !== "win32",
+          encoding: "utf8",
+          env: {},
+          maxBuffer: 1_048_576,
+          timeout: 5_000,
+        },
+      ));
+    } catch (error) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "The detached CI candidate could not derive and validate its executable plan.",
+        {
+          exitCode:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "code")
+              ? String(error.code)
+              : "unknown",
+          signal:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "signal")
+              ? String(error.signal)
+              : "none",
+        },
+      );
+    }
+
+    const afterBytes = await readRegularAbsoluteBytes(
+      shadow.canonicalCandidatePath,
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "Detached single-pass CI candidate",
+    );
+    if (!byteEqual(authenticatedBytes, afterBytes)) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "Detached single-pass CI candidate bytes changed during executable observation.",
+      );
+    }
+    if (typeof stdout !== "string" || !stdout.startsWith(DETACHED_CI_PLAN_PROBE_PREFIX)) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "The detached CI candidate did not return one isolated executable plan.",
+      );
+    }
+    const encoded = stdout.slice(DETACHED_CI_PLAN_PROBE_PREFIX.length);
+    if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(encoded)) {
+      fail(
+        "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+        "The detached CI candidate returned a malformed executable-plan receipt.",
+      );
+    }
+    const candidate = parseJson(
+      Buffer.from(encoded, "base64").toString("utf8"),
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT",
+      "Detached CI candidate executable-plan receipt",
+    );
+    const receipt = validateDetachedCandidateCiPlan(candidate, ciInventory);
+    await executeDetachedCandidateCiEntrypoint(
+      shadow,
+      generatedDirectory,
+      authenticatedBytes,
+      candidate.steps,
+      candidate.entries.length,
+    );
+    return receipt;
+  } finally {
+    await rm(generatedTemporaryDirectory, { recursive: true, force: true });
+  }
+}
+
 function validateCiReceipt(receipt, ciInventory) {
   const exactShape = exactPlainRecord(receipt, CI_RECEIPT_KEYS);
+  const frozenM07T01Plan =
+    ciInventory.planHash === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.planSha256 &&
+    ciInventory.entries.length === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries &&
+    ciInventory.stepCount === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.stepCount;
   const historical =
     exactShape &&
+    frozenM07T01Plan &&
     ownData(receipt, "planSha256") === HISTORICAL_CI_RECEIPT.planSha256 &&
     ownData(receipt, "proofEntries") === HISTORICAL_CI_RECEIPT.proofEntries &&
     ownData(receipt, "stepCount") === HISTORICAL_CI_RECEIPT.stepCount &&
@@ -2144,8 +3337,12 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
   const trackedPairs = await Promise.all(
     TRACKED.map(async (relativePath) => {
       const input = await trackedInput(options, relativePath);
-      return Object.freeze({ relativePath, ...input });
+      return safeObjectFreeze({ relativePath, ...input });
     }),
+  );
+  const compatibilityReaderProjections = await authenticateCurrentCompatibilityReaders(
+    trackedPairs,
+    options,
   );
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
   const text = (relativePath) => {
@@ -2180,7 +3377,19 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
     text(CI_WORKFLOW),
     ciInventory,
   );
-  validateCiReceipt(options.ciReceipt ?? (await executeLiveCiProbe()), ciInventory);
+  const ciSourceInput = trackedPairs.find(({ relativePath }) => relativePath === CI_SOURCE);
+  const observedCiReceipt =
+    ciSourceInput?.overridden === true
+      ? await executeDetachedCandidateCiPlan(
+          bytesByPath.get(CI_SOURCE),
+          bytesByPath.get(ROOT_PACKAGE),
+          ciInventory,
+        )
+      : (options.ciReceipt ?? (await executeLiveCiProbe()));
+  validateCiReceipt(observedCiReceipt, ciInventory);
+  if (ciSourceInput?.overridden === true && options.ciReceipt !== undefined) {
+    validateCiReceipt(options.ciReceipt, ciInventory);
+  }
   const runtimeReceipt = validateRuntimeReceipt(
     options.runtimeReceipt ??
       (await executeOfficialPublicRuntimeProbe(text(SOURCE_FIXTURE), text(CATALOG_FIXTURE))),
@@ -2189,7 +3398,11 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
   const traceabilityOwnership = traceabilityClaims(text(TRACEABILITY));
   const trackedFiles = Object.freeze(
     trackedPairs.map(({ relativePath, bytes, overridden }) => {
-      const historical = overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath];
+      const historical =
+        compatibilityReaderProjections.get(relativePath) ??
+        (overridden && ![CI_SOURCE, ROOT_PACKAGE].includes(relativePath)
+          ? undefined
+          : HISTORICAL_TRACKED_RECEIPTS[relativePath]);
       return historical === undefined
         ? Object.freeze({
             path: relativePath,

@@ -123,6 +123,12 @@ The evidence builder:
 - writes through an exclusive same-directory temporary, rechecks inode and bytes, performs an
   atomic rename, and rejects destination symlinks or pre-rename tampering.
 
+The current M05 source-audit reader and root test are authenticated against exact approved
+successor receipts before their original task-time receipts are emitted into this frozen M06-T05
+artifact. The M06-T05 proof reader and root test also retain their task-time artifact projection;
+M07-T01 externally pins their current bytes. This preserves the exact historical artifact SHA
+without allowing a caller-provided receipt or updated reader to become verification authority.
+
 The focused inventory currently contains 14 Publisher runtime cases, 28 compiler-negative cases,
 50 Validator binding cases, 50 Validator execution cases, and 15 independent root
 proof/mutation cases.

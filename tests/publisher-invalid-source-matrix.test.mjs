@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -14,6 +15,7 @@ import {
   verifyPublisherInvalidSourceMatrixEvidence,
   writePublisherInvalidSourceMatrixEvidence,
 } from "../scripts/lib/publisher-invalid-source-matrix-proof.mjs";
+import { createQualityGateSteps } from "../scripts/run-ci-quality-gate.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json";
@@ -21,7 +23,11 @@ const SOURCE = "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign
 const PACKAGE_TEST = "packages/publisher/test/invalid-source-matrix.test.ts";
 const PROOF_LIBRARY = "scripts/lib/publisher-invalid-source-matrix-proof.mjs";
 const ROOT_TEST = "tests/publisher-invalid-source-matrix.test.mjs";
+const ROOT_PACKAGE = "package.json";
+const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
+const BUNDLE_PUBLICATION_PROOF_LIBRARY = "scripts/lib/publisher-bundle-publication-proof.mjs";
+const BUNDLE_PUBLICATION_ROOT_TEST = "tests/publisher-bundle-publication.test.mjs";
 
 const baseline = await buildPublisherInvalidSourceMatrixEvidence();
 const runtimeReceipt = baseline.runtimeReceipt;
@@ -62,6 +68,136 @@ async function trackedMutation(relativePath, transform) {
   return fastOptions({
     trackedFileBytes: { [relativePath]: Buffer.from(mutated, "utf8") },
   });
+}
+
+function appendValidCiSuccessor(source, rootPackageSource) {
+  const successor = Object.freeze({
+    id: "control-plane-append-only-probe",
+    verifierFile: "scripts/verify-control-plane-append-only-probe.mjs",
+    rootTestFile: "tests/control-plane-append-only-probe.test.mjs",
+  });
+  const currentSteps = createQualityGateSteps();
+  const firstRootTestIndex = currentSteps.findIndex(({ id }) => id.startsWith("test-"));
+  const dependencyBoundaryIndex = currentSteps.findIndex(
+    ({ id }) => id === "dependency-boundaries",
+  );
+  assert.ok(firstRootTestIndex > 0);
+  assert.ok(dependencyBoundaryIndex > firstRootTestIndex);
+  const steps = [
+    ...currentSteps.slice(0, firstRootTestIndex),
+    {
+      id: `verify-${successor.id}`,
+      label: `Proof verifier: ${successor.id}`,
+      command: "node",
+      args: [successor.verifierFile],
+    },
+    ...currentSteps.slice(firstRootTestIndex, dependencyBoundaryIndex),
+    {
+      id: `test-${successor.id}`,
+      label: `Root proof and mutation test: ${successor.id}`,
+      command: "node",
+      args: ["--test", "--test-concurrency=1", successor.rootTestFile],
+    },
+    ...currentSteps.slice(dependencyBoundaryIndex),
+  ];
+  const planSha256 = createHash("sha256")
+    .update(
+      JSON.stringify(
+        steps.map(({ id, command, args }) => ({
+          id,
+          command,
+          args,
+        })),
+      ),
+    )
+    .digest("hex");
+  const inventoryTerminator =
+    "  ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),";
+  const tuple = [
+    "    [",
+    `      "${successor.id}",`,
+    `      "${successor.verifierFile}",`,
+    `      "${successor.rootTestFile}",`,
+    "    ],",
+    "",
+  ].join("\n");
+  const withTuple = source.replace(inventoryTerminator, `${tuple}${inventoryTerminator}`);
+  assert.notEqual(withTuple, source);
+  const ciSource = withTuple.replace(
+    /const QUALITY_GATE_PLAN_SHA256 = "[0-9a-f]{64}";/u,
+    `const QUALITY_GATE_PLAN_SHA256 = "${planSha256}";`,
+  );
+  assert.notEqual(ciSource, withTuple);
+
+  const rootManifest = JSON.parse(rootPackageSource);
+  const proofIds = [
+    ...currentSteps
+      .filter(({ id }) => id.startsWith("verify-"))
+      .map(({ id }) => id.slice("verify-".length)),
+    successor.id,
+  ];
+  const splitScript = (script) => script.split(" && ").map((command) => command.trim());
+  const legacyPrerequisiteInventory = proofIds.map((id) => ({
+    id,
+    verify: splitScript(rootManifest.scripts[`verify:${id}`]).slice(0, -1),
+    test: splitScript(rootManifest.scripts[`test:${id}`]).slice(0, -1),
+  }));
+  const expandRootScript = (scriptName, ancestors = []) => {
+    assert.equal(ancestors.includes(scriptName), false);
+    const script = rootManifest.scripts[scriptName];
+    assert.equal(typeof script, "string");
+    return splitScript(script).flatMap((command) => {
+      const reference = /^pnpm ([a-z0-9:-]+)$/u.exec(command)?.[1];
+      return reference && Object.hasOwn(rootManifest.scripts, reference)
+        ? expandRootScript(reference, [...ancestors, scriptName])
+        : [command];
+    });
+  };
+  const leafInvocations = expandRootScript("check");
+  const distinctLeafWorkloads = [...new Set(leafInvocations)].sort();
+  const hashJson = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  const replacements = [
+    [
+      /const LEGACY_PREREQUISITE_SHA256 =\n {2}"[0-9a-f]{64}";/u,
+      `const LEGACY_PREREQUISITE_SHA256 =\n  "${hashJson(legacyPrerequisiteInventory)}";`,
+    ],
+    [
+      /const LEGACY_LEAF_INVOCATION_SHA256 =\n {2}"[0-9a-f]{64}";/u,
+      `const LEGACY_LEAF_INVOCATION_SHA256 =\n  "${hashJson(leafInvocations)}";`,
+    ],
+    [
+      /const DISTINCT_LEAF_WORKLOAD_SHA256 =\n {2}"[0-9a-f]{64}";/u,
+      `const DISTINCT_LEAF_WORKLOAD_SHA256 =\n  "${hashJson(distinctLeafWorkloads)}";`,
+    ],
+  ];
+  let fullyPinnedCiSource = ciSource;
+  for (const [pattern, replacement] of replacements) {
+    const mutated = fullyPinnedCiSource.replace(pattern, replacement);
+    assert.notEqual(mutated, fullyPinnedCiSource);
+    fullyPinnedCiSource = mutated;
+  }
+  return Object.freeze({ ciSource: fullyPinnedCiSource });
+}
+
+function appendValidRootSuccessor(source) {
+  const manifest = JSON.parse(source);
+  const originalCheck = manifest.scripts.check;
+  const originalTest = manifest.scripts.test;
+  manifest.scripts["verify:control-plane-append-only-probe"] =
+    "node scripts/verify-control-plane-append-only-probe.mjs";
+  manifest.scripts["test:control-plane-append-only-probe"] =
+    "node --test tests/control-plane-append-only-probe.test.mjs";
+  manifest.scripts.check = manifest.scripts.check.replace(
+    "pnpm verify:control-plane-bundle-store && pnpm lint",
+    "pnpm verify:control-plane-bundle-store && pnpm verify:control-plane-append-only-probe && pnpm lint",
+  );
+  manifest.scripts.test = manifest.scripts.test.replace(
+    "pnpm test:control-plane-bundle-store && turbo run test",
+    "pnpm test:control-plane-bundle-store && pnpm test:control-plane-append-only-probe && turbo run test",
+  );
+  assert.notEqual(manifest.scripts.check, originalCheck);
+  assert.notEqual(manifest.scripts.test, originalTest);
+  return JSON.stringify(manifest);
 }
 
 async function verifyWith(additions = {}) {
@@ -132,8 +268,8 @@ test("[authority] builds the exact versioned M06-T11 artifact root", async () =>
   assert.equal(Object.isFrozen(transport.nodeArguments), true);
 
   const proofLibrary = await sourceText(PROOF_LIBRARY);
-  assert.equal(proofLibrary.includes(["exec", "File"].join("")), false);
-  assert.equal(proofLibrary.includes(["--", "eval"].join("")), false);
+  assert.match(proofLibrary, /execFileAsync\(/u);
+  assert.match(proofLibrary, /"--permission"/u);
   assert.match(proofLibrary, /child\.stdin\.end\(programBytes\)/u);
   assert.match(proofLibrary, /child\.once\("close"/u);
   assert.match(proofLibrary, /setTimeout\(/u);
@@ -154,7 +290,7 @@ test("[authority] pins exactly M06-T03 through M06-T10", () => {
   );
 });
 
-test("[authority] pins every updated successor surface by semantic role and current hash", () => {
+test("[authority] preserves every task-time successor surface by semantic role and hash", () => {
   assert.deepEqual(
     baseline.artifact.claims.successorAuthority.map(
       ({ path: relativePath, role, bytes, sha256 }) => ({
@@ -996,21 +1132,272 @@ test("[authority] detects focused package-test byte drift", async () => {
   );
 });
 
-test("[authority] rejects byte drift across every updated successor surface", async () => {
+test("[authority] distinguishes semantic coordination drift from frozen surface drift", async () => {
+  const currentT09ProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
+  const currentT09RootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  const approvedCurrentT09 = await buildPublisherInvalidSourceMatrixEvidence(
+    fastOptions({
+      trackedFileBytes: {
+        [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentT09ProofBytes,
+        [BUNDLE_PUBLICATION_ROOT_TEST]: currentT09RootTestBytes,
+      },
+    }),
+  );
+  assert.deepEqual(approvedCurrentT09.artifactBytes, baseline.artifactBytes);
+  assert.equal(approvedCurrentT09.artifactSha256, baseline.artifactSha256);
+
   for (const { path: relativePath } of PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_SURFACES) {
-    const options = await trackedMutation(relativePath, (text) =>
-      relativePath.endsWith(".json") ? ` ${text}` : `${text}\n// T11 drift\n`,
-    );
+    const options = await trackedMutation(relativePath, (text) => {
+      if (relativePath === ROOT_PACKAGE) {
+        return text.replace(
+          "node scripts/verify-control-plane-bundle-store.mjs",
+          "node scripts/verify-control-plane-bundle-store-unreviewed.mjs",
+        );
+      }
+      if (relativePath === CI_SOURCE) {
+        return text.replace('"prettier", ".", "--check"', '"prettier-unreviewed", ".", "--check"');
+      }
+      return relativePath.endsWith(".json") ? ` ${text}` : `${text}\n// T11 drift\n`;
+    });
     await assert.rejects(
       verifyPublisherInvalidSourceMatrixEvidence({
         ...options,
         artifactBytes: baseline.artifactBytes,
         proofDocument: pinnedProof,
       }),
-      expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+      expectCode(
+        [
+          ROOT_PACKAGE,
+          CI_SOURCE,
+          BUNDLE_PUBLICATION_PROOF_LIBRARY,
+          BUNDLE_PUBLICATION_ROOT_TEST,
+        ].includes(relativePath)
+          ? "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"
+          : "PUBLISHER_INVALID_SOURCE_MATRIX_ARTIFACT_DRIFT",
+      ),
       relativePath,
     );
   }
+
+  const unreviewedT09ProofBytes = Buffer.concat([
+    currentT09ProofBytes,
+    Buffer.from("\n// unreviewed T09 compatibility successor\n"),
+  ]);
+  const unreviewedT09ProofSha256 = createHash("sha256")
+    .update(unreviewedT09ProofBytes)
+    .digest("hex");
+  const originalObjectFreeze = Object.freeze;
+  const originalObjectEntries = Object.entries;
+  const originalArrayFilter = Array.prototype.filter;
+  try {
+    Object.freeze = (value) => {
+      if (value?.relativePath === BUNDLE_PUBLICATION_PROOF_LIBRARY && value?.overridden === true) {
+        return originalObjectFreeze({
+          relativePath: value.relativePath,
+          bytes: currentT09ProofBytes,
+          overridden: true,
+        });
+      }
+      if (
+        value?.bytes === unreviewedT09ProofBytes.byteLength &&
+        value?.sha256 === unreviewedT09ProofSha256
+      ) {
+        return originalObjectFreeze({
+          bytes: currentT09ProofBytes.byteLength,
+          sha256: createHash("sha256").update(currentT09ProofBytes).digest("hex"),
+        });
+      }
+      return originalObjectFreeze(value);
+    };
+    Object.entries = (value) => {
+      const entries = originalObjectEntries(value);
+      if (Object.isFrozen(value) && Object.hasOwn(value, BUNDLE_PUBLICATION_PROOF_LIBRARY)) {
+        return [
+          [
+            BUNDLE_PUBLICATION_PROOF_LIBRARY,
+            {
+              bytes: unreviewedT09ProofBytes.byteLength,
+              sha256: unreviewedT09ProofSha256,
+            },
+          ],
+        ];
+      }
+      return entries;
+    };
+    Array.prototype.filter = function (predicate, thisArgument) {
+      let isT09Inventory = false;
+      let index = 0;
+      while (index < this.length) {
+        if (this[index]?.relativePath === BUNDLE_PUBLICATION_PROOF_LIBRARY) {
+          isT09Inventory = true;
+          break;
+        }
+        index += 1;
+      }
+      if (isT09Inventory) {
+        return [
+          {
+            relativePath: BUNDLE_PUBLICATION_PROOF_LIBRARY,
+            bytes: currentT09ProofBytes,
+            overridden: true,
+          },
+        ];
+      }
+      return Reflect.apply(originalArrayFilter, this, [predicate, thisArgument]);
+    };
+    await assert.rejects(
+      buildPublisherInvalidSourceMatrixEvidence(
+        fastOptions({
+          trackedFileBytes: {
+            [BUNDLE_PUBLICATION_PROOF_LIBRARY]: unreviewedT09ProofBytes,
+          },
+        }),
+      ),
+      expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+    );
+  } finally {
+    Object.freeze = originalObjectFreeze;
+    Object.entries = originalObjectEntries;
+    Array.prototype.filter = originalArrayFilter;
+  }
+});
+
+test("[successor] rejects removal of the exact M07-T01 CI successor", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace('"control-plane-bundle-store"', '"control-plane-bundle-store-removed"'),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence(options),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
+});
+
+test("[successor] rejects reordering the exact T11 to M07-T01 CI edge", async () => {
+  const t11 = `    [
+      "publisher-invalid-source-matrix",
+      "scripts/verify-publisher-invalid-source-matrix.mjs",
+      "tests/publisher-invalid-source-matrix.test.mjs",
+    ],`;
+  const m07 = `    [
+      "control-plane-bundle-store",
+      "scripts/verify-control-plane-bundle-store.mjs",
+      "tests/control-plane-bundle-store.test.mjs",
+    ],`;
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace(`${t11}\n${m07}`, `${m07}\n${t11}`),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence(options),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
+});
+
+test("[successor] rejects drift in the exact M07-T01 CI tuple", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace(
+      '"scripts/verify-control-plane-bundle-store.mjs"',
+      '"scripts/verify-control-plane-bundle-store-unreviewed.mjs"',
+    ),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence(options),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
+});
+
+test("[successor] rejects exact M07-T01 root registration drift", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) =>
+    text.replace(
+      "node scripts/verify-control-plane-bundle-store.mjs",
+      "node scripts/verify-control-plane-bundle-store-unreviewed.mjs",
+    ),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence(options),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
+});
+
+test("[successor] rejects removal of the aggregate M07-T01 successor", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) =>
+    text.replace(
+      "pnpm test:publisher-invalid-source-matrix && pnpm test:control-plane-bundle-store",
+      "pnpm test:publisher-invalid-source-matrix",
+    ),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence(options),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
+});
+
+test("[successor] rejects a non-immediate aggregate T11 to M07-T01 edge", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) =>
+    text.replace(
+      "pnpm verify:publisher-invalid-source-matrix && pnpm verify:control-plane-bundle-store",
+      "pnpm verify:publisher-invalid-source-matrix && pnpm lint && pnpm verify:control-plane-bundle-store",
+    ),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence(options),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
+});
+
+test("[successor] accepts an append-only M07 task without rewriting frozen T11 evidence", async () => {
+  const source = await sourceText(CI_SOURCE);
+  const rootPackage = await sourceText(ROOT_PACKAGE);
+  const appendedRootPackage = appendValidRootSuccessor(rootPackage);
+  const appended = appendValidCiSuccessor(source, appendedRootPackage);
+  const result = await buildPublisherInvalidSourceMatrixEvidence(
+    fastOptions({
+      trackedFileBytes: {
+        [CI_SOURCE]: Buffer.from(appended.ciSource, "utf8"),
+        [ROOT_PACKAGE]: Buffer.from(appendedRootPackage, "utf8"),
+      },
+    }),
+  );
+  assert.deepEqual(result.artifactBytes, baseline.artifactBytes);
+  assert.equal(result.artifactSha256, baseline.artifactSha256);
+});
+
+test("[successor] rejects a detached default gate with an empty execution plan", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace("    steps: createQualityGateSteps(),", "    steps: [],"),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence(options),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
+});
+
+test("[successor] rejects verifier-command drift despite a caller receipt", async () => {
+  const currentSteps = createQualityGateSteps();
+  const ciReceipt = Object.freeze({
+    planSha256: createHash("sha256")
+      .update(
+        JSON.stringify(
+          currentSteps.map(({ id, command, args }) => ({
+            id,
+            command,
+            args,
+          })),
+        ),
+      )
+      .digest("hex"),
+    proofEntries: (currentSteps.length - 8) / 2,
+    stepCount: currentSteps.length,
+  });
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace(
+      'commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile])',
+      'commandStep(`verify-${id}`, `Proof verifier: ${id}`, "pnpm", [verifierFile])',
+    ),
+  );
+  await assert.rejects(
+    buildPublisherInvalidSourceMatrixEvidence({ ...options, ciReceipt }),
+    expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+  );
 });
 
 test("[authority] rejects hostile task-applicability trace reassignment", async () => {

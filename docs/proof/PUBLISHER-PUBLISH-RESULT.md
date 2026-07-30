@@ -66,6 +66,12 @@ canonicalization precondition, and PF-060. The G05 artifact remains byte-identic
 also takes byte-level ownership of the four compatibility-reader paths that separate its
 task-time receipt from a live current-host audit. It independently verifies:
 
+The current M05 reader and root test must match either their exact task-time receipts or the exact
+approved M07-T01 successor receipts. The builder then emits only the original M06-T01 receipt
+projection, so this artifact and its SHA remain unchanged. M07-T01 separately pins the current
+M06-T01 reader and root-test bytes, closing the updated-reader authority without rewriting
+historical evidence.
+
 1. the sixteen required Section 25.1 stages in exact order;
 2. the two M06-T01 diagnostic definitions, registry immutability, lookup identity, and collision
    resistance;

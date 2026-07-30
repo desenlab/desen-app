@@ -47,6 +47,10 @@ test("two independent Publisher evidence builds are byte-identical", async () =>
 
   assert.equal(first.artifactBytes.toString("hex"), second.artifactBytes.toString("hex"));
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(
+    first.artifactSha256,
+    "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63",
+  );
   assert.equal(first.artifact.prerequisite.historicalArtifactRewritten, false);
   assert.deepEqual(first.artifact.prerequisite.currentCompatibilityOwnershipPaths, [
     "scripts/generate-reference-host-web-source-audit-proof.mjs",
@@ -54,6 +58,125 @@ test("two independent Publisher evidence builds are byte-identical", async () =>
     "scripts/verify-reference-host-web-source-audit.mjs",
     "tests/reference-host-web-source-audit.test.mjs",
   ]);
+
+  const currentCompatibilityBytes = Object.fromEntries(
+    await Promise.all(
+      [
+        "scripts/lib/reference-host-web-source-audit-proof.mjs",
+        "tests/reference-host-web-source-audit.test.mjs",
+      ].map(async (relativePath) => [
+        relativePath,
+        await readFile(new URL(`../${relativePath}`, import.meta.url)),
+      ]),
+    ),
+  );
+  const projected = await buildPublisherPublishResultEvidence({
+    verifySnapshot: false,
+    trackedFileBytes: currentCompatibilityBytes,
+  });
+  assert.deepEqual(projected.artifactBytes, first.artifactBytes);
+
+  for (const [relativePath, bytes] of Object.entries(currentCompatibilityBytes)) {
+    const tampered = Buffer.from(bytes);
+    tampered[Math.floor(tampered.byteLength / 2)] ^= 1;
+    await assert.rejects(
+      buildPublisherPublishResultEvidence({
+        verifySnapshot: false,
+        trackedFileBytes: { [relativePath]: tampered },
+      }),
+      hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
+    );
+    await assert.rejects(
+      buildPublisherPublishResultEvidence({
+        verifySnapshot: false,
+        trackedFileBytes: {
+          [relativePath]: Buffer.concat([bytes, Buffer.from("\n// unreviewed successor\n")]),
+        },
+      }),
+      hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
+    );
+  }
+
+  await assert.rejects(
+    buildPublisherPublishResultEvidence({
+      verifySnapshot: false,
+      reviewedCurrentG05Receipts: {},
+    }),
+    hasEvidenceCode("PUBLISHER_OPTIONS_INVALID"),
+  );
+  await assert.rejects(
+    buildPublisherPublishResultEvidence({
+      verifySnapshot: false,
+      trackedFileBytes: {
+        "scripts/lib/publisher-publish-result-proof.mjs": Buffer.from("caller authority"),
+      },
+    }),
+    hasEvidenceCode("PUBLISHER_OPTIONS_INVALID"),
+  );
+  const accessorOptions = { verifySnapshot: false };
+  Object.defineProperty(accessorOptions, "trackedFileBytes", {
+    enumerable: true,
+    get() {
+      return currentCompatibilityBytes;
+    },
+  });
+  await assert.rejects(
+    buildPublisherPublishResultEvidence(accessorOptions),
+    hasEvidenceCode("PUBLISHER_OPTIONS_INVALID"),
+  );
+
+  const compatibilityPath = "scripts/lib/reference-host-web-source-audit-proof.mjs";
+  const poisonedCandidate = Buffer.from(currentCompatibilityBytes[compatibilityPath]);
+  poisonedCandidate[Math.floor(poisonedCandidate.byteLength / 3)] ^= 1;
+  const originalEntries = Object.entries;
+  try {
+    Object.entries = (value) => {
+      if (
+        Object.getPrototypeOf(value) === null &&
+        Object.keys(value).length === 1 &&
+        Object.hasOwn(value, compatibilityPath)
+      ) {
+        return [[compatibilityPath, currentCompatibilityBytes[compatibilityPath]]];
+      }
+      return originalEntries(value);
+    };
+    await assert.rejects(
+      buildPublisherPublishResultEvidence({
+        verifySnapshot: false,
+        trackedFileBytes: { [compatibilityPath]: poisonedCandidate },
+      }),
+      hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
+    );
+  } finally {
+    Object.entries = originalEntries;
+  }
+
+  const originalFreeze = Object.freeze;
+  let freezeSubstitutions = 0;
+  try {
+    Object.freeze = (value) => {
+      if (
+        value !== null &&
+        typeof value === "object" &&
+        Object.getPrototypeOf(value) === null &&
+        Object.hasOwn(value, compatibilityPath)
+      ) {
+        freezeSubstitutions += 1;
+        return { [compatibilityPath]: currentCompatibilityBytes[compatibilityPath] };
+      }
+      return originalFreeze(value);
+    };
+    await assert.rejects(
+      buildPublisherPublishResultEvidence({
+        verifySnapshot: false,
+        trackedFileBytes: { [compatibilityPath]: poisonedCandidate },
+      }),
+      hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
+    );
+    assert.equal(freezeSubstitutions, 0);
+  } finally {
+    Object.freeze = originalFreeze;
+  }
 });
 
 test("rejects stale or one-byte-tampered Publisher evidence and documentation pins", async () => {

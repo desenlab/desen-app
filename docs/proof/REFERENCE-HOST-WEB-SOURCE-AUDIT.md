@@ -119,6 +119,11 @@ workspace roots, source overrides, proof-text regeneration, and other successor-
 The default writer performs no write; an alternate in-workspace destination receives only an
 atomic copy of the already authenticated historical bytes.
 
+Bounded regular-file reads pin the target pathname, open-handle state, canonical path, and every
+ancestor directory identity around the read. Ancestor identity compares device and inode rather
+than mutable directory-entry metadata: unrelated sibling creation or removal cannot make a valid
+read flaky, while symbolic links and directory replacement still fail closed.
+
 Current host safety remains independently executable. A separately named current audit reruns the
 complete source inventory, semantic checker, two observed Vite builds with backing-file
 reauthentication, build-envelope checks, and dependency-cruiser boundary. It then compares every
@@ -127,13 +132,19 @@ paths are the only records excluded outright from successor raw-byte equality.
 
 The root `package.json` and `pnpm-lock.yaml` instead use narrow coordination projections. Their
 current raw byte lengths and hashes must first equal the tracked records produced by the live
-audit. The canonical root manifest may then remove only Publisher-namespaced
-generate/verify/test script keys and exact Publisher verify/test pipeline segments; the complete
-remaining bytes must equal the historical length and hash. The lockfile may replace only its
-unique `packages/publisher` importer block with the historical empty importer; every other byte
-must equal the historical length and hash. Root tool versions and scripts, package snapshots,
-integrity and patch metadata, lock settings, and every non-Publisher importer therefore retain
-task-time provenance.
+audit. The canonical root manifest may then remove Publisher-namespaced generate/verify/test
+script keys and exact Publisher verify/test pipeline segments. It may also remove only the three
+exact M07-T01 Bundle-store script values after authenticating the complete 67-segment `check` and
+62-segment `test` command digests, including their one exact position after the M06-T11 edge;
+missing, duplicate, reordered, renamed, extra, or byte-different aggregate commands fail closed.
+The complete remaining bytes must equal the historical length and hash. The
+lockfile may replace its unique `packages/publisher` importer block with the historical empty
+importer. It may separately project the unique `apps/control-plane-api` importer to its historical
+empty form only after the complete canonical importer block equals the reviewed M07-T01 bytes;
+the structural parser then independently confirms the exact group, package, specifier, and version
+inventory. Every other byte must equal the historical length and hash. Root tool versions and
+unrelated scripts, package snapshots, integrity and patch metadata, lock settings, and every other
+importer therefore retain task-time provenance.
 
 Before that projection, the complete current lockfile must pass a bounded parser for pnpm's
 canonical lockfile YAML subset. It requires strict UTF-8 and LF framing, canonical indentation,
@@ -142,13 +153,17 @@ structurally valid mappings/sequences and balanced flow collections, and unique 
 aliases, anchors, tags, merge keys, block scalars, directives, comments, duplicate block or flow
 keys, ambiguous plain scalars, and excessive line/nesting/token input fail closed. The unique
 Publisher importer must be either the exact empty mapping or dependency groups whose entries each
-contain exactly one genuine plain or quoted `specifier` and `version`. Each field must resolve
-under pnpm's YAML schema to a bounded, non-empty, control-free, well-formed string rather than a
-null, boolean, number, timestamp, flow mapping, or sequence. Decoded dependency names must also
-match the bounded npm package-name domain. Unquoted values and mapping keys reject YAML-reserved
-leading indicators—including `%`, `@`, and backtick—while properly quoted string equivalents
-remain valid. Malformed Publisher bytes cannot disappear through projection, and diagnostics
-expose only controlled classifications rather than rejected lockfile content.
+contain exactly one genuine plain or quoted `specifier` and `version`. The M07-T01 control-plane
+importer must contain exactly the reviewed `dependencies` and `devDependencies` entries in their
+reviewed order; extra or missing groups, packages, fields, or duplicate importer headers fail
+closed. Each field must resolve under pnpm's YAML schema to a bounded, non-empty, control-free,
+well-formed string rather than a null, boolean, number, timestamp, flow mapping, or sequence.
+Decoded dependency names must also match the bounded npm package-name domain. Within the flexible
+Publisher projection, unquoted values and mapping keys reject YAML-reserved leading
+indicators—including `%`, `@`, and backtick—while properly quoted string equivalents remain valid.
+The control-plane block instead requires its one reviewed canonical spelling. Malformed successor
+bytes cannot disappear through projection, and diagnostics expose only controlled classifications
+rather than rejected lockfile content.
 
 All six coordination paths are still captured before and after the live audit, and every
 host-relevant semantic effect remains in the compared build envelope, tool-version checks,
@@ -156,7 +171,8 @@ resolved graph, backing snapshots, boundary, claims, and nonclaims. Current-evid
 also preserves hostile `__proto__` keys, requires exact tracked-record fields, rejects decorated or
 duplicate records, and applies aggregate node, scalar, key, and string-byte budgets. No host
 source, host manifest, Catalog/Bundle data, configuration, graph module, semantic result, toolchain
-input, lockfile input outside the Publisher importer, or unlisted tracked path can drift silently.
+input, lockfile input outside the two reviewed importer projections, or unlisted tracked path can
+drift silently.
 
 By M06-T04, the cumulative Publisher-era Validator successor differs from the immutable M05 graph
 in four already-present modules. M06-T03 introduced the index, semantic, and structural successor;

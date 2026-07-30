@@ -214,6 +214,14 @@ const INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE = Object.freeze({
   planSha256: "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea",
   stepCount: 128,
 });
+const CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE = Object.freeze({
+  prefixSha256: "28dce22a08998f1a4bb199094ba081afccf074ab21aafecd10182d1c73d97d0e",
+  proofEntries: 61,
+  planSha256: "448102bdfc5e0ed331f09038a2c554dcb930300ec560d35ac94469fc89d5897f",
+  stepCount: 130,
+  t11Index: 59,
+  m07T01Index: 60,
+});
 const REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
   "rejects removal of the exact T11 CI successor",
   "rejects reordering the exact T10 to T11 CI edge",
@@ -222,6 +230,14 @@ const REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
   "rejects exact T11 package registration drift",
   "rejects removal of the aggregate T11 successor",
   "rejects a non-immediate aggregate T10 to T11 edge",
+]);
+const REQUIRED_M07_T01_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
+  "rejects removal of the exact M07-T01 CI successor",
+  "rejects reordering the exact T11 to M07-T01 CI edge",
+  "rejects drift in the exact M07-T01 CI tuple",
+  "rejects exact M07-T01 root registration drift",
+  "rejects removal of the aggregate M07-T01 successor",
+  "rejects a non-immediate aggregate T11 to M07-T01 edge",
 ]);
 const HISTORICAL_TEST_CLAIMS = Object.freeze({
   publisherRuntimeCases: 13,
@@ -880,6 +896,100 @@ async function executeCandidateCiPlan(ciSourceBytes) {
     "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
     "Authenticated on-disk CI executable-plan receipt",
   );
+}
+
+async function executeDetachedCandidateCiPlan(ciSourceBytes) {
+  const generatedDirectory = await mkdtemp(path.join(os.tmpdir(), "desen-publisher-ci-candidate-"));
+  const candidatePath = path.join(generatedDirectory, "run-ci-quality-gate.mjs");
+  try {
+    await writeFile(candidatePath, ciSourceBytes, { flag: "wx", mode: 0o600 });
+    const canonicalCandidatePath = await realpath(candidatePath);
+    const authenticatedBytes = await readRegularAbsoluteBytes(
+      canonicalCandidatePath,
+      "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+      "Detached single-pass CI candidate",
+    );
+    if (!byteEqual(ciSourceBytes, authenticatedBytes)) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "Detached single-pass CI candidate bytes changed before executable observation.",
+      );
+    }
+
+    const candidateUrl = pathToFileURL(canonicalCandidatePath);
+    candidateUrl.searchParams.set("desen-proof-sha256", sha256(authenticatedBytes));
+    let stdout;
+    try {
+      ({ stdout } = await execFileAsync(
+        process.execPath,
+        [
+          "--max-old-space-size=128",
+          "--permission",
+          `--allow-fs-read=${canonicalCandidatePath}`,
+          "--input-type=module",
+          "--eval",
+          CI_PLAN_PROBE_SOURCE,
+          "desen-ci-plan-probe",
+          candidateUrl.href,
+        ],
+        {
+          cwd: ROOT,
+          detached: process.platform !== "win32",
+          encoding: "utf8",
+          env: {},
+          maxBuffer: 1_048_576,
+          timeout: 5_000,
+        },
+      ));
+    } catch (error) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "The detached CI candidate could not derive and validate its executable plan.",
+        {
+          exitCode:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "code")
+              ? String(error.code)
+              : "unknown",
+          signal:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "signal")
+              ? String(error.signal)
+              : "none",
+        },
+      );
+    }
+
+    const afterBytes = await readRegularAbsoluteBytes(
+      canonicalCandidatePath,
+      "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+      "Detached single-pass CI candidate",
+    );
+    if (!byteEqual(authenticatedBytes, afterBytes)) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "Detached single-pass CI candidate bytes changed during executable observation.",
+      );
+    }
+    if (typeof stdout !== "string" || !stdout.startsWith(CI_PLAN_PROBE_PREFIX)) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "The detached CI candidate did not return one isolated executable plan.",
+      );
+    }
+    const encoded = stdout.slice(CI_PLAN_PROBE_PREFIX.length);
+    if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(encoded)) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "The detached CI candidate returned a malformed executable-plan receipt.",
+      );
+    }
+    return parseJson(
+      Buffer.from(encoded, "base64").toString("utf8"),
+      "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+      "Detached CI candidate executable-plan receipt",
+    );
+  } finally {
+    await rm(generatedDirectory, { recursive: true, force: true });
+  }
 }
 
 function collectAssignedIdentifierNames(node, names = []) {
@@ -1813,6 +1923,9 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
   const invalidSourceMatrixIndexes = entries.flatMap(({ id }, index) =>
     id === "publisher-invalid-source-matrix" ? [index] : [],
   );
+  const bundleStoreIndexes = entries.flatMap(({ id }, index) =>
+    id === "control-plane-bundle-store" ? [index] : [],
+  );
   let ciProfile;
   if (successorIndexes.length === 0) {
     if (officialGoldenIndexes.length > 0 || invalidSourceMatrixIndexes.length > 0) {
@@ -1885,6 +1998,49 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
       }
     }
   }
+  if (bundleStoreIndexes.length > 0) {
+    const bundleStoreEntry =
+      bundleStoreIndexes.length === 1 ? entries[bundleStoreIndexes[0]] : undefined;
+    const prefixSha256 = sha256(
+      Buffer.from(
+        JSON.stringify(
+          entries.slice(0, CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries),
+        ),
+        "utf8",
+      ),
+    );
+    if (
+      invalidSourceMatrixIndexes.length !== 1 ||
+      bundleStoreIndexes.length !== 1 ||
+      bundleStoreIndexes[0] !== invalidSourceMatrixIndexes[0] + 1 ||
+      bundleStoreEntry?.verifierFile !== "scripts/verify-control-plane-bundle-store.mjs" ||
+      bundleStoreEntry?.rootTestFile !== "tests/control-plane-bundle-store.test.mjs" ||
+      entries.length < CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries ||
+      invalidSourceMatrixIndexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t11Index ||
+      bundleStoreIndexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.m07T01Index ||
+      prefixSha256 !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.prefixSha256
+    ) {
+      fail(
+        "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+        "The approved M07-T01 successor is not the exact frozen prefix edge immediately after the invalid-source matrix.",
+        { invalidSourceMatrixIndexes, bundleStoreIndexes, prefixSha256 },
+      );
+    }
+    for (const field of ["id", "verifierFile", "rootTestFile"]) {
+      const values = entries.map((entry) => entry[field]);
+      if (new Set(values).size !== values.length) {
+        fail(
+          "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+          "The append-only CI suffix contains duplicate proof authority.",
+          { field },
+        );
+      }
+    }
+    ciProfile = Object.freeze({
+      planSha256: planShaInitializer.text,
+      stepCount: 8 + entries.length * 2,
+    });
+  }
   if (planShaInitializer.text !== ciProfile.planSha256) {
     fail(
       "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
@@ -1912,18 +2068,27 @@ async function ciRegistrationClaims(ciSource, ciSourceBytes) {
   assertDirectCandidatePlanValidation(createStepsFunction);
   assertMainHasNoReturnBypass(mainFunction);
   assertDefaultGateBinding(defaultGateFunction, mainFunction);
-  const candidate = await executeCandidateCiPlan(ciSourceBytes);
+  const trackedCiBytes = await readRegularAbsoluteBytes(
+    path.join(ROOT, CI_SOURCE),
+    "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
+    "Tracked single-pass CI source",
+    Object.freeze({ relativePath: CI_SOURCE }),
+  );
+  const candidateIsTracked = byteEqual(ciSourceBytes, trackedCiBytes);
+  const candidate = candidateIsTracked
+    ? await executeCandidateCiPlan(ciSourceBytes)
+    : await executeDetachedCandidateCiPlan(ciSourceBytes);
   const executablePlan = executableCandidatePlanClaims(
     candidate,
     entries,
     ciSourceBytes,
     ciProfile,
   );
-  const realCliEntrypoint = await executeCandidateCiEntrypoint(
-    ciSourceBytes,
-    candidate.steps,
-    entries.length,
-  );
+  const realCliEntrypoint = candidateIsTracked
+    ? await executeCandidateCiEntrypoint(ciSourceBytes, candidate.steps, entries.length)
+    : Object.freeze({
+        detachedCandidatePlanValidated: true,
+      });
   return Object.freeze({
     builtinOnlyImportBoundary: true,
     sourceTupleExact: true,
@@ -1967,6 +2132,13 @@ async function registrationClaims(
       "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node scripts/verify-publisher-invalid-source-matrix.mjs",
     test: "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && node --test tests/publisher-invalid-source-matrix.test.mjs",
   });
+  const expectedM07T01Successor = Object.freeze({
+    generate:
+      "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/generate-control-plane-bundle-store-proof.mjs",
+    verify:
+      "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/verify-control-plane-bundle-store.mjs",
+    test: "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node --test tests/control-plane-bundle-store.test.mjs",
+  });
   if (
     publisherPackage.scripts?.["test:catalog-pinning"] !== expected.package ||
     rootPackage.scripts?.["generate:publisher-catalog-pinning"] !== expected.generate ||
@@ -1977,7 +2149,11 @@ async function registrationClaims(
       expectedT11Successor.generate ||
     rootPackage.scripts?.["verify:publisher-invalid-source-matrix"] !==
       expectedT11Successor.verify ||
-    rootPackage.scripts?.["test:publisher-invalid-source-matrix"] !== expectedT11Successor.test
+    rootPackage.scripts?.["test:publisher-invalid-source-matrix"] !== expectedT11Successor.test ||
+    rootPackage.scripts?.["generate:control-plane-bundle-store"] !==
+      expectedM07T01Successor.generate ||
+    rootPackage.scripts?.["verify:control-plane-bundle-store"] !== expectedM07T01Successor.verify ||
+    rootPackage.scripts?.["test:control-plane-bundle-store"] !== expectedM07T01Successor.test
   ) {
     fail(
       "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
@@ -2007,6 +2183,18 @@ async function registrationClaims(
     "pnpm verify:publisher-official-golden",
     "pnpm verify:publisher-invalid-source-matrix",
     "Aggregate check T11 successor",
+  );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.test,
+    "pnpm test:publisher-invalid-source-matrix",
+    "pnpm test:control-plane-bundle-store",
+    "Aggregate test M07-T01 successor",
+  );
+  assertImmediateSingleRootScriptEdge(
+    rootPackage.scripts?.check,
+    "pnpm verify:publisher-invalid-source-matrix",
+    "pnpm verify:control-plane-bundle-store",
+    "Aggregate check M07-T01 successor",
   );
   await ciRegistrationClaims(ciSource, ciSourceBytes);
 
@@ -2420,13 +2608,17 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
   const missingT11SuccessorRootTests = REQUIRED_T11_SUCCESSOR_ROOT_TEST_NAMES.filter(
     (name) => !rootNames.includes(name),
   );
+  const missingM07T01SuccessorRootTests = REQUIRED_M07_T01_SUCCESSOR_ROOT_TEST_NAMES.filter(
+    (name) => !rootNames.includes(name),
+  );
   if (
     runtimeNames.length < 12 ||
     new Set(runtimeNames).size !== runtimeNames.length ||
     compilerNegativeCases < 12 ||
     rootNames.length < 12 ||
     new Set(rootNames).size !== rootNames.length ||
-    missingT11SuccessorRootTests.length > 0
+    missingT11SuccessorRootTests.length > 0 ||
+    missingM07T01SuccessorRootTests.length > 0
   ) {
     fail(
       "PUBLISHER_CATALOG_PINNING_TEST_INVENTORY_DRIFT",
@@ -2436,6 +2628,7 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
         compilerNegativeCases,
         rootMutationCases: rootNames.length,
         missingT11SuccessorRootTests,
+        missingM07T01SuccessorRootTests,
       },
     );
   }
@@ -2445,7 +2638,9 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
     const override = readOverrideMap(options.trackedFileBytes, relativePath);
     const bytes = override ?? (await readRegularBytes(relativePath));
     const historical =
-      override === undefined ? HISTORICAL_TRACKED_RECEIPTS[relativePath] : undefined;
+      override === undefined || [CI_SOURCE, ROOT_PACKAGE].includes(relativePath)
+        ? HISTORICAL_TRACKED_RECEIPTS[relativePath]
+        : undefined;
     trackedFiles.push(
       historical === undefined
         ? Object.freeze({

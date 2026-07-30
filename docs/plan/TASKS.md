@@ -438,8 +438,8 @@ fixtures, built public files, and one-way successor hashes. It deliberately inve
 negative for deterministic `source-digest`, `authoring-removal`, `catalog-pinning`, or
 `bundle-revision` stages. The full Publisher suite passes 292/292. P-03 and P-11 remain `PROVEN`;
 P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the Publisher conformance target remain
-`PLANNED` for their later owners. M06-T11 and G06 are `DONE`; M07-T01 owns immutable
-content-addressed Bundle storage next.
+`PLANNED` for their later owners. M06-T11 and G06 are `DONE`; at that checkpoint M07-T01 owned
+immutable content-addressed Bundle storage, whose completed evidence appears below.
 
 `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
 `sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
@@ -448,7 +448,7 @@ content-addressed Bundle storage next.
 
 | ID      | Status      | Depends on       | Deliverable / evidence                                                                                               |
 | ------- | ----------- | ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| M07-T01 | NOT_STARTED | G06              | Content-addressed bundle store with immutable revision entries                                                       |
+| M07-T01 | DONE        | G06              | Content-addressed bundle store with immutable revision entries                                                       |
 | M07-T02 | NOT_STARTED | M07-T01          | Protocol, revision, available source digest, and bundle-size verification                                            |
 | M07-T03 | NOT_STARTED | M07-T02          | Exact package target/version/digest resolution and preflight                                                         |
 | M07-T04 | NOT_STARTED | M07-T02–M07-T03  | Surface/capability reference and finite-limit preflight                                                              |
@@ -460,6 +460,27 @@ content-addressed Bundle storage next.
 | M07-T10 | NOT_STARTED | M07-T09          | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
 | M07-T11 | NOT_STARTED | M07-T05, M07-T10 | Control-plane channel consumed by separately built reference host                                                    |
 | G07     | NOT_STARTED | M07-T01–M07-T11  | Every pre-commit fault preserves a valid durable activation record and invalid revision never becomes active         |
+
+M07-T01 adds the built `@desen/control-plane-api` package root and one local POSIX repository that
+stores exact complete Bundle bytes under a strict lowercase SHA-256 revision path. The first
+writer commits through an exclusive same-shard temporary and no-clobber hard link; identical
+retries preserve the inode as `unchanged`, different bytes return `conflict`, and readers receive
+fresh copies. Parent-directory flushes, read-only single-link checks, committed-temporary alias
+recovery, redacted failure codes, and post-link indeterminate retry semantics make concurrent and
+crash-adjacent outcomes explicit.
+
+The official 2,173-byte Publisher golden, a same-revision publication-only conflict, eight equal
+writers, divergent writers, pre-link visibility, temporary truncation, hard links, symlinks,
+special files, path keys, typed-array brands, hostile inputs, and package-root consumption pass 18
+focused cases plus four compiler-negative and 16 independent proof/mutation cases. This proves
+storage only: M07-T02 still owns integrity and size verification; channels, package preflight,
+activation, last-known-good recovery, and host consumption remain later M07 tasks. `N-010` remains
+`PLANNED` for M07-T03 installed-package verification and M12-T12 packed-distribution evidence;
+`N-019` remains `PLANNED` for M07-T05 control-plane integration, P-12 remains `NOT_PROVEN`, and G07
+remains open.
+
+`docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
+`sha256:698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`.
 
 ## M08 — Framework-neutral editor core
 

@@ -304,6 +304,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-publisher-invalid-source-matrix.mjs",
       "tests/publisher-invalid-source-matrix.test.mjs",
     ],
+    [
+      "control-plane-bundle-store",
+      "scripts/verify-control-plane-bundle-store.mjs",
+      "tests/control-plane-bundle-store.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -327,12 +332,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "611a1f73611839d1c65648157702bce366df85d2e777a2275b19f0e219d4ee01";
+  "bfce7beb80d98b29a21c43263c422e87218738ed0c040e6a45c60a35fb8f8290";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "4b008198730a6beeeeec4f47527f8ef870d8d566ac07f4708e27e8f7969dda41";
+  "3c6ae8ee7f034a5e6204e2996f096b475fbef38ea34417effab6850794fc3fa2";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "d1ef3faec732ad9dbabc28414fdc158ca07f2fcb05de5d3134a2a09cb954e47c";
-const QUALITY_GATE_PLAN_SHA256 = "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea";
+  "6825adfa7c2569fdfd9dbae167f980960469c47e187a7a26423d2e0ec1d74fef";
+const QUALITY_GATE_PLAN_SHA256 = "448102bdfc5e0ed331f09038a2c554dcb930300ec560d35ac94469fc89d5897f";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -340,7 +345,7 @@ const QUALITY_GATE_PLAN_SHA256 = "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b62
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "6dc7cae96692feb13650a06f3b8733da6f6c431a0cad777e08a8d0d567880c3d";
+  "5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4";
 const WORKSPACE_MANIFEST_SHA256 =
   "c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);

@@ -441,7 +441,12 @@ warnings, and deterministic replay. The matrix covers stage 8 → 9 → 10 prece
 default-limit branch, the complete 14-code Publisher registry, exact fixture and successor bytes,
 31 task-applicability records, two task-local PF-047 records, and 12 trace rows. It does not invent
 failures for deterministic stages that have no invalid two-argument data input. The complete
-Publisher suite passes 292/292, M06-T11 and G06 are `DONE`, and immutable storage begins at M07-T01.
+Publisher suite passes 292/292, M06-T11 and G06 are `DONE`. M07-T01 now adds the built public
+control-plane package root and a local POSIX repository that stores the official 2,173-byte Bundle
+golden once under its exact revision. Identical retries preserve the inode, different exact bytes
+conflict, concurrent writers cannot replace or mix the winner, and path, alias, partial-write, and
+post-commit uncertainty cases fail closed. Integrity verification and activation remain later M07
+work.
 P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the
 Publisher conformance target remain `PLANNED`.
 
@@ -451,10 +456,11 @@ Publisher conformance target remain `PLANNED`.
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `74 / 145 tasks complete (51%)`
+- Overall implementation progress: `75 / 145 tasks complete (52%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
+- M07 progress: `1 / 11 tasks complete (9%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -514,12 +520,13 @@ Publisher conformance target remain `PLANNED`.
   `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`,
   `M06-T09 — Bundle validation and revision calculation`,
   `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
-  `M06-T11 — Invalid-source matrix proves no bundle is emitted`
-- Active task: none
+  `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
+  `M07-T01 — Content-addressed bundle store with immutable revision entries`
+- Active task: none; M07-T01 is complete and M07-T02 has not started
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
-  `M07-T01 — Content-addressed bundle store with immutable revision entries`
-- Status: M06 and G06 are complete; M07-T01 is ready
+  `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`
+- Status: M07-T01 is complete; M07-T02 is ready to begin; G07 remains open
 
 ## Completed preparation
 
@@ -878,12 +885,13 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M07-T01 — Content-addressed bundle store with immutable revision entries`. Persist only
-already validated, revision-closed Bundle bytes under their exact revision identity; reject
-overwrite, collision, partial-write, path, and mutable-alias failure modes before any channel or
-activation authority exists. This task starts storage evidence only. Digest re-verification,
-installed-package verification, channel mutation, last-known-good activation, crash recovery, and
-control-plane APIs remain with their later M07 owners.
+Implement
+`M07-T02 — Protocol, revision, available source digest, and bundle-size verification`. Treat every
+stored byte sequence as untrusted on ingress: parse it under bounded rules, validate the exact
+DESEN 0.1.0 Bundle, independently recalculate and compare its claimed revision and available
+Source digest, and enforce the complete Bundle-size profile before returning any verified
+authority. Package resolution, channels, activation, last-known-good state, and recovery remain
+with their later M07 owners.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1714,7 +1722,37 @@ M06-T11 and G06 evidence:
   host, adapter, editor, network, and control-plane behavior remain outside M06
 - coverage decision: M06-T11 and G06 become `DONE`; P-03 and P-11 remain `PROVEN`; P-05 and P-17
   remain `PARTIAL`; N-016, N-018, N-041, and the Publisher conformance target remain `PLANNED`;
-  M07-T01 owns the immutable content-addressed Bundle store next
+  at that checkpoint M07-T01 owned the immutable content-addressed Bundle store
+
+M07-T01 evidence:
+
+- `docs/proof/CONTROL-PLANE-BUNDLE-STORE.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
+- artifact SHA-256:
+  `698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`
+- exact boundary: one built self-importable `@desen/control-plane-api` package root; one frozen
+  two-method store; strict revision-derived storage path; exact nonempty `Uint8Array` snapshot;
+  and fresh byte copies on read
+- immutable semantics: the official 2,173-byte Bundle is `stored` once and reopens exactly;
+  byte-identical retries return `unchanged` without inode or mtime replacement; different bytes,
+  including the 2,230-byte publication-only same-revision variant, return `conflict` and preserve
+  the winner
+- filesystem profile: application-owned POSIX root, exclusive same-shard temporary, mode `0400`,
+  complete byte/inode re-read, no-clobber hard-link commit, parent and shard directory flushes,
+  committed-temporary alias recovery, single-link reads, and explicit post-link indeterminate
+  retry semantics
+- adversarial and concurrency coverage: eight equal writers produce one winner; divergent writers
+  produce one complete winner and one conflict; partial temporaries, unsafe paths, external hard
+  links, symlinks, directories, FIFOs, malformed revisions, hostile records, shared memory, and
+  non-`Uint8Array` brands fail closed
+- executable evidence: 18 focused package cases, four compiler-negative cases, 16 independent
+  root proof/mutation cases, four exact prerequisite pins, task-owned source and distribution
+  receipts, and exact `PIPE-005`, `PIPE-009`, `R-012`, `R-125`, and `A-007` trace rows
+- honest boundary: protocol/revision/Source-digest/size verification, capability packages,
+  channels, activation, last-known-good state, recovery, and host consumption remain later M07
+  work; N-010 and N-019 remain `PLANNED`, P-12 remains `NOT_PROVEN`, and G07 remains open
+- coverage decision: M07-T01 becomes `DONE`; overall progress is 75/145; M07-T02 owns verified
+  Bundle ingress next
 
 ## Status vocabulary
 
