@@ -249,6 +249,61 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-reference-host-web-source-audit.mjs",
       "tests/reference-host-web-source-audit.test.mjs",
     ],
+    [
+      "publisher-publish-result",
+      "scripts/verify-publisher-publish-result.mjs",
+      "tests/publisher-publish-result.test.mjs",
+    ],
+    [
+      "publisher-catalog-resolution",
+      "scripts/verify-publisher-catalog-resolution.mjs",
+      "tests/publisher-catalog-resolution.test.mjs",
+    ],
+    [
+      "publisher-source-preflight",
+      "scripts/verify-publisher-source-preflight.mjs",
+      "tests/publisher-source-preflight.test.mjs",
+    ],
+    [
+      "publisher-capability-preflight",
+      "scripts/verify-publisher-capability-preflight.mjs",
+      "tests/publisher-capability-preflight.test.mjs",
+    ],
+    [
+      "publisher-execution-preflight",
+      "scripts/verify-publisher-execution-preflight.mjs",
+      "tests/publisher-execution-preflight.test.mjs",
+    ],
+    [
+      "publisher-source-preservation",
+      "scripts/verify-publisher-source-preservation.mjs",
+      "tests/publisher-source-preservation.test.mjs",
+    ],
+    [
+      "publisher-source-normalization",
+      "scripts/verify-publisher-source-normalization.mjs",
+      "tests/publisher-source-normalization.test.mjs",
+    ],
+    [
+      "publisher-catalog-pinning",
+      "scripts/verify-publisher-catalog-pinning.mjs",
+      "tests/publisher-catalog-pinning.test.mjs",
+    ],
+    [
+      "publisher-bundle-publication",
+      "scripts/verify-publisher-bundle-publication.mjs",
+      "tests/publisher-bundle-publication.test.mjs",
+    ],
+    [
+      "publisher-official-golden",
+      "scripts/verify-publisher-official-golden.mjs",
+      "tests/publisher-official-golden.test.mjs",
+    ],
+    [
+      "publisher-invalid-source-matrix",
+      "scripts/verify-publisher-invalid-source-matrix.mjs",
+      "tests/publisher-invalid-source-matrix.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -272,14 +327,20 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "5db4022e9d4bcf11128167c790d13088c3802a69e31364995c8256b832635ac1";
+  "611a1f73611839d1c65648157702bce366df85d2e777a2275b19f0e219d4ee01";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "cbf7f76682e8b2bfad4531b1311b13f898660a302541b6f10268b5566c8947d5";
+  "4b008198730a6beeeeec4f47527f8ef870d8d566ac07f4708e27e8f7969dda41";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "f69e77ba84b8e814071f04b9d4496d35dd37f326f0435fe12f5ecbce6e8990e7";
-const QUALITY_GATE_PLAN_SHA256 = "b797ce0a8675fbf525f08f3eb3a9e30ae1b74df9ea7cf789f11283afdf2fc73f";
+  "d1ef3faec732ad9dbabc28414fdc158ca07f2fcb05de5d3134a2a09cb954e47c";
+const QUALITY_GATE_PLAN_SHA256 = "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea";
+// Historical M06-T08 plan pin retained for its frozen mutation test:
+// 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
+// Historical M06-T09 plan pin retained for its frozen compatibility reader:
+// 3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c
+// Historical M06-T10 plan pin retained for its frozen compatibility reader:
+// ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "ef2070b02ea05fe7523f78e77ae99846670f608b52dec7a5c79cdf9ec45fe194";
+  "6dc7cae96692feb13650a06f3b8733da6f6c431a0cad777e08a8d0d567880c3d";
 const WORKSPACE_MANIFEST_SHA256 =
   "c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
@@ -1225,6 +1286,13 @@ export async function executeQualityGate({
   return receipt;
 }
 
+export async function executeDefaultQualityGate(options = {}) {
+  return executeQualityGate({
+    ...options,
+    steps: createQualityGateSteps(),
+  });
+}
+
 function summaryCell(value) {
   return String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
 }
@@ -1291,7 +1359,7 @@ async function main() {
         throw new CancellationError(signalState.receivedSignal);
       }
     };
-    receipt = await executeQualityGate({
+    receipt = await executeDefaultQualityGate({
       runStep: async (step) => {
         await runCommandStep(step, signalState);
       },

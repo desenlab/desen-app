@@ -15,9 +15,11 @@ import exampleSource from "../../protocol/upstream/0.1.0/snapshot/examples/sign-
 import exampleSortableSource from "../../protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json";
 import exampleStoreMapSource from "../../protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json";
 import {
+  prepareDesenSourceFoundation,
   validateDesenBundleSemantics,
   validateDesenCatalogSemantics,
   validateDesenCatalogSet,
+  validatePreparedDesenSourceReferences,
   validateDesenSourceSemantics,
 } from "../src/semantic-validation.js";
 
@@ -171,6 +173,84 @@ function expectDeepFrozen(value: unknown, visited = new Set<object>()): void {
   expect(Object.isFrozen(value)).toBe(true);
   for (const child of Object.values(value)) expectDeepFrozen(child, visited);
 }
+
+describe("phase-aware Source foundation", () => {
+  it("prepares one detached, deeply frozen Source without serializing its runtime brand", () => {
+    const mutable = cloneFixture(validSource);
+    const result = prepareDesenSourceFoundation(mutable);
+
+    expect(result).toMatchObject({
+      valid: true,
+      target: "source-foundation",
+      diagnostics: [],
+    });
+    if (!result.valid) throw new TypeError("Expected Source preparation to pass.");
+    expect(result.value).not.toBe(mutable);
+    expect(Reflect.ownKeys(result.value).every((key) => typeof key === "string")).toBe(true);
+    expectDeepFrozen(result);
+  });
+
+  it("distinguishes root, embedded-schema, and intrinsic identity failures", () => {
+    const embedded = cloneFixture(validSource);
+    writeAt(embedded, ["surfaces", "sign-in", "state", "email", "schema"], {
+      type: "not-a-json-schema-type",
+    });
+
+    const cases = [
+      [prepareDesenSourceFoundation(sourceUnknownCoreField), "root-schema", "UNKNOWN_CORE_FIELD"],
+      [prepareDesenSourceFoundation(embedded), "embedded-schema", "SCHEMA_INVALID"],
+      [prepareDesenSourceFoundation(sourceDuplicateNodeId), "identity", "DUPLICATE_NODE_ID"],
+    ] as const;
+    for (const [result, phase, code] of cases) {
+      expect(result.valid).toBe(false);
+      if (result.valid) throw new TypeError("Expected Source preparation to fail.");
+      expect(result.phase).toBe(phase);
+      expect(result.diagnostics.some((diagnostic) => diagnostic.code === code)).toBe(true);
+      expect(Object.hasOwn(result, "value")).toBe(false);
+      expectDeepFrozen(result);
+    }
+  });
+
+  it("finalizes exact Catalog relations and category-aware references only for prepared Sources", () => {
+    const prepared = prepareDesenSourceFoundation(validSource);
+    expect(prepared.valid).toBe(true);
+    if (!prepared.valid) throw new TypeError("Expected Source preparation to pass.");
+    expect(
+      validatePreparedDesenSourceReferences(prepared.value, trustedCatalogSet()),
+    ).toMatchObject({ valid: true, diagnostics: [] });
+
+    const unknown = prepareDesenSourceFoundation(sourceUnknownCapability);
+    expect(unknown.valid).toBe(true);
+    if (!unknown.valid) throw new TypeError("Expected intrinsic Source preparation to pass.");
+    expectOnlyDiagnostic(
+      validatePreparedDesenSourceReferences(unknown.value, trustedCatalogSet()),
+      "UNKNOWN_CAPABILITY",
+      "/surfaces/home/root/slots/default/0/use",
+    );
+  });
+
+  it("rejects cloned or cast Source values and forged Catalog authority at runtime", () => {
+    const prepared = prepareDesenSourceFoundation(validSource);
+    expect(prepared.valid).toBe(true);
+    if (!prepared.valid) throw new TypeError("Expected Source preparation to pass.");
+
+    const clone = cloneFixture(prepared.value) as typeof prepared.value;
+    expectOnlyDiagnostic(
+      validatePreparedDesenSourceReferences(clone, trustedCatalogSet()),
+      "SCHEMA_INVALID",
+      "",
+    );
+
+    const forgedCatalogSet = cloneFixture([validCatalog]) as unknown as ReturnType<
+      typeof trustedCatalogSet
+    >;
+    expectOnlyDiagnostic(
+      validatePreparedDesenSourceReferences(prepared.value, forgedCatalogSet),
+      REQUIREMENT_MISMATCH,
+      "/catalogs",
+    );
+  });
+});
 
 describe("M02-T07 frozen roots and stage boundaries", () => {
   it("accepts all three frozen valid conformance roots", () => {
@@ -694,6 +774,87 @@ describe("inert trust boundary and immutable semantic results", () => {
 
     expectCode(validateDesenCatalogSet([hostile]), "SCHEMA_INVALID");
     expect(getterInvocations).toBe(0);
+  });
+
+  it("ignores inherited optional Source fields throughout semantic traversal", () => {
+    const operationAction = {
+      type: "operation.invoke",
+      operation: UNKNOWN_OPERATION_ID,
+      as: "prototype.operation",
+      input: {},
+    } as const;
+    const sourceWithoutTarget = cloneFixture(validSource);
+    deleteAt(sourceWithoutTarget, ["catalogs", 0, "target"]);
+    const cases = [
+      {
+        key: "target",
+        value: "prototype-target",
+        source: sourceWithoutTarget,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "behaviors",
+        value: [
+          {
+            id: "prototype.behavior",
+            use: UNKNOWN_BEHAVIOR_ID,
+            props: {},
+          },
+        ],
+        source: validSource,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "on",
+        value: { polluted: [operationAction] },
+        source: validSource,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "slots",
+        value: {
+          polluted: [
+            {
+              id: "prototype.node",
+              use: UNKNOWN_COMPONENT_ID,
+              props: {},
+            },
+          ],
+        },
+        source: validSource,
+        catalogs: [validCatalog],
+      },
+      {
+        key: "onSuccess",
+        value: [operationAction],
+        source: exampleSortableSource,
+        catalogs: [exampleCatalog],
+      },
+      {
+        key: "onFailure",
+        value: [operationAction],
+        source: exampleSortableSource,
+        catalogs: [exampleCatalog],
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const prior = Object.getOwnPropertyDescriptor(Object.prototype, testCase.key);
+      let result: ReturnType<typeof validateSource>;
+      Object.defineProperty(Object.prototype, testCase.key, {
+        configurable: true,
+        value: testCase.value,
+        writable: true,
+      });
+      try {
+        result = validateSource(testCase.source, testCase.catalogs);
+      } finally {
+        if (prior === undefined) Reflect.deleteProperty(Object.prototype, testCase.key);
+        else Object.defineProperty(Object.prototype, testCase.key, prior);
+      }
+
+      expect(result, testCase.key).toMatchObject({ valid: true, diagnostics: [] });
+    }
   });
 
   it("rejects cyclic Source and catalog inputs", () => {

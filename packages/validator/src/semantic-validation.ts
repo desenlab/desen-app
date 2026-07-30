@@ -11,7 +11,7 @@ import {
   normalizeSemanticDiagnostics,
   prefixedCoreDiagnostic,
 } from "./semantic-diagnostics.js";
-import { validateDesenStructure } from "./structural-validation.js";
+import { validateDesenStructure, validateDesenStructurePhases } from "./structural-validation.js";
 import { compareText, ROOT_POINTER } from "./validation-internals.js";
 
 import type {
@@ -105,6 +105,41 @@ type NodeSnapshot = SurfaceSnapshot["root"];
 type BehaviorSnapshot = NonNullable<NodeSnapshot["behaviors"]>[number];
 type ActionSnapshot = NonNullable<NodeSnapshot["on"]>[string][number];
 
+declare const preparedSourceFoundationBrand: unique symbol;
+
+/**
+ * A detached Source that passed root, embedded-schema, and catalog-independent identity checks.
+ *
+ * @remarks The nominal brand is backed by a private runtime registry. No symbol or executable
+ * metadata is written into the JSON document.
+ */
+export type DesenPreparedSourceFoundation = SourceSnapshot & {
+  readonly [preparedSourceFoundationBrand]: "DesenPreparedSourceFoundation";
+};
+
+/** Exact Source-foundation subphase that rejected publication preparation. */
+export type DesenSourceFoundationPhase = "root-schema" | "embedded-schema" | "identity";
+
+/** Successful preparation of one runtime-authenticated Source foundation. */
+export interface DesenSourceFoundationPreparationSuccess {
+  readonly valid: true;
+  readonly target: "source-foundation";
+  readonly value: DesenPreparedSourceFoundation;
+  readonly diagnostics: readonly [];
+}
+
+/** Failed preparation with no trusted Source value. */
+export interface DesenSourceFoundationPreparationFailure {
+  readonly valid: false;
+  readonly target: "source-foundation";
+  readonly phase: DesenSourceFoundationPhase;
+  readonly diagnostics: readonly DesenSemanticDiagnostic[];
+}
+
+/** Phase-aware Source preparation used by deterministic Publisher orchestration. */
+export type DesenSourceFoundationPreparationResult =
+  DesenSourceFoundationPreparationSuccess | DesenSourceFoundationPreparationFailure;
+
 type CapabilityKind = "component" | "behavior" | "operation" | "resource";
 type CapabilityMapName = "components" | "behaviors" | "operations" | "resources";
 
@@ -172,6 +207,7 @@ const CAPABILITY_MAPS: readonly CapabilityMapSpec[] = Object.freeze([
 
 const TRUSTED_CATALOG_SETS = new WeakSet<object>();
 const CATALOG_SET_METADATA = new WeakMap<object, CatalogSetMetadata>();
+const PREPARED_SOURCE_FOUNDATIONS = new WeakSet<object>();
 
 function appendPath(pointer: JsonPointer, ...segments: readonly (number | string)[]): JsonPointer {
   return segments.reduce<JsonPointer>(
@@ -203,6 +239,28 @@ function semanticFailure<Target extends DesenStructuralTarget>(
     valid: false,
     target,
     diagnostics: normalizeSemanticDiagnostics(diagnostics),
+  });
+}
+
+function sourceFoundationFailure(
+  phase: DesenSourceFoundationPhase,
+  diagnostics: readonly DesenSemanticDiagnostic[],
+): DesenSourceFoundationPreparationFailure {
+  return Object.freeze({
+    valid: false,
+    target: "source-foundation",
+    phase,
+    diagnostics: normalizeSemanticDiagnostics(diagnostics),
+  });
+}
+
+function sourceFoundationSuccess(value: SourceSnapshot): DesenSourceFoundationPreparationSuccess {
+  PREPARED_SOURCE_FOUNDATIONS.add(value as object);
+  return Object.freeze({
+    valid: true,
+    target: "source-foundation",
+    value: value as DesenPreparedSourceFoundation,
+    diagnostics: EMPTY_DIAGNOSTICS,
   });
 }
 
@@ -482,11 +540,12 @@ function sourceRequirementDiagnostics(
 
   document.catalogs.forEach((requirement, requirementIndex) => {
     // `location` is deliberately never read: DESEN 0.1.0 makes it an inert discovery hint.
+    const requirementTarget = Object.hasOwn(requirement, "target") ? requirement.target : undefined;
     const matches =
-      (requirement.target === undefined
+      (requirementTarget === undefined
         ? metadata.byIdVersion.get(catalogIdentityKey(requirement.id, requirement.version))
         : metadata.byExactTuple.get(
-            catalogIdentityKey(requirement.id, requirement.version, requirement.target),
+            catalogIdentityKey(requirement.id, requirement.version, requirementTarget),
           )) ?? [];
     if (matches.length !== 1) {
       diagnostics.push(
@@ -636,8 +695,8 @@ function inspectActions(
     );
 
     const nestedGroups = [
-      ["onFailure", action.onFailure],
-      ["onSuccess", action.onSuccess],
+      ["onFailure", Object.hasOwn(action, "onFailure") ? action.onFailure : undefined],
+      ["onSuccess", Object.hasOwn(action, "onSuccess") ? action.onSuccess : undefined],
     ] as const;
     for (const [field, nested] of nestedGroups) {
       if (nested === undefined) continue;
@@ -723,8 +782,18 @@ function inspectSurface(
         metadata,
         diagnostics,
       );
-      inspectHandlers(current.value.on, current.pointer, context, metadata, diagnostics);
-      pushSlotChildren(stack, current.value.slots, current.pointer);
+      inspectHandlers(
+        Object.hasOwn(current.value, "on") ? current.value.on : undefined,
+        current.pointer,
+        context,
+        metadata,
+        diagnostics,
+      );
+      pushSlotChildren(
+        stack,
+        Object.hasOwn(current.value, "slots") ? current.value.slots : undefined,
+        current.pointer,
+      );
       continue;
     }
 
@@ -736,11 +805,23 @@ function inspectSurface(
       metadata,
       diagnostics,
     );
-    inspectHandlers(current.value.on, current.pointer, context, metadata, diagnostics);
+    inspectHandlers(
+      Object.hasOwn(current.value, "on") ? current.value.on : undefined,
+      current.pointer,
+      context,
+      metadata,
+      diagnostics,
+    );
 
     // Node-owned slot children execute after behavior identities and their nested slot trees.
-    pushSlotChildren(stack, current.value.slots, current.pointer);
-    const behaviors = current.value.behaviors ?? [];
+    pushSlotChildren(
+      stack,
+      Object.hasOwn(current.value, "slots") ? current.value.slots : undefined,
+      current.pointer,
+    );
+    const behaviors = Object.hasOwn(current.value, "behaviors")
+      ? (current.value.behaviors ?? [])
+      : [];
     for (let behaviorIndex = behaviors.length - 1; behaviorIndex >= 0; behaviorIndex -= 1) {
       stack.push({
         kind: "behavior",
@@ -789,6 +870,78 @@ function documentFoundationDiagnostics(
   }
 
   return normalizeSemanticDiagnostics(diagnostics);
+}
+
+/**
+ * Prepares one Source through root schema, embedded schemas, and intrinsic identity semantics.
+ *
+ * @remarks This phase intentionally does not inspect a Catalog set. It proves strict Source
+ * requirement versions, entry existence, surface identity, and the per-surface node/behavior
+ * identity namespace before a Publisher may inspect package candidates. Catalog-backed capability
+ * existence is finalized by {@link validatePreparedDesenSourceReferences}.
+ */
+export function prepareDesenSourceFoundation(
+  input: unknown,
+): DesenSourceFoundationPreparationResult {
+  const structural = validateDesenStructurePhases("source", input);
+  if (!structural.valid) {
+    return sourceFoundationFailure(structural.phase, structural.diagnostics);
+  }
+
+  const source = structural.value as SourceSnapshot;
+  const diagnostics = normalizeSemanticDiagnostics([
+    ...exactVersionDiagnostics("source", source),
+    ...documentFoundationDiagnostics(source, undefined),
+  ]);
+  return diagnostics.length === 0
+    ? sourceFoundationSuccess(source)
+    : sourceFoundationFailure("identity", diagnostics);
+}
+
+/**
+ * Validates exact Source requirements and category-aware static references against trusted Catalogs.
+ *
+ * @remarks Both authorities are runtime authenticated. A TypeScript cast, cloned Source, serialized
+ * Source, or forged Catalog array cannot cross this seam. Prop, slot, style, interaction, binding,
+ * state, action, and execution contracts remain assigned to later cumulative validators.
+ */
+export function validatePreparedDesenSourceReferences(
+  source: DesenPreparedSourceFoundation,
+  catalogSet: DesenValidatedCatalogSet,
+): DesenSemanticValidationResult<"source"> {
+  if (
+    typeof source !== "object" ||
+    source === null ||
+    !PREPARED_SOURCE_FOUNDATIONS.has(source as object)
+  ) {
+    return semanticFailure("source", [
+      createCoreDiagnostic({
+        code: "SCHEMA_INVALID",
+        message: "Source reference validation requires a prepared Source foundation.",
+        pointer: ROOT_POINTER,
+      }),
+    ]);
+  }
+
+  const metadata = trustedCatalogMetadata(catalogSet);
+  if (metadata === undefined) {
+    return semanticFailure("source", [
+      catalogRequirementMismatchDiagnostic(appendPath(ROOT_POINTER, "catalogs"), {
+        documentId: source.id,
+      }),
+    ]);
+  }
+
+  const requirementAnalysis = sourceRequirementDiagnostics(source, metadata);
+  if (requirementAnalysis.diagnostics.length > 0) {
+    return semanticFailure("source", requirementAnalysis.diagnostics);
+  }
+
+  const documentMetadata = metadataForDocument(metadata, requirementAnalysis.catalogIndexes);
+  const diagnostics = documentFoundationDiagnostics(source, documentMetadata);
+  return diagnostics.length === 0
+    ? semanticSuccess("source", source)
+    : semanticFailure("source", diagnostics);
 }
 
 function catalogSemanticResult(value: CatalogSnapshot): DesenSemanticValidationResult<"catalog"> {

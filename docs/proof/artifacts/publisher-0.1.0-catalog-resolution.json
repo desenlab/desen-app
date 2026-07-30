@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.catalog-resolution-proof.v1",
+  "task": "M06-T02",
+  "result": "PASS",
+  "summary": "The built package-private Publisher resolver selects one exact Catalog tuple, rejects ambiguity without candidate-order fallback, checks declared/observed tuple consistency, and returns only detached branded Catalog authority.",
+  "prerequisites": [
+    {
+      "task": "M06-T01",
+      "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+      "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63",
+      "claim": "closed Publisher result, staged diagnostics, and no-partial-Bundle boundary",
+      "verifiedSha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63",
+      "matchesPin": true
+    },
+    {
+      "task": "M03-T04",
+      "path": "docs/proof/artifacts/reference-catalog-web-package-digest-v1.json",
+      "sha256": "e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716",
+      "claim": "historical deterministic Web-React package-digest profile evidence",
+      "verifiedSha256": "e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716",
+      "matchesPin": true
+    },
+    {
+      "task": "M02-T07",
+      "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
+      "sha256": "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
+      "claim": "Catalog-set branding, exact SemVer, and namespace semantics",
+      "verifiedSha256": "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
+      "matchesPin": true
+    },
+    {
+      "task": "M05-T04",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+      "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0",
+      "claim": "current Web-React package observation with exact artifact-entry digests and package tuple",
+      "verifiedSha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0",
+      "matchesPin": true
+    }
+  ],
+  "fixture": {
+    "sourcePath": "examples/sign-in/official-derived.source.desen.json",
+    "catalogPath": "packages/reference-catalog-web/catalog.json",
+    "sourceId": "com.example.account-app",
+    "exactTuple": {
+      "id": "run.desen.reference.sign-in",
+      "version": "0.1.0",
+      "target": "web-react",
+      "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0"
+    }
+  },
+  "claims": {
+    "exactResolution": {
+      "documentId": "com.example.account-app",
+      "requirement": {
+        "id": "run.desen.reference.sign-in",
+        "version": "0.1.0",
+        "target": "web-react"
+      },
+      "resolvedTuple": {
+        "id": "run.desen.reference.sign-in",
+        "version": "0.1.0",
+        "target": "web-react",
+        "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0"
+      },
+      "requirementPackageIndexes": [0],
+      "detached": true,
+      "deeplyFrozen": true,
+      "noBundle": true
+    },
+    "duplicateAmbiguity": {
+      "forward": {
+        "stage": "catalog-resolution",
+        "code": "CATALOG_VERSION_UNAVAILABLE",
+        "pointer": "/catalogs/0",
+        "classification": "activation",
+        "noPartial": true,
+        "frozen": true
+      },
+      "reverse": {
+        "stage": "catalog-resolution",
+        "code": "CATALOG_VERSION_UNAVAILABLE",
+        "pointer": "/catalogs/0",
+        "classification": "activation",
+        "noPartial": true,
+        "frozen": true
+      },
+      "identical": {
+        "stage": "catalog-resolution",
+        "code": "CATALOG_VERSION_UNAVAILABLE",
+        "pointer": "/catalogs/0",
+        "classification": "activation",
+        "noPartial": true,
+        "frozen": true
+      },
+      "candidateOrderWinner": false,
+      "canonicalIdentityDedupe": false
+    },
+    "locationNonAuthority": {
+      "uniqueExactResolutionUnaffected": true,
+      "duplicateStillAmbiguous": {
+        "stage": "catalog-resolution",
+        "code": "CATALOG_VERSION_UNAVAILABLE",
+        "pointer": "/catalogs/0",
+        "classification": "activation",
+        "noPartial": true,
+        "frozen": true
+      },
+      "locationCopiedToResult": false
+    },
+    "tupleAndDigestConsistency": {
+      "digestMismatch": {
+        "stage": "catalog-integrity",
+        "code": "CATALOG_DIGEST_MISMATCH",
+        "pointer": "/catalogs/0",
+        "classification": "activation",
+        "noPartial": true,
+        "frozen": true
+      },
+      "tupleMismatch": {
+        "stage": "catalog-integrity",
+        "code": "run.desen.publisher/INVALID_CATALOG_INPUT",
+        "pointer": "/catalogs/0",
+        "noPartial": true,
+        "frozen": true
+      }
+    },
+    "namespaceConflict": {
+      "stage": "namespace-conflicts",
+      "code": "AMBIGUOUS_CAPABILITY",
+      "pointer": "/catalogs/1",
+      "classification": "catalog",
+      "noPartial": true,
+      "frozen": true,
+      "pointerDomain": "Source requirement",
+      "firstConflictingRequirementIndex": 1
+    },
+    "finiteProfile": {
+      "defaults": {
+        "maxRequirements": 256,
+        "maxCandidates": 1024,
+        "maxCatalogCanonicalBytes": 16777216,
+        "maxAggregateCatalogCanonicalBytes": 67108864,
+        "maxCatalogDepth": 128,
+        "maxCatalogValueOccurrences": 100000,
+        "maxCatalogStringCodeUnits": 4194304,
+        "maxCapabilityDeclarations": 100000,
+        "maxDiagnostics": 1024,
+        "maxIdentityStringCodeUnits": 4096
+      },
+      "exercisedLimit": "maxCandidates",
+      "exercisedMaximum": 1,
+      "failure": {
+        "stage": "catalog-resolution",
+        "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED",
+        "pointer": "/catalogs",
+        "noPartial": true,
+        "frozen": true
+      }
+    },
+    "immutableDetachedResult": true,
+    "terminalFailuresExposeNoBundleOrCatalogAuthority": true,
+    "rootApiPrivacy": {
+      "rootRuntimeExports": [
+        "DEPRECATED_CAPABILITY_CODE",
+        "INVALID_SOURCE_JSON_CODE",
+        "PUBLISHER_DIAGNOSTIC_REGISTRY",
+        "PUBLISH_PIPELINE_STAGES",
+        "PUBLISH_SOURCE_JSON_LIMITS",
+        "SOURCE_LIMIT_EXCEEDED_CODE",
+        "getPublisherDiagnosticDefinition",
+        "isPublisherDiagnosticCode"
+      ],
+      "resolverRuntimeExported": false,
+      "resolverTypeExported": false,
+      "resolverSubpathExported": false,
+      "packagePrivateDistImportUsedByProof": "packages/publisher/dist/catalog-resolution.js"
+    },
+    "targetNeutralDependencyBoundary": {
+      "imports": [
+        "./publish-diagnostics.js",
+        "./publish-result.js",
+        "@desen/protocol",
+        "@desen/protocol",
+        "@desen/validator",
+        "@desen/validator"
+      ],
+      "productionDependencies": ["@desen/protocol", "@desen/validator"],
+      "nodeBuiltins": false,
+      "browserGlobals": false,
+      "frameworkDependencies": false,
+      "productionAdapterDependencies": false
+    }
+  },
+  "trustBoundary": {
+    "observedPackageDigest": "A target-specific package profile must authenticate package bytes before supplying observedPackageDigest.",
+    "resolverProof": "The resolver proves exact equality between the preverified caller observation, candidate tuple, and validated Catalog declaration.",
+    "packageByteAuthenticationPerformedHere": false,
+    "canonicalCatalogJsonUsedAsPackageDigest": false
+  },
+  "nonclaims": [
+    "This resolver does not read, hash, download, install, or authenticate package artifact bytes.",
+    "Caller-supplied observedPackageDigest is not trusted merely because it has SHA-256 syntax.",
+    "Catalog JSON equality does not authenticate that two observations name the same package artifact.",
+    "Source location is an inert discovery hint and never grants resolution authority.",
+    "This task does not expose a partial public Publisher API or emit a DESEN Bundle."
+  ],
+  "tests": { "packageRuntimeCases": 22, "compilerNegativeCases": 10, "rootMutationCases": 8 },
+  "trackedFiles": [
+    {
+      "path": "examples/sign-in/official-derived.source.desen.json",
+      "bytes": 4724,
+      "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+    },
+    {
+      "path": "packages/publisher/dist/catalog-resolution.d.ts",
+      "bytes": 5409,
+      "sha256": "b9e3d9d719cce52b23b86ee256ee26f5e638bdfaef7a22fa8577b8afe74da7a0"
+    },
+    {
+      "path": "packages/publisher/dist/catalog-resolution.js",
+      "bytes": 32333,
+      "sha256": "b33ea4c7d3b7fef3dbf5dd4795a5f807644e4f16bf8112f78c1b6429b956d142"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "bytes": 902,
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 1304,
+      "sha256": "27946cfda1b8d883795b292dba3f2b093c37eafbbd5e709fb0d82be4a1ad5fcc"
+    },
+    {
+      "path": "packages/publisher/src/catalog-resolution.ts",
+      "bytes": 37492,
+      "sha256": "ec922db9ba6c1c42759b03757e59375966c428fe571eddaef4850cb2ad69ead1"
+    },
+    {
+      "path": "packages/publisher/src/index.ts",
+      "bytes": 911,
+      "sha256": "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30"
+    },
+    {
+      "path": "packages/publisher/test/catalog-resolution.test.ts",
+      "bytes": 21773,
+      "sha256": "a90945e2b3a27ed317eb5d397e175c053a32fb100066328f1f03b38db6543ac3"
+    },
+    {
+      "path": "packages/publisher/test/catalog-resolution.types.ts",
+      "bytes": 2024,
+      "sha256": "356cf93917c54cdb86f5d0d27c24814066ec656cd762e0089366b2dbd70d1b0b"
+    },
+    {
+      "path": "packages/reference-catalog-web/catalog.json",
+      "bytes": 8439,
+      "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+    },
+    {
+      "path": "scripts/generate-publisher-catalog-resolution-proof.mjs",
+      "bytes": 841,
+      "sha256": "2e003fa50d7b183fe75e4e127be374e4fac0c98bdbb3b70610b85015dcbb00ed"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+      "bytes": 30623,
+      "sha256": "70d244db9f6b07cd793fb94995d3d89b23b335610da40611325b32f3b6d1bf08"
+    },
+    {
+      "path": "scripts/verify-publisher-catalog-resolution.mjs",
+      "bytes": 671,
+      "sha256": "4f0c5310dc646cefd26a9bc83c909483518fa1f95c86e69546e255f37f722142"
+    },
+    {
+      "path": "tests/publisher-catalog-resolution.test.mjs",
+      "bytes": 5861,
+      "sha256": "c2c69c1640dd94e4d359d18fc3bca43bfb7a407ae3344b1c635e64fdca659a3b"
+    }
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/publisher build",
+    "node scripts/generate-publisher-catalog-resolution-proof.mjs",
+    "node scripts/verify-publisher-catalog-resolution.mjs",
+    "node --test tests/publisher-catalog-resolution.test.mjs"
+  ]
+}

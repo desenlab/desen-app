@@ -1,0 +1,477 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.source-preservation-proof.v1",
+  "task": "M06-T06",
+  "result": "PASS",
+  "summary": "The built package-private Publisher preservation boundary retains exact M06-T05 authority, preserves all 16 Source-reachable opaque extension locations and every semantic Source array by exact parsed runtime reference, and emits one complete bounded five-string component-node trace under the unchanged-node-identifiers strategy without emitting a Bundle.",
+  "prerequisites": [
+    {
+      "task": "M02-T07",
+      "path": "docs/proof/artifacts/protocol-0.1.0-semantic-foundation.json",
+      "sha256": "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
+      "claim": "opaque detached extension values at the trusted semantic-foundation boundary",
+      "verifiedSha256": "96048882670a6c23629ff686f61e14105a51bc6bcf287fff7ee372045782caa7",
+      "matchesPin": true
+    },
+    {
+      "task": "M05-T05",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-reconciliation-diagnostics.json",
+      "sha256": "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb",
+      "claim": "selected Web–React runtime/source identity and one-to-many diagnostic relation",
+      "verifiedSha256": "292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb",
+      "matchesPin": true
+    },
+    {
+      "task": "M06-T05",
+      "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+      "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67",
+      "claim": "exact complete Source, Catalog, package, alignment, warning, and obligation authority",
+      "verifiedSha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67",
+      "matchesPin": true
+    }
+  ],
+  "frozenSchemas": {
+    "source": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+    "bundle": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+    "extensions": {
+      "exactSharedDeclaredPoints": 17,
+      "exactReachablePerDocument": 16,
+      "declaredSchemaPointers": [
+        "/$defs/actionSpec/oneOf/0/properties/extensions",
+        "/$defs/actionSpec/oneOf/1/properties/extensions",
+        "/$defs/actionSpec/oneOf/2/properties/extensions",
+        "/$defs/actionSpec/oneOf/3/properties/extensions",
+        "/$defs/actionSpec/oneOf/4/properties/extensions",
+        "/$defs/actionSpec/oneOf/5/properties/extensions",
+        "/$defs/actionSpec/oneOf/6/properties/extensions",
+        "/$defs/behaviorSpec/properties/extensions",
+        "/$defs/exactCatalogRequirement/properties/extensions",
+        "/$defs/nodeSpec/properties/extensions",
+        "/$defs/repeatSpec/properties/extensions",
+        "/$defs/resourceInstanceSpec/properties/extensions",
+        "/$defs/sourceCatalogRequirement/properties/extensions",
+        "/$defs/stateSpec/properties/extensions",
+        "/$defs/surfaceSpec/properties/extensions",
+        "/$defs/variantSpec/properties/extensions",
+        "/properties/extensions"
+      ],
+      "sourceOnlyReachable": "/$defs/sourceCatalogRequirement/properties/extensions",
+      "bundleOnlyReachable": "/$defs/exactCatalogRequirement/properties/extensions",
+      "sourceAndBundleDeclarationParity": true
+    }
+  },
+  "fixtures": {
+    "paths": {
+      "validSource": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "validCatalog": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "sortableSource": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+      "storeMapSource": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json"
+    },
+    "comprehensiveSourceId": "com.example.account-app",
+    "comprehensiveCatalogRequirements": 2
+  },
+  "claims": {
+    "exactNonterminalAuthority": {
+      "documentId": "com.example.account-app",
+      "catalogRequirements": 2,
+      "selectedPackages": 2,
+      "requirementPackageIndexes": [0, 1],
+      "t05ProjectionCanonicalJsonEqual": true,
+      "sourceAuthorityDetachedFromRawCaller": true,
+      "preservedSurfacesExactRuntimeReference": true,
+      "preservedRootExtensionsExactRuntimeReference": true,
+      "sourceCatalogRequirementsExactRuntimeReference": true,
+      "selectedCatalogsRetainPackageIdentity": true,
+      "authoringRetainedOnlyOnAuthenticatedSource": true,
+      "sourceKindExcludedFromPreservedProjection": true,
+      "terminalOkAbsent": true,
+      "bundleAbsent": true,
+      "deeplyFrozen": true
+    },
+    "opaqueExtensionPreservation": {
+      "sourceReachableKinds": [
+        "document",
+        "action.state.set",
+        "action.state.toggle",
+        "action.navigate",
+        "action.operation.invoke",
+        "action.resource.refresh",
+        "action.component.command",
+        "action.event.emit",
+        "variant",
+        "behavior",
+        "repeat",
+        "node",
+        "state",
+        "resource-instance",
+        "surface",
+        "source-catalog-requirement"
+      ],
+      "exactDetachedCanonicalJsonValues": true,
+      "exactRuntimeReferencesAcrossT06": true,
+      "dangerousOwnKeysPreserved": ["__proto__", "constructor", "prototype"],
+      "apparentCoreFieldsRemainInert": ["$ref", "entry", "id", "use", "version"],
+      "changesPackageSelection": false,
+      "changesRuntimeObligations": false,
+      "createsSourceNodeTraceEntries": false,
+      "rawWhitespaceOrMemberLexicalOrderClaim": false
+    },
+    "semanticArrayOrderPreservation": {
+      "exactProjection": {
+        "catalogs": ["com.example.web-catalog", "com.example.empty-preservation-catalog"],
+        "rootSlots": [
+          "sign-in.title",
+          "sign-in.email",
+          "sign-in.password",
+          "sign-in.error",
+          "sign-in.submit",
+          "sign-in.map"
+        ],
+        "behaviorAttachments": ["sign-in.sortable"],
+        "behaviorSlots": ["sign-in.drag-preview"],
+        "actions": [
+          "state.set",
+          "state.toggle",
+          "navigate",
+          "operation.invoke",
+          "resource.refresh",
+          "component.command",
+          "event.emit"
+        ],
+        "settlementActions": ["navigate"],
+        "variants": ["Enabled first", "Disabled middle", "Context last"],
+        "repeatItems": ["repeat-first", "repeat-middle", "repeat-last"]
+      },
+      "arraysCovered": [
+        "catalog requirements",
+        "component slots",
+        "behavior attachments",
+        "behavior-owned slots",
+        "event actions",
+        "operation settlement actions",
+        "variants",
+        "literal repeat items"
+      ],
+      "noSorting": true,
+      "noDeduplication": true,
+      "noRepeatMaterialization": true,
+      "repeatedInputProjectionCanonicalJsonEqual": true
+    },
+    "sourceNodeTraceability": {
+      "strategy": "unchanged-node-identifiers",
+      "sourceNodeEntries": 10,
+      "exactEntries": [
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "home",
+          "sourceNodeId": "home.layout",
+          "capabilityId": "com.example.ui/Stack",
+          "sourcePointer": "/surfaces/home/root"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "home",
+          "sourceNodeId": "sign-in.title",
+          "capabilityId": "com.example.ui/Text",
+          "sourcePointer": "/surfaces/home/root/slots/default/0"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.layout",
+          "capabilityId": "com.example.ui/Stack",
+          "sourcePointer": "/surfaces/sign-in/root"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.drag-preview",
+          "capabilityId": "com.example.ui/Text",
+          "sourcePointer": "/surfaces/sign-in/root/behaviors/0/slots/dragPreview/0"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.title",
+          "capabilityId": "com.example.ui/Text",
+          "sourcePointer": "/surfaces/sign-in/root/slots/default/0"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.email",
+          "capabilityId": "com.example.ui/TextField",
+          "sourcePointer": "/surfaces/sign-in/root/slots/default/1"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.password",
+          "capabilityId": "com.example.ui/TextField",
+          "sourcePointer": "/surfaces/sign-in/root/slots/default/2"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.error",
+          "capabilityId": "com.example.ui/Alert",
+          "sourcePointer": "/surfaces/sign-in/root/slots/default/3"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.submit",
+          "capabilityId": "com.example.ui/Button",
+          "sourcePointer": "/surfaces/sign-in/root/slots/default/4"
+        },
+        {
+          "documentId": "com.example.account-app",
+          "surfaceId": "sign-in",
+          "sourceNodeId": "sign-in.map",
+          "capabilityId": "com.example.maps/Map",
+          "sourcePointer": "/surfaces/sign-in/root/slots/default/5"
+        }
+      ],
+      "completeForSchemaDefinedComponentNodes": true,
+      "uniqueSourcePointers": true,
+      "uniqueSurfaceAndSourceIdPairs": true,
+      "sourceNodeIdsMayRepeatAcrossSurfaces": true,
+      "behaviorIdsRemainInPreservedSourceOnly": true,
+      "authoringAndExtensionNodeShapesIgnored": true,
+      "closedFiveStringRecords": true,
+      "executableOrPlatformAuthorityRetained": false
+    },
+    "exactAndOverTraceCeilings": {
+      "defaults": {
+        "maxSourceNodeTraceEntries": 25000,
+        "maxSourceNodePointerCodeUnits": 4096,
+        "maxAggregateSourceNodeTraceCodeUnits": 4194304
+      },
+      "exactAccepted": { "entries": 10, "pointerCodeUnits": 54, "aggregateCodeUnits": 996 },
+      "oneBelowExactRejected": ["entries", "pointer", "aggregate"],
+      "overBudgetCode": "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED",
+      "overBudgetStage": "normalization",
+      "overBudgetPointer": "",
+      "traceNeverTruncated": true,
+      "extensionsUseInheritedRawSourceLimits": true,
+      "failuresExposeNoPartialAuthorityOrBundle": true
+    },
+    "authoringScope": {
+      "authenticatedSourceRetainsExactAuthoringValue": true,
+      "preservedDocumentStructurallyHasNoAuthoringMember": true,
+      "authoringValueInspectedOrTransformed": false,
+      "authoringNodeShapesCreateTraceEntries": false,
+      "removalOrNormalizationClaim": false,
+      "rationale": "M06-T06 exposes a separate exact-field projection; it does not mutate or remove authoring from the authenticated M06-T05 Source authority."
+    },
+    "failuresExposeNoPartialAuthorityOrBundle": true,
+    "rootApiPrivacy": {
+      "rootRuntimeExports": [
+        "DEPRECATED_CAPABILITY_CODE",
+        "INVALID_SOURCE_JSON_CODE",
+        "PUBLISHER_DIAGNOSTIC_REGISTRY",
+        "PUBLISH_PIPELINE_STAGES",
+        "PUBLISH_SOURCE_JSON_LIMITS",
+        "SOURCE_LIMIT_EXCEEDED_CODE",
+        "getPublisherDiagnosticDefinition",
+        "isPublisherDiagnosticCode"
+      ],
+      "preservationRuntimeExported": false,
+      "preservationTypeExported": false,
+      "preservationSubpathExported": false,
+      "packagePrivateDistImportUsedByProof": "packages/publisher/dist/source-preservation.js"
+    },
+    "targetNeutralDependencyBoundary": {
+      "source": {
+        "kind": "source",
+        "imports": [
+          "./catalog-resolution.js",
+          "./execution-preflight.js",
+          "./execution-preflight.js",
+          "./publish-diagnostics.js",
+          "./publish-result.js",
+          "@desen/protocol",
+          "@desen/protocol",
+          "@desen/validator"
+        ],
+        "unexpectedStaticImports": [],
+        "enumeratedPlatformIdentifiersObserved": [],
+        "directLoaderFormsObserved": [],
+        "ambientRuntimeDeclarationsObserved": [],
+        "diagnosticSuppressionDirectivesObserved": [],
+        "tripleSlashReferenceDirectivesObserved": []
+      },
+      "declaration": {
+        "kind": "declaration",
+        "imports": [
+          "./catalog-resolution.js",
+          "./execution-preflight.js",
+          "./publish-result.js",
+          "@desen/protocol",
+          "@desen/validator"
+        ],
+        "unexpectedStaticImports": [],
+        "enumeratedPlatformIdentifiersObserved": [],
+        "directLoaderFormsObserved": [],
+        "ambientRuntimeDeclarationsObserved": [],
+        "diagnosticSuppressionDirectivesObserved": [],
+        "tripleSlashReferenceDirectivesObserved": []
+      },
+      "productionDependencies": ["@desen/protocol", "@desen/validator"],
+      "inspectionMethod": "TypeScript AST direct-form source/declaration audit",
+      "inspectionScope": [
+        "static import, re-export, and import-type specifiers",
+        "exact production dependency names",
+        "enumerated direct platform identifiers",
+        "direct dynamic-loader and constructor forms",
+        "ambient runtime value declarations",
+        "TypeScript and ESLint diagnostic-suppression directives",
+        "triple-slash reference directives"
+      ],
+      "exhaustiveJavaScriptSandboxClaim": false
+    },
+    "selectedCiRegistration": {
+      "focusedPackageScript": "vitest run test/source-preservation.test.ts",
+      "generate": "pnpm verify:publisher-execution-preflight && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:source-preservation && node scripts/generate-publisher-source-preservation-proof.mjs",
+      "verify": "pnpm verify:publisher-execution-preflight && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:source-preservation && node scripts/verify-publisher-source-preservation.mjs",
+      "test": "pnpm verify:publisher-execution-preflight && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:source-preservation && node --test tests/publisher-source-preservation.test.mjs",
+      "checkEntry": "pnpm verify:publisher-source-preservation",
+      "testEntry": "pnpm test:publisher-source-preservation",
+      "proofTuple": [
+        "publisher-source-preservation",
+        "scripts/verify-publisher-source-preservation.mjs",
+        "tests/publisher-source-preservation.test.mjs"
+      ],
+      "checkRegisteredExactlyOnceAfterM06T05": true,
+      "testRegisteredExactlyOnceAfterM06T05": true,
+      "ciProofTupleRegisteredExactlyOnce": true,
+      "successorAdditionsExcludedFromByteInventory": true
+    },
+    "deterministicEvidenceBuild": {
+      "canonicalJsonFormatting": "Prettier JSON parser, LF",
+      "extensionComparison": "RFC 8785 canonical JSON after raw Source parsing",
+      "trackedFileInventorySortedAndUnique": true,
+      "successorRegistrationSemanticallyAuthenticatedNotByteTracked": true,
+      "builtJavaScriptByteTracked": "packages/publisher/dist/source-preservation.js",
+      "builtDeclarationByteTracked": "packages/publisher/dist/source-preservation.d.ts",
+      "repeatedBuildCheckedByRootEvidence": true,
+      "atomicWriter": "scripts/lib/atomic-proof-artifact.mjs"
+    }
+  },
+  "ownership": {
+    "traceRules": ["R-037", "R-107"],
+    "normativeClauses": ["N-014", "N-021"],
+    "taskStatus": "COMPLETE",
+    "stageUsedForControlledT06Failure": "normalization",
+    "normalizationStageCompletionClaim": false,
+    "includes": [
+      "all frozen Source/Bundle extension declaration and reachability classes",
+      "opaque parsed extension-value preservation without core interpretation",
+      "semantic Source array reference and order preservation",
+      "complete deterministic component-node identity traceability"
+    ],
+    "rationale": "Preservation is established before later normalization can transform any publication projection; T06 failures use the existing normalization stage without claiming that T07 normalization is complete."
+  },
+  "nonclaims": [
+    "M06-T06 remains package-private and nonterminal; it does not expose a public publish function or emit a Bundle.",
+    "Raw Source whitespace and JSON object-member lexical order are outside the parsed M06-T05 authority and are not claimed to survive.",
+    "The preserved-document projection omits authoring but does not remove, mutate, inspect, or normalize authoring on the authenticated Source; M06-T07 owns removal and normalization.",
+    "M06-T06 preserves repeat declarations and ordered Source values but does not materialize runtime repeat instances.",
+    "M06-T06 does not calculate a Source digest, pin exact Bundle package tuples, validate a Bundle, calculate a revision, or prove double-publish determinism.",
+    "The five-string trace grants no runtime instance, adapter, host, executable, callback, Catalog, prop, style, slot, action, extension, or authoring authority.",
+    "The target-boundary source/declaration audit is not a JavaScript sandbox and does not claim exhaustive detection of intentionally obfuscated reflection, metaprogramming, or runtime code generation.",
+    "M06-T06 performs no editor save/open round trip, network discovery, package download, activation, rendering, signing, npm publication, or deployment."
+  ],
+  "tests": { "publisherRuntimeCases": 15, "compilerNegativeCases": 46, "rootMutationCases": 18 },
+  "trackedFiles": [
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+      "sha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+      "sha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+      "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+      "sha256": "5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
+    },
+    {
+      "path": "packages/publisher/dist/source-preservation.d.ts",
+      "sha256": "c74b4afd49c6724b8b58514f829736524289f3baeff7b2974f4801cf25814d43"
+    },
+    {
+      "path": "packages/publisher/dist/source-preservation.js",
+      "sha256": "109cf93eb2a7b4a314f0caceb9b9f84e5a43f4c063193715a507ea198c090353"
+    },
+    {
+      "path": "packages/publisher/src/execution-preflight.ts",
+      "sha256": "091b9e4877ada2198e26398fb1778024739aaf5c1c89baab3544dfe9470e6efa"
+    },
+    {
+      "path": "packages/publisher/src/publish-diagnostics.ts",
+      "sha256": "908fc64f8f4a8b24f14113656a683dcaca67f7d03ab27d52113adf23760cd8b6"
+    },
+    {
+      "path": "packages/publisher/src/publish-result.ts",
+      "sha256": "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00"
+    },
+    {
+      "path": "packages/publisher/src/source-preservation.ts",
+      "sha256": "e84f40671f2e219b759c02700db28a8f79aa5647e0dc4331b72d2d3c22d2ec22"
+    },
+    {
+      "path": "packages/publisher/test/source-preservation.test.ts",
+      "sha256": "1483925ef8d3db01a4991b047e42b1e4e22b3a629e9f519b11d77209acc8af1d"
+    },
+    {
+      "path": "packages/publisher/test/source-preservation.types.ts",
+      "sha256": "28ef3692d6ee364af34f66eb5ea3796b055e6651add1a5561c7a8c65fce95e15"
+    },
+    {
+      "path": "scripts/generate-publisher-source-preservation-proof.mjs",
+      "sha256": "2ea859906e87c83f7f634700c254e299a165149f72ca6fe0f84dfa468e70bae2"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/publisher-source-preservation-proof.mjs",
+      "sha256": "1f1a93804aad00209dc71ea7beec0b4c6108e123ff1e8b0e523bd79de45cfda8"
+    },
+    {
+      "path": "scripts/verify-publisher-source-preservation.mjs",
+      "sha256": "c06159f3fb7e61a611ee1fc41832a3fc8dd797184f14c37d9686fbee263b9864"
+    },
+    {
+      "path": "tests/publisher-source-preservation.test.mjs",
+      "sha256": "54db666b90a500298a2ef28ceb35f4326caedf3be196b3811d682ab45354637b"
+    }
+  ],
+  "reproduction": [
+    "pnpm verify:publisher-execution-preflight",
+    "pnpm --filter @desen/publisher build",
+    "pnpm --filter @desen/publisher typecheck",
+    "pnpm --filter @desen/publisher test:source-preservation",
+    "node scripts/generate-publisher-source-preservation-proof.mjs",
+    "node scripts/verify-publisher-source-preservation.mjs",
+    "node --test tests/publisher-source-preservation.test.mjs"
+  ]
+}

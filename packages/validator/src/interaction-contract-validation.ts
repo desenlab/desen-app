@@ -1354,8 +1354,14 @@ function validateNodeInteractions(
 function pushNestedActions(actionWork: ActionWork, actionStack: ActionWork[]): void {
   if (actionWork.action.type !== "operation.invoke") return;
   for (const [field, actions] of [
-    ["onFailure", actionWork.action.onFailure],
-    ["onSuccess", actionWork.action.onSuccess],
+    [
+      "onFailure",
+      Object.hasOwn(actionWork.action, "onFailure") ? actionWork.action.onFailure : undefined,
+    ],
+    [
+      "onSuccess",
+      Object.hasOwn(actionWork.action, "onSuccess") ? actionWork.action.onSuccess : undefined,
+    ],
   ] as const) {
     if (actions === undefined) continue;
     for (let index = actions.length - 1; index >= 0; index -= 1) {

@@ -1,0 +1,504 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.capability-preflight-proof.v1",
+  "task": "M06-T04",
+  "result": "PASS",
+  "summary": "The built package-private Publisher capability preflight reuses public Validator component and interaction contracts, retains exact M06-T03 authority, emits safe deterministic deprecation warnings, and exposes no Bundle or dynamic obligations.",
+  "prerequisites": [
+    {
+      "task": "M02-T08",
+      "path": "docs/proof/artifacts/protocol-0.1.0-component-contracts.json",
+      "sha256": "71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac",
+      "claim": "component prop, slot, style, visual-state, and dynamic-obligation contracts",
+      "verifiedSha256": "71cd73475a1c59f734870051bcd6d26a8a2b7bf83caf9bed3d3882da467014ac",
+      "matchesPin": true
+    },
+    {
+      "task": "M02-T09",
+      "path": "docs/proof/artifacts/protocol-0.1.0-interaction-contracts.json",
+      "sha256": "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208",
+      "claim": "behavior, event, command, attachment, and conflict contracts",
+      "verifiedSha256": "981e1d59dd68e32639055b1267880cc1e6ebb3a76ad1176298990b28fe048208",
+      "matchesPin": true
+    },
+    {
+      "task": "M02-T13",
+      "path": "docs/proof/artifacts/protocol-0.1.0-validator-diagnostic-micro-vectors.json",
+      "sha256": "3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718",
+      "claim": "exact accepted and rejected Validator diagnostic micro-vectors",
+      "verifiedSha256": "3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718",
+      "matchesPin": true
+    },
+    {
+      "task": "M06-T03",
+      "path": "docs/proof/artifacts/publisher-0.1.0-source-preflight.json",
+      "sha256": "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387",
+      "claim": "exact prepared Source, Catalog package, and requirement-alignment authority",
+      "verifiedSha256": "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387",
+      "matchesPin": true
+    }
+  ],
+  "fixtures": {
+    "paths": {
+      "officialSource": "examples/sign-in/official-derived.source.desen.json",
+      "referenceCatalog": "packages/reference-catalog-web/catalog.json",
+      "validSource": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "validCatalog": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "exampleSignIn": "packages/protocol/upstream/0.1.0/snapshot/examples/sign-in.source.desen.json",
+      "exampleSortable": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+      "exampleStoreMap": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+      "exampleCatalog": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json"
+    },
+    "accepted": [
+      {
+        "id": "official-derived sign-in",
+        "sourceId": "com.example.account-app",
+        "publicValidatorAccepted": true,
+        "publisherAccepted": true,
+        "publicValidatorDynamicObligations": 3,
+        "publisherDynamicObligationsExposed": false,
+        "warnings": 0
+      },
+      {
+        "id": "frozen valid sign-in",
+        "sourceId": "com.example.account-app",
+        "publicValidatorAccepted": true,
+        "publisherAccepted": true,
+        "publicValidatorDynamicObligations": 3,
+        "publisherDynamicObligationsExposed": false,
+        "warnings": 0
+      },
+      {
+        "id": "frozen example sign-in",
+        "sourceId": "com.example.account-app",
+        "publicValidatorAccepted": true,
+        "publisherAccepted": true,
+        "publicValidatorDynamicObligations": 3,
+        "publisherDynamicObligationsExposed": false,
+        "warnings": 0
+      },
+      {
+        "id": "frozen example sortable list",
+        "sourceId": "com.example.task-list",
+        "publicValidatorAccepted": true,
+        "publisherAccepted": true,
+        "publicValidatorDynamicObligations": 1,
+        "publisherDynamicObligationsExposed": false,
+        "warnings": 0
+      },
+      {
+        "id": "frozen example store map",
+        "sourceId": "com.example.store-locator",
+        "publicValidatorAccepted": true,
+        "publisherAccepted": true,
+        "publicValidatorDynamicObligations": 3,
+        "publisherDynamicObligationsExposed": false,
+        "warnings": 0
+      }
+    ]
+  },
+  "claims": {
+    "exactNonterminalAuthority": {
+      "sourceId": "com.example.account-app",
+      "catalogs": 1,
+      "selectedPackages": 1,
+      "requirementPackageIndexes": [0],
+      "interactionAuthorityReauthenticatedByIdentity": true,
+      "sourceReferenceAuthorityReauthenticatedByIdentity": true,
+      "sourceDetached": true,
+      "catalogDetached": true,
+      "dynamicObligationsAbsent": true,
+      "terminalOkAbsent": true,
+      "bundleAbsent": true,
+      "deeplyFrozen": true,
+      "repeatedJsonByteIdentical": true
+    },
+    "inheritedM06T03FailurePassThrough": {
+      "stage": "source-semantics",
+      "code": "ENTRY_NOT_FOUND",
+      "pointer": "/entry",
+      "diagnosticCount": 1,
+      "noPartial": true,
+      "deeplyFrozen": true,
+      "byteEqualToDirectM06T03Result": true
+    },
+    "publicValidatorAndPublisherStaticFailureMatrix": [
+      {
+        "id": "component-prop",
+        "code": "PROP_TYPE_MISMATCH",
+        "pointer": "/surfaces/sign-in/root/slots/default/4/props/label",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      },
+      {
+        "id": "component-slot",
+        "code": "UNKNOWN_SLOT",
+        "pointer": "/surfaces/sign-in/root/slots/unexpected",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      },
+      {
+        "id": "component-style",
+        "code": "UNKNOWN_PROP",
+        "pointer": "/surfaces/sign-in/root/style/base/unexpectedPart",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      },
+      {
+        "id": "component-event",
+        "code": "UNKNOWN_EVENT",
+        "pointer": "/surfaces/sign-in/root/on/unexpectedEvent",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      },
+      {
+        "id": "component-command",
+        "code": "UNKNOWN_COMMAND",
+        "pointer": "/surfaces/stores/root/slots/default/1/on/press/0/command",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      },
+      {
+        "id": "behavior-prop",
+        "code": "PROP_TYPE_MISMATCH",
+        "pointer": "/surfaces/tasks/root/behaviors/0/props/axis",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      },
+      {
+        "id": "behavior-attachment",
+        "code": "BEHAVIOR_ATTACHMENT_INVALID",
+        "pointer": "/surfaces/tasks/root/behaviors/0/use",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      },
+      {
+        "id": "unsafe-component-schema",
+        "code": "run.desen.validator/INVALID_COMPONENT_CONTRACT",
+        "pointer": "/0/components/com.example.ui~1Button/propsSchema/$ref",
+        "publicValidatorMatched": true,
+        "publisherStage": "capability-contracts",
+        "noPartial": true
+      }
+    ],
+    "safeDeterministicDeprecationWarnings": {
+      "warningCount": 7,
+      "pointers": [
+        "/surfaces/tasks/resources/tasks/use",
+        "/surfaces/tasks/root/behaviors/0/on/reorder/0/onSuccess/0/operation",
+        "/surfaces/tasks/root/behaviors/0/on/reorder/0/operation",
+        "/surfaces/tasks/root/behaviors/0/slots/dragPreview/0/use",
+        "/surfaces/tasks/root/behaviors/0/use",
+        "/surfaces/tasks/root/slots/default/0/use",
+        "/surfaces/tasks/root/use"
+      ],
+      "componentTrueWarned": true,
+      "nestedComponentWarned": true,
+      "behaviorStringWarned": true,
+      "behaviorSlotComponentWarned": true,
+      "resourceTrueWarned": true,
+      "operationTopLevelWarned": true,
+      "operationNestedWarned": true,
+      "explicitFalseWarnings": 0,
+      "warningMessageFixed": true,
+      "catalogProseRedacted": true,
+      "replacementNotSelectedOrDisclosed": true,
+      "sortedAndDeduplicated": true,
+      "repeatedWarningsByteIdentical": true
+    },
+    "exactAndOverDiagnosticCeilings": {
+      "defaults": {
+        "maxDiagnosticsPerStoppedStage": 1024,
+        "maxDiagnosticPointerCodeUnits": 4096,
+        "maxAggregateDiagnosticCodeUnits": 1048576
+      },
+      "exactAccepted": { "diagnostics": 7, "pointerCodeUnits": 67, "aggregateCodeUnits": 1392 },
+      "oneBelowExactRejected": ["diagnostics", "pointer", "aggregate"],
+      "overBudgetCode": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED",
+      "overBudgetStage": "capability-contracts",
+      "overBudgetPointer": "",
+      "warningsNeverTruncated": true,
+      "failuresExposeNoPartialAuthorityOrBundle": true
+    },
+    "inheritedOptionalDataIgnored": {
+      "inheritedPreflightedIgnored": true,
+      "inheritedDeprecatedIgnored": true,
+      "inheritedNodeSlotsIgnored": true,
+      "inheritedNodeBehaviorsIgnored": true,
+      "inheritedEventMapIgnored": true,
+      "inheritedSettlementHandlersIgnored": true,
+      "everyT04OptionalTraversalUsesOwnDataGuard": true,
+      "optionalPropertiesExercisedOneAtATime": true,
+      "combinedPrototypePollutionSuccessClaimed": false,
+      "accessorNonObservationClaimed": false
+    },
+    "failuresExposeNoPartialAuthorityOrBundle": true,
+    "dynamicObligationsNotExposed": true,
+    "rootApiPrivacy": {
+      "rootRuntimeExports": [
+        "DEPRECATED_CAPABILITY_CODE",
+        "INVALID_SOURCE_JSON_CODE",
+        "PUBLISHER_DIAGNOSTIC_REGISTRY",
+        "PUBLISH_PIPELINE_STAGES",
+        "PUBLISH_SOURCE_JSON_LIMITS",
+        "SOURCE_LIMIT_EXCEEDED_CODE",
+        "getPublisherDiagnosticDefinition",
+        "isPublisherDiagnosticCode"
+      ],
+      "preflightRuntimeExported": false,
+      "preflightTypeExported": false,
+      "preflightSubpathExported": false,
+      "warningCodePublic": true,
+      "warningRegistryStage": "capability-contracts",
+      "warningRegistrySeverity": "warning",
+      "packagePrivateDistImportUsedByProof": "packages/publisher/dist/capability-preflight.js"
+    },
+    "targetNeutralDependencyBoundary": {
+      "imports": [
+        "./catalog-resolution.js",
+        "./publish-diagnostics.js",
+        "./publish-result.js",
+        "./source-preflight.js",
+        "./source-preflight.js",
+        "@desen/protocol",
+        "@desen/protocol",
+        "@desen/validator",
+        "@desen/validator"
+      ],
+      "productionDependencies": ["@desen/protocol", "@desen/validator"],
+      "inspectionMethod": "TypeScript AST direct-form audit",
+      "inspectionScope": [
+        "static import and re-export specifiers",
+        "exact production dependency names",
+        "enumerated direct platform identifiers",
+        "direct dynamic-loader and constructor forms",
+        "ambient runtime value declarations",
+        "TypeScript diagnostic-suppression directives",
+        "triple-slash reference directives"
+      ],
+      "unexpectedStaticImports": [],
+      "enumeratedPlatformIdentifiersObserved": [],
+      "directLoaderFormsObserved": [],
+      "ambientRuntimeDeclarationsObserved": [],
+      "diagnosticSuppressionDirectivesObserved": [],
+      "tripleSlashReferenceDirectivesObserved": [],
+      "exhaustiveJavaScriptSandboxClaim": false
+    }
+  },
+  "pipelineOwnership": {
+    "trace": "PIPE-032",
+    "publicationStep": 8,
+    "m06T04ComponentAndInteractionSlice": "COMPLETE",
+    "includes": [
+      "component props, slots, styles, visual states, events, and statically known commands",
+      "behavior props, slots, styles, events, attachment rules, and conflicts",
+      "safe Catalog contract-schema preparation",
+      "non-blocking deprecated capability warnings"
+    ],
+    "m06T05ResourceAndOperationContractSlice": "DEFERRED",
+    "m06T05DynamicBindingCompatibilityAndRuntimeObligations": "DEFERRED",
+    "rationale": "M06-T04 proves only component and interaction contracts that are statically knowable; resource/operation receiving schemas and dynamic values require M06-T05 compatibility analysis and explicit runtime obligations."
+  },
+  "nonclaims": [
+    "M06-T04 remains package-private and nonterminal; it does not expose a public publish function or emit a Bundle.",
+    "M06-T04 does not discharge or expose dynamic binding, state, predicate, repeat, action, resource, operation, or runtime validation obligations assigned to M06-T05.",
+    "M06-T04 does not validate resource/operation input, output, error, policy, effect, lifecycle, or settlement contracts assigned to M06-T05 and later runtime owners.",
+    "Deprecation warnings do not select or follow replacement capabilities and do not claim removal compatibility.",
+    "M06-T04 does not normalize Source data, calculate digests, pin Bundle tuples, validate a Bundle, calculate a revision, or emit a Bundle.",
+    "The target-boundary source audit is not a JavaScript sandbox and does not claim exhaustive detection of intentionally obfuscated reflection, metaprogramming, or runtime code generation.",
+    "M06-T04 performs no network discovery, package download, activation, rendering, signing, npm publication, or deployment."
+  ],
+  "tests": {
+    "publisherRuntimeCases": 14,
+    "compilerNegativeCases": 20,
+    "validatorComponentCases": 32,
+    "validatorInteractionCases": 49,
+    "validatorDiagnosticMicroVectorCases": 4,
+    "rootMutationCases": 15
+  },
+  "trackedFiles": [
+    {
+      "path": "examples/sign-in/official-derived.source.desen.json",
+      "bytes": 4724,
+      "sha256": "a679ad21c0648414544e78efa231c2f058745a97331603ceeb78722231a71b4c"
+    },
+    {
+      "path": "package.json",
+      "bytes": 52201,
+      "sha256": "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sign-in.source.desen.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+      "bytes": 2252,
+      "sha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+      "bytes": 3877,
+      "sha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e"
+    },
+    {
+      "path": "packages/publisher/dist/capability-preflight.d.ts",
+      "bytes": 2411,
+      "sha256": "060a111c5514920cfce2fad8adeee0d49146c6f430d75706dd516d938cfc500c"
+    },
+    {
+      "path": "packages/publisher/dist/capability-preflight.js",
+      "bytes": 11955,
+      "sha256": "2d7656c0cb1eb78769b64ef1eed152941def896a04d822acdcca19e7cedcb353"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "bytes": 902,
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 1375,
+      "sha256": "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7"
+    },
+    {
+      "path": "packages/publisher/src/capability-preflight.ts",
+      "bytes": 16404,
+      "sha256": "1d8d66774a6368f8579f405829d066386a2ee13846650da61a5e8050218854da"
+    },
+    {
+      "path": "packages/publisher/src/index.ts",
+      "bytes": 911,
+      "sha256": "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30"
+    },
+    {
+      "path": "packages/publisher/src/publish-diagnostics.ts",
+      "bytes": 9286,
+      "sha256": "908fc64f8f4a8b24f14113656a683dcaca67f7d03ab27d52113adf23760cd8b6"
+    },
+    {
+      "path": "packages/publisher/src/publish-result.ts",
+      "bytes": 10665,
+      "sha256": "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00"
+    },
+    {
+      "path": "packages/publisher/src/source-preflight.ts",
+      "bytes": 11524,
+      "sha256": "af26af6c01b0e93eca8acbc52de1645556a3606ca072f8c18715af0ce67d4321"
+    },
+    {
+      "path": "packages/publisher/test/capability-preflight.test.ts",
+      "bytes": 32855,
+      "sha256": "19079b602b74ce64999c5286afde11381a387a03153a6b5d48fc56f9aabce970"
+    },
+    {
+      "path": "packages/publisher/test/capability-preflight.types.ts",
+      "bytes": 5312,
+      "sha256": "d727c78362782e61b0cdcf98a5bfa69ddb5e6b40aa29348e313c696b9e4a9024"
+    },
+    {
+      "path": "packages/reference-catalog-web/catalog.json",
+      "bytes": 8439,
+      "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+    },
+    {
+      "path": "packages/validator/src/component-contract-validation.ts",
+      "bytes": 33804,
+      "sha256": "f469bea2473639ec2ce9dde61d1390c9ce6dab3003998928922699c1bebb3e6d"
+    },
+    {
+      "path": "packages/validator/src/index.ts",
+      "bytes": 5916,
+      "sha256": "8fb565cd1276386510bef53be5de6bb48803b8d4f6048757e261e6849adfba92"
+    },
+    {
+      "path": "packages/validator/src/interaction-contract-validation.ts",
+      "bytes": 63591,
+      "sha256": "559de34751c6ea52716926fffd031e147ed0785abf31708376aa838276172031"
+    },
+    {
+      "path": "packages/validator/test/component-contracts.test.ts",
+      "bytes": 31970,
+      "sha256": "17d7bf7503b7d3dbb88ffe44ab51b86015bfa8448a4c7ef5167beb1cb9d65ecc"
+    },
+    {
+      "path": "packages/validator/test/diagnostic-micro-vectors.test.ts",
+      "bytes": 3271,
+      "sha256": "b3d4eb1b65005b9b1df8ecc95a4221ed5f46c296cc919ece6f9697ec1f8046aa"
+    },
+    {
+      "path": "packages/validator/test/interaction-contracts.test.ts",
+      "bytes": 45845,
+      "sha256": "e09414c399ec4f8640c3925c1eecbc08e8c9d5d59a60567edcfd95ef16c5b18b"
+    },
+    {
+      "path": "scripts/generate-publisher-capability-preflight-proof.mjs",
+      "bytes": 853,
+      "sha256": "d201ad622ed35ce366d5a621d5b7344a413edb671e66c889636e504b74ecd289"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/publisher-capability-preflight-proof.mjs",
+      "bytes": 62137,
+      "sha256": "5aa8c82170b93d5c3eca9c7801c5a562d706b2f59ed2af956c998893aef3479d"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 45050,
+      "sha256": "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360"
+    },
+    {
+      "path": "scripts/test/ci-quality-gate.test.mjs",
+      "bytes": 24068,
+      "sha256": "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf"
+    },
+    {
+      "path": "scripts/verify-publisher-capability-preflight.mjs",
+      "bytes": 681,
+      "sha256": "8060af4e53c15768eb99a4c7fd080fb247f8901661d9aae96ca3f0b5c9cd1823"
+    },
+    {
+      "path": "tests/publisher-capability-preflight.test.mjs",
+      "bytes": 13757,
+      "sha256": "87e7e7e42f016bfe0663f0c149486daf8e5a7cda84d2874804cb83d8c31dc1b7"
+    }
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/validator build",
+    "pnpm --filter @desen/validator test:component-contracts",
+    "pnpm --filter @desen/validator test:interaction-contracts",
+    "pnpm --filter @desen/publisher build",
+    "pnpm --filter @desen/publisher typecheck",
+    "pnpm --filter @desen/publisher test:capability-preflight",
+    "node scripts/generate-publisher-capability-preflight-proof.mjs",
+    "node scripts/verify-publisher-capability-preflight.mjs",
+    "node --test tests/publisher-capability-preflight.test.mjs"
+  ]
+}

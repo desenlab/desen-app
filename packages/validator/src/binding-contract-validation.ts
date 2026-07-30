@@ -92,6 +92,22 @@ export interface DesenBindingContractValidationFailure<Target extends DesenBindi
 export type DesenBindingContractValidationResult<Target extends DesenBindingContractTarget> =
   DesenBindingContractValidationSuccess<Target> | DesenBindingContractValidationFailure<Target>;
 
+/** Publication phase that owns one diagnostic emitted by the prepared T10 binding walk. */
+export type DesenPreparedBindingPublicationPhase =
+  "binding-compatibility" | "state-and-control-flow";
+
+/**
+ * Phase-preserving diagnostics from one exact prepared Source or Bundle binding walk.
+ *
+ * @internal This sibling-module seam lets cumulative execution validation preserve publication
+ * stage provenance without inferring it from a diagnostic code or JSON Pointer. It is intentionally
+ * absent from the package root.
+ */
+export interface DesenPreparedBindingPublicationDiagnostics {
+  readonly stateAndControlFlowDiagnostics: readonly DesenSemanticDiagnostic[];
+  readonly bindingCompatibilityDiagnostics: readonly DesenSemanticDiagnostic[];
+}
+
 /**
  * Static information supplied by a later validator stage for one resource or operation reference.
  *
@@ -215,6 +231,20 @@ type ItemPathAnalysis =
   | Readonly<{ kind: "missing" }>
   | Readonly<{ kind: "unknown" }>
   | Readonly<{ kind: "value"; alternatives: readonly ValueKnowledge[] }>;
+
+const BINDING_DIAGNOSTIC_PUBLICATION_PHASE = new WeakMap<
+  object,
+  DesenPreparedBindingPublicationPhase
+>();
+
+function pushBindingDiagnostic(
+  diagnostics: DesenSemanticDiagnostic[],
+  diagnostic: DesenSemanticDiagnostic,
+  phase: DesenPreparedBindingPublicationPhase,
+): void {
+  BINDING_DIAGNOSTIC_PUBLICATION_PHASE.set(diagnostic, phase);
+  diagnostics.push(diagnostic);
+}
 
 function appendPath(pointer: JsonPointer, ...segments: readonly (number | string)[]): JsonPointer {
   return segments.reduce<JsonPointer>(
@@ -379,6 +409,7 @@ function addCoreDiagnostic(
   >,
   pointer: JsonPointer,
   context: Readonly<DesenDiagnosticContext>,
+  phase: DesenPreparedBindingPublicationPhase,
 ): void {
   const messages = {
     PREDICATE_TYPE_MISMATCH: "A statically known predicate operand has an incompatible type.",
@@ -387,7 +418,11 @@ function addCoreDiagnostic(
     REPEAT_KEY_INVALID: "A repeat key is statically missing, invalid, or duplicated.",
     STATE_WRITE_INVALID: "A state action does not target a declared surface-local state entry.",
   } as const;
-  diagnostics.push(createCoreDiagnostic({ code, message: messages[code], pointer, context }));
+  pushBindingDiagnostic(
+    diagnostics,
+    createCoreDiagnostic({ code, message: messages[code], pointer, context }),
+    phase,
+  );
 }
 
 function validateStateContracts(
@@ -407,11 +442,13 @@ function validateStateContracts(
     const graphIssues = validateSchemaContractGraph(schema);
     if (graphIssues.length > 0) {
       graphIssues.forEach((issue) => {
-        diagnostics.push(
+        pushBindingDiagnostic(
+          diagnostics,
           invalidBindingContractDiagnostic(
             appendRelativePointer(appendJsonPointer(pointer, "schema"), issue.pointer),
             context,
           ),
+          "state-and-control-flow",
         );
       });
       continue;
@@ -427,17 +464,21 @@ function validateStateContracts(
       );
     } catch (error) {
       if (!(error instanceof RangeError)) throw error;
-      diagnostics.push(
+      pushBindingDiagnostic(
+        diagnostics,
         invalidBindingContractDiagnostic(appendJsonPointer(pointer, "initial"), context),
+        "state-and-control-flow",
       );
       continue;
     }
     result.issues.forEach((issue) => {
-      diagnostics.push(
+      pushBindingDiagnostic(
+        diagnostics,
         invalidBindingContractDiagnostic(
           appendRelativePointer(appendJsonPointer(pointer, "initial"), issue.pointer),
           context,
         ),
+        "state-and-control-flow",
       );
     });
   }
@@ -905,15 +946,21 @@ function inspectFormat(
   const names = parseFormatTemplate(template);
   const templatePointer = appendPath(pointer, "$format", "template");
   if (names === undefined || [...names].some((name) => !Object.hasOwn(values, name))) {
-    diagnostics.push(invalidBindingContractDiagnostic(templatePointer, scope.context));
+    pushBindingDiagnostic(
+      diagnostics,
+      invalidBindingContractDiagnostic(templatePointer, scope.context),
+      "binding-compatibility",
+    );
   }
   for (const key of sortedKeys(values)) {
     if (names !== undefined && !names.has(key)) {
-      diagnostics.push(
+      pushBindingDiagnostic(
+        diagnostics,
         invalidBindingContractDiagnostic(
           appendPath(pointer, "$format", "values", key),
           scope.context,
         ),
+        "binding-compatibility",
       );
     }
     valueStack.push({
@@ -946,6 +993,7 @@ function inspectReference(
       "REFERENCE_UNRESOLVED",
       appendJsonPointer(pointer, "$ref"),
       scope.context,
+      "binding-compatibility",
     );
   }
   if (Object.hasOwn(value, "fallback")) {
@@ -1017,7 +1065,13 @@ function predicateMismatch(
   pointer: JsonPointer,
   scope: BindingScope,
 ): void {
-  addCoreDiagnostic(diagnostics, "PREDICATE_TYPE_MISMATCH", pointer, scope.context);
+  addCoreDiagnostic(
+    diagnostics,
+    "PREDICATE_TYPE_MISMATCH",
+    pointer,
+    scope.context,
+    "state-and-control-flow",
+  );
 }
 
 function validateOrderedPredicate(
@@ -1182,13 +1236,25 @@ function validateStaticRepeatKeys(
         typeof result.value !== "string" &&
         typeof result.value !== "number")
     ) {
-      addCoreDiagnostic(diagnostics, "REPEAT_KEY_INVALID", pointer, scope.context);
+      addCoreDiagnostic(
+        diagnostics,
+        "REPEAT_KEY_INVALID",
+        pointer,
+        scope.context,
+        "state-and-control-flow",
+      );
       return true;
     }
     if (result.kind !== "value") continue;
     const identity = canonicalizeJson(result.value);
     if (identities.has(identity)) {
-      addCoreDiagnostic(diagnostics, "REPEAT_KEY_INVALID", pointer, scope.context);
+      addCoreDiagnostic(
+        diagnostics,
+        "REPEAT_KEY_INVALID",
+        pointer,
+        scope.context,
+        "state-and-control-flow",
+      );
       return true;
     }
     identities.add(identity);
@@ -1218,19 +1284,24 @@ function prepareNodeRepeat(
       "REPEAT_ITEMS_INVALID",
       appendJsonPointer(repeatPointer, "items"),
       scope.context,
+      "state-and-control-flow",
     );
   }
   if (findRepeatAlias(scope.repeat, alias) !== undefined) {
-    diagnostics.push(
+    pushBindingDiagnostic(
+      diagnostics,
       invalidBindingContractDiagnostic(appendJsonPointer(repeatPointer, "as"), scope.context),
+      "state-and-control-flow",
     );
   }
 
   const itemTemplates = Array.isArray(items) ? items : undefined;
   const limit = ownValue(repeat, "limit");
   if (itemTemplates !== undefined && typeof limit === "number" && itemTemplates.length > limit) {
-    diagnostics.push(
+    pushBindingDiagnostic(
+      diagnostics,
       invalidBindingContractDiagnostic(appendJsonPointer(repeatPointer, "limit"), scope.context),
+      "state-and-control-flow",
     );
   }
   const repeatScope = withRepeat(
@@ -1250,13 +1321,25 @@ function prepareNodeRepeat(
       new Set<SchemaContractJsonType>(["number", "string"]),
     )
   ) {
-    addCoreDiagnostic(diagnostics, "REPEAT_KEY_INVALID", keyPointer, repeatScope.context);
+    addCoreDiagnostic(
+      diagnostics,
+      "REPEAT_KEY_INVALID",
+      keyPointer,
+      repeatScope.context,
+      "state-and-control-flow",
+    );
     consumerDiagnosed = true;
   } else if (
     keyAlternatives.length > 0 &&
     keyAlternatives.every((knowledge) => knowledge.kind === "unresolved")
   ) {
-    addCoreDiagnostic(diagnostics, "REPEAT_KEY_INVALID", keyPointer, repeatScope.context);
+    addCoreDiagnostic(
+      diagnostics,
+      "REPEAT_KEY_INVALID",
+      keyPointer,
+      repeatScope.context,
+      "state-and-control-flow",
+    );
     consumerDiagnosed = true;
   } else if (itemTemplates !== undefined) {
     consumerDiagnosed = validateStaticRepeatKeys(
@@ -1536,6 +1619,7 @@ function inspectActionWork(
         "STATE_WRITE_INVALID",
         appendJsonPointer(work.pointer, "path"),
         work.scope.context,
+        "state-and-control-flow",
       );
     }
   }
@@ -1636,18 +1720,7 @@ function surfaceBindingDiagnostics(
   }
 }
 
-/**
- * Runs the T10 binding walker over one already trusted immutable Source or Bundle snapshot.
- *
- * @remarks Without a resolver this is the exact package-private path used by the public T10 API.
- * A later cumulative validator may supply static resource and operation metadata so the same
- * fallback, predicate, repeat, format, and ValueSpec logic can inspect those namespaces without
- * duplicating traversal. The function performs no structural snapshotting and does not establish
- * catalog trust; both arguments must already have crossed their respective earlier boundaries.
- *
- * @internal This bridge is intentionally absent from the package root API.
- */
-export function validateDesenPreparedBindingSnapshot(
+function preparedBindingSnapshotDiagnostics(
   document: ImmutableJson<DesenSource> | ImmutableJson<DesenBundle>,
   catalogSet: DesenValidatedInteractionCatalogSet,
   externalReferenceResolver?: DesenBindingExternalReferenceResolver,
@@ -1669,7 +1742,61 @@ export function validateDesenPreparedBindingSnapshot(
       );
     }
   }
-  return normalizeSemanticDiagnostics(diagnostics);
+  return diagnostics;
+}
+
+/**
+ * Runs the T10 binding walker over one already trusted immutable Source or Bundle snapshot.
+ *
+ * @remarks Without a resolver this is the exact package-private path used by the public T10 API.
+ * A later cumulative validator may supply static resource and operation metadata so the same
+ * fallback, predicate, repeat, format, and ValueSpec logic can inspect those namespaces without
+ * duplicating traversal. The function performs no structural snapshotting and does not establish
+ * catalog trust; both arguments must already have crossed their respective earlier boundaries.
+ *
+ * @internal This bridge is intentionally absent from the package root API.
+ */
+export function validateDesenPreparedBindingSnapshot(
+  document: ImmutableJson<DesenSource> | ImmutableJson<DesenBundle>,
+  catalogSet: DesenValidatedInteractionCatalogSet,
+  externalReferenceResolver?: DesenBindingExternalReferenceResolver,
+): readonly DesenSemanticDiagnostic[] {
+  return normalizeSemanticDiagnostics(
+    preparedBindingSnapshotDiagnostics(document, catalogSet, externalReferenceResolver),
+  );
+}
+
+/**
+ * Runs the same exact T10 walk while preserving emission-site publication phase provenance.
+ *
+ * @internal The two arrays are normalized independently and together cover every diagnostic from
+ * {@link validateDesenPreparedBindingSnapshot}. No diagnostic code or pointer is inspected to
+ * recover its phase.
+ */
+export function validateDesenPreparedBindingSnapshotForPublication(
+  document: ImmutableJson<DesenSource> | ImmutableJson<DesenBundle>,
+  catalogSet: DesenValidatedInteractionCatalogSet,
+  externalReferenceResolver?: DesenBindingExternalReferenceResolver,
+): DesenPreparedBindingPublicationDiagnostics {
+  const diagnostics = preparedBindingSnapshotDiagnostics(
+    document,
+    catalogSet,
+    externalReferenceResolver,
+  );
+  const stateAndControlFlowDiagnostics: DesenSemanticDiagnostic[] = [];
+  const bindingCompatibilityDiagnostics: DesenSemanticDiagnostic[] = [];
+  for (const diagnostic of diagnostics) {
+    const phase = BINDING_DIAGNOSTIC_PUBLICATION_PHASE.get(diagnostic);
+    if (phase === "state-and-control-flow") stateAndControlFlowDiagnostics.push(diagnostic);
+    else if (phase === "binding-compatibility") bindingCompatibilityDiagnostics.push(diagnostic);
+    else {
+      throw new TypeError("A prepared binding diagnostic has no publication phase.");
+    }
+  }
+  return Object.freeze({
+    stateAndControlFlowDiagnostics: normalizeSemanticDiagnostics(stateAndControlFlowDiagnostics),
+    bindingCompatibilityDiagnostics: normalizeSemanticDiagnostics(bindingCompatibilityDiagnostics),
+  });
 }
 
 /**

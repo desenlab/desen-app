@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27
+Last updated: 2026-07-30
 
 ## Plain-language status
 
@@ -344,16 +344,118 @@ factory bypass, structural render plan, capability/source-node selection, dynami
 package path, forbidden application edge, authoring Source input, orphan source, symlink, or
 unknown asset fails closed. `PF-059` records this audit profile. P-07 advances to `PARTIAL`;
 P-06/P-10 remain `PARTIAL` for their later Desen App slices; and G05 is `DONE`.
+M06-T01 now establishes the Publisher's closed terminal result, exact sixteen-stage vocabulary,
+stable raw-ingress diagnostics, and package-private strict JSON boundary. Successful publication
+is reserved for a complete immutable Bundle plus warnings; every controlled failure starts with a
+blocking error and structurally contains no Bundle or partial parsed value. Malformed JSON,
+duplicate decoded names, invalid Unicode, non-finite numeric outcomes, finite-budget crossings,
+hostile limit profiles, revoked Proxies, and long-path CPU regressions have executable coverage.
+This task intentionally emits no Bundle and changes no proof claim, normative status, or gate.
+M06-T02 now resolves already validated Source Catalog requirements only against a closed,
+caller-supplied package-observation inventory. Exact `id`, `version`, and optional `target`
+matching admits one candidate; discovery locations, candidate order, SemVer ranges, Unicode
+normalization, and equal Catalog JSON never create authority. Every unique Catalog crosses bounded
+inert capture, frozen structural validation, exact candidate/Catalog identity and observed-digest
+consistency, and one immutable set-wide capability namespace. Missing, ambiguous, malformed,
+inconsistent, over-budget, or conflicting input returns the M06-T01 no-Bundle failure shell with
+no partial Catalog authority. `PF-061` records that the resolver compares a preverified
+target-profile digest observation rather than claiming to hash arbitrary package bytes itself.
+M06-T03 now prepares one complete immutable Source authority before any later Publisher
+transformation. Strict raw JSON, the exact Source root, every embedded state schema, exact
+requirement SemVer, entry and surface identity, and the shared node/behavior namespace run before
+Catalog candidate observation. M06-T02 then establishes the exact Catalog authority before
+category-aware component, behavior, resource, and nested-operation references are finalized.
+Root, embedded, Source-local, Catalog, and Catalog-backed reference failures retain their exact
+stopped stages and expose no partial Source, Catalog set, package tuple, alignment, or Bundle.
+Under-budget inherited T01/T02 failures remain byte-identical; an over-budget inherited report is
+replaced by one redacted diagnostic at the same stage. `PF-062` records this causal ordering and
+private runtime-authentication boundary.
+M06-T04 now prepares the exact selected Catalogs for component and interaction validation before
+checking the exact M06-T03 Source. Statically knowable component props, Variant props, slots,
+accepted children, styles, visual states, events and commands, plus behavior props, slots, styles,
+events, attachment, and conflict rules all fail at `capability-contracts` with no partial
+authority or Bundle. Only a complete static success may emit fixed, redacted, deterministic
+deprecated-capability warnings; Catalog prose and replacement hints never become authority or
+diagnostic content. Own-data traversal and discriminator hardening prevents inherited optional
+fields from fabricating Source structure or stage success. `PF-063` records why the remaining
+resource/operation receiving contracts, dynamic compatibility, and runtime obligations stay
+together in M06-T05.
+M06-T05 now closes that cumulative execution slice without evaluating a runtime value. The exact
+M06-T04 Source, selected packages, Catalogs, requirement alignment, and warnings cross one
+phase-aware Validator analysis. Resource/operation schema and input failures stop at
+`capability-contracts`; state, predicate, repeat, action-target, and control-flow failures stop at
+`state-and-control-flow`; lexical, lifecycle, format, and static binding failures stop at
+`binding-compatibility`. Phase ownership is attached where diagnostics are emitted, with exact
+8 → 9 → 10 simultaneous-error precedence. A complete success adds only the exact execution Catalog
+authority and the closed eight-kind runtime-obligation handoff. Count, pointer, and aggregate
+limits reject without truncation or partial authority. `PF-064` records the phase-provenance
+decision, and the composed M04-T02/M05-T02/M06-T05 evidence advances N-027 to `TESTED`.
+M06-T06 now preserves the exact parsed Source production fields, all Source-reachable opaque
+extensions, every semantic Source array, and one complete surface-scoped component-node trace
+without removing authoring or emitting a Bundle. The trace retains unchanged node identifiers and
+exact RFC 6901 pointers while granting no extension, behavior, runtime, executable, host, or
+platform authority. Exact count, pointer, and aggregate ceilings pass; a one-below crossing rejects
+atomically at `normalization`. `PF-065` records the parsed-value versus raw lexical-byte boundary.
+The composed M05-T05/M06-T06 evidence advances N-021 to `TESTED`; N-012 and N-014 remain
+`PLANNED` for their editor owners.
+M06-T07 now executes the frozen publication order that the earlier task split had obscured:
+calculate `sourceDigest` from the exact authenticated Source, remove only root `authoring`, then
+minimally normalize one detached production-document base. Root authoring changes affect neither
+the digest nor normalized bytes; nested extension data remains semantic. No default, empty-member
+deletion, index, array sort, or deduplication is introduced. The nonterminal success keeps the
+digest separate from the incomplete document, and exact 2 MiB intermediate limits fail closed.
+`PF-066` records the profile and ordering correction. At that checkpoint P-11 advanced only to
+`PARTIAL`; exact tuple pinning remained M06-T08, while Bundle validation/revision, official
+determinism, and the invalid-source matrix remained M06-T09 through M06-T11.
+M06-T08 now independently authenticates that carried Source digest before mapping every loose
+requirement position through the exact selected-package index. The resulting package-private
+document preserves order, duplicates, and opaque extensions while taking
+`id`/`version`/`target`/`digest` only from the authenticated package tuple. Discovery `location`
+remains Source-only digest input and never becomes production selection authority. The pinned
+document is recursively immutable and still contains no revision, publication metadata, terminal
+Bundle success, signing, runtime, host, adapter, activation, or deployment authority. `PF-067`
+records this boundary. P-05 and P-11 remain `PARTIAL`, P-03 remains `NOT_PROVEN`, and M06-T09
+owns final Bundle validation and revision closure.
+M06-T09 now exposes `publishDesenSource` only after composing M06-T08 once, adding a provisional
+revision, enforcing the complete 2 MiB canonical UTF-8 envelope, and validating the exact
+candidate against the exact authenticated Catalog set. The Validator must return an independent
+frozen byte-equal Bundle snapshot; the Publisher remeasures it and requires provisional,
+embedded, and freshly calculated revisions to close. Success returns only that exact snapshot and
+the exact predecessor warnings. Every malformed authority, Validator, byte, limit, or revision
+path remains an atomic no-Bundle failure. `PF-068` records the bootstrap/closure and byte-metric
+profile. P-03 remains `NOT_PROVEN` until M06-T10's official double-publication golden; P-05 and
+P-11 remain `PARTIAL`; G06 remains open.
+M06-T10 now freezes the public Publisher's official Source-to-Bundle golden without adding a
+second production path. Two fresh official Source/Catalog candidate graphs published through
+`publishDesenSource` produce separate immutable Bundle graphs with identical 2,173-byte RFC 8785
+canonical output, revision, and Source digest. Those bytes exactly equal the frozen official
+Bundle after removing only its own root `publication` member; root `authoring` remains excluded
+while nested semantic content remains significant. P-03 and P-11 are now `PROVEN`; P-05 remains
+`PARTIAL`, N-016 and N-018 remain `PLANNED` for later runtime/editor owners, and at that checkpoint
+G06 remained open for M06-T11's invalid-source matrix.
+M06-T11 now closes that final Publisher gap through the built public two-argument
+`publishDesenSource` root. Its 127 invalid cases stop at the exact earliest naturally reachable
+stage with immutable error-first diagnostics and no Bundle or partial publication authority; eight
+positive guards retain the official golden, dynamic obligations, exact boundaries, sanitized
+warnings, and deterministic replay. The matrix covers stage 8 → 9 → 10 precedence, every reachable
+default-limit branch, the complete 14-code Publisher registry, exact fixture and successor bytes,
+31 task-applicability records, two task-local PF-047 records, and 12 trace rows. It does not invent
+failures for deterministic stages that have no invalid two-argument data input. The complete
+Publisher suite passes 292/292, M06-T11 and G06 are `DONE`, and immutable storage begins at M07-T01.
+P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the
+Publisher conformance target remain `PLANNED`.
 
 ## Current milestone
 
-- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`
+- Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
+  `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `M06 — Deterministic publisher`
-- Overall implementation progress: `63 / 145 tasks complete (43%)`
+- Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
+- Overall implementation progress: `74 / 145 tasks complete (51%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
-- Proof-gate progress: `6 / 13 complete`
+- M06 progress: `11 / 11 tasks complete (100%)`
+- Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -401,11 +503,23 @@ P-06/P-10 remain `PARTIAL` for their later Desen App slices; and G05 is `DONE`.
   `M05-T06 — Error boundaries and explicit capability failure`,
   `M05-T07 — Independently built reference-host shell with host ports`,
   `M05-T08 — Official sign-in bundle running through real adapters`,
-  `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`
+  `M05-T09 — Automated source/import audit preventing handwritten managed-screen composition`,
+  `M06-T01 — Staged PublishResult and diagnostics API`,
+  `M06-T02 — Exact Catalog resolution, package immutability, and namespace-conflict checks`,
+  `M06-T03 — Source, embedded-schema, identity, entry, and static-reference preflight`,
+  `M06-T04 — Prop, slot, style, event, command, and behavior preflight`,
+  `M06-T05 — Resource/operation contracts, dynamic compatibility, and runtime obligations`,
+  `M06-T06 — Extension preservation, array-order preservation, and source-node identity traceability`,
+  `M06-T07 — Source digest, authoring removal, and deterministic normalization`,
+  `M06-T08 — Source-digest authentication/carry and exact package tuple pinning`,
+  `M06-T09 — Bundle validation and revision calculation`,
+  `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
+  `M06-T11 — Invalid-source matrix proves no bundle is emitted`
 - Active task: none
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
-- Next implementation task: `M06-T01 — Staged PublishResult and diagnostics API`
-- Status: M05 and G05 are complete; M06-T01 is ready to start
+- Next implementation task:
+  `M07-T01 — Content-addressed bundle store with immutable revision entries`
+- Status: M06 and G06 are complete; M07-T01 is ready
 
 ## Completed preparation
 
@@ -749,9 +863,9 @@ test-support, or facade dependency. The official-derived sign-in application now
 stack through the real reference adapters and trusted operation boundary, exercising pending,
 declared failure, retry, success, navigation, replacement, disposal, and stale-result containment
 without accepting a caller-selected Bundle, Catalog, capability, registry, route, managed React
-tree, or recovery key. N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-06, P-10, P-16, and
-P-17 remain `PARTIAL`, and N-021 remains `PLANNED`. The M05-T09 TypeScript semantic audit and real
-Vite graph now prove that every discovered production source is reachable, exact
+tree, or recovery key. N-021, N-026, N-029, N-033, N-034, and N-037 are `TESTED`; P-06, P-10,
+P-16, and P-17 remain `PARTIAL`. The M05-T09 TypeScript semantic audit and real Vite graph now
+prove that every discovered production source is reachable, exact
 host-infrastructure JSX is the only handwritten tree, and the managed branch crosses the public
 generic renderer and shared adapter factory without an alternate executable path. P-07 is now
 `PARTIAL` pending Desen App E2E; G05 is complete.
@@ -764,10 +878,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Next task
 
-Begin `M06-T01 — Staged PublishResult and diagnostics API`. Define the deterministic Publisher's
-closed success/failure result boundary and stable diagnostics without emitting a Bundle yet;
-M06-T02 and later tasks will add exact Catalog resolution, semantic preflight, authoring removal,
-and deterministic publication in dependency order.
+Begin `M07-T01 — Content-addressed bundle store with immutable revision entries`. Persist only
+already validated, revision-closed Bundle bytes under their exact revision identity; reject
+overwrite, collision, partial-write, path, and mutable-alias failure modes before any channel or
+activation authority exists. This task starts storage evidence only. Digest re-verification,
+installed-package verification, channel mutation, last-known-good activation, crash recovery, and
+control-plane APIs remain with their later M07 owners.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1337,6 +1453,268 @@ M05-T09 evidence:
 - honest limits: no M06 Publisher provenance, dynamic capability installation, browser E2E, Desen
   App registry/Run Mode parity, deployment-security, channel activation, persistent recovery, or
   native-runtime claim
+
+M06-T01 evidence:
+
+- `docs/proof/PUBLISHER-PUBLISH-RESULT.md`
+- `docs/proof/artifacts/publisher-0.1.0-publish-result.json`
+- artifact SHA-256: `aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63`
+- exact boundary: one closed `PublishResult`; immutable complete-Bundle success with warnings;
+  error-first no-Bundle failure; sixteen ordered stages; separate severity/classification; and a
+  package-private strict raw Source JSON stage
+- ingress profile: 8,388,608 UTF-8 bytes, 256 container levels, 262,144 value occurrences,
+  4,194,304 decoded string code units, and 1,024 code units per number token
+- executable evidence: 13 focused package cases, 9 compiler-negative cases, 12 root proof/mutation
+  cases, 10 byte-tracked evidence and G05 compatibility-ownership files, exact source and built
+  declaration exports, exact package entry, deterministic artifact rebuilds, hostile-profile and
+  long-path regressions, no partial output, and atomic-write protection
+- coverage decision: M06-T01 becomes `DONE`; no `P-*`, `N-*`, `S-*`, or gate status changes;
+  M06-T02 owns exact Catalog resolution next
+
+M06-T02 evidence:
+
+- `docs/proof/PUBLISHER-CATALOG-RESOLUTION.md`
+- `docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
+- artifact SHA-256: `02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6`
+- exact boundary: code-unit-equal `id`/`version`/optional-`target` resolution from one closed
+  package-observation inventory; no location, range, normalization, newest, or first-candidate
+  authority; bounded inert Catalog capture; exact candidate/Catalog identity and preobserved
+  package-digest consistency; immutable single-namespace Catalog set; and no partial authority or
+  Bundle on failure
+- finite profile: 256 Source requirements, 1,024 candidates, 16 MiB per canonical Catalog, 64 MiB
+  aggregate canonical Catalog bytes, 128 container levels, 100,000 JSON values, 4,194,304 decoded
+  string code units, 100,000 capability declarations, 4,096 code units per identity field, and
+  1,024 diagnostics per stopped Catalog stage
+- executable evidence: 22 focused runtime cases, 10 compiler-negative cases, 8 independent
+  proof/mutation cases, 4 exact prerequisite pins, 15 byte-tracked task files, deterministic
+  artifact regeneration, unique proof-document pinning, package-root privacy, target neutrality,
+  hostile input containment, and reviewed single-pass CI registration
+- coverage decision: M06-T02 becomes `DONE`; N-007 and N-025 retain `TESTED` with completed
+  Publisher integration evidence; no `P-*` or gate status changes; M06-T03 owns complete Source
+  preflight next
+
+M06-T03 evidence:
+
+- `docs/proof/PUBLISHER-SOURCE-PREFLIGHT.md`
+- `docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+- artifact SHA-256: `07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`
+- exact boundary: strict raw Source ingress; distinct Source-root and embedded-schema phases;
+  catalog-independent SemVer, entry, surface, and node/behavior identity checks before candidate
+  observation; exact M06-T02 Catalog authority before category-aware component, behavior,
+  resource, and nested-operation references; one runtime-authenticated immutable nonterminal
+  result; and no partial authority or Bundle on any failure
+- finite report profile: 1,024 diagnostics per stopped stage, 4,096 UTF-16 code units per
+  diagnostic pointer, and 1,048,576 aggregate diagnostic/context code units; the same ceiling
+  preserves under-budget inherited T01/T02 failures and replaces only an over-budget report with
+  one redacted same-stage diagnostic
+- executable evidence: 10 focused Publisher cases, 16 compiler-negative cases, 4
+  Validator-foundation cases, 10 independent proof/mutation cases, 4 exact prerequisite pins, 20
+  byte-tracked files, deterministic artifact regeneration, phase-order and candidate-nonobservation
+  mutations, static-reference bypass rejection, package-root privacy, target neutrality,
+  no-partial failure, and atomic-write protection
+- coverage decision: M06-T03 becomes `DONE`; N-013, N-017, and N-025 retain `TESTED` with completed
+  Publisher integration evidence; no `P-*` or gate status changes; M06-T04 owns capability
+  contracts next
+
+M06-T04 evidence:
+
+- `docs/proof/PUBLISHER-CAPABILITY-PREFLIGHT.md`
+- `docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+- artifact SHA-256: `2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`
+- exact boundary: the exact M06-T03 Source, selected packages, Catalogs, and requirement alignment
+  cross safe interaction-schema preparation and complete static component/behavior contract
+  validation; success stays package-private and nonterminal with no dynamic obligations or Bundle
+- warning profile: exact deprecated component, behavior, resource, and top-level or nested
+  operation use sites receive one fixed redacted warning; `false` and absence do not warn;
+  Catalog prose and replacement hints are neither disclosed nor selected
+- finite report profile: 1,024 diagnostics per stopped stage, 4,096 UTF-16 code units per
+  diagnostic pointer, and 1,048,576 aggregate diagnostic/context code units; over-budget warning
+  sets fail closed and are never truncated
+- executable evidence: 14 focused Publisher runtime cases, 20 compiler-negative cases, 32
+  component cases, 49 interaction cases, 4 diagnostic micro-vector cases, 15 independent
+  proof/mutation cases, 4 exact prerequisite pins, and 33 byte-tracked files
+- hardening: inherited optional Source/Catalog data and lower-stage discriminators cannot fabricate
+  traversal or success; the shared semantic and interaction walkers now apply the same own-data
+  rule, with focused regressions; the enduring M05-T09 host audit admits only the source-, module-,
+  graph-, and backing-snapshot-pinned cumulative Validator successor through M06-T04
+- coverage decision: M06-T04 becomes `DONE`; no `P-*`, `N-*`, `S-*`, or gate status changes;
+  `PIPE-032` remains partial because M06-T05 owns resource/operation receiving contracts, dynamic
+  compatibility, and recorded runtime obligations next
+
+M06-T05 evidence:
+
+- `docs/proof/PUBLISHER-EXECUTION-PREFLIGHT.md`
+- `docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
+- artifact SHA-256: `6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67`
+- exact boundary: internal M06-T04 composition; exact prepared Source, execution Catalog, selected
+  package, requirement-alignment, and warning authority; one emission-site phase-aware T10/T11
+  analysis; exact stage 8 → 9 → 10 precedence; and one package-private nonterminal success
+- obligation profile: exact closed eight-kind vocabulary; complete sorted, de-duplicated, deeply
+  frozen handoff; 4,096-obligation, 4,096-pointer-unit, and 1,048,576 aggregate-unit ceilings;
+  exact-boundary acceptance and one-below rejection without truncation
+- executable evidence: 14 focused Publisher cases, 28 compiler-negative cases, 50 binding cases,
+  50 execution cases, 15 independent proof/mutation cases, 3 exact prerequisite pins, and 35
+  byte-tracked files
+- compatibility hardening: the enduring M05 host audit retains its immutable historical artifact
+  while exact-pinning the six-module M06-T05 Validator successor, including the one new
+  execution-to-semantic authority edge and derived graph counters
+- coverage decision: M06-T05 becomes `DONE`; the Publisher portion of `PIPE-032` is complete;
+  `PIPE-033` and `PIPE-034` have direct publication evidence; composed M04-T02/M05-T02/M06-T05
+  evidence advances N-027 to `TESTED`; no `P-*`, `S-*`, or gate status changes; M06-T06 owns
+  extension/order preservation and source-node identity traceability next
+
+M06-T06 evidence:
+
+- `docs/proof/PUBLISHER-SOURCE-PRESERVATION.md`
+- `docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
+- artifact SHA-256: `261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff`
+- exact boundary: internal M06-T05 composition; exact Source, execution Catalog, selected package,
+  requirement-alignment, warning, and obligation identity; one separate frozen production-field
+  projection; and one package-private nonterminal preservation success
+- preservation scope: all 17 shared Source/Bundle extension declarations are derived from the
+  frozen schemas, all 16 Source-reachable kinds are exercised, eight semantic-array classes retain
+  exact parsed Source references and order, and raw JSON lexical spelling remains explicitly
+  outside the claim
+- trace profile: one exact five-string record per schema-reachable component node under unchanged
+  identifiers; unique Source pointers and surface-scoped `(surfaceId, sourceNodeId)` pairs; equal
+  node ids on different surfaces remain valid; behavior, extension, and authoring node shapes gain
+  no trace authority
+- finite envelope: 25,000 records, 4,096 UTF-16 units in one pointer, and 4,194,304 aggregate
+  identity/pointer units; three exact boundaries pass and three one-below crossings reject at
+  `normalization` without truncation, inherited warnings, partial authority, or a Bundle
+- executable evidence: 15 focused Publisher cases, 46 compiler-negative cases, 18 independent
+  proof/mutation cases, 3 exact prerequisite pins, and 20 byte-tracked files; the CI inventory now
+  contains 55 proofs and a reviewed 118-step single-pass plan
+- coverage decision: M06-T06 becomes `DONE`; the composed M05-T05/M06-T06 evidence advances N-021
+  to `TESTED`; N-012 and N-014 remain `PLANNED` for M08-T07 and M08-T03; no `P-*`, `S-*`, or gate
+  status changes; at that checkpoint M06-T07 owned the next publication slice
+
+M06-T07 evidence:
+
+- `docs/proof/PUBLISHER-SOURCE-NORMALIZATION.md`
+- `docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
+- artifact SHA-256: `59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`
+- exact boundary: one internal M06-T06 composition; Source digest from the exact authenticated
+  pre-normalization Source; root-only authoring removal; one detached RFC 8785-normalized
+  production-document base; and one package-private nonterminal success
+- ordering and preservation: digest → authoring removal → normalization; root authoring changes
+  affect neither digest nor normalized bytes; nested authoring and every opaque extension remain
+  semantic; array order, identifiers, conditions, literals, capability ids, and trace pointers
+  remain unchanged
+- normalization profile: no defaults, empty-member deletion, hidden index, semantic-array sorting,
+  or deduplication; object insertion order has no canonical-byte authority
+- finite envelope: 2,097,152 canonical UTF-8 bytes for the intermediate; exact and zero boundaries
+  plus one-byte crossings; `source-digest` and `normalization` failures expose no warning, partial
+  authority, or Bundle
+- executable evidence: 17 focused Publisher cases, 52 compiler-negative cases, 26 exact named
+  independent proof/mutation cases, 2 exact prerequisite pins, 18 byte-tracked files, source and
+  built-distribution order audits, and 9 immutable trace-ownership rows
+- coverage decision: M06-T07 becomes `DONE`; P-11 advances to `PARTIAL`; P-03 and P-05 remain open,
+  N-018 remains `PLANNED` for the terminal Bundle/editor owners, and G06 remains open; M06-T08 owns
+  digest authentication/carry and exact Catalog tuple pinning next
+
+M06-T08 evidence:
+
+- `docs/proof/PUBLISHER-CATALOG-PINNING.md`
+- `docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`
+- artifact SHA-256: `de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`
+- exact boundary: one internal M06-T07 composition; independent authentication of its exact
+  pre-normalization Source digest; positional mapping through the exact M06-T02 requirement-package
+  indexes; exact selected `id`/`version`/`target`/`digest` tuples; and one package-private
+  nonterminal pinned document
+- requirement semantics: Source order and duplicate positions remain unchanged; omitted target is
+  filled only from the selected package; optional extensions cross by exact immutable identity;
+  top-level discovery `location` remains digest-significant Source data but never enters the exact
+  tuple, while nested extension fields with that spelling remain opaque
+- failure and authority profile: malformed, thrown, or unequal digest authority stops at
+  `source-digest`; tuple-authority drift stops at `catalog-pinning`; neither exposes inherited
+  warnings, partial Source/Catalog/package authority, a pinned document, or a Bundle
+- executable evidence: 13 focused Publisher cases, 52 compiler-negative cases, 37 independent
+  proof/mutation cases, 2 exact prerequisite pins, 21 tracked files, 12 immutable trace-ownership
+  rows, package-root privacy, deterministic artifact regeneration, single-pass CI registration,
+  hostile authority rejection, and atomic-write protection
+- coverage decision: M06-T08 becomes `DONE`; P-05 and P-11 remain `PARTIAL`, P-03 remains
+  `NOT_PROVEN`, N-016/N-018/N-020 remain `PLANNED` for their terminal Publisher, runtime, and
+  editor owners, and G06 remains open; M06-T09 owns complete Bundle validation, final-size
+  enforcement, and revision closure next
+
+M06-T09 evidence:
+
+- `docs/proof/PUBLISHER-BUNDLE-PUBLICATION.md`
+- `docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
+- artifact SHA-256: `2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`
+- exact boundary: one internal M06-T08 composition; provisional revision over the exact pinned
+  document; explicit revision-only candidate construction; complete canonical-byte measurement;
+  one cumulative Bundle Validator call with the exact authenticated Catalog set; independent
+  byte-equal Validator snapshot; second complete measurement; and three-way revision closure
+- terminal contract: public `publishDesenSource(rawSource, catalogPackages)` exposes only the exact
+  immutable Validator Bundle plus exact predecessor warnings on success; limits, intermediates,
+  authority diagnostics, publication metadata, and private stage entry points remain absent from
+  the package root
+- failure and authority profile: every inherited failure passes through only when its frozen
+  diagnostic shell is authentic; malformed predecessor/Validator data, mutable or shared graphs,
+  non-byte canonicalization, byte drift, overflow, helper throws, and revision mismatch return an
+  atomic no-Bundle failure
+- evidence boundary: T09 proves complete validation, final-size enforcement, revision closure,
+  source/distribution parity, public/private API shape, and current compatibility readers; the
+  official golden/double-publish claim remains exclusively M06-T10 and the invalid-source matrix
+  remains M06-T11
+- coverage decision: M06-T09 becomes `DONE`; P-03 remains `NOT_PROVEN`, P-05 and P-11 remain
+  `PARTIAL`, N-016/N-018/N-041 remain `PLANNED` for later owners, and G06 remains open; M06-T10
+  owns the official source-to-bundle golden and double-publication determinism next
+
+M06-T10 evidence:
+
+- `docs/proof/PUBLISHER-OFFICIAL-GOLDEN.md`
+- `docs/proof/artifacts/publisher-0.1.0-official-golden.json`
+- artifact SHA-256: `a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`
+- exact golden: two fresh official Source/Catalog candidate graphs cross only the public
+  `publishDesenSource` root and produce separate recursively immutable results whose 2,173 RFC
+  8785 canonical Bundle bytes, revision, and Source digest are identical
+- external oracle: both public outputs equal the frozen official sign-in Bundle after removing
+  exactly its own root `publication`; no other root or nested member is projected away
+- deterministic constants: canonical SHA-256
+  `fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247`,
+  revision `sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601`,
+  and Source digest
+  `sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878`
+- evidence boundary: exact T09/snapshot/canonicalization/official-suite pins, 19 tracked files,
+  six focused Publisher cases, 71 hostile root mutation cases, no-follow reads, strict inert
+  authority capture, and atomic writes; no alternate production implementation was added
+- coverage decision: M06-T10 becomes `DONE`; P-03 and P-11 become `PROVEN`; P-05 remains
+  `PARTIAL`, N-016 and N-018 remain `PLANNED`, and G06 remains open only for M06-T11's complete
+  invalid-source/no-Bundle matrix
+
+M06-T11 and G06 evidence:
+
+- `docs/proof/PUBLISHER-INVALID-SOURCE-MATRIX.md`
+- `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+- artifact SHA-256:
+  `fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`
+- exact boundary: one isolated built public Publisher root; every publication case calls only
+  `publishDesenSource(rawSource, catalogPackages)`; 127 invalid cases stop at their exact earliest
+  naturally reachable stage; every failure is an immutable exact `{ diagnostics, ok, stage }`
+  shell with a nonempty error-first report and no Bundle or partial publication authority
+- positive guard boundary: eight deterministic guards preserve the official golden, dynamic
+  `context.runtimeTitle` obligations, exact obligation count/pointer/aggregate limits, exact final
+  Bundle admission, sanitized deprecation warnings, and repeated-result equality
+- causal and limit coverage: exact stage 8 → 9 → 10 precedence; inherited parse and Catalog report
+  ceilings; blocking capability and execution report count/pointer/aggregate ceilings;
+  deprecation-warning count/pointer/aggregate ceilings; complete Source-trace
+  count/pointer/aggregate ceilings; and naturally reachable normalization/final-Bundle limits
+- public diagnostic authority: complete ordered 14-code Publisher registry with exact stage and
+  severity metadata; every matrix-emitted Publisher code is registered; discovery `location`
+  remains Source-only, digest-significant data and never establishes package trust
+- executable evidence: 135 focused cases, 292/292 full Publisher tests, 67 independent hostile
+  root proof/mutation cases, 31 exact task-applicability records, two task-local PF-047 records,
+  12 trace rows, exact frozen fixtures, built public files, prerequisite artifacts, one-way
+  successor hashes, deterministic generation, no-follow reads, and atomic writes
+- honest boundary: no fake public negative is created for `source-digest`, `authoring-removal`,
+  `catalog-pinning`, or `bundle-revision`; signing, storage, activation, deployment, runtime,
+  host, adapter, editor, network, and control-plane behavior remain outside M06
+- coverage decision: M06-T11 and G06 become `DONE`; P-03 and P-11 remain `PROVEN`; P-05 and P-17
+  remain `PARTIAL`; N-016, N-018, N-041, and the Publisher conformance target remain `PLANNED`;
+  M07-T01 owns the immutable content-addressed Bundle store next
 
 ## Status vocabulary
 

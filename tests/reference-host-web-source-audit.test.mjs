@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   lstat,
   mkdir,
@@ -17,8 +18,11 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+import { format } from "prettier";
+
 import {
   ReferenceHostWebSourceAuditEvidenceError,
+  buildCurrentReferenceHostWebSourceAuditEvidence,
   buildReferenceHostWebSourceAuditEvidence,
   inspectReferenceHostWebSourceAudit,
   inspectReferenceHostWebSourceInventory,
@@ -27,12 +31,16 @@ import {
   verifyReferenceHostWebDependencyBoundaryConfiguration,
   verifyReferenceHostWebHtmlEnvelopePolicy,
   verifyReferenceHostWebPostCssBuildEnvelopePolicy,
+  verifyReferenceHostWebCurrentCoordinationPolicy,
+  verifyReferenceHostWebCurrentEvidencePolicy,
+  verifyReferenceHostWebValidatorSuccessorSources,
   verifyReferenceHostWebSourceAuditDocumentation,
   verifyReferenceHostWebSourceAuditEvidence,
   verifyReferenceHostWebSourceAuditProofDocument,
   verifyReferenceHostWebBuildEnvelopeEntryPolicy,
   verifyReferenceHostWebSourceGraphPolicy,
   writeReferenceHostWebSourceAuditEvidence,
+  verifyCurrentReferenceHostWebSourceAuditEvidence,
 } from "../scripts/lib/reference-host-web-source-audit-proof.mjs";
 
 const WORKSPACE_ROOT = path.resolve(new URL("..", import.meta.url).pathname);
@@ -42,6 +50,14 @@ const APPLICATION_SOURCE = `${SOURCE_ROOT}/application.tsx`;
 const BROWSER_PROFILE_SOURCE = `${SOURCE_ROOT}/browser-profile.ts`;
 const OFFICIAL_SOURCE = `${SOURCE_ROOT}/official-sign-in.ts`;
 const MAIN_SOURCE = `${SOURCE_ROOT}/main.tsx`;
+const VALIDATOR_SUCCESSOR_SOURCE_PATHS = Object.freeze([
+  "packages/validator/src/index.ts",
+  "packages/validator/src/binding-contract-validation.ts",
+  "packages/validator/src/execution-contract-validation.ts",
+  "packages/validator/src/interaction-contract-validation.ts",
+  "packages/validator/src/semantic-validation.ts",
+  "packages/validator/src/structural-validation.ts",
+]);
 
 function hasEvidenceCode(...expectedCodes) {
   return (error) => {
@@ -53,6 +69,35 @@ function hasEvidenceCode(...expectedCodes) {
 
 async function sourceText(relativePath) {
   return readFile(path.join(WORKSPACE_ROOT, relativePath), "utf8");
+}
+
+async function validatorSuccessorSourceBytes() {
+  return Promise.all(
+    VALIDATOR_SUCCESSOR_SOURCE_PATHS.map((relativePath) =>
+      readFile(path.join(WORKSPACE_ROOT, relativePath)),
+    ),
+  );
+}
+
+function bindTrackedBytes(artifact, relativePath, bytes) {
+  const entry = artifact.evidence.trackedFiles.find(
+    ({ path: candidate }) => candidate === relativePath,
+  );
+  assert.ok(entry);
+  entry.bytes = bytes.length;
+  entry.sha256 = `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
+}
+
+async function canonicalPackageBytes(manifest) {
+  return Buffer.from(
+    await format(JSON.stringify(manifest), {
+      endOfLine: "lf",
+      parser: "json-stringify",
+      printWidth: 100,
+      tabWidth: 2,
+    }),
+    "utf8",
+  );
 }
 
 async function rejectMutation(relativePath, mutate, expectedMessage) {
@@ -112,7 +157,12 @@ function syntheticDocumentation(sha256) {
 test("accepts the stored deterministic M05-T09 source/import audit", async () => {
   const result = await verifyReferenceHostWebSourceAuditEvidence();
   assert.equal(result.result, "PASS");
-  assert.match(result.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    result.artifactSha256,
+    "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89",
+  );
+  assert.equal(result.artifactBytes, 59_871);
+  assert.equal(result.compatibilityMode, "immutable-task-time-artifact");
   assert.equal(result.sourceFiles, 12);
   assert.equal(result.jsxElements, 18);
   assert.equal(result.graphDynamicEdges, 0);
@@ -121,8 +171,8 @@ test("accepts the stored deterministic M05-T09 source/import audit", async () =>
 });
 
 test("builds a deterministic real Vite graph and semantic TypeScript inventory", async () => {
-  const first = await buildReferenceHostWebSourceAuditEvidence();
-  const second = await buildReferenceHostWebSourceAuditEvidence();
+  const first = await buildCurrentReferenceHostWebSourceAuditEvidence();
+  const second = await buildCurrentReferenceHostWebSourceAuditEvidence();
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifact.claim.g05Closed, true);
   assert.equal(first.artifact.claim.p07Status, "PARTIAL");
@@ -153,6 +203,598 @@ test("builds a deterministic real Vite graph and semantic TypeScript inventory",
   );
   assert.equal(Object.isFrozen(first.artifact), true);
   assert.equal(Object.isFrozen(first.artifact.runtimeResolution.modules), true);
+});
+
+test("runs the full current host audit while comparing every enduring M05 input", async () => {
+  const result = await verifyCurrentReferenceHostWebSourceAuditEvidence();
+  assert.equal(result.result, "PASS");
+  assert.equal(
+    result.historicalArtifactSha256,
+    "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89",
+  );
+  assert.equal(result.trackedFiles, 24);
+  assert.equal(result.comparedTrackedFiles, 18);
+  assert.deepEqual(result.admittedSuccessor, {
+    task: "M06-T05",
+    sourceFiles: VALIDATOR_SUCCESSOR_SOURCE_PATHS,
+    modules: [
+      "packages/validator/dist/binding-contract-validation.js",
+      "packages/validator/dist/execution-contract-validation.js",
+      "packages/validator/dist/index.js",
+      "packages/validator/dist/interaction-contract-validation.js",
+      "packages/validator/dist/semantic-validation.js",
+      "packages/validator/dist/structural-validation.js",
+    ],
+  });
+  assert.deepEqual(result.successorSources, {
+    result: "PASS",
+    task: "M06-T05",
+    sources: [
+      {
+        path: "packages/validator/src/index.ts",
+        bytes: 5_916,
+        sha256: "8fb565cd1276386510bef53be5de6bb48803b8d4f6048757e261e6849adfba92",
+      },
+      {
+        path: "packages/validator/src/binding-contract-validation.ts",
+        bytes: 60_596,
+        sha256: "a30578fd38c5662b1fdcdd510f7cfa1a07dd7e190df908db2cc18b7be339ea1a",
+      },
+      {
+        path: "packages/validator/src/execution-contract-validation.ts",
+        bytes: 102_812,
+        sha256: "000933db59b168dbb27983a8a0d55bb4aa30c6ec3946fb6000ea03dd1ce3a176",
+      },
+      {
+        path: "packages/validator/src/interaction-contract-validation.ts",
+        bytes: 63_591,
+        sha256: "559de34751c6ea52716926fffd031e147ed0785abf31708376aa838276172031",
+      },
+      {
+        path: "packages/validator/src/semantic-validation.ts",
+        bytes: 36_879,
+        sha256: "b5ae0899b4202b313c6fe864e6a46189ffc3e45fd1fe659e3f2285fd84d1c463",
+      },
+      {
+        path: "packages/validator/src/structural-validation.ts",
+        bytes: 10_705,
+        sha256: "8e7d4fb3a69b31bb8f4e3da050088058f53218d4ee4c440b8f631c0c475a1fc8",
+      },
+    ],
+  });
+  assert.deepEqual(result.excludedCoordinationPaths, [
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts/generate-reference-host-web-source-audit-proof.mjs",
+    "scripts/lib/reference-host-web-source-audit-proof.mjs",
+    "scripts/verify-reference-host-web-source-audit.mjs",
+    "tests/reference-host-web-source-audit.test.mjs",
+  ]);
+  assert.equal(result.sourceFiles, 12);
+  assert.equal(result.graphModules, 103);
+  assert.equal(result.graphDynamicEdges, 0);
+  assert.equal(result.packageBoundaryViolations, 0);
+  assert.equal(result.coordination.result, "PASS");
+  assert.equal(
+    result.coordination.rootPackageHistoricalSha256,
+    "sha256:1f1d19b6bdb0652f0598ba01a8549eae5c6e8b1a8825cf2cb40503c196bad6da",
+  );
+  assert.equal(
+    result.coordination.lockfileHistoricalSha256,
+    "sha256:d27fadcdc12df64a0ca99d8bc78ba5fc439b06751945339cf374944689cdbe64",
+  );
+});
+
+test("current-evidence policy excludes only coordination bytes and rejects all enduring drift", async () => {
+  const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
+  const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
+  const successorSourceBytes = await validatorSuccessorSourceBytes();
+  const verifyPolicy = (candidate) =>
+    verifyReferenceHostWebCurrentEvidencePolicy(historical, candidate, successorSourceBytes);
+  assert.equal(verifyPolicy(current).comparedTrackedFiles, 18);
+
+  const coordinationOnly = structuredClone(current);
+  for (const relativePath of [
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts/lib/reference-host-web-source-audit-proof.mjs",
+  ]) {
+    const entry = coordinationOnly.evidence.trackedFiles.find(
+      ({ path: candidate }) => candidate === relativePath,
+    );
+    entry.bytes += 1;
+    entry.sha256 = `sha256:${"f".repeat(64)}`;
+  }
+  assert.equal(verifyPolicy(coordinationOnly).result, "PASS");
+
+  const hostSourceDrift = structuredClone(current);
+  hostSourceDrift.evidence.trackedFiles.find(
+    ({ path: candidate }) => candidate === "apps/reference-host-web/src/main.tsx",
+  ).sha256 = `sha256:${"e".repeat(64)}`;
+  assert.throws(
+    () => verifyPolicy(hostSourceDrift),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  const graphDrift = structuredClone(current);
+  graphDrift.runtimeResolution.graphSha256 = `sha256:${"d".repeat(64)}`;
+  assert.throws(
+    () => verifyPolicy(graphDrift),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  const disguisedCoordinationPath = structuredClone(current);
+  disguisedCoordinationPath.evidence.trackedFiles.push({
+    path: "apps/reference-host-web/package.json",
+    bytes: 1,
+    sha256: `sha256:${"c".repeat(64)}`,
+  });
+  assert.throws(
+    () => verifyPolicy(disguisedCoordinationPath),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  const decoratedExcludedRecord = structuredClone(current);
+  decoratedExcludedRecord.evidence.trackedFiles.find(
+    ({ path: candidate }) => candidate === "package.json",
+  ).unexpected = true;
+  assert.throws(
+    () => verifyPolicy(decoratedExcludedRecord),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  const protoDrift = structuredClone(current);
+  Object.defineProperty(protoDrift, "__proto__", {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    value: { polluted: true },
+  });
+  assert.throws(
+    () => verifyPolicy(protoDrift),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+  assert.equal(Object.prototype.polluted, undefined);
+
+  const primitiveArrayBudget = structuredClone(current);
+  primitiveArrayBudget.nonclaims = Array.from({ length: 65_537 }, () => 0);
+  assert.throws(
+    () => verifyPolicy(primitiveArrayBudget),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  assert.throws(
+    () => verifyPolicy(new Proxy(current, {})),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+});
+
+test("admits only the source-pinned M06-T05 Validator runtime successor", async () => {
+  const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
+  const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
+  const successorSourceBytes = await validatorSuccessorSourceBytes();
+  const verifyPolicy = (candidate, sources = successorSourceBytes) =>
+    verifyReferenceHostWebCurrentEvidencePolicy(historical, candidate, sources);
+  const policy = verifyPolicy(current);
+  assert.equal(policy.admittedSuccessor.task, "M06-T05");
+  assert.equal(policy.admittedSuccessor.modules.length, 6);
+  assert.equal(policy.successorSources.result, "PASS");
+  assert.equal(
+    verifyReferenceHostWebValidatorSuccessorSources(successorSourceBytes).result,
+    "PASS",
+  );
+  for (const sourceIndex of successorSourceBytes.keys()) {
+    const tamperedSources = successorSourceBytes.map((bytes) => Buffer.from(bytes));
+    tamperedSources[sourceIndex][tamperedSources[sourceIndex].length - 2] ^= 1;
+    assert.throws(
+      () => verifyReferenceHostWebValidatorSuccessorSources(tamperedSources),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+    assert.throws(
+      () => verifyPolicy(current, tamperedSources),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  }
+  assert.throws(
+    () => verifyReferenceHostWebCurrentEvidencePolicy(historical, current),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID"),
+  );
+
+  const validatorModules = [
+    "packages/validator/dist/binding-contract-validation.js",
+    "packages/validator/dist/execution-contract-validation.js",
+    "packages/validator/dist/index.js",
+    "packages/validator/dist/interaction-contract-validation.js",
+    "packages/validator/dist/semantic-validation.js",
+    "packages/validator/dist/structural-validation.js",
+  ];
+  const mutateModule = (moduleId, mutate) => {
+    const mutated = structuredClone(current);
+    const module = mutated.runtimeResolution.modules.find(({ id }) => id === moduleId);
+    assert.ok(module);
+    mutate(module, mutated);
+    return mutated;
+  };
+  for (const moduleId of validatorModules) {
+    for (const mutated of [
+      mutateModule(moduleId, (module) => {
+        module.codeBytes += 1;
+      }),
+      mutateModule(moduleId, (module) => {
+        module.codeSha256 = `sha256:${"a".repeat(64)}`;
+      }),
+    ]) {
+      assert.throws(
+        () => verifyPolicy(mutated),
+        hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+      );
+    }
+  }
+  const validatorIndex = "packages/validator/dist/index.js";
+  const validatorExecution = "packages/validator/dist/execution-contract-validation.js";
+  for (const mutated of [
+    mutateModule(validatorExecution, (module) => {
+      module.imports = module.imports.filter(
+        (id) => id !== "packages/validator/dist/semantic-validation.js",
+      );
+    }),
+    mutateModule(validatorExecution, (module) => {
+      module.imports.push("packages/validator/dist/unreviewed.js");
+    }),
+    mutateModule(validatorIndex, (module) => {
+      module.imports.push("packages/validator/dist/unreviewed.js");
+    }),
+    mutateModule(validatorIndex, (module) => {
+      module.id = "packages/validator/dist/unreviewed.js";
+    }),
+    mutateModule(validatorIndex, (_module, artifact) => {
+      artifact.runtimeResolution.modules.push({
+        id: "packages/validator/dist/unreviewed.js",
+        imports: [],
+        dynamicImports: [],
+        codeBytes: 1,
+        codeSha256: `sha256:${"b".repeat(64)}`,
+      });
+    }),
+    mutateModule(validatorIndex, (_module, artifact) => {
+      artifact.runtimeResolution.backingSnapshotSha256 = `sha256:${"c".repeat(64)}`;
+    }),
+  ]) {
+    assert.throws(
+      () => verifyPolicy(mutated),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  }
+});
+
+test("Publisher-only coordination preserves root toolchain and complete lockfile provenance", async () => {
+  const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
+  const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
+  const [rootPackageBytes, lockfileBytes] = await Promise.all([
+    readFile(path.join(WORKSPACE_ROOT, "package.json")),
+    readFile(path.join(WORKSPACE_ROOT, "pnpm-lock.yaml")),
+  ]);
+  const lockfileText = lockfileBytes.toString("utf8");
+  assert.equal(
+    (
+      await verifyReferenceHostWebCurrentCoordinationPolicy({
+        historicalArtifact: historical,
+        currentArtifact: current,
+        rootPackageBytes,
+        lockfileBytes,
+      })
+    ).result,
+    "PASS",
+  );
+
+  const futureManifest = JSON.parse(rootPackageBytes.toString("utf8"));
+  futureManifest.scripts["verify:publisher-future-proof"] = "node scripts/future-publisher.mjs";
+  futureManifest.scripts["test:publisher-future-proof"] =
+    "node --test tests/future-publisher.test.mjs";
+  futureManifest.scripts.check = futureManifest.scripts.check.replace(
+    " && pnpm lint",
+    " && pnpm verify:publisher-future-proof && pnpm lint",
+  );
+  futureManifest.scripts.test = futureManifest.scripts.test.replace(
+    " && turbo run test",
+    " && pnpm test:publisher-future-proof && turbo run test",
+  );
+  const futureRootPackageBytes = await canonicalPackageBytes(futureManifest);
+  const publisherImporterMarker = "  packages/publisher:\n";
+  assert.equal(lockfileText.split(publisherImporterMarker).length - 1, 1);
+  const publisherStart = lockfileText.indexOf(publisherImporterMarker);
+  const publisherEnd = lockfileText.indexOf("\n  packages/reference-catalog-web:", publisherStart);
+  assert.ok(publisherStart >= 0);
+  assert.ok(publisherEnd > publisherStart);
+  const mutatePublisher = (needle, replacement) => {
+    const block = lockfileText.slice(publisherStart, publisherEnd);
+    assert.equal(block.split(needle).length - 1, 1);
+    return `${lockfileText.slice(0, publisherStart)}${block.replace(
+      needle,
+      replacement,
+    )}${lockfileText.slice(publisherEnd)}`;
+  };
+  const futureLockfileBytes = Buffer.from(
+    lockfileText.replace(
+      publisherImporterMarker,
+      `${publisherImporterMarker}    optionalDependencies:\n      typescript:\n        specifier: 6.0.3\n        version: 6.0.3\n`,
+    ),
+    "utf8",
+  );
+  const futureArtifact = structuredClone(current);
+  bindTrackedBytes(futureArtifact, "package.json", futureRootPackageBytes);
+  bindTrackedBytes(futureArtifact, "pnpm-lock.yaml", futureLockfileBytes);
+  assert.equal(
+    (
+      await verifyReferenceHostWebCurrentCoordinationPolicy({
+        historicalArtifact: historical,
+        currentArtifact: futureArtifact,
+        rootPackageBytes: futureRootPackageBytes,
+        lockfileBytes: futureLockfileBytes,
+      })
+    ).result,
+    "PASS",
+  );
+
+  await assert.rejects(
+    verifyReferenceHostWebCurrentCoordinationPolicy({
+      historicalArtifact: historical,
+      currentArtifact: current,
+      rootPackageBytes: futureRootPackageBytes,
+      lockfileBytes,
+    }),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  const rejectMalformedLock = async (malformedText, secret) => {
+    const malformedBytes = Buffer.from(malformedText, "utf8");
+    const malformedArtifact = structuredClone(current);
+    bindTrackedBytes(malformedArtifact, "pnpm-lock.yaml", malformedBytes);
+    await assert.rejects(
+      verifyReferenceHostWebCurrentCoordinationPolicy({
+        historicalArtifact: historical,
+        currentArtifact: malformedArtifact,
+        rootPackageBytes,
+        lockfileBytes: malformedBytes,
+      }),
+      (error) => {
+        assert.ok(error instanceof ReferenceHostWebSourceAuditEvidenceError);
+        assert.equal(error.code, "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT");
+        assert.equal(error.message.includes(secret), false);
+        assert.equal(JSON.stringify(error.details ?? {}).includes(secret), false);
+        return true;
+      },
+    );
+  };
+  await rejectMalformedLock(
+    lockfileText.replace(
+      publisherImporterMarker,
+      `${publisherImporterMarker}    [this is not valid yaml\n`,
+    ),
+    "[this is not valid yaml",
+  );
+  const protocolSpecifier = "      '@desen/protocol':\n        specifier: workspace:*";
+  const validBoundaryScalarBytes = Buffer.from(
+    mutatePublisher(
+      protocolSpecifier,
+      "      '@desen/protocol':\n        specifier: 'workspace:*'",
+    ),
+    "utf8",
+  );
+  const validBoundaryScalarArtifact = structuredClone(current);
+  bindTrackedBytes(validBoundaryScalarArtifact, "pnpm-lock.yaml", validBoundaryScalarBytes);
+  assert.equal(
+    (
+      await verifyReferenceHostWebCurrentCoordinationPolicy({
+        historicalArtifact: historical,
+        currentArtifact: validBoundaryScalarArtifact,
+        rootPackageBytes,
+        lockfileBytes: validBoundaryScalarBytes,
+      })
+    ).result,
+    "PASS",
+  );
+  const validQuotedVersionBytes = Buffer.from(
+    mutatePublisher("version: link:../protocol", 'version: "link:../protocol"'),
+    "utf8",
+  );
+  const validQuotedVersionArtifact = structuredClone(current);
+  bindTrackedBytes(validQuotedVersionArtifact, "pnpm-lock.yaml", validQuotedVersionBytes);
+  assert.equal(
+    (
+      await verifyReferenceHostWebCurrentCoordinationPolicy({
+        historicalArtifact: historical,
+        currentArtifact: validQuotedVersionArtifact,
+        rootPackageBytes,
+        lockfileBytes: validQuotedVersionBytes,
+      })
+    ).result,
+    "PASS",
+  );
+  const validQuotedIndicatorBytes = Buffer.from(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: '@bad'"),
+    "utf8",
+  );
+  const validQuotedIndicatorArtifact = structuredClone(current);
+  bindTrackedBytes(validQuotedIndicatorArtifact, "pnpm-lock.yaml", validQuotedIndicatorBytes);
+  assert.equal(
+    (
+      await verifyReferenceHostWebCurrentCoordinationPolicy({
+        historicalArtifact: historical,
+        currentArtifact: validQuotedIndicatorArtifact,
+        rootPackageBytes,
+        lockfileBytes: validQuotedIndicatorBytes,
+      })
+    ).result,
+    "PASS",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(
+      protocolSpecifier,
+      "      '@desen/protocol':\n        specifier: workspace:\u0000*",
+    ),
+    "\u0000",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(
+      protocolSpecifier,
+      "      '@desen/protocol':\n        specifier: workspace:\u000b*",
+    ),
+    "\u000b",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: {}"),
+    "specifier: {}",
+  );
+  await rejectMalformedLock(
+    mutatePublisher("version: link:../protocol", "version: []"),
+    "version: []",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: @bad"),
+    "@bad",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: ,bad"),
+    ",bad",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: foo:"),
+    "foo:",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: null"),
+    "specifier: null",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: ''"),
+    "specifier: ''",
+  );
+  await rejectMalformedLock(
+    mutatePublisher("version: link:../protocol", "version: 1"),
+    "version: 1",
+  );
+  await rejectMalformedLock(
+    mutatePublisher("version: link:../protocol", "version: .5"),
+    "version: .5",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: 0b10"),
+    "specifier: 0b10",
+  );
+  await rejectMalformedLock(
+    mutatePublisher("version: link:../protocol", "version: 1:20"),
+    "version: 1:20",
+  );
+  await rejectMalformedLock(
+    mutatePublisher("version: link:../protocol", "version: 2026-07-29"),
+    "version: 2026-07-29",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, `      '@desen/protocol':\n        specifier: "\\u0000"`),
+    "\\u0000",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, `      '@desen/protocol':\n        specifier: "\\ud800"`),
+    "\\ud800",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(protocolSpecifier, "      '@desen/protocol':\n        specifier: ' '"),
+    "specifier: ' '",
+  );
+  await rejectMalformedLock(mutatePublisher("      '@desen/protocol':", "      '':"), "''");
+  await rejectMalformedLock(
+    mutatePublisher("      '@desen/protocol':", '      "\\u0000":'),
+    "\\u0000",
+  );
+  await rejectMalformedLock(
+    mutatePublisher("      '@desen/protocol':", "      favicon.ico:"),
+    "favicon.ico",
+  );
+  await rejectMalformedLock(mutatePublisher("      '@desen/protocol':", "      %bad:"), "%bad");
+  await rejectMalformedLock(mutatePublisher("      '@desen/protocol':", "      - bad:"), "- bad");
+  await rejectMalformedLock(
+    mutatePublisher(
+      protocolSpecifier,
+      "      '@desen/protocol':\n        specifier: &desen workspace:*",
+    ),
+    "&desen",
+  );
+  await rejectMalformedLock(
+    mutatePublisher("version: link:../protocol", "version: *desen"),
+    "*desen",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(
+      protocolSpecifier,
+      "      '@desen/protocol':\n        specifier: !desen workspace:*",
+    ),
+    "!desen",
+  );
+  await rejectMalformedLock(
+    mutatePublisher(
+      protocolSpecifier,
+      "      '@desen/protocol':\n        specifier: workspace:*\n        specifier: workspace:*",
+    ),
+    "specifier: workspace:*",
+  );
+  await rejectMalformedLock(
+    lockfileText.replace(
+      "  autoInstallPeers: true",
+      "  autoInstallPeers: true\n  autoInstallPeers: true",
+    ),
+    "autoInstallPeers",
+  );
+
+  const toolchainManifest = JSON.parse(rootPackageBytes.toString("utf8"));
+  toolchainManifest.devDependencies.typescript = "6.0.4";
+  const toolchainBytes = await canonicalPackageBytes(toolchainManifest);
+  const toolchainArtifact = structuredClone(current);
+  bindTrackedBytes(toolchainArtifact, "package.json", toolchainBytes);
+  await assert.rejects(
+    verifyReferenceHostWebCurrentCoordinationPolicy({
+      historicalArtifact: historical,
+      currentArtifact: toolchainArtifact,
+      rootPackageBytes: toolchainBytes,
+      lockfileBytes,
+    }),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  const lockSettingsBytes = Buffer.from(
+    lockfileText.replace("  excludeLinksFromLockfile: false", "  excludeLinksFromLockfile: true"),
+    "utf8",
+  );
+  const lockSettingsArtifact = structuredClone(current);
+  bindTrackedBytes(lockSettingsArtifact, "pnpm-lock.yaml", lockSettingsBytes);
+  await assert.rejects(
+    verifyReferenceHostWebCurrentCoordinationPolicy({
+      historicalArtifact: historical,
+      currentArtifact: lockSettingsArtifact,
+      rootPackageBytes,
+      lockfileBytes: lockSettingsBytes,
+    }),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
+
+  const duplicatePublisherBytes = Buffer.from(
+    lockfileText.replace(
+      publisherImporterMarker,
+      `${publisherImporterMarker}  packages/publisher: {}\n\n`,
+    ),
+    "utf8",
+  );
+  const duplicatePublisherArtifact = structuredClone(current);
+  bindTrackedBytes(duplicatePublisherArtifact, "pnpm-lock.yaml", duplicatePublisherBytes);
+  await assert.rejects(
+    verifyReferenceHostWebCurrentCoordinationPolicy({
+      historicalArtifact: historical,
+      currentArtifact: duplicatePublisherArtifact,
+      rootPackageBytes,
+      lockfileBytes: duplicatePublisherBytes,
+    }),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
 });
 
 test("pins exact JSX ownership and leaves every other production module JSX-free", async () => {
@@ -684,7 +1326,7 @@ test("parses only the exact canonical HTML node and attribute envelope", async (
 });
 
 test("rejects orphan unresolved dynamic forbidden and substituted runtime graphs", async () => {
-  const built = await buildReferenceHostWebSourceAuditEvidence();
+  const built = await buildCurrentReferenceHostWebSourceAuditEvidence();
   const pristine = structuredClone(built.artifact.runtimeResolution.modules);
   const sourcePaths = pristine
     .map(({ id }) => id)
@@ -744,7 +1386,7 @@ test("rejects orphan unresolved dynamic forbidden and substituted runtime graphs
 });
 
 test("rejects malformed duplicate and hostile graph seam containers", async () => {
-  const built = await buildReferenceHostWebSourceAuditEvidence();
+  const built = await buildCurrentReferenceHostWebSourceAuditEvidence();
   const pristine = structuredClone(built.artifact.runtimeResolution.modules);
   const sourcePaths = pristine
     .map(({ id }) => id)
@@ -1030,6 +1672,33 @@ test("rejects ambiguous verifier inputs and a FIFO artifact without blocking", a
   }
 });
 
+test("historical receipt APIs reject live-build and successor injection", async () => {
+  for (const operation of [
+    () => buildReferenceHostWebSourceAuditEvidence({ workspaceRoot: WORKSPACE_ROOT }),
+    () =>
+      verifyReferenceHostWebSourceAuditEvidence({
+        workspaceRoot: WORKSPACE_ROOT,
+      }),
+    () =>
+      writeReferenceHostWebSourceAuditEvidence({
+        workspaceRoot: WORKSPACE_ROOT,
+      }),
+    () =>
+      buildReferenceHostWebSourceAuditEvidence({
+        sourceOverrides: { [MAIN_SOURCE]: "export {};" },
+      }),
+    () =>
+      writeReferenceHostWebSourceAuditEvidence({
+        proofDocumentText: "successor content",
+      }),
+  ]) {
+    await assert.rejects(
+      operation(),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_OPTIONS_INVALID"),
+    );
+  }
+});
+
 test("rejects a symlinked workspace root before reading production source", async () => {
   const temporary = await mkdtemp(path.join(os.tmpdir(), "desen-t09-root-"));
   const linkedRoot = path.join(temporary, "workspace");
@@ -1143,6 +1812,44 @@ test("rejects one-byte and semantic stored-artifact tampering", async () => {
     }),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_ARTIFACT_DRIFT"),
   );
+});
+
+test("default writer preserves immutable bytes and alternate writes are exact copies", async () => {
+  const historicalPath = path.join(
+    WORKSPACE_ROOT,
+    "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+  );
+  const beforeState = await lstat(historicalPath, { bigint: true });
+  const beforeBytes = await readFile(historicalPath);
+  let hookRan = false;
+  const preserved = await writeReferenceHostWebSourceAuditEvidence({
+    beforeAtomicRename() {
+      hookRan = true;
+    },
+  });
+  const afterState = await lstat(historicalPath, { bigint: true });
+  assert.equal(preserved.preserved, true);
+  assert.equal(hookRan, false);
+  assert.equal(afterState.dev, beforeState.dev);
+  assert.equal(afterState.ino, beforeState.ino);
+  assert.equal(afterState.size, beforeState.size);
+  assert.equal(afterState.mtimeNs, beforeState.mtimeNs);
+  assert.equal(afterState.ctimeNs, beforeState.ctimeNs);
+  assert.deepEqual(await readFile(historicalPath), beforeBytes);
+
+  const temporary = await mkdtemp(path.join(WORKSPACE_ROOT, ".t09-copy-"));
+  const artifactPath = path.join(temporary, "receipt.json");
+  try {
+    const copied = await writeReferenceHostWebSourceAuditEvidence({ artifactPath });
+    assert.equal(copied.preserved, false);
+    assert.equal(
+      copied.artifactSha256,
+      "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89",
+    );
+    assert.deepEqual(await readFile(artifactPath), beforeBytes);
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
 });
 
 test("keeps the previous artifact intact when the atomic pre-rename hook fails", async () => {

@@ -20,9 +20,12 @@ import {
   validateDesenExecutionCatalogSet,
   validateDesenExecutionContracts,
   validateDesenExecutionValue,
+  validateDesenPreparedSourcePublicationContracts,
   validateDesenSourceExecutionContracts,
 } from "../src/execution-contract-validation.js";
+import { validateDesenPreparedSourcePublicationContracts as validatePublicationContractsFromRoot } from "../src/index.js";
 import { validateDesenInteractionCatalogSet } from "../src/interaction-contract-validation.js";
+import { prepareDesenSourceFoundation } from "../src/semantic-validation.js";
 
 type MutableRecord = Record<string, unknown>;
 
@@ -216,6 +219,13 @@ function executionCatalogSet(catalogs: readonly unknown[] = [validCatalog]) {
   return result.value;
 }
 
+function preparedSource(input: unknown) {
+  const result = prepareDesenSourceFoundation(input);
+  expect(result.valid).toBe(true);
+  if (!result.valid) throw new TypeError("Expected Source foundation preparation to pass.");
+  return result.value;
+}
+
 function interactionCatalogSet(catalogs: readonly unknown[] = [validCatalog]) {
   const result = validateDesenInteractionCatalogSet(catalogs);
   expect(result.valid).toBe(true);
@@ -286,6 +296,21 @@ function signInAction(alias = "request"): MutableRecord {
   };
 }
 
+function sourceWithPublicationPhaseFailures(options: {
+  readonly bindingCompatibility: boolean;
+  readonly capabilityContracts: boolean;
+  readonly stateAndControlFlow: boolean;
+}): unknown {
+  const action = signInAction();
+  if (options.capabilityContracts) record(action.input).password = "";
+  const actor = buttonWithActions([action]);
+  if (options.stateAndControlFlow) actor.when = { op: "gt", args: [true, 1] };
+  if (options.bindingCompatibility) {
+    record(actor.props).label = { $ref: "state.missing" };
+  }
+  return minimalSource(actor);
+}
+
 describe("M02-T11 cumulative boundary and frozen corpus", () => {
   it("accepts the exact frozen valid Catalog, Source, Bundle, and all five examples", () => {
     for (const catalog of [validCatalog, exampleCatalog]) {
@@ -348,6 +373,114 @@ describe("M02-T11 cumulative boundary and frozen corpus", () => {
   it("keeps Bundle revision and catalog-digest failures in their later integrity scope", () => {
     expect(validateBundle(bundleRevisionMismatch).valid).toBe(true);
     expect(validateBundle(bundleCatalogDigestMismatch).valid).toBe(true);
+  });
+});
+
+describe("M02-T11 phase-aware prepared Source publication seam", () => {
+  it("preserves exact Source authority and the complete cumulative obligation set", () => {
+    const source = preparedSource(exampleStoreMapSource);
+    const catalogs = executionCatalogSet();
+    const result = validateDesenPreparedSourcePublicationContracts(source, catalogs);
+    const cumulative = validateDesenSourceExecutionContracts(source, catalogs);
+
+    expect(validatePublicationContractsFromRoot).toBe(
+      validateDesenPreparedSourcePublicationContracts,
+    );
+    expect(result.valid).toBe(true);
+    expect(cumulative.valid).toBe(true);
+    if (!result.valid || !cumulative.valid) {
+      throw new TypeError("Expected both execution publication paths to pass.");
+    }
+    expect(result.target).toBe("source-publication-contracts");
+    expect(result.value).toBe(source);
+    expect(result.diagnostics).toEqual([]);
+    expect(result.obligations).toEqual(cumulative.obligations);
+    expectDeepFrozen(result);
+  });
+
+  it("requires the exact prepared Source and exact execution Catalog authorities", () => {
+    const source = preparedSource(validSource);
+    const catalogs = executionCatalogSet();
+    const forgedSource = cloneFixture(source) as typeof source;
+    const sourceFailure = validateDesenPreparedSourcePublicationContracts(forgedSource, catalogs);
+
+    expect(sourceFailure.valid).toBe(false);
+    if (sourceFailure.valid) throw new TypeError("Expected forged Source authority to fail.");
+    expect(sourceFailure.phase).toBe("capability-contracts");
+    expect(diagnosticIdentity(sourceFailure)).toEqual([["SCHEMA_INVALID", ""]]);
+    expect("value" in sourceFailure).toBe(false);
+
+    const lowerStageCatalogs = interactionCatalogSet();
+    const catalogFailure = validateDesenPreparedSourcePublicationContracts(
+      source,
+      lowerStageCatalogs as never,
+    );
+    expect(catalogFailure.valid).toBe(false);
+    if (catalogFailure.valid)
+      throw new TypeError("Expected lower-stage Catalog authority to fail.");
+    expect(catalogFailure.phase).toBe("capability-contracts");
+    expectOnlyDiagnostic(catalogFailure, INVALID_EXECUTION_CONTRACT, "/catalogs");
+    expect("value" in catalogFailure).toBe(false);
+  });
+
+  it("returns only the normative earliest phase when three phases fail simultaneously", () => {
+    const catalogs = executionCatalogSet();
+    const capabilityFailure = validateDesenPreparedSourcePublicationContracts(
+      preparedSource(
+        sourceWithPublicationPhaseFailures({
+          bindingCompatibility: true,
+          capabilityContracts: true,
+          stateAndControlFlow: true,
+        }),
+      ),
+      catalogs,
+    );
+    expect(capabilityFailure.valid).toBe(false);
+    if (capabilityFailure.valid) throw new TypeError("Expected capability phase to fail.");
+    expect(capabilityFailure.phase).toBe("capability-contracts");
+    expectOnlyDiagnostic(
+      capabilityFailure,
+      "OPERATION_INPUT_INVALID",
+      "/surfaces/main/root/on/press/0/input/password",
+    );
+
+    const stateFailure = validateDesenPreparedSourcePublicationContracts(
+      preparedSource(
+        sourceWithPublicationPhaseFailures({
+          bindingCompatibility: true,
+          capabilityContracts: false,
+          stateAndControlFlow: true,
+        }),
+      ),
+      catalogs,
+    );
+    expect(stateFailure.valid).toBe(false);
+    if (stateFailure.valid) throw new TypeError("Expected state/control-flow phase to fail.");
+    expect(stateFailure.phase).toBe("state-and-control-flow");
+    expectOnlyDiagnostic(
+      stateFailure,
+      "PREDICATE_TYPE_MISMATCH",
+      "/surfaces/main/root/when/args/0",
+    );
+
+    const bindingFailure = validateDesenPreparedSourcePublicationContracts(
+      preparedSource(
+        sourceWithPublicationPhaseFailures({
+          bindingCompatibility: true,
+          capabilityContracts: false,
+          stateAndControlFlow: false,
+        }),
+      ),
+      catalogs,
+    );
+    expect(bindingFailure.valid).toBe(false);
+    if (bindingFailure.valid) throw new TypeError("Expected binding phase to fail.");
+    expect(bindingFailure.phase).toBe("binding-compatibility");
+    expectOnlyDiagnostic(
+      bindingFailure,
+      "REFERENCE_UNRESOLVED",
+      "/surfaces/main/root/props/label/$ref",
+    );
   });
 });
 

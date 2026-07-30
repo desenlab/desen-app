@@ -10,15 +10,15 @@ the complete claim is not established. A visual demonstration alone cannot chang
 | ---- | ------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | P-01 | The implementation consumes exact, immutable DESEN 0.1.0 bytes                                    | M02-T01                                     | PROVEN         | Complete 31-file upstream Git tree is vendored; pinned manifest, inventory, bytes, aggregate, modes, and drift tests pass                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Vendored-byte checksum test against exact upstream commit                                                             | `protocol-0.1.0-snapshot.json` `sha256:aaf58f79bc95924fbaa0c2b278cc06f3d28b3986e5d168b5468e6432c04cd5a9`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 2026-07-21    |
 | P-02 | Official valid/negative cases and examples produce expected results                               | M02-T12, M02-T13                            | PROVEN         | Python and built TypeScript pass the exact 14-case starter suite; 34 positive/negative diagnostic pairs pass the complete declared validator scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Fulfilled: official parity plus one positive and one exact negative vector for every validator-emitted diagnostic     | `protocol-0.1.0-validation.txt` `sha256:d2c5e7e27a5a1f5ecc66f3aad4956451c81b420a60908be5c948071a7305aa86`; `protocol-0.1.0-checksums.txt` `sha256:6208ed37fa4da3b816e505c106be1801fcee504e1dde2ab4a4e4ceb5b0ca166f`; `protocol-0.1.0-official-suite-parity.json` `sha256:efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae`; `protocol-0.1.0-validator-diagnostic-micro-vectors.json` `sha256:3214a26a683d46a3b20c6ca400de44faa2c5e394f706a6e3e8d3d3628da78718`                                                                                                                          | 2026-07-23    |
-| P-03 | Publication is deterministic                                                                      | M06-T10                                     | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Same source/catalog twice produces byte-identical semantic bundle and revision                                        | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | —             |
+| P-03 | Publication is deterministic                                                                      | M06-T10                                     | PROVEN         | Two independently parsed official Sources and two independently cloned Catalog-package candidates cross only the public `publishDesenSource` root. They produce identity-disjoint immutable results with the same 2,173 RFC 8785 canonical UTF-8 Bundle bytes, revision, and Source digest; both byte sequences equal the frozen official Bundle after removing exactly its own root `publication` member.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Fulfilled: two fresh public publications are byte-identical to each other and the frozen official projection.         | `publisher-0.1.0-official-golden.json` `sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 2026-07-29    |
 | P-04 | Source and bundle documents are inert data and cannot select executable code                      | M02-T06, M12-T03                            | PARTIAL        | M02-T06 returns detached deep-frozen snapshots; ahead-of-time validators and source/distribution audits reject runtime code loading and network access                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Exhaustive executable-content forms, markup interpretation, and remote code-selection proof under M12-T03             | `protocol-0.1.0-structural-validation.json` `sha256:7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 2026-07-23    |
-| P-05 | Capabilities are pinned by exact id/version/target/digest                                         | M03-T04, M03-T10, M05-T04, M06-T08, M07-T03 | PARTIAL        | M03-T10 preserves the historical `run.desen.reference.sign-in@0.1.0` Web–React tuple over its exact 76-file distribution; M05-T04 independently pins the current 80-file successor plus projected Catalog after adding the executable `./react-adapters` subpath                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Package-mismatch publication, immutable distribution, resolution, and activation tests                                | `reference-catalog-web-package-digest-v1.json` `sha256:e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716`; `reference-catalog-web-capability-artifact.json` `sha256:4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0`; `runtime-react-0.1.0-interactions.json` `sha256:9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0`                                                                                                                                                                                                                                 | 2026-07-27    |
+| P-05 | Capabilities are pinned by exact id/version/target/digest                                         | M03-T04, M03-T10, M05-T04, M06-T08, M07-T03 | PARTIAL        | M03-T10 preserves the historical `run.desen.reference.sign-in@0.1.0` Web–React tuple over its exact 76-file distribution; M05-T04 independently pins the current 80-file successor plus projected Catalog after adding the executable `./react-adapters` subpath; M06-T08 authenticates the carried Source digest and positionally replaces every loose requirement with the exact selected package `id`/`version`/`target`/`digest` tuple without location, best-match, sorting, or deduplication authority                                                                                                                                                                                                                                                                                                                                                                                                                      | M07-T03 installed-package tuple verification and exact no-substitution activation preflight                           | `reference-catalog-web-package-digest-v1.json` `sha256:e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716`; `reference-catalog-web-capability-artifact.json` `sha256:4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0`; `runtime-react-0.1.0-interactions.json` `sha256:9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0`; `publisher-0.1.0-catalog-pinning.json` `sha256:de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`                                                                                                               | 2026-07-29    |
 | P-06 | Desen App and the production-like host use the same real components                               | M03-T09, M05-T04, M05-T08, M09-T03          | PARTIAL        | M03-T09 preserves the historical five-export logical parity record; M05-T04 adds the current package's exact static five-component React registry and concrete command/event wiring; M05-T08 runs the controlled official-derived Bundle in the independent host through that public registry and all five real components. M05-T09 proves the actual Vite graph reaches that same public adapter factory without a host-local replacement. Desen App registry identity remains M09-T03.                                                                                                                                                                                                                                                                                                                                                                                                                                          | Desen App registry identity and host-versus-App comparison evidence                                                   | `reference-catalog-web-parity.json` `sha256:6e350f2af71ac4e1f040afe7a3fcc3035de35b585f0121db6a2b35b4f3552a8a`; `reference-catalog-web-capability-artifact.json` `sha256:4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0`; `runtime-react-0.1.0-interactions.json` `sha256:9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0`; `reference-host-web-0.1.0-sign-in.json` `sha256:a7c83d438190ee45dae4714bd092e56282cb3db4c69c72eeaca44e2647683adb`; `reference-host-web-0.1.0-source-audit.json` `sha256:cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89` | 2026-07-28    |
 | P-07 | Managed surfaces have no handwritten host component tree                                          | M05-T09, M10-T05                            | PARTIAL        | M05-T09 discovers the complete independent-host production source inventory, resolves JSX and aliases through the TypeScript checker, and observes the real Vite production graph. Exact host-infrastructure JSX is allowlisted; the managed path reaches only the public generic runtime renderer and shared public adapter factory. Direct, aliased, namespace, helper-hidden, factory-created, plan-shaped, dynamically loaded, orphaned, and forbidden-data alternatives fail closed.                                                                                                                                                                                                                                                                                                                                                                                                                                         | M10-T05 must add Desen App host E2E and its corresponding source/import audit before the broader claim is `PROVEN`.   | `reference-host-web-0.1.0-source-audit.json` `sha256:cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 2026-07-28    |
 | P-08 | A designer edits props, slots, state, bindings, and actions visually                              | M09-T05–M09-T09, M10-T01                    | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Desen App browser E2E from an empty project                                                                           | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | —             |
 | P-09 | Run Mode executes events, state, and operation lifecycle                                          | M09-T10, M10-T02–M10-T04                    | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Pending/success/failure observable trace and UI tests                                                                 | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | —             |
 | P-10 | Real host operations remain outside design documents                                              | M03-T08, M05-T08–M05-T09, M10-T04           | PARTIAL        | Exact fixtures and the final Catalog remain inert data; the exact package surface exposes no loader while application code retains the executable binding. M05-T08 executes the official-derived Bundle through a fixed same-origin host operation whose capability, alias, effect, input shape, response budget, and navigation policy are outside the Bundle and fail closed. M05-T09 proves that the real resolved host graph cannot replace that boundary with document-selected code or a handwritten managed tree.                                                                                                                                                                                                                                                                                                                                                                                                          | Desen App Run Mode operation execution                                                                                | `reference-sign-in-fixtures-and-host-binding.json` `sha256:b0413687bd907b71509db52d3e22b6eda5a4150509ac323bf51e5f8425f897e2`; `reference-catalog-web-capability-artifact.json` `sha256:4ddeee8d33ff718e1907a6402b7c2d10ef0769c872832a4cb056231441ae65e0`; `reference-host-web-0.1.0-sign-in.json` `sha256:a7c83d438190ee45dae4714bd092e56282cb3db4c69c72eeaca44e2647683adb`; `reference-host-web-0.1.0-source-audit.json` `sha256:cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89`                                                                                                     | 2026-07-28    |
-| P-11 | Authoring-only state does not enter production bundles                                            | M06-T07–M06-T10                             | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Golden publication, source-digest, and authoring-removal tests                                                        | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | —             |
+| P-11 | Authoring-only state does not enter production bundles                                            | M06-T07–M06-T10                             | PROVEN         | M06-T07 calculates the exact authenticated Source digest with only root `authoring` excluded and removes that member from the production base. M06-T08 independently authenticates and carries the digest; M06-T09 validates and revision-closes the complete authoring-free Bundle. M06-T10 publishes two fresh official inputs through the public root, proves root-authoring changes leave the exact Source digest and terminal Bundle unchanged, proves neither output contains root `authoring`, and matches both outputs to the frozen official Bundle after removing only root `publication`; nested semantic content is not projected away.                                                                                                                                                                                                                                                                               | Fulfilled: the complete public publication golden proves root authoring never enters production Bundle bytes.         | `publisher-0.1.0-source-normalization.json` `sha256:59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`; `publisher-0.1.0-catalog-pinning.json` `sha256:de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`; `publisher-0.1.0-bundle-publication.json` `sha256:2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`; `publisher-0.1.0-official-golden.json` `sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`                                                                                                                          | 2026-07-29    |
 | P-12 | Invalid activation preserves last-known-good across restart                                       | M07-T07–M07-T11, M10-T07                    | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Transactional active/previous-good record, boundary fault injection, A → invalid B → valid C, race, and restart tests | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | —             |
 | P-13 | Map integrates without changing runtime-core                                                      | M10-T09, M11-T06–M11-T07                    | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Map E2E and runtime-core tree hash equal to frozen G10 baseline                                                       | Future `docs/proof/artifacts/runtime-core-baseline.json` and Map comparison                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | —             |
 | P-14 | Sortable behavior integrates without changing runtime-core                                        | M10-T09, M11-T12                            | NOT_PROVEN     | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Reorder E2E and runtime-core tree hash equal to frozen G10 baseline                                                   | Future `docs/proof/artifacts/runtime-core-baseline.json` and Sortable comparison                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | —             |
@@ -778,9 +778,10 @@ lookups retain no props, styles, slots, React/platform values, session, Catalog,
 callback. Explicit ceilings, hostile reflection vectors, lifecycle tests, source-boundary pins,
 and byte-exact prerequisite verification close the selected Web–React slice.
 
-P-16 advances to `PARTIAL`; M09-T13 still owns end-to-end Desen App diagnostic selection. N-021
-remains `PLANNED` because M06-T06 must prove that publication preserves protocol behavior and
-source-node traceability. R-104's selected Web–React adapter-instance portion is complete.
+P-16 advances to `PARTIAL`; M09-T13 still owns end-to-end Desen App diagnostic selection. At the
+M05-T05 checkpoint N-021 remained `PLANNED`; M06-T06 now supplies the Publisher-side preservation
+evidence and advances it to `TESTED`. R-104's selected Web–React adapter-instance portion is
+complete.
 
 `runtime-react-0.1.0-reconciliation-diagnostics.json`
 `sha256:292731d7eff67d5c80bd0de0d0c940c9783e49efd34069c5c11cc9eb4264dbfb`.
@@ -916,3 +917,317 @@ deployment-security evidence, or a native-runtime claim.
 
 `reference-host-web-0.1.0-source-audit.json`
 `sha256:cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89`.
+
+## M06-T01
+
+M06-T01 establishes the deterministic Publisher's closed terminal result and strict raw Source
+boundary without exposing a partial publisher or emitting a Bundle. Success is reserved for a
+fully validated immutable Bundle plus warnings; failure identifies the first blocking stage,
+starts with an error diagnostic, and structurally contains no `bundle` member.
+
+Before schema validation or hashing, the package-private parser rejects malformed input,
+duplicate decoded member names, invalid Unicode, non-finite numeric outcomes, and explicit finite
+budget crossings. Accepted JSON becomes a detached recursively frozen snapshot. Diagnostics retain
+no caller Source fragment or native exception detail. Lazy pointer paths and hostile-profile
+vectors cover long-path CPU behavior, accessors, non-finite limits, and revoked Proxies.
+
+The evidence checks the exact sixteen-stage order, two task-owned diagnostic definitions, stable
+classification/severity separation, source and built declaration exports, package entry metadata,
+platform neutrality, derived test inventory, deterministic artifact bytes, and fail-closed
+mutation behavior. Its export and diagnostic inventory is explicitly the historical M06-T01
+slice; later modules remain owned by their successor proofs. No `P-*`, normative-coverage, or gate
+status changes; M06-T02 owns exact Catalog resolution next.
+
+`docs/proof/artifacts/publisher-0.1.0-publish-result.json`
+`sha256:aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63`.
+
+## M06-T02
+
+M06-T02 adds package-private exact Catalog resolution without exposing an unfinished public
+Publisher or emitting a Bundle. Each already validated Source requirement matches exactly one
+closed package observation by code-unit-equal `id`, `version`, and optional `target`; locations,
+candidate order, ranges, normalization, and equal Catalog JSON remain non-authoritative. Duplicate
+Source requirements preserve index alignment while sharing one uniquely selected package.
+
+Selected Catalogs cross bounded inert capture, frozen structural validation, exact
+candidate/Catalog identity and observed-digest consistency, and the Validator's immutable
+single-namespace gate. Missing, ambiguous, malformed, inconsistent, over-budget, and conflicting
+inputs return the M06-T01 terminal failure shell with no Bundle or partial Catalog authority. The
+data-only stage compares a target-profile package observation but does not claim to authenticate
+arbitrary package bytes itself.
+
+The evidence contains 22 focused runtime cases, 10 compiler-negative cases, and 8 independent
+proof/mutation cases. It pins four prerequisites, the current official-derived Source and current
+Web–React Catalog tuple, package-root privacy, target neutrality, deterministic artifact bytes,
+and the unique proof-document hash. No `P-*`, normative status, or gate changes; M06-T03 owns
+complete Source preflight next.
+
+`docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json`
+`sha256:02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6`.
+
+## M06-T03
+
+M06-T03 composes strict raw Source JSON ingress, Source-root and embedded-schema validation,
+intrinsic identity and entry semantics, M06-T02 Catalog authority, and category-aware static
+capability references into one package-private nonterminal preflight. Success preserves the exact
+immutable Source, Catalog set, selected package tuples, and requirement alignment without exposing
+a public `publish` function or emitting a Bundle. Failure retains the M06-T01 closed shell and
+exposes no partial Source, Catalog, package, alignment, or Bundle authority.
+
+Source-local checks stop before any Catalog candidate observation. Catalog-dependent component,
+behavior, resource, and nested-operation references run only after exact trusted Catalog
+preparation; unknown and wrong-category references stop at `source-semantics` with
+`UNKNOWN_CAPABILITY`, while invalid Catalog authority retains the earlier M06-T02 stopped stage.
+The task-owned finite diagnostic wrapper also preserves under-budget inherited T01/T02 failures
+and replaces over-budget reports with one redacted failure at the same stage.
+
+The evidence contains 10 focused Publisher runtime cases, 16 compiler-negative cases, 4 Validator
+foundation cases, and 10 independent proof/mutation cases. It pins four prerequisites, the current
+official-derived Source and Web–React Catalog tuple, phase ordering, complete failure atomicity,
+recursive immutability, repeated-byte determinism, package-root privacy, platform neutrality, and
+the unique proof-document hash. No `P-*`, normative, or gate status changes; M06-T04 owns prop,
+slot, style, event, command, and behavior contracts next.
+
+`docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+`sha256:07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`.
+
+## M06-T04
+
+M06-T04 composes the exact M06-T03 authority with the Validator's component and interaction
+contract preparation. It blocks statically knowable component prop and Variant, slot and accepted
+child, style and visual-state, event and command, behavior prop/slot/style/event, attachment, and
+conflict violations at `capability-contracts`. Unsafe Catalog contract schemas fail before Source
+capability values are observed. Success remains package-private and nonterminal, preserves exact
+Source, Catalog, package, and requirement alignment identities, and exposes no dynamic obligations
+or Bundle.
+
+Only a complete static success may produce fixed deprecated-capability warnings at exact Source
+use sites. Catalog deprecation prose and replacement hints remain non-authoritative and are never
+disclosed or followed. The common finite diagnostic profile rejects an over-budget report rather
+than truncating warnings. Own-data traversal and lower-stage discriminator checks prevent
+inherited prototype values from fabricating Source structure, warning sites, or success.
+
+The evidence contains 14 focused Publisher runtime cases, 20 compiler-negative cases, 32
+component cases, 49 interaction cases, 4 diagnostic micro-vector cases, and 15 independent
+proof/mutation cases. It pins four prerequisites and 33 current files, including exact authority
+identity, static failure parity, warning safety, budget boundaries, package-root privacy, target
+neutral static dependency edges, an enumerated direct-form source audit, deterministic generation,
+and atomic-write behavior. The source audit is not a JavaScript sandbox and makes no exhaustive
+metaprogramming or runtime-code-generation claim. `PIPE-032` remains partial:
+M06-T05 owns resource/operation receiving contracts, dynamic compatibility, and recorded runtime
+obligations. No `P-*`, normative, or gate status changes.
+
+`docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+`sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
+
+## M06-T05
+
+M06-T05 composes M06-T04 internally and upgrades only its exact prepared Source, selected package,
+Catalog, requirement-alignment, and safe-warning authorities. The exact Catalog array crosses the
+Validator's execution-contract preparation, and one cumulative analysis retains diagnostic phase
+ownership at each emission site. Resource/operation schema, policy, and statically known receiving
+input failures stop at `capability-contracts`; predicate, repeat, state-write, navigation, refresh,
+operation-alias, and command-target failures stop at `state-and-control-flow`; lexical, format,
+lifecycle, and static binding failures stop at `binding-compatibility`. Independent simultaneous
+defects prove exact stage 8 → 9 → 10 precedence without code/pointer reclassification or repeated
+cumulative walks.
+
+A complete package-private nonterminal success preserves all exact T04 authorities and warnings,
+adds the runtime-authenticated execution Catalog authority, and records every unresolved receiving
+check in one closed eight-kind vocabulary. Obligations are sorted, de-duplicated, deeply frozen,
+and bounded by 4,096 entries, 4,096 UTF-16 units in one pointer, and 1,048,576 aggregate
+kind/pointer/context units. Exact boundaries pass; one-below profiles reject the whole
+intermediate at `binding-compatibility` with one redacted diagnostic. No failure exposes a Source,
+Catalog, package, alignment, warning, obligation, partial value, or Bundle. Operation/resource
+outputs remain runtime receiving checks rather than publication obligations.
+
+Evidence includes 14 focused Publisher cases, 28 compiler-negative cases, 50 binding cases, 50
+execution cases, 15 independent proof/mutation cases, 3 exact prerequisite pins, and 35
+byte-tracked files. It also authenticates package-root privacy, source/declaration target
+neutrality, deterministic artifact rebuilds, proof-document uniqueness, prerequisite and fixture
+drift, exact authority, stage mapping, complete obligations, finite limits, atomic writing, and the
+six-module Validator successor admitted by the immutable M05 host evidence.
+
+The Publisher's resource/operation and dynamic-obligation portion completes `PIPE-032`;
+`PIPE-033` and `PIPE-034` gain direct publication evidence. Together with M04-T02 safe dynamic
+resolution and M05-T02 final receiving validation, this advances N-027 to `TESTED`. No `P-*`,
+`S-*`, or gate status changes. M06-T06 owns extension/order preservation and source-node
+traceability next.
+
+`docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
+`sha256:6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67`.
+
+## M06-T06
+
+M06-T06 composes the exact M06-T05 boundary internally from raw Source JSON and closed package
+candidates. Its package-private nonterminal success preserves the authenticated Source, execution
+Catalog set, selected packages, requirement alignment, warnings, and runtime obligations by exact
+identity. A separate frozen production-field projection retains every Source-reachable opaque
+extension and semantic Source array by exact parsed runtime reference while leaving actual
+top-level authoring removal to M06-T07. Raw whitespace, escape spelling, number-token spelling, and
+object-member lexical order are explicitly outside the parsed preservation claim.
+
+One complete immutable trace records every schema-reachable component node through the document
+id, surface id, unchanged Source node id, capability id, and exact RFC 6901 pointer. Identity is
+surface-scoped, so equal node ids on different surfaces remain valid and independently traceable.
+Behavior identities remain in the Source graph without being mislabeled as component nodes, and
+node-shaped values inside extensions or authoring remain opaque.
+
+The trace envelope admits 25,000 records, 4,096 UTF-16 units in one pointer, and 4,194,304
+aggregate identity/pointer units. Three exact ceilings pass; three one-below crossings reject the
+whole intermediate at `normalization` without truncation, inherited warnings, partial authority,
+or a Bundle. The evidence derives 17 shared Source/Bundle extension declarations and 16 reachable
+locations per document from the frozen schemas, exercises all 16 Source-reachable kinds and eight
+semantic-array classes, and authenticates three exact prerequisites plus 20 byte-tracked files.
+Fifteen focused Publisher cases, 46 compiler-negative cases, and 18 independent proof/mutation
+cases pass. Package-root privacy, platform neutrality, deterministic evidence bytes, finite
+limits, artifact tampering, proof-pin drift, authority cloning, extension loss, order drift,
+trace loss, partial leakage, and selected successor-tolerant CI registration are mutation-tested.
+
+This completes the Publisher side of the M05-T05 runtime/source relation and advances N-021 to
+`TESTED`. N-012 remains `PLANNED` for the M08-T07 editor save/open round trip, and N-014 remains
+`PLANNED` for M08-T03 editor reorder coverage. No `P-*`, `S-*`, or gate status changes. M06-T07
+owns actual authoring removal and deterministic normalization next.
+
+`docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
+`sha256:261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff`.
+
+## M06-T07 — Source digest, authoring removal, and deterministic normalization
+
+M06-T07 composes the exact M06-T06 preservation authority once, calculates the Source digest from
+that authenticated Source before any production projection, removes only the root `authoring`
+member, and performs one RFC 8785 serialization/parse round trip. The digest remains a separate
+immutable result field and is intentionally absent from the nonterminal `normalizedDocument`.
+M06-T08 subsequently authenticates and carries that exact value while replacing loose
+requirements with exact Catalog tuples.
+
+Root-authoring changes affect neither digest nor normalized canonical bytes. Nested `authoring`
+members inside opaque extensions remain semantic, and changing any such extension changes the
+digest. No defaults, empty-member deletion, hidden index, semantic-array sorting, or deduplication
+occurs; object insertion order has no canonical-byte authority while semantic array order,
+identifiers, conditions, literals, capability ids, and trace pointers remain unchanged.
+
+The normalized intermediate admits at most 2,097,152 canonical UTF-8 bytes. Exact capacity and
+the explicit zero profile are mutation-tested, while one-byte crossings stop atomically at
+`normalization`. Digest-helper exceptions or malformed digest output stop at `source-digest`.
+Neither task-owned failure exposes warnings, partial authority, a normalized document, a digest,
+or a Bundle.
+
+Seventeen focused Publisher cases, 52 compiler-negative cases, and 26 exact named independent
+proof/mutation cases protect the boundary. The evidence authenticates two exact prerequisites,
+18 byte-tracked files, the source and built-distribution statement order, and nine immutable
+trace-ownership rows.
+
+At this historical checkpoint P-11 advanced only to `PARTIAL`. P-03 remained `NOT_PROVEN`, P-05
+remained `PARTIAL`, N-018 remained `PLANNED`, and no proof gate changed. M06-T08 subsequently
+completed exact tuple pinning; terminal Bundle validation, revision, and golden double-publication
+evidence remain M06-T09 through M06-T10.
+
+`docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
+`sha256:59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`.
+
+## M06-T08 — Source-digest authentication and exact Catalog pinning
+
+M06-T08 composes the exact M06-T07 authority once from raw Source JSON and the closed package
+inventory. It independently recalculates the digest from the same authenticated pre-normalization
+Source, requires exact lowercase SHA-256 syntax and byte equality, and refuses to replace a
+malformed, thrown, or mismatched predecessor value. Digest failures stop at `source-digest`
+without warnings, partial authority, or a Bundle.
+
+Every Source requirement position maps through the exact M06-T02
+`requirementPackageIndexes` authority. The selected immutable package supplies `id`, `version`,
+`target`, and `packageDigest`; the output renames only the final field to `digest`. Requirement
+order, duplicates, and exact optional extensions remain positional. A top-level Source
+`location` remains digest-significant discovery data but never becomes selection authority or
+enters `requires.catalogs`; a nested extension field with that spelling remains opaque data.
+
+The recursively immutable `pinnedDocument` remains package-private and nonterminal. It adds only
+the authenticated `sourceDigest` and exact requirements to the T07 normalized base, with no
+`revision`, `publication`, terminal success, signing, runtime, host, adapter, activation, or
+deployment authority. Thirteen focused Publisher cases, 52 compiler-negative cases, and 37
+independent proof/mutation cases authenticate two exact prerequisites, 21 tracked files, and 12
+trace-ownership rows.
+
+P-05 and P-11 remain `PARTIAL`; P-03 remains `NOT_PROVEN`; N-016, N-018, and N-020 remain
+`PLANNED` for their terminal Publisher, runtime, and editor owners; and no proof gate changes.
+M06-T09 owns complete Bundle validation, the final byte envelope, and revision closure next.
+
+`docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`
+`sha256:de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`.
+
+## M06-T09 — Complete Bundle validation and revision closure
+
+M06-T09 composes the exact M06-T08 authority once through the first public terminal Publisher
+operation. It calculates a provisional revision from the pinned revision-free document, builds an
+explicit candidate by adding only that member, and enforces the complete 2,097,152-byte RFC 8785
+canonical UTF-8 envelope before invoking the cumulative Bundle execution Validator.
+
+The Validator receives the exact candidate and exact authenticated Catalog set once. Success
+requires an independently allocated, recursively immutable Bundle graph whose canonical bytes
+equal the candidate. The snapshot is remeasured and its revision is recalculated; provisional,
+embedded, and closing values must be identical. The public result returns only that exact snapshot
+and the exact M06-T08 warning array. Every inherited or terminal failure structurally contains no
+Bundle or intermediate authority.
+
+The proof authenticates source and built-distribution call order, exact public/private exports,
+finite limits, immutable result shells, isolated execution of the actual built package root,
+single-pass CI registration, and the seven live compatibility readers that preserve T02–T08
+task-time artifacts without regenerating them. It deliberately does not compare with the frozen
+official Bundle or claim two independent publications; M06-T10 owns that golden. The complete
+invalid-source and precedence matrix remains M06-T11.
+
+P-11 gains complete-Bundle and revision-closure evidence but remains `PARTIAL` until the M06-T10
+golden. P-03 remains `NOT_PROVEN`; P-05 remains `PARTIAL`; N-016, N-018, and N-041 remain
+`PLANNED` for later owners; and G06 remains open.
+
+`docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
+`sha256:2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`.
+
+### M06-T10 official golden closure
+
+M06-T10 invokes only the built public Publisher root with two fresh official Source/Catalog
+candidate graphs. Both publications produce separate recursively immutable success graphs with
+the same revision, Source digest, and 2,173 RFC 8785 canonical UTF-8 Bundle bytes. Those bytes
+equal the frozen official sign-in Bundle after removing exactly its own root `publication`
+member. The proof also rejects any additional root or nested projection, shared identity,
+fixture/prerequisite drift, private-API substitution, and canonical-byte or digest mismatch.
+
+This closes P-03 and P-11 as `PROVEN`. P-05 remains `PARTIAL` until installed-package activation
+verification, N-016 and N-018 remain `PLANNED` for their later runtime/editor owners, and G06
+remains open only for M06-T11's complete invalid-source/no-Bundle matrix.
+
+`docs/proof/artifacts/publisher-0.1.0-official-golden.json`
+`sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
+
+## M06-T11 and G06 — Public invalid-Source/no-Bundle closure
+
+M06-T11 imports the built public Publisher root in one isolated process. All 127 reviewed
+task-owned invalid cases invoke only `publishDesenSource(rawSource, catalogPackages)`, stop at their
+exact earliest naturally reachable pipeline stage, and return a recursively immutable exact
+`{ diagnostics, ok, stage }` shell. Every report is nonempty and error-first, its first diagnostic
+stage equals the result stage, and no failure contains a Bundle or any partial Source, Catalog,
+package, obligation, trace, normalized document, digest, revision, or publication authority.
+
+Eight positive guards bring the focused matrix to 135 cases. They preserve the official golden,
+dynamic `context.runtimeTitle`, the exact obligation count/pointer/aggregate boundaries, the exact
+final-Bundle admission boundary, sanitized warnings, and deterministic replay. The invalid table
+proves stage 8 → 9 → 10 precedence and independently crosses inherited parse/Catalog report
+budgets; capability error and warning report budgets; execution error and obligation budgets;
+Source-trace count, pointer, and aggregate budgets; and the naturally reachable normalization and
+complete-Bundle byte limits. Discovery `location` cannot establish trust.
+
+The evidence pins the ordered complete 14-code Publisher registry, 67 independent hostile root
+cases, 31 exact task-applicability records, two task-local PF-047 applicability records, 12 trace
+rows, frozen fixtures and prerequisites, built public files, and one-way successor hashes. The
+complete Publisher package suite passes 292/292. No public negative is fabricated for
+`source-digest`, `authoring-removal`, `catalog-pinning`, or `bundle-revision`; these deterministic
+stages retain the exact successful M06-T07 through M06-T10 evidence.
+
+M06-T11 and G06 are `DONE`. P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`.
+N-016, N-018, N-041, and the Publisher conformance target remain `PLANNED` for their later owners.
+The gate proves reviewed deterministic valid publication plus atomic invalid rejection, not
+signing, storage, activation, deployment, runtime execution, host, adapter, editor, network, or
+control-plane behavior.
+
+`docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+`sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.

@@ -69,6 +69,35 @@ The semantic foundation implements strict SemVer, exact catalog requirements, ca
 surface-local identity namespaces, entry validation, extension opacity, and exact capability
 existence for component, behavior, resource, and operation categories.
 
+M06-T03 adds an orchestration seam over that same authority. It prepares root, embedded-schema,
+exact-version, entry, surface, and local identity checks before Catalog observation, then finalizes
+the exact Source-to-Catalog relation and category-aware static references only against a
+runtime-authenticated Catalog set. Existing structural and cumulative semantic results remain
+unchanged.
+
+M06-T04 composes the existing public component and interaction APIs over that exact prepared
+Source and Catalog authority. It does not add or weaken a Validator rule: the Publisher prepares
+the selected Catalog set through `validateDesenInteractionCatalogSet`, then applies
+`validateDesenSourceInteractionContracts` and retains the exact upstream Source identity rather
+than accepting the Validator's cloned result or dynamic-obligation projection. Inherited optional
+Source fields are now consistently ignored by the semantic and interaction walkers.
+
+M06-T05 adds `validateDesenPreparedSourcePublicationContracts` for the exact prepared Source and
+execution Catalog authority. It performs one cumulative T10/T11 document walk while retaining
+each diagnostic's emission-site publication phase. A failure returns only the earliest blocking
+phase in the order `capability-contracts`, `state-and-control-flow`, then
+`binding-compatibility`; it never derives that phase from a code or pointer. Success returns the
+same authenticated Source object and the complete normalized runtime-obligation set. The existing
+cumulative validation APIs and diagnostic output remain unchanged.
+
+M06-T09 uses `validateDesenBundleExecutionContracts` as the single cumulative terminal
+Bundle-validation authority. The Publisher supplies only its exact revision-bearing candidate and
+the exact M06-T08 Catalog set. Validator returns an independently allocated, recursively immutable
+Bundle snapshot plus any unresolved runtime obligations; the Publisher authenticates that shell,
+requires byte equality with the candidate, remeasures it, and closes the revision before exposing
+success. The Validator does not calculate the revision, apply Publisher byte policy, add
+publication metadata, or authorize storage, activation, rendering, or execution.
+
 The M02-T08 component layer preserves dynamic ValueSpecs as explicit later-validation obligations
 and prepares component prop and style schemas through the documented `PF-011` host-safe boundary.
 Its public APIs remain available when a caller intentionally needs only the lower component stage.
@@ -110,6 +139,12 @@ The M02-T11 execution layer is implemented cumulatively on top of T10. It:
   preserving post-write checks that need runtime state; and
 - exposes one detached resolved-value API for component command input and operation/resource input
   and output contracts.
+
+The M06-T05 prepared-publication seam reuses that same analysis. It first authenticates the exact
+prepared Source and exact T11 Catalog set, then separates capability, state/control-flow, and
+binding diagnostics by private emission-site provenance. It is an orchestration API for a
+Publisher that must retain protocol publication stages; it does not authorize execution,
+materialize dynamic values, or replace the receiving and resolved-value APIs.
 
 The M05 receiving boundary reuses the exact factory-authenticated T11 Catalog set. It:
 
@@ -195,7 +230,8 @@ package tests and 9 independent root proof and mutation tests.
 ## Public entry point
 
 M02-T12 and M02-T13 add no public entry point. The APIs below contain the cumulative M02 surface
-plus the later M05 resolved adapter receiving boundary.
+plus the later M05 resolved adapter receiving boundary and the additive M06-T03
+Source-foundation seam.
 
 ### Structural and semantic APIs
 
@@ -208,9 +244,78 @@ plus the later M05 resolved adapter receiving boundary.
 | `isExactSemanticVersion(value)`                               | Guard exact Semantic Versioning 2.0.0 syntax               |
 | `validateDesenCatalogSet(input)`                              | Build a trusted immutable T07 catalog set                  |
 | `validateDesenCatalogSemantics(input)`                        | Validate Catalog version and namespace semantics           |
+| `prepareDesenSourceFoundation(input)`                         | Prepare Source-local structure and identity authority      |
+| `validatePreparedDesenSourceReferences(source, catalogSet)`   | Finalize exact Catalog relation and static references      |
 | `validateDesenSourceSemantics(input, catalogSet)`             | Validate Source identity and declared capabilities         |
 | `validateDesenBundleSemantics(input, catalogSet)`             | Validate Bundle identity and exact requirements            |
 | `validateDesenSemanticFoundation(target, input, catalogSet?)` | Select the semantic target explicitly                      |
+
+### Publisher Source-foundation seam
+
+`prepareDesenSourceFoundation` reuses the generated Source-root validator, embedded-schema
+validation, exact SemVer checks, and the existing identity walker. A success returns one detached,
+recursively frozen `DesenPreparedSourceFoundation`. The exact returned Source object is registered
+in module-private runtime trust metadata; its nominal TypeScript brand is not serialized into
+DESEN JSON. A clone, serialization round trip, structurally equal object, or TypeScript cast cannot
+reproduce that authority.
+
+`validatePreparedDesenSourceReferences` accepts only that exact prepared Source and an exact
+Validator-authenticated Catalog set. It validates the Source requirements and category-aware
+component, behavior, resource, and nested-operation references without duplicating the semantic
+walker inside the Publisher. A forged Source fails as `SCHEMA_INVALID`; a forged Catalog set fails
+with the established catalog-requirement diagnostic. Neither function validates later prop, slot,
+style, event, command, behavior, binding, state, predicate, repeat, or action contracts, and
+neither emits a Bundle.
+
+The phase-specific internal structural helper remains unexported. The two Source-specific
+orchestration functions are additive primitives rather than a new terminal Publisher or a
+replacement for the cumulative Validator APIs.
+
+Publisher integration evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+`sha256:07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`.
+
+### Publisher capability-contract seam
+
+M06-T04 uses the public cumulative interaction authority to prepare safe component, behavior,
+event, command, and style schemas before observing Source contract values. Static component and
+behavior prop, slot, style, visual-state, event, command, attachment, and conflict failures retain
+their exact Validator code and pointer while the Publisher assigns the
+`capability-contracts` stopped stage. The exact M06-T03 Source, Catalog, package, and requirement
+alignment remain the downstream authority; dynamic obligations are deliberately not exposed.
+
+The Publisher's deprecated-capability scan is separate from Validator correctness. Deprecation is
+non-blocking package policy, never a Validator error and never a reason to select a replacement.
+The shared semantic and interaction traversal now reads optional `target`, `behaviors`, `on`,
+`slots`, `onSuccess`, and `onFailure` only as own data properties, preventing inherited prototype
+data from fabricating identities, actions, or capability uses.
+
+Publisher integration evidence:
+`docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+`sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
+
+### Publisher terminal Bundle seam
+
+M06-T09 calls `validateDesenBundleExecutionContracts` exactly once after M06-T08 has authenticated
+the Source digest, pinned every exact Catalog tuple, calculated a provisional revision, and
+enforced the first complete-Bundle byte measurement. The Validator receives the candidate and the
+same runtime-authenticated execution Catalog set; a structurally equal reconstructed Catalog set
+does not gain authority.
+
+A Validator success may legitimately contain unresolved runtime obligations. They remain
+Validator-internal evidence at this boundary and are not a reason to reject a publishable Bundle.
+The Publisher instead authenticates the exact success discriminator, target, empty diagnostic
+array, frozen obligation array, and independent frozen `value` snapshot. It requires canonical
+byte equality with the candidate and returns that exact Validator snapshot rather than the
+candidate or a Publisher clone. A Validator failure keeps its established code and pointer and is
+annotated only with the `bundle-validation` publication stage.
+
+This seam deliberately keeps responsibilities separate: Validator proves cumulative Bundle
+structure and semantics; Publisher owns the final canonical-byte envelope, revision bootstrap and
+closure, warning carry, and no-Bundle failure shell.
+
+Publisher integration evidence:
+`docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`.
 
 ### Component-contract APIs
 
@@ -517,6 +622,16 @@ transition.
 Validation has ordered, non-skippable stages: **T06 structural → T07 semantic foundation → T08
 component contracts → T09 interaction contracts → T10 binding contracts → T11 execution
 contracts**.
+
+The M06-T03 Publisher seam preserves those authorities while exposing exact stopped subphases:
+Source root → embedded schemas → Source-local identity precede any Catalog-candidate observation;
+exact Catalog authority then precedes Catalog-backed static-reference existence. This is a causal
+orchestration split, not a new lower-level validation rule or a change to the established
+cumulative results.
+
+The M06-T04 Publisher seam then applies the exact T08/T09 authorities without advancing into
+T10/T11. Resource and operation receiving contracts, dynamic compatibility, and recorded runtime
+obligations remain M06-T05.
 
 1. Input is converted to RFC 8785-compatible canonical JSON, parsed into an independent plain-data
    tree, and recursively frozen. Unsupported JavaScript values, accessors, custom prototypes,
@@ -843,7 +958,9 @@ and values beyond the documented limits fail closed.
 
 The semantic and contract layers use own-property traversal, `Map`, `Set`, and private
 `WeakMap`/`WeakSet` trust metadata. They use fixed messages that never echo caller values, do not
-inspect extension payloads for invented meaning, and never use Source `location` for I/O.
+inspect extension payloads for invented meaning, and never use Source `location` for I/O. Prepared
+Source authority and Catalog-set authority are tied to the exact factory-returned objects; copying
+their JSON does not copy runtime trust.
 
 Development-time generation uses Node, but the runtime API does not depend on Node, React, DOM,
 CSS, browser globals, or application code. Validation does not render a UI, invoke an adapter,

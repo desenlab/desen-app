@@ -17,9 +17,27 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src --max-warnings=0",
+    "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:coverage": "vitest run --coverage --passWithNoTests"
+    "test": "vitest run",
+    "test:bundle-publication": "vitest run test/bundle-publication.test.ts",
+    "test:invalid-source-matrix": "vitest run test/invalid-source-matrix.test.ts",
+    "test:official-golden": "vitest run test/official-golden.test.ts",
+    "test:capability-preflight": "vitest run test/capability-preflight.test.ts",
+    "test:catalog-pinning": "vitest run test/catalog-pinning.test.ts",
+    "test:catalog-resolution": "vitest run test/catalog-resolution.test.ts",
+    "test:execution-preflight": "vitest run test/execution-preflight.test.ts",
+    "test:publish-result": "vitest run test/publish-result.test.ts",
+    "test:source-normalization": "vitest run test/source-normalization.test.ts",
+    "test:source-preservation": "vitest run test/source-preservation.test.ts",
+    "test:source-preflight": "vitest run test/source-preflight.test.ts",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@desen/protocol": "workspace:*",
+    "@desen/validator": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
   }
 }

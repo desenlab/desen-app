@@ -1,0 +1,2448 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.invalid-source-matrix-proof.v1",
+  "task": "M06-T11",
+  "result": "PASS",
+  "summary": "127 invalid publication cases stop at their exact earliest public stage with immutable error-first diagnostics and no Bundle or partial publication authority, while dynamic obligations and sanitized warnings remain valid only on complete public success.",
+  "prerequisites": [
+    {
+      "task": "M06-T03",
+      "path": "docs/proof/artifacts/publisher-0.1.0-source-preflight.json",
+      "sha256": "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387",
+      "verifiedSha256": "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387"
+    },
+    {
+      "task": "M06-T04",
+      "path": "docs/proof/artifacts/publisher-0.1.0-capability-preflight.json",
+      "sha256": "2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e",
+      "verifiedSha256": "2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e"
+    },
+    {
+      "task": "M06-T05",
+      "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+      "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67",
+      "verifiedSha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+    },
+    {
+      "task": "M06-T06",
+      "path": "docs/proof/artifacts/publisher-0.1.0-source-preservation.json",
+      "sha256": "261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff",
+      "verifiedSha256": "261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff"
+    },
+    {
+      "task": "M06-T07",
+      "path": "docs/proof/artifacts/publisher-0.1.0-source-normalization.json",
+      "sha256": "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e",
+      "verifiedSha256": "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e"
+    },
+    {
+      "task": "M06-T08",
+      "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+      "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f",
+      "verifiedSha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+    },
+    {
+      "task": "M06-T09",
+      "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+      "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df",
+      "verifiedSha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+    },
+    {
+      "task": "M06-T10",
+      "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+      "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+      "verifiedSha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+    }
+  ],
+  "claims": {
+    "publicInvalidSourceMatrix": {
+      "publicPackageRoot": "packages/publisher/dist/index.js",
+      "publicOperation": "publishDesenSource",
+      "isolatedProcesses": 1,
+      "builtRootImportReplacements": 1,
+      "focusedRuntimeTests": 135,
+      "invalidCases": 127,
+      "coveredTraceRows": [
+        "PIPE-025",
+        "PIPE-026",
+        "PIPE-027",
+        "PIPE-028",
+        "PIPE-029",
+        "PIPE-030",
+        "PIPE-031",
+        "PIPE-032",
+        "PIPE-033",
+        "PIPE-034",
+        "PIPE-039",
+        "PIPE-037"
+      ],
+      "stoppedStages": [
+        "json-parse",
+        "source-schema",
+        "embedded-schema",
+        "source-semantics",
+        "catalog-resolution",
+        "catalog-integrity",
+        "namespace-conflicts",
+        "capability-contracts",
+        "state-and-control-flow",
+        "binding-compatibility",
+        "bundle-validation",
+        "normalization"
+      ],
+      "stageEightNineTenPrecedence": [
+        {
+          "id": "PIPE-032-capability-precedence",
+          "name": "stage eight wins over simultaneous stage-nine and stage-ten defects",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_EVENT"
+        },
+        {
+          "id": "PIPE-033-control-flow-precedence",
+          "name": "stage nine wins over a simultaneous stage-ten defect",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "PREDICATE_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-034-binding-precedence",
+          "name": "stage ten rejects a static mismatch and suppresses earlier warnings",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        }
+      ],
+      "exactFailureKeys": ["diagnostics", "ok", "stage"],
+      "forbiddenFailureAuthority": [
+        "bundle",
+        "catalogSet",
+        "catalogsPinned",
+        "capabilityPreflighted",
+        "executionPreflighted",
+        "normalized",
+        "normalizedDocument",
+        "obligations",
+        "packages",
+        "pinnedDocument",
+        "preflighted",
+        "preserved",
+        "preservedDocument",
+        "publication",
+        "requirementPackageIndexes",
+        "revision",
+        "source",
+        "sourceCatalogRequirements",
+        "sourceDigest",
+        "sourceNodeTrace",
+        "traceability",
+        "value"
+      ],
+      "errorFirstNonemptyDiagnostics": true,
+      "firstDiagnosticStageMatchesResult": true,
+      "recursivelyImmutableFailures": true,
+      "warningSuppressionOnLaterFailure": true,
+      "sanitizedWarningsOnlyOnCompleteSuccess": true,
+      "dynamicRuntimeObligationsRemainPublishable": true,
+      "publicSourceJsonLimits": {
+        "maxDecodedStringCodeUnits": 4194304,
+        "maxJsonDepth": 256,
+        "maxJsonValueOccurrences": 262144,
+        "maxNumberTokenCodeUnits": 1024,
+        "maxSourceUtf8Bytes": 8388608
+      },
+      "completePublisherDiagnosticRegistry": [
+        {
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON",
+          "stage": "json-parse",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED",
+          "stage": "json-parse",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/DEPRECATED_CAPABILITY",
+          "stage": "capability-contracts",
+          "severity": "warning"
+        },
+        {
+          "code": "run.desen.publisher/INVALID_CATALOG_INPUT",
+          "stage": "catalog-resolution",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED",
+          "stage": "catalog-integrity",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED",
+          "stage": "source-semantics",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED",
+          "stage": "capability-contracts",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_AUTHORITY_INVALID",
+          "stage": "capability-contracts",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED",
+          "stage": "binding-compatibility",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/SOURCE_PRESERVATION_AUTHORITY_INVALID",
+          "stage": "normalization",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED",
+          "stage": "normalization",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/SOURCE_NORMALIZATION_AUTHORITY_INVALID",
+          "stage": "source-digest",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED",
+          "stage": "normalization",
+          "severity": "error"
+        },
+        {
+          "code": "run.desen.publisher/BUNDLE_VALIDATION_AUTHORITY_INVALID",
+          "stage": "bundle-validation",
+          "severity": "error"
+        }
+      ],
+      "deliberatelyUnrepresentedNegativeStages": [
+        "source-digest",
+        "authoring-removal",
+        "catalog-pinning",
+        "bundle-revision"
+      ]
+    },
+    "runtimeProbeTransport": {
+      "transport": "stdin",
+      "nodeArguments": ["--no-warnings", "--input-type=module", "-"],
+      "programBytes": 134816,
+      "maximumProgramBytes": 2097152,
+      "maximumStdoutBytes": 8388608,
+      "maximumStderrBytes": 262144,
+      "timeoutMilliseconds": 180000,
+      "executableSourceArgumentBytes": 0,
+      "inheritedNodeOptions": false,
+      "inheritedNodePath": false,
+      "settlesOnClose": true,
+      "shell": false,
+      "temporaryFiles": false
+    },
+    "traceability": [
+      { "id": "PIPE-025", "owners": ["M06-T01"], "tests": ["M06-T11"] },
+      { "id": "PIPE-026", "owners": ["M06-T03"], "tests": ["M06-T11"] },
+      { "id": "PIPE-027", "owners": ["M06-T03"], "tests": ["M06-T11"] },
+      { "id": "PIPE-028", "owners": ["M06-T03"], "tests": ["M06-T11"] },
+      { "id": "PIPE-029", "owners": ["M06-T02"], "tests": ["M06-T11"] },
+      { "id": "PIPE-030", "owners": ["M06-T02", "M06-T03"], "tests": ["M06-T11"] },
+      { "id": "PIPE-031", "owners": ["M06-T02"], "tests": ["M06-T11"] },
+      { "id": "PIPE-032", "owners": ["M06-T04"], "tests": ["M06-T11"] },
+      { "id": "PIPE-033", "owners": ["M06-T03", "M06-T05"], "tests": ["M06-T11"] },
+      { "id": "PIPE-034", "owners": ["M06-T05"], "tests": ["M06-T11"] },
+      { "id": "PIPE-037", "owners": ["M06-T07"], "tests": ["M06-T10"] },
+      { "id": "PIPE-039", "owners": ["M06-T09"], "tests": ["M06-T10", "M06-T11"] }
+    ],
+    "taskApplicability": {
+      "ledgerSha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147",
+      "records": [
+        {
+          "ledger": {
+            "collection": "conformanceRules",
+            "id": "C-011",
+            "section": "7.3",
+            "anchor": "performs the checks in Section 25",
+            "owners": ["M06-T01", "M06-T11"],
+            "tests": ["M06-T10", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_COMPOSITE",
+            "invalidTraceIds": [
+              "PIPE-025",
+              "PIPE-026",
+              "PIPE-027",
+              "PIPE-028",
+              "PIPE-029",
+              "PIPE-030",
+              "PIPE-031",
+              "PIPE-032",
+              "PIPE-033",
+              "PIPE-034",
+              "PIPE-037",
+              "PIPE-039"
+            ],
+            "positiveStageIds": ["PIPE-035", "PIPE-036", "PIPE-038", "PIPE-040"],
+            "positiveGuardNames": [
+              "publishes the unmodified official golden through every total public stage"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "conformanceRules",
+            "id": "C-012",
+            "section": "7.3",
+            "anchor": "structurally and semantically valid",
+            "owners": ["M06-T09"],
+            "tests": ["M06-T10", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_GOLDEN_AND_NO_BUNDLE_MATRIX",
+            "invalidCaseCount": 127,
+            "positiveGuardNames": [
+              "publishes the unmodified official golden through every total public stage"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-004",
+            "section": "6.3",
+            "anchor": "validates the source against the exact catalogs",
+            "owners": ["M06-T03", "M06-T04", "M06-T05"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION_SLICE",
+            "invalidTraceIds": [
+              "PIPE-026",
+              "PIPE-027",
+              "PIPE-028",
+              "PIPE-029",
+              "PIPE-030",
+              "PIPE-031",
+              "PIPE-032",
+              "PIPE-033",
+              "PIPE-034"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-025",
+            "section": "25.1",
+            "anchor": "JSON parsing",
+            "owners": ["M06-T01"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-025-malformed-json",
+              "PIPE-025-duplicate-member",
+              "PIPE-025-inherited-diagnostic-pointer-limit",
+              "PIPE-025-raw-source-limit",
+              "PIPE-025-lone-surrogate",
+              "PIPE-025-nonfinite-number",
+              "PIPE-025-depth-limit",
+              "PIPE-025-value-limit",
+              "PIPE-025-decoded-string-limit",
+              "PIPE-025-number-token-limit"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-026",
+            "section": "25.1",
+            "anchor": "source schema validation",
+            "owners": ["M06-T03"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-026-source-schema",
+              "PIPE-026-source-root-type",
+              "PIPE-026-diagnostic-count-limit",
+              "PIPE-026-diagnostic-pointer-limit",
+              "PIPE-026-diagnostic-aggregate-limit"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-027",
+            "section": "25.1",
+            "anchor": "embedded JSON Schema validation",
+            "owners": ["M06-T03"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": ["PIPE-027-embedded-schema"]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-028",
+            "section": "25.1",
+            "anchor": "identifier and reference validation",
+            "owners": ["M06-T03"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-028-duplicate-node-id",
+              "PIPE-028-static-reference",
+              "PIPE-028-behavior-reference-category",
+              "PIPE-028-resource-reference-category",
+              "PIPE-028-missing-entry",
+              "PIPE-028-surface-key-id-mismatch",
+              "PIPE-028-invalid-semver",
+              "PIPE-028-wrong-capability-category"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-029",
+            "section": "25.1",
+            "anchor": "exact catalog resolution",
+            "owners": ["M06-T02"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-029-missing-catalog",
+              "PIPE-029-ambiguous-catalog",
+              "PIPE-029-incompatible-target",
+              "PIPE-029-candidate-limit",
+              "PIPE-029-malformed-candidate",
+              "PIPE-029-requirement-limit",
+              "PIPE-029-identity-limit",
+              "PIPE-029-document-identity-limit",
+              "PIPE-029-requirement-identity-limit",
+              "PIPE-029-inherited-diagnostic-aggregate-limit"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-030",
+            "section": "25.1",
+            "anchor": "catalog schema and digest",
+            "owners": ["M06-T02", "M06-T03"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-030-catalog-schema",
+              "PIPE-030-catalog-digest",
+              "PIPE-030-catalog-identity-mismatch",
+              "PIPE-030-location-cannot-establish-trust",
+              "PIPE-030-malformed-catalog-json",
+              "PIPE-030-catalog-depth-limit",
+              "PIPE-030-catalog-value-limit",
+              "PIPE-030-catalog-string-limit",
+              "PIPE-030-catalog-single-byte-limit",
+              "PIPE-030-catalog-aggregate-byte-limit",
+              "PIPE-030-catalog-diagnostic-limit",
+              "PIPE-030-catalog-capability-limit"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-031",
+            "section": "25.1",
+            "anchor": "namespace conflict detection",
+            "owners": ["M06-T02"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": ["PIPE-031-namespace-conflict", "PIPE-031-namespace-diagnostic-limit"]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-032",
+            "section": "25.1",
+            "anchor": "prop, slot, event, command",
+            "owners": ["M06-T04"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-032-unknown-prop",
+              "PIPE-032-required-prop",
+              "PIPE-032-prop-type",
+              "PIPE-032-variant-prop",
+              "PIPE-032-unknown-slot",
+              "PIPE-032-leaf-slot",
+              "PIPE-032-required-slot",
+              "PIPE-032-slot-cardinality",
+              "PIPE-032-slot-child",
+              "PIPE-032-component-style-part",
+              "PIPE-032-component-visual-state",
+              "PIPE-032-component-style-property",
+              "PIPE-032-behavior-prop",
+              "PIPE-032-behavior-slot",
+              "PIPE-032-behavior-slot-required",
+              "PIPE-032-behavior-slot-cardinality",
+              "PIPE-032-behavior-slot-child",
+              "PIPE-032-behavior-event",
+              "PIPE-032-behavior-style-part",
+              "PIPE-032-behavior-visual-state",
+              "PIPE-032-behavior-style-property",
+              "PIPE-032-behavior-attachment",
+              "PIPE-032-behavior-conflict",
+              "PIPE-032-unknown-command",
+              "PIPE-032-invalid-component-contract",
+              "PIPE-032-invalid-interaction-contract",
+              "PIPE-032-diagnostic-limit",
+              "PIPE-032-diagnostic-pointer-limit",
+              "PIPE-032-diagnostic-aggregate-limit",
+              "PIPE-032-warning-count-limit",
+              "PIPE-032-warning-pointer-limit",
+              "PIPE-032-warning-aggregate-limit",
+              "PIPE-032-capability-precedence",
+              "PIPE-032-resource-input",
+              "PIPE-032-resource-input-value",
+              "PIPE-032-operation-input",
+              "PIPE-032-command-input",
+              "PIPE-032-invalid-execution-contract",
+              "PIPE-032-invalid-resource-execution-contract"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-033",
+            "section": "25.1",
+            "anchor": "predicate, repeat, and state",
+            "owners": ["M06-T03", "M06-T05"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-033-control-flow-precedence",
+              "PIPE-033-diagnostic-count-limit",
+              "PIPE-033-diagnostic-pointer-limit",
+              "PIPE-033-diagnostic-aggregate-limit",
+              "PIPE-033-predicate-type",
+              "PIPE-033-operation-alias-conflict",
+              "PIPE-033-repeat-items",
+              "PIPE-033-repeat-key",
+              "PIPE-033-repeat-limit",
+              "PIPE-033-repeat-alias-shadow",
+              "PIPE-033-navigation-target",
+              "PIPE-033-state-path",
+              "PIPE-033-state-root",
+              "PIPE-033-state-toggle",
+              "PIPE-033-resource-target",
+              "PIPE-033-command-target",
+              "PIPE-033-state-write",
+              "PIPE-033-state-initial"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-034",
+            "section": "25.1",
+            "anchor": "static binding compatibility",
+            "owners": ["M06-T05"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-034-binding-precedence",
+              "PIPE-034-lexical-binding",
+              "PIPE-034-event-scope",
+              "PIPE-034-settlement-event-scope",
+              "PIPE-034-repeat-body-reference",
+              "PIPE-034-repeat-items-alias-scope",
+              "PIPE-034-format-binding",
+              "PIPE-034-format-extra",
+              "PIPE-034-format-malformed",
+              "PIPE-034-operation-lifecycle-binding",
+              "PIPE-034-resource-lifecycle-binding",
+              "PIPE-034-obligation-pointer-limit",
+              "PIPE-034-obligation-aggregate-limit",
+              "PIPE-034-obligation-limit"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-035",
+            "section": "25.1",
+            "anchor": "source digest calculation",
+            "owners": ["M06-T08"],
+            "tests": ["M06-T10"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_TOTAL_STAGE_SUCCESS",
+            "positiveGuardNames": [
+              "publishes the unmodified official golden through every total public stage"
+            ],
+            "prerequisiteTasks": ["M06-T08", "M06-T10"]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-036",
+            "section": "25.1",
+            "anchor": "removal of `authoring`",
+            "owners": ["M06-T07"],
+            "tests": ["M06-T10"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_TOTAL_STAGE_SUCCESS",
+            "positiveGuardNames": [
+              "publishes the unmodified official golden through every total public stage"
+            ],
+            "prerequisiteTasks": ["M06-T07", "M06-T10"]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-037",
+            "section": "25.1",
+            "anchor": "deterministic normalization",
+            "owners": ["M06-T07"],
+            "tests": ["M06-T10"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-037-first-normalization-limit",
+              "PIPE-037-source-node-trace-limit",
+              "PIPE-037-source-node-pointer-limit",
+              "PIPE-037-source-node-aggregate-limit",
+              "PIPE-037-normalization-limit"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-038",
+            "section": "25.1",
+            "anchor": "exact catalog pinning",
+            "owners": ["M06-T08"],
+            "tests": ["M06-T10"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_TOTAL_STAGE_SUCCESS",
+            "positiveGuardNames": [
+              "publishes the unmodified official golden through every total public stage"
+            ],
+            "prerequisiteTasks": ["M06-T08", "M06-T10"]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-039",
+            "section": "25.1",
+            "anchor": "bundle schema and semantic validation",
+            "owners": ["M06-T09"],
+            "tests": ["M06-T10", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_INVALID_PUBLICATION",
+            "invalidCaseIds": [
+              "PIPE-039-first-final-bundle-limit",
+              "PIPE-039-last-normalization-admitted",
+              "PIPE-039-final-bundle-limit"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-040",
+            "section": "25.1",
+            "anchor": "bundle revision calculation",
+            "owners": ["M06-T09"],
+            "tests": ["M06-T10"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_TOTAL_STAGE_SUCCESS",
+            "positiveGuardNames": [
+              "publishes the unmodified official golden through every total public stage"
+            ],
+            "prerequisiteTasks": ["M06-T09", "M06-T10"]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "pipelineSteps",
+            "id": "PIPE-041",
+            "section": "25.1",
+            "anchor": "optional signing",
+            "owners": ["M12-T08"],
+            "tests": ["M12-T08"],
+            "status": "JUSTIFIED_NA"
+          },
+          "applicability": {
+            "classification": "JUSTIFIED_NA",
+            "rationale": "DESEN 0.1.0 defines no signing profile and the local Web-React proof makes no authenticity claim",
+            "localClaim": "unsigned publication only",
+            "completeRuleClaim": false
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-025",
+            "section": "10.3",
+            "anchor": "use JSON Schema Draft 2020-12",
+            "owners": ["M02-T06", "M06-T03"],
+            "tests": ["M02-T13", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-027-embedded-schema"],
+            "positiveGuardNames": []
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-033",
+            "section": "12.2",
+            "anchor": "discovery hint only",
+            "owners": ["M02-T07", "M06-T02", "M06-T08"],
+            "tests": ["M06-T10", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-030-location-cannot-establish-trust"],
+            "positiveGuardNames": []
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-052",
+            "section": "15.1",
+            "anchor": "Ordering operands of different types is invalid",
+            "owners": ["M02-T10", "M04-T04", "M06-T05"],
+            "tests": ["M02-T13", "M04-T16", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-033-predicate-type"],
+            "positiveGuardNames": []
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-057",
+            "section": "17.2",
+            "anchor": "validates literal values immediately",
+            "owners": ["M02-T08", "M06-T04", "M06-T05"],
+            "tests": ["M02-T13", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-032-prop-type"],
+            "positiveGuardNames": [
+              "publishes a dynamic context.runtimeTitle obligation without guessing its value"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-083",
+            "section": "21.1",
+            "anchor": "treated as one namespace",
+            "owners": ["M02-T07", "M06-T02"],
+            "tests": ["M02-T13", "M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-031-namespace-conflict"],
+            "positiveGuardNames": []
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-108",
+            "section": "25.3",
+            "anchor": "correctness cannot be proven",
+            "owners": ["M06-T11"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_COMPLETE_NO_BUNDLE_MATRIX",
+            "invalidCaseCount": 127
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-111",
+            "section": "26.2",
+            "anchor": "should be caught at publication",
+            "owners": ["M02-T13", "M06-T11", "M04-T16"],
+            "tests": ["M06-T11", "M04-T16"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": [
+              "PIPE-032-capability-precedence",
+              "PIPE-033-control-flow-precedence",
+              "PIPE-034-binding-precedence"
+            ],
+            "positiveGuardNames": []
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-137",
+            "section": "30.3",
+            "anchor": "Removal requires a breaking package version",
+            "owners": ["M06-T04", "M12-T07"],
+            "tests": ["M06-T11", "M12-T08"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-034-binding-precedence"],
+            "positiveGuardNames": [
+              "emits only fixed sanitized deprecation warnings on complete success"
+            ]
+          }
+        },
+        {
+          "ledger": {
+            "collection": "proseRules",
+            "id": "R-143",
+            "section": "31.4",
+            "anchor": "trust must be established independently",
+            "owners": ["M06-T02", "M06-T11"],
+            "tests": ["M06-T11"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-030-location-cannot-establish-trust"],
+            "positiveGuardNames": []
+          }
+        },
+        {
+          "ledger": {
+            "collection": "diagnostics",
+            "id": "D-032",
+            "section": "Appendix B",
+            "anchor": "CATALOG_DIGEST_MISMATCH",
+            "owners": ["M02-T05", "M06-T02", "M07-T03"],
+            "tests": ["M06-T11", "M10-T07"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-030-catalog-digest", "PIPE-030-location-cannot-establish-trust"],
+            "positiveGuardNames": []
+          }
+        },
+        {
+          "ledger": {
+            "collection": "diagnostics",
+            "id": "D-033",
+            "section": "Appendix B",
+            "anchor": "CATALOG_VERSION_UNAVAILABLE",
+            "owners": ["M02-T05", "M06-T02", "M07-T03"],
+            "tests": ["M06-T11", "M10-T07"],
+            "status": "ASSIGNED"
+          },
+          "applicability": {
+            "classification": "EXECUTABLE_REPRESENTATIVE_CASES",
+            "caseIds": ["PIPE-029-missing-catalog"],
+            "positiveGuardNames": []
+          }
+        }
+      ],
+      "taskLocalFindingAuthority": {
+        "finding": "PF-047",
+        "records": [
+          {
+            "finding": "PF-047",
+            "historicalLedger": {
+              "collection": "invariants",
+              "id": "A-011",
+              "owners": ["M02-T08", "M02-T09", "M02-T10", "M02-T11", "M03-T09"],
+              "tests": ["M02-T13", "M03-T09", "M04-T16"]
+            },
+            "applicableM06T11": {
+              "status": "TASK_LOCAL_SLICE_PROVED",
+              "slice": "public invalid design-to-capability boundary",
+              "caseIds": ["PIPE-032-prop-type", "PIPE-032-invalid-component-contract"],
+              "completeRuleClaim": false,
+              "frozenLedgerReassignment": false
+            }
+          },
+          {
+            "finding": "PF-047",
+            "historicalLedger": {
+              "collection": "diagnostics",
+              "id": "D-009",
+              "owners": ["M02-T05", "M02-T08", "M04-T02"],
+              "tests": ["M02-T13", "M04-T16"]
+            },
+            "applicableM06T11": {
+              "status": "TASK_LOCAL_SLICE_PROVED",
+              "slice": "resolved-property mismatch with no Bundle",
+              "caseIds": ["PIPE-032-prop-type"],
+              "completeRuleClaim": false,
+              "frozenLedgerReassignment": false
+            }
+          }
+        ],
+        "frozenLedgerReassignment": false
+      }
+    },
+    "packageTests": {
+      "path": "packages/publisher/test/invalid-source-matrix.test.ts",
+      "exactNames": [
+        "pins exact trace coverage without inventing public data negatives for total stages",
+        "publishes the unmodified official golden through every total public stage",
+        "publishes a dynamic context.runtimeTitle obligation without guessing its value",
+        "publishes the exact 4,096-obligation positive boundary without exposing obligations",
+        "publishes an obligation pointer at exactly 4,096 code units",
+        "publishes obligations at exactly 1,048,576 aggregate code units",
+        "publishes the exact largest payload admitted by final Bundle validation",
+        "emits only fixed sanitized deprecation warnings on complete success"
+      ],
+      "exactRuntimeImport": "../src/index.js",
+      "bytes": 91924,
+      "sha256": "959b366b99d304e217b51e89ff377b2c4bb09c61e5202bf454a09575c75b0a56",
+      "assertionFamilies": [
+        "parameterized-complete-table",
+        "exact-parameterized-case-name",
+        "first-public-invocation",
+        "second-public-invocation",
+        "raw-source-input-immutability",
+        "catalog-candidate-input-immutability",
+        "exact-no-bundle-failure-shell",
+        "exact-stopped-stage",
+        "nonempty-diagnostics",
+        "exact-first-diagnostic-code",
+        "first-diagnostic-error",
+        "first-diagnostic-stage",
+        "only-error-diagnostics",
+        "no-partial-publication-authority",
+        "recursive-result-freeze",
+        "deterministic-public-result",
+        "later-failure-warning-code-suppression",
+        "later-failure-warning-severity-suppression",
+        "exact-success-shell",
+        "total-stage-explicit-nonclaim",
+        "complete-publisher-diagnostic-registry",
+        "unique-publisher-diagnostic-registry",
+        "frozen-publisher-diagnostic-registry",
+        "frozen-publisher-diagnostic-definitions",
+        "publisher-diagnostic-lookup-identity",
+        "unknown-publisher-diagnostic-rejection",
+        "emitted-publisher-diagnostics-registered",
+        "sanitized-warning-private-text-absence",
+        "sanitized-warning-private-replacement-absence"
+      ],
+      "invalidCases": 127,
+      "caseInventory": [
+        {
+          "id": "PIPE-025-malformed-json",
+          "name": "malformed raw JSON stops before a Source exists",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON"
+        },
+        {
+          "id": "PIPE-025-duplicate-member",
+          "name": "duplicate decoded object names remain non-interoperable",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON"
+        },
+        {
+          "id": "PIPE-025-inherited-diagnostic-pointer-limit",
+          "name": "an inherited JSON diagnostic pointer beyond 4,096 units is rebound safely",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-025-raw-source-limit",
+          "name": "one byte beyond the public raw Source ceiling fails closed",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-025-lone-surrogate",
+          "name": "an escaped lone surrogate is rejected as non-interoperable Unicode",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON"
+        },
+        {
+          "id": "PIPE-025-nonfinite-number",
+          "name": "a JSON number that converts to infinity is rejected before schema work",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON"
+        },
+        {
+          "id": "PIPE-025-depth-limit",
+          "name": "the 257th JSON container level crosses the public depth ceiling",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-025-value-limit",
+          "name": "one JSON value occurrence beyond 262,144 fails closed",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-025-decoded-string-limit",
+          "name": "one decoded UTF-16 unit beyond 4,194,304 fails closed",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-025-number-token-limit",
+          "name": "one numeric-token code unit beyond 1,024 fails before conversion",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-026-source-schema",
+          "name": "a structurally invalid Source emits no Bundle",
+          "trace": "PIPE-026",
+          "stage": "source-schema",
+          "code": "UNKNOWN_CORE_FIELD"
+        },
+        {
+          "id": "PIPE-026-source-root-type",
+          "name": "a parsed non-object Source fails structural validation",
+          "trace": "PIPE-026",
+          "stage": "source-schema",
+          "code": "SCHEMA_INVALID"
+        },
+        {
+          "id": "PIPE-026-diagnostic-count-limit",
+          "name": "1,025 structural diagnostics collapse to one bounded failure",
+          "trace": "PIPE-026",
+          "stage": "source-schema",
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-026-diagnostic-pointer-limit",
+          "name": "a structural diagnostic pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-026",
+          "stage": "source-schema",
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-026-diagnostic-aggregate-limit",
+          "name": "an exact-count structural report beyond the aggregate budget fails closed",
+          "trace": "PIPE-026",
+          "stage": "source-schema",
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-027-embedded-schema",
+          "name": "an invalid embedded Draft 2020-12 schema fails before semantics",
+          "trace": "PIPE-027",
+          "stage": "embedded-schema",
+          "code": "SCHEMA_INVALID"
+        },
+        {
+          "id": "PIPE-028-duplicate-node-id",
+          "name": "duplicate Source node identity fails intrinsic semantics",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "DUPLICATE_NODE_ID"
+        },
+        {
+          "id": "PIPE-028-static-reference",
+          "name": "a missing static capability reference emits no Bundle",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "UNKNOWN_CAPABILITY"
+        },
+        {
+          "id": "PIPE-028-behavior-reference-category",
+          "name": "an existing component cannot satisfy a behavior reference",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "UNKNOWN_CAPABILITY"
+        },
+        {
+          "id": "PIPE-028-resource-reference-category",
+          "name": "an existing operation cannot satisfy a resource reference",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "UNKNOWN_CAPABILITY"
+        },
+        {
+          "id": "PIPE-028-missing-entry",
+          "name": "a missing entry surface fails intrinsic Source semantics",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "ENTRY_NOT_FOUND"
+        },
+        {
+          "id": "PIPE-028-surface-key-id-mismatch",
+          "name": "a surface map key that disagrees with its id is rejected",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "DUPLICATE_SURFACE_ID"
+        },
+        {
+          "id": "PIPE-028-invalid-semver",
+          "name": "a non-exact Catalog requirement version fails Source semantics",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "run.desen.validator/INVALID_SEMVER"
+        },
+        {
+          "id": "PIPE-028-wrong-capability-category",
+          "name": "an existing component cannot satisfy an operation reference",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "UNKNOWN_CAPABILITY"
+        },
+        {
+          "id": "PIPE-029-missing-catalog",
+          "name": "a missing exact Catalog package is never substituted",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "CATALOG_VERSION_UNAVAILABLE"
+        },
+        {
+          "id": "PIPE-029-ambiguous-catalog",
+          "name": "two exact Catalog candidates are rejected as ambiguous",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "CATALOG_VERSION_UNAVAILABLE"
+        },
+        {
+          "id": "PIPE-029-incompatible-target",
+          "name": "a target-incompatible Catalog candidate cannot satisfy the requirement",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "CATALOG_VERSION_UNAVAILABLE"
+        },
+        {
+          "id": "PIPE-029-candidate-limit",
+          "name": "one candidate beyond the finite public inventory fails before selection",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-029-malformed-candidate",
+          "name": "a candidate envelope with an extra authority field is rejected",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/INVALID_CATALOG_INPUT"
+        },
+        {
+          "id": "PIPE-029-requirement-limit",
+          "name": "one Source requirement beyond the 256-entry ceiling fails closed",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-029-identity-limit",
+          "name": "one unselected candidate identity beyond 4,096 units fails globally",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-029-document-identity-limit",
+          "name": "a Source document identity beyond 4,096 units fails before package observation",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-029-requirement-identity-limit",
+          "name": "a Source Catalog requirement identity beyond 4,096 units fails closed",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-029-inherited-diagnostic-aggregate-limit",
+          "name": "an inherited Catalog report beyond the aggregate budget is rebound safely",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-schema",
+          "name": "an invalid selected Catalog schema fails integrity",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "UNKNOWN_CORE_FIELD"
+        },
+        {
+          "id": "PIPE-030-catalog-digest",
+          "name": "a package observation that disagrees with Catalog digest fails integrity",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "CATALOG_DIGEST_MISMATCH"
+        },
+        {
+          "id": "PIPE-030-catalog-identity-mismatch",
+          "name": "a selected package envelope cannot override its inner Catalog identity",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/INVALID_CATALOG_INPUT"
+        },
+        {
+          "id": "PIPE-030-location-cannot-establish-trust",
+          "name": "a discovery location cannot override a mismatched observed package digest",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "CATALOG_DIGEST_MISMATCH"
+        },
+        {
+          "id": "PIPE-030-malformed-catalog-json",
+          "name": "a selected Catalog with a lone surrogate is not inert JSON",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/INVALID_CATALOG_INPUT"
+        },
+        {
+          "id": "PIPE-030-catalog-depth-limit",
+          "name": "a selected Catalog beyond the 128-level depth ceiling fails closed",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-value-limit",
+          "name": "a selected Catalog beyond 100,000 values fails closed",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-string-limit",
+          "name": "a selected Catalog beyond 4,194,304 string units fails closed",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-single-byte-limit",
+          "name": "escaped control data crosses the honest 16 MiB single-Catalog ceiling",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-aggregate-byte-limit",
+          "name": "six individually admitted Catalogs cross the 64 MiB aggregate ceiling",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-diagnostic-limit",
+          "name": "1,025 Catalog schema diagnostics collapse to one bounded failure",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-capability-limit",
+          "name": "capabilities admitted per Catalog cross the 100,000 aggregate ceiling",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-031-namespace-conflict",
+          "name": "duplicate capability identity across exact Catalogs fails atomically",
+          "trace": "PIPE-031",
+          "stage": "namespace-conflicts",
+          "code": "AMBIGUOUS_CAPABILITY"
+        },
+        {
+          "id": "PIPE-031-namespace-diagnostic-limit",
+          "name": "1,025 cross-Catalog conflicts collapse to one bounded failure",
+          "trace": "PIPE-031",
+          "stage": "namespace-conflicts",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-unknown-prop",
+          "name": "an undeclared literal component prop fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_PROP"
+        },
+        {
+          "id": "PIPE-032-required-prop",
+          "name": "an omitted required component prop fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "PROP_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-032-prop-type",
+          "name": "a literal component prop type mismatch fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "PROP_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-032-variant-prop",
+          "name": "a Variant component prop type mismatch fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "PROP_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-032-unknown-slot",
+          "name": "an undeclared component slot fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_SLOT"
+        },
+        {
+          "id": "PIPE-032-leaf-slot",
+          "name": "children attached to a leaf component slot fail terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_SLOT"
+        },
+        {
+          "id": "PIPE-032-required-slot",
+          "name": "an omitted required component slot fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "SLOT_CARDINALITY"
+        },
+        {
+          "id": "PIPE-032-slot-cardinality",
+          "name": "a Catalog slot cardinality violation fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "SLOT_CARDINALITY"
+        },
+        {
+          "id": "PIPE-032-slot-child",
+          "name": "a child category rejected by its parent slot fails publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "SLOT_CHILD_REJECTED"
+        },
+        {
+          "id": "PIPE-032-component-style-part",
+          "name": "an undeclared component style part fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_PROP"
+        },
+        {
+          "id": "PIPE-032-component-visual-state",
+          "name": "an undeclared component visual state fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_PROP"
+        },
+        {
+          "id": "PIPE-032-component-style-property",
+          "name": "a component style-property schema mismatch fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "PROP_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-032-behavior-prop",
+          "name": "a behavior prop schema mismatch fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "PROP_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-032-behavior-slot",
+          "name": "an undeclared behavior slot fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_SLOT"
+        },
+        {
+          "id": "PIPE-032-behavior-slot-required",
+          "name": "an omitted required behavior slot fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "SLOT_CARDINALITY"
+        },
+        {
+          "id": "PIPE-032-behavior-slot-cardinality",
+          "name": "a behavior slot above its maximum cardinality fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "SLOT_CARDINALITY"
+        },
+        {
+          "id": "PIPE-032-behavior-slot-child",
+          "name": "a child rejected by its behavior slot fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "SLOT_CHILD_REJECTED"
+        },
+        {
+          "id": "PIPE-032-behavior-event",
+          "name": "an undeclared behavior event fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_EVENT"
+        },
+        {
+          "id": "PIPE-032-behavior-style-part",
+          "name": "an undeclared behavior style part fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_PROP"
+        },
+        {
+          "id": "PIPE-032-behavior-visual-state",
+          "name": "an undeclared behavior visual state fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_PROP"
+        },
+        {
+          "id": "PIPE-032-behavior-style-property",
+          "name": "a behavior style-property schema mismatch fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "PROP_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-032-behavior-attachment",
+          "name": "a behavior attached to a rejected component category fails publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "BEHAVIOR_ATTACHMENT_INVALID"
+        },
+        {
+          "id": "PIPE-032-behavior-conflict",
+          "name": "two exclusive behavior instances on one node fail publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "BEHAVIOR_CONFLICT"
+        },
+        {
+          "id": "PIPE-032-unknown-command",
+          "name": "an undeclared component command fails terminal publication",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_COMMAND"
+        },
+        {
+          "id": "PIPE-032-invalid-component-contract",
+          "name": "an unresolved component schema reference fails Catalog preparation",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.validator/INVALID_COMPONENT_CONTRACT"
+        },
+        {
+          "id": "PIPE-032-invalid-interaction-contract",
+          "name": "an unsafe event payload pattern fails interaction preparation",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.validator/INVALID_INTERACTION_CONTRACT"
+        },
+        {
+          "id": "PIPE-032-diagnostic-limit",
+          "name": "1,025 static capability errors collapse to one bounded failure",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-diagnostic-pointer-limit",
+          "name": "a static capability diagnostic pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-diagnostic-aggregate-limit",
+          "name": "an exact-count static capability report beyond the aggregate budget fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-warning-count-limit",
+          "name": "1,025 deprecated capability warnings fail closed instead of truncating",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-warning-pointer-limit",
+          "name": "a deprecated capability warning pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-warning-aggregate-limit",
+          "name": "an exact-count warning report beyond the aggregate budget fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-capability-precedence",
+          "name": "stage eight wins over simultaneous stage-nine and stage-ten defects",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "UNKNOWN_EVENT"
+        },
+        {
+          "id": "PIPE-032-resource-input",
+          "name": "a Source resource policy absent from its Catalog fails capability use",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "RESOURCE_INPUT_INVALID"
+        },
+        {
+          "id": "PIPE-032-resource-input-value",
+          "name": "a statically invalid literal resource input fails capability use",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "RESOURCE_INPUT_INVALID"
+        },
+        {
+          "id": "PIPE-032-operation-input",
+          "name": "a statically invalid literal operation input fails capability use",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "OPERATION_INPUT_INVALID"
+        },
+        {
+          "id": "PIPE-032-command-input",
+          "name": "a statically invalid literal command input fails capability use",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "COMMAND_INPUT_INVALID"
+        },
+        {
+          "id": "PIPE-032-invalid-execution-contract",
+          "name": "an unresolved operation output schema fails execution Catalog preparation",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT"
+        },
+        {
+          "id": "PIPE-032-invalid-resource-execution-contract",
+          "name": "an unresolved resource input schema fails execution Catalog preparation",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT"
+        },
+        {
+          "id": "PIPE-033-control-flow-precedence",
+          "name": "stage nine wins over a simultaneous stage-ten defect",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "PREDICATE_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-033-diagnostic-count-limit",
+          "name": "1,025 execution diagnostics fail closed instead of truncating",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-033-diagnostic-pointer-limit",
+          "name": "an execution diagnostic pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-033-diagnostic-aggregate-limit",
+          "name": "an exact-count execution report beyond the aggregate budget fails closed",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-033-predicate-type",
+          "name": "an isolated predicate operand type mismatch fails control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "PREDICATE_TYPE_MISMATCH"
+        },
+        {
+          "id": "PIPE-033-operation-alias-conflict",
+          "name": "one operation alias cannot identify two different capabilities",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT"
+        },
+        {
+          "id": "PIPE-033-repeat-items",
+          "name": "a statically non-iterable repeat input fails control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "REPEAT_ITEMS_INVALID"
+        },
+        {
+          "id": "PIPE-033-repeat-key",
+          "name": "duplicate resolved repeat keys fail control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "REPEAT_KEY_INVALID"
+        },
+        {
+          "id": "PIPE-033-repeat-limit",
+          "name": "a literal repeat exceeding its declared limit fails control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.validator/INVALID_BINDING_CONTRACT"
+        },
+        {
+          "id": "PIPE-033-repeat-alias-shadow",
+          "name": "a nested repeat cannot shadow an active lexical alias",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.validator/INVALID_BINDING_CONTRACT"
+        },
+        {
+          "id": "PIPE-033-navigation-target",
+          "name": "a navigation action targeting a missing surface fails control flow",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "ENTRY_NOT_FOUND"
+        },
+        {
+          "id": "PIPE-033-state-path",
+          "name": "a definitely missing nested state path fails control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "STATE_WRITE_INVALID"
+        },
+        {
+          "id": "PIPE-033-state-root",
+          "name": "an undeclared root state path fails control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "STATE_WRITE_INVALID"
+        },
+        {
+          "id": "PIPE-033-state-toggle",
+          "name": "a toggle of a definitely non-boolean state value fails control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "STATE_WRITE_INVALID"
+        },
+        {
+          "id": "PIPE-033-resource-target",
+          "name": "a refresh action targeting a missing resource fails control flow",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-033-command-target",
+          "name": "a command action targeting a missing node fails control flow",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "UNKNOWN_COMMAND"
+        },
+        {
+          "id": "PIPE-033-state-write",
+          "name": "a statically invalid state write fails control-flow semantics",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "STATE_WRITE_INVALID"
+        },
+        {
+          "id": "PIPE-034-binding-precedence",
+          "name": "stage ten rejects a static mismatch and suppresses earlier warnings",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-034-lexical-binding",
+          "name": "an isolated lexical state reference fails binding compatibility",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-034-event-scope",
+          "name": "an event reference outside a declared handler fails binding compatibility",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-034-settlement-event-scope",
+          "name": "an operation settlement action cannot retain its parent component event scope",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-034-repeat-body-reference",
+          "name": "every literal repeat item must satisfy an unfallbacked body reference",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-034-repeat-items-alias-scope",
+          "name": "a repeat alias is not in scope inside its own items expression",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-033-state-initial",
+          "name": "a state initial value must satisfy its declared schema before binding compatibility",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.validator/INVALID_BINDING_CONTRACT"
+        },
+        {
+          "id": "PIPE-034-format-binding",
+          "name": "a format template with an unresolved placeholder fails compatibility",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "run.desen.validator/INVALID_BINDING_CONTRACT"
+        },
+        {
+          "id": "PIPE-034-format-extra",
+          "name": "a format value without a matching placeholder fails compatibility",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "run.desen.validator/INVALID_BINDING_CONTRACT"
+        },
+        {
+          "id": "PIPE-034-format-malformed",
+          "name": "an unclosed format placeholder fails compatibility without regex evaluation",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "run.desen.validator/INVALID_BINDING_CONTRACT"
+        },
+        {
+          "id": "PIPE-034-operation-lifecycle-binding",
+          "name": "a definitely closed operation output path fails compatibility",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-034-resource-lifecycle-binding",
+          "name": "a resource field unavailable in its lifecycle fails compatibility",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "REFERENCE_UNRESOLVED"
+        },
+        {
+          "id": "PIPE-034-obligation-pointer-limit",
+          "name": "one pointer unit beyond 4,096 rejects the complete obligation report",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-034-obligation-aggregate-limit",
+          "name": "one aggregate unit beyond 1,048,576 rejects the complete obligation report",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-034-obligation-limit",
+          "name": "one runtime obligation beyond the finite public ceiling is never truncated",
+          "trace": "PIPE-034",
+          "stage": "binding-compatibility",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-039-first-final-bundle-limit",
+          "name": "one payload unit beyond the exact successful Bundle boundary fails admission",
+          "trace": "PIPE-039",
+          "stage": "bundle-validation",
+          "code": "BUNDLE_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-039-last-normalization-admitted",
+          "name": "the last normalized payload still reaches final Bundle admission",
+          "trace": "PIPE-039",
+          "stage": "bundle-validation",
+          "code": "BUNDLE_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-037-first-normalization-limit",
+          "name": "one payload unit beyond normalization admission fails at stage thirteen",
+          "trace": "PIPE-037",
+          "stage": "normalization",
+          "code": "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-037-source-node-trace-limit",
+          "name": "one component node beyond the complete Source trace ceiling fails closed",
+          "trace": "PIPE-037",
+          "stage": "normalization",
+          "code": "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-037-source-node-pointer-limit",
+          "name": "a complete Source trace pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-037",
+          "stage": "normalization",
+          "code": "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-037-source-node-aggregate-limit",
+          "name": "a sub-count Source trace beyond the aggregate budget fails closed",
+          "trace": "PIPE-037",
+          "stage": "normalization",
+          "code": "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-037-normalization-limit",
+          "name": "the larger extensions vector stops at the real normalization ceiling",
+          "trace": "PIPE-037",
+          "stage": "normalization",
+          "code": "run.desen.publisher/SOURCE_NORMALIZATION_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-039-final-bundle-limit",
+          "name": "the smaller extensions vector reaches and fails final Bundle admission",
+          "trace": "PIPE-039",
+          "stage": "bundle-validation",
+          "code": "BUNDLE_LIMIT_EXCEEDED"
+        }
+      ],
+      "finiteLimitClosure": [
+        {
+          "id": "PIPE-025-inherited-diagnostic-pointer-limit",
+          "name": "an inherited JSON diagnostic pointer beyond 4,096 units is rebound safely",
+          "trace": "PIPE-025",
+          "stage": "json-parse",
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-029-inherited-diagnostic-aggregate-limit",
+          "name": "an inherited Catalog report beyond the aggregate budget is rebound safely",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-diagnostic-pointer-limit",
+          "name": "a static capability diagnostic pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-diagnostic-aggregate-limit",
+          "name": "an exact-count static capability report beyond the aggregate budget fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-warning-count-limit",
+          "name": "1,025 deprecated capability warnings fail closed instead of truncating",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-warning-pointer-limit",
+          "name": "a deprecated capability warning pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-032-warning-aggregate-limit",
+          "name": "an exact-count warning report beyond the aggregate budget fails closed",
+          "trace": "PIPE-032",
+          "stage": "capability-contracts",
+          "code": "run.desen.publisher/CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-033-diagnostic-count-limit",
+          "name": "1,025 execution diagnostics fail closed instead of truncating",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-033-diagnostic-pointer-limit",
+          "name": "an execution diagnostic pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-033-diagnostic-aggregate-limit",
+          "name": "an exact-count execution report beyond the aggregate budget fails closed",
+          "trace": "PIPE-033",
+          "stage": "state-and-control-flow",
+          "code": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-037-source-node-pointer-limit",
+          "name": "a complete Source trace pointer beyond 4,096 units fails closed",
+          "trace": "PIPE-037",
+          "stage": "normalization",
+          "code": "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-037-source-node-aggregate-limit",
+          "name": "a sub-count Source trace beyond the aggregate budget fails closed",
+          "trace": "PIPE-037",
+          "stage": "normalization",
+          "code": "run.desen.publisher/SOURCE_PRESERVATION_LIMIT_EXCEEDED"
+        }
+      ],
+      "publicBranchClosure": [
+        {
+          "id": "PIPE-028-behavior-reference-category",
+          "name": "an existing component cannot satisfy a behavior reference",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "UNKNOWN_CAPABILITY"
+        },
+        {
+          "id": "PIPE-028-resource-reference-category",
+          "name": "an existing operation cannot satisfy a resource reference",
+          "trace": "PIPE-028",
+          "stage": "source-semantics",
+          "code": "UNKNOWN_CAPABILITY"
+        },
+        {
+          "id": "PIPE-029-document-identity-limit",
+          "name": "a Source document identity beyond 4,096 units fails before package observation",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-029-requirement-identity-limit",
+          "name": "a Source Catalog requirement identity beyond 4,096 units fails closed",
+          "trace": "PIPE-029",
+          "stage": "catalog-resolution",
+          "code": "run.desen.publisher/CATALOG_LIMIT_EXCEEDED"
+        },
+        {
+          "id": "PIPE-030-catalog-identity-mismatch",
+          "name": "a selected package envelope cannot override its inner Catalog identity",
+          "trace": "PIPE-030",
+          "stage": "catalog-integrity",
+          "code": "run.desen.publisher/INVALID_CATALOG_INPUT"
+        }
+      ],
+      "traceDistribution": {
+        "PIPE-025": 10,
+        "PIPE-026": 5,
+        "PIPE-027": 1,
+        "PIPE-028": 8,
+        "PIPE-029": 10,
+        "PIPE-030": 12,
+        "PIPE-031": 2,
+        "PIPE-032": 39,
+        "PIPE-033": 18,
+        "PIPE-034": 14,
+        "PIPE-039": 3,
+        "PIPE-037": 5
+      },
+      "stageDistribution": {
+        "json-parse": 10,
+        "source-schema": 5,
+        "embedded-schema": 1,
+        "source-semantics": 8,
+        "catalog-resolution": 10,
+        "catalog-integrity": 12,
+        "namespace-conflicts": 2,
+        "capability-contracts": 39,
+        "state-and-control-flow": 18,
+        "binding-compatibility": 14,
+        "bundle-validation": 3,
+        "normalization": 5
+      }
+    },
+    "fixtureAuthority": [
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+        "bytes": 4719,
+        "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1",
+        "verifiedSha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+        "bytes": 22084,
+        "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d",
+        "verifiedSha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-duplicate-node-id.json",
+        "bytes": 4935,
+        "sha256": "c7bb3bce450e0db4c0e1bb962d10138fbba6becfa47f240087de027a10387cb9",
+        "verifiedSha256": "c7bb3bce450e0db4c0e1bb962d10138fbba6becfa47f240087de027a10387cb9"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-capability.json",
+        "bytes": 4726,
+        "sha256": "302c579e5d30716de7b9e6cdf11c4d127cdad2b2ba96452c794a21f93ceea72f",
+        "verifiedSha256": "302c579e5d30716de7b9e6cdf11c4d127cdad2b2ba96452c794a21f93ceea72f"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-core-field.json",
+        "bytes": 4746,
+        "sha256": "6b1e25971761c5695f97c8a993908e104bd6d27581c5eb2c6422dbcee6c9bb7d",
+        "verifiedSha256": "6b1e25971761c5695f97c8a993908e104bd6d27581c5eb2c6422dbcee6c9bb7d"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-event.json",
+        "bytes": 4927,
+        "sha256": "de0c8c544171f5b012cc57cc4da0427713bdf91d523747616eb9c28ae5443857",
+        "verifiedSha256": "de0c8c544171f5b012cc57cc4da0427713bdf91d523747616eb9c28ae5443857"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+        "bytes": 2252,
+        "sha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b",
+        "verifiedSha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+        "bytes": 3877,
+        "sha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e",
+        "verifiedSha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e"
+      }
+    ],
+    "successorAuthority": [
+      {
+        "path": "package.json",
+        "role": "workspace T11 registration",
+        "bytes": 55243,
+        "sha256": "57a70fff3ef1fd2f8a3665bb0f360e009225139f4f37c0ca1e5ff240acdc84f9",
+        "verifiedSha256": "57a70fff3ef1fd2f8a3665bb0f360e009225139f4f37c0ca1e5ff240acdc84f9"
+      },
+      {
+        "path": "packages/publisher/package.json",
+        "role": "Publisher focused-test registration",
+        "bytes": 1606,
+        "sha256": "f348c2e1a3ccfa4ce0a96575b3ee58c06b8ac35fd5fb6546a2c41b8510afedac",
+        "verifiedSha256": "f348c2e1a3ccfa4ce0a96575b3ee58c06b8ac35fd5fb6546a2c41b8510afedac"
+      },
+      {
+        "path": "scripts/run-ci-quality-gate.mjs",
+        "role": "single-pass quality-gate T11 tuple",
+        "bytes": 45961,
+        "sha256": "bd26364d95e79b7aa7278cabfdd97ff95cc6debbf0253a4d27a4a6fb6dbaea16",
+        "verifiedSha256": "bd26364d95e79b7aa7278cabfdd97ff95cc6debbf0253a4d27a4a6fb6dbaea16"
+      },
+      {
+        "path": "scripts/test/ci-quality-gate.test.mjs",
+        "role": "single-pass quality-gate T11 receipt",
+        "bytes": 24068,
+        "sha256": "2be9f2207f966800a481064dab490cbe3f548c23853b34b2916be7d9d5512693",
+        "verifiedSha256": "2be9f2207f966800a481064dab490cbe3f548c23853b34b2916be7d9d5512693"
+      },
+      {
+        "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+        "role": "M06-T02 immutable-receipt compatibility reader",
+        "bytes": 33506,
+        "sha256": "29ee08e6924fb619a4f6828fe5b4ab19f656a994251cadb0bb5a7afd1e631495",
+        "verifiedSha256": "29ee08e6924fb619a4f6828fe5b4ab19f656a994251cadb0bb5a7afd1e631495"
+      },
+      {
+        "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+        "role": "M06-T08 forward-compatible T11 reader",
+        "bytes": 93922,
+        "sha256": "9ea32c41d466aa14c7daa320a4775e9e34ae8ed4fecf27099f3e8317a9add94d",
+        "verifiedSha256": "9ea32c41d466aa14c7daa320a4775e9e34ae8ed4fecf27099f3e8317a9add94d"
+      },
+      {
+        "path": "tests/publisher-catalog-pinning.test.mjs",
+        "role": "M06-T08 T11 successor mutations",
+        "bytes": 30614,
+        "sha256": "d245aa97bfe6d8879f4872b81f1e7b31cb30b9d84366ae71b7c10c615bc324dc",
+        "verifiedSha256": "d245aa97bfe6d8879f4872b81f1e7b31cb30b9d84366ae71b7c10c615bc324dc"
+      },
+      {
+        "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+        "role": "M06-T09 forward-compatible T11 reader",
+        "bytes": 89602,
+        "sha256": "339cade1d676626653078fef299c99040c8d6757310f7e07cbbda09c63a013f6",
+        "verifiedSha256": "339cade1d676626653078fef299c99040c8d6757310f7e07cbbda09c63a013f6"
+      },
+      {
+        "path": "tests/publisher-bundle-publication.test.mjs",
+        "role": "M06-T09 T11 successor mutations",
+        "bytes": 46946,
+        "sha256": "52a19852972d31429ad7631de4e8338249eb9d6b894ccaa7b34dc68deb6b0b80",
+        "verifiedSha256": "52a19852972d31429ad7631de4e8338249eb9d6b894ccaa7b34dc68deb6b0b80"
+      },
+      {
+        "path": "scripts/lib/publisher-official-golden-proof.mjs",
+        "role": "M06-T10 forward-compatible T11 reader",
+        "bytes": 56040,
+        "sha256": "569f25138a3f8e9e36ca8a6dee348f3bdb486e999c83b0bc26054117e0f15207",
+        "verifiedSha256": "569f25138a3f8e9e36ca8a6dee348f3bdb486e999c83b0bc26054117e0f15207"
+      },
+      {
+        "path": "tests/publisher-official-golden.test.mjs",
+        "role": "M06-T10 T11 successor mutations",
+        "bytes": 37056,
+        "sha256": "f2c6c28956b21459caf3b6324100e4fd551e3b514b52f34ccbfa3d55445df9d0",
+        "verifiedSha256": "f2c6c28956b21459caf3b6324100e4fd551e3b514b52f34ccbfa3d55445df9d0"
+      },
+      {
+        "path": "packages/publisher/src/publish-result.ts",
+        "role": "complete Publisher diagnostic registry source",
+        "bytes": 13725,
+        "sha256": "0068cb1106eb4614fab640aef773d658e820148e5f2138f40aa616413e87fe9a",
+        "verifiedSha256": "0068cb1106eb4614fab640aef773d658e820148e5f2138f40aa616413e87fe9a"
+      },
+      {
+        "path": "packages/publisher/src/catalog-resolution.ts",
+        "role": "public Catalog diagnostic documentation source",
+        "bytes": 37846,
+        "sha256": "9faba3cee4dc34ac7787d52325a1675e547c72bbe74ee866319f49240a589c03",
+        "verifiedSha256": "9faba3cee4dc34ac7787d52325a1675e547c72bbe74ee866319f49240a589c03"
+      },
+      {
+        "path": "packages/publisher/dist/publish-result.js",
+        "role": "built Publisher diagnostic registry runtime",
+        "bytes": 5740,
+        "sha256": "c0bccb5a472f8fe1d480224d44af23d0156864f4dedc966e4209329bfd1029e6",
+        "verifiedSha256": "c0bccb5a472f8fe1d480224d44af23d0156864f4dedc966e4209329bfd1029e6"
+      },
+      {
+        "path": "packages/publisher/dist/publish-result.d.ts",
+        "role": "built Publisher diagnostic registry declaration",
+        "bytes": 12393,
+        "sha256": "1e273576488ee6d94cb8b02c264d4aec3c37c18e53e414a3057959221350d728",
+        "verifiedSha256": "1e273576488ee6d94cb8b02c264d4aec3c37c18e53e414a3057959221350d728"
+      },
+      {
+        "path": "packages/publisher/dist/catalog-resolution.js",
+        "role": "built Catalog resolution runtime",
+        "bytes": 32333,
+        "sha256": "b33ea4c7d3b7fef3dbf5dd4795a5f807644e4f16bf8112f78c1b6429b956d142",
+        "verifiedSha256": "b33ea4c7d3b7fef3dbf5dd4795a5f807644e4f16bf8112f78c1b6429b956d142"
+      },
+      {
+        "path": "packages/publisher/dist/catalog-resolution.d.ts",
+        "role": "built Catalog resolution declaration",
+        "bytes": 5773,
+        "sha256": "0774c6bf95d7e233727b57e3f3300e13581d02f33149e40f8bf27dfca6cc3b71",
+        "verifiedSha256": "0774c6bf95d7e233727b57e3f3300e13581d02f33149e40f8bf27dfca6cc3b71"
+      }
+    ],
+    "scope": {
+      "publicBuiltPackageRootOnly": true,
+      "completeReviewedPublicBranchMatrix": true,
+      "finiteCapabilityDiagnosticLimitsClosed": true,
+      "finiteCapabilityWarningLimitsClosed": true,
+      "finiteSourcePreservationLimitsClosed": true,
+      "naturallyReachableDefaultFiniteLimitBranchesClosed": true,
+      "publicTraversalAndIdentityBranchesClosed": true,
+      "invalidPublicationEmitsNoBundle": true,
+      "stagePrecedenceExact": true,
+      "warningSuppressionExact": true,
+      "publicFiniteSourceLimitsPinned": true
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-duplicate-node-id.json",
+      "bytes": 4935,
+      "sha256": "c7bb3bce450e0db4c0e1bb962d10138fbba6becfa47f240087de027a10387cb9"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-capability.json",
+      "bytes": 4726,
+      "sha256": "302c579e5d30716de7b9e6cdf11c4d127cdad2b2ba96452c794a21f93ceea72f"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-core-field.json",
+      "bytes": 4746,
+      "sha256": "6b1e25971761c5695f97c8a993908e104bd6d27581c5eb2c6422dbcee6c9bb7d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/invalid/source-unknown-event.json",
+      "bytes": 4927,
+      "sha256": "de0c8c544171f5b012cc57cc4da0427713bdf91d523747616eb9c28ae5443857"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+      "bytes": 2252,
+      "sha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+      "bytes": 3877,
+      "sha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e"
+    },
+    {
+      "path": "docs/proof/protocol-0.1.0-traceability.json",
+      "bytes": 134870,
+      "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+    },
+    {
+      "path": "packages/publisher/dist/index.js",
+      "bytes": 515,
+      "sha256": "536274c355b47020d0620d5548a3674ba3b229f1665a21907d0be16efa154250"
+    },
+    {
+      "path": "packages/publisher/dist/bundle-publication.js",
+      "bytes": 29627,
+      "sha256": "9b66656ad1ef353c9741629e713067ec194653b41b2b879797f82830c67b0d07"
+    },
+    {
+      "path": "packages/publisher/dist/source-json.js",
+      "bytes": 12150,
+      "sha256": "7e4ebf1474fbb198f1a0077af0732f15e174c41c94115c27d744152ef73bc3ba"
+    },
+    {
+      "path": "packages/publisher/test/invalid-source-matrix.test.ts",
+      "bytes": 91924,
+      "sha256": "959b366b99d304e217b51e89ff377b2c4bb09c61e5202bf454a09575c75b0a56"
+    },
+    {
+      "path": "scripts/generate-publisher-invalid-source-matrix-proof.mjs",
+      "bytes": 848,
+      "sha256": "18103fac5b59089add5be6124460d68f1ee24b7f6837d0297afcc4294053798c"
+    },
+    {
+      "path": "scripts/verify-publisher-invalid-source-matrix.mjs",
+      "bytes": 682,
+      "sha256": "574fd560dd9309270f1a93a8eac882bfc6bc186b8ed74e157144dd8e129daf0d"
+    },
+    {
+      "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+      "bytes": 103404,
+      "sha256": "95b3ecb5e2f9ec98bd689e3d5fa1be4e5e6fc75627fcfd4a67301f5ffcfbda46"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/publisher-invalid-source-matrix.test.mjs",
+      "bytes": 44979,
+      "sha256": "84c95f15747d461225918fca3ff590babbb8d1bc30288be4044d96929e0ef247"
+    },
+    {
+      "path": "package.json",
+      "bytes": 55243,
+      "sha256": "57a70fff3ef1fd2f8a3665bb0f360e009225139f4f37c0ca1e5ff240acdc84f9"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 1606,
+      "sha256": "f348c2e1a3ccfa4ce0a96575b3ee58c06b8ac35fd5fb6546a2c41b8510afedac"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 45961,
+      "sha256": "bd26364d95e79b7aa7278cabfdd97ff95cc6debbf0253a4d27a4a6fb6dbaea16"
+    },
+    {
+      "path": "scripts/test/ci-quality-gate.test.mjs",
+      "bytes": 24068,
+      "sha256": "2be9f2207f966800a481064dab490cbe3f548c23853b34b2916be7d9d5512693"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+      "bytes": 33506,
+      "sha256": "29ee08e6924fb619a4f6828fe5b4ab19f656a994251cadb0bb5a7afd1e631495"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+      "bytes": 93922,
+      "sha256": "9ea32c41d466aa14c7daa320a4775e9e34ae8ed4fecf27099f3e8317a9add94d"
+    },
+    {
+      "path": "tests/publisher-catalog-pinning.test.mjs",
+      "bytes": 30614,
+      "sha256": "d245aa97bfe6d8879f4872b81f1e7b31cb30b9d84366ae71b7c10c615bc324dc"
+    },
+    {
+      "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+      "bytes": 89602,
+      "sha256": "339cade1d676626653078fef299c99040c8d6757310f7e07cbbda09c63a013f6"
+    },
+    {
+      "path": "tests/publisher-bundle-publication.test.mjs",
+      "bytes": 46946,
+      "sha256": "52a19852972d31429ad7631de4e8338249eb9d6b894ccaa7b34dc68deb6b0b80"
+    },
+    {
+      "path": "scripts/lib/publisher-official-golden-proof.mjs",
+      "bytes": 56040,
+      "sha256": "569f25138a3f8e9e36ca8a6dee348f3bdb486e999c83b0bc26054117e0f15207"
+    },
+    {
+      "path": "tests/publisher-official-golden.test.mjs",
+      "bytes": 37056,
+      "sha256": "f2c6c28956b21459caf3b6324100e4fd551e3b514b52f34ccbfa3d55445df9d0"
+    },
+    {
+      "path": "packages/publisher/src/publish-result.ts",
+      "bytes": 13725,
+      "sha256": "0068cb1106eb4614fab640aef773d658e820148e5f2138f40aa616413e87fe9a"
+    },
+    {
+      "path": "packages/publisher/src/catalog-resolution.ts",
+      "bytes": 37846,
+      "sha256": "9faba3cee4dc34ac7787d52325a1675e547c72bbe74ee866319f49240a589c03"
+    },
+    {
+      "path": "packages/publisher/dist/publish-result.js",
+      "bytes": 5740,
+      "sha256": "c0bccb5a472f8fe1d480224d44af23d0156864f4dedc966e4209329bfd1029e6"
+    },
+    {
+      "path": "packages/publisher/dist/publish-result.d.ts",
+      "bytes": 12393,
+      "sha256": "1e273576488ee6d94cb8b02c264d4aec3c37c18e53e414a3057959221350d728"
+    },
+    {
+      "path": "packages/publisher/dist/catalog-resolution.js",
+      "bytes": 32333,
+      "sha256": "b33ea4c7d3b7fef3dbf5dd4795a5f807644e4f16bf8112f78c1b6429b956d142"
+    },
+    {
+      "path": "packages/publisher/dist/catalog-resolution.d.ts",
+      "bytes": 5773,
+      "sha256": "0774c6bf95d7e233727b57e3f3300e13581d02f33149e40f8bf27dfca6cc3b71"
+    }
+  ],
+  "tests": {
+    "focusedPackageCases": 8,
+    "focusedRuntimeCases": 135,
+    "invalidMatrixCases": 127,
+    "rootMutationCases": 67,
+    "requiredRootCategories": [
+      "[authority]",
+      "[artifact]",
+      "[bytes]",
+      "[options]",
+      "[prerequisite]",
+      "[runtime]",
+      "[symlink]",
+      "[writer]"
+    ]
+  },
+  "nonclaims": [
+    "The finite matrix closes the reviewed naturally reachable public branches with representative malformed values; it does not enumerate every conceivable invalid JSON or Source value.",
+    "M06-T11 does not manufacture negative cases for source-digest, authoring-removal, catalog-pinning, or bundle-revision; those deterministic stages have no natural invalid public input after their authenticated predecessors succeed.",
+    "Dynamic runtime obligations are a valid publication success and are not misreported as a binding failure.",
+    "M06-T11 pins the current updated package, single-pass quality-gate, and M06-T08 through M06-T10 successor-compatibility surfaces; it does not rewrite historical M06-T08 through M06-T10 artifact receipts or create a reverse dependency on this artifact.",
+    "The matrix proves atomic no-Bundle publication rejection, not signing, storage, activation, deployment, runtime execution, host, adapter, editor, network, or control-plane behavior."
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/publisher... build",
+    "pnpm --filter @desen/publisher test:invalid-source-matrix",
+    "node scripts/generate-publisher-invalid-source-matrix-proof.mjs",
+    "node scripts/verify-publisher-invalid-source-matrix.mjs",
+    "node --test tests/publisher-invalid-source-matrix.test.mjs"
+  ]
+}

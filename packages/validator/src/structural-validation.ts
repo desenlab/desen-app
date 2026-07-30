@@ -73,6 +73,21 @@ export interface DesenStructuralValidationFailure<Target extends DesenStructural
 export type DesenStructuralValidationResult<Target extends DesenStructuralTarget> =
   DesenStructuralValidationSuccess<Target> | DesenStructuralValidationFailure<Target>;
 
+/** Exact structural subphase used by cumulative Source-foundation preparation. */
+export type DesenStructuralValidationPhase = "root-schema" | "embedded-schema";
+
+/** Internal phase-aware structural failure with the same trusted diagnostic payload. */
+export interface DesenStructuralPhaseValidationFailure<Target extends DesenStructuralTarget> {
+  readonly valid: false;
+  readonly target: Target;
+  readonly phase: DesenStructuralValidationPhase;
+  readonly diagnostics: readonly DesenStructuralDiagnostic[];
+}
+
+/** Internal phase-aware structural result used without changing the established public result. */
+export type DesenStructuralPhaseValidationResult<Target extends DesenStructuralTarget> =
+  DesenStructuralValidationSuccess<Target> | DesenStructuralPhaseValidationFailure<Target>;
+
 const ROOT_VALIDATORS: Readonly<Record<DesenStructuralTarget, GeneratedValidator>> = Object.freeze({
   source: generatedValidateSource as GeneratedValidator,
   bundle: generatedValidateBundle as GeneratedValidator,
@@ -121,6 +136,14 @@ function validationFailure<Target extends DesenStructuralTarget>(
   return Object.freeze({ valid: false, target, diagnostics });
 }
 
+function phaseValidationFailure<Target extends DesenStructuralTarget>(
+  target: Target,
+  phase: DesenStructuralValidationPhase,
+  diagnostics: readonly DesenStructuralDiagnostic[],
+): DesenStructuralPhaseValidationFailure<Target> {
+  return Object.freeze({ valid: false, target, phase, diagnostics });
+}
+
 function validationSuccess<Target extends DesenStructuralTarget>(
   target: Target,
   snapshot: JsonValue,
@@ -149,22 +172,22 @@ function hasUnsupportedProtocolVersion(snapshot: JsonValue): boolean {
 }
 
 /**
- * Validates unknown input against one exact DESEN 0.1.0 root schema and every embedded schema.
+ * Runs the structural boundary while retaining the exact stopped subphase.
  *
- * @remarks Validation is platform-neutral and side-effect free. The input is copied through RFC
- * 8785 canonical JSON before generated validators inspect it. This task validates schema structure
- * only; identity, catalog resolution, references, digest integrity, and runtime values remain owned
- * by later validation stages.
- *
- * @throws TypeError only when `target` is not one of the three public target literals.
+ * @internal This seam lets cumulative validators preserve publication ordering without inferring
+ * ownership from diagnostic text or JSON Pointer shape. The package root deliberately does not
+ * export it; callers use the Source-specific prepared-foundation API instead.
  */
-export function validateDesenStructure<Target extends DesenStructuralTarget>(
+export function validateDesenStructurePhases<Target extends DesenStructuralTarget>(
   target: Target,
   input: unknown,
-): DesenStructuralValidationResult<Target> {
+): DesenStructuralPhaseValidationResult<Target> {
   assertTarget(target);
   const snapshot = inertSnapshot(input);
-  if (snapshot === undefined) return invalidInputResult(target);
+  if (snapshot === undefined) {
+    const invalid = invalidInputResult(target);
+    return phaseValidationFailure(target, "root-schema", invalid.diagnostics);
+  }
 
   try {
     const rootValidator = ROOT_VALIDATORS[target];
@@ -182,12 +205,13 @@ export function validateDesenStructure<Target extends DesenStructuralTarget>(
         );
       }
       const diagnostics = normalizeDiagnostics(rootDiagnostics);
-      return validationFailure(target, diagnostics);
+      return phaseValidationFailure(target, "root-schema", diagnostics);
     }
 
     if (!isJsonObject(snapshot)) {
       // The generated root schemas require an object, so this is defensive against artifact drift.
-      return invalidInputResult(target);
+      const invalid = invalidInputResult(target);
+      return phaseValidationFailure(target, "root-schema", invalid.diagnostics);
     }
 
     const embeddedDiagnostics = normalizeDiagnostics(
@@ -195,11 +219,32 @@ export function validateDesenStructure<Target extends DesenStructuralTarget>(
     );
     return embeddedDiagnostics.length === 0
       ? validationSuccess(target, snapshot)
-      : validationFailure(target, embeddedDiagnostics);
+      : phaseValidationFailure(target, "embedded-schema", embeddedDiagnostics);
   } catch (error) {
-    if (error instanceof RangeError) return invalidInputResult(target);
+    if (error instanceof RangeError) {
+      const invalid = invalidInputResult(target);
+      return phaseValidationFailure(target, "root-schema", invalid.diagnostics);
+    }
     throw error;
   }
+}
+
+/**
+ * Validates unknown input against one exact DESEN 0.1.0 root schema and every embedded schema.
+ *
+ * @remarks Validation is platform-neutral and side-effect free. The input is copied through RFC
+ * 8785 canonical JSON before generated validators inspect it. This task validates schema structure
+ * only; identity, catalog resolution, references, digest integrity, and runtime values remain owned
+ * by later validation stages.
+ *
+ * @throws TypeError only when `target` is not one of the three public target literals.
+ */
+export function validateDesenStructure<Target extends DesenStructuralTarget>(
+  target: Target,
+  input: unknown,
+): DesenStructuralValidationResult<Target> {
+  const result = validateDesenStructurePhases(target, input);
+  return result.valid ? result : validationFailure(target, result.diagnostics);
 }
 
 /** Validates unknown input as a DESEN 0.1.0 editable Source document. */

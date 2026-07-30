@@ -1,0 +1,531 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.execution-preflight-proof.v1",
+  "task": "M06-T05",
+  "result": "PASS",
+  "summary": "The built package-private Publisher execution preflight retains exact M06-T04 authority, stops static publication failures at stages 8, 9, or 10 by Validator emission-site provenance, and hands off the complete bounded eight-kind runtime-obligation vocabulary without emitting a Bundle.",
+  "prerequisites": [
+    {
+      "task": "M02-T10",
+      "path": "docs/proof/artifacts/protocol-0.1.0-binding-contracts.json",
+      "sha256": "2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c",
+      "claim": "state, predicate, repeat, lexical-reference, and binding compatibility contracts",
+      "verifiedSha256": "2ffa1b874bae23df8ba3e0e0334b3f0b6739ec4dfd6acc9e2aabf1c87ce9c39c",
+      "matchesPin": true
+    },
+    {
+      "task": "M02-T11",
+      "path": "docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
+      "sha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
+      "claim": "resource, operation, action, lifecycle, and resolved receiving contracts",
+      "verifiedSha256": "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
+      "matchesPin": true
+    },
+    {
+      "task": "M06-T04",
+      "path": "docs/proof/artifacts/publisher-0.1.0-capability-preflight.json",
+      "sha256": "2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e",
+      "claim": "exact Source, execution-independent Catalog, package, alignment, and warning authority",
+      "verifiedSha256": "2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e",
+      "matchesPin": true
+    }
+  ],
+  "fixtures": {
+    "paths": {
+      "validSource": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "validCatalog": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "exampleSortable": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+      "exampleStoreMap": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+      "exampleCatalog": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json"
+    },
+    "accepted": [
+      {
+        "id": "frozen valid sign-in",
+        "sourceId": "com.example.account-app",
+        "publisherAccepted": true,
+        "publicValidatorAccepted": true,
+        "obligations": 7,
+        "kinds": ["component-prop", "operation-input", "state-write"]
+      },
+      {
+        "id": "frozen example sortable list",
+        "sourceId": "com.example.task-list",
+        "publisherAccepted": true,
+        "publicValidatorAccepted": true,
+        "obligations": 4,
+        "kinds": ["component-prop", "operation-input"]
+      },
+      {
+        "id": "frozen example store map",
+        "sourceId": "com.example.store-locator",
+        "publisherAccepted": true,
+        "publicValidatorAccepted": true,
+        "obligations": 5,
+        "kinds": ["component-command-input", "component-prop", "state-write", "style-part-property"]
+      },
+      {
+        "id": "dynamic behavior and resource coverage",
+        "sourceId": "com.example.task-list",
+        "publisherAccepted": true,
+        "publicValidatorAccepted": true,
+        "obligations": 7,
+        "kinds": [
+          "behavior-prop",
+          "behavior-style-part-property",
+          "component-prop",
+          "operation-input",
+          "resource-input"
+        ]
+      }
+    ]
+  },
+  "claims": {
+    "exactNonterminalAuthority": {
+      "sourceId": "com.example.account-app",
+      "catalogs": 1,
+      "selectedPackages": 1,
+      "requirementPackageIndexes": [0],
+      "t04ProjectionByteEqual": true,
+      "t04WarningProjectionByteEqual": true,
+      "executionCatalogAuthorityReauthenticatedByIdentity": true,
+      "sourceReferenceAuthorityReauthenticatedByIdentity": true,
+      "publicationAuthorityReauthenticatedByIdentity": true,
+      "sourceDetached": true,
+      "catalogDetached": true,
+      "obligationCount": 7,
+      "exactOfficialObligations": [
+        {
+          "kind": "state-write",
+          "pointer": "/surfaces/sign-in/root/slots/default/1/on/change/0/value"
+        },
+        {
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/1/props/value"
+        },
+        {
+          "kind": "state-write",
+          "pointer": "/surfaces/sign-in/root/slots/default/2/on/change/0/value"
+        },
+        {
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/2/props/value"
+        },
+        {
+          "kind": "operation-input",
+          "pointer": "/surfaces/sign-in/root/slots/default/4/on/press/0/input/email"
+        },
+        {
+          "kind": "operation-input",
+          "pointer": "/surfaces/sign-in/root/slots/default/4/on/press/0/input/password"
+        },
+        {
+          "kind": "component-prop",
+          "pointer": "/surfaces/sign-in/root/slots/default/4/props/loading"
+        }
+      ],
+      "terminalOkAbsent": true,
+      "bundleAbsent": true,
+      "deeplyFrozen": true,
+      "repeatedJsonByteIdentical": true
+    },
+    "phaseAwareFailureMatrix": [
+      {
+        "id": "unsafe-operation-contract",
+        "validatorPhase": "capability-contracts",
+        "publisherStage": "capability-contracts",
+        "code": "run.desen.validator/INVALID_EXECUTION_CONTRACT",
+        "pointer": "/0/operations/com.example.auth~1signIn/outputSchema/$ref",
+        "noPartial": true
+      },
+      {
+        "id": "resource-policy",
+        "validatorPhase": "capability-contracts",
+        "publisherStage": "capability-contracts",
+        "code": "RESOURCE_INPUT_INVALID",
+        "pointer": "/surfaces/tasks/resources/tasks/policy",
+        "noPartial": true
+      },
+      {
+        "id": "predicate-type",
+        "validatorPhase": "state-and-control-flow",
+        "publisherStage": "state-and-control-flow",
+        "code": "PREDICATE_TYPE_MISMATCH",
+        "pointer": "/surfaces/sign-in/root/when/args/0",
+        "noPartial": true
+      },
+      {
+        "id": "navigation-target",
+        "validatorPhase": "state-and-control-flow",
+        "publisherStage": "state-and-control-flow",
+        "code": "ENTRY_NOT_FOUND",
+        "pointer": "/surfaces/sign-in/root/slots/default/4/on/press/0/surface",
+        "noPartial": true
+      },
+      {
+        "id": "missing-state-binding",
+        "validatorPhase": "binding-compatibility",
+        "publisherStage": "binding-compatibility",
+        "code": "REFERENCE_UNRESOLVED",
+        "pointer": "/surfaces/sign-in/root/slots/default/1/props/value/$ref",
+        "noPartial": true
+      },
+      {
+        "id": "format-placeholder",
+        "validatorPhase": "binding-compatibility",
+        "publisherStage": "binding-compatibility",
+        "code": "run.desen.validator/INVALID_BINDING_CONTRACT",
+        "pointer": "/surfaces/stores/root/slots/default/0/slots/popup/0/props/text/$format/template",
+        "noPartial": true
+      }
+    ],
+    "simultaneousErrorPrecedence": [
+      {
+        "id": "capability-before-state-before-binding",
+        "expectedStage": "capability-contracts",
+        "validatorPhase": "capability-contracts",
+        "publisherStage": "capability-contracts",
+        "laterPhaseDiagnosticsSuppressed": true,
+        "noPartial": true
+      },
+      {
+        "id": "state-before-binding",
+        "expectedStage": "state-and-control-flow",
+        "validatorPhase": "state-and-control-flow",
+        "publisherStage": "state-and-control-flow",
+        "laterPhaseDiagnosticsSuppressed": true,
+        "noPartial": true
+      }
+    ],
+    "runtimeObligations": {
+      "exactKinds": [
+        "behavior-prop",
+        "behavior-style-part-property",
+        "component-command-input",
+        "component-prop",
+        "operation-input",
+        "resource-input",
+        "state-write",
+        "style-part-property"
+      ],
+      "allEightKindsCovered": true,
+      "normalizedAndDeduplicated": true,
+      "operationOutputNotEmitted": true,
+      "resourceOutputNotEmitted": true,
+      "completeNotSampled": true
+    },
+    "exactAndOverObligationCeilings": {
+      "defaults": {
+        "sourcePreflight": {
+          "maxDiagnosticsPerStoppedStage": 1024,
+          "maxDiagnosticPointerCodeUnits": 4096,
+          "maxAggregateDiagnosticCodeUnits": 1048576
+        },
+        "maxRuntimeValidationObligations": 4096,
+        "maxRuntimeObligationPointerCodeUnits": 4096,
+        "maxAggregateRuntimeObligationCodeUnits": 1048576
+      },
+      "exactAccepted": { "obligations": 7, "pointerCodeUnits": 64, "aggregateCodeUnits": 984 },
+      "oneBelowExactRejected": ["count", "pointer", "aggregate"],
+      "overBudgetCode": "run.desen.publisher/EXECUTION_PREFLIGHT_LIMIT_EXCEEDED",
+      "overBudgetStage": "binding-compatibility",
+      "overBudgetPointer": "",
+      "obligationsNeverTruncated": true,
+      "failuresExposeNoPartialAuthorityOrBundle": true
+    },
+    "failuresExposeNoPartialAuthorityOrBundle": true,
+    "rootApiPrivacy": {
+      "rootRuntimeExports": [
+        "DEPRECATED_CAPABILITY_CODE",
+        "INVALID_SOURCE_JSON_CODE",
+        "PUBLISHER_DIAGNOSTIC_REGISTRY",
+        "PUBLISH_PIPELINE_STAGES",
+        "PUBLISH_SOURCE_JSON_LIMITS",
+        "SOURCE_LIMIT_EXCEEDED_CODE",
+        "getPublisherDiagnosticDefinition",
+        "isPublisherDiagnosticCode"
+      ],
+      "preflightRuntimeExported": false,
+      "preflightTypeExported": false,
+      "preflightSubpathExported": false,
+      "packagePrivateDistImportUsedByProof": "packages/publisher/dist/execution-preflight.js"
+    },
+    "targetNeutralDependencyBoundary": {
+      "source": {
+        "kind": "source",
+        "imports": [
+          "./capability-preflight.js",
+          "./catalog-resolution.js",
+          "./publish-diagnostics.js",
+          "./publish-result.js",
+          "./source-preflight.js",
+          "./source-preflight.js",
+          "@desen/protocol",
+          "@desen/protocol",
+          "@desen/validator",
+          "@desen/validator"
+        ],
+        "unexpectedStaticImports": [],
+        "enumeratedPlatformIdentifiersObserved": [],
+        "directLoaderFormsObserved": [],
+        "ambientRuntimeDeclarationsObserved": [],
+        "diagnosticSuppressionDirectivesObserved": [],
+        "tripleSlashReferenceDirectivesObserved": []
+      },
+      "declaration": {
+        "kind": "declaration",
+        "imports": [
+          "./catalog-resolution.js",
+          "./publish-result.js",
+          "./source-preflight.js",
+          "@desen/validator"
+        ],
+        "unexpectedStaticImports": [],
+        "enumeratedPlatformIdentifiersObserved": [],
+        "directLoaderFormsObserved": [],
+        "ambientRuntimeDeclarationsObserved": [],
+        "diagnosticSuppressionDirectivesObserved": [],
+        "tripleSlashReferenceDirectivesObserved": []
+      },
+      "productionDependencies": ["@desen/protocol", "@desen/validator"],
+      "inspectionMethod": "TypeScript AST direct-form source/declaration audit",
+      "inspectionScope": [
+        "static import and re-export specifiers",
+        "exact production dependency names",
+        "enumerated direct platform identifiers",
+        "direct dynamic-loader and constructor forms",
+        "ambient runtime value declarations",
+        "TypeScript diagnostic-suppression directives",
+        "triple-slash reference directives"
+      ],
+      "exhaustiveJavaScriptSandboxClaim": false
+    },
+    "deterministicEvidenceBuild": {
+      "canonicalJsonFormatting": "Prettier JSON parser, LF",
+      "trackedFileInventorySortedAndUnique": true,
+      "builtJavaScriptByteTracked": "packages/publisher/dist/execution-preflight.js",
+      "builtDeclarationByteTracked": "packages/publisher/dist/execution-preflight.d.ts",
+      "repeatedBuildCheckedByRootEvidence": true,
+      "atomicWriter": "scripts/lib/atomic-proof-artifact.mjs"
+    }
+  },
+  "pipelineOwnership": {
+    "traces": ["PIPE-032", "PIPE-033", "PIPE-034"],
+    "publicationStages": [
+      { "ordinal": 8, "stage": "capability-contracts", "status": "COMPLETE" },
+      { "ordinal": 9, "stage": "state-and-control-flow", "status": "COMPLETE" },
+      { "ordinal": 10, "stage": "binding-compatibility", "status": "COMPLETE" }
+    ],
+    "exactPrecedence": ["capability-contracts", "state-and-control-flow", "binding-compatibility"],
+    "includes": [
+      "resource and operation schema safety plus statically known receiving contracts",
+      "state, predicate, repeat, action target, and control-flow compatibility",
+      "lexical, format, resource-lifecycle, and operation-lifecycle binding compatibility",
+      "complete finite runtime-obligation handoff for eight exact kinds"
+    ],
+    "rationale": "Validator diagnostics retain emission-site provenance, so the Publisher selects the earliest normative phase without inferring a stage from diagnostic code or pointer text."
+  },
+  "nonclaims": [
+    "M06-T05 remains package-private and nonterminal; it does not expose a public publish function or emit a Bundle.",
+    "Runtime obligations record future receiving-schema checks; M06-T05 does not resolve, execute, or discharge dynamic values.",
+    "Operation outputs, resource outputs, public errors, and host settlements are validated by their owning runtime boundaries rather than emitted as Source obligations.",
+    "The finite Publisher output check does not claim a shared incremental allocation budget inside the cumulative Validator walk.",
+    "M06-T05 does not preserve extensions or source-node trace identity, normalize Source data, remove authoring data, calculate digests, pin Bundle tuples, validate a Bundle, calculate a revision, or emit a Bundle.",
+    "The target-boundary source/declaration audit is not a JavaScript sandbox and does not claim exhaustive detection of intentionally obfuscated reflection, metaprogramming, or runtime code generation.",
+    "M06-T05 performs no network discovery, package download, activation, rendering, signing, npm publication, or deployment."
+  ],
+  "tests": {
+    "publisherRuntimeCases": 14,
+    "compilerNegativeCases": 28,
+    "validatorBindingCases": 50,
+    "validatorExecutionCases": 50,
+    "rootMutationCases": 15
+  },
+  "trackedFiles": [
+    {
+      "path": "package.json",
+      "bytes": 52201,
+      "sha256": "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/catalog.web.example.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/sortable-list.source.desen.json",
+      "bytes": 2252,
+      "sha256": "0cd1a8a48a0b182a41d219cbdb1d1c091186e83a9b6f99394a5ac5653b92920b"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/examples/store-map.source.desen.json",
+      "bytes": 3877,
+      "sha256": "c9d49c0b338164a68f4db9613b470de318e626028e8be4c10ae6213008617c3e"
+    },
+    {
+      "path": "packages/publisher/README.md",
+      "bytes": 24702,
+      "sha256": "437239aa443ba63829624de67263037e677f547c676c45e5213d32047cca416c"
+    },
+    {
+      "path": "packages/publisher/dist/execution-preflight.d.ts",
+      "bytes": 4356,
+      "sha256": "284852a060fdf27f9f3386a6f7110b96c45e4ebaaf4b2bf8cfb1af62cb4f70b0"
+    },
+    {
+      "path": "packages/publisher/dist/execution-preflight.js",
+      "bytes": 10937,
+      "sha256": "20b0a5cf186c0e11af73cf3c76d334f35362c5c1ee27ad1048f9ea31f2dd7393"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "bytes": 902,
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 1375,
+      "sha256": "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7"
+    },
+    {
+      "path": "packages/publisher/src/capability-preflight.ts",
+      "bytes": 16404,
+      "sha256": "1d8d66774a6368f8579f405829d066386a2ee13846650da61a5e8050218854da"
+    },
+    {
+      "path": "packages/publisher/src/execution-preflight.ts",
+      "bytes": 14418,
+      "sha256": "091b9e4877ada2198e26398fb1778024739aaf5c1c89baab3544dfe9470e6efa"
+    },
+    {
+      "path": "packages/publisher/src/index.ts",
+      "bytes": 911,
+      "sha256": "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30"
+    },
+    {
+      "path": "packages/publisher/src/publish-diagnostics.ts",
+      "bytes": 9286,
+      "sha256": "908fc64f8f4a8b24f14113656a683dcaca67f7d03ab27d52113adf23760cd8b6"
+    },
+    {
+      "path": "packages/publisher/src/publish-result.ts",
+      "bytes": 10665,
+      "sha256": "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00"
+    },
+    {
+      "path": "packages/publisher/src/source-preflight.ts",
+      "bytes": 11524,
+      "sha256": "af26af6c01b0e93eca8acbc52de1645556a3606ca072f8c18715af0ce67d4321"
+    },
+    {
+      "path": "packages/publisher/test/execution-preflight.test.ts",
+      "bytes": 24774,
+      "sha256": "d47d9646d404b4da177dd704186de4fd7bb5a59e3e1747d6ee233d3ba9f81e06"
+    },
+    {
+      "path": "packages/publisher/test/execution-preflight.types.ts",
+      "bytes": 6666,
+      "sha256": "fc48135a6b594302fcf8d7accb99d8a70e88fe0c573f2fcb1fbd8427bc46a60c"
+    },
+    {
+      "path": "packages/validator/README.md",
+      "bytes": 63186,
+      "sha256": "cc3084bee297f75453723705b1e0bd99857fe92613ba2f6f0cb3cb11372a7718"
+    },
+    {
+      "path": "packages/validator/src/binding-contract-validation.ts",
+      "bytes": 60596,
+      "sha256": "a30578fd38c5662b1fdcdd510f7cfa1a07dd7e190df908db2cc18b7be339ea1a"
+    },
+    {
+      "path": "packages/validator/src/execution-contract-validation.ts",
+      "bytes": 102812,
+      "sha256": "000933db59b168dbb27983a8a0d55bb4aa30c6ec3946fb6000ea03dd1ce3a176"
+    },
+    {
+      "path": "packages/validator/src/index.ts",
+      "bytes": 5916,
+      "sha256": "8fb565cd1276386510bef53be5de6bb48803b8d4f6048757e261e6849adfba92"
+    },
+    {
+      "path": "packages/validator/test/binding-contracts.test.ts",
+      "bytes": 35403,
+      "sha256": "f943eb4e8285d294bb6f2e4719c1f48d13b33e872abc8ee82cb7592278d2d63a"
+    },
+    {
+      "path": "packages/validator/test/execution-contracts.test.ts",
+      "bytes": 48612,
+      "sha256": "4d163f1d263c0f78e13c1680acc9de128b7d0498f8a05162895793223882cfa4"
+    },
+    {
+      "path": "packages/validator/test/execution-publication-contracts.types.ts",
+      "bytes": 1102,
+      "sha256": "31b612165575e981721b7205220f93ca1e8d5cab82c0ab002adbe60ec9d0d7b2"
+    },
+    {
+      "path": "scripts/generate-publisher-execution-preflight-proof.mjs",
+      "bytes": 847,
+      "sha256": "003efd4da6042b64b3e0320f399e4cd2f86ff44baa1392e0057587c4834dea8b"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+      "bytes": 59307,
+      "sha256": "d7673e27909b5b6fdaf0268c539867deec6049e80e3eba21c3b50b7cd07247ab"
+    },
+    {
+      "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+      "bytes": 228873,
+      "sha256": "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 45050,
+      "sha256": "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360"
+    },
+    {
+      "path": "scripts/test/ci-quality-gate.test.mjs",
+      "bytes": 24068,
+      "sha256": "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf"
+    },
+    {
+      "path": "scripts/verify-publisher-execution-preflight.mjs",
+      "bytes": 676,
+      "sha256": "dfd55792a1f2de6e6704a4de2bea4d013188b188e557421f71b52f3ca142b039"
+    },
+    {
+      "path": "tests/publisher-execution-preflight.test.mjs",
+      "bytes": 12361,
+      "sha256": "bd40e0d124504caabf172b4bba6143dad519b30af026a7dcf96e4b4bcf2cd9e0"
+    },
+    {
+      "path": "tests/reference-host-web-source-audit.test.mjs",
+      "bytes": 70344,
+      "sha256": "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f"
+    }
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/validator build",
+    "pnpm --filter @desen/validator test:binding-contracts",
+    "pnpm --filter @desen/validator test:execution-contracts",
+    "pnpm --filter @desen/publisher build",
+    "pnpm --filter @desen/publisher typecheck",
+    "pnpm --filter @desen/publisher test:execution-preflight",
+    "node scripts/generate-publisher-execution-preflight-proof.mjs",
+    "node scripts/verify-publisher-execution-preflight.mjs",
+    "node --test tests/publisher-execution-preflight.test.mjs"
+  ]
+}

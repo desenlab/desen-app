@@ -213,6 +213,338 @@ This artifact proves a stable contract-to-bytes identity but does not perform co
 Executable registry construction, render-plan materialization, event bridging, command dispatch,
 and operation execution remain owned by M05 and the host composition roots.
 
+## Publisher Catalog authority boundary
+
+The M06 Publisher resolves a Source Catalog requirement only against a closed, caller-supplied
+inventory of target-profile package observations. Matching is exact for `id`, `version`, and the
+optional `target`; `location` remains a discovery hint, and candidate order, version ranges,
+Unicode normalization, or equal Catalog JSON never establish authority. Zero or multiple matches
+fail before a Catalog can enter later publication stages.
+
+One unique selection is captured as bounded inert data, structurally validated, checked against
+its candidate tuple and preobserved package digest, and admitted into one immutable Catalog
+namespace. The resolver itself performs no filesystem, network, registry, loader, or target
+adapter operation. The caller remains responsible for obtaining `observedPackageDigest` from the
+applicable deterministic package-byte profile; M07 independently verifies installed package
+bytes before activation. A failure exposes no partial Catalog set, selected package authority, or
+Bundle.
+
+## Publisher phased Source preflight boundary
+
+M06-T03 keeps the terminal Publisher private and composes one nonterminal, platform-neutral
+preflight in causal order:
+
+1. strict raw Source JSON;
+2. frozen Source-root structure;
+3. every embedded Draft 2020-12 state schema;
+4. exact requirement versions, entry, surface identity, and surface-local node/behavior identity;
+5. M06-T02 Catalog selection, integrity, and namespace authority; and
+6. the exact Source-to-Catalog relation plus component, behavior, resource, and nested-operation
+   static references.
+
+Catalog candidates remain completely unobserved through step 4. The split is intentional:
+Catalog-independent Source errors must win without touching candidate input, but capability
+existence and category cannot be decided until a trusted Catalog set exists. An invalid Catalog
+therefore precedes an indeterminate static-reference error; once Catalog authority is valid, an
+unknown or wrong-category reference retains its exact Source pointer and the `source-semantics`
+stage. `PF-062` records this distinction between logical stage ownership and causal authority
+order.
+
+The Validator authenticates the exact prepared Source and Catalog set with module-private runtime
+metadata. The Publisher success carries those authorities, selected immutable package tuples, and
+requirement alignment, but remains package-private, nonterminal, and contains neither `ok` nor a
+Bundle. Its outer `PublishSourcePreflightSuccess` object is frozen but is not itself runtime
+branded. Immediate in-package composition is therefore the current safety boundary. A later
+Publisher stage must not accept a caller-supplied or reconstructed outer shell; it must
+authenticate the exact preflight result identity or independently revalidate coherence among the
+Source, Catalog set, packages, and alignment.
+
+Every rejection uses the M06-T01 failure shell and exposes no Source, Catalog set, selected
+package, alignment, partial value, or Bundle. One common diagnostic profile bounds task-owned
+reports and inherited M06-T01/M06-T02 reports; under-budget inherited failures remain unchanged,
+while an over-budget report becomes one redacted
+`run.desen.publisher/SOURCE_PREFLIGHT_LIMIT_EXCEEDED` error at the original stopped stage.
+
+This boundary does not validate the M06-T04 capability contracts or M06-T05 dynamic obligations,
+normalize or hash Source data, pin or validate a Bundle, calculate a revision, emit a Bundle, or
+perform discovery, download, activation, rendering, signing, publication, or deployment.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preflight.json`
+`sha256:07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387`.
+
+## Publisher static capability preflight boundary
+
+M06-T04 immediately composes the exact M06-T03 authority rather than accepting a caller-created
+stage shell. The exact selected Catalog array first crosses the Validator's interaction-contract
+preparation authority; only then may the exact prepared Source be checked for statically knowable
+component props and Variants, slots and accepted children, styles and visual states, events and
+commands, behavior props and slots, behavior styles and events, attachment, and conflicts.
+Unsafe Catalog contract schemas therefore fail before Source capability values are observed.
+
+The Publisher retains the exact M06-T03 Source, packages, Catalogs, and requirement alignment. It
+does not accept the Validator's cloned Source output or expose dynamic obligations at this
+boundary. Success is still package-private and nonterminal, with neither `ok` nor `bundle`; every
+blocking failure uses the M06-T01 shell and exposes no partial authority.
+
+Deprecation discovery runs only after static success. Exact component, behavior, resource, and
+operation use sites may emit the public fixed
+`run.desen.publisher/DEPRECATED_CAPABILITY` warning, but Catalog-controlled prose and replacement
+hints are never copied or followed. Warning order and finite budgets are deterministic. Optional
+traversal fields and lower-stage discriminators must be own data properties, preventing inherited
+prototype data from fabricating structure or authority.
+
+Publication step 8 also contains resource and operation receiving contracts plus dynamic
+compatibility work. The current public Validator execution entry point intentionally composes
+those concerns with state, binding, action, and runtime obligations. M06-T04 therefore completes
+only the static component/interaction slice; M06-T05 depends on it and closes the remaining
+resource/operation and dynamic-obligation slice without importing runtime or target-framework
+dependencies.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-capability-preflight.json`
+`sha256:2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e`.
+
+## Publisher execution preflight boundary
+
+M06-T05 composes M06-T04 internally and accepts no caller-reconstructed intermediate. It
+re-authenticates the exact prepared Source and upgrades the exact selected Catalog array through
+the Validator's execution-contract authority. The same selected packages, requirement alignment,
+and safe deprecation warnings remain attached to that authority; no structurally equal clone or
+serialization round trip can substitute for an authenticated object.
+
+One cumulative Validator analysis records publication-phase provenance at each diagnostic
+emission site. Resource and operation schema, policy, and statically known receiving-input
+failures stop at `capability-contracts`; state, predicate, repeat, action-target, and control-flow
+failures stop at `state-and-control-flow`; lexical, lifecycle, format, and statically decidable
+binding failures stop at `binding-compatibility`. Only the earliest non-empty phase is returned,
+so simultaneous defects preserve exact publication-step 8 → 9 → 10 precedence without repeating
+the cumulative walk or classifying diagnostics from their codes or pointers.
+
+A complete success adds one normalized runtime-obligation handoff with the closed kinds
+`behavior-prop`, `behavior-style-part-property`, `component-command-input`, `component-prop`,
+`operation-input`, `resource-input`, `state-write`, and `style-part-property`. The handoff is
+sorted, de-duplicated, deeply frozen, and bounded by 4,096 obligations, 4,096 UTF-16 code units in
+one pointer, and 1,048,576 aggregate obligation and identity-context code units. A crossing rejects
+the complete intermediate at `binding-compatibility`; obligations are never truncated.
+Operation/resource outputs remain exact runtime receiving checks and are not fabricated as Source
+obligations.
+
+The success remains package-private and nonterminal. It emits no Bundle, performs no normalization
+or hashing, and owns no runtime value, target adapter, filesystem, network, registry, activation,
+rendering, signing, or deployment authority. A later blocking phase suppresses inherited warnings,
+and every failure exposes no Source, Catalog, selected package, alignment, warning, obligation,
+partial value, or Bundle. M06-T06 may inspect only this exact authority while proving extension,
+semantic-order, and source-node identity preservation.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-execution-preflight.json`
+`sha256:6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67`.
+
+## Publisher Source-preservation boundary
+
+M06-T06 composes the exact M06-T05 function internally from raw Source JSON and closed package
+candidates. It does not accept a caller-created execution-preflight shell. The authenticated
+Source, execution Catalog set, selected packages, requirement indexes, safe warnings, and runtime
+obligations cross by exact identity.
+
+The task prepares two deliberately separate views:
+
+1. the exact authenticated Source, which still contains top-level `authoring`; and
+2. a shallow frozen production-field projection containing `desen`, `id`, `entry`, `surfaces`, and
+   optional root `extensions`, with ordered Source Catalog requirements retained separately.
+
+Every nested value in that projection is the exact parsed Source value. Unknown extensions stay
+opaque, and semantic arrays are neither sorted, deduplicated, rebuilt, nor materialized. This is
+parsed-value preservation, not preservation of raw JSON whitespace or object-member lexical
+order. Actual authoring removal and deterministic normalization remain M06-T07.
+
+An iterative schema-edge walk builds one bounded immutable trace entry for every reachable
+component node. Each entry contains exactly the document id, owning surface id, unchanged Source
+node id, capability id, and RFC 6901 Source pointer. Surface and slot maps use deterministic UTF-16
+key order while node and behavior arrays keep their Source index order. Identity is
+surface-scoped, so equal node ids on different surfaces remain legal and separately traceable.
+Behavior ids remain in the preserved Source graph rather than being mislabeled as component
+nodes. Node-shaped values under extensions or authoring remain opaque and never enter the trace.
+
+The trace admits at most 25,000 records, 4,096 UTF-16 code units in one pointer, and 4,194,304
+aggregate identity/pointer units. A crossing rejects the complete intermediate at `normalization`
+with no truncation, inherited warning, partial authority, or Bundle. Inherited Source and execution
+profiles continue to bound input data. The boundary remains package-private, platform-neutral, and
+nonterminal; it performs no authoring mutation, normalization, digest, exact Bundle tuple pinning,
+Bundle validation, revision calculation, runtime execution, activation, rendering, signing, or
+deployment.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-preservation.json`
+`sha256:261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff`.
+
+## Publisher Source-digest, authoring-removal, and normalization boundary
+
+M06-T07 composes M06-T06 internally from raw Source JSON and the closed package-candidate
+inventory. It accepts no caller-reconstructed preservation result. The exact authenticated Source,
+execution Catalog set, selected packages, requirement alignment, safe warnings, runtime
+obligations, preservation projection, loose Source requirements, and source-node trace cross the
+boundary by runtime identity.
+
+The boundary executes the protocol's required order—Source digest, root authoring removal, then
+deterministic normalization—and keeps three authorities deliberately separate:
+
+1. the exact authenticated pre-normalization Source;
+2. its DESEN Source digest, calculated before any publication-specific transformation and retained
+   as a separate nonterminal result field; and
+3. one detached, recursively frozen production-document base containing only Bundle `kind`,
+   protocol version, document id, entry surface, surfaces, and optional root extensions.
+
+Producing the third value performs actual top-level authoring removal. It never recursively
+deletes a field named `authoring`, so opaque extension payloads retain such fields unchanged.
+Loose Catalog requirements and discovery locations remain attached to the authenticated Source
+authority for the next exact-pinning step; neither enters the normalized document. M06-T08
+authenticates and carries the already calculated digest while replacing loose requirements with
+exact tuples.
+
+The selected DESEN 0.1.0 Publisher profile uses a minimal RFC 8785 round trip. It applies no schema
+defaults, removes no empty optional member, constructs no hidden dependency index, and never sorts
+or deduplicates semantic arrays. Identifiers, conditions, literals, capability ids, array order,
+opaque extension values, and the T06 source-node trace therefore retain their parsed semantics.
+Canonical serialization is stable across object insertion order; JavaScript in-memory own-key
+enumeration is not treated as an interoperable ordering guarantee.
+
+The production-document base is limited to 2,097,152 canonical UTF-8 bytes. Exact capacity passes;
+a crossing rejects the whole intermediate at `normalization` with a redacted error and no
+inherited warning or partial authority. Invalid digest authority rejects earlier at
+`source-digest` under the same no-partial rule. This is an intermediate envelope, not proof that
+the later complete Bundle fits the Reference Profile after exact requirements and digest fields
+are added. M06-T09 must enforce that final bound again. The T07 success remains package-private
+and nonterminal: it emits no exact requirement set, revision, publication metadata, Bundle,
+runtime value, target adapter, activation, storage, or signing authority.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-source-normalization.json`
+`sha256:59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e`.
+
+## Publisher Source-digest authentication and exact Catalog-pinning boundary
+
+M06-T08 invokes the complete M06-T07 boundary exactly once from raw inputs and accepts no
+caller-created normalization shell. It independently recalculates `sourceDigest` from the exact
+authenticated Source, requires valid SHA-256 syntax, and compares the value byte-for-byte with the
+T07 authority before constructing a tuple. A failed calculation or mismatch stops at
+`source-digest`; the recalculated value is never substituted into output.
+
+Every loose Source requirement is then mapped positionally through the exact
+`requirementPackageIndexes` produced by M06-T02. Tuple `id`, `version`, `target`, and `digest` come
+only from the selected package and its execution Catalog. An omitted Source target is filled from
+that one selected package. Requirements are neither sorted nor deduplicated: duplicate positions
+retain separate tuple entries and their distinct opaque extensions.
+
+Source `location` remains part of the authenticated Source and therefore affects the Source digest,
+but it is never selection authority and never enters `requires.catalogs`. A nested `location` inside
+an extension remains opaque data. This prevents both blanket recursive key deletion and accidental
+whole-requirement spreading.
+
+The result carries every T07 authority by exact runtime identity and adds one recursively immutable
+`pinnedDocument`. That document contains the normalized production fields, authenticated
+`sourceDigest`, and exact `requires.catalogs`; it still has no `revision`, `publication`, terminal
+Bundle success, signature, runtime, host, adapter, activation, or storage authority. Complete
+Bundle validation, the final 2 MiB limit, and two-stage revision closure remain M06-T09.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json`
+`sha256:de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f`.
+
+## Publisher complete-Bundle validation and revision-closure boundary
+
+M06-T09 is the first public terminal Publisher boundary. `publishDesenSource` accepts only raw
+Source JSON and a closed array of immutable package observations; caller-adjustable limits and all
+M06-T01–T08 intermediates remain package-private. It invokes the complete M06-T08 boundary exactly
+once and accepts no reconstructed stage result.
+
+Revision creation uses a deliberate bootstrap-and-closure profile. The Publisher calculates a
+provisional revision over the pinned document, adds only that `revision`, and measures the
+candidate's RFC 8785 canonical UTF-8 bytes. It then invokes the cumulative Bundle execution
+Validator exactly once with the exact M06-T08 Catalog set. The Validator must return an independent,
+recursively immutable graph whose canonical bytes equal the candidate. The Publisher remeasures
+that snapshot and recalculates its revision. Provisional, embedded, and closed revisions must all
+match. This resolves the schema/revision circularity without hashing a placeholder or allowing
+`revision` to hash itself.
+
+The project interprets the Reference Profile's “2 MiB uncompressed” terminal limit as at most
+2,097,152 RFC 8785 canonical UTF-8 bytes for the complete M06 Bundle. The ceiling is checked before
+and after Validator snapshotting. Optional future `publication` metadata is absent; its later owner
+must remeasure after adding it.
+
+Success returns only the exact Validator Bundle snapshot and the exact authenticated M06-T08
+warning array. Every inherited or terminal failure returns the closed no-Bundle shell. Malformed
+stage authority, mutable or shared Validator graphs, byte-authority drift, final-size overflow,
+and revision failure cannot expose a candidate, partial Bundle, Source, Catalog set, obligation,
+or warning. The operation is synchronous, deterministic, platform-neutral, and has no filesystem,
+network, clock, signing, storage, activation, host, adapter, editor, or deployment authority.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
+`sha256:2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`.
+
+## Publisher official golden and deterministic replay boundary
+
+M06-T10 adds no Publisher implementation path. It treats the M06-T09 public package root as the
+only executable publication authority and uses frozen upstream conformance documents as external
+oracles. Two separately parsed Source objects and two separately cloned Catalog-package
+candidates are published independently; their input, result, Bundle, and diagnostic graphs remain
+identity-disjoint.
+
+The comparison oracle removes exactly the official Bundle's own root `publication` member. It
+does not omit `revision`, `extensions`, or any nested member with the same name. Both public
+outputs must equal that projection as RFC 8785 canonical UTF-8 bytes and must equal one another.
+The frozen sign-in golden is 2,173 canonical bytes with SHA-256
+`fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247`,
+revision
+`sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601`,
+and Source digest
+`sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878`.
+
+Root object allocation order and root-only authoring changes have no publication authority.
+Semantic nested data remains significant. The golden proves deterministic valid publication and
+authoring exclusion; it does not stand in for M06-T11's invalid-source precedence and no-Bundle
+matrix.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-official-golden.json`
+`sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
+
+## Publisher public invalid-Source and G06 boundary
+
+M06-T11 tests only the built public Publisher root and its fixed two-argument
+`publishDesenSource` operation. It adds no private publication route, injectable stage, or
+case-specific production behavior. The reviewed task-owned matrix contains 127 invalid inputs and
+eight positive guards. Every invalid input stops at its exact earliest naturally reachable stage
+and returns only a recursively immutable, nonempty, error-first
+`{ diagnostics, ok, stage }` result. A failure never exposes a Bundle or any lower Source, Catalog,
+package, obligation, trace, normalization, digest, revision, or publication authority.
+
+The boundary makes causal precedence explicit. A stage-eight capability failure wins over
+simultaneous stage-nine and stage-ten defects; stage nine wins over stage ten; and stage-ten
+binding failure suppresses every earlier deprecation warning. Blocking errors therefore cannot be
+reclassified from their code or pointer after the fact. Dynamic obligations remain valid
+successful publication work and never become fabricated static errors.
+
+The same public matrix independently crosses each reachable default report and data envelope:
+inherited parse and Catalog reports; capability and execution error reports; deprecation-warning
+reports; runtime obligations; Source-node trace output; normalized-document bytes; and complete
+Bundle bytes. The ordered 14-code Publisher registry records every project-owned code with its
+default stage and severity. Discovery `location` remains authenticated, digest-significant Source
+data but supplies no Catalog or package trust.
+
+The deterministic `source-digest`, `authoring-removal`, `catalog-pinning`, and `bundle-revision`
+stages have no natural invalid data input once their authenticated predecessors succeed. M06-T11
+does not create fake public negatives for them; the exact successful M06-T07 through M06-T10
+evidence remains authoritative. This boundary closes G06 for reviewed valid publication and atomic
+invalid rejection only. Signing, storage, activation, deployment, runtime execution, host,
+adapter, editor, network, and control-plane behavior remain later authorities.
+
+Evidence:
+`docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+`sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
+
 ## Applications
 
 ### Desen App

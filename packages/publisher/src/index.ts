@@ -4,4 +4,33 @@
  * @packageDocumentation
  */
 
-export {};
+export {
+  DEPRECATED_CAPABILITY_CODE,
+  getPublisherDiagnosticDefinition,
+  INVALID_SOURCE_JSON_CODE,
+  isPublisherDiagnosticCode,
+  PUBLISH_PIPELINE_STAGES,
+  PUBLISHER_DIAGNOSTIC_REGISTRY,
+  SOURCE_LIMIT_EXCEEDED_CODE,
+} from "./publish-result.js";
+export { publishDesenSource } from "./bundle-publication.js";
+export { PUBLISH_SOURCE_JSON_LIMITS } from "./source-json.js";
+
+export type {
+  PublishCoreDiagnostic,
+  PublishDiagnostic,
+  PublishDiagnosticSeverity,
+  PublishErrorDiagnostic,
+  PublishExtensionDiagnostic,
+  PublishExtensionDiagnosticCode,
+  PublishFailure,
+  PublishPipelineStage,
+  PublisherDiagnosticCode,
+  PublisherDiagnosticDefinition,
+  PublisherExtensionDiagnosticCode,
+  PublishResult,
+  PublishSuccess,
+  PublishWarningDiagnostic,
+} from "./publish-result.js";
+export type { PublishCatalogPackageCandidate } from "./catalog-resolution.js";
+export type { PublishSourceJsonLimits } from "./source-json.js";

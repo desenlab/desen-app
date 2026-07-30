@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "task": "M06-T01",
+  "result": "PASS",
+  "profile": "desen-publisher-publish-result-v1",
+  "claim": {
+    "protocol": "0.1.0",
+    "target": "platform-neutral",
+    "summary": "The Publisher exposes one closed terminal success/failure contract, stable staged diagnostics, and an I-JSON-safe finite raw Source boundary without exposing a partial Bundle.",
+    "publicPartialPublicationApiInReviewedT01Slice": false,
+    "bundleOnFailure": false,
+    "bundleProducedByThisTask": false
+  },
+  "prerequisite": {
+    "task": "M05-T09",
+    "gate": "G05",
+    "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+    "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89",
+    "historicalArtifactRewritten": false,
+    "currentCompatibilityOwnershipPaths": [
+      "scripts/generate-reference-host-web-source-audit-proof.mjs",
+      "scripts/lib/reference-host-web-source-audit-proof.mjs",
+      "scripts/verify-reference-host-web-source-audit.mjs",
+      "tests/reference-host-web-source-audit.test.mjs"
+    ]
+  },
+  "frozenProtocol": {
+    "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+    "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+    "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+    "trace": { "conformanceRule": "C-011", "pipelineStep": "PIPE-025" },
+    "guidance": "IMPLEMENTATION-GUIDE.md#5-publisher-architecture"
+  },
+  "publicApi": {
+    "reviewedRuntimeExports": [
+      "getPublisherDiagnosticDefinition",
+      "INVALID_SOURCE_JSON_CODE",
+      "isPublisherDiagnosticCode",
+      "PUBLISH_PIPELINE_STAGES",
+      "PUBLISH_SOURCE_JSON_LIMITS",
+      "PUBLISHER_DIAGNOSTIC_REGISTRY",
+      "SOURCE_LIMIT_EXCEEDED_CODE"
+    ],
+    "reviewedTypeExports": [
+      "PublishCoreDiagnostic",
+      "PublishDiagnostic",
+      "PublishDiagnosticSeverity",
+      "PublishErrorDiagnostic",
+      "PublishExtensionDiagnostic",
+      "PublishExtensionDiagnosticCode",
+      "PublishFailure",
+      "PublishPipelineStage",
+      "PublisherDiagnosticCode",
+      "PublisherDiagnosticDefinition",
+      "PublisherExtensionDiagnosticCode",
+      "PublishResult",
+      "PublishSourceJsonLimits",
+      "PublishSuccess",
+      "PublishWarningDiagnostic"
+    ],
+    "result": {
+      "discriminator": "ok",
+      "success": ["bundle", "warning diagnostics"],
+      "failure": ["first failed stage", "non-empty error-first diagnostics"],
+      "failureBundleMember": false
+    },
+    "pipelineStages": [
+      "json-parse",
+      "source-schema",
+      "embedded-schema",
+      "source-semantics",
+      "catalog-resolution",
+      "catalog-integrity",
+      "namespace-conflicts",
+      "capability-contracts",
+      "state-and-control-flow",
+      "binding-compatibility",
+      "source-digest",
+      "authoring-removal",
+      "normalization",
+      "catalog-pinning",
+      "bundle-validation",
+      "bundle-revision"
+    ]
+  },
+  "diagnostics": {
+    "registry": [
+      {
+        "code": "run.desen.publisher/INVALID_SOURCE_JSON",
+        "meaning": "Raw Source input is not interoperable JSON.",
+        "defaultStage": "json-parse",
+        "defaultSeverity": "error"
+      },
+      {
+        "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED",
+        "meaning": "Raw Source parsing exceeded the finite Publisher profile.",
+        "defaultStage": "json-parse",
+        "defaultSeverity": "error"
+      }
+    ],
+    "severityIsSeparateFromCoreClassification": true,
+    "deterministicOrdering": "error before warning, then pipeline stage, pointer, code, context, and message",
+    "rawSourceTextOrNativeErrorRetained": false
+  },
+  "sourceIngress": {
+    "limits": {
+      "maxSourceUtf8Bytes": 8388608,
+      "maxJsonDepth": 256,
+      "maxJsonValueOccurrences": 262144,
+      "maxDecodedStringCodeUnits": 4194304,
+      "maxNumberTokenCodeUnits": 1024
+    },
+    "inputKind": "raw JSON string",
+    "acceptedSnapshot": "detached and recursively frozen",
+    "duplicateNamesComparedAfterEscapeDecoding": true,
+    "parseBoundary": {
+      "accepted": {
+        "id": "com.example.app",
+        "frozenResult": true,
+        "frozenValue": true,
+        "bundleMember": false
+      },
+      "rejected": [
+        {
+          "id": "malformed",
+          "result": "rejected",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON",
+          "pointer": "",
+          "bundleMember": false,
+          "valueMember": false
+        },
+        {
+          "id": "duplicate-decoded-member",
+          "result": "rejected",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON",
+          "pointer": "/a",
+          "bundleMember": false,
+          "valueMember": false
+        },
+        {
+          "id": "invalid-unicode",
+          "result": "rejected",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON",
+          "pointer": "/value",
+          "bundleMember": false,
+          "valueMember": false
+        },
+        {
+          "id": "non-finite-number",
+          "result": "rejected",
+          "code": "run.desen.publisher/INVALID_SOURCE_JSON",
+          "pointer": "/value",
+          "bundleMember": false,
+          "valueMember": false
+        },
+        {
+          "id": "finite-limit",
+          "result": "rejected",
+          "code": "run.desen.publisher/SOURCE_LIMIT_EXCEEDED",
+          "pointer": "",
+          "bundleMember": false,
+          "valueMember": false
+        }
+      ],
+      "repeatedFailureJson": "{\"ok\":false,\"stage\":\"json-parse\",\"diagnostics\":[{\"code\":\"run.desen.publisher/INVALID_SOURCE_JSON\",\"message\":\"Source JSON contains a duplicate decoded object member name.\",\"pointer\":\"/x\",\"stage\":\"json-parse\",\"severity\":\"error\"}]}"
+    }
+  },
+  "boundary": {
+    "requiredProductionDependencies": ["@desen/protocol", "@desen/validator"],
+    "productionSourceFiles": [
+      "packages/publisher/src/publish-result.ts",
+      "packages/publisher/src/publish-diagnostics.ts",
+      "packages/publisher/src/source-json.ts"
+    ],
+    "nodeOrFrameworkImports": 0,
+    "publicParserExportsInReviewedT01Slice": 0,
+    "storageNetworkRuntimeEditorEffects": 0,
+    "compilerConfiguration": {
+      "base": {
+        "strict": true,
+        "exactOptionalPropertyTypes": true,
+        "noUncheckedIndexedAccess": true,
+        "noCheck": false,
+        "noEmit": true,
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "target": "ES2023",
+        "lib": ["ES2023"],
+        "verbatimModuleSyntax": true
+      },
+      "package": {
+        "extends": "../../tsconfig.base.json",
+        "compilerOptionKeys": ["types"],
+        "noCheck": false,
+        "types": [],
+        "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx"],
+        "exclude": [],
+        "files": null
+      },
+      "build": {
+        "extends": "./tsconfig.json",
+        "compilerOptionKeys": [
+          "declaration",
+          "declarationMap",
+          "noEmit",
+          "outDir",
+          "rootDir",
+          "sourceMap"
+        ],
+        "noCheck": false,
+        "compilerOptions": {
+          "declaration": true,
+          "declarationMap": true,
+          "noEmit": false,
+          "outDir": "dist",
+          "rootDir": "src",
+          "sourceMap": true
+        },
+        "include": ["src/**/*.ts", "src/**/*.tsx"],
+        "exclude": ["test/**/*", "**/*.test.ts", "**/*.test.tsx"],
+        "files": null
+      },
+      "effective": {
+        "typecheck": {
+          "noCheck": false,
+          "strict": true,
+          "exactOptionalPropertyTypes": true,
+          "noUncheckedIndexedAccess": true,
+          "noEmit": true,
+          "requiredFiles": [
+            "packages/publisher/src/index.ts",
+            "packages/publisher/src/publish-diagnostics.ts",
+            "packages/publisher/src/publish-result.ts",
+            "packages/publisher/src/source-json.ts",
+            "packages/publisher/test/publish-result.test.ts",
+            "packages/publisher/test/publish-result.types.ts"
+          ]
+        },
+        "build": {
+          "noCheck": false,
+          "strict": true,
+          "exactOptionalPropertyTypes": true,
+          "noUncheckedIndexedAccess": true,
+          "noEmit": false,
+          "declaration": true,
+          "declarationMap": true,
+          "sourceMap": true,
+          "rootDir": "packages/publisher/src",
+          "outDir": "packages/publisher/dist",
+          "requiredFiles": [
+            "packages/publisher/src/index.ts",
+            "packages/publisher/src/publish-diagnostics.ts",
+            "packages/publisher/src/publish-result.ts",
+            "packages/publisher/src/source-json.ts"
+          ],
+          "testFiles": []
+        }
+      }
+    }
+  },
+  "evidence": {
+    "packageTests": 13,
+    "compilerNegativeCases": 9,
+    "rootMutationTests": 12,
+    "trackedFiles": [
+      {
+        "path": "packages/publisher/test/publish-result.test.ts",
+        "bytes": 14217,
+        "sha256": "270398e495f933f14d79c1c02a197a5acc243842d4a4699569f34f8e362ea29d"
+      },
+      {
+        "path": "packages/publisher/test/publish-result.types.ts",
+        "bytes": 3027,
+        "sha256": "9a6f33436604ccb6210c4b66634c4e756c7fe1058e966bd904aa5290f980937c"
+      },
+      {
+        "path": "scripts/generate-reference-host-web-source-audit-proof.mjs",
+        "bytes": 1055,
+        "sha256": "d17311aeb0d358c0e8543fdfe58820f56e691c004fcb783b9ecdd3466fff7a37"
+      },
+      {
+        "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+        "bytes": 228873,
+        "sha256": "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1"
+      },
+      {
+        "path": "scripts/verify-reference-host-web-source-audit.mjs",
+        "bytes": 913,
+        "sha256": "23d8cd7bee85dcd02a12bc81e380240cd42c5cd31159b2b17767e290f576bb74"
+      },
+      {
+        "path": "tests/reference-host-web-source-audit.test.mjs",
+        "bytes": 70344,
+        "sha256": "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f"
+      },
+      {
+        "path": "scripts/lib/publisher-publish-result-proof.mjs",
+        "bytes": 49227,
+        "sha256": "11dd9ea20b2607527a4846296b82a12ae6e754bd35884a9211177d5978591649"
+      },
+      {
+        "path": "scripts/generate-publisher-publish-result-proof.mjs",
+        "bytes": 809,
+        "sha256": "04d4e5a061efa083bfa233a09ae934d3ecac334085ba8f2d487d66608886c10b"
+      },
+      {
+        "path": "scripts/verify-publisher-publish-result.mjs",
+        "bytes": 651,
+        "sha256": "b4a7f734d523509c7a9953a0dc3081f1074ccc102111e415c35a14546ea789c3"
+      },
+      {
+        "path": "tests/publisher-publish-result.test.mjs",
+        "bytes": 14115,
+        "sha256": "fae2e18ee715e2eebd2b261627adcb33786eaa90f4c4e33d145cf666a2b4e076"
+      }
+    ],
+    "commands": [
+      "pnpm verify:publisher-publish-result",
+      "pnpm test:publisher-publish-result",
+      "pnpm check"
+    ]
+  },
+  "limitations": [
+    "M06-T01 defines and exercises the terminal contract but does not expose a Publisher entry point or emit a Bundle.",
+    "Catalog resolution, Source/schema semantics, capability contracts, normalization, digests, and final Bundle validation remain M06-T02 through M06-T11.",
+    "The finite Source-ingress values are a documented project profile, not universal DESEN constants.",
+    "The artifact re-verifies only the M06-T01 public export and diagnostic slice; every later Publisher module or root export requires its successor task's own proof.",
+    "Optional signing and publication metadata retain M12 ownership; this evidence makes no authenticity claim.",
+    "No Proof Matrix P-claim or normative N-row changes status from this infrastructure task alone."
+  ]
+}

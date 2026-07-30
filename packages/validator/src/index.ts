@@ -13,9 +13,11 @@ export {
 
 export {
   isExactSemanticVersion,
+  prepareDesenSourceFoundation,
   validateDesenBundleSemantics,
   validateDesenCatalogSemantics,
   validateDesenCatalogSet,
+  validatePreparedDesenSourceReferences,
   validateDesenSemanticFoundation,
   validateDesenSourceSemantics,
 } from "./semantic-validation.js";
@@ -50,6 +52,7 @@ export {
   validateDesenExecutionCatalogSet,
   validateDesenExecutionContracts,
   validateDesenExecutionValue,
+  validateDesenPreparedSourcePublicationContracts,
   validateDesenResolvedAdapterProps,
   validateDesenResolvedAdapterSlots,
   validateDesenResolvedAdapterStyle,
@@ -81,9 +84,14 @@ export type {
   DesenCatalogSetValidationFailure,
   DesenCatalogSetValidationResult,
   DesenCatalogSetValidationSuccess,
+  DesenPreparedSourceFoundation,
   DesenSemanticValidationFailure,
   DesenSemanticValidationResult,
   DesenSemanticValidationSuccess,
+  DesenSourceFoundationPhase,
+  DesenSourceFoundationPreparationFailure,
+  DesenSourceFoundationPreparationResult,
+  DesenSourceFoundationPreparationSuccess,
   DesenValidatedCatalogSet,
 } from "./semantic-validation.js";
 
@@ -166,5 +174,9 @@ export type {
   DesenResolvedAdapterValidationSuccess,
   DesenResolvedAdapterValidationTarget,
   DesenResolvedAdapterValueMap,
+  DesenSourcePublicationContractPhase,
+  DesenSourcePublicationContractValidationFailure,
+  DesenSourcePublicationContractValidationResult,
+  DesenSourcePublicationContractValidationSuccess,
   DesenValidatedExecutionCatalogSet,
 } from "./execution-contract-validation.js";

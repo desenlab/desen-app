@@ -43,10 +43,16 @@ node --test tests/runtime-react-failure-boundary.test.mjs
 node scripts/verify-runtime-react-failure-boundary.mjs
 ```
 
-The proof verifier performs static source/package inspection, authenticates five immutable
-prerequisite artifacts, checks the focused and compiler-negative inventories, rejects unsafe file
-or option shapes, and validates the N-037, P-17, and PF-055 documentation projections. It does not
-dynamically load or execute adapter code.
+At task time, the proof authenticated the exact production source/package boundary, five immutable
+prerequisites, 22 focused cases, 9 compiler-negative cases, 25 hostile root mutations, 64 source
+assertions, and 16 byte-pinned files. The compatibility verifier pins the immutable task-time M05-T06
+artifact—the original task output—and does not rebuild evidence from current successor source or
+tests. It cannot refresh task-time tracked-file hashes to later source bytes. It accepts one unambiguous input
+source per document, performs bounded canonical regular-file reads with complete before/after file
+state checks, authenticates the exact reviewed semantics and globally unique pins, and rejects
+additive contradictions in the N-037, P-17, and PF-055 projections. The default write is a true
+no-op; an explicit alternate destination receives only an exact authenticated atomic copy.
+Successor production-seam mutation coverage belongs to M05-T07 and later evidence.
 
 ## Evidence artifact
 

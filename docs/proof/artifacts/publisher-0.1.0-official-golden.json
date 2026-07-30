@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.official-golden-proof.v1",
+  "task": "M06-T10",
+  "result": "PASS",
+  "summary": "Two fresh identities passed through only the built public Publisher package root and produced byte-identical RFC 8785 Bundles whose revision and sourceDigest exactly match the frozen official sign-in Bundle after removing only its root publication member.",
+  "prerequisites": [
+    {
+      "task": "M06-T09",
+      "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+      "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df",
+      "verifiedSha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+    },
+    {
+      "task": "M02-T01",
+      "path": "docs/proof/artifacts/protocol-0.1.0-snapshot.json",
+      "sha256": "aaf58f79bc95924fbaa0c2b278cc06f3d28b3986e5d168b5468e6432c04cd5a9",
+      "verifiedSha256": "aaf58f79bc95924fbaa0c2b278cc06f3d28b3986e5d168b5468e6432c04cd5a9"
+    },
+    {
+      "task": "M02-T04",
+      "path": "docs/proof/artifacts/protocol-0.1.0-canonicalization.json",
+      "sha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6",
+      "verifiedSha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6"
+    },
+    {
+      "task": "M02-T12",
+      "path": "docs/proof/artifacts/protocol-0.1.0-official-suite-parity.json",
+      "sha256": "efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae",
+      "verifiedSha256": "efa6b4ed014b942d45d621ffc77c47e76d82dd6965deb13cf677c6bebf7a76ae"
+    }
+  ],
+  "claims": {
+    "frozenOfficialInputs": [
+      {
+        "role": "officialSource",
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+        "bytes": 4719,
+        "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+      },
+      {
+        "role": "officialCatalog",
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+        "bytes": 22084,
+        "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+      },
+      {
+        "role": "officialBundle",
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.bundle.json",
+        "bytes": 4894,
+        "sha256": "96be7f18b7b825110d7ba3703c15124ab7a09b9926b01cde43633915eaaf2edf"
+      },
+      {
+        "role": "officialVectors",
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/vectors.json",
+        "bytes": 1377,
+        "sha256": "19cd13718234f8a95b83b6f7725985529e5b134f8fe7b636b9433c16696096e8"
+      }
+    ],
+    "vectorManifest": {
+      "version": "0.1.0",
+      "catalog": "valid/web.catalog.json",
+      "cases": 9,
+      "officialValidRows": 3
+    },
+    "publicDoublePublication": {
+      "publicPackageRoot": "packages/publisher/dist/index.js",
+      "publicOperation": "publishDesenSource",
+      "isolatedProcesses": 1,
+      "freshPublicationInvocations": 2,
+      "freshCatalogGraphs": 2,
+      "freshCandidateGraphs": 2,
+      "freshResultGraphs": 2,
+      "canonicalization": "RFC 8785 canonical UTF-8 through the built Protocol package root",
+      "firstPublication": {
+        "canonicalBytes": 2173,
+        "canonicalSha256": "fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247",
+        "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878"
+      },
+      "secondPublication": {
+        "canonicalBytes": 2173,
+        "canonicalSha256": "fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247",
+        "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878"
+      },
+      "officialBundleWithoutRootPublication": {
+        "removedRootKeys": ["publication"],
+        "canonicalBytes": 2173,
+        "canonicalSha256": "fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247",
+        "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878"
+      },
+      "comparisons": {
+        "firstEqualsSecondCanonicalBytes": true,
+        "firstEqualsOfficialCanonicalBytes": true,
+        "secondEqualsOfficialCanonicalBytes": true,
+        "revisionsExactAcrossAllThree": true,
+        "sourceDigestsExactAcrossAllThree": true
+      },
+      "immutableIndependentResults": true,
+      "inputOutputGraphsDisjoint": true,
+      "inputsUnchanged": true,
+      "publicationMetadataAbsentFromBothOutputs": true,
+      "authoringAbsentFromBothOutputs": true,
+      "privatePublisherSeamsAbsent": true
+    },
+    "registrations": {
+      "package": "vitest run test/official-golden.test.ts",
+      "generate": "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/generate-publisher-official-golden-proof.mjs",
+      "verify": "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/verify-publisher-official-golden.mjs",
+      "test": "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node --test tests/publisher-official-golden.test.mjs",
+      "aggregateImmediatePredecessor": "publisher-bundle-publication",
+      "ci": {
+        "id": "publisher-official-golden",
+        "verifierFile": "scripts/verify-publisher-official-golden.mjs",
+        "rootTestFile": "tests/publisher-official-golden.test.mjs",
+        "tupleExact": true
+      },
+      "hostedWorkflowSinglePass": true
+    },
+    "scope": {
+      "officialBundleNormalizationRemovesExactlyRootPublication": true,
+      "historicalArtifactsReadOnly": true
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.bundle.json",
+      "bytes": 4894,
+      "sha256": "96be7f18b7b825110d7ba3703c15124ab7a09b9926b01cde43633915eaaf2edf"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/vectors.json",
+      "bytes": 1377,
+      "sha256": "19cd13718234f8a95b83b6f7725985529e5b134f8fe7b636b9433c16696096e8"
+    },
+    {
+      "path": "packages/publisher/dist/index.js",
+      "bytes": 515,
+      "sha256": "536274c355b47020d0620d5548a3674ba3b229f1665a21907d0be16efa154250"
+    },
+    {
+      "path": "packages/publisher/dist/bundle-publication.js",
+      "bytes": 29627,
+      "sha256": "9b66656ad1ef353c9741629e713067ec194653b41b2b879797f82830c67b0d07"
+    },
+    {
+      "path": "packages/protocol/dist/index.js",
+      "bytes": 679,
+      "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+    },
+    {
+      "path": "packages/protocol/dist/canonicalization.js",
+      "bytes": 17634,
+      "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+    },
+    {
+      "path": "packages/publisher/test/official-golden.test.ts",
+      "bytes": 11575,
+      "sha256": "786712cff170a4289f8e7f88050498a6a375ecf5d1813c97f5565ea71654b9a6"
+    },
+    {
+      "path": "package.json",
+      "bytes": 54258,
+      "sha256": "2404aea7cc4f94601d3d8eb8dd97921b6e0eceefa9e95bc5091ca467a00f4a0c"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 1523,
+      "sha256": "4be90e5670e99034cc330eb506c44007ceeb1bac0db4b2343c03f82517ef8437"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 45646,
+      "sha256": "20dcd61bbf1921b154793990ea4f80d66d1be419e3183799fe2c4445ad311fc3"
+    },
+    {
+      "path": "scripts/test/ci-quality-gate.test.mjs",
+      "bytes": 24068,
+      "sha256": "5c48cf2a16ffd0d205a63c5e854c53914a898844a0441d5b9fa68b64d9ca10c6"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 2168,
+      "sha256": "d94e840ac09f8166ff62d1fe43be0045457a23b6b1155fbe5a1df13ddf91797e"
+    },
+    {
+      "path": "scripts/generate-publisher-official-golden-proof.mjs",
+      "bytes": 823,
+      "sha256": "9b31fb17d9cc5df7fa6f7fdd9986920ee37769d31a0eca413e4973009b67cad2"
+    },
+    {
+      "path": "scripts/verify-publisher-official-golden.mjs",
+      "bytes": 656,
+      "sha256": "02b809d3e8b0830ddb90d8e867847b3401b2b6343c3d09055704d68c78ebc36e"
+    },
+    {
+      "path": "scripts/lib/publisher-official-golden-proof.mjs",
+      "bytes": 50687,
+      "sha256": "8858f51cab48544624ea01cffdfdfe1615c47f76ff4aa256d37ddc142e1fe10b"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/publisher-official-golden.test.mjs",
+      "bytes": 34560,
+      "sha256": "d0b48ae54c4c4cbcdbd1b6e2522ab5aeaa9dac4fb1810845fd9fd1ec958c2bae"
+    }
+  ],
+  "tests": {
+    "publisherRuntimeCases": 6,
+    "publisherRuntimeCaseNames": [
+      "matches the frozen official Bundle after removing exactly root publication",
+      "publishes two fresh independent fixture graphs to byte-identical immutable Bundles",
+      "gives root object-member allocation order no publication authority",
+      "keeps root authoring outside both the official digest and terminal Bundle",
+      "projects no field except root publication from official-golden authority",
+      "uses only the public Publisher package root"
+    ],
+    "rootMutationCases": 71,
+    "requiredRootCaseNames": [
+      "[authority] verifies fresh in-memory artifact bytes and one exact proof pin",
+      "[authority] rejects one changed artifact byte",
+      "[proof] rejects a PENDING proof-document pin",
+      "[options] rejects a transparent Proxy options record without invoking traps",
+      "[options] the builder rejects verifier-only artifact authority",
+      "[options] the verifier rejects writer-only hook authority",
+      "[options] rejects a transparent Proxy tracked byte without invoking traps",
+      "[options] controls a revoked Proxy prerequisite byte authority",
+      "[prerequisite] rejects exact drift in every direct prerequisite",
+      "[fixture] rejects one changed byte in every frozen official input",
+      "[runtime] rejects a changed first canonical byte output",
+      "[runtime] rejects a changed second canonical byte output",
+      "[runtime] rejects a changed official canonical byte output",
+      "[runtime] rejects shared fresh input identities",
+      "[runtime] rejects shared publication result graphs",
+      "[runtime] rejects shared input-output graphs",
+      "[runtime] controls a revoked Proxy nested in receipt keys",
+      "[runtime] rejects a nested key accessor without invoking it",
+      "[registration] rejects focused Publisher command drift",
+      "[registration] rejects root verifier command drift",
+      "[ci] rejects removal of the exact T10 single-pass inventory id",
+      "[writer] atomically writes exact official evidence bytes",
+      "[writer] preserves the old destination and removes a tampered temporary",
+      "[symlink] rejects an atomic-writer destination symlink",
+      "[symlink] rejects a verifier artifact symlink through the no-follow reader",
+      "[symlink] rejects a proof-document symlink through the no-follow reader",
+      "[proof] fatally rejects invalid UTF-8 in a proof-document file",
+      "[writer] rejects semantic overrides on the official write path"
+    ],
+    "minimumRootMutationCases": 25,
+    "hostileOptionsAndBytes": true,
+    "symlinkReadersAndWriter": true,
+    "atomicWriterTamperContainment": true
+  },
+  "nonclaims": [
+    "M06-T10 proves only the frozen official valid Source/Catalog/Bundle golden and two fresh successful publications; M06-T11 owns the complete invalid-source no-Bundle matrix.",
+    "The proof does not add publication metadata and does not prove signing, storage, activation, deployment, runtime, host, adapter, editor, or control-plane behavior.",
+    "Byte equality is scoped to the frozen DESEN 0.1.0 fixtures, the pinned RFC 8785 canonicalization authority, and the current built public Publisher package root."
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/publisher... build",
+    "node scripts/generate-publisher-official-golden-proof.mjs",
+    "node scripts/verify-publisher-official-golden.mjs",
+    "node --test tests/publisher-official-golden.test.mjs"
+  ]
+}

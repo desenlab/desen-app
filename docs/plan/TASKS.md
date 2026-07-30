@@ -230,20 +230,219 @@ evidence.
 
 ## M06 — Deterministic publisher
 
-| ID      | Status      | Depends on       | Deliverable / evidence                                                                  |
-| ------- | ----------- | ---------------- | --------------------------------------------------------------------------------------- |
-| M06-T01 | NOT_STARTED | G05              | Staged `PublishResult` and diagnostics API                                              |
-| M06-T02 | NOT_STARTED | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
-| M06-T03 | NOT_STARTED | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
-| M06-T04 | NOT_STARTED | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
-| M06-T05 | NOT_STARTED | M06-T03          | Dynamic binding compatibility and recorded runtime validation obligations               |
-| M06-T06 | NOT_STARTED | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
-| M06-T07 | NOT_STARTED | M06-T06          | Authoring removal and deterministic normalization                                       |
-| M06-T08 | NOT_STARTED | M06-T02, M06-T07 | Source digest and exact package tuple pinning                                           |
-| M06-T09 | NOT_STARTED | M06-T08          | Bundle validation and revision calculation                                              |
-| M06-T10 | NOT_STARTED | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
-| M06-T11 | NOT_STARTED | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
-| G06     | NOT_STARTED | M06-T01–M06-T11  | Valid source publishes; invalid source emits no bundle                                  |
+| ID      | Status | Depends on       | Deliverable / evidence                                                                  |
+| ------- | ------ | ---------------- | --------------------------------------------------------------------------------------- |
+| M06-T01 | DONE   | G05              | Staged `PublishResult` and diagnostics API                                              |
+| M06-T02 | DONE   | M06-T01          | Exact catalog resolution, package immutability, and namespace-conflict checks           |
+| M06-T03 | DONE   | M06-T02          | Source, embedded-schema, identity, entry, and static-reference preflight                |
+| M06-T04 | DONE   | M06-T03          | Prop, slot, style, event, command, and behavior preflight                               |
+| M06-T05 | DONE   | M06-T04          | Resource/operation contracts, dynamic compatibility, and runtime obligations            |
+| M06-T06 | DONE   | M06-T03–M06-T05  | Extension preservation, array-order preservation, and source-node identity traceability |
+| M06-T07 | DONE   | M06-T06          | Source digest, authoring removal, and deterministic normalization                       |
+| M06-T08 | DONE   | M06-T02, M06-T07 | Source-digest authentication/carry and exact package tuple pinning                      |
+| M06-T09 | DONE   | M06-T08          | Bundle validation and revision calculation                                              |
+| M06-T10 | DONE   | M06-T09          | Official source-to-bundle golden and double-publish determinism tests                   |
+| M06-T11 | DONE   | M06-T03–M06-T10  | Invalid-source matrix proves no bundle is emitted                                       |
+| G06     | DONE   | M06-T01–M06-T11  | Valid source publishes; invalid source emits no bundle                                  |
+
+M06-T01 defines the Publisher's closed terminal success/failure union, exact sixteen-stage
+vocabulary, stable task-owned diagnostic definitions, and strict package-private raw Source JSON
+boundary. Success is reserved for a complete immutable Bundle plus warnings; failure starts with a
+blocking error, identifies the stopped stage, and structurally exposes no Bundle or partial parsed
+value. Duplicate decoded names, invalid Unicode, non-finite numbers, malformed syntax, and bounded
+ingress exhaustion fail with controlled redacted diagnostics. Lazy JSON Pointer paths, hostile
+limit profiles, source and built declaration checks, package-entry verification, derived test
+inventory, deterministic evidence, and atomic-write mutations protect the boundary. This task
+emits no Bundle and changes no Proof Matrix claim, normative status, or gate; M06-T02 owns exact
+Catalog resolution next.
+
+M06-T02 now resolves every already validated Source Catalog requirement against one closed,
+caller-supplied package-observation inventory by exact `id`, `version`, and optional `target`.
+Discovery locations, candidate order, SemVer ranges, Unicode normalization, and equal Catalog JSON
+cannot create authority. Missing or ambiguous requirements fail before Catalog inspection; every
+unique selection then crosses bounded inert capture, frozen structural validation, exact
+candidate/Catalog tuple and observed-digest consistency, and one immutable set-wide capability
+namespace. Duplicate Source requirements retain their own positions while sharing one uniquely
+selected package. All failures use the M06-T01 no-Bundle shell and expose no candidate index,
+partial Catalog set, selected tuple, or Bundle. The package observation is explicitly preverified
+input rather than a claim that this data-only stage hashed arbitrary package bytes. Twenty-two
+focused runtime cases, ten compiler-negative cases, eight independent proof/mutation cases, four
+pinned prerequisites, and the reviewed single-pass CI inventory protect the boundary. `PF-061`
+records the trust and target-omission profile. No Proof Matrix claim, normative status, or gate
+changes; M06-T03 owns complete Source preflight next.
+
+M06-T03 now composes strict raw JSON ingress, exact Source-root validation, all embedded state
+schemas, catalog-independent Source identity and entry semantics, M06-T02 Catalog authority, and
+category-aware component, behavior, resource, and nested-operation references into one immutable
+package-private preflight result. Root, embedded, and intrinsic semantic failures retain distinct
+stopped stages; Catalog candidates remain unobserved until Source-local checks pass. Catalog-backed
+references run only after a valid, digest-consistent, namespace-clean Catalog authority exists.
+Under-budget T01/T02 failures pass through unchanged, while the common diagnostic ceiling replaces
+an inherited over-budget report with one redacted error at the same stage. Every failure exposes no
+Source, Catalog set, package, alignment, partial value, or Bundle. Ten focused Publisher cases,
+sixteen compiler-negative cases, four Validator-foundation cases, ten independent proof/mutation
+cases, four prerequisite pins, twenty tracked files, and the reviewed single-pass CI inventory
+protect the boundary. `PF-062` records the phase and authority ordering. No Proof Matrix claim,
+normative status, or gate changes; M06-T04 owns capability contracts next.
+
+M06-T04 now upgrades the exact M06-T03 authorities through the Validator's component and
+interaction contract preparation before checking every statically knowable component prop,
+Variant prop, slot, accepted child, style, visual state, event, command, behavior prop, behavior
+slot, behavior style, attachment, and conflict rule. Static failures stop at
+`capability-contracts`, suppress warning discovery, retain exact Validator diagnostics, and expose
+no Source, Catalog, package, alignment, dynamic obligation, partial value, or Bundle. Successful
+preflight preserves the exact authenticated Source and selected package authority, carries only
+safe deterministic deprecated-capability warnings, and remains package-private and nonterminal.
+Inherited optional data and success discriminators cannot fabricate traversal or authority, and
+the shared finite report profile fails closed without truncating warnings. Fourteen focused
+Publisher cases, twenty compiler-negative cases, eighty-five focused Validator cases, fifteen
+independent proof/mutation cases, four prerequisite pins, and thirty-three tracked files protect
+the boundary. `PF-063` records why M06-T04 completes only the static component/interaction slice of
+publication step 8. No Proof Matrix claim, normative status, or gate changes; M06-T05 owns
+resource/operation receiving contracts, dynamic binding compatibility, and recorded runtime
+obligations next.
+
+M06-T05 now runs M06-T04 internally and upgrades only its exact authenticated Source, selected
+package, Catalog, requirement-alignment, and warning authorities. Resource and operation schemas,
+resource policies, and statically known resource/operation/component-command inputs stop at
+`capability-contracts`; predicate, repeat, state-write, navigation, refresh, operation-alias, and
+command-target failures stop at `state-and-control-flow`; lexical, format, lifecycle, and other
+provable binding failures stop at `binding-compatibility`. Validator assigns that phase at each
+diagnostic emission site, so Publisher neither repeats the cumulative walk nor guesses a stage
+from a code or pointer. Simultaneous failures retain the exact 8 → 9 → 10 precedence.
+
+A complete success preserves the exact T04 authorities and warnings while adding the exact
+execution Catalog authority plus all normalized dynamic obligations. The eight-kind vocabulary is
+closed, sorted, deduplicated, deeply frozen, and excludes future operation/resource outputs. The
+project-owned envelope admits 4,096 obligations, 4,096 UTF-16 units in one pointer, and 1,048,576
+aggregate obligation/context units; a crossing rejects at `binding-compatibility` without
+truncation or partial authority. Fourteen focused Publisher cases, twenty-eight compiler-negative
+cases, one hundred focused Validator cases, fifteen independent proof/mutation cases, three
+prerequisite pins, and thirty-five tracked files protect the boundary. `PF-063` records the
+completed T04/T05 step-8 split, while `PF-064` records emission-site phase provenance and warning
+suppression. The Publisher-side runtime-obligation part completes the composed `N-027` evidence.
+
+M06-T06 now composes M06-T05 internally and carries its exact Source, execution Catalog, package
+selection, requirement alignment, warning, and obligation authorities without accepting a
+caller-reconstructed intermediate. A separate frozen production-field projection preserves every
+Source-reachable opaque extension and semantic Source array by exact parsed runtime reference while
+leaving top-level authoring intact on the authenticated Source for the next task. The complete
+component-node trace uses unchanged identifiers and exact RFC 6901 pointers, treats identity as
+surface-scoped, and grants no behavior, extension, authoring, Catalog, executable, runtime, host, or
+platform authority. The same node id may therefore remain traceable on different surfaces without
+being falsely rejected.
+
+The additional finite envelope admits 25,000 trace records, 4,096 UTF-16 units in one pointer, and
+4,194,304 aggregate identity/pointer units; exact boundaries pass and a one-below crossing rejects
+the whole intermediate at `normalization` without truncation, inherited warnings, partial
+authority, or a Bundle. Fifteen focused Publisher cases, forty-six compiler-negative cases,
+eighteen independent proof/mutation cases, three exact prerequisite pins, twenty byte-tracked
+files, all sixteen Source-reachable extension kinds, eight semantic-array classes, and the reviewed
+single-pass CI registration protect the boundary. `PF-065` records the exact parsed-value versus
+raw lexical-byte scope and the broader preservation surface required by `R-107`/`N-021`. The
+Publisher half completes `N-021`, which advances to `TESTED`; `N-014` and `N-012` remain open for
+their editor owners.
+
+M06-T07 now composes M06-T06 exactly once, calculates `sourceDigest` from the exact authenticated
+Source before any publication-specific transformation, removes only the root `authoring` member,
+and minimally normalizes one detached production-document base through RFC 8785. The digest helper
+omits only root authoring, so authoring-only changes leave both digest and normalized bytes
+unchanged while nested extension data remains semantic. Every T06 authority crosses by exact
+identity; `sourceDigest` remains a separate success field and never enters the normalized document.
+
+The selected profile inserts no default, removes no empty optional member, creates no hidden
+index, and never sorts or deduplicates a semantic array. A 2,097,152-canonical-UTF-8-byte
+intermediate envelope accepts the exact boundary and rejects a one-byte crossing atomically.
+Digest failures stop at `source-digest`; projection and byte-limit failures stop at
+`normalization`; neither exposes warnings, partial authority, or a Bundle. Seventeen focused
+Publisher cases, fifty-two compiler-negative cases, twenty-six independently authenticated
+proof/mutation cases, two exact prerequisites, eighteen byte-tracked files, and the reviewed
+single-pass CI registration protect the boundary. `PF-066` records the minimal profile and the
+required digest → authoring-removal → normalization order. At the T07 checkpoint, P-11 advanced
+only to `PARTIAL`; P-03, P-05, and G06 remained open, and M06-T08 retained the next integration
+ownership for authenticating the digest and pinning exact Catalog tuples.
+
+M06-T08 now composes M06-T07 exactly once, recalculates the digest from the same authenticated
+pre-normalization Source, and refuses malformed, thrown, or unequal digest authority at
+`source-digest` without silently replacing it. Only after that check does it map every loose
+Source requirement position through M06-T02's exact `requirementPackageIndexes` authority.
+`id`, `version`, `target`, and `digest` come from the selected immutable package; an omitted Source
+target is filled only from that package. Requirement order and duplicates remain positional, so
+the independently exercised `A, B, A` input produces indexes `0, 1, 0` and three output tuples.
+Discovery `location` remains digest-significant Source data but never becomes tuple or selection
+authority; optional requirement extensions cross by exact opaque identity.
+
+The new `pinnedDocument` is recursively immutable and remains package-private and nonterminal. It
+adds only `sourceDigest` and exact `requires.catalogs` to the T07 normalized base; `revision`,
+`publication`, terminal Bundle success, signing, runtime, host, adapter, activation, and deployment
+remain absent. Thirteen focused Publisher cases, fifty-two compiler-negative cases, thirty-seven
+independent proof/mutation cases, two exact prerequisite pins, twenty-one tracked files, and twelve
+trace-ownership rows protect the boundary. `PF-067` records the positional and discovery-hint
+rules. P-05 and P-11 remain `PARTIAL`, P-03 remains `NOT_PROVEN`, and G06 remains open. M06-T09
+owns complete Bundle validation, final-size enforcement, and revision closure next.
+
+M06-T09 now exposes the first complete public Publisher operation. It composes M06-T08 exactly
+once, calculates a provisional revision from the exact pinned document, adds only `revision`, and
+enforces the complete 2,097,152-byte RFC 8785 canonical UTF-8 envelope. The exact candidate and
+exact authenticated Catalog set cross the cumulative Bundle execution Validator exactly once. A
+success is admitted only when the Validator returns an independent recursively immutable snapshot
+whose canonical bytes equal the candidate, whose complete bytes remain within the same ceiling,
+and whose embedded revision equals both the provisional value and a fresh closure calculation.
+
+Only that exact Validator Bundle and the exact M06-T08 warnings cross the terminal success
+boundary. Every inherited, authority, canonicalization, limit, Validator, or revision failure
+retains the closed no-Bundle shell; malformed or shared stage objects and thrown helpers are
+contained. The operation adds no publication metadata and performs no signing, storage,
+activation, runtime, host, adapter, editor, or deployment work. `PF-068` records the
+provisional → validate → recompute revision profile and the local canonical-byte interpretation of
+“2 MiB uncompressed.” P-03 remains `NOT_PROVEN` until M06-T10's official double-publication
+golden; P-05 and P-11 remain `PARTIAL`; N-016, N-018, and N-041 remain `PLANNED` for their later
+owners; and G06 remains open. M06-T10 owns the official source-to-bundle golden next.
+
+M06-T10 adds no production path. It invokes only the public `publishDesenSource` root with two
+fresh copies of the frozen official sign-in Source and web Catalog candidate. Both calls produce
+separate recursively immutable result graphs with identical 2,173-byte RFC 8785 canonical Bundle
+output, revision, and Source digest. Those bytes exactly equal the frozen official Bundle after
+removing only its own root `publication` member; every other root and nested member remains part
+of the golden.
+
+The proof pins the exact official fixture/vector bytes and direct T09, snapshot,
+canonicalization, and official-suite artifacts. It also authenticates the six-case public package
+test and rejects shared identities, private-path substitution, extra projection, fixture or
+prerequisite drift, canonical-byte mismatch, malformed receipts, unsafe filesystem authority, and
+non-atomic evidence output. P-03 and P-11 become `PROVEN`; P-05 remains `PARTIAL`; N-016 and N-018
+remain `PLANNED` for their later runtime/editor owners; and G06 remains open for M06-T11's complete
+invalid-source/no-Bundle matrix.
+
+`docs/proof/artifacts/publisher-0.1.0-official-golden.json`
+`sha256:a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2`.
+
+M06-T11 closes the public rejection side of publication without adding an alternate Publisher or
+private test-only entry point. All 127 reviewed invalid cases call only the built public
+two-argument `publishDesenSource` root and stop at their exact earliest naturally reachable stage.
+Every failure is a recursively immutable, nonempty, error-first
+`{ diagnostics, ok, stage }` result with no Bundle or partial Source, Catalog, package,
+normalization, obligation, trace, digest, revision, or publication authority.
+
+The 135 focused cases include eight positive guards for the official golden, dynamic obligations,
+exact obligation and final-size boundaries, sanitized deprecation warnings, and deterministic
+replay. They prove stage 8 → 9 → 10 precedence, all three blocking-report budgets at the execution
+boundary, all three deprecation-warning budgets, inherited parse and Catalog report limits, the
+complete Source-trace profile, and the naturally reachable normalization and final-Bundle limits.
+The public Publisher registry is now a complete ordered 14-code inventory. Discovery `location`
+remains digest-significant Source data but never establishes package trust.
+
+The artifact authenticates 67 independent root proof/mutation cases, 31 exact
+task-applicability records, two task-local PF-047 applicability records, 12 trace rows, frozen
+fixtures, built public files, and one-way successor hashes. It deliberately invents no public
+negative for deterministic `source-digest`, `authoring-removal`, `catalog-pinning`, or
+`bundle-revision` stages. The full Publisher suite passes 292/292. P-03 and P-11 remain `PROVEN`;
+P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the Publisher conformance target remain
+`PLANNED` for their later owners. M06-T11 and G06 are `DONE`; M07-T01 owns immutable
+content-addressed Bundle storage next.
+
+`docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
+`sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 

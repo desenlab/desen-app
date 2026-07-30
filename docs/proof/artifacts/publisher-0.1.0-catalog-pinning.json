@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.publisher.catalog-pinning-proof.v1",
+  "task": "M06-T08",
+  "result": "PASS",
+  "summary": "The Publisher independently authenticates the exact pre-normalization Source digest and positionally replaces loose Catalog hints with immutable exact package tuples without emitting a terminal Bundle.",
+  "prerequisites": [
+    {
+      "task": "M06-T02",
+      "path": "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
+      "sha256": "02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6",
+      "verifiedSha256": "02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6"
+    },
+    {
+      "task": "M06-T07",
+      "path": "docs/proof/artifacts/publisher-0.1.0-source-normalization.json",
+      "sha256": "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e",
+      "verifiedSha256": "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e"
+    }
+  ],
+  "claims": {
+    "exactT07AuthorityCarry": [
+      "catalogSet",
+      "diagnostics",
+      "normalizedDocument",
+      "obligations",
+      "packages",
+      "preservedDocument",
+      "requirementPackageIndexes",
+      "source",
+      "sourceCatalogRequirements",
+      "sourceDigest",
+      "traceability"
+    ],
+    "sourceDigestReauthenticatedFromExactSource": true,
+    "sourceDigestNeverSilentlyReplaced": true,
+    "authorityIdentity": {
+      "sourceRequirementsShareAuthenticatedSourceIdentity": true,
+      "packageCatalogsShareCatalogSetIdentity": true,
+      "requirementAlignmentSharesAuthenticatedSourceCardinality": true
+    },
+    "exactPackageTuple": {
+      "id": "com.example.web-catalog",
+      "version": "1.0.0",
+      "target": "web-react",
+      "digest": "sha256:c8e15513005c9f54d2fc35b60c01f9f7d187dabd3c5efba71cd4dc6db2542a1f"
+    },
+    "canonicalPinnedDocumentSha256": "43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+    "variants": {
+      "omittedTargetFilledFromSelectedPackage": true,
+      "omittedTargetDigestRemainsSourceSpecific": true,
+      "locationExcludedFromTupleButIncludedInSourceDigest": true,
+      "opaqueRequirementExtensionsPreserved": true,
+      "positionalIndexes": [0, 1, 0],
+      "duplicatePositionsPreserved": true,
+      "candidateOrderIndependent": true,
+      "packageDigestChangeRequiresExplicitTupleAdoption": true,
+      "rootAuthoringIndependent": true,
+      "inheritedFailurePartialFree": true
+    },
+    "completeSuccessDeeplyFrozen": true,
+    "terminalFieldsAbsent": ["bundle", "ok", "publication", "revision", "signature"],
+    "implementation": {
+      "sourceImports": [
+        "./catalog-resolution.js",
+        "./publish-diagnostics.js",
+        "./publish-result.js",
+        "./publish-result.js",
+        "./source-normalization.js",
+        "./source-normalization.js",
+        "./source-preservation.js",
+        "@desen/protocol",
+        "@desen/validator"
+      ],
+      "platformNeutral": true,
+      "oneT07Call": true,
+      "oneIndependentDigestRecheck": true,
+      "digestRecheckAfterT07": true,
+      "exactTupleProjection": true,
+      "exactSuccessAuthorityProjection": true,
+      "noLocationPropertyRead": true,
+      "noDirectPredecessorBypass": true,
+      "builtDistributionOneT07Call": true,
+      "builtDistributionOneDigestRecheck": true
+    },
+    "registrations": {
+      "package": "vitest run test/catalog-pinning.test.ts",
+      "generate": "pnpm verify:publisher-source-normalization && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:catalog-pinning && node scripts/generate-publisher-catalog-pinning-proof.mjs",
+      "verify": "pnpm verify:publisher-source-normalization && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:catalog-pinning && node scripts/verify-publisher-catalog-pinning.mjs",
+      "test": "pnpm verify:publisher-source-normalization && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:catalog-pinning && node --test tests/publisher-catalog-pinning.test.mjs",
+      "legacyImmediatePredecessor": true,
+      "ci": {
+        "builtinOnlyImportBoundary": true,
+        "sourceTupleExact": true,
+        "directUnconditionalPlanValidation": true,
+        "mainUsesNonOverridableDefaultPlan": true,
+        "candidateSourceSha256": "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360",
+        "authenticatedOnDiskSourceExecutedInIsolatedReadOnlyProcess": true,
+        "exportedInventoryMatchesCandidateSource": true,
+        "independentlyPinnedPlanSha256": "2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0",
+        "executablePlanValidated": true,
+        "verifierAndRootTestExactOnce": true,
+        "processLocalReauthenticatedCliObservationCache": true,
+        "realCliEntrypointExecuted": true,
+        "realCliExactPinnedCommands": 122,
+        "realCliTerminalReceiptValidated": true,
+        "realCliUsesNoOpExecutableWrappers": true
+      },
+      "packagePrivate": true,
+      "exactRootPackageExport": true
+    },
+    "historicalCompatibilityReaderAnchored": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+    "traceabilityOwnership": {
+      "rows": [
+        "C-013",
+        "C-014",
+        "PIPE-035",
+        "PIPE-038",
+        "R-018",
+        "R-028",
+        "R-033",
+        "R-034",
+        "R-136",
+        "R-139",
+        "A-004",
+        "D-031"
+      ],
+      "normativeClause": "N-016"
+    }
+  },
+  "nonclaims": [
+    "No Bundle revision, terminal Bundle validation, signing, publication metadata, runtime, host, adapter, activation, or deployment authority is produced.",
+    "Source discovery location remains authenticated Source data but never becomes an exact package tuple field or selection authority.",
+    "Package bytes are authenticated by the target-specific observation supplied to M06-T02, not by this data-only projection."
+  ],
+  "tests": {
+    "publisherRuntimeCases": 13,
+    "compilerNegativeCases": 52,
+    "rootMutationCases": 37,
+    "reviewedSha256": {
+      "runtime": "c7171da4ca48e70ee88e3db9321dc95f4b629cfbf2c5cef573e1481251a888a9",
+      "types": "a4eb13e5a0a75d915b9c760537ed3f0e95bd020c5c360b5369af2ae74e79cbd8",
+      "root": "246edeaf99e8af88395a8bd12742bffbd12415914976d5baeb5f90cda9dbc287"
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "docs/proof/protocol-0.1.0-traceability.json",
+      "bytes": 134870,
+      "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json",
+      "bytes": 22084,
+      "sha256": "7b9a8bad7b49340dc2a5f818ac008feb403fb43c8c476eecba5e1fcbdf3bf45d"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+      "bytes": 19588,
+      "sha256": "5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+      "bytes": 20001,
+      "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1"
+    },
+    {
+      "path": "packages/publisher/dist/catalog-pinning.js",
+      "bytes": 18412,
+      "sha256": "4f811d901b369d5345eb78960900fb70f9b068b3417a9d49cfb0ddc4d5d3be75"
+    },
+    {
+      "path": "packages/publisher/dist/catalog-pinning.d.ts",
+      "bytes": 4457,
+      "sha256": "851c4c42aa07af4cb8afc270776ad96f572165dba46c1555fde8124dfadd7ff7"
+    },
+    {
+      "path": "packages/publisher/dist/index.d.ts",
+      "bytes": 902,
+      "sha256": "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954"
+    },
+    {
+      "path": "packages/publisher/src/catalog-pinning.ts",
+      "bytes": 22580,
+      "sha256": "ffec13b0b8da580b53e49d169bf49f3e6b9743f2a7658bbbbcc454fd51872f64"
+    },
+    {
+      "path": "packages/publisher/test/catalog-pinning.test.ts",
+      "bytes": 23296,
+      "sha256": "c7171da4ca48e70ee88e3db9321dc95f4b629cfbf2c5cef573e1481251a888a9"
+    },
+    {
+      "path": "packages/publisher/test/catalog-pinning.types.ts",
+      "bytes": 12408,
+      "sha256": "a4eb13e5a0a75d915b9c760537ed3f0e95bd020c5c360b5369af2ae74e79cbd8"
+    },
+    {
+      "path": "package.json",
+      "bytes": 52201,
+      "sha256": "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a"
+    },
+    {
+      "path": "packages/publisher/package.json",
+      "bytes": 1375,
+      "sha256": "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 45050,
+      "sha256": "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360"
+    },
+    {
+      "path": "scripts/test/ci-quality-gate.test.mjs",
+      "bytes": 24068,
+      "sha256": "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-resolution-proof.mjs",
+      "bytes": 31808,
+      "sha256": "4a764e7208aee4aa63471183781930776a11319b22afecef8b9ac783a4c6a0df"
+    },
+    {
+      "path": "scripts/generate-publisher-catalog-pinning-proof.mjs",
+      "bytes": 823,
+      "sha256": "f2b73b790aa64436e1f9119c35a19a46e9ef3dc32ab70df78b65da6242647c92"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+      "bytes": 84023,
+      "sha256": "5d0434d3455dbd182f8b1a9a0ac4e8b47920cb67d214f23ff2157585c12c5f7c"
+    },
+    {
+      "path": "scripts/verify-publisher-catalog-pinning.mjs",
+      "bytes": 656,
+      "sha256": "45bfed120b0b372d7d83ca72fb454c8c784af1d1eda8b63ed850db9573b4d550"
+    },
+    {
+      "path": "tests/publisher-catalog-pinning.test.mjs",
+      "bytes": 26182,
+      "sha256": "246edeaf99e8af88395a8bd12742bffbd12415914976d5baeb5f90cda9dbc287"
+    }
+  ],
+  "reproduction": [
+    "pnpm verify:publisher-source-normalization",
+    "pnpm --filter @desen/publisher build",
+    "pnpm --filter @desen/publisher typecheck",
+    "pnpm --filter @desen/publisher test:catalog-pinning",
+    "node scripts/generate-publisher-catalog-pinning-proof.mjs",
+    "node scripts/verify-publisher-catalog-pinning.mjs",
+    "node --test tests/publisher-catalog-pinning.test.mjs"
+  ]
+}

@@ -14,6 +14,7 @@ import {
   assertSafeStep,
   assertTrackedWorkspaceUnchanged,
   createQualityGateSteps,
+  executeDefaultQualityGate,
   executeQualityGate,
   forwardSignal,
   runStepSequence,
@@ -94,18 +95,18 @@ async function runProcess(command, args, cwd) {
 test("the current repository exactly matches the frozen proof inventory", async () => {
   const result = validateProofInventory(await currentInventory());
   assert.deepEqual(result, {
-    proofCount: 49,
-    verifierCount: 49,
-    rootTestCount: 49,
-    legacyPrerequisiteCount: 285,
-    legacyPrerequisiteSha256: "5db4022e9d4bcf11128167c790d13088c3802a69e31364995c8256b832635ac1",
-    legacyLeafInvocationCount: 1301,
-    legacyLeafInvocationSha256: "cbf7f76682e8b2bfad4531b1311b13f898660a302541b6f10268b5566c8947d5",
-    distinctLeafWorkloadCount: 162,
-    distinctLeafWorkloadSha256: "f69e77ba84b8e814071f04b9d4496d35dd37f326f0435fe12f5ecbce6e8990e7",
+    proofCount: 60,
+    verifierCount: 60,
+    rootTestCount: 60,
+    legacyPrerequisiteCount: 379,
+    legacyPrerequisiteSha256: "611a1f73611839d1c65648157702bce366df85d2e777a2275b19f0e219d4ee01",
+    legacyLeafInvocationCount: 1697,
+    legacyLeafInvocationSha256: "4b008198730a6beeeeec4f47527f8ef870d8d566ac07f4708e27e8f7969dda41",
+    distinctLeafWorkloadCount: 197,
+    distinctLeafWorkloadSha256: "d1ef3faec732ad9dbabc28414fdc158ca07f2fcb05de5d3134a2a09cb954e47c",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 13,
-    workspaceTestScriptSha256: "ef2070b02ea05fe7523f78e77ae99846670f608b52dec7a5c79cdf9ec45fe194",
+    workspaceTestScriptSha256: "6dc7cae96692feb13650a06f3b8733da6f6c431a0cad777e08a8d0d567880c3d",
     workspaceManifestSha256: "c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
@@ -344,8 +345,8 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 106);
-  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 49);
+  assert.equal(steps.length, 128);
+  assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 60);
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -366,8 +367,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 106,
-    planSha256: "b797ce0a8675fbf525f08f3eb3a9e30ae1b74df9ea7cf789f11283afdf2fc73f",
+    stepCount: 128,
+    planSha256: "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea",
   });
 
   const missingTypecheck = clone(steps);
@@ -379,6 +380,25 @@ test("the exact single-pass plan rejects command removal and duplicate root cove
   const rootTestSteps = duplicatedRootTest.filter(({ id }) => id.startsWith("test-"));
   rootTestSteps[1].args = [...rootTestSteps[0].args];
   assert.throws(() => validateQualityGatePlan(duplicatedRootTest), QualityGateError);
+});
+
+test("the default quality gate always executes its own validated plan", async () => {
+  const executedStepIds = [];
+  const receipt = await executeDefaultQualityGate({
+    readInventoryFunction: currentInventory,
+    snapshotFunction: async () => ({ digest: "same", trackedFileCount: 1 }),
+    steps: [{ id: "caller-injected", label: "Caller injected" }],
+    runStep: async ({ id }) => {
+      executedStepIds.push(id);
+    },
+  });
+
+  assert.equal(receipt.status, "PASS");
+  assert.deepEqual(
+    executedStepIds,
+    createQualityGateSteps().map(({ id }) => id),
+  );
+  assert.equal(executedStepIds.includes("caller-injected"), false);
 });
 
 test("step execution is sequential, fail-fast, and preserves rejection", async () => {
