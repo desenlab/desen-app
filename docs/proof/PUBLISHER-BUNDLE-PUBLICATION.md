@@ -37,6 +37,12 @@ M02-T11 artifacts and externally tracks all seven current M06-T02 through M06-T0
 All textual evidence inputs use fatal UTF-8 decoding, all filesystem reads require regular
 non-symbolic files with no-follow opens, and evidence output uses the shared atomic writer.
 
+The current M06-T05 execution-preflight reader must match its exact approved successor receipt in
+the live worktree, any supplied mutation candidate, and the captured tracked inventory. The proof
+then emits its original task-time M06-T05 receipt, preserving this frozen T09 artifact and SHA.
+M07-T01 separately pins the current T09 reader and root-test bytes so the compatibility code itself
+remains inside current evidence authority.
+
 `docs/proof/artifacts/publisher-0.1.0-bundle-publication.json`
 
 `sha256:2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df`

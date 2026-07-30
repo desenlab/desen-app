@@ -170,6 +170,54 @@ test("accepts the stored deterministic M05-T09 source/import audit", async () =>
   assert.equal(result.exactDocumentationReferences, 12);
 });
 
+test("accepts unrelated ancestor entry churn without weakening directory identity checks", async () => {
+  const temporary = await mkdtemp(path.join(WORKSPACE_ROOT, ".t09-reader-churn-"));
+  const proofPath = path.join(temporary, "proof.md");
+  const proofMatrixPath = path.join(temporary, "matrix.md");
+  const projectStatusPath = path.join(temporary, "status.md");
+  const churnPath = path.join(temporary, ".unrelated-churn");
+  let keepChurning = true;
+  let churns = 0;
+  try {
+    await Promise.all([
+      writeFile(
+        proofPath,
+        await readFile(path.join(WORKSPACE_ROOT, "docs/proof/REFERENCE-HOST-WEB-SOURCE-AUDIT.md")),
+      ),
+      writeFile(
+        proofMatrixPath,
+        await readFile(path.join(WORKSPACE_ROOT, "docs/proof/PROOF-MATRIX.md")),
+      ),
+      writeFile(projectStatusPath, await readFile(path.join(WORKSPACE_ROOT, "PROJECT-STATUS.md"))),
+    ]);
+    const churn = (async () => {
+      while (keepChurning) {
+        await writeFile(churnPath, String(churns));
+        await unlink(churnPath);
+        churns += 1;
+        await new Promise((resolve) => setImmediate(resolve));
+      }
+    })();
+    try {
+      for (let index = 0; index < 3; index += 1) {
+        const result = await verifyReferenceHostWebSourceAuditEvidence({
+          proofPath,
+          proofMatrixPath,
+          projectStatusPath,
+        });
+        assert.equal(result.result, "PASS");
+      }
+    } finally {
+      keepChurning = false;
+      await churn;
+    }
+    assert.ok(churns > 0);
+  } finally {
+    keepChurning = false;
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
 test("builds a deterministic real Vite graph and semantic TypeScript inventory", async () => {
   const first = await buildCurrentReferenceHostWebSourceAuditEvidence();
   const second = await buildCurrentReferenceHostWebSourceAuditEvidence();
@@ -275,6 +323,10 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.graphDynamicEdges, 0);
   assert.equal(result.packageBoundaryViolations, 0);
   assert.equal(result.coordination.result, "PASS");
+  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T01");
+  assert.equal(result.coordination.normalizedControlPlaneScriptKeys, true);
+  assert.equal(result.coordination.normalizedControlPlanePipelineSegments, true);
+  assert.equal(result.coordination.normalizedControlPlaneLockfileImporter, true);
   assert.equal(
     result.coordination.rootPackageHistoricalSha256,
     "sha256:1f1d19b6bdb0652f0598ba01a8549eae5c6e8b1a8825cf2cb40503c196bad6da",
@@ -467,7 +519,7 @@ test("admits only the source-pinned M06-T05 Validator runtime successor", async 
   }
 });
 
-test("Publisher-only coordination preserves root toolchain and complete lockfile provenance", async () => {
+test("reviewed Publisher and M07-T01 coordination preserve root and lockfile provenance", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
   const [rootPackageBytes, lockfileBytes] = await Promise.all([
@@ -486,26 +538,162 @@ test("Publisher-only coordination preserves root toolchain and complete lockfile
     ).result,
     "PASS",
   );
+  const verifyCoordination = async ({
+    candidateRootBytes = rootPackageBytes,
+    candidateLockBytes = lockfileBytes,
+  }) => {
+    const candidateArtifact = structuredClone(current);
+    bindTrackedBytes(candidateArtifact, "package.json", candidateRootBytes);
+    bindTrackedBytes(candidateArtifact, "pnpm-lock.yaml", candidateLockBytes);
+    return verifyReferenceHostWebCurrentCoordinationPolicy({
+      historicalArtifact: historical,
+      currentArtifact: candidateArtifact,
+      rootPackageBytes: candidateRootBytes,
+      lockfileBytes: candidateLockBytes,
+    });
+  };
+  const rejectRootManifest = async (mutate) => {
+    const manifest = JSON.parse(rootPackageBytes.toString("utf8"));
+    mutate(manifest);
+    const candidateRootBytes = await canonicalPackageBytes(manifest);
+    await assert.rejects(
+      verifyCoordination({ candidateRootBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  };
+  await rejectRootManifest((manifest) => {
+    delete manifest.scripts["generate:control-plane-bundle-store"];
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["verify:control-plane-bundle-store"] += " --unreviewed";
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["verify:control-plane-decoy"] = "node scripts/decoy.mjs";
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts.check = manifest.scripts.check.replace(
+      "pnpm verify:control-plane-bundle-store",
+      "pnpm verify:control-plane-bundle-store && pnpm verify:control-plane-bundle-store",
+    );
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts.check = manifest.scripts.check.replace(
+      "pnpm verify:control-plane-bundle-store && pnpm lint",
+      "pnpm lint && pnpm verify:control-plane-bundle-store",
+    );
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts.test = manifest.scripts.test.replace(
+      "pnpm test:control-plane-bundle-store && turbo run test",
+      "pnpm test:control-plane-bundle-store && pnpm test:control-plane-decoy && turbo run test",
+    );
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["verify:publisher-decoy"] = "node scripts/publisher-decoy.mjs";
+    manifest.scripts.check = manifest.scripts.check.replace(
+      "pnpm verify:publisher-invalid-source-matrix && pnpm verify:control-plane-bundle-store",
+      "pnpm verify:publisher-decoy && pnpm verify:publisher-invalid-source-matrix && pnpm verify:control-plane-bundle-store",
+    );
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts.check = manifest.scripts.check.replace(
+      "pnpm verify:publisher-invalid-source-matrix && pnpm verify:control-plane-bundle-store",
+      "pnpm verify:publisher-invalid-source-matrix && pnpm verify:publisher-invalid-source-matrix && pnpm verify:control-plane-bundle-store",
+    );
+  });
+  const poisonedManifest = JSON.parse(rootPackageBytes.toString("utf8"));
+  poisonedManifest.scripts["verify:control-plane-bundle-store"] +=
+    " && node scripts/unreviewed.mjs";
+  const poisonedRootPackageBytes = await canonicalPackageBytes(poisonedManifest);
+  const originalObjectEntries = Object.entries;
+  try {
+    Object.entries = (value) => {
+      const entries = originalObjectEntries(value);
+      if (Object.isFrozen(value) && Object.hasOwn(value, "verify:control-plane-bundle-store")) {
+        return entries.map(([key, command]) => [
+          key,
+          key === "verify:control-plane-bundle-store"
+            ? `${command} && node scripts/unreviewed.mjs`
+            : command,
+        ]);
+      }
+      return entries;
+    };
+    await assert.rejects(
+      verifyCoordination({ candidateRootBytes: poisonedRootPackageBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  } finally {
+    Object.entries = originalObjectEntries;
+  }
+  const originalArrayIterator = Array.prototype[Symbol.iterator];
+  try {
+    Array.prototype[Symbol.iterator] = function () {
+      const original = originalArrayIterator.call(this);
+      if (
+        this.length === 2 &&
+        this[0] === "verify:control-plane-bundle-store" &&
+        typeof this[1] === "string"
+      ) {
+        let index = 0;
+        return {
+          next: () => {
+            index += 1;
+            if (index === 1) return { done: false, value: this[0] };
+            if (index === 2) {
+              return {
+                done: false,
+                value: `${this[1]} && node scripts/unreviewed.mjs`,
+              };
+            }
+            return { done: true, value: undefined };
+          },
+          [Symbol.iterator]() {
+            return this;
+          },
+        };
+      }
+      return original;
+    };
+    await assert.rejects(
+      verifyCoordination({ candidateRootBytes: poisonedRootPackageBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  } finally {
+    Array.prototype[Symbol.iterator] = originalArrayIterator;
+  }
 
   const futureManifest = JSON.parse(rootPackageBytes.toString("utf8"));
   futureManifest.scripts["verify:publisher-future-proof"] = "node scripts/future-publisher.mjs";
   futureManifest.scripts["test:publisher-future-proof"] =
     "node --test tests/future-publisher.test.mjs";
-  futureManifest.scripts.check = futureManifest.scripts.check.replace(
+  const futureRootPackageBytes = await canonicalPackageBytes(futureManifest);
+  const futurePipelineManifest = structuredClone(futureManifest);
+  futurePipelineManifest.scripts.check = futurePipelineManifest.scripts.check.replace(
     " && pnpm lint",
     " && pnpm verify:publisher-future-proof && pnpm lint",
   );
-  futureManifest.scripts.test = futureManifest.scripts.test.replace(
+  futurePipelineManifest.scripts.test = futurePipelineManifest.scripts.test.replace(
     " && turbo run test",
     " && pnpm test:publisher-future-proof && turbo run test",
   );
-  const futureRootPackageBytes = await canonicalPackageBytes(futureManifest);
+  const futurePipelineRootPackageBytes = await canonicalPackageBytes(futurePipelineManifest);
+  await assert.rejects(
+    verifyCoordination({ candidateRootBytes: futurePipelineRootPackageBytes }),
+    hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+  );
   const publisherImporterMarker = "  packages/publisher:\n";
+  const controlPlaneImporterMarker = "  apps/control-plane-api:\n";
   assert.equal(lockfileText.split(publisherImporterMarker).length - 1, 1);
+  assert.equal(lockfileText.split(controlPlaneImporterMarker).length - 1, 1);
   const publisherStart = lockfileText.indexOf(publisherImporterMarker);
   const publisherEnd = lockfileText.indexOf("\n  packages/reference-catalog-web:", publisherStart);
+  const controlPlaneStart = lockfileText.indexOf(controlPlaneImporterMarker);
+  const controlPlaneEnd = lockfileText.indexOf("\n  apps/desen-app:", controlPlaneStart);
   assert.ok(publisherStart >= 0);
   assert.ok(publisherEnd > publisherStart);
+  assert.ok(controlPlaneStart >= 0);
+  assert.ok(controlPlaneEnd > controlPlaneStart);
   const mutatePublisher = (needle, replacement) => {
     const block = lockfileText.slice(publisherStart, publisherEnd);
     assert.equal(block.split(needle).length - 1, 1);
@@ -535,6 +723,70 @@ test("Publisher-only coordination preserves root toolchain and complete lockfile
     ).result,
     "PASS",
   );
+  const mutateControlPlane = (needle, replacement) => {
+    const block = lockfileText.slice(controlPlaneStart, controlPlaneEnd);
+    assert.equal(block.split(needle).length - 1, 1);
+    return `${lockfileText.slice(0, controlPlaneStart)}${block.replace(
+      needle,
+      replacement,
+    )}${lockfileText.slice(controlPlaneEnd)}`;
+  };
+  for (const mutatedLockText of [
+    mutateControlPlane(
+      "version: link:../../packages/protocol",
+      "version: 'link:../../packages/protocol'",
+    ),
+    lockfileText.replace(
+      lockfileText.slice(controlPlaneStart, controlPlaneEnd),
+      "  apps/control-plane-api: {}\n",
+    ),
+    mutateControlPlane(
+      "      '@desen/protocol':\n        specifier: workspace:*",
+      "      '@desen/protocol':\n        specifier: workspace:^",
+    ),
+    mutateControlPlane(
+      "version: link:../../packages/publisher",
+      "version: link:../../packages/unreviewed",
+    ),
+    mutateControlPlane(
+      "    devDependencies:",
+      "    optionalDependencies:\n      typescript:\n        specifier: 6.0.3\n        version: 6.0.3\n    devDependencies:",
+    ),
+    lockfileText.replace(
+      controlPlaneImporterMarker,
+      `${controlPlaneImporterMarker}  apps/control-plane-api: {}\n\n`,
+    ),
+  ]) {
+    const candidateLockBytes = Buffer.from(mutatedLockText, "utf8");
+    await assert.rejects(
+      verifyCoordination({ candidateLockBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  }
+  const poisonedControlPlaneLockBytes = Buffer.from(
+    mutateControlPlane(
+      "version: link:../../packages/publisher",
+      "version: link:../../packages/unreviewed",
+    ),
+    "utf8",
+  );
+  const originalDefineProperty = Object.defineProperty;
+  try {
+    Object.defineProperty = (target, key, descriptor) =>
+      originalDefineProperty(
+        target,
+        key,
+        key === "version" && descriptor?.value === "link:../../packages/unreviewed"
+          ? { ...descriptor, value: "link:../../packages/publisher" }
+          : descriptor,
+      );
+    await assert.rejects(
+      verifyCoordination({ candidateLockBytes: poisonedControlPlaneLockBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  } finally {
+    Object.defineProperty = originalDefineProperty;
+  }
 
   await assert.rejects(
     verifyReferenceHostWebCurrentCoordinationPolicy({

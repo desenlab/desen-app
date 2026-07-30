@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import { preflightPublishCatalogPinning } from "../packages/publisher/dist/catalog-pinning.js";
+import { createQualityGateSteps } from "../scripts/run-ci-quality-gate.mjs";
 import {
   buildPublisherCatalogPinningEvidence,
   DEFAULT_PUBLISHER_CATALOG_PINNING_ARTIFACT_PATH,
@@ -62,6 +64,86 @@ function validProofDocument(artifactSha256) {
     `\`sha256:${artifactSha256}\``,
     "",
   ].join("\n");
+}
+
+function appendValidCiSuccessor(source) {
+  const successor = Object.freeze({
+    id: "control-plane-append-only-probe",
+    verifierFile: "scripts/verify-control-plane-append-only-probe.mjs",
+    rootTestFile: "tests/control-plane-append-only-probe.test.mjs",
+  });
+  const currentSteps = createQualityGateSteps();
+  const firstRootTestIndex = currentSteps.findIndex(({ id }) => id.startsWith("test-"));
+  const dependencyBoundaryIndex = currentSteps.findIndex(
+    ({ id }) => id === "dependency-boundaries",
+  );
+  assert.ok(firstRootTestIndex > 0);
+  assert.ok(dependencyBoundaryIndex > firstRootTestIndex);
+  const steps = [
+    ...currentSteps.slice(0, firstRootTestIndex),
+    {
+      id: `verify-${successor.id}`,
+      label: `Proof verifier: ${successor.id}`,
+      command: "node",
+      args: [successor.verifierFile],
+    },
+    ...currentSteps.slice(firstRootTestIndex, dependencyBoundaryIndex),
+    {
+      id: `test-${successor.id}`,
+      label: `Root proof and mutation test: ${successor.id}`,
+      command: "node",
+      args: ["--test", "--test-concurrency=1", successor.rootTestFile],
+    },
+    ...currentSteps.slice(dependencyBoundaryIndex),
+  ];
+  const planSha256 = createHash("sha256")
+    .update(
+      JSON.stringify(
+        steps.map(({ id, command, args }) => ({
+          id,
+          command,
+          args,
+        })),
+      ),
+    )
+    .digest("hex");
+  const inventoryTerminator =
+    "  ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),";
+  const tuple = [
+    "    [",
+    `      "${successor.id}",`,
+    `      "${successor.verifierFile}",`,
+    `      "${successor.rootTestFile}",`,
+    "    ],",
+    "",
+  ].join("\n");
+  const withTuple = source.replace(inventoryTerminator, `${tuple}${inventoryTerminator}`);
+  assert.notEqual(withTuple, source);
+  const withPlan = withTuple.replace(
+    /const QUALITY_GATE_PLAN_SHA256 = "[0-9a-f]{64}";/u,
+    `const QUALITY_GATE_PLAN_SHA256 = "${planSha256}";`,
+  );
+  assert.notEqual(withPlan, withTuple);
+  return withPlan;
+}
+
+function appendValidRootSuccessor(source) {
+  const manifest = JSON.parse(source);
+  manifest.scripts["verify:control-plane-append-only-probe"] =
+    "node scripts/verify-control-plane-append-only-probe.mjs";
+  manifest.scripts["test:control-plane-append-only-probe"] =
+    "node --test tests/control-plane-append-only-probe.test.mjs";
+  manifest.scripts.check = manifest.scripts.check.replace(
+    "pnpm verify:control-plane-bundle-store && pnpm lint",
+    "pnpm verify:control-plane-bundle-store && pnpm verify:control-plane-append-only-probe && pnpm lint",
+  );
+  manifest.scripts.test = manifest.scripts.test.replace(
+    "pnpm test:control-plane-bundle-store && turbo run test",
+    "pnpm test:control-plane-bundle-store && pnpm test:control-plane-append-only-probe && turbo run test",
+  );
+  assert.notEqual(manifest.scripts.check, JSON.parse(source).scripts.check);
+  assert.notEqual(manifest.scripts.test, JSON.parse(source).scripts.test);
+  return JSON.stringify(manifest);
 }
 
 test("accepts the real deterministic M06-T08 Catalog-pinning evidence", async () => {
@@ -463,6 +545,130 @@ test("rejects a non-immediate aggregate T10 to T11 edge", async () => {
   );
 });
 
+test("rejects removal of the exact M07-T01 CI successor", async () => {
+  const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
+  const mutated = ci.replace(
+    '"control-plane-bundle-store"',
+    '"control-plane-bundle-store-removed"',
+  );
+  assert.notEqual(mutated, ci);
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "scripts/run-ci-quality-gate.mjs": Buffer.from(mutated),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects reordering the exact T11 to M07-T01 CI edge", async () => {
+  const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
+  const t11Tuple = [
+    "    [",
+    '      "publisher-invalid-source-matrix",',
+    '      "scripts/verify-publisher-invalid-source-matrix.mjs",',
+    '      "tests/publisher-invalid-source-matrix.test.mjs",',
+    "    ],",
+    "",
+  ].join("\n");
+  const m07Tuple = [
+    "    [",
+    '      "control-plane-bundle-store",',
+    '      "scripts/verify-control-plane-bundle-store.mjs",',
+    '      "tests/control-plane-bundle-store.test.mjs",',
+    "    ],",
+    "",
+  ].join("\n");
+  const mutated = ci.replace(`${t11Tuple}${m07Tuple}`, `${m07Tuple}${t11Tuple}`);
+  assert.notEqual(mutated, ci);
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "scripts/run-ci-quality-gate.mjs": Buffer.from(mutated),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects drift in the exact M07-T01 CI tuple", async () => {
+  const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
+  const mutated = ci.replace(
+    '"scripts/verify-control-plane-bundle-store.mjs"',
+    '"scripts/verify-publisher-invalid-source-matrix.mjs"',
+  );
+  assert.notEqual(mutated, ci);
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "scripts/run-ci-quality-gate.mjs": Buffer.from(mutated),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects exact M07-T01 root registration drift", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  manifest.scripts["verify:control-plane-bundle-store"] =
+    "node scripts/verify-control-plane-bundle-store.mjs";
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "package.json": Buffer.from(JSON.stringify(manifest)),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects removal of the aggregate M07-T01 successor", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  manifest.scripts.test = manifest.scripts.test.replace(
+    " && pnpm test:control-plane-bundle-store",
+    "",
+  );
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "package.json": Buffer.from(JSON.stringify(manifest)),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("rejects a non-immediate aggregate T11 to M07-T01 edge", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  manifest.scripts.check = manifest.scripts.check.replace(
+    "pnpm verify:publisher-invalid-source-matrix && pnpm verify:control-plane-bundle-store",
+    "pnpm verify:control-plane-bundle-store && pnpm verify:publisher-invalid-source-matrix",
+  );
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        "package.json": Buffer.from(JSON.stringify(manifest)),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT"),
+  );
+});
+
+test("accepts an append-only M07 successor without rewriting frozen T08 evidence", async () => {
+  const baseline = await buildPublisherCatalogPinningEvidence();
+  const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
+  const rootPackage = await readFile(new URL("../package.json", import.meta.url), "utf8");
+  const appended = await buildPublisherCatalogPinningEvidence({
+    trackedFileBytes: {
+      "scripts/run-ci-quality-gate.mjs": Buffer.from(appendValidCiSuccessor(ci), "utf8"),
+      "package.json": Buffer.from(appendValidRootSuccessor(rootPackage), "utf8"),
+    },
+  });
+  assert.deepEqual(appended.artifactBytes, baseline.artifactBytes);
+  assert.equal(appended.artifactSha256, baseline.artifactSha256);
+});
+
 test("rejects dead CI proof steps that are absent from the executed plan", async () => {
   const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
   const filtered = ci.replaceAll(
@@ -651,8 +857,8 @@ test("rejects caller-controlled steps placed after the default CI plan", async (
 test("rejects drift in the independently pinned CI plan digest", async () => {
   const ci = await readFile(new URL("../scripts/run-ci-quality-gate.mjs", import.meta.url), "utf8");
   const mutated = ci.replace(
-    "2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0",
-    "0".repeat(64),
+    /const QUALITY_GATE_PLAN_SHA256 = "[0-9a-f]{64}";/u,
+    `const QUALITY_GATE_PLAN_SHA256 = "${"0".repeat(64)}";`,
   );
   assert.notEqual(mutated, ci);
   await assert.rejects(

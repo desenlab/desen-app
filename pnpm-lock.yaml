@@ -51,7 +51,18 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))
 
-  apps/control-plane-api: {}
+  apps/control-plane-api:
+    dependencies:
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+    devDependencies:
+      '@desen/publisher':
+        specifier: workspace:*
+        version: link:../../packages/publisher
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))
 
   apps/desen-app: {}
 

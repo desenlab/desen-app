@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -13,6 +14,7 @@ import {
   verifyPublisherBundlePublicationEvidence,
   writePublisherBundlePublicationEvidence,
 } from "../scripts/lib/publisher-bundle-publication-proof.mjs";
+import { createQualityGateSteps } from "../scripts/run-ci-quality-gate.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const SOURCE = "packages/publisher/src/bundle-publication.ts";
@@ -75,6 +77,136 @@ async function trackedMutation(relativePath, transform) {
       [relativePath]: Buffer.from(mutated, "utf8"),
     },
   });
+}
+
+function appendValidCiSuccessor(source, rootPackageSource) {
+  const successor = Object.freeze({
+    id: "control-plane-append-only-probe",
+    verifierFile: "scripts/verify-control-plane-append-only-probe.mjs",
+    rootTestFile: "tests/control-plane-append-only-probe.test.mjs",
+  });
+  const currentSteps = createQualityGateSteps();
+  const firstRootTestIndex = currentSteps.findIndex(({ id }) => id.startsWith("test-"));
+  const dependencyBoundaryIndex = currentSteps.findIndex(
+    ({ id }) => id === "dependency-boundaries",
+  );
+  assert.ok(firstRootTestIndex > 0);
+  assert.ok(dependencyBoundaryIndex > firstRootTestIndex);
+  const steps = [
+    ...currentSteps.slice(0, firstRootTestIndex),
+    {
+      id: `verify-${successor.id}`,
+      label: `Proof verifier: ${successor.id}`,
+      command: "node",
+      args: [successor.verifierFile],
+    },
+    ...currentSteps.slice(firstRootTestIndex, dependencyBoundaryIndex),
+    {
+      id: `test-${successor.id}`,
+      label: `Root proof and mutation test: ${successor.id}`,
+      command: "node",
+      args: ["--test", "--test-concurrency=1", successor.rootTestFile],
+    },
+    ...currentSteps.slice(dependencyBoundaryIndex),
+  ];
+  const planSha256 = createHash("sha256")
+    .update(
+      JSON.stringify(
+        steps.map(({ id, command, args }) => ({
+          id,
+          command,
+          args,
+        })),
+      ),
+    )
+    .digest("hex");
+  const inventoryTerminator =
+    "  ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),";
+  const tuple = [
+    "    [",
+    `      "${successor.id}",`,
+    `      "${successor.verifierFile}",`,
+    `      "${successor.rootTestFile}",`,
+    "    ],",
+    "",
+  ].join("\n");
+  const withTuple = source.replace(inventoryTerminator, `${tuple}${inventoryTerminator}`);
+  assert.notEqual(withTuple, source);
+  const ciSource = withTuple.replace(
+    /const QUALITY_GATE_PLAN_SHA256 = "[0-9a-f]{64}";/u,
+    `const QUALITY_GATE_PLAN_SHA256 = "${planSha256}";`,
+  );
+  assert.notEqual(ciSource, withTuple);
+
+  const rootManifest = JSON.parse(rootPackageSource);
+  const proofIds = [
+    ...currentSteps
+      .filter(({ id }) => id.startsWith("verify-"))
+      .map(({ id }) => id.slice("verify-".length)),
+    successor.id,
+  ];
+  const splitScript = (script) => script.split(" && ").map((command) => command.trim());
+  const legacyPrerequisiteInventory = proofIds.map((id) => ({
+    id,
+    verify: splitScript(rootManifest.scripts[`verify:${id}`]).slice(0, -1),
+    test: splitScript(rootManifest.scripts[`test:${id}`]).slice(0, -1),
+  }));
+  const expandRootScript = (scriptName, ancestors = []) => {
+    assert.equal(ancestors.includes(scriptName), false);
+    const script = rootManifest.scripts[scriptName];
+    assert.equal(typeof script, "string");
+    return splitScript(script).flatMap((command) => {
+      const reference = /^pnpm ([a-z0-9:-]+)$/u.exec(command)?.[1];
+      return reference && Object.hasOwn(rootManifest.scripts, reference)
+        ? expandRootScript(reference, [...ancestors, scriptName])
+        : [command];
+    });
+  };
+  const leafInvocations = expandRootScript("check");
+  const distinctLeafWorkloads = [...new Set(leafInvocations)].sort();
+  const hashJson = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  const replacements = [
+    [
+      /const LEGACY_PREREQUISITE_SHA256 =\n {2}"[0-9a-f]{64}";/u,
+      `const LEGACY_PREREQUISITE_SHA256 =\n  "${hashJson(legacyPrerequisiteInventory)}";`,
+    ],
+    [
+      /const LEGACY_LEAF_INVOCATION_SHA256 =\n {2}"[0-9a-f]{64}";/u,
+      `const LEGACY_LEAF_INVOCATION_SHA256 =\n  "${hashJson(leafInvocations)}";`,
+    ],
+    [
+      /const DISTINCT_LEAF_WORKLOAD_SHA256 =\n {2}"[0-9a-f]{64}";/u,
+      `const DISTINCT_LEAF_WORKLOAD_SHA256 =\n  "${hashJson(distinctLeafWorkloads)}";`,
+    ],
+  ];
+  let fullyPinnedCiSource = ciSource;
+  for (const [pattern, replacement] of replacements) {
+    const mutated = fullyPinnedCiSource.replace(pattern, replacement);
+    assert.notEqual(mutated, fullyPinnedCiSource);
+    fullyPinnedCiSource = mutated;
+  }
+  return Object.freeze({ ciSource: fullyPinnedCiSource });
+}
+
+function appendValidRootSuccessor(source) {
+  const manifest = JSON.parse(source);
+  const originalCheck = manifest.scripts.check;
+  const originalTest = manifest.scripts.test;
+  manifest.scripts["verify:control-plane-append-only-probe"] =
+    "node scripts/verify-control-plane-append-only-probe.mjs";
+  manifest.scripts["test:control-plane-append-only-probe"] =
+    "node --test tests/control-plane-append-only-probe.test.mjs";
+  manifest.scripts.check = manifest.scripts.check.replace(
+    "pnpm verify:control-plane-bundle-store && pnpm lint",
+    "pnpm verify:control-plane-bundle-store && pnpm verify:control-plane-append-only-probe && pnpm lint",
+  );
+  manifest.scripts.test = manifest.scripts.test.replace(
+    "pnpm test:control-plane-bundle-store && turbo run test",
+    "pnpm test:control-plane-bundle-store && pnpm test:control-plane-append-only-probe && turbo run test",
+  );
+  assert.notEqual(manifest.scripts.check, originalCheck);
+  assert.notEqual(manifest.scripts.test, originalTest);
+  return JSON.stringify(manifest);
 }
 
 async function verifyWith(additions = {}) {
@@ -179,6 +311,17 @@ test("[compatibility] externally tracks every current T02 through T08 proof read
       /^[0-9a-f]{64}$/u.test(sha256),
     ),
     true,
+  );
+  assert.deepEqual(
+    baseline.artifact.trackedFiles.find(
+      ({ path: trackedPath }) =>
+        trackedPath === "scripts/lib/publisher-execution-preflight-proof.mjs",
+    ),
+    {
+      path: "scripts/lib/publisher-execution-preflight-proof.mjs",
+      bytes: 62_112,
+      sha256: "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db",
+    },
   );
 });
 
@@ -833,6 +976,148 @@ test("[ci] rejects a non-immediate aggregate T10 to T11 edge", async () => {
   );
 });
 
+test("[ci] rejects removal of the exact M07-T01 CI successor", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace('"control-plane-bundle-store"', '"control-plane-bundle-store-removed"'),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects reordering the exact T11 to M07-T01 CI edge", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) => {
+    const t11Tuple = [
+      "    [",
+      '      "publisher-invalid-source-matrix",',
+      '      "scripts/verify-publisher-invalid-source-matrix.mjs",',
+      '      "tests/publisher-invalid-source-matrix.test.mjs",',
+      "    ],",
+      "",
+    ].join("\n");
+    const m07T01Tuple = [
+      "    [",
+      '      "control-plane-bundle-store",',
+      '      "scripts/verify-control-plane-bundle-store.mjs",',
+      '      "tests/control-plane-bundle-store.test.mjs",',
+      "    ],",
+      "",
+    ].join("\n");
+    return text.replace(`${t11Tuple}${m07T01Tuple}`, `${m07T01Tuple}${t11Tuple}`);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects drift in the exact M07-T01 CI tuple", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace(
+      '"scripts/verify-control-plane-bundle-store.mjs"',
+      '"scripts/verify-publisher-invalid-source-matrix.mjs"',
+    ),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects exact M07-T01 root registration drift", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts["verify:control-plane-bundle-store"] =
+      "node scripts/verify-control-plane-bundle-store.mjs";
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[ci] rejects removal of the aggregate M07-T01 successor", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts.test = manifest.scripts.test.replace(
+      " && pnpm test:control-plane-bundle-store",
+      "",
+    );
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[ci] rejects a non-immediate aggregate T11 to M07-T01 edge", async () => {
+  const options = await trackedMutation(ROOT_PACKAGE, (text) => {
+    const manifest = JSON.parse(text);
+    manifest.scripts.check = manifest.scripts.check.replace(
+      "pnpm verify:publisher-invalid-source-matrix && pnpm verify:control-plane-bundle-store",
+      "pnpm verify:control-plane-bundle-store && pnpm verify:publisher-invalid-source-matrix",
+    );
+    return JSON.stringify(manifest);
+  });
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_REGISTRATION_DRIFT"),
+  );
+});
+
+test("[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence", async () => {
+  const source = await sourceText(CI_SOURCE);
+  const rootPackage = await sourceText(ROOT_PACKAGE);
+  const appendedRootPackage = appendValidRootSuccessor(rootPackage);
+  const appended = appendValidCiSuccessor(source, appendedRootPackage);
+  const result = await buildPublisherBundlePublicationEvidence({
+    runtimeReceipt,
+    trackedFileBytes: {
+      [CI_SOURCE]: Buffer.from(appended.ciSource, "utf8"),
+      [ROOT_PACKAGE]: Buffer.from(appendedRootPackage, "utf8"),
+    },
+  });
+  assert.deepEqual(result.artifactBytes, baseline.artifactBytes);
+  assert.equal(result.artifactSha256, baseline.artifactSha256);
+});
+
+test("[ci] executes byte-identical detached CI bytes through the real default entrypoint", async () => {
+  const result = await buildPublisherBundlePublicationEvidence({
+    runtimeReceipt,
+    trackedFileBytes: {
+      [CI_SOURCE]: await sourceBytes(CI_SOURCE),
+    },
+  });
+  assert.deepEqual(result.artifactBytes, baseline.artifactBytes);
+  assert.equal(result.artifactSha256, baseline.artifactSha256);
+});
+
+test("[ci] rejects a detached real CLI that replaces the validated default plan with zero steps", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace("    steps: createQualityGateSteps(),", "    steps: [],"),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"),
+  );
+});
+
+test("[ci] rejects verifier-command drift despite a trusted historical receipt", async () => {
+  const options = await trackedMutation(CI_SOURCE, (text) =>
+    text.replace(
+      'commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile])',
+      'commandStep(`verify-${id}`, `Proof verifier: ${id}`, "pnpm", [verifierFile])',
+    ),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(options),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_CI_RUNTIME_DRIFT"),
+  );
+});
+
 test("[ci] rejects drift in the independently observed CI plan digest", async () => {
   const options = await trackedMutation(CI_SOURCE, (text) =>
     text.replace(
@@ -1100,6 +1385,7 @@ test("[authority] rejects a root mutation inventory reduced below thirty cases",
 });
 
 test("[compatibility] detects tamper in each externally anchored T02 through T08 reader", async () => {
+  const reviewedCurrentPath = "scripts/lib/publisher-execution-preflight-proof.mjs";
   for (const readerPath of PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS) {
     const bytes = Buffer.from(await sourceBytes(readerPath));
     bytes[bytes.length - 1] ^= 1;
@@ -1111,9 +1397,136 @@ test("[compatibility] detects tamper in each externally anchored T02 through T08
           trackedFileBytes: { [readerPath]: bytes },
         }),
       ),
-      expectCode("PUBLISHER_BUNDLE_PUBLICATION_ARTIFACT_DRIFT"),
+      expectCode(
+        readerPath === reviewedCurrentPath
+          ? "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"
+          : "PUBLISHER_BUNDLE_PUBLICATION_ARTIFACT_DRIFT",
+      ),
       readerPath,
     );
+  }
+
+  const reviewedCurrentBytes = await sourceBytes(reviewedCurrentPath);
+  const approved = await buildPublisherBundlePublicationEvidence(
+    fastOptions({
+      trackedFileBytes: { [reviewedCurrentPath]: reviewedCurrentBytes },
+    }),
+  );
+  assert.deepEqual(approved.artifactBytes, baseline.artifactBytes);
+  assert.equal(approved.artifactSha256, baseline.artifactSha256);
+
+  const unreviewedCurrentBytes = Buffer.concat([
+    reviewedCurrentBytes,
+    Buffer.from("\n// unreviewed compatibility successor\n"),
+  ]);
+  const reviewedCurrentSha256 = createHash("sha256").update(reviewedCurrentBytes).digest("hex");
+  const unreviewedCurrentSha256 = createHash("sha256").update(unreviewedCurrentBytes).digest("hex");
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({
+        trackedFileBytes: { [reviewedCurrentPath]: unreviewedCurrentBytes },
+      }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
+
+  const originalObjectFreeze = Object.freeze;
+  try {
+    Object.freeze = (value) => {
+      if (
+        value?.overridden === true &&
+        value.bytes instanceof Uint8Array &&
+        value.bytes.byteLength === unreviewedCurrentBytes.byteLength &&
+        createHash("sha256").update(value.bytes).digest("hex") === unreviewedCurrentSha256
+      ) {
+        return originalObjectFreeze({
+          bytes: reviewedCurrentBytes,
+          overridden: true,
+        });
+      }
+      if (
+        value?.bytes === unreviewedCurrentBytes.byteLength &&
+        value?.sha256 === unreviewedCurrentSha256
+      ) {
+        return originalObjectFreeze({
+          bytes: reviewedCurrentBytes.byteLength,
+          sha256: reviewedCurrentSha256,
+        });
+      }
+      return originalObjectFreeze(value);
+    };
+    await assert.rejects(
+      buildPublisherBundlePublicationEvidence(
+        fastOptions({
+          trackedFileBytes: { [reviewedCurrentPath]: unreviewedCurrentBytes },
+        }),
+      ),
+      expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+    );
+  } finally {
+    Object.freeze = originalObjectFreeze;
+  }
+
+  const originalObjectEntries = Object.entries;
+  try {
+    Object.entries = (value) => {
+      const entries = originalObjectEntries(value);
+      if (Object.isFrozen(value) && entries.length === 1 && entries[0][0] === reviewedCurrentPath) {
+        return [
+          [
+            reviewedCurrentPath,
+            {
+              bytes: unreviewedCurrentBytes.byteLength,
+              sha256: unreviewedCurrentSha256,
+            },
+          ],
+        ];
+      }
+      return entries;
+    };
+    await assert.rejects(
+      buildPublisherBundlePublicationEvidence(
+        fastOptions({
+          trackedFileBytes: { [reviewedCurrentPath]: unreviewedCurrentBytes },
+        }),
+      ),
+      expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+    );
+  } finally {
+    Object.entries = originalObjectEntries;
+  }
+
+  const originalArrayFilter = Array.prototype.filter;
+  try {
+    Array.prototype.filter = function (predicate, thisArgument) {
+      let isTrackedPairInventory = false;
+      for (let index = 0; index < this.length; index += 1) {
+        if (this[index]?.relativePath === reviewedCurrentPath) {
+          isTrackedPairInventory = true;
+          break;
+        }
+      }
+      if (isTrackedPairInventory) {
+        return [
+          {
+            relativePath: reviewedCurrentPath,
+            bytes: reviewedCurrentBytes,
+            overridden: true,
+          },
+        ];
+      }
+      return Reflect.apply(originalArrayFilter, this, [predicate, thisArgument]);
+    };
+    await assert.rejects(
+      buildPublisherBundlePublicationEvidence(
+        fastOptions({
+          trackedFileBytes: { [reviewedCurrentPath]: unreviewedCurrentBytes },
+        }),
+      ),
+      expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+    );
+  } finally {
+    Array.prototype.filter = originalArrayFilter;
   }
 });
 

@@ -1231,3 +1231,29 @@ control-plane behavior.
 
 `docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json`
 `sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
+
+## M07-T01 — Immutable content-addressed Bundle storage
+
+M07-T01 persists the 2,173-byte public Publisher golden once under its exact revision and reopens
+the same byte sequence through the built `@desen/control-plane-api` package. A byte-identical retry
+returns `unchanged` without replacing the inode; a different sequence, including the proven
+publication-only same-revision variant, returns `conflict` and preserves the winner. Equal and
+divergent concurrent writers linearize through one POSIX no-clobber hard-link commit without
+exposing partial or mixed addressed bytes.
+
+The focused suite additionally proves synchronous input snapshotting, fresh read copies, parent
+directory durability across the concurrent shard-creation race, read-only single-link storage,
+committed-temporary alias recovery, owned-temporary cleanup on handled pre-commit failure when
+identity remains established, post-commit cleanup durability and indeterminate retry, strict
+revision paths, exact `Uint8Array` branding, and fail-closed symlink, special-file, hard-link, and
+hostile-authority behavior. The artifact authenticates 18 package cases, four compiler-negative
+cases, 16 independent root proof/mutation cases, the task-owned generated distribution, and five
+exact trace rows.
+
+This is storage evidence only. `P-12` remains `NOT_PROVEN` because verified ingress, package
+preflight, mutable channels, staging, transactional activation, last-known-good recovery, fault
+injection, and separately built host consumption remain M07-T02 through M07-T11. `N-010` and
+`N-019` remain `PLANNED` for their remaining owners, and no proof gate changes.
+
+`docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
+`sha256:698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`.

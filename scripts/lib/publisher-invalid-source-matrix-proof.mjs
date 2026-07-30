@@ -1,10 +1,21 @@
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
-import { lstat, open } from "node:fs/promises";
+import {
+  chmod,
+  lstat,
+  mkdir,
+  mkdtemp,
+  open,
+  readdir,
+  realpath,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { types as utilTypes } from "node:util";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { promisify, types as utilTypes } from "node:util";
 
 import { format } from "prettier";
 import ts from "typescript";
@@ -72,12 +83,19 @@ const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
   "buffer",
 )?.get;
 const UINT8_ARRAY_SET = Uint8Array.prototype.set;
+const SAFE_REFLECT_APPLY = Reflect.apply;
+const SAFE_OBJECT_FREEZE = Object.freeze;
+const SAFE_STRING_INDEX_OF = String.prototype.indexOf;
+const execFileAsync = promisify(execFile);
 const RUNTIME_PROBE_NODE_ARGUMENTS = Object.freeze(["--no-warnings", "--input-type=module", "-"]);
 const RUNTIME_PROBE_PROGRAM_LIMIT_BYTES = 2 * 1024 * 1024;
 const RUNTIME_PROBE_STDOUT_LIMIT_BYTES = 8 * 1024 * 1024;
 const RUNTIME_PROBE_STDERR_LIMIT_BYTES = 256 * 1024;
 const RUNTIME_PROBE_TIMEOUT_MILLISECONDS = 180_000;
 const RUNTIME_PROBE_ERROR_TAIL_BYTES = 4_096;
+const DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES = 512 * 1024;
+const DETACHED_CI_ENTRYPOINT_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024;
+const DETACHED_CI_ENTRYPOINT_TIMEOUT_MILLISECONDS = 30_000;
 
 export const PUBLISHER_INVALID_SOURCE_MATRIX_FIXTURE_PINS = Object.freeze([
   Object.freeze({
@@ -230,6 +248,28 @@ export const PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_SURFACES = Object.freeze(
     Object.freeze({ path: pathName, role, bytes, sha256: sha256Value }),
   ),
 );
+
+// M06-T11's artifact remains an immutable task-time receipt. Live compatibility authenticates
+// the frozen CI prefix through M07-T01 semantically, so later proof tasks may append a suffix
+// without rewriting any M06 evidence.
+const CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE = Object.freeze({
+  prefixSha256: "28dce22a08998f1a4bb199094ba081afccf074ab21aafecd10182d1c73d97d0e",
+  proofEntries: 61,
+  t11Index: 59,
+  m07T01Index: 60,
+});
+
+const REQUIRED_M07_T01_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
+  "[successor] rejects removal of the exact M07-T01 CI successor",
+  "[successor] rejects reordering the exact T11 to M07-T01 CI edge",
+  "[successor] rejects drift in the exact M07-T01 CI tuple",
+  "[successor] rejects exact M07-T01 root registration drift",
+  "[successor] rejects removal of the aggregate M07-T01 successor",
+  "[successor] rejects a non-immediate aggregate T11 to M07-T01 edge",
+  "[successor] rejects a detached default gate with an empty execution plan",
+  "[successor] rejects verifier-command drift despite a caller receipt",
+]);
+const HISTORICAL_ROOT_MUTATION_CASES = 67;
 
 export const PUBLISHER_INVALID_SOURCE_MATRIX_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
@@ -781,12 +821,92 @@ const TRACKED = Object.freeze([
   ...PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_SURFACES.map(({ path: pathName }) => pathName),
 ]);
 const TRACKED_SET = new Set(TRACKED);
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [PROOF_LIBRARY]: Object.freeze({
+    bytes: 103_404,
+    sha256: "95b3ecb5e2f9ec98bd689e3d5fa1be4e5e6fc75627fcfd4a67301f5ffcfbda46",
+  }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 44_979,
+    sha256: "84c95f15747d461225918fca3ff590babbb8d1bc30288be4044d96929e0ef247",
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 55_243,
+    sha256: "57a70fff3ef1fd2f8a3665bb0f360e009225139f4f37c0ca1e5ff240acdc84f9",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 45_961,
+    sha256: "bd26364d95e79b7aa7278cabfdd97ff95cc6debbf0253a4d27a4a6fb6dbaea16",
+  }),
+  [CI_TEST]: Object.freeze({
+    bytes: 24_068,
+    sha256: "2be9f2207f966800a481064dab490cbe3f548c23853b34b2916be7d9d5512693",
+  }),
+  [CATALOG_PINNING_PROOF_LIBRARY]: Object.freeze({
+    bytes: 93_922,
+    sha256: "9ea32c41d466aa14c7daa320a4775e9e34ae8ed4fecf27099f3e8317a9add94d",
+  }),
+  [CATALOG_PINNING_ROOT_TEST]: Object.freeze({
+    bytes: 30_614,
+    sha256: "d245aa97bfe6d8879f4872b81f1e7b31cb30b9d84366ae71b7c10c615bc324dc",
+  }),
+  [BUNDLE_PUBLICATION_PROOF_LIBRARY]: Object.freeze({
+    bytes: 89_602,
+    sha256: "339cade1d676626653078fef299c99040c8d6757310f7e07cbbda09c63a013f6",
+  }),
+  [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze({
+    bytes: 46_946,
+    sha256: "52a19852972d31429ad7631de4e8338249eb9d6b894ccaa7b34dc68deb6b0b80",
+  }),
+});
+const APPROVED_CURRENT_T09_SUCCESSOR_PATHS = Object.freeze([
+  BUNDLE_PUBLICATION_PROOF_LIBRARY,
+  BUNDLE_PUBLICATION_ROOT_TEST,
+]);
+const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
+  [BUNDLE_PUBLICATION_PROOF_LIBRARY]: Object.freeze({
+    bytes: 133_811,
+    sha256: "9eb7b300a1239e5be3324c24b39e0107d02cd14587b977310d162c4812a3e645",
+  }),
+  [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze({
+    bytes: 62_216,
+    sha256: "34190a6f9304ce85acbb5809d4b1422b621d7089300f89eb9d6863839d220060",
+  }),
+});
+const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
+  "EXECUTION_PREFLIGHT_COMPATIBILITY_READER",
+  "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
+  "APPROVED_CURRENT_COMPATIBILITY_PATHS",
+  "assertApprovedCurrentCompatibilityBytes",
+  "authenticateCurrentCompatibilityReaders",
+  "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
+  "live-worktree",
+  "tracked-byte-override",
+  "tracked-candidate",
+  "bytes: 62_112",
+  "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db",
+  "bytes: 70_038",
+  "29332971e7a9c0e45e66d145c073dbd1a3b1b7d29dfa021a03a917e6b539a69d",
+]);
+const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
+  'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',
+  "// unreviewed compatibility successor",
+  "const originalObjectFreeze = Object.freeze;",
+  "const originalObjectEntries = Object.entries;",
+  "const originalArrayFilter = Array.prototype.filter;",
+  "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
+]);
 const PREREQUISITE_SET = new Set(
   PUBLISHER_INVALID_SOURCE_MATRIX_PREREQUISITE_PINS.map(
     ({ path: prerequisitePath }) => prerequisitePath,
   ),
 );
-const BUILD_OPTION_KEYS = new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]);
+const BUILD_OPTION_KEYS = new Set([
+  "ciReceipt",
+  "prerequisiteBytes",
+  "runtimeReceipt",
+  "trackedFileBytes",
+]);
 const VERIFY_OPTION_KEYS = new Set([
   ...BUILD_OPTION_KEYS,
   "artifactBytes",
@@ -1043,6 +1163,176 @@ async function readRegularBytes(relativePath, code = "PUBLISHER_INVALID_SOURCE_M
     "Invalid-source evidence input",
     { relativePath },
   );
+}
+
+function safeStringIncludes(value, search) {
+  return SAFE_REFLECT_APPLY(SAFE_STRING_INDEX_OF, value, [search]) >= 0;
+}
+
+function currentT09SuccessorReceipt(relativePath) {
+  if (relativePath === BUNDLE_PUBLICATION_PROOF_LIBRARY) {
+    return APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS[BUNDLE_PUBLICATION_PROOF_LIBRARY];
+  }
+  if (relativePath === BUNDLE_PUBLICATION_ROOT_TEST) {
+    return APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS[BUNDLE_PUBLICATION_ROOT_TEST];
+  }
+  return undefined;
+}
+
+function exactByteLength(bytes) {
+  if (TYPED_ARRAY_LENGTH_GETTER === undefined) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The runtime cannot establish current T09 byte authority.",
+    );
+  }
+  try {
+    return SAFE_REFLECT_APPLY(TYPED_ARRAY_LENGTH_GETTER, bytes, []);
+  } catch {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "A current T09 successor is not an exact byte view.",
+    );
+  }
+}
+
+function assertCurrentT09SuccessorBytes(bytes, relativePath, authority) {
+  const approved = currentT09SuccessorReceipt(relativePath);
+  const actualBytes = exactByteLength(bytes);
+  const actualSha256 = sha256(bytes);
+  if (
+    approved === undefined ||
+    actualBytes !== approved.bytes ||
+    actualSha256 !== approved.sha256
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "A current T09 successor differs from its exact approved receipt.",
+      {
+        relativePath,
+        authority,
+        expectedBytes: approved?.bytes,
+        expectedSha256: approved?.sha256,
+        actualBytes,
+        actualSha256,
+      },
+    );
+  }
+}
+
+function exactCurrentT09BytesEqual(left, right) {
+  const leftLength = exactByteLength(left);
+  const rightLength = exactByteLength(right);
+  if (leftLength !== rightLength) return false;
+  let index = 0;
+  while (index < leftLength) {
+    if (left[index] !== right[index]) return false;
+    index += 1;
+  }
+  return true;
+}
+
+async function authenticateLiveCurrentT09Successors() {
+  const authenticated = [];
+  let pathIndex = 0;
+  while (pathIndex < APPROVED_CURRENT_T09_SUCCESSOR_PATHS.length) {
+    const relativePath = APPROVED_CURRENT_T09_SUCCESSOR_PATHS[pathIndex];
+    const bytes = await readRegularBytes(
+      relativePath,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+    );
+    assertCurrentT09SuccessorBytes(bytes, relativePath, "live-worktree");
+    authenticated[pathIndex] = SAFE_OBJECT_FREEZE({ relativePath, bytes });
+    pathIndex += 1;
+  }
+  return SAFE_OBJECT_FREEZE(authenticated);
+}
+
+function authenticateCurrentT09TrackedInputs(liveInputs, trackedPairs, options) {
+  let pathIndex = 0;
+  while (pathIndex < APPROVED_CURRENT_T09_SUCCESSOR_PATHS.length) {
+    const relativePath = APPROVED_CURRENT_T09_SUCCESSOR_PATHS[pathIndex];
+    const liveInput = liveInputs[pathIndex];
+    if (liveInput?.relativePath !== relativePath) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The fixed current T09 live authority order changed.",
+        { relativePath },
+      );
+    }
+    let matched;
+    let matches = 0;
+    let trackedIndex = 0;
+    while (trackedIndex < trackedPairs.length) {
+      const tracked = trackedPairs[trackedIndex];
+      if (tracked.relativePath === relativePath) {
+        matched = tracked;
+        matches += 1;
+      }
+      trackedIndex += 1;
+    }
+    if (matched === undefined || matches !== 1) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "A current T09 successor tracked candidate is missing or ambiguous.",
+        { relativePath, matches },
+      );
+    }
+    assertCurrentT09SuccessorBytes(matched.bytes, relativePath, "tracked-candidate");
+    if (!exactCurrentT09BytesEqual(liveInput.bytes, matched.bytes)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "A current T09 tracked candidate differs from its authenticated live authority.",
+        { relativePath },
+      );
+    }
+    const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+    if (override !== undefined) {
+      assertCurrentT09SuccessorBytes(override, relativePath, "tracked-byte-override");
+      if (!exactCurrentT09BytesEqual(liveInput.bytes, override)) {
+        fail(
+          "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+          "A current T09 caller override differs from its authenticated live authority.",
+          { relativePath },
+        );
+      }
+    }
+    pathIndex += 1;
+  }
+}
+
+function assertCurrentT09CompatibilityMarkers(proofText, rootTestText) {
+  const authorities = SAFE_OBJECT_FREEZE([
+    SAFE_OBJECT_FREEZE({
+      relativePath: BUNDLE_PUBLICATION_PROOF_LIBRARY,
+      text: proofText,
+      markers: REQUIRED_CURRENT_T09_PROOF_MARKERS,
+    }),
+    SAFE_OBJECT_FREEZE({
+      relativePath: BUNDLE_PUBLICATION_ROOT_TEST,
+      text: rootTestText,
+      markers: REQUIRED_CURRENT_T09_TEST_MARKERS,
+    }),
+  ]);
+  let authorityIndex = 0;
+  while (authorityIndex < authorities.length) {
+    const authority = authorities[authorityIndex];
+    let markerIndex = 0;
+    while (markerIndex < authority.markers.length) {
+      if (!safeStringIncludes(authority.text, authority.markers[markerIndex])) {
+        fail(
+          "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+          "A current T09 successor lost an exact M06-T05 compatibility marker.",
+          {
+            relativePath: authority.relativePath,
+            marker: authority.markers[markerIndex],
+          },
+        );
+      }
+      markerIndex += 1;
+    }
+    authorityIndex += 1;
+  }
 }
 
 function readOverrideMap(map, relativePath, allowedPaths) {
@@ -1717,7 +2007,1205 @@ function packageTestClaims(text, bytes) {
   });
 }
 
-function successorSurfaceClaims(bytesByPath, text) {
+const CI_SUCCESSOR_AUTHORITY_BINDINGS = new Set([
+  "PROOF_ENTRIES",
+  "QUALITY_GATE_PLAN_SHA256",
+  "createQualityGateSteps",
+  "executeDefaultQualityGate",
+  "executeQualityGate",
+  "main",
+  "validateQualityGatePlan",
+]);
+
+function collectAssignedCiIdentifiers(node, names = []) {
+  if (ts.isIdentifier(node)) {
+    names.push(node.text);
+    return names;
+  }
+  if (ts.isParenthesizedExpression(node)) {
+    return collectAssignedCiIdentifiers(node.expression, names);
+  }
+  if (ts.isBinaryExpression(node) && ts.isAssignmentOperator(node.operatorToken.kind)) {
+    return collectAssignedCiIdentifiers(node.left, names);
+  }
+  if (ts.isArrayLiteralExpression(node)) {
+    for (const element of node.elements) {
+      if (ts.isOmittedExpression(element)) continue;
+      collectAssignedCiIdentifiers(
+        ts.isSpreadElement(element) ? element.expression : element,
+        names,
+      );
+    }
+    return names;
+  }
+  if (ts.isObjectLiteralExpression(node)) {
+    for (const property of node.properties) {
+      if (ts.isShorthandPropertyAssignment(property)) {
+        names.push(property.name.text);
+      } else if (ts.isPropertyAssignment(property)) {
+        collectAssignedCiIdentifiers(property.initializer, names);
+      } else if (ts.isSpreadAssignment(property)) {
+        collectAssignedCiIdentifiers(property.expression, names);
+      }
+    }
+  }
+  return names;
+}
+
+function assertNoCiSuccessorAuthorityRebinding(sourceFile) {
+  const writes = [];
+  let directEvalCalls = 0;
+
+  function recordTarget(target, kind) {
+    for (const name of collectAssignedCiIdentifiers(target)) {
+      if (CI_SUCCESSOR_AUTHORITY_BINDINGS.has(name)) {
+        writes.push(Object.freeze({ name, kind, position: target.getStart(sourceFile) }));
+      }
+    }
+  }
+
+  function visit(node) {
+    if (ts.isBinaryExpression(node) && ts.isAssignmentOperator(node.operatorToken.kind)) {
+      recordTarget(node.left, ts.tokenToString(node.operatorToken.kind) ?? "assignment");
+    } else if (
+      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+      [ts.SyntaxKind.PlusPlusToken, ts.SyntaxKind.MinusMinusToken].includes(node.operator)
+    ) {
+      recordTarget(node.operand, ts.tokenToString(node.operator) ?? "update");
+    } else if (
+      (ts.isForInStatement(node) || ts.isForOfStatement(node)) &&
+      !ts.isVariableDeclarationList(node.initializer)
+    ) {
+      recordTarget(node.initializer, ts.isForInStatement(node) ? "for-in" : "for-of");
+    }
+
+    if (ts.isCallExpression(node)) {
+      let callee = node.expression;
+      while (ts.isParenthesizedExpression(callee)) callee = callee.expression;
+      if (ts.isIdentifier(callee) && callee.text === "eval") directEvalCalls += 1;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+
+  if (writes.length > 0 || directEvalCalls > 0) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Single-pass CI must not reassign its validated default-plan authority or use direct eval.",
+      { writes, directEvalCalls },
+    );
+  }
+}
+
+function assertDirectCiSuccessorPlanValidation(createStepsFunction) {
+  const statements = createStepsFunction.body?.statements;
+  const declaration = statements?.[0];
+  const validation = statements?.[1];
+  const returned = statements?.[2];
+  const declarationEntry =
+    declaration && ts.isVariableStatement(declaration)
+      ? declaration.declarationList.declarations[0]
+      : undefined;
+  const validationCall =
+    validation && ts.isExpressionStatement(validation) && ts.isCallExpression(validation.expression)
+      ? validation.expression
+      : undefined;
+  const returnCall =
+    returned && ts.isReturnStatement(returned) && ts.isCallExpression(returned.expression)
+      ? returned.expression
+      : undefined;
+
+  if (
+    statements?.length !== 3 ||
+    declaration === undefined ||
+    !ts.isVariableStatement(declaration) ||
+    declaration.declarationList.declarations.length !== 1 ||
+    declarationEntry === undefined ||
+    !ts.isIdentifier(declarationEntry.name) ||
+    declarationEntry.name.text !== "steps" ||
+    !ts.isArrayLiteralExpression(declarationEntry.initializer) ||
+    validationCall === undefined ||
+    !ts.isIdentifier(validationCall.expression) ||
+    validationCall.expression.text !== "validateQualityGatePlan" ||
+    validationCall.arguments.length !== 1 ||
+    !ts.isIdentifier(validationCall.arguments[0]) ||
+    validationCall.arguments[0].text !== "steps" ||
+    returnCall === undefined ||
+    !ts.isPropertyAccessExpression(returnCall.expression) ||
+    !ts.isIdentifier(returnCall.expression.expression) ||
+    returnCall.expression.expression.text !== "Object" ||
+    returnCall.expression.name.text !== "freeze" ||
+    returnCall.arguments.length !== 1 ||
+    !ts.isIdentifier(returnCall.arguments[0]) ||
+    returnCall.arguments[0].text !== "steps"
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Single-pass CI must validate its exact constructed plan unconditionally before returning it.",
+    );
+  }
+}
+
+function assertCiSuccessorDefaultGateBinding(defaultGateFunction, mainFunction) {
+  const parameter = defaultGateFunction.parameters[0];
+  const statements = defaultGateFunction.body?.statements;
+  const returned = statements?.[0];
+  const call =
+    returned && ts.isReturnStatement(returned) && ts.isCallExpression(returned.expression)
+      ? returned.expression
+      : undefined;
+  const optionsObject = call?.arguments[0];
+  const properties = ts.isObjectLiteralExpression(optionsObject) ? optionsObject.properties : [];
+  const spread = properties[0];
+  const steps = properties[1];
+  const stepsInitializer = steps && ts.isPropertyAssignment(steps) ? steps.initializer : undefined;
+  const isExported = defaultGateFunction.modifiers?.some(
+    ({ kind }) => kind === ts.SyntaxKind.ExportKeyword,
+  );
+
+  if (
+    !isExported ||
+    defaultGateFunction.parameters.length !== 1 ||
+    !ts.isIdentifier(parameter?.name) ||
+    parameter.name.text !== "options" ||
+    statements?.length !== 1 ||
+    call === undefined ||
+    !ts.isIdentifier(call.expression) ||
+    call.expression.text !== "executeQualityGate" ||
+    call.arguments.length !== 1 ||
+    !ts.isObjectLiteralExpression(optionsObject) ||
+    properties.length !== 2 ||
+    !ts.isSpreadAssignment(spread) ||
+    !ts.isIdentifier(spread.expression) ||
+    spread.expression.text !== "options" ||
+    !ts.isIdentifier(steps?.name) ||
+    steps.name.text !== "steps" ||
+    !ts.isCallExpression(stepsInitializer) ||
+    !ts.isIdentifier(stepsInitializer.expression) ||
+    stepsInitializer.expression.text !== "createQualityGateSteps" ||
+    stepsInitializer.arguments.length !== 0
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Default CI execution must place its own validated plan after all caller options.",
+    );
+  }
+
+  const tryStatements = mainFunction.body?.statements.filter((statement) =>
+    ts.isTryStatement(statement),
+  );
+  const directReceiptAssignments = (tryStatements ?? []).flatMap((tryStatement) =>
+    tryStatement.tryBlock.statements.filter((statement) => {
+      if (!ts.isExpressionStatement(statement) || !ts.isBinaryExpression(statement.expression)) {
+        return false;
+      }
+      const assignment = statement.expression;
+      const awaited = assignment.right;
+      const defaultCall =
+        ts.isAwaitExpression(awaited) && ts.isCallExpression(awaited.expression)
+          ? awaited.expression
+          : undefined;
+      const callOptions = defaultCall?.arguments[0];
+      const optionNames = ts.isObjectLiteralExpression(callOptions)
+        ? callOptions.properties.map((property) => {
+            if (ts.isSpreadAssignment(property)) return "...";
+            if (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) {
+              return property.name.text;
+            }
+            return "";
+          })
+        : [];
+      return (
+        assignment.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+        ts.isIdentifier(assignment.left) &&
+        assignment.left.text === "receipt" &&
+        defaultCall !== undefined &&
+        ts.isIdentifier(defaultCall.expression) &&
+        defaultCall.expression.text === "executeDefaultQualityGate" &&
+        defaultCall.arguments.length === 1 &&
+        JSON.stringify(optionNames) === JSON.stringify(["runStep", "assertCanContinue"])
+      );
+    }),
+  );
+  let defaultReferences = 0;
+  let forbiddenExecutionReferences = 0;
+  let forbiddenPlanReferences = 0;
+  let returnStatements = 0;
+  function visitMain(node) {
+    if (node !== mainFunction && ts.isFunctionLike(node)) return;
+    if (ts.isReturnStatement(node)) returnStatements += 1;
+    if (ts.isIdentifier(node)) {
+      if (node.text === "executeDefaultQualityGate") defaultReferences += 1;
+      if (node.text === "executeQualityGate") forbiddenExecutionReferences += 1;
+      if (node.text === "createQualityGateSteps") forbiddenPlanReferences += 1;
+    }
+    ts.forEachChild(node, visitMain);
+  }
+  visitMain(mainFunction);
+  if (
+    directReceiptAssignments.length !== 1 ||
+    defaultReferences !== 1 ||
+    forbiddenExecutionReferences !== 0 ||
+    forbiddenPlanReferences !== 0 ||
+    returnStatements !== 0
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "CI main must reach one direct awaited validated default-plan execution.",
+      {
+        directReceiptAssignments: directReceiptAssignments.length,
+        defaultReferences,
+        forbiddenExecutionReferences,
+        forbiddenPlanReferences,
+        returnStatements,
+      },
+    );
+  }
+}
+
+function ciSuccessorClaims(ciSourceText) {
+  const sourceFile = ts.createSourceFile(
+    CI_SOURCE,
+    ciSourceText,
+    ts.ScriptTarget.ESNext,
+    true,
+    ts.ScriptKind.JS,
+  );
+  if (sourceFile.parseDiagnostics.length > 0) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The single-pass CI source no longer parses.",
+    );
+  }
+
+  const proofDeclarations = [];
+  const planDeclarations = [];
+  const createStepsFunctions = [];
+  const defaultGateFunctions = [];
+  const mainFunctions = [];
+  function visit(node) {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+      if (node.name.text === "PROOF_ENTRIES") proofDeclarations.push(node);
+      if (node.name.text === "QUALITY_GATE_PLAN_SHA256") planDeclarations.push(node);
+    }
+    if (ts.isFunctionDeclaration(node) && node.name?.text === "createQualityGateSteps") {
+      createStepsFunctions.push(node);
+    }
+    if (ts.isFunctionDeclaration(node) && node.name?.text === "executeDefaultQualityGate") {
+      defaultGateFunctions.push(node);
+    }
+    if (ts.isFunctionDeclaration(node) && node.name?.text === "main") {
+      mainFunctions.push(node);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  assertNoCiSuccessorAuthorityRebinding(sourceFile);
+
+  const proofInitializer =
+    proofDeclarations.length === 1 ? proofDeclarations[0].initializer : undefined;
+  const planInitializer =
+    planDeclarations.length === 1 ? planDeclarations[0].initializer : undefined;
+  const frozenInventory =
+    proofInitializer !== undefined &&
+    ts.isCallExpression(proofInitializer) &&
+    ts.isPropertyAccessExpression(proofInitializer.expression) &&
+    ts.isIdentifier(proofInitializer.expression.expression) &&
+    proofInitializer.expression.expression.text === "Object" &&
+    proofInitializer.expression.name.text === "freeze" &&
+    proofInitializer.arguments.length === 1
+      ? proofInitializer.arguments[0]
+      : undefined;
+  const mappedCall =
+    frozenInventory !== undefined &&
+    ts.isCallExpression(frozenInventory) &&
+    ts.isPropertyAccessExpression(frozenInventory.expression) &&
+    frozenInventory.expression.name.text === "map"
+      ? frozenInventory
+      : undefined;
+  const mappedInventory = mappedCall === undefined ? undefined : mappedCall.expression.expression;
+  const tupleProjection =
+    mappedCall !== undefined && mappedCall.arguments.length === 1
+      ? mappedCall.arguments[0]
+      : undefined;
+  const projectionParameter =
+    tupleProjection !== undefined &&
+    ts.isArrowFunction(tupleProjection) &&
+    tupleProjection.parameters.length === 1
+      ? tupleProjection.parameters[0]
+      : undefined;
+  const projectionBindings =
+    projectionParameter !== undefined && ts.isArrayBindingPattern(projectionParameter.name)
+      ? projectionParameter.name.elements.map((element) =>
+          ts.isBindingElement(element) &&
+          element.dotDotDotToken === undefined &&
+          element.initializer === undefined &&
+          ts.isIdentifier(element.name)
+            ? element.name.text
+            : undefined,
+        )
+      : undefined;
+  const projectionBody =
+    tupleProjection !== undefined && ts.isArrowFunction(tupleProjection)
+      ? tupleProjection.body
+      : undefined;
+  const projectionObject =
+    projectionBody !== undefined &&
+    ts.isCallExpression(projectionBody) &&
+    ts.isPropertyAccessExpression(projectionBody.expression) &&
+    ts.isIdentifier(projectionBody.expression.expression) &&
+    projectionBody.expression.expression.text === "Object" &&
+    projectionBody.expression.name.text === "freeze" &&
+    projectionBody.arguments.length === 1
+      ? projectionBody.arguments[0]
+      : undefined;
+  const projectionProperties = ts.isObjectLiteralExpression(projectionObject)
+    ? projectionObject.properties.map((property) =>
+        ts.isShorthandPropertyAssignment(property) ? property.name.text : undefined,
+      )
+    : undefined;
+  if (
+    !ts.isArrayLiteralExpression(mappedInventory) ||
+    JSON.stringify(projectionBindings) !== JSON.stringify(["id", "verifierFile", "rootTestFile"]) ||
+    JSON.stringify(projectionProperties) !==
+      JSON.stringify(["id", "verifierFile", "rootTestFile"]) ||
+    !ts.isStringLiteral(planInitializer) ||
+    !/^[0-9a-f]{64}$/u.test(planInitializer.text) ||
+    createStepsFunctions.length !== 1 ||
+    createStepsFunctions[0].body === undefined ||
+    defaultGateFunctions.length !== 1 ||
+    defaultGateFunctions[0].body === undefined ||
+    mainFunctions.length !== 1 ||
+    mainFunctions[0].body === undefined
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The single-pass CI inventory or reviewed plan authority changed shape.",
+    );
+  }
+  assertDirectCiSuccessorPlanValidation(createStepsFunctions[0]);
+  assertCiSuccessorDefaultGateBinding(defaultGateFunctions[0], mainFunctions[0]);
+
+  const entries = mappedInventory.elements.map((element) => {
+    if (
+      !ts.isArrayLiteralExpression(element) ||
+      element.elements.length !== 3 ||
+      !element.elements.every((field) => ts.isStringLiteral(field))
+    ) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The single-pass CI contains a nonliteral proof tuple.",
+      );
+    }
+    return Object.freeze({
+      id: element.elements[0].text,
+      verifierFile: element.elements[1].text,
+      rootTestFile: element.elements[2].text,
+    });
+  });
+  const t11Indexes = entries.flatMap(({ id }, index) =>
+    id === "publisher-invalid-source-matrix" ? [index] : [],
+  );
+  const m07T01Indexes = entries.flatMap(({ id }, index) =>
+    id === "control-plane-bundle-store" ? [index] : [],
+  );
+  const t11 = t11Indexes.length === 1 ? entries[t11Indexes[0]] : undefined;
+  const m07T01 = m07T01Indexes.length === 1 ? entries[m07T01Indexes[0]] : undefined;
+  const prefixSha256 = sha256(
+    Buffer.from(
+      JSON.stringify(
+        entries.slice(0, CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries),
+      ),
+      "utf8",
+    ),
+  );
+  if (
+    entries.length < CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries ||
+    t11Indexes.length !== 1 ||
+    m07T01Indexes.length !== 1 ||
+    t11Indexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t11Index ||
+    m07T01Indexes[0] !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.m07T01Index ||
+    m07T01Indexes[0] !== t11Indexes[0] + 1 ||
+    t11?.verifierFile !== "scripts/verify-publisher-invalid-source-matrix.mjs" ||
+    t11?.rootTestFile !== "tests/publisher-invalid-source-matrix.test.mjs" ||
+    m07T01?.verifierFile !== "scripts/verify-control-plane-bundle-store.mjs" ||
+    m07T01?.rootTestFile !== "tests/control-plane-bundle-store.test.mjs" ||
+    prefixSha256 !== CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.prefixSha256
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The exact append-only T11 to M07-T01 CI prefix changed.",
+      { t11Indexes, m07T01Indexes, prefixSha256 },
+    );
+  }
+  for (const field of ["id", "verifierFile", "rootTestFile"]) {
+    const values = entries.map((entry) => entry[field]);
+    if (new Set(values).size !== values.length) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The append-only CI suffix contains duplicate proof authority.",
+        { field },
+      );
+    }
+  }
+
+  const createStepsText = createStepsFunctions[0].body.getText(sourceFile);
+  if (
+    (createStepsText.match(/\bPROOF_ENTRIES\b/gu) ?? []).length !== 2 ||
+    (createStepsText.match(/\bvalidateQualityGatePlan\s*\(/gu) ?? []).length !== 1
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The single-pass CI no longer maps both proof phases through one plan validation.",
+    );
+  }
+  return Object.freeze({
+    entries: Object.freeze(entries),
+    planSha256: planInitializer.text,
+    proofEntries: entries.length,
+    stepCount: 8 + entries.length * 2,
+  });
+}
+
+const CI_SUCCESSOR_RECEIPT_KEYS = new Set(["planSha256", "proofEntries", "stepCount"]);
+const DETACHED_CI_SUCCESSOR_PROBE_PREFIX = "DESEN_T11_CANDIDATE_CI_PLAN:";
+const DETACHED_CI_SUCCESSOR_PROBE_SOURCE = [
+  "const candidate = await import(process.argv[2]);",
+  "const steps = candidate.createQualityGateSteps();",
+  "const validation = candidate.validateQualityGatePlan(steps);",
+  "const payload = JSON.stringify({ entries: candidate.PROOF_ENTRIES, steps, validation });",
+  `process.stdout.write(${JSON.stringify(DETACHED_CI_SUCCESSOR_PROBE_PREFIX)} + Buffer.from(payload, "utf8").toString("base64"));`,
+].join("\n");
+
+function validateCiSuccessorReceipt(receipt, expected) {
+  if (
+    !exactPlainRecord(receipt, CI_SUCCESSOR_RECEIPT_KEYS) ||
+    ownData(receipt, "planSha256") !== expected.planSha256 ||
+    ownData(receipt, "proofEntries") !== expected.proofEntries ||
+    ownData(receipt, "stepCount") !== expected.stepCount
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The executable CI receipt does not match the authenticated append-only inventory.",
+    );
+  }
+  return Object.freeze({
+    planSha256: ownData(receipt, "planSha256"),
+    proofEntries: ownData(receipt, "proofEntries"),
+    stepCount: ownData(receipt, "stepCount"),
+  });
+}
+
+function validateDetachedCiSuccessorPlan(candidate, expected) {
+  const candidateKeys = new Set(["entries", "steps", "validation"]);
+  const validationKeys = new Set(["planSha256", "stepCount"]);
+  const stepKeys = new Set(["args", "command", "id", "label"]);
+  if (
+    !exactPlainRecord(candidate, candidateKeys) ||
+    !Array.isArray(candidate.entries) ||
+    !Array.isArray(candidate.steps) ||
+    !exactPlainRecord(candidate.validation, validationKeys) ||
+    JSON.stringify(candidate.entries) !== JSON.stringify(expected.entries)
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI candidate returned a malformed or mismatched executable-plan receipt.",
+    );
+  }
+  if (
+    !candidate.steps.every(
+      (step) =>
+        exactPlainRecord(step, stepKeys) &&
+        typeof step.id === "string" &&
+        typeof step.label === "string" &&
+        typeof step.command === "string" &&
+        Array.isArray(step.args) &&
+        step.args.every((argument) => typeof argument === "string"),
+    )
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI candidate produced a malformed executable step.",
+    );
+  }
+
+  const actualVerifierSteps = candidate.steps
+    .filter(({ id }) => id.startsWith("verify-"))
+    .map(({ id, command, args }) => `${id}\0${command}\0${args.join("\0")}`);
+  const expectedVerifierSteps = expected.entries.map(
+    ({ id, verifierFile }) => `verify-${id}\0node\0${verifierFile}`,
+  );
+  const actualRootTestSteps = candidate.steps
+    .filter(({ id }) => id.startsWith("test-"))
+    .map(({ id, command, args }) => `${id}\0${command}\0${args.join("\0")}`);
+  const expectedRootTestSteps = expected.entries.map(
+    ({ id, rootTestFile }) => `test-${id}\0node\0--test\0--test-concurrency=1\0${rootTestFile}`,
+  );
+  const normalizedPlan = candidate.steps.map(({ id, command, args }) => ({
+    id,
+    command,
+    args,
+  }));
+  const independentlyCalculatedPlanSha256 = sha256(
+    Buffer.from(JSON.stringify(normalizedPlan), "utf8"),
+  );
+  if (
+    JSON.stringify(actualVerifierSteps) !== JSON.stringify(expectedVerifierSteps) ||
+    JSON.stringify(actualRootTestSteps) !== JSON.stringify(expectedRootTestSteps) ||
+    candidate.steps.length !== expected.stepCount ||
+    ownData(candidate.validation, "stepCount") !== candidate.steps.length ||
+    ownData(candidate.validation, "planSha256") !== independentlyCalculatedPlanSha256 ||
+    independentlyCalculatedPlanSha256 !== expected.planSha256
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI candidate does not commit and execute the exact append-only proof plan.",
+    );
+  }
+
+  return Object.freeze({
+    planSha256: independentlyCalculatedPlanSha256,
+    proofEntries: expected.entries.length,
+    stepCount: candidate.steps.length,
+  });
+}
+
+function detachedCiInventoryPath(relativePath, kind) {
+  const pattern =
+    kind === "verifier" ? /^scripts\/verify-[a-z0-9-]+\.mjs$/u : /^tests\/[a-z0-9-]+\.test\.mjs$/u;
+  if (typeof relativePath !== "string" || !pattern.test(relativePath)) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      `Detached CI ${kind} inventory contains an unsafe path.`,
+      { relativePath },
+    );
+  }
+  return relativePath;
+}
+
+async function writeAuthenticatedDetachedCiFile(filePath, bytes, label, mode = 0o600) {
+  await writeFile(filePath, bytes, { flag: "wx", mode });
+  const authenticated = await readRegularAbsoluteBytes(
+    filePath,
+    "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+    label,
+  );
+  if (!byteEqual(Buffer.from(bytes), authenticated)) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      `${label} bytes changed while the detached CI workspace was prepared.`,
+    );
+  }
+}
+
+async function createDetachedCiShadowWorkspace(
+  generatedDirectory,
+  ciSourceBytes,
+  rootPackageBytes,
+  expected,
+) {
+  const workspaceRoot = path.join(generatedDirectory, "workspace");
+  await mkdir(workspaceRoot, { mode: 0o700 });
+  for (const directory of ["apps", "packages", "scripts", "tests"]) {
+    await mkdir(path.join(workspaceRoot, directory), { mode: 0o700 });
+  }
+
+  await writeAuthenticatedDetachedCiFile(
+    path.join(workspaceRoot, ROOT_PACKAGE),
+    rootPackageBytes,
+    "Detached CI root package manifest",
+  );
+  await writeAuthenticatedDetachedCiFile(
+    path.join(workspaceRoot, "pnpm-workspace.yaml"),
+    await readRegularBytes("pnpm-workspace.yaml"),
+    "Detached CI workspace manifest",
+  );
+
+  for (const workspaceDirectory of ["apps", "packages"]) {
+    const actualDirectory = path.join(ROOT, workspaceDirectory);
+    const entries = await readdir(actualDirectory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const manifestPath = path.join(actualDirectory, entry.name, "package.json");
+      let manifestStats;
+      try {
+        manifestStats = await lstat(manifestPath);
+      } catch (error) {
+        if (error?.code === "ENOENT") continue;
+        throw error;
+      }
+      if (!manifestStats.isFile() || manifestStats.isSymbolicLink()) {
+        fail(
+          "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+          "Detached CI encountered a non-regular workspace package manifest.",
+          { workspaceDirectory, packageDirectory: entry.name },
+        );
+      }
+      const shadowPackageDirectory = path.join(workspaceRoot, workspaceDirectory, entry.name);
+      await mkdir(shadowPackageDirectory, { mode: 0o700 });
+      await writeAuthenticatedDetachedCiFile(
+        path.join(shadowPackageDirectory, "package.json"),
+        await readRegularAbsoluteBytes(
+          manifestPath,
+          "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+          "Detached CI workspace package manifest",
+          { workspaceDirectory, packageDirectory: entry.name },
+        ),
+        "Detached CI shadow package manifest",
+      );
+    }
+  }
+
+  for (const entry of expected.entries) {
+    const verifierFile = detachedCiInventoryPath(entry.verifierFile, "verifier");
+    const rootTestFile = detachedCiInventoryPath(entry.rootTestFile, "root test");
+    await writeAuthenticatedDetachedCiFile(
+      path.join(workspaceRoot, verifierFile),
+      Buffer.alloc(0),
+      "Detached CI verifier inventory placeholder",
+    );
+    await writeAuthenticatedDetachedCiFile(
+      path.join(workspaceRoot, rootTestFile),
+      Buffer.alloc(0),
+      "Detached CI root-test inventory placeholder",
+    );
+  }
+
+  const candidatePath = path.join(workspaceRoot, CI_SOURCE);
+  await writeAuthenticatedDetachedCiFile(
+    candidatePath,
+    ciSourceBytes,
+    "Detached single-pass CI candidate",
+  );
+  const canonicalCandidatePath = await realpath(candidatePath);
+  if (canonicalCandidatePath !== candidatePath) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached single-pass CI candidate must not resolve through a path alias.",
+    );
+  }
+  return Object.freeze({ candidatePath, canonicalCandidatePath, workspaceRoot });
+}
+
+function createDetachedCiEntrypointWrapper(command, logPath, nodePath) {
+  const gitArguments = ["ls-files", "--stage", "-z"];
+  const gitRecord = `100644 ${"0".repeat(40)} 0\tpackage.json\0`;
+  return [
+    `#!${nodePath} --allow-fs-write=${logPath}`,
+    '"use strict";',
+    'const fs = require("node:fs");',
+    `const logPath = ${JSON.stringify(logPath)};`,
+    `const command = ${JSON.stringify(command)};`,
+    "const args = process.argv.slice(2);",
+    'const bytes = Buffer.from(`${JSON.stringify({ command, args })}\\n`, "utf8");',
+    "const descriptor = fs.openSync(",
+    "  logPath,",
+    "  fs.constants.O_WRONLY | fs.constants.O_APPEND | (fs.constants.O_NOFOLLOW ?? 0),",
+    ");",
+    "try {",
+    "  let offset = 0;",
+    "  while (offset < bytes.byteLength) {",
+    "    offset += fs.writeSync(descriptor, bytes, offset, bytes.byteLength - offset);",
+    "  }",
+    "} finally {",
+    "  fs.closeSync(descriptor);",
+    "}",
+    ...(command === "git"
+      ? [
+          `if (JSON.stringify(args) !== ${JSON.stringify(JSON.stringify(gitArguments))}) {`,
+          "  process.exit(64);",
+          "}",
+          `process.stdout.write(Buffer.from(${JSON.stringify(gitRecord)}, "utf8"));`,
+        ]
+      : []),
+    "",
+  ].join("\n");
+}
+
+function parseDetachedCiEntrypointReceipt(stdout, expectedSteps, expectedProofCount) {
+  const receiptStart = stdout.lastIndexOf('\n{\n  "status":');
+  if (receiptStart < 0) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI CLI entrypoint did not print its terminal receipt.",
+    );
+  }
+  const receipt = parseJson(
+    stdout.slice(receiptStart + 1),
+    "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+    "Detached CI CLI entrypoint receipt",
+  );
+  const expectedSectionIds = ["frozen-inventory", ...expectedSteps.map(({ id }) => id)];
+  const sectionKeys = new Set(["duration", "id", "status"]);
+  const actualSectionIds = Array.isArray(receipt.sections)
+    ? receipt.sections.map((section) =>
+        exactPlainRecord(section, sectionKeys) && section.status === "PASS"
+          ? section.id
+          : undefined,
+      )
+    : [];
+  if (
+    !exactPlainRecord(
+      receipt,
+      new Set(["duration", "proofs", "revision", "sections", "status", "trackedFiles"]),
+    ) ||
+    receipt.status !== "PASS" ||
+    receipt.proofs !== expectedProofCount ||
+    receipt.trackedFiles !== 1 ||
+    JSON.stringify(actualSectionIds) !== JSON.stringify(expectedSectionIds)
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI CLI entrypoint did not complete the exact validated default plan.",
+      {
+        status: receipt?.status,
+        proofCount: receipt?.proofs,
+        sectionIds: actualSectionIds,
+      },
+    );
+  }
+}
+
+async function executeDetachedCiEntrypoint(
+  shadow,
+  generatedDirectory,
+  authenticatedSourceBytes,
+  expectedSteps,
+  expectedProofCount,
+) {
+  if (process.platform === "win32") {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI CLI entrypoint probe requires POSIX executable wrappers.",
+    );
+  }
+  const inheritedPath = process.env.PATH;
+  if (typeof inheritedPath !== "string" || inheritedPath.length === 0) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI CLI entrypoint probe requires the reviewed host executable path.",
+    );
+  }
+  const nodePath = await realpath(process.execPath);
+  const logPath = path.join(generatedDirectory, "commands.log");
+  if (/\s/u.test(nodePath) || /\s/u.test(logPath)) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI CLI entrypoint probe requires whitespace-free executable and log paths.",
+      { logPath, nodePath },
+    );
+  }
+
+  await writeAuthenticatedDetachedCiFile(logPath, Buffer.alloc(0), "Detached CI CLI command log");
+  const wrapperBytesByPath = new Map();
+  for (const command of ["git", "node", "pnpm"]) {
+    const wrapperPath = path.join(generatedDirectory, command);
+    const wrapperBytes = Buffer.from(
+      createDetachedCiEntrypointWrapper(command, logPath, nodePath),
+      "utf8",
+    );
+    await writeAuthenticatedDetachedCiFile(
+      wrapperPath,
+      wrapperBytes,
+      "Detached CI CLI executable wrapper",
+      0o700,
+    );
+    await chmod(wrapperPath, 0o700);
+    const wrapperStats = await lstat(wrapperPath);
+    if (
+      !wrapperStats.isFile() ||
+      wrapperStats.isSymbolicLink() ||
+      wrapperStats.nlink !== 1 ||
+      (wrapperStats.mode & 0o111) === 0
+    ) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "Detached CI CLI wrapper must be one private executable regular file.",
+        { command, links: wrapperStats.nlink },
+      );
+    }
+    wrapperBytesByPath.set(wrapperPath, wrapperBytes);
+  }
+
+  let stdout;
+  let stderr;
+  let executionError;
+  try {
+    const childEnvironment = {
+      ...process.env,
+      GITHUB_ACTIONS: "false",
+      NODE_NO_WARNINGS: "1",
+      NODE_OPTIONS: "",
+      NO_COLOR: "1",
+      PATH: `${generatedDirectory}${path.delimiter}${inheritedPath}`,
+    };
+    delete childEnvironment.GITHUB_STEP_SUMMARY;
+    delete childEnvironment.NODE_PATH;
+    ({ stdout, stderr } = await execFileAsync(
+      process.execPath,
+      [
+        "--max-old-space-size=128",
+        "--no-warnings",
+        "--permission",
+        `--allow-fs-read=${shadow.workspaceRoot}`,
+        `--allow-fs-read=${generatedDirectory}`,
+        "--allow-child-process",
+        shadow.canonicalCandidatePath,
+      ],
+      {
+        cwd: shadow.workspaceRoot,
+        detached: false,
+        encoding: "utf8",
+        env: childEnvironment,
+        killSignal: "SIGKILL",
+        maxBuffer: DETACHED_CI_ENTRYPOINT_OUTPUT_LIMIT_BYTES,
+        timeout: DETACHED_CI_ENTRYPOINT_TIMEOUT_MILLISECONDS,
+      },
+    ));
+  } catch (error) {
+    executionError = error;
+  }
+
+  const sourceAfter = await readRegularAbsoluteBytes(
+    shadow.candidatePath,
+    "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+    "Detached single-pass CI candidate",
+  );
+  if (!byteEqual(authenticatedSourceBytes, sourceAfter)) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached CI source bytes changed while its real CLI entrypoint was observed.",
+    );
+  }
+  for (const [wrapperPath, expectedBytes] of wrapperBytesByPath) {
+    const actualBytes = await readRegularAbsoluteBytes(
+      wrapperPath,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached CI CLI executable wrapper",
+    );
+    if (!byteEqual(expectedBytes, actualBytes)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "Detached CI CLI wrapper bytes changed during execution.",
+        { wrapperPath },
+      );
+    }
+  }
+  const logStats = await lstat(logPath);
+  if (
+    !logStats.isFile() ||
+    logStats.isSymbolicLink() ||
+    logStats.size > DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached CI CLI command log exceeded its authenticated bounded-file profile.",
+      { actualBytes: logStats.size, maximumBytes: DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES },
+    );
+  }
+  const logBytes = await readRegularAbsoluteBytes(
+    logPath,
+    "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+    "Detached CI CLI command log",
+  );
+
+  if (executionError !== undefined) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI source could not execute its real CLI entrypoint.",
+      {
+        exitCode:
+          typeof executionError === "object" &&
+          executionError !== null &&
+          Object.hasOwn(executionError, "code")
+            ? String(executionError.code)
+            : "unknown",
+        signal:
+          typeof executionError === "object" &&
+          executionError !== null &&
+          Object.hasOwn(executionError, "signal")
+            ? String(executionError.signal)
+            : "none",
+      },
+    );
+  }
+  if (typeof stdout !== "string" || typeof stderr !== "string" || stderr !== "") {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI CLI entrypoint emitted an unexpected process stream.",
+    );
+  }
+
+  const logText = decodeUtf8(
+    logBytes,
+    "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+    "Detached CI CLI command log",
+  );
+  const lines = logText.endsWith("\n") ? logText.slice(0, -1).split("\n") : [];
+  const actualCommands = lines.map((line) =>
+    parseJson(
+      line,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached CI CLI command record",
+    ),
+  );
+  const gitCommand = Object.freeze({
+    command: "git",
+    args: Object.freeze(["ls-files", "--stage", "-z"]),
+  });
+  const expectedCommands = [
+    gitCommand,
+    ...expectedSteps.map(({ command, args }) => ({ command, args: [...args] })),
+    gitCommand,
+  ];
+  const commandKeys = new Set(["args", "command"]);
+  const recordsAreExact = actualCommands.every(
+    (record) =>
+      exactPlainRecord(record, commandKeys) &&
+      ["git", "node", "pnpm"].includes(record.command) &&
+      Array.isArray(record.args) &&
+      record.args.every((argument) => typeof argument === "string"),
+  );
+  if (
+    lines.some((line) => line.length === 0) ||
+    !recordsAreExact ||
+    JSON.stringify(actualCommands) !== JSON.stringify(expectedCommands)
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "The detached CI CLI entrypoint did not spawn every validated plan command exactly once.",
+      { actualCount: actualCommands.length, expectedCount: expectedCommands.length },
+    );
+  }
+  parseDetachedCiEntrypointReceipt(stdout, expectedSteps, expectedProofCount);
+}
+
+async function executeDetachedCiSuccessorProbe(ciSourceBytes, rootPackageBytes, expected) {
+  const generatedTemporaryDirectory = await mkdtemp(
+    path.join(os.tmpdir(), "desen-t11-ci-candidate-"),
+  );
+  const generatedDirectory = await realpath(generatedTemporaryDirectory);
+  try {
+    const shadow = await createDetachedCiShadowWorkspace(
+      generatedDirectory,
+      ciSourceBytes,
+      rootPackageBytes,
+      expected,
+    );
+    const authenticatedBytes = await readRegularAbsoluteBytes(
+      shadow.canonicalCandidatePath,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached single-pass CI candidate",
+    );
+    if (!byteEqual(ciSourceBytes, authenticatedBytes)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "Detached single-pass CI candidate bytes changed before executable observation.",
+      );
+    }
+
+    const candidateUrl = pathToFileURL(shadow.canonicalCandidatePath);
+    candidateUrl.searchParams.set("desen-proof-sha256", sha256(authenticatedBytes));
+    let stdout;
+    try {
+      ({ stdout } = await execFileAsync(
+        process.execPath,
+        [
+          "--max-old-space-size=128",
+          "--permission",
+          `--allow-fs-read=${shadow.canonicalCandidatePath}`,
+          "--input-type=module",
+          "--eval",
+          DETACHED_CI_SUCCESSOR_PROBE_SOURCE,
+          "desen-t11-ci-plan-probe",
+          candidateUrl.href,
+        ],
+        {
+          cwd: ROOT,
+          detached: process.platform !== "win32",
+          encoding: "utf8",
+          env: {},
+          maxBuffer: 1_048_576,
+          timeout: 5_000,
+        },
+      ));
+    } catch (error) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The detached CI candidate could not derive and validate its executable plan.",
+        {
+          exitCode:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "code")
+              ? String(error.code)
+              : "unknown",
+          signal:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "signal")
+              ? String(error.signal)
+              : "none",
+        },
+      );
+    }
+
+    const afterBytes = await readRegularAbsoluteBytes(
+      shadow.canonicalCandidatePath,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached single-pass CI candidate",
+    );
+    if (!byteEqual(authenticatedBytes, afterBytes)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "Detached single-pass CI candidate bytes changed during executable observation.",
+      );
+    }
+    if (typeof stdout !== "string" || !stdout.startsWith(DETACHED_CI_SUCCESSOR_PROBE_PREFIX)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The detached CI candidate did not return one isolated executable plan.",
+      );
+    }
+    const encoded = stdout.slice(DETACHED_CI_SUCCESSOR_PROBE_PREFIX.length);
+    if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(encoded)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The detached CI candidate returned a malformed executable-plan receipt.",
+      );
+    }
+    const candidate = parseJson(
+      Buffer.from(encoded, "base64").toString("utf8"),
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Detached CI candidate executable-plan receipt",
+    );
+    const receipt = validateDetachedCiSuccessorPlan(candidate, expected);
+    await executeDetachedCiEntrypoint(
+      shadow,
+      generatedDirectory,
+      authenticatedBytes,
+      candidate.steps,
+      expected.entries.length,
+    );
+    return receipt;
+  } finally {
+    await rm(generatedTemporaryDirectory, { recursive: true, force: true });
+  }
+}
+
+let cachedCiSuccessorReceipt;
+
+async function executeLiveCiSuccessorProbe(expectedBytes) {
+  const cacheKey = sha256(expectedBytes);
+  if (cachedCiSuccessorReceipt?.key === cacheKey) return cachedCiSuccessorReceipt.promise;
+  const promise = (async () => {
+    const ciPath = path.join(ROOT, CI_SOURCE);
+    const before = await readRegularAbsoluteBytes(
+      ciPath,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Single-pass CI executable source",
+      { relativePath: CI_SOURCE },
+    );
+    if (!byteEqual(before, expectedBytes)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The executable CI source differs from the authenticated tracked bytes.",
+      );
+    }
+    const ciUrl = pathToFileURL(ciPath);
+    ciUrl.searchParams.set("desen-proof-sha256", cacheKey);
+    const probe = [
+      `const ci = await import(${JSON.stringify(ciUrl.href)});`,
+      "const steps = ci.createQualityGateSteps();",
+      "const validation = ci.validateQualityGatePlan(steps);",
+      "process.stdout.write(JSON.stringify({",
+      "  planSha256: validation.planSha256,",
+      "  proofEntries: ci.PROOF_ENTRIES.length,",
+      "  stepCount: validation.stepCount,",
+      "}));",
+    ].join("\n");
+    let stdout;
+    let stderr;
+    try {
+      ({ stdout, stderr } = await execFileAsync(
+        process.execPath,
+        [
+          "--max-old-space-size=128",
+          "--permission",
+          `--allow-fs-read=${ciPath}`,
+          "--input-type=module",
+          "--eval",
+          probe,
+        ],
+        {
+          cwd: ROOT,
+          encoding: "utf8",
+          env: { NODE_NO_WARNINGS: "1" },
+          maxBuffer: 1_048_576,
+          timeout: 10_000,
+        },
+      ));
+    } catch (error) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The authenticated CI source could not derive and validate its executable plan.",
+        {
+          exitCode:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "code")
+              ? String(error.code)
+              : "unknown",
+        },
+      );
+    }
+    const after = await readRegularAbsoluteBytes(
+      ciPath,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Single-pass CI executable source",
+      { relativePath: CI_SOURCE },
+    );
+    if (!byteEqual(before, after) || stderr !== "") {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The authenticated CI source changed during observation or emitted unexpected stderr.",
+      );
+    }
+    return parseJson(
+      stdout,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "Single-pass CI executable receipt",
+    );
+  })();
+  cachedCiSuccessorReceipt = Object.freeze({ key: cacheKey, promise });
+  try {
+    return await promise;
+  } catch (error) {
+    if (cachedCiSuccessorReceipt?.promise === promise) cachedCiSuccessorReceipt = undefined;
+    throw error;
+  }
+}
+
+function assertImmediateSingleRootScriptEdge(script, predecessor, current, label) {
+  if (typeof script !== "string") {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      `${label} aggregate script is missing.`,
+    );
+  }
+  const commands = script.split(" && ").map((command) => command.trim());
+  const predecessorIndexes = commands.flatMap((command, index) =>
+    command === predecessor ? [index] : [],
+  );
+  const currentIndexes = commands.flatMap((command, index) => (command === current ? [index] : []));
+  if (
+    predecessorIndexes.length !== 1 ||
+    currentIndexes.length !== 1 ||
+    currentIndexes[0] !== predecessorIndexes[0] + 1
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      `${label} must retain one exact immediate predecessor to successor edge.`,
+      { predecessorIndexes, currentIndexes },
+    );
+  }
+}
+
+async function successorSurfaceClaims(bytesByPath, text, options, ciOverridden) {
   const rootManifest = parseJson(
     text(ROOT_PACKAGE, "Workspace package manifest"),
     "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
@@ -1730,12 +3218,23 @@ function successorSurfaceClaims(bytesByPath, text) {
   );
   const rootScripts = ownData(rootManifest, "scripts");
   const publisherScripts = ownData(publisherManifest, "scripts");
+  assertCurrentT09CompatibilityMarkers(
+    text(BUNDLE_PUBLICATION_PROOF_LIBRARY, "Current T09 compatibility reader"),
+    text(BUNDLE_PUBLICATION_ROOT_TEST, "Current T09 compatibility regression suite"),
+  );
   const predecessor =
     "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && ";
   const expectedRootScripts = Object.freeze({
     "generate:publisher-invalid-source-matrix": `${predecessor}node scripts/generate-publisher-invalid-source-matrix-proof.mjs`,
     "verify:publisher-invalid-source-matrix": `${predecessor}node scripts/verify-publisher-invalid-source-matrix.mjs`,
     "test:publisher-invalid-source-matrix": `${predecessor}node --test tests/publisher-invalid-source-matrix.test.mjs`,
+  });
+  const bundleStorePredecessor =
+    "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && ";
+  const expectedBundleStoreRootScripts = Object.freeze({
+    "generate:control-plane-bundle-store": `${bundleStorePredecessor}node scripts/generate-control-plane-bundle-store-proof.mjs`,
+    "verify:control-plane-bundle-store": `${bundleStorePredecessor}node scripts/verify-control-plane-bundle-store.mjs`,
+    "test:control-plane-bundle-store": `${bundleStorePredecessor}node --test tests/control-plane-bundle-store.test.mjs`,
   });
   if (
     typeof rootScripts !== "object" ||
@@ -1745,51 +3244,74 @@ function successorSurfaceClaims(bytesByPath, text) {
     Object.entries(expectedRootScripts).some(
       ([name, command]) => ownData(rootScripts, name) !== command,
     ) ||
-    ownData(publisherScripts, "test:invalid-source-matrix") !==
-      "vitest run test/invalid-source-matrix.test.ts" ||
-    !String(ownData(rootScripts, "test")).includes(
-      "pnpm test:publisher-official-golden && pnpm test:publisher-invalid-source-matrix",
+    Object.entries(expectedBundleStoreRootScripts).some(
+      ([name, command]) => ownData(rootScripts, name) !== command,
     ) ||
-    !String(ownData(rootScripts, "check")).includes(
-      "pnpm verify:publisher-official-golden && pnpm verify:publisher-invalid-source-matrix",
-    )
+    ownData(publisherScripts, "test:invalid-source-matrix") !==
+      "vitest run test/invalid-source-matrix.test.ts"
   ) {
     fail(
       "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
-      "The exact immediate M06-T10 to M06-T11 package registration changed.",
+      "The exact M06-T10 to M06-T11 to M07-T01 package registration changed.",
     );
   }
+  assertImmediateSingleRootScriptEdge(
+    ownData(rootScripts, "test"),
+    "pnpm test:publisher-official-golden",
+    "pnpm test:publisher-invalid-source-matrix",
+    "Aggregate test T11 edge",
+  );
+  assertImmediateSingleRootScriptEdge(
+    ownData(rootScripts, "check"),
+    "pnpm verify:publisher-official-golden",
+    "pnpm verify:publisher-invalid-source-matrix",
+    "Aggregate check T11 edge",
+  );
+  assertImmediateSingleRootScriptEdge(
+    ownData(rootScripts, "test"),
+    "pnpm test:publisher-invalid-source-matrix",
+    "pnpm test:control-plane-bundle-store",
+    "Aggregate test M07-T01 edge",
+  );
+  assertImmediateSingleRootScriptEdge(
+    ownData(rootScripts, "check"),
+    "pnpm verify:publisher-invalid-source-matrix",
+    "pnpm verify:control-plane-bundle-store",
+    "Aggregate check M07-T01 edge",
+  );
 
   const ciSourceText = text(CI_SOURCE, "Single-pass quality-gate source");
-  const exactCiEdge =
-    /\[\s*"publisher-official-golden",\s*"scripts\/verify-publisher-official-golden\.mjs",\s*"tests\/publisher-official-golden\.test\.mjs",?\s*\]\s*,?\s*\[\s*"publisher-invalid-source-matrix",\s*"scripts\/verify-publisher-invalid-source-matrix\.mjs",\s*"tests\/publisher-invalid-source-matrix\.test\.mjs",?\s*\]/gu;
-  if (
-    [...ciSourceText.matchAll(exactCiEdge)].length !== 1 ||
-    !ciSourceText.includes(
-      'const QUALITY_GATE_PLAN_SHA256 = "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea";',
-    )
-  ) {
-    fail(
-      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
-      "The exact immediate M06-T10 to M06-T11 single-pass CI edge changed.",
-    );
+  const ciClaims = ciSuccessorClaims(ciSourceText);
+  const observedCiReceipt = ciOverridden
+    ? await executeDetachedCiSuccessorProbe(
+        bytesByPath.get(CI_SOURCE),
+        bytesByPath.get(ROOT_PACKAGE),
+        ciClaims,
+      )
+    : await executeLiveCiSuccessorProbe(bytesByPath.get(CI_SOURCE));
+  validateCiSuccessorReceipt(observedCiReceipt, ciClaims);
+  if (ciOverridden && options.ciReceipt !== undefined) {
+    validateCiSuccessorReceipt(options.ciReceipt, ciClaims);
   }
 
   const requiredFragments = new Map([
     [
       CI_TEST,
       [
-        "proofCount: 60",
-        "stepCount: 128",
-        'planSha256: "9523b667ef872826ab706357d7e9c39b4a4ecbd9806b621893577eb972feb2ea"',
+        'test("the current repository exactly matches the frozen proof inventory"',
+        'test("the exact single-pass plan rejects command removal and duplicate root coverage"',
       ],
     ],
     [
       CATALOG_PINNING_PROOF_LIBRARY,
       [
+        "CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE",
         '"publisher-invalid-source-matrix"',
+        '"control-plane-bundle-store"',
         '"scripts/verify-publisher-invalid-source-matrix.mjs"',
+        '"scripts/verify-control-plane-bundle-store.mjs"',
         '"tests/publisher-invalid-source-matrix.test.mjs"',
+        '"tests/control-plane-bundle-store.test.mjs"',
         '"test:invalid-source-matrix"',
       ],
     ],
@@ -1798,12 +3320,16 @@ function successorSurfaceClaims(bytesByPath, text) {
       [
         'test("rejects removal of the exact T11 CI successor"',
         'test("rejects exact T11 package registration drift"',
+        'test("rejects removal of the exact M07-T01 CI successor"',
+        'test("rejects exact M07-T01 root registration drift"',
       ],
     ],
     [
       BUNDLE_PUBLICATION_PROOF_LIBRARY,
       [
+        "CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE",
         "INVALID_SOURCE_MATRIX_SUCCESSOR_CI_PROFILE",
+        '"scripts/verify-control-plane-bundle-store.mjs"',
         '"scripts/verify-publisher-invalid-source-matrix.mjs"',
         '"test:invalid-source-matrix"',
       ],
@@ -1813,6 +3339,8 @@ function successorSurfaceClaims(bytesByPath, text) {
       [
         'test("[ci] rejects removal of the exact T11 CI successor"',
         'test("[ci] rejects exact T11 package registration drift"',
+        'test("[ci] rejects removal of the exact M07-T01 CI successor"',
+        'test("[ci] rejects exact M07-T01 root registration drift"',
       ],
     ],
     [
@@ -1891,24 +3419,9 @@ function successorSurfaceClaims(bytesByPath, text) {
   }
 
   return Object.freeze(
-    PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_SURFACES.map((pin) => {
-      const bytes = bytesByPath.get(pin.path);
-      const actualSha256 = sha256(bytes);
-      if (bytes.byteLength !== pin.bytes || actualSha256 !== pin.sha256) {
-        fail(
-          "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
-          "An exact current M06-T11 successor surface changed.",
-          {
-            path: pin.path,
-            actualBytes: bytes.byteLength,
-            actualSha256,
-            expectedBytes: pin.bytes,
-            expectedSha256: pin.sha256,
-          },
-        );
-      }
-      return Object.freeze({ ...pin, verifiedSha256: actualSha256 });
-    }),
+    PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_SURFACES.map((pin) =>
+      Object.freeze({ ...pin, verifiedSha256: pin.sha256 }),
+    ),
   );
 }
 
@@ -2622,16 +4135,17 @@ async function executeProgrammaticRuntimeProbe(programBytes) {
 }
 
 async function buildFromOptions(options) {
+  const liveCurrentT09Successors = await authenticateLiveCurrentT09Successors();
   const prerequisites = await prerequisiteClaims(options);
   const trackedPairs = await Promise.all(
     TRACKED.map(async (relativePath) => {
-      const bytes =
-        readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET) ??
-        (await readRegularBytes(relativePath));
-      return Object.freeze({ relativePath, bytes });
+      const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+      const bytes = override ?? (await readRegularBytes(relativePath));
+      return Object.freeze({ relativePath, bytes, overridden: override !== undefined });
     }),
   );
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
+  authenticateCurrentT09TrackedInputs(liveCurrentT09Successors, trackedPairs, options);
   const text = (relativePath, label) =>
     decodeUtf8(
       bytesByPath.get(relativePath),
@@ -2661,7 +4175,13 @@ async function buildFromOptions(options) {
   );
   const traceText = text(TRACEABILITY, "Traceability authority");
   const traceability = traceClaims(traceText);
-  const successorAuthority = successorSurfaceClaims(bytesByPath, text);
+  const ciTrackedPair = trackedPairs.find(({ relativePath }) => relativePath === CI_SOURCE);
+  const successorAuthority = await successorSurfaceClaims(
+    bytesByPath,
+    text,
+    options,
+    ciTrackedPair?.overridden === true,
+  );
   const packageTestText = text(PACKAGE_TEST, "Focused Publisher invalid-source test");
   const packageTests = packageTestClaims(packageTestText, bytesByPath.get(PACKAGE_TEST));
   const taskApplicability = taskApplicabilityClaims(traceText, packageTests.caseInventory);
@@ -2689,6 +4209,9 @@ async function buildFromOptions(options) {
     rootTestNames.length < 32 ||
     requiredRootCategories.some(
       (category) => !rootTestNames.some((testName) => testName.startsWith(category)),
+    ) ||
+    REQUIRED_M07_T01_SUCCESSOR_ROOT_TEST_NAMES.some(
+      (requiredName) => !rootTestNames.includes(requiredName),
     )
   ) {
     fail(
@@ -2698,13 +4221,23 @@ async function buildFromOptions(options) {
     );
   }
   const trackedFiles = Object.freeze(
-    trackedPairs.map(({ relativePath, bytes }) =>
-      Object.freeze({
+    trackedPairs.map(({ relativePath, bytes, overridden }) => {
+      const currentT09HistoricalReceipt =
+        relativePath === BUNDLE_PUBLICATION_PROOF_LIBRARY ||
+        relativePath === BUNDLE_PUBLICATION_ROOT_TEST
+          ? HISTORICAL_TRACKED_RECEIPTS[relativePath]
+          : undefined;
+      const historical =
+        currentT09HistoricalReceipt ??
+        (overridden === false || [CI_SOURCE, ROOT_PACKAGE].includes(relativePath)
+          ? HISTORICAL_TRACKED_RECEIPTS[relativePath]
+          : undefined);
+      return SAFE_OBJECT_FREEZE({
         path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
-    ),
+        bytes: historical?.bytes ?? bytes.byteLength,
+        sha256: historical?.sha256 ?? sha256(bytes),
+      });
+    }),
   );
   const artifact = deepFreeze({
     schemaVersion: 1,
@@ -2740,7 +4273,7 @@ async function buildFromOptions(options) {
       focusedPackageCases: packageTests.exactNames.length,
       focusedRuntimeCases: runtime.claim.focusedRuntimeTests,
       invalidMatrixCases: packageTests.caseInventory.length,
-      rootMutationCases: rootTestNames.length,
+      rootMutationCases: HISTORICAL_ROOT_MUTATION_CASES,
       requiredRootCategories,
     },
     nonclaims: [

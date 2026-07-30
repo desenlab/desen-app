@@ -1,0 +1,520 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.control-plane.bundle-store-proof.v1",
+  "task": "M07-T01",
+  "result": "PASS",
+  "summary": "Exact Bundle bytes are persisted once under one revision with no-clobber, retry-safe, fail-closed local POSIX semantics.",
+  "prerequisites": [
+    {
+      "task": "M06-T11",
+      "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+      "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8",
+      "verifiedSha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+    },
+    {
+      "task": "M06-T10",
+      "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+      "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+      "verifiedSha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+    },
+    {
+      "task": "M02-T04",
+      "path": "docs/proof/artifacts/protocol-0.1.0-canonicalization.json",
+      "sha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6",
+      "verifiedSha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6"
+    },
+    {
+      "task": "M04-T01",
+      "path": "docs/proof/artifacts/runtime-core-0.1.0-host-ports.json",
+      "sha256": "5a53cfc9698339a2e9da72c496c1b204e0da138da3d3c1efdc1fe0b5c0e4f190",
+      "verifiedSha256": "5a53cfc9698339a2e9da72c496c1b204e0da138da3d3c1efdc1fe0b5c0e4f190"
+    }
+  ],
+  "claims": {
+    "officialBundle": {
+      "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+      "canonicalBytes": 2173,
+      "canonicalSha256": "fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247"
+    },
+    "address": {
+      "algorithm": "sha256",
+      "layout": "bundles/sha256/<first-2-hex>/<remaining-62-hex>.bundle",
+      "officialRelativePath": "bundles/sha256/43/eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601.bundle",
+      "callerPathsAccepted": false
+    },
+    "publicBoundary": {
+      "requiredRuntimeExports": ["BundleStoreError", "openBundleStore"],
+      "requiredTypeExports": [
+        "BundleStore",
+        "BundleStoreEntry",
+        "BundleStoreErrorCode",
+        "BundleStorePutResult",
+        "BundleStoreReadResult",
+        "OpenBundleStoreOptions"
+      ],
+      "storeMethods": ["getBundle", "putBundle"],
+      "storeFrozen": true,
+      "testFaultSeamPublic": false,
+      "errorCodes": [
+        "COMMIT_OUTCOME_INDETERMINATE",
+        "INVALID_ENTRY",
+        "INVALID_REVISION",
+        "INVALID_ROOT_DIRECTORY",
+        "STORAGE_IO_FAILURE",
+        "UNSAFE_STORAGE_PATH"
+      ]
+    },
+    "immutableWrite": {
+      "commitPrimitive": "same-directory POSIX hard-link with existing-destination failure",
+      "implementationAuthority": {
+        "noClobberCommit": "putNewEntry:await link(temporary.path, finalPath)",
+        "parentDurability": "establishShardParentDurability:await syncDirectory(authority.algorithm)",
+        "byteBrand": "captureBytes:tag !== \"Uint8Array\"",
+        "singleLinkRead": "readRegularFile:before.nlink !== 1n"
+      },
+      "inputSnapshotBeforeAsyncWork": true,
+      "initialWrite": "stored",
+      "reopenedRead": "found",
+      "exactReopenedBytes": true,
+      "byteIdenticalRetry": "unchanged",
+      "retryPreservedInode": true,
+      "retryPreservedMtime": true,
+      "publicationOnlyChange": "conflict",
+      "conflictPreservedWinner": true,
+      "storedFileMode": 256,
+      "storedFileLinks": 1,
+      "temporaryArtifactsAfterSuccess": 0
+    },
+    "publicationProjectionBoundary": {
+      "sameProtocolRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+      "differentExactBytes": 2230,
+      "differentExactSha256": "9a8b6e540f69c1bf2ae10d3c4db5c538114db28a45608c8430fe818d6a0955be",
+      "outcome": "conflict"
+    },
+    "concurrency": {
+      "equalWriters": { "writers": 8, "stored": 1, "unchanged": 7, "conflict": 0 },
+      "divergentWriters": { "statuses": ["conflict", "stored"], "completeWinner": true }
+    },
+    "readIsolation": { "freshCopies": true, "resultsFrozen": true },
+    "historicalCompatibility": {
+      "currentReaderPaths": [
+        "scripts/lib/reference-host-web-source-audit-proof.mjs",
+        "tests/reference-host-web-source-audit.test.mjs",
+        "scripts/lib/publisher-publish-result-proof.mjs",
+        "tests/publisher-publish-result.test.mjs",
+        "scripts/lib/publisher-execution-preflight-proof.mjs",
+        "tests/publisher-execution-preflight.test.mjs",
+        "scripts/lib/publisher-catalog-pinning-proof.mjs",
+        "tests/publisher-catalog-pinning.test.mjs",
+        "scripts/lib/publisher-bundle-publication-proof.mjs",
+        "tests/publisher-bundle-publication.test.mjs",
+        "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+        "tests/publisher-invalid-source-matrix.test.mjs"
+      ],
+      "historicalArtifactsRewritten": false
+    },
+    "registrations": {
+      "app": {
+        "name": "@desen/control-plane-api",
+        "main": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "exportKeys": ["."],
+        "exports": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+        "packageTest": "vitest run test/bundle-store.test.ts",
+        "protocolDependency": "workspace:*"
+      },
+      "rootScripts": {
+        "generate": "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/generate-control-plane-bundle-store-proof.mjs",
+        "verify": "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/verify-control-plane-bundle-store.mjs",
+        "test": "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node --test tests/control-plane-bundle-store.test.mjs"
+      },
+      "aggregateImmediatePredecessor": "publisher-invalid-source-matrix",
+      "aggregateSuccessorExtensionSafe": true,
+      "ci": {
+        "id": "control-plane-bundle-store",
+        "verifierFile": "scripts/verify-control-plane-bundle-store.mjs",
+        "rootTestFile": "tests/control-plane-bundle-store.test.mjs",
+        "tupleExact": true
+      },
+      "publicSourceExports": {
+        "inventory": [
+          {
+            "imported": "BundleStoreError",
+            "exported": "BundleStoreError",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": false
+          },
+          {
+            "imported": "openBundleStore",
+            "exported": "openBundleStore",
+            "module": "./bundle-store.js",
+            "typeOnly": false
+          },
+          {
+            "imported": "BundleStore",
+            "exported": "BundleStore",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "imported": "BundleStoreEntry",
+            "exported": "BundleStoreEntry",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "imported": "BundleStoreErrorCode",
+            "exported": "BundleStoreErrorCode",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "imported": "BundleStorePutResult",
+            "exported": "BundleStorePutResult",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "imported": "BundleStoreReadResult",
+            "exported": "BundleStoreReadResult",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "imported": "OpenBundleStoreOptions",
+            "exported": "OpenBundleStoreOptions",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          }
+        ],
+        "requiredRuntime": ["BundleStoreError", "openBundleStore"],
+        "requiredTypes": [
+          "BundleStore",
+          "BundleStoreEntry",
+          "BundleStoreErrorCode",
+          "BundleStorePutResult",
+          "BundleStoreReadResult",
+          "OpenBundleStoreOptions"
+        ],
+        "internalFactoryAbsent": true
+      }
+    },
+    "traceRows": [
+      {
+        "id": "PIPE-005",
+        "section": "6.3",
+        "line": 300,
+        "anchor": "emits and stores a Published Design Bundle",
+        "summary": "Lifecycle step 5: emit and store an immutable bundle",
+        "owners": ["M06-T09", "M07-T01"],
+        "tests": ["M06-T10", "M07-T10"],
+        "evidence": "Golden bundle is content-addressed and immutable"
+      },
+      {
+        "id": "PIPE-009",
+        "section": "24.1",
+        "line": 1304,
+        "anchor": "fetch or receive the immutable bundle",
+        "summary": "Activation step 1: receive immutable bundle",
+        "owners": ["M07-T01", "M07-T11"],
+        "tests": ["M07-T09"],
+        "evidence": "Fetch failure preserves the durable active record"
+      },
+      {
+        "id": "R-012",
+        "section": "6.1.2",
+        "line": 274,
+        "anchor": "immutable production representation",
+        "summary": "A bundle is immutable production data with exact package and reproducible digest information",
+        "owners": ["M06-T09", "M07-T01"],
+        "tests": ["M06-T10", "M07-T10"],
+        "evidence": "Golden bundle and content-addressed storage enforce artifact identity"
+      },
+      {
+        "id": "R-125",
+        "section": "28.2",
+        "line": 1510,
+        "anchor": "revision artifact itself never changes",
+        "summary": "Bundles and packages are content-addressed immutable artifacts while channels alone are mutable",
+        "owners": ["M03-T10", "M07-T01", "M07-T05"],
+        "tests": ["M03-T10", "M07-T10"],
+        "evidence": "Mutation attempts fail and channel updates point to new immutable revisions"
+      },
+      {
+        "id": "A-007",
+        "section": "Appendix A",
+        "line": 1840,
+        "anchor": "Immutable revisions",
+        "summary": "Bundle revisions and package digests never change associated content",
+        "owners": ["M03-T10", "M07-T01"],
+        "tests": ["M03-T10", "M07-T10"],
+        "evidence": "Content-addressed immutability tests"
+      }
+    ]
+  },
+  "trackedFiles": [
+    {
+      "path": "apps/control-plane-api/package.json",
+      "bytes": 861,
+      "sha256": "470ad074376d5c6835d977cccccb364d5387c2749d63060fdb10045000304c6f"
+    },
+    {
+      "path": "apps/control-plane-api/src/index.ts",
+      "bytes": 413,
+      "sha256": "37f02d98716ecb6ff84c57c0c388959a43f4ae499eddc5bcbd9b34b85c59cdee"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-store-contract.ts",
+      "bytes": 4345,
+      "sha256": "e67b72e4d856922d484ffd7df41702e6581344eab91104c8a1b5c1d04236d858"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-store-internal.ts",
+      "bytes": 27817,
+      "sha256": "27492c6e3a924cd59d5c9df401c75b9f2c00ebe9cb72b6b217df170dd42d84db"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-store.ts",
+      "bytes": 831,
+      "sha256": "d9a82872d3a15b1aa40d8cbe8766f73ac40323d82c2316e44f5f36d911f5a4e1"
+    },
+    {
+      "path": "apps/control-plane-api/test/bundle-store.test.ts",
+      "bytes": 23003,
+      "sha256": "f18207386ea189fc2bc4925b7295c498bb3dc7d1a02c5e173ab64c2ea039ed55"
+    },
+    {
+      "path": "apps/control-plane-api/test/bundle-store.types.ts",
+      "bytes": 1221,
+      "sha256": "0c4e38cd9904240bca6768e21b4b689d57e304ce5bed2297c23e22faaf713531"
+    },
+    {
+      "path": "scripts/generate-control-plane-bundle-store-proof.mjs",
+      "bytes": 821,
+      "sha256": "01cbdfd10d9ed68180dd6b761d83f80988e51fb3dab957573e57499fbea9d5d2"
+    },
+    {
+      "path": "scripts/verify-control-plane-bundle-store.mjs",
+      "bytes": 657,
+      "sha256": "5be52c2f7a122b89c95f8de48c23bdec2d2da5ebc9d817641853b3135a30cd9e"
+    },
+    {
+      "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+      "bytes": 73090,
+      "sha256": "761dc922a9609510e154c87ad535f7af69b8b4822ef8b01c92109f99c37551a0"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/control-plane-bundle-store.test.mjs",
+      "bytes": 25988,
+      "sha256": "b6898c681aa03735d4ff92ad1f9c54106cbe39d15140b288ba96142f253a3190"
+    },
+    {
+      "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+      "bytes": 242844,
+      "sha256": "ebe063da6cc2eed7138e5d052ec096c75bed43e83ef7c7d3b48a6064432ba046"
+    },
+    {
+      "path": "tests/reference-host-web-source-audit.test.mjs",
+      "bytes": 80313,
+      "sha256": "95cc3667f9e512476eb71152f69c10391447f8bcbfe17c6f3c2eb77dda7ac2e2"
+    },
+    {
+      "path": "scripts/lib/publisher-publish-result-proof.mjs",
+      "bytes": 57168,
+      "sha256": "932d16f093247b5cbfadc5ccbe0e60c7cf6b5ddcf55fa8c0b28d1aedc2a8d6a8"
+    },
+    {
+      "path": "tests/publisher-publish-result.test.mjs",
+      "bytes": 18129,
+      "sha256": "87f8c5cf1977c1c3b12c05626c5c7c60a65907a7afdaf7cdcb7aee590ec562b8"
+    },
+    {
+      "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+      "bytes": 70038,
+      "sha256": "29332971e7a9c0e45e66d145c073dbd1a3b1b7d29dfa021a03a917e6b539a69d"
+    },
+    {
+      "path": "tests/publisher-execution-preflight.test.mjs",
+      "bytes": 17284,
+      "sha256": "0dbe37fefa1fccd4efbba954aa8a7e29e15cdfa3a2e2cb9453aa3d423ff35b23"
+    },
+    {
+      "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+      "bytes": 102413,
+      "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+    },
+    {
+      "path": "tests/publisher-catalog-pinning.test.mjs",
+      "bytes": 38486,
+      "sha256": "17c2ab84f2171857c32276e329f989a6e54178f7efab4cb74c9945c1ab5f09f9"
+    },
+    {
+      "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+      "bytes": 133811,
+      "sha256": "9eb7b300a1239e5be3324c24b39e0107d02cd14587b977310d162c4812a3e645"
+    },
+    {
+      "path": "tests/publisher-bundle-publication.test.mjs",
+      "bytes": 62216,
+      "sha256": "34190a6f9304ce85acbb5809d4b1422b621d7089300f89eb9d6863839d220060"
+    },
+    {
+      "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+      "bytes": 159364,
+      "sha256": "f8cacd9c94899eaa80582c570aa8a2bee4a1beedabdc4f28679d7b33dc72827b"
+    },
+    {
+      "path": "tests/publisher-invalid-source-matrix.test.mjs",
+      "bytes": 59559,
+      "sha256": "178081b9b084c87ae1849b7464efa657900b46c166ab50638c5600168bc5c721"
+    }
+  ],
+  "distribution": [
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-contract.d.ts",
+      "bytes": 3537,
+      "sha256": "ce006551785b8d2ed0f19aa1922e3d7968ad2f3462067d249b8fa7fb5a14cbf2"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-contract.d.ts.map",
+      "bytes": 1325,
+      "sha256": "33d4b6de951cd52db258c1a94dd62804a676b2bf12e39aee61d58345db8110a3"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-contract.js",
+      "bytes": 1382,
+      "sha256": "383d391b5faaabdde068faad94e411585f3f9a2fa5ce59cb8ee3570592310b3f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-contract.js.map",
+      "bytes": 599,
+      "sha256": "bbc2d94a1c0d6b714c7a3dc9a4baf8ab564be75c973dd73974150681c6afed23"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-internal.d.ts",
+      "bytes": 62,
+      "sha256": "66c67c8ee0f0f00f5d99a6d34ee87e69207146d82ff1d95aad6c007e828c5cda"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-internal.d.ts.map",
+      "bytes": 136,
+      "sha256": "d177af924fee36886d1d43c70ed7b054d6329ffd67624438a3ec87d23f60a7b4"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-internal.js",
+      "bytes": 25762,
+      "sha256": "e0bff41ad5993381f6bc441bf5da444ef011b7dbf07b2c55e209cbbd7f4769d6"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-internal.js.map",
+      "bytes": 24612,
+      "sha256": "1dfbec59dc92fb81f3121393a935255fbdf679a6ded295aae4e28b4600237f0e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store.d.ts",
+      "bytes": 763,
+      "sha256": "9bb752459c145031a76c4b742eae6a08a9cc1c322f9722d73a0c035355b44427"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store.d.ts.map",
+      "bytes": 264,
+      "sha256": "80dde8a1e65b9e215cab37ad2fb748c44aa1bde2700b457d6ac52618244ab59e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store.js",
+      "bytes": 738,
+      "sha256": "7a24e88d5b711f845a7b5596696c3d5b231d81bab1180c739e742084d5113597"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store.js.map",
+      "bytes": 257,
+      "sha256": "7dd9c141af04ebce744e8b1f8e574f21ea18a62b82885025ee2a3d8f983c281f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts",
+      "bytes": 434,
+      "sha256": "03badce6c5e86dd75faae3bd2e228251d9274e4bf0f01025abde47e1159fa2a0"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts.map",
+      "bytes": 311,
+      "sha256": "6764987cf45e3a78fd66f4b93eab8cad2a8e17d2e10742835519e2489e748c70"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js",
+      "bytes": 259,
+      "sha256": "c99e708f4e15b6ae676f7641998d8253de4351240dd2828b8d005adc148be78f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js.map",
+      "bytes": 201,
+      "sha256": "22a49bfe8d231504f570884637df1f65fe8adfc0d4db49d02a13a85654d4ba87"
+    }
+  ],
+  "tests": {
+    "packageRuntimeCases": 18,
+    "packageRuntimeCaseNames": [
+      "stores the public Publisher golden exactly and reads it from a fresh store instance",
+      "returns unchanged for byte-identical content without rewriting the inode",
+      "reports exact-byte conflicts, including publication-only changes, without replacing the winner",
+      "snapshots an exact Uint8Array view synchronously before the first asynchronous step",
+      "returns a fresh byte copy for every read",
+      "linearizes concurrent byte-identical writes across independent store instances",
+      "uses first-writer-wins for concurrent divergent bytes without producing a mixed file",
+      "keeps the addressed path absent until the complete temporary file is linked",
+      "detects temporary truncation and removes the non-authoritative partial file",
+      "reports a post-link fault as indeterminate while preserving a complete retry-safe entry",
+      "removes the committed temporary alias safely when a reader overlaps the link window",
+      "rejects an unowned hard-link alias instead of accepting mutable revision authority",
+      "rejects final symlinks, directories, and FIFOs without following or replacing them",
+      "rejects a symlinked shard without writing through it",
+      "rejects malformed revision keys before any revision-derived filesystem access",
+      "rejects hostile entry shells, accessors, empty bytes, and shared memory before I/O",
+      "rejects symlinked and hostile root configuration with redacted failures",
+      "exposes only immutable byte storage operations and no channel, activation, list, or delete API"
+    ],
+    "compileTimeNegativeCases": 4,
+    "rootMutationCases": 16,
+    "rootMutationCaseNames": [
+      "[authority] builds the exact versioned M07-T01 artifact and golden receipt",
+      "[determinism] two independent evidence builds produce byte-identical artifacts",
+      "[authority] verifies fresh artifact bytes and one exact proof-document pin",
+      "[artifact] rejects one changed evidence byte",
+      "[proof] rejects pending, wrong, duplicate, or missing final pins",
+      "[prerequisites] rejects one changed byte in every direct prerequisite",
+      "[implementation] rejects no-clobber, durability, or byte-brand source drift",
+      "[registration] rejects package-root, public-export, aggregate, or CI tuple drift",
+      "[traceability] rejects owner or identity drift in all five exact rows",
+      "[runtime] rejects overwrite, alias, copy, concurrency, or public-boundary fake receipts",
+      "[tests] rejects skipped runtime cases or removed compile-time negatives",
+      "[filesystem] rejects symlinked artifact and proof-document authority",
+      "[writer] atomically writes exact deterministic evidence bytes",
+      "[writer] preserves the old destination and removes a tampered temporary",
+      "[options] rejects unknown, accessor-backed, shared-memory, or hostile authority",
+      "[immutability] freezes the evidence graph and preserves honest later-task nonclaims"
+    ]
+  },
+  "nonclaims": [
+    "M07-T02 still owns protocol version, claimed revision, available source digest, and complete Bundle-size verification.",
+    "M07-T03 and M07-T04 still own exact package and capability preflight.",
+    "M07-T05 still owns editable Sources, mutable channel pointers, and the local transport API.",
+    "M07-T06 through M07-T11 still own staging, activation, last-known-good state, crash recovery, fault matrices, and host consumption.",
+    "N-010 remains PLANNED for M07-T03 installed-package verification and M12-T12 packed-distribution evidence; N-019 remains PLANNED for M07-T05 channel/control-plane integration.",
+    "The POSIX profile assumes an application-owned local root; hostile same-UID or privileged mutation and non-POSIX filesystems are outside this task.",
+    "An abrupt pre-link process death may leave an unaddressed temporary; it has no revision authority and maintenance/recovery policy remains later M07 work."
+  ],
+  "reproduction": [
+    "pnpm verify:publisher-invalid-source-matrix",
+    "pnpm --filter @desen/control-plane-api... build",
+    "pnpm --filter @desen/control-plane-api typecheck",
+    "pnpm --filter @desen/control-plane-api test:bundle-store",
+    "node scripts/generate-control-plane-bundle-store-proof.mjs",
+    "node scripts/verify-control-plane-bundle-store.mjs",
+    "node --test tests/control-plane-bundle-store.test.mjs"
+  ]
+}

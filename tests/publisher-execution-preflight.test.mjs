@@ -78,6 +78,149 @@ test("two independent evidence builds are byte-identical and retain stages 8, 9,
 
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.equal(
+    first.artifactSha256,
+    "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67",
+  );
+  const compatibilitySources = [
+    {
+      path: "scripts/lib/reference-host-web-source-audit-proof.mjs",
+      url: new URL("../scripts/lib/reference-host-web-source-audit-proof.mjs", import.meta.url),
+      historicalBytes: 228_873,
+      historicalSha256: "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1",
+    },
+    {
+      path: "tests/reference-host-web-source-audit.test.mjs",
+      url: new URL("./reference-host-web-source-audit.test.mjs", import.meta.url),
+      historicalBytes: 70_344,
+      historicalSha256: "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f",
+    },
+  ];
+  for (const [index, compatibilitySource] of compatibilitySources.entries()) {
+    const currentBytes = await readFile(compatibilitySource.url);
+    const approved = await buildPublisherExecutionPreflightEvidence({
+      compatibilitySourceBytes: {
+        [compatibilitySource.path]: currentBytes,
+      },
+    });
+    assert.deepEqual(approved.artifactBytes, first.artifactBytes);
+    assert.deepEqual(
+      approved.artifact.trackedFiles.find(
+        ({ path: trackedPath }) => trackedPath === compatibilitySource.path,
+      ),
+      {
+        path: compatibilitySource.path,
+        bytes: compatibilitySource.historicalBytes,
+        sha256: compatibilitySource.historicalSha256,
+      },
+    );
+
+    const oneByteDrift = Buffer.from(currentBytes);
+    oneByteDrift[0] ^= 1;
+    await assert.rejects(
+      buildPublisherExecutionPreflightEvidence({
+        compatibilitySourceBytes: {
+          [compatibilitySource.path]: oneByteDrift,
+        },
+      }),
+      hasCode("PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT"),
+    );
+    await assert.rejects(
+      buildPublisherExecutionPreflightEvidence({
+        compatibilitySourceBytes: {
+          [compatibilitySource.path]: Buffer.concat([
+            currentBytes,
+            Buffer.from("\n// unreviewed successor\n"),
+          ]),
+        },
+      }),
+      hasCode("PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT"),
+    );
+    if (index === 0) {
+      await assert.rejects(
+        verifyPublisherExecutionPreflightEvidence({
+          compatibilitySourceBytes: {
+            [compatibilitySource.path]: currentBytes,
+          },
+        }),
+        hasCode("PUBLISHER_EXECUTION_OPTIONS_INVALID"),
+      );
+      await assert.rejects(
+        writePublisherExecutionPreflightEvidence({
+          compatibilitySourceBytes: {
+            [compatibilitySource.path]: currentBytes,
+          },
+        }),
+        hasCode("PUBLISHER_EXECUTION_OPTIONS_INVALID"),
+      );
+    }
+  }
+
+  const poisonedPath = compatibilitySources[0].path;
+  const approvedBytes = await readFile(compatibilitySources[0].url);
+  const poisonedBytes = Buffer.from(approvedBytes);
+  poisonedBytes[Math.floor(poisonedBytes.byteLength / 2)] ^= 1;
+  const originalMapGet = Map.prototype.get;
+  try {
+    Map.prototype.get = function (key) {
+      if (key === poisonedPath) return approvedBytes;
+      return Reflect.apply(originalMapGet, this, [key]);
+    };
+    await assert.rejects(
+      buildPublisherExecutionPreflightEvidence({
+        compatibilitySourceBytes: { [poisonedPath]: poisonedBytes },
+      }),
+      hasCode("PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT"),
+    );
+  } finally {
+    Map.prototype.get = originalMapGet;
+  }
+
+  const originalObjectCreate = Object.create;
+  let poisonedCreateCalls = 0;
+  try {
+    Object.create = function (prototype, ...arguments_) {
+      if (prototype === null) {
+        poisonedCreateCalls += 1;
+        const injected = originalObjectCreate(null);
+        injected.compatibilitySourceBytes = { [poisonedPath]: approvedBytes };
+        return injected;
+      }
+      return originalObjectCreate(prototype, ...arguments_);
+    };
+    await assert.rejects(
+      verifyPublisherExecutionPreflightEvidence({
+        compatibilitySourceBytes: { [poisonedPath]: poisonedBytes },
+      }),
+      hasCode("PUBLISHER_EXECUTION_OPTIONS_INVALID"),
+    );
+    assert.equal(poisonedCreateCalls, 0);
+  } finally {
+    Object.create = originalObjectCreate;
+  }
+
+  const originalObjectFreeze = Object.freeze;
+  let poisonedFreezeCalls = 0;
+  try {
+    Object.freeze = function (value) {
+      const stack = new Error().stack ?? "";
+      if (stack.includes("captureOptions") || stack.includes("captureCompatibilitySourceBytes")) {
+        poisonedFreezeCalls += 1;
+        return { compatibilitySourceBytes: { [poisonedPath]: approvedBytes } };
+      }
+      return originalObjectFreeze(value);
+    };
+    await assert.rejects(
+      verifyPublisherExecutionPreflightEvidence({
+        compatibilitySourceBytes: { [poisonedPath]: poisonedBytes },
+      }),
+      hasCode("PUBLISHER_EXECUTION_OPTIONS_INVALID"),
+    );
+    assert.equal(poisonedFreezeCalls, 0);
+  } finally {
+    Object.freeze = originalObjectFreeze;
+  }
+
   assert.deepEqual(first.artifact.pipelineOwnership.exactPrecedence, [
     "capability-contracts",
     "state-and-control-flow",

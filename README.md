@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████░░░░░░░░░░░░` **74 / 145 tasks complete (51%)**
+**Overall:** `█████████████░░░░░░░░░░░░` **75 / 145 tasks complete (52%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,7 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**Proof gates:** **7 / 13 complete** · **Next:** `M07-T01`
+**M07:** `█░░░░░░░░░░` **1 / 11 tasks complete (9%)**
+
+**Proof gates:** **7 / 13 complete** · **Next:** `M07-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -30,7 +32,14 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 Source and rejects all 127 reviewed task-owned invalid cases at their exact earliest stage with no
 Bundle or partial authority. The [public invalid-Source proof](docs/proof/PUBLISHER-INVALID-SOURCE-MATRIX.md)
 is pinned by `sha256:fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8`.
-Signing, storage, activation, runtime, and deployment remain later milestones.
+Signing, verified storage ingress, activation, runtime consumption, and deployment remain later
+milestones.
+
+**M07-T01 checkpoint:** the built `@desen/control-plane-api` package now stores the official
+2,173-byte Bundle exactly once under its revision. Identical retries preserve the winner, different
+exact bytes conflict, and concurrent writers cannot replace or mix that winner; unsafe filesystem
+paths fail closed. Integrity verification, channels, activation, last-known-good recovery, and G07
+remain later work.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
@@ -129,6 +138,7 @@ packages/
 - [Publisher complete Bundle publication proof](docs/proof/PUBLISHER-BUNDLE-PUBLICATION.md)
 - [Publisher official Source-to-Bundle golden](docs/proof/PUBLISHER-OFFICIAL-GOLDEN.md)
 - [Publisher public invalid-Source no-Bundle matrix](docs/proof/PUBLISHER-INVALID-SOURCE-MATRIX.md)
+- [Control-plane immutable Bundle-store proof](docs/proof/CONTROL-PLANE-BUNDLE-STORE.md)
 - [Runtime core host-port proof](docs/proof/RUNTIME-CORE-HOST-PORTS.md)
 - [Runtime core value-resolution proof](docs/proof/RUNTIME-CORE-VALUE-RESOLUTION.md)
 - [Runtime core token and format-resolution proof](docs/proof/RUNTIME-CORE-TOKEN-FORMAT-RESOLUTION.md)

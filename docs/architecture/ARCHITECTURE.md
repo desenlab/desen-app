@@ -571,8 +571,55 @@ A small local-first service with three conceptual stores:
 - immutable bundles keyed by revision; and
 - mutable channel pointers such as `preview` or `production-proof`.
 
-Storage details are replaceable through repositories. The proof may begin with SQLite and local
-immutable files; production storage is intentionally deferred.
+M07-T01 realizes only the immutable Bundle repository. Its public boundary accepts an already
+validated, revision-closed `{ revision, bytes }` entry, snapshots the exact nonempty byte view, and
+offers only `putBundle` and `getBundle`. An exact lowercase `sha256:<64 hex>` key maps to
+`bundles/sha256/<first 2 hex>/<remaining 62 hex>.bundle`; callers cannot supply paths or mutable
+aliases. Reads return fresh byte copies, and the API deliberately has no overwrite, delete, list,
+channel, activation, or filesystem-handle authority.
+
+Each revision is first-writer-wins for one exact byte sequence. A write returns `stored`,
+`unchanged` for byte-identical content, or `conflict` for different bytes without replacing the
+winner. Comparison is exact-byte equality, not semantic JSON equality: because DESEN 0.1.0 excludes
+`publication` from its revision projection while requiring immutable bytes under a revision, even
+a publication-only byte change conflicts. Mutable publication metadata therefore belongs outside
+the immutable entry.
+
+The current local POSIX repository requires a pre-existing application-owned root. It writes and
+flushes an exclusive same-directory temporary, changes it to read-only mode, verifies its bytes
+and identity, then uses a no-clobber hard link for the commit point. New store and shard entries are
+flushed through their parent directories. Every writer flushes the algorithm parent and revalidates
+the shard before use, including when a concurrent writer created it first. The writer flushes the
+shard, removes the temporary link, flushes again, and reads the final file back before reporting
+`stored`. Readers accept only a read-only single-link final file and flush the shard before
+returning accepted bytes; an exact owned committed-temporary alias can be removed and flushed
+safely, while an unowned hard link fails closed. Readers consequently observe either a missing
+revision or one complete regular file; concurrent writers cannot replace the first winner or
+publish mixed bytes. Symlinks, non-regular entries, and changed directory/file identities fail
+closed.
+
+Public errors use stable codes and redacted fixed messages. A failure before the hard-link commit
+does not publish the candidate under its revision. Commit-aware cleanup flushes the shard again
+after a post-link failure, which reports `COMMIT_OUTCOME_INDETERMINATE` because the complete entry
+may already be durable; retrying the same revision and bytes is safe and resolves to `unchanged`
+when it did commit.
+
+This profile assumes an absolute, application-owned local root and POSIX hard-link/directory-flush
+semantics. It defends the boundary against unsafe path entries but does not claim protection from a
+hostile same-UID or privileged actor mutating that owned tree between separate Node.js path
+operations. Repository implementations remain replaceable, provided they preserve the same
+no-clobber and durability invariants.
+
+An abrupt process death before the hard-link commit may leave an unaddressed temporary. It has no
+revision authority and is never read as a Bundle; later recovery and maintenance work owns orphan
+lifecycle policy.
+
+The store does not yet verify protocol version, claimed revision, available source digest, Bundle
+size, package identity, references, or limits. M07-T02 through M07-T04 own those checks; M07-T05
+owns editable sources, mutable channels, and the transport API; M07-T06 through M07-T10 own
+staging, transactional activation, last-known-good recovery, and fault behavior; M07-T11 owns
+reference-host channel consumption. A successful M07-T01 write is therefore persistence evidence,
+not integrity or activation authority.
 
 ### DESEN Developer Platform (`desen.run`)
 

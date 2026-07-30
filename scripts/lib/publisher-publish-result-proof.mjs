@@ -178,6 +178,44 @@ const TRACKED_EVIDENCE_PATHS = Object.freeze([
   "tests/publisher-publish-result.test.mjs",
 ]);
 
+/**
+ * Immutable M06-T01 receipts for evidence readers that legitimately evolve after task completion.
+ *
+ * The current M05 reader and root test are authenticated against the reviewed M07-T01 successor
+ * receipts below before these historical records are emitted. The T01 reader and root test cannot
+ * self-authenticate their current bytes without a circular receipt, so M07-T01 externally anchors
+ * their current files while this reader preserves the exact task-time artifact projection.
+ */
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
+    bytes: 228_873,
+    sha256: "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1",
+  }),
+  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
+    bytes: 70_344,
+    sha256: "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f",
+  }),
+  "scripts/lib/publisher-publish-result-proof.mjs": Object.freeze({
+    bytes: 49_227,
+    sha256: "11dd9ea20b2607527a4846296b82a12ae6e754bd35884a9211177d5978591649",
+  }),
+  "tests/publisher-publish-result.test.mjs": Object.freeze({
+    bytes: 14_115,
+    sha256: "fae2e18ee715e2eebd2b261627adcb33786eaa90f4c4e33d145cf666a2b4e076",
+  }),
+});
+
+const REVIEWED_CURRENT_G05_RECEIPTS = Object.freeze({
+  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
+    bytes: 242_844,
+    sha256: "ebe063da6cc2eed7138e5d052ec096c75bed43e83ef7c7d3b48a6064432ba046",
+  }),
+  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
+    bytes: 80_313,
+    sha256: "95cc3667f9e512476eb71152f69c10391447f8bcbfe17c6f3c2eb77dda7ac2e2",
+  }),
+});
+
 const EXPECTED_TEST_INVENTORY = Object.freeze({
   packageTests: 13,
   compilerNegativeCases: 9,
@@ -307,6 +345,154 @@ function exact(actual, expected, code, message) {
 
 function splitScript(script) {
   return typeof script === "string" ? script.split(" && ").map((step) => step.trim()) : [];
+}
+
+const BUILD_OPTION_KEYS = new Set([
+  "baseTsconfig",
+  "canonicalizationText",
+  "compilerTypeSource",
+  "declarationIndexSource",
+  "findingText",
+  "guard",
+  "guideText",
+  "indexSource",
+  "lookup",
+  "packageTestSource",
+  "parser",
+  "pipelineStages",
+  "prerequisiteBytes",
+  "productionSource",
+  "publisherBuildTsconfig",
+  "publisherPackage",
+  "publisherTsconfig",
+  "registry",
+  "rootTestSource",
+  "snapshotRoot",
+  "sourceLimits",
+  "trace",
+  "trackedFileBytes",
+  "verifySnapshot",
+  "workspacePackage",
+]);
+const TRACKED_FILE_OVERRIDE_PATHS = new Set(Object.keys(REVIEWED_CURRENT_G05_RECEIPTS));
+const SAFE_ARRAY_BUFFER_IS_VIEW = ArrayBuffer.isView;
+const SAFE_ARRAY_BUFFER_PROTOTYPE = ArrayBuffer.prototype;
+const SAFE_ARRAY_IS_ARRAY = Array.isArray;
+const SAFE_BUFFER_FROM = Buffer.from.bind(Buffer);
+const SAFE_NUMBER_IS_SAFE_INTEGER = Number.isSafeInteger;
+const SAFE_OBJECT_CREATE = Object.create;
+const SAFE_OBJECT_ENTRIES = Object.entries;
+const SAFE_OBJECT_FREEZE = Object.freeze;
+const SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR = Object.getOwnPropertyDescriptor;
+const SAFE_OBJECT_GET_PROTOTYPE_OF = Object.getPrototypeOf;
+const SAFE_OBJECT_HAS_OWN = Object.hasOwn;
+const SAFE_OBJECT_PROTOTYPE = Object.prototype;
+const SAFE_REFLECT_APPLY = Reflect.apply;
+const SAFE_REFLECT_OWN_KEYS = Reflect.ownKeys;
+const SAFE_UINT8_ARRAY = Uint8Array;
+const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "buffer",
+)?.get;
+const TYPED_ARRAY_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteLength",
+)?.get;
+const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteOffset",
+)?.get;
+const TYPED_ARRAY_TAG_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  Symbol.toStringTag,
+)?.get;
+
+function captureOwnDataRecord(value, allowedKeys, label) {
+  let validRecord = false;
+  try {
+    if (value !== null && typeof value === "object" && !SAFE_ARRAY_IS_ARRAY(value)) {
+      const prototype = SAFE_OBJECT_GET_PROTOTYPE_OF(value);
+      validRecord = prototype === SAFE_OBJECT_PROTOTYPE || prototype === null;
+    }
+  } catch {
+    fail("PUBLISHER_OPTIONS_INVALID", `${label} could not be inspected safely.`);
+  }
+  if (!validRecord) {
+    fail("PUBLISHER_OPTIONS_INVALID", `${label} must be a plain own-data record.`);
+  }
+  let keys;
+  try {
+    keys = SAFE_REFLECT_OWN_KEYS(value);
+  } catch {
+    fail("PUBLISHER_OPTIONS_INVALID", `${label} could not be inspected safely.`);
+  }
+  const captured = SAFE_OBJECT_CREATE(null);
+  for (const key of keys) {
+    if (typeof key !== "string" || !allowedKeys.has(key)) {
+      fail("PUBLISHER_OPTIONS_INVALID", `${label} contains an unsupported field.`);
+    }
+    let descriptor;
+    try {
+      descriptor = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(value, key);
+    } catch {
+      fail("PUBLISHER_OPTIONS_INVALID", `${label} could not be inspected safely.`);
+    }
+    if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+      fail("PUBLISHER_OPTIONS_INVALID", `${label} must contain only enumerable own data.`);
+    }
+    captured[key] = descriptor.value;
+  }
+  return captured;
+}
+
+function captureExactBytes(value, label) {
+  try {
+    if (
+      !SAFE_ARRAY_BUFFER_IS_VIEW(value) ||
+      TYPED_ARRAY_BUFFER_GETTER === undefined ||
+      TYPED_ARRAY_BYTE_LENGTH_GETTER === undefined ||
+      TYPED_ARRAY_BYTE_OFFSET_GETTER === undefined ||
+      TYPED_ARRAY_TAG_GETTER === undefined
+    ) {
+      throw new TypeError();
+    }
+    const tag = SAFE_REFLECT_APPLY(TYPED_ARRAY_TAG_GETTER, value, []);
+    const buffer = SAFE_REFLECT_APPLY(TYPED_ARRAY_BUFFER_GETTER, value, []);
+    const byteLength = SAFE_REFLECT_APPLY(TYPED_ARRAY_BYTE_LENGTH_GETTER, value, []);
+    const byteOffset = SAFE_REFLECT_APPLY(TYPED_ARRAY_BYTE_OFFSET_GETTER, value, []);
+    if (
+      tag !== "Uint8Array" ||
+      SAFE_OBJECT_GET_PROTOTYPE_OF(buffer) !== SAFE_ARRAY_BUFFER_PROTOTYPE ||
+      !SAFE_NUMBER_IS_SAFE_INTEGER(byteLength) ||
+      !SAFE_NUMBER_IS_SAFE_INTEGER(byteOffset) ||
+      byteLength < 0 ||
+      byteOffset < 0
+    ) {
+      throw new TypeError();
+    }
+    return SAFE_BUFFER_FROM(new SAFE_UINT8_ARRAY(buffer, byteOffset, byteLength));
+  } catch {
+    fail("PUBLISHER_OPTIONS_INVALID", `${label} must be exact unshared Uint8Array bytes.`);
+  }
+}
+
+function captureBuildOptions(value) {
+  if (value === undefined) return SAFE_OBJECT_FREEZE(SAFE_OBJECT_CREATE(null));
+  const captured = captureOwnDataRecord(value, BUILD_OPTION_KEYS, "Evidence options");
+  if (captured.trackedFileBytes !== undefined) {
+    const rawOverrides = captureOwnDataRecord(
+      captured.trackedFileBytes,
+      TRACKED_FILE_OVERRIDE_PATHS,
+      "trackedFileBytes",
+    );
+    const overrides = SAFE_OBJECT_CREATE(null);
+    for (const [relativePath, bytes] of SAFE_OBJECT_ENTRIES(rawOverrides)) {
+      overrides[relativePath] = captureExactBytes(bytes, `trackedFileBytes.${relativePath}`);
+    }
+    captured.trackedFileBytes = SAFE_OBJECT_FREEZE(overrides);
+  }
+  return SAFE_OBJECT_FREEZE(captured);
 }
 
 async function readRegularFile(filePath, missingCode, unsafeCode) {
@@ -1072,18 +1258,43 @@ async function readVerifiedProductionSource() {
   return Object.freeze({ files: VERIFIED_PRODUCTION_PATHS, text: texts.join("\n") });
 }
 
-async function trackedFileEvidence() {
+async function trackedFileEvidence(overrides = SAFE_OBJECT_FREEZE(SAFE_OBJECT_CREATE(null))) {
   return Promise.all(
     TRACKED_EVIDENCE_PATHS.map(async (relativePath) => {
-      const bytes = await readRegularFile(
-        path.join(WORKSPACE_ROOT, relativePath),
-        "PUBLISHER_TRACKED_FILE_MISSING",
-        "PUBLISHER_TRACKED_FILE_UNSAFE",
-      );
-      return Object.freeze({
-        path: relativePath,
+      const bytes = SAFE_OBJECT_HAS_OWN(overrides, relativePath)
+        ? SAFE_BUFFER_FROM(overrides[relativePath])
+        : await readRegularFile(
+            path.join(WORKSPACE_ROOT, relativePath),
+            "PUBLISHER_TRACKED_FILE_MISSING",
+            "PUBLISHER_TRACKED_FILE_UNSAFE",
+          );
+      const actual = SAFE_OBJECT_FREEZE({
         bytes: bytes.byteLength,
         sha256: sha256(bytes),
+      });
+      const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
+      const reviewedCurrent = REVIEWED_CURRENT_G05_RECEIPTS[relativePath];
+      if (
+        reviewedCurrent !== undefined &&
+        !isDeepStrictEqual(actual, historical) &&
+        !isDeepStrictEqual(actual, reviewedCurrent)
+      ) {
+        fail(
+          "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
+          "The current G05 compatibility reader differs from every reviewed receipt.",
+          {
+            path: relativePath,
+            actual,
+            expectedSha256: [historical.sha256, reviewedCurrent.sha256],
+          },
+        );
+      }
+      if (historical !== undefined) {
+        return SAFE_OBJECT_FREEZE({ path: relativePath, ...historical });
+      }
+      return SAFE_OBJECT_FREEZE({
+        path: relativePath,
+        ...actual,
       });
     }),
   );
@@ -1137,7 +1348,8 @@ function exactDocumentationPin(text, heading, artifactSha256, code, suffix = "")
 }
 
 /** Builds deterministic M06-T01 evidence in memory. */
-export async function buildPublisherPublishResultEvidence(options = {}) {
+export async function buildPublisherPublishResultEvidence(rawOptions = undefined) {
+  const options = captureBuildOptions(rawOptions);
   if (options.verifySnapshot !== false) {
     await verifyProtocolSnapshot(options.snapshotRoot ?? DEFAULT_SNAPSHOT_ROOT);
   }
@@ -1297,7 +1509,7 @@ export async function buildPublisherPublishResultEvidence(options = {}) {
     },
     evidence: {
       ...testInventory,
-      trackedFiles: await trackedFileEvidence(),
+      trackedFiles: await trackedFileEvidence(options.trackedFileBytes),
       commands: [
         "pnpm verify:publisher-publish-result",
         "pnpm test:publisher-publish-result",

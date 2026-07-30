@@ -48,6 +48,12 @@ bounded inert byte snapshots, proxy rejection, fatal UTF-8 decoding, and no-foll
 reads. The generator accepts no semantic override and commits deterministic bytes through the
 shared same-directory atomic writer.
 
+The current M06-T09 proof reader and root test are read independently from the live worktree and
+must match their exact approved receipts before any caller mutation input is considered. Exact
+tracked candidates are then projected back to their original task-time receipts, preserving this
+frozen T11 artifact and SHA. M07-T01 pins the current T11 reader and root-test bytes, so the
+compatibility chain remains externally anchored without rewriting M06 history.
+
 The isolated runtime authority is itself transport-bounded and checkout-path independent. Its
 generated module is larger than 128 KiB, but zero source bytes enter an executable argument:
 Node receives the module through stdin with a 2 MiB program ceiling, 8 MiB stdout ceiling,

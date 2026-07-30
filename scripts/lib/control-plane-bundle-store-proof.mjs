@@ -1,0 +1,1916 @@
+import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
+import { constants as fileConstants } from "node:fs";
+import {
+  lstat,
+  mkdtemp,
+  open,
+  readFile,
+  readdir,
+  realpath,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { promisify } from "node:util";
+
+import { format } from "prettier";
+import ts from "typescript";
+
+import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json";
+const PROOF_DOCUMENT = "docs/proof/CONTROL-PLANE-BUNDLE-STORE.md";
+const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
+const SOURCE_FIXTURE =
+  "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json";
+const CATALOG_FIXTURE =
+  "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
+const APP_DIRECTORY = "apps/control-plane-api";
+const APP_PACKAGE = `${APP_DIRECTORY}/package.json`;
+const APP_INDEX = `${APP_DIRECTORY}/src/index.ts`;
+const APP_RUNTIME_TEST = `${APP_DIRECTORY}/test/bundle-store.test.ts`;
+const APP_TYPE_TEST = `${APP_DIRECTORY}/test/bundle-store.types.ts`;
+const ROOT_PACKAGE = "package.json";
+const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
+const GENERATOR = "scripts/generate-control-plane-bundle-store-proof.mjs";
+const VERIFIER = "scripts/verify-control-plane-bundle-store.mjs";
+const PROOF_LIBRARY = "scripts/lib/control-plane-bundle-store-proof.mjs";
+const ATOMIC_WRITER = "scripts/lib/atomic-proof-artifact.mjs";
+const ROOT_TEST = "tests/control-plane-bundle-store.test.mjs";
+const HISTORICAL_COMPATIBILITY_READERS = Object.freeze([
+  "scripts/lib/reference-host-web-source-audit-proof.mjs",
+  "tests/reference-host-web-source-audit.test.mjs",
+  "scripts/lib/publisher-publish-result-proof.mjs",
+  "tests/publisher-publish-result.test.mjs",
+  "scripts/lib/publisher-execution-preflight-proof.mjs",
+  "tests/publisher-execution-preflight.test.mjs",
+  "scripts/lib/publisher-catalog-pinning-proof.mjs",
+  "tests/publisher-catalog-pinning.test.mjs",
+  "scripts/lib/publisher-bundle-publication-proof.mjs",
+  "tests/publisher-bundle-publication.test.mjs",
+  "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+  "tests/publisher-invalid-source-matrix.test.mjs",
+]);
+const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
+const READ_FLAGS = fileConstants.O_RDONLY | fileConstants.O_NOFOLLOW | fileConstants.O_NONBLOCK;
+const execFileAsync = promisify(execFile);
+const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "buffer",
+)?.get;
+const TYPED_ARRAY_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteLength",
+)?.get;
+const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  "byteOffset",
+)?.get;
+const TYPED_ARRAY_TAG_GETTER = Object.getOwnPropertyDescriptor(
+  TYPED_ARRAY_PROTOTYPE,
+  Symbol.toStringTag,
+)?.get;
+
+const EXPECTED_REVISION = "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601";
+const EXPECTED_BUNDLE_BYTES = 2_173;
+const EXPECTED_BUNDLE_SHA256 = "fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247";
+const EXPECTED_VARIANT_BYTES = 2_230;
+const EXPECTED_VARIANT_SHA256 = "9a8b6e540f69c1bf2ae10d3c4db5c538114db28a45608c8430fe818d6a0955be";
+const TRACE_IDS = Object.freeze(["PIPE-005", "PIPE-009", "R-012", "R-125", "A-007"]);
+const REQUIRED_ERROR_CODES = Object.freeze([
+  "COMMIT_OUTCOME_INDETERMINATE",
+  "INVALID_ENTRY",
+  "INVALID_REVISION",
+  "INVALID_ROOT_DIRECTORY",
+  "STORAGE_IO_FAILURE",
+  "UNSAFE_STORAGE_PATH",
+]);
+const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
+  "stores the public Publisher golden exactly and reads it from a fresh store instance",
+  "returns unchanged for byte-identical content without rewriting the inode",
+  "reports exact-byte conflicts, including publication-only changes, without replacing the winner",
+  "snapshots an exact Uint8Array view synchronously before the first asynchronous step",
+  "returns a fresh byte copy for every read",
+  "linearizes concurrent byte-identical writes across independent store instances",
+  "uses first-writer-wins for concurrent divergent bytes without producing a mixed file",
+  "keeps the addressed path absent until the complete temporary file is linked",
+  "detects temporary truncation and removes the non-authoritative partial file",
+  "reports a post-link fault as indeterminate while preserving a complete retry-safe entry",
+  "removes the committed temporary alias safely when a reader overlaps the link window",
+  "rejects an unowned hard-link alias instead of accepting mutable revision authority",
+  "rejects final symlinks, directories, and FIFOs without following or replacing them",
+  "rejects a symlinked shard without writing through it",
+  "rejects malformed revision keys before any revision-derived filesystem access",
+  "rejects hostile entry shells, accessors, empty bytes, and shared memory before I/O",
+  "rejects symlinked and hostile root configuration with redacted failures",
+  "exposes only immutable byte storage operations and no channel, activation, list, or delete API",
+]);
+const EXPECTED_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] builds the exact versioned M07-T01 artifact and golden receipt",
+  "[determinism] two independent evidence builds produce byte-identical artifacts",
+  "[authority] verifies fresh artifact bytes and one exact proof-document pin",
+  "[artifact] rejects one changed evidence byte",
+  "[proof] rejects pending, wrong, duplicate, or missing final pins",
+  "[prerequisites] rejects one changed byte in every direct prerequisite",
+  "[implementation] rejects no-clobber, durability, or byte-brand source drift",
+  "[registration] rejects package-root, public-export, aggregate, or CI tuple drift",
+  "[traceability] rejects owner or identity drift in all five exact rows",
+  "[runtime] rejects overwrite, alias, copy, concurrency, or public-boundary fake receipts",
+  "[tests] rejects skipped runtime cases or removed compile-time negatives",
+  "[filesystem] rejects symlinked artifact and proof-document authority",
+  "[writer] atomically writes exact deterministic evidence bytes",
+  "[writer] preserves the old destination and removes a tampered temporary",
+  "[options] rejects unknown, accessor-backed, shared-memory, or hostile authority",
+  "[immutability] freezes the evidence graph and preserves honest later-task nonclaims",
+]);
+const EXPECTED_TYPE_NEGATIVE_CASES = Object.freeze([
+  Object.freeze({
+    directive: "// @ts-expect-error Bundle entries are immutable at the contract boundary.",
+    statement: 'entry.revision = "sha256:mutated";',
+  }),
+  Object.freeze({
+    directive: "// @ts-expect-error Exact bytes must be a Uint8Array view.",
+    statement: 'void store.putBundle({ revision: entry.revision, bytes: "{}" });',
+  }),
+  Object.freeze({
+    directive:
+      "// @ts-expect-error The store deliberately exposes no mutable channel API in M07-T01.",
+    statement: 'void store.setChannel("preview", entry.revision);',
+  }),
+  Object.freeze({
+    directive: "// @ts-expect-error The store deliberately exposes no deletion API.",
+    statement: "void store.deleteBundle(entry.revision);",
+  }),
+]);
+const EXPECTED_PUBLIC_SOURCE_EXPORTS = Object.freeze([
+  Object.freeze({
+    imported: "BundleStoreError",
+    exported: "BundleStoreError",
+    module: "./bundle-store-contract.js",
+    typeOnly: false,
+  }),
+  Object.freeze({
+    imported: "openBundleStore",
+    exported: "openBundleStore",
+    module: "./bundle-store.js",
+    typeOnly: false,
+  }),
+  ...[
+    "BundleStore",
+    "BundleStoreEntry",
+    "BundleStoreErrorCode",
+    "BundleStorePutResult",
+    "BundleStoreReadResult",
+    "OpenBundleStoreOptions",
+  ].map((name) =>
+    Object.freeze({
+      imported: name,
+      exported: name,
+      module: "./bundle-store-contract.js",
+      typeOnly: true,
+    }),
+  ),
+]);
+
+export const CONTROL_PLANE_BUNDLE_STORE_PREREQUISITE_PINS = Object.freeze([
+  Object.freeze({
+    task: "M06-T11",
+    path: "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+    sha256: "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8",
+  }),
+  Object.freeze({
+    task: "M06-T10",
+    path: "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+    sha256: "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+  }),
+  Object.freeze({
+    task: "M02-T04",
+    path: "docs/proof/artifacts/protocol-0.1.0-canonicalization.json",
+    sha256: "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6",
+  }),
+  Object.freeze({
+    task: "M04-T01",
+    path: "docs/proof/artifacts/runtime-core-0.1.0-host-ports.json",
+    sha256: "5a53cfc9698339a2e9da72c496c1b204e0da138da3d3c1efdc1fe0b5c0e4f190",
+  }),
+]);
+
+const TRACKED_TASK_FILES = Object.freeze([
+  APP_PACKAGE,
+  APP_INDEX,
+  `${APP_DIRECTORY}/src/bundle-store-contract.ts`,
+  `${APP_DIRECTORY}/src/bundle-store-internal.ts`,
+  `${APP_DIRECTORY}/src/bundle-store.ts`,
+  APP_RUNTIME_TEST,
+  APP_TYPE_TEST,
+  GENERATOR,
+  VERIFIER,
+  PROOF_LIBRARY,
+  ATOMIC_WRITER,
+  ROOT_TEST,
+  ...HISTORICAL_COMPATIBILITY_READERS,
+]);
+const DISTRIBUTION_FILES = Object.freeze([
+  "bundle-store-contract.d.ts",
+  "bundle-store-contract.d.ts.map",
+  "bundle-store-contract.js",
+  "bundle-store-contract.js.map",
+  "bundle-store-internal.d.ts",
+  "bundle-store-internal.d.ts.map",
+  "bundle-store-internal.js",
+  "bundle-store-internal.js.map",
+  "bundle-store.d.ts",
+  "bundle-store.d.ts.map",
+  "bundle-store.js",
+  "bundle-store.js.map",
+  "index.d.ts",
+  "index.d.ts.map",
+  "index.js",
+  "index.js.map",
+]);
+const ROOT_SCRIPT_COMMANDS = Object.freeze({
+  generate:
+    "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/generate-control-plane-bundle-store-proof.mjs",
+  verify:
+    "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/verify-control-plane-bundle-store.mjs",
+  test: "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node --test tests/control-plane-bundle-store.test.mjs",
+});
+
+export const DEFAULT_CONTROL_PLANE_BUNDLE_STORE_ARTIFACT_PATH = path.join(ROOT, ARTIFACT);
+
+export class ControlPlaneBundleStoreEvidenceError extends Error {
+  constructor(code, message, details = {}) {
+    super(message);
+    this.name = "ControlPlaneBundleStoreEvidenceError";
+    this.code = code;
+    this.details = Object.freeze({ ...details });
+  }
+}
+
+function fail(code, message, details = {}) {
+  throw new ControlPlaneBundleStoreEvidenceError(code, message, details);
+}
+
+function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+function byteEqual(left, right) {
+  return Buffer.from(left).equals(Buffer.from(right));
+}
+
+function deepFreeze(value) {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) return value;
+  for (const child of Object.values(value)) deepFreeze(child);
+  return Object.freeze(value);
+}
+
+function exactOwnDataOptions(value, allowedKeys, label) {
+  if (value === undefined) return Object.freeze({});
+  try {
+    if (
+      value === null ||
+      typeof value !== "object" ||
+      Array.isArray(value) ||
+      (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
+    ) {
+      fail("INVALID_OPTIONS", `${label} must be a plain own-data record.`);
+    }
+    const result = {};
+    for (const key of Reflect.ownKeys(value)) {
+      if (typeof key !== "string" || !allowedKeys.has(key)) {
+        fail("INVALID_OPTIONS", `${label} contains an unsupported option.`);
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+        fail("INVALID_OPTIONS", `${label} options must be enumerable own data.`);
+      }
+      result[key] = descriptor.value;
+    }
+    return Object.freeze(result);
+  } catch (error) {
+    if (error instanceof ControlPlaneBundleStoreEvidenceError) throw error;
+    fail("INVALID_OPTIONS", `${label} could not be inspected safely.`);
+  }
+}
+
+function captureOptionalPath(value, label) {
+  if (value === undefined) return undefined;
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value.includes("\0") ||
+    Buffer.byteLength(value, "utf8") > MAX_AUTHORITY_BYTES
+  ) {
+    fail("INVALID_OPTIONS", `${label} must be a bounded primitive path string.`);
+  }
+  return value;
+}
+
+function captureBytes(value, label) {
+  try {
+    if (
+      !ArrayBuffer.isView(value) ||
+      TYPED_ARRAY_BUFFER_GETTER === undefined ||
+      TYPED_ARRAY_BYTE_LENGTH_GETTER === undefined ||
+      TYPED_ARRAY_BYTE_OFFSET_GETTER === undefined ||
+      TYPED_ARRAY_TAG_GETTER === undefined
+    ) {
+      throw new TypeError();
+    }
+    const tag = Reflect.apply(TYPED_ARRAY_TAG_GETTER, value, []);
+    const buffer = Reflect.apply(TYPED_ARRAY_BUFFER_GETTER, value, []);
+    const byteLength = Reflect.apply(TYPED_ARRAY_BYTE_LENGTH_GETTER, value, []);
+    const byteOffset = Reflect.apply(TYPED_ARRAY_BYTE_OFFSET_GETTER, value, []);
+    if (
+      tag !== "Uint8Array" ||
+      Object.getPrototypeOf(buffer) !== ArrayBuffer.prototype ||
+      !Number.isSafeInteger(byteLength) ||
+      !Number.isSafeInteger(byteOffset) ||
+      byteLength < 0 ||
+      byteOffset < 0 ||
+      byteLength > MAX_AUTHORITY_BYTES
+    ) {
+      throw new TypeError();
+    }
+    const exactView = new Uint8Array(buffer, byteOffset, byteLength);
+    return Buffer.from(exactView);
+  } catch (error) {
+    if (error instanceof ControlPlaneBundleStoreEvidenceError) throw error;
+    fail("INVALID_OPTIONS", `${label} must be exact unshared Uint8Array bytes.`);
+  }
+}
+
+function captureByteOverrides(value, allowedPaths, label) {
+  if (value === undefined) return Object.freeze({});
+  const record = exactOwnDataOptions(value, new Set(allowedPaths), label);
+  const result = {};
+  for (const [relativePath, bytes] of Object.entries(record)) {
+    result[relativePath] = captureBytes(bytes, `${label}.${relativePath}`);
+  }
+  return Object.freeze(result);
+}
+
+function copyInertJson(value, label, active = new Set(), budget = { nodes: 0 }) {
+  budget.nodes += 1;
+  if (budget.nodes > 20_000) fail("INVALID_OPTIONS", `${label} exceeds the inert-data budget.`);
+  if (
+    value === null ||
+    typeof value === "string" ||
+    typeof value === "boolean" ||
+    (typeof value === "number" && Number.isFinite(value))
+  ) {
+    return value;
+  }
+  if (typeof value !== "object") fail("INVALID_OPTIONS", `${label} is not inert JSON data.`);
+  if (active.has(value)) fail("INVALID_OPTIONS", `${label} must not contain a cycle.`);
+  active.add(value);
+  try {
+    if (Array.isArray(value)) {
+      const keys = Reflect.ownKeys(value);
+      const lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+      if (
+        lengthDescriptor === undefined ||
+        !("value" in lengthDescriptor) ||
+        !Number.isSafeInteger(lengthDescriptor.value) ||
+        lengthDescriptor.value < 0 ||
+        lengthDescriptor.value > 20_000
+      ) {
+        fail("INVALID_OPTIONS", `${label} has an invalid array length.`);
+      }
+      const length = lengthDescriptor.value;
+      if (
+        keys.length !== length + 1 ||
+        !keys.includes("length") ||
+        keys.some((key) => {
+          if (key === "length") return false;
+          return (
+            typeof key !== "string" ||
+            !/^(?:0|[1-9]\d*)$/u.test(key) ||
+            Number(key) >= length ||
+            String(Number(key)) !== key
+          );
+        })
+      ) {
+        fail("INVALID_OPTIONS", `${label} contains an unsupported array property.`);
+      }
+      const output = [];
+      for (let index = 0; index < length; index += 1) {
+        const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+        if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+          fail("INVALID_OPTIONS", `${label} arrays must be dense own data.`);
+        }
+        output.push(copyInertJson(descriptor.value, label, active, budget));
+      }
+      return output;
+    }
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      fail("INVALID_OPTIONS", `${label} must contain only plain records.`);
+    }
+    const output = Object.create(null);
+    for (const key of Reflect.ownKeys(value)) {
+      if (typeof key !== "string") fail("INVALID_OPTIONS", `${label} contains a symbol key.`);
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+        fail("INVALID_OPTIONS", `${label} must contain only enumerable own data.`);
+      }
+      output[key] = copyInertJson(descriptor.value, label, active, budget);
+    }
+    return output;
+  } catch (error) {
+    if (error instanceof ControlPlaneBundleStoreEvidenceError) throw error;
+    fail("INVALID_OPTIONS", `${label} could not be copied safely.`);
+  } finally {
+    active.delete(value);
+  }
+}
+
+async function captureNoFollowParentAuthority(absolute) {
+  const root = path.parse(absolute).root;
+  const parent = path.dirname(absolute);
+  const relativeParent = path.relative(root, parent);
+  const segments =
+    relativeParent === "" ? [] : relativeParent.split(path.sep).filter((segment) => segment !== "");
+  const authority = [];
+  let current = root;
+  for (const segment of segments) {
+    current = path.join(current, segment);
+    let entry;
+    try {
+      entry = await lstat(current, { bigint: true });
+    } catch {
+      fail("FILE_AUTHORITY_INVALID", "An evidence input parent could not be inspected.");
+    }
+    if (!entry.isDirectory() || entry.isSymbolicLink()) {
+      fail("FILE_AUTHORITY_INVALID", "An evidence input has a symlinked or invalid parent.");
+    }
+    authority.push(Object.freeze({ path: current, dev: entry.dev, ino: entry.ino }));
+  }
+  return Object.freeze(authority);
+}
+
+async function assertNoFollowParentAuthority(authority) {
+  for (const expected of authority) {
+    let entry;
+    try {
+      entry = await lstat(expected.path, { bigint: true });
+    } catch {
+      fail("FILE_AUTHORITY_INVALID", "An evidence input parent changed while it was read.");
+    }
+    if (
+      !entry.isDirectory() ||
+      entry.isSymbolicLink() ||
+      entry.dev !== expected.dev ||
+      entry.ino !== expected.ino
+    ) {
+      fail("FILE_AUTHORITY_INVALID", "An evidence input parent changed while it was read.");
+    }
+  }
+}
+
+async function safeReadAbsolute(filePath, rejectSymlinkedParents = false) {
+  const absolute = path.resolve(filePath);
+  const parentAuthority = rejectSymlinkedParents
+    ? await captureNoFollowParentAuthority(absolute)
+    : undefined;
+  let pathEntry;
+  try {
+    pathEntry = await lstat(absolute, { bigint: true });
+  } catch {
+    fail("FILE_AUTHORITY_INVALID", "An evidence input could not be opened.");
+  }
+  if (!pathEntry.isFile() || pathEntry.isSymbolicLink()) {
+    fail("FILE_AUTHORITY_INVALID", "An evidence input is not a regular no-follow file.");
+  }
+  if (pathEntry.size < 0n || pathEntry.size > BigInt(MAX_AUTHORITY_BYTES)) {
+    fail("FILE_AUTHORITY_INVALID", "An evidence input exceeds the bounded file profile.");
+  }
+  let handle;
+  try {
+    handle = await open(absolute, READ_FLAGS);
+    const before = await handle.stat({ bigint: true });
+    if (
+      !before.isFile() ||
+      before.dev !== pathEntry.dev ||
+      before.ino !== pathEntry.ino ||
+      before.size !== pathEntry.size
+    ) {
+      fail("FILE_AUTHORITY_INVALID", "An evidence input changed before it was read.");
+    }
+    if (parentAuthority !== undefined) {
+      await assertNoFollowParentAuthority(parentAuthority);
+    }
+    const bytes = await handle.readFile();
+    const after = await handle.stat({ bigint: true });
+    const namedAfter = await lstat(absolute, { bigint: true });
+    if (
+      !after.isFile() ||
+      !namedAfter.isFile() ||
+      namedAfter.isSymbolicLink() ||
+      after.dev !== namedAfter.dev ||
+      after.ino !== namedAfter.ino ||
+      before.dev !== after.dev ||
+      before.ino !== after.ino ||
+      before.size !== after.size ||
+      before.mtimeNs !== after.mtimeNs ||
+      before.ctimeNs !== after.ctimeNs ||
+      BigInt(bytes.byteLength) !== after.size
+    ) {
+      fail("FILE_AUTHORITY_INVALID", "An evidence input changed while it was read.");
+    }
+    if (parentAuthority !== undefined) {
+      await assertNoFollowParentAuthority(parentAuthority);
+    }
+    return Buffer.from(bytes);
+  } catch (error) {
+    if (error instanceof ControlPlaneBundleStoreEvidenceError) throw error;
+    fail("FILE_AUTHORITY_INVALID", "An evidence input could not be read safely.");
+  } finally {
+    if (handle !== undefined) await handle.close().catch(() => undefined);
+  }
+}
+
+async function authorityBytes(relativePath, overrides = {}) {
+  if (Object.hasOwn(overrides, relativePath)) return Buffer.from(overrides[relativePath]);
+  return safeReadAbsolute(path.join(ROOT, relativePath));
+}
+
+function fatalText(bytes, label) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    fail("FILE_AUTHORITY_INVALID", `${label} is not valid UTF-8.`);
+  }
+}
+
+function parseJsonBytes(bytes, label) {
+  try {
+    return JSON.parse(fatalText(bytes, label));
+  } catch (error) {
+    if (error instanceof ControlPlaneBundleStoreEvidenceError) throw error;
+    fail("FILE_AUTHORITY_INVALID", `${label} is not valid JSON.`);
+  }
+}
+
+function parseTypescript(source, relativePath, errorCode = "TEST_AUTHORITY_DRIFT") {
+  const sourceFile = ts.createSourceFile(
+    relativePath,
+    source,
+    ts.ScriptTarget.ESNext,
+    true,
+    relativePath.endsWith(".js") || relativePath.endsWith(".mjs")
+      ? ts.ScriptKind.JS
+      : ts.ScriptKind.TS,
+  );
+  if (sourceFile.parseDiagnostics.length > 0) {
+    fail(errorCode, "A proof-owned source file is not syntactically valid.", {
+      path: relativePath,
+    });
+  }
+  return sourceFile;
+}
+
+function registeredTestNames(source, relativePath, functionName) {
+  const sourceFile = parseTypescript(source, relativePath);
+  const names = [];
+  const isDirectRegistration = (call) => {
+    if (!ts.isExpressionStatement(call.parent)) return false;
+    if (functionName === "test") return call.parent.parent === sourceFile;
+    const block = call.parent.parent;
+    if (!ts.isBlock(block)) return false;
+    const callback = block.parent;
+    if (
+      (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback)) ||
+      callback.body !== block
+    ) {
+      return false;
+    }
+    const describeCall = callback.parent;
+    return (
+      ts.isCallExpression(describeCall) &&
+      ts.isIdentifier(describeCall.expression) &&
+      describeCall.expression.text === "describe" &&
+      describeCall.arguments.includes(callback) &&
+      ts.isExpressionStatement(describeCall.parent) &&
+      describeCall.parent.parent === sourceFile
+    );
+  };
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      ts.isIdentifier(node.expression.expression) &&
+      node.expression.expression.text === functionName
+    ) {
+      fail(
+        "TEST_AUTHORITY_DRIFT",
+        "Skipped, conditional, or modified test registrations are forbidden.",
+        {
+          path: relativePath,
+        },
+      );
+    }
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === functionName
+    ) {
+      const [title, implementation] = node.arguments;
+      if (
+        !isDirectRegistration(node) ||
+        title === undefined ||
+        !ts.isStringLiteralLike(title) ||
+        implementation === undefined ||
+        (!ts.isArrowFunction(implementation) && !ts.isFunctionExpression(implementation))
+      ) {
+        fail("TEST_AUTHORITY_DRIFT", "Tests must be direct literal registrations with a body.", {
+          path: relativePath,
+        });
+      }
+      names.push(title.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return names;
+}
+
+function compilerNegativeCases(source, relativePath) {
+  const sourceFile = parseTypescript(source, relativePath);
+  const directives = (sourceFile.commentDirectives ?? []).filter(
+    ({ type }) => type === ts.CommentDirectiveType.ExpectError,
+  );
+  const cases = directives.map(({ range }) => {
+    const statement = sourceFile.statements.find(
+      (candidate) => candidate.getStart(sourceFile) >= range.end,
+    );
+    if (
+      statement === undefined ||
+      !/^\s*$/u.test(source.slice(range.end, statement.getStart(sourceFile)))
+    ) {
+      fail(
+        "TEST_AUTHORITY_DRIFT",
+        "Every compiler-negative directive must bind the next statement.",
+        {
+          path: relativePath,
+        },
+      );
+    }
+    return Object.freeze({
+      directive: source.slice(range.pos, range.end).trim(),
+      statement: statement.getText(sourceFile),
+    });
+  });
+  if (JSON.stringify(cases) !== JSON.stringify(EXPECTED_TYPE_NEGATIVE_CASES)) {
+    fail("TEST_AUTHORITY_DRIFT", "The exact compiler-negative case inventory drifted.", {
+      path: relativePath,
+    });
+  }
+  return cases;
+}
+
+function publicExportInventory(source, relativePath) {
+  const sourceFile = parseTypescript(source, relativePath, "REGISTRATION_DRIFT");
+  const exports = [];
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isExportDeclaration(statement) ||
+      statement.exportClause === undefined ||
+      !ts.isNamedExports(statement.exportClause) ||
+      statement.moduleSpecifier === undefined ||
+      !ts.isStringLiteral(statement.moduleSpecifier)
+    ) {
+      fail("REGISTRATION_DRIFT", "The package root may contain only explicit named re-exports.");
+    }
+    for (const element of statement.exportClause.elements) {
+      exports.push(
+        Object.freeze({
+          imported: element.propertyName?.text ?? element.name.text,
+          exported: element.name.text,
+          module: statement.moduleSpecifier.text,
+          typeOnly: statement.isTypeOnly || element.isTypeOnly,
+        }),
+      );
+    }
+  }
+  if (JSON.stringify(exports) !== JSON.stringify(EXPECTED_PUBLIC_SOURCE_EXPORTS)) {
+    fail("REGISTRATION_DRIFT", "The exact public package-root export inventory drifted.");
+  }
+  return exports;
+}
+
+function ciProofTupleProjection(source, relativePath) {
+  const sourceFile = parseTypescript(source, relativePath, "REGISTRATION_DRIFT");
+  const isObjectFreezeCall = (node) =>
+    ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    ts.isIdentifier(node.expression.expression) &&
+    node.expression.expression.text === "Object" &&
+    node.expression.name.text === "freeze";
+  const declarations = sourceFile.statements.flatMap((statement) => {
+    if (!ts.isVariableStatement(statement)) return [];
+    return statement.declarationList.declarations.filter(
+      (declaration) =>
+        ts.isIdentifier(declaration.name) && declaration.name.text === "PROOF_ENTRIES",
+    );
+  });
+  const planDeclarations = sourceFile.statements.flatMap((statement) => {
+    if (!ts.isVariableStatement(statement)) return [];
+    return statement.declarationList.declarations.filter(
+      (declaration) =>
+        ts.isIdentifier(declaration.name) && declaration.name.text === "QUALITY_GATE_PLAN_SHA256",
+    );
+  });
+  if (declarations.length !== 1) {
+    fail("REGISTRATION_DRIFT", "The single-pass CI proof inventory declaration drifted.");
+  }
+  const planInitializer =
+    planDeclarations.length === 1 ? planDeclarations[0].initializer : undefined;
+  if (
+    planInitializer === undefined ||
+    !ts.isStringLiteral(planInitializer) ||
+    !/^[0-9a-f]{64}$/u.test(planInitializer.text)
+  ) {
+    fail("REGISTRATION_DRIFT", "The single-pass CI plan digest declaration drifted.");
+  }
+  const initializer = declarations[0].initializer;
+  const frozenArgument =
+    initializer !== undefined && isObjectFreezeCall(initializer)
+      ? initializer.arguments[0]
+      : undefined;
+  const mapAccess =
+    frozenArgument !== undefined && ts.isCallExpression(frozenArgument)
+      ? frozenArgument.expression
+      : undefined;
+  const inventory =
+    mapAccess !== undefined &&
+    ts.isPropertyAccessExpression(mapAccess) &&
+    mapAccess.name.text === "map" &&
+    ts.isArrayLiteralExpression(mapAccess.expression)
+      ? mapAccess.expression
+      : undefined;
+  const mapCallback =
+    frozenArgument !== undefined && ts.isCallExpression(frozenArgument)
+      ? frozenArgument.arguments[0]
+      : undefined;
+  const exactMapCallback =
+    mapCallback !== undefined &&
+    ts.isArrowFunction(mapCallback) &&
+    (mapCallback.modifiers?.length ?? 0) === 0 &&
+    mapCallback.typeParameters === undefined &&
+    mapCallback.type === undefined &&
+    mapCallback.parameters.length === 1 &&
+    (mapCallback.parameters[0].modifiers?.length ?? 0) === 0 &&
+    mapCallback.parameters[0].dotDotDotToken === undefined &&
+    mapCallback.parameters[0].questionToken === undefined &&
+    mapCallback.parameters[0].type === undefined &&
+    mapCallback.parameters[0].initializer === undefined
+      ? mapCallback
+      : undefined;
+  const callbackParameter =
+    exactMapCallback === undefined ? undefined : exactMapCallback.parameters[0].name;
+  const callbackBindings =
+    callbackParameter !== undefined && ts.isArrayBindingPattern(callbackParameter)
+      ? callbackParameter.elements.map((element) =>
+          ts.isBindingElement(element) &&
+          element.dotDotDotToken === undefined &&
+          element.propertyName === undefined &&
+          element.initializer === undefined &&
+          ts.isIdentifier(element.name)
+            ? element.name.text
+            : undefined,
+        )
+      : [];
+  const callbackResult = exactMapCallback === undefined ? undefined : exactMapCallback.body;
+  const callbackProperties =
+    callbackResult !== undefined &&
+    isObjectFreezeCall(callbackResult) &&
+    callbackResult.arguments.length === 1 &&
+    ts.isObjectLiteralExpression(callbackResult.arguments[0])
+      ? callbackResult.arguments[0].properties.map((property) =>
+          ts.isShorthandPropertyAssignment(property) ? property.name.text : undefined,
+        )
+      : [];
+  if (
+    inventory === undefined ||
+    initializer.arguments.length !== 1 ||
+    frozenArgument.arguments.length !== 1 ||
+    JSON.stringify(callbackBindings) !== JSON.stringify(["id", "verifierFile", "rootTestFile"]) ||
+    JSON.stringify(callbackProperties) !== JSON.stringify(["id", "verifierFile", "rootTestFile"])
+  ) {
+    fail("REGISTRATION_DRIFT", "The executable single-pass CI proof inventory shape drifted.");
+  }
+  const entries = inventory.elements.map((element) => {
+    if (
+      !ts.isArrayLiteralExpression(element) ||
+      element.elements.length !== 3 ||
+      !element.elements.every((value) => ts.isStringLiteral(value))
+    ) {
+      fail("REGISTRATION_DRIFT", "The single-pass CI contains a nonliteral proof tuple.");
+    }
+    return Object.freeze({
+      id: element.elements[0].text,
+      verifierFile: element.elements[1].text,
+      rootTestFile: element.elements[2].text,
+    });
+  });
+  for (const field of ["id", "verifierFile", "rootTestFile"]) {
+    const values = entries.map((entry) => entry[field]);
+    if (new Set(values).size !== values.length) {
+      fail("REGISTRATION_DRIFT", "The single-pass CI contains duplicate proof authority.", {
+        field,
+      });
+    }
+  }
+  const matches = entries.filter(({ id }) => id === "control-plane-bundle-store");
+  const expected = {
+    id: "control-plane-bundle-store",
+    verifierFile: VERIFIER,
+    rootTestFile: ROOT_TEST,
+  };
+  const observed = matches.length === 1 ? matches[0] : undefined;
+  if (matches.length !== 1 || JSON.stringify(observed) !== JSON.stringify(expected)) {
+    fail("REGISTRATION_DRIFT", "The exact executable single-pass CI proof tuple drifted.");
+  }
+  return deepFreeze({
+    entries,
+    planSha256: planInitializer.text,
+    tuple: expected,
+  });
+}
+
+const DETACHED_CI_PLAN_PREFIX = "DESEN_M07_CANDIDATE_CI_PLAN:";
+const DETACHED_CI_PLAN_PROBE = [
+  "const intrinsicApply = Reflect.apply;",
+  "const intrinsicArrayIsArray = Array.isArray;",
+  "const intrinsicBuffer = Buffer;",
+  "const intrinsicBufferFrom = Buffer.from;",
+  "const intrinsicBufferToString = Buffer.prototype.toString;",
+  "const intrinsicEvery = Array.prototype.every;",
+  "const intrinsicIsFrozen = Object.isFrozen;",
+  "const intrinsicJson = JSON;",
+  "const intrinsicStringify = JSON.stringify;",
+  "const intrinsicStdout = process.stdout;",
+  "const intrinsicStdoutWrite = process.stdout.write;",
+  "const candidate = await import(process.argv[2]);",
+  "const entries = candidate.PROOF_ENTRIES;",
+  "const steps = candidate.createQualityGateSteps();",
+  "const validation = candidate.validateQualityGatePlan(steps);",
+  "const every = (array, predicate) => intrinsicApply(intrinsicEvery, array, [predicate]);",
+  "const payload = intrinsicApply(intrinsicStringify, intrinsicJson, [{",
+  "  entries,",
+  "  entriesAreFrozenRecords:",
+  "    intrinsicArrayIsArray(entries) && every(entries, (entry) => intrinsicIsFrozen(entry)),",
+  "  inventoryFrozen: intrinsicIsFrozen(entries),",
+  "  stepArgumentsFrozen:",
+  "    intrinsicArrayIsArray(steps) && every(steps, (step) => intrinsicIsFrozen(step.args)),",
+  "  stepRecordsFrozen:",
+  "    intrinsicArrayIsArray(steps) && every(steps, (step) => intrinsicIsFrozen(step)),",
+  "  steps,",
+  "  stepsFrozen: intrinsicIsFrozen(steps),",
+  "  validation,",
+  "}]);",
+  'const payloadBytes = intrinsicApply(intrinsicBufferFrom, intrinsicBuffer, [payload, "utf8"]);',
+  'const encoded = intrinsicApply(intrinsicBufferToString, payloadBytes, ["base64"]);',
+  `intrinsicApply(intrinsicStdoutWrite, intrinsicStdout, [${JSON.stringify(DETACHED_CI_PLAN_PREFIX)} + encoded]);`,
+].join("\n");
+
+const FIXED_CI_PLAN_PREFIX = Object.freeze([
+  Object.freeze({
+    id: "orchestrator-contracts",
+    command: "node",
+    args: Object.freeze(["--test", "scripts/test/ci-quality-gate.test.mjs"]),
+  }),
+  Object.freeze({
+    id: "format",
+    command: "pnpm",
+    args: Object.freeze(["exec", "prettier", ".", "--check"]),
+  }),
+  Object.freeze({
+    id: "lint",
+    command: "pnpm",
+    args: Object.freeze(["exec", "eslint", ".", "--max-warnings=0"]),
+  }),
+  Object.freeze({
+    id: "structural-validator-artifacts",
+    command: "node",
+    args: Object.freeze(["packages/validator/scripts/verify-structural-validators.mjs"]),
+  }),
+  Object.freeze({
+    id: "workspace-graph",
+    command: "pnpm",
+    args: Object.freeze(["exec", "turbo", "run", "build", "typecheck", "--force", "--ui=stream"]),
+  }),
+  Object.freeze({
+    id: "package-tests",
+    command: "pnpm",
+    args: Object.freeze([
+      "--recursive",
+      "--workspace-concurrency=1",
+      "--if-present",
+      "run",
+      "test",
+    ]),
+  }),
+]);
+
+const FIXED_CI_PLAN_SUFFIX = Object.freeze([
+  Object.freeze({
+    id: "dependency-boundaries",
+    command: "pnpm",
+    args: Object.freeze([
+      "exec",
+      "depcruise",
+      "--config",
+      "dependency-cruiser.config.cjs",
+      "apps",
+      "packages",
+    ]),
+  }),
+  Object.freeze({
+    id: "boundary-fixtures",
+    command: "node",
+    args: Object.freeze(["scripts/verify-boundary-fixtures.mjs"]),
+  }),
+]);
+
+function exactJsonRecord(value, expectedKeys) {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype &&
+    JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...expectedKeys].sort())
+  );
+}
+
+function validateDetachedCiPlan(receipt, sourceProjection) {
+  const receiptKeys = [
+    "entries",
+    "entriesAreFrozenRecords",
+    "inventoryFrozen",
+    "stepArgumentsFrozen",
+    "stepRecordsFrozen",
+    "steps",
+    "stepsFrozen",
+    "validation",
+  ];
+  if (
+    !exactJsonRecord(receipt, receiptKeys) ||
+    !Array.isArray(receipt.entries) ||
+    !Array.isArray(receipt.steps) ||
+    !exactJsonRecord(receipt.validation, ["planSha256", "stepCount"]) ||
+    receipt.inventoryFrozen !== true ||
+    receipt.entriesAreFrozenRecords !== true ||
+    receipt.stepsFrozen !== true ||
+    receipt.stepRecordsFrozen !== true ||
+    receipt.stepArgumentsFrozen !== true
+  ) {
+    fail(
+      "REGISTRATION_DRIFT",
+      "The detached CI candidate did not expose one exact recursively frozen plan authority.",
+    );
+  }
+  if (
+    !receipt.entries.every(
+      (entry) =>
+        exactJsonRecord(entry, ["id", "verifierFile", "rootTestFile"]) &&
+        typeof entry.id === "string" &&
+        typeof entry.verifierFile === "string" &&
+        typeof entry.rootTestFile === "string",
+    ) ||
+    JSON.stringify(receipt.entries) !== JSON.stringify(sourceProjection.entries)
+  ) {
+    fail(
+      "REGISTRATION_DRIFT",
+      "The detached CI candidate exports different proof tuples than its exact source bytes.",
+    );
+  }
+  if (
+    !receipt.steps.every(
+      (step) =>
+        exactJsonRecord(step, ["args", "command", "id", "label"]) &&
+        typeof step.id === "string" &&
+        typeof step.label === "string" &&
+        typeof step.command === "string" &&
+        Array.isArray(step.args) &&
+        step.args.every((argument) => typeof argument === "string"),
+    )
+  ) {
+    fail("REGISTRATION_DRIFT", "The detached CI candidate produced a malformed plan step.");
+  }
+
+  const expectedPlan = [
+    ...FIXED_CI_PLAN_PREFIX,
+    ...sourceProjection.entries.map(({ id, verifierFile }) => ({
+      id: `verify-${id}`,
+      command: "node",
+      args: [verifierFile],
+    })),
+    ...sourceProjection.entries.map(({ id, rootTestFile }) => ({
+      id: `test-${id}`,
+      command: "node",
+      args: ["--test", "--test-concurrency=1", rootTestFile],
+    })),
+    ...FIXED_CI_PLAN_SUFFIX,
+  ];
+  const observedPlan = receipt.steps.map(({ id, command, args }) => ({ id, command, args }));
+  const independentlyCalculatedPlanSha256 = sha256(
+    Buffer.from(JSON.stringify(observedPlan), "utf8"),
+  );
+  if (
+    JSON.stringify(observedPlan) !== JSON.stringify(expectedPlan) ||
+    receipt.validation.stepCount !== observedPlan.length ||
+    receipt.validation.planSha256 !== independentlyCalculatedPlanSha256 ||
+    independentlyCalculatedPlanSha256 !== sourceProjection.planSha256
+  ) {
+    fail(
+      "REGISTRATION_DRIFT",
+      "The detached CI candidate does not execute the complete exact append-only quality-gate plan.",
+    );
+  }
+}
+
+async function executeDetachedCiPlan(ciSourceBytes, sourceProjection) {
+  const generatedDirectory = await mkdtemp(path.join(os.tmpdir(), "desen-m07-ci-candidate-"));
+  const candidatePath = path.join(generatedDirectory, "run-ci-quality-gate.mjs");
+  try {
+    await writeFile(candidatePath, ciSourceBytes, { flag: "wx", mode: 0o600 });
+    const canonicalCandidatePath = await realpath(candidatePath);
+    const authenticatedBytes = await safeReadAbsolute(canonicalCandidatePath);
+    if (!byteEqual(authenticatedBytes, ciSourceBytes)) {
+      fail(
+        "REGISTRATION_DRIFT",
+        "The detached CI candidate changed before executable observation.",
+      );
+    }
+
+    const candidateUrl = pathToFileURL(canonicalCandidatePath);
+    candidateUrl.searchParams.set("desen-proof-sha256", sha256(authenticatedBytes));
+    let stdout;
+    let stderr;
+    try {
+      ({ stdout, stderr } = await execFileAsync(
+        process.execPath,
+        [
+          "--max-old-space-size=128",
+          "--permission",
+          `--allow-fs-read=${canonicalCandidatePath}`,
+          "--input-type=module",
+          "--eval",
+          DETACHED_CI_PLAN_PROBE,
+          "desen-m07-ci-plan-probe",
+          candidateUrl.href,
+        ],
+        {
+          cwd: ROOT,
+          detached: process.platform !== "win32",
+          encoding: "utf8",
+          env: {},
+          maxBuffer: 1_048_576,
+          timeout: 5_000,
+        },
+      ));
+    } catch (error) {
+      fail(
+        "REGISTRATION_DRIFT",
+        "The detached CI candidate could not derive and validate its executable plan.",
+        {
+          exitCode:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "code")
+              ? String(error.code)
+              : "unknown",
+          signal:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "signal")
+              ? String(error.signal)
+              : "none",
+          stderr:
+            typeof error === "object" && error !== null && Object.hasOwn(error, "stderr")
+              ? String(error.stderr).slice(-4_096)
+              : "",
+        },
+      );
+    }
+
+    const afterBytes = await safeReadAbsolute(canonicalCandidatePath);
+    if (!byteEqual(authenticatedBytes, afterBytes) || stderr !== "") {
+      fail(
+        "REGISTRATION_DRIFT",
+        "The detached CI candidate changed during observation or emitted unexpected stderr.",
+      );
+    }
+    if (typeof stdout !== "string" || !stdout.startsWith(DETACHED_CI_PLAN_PREFIX)) {
+      fail("REGISTRATION_DRIFT", "The detached CI candidate returned no isolated plan receipt.");
+    }
+    const encoded = stdout.slice(DETACHED_CI_PLAN_PREFIX.length);
+    if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(encoded)) {
+      fail("REGISTRATION_DRIFT", "The detached CI candidate returned a malformed plan receipt.");
+    }
+    let receipt;
+    try {
+      receipt = JSON.parse(Buffer.from(encoded, "base64").toString("utf8"));
+    } catch {
+      fail("REGISTRATION_DRIFT", "The detached CI candidate plan receipt is not valid JSON.");
+    }
+    validateDetachedCiPlan(receipt, sourceProjection);
+  } finally {
+    await rm(generatedDirectory, { force: true, recursive: true });
+  }
+}
+
+function commandSegments(value) {
+  return typeof value === "string"
+    ? value
+        .split(/\s*&&\s*/u)
+        .map((segment) => segment.trim())
+        .filter(Boolean)
+    : [];
+}
+
+function assertSuccessorSafeAggregateEdge(script, predecessor, current, terminal) {
+  const segments = commandSegments(script);
+  const predecessorIndexes = segments.flatMap((segment, index) =>
+    segment === predecessor ? [index] : [],
+  );
+  const currentIndexes = segments.flatMap((segment, index) => (segment === current ? [index] : []));
+  const terminalIndexes = segments.flatMap((segment, index) =>
+    segment === terminal ? [index] : [],
+  );
+  if (
+    predecessorIndexes.length !== 1 ||
+    currentIndexes.length !== 1 ||
+    terminalIndexes.length !== 1 ||
+    predecessorIndexes[0] + 1 !== currentIndexes[0] ||
+    currentIndexes[0] >= terminalIndexes[0]
+  ) {
+    fail("REGISTRATION_DRIFT", "The aggregate proof dependency edge drifted.");
+  }
+}
+
+function functionDeclaration(sourceFile, name) {
+  const declarations = sourceFile.statements.filter(
+    (statement) => ts.isFunctionDeclaration(statement) && statement.name?.text === name,
+  );
+  if (declarations.length !== 1 || declarations[0].body === undefined) {
+    fail("IMPLEMENTATION_DRIFT", "A required immutable-store implementation boundary drifted.");
+  }
+  return declarations[0];
+}
+
+function nodeTextCount(sourceFile, root, predicate, expectedText) {
+  let count = 0;
+  const visit = (node) => {
+    if (predicate(node) && node.getText(sourceFile) === expectedText) count += 1;
+    ts.forEachChild(node, visit);
+  };
+  visit(root);
+  return count;
+}
+
+async function implementationProjection(overrides) {
+  const relativePath = `${APP_DIRECTORY}/src/bundle-store-internal.ts`;
+  const source = fatalText(await authorityBytes(relativePath, overrides), relativePath);
+  const sourceFile = parseTypescript(source, relativePath, "IMPLEMENTATION_DRIFT");
+  const checks = [
+    {
+      functionName: "putNewEntry",
+      predicate: ts.isAwaitExpression,
+      text: "await link(temporary.path, finalPath)",
+      claim: "same-directory hard-link commit",
+    },
+    {
+      functionName: "establishShardParentDurability",
+      predicate: ts.isAwaitExpression,
+      text: "await syncDirectory(authority.algorithm)",
+      claim: "algorithm-directory durability",
+    },
+    {
+      functionName: "captureBytes",
+      predicate: ts.isBinaryExpression,
+      text: 'tag !== "Uint8Array"',
+      claim: "exact Uint8Array brand",
+    },
+    {
+      functionName: "readRegularFile",
+      predicate: ts.isBinaryExpression,
+      text: "before.nlink !== 1n",
+      claim: "single-link read authority",
+    },
+  ];
+  for (const check of checks) {
+    const declaration = functionDeclaration(sourceFile, check.functionName);
+    if (nodeTextCount(sourceFile, declaration.body, check.predicate, check.text) !== 1) {
+      fail("IMPLEMENTATION_DRIFT", `The ${check.claim} implementation authority drifted.`);
+    }
+  }
+  return deepFreeze({
+    noClobberCommit: "putNewEntry:await link(temporary.path, finalPath)",
+    parentDurability: "establishShardParentDurability:await syncDirectory(authority.algorithm)",
+    byteBrand: 'captureBytes:tag !== "Uint8Array"',
+    singleLinkRead: "readRegularFile:before.nlink !== 1n",
+  });
+}
+
+function collectTraceRows(value, found = []) {
+  if (Array.isArray(value)) {
+    for (const entry of value) collectTraceRows(entry, found);
+    return found;
+  }
+  if (value !== null && typeof value === "object") {
+    if (typeof value.id === "string" && TRACE_IDS.includes(value.id)) found.push(value);
+    for (const child of Object.values(value)) collectTraceRows(child, found);
+  }
+  return found;
+}
+
+async function trackedFileReceipts(overrides) {
+  const receipts = [];
+  for (const relativePath of TRACKED_TASK_FILES) {
+    const bytes = await authorityBytes(relativePath, overrides);
+    receipts.push(
+      Object.freeze({
+        path: relativePath,
+        bytes: bytes.byteLength,
+        sha256: sha256(bytes),
+      }),
+    );
+  }
+  return Object.freeze(receipts);
+}
+
+async function distributionReceipts() {
+  const distDirectory = path.join(ROOT, APP_DIRECTORY, "dist");
+  const observed = (await readdir(distDirectory))
+    .filter((fileName) => fileName.startsWith("bundle-store") || fileName.startsWith("index."))
+    .sort();
+  if (JSON.stringify(observed) !== JSON.stringify(DISTRIBUTION_FILES)) {
+    fail("DISTRIBUTION_DRIFT", "The task-owned generated distribution inventory drifted.", {
+      observed,
+    });
+  }
+  return Object.freeze(
+    await Promise.all(
+      observed.map(async (fileName) => {
+        const relativePath = `${APP_DIRECTORY}/dist/${fileName}`;
+        const bytes = await safeReadAbsolute(path.join(ROOT, relativePath));
+        return Object.freeze({
+          path: relativePath,
+          bytes: bytes.byteLength,
+          sha256: sha256(bytes),
+        });
+      }),
+    ),
+  );
+}
+
+async function prerequisiteReceipts(overrides) {
+  const receipts = [];
+  for (const pin of CONTROL_PLANE_BUNDLE_STORE_PREREQUISITE_PINS) {
+    const bytes = await authorityBytes(pin.path, overrides);
+    const observed = sha256(bytes);
+    if (observed !== pin.sha256) {
+      fail("PREREQUISITE_DRIFT", "A direct prerequisite artifact drifted.", {
+        task: pin.task,
+        path: pin.path,
+        expectedSha256: pin.sha256,
+        observedSha256: observed,
+      });
+    }
+    receipts.push(Object.freeze({ ...pin, verifiedSha256: observed }));
+  }
+  return Object.freeze(receipts);
+}
+
+async function registrationProjection(overrides) {
+  const [appPackageBytes, appIndexBytes, rootPackageBytes, ciSourceBytes] = await Promise.all([
+    authorityBytes(APP_PACKAGE, overrides),
+    authorityBytes(APP_INDEX, overrides),
+    authorityBytes(ROOT_PACKAGE, overrides),
+    authorityBytes(CI_SOURCE, overrides),
+  ]);
+  const appPackage = parseJsonBytes(appPackageBytes, APP_PACKAGE);
+  const rootPackage = parseJsonBytes(rootPackageBytes, ROOT_PACKAGE);
+  const appIndex = fatalText(appIndexBytes, APP_INDEX);
+  const ciSource = fatalText(ciSourceBytes, CI_SOURCE);
+  const expectedAppProjection = {
+    name: "@desen/control-plane-api",
+    main: "./dist/index.js",
+    types: "./dist/index.d.ts",
+    exportKeys: ["."],
+    exports: {
+      types: "./dist/index.d.ts",
+      import: "./dist/index.js",
+    },
+    packageTest: "vitest run test/bundle-store.test.ts",
+    protocolDependency: "workspace:*",
+  };
+  const observedAppProjection = {
+    name: appPackage.name,
+    main: appPackage.main,
+    types: appPackage.types,
+    exportKeys:
+      appPackage.exports !== null && typeof appPackage.exports === "object"
+        ? Object.keys(appPackage.exports).sort()
+        : [],
+    exports: appPackage.exports?.["."],
+    packageTest: appPackage.scripts?.["test:bundle-store"],
+    protocolDependency: appPackage.dependencies?.["@desen/protocol"],
+  };
+  if (JSON.stringify(observedAppProjection) !== JSON.stringify(expectedAppProjection)) {
+    fail("REGISTRATION_DRIFT", "The M07-T01 package registration projection drifted.");
+  }
+  const publicExports = publicExportInventory(appIndex, APP_INDEX);
+  const observedRootScripts = {
+    generate: rootPackage.scripts?.["generate:control-plane-bundle-store"],
+    verify: rootPackage.scripts?.["verify:control-plane-bundle-store"],
+    test: rootPackage.scripts?.["test:control-plane-bundle-store"],
+  };
+  if (JSON.stringify(observedRootScripts) !== JSON.stringify(ROOT_SCRIPT_COMMANDS)) {
+    fail("REGISTRATION_DRIFT", "The root Bundle-store proof commands drifted.");
+  }
+  assertSuccessorSafeAggregateEdge(
+    rootPackage.scripts?.check,
+    "pnpm verify:publisher-invalid-source-matrix",
+    "pnpm verify:control-plane-bundle-store",
+    "pnpm lint",
+  );
+  assertSuccessorSafeAggregateEdge(
+    rootPackage.scripts?.test,
+    "pnpm test:publisher-invalid-source-matrix",
+    "pnpm test:control-plane-bundle-store",
+    "turbo run test",
+  );
+  const ciProjection = ciProofTupleProjection(ciSource, CI_SOURCE);
+  if (Object.hasOwn(overrides, CI_SOURCE)) {
+    await executeDetachedCiPlan(ciSourceBytes, ciProjection);
+  }
+  const ciTuple = ciProjection.tuple;
+  return deepFreeze({
+    app: expectedAppProjection,
+    rootScripts: ROOT_SCRIPT_COMMANDS,
+    aggregateImmediatePredecessor: "publisher-invalid-source-matrix",
+    aggregateSuccessorExtensionSafe: true,
+    ci: { ...ciTuple, tupleExact: true },
+    publicSourceExports: {
+      inventory: publicExports,
+      requiredRuntime: publicExports
+        .filter(({ typeOnly }) => !typeOnly)
+        .map(({ exported }) => exported),
+      requiredTypes: publicExports
+        .filter(({ typeOnly }) => typeOnly)
+        .map(({ exported }) => exported),
+      internalFactoryAbsent: true,
+    },
+  });
+}
+
+async function traceProjection(overrides) {
+  const trace = parseJsonBytes(await authorityBytes(TRACEABILITY, overrides), TRACEABILITY);
+  const rows = collectTraceRows(trace).sort(
+    (left, right) => TRACE_IDS.indexOf(left.id) - TRACE_IDS.indexOf(right.id),
+  );
+  if (
+    rows.length !== TRACE_IDS.length ||
+    rows.some((row, index) => row.id !== TRACE_IDS[index] || !row.owners?.includes("M07-T01"))
+  ) {
+    fail("TRACEABILITY_DRIFT", "The exact M07-T01 trace projection drifted.");
+  }
+  return deepFreeze(copyInertJson(rows, "trace rows"));
+}
+
+async function packageTestProjection(overrides) {
+  const [runtimeTestBytes, typeTestBytes, rootTestBytes] = await Promise.all([
+    authorityBytes(APP_RUNTIME_TEST, overrides),
+    authorityBytes(APP_TYPE_TEST, overrides),
+    authorityBytes(ROOT_TEST, overrides),
+  ]);
+  const runtimeTest = fatalText(runtimeTestBytes, APP_RUNTIME_TEST);
+  const typeTest = fatalText(typeTestBytes, APP_TYPE_TEST);
+  const rootTest = fatalText(rootTestBytes, ROOT_TEST);
+  const names = registeredTestNames(runtimeTest, APP_RUNTIME_TEST, "it");
+  if (JSON.stringify(names) !== JSON.stringify(EXPECTED_PACKAGE_TEST_NAMES)) {
+    fail("TEST_AUTHORITY_DRIFT", "The exact focused Bundle-store test inventory drifted.");
+  }
+  const typeNegativeCases = compilerNegativeCases(typeTest, APP_TYPE_TEST);
+  const rootNames = registeredTestNames(rootTest, ROOT_TEST, "test");
+  if (JSON.stringify(rootNames) !== JSON.stringify(EXPECTED_ROOT_TEST_NAMES)) {
+    fail("TEST_AUTHORITY_DRIFT", "The exact root mutation-test inventory drifted.");
+  }
+  return deepFreeze({
+    packageRuntimeCases: names.length,
+    packageRuntimeCaseNames: names,
+    compileTimeNegativeCases: typeNegativeCases.length,
+    rootMutationCases: rootNames.length,
+    rootMutationCaseNames: rootNames,
+  });
+}
+
+function bundleRelativePath(revision) {
+  const hexadecimal = revision.slice("sha256:".length);
+  return path.join("bundles", "sha256", hexadecimal.slice(0, 2), `${hexadecimal.slice(2)}.bundle`);
+}
+
+async function probePackageSelfReference() {
+  const program = [
+    'import("@desen/control-plane-api")',
+    "  .then((module) => process.stdout.write(JSON.stringify({",
+    '    error: typeof module.BundleStoreError === "function",',
+    '    open: typeof module.openBundleStore === "function",',
+    '    internal: Object.hasOwn(module, "openBundleStoreInternal"),',
+    "    keys: Object.keys(module).sort()",
+    "  })))",
+    "  .catch((error) => { process.stderr.write(String(error)); process.exitCode = 1; });",
+  ].join("\n");
+  const environment = { ...process.env, NODE_OPTIONS: "" };
+  delete environment.NODE_PATH;
+  try {
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      ["--no-warnings", "--input-type=module", "-e", program],
+      {
+        cwd: path.join(ROOT, APP_DIRECTORY),
+        encoding: "utf8",
+        env: environment,
+        maxBuffer: 64 * 1024,
+        timeout: 30_000,
+      },
+    );
+    return parseJsonBytes(Buffer.from(stdout, "utf8"), "package self-reference probe");
+  } catch {
+    fail("RUNTIME_PROBE_MISMATCH", "The built public package root is not self-importable.");
+  }
+}
+
+export async function runControlPlaneBundleStoreProbe() {
+  const [controlPlane, publisher, protocol, sourceBytes, catalogBytes, selfReference] =
+    await Promise.all([
+      import(pathToFileURL(path.join(ROOT, APP_DIRECTORY, "dist/index.js")).href),
+      import(pathToFileURL(path.join(ROOT, "packages/publisher/dist/index.js")).href),
+      import(pathToFileURL(path.join(ROOT, "packages/protocol/dist/index.js")).href),
+      safeReadAbsolute(path.join(ROOT, SOURCE_FIXTURE)),
+      safeReadAbsolute(path.join(ROOT, CATALOG_FIXTURE)),
+      probePackageSelfReference(),
+    ]);
+  const source = parseJsonBytes(sourceBytes, SOURCE_FIXTURE);
+  const catalog = parseJsonBytes(catalogBytes, CATALOG_FIXTURE);
+  const published = publisher.publishDesenSource(JSON.stringify(source), [
+    {
+      id: catalog.id,
+      version: catalog.version,
+      target: catalog.target,
+      observedPackageDigest: catalog.packageDigest,
+      catalog,
+    },
+  ]);
+  if (!published.ok) {
+    fail("RUNTIME_PROBE_MISMATCH", "The official Source did not publish for the storage probe.");
+  }
+  const officialBytes = protocol.canonicalizeJsonBytes(published.bundle);
+  const publicationVariant = structuredClone(published.bundle);
+  publicationVariant.publication = { pipeline: "m07-t01-publication-variant" };
+  const variantBytes = protocol.canonicalizeJsonBytes(publicationVariant);
+  const revision = published.bundle.revision;
+  const roots = [];
+  const makeRoot = async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), "desen-m07-t01-proof-"));
+    roots.push(root);
+    return root;
+  };
+  try {
+    const primaryRoot = await makeRoot();
+    const store = await controlPlane.openBundleStore({ rootDirectory: primaryRoot });
+    const before = await store.getBundle(revision);
+    const stored = await store.putBundle({ revision, bytes: officialBytes });
+    const finalPath = path.join(primaryRoot, bundleRelativePath(revision));
+    const firstStats = await stat(finalPath, { bigint: true });
+    const reopened = await controlPlane.openBundleStore({ rootDirectory: primaryRoot });
+    const reopenedRead = await reopened.getBundle(revision);
+    const unchanged = await reopened.putBundle({
+      revision,
+      bytes: new Uint8Array(officialBytes),
+    });
+    const unchangedStats = await stat(finalPath, { bigint: true });
+    const conflict = await reopened.putBundle({ revision, bytes: variantBytes });
+    const afterConflictBytes = await readFile(finalPath);
+
+    const firstRead = await reopened.getBundle(revision);
+    if (firstRead.status !== "found") {
+      fail("RUNTIME_PROBE_MISMATCH", "The first copy-isolation read was missing.");
+    }
+    firstRead.entry.bytes.fill(0);
+    const secondRead = await reopened.getBundle(revision);
+
+    const snapshotRoot = await makeRoot();
+    const snapshotStore = await controlPlane.openBundleStore({ rootDirectory: snapshotRoot });
+    const backing = new Uint8Array(officialBytes.byteLength + 4);
+    backing.set(officialBytes, 2);
+    const exactView = backing.subarray(2, backing.byteLength - 2);
+    const pendingSnapshot = snapshotStore.putBundle({ revision, bytes: exactView });
+    backing.fill(0);
+    const snapshotResult = await pendingSnapshot;
+    const snapshotRead = await snapshotStore.getBundle(revision);
+
+    const equalRoot = await makeRoot();
+    const equalStores = await Promise.all(
+      Array.from({ length: 8 }, () => controlPlane.openBundleStore({ rootDirectory: equalRoot })),
+    );
+    const equalResults = await Promise.all(
+      equalStores.map((candidateStore) =>
+        candidateStore.putBundle({ revision, bytes: officialBytes }),
+      ),
+    );
+
+    const divergentRoot = await makeRoot();
+    const divergentStores = await Promise.all([
+      controlPlane.openBundleStore({ rootDirectory: divergentRoot }),
+      controlPlane.openBundleStore({ rootDirectory: divergentRoot }),
+    ]);
+    const divergentResults = await Promise.all([
+      divergentStores[0].putBundle({ revision, bytes: officialBytes }),
+      divergentStores[1].putBundle({ revision, bytes: variantBytes }),
+    ]);
+    const divergentBytes = await readFile(path.join(divergentRoot, bundleRelativePath(revision)));
+    const primaryShardEntries = await readdir(path.dirname(finalPath));
+
+    let invalidRevisionCode;
+    try {
+      await store.getBundle(`sha256:${"A".repeat(64)}`);
+    } catch (error) {
+      invalidRevisionCode = error?.code;
+    }
+
+    return deepFreeze({
+      requiredRuntimeExportsPresent:
+        typeof controlPlane.BundleStoreError === "function" &&
+        typeof controlPlane.openBundleStore === "function",
+      privateInternalExportAbsent: !Object.hasOwn(controlPlane, "openBundleStoreInternal"),
+      publicModuleKeys: Object.keys(controlPlane).sort(),
+      packageSelfReference: selfReference,
+      storeKeys: Object.keys(store).sort(),
+      storeFrozen: Object.isFrozen(store),
+      revision,
+      official: {
+        bytes: officialBytes.byteLength,
+        sha256: sha256(officialBytes),
+      },
+      publicationVariant: {
+        revision: protocol.calculateDesenBundleRevision(publicationVariant),
+        bytes: variantBytes.byteLength,
+        sha256: sha256(variantBytes),
+      },
+      relativePath: bundleRelativePath(revision),
+      beforeStatus: before.status,
+      storedStatus: stored.status,
+      reopenedStatus: reopenedRead.status,
+      reopenedBytesExact:
+        reopenedRead.status === "found" && byteEqual(reopenedRead.entry.bytes, officialBytes),
+      unchangedStatus: unchanged.status,
+      unchangedInode:
+        firstStats.dev === unchangedStats.dev && firstStats.ino === unchangedStats.ino,
+      unchangedMtime: firstStats.mtimeNs === unchangedStats.mtimeNs,
+      storedMode: Number(firstStats.mode & 0o777n),
+      storedLinks: Number(unchangedStats.nlink),
+      conflictStatus: conflict.status,
+      conflictPreservedWinner: byteEqual(afterConflictBytes, officialBytes),
+      freshReadCopies:
+        firstRead.status === "found" &&
+        secondRead.status === "found" &&
+        firstRead.entry.bytes !== secondRead.entry.bytes &&
+        byteEqual(secondRead.entry.bytes, officialBytes),
+      snapshotStatus: snapshotResult.status,
+      snapshotExact:
+        snapshotRead.status === "found" && byteEqual(snapshotRead.entry.bytes, officialBytes),
+      equalConcurrency: {
+        writers: equalResults.length,
+        stored: equalResults.filter(({ status }) => status === "stored").length,
+        unchanged: equalResults.filter(({ status }) => status === "unchanged").length,
+        conflict: equalResults.filter(({ status }) => status === "conflict").length,
+      },
+      divergentConcurrency: {
+        statuses: divergentResults.map(({ status }) => status).sort(),
+        completeWinner:
+          byteEqual(divergentBytes, officialBytes) || byteEqual(divergentBytes, variantBytes),
+      },
+      temporaryArtifacts: primaryShardEntries.filter((name) => name.endsWith(".tmp")).length,
+      invalidRevisionCode,
+      resultsFrozen:
+        Object.isFrozen(before) &&
+        Object.isFrozen(stored) &&
+        Object.isFrozen(reopenedRead) &&
+        Object.isFrozen(unchanged) &&
+        Object.isFrozen(conflict),
+    });
+  } finally {
+    await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
+  }
+}
+
+function assertRuntimeReceipt(receipt) {
+  const expected = {
+    requiredRuntimeExportsPresent: true,
+    privateInternalExportAbsent: true,
+    publicModuleKeys: ["BundleStoreError", "openBundleStore"],
+    packageSelfReference: {
+      error: true,
+      open: true,
+      internal: false,
+      keys: ["BundleStoreError", "openBundleStore"],
+    },
+    storeKeys: ["getBundle", "putBundle"],
+    storeFrozen: true,
+    revision: EXPECTED_REVISION,
+    official: { bytes: EXPECTED_BUNDLE_BYTES, sha256: EXPECTED_BUNDLE_SHA256 },
+    publicationVariant: {
+      revision: EXPECTED_REVISION,
+      bytes: EXPECTED_VARIANT_BYTES,
+      sha256: EXPECTED_VARIANT_SHA256,
+    },
+    relativePath: bundleRelativePath(EXPECTED_REVISION),
+    beforeStatus: "missing",
+    storedStatus: "stored",
+    reopenedStatus: "found",
+    reopenedBytesExact: true,
+    unchangedStatus: "unchanged",
+    unchangedInode: true,
+    unchangedMtime: true,
+    storedMode: 0o400,
+    storedLinks: 1,
+    conflictStatus: "conflict",
+    conflictPreservedWinner: true,
+    freshReadCopies: true,
+    snapshotStatus: "stored",
+    snapshotExact: true,
+    equalConcurrency: { writers: 8, stored: 1, unchanged: 7, conflict: 0 },
+    divergentConcurrency: { statuses: ["conflict", "stored"], completeWinner: true },
+    temporaryArtifacts: 0,
+    invalidRevisionCode: "INVALID_REVISION",
+    resultsFrozen: true,
+  };
+  if (JSON.stringify(receipt) !== JSON.stringify(expected)) {
+    fail("RUNTIME_PROBE_MISMATCH", "The immutable Bundle-store runtime receipt drifted.");
+  }
+  return deepFreeze(receipt);
+}
+
+export async function buildControlPlaneBundleStoreEvidence(options) {
+  const captured = exactOwnDataOptions(
+    options,
+    new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]),
+    "build options",
+  );
+  const trackedFileBytes = captureByteOverrides(
+    captured.trackedFileBytes,
+    [...TRACKED_TASK_FILES, APP_PACKAGE, APP_INDEX, ROOT_PACKAGE, CI_SOURCE, TRACEABILITY],
+    "trackedFileBytes",
+  );
+  const prerequisiteBytes = captureByteOverrides(
+    captured.prerequisiteBytes,
+    CONTROL_PLANE_BUNDLE_STORE_PREREQUISITE_PINS.map(
+      ({ path: prerequisitePath }) => prerequisitePath,
+    ),
+    "prerequisiteBytes",
+  );
+  const runtimeReceipt = assertRuntimeReceipt(
+    captured.runtimeReceipt === undefined
+      ? await runControlPlaneBundleStoreProbe()
+      : deepFreeze(copyInertJson(captured.runtimeReceipt, "runtimeReceipt")),
+  );
+  const [
+    prerequisites,
+    trackedFiles,
+    distribution,
+    registrations,
+    implementation,
+    traceRows,
+    tests,
+  ] = await Promise.all([
+    prerequisiteReceipts(prerequisiteBytes),
+    trackedFileReceipts(trackedFileBytes),
+    distributionReceipts(),
+    registrationProjection(trackedFileBytes),
+    implementationProjection(trackedFileBytes),
+    traceProjection(trackedFileBytes),
+    packageTestProjection(trackedFileBytes),
+  ]);
+  const artifact = deepFreeze({
+    schemaVersion: 1,
+    profile: "desen.control-plane.bundle-store-proof.v1",
+    task: "M07-T01",
+    result: "PASS",
+    summary:
+      "Exact Bundle bytes are persisted once under one revision with no-clobber, retry-safe, fail-closed local POSIX semantics.",
+    prerequisites,
+    claims: {
+      officialBundle: {
+        revision: runtimeReceipt.revision,
+        canonicalBytes: runtimeReceipt.official.bytes,
+        canonicalSha256: runtimeReceipt.official.sha256,
+      },
+      address: {
+        algorithm: "sha256",
+        layout: "bundles/sha256/<first-2-hex>/<remaining-62-hex>.bundle",
+        officialRelativePath: runtimeReceipt.relativePath,
+        callerPathsAccepted: false,
+      },
+      publicBoundary: {
+        requiredRuntimeExports: registrations.publicSourceExports.requiredRuntime,
+        requiredTypeExports: registrations.publicSourceExports.requiredTypes,
+        storeMethods: runtimeReceipt.storeKeys,
+        storeFrozen: runtimeReceipt.storeFrozen,
+        testFaultSeamPublic: !runtimeReceipt.privateInternalExportAbsent,
+        errorCodes: REQUIRED_ERROR_CODES,
+      },
+      immutableWrite: {
+        commitPrimitive: "same-directory POSIX hard-link with existing-destination failure",
+        implementationAuthority: implementation,
+        inputSnapshotBeforeAsyncWork: runtimeReceipt.snapshotExact,
+        initialWrite: runtimeReceipt.storedStatus,
+        reopenedRead: runtimeReceipt.reopenedStatus,
+        exactReopenedBytes: runtimeReceipt.reopenedBytesExact,
+        byteIdenticalRetry: runtimeReceipt.unchangedStatus,
+        retryPreservedInode: runtimeReceipt.unchangedInode,
+        retryPreservedMtime: runtimeReceipt.unchangedMtime,
+        publicationOnlyChange: runtimeReceipt.conflictStatus,
+        conflictPreservedWinner: runtimeReceipt.conflictPreservedWinner,
+        storedFileMode: runtimeReceipt.storedMode,
+        storedFileLinks: runtimeReceipt.storedLinks,
+        temporaryArtifactsAfterSuccess: runtimeReceipt.temporaryArtifacts,
+      },
+      publicationProjectionBoundary: {
+        sameProtocolRevision: runtimeReceipt.publicationVariant.revision,
+        differentExactBytes: runtimeReceipt.publicationVariant.bytes,
+        differentExactSha256: runtimeReceipt.publicationVariant.sha256,
+        outcome: runtimeReceipt.conflictStatus,
+      },
+      concurrency: {
+        equalWriters: runtimeReceipt.equalConcurrency,
+        divergentWriters: runtimeReceipt.divergentConcurrency,
+      },
+      readIsolation: {
+        freshCopies: runtimeReceipt.freshReadCopies,
+        resultsFrozen: runtimeReceipt.resultsFrozen,
+      },
+      historicalCompatibility: {
+        currentReaderPaths: HISTORICAL_COMPATIBILITY_READERS,
+        historicalArtifactsRewritten: false,
+      },
+      registrations,
+      traceRows,
+    },
+    trackedFiles,
+    distribution,
+    tests,
+    nonclaims: [
+      "M07-T02 still owns protocol version, claimed revision, available source digest, and complete Bundle-size verification.",
+      "M07-T03 and M07-T04 still own exact package and capability preflight.",
+      "M07-T05 still owns editable Sources, mutable channel pointers, and the local transport API.",
+      "M07-T06 through M07-T11 still own staging, activation, last-known-good state, crash recovery, fault matrices, and host consumption.",
+      "N-010 remains PLANNED for M07-T03 installed-package verification and M12-T12 packed-distribution evidence; N-019 remains PLANNED for M07-T05 channel/control-plane integration.",
+      "The POSIX profile assumes an application-owned local root; hostile same-UID or privileged mutation and non-POSIX filesystems are outside this task.",
+      "An abrupt pre-link process death may leave an unaddressed temporary; it has no revision authority and maintenance/recovery policy remains later M07 work.",
+    ],
+    reproduction: [
+      "pnpm verify:publisher-invalid-source-matrix",
+      "pnpm --filter @desen/control-plane-api... build",
+      "pnpm --filter @desen/control-plane-api typecheck",
+      "pnpm --filter @desen/control-plane-api test:bundle-store",
+      "node scripts/generate-control-plane-bundle-store-proof.mjs",
+      "node scripts/verify-control-plane-bundle-store.mjs",
+      "node --test tests/control-plane-bundle-store.test.mjs",
+    ],
+  });
+  const artifactText = await format(JSON.stringify(artifact), {
+    parser: "json",
+    printWidth: 100,
+  });
+  const artifactBytes = Buffer.from(artifactText, "utf8");
+  return Object.freeze({
+    artifact,
+    artifactBytes,
+    artifactSha256: sha256(artifactBytes),
+    runtimeReceipt,
+  });
+}
+
+function proofDocumentHasExactPin(document, artifactSha256) {
+  const artifactMentions = [
+    ...document.matchAll(new RegExp(ARTIFACT.replaceAll(".", "\\."), "gu")),
+  ];
+  const hashMentions = [...document.matchAll(new RegExp(`sha256:${artifactSha256}`, "gu"))];
+  return (
+    artifactMentions.length === 1 &&
+    hashMentions.length === 1 &&
+    !document.includes("sha256:PENDING")
+  );
+}
+
+function captureProofDocument(value) {
+  if (typeof value !== "string" || Buffer.byteLength(value, "utf8") > MAX_AUTHORITY_BYTES) {
+    fail("INVALID_OPTIONS", "proofDocument must be a bounded primitive string.");
+  }
+  return value;
+}
+
+export async function verifyControlPlaneBundleStoreEvidence(options) {
+  const captured = exactOwnDataOptions(
+    options,
+    new Set([
+      "artifactBytes",
+      "artifactPath",
+      "prerequisiteBytes",
+      "proofDocument",
+      "proofDocumentPath",
+      "runtimeReceipt",
+      "trackedFileBytes",
+    ]),
+    "verify options",
+  );
+  const artifactPath = captureOptionalPath(captured.artifactPath, "artifactPath");
+  const proofDocumentPath = captureOptionalPath(captured.proofDocumentPath, "proofDocumentPath");
+  const built = await buildControlPlaneBundleStoreEvidence({
+    prerequisiteBytes: captured.prerequisiteBytes,
+    runtimeReceipt: captured.runtimeReceipt,
+    trackedFileBytes: captured.trackedFileBytes,
+  });
+  const artifactBytes =
+    captured.artifactBytes === undefined
+      ? await safeReadAbsolute(
+          artifactPath === undefined
+            ? DEFAULT_CONTROL_PLANE_BUNDLE_STORE_ARTIFACT_PATH
+            : artifactPath,
+          true,
+        )
+      : captureBytes(captured.artifactBytes, "artifactBytes");
+  if (!byteEqual(artifactBytes, built.artifactBytes)) {
+    fail("ARTIFACT_DRIFT", "The committed M07-T01 evidence artifact is not reproducible.");
+  }
+  const proofDocument =
+    captured.proofDocument === undefined
+      ? fatalText(
+          await safeReadAbsolute(
+            proofDocumentPath === undefined ? path.join(ROOT, PROOF_DOCUMENT) : proofDocumentPath,
+            true,
+          ),
+          PROOF_DOCUMENT,
+        )
+      : captureProofDocument(captured.proofDocument);
+  if (!proofDocumentHasExactPin(proofDocument, built.artifactSha256)) {
+    fail(
+      "PROOF_DOCUMENT_DRIFT",
+      "The proof document does not contain one exact final artifact pin.",
+    );
+  }
+  return Object.freeze({
+    result: "PASS",
+    task: "M07-T01",
+    artifactSha256: built.artifactSha256,
+    revision: EXPECTED_REVISION,
+    canonicalBytes: EXPECTED_BUNDLE_BYTES,
+    packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
+    rootMutationCases: built.artifact.tests.rootMutationCases,
+  });
+}
+
+export async function writeControlPlaneBundleStoreEvidence(options) {
+  const captured = exactOwnDataOptions(
+    options,
+    new Set(["artifactPath", "beforeAtomicRename"]),
+    "write options",
+  );
+  const requestedArtifactPath = captureOptionalPath(captured.artifactPath, "artifactPath");
+  if (
+    captured.beforeAtomicRename !== undefined &&
+    typeof captured.beforeAtomicRename !== "function"
+  ) {
+    fail("INVALID_OPTIONS", "beforeAtomicRename must be a function.");
+  }
+  const built = await buildControlPlaneBundleStoreEvidence();
+  const artifactPath =
+    requestedArtifactPath === undefined
+      ? DEFAULT_CONTROL_PLANE_BUNDLE_STORE_ARTIFACT_PATH
+      : requestedArtifactPath;
+  try {
+    await writeAtomicProofArtifact({
+      artifactPath,
+      artifactBytes: built.artifactBytes,
+      beforeAtomicRename: captured.beforeAtomicRename,
+    });
+  } catch {
+    fail(
+      "ARTIFACT_WRITE_FAILED",
+      "The M07-T01 evidence artifact could not be committed atomically.",
+    );
+  }
+  return Object.freeze({
+    artifactPath: path.resolve(artifactPath),
+    artifactSha256: built.artifactSha256,
+    result: "PASS",
+  });
+}
