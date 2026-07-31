@@ -62,6 +62,8 @@ The ordered 1,781-entry legacy leaf-invocation inventory is pinned as
 `sha256:6825adfa7c2569fdfd9dbae167f980960469c47e187a7a26423d2e0ec1d74fef`. The normalized
 single-pass plan is pinned as
 `sha256:448102bdfc5e0ed331f09038a2c554dcb930300ec560d35ac94469fc89d5897f`.
+The scheduler-neutral I07-02 inventory is independently pinned as
+`sha256:bc8644fc1147166f98f905ec5fef1e6d81ef6e639008de9bd53e7256825abb94`.
 
 The reviewed workspace package-test inventory contains 14 Vitest commands and is pinned as
 `sha256:5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4`. Two
@@ -117,12 +119,14 @@ acceptable update.
 
 ## I07 modular migration
 
-I07-01 adds a non-authoritative `SHADOW + EXHAUSTIVE` candidate beside this gate. The candidate
-imports this gate's validated proof inventory and exact normalized plan rather than maintaining a
-second command list. It executes every global step and every verifier/root-test pair from fresh
-inputs. Candidate proof pairs may run with concurrency two only while the legacy result remains
-authoritative. It does not select by changed paths, read cached proof success, generate evidence,
-or write tracked files.
+### Historical I07-01 checkpoint
+
+I07-01 added a non-authoritative `SHADOW + EXHAUSTIVE` candidate beside this gate. The candidate
+imported this gate's validated proof inventory and exact normalized plan rather than maintaining a
+second command list. It executed every global step and every verifier/root-test pair from fresh
+inputs. Candidate proof pairs could run with concurrency two only while the sequential result
+remained authoritative. It did not select by changed paths, read cached proof success, generate
+evidence, or write tracked files.
 
 The shadow also validates one hash-chained current-reader checkpoint whose genesis digest is pinned
 outside the manifest by the I07-01 baseline. Frozen task artifacts remain the historical claim
@@ -130,14 +134,100 @@ authority; the checkpoint records reviewed live proof/test readers that can legi
 security hardening after task completion. The checkpoint never chooses a command. Executable
 verifier/test ownership remains in reviewed code.
 
-During I07-01 the existing sequential gate remains the sole pass/fail authority. The `CI v2 shadow`
-workflow must not be configured as required before I07-02. I07-02 may promote modular execution to
-`REQUIRED + EXHAUSTIVE` only after the same revision proves:
+The existing sequential gate remained the sole pass/fail authority throughout that checkpoint.
+The archived I07-01 local and hosted comparisons are historical evidence, not I07-02 cutover
+evidence.
+
+### I07-02 local architecture and pending cutover
+
+`exhaustive-workload-inventory.mjs` is now the neutral executable authority. It validates the
+repository inputs and owns all 130 ids, labels, shell-free command/argument vectors, dependencies,
+execution classes, and inert shared-state records without importing either scheduler. The retained
+legacy sequential implementation is a rollback mirror. The rollback-only
+`required-exhaustive-equivalence.mjs` adapter compares its exact ordered plan against the neutral
+inventory, proves set equality and exactly-once ownership, and retains the reviewed plan digest.
+It cannot turn either source into executable authority.
+
+The equivalence adapter also normalizes terminal receipts. PASS requires all 130 exact workloads
+to report PASS after an observed close and requires the tracked-workspace digest to remain
+unchanged. Missing, duplicated, skipped, not-run, cancelled, timed-out, failed, or unclosed work
+fails closed. Inventory, workload, workspace, cancellation, and timeout are distinct terminal
+authorities; timing and concurrent sibling completion order are observational only.
+
+The local exhaustive plan factory accepts no scope except `EXHAUSTIVE`, defaults to `REQUIRED`, and
+requires `SHADOW` to be explicit. The required runner is implemented locally and the candidate
+shadow workflow now invokes the same executable in explicit `SHADOW` mode. Required-workflow
+cutover remains pending until complete local and same-revision hosted evidence pass. Until then
+GitHub Actions still uses the retained sequential gate as its sole repository pass/fail authority.
+
+All 130 workloads have one exact shared-state class:
+
+| Execution class                  | Count | Scheduling rule                                    |
+| -------------------------------- | ----: | -------------------------------------------------- |
+| `GLOBAL_EXCLUSIVE`               |     6 | Drained repository-wide barrier                    |
+| `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Sole workspace build/typecheck writer              |
+| `PACKAGE_TEST_EXCLUSIVE`         |     1 | Drained complete package-test barrier              |
+| `PROOF_READ_ONLY`                |    66 | No shared workspace writes                         |
+| `PROOF_OS_TEMP_ISOLATED`         |    55 | Writes only to a workload-owned OS temp root       |
+| `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | Sole source-audit workspace-temp root-test barrier |
+
+Sixty proof pairs may overlap pair-by-pair at concurrency two after their predecessors pass. A
+pair's root test still follows its verifier. The `reference-host-web-source-audit` pair is the sole
+exclusive barrier.
+
+Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
+
+- `publisher-catalog-pinning`;
+- `publisher-bundle-publication`;
+- `publisher-official-golden`;
+- `publisher-invalid-source-matrix`; and
+- `control-plane-bundle-store`.
+
+Only the exact `reference-host-web-source-audit` verifier/root-test pair may load the reviewed
+native addon. The verifier remains workspace-read-only; the root test owns the single exclusive
+workspace-temp exception.
+
+Every proof process gets a fresh, identity-checked temp root and generated Node permissions.
+Workspace writes, child processes, and addons are absent unless the code-owned workload record
+grants them. Inherited `NODE_OPTIONS` is rejected, and a mandatory preload denies TCP and UDP
+listener binding. The runner authenticates temp identity again before cleanup.
+
+`REQUIRED` rejects injected success observations and every injected runner, Git reader, workspace
+capture, guard, process, environment, signal, or timeout seam. Those seams exist only for
+non-authoritative contract tests. Its opening clean-input proof binds HEAD to the authenticated
+revision and requires empty porcelain-v2 status, including staged, unstaged, non-ignored untracked,
+and submodule state. The hosted `SHADOW` candidate uses the same real clean-input proof; only
+focused non-authoritative tests may inject that boundary.
+
+One first-terminal record is shared by the host handlers, scheduler, and child-process registry.
+The first timeout, process error, nonzero close, execution error, SIGINT, or SIGTERM fixes the
+primary reason and exit code, immediately terminates every active group, and prevents later
+launches. Later signals may escalate but cannot replace that record. Every active child `close` and
+isolation cleanup is still awaited before the gate settles.
+
+The runner owns a 15-minute soft complete-gate deadline and a five-second child-termination grace.
+Because authentic settlement still awaits child `close`, cleanup, and boundary capture, the Phase A
+command also has an 18-minute operating-system ceiling with a 30-second kill grace. GitHub's
+25-minute job ceiling remains outside both. An outer-ceiling failure is red and cannot serve as
+promotion evidence; setup, contract checks, receipt emission, and hosted variance retain their own
+headroom.
+
+The required execution design layers three closing guards:
+
+- a no-follow seal across the 33 reviewed build and Turbo output roots around the proof phase;
+- a bounded digest of every non-ignored untracked entry around the full 130-step region; and
+- a tracked-workspace boundary covering bytes, executable modes, file count, and Git index object
+  ids around the full run, including failure and cancellation paths.
+
+No proof-result cache is admitted. The pnpm store may cache immutable dependency downloads only;
+every build, test, verifier, mutation, checkpoint, and boundary result is recomputed.
+
+I07-02 may promote execution to hosted `REQUIRED + EXHAUSTIVE` only after the same revision proves:
 
 - exact plan and workload-set equality;
 - exactly-once coverage for every global step and proof pair;
 - identical pass/fail outcomes with no tracked-byte or index drift;
-- safe cancellation and sibling-process termination; and
+- safe cancellation and sibling-process termination;
 - code-owned shared-state, build-output, port, and temporary-path classification; and
 - a recorded local and hosted timing comparison.
 
@@ -145,6 +235,7 @@ I07-03 may calculate an `AFFECTED` plan only in shadow. Unknown paths, statuses,
 dependency or policy changes, missing Git authority, and any ambiguous classification must expand
 to `EXHAUSTIVE`. Promotion is reserved for I07-04 after ADR 0011's frozen threshold passes.
 `EXHAUSTIVE` fresh execution remains mandatory on `main`, release candidates, and manual audits.
-The current-reader bridges remain owned by I07-04, and the sequential runner remains owned by
-I07-05, until their exact machine-checked removal conditions in
-`docs/plan/DEBT-REGISTER.md` are satisfied.
+I07-02 implements no affected selector and retires no legacy component. The current-reader bridges
+remain owned by I07-04. `DEBT-I07-007` assigns the sequential runner, rollback-only equivalence
+adapter, and other rollback references to I07-05 until their exact machine-checked removal
+conditions in `docs/plan/DEBT-REGISTER.md` are satisfied.

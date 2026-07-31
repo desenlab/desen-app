@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-31
+Last updated: 2026-08-01
 
 ## Plain-language status
 
@@ -536,7 +536,7 @@ retirement by G12. M07-T02 remains `NOT_STARTED` and has an explicit I07-02 depe
   `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
   `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
   `M07-T01 — Content-addressed bundle store with immutable revision entries`
-- Next infrastructure task:
+- Active infrastructure task:
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`

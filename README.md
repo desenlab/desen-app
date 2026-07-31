@@ -22,7 +22,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07:** `█░░░░░░░░░░` **1 / 11 tasks complete (9%)**
 
-**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-02` · **Next implementation:** `M07-T02` (paused)
+**Proof gates:** **7 / 13 complete** · **Active infrastructure:** `I07-02` · **Next implementation:** `M07-T02` (paused)
 
 [View the detailed task board](docs/plan/TASKS.md)
 

@@ -3,8 +3,11 @@
 - Status: Accepted
 - Date: 2026-07-30
 - Decision owner: I07-01
-- Implementation status: I07-01 complete as a non-authoritative exhaustive shadow; no selector,
-  required-CI cutover, compatibility cleanup, or legacy retirement is claimed
+- Implementation status: I07-01 is complete as a non-authoritative exhaustive shadow. I07-02's
+  neutral inventory, exact rollback-equivalence adapter, shared-state authority, and exhaustive
+  runner are implemented locally. The candidate shadow workflow is wired for measurement;
+  same-revision hosted equivalence, required-workflow cutover, and closure evidence remain pending.
+  No selector, compatibility cleanup, or legacy retirement is claimed
 
 ## Context
 
@@ -152,6 +155,90 @@ exit codes, and clean-input requirement. A download cache may supply immutable d
 build output, test output, proof output, mutation success, checkpoint success, and proof success
 are never read from cache.
 
+#### I07-02 implementation checkpoint
+
+The I07-02 neutral inventory is now the code-owned authority for the exact 130 workloads and 61
+proof units. It owns stable ids, labels, shell-free command/argument vectors, explicit
+dependencies, execution classes, and inert shared-state metadata without importing either
+scheduler. Its normalized digest is
+`sha256:bc8644fc1147166f98f905ec5fef1e6d81ef6e639008de9bd53e7256825abb94`.
+
+The legacy sequential CI-01 implementation remains available as a rollback mirror. A separate
+inert equivalence adapter compares all 130 ids, labels, commands, and argument vectors in exact
+order, proves set equality and exactly-once ownership, and retains the reviewed sequential-plan
+digest
+`sha256:448102bdfc5e0ed331f09038a2c554dcb930300ec560d35ac94469fc89d5897f`.
+Its terminal normalization rejects a passing claim for any missing, duplicated, skipped, not-run,
+cancelled, timed-out, failed, or unclosed workload and preserves inventory, workload, workspace,
+cancellation, and timeout failure authority while ignoring timing and sibling completion order.
+
+The local plan factory accepts only `EXHAUSTIVE`, defaults its authority to `REQUIRED`, and requires
+`SHADOW` to be explicit. The runner executes the dependency-derived prefix, at most two compatible
+proof pairs, the exclusive source-audit barrier, and the suffix. This is an implementation target,
+not a declaration that hosted CI has cut over: a same-revision clean comparison, hosted evidence,
+and workflow promotion must still pass before the retained sequential workflow stops deciding
+repository status.
+
+The shared-state authority classifies all 130 workloads exactly once:
+
+| Execution class                  | Count |
+| -------------------------------- | ----: |
+| `GLOBAL_EXCLUSIVE`               |     6 |
+| `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 |
+| `PACKAGE_TEST_EXCLUSIVE`         |     1 |
+| `PROOF_READ_ONLY`                |    66 |
+| `PROOF_OS_TEMP_ISOLATED`         |    55 |
+| `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 |
+
+Sixty proof pairs are eligible for pair-level overlap at concurrency two. Their verifier and root
+test remain dependency-ordered within the pair. `reference-host-web-source-audit` is the sole
+exclusive proof-pair barrier because its root test requires bounded workspace-temp authority.
+
+Only five verifier proofs may create child runtime probes and write to their runner-owned temp
+root: `publisher-catalog-pinning`, `publisher-bundle-publication`,
+`publisher-official-golden`, `publisher-invalid-source-matrix`, and
+`control-plane-bundle-store`. Only the `reference-host-web-source-audit` verifier/root-test pair
+may load the reviewed native addon; its verifier remains workspace-read-only.
+
+Every proof step receives a fresh authenticated OS temp root and a generated Node permission
+policy. Workspace writes, child processes, and native addons are denied unless its exact
+classification grants them; inherited `NODE_OPTIONS` is rejected, and a required preload denies
+TCP and UDP listener binding. Temp cleanup verifies directory identity before removal.
+
+Required authority accepts only close observations emitted by the non-injected shell-free process
+runner. Injected step, Git-reader, workspace-capture, guard, environment, spawn, signal, or timeout
+seams are rejected before execution; those seams remain available only to non-authoritative
+`SHADOW` contract tests. The hosted `SHADOW` candidate uses the real clean-input authority: before
+the first workload, the checked-out HEAD must equal the authenticated revision and porcelain-v2
+status must contain no staged, unstaged, non-ignored untracked, or submodule change. The later
+hosted `REQUIRED` cutover must retain that same authority.
+
+One monotonic terminal authority is shared from the host signal handlers through the scheduler and
+all active process groups. The first timeout, process error, nonzero close, execution error, SIGINT,
+or SIGTERM fixes the failure and exit code, stops new scheduling, and synchronously requests
+termination for every registered group. Later signals may escalate to SIGKILL but cannot replace
+the first cause. Results settle only after every active child emits `close` and isolation cleanup is
+awaited.
+
+The complete runner owns a 15-minute soft terminal deadline in addition to each workload timeout.
+It still awaits child `close`, cleanup, and boundary capture rather than fabricating a completed
+receipt. The hosted command therefore adds an 18-minute process ceiling with a 30-second kill grace,
+inside a 25-minute job ceiling. An uncooperative hang is stopped by that outer process boundary and
+cannot qualify as promotion evidence; dependency setup and contract checks retain separate hosted
+headroom.
+
+Three independent closing guards remain mandatory for the required runner:
+
+- a bounded no-follow seal over all reviewed build and Turbo output roots around the proof phase;
+- a bounded digest of all non-ignored untracked entries around the complete 130-step execution;
+  and
+- the neutral gate boundary's tracked-byte, executable-mode, tracked-file-count, and Git-index
+  identity comparison around the complete execution, including failure and cancellation paths.
+
+These authorities do not implement affected selection and do not retire the sequential path.
+`DEBT-I07-007` governs the rollback-only structures and their equivalence references; I07-05 may
+remove them only after Gate E passes.
+
 ### Phase 3 — I07-03: `SHADOW + AFFECTED`
 
 The selector may plan a reduced graph only after required exhaustive equivalence is complete. It
@@ -293,8 +380,11 @@ This ADR does not claim:
 
 - that I07-01's exhaustive shadow is authoritative;
 - that its first same-revision comparison completes I07-02's required equivalence program;
-- that `REQUIRED + EXHAUSTIVE` or either `AFFECTED` mode currently exists;
+- that the local `REQUIRED + EXHAUSTIVE` target is already the hosted required workflow;
+- that an `AFFECTED` selector or required affected mode currently exists;
 - that any debt-register entry is ready for removal;
+- that the retained sequential runner or rollback-equivalence adapter may be removed before
+  I07-05 and Gate E;
 - that the protocol task count, proof-gate count, or protocol claims have changed;
 - that selective CI is safe before Gate D;
 - that a cached proof result is acceptable;

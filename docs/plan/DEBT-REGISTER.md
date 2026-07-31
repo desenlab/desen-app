@@ -41,7 +41,7 @@ complete only when:
 | DEBT-I07-004 | OPEN   | M06-T11 current T09 receipts and source-string markers   | I07-01        | I07-04        | G07           |
 | DEBT-I07-005 | OPEN   | M07-T01 duplicated inventory of twelve live readers      | I07-01        | I07-04        | G07           |
 | DEBT-I07-006 | OPEN   | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
-| DEBT-I07-007 | OPEN   | Legacy sequential quality-gate runner and workflow path  | I07-01        | I07-05        | G12           |
+| DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and workflow path       | I07-01        | I07-05        | G12           |
 | DEBT-I07-008 | OPEN   | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
@@ -304,6 +304,18 @@ complete only when:
     - `executeQualityGate`
     - `executeDefaultQualityGate`
     - `activeChild`
+  - `scripts/ci/required-exhaustive-equivalence.mjs`
+    - `../run-ci-quality-gate.mjs`
+    - `createRetainedSequentialSteps`
+    - `validateRetainedSequentialPlan`
+    - `EXPECTED_RETAINED_PLAN_SHA256`
+    - `verifyRequiredExhaustiveInventoryEquivalence`
+  - `scripts/ci/test/required-exhaustive-equivalence.test.mjs`
+    - `../../run-ci-quality-gate.mjs`
+    - `createRetainedSequentialSteps`
+    - `EXPECTED_RETAINED_PLAN_SHA256`
+    - `verifyRequiredExhaustiveInventoryEquivalence`
+    - `retained-plan omission, reorder, argv substitution, and duplicate fail closed`
   - `tests/publisher-bundle-publication.test.mjs`
     - `createQualityGateSteps`
   - `tests/publisher-catalog-pinning.test.mjs`
@@ -314,15 +326,20 @@ complete only when:
     - `createQualityGateSteps`
   - `.github/workflows/ci.yml`
     - `node scripts/run-ci-quality-gate.mjs`
-- Reason retained: the existing sequential runner and hosted workflow are the only authoritative
-  quality gate until the modular graph proves equivalent inventory, failure, cancellation,
-  workspace-integrity, and hosted behavior. Removing them earlier would turn the migration itself
-  into an unproven reduction of coverage.
+- Reason retained: the existing sequential runner and hosted workflow remain the rollback
+  authority until the modular graph proves equivalent inventory, failure, cancellation,
+  workspace-integrity, and hosted behavior. The required-exhaustive equivalence module and its
+  focused test are rollback-only adapters: they import and compare the retained sequential plan,
+  but they are not required-execution authority. Removing any one of these structures early would
+  turn the migration itself into an unproven reduction of coverage.
 - Objective removal trigger: ADR 0011's exhaustive, affected-selector, and retirement cleanup
   gates all pass; the modular `REQUIRED + EXHAUSTIVE` schedule covers every legacy workload from
   fresh inputs; unknown selection always becomes `EXHAUSTIVE`; no proof success is read from cache;
   hosted pass/fail and cancellation equivalence is archived; and a rollback exercise proves the
-  retained legacy path is no longer needed.
+  retained legacy path is no longer needed. I07-05 then removes the legacy runner, its tests, the
+  hosted legacy invocation, and both rollback-only required-equivalence paths together; any
+  enduring required receipt normalization must live under required-only authority with no retained
+  sequential import or digest comparison.
 - Must close by gate: `G12`
 - Exact verification and zero-reference rule:
   - `node --test scripts/test/ci-quality-gate.test.mjs`
@@ -333,9 +350,13 @@ complete only when:
     malformed graph, cancellation, and first-failure cases
   - run the final hosted workflow and archive its URL and timing
   - scoped zero-reference verification must cover every exact DEBT-I07-007 target above and find
-    none of its machine-owned symbols after retirement. The `scripts/run-ci-quality-gate.mjs` path
-    may remain only if it has become a modular entry point without the legacy symbols; aggregate
-    package compatibility commands may remain, but they may not be hosted execution authority.
+    none of its machine-owned symbols after retirement. Both
+    `scripts/ci/required-exhaustive-equivalence.mjs` and
+    `scripts/ci/test/required-exhaustive-equivalence.test.mjs` must be absent rather than retained
+    as adapters after the sequential authority is removed. The `scripts/run-ci-quality-gate.mjs`
+    path may remain only if it has become a modular entry point without the legacy symbols;
+    aggregate package compatibility commands may remain, but they may not be hosted execution
+    authority.
 - Closure evidence: `PENDING` — record commit, pull request, legacy/modular equivalence artifact
   SHA-256, hosted exhaustive and affected run URLs, cancellation receipt, and final workflow
   SHA-256.
@@ -361,9 +382,11 @@ complete only when:
     - `../../run-ci-quality-gate.mjs`
     - `PROOF_ENTRIES`
     - `createQualityGateSteps`
-- Reason retained: I07-01 must derive its exact 130-step candidate from the authoritative legacy
-  inventory and run it in a visibly non-authoritative workflow. Keeping this adapter explicit
-  prevents an unreviewed second workload list while equivalence is still being measured.
+- Reason retained: the active Phase A candidate now executes all 130 steps from the neutral
+  inventory through the required-exhaustive runner, but it remains visibly non-authoritative while
+  same-revision equivalence is measured. The former modular runner and its tests remain only as a
+  temporary comparison and rollback adapter; keeping those exact targets explicit prevents their
+  accidental survival after required authority is proven.
 - Objective removal trigger: I07-02 records same-revision local and hosted equivalence, introduces
   code-owned shared-state/output/port/temp-path classification, promotes the exhaustive modular
   path to required authority, and either removes this workflow or renames and rewires it so no

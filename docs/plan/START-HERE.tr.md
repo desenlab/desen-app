@@ -25,7 +25,7 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-`I07-01` tamamlandı; sıradaki iş `I07-02` adlı sayılmayan altyapı görevidir. M07-T02 başlamadı
+`I07-01` tamamlandı; aktif iş `I07-02` adlı sayılmayan altyapı görevidir. M07-T02 başlamadı
 ve bu bağımlılık tamamlanana kadar bilerek bekliyor. I07-01 aynı 130 işi iki güvenli işçiyle
 modüler çalıştırdı; yerel ve GitHub koşularında hem eski hem yeni yol geçti. Eski sistem hâlâ sonucu
 belirler. I07-02'nin amacı ortak dosya, çıktı, port ve geçici-dizin kullanımını kodla sınıflandırmak,

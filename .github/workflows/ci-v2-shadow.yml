@@ -17,7 +17,10 @@ jobs:
   modular-shadow:
     name: Exhaustive modular shadow
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # The runner owns a 15-minute soft deadline; the command wrapper enforces an
+    # 18-minute process ceiling plus 30-second kill grace. The remaining hosted
+    # budget covers setup, contract checks, receipt emission, and runner variance.
+    timeout-minutes: 25
     env:
       CI: "true"
 
@@ -61,8 +64,16 @@ jobs:
           node scripts/ci/verify-infrastructure-debt.mjs
           node --test scripts/ci/test/infrastructure-debt.test.mjs
 
-      - name: Verify modular runner contracts
-        run: node --test scripts/ci/test/modular-quality-gate.test.mjs
+      - name: Verify required-exhaustive candidate contracts
+        run: |
+          node --test scripts/ci/test/exhaustive-workload-inventory.test.mjs
+          node --test scripts/ci/test/exhaustive-gate-boundary.test.mjs
+          node --test scripts/ci/test/shared-state-authority.test.mjs
+          node --test scripts/ci/test/required-exhaustive-equivalence.test.mjs
+          node --test scripts/ci/test/required-exhaustive-quality-gate.test.mjs
+          node --test scripts/ci/test/modular-quality-gate.test.mjs
 
       - name: Run exhaustive modular shadow
-        run: node scripts/ci/run-modular-quality-gate.mjs
+        env:
+          DESEN_CI_AUTHORITY: SHADOW
+        run: timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-exhaustive-quality-gate.mjs

@@ -205,8 +205,31 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "Exhaustive modular shadow",
     "Run exhaustive modular shadow",
   ]);
+  const legacyAuthority = manifest.entries[6];
+  assert.equal(legacyAuthority.targets.length, 9);
   assert.deepEqual(
-    manifest.entries[6].targets.slice(2, 6).map((target) => target.path),
+    legacyAuthority.targets.slice(2, 4).map((target) => target.path),
+    [
+      "scripts/ci/required-exhaustive-equivalence.mjs",
+      "scripts/ci/test/required-exhaustive-equivalence.test.mjs",
+    ],
+  );
+  assert.deepEqual(legacyAuthority.targets[2].symbols, [
+    "../run-ci-quality-gate.mjs",
+    "createRetainedSequentialSteps",
+    "validateRetainedSequentialPlan",
+    "EXPECTED_RETAINED_PLAN_SHA256",
+    "verifyRequiredExhaustiveInventoryEquivalence",
+  ]);
+  assert.deepEqual(legacyAuthority.targets[3].symbols, [
+    "../../run-ci-quality-gate.mjs",
+    "createRetainedSequentialSteps",
+    "EXPECTED_RETAINED_PLAN_SHA256",
+    "verifyRequiredExhaustiveInventoryEquivalence",
+    "retained-plan omission, reorder, argv substitution, and duplicate fail closed",
+  ]);
+  assert.deepEqual(
+    legacyAuthority.targets.slice(4, 8).map((target) => target.path),
     [
       "tests/publisher-bundle-publication.test.mjs",
       "tests/publisher-catalog-pinning.test.mjs",
@@ -465,6 +488,36 @@ test("enforces scoped zero references only after an entry is CLOSED", async () =
       await readFile(path.join(fixture.root, "scripts/ci/infrastructure-debt.json"), "utf8"),
       /CI v2 shadow/u,
     );
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy closure", async () => {
+  const fixture = await createFixture();
+  try {
+    fixture.manifest.entries[6].status = "CLOSED";
+    await fixture.recordEvidence(6, "CLOSURE");
+    await fixture.rewriteManifestAndRegister();
+    await writeRelative(fixture.root, "docs/plan/TASKS.md", taskBoard({ "I07-05": "DONE" }));
+
+    await assert.rejects(
+      verifyInfrastructureDebt({ workspaceRoot: fixture.root }),
+      expectCode("INFRASTRUCTURE_DEBT_CLOSED_REFERENCE_PRESENT"),
+    );
+
+    for (const target of fixture.manifest.entries[6].targets) {
+      const absolutePath = path.join(fixture.root, ...target.path.split("/"));
+      let targetText = await readFile(absolutePath, "utf8");
+      for (const symbol of target.symbols) targetText = targetText.replaceAll(symbol, "");
+      await writeRelative(fixture.root, target.path, targetText);
+    }
+    const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
+    assert.deepEqual(receipt.statusCounts, {
+      OPEN: 7,
+      READY_FOR_REMOVAL: 0,
+      CLOSED: 1,
+    });
   } finally {
     await fixture.cleanup();
   }

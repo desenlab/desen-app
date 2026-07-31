@@ -189,6 +189,26 @@
           ]
         },
         {
+          "path": "scripts/ci/required-exhaustive-equivalence.mjs",
+          "symbols": [
+            "../run-ci-quality-gate.mjs",
+            "createRetainedSequentialSteps",
+            "validateRetainedSequentialPlan",
+            "EXPECTED_RETAINED_PLAN_SHA256",
+            "verifyRequiredExhaustiveInventoryEquivalence"
+          ]
+        },
+        {
+          "path": "scripts/ci/test/required-exhaustive-equivalence.test.mjs",
+          "symbols": [
+            "../../run-ci-quality-gate.mjs",
+            "createRetainedSequentialSteps",
+            "EXPECTED_RETAINED_PLAN_SHA256",
+            "verifyRequiredExhaustiveInventoryEquivalence",
+            "retained-plan omission, reorder, argv substitution, and duplicate fail closed"
+          ]
+        },
+        {
           "path": "tests/publisher-bundle-publication.test.mjs",
           "symbols": ["createQualityGateSteps"]
         },
