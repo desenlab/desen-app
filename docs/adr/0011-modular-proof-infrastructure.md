@@ -3,7 +3,7 @@
 - Status: Accepted
 - Date: 2026-07-30
 - Decision owner: I07-01
-- Implementation status: I07-01 in progress; its candidate is non-authoritative, and no selector,
+- Implementation status: I07-01 complete as a non-authoritative exhaustive shadow; no selector,
   required-CI cutover, compatibility cleanup, or legacy retirement is claimed
 
 ## Context
@@ -33,7 +33,7 @@ weaken any current proof, root mutation test, boundary check, or cancellation ru
 
 ## Decision
 
-I07-01 will define modular proof infrastructure with three separate layers:
+I07-01 defines modular proof infrastructure with three separate layers:
 
 1. **Frozen evidence** preserves what a completed task proved at task time.
 2. **Current checkpoint** authenticates the exact live successor state accepted by the present
@@ -291,11 +291,11 @@ selector that cannot establish its base and complete changed-path set runs `EXHA
 
 This ADR does not claim:
 
-- that I07-01 is implemented or complete;
-- that I07-01 is complete or its exhaustive shadow is authoritative;
+- that I07-01's exhaustive shadow is authoritative;
+- that its first same-revision comparison completes I07-02's required equivalence program;
 - that `REQUIRED + EXHAUSTIVE` or either `AFFECTED` mode currently exists;
 - that any debt-register entry is ready for removal;
-- that the present proof count, execution plan, or hosted timing has changed;
+- that the protocol task count, proof-gate count, or protocol claims have changed;
 - that selective CI is safe before Gate D;
 - that a cached proof result is acceptable;
 - that any frozen artifact may be regenerated from current source; or

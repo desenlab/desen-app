@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-30
+Last updated: 2026-07-31
 
 ## Plain-language status
 
@@ -450,15 +450,19 @@ work.
 P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the
 Publisher conformance target remain `PLANNED`.
 
-I07-01 pauses implementation work before M07-T02 so proof-environment growth does not keep
-rewriting already closed task readers. The migration separates immutable task-time evidence from
-one current-reader checkpoint authority and one derived execution schedule, while an exhaustive
-modular candidate runs in shadow against the still-authoritative legacy gate. This infrastructure
-work changes no protocol claim, implementation-task count, or proof-gate count. Every retained
-receipt bridge, compatibility reader, sequential runner, and shadow component has a registered
-removal trigger in `docs/plan/DEBT-REGISTER.md`; I07-04 owns all G07-due current-reader cleanup,
-while I07-05 owns legacy sequential-runner retirement by G12. M07-T02 remains `NOT_STARTED` and has
-an explicit I07-02 dependency.
+I07-01 is complete. The proof environment now separates immutable task-time evidence from one
+current-reader checkpoint authority and one derived 130-step execution schedule. The checkpoint
+authenticates six frozen artifacts and twelve live readers; 52 focused hostile and contract tests
+pass; eight temporary structures have machine-enforced owners and deadlines. On candidate commit
+`f12864e5353441b13115c99afa14d2303e55cf74`, the local legacy and modular paths both passed in
+459.94 and 317.95 seconds, respectively. Hosted legacy and modular gates also both passed in 690
+and 518 seconds. The exact comparison is archived in the
+[I07-01 baseline](docs/proof/baselines/i07-01-modular-proof-shadow.json). This is measured
+`SHADOW + EXHAUSTIVE` evidence, not CI-authority cutover. The
+legacy gate remains authoritative; I07-02 must classify shared state and complete required
+equivalence. This work changes no protocol claim, implementation-task count, or proof-gate count.
+I07-04 owns all G07-due current-reader cleanup, while I07-05 owns legacy sequential-runner
+retirement by G12. M07-T02 remains `NOT_STARTED` and has an explicit I07-02 dependency.
 
 ## Current milestone
 
@@ -532,9 +536,10 @@ an explicit I07-02 dependency.
   `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
   `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
   `M07-T01 — Content-addressed bundle store with immutable revision entries`
-- Active infrastructure task:
-  `I07-01 — Current-reader checkpoint, machine-enforced cleanup register, and exhaustive modular shadow candidate`
-- Completed operational task: `CI-01 — Secure single-pass CI orchestration`
+- Next infrastructure task:
+  `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
+- Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
+  `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`
 - Next implementation task:
   `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`
 - Status: M07-T01 is complete; M07-T02 remains `NOT_STARTED` and is intentionally paused through
@@ -897,12 +902,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 
 ## Current infrastructure work and next implementation task
 
-Complete `I07-01`, then `I07-02`, before implementation resumes. The migration must preserve the
-complete existing workload universe, keep the legacy gate authoritative during shadowing, run no
-proof generator or writer, trust no cached success, and make every unknown or ambiguous selection
-condition expand to `EXHAUSTIVE`. Exact reader checkpoints and the machine-enforced cleanup
-register must prevent a future reader hardening from rewriting unrelated frozen artifacts while
-retaining an auditable current trust root.
+Complete `I07-02` before implementation resumes. I07-01 already preserved the complete existing
+workload universe, established the current-reader checkpoint and cleanup register, and archived a
+successful same-revision local and hosted shadow comparison. The migration must keep the legacy
+gate authoritative until I07-02 classifies shared mutable state and proves the broader required
+equivalence program. It must still run no proof generator or writer, trust no cached success, and
+make every unknown or ambiguous selection condition expand to `EXHAUSTIVE`.
 
 After I07-02 proves exact legacy/modular coverage parity and cuts required CI over to exhaustive
 execution with code-owned shared-state classification, implement
