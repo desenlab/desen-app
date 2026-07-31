@@ -450,6 +450,16 @@ work.
 P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the
 Publisher conformance target remain `PLANNED`.
 
+I07-01 pauses implementation work before M07-T02 so proof-environment growth does not keep
+rewriting already closed task readers. The migration separates immutable task-time evidence from
+one current-reader checkpoint authority and one derived execution schedule, while an exhaustive
+modular candidate runs in shadow against the still-authoritative legacy gate. This infrastructure
+work changes no protocol claim, implementation-task count, or proof-gate count. Every retained
+receipt bridge, compatibility reader, sequential runner, and shadow component has a registered
+removal trigger in `docs/plan/DEBT-REGISTER.md`; I07-04 owns all G07-due current-reader cleanup,
+while I07-05 owns legacy sequential-runner retirement by G12. M07-T02 remains `NOT_STARTED` and has
+an explicit I07-02 dependency.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
@@ -522,11 +532,13 @@ Publisher conformance target remain `PLANNED`.
   `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
   `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
   `M07-T01 — Content-addressed bundle store with immutable revision entries`
-- Active task: none; M07-T01 is complete and M07-T02 has not started
+- Active infrastructure task:
+  `I07-01 — Current-reader checkpoint, machine-enforced cleanup register, and exhaustive modular shadow candidate`
 - Completed operational task: `CI-01 — Secure single-pass CI orchestration`
 - Next implementation task:
   `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`
-- Status: M07-T01 is complete; M07-T02 is ready to begin; G07 remains open
+- Status: M07-T01 is complete; M07-T02 remains `NOT_STARTED` and is intentionally paused through
+  I07-02; G07 remains open
 
 ## Completed preparation
 
@@ -883,9 +895,17 @@ pre-release targeting exact commit `b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca`. I
 explicitly labeled as a Working Draft, and the release operation changed no frozen protocol byte.
 `PF-004` records the completed release hygiene.
 
-## Next task
+## Current infrastructure work and next implementation task
 
-Implement
+Complete `I07-01`, then `I07-02`, before implementation resumes. The migration must preserve the
+complete existing workload universe, keep the legacy gate authoritative during shadowing, run no
+proof generator or writer, trust no cached success, and make every unknown or ambiguous selection
+condition expand to `EXHAUSTIVE`. Exact reader checkpoints and the machine-enforced cleanup
+register must prevent a future reader hardening from rewriting unrelated frozen artifacts while
+retaining an auditable current trust root.
+
+After I07-02 proves exact legacy/modular coverage parity and cuts required CI over to exhaustive
+execution with code-owned shared-state classification, implement
 `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`. Treat every
 stored byte sequence as untrusted on ingress: parse it under bounded rules, validate the exact
 DESEN 0.1.0 Bundle, independently recalculate and compare its claimed revision and available

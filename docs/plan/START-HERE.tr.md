@@ -25,6 +25,13 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
+Şu anda aktif iş `I07-01` adlı sayılmayan altyapı görevidir. M07-T02 başlamadı; görev panosundaki
+I07-02 bağımlılığı nedeniyle bilerek bekliyor. Amaç kanıt kapsamını azaltmak değil, aynı 130 işi
+daha modüler ve ölçülebilir çalıştırmaktır. Eski sistem ilk aşamada sonucu belirlemeye devam eder;
+yeni sistem bütün işleri gölge olarak çalıştırır. Geçici eski blokların kaldırma sahibi ve son
+tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından kontrol edilir. Teknik karar
+ve güvenlik kapıları [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) içinde kayıtlıdır.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

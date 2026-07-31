@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.ci.infrastructure-debt.v1",
+  "entries": [
+    {
+      "id": "DEBT-I07-001",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "symbols": [
+            "G05_COMPATIBILITY_OWNERSHIP_PATHS",
+            "REVIEWED_CURRENT_G05_RECEIPTS",
+            "TRACKED_FILE_OVERRIDE_PATHS"
+          ]
+        },
+        {
+          "path": "tests/publisher-publish-result.test.mjs",
+          "symbols": [
+            "currentCompatibilityBytes",
+            "reviewedCurrentG05Receipts",
+            "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-002",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "symbols": [
+            "M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH",
+            "M05_SOURCE_AUDIT_TEST_RELATIVE_PATH",
+            "APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS",
+            "captureCompatibilitySourceBytes"
+          ]
+        },
+        {
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "symbols": ["compatibilitySources", "compatibilitySourceBytes"]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-003",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "symbols": [
+            "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
+            "EXECUTION_PREFLIGHT_COMPATIBILITY_READER",
+            "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
+            "APPROVED_CURRENT_COMPATIBILITY_PATHS",
+            "assertApprovedCurrentCompatibilityBytes",
+            "authenticateCurrentCompatibilityReaders"
+          ]
+        },
+        {
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "symbols": [
+            "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
+            "[compatibility] externally tracks every current T02 through T08 proof reader",
+            "[compatibility] detects tamper in each externally anchored T02 through T08 reader"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-004",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "symbols": [
+            "APPROVED_CURRENT_T09_SUCCESSOR_PATHS",
+            "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
+            "REQUIRED_CURRENT_T09_PROOF_MARKERS",
+            "REQUIRED_CURRENT_T09_TEST_MARKERS",
+            "currentT09SuccessorReceipt",
+            "authenticateLiveCurrentT09Successors",
+            "authenticateCurrentT09TrackedInputs",
+            "assertCurrentT09CompatibilityMarkers"
+          ]
+        },
+        {
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "symbols": [
+            "[authority] distinguishes semantic coordination drift from frozen surface drift",
+            "BUNDLE_PUBLICATION_PROOF_LIBRARY",
+            "BUNDLE_PUBLICATION_ROOT_TEST",
+            "currentT09ProofBytes",
+            "currentT09RootTestBytes",
+            "approvedCurrentT09",
+            "unreviewedT09ProofBytes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-005",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "symbols": ["HISTORICAL_COMPATIBILITY_READERS", "currentReaderPaths"]
+        },
+        {
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "symbols": ["HISTORICAL_COMPATIBILITY_READERS", "currentReaderPaths"]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-006",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "symbols": [
+            "M06_T05_VALIDATOR_SUCCESSOR",
+            "uniqueRuntimeResolutionModule",
+            "assertPinnedRuntimeResolutionDigest",
+            "normalizeReviewedValidatorSuccessor",
+            "verifyReferenceHostWebValidatorSuccessorSources"
+          ]
+        },
+        {
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "symbols": [
+            "verifyReferenceHostWebValidatorSuccessorSources",
+            "admits only the source-pinned M06-T05 Validator runtime successor"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-007",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-05",
+      "deadline": "G12",
+      "targets": [
+        {
+          "path": "scripts/run-ci-quality-gate.mjs",
+          "symbols": [
+            "createQualityGateSteps",
+            "runStepSequence",
+            "executeQualityGate",
+            "executeDefaultQualityGate",
+            "activeChild"
+          ]
+        },
+        {
+          "path": "scripts/test/ci-quality-gate.test.mjs",
+          "symbols": [
+            "createQualityGateSteps",
+            "runStepSequence",
+            "executeQualityGate",
+            "executeDefaultQualityGate",
+            "activeChild"
+          ]
+        },
+        {
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "symbols": ["createQualityGateSteps"]
+        },
+        {
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "symbols": ["createQualityGateSteps"]
+        },
+        {
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "symbols": ["createQualityGateSteps"]
+        },
+        {
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "symbols": ["createQualityGateSteps"]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": ["node scripts/run-ci-quality-gate.mjs"]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-008",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-02",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": ".github/workflows/ci-v2-shadow.yml",
+          "symbols": [
+            "CI v2 shadow",
+            "modular-shadow",
+            "Exhaustive modular shadow",
+            "Run exhaustive modular shadow"
+          ]
+        },
+        {
+          "path": "scripts/ci/run-modular-quality-gate.mjs",
+          "symbols": [
+            "../run-ci-quality-gate.mjs",
+            "PROOF_ENTRIES",
+            "createQualityGateSteps",
+            "executeQualityGate",
+            "validateQualityGatePlan"
+          ]
+        },
+        {
+          "path": "scripts/ci/test/modular-quality-gate.test.mjs",
+          "symbols": ["../../run-ci-quality-gate.mjs", "PROOF_ENTRIES", "createQualityGateSteps"]
+        }
+      ]
+    }
+  ]
+}

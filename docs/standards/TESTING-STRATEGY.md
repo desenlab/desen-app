@@ -46,3 +46,18 @@ comparison, mutation, or atomic-write checks.
 CI must never generate or repair tracked proof artifacts before verifying them. It must not trust
 changed-file filters, cached proof success, or timing output. A change to the legacy prerequisite
 inventory or exact execution plan requires an explicit reviewed pin update.
+
+I07 introduces modular execution in evidence-first phases. Its first
+`SHADOW + EXHAUSTIVE` candidate still runs every validated workload. Proof verifier/root-test pairs
+may overlap at concurrency two only while the legacy gate remains authoritative; I07-02 must prove
+their shared-state and output isolation before the schedule becomes required. Later `AFFECTED`
+planning cannot become a required shortcut until it has complete tracked-path ownership, reverse
+dependency closure, exact exhaustive comparison, and fail-closed unknown-to-exhaustive behavior.
+Even after promotion, `main`, release, and manual-audit runs remain exhaustive and never trust a
+cached proof success.
+
+Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
+one live reader through the reviewed checkpoint append procedure only when every previously pinned
+checkpoint digest, frozen artifact, claim/nonclaim scope, and historical projection remains
+unchanged and the full existing plus new regression suite passes. The checkpoint is inert data and
+cannot select executable commands.

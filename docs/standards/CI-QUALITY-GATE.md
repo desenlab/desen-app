@@ -114,3 +114,37 @@ When a proof task or prerequisite is added:
 
 Changing a pinned digest without reviewing the corresponding readable inventory is not an
 acceptable update.
+
+## I07 modular migration
+
+I07-01 adds a non-authoritative `SHADOW + EXHAUSTIVE` candidate beside this gate. The candidate
+imports this gate's validated proof inventory and exact normalized plan rather than maintaining a
+second command list. It executes every global step and every verifier/root-test pair from fresh
+inputs. Candidate proof pairs may run with concurrency two only while the legacy result remains
+authoritative. It does not select by changed paths, read cached proof success, generate evidence,
+or write tracked files.
+
+The shadow also validates one hash-chained current-reader checkpoint whose genesis digest is pinned
+outside the manifest by the I07-01 baseline. Frozen task artifacts remain the historical claim
+authority; the checkpoint records reviewed live proof/test readers that can legitimately receive
+security hardening after task completion. The checkpoint never chooses a command. Executable
+verifier/test ownership remains in reviewed code.
+
+During I07-01 the existing sequential gate remains the sole pass/fail authority. The `CI v2 shadow`
+workflow must not be configured as required before I07-02. I07-02 may promote modular execution to
+`REQUIRED + EXHAUSTIVE` only after the same revision proves:
+
+- exact plan and workload-set equality;
+- exactly-once coverage for every global step and proof pair;
+- identical pass/fail outcomes with no tracked-byte or index drift;
+- safe cancellation and sibling-process termination; and
+- code-owned shared-state, build-output, port, and temporary-path classification; and
+- a recorded local and hosted timing comparison.
+
+I07-03 may calculate an `AFFECTED` plan only in shadow. Unknown paths, statuses, file modes,
+dependency or policy changes, missing Git authority, and any ambiguous classification must expand
+to `EXHAUSTIVE`. Promotion is reserved for I07-04 after ADR 0011's frozen threshold passes.
+`EXHAUSTIVE` fresh execution remains mandatory on `main`, release candidates, and manual audits.
+The current-reader bridges remain owned by I07-04, and the sequential runner remains owned by
+I07-05, until their exact machine-checked removal conditions in
+`docs/plan/DEBT-REGISTER.md` are satisfied.
