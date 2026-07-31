@@ -22,7 +22,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07:** `█░░░░░░░░░░` **1 / 11 tasks complete (9%)**
 
-**Proof gates:** **7 / 13 complete** · **Next:** `M07-T02`
+**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-02` · **Next implementation:** `M07-T02` (paused)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -40,6 +40,17 @@ milestones.
 exact bytes conflict, and concurrent writers cannot replace or mix that winner; unsafe filesystem
 paths fail closed. Integrity verification, channels, activation, last-known-good recovery, and G07
 remain later work.
+
+**I07-01 infrastructure checkpoint:** the proof environment now separates frozen historical
+evidence, one current-reader checkpoint authority, and a derived 130-step modular schedule. On the
+same candidate commit, both local paths passed; the measured modular run was 30.87% shorter. Both
+hosted workflows also passed, with the modular gate 24.93% shorter. The legacy exhaustive gate
+remains the sole pass/fail authority until I07-02 proves required-exhaustive equivalence and
+classifies shared state. Every temporary bridge, shadow adapter, and legacy component has a
+machine-checked removal owner and deadline in the
+[debt register](docs/plan/DEBT-REGISTER.md). The exact comparison is preserved in the
+[I07-01 baseline](docs/proof/baselines/i07-01-modular-proof-shadow.json); implementation progress
+remains 75/145.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
@@ -106,10 +117,12 @@ packages/
 - [Project status](PROJECT-STATUS.md)
 - [Master implementation plan](docs/plan/MASTER-PLAN.md)
 - [Task board](docs/plan/TASKS.md)
+- [Infrastructure debt and cleanup register](docs/plan/DEBT-REGISTER.md)
 - [Strategic validation checkpoints](docs/plan/STRATEGIC-VALIDATION.md)
 - [SC-01 DESEN–A2UI comparison](docs/proof/SC-01-DESEN-A2UI-COMPARISON.md)
 - [DTCG 2025.10 compatibility profile](docs/profiles/DTCG-2025.10-COMPATIBILITY.md)
 - [ADR 0009: protocol positioning and interoperability](docs/adr/0009-sc-01-protocol-positioning-and-interoperability.md)
+- [ADR 0011: modular proof infrastructure](docs/adr/0011-modular-proof-infrastructure.md)
 - [Proof matrix](docs/proof/PROOF-MATRIX.md)
 - [Structural-validation proof](docs/proof/PROTOCOL-STRUCTURAL-VALIDATION.md)
 - [Semantic-foundation proof](docs/proof/PROTOCOL-SEMANTIC-FOUNDATION.md)

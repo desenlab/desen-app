@@ -1,0 +1,155 @@
+{
+  "task": "I07-01",
+  "date": "2026-07-31",
+  "repository": "https://github.com/desenlab/desen-app",
+  "pullRequest": {
+    "number": 15,
+    "url": "https://github.com/desenlab/desen-app/pull/15",
+    "measuredCommit": "f12864e5353441b13115c99afa14d2303e55cf74"
+  },
+  "authority": {
+    "legacy": "REQUIRED + EXHAUSTIVE",
+    "candidate": "SHADOW + EXHAUSTIVE",
+    "requiredCutover": false,
+    "affectedSelection": false,
+    "legacyRetired": false
+  },
+  "inventory": {
+    "legacyPlanSha256": "448102bdfc5e0ed331f09038a2c554dcb930300ec560d35ac94469fc89d5897f",
+    "modularScheduleSha256": "28040878bca4748500f08b0f946a409a6abc4099c80f432bc9ac33d7b5342575",
+    "steps": 130,
+    "sequentialPrefixSteps": 6,
+    "proofPairs": 61,
+    "sequentialSuffixSteps": 2,
+    "proofPairConcurrency": 2,
+    "trackedFilesGuarded": 849,
+    "workloadFiltering": false
+  },
+  "currentReaderCheckpoint": {
+    "profile": "desen.ci.proof-reader-checkpoints.v1",
+    "headSha256": "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
+    "reviewedChainSha256": ["5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8"],
+    "checkpoints": 1,
+    "frozenArtifacts": 6,
+    "currentReaders": 12,
+    "liveVerification": "PASS"
+  },
+  "infrastructureDebt": {
+    "profile": "desen.ci.infrastructure-debt.v1",
+    "entries": 8,
+    "open": 8,
+    "readyForRemoval": 0,
+    "closed": 0,
+    "g07Owners": ["I07-02", "I07-04"],
+    "g12Owners": ["I07-05"],
+    "liveVerification": "PASS"
+  },
+  "focusedValidation": {
+    "tests": 52,
+    "passed": 52,
+    "failed": 0,
+    "checkpointHostileTests": 22,
+    "debtLifecycleAndHostileTests": 14,
+    "modularRunnerContractTests": 16,
+    "eslint": "PASS",
+    "prettier": "PASS",
+    "diffCheck": "PASS"
+  },
+  "local": {
+    "commit": "f12864e5353441b13115c99afa14d2303e55cf74",
+    "workspaceBeforeAndAfter": "CLEAN",
+    "legacy": {
+      "command": "/usr/bin/time -p node scripts/run-ci-quality-gate.mjs",
+      "status": "PASS",
+      "proofs": 61,
+      "trackedFilesGuarded": 849,
+      "receiptDurationSeconds": 459.8,
+      "wallDurationSeconds": 459.94
+    },
+    "modular": {
+      "command": "/usr/bin/time -p node scripts/ci/run-modular-quality-gate.mjs",
+      "status": "PASS",
+      "successfulFullRuns": 2,
+      "stepsPassed": 130,
+      "wallDurationSeconds": 317.95
+    },
+    "comparison": {
+      "terminalStatusEqual": true,
+      "inventoryEqual": true,
+      "trackedWorkspaceEqual": true,
+      "secondsSaved": 141.99,
+      "reductionPercent": 30.87,
+      "speedup": 1.45
+    }
+  },
+  "hosted": {
+    "commit": "f12864e5353441b13115c99afa14d2303e55cf74",
+    "legacy": {
+      "workflow": "CI",
+      "job": "Quality gate",
+      "runId": 30661586349,
+      "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30661586349",
+      "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30661586349/job/91258833192",
+      "conclusion": "success",
+      "runStartedAt": "2026-07-31T20:05:45Z",
+      "runUpdatedAt": "2026-07-31T20:17:39Z",
+      "runDurationSeconds": 714,
+      "jobStartedAt": "2026-07-31T20:05:48Z",
+      "jobCompletedAt": "2026-07-31T20:17:38Z",
+      "jobDurationSeconds": 710,
+      "gateStartedAt": "2026-07-31T20:06:05Z",
+      "gateCompletedAt": "2026-07-31T20:17:35Z",
+      "gateDurationSeconds": 690
+    },
+    "modular": {
+      "workflow": "CI v2 shadow",
+      "job": "Exhaustive modular shadow",
+      "runId": 30661586495,
+      "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30661586495",
+      "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30661586495/job/91258833174",
+      "conclusion": "success",
+      "runStartedAt": "2026-07-31T20:05:46Z",
+      "runUpdatedAt": "2026-07-31T20:14:50Z",
+      "runDurationSeconds": 544,
+      "jobStartedAt": "2026-07-31T20:05:54Z",
+      "jobCompletedAt": "2026-07-31T20:14:49Z",
+      "jobDurationSeconds": 535,
+      "gateStartedAt": "2026-07-31T20:06:09Z",
+      "gateCompletedAt": "2026-07-31T20:14:47Z",
+      "gateDurationSeconds": 518
+    },
+    "comparison": {
+      "sameRevision": true,
+      "terminalStatusEqual": true,
+      "gateSecondsSaved": 172,
+      "gateReductionPercent": 24.93,
+      "gateSpeedup": 1.33,
+      "jobSecondsSaved": 175,
+      "jobReductionPercent": 24.65,
+      "runSecondsSaved": 170,
+      "runReductionPercent": 23.81
+    }
+  },
+  "security": {
+    "proofGeneratorsRun": false,
+    "proofWritersRun": false,
+    "proofCacheReads": false,
+    "changedFileFiltering": false,
+    "dependencyDownloadCacheOnly": true,
+    "trackedWorkspaceAndIndexGuard": true,
+    "selectionMode": "EXHAUSTIVE_ONLY",
+    "validatedLegacyInventoryDerived": true,
+    "failFastSiblingTermination": true,
+    "processGroupSignalForwarding": true,
+    "shadowCanAuthorizePass": false
+  },
+  "limitations": [
+    "I07-01 records one same-revision hosted comparison and two successful local modular runs; it does not satisfy I07-02's required exhaustive equivalence program by itself.",
+    "Shared build-output, temporary-path, port, and mutable-state ownership is not yet code-owned; I07-02 must classify and mutation-test it before required cutover.",
+    "The modular workflow remains non-authoritative. The legacy CI workflow is still the sole repository pass/fail gate.",
+    "Local and hosted timing varies with hardware and shared-runner load; the comparison claims only the archived measurements above.",
+    "An earlier local attempt overlapped repository edits and CPU-intensive review work. The tracked-workspace guard rejected that attempt, so it is excluded from timing and equivalence evidence.",
+    "All eight registered infrastructure-debt entries remain open and must close under their named I07 owners and gate deadlines."
+  ],
+  "next": "I07-02"
+}

@@ -14,6 +14,9 @@ the later authorized creation of `desenlab/desen-app` and the first successful `
 historical baseline files retain the state that was true when each check occurred.
 `ci-01-single-pass.json` records the successful before/after hosted-run comparison for the
 fail-closed single-pass quality gate.
+`i07-01-modular-proof-shadow.json` records the same-revision local and hosted comparison for the
+non-authoritative exhaustive modular candidate, including its exact legacy inventory, checkpoint
+genesis, open cleanup debt, timing, and remaining cutover limitations.
 
 Evidence files must state the command, scope, source commit when one exists, result, and known
 limitations. Generated proof artifacts additionally record SHA-256 hashes at their owning task.

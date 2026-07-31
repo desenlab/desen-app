@@ -37,16 +37,41 @@ explicitly parallel branches inside M11 may progress independently.
 external release hygiene and does not block local implementation. Until each task is complete, no
 document may claim the corresponding clean-checkout or remote-CI evidence.
 
-## Operational work — excluded from the 145 implementation-task count
+## Operational and infrastructure work — excluded from the 145 implementation-task count
 
-| ID    | Status | Depends on                           | Deliverable                                                                                        | Evidence                                      |
-| ----- | ------ | ------------------------------------ | -------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| CI-01 | DONE   | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition | `docs/proof/baselines/ci-01-single-pass.json` |
+| ID     | Status      | Depends on                           | Deliverable                                                                                                                                       | Evidence                                                           |
+| ------ | ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| CI-01  | DONE        | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition                                                | `docs/proof/baselines/ci-01-single-pass.json`                      |
+| I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
+| I07-02 | NOT_STARTED | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
+| I07-03 | NOT_STARTED | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
+| I07-04 | NOT_STARTED | I07-03                               | Promote proven PR selection, retain exhaustive main/release/manual coverage, and remove all G07-due current-reader compatibility shims            | `docs/proof/baselines/i07-04-affected-selector-promotion.json`     |
+| I07-05 | NOT_STARTED | I07-04                               | Retire the legacy sequential runner only after rollback, failure, cancellation, hosted, and zero-reference gates pass                             | `docs/proof/baselines/i07-05-legacy-retirement.json`               |
 
 `CI-01` temporarily precedes `M04-T03` in the working order but does not change the protocol task
 dependency graph, milestone totals, or proof-gate counts. It must keep the existing task-specific
 commands available, run every frozen-snapshot, proof-artifact, negative, mutation, and boundary
 check from fresh inputs, and must not trust path filters or cached proof success.
+
+`I07-01` and `I07-02` temporarily precede `M07-T02` in the working order without changing the
+145-task implementation total or proof-gate counts. M07-T02 remains `NOT_STARTED` and is
+intentionally paused by its explicit I07-02 dependency. The legacy gate remains the sole pass/fail
+authority while the candidate runs as `SHADOW + EXHAUSTIVE`. I07-02 may switch the modular path to
+`REQUIRED + EXHAUSTIVE` only after exact workload, result, cancellation, tracked-workspace, hosted,
+and shared-state equivalence passes.
+
+I07-03 may observe later real task changes without selecting the required workload. Its threshold
+must be frozen before observation begins and must include every selector category, zero false
+negatives, and at least 20 consecutive same-revision hosted comparisons. I07-04 may then promote
+`AFFECTED` selection for eligible pull requests. Unknown, ambiguous, policy, dependency,
+frozen-input, unowned-path, or incomplete-diff changes must always expand to `EXHAUSTIVE`. Fresh
+`EXHAUSTIVE` verification remains mandatory on `main`, releases, and manual audits.
+
+Every temporary compatibility reader, receipt bridge, legacy runner, or shadow-only component
+created or retained by this migration must have an exact owner, removal trigger, deadline, and
+closure check in `docs/plan/DEBT-REGISTER.md`. I07-04 must close every G07-due entry before G07 may
+close. I07-05 owns the later sequential-runner retirement and must close its G12-due entry before
+G12 may close. A generic “clean up later” note is not an acceptable owner.
 
 ## M02 — Protocol package and validator
 
@@ -446,20 +471,20 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 
-| ID      | Status      | Depends on       | Deliverable / evidence                                                                                               |
-| ------- | ----------- | ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| M07-T01 | DONE        | G06              | Content-addressed bundle store with immutable revision entries                                                       |
-| M07-T02 | NOT_STARTED | M07-T01          | Protocol, revision, available source digest, and bundle-size verification                                            |
-| M07-T03 | NOT_STARTED | M07-T02          | Exact package target/version/digest resolution and preflight                                                         |
-| M07-T04 | NOT_STARTED | M07-T02–M07-T03  | Surface/capability reference and finite-limit preflight                                                              |
-| M07-T05 | NOT_STARTED | M07-T01          | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
-| M07-T06 | NOT_STARTED | M07-T03–M07-T05  | Staged runtime indexes and active/staged state separation                                                            |
-| M07-T07 | NOT_STARTED | M07-T04, M07-T06 | Durable transactional commit of `{activeRevision, previousGoodRevision}` as one consistent record                    |
-| M07-T08 | NOT_STARTED | M07-T07          | Restart recovery validates and restores the transactional active/previous-good record                                |
-| M07-T09 | NOT_STARTED | M07-T07–M07-T08  | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
-| M07-T10 | NOT_STARTED | M07-T09          | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
-| M07-T11 | NOT_STARTED | M07-T05, M07-T10 | Control-plane channel consumed by separately built reference host                                                    |
-| G07     | NOT_STARTED | M07-T01–M07-T11  | Every pre-commit fault preserves a valid durable activation record and invalid revision never becomes active         |
+| ID      | Status      | Depends on              | Deliverable / evidence                                                                                               |
+| ------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| M07-T01 | DONE        | G06                     | Content-addressed bundle store with immutable revision entries                                                       |
+| M07-T02 | NOT_STARTED | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
+| M07-T03 | NOT_STARTED | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
+| M07-T04 | NOT_STARTED | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
+| M07-T05 | NOT_STARTED | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
+| M07-T06 | NOT_STARTED | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
+| M07-T07 | NOT_STARTED | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision}` as one consistent record                    |
+| M07-T08 | NOT_STARTED | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
+| M07-T09 | NOT_STARTED | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
+| M07-T10 | NOT_STARTED | M07-T09                 | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
+| M07-T11 | NOT_STARTED | M07-T05, M07-T10        | Control-plane channel consumed by separately built reference host                                                    |
+| G07     | NOT_STARTED | M07-T01–M07-T11, I07-04 | Every pre-commit fault preserves a valid durable activation record and invalid revision never becomes active         |
 
 M07-T01 adds the built `@desen/control-plane-api` package root and one local POSIX repository that
 stores exact complete Bundle bytes under a strict lowercase SHA-256 revision path. The first
@@ -558,19 +583,19 @@ exact runtime-core tree hash captured by M10-T09.
 
 ## M12 — Evidence report and public-alpha preparation
 
-| ID      | Status      | Depends on      | Deliverable / evidence                                                                                                                  |
-| ------- | ----------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| M12-T01 | NOT_STARTED | G11             | Every mandatory and recommended BCP 14 clause updated to TESTED or justified status                                                     |
-| M12-T02 | NOT_STARTED | M12-T01         | Proof Matrix generated from test and artifact results                                                                                   |
-| M12-T03 | NOT_STARTED | G11             | Data-only, no-eval, no-executable-markup, and no-remote-code-selection checks                                                           |
-| M12-T04 | NOT_STARTED | G11             | Secret and personal-data fixture audit                                                                                                  |
-| M12-T05 | NOT_STARTED | G11             | Bundle, node, depth, repeat, predicate, action, and settlement limits measured                                                          |
-| M12-T06 | NOT_STARTED | G11             | Public TSDoc and package README audit                                                                                                   |
-| M12-T07 | NOT_STARTED | M12-T06         | Compatibility documentation and Desen App-independent integration quickstart                                                            |
-| M12-T08 | NOT_STARTED | M12-T01–M12-T07 | Final validation, conformance-target, and implementation report                                                                         |
-| M12-T09 | NOT_STARTED | M12-T08         | Public-alpha demo runbook and release-candidate inventory                                                                               |
-| M12-T10 | NOT_STARTED | M12-T07–M12-T09 | Versioned DESEN Developer Platform content for `desen.run`, including a byte-identical protocol 0.1.0 mirror with checksum verification |
-| M12-T11 | NOT_STARTED | M12-T07         | Public `desen` facade with documented subpath exports and a functional CLI rather than placeholder entry points                         |
-| M12-T12 | NOT_STARTED | M12-T10–M12-T11 | `npm pack` artifacts pass fresh-consumer install/import/CLI smoke tests and declared compatibility checks                               |
-| M12-T13 | NOT_STARTED | M12-T08–M12-T12 | Final external-release checklist requiring explicit approval before domain deployment, npm publication, push, or release creation       |
-| G12     | NOT_STARTED | M12-T01–M12-T13 | Repeatable Web–React public alpha artifacts are ready for explicit external release approval                                            |
+| ID      | Status      | Depends on              | Deliverable / evidence                                                                                                                  |
+| ------- | ----------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| M12-T01 | NOT_STARTED | G11                     | Every mandatory and recommended BCP 14 clause updated to TESTED or justified status                                                     |
+| M12-T02 | NOT_STARTED | M12-T01                 | Proof Matrix generated from test and artifact results                                                                                   |
+| M12-T03 | NOT_STARTED | G11                     | Data-only, no-eval, no-executable-markup, and no-remote-code-selection checks                                                           |
+| M12-T04 | NOT_STARTED | G11                     | Secret and personal-data fixture audit                                                                                                  |
+| M12-T05 | NOT_STARTED | G11                     | Bundle, node, depth, repeat, predicate, action, and settlement limits measured                                                          |
+| M12-T06 | NOT_STARTED | G11                     | Public TSDoc and package README audit                                                                                                   |
+| M12-T07 | NOT_STARTED | M12-T06                 | Compatibility documentation and Desen App-independent integration quickstart                                                            |
+| M12-T08 | NOT_STARTED | M12-T01–M12-T07         | Final validation, conformance-target, and implementation report                                                                         |
+| M12-T09 | NOT_STARTED | M12-T08                 | Public-alpha demo runbook and release-candidate inventory                                                                               |
+| M12-T10 | NOT_STARTED | M12-T07–M12-T09         | Versioned DESEN Developer Platform content for `desen.run`, including a byte-identical protocol 0.1.0 mirror with checksum verification |
+| M12-T11 | NOT_STARTED | M12-T07                 | Public `desen` facade with documented subpath exports and a functional CLI rather than placeholder entry points                         |
+| M12-T12 | NOT_STARTED | M12-T10–M12-T11         | `npm pack` artifacts pass fresh-consumer install/import/CLI smoke tests and declared compatibility checks                               |
+| M12-T13 | NOT_STARTED | M12-T08–M12-T12         | Final external-release checklist requiring explicit approval before domain deployment, npm publication, push, or release creation       |
+| G12     | NOT_STARTED | M12-T01–M12-T13, I07-05 | Repeatable Web–React public alpha artifacts are ready for explicit external release approval                                            |
