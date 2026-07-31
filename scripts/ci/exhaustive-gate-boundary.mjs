@@ -417,6 +417,26 @@ export async function readExhaustiveGateRepositoryInventory(
   });
 }
 
+async function readCurrentExhaustiveGateRevision(workspaceRoot) {
+  if (
+    typeof workspaceRoot !== "string" ||
+    workspaceRoot.length === 0 ||
+    !path.isAbsolute(workspaceRoot)
+  ) {
+    fail("EXHAUSTIVE_GATE_WORKSPACE_INVALID", "The normalized Git workspace is invalid.");
+  }
+  const { stdout } = await runGit(workspaceRoot, ["rev-parse", "--verify", "HEAD^{commit}"]);
+  const revision = decodeUtf8(stdout, "Git revision output").trim();
+  if (!REVISION_PATTERN.test(revision)) {
+    fail(
+      "EXHAUSTIVE_GATE_REVISION_INVALID",
+      "Git returned an unsupported exhaustive gate revision.",
+      { revision },
+    );
+  }
+  return revision;
+}
+
 /**
  * Reads the checked-out commit directly from Git and optionally authenticates the hosted revision.
  */
@@ -435,15 +455,7 @@ export async function readExhaustiveGateRevision(
       { expectedRevision },
     );
   }
-  const { stdout } = await runGit(root, ["rev-parse", "--verify", "HEAD^{commit}"]);
-  const revision = decodeUtf8(stdout, "Git revision output").trim();
-  if (!REVISION_PATTERN.test(revision)) {
-    fail(
-      "EXHAUSTIVE_GATE_REVISION_INVALID",
-      "Git returned an unsupported exhaustive gate revision.",
-      { revision },
-    );
-  }
+  const revision = await readCurrentExhaustiveGateRevision(root);
   if (expectedRevision !== undefined && revision !== expectedRevision) {
     fail(
       "EXHAUSTIVE_GATE_REVISION_MISMATCH",
@@ -475,7 +487,7 @@ export async function assertExhaustiveGateCleanInput(
     );
   }
 
-  const revision = await readExhaustiveGateRevision(root, undefined);
+  const revision = await readCurrentExhaustiveGateRevision(root);
   const statusBytes = await readBoundedGitStatus(root);
   const revisionMatches = revision === expectedRevision;
   const clean = statusBytes.byteLength === 0;

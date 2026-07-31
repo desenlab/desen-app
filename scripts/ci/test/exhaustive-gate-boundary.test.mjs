@@ -89,8 +89,10 @@ function expectCleanInputFailure(expectedCode, expectedClean) {
 
 test("proves that a clean checkout is bound to the supplied revision", async () => {
   const fixture = await createRepository();
+  const originalHostedRevision = process.env.GITHUB_SHA;
   try {
     const expectedRevision = (await runGit(fixture.root, ["rev-parse", "HEAD"])).stdout.trim();
+    process.env.GITHUB_SHA = "f".repeat(40);
     const receipt = await assertExhaustiveGateCleanInput(fixture.root, expectedRevision);
 
     assert.deepEqual(receipt, {
@@ -107,6 +109,8 @@ test("proves that a clean checkout is bound to the supplied revision", async () 
     });
     assert.equal(Object.isFrozen(receipt), true);
   } finally {
+    if (originalHostedRevision === undefined) delete process.env.GITHUB_SHA;
+    else process.env.GITHUB_SHA = originalHostedRevision;
     await fixture.cleanup();
   }
 });
@@ -235,10 +239,12 @@ test("detects tracked byte drift and the execution wrapper returns no passing re
     );
 
     await writeRelative(fixture.root, "scripts/verify-alpha.mjs", "export {};\n");
+    const expectedRevision = (await runGit(fixture.root, ["rev-parse", "HEAD"])).stdout.trim();
     const primary = new Error("injected workload failure");
     await assert.rejects(
       executeExhaustiveGateBoundary({
         workspaceRoot: fixture.root,
+        expectedRevision,
         authenticateInventory: async () => Object.freeze({ status: "PASS" }),
         execute: async () => {
           await writeRelative(fixture.root, "tests/alpha.test.mjs", "export const changed = 1;\n");
