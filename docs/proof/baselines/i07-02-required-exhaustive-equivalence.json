@@ -1,0 +1,238 @@
+{
+  "task": "I07-02",
+  "date": "2026-08-01",
+  "repository": "https://github.com/desenlab/desen-app",
+  "pullRequest": {
+    "number": 16,
+    "url": "https://github.com/desenlab/desen-app/pull/16",
+    "branch": "agent/i07-02-required-exhaustive",
+    "cutoverCommit": "3cf72552ee3ea23a0b5e99f782f837bc6237f78b"
+  },
+  "authority": {
+    "required": "REQUIRED + EXHAUSTIVE",
+    "requiredWorkflow": ".github/workflows/ci.yml",
+    "requiredJob": "Quality gate",
+    "legacy": "MANUAL_ROLLBACK_ONLY + EXHAUSTIVE",
+    "legacyWorkflow": ".github/workflows/ci.yml",
+    "legacyJob": "Legacy rollback",
+    "shadowWorkflowRemoved": true,
+    "affectedSelection": false,
+    "legacyRetired": false
+  },
+  "inventory": {
+    "profile": "desen.ci.exhaustive-workload-inventory.v1",
+    "inventorySha256": "bc8644fc1147166f98f905ec5fef1e6d81ef6e639008de9bd53e7256825abb94",
+    "requiredPlanSha256": "c61f71611fc0b979b19a0f0e940ee3762910354cf6521d2c0c792bc114fafe96",
+    "workloads": 130,
+    "proofPairs": 61,
+    "workloadFiltering": false,
+    "selectionMode": "EXHAUSTIVE_ONLY"
+  },
+  "sharedState": {
+    "classifiedWorkloads": 130,
+    "classes": {
+      "GLOBAL_EXCLUSIVE": 6,
+      "WORKSPACE_OUTPUT_EXCLUSIVE": 1,
+      "PACKAGE_TEST_EXCLUSIVE": 1,
+      "PROOF_READ_ONLY": 66,
+      "PROOF_OS_TEMP_ISOLATED": 45,
+      "PROOF_TRACKED_ALIAS_EXCLUSIVE": 10,
+      "PROOF_WORKSPACE_TEMP_EXCLUSIVE": 1
+    },
+    "ordinaryProofPairs": 50,
+    "exclusiveProofPairBarriers": 11,
+    "proofPairConcurrency": 2,
+    "buildOutputRootsSealed": 33,
+    "trackedWorkspaceBoundary": true,
+    "untrackedWorkspaceBoundary": true,
+    "listenerBindingDenied": true,
+    "workloadOwnedTemporaryRoots": true
+  },
+  "currentReaderCheckpoint": {
+    "profile": "desen.ci.proof-reader-checkpoints.v1",
+    "headSha256": "95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c",
+    "reviewedChainSha256": [
+      "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
+      "95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c"
+    ],
+    "checkpoints": 2,
+    "frozenArtifacts": 8,
+    "currentReaders": 16,
+    "liveVerification": "PASS"
+  },
+  "infrastructureDebt": {
+    "profile": "desen.ci.infrastructure-debt.v1",
+    "entries": 8,
+    "open": 7,
+    "readyForRemoval": 0,
+    "closed": 1,
+    "closedIds": ["DEBT-I07-008"],
+    "liveVerification": "PASS"
+  },
+  "phaseA": {
+    "purpose": "Build and harden one scheduler-neutral required-exhaustive authority before hosted comparison.",
+    "localRequiredRun": {
+      "commit": "2339741fac39835afd140e7e186ac293c652fbaf",
+      "command": "node scripts/ci/run-required-exhaustive-quality-gate.mjs",
+      "authority": "REQUIRED",
+      "scope": "EXHAUSTIVE",
+      "status": "PASS",
+      "workloadsPassed": 130,
+      "proofPairsPassed": 61,
+      "wallDuration": "approximately 7m16s",
+      "trackedFiles": 862,
+      "trackedBytes": 14932275,
+      "trackedWorkspaceBeforeAndAfter": "EQUAL"
+    },
+    "failureAndCancellationContracts": "PASS",
+    "sharedStateMutationCoverage": "PASS",
+    "requiredInjectionRejection": "PASS"
+  },
+  "phaseB": {
+    "purpose": "Compare the required-exhaustive runner and retained sequential runner on the same candidate revision before cutover.",
+    "rejectedAttempt": {
+      "commit": "9a009af5b4990dce3e1cb33d52fbdde6033a65b4",
+      "runId": 30691459338,
+      "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30691459338",
+      "requiredJob": {
+        "jobId": 91346813731,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30691459338/job/91346813731",
+        "conclusion": "failure"
+      },
+      "legacyJob": {
+        "jobId": 91346813736,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30691459338/job/91346813736",
+        "conclusion": "failure"
+      },
+      "sharedFailureCode": "PUBLISHER_BUNDLE_PUBLICATION_ARTIFACT_DRIFT",
+      "storedArtifactSha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df",
+      "acceptedAsEquivalenceEvidence": false,
+      "decision": "The common artifact drift was repaired and both paths were rerun from one successor revision; a common failure is not PASS equivalence."
+    },
+    "successfulComparison": {
+      "commit": "077560fe81d0fcf4560554dd7511413bad5bc30e",
+      "actualPullRequestMergeCheckout": "cac25a74a5fad90fc2f27f7722f7135383584f35",
+      "comparisonRun": {
+        "workflow": "CI v2 shadow",
+        "runId": 30691892655,
+        "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30691892655",
+        "conclusion": "success",
+        "required": {
+          "job": "Exhaustive modular shadow",
+          "jobId": 91347966696,
+          "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30691892655/job/91347966696",
+          "conclusion": "success",
+          "authority": "REQUIRED",
+          "scope": "EXHAUSTIVE",
+          "workloadsPassed": 130,
+          "proofPairsPassed": 61,
+          "jobDurationSeconds": 647
+        },
+        "legacy": {
+          "job": "Legacy comparison",
+          "jobId": 91347966725,
+          "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30691892655/job/91347966725",
+          "conclusion": "success",
+          "jobDurationSeconds": 725
+        },
+        "comparison": {
+          "sameRevision": true,
+          "terminalStatusEqual": true,
+          "inventoryEqual": true,
+          "trackedWorkspaceEqual": true
+        }
+      },
+      "retainedOfficialRun": {
+        "workflow": "CI",
+        "job": "Quality gate",
+        "runId": 30691892632,
+        "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30691892632",
+        "jobId": 91347966668,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30691892632/job/91347966668",
+        "conclusion": "success",
+        "jobDurationSeconds": 517
+      }
+    }
+  },
+  "phaseC": {
+    "purpose": "Promote the proven runner to the official required workflow, retain a manual rollback path, then remove the temporary comparison surface.",
+    "cutover": {
+      "commit": "3cf72552ee3ea23a0b5e99f782f837bc6237f78b",
+      "actualPullRequestMergeCheckout": "e61e5a3f1bef9177f675554880233a78b0afb343",
+      "workflow": {
+        "path": ".github/workflows/ci.yml",
+        "bytes": 4994,
+        "sha256": "4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0"
+      },
+      "hostedRun": {
+        "runId": 30699616361,
+        "runUrl": "https://github.com/desenlab/desen-app/actions/runs/30699616361",
+        "conclusion": "success",
+        "requiredJob": {
+          "job": "Quality gate",
+          "jobId": 91368187966,
+          "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30699616361/job/91368187966",
+          "conclusion": "success",
+          "jobDurationSeconds": 633
+        },
+        "legacyRollbackJob": {
+          "job": "Legacy rollback",
+          "jobId": 91368188339,
+          "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/30699616361/job/91368188339",
+          "conclusion": "skipped",
+          "reason": "Manual rollback was not requested for the pull-request event."
+        },
+        "shadowWorkflowTriggered": false
+      }
+    },
+    "removedTemporaryTargets": [
+      {
+        "path": ".github/workflows/ci-v2-shadow.yml",
+        "preRemovalSha256": "d43f28fc14ae5678facaa2b96f2ff6a419010f97001389fca9c11c15e4b3a22c"
+      },
+      {
+        "path": "scripts/ci/run-modular-quality-gate.mjs",
+        "preRemovalSha256": "4368493921fb835e8cd74226d320c2868e9d653463cd0d43fa1820d06774231f"
+      },
+      {
+        "path": "scripts/ci/test/modular-quality-gate.test.mjs",
+        "preRemovalSha256": "b997e518558c7d19e3de5b0ff43ad18961e7b74e7fcea16207d9cf330481da38"
+      }
+    ],
+    "closedInfrastructureDebt": "DEBT-I07-008"
+  },
+  "security": {
+    "proofGeneratorsRun": false,
+    "proofWritersRun": false,
+    "proofCacheReads": false,
+    "changedFileFiltering": false,
+    "dependencyDownloadCacheOnly": true,
+    "trackedWorkspaceAndIndexGuard": true,
+    "untrackedWorkspaceGuard": true,
+    "buildOutputSeal": true,
+    "selectionMode": "EXHAUSTIVE_ONLY",
+    "requiredInjectedSuccessRejected": true,
+    "firstTerminalFailureWins": true,
+    "failFastSiblingTermination": true,
+    "processGroupSignalForwarding": true,
+    "manualRollbackConcurrencyIsolated": true,
+    "shadowCanAuthorizePass": false
+  },
+  "nonClaims": [
+    "I07-02 introduces no AFFECTED selector and makes no claim that selective CI is safe; I07-03 owns shadow observation and I07-04 owns promotion.",
+    "The retained sequential runner is not retired. It remains available only through the explicit manual legacy-rollback mode until I07-05 and Gate E pass.",
+    "Current-reader compatibility shims remain owned by I07-04 and are not completed by this cutover.",
+    "No frozen protocol byte, protocol conformance claim, implementation-task count, or proof-gate count changes.",
+    "No M07-T02 integrity, size, activation, channel, last-known-good, or recovery behavior is claimed.",
+    "Hosted duration is an archived observation, not a performance guarantee."
+  ],
+  "progress": {
+    "implementationTasksComplete": 75,
+    "implementationTasksTotal": 145,
+    "m07TasksComplete": 1,
+    "m07TasksTotal": 11,
+    "proofGatesComplete": 7,
+    "proofGatesTotal": 13
+  },
+  "next": "M07-T02"
+}

@@ -43,7 +43,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | ------ | ----------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | CI-01  | DONE        | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition                                                | `docs/proof/baselines/ci-01-single-pass.json`                      |
 | I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
-| I07-02 | IN_PROGRESS | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
+| I07-02 | DONE        | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
 | I07-03 | NOT_STARTED | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
 | I07-04 | NOT_STARTED | I07-03                               | Promote proven PR selection, retain exhaustive main/release/manual coverage, and remove all G07-due current-reader compatibility shims            | `docs/proof/baselines/i07-04-affected-selector-promotion.json`     |
 | I07-05 | NOT_STARTED | I07-04                               | Retire the legacy sequential runner only after rollback, failure, cancellation, hosted, and zero-reference gates pass                             | `docs/proof/baselines/i07-05-legacy-retirement.json`               |
@@ -53,12 +53,13 @@ dependency graph, milestone totals, or proof-gate counts. It must keep the exist
 commands available, run every frozen-snapshot, proof-artifact, negative, mutation, and boundary
 check from fresh inputs, and must not trust path filters or cached proof success.
 
-`I07-01` and `I07-02` temporarily precede `M07-T02` in the working order without changing the
-145-task implementation total or proof-gate counts. M07-T02 remains `NOT_STARTED` and is
-intentionally paused by its explicit I07-02 dependency. The legacy gate remains the sole pass/fail
-authority while the candidate runs as `SHADOW + EXHAUSTIVE`. I07-02 may switch the modular path to
-`REQUIRED + EXHAUSTIVE` only after exact workload, result, cancellation, tracked-workspace, hosted,
-and shared-state equivalence passes.
+`I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
+implementation total or proof-gate counts. Both infrastructure tasks are complete. The official
+GitHub `Quality gate` now executes all 130 workloads as `REQUIRED + EXHAUSTIVE`; the retained
+sequential runner is available only through explicit manual `legacy-rollback`. Exact workload,
+result, cancellation, tracked-workspace, hosted, and shared-state equivalence is archived in the
+I07-02 baseline. M07-T02 remains `NOT_STARTED`, but its dependencies are now satisfied and it is
+ready to start.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -503,6 +504,10 @@ activation, last-known-good recovery, and host consumption remain later M07 task
 `PLANNED` for M07-T03 installed-package verification and M12-T12 packed-distribution evidence;
 `N-019` remains `PLANNED` for M07-T05 control-plane integration, P-12 remains `NOT_PROVEN`, and G07
 remains open.
+
+I07-02 now satisfies M07-T02's infrastructure dependency. M07-T02 is ready but remains
+`NOT_STARTED`; no integrity, size, activation, channel, or recovery behavior is claimed by the CI
+cutover itself.
 
 `docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
 `sha256:698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`.

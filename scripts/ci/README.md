@@ -1,8 +1,8 @@
 # Proof infrastructure
 
-This directory contains the I07 migration layer. It remains deliberately separate from the
-frozen CI-01 workflow authority until the I07-02 cutover and hosted equivalence evidence are
-complete.
+This directory contains the I07 proof-execution authority. I07-02 completed the hosted cutover:
+the official `Quality gate` now executes the required exhaustive runner defined here, while the
+CI-01 sequential runner remains available only through explicit manual rollback.
 
 ## Trust layers
 
@@ -12,7 +12,7 @@ complete.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the exact 130-node,
    61-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
-4. The retained legacy sequential runner is an I07-02 rollback mirror, not the source of the new
+4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
    `required-exhaustive-equivalence.mjs` compares every id, label, command, and argument vector in
    order, proves set equality and exactly-once ownership, and normalizes fail-closed terminal
@@ -24,21 +24,13 @@ The checkpoint is inert data. It cannot name an executable command or cause a ve
 run. Executable ownership remains in reviewed source. The neutral inventory is also inert until a
 validated scheduler executes its exact shell-free command vectors.
 
-## I07-01 commands
-
-```bash
-node scripts/ci/verify-proof-reader-checkpoints.mjs
-node --test scripts/ci/test/proof-reader-checkpoints.test.mjs
-node scripts/ci/verify-infrastructure-debt.mjs
-node --test scripts/ci/test/infrastructure-debt.test.mjs
-node --test scripts/ci/test/modular-quality-gate.test.mjs
-node scripts/ci/run-modular-quality-gate.mjs
-```
+## Historical I07-01 checkpoint
 
 I07-01 is the historical `SHADOW + EXHAUSTIVE` checkpoint. Every one of the retained plan's global
 steps and proof verifier/root-test pairs ran from fresh inputs. Candidate proof pairs could run
 with concurrency two while the sequential result remained authoritative; no changed-file filter,
-cached proof success, generator, or evidence writer was admitted.
+cached proof success, generator, or evidence writer was admitted. Its removed comparison wrapper
+is authenticated by the I07-01 and I07-02 baselines; it is no longer a current command surface.
 
 ## I07-02 required-exhaustive architecture
 
@@ -48,14 +40,15 @@ node --test scripts/ci/test/exhaustive-gate-boundary.test.mjs
 node --test scripts/ci/test/shared-state-authority.test.mjs
 node --test scripts/ci/test/required-exhaustive-equivalence.test.mjs
 node --test scripts/ci/test/required-exhaustive-quality-gate.test.mjs
-DESEN_CI_AUTHORITY=SHADOW node scripts/ci/run-required-exhaustive-quality-gate.mjs
+node scripts/ci/run-required-exhaustive-quality-gate.mjs
 ```
 
-The local I07-02 authorities establish a single `EXHAUSTIVE` target whose plan factory defaults to
-`REQUIRED`; `SHADOW` must be explicit and any other scope fails closed. This target is not yet the
-hosted required gate: the workflow cutover and same-revision hosted evidence remain pending, so the
-retained sequential workflow still decides pass or fail. The candidate shadow workflow invokes
-this same executable with explicit `DESEN_CI_AUTHORITY=SHADOW` while equivalence is measured.
+The I07-02 authorities establish a single `EXHAUSTIVE` target whose plan factory defaults to
+`REQUIRED`; `SHADOW` must be explicit and any other scope fails closed. The official hosted
+workflow invokes this exact command without an authority override, so the fail-closed default is
+the repository pass/fail authority. The retained sequential workflow is available only through
+manual `legacy-rollback`. The temporary shadow workflow and comparison adapter/test were removed
+after the accepted same-revision comparison and successful hosted cutover.
 
 Every workload has exactly one code-owned shared-state class:
 
@@ -135,13 +128,14 @@ output root across the proof phase and compares non-ignored untracked state acro
 execution region. A dependency download cache may save network time; no build, test, checkpoint,
 mutation, or proof pass is reusable authority.
 
-## Promotion boundary
+## Completed promotion boundary
 
-The retained sequential gate remains authoritative until I07-02 records exact workload equality,
-exactly-once coverage, matching outcomes, clean tracked-workspace parity, safe cancellation,
-shared-state classification, and local plus hosted evidence, then completes the workflow cutover.
-I07-02 implements no affected-path selector. Its final promotion closes `DEBT-I07-008` by removing
-the temporary shadow workflow and modular comparison adapter/test. I07-03 may calculate `AFFECTED`
-plans only in shadow; any unknown or ambiguous input expands to `EXHAUSTIVE`. I07-04 owns selector
-promotion and G07-due reader cleanup. `DEBT-I07-007` keeps the sequential runner, equivalence
-adapter, and other rollback-only paths until I07-05 proves their removal gates.
+I07-02 recorded exact workload equality, exactly-once coverage, matching outcomes, clean
+tracked-workspace parity, safe cancellation, shared-state classification, and local plus hosted
+evidence before completing the workflow cutover. The accepted evidence is
+`docs/proof/baselines/i07-02-required-exhaustive-equivalence.json`. I07-02 implements no
+affected-path selector. Its promotion closed `DEBT-I07-008` by removing the temporary shadow
+workflow and modular comparison adapter/test. I07-03 may calculate `AFFECTED` plans only in shadow;
+any unknown or ambiguous input expands to `EXHAUSTIVE`. I07-04 owns selector promotion and G07-due
+reader cleanup. `DEBT-I07-007` keeps the sequential runner, equivalence adapter, and other
+rollback-only paths until I07-05 proves their removal gates.

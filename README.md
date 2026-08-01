@@ -22,7 +22,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07:** `█░░░░░░░░░░` **1 / 11 tasks complete (9%)**
 
-**Proof gates:** **7 / 13 complete** · **Active infrastructure:** `I07-02` · **Next implementation:** `M07-T02` (paused)
+**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T02` (ready, `NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -41,16 +41,18 @@ exact bytes conflict, and concurrent writers cannot replace or mix that winner; 
 paths fail closed. Integrity verification, channels, activation, last-known-good recovery, and G07
 remain later work.
 
-**I07-01 infrastructure checkpoint:** the proof environment now separates frozen historical
-evidence, one current-reader checkpoint authority, and a derived 130-step modular schedule. On the
-same candidate commit, both local paths passed; the measured modular run was 30.87% shorter. Both
-hosted workflows also passed, with the modular gate 24.93% shorter. The legacy exhaustive gate
-remains the sole pass/fail authority until I07-02 proves required-exhaustive equivalence and
-classifies shared state. Every temporary bridge, shadow adapter, and legacy component has a
-machine-checked removal owner and deadline in the
-[debt register](docs/plan/DEBT-REGISTER.md). The exact comparison is preserved in the
-[I07-01 baseline](docs/proof/baselines/i07-01-modular-proof-shadow.json); implementation progress
-remains 75/145.
+**I07-02 infrastructure checkpoint:** the official GitHub `Quality gate` now executes the
+code-owned 130-workload, 61-proof-pair plan as `REQUIRED + EXHAUSTIVE`. Its exact shared-state
+classes, cancellation behavior, tracked/untracked workspace guards, and same-revision equality
+with the retained sequential runner passed locally and in hosted CI. The cutover run passed in 10
+minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
+temporary shadow workflow and modular comparison adapter/test are removed, closing
+`DEBT-I07-008`. The sequential runner remains available only through explicit manual
+`legacy-rollback`; I07-02 adds no affected-path selector. Remaining reader and retirement work
+stays machine-owned by I07-04 and I07-05 in the
+[debt register](docs/plan/DEBT-REGISTER.md). Exact evidence is preserved in the
+[I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json); implementation
+progress remains 75/145 and M07-T02 is ready to start.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

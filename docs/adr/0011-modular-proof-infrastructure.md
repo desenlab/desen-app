@@ -3,11 +3,12 @@
 - Status: Accepted
 - Date: 2026-07-30
 - Decision owner: I07-01
-- Implementation status: I07-01 is complete as a non-authoritative exhaustive shadow. I07-02's
+- Implementation status: I07-01 is complete historical shadow evidence. I07-02 is complete: its
   neutral inventory, exact rollback-equivalence adapter, shared-state authority, and exhaustive
-  runner are implemented locally. The candidate shadow workflow is wired for measurement;
-  same-revision hosted equivalence, required-workflow cutover, and closure evidence remain pending.
-  No selector, compatibility cleanup, or legacy retirement is claimed
+  runner passed same-revision comparison; the official workflow now runs
+  `REQUIRED + EXHAUSTIVE`. The temporary shadow workflow and modular comparison adapter/test are
+  removed, closing `DEBT-I07-008`. No affected selector, current-reader cleanup, or legacy
+  retirement is claimed
 
 ## Context
 
@@ -28,11 +29,12 @@ historical artifact itself has not changed. The immutable evidence boundary, the
 checkpoint, and the execution scheduler are different authorities and should not continue to be
 represented by the same modules.
 
-The existing single-pass CI gate already avoids recursively rerunning identical prerequisite
-chains. It validates a frozen inventory, executes every distinct reviewed workload from fresh
-inputs, rejects writers and shortcuts, and preserves the tracked workspace. It is the authoritative
-gate during this migration. This ADR does not declare a replacement implemented and does not
-weaken any current proof, root mutation test, boundary check, or cancellation rule.
+At decision time, the existing single-pass CI gate already avoided recursively rerunning identical
+prerequisite chains. It validates a frozen inventory, executes every distinct reviewed workload
+from fresh inputs, rejects writers and shortcuts, and preserves the tracked workspace. It remained
+authoritative through I07-01 and the I07-02 equivalence phase. The completed cutover retains it only
+as a manual rollback path and does not weaken any proof, root mutation test, boundary check, or
+cancellation rule.
 
 ## Decision
 
@@ -104,9 +106,9 @@ Graph validation must reject:
 
 Dependencies may run concurrently only when their complete predecessor set has passed and their
 execution classes are proven not to race over the same build output, temporary authority, port, or
-tracked path. I07-01 may measure verifier/root-test pairs at concurrency two only in a
-non-authoritative exhaustive shadow. I07-02 cannot make that schedule required until shared-state,
-output, port, and temporary-path ownership is code-owned and mutation-tested.
+tracked path. I07-01 measured verifier/root-test pairs at concurrency two only in a
+non-authoritative exhaustive shadow. I07-02 made that schedule required only after shared-state,
+output, port, and temporary-path ownership became code-owned and mutation-tested.
 
 The runner installs permanent cancellation state before scheduling. On the first `SIGINT`,
 `SIGTERM`, timeout, or workload failure, it stops launching nodes, forwards termination to every
@@ -129,10 +131,11 @@ promotes authority.
 
 ### Phase 1 — I07-01: `SHADOW + EXHAUSTIVE`
 
-The retained legacy gate remains the sole pass/fail authority. The modular candidate independently
-loads and validates the current checkpoint, derives its schedule from the exact legacy plan, and
-executes all 130 validated workloads from fresh inputs. I07-01 is a derived schedule, not yet the
-complete input/dependency graph required for affected selection. Its result cannot make CI pass.
+During I07-01, the retained legacy gate remained the sole pass/fail authority. The modular
+candidate independently loads and validates the current checkpoint, derives its schedule from the
+exact legacy plan, and executes all 130 validated workloads from fresh inputs. I07-01 is a derived
+schedule, not yet the complete input/dependency graph required for affected selection. Its result
+cannot make CI pass.
 
 The exhaustive shadow compares, at minimum:
 
@@ -145,9 +148,9 @@ The exhaustive shadow compares, at minimum:
 
 ### Phase 2 — I07-02: `REQUIRED + EXHAUSTIVE`
 
-The modular runner may become required only after same-revision local and hosted exhaustive
-equivalence passes and shared mutable state is classified in code. The legacy runner remains
-available for equivalence and rollback; it is not deleted at this cutover.
+The modular runner became required only after same-revision local and hosted exhaustive
+equivalence passed and shared mutable state was classified in code. The legacy runner remains
+available for explicit manual rollback; it was not deleted at this cutover.
 
 Required exhaustive execution preserves the existing fail-fast behavior, every proof and mutation
 workload, dependency-boundary checks, tracked-workspace immutability, process-group cancellation,
@@ -172,12 +175,23 @@ Its terminal normalization rejects a passing claim for any missing, duplicated, 
 cancelled, timed-out, failed, or unclosed workload and preserves inventory, workload, workspace,
 cancellation, and timeout failure authority while ignoring timing and sibling completion order.
 
-The local plan factory accepts only `EXHAUSTIVE`, defaults its authority to `REQUIRED`, and requires
+The plan factory accepts only `EXHAUSTIVE`, defaults its authority to `REQUIRED`, and requires
 `SHADOW` to be explicit. The runner executes the dependency-derived prefix, ordinary proof-pair
 segments at concurrency two, ten drained tracked-alias pairs, the drained source-audit pair, and
-the suffix. This is an implementation target, not a declaration that hosted CI has cut over: a
-same-revision clean comparison, hosted evidence, and workflow promotion must still pass before the
-retained sequential workflow stops deciding repository status.
+the suffix. The accepted clean comparison at commit
+`077560fe81d0fcf4560554dd7511413bad5bc30e` and hosted cutover at commit
+`3cf72552ee3ea23a0b5e99f782f837bc6237f78b` completed that promotion. The official workflow now
+executes this target as `REQUIRED + EXHAUSTIVE`; the retained sequential workflow decides status
+only when a trusted operator explicitly dispatches `legacy-rollback`.
+
+The hosted cutover run
+[`30699616361`](https://github.com/desenlab/desen-app/actions/runs/30699616361) passed its required
+job in 10 minutes 33 seconds. The manual rollback job was skipped and no shadow workflow triggered.
+The exact evidence is archived in
+[`i07-02-required-exhaustive-equivalence.json`](../proof/baselines/i07-02-required-exhaustive-equivalence.json).
+The current-reader chain has two checkpoints and authenticates eight frozen artifacts plus sixteen
+live readers at head
+`95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c`.
 
 The shared-state authority classifies all 130 workloads exactly once:
 
@@ -411,9 +425,8 @@ This ADR does not claim:
 
 - that I07-01's exhaustive shadow is authoritative;
 - that its first same-revision comparison completes I07-02's required equivalence program;
-- that the local `REQUIRED + EXHAUSTIVE` target is already the hosted required workflow;
 - that an `AFFECTED` selector or required affected mode currently exists;
-- that any debt-register entry is ready for removal;
+- that any debt-register entry other than `DEBT-I07-008` is closed by this cutover;
 - that the retained sequential runner or rollback-equivalence adapter may be removed before
   I07-05 and Gate E;
 - that the protocol task count, proof-gate count, or protocol claims have changed;

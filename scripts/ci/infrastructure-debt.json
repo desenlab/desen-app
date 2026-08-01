@@ -236,7 +236,9 @@
             "createRetainedSequentialSteps",
             "EXPECTED_RETAINED_PLAN_SHA256",
             "verifyRequiredExhaustiveInventoryEquivalence",
-            "retained-plan omission, reorder, argv substitution, and duplicate fail closed"
+            "retained-plan omission, reorder, argv substitution, and duplicate fail closed",
+            "RETAINED_LEGACY_COMMAND",
+            "official CI admits only required exhaustive authority and a manual legacy rollback"
           ]
         },
         {
@@ -269,8 +271,15 @@
     },
     {
       "id": "DEBT-I07-008",
-      "status": "OPEN",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "3cf72552ee3ea23a0b5e99f782f837bc6237f78b",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/16",
+        "evidencePath": "docs/proof/baselines/i07-02-required-exhaustive-equivalence.json",
+        "evidenceSha256": "6b876b09f94517e27098076c9f16e207368ef8d31eb70b0ae2f187b15757345d",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/30699616361"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-02",
       "deadline": "G07",

@@ -25,14 +25,18 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-`I07-01` tamamlandı; aktif iş `I07-02` adlı sayılmayan altyapı görevidir. M07-T02 başlamadı
-ve bu bağımlılık tamamlanana kadar bilerek bekliyor. I07-01 aynı 130 işi iki güvenli işçiyle
-modüler çalıştırdı; yerel ve GitHub koşularında hem eski hem yeni yol geçti. Eski sistem hâlâ sonucu
-belirler. I07-02'nin amacı ortak dosya, çıktı, port ve geçici-dizin kullanımını kodla sınıflandırmak,
-daha geniş eşdeğerlik kanıtını tamamlamak ve ancak ondan sonra modüler yolu zorunlu hale getirmektir.
-Geçici eski blokların kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde
-makine tarafından kontrol edilir. Teknik karar ve güvenlik kapıları
-[`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) içinde kayıtlıdır.
+`I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. GitHub'daki resmi `Quality gate`
+artık 130 işin ve 61 kanıt çiftinin tamamını yeni sistemle zorunlu olarak çalıştırır. Ortak dosya,
+çıktı, port ve geçici-dizin kullanımı kodla sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
+başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
+otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
+Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
+bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
+kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından
+kontrol edilir. Teknik karar, güvenlik kapıları ve kesin kanıt
+[`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) ile
+[`I07-02 baseline`](../proof/baselines/i07-02-required-exhaustive-equivalence.json) içinde kayıtlıdır.
+`M07-T02` hâlâ `NOT_STARTED` durumundadır, fakat bütün bağımlılıkları tamamlanmış ve başlamaya hazırdır.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

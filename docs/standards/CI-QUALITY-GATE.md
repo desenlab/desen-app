@@ -6,8 +6,10 @@ The hosted CI gate must prove the same safety properties as the cumulative task 
 restarting identical builds and tests through every historical prerequisite wrapper.
 
 The task-specific `verify:*`, `test:*`, aggregate `test`, and aggregate `check` scripts remain the
-reviewed compatibility surface. GitHub Actions invokes `scripts/run-ci-quality-gate.mjs`, which
-audits that legacy surface before running its single-pass equivalent.
+reviewed compatibility surface. GitHub Actions first verifies the required-exhaustive contracts,
+then invokes `scripts/ci/run-required-exhaustive-quality-gate.mjs` as the official
+`REQUIRED + EXHAUSTIVE` authority. `scripts/run-ci-quality-gate.mjs` is retained only behind the
+explicit manual `legacy-rollback` workflow mode.
 
 ## Single-pass order
 
@@ -138,7 +140,7 @@ The existing sequential gate remained the sole pass/fail authority throughout th
 The archived I07-01 local and hosted comparisons are historical evidence, not I07-02 cutover
 evidence.
 
-### I07-02 local architecture and pending cutover
+### I07-02 required-exhaustive architecture and completed cutover
 
 `exhaustive-workload-inventory.mjs` is now the neutral executable authority. It validates the
 repository inputs and owns all 130 ids, labels, shell-free command/argument vectors, dependencies,
@@ -154,11 +156,14 @@ unchanged. Missing, duplicated, skipped, not-run, cancelled, timed-out, failed, 
 fails closed. Inventory, workload, workspace, cancellation, and timeout are distinct terminal
 authorities; timing and concurrent sibling completion order are observational only.
 
-The local exhaustive plan factory accepts no scope except `EXHAUSTIVE`, defaults to `REQUIRED`, and
-requires `SHADOW` to be explicit. The required runner is implemented locally and the candidate
-shadow workflow now invokes the same executable in explicit `SHADOW` mode. Required-workflow
-cutover remains pending until complete local and same-revision hosted evidence pass. Until then
-GitHub Actions still uses the retained sequential gate as its sole repository pass/fail authority.
+The exhaustive plan factory accepts no scope except `EXHAUSTIVE`, defaults to `REQUIRED`, and
+requires `SHADOW` to be explicit. The official pull-request and `main` workflow now invokes that
+runner without an authority override, so its fail-closed default is `REQUIRED`. The exact 4,994-byte
+workflow is pinned as
+`sha256:4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0`.
+The retained sequential runner is not an automatic peer: it runs only when a trusted operator
+manually dispatches `legacy-rollback`. Event name and mode are part of the concurrency key, so a
+rollback exercise cannot cancel a pull-request or `main` authority run.
 
 All 130 workloads have one exact shared-state class:
 
@@ -240,7 +245,7 @@ The required execution design layers three closing guards:
 No proof-result cache is admitted. The pnpm store may cache immutable dependency downloads only;
 every build, test, verifier, mutation, checkpoint, and boundary result is recomputed.
 
-I07-02 may promote execution to hosted `REQUIRED + EXHAUSTIVE` only after the same revision proves:
+I07-02 promoted execution to hosted `REQUIRED + EXHAUSTIVE` only after the same revision proved:
 
 - exact plan and workload-set equality;
 - exactly-once coverage for every global step and proof pair;
@@ -249,12 +254,22 @@ I07-02 may promote execution to hosted `REQUIRED + EXHAUSTIVE` only after the sa
 - code-owned shared-state, build-output, port, and temporary-path classification; and
 - a recorded local and hosted timing comparison.
 
+The accepted pre-cutover comparison at commit
+`077560fe81d0fcf4560554dd7511413bad5bc30e` passed the 130-workload required runner and retained
+legacy runner on the same pull-request revision. The official cutover at commit
+`3cf72552ee3ea23a0b5e99f782f837bc6237f78b` passed hosted run
+[`30699616361`](https://github.com/desenlab/desen-app/actions/runs/30699616361): the required
+`Quality gate` completed in 10 minutes 33 seconds, the manual rollback job was skipped, and no
+shadow workflow ran. The exact program, including an earlier rejected common-drift attempt, is
+archived in
+[`i07-02-required-exhaustive-equivalence.json`](../proof/baselines/i07-02-required-exhaustive-equivalence.json).
+
 I07-03 may calculate an `AFFECTED` plan only in shadow. Unknown paths, statuses, file modes,
 dependency or policy changes, missing Git authority, and any ambiguous classification must expand
 to `EXHAUSTIVE`. Promotion is reserved for I07-04 after ADR 0011's frozen threshold passes.
 `EXHAUSTIVE` fresh execution remains mandatory on `main`, release candidates, and manual audits.
-I07-02 implements no affected selector. Its final promotion closes `DEBT-I07-008` by removing the
-temporary shadow workflow and modular comparison adapter/test. The current-reader bridges remain
-owned by I07-04. `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and
-other rollback references under I07-05 until their exact machine-checked removal conditions in
-`docs/plan/DEBT-REGISTER.md` are satisfied.
+I07-02 implements no affected selector. Its completed promotion closed `DEBT-I07-008` by removing
+the temporary shadow workflow and modular comparison adapter/test. The current-reader bridges
+remain owned by I07-04. `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence
+adapter, and other rollback references under I07-05 until their exact machine-checked removal
+conditions in `docs/plan/DEBT-REGISTER.md` are satisfied.

@@ -210,6 +210,8 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       "EXPECTED_RETAINED_PLAN_SHA256",
       "verifyRequiredExhaustiveInventoryEquivalence",
       "retained-plan omission, reorder, argv substitution, and duplicate fail closed",
+      "RETAINED_LEGACY_COMMAND",
+      "official CI admits only required exhaustive authority and a manual legacy rollback",
     ]),
     target("tests/publisher-bundle-publication.test.mjs", ["createQualityGateSteps"]),
     target("tests/publisher-catalog-pinning.test.mjs", ["createQualityGateSteps"]),

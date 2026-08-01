@@ -30,6 +30,16 @@ const REPOSITORY_ROOT = path.resolve(import.meta.dirname, "../../..");
 const MANIFEST_PATH = path.join(REPOSITORY_ROOT, "scripts/ci/infrastructure-debt.json");
 const CANONICAL_MANIFEST_BYTES = await readFile(MANIFEST_PATH);
 const BASE_MANIFEST = JSON.parse(CANONICAL_MANIFEST_BYTES.toString("utf8"));
+const CANONICAL_EVIDENCE_BYTES = new Map(
+  await Promise.all(
+    BASE_MANIFEST.entries
+      .filter((entry) => entry.evidence !== null)
+      .map(async (entry) => [
+        entry.evidence.evidencePath,
+        await readFile(path.join(REPOSITORY_ROOT, ...entry.evidence.evidencePath.split("/"))),
+      ]),
+  ),
+);
 
 function cloneManifest() {
   return structuredClone(BASE_MANIFEST);
@@ -81,7 +91,7 @@ function debtRegister(manifest) {
 function taskBoard(overrides = {}) {
   const statuses = {
     "I07-01": "IN_PROGRESS",
-    "I07-02": "NOT_STARTED",
+    "I07-02": "DONE",
     "I07-04": "NOT_STARTED",
     "I07-05": "NOT_STARTED",
     G07: "NOT_STARTED",
@@ -107,9 +117,10 @@ async function writeRelative(root, relativePath, contents) {
   await writeFile(absolutePath, contents);
 }
 
-function targetSymbolsByPath() {
+function activeTargetSymbolsByPath(manifest) {
   const byPath = new Map();
-  for (const entry of INFRASTRUCTURE_DEBT_AUTHORITY) {
+  for (const [entryIndex, entry] of INFRASTRUCTURE_DEBT_AUTHORITY.entries()) {
+    if (manifest.entries[entryIndex].status === "CLOSED") continue;
     for (const target of entry.targets) {
       const symbols = byPath.get(target.path) ?? new Set();
       for (const symbol of target.symbols) symbols.add(symbol);
@@ -129,7 +140,10 @@ async function createFixture() {
   );
   await writeRelative(root, "docs/plan/DEBT-REGISTER.md", debtRegister(manifest));
   await writeRelative(root, "docs/plan/TASKS.md", taskBoard());
-  for (const [relativePath, symbols] of targetSymbolsByPath()) {
+  for (const [evidencePath, evidenceBytes] of CANONICAL_EVIDENCE_BYTES) {
+    await writeRelative(root, evidencePath, evidenceBytes);
+  }
+  for (const [relativePath, symbols] of activeTargetSymbolsByPath(manifest)) {
     await writeRelative(root, relativePath, `${[...symbols].join("\n")}\n`);
   }
   await EXEC_FILE("git", ["init", "--quiet"], { cwd: root });
@@ -168,8 +182,40 @@ async function createFixture() {
 test("accepts the exact canonical code-owned debt inventory", () => {
   const manifest = parseInfrastructureDebtManifest(CANONICAL_MANIFEST_BYTES);
   assert.equal(
-    manifest.entries.every((entry) => entry.evidence === null),
+    manifest.entries.slice(0, 7).every((entry) => entry.evidence === null),
     true,
+  );
+  assert.deepEqual(
+    manifest.entries.map(({ id, status }) => ({ id, status })),
+    [
+      ...Array.from({ length: 7 }, (_, index) => ({
+        id: `DEBT-I07-00${index + 1}`,
+        status: "OPEN",
+      })),
+      { id: "DEBT-I07-008", status: "CLOSED" },
+    ],
+  );
+  assert.deepEqual(
+    {
+      kind: manifest.entries[7].evidence.kind,
+      commitSha: manifest.entries[7].evidence.commitSha,
+      pullRequestUrl: manifest.entries[7].evidence.pullRequestUrl,
+      evidencePath: manifest.entries[7].evidence.evidencePath,
+      hostedRunUrl: manifest.entries[7].evidence.hostedRunUrl,
+    },
+    {
+      kind: "CLOSURE",
+      commitSha: "3cf72552ee3ea23a0b5e99f782f837bc6237f78b",
+      pullRequestUrl: "https://github.com/desenlab/desen-app/pull/16",
+      evidencePath: "docs/proof/baselines/i07-02-required-exhaustive-equivalence.json",
+      hostedRunUrl: "https://github.com/desenlab/desen-app/actions/runs/30699616361",
+    },
+  );
+  assert.equal(
+    manifest.entries[7].evidence.evidenceSha256,
+    createHash("sha256")
+      .update(CANONICAL_EVIDENCE_BYTES.get(manifest.entries[7].evidence.evidencePath))
+      .digest("hex"),
   );
   assert.deepEqual(
     manifest.entries.map(({ id, registeredBy, removalOwner, deadline }) => ({
@@ -280,6 +326,8 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "EXPECTED_RETAINED_PLAN_SHA256",
     "verifyRequiredExhaustiveInventoryEquivalence",
     "retained-plan omission, reorder, argv substitution, and duplicate fail closed",
+    "RETAINED_LEGACY_COMMAND",
+    "official CI admits only required exhaustive authority and a manual legacy rollback",
   ]);
   assert.deepEqual(
     legacyAuthority.targets.slice(4, 8).map((target) => target.path),
@@ -420,11 +468,12 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 8,
+      OPEN: 7,
       READY_FOR_REMOVAL: 0,
-      CLOSED: 0,
+      CLOSED: 1,
     });
     assert.equal(receipt.taskStatuses["I07-01"], "IN_PROGRESS");
+    assert.equal(receipt.taskStatuses["I07-02"], "DONE");
     assert.equal(receipt.taskStatuses["I07-05"], "NOT_STARTED");
   } finally {
     await fixture.cleanup();
@@ -514,21 +563,19 @@ test("does not confuse registration completion with an overdue removal", async (
   }
 });
 
-test("enforces scoped zero references only after an entry is CLOSED", async () => {
+test("enforces scoped zero references while retaining CLOSED authority records", async () => {
   const fixture = await createFixture();
   try {
-    fixture.manifest.entries[7].status = "CLOSED";
-    await fixture.recordEvidence(7, "CLOSURE");
-    await fixture.rewriteManifestAndRegister();
-    await writeRelative(fixture.root, "docs/plan/TASKS.md", taskBoard({ "I07-02": "DONE" }));
+    const closedEntry = fixture.manifest.entries[7];
+    const target = closedEntry.targets[0];
+    await writeRelative(fixture.root, target.path, `${target.symbols.join("\n")}\n`);
+    await EXEC_FILE("git", ["add", "--", target.path], { cwd: fixture.root });
     await assert.rejects(
       verifyInfrastructureDebt({ workspaceRoot: fixture.root }),
       expectCode("INFRASTRUCTURE_DEBT_CLOSED_REFERENCE_PRESENT"),
     );
 
-    for (const target of fixture.manifest.entries[7].targets) {
-      await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
-    }
+    await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
       OPEN: 7,
@@ -567,9 +614,9 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 7,
+      OPEN: 6,
       READY_FOR_REMOVAL: 0,
-      CLOSED: 1,
+      CLOSED: 2,
     });
   } finally {
     await fixture.cleanup();
@@ -626,14 +673,9 @@ test("requires active removal ownership and authentic evidence bytes for lifecyc
 test("rejects a CLOSED target deleted only from the worktree while still index-tracked", async () => {
   const fixture = await createFixture();
   try {
-    fixture.manifest.entries[7].status = "CLOSED";
-    await fixture.recordEvidence(7, "CLOSURE");
-    for (const target of fixture.manifest.entries[7].targets) {
-      await writeRelative(fixture.root, target.path, "replacement\n");
-    }
-    await fixture.rewriteManifestAndRegister();
-    await writeRelative(fixture.root, "docs/plan/TASKS.md", taskBoard({ "I07-02": "DONE" }));
     const deletedPath = fixture.manifest.entries[7].targets[0].path;
+    await writeRelative(fixture.root, deletedPath, "replacement\n");
+    await EXEC_FILE("git", ["add", "--", deletedPath], { cwd: fixture.root });
     await unlink(path.join(fixture.root, ...deletedPath.split("/")));
     await assert.rejects(
       verifyInfrastructureDebt({ workspaceRoot: fixture.root }),

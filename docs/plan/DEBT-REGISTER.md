@@ -1,9 +1,9 @@
 # Infrastructure Debt and Cleanup Register
 
 This register tracks temporary compatibility structures registered by I07-01 while immutable task
-evidence is separated from current-checkpoint authentication and CI execution orchestration. An
-entry records planned removal work; it does not claim that the modular proof infrastructure, a
-replacement checkpoint, or any cleanup has already been implemented.
+evidence is separated from current-checkpoint authentication and CI execution orchestration. Seven
+entries remain open; DEBT-I07-008 is closed with authenticated removal evidence. An open entry
+records planned removal work and does not claim that its cleanup has already been implemented.
 
 This is an engineering-maintenance register, not a protocol finding or Proof Matrix. Removing an
 entry may not rewrite a frozen artifact, weaken a proof, turn an unknown input into a skipped
@@ -20,8 +20,8 @@ check, or treat an earlier successful run as current evidence.
 Every entry records both the task that registered it and the later infrastructure task that owns
 its removal. `Must close by` is a hard gate ceiling, not permission to postpone a trigger that has
 already become true. The canonical machine-readable inventory and its lifecycle validator live
-under `scripts/ci/`; I07-02 must place that validator on the required exhaustive path. A cleanup is
-complete only when:
+under `scripts/ci/`; the official required-exhaustive path runs that validator before executing
+the full gate. A cleanup is complete only when:
 
 1. the replacement current checkpoint is authenticated from fresh tracked bytes;
 2. frozen task artifacts and their task-time projections remain byte-identical;
@@ -31,7 +31,7 @@ complete only when:
 5. the entry-specific zero-reference rule passes; and
 6. the complete fresh quality gate passes without cached proof success.
 
-## Open-entry summary
+## Lifecycle summary
 
 | ID           | Status | Temporary structure                                      | Registered by | Removal owner | Must close by |
 | ------------ | ------ | -------------------------------------------------------- | ------------- | ------------- | ------------- |
@@ -42,7 +42,7 @@ complete only when:
 | DEBT-I07-005 | OPEN   | M07-T01 historical projection for checkpointed readers   | I07-01        | I07-04        | G07           |
 | DEBT-I07-006 | OPEN   | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
 | DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
-| DEBT-I07-008 | OPEN   | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
+| DEBT-I07-008 | CLOSED | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -341,6 +341,8 @@ complete only when:
     - `EXPECTED_RETAINED_PLAN_SHA256`
     - `verifyRequiredExhaustiveInventoryEquivalence`
     - `retained-plan omission, reorder, argv substitution, and duplicate fail closed`
+    - `RETAINED_LEGACY_COMMAND`
+    - `official CI admits only required exhaustive authority and a manual legacy rollback`
   - `tests/publisher-bundle-publication.test.mjs`
     - `createQualityGateSteps`
   - `tests/publisher-catalog-pinning.test.mjs`
@@ -392,7 +394,7 @@ complete only when:
 
 ## DEBT-I07-008 — Shadow workflow and legacy-authority adapter
 
-- Status: `OPEN`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-02`
 - Exact paths and symbols:
@@ -411,16 +413,14 @@ complete only when:
     - `../../run-ci-quality-gate.mjs`
     - `PROOF_ENTRIES`
     - `createQualityGateSteps`
-- Reason retained: the active Phase A candidate now executes all 130 steps from the neutral
-  inventory through the required-exhaustive runner, but it remains visibly non-authoritative while
-  same-revision equivalence is measured. The former modular runner and its tests remain only as a
-  temporary comparison and rollback adapter; keeping those exact targets explicit prevents their
-  accidental survival after required authority is proven.
-- Objective removal trigger: I07-02 records same-revision local and hosted equivalence, introduces
-  code-owned shared-state/output/port/temp-path classification, promotes the exhaustive modular
-  path to required authority, and either removes this workflow or renames and rewires it so no
-  shadow-only authority remains. The exhaustive runner may continue to consume a shared neutral
-  inventory, but it may no longer import scheduling authority from a legacy sequential runner.
+- Closure result: I07-02 recorded same-revision local and hosted equivalence, introduced code-owned
+  shared-state/output/port/temp-path classification, and promoted the required-exhaustive runner to
+  official CI authority. The shadow workflow, legacy-authority adapter, and its focused adapter
+  test were deleted. Their exact target records remain here and in the code-owned manifest so the
+  closed zero-reference rule continues to prevent accidental restoration.
+- Objective removal trigger: `SATISFIED` — the official workflow runs the exhaustive modular path
+  as required authority, the retained sequential runner is available only through the separately
+  registered manual rollback in DEBT-I07-007, and no shadow-only execution authority remains.
 - Must close by gate: `G07`
 - Exact verification and zero-reference rule:
   - the I07-02 required-exhaustive equivalence verifier and mutation tests
@@ -429,5 +429,11 @@ complete only when:
     and find none of their machine-owned symbols after the shared neutral inventory replaces the
     adapter. The debt manifest, verifier, tests, and this register are authority records and are
     intentionally outside that target set.
-- Closure evidence: `PENDING` — record the I07-02 commit, pull request, required workflow URL,
-  neutral-inventory SHA-256, and removed shadow-workflow SHA-256.
+- Closure evidence: `CLOSURE` — authenticated by:
+  - cutover commit: `3cf72552ee3ea23a0b5e99f782f837bc6237f78b`
+  - pull request: `https://github.com/desenlab/desen-app/pull/16`
+  - evidence artifact: `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json`
+  - evidence SHA-256: `6b876b09f94517e27098076c9f16e207368ef8d31eb70b0ae2f187b15757345d`
+  - hosted required-exhaustive run: `https://github.com/desenlab/desen-app/actions/runs/30699616361`
+  - the evidence artifact records the neutral-inventory and retired target receipts, including the
+    removed shadow workflow.

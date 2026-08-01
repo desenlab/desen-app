@@ -52,7 +52,7 @@ I07 introduces modular execution in evidence-first phases. I07-01's historical
 authoritative. Its local and hosted results are preserved evidence, not proof of the I07-02
 required-workflow cutover.
 
-I07-02 tests the scheduler-neutral 130-node, 61-proof-unit inventory independently from both
+I07-02 established the scheduler-neutral 130-node, 61-proof-unit inventory independently from both
 schedulers. Contract and hostile-input tests cover exact ordered ids, labels, commands, arguments,
 dependencies, execution classes, and shared-state records; omission, duplication, reorder,
 substitution, cycles, unknown classes, shell syntax, writer insertion, and affected-only metadata
@@ -107,13 +107,15 @@ escalation, and the complete-gate deadline. The first event must retain its reas
 every active sibling must receive termination in that event, no dependent workload may start, and
 the result may settle only after all active children close and cleanup completes.
 
-The local plan factory defaults to `REQUIRED + EXHAUSTIVE`, but GitHub Actions remains on the
-retained sequential authority until same-revision local evidence, hosted evidence, and workflow
-cutover all pass. The implemented candidate runs in explicit `SHADOW` during measurement. I07-02
-adds no `AFFECTED` selector; its final promotion closes `DEBT-I07-008` by deleting the temporary
-shadow workflow and modular comparison adapter/test. Under `DEBT-I07-007`, the retained sequential
-runner and rollback-equivalence adapter remain test targets until I07-05 proves their exact
-removal conditions.
+The plan factory defaults to `REQUIRED + EXHAUSTIVE`, and GitHub Actions now invokes that default as
+the official pull-request and `main` authority. The accepted same-revision required/legacy
+comparison and subsequent hosted cutover are archived in the I07-02 baseline. The retained
+sequential runner executes only through explicit manual `legacy-rollback`; a rollback dispatch
+cannot cancel an authoritative event because mode and event are part of the concurrency key.
+I07-02 adds no `AFFECTED` selector. Its completed promotion closed `DEBT-I07-008` by deleting the
+temporary shadow workflow and modular comparison adapter/test. Under `DEBT-I07-007`, the retained
+sequential runner and rollback-equivalence adapter remain test targets until I07-05 proves their
+exact removal conditions.
 
 Later `AFFECTED` planning cannot become a required shortcut until it has complete tracked-path
 ownership, reverse dependency closure, exact exhaustive comparison, and fail-closed
