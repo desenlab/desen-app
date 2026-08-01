@@ -39,7 +39,9 @@ const PROFILE = "desen.ci.proof-reader-checkpoints.v1";
 const GENESIS_PREDECESSOR_SHA256 = "0".repeat(64);
 export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE([
   "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
+  "95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c",
 ]);
+export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([6, 8]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
@@ -72,8 +74,9 @@ function freezeTaskAuthority(task, artifact, proofLibrary, rootTest) {
 /**
  * Code-owned task, artifact, reader-path, and reader-role authority.
  *
- * The checkpoint is data only: it cannot add tasks, choose executable commands, or redirect a
- * reader to another path. Future checkpoints may update only exact reader byte receipts.
+ * The checkpoint is data only: it cannot invent tasks, choose executable commands, or redirect a
+ * reader to another path. A reviewed successor may append a code-owned task generation and update
+ * exact reader byte receipts; the genesis generation remains immutable.
  */
 export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
   freezeTaskAuthority(
@@ -136,7 +139,50 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
     "tests/publisher-invalid-source-matrix.test.mjs",
   ),
+  freezeTaskAuthority(
+    "M06-T10",
+    {
+      path: "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+      bytes: 13_179,
+      sha256: "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+    },
+    "scripts/lib/publisher-official-golden-proof.mjs",
+    "tests/publisher-official-golden.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M07-T01",
+    {
+      path: "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+      bytes: 22_396,
+      sha256: "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795",
+    },
+    "scripts/lib/control-plane-bundle-store-proof.mjs",
+    "tests/control-plane-bundle-store.test.mjs",
+  ),
 ]);
+
+function taskAuthorityForCheckpointSequence(sequence) {
+  const reviewedTaskCount = PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS[sequence - 1];
+  const taskCount = reviewedTaskCount ?? PROOF_READER_CHECKPOINT_TASK_AUTHORITY.length;
+  if (
+    !SAFE_NUMBER_IS_SAFE_INTEGER(taskCount) ||
+    taskCount <= 0 ||
+    taskCount > PROOF_READER_CHECKPOINT_TASK_AUTHORITY.length
+  ) {
+    fail(
+      "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
+      "Code-owned checkpoint task-generation authority is inconsistent.",
+      { sequence, taskCount },
+    );
+  }
+  const authority = [];
+  let index = 0;
+  while (index < taskCount) {
+    authority[index] = PROOF_READER_CHECKPOINT_TASK_AUTHORITY[index];
+    index += 1;
+  }
+  return SAFE_OBJECT_FREEZE(authority);
+}
 
 export const DEFAULT_PROOF_READER_CHECKPOINT_PATH = path.join(
   WORKSPACE_ROOT,
@@ -334,10 +380,10 @@ function normalizeArtifact(rawArtifact, expected, index) {
   };
 }
 
-function readerAuthorityAt(index) {
+function readerAuthorityAt(index, taskAuthority) {
   const taskIndex = Math.floor(index / 2);
   const roleIndex = index % 2;
-  const task = PROOF_READER_CHECKPOINT_TASK_AUTHORITY[taskIndex];
+  const task = taskAuthority[taskIndex];
   const reader = task?.readers[roleIndex];
   return task === undefined || reader === undefined
     ? undefined
@@ -439,17 +485,18 @@ function normalizeCheckpoint(rawCheckpoint) {
     );
   }
   assertSha256(checkpoint.predecessorSha256, "checkpoint predecessor");
+  const taskAuthority = taskAuthorityForCheckpointSequence(checkpoint.sequence);
 
   const rawArtifacts = exactDenseArray(
     checkpoint.artifacts,
     "checkpoint artifacts",
-    PROOF_READER_CHECKPOINT_TASK_AUTHORITY.length,
+    taskAuthority.length,
   );
-  if (rawArtifacts.length !== PROOF_READER_CHECKPOINT_TASK_AUTHORITY.length) {
+  if (rawArtifacts.length !== taskAuthority.length) {
     fail(
       "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
-      "Every checkpoint must contain the exact six frozen artifacts.",
-      { actual: rawArtifacts.length },
+      "A checkpoint must contain its exact code-owned frozen-artifact generation.",
+      { expected: taskAuthority.length, actual: rawArtifacts.length },
     );
   }
   const artifacts = [];
@@ -457,20 +504,20 @@ function normalizeCheckpoint(rawCheckpoint) {
   while (artifactIndex < rawArtifacts.length) {
     artifacts[artifactIndex] = normalizeArtifact(
       rawArtifacts[artifactIndex],
-      PROOF_READER_CHECKPOINT_TASK_AUTHORITY[artifactIndex],
+      taskAuthority[artifactIndex],
       artifactIndex,
     );
     artifactIndex += 1;
   }
   assertUniqueArtifactAuthority(artifacts);
 
-  const expectedReaderCount = PROOF_READER_CHECKPOINT_TASK_AUTHORITY.length * 2;
+  const expectedReaderCount = taskAuthority.length * 2;
   const rawReaders = exactDenseArray(checkpoint.readers, "checkpoint readers", expectedReaderCount);
   if (rawReaders.length !== expectedReaderCount) {
     fail(
       "PROOF_READER_CHECKPOINT_SCHEMA_INVALID",
-      "Every checkpoint must contain the exact twelve current readers.",
-      { actual: rawReaders.length },
+      "A checkpoint must contain its exact code-owned current-reader generation.",
+      { expected: expectedReaderCount, actual: rawReaders.length },
     );
   }
   const readers = [];
@@ -478,7 +525,7 @@ function normalizeCheckpoint(rawCheckpoint) {
   while (readerIndex < rawReaders.length) {
     readers[readerIndex] = normalizeReader(
       rawReaders[readerIndex],
-      readerAuthorityAt(readerIndex),
+      readerAuthorityAt(readerIndex, taskAuthority),
       readerIndex,
     );
     readerIndex += 1;
@@ -530,6 +577,12 @@ function assertReaderHistoryIsAppendOnly(history, checkpoint, checkpointIndex) {
     const reader = checkpoint.readers[readerIndex];
     const previous = history[readerIndex];
     const receipt = `${reader.bytes}:${reader.sha256}`;
+    if (previous === undefined) {
+      history[readerIndex] = [receipt];
+      changed = true;
+      readerIndex += 1;
+      continue;
+    }
     const latest = previous[previous.length - 1];
     if (receipt === latest) {
       readerIndex += 1;
@@ -565,6 +618,15 @@ function normalizeManifest(rawManifest) {
     );
   }
   assertSha256(manifest.headSha256, "manifest head");
+  if (
+    PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS.length !==
+    PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.length
+  ) {
+    fail(
+      "PROOF_READER_CHECKPOINT_HISTORY_UNANCHORED",
+      "Every reviewed checkpoint digest must pin one immutable task-generation size.",
+    );
+  }
   const rawCheckpoints = exactDenseArray(manifest.checkpoints, "manifest checkpoints", 1_024);
   if (rawCheckpoints.length === 0) {
     fail(
@@ -969,7 +1031,7 @@ function assertLiveReceipt(bytes, receipt, code, kind) {
 }
 
 /**
- * Verifies the canonical checkpoint and all six artifacts plus twelve current reader files.
+ * Verifies the canonical checkpoint and every artifact and reader in its current reviewed head.
  */
 export async function verifyProofReaderCheckpoints(rawOptions = undefined) {
   const options = captureOptions(rawOptions);

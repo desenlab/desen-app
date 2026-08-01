@@ -141,6 +141,10 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 24_068,
     sha256: "5c48cf2a16ffd0d205a63c5e854c53914a898844a0441d5b9fa68b64d9ca10c6",
   }),
+  [CI_WORKFLOW]: Object.freeze({
+    bytes: 2_168,
+    sha256: "d94e840ac09f8166ff62d1fe43be0045457a23b6b1155fbe5a1df13ddf91797e",
+  }),
   [PROOF_LIBRARY]: Object.freeze({
     bytes: 50_687,
     sha256: "8858f51cab48544624ea01cffdfdfe1615c47f76ff4aa256d37ddc142e1fe10b",
@@ -149,6 +153,12 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 34_560,
     sha256: "d0b48ae54c4c4cbcdbd1b6e2522ab5aeaa9dac4fb1810845fd9fd1ec958c2bae",
   }),
+});
+// I07-02 changes only the hosted coordination successor. Exact live authentication preserves the
+// immutable M06-T10 workflow projection without regenerating task-time proof bytes.
+const APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT = Object.freeze({
+  bytes: 4_994,
+  sha256: "4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0",
 });
 const TRACKED_SET = new Set(TRACKED);
 const PREREQUISITE_SET = new Set(
@@ -559,6 +569,43 @@ async function readRegularBytes(relativePath, code = "PUBLISHER_OFFICIAL_GOLDEN_
     "Official-golden evidence input",
     { relativePath },
   );
+}
+
+function matchesReceipt(bytes, receipt) {
+  return bytes.byteLength === receipt.bytes && sha256(bytes) === receipt.sha256;
+}
+
+async function authenticateRequiredCiWorkflow(trackedPairs) {
+  const matches = trackedPairs.filter(({ relativePath }) => relativePath === CI_WORKFLOW);
+  if (matches.length !== 1) {
+    fail(
+      "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
+      "The reviewed hosted CI workflow is missing or ambiguous.",
+      { count: matches.length },
+    );
+  }
+  const tracked = matches[0];
+  const liveBytes = await readRegularBytes(CI_WORKFLOW, "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT");
+  if (!matchesReceipt(liveBytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT)) {
+    fail(
+      "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
+      "The live hosted CI workflow differs from the exact reviewed I07-02 successor.",
+      {
+        expectedBytes: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.bytes,
+        expectedSha256: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.sha256,
+        actualBytes: liveBytes.byteLength,
+        actualSha256: sha256(liveBytes),
+      },
+    );
+  }
+  const trackedIsApproved = matchesReceipt(tracked.bytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT);
+  if (!tracked.overridden && !trackedIsApproved) {
+    fail(
+      "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
+      "The captured hosted CI workflow differs from its authenticated live bytes.",
+    );
+  }
+  return trackedIsApproved ? HISTORICAL_TRACKED_RECEIPTS[CI_WORKFLOW] : undefined;
 }
 
 function readOverrideMap(map, relativePath, allowedPaths) {
@@ -1232,6 +1279,7 @@ async function buildFromOptions(options) {
       return Object.freeze({ relativePath, bytes, overridden: override !== undefined });
     }),
   );
+  const historicalCiWorkflowProjection = await authenticateRequiredCiWorkflow(trackedPairs);
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
   const frozenInputs = assertFrozenInputs(bytesByPath);
   const trackedText = (relativePath, label) =>
@@ -1297,7 +1345,9 @@ async function buildFromOptions(options) {
   }
   const trackedFiles = Object.freeze(
     trackedPairs.map(({ relativePath, bytes, overridden }) => {
-      const historical = overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath];
+      const historical =
+        (relativePath === CI_WORKFLOW ? historicalCiWorkflowProjection : undefined) ??
+        (overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath]);
       return historical === undefined
         ? Object.freeze({
             path: relativePath,

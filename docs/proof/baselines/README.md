@@ -17,6 +17,11 @@ fail-closed single-pass quality gate.
 `i07-01-modular-proof-shadow.json` records the same-revision local and hosted comparison for the
 non-authoritative exhaustive modular candidate, including its exact legacy inventory, checkpoint
 genesis, open cleanup debt, timing, and remaining cutover limitations.
+`i07-02-required-exhaustive-equivalence.json` records the accepted local and hosted equivalence
+program, the rejected common-drift attempt, exact shared-state ownership, the required-workflow
+cutover, the manual-only legacy rollback boundary, the second current-reader checkpoint, and the
+three removed temporary comparison targets. It closes no protocol claim and introduces no
+affected-path selection.
 
 Evidence files must state the command, scope, source commit when one exists, result, and known
 limitations. Generated proof artifacts additionally record SHA-256 hashes at their owning task.

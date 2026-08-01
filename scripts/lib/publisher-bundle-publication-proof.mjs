@@ -162,6 +162,10 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 24_068,
     sha256: "7358443014ef4161b9c2e18117d40a5c7f5b3103a31dc9048ac396c2bcd37ac9",
   }),
+  [CI_WORKFLOW]: Object.freeze({
+    bytes: 2_168,
+    sha256: "d94e840ac09f8166ff62d1fe43be0045457a23b6b1155fbe5a1df13ddf91797e",
+  }),
   "scripts/lib/publisher-catalog-pinning-proof.mjs": Object.freeze({
     bytes: 88_341,
     sha256: "d3ec245fd3adc5f594b7da1bb79e486cc4b6d7238f7a42319cfc840783acac3e",
@@ -189,6 +193,14 @@ const APPROVED_CURRENT_COMPATIBILITY_RECEIPTS = Object.freeze({
 const APPROVED_CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   EXECUTION_PREFLIGHT_COMPATIBILITY_READER,
 ]);
+
+// I07-02 promotes the exhaustive scheduler without rewriting immutable M06-T09 evidence. The
+// live workflow must match this reviewed successor exactly before the task-time workflow receipt
+// may be projected into the frozen artifact.
+const APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT = Object.freeze({
+  bytes: 4_994,
+  sha256: "4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0",
+});
 
 const HISTORICAL_CI_RECEIPT = Object.freeze({
   planSha256: "3c927667b5b932a523f3bbe347cc554cd16b94e08fe493f5afe1b76361311f0c",
@@ -744,6 +756,43 @@ async function authenticateCurrentCompatibilityReaders(trackedPairs, options) {
     approvedIndex += 1;
   }
   return historicalProjections;
+}
+
+function matchesReceipt(bytes, receipt) {
+  return bytes.byteLength === receipt.bytes && sha256(bytes) === receipt.sha256;
+}
+
+async function authenticateRequiredCiWorkflow(trackedPairs) {
+  const matches = trackedPairs.filter(({ relativePath }) => relativePath === CI_WORKFLOW);
+  if (matches.length !== 1) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "The reviewed hosted CI workflow is missing or ambiguous.",
+      { count: matches.length },
+    );
+  }
+  const tracked = matches[0];
+  const liveBytes = await readRegularBytes(CI_WORKFLOW, "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT");
+  if (!matchesReceipt(liveBytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT)) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "The live hosted CI workflow differs from the exact reviewed I07-02 successor.",
+      {
+        expectedBytes: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.bytes,
+        expectedSha256: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.sha256,
+        actualBytes: liveBytes.byteLength,
+        actualSha256: sha256(liveBytes),
+      },
+    );
+  }
+  const trackedIsApproved = matchesReceipt(tracked.bytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT);
+  if (!tracked.overridden && !trackedIsApproved) {
+    fail(
+      "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
+      "The captured hosted CI workflow differs from its authenticated live bytes.",
+    );
+  }
+  return trackedIsApproved ? HISTORICAL_TRACKED_RECEIPTS[CI_WORKFLOW] : undefined;
 }
 
 async function prerequisiteClaims(options) {
@@ -3344,6 +3393,7 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
     trackedPairs,
     options,
   );
+  const historicalCiWorkflowProjection = await authenticateRequiredCiWorkflow(trackedPairs);
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
   const text = (relativePath) => {
     const bytes = bytesByPath.get(relativePath);
@@ -3400,6 +3450,7 @@ export async function buildPublisherBundlePublicationEvidence(rawOptions = undef
     trackedPairs.map(({ relativePath, bytes, overridden }) => {
       const historical =
         compatibilityReaderProjections.get(relativePath) ??
+        (relativePath === CI_WORKFLOW ? historicalCiWorkflowProjection : undefined) ??
         (overridden && ![CI_SOURCE, ROOT_PACKAGE].includes(relativePath)
           ? undefined
           : HISTORICAL_TRACKED_RECEIPTS[relativePath]);

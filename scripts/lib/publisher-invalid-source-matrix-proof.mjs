@@ -858,6 +858,14 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     bytes: 46_946,
     sha256: "52a19852972d31429ad7631de4e8338249eb9d6b894ccaa7b34dc68deb6b0b80",
   }),
+  [OFFICIAL_GOLDEN_PROOF_LIBRARY]: Object.freeze({
+    bytes: 56_040,
+    sha256: "569f25138a3f8e9e36ca8a6dee348f3bdb486e999c83b0bc26054117e0f15207",
+  }),
+  [OFFICIAL_GOLDEN_ROOT_TEST]: Object.freeze({
+    bytes: 37_056,
+    sha256: "f2c6c28956b21459caf3b6324100e4fd551e3b514b52f34ccbfa3d55445df9d0",
+  }),
 });
 const APPROVED_CURRENT_T09_SUCCESSOR_PATHS = Object.freeze([
   BUNDLE_PUBLICATION_PROOF_LIBRARY,
@@ -865,12 +873,26 @@ const APPROVED_CURRENT_T09_SUCCESSOR_PATHS = Object.freeze([
 ]);
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]: Object.freeze({
-    bytes: 133_811,
-    sha256: "9eb7b300a1239e5be3324c24b39e0107d02cd14587b977310d162c4812a3e645",
+    bytes: 135_987,
+    sha256: "66bc126178e7101d0ecc2a7ba860824ba698f0d0de244fb47c57e4fe52ea827e",
   }),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze({
-    bytes: 62_216,
-    sha256: "34190a6f9304ce85acbb5809d4b1422b621d7089300f89eb9d6863839d220060",
+    bytes: 62_798,
+    sha256: "f601032052ece836b1a8dee5de79f7573c3bc7883626ec9691935e74f172c1b8",
+  }),
+});
+const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
+  OFFICIAL_GOLDEN_PROOF_LIBRARY,
+  OFFICIAL_GOLDEN_ROOT_TEST,
+]);
+const APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS = Object.freeze({
+  [OFFICIAL_GOLDEN_PROOF_LIBRARY]: Object.freeze({
+    bytes: 58_158,
+    sha256: "48d401ecfd0a4c09a0a92c8d16fb3949140a5b035f665027c708d35adc10ee9d",
+  }),
+  [OFFICIAL_GOLDEN_ROOT_TEST]: Object.freeze({
+    bytes: 37_617,
+    sha256: "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9",
   }),
 });
 const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
@@ -879,6 +901,9 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "APPROVED_CURRENT_COMPATIBILITY_PATHS",
   "assertApprovedCurrentCompatibilityBytes",
   "authenticateCurrentCompatibilityReaders",
+  "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
+  "authenticateRequiredCiWorkflow",
+  "4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0",
   "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
   "live-worktree",
   "tracked-byte-override",
@@ -890,6 +915,7 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',
+  'test("[ci] admits only the exact required-workflow successor into frozen T09 evidence"',
   "// unreviewed compatibility successor",
   "const originalObjectFreeze = Object.freeze;",
   "const originalObjectEntries = Object.entries;",
@@ -1246,6 +1272,109 @@ async function authenticateLiveCurrentT09Successors() {
     pathIndex += 1;
   }
   return SAFE_OBJECT_FREEZE(authenticated);
+}
+
+function currentT10SuccessorReceipt(relativePath) {
+  if (relativePath === OFFICIAL_GOLDEN_PROOF_LIBRARY) {
+    return APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS[OFFICIAL_GOLDEN_PROOF_LIBRARY];
+  }
+  if (relativePath === OFFICIAL_GOLDEN_ROOT_TEST) {
+    return APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS[OFFICIAL_GOLDEN_ROOT_TEST];
+  }
+  return undefined;
+}
+
+function assertCurrentT10SuccessorBytes(bytes, relativePath, authority) {
+  const approved = currentT10SuccessorReceipt(relativePath);
+  const actualBytes = exactByteLength(bytes);
+  const actualSha256 = sha256(bytes);
+  if (
+    approved === undefined ||
+    actualBytes !== approved.bytes ||
+    actualSha256 !== approved.sha256
+  ) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+      "A current T10 successor differs from its exact approved receipt.",
+      {
+        relativePath,
+        authority,
+        expectedBytes: approved?.bytes,
+        expectedSha256: approved?.sha256,
+        actualBytes,
+        actualSha256,
+      },
+    );
+  }
+}
+
+async function authenticateLiveCurrentT10Successors() {
+  const authenticated = [];
+  let pathIndex = 0;
+  while (pathIndex < APPROVED_CURRENT_T10_SUCCESSOR_PATHS.length) {
+    const relativePath = APPROVED_CURRENT_T10_SUCCESSOR_PATHS[pathIndex];
+    const bytes = await readRegularBytes(
+      relativePath,
+      "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+    );
+    assertCurrentT10SuccessorBytes(bytes, relativePath, "live-worktree");
+    authenticated[pathIndex] = SAFE_OBJECT_FREEZE({ relativePath, bytes });
+    pathIndex += 1;
+  }
+  return SAFE_OBJECT_FREEZE(authenticated);
+}
+
+function authenticateCurrentT10TrackedInputs(liveInputs, trackedPairs, options) {
+  let pathIndex = 0;
+  while (pathIndex < APPROVED_CURRENT_T10_SUCCESSOR_PATHS.length) {
+    const relativePath = APPROVED_CURRENT_T10_SUCCESSOR_PATHS[pathIndex];
+    const liveInput = liveInputs[pathIndex];
+    if (liveInput?.relativePath !== relativePath) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "The fixed current T10 live authority order changed.",
+        { relativePath },
+      );
+    }
+    let matched;
+    let matches = 0;
+    let trackedIndex = 0;
+    while (trackedIndex < trackedPairs.length) {
+      const tracked = trackedPairs[trackedIndex];
+      if (tracked.relativePath === relativePath) {
+        matched = tracked;
+        matches += 1;
+      }
+      trackedIndex += 1;
+    }
+    if (matched === undefined || matches !== 1) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "A current T10 successor tracked candidate is missing or ambiguous.",
+        { relativePath, matches },
+      );
+    }
+    assertCurrentT10SuccessorBytes(matched.bytes, relativePath, "tracked-candidate");
+    if (!exactCurrentT09BytesEqual(liveInput.bytes, matched.bytes)) {
+      fail(
+        "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+        "A current T10 tracked candidate differs from its authenticated live authority.",
+        { relativePath },
+      );
+    }
+    const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+    if (override !== undefined) {
+      assertCurrentT10SuccessorBytes(override, relativePath, "tracked-byte-override");
+      if (!exactCurrentT09BytesEqual(liveInput.bytes, override)) {
+        fail(
+          "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT",
+          "A current T10 caller override differs from its authenticated live authority.",
+          { relativePath },
+        );
+      }
+    }
+    pathIndex += 1;
+  }
 }
 
 function authenticateCurrentT09TrackedInputs(liveInputs, trackedPairs, options) {
@@ -4136,6 +4265,7 @@ async function executeProgrammaticRuntimeProbe(programBytes) {
 
 async function buildFromOptions(options) {
   const liveCurrentT09Successors = await authenticateLiveCurrentT09Successors();
+  const liveCurrentT10Successors = await authenticateLiveCurrentT10Successors();
   const prerequisites = await prerequisiteClaims(options);
   const trackedPairs = await Promise.all(
     TRACKED.map(async (relativePath) => {
@@ -4146,6 +4276,7 @@ async function buildFromOptions(options) {
   );
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
   authenticateCurrentT09TrackedInputs(liveCurrentT09Successors, trackedPairs, options);
+  authenticateCurrentT10TrackedInputs(liveCurrentT10Successors, trackedPairs, options);
   const text = (relativePath, label) =>
     decodeUtf8(
       bytesByPath.get(relativePath),
@@ -4227,8 +4358,13 @@ async function buildFromOptions(options) {
         relativePath === BUNDLE_PUBLICATION_ROOT_TEST
           ? HISTORICAL_TRACKED_RECEIPTS[relativePath]
           : undefined;
+      const currentT10HistoricalReceipt =
+        relativePath === OFFICIAL_GOLDEN_PROOF_LIBRARY || relativePath === OFFICIAL_GOLDEN_ROOT_TEST
+          ? HISTORICAL_TRACKED_RECEIPTS[relativePath]
+          : undefined;
       const historical =
         currentT09HistoricalReceipt ??
+        currentT10HistoricalReceipt ??
         (overridden === false || [CI_SOURCE, ROOT_PACKAGE].includes(relativePath)
           ? HISTORICAL_TRACKED_RECEIPTS[relativePath]
           : undefined);

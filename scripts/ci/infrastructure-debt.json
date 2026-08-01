@@ -67,7 +67,10 @@
             "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
             "APPROVED_CURRENT_COMPATIBILITY_PATHS",
             "assertApprovedCurrentCompatibilityBytes",
-            "authenticateCurrentCompatibilityReaders"
+            "authenticateCurrentCompatibilityReaders",
+            "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
+            "matchesReceipt",
+            "authenticateRequiredCiWorkflow"
           ]
         },
         {
@@ -75,7 +78,8 @@
           "symbols": [
             "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
             "[compatibility] externally tracks every current T02 through T08 proof reader",
-            "[compatibility] detects tamper in each externally anchored T02 through T08 reader"
+            "[compatibility] detects tamper in each externally anchored T02 through T08 reader",
+            "[ci] admits only the exact required-workflow successor into frozen T09 evidence"
           ]
         }
       ]
@@ -93,11 +97,18 @@
           "symbols": [
             "APPROVED_CURRENT_T09_SUCCESSOR_PATHS",
             "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
+            "APPROVED_CURRENT_T10_SUCCESSOR_PATHS",
+            "APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS",
             "REQUIRED_CURRENT_T09_PROOF_MARKERS",
             "REQUIRED_CURRENT_T09_TEST_MARKERS",
             "currentT09SuccessorReceipt",
+            "currentT10SuccessorReceipt",
+            "assertCurrentT10SuccessorBytes",
             "authenticateLiveCurrentT09Successors",
             "authenticateCurrentT09TrackedInputs",
+            "authenticateLiveCurrentT10Successors",
+            "authenticateCurrentT10TrackedInputs",
+            "currentT10HistoricalReceipt",
             "assertCurrentT09CompatibilityMarkers"
           ]
         },
@@ -109,8 +120,24 @@
             "BUNDLE_PUBLICATION_ROOT_TEST",
             "currentT09ProofBytes",
             "currentT09RootTestBytes",
+            "currentT10ProofBytes",
+            "currentT10RootTestBytes",
             "approvedCurrentT09",
             "unreviewedT09ProofBytes"
+          ]
+        },
+        {
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "symbols": [
+            "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
+            "matchesReceipt",
+            "authenticateRequiredCiWorkflow"
+          ]
+        },
+        {
+          "path": "tests/publisher-official-golden.test.mjs",
+          "symbols": [
+            "[ci] admits only the exact required-workflow successor into frozen T10 evidence"
           ]
         }
       ]
@@ -125,7 +152,11 @@
       "targets": [
         {
           "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
-          "symbols": ["HISTORICAL_COMPATIBILITY_READERS", "currentReaderPaths"]
+          "symbols": [
+            "HISTORICAL_COMPATIBILITY_READERS",
+            "HISTORICAL_TRACKED_RECEIPTS",
+            "currentReaderPaths"
+          ]
         },
         {
           "path": "tests/control-plane-bundle-store.test.mjs",
@@ -189,6 +220,28 @@
           ]
         },
         {
+          "path": "scripts/ci/required-exhaustive-equivalence.mjs",
+          "symbols": [
+            "../run-ci-quality-gate.mjs",
+            "createRetainedSequentialSteps",
+            "validateRetainedSequentialPlan",
+            "EXPECTED_RETAINED_PLAN_SHA256",
+            "verifyRequiredExhaustiveInventoryEquivalence"
+          ]
+        },
+        {
+          "path": "scripts/ci/test/required-exhaustive-equivalence.test.mjs",
+          "symbols": [
+            "../../run-ci-quality-gate.mjs",
+            "createRetainedSequentialSteps",
+            "EXPECTED_RETAINED_PLAN_SHA256",
+            "verifyRequiredExhaustiveInventoryEquivalence",
+            "retained-plan omission, reorder, argv substitution, and duplicate fail closed",
+            "RETAINED_LEGACY_COMMAND",
+            "official CI admits only required exhaustive authority and a manual legacy rollback"
+          ]
+        },
+        {
           "path": "tests/publisher-bundle-publication.test.mjs",
           "symbols": ["createQualityGateSteps"]
         },
@@ -206,14 +259,27 @@
         },
         {
           "path": ".github/workflows/ci.yml",
-          "symbols": ["node scripts/run-ci-quality-gate.mjs"]
+          "symbols": [
+            "legacy-rollback",
+            "legacy-pnpm-store",
+            "Legacy rollback",
+            "Run retained legacy rollback",
+            "node scripts/run-ci-quality-gate.mjs"
+          ]
         }
       ]
     },
     {
       "id": "DEBT-I07-008",
-      "status": "OPEN",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "3cf72552ee3ea23a0b5e99f782f837bc6237f78b",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/16",
+        "evidencePath": "docs/proof/baselines/i07-02-required-exhaustive-equivalence.json",
+        "evidenceSha256": "6b876b09f94517e27098076c9f16e207368ef8d31eb70b0ae2f187b15757345d",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/30699616361"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-02",
       "deadline": "G07",

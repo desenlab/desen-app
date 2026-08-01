@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-31
+Last updated: 2026-08-01
 
 ## Plain-language status
 
@@ -450,19 +450,31 @@ work.
 P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the
 Publisher conformance target remain `PLANNED`.
 
-I07-01 is complete. The proof environment now separates immutable task-time evidence from one
-current-reader checkpoint authority and one derived 130-step execution schedule. The checkpoint
-authenticates six frozen artifacts and twelve live readers; 52 focused hostile and contract tests
-pass; eight temporary structures have machine-enforced owners and deadlines. On candidate commit
+I07-01 is complete historical evidence. It separated immutable task-time evidence from a
+current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
 `f12864e5353441b13115c99afa14d2303e55cf74`, the local legacy and modular paths both passed in
-459.94 and 317.95 seconds, respectively. Hosted legacy and modular gates also both passed in 690
-and 518 seconds. The exact comparison is archived in the
-[I07-01 baseline](docs/proof/baselines/i07-01-modular-proof-shadow.json). This is measured
-`SHADOW + EXHAUSTIVE` evidence, not CI-authority cutover. The
-legacy gate remains authoritative; I07-02 must classify shared state and complete required
-equivalence. This work changes no protocol claim, implementation-task count, or proof-gate count.
-I07-04 owns all G07-due current-reader cleanup, while I07-05 owns legacy sequential-runner
-retirement by G12. M07-T02 remains `NOT_STARTED` and has an explicit I07-02 dependency.
+459.94 and 317.95 seconds, while hosted gates passed in 690 and 518 seconds. The exact shadow
+comparison remains archived in the
+[I07-01 baseline](docs/proof/baselines/i07-01-modular-proof-shadow.json).
+
+I07-02 is now complete. All 130 workloads have one code-owned shared-state class, all 61 proof
+pairs have exact ownership, and required execution rejects missing, skipped, cancelled, timed-out,
+unclosed, or injected success. The accepted same-revision comparison at commit
+`077560fe81d0fcf4560554dd7511413bad5bc30e` passed both required-exhaustive and retained legacy
+jobs. The official cutover at commit `3cf72552ee3ea23a0b5e99f782f837bc6237f78b` then passed hosted
+run `30699616361`: `Quality gate` completed in 10 minutes 33 seconds, while the manual-only legacy
+rollback job was correctly skipped and the shadow workflow did not trigger. The current-reader
+chain now authenticates eight frozen artifacts and sixteen live readers through checkpoint head
+`95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c`. The temporary shadow
+workflow and modular comparison adapter/test are removed, closing `DEBT-I07-008`. Exact accepted
+and rejected evidence is archived in the
+[I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json).
+
+This work changes no protocol claim, implementation-task count, or proof-gate count. It introduces
+no affected-path selector and does not retire the sequential runner, which remains an explicit
+manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
+retirement by G12. M07-T02 remains `NOT_STARTED`, but its I07-02 dependency is satisfied and it is
+ready to start.
 
 ## Current milestone
 
@@ -536,14 +548,13 @@ retirement by G12. M07-T02 remains `NOT_STARTED` and has an explicit I07-02 depe
   `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
   `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
   `M07-T01 — Content-addressed bundle store with immutable revision entries`
-- Next infrastructure task:
-  `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
-  `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`
+  `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
+  `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
   `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`
-- Status: M07-T01 is complete; M07-T02 remains `NOT_STARTED` and is intentionally paused through
-  I07-02; G07 remains open
+- Status: M07-T01 and I07-02 are complete; M07-T02 remains `NOT_STARTED`, its dependencies are
+  satisfied, and it is ready to start; G07 remains open
 
 ## Completed preparation
 
@@ -900,17 +911,15 @@ pre-release targeting exact commit `b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca`. I
 explicitly labeled as a Working Draft, and the release operation changed no frozen protocol byte.
 `PF-004` records the completed release hygiene.
 
-## Current infrastructure work and next implementation task
+## Completed infrastructure work and next implementation task
 
-Complete `I07-02` before implementation resumes. I07-01 already preserved the complete existing
-workload universe, established the current-reader checkpoint and cleanup register, and archived a
-successful same-revision local and hosted shadow comparison. The migration must keep the legacy
-gate authoritative until I07-02 classifies shared mutable state and proves the broader required
-equivalence program. It must still run no proof generator or writer, trust no cached success, and
-make every unknown or ambiguous selection condition expand to `EXHAUSTIVE`.
+I07-02 completed exact legacy/modular coverage parity, code-owned shared-state classification, and
+the official `REQUIRED + EXHAUSTIVE` CI cutover. Required CI runs no proof generator or writer,
+trusts no cached success, and executes the fresh complete workload. The legacy sequential path is
+manual rollback only; affected selection remains future work and every unknown or ambiguous
+selector condition must eventually expand to `EXHAUSTIVE`.
 
-After I07-02 proves exact legacy/modular coverage parity and cuts required CI over to exhaustive
-execution with code-owned shared-state classification, implement
+Implement
 `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`. Treat every
 stored byte sequence as untrusted on ingress: parse it under bounded rules, validate the exact
 DESEN 0.1.0 Bundle, independently recalculate and compare its claimed revision and available
