@@ -173,11 +173,11 @@ cancelled, timed-out, failed, or unclosed workload and preserves inventory, work
 cancellation, and timeout failure authority while ignoring timing and sibling completion order.
 
 The local plan factory accepts only `EXHAUSTIVE`, defaults its authority to `REQUIRED`, and requires
-`SHADOW` to be explicit. The runner executes the dependency-derived prefix, at most two compatible
-proof pairs, the exclusive source-audit barrier, and the suffix. This is an implementation target,
-not a declaration that hosted CI has cut over: a same-revision clean comparison, hosted evidence,
-and workflow promotion must still pass before the retained sequential workflow stops deciding
-repository status.
+`SHADOW` to be explicit. The runner executes the dependency-derived prefix, ordinary proof-pair
+segments at concurrency two, ten drained tracked-alias pairs, the drained source-audit pair, and
+the suffix. This is an implementation target, not a declaration that hosted CI has cut over: a
+same-revision clean comparison, hosted evidence, and workflow promotion must still pass before the
+retained sequential workflow stops deciding repository status.
 
 The shared-state authority classifies all 130 workloads exactly once:
 
@@ -187,12 +187,14 @@ The shared-state authority classifies all 130 workloads exactly once:
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 |
 | `PROOF_READ_ONLY`                |    66 |
-| `PROOF_OS_TEMP_ISOLATED`         |    55 |
+| `PROOF_OS_TEMP_ISOLATED`         |    45 |
+| `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 |
 
-Sixty proof pairs are eligible for pair-level overlap at concurrency two. Their verifier and root
-test remain dependency-ordered within the pair. `reference-host-web-source-audit` is the sole
-exclusive proof-pair barrier because its root test requires bounded workspace-temp authority.
+Fifty proof pairs are eligible for pair-level overlap at concurrency two. Their verifier and root
+test remain dependency-ordered within the pair. Eleven pairs drain the scheduler: ten root tests
+that deliberately create a real tracked alias plus `reference-host-web-source-audit`, whose root
+test requires bounded workspace-temp authority.
 
 Only five verifier proofs may create child runtime probes and write to their runner-owned temp
 root: `publisher-catalog-pinning`, `publisher-bundle-publication`,
@@ -201,9 +203,36 @@ root: `publisher-catalog-pinning`, `publisher-bundle-publication`,
 may load the reviewed native addon; its verifier remains workspace-read-only.
 
 Every proof step receives a fresh authenticated OS temp root and a generated Node permission
-policy. Workspace writes, child processes, and native addons are denied unless its exact
-classification grants them; inherited `NODE_OPTIONS` is rejected, and a required preload denies
-TCP and UDP listener binding. Temp cleanup verifies directory identity before removal.
+policy. Direct workspace-write grants, child processes, and native addons are absent unless its
+exact classification grants them; inherited `NODE_OPTIONS` is rejected, and a required preload
+denies TCP and UDP listener binding. Temp cleanup verifies directory identity before removal.
+
+Node 24's asynchronous `fs.cp` implementation reads destination ancestors outside an otherwise
+authorized step temp root, while its permission model rejects reviewed symlink calls whose target
+is outside that root. Eighteen exact root-test records therefore carry an orthogonal schema-v2
+compatibility policy: 112 workloads remain `NONE`, two are `FIXTURE_COPY`, fifteen are
+`REVIEWED_SYMLINK`, and one is `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. The ten real-alias workloads
+are separated into `PROOF_TRACKED_ALIAS_EXCLUSIVE`; the other policies remain orthogonal to
+scheduling.
+
+Fixture copying accepts only one code-owned source root per workload, an absent or empty
+no-follow destination under that workload's own temp root, and the exact recursive option shape.
+It rejects symlinked or special source entries, bounds depth, entries, and bytes, and compares
+source and destination fingerprints. Reviewed symlink handling keeps temp-to-temp links inside the
+same authenticated temp root. Fourteen workloads additionally own eighteen exact workspace-target
+rules: eight unsafe-input probes receive exact-byte files mirrored into their own temp root, while
+ten canonical-path or inode probes retain their exact tracked target alias. Every workspace target,
+target kind, destination parent, and resulting link is authenticated without following an
+unreviewed path.
+
+The generated permission list adds no workspace-write path, shared OS-temp parent, or sibling-temp
+path. The compatibility preload is nevertheless a trusted-repository-code adapter, not an
+adversarial operating-system sandbox: root tests already require child-process authority, and ten
+historical checks intentionally exercise a real tracked alias. Those fixed tests perform no write
+through the aliases; the complete gate's closing tracked-byte, mode, file-count, and Git-index seal
+still rejects any persistent workspace mutation. The ten real-alias pairs also run only after the
+parallel pool drains. Other workloads cannot claim the policy, and the historical proof tests and
+artifacts remain byte-unchanged.
 
 Required authority accepts only close observations emitted by the non-injected shell-free process
 runner. Injected step, Git-reader, workspace-capture, guard, environment, spawn, signal, or timeout

@@ -1530,10 +1530,10 @@ async function runProofPairRegion(
     }
   }
   flushOrdinarySegment();
-  if (barrierCount !== 1 || plan.proofPairs.length - barrierCount !== 60) {
+  if (barrierCount !== 11 || plan.proofPairs.length - barrierCount !== 50) {
     fail(
       "REQUIRED_EXHAUSTIVE_CLASS_DRIFT",
-      "The shared-state authority must classify exactly 60 ordinary pairs and one barrier pair.",
+      "The shared-state authority must classify exactly 50 ordinary pairs and 11 barrier pairs.",
       { barrierCount, proofPairCount: plan.proofPairs.length },
     );
   }

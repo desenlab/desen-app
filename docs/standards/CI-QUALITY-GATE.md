@@ -162,18 +162,19 @@ GitHub Actions still uses the retained sequential gate as its sole repository pa
 
 All 130 workloads have one exact shared-state class:
 
-| Execution class                  | Count | Scheduling rule                                    |
-| -------------------------------- | ----: | -------------------------------------------------- |
-| `GLOBAL_EXCLUSIVE`               |     6 | Drained repository-wide barrier                    |
-| `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Sole workspace build/typecheck writer              |
-| `PACKAGE_TEST_EXCLUSIVE`         |     1 | Drained complete package-test barrier              |
-| `PROOF_READ_ONLY`                |    66 | No shared workspace writes                         |
-| `PROOF_OS_TEMP_ISOLATED`         |    55 | Writes only to a workload-owned OS temp root       |
-| `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | Sole source-audit workspace-temp root-test barrier |
+| Execution class                  | Count | Scheduling rule                                      |
+| -------------------------------- | ----: | ---------------------------------------------------- |
+| `GLOBAL_EXCLUSIVE`               |     6 | Drained repository-wide barrier                      |
+| `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Sole workspace build/typecheck writer                |
+| `PACKAGE_TEST_EXCLUSIVE`         |     1 | Drained complete package-test barrier                |
+| `PROOF_READ_ONLY`                |    66 | No shared workspace writes                           |
+| `PROOF_OS_TEMP_ISOLATED`         |    45 | Writes only to a workload-owned OS temp root         |
+| `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases under a drained scheduler       |
+| `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | Direct source-audit workspace-temp root-test barrier |
 
-Sixty proof pairs may overlap pair-by-pair at concurrency two after their predecessors pass. A
-pair's root test still follows its verifier. The `reference-host-web-source-audit` pair is the sole
-exclusive barrier.
+Fifty proof pairs may overlap pair-by-pair at concurrency two after their predecessors pass. A
+pair's root test still follows its verifier. Ten real tracked-alias pairs and the
+`reference-host-web-source-audit` pair are the eleven exclusive barriers.
 
 Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
 
@@ -188,9 +189,25 @@ native addon. The verifier remains workspace-read-only; the root test owns the s
 workspace-temp exception.
 
 Every proof process gets a fresh, identity-checked temp root and generated Node permissions.
-Workspace writes, child processes, and addons are absent unless the code-owned workload record
-grants them. Inherited `NODE_OPTIONS` is rejected, and a mandatory preload denies TCP and UDP
-listener binding. The runner authenticates temp identity again before cleanup.
+Direct workspace-write grants, child processes, and addons are absent unless the code-owned
+workload record grants them. Inherited `NODE_OPTIONS` is rejected, and a mandatory preload denies
+TCP and UDP listener binding. The runner authenticates temp identity again before cleanup.
+
+Eighteen root-test records also own an orthogonal schema-v2 Node-permission compatibility policy:
+112 workloads are `NONE`, two are `FIXTURE_COPY`, fifteen are `REVIEWED_SYMLINK`, and one is
+`FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy is limited to the exact code-owned workspace
+source, a no-follow destination inside the workload's own temp root, two reviewed recursive option
+shapes, bounded regular trees, and matching source/destination fingerprints. Symlink handling
+keeps ordinary targets in the same temp root and pins fourteen workspace-target workloads to
+eighteen exact target-and-kind rules. Eight unsafe-input targets are mirrored into the caller's
+temp root; ten historical canonical-path or inode checks retain their exact tracked alias.
+
+The generated grant list still adds no workspace-write, shared-parent, or sibling-temp path. This
+adapter is defense in depth for fixed trusted repository tests, not a security sandbox for
+adversarial JavaScript or child processes. Its real tracked aliases are covered by reviewed test
+behavior, exclusive scheduling, and the complete gate's closing tracked-workspace seal. Unlisted
+workloads, sources, workspace targets, target kinds, symlink-parent traversal, and copy options
+fail closed.
 
 `REQUIRED` rejects injected success observations and every injected runner, Git reader, workspace
 capture, guard, process, environment, signal, or timeout seam. Those seams exist only for
@@ -235,7 +252,8 @@ I07-03 may calculate an `AFFECTED` plan only in shadow. Unknown paths, statuses,
 dependency or policy changes, missing Git authority, and any ambiguous classification must expand
 to `EXHAUSTIVE`. Promotion is reserved for I07-04 after ADR 0011's frozen threshold passes.
 `EXHAUSTIVE` fresh execution remains mandatory on `main`, release candidates, and manual audits.
-I07-02 implements no affected selector and retires no legacy component. The current-reader bridges
-remain owned by I07-04. `DEBT-I07-007` assigns the sequential runner, rollback-only equivalence
-adapter, and other rollback references to I07-05 until their exact machine-checked removal
-conditions in `docs/plan/DEBT-REGISTER.md` are satisfied.
+I07-02 implements no affected selector. Its final promotion closes `DEBT-I07-008` by removing the
+temporary shadow workflow and modular comparison adapter/test. The current-reader bridges remain
+owned by I07-04. `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and
+other rollback references under I07-05 until their exact machine-checked removal conditions in
+`docs/plan/DEBT-REGISTER.md` are satisfied.

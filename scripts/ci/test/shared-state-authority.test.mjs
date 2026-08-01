@@ -1,6 +1,16 @@
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
-import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import {
+  lstat,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readlink,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -10,6 +20,10 @@ import {
   BUILD_OUTPUT_ROOTS,
   CHILD_PROCESS_VERIFIER_PROOF_IDS,
   EXECUTION_CLASSES,
+  FILESYSTEM_COMPATIBILITY_ROOT_STEP_IDS,
+  FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS,
+  FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_BEHAVIORS,
+  FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES,
   NATIVE_ADDON_PROOF_IDS,
   OS_TEMP_ROOT_PROOF_IDS,
   PROOF_IDS,
@@ -29,6 +43,11 @@ import {
 } from "../shared-state-authority.mjs";
 
 const execFileAsync = promisify(execFile);
+const REPOSITORY_ROOT = path.resolve(import.meta.dirname, "../../..");
+const COMPATIBILITY_PRELOAD_PATH = path.join(
+  REPOSITORY_ROOT,
+  "scripts/ci/proof-filesystem-compatibility.cjs",
+);
 
 async function temporaryDirectory(prefix) {
   return await mkdtemp(path.join(tmpdir(), prefix));
@@ -60,32 +79,34 @@ function mutableMetadata(stepId) {
   return structuredClone(classifyWorkloadStateMetadata(stepId));
 }
 
-test("owns exactly 130 steps across the six reviewed execution classes", () => {
-  const allStepIds = [
-    "orchestrator-contracts",
-    "format",
-    "lint",
-    "structural-validator-artifacts",
-    "workspace-graph",
-    "package-tests",
-    ...PROOF_IDS.map((id) => `verify-${id}`),
-    ...PROOF_IDS.map((id) => `test-${id}`),
-    "dependency-boundaries",
-    "boundary-fixtures",
-  ];
+const ALL_STEP_IDS = Object.freeze([
+  "orchestrator-contracts",
+  "format",
+  "lint",
+  "structural-validator-artifacts",
+  "workspace-graph",
+  "package-tests",
+  ...PROOF_IDS.map((id) => `verify-${id}`),
+  ...PROOF_IDS.map((id) => `test-${id}`),
+  "dependency-boundaries",
+  "boundary-fixtures",
+]);
+
+test("owns exactly 130 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
-  for (const stepId of allStepIds) {
+  for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(allStepIds.length, 130);
-  assert.equal(new Set(allStepIds).size, 130);
+  assert.equal(ALL_STEP_IDS.length, 130);
+  assert.equal(new Set(ALL_STEP_IDS).size, 130);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 1,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 66,
-    PROOF_OS_TEMP_ISOLATED: 55,
+    PROOF_OS_TEMP_ISOLATED: 45,
+    PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
 });
@@ -116,7 +137,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
   ]);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
-      schemaVersion: 1,
+      schemaVersion: 2,
       stepId: `verify-${proofId}`,
       executionClass: "PROOF_OS_TEMP_ISOLATED",
       workspaceReads: ["."],
@@ -126,6 +147,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ports: [],
       childProcessPolicy: "VERIFIER_RUNTIME_PROBE",
       nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
   }
@@ -184,7 +206,7 @@ test("path traversal in untrusted metadata is rejected before comparison", () =>
   );
 });
 
-test("ordinary proof pairs may overlap but source audit always requires a barrier", () => {
+test("ordinary proof pairs overlap while tracked aliases and source audit require barriers", () => {
   assert.deepEqual(
     assertProofPairsCanRunConcurrently("protocol-snapshot", "protocol-canonicalization"),
     {
@@ -192,6 +214,22 @@ test("ordinary proof pairs may overlap but source audit always requires a barrie
       proofIds: ["protocol-snapshot", "protocol-canonicalization"],
     },
   );
+  assert.deepEqual(FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS, [
+    "test-reference-catalog-web-components",
+    "test-reference-catalog-web-form-feedback",
+    "test-reference-catalog-web-parity",
+    "test-reference-catalog-web-capability-artifact",
+    "test-reference-sign-in-fixtures-and-host-binding",
+    "test-reference-tokens-and-synthetic-fixtures",
+    "test-runtime-core-command-event-actions",
+    "test-runtime-core-local-state-identity",
+    "test-runtime-core-reactive-reevaluation",
+    "test-sc-01-dtcg-compatibility",
+  ]);
+  for (const stepId of FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS) {
+    const proofId = stepId.slice("test-".length);
+    assert.equal(classifyProofPairState(proofId).barrier, true);
+  }
   assert.equal(classifyProofPairState("reference-host-web-source-audit").barrier, true);
   assert.throws(
     () =>
@@ -363,6 +401,486 @@ test("only the exact source-audit proof pair receives native-addon authority", a
   );
 });
 
+test("filesystem compatibility is limited to eighteen reviewed workloads and exact rules", () => {
+  assert.deepEqual(FILESYSTEM_COMPATIBILITY_ROOT_STEP_IDS, [
+    "test-protocol-snapshot",
+    "test-protocol-types",
+    "test-protocol-official-suite-parity",
+    "test-sc-01-a2ui-bridge",
+    "test-reference-catalog-web-components",
+    "test-reference-catalog-web-form-feedback",
+    "test-reference-catalog-web-parity",
+    "test-reference-catalog-web-capability-artifact",
+    "test-reference-sign-in-fixtures-and-host-binding",
+    "test-reference-tokens-and-synthetic-fixtures",
+    "test-reference-host-web-shell",
+    "test-reference-host-web-sign-in",
+    "test-runtime-core-command-event-actions",
+    "test-runtime-core-local-state-identity",
+    "test-runtime-core-reactive-reevaluation",
+    "test-runtime-react-reconciliation-diagnostics",
+    "test-runtime-react-failure-boundary",
+    "test-sc-01-dtcg-compatibility",
+  ]);
+  assert.equal(
+    classifyWorkloadStateMetadata("test-protocol-snapshot").filesystemCompatibilityPolicy,
+    "FIXTURE_COPY_AND_REVIEWED_SYMLINK",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-protocol-types").filesystemCompatibilityPolicy,
+    "REVIEWED_SYMLINK",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-protocol-official-suite-parity")
+      .filesystemCompatibilityPolicy,
+    "FIXTURE_COPY",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-sc-01-a2ui-bridge").filesystemCompatibilityPolicy,
+    "FIXTURE_COPY",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-reference-host-web-sign-in").filesystemCompatibilityPolicy,
+    "REVIEWED_SYMLINK",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-protocol-diagnostics").filesystemCompatibilityPolicy,
+    "NONE",
+  );
+
+  const policyCounts = {
+    NONE: 0,
+    FIXTURE_COPY: 0,
+    REVIEWED_SYMLINK: 0,
+    FIXTURE_COPY_AND_REVIEWED_SYMLINK: 0,
+  };
+  for (const stepId of ALL_STEP_IDS) {
+    policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
+  }
+  assert.deepEqual(policyCounts, {
+    NONE: 112,
+    FIXTURE_COPY: 2,
+    REVIEWED_SYMLINK: 15,
+    FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,
+  });
+
+  const workspaceRuleEntries = Object.entries(FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES);
+  const workspaceRules = workspaceRuleEntries.flatMap(([, rules]) => rules);
+  assert.equal(workspaceRuleEntries.length, 14);
+  assert.equal(workspaceRules.length, 18);
+  assert.equal(
+    workspaceRules.filter(
+      ({ behavior }) =>
+        behavior === FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_BEHAVIORS.TRACKED_ALIAS,
+    ).length,
+    10,
+  );
+  assert.equal(
+    workspaceRules.filter(
+      ({ behavior }) =>
+        behavior === FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_BEHAVIORS.TEMP_FILE_MIRROR,
+    ).length,
+    8,
+  );
+  assert.deepEqual(FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES, {
+    "test-reference-catalog-web-components": [
+      {
+        relativeTarget: "docs/proof/artifacts/reference-catalog-web-components.json",
+        kind: "file",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-reference-catalog-web-form-feedback": [
+      {
+        relativeTarget: "docs/proof/artifacts/reference-catalog-web-form-feedback.json",
+        kind: "file",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-reference-catalog-web-parity": [
+      {
+        relativeTarget: "docs/proof/artifacts/reference-catalog-web-parity.json",
+        kind: "file",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-reference-catalog-web-capability-artifact": [
+      {
+        relativeTarget: "docs/proof/artifacts",
+        kind: "directory",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-reference-sign-in-fixtures-and-host-binding": [
+      {
+        relativeTarget: "docs/proof/artifacts/reference-sign-in-fixtures-and-host-binding.json",
+        kind: "file",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-reference-tokens-and-synthetic-fixtures": [
+      {
+        relativeTarget: "docs/proof/artifacts",
+        kind: "directory",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-reference-host-web-shell": [
+      {
+        relativeTarget: "docs/proof/artifacts/reference-host-web-0.1.0-shell.json",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+      {
+        relativeTarget: "docs/proof/REFERENCE-HOST-WEB-SHELL.md",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+    ],
+    "test-reference-host-web-sign-in": [
+      {
+        relativeTarget: "docs/proof/artifacts/reference-host-web-0.1.0-sign-in.json",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+      {
+        relativeTarget: "docs/proof/REFERENCE-HOST-WEB-SIGN-IN.md",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+    ],
+    "test-runtime-core-command-event-actions": [
+      {
+        relativeTarget: "docs/proof/artifacts",
+        kind: "directory",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-runtime-core-local-state-identity": [
+      {
+        relativeTarget: "docs/proof/artifacts",
+        kind: "directory",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-runtime-core-reactive-reevaluation": [
+      {
+        relativeTarget: "docs/proof/artifacts",
+        kind: "directory",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+    "test-runtime-react-reconciliation-diagnostics": [
+      {
+        relativeTarget: "docs/proof/artifacts/runtime-react-0.1.0-reconciliation-diagnostics.json",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+      {
+        relativeTarget: "docs/proof/RUNTIME-REACT-RECONCILIATION-DIAGNOSTICS.md",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+    ],
+    "test-runtime-react-failure-boundary": [
+      {
+        relativeTarget: "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+      {
+        relativeTarget: "docs/proof/RUNTIME-REACT-FAILURE-BOUNDARY.md",
+        kind: "file",
+        behavior: "TEMP_FILE_MIRROR",
+      },
+    ],
+    "test-sc-01-dtcg-compatibility": [
+      {
+        relativeTarget: "docs/proof/artifacts",
+        kind: "directory",
+        behavior: "TRACKED_ALIAS",
+      },
+    ],
+  });
+
+  const widened = mutableMetadata("test-protocol-diagnostics");
+  widened.filesystemCompatibilityPolicy = "FIXTURE_COPY";
+  assert.throws(
+    () => validateWorkloadStateMetadata("test-protocol-diagnostics", widened),
+    (error) => error.code === "SHARED_STATE_METADATA_INVALID",
+  );
+});
+
+test("filesystem compatibility pins reviewed calls without widening generated grants", async (context) => {
+  const workspaceRoot = await temporaryDirectory("desen-shared-state-compat-workspace-");
+  const externalRoot = await temporaryDirectory("desen-shared-state-compat-external-");
+  context.after(async () => {
+    await rm(workspaceRoot, { recursive: true, force: true });
+    await rm(externalRoot, { recursive: true, force: true });
+  });
+  const sourceRoot = path.join(workspaceRoot, "packages/protocol/upstream/0.1.0/snapshot");
+  const artifactRoot = path.join(workspaceRoot, "docs/proof/artifacts");
+  const compatibilityPreloadPath = path.join(
+    workspaceRoot,
+    "scripts/ci/proof-filesystem-compatibility.cjs",
+  );
+  const trackedAliasTarget = path.join(artifactRoot, "reference-catalog-web-components.json");
+  const mirroredAliasTarget = path.join(artifactRoot, "reference-host-web-0.1.0-shell.json");
+  await mkdir(sourceRoot, { recursive: true });
+  await mkdir(artifactRoot, { recursive: true });
+  await mkdir(path.dirname(compatibilityPreloadPath), { recursive: true });
+  await writeFile(compatibilityPreloadPath, await readFile(COMPATIBILITY_PRELOAD_PATH));
+  await writeFile(path.join(sourceRoot, "source.txt"), "fixture\n");
+  await writeFile(trackedAliasTarget, "tracked\n");
+  await writeFile(mirroredAliasTarget, "mirrored\n");
+  await writeFile(path.join(externalRoot, "outside.txt"), "outside\n");
+
+  const compatible = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "test-protocol-snapshot",
+    baseEnvironment: {},
+  });
+  const sibling = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "test-protocol-types",
+    baseEnvironment: {},
+  });
+  const trackedAlias = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "test-reference-catalog-web-components",
+    baseEnvironment: {},
+  });
+  const mirroredAlias = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "test-reference-host-web-shell",
+    baseEnvironment: {},
+  });
+  const policyless = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "test-protocol-diagnostics",
+    baseEnvironment: {
+      DESEN_CI_FILESYSTEM_COMPATIBILITY: "FIXTURE_COPY",
+      DESEN_CI_WORKSPACE_ROOT: externalRoot,
+    },
+  });
+  context.after(async () => {
+    await compatible.dispose();
+    await sibling.dispose();
+    await trackedAlias.dispose();
+    await mirroredAlias.dispose();
+    await policyless.dispose();
+  });
+
+  assert.equal(
+    compatible.env.DESEN_CI_FILESYSTEM_COMPATIBILITY,
+    "FIXTURE_COPY_AND_REVIEWED_SYMLINK",
+  );
+  assert.equal(compatible.env.DESEN_CI_WORKSPACE_ROOT, await realpath(workspaceRoot));
+  assert.match(compatible.env.NODE_OPTIONS, /proof-filesystem-compatibility\.cjs/u);
+  assert.equal(policyless.env.DESEN_CI_FILESYSTEM_COMPATIBILITY, undefined);
+  assert.equal(policyless.env.DESEN_CI_WORKSPACE_ROOT, undefined);
+  assert.doesNotMatch(policyless.env.NODE_OPTIONS, /proof-filesystem-compatibility\.cjs/u);
+  assert.equal(trackedAlias.metadata.executionClass, "PROOF_TRACKED_ALIAS_EXCLUSIVE");
+  assert.deepEqual(trackedAlias.metadata.workspaceWrites, [
+    "docs/proof/artifacts/reference-catalog-web-components.json",
+  ]);
+  assert.equal(trackedAlias.metadata.barrier, true);
+  assert.equal(trackedAlias.env.NODE_OPTIONS.includes(`--allow-fs-write=${workspaceRoot}`), false);
+  assert.equal(
+    compatible.env.NODE_OPTIONS.includes(`--allow-fs-read=${path.dirname(compatible.tempRoot)} `),
+    false,
+  );
+
+  const destination = path.join(compatible.tempRoot, "copy");
+  const linkPath = path.join(compatible.tempRoot, "relative-link.txt");
+  const success = await runNode(
+    [
+      'const { cp, symlink } = require("node:fs/promises");',
+      "void (async () => {",
+      `  await cp(${JSON.stringify(sourceRoot)}, ${JSON.stringify(destination)}, { recursive: true, preserveTimestamps: true });`,
+      `  await symlink("copy/source.txt", ${JSON.stringify(linkPath)});`,
+      '  process.stdout.write("compatible");',
+      "})();",
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.equal(success.code, 0, success.stderr);
+  assert.equal(success.stdout, "compatible");
+  assert.equal(await readFile(path.join(destination, "source.txt"), "utf8"), "fixture\n");
+  assert.equal(await readlink(linkPath), "copy/source.txt");
+
+  const workspaceLinkPath = path.join(trackedAlias.tempRoot, "workspace-link.txt");
+  const workspaceLink = await runNode(
+    [
+      'const { symlink } = require("node:fs/promises");',
+      `void symlink(${JSON.stringify(trackedAliasTarget)}, ${JSON.stringify(workspaceLinkPath)});`,
+    ].join("\n"),
+    trackedAlias.env,
+  );
+  assert.equal(workspaceLink.code, 0, workspaceLink.stderr);
+  assert.equal(await readlink(workspaceLinkPath), await realpath(trackedAliasTarget));
+
+  const unreviewedWorkspaceTarget = await runNode(
+    [
+      'const { symlink } = require("node:fs/promises");',
+      `void symlink(${JSON.stringify(path.join(sourceRoot, "source.txt"))}, ${JSON.stringify(path.join(trackedAlias.tempRoot, "unreviewed-link.txt"))});`,
+    ].join("\n"),
+    trackedAlias.env,
+  );
+  assert.notEqual(unreviewedWorkspaceTarget.code, 0);
+  assert.match(unreviewedWorkspaceTarget.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const mirroredLinkPath = path.join(mirroredAlias.tempRoot, "mirrored-link.json");
+  const mirroredLink = await runNode(
+    [
+      'const { symlink, writeFile } = require("node:fs/promises");',
+      "void (async () => {",
+      `  await symlink(${JSON.stringify(mirroredAliasTarget)}, ${JSON.stringify(mirroredLinkPath)});`,
+      `  await writeFile(${JSON.stringify(mirroredLinkPath)}, "temp-only\\n");`,
+      "})();",
+    ].join("\n"),
+    mirroredAlias.env,
+  );
+  assert.equal(mirroredLink.code, 0, mirroredLink.stderr);
+  const mirroredTarget = await readlink(mirroredLinkPath);
+  assert.equal(mirroredTarget.startsWith(`${mirroredAlias.tempRoot}${path.sep}`), true);
+  assert.equal(await readFile(mirroredLinkPath, "utf8"), "temp-only\n");
+  assert.equal(await readFile(mirroredAliasTarget, "utf8"), "mirrored\n");
+
+  const reboundLinkPath = path.join(workspaceRoot, "rebound-link");
+  const reboundEnvironment = {
+    ...compatible.env,
+    TMPDIR: workspaceRoot,
+    TMP: workspaceRoot,
+    TEMP: workspaceRoot,
+  };
+  const reboundTemp = await runNode(
+    [
+      'const { symlink } = require("node:fs/promises");',
+      `void symlink("scripts/ci/proof-filesystem-compatibility.cjs", ${JSON.stringify(reboundLinkPath)});`,
+    ].join("\n"),
+    reboundEnvironment,
+  );
+  assert.notEqual(reboundTemp.code, 0);
+  assert.match(reboundTemp.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+  await assert.rejects(lstat(reboundLinkPath), { code: "ENOENT" });
+
+  const reboundStepLinkPath = path.join(trackedAlias.tempRoot, "rebound-step-link");
+  const reboundStep = await runNode(
+    [
+      'const { symlink } = require("node:fs/promises");',
+      `void symlink(${JSON.stringify(mirroredAliasTarget)}, ${JSON.stringify(reboundStepLinkPath)});`,
+    ].join("\n"),
+    {
+      ...trackedAlias.env,
+      DESEN_CI_STEP_ID: "test-reference-host-web-shell",
+    },
+  );
+  assert.notEqual(reboundStep.code, 0);
+  assert.match(reboundStep.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+  await assert.rejects(lstat(reboundStepLinkPath), { code: "ENOENT" });
+
+  const siblingEscape = await runNode(
+    [
+      'const { cp } = require("node:fs/promises");',
+      `void cp(${JSON.stringify(sourceRoot)}, ${JSON.stringify(path.join(sibling.tempRoot, "copy"))}, { recursive: true });`,
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.notEqual(siblingEscape.code, 0);
+  assert.match(siblingEscape.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const sourceEscape = await runNode(
+    [
+      'const { cp } = require("node:fs/promises");',
+      `void cp(${JSON.stringify(externalRoot)}, ${JSON.stringify(path.join(compatible.tempRoot, "outside-copy"))}, { recursive: true });`,
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.notEqual(sourceEscape.code, 0);
+  assert.match(sourceEscape.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const destinationEscape = await runNode(
+    [
+      'const { cp } = require("node:fs/promises");',
+      `void cp(${JSON.stringify(sourceRoot)}, ${JSON.stringify(path.join(workspaceRoot, "forbidden-copy"))}, { recursive: true });`,
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.notEqual(destinationEscape.code, 0);
+  assert.match(destinationEscape.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const relativeSymlinkEscape = await runNode(
+    [
+      'const { symlink } = require("node:fs/promises");',
+      `void symlink(${JSON.stringify(path.relative(compatible.tempRoot, path.join(sibling.tempRoot, "forbidden.txt")))}, ${JSON.stringify(path.join(compatible.tempRoot, "forbidden-link"))});`,
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.notEqual(relativeSymlinkEscape.code, 0);
+  assert.match(relativeSymlinkEscape.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const redirectedParent = path.join(compatible.tempRoot, "redirected-parent");
+  await symlink(sibling.tempRoot, redirectedParent, "dir");
+  const redirectedCopy = await runNode(
+    [
+      'const { cp } = require("node:fs/promises");',
+      `void cp(${JSON.stringify(sourceRoot)}, ${JSON.stringify(path.join(redirectedParent, "copy"))}, { recursive: true });`,
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.notEqual(redirectedCopy.code, 0);
+  assert.match(redirectedCopy.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+  await assert.rejects(readFile(path.join(sibling.tempRoot, "copy/source.txt")), {
+    code: "ENOENT",
+  });
+
+  const trackedRedirectedParent = path.join(trackedAlias.tempRoot, "redirected-parent");
+  await symlink(sibling.tempRoot, trackedRedirectedParent, "dir");
+  const redirectedSymlink = await runNode(
+    [
+      'const { symlink } = require("node:fs/promises");',
+      `void symlink(${JSON.stringify(trackedAliasTarget)}, ${JSON.stringify(path.join(trackedRedirectedParent, "link.txt"))});`,
+    ].join("\n"),
+    trackedAlias.env,
+  );
+  assert.notEqual(redirectedSymlink.code, 0);
+  assert.match(redirectedSymlink.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const externalSourceLink = path.join(sourceRoot, "external-link.txt");
+  await symlink(path.join(externalRoot, "outside.txt"), externalSourceLink);
+  const linkedSourceEscape = await runNode(
+    [
+      'const { cp } = require("node:fs/promises");',
+      `void cp(${JSON.stringify(sourceRoot)}, ${JSON.stringify(path.join(compatible.tempRoot, "linked-source-copy"))}, { recursive: true });`,
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.notEqual(linkedSourceEscape.code, 0);
+  assert.match(linkedSourceEscape.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const unsupportedCopyOptions = await runNode(
+    [
+      'const { cp } = require("node:fs/promises");',
+      `void cp(${JSON.stringify(sourceRoot)}, ${JSON.stringify(path.join(compatible.tempRoot, "filtered-copy"))}, { recursive: true, filter: () => true });`,
+    ].join("\n"),
+    compatible.env,
+  );
+  assert.notEqual(unsupportedCopyOptions.code, 0);
+  assert.match(unsupportedCopyOptions.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+
+  const mismatchedEnvironment = {
+    ...compatible.env,
+    DESEN_CI_STEP_ID: "test-protocol-diagnostics",
+  };
+  const policyMismatch = await runNode(
+    'process.stdout.write("unreachable")',
+    mismatchedEnvironment,
+  );
+  assert.notEqual(policyMismatch.code, 0);
+  assert.match(policyMismatch.stderr, /DESEN_CI_FILESYSTEM_COMPATIBILITY_INVALID/u);
+});
+
 test("a verifier cannot write into its workspace", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-denied-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
@@ -388,12 +906,12 @@ test("a root test may write only inside its own runner temp root", async (contex
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const first = await createProofStepIsolationContext({
     workspaceRoot,
-    workload: "test-protocol-snapshot",
+    workload: "test-protocol-diagnostics",
     baseEnvironment: {},
   });
   const second = await createProofStepIsolationContext({
     workspaceRoot,
-    workload: "test-protocol-types",
+    workload: "test-protocol-structural-validation",
     baseEnvironment: {},
   });
   context.after(async () => {
@@ -418,7 +936,7 @@ test("a root test may write only inside its own runner temp root", async (contex
   await assert.rejects(readFile(siblingPath), { code: "ENOENT" });
 });
 
-test("only the exact source-audit root test receives workspace write authority", async (context) => {
+test("only the exact source-audit root test receives a direct workspace-write grant", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-source-audit-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const destination = path.join(workspaceRoot, "source-audit-temp.txt");
@@ -507,7 +1025,7 @@ test("runner temp cleanup removes files and is idempotent", async (context) => {
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const isolation = await createProofStepIsolationContext({
     workspaceRoot,
-    workload: "test-protocol-types",
+    workload: "test-protocol-diagnostics",
     baseEnvironment: {},
   });
   await writeFile(path.join(isolation.tempRoot, "residue.txt"), "residue");

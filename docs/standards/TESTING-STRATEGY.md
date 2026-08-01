@@ -60,19 +60,33 @@ must fail closed. A separate rollback-only adapter proves exact equality with th
 sequential plan and rejects PASS receipts containing missing, duplicated, skipped, not-run,
 cancelled, timed-out, failed, or unclosed work.
 
-Shared-state mutation tests cover all six exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 66 `PROOF_READ_ONLY`, 55
-`PROOF_OS_TEMP_ISOLATED`, and 1 `PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 60 proof pairs are
-eligible for pair-level overlap at concurrency two and that `reference-host-web-source-audit`
-always drains the scheduler as the sole exclusive proof-pair barrier.
+Shared-state mutation tests cover all seven exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 66 `PROOF_READ_ONLY`, 45
+`PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 50 proof pairs are eligible for pair-level overlap
+at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
+always drain the scheduler as eleven exclusive proof-pair barriers.
 
-Real isolation probes verify per-step temp ownership, Node filesystem permissions, child-process
-denial, native-addon denial, inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and
-identity-checked cleanup. Child runtime probes are permitted only for the verifier side of
+Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
+child-process denial, the exact root-test Node-harness grant, native-addon denial,
+inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and identity-checked cleanup. Child
+runtime probes are permitted only for the verifier side of
 `publisher-catalog-pinning`, `publisher-bundle-publication`, `publisher-official-golden`,
 `publisher-invalid-source-matrix`, and `control-plane-bundle-store`. Native-addon authority is
 permitted only for the exact `reference-host-web-source-audit` verifier/root-test pair; its
 verifier remains workspace-read-only.
+
+The probes also pin all eighteen exact Node-permission compatibility workloads and their policy
+distribution: 112 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
+They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
+matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
+external-source, symlink-parent, unreviewed-workspace-target, and unsupported-option escapes.
+Eight unsafe-input workspace files are mirrored into the workload temp root; ten canonical-path or
+inode cases retain only their exact reviewed tracked aliases and execute exclusively. Tests also
+prove that the generated permission list grants neither the shared OS-temp parent nor a direct
+workspace-write path, and that rebinding temp environment variables cannot redirect the adapter.
+This is a trusted-code compatibility contract rather than an adversarial OS sandbox; the outer
+tracked workspace seal remains the mutation authority.
 
 Mutation tests must also prove that build or Turbo output drift fails the proof-phase seal,
 non-ignored untracked residue fails the complete-execution guard, and tracked byte, executable
@@ -95,9 +109,10 @@ the result may settle only after all active children close and cleanup completes
 The local plan factory defaults to `REQUIRED + EXHAUSTIVE`, but GitHub Actions remains on the
 retained sequential authority until same-revision local evidence, hosted evidence, and workflow
 cutover all pass. The implemented candidate runs in explicit `SHADOW` during measurement. I07-02
-adds no `AFFECTED` selector and retires no legacy component. Under `DEBT-I07-007`, the retained
-runner and rollback-equivalence adapter remain test targets until I07-05 proves their exact removal
-conditions.
+adds no `AFFECTED` selector; its final promotion closes `DEBT-I07-008` by deleting the temporary
+shadow workflow and modular comparison adapter/test. Under `DEBT-I07-007`, the retained sequential
+runner and rollback-equivalence adapter remain test targets until I07-05 proves their exact
+removal conditions.
 
 Later `AFFECTED` planning cannot become a required shortcut until it has complete tracked-path
 ownership, reverse dependency closure, exact exhaustive comparison, and fail-closed

@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { lstat, mkdtemp, readFile, readdir, readlink, realpath, rm } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify, isDeepStrictEqual } from "node:util";
@@ -9,6 +10,17 @@ import { fileURLToPath } from "node:url";
 const execFileAsync = promisify(execFile);
 const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const LISTENER_GUARD_PATH = path.join(MODULE_DIRECTORY, "no-proof-listener.cjs");
+const FILESYSTEM_COMPATIBILITY_PATH = path.join(
+  MODULE_DIRECTORY,
+  "proof-filesystem-compatibility.cjs",
+);
+const require = createRequire(import.meta.url);
+const filesystemCompatibility = require(FILESYSTEM_COMPATIBILITY_PATH);
+const {
+  FILESYSTEM_COMPATIBILITY_POLICIES,
+  POLICY_BY_STEP_ID: FILESYSTEM_COMPATIBILITY_POLICY_BY_STEP_ID,
+  expectedPolicyForStep: filesystemCompatibilityPolicyForStep,
+} = filesystemCompatibility;
 const DEFAULT_MAX_FILES = 50_000;
 const DEFAULT_MAX_BYTES = 536_870_912;
 const DEFAULT_GIT_OUTPUT_BYTES = 8_388_608;
@@ -20,6 +32,7 @@ export const EXECUTION_CLASSES = Object.freeze({
   PACKAGE_TEST_EXCLUSIVE: "PACKAGE_TEST_EXCLUSIVE",
   PROOF_READ_ONLY: "PROOF_READ_ONLY",
   PROOF_OS_TEMP_ISOLATED: "PROOF_OS_TEMP_ISOLATED",
+  PROOF_TRACKED_ALIAS_EXCLUSIVE: "PROOF_TRACKED_ALIAS_EXCLUSIVE",
   PROOF_WORKSPACE_TEMP_EXCLUSIVE: "PROOF_WORKSPACE_TEMP_EXCLUSIVE",
 });
 
@@ -117,12 +130,47 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
 /** The exact proof whose Vite graph observation loads a reviewed native Rolldown addon. */
 export const NATIVE_ADDON_PROOF_IDS = Object.freeze(["reference-host-web-source-audit"]);
 
+/** Exact root-test steps that need bounded Node-permission API compatibility. */
+export const FILESYSTEM_COMPATIBILITY_ROOT_STEP_IDS = Object.freeze(
+  Object.keys(FILESYSTEM_COMPATIBILITY_POLICY_BY_STEP_ID),
+);
+
+/** Exact workspace-target rules admitted by the trusted Node-permission compatibility adapter. */
+export const FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES =
+  filesystemCompatibility.WORKSPACE_SYMLINK_RULES_BY_STEP_ID;
+
+/** Closed behavior vocabulary for reviewed workspace-target symlink calls. */
+export const FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_BEHAVIORS =
+  filesystemCompatibility.WORKSPACE_SYMLINK_BEHAVIORS;
+
+/** Exact root-test steps whose historical semantics require a real tracked workspace alias. */
+export const FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS = Object.freeze(
+  Object.entries(FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES)
+    .filter(([, rules]) =>
+      rules.some(
+        ({ behavior }) =>
+          behavior === FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_BEHAVIORS.TRACKED_ALIAS,
+      ),
+    )
+    .map(([stepId]) => stepId),
+);
+
+if (FILESYSTEM_COMPATIBILITY_ROOT_STEP_IDS.length !== 18) {
+  throw new Error("The reviewed filesystem compatibility workload set drifted.");
+}
+if (FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS.length !== 10) {
+  throw new Error("The reviewed tracked-alias workload set drifted.");
+}
+
 const READ_ONLY_ROOT_PROOF_ID_SET = new Set(READ_ONLY_ROOT_PROOF_IDS);
 const WORKSPACE_TEMP_ROOT_PROOF_ID_SET = new Set(WORKSPACE_TEMP_ROOT_PROOF_IDS);
 const CHILD_PROCESS_VERIFIER_PROOF_ID_SET = new Set(CHILD_PROCESS_VERIFIER_PROOF_IDS);
 const NATIVE_ADDON_PROOF_ID_SET = new Set(NATIVE_ADDON_PROOF_IDS);
+const FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_ID_SET = new Set(
+  FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS,
+);
 
-/** Proof ids whose root tests write only beneath a runner-owned operating-system temp root. */
+/** Proof ids whose root tests receive OS-temp authority without a direct workspace-write grant. */
 export const OS_TEMP_ROOT_PROOF_IDS = Object.freeze(
   PROOF_IDS.filter(
     (id) => !READ_ONLY_ROOT_PROOF_ID_SET.has(id) && !WORKSPACE_TEMP_ROOT_PROOF_ID_SET.has(id),
@@ -228,10 +276,11 @@ function createMetadata({
   ports = [],
   childProcessPolicy = CHILD_PROCESS_POLICIES.NONE,
   nativeAddonPolicy = NATIVE_ADDON_POLICIES.NONE,
+  filesystemCompatibilityPolicy = FILESYSTEM_COMPATIBILITY_POLICIES.NONE,
   barrier = false,
 }) {
   return Object.freeze({
-    schemaVersion: 1,
+    schemaVersion: 2,
     stepId,
     executionClass,
     workspaceReads: frozenArray(workspaceReads),
@@ -241,6 +290,7 @@ function createMetadata({
     ports: frozenArray(ports),
     childProcessPolicy,
     nativeAddonPolicy,
+    filesystemCompatibilityPolicy,
     barrier,
   });
 }
@@ -331,16 +381,35 @@ for (const proofId of PROOF_IDS) {
     );
   } else {
     const readOnly = READ_ONLY_ROOT_PROOF_ID_SET.has(proofId);
+    const trackedAliasExclusive =
+      FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_ID_SET.has(testStepId);
+    const trackedAliasWorkspaceWrites = trackedAliasExclusive
+      ? Object.freeze([
+          ...new Set(
+            FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES[testStepId]
+              .filter(
+                ({ behavior }) =>
+                  behavior === FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_BEHAVIORS.TRACKED_ALIAS,
+              )
+              .map(({ relativeTarget }) => relativeTarget),
+          ),
+        ])
+      : Object.freeze([]);
     METADATA_BY_STEP_ID.set(
       testStepId,
       createMetadata({
         stepId: testStepId,
         executionClass: readOnly
           ? EXECUTION_CLASSES.PROOF_READ_ONLY
-          : EXECUTION_CLASSES.PROOF_OS_TEMP_ISOLATED,
+          : trackedAliasExclusive
+            ? EXECUTION_CLASSES.PROOF_TRACKED_ALIAS_EXCLUSIVE
+            : EXECUTION_CLASSES.PROOF_OS_TEMP_ISOLATED,
+        workspaceWrites: trackedAliasWorkspaceWrites,
         tempPolicy: TEMP_POLICIES.RUNNER_SCOPED_OS,
         tempKey: testStepId,
         childProcessPolicy: CHILD_PROCESS_POLICIES.NODE_TEST_HARNESS,
+        filesystemCompatibilityPolicy: filesystemCompatibilityPolicyForStep(testStepId),
+        barrier: trackedAliasExclusive,
       }),
     );
   }
@@ -426,11 +495,12 @@ function validateMetadataShape(metadata, label = "Shared-state metadata") {
       "ports",
       "childProcessPolicy",
       "nativeAddonPolicy",
+      "filesystemCompatibilityPolicy",
       "barrier",
     ],
     label,
   );
-  if (metadata.schemaVersion !== 1) {
+  if (metadata.schemaVersion !== 2) {
     fail("SHARED_STATE_METADATA_INVALID", `${label} has an unknown schema version.`);
   }
   if (typeof metadata.stepId !== "string" || metadata.stepId.length === 0) {
@@ -490,6 +560,21 @@ function validateMetadataShape(metadata, label = "Shared-state metadata") {
   }
   if (!Object.values(NATIVE_ADDON_POLICIES).includes(metadata.nativeAddonPolicy)) {
     fail("SHARED_STATE_METADATA_INVALID", `${label} has an unknown native-addon policy.`);
+  }
+  if (
+    !Object.values(FILESYSTEM_COMPATIBILITY_POLICIES).includes(
+      metadata.filesystemCompatibilityPolicy,
+    )
+  ) {
+    fail(
+      "SHARED_STATE_METADATA_INVALID",
+      `${label} has an unknown filesystem compatibility policy.`,
+    );
+  }
+  if (
+    metadata.filesystemCompatibilityPolicy !== filesystemCompatibilityPolicyForStep(metadata.stepId)
+  ) {
+    fail("SHARED_STATE_METADATA_INVALID", `${label} has unauthorized filesystem compatibility.`);
   }
   if (typeof metadata.barrier !== "boolean") {
     fail("SHARED_STATE_METADATA_INVALID", `${label}.barrier must be boolean.`);
@@ -700,6 +785,44 @@ async function canonicalDirectory(directory, label) {
   });
 }
 
+async function authenticateFilesystemCompatibilityPath(workspaceRoot) {
+  const candidatePath = path.join(workspaceRoot, "scripts/ci/proof-filesystem-compatibility.cjs");
+  const candidateEntry = await lstat(candidatePath, { bigint: true }).catch((error) => {
+    fail(
+      "SHARED_STATE_COMPATIBILITY_PRELOAD_INVALID",
+      "The workspace filesystem compatibility preload is missing.",
+      { cause: String(error) },
+    );
+  });
+  if (
+    !candidateEntry.isFile() ||
+    candidateEntry.isSymbolicLink() ||
+    candidateEntry.size < 1n ||
+    candidateEntry.size > 1_048_576n ||
+    (await realpath(candidatePath)) !== candidatePath
+  ) {
+    fail(
+      "SHARED_STATE_COMPATIBILITY_PRELOAD_INVALID",
+      "The workspace filesystem compatibility preload is unsafe.",
+    );
+  }
+  if (candidatePath !== FILESYSTEM_COMPATIBILITY_PATH) {
+    const [authorityBytes, candidateBytes] = await Promise.all([
+      readFile(FILESYSTEM_COMPATIBILITY_PATH),
+      readFile(candidatePath),
+    ]);
+    const authoritySha256 = createHash("sha256").update(authorityBytes).digest("hex");
+    const candidateSha256 = createHash("sha256").update(candidateBytes).digest("hex");
+    if (candidateSha256 !== authoritySha256) {
+      fail(
+        "SHARED_STATE_COMPATIBILITY_PRELOAD_INVALID",
+        "The workspace filesystem compatibility preload differs from code-owned authority.",
+      );
+    }
+  }
+  return candidatePath;
+}
+
 function quoteNodeOption(token) {
   if (typeof token !== "string" || token.length === 0 || /[\0\r\n]/u.test(token)) {
     fail("SHARED_STATE_NODE_OPTIONS_INVALID", "A generated Node option is unsafe.");
@@ -757,6 +880,10 @@ export async function createProofStepIsolationContext({
   const metadata = classifyWorkloadStateMetadata(workload);
   proofWorkloadKind(metadata.stepId);
   const workspace = await canonicalDirectory(workspaceRoot, "Workspace root");
+  const filesystemCompatibilityPath =
+    metadata.filesystemCompatibilityPolicy === FILESYSTEM_COMPATIBILITY_POLICIES.NONE
+      ? undefined
+      : await authenticateFilesystemCompatibilityPath(workspace.path);
   const tempBase = await canonicalDirectory(tempBaseDirectory, "Temp base directory");
   const createdTemp = await mkdtemp(path.join(tempBase.path, `desen-ci-${metadata.stepId}-`));
   const temp = await canonicalDirectory(createdTemp, "Runner-owned step temp root");
@@ -773,6 +900,17 @@ export async function createProofStepIsolationContext({
     `--allow-fs-read=${LISTENER_GUARD_PATH}`,
     `--require=${LISTENER_GUARD_PATH}`,
   ];
+  if (metadata.filesystemCompatibilityPolicy !== FILESYSTEM_COMPATIBILITY_POLICIES.NONE) {
+    environment.DESEN_CI_FILESYSTEM_COMPATIBILITY = metadata.filesystemCompatibilityPolicy;
+    environment.DESEN_CI_WORKSPACE_ROOT = workspace.path;
+    nodeOptions.push(
+      `--allow-fs-read=${filesystemCompatibilityPath}`,
+      `--require=${filesystemCompatibilityPath}`,
+    );
+  } else {
+    delete environment.DESEN_CI_FILESYSTEM_COMPATIBILITY;
+    delete environment.DESEN_CI_WORKSPACE_ROOT;
+  }
   if (metadata.tempPolicy !== TEMP_POLICIES.NONE) {
     nodeOptions.push(
       ...temp.permissionPaths.map((allowedPath) => `--allow-fs-write=${allowedPath}`),

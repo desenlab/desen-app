@@ -65,12 +65,13 @@ Every workload has exactly one code-owned shared-state class:
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Workspace build/typecheck output writer              |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
 | `PROOF_READ_ONLY`                |    66 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    55 | Proof work restricted to a runner-owned OS temp root |
-| `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The source-audit root-test barrier                   |
+| `PROOF_OS_TEMP_ISOLATED`         |    45 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
+| `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
-Sixty proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
-pass. `reference-host-web-source-audit` is the sole exclusive proof-pair barrier. Within every
-pair, the root test still depends on its verifier.
+Fifty proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
+pass. Ten real tracked-alias pairs and `reference-host-web-source-audit` are the eleven exclusive
+proof-pair barriers. Within every pair, the root test still depends on its verifier.
 
 The only verifier runtime-probe exceptions, each with isolated temp and child-process authority,
 are:
@@ -83,12 +84,27 @@ are:
 
 Only the `reference-host-web-source-audit` verifier/root-test pair receives the reviewed native
 addon exception. Its verifier remains workspace-read-only; its root test is the sole
-workspace-temp exclusive barrier.
+workspace-temp barrier.
+
+Node 24 requires an orthogonal schema-v2 compatibility policy for eighteen exact root tests. The
+distribution across all 130 workloads is 112 `NONE`, two `FIXTURE_COPY`, fifteen
+`REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
+code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
+symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
+target-and-kind rules: eight unsafe-input files are mirrored into temp, while ten historical
+canonical-path or inode checks retain their exact tracked aliases.
+
+The generated permissions add no shared-parent, sibling-temp, or workspace-write path. The preload
+is a trusted-repository-code compatibility adapter, not an adversarial OS sandbox; every root test
+already requires child-process authority. Static target/kind regressions, permission-bound temp
+identity, exclusive scheduling for real aliases, and the closing tracked workspace seal provide
+the enforcement appropriate to this CI boundary.
 
 Each proof process receives a fresh authenticated temp root and generated Node permission policy.
-Workspace writes, child processes, and native addons are denied unless the exact workload
-classification grants them; inherited `NODE_OPTIONS` is rejected. A required preload denies TCP
-and UDP listener binding. Cleanup authenticates the temp directory identity before removing it.
+Direct workspace-write grants, child processes, and native addons are denied unless the exact
+workload classification grants them; inherited `NODE_OPTIONS` is rejected. A required preload
+denies TCP and UDP listener binding. Cleanup authenticates the temp directory identity before
+removing it.
 
 Required authority cannot be fabricated through the injected callbacks used by the focused test
 harness. Only the default shell-free process runner can emit an accepted required close receipt;
@@ -120,7 +136,8 @@ mutation, or proof pass is reusable authority.
 The retained sequential gate remains authoritative until I07-02 records exact workload equality,
 exactly-once coverage, matching outcomes, clean tracked-workspace parity, safe cancellation,
 shared-state classification, and local plus hosted evidence, then completes the workflow cutover.
-I07-02 implements no affected-path selector and retires no compatibility path. I07-03 may calculate
-`AFFECTED` plans only in shadow; any unknown or ambiguous input expands to `EXHAUSTIVE`. I07-04 owns
-selector promotion and G07-due reader cleanup. `DEBT-I07-007` assigns the retained runner,
-equivalence adapter, and other rollback-only cleanup to I07-05 after their removal gates pass.
+I07-02 implements no affected-path selector. Its final promotion closes `DEBT-I07-008` by removing
+the temporary shadow workflow and modular comparison adapter/test. I07-03 may calculate `AFFECTED`
+plans only in shadow; any unknown or ambiguous input expands to `EXHAUSTIVE`. I07-04 owns selector
+promotion and G07-due reader cleanup. `DEBT-I07-007` keeps the sequential runner, equivalence
+adapter, and other rollback-only paths until I07-05 proves their removal gates.

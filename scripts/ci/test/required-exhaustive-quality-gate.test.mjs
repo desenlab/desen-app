@@ -29,6 +29,7 @@ import {
   resolveRequiredExhaustiveAuthority,
   runRequiredExhaustivePlan,
 } from "../run-required-exhaustive-quality-gate.mjs";
+import { classifyProofPairState } from "../shared-state-authority.mjs";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const SAME_BUILD = Object.freeze({ profile: "test.build", digest: "same" });
@@ -242,12 +243,15 @@ test("all 130 successful closes produce stable inventory-ordered receipts", asyn
   );
 });
 
-test("dynamic workers keep two safe ordinary pairs active and drain for the barrier pair", async () => {
+test("dynamic workers keep two safe ordinary pairs active and drain for all barrier pairs", async () => {
   const plan = createShadowPlan();
-  const barrierId = "reference-host-web-source-audit";
+  const barrierPairs = plan.proofPairs.filter(({ id }) => classifyProofPairState(id).barrier);
+  const barrierStepIds = new Set(
+    barrierPairs.flatMap(({ verifier, rootTest }) => [verifier.id, rootTest.id]),
+  );
   let activeProofSteps = 0;
   let maximumActive = 0;
-  let barrierWasExclusive = false;
+  const exclusiveBarrierSteps = new Set();
   let firstVerifierHeld = true;
   let releaseFirst;
   const firstRelease = new Promise((resolvePromise) => {
@@ -268,8 +272,8 @@ test("dynamic workers keep two safe ordinary pairs active and drain for the barr
           firstVerifierHeld = false;
           releaseFirst();
         }
-        if (workload.id === `verify-${barrierId}` || workload.id === `test-${barrierId}`) {
-          barrierWasExclusive ||= activeProofSteps === 1;
+        if (barrierStepIds.has(workload.id)) {
+          if (activeProofSteps === 1) exclusiveBarrierSteps.add(workload.id);
           assert.equal(activeProofSteps, 1);
         }
         await delay(1);
@@ -283,7 +287,8 @@ test("dynamic workers keep two safe ordinary pairs active and drain for the barr
   assert.equal(receipt.status, "PASS");
   assert.equal(maximumActive, 2);
   assert.equal(thirdPairStartedWhileFirstHeld, true);
-  assert.equal(barrierWasExclusive, true);
+  assert.equal(barrierPairs.length, 11);
+  assert.equal(exclusiveBarrierSteps.size, 22);
 });
 
 test("the first proof failure permanently aborts and awaits its active sibling", async () => {
