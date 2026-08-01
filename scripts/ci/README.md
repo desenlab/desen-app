@@ -100,6 +100,10 @@ already requires child-process authority. Static target/kind regressions, permis
 identity, exclusive scheduling for real aliases, and the closing tracked workspace seal provide
 the enforcement appropriate to this CI boundary.
 
+Native-addon authority is limited to the `reference-host-web-source-audit` verifier/root-test pair
+and the `publisher-invalid-source-matrix` root test. The latter grants its nested programmatic
+probe access to the reviewed platform-specific Rolldown binding; its verifier remains denied.
+
 Each proof process receives a fresh authenticated temp root and generated Node permission policy.
 Direct workspace-write grants, child processes, and native addons are denied unless the exact
 workload classification grants them; inherited `NODE_OPTIONS` is rejected. A required preload

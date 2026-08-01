@@ -25,6 +25,7 @@ import {
   FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_BEHAVIORS,
   FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES,
   NATIVE_ADDON_PROOF_IDS,
+  NATIVE_ADDON_ROOT_STEP_IDS,
   OS_TEMP_ROOT_PROOF_IDS,
   PROOF_IDS,
   READ_ONLY_ROOT_PROOF_IDS,
@@ -152,6 +153,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     });
   }
   assert.deepEqual(NATIVE_ADDON_PROOF_IDS, ["reference-host-web-source-audit"]);
+  assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, ["test-publisher-invalid-source-matrix"]);
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
     "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -159,6 +161,14 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
   assert.equal(
     classifyWorkloadStateMetadata("test-reference-host-web-source-audit").nativeAddonPolicy,
     "REFERENCE_HOST_WEB_SOURCE_AUDIT",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-publisher-invalid-source-matrix").nativeAddonPolicy,
+    "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("verify-publisher-invalid-source-matrix").nativeAddonPolicy,
+    "NONE",
   );
   assert.equal(classifyWorkloadStateMetadata("verify-protocol-snapshot").nativeAddonPolicy, "NONE");
   assert.equal(
@@ -363,7 +373,7 @@ test("only exact runtime-probe verifiers receive child-process authority", async
   );
 });
 
-test("only the exact source-audit proof pair receives native-addon authority", async (context) => {
+test("only the three exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({
@@ -381,16 +391,30 @@ test("only the exact source-audit proof pair receives native-addon authority", a
     workload: "verify-protocol-snapshot",
     baseEnvironment: {},
   });
+  const publisherMatrixVerifier = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-publisher-invalid-source-matrix",
+    baseEnvironment: {},
+  });
+  const publisherMatrixRoot = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "test-publisher-invalid-source-matrix",
+    baseEnvironment: {},
+  });
   context.after(async () => {
     await verifier.dispose();
     await rootTest.dispose();
     await ordinary.dispose();
+    await publisherMatrixVerifier.dispose();
+    await publisherMatrixRoot.dispose();
   });
 
   assert.equal(verifier.metadata.executionClass, "PROOF_READ_ONLY");
   assert.match(verifier.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.doesNotMatch(verifier.env.NODE_OPTIONS, /--allow-fs-write=/u);
   assert.match(rootTest.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.doesNotMatch(publisherMatrixVerifier.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.match(publisherMatrixRoot.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.doesNotMatch(ordinary.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
 
   const widened = mutableMetadata("verify-protocol-snapshot");

@@ -199,8 +199,10 @@ test requires bounded workspace-temp authority.
 Only five verifier proofs may create child runtime probes and write to their runner-owned temp
 root: `publisher-catalog-pinning`, `publisher-bundle-publication`,
 `publisher-official-golden`, `publisher-invalid-source-matrix`, and
-`control-plane-bundle-store`. Only the `reference-host-web-source-audit` verifier/root-test pair
-may load the reviewed native addon; its verifier remains workspace-read-only.
+`control-plane-bundle-store`. Native-addon authority is limited to three exact steps: the
+`reference-host-web-source-audit` verifier/root-test pair and the
+`publisher-invalid-source-matrix` root test, whose nested programmatic probe loads the reviewed
+Rolldown binding. The source-audit verifier remains workspace-read-only.
 
 Every proof step receives a fresh authenticated OS temp root and a generated Node permission
 policy. Direct workspace-write grants, child processes, and native addons are absent unless its

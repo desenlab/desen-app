@@ -184,9 +184,10 @@ Only these verifier proofs receive both runner-owned temp-write and child-runtim
 - `publisher-invalid-source-matrix`; and
 - `control-plane-bundle-store`.
 
-Only the exact `reference-host-web-source-audit` verifier/root-test pair may load the reviewed
-native addon. The verifier remains workspace-read-only; the root test owns the single exclusive
-workspace-temp exception.
+Native-addon authority is limited to the exact `reference-host-web-source-audit`
+verifier/root-test pair and the `publisher-invalid-source-matrix` root test, whose nested
+programmatic probe loads the reviewed Rolldown binding. The source-audit verifier remains
+workspace-read-only; its root test owns the single exclusive workspace-temp exception.
 
 Every proof process gets a fresh, identity-checked temp root and generated Node permissions.
 Direct workspace-write grants, child processes, and addons are absent unless the code-owned

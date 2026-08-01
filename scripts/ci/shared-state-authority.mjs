@@ -127,8 +127,11 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "control-plane-bundle-store",
 ]);
 
-/** The exact proof whose Vite graph observation loads a reviewed native Rolldown addon. */
+/** The exact proof whose verifier and root test load a reviewed native Rolldown addon. */
 export const NATIVE_ADDON_PROOF_IDS = Object.freeze(["reference-host-web-source-audit"]);
+
+/** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
+export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze(["test-publisher-invalid-source-matrix"]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
 export const FILESYSTEM_COMPATIBILITY_ROOT_STEP_IDS = Object.freeze(
@@ -166,6 +169,7 @@ const READ_ONLY_ROOT_PROOF_ID_SET = new Set(READ_ONLY_ROOT_PROOF_IDS);
 const WORKSPACE_TEMP_ROOT_PROOF_ID_SET = new Set(WORKSPACE_TEMP_ROOT_PROOF_IDS);
 const CHILD_PROCESS_VERIFIER_PROOF_ID_SET = new Set(CHILD_PROCESS_VERIFIER_PROOF_IDS);
 const NATIVE_ADDON_PROOF_ID_SET = new Set(NATIVE_ADDON_PROOF_IDS);
+const NATIVE_ADDON_ROOT_STEP_ID_SET = new Set(NATIVE_ADDON_ROOT_STEP_IDS);
 const FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_ID_SET = new Set(
   FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS,
 );
@@ -240,6 +244,7 @@ const CHILD_PROCESS_POLICIES = Object.freeze({
 });
 const NATIVE_ADDON_POLICIES = Object.freeze({
   NONE: "NONE",
+  PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
 });
 
@@ -408,6 +413,9 @@ for (const proofId of PROOF_IDS) {
         tempPolicy: TEMP_POLICIES.RUNNER_SCOPED_OS,
         tempKey: testStepId,
         childProcessPolicy: CHILD_PROCESS_POLICIES.NODE_TEST_HARNESS,
+        nativeAddonPolicy: NATIVE_ADDON_ROOT_STEP_ID_SET.has(testStepId)
+          ? NATIVE_ADDON_POLICIES.PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE
+          : NATIVE_ADDON_POLICIES.NONE,
         filesystemCompatibilityPolicy: filesystemCompatibilityPolicyForStep(testStepId),
         barrier: trackedAliasExclusive,
       }),

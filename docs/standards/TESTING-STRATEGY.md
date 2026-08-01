@@ -73,8 +73,9 @@ inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and identity-checke
 runtime probes are permitted only for the verifier side of
 `publisher-catalog-pinning`, `publisher-bundle-publication`, `publisher-official-golden`,
 `publisher-invalid-source-matrix`, and `control-plane-bundle-store`. Native-addon authority is
-permitted only for the exact `reference-host-web-source-audit` verifier/root-test pair; its
-verifier remains workspace-read-only.
+permitted only for the exact `reference-host-web-source-audit` verifier/root-test pair and the
+`publisher-invalid-source-matrix` root test. Regression tests prove that its verifier and every
+other unlisted step remain denied; the source-audit verifier remains workspace-read-only.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their policy
 distribution: 112 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
