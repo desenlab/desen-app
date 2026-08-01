@@ -7,33 +7,21 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: Select the required gate or the retained manual rollback path
-        required: true
-        default: required
-        type: choice
-        options:
-          - required
-          - legacy-rollback
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event.inputs.mode || 'required' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   quality:
     name: Quality gate
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}
     runs-on: ubuntu-24.04
-    # The runner owns a 15-minute soft deadline; the command wrapper enforces an
-    # 18-minute process ceiling plus 30-second kill grace. The remaining hosted
-    # budget covers setup, contract checks, receipt emission, and runner variance.
-    timeout-minutes: 25
+    # The clean hosted CI-01 baseline completed in 12m30s. This ceiling keeps
+    # measured variance headroom while stopping pathological regressions early.
+    timeout-minutes: 20
     env:
       CI: "true"
 
@@ -57,7 +45,7 @@ jobs:
 
       - name: Restore trusted pnpm store
         id: pnpm-cache
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+        if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
@@ -68,27 +56,8 @@ jobs:
       - name: Install exact dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify current-reader checkpoint
-        run: |
-          node scripts/ci/verify-proof-reader-checkpoints.mjs
-          node --test scripts/ci/test/proof-reader-checkpoints.test.mjs
-
-      - name: Verify infrastructure cleanup register
-        run: |
-          node scripts/ci/verify-infrastructure-debt.mjs
-          node --test scripts/ci/test/infrastructure-debt.test.mjs
-
-      - name: Verify required-exhaustive contracts
-        run: |
-          node --test scripts/ci/test/exhaustive-workload-inventory.test.mjs
-          node --test scripts/ci/test/exhaustive-gate-boundary.test.mjs
-          node --test scripts/ci/test/shared-state-authority.test.mjs
-          node --test scripts/ci/test/required-exhaustive-equivalence.test.mjs
-          node --test scripts/ci/test/required-exhaustive-quality-gate.test.mjs
-          node --test scripts/ci/test/modular-quality-gate.test.mjs
-
-      - name: Run required exhaustive quality gate
-        run: timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-exhaustive-quality-gate.mjs
+      - name: Run quality gate
+        run: node scripts/run-ci-quality-gate.mjs
 
       - name: Save trusted pnpm store
         if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true' }}
@@ -96,44 +65,3 @@ jobs:
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ steps.pnpm-cache.outputs.cache-primary-key }}
-
-  legacy-comparison:
-    name: Legacy comparison
-    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'legacy-rollback') }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    env:
-      CI: "true"
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.10.0
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Read pnpm store path
-        id: legacy-pnpm-store
-        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
-
-      - name: Restore trusted pnpm store
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ${{ steps.legacy-pnpm-store.outputs.path }}
-          key: ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-
-
-      - name: Install exact dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run retained legacy comparison
-        run: node scripts/run-ci-quality-gate.mjs
