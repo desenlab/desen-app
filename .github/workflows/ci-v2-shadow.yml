@@ -1,9 +1,6 @@
 name: CI v2 shadow
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:

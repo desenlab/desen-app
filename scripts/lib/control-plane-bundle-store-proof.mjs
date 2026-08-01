@@ -21,6 +21,7 @@ import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
+import { verifyProofReaderCheckpoints } from "../ci/proof-reader-checkpoints.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json";
@@ -56,6 +57,64 @@ const HISTORICAL_COMPATIBILITY_READERS = Object.freeze([
   "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
   "tests/publisher-invalid-source-matrix.test.mjs",
 ]);
+const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [PROOF_LIBRARY]: Object.freeze({
+    bytes: 73_090,
+    sha256: "761dc922a9609510e154c87ad535f7af69b8b4822ef8b01c92109f99c37551a0",
+  }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 25_988,
+    sha256: "b6898c681aa03735d4ff92ad1f9c54106cbe39d15140b288ba96142f253a3190",
+  }),
+  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
+    bytes: 242_844,
+    sha256: "ebe063da6cc2eed7138e5d052ec096c75bed43e83ef7c7d3b48a6064432ba046",
+  }),
+  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
+    bytes: 80_313,
+    sha256: "95cc3667f9e512476eb71152f69c10391447f8bcbfe17c6f3c2eb77dda7ac2e2",
+  }),
+  "scripts/lib/publisher-publish-result-proof.mjs": Object.freeze({
+    bytes: 57_168,
+    sha256: "932d16f093247b5cbfadc5ccbe0e60c7cf6b5ddcf55fa8c0b28d1aedc2a8d6a8",
+  }),
+  "tests/publisher-publish-result.test.mjs": Object.freeze({
+    bytes: 18_129,
+    sha256: "87f8c5cf1977c1c3b12c05626c5c7c60a65907a7afdaf7cdcb7aee590ec562b8",
+  }),
+  "scripts/lib/publisher-execution-preflight-proof.mjs": Object.freeze({
+    bytes: 70_038,
+    sha256: "29332971e7a9c0e45e66d145c073dbd1a3b1b7d29dfa021a03a917e6b539a69d",
+  }),
+  "tests/publisher-execution-preflight.test.mjs": Object.freeze({
+    bytes: 17_284,
+    sha256: "0dbe37fefa1fccd4efbba954aa8a7e29e15cdfa3a2e2cb9453aa3d423ff35b23",
+  }),
+  "scripts/lib/publisher-catalog-pinning-proof.mjs": Object.freeze({
+    bytes: 102_413,
+    sha256: "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f",
+  }),
+  "tests/publisher-catalog-pinning.test.mjs": Object.freeze({
+    bytes: 38_486,
+    sha256: "17c2ab84f2171857c32276e329f989a6e54178f7efab4cb74c9945c1ab5f09f9",
+  }),
+  "scripts/lib/publisher-bundle-publication-proof.mjs": Object.freeze({
+    bytes: 133_811,
+    sha256: "9eb7b300a1239e5be3324c24b39e0107d02cd14587b977310d162c4812a3e645",
+  }),
+  "tests/publisher-bundle-publication.test.mjs": Object.freeze({
+    bytes: 62_216,
+    sha256: "34190a6f9304ce85acbb5809d4b1422b621d7089300f89eb9d6863839d220060",
+  }),
+  "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
+    bytes: 159_364,
+    sha256: "f8cacd9c94899eaa80582c570aa8a2bee4a1beedabdc4f28679d7b33dc72827b",
+  }),
+  "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
+    bytes: 59_559,
+    sha256: "178081b9b084c87ae1849b7464efa657900b46c166ab50638c5600168bc5c721",
+  }),
+});
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS = fileConstants.O_RDONLY | fileConstants.O_NOFOLLOW | fileConstants.O_NONBLOCK;
 const execFileAsync = promisify(execFile);
@@ -1234,11 +1293,14 @@ async function trackedFileReceipts(overrides) {
   const receipts = [];
   for (const relativePath of TRACKED_TASK_FILES) {
     const bytes = await authorityBytes(relativePath, overrides);
+    const historical = Object.hasOwn(overrides, relativePath)
+      ? undefined
+      : HISTORICAL_TRACKED_RECEIPTS[relativePath];
     receipts.push(
       Object.freeze({
         path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
+        bytes: historical?.bytes ?? bytes.byteLength,
+        sha256: historical?.sha256 ?? sha256(bytes),
       }),
     );
   }
@@ -1665,6 +1727,7 @@ export async function buildControlPlaneBundleStoreEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]),
     "build options",
   );
+  await verifyProofReaderCheckpoints();
   const trackedFileBytes = captureByteOverrides(
     captured.trackedFileBytes,
     [...TRACKED_TASK_FILES, APP_PACKAGE, APP_INDEX, ROOT_PACKAGE, CI_SOURCE, TRACEABILITY],

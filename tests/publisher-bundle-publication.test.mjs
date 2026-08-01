@@ -1144,6 +1144,23 @@ test("[ci] rejects hosted workflow bypass of the reviewed single-pass entrypoint
   );
 });
 
+test("[ci] admits only the exact required-workflow successor into frozen T09 evidence", async () => {
+  const exact = await buildPublisherBundlePublicationEvidence({
+    runtimeReceipt,
+    ciReceipt,
+    trackedFileBytes: {
+      [CI_WORKFLOW]: await sourceBytes(CI_WORKFLOW),
+    },
+  });
+  assert.deepEqual(exact.artifactBytes, baseline.artifactBytes);
+
+  const unreviewed = await trackedMutation(CI_WORKFLOW, (text) => `${text}\n# unreviewed drift\n`);
+  await assert.rejects(
+    verifyWith(unreviewed),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_ARTIFACT_DRIFT"),
+  );
+});
+
 test("[authority] rejects a runtime receipt with failed revision closure", async () => {
   const receipt = structuredClone(runtimeReceipt);
   receipt.revisionClosed = false;

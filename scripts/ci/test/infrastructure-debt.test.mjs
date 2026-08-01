@@ -205,6 +205,52 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "Exhaustive modular shadow",
     "Run exhaustive modular shadow",
   ]);
+  assert.deepEqual(manifest.entries[3].targets[0].symbols, [
+    "APPROVED_CURRENT_T09_SUCCESSOR_PATHS",
+    "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
+    "APPROVED_CURRENT_T10_SUCCESSOR_PATHS",
+    "APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS",
+    "REQUIRED_CURRENT_T09_PROOF_MARKERS",
+    "REQUIRED_CURRENT_T09_TEST_MARKERS",
+    "currentT09SuccessorReceipt",
+    "currentT10SuccessorReceipt",
+    "assertCurrentT10SuccessorBytes",
+    "authenticateLiveCurrentT09Successors",
+    "authenticateCurrentT09TrackedInputs",
+    "authenticateLiveCurrentT10Successors",
+    "authenticateCurrentT10TrackedInputs",
+    "currentT10HistoricalReceipt",
+    "assertCurrentT09CompatibilityMarkers",
+  ]);
+  assert.deepEqual(manifest.entries[2].targets[0].symbols.slice(-3), [
+    "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
+    "matchesReceipt",
+    "authenticateRequiredCiWorkflow",
+  ]);
+  assert.equal(
+    manifest.entries[2].targets[1].symbols.at(-1),
+    "[ci] admits only the exact required-workflow successor into frozen T09 evidence",
+  );
+  assert.deepEqual(
+    manifest.entries[3].targets.slice(2).map((target) => target.path),
+    ["scripts/lib/publisher-official-golden-proof.mjs", "tests/publisher-official-golden.test.mjs"],
+  );
+  assert.deepEqual(manifest.entries[3].targets[2].symbols, [
+    "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
+    "matchesReceipt",
+    "authenticateRequiredCiWorkflow",
+  ]);
+  assert.deepEqual(manifest.entries[3].targets[1].symbols.slice(3, 7), [
+    "currentT09ProofBytes",
+    "currentT09RootTestBytes",
+    "currentT10ProofBytes",
+    "currentT10RootTestBytes",
+  ]);
+  assert.deepEqual(manifest.entries[4].targets[0].symbols, [
+    "HISTORICAL_COMPATIBILITY_READERS",
+    "HISTORICAL_TRACKED_RECEIPTS",
+    "currentReaderPaths",
+  ]);
   const legacyAuthority = manifest.entries[6];
   assert.equal(legacyAuthority.targets.length, 9);
   assert.deepEqual(
@@ -214,6 +260,13 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       "scripts/ci/test/required-exhaustive-equivalence.test.mjs",
     ],
   );
+  assert.deepEqual(legacyAuthority.targets[8].symbols, [
+    "legacy-rollback",
+    "legacy-pnpm-store",
+    "Legacy rollback",
+    "Run retained legacy rollback",
+    "node scripts/run-ci-quality-gate.mjs",
+  ]);
   assert.deepEqual(legacyAuthority.targets[2].symbols, [
     "../run-ci-quality-gate.mjs",
     "createRetainedSequentialSteps",

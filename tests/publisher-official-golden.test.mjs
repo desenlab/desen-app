@@ -844,6 +844,22 @@ test("[ci] rejects hosted workflow bypass of the reviewed single-pass entrypoint
   );
 });
 
+test("[ci] admits only the exact required-workflow successor into frozen T10 evidence", async () => {
+  const exact = await buildPublisherOfficialGoldenEvidence({
+    runtimeReceipt,
+    trackedFileBytes: {
+      [CI_WORKFLOW]: await sourceBytes(CI_WORKFLOW),
+    },
+  });
+  assert.deepEqual(exact.artifactBytes, baseline.artifactBytes);
+
+  const unreviewed = await trackedMutation(CI_WORKFLOW, (text) => `${text}\n# unreviewed drift\n`);
+  await assert.rejects(
+    verifyWith(unreviewed),
+    expectCode("PUBLISHER_OFFICIAL_GOLDEN_ARTIFACT_DRIFT"),
+  );
+});
+
 test("[authority] detects drift in the T10 proof implementation", async () => {
   const options = await trackedMutation(PROOF_LIBRARY, (text) => `${text}\n// drift\n`);
   await assert.rejects(

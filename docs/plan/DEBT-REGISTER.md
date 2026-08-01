@@ -38,10 +38,10 @@ complete only when:
 | DEBT-I07-001 | OPEN   | M06-T01 current G05 receipt ownership                    | I07-01        | I07-04        | G07           |
 | DEBT-I07-002 | OPEN   | M06-T05 duplicate current M05 receipts                   | I07-01        | I07-04        | G07           |
 | DEBT-I07-003 | OPEN   | M06-T09 predecessor compatibility helpers                | I07-01        | I07-04        | G07           |
-| DEBT-I07-004 | OPEN   | M06-T11 current T09 receipts and source-string markers   | I07-01        | I07-04        | G07           |
-| DEBT-I07-005 | OPEN   | M07-T01 duplicated inventory of twelve live readers      | I07-01        | I07-04        | G07           |
+| DEBT-I07-004 | OPEN   | M06-T11 current T09/T10 receipts and source markers      | I07-01        | I07-04        | G07           |
+| DEBT-I07-005 | OPEN   | M07-T01 historical projection for checkpointed readers   | I07-01        | I07-04        | G07           |
 | DEBT-I07-006 | OPEN   | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
-| DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and workflow path       | I07-01        | I07-05        | G12           |
+| DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
 | DEBT-I07-008 | OPEN   | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
@@ -116,7 +116,7 @@ complete only when:
 - Closure evidence: `PENDING` — record commit, pull request, replacement checkpoint receipt
   SHA-256, frozen M06-T05 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
 
-## DEBT-I07-003 — M06-T09 predecessor compatibility helpers
+## DEBT-I07-003 — M06-T09 predecessor and workflow compatibility helpers
 
 - Status: `OPEN`
 - Registered by infrastructure task: `I07-01`
@@ -129,30 +129,34 @@ complete only when:
     - `APPROVED_CURRENT_COMPATIBILITY_PATHS`
     - `assertApprovedCurrentCompatibilityBytes`
     - `authenticateCurrentCompatibilityReaders`
+    - `APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT`
+    - `matchesReceipt`
+    - `authenticateRequiredCiWorkflow`
   - `tests/publisher-bundle-publication.test.mjs`
     - `PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS`
     - `[compatibility] externally tracks every current T02 through T08 proof reader`
     - `[compatibility] detects tamper in each externally anchored T02 through T08 reader`
+    - `[ci] admits only the exact required-workflow successor into frozen T09 evidence`
 - Reason retained: the frozen M06-T09 proof authenticates seven evolving M06-T02 through M06-T08
-  readers and additionally embeds the current M06-T05 reader receipt. This protects the live edge
-  today, but combines immutable T09 evidence, current compatibility, and execution coordination in
-  one module.
+  readers, embeds the current M06-T05 reader receipt, and projects the authenticated required-CI
+  successor back to its task-time workflow receipt. These checks protect the live edges today but
+  combine immutable T09 evidence, current compatibility, and execution coordination in one module.
 - Objective removal trigger: the current checkpoint owns the exact seven-reader inventory and
-  their current receipts; M06-T09 retains only frozen prerequisite and task-time evidence; all
-  seven tamper cases fail through the checkpoint; and the modular schedule proves the same T02–T09
-  dependency closure in both exhaustive authority modes.
+  their current receipts; required-only workflow authority owns current CI authentication; M06-T09
+  retains only frozen prerequisite and task-time evidence; all seven tamper cases fail through the
+  checkpoint; and required-exhaustive CI preserves the same T02–T09 dependency closure.
 - Must close by gate: `G07`
 - Exact verification and zero-reference rule:
   - `node scripts/verify-publisher-bundle-publication.mjs`
   - `node --test tests/publisher-bundle-publication.test.mjs`
   - `node scripts/verify-publisher-execution-preflight.mjs`
-  - `rg -n "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_CURRENT_COMPATIBILITY_PATHS|assertApprovedCurrentCompatibilityBytes|authenticateCurrentCompatibilityReaders" scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs`
+  - `rg -n "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_CURRENT_COMPATIBILITY_PATHS|assertApprovedCurrentCompatibilityBytes|authenticateCurrentCompatibilityReaders|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T09 evidence" scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs`
     must return no matches after removal. The checkpoint may retain the seven exact paths under new
     checkpoint-owned symbols.
 - Closure evidence: `PENDING` — record commit, pull request, seven-reader checkpoint receipt
   SHA-256, frozen M06-T09 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
 
-## DEBT-I07-004 — M06-T11 current T09 receipts and source-string markers
+## DEBT-I07-004 — M06-T11 current T09/T10 receipts and source-string markers
 
 - Status: `OPEN`
 - Registered by infrastructure task: `I07-01`
@@ -161,11 +165,18 @@ complete only when:
   - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
     - `APPROVED_CURRENT_T09_SUCCESSOR_PATHS`
     - `APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS`
+    - `APPROVED_CURRENT_T10_SUCCESSOR_PATHS`
+    - `APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS`
     - `REQUIRED_CURRENT_T09_PROOF_MARKERS`
     - `REQUIRED_CURRENT_T09_TEST_MARKERS`
     - `currentT09SuccessorReceipt`
+    - `currentT10SuccessorReceipt`
+    - `assertCurrentT10SuccessorBytes`
     - `authenticateLiveCurrentT09Successors`
     - `authenticateCurrentT09TrackedInputs`
+    - `authenticateLiveCurrentT10Successors`
+    - `authenticateCurrentT10TrackedInputs`
+    - `currentT10HistoricalReceipt`
     - `assertCurrentT09CompatibilityMarkers`
   - `tests/publisher-invalid-source-matrix.test.mjs`
     - `[authority] distinguishes semantic coordination drift from frozen surface drift`
@@ -173,29 +184,42 @@ complete only when:
     - `BUNDLE_PUBLICATION_ROOT_TEST`
     - `currentT09ProofBytes`
     - `currentT09RootTestBytes`
+    - `currentT10ProofBytes`
+    - `currentT10RootTestBytes`
     - `approvedCurrentT09`
     - `unreviewedT09ProofBytes`
+  - `scripts/lib/publisher-official-golden-proof.mjs`
+    - `APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT`
+    - `matchesReceipt`
+    - `authenticateRequiredCiWorkflow`
+  - `tests/publisher-official-golden.test.mjs`
+    - `[ci] admits only the exact required-workflow successor into frozen T10 evidence`
   - current receipt and marker targets:
     - `scripts/lib/publisher-bundle-publication-proof.mjs`
     - `tests/publisher-bundle-publication.test.mjs`
-- Reason retained: M06-T11 must reject an unreviewed current T09 successor while keeping its own
-  artifact frozen. It currently does so with exact current file receipts plus a list of required
-  implementation and test source substrings. The check is intentionally strict but couples T11 to
-  T09 source spelling rather than a separately authenticated current-checkpoint contract.
-- Objective removal trigger: the current checkpoint authenticates T09 proof/test bytes and a
-  structured compatibility result without source-substring inspection; T11 consumes only that
-  result plus its frozen task-time receipts; every current-T09 tracked-candidate, caller-override,
-  live-worktree, and poison mutation remains rejected; and the exhaustive shadow/required results
-  are equivalent.
+    - `scripts/lib/publisher-official-golden-proof.mjs`
+    - `tests/publisher-official-golden.test.mjs`
+- Reason retained: M06-T11 must reject unreviewed current T09 and T10 successors while keeping its
+  own artifact frozen. It currently does so with exact current file receipts and, for T09, a list
+  of required implementation and test source substrings. The checks are intentionally strict but
+  duplicate authority now owned by the append-only current-reader checkpoint. The T10 workflow
+  projection is also temporary: required-only workflow authority must ultimately own that current
+  receipt without making the frozen proof library a second coordination source.
+- Objective removal trigger: the current checkpoint authenticates T09 and T10 proof/test bytes and
+  structured compatibility results without source-substring inspection; T11 consumes only those
+  results plus its frozen task-time receipts; every current tracked-candidate, caller-override,
+  live-worktree, and poison mutation remains rejected; and required-exhaustive CI remains green.
 - Must close by gate: `G07`
 - Exact verification and zero-reference rule:
   - `node scripts/verify-publisher-invalid-source-matrix.mjs`
   - `node --test tests/publisher-invalid-source-matrix.test.mjs`
   - `node scripts/verify-publisher-bundle-publication.mjs`
   - `node --test tests/publisher-bundle-publication.test.mjs`
-  - `rg -n "APPROVED_CURRENT_T09_SUCCESSOR_(PATHS|RECEIPTS)|REQUIRED_CURRENT_T09_(PROOF|TEST)_MARKERS|currentT09SuccessorReceipt|authenticateLiveCurrentT09Successors|authenticateCurrentT09TrackedInputs|assertCurrentT09CompatibilityMarkers|\[authority\] distinguishes semantic coordination drift from frozen surface drift|BUNDLE_PUBLICATION_PROOF_LIBRARY|BUNDLE_PUBLICATION_ROOT_TEST|currentT09ProofBytes|currentT09RootTestBytes|approvedCurrentT09|unreviewedT09ProofBytes" scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs`
+  - `node scripts/verify-publisher-official-golden.mjs`
+  - `node --test tests/publisher-official-golden.test.mjs`
+  - `rg -n "APPROVED_CURRENT_T(09|10)_SUCCESSOR_(PATHS|RECEIPTS)|REQUIRED_CURRENT_T09_(PROOF|TEST)_MARKERS|currentT(09|10)SuccessorReceipt|assertCurrentT10SuccessorBytes|authenticateLiveCurrentT(09|10)Successors|authenticateCurrentT(09|10)TrackedInputs|currentT10HistoricalReceipt|assertCurrentT09CompatibilityMarkers|\[authority\] distinguishes semantic coordination drift from frozen surface drift|BUNDLE_PUBLICATION_(PROOF_LIBRARY|ROOT_TEST)|currentT(09|10)(Proof|RootTest)Bytes|approvedCurrentT09|unreviewedT09ProofBytes|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T10 evidence" scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs scripts/lib/publisher-official-golden-proof.mjs tests/publisher-official-golden.test.mjs`
     must return no matches after removal.
-- Closure evidence: `PENDING` — record commit, pull request, structured T09 checkpoint receipt
+- Closure evidence: `PENDING` — record commit, pull request, structured T09/T10 checkpoint receipt
   SHA-256, frozen M06-T11 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
 
 ## DEBT-I07-005 — M07-T01 inventory of twelve live readers
@@ -206,6 +230,7 @@ complete only when:
 - Exact paths and symbols:
   - `scripts/lib/control-plane-bundle-store-proof.mjs`
     - `HISTORICAL_COMPATIBILITY_READERS`
+    - `HISTORICAL_TRACKED_RECEIPTS`
     - the twelve-reader expansion inside `TRACKED`
     - `currentReaderPaths`
   - `tests/control-plane-bundle-store.test.mjs`
@@ -224,19 +249,19 @@ complete only when:
     - `tests/publisher-bundle-publication.test.mjs`
     - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
     - `tests/publisher-invalid-source-matrix.test.mjs`
-- Reason retained: M07-T01 externally anchors the current proof-reader/root-test pairs that preserve
-  immutable M05 and M06 receipts. The same twelve-item inventory is currently duplicated in its
-  proof library and root test because no checkpoint manifest owns the live-reader set.
-- Objective removal trigger: one checkpoint manifest enumerates and authenticates all twelve
-  current readers, M07-T01 refers only to the checkpoint receipt while its frozen artifact remains
-  unchanged, duplicate arrays are absent, and mutations prove missing, reordered, duplicated, and
-  substituted reader records fail closed.
+- Reason retained: the append-only checkpoint now authenticates sixteen current readers and M07-T01
+  verifies that checkpoint before building. Its frozen artifact still needs the historical
+  twelve-reader list and task-time receipt projection, so those compatibility structures remain a
+  temporary bridge until the dedicated cleanup task.
+- Objective removal trigger: M07-T01 consumes only the checkpoint result while its frozen artifact
+  remains unchanged, the historical reader array and receipt projection are absent, and mutations
+  prove missing, reordered, duplicated, and substituted checkpoint records fail closed.
 - Must close by gate: `G07`
 - Exact verification and zero-reference rule:
   - `node scripts/verify-control-plane-bundle-store.mjs`
   - `node --test tests/control-plane-bundle-store.test.mjs`
   - all focused verifiers and root tests named by the twelve paths above
-  - `rg -n "HISTORICAL_COMPATIBILITY_READERS|currentReaderPaths" scripts/lib/control-plane-bundle-store-proof.mjs tests/control-plane-bundle-store.test.mjs`
+  - `rg -n "HISTORICAL_COMPATIBILITY_READERS|HISTORICAL_TRACKED_RECEIPTS|currentReaderPaths" scripts/lib/control-plane-bundle-store-proof.mjs tests/control-plane-bundle-store.test.mjs`
     must return no matches after removal. The twelve paths may appear once in the replacement
     current-checkpoint manifest and in frozen historical projections.
 - Closure evidence: `PENDING` — record commit, pull request, twelve-reader checkpoint manifest
@@ -325,13 +350,17 @@ complete only when:
   - `tests/control-plane-bundle-store.test.mjs`
     - `createQualityGateSteps`
   - `.github/workflows/ci.yml`
+    - `legacy-rollback`
+    - `legacy-pnpm-store`
+    - `Legacy rollback`
+    - `Run retained legacy rollback`
     - `node scripts/run-ci-quality-gate.mjs`
-- Reason retained: the existing sequential runner and hosted workflow remain the rollback
-  authority until the modular graph proves equivalent inventory, failure, cancellation,
-  workspace-integrity, and hosted behavior. The required-exhaustive equivalence module and its
-  focused test are rollback-only adapters: they import and compare the retained sequential plan,
-  but they are not required-execution authority. Removing any one of these structures early would
-  turn the migration itself into an unproven reduction of coverage.
+- Reason retained: the required-exhaustive scheduler is the hosted authority, while the existing
+  sequential runner remains available only through an explicitly selected manual rollback job.
+  The required-exhaustive equivalence module and its focused test are also rollback-only adapters:
+  they import and compare the retained sequential plan but are not required-execution authority.
+  Removing these structures before the scheduled rollback exercise would discard the controlled
+  recovery path before its retirement evidence exists.
 - Objective removal trigger: ADR 0011's exhaustive, affected-selector, and retirement cleanup
   gates all pass; the modular `REQUIRED + EXHAUSTIVE` schedule covers every legacy workload from
   fresh inputs; unknown selection always becomes `EXHAUSTIVE`; no proof success is read from cache;

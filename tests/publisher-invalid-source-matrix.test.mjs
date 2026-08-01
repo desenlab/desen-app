@@ -1135,11 +1135,15 @@ test("[authority] detects focused package-test byte drift", async () => {
 test("[authority] distinguishes semantic coordination drift from frozen surface drift", async () => {
   const currentT09ProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
   const currentT09RootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  const currentT10ProofBytes = await sourceBytes("scripts/lib/publisher-official-golden-proof.mjs");
+  const currentT10RootTestBytes = await sourceBytes("tests/publisher-official-golden.test.mjs");
   const approvedCurrentT09 = await buildPublisherInvalidSourceMatrixEvidence(
     fastOptions({
       trackedFileBytes: {
         [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentT09ProofBytes,
         [BUNDLE_PUBLICATION_ROOT_TEST]: currentT09RootTestBytes,
+        "scripts/lib/publisher-official-golden-proof.mjs": currentT10ProofBytes,
+        "tests/publisher-official-golden.test.mjs": currentT10RootTestBytes,
       },
     }),
   );
@@ -1171,6 +1175,8 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
           CI_SOURCE,
           BUNDLE_PUBLICATION_PROOF_LIBRARY,
           BUNDLE_PUBLICATION_ROOT_TEST,
+          "scripts/lib/publisher-official-golden-proof.mjs",
+          "tests/publisher-official-golden.test.mjs",
         ].includes(relativePath)
           ? "PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"
           : "PUBLISHER_INVALID_SOURCE_MATRIX_ARTIFACT_DRIFT",
