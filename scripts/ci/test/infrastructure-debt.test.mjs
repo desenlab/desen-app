@@ -196,6 +196,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       })),
       { id: "DEBT-I07-008", status: "CLOSED" },
       { id: "DEBT-I07-009", status: "OPEN" },
+      { id: "DEBT-I07-010", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -248,6 +249,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       },
       {
         id: "DEBT-I07-009",
+        registeredBy: "I07-01",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
+      {
+        id: "DEBT-I07-010",
         registeredBy: "I07-01",
         removalOwner: "I07-04",
         deadline: "G07",
@@ -357,11 +364,31 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "scripts/ci/test/modular-quality-gate.test.mjs",
   );
   assert.deepEqual(manifest.entries[8].targets[0].symbols, [
-    "M07_T02_CONTROL_PLANE_COORDINATION",
-    "M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK",
+    "M07_T03_CONTROL_PLANE_COORDINATION",
+    "M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK",
     "normalizeCurrentRootPackageBytes",
     "inspectExactControlPlaneImporter",
     "normalizeCurrentLockfileBytes",
+  ]);
+  assert.deepEqual(manifest.entries[9].targets, [
+    {
+      path: "scripts/lib/runtime-react-interactions-proof.mjs",
+      symbols: [
+        "EXPECTED_CURRENT_P05_SUCCESSOR",
+        "p05HistoricalStatus",
+        "p05CurrentStatus",
+        "p05SuccessorArtifactSha256",
+      ],
+    },
+    {
+      path: "tests/runtime-react-interactions.test.mjs",
+      symbols: [
+        "SUCCESSOR_SHA256",
+        "SUCCESSOR_ARTIFACT_FILE_NAME",
+        "SUCCESSOR_EVIDENCE_TEXT",
+        "rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift",
+      ],
+    },
   ]);
   assert.ok(Object.isFrozen(manifest.entries[0].targets[0].symbols));
 });
@@ -489,7 +516,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 8,
+      OPEN: 9,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -599,7 +626,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 8,
+      OPEN: 9,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -635,7 +662,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 7,
+      OPEN: 8,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

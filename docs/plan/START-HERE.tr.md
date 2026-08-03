@@ -26,20 +26,31 @@ Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding s�
 kontrolden çıkmasını engeller.
 
 `I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
-61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T02 eklendikten sonra GitHub'daki resmi
-`Quality gate` güncel 132 işin ve 62 kanıt çiftinin tamamını yeni sistemle zorunlu olarak çalıştırır. Ortak dosya,
+61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T03 eklendikten sonra GitHub'daki resmi
+`Quality gate` güncel 134 işin ve 63 kanıt çiftinin tamamını yeni sistemle zorunlu olarak çalıştırır. Ortak dosya,
 çıktı, port ve geçici-dizin kullanımı kodla sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
 başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
 otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
+Tarihsel okuyucu checkpoint'i sıra 4, on değişmez kanıt eserini ve yirmi canlı okuyucuyu
+`ee2d72c3529d9295945d339fb214c41dbbf906ffa6613a7ad6e766ec79c1bcf5` zincir başında doğrular.
+M07-T03 sonrasındaki düzeltici M05-T04 güncel-okuyucu eki tarihsel sıra 5'i kurdu; zincir başı
+`7df3631d509ed7e65c571566a825d6d3cd52d336e1a74512bf3e8e26920749b3`, on bir değişmez kanıt
+eserini ve yirmi iki canlı okuyucuyu doğrular. Sıra 6 yalnızca M06-T11 kanıt/test alındılarını
+sınırlı ve açık 20 saniyelik iç içe Vitest zaman aşımı için ilerletir; güncel zincir başı
+`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` yine on bir değişmez kanıt eserini ve yirmi iki canlı okuyucuyu
+doğrular. Kapsam, assertion, eşzamanlılık, dondurulmuş kanıt, iş yükü/kanıt sayısı, ilerleme
+veya plan digest'i değişmez; sıra 1–5 bayt ve hash olarak aynı kalır.
 Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
 bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
 kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından
 kontrol edilir. Teknik karar, güvenlik kapıları ve kesin kanıt
 [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) ile
 [`I07-02 baseline`](../proof/baselines/i07-02-required-exhaustive-equivalence.json) içinde kayıtlıdır.
-`M07-T02` tamamlandı: depodaki Bundle baytlarının protokolü, boyutu, revision'ı ve varsa gerçek
-Source baytlarının digest'i bağımsız olarak doğrulanıyor. Sıradaki görev, bu doğrulanmış Bundle'ın
-istediği paketlerin tam kimlik ve digest ile gerçekten kurulu olduğunu denetleyecek `M07-T03`'tür.
+`M07-T03` tamamlandı: yalnızca `M07-T02` tarafından doğrulanmış Bundle yetkisi kabul ediliyor;
+Bundle'ın istediği her paket tam kimlik, sürüm ve hedef ile tek bir kurulu adayla eşleşiyor ve gerçek
+Catalog ile dağıtım baytları istenen digest'i yeniden üretmeden paket yetkisi verilmiyor. Şimdilik
+yalnızca statik `web-react` profili destekleniyor. Sıradaki görev, doğrulanmış paketlerdeki yüzey ve
+capability referanslarını bütün aktivasyon limitleriyle denetleyecek `M07-T04`'tür.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

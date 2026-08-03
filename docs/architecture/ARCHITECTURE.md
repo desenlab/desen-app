@@ -642,11 +642,41 @@ Package-private consumers authenticate its exact identity through a `WeakMap`; c
 fields or forcing a TypeScript cast cannot create authority. Rejections expose only a closed stage
 and immutable redacted diagnostics, never a partial parsed document or digest authority.
 
-M07-T03 still owns installed package identity and digest preflight; M07-T04 owns capability
-references and activation limits. M07-T05 owns editable sources, mutable channels, and the transport
-API; M07-T06 through M07-T10 own staging, transactional activation, last-known-good recovery, and
-fault behavior; M07-T11 owns reference-host channel consumption. A stored entry is persistence
-evidence, and an M07-T02 authority is integrity evidence—not activation authority.
+M07-T03 adds the next synchronous boundary without widening storage or granting activation power.
+`preflightBundlePackages(integrityAuthority, installedPackages)` authenticates the exact M07-T02
+authority before observing the inventory. It captures each Bundle requirement and resolves only
+literal code-unit package id, exact SemVer, and literal target to exactly one physical installed
+candidate. Duplicate Bundle requirement positions remain positional while sharing the same unique
+verified package. Trimming, case folding, Unicode normalization, ranges, newest/best-match rules,
+candidate order, filesystem locations, callbacks, loaders, dynamic imports, and network discovery
+have no authority. Target dispatch is a host-owned static table; this checkpoint supports only
+`web-react`.
+
+Selected candidates are inert enumerable own-data records. The implementation rejects proxies,
+accessors, shared or detached memory, custom array prototypes, duplicate/reserved artifact paths,
+and over-limit inventories without invoking hostile traps. Non-enumerable and Symbol decorations
+are outside the admitted JSON projection and are neither retained nor executed. It synchronously
+copies each exact attached, nonshared `Uint8Array` subview and the selected Catalog under fixed
+requirement, candidate, identity, artifact, path, byte, Catalog depth/member/value/string,
+capability, and diagnostic ceilings. A generated standalone first-issue guard admits the frozen
+Catalog shape and embedded schemas; a separate namespace-ambiguity precheck rejects duplicate
+capability ids before the established exhaustive Catalog-set validator.
+
+The Web–React v1 digest implementation is independent of the reference package. It frames one
+projected Catalog and every exact target artifact, then requires the Bundle requirement digest,
+Catalog `packageDigest`, and independently calculated SHA-256 digest to be identical. The current
+official package contributes 80 distribution artifacts and 81 framed entries. Only complete
+success creates a frozen public `BundlePackagePreflightAuthority` containing byte-free package
+metadata and positional requirement indexes. A package-private `WeakMap` retains independent
+Catalog/artifact snapshots for later preflight and staging owners; cloning or casting the public
+shape cannot authenticate it.
+
+M07-T04 owns surface/capability references and whole-activation limits. M07-T05 owns editable
+sources, mutable channels, and the transport API; M07-T06 through M07-T10 own staging,
+transactional activation, last-known-good recovery, and fault behavior; M07-T11 owns reference-host
+channel consumption. A stored entry is persistence evidence, an M07-T02 authority is integrity
+evidence, and an M07-T03 authority is exact installed-package evidence—none is activation
+authority.
 
 ### DESEN Developer Platform (`desen.run`)
 

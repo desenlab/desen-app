@@ -314,6 +314,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-control-plane-bundle-verification.mjs",
       "tests/control-plane-bundle-verification.test.mjs",
     ],
+    [
+      "control-plane-package-preflight",
+      "scripts/verify-control-plane-package-preflight.mjs",
+      "tests/control-plane-package-preflight.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -337,12 +342,12 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
 ]);
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "00f6e1eaf1218ce2ad473e603927548ab995f241dc2496882ebe3f03019088bb";
+  "27e63e391725eb8b9ebf5082c39487380200222deefc66ed23a416073cc3068b";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "facf5da7879692a2c4bb5e3a0a5a6850b5d7f772e3307be16387557ec66db30d";
+  "5793261b95370a7eff9d254ea1124afce7fb630d9062df8c32176f498e9dcf4b";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "32f0bda43787914cd7fe4664272efd058c866dad5fc6333f5a528eb65781c78c";
-const QUALITY_GATE_PLAN_SHA256 = "fdee7ba323c3981edde99f9440eea7d0be569901206f38127f6983de07977b83";
+  "5293191caa9c472a9ffdbe0a6ac1427eae593c62e7e684a5949988e031b30c2c";
+const QUALITY_GATE_PLAN_SHA256 = "2599f9a01b53a8f8fabfd78f814c3a89dc897577b7f55c33e21cfd7cfd4bd356";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -592,6 +597,21 @@ function classifyLegacyPrerequisite({
       });
     }
     return "structural-validator-artifacts";
+  }
+
+  if (task === "verify:package-preflight-guards") {
+    if (
+      packageName !== "@desen/control-plane-api" ||
+      packageManifest.scripts?.[task] !== "pnpm run verify:package-preflight-catalog-guard" ||
+      packageManifest.scripts?.["verify:package-preflight-catalog-guard"] !==
+        "node scripts/verify-package-preflight-catalog-guard.mjs"
+    ) {
+      throw new QualityGateError("The package-preflight guard prerequisite drifted.", {
+        command,
+        actual: packageManifest.scripts?.[task],
+      });
+    }
+    return "package-preflight-guard-artifact";
   }
 
   if (task === "test") {

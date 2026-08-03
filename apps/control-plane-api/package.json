@@ -2,7 +2,7 @@
   "name": "@desen/control-plane-api",
   "version": "0.0.0",
   "private": true,
-  "description": "Local control-plane infrastructure for immutable DESEN Bundle storage and integrity verification.",
+  "description": "Local control-plane infrastructure for immutable DESEN Bundle storage, integrity verification, and exact installed-package preflight.",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -21,12 +21,16 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "generate:bundle-verification-guards": "node scripts/generate-bundle-verification-guards.mjs",
+    "generate:package-preflight-catalog-guard": "node scripts/generate-package-preflight-catalog-guard.mjs",
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:package-preflight": "vitest run test/package-preflight.test.ts test/package-preflight-schema-guard.test.ts",
     "test:bundle-verification": "vitest run test/bundle-verification.test.ts test/bundle-verification-guard.test.ts",
     "test:bundle-store": "vitest run test/bundle-store.test.ts",
-    "verify:bundle-verification-guards": "node scripts/verify-bundle-verification-guards.mjs"
+    "verify:bundle-verification-guards": "node scripts/verify-bundle-verification-guards.mjs",
+    "verify:package-preflight-catalog-guard": "node scripts/verify-package-preflight-catalog-guard.mjs",
+    "verify:package-preflight-guards": "pnpm run verify:package-preflight-catalog-guard"
   },
   "dependencies": {
     "@desen/protocol": "workspace:*",

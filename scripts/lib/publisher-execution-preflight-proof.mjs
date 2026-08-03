@@ -202,12 +202,12 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
 
 const APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS = Object.freeze({
   [M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH]: Object.freeze({
-    bytes: 245_054,
-    sha256: "57276f312b71d8fb08c05fa57f1344d07e94eea445f1b727d61e2e0970af0215",
+    bytes: 246_554,
+    sha256: "2bf728948372d8366f7badc7f2d7a36f6b8799b0dcc45baef92c29c90bdd2114",
   }),
   [M05_SOURCE_AUDIT_TEST_RELATIVE_PATH]: Object.freeze({
-    bytes: 81_029,
-    sha256: "95a89c627f78d75330f3f8fe63d1cc72ab967c5db380c4d8763e9eaa7e872369",
+    bytes: 81_283,
+    sha256: "499888c12d43b62d81a0cdaaf0c6248bfb0b7956eca9cce3c478d0ab7f39b5cd",
   }),
 });
 

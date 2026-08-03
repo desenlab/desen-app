@@ -16,6 +16,20 @@ const NORMATIVE_COVERAGE_PATH = "docs/proof/NORMATIVE-COVERAGE.md";
 const HISTORICAL_ARTIFACT_SHA256 =
   "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0";
 const HISTORICAL_ARTIFACT_BYTES = 52_430;
+const EXPECTED_CURRENT_P05_SUCCESSOR = Object.freeze({
+  historicalStatus: "PARTIAL",
+  owners: "M03-T04, M03-T10, M05-T04, M06-T08, M07-T03",
+  status: "PROVEN",
+  evidence: [
+    "M03-T10 preserves the historical `run.desen.reference.sign-in@0.1.0` Web–React tuple over its exact 76-file distribution",
+    "M05-T04 independently pins the current 80-file successor plus projected Catalog after adding the executable `./react-adapters` subpath",
+    "M06-T08 authenticates the carried Source digest and positionally replaces every loose requirement with the exact selected package tuple without location, best-match, sorting, or deduplication authority",
+    "M07-T03 authenticates the M07-T02 Bundle authority, resolves each literal id/exact version/literal target tuple to exactly one installed candidate, snapshots the selected Catalog and 80 actual artifacts, and independently reproduces the required digest while missing, duplicate, substituted, stale, or mutated material yields no package authority",
+  ].join("; "),
+  artifactFileName: "control-plane-api-0.1.0-package-preflight.json",
+  artifactSha256: "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628",
+});
+const P06_CURRENT_STATUS = "PARTIAL";
 const COMPATIBILITY_MODE = "immutable-task-time-artifact";
 const MAX_PROOF_DOCUMENT_BYTES = 500_000;
 const MAX_PROOF_MATRIX_BYTES = 2_000_000;
@@ -878,21 +892,40 @@ function verifyProofMatrix(markdown) {
     );
   }
 
-  const pin = `\`${ARTIFACT_FILE_NAME}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\``;
-  for (const id of ["P-05", "P-06"]) {
-    const row = exactRow(markdown, id);
-    if (
-      row.cells[0] !== id ||
-      row.cells[3] !== "PARTIAL" ||
-      !row.cells[2].includes("M05-T04") ||
-      !row.line.includes(pin) ||
-      row.line.includes(PENDING_ARTIFACT_SHA256)
-    ) {
-      fail(
-        "INTERACTIONS_PROOF_PIN_DRIFT",
-        `The exact ${id} M05-T04 artifact pin or historical status drifted.`,
-      );
-    }
+  const historicalPin = `\`${ARTIFACT_FILE_NAME}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\``;
+  const p05 = exactRow(markdown, "P-05");
+  const statusRank = Object.freeze({ NOT_PROVEN: 0, PARTIAL: 1, PROVEN: 2 });
+  const currentRank = statusRank[p05.cells[3]];
+  const successorPin = `\`${EXPECTED_CURRENT_P05_SUCCESSOR.artifactFileName}\` \`sha256:${EXPECTED_CURRENT_P05_SUCCESSOR.artifactSha256}\``;
+  if (
+    p05.cells[0] !== "P-05" ||
+    p05.cells[2] !== EXPECTED_CURRENT_P05_SUCCESSOR.owners ||
+    currentRank === undefined ||
+    currentRank < statusRank[EXPECTED_CURRENT_P05_SUCCESSOR.historicalStatus] ||
+    p05.cells[3] !== EXPECTED_CURRENT_P05_SUCCESSOR.status ||
+    p05.cells[4] !== EXPECTED_CURRENT_P05_SUCCESSOR.evidence ||
+    p05.line.split(historicalPin).length !== 2 ||
+    p05.line.split(successorPin).length !== 2 ||
+    p05.line.includes(PENDING_ARTIFACT_SHA256)
+  ) {
+    fail(
+      "INTERACTIONS_PROOF_PIN_DRIFT",
+      "P-05 lost its exact monotonic M05-T04/M07-T03 successor closure.",
+    );
+  }
+
+  const p06 = exactRow(markdown, "P-06");
+  if (
+    p06.cells[0] !== "P-06" ||
+    p06.cells[3] !== P06_CURRENT_STATUS ||
+    !p06.cells[2].includes("M05-T04") ||
+    p06.line.split(historicalPin).length !== 2 ||
+    p06.line.includes(PENDING_ARTIFACT_SHA256)
+  ) {
+    fail(
+      "INTERACTIONS_PROOF_PIN_DRIFT",
+      "The exact P-06 M05-T04 artifact pin or historical status drifted.",
+    );
   }
 }
 
@@ -966,6 +999,10 @@ function summarizeEvidence(built) {
     rootMutationTests: EXPECTED_TESTS.rootMutationTests,
     trackedFiles: 114,
     compatibilityPaths: EXPECTED_COMPATIBILITY_PATHS.length,
+    p05HistoricalStatus: EXPECTED_CURRENT_P05_SUCCESSOR.historicalStatus,
+    p05CurrentStatus: EXPECTED_CURRENT_P05_SUCCESSOR.status,
+    p05SuccessorArtifactSha256: EXPECTED_CURRENT_P05_SUCCESSOR.artifactSha256,
+    p06CurrentStatus: P06_CURRENT_STATUS,
     normativeStatus: "N-034:TESTED",
     exactDocumentationReferences: 5,
   });

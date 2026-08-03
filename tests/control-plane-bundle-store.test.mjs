@@ -324,12 +324,12 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-bundle-verification && pnpm lint",
-        "pnpm verify:control-plane-bundle-verification && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm verify:control-plane-package-preflight && pnpm lint",
+        "pnpm verify:control-plane-package-preflight && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-bundle-verification && turbo run test",
-        "pnpm test:control-plane-bundle-verification && pnpm test:control-plane-successor && turbo run test",
+        "pnpm test:control-plane-package-preflight && turbo run test",
+        "pnpm test:control-plane-package-preflight && pnpm test:control-plane-successor && turbo run test",
       ),
   );
   const successor = await buildControlPlaneBundleStoreEvidence(successorOptions);

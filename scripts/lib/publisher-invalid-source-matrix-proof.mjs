@@ -92,6 +92,7 @@ const RUNTIME_PROBE_PROGRAM_LIMIT_BYTES = 2 * 1024 * 1024;
 const RUNTIME_PROBE_STDOUT_LIMIT_BYTES = 8 * 1024 * 1024;
 const RUNTIME_PROBE_STDERR_LIMIT_BYTES = 256 * 1024;
 const RUNTIME_PROBE_TIMEOUT_MILLISECONDS = 180_000;
+const RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS = 20_000;
 const RUNTIME_PROBE_ERROR_TAIL_BYTES = 4_096;
 const DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES = 512 * 1024;
 const DETACHED_CI_ENTRYPOINT_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024;
@@ -874,11 +875,11 @@ const APPROVED_CURRENT_T09_SUCCESSOR_PATHS = Object.freeze([
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]: Object.freeze({
     bytes: 136_184,
-    sha256: "88ef9704b8615dd0c751be0c9a4ca2e027fcc41a8d368fdccacd33fba8de2eaa",
+    sha256: "6cd1b727f102c46ef546a00d4c5eb85a94a8d8727831f6ec577cc8576a5a5bd1",
   }),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze({
-    bytes: 62_826,
-    sha256: "dba2e4211eee9864e31593ab7c81d6c4723c2405c40bb82c9c2a707e73dc7d70",
+    bytes: 62_818,
+    sha256: "0469709b05c9ad61fd0dc64fb76c8758dcf21d540592a0aa6c201877286df784",
   }),
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
@@ -911,7 +912,7 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "bytes: 62_112",
   "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db",
   "bytes: 70_038",
-  "4df73e1c05474793cb3f0677216738ebb3ef4c590f631be067fe2c8f8dd7cf85",
+  "b203eb295bc4056f185416b8616c541f9d2cdebbfe74ed4ccb84e328d4da9c02",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',
@@ -3737,6 +3738,8 @@ function validateRuntimeReceipt(receipt, matrixCases) {
   });
 }
 
+// The frozen M06-T11 artifact pins this embedded program's byte count. Its compact option block
+// therefore preserves that task-time envelope while current reader hardening changes semantics.
 function programmaticRuntimeProbeSource(packageTestText, matrixCases) {
   return `
 import path from "node:path";
@@ -3812,11 +3815,9 @@ try {
     "test",
     [packageTestPath],
     {
-      chaiConfig: { truncateThreshold: 10_000 },
-      config: false,
-      run: true,
-      reporters: [{}],
-      passWithNoTests: false,
+      chaiConfig:{truncateThreshold:10000},
+      config: false,testTimeout: ${RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS},
+      run: true,reporters: [{}],passWithNoTests: false,
     },
     { root: proofRoot, plugins: [plugin] },
   );

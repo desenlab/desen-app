@@ -254,14 +254,28 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
   ]),
   authority("DEBT-I07-009", "I07-04", "G07", [
     target("scripts/lib/reference-host-web-source-audit-proof.mjs", [
-      "M07_T02_CONTROL_PLANE_COORDINATION",
-      "M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK",
+      "M07_T03_CONTROL_PLANE_COORDINATION",
+      "M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK",
       "normalizeCurrentRootPackageBytes",
       "inspectExactControlPlaneImporter",
       "normalizeCurrentLockfileBytes",
     ]),
     target("tests/reference-host-web-source-audit.test.mjs", [
-      "reviewed Publisher and M07-T02 coordination preserve root and lockfile provenance",
+      "reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance",
+    ]),
+  ]),
+  authority("DEBT-I07-010", "I07-04", "G07", [
+    target("scripts/lib/runtime-react-interactions-proof.mjs", [
+      "EXPECTED_CURRENT_P05_SUCCESSOR",
+      "p05HistoricalStatus",
+      "p05CurrentStatus",
+      "p05SuccessorArtifactSha256",
+    ]),
+    target("tests/runtime-react-interactions.test.mjs", [
+      "SUCCESSOR_SHA256",
+      "SUCCESSOR_ARTIFACT_FILE_NAME",
+      "SUCCESSOR_EVIDENCE_TEXT",
+      "rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift",
     ]),
   ]),
 ]);
