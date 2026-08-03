@@ -100,6 +100,7 @@ export const PROOF_IDS = Object.freeze([
   "publisher-invalid-source-matrix",
   "control-plane-bundle-store",
   "control-plane-bundle-verification",
+  "control-plane-package-preflight",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -425,8 +426,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 132) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 132 steps.", {
+if (METADATA_BY_STEP_ID.size !== 134) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 134 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

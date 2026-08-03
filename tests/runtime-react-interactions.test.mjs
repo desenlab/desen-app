@@ -13,6 +13,10 @@ import {
 
 const HISTORICAL_SHA256 = "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0";
 const HISTORICAL_BYTES = 52_430;
+const SUCCESSOR_SHA256 = "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628";
+const SUCCESSOR_ARTIFACT_FILE_NAME = "control-plane-api-0.1.0-package-preflight.json";
+const SUCCESSOR_EVIDENCE_TEXT =
+  "M07-T03 authenticates the M07-T02 Bundle authority, resolves each literal id/exact version/literal target tuple to exactly one installed candidate, snapshots the selected Catalog and 80 actual artifacts, and independently reproduces the required digest while missing, duplicate, substituted, stale, or mutated material yields no package authority";
 const PENDING_SHA256 = "[PENDING_FINAL_ARTIFACT_SHA256]";
 const ARTIFACT_FILE_NAME = "runtime-react-0.1.0-interactions.json";
 const ARTIFACT_RELATIVE_PATH = `docs/proof/artifacts/${ARTIFACT_FILE_NAME}`;
@@ -46,6 +50,11 @@ function replaceRow(markdown, id, replace) {
   return lines.join("\n");
 }
 
+function replaceExactOnce(text, search, replacement) {
+  assert.equal(text.split(search).length - 1, 1);
+  return text.replace(search, replacement);
+}
+
 test("accepts immutable task-time M05-T04 interaction evidence and root mutation coverage", async () => {
   const result = await verifyRuntimeReactInteractionsEvidence();
   assert.deepEqual(result, {
@@ -63,6 +72,10 @@ test("accepts immutable task-time M05-T04 interaction evidence and root mutation
     rootMutationTests: 18,
     trackedFiles: 114,
     compatibilityPaths: 28,
+    p05HistoricalStatus: "PARTIAL",
+    p05CurrentStatus: "PROVEN",
+    p05SuccessorArtifactSha256: SUCCESSOR_SHA256,
+    p06CurrentStatus: "PARTIAL",
     normativeStatus: "N-034:TESTED",
     exactDocumentationReferences: 5,
   });
@@ -300,17 +313,41 @@ test("rejects moved, duplicated, pending, or mismatched M05-T04 Proof Matrix pin
   }
 });
 
-test("rejects drift in either P-05 or P-06 exact historical pin and status", async () => {
+test("rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift", async () => {
   const texts = await proofTexts();
   const variants = [
     replaceRow(texts.proofMatrixText, "P-05", (row) =>
       row.replace(`\`${ARTIFACT_FILE_NAME}\``, `\`evil/${ARTIFACT_FILE_NAME}\``),
     ),
-    replaceRow(texts.proofMatrixText, "P-05", (row) => row.replace("| PARTIAL ", "| PROVEN  ")),
+    replaceRow(texts.proofMatrixText, "P-05", (row) =>
+      replaceExactOnce(row, "| PROVEN         |", "| PARTIAL        |"),
+    ),
+    replaceRow(texts.proofMatrixText, "P-05", (row) =>
+      replaceExactOnce(row, "| PROVEN         |", "| UNKNOWN        |"),
+    ),
+    replaceRow(texts.proofMatrixText, "P-05", (row) =>
+      replaceExactOnce(
+        row,
+        "M03-T04, M03-T10, M05-T04, M06-T08, M07-T03",
+        "M03-T04, M03-T10, M05-T04, M06-T08, M07-T99",
+      ),
+    ),
+    replaceRow(texts.proofMatrixText, "P-05", (row) =>
+      replaceExactOnce(row, SUCCESSOR_ARTIFACT_FILE_NAME, `evil/${SUCCESSOR_ARTIFACT_FILE_NAME}`),
+    ),
+    replaceRow(texts.proofMatrixText, "P-05", (row) =>
+      replaceExactOnce(row, SUCCESSOR_SHA256, "e".repeat(64)),
+    ),
+    replaceRow(texts.proofMatrixText, "P-05", (row) =>
+      replaceExactOnce(row, SUCCESSOR_EVIDENCE_TEXT, "M07-T03 successor evidence removed"),
+    ),
     replaceRow(texts.proofMatrixText, "P-06", (row) =>
       row.replace(HISTORICAL_SHA256, "f".repeat(64)),
     ),
     replaceRow(texts.proofMatrixText, "P-06", (row) => row.replace("M05-T04", "M05-T99")),
+    replaceRow(texts.proofMatrixText, "P-06", (row) =>
+      replaceExactOnce(row, "| PARTIAL        |", "| PROVEN         |"),
+    ),
   ];
   for (const proofMatrixText of variants) {
     await assert.rejects(

@@ -1,7 +1,7 @@
 # Infrastructure Debt and Cleanup Register
 
 This register tracks temporary compatibility structures registered by I07-01 while immutable task
-evidence is separated from current-checkpoint authentication and CI execution orchestration. Eight
+evidence is separated from current-checkpoint authentication and CI execution orchestration. Nine
 entries remain open; DEBT-I07-008 is closed with authenticated removal evidence. An open entry
 records planned removal work and does not claim that its cleanup has already been implemented.
 
@@ -44,6 +44,7 @@ the full gate. A cleanup is complete only when:
 | DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
 | DEBT-I07-008 | CLOSED | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
 | DEBT-I07-009 | OPEN   | M05-T09 current M07-T02 coordination projection          | I07-01        | I07-04        | G07           |
+| DEBT-I07-010 | OPEN   | M05-T04 current M07-T03 P-05 successor projection        | I07-01        | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -446,26 +447,26 @@ the full gate. A cleanup is complete only when:
   - the evidence artifact records the neutral-inventory and retired target receipts, including the
     removed shadow workflow.
 
-## DEBT-I07-009 — M05-T09 current M07-T02 coordination projection
+## DEBT-I07-009 — M05-T09 current M07-T03 coordination projection
 
 - Status: `OPEN`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
   - `scripts/lib/reference-host-web-source-audit-proof.mjs`
-    - `M07_T02_CONTROL_PLANE_COORDINATION`
-    - `M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK`
+    - `M07_T03_CONTROL_PLANE_COORDINATION`
+    - `M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK`
     - `normalizeCurrentRootPackageBytes`
     - `inspectExactControlPlaneImporter`
     - `normalizeCurrentLockfileBytes`
   - `tests/reference-host-web-source-audit.test.mjs`
-    - `reviewed Publisher and M07-T02 coordination preserve root and lockfile provenance`
+    - `reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance`
 - Reason retained: the frozen M05-T09 artifact still projects its task-time root package and
-  lockfile bytes, while the live workspace now contains the reviewed M07-T01 and M07-T02
+  lockfile bytes, while the live workspace now contains the reviewed M07-T01 through M07-T03
   control-plane commands, aggregate edges, and Validator importer. The current source-audit reader
-  must authenticate that exact successor before removing both control-plane tasks from the
+  must authenticate that exact successor before removing those control-plane tasks from the
   historical projection.
-- Objective removal trigger: the current checkpoint owns the exact M07-T02 root-command,
+- Objective removal trigger: the current checkpoint owns the exact M07-T03 root-command,
   aggregate-edge, and lock-importer receipts; M05-T09 consumes only the checkpoint result and
   returns to its immutable task-time coordination projection; and every missing, duplicated,
   reordered, substituted, quoted, or extra control-plane authority mutation remains rejected.
@@ -473,8 +474,45 @@ the full gate. A cleanup is complete only when:
 - Exact verification and zero-reference rule:
   - `node scripts/verify-reference-host-web-source-audit.mjs`
   - `node --test tests/reference-host-web-source-audit.test.mjs`
-  - `rg -n "M07_T02_CONTROL_PLANE_COORDINATION|M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK|normalizeCurrentRootPackageBytes|inspectExactControlPlaneImporter|normalizeCurrentLockfileBytes|reviewed Publisher and M07-T02 coordination preserve root and lockfile provenance" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
-    must return no matches after removal. The replacement checkpoint may retain exact M07-T02
+  - `rg -n "M07_T03_CONTROL_PLANE_COORDINATION|M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK|normalizeCurrentRootPackageBytes|inspectExactControlPlaneImporter|normalizeCurrentLockfileBytes|reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
+    must return no matches after removal. The replacement checkpoint may retain exact M07-T03
     receipts under checkpoint-owned symbols.
 - Closure evidence: `PENDING` — record commit, pull request, replacement coordination-checkpoint
   SHA-256, frozen M05-T09 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
+
+## DEBT-I07-010 — M05-T04 current M07-T03 P-05 successor projection
+
+- Status: `OPEN`
+- Registered by infrastructure task: `I07-01`
+- Removal owner: `I07-04`
+- Exact paths and symbols:
+  - `scripts/lib/runtime-react-interactions-proof.mjs`
+    - `EXPECTED_CURRENT_P05_SUCCESSOR`
+    - `p05HistoricalStatus`
+    - `p05CurrentStatus`
+    - `p05SuccessorArtifactSha256`
+  - `tests/runtime-react-interactions.test.mjs`
+    - `SUCCESSOR_SHA256`
+    - `SUCCESSOR_ARTIFACT_FILE_NAME`
+    - `SUCCESSOR_EVIDENCE_TEXT`
+    - `rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift`
+- Reason retained: the frozen M05-T04 artifact preserves the task-time `P-05: PARTIAL` claim,
+  while M07-T03 legitimately closes the live Proof Matrix row as `PROVEN`. The current interaction
+  reader must preserve both facts and reject a missing, substituted, downgraded, or falsely
+  attributed M07-T03 successor without rewriting the immutable M05-T04 artifact.
+- Objective removal trigger: the current checkpoint owns the structured M07-T03 P-05 successor
+  projection and exact M05-T04 reader receipts; the historical interaction reader consumes only
+  that authenticated checkpoint result plus its immutable task-time evidence; all status, owner,
+  evidence-text, artifact-path, and artifact-hash mutations remain rejected; and both frozen
+  artifacts remain byte-identical.
+- Must close by gate: `G07`
+- Exact verification and zero-reference rule:
+  - `node scripts/verify-runtime-react-interactions.mjs`
+  - `node --test tests/runtime-react-interactions.test.mjs`
+  - `node scripts/ci/verify-proof-reader-checkpoints.mjs`
+  - `rg -n "EXPECTED_CURRENT_P05_SUCCESSOR|p05HistoricalStatus|p05CurrentStatus|p05SuccessorArtifactSha256|SUCCESSOR_SHA256|SUCCESSOR_ARTIFACT_FILE_NAME|SUCCESSOR_EVIDENCE_TEXT|rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift" scripts/lib/runtime-react-interactions-proof.mjs tests/runtime-react-interactions.test.mjs`
+    must return no matches after removal. The replacement checkpoint may retain the exact M07-T03
+    semantic successor and M05-T04 reader receipts under checkpoint-owned symbols.
+- Closure evidence: `PENDING` — record commit, pull request, replacement semantic-checkpoint
+  SHA-256, frozen M05-T04 and M07-T03 artifact SHA-256 values, and hosted required-exhaustive
+  equivalence run URL.

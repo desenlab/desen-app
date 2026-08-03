@@ -327,8 +327,8 @@
         {
           "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
           "symbols": [
-            "M07_T02_CONTROL_PLANE_COORDINATION",
-            "M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK",
+            "M07_T03_CONTROL_PLANE_COORDINATION",
+            "M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK",
             "normalizeCurrentRootPackageBytes",
             "inspectExactControlPlaneImporter",
             "normalizeCurrentLockfileBytes"
@@ -337,7 +337,35 @@
         {
           "path": "tests/reference-host-web-source-audit.test.mjs",
           "symbols": [
-            "reviewed Publisher and M07-T02 coordination preserve root and lockfile provenance"
+            "reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-010",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-01",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "symbols": [
+            "EXPECTED_CURRENT_P05_SUCCESSOR",
+            "p05HistoricalStatus",
+            "p05CurrentStatus",
+            "p05SuccessorArtifactSha256"
+          ]
+        },
+        {
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "symbols": [
+            "SUCCESSOR_SHA256",
+            "SUCCESSOR_ARTIFACT_FILE_NAME",
+            "SUCCESSOR_EVIDENCE_TEXT",
+            "rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift"
           ]
         }
       ]

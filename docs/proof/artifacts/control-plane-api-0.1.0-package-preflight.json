@@ -1,0 +1,1491 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.control-plane.package-preflight-proof.v1",
+  "task": "M07-T03",
+  "result": "PASS",
+  "summary": "An authenticated Bundle authority resolves every literal package tuple to one installed package whose actual Catalog and Web-React bytes reproduce the exact required digest before yielding opaque preflight authority.",
+  "prerequisites": [
+    {
+      "task": "M07-T02",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+      "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a",
+      "bytes": 48642,
+      "verifiedSha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+    },
+    {
+      "task": "M05-T04",
+      "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+      "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0",
+      "bytes": 52430,
+      "verifiedSha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+    },
+    {
+      "task": "M03-T04",
+      "path": "docs/proof/artifacts/reference-catalog-web-package-digest-v1.json",
+      "sha256": "e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716",
+      "bytes": 12573,
+      "verifiedSha256": "e56c74696e8aa68c1d3ab71ac3ae087ed8c5df05f4a19b9a6d310da8758b0716"
+    },
+    {
+      "task": "M06-T08",
+      "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+      "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f",
+      "bytes": 10688,
+      "verifiedSha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+    },
+    {
+      "task": "M02-T05",
+      "path": "docs/proof/artifacts/protocol-0.1.0-diagnostics.json",
+      "sha256": "e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b",
+      "bytes": 13223,
+      "verifiedSha256": "e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b"
+    }
+  ],
+  "fixtures": [
+    {
+      "role": "officialDerivedBundle",
+      "path": "examples/sign-in/official-derived.bundle.desen.json",
+      "bytes": 4899,
+      "sha256": "334450fa1864bf280a30342090a46ba1d2f2dc96552b9430afdde5fcada902b0"
+    },
+    {
+      "role": "currentWebReactCatalog",
+      "path": "packages/reference-catalog-web/catalog.json",
+      "bytes": 8439,
+      "sha256": "71fa2829880935f4b745d2bbed70379796d1e197c23a6bf316306d098ba2d2e2"
+    }
+  ],
+  "claims": {
+    "supportedProtocol": "0.1.0",
+    "supportedTargets": ["web-react"],
+    "failFastCatalogGuard": {
+      "generation": {
+        "result": "PASS",
+        "protocol": "0.1.0",
+        "tools": { "ajv": "8.20.0", "prettier": "3.9.6" },
+        "schemaRoots": 1,
+        "schemas": [
+          {
+            "schemaFile": "desen-catalog.schema.json",
+            "schemaId": "https://schemas.desen.dev/0.1/desen-catalog.schema.json",
+            "sha256": "51014ab088b6a483502fd6aee5eed9fc4451be55556b6bd6220a5a6a1b610555",
+            "bytes": 15654
+          }
+        ],
+        "exports": ["validatePackagePreflightCatalogGuard"],
+        "allErrors": false,
+        "runtimeCompilation": false,
+        "dynamicLoading": false,
+        "networkAccess": false,
+        "runtimeImports": ["../../bundle-verification-standalone-runtime.js"],
+        "localHelpers": ["unicodeLength"],
+        "outputSha256": "443d1ce182f80c7a7375ae65f597d18dc458f6dc0203b519c8596b34ae7f4a0f",
+        "outputBytes": 456985
+      },
+      "admissionBeforeExhaustiveValidation": true,
+      "firstIssueOnly": true
+    },
+    "currentPackage": {
+      "id": "run.desen.reference.sign-in",
+      "version": "0.1.0",
+      "target": "web-react",
+      "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+      "digestProfile": "desen.web-react.package-digest",
+      "digestProfileVersion": 1,
+      "artifactCount": 80,
+      "framedEntryCount": 81,
+      "framedByteLength": 252072,
+      "distributionByteLength": 243175,
+      "publicProfile": {
+        "profile": "desen.web-react.package-digest",
+        "profileVersion": 1,
+        "target": "web-react",
+        "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+        "entries": [
+          {
+            "path": "catalog.json",
+            "byteLength": 5873,
+            "contentDigest": "sha256:033445d7d0862c8b5a0de5cce8c6c73417d6c1e637404bfd23133026c29ebdfa"
+          },
+          {
+            "path": "dist/components/alert.d.ts",
+            "byteLength": 653,
+            "contentDigest": "sha256:2ea6e413820b31a11610f2a3d983fd04b5f82ee626a79cbbabd40d8ddd7947b0"
+          },
+          {
+            "path": "dist/components/alert.d.ts.map",
+            "byteLength": 299,
+            "contentDigest": "sha256:7c7f6cdfd5b7da75d5c780b7037205cc8dba35747859d7a0aae18d64bbd4522b"
+          },
+          {
+            "path": "dist/components/alert.js",
+            "byteLength": 1951,
+            "contentDigest": "sha256:97e9d8a8b596a90905da2ff2ca9fa79c927e86abdc5c36223d82f007517c399f"
+          },
+          {
+            "path": "dist/components/alert.js.map",
+            "byteLength": 1186,
+            "contentDigest": "sha256:64c459caee0b31320dc0c048d05d13fbc8845cc5f5d6cc023fe5a813890d123c"
+          },
+          {
+            "path": "dist/components/button.d.ts",
+            "byteLength": 1032,
+            "contentDigest": "sha256:5421ed336b532ec0a852b2cee8171835ea3aa0b0150929b08e04a60252854544"
+          },
+          {
+            "path": "dist/components/button.d.ts.map",
+            "byteLength": 465,
+            "contentDigest": "sha256:33bbbdf93cc7ad50604f96754fe0568f84b2bd2a6914d1a33fbd4f7505f5ec01"
+          },
+          {
+            "path": "dist/components/button.js",
+            "byteLength": 2334,
+            "contentDigest": "sha256:d0f9e3734c5b0b7a795c1514d2310bb61f10532f5476290ffb8c9fd8456c8011"
+          },
+          {
+            "path": "dist/components/button.js.map",
+            "byteLength": 1652,
+            "contentDigest": "sha256:ee3858a466ea91384b7425a9594254ec81132ef97b6dd651f1dc3596b394df00"
+          },
+          {
+            "path": "dist/components/contracts.d.ts",
+            "byteLength": 6534,
+            "contentDigest": "sha256:30cd78650233a2f4de8c74b9ac49a9dcc98bcc3d62505d62cdc1959f50862489"
+          },
+          {
+            "path": "dist/components/contracts.d.ts.map",
+            "byteLength": 954,
+            "contentDigest": "sha256:0e631d53744e42a4c29476e89051ac480090ea84939f6312aae921c9214acd69"
+          },
+          {
+            "path": "dist/components/contracts.js",
+            "byteLength": 4697,
+            "contentDigest": "sha256:f9e205f65f0f28a29435c4d391b332afd1e75b6310135f076c0e53523336f34c"
+          },
+          {
+            "path": "dist/components/contracts.js.map",
+            "byteLength": 2470,
+            "contentDigest": "sha256:855ed8b07124aff6b54adc869d7f5ee6e2c4ad396b70d7695a660b6e73fcf00e"
+          },
+          {
+            "path": "dist/components/index.d.ts",
+            "byteLength": 1276,
+            "contentDigest": "sha256:fcca4cae682b68c76724de9087bb7ddaf0ccd282b2b9005a53662889afacdce9"
+          },
+          {
+            "path": "dist/components/index.d.ts.map",
+            "byteLength": 979,
+            "contentDigest": "sha256:4c1c7b166440b7babf77696b1b4cc4f7cc6d371ab02e159cc7d2383db329dfeb"
+          },
+          {
+            "path": "dist/components/index.js",
+            "byteLength": 686,
+            "contentDigest": "sha256:74252813b0e340cf1a79e6acef84cdf246cff0e5aa43a0551550ef33ba46d1e9"
+          },
+          {
+            "path": "dist/components/index.js.map",
+            "byteLength": 530,
+            "contentDigest": "sha256:131642815b500f88de5276fe0a3765f0b99b04ba7bc1a664b552bdd9183fb4ed"
+          },
+          {
+            "path": "dist/components/interactive-contracts.d.ts",
+            "byteLength": 11745,
+            "contentDigest": "sha256:b4ff272017befe8117363a3fcf34cc44ef64c7fbfdd857eb0bba0d71409fab66"
+          },
+          {
+            "path": "dist/components/interactive-contracts.d.ts.map",
+            "byteLength": 1515,
+            "contentDigest": "sha256:ef5c9bb0177f042072ae0b54c58d69ec547096c9e22ca5249b40a8b59c9fc814"
+          },
+          {
+            "path": "dist/components/interactive-contracts.js",
+            "byteLength": 8780,
+            "contentDigest": "sha256:bc0ff4a6556015fab67cc8549d134fb9c37e13a525c174adf2f0bcb38b29bcf8"
+          },
+          {
+            "path": "dist/components/interactive-contracts.js.map",
+            "byteLength": 4390,
+            "contentDigest": "sha256:68c32f9884e39f989bba2f3e8d57719490562628cfab2956776c4c9a79bdaee5"
+          },
+          {
+            "path": "dist/components/stack.d.ts",
+            "byteLength": 980,
+            "contentDigest": "sha256:57424edec480bf845855498cb6f3c618b7b2962640a84a890a77ffcb6276c37a"
+          },
+          {
+            "path": "dist/components/stack.d.ts.map",
+            "byteLength": 446,
+            "contentDigest": "sha256:d0b6f4c08515c8f6467c736a230a626202e93d23d8d5c039cf5fdcbef715125b"
+          },
+          {
+            "path": "dist/components/stack.js",
+            "byteLength": 1337,
+            "contentDigest": "sha256:cf2d55bb52885198eba4a055b1defdc5de2582c44c6da03cd09f01e391e154a1"
+          },
+          {
+            "path": "dist/components/stack.js.map",
+            "byteLength": 1050,
+            "contentDigest": "sha256:8380fe119b5a86f793d949c1b80856fcbfb648e0eea6476acdcd8190d1f9c99c"
+          },
+          {
+            "path": "dist/components/text-field.d.ts",
+            "byteLength": 1763,
+            "contentDigest": "sha256:2de7f34017b87cef6bee63075d4cc493f2940c8132e868c6125327296784f782"
+          },
+          {
+            "path": "dist/components/text-field.d.ts.map",
+            "byteLength": 800,
+            "contentDigest": "sha256:74d6216d8087fe3861094639f922517ad81f05486d405930827d6f11d3b88326"
+          },
+          {
+            "path": "dist/components/text-field.js",
+            "byteLength": 2437,
+            "contentDigest": "sha256:a9f662669e7975f8393f922e2fc5d25d54ca616fa607215b4329e0581cd6143e"
+          },
+          {
+            "path": "dist/components/text-field.js.map",
+            "byteLength": 1950,
+            "contentDigest": "sha256:0a22cd226d5ab4ada24a4dc8609f144961fdae1a1559afabcf13e1116e2ab3c4"
+          },
+          {
+            "path": "dist/components/text.d.ts",
+            "byteLength": 718,
+            "contentDigest": "sha256:eb268d82d5720985505e74582c763330b50c06c60a74c00c8a3adc22e5ee6046"
+          },
+          {
+            "path": "dist/components/text.d.ts.map",
+            "byteLength": 297,
+            "contentDigest": "sha256:07cd9a51f431d6e89a90ac76d47e7cdcf727218caf580ee70c078ce990e25eb6"
+          },
+          {
+            "path": "dist/components/text.js",
+            "byteLength": 606,
+            "contentDigest": "sha256:562ab4de0201f49cb385b0c4f4329fc803c6833dde2c21e1b07302551a1e0eae"
+          },
+          {
+            "path": "dist/components/text.js.map",
+            "byteLength": 406,
+            "contentDigest": "sha256:ef7bbe50528bef3198279f272f907849195c658723b430682fd17e3d0c62ea14"
+          },
+          {
+            "path": "dist/host-operations/index.d.ts",
+            "byteLength": 309,
+            "contentDigest": "sha256:c76cfe10c234e06d11dd926696e79c8555b73a2cf8693729f10031963ad840bc"
+          },
+          {
+            "path": "dist/host-operations/index.d.ts.map",
+            "byteLength": 232,
+            "contentDigest": "sha256:9912c360b2dcebf2f73f86799a8af3e0614dcb28b25534735b2223ca26cebff8"
+          },
+          {
+            "path": "dist/host-operations/index.js",
+            "byteLength": 215,
+            "contentDigest": "sha256:f41bb3432fc5fd3225109ef7150e642f3fed35d427fb05f7126d490b5856c05c"
+          },
+          {
+            "path": "dist/host-operations/index.js.map",
+            "byteLength": 175,
+            "contentDigest": "sha256:c665639f3e53dc59f04755c37d072c180e582b653f337cae826c59ee0f996cc7"
+          },
+          {
+            "path": "dist/host-operations/sign-in.d.ts",
+            "byteLength": 2052,
+            "contentDigest": "sha256:f72271fb07c36c301cf95ce7019f2ba3c88590ff3a108b7d126660d6f1185b2d"
+          },
+          {
+            "path": "dist/host-operations/sign-in.d.ts.map",
+            "byteLength": 531,
+            "contentDigest": "sha256:377abb2f9e224e8181ccc596f0d3eab375bcfb6c1167ce50ca789fb0057f2b09"
+          },
+          {
+            "path": "dist/host-operations/sign-in.js",
+            "byteLength": 926,
+            "contentDigest": "sha256:fbcd81c04fc398f5c15d2ec98945ebee047c5b274c6bdc5068fddc11d0745c1b"
+          },
+          {
+            "path": "dist/host-operations/sign-in.js.map",
+            "byteLength": 417,
+            "contentDigest": "sha256:678b3ae31d9ec0d1b64668120446c86d6bd3c86f93a76a1a394850056d0638e0"
+          },
+          {
+            "path": "dist/index.d.ts",
+            "byteLength": 612,
+            "contentDigest": "sha256:21ac34b13f264acfb4cea01243ca6a676d2930683a6e68de22557566e63aadbc"
+          },
+          {
+            "path": "dist/index.d.ts.map",
+            "byteLength": 311,
+            "contentDigest": "sha256:d1dfddbf7f295cfa12b31fa0205a7baa52ff6852303856c6bc11fb42cb76ce9b"
+          },
+          {
+            "path": "dist/index.js",
+            "byteLength": 398,
+            "contentDigest": "sha256:8ff595081672ff63ffd2e2c15207964451cf29f5e810e65e5621b11f2a3e6ba7"
+          },
+          {
+            "path": "dist/index.js.map",
+            "byteLength": 211,
+            "contentDigest": "sha256:170c7305e7fbf5db523163d6363fc91eb890998352467b3c40f731d302179509"
+          },
+          {
+            "path": "dist/operations/index.d.ts",
+            "byteLength": 392,
+            "contentDigest": "sha256:6b3f81923532b9b4033c75da8f6e7e68a5ccdc92b45cd9e231eb65e4a2fc6afb"
+          },
+          {
+            "path": "dist/operations/index.d.ts.map",
+            "byteLength": 282,
+            "contentDigest": "sha256:fc8f4a40e95176d4acdbb6199686261d2a31a91f9f7302337d38f2142a9280c7"
+          },
+          {
+            "path": "dist/operations/index.js",
+            "byteLength": 249,
+            "contentDigest": "sha256:fa9b7854d3f5fd690e2dec59b0813fcabad057e2d171811dcf0ec253a72f5c23"
+          },
+          {
+            "path": "dist/operations/index.js.map",
+            "byteLength": 197,
+            "contentDigest": "sha256:c31f3f1eca511dcb5c7e48b4b6cc18dc2de3346bdbb94a17db54ec072ad6d000"
+          },
+          {
+            "path": "dist/operations/sign-in.d.ts",
+            "byteLength": 3996,
+            "contentDigest": "sha256:8cf9b87ab9489ce25dc21e436ea6bccd3e1a553ccd1a2d43d4674357512eaa2d"
+          },
+          {
+            "path": "dist/operations/sign-in.d.ts.map",
+            "byteLength": 751,
+            "contentDigest": "sha256:28f534ebc71ef9748433623a414f40704f868d51708ed684c1760fcc6258de58"
+          },
+          {
+            "path": "dist/operations/sign-in.js",
+            "byteLength": 2841,
+            "contentDigest": "sha256:b5b5def58fc33ef8567edde42d605efa5a7d9583b3c153d5c670c32b530277de"
+          },
+          {
+            "path": "dist/operations/sign-in.js.map",
+            "byteLength": 1195,
+            "contentDigest": "sha256:8d25b6aab4d9374f55481e33adc925b16dee0b676f1bbe0e1a8d3884682f7da0"
+          },
+          {
+            "path": "dist/package-digest-profile.d.ts",
+            "byteLength": 7377,
+            "contentDigest": "sha256:8d0ed1c6854f46e7069341498bb3433455e357e87d769b988fb7fe1d1c496905"
+          },
+          {
+            "path": "dist/package-digest-profile.d.ts.map",
+            "byteLength": 1638,
+            "contentDigest": "sha256:74b64288fe506a3ee62d340f01317cf457a7c22e1d4a714c91a3c66150c58a00"
+          },
+          {
+            "path": "dist/package-digest-profile.js",
+            "byteLength": 28624,
+            "contentDigest": "sha256:c18595171b51be9037253dd61486393a727ecfd03867eb728bba9519b237acb1"
+          },
+          {
+            "path": "dist/package-digest-profile.js.map",
+            "byteLength": 23392,
+            "contentDigest": "sha256:c7c03c202bf386e17fbe2f35a5fb3afbbeb3f5f8ed8409c782e2730893047e99"
+          },
+          {
+            "path": "dist/parity/index.d.ts",
+            "byteLength": 622,
+            "contentDigest": "sha256:e9b26ae38e4bd85a8c0d5f6c5c46b8776467241188605484540bbf89d5da8ec9"
+          },
+          {
+            "path": "dist/parity/index.d.ts.map",
+            "byteLength": 307,
+            "contentDigest": "sha256:6579259002044821bfef97f2160a78cfd373dbdcb0d10fe7be7ac8f4b4945447"
+          },
+          {
+            "path": "dist/parity/index.js",
+            "byteLength": 253,
+            "contentDigest": "sha256:0a1a16021e6bfd1c79f2061468d56f639c46e2e6355e91dc2cf8d0d23cc5a06e"
+          },
+          {
+            "path": "dist/parity/index.js.map",
+            "byteLength": 168,
+            "contentDigest": "sha256:08e2287322f1c55cfba3d9b27ffae44dcef830ca174b54d0c2096b89c4adf33d"
+          },
+          {
+            "path": "dist/parity/reference-web-implementation-metadata.d.ts",
+            "byteLength": 6962,
+            "contentDigest": "sha256:a36d1c2797a6aee566e822df10ce2548d8faf9130614df469e51072db59853f9"
+          },
+          {
+            "path": "dist/parity/reference-web-implementation-metadata.d.ts.map",
+            "byteLength": 2590,
+            "contentDigest": "sha256:c7c1e775162d61200e60e142663c5d13a426eeaf69375078c52d04b0cf0874f8"
+          },
+          {
+            "path": "dist/parity/reference-web-implementation-metadata.js",
+            "byteLength": 10443,
+            "contentDigest": "sha256:8ff2b6e9e0c8e9ab7336592521a5b752fbdac562646c96676787ee5bbdfde9a5"
+          },
+          {
+            "path": "dist/parity/reference-web-implementation-metadata.js.map",
+            "byteLength": 8446,
+            "contentDigest": "sha256:c4fe35e3dae073781ca39ae893e9728a635bf623a96ebe960f048c5b6d4ad016"
+          },
+          {
+            "path": "dist/react-adapters/index.d.ts",
+            "byteLength": 5432,
+            "contentDigest": "sha256:9a4d39bbb039b03f533eaa0171282caa92b383c4a57f345a7767fbd81250e23b"
+          },
+          {
+            "path": "dist/react-adapters/index.d.ts.map",
+            "byteLength": 935,
+            "contentDigest": "sha256:25148bee11672958e67af4bf4d4e79fe7233817770f5aba9bd15699d68f558e8"
+          },
+          {
+            "path": "dist/react-adapters/index.js",
+            "byteLength": 7521,
+            "contentDigest": "sha256:31834b57d0e9c43e68f4ca23b3dabebeb7093040fe631ab718063bbc6112ed99"
+          },
+          {
+            "path": "dist/react-adapters/index.js.map",
+            "byteLength": 5218,
+            "contentDigest": "sha256:5f00a4223be3679ff085cb0ef123298c6c004e3c6c69659e35349f1a9ad16a35"
+          },
+          {
+            "path": "dist/tokens/index.d.ts",
+            "byteLength": 856,
+            "contentDigest": "sha256:860dd43b11e8e3c6c7ffbde478d0ab5d69a98b2b29e2a5dd7c85570188c080a1"
+          },
+          {
+            "path": "dist/tokens/index.d.ts.map",
+            "byteLength": 490,
+            "contentDigest": "sha256:d1ed92862a82bda22f763dc5057761af226bda59f118debdcacbddaa8ba2c949"
+          },
+          {
+            "path": "dist/tokens/index.js",
+            "byteLength": 409,
+            "contentDigest": "sha256:4b47a66a77ddfb34a8ead7f62a35523c06aff94467f29183eeaba291f779eaf8"
+          },
+          {
+            "path": "dist/tokens/index.js.map",
+            "byteLength": 266,
+            "contentDigest": "sha256:bf5437a754a9dca5659916eaec6b8c2bdc31fd0e48cbc0005cb6d36cdfd33a72"
+          },
+          {
+            "path": "dist/tokens/reference-token-document.d.ts",
+            "byteLength": 9415,
+            "contentDigest": "sha256:6776cf26ee60bfd5d775ec05fe4c3b81089d943ae8e7e5ef618cb5ac14e82466"
+          },
+          {
+            "path": "dist/tokens/reference-token-document.d.ts.map",
+            "byteLength": 2603,
+            "contentDigest": "sha256:1e67325ec9eb619480bfe3a0151dbc781df200200baf2cb138131135ce11ff6c"
+          },
+          {
+            "path": "dist/tokens/reference-token-document.js",
+            "byteLength": 3184,
+            "contentDigest": "sha256:9f566e8ca4d8ac065abd531ec30e9a8b01fa6557b44e46c1d03c0c1b163066b3"
+          },
+          {
+            "path": "dist/tokens/reference-token-document.js.map",
+            "byteLength": 2713,
+            "contentDigest": "sha256:dfbb29a9a7f43d61b5aefcba23b333150ff8aed4c1da93aca892f0a3a9c9a237"
+          },
+          {
+            "path": "dist/tokens/web-token-provider.d.ts",
+            "byteLength": 7734,
+            "contentDigest": "sha256:d8b30429cc0d7a337411e83c68fc7c4798645cc9ebd4b37bfaa7d317e37de432"
+          },
+          {
+            "path": "dist/tokens/web-token-provider.d.ts.map",
+            "byteLength": 1632,
+            "contentDigest": "sha256:8434fca2b5984d05e27ade889d7c1615aecfd91b9791f08080ec21966496717f"
+          },
+          {
+            "path": "dist/tokens/web-token-provider.js",
+            "byteLength": 11116,
+            "contentDigest": "sha256:81c4897b946483672cb6b70d79b9ec05fad2f45e06dc14bea3dfb0cf7af7ffd5"
+          },
+          {
+            "path": "dist/tokens/web-token-provider.js.map",
+            "byteLength": 9619,
+            "contentDigest": "sha256:8d4c3cf40953575c97ed1035344934ad695ed9c18f8dd42dfa15a05abd0a0d68"
+          }
+        ],
+        "resultFrozen": true,
+        "entriesFrozen": true
+      }
+    },
+    "exactResolution": {
+      "equality": "literal-code-unit id + exact SemVer + literal target",
+      "physicalCandidateCardinality": "exactly-one",
+      "trimming": false,
+      "caseFolding": false,
+      "unicodeNormalization": false,
+      "ranges": false,
+      "newestOrBestMatch": false,
+      "candidateOrderSelection": false,
+      "locationOrLoaderSubstitution": false,
+      "missing": {
+        "status": "rejected",
+        "stage": "package-resolution",
+        "codes": ["CATALOG_VERSION_UNAVAILABLE"],
+        "pointers": ["/requires/catalogs/0"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      },
+      "duplicatePhysicalCandidates": {
+        "status": "rejected",
+        "stage": "package-resolution",
+        "codes": ["CATALOG_VERSION_UNAVAILABLE"],
+        "pointers": ["/requires/catalogs/0"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      },
+      "caseVariant": {
+        "status": "rejected",
+        "stage": "package-resolution",
+        "codes": ["CATALOG_VERSION_UNAVAILABLE"],
+        "pointers": ["/requires/catalogs/0"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      },
+      "newerOnly": {
+        "status": "rejected",
+        "stage": "package-resolution",
+        "codes": ["CATALOG_VERSION_UNAVAILABLE"],
+        "pointers": ["/requires/catalogs/0"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      },
+      "unknownTarget": {
+        "status": "rejected",
+        "stage": "package-resolution",
+        "codes": ["CATALOG_VERSION_UNAVAILABLE"],
+        "pointers": ["/requires/catalogs/0"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      }
+    },
+    "digestClosure": {
+      "relation": "Bundle requirement digest = Catalog packageDigest = actual framed package bytes",
+      "publicProfileParity": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+      "exactSuccess": {
+        "status": "preflighted",
+        "resultFrozen": true,
+        "authorityPublicKeys": [
+          "packages",
+          "protocolVersion",
+          "requirementPackageIndexes",
+          "revision"
+        ],
+        "authorityFrozen": true,
+        "protocolVersion": "0.1.0",
+        "revision": "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb",
+        "packages": [
+          {
+            "id": "run.desen.reference.sign-in",
+            "version": "0.1.0",
+            "target": "web-react",
+            "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+            "digestProfile": "desen.web-react.package-digest",
+            "digestProfileVersion": 1,
+            "artifactCount": 80,
+            "framedByteLength": 252072
+          }
+        ],
+        "packagesFrozen": true,
+        "requirementPackageIndexes": [0],
+        "indexesFrozen": true,
+        "authenticated": true,
+        "recordPresent": true,
+        "recordFrozen": true,
+        "privateCatalogCount": 1,
+        "privatePackageCount": 1,
+        "privateArtifactsPerPackage": [80],
+        "rawCatalogPublic": false,
+        "rawArtifactsPublic": false,
+        "loaderPublic": false,
+        "activationPublic": false
+      },
+      "historicalDigestSubstitution": {
+        "status": "rejected",
+        "stage": "package-digest",
+        "codes": ["CATALOG_DIGEST_MISMATCH"],
+        "pointers": ["/requires/catalogs/0/digest"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      },
+      "changedArtifact": {
+        "status": "rejected",
+        "stage": "package-digest",
+        "codes": ["CATALOG_DIGEST_MISMATCH"],
+        "pointers": ["/requires/catalogs/0/digest"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      },
+      "changedCatalogDigest": {
+        "status": "rejected",
+        "stage": "package-digest",
+        "codes": ["CATALOG_DIGEST_MISMATCH"],
+        "pointers": ["/requires/catalogs/0/digest"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      },
+      "changedCatalogIdentity": {
+        "status": "rejected",
+        "stage": "package-catalog",
+        "codes": ["run.desen.control-plane/INVALID_INSTALLED_PACKAGE"],
+        "pointers": ["/requires/catalogs/0"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true,
+        "authorityAbsent": true
+      }
+    },
+    "positionalRequirements": {
+      "duplicateRequirementPositionsPreserved": true,
+      "duplicateRequirements": {
+        "status": "preflighted",
+        "resultFrozen": true,
+        "authorityPublicKeys": [
+          "packages",
+          "protocolVersion",
+          "requirementPackageIndexes",
+          "revision"
+        ],
+        "authorityFrozen": true,
+        "protocolVersion": "0.1.0",
+        "revision": "sha256:dbd6da76cd636af9e7e6ed061a8f221600ea89070023a0b695197456f2e3a25a",
+        "packages": [
+          {
+            "id": "run.desen.reference.sign-in",
+            "version": "0.1.0",
+            "target": "web-react",
+            "packageDigest": "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0",
+            "digestProfile": "desen.web-react.package-digest",
+            "digestProfileVersion": 1,
+            "artifactCount": 80,
+            "framedByteLength": 252072
+          }
+        ],
+        "packagesFrozen": true,
+        "requirementPackageIndexes": [0, 0],
+        "indexesFrozen": true,
+        "authenticated": true,
+        "recordPresent": true,
+        "recordFrozen": true,
+        "privateCatalogCount": 1,
+        "privatePackageCount": 1,
+        "privateArtifactsPerPackage": [80],
+        "rawCatalogPublic": false,
+        "rawArtifactsPublic": false,
+        "loaderPublic": false,
+        "activationPublic": false
+      },
+      "unusedCandidateOrderIndependent": true
+    },
+    "authority": {
+      "inputIntegrityAuthorityAuthenticated": true,
+      "forgedAuthorityRejectedBeforeInventoryObservation": true,
+      "returnedOnlyOnCompleteSuccess": true,
+      "runtimeAuthenticated": true,
+      "shallowCloneRejected": true,
+      "immutable": true,
+      "rawCatalogOrArtifactsPublic": false,
+      "executableLoaderPublic": false,
+      "activationAuthorityPublic": false
+    },
+    "failureSemantics": {
+      "unavailableCode": "CATALOG_VERSION_UNAVAILABLE",
+      "digestMismatchCode": "CATALOG_DIGEST_MISMATCH",
+      "noPartialAuthority": true,
+      "precedence": [
+        "authenticate exact M07-T02 authority before inventory observation",
+        "capture fixed finite Bundle requirements",
+        "capture fixed finite installed-package inventory shells",
+        "resolve each literal id/version/target tuple to exactly one physical candidate",
+        "capture and structurally validate the selected Catalog",
+        "capture every exact target artifact and independently frame its digest",
+        "close Bundle digest, Catalog self-digest, and actual-byte digest equality",
+        "validate the complete selected Catalog set",
+        "create opaque immutable M07-T03 authority"
+      ]
+    },
+    "limits": {
+      "maxRequirements": 256,
+      "maxCandidates": 1024,
+      "maxIdentityStringCodeUnits": 4096,
+      "maxCatalogCanonicalBytes": 16777216,
+      "maxAggregateCatalogCanonicalBytes": 67108864,
+      "maxCatalogDepth": 128,
+      "maxCatalogValueOccurrences": 100000,
+      "maxCatalogObjectMembers": 100000,
+      "maxCatalogStringCodeUnits": 4194304,
+      "maxCapabilityDeclarations": 100000,
+      "maxArtifactsPerPackage": 1024,
+      "maxArtifactPathBytes": 240,
+      "maxArtifactEntryBytes": 16777216,
+      "maxPackagePreimageBytes": 67108864,
+      "maxAggregatePackagePreimageBytes": 67108864,
+      "maxDiagnostics": 256
+    },
+    "implementation": {
+      "integrityAuthority": "readBundleIntegrityAuthority exact object identity",
+      "tupleMatching": "literal id/version/target Map key; one physical candidate",
+      "targetDispatch": "static web-react only; unknown targets unavailable",
+      "digestClosure": "Bundle digest = Catalog self-digest = independently framed bytes",
+      "catalogGuard": "deterministic generated Catalog root plus sorted embedded-schema fail-fast admission",
+      "authorityIdentity": "package-private WeakMap",
+      "normalization": "none",
+      "dynamicLoading": false,
+      "networkAcquisition": false
+    },
+    "registrations": {
+      "app": {
+        "name": "@desen/control-plane-api",
+        "main": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "exports": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+        "packageTest": "vitest run test/package-preflight.test.ts test/package-preflight-schema-guard.test.ts",
+        "guardGenerator": "node scripts/generate-package-preflight-catalog-guard.mjs",
+        "guardVerifier": "pnpm run verify:package-preflight-catalog-guard",
+        "protocolDependency": "workspace:*",
+        "validatorDependency": "workspace:*",
+        "referenceCatalogProductionDependency": null
+      },
+      "rootScripts": {
+        "generate": "pnpm verify:control-plane-bundle-verification && pnpm --filter @desen/reference-catalog-web... build && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api verify:package-preflight-guards && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:package-preflight && node scripts/generate-control-plane-package-preflight-proof.mjs",
+        "verify": "pnpm verify:control-plane-bundle-verification && pnpm --filter @desen/reference-catalog-web... build && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api verify:package-preflight-guards && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:package-preflight && node scripts/verify-control-plane-package-preflight.mjs",
+        "test": "pnpm verify:control-plane-bundle-verification && pnpm --filter @desen/reference-catalog-web... build && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api verify:package-preflight-guards && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:package-preflight && node --test tests/control-plane-package-preflight.test.mjs"
+      },
+      "aggregateImmediatePredecessor": "control-plane-bundle-verification",
+      "aggregateTerminalTail": true,
+      "ciTuple": [
+        "control-plane-package-preflight",
+        "scripts/verify-control-plane-package-preflight.mjs",
+        "tests/control-plane-package-preflight.test.mjs"
+      ],
+      "ciTupleExactInRunnerAndInventory": true,
+      "publicSourceExports": [
+        {
+          "imported": "BUNDLE_INTEGRITY_LIMITS",
+          "exported": "BUNDLE_INTEGRITY_LIMITS",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+          "exported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleIntegrityAuthority",
+          "exported": "BundleIntegrityAuthority",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnostic",
+          "exported": "BundleIntegrityDiagnostic",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnosticCode",
+          "exported": "BundleIntegrityDiagnosticCode",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityLimits",
+          "exported": "BundleIntegrityLimits",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationResult",
+          "exported": "BundleIntegrityVerificationResult",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationStage",
+          "exported": "BundleIntegrityVerificationStage",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightAuthority",
+          "exported": "BundlePackagePreflightAuthority",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightDiagnostic",
+          "exported": "BundlePackagePreflightDiagnostic",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightDiagnosticCode",
+          "exported": "BundlePackagePreflightDiagnosticCode",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightLimits",
+          "exported": "BundlePackagePreflightLimits",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightResult",
+          "exported": "BundlePackagePreflightResult",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightStage",
+          "exported": "BundlePackagePreflightStage",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleSourceMaterial",
+          "exported": "BundleSourceMaterial",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStore",
+          "exported": "BundleStore",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreEntry",
+          "exported": "BundleStoreEntry",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreError",
+          "exported": "BundleStoreError",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleStoreErrorCode",
+          "exported": "BundleStoreErrorCode",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStorePutResult",
+          "exported": "BundleStorePutResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreReadResult",
+          "exported": "BundleStoreReadResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+          "exported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "INVALID_INSTALLED_PACKAGE_CODE",
+          "exported": "INVALID_INSTALLED_PACKAGE_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "InstalledPackageArtifact",
+          "exported": "InstalledPackageArtifact",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "InstalledPackageCandidate",
+          "exported": "InstalledPackageCandidate",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "OpenBundleStoreOptions",
+          "exported": "OpenBundleStoreOptions",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "exported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+          "exported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "exported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "VerifiedInstalledPackage",
+          "exported": "VerifiedInstalledPackage",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "openBundleStore",
+          "exported": "openBundleStore",
+          "module": "./bundle-store.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "preflightBundlePackages",
+          "exported": "preflightBundlePackages",
+          "module": "./package-preflight.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "verifyBundleStoreEntry",
+          "exported": "verifyBundleStoreEntry",
+          "module": "./bundle-verification.js",
+          "typeOnly": false
+        }
+      ]
+    },
+    "traceRows": [
+      {
+        "id": "PIPE-006",
+        "section": "6.3",
+        "line": 301,
+        "anchor": "stages the bundle and resolves exact package digests",
+        "summary": "Lifecycle step 6: stage bundle and resolve exact packages",
+        "owners": ["M07-T03", "M07-T06"],
+        "tests": ["M07-T09"],
+        "evidence": "Fault injection covers tuple resolution and staging"
+      },
+      {
+        "id": "PIPE-012",
+        "section": "24.1",
+        "line": 1307,
+        "anchor": "resolve exact capability package tuples",
+        "summary": "Activation step 4: resolve exact packages",
+        "owners": ["M07-T03"],
+        "tests": ["M07-T09", "M10-T07"],
+        "evidence": "Unavailable or substituted tuple is rejected"
+      },
+      {
+        "id": "PIPE-013",
+        "section": "24.1",
+        "line": 1308,
+        "anchor": "verify package digests",
+        "summary": "Activation step 5: verify package digests",
+        "owners": ["M07-T03"],
+        "tests": ["M07-T09", "M10-T07"],
+        "evidence": "Catalog digest mismatch preserves last known good"
+      },
+      {
+        "id": "R-005",
+        "section": "5.3",
+        "line": 234,
+        "anchor": "All executable behavior originates",
+        "summary": "Executable behavior originates only from host-trusted capabilities",
+        "owners": ["M07-T03", "M12-T03"],
+        "tests": ["M12-T03"],
+        "evidence": "Source audit finds no document-selected executable code path",
+        "bcp14": ["N-002"]
+      },
+      {
+        "id": "R-017",
+        "section": "8.4",
+        "line": 410,
+        "anchor": "Target strings are open but exact",
+        "summary": "Target strings are exact and package resolution cannot normalize or substitute them",
+        "owners": ["M02-T07", "M07-T03"],
+        "tests": ["M02-T13", "M10-T07"],
+        "evidence": "Case or value mismatch rejects publication or activation",
+        "bcp14": ["N-009"]
+      },
+      {
+        "id": "R-018",
+        "section": "8.5",
+        "line": 414,
+        "endLine": 418,
+        "anchor": "uniquely identifies a capability package",
+        "summary": "Package identity is the id, version, target, and packageDigest tuple",
+        "owners": ["M03-T04", "M06-T08", "M07-T03"],
+        "tests": ["M03-T10", "M10-T07"],
+        "evidence": "Tuple identity drives digest, publication, and activation tests"
+      },
+      {
+        "id": "R-021",
+        "section": "9.3",
+        "line": 461,
+        "anchor": "requires a major package version",
+        "summary": "Breaking contract changes require a major version and incompatible fallback is prohibited",
+        "owners": ["M03-T04", "M07-T03", "M12-T07"],
+        "tests": ["M03-T10", "M10-T07"],
+        "evidence": "Compatibility documentation and mismatch activation tests enforce major-version boundaries",
+        "bcp14": ["N-011"]
+      },
+      {
+        "id": "R-118",
+        "section": "27.3",
+        "line": 1461,
+        "anchor": "Only host-approved capability packages execute code",
+        "summary": "Bundle data cannot govern loading or updating executable package code",
+        "owners": ["M07-T03", "M12-T03"],
+        "tests": ["M10-T07", "M12-T03"],
+        "evidence": "Unknown document-selected code references fail exact host package resolution"
+      },
+      {
+        "id": "R-127",
+        "section": "28.4",
+        "line": 1518,
+        "anchor": "never embedded in the bundle",
+        "summary": "Lazy code remains exact, preflight-known, and loaded only from trusted package distribution",
+        "owners": ["M07-T03", "M07-T06", "M12-T03"],
+        "tests": ["M07-T09", "M12-T03"],
+        "evidence": "Lazy package tests reject bundle-embedded or unpinned runtime code"
+      },
+      {
+        "id": "R-139",
+        "section": "30.5",
+        "line": 1633,
+        "anchor": "no runtime negotiation to a different version",
+        "summary": "Runtime package selection uses exact bundle requirements rather than version negotiation",
+        "owners": ["M06-T08", "M07-T03"],
+        "tests": ["M10-T07"],
+        "evidence": "Newer compatible package cannot substitute for the exact tuple"
+      },
+      {
+        "id": "A-003",
+        "section": "Appendix A",
+        "line": 1836,
+        "anchor": "Trusted execution",
+        "summary": "Only host-approved capability packages provide executable behavior",
+        "owners": ["M07-T03", "M12-T03"],
+        "tests": ["M10-T07", "M12-T03"],
+        "evidence": "Exact trusted package resolution and no remote code selection"
+      },
+      {
+        "id": "A-004",
+        "section": "Appendix A",
+        "line": 1837,
+        "anchor": "Exact package pinning",
+        "summary": "Production bundles pin exact package identity tuples",
+        "owners": ["M06-T08", "M07-T03"],
+        "tests": ["M06-T10", "M10-T07"],
+        "evidence": "Golden package tuple and mismatch activation test"
+      },
+      {
+        "id": "A-012",
+        "section": "Appendix A",
+        "line": 1845,
+        "anchor": "No silent substitution",
+        "summary": "Runtimes never guess unknown capabilities or incompatible versions",
+        "owners": ["M05-T06", "M07-T03"],
+        "tests": ["M10-T07", "M11-T14"],
+        "evidence": "Unknown capability and exact-version mismatch failures"
+      },
+      {
+        "id": "D-032",
+        "section": "Appendix B",
+        "line": 1886,
+        "anchor": "CATALOG_DIGEST_MISMATCH",
+        "summary": "Required package digest differs from installed package",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M06-T02", "M07-T03"],
+        "tests": ["M06-T11", "M10-T07"],
+        "evidence": "Package digest mismatch publication and activation vectors"
+      },
+      {
+        "id": "D-033",
+        "section": "Appendix B",
+        "line": 1887,
+        "anchor": "CATALOG_VERSION_UNAVAILABLE",
+        "summary": "Exact package tuple cannot be resolved",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M06-T02", "M07-T03"],
+        "tests": ["M06-T11", "M10-T07"],
+        "evidence": "Unavailable exact version vector"
+      }
+    ]
+  },
+  "trackedFiles": [
+    {
+      "path": "apps/control-plane-api/package.json",
+      "bytes": 1744,
+      "sha256": "5a9c02445cac83f7ad11c56fbb075a24bd6f6e7d107a4cf22d8b670cdfa3e192"
+    },
+    {
+      "path": "apps/control-plane-api/src/index.ts",
+      "bytes": 1595,
+      "sha256": "42d5c844e108fddce5fb3190fee09e192bef4f12d79d61c4c96c2fae016150b3"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-contract.ts",
+      "bytes": 9590,
+      "sha256": "13cd8a3dbee84d160927f6022da255d7115361cf09a7f3042e8a67f2be9e3295"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-internal.ts",
+      "bytes": 32266,
+      "sha256": "f3c122ccd59ac78cea5d85e84c56f0209d9db98dbcb066614b9a568471c019bb"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-schema-guard.ts",
+      "bytes": 15370,
+      "sha256": "1cf0c7d14d629c2f2d166b5a8fc741206c58ebd29f0dc08fc14a2edeaa890ae4"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-web-react.ts",
+      "bytes": 3729,
+      "sha256": "764e898c530fbe81161d5681b65a79841a212d4461469cbba99f971afb69d71d"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight.ts",
+      "bytes": 1577,
+      "sha256": "9ecdf0423656d550a3523a82c270739fce67cd152605024cbbc1f58de99c1640"
+    },
+    {
+      "path": "apps/control-plane-api/src/generated/0.1.0/package-preflight-catalog-guard.ts",
+      "bytes": 456985,
+      "sha256": "443d1ce182f80c7a7375ae65f597d18dc458f6dc0203b519c8596b34ae7f4a0f"
+    },
+    {
+      "path": "apps/control-plane-api/test/package-preflight.test.ts",
+      "bytes": 48349,
+      "sha256": "b3707854536fac736335704c5c5e36e588276be1c8cad8b0659804321e616d45"
+    },
+    {
+      "path": "apps/control-plane-api/test/package-preflight-schema-guard.test.ts",
+      "bytes": 6603,
+      "sha256": "9ca8e7e4129b932b4f18b5365328461c75628552082eeba94b0e8b40af96c713"
+    },
+    {
+      "path": "apps/control-plane-api/test/package-preflight.types.ts",
+      "bytes": 2891,
+      "sha256": "11f4683b5dcb94b37340d8f38732c37393810aa4698b732ecee8d36ba705ccf9"
+    },
+    {
+      "path": "apps/control-plane-api/scripts/generate-package-preflight-catalog-guard.mjs",
+      "bytes": 934,
+      "sha256": "edc672eade3b8c83bd859f8e9458a03ab9ea6471ac4359fd2a0844adbf2b9cb2"
+    },
+    {
+      "path": "apps/control-plane-api/scripts/verify-package-preflight-catalog-guard.mjs",
+      "bytes": 721,
+      "sha256": "b65765993b4885920251565249b4ba46d49f90b665e0ed4502d82060dd4c21c8"
+    },
+    {
+      "path": "apps/control-plane-api/scripts/lib/package-preflight-catalog-guard-codegen.mjs",
+      "bytes": 15984,
+      "sha256": "bb240b2be4575cac34ab964b1cab9a4ac17be7e6f018c5a54c88e7d8031826e7"
+    },
+    {
+      "path": "scripts/generate-control-plane-package-preflight-proof.mjs",
+      "bytes": 857,
+      "sha256": "5edab208b0ad8bbff7c93f1e5bd2a5d2cb7fdf274cdc5aca486fe53954077ba5"
+    },
+    {
+      "path": "scripts/verify-control-plane-package-preflight.mjs",
+      "bytes": 682,
+      "sha256": "adb195f76a336a5d7d7f4aabad96699fd25e808888317479b5ff197011c54560"
+    },
+    {
+      "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+      "bytes": 74175,
+      "sha256": "5b467517c793c7616722e98328aba296457424132b2ab356c0cbfb5a6f9e6cb5"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/control-plane-package-preflight.test.mjs",
+      "bytes": 20121,
+      "sha256": "566ec3535d9814526189e1cd168627c32eb08940e2c7967b9b4d2982ce7e32d1"
+    },
+    {
+      "path": "package.json",
+      "bytes": 58777,
+      "sha256": "7b80f42d3f565a58a46de8d0c404c71ceb3407c38e1216135f969bfa90736f61"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 47044,
+      "sha256": "d6f39b225217a04c8e1712d7514973819e7c9868d058e4c515135f484e5256a9"
+    },
+    {
+      "path": "scripts/ci/exhaustive-workload-inventory.mjs",
+      "bytes": 45389,
+      "sha256": "259638a7e74e1bf3dcc131c29ff4e977ef2a76d0c93b984a4dc537766929f9d4"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-catalog.schema.json",
+      "bytes": 15654,
+      "sha256": "51014ab088b6a483502fd6aee5eed9fc4451be55556b6bd6220a5a6a1b610555"
+    }
+  ],
+  "distribution": [
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/package-preflight-catalog-guard.d.ts",
+      "bytes": 524,
+      "sha256": "75f7e1f7901758adf948ee90f0c89066386e1b921298b5429438181a319da27d"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/package-preflight-catalog-guard.d.ts.map",
+      "bytes": 338,
+      "sha256": "d596ade29721458eb3b7ae3f583915a2db551583614d4658e5f796629dcad836"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/package-preflight-catalog-guard.js",
+      "bytes": 696370,
+      "sha256": "0ddb6f4b1545fbb378653f12b7956e07b07382c2f7450f58a3ac1307b5c595a5"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/package-preflight-catalog-guard.js.map",
+      "bytes": 196861,
+      "sha256": "ded38eee6949112130b1db132aa2db7c0923be71981de5a5f19819f55915d2da"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts",
+      "bytes": 1570,
+      "sha256": "9b4ed2ac2abce81b9c08e3d6c0a0b20497ef9dd5f2f1e4c0044c7cc3b7e4dbbd"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts.map",
+      "bytes": 833,
+      "sha256": "0e0ab85e46db44dc9b195add77ef575da82d1b59cde707d722a611ab69ef7f78"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js",
+      "bytes": 810,
+      "sha256": "5b3651b6126b61cfc5f7f69ac5a95fc122ccd93838a7e9b7f292b8324a356aaa"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js.map",
+      "bytes": 449,
+      "sha256": "90a97ad54cc860b414dbda2a3e850dc4853f227413176f43355e5d21ff055e77"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-contract.d.ts",
+      "bytes": 9015,
+      "sha256": "6d13872f855b476a4ed620c150448bbd138271eb14aaa43a60e06a2cb1a63843"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-contract.d.ts.map",
+      "bytes": 3578,
+      "sha256": "2bee833477154696ef9aae638b19fbfd924ce51c1c99536d3378b786a45c4f02"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-contract.js",
+      "bytes": 1949,
+      "sha256": "fd489331ec881b8664ae2e53bc7818b91dc3513f06e582af6b88ea1a87789802"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-contract.js.map",
+      "bytes": 943,
+      "sha256": "437b2f794cbf47500cfd2f08fa4e4026bb2642ff99809797825d534da98a4515"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-internal.d.ts",
+      "bytes": 67,
+      "sha256": "1dd4c976c62d914c59cd187db4b13b75accec96ad787f733832f397c342eea56"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-internal.d.ts.map",
+      "bytes": 146,
+      "sha256": "ff42567acb8370fd0b7f438fa07bdde87c23cb9b2d71ae4aa8d72d8e02221c3c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-internal.js",
+      "bytes": 29177,
+      "sha256": "0d685c5244c5a542977f16a750e300381ae1e63a2494054df11e3e611a820f9f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-internal.js.map",
+      "bytes": 24279,
+      "sha256": "d12fde6dfb26afb38f0fd2b8e8e88edfea21cb99519aee91c0c6fe4733c39957"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-schema-guard.d.ts",
+      "bytes": 71,
+      "sha256": "68fc8f61f36811ae69a8f84fb6a089f6394bf8550e137eee0bf85e023044d246"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-schema-guard.d.ts.map",
+      "bytes": 154,
+      "sha256": "ae642e11d4aeb64fd95c13a840bea521971c8a95e8c3936f8ace3bf21abff176"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-schema-guard.js",
+      "bytes": 14017,
+      "sha256": "a3035078e4dc8f816023cb07b4cd2a596f06200ca796b0c4de628e59a9306277"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-schema-guard.js.map",
+      "bytes": 13903,
+      "sha256": "d694b05d7933ace7e663a0984fdaf96bedc7d2fbf0c19d2d35022b40956795ca"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-web-react.d.ts",
+      "bytes": 68,
+      "sha256": "afb8c182d61d79b130882a7a12b1b4354e7584c1eab8f8b84e945da2f66d7e90"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-web-react.d.ts.map",
+      "bytes": 148,
+      "sha256": "cafc2534fb7023bebef6b843a6fb4fde2625493fcbe5a3d685eb7c8974dbfc56"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-web-react.js",
+      "bytes": 2955,
+      "sha256": "a2bc83111c7bacdfb64ec5abf8a298a67c269bc4951268b6c17ff51f15781319"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-web-react.js.map",
+      "bytes": 2886,
+      "sha256": "98df912a5cb5a82e8c7ab4b87b724902d72a1c257f208435ab1477f9b2abd296"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight.d.ts",
+      "bytes": 1460,
+      "sha256": "c41f734999ecaf5a612b78267222c5458ac6722e4d9ce3e92d2d1d8197c09ed2"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight.d.ts.map",
+      "bytes": 360,
+      "sha256": "9e4e3367d76a28dd1eaca864acd614c4c8b1fbba7065c10eb0c2849028005a5c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight.js",
+      "bytes": 1321,
+      "sha256": "bbc22bb0e7199e51bffc8b1cd94ba7bf9c88c2dfdfa10df56220be02849d6504"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight.js.map",
+      "bytes": 301,
+      "sha256": "ab909dd7641350304627e53300186e18be93b37beffc84783f0382c29c611fc3"
+    }
+  ],
+  "tests": {
+    "packageRuntimeCases": 34,
+    "packageRuntimeCaseNames": [
+      "matches the independent Web–React v1 framing golden and returns only opaque frozen authority",
+      "accepts the exact candidate in either order without observing hostile newer material",
+      "rejects a wrong package id without trimming whitespace",
+      "rejects a newer installed version instead of silently selecting the newest",
+      "rejects target case, Unicode-hyphen, and trailing-whitespace aliases",
+      "rejects canonically equivalent composed and decomposed package ids",
+      "resolves only one literal id/version/target tuple without observing unselected material",
+      "preserves duplicate requirement positions while sharing one uniquely verified package",
+      "rejects byte, path, Catalog, declared-digest, and envelope identity drift",
+      "rejects a historical digest even when Bundle and Catalog repeat the same stale value",
+      "rejects artifact addition, removal, and rename against the pinned package digest",
+      "rejects duplicate artifact paths and the reserved catalog.json path before hashing",
+      "accepts an empty artifact inventory and an explicitly fingerprinted zero-byte artifact",
+      "snapshots only the exact Uint8Array subview before caller mutation",
+      "rejects detached and Proxy-backed artifact bytes without running Proxy traps",
+      "stops invalid requirement SemVer at M07-T02 so it cannot forge M07-T03 authority",
+      "rejects forged authority and hostile records without invoking accessors",
+      "accepts only detached Uint8Array views and refuses shared or differently typed memory",
+      "enforces the immutable inventory, identity, artifact, path, Catalog-depth, and requirement limits",
+      "accepts the exact candidate-count and identity-length boundaries",
+      "accepts exact artifact-path and artifact-count boundaries when the digest covers them",
+      "accepts exact Catalog-depth and requirement-count boundaries",
+      "enforces Catalog value, string, canonical-byte, and artifact-entry ceilings",
+      "enforces aggregate Catalog and capability-declaration ceilings",
+      "enforces exact framer and aggregate package-preimage ceilings",
+      "retains exactly the finite diagnostic ceiling for missing requirements",
+      "maps an injected digest-verifier throw to one redacted internal rejection",
+      "rejects an injected wrong digest without issuing partial package authority",
+      "stops a 10,000-declaration structural fanout before exhaustive validation or digest work",
+      "ignores non-enumerable and Symbol decorations without retaining or invoking them",
+      "rejects Proxy-backed array prototypes without invoking prototype traps",
+      "caps enumerable Catalog object members before exhaustive validation",
+      "redacts rejected Catalog values, artifact paths and bytes, and executable loader fields",
+      "rejects a structurally valid but capability-ambiguous installed Catalog set"
+    ],
+    "packageGuardCases": 5,
+    "packageGuardCaseNames": [
+      "accepts the official Catalog with generated-root and exhaustive-validator parity",
+      "matches exhaustive rejection for closed-root, required-field, and capability-shape drift",
+      "covers every component, behavior, operation, and resource embedded-schema location",
+      "returns only one stable first issue for a 10,000-declaration invalid root fanout",
+      "returns only one first issue for 10,000 valid envelopes carrying invalid embedded schemas"
+    ],
+    "packageFocusedCases": 39,
+    "compileTimeNegativeCases": 9,
+    "compileTimeNegativeClaims": [
+      "Caller-selected digests or verification callbacks cannot bypass byte hashing.",
+      "Opaque package authority cannot be created structurally.",
+      "Artifact contents must be exact Uint8Array bytes.",
+      "Package authority deliberately exposes no Catalog material.",
+      "Package authority deliberately exposes no artifact bytes or package loader.",
+      "Package authority is not activation authority.",
+      "Public package metadata is immutable.",
+      "Rejected preflight never carries a partial authority.",
+      "The fixed finite profile is immutable and caller-independent."
+    ],
+    "rootMutationCases": 16,
+    "rootMutationCaseNames": [
+      "[authority] builds the exact versioned M07-T03 artifact and current Web-React receipt",
+      "[determinism] two independent evidence builds produce byte-identical artifacts",
+      "[authority] verifies exact artifact bytes and one final proof-document pin",
+      "[artifact] rejects one changed evidence byte",
+      "[proof] rejects pending, wrong, duplicate, or missing final pins",
+      "[prerequisites] rejects one changed byte in every direct prerequisite",
+      "[implementation] rejects changed contract, matcher, digest, guard, or type authority receipts",
+      "[registration] rejects package-root, package-script, aggregate, or CI tuple drift",
+      "[traceability] rejects owner or identity drift in all fifteen exact rows",
+      "[runtime] rejects changed exact-match, digest, precedence, or authority receipts",
+      "[tests] rejects skipped focused cases or removed compile-time negatives",
+      "[filesystem] rejects symlinked artifact and proof-document authority",
+      "[writer] atomically writes exact deterministic evidence bytes",
+      "[writer] preserves the old destination and removes a tampered temporary",
+      "[options] rejects unknown, accessor-backed, shared-memory, or hostile authority",
+      "[immutability] freezes the evidence graph and preserves honest later-task nonclaims"
+    ]
+  },
+  "nonclaims": [
+    "M07-T04 still owns surface and capability reference preflight plus whole-activation limits.",
+    "M07-T05 still owns immutable Bundle persistence integration, mutable channel pointers, and local transport API behavior.",
+    "M07-T06 through M07-T11 still own staging, activation, last-known-good state, recovery, fault injection, concurrency, and reference-host channel consumption.",
+    "M12-T12 still owns npm-packed distribution, dependency-tree, and clean external-consumer integrity.",
+    "Publication signatures, publisher authenticity, registry transport, discovery, download, upgrade negotiation, and dependency installation are not verified here.",
+    "The current implementation and proof support only the Web-React target; native targets require separately reviewed static profiles.",
+    "Successful package preflight exposes no Catalog bytes, target artifacts, module specifier, callback, loader, staging operation, channel mutation, or activation operation."
+  ],
+  "reproduction": [
+    "pnpm verify:control-plane-bundle-verification",
+    "pnpm --filter @desen/reference-catalog-web... build",
+    "pnpm --filter @desen/control-plane-api... build",
+    "pnpm --filter @desen/control-plane-api verify:package-preflight-guards",
+    "pnpm --filter @desen/control-plane-api typecheck",
+    "pnpm --filter @desen/control-plane-api test:package-preflight",
+    "node scripts/generate-control-plane-package-preflight-proof.mjs",
+    "node scripts/verify-control-plane-package-preflight.mjs",
+    "node --test tests/control-plane-package-preflight.test.mjs"
+  ]
+}

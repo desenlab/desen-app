@@ -452,8 +452,12 @@ exact raw and canonical 2 MiB Bundle ceilings, a generated fail-fast guard befor
 digest calculation over real Source bytes when available. Only complete success
 returns a frozen runtime-authenticated integrity authority; no package, channel, staging, or
 activation authority is granted.
-P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016 advances to `TESTED`; N-018,
-N-038, N-041, and the Publisher conformance target remain `PLANNED`.
+M07-T03 now consumes only that authenticated authority, resolves literal package id/exact
+version/literal target tuples to exactly one installed candidate, snapshots the selected Catalog
+and real artifacts, and independently recalculates the current Web–React package digest. Only
+three-way digest equality yields a frozen, byte-free package authority. P-03, P-05, and P-11 are
+`PROVEN`; P-17 remains `PARTIAL`; N-011, N-016, and N-020 are `TESTED`; N-010, N-018, N-038,
+N-041, and the Publisher conformance target remain `PLANNED`.
 
 I07-01 is complete historical evidence. It separated immutable task-time evidence from a
 current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
@@ -471,9 +475,19 @@ run `30699616361`: `Quality gate` completed in 10 minutes 33 seconds, while the 
 rollback job was correctly skipped and the shadow workflow did not trigger. The immutable I07-02
 cutover checkpoint authenticates eight frozen artifacts and sixteen live readers through
 historical head `95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c`.
-M07-T02 appends reviewed checkpoint sequence 3 without rewriting that history; current head
+M07-T02 appends reviewed checkpoint sequence 3 without rewriting that history; its head
 `f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882` authenticates nine frozen
-artifacts and eighteen live readers. The temporary shadow workflow and modular comparison
+artifacts and eighteen live readers. M07-T03 appends historical checkpoint sequence 4; its head
+`ee2d72c3529d9295945d339fb214c41dbbf906ffa6613a7ad6e766ec79c1bcf5` authenticates ten frozen
+artifacts and twenty live readers. A corrective M05-T04 current-reader append after M07-T03
+established historical sequence 5; its head
+`7df3631d509ed7e65c571566a825d6d3cd52d336e1a74512bf3e8e26920749b3` authenticates eleven frozen
+artifacts and twenty-two live readers. Sequence 6 only advances the M06-T11 proof/test receipts for
+a bounded, explicit 20-second nested Vitest timeout; current head `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` still
+authenticates eleven frozen artifacts and twenty-two live readers. It changes no coverage,
+assertion, concurrency, frozen evidence, workload/proof count, progress, or plan digest, and
+sequences 1–5 remain byte- and hash-unchanged. The
+temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
 archived in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json).
@@ -481,8 +495,8 @@ archived in the
 The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
 no affected-path selector and does not retire the sequential runner, which remains an explicit
 manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T02 is now `DONE`; its two proof workloads extend the live successor to 132
-workloads and 62 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T03 is next.
+retirement by G12. M07-T03 is now `DONE`; its proof pair extends the live successor to 134
+workloads and 63 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T04 is next.
 
 ## Current milestone
 
@@ -490,11 +504,11 @@ workloads and 62 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `76 / 145 tasks complete (52%)`
+- Overall implementation progress: `77 / 145 tasks complete (53%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `2 / 11 tasks complete (18%)`
+- M07 progress: `3 / 11 tasks complete (27%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -556,14 +570,15 @@ workloads and 62 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
   `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
   `M07-T01 — Content-addressed bundle store with immutable revision entries`,
-  `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`
+  `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`,
+  `M07-T03 — Exact package target/version/digest resolution and preflight`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
-  `M07-T03 — Exact package target/version/digest resolution and preflight`
-- Status: M07-T02 and I07-02 are complete; M07-T03 is `NOT_STARTED`, its dependency is satisfied,
-  and it is ready to start; G07 remains open
+  `M07-T04 — Surface/capability reference and finite-limit preflight`
+- Status: M07-T03 and I07-02 are complete; M07-T04 is `NOT_STARTED`, its dependencies are
+  satisfied, and it is ready to start; G07 remains open
 
 ## Completed preparation
 
@@ -928,17 +943,20 @@ trusts no cached success, and executes the fresh complete workload. The legacy s
 manual rollback only; affected selection remains future work and every unknown or ambiguous
 selector condition must eventually expand to `EXHAUSTIVE`.
 
-M07-T02 is complete. Stored byte sequences now cross a bounded strict parser, a generated
-first-error guard before exact DESEN 0.1.0 validation, independent three-way revision closure, raw
-and canonical Bundle-size limits, and—when available—raw/canonical Source limits plus independent
-validation and digest calculation over real Source bytes. The
-resulting frozen integrity authority is necessary but deliberately insufficient for activation.
+M07-T03 is complete. Only an authenticated M07-T02 authority can reach the installed-package
+inventory. Every requirement resolves by literal id, exact SemVer, and literal target to exactly
+one physical candidate; no range, normalization, newest/best match, candidate ordering, location,
+callback, or loader can substitute another package. For the current static `web-react` profile,
+the selected inert Catalog and 80 actual distribution artifacts are snapshotted under fixed
+limits, independently framed, and required to close the Bundle digest, Catalog self-digest, and
+calculated byte digest before opaque package authority exists.
 
 Implement
-`M07-T03 — Exact package target/version/digest resolution and preflight`. It must consume only an
-authenticated M07-T02 authority and prove that every exact required package tuple resolves to the
-installed target/version/digest without best-match or substitution. Channels, activation,
-last-known-good state, and recovery remain with their later M07 owners.
+`M07-T04 — Surface/capability reference and finite-limit preflight`. It must consume the authentic
+M07-T03 package authority, prove all Bundle surface and capability references against the selected
+Catalog set, and apply whole-activation finite ceilings before any staging or activation authority.
+Channels, staging, activation, last-known-good state, and recovery remain with their later M07
+owners.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1829,6 +1847,39 @@ M07-T02 evidence:
 - coverage decision: M07-T02 becomes `DONE`; N-016 advances to `TESTED`; N-038 and N-041 remain
   `PLANNED`; P-12 remains `NOT_PROVEN`; overall progress is 76/145 and M07-T03 owns exact installed
   package tuple preflight next
+
+M07-T03 evidence:
+
+- `docs/proof/CONTROL-PLANE-PACKAGE-PREFLIGHT.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json`
+- artifact SHA-256:
+  `79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628`
+- exact boundary: an authentic M07-T02 integrity authority plus an untrusted installed-package
+  inventory; authority authentication happens before inventory observation
+- resolution profile: literal code-unit id, exact SemVer, literal target, and exactly one physical
+  candidate; duplicate requirement positions are preserved while sharing one verified package
+- no substitution: whitespace, case, Unicode normalization, ranges, newest/best match, candidate
+  order, locations, callbacks, loaders, dynamic imports, and network acquisition grant no authority
+- digest profile: the current static `web-react` implementation snapshots one inert Catalog and 80
+  exact distribution artifacts, frames 81 entries/252,072 bytes, and requires Bundle digest =
+  Catalog self-digest = independently calculated package digest
+- finite hostile-input profile: fixed requirement, candidate, identity, artifact, path, byte,
+  Catalog depth/member/value/string/capability, package-preimage, and diagnostic ceilings; a
+  generated first-issue Catalog guard and namespace-ambiguity precheck precede exhaustive
+  validation
+- limit evidence method: representative exact/one-over public boundaries plus immutable internal
+  port isolation for aggregate Catalog, capability, and preimage branches; object-member/value and
+  diagnostic/requirement dominance is recorded explicitly, with no mutable public limit override
+  or 64 MiB test fixture
+- authority profile: only complete success yields one frozen runtime-authenticated authority with
+  immutable byte-free metadata and positional indexes; private snapshots grant no staging,
+  channel, or activation operation
+- executable evidence: 34 runtime cases, five guard cases, nine compiler-negative cases, 16 root
+  proof/mutation cases, five exact prerequisite pins, 15 exact trace rows, and reviewed reader
+  checkpoint sequence 4 with ten artifacts and twenty readers
+- coverage decision: M07-T03 becomes `DONE`; P-05 becomes `PROVEN`; N-011 and N-020 become
+  `TESTED`; N-010, N-038, and N-041 remain `PLANNED`; P-12 remains `NOT_PROVEN`; overall progress
+  is 77/145 and M07-T04 owns surface/capability reference and whole-activation limit preflight next
 
 ## Status vocabulary
 

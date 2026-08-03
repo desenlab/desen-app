@@ -76,11 +76,11 @@ const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm boundaries",
 ]);
 const EXPECTED_PREREQUISITE_SHA256 =
-  "00f6e1eaf1218ce2ad473e603927548ab995f241dc2496882ebe3f03019088bb";
+  "27e63e391725eb8b9ebf5082c39487380200222deefc66ed23a416073cc3068b";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "facf5da7879692a2c4bb5e3a0a5a6850b5d7f772e3307be16387557ec66db30d";
+  "5793261b95370a7eff9d254ea1124afce7fb630d9062df8c32176f498e9dcf4b";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "32f0bda43787914cd7fe4664272efd058c866dad5fc6333f5a528eb65781c78c";
+  "5293191caa9c472a9ffdbe0a6ac1427eae593c62e7e684a5949988e031b30c2c";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -392,6 +392,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "control-plane-bundle-verification",
     "scripts/verify-control-plane-bundle-verification.mjs",
     "tests/control-plane-bundle-verification.test.mjs",
+  ],
+  [
+    "control-plane-package-preflight",
+    "scripts/verify-control-plane-package-preflight.mjs",
+    "tests/control-plane-package-preflight.test.mjs",
   ],
 ]);
 
@@ -725,6 +730,20 @@ function classifyPrerequisite({
       });
     }
     return "structural-validator-artifacts";
+  }
+  if (task === "verify:package-preflight-guards") {
+    if (
+      packageName !== "@desen/control-plane-api" ||
+      packageScripts[task] !== "pnpm run verify:package-preflight-catalog-guard" ||
+      packageScripts["verify:package-preflight-catalog-guard"] !==
+        "node scripts/verify-package-preflight-catalog-guard.mjs"
+    ) {
+      fail("The package-preflight guard prerequisite drifted.", {
+        command,
+        actual: packageScripts[task],
+      });
+    }
+    return "package-preflight-guard-artifact";
   }
   if (task === "test") {
     if (!packageScripts.test) fail(packageName + " no longer defines its full test suite.");
@@ -1246,7 +1265,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "701faf129a5c26572ed13b3a67eef8f9d32eeaea364847b10427a156b622c825";
+  "681f75acb95218c5f454554e2bc7259c440b4d9c9ce6c9d416c2a420b741b570";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

@@ -10,7 +10,7 @@ CI-01 sequential runner remains available only through explicit manual rollback.
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   132-node, 62-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   134-node, 63-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -24,9 +24,18 @@ The checkpoint is inert data. It cannot name an executable command or cause a ve
 run. Executable ownership remains in reviewed source. The neutral inventory is also inert until a
 validated scheduler executes its exact shell-free command vectors.
 
-M07-T02 appends reviewed checkpoint sequence 3. The current head
-`f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882` authenticates nine frozen
-artifacts and eighteen live readers; the two earlier checkpoint bytes and hashes remain unchanged.
+M07-T02 appends reviewed checkpoint sequence 3 with head
+`f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882`, nine frozen artifacts, and
+eighteen live readers. M07-T03 appends historical sequence 4; its head
+`ee2d72c3529d9295945d339fb214c41dbbf906ffa6613a7ad6e766ec79c1bcf5` authenticates ten frozen
+artifacts and twenty live readers while every earlier checkpoint byte and hash remains unchanged.
+A corrective M05-T04 current-reader append after M07-T03 established historical sequence 5; its
+head `7df3631d509ed7e65c571566a825d6d3cd52d336e1a74512bf3e8e26920749b3` authenticates eleven frozen
+artifacts and twenty-two live readers. Sequence 6 only advances the M06-T11 proof/test receipts for
+a bounded, explicit 20-second nested Vitest timeout; current head `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` still
+authenticates eleven frozen artifacts and twenty-two live readers. It changes no coverage,
+assertion, concurrency, frozen evidence, workload/proof count, progress, or plan digest, and
+sequences 1–5 remain byte- and hash-unchanged.
 
 ## Historical I07-01 checkpoint
 
@@ -89,7 +98,7 @@ addon exception. Its verifier remains workspace-read-only; its root test is the 
 workspace-temp barrier.
 
 Node 24 requires an orthogonal schema-v2 compatibility policy for eighteen exact root tests. The
-distribution across all 132 workloads is 114 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across all 134 workloads is 116 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
 code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
 symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
@@ -131,7 +140,7 @@ command in an 18-minute operating-system ceiling with a 30-second kill grace, in
 hosted job. An outer-ceiling failure is never accepted as promotion evidence.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
-bytes, executable modes, tracked-file count, and Git index object ids before and after all 132
+bytes, executable modes, tracked-file count, and Git index object ids before and after all 134
 steps, including failure paths. The shared-state boundary also seals every reviewed build/Turbo
 output root across the proof phase and compares non-ignored untracked state across the complete
 execution region. A dependency download cache may save network time; no build, test, checkpoint,

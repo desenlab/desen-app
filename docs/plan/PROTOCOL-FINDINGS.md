@@ -2877,9 +2877,40 @@ This file records implementation discoveries without changing the frozen DESEN 0
   because the frozen revision projection excludes root `publication`; the verifier preserves and
   validates that complete Bundle while still enforcing its complete canonical size.
 
-- Future action: M07-T03 must consume only authenticated integrity authority for exact installed
-  package preflight; M07-T04 adds reference and activation-limit checks; M07-T05 owns Source and
+- Future action: M07-T03 now consumes only authenticated integrity authority for exact installed
+  package preflight. M07-T04 adds reference and activation-limit checks; M07-T05 owns Source and
   channel storage/API; M07-T06 through M07-T10 own staging, activation, recovery, and fault
   behavior. A later protocol revision should define the normative Bundle-size metric explicitly.
   If the same hostile-JSON boundary is needed elsewhere, extract the reviewed parser as a shared
   internal primitive without altering the frozen M06 Publisher evidence or weakening its limits.
+
+## PF-072 — Verified package bytes need an explicit snapshot-to-staging TOCTOU boundary
+
+- Status: OPEN
+- Blocks proof: No; M07-T03 closes its local installed-package verification boundary without
+  changing a DESEN 0.1.0 protocol byte or claiming that staging and activation are complete.
+- Protocol location: SPEC package-selection, exact-digest, preflight, and activation requirements;
+  `PIPE-006`, `PIPE-012`, `PIPE-013`, `R-005`, `R-017`, `R-018`, `R-021`, `R-118`, `R-127`,
+  `R-139`, `A-003`, `A-004`, `A-012`, `D-032`, and `D-033`; related findings `PF-061`, `PF-067`,
+  and `PF-071`; related decision `ADR 0008`
+- Observation: checking a caller-provided digest does not prove which implementation bytes were
+  inspected. Even after recalculating a digest, retaining caller-owned mutable byte views would
+  allow those bytes to change between package preflight and later staging. DESEN 0.1.0 defines the
+  exact required tuple and digest relation, but it does not prescribe a host packaging store or
+  the lifecycle that carries verified bytes across this time-of-check/time-of-use boundary.
+- Implementation decision: M07-T03 accepts only an authenticated M07-T02 integrity authority. It
+  synchronously captures the selected candidate's inert enumerable own-data Catalog projection
+  and exact attached, nonshared `Uint8Array` subviews into independent private snapshots, then
+  independently recalculates the Web–React v1 digest. It binds the successful result to a
+  package-private `WeakMap`; the frozen public authority exposes only byte-free metadata and
+  positional indexes, with no loader, module specifier, filesystem location, staging operation,
+  channel mutation, or activation operation. Caller mutation therefore cannot alter the bytes
+  verified by M07-T03. Those copied arrays are nevertheless trusted package-private process state,
+  not an immutable external package store, and M07-T03 neither stages nor activates them.
+- Future action: M07-T04 must consume only the authenticated M07-T03 authority when checking
+  surface and capability references. M07-T06 must stage from the private verified snapshots—or
+  copy them into equivalently closed immutable runtime indexes—and reclose identity and authority
+  immediately at the staging boundary. M07-T07 through M07-T10 must prove that stale, failed,
+  restarted, raced, or otherwise modified material cannot become active. If a later implementation
+  moves installation across processes or into a persistent package store, it needs an
+  authenticated installed-package store/handle rather than arbitrary caller callbacks or paths.

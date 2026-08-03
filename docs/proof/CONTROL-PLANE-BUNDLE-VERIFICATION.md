@@ -78,8 +78,8 @@ trace ownership, filesystem authority, and atomic evidence writes.
 
 The artifact pins six direct prerequisites (`M07-T01`, `I07-02`, `M06-T10`, and `M02-T04` through
 `M02-T06`) plus nine exact trace rows: `PIPE-010`, `PIPE-011`, `R-007`, `R-031`, `R-138`, `D-030`,
-`D-031`, `D-034`, and `D-035`. The live required-exhaustive CI successor contains 62 proof pairs
-and 132 workloads; the immutable I07-02 cutover baseline remains 61/130.
+`D-031`, `D-034`, and `D-035`. The live required-exhaustive CI successor contains 63 proof pairs
+and 134 workloads; the immutable I07-02 cutover baseline remains 61/130.
 
 Evidence: `docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json`
 `sha256:db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a`.

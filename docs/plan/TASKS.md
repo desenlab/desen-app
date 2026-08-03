@@ -55,12 +55,12 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
-and proved the 130-workload, 61-proof-pair cutover baseline; after M07-T02 registration the current
-official GitHub `Quality gate` executes 132 workloads and 62 proof pairs as
+and proved the 130-workload, 61-proof-pair cutover baseline; after M07-T03 registration the current
+official GitHub `Quality gate` executes 134 workloads and 63 proof pairs as
 `REQUIRED + EXHAUSTIVE`. The retained sequential runner is available only through explicit manual
 `legacy-rollback`. Exact cutover workload, result, cancellation, tracked-workspace, hosted, and
-shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T02 is `DONE`, and
-M07-T03 is next.
+shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T03 is `DONE`, and
+M07-T04 is next.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -477,7 +477,7 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | ------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | M07-T01 | DONE        | G06                     | Content-addressed bundle store with immutable revision entries                                                       |
 | M07-T02 | DONE        | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
-| M07-T03 | NOT_STARTED | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
+| M07-T03 | DONE        | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
 | M07-T04 | NOT_STARTED | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
 | M07-T05 | NOT_STARTED | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
 | M07-T06 | NOT_STARTED | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
@@ -502,7 +502,8 @@ special files, path keys, typed-array brands, hostile inputs, and package-root c
 focused cases plus four compiler-negative and 16 independent proof/mutation cases. This proves
 storage only; channels, package preflight, activation, last-known-good recovery, and host
 consumption remain later M07 tasks. `N-010` remains
-`PLANNED` for M07-T03 installed-package verification and M12-T12 packed-distribution evidence;
+`PLANNED` for the remaining M12-T12 packed-distribution evidence; M07-T03 now proves the local
+installed-package byte and tuple boundary without claiming external packed-distribution integrity;
 `N-019` remains `PLANNED` for M07-T05 control-plane integration, P-12 remains `NOT_PROVEN`, and G07
 remains open.
 
@@ -520,13 +521,44 @@ bytes, parsed documents, or partial authority. The official golden passes with m
 Source evidence; noncanonical stored JSON, exact limit boundaries, canonical numeric expansion,
 publication-preserving same-revision input, malformed UTF-8/JSON, revision mismatches, Source
 mismatches, hostile records, shared memory, and forged authority fail or pass at their exact
-assigned boundary. M07-T03 owns exact installed-package preflight next; M07-T04 through M07-T11
-still own references, channels, activation, recovery, faults, and host consumption. P-12 remains
-`NOT_PROVEN`, while `N-038` and `N-041` remain `PLANNED` for their later activation and limit owners.
+assigned boundary. At the M07-T02 checkpoint, M07-T03 still owned exact installed-package
+preflight; M07-T04 through M07-T11 owned references, channels, activation, recovery, faults, and
+host consumption. P-12 remained `NOT_PROVEN`, while `N-038` and `N-041` remained `PLANNED` for
+their later activation and limit owners.
 
 Evidence: `docs/proof/CONTROL-PLANE-BUNDLE-VERIFICATION.md` and
 `docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json`
 `sha256:db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a`.
+
+M07-T03 adds a separate built-package preflight over an authentic M07-T02 integrity authority and
+an untrusted installed-package inventory. It matches literal code units for package id and target,
+requires one exact SemVer and exactly one physical candidate, preserves duplicate requirement
+positions, and grants no trimming, case folding, Unicode normalization, range, newest/best-match,
+candidate-order, location, callback, loader, or network authority. The current dispatch table is
+deliberately static and supports only `web-react`.
+
+The selected Catalog and its enumerable own-data JSON graph plus every exact attached, nonshared
+`Uint8Array` artifact view are synchronously snapshotted under fixed finite ceilings. A generated
+first-issue Catalog guard and capability-namespace ambiguity precheck run before exhaustive
+validation. The independent Web–React v1 framer then requires the Bundle digest, Catalog
+self-digest, and digest calculated from one Catalog plus the 80 actual distribution artifacts to
+be identical. Only complete success yields one frozen, runtime-authenticated, byte-free public
+authority; package-private snapshots are retained for M07-T04 and later staging work.
+
+The official package tuple, missing/duplicate/newer/alias candidates, historical digest,
+Catalog/artifact mutation, hostile records and memory, representative exact/one-over boundaries
+plus branch-isolating aggregate tests and explicit dominance evidence for every finite ceiling,
+10,000-entry structural fan-outs, forged authority precedence, positional duplicates, and
+independent public digest-profile parity are executable evidence. `P-05` becomes `PROVEN`; `N-011`
+and `N-020`
+become `TESTED`. `N-010`, `N-038`, and `N-041` remain `PLANNED`, P-12 remains `NOT_PROVEN`, and G07
+remains open. M07-T04 owns surface/capability reference and whole-activation finite-limit
+preflight next; M07-T05 through M07-T11 still own channels, staging, activation, recovery, faults,
+and host consumption.
+
+Evidence: `docs/proof/CONTROL-PLANE-PACKAGE-PREFLIGHT.md` and
+`docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json`
+`sha256:79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628`.
 
 ## M08 — Framework-neutral editor core
 

@@ -8,9 +8,10 @@ infrastructure, not the public `desen.run` developer API.
 ## Status
 
 M07-T01 implements a persistent, revision-addressed store for exact Bundle bytes. M07-T02 adds a
-separate synchronous integrity boundary for treating those stored bytes as untrusted input before
-package preflight. Editable-source persistence, channel pointers, package/reference preflight, and
-activation remain later M07 work.
+separate synchronous integrity boundary for treating those stored bytes as untrusted input.
+M07-T03 consumes only that authenticated authority and independently resolves and fingerprints the
+complete installed Web–React package set. Editable-source persistence, channel pointers,
+surface/capability reference preflight, staging, and activation remain later M07 work.
 
 The current implementation is a local POSIX filesystem profile. It deliberately accepts only
 already validated, revision-closed Bundle entries as a trusted caller precondition. The store does
@@ -23,6 +24,7 @@ not silently acquire integrity authority: a caller must pass a read entry throug
 import {
   BundleStoreError,
   openBundleStore,
+  preflightBundlePackages,
   verifyBundleStoreEntry,
 } from "@desen/control-plane-api";
 
@@ -43,7 +45,18 @@ if (read.status === "found") {
     sourceBytes,
   });
   if (integrity.status === "verified") {
-    // `integrity.authority` is the only value later package-preflight stages may authenticate.
+    const packagePreflight = preflightBundlePackages(integrity.authority, [
+      {
+        id: "run.desen.reference.sign-in",
+        version: "0.1.0",
+        target: "web-react",
+        catalog: installedCatalog,
+        artifacts: [{ path: "dist/index.js", bytes: installedIndexBytes }],
+      },
+    ]);
+    if (packagePreflight.status === "preflighted") {
+      // Only this opaque authority may enter M07-T04 reference preflight.
+    }
   }
 }
 ```
@@ -56,13 +69,13 @@ if (read.status === "found") {
   entry contains a fresh byte copy. Mutating that returned copy cannot mutate stored content.
 
 The root must already exist as an absolute, application-owned local directory; the store does not
-create or choose that authority for the caller. The package root exports the runtime values
-`BundleStoreError`, `openBundleStore`, `BUNDLE_INTEGRITY_LIMITS`, and
-`SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE`, and `verifyBundleStoreEntry`, plus their documented storage
-and integrity types. Filesystem paths, file handles, raw or partially parsed documents, byte
-snapshots, Source material, internal authority readers, test fault hooks, list/delete operations,
-and mutable channel operations do not cross that root. The one exception is the complete immutable
-Bundle snapshot carried only by an authenticated verification success.
+create or choose that authority for the caller. The package root exports the storage and integrity
+values above plus `preflightBundlePackages`, `BUNDLE_PACKAGE_PREFLIGHT_LIMITS`, the four stable
+package-preflight diagnostic constants, and their documented types. Filesystem paths, file handles,
+raw or partially parsed documents, byte snapshots, Source material, internal authority readers,
+test fault hooks, list/delete operations, loaders, executable callbacks, and mutable channel
+operations do not cross that root. The complete immutable Bundle snapshot is carried only by an
+authenticated integrity success; accepted Catalogs and artifact snapshots remain package-private.
 
 ## Bundle integrity boundary
 
@@ -112,6 +125,65 @@ first-issue mirror of the established embedded-schema profile. Runtime code neve
 schema, loads executable code dynamically, resolves schema files, or accesses a network. Only a
 guard-successful document reaches the established exhaustive Validator, preventing invalid node or
 schema fan-out from allocating an input-proportional diagnostic report.
+
+## Installed-package preflight boundary
+
+`preflightBundlePackages(integrityAuthority, installedPackages)` is synchronous and accepts only a
+live M07-T02 integrity authority. A copied object or TypeScript cast fails before the package
+inventory is observed. The closed inventory consists only of inert candidate envelopes carrying an
+exact `id`, exact Semantic Version, literal target, Catalog data, and complete target artifact
+bytes. The public operation accepts no observed digest, callback, loader, registry, location,
+resolver, mutable limit, or executable module.
+
+Input snapshots use the enumerable own-data JSON surface only. Accessors, sparse arrays, custom or
+Proxy-backed array prototypes, and unexpected enumerable string fields fail closed without invoking
+caller code. Non-enumerable and Symbol decorations are deliberately ignored and never retained;
+they cannot affect tuple resolution, Catalog validation, package bytes, or authority.
+
+Checks run in this causal order:
+
+1. authenticate the exact integrity-authority object;
+2. capture a bounded dense package inventory without invoking accessors;
+3. require exactly one literal `id`/`version`/`target` candidate for every positional Bundle
+   requirement—without ranges, normalization, newest-version preference, best matching, or silent
+   substitution;
+4. snapshot only selected Catalogs as bounded inert JSON, validate the frozen Catalog schema, and
+   close candidate/Catalog identity;
+5. snapshot every selected artifact from a genuine non-shared `Uint8Array`, enforce portable
+   lowercase-ASCII paths and the Web–React v1 entry limits, and independently rebuild the complete
+   versioned digest framing;
+6. require the Bundle requirement digest, Catalog self-digest, and calculated SHA-256 digest to be
+   identical; and
+7. validate all selected Catalogs as one non-ambiguous capability namespace.
+
+The digest input is exactly the Web–React v1 magic value, a big-endian entry count, and sorted
+length-framed `catalog.json` plus target artifacts. Only the top-level Catalog `packageDigest` is
+projected to the reserved all-zero placeholder before RFC 8785 canonicalization. Artifact order and
+Catalog object-key order therefore grant no identity; every Catalog value, artifact path, artifact
+byte, and inventory shape does. Production code implements this verifier independently and does not
+import the reference Catalog package.
+
+Before the historical exhaustive Validator runs, a separate deterministic Catalog guard generated
+from the exact frozen DESEN 0.1.0 Catalog schema stops at the first root issue with Ajv
+`allErrors: false`. A sorted first-issue walk then applies the same Draft 2020-12 meta-schema and
+custom dialect, URI, local-reference, vocabulary, and Unicode-regexp profile to every component or
+behavior props/event/command/style schema and every operation or resource input/output schema.
+Runtime code performs no schema compilation or dynamic loading. Namespace duplication is likewise
+stopped by a fixed-category, sorted-key Set before the exhaustive Catalog-set consistency fence, so
+neither structural nor ambiguity fan-out can allocate caller-proportional diagnostic reports.
+
+Complete success returns one frozen runtime-authenticated `BundlePackagePreflightAuthority`. Its
+public surface contains only the verified Bundle revision, safe byte-free package audit metadata,
+and the positional requirement-to-package mapping. Catalogs and copied artifact bytes remain in
+private authority state for later trusted stages. A failure returns one terminal stage and frozen
+redacted diagnostics with no partial package or Catalog authority.
+
+`BUNDLE_PACKAGE_PREFLIGHT_LIMITS` fixes the local work profile: at most 256 requirements, 1,024
+candidates, 1,024 artifacts per selected package, 16 MiB per Catalog or artifact entry, 64 MiB of
+aggregate Catalog bytes, and 64 MiB of aggregate framed package material, with additional published
+identity, path, depth, value, string, capability, and diagnostic ceilings. These values reproduce
+the initial target profile where applicable; they are implementation limits rather than new
+universal DESEN 0.1.0 constants.
 
 ## Storage layout
 
@@ -197,15 +269,15 @@ repository implementation with equivalent no-clobber and durability semantics.
 
 ## Explicitly deferred
 
-M07-T01 and M07-T02 prove immutable exact-byte persistence and the first independent integrity
-boundary only. They do not yet provide:
+M07-T01 through M07-T03 prove immutable exact-byte persistence, Bundle integrity, and exact
+installed-package preflight. They do not yet provide:
 
-- M07-T03 exact package target/version/digest resolution and preflight;
 - M07-T04 surface/capability reference and finite-limit preflight;
 - M07-T05 editable-source storage, mutable channel pointers, or a control-plane transport API;
 - M07-T06 through M07-T10 staging, transactional activation, last-known-good state, recovery, and
   fault matrices; or
 - M07-T11 reference-host channel consumption.
 
-Callers must not treat a successful M07-T01 write as integrity verification, or an M07-T02
-integrity authority as package-preflight or activation authority.
+Callers must not treat a successful M07-T01 write as integrity verification, an M07-T02 integrity
+authority as package authority, or an M07-T03 package authority as reference, staging, channel, or
+activation authority.
