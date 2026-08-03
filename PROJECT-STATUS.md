@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-01
+Last updated: 2026-08-03
 
 ## Plain-language status
 
@@ -445,10 +445,15 @@ Publisher suite passes 292/292, M06-T11 and G06 are `DONE`. M07-T01 now adds the
 control-plane package root and a local POSIX repository that stores the official 2,173-byte Bundle
 golden once under its exact revision. Identical retries preserve the inode, different exact bytes
 conflict, concurrent writers cannot replace or mix the winner, and path, alias, partial-write, and
-post-commit uncertainty cases fail closed. Integrity verification and activation remain later M07
-work.
-P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016, N-018, N-041, and the
-Publisher conformance target remain `PLANNED`.
+post-commit uncertainty cases fail closed. M07-T02 now treats each stored Bundle and available
+Source byte view as untrusted. Its separate built-package verifier applies bounded strict JSON,
+exact raw and canonical 2 MiB Bundle ceilings, a generated fail-fast guard before exhaustive frozen
+0.1.0 schema validation, triple revision equality, and raw/canonical 8 MiB limits plus independent
+digest calculation over real Source bytes when available. Only complete success
+returns a frozen runtime-authenticated integrity authority; no package, channel, staging, or
+activation authority is granted.
+P-03 and P-11 remain `PROVEN`; P-05 and P-17 remain `PARTIAL`; N-016 advances to `TESTED`; N-018,
+N-038, N-041, and the Publisher conformance target remain `PLANNED`.
 
 I07-01 is complete historical evidence. It separated immutable task-time evidence from a
 current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
@@ -463,18 +468,21 @@ unclosed, or injected success. The accepted same-revision comparison at commit
 `077560fe81d0fcf4560554dd7511413bad5bc30e` passed both required-exhaustive and retained legacy
 jobs. The official cutover at commit `3cf72552ee3ea23a0b5e99f782f837bc6237f78b` then passed hosted
 run `30699616361`: `Quality gate` completed in 10 minutes 33 seconds, while the manual-only legacy
-rollback job was correctly skipped and the shadow workflow did not trigger. The current-reader
-chain now authenticates eight frozen artifacts and sixteen live readers through checkpoint head
-`95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c`. The temporary shadow
-workflow and modular comparison adapter/test are removed, closing `DEBT-I07-008`. Exact accepted
-and rejected evidence is archived in the
+rollback job was correctly skipped and the shadow workflow did not trigger. The immutable I07-02
+cutover checkpoint authenticates eight frozen artifacts and sixteen live readers through
+historical head `95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c`.
+M07-T02 appends reviewed checkpoint sequence 3 without rewriting that history; current head
+`f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882` authenticates nine frozen
+artifacts and eighteen live readers. The temporary shadow workflow and modular comparison
+adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
+archived in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json).
 
-This work changes no protocol claim, implementation-task count, or proof-gate count. It introduces
+The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
 no affected-path selector and does not retire the sequential runner, which remains an explicit
 manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T02 remains `NOT_STARTED`, but its I07-02 dependency is satisfied and it is
-ready to start.
+retirement by G12. M07-T02 is now `DONE`; its two proof workloads extend the live successor to 132
+workloads and 62 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T03 is next.
 
 ## Current milestone
 
@@ -482,11 +490,11 @@ ready to start.
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `75 / 145 tasks complete (52%)`
+- Overall implementation progress: `76 / 145 tasks complete (52%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `1 / 11 tasks complete (9%)`
+- M07 progress: `2 / 11 tasks complete (18%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -547,14 +555,15 @@ ready to start.
   `M06-T09 — Bundle validation and revision calculation`,
   `M06-T10 — Official source-to-bundle golden and double-publish determinism tests`,
   `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
-  `M07-T01 — Content-addressed bundle store with immutable revision entries`
+  `M07-T01 — Content-addressed bundle store with immutable revision entries`,
+  `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
-  `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`
-- Status: M07-T01 and I07-02 are complete; M07-T02 remains `NOT_STARTED`, its dependencies are
-  satisfied, and it is ready to start; G07 remains open
+  `M07-T03 — Exact package target/version/digest resolution and preflight`
+- Status: M07-T02 and I07-02 are complete; M07-T03 is `NOT_STARTED`, its dependency is satisfied,
+  and it is ready to start; G07 remains open
 
 ## Completed preparation
 
@@ -919,13 +928,17 @@ trusts no cached success, and executes the fresh complete workload. The legacy s
 manual rollback only; affected selection remains future work and every unknown or ambiguous
 selector condition must eventually expand to `EXHAUSTIVE`.
 
+M07-T02 is complete. Stored byte sequences now cross a bounded strict parser, a generated
+first-error guard before exact DESEN 0.1.0 validation, independent three-way revision closure, raw
+and canonical Bundle-size limits, and—when available—raw/canonical Source limits plus independent
+validation and digest calculation over real Source bytes. The
+resulting frozen integrity authority is necessary but deliberately insufficient for activation.
+
 Implement
-`M07-T02 — Protocol, revision, available source digest, and bundle-size verification`. Treat every
-stored byte sequence as untrusted on ingress: parse it under bounded rules, validate the exact
-DESEN 0.1.0 Bundle, independently recalculate and compare its claimed revision and available
-Source digest, and enforce the complete Bundle-size profile before returning any verified
-authority. Package resolution, channels, activation, last-known-good state, and recovery remain
-with their later M07 owners.
+`M07-T03 — Exact package target/version/digest resolution and preflight`. It must consume only an
+authenticated M07-T02 authority and prove that every exact required package tuple resolves to the
+installed target/version/digest without best-match or substitution. Channels, activation,
+last-known-good state, and recovery remain with their later M07 owners.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1787,6 +1800,35 @@ M07-T01 evidence:
   work; N-010 and N-019 remain `PLANNED`, P-12 remains `NOT_PROVEN`, and G07 remains open
 - coverage decision: M07-T01 becomes `DONE`; overall progress is 75/145; M07-T02 owns verified
   Bundle ingress next
+
+M07-T02 evidence:
+
+- `docs/proof/CONTROL-PLANE-BUNDLE-VERIFICATION.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json`
+- artifact SHA-256:
+  `db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a`
+- exact boundary: one built `@desen/control-plane-api` root consumes an untrusted immutable-store
+  entry plus explicit available or unavailable Source evidence; bounded strict JSON, exact frozen
+  0.1.0 schemas, and independent digest calculations precede any integrity authority
+- finite profile: separate raw and complete RFC 8785 canonical ceilings of 2,097,152 bytes for
+  Bundle and 8,388,608 bytes for available Source; fixed parser depth, value, decoded-string, and
+  number-token budgets; exact boundaries pass and one-over inputs fail closed
+- allocation hardening: a deterministic 730,791-byte Ajv 8.20.0 standalone first-issue guard is
+  regenerated and byte-compared by mandatory proof; four 10,000-item hostile fan-outs stop with
+  one diagnostic and zero exhaustive-Validator calls
+- integrity profile: outer store key, embedded revision, and independently recalculated revision
+  must agree; available Source must be real raw bytes whose independently calculated digest
+  matches, while `not-available` makes no corroboration claim
+- authority profile: only complete success yields one frozen, runtime-authenticated Bundle
+  integrity authority; rejection exposes one closed stage and redacted diagnostic with no raw
+  bytes, parsed document, digest detail, package/channel/staging/activation power, or partial
+  authority
+- executable evidence: 17 runtime cases, six guard cases, nine compiler-negative cases, 16 root
+  proof/mutation cases, six exact prerequisite pins, nine exact trace rows, and reviewed reader
+  checkpoint sequence 3 with nine artifacts and eighteen readers
+- coverage decision: M07-T02 becomes `DONE`; N-016 advances to `TESTED`; N-038 and N-041 remain
+  `PLANNED`; P-12 remains `NOT_PROVEN`; overall progress is 76/145 and M07-T03 owns exact installed
+  package tuple preflight next
 
 ## Status vocabulary
 

@@ -58,6 +58,14 @@ const HISTORICAL_COMPATIBILITY_READERS = Object.freeze([
   "tests/publisher-invalid-source-matrix.test.mjs",
 ]);
 const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 861,
+    sha256: "470ad074376d5c6835d977cccccb364d5387c2749d63060fdb10045000304c6f",
+  }),
+  [APP_INDEX]: Object.freeze({
+    bytes: 413,
+    sha256: "37f02d98716ecb6ff84c57c0c388959a43f4ae499eddc5bcbd9b34b85c59cdee",
+  }),
   [PROOF_LIBRARY]: Object.freeze({
     bytes: 73_090,
     sha256: "761dc922a9609510e154c87ad535f7af69b8b4822ef8b01c92109f99c37551a0",
@@ -113,6 +121,16 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
     bytes: 59_559,
     sha256: "178081b9b084c87ae1849b7464efa657900b46c166ab50638c5600168bc5c721",
+  }),
+});
+const APPROVED_M07_T02_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 1_285,
+    sha256: "734609cdd94f1e93030f75a7009505a0da4988d31d955f7100aee256cb0c2a5b",
+  }),
+  [APP_INDEX]: Object.freeze({
+    bytes: 896,
+    sha256: "58fe0462d7d35a1231259b6386006f950600d401113f229debbe057f0120a4df",
   }),
 });
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
@@ -236,6 +254,69 @@ const EXPECTED_PUBLIC_SOURCE_EXPORTS = Object.freeze([
     }),
   ),
 ]);
+const APPROVED_M07_T02_PUBLIC_SOURCE_EXPORTS = Object.freeze([
+  Object.freeze({
+    imported: "BundleStoreError",
+    exported: "BundleStoreError",
+    module: "./bundle-store-contract.js",
+    typeOnly: false,
+  }),
+  Object.freeze({
+    imported: "BUNDLE_INTEGRITY_LIMITS",
+    exported: "BUNDLE_INTEGRITY_LIMITS",
+    module: "./bundle-verification-contract.js",
+    typeOnly: false,
+  }),
+  Object.freeze({
+    imported: "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+    exported: "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+    module: "./bundle-verification-contract.js",
+    typeOnly: false,
+  }),
+  Object.freeze({
+    imported: "verifyBundleStoreEntry",
+    exported: "verifyBundleStoreEntry",
+    module: "./bundle-verification.js",
+    typeOnly: false,
+  }),
+  Object.freeze({
+    imported: "openBundleStore",
+    exported: "openBundleStore",
+    module: "./bundle-store.js",
+    typeOnly: false,
+  }),
+  ...[
+    "BundleIntegrityAuthority",
+    "BundleIntegrityDiagnostic",
+    "BundleIntegrityDiagnosticCode",
+    "BundleIntegrityLimits",
+    "BundleIntegrityVerificationResult",
+    "BundleIntegrityVerificationStage",
+    "BundleSourceMaterial",
+  ].map((name) =>
+    Object.freeze({
+      imported: name,
+      exported: name,
+      module: "./bundle-verification-contract.js",
+      typeOnly: true,
+    }),
+  ),
+  ...[
+    "BundleStore",
+    "BundleStoreEntry",
+    "BundleStoreErrorCode",
+    "BundleStorePutResult",
+    "BundleStoreReadResult",
+    "OpenBundleStoreOptions",
+  ].map((name) =>
+    Object.freeze({
+      imported: name,
+      exported: name,
+      module: "./bundle-store-contract.js",
+      typeOnly: true,
+    }),
+  ),
+]);
 
 export const CONTROL_PLANE_BUNDLE_STORE_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
@@ -293,6 +374,42 @@ const DISTRIBUTION_FILES = Object.freeze([
   "index.js",
   "index.js.map",
 ]);
+const HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
+  "index.d.ts": Object.freeze({
+    bytes: 434,
+    sha256: "03badce6c5e86dd75faae3bd2e228251d9274e4bf0f01025abde47e1159fa2a0",
+  }),
+  "index.d.ts.map": Object.freeze({
+    bytes: 311,
+    sha256: "6764987cf45e3a78fd66f4b93eab8cad2a8e17d2e10742835519e2489e748c70",
+  }),
+  "index.js": Object.freeze({
+    bytes: 259,
+    sha256: "c99e708f4e15b6ae676f7641998d8253de4351240dd2828b8d005adc148be78f",
+  }),
+  "index.js.map": Object.freeze({
+    bytes: 201,
+    sha256: "22a49bfe8d231504f570884637df1f65fe8adfc0d4db49d02a13a85654d4ba87",
+  }),
+});
+const APPROVED_M07_T02_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
+  "index.d.ts": Object.freeze({
+    bytes: 899,
+    sha256: "9bf4bef4c690c138df002fdc44c4e83a0ef94c30eb72a925c39f7253eeffa680",
+  }),
+  "index.d.ts.map": Object.freeze({
+    bytes: 539,
+    sha256: "ead852d17b09a440050e9c56d456bf403b3b8ff6f7e09910e87dd659f4e68a86",
+  }),
+  "index.js": Object.freeze({
+    bytes: 468,
+    sha256: "4adf7d465b29b36ba60fdd03894b0abc08119f18dbf12a361a6f2da3eea44f69",
+  }),
+  "index.js.map": Object.freeze({
+    bytes: 305,
+    sha256: "797b2c0d81af06f50abb1bfc52b7e32861c23cb4dfb28023141e76ba76875e67",
+  }),
+});
 const ROOT_SCRIPT_COMMANDS = Object.freeze({
   generate:
     "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/generate-control-plane-bundle-store-proof.mjs",
@@ -759,10 +876,15 @@ function publicExportInventory(source, relativePath) {
       );
     }
   }
-  if (JSON.stringify(exports) !== JSON.stringify(EXPECTED_PUBLIC_SOURCE_EXPORTS)) {
+  const taskTime = JSON.stringify(exports) === JSON.stringify(EXPECTED_PUBLIC_SOURCE_EXPORTS);
+  const approvedM07T02 =
+    JSON.stringify(exports) === JSON.stringify(APPROVED_M07_T02_PUBLIC_SOURCE_EXPORTS);
+  if (!taskTime && !approvedM07T02) {
     fail("REGISTRATION_DRIFT", "The exact public package-root export inventory drifted.");
   }
-  return exports;
+  // M07-T01 owns only its task-time exports. M07-T02 authenticates the reviewed successor root,
+  // while this historical reader projects the original inventory into the frozen T01 artifact.
+  return EXPECTED_PUBLIC_SOURCE_EXPORTS;
 }
 
 function ciProofTupleProjection(source, relativePath) {
@@ -1293,14 +1415,27 @@ async function trackedFileReceipts(overrides) {
   const receipts = [];
   for (const relativePath of TRACKED_TASK_FILES) {
     const bytes = await authorityBytes(relativePath, overrides);
-    const historical = Object.hasOwn(overrides, relativePath)
-      ? undefined
-      : HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    const overridden = Object.hasOwn(overrides, relativePath);
+    const historical = overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    const taskTime = HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T02 = APPROVED_M07_T02_TRACKED_RECEIPTS[relativePath];
+    const observedSha256 = sha256(bytes);
+    if (
+      approvedM07T02 !== undefined &&
+      !(
+        (bytes.byteLength === taskTime?.bytes && observedSha256 === taskTime.sha256) ||
+        (bytes.byteLength === approvedM07T02.bytes && observedSha256 === approvedM07T02.sha256)
+      )
+    ) {
+      fail("REGISTRATION_DRIFT", "The reviewed M07-T02 package successor bytes drifted.", {
+        path: relativePath,
+      });
+    }
     receipts.push(
       Object.freeze({
         path: relativePath,
         bytes: historical?.bytes ?? bytes.byteLength,
-        sha256: historical?.sha256 ?? sha256(bytes),
+        sha256: historical?.sha256 ?? observedSha256,
       }),
     );
   }
@@ -1322,10 +1457,26 @@ async function distributionReceipts() {
       observed.map(async (fileName) => {
         const relativePath = `${APP_DIRECTORY}/dist/${fileName}`;
         const bytes = await safeReadAbsolute(path.join(ROOT, relativePath));
+        const historical = HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS[fileName];
+        const approvedM07T02 = APPROVED_M07_T02_INDEX_DISTRIBUTION_RECEIPTS[fileName];
+        const observedSha256 = sha256(bytes);
+        if (
+          historical !== undefined &&
+          !(
+            (bytes.byteLength === historical.bytes && observedSha256 === historical.sha256) ||
+            (approvedM07T02 !== undefined &&
+              bytes.byteLength === approvedM07T02.bytes &&
+              observedSha256 === approvedM07T02.sha256)
+          )
+        ) {
+          fail("DISTRIBUTION_DRIFT", "The reviewed M07-T02 package-root distribution drifted.", {
+            path: relativePath,
+          });
+        }
         return Object.freeze({
           path: relativePath,
-          bytes: bytes.byteLength,
-          sha256: sha256(bytes),
+          bytes: historical?.bytes ?? bytes.byteLength,
+          sha256: historical?.sha256 ?? observedSha256,
         });
       }),
     ),
@@ -1675,7 +1826,7 @@ export async function runControlPlaneBundleStoreProbe() {
 }
 
 function assertRuntimeReceipt(receipt) {
-  const expected = {
+  const taskTimeExpected = {
     requiredRuntimeExportsPresent: true,
     privateInternalExportAbsent: true,
     publicModuleKeys: ["BundleStoreError", "openBundleStore"],
@@ -1715,10 +1866,39 @@ function assertRuntimeReceipt(receipt) {
     invalidRevisionCode: "INVALID_REVISION",
     resultsFrozen: true,
   };
-  if (JSON.stringify(receipt) !== JSON.stringify(expected)) {
+  const approvedM07T02 = {
+    ...taskTimeExpected,
+    publicModuleKeys: [
+      "BUNDLE_INTEGRITY_LIMITS",
+      "BundleStoreError",
+      "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+      "openBundleStore",
+      "verifyBundleStoreEntry",
+    ],
+    packageSelfReference: {
+      ...taskTimeExpected.packageSelfReference,
+      keys: [
+        "BUNDLE_INTEGRITY_LIMITS",
+        "BundleStoreError",
+        "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+        "openBundleStore",
+        "verifyBundleStoreEntry",
+      ],
+    },
+  };
+  const serialized = JSON.stringify(receipt);
+  if (
+    serialized !== JSON.stringify(taskTimeExpected) &&
+    serialized !== JSON.stringify(approvedM07T02)
+  ) {
     fail("RUNTIME_PROBE_MISMATCH", "The immutable Bundle-store runtime receipt drifted.");
   }
-  return deepFreeze(receipt);
+  if (serialized === JSON.stringify(taskTimeExpected)) return deepFreeze(receipt);
+  return deepFreeze({
+    ...receipt,
+    publicModuleKeys: taskTimeExpected.publicModuleKeys,
+    packageSelfReference: taskTimeExpected.packageSelfReference,
+  });
 }
 
 export async function buildControlPlaneBundleStoreEvidence(options) {

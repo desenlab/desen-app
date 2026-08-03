@@ -25,8 +25,9 @@ kullanmadan `desen` kütüphanesini kendi ürününe entegre edebilmelidir.
 Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding sırasında kapsamın
 kontrolden çıkmasını engeller.
 
-`I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. GitHub'daki resmi `Quality gate`
-artık 130 işin ve 61 kanıt çiftinin tamamını yeni sistemle zorunlu olarak çalıştırır. Ortak dosya,
+`I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
+61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T02 eklendikten sonra GitHub'daki resmi
+`Quality gate` güncel 132 işin ve 62 kanıt çiftinin tamamını yeni sistemle zorunlu olarak çalıştırır. Ortak dosya,
 çıktı, port ve geçici-dizin kullanımı kodla sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
 başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
 otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
@@ -36,7 +37,9 @@ kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde ma
 kontrol edilir. Teknik karar, güvenlik kapıları ve kesin kanıt
 [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) ile
 [`I07-02 baseline`](../proof/baselines/i07-02-required-exhaustive-equivalence.json) içinde kayıtlıdır.
-`M07-T02` hâlâ `NOT_STARTED` durumundadır, fakat bütün bağımlılıkları tamamlanmış ve başlamaya hazırdır.
+`M07-T02` tamamlandı: depodaki Bundle baytlarının protokolü, boyutu, revision'ı ve varsa gerçek
+Source baytlarının digest'i bağımsız olarak doğrulanıyor. Sıradaki görev, bu doğrulanmış Bundle'ın
+istediği paketlerin tam kimlik ve digest ile gerçekten kurulu olduğunu denetleyecek `M07-T03`'tür.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

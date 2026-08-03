@@ -2,7 +2,7 @@
   "name": "@desen/control-plane-api",
   "version": "0.0.0",
   "private": true,
-  "description": "Local control-plane infrastructure and immutable DESEN Bundle storage.",
+  "description": "Local control-plane infrastructure for immutable DESEN Bundle storage and integrity verification.",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -20,16 +20,22 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "generate:bundle-verification-guards": "node scripts/generate-bundle-verification-guards.mjs",
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:bundle-store": "vitest run test/bundle-store.test.ts"
+    "test:bundle-verification": "vitest run test/bundle-verification.test.ts test/bundle-verification-guard.test.ts",
+    "test:bundle-store": "vitest run test/bundle-store.test.ts",
+    "verify:bundle-verification-guards": "node scripts/verify-bundle-verification-guards.mjs"
   },
   "dependencies": {
-    "@desen/protocol": "workspace:*"
+    "@desen/protocol": "workspace:*",
+    "@desen/validator": "workspace:*"
   },
   "devDependencies": {
     "@desen/publisher": "workspace:*",
+    "ajv": "8.20.0",
+    "prettier": "3.9.6",
     "vitest": "4.1.10"
   }
 }

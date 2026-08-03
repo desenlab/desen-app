@@ -1257,3 +1257,33 @@ injection, and separately built host consumption remain M07-T02 through M07-T11.
 
 `docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
 `sha256:698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`.
+
+## M07-T02 — Stored Bundle integrity verification
+
+M07-T02 consumes untrusted stored bytes through the built `@desen/control-plane-api` package. A
+bounded strict JSON parser enforces fatal UTF-8, duplicate-key, Unicode-scalar, finite-number,
+depth, value, string, number-token, and separate raw/canonical byte limits. A deterministic
+generated first-issue guard validates the exact frozen Source and Bundle schemas before the
+established exhaustive Validator can allocate diagnostics. The committed 730,791-byte guard is
+regenerated and compared byte for byte by mandatory proof.
+
+The successful boundary closes the outer storage key, embedded Bundle revision, and independently
+recalculated revision. Available Source evidence must contain real raw bytes and independently
+match the embedded Source digest; explicit absence remains an honest `not-available` state. Only
+complete success yields one frozen runtime-authenticated integrity authority. Failures expose one
+closed stage and redacted diagnostic without raw bytes, parsed documents, digest detail, or partial
+authority.
+
+The executable evidence contains 17 runtime cases, six dedicated guard cases, nine
+compiler-negative cases, and 16 independent root proof/mutation cases. Four 10,000-item hostile
+fan-outs stop with one diagnostic and zero exhaustive-Validator calls. Six prerequisite artifacts,
+nine exact trace rows, deterministic code generation, package exports, generated distribution,
+and atomic artifact writing are pinned.
+
+This advances `N-016` to `TESTED`. `N-038` and `N-041` remain `PLANNED`, and `P-12` remains
+`NOT_PROVEN`: installed-package preflight, reference validation, channels, staging, transactional
+activation, recovery, fault injection, and separately built host consumption remain M07-T03
+through M07-T11.
+
+`docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json`
+`sha256:db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a`.

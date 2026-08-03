@@ -54,12 +54,13 @@ commands available, run every frozen-snapshot, proof-artifact, negative, mutatio
 check from fresh inputs, and must not trust path filters or cached proof success.
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
-implementation total or proof-gate counts. Both infrastructure tasks are complete. The official
-GitHub `Quality gate` now executes all 130 workloads as `REQUIRED + EXHAUSTIVE`; the retained
-sequential runner is available only through explicit manual `legacy-rollback`. Exact workload,
-result, cancellation, tracked-workspace, hosted, and shared-state equivalence is archived in the
-I07-02 baseline. M07-T02 remains `NOT_STARTED`, but its dependencies are now satisfied and it is
-ready to start.
+implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
+and proved the 130-workload, 61-proof-pair cutover baseline; after M07-T02 registration the current
+official GitHub `Quality gate` executes 132 workloads and 62 proof pairs as
+`REQUIRED + EXHAUSTIVE`. The retained sequential runner is available only through explicit manual
+`legacy-rollback`. Exact cutover workload, result, cancellation, tracked-workspace, hosted, and
+shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T02 is `DONE`, and
+M07-T03 is next.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -475,7 +476,7 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | ID      | Status      | Depends on              | Deliverable / evidence                                                                                               |
 | ------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | M07-T01 | DONE        | G06                     | Content-addressed bundle store with immutable revision entries                                                       |
-| M07-T02 | NOT_STARTED | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
+| M07-T02 | DONE        | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
 | M07-T03 | NOT_STARTED | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
 | M07-T04 | NOT_STARTED | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
 | M07-T05 | NOT_STARTED | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
@@ -499,18 +500,33 @@ The official 2,173-byte Publisher golden, a same-revision publication-only confl
 writers, divergent writers, pre-link visibility, temporary truncation, hard links, symlinks,
 special files, path keys, typed-array brands, hostile inputs, and package-root consumption pass 18
 focused cases plus four compiler-negative and 16 independent proof/mutation cases. This proves
-storage only: M07-T02 still owns integrity and size verification; channels, package preflight,
-activation, last-known-good recovery, and host consumption remain later M07 tasks. `N-010` remains
+storage only; channels, package preflight, activation, last-known-good recovery, and host
+consumption remain later M07 tasks. `N-010` remains
 `PLANNED` for M07-T03 installed-package verification and M12-T12 packed-distribution evidence;
 `N-019` remains `PLANNED` for M07-T05 control-plane integration, P-12 remains `NOT_PROVEN`, and G07
 remains open.
 
-I07-02 now satisfies M07-T02's infrastructure dependency. M07-T02 is ready but remains
-`NOT_STARTED`; no integrity, size, activation, channel, or recovery behavior is claimed by the CI
-cutover itself.
+M07-T02 adds a separate built-package integrity verifier over untrusted stored bytes. It enforces
+the exact raw and complete RFC 8785 canonical 2 MiB Bundle ceilings with bounded strict JSON,
+uses a deterministic fail-fast guard before exhaustive structural validation, validates exact
+DESEN 0.1.0 structure, and closes the outer storage key, embedded revision, and independently
+recalculated revision. Available Source evidence must be real raw Source bytes and must pass its
+own finite parser, raw and canonical 8 MiB ceilings, exact schema, and independent digest
+calculation; absence remains explicitly `not-available`.
 
-`docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
-`sha256:698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`.
+Success yields only a frozen runtime-authenticated authority containing the immutable Bundle and
+safe integrity metadata. Rejections expose a closed stage and redacted diagnostics without raw
+bytes, parsed documents, or partial authority. The official golden passes with matched and absent
+Source evidence; noncanonical stored JSON, exact limit boundaries, canonical numeric expansion,
+publication-preserving same-revision input, malformed UTF-8/JSON, revision mismatches, Source
+mismatches, hostile records, shared memory, and forged authority fail or pass at their exact
+assigned boundary. M07-T03 owns exact installed-package preflight next; M07-T04 through M07-T11
+still own references, channels, activation, recovery, faults, and host consumption. P-12 remains
+`NOT_PROVEN`, while `N-038` and `N-041` remain `PLANNED` for their later activation and limit owners.
+
+Evidence: `docs/proof/CONTROL-PLANE-BUNDLE-VERIFICATION.md` and
+`docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json`
+`sha256:db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a`.
 
 ## M08 — Framework-neutral editor core
 

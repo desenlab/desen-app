@@ -7,18 +7,24 @@ infrastructure, not the public `desen.run` developer API.
 
 ## Status
 
-M07-T01 implements the first concrete boundary: a persistent, revision-addressed store for exact
-Bundle bytes. Editable-source persistence, channel pointers, verification, and activation remain
-later M07 work.
+M07-T01 implements a persistent, revision-addressed store for exact Bundle bytes. M07-T02 adds a
+separate synchronous integrity boundary for treating those stored bytes as untrusted input before
+package preflight. Editable-source persistence, channel pointers, package/reference preflight, and
+activation remain later M07 work.
 
 The current implementation is a local POSIX filesystem profile. It deliberately accepts only
-already validated, revision-closed Bundle entries as a trusted caller precondition; it does not
-yet prove that the supplied bytes match the supplied revision.
+already validated, revision-closed Bundle entries as a trusted caller precondition. The store does
+not silently acquire integrity authority: a caller must pass a read entry through
+`verifyBundleStoreEntry` before handing its opaque success authority to later M07 stages.
 
 ## Public API
 
 ```ts
-import { BundleStoreError, openBundleStore } from "@desen/control-plane-api";
+import {
+  BundleStoreError,
+  openBundleStore,
+  verifyBundleStoreEntry,
+} from "@desen/control-plane-api";
 
 const store = await openBundleStore({
   rootDirectory: "/absolute/application-owned/desen-data",
@@ -30,6 +36,16 @@ const write = await store.putBundle({
 });
 
 const read = await store.getBundle("sha256:<64 lowercase hexadecimal characters>");
+
+if (read.status === "found") {
+  const integrity = verifyBundleStoreEntry(read.entry, {
+    status: "available",
+    sourceBytes,
+  });
+  if (integrity.status === "verified") {
+    // `integrity.authority` is the only value later package-preflight stages may authenticate.
+  }
+}
 ```
 
 `openBundleStore` returns a frozen store with exactly two operations:
@@ -40,11 +56,62 @@ const read = await store.getBundle("sha256:<64 lowercase hexadecimal characters>
   entry contains a fresh byte copy. Mutating that returned copy cannot mutate stored content.
 
 The root must already exist as an absolute, application-owned local directory; the store does not
-create or choose that authority for the caller. The package root exports exactly the runtime values
-`BundleStoreError` and `openBundleStore`, plus the types `BundleStore`, `BundleStoreEntry`,
-`BundleStoreErrorCode`, `BundleStorePutResult`, `BundleStoreReadResult`, and
-`OpenBundleStoreOptions`. Filesystem paths, file handles, test fault hooks, list/delete operations,
-and mutable channel operations do not cross that root.
+create or choose that authority for the caller. The package root exports the runtime values
+`BundleStoreError`, `openBundleStore`, `BUNDLE_INTEGRITY_LIMITS`, and
+`SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE`, and `verifyBundleStoreEntry`, plus their documented storage
+and integrity types. Filesystem paths, file handles, raw or partially parsed documents, byte
+snapshots, Source material, internal authority readers, test fault hooks, list/delete operations,
+and mutable channel operations do not cross that root. The one exception is the complete immutable
+Bundle snapshot carried only by an authenticated verification success.
+
+## Bundle integrity boundary
+
+`verifyBundleStoreEntry(entry, sourceMaterial)` is synchronous so both genuine `Uint8Array` views
+are snapshotted before the caller can mutate them. `sourceMaterial` is an exact closed union:
+
+- `{ status: "not-available" }` permits verification to continue while explicitly recording that
+  the Bundle's claimed `sourceDigest` was not independently corroborated;
+- `{ status: "available", sourceBytes }` requires the supplied Source JSON to pass the same strict
+  ingress rules and its independently recalculated digest to match the Bundle.
+
+The verifier performs these checks in causal order:
+
+1. exact own-data entry capture and a genuine, non-shared byte snapshot;
+2. the 2,097,152-byte raw Bundle ceiling, fatal UTF-8 decoding, no BOM, duplicate decoded-key
+   rejection, I-JSON number/Unicode rules, and finite parser budgets;
+3. explicit DESEN `0.1.0` support before general schema diagnostics;
+4. a pre-allocation measurement of the parsed document against the complete Bundle's 2,097,152-byte
+   RFC 8785 canonical UTF-8 ceiling;
+5. a generated first-issue guard over the exact frozen root and embedded schemas, followed only on
+   success by exhaustive structural validation, the same measurement on the accepted immutable
+   snapshot, and an exact check against the real canonical bytes;
+6. equality of the store key, embedded `revision`, and independently recalculated revision; and
+7. when available, strict Source parsing, raw and complete canonical 8 MiB ceilings, guarded exact
+   structural validation, and independently recalculated `sourceDigest` equality.
+
+Only complete success returns `{ status: "verified", authority }`. The frozen authority exposes the
+independent immutable Bundle, protocol version, closed revision, claimed Source digest, visible
+`matched`/`not-available` corroboration status, and stored/canonical byte lengths. It exposes no raw
+Bundle byte view or Source material. A clone or TypeScript cast cannot forge its package-private
+runtime identity. Rejection returns one closed `stage`, immutable diagnostics, and no partial
+authority. Relevant codes include `SCHEMA_INVALID`, `UNKNOWN_CORE_FIELD`,
+`UNSUPPORTED_PROTOCOL`, `BUNDLE_LIMIT_EXCEEDED`, `REVISION_MISMATCH`,
+`SOURCE_DIGEST_MISMATCH`, and the project-owned
+`run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED`.
+
+`BUNDLE_INTEGRITY_LIMITS` documents the fixed project profile. In addition to both 2 MiB Bundle
+ceilings, it applies depth, value-count, decoded-string, and number-token budgets to each parsed
+document. Available Source JSON has separate 8 MiB raw and complete canonical ceilings matching the
+bounded Publisher ingress scale. Source-budget exhaustion uses the namespaced Source-material
+diagnostic rather than the protocol's Bundle-only `BUNDLE_LIMIT_EXCEEDED`; neither choice redefines
+the final-Bundle size rule.
+
+The structural guard is deterministic build output from the exact frozen Source, Bundle, and Draft
+2020-12 schemas under pinned Ajv/Prettier versions. It uses fail-fast generated validators plus a
+first-issue mirror of the established embedded-schema profile. Runtime code never compiles a
+schema, loads executable code dynamically, resolves schema files, or accesses a network. Only a
+guard-successful document reaches the established exhaustive Validator, preventing invalid node or
+schema fan-out from allocating an input-proportional diagnostic report.
 
 ## Storage layout
 
@@ -130,10 +197,9 @@ repository implementation with equivalent no-clobber and durability semantics.
 
 ## Explicitly deferred
 
-M07-T01 proves immutable exact-byte persistence only. It does not yet provide:
+M07-T01 and M07-T02 prove immutable exact-byte persistence and the first independent integrity
+boundary only. They do not yet provide:
 
-- M07-T02 protocol-version, claimed-revision, available source-digest, or Bundle-size
-  verification;
 - M07-T03 exact package target/version/digest resolution and preflight;
 - M07-T04 surface/capability reference and finite-limit preflight;
 - M07-T05 editable-source storage, mutable channel pointers, or a control-plane transport API;
@@ -141,5 +207,5 @@ M07-T01 proves immutable exact-byte persistence only. It does not yet provide:
   fault matrices; or
 - M07-T11 reference-host channel consumption.
 
-Callers must not treat a successful M07-T01 write as integrity verification or activation
-authority.
+Callers must not treat a successful M07-T01 write as integrity verification, or an M07-T02
+integrity authority as package-preflight or activation authority.

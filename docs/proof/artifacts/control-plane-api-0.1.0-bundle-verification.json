@@ -1,0 +1,1230 @@
+{
+  "schemaVersion": 1,
+  "profile": "desen.control-plane.bundle-verification-proof.v1",
+  "task": "M07-T02",
+  "result": "PASS",
+  "summary": "Untrusted stored bytes yield authenticated DESEN 0.1.0 Bundle authority only after bounded syntax, protocol, complete-size, revision, and available-Source digest verification.",
+  "prerequisites": [
+    {
+      "task": "M07-T01",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+      "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795",
+      "bytes": 22396,
+      "verifiedSha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+    },
+    {
+      "task": "I07-02",
+      "path": "docs/proof/baselines/i07-02-required-exhaustive-equivalence.json",
+      "sha256": "6b876b09f94517e27098076c9f16e207368ef8d31eb70b0ae2f187b15757345d",
+      "bytes": 9406,
+      "verifiedSha256": "6b876b09f94517e27098076c9f16e207368ef8d31eb70b0ae2f187b15757345d"
+    },
+    {
+      "task": "M06-T10",
+      "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+      "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+      "bytes": 13179,
+      "verifiedSha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+    },
+    {
+      "task": "M02-T04",
+      "path": "docs/proof/artifacts/protocol-0.1.0-canonicalization.json",
+      "sha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6",
+      "bytes": 10278,
+      "verifiedSha256": "8da65b96973ee2a592735a6868f45ac1f1d0d059114902769a390fe7de33dcc6"
+    },
+    {
+      "task": "M02-T05",
+      "path": "docs/proof/artifacts/protocol-0.1.0-diagnostics.json",
+      "sha256": "e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b",
+      "bytes": 13223,
+      "verifiedSha256": "e3ec18d8e870e8bbfb8dbfb9958d35208c894519b6ba9af30b6b0bcc5c9e7b8b"
+    },
+    {
+      "task": "M02-T06",
+      "path": "docs/proof/artifacts/protocol-0.1.0-structural-validation.json",
+      "sha256": "7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536",
+      "bytes": 22051,
+      "verifiedSha256": "7e7662e6b20e29452f8c5092e37d2fefe1a416e787816693543b0c2c1a2e6536"
+    }
+  ],
+  "fixtures": [
+    {
+      "role": "officialSource",
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "role": "officialBundle",
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.bundle.json",
+      "bytes": 4894,
+      "sha256": "96be7f18b7b825110d7ba3703c15124ab7a09b9926b01cde43633915eaaf2edf"
+    }
+  ],
+  "claims": {
+    "supportedProtocol": "0.1.0",
+    "failFastStructuralGuard": {
+      "generation": {
+        "result": "PASS",
+        "protocol": "0.1.0",
+        "tools": { "ajv": "8.20.0", "prettier": "3.9.6" },
+        "schemaRoots": 2,
+        "schemas": [
+          {
+            "schemaFile": "desen-source.schema.json",
+            "schemaId": "https://schemas.desen.dev/0.1/desen-source.schema.json",
+            "sha256": "5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3",
+            "bytes": 19588,
+            "exportName": "validateSourceGuard"
+          },
+          {
+            "schemaFile": "desen-bundle.schema.json",
+            "schemaId": "https://schemas.desen.dev/0.1/desen-bundle.schema.json",
+            "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1",
+            "bytes": 20001,
+            "exportName": "validateBundleGuard"
+          }
+        ],
+        "exports": ["validateSourceGuard", "validateBundleGuard", "validateDraft202012Guard"],
+        "allErrors": false,
+        "runtimeCompilation": false,
+        "dynamicLoading": false,
+        "networkAccess": false,
+        "runtimeImports": ["../../bundle-verification-standalone-runtime.js"],
+        "localHelpers": ["jsonEqual", "unicodeLength"],
+        "outputSha256": "96e9c9ed5912fb39879f9e49b15321cd1161878c67f9269d0fb41a5a3f58ff29",
+        "outputBytes": 730791
+      },
+      "runtime": {
+        "rootChildArray": {
+          "childCount": 10000,
+          "inputBytes": 32081,
+          "verification": {
+            "status": "rejected",
+            "stage": "bundle-schema",
+            "codes": ["SCHEMA_INVALID"],
+            "pointers": ["/surfaces/home/root/slots/default/0/id"],
+            "resultFrozen": true,
+            "diagnosticsFrozen": true
+          }
+        },
+        "customEmbeddedSchemas": {
+          "schemaCount": 10000,
+          "inputBytes": 771062,
+          "verification": {
+            "status": "rejected",
+            "stage": "bundle-schema",
+            "codes": ["SCHEMA_INVALID"],
+            "pointers": ["/surfaces/home/state/s0/schema/$ref"],
+            "resultFrozen": true,
+            "diagnosticsFrozen": true
+          }
+        },
+        "exhaustiveBundleCalls": 0,
+        "exhaustiveSourceCalls": 0
+      }
+    },
+    "publicBoundary": {
+      "runtimeExports": [
+        "BUNDLE_INTEGRITY_LIMITS",
+        "BundleStoreError",
+        "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+        "openBundleStore",
+        "verifyBundleStoreEntry"
+      ],
+      "sourceExports": [
+        {
+          "imported": "BUNDLE_INTEGRITY_LIMITS",
+          "exported": "BUNDLE_INTEGRITY_LIMITS",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleIntegrityAuthority",
+          "exported": "BundleIntegrityAuthority",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnostic",
+          "exported": "BundleIntegrityDiagnostic",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnosticCode",
+          "exported": "BundleIntegrityDiagnosticCode",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityLimits",
+          "exported": "BundleIntegrityLimits",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationResult",
+          "exported": "BundleIntegrityVerificationResult",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationStage",
+          "exported": "BundleIntegrityVerificationStage",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleSourceMaterial",
+          "exported": "BundleSourceMaterial",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStore",
+          "exported": "BundleStore",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreEntry",
+          "exported": "BundleStoreEntry",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreError",
+          "exported": "BundleStoreError",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleStoreErrorCode",
+          "exported": "BundleStoreErrorCode",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStorePutResult",
+          "exported": "BundleStorePutResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreReadResult",
+          "exported": "BundleStoreReadResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "OpenBundleStoreOptions",
+          "exported": "OpenBundleStoreOptions",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "exported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "openBundleStore",
+          "exported": "openBundleStore",
+          "module": "./bundle-store.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "verifyBundleStoreEntry",
+          "exported": "verifyBundleStoreEntry",
+          "module": "./bundle-verification.js",
+          "typeOnly": false
+        }
+      ],
+      "packageSelfReference": {
+        "verify": true,
+        "limits": true,
+        "sourceLimitCode": "run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED",
+        "internalReader": false,
+        "internalPredicate": false,
+        "keys": [
+          "BUNDLE_INTEGRITY_LIMITS",
+          "BundleStoreError",
+          "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "openBundleStore",
+          "verifyBundleStoreEntry"
+        ]
+      },
+      "privateAuthorityReaderExported": false
+    },
+    "limits": {
+      "maxBundleUtf8Bytes": 2097152,
+      "maxBundleCanonicalUtf8Bytes": 2097152,
+      "maxSourceUtf8Bytes": 8388608,
+      "maxSourceCanonicalUtf8Bytes": 8388608,
+      "maxJsonDepth": 256,
+      "maxJsonValueOccurrences": 262144,
+      "maxDecodedStringCodeUnits": 4194304,
+      "maxNumberTokenCodeUnits": 1024
+    },
+    "officialBundle": {
+      "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+      "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+      "canonicalBytes": 2173,
+      "canonicalSha256": "fac0ee3d559528af2f4274cdfb21979463cbadd419f2faba584263cc8b4c0247",
+      "availableStatus": "verified",
+      "unavailableStatus": "verified",
+      "availableResultFrozen": true,
+      "unavailableResultFrozen": true,
+      "matchedAuthority": {
+        "publicKeys": [
+          "bundle",
+          "canonicalByteLength",
+          "protocolVersion",
+          "revision",
+          "sourceDigest",
+          "sourceDigestVerification",
+          "storedByteLength"
+        ],
+        "protocolVersion": "0.1.0",
+        "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "sourceDigestVerification": "matched",
+        "storedByteLength": 2173,
+        "canonicalByteLength": 2173,
+        "bundleRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "bundleSourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "authorityFrozen": true,
+        "bundleFrozen": true,
+        "recordFrozen": true,
+        "recordBundleFrozen": true,
+        "publicAndInternalMetadataEqual": true,
+        "authenticated": true
+      },
+      "unavailableAuthority": {
+        "publicKeys": [
+          "bundle",
+          "canonicalByteLength",
+          "protocolVersion",
+          "revision",
+          "sourceDigest",
+          "sourceDigestVerification",
+          "storedByteLength"
+        ],
+        "protocolVersion": "0.1.0",
+        "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "sourceDigestVerification": "not-available",
+        "storedByteLength": 2173,
+        "canonicalByteLength": 2173,
+        "bundleRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "bundleSourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "authorityFrozen": true,
+        "bundleFrozen": true,
+        "recordFrozen": true,
+        "recordBundleFrozen": true,
+        "publicAndInternalMetadataEqual": true,
+        "authenticated": true
+      },
+      "authorityCloneRejected": true
+    },
+    "publicationBearingBundle": {
+      "fixtureRootPublicationProjectedOnlyForGolden": true,
+      "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+      "canonicalBytes": 2270,
+      "canonicalSha256": "adb67ee33f7e8f0428fb2da10c4762c9d4d0517fd90acc65ccbcace24efc3d73",
+      "verification": {
+        "status": "verified",
+        "resultFrozen": true,
+        "authority": {
+          "publicKeys": [
+            "bundle",
+            "canonicalByteLength",
+            "protocolVersion",
+            "revision",
+            "sourceDigest",
+            "sourceDigestVerification",
+            "storedByteLength"
+          ],
+          "protocolVersion": "0.1.0",
+          "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+          "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+          "sourceDigestVerification": "not-available",
+          "storedByteLength": 2270,
+          "canonicalByteLength": 2270,
+          "bundleRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+          "bundleSourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+          "authorityFrozen": true,
+          "bundleFrozen": true,
+          "recordFrozen": true,
+          "recordBundleFrozen": true,
+          "publicAndInternalMetadataEqual": true,
+          "authenticated": true
+        }
+      },
+      "publicationPreserved": true
+    },
+    "completeBundleSizeProfile": {
+      "exactCanonicalLimit": {
+        "targetBytes": 2097152,
+        "verification": {
+          "status": "verified",
+          "resultFrozen": true,
+          "authority": {
+            "publicKeys": [
+              "bundle",
+              "canonicalByteLength",
+              "protocolVersion",
+              "revision",
+              "sourceDigest",
+              "sourceDigestVerification",
+              "storedByteLength"
+            ],
+            "protocolVersion": "0.1.0",
+            "revision": "sha256:ece1ce73c8d0f22e619e40d4fa820f7690e00ec52ea553b5f3aa58f21fdf4816",
+            "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+            "sourceDigestVerification": "not-available",
+            "storedByteLength": 2097152,
+            "canonicalByteLength": 2097152,
+            "bundleRevision": "sha256:ece1ce73c8d0f22e619e40d4fa820f7690e00ec52ea553b5f3aa58f21fdf4816",
+            "bundleSourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+            "authorityFrozen": true,
+            "bundleFrozen": true,
+            "recordFrozen": true,
+            "recordBundleFrozen": true,
+            "publicAndInternalMetadataEqual": true,
+            "authenticated": true
+          }
+        }
+      },
+      "rawLimitExceeded": {
+        "inputBytes": 2097153,
+        "verification": {
+          "status": "rejected",
+          "stage": "bundle-size",
+          "codes": ["BUNDLE_LIMIT_EXCEEDED"],
+          "pointers": [""],
+          "resultFrozen": true,
+          "diagnosticsFrozen": true
+        }
+      },
+      "canonicalExpansionExceeded": {
+        "rawBytes": 502185,
+        "canonicalBytes": 2202185,
+        "verification": {
+          "status": "rejected",
+          "stage": "bundle-size",
+          "codes": ["BUNDLE_LIMIT_EXCEEDED"],
+          "pointers": [""],
+          "resultFrozen": true,
+          "diagnosticsFrozen": true
+        }
+      }
+    },
+    "availableSourceLimits": {
+      "diagnosticCode": "run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED",
+      "rawLimitExceeded": {
+        "inputBytes": 8388609,
+        "verification": {
+          "status": "rejected",
+          "stage": "source-material",
+          "codes": ["run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED"],
+          "pointers": [""],
+          "resultFrozen": true,
+          "diagnosticsFrozen": true
+        }
+      },
+      "parserLimitExceeded": {
+        "inputBytes": 4196235,
+        "decodedPaddingCodeUnits": 4194305,
+        "verification": {
+          "status": "rejected",
+          "stage": "source-json",
+          "codes": ["run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED"],
+          "pointers": ["/authoring/padding"],
+          "resultFrozen": true,
+          "diagnosticsFrozen": true
+        }
+      },
+      "exactCanonicalLimit": {
+        "targetBytes": 8388608,
+        "inputBytes": 8388608,
+        "verification": {
+          "status": "verified",
+          "resultFrozen": true,
+          "authority": {
+            "publicKeys": [
+              "bundle",
+              "canonicalByteLength",
+              "protocolVersion",
+              "revision",
+              "sourceDigest",
+              "sourceDigestVerification",
+              "storedByteLength"
+            ],
+            "protocolVersion": "0.1.0",
+            "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+            "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+            "sourceDigestVerification": "matched",
+            "storedByteLength": 2173,
+            "canonicalByteLength": 2173,
+            "bundleRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+            "bundleSourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+            "authorityFrozen": true,
+            "bundleFrozen": true,
+            "recordFrozen": true,
+            "recordBundleFrozen": true,
+            "publicAndInternalMetadataEqual": true,
+            "authenticated": true
+          }
+        }
+      },
+      "canonicalExpansionExceeded": {
+        "rawBytes": 8388592,
+        "canonicalBytes": 8388609,
+        "verification": {
+          "status": "rejected",
+          "stage": "source-json",
+          "codes": ["run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED"],
+          "pointers": [""],
+          "resultFrozen": true,
+          "diagnosticsFrozen": true
+        }
+      }
+    },
+    "diagnostics": {
+      "requiredCodes": [
+        "BUNDLE_LIMIT_EXCEEDED",
+        "REVISION_MISMATCH",
+        "SCHEMA_INVALID",
+        "SOURCE_DIGEST_MISMATCH",
+        "UNKNOWN_CORE_FIELD",
+        "UNSUPPORTED_PROTOCOL",
+        "run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED"
+      ],
+      "closedFailureStages": [
+        "entry-capture",
+        "bundle-size",
+        "bundle-json",
+        "bundle-protocol",
+        "bundle-schema",
+        "bundle-revision",
+        "source-material",
+        "source-json",
+        "source-protocol",
+        "source-schema",
+        "source-digest",
+        "internal"
+      ],
+      "sourceMismatch": {
+        "status": "rejected",
+        "stage": "source-digest",
+        "codes": ["SOURCE_DIGEST_MISMATCH"],
+        "pointers": ["/sourceDigest"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true
+      },
+      "revisionMismatch": {
+        "status": "rejected",
+        "stage": "bundle-revision",
+        "codes": ["REVISION_MISMATCH"],
+        "pointers": ["/revision"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true
+      },
+      "unsupportedProtocol": {
+        "status": "rejected",
+        "stage": "bundle-protocol",
+        "codes": ["UNSUPPORTED_PROTOCOL"],
+        "pointers": ["/desen"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true
+      },
+      "schemaInvalid": {
+        "status": "rejected",
+        "stage": "bundle-schema",
+        "codes": ["SCHEMA_INVALID"],
+        "pointers": ["/entry"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true
+      },
+      "malformedSyntax": {
+        "status": "rejected",
+        "stage": "bundle-json",
+        "codes": ["SCHEMA_INVALID"],
+        "pointers": [""],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true
+      },
+      "duplicateMember": {
+        "status": "rejected",
+        "stage": "bundle-json",
+        "codes": ["SCHEMA_INVALID"],
+        "pointers": ["/kind"],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true
+      },
+      "oversizedIngress": {
+        "status": "rejected",
+        "stage": "bundle-size",
+        "codes": ["BUNDLE_LIMIT_EXCEEDED"],
+        "pointers": [""],
+        "resultFrozen": true,
+        "diagnosticsFrozen": true
+      }
+    },
+    "authority": {
+      "returnedOnlyOnSuccess": true,
+      "publicMetadata": {
+        "publicKeys": [
+          "bundle",
+          "canonicalByteLength",
+          "protocolVersion",
+          "revision",
+          "sourceDigest",
+          "sourceDigestVerification",
+          "storedByteLength"
+        ],
+        "protocolVersion": "0.1.0",
+        "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "sourceDigestVerification": "matched",
+        "storedByteLength": 2173,
+        "canonicalByteLength": 2173,
+        "bundleRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "bundleSourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "authorityFrozen": true,
+        "bundleFrozen": true,
+        "recordFrozen": true,
+        "recordBundleFrozen": true,
+        "publicAndInternalMetadataEqual": true,
+        "authenticated": true
+      },
+      "unavailableSourceMetadata": {
+        "publicKeys": [
+          "bundle",
+          "canonicalByteLength",
+          "protocolVersion",
+          "revision",
+          "sourceDigest",
+          "sourceDigestVerification",
+          "storedByteLength"
+        ],
+        "protocolVersion": "0.1.0",
+        "revision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "sourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "sourceDigestVerification": "not-available",
+        "storedByteLength": 2173,
+        "canonicalByteLength": 2173,
+        "bundleRevision": "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+        "bundleSourceDigest": "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+        "authorityFrozen": true,
+        "bundleFrozen": true,
+        "recordFrozen": true,
+        "recordBundleFrozen": true,
+        "publicAndInternalMetadataEqual": true,
+        "authenticated": true
+      },
+      "runtimeAuthenticated": true,
+      "shallowCloneRejected": true,
+      "immutable": true,
+      "internalMetadataEqual": true
+    },
+    "precedence": [
+      "exact entry capture and raw Bundle byte ceiling",
+      "bounded Bundle UTF-8 and JSON syntax",
+      "supported Bundle protocol",
+      "complete canonical Bundle-size premeasurement",
+      "fail-fast exact Bundle structural schema and exhaustive success consistency fence",
+      "stored key, embedded revision, and recalculated revision equality",
+      "exact Source availability envelope and raw Source byte ceiling",
+      "bounded Source UTF-8 and JSON syntax",
+      "supported Source protocol",
+      "complete canonical Source-size premeasurement",
+      "fail-fast exact Source structural schema and exhaustive success consistency fence",
+      "available Source digest equality"
+    ],
+    "registrations": {
+      "app": {
+        "name": "@desen/control-plane-api",
+        "main": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "exports": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+        "packageTest": "vitest run test/bundle-verification.test.ts test/bundle-verification-guard.test.ts",
+        "guardGenerator": "node scripts/generate-bundle-verification-guards.mjs",
+        "guardVerifier": "node scripts/verify-bundle-verification-guards.mjs",
+        "protocolDependency": "workspace:*",
+        "validatorDependency": "workspace:*",
+        "ajvBuildDependency": "8.20.0",
+        "prettierBuildDependency": "3.9.6"
+      },
+      "rootScripts": {
+        "generate": "pnpm verify:control-plane-bundle-store && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-verification && node scripts/generate-control-plane-bundle-verification-proof.mjs",
+        "verify": "pnpm verify:control-plane-bundle-store && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-verification && node scripts/verify-control-plane-bundle-verification.mjs",
+        "test": "pnpm verify:control-plane-bundle-store && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-verification && node --test tests/control-plane-bundle-verification.test.mjs"
+      },
+      "aggregateImmediatePredecessor": "control-plane-bundle-store",
+      "aggregateSuccessorExtensionSafe": true,
+      "ciTuple": [
+        "control-plane-bundle-verification",
+        "scripts/verify-control-plane-bundle-verification.mjs",
+        "tests/control-plane-bundle-verification.test.mjs"
+      ],
+      "ciTupleExactInRunnerAndInventory": true,
+      "publicSourceExports": [
+        {
+          "imported": "BUNDLE_INTEGRITY_LIMITS",
+          "exported": "BUNDLE_INTEGRITY_LIMITS",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleIntegrityAuthority",
+          "exported": "BundleIntegrityAuthority",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnostic",
+          "exported": "BundleIntegrityDiagnostic",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnosticCode",
+          "exported": "BundleIntegrityDiagnosticCode",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityLimits",
+          "exported": "BundleIntegrityLimits",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationResult",
+          "exported": "BundleIntegrityVerificationResult",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationStage",
+          "exported": "BundleIntegrityVerificationStage",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleSourceMaterial",
+          "exported": "BundleSourceMaterial",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStore",
+          "exported": "BundleStore",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreEntry",
+          "exported": "BundleStoreEntry",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreError",
+          "exported": "BundleStoreError",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleStoreErrorCode",
+          "exported": "BundleStoreErrorCode",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStorePutResult",
+          "exported": "BundleStorePutResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreReadResult",
+          "exported": "BundleStoreReadResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "OpenBundleStoreOptions",
+          "exported": "OpenBundleStoreOptions",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "exported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "openBundleStore",
+          "exported": "openBundleStore",
+          "module": "./bundle-store.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "verifyBundleStoreEntry",
+          "exported": "verifyBundleStoreEntry",
+          "module": "./bundle-verification.js",
+          "typeOnly": false
+        }
+      ]
+    },
+    "traceRows": [
+      {
+        "id": "PIPE-010",
+        "section": "24.1",
+        "line": 1305,
+        "anchor": "verify document syntax and supported protocol",
+        "summary": "Activation step 2: verify syntax and protocol version",
+        "owners": ["M07-T02"],
+        "tests": ["M07-T09"],
+        "evidence": "Malformed and unsupported bundles never stage"
+      },
+      {
+        "id": "PIPE-011",
+        "section": "24.1",
+        "line": 1306,
+        "anchor": "verify `revision`",
+        "summary": "Activation step 3: verify revision and publication integrity",
+        "owners": ["M07-T02"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Tampered revision fails before activation"
+      },
+      {
+        "id": "R-007",
+        "section": "5.5",
+        "line": 242,
+        "anchor": "source document is not directly activated",
+        "summary": "Production activates validated bundles rather than source or authoring state",
+        "owners": ["M06-T09", "M07-T02"],
+        "tests": ["M05-T08", "M07-T10"],
+        "evidence": "Reference host accepts bundles only after publication and preflight"
+      },
+      {
+        "id": "R-031",
+        "section": "11.5",
+        "line": 539,
+        "anchor": "mismatch is an integrity error",
+        "summary": "Available digest material is verified and mismatch prevents activation",
+        "owners": ["M06-T09", "M07-T02"],
+        "tests": ["M07-T09", "M10-T07"],
+        "evidence": "Source or revision tampering never becomes active",
+        "bcp14": ["N-016"]
+      },
+      {
+        "id": "R-138",
+        "section": "30.4",
+        "line": 1629,
+        "anchor": "reject unsupported versions before activation",
+        "summary": "Runtimes declare supported protocol versions, reject unsupported input early, and never guess forward compatibility",
+        "owners": ["M02-T06", "M07-T02"],
+        "tests": ["M02-T13", "M07-T09"],
+        "evidence": "Unsupported version fails before staging or activation"
+      },
+      {
+        "id": "D-030",
+        "section": "Appendix B",
+        "line": 1884,
+        "anchor": "REVISION_MISMATCH",
+        "summary": "Bundle revision differs from canonical content",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M02-T04", "M07-T02"],
+        "tests": ["M02-T04", "M07-T09"],
+        "evidence": "Canonical revision tamper vector"
+      },
+      {
+        "id": "D-031",
+        "section": "Appendix B",
+        "line": 1885,
+        "anchor": "SOURCE_DIGEST_MISMATCH",
+        "summary": "Bundle source digest differs from source",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M06-T08", "M07-T02"],
+        "tests": ["M06-T10", "M07-T09"],
+        "evidence": "Available-source digest mismatch vector"
+      },
+      {
+        "id": "D-034",
+        "section": "Appendix B",
+        "line": 1888,
+        "anchor": "UNSUPPORTED_PROTOCOL",
+        "summary": "Runtime does not support the document version",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M02-T06", "M07-T02"],
+        "tests": ["M02-T13", "M07-T09"],
+        "evidence": "Unsupported protocol validation and activation vectors"
+      },
+      {
+        "id": "D-035",
+        "section": "Appendix B",
+        "line": 1889,
+        "anchor": "BUNDLE_LIMIT_EXCEEDED",
+        "summary": "Bundle violates configured resource limits",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M07-T02", "M07-T04"],
+        "tests": ["M07-T09", "M12-T05"],
+        "evidence": "Bundle byte, depth, and materialization limit vectors"
+      }
+    ]
+  },
+  "trackedFiles": [
+    {
+      "path": "apps/control-plane-api/package.json",
+      "bytes": 1285,
+      "sha256": "734609cdd94f1e93030f75a7009505a0da4988d31d955f7100aee256cb0c2a5b"
+    },
+    {
+      "path": "apps/control-plane-api/src/index.ts",
+      "bytes": 896,
+      "sha256": "58fe0462d7d35a1231259b6386006f950600d401113f229debbe057f0120a4df"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-contract.ts",
+      "bytes": 6480,
+      "sha256": "c1696631698a449e1dfb4dd83079c6892ea66a6d9bbc9b525a08f0db81c98b70"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-internal.ts",
+      "bytes": 27667,
+      "sha256": "7e8c5defbe5bb352e0a60f112350f19a62deb94cb807e2fa154697eb37d22aa9"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-schema-guard.ts",
+      "bytes": 13220,
+      "sha256": "af11f9a19326b3e12d400ae4142284401630315c71a87bece6fe17dad78563f0"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-standalone-runtime.ts",
+      "bytes": 1411,
+      "sha256": "f48d8ef9cf0edd6a34480eec7895bb3f78ff41d2c798658009d24edec33e26a6"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification.ts",
+      "bytes": 1250,
+      "sha256": "1b1ed90b149f8a65f5895df6133c1991bd1e3c0e5b45e14b10a94d3c8499218f"
+    },
+    {
+      "path": "apps/control-plane-api/src/generated/0.1.0/bundle-verification-guards.ts",
+      "bytes": 730791,
+      "sha256": "96e9c9ed5912fb39879f9e49b15321cd1161878c67f9269d0fb41a5a3f58ff29"
+    },
+    {
+      "path": "apps/control-plane-api/test/bundle-verification-guard.test.ts",
+      "bytes": 8458,
+      "sha256": "0b29e79d794bcec94f0d04e26f0275ff332a368ca112208983b51bc549db0395"
+    },
+    {
+      "path": "apps/control-plane-api/test/bundle-verification.test.ts",
+      "bytes": 28097,
+      "sha256": "776971e60f42f42215b6d02751117384c70e857501b09b16a03ebefcdf3aee38"
+    },
+    {
+      "path": "apps/control-plane-api/test/bundle-verification.types.ts",
+      "bytes": 2267,
+      "sha256": "9ea261360a695c10f063205acd07d3c02a7ab960498163474b2c3158346879f1"
+    },
+    {
+      "path": "apps/control-plane-api/scripts/generate-bundle-verification-guards.mjs",
+      "bytes": 890,
+      "sha256": "361a62a35e7d53f142f9860de941a1762b203714e24bb625e4800b9388392e8e"
+    },
+    {
+      "path": "apps/control-plane-api/scripts/verify-bundle-verification-guards.mjs",
+      "bytes": 695,
+      "sha256": "5497039578eaeb8a56e9c6242fe5788288d70d75911a82b115832547218a969c"
+    },
+    {
+      "path": "apps/control-plane-api/scripts/lib/bundle-verification-guard-codegen.mjs",
+      "bytes": 18515,
+      "sha256": "1d6c28655ce48c8f507edb9462968f43ebefce6509918b53521df0f79dd9c7af"
+    },
+    {
+      "path": "scripts/generate-control-plane-bundle-verification-proof.mjs",
+      "bytes": 863,
+      "sha256": "d55020ac3322af10552a995b5515853ecc167c7b4596803be1fe8563f74651ee"
+    },
+    {
+      "path": "scripts/verify-control-plane-bundle-verification.mjs",
+      "bytes": 692,
+      "sha256": "6007aecbf34d918b60b98126697fd1427ee58b80a58951130f44dab7ddd42010"
+    },
+    {
+      "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+      "bytes": 76998,
+      "sha256": "d317cef88d2d3fd126bf9ce1d7327cec77aecfdbec9724a205365a63c30521d1"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/control-plane-bundle-verification.test.mjs",
+      "bytes": 19794,
+      "sha256": "491dd3f45000db8b392f33ad66f380d6c0209aa0209353725cb5310212e71683"
+    },
+    {
+      "path": "package.json",
+      "bytes": 57321,
+      "sha256": "34688d939024b598bddaf057767ad028c3d00529cdbaa6fa33de75edd0980a6a"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 46292,
+      "sha256": "773ce3520cc088e810c686cea3ad816ec0f52211e1bc156c3676623a71b09f23"
+    },
+    {
+      "path": "scripts/ci/exhaustive-workload-inventory.mjs",
+      "bytes": 44703,
+      "sha256": "dee3450aaa3496f4850c79597f183afa138ad756fd6709c1291ff9d8bab5c9d2"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+      "bytes": 19588,
+      "sha256": "5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+      "bytes": 20001,
+      "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1"
+    }
+  ],
+  "distribution": [
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-contract.d.ts",
+      "bytes": 6171,
+      "sha256": "667d6d1b079b22d40b330d586b59159ab763935f2cdaae12a138995ebc7cc028"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-contract.d.ts.map",
+      "bytes": 2423,
+      "sha256": "1b60c43a6cc9d4985666e821ca140dd5dcae651776931587ae50e2e80a8ccf37"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-contract.js",
+      "bytes": 1106,
+      "sha256": "82095c8de6b2cfd8e869def67110235addf4765fdb27b4ebe9f2d768e09233fb"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-contract.js.map",
+      "bytes": 475,
+      "sha256": "b06813fb7adfcb71be789ede04e53bd296a5c426bd9bef4d01cbfaa4ca032fd0"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-internal.d.ts",
+      "bytes": 69,
+      "sha256": "e5405e2741dd8f1f6616836ec2e5f1a4a7a78d27d9afc7950cd1c23af01fddee"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-internal.d.ts.map",
+      "bytes": 150,
+      "sha256": "c033dcf54bd8f56d766216fb751fee0992f5d45e46f8987814df1a9a23c82e52"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-internal.js",
+      "bytes": 24282,
+      "sha256": "24e83ff9affadf61f27d0d0c48e653be2b40879e9f21322dd30ef0318b0ff06a"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-internal.js.map",
+      "bytes": 22736,
+      "sha256": "0084c80d697adafae9728f4ce4fc785b0b7fc9ae0a72d358209af741f39a3fa3"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-schema-guard.d.ts",
+      "bytes": 347,
+      "sha256": "05071345eb07e366e13b086b358d2e2d9305d39afa25846aea030afe0b70fba9"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-schema-guard.d.ts.map",
+      "bytes": 442,
+      "sha256": "07110bf62434ed83678e4aabafa5b942e808e1f886f0cc72e9b804a3577711a8"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-schema-guard.js",
+      "bytes": 12276,
+      "sha256": "22043677dd79de56f863464998edd8119f32502431196a606e3b120c1ab83567"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-schema-guard.js.map",
+      "bytes": 12348,
+      "sha256": "398f7d6cb9118d244cc550c1851605bf674fdef2b73f603b232df95a0c8b2ce5"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-standalone-runtime.d.ts",
+      "bytes": 375,
+      "sha256": "a70f1e2bda8c50f9be18af6b740cc647e2cd4740ffb8b88c8388453f9afbdc2e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-standalone-runtime.d.ts.map",
+      "bytes": 322,
+      "sha256": "fdcac59aa741b58c6d905f8126e3050fd28570cc78762482d7b360935e850d12"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-standalone-runtime.js",
+      "bytes": 1456,
+      "sha256": "211e8afbeb624fdf992514a9b6aa99dcc289732833df2fecdc0dc48d04d6509c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-standalone-runtime.js.map",
+      "bytes": 1651,
+      "sha256": "3f9f088d6aaff4bcce3cd05e4ffa5ce8362049bb653a8323f98e1a805df3808f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification.d.ts",
+      "bytes": 1142,
+      "sha256": "e644539fc6b163f528bcdf8cda704ab13b81544b1be5cf7aed328a9b5574952c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification.d.ts.map",
+      "bytes": 349,
+      "sha256": "dd2383a6056a39475bc4fa7464ed79ff98e737dbec7a71d3cfdcd11c970662df"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification.js",
+      "bytes": 1028,
+      "sha256": "640bb02bbc9e35aa6dda091c4e02048a69ab4f3f0e6d83a4f61d7818408c66f5"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification.js.map",
+      "bytes": 299,
+      "sha256": "0a348e862744f898c97c3e24cc99c98f12a2c3d02f71b3f7f81c034c10a34396"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/bundle-verification-guards.d.ts",
+      "bytes": 3370,
+      "sha256": "2928fda0f0bb939ec029cf223aa125ae6f3a4a939e34bed4ee99848571eee9d4"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/bundle-verification-guards.d.ts.map",
+      "bytes": 666,
+      "sha256": "abbb78c646cab73278c7e3d5176239b3c982f309cebcea1e9a45d9e829bad22f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/bundle-verification-guards.js",
+      "bytes": 1067394,
+      "sha256": "fa601b42c4f6be533eb1c8af0f24d43a8fdf3b87a77afb0898e2ad69965a6579"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/bundle-verification-guards.js.map",
+      "bytes": 504347,
+      "sha256": "aeda3b901705729f68c309524c038f59b0ee5d50d0884d0f3e9ec85f5c971755"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts",
+      "bytes": 899,
+      "sha256": "9bf4bef4c690c138df002fdc44c4e83a0ef94c30eb72a925c39f7253eeffa680"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts.map",
+      "bytes": 539,
+      "sha256": "ead852d17b09a440050e9c56d456bf403b3b8ff6f7e09910e87dd659f4e68a86"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js",
+      "bytes": 468,
+      "sha256": "4adf7d465b29b36ba60fdd03894b0abc08119f18dbf12a361a6f2da3eea44f69"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js.map",
+      "bytes": 305,
+      "sha256": "797b2c0d81af06f50abb1bfc52b7e32861c23cb4dfb28023141e76ba76875e67"
+    }
+  ],
+  "tests": {
+    "packageRuntimeCases": 17,
+    "packageRuntimeCaseNames": [
+      "authenticates the Publisher golden with matching or unavailable Source evidence",
+      "accepts noncanonical whitespace and exact offset views without retaining caller bytes",
+      "accepts authoring-only Source changes because the normative digest omits authoring",
+      "enforces the exact 2 MiB stored and complete canonical Bundle boundary",
+      "enforces the exact 8 MiB complete canonical Source boundary",
+      "rejects malformed UTF-8, a BOM, trailing data, duplicate decoded keys, lone surrogates, and nonfinite numbers",
+      "stops at fixed depth, value-count, number-token, and Source-string budgets",
+      "gives an explicit unsupported protocol precedence before schema and revision checks",
+      "preserves deterministic structural diagnostics without granting authority",
+      "requires the stored, embedded, and independently calculated revisions to agree",
+      "independently validates available Source bytes and rejects digest mismatch",
+      "rejects unsupported or non-interoperable available Source material",
+      "captures only exact own-data entry and Source envelopes without invoking accessors",
+      "accepts authentic Uint8Array subclasses and rejects spoofed, proxied, shared, or wrong views",
+      "rejects malformed Source availability envelopes after Bundle integrity succeeds",
+      "does not observe Source material after an earlier revision rejection",
+      "keeps authority identity unforgeable and returns no partial data on rejection"
+    ],
+    "packageGuardCases": 6,
+    "packageGuardCaseNames": [
+      "matches exhaustive structural success across every frozen valid Source and Bundle fixture",
+      "cuts off custom embedded-schema fan-out before either exhaustive validator",
+      "cuts off Draft meta-schema fan-out before exhaustive validation",
+      "cuts off root child-array diagnostic fan-out before exhaustive validation",
+      "stops one embedded schema at its first custom-profile issue",
+      "retains one stable root code and offending-property pointer"
+    ],
+    "packageFocusedCases": 23,
+    "compileTimeNegativeCases": 9,
+    "compileTimeNegativeClaims": [
+      "Source availability must be supplied explicitly.",
+      "Caller-selected limits or helper injection cannot weaken the fixed profile.",
+      "Available Source evidence must carry a Uint8Array byte view.",
+      "The opaque authority cannot be created structurally.",
+      "An authority exposes no raw byte view.",
+      "Integrity authority grants no activation, channel, or package-resolution API.",
+      "The verified Bundle snapshot is recursively immutable.",
+      "Rejected results never carry partial authority.",
+      "The finite verification profile is immutable."
+    ],
+    "rootMutationCases": 16,
+    "rootMutationCaseNames": [
+      "[authority] builds the exact versioned M07-T02 artifact and golden receipt",
+      "[determinism] two independent evidence builds produce byte-identical artifacts",
+      "[authority] verifies exact artifact bytes and one final proof-document pin",
+      "[artifact] rejects one changed evidence byte",
+      "[proof] rejects pending, wrong, duplicate, or missing final pins",
+      "[prerequisites] rejects one changed byte in every direct prerequisite",
+      "[implementation] rejects changed contract, parser, verifier, or type authority receipts",
+      "[registration] rejects package-root, package-script, aggregate, or CI tuple drift",
+      "[traceability] rejects owner or identity drift in all nine exact rows",
+      "[runtime] rejects changed official authority or diagnostic receipts",
+      "[tests] rejects skipped focused cases or removed compile-time negatives",
+      "[filesystem] rejects symlinked artifact and proof-document authority",
+      "[writer] atomically writes exact deterministic evidence bytes",
+      "[writer] preserves the old destination and removes a tampered temporary",
+      "[options] rejects unknown, accessor-backed, shared-memory, or hostile authority",
+      "[immutability] freezes the evidence graph and preserves honest later-task nonclaims"
+    ]
+  },
+  "nonclaims": [
+    "M07-T03 still owns exact package target, version, artifact-digest resolution, and package preflight.",
+    "M07-T04 still owns surface/capability reference preflight and the remaining finite runtime limits.",
+    "M07-T05 still owns editable Source persistence, immutable Bundle integration, mutable channel pointers, and the local transport API.",
+    "M07-T06 through M07-T11 still own staging, activation, last-known-good state, crash recovery, fault injection, concurrency, and reference-host channel consumption.",
+    "Source bytes are verified only when explicitly supplied to this stateless boundary; this task does not persist, retrieve, select, or trust a Source location.",
+    "Publication signatures and owner-specific publication measurements are not verified or claimed by M07-T02.",
+    "Successful verification is not package preflight, staging, activation, or durable last-known-good authority."
+  ],
+  "reproduction": [
+    "pnpm verify:control-plane-bundle-store",
+    "pnpm --filter @desen/control-plane-api... build",
+    "pnpm --filter @desen/control-plane-api typecheck",
+    "pnpm --filter @desen/control-plane-api test:bundle-verification",
+    "node scripts/generate-control-plane-bundle-verification-proof.mjs",
+    "node scripts/verify-control-plane-bundle-verification.mjs",
+    "node --test tests/control-plane-bundle-verification.test.mjs"
+  ]
+}

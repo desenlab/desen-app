@@ -93,28 +93,28 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 130 steps across the seven reviewed execution classes", () => {
+test("owns exactly 132 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 130);
-  assert.equal(new Set(ALL_STEP_IDS).size, 130);
+  assert.equal(ALL_STEP_IDS.length, 132);
+  assert.equal(new Set(ALL_STEP_IDS).size, 132);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 1,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 66,
-    PROOF_OS_TEMP_ISOLATED: 45,
+    PROOF_OS_TEMP_ISOLATED: 47,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
 });
 
 test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 61);
-  assert.equal(new Set(PROOF_IDS).size, 61);
+  assert.equal(PROOF_IDS.length, 62);
+  assert.equal(new Set(PROOF_IDS).size, 62);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
     "protocol-traceability",
@@ -128,13 +128,14 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "runtime-core-state-navigation-actions",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 50);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 51);
   assert.deepEqual(CHILD_PROCESS_VERIFIER_PROOF_IDS, [
     "publisher-catalog-pinning",
     "publisher-bundle-publication",
     "publisher-official-golden",
     "publisher-invalid-source-matrix",
     "control-plane-bundle-store",
+    "control-plane-bundle-verification",
   ]);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
@@ -177,7 +178,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    61,
+    62,
   );
 });
 
@@ -482,7 +483,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 112,
+    NONE: 114,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

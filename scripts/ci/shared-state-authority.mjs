@@ -36,7 +36,7 @@ export const EXECUTION_CLASSES = Object.freeze({
   PROOF_WORKSPACE_TEMP_EXCLUSIVE: "PROOF_WORKSPACE_TEMP_EXCLUSIVE",
 });
 
-/** Exact reviewed proof ids in the I07-02 exhaustive workload universe. */
+/** Exact reviewed proof ids in the live append-only exhaustive workload universe. */
 export const PROOF_IDS = Object.freeze([
   "protocol-snapshot",
   "protocol-traceability",
@@ -99,6 +99,7 @@ export const PROOF_IDS = Object.freeze([
   "publisher-official-golden",
   "publisher-invalid-source-matrix",
   "control-plane-bundle-store",
+  "control-plane-bundle-verification",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -125,6 +126,7 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "publisher-official-golden",
   "publisher-invalid-source-matrix",
   "control-plane-bundle-store",
+  "control-plane-bundle-verification",
 ]);
 
 /** The exact proof whose verifier and root test load a reviewed native Rolldown addon. */
@@ -423,8 +425,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 130) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 130 steps.", {
+if (METADATA_BY_STEP_ID.size !== 132) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 132 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

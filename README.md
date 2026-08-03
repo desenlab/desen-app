@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████░░░░░░░░░░░░` **75 / 145 tasks complete (52%)**
+**Overall:** `█████████████░░░░░░░░░░░░` **76 / 145 tasks complete (52%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,9 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M07:** `█░░░░░░░░░░` **1 / 11 tasks complete (9%)**
+**M07:** `██░░░░░░░░░` **2 / 11 tasks complete (18%)**
 
-**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T02` (ready, `NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T03` (ready, `NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -38,21 +38,33 @@ milestones.
 **M07-T01 checkpoint:** the built `@desen/control-plane-api` package now stores the official
 2,173-byte Bundle exactly once under its revision. Identical retries preserve the winner, different
 exact bytes conflict, and concurrent writers cannot replace or mix that winner; unsafe filesystem
-paths fail closed. Integrity verification, channels, activation, last-known-good recovery, and G07
-remain later work.
+paths fail closed. Channels, activation, last-known-good recovery, and G07 remain later work.
 
-**I07-02 infrastructure checkpoint:** the official GitHub `Quality gate` now executes the
-code-owned 130-workload, 61-proof-pair plan as `REQUIRED + EXHAUSTIVE`. Its exact shared-state
-classes, cancellation behavior, tracked/untracked workspace guards, and same-revision equality
-with the retained sequential runner passed locally and in hosted CI. The cutover run passed in 10
+**M07-T02 checkpoint:** the separate built-package verifier now treats stored Bundle and available
+Source bytes as untrusted input. It applies bounded strict JSON, exact raw and canonical 2 MiB
+Bundle ceilings, a generated fail-fast guard over the frozen 0.1.0 schemas, triple revision
+equality, and—when supplied—raw/canonical 8 MiB Source ceilings plus independent validation and
+digest calculation over real Source bytes. Only complete success yields a frozen,
+runtime-authenticated integrity authority; it still grants no package, channel, staging, or
+activation power. The [executable integrity proof](docs/proof/CONTROL-PLANE-BUNDLE-VERIFICATION.md)
+is pinned by `sha256:db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a`.
+M07-T03 will add exact installed-package preflight.
+
+**I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
+61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current successor contains 132 workloads and 62
+proof pairs after M07-T02 registration. Exact shared-state classes, cancellation behavior,
+tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
+passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
 minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
+current reviewed checkpoint contains nine frozen artifacts and eighteen live readers at
+`f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882`. The
 temporary shadow workflow and modular comparison adapter/test are removed, closing
 `DEBT-I07-008`. The sequential runner remains available only through explicit manual
 `legacy-rollback`; I07-02 adds no affected-path selector. Remaining reader and retirement work
 stays machine-owned by I07-04 and I07-05 in the
 [debt register](docs/plan/DEBT-REGISTER.md). Exact evidence is preserved in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json); implementation
-progress remains 75/145 and M07-T02 is ready to start.
+progress is 76/145 and M07-T03 is ready to start.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

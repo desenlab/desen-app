@@ -76,11 +76,11 @@ const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm boundaries",
 ]);
 const EXPECTED_PREREQUISITE_SHA256 =
-  "bfce7beb80d98b29a21c43263c422e87218738ed0c040e6a45c60a35fb8f8290";
+  "00f6e1eaf1218ce2ad473e603927548ab995f241dc2496882ebe3f03019088bb";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "3c6ae8ee7f034a5e6204e2996f096b475fbef38ea34417effab6850794fc3fa2";
+  "facf5da7879692a2c4bb5e3a0a5a6850b5d7f772e3307be16387557ec66db30d";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "6825adfa7c2569fdfd9dbae167f980960469c47e187a7a26423d2e0ec1d74fef";
+  "32f0bda43787914cd7fe4664272efd058c866dad5fc6333f5a528eb65781c78c";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -387,6 +387,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "control-plane-bundle-store",
     "scripts/verify-control-plane-bundle-store.mjs",
     "tests/control-plane-bundle-store.test.mjs",
+  ],
+  [
+    "control-plane-bundle-verification",
+    "scripts/verify-control-plane-bundle-verification.mjs",
+    "tests/control-plane-bundle-verification.test.mjs",
   ],
 ]);
 
@@ -760,7 +765,7 @@ function validateNode(rawNode, index) {
   workload.label = exactString(workload.label, label + ".label", 240);
   workload.command = exactString(workload.command, label + ".command", 32);
   workload.args = stringArray(workload.args, label + ".args", 64);
-  workload.dependencies = stringArray(workload.dependencies, label + ".dependencies", 130);
+  workload.dependencies = stringArray(workload.dependencies, label + ".dependencies", 132);
   workload.executionClass = exactString(workload.executionClass, label + ".executionClass", 64);
   workload.sharedState = validateSharedState(workload.sharedState, label + ".sharedState");
 
@@ -1241,7 +1246,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "bc8644fc1147166f98f905ec5fef1e6d81ef6e639008de9bd53e7256825abb94";
+  "701faf129a5c26572ed13b3a67eef8f9d32eeaea364847b10427a156b622c825";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {
