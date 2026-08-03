@@ -52,18 +52,20 @@ I07 introduces modular execution in evidence-first phases. I07-01's historical
 authoritative. Its local and hosted results are preserved evidence, not proof of the I07-02
 required-workflow cutover.
 
-I07-02 established the scheduler-neutral 130-node, 61-proof-unit inventory independently from both
-schedulers. Contract and hostile-input tests cover exact ordered ids, labels, commands, arguments,
+I07-02 established the scheduler-neutral 130-node, 61-proof-unit cutover inventory independently
+from both schedulers. M07-T02 appends one verifier/root-test pair, so the live successor contains
+132 nodes and 62 proof units without rewriting that frozen baseline. Contract and hostile-input
+tests cover exact ordered ids, labels, commands, arguments,
 dependencies, execution classes, and shared-state records; omission, duplication, reorder,
 substitution, cycles, unknown classes, shell syntax, writer insertion, and affected-only metadata
 must fail closed. A separate rollback-only adapter proves exact equality with the retained
 sequential plan and rejects PASS receipts containing missing, duplicated, skipped, not-run,
 cancelled, timed-out, failed, or unclosed work.
 
-Shared-state mutation tests cover all seven exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 66 `PROOF_READ_ONLY`, 45
+Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 66 `PROOF_READ_ONLY`, 47
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 50 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 51 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -72,13 +74,14 @@ child-process denial, the exact root-test Node-harness grant, native-addon denia
 inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and identity-checked cleanup. Child
 runtime probes are permitted only for the verifier side of
 `publisher-catalog-pinning`, `publisher-bundle-publication`, `publisher-official-golden`,
-`publisher-invalid-source-matrix`, and `control-plane-bundle-store`. Native-addon authority is
+`publisher-invalid-source-matrix`, `control-plane-bundle-store`, and
+`control-plane-bundle-verification`. Native-addon authority is
 permitted only for the exact `reference-host-web-source-audit` verifier/root-test pair and the
 `publisher-invalid-source-matrix` root test. Regression tests prove that its verifier and every
 other unlisted step remain denied; the source-audit verifier remains workspace-read-only.
 
-The probes also pin all eighteen exact Node-permission compatibility workloads and their policy
-distribution: 112 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
+The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
+distribution: 114 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
 external-source, symlink-parent, unreviewed-workspace-target, and unsupported-option escapes.
@@ -127,4 +130,7 @@ Current reader compatibility is distinct from frozen task evidence. Security har
 one live reader through the reviewed checkpoint append procedure only when every previously pinned
 checkpoint digest, frozen artifact, claim/nonclaim scope, and historical projection remains
 unchanged and the full existing plus new regression suite passes. The checkpoint is inert data and
-cannot select executable commands.
+cannot select executable commands. M07-T02 follows that procedure in checkpoint sequence 3: the
+current head `f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882`
+authenticates nine artifacts and eighteen readers while retaining both historical checkpoint
+digests unchanged.

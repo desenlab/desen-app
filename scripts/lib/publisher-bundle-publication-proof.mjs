@@ -187,7 +187,7 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
 const APPROVED_CURRENT_COMPATIBILITY_RECEIPTS = Object.freeze({
   [EXECUTION_PREFLIGHT_COMPATIBILITY_READER]: Object.freeze({
     bytes: 70_038,
-    sha256: "29332971e7a9c0e45e66d145c073dbd1a3b1b7d29dfa021a03a917e6b539a69d",
+    sha256: "4df73e1c05474793cb3f0677216738ebb3ef4c590f631be067fe2c8f8dd7cf85",
   }),
 });
 const APPROVED_CURRENT_COMPATIBILITY_PATHS = Object.freeze([
@@ -3252,13 +3252,15 @@ async function executeDetachedCandidateCiPlan(ciSourceBytes, rootPackageBytes, c
 
 function validateCiReceipt(receipt, ciInventory) {
   const exactShape = exactPlainRecord(receipt, CI_RECEIPT_KEYS);
-  const frozenM07T01Plan =
-    ciInventory.planHash === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.planSha256 &&
-    ciInventory.entries.length === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries &&
-    ciInventory.stepCount === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.stepCount;
+  const authenticatedM07T01Prefix =
+    ciInventory.entries.length >= CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.proofEntries &&
+    ciInventory.t09Index === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t09Index &&
+    ciInventory.t10Index === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t10Index &&
+    ciInventory.t11Index === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.t11Index &&
+    ciInventory.m07T01Index === CONTROL_PLANE_BUNDLE_STORE_SUCCESSOR_CI_PROFILE.m07T01Index;
   const historical =
     exactShape &&
-    frozenM07T01Plan &&
+    authenticatedM07T01Prefix &&
     ownData(receipt, "planSha256") === HISTORICAL_CI_RECEIPT.planSha256 &&
     ownData(receipt, "proofEntries") === HISTORICAL_CI_RECEIPT.proofEntries &&
     ownData(receipt, "stepCount") === HISTORICAL_CI_RECEIPT.stepCount &&

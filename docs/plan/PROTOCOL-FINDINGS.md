@@ -2830,3 +2830,56 @@ This file records implementation discoveries without changing the frozen DESEN 0
   activation, crash recovery, and fault injection. A later protocol revision should decide
   whether publication metadata receives a separate artifact identifier, is always stored outside
   the revision-closed Bundle, or becomes part of a newly specified complete-byte identity.
+
+## PF-071 — Integrity ingress distinguishes stored bytes, canonical Bundle size, and Source material
+
+- Status: OPEN
+- Blocks proof: No; M07-T02 freezes a fail-closed local verification profile without changing any
+  DESEN 0.1.0 protocol byte, digest projection, or schema.
+- Protocol location: SPEC Sections 11.3, 13.2, 24.1, and 28.2; `PIPE-010`, `PIPE-011`, `R-007`,
+  `R-031`, `R-138`, `D-030`, `D-031`, `D-034`, and `D-035`; related findings `PF-068`–`PF-070`
+- Observation: the 0.1.0 Reference Profile states a 2 MiB uncompressed Bundle limit but does not
+  define whether that metric means received JSON bytes, RFC 8785 canonical bytes, or both. JCS
+  identity does not require a stored JSON document itself to be canonical, and compact exponent
+  notation can expand substantially when canonicalized. Likewise, a caller-supplied digest string
+  is not independent evidence that available Source material matches the Bundle.
+- Implementation decision: M07-T02 snapshots and limits the exact stored Bundle view to 2,097,152
+  bytes, then performs bounded fatal UTF-8 and strict interoperable-JSON parsing. Before structural
+  validation can allocate its inert snapshot, it measures the parsed document against the
+  2,097,152-byte RFC 8785 ceiling; after validation it repeats that measurement on the immutable
+  accepted Bundle and checks it against the real canonical bytes. Noncanonical whitespace is
+  accepted and is not rewritten in storage; both raw and canonical limits must pass. Fixed depth,
+  value-count, decoded-string, and number-token budgets prevent a compact input from bypassing the
+  allocation boundary.
+
+  Exact root and embedded-schema admission is protected by a task-local standalone guard generated
+  from the frozen Source, Bundle, and Draft 2020-12 schemas with pinned Ajv and Prettier versions.
+  The guard stops at the first structural issue, and its embedded-schema profile stops at the first
+  dialect, identifier, reference, vocabulary, or regular-expression issue. Only guard-successful
+  data reaches the established exhaustive Validator, preventing untrusted arrays or schema maps
+  from amplifying one rejected document into an unbounded diagnostic list. Runtime verification
+  performs no schema compilation, dynamic code loading, filesystem resolution, or network access.
+
+  The verifier then requires the outer storage key, embedded `revision`, and independently
+  recalculated revision to be exactly equal. When Source material is available, the caller must
+  provide its real raw bytes, bounded to 8,388,608 bytes and subjected to the same strict parser.
+  Its complete canonical form is independently bounded to 8,388,608 bytes before validation and
+  rechecked on the accepted immutable snapshot, preventing compact numeric input from expanding
+  inside validation or digest calculation. The exact Source schema then passes before the digest is
+  independently recalculated. Absence is represented explicitly as `not-available`; it is never
+  reported as a successful digest match. Source-only resource exhaustion uses the project-owned
+  `run.desen.control-plane/SOURCE_MATERIAL_LIMIT_EXCEEDED` code rather than redefining a protocol
+  diagnostic.
+
+  Success returns one frozen, factory-authenticated integrity authority containing the immutable
+  validated Bundle and safe metadata but no raw Bundle or Source bytes. A copied or cast object
+  has no runtime authority. A publication-bearing Bundle may legitimately keep the same revision
+  because the frozen revision projection excludes root `publication`; the verifier preserves and
+  validates that complete Bundle while still enforcing its complete canonical size.
+
+- Future action: M07-T03 must consume only authenticated integrity authority for exact installed
+  package preflight; M07-T04 adds reference and activation-limit checks; M07-T05 owns Source and
+  channel storage/API; M07-T06 through M07-T10 own staging, activation, recovery, and fault
+  behavior. A later protocol revision should define the normative Bundle-size metric explicitly.
+  If the same hostile-JSON boundary is needed elsewhere, extract the reviewed parser as a shared
+  internal primitive without altering the frozen M06 Publisher evidence or weakening its limits.

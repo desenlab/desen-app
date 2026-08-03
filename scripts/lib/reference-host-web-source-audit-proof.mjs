@@ -88,8 +88,8 @@ const CURRENT_AUDIT_COORDINATION_PATHS = Object.freeze([
   ...T09_PROOF_PATHS,
 ]);
 const CURRENT_AUDIT_COORDINATION_PATH_SET = new Set(CURRENT_AUDIT_COORDINATION_PATHS);
-const M07_T01_CONTROL_PLANE_COORDINATION = Object.freeze({
-  task: "M07-T01",
+const M07_T02_CONTROL_PLANE_COORDINATION = Object.freeze({
+  task: "M07-T02",
   scripts: Object.freeze({
     "generate:control-plane-bundle-store":
       "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/generate-control-plane-bundle-store-proof.mjs",
@@ -97,25 +97,39 @@ const M07_T01_CONTROL_PLANE_COORDINATION = Object.freeze({
       "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node scripts/verify-control-plane-bundle-store.mjs",
     "test:control-plane-bundle-store":
       "pnpm verify:publisher-invalid-source-matrix && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-store && node --test tests/control-plane-bundle-store.test.mjs",
+    "generate:control-plane-bundle-verification":
+      "pnpm verify:control-plane-bundle-store && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-verification && node scripts/generate-control-plane-bundle-verification-proof.mjs",
+    "verify:control-plane-bundle-verification":
+      "pnpm verify:control-plane-bundle-store && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-verification && node scripts/verify-control-plane-bundle-verification.mjs",
+    "test:control-plane-bundle-verification":
+      "pnpm verify:control-plane-bundle-store && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:bundle-verification && node --test tests/control-plane-bundle-verification.test.mjs",
   }),
   aggregateEdges: Object.freeze([
     Object.freeze({
       script: "check",
       commandKind: "verify",
-      segments: 67,
-      sha256: "c31e8bd78274a9141150b73ce813c4a532a9562a51f901ca68b01cac937e4ebc",
-      predecessor: "pnpm verify:publisher-invalid-source-matrix",
-      segment: "pnpm verify:control-plane-bundle-store",
+      segments: 68,
+      sha256: "a3587bf40c9e3b0bad726afbb0becc5481923d3da0d3068ac0d3e19fe3d8f2e8",
+      predecessor: "pnpm verify:control-plane-bundle-store",
+      segment: "pnpm verify:control-plane-bundle-verification",
       successor: "pnpm lint",
+      normalizedSegments: Object.freeze([
+        "pnpm verify:control-plane-bundle-store",
+        "pnpm verify:control-plane-bundle-verification",
+      ]),
     }),
     Object.freeze({
       script: "test",
       commandKind: "test",
-      segments: 62,
-      sha256: "0cd9df1a1d030a804d0b15efc9651aae0b0855377cfd41c980dc61d7f1a6cbee",
-      predecessor: "pnpm test:publisher-invalid-source-matrix",
-      segment: "pnpm test:control-plane-bundle-store",
+      segments: 63,
+      sha256: "4a5bc2233af9e532344a9501207fe6dcf0677e16e5377745c7d87920096b6721",
+      predecessor: "pnpm test:control-plane-bundle-store",
+      segment: "pnpm test:control-plane-bundle-verification",
       successor: "turbo run test",
+      normalizedSegments: Object.freeze([
+        "pnpm test:control-plane-bundle-store",
+        "pnpm test:control-plane-bundle-verification",
+      ]),
     }),
   ]),
   lockfileImporter: Object.freeze({
@@ -129,6 +143,11 @@ const M07_T01_CONTROL_PLANE_COORDINATION = Object.freeze({
             specifier: "workspace:*",
             version: "link:../../packages/protocol",
           }),
+          Object.freeze({
+            name: "@desen/validator",
+            specifier: "workspace:*",
+            version: "link:../../packages/validator",
+          }),
         ]),
       }),
       Object.freeze({
@@ -138,6 +157,16 @@ const M07_T01_CONTROL_PLANE_COORDINATION = Object.freeze({
             name: "@desen/publisher",
             specifier: "workspace:*",
             version: "link:../../packages/publisher",
+          }),
+          Object.freeze({
+            name: "ajv",
+            specifier: "8.20.0",
+            version: "8.20.0",
+          }),
+          Object.freeze({
+            name: "prettier",
+            specifier: "3.9.6",
+            version: "3.9.6",
           }),
           Object.freeze({
             name: "vitest",
@@ -150,15 +179,24 @@ const M07_T01_CONTROL_PLANE_COORDINATION = Object.freeze({
     ]),
   }),
 });
-const M07_T01_CONTROL_PLANE_LOCKFILE_BLOCK = `  apps/control-plane-api:
+const M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK = `  apps/control-plane-api:
     dependencies:
       '@desen/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
+      '@desen/validator':
+        specifier: workspace:*
+        version: link:../../packages/validator
     devDependencies:
       '@desen/publisher':
         specifier: workspace:*
         version: link:../../packages/publisher
+      ajv:
+        specifier: 8.20.0
+        version: 8.20.0
+      prettier:
+        specifier: 3.9.6
+        version: 3.9.6
       vitest:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@24.13.3))
@@ -5189,7 +5227,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     );
   }
   const expectedControlPlaneScripts = SAFE_OBJECT_ENTRIES(
-    M07_T01_CONTROL_PLANE_COORDINATION.scripts,
+    M07_T02_CONTROL_PLANE_COORDINATION.scripts,
   );
   const observedControlPlaneScriptKeys = [];
   const expectedControlPlaneScriptKeys = [];
@@ -5222,7 +5260,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     ) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        "Current M05 root package lost the exact reviewed M07-T01 control-plane commands.",
+        "Current M05 root package lost the exact reviewed M07-T02 control-plane commands.",
       );
     }
     index += 1;
@@ -5232,12 +5270,12 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
   if (!isDeepStrictEqual(observedControlPlaneScriptKeys, expectedControlPlaneScriptKeys)) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-      "Current M05 root package lost the exact reviewed M07-T01 control-plane commands.",
+      "Current M05 root package lost the exact reviewed M07-T02 control-plane commands.",
     );
   }
   let edgeIndex = 0;
-  while (edgeIndex < M07_T01_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
-    const edge = M07_T01_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
+  while (edgeIndex < M07_T02_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
+    const edge = M07_T02_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
     const commandDescriptor = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
       manifest.scripts,
       edge.script,
@@ -5278,7 +5316,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     ) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        `Current M05 root ${edge.script} lost the exact reviewed M07-T01 aggregate edge.`,
+        `Current M05 root ${edge.script} lost the exact reviewed M07-T02 aggregate edge.`,
       );
     }
     edgeIndex += 1;
@@ -5295,7 +5333,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
         /^(?:generate|test|verify):publisher(?:-[a-z0-9]+)*$/u,
         [scriptName],
       ) &&
-      !SAFE_OBJECT_HAS_OWN(M07_T01_CONTROL_PLANE_COORDINATION.scripts, scriptName)
+      !SAFE_OBJECT_HAS_OWN(M07_T02_CONTROL_PLANE_COORDINATION.scripts, scriptName)
     ) {
       SAFE_OBJECT_DEFINE_PROPERTY(normalizedScripts, scriptName, {
         configurable: true,
@@ -5344,10 +5382,16 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
       }
       let isControlPlaneSegment = false;
       edgeIndex = 0;
-      while (edgeIndex < M07_T01_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
-        const edge = M07_T01_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
-        if (edge.script === scriptName && edge.segment === segment) {
-          isControlPlaneSegment = true;
+      while (edgeIndex < M07_T02_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
+        const edge = M07_T02_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
+        if (edge.script === scriptName) {
+          let normalizedSegmentIndex = 0;
+          while (normalizedSegmentIndex < edge.normalizedSegments.length) {
+            if (edge.normalizedSegments[normalizedSegmentIndex] === segment) {
+              isControlPlaneSegment = true;
+            }
+            normalizedSegmentIndex += 1;
+          }
         }
         edgeIndex += 1;
       }
@@ -5815,31 +5859,31 @@ function validatePublisherImporterShape(lines, start, end) {
 }
 
 function inspectExactControlPlaneImporter(lines, start, end) {
-  const expected = M07_T01_CONTROL_PLANE_COORDINATION.lockfileImporter;
+  const expected = M07_T02_CONTROL_PLANE_COORDINATION.lockfileImporter;
   const body = lines.slice(start + 1, end).filter((line) => line.length > 0);
   if (lines[start] !== `  ${expected.path}:` || body.length === 0) {
-    failCurrentLockfile("lost the reviewed M07-T01 control-plane importer");
+    failCurrentLockfile("lost the reviewed M07-T02 control-plane importer");
   }
   const groups = [];
   let index = 0;
   while (index < body.length) {
     const groupLine = body[index];
     if (!groupLine.startsWith("    ") || groupLine.startsWith("      ")) {
-      failCurrentLockfile("has an invalid M07-T01 control-plane dependency group");
+      failCurrentLockfile("has an invalid M07-T02 control-plane dependency group");
     }
     const group = parseYamlMappingLine(groupLine.slice(4), "Control-plane dependency group");
     if (!group.opensContainer) {
-      failCurrentLockfile("has a non-mapping M07-T01 control-plane dependency group");
+      failCurrentLockfile("has a non-mapping M07-T02 control-plane dependency group");
     }
     index += 1;
     const packages = [];
     while (index < body.length && body[index].startsWith("      ")) {
       if (body[index].startsWith("        ")) {
-        failCurrentLockfile("has an orphan M07-T01 control-plane dependency field");
+        failCurrentLockfile("has an orphan M07-T02 control-plane dependency field");
       }
       const dependency = parseYamlMappingLine(body[index].slice(6), "Control-plane dependency");
       if (!dependency.opensContainer) {
-        failCurrentLockfile("has a non-mapping M07-T01 control-plane dependency");
+        failCurrentLockfile("has a non-mapping M07-T02 control-plane dependency");
       }
       validatePublisherDependencyName(dependency.key);
       index += 1;
@@ -5852,7 +5896,7 @@ function inspectExactControlPlaneImporter(lines, start, end) {
           field.valueKind !== "scalar" ||
           !["specifier", "version"].includes(field.key)
         ) {
-          failCurrentLockfile("has an invalid M07-T01 control-plane dependency field");
+          failCurrentLockfile("has an invalid M07-T02 control-plane dependency field");
         }
         SAFE_OBJECT_DEFINE_PROPERTY(fields, field.key, {
           configurable: true,
@@ -5865,7 +5909,7 @@ function inspectExactControlPlaneImporter(lines, start, end) {
       }
       if (!isDeepStrictEqual(fieldKeys, ["specifier", "version"])) {
         failCurrentLockfile(
-          "must pin each M07-T01 control-plane specifier and version exactly once",
+          "must pin each M07-T02 control-plane specifier and version exactly once",
         );
       }
       packages.push({
@@ -5877,7 +5921,7 @@ function inspectExactControlPlaneImporter(lines, start, end) {
     groups.push({ name: group.key, packages });
   }
   if (!isDeepStrictEqual(groups, expected.groups)) {
-    failCurrentLockfile("changed the exact reviewed M07-T01 control-plane importer");
+    failCurrentLockfile("changed the exact reviewed M07-T02 control-plane importer");
   }
 }
 
@@ -5903,14 +5947,14 @@ function normalizeCurrentLockfileBytes(rawBytes) {
       "Current M05 workspace lockfile must retain canonical control-free LF framing.",
     );
   }
-  const exactControlPlaneBlock = safeStringIndexOf(text, M07_T01_CONTROL_PLANE_LOCKFILE_BLOCK);
+  const exactControlPlaneBlock = safeStringIndexOf(text, M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK);
   const duplicateExactControlPlaneBlock =
     exactControlPlaneBlock < 0
       ? -1
       : safeStringIndexOf(
           text,
-          M07_T01_CONTROL_PLANE_LOCKFILE_BLOCK,
-          exactControlPlaneBlock + M07_T01_CONTROL_PLANE_LOCKFILE_BLOCK.length,
+          M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK,
+          exactControlPlaneBlock + M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK.length,
         );
   const controlPlaneHeader = "  apps/control-plane-api:";
   let headerCount = 0;
@@ -5926,7 +5970,7 @@ function normalizeCurrentLockfileBytes(rawBytes) {
   if (exactControlPlaneBlock < 0 || duplicateExactControlPlaneBlock >= 0 || headerCount !== 1) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-      "Current M05 workspace lockfile changed the exact reviewed M07-T01 control-plane importer.",
+      "Current M05 workspace lockfile changed the exact reviewed M07-T02 control-plane importer.",
     );
   }
   const lines = text.split("\n");
@@ -5961,7 +6005,7 @@ function normalizeCurrentLockfileBytes(rawBytes) {
   };
   const publisher = importerRange("packages/publisher", true);
   const controlPlane = importerRange(
-    M07_T01_CONTROL_PLANE_COORDINATION.lockfileImporter.path,
+    M07_T02_CONTROL_PLANE_COORDINATION.lockfileImporter.path,
     false,
   );
   validatePublisherImporterShape(lines, publisher.start, publisher.end);
@@ -6064,7 +6108,7 @@ export async function verifyReferenceHostWebCurrentCoordinationPolicy(rawOptions
     normalizedPublisherScriptKeys: true,
     normalizedPublisherPipelineSegments: true,
     normalizedPublisherLockfileImporter: true,
-    admittedControlPlaneCoordination: M07_T01_CONTROL_PLANE_COORDINATION.task,
+    admittedControlPlaneCoordination: M07_T02_CONTROL_PLANE_COORDINATION.task,
     normalizedControlPlaneScriptKeys: true,
     normalizedControlPlanePipelineSegments: true,
     normalizedControlPlaneLockfileImporter: true,

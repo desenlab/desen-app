@@ -9,8 +9,8 @@ CI-01 sequential runner remains available only through explicit manual rollback.
 1. Frozen task artifacts preserve the exact task-time claim and nonclaim boundary.
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
-3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the exact 130-node,
-   61-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
+   132-node, 62-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -23,6 +23,10 @@ CI-01 sequential runner remains available only through explicit manual rollback.
 The checkpoint is inert data. It cannot name an executable command or cause a verifier or test to
 run. Executable ownership remains in reviewed source. The neutral inventory is also inert until a
 validated scheduler executes its exact shell-free command vectors.
+
+M07-T02 appends reviewed checkpoint sequence 3. The current head
+`f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882` authenticates nine frozen
+artifacts and eighteen live readers; the two earlier checkpoint bytes and hashes remain unchanged.
 
 ## Historical I07-01 checkpoint
 
@@ -50,6 +54,10 @@ the repository pass/fail authority. The retained sequential workflow is availabl
 manual `legacy-rollback`. The temporary shadow workflow and comparison adapter/test were removed
 after the accepted same-revision comparison and successful hosted cutover.
 
+The archived I07-02 baseline remains the immutable 130-workload/61-proof cutover receipt. The live
+authority is an append-only successor: M07-T02 adds one verifier/root-test pair without rewriting
+that historical baseline.
+
 Every workload has exactly one code-owned shared-state class:
 
 | Execution class                  | Count | Authority                                            |
@@ -58,11 +66,11 @@ Every workload has exactly one code-owned shared-state class:
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Workspace build/typecheck output writer              |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
 | `PROOF_READ_ONLY`                |    66 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    45 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_OS_TEMP_ISOLATED`         |    47 | Proof work restricted to a runner-owned OS temp root |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
-Fifty proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
+Fifty-one proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
 pass. Ten real tracked-alias pairs and `reference-host-web-source-audit` are the eleven exclusive
 proof-pair barriers. Within every pair, the root test still depends on its verifier.
 
@@ -73,14 +81,15 @@ are:
 - `publisher-bundle-publication`;
 - `publisher-official-golden`;
 - `publisher-invalid-source-matrix`; and
-- `control-plane-bundle-store`.
+- `control-plane-bundle-store`; and
+- `control-plane-bundle-verification`.
 
 Only the `reference-host-web-source-audit` verifier/root-test pair receives the reviewed native
 addon exception. Its verifier remains workspace-read-only; its root test is the sole
 workspace-temp barrier.
 
 Node 24 requires an orthogonal schema-v2 compatibility policy for eighteen exact root tests. The
-distribution across all 130 workloads is 112 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across all 132 workloads is 114 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
 code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
 symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
@@ -122,7 +131,7 @@ command in an 18-minute operating-system ceiling with a 30-second kill grace, in
 hosted job. An outer-ceiling failure is never accepted as promotion evidence.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
-bytes, executable modes, tracked-file count, and Git index object ids before and after all 130
+bytes, executable modes, tracked-file count, and Git index object ids before and after all 132
 steps, including failure paths. The shared-state boundary also seals every reviewed build/Turbo
 output root across the proof phase and compares non-ignored untracked state across the complete
 execution region. A dependency download cache may save network time; no build, test, checkpoint,

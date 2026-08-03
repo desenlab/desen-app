@@ -614,12 +614,39 @@ An abrupt process death before the hard-link commit may leave an unaddressed tem
 revision authority and is never read as a Bundle; later recovery and maintenance work owns orphan
 lifecycle policy.
 
-The store does not yet verify protocol version, claimed revision, available source digest, Bundle
-size, package identity, references, or limits. M07-T02 through M07-T04 own those checks; M07-T05
-owns editable sources, mutable channels, and the transport API; M07-T06 through M07-T10 own
-staging, transactional activation, last-known-good recovery, and fault behavior; M07-T11 owns
-reference-host channel consumption. A successful M07-T01 write is therefore persistence evidence,
-not integrity or activation authority.
+M07-T02 adds a separate synchronous integrity boundary without widening the two-method repository.
+`verifyBundleStoreEntry(entry, sourceMaterial)` snapshots untrusted stored bytes, rejects raw Bundle
+views above 2,097,152 bytes, and applies fatal UTF-8 plus bounded strict interoperable-JSON parsing.
+Unsupported protocol versions stop before general schema diagnostics. A pre-allocation RFC 8785
+measurement prevents compact numeric forms from expanding beyond 2,097,152 canonical bytes inside
+the structural validator; the validated immutable snapshot is then measured again and compared
+with the actual canonical output. Before the established exhaustive Validator runs, a task-local
+standalone guard generated from the exact frozen roots and Draft 2020-12 meta-schema stops at the
+first root or embedded-schema issue. The exhaustive path therefore receives only guard-valid data
+and cannot amplify one hostile document into an input-proportional diagnostic list. The guard is
+generated with pinned tools and contains no runtime schema compilation or dynamic loading.
+
+Integrity requires the outer storage key, embedded `revision`, and independently recalculated
+Bundle revision to be exactly equal. Available Source evidence is an exact raw byte view, not a
+caller-supplied digest: it receives its own 8 MiB raw cap, strict parser, 8 MiB canonical
+pre-allocation cap, exact Source schema, post-snapshot measurement, and independent digest
+calculation. Absence is represented explicitly as `not-available`. Publication
+metadata is preserved and validated even though the frozen 0.1.0 revision projection excludes it,
+so different complete Bundles may pass with the same closed revision while remaining different
+immutable storage artifacts.
+
+Only full success returns a frozen runtime-authenticated `BundleIntegrityAuthority`. It carries the
+independent immutable Bundle plus protocol, revision, Source-corroboration, and byte-length metadata,
+but no raw Bundle/Source bytes and no storage, package, channel, staging, or activation methods.
+Package-private consumers authenticate its exact identity through a `WeakMap`; copying its visible
+fields or forcing a TypeScript cast cannot create authority. Rejections expose only a closed stage
+and immutable redacted diagnostics, never a partial parsed document or digest authority.
+
+M07-T03 still owns installed package identity and digest preflight; M07-T04 owns capability
+references and activation limits. M07-T05 owns editable sources, mutable channels, and the transport
+API; M07-T06 through M07-T10 own staging, transactional activation, last-known-good recovery, and
+fault behavior; M07-T11 owns reference-host channel consumption. A stored entry is persistence
+evidence, and an M07-T02 authority is integrity evidence—not activation authority.
 
 ### DESEN Developer Platform (`desen.run`)
 

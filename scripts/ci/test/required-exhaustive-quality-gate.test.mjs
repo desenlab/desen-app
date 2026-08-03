@@ -85,7 +85,7 @@ async function waitFor(predicate, message) {
   assert.fail(message);
 }
 
-test("the dependency-derived plan owns the exact 130-node exhaustive inventory", () => {
+test("the dependency-derived plan owns the exact 132-node exhaustive inventory", () => {
   const plan = createRequiredExhaustivePlan();
   const inventory = createExhaustiveWorkloadInventory();
   const ownedIds = [
@@ -98,13 +98,13 @@ test("the dependency-derived plan owns the exact 130-node exhaustive inventory",
   assert.equal(plan.scope, EXHAUSTIVE_SCOPE);
   assert.equal(plan.concurrency, 2);
   assert.equal(PROOF_PAIR_CONCURRENCY, 2);
-  assert.equal(plan.stepCount, 130);
-  assert.equal(plan.proofPairCount, 61);
+  assert.equal(plan.stepCount, 132);
+  assert.equal(plan.proofPairCount, 62);
   assert.equal(plan.prefix.length, 6);
   assert.equal(plan.suffix.length, 2);
-  assert.equal(plan.planSha256, "c61f71611fc0b979b19a0f0e940ee3762910354cf6521d2c0c792bc114fafe96");
-  assert.equal(ownedIds.length, 130);
-  assert.equal(new Set(ownedIds).size, 130);
+  assert.equal(plan.planSha256, "68b599e8cf8b9c5ace8968525a30c6f03671f627a13a458baddac64585a60655");
+  assert.equal(ownedIds.length, 132);
+  assert.equal(new Set(ownedIds).size, 132);
   assert.deepEqual([...ownedIds].sort(), inventory.nodes.map(({ id }) => id).sort());
   for (const pair of plan.proofPairs) {
     assert.deepEqual(pair.rootTest.dependencies, [pair.verifier.id]);
@@ -129,7 +129,7 @@ test("authority defaults to REQUIRED, accepts only explicit SHADOW, and fixes EX
   assert.equal(observationPlan.scope, "EXHAUSTIVE");
   assert.equal(
     observationPlan.planSha256,
-    "0b4cfa6617a1210866c6655693de6a5bf06f6bee626f135dcd2ff234a357a80f",
+    "b82e7d61e397c50639e44de93dcb309f2121b4d72827baefd404d876abf0e474",
   );
   assert.throws(
     () => createRequiredExhaustivePlan({ scope: "AFFECTED" }),
@@ -214,7 +214,7 @@ test("REQUIRED authority rejects injected success runners and repository seams",
   assert.equal(executionCount, 0);
 });
 
-test("all 130 successful closes produce stable inventory-ordered receipts", async () => {
+test("all 132 successful closes produce stable inventory-ordered receipts", async () => {
   const plan = createShadowPlan();
   const calls = [];
   const receipt = await runShadowPlan(plan, {
@@ -225,10 +225,10 @@ test("all 130 successful closes produce stable inventory-ordered receipts", asyn
     ...successfulGuardOptions(),
   });
 
-  assert.equal(calls.length, 130);
-  assert.equal(new Set(calls).size, 130);
+  assert.equal(calls.length, 132);
+  assert.equal(new Set(calls).size, 132);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 130);
+  assert.equal(receipt.observedClosedCount, 132);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     plan.nodes.map(({ id }) => id),
@@ -1010,7 +1010,7 @@ test("build-output and untracked closing guards run after a primary proof failur
   assert.equal(untrackedSnapshots, 2);
 });
 
-test("untracked drift fails the gate even after all 130 steps close successfully", async () => {
+test("untracked drift fails the gate even after all 132 steps close successfully", async () => {
   const plan = createShadowPlan();
   const untrackedDrift = new Error("untracked drift");
   await assert.rejects(
@@ -1025,7 +1025,7 @@ test("untracked drift fails the gate even after all 130 steps close successfully
     (error) => {
       assert.equal(error, untrackedDrift);
       assert.equal(error.requiredExhaustiveReceipt.status, "FAIL");
-      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 130);
+      assert.equal(error.requiredExhaustiveReceipt.observedClosedCount, 132);
       return true;
     },
   );
@@ -1054,7 +1054,7 @@ test("the full gate authenticates repository inputs and hosted revision without 
   assert.equal(receipt.inventory.authority, "SHADOW");
   assert.equal(receipt.inventory.scope, "EXHAUSTIVE");
   assert.equal(receipt.execution.status, "PASS");
-  assert.equal(receipt.execution.observedClosedCount, 130);
+  assert.equal(receipt.execution.observedClosedCount, 132);
   assert.equal(receipt.execution.cleanInput.revision, revision);
 });
 

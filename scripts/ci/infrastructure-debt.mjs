@@ -112,12 +112,14 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
       "matchesReceipt",
       "authenticateRequiredCiWorkflow",
+      "authenticatedM07T01Prefix",
     ]),
     target("tests/publisher-bundle-publication.test.mjs", [
       "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
       "[compatibility] externally tracks every current T02 through T08 proof reader",
       "[compatibility] detects tamper in each externally anchored T02 through T08 reader",
       "[ci] admits only the exact required-workflow successor into frozen T09 evidence",
+      "[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence",
     ]),
   ]),
   authority("DEBT-I07-004", "I07-04", "G07", [
@@ -148,6 +150,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       "currentT10RootTestBytes",
       "approvedCurrentT09",
       "unreviewedT09ProofBytes",
+      "[successor] accepts an append-only M07 task without rewriting frozen T11 evidence",
     ]),
     target("scripts/lib/publisher-official-golden-proof.mjs", [
       "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
@@ -162,6 +165,10 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
     target("scripts/lib/control-plane-bundle-store-proof.mjs", [
       "HISTORICAL_COMPATIBILITY_READERS",
       "HISTORICAL_TRACKED_RECEIPTS",
+      "APPROVED_M07_T02_TRACKED_RECEIPTS",
+      "APPROVED_M07_T02_PUBLIC_SOURCE_EXPORTS",
+      "HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS",
+      "APPROVED_M07_T02_INDEX_DISTRIBUTION_RECEIPTS",
       "currentReaderPaths",
     ]),
     target("tests/control-plane-bundle-store.test.mjs", [
@@ -243,6 +250,18 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       "../../run-ci-quality-gate.mjs",
       "PROOF_ENTRIES",
       "createQualityGateSteps",
+    ]),
+  ]),
+  authority("DEBT-I07-009", "I07-04", "G07", [
+    target("scripts/lib/reference-host-web-source-audit-proof.mjs", [
+      "M07_T02_CONTROL_PLANE_COORDINATION",
+      "M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK",
+      "normalizeCurrentRootPackageBytes",
+      "inspectExactControlPlaneImporter",
+      "normalizeCurrentLockfileBytes",
+    ]),
+    target("tests/reference-host-web-source-audit.test.mjs", [
+      "reviewed Publisher and M07-T02 coordination preserve root and lockfile provenance",
     ]),
   ]),
 ]);

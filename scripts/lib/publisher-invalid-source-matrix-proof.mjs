@@ -873,12 +873,12 @@ const APPROVED_CURRENT_T09_SUCCESSOR_PATHS = Object.freeze([
 ]);
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]: Object.freeze({
-    bytes: 135_987,
-    sha256: "66bc126178e7101d0ecc2a7ba860824ba698f0d0de244fb47c57e4fe52ea827e",
+    bytes: 136_184,
+    sha256: "88ef9704b8615dd0c751be0c9a4ca2e027fcc41a8d368fdccacd33fba8de2eaa",
   }),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze({
-    bytes: 62_798,
-    sha256: "f601032052ece836b1a8dee5de79f7573c3bc7883626ec9691935e74f172c1b8",
+    bytes: 62_826,
+    sha256: "dba2e4211eee9864e31593ab7c81d6c4723c2405c40bb82c9c2a707e73dc7d70",
   }),
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
@@ -911,7 +911,7 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "bytes: 62_112",
   "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db",
   "bytes: 70_038",
-  "29332971e7a9c0e45e66d145c073dbd1a3b1b7d29dfa021a03a917e6b539a69d",
+  "4df73e1c05474793cb3f0677216738ebb3ef4c590f631be067fe2c8f8dd7cf85",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',

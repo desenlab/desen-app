@@ -40,8 +40,9 @@ const GENESIS_PREDECESSOR_SHA256 = "0".repeat(64);
 export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE([
   "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
   "95a4ebc5261c98569d0e42320aa300f70ec568d1083af38d869b06c82398368c",
+  "f92e879b3a72e75abb07af2b2bcfded62e014b99aa0cbe69c64aee12d5379882",
 ]);
-export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([6, 8]);
+export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([6, 8, 9]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
@@ -158,6 +159,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/control-plane-bundle-store-proof.mjs",
     "tests/control-plane-bundle-store.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M07-T02",
+    {
+      path: "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+      bytes: 48_642,
+      sha256: "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a",
+    },
+    "scripts/lib/control-plane-bundle-verification-proof.mjs",
+    "tests/control-plane-bundle-verification.test.mjs",
   ),
 ]);
 

@@ -323,7 +323,7 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.graphDynamicEdges, 0);
   assert.equal(result.packageBoundaryViolations, 0);
   assert.equal(result.coordination.result, "PASS");
-  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T01");
+  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T02");
   assert.equal(result.coordination.normalizedControlPlaneScriptKeys, true);
   assert.equal(result.coordination.normalizedControlPlanePipelineSegments, true);
   assert.equal(result.coordination.normalizedControlPlaneLockfileImporter, true);
@@ -519,7 +519,7 @@ test("admits only the source-pinned M06-T05 Validator runtime successor", async 
   }
 });
 
-test("reviewed Publisher and M07-T01 coordination preserve root and lockfile provenance", async () => {
+test("reviewed Publisher and M07-T02 coordination preserve root and lockfile provenance", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
   const [rootPackageBytes, lockfileBytes] = await Promise.all([
@@ -568,24 +568,30 @@ test("reviewed Publisher and M07-T01 coordination preserve root and lockfile pro
     manifest.scripts["verify:control-plane-bundle-store"] += " --unreviewed";
   });
   await rejectRootManifest((manifest) => {
+    delete manifest.scripts["generate:control-plane-bundle-verification"];
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["verify:control-plane-bundle-verification"] += " --unreviewed";
+  });
+  await rejectRootManifest((manifest) => {
     manifest.scripts["verify:control-plane-decoy"] = "node scripts/decoy.mjs";
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.check = manifest.scripts.check.replace(
-      "pnpm verify:control-plane-bundle-store",
-      "pnpm verify:control-plane-bundle-store && pnpm verify:control-plane-bundle-store",
+      "pnpm verify:control-plane-bundle-verification",
+      "pnpm verify:control-plane-bundle-verification && pnpm verify:control-plane-bundle-verification",
     );
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.check = manifest.scripts.check.replace(
-      "pnpm verify:control-plane-bundle-store && pnpm lint",
-      "pnpm lint && pnpm verify:control-plane-bundle-store",
+      "pnpm verify:control-plane-bundle-store && pnpm verify:control-plane-bundle-verification",
+      "pnpm verify:control-plane-bundle-verification && pnpm verify:control-plane-bundle-store",
     );
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.test = manifest.scripts.test.replace(
-      "pnpm test:control-plane-bundle-store && turbo run test",
-      "pnpm test:control-plane-bundle-store && pnpm test:control-plane-decoy && turbo run test",
+      "pnpm test:control-plane-bundle-verification && turbo run test",
+      "pnpm test:control-plane-bundle-verification && pnpm test:control-plane-decoy && turbo run test",
     );
   });
   await rejectRootManifest((manifest) => {
@@ -744,6 +750,15 @@ test("reviewed Publisher and M07-T01 coordination preserve root and lockfile pro
       "      '@desen/protocol':\n        specifier: workspace:*",
       "      '@desen/protocol':\n        specifier: workspace:^",
     ),
+    mutateControlPlane(
+      "      '@desen/validator':\n        specifier: workspace:*",
+      "      '@desen/validator':\n        specifier: workspace:^",
+    ),
+    mutateControlPlane(
+      "      ajv:\n        specifier: 8.20.0",
+      "      ajv:\n        specifier: ^8.20.0",
+    ),
+    mutateControlPlane("version: 3.9.6", "version: 3.9.5"),
     mutateControlPlane(
       "version: link:../../packages/publisher",
       "version: link:../../packages/unreviewed",

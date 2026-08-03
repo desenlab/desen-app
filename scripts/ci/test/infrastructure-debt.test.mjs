@@ -182,7 +182,9 @@ async function createFixture() {
 test("accepts the exact canonical code-owned debt inventory", () => {
   const manifest = parseInfrastructureDebtManifest(CANONICAL_MANIFEST_BYTES);
   assert.equal(
-    manifest.entries.slice(0, 7).every((entry) => entry.evidence === null),
+    manifest.entries
+      .filter((entry) => entry.status === "OPEN")
+      .every((entry) => entry.evidence === null),
     true,
   );
   assert.deepEqual(
@@ -193,6 +195,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         status: "OPEN",
       })),
       { id: "DEBT-I07-008", status: "CLOSED" },
+      { id: "DEBT-I07-009", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -243,6 +246,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         removalOwner: "I07-02",
         deadline: "G07",
       },
+      {
+        id: "DEBT-I07-009",
+        registeredBy: "I07-01",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
     ],
   );
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
@@ -268,14 +277,15 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "currentT10HistoricalReceipt",
     "assertCurrentT09CompatibilityMarkers",
   ]);
-  assert.deepEqual(manifest.entries[2].targets[0].symbols.slice(-3), [
+  assert.deepEqual(manifest.entries[2].targets[0].symbols.slice(-4), [
     "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
     "matchesReceipt",
     "authenticateRequiredCiWorkflow",
+    "authenticatedM07T01Prefix",
   ]);
   assert.equal(
     manifest.entries[2].targets[1].symbols.at(-1),
-    "[ci] admits only the exact required-workflow successor into frozen T09 evidence",
+    "[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence",
   );
   assert.deepEqual(
     manifest.entries[3].targets.slice(2).map((target) => target.path),
@@ -295,6 +305,10 @@ test("accepts the exact canonical code-owned debt inventory", () => {
   assert.deepEqual(manifest.entries[4].targets[0].symbols, [
     "HISTORICAL_COMPATIBILITY_READERS",
     "HISTORICAL_TRACKED_RECEIPTS",
+    "APPROVED_M07_T02_TRACKED_RECEIPTS",
+    "APPROVED_M07_T02_PUBLIC_SOURCE_EXPORTS",
+    "HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS",
+    "APPROVED_M07_T02_INDEX_DISTRIBUTION_RECEIPTS",
     "currentReaderPaths",
   ]);
   const legacyAuthority = manifest.entries[6];
@@ -342,6 +356,13 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     manifest.entries[7].targets[2].path,
     "scripts/ci/test/modular-quality-gate.test.mjs",
   );
+  assert.deepEqual(manifest.entries[8].targets[0].symbols, [
+    "M07_T02_CONTROL_PLANE_COORDINATION",
+    "M07_T02_CONTROL_PLANE_LOCKFILE_BLOCK",
+    "normalizeCurrentRootPackageBytes",
+    "inspectExactControlPlaneImporter",
+    "normalizeCurrentLockfileBytes",
+  ]);
   assert.ok(Object.isFrozen(manifest.entries[0].targets[0].symbols));
 });
 
@@ -468,7 +489,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 7,
+      OPEN: 8,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -578,7 +599,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 7,
+      OPEN: 8,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -614,7 +635,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 6,
+      OPEN: 7,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });
