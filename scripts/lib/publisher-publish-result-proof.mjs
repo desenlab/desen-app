@@ -181,10 +181,11 @@ const TRACKED_EVIDENCE_PATHS = Object.freeze([
 /**
  * Immutable M06-T01 receipts for evidence readers that legitimately evolve after task completion.
  *
- * The current M05 reader and root test are authenticated against the reviewed M07-T01 successor
- * receipts below before these historical records are emitted. The T01 reader and root test cannot
- * self-authenticate their current bytes without a circular receipt, so M07-T01 externally anchors
- * their current files while this reader preserves the exact task-time artifact projection.
+ * The current M05 reader and root test are authenticated against the closed reviewed-successor
+ * histories below before these historical records are emitted. The T01 reader and root test
+ * cannot self-authenticate their current bytes without a circular receipt, so later checkpoints
+ * externally anchor their current files while this reader preserves the exact task-time artifact
+ * projection.
  */
 const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
@@ -205,15 +206,31 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   }),
 });
 
-const REVIEWED_CURRENT_G05_RECEIPTS = Object.freeze({
-  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
-    bytes: 246_554,
-    sha256: "2bf728948372d8366f7badc7f2d7a36f6b8799b0dcc45baef92c29c90bdd2114",
-  }),
-  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
-    bytes: 81_283,
-    sha256: "499888c12d43b62d81a0cdaaf0c6248bfb0b7956eca9cce3c478d0ab7f39b5cd",
-  }),
+const REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY = Object.freeze({
+  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze([
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 246_554,
+      sha256: "2bf728948372d8366f7badc7f2d7a36f6b8799b0dcc45baef92c29c90bdd2114",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 252_188,
+      sha256: "94d1d9f02af9d564ebe4dd2c5b36fc0f7bab4d28cad87ca144ddb41756dd1c17",
+    }),
+  ]),
+  "tests/reference-host-web-source-audit.test.mjs": Object.freeze([
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 81_283,
+      sha256: "499888c12d43b62d81a0cdaaf0c6248bfb0b7956eca9cce3c478d0ab7f39b5cd",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 83_937,
+      sha256: "1690d26b0a301b2528413b4bcfa9fc2e3f32171db284e6fced82726669c16840",
+    }),
+  ]),
 });
 
 const EXPECTED_TEST_INVENTORY = Object.freeze({
@@ -374,7 +391,9 @@ const BUILD_OPTION_KEYS = new Set([
   "verifySnapshot",
   "workspacePackage",
 ]);
-const TRACKED_FILE_OVERRIDE_PATHS = new Set(Object.keys(REVIEWED_CURRENT_G05_RECEIPTS));
+const TRACKED_FILE_OVERRIDE_PATHS = new Set(
+  Object.keys(REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY),
+);
 const SAFE_ARRAY_BUFFER_IS_VIEW = ArrayBuffer.isView;
 const SAFE_ARRAY_BUFFER_PROTOTYPE = ArrayBuffer.prototype;
 const SAFE_ARRAY_IS_ARRAY = Array.isArray;
@@ -1273,19 +1292,36 @@ async function trackedFileEvidence(overrides = SAFE_OBJECT_FREEZE(SAFE_OBJECT_CR
         sha256: sha256(bytes),
       });
       const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-      const reviewedCurrent = REVIEWED_CURRENT_G05_RECEIPTS[relativePath];
-      if (
-        reviewedCurrent !== undefined &&
-        !isDeepStrictEqual(actual, historical) &&
-        !isDeepStrictEqual(actual, reviewedCurrent)
-      ) {
+      const reviewedHistory = REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY[relativePath];
+      let receiptIsReviewed = historical !== undefined && isDeepStrictEqual(actual, historical);
+      if (reviewedHistory !== undefined && historical === undefined) {
         fail(
           "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
-          "The current G05 compatibility reader differs from every reviewed receipt.",
+          "A reviewed G05 successor lost its task-time historical projection.",
+          { path: relativePath },
+        );
+      }
+      if (!receiptIsReviewed && reviewedHistory !== undefined) {
+        const latestReviewed = reviewedHistory[reviewedHistory.length - 1];
+        if (latestReviewed === undefined) {
+          fail(
+            "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
+            "A reviewed G05 successor history lost its exact latest receipt.",
+            { path: relativePath },
+          );
+        }
+        receiptIsReviewed =
+          actual.bytes === latestReviewed.bytes && actual.sha256 === latestReviewed.sha256;
+      }
+      if (reviewedHistory !== undefined && !receiptIsReviewed) {
+        fail(
+          "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
+          "The current G05 compatibility reader differs from its task-time and latest reviewed receipt.",
           {
             path: relativePath,
             actual,
-            expectedSha256: [historical.sha256, reviewedCurrent.sha256],
+            historical,
+            reviewedHistory,
           },
         );
       }

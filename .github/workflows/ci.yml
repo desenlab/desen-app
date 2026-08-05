@@ -32,7 +32,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'required' }}
     name: Quality gate
     runs-on: ubuntu-24.04
-    # The scheduler owns a 15-minute soft deadline; the command wrapper enforces an
+    # The scheduler owns a 17-minute soft deadline; the command wrapper enforces an
     # 18-minute process ceiling plus 30-second kill grace. Remaining time covers setup,
     # contract preflight, receipt emission, and hosted-runner variance.
     timeout-minutes: 25

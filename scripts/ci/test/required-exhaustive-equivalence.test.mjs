@@ -133,25 +133,25 @@ function expectEquivalenceError(code) {
   };
 }
 
-test("proves all 134 exact ordered commands and both reviewed digests", () => {
+test("proves all 136 exact ordered commands and both reviewed digests", () => {
   const result = verifyRequiredExhaustiveInventoryEquivalence();
 
   assert.deepEqual(result, {
     status: "PASS",
-    workloadCount: 134,
+    workloadCount: 136,
     exactlyOnce: true,
     retainedPlanSha256: EXPECTED_RETAINED_PLAN_SHA256,
     neutralInventorySha256: EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    orderedProjectionSha256: "0cf74075304304385594ae6c7def89c76f22a82be3059bc0841f408682f198f8",
+    orderedProjectionSha256: "1f31f568139c07329c66d8937f690a58aa2a5920695e9035b14fdc62ebcd57fd",
     workloadSetSha256: EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
   });
   assert.equal(
     EXPECTED_RETAINED_PLAN_SHA256,
-    "2599f9a01b53a8f8fabfd78f814c3a89dc897577b7f55c33e21cfd7cfd4bd356",
+    "6c8ad48825248258b7ed5cf287793ef5f46a77584a336c25ebf0456e6052a590",
   );
   assert.equal(
     EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
-    "49977fca154b0bf06639b8e3f0b667d04e060603cc14ec99660c8c434b7f5edb",
+    "6809122b457d1ff965a9fd709ce196c1411ffca26125765fb76ba0561778c05d",
   );
   assert.equal(Object.isFrozen(result), true);
 });
@@ -180,7 +180,7 @@ test("PASS requires every exact workload closed successfully and ignores arrival
   const normalized = normalizeRequiredExecutionReceipt(reversed);
 
   assert.equal(normalized.status, "PASS");
-  assert.equal(normalized.workloads.length, 134);
+  assert.equal(normalized.workloads.length, 136);
   assert.deepEqual(
     normalized.workloads.map(({ id }) => id),
     canonicalIds(),
@@ -344,6 +344,7 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   );
   assert.equal(exactRunCount(requiredJob, REQUIRED_EXHAUSTIVE_COMMAND), 1);
   assert.equal(exactRunCount(requiredJob, RETAINED_LEGACY_COMMAND), 0);
+  assert.equal(scalarValue(requiredJob, "timeout-minutes", 4), "25");
 
   const legacyJob = extractMappingBlock(jobs, "legacy-rollback", 2);
   assert.equal(

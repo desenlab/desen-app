@@ -55,12 +55,12 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
-and proved the 130-workload, 61-proof-pair cutover baseline; after M07-T03 registration the current
-official GitHub `Quality gate` executes 134 workloads and 63 proof pairs as
-`REQUIRED + EXHAUSTIVE`. The retained sequential runner is available only through explicit manual
+and proved the 130-workload, 61-proof-pair cutover baseline. The reviewed M07-T04 live successor
+contains 136 workloads and 64 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
+frozen cutover evidence. The retained sequential runner is available only through explicit manual
 `legacy-rollback`. Exact cutover workload, result, cancellation, tracked-workspace, hosted, and
-shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T03 is `DONE`, and
-M07-T04 is next.
+shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T04 is `DONE`, and
+M07-T05 is next.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -478,7 +478,7 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | M07-T01 | DONE        | G06                     | Content-addressed bundle store with immutable revision entries                                                       |
 | M07-T02 | DONE        | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
 | M07-T03 | DONE        | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
-| M07-T04 | NOT_STARTED | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
+| M07-T04 | DONE        | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
 | M07-T05 | NOT_STARTED | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
 | M07-T06 | NOT_STARTED | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
 | M07-T07 | NOT_STARTED | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision}` as one consistent record                    |
@@ -559,6 +559,45 @@ and host consumption.
 Evidence: `docs/proof/CONTROL-PLANE-PACKAGE-PREFLIGHT.md` and
 `docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json`
 `sha256:79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628`.
+
+M07-T04 adds one separate bounded pre-staging authority over the exact M07-T03 identity. A
+deterministic iterative scan closes entry and navigation surfaces, surface identity, the shared
+node/behavior identity namespace, category-correct component/behavior/resource/operation
+capabilities, declared events, resource-refresh aliases, command targets/names, and nested
+operation settlement programs. Unknown semantics never fall back to placeholders, another
+category, similarly spelled ids, dynamic discovery, or executable code.
+
+The immutable Reference Profile enforces all 13 public ceilings without caller overrides or
+truncation: 256 surfaces; 25,000 aggregate and 5,000 per-surface source nodes; 5,000 conservatively
+possible materialized nodes; zero-based depth 64; 1,000 effective repeat instances; 64 actions per
+turn and 25,000 overall; settlement depth 16; predicate arity/expression/aggregate budgets; and
+25,000 total reference occurrences. Every ceiling has an executable exact/one-over vector or an
+explicit executable dominance proof. Only a successful bounded scan reaches one independent
+semantic Validator agreement over the same authenticated snapshots; throws, malformed results,
+and canonical-content disagreement become one redacted internal rejection.
+
+Complete success returns only a frozen revision/profile/per-surface audit identity. Bundle,
+Catalog, artifacts, obligations, runtime indexes, callbacks, staging, channel, commit, and
+activation authority remain absent. M07-T06 owns the parallel staging branch, and M07-T07 must join
+the exact T04 and T06 identities. The built official two-surface chain, 22 focused runtime cases,
+12 compiler-negative cases, and 16 independent proof/mutation cases pass. P-17 becomes `PROVEN`;
+P-12 remains `NOT_PROVEN`; N-038 and N-041 remain `PLANNED` for their later owners. Overall
+progress is 78/145, and M07-T05 owns the local editable-Source/immutable-Bundle/channel API next.
+
+Evidence: `docs/proof/CONTROL-PLANE-REFERENCE-PREFLIGHT.md` and
+`docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json`
+`sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`.
+
+Reviewed reader checkpoint sequence 7 links predecessor head
+`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5` and authenticates 13 frozen
+artifacts plus 26 live readers. It adds the 34,612-byte T04 artifact, live T04 proof/root and current
+M05-T06 compatibility readers. It seals the exact final receipts of the complete 26-reader live
+set after all T04 compatibility bridges and the reviewed CI timeout calibration, including current
+M05-T09, M06-T01/T05/T08/T09/T10/T11, and M07-T01/T02/T03 readers. The frozen M05-T06 artifact
+remains byte-identical and historically
+`PARTIAL`; live P-17 is `PROVEN`. Sequences 1–6 remain unchanged. This reviewed local checkpoint
+makes no new hosted CI claim.
 
 ## M08 — Framework-neutral editor core
 

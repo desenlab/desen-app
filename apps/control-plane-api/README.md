@@ -10,8 +10,10 @@ infrastructure, not the public `desen.run` developer API.
 M07-T01 implements a persistent, revision-addressed store for exact Bundle bytes. M07-T02 adds a
 separate synchronous integrity boundary for treating those stored bytes as untrusted input.
 M07-T03 consumes only that authenticated authority and independently resolves and fingerprints the
-complete installed Web–React package set. Editable-source persistence, channel pointers,
-surface/capability reference preflight, staging, and activation remain later M07 work.
+complete installed Web–React package set. M07-T04 consumes only that exact package authority and
+preflights its M07-T04 static surface, capability, event, navigation, resource, command, and
+operation references under one fixed finite profile. Editable-source persistence, channel
+pointers, staging, and activation remain later M07 work.
 
 The current implementation is a local POSIX filesystem profile. It deliberately accepts only
 already validated, revision-closed Bundle entries as a trusted caller precondition. The store does
@@ -25,6 +27,7 @@ import {
   BundleStoreError,
   openBundleStore,
   preflightBundlePackages,
+  preflightBundleReferences,
   verifyBundleStoreEntry,
 } from "@desen/control-plane-api";
 
@@ -55,7 +58,10 @@ if (read.status === "found") {
       },
     ]);
     if (packagePreflight.status === "preflighted") {
-      // Only this opaque authority may enter M07-T04 reference preflight.
+      const references = preflightBundleReferences(packagePreflight.authority);
+      if (references.status === "preflighted") {
+        // M07-T07 will join this opaque authority with independent M07-T06 staging authority.
+      }
     }
   }
 }
@@ -70,12 +76,12 @@ if (read.status === "found") {
 
 The root must already exist as an absolute, application-owned local directory; the store does not
 create or choose that authority for the caller. The package root exports the storage and integrity
-values above plus `preflightBundlePackages`, `BUNDLE_PACKAGE_PREFLIGHT_LIMITS`, the four stable
-package-preflight diagnostic constants, and their documented types. Filesystem paths, file handles,
-raw or partially parsed documents, byte snapshots, Source material, internal authority readers,
-test fault hooks, list/delete operations, loaders, executable callbacks, and mutable channel
-operations do not cross that root. The complete immutable Bundle snapshot is carried only by an
-authenticated integrity success; accepted Catalogs and artifact snapshots remain package-private.
+values above plus the package and reference preflight functions, their frozen finite profiles,
+stable diagnostic constants, and documented types. Filesystem paths, file handles, raw or partially
+parsed documents, byte snapshots, Source material, internal authority readers, test fault hooks,
+list/delete operations, loaders, executable callbacks, and mutable channel operations do not cross
+that root. The complete immutable Bundle snapshot is carried only by authenticated private state;
+accepted Catalogs and artifact snapshots remain package-private.
 
 ## Bundle integrity boundary
 
@@ -185,6 +191,44 @@ identity, path, depth, value, string, capability, and diagnostic ceilings. These
 the initial target profile where applicable; they are implementation limits rather than new
 universal DESEN 0.1.0 constants.
 
+## Surface and capability reference preflight
+
+`preflightBundleReferences(packageAuthority)` accepts exactly one live M07-T03 authority. It never
+accepts a caller-selected Bundle, Catalog, package list, resolver, callback, loader, path, network
+location, or limit override. A copied, cast, Proxy-backed, revoked, or stale public shape fails
+before the private Bundle or Validator port is observed.
+
+The implementation first performs one deterministic bounded walk over the already immutable
+M07-T02 Bundle and the exact M07-T03 Catalog snapshots. The walk checks entry and surface identity,
+the surface-wide node/behavior identity namespace, category-correct component/behavior/resource/
+operation capabilities, declared component and behavior events, managed navigation targets,
+surface resource refresh aliases, component command targets/names, and nested operation references.
+It visits component and behavior slot trees in stable code-unit order and follows every operation
+success/failure program without executing any action or dynamic value.
+
+The same pass enforces the Reference Profile before staging: root depth is zero and depth 64 is the
+last accepted source-tree level; one event or settlement turn admits at most 64 direct actions;
+settlement nesting stops at 16; predicates admit at most 64 arguments and use a fixed per-expression
+and whole-Bundle work budget. Repeat materialization uses the runtime-consistent effective bound
+`min(declared limit ?? 1,000, 1,000)`. Literal repeat arrays use their real length; unresolved
+dynamic repeat values use that conservative effective maximum. Saturating ancestor multiplication
+counts conditional nodes as possibly present and rejects a surface whose maximum possible
+materialization exceeds 5,000 nodes. No limit silently truncates a Bundle.
+
+Only a guard-successful Bundle reaches `validateDesenBundleSemantics`, whose independent immutable
+snapshot must have identical RFC 8785 canonical content. The exhaustive semantic fence cannot
+amplify untrusted structure: M07-T02 already bounded and validated the complete graph, M07-T03
+authenticated its Catalog set, and the T04 walk has already stopped every task-owned reference
+issue. A disagreement or throw is redacted as an internal failure rather than exposing private
+state.
+
+Success returns a frozen, runtime-authenticated `BundleReferencePreflightAuthority` containing only
+the exact revision, stable profile identity, and safe per-surface counts. The package authority,
+Bundle, Catalogs, artifact bytes, and reference relation remain private. The handle grants no
+execution-contract, runtime-index, staging, channel, activation, durable-commit, recovery, or
+adapter authority; M07-T06 independently owns staging and M07-T07 must authenticate and join both
+authorities before any durable commit.
+
 ## Storage layout
 
 An exact revision `sha256:<64 hex>` maps only to:
@@ -269,15 +313,15 @@ repository implementation with equivalent no-clobber and durability semantics.
 
 ## Explicitly deferred
 
-M07-T01 through M07-T03 prove immutable exact-byte persistence, Bundle integrity, and exact
-installed-package preflight. They do not yet provide:
+M07-T01 through M07-T04 prove immutable exact-byte persistence, Bundle integrity, exact
+installed-package preflight, and bounded surface/capability reference preflight. They do not yet
+provide:
 
-- M07-T04 surface/capability reference and finite-limit preflight;
 - M07-T05 editable-source storage, mutable channel pointers, or a control-plane transport API;
 - M07-T06 through M07-T10 staging, transactional activation, last-known-good state, recovery, and
   fault matrices; or
 - M07-T11 reference-host channel consumption.
 
 Callers must not treat a successful M07-T01 write as integrity verification, an M07-T02 integrity
-authority as package authority, or an M07-T03 package authority as reference, staging, channel, or
-activation authority.
+authority as package authority, an M07-T03 package authority as reference authority, or an M07-T04
+reference authority as staging, channel, commit, or activation authority.

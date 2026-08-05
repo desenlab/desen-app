@@ -44,9 +44,10 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "ee2d72c3529d9295945d339fb214c41dbbf906ffa6613a7ad6e766ec79c1bcf5",
   "7df3631d509ed7e65c571566a825d6d3cd52d336e1a74512bf3e8e26920749b3",
   "790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd",
+  "d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
-  6, 8, 9, 10, 11, 11,
+  6, 8, 9, 10, 11, 11, 13,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -194,6 +195,26 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/runtime-react-interactions-proof.mjs",
     "tests/runtime-react-interactions.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M07-T04",
+    {
+      path: "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+      bytes: 34_612,
+      sha256: "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394",
+    },
+    "scripts/lib/control-plane-reference-preflight-proof.mjs",
+    "tests/control-plane-reference-preflight.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M05-T06",
+    {
+      path: "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+      bytes: 9_534,
+      sha256: "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723",
+    },
+    "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+    "tests/runtime-react-failure-boundary.test.mjs",
   ),
 ]);
 

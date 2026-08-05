@@ -872,15 +872,47 @@ const APPROVED_CURRENT_T09_SUCCESSOR_PATHS = Object.freeze([
   BUNDLE_PUBLICATION_PROOF_LIBRARY,
   BUNDLE_PUBLICATION_ROOT_TEST,
 ]);
+const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
+  [BUNDLE_PUBLICATION_PROOF_LIBRARY]: Object.freeze([
+    Object.freeze({
+      task: "M06-T09",
+      bytes: 89_602,
+      sha256: "339cade1d676626653078fef299c99040c8d6757310f7e07cbbda09c63a013f6",
+    }),
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 136_184,
+      sha256: "6cd1b727f102c46ef546a00d4c5eb85a94a8d8727831f6ec577cc8576a5a5bd1",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 137_548,
+      sha256: "d154e49af93f1f6193c429709f81e5e8e7601e999c13f3a023a510e302fc2b19",
+    }),
+  ]),
+  [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze([
+    Object.freeze({
+      task: "M06-T09",
+      bytes: 46_946,
+      sha256: "52a19852972d31429ad7631de4e8338249eb9d6b894ccaa7b34dc68deb6b0b80",
+    }),
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 62_818,
+      sha256: "0469709b05c9ad61fd0dc64fb76c8758dcf21d540592a0aa6c201877286df784",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 63_899,
+      sha256: "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f",
+    }),
+  ]),
+});
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
-  [BUNDLE_PUBLICATION_PROOF_LIBRARY]: Object.freeze({
-    bytes: 136_184,
-    sha256: "6cd1b727f102c46ef546a00d4c5eb85a94a8d8727831f6ec577cc8576a5a5bd1",
-  }),
-  [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze({
-    bytes: 62_818,
-    sha256: "0469709b05c9ad61fd0dc64fb76c8758dcf21d540592a0aa6c201877286df784",
-  }),
+  [BUNDLE_PUBLICATION_PROOF_LIBRARY]:
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][2],
+  [BUNDLE_PUBLICATION_ROOT_TEST]:
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][2],
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
   OFFICIAL_GOLDEN_PROOF_LIBRARY,
@@ -888,8 +920,8 @@ const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
 ]);
 const APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS = Object.freeze({
   [OFFICIAL_GOLDEN_PROOF_LIBRARY]: Object.freeze({
-    bytes: 58_158,
-    sha256: "48d401ecfd0a4c09a0a92c8d16fb3949140a5b035f665027c708d35adc10ee9d",
+    bytes: 58_144,
+    sha256: "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245",
   }),
   [OFFICIAL_GOLDEN_ROOT_TEST]: Object.freeze({
     bytes: 37_617,
@@ -904,7 +936,7 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "authenticateCurrentCompatibilityReaders",
   "APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT",
   "authenticateRequiredCiWorkflow",
-  "4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0",
+  "04429211188d351ee720c1e64802d48e34e425348b397c4bb835ba5c1fe4ccf5",
   "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
   "live-worktree",
   "tracked-byte-override",
@@ -913,9 +945,16 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db",
   "bytes: 70_038",
   "b203eb295bc4056f185416b8616c541f9d2cdebbfe74ed4ccb84e328d4da9c02",
+  "EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST",
+  "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
+  "bytes: 70_789",
+  "6c0d2fc7169a0ee7b3f13d65b6e97db17d14e67f1f4b480dc1d083e7ef37a9ee",
+  "bytes: 17_767",
+  "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',
+  'test("[compatibility] admits only the exact current execution-preflight root reader"',
   'test("[ci] admits only the exact required-workflow successor into frozen T09 evidence"',
   "// unreviewed compatibility successor",
   "const originalObjectFreeze = Object.freeze;",
@@ -3428,7 +3467,7 @@ async function successorSurfaceClaims(bytesByPath, text, options, ciOverridden) 
     [
       CI_TEST,
       [
-        'test("the current repository exactly matches the frozen proof inventory"',
+        'test("the current repository exactly matches the reviewed live proof inventory"',
         'test("the exact single-pass plan rejects command removal and duplicate root coverage"',
       ],
     ],

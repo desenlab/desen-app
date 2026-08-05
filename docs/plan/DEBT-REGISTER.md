@@ -1,7 +1,8 @@
 # Infrastructure Debt and Cleanup Register
 
-This register tracks temporary compatibility structures registered by I07-01 while immutable task
-evidence is separated from current-checkpoint authentication and CI execution orchestration. Nine
+This register tracks temporary compatibility structures registered by I07-01 and later
+task-specific successors while immutable task evidence is separated from current-checkpoint
+authentication and CI execution orchestration. Ten
 entries remain open; DEBT-I07-008 is closed with authenticated removal evidence. An open entry
 records planned removal work and does not claim that its cleanup has already been implemented.
 
@@ -43,8 +44,9 @@ the full gate. A cleanup is complete only when:
 | DEBT-I07-006 | OPEN   | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
 | DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
 | DEBT-I07-008 | CLOSED | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
-| DEBT-I07-009 | OPEN   | M05-T09 current M07-T02 coordination projection          | I07-01        | I07-04        | G07           |
+| DEBT-I07-009 | OPEN   | M05-T09 current M07-T04 coordination projection          | I07-01        | I07-04        | G07           |
 | DEBT-I07-010 | OPEN   | M05-T04 current M07-T03 P-05 successor projection        | I07-01        | I07-04        | G07           |
+| DEBT-I07-011 | OPEN   | M07-T04 current-reader and P-17 successor bridges        | M07-T04       | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -54,11 +56,17 @@ the full gate. A cleanup is complete only when:
 - Exact paths and symbols:
   - `scripts/lib/publisher-publish-result-proof.mjs`
     - `G05_COMPATIBILITY_OWNERSHIP_PATHS`
-    - `REVIEWED_CURRENT_G05_RECEIPTS`
+    - `REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY`
     - `TRACKED_FILE_OVERRIDE_PATHS`
+    - `reviewedHistory`
+    - `latestReviewed`
+    - `receiptIsReviewed`
   - `tests/publisher-publish-result.test.mjs`
+    - `M07_T03_SOURCE_AUDIT_RECONSTRUCTION_PATCH`
+    - `reconstructM07T03SourceAuditProof`
     - `currentCompatibilityBytes`
-    - `reviewedCurrentG05Receipts`
+    - `compatibilityPaths`
+    - `reviewedG05CompatibilityReceiptHistory`
     - `PUBLISHER_G05_COMPATIBILITY_READER_DRIFT`
   - current receipt targets:
     - `scripts/lib/reference-host-web-source-audit-proof.mjs`
@@ -76,7 +84,7 @@ the full gate. A cleanup is complete only when:
   - `node --test tests/publisher-publish-result.test.mjs`
   - `node scripts/verify-reference-host-web-source-audit.mjs`
   - `node --test tests/reference-host-web-source-audit.test.mjs`
-  - `rg -n "G05_COMPATIBILITY_OWNERSHIP_PATHS|REVIEWED_CURRENT_G05_RECEIPTS|TRACKED_FILE_OVERRIDE_PATHS|currentCompatibilityBytes|reviewedCurrentG05Receipts|PUBLISHER_G05_COMPATIBILITY_READER_DRIFT" scripts/lib/publisher-publish-result-proof.mjs tests/publisher-publish-result.test.mjs`
+  - `rg -n "G05_COMPATIBILITY_OWNERSHIP_PATHS|REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY|TRACKED_FILE_OVERRIDE_PATHS|reviewedHistory|latestReviewed|receiptIsReviewed|M07_T03_SOURCE_AUDIT_RECONSTRUCTION_PATCH|reconstructM07T03SourceAuditProof|currentCompatibilityBytes|compatibilityPaths|reviewedG05CompatibilityReceiptHistory|PUBLISHER_G05_COMPATIBILITY_READER_DRIFT" scripts/lib/publisher-publish-result-proof.mjs tests/publisher-publish-result.test.mjs`
     must return no matches after removal. Historical path strings inside immutable task-receipt
     projections are not part of this zero-reference rule.
 - Closure evidence: `PENDING` — record commit, pull request, replacement checkpoint receipt
@@ -91,12 +99,15 @@ the full gate. A cleanup is complete only when:
   - `scripts/lib/publisher-execution-preflight-proof.mjs`
     - `M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH`
     - `M05_SOURCE_AUDIT_TEST_RELATIVE_PATH`
+    - `APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY`
     - `APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS`
     - `captureCompatibilitySourceBytes`
     - the current-receipt branch in `fileInventory`
   - `tests/publisher-execution-preflight.test.mjs`
     - `compatibilitySources`
     - `compatibilitySourceBytes`
+    - `currentBytes`
+    - `currentSha256`
   - duplicated current targets:
     - `scripts/lib/reference-host-web-source-audit-proof.mjs`
     - `tests/reference-host-web-source-audit.test.mjs`
@@ -112,7 +123,7 @@ the full gate. A cleanup is complete only when:
   - `node scripts/verify-publisher-execution-preflight.mjs`
   - `node --test tests/publisher-execution-preflight.test.mjs`
   - `node scripts/verify-reference-host-web-source-audit.mjs`
-  - `rg -n "APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS|captureCompatibilitySourceBytes|compatibilitySourceBytes" scripts/lib/publisher-execution-preflight-proof.mjs tests/publisher-execution-preflight.test.mjs`
+  - `rg -n "M05_SOURCE_AUDIT_(PROOF|TEST)_RELATIVE_PATH|APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS|captureCompatibilitySourceBytes|compatibilitySources|compatibilitySourceBytes|currentBytes|currentSha256" scripts/lib/publisher-execution-preflight-proof.mjs tests/publisher-execution-preflight.test.mjs`
     must return no matches after removal. Immutable historical receipt records may retain their
     exact M05-T09 paths and hashes.
 - Closure evidence: `PENDING` — record commit, pull request, replacement checkpoint receipt
@@ -127,6 +138,8 @@ the full gate. A cleanup is complete only when:
   - `scripts/lib/publisher-bundle-publication-proof.mjs`
     - `PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS`
     - `EXECUTION_PREFLIGHT_COMPATIBILITY_READER`
+    - `EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST`
+    - `APPROVED_COMPATIBILITY_RECEIPT_HISTORY`
     - `APPROVED_CURRENT_COMPATIBILITY_RECEIPTS`
     - `APPROVED_CURRENT_COMPATIBILITY_PATHS`
     - `assertApprovedCurrentCompatibilityBytes`
@@ -139,12 +152,14 @@ the full gate. A cleanup is complete only when:
     - `PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS`
     - `[compatibility] externally tracks every current T02 through T08 proof reader`
     - `[compatibility] detects tamper in each externally anchored T02 through T08 reader`
+    - `[compatibility] admits only the exact current execution-preflight root reader`
     - `[ci] admits only the exact required-workflow successor into frozen T09 evidence`
     - `[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence`
 - Reason retained: the frozen M06-T09 proof authenticates seven evolving M06-T02 through M06-T08
-  readers, embeds the current M06-T05 reader receipt, and projects the authenticated required-CI
-  successor back to its task-time workflow receipt. These checks protect the live edges today but
-  combine immutable T09 evidence, current compatibility, and execution coordination in one module.
+  readers, embeds the current M06-T05 reader and root-test receipt history, and projects the
+  authenticated required-CI successor back to its task-time workflow receipt. These checks protect
+  the live edges today but combine immutable T09 evidence, current compatibility, and execution
+  coordination in one module.
 - Objective removal trigger: the current checkpoint owns the exact seven-reader inventory and
   their current receipts; required-only workflow authority owns current CI authentication; M06-T09
   retains only frozen prerequisite and task-time evidence; all seven tamper cases fail through the
@@ -154,7 +169,7 @@ the full gate. A cleanup is complete only when:
   - `node scripts/verify-publisher-bundle-publication.mjs`
   - `node --test tests/publisher-bundle-publication.test.mjs`
   - `node scripts/verify-publisher-execution-preflight.mjs`
-  - `rg -n "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_CURRENT_COMPATIBILITY_PATHS|assertApprovedCurrentCompatibilityBytes|authenticateCurrentCompatibilityReaders|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T09 evidence" scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs`
+  - `rg -n "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS|EXECUTION_PREFLIGHT_COMPATIBILITY_(READER|ROOT_TEST)|APPROVED_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_CURRENT_COMPATIBILITY_PATHS|assertApprovedCurrentCompatibilityBytes|authenticateCurrentCompatibilityReaders|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|authenticatedM07T01Prefix|\[compatibility\] externally tracks every current T02 through T08 proof reader|\[compatibility\] detects tamper in each externally anchored T02 through T08 reader|\[compatibility\] admits only the exact current execution-preflight root reader|\[ci\] admits only the exact required-workflow successor into frozen T09 evidence|\[ci\] accepts an append-only M07 successor without rewriting frozen T09 evidence" scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs`
     must return no matches after removal. The checkpoint may retain the seven exact paths under new
     checkpoint-owned symbols.
 - Closure evidence: `PENDING` — record commit, pull request, seven-reader checkpoint receipt
@@ -168,6 +183,7 @@ the full gate. A cleanup is complete only when:
 - Exact paths and symbols:
   - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
     - `APPROVED_CURRENT_T09_SUCCESSOR_PATHS`
+    - `APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY`
     - `APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS`
     - `APPROVED_CURRENT_T10_SUCCESSOR_PATHS`
     - `APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS`
@@ -222,7 +238,7 @@ the full gate. A cleanup is complete only when:
   - `node --test tests/publisher-bundle-publication.test.mjs`
   - `node scripts/verify-publisher-official-golden.mjs`
   - `node --test tests/publisher-official-golden.test.mjs`
-  - `rg -n "APPROVED_CURRENT_T(09|10)_SUCCESSOR_(PATHS|RECEIPTS)|REQUIRED_CURRENT_T09_(PROOF|TEST)_MARKERS|currentT(09|10)SuccessorReceipt|assertCurrentT10SuccessorBytes|authenticateLiveCurrentT(09|10)Successors|authenticateCurrentT(09|10)TrackedInputs|currentT10HistoricalReceipt|assertCurrentT09CompatibilityMarkers|\[authority\] distinguishes semantic coordination drift from frozen surface drift|BUNDLE_PUBLICATION_(PROOF_LIBRARY|ROOT_TEST)|currentT(09|10)(Proof|RootTest)Bytes|approvedCurrentT09|unreviewedT09ProofBytes|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T10 evidence" scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs scripts/lib/publisher-official-golden-proof.mjs tests/publisher-official-golden.test.mjs`
+  - `rg -n "APPROVED_CURRENT_T(09|10)_SUCCESSOR_(PATHS|RECEIPTS)|APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY|REQUIRED_CURRENT_T09_(PROOF|TEST)_MARKERS|currentT(09|10)SuccessorReceipt|assertCurrentT10SuccessorBytes|authenticateLiveCurrentT(09|10)Successors|authenticateCurrentT(09|10)TrackedInputs|currentT10HistoricalReceipt|assertCurrentT09CompatibilityMarkers|\[authority\] distinguishes semantic coordination drift from frozen surface drift|BUNDLE_PUBLICATION_(PROOF_LIBRARY|ROOT_TEST)|currentT(09|10)(Proof|RootTest)Bytes|approvedCurrentT09|unreviewedT09ProofBytes|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T10 evidence" scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs scripts/lib/publisher-official-golden-proof.mjs tests/publisher-official-golden.test.mjs`
     must return no matches after removal.
 - Closure evidence: `PENDING` — record commit, pull request, structured T09/T10 checkpoint receipt
   SHA-256, frozen M06-T11 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
@@ -447,26 +463,26 @@ the full gate. A cleanup is complete only when:
   - the evidence artifact records the neutral-inventory and retired target receipts, including the
     removed shadow workflow.
 
-## DEBT-I07-009 — M05-T09 current M07-T03 coordination projection
+## DEBT-I07-009 — M05-T09 current M07-T04 coordination projection
 
 - Status: `OPEN`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
   - `scripts/lib/reference-host-web-source-audit-proof.mjs`
-    - `M07_T03_CONTROL_PLANE_COORDINATION`
-    - `M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK`
+    - `M07_T04_CONTROL_PLANE_COORDINATION`
+    - `M07_T04_CONTROL_PLANE_LOCKFILE_BLOCK`
     - `normalizeCurrentRootPackageBytes`
     - `inspectExactControlPlaneImporter`
     - `normalizeCurrentLockfileBytes`
   - `tests/reference-host-web-source-audit.test.mjs`
-    - `reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance`
+    - `reviewed Publisher and M07-T04 coordination preserve root, package, and lockfile provenance`
 - Reason retained: the frozen M05-T09 artifact still projects its task-time root package and
-  lockfile bytes, while the live workspace now contains the reviewed M07-T01 through M07-T03
-  control-plane commands, aggregate edges, and Validator importer. The current source-audit reader
-  must authenticate that exact successor before removing those control-plane tasks from the
-  historical projection.
-- Objective removal trigger: the current checkpoint owns the exact M07-T03 root-command,
+  lockfile bytes, while the live workspace now contains the reviewed M07-T01 through M07-T04
+  control-plane commands, package-test script, aggregate edges, and Validator importer. The
+  current source-audit successor authenticates that complete T04 command graph before those
+  control-plane tasks can leave the historical projection.
+- Objective removal trigger: the current checkpoint owns the exact M07-T04 root-command,
   aggregate-edge, and lock-importer receipts; M05-T09 consumes only the checkpoint result and
   returns to its immutable task-time coordination projection; and every missing, duplicated,
   reordered, substituted, quoted, or extra control-plane authority mutation remains rejected.
@@ -474,8 +490,8 @@ the full gate. A cleanup is complete only when:
 - Exact verification and zero-reference rule:
   - `node scripts/verify-reference-host-web-source-audit.mjs`
   - `node --test tests/reference-host-web-source-audit.test.mjs`
-  - `rg -n "M07_T03_CONTROL_PLANE_COORDINATION|M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK|normalizeCurrentRootPackageBytes|inspectExactControlPlaneImporter|normalizeCurrentLockfileBytes|reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
-    must return no matches after removal. The replacement checkpoint may retain exact M07-T03
+  - `rg -n "M07_T04_CONTROL_PLANE_COORDINATION|M07_T04_CONTROL_PLANE_LOCKFILE_BLOCK|normalizeCurrentRootPackageBytes|inspectExactControlPlaneImporter|normalizeCurrentLockfileBytes|reviewed Publisher and M07-T04 coordination preserve root, package, and lockfile provenance" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
+    must return no matches after removal. The replacement checkpoint may retain exact M07-T04
     receipts under checkpoint-owned symbols.
 - Closure evidence: `PENDING` — record commit, pull request, replacement coordination-checkpoint
   SHA-256, frozen M05-T09 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
@@ -516,3 +532,86 @@ the full gate. A cleanup is complete only when:
 - Closure evidence: `PENDING` — record commit, pull request, replacement semantic-checkpoint
   SHA-256, frozen M05-T04 and M07-T03 artifact SHA-256 values, and hosted required-exhaustive
   equivalence run URL.
+
+## DEBT-I07-011 — M07-T04 current-reader and P-17 successor bridges
+
+- Status: `OPEN`
+- Registered by infrastructure task: `M07-T04`
+- Removal owner: `I07-04`
+- Exact paths and symbols:
+  - `scripts/lib/runtime-react-failure-boundary-proof.mjs`
+    - `EXPECTED_CURRENT_P17_SUCCESSOR`
+    - `p17HistoricalStatus`
+    - `p17CurrentStatus`
+    - `p17SuccessorArtifactSha256`
+  - `tests/runtime-react-failure-boundary.test.mjs`
+    - `SUCCESSOR_SHA256`
+    - `SUCCESSOR_ARTIFACT_FILE_NAME`
+    - `SUCCESSOR_EVIDENCE_TEXT`
+    - `rejects N-037, monotonic P-17 successor, and PF-055 current-closure drift`
+  - `scripts/lib/control-plane-bundle-store-proof.mjs`
+    - `APPROVED_M07_T04_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS`
+    - `approvedM07T04`
+  - `tests/control-plane-bundle-store.test.mjs`
+    - `changedPackageByte`
+    - `indexWithAppendedTail`
+  - `scripts/lib/control-plane-bundle-verification-proof.mjs`
+    - `APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T04_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS`
+    - `approvedM07T04`
+    - `approvedM07T04Keys`
+    - `reviewedSuccessor`
+  - `tests/control-plane-bundle-verification.test.mjs`
+    - `APP_INDEX`
+    - `indexWithAppendedTail`
+  - `scripts/lib/control-plane-package-preflight-proof.mjs`
+    - `APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T04_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS`
+    - `approvedM07T04`
+    - `taskTimeTail`
+    - `successorIndex`
+    - `reviewedSuccessor`
+    - `reviewedSuccessorTail`
+    - `pnpm verify:control-plane-reference-preflight`
+    - `pnpm test:control-plane-reference-preflight`
+  - `tests/control-plane-package-preflight.test.mjs`
+    - `indexWithAppendedTail`
+    - `unreviewed successor tail`
+- Reason retained: the frozen M05-T06 artifact truthfully preserves its task-time `P-17: PARTIAL`
+  projection and its exact M07-T04 remainder, while M07-T04 legitimately closes the live Proof
+  Matrix row as `PROVEN`. The current failure-boundary reader must preserve both facts and reject a
+  missing, substituted, downgraded, or falsely attributed M07-T04 successor without rewriting the
+  immutable 9,534-byte M05-T06 artifact. The frozen M07-T01 through M07-T03 readers must likewise
+  project their task-time package roots while admitting only the exact M07-T04 package, export,
+  distribution, and runtime receipts; their six proof/test reader files therefore carry temporary
+  successor branches until I07-04 moves current authentication fully into the checkpoint.
+- Objective removal trigger: the current checkpoint owns the structured M07-T04 P-17 successor,
+  the exact M07-T04 artifact, current M05-T06 proof/test receipts, and the M07-T01 through M07-T04
+  control-plane package/export/distribution transition. Historical readers consume only that
+  authenticated checkpoint plus immutable task-time evidence; every receipt, export, runtime-key,
+  status, owner, evidence-text, artifact-path, and artifact-hash mutation remains rejected; and all
+  frozen artifacts remain byte-identical.
+- Must close by gate: `G07`
+- Exact verification and zero-reference rule:
+  - `node scripts/verify-runtime-react-failure-boundary.mjs`
+  - `node --test tests/runtime-react-failure-boundary.test.mjs`
+  - `node scripts/verify-control-plane-bundle-store.mjs`
+  - `node --test tests/control-plane-bundle-store.test.mjs`
+  - `node scripts/verify-control-plane-bundle-verification.mjs`
+  - `node --test tests/control-plane-bundle-verification.test.mjs`
+  - `node scripts/verify-control-plane-package-preflight.mjs`
+  - `node --test tests/control-plane-package-preflight.test.mjs`
+  - `node scripts/ci/verify-proof-reader-checkpoints.mjs`
+  - `rg -n "EXPECTED_CURRENT_P17_SUCCESSOR|p17HistoricalStatus|p17CurrentStatus|p17SuccessorArtifactSha256|SUCCESSOR_SHA256|SUCCESSOR_ARTIFACT_FILE_NAME|SUCCESSOR_EVIDENCE_TEXT|rejects N-037, monotonic P-17 successor, and PF-055 current-closure drift|APPROVED_M07_T04_(TRACKED_RECEIPTS|PUBLIC_SOURCE_EXPORTS|PUBLIC_RUNTIME_KEYS|INDEX_DISTRIBUTION_RECEIPTS)|approvedM07T04(Keys)?|taskTimeTail|successorIndex|reviewedSuccessor(Tail)?|pnpm (verify|test):control-plane-reference-preflight|changedPackageByte|indexWithAppendedTail|APP_INDEX|unreviewed successor tail" scripts/lib/runtime-react-failure-boundary-proof.mjs tests/runtime-react-failure-boundary.test.mjs scripts/lib/control-plane-bundle-store-proof.mjs tests/control-plane-bundle-store.test.mjs scripts/lib/control-plane-bundle-verification-proof.mjs tests/control-plane-bundle-verification.test.mjs scripts/lib/control-plane-package-preflight-proof.mjs tests/control-plane-package-preflight.test.mjs`
+    must return no matches after removal. The replacement checkpoint may retain the exact M07-T04
+    semantic successor, M05-T06 reader receipts, and control-plane transition under
+    checkpoint-owned symbols.
+- Closure evidence: `PENDING` — record commit, pull request, replacement semantic-checkpoint
+  SHA-256, frozen M05-T06 plus M07-T01 through M07-T04 artifact SHA-256 values, and hosted
+  required-exhaustive equivalence run URL.

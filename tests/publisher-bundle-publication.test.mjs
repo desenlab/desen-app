@@ -197,12 +197,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-package-preflight && pnpm lint",
-    "pnpm verify:control-plane-package-preflight && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-reference-preflight && pnpm lint",
+    "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-package-preflight && turbo run test",
-    "pnpm test:control-plane-package-preflight && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-reference-preflight && turbo run test",
+    "pnpm test:control-plane-reference-preflight && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1545,6 +1545,33 @@ test("[compatibility] detects tamper in each externally anchored T02 through T08
   } finally {
     Array.prototype.filter = originalArrayFilter;
   }
+});
+
+test("[compatibility] admits only the exact current execution-preflight root reader", async () => {
+  const readerPath = "tests/publisher-execution-preflight.test.mjs";
+  const currentBytes = await sourceBytes(readerPath);
+  assert.equal(currentBytes.byteLength, 17_767);
+  assert.equal(
+    createHash("sha256").update(currentBytes).digest("hex"),
+    "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
+  );
+
+  const approved = await buildPublisherBundlePublicationEvidence(
+    fastOptions({ trackedFileBytes: { [readerPath]: currentBytes } }),
+  );
+  assert.deepEqual(approved.artifactBytes, baseline.artifactBytes);
+  assert.equal(approved.artifactSha256, baseline.artifactSha256);
+
+  const unreviewedBytes = Buffer.concat([
+    currentBytes,
+    Buffer.from("\n// unreviewed execution-preflight root successor\n"),
+  ]);
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({ trackedFileBytes: { [readerPath]: unreviewedBytes } }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
 });
 
 for (const authorityPath of PUBLISHER_BUNDLE_PUBLICATION_RESULT_AUTHORITY_FILES) {

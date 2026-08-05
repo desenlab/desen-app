@@ -10,7 +10,7 @@ CI-01 sequential runner remains available only through explicit manual rollback.
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   134-node, 63-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   136-node, 64-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -36,6 +36,18 @@ a bounded, explicit 20-second nested Vitest timeout; current head `790ad28b6fd44
 authenticates eleven frozen artifacts and twenty-two live readers. It changes no coverage,
 assertion, concurrency, frozen evidence, workload/proof count, progress, or plan digest, and
 sequences 1–5 remain byte- and hash-unchanged.
+
+Reviewed sequence 7 links predecessor head
+`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to current head
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5`, authenticating 13 frozen
+artifacts and 26 live readers. It adds the 34,612-byte M07-T04 artifact
+`sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`, live T04 proof/root and
+current M05-T06 compatibility readers. It seals the exact final receipts of the complete 26-reader
+live set after all T04 compatibility bridges and the reviewed CI timeout calibration, including
+current M05-T09, M06-T01/T05/T08/T09/T10/T11, and M07-T01/T02/T03 readers. The frozen M05-T06
+artifact remains byte-identical with its historical
+`PARTIAL` projection; live P-17 is `PROVEN`. Sequences 1–6 remain unchanged. This is a reviewed
+local-reader checkpoint and does not claim a new hosted CI pass.
 
 ## Historical I07-01 checkpoint
 
@@ -64,8 +76,13 @@ manual `legacy-rollback`. The temporary shadow workflow and comparison adapter/t
 after the accepted same-revision comparison and successful hosted cutover.
 
 The archived I07-02 baseline remains the immutable 130-workload/61-proof cutover receipt. The live
-authority is an append-only successor: M07-T02 adds one verifier/root-test pair without rewriting
-that historical baseline.
+authority is an append-only successor: M07-T02, M07-T03, and M07-T04 each add one verifier/root-test
+pair without rewriting that historical baseline. The M07-T04 live receipt contains 136 workloads,
+64 proof pairs, 415 prerequisite segments, 2,089 ordered leaf invocations, and 212 distinct leaf
+workloads. Its inventory is
+`sha256:c4ee9d861f263757b6240a448b062896dcf358c42d499d338bc39d442750314e`, and its required plan is
+`sha256:6ca8631e4d3622c31259ffce82e1a29092789496a8c8479ba12d629efec63ed5`. These are reviewed
+local/code-owned successor pins; they do not claim a new hosted CI run has passed.
 
 Every workload has exactly one code-owned shared-state class:
 
@@ -74,14 +91,19 @@ Every workload has exactly one code-owned shared-state class:
 | `GLOBAL_EXCLUSIVE`               |     6 | Repository-wide integrity and boundary barriers      |
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Workspace build/typecheck output writer              |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
-| `PROOF_READ_ONLY`                |    66 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    47 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_READ_ONLY`                |    68 | Proof work with no shared workspace writes           |
+| `PROOF_OS_TEMP_ISOLATED`         |    49 | Proof work restricted to a runner-owned OS temp root |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
-Fifty-one proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
+Fifty-three proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
 pass. Ten real tracked-alias pairs and `reference-host-web-source-audit` are the eleven exclusive
 proof-pair barriers. Within every pair, the root test still depends on its verifier.
+
+The M07-T04 `control-plane-reference-preflight` pair is ordinary and non-barrier. Its verifier is
+`PROOF_READ_ONLY`; its root mutation test is `PROOF_OS_TEMP_ISOLATED` and writes only inside its
+runner-owned OS temp root. It receives no workspace-write, port, or native-addon authority, and its
+verifier receives no child-runtime-probe grant.
 
 The only verifier runtime-probe exceptions, each with isolated temp and child-process authority,
 are:
@@ -98,7 +120,7 @@ addon exception. Its verifier remains workspace-read-only; its root test is the 
 workspace-temp barrier.
 
 Node 24 requires an orthogonal schema-v2 compatibility policy for eighteen exact root tests. The
-distribution across all 134 workloads is 116 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across all 136 workloads is 118 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
 code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
 symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
@@ -134,13 +156,13 @@ and exit code, immediately terminates all active groups, and prevents new launch
 may escalate to SIGKILL but cannot replace the winner. Settlement still waits for every child
 `close` and isolation cleanup.
 
-A code-owned 15-minute soft complete-gate timeout sits above the workload timeouts. Authentic
+A code-owned 17-minute soft complete-gate timeout sits above the 15-minute workload timeouts. Authentic
 settlement still awaits child `close`, cleanup, and boundary capture. Phase A therefore wraps the
 command in an 18-minute operating-system ceiling with a 30-second kill grace, inside a 25-minute
 hosted job. An outer-ceiling failure is never accepted as promotion evidence.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
-bytes, executable modes, tracked-file count, and Git index object ids before and after all 134
+bytes, executable modes, tracked-file count, and Git index object ids before and after all 136
 steps, including failure paths. The shared-state boundary also seals every reviewed build/Turbo
 output root across the proof phase and compares non-ignored untracked state across the complete
 execution region. A dependency download cache may save network time; no build, test, checkpoint,

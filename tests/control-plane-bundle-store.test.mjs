@@ -321,15 +321,35 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
     );
   }
 
+  const changedPackageByte = Uint8Array.from(await sourceBytes(APP_PACKAGE));
+  changedPackageByte[Math.floor(changedPackageByte.byteLength / 2)] ^= 1;
+  await assert.rejects(
+    buildControlPlaneBundleStoreEvidence(
+      fastOptions({ trackedFileBytes: { [APP_PACKAGE]: changedPackageByte } }),
+    ),
+    expectCode("REGISTRATION_DRIFT"),
+  );
+
+  const indexWithAppendedTail = Buffer.concat([
+    await sourceBytes(APP_INDEX),
+    Buffer.from("\n/* unreviewed successor tail */\n", "utf8"),
+  ]);
+  await assert.rejects(
+    buildControlPlaneBundleStoreEvidence(
+      fastOptions({ trackedFileBytes: { [APP_INDEX]: indexWithAppendedTail } }),
+    ),
+    expectCode("REGISTRATION_DRIFT"),
+  );
+
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-package-preflight && pnpm lint",
-        "pnpm verify:control-plane-package-preflight && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm verify:control-plane-reference-preflight && pnpm lint",
+        "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-package-preflight && turbo run test",
-        "pnpm test:control-plane-package-preflight && pnpm test:control-plane-successor && turbo run test",
+        "pnpm test:control-plane-reference-preflight && turbo run test",
+        "pnpm test:control-plane-reference-preflight && pnpm test:control-plane-successor && turbo run test",
       ),
   );
   const successor = await buildControlPlaneBundleStoreEvidence(successorOptions);
