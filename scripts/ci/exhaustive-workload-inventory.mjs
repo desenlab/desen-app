@@ -76,15 +76,15 @@ const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm boundaries",
 ]);
 const EXPECTED_PREREQUISITE_SHA256 =
-  "7989c191437166b3ac419efe79f08cc8c668d4fd75c1c95f312093c0892ba9c1";
+  "106b40cbcb85dd63833cdf7da29ca4b87d30e6fdced7d8b6e7ce91742b5e98d1";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "c7199737611c89155eca96b27c66ef15e495b215a23cce226225f7dc0b88cd6d";
+  "a4ca5e101bab7ba21ea56dccc9c2e9306aaad3cb60e3b540ba32d70a0f587b9f";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "33492ae60b3234edb5f06e0b9fa84f1a007305b8f27248cf971d502d5a735d8c";
+  "af7be654a83989448ba8db76c8e9f22ba4ce515f46834853f95f4ac14a56cb90";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
-  "c9729b90c41f345a60acacc3a4d38826183777f57798b4f076aa4b876a3d99ba";
+  "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
 const FORBIDDEN_COMMAND_PATTERN =
   /generate|writ(?:e|er)|--affected\b|--since\b|changed-files?|git-diff/i;
@@ -402,6 +402,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "control-plane-reference-preflight",
     "scripts/verify-control-plane-reference-preflight.mjs",
     "tests/control-plane-reference-preflight.test.mjs",
+  ],
+  [
+    "control-plane-local-api",
+    "scripts/verify-control-plane-local-api.mjs",
+    "tests/control-plane-local-api.test.mjs",
   ],
 ]);
 
@@ -1270,7 +1275,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "c4ee9d861f263757b6240a448b062896dcf358c42d499d338bc39d442750314e";
+  "d26e9fa74f85be06852cd4f667467606735687e851ab03a6ef5611700c9ccc92";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

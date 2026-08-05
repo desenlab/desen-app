@@ -55,12 +55,12 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
-and proved the 130-workload, 61-proof-pair cutover baseline. The reviewed M07-T04 live successor
-contains 136 workloads and 64 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
+and proved the 130-workload, 61-proof-pair cutover baseline. The reviewed M07-T05 live successor
+contains 138 workloads and 65 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
 frozen cutover evidence. The retained sequential runner is available only through explicit manual
 `legacy-rollback`. Exact cutover workload, result, cancellation, tracked-workspace, hosted, and
-shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T04 is `DONE`, and
-M07-T05 is next.
+shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T05 is `DONE`, and
+M07-T06 is next.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -479,7 +479,7 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | M07-T02 | DONE        | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
 | M07-T03 | DONE        | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
 | M07-T04 | DONE        | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
-| M07-T05 | NOT_STARTED | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
+| M07-T05 | DONE        | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
 | M07-T06 | NOT_STARTED | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
 | M07-T07 | NOT_STARTED | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision}` as one consistent record                    |
 | M07-T08 | NOT_STARTED | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
@@ -588,6 +588,33 @@ Evidence: `docs/proof/CONTROL-PLANE-REFERENCE-PREFLIGHT.md` and
 `docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json`
 `sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`.
 
+M07-T05 adds one local fixed-loopback Fastify boundary with explicit bearer authentication and
+exact-origin CORS. Editable Source bytes live in SQLite behind monotonic generations and
+compare-and-swap writes; stale generations fail without replacing the winner. Exact successful
+origins can read the `ETag` generation header. Immutable Bundle routes delegate to the already
+proved M07-T01 first-writer-wins repository, while mutable channel pointers expose discovery
+metadata only: they do not verify, stage, commit, activate, or confer runtime authority.
+
+Strict JSON, bounded request bodies, stable redacted errors, and SQLite durability keep malformed,
+oversized, concurrent, restart, and mutation cases fail closed. The service binds only to its
+fixed loopback profile and bounds inactive connections at 5 seconds, complete requests at 15
+seconds, and keep-alive at 5 seconds so a partial-body client cannot block shutdown indefinitely.
+Native `better-sqlite3` imports are isolated to the exact local-API proof pair, and the production
+dependency audit reports no known vulnerability in the reviewed lockfile.
+
+The executable evidence contains 16 focused runtime cases, 18 compiler-negative cases, and 16
+independent root proof/mutation cases. The 41,945-byte artifact authenticates the public contract,
+transport and persistence implementation, generated distribution, prerequisite receipts, exact
+nonclaims, and timeout behavior at
+`sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`.
+`N-019` becomes `TESTED`; `P-12` remains `NOT_PROVEN`, `G07` remains open, and `PF-074` remains
+`OPEN`. Overall progress is 79/145, and M07-T06 owns staged runtime indexes and active/staged state
+separation next.
+
+Evidence: `docs/proof/CONTROL-PLANE-LOCAL-API.md` and
+`docs/proof/artifacts/control-plane-api-0.1.0-local-api.json`
+`sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`.
+
 Reviewed reader checkpoint sequence 7 links predecessor head
 `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to
 `d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5` and authenticates 13 frozen
@@ -598,6 +625,68 @@ M05-T09, M06-T01/T05/T08/T09/T10/T11, and M07-T01/T02/T03 readers. The frozen M0
 remains byte-identical and historically
 `PARTIAL`; live P-17 is `PROVEN`. Sequences 1–6 remain unchanged. This reviewed local checkpoint
 makes no new hosted CI claim.
+
+Reviewed reader checkpoint sequence 8 links the exact sequence 7 head
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5` to
+`f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a` and authenticates 14 frozen
+artifacts plus 28 live readers. It adds the 41,945-byte M07-T05 artifact
+`sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`, its 73,915-byte proof
+reader `sha256:f66d40863a46dd7ed9e28afb2c78f8afbda8aee964e72d4fba60e65e55a351b3`, and its 17,291-byte root
+reader `sha256:490d4f922ea41dc7bca178cc54ab938ab136f0b922d7842af623001eabf60a65`. Prior live receipts,
+including current M07-T01 through M07-T04 and reference-host source-audit compatibility readers,
+are resealed after the T05 compatibility changes. Sequences 1–7 and every predecessor frozen
+artifact remain unchanged. This is a reviewed local checkpoint and makes no new hosted CI claim;
+I07-04 still owns the remaining compatibility-reader debt.
+
+Reviewed reader checkpoint sequence 9 links the exact sequence 8 head
+`f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a` to
+`94f48160552a6e0de702f71200e56c23d61bab8692d43f3ac1104dcfa681568b` with the same 14 frozen
+artifacts and 28 readers. Exactly reader indexes `[16, 17, 18, 19]` change: M07-T02 proof
+94,612 bytes / `sha256:4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9`;
+M07-T02 root 20,959 bytes / `sha256:fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed`;
+M07-T03 proof 86,174 bytes / `sha256:5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab`;
+and M07-T03 root 21,119 bytes /
+`sha256:10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11`.
+The minimal T05 compatibility bridges authenticate the current shared strict-JSON internal
+source/distribution and exact T03 → T04 → T05 aggregate adjacency while continuing to project the
+unchanged frozen T02/T03 artifacts. Sequences 1–8 and every frozen artifact remain unchanged. This
+is reviewed local evidence only, not a hosted CI claim; `DEBT-I07-012` cleanup remains owned by
+I07-04.
+
+Reviewed reader checkpoint sequence 10 links the exact sequence 9 head
+`94f48160552a6e0de702f71200e56c23d61bab8692d43f3ac1104dcfa681568b` to
+`bd3f5b90656f0e41d7f6aa439fdc01889e9ebeada26cd3caf8624c3ce1db7d07` with the same 14 frozen
+artifacts and 28 readers. Exactly reader indexes `[7, 14, 15]` change: the M06-T08 catalog root
+`tests/publisher-catalog-pinning.test.mjs` is 38,530 bytes at
+`sha256:bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116`; the M07-T01 proof reader
+is 99,672 bytes at `sha256:d9d9edd6379357dde229999ce461a0dc66bf58dc0d7900eb6f5ece177a9b3fba`;
+and the M07-T01 root reader is 26,679 bytes at
+`sha256:6b3a7869962046a3594a788095faad640c76fec660a59aee7b26844e831851ff`. These minimal test-fixture
+successors recognize the local-API aggregate tail and updated catalog-root receipt while the frozen
+catalog and T01 artifacts remain unchanged. The final strictly sequential local catalog and T01
+checks pass 51/51 and 16/16. Sequences 1–9 remain immutable. This is reviewed local evidence only,
+not a hosted CI claim; `DEBT-I07-012` cleanup remains owned by I07-04.
+
+Reviewed reader checkpoint sequence 11 links the exact sequence 10 head
+`bd3f5b90656f0e41d7f6aa439fdc01889e9ebeada26cd3caf8624c3ce1db7d07` to
+`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` with the same 14 unchanged
+frozen artifacts and 28 readers. Only indexes `[26, 27]` change: the M07-T05 proof reader is 77,034
+bytes at `sha256:c704e25024eaf7bdf317cc144f6b85922a3fe73a24c9c91e639ede032e22eb6f`,
+and its root reader is 17,578 bytes at
+`sha256:4871c406390c4c9b36bff1c417a6c8dd22798736ea8daad1c63a3cbd0a978389`. Sequences 1–10 and every
+frozen artifact remain unchanged. This is a reviewed local-reader checkpoint and makes no hosted
+CI claim.
+
+Reviewed reader checkpoint sequence 12 links the exact sequence 11 head
+`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to current head
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` with the same 14 unchanged
+frozen artifacts and 28 readers. Only indexes `[26, 27]` change: the M07-T05 proof reader is 77,507
+bytes at `sha256:e2050408c5bf3e084eacd6e42880310dafbfdf03b79821500cc0567b998f7d66`,
+and its root reader is 17,716 bytes at
+`sha256:061b40ea20e0f7ee362f26bd54db954c3caea338df5e2f090ce34a4618ac37cc`. This successor authenticates
+the exact ADR token-bound documentation update while the M07-T05 artifact and every other frozen
+artifact remain unchanged. This is reviewed local-reader evidence; hosted CI has not yet been
+claimed, and I07-04 still owns the compatibility-reader debt.
 
 ## M08 — Framework-neutral editor core
 

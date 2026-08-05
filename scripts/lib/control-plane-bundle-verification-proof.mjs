@@ -22,6 +22,7 @@ const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const APP_DIRECTORY = "apps/control-plane-api";
 const APP_PACKAGE = `${APP_DIRECTORY}/package.json`;
 const APP_INDEX = `${APP_DIRECTORY}/src/index.ts`;
+const APP_BUNDLE_VERIFICATION_INTERNAL = `${APP_DIRECTORY}/src/bundle-verification-internal.ts`;
 const APP_RUNTIME_TEST = `${APP_DIRECTORY}/test/bundle-verification.test.ts`;
 const APP_GUARD_TEST = `${APP_DIRECTORY}/test/bundle-verification-guard.test.ts`;
 const APP_TYPE_TEST = `${APP_DIRECTORY}/test/bundle-verification.types.ts`;
@@ -366,6 +367,70 @@ const APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS = Object.freeze([
   "preflightBundleReferences",
   "verifyBundleStoreEntry",
 ]);
+const APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS = Object.freeze(
+  [
+    ...APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS,
+    ...[
+      "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+      "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+      "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+      "LOCAL_CONTROL_PLANE_LIMITS",
+      "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+      "LocalControlPlaneError",
+    ].map((name) =>
+      Object.freeze({
+        imported: name,
+        exported: name,
+        module: "./local-control-plane-contract.js",
+        typeOnly: false,
+      }),
+    ),
+    Object.freeze({
+      imported: "openLocalControlPlane",
+      exported: "openLocalControlPlane",
+      module: "./local-control-plane.js",
+      typeOnly: false,
+    }),
+    ...[
+      "LocalControlPlane",
+      "LocalControlPlaneBundlePutResult",
+      "LocalControlPlaneBundleReadResult",
+      "LocalControlPlaneBundleRecord",
+      "LocalControlPlaneChannelPutBody",
+      "LocalControlPlaneChannelPutResult",
+      "LocalControlPlaneChannelReadResult",
+      "LocalControlPlaneChannelRecord",
+      "LocalControlPlaneErrorCode",
+      "LocalControlPlaneErrorDetail",
+      "LocalControlPlaneErrorEnvelope",
+      "LocalControlPlaneHttpStatusCode",
+      "LocalControlPlaneInjectMethod",
+      "LocalControlPlaneInjectRequest",
+      "LocalControlPlaneInjectResponse",
+      "LocalControlPlaneLimits",
+      "LocalControlPlaneListenResult",
+      "LocalControlPlaneSourcePutResult",
+      "LocalControlPlaneSourceReadResult",
+      "LocalControlPlaneSourceRecord",
+      "OpenLocalControlPlaneOptions",
+    ].map((name) =>
+      Object.freeze({
+        imported: name,
+        exported: name,
+        module: "./local-control-plane-contract.js",
+        typeOnly: true,
+      }),
+    ),
+  ].sort((left, right) => {
+    const exported = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
+    return exported === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : exported;
+  }),
+);
+const APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS = Object.freeze(
+  APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly)
+    .map(({ exported }) => exported)
+    .sort(),
+);
 const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   [APP_PACKAGE]: Object.freeze({
     bytes: 1_285,
@@ -394,6 +459,18 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   [CI_INVENTORY]: Object.freeze({
     bytes: 44_703,
     sha256: "dee3450aaa3496f4850c79597f183afa138ad756fd6709c1291ff9d8bab5c9d2",
+  }),
+});
+const M07_T05_BUNDLE_VERIFICATION_INTERNAL_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_BUNDLE_VERIFICATION_INTERNAL]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 27_667,
+      sha256: "7e8c5defbe5bb352e0a60f112350f19a62deb94cb807e2fa154697eb37d22aa9",
+    }),
+    successor: Object.freeze({
+      bytes: 17_671,
+      sha256: "5bf5f6234bcb710393af852fad67b9d914c0379a9aee934e92e2714a531e40d1",
+    }),
   }),
 });
 const APPROVED_M07_T03_TRACKED_RECEIPTS = Object.freeze({
@@ -440,6 +517,28 @@ const APPROVED_M07_T04_TRACKED_RECEIPTS = Object.freeze({
     sha256: "df477424e71cda0f411483fcd62db17f03c36a68b34bf5273b2198dc1c09b46a",
   }),
 });
+const APPROVED_M07_T05_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 1_972,
+    sha256: "fba38ac87e42c58c5965f32433e2391b8a52a10ec2ab4a90bc18a263840398e1",
+  }),
+  [APP_INDEX]: Object.freeze({
+    bytes: 3_343,
+    sha256: "f33d36872ebb0b320569c38d29f4397e81d459db085d2d9d92111a2795510e24",
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 60_843,
+    sha256: "c725d3daf2c09ac199edd816c02485e5f281984c2c9a2ff197e1b554196fa5b9",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 47_366,
+    sha256: "ac96b317d49f031db23bd73995193c854249f66bcdcb6a04905d0e3ca0eb6b77",
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    bytes: 45_691,
+    sha256: "e71e53c6a94c798e28bbb2d41ee6556a7cdc28bfdf3bfdbb3c3d39e1d45872c0",
+  }),
+});
 const HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.d.ts": Object.freeze({
     bytes: 899,
@@ -456,6 +555,28 @@ const HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.js.map": Object.freeze({
     bytes: 305,
     sha256: "797b2c0d81af06f50abb1bfc52b7e32861c23cb4dfb28023141e76ba76875e67",
+  }),
+});
+const M07_T05_BUNDLE_VERIFICATION_INTERNAL_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
+  "bundle-verification-internal.js": Object.freeze({
+    historical: Object.freeze({
+      bytes: 24_282,
+      sha256: "24e83ff9affadf61f27d0d0c48e653be2b40879e9f21322dd30ef0318b0ff06a",
+    }),
+    successor: Object.freeze({
+      bytes: 14_636,
+      sha256: "58f135d7c403d52ca551d8bfbd3f16f2f385c93902c8c42e8a0baa0661598e13",
+    }),
+  }),
+  "bundle-verification-internal.js.map": Object.freeze({
+    historical: Object.freeze({
+      bytes: 22_736,
+      sha256: "0084c80d697adafae9728f4ce4fc785b0b7fc9ae0a72d358209af741f39a3fa3",
+    }),
+    successor: Object.freeze({
+      bytes: 11_524,
+      sha256: "dcc1a468b848254937f6573978623f2fb4f297b6dd48430c308f5e3f04b19906",
+    }),
   }),
 });
 const APPROVED_M07_T03_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
@@ -492,6 +613,24 @@ const APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.js.map": Object.freeze({
     bytes: 566,
     sha256: "0060ea89d7c17c22492ddabcdf976661de09da7ea588736d8385a88da1f0c26d",
+  }),
+});
+const APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
+  "index.d.ts": Object.freeze({
+    bytes: 3_244,
+    sha256: "453e5c2b15d3faed0357193ffe5682e5c518b06b5ab9cf904361e76a785401bd",
+  }),
+  "index.d.ts.map": Object.freeze({
+    bytes: 1_537,
+    sha256: "53fd5e67aa7236adf897f443611614c248a99beb436ccf3fdb827651de613428",
+  }),
+  "index.js": Object.freeze({
+    bytes: 1_469,
+    sha256: "166709a7330e573bf737e2d985fe0c0761c614215df3cadc71d6bbc783c9e777",
+  }),
+  "index.js.map": Object.freeze({
+    bytes: 723,
+    sha256: "16112df85d0fe16f3767b17c28f36d0c8c3bc015f82114d4ab2b718c6d9567db",
   }),
 });
 const ROOT_SCRIPT_COMMANDS = Object.freeze({
@@ -846,7 +985,8 @@ function publicExportInventory(source, relativePath) {
   if (
     serialized !== JSON.stringify(EXPECTED_PUBLIC_SOURCE_EXPORTS) &&
     serialized !== JSON.stringify(APPROVED_M07_T03_PUBLIC_SOURCE_EXPORTS) &&
-    serialized !== JSON.stringify(APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS)
+    serialized !== JSON.stringify(APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS) &&
+    serialized !== JSON.stringify(APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS)
   ) {
     fail("REGISTRATION_DRIFT", "The exact public package-root export inventory drifted.");
   }
@@ -974,12 +1114,20 @@ async function trackedFileReceipts(overrides) {
   for (const relativePath of paths) {
     const bytes = await authorityBytes(relativePath, overrides);
     const overridden = Object.hasOwn(overrides, relativePath);
-    const historical = overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    const internalBridge =
+      M07_T05_BUNDLE_VERIFICATION_INTERNAL_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const historical = overridden
+      ? undefined
+      : (HISTORICAL_TRACKED_RECEIPTS[relativePath] ?? internalBridge?.historical);
     const approvedM07T03 = APPROVED_M07_T03_TRACKED_RECEIPTS[relativePath];
     const approvedM07T04 = APPROVED_M07_T04_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T05 =
+      APPROVED_M07_T05_TRACKED_RECEIPTS[relativePath] ?? internalBridge?.successor;
     const observedSha256 = sha256(bytes);
     if (
-      (approvedM07T03 !== undefined || approvedM07T04 !== undefined) &&
+      (approvedM07T03 !== undefined ||
+        approvedM07T04 !== undefined ||
+        approvedM07T05 !== undefined) &&
       !(
         (bytes.byteLength === historical?.bytes && observedSha256 === historical.sha256) ||
         (approvedM07T03 !== undefined &&
@@ -987,7 +1135,10 @@ async function trackedFileReceipts(overrides) {
           observedSha256 === approvedM07T03.sha256) ||
         (approvedM07T04 !== undefined &&
           bytes.byteLength === approvedM07T04.bytes &&
-          observedSha256 === approvedM07T04.sha256)
+          observedSha256 === approvedM07T04.sha256) ||
+        (approvedM07T05 !== undefined &&
+          bytes.byteLength === approvedM07T05.bytes &&
+          observedSha256 === approvedM07T05.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed package successor bytes drifted.", {
@@ -1104,9 +1255,14 @@ async function distributionReceipts() {
       observed.map(async (name) => {
         const relativePath = `${APP_DIRECTORY}/dist/${name}`;
         const bytes = await safeReadAbsolute(path.join(ROOT, relativePath));
-        const historical = HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS[name];
+        const internalBridge =
+          M07_T05_BUNDLE_VERIFICATION_INTERNAL_DISTRIBUTION_RECEIPT_BRIDGE[name];
+        const historical =
+          HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS[name] ?? internalBridge?.historical;
         const approvedM07T03 = APPROVED_M07_T03_INDEX_DISTRIBUTION_RECEIPTS[name];
         const approvedM07T04 = APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS[name];
+        const approvedM07T05 =
+          APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS[name] ?? internalBridge?.successor;
         const observedSha256 = sha256(bytes);
         if (
           historical !== undefined &&
@@ -1117,7 +1273,10 @@ async function distributionReceipts() {
               observedSha256 === approvedM07T03.sha256) ||
             (approvedM07T04 !== undefined &&
               bytes.byteLength === approvedM07T04.bytes &&
-              observedSha256 === approvedM07T04.sha256)
+              observedSha256 === approvedM07T04.sha256) ||
+            (approvedM07T05 !== undefined &&
+              bytes.byteLength === approvedM07T05.bytes &&
+              observedSha256 === approvedM07T05.sha256)
           )
         ) {
           fail("DISTRIBUTION_DRIFT", "The reviewed package-root distribution drifted.", {
@@ -1757,10 +1916,13 @@ function assertRuntimeReceipt(observedReceipt) {
   const currentSelfReferenceKeys = JSON.stringify(observedReceipt.packageSelfReference?.keys);
   const approvedM07T03Keys = JSON.stringify(APPROVED_M07_T03_PUBLIC_RUNTIME_KEYS);
   const approvedM07T04Keys = JSON.stringify(APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS);
+  const approvedM07T05Keys = JSON.stringify(APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS);
   const reviewedSuccessor =
     (currentRuntimeKeys === approvedM07T03Keys &&
       currentSelfReferenceKeys === approvedM07T03Keys) ||
-    (currentRuntimeKeys === approvedM07T04Keys && currentSelfReferenceKeys === approvedM07T04Keys);
+    (currentRuntimeKeys === approvedM07T04Keys &&
+      currentSelfReferenceKeys === approvedM07T04Keys) ||
+    (currentRuntimeKeys === approvedM07T05Keys && currentSelfReferenceKeys === approvedM07T05Keys);
   const receipt = reviewedSuccessor
     ? {
         ...observedReceipt,

@@ -309,6 +309,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-local-api",
+          "pnpm verify:control-plane-reference-preflight",
+        ),
+    ],
+    [
       CI_SOURCE,
       (source) =>
         source.replace(

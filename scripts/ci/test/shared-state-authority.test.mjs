@@ -93,28 +93,28 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 136 steps across the seven reviewed execution classes", () => {
+test("owns exactly 138 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 136);
-  assert.equal(new Set(ALL_STEP_IDS).size, 136);
+  assert.equal(ALL_STEP_IDS.length, 138);
+  assert.equal(new Set(ALL_STEP_IDS).size, 138);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 1,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 68,
-    PROOF_OS_TEMP_ISOLATED: 49,
+    PROOF_OS_TEMP_ISOLATED: 51,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
 });
 
 test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 64);
-  assert.equal(new Set(PROOF_IDS).size, 64);
+  assert.equal(PROOF_IDS.length, 65);
+  assert.equal(new Set(PROOF_IDS).size, 65);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
     "protocol-traceability",
@@ -128,7 +128,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "runtime-core-state-navigation-actions",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 53);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 54);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -168,6 +168,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "publisher-invalid-source-matrix",
     "control-plane-bundle-store",
     "control-plane-bundle-verification",
+    "control-plane-local-api",
   ]);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
@@ -180,13 +181,20 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       tempKey: `verify-${proofId}`,
       ports: [],
       childProcessPolicy: "VERIFIER_RUNTIME_PROBE",
-      nativeAddonPolicy: "NONE",
+      nativeAddonPolicy:
+        proofId === "control-plane-local-api" ? "CONTROL_PLANE_LOCAL_API_SQLITE" : "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
   }
-  assert.deepEqual(NATIVE_ADDON_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, ["test-publisher-invalid-source-matrix"]);
+  assert.deepEqual(NATIVE_ADDON_PROOF_IDS, [
+    "reference-host-web-source-audit",
+    "control-plane-local-api",
+  ]);
+  assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, [
+    "test-publisher-invalid-source-matrix",
+    "test-control-plane-local-api",
+  ]);
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
     "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -200,6 +208,14 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   );
   assert.equal(
+    classifyWorkloadStateMetadata("verify-control-plane-local-api").nativeAddonPolicy,
+    "CONTROL_PLANE_LOCAL_API_SQLITE",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-control-plane-local-api").nativeAddonPolicy,
+    "CONTROL_PLANE_LOCAL_API_SQLITE",
+  );
+  assert.equal(
     classifyWorkloadStateMetadata("verify-publisher-invalid-source-matrix").nativeAddonPolicy,
     "NONE",
   );
@@ -210,7 +226,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    64,
+    65,
   );
 });
 
@@ -416,7 +432,7 @@ test("only exact runtime-probe verifiers receive child-process authority", async
   );
 });
 
-test("only the three exact reviewed steps receive native-addon authority", async (context) => {
+test("only the five exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({
@@ -525,7 +541,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 118,
+    NONE: 120,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

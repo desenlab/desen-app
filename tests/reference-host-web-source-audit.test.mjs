@@ -323,7 +323,7 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.graphDynamicEdges, 0);
   assert.equal(result.packageBoundaryViolations, 0);
   assert.equal(result.coordination.result, "PASS");
-  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T04");
+  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T05");
   assert.equal(result.coordination.normalizedControlPlaneScriptKeys, true);
   assert.equal(result.coordination.normalizedControlPlanePipelineSegments, true);
   assert.equal(result.coordination.normalizedControlPlaneLockfileImporter, true);
@@ -331,10 +331,10 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.coordination.normalizedControlPlaneValidatorImporter, true);
   assert.deepEqual(result.coordination.controlPlanePackage, {
     path: "apps/control-plane-api/package.json",
-    bytes: 1_846,
-    rawSha256: "sha256:5934807f1d66f001cf2173e3b1fa0a7b4e5f461df8822b16335cb8f53a83bf94",
-    testScript: "test:reference-preflight",
-    testCommand: "vitest run test/reference-preflight.test.ts",
+    bytes: 1_972,
+    rawSha256: "sha256:fba38ac87e42c58c5965f32433e2391b8a52a10ec2ab4a90bc18a263840398e1",
+    testScript: "test:local-api",
+    testCommand: "vitest run test/local-control-plane.test.ts",
     validatorSpecifier: "workspace:*",
   });
   assert.equal(
@@ -529,7 +529,7 @@ test("admits only the source-pinned M06-T05 Validator runtime successor", async 
   }
 });
 
-test("reviewed Publisher and M07-T04 coordination preserve root, package, and lockfile provenance", async () => {
+test("reviewed Publisher and M07-T05 coordination preserve root, package, and lockfile provenance", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
   const [rootPackageBytes, lockfileBytes, controlPlanePackageBytes] = await Promise.all([
@@ -620,6 +620,23 @@ test("reviewed Publisher and M07-T04 coordination preserve root, package, and lo
     );
   });
   await rejectRootManifest((manifest) => {
+    delete manifest.scripts["generate:control-plane-local-api"];
+  });
+  await rejectRootManifest((manifest) => {
+    delete manifest.scripts["test:control-plane-local-api"];
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["verify:control-plane-local-api"] += " --unreviewed";
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["generate:control-plane-local-api"] = manifest.scripts[
+      "generate:control-plane-local-api"
+    ].replace(
+      "pnpm --filter @desen/control-plane-api test:local-api",
+      "pnpm --filter @desen/control-plane-api test:reference-preflight",
+    );
+  });
+  await rejectRootManifest((manifest) => {
     manifest.scripts["verify:control-plane-decoy"] = "node scripts/decoy.mjs";
   });
   await rejectRootManifest((manifest) => {
@@ -636,8 +653,8 @@ test("reviewed Publisher and M07-T04 coordination preserve root, package, and lo
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.test = manifest.scripts.test.replace(
-      "pnpm test:control-plane-reference-preflight && turbo run test",
-      "pnpm test:control-plane-reference-preflight && pnpm test:control-plane-decoy && turbo run test",
+      "pnpm test:control-plane-local-api && turbo run test",
+      "pnpm test:control-plane-local-api && pnpm test:control-plane-decoy && turbo run test",
     );
   });
   await rejectControlPlanePackage((manifest) => {
@@ -648,6 +665,18 @@ test("reviewed Publisher and M07-T04 coordination preserve root, package, and lo
   });
   await rejectControlPlanePackage((manifest) => {
     manifest.dependencies["@desen/validator"] = "workspace:^";
+  });
+  await rejectControlPlanePackage((manifest) => {
+    delete manifest.scripts["test:local-api"];
+  });
+  await rejectControlPlanePackage((manifest) => {
+    manifest.scripts["test:local-api"] = "vitest run test/reference-preflight.test.ts";
+  });
+  await rejectControlPlanePackage((manifest) => {
+    manifest.dependencies["better-sqlite3"] = "13.0.2";
+  });
+  await rejectControlPlanePackage((manifest) => {
+    manifest.dependencies.fastify = "5.11.1";
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts["verify:publisher-decoy"] = "node scripts/publisher-decoy.mjs";
@@ -1068,8 +1097,8 @@ test("reviewed Publisher and M07-T04 coordination preserve root, package, and lo
   );
   await rejectMalformedLock(
     lockfileText.replace(
-      "  autoInstallPeers: true",
-      "  autoInstallPeers: true\n  autoInstallPeers: true",
+      "  autoInstallPeers: false",
+      "  autoInstallPeers: false\n  autoInstallPeers: false",
     ),
     "autoInstallPeers",
   );

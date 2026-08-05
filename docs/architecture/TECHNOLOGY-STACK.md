@@ -16,6 +16,9 @@ every dependency to have a documented responsibility.
 - Vite 8.1.5 for the independent reference host's zero-configuration production build and
   programmatic resolved-module-graph audit
 - Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable component semantics
+- Fastify 5.11.2 for the fixed-loopback, bearer-authenticated local control-plane transport
+- better-sqlite3 13.0.3 behind the local Source-generation and channel-pointer repositories; its
+  native import is isolated to the exact control-plane local-API proof pair
 - the browser's injected `fetch` capability for the reference host's fixed same-origin
   `POST /api/sign-in` operation boundary; no transport client dependency is added
 - dependency-cruiser 18.1.0
@@ -29,13 +32,11 @@ every dependency to have a documented responsibility.
 | Desen App client         | React 19 and Vite 8                     | Client-heavy editor with a simple, explicit Web build               |
 | Protocol validation      | Ajv Draft 2020-12                       | Direct execution of canonical JSON Schema without a second contract |
 | Protocol type projection | json-schema-to-typescript 15.0.4        | Deterministic build-only declarations from the frozen schema roots  |
-| API                      | Fastify 5                               | Small typed control plane with replaceable repositories             |
 | Unit/integration tests   | Vitest                                  | Fast TypeScript-native package tests                                |
 | Property tests           | fast-check                              | Determinism, canonicalization, limits, and state-machine invariants |
 | React tests              | Testing Library                         | User-observable adapter and editor behavior                         |
 | Browser proof            | Playwright                              | Cross-application Desen App-to-host evidence                        |
 | Web styling              | CSS variables/tokens and CSS Modules    | No CSS or DOM implementation detail leaks into capability contracts |
-| Local metadata           | SQLite behind repositories              | Repeatable local proof without premature cloud infrastructure       |
 | Immutable artifacts      | Content-addressed local files initially | Bundle bytes can be independently hashed and audited                |
 | Browser LKG              | IndexedDB behind a storage port         | Persistent last-known-good across browser restart                   |
 
@@ -54,6 +55,12 @@ only by their owning tasks and require an ADR when they affect public capability
   React-Web or browser configuration, and the control plane extends the Node configuration.
 - `catalog-sdk` describes data contracts only. React adapter registration belongs to
   `runtime-react`.
+- The local control plane binds only to its fixed loopback profile, accepts exact bearer and origin
+  configuration, and uses finite 5-second inactivity, 15-second request, and 5-second keep-alive
+  timeouts. SQLite is a replaceable repository implementation, not protocol authority.
+- Native-addon execution is denied by default in proof isolation and granted only to the reviewed
+  local-API verifier/root-test pair. The locked production dependency graph is audited before the
+  task artifact is accepted.
 - The reference host is Web-only and independently built with Vite's zero-configuration path;
   future native targets own separate renderers and platform hosts rather than importing its React
   root.

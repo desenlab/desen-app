@@ -344,12 +344,12 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-reference-preflight && pnpm lint",
-        "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm verify:control-plane-local-api && pnpm lint",
+        "pnpm verify:control-plane-local-api && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-reference-preflight && turbo run test",
-        "pnpm test:control-plane-reference-preflight && pnpm test:control-plane-successor && turbo run test",
+        "pnpm test:control-plane-local-api && turbo run test",
+        "pnpm test:control-plane-local-api && pnpm test:control-plane-successor && turbo run test",
       ),
   );
   const successor = await buildControlPlaneBundleStoreEvidence(successorOptions);
@@ -527,7 +527,7 @@ test("[tests] rejects skipped runtime cases or removed compile-time negatives", 
         artifactBytes: baseline.artifactBytes,
         proofDocument: pinnedProof,
       }),
-      expectCode("ARTIFACT_DRIFT"),
+      expectCode("REGISTRATION_DRIFT"),
     );
   }
 });

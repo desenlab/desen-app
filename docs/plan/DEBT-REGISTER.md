@@ -2,9 +2,9 @@
 
 This register tracks temporary compatibility structures registered by I07-01 and later
 task-specific successors while immutable task evidence is separated from current-checkpoint
-authentication and CI execution orchestration. Ten
-entries remain open; DEBT-I07-008 is closed with authenticated removal evidence. An open entry
-records planned removal work and does not claim that its cleanup has already been implemented.
+authentication and CI execution orchestration. Eleven entries remain open; DEBT-I07-008 is closed
+with authenticated removal evidence. An open entry records planned removal work and does not claim
+that its cleanup has already been implemented.
 
 This is an engineering-maintenance register, not a protocol finding or Proof Matrix. Removing an
 entry may not rewrite a frozen artifact, weaken a proof, turn an unknown input into a skipped
@@ -44,9 +44,10 @@ the full gate. A cleanup is complete only when:
 | DEBT-I07-006 | OPEN   | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
 | DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
 | DEBT-I07-008 | CLOSED | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
-| DEBT-I07-009 | OPEN   | M05-T09 current M07-T04 coordination projection          | I07-01        | I07-04        | G07           |
+| DEBT-I07-009 | OPEN   | M05-T09 current M07-T05 coordination projection          | I07-01        | I07-04        | G07           |
 | DEBT-I07-010 | OPEN   | M05-T04 current M07-T03 P-05 successor projection        | I07-01        | I07-04        | G07           |
 | DEBT-I07-011 | OPEN   | M07-T04 current-reader and P-17 successor bridges        | M07-T04       | I07-04        | G07           |
+| DEBT-I07-012 | OPEN   | M07-T05 historical control-plane reader bridges          | M07-T05       | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -463,35 +464,38 @@ the full gate. A cleanup is complete only when:
   - the evidence artifact records the neutral-inventory and retired target receipts, including the
     removed shadow workflow.
 
-## DEBT-I07-009 — M05-T09 current M07-T04 coordination projection
+## DEBT-I07-009 — M05-T09 current M07-T05 coordination projection
 
 - Status: `OPEN`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
   - `scripts/lib/reference-host-web-source-audit-proof.mjs`
-    - `M07_T04_CONTROL_PLANE_COORDINATION`
-    - `M07_T04_CONTROL_PLANE_LOCKFILE_BLOCK`
+    - `M07_T05_CONTROL_PLANE_COORDINATION`
+    - `M07_T05_CONTROL_PLANE_LOCKFILE_BLOCK`
+    - `APPROVED_M07_T05_DEPENDENCY_POLICY_SUCCESSOR`
     - `normalizeCurrentRootPackageBytes`
     - `inspectExactControlPlaneImporter`
     - `normalizeCurrentLockfileBytes`
   - `tests/reference-host-web-source-audit.test.mjs`
-    - `reviewed Publisher and M07-T04 coordination preserve root, package, and lockfile provenance`
+    - `reviewed Publisher and M07-T05 coordination preserve root, package, and lockfile provenance`
 - Reason retained: the frozen M05-T09 artifact still projects its task-time root package and
-  lockfile bytes, while the live workspace now contains the reviewed M07-T01 through M07-T04
-  control-plane commands, package-test script, aggregate edges, and Validator importer. The
-  current source-audit successor authenticates that complete T04 command graph before those
-  control-plane tasks can leave the historical projection.
-- Objective removal trigger: the current checkpoint owns the exact M07-T04 root-command,
-  aggregate-edge, and lock-importer receipts; M05-T09 consumes only the checkpoint result and
-  returns to its immutable task-time coordination projection; and every missing, duplicated,
-  reordered, substituted, quoted, or extra control-plane authority mutation remains rejected.
+  lockfile bytes, while the live workspace now contains the reviewed M07-T01 through M07-T05
+  control-plane commands, local-API package dependencies, package-test script, aggregate edges,
+  native-addon policy, and Validator importer. The current source-audit successor authenticates
+  that complete T05 command and dependency graph before those control-plane tasks can leave the
+  historical projection.
+- Objective removal trigger: the current checkpoint owns the exact M07-T05 root-command,
+  aggregate-edge, dependency-policy, and lock-importer receipts; M05-T09 consumes only the
+  checkpoint result and returns to its immutable task-time coordination projection; and every
+  missing, duplicated, reordered, substituted, quoted, or extra control-plane authority mutation
+  remains rejected.
 - Must close by gate: `G07`
 - Exact verification and zero-reference rule:
   - `node scripts/verify-reference-host-web-source-audit.mjs`
   - `node --test tests/reference-host-web-source-audit.test.mjs`
-  - `rg -n "M07_T04_CONTROL_PLANE_COORDINATION|M07_T04_CONTROL_PLANE_LOCKFILE_BLOCK|normalizeCurrentRootPackageBytes|inspectExactControlPlaneImporter|normalizeCurrentLockfileBytes|reviewed Publisher and M07-T04 coordination preserve root, package, and lockfile provenance" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
-    must return no matches after removal. The replacement checkpoint may retain exact M07-T04
+  - `rg -n "M07_T05_CONTROL_PLANE_(COORDINATION|LOCKFILE_BLOCK)|APPROVED_M07_T05_DEPENDENCY_POLICY_SUCCESSOR|normalizeCurrentRootPackageBytes|inspectExactControlPlaneImporter|normalizeCurrentLockfileBytes|reviewed Publisher and M07-T05 coordination preserve root, package, and lockfile provenance" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
+    must return no matches after removal. The replacement checkpoint may retain exact M07-T05
     receipts under checkpoint-owned symbols.
 - Closure evidence: `PENDING` — record commit, pull request, replacement coordination-checkpoint
   SHA-256, frozen M05-T09 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
@@ -615,3 +619,96 @@ the full gate. A cleanup is complete only when:
 - Closure evidence: `PENDING` — record commit, pull request, replacement semantic-checkpoint
   SHA-256, frozen M05-T06 plus M07-T01 through M07-T04 artifact SHA-256 values, and hosted
   required-exhaustive equivalence run URL.
+
+## DEBT-I07-012 — M07-T05 historical control-plane reader bridges
+
+- Status: `OPEN`
+- Registered by infrastructure task: `M07-T05`
+- Removal owner: `I07-04`
+- Exact paths and symbols:
+  - `scripts/lib/control-plane-bundle-store-proof.mjs`
+    - `APPROVED_M07_T05_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS`
+  - `scripts/lib/control-plane-bundle-verification-proof.mjs`
+    - `APPROVED_M07_T05_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS`
+    - `M07_T05_BUNDLE_VERIFICATION_INTERNAL_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T05_BUNDLE_VERIFICATION_INTERNAL_DISTRIBUTION_RECEIPT_BRIDGE`
+  - `tests/control-plane-bundle-verification.test.mjs`
+    - `APP_BUNDLE_VERIFICATION_INTERNAL`
+    - `relativePath === APP_BUNDLE_VERIFICATION_INTERNAL`
+  - `scripts/lib/control-plane-package-preflight-proof.mjs`
+    - `APPROVED_M07_T05_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS`
+    - `M07_T05_AGGREGATE_SUCCESSOR_COMMANDS`
+  - `tests/control-plane-package-preflight.test.mjs`
+    - `pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-local-api`
+  - `scripts/lib/control-plane-reference-preflight-proof.mjs`
+    - `APPROVED_M07_T05_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS`
+    - `HISTORICAL_M07_T04_TRACKED_RECEIPTS`
+    - `HISTORICAL_M07_T04_INDEX_DISTRIBUTION_RECEIPTS`
+  - `tests/control-plane-bundle-store.test.mjs`
+    - `[registration] rejects package-root, public-export, aggregate, or CI tuple drift`
+    - `pnpm verify:control-plane-local-api && pnpm lint`
+    - `pnpm test:control-plane-local-api && turbo run test`
+    - `REGISTRATION_DRIFT`
+  - `tests/publisher-catalog-pinning.test.mjs`
+    - `appendValidRootSuccessor`
+    - `pnpm verify:control-plane-local-api && pnpm lint`
+    - `pnpm test:control-plane-local-api && turbo run test`
+  - `scripts/lib/control-plane-local-api-proof.mjs`
+    - `M07_T05_STRICT_JSON_FORMATTING_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T05_STRICT_JSON_FORMATTING_DISTRIBUTION_RECEIPT_BRIDGE`
+    - `M07_T05_FORMATTING_READER_RECEIPT_PROJECTION`
+    - `M07_T05_ADR_TOKEN_BOUNDS_TRACKED_RECEIPT_BRIDGE`
+  - `tests/control-plane-local-api.test.mjs`
+    - `APP_STRICT_JSON`
+    - `ADR`
+    - `[implementation] rejects transport, repository, SQLite, or public-factory source drift`
+- Reason retained: the frozen M07-T01 through M07-T04 readers preserve their task-time package,
+  public-export, runtime-key, and distribution projections. M07-T05 legitimately adds the local
+  control-plane API and its public surface, so each historical reader carries a narrowly pinned
+  successor branch. The M07-T04 reader additionally retains explicit task-time receipts while it
+  authenticates the exact M07-T05 transition. The frozen M07-T01 and M06-T08 root tests also retain
+  the exact append-only local-API aggregate tails: the bundle-store test keeps its scoped
+  registration-drift rejection boundary, while Catalog pinning uses one bounded successor helper.
+  The frozen M07-T05 reader additionally bridges the formatting-only strict-JSON receipt change and
+  the ADR token-bound receipt change, keeping both sources inside the existing implementation-drift
+  root case.
+- Objective removal trigger: the current checkpoint owns the exact M07-T05 package, tracked-file,
+  public-export, runtime-key, and distribution receipts plus the M07-T04 task-time receipts;
+  historical readers, formatting bridges, and test-only compatibility fixtures consume only that
+  checkpoint and immutable task evidence; every missing, substituted, reordered, or appended
+  transition remains rejected; and all frozen artifacts stay byte-identical.
+- Must close by gate: `G07`
+- Exact verification and zero-reference rule:
+  - `node scripts/verify-control-plane-bundle-store.mjs`
+  - `node --test tests/control-plane-bundle-store.test.mjs`
+  - `node scripts/verify-control-plane-bundle-verification.mjs`
+  - `node --test tests/control-plane-bundle-verification.test.mjs`
+  - `node scripts/verify-control-plane-package-preflight.mjs`
+  - `node --test tests/control-plane-package-preflight.test.mjs`
+  - `node scripts/verify-control-plane-reference-preflight.mjs`
+  - `node --test tests/control-plane-reference-preflight.test.mjs`
+  - `node scripts/verify-publisher-catalog-pinning.mjs`
+  - `node --test tests/publisher-catalog-pinning.test.mjs`
+  - `node scripts/verify-control-plane-local-api.mjs`
+  - `node --test tests/control-plane-local-api.test.mjs`
+  - `node scripts/ci/verify-proof-reader-checkpoints.mjs`
+  - `rg -n "APPROVED_M07_T05_(TRACKED_RECEIPTS|PUBLIC_SOURCE_EXPORTS|PUBLIC_RUNTIME_KEYS|INDEX_DISTRIBUTION_RECEIPTS)|M07_T05_BUNDLE_VERIFICATION_INTERNAL_(TRACKED|DISTRIBUTION)_RECEIPT_BRIDGE|M07_T05_AGGREGATE_SUCCESSOR_COMMANDS|APP_BUNDLE_VERIFICATION_INTERNAL|relativePath === APP_BUNDLE_VERIFICATION_INTERNAL|pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-local-api|HISTORICAL_M07_T04_(TRACKED_RECEIPTS|INDEX_DISTRIBUTION_RECEIPTS)|appendValidRootSuccessor|pnpm (verify|test):control-plane-local-api|M07_T05_STRICT_JSON_FORMATTING_(TRACKED|DISTRIBUTION)_RECEIPT_BRIDGE|M07_T05_FORMATTING_READER_RECEIPT_PROJECTION|M07_T05_ADR_TOKEN_BOUNDS_TRACKED_RECEIPT_BRIDGE|APP_STRICT_JSON|ADR|\[implementation\] rejects transport, repository, SQLite, or public-factory source drift" scripts/lib/control-plane-bundle-store-proof.mjs scripts/lib/control-plane-bundle-verification-proof.mjs tests/control-plane-bundle-verification.test.mjs scripts/lib/control-plane-package-preflight-proof.mjs tests/control-plane-package-preflight.test.mjs scripts/lib/control-plane-reference-preflight-proof.mjs tests/control-plane-bundle-store.test.mjs tests/publisher-catalog-pinning.test.mjs scripts/lib/control-plane-local-api-proof.mjs tests/control-plane-local-api.test.mjs`
+    must return no matches after removal. The replacement checkpoint may retain these exact
+    transition receipts under checkpoint-owned symbols. The bundle-store registration error is
+    scoped to the named registration test above; unrelated error taxonomies are not part of this
+    entry.
+- Closure evidence: `PENDING` — record commit, pull request, replacement reader-checkpoint
+  SHA-256, frozen M07-T01 through M07-T05 artifact SHA-256 values, and hosted required-exhaustive
+  equivalence run URL.

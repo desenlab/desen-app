@@ -18,6 +18,8 @@ const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verificati
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const APP_PACKAGE = "apps/control-plane-api/package.json";
 const APP_INDEX = "apps/control-plane-api/src/index.ts";
+const APP_BUNDLE_VERIFICATION_INTERNAL =
+  "apps/control-plane-api/src/bundle-verification-internal.ts";
 const APP_RUNTIME_TEST = "apps/control-plane-api/test/bundle-verification.test.ts";
 const APP_GUARD_TEST = "apps/control-plane-api/test/bundle-verification-guard.test.ts";
 const APP_GUARD_CODEGEN =
@@ -190,6 +192,16 @@ test("[implementation] rejects changed contract, parser, verifier, or type autho
           runtimeReceipt: built.runtimeReceipt,
         }),
         expectedError("TEST_AUTHORITY_DRIFT"),
+      );
+      continue;
+    }
+    if (relativePath === APP_BUNDLE_VERIFICATION_INTERNAL) {
+      await assert.rejects(
+        buildControlPlaneBundleVerificationEvidence({
+          trackedFileBytes: { [relativePath]: changedByte(bytes) },
+          runtimeReceipt: built.runtimeReceipt,
+        }),
+        expectedError("REGISTRATION_DRIFT"),
       );
       continue;
     }

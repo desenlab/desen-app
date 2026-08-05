@@ -12,24 +12,43 @@ separate synchronous integrity boundary for treating those stored bytes as untru
 M07-T03 consumes only that authenticated authority and independently resolves and fingerprints the
 complete installed Web–React package set. M07-T04 consumes only that exact package authority and
 preflights its M07-T04 static surface, capability, event, navigation, resource, command, and
-operation references under one fixed finite profile. Editable-source persistence, channel
-pointers, staging, and activation remain later M07 work.
+operation references under one fixed finite profile. M07-T05 adds the authenticated local
+transport and persistent editable-Source/channel metadata while keeping channel discovery separate
+from staging and activation. Those latter two boundaries remain later M07 work.
 
-The current implementation is a local POSIX filesystem profile. It deliberately accepts only
-already validated, revision-closed Bundle entries as a trusted caller precondition. The store does
-not silently acquire integrity authority: a caller must pass a read entry through
-`verifyBundleStoreEntry` before handing its opaque success authority to later M07 stages.
+The current implementation is a local POSIX filesystem profile. The low-level Bundle store treats
+validation as a caller precondition; the T05 transport deliberately permits unverified candidate
+bytes so later rejection paths remain real. Neither path silently acquires integrity authority: a
+caller must pass a read entry through `verifyBundleStoreEntry` before handing its opaque success
+authority to later M07 stages.
 
 ## Public API
+
+The following is composition pseudocode. `applicationOwnedPackageInventory` represents a
+host-owned integration that must supply the exact Catalog and all 80 reviewed Web–React
+distribution artifacts; DESEN deliberately exposes no package loader or discovery helper.
 
 ```ts
 import {
   BundleStoreError,
   openBundleStore,
+  openLocalControlPlane,
   preflightBundlePackages,
   preflightBundleReferences,
   verifyBundleStoreEntry,
 } from "@desen/control-plane-api";
+
+const localApiToken = process.env.DESEN_LOCAL_API_TOKEN;
+if (localApiToken === undefined) throw new Error("The local control-plane token is required.");
+
+const localApi = await openLocalControlPlane({
+  rootDirectory: "/absolute/application-owned/desen-data",
+  apiToken: localApiToken,
+  allowedOrigins: ["https://desen.app"],
+});
+
+const listener = await localApi.listen(0);
+// listener.address is always 127.0.0.1; callers cannot choose a remote bind address.
 
 const store = await openBundleStore({
   rootDirectory: "/absolute/application-owned/desen-data",
@@ -48,13 +67,18 @@ if (read.status === "found") {
     sourceBytes,
   });
   if (integrity.status === "verified") {
+    const installedPackage = await applicationOwnedPackageInventory.requireExact({
+      id: "run.desen.reference.sign-in",
+      version: "0.1.0",
+      target: "web-react",
+    });
     const packagePreflight = preflightBundlePackages(integrity.authority, [
       {
         id: "run.desen.reference.sign-in",
         version: "0.1.0",
         target: "web-react",
-        catalog: installedCatalog,
-        artifacts: [{ path: "dist/index.js", bytes: installedIndexBytes }],
+        catalog: installedPackage.catalog,
+        artifacts: installedPackage.artifacts,
       },
     ]);
     if (packagePreflight.status === "preflighted") {
@@ -77,11 +101,57 @@ if (read.status === "found") {
 The root must already exist as an absolute, application-owned local directory; the store does not
 create or choose that authority for the caller. The package root exports the storage and integrity
 values above plus the package and reference preflight functions, their frozen finite profiles,
-stable diagnostic constants, and documented types. Filesystem paths, file handles, raw or partially
-parsed documents, byte snapshots, Source material, internal authority readers, test fault hooks,
-list/delete operations, loaders, executable callbacks, and mutable channel operations do not cross
-that root. The complete immutable Bundle snapshot is carried only by authenticated private state;
-accepted Catalogs and artifact snapshots remain package-private.
+stable diagnostic constants, the closed local transport, and documented types. Filesystem paths,
+file handles, partially parsed documents, internal authority readers, test fault hooks, list/delete
+operations, loaders, and executable callbacks do not cross that root. The complete authenticated
+Bundle snapshot is carried only by private preflight state; accepted Catalogs and artifact snapshots
+remain package-private.
+
+## Local Source, Bundle, and channel transport
+
+`openLocalControlPlane` composes three deliberately separate namespaces:
+
+- editable Source records preserve exact strict-JSON bytes and use monotonic generation ETags;
+- immutable Bundle records delegate exact first-writer ownership to the M07-T01 store; and
+- mutable channels store only `{ channelName, revision, generation }` discovery metadata.
+
+Source and channel creation requires `If-None-Match: *`; an update requires the exact current
+`If-Match: "g:<generation>"`. A stale precondition returns `412` without changing state. An
+identical value at the current generation is `unchanged` and does not advance the generation.
+Channel updates require the target Bundle revision to exist, but do not verify or activate that
+Bundle. A channel may therefore point at bytes that a later M07-T02–T04 preflight rejects; this is
+intentional and keeps invalid-candidate/last-known-good behavior testable.
+
+The fixed route set is:
+
+| Method        | Route                       | Meaning                                     |
+| ------------- | --------------------------- | ------------------------------------------- |
+| `PUT` / `GET` | `/v1/sources/:sourceKey`    | CAS edit or exact-byte read of one Source   |
+| `PUT` / `GET` | `/v1/bundles/:revision`     | Immutable exact-byte Bundle write or read   |
+| `PUT` / `GET` | `/v1/channels/:channelName` | CAS update or read of one discovery pointer |
+
+Every data request requires a host-supplied 32–256-byte visible-ASCII bearer token. The token is
+reduced to a SHA-256 comparison digest before the returned service is created. A real listener
+binds only `127.0.0.1`; browser origins are denied by default and CORS admits only exact configured
+HTTP(S) origins and route-specific header sets. Data responses for an admitted origin expose only
+`ETag`, allowing browser clients to perform the required compare-and-set update after a read or a
+stale-write response. Query aliases, percent-encoded identities,
+compressed request bodies, media-type parameters, wildcard origins, list/delete routes, and remote
+bind options are rejected. Errors use closed codes and fixed messages without paths, SQL, stack,
+token, body, or caller values.
+
+The listener permits at most 5 seconds of socket inactivity, 15 seconds to receive one complete
+request, and 5 seconds for an idle keep-alive connection. These finite limits ensure that a client
+which sends only part of a request body cannot hold service shutdown open indefinitely.
+
+SQLite stores only Source bytes, channel pointers, and their generations in
+`control-plane.sqlite3`; Bundle bytes remain under the independent content-addressed tree. The
+metadata profile uses strict tables, prepared statements, `BEGIN IMMEDIATE` CAS transactions,
+`WAL`, `synchronous=FULL`, a finite busy timeout, an exact schema version, and durable database-file
+creation. Importing the package root does not load SQLite's native addon; only
+`openLocalControlPlane` dynamically loads the pinned adapter. `close()` first stops admission,
+coordinates any listener startup, drains admitted work within the finite transport profile, and
+then closes metadata.
 
 ## Bundle integrity boundary
 
@@ -313,15 +383,14 @@ repository implementation with equivalent no-clobber and durability semantics.
 
 ## Explicitly deferred
 
-M07-T01 through M07-T04 prove immutable exact-byte persistence, Bundle integrity, exact
-installed-package preflight, and bounded surface/capability reference preflight. They do not yet
-provide:
+M07-T01 through M07-T05 prove immutable exact-byte persistence, Bundle integrity, exact
+installed-package preflight, bounded surface/capability reference preflight, and the authenticated
+local Source/Bundle/channel transport. They do not yet provide:
 
-- M07-T05 editable-source storage, mutable channel pointers, or a control-plane transport API;
 - M07-T06 through M07-T10 staging, transactional activation, last-known-good state, recovery, and
   fault matrices; or
 - M07-T11 reference-host channel consumption.
 
-Callers must not treat a successful M07-T01 write as integrity verification, an M07-T02 integrity
-authority as package authority, an M07-T03 package authority as reference authority, or an M07-T04
-reference authority as staging, channel, commit, or activation authority.
+Callers must not treat a successful M07-T01/T05 Bundle write or a channel pointer as integrity
+verification, an M07-T02 integrity authority as package authority, an M07-T03 package authority as
+reference authority, or an M07-T04 reference authority as staging, commit, or activation authority.

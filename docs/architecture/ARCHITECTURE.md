@@ -692,6 +692,27 @@ last-known-good recovery, and fault behavior; M07-T11 owns reference-host channe
 stored entry, integrity authority, package authority, reference authority, and staging authority
 are distinct evidence; none alone is durable activation authority.
 
+M07-T05 realizes the local transport without widening any earlier authority. One Fastify server
+binds only to the fixed loopback profile, authenticates an exact bearer token, accepts exact
+configured origins, and exposes `ETag` only to those origins. Strict JSON and fixed body ceilings
+precede repository work. Inactive connections, complete requests, and keep-alive are bounded at
+5, 15, and 5 seconds respectively, so an incomplete body cannot hold service shutdown forever.
+
+The persistence layer keeps the three responsibilities separate. SQLite stores exact editable
+Source bytes under monotonic generations; compare-and-swap rejects a stale expected generation
+without replacing the winner. Immutable Bundle requests delegate to the existing M07-T01
+first-writer-wins repository and therefore cannot overwrite revision-addressed bytes. SQLite
+channel rows contain only a mutable channel name, revision pointer, and generation for discovery;
+they do not imply that the Bundle was verified, staged, committed, activated, or made runnable.
+WAL mode, full synchronous durability, immediate transactions, stable redacted errors, and
+restart/concurrency tests protect the admitted local profile.
+
+This API is deliberately an application-owned local control plane rather than a remotely exposed
+multi-tenant service. It grants no network discovery, package loading, reference-preflight,
+staging, activation, or last-known-good authority. M07-T06 owns staged runtime indexes and the
+active/staged separation, and M07-T07 must still join authentic reference and staging branches in
+one durable activation transaction.
+
 ### DESEN Developer Platform (`desen.run`)
 
 The future developer documentation application. It will publish versioned protocol snapshots,

@@ -153,6 +153,64 @@ const APPROVED_M07_T04_TRACKED_RECEIPTS = Object.freeze({
     sha256: "b1081dafc56b43c422e23b8ab14251133bc78295a815d83c12a95122d024fce0",
   }),
 });
+const APPROVED_M07_T05_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 1_972,
+    sha256: "fba38ac87e42c58c5965f32433e2391b8a52a10ec2ab4a90bc18a263840398e1",
+  }),
+  [APP_INDEX]: Object.freeze({
+    bytes: 3_343,
+    sha256: "f33d36872ebb0b320569c38d29f4397e81d459db085d2d9d92111a2795510e24",
+  }),
+  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
+    bytes: 255_778,
+    sha256: "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f",
+  }),
+  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
+    bytes: 85_044,
+    sha256: "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979",
+  }),
+  "scripts/lib/publisher-publish-result-proof.mjs": Object.freeze({
+    bytes: 58_744,
+    sha256: "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62",
+  }),
+  "tests/publisher-publish-result.test.mjs": Object.freeze({
+    bytes: 33_936,
+    sha256: "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac",
+  }),
+  "scripts/lib/publisher-execution-preflight-proof.mjs": Object.freeze({
+    bytes: 71_098,
+    sha256: "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791",
+  }),
+  "tests/publisher-execution-preflight.test.mjs": Object.freeze({
+    bytes: 17_767,
+    sha256: "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea",
+  }),
+  "scripts/lib/publisher-catalog-pinning-proof.mjs": Object.freeze({
+    bytes: 102_413,
+    sha256: "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f",
+  }),
+  "tests/publisher-catalog-pinning.test.mjs": Object.freeze({
+    bytes: 38_530,
+    sha256: "bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116",
+  }),
+  "scripts/lib/publisher-bundle-publication-proof.mjs": Object.freeze({
+    bytes: 137_856,
+    sha256: "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6",
+  }),
+  "tests/publisher-bundle-publication.test.mjs": Object.freeze({
+    bytes: 63_899,
+    sha256: "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f",
+  }),
+  "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
+    bytes: 166_095,
+    sha256: "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08",
+  }),
+  "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
+    bytes: 60_612,
+    sha256: "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d",
+  }),
+});
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS = fileConstants.O_RDONLY | fileConstants.O_NOFOLLOW | fileConstants.O_NONBLOCK;
 const execFileAsync = promisify(execFile);
@@ -565,6 +623,66 @@ const APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS = Object.freeze([
     }),
   ),
 ]);
+const APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS = Object.freeze([
+  ...APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly),
+  ...[
+    "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+    "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+    "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+    "LOCAL_CONTROL_PLANE_LIMITS",
+    "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+    "LocalControlPlaneError",
+  ].map((name) =>
+    Object.freeze({
+      imported: name,
+      exported: name,
+      module: "./local-control-plane-contract.js",
+      typeOnly: false,
+    }),
+  ),
+  Object.freeze({
+    imported: "openLocalControlPlane",
+    exported: "openLocalControlPlane",
+    module: "./local-control-plane.js",
+    typeOnly: false,
+  }),
+  ...APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS.filter(({ typeOnly }) => typeOnly),
+  ...[
+    "LocalControlPlane",
+    "LocalControlPlaneBundlePutResult",
+    "LocalControlPlaneBundleReadResult",
+    "LocalControlPlaneBundleRecord",
+    "LocalControlPlaneChannelPutBody",
+    "LocalControlPlaneChannelPutResult",
+    "LocalControlPlaneChannelReadResult",
+    "LocalControlPlaneChannelRecord",
+    "LocalControlPlaneErrorCode",
+    "LocalControlPlaneErrorDetail",
+    "LocalControlPlaneErrorEnvelope",
+    "LocalControlPlaneHttpStatusCode",
+    "LocalControlPlaneInjectMethod",
+    "LocalControlPlaneInjectRequest",
+    "LocalControlPlaneInjectResponse",
+    "LocalControlPlaneLimits",
+    "LocalControlPlaneListenResult",
+    "LocalControlPlaneSourcePutResult",
+    "LocalControlPlaneSourceReadResult",
+    "LocalControlPlaneSourceRecord",
+    "OpenLocalControlPlaneOptions",
+  ].map((name) =>
+    Object.freeze({
+      imported: name,
+      exported: name,
+      module: "./local-control-plane-contract.js",
+      typeOnly: true,
+    }),
+  ),
+]);
+const APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS = Object.freeze(
+  APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly)
+    .map(({ exported }) => exported)
+    .sort(),
+);
 
 export const CONTROL_PLANE_BUNDLE_STORE_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
@@ -692,6 +810,24 @@ const APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.js.map": Object.freeze({
     bytes: 566,
     sha256: "0060ea89d7c17c22492ddabcdf976661de09da7ea588736d8385a88da1f0c26d",
+  }),
+});
+const APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
+  "index.d.ts": Object.freeze({
+    bytes: 3_244,
+    sha256: "453e5c2b15d3faed0357193ffe5682e5c518b06b5ab9cf904361e76a785401bd",
+  }),
+  "index.d.ts.map": Object.freeze({
+    bytes: 1_537,
+    sha256: "53fd5e67aa7236adf897f443611614c248a99beb436ccf3fdb827651de613428",
+  }),
+  "index.js": Object.freeze({
+    bytes: 1_469,
+    sha256: "166709a7330e573bf737e2d985fe0c0761c614215df3cadc71d6bbc783c9e777",
+  }),
+  "index.js.map": Object.freeze({
+    bytes: 723,
+    sha256: "16112df85d0fe16f3767b17c28f36d0c8c3bc015f82114d4ab2b718c6d9567db",
   }),
 });
 const ROOT_SCRIPT_COMMANDS = Object.freeze({
@@ -1167,7 +1303,9 @@ function publicExportInventory(source, relativePath) {
     JSON.stringify(exports) === JSON.stringify(APPROVED_M07_T03_PUBLIC_SOURCE_EXPORTS);
   const approvedM07T04 =
     JSON.stringify(exports) === JSON.stringify(APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS);
-  if (!taskTime && !approvedM07T02 && !approvedM07T03 && !approvedM07T04) {
+  const approvedM07T05 =
+    JSON.stringify(exports) === JSON.stringify(APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS);
+  if (!taskTime && !approvedM07T02 && !approvedM07T03 && !approvedM07T04 && !approvedM07T05) {
     fail("REGISTRATION_DRIFT", "The exact public package-root export inventory drifted.");
   }
   // M07-T01 owns only its task-time exports. Reviewed successors are authenticated while this
@@ -1709,11 +1847,13 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T02 = APPROVED_M07_T02_TRACKED_RECEIPTS[relativePath];
     const approvedM07T03 = APPROVED_M07_T03_TRACKED_RECEIPTS[relativePath];
     const approvedM07T04 = APPROVED_M07_T04_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T05 = APPROVED_M07_T05_TRACKED_RECEIPTS[relativePath];
     const observedSha256 = sha256(bytes);
     if (
       (approvedM07T02 !== undefined ||
         approvedM07T03 !== undefined ||
-        approvedM07T04 !== undefined) &&
+        approvedM07T04 !== undefined ||
+        approvedM07T05 !== undefined) &&
       !(
         (bytes.byteLength === taskTime?.bytes && observedSha256 === taskTime.sha256) ||
         (approvedM07T02 !== undefined &&
@@ -1724,7 +1864,10 @@ async function trackedFileReceipts(overrides) {
           observedSha256 === approvedM07T03.sha256) ||
         (approvedM07T04 !== undefined &&
           bytes.byteLength === approvedM07T04.bytes &&
-          observedSha256 === approvedM07T04.sha256)
+          observedSha256 === approvedM07T04.sha256) ||
+        (approvedM07T05 !== undefined &&
+          bytes.byteLength === approvedM07T05.bytes &&
+          observedSha256 === approvedM07T05.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed package successor bytes drifted.", {
@@ -1761,6 +1904,7 @@ async function distributionReceipts() {
         const approvedM07T02 = APPROVED_M07_T02_INDEX_DISTRIBUTION_RECEIPTS[fileName];
         const approvedM07T03 = APPROVED_M07_T03_INDEX_DISTRIBUTION_RECEIPTS[fileName];
         const approvedM07T04 = APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS[fileName];
+        const approvedM07T05 = APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS[fileName];
         const observedSha256 = sha256(bytes);
         if (
           historical !== undefined &&
@@ -1774,7 +1918,10 @@ async function distributionReceipts() {
               observedSha256 === approvedM07T03.sha256) ||
             (approvedM07T04 !== undefined &&
               bytes.byteLength === approvedM07T04.bytes &&
-              observedSha256 === approvedM07T04.sha256)
+              observedSha256 === approvedM07T04.sha256) ||
+            (approvedM07T05 !== undefined &&
+              bytes.byteLength === approvedM07T05.bytes &&
+              observedSha256 === approvedM07T05.sha256)
           )
         ) {
           fail("DISTRIBUTION_DRIFT", "The reviewed package-root distribution drifted.", {
@@ -2266,12 +2413,21 @@ function assertRuntimeReceipt(receipt) {
       ],
     },
   };
+  const approvedM07T05 = {
+    ...taskTimeExpected,
+    publicModuleKeys: APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS,
+    packageSelfReference: {
+      ...taskTimeExpected.packageSelfReference,
+      keys: APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS,
+    },
+  };
   const serialized = JSON.stringify(receipt);
   if (
     serialized !== JSON.stringify(taskTimeExpected) &&
     serialized !== JSON.stringify(approvedM07T02) &&
     serialized !== JSON.stringify(approvedM07T03) &&
-    serialized !== JSON.stringify(approvedM07T04)
+    serialized !== JSON.stringify(approvedM07T04) &&
+    serialized !== JSON.stringify(approvedM07T05)
   ) {
     fail("RUNTIME_PROBE_MISMATCH", "The immutable Bundle-store runtime receipt drifted.");
   }

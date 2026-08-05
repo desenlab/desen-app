@@ -1,0 +1,1059 @@
+{
+  "schemaVersion": 1,
+  "proofId": "control-plane-local-api",
+  "profile": "desen.control-plane.local-api-proof.v1",
+  "task": "M07-T05",
+  "result": "PASS",
+  "summary": "The built public package opens one authenticated fixed-loopback local API whose exact Source bytes and channel generations persist in SQLite while immutable Bundle bytes remain in the M07-T01 store; restart and two-instance compare-and-set evidence grants no staging or activation authority.",
+  "prerequisites": [
+    {
+      "task": "M07-T01",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+      "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795",
+      "bytes": 22396,
+      "verifiedSha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+    }
+  ],
+  "fixtures": [
+    {
+      "role": "officialSource",
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    }
+  ],
+  "claims": {
+    "publicFactory": {
+      "export": "openLocalControlPlane",
+      "packageSelfReference": "@desen/control-plane-api",
+      "returnsClosedWrapper": {
+        "keys": ["close", "inject", "listen"],
+        "frozen": true,
+        "noTcpListenerOpenedByBuiltRuntimeReceipt": true,
+        "activationAbsent": true,
+        "listDeleteAbsent": true
+      },
+      "nativeSqliteLoadedOnlyWhenOpened": true
+    },
+    "transport": {
+      "routes": [
+        "GET /v1/sources/:sourceKey",
+        "PUT /v1/sources/:sourceKey",
+        "GET /v1/bundles/:revision",
+        "PUT /v1/bundles/:revision",
+        "GET /v1/channels/:channelName",
+        "PUT /v1/channels/:channelName"
+      ],
+      "injectAndListenShareApplication": true,
+      "listenerAddress": "127.0.0.1",
+      "networkListenerUsedByBuiltRuntimeReceipt": false,
+      "fixedLoopbackListenerUsedByFocusedLifecycleCase": true,
+      "finiteTimeouts": {
+        "frozen": true,
+        "connectionTimeoutMilliseconds": 5000,
+        "requestTimeoutMilliseconds": 15000,
+        "keepAliveTimeoutMilliseconds": 5000
+      },
+      "contentType": "application/json",
+      "exactIdentifierGrammar": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "officialSource": {
+      "sourceKey": "official-sign-in",
+      "officialBytes": 4719,
+      "officialSha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1",
+      "variantBytes": 2033,
+      "variantSha256": "6d1a77e171f88059a3a4b6757b2d55033006f813abcc04f66dad179f0d502cfa",
+      "createStatusCode": 201,
+      "createStatus": "created",
+      "createGeneration": 1,
+      "createEtag": "\"g:1\"",
+      "firstReadExact": true,
+      "firstReadEtag": "\"g:1\"",
+      "identicalStatus": "unchanged",
+      "identicalGeneration": 1,
+      "secondInstanceReadExact": true,
+      "secondInstanceReadEtag": "\"g:1\"",
+      "twoInstanceCas": {
+        "writers": 2,
+        "winners": 1,
+        "staleWriters": 1,
+        "winnerStatus": "updated",
+        "winnerGeneration": 2,
+        "staleCode": "GENERATION_MISMATCH",
+        "staleEtag": "\"g:2\""
+      },
+      "finalExact": true,
+      "finalEtag": "\"g:2\"",
+      "restartExact": true,
+      "restartEtag": "\"g:2\""
+    },
+    "immutableBundles": {
+      "first": {
+        "revision": "sha256:48eaae5f3d6405bc765e8acc157b8e4e2980d93347af551934e3c8f1f04a91e2",
+        "bytes": 56,
+        "sha256": "48eaae5f3d6405bc765e8acc157b8e4e2980d93347af551934e3c8f1f04a91e2",
+        "storeStatusCode": 201,
+        "storeStatus": "stored",
+        "integrity": {
+          "status": "rejected",
+          "stage": "bundle-schema",
+          "codes": ["SCHEMA_INVALID"],
+          "resultFrozen": true,
+          "diagnosticsFrozen": true,
+          "authorityAbsent": true
+        },
+        "exactAfterRestart": true,
+        "inodePreserved": true,
+        "singleLink": true
+      },
+      "second": {
+        "revision": "sha256:05d5b04f5b9ff3e1835b14f4f54315d2ba488260d77dd552f03795d0dddb7811",
+        "bytes": 56,
+        "sha256": "05d5b04f5b9ff3e1835b14f4f54315d2ba488260d77dd552f03795d0dddb7811",
+        "storeStatusCode": 201,
+        "storeStatus": "stored",
+        "integrity": {
+          "status": "rejected",
+          "stage": "bundle-schema",
+          "codes": ["SCHEMA_INVALID"],
+          "resultFrozen": true,
+          "diagnosticsFrozen": true,
+          "authorityAbsent": true
+        },
+        "exactAfterRestart": true,
+        "inodePreserved": true,
+        "singleLink": true
+      },
+      "integrityOrPreflightImpliedByStorage": false,
+      "exactM07T01FirstWriterSemanticsRetained": true
+    },
+    "mutableChannel": {
+      "channelName": "proof-preview",
+      "createStatusCode": 201,
+      "createStatus": "created",
+      "createGeneration": 1,
+      "createRevision": "sha256:48eaae5f3d6405bc765e8acc157b8e4e2980d93347af551934e3c8f1f04a91e2",
+      "createEtag": "\"g:1\"",
+      "secondInstanceGeneration": 1,
+      "secondInstanceRevision": "sha256:48eaae5f3d6405bc765e8acc157b8e4e2980d93347af551934e3c8f1f04a91e2",
+      "twoInstanceCas": {
+        "writers": 2,
+        "winners": 1,
+        "staleWriters": 1,
+        "winnerStatus": "updated",
+        "winnerGeneration": 2,
+        "staleCode": "GENERATION_MISMATCH",
+        "staleEtag": "\"g:2\""
+      },
+      "finalGeneration": 2,
+      "finalRevision": "sha256:05d5b04f5b9ff3e1835b14f4f54315d2ba488260d77dd552f03795d0dddb7811",
+      "finalEtag": "\"g:2\"",
+      "restartGeneration": 2,
+      "restartRevision": "sha256:05d5b04f5b9ff3e1835b14f4f54315d2ba488260d77dd552f03795d0dddb7811",
+      "restartEtag": "\"g:2\"",
+      "activationFieldsAbsent": true
+    },
+    "concurrencyAndRestart": {
+      "sourceTwoInstanceCas": {
+        "writers": 2,
+        "winners": 1,
+        "staleWriters": 1,
+        "winnerStatus": "updated",
+        "winnerGeneration": 2,
+        "staleCode": "GENERATION_MISMATCH",
+        "staleEtag": "\"g:2\""
+      },
+      "channelTwoInstanceCas": {
+        "writers": 2,
+        "winners": 1,
+        "staleWriters": 1,
+        "winnerStatus": "updated",
+        "winnerGeneration": 2,
+        "staleCode": "GENERATION_MISMATCH",
+        "staleEtag": "\"g:2\""
+      },
+      "persistence": {
+        "sqliteFileRegular": true,
+        "sqliteFileSingleLink": true,
+        "sqliteIdentityPreservedAcrossRestart": true,
+        "sourceAndChannelSurvivedCloseReopen": true,
+        "independentOpenInstances": 2
+      },
+      "identicalCurrentGenerationDoesNotAdvance": true,
+      "staleEvenWhenProposedValueMatchesWinner": true
+    },
+    "security": {
+      "missingTokenCode": "AUTHENTICATION_REQUIRED",
+      "wrongTokenCode": "AUTHENTICATION_REQUIRED",
+      "equalAuthenticationFailureBytes": true,
+      "tokenRedacted": true,
+      "storagePathRedacted": true,
+      "hostileHostCode": "HOST_NOT_ALLOWED",
+      "hostileOriginCode": "ORIGIN_NOT_ALLOWED",
+      "allowedOriginStatusCode": 200,
+      "allowedOriginEcho": "https://desen.app",
+      "exposedResponseHeaders": "etag",
+      "allowedOriginEtag": "\"sha256:48eaae5f3d6405bc765e8acc157b8e4e2980d93347af551934e3c8f1f04a91e2\"",
+      "cacheControl": "no-store",
+      "contentTypeOptions": "nosniff"
+    },
+    "separation": {
+      "invalidBundleDiscoverableWithoutIntegrityAuthority": true,
+      "channelMutationPreservedBundleInodes": true,
+      "stagedAuthorityPublic": false,
+      "activeRevisionPublic": false,
+      "previousGoodRevisionPublic": false
+    },
+    "implementation": {
+      "publicFactory": "openLocalControlPlane with inert captured options and canonical owned root",
+      "transport": {
+        "framework": "Fastify inject/listen wrapper",
+        "fixedLoopback": true,
+        "proxyTrust": false,
+        "logger": false,
+        "connectionTimeoutMilliseconds": 5000,
+        "requestTimeoutMilliseconds": 15000,
+        "keepAliveTimeoutMilliseconds": 5000
+      },
+      "authentication": "SHA-256 token digests compared with timingSafeEqual",
+      "sourcePersistence": "exact defensive bytes plus positive safe-integer generation CAS",
+      "bundlePersistence": "delegated unchanged to the immutable M07-T01 BundleStore",
+      "channelPersistence": "SQLite name/revision/generation record separate from Bundle bytes",
+      "sqliteProfile": {
+        "implementation": "better-sqlite3@13.0.3",
+        "strictTables": true,
+        "schemaVersioned": true,
+        "journalMode": "WAL",
+        "synchronous": "FULL",
+        "foreignKeys": true,
+        "trustedSchema": false,
+        "busyTimeoutMilliseconds": 5000,
+        "preparedStatements": true,
+        "immediateCasTransactions": true
+      },
+      "nativeImportConfinedToSqliteComposition": true,
+      "explicitAnyTypes": 0,
+      "networkAcquisition": false
+    },
+    "registrations": {
+      "app": {
+        "name": "@desen/control-plane-api",
+        "main": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "exports": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+        "packageTest": "vitest run test/local-control-plane.test.ts",
+        "protocolDependency": "workspace:*",
+        "validatorDependency": "workspace:*",
+        "sqliteDependency": "13.0.3",
+        "fastifyDependency": "5.11.2",
+        "sqliteTypes": "9.6.0"
+      },
+      "rootScripts": {
+        "generate": "pnpm verify:control-plane-reference-preflight && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:local-api && node scripts/generate-control-plane-local-api-proof.mjs",
+        "verify": "pnpm verify:control-plane-reference-preflight && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:local-api && node scripts/verify-control-plane-local-api.mjs",
+        "test": "pnpm verify:control-plane-reference-preflight && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:local-api && node --test tests/control-plane-local-api.test.mjs"
+      },
+      "aggregateImmediatePredecessor": "control-plane-reference-preflight",
+      "aggregateTerminalTail": true,
+      "ciTuple": [
+        "control-plane-local-api",
+        "scripts/verify-control-plane-local-api.mjs",
+        "tests/control-plane-local-api.test.mjs"
+      ],
+      "ciTupleExactInRunnerAndInventory": true,
+      "boundedChildRuntimeProbeRegistered": true,
+      "nativeDependencyPolicy": {
+        "version": "13.0.3",
+        "implicitBuildAllowed": false,
+        "minimumReleaseAgeExceptionExact": true
+      },
+      "publicSourceExports": [
+        {
+          "imported": "BUNDLE_INTEGRITY_LIMITS",
+          "exported": "BUNDLE_INTEGRITY_LIMITS",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+          "exported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BUNDLE_REFERENCE_PREFLIGHT_LIMITS",
+          "exported": "BUNDLE_REFERENCE_PREFLIGHT_LIMITS",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleIntegrityAuthority",
+          "exported": "BundleIntegrityAuthority",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnostic",
+          "exported": "BundleIntegrityDiagnostic",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityDiagnosticCode",
+          "exported": "BundleIntegrityDiagnosticCode",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityLimits",
+          "exported": "BundleIntegrityLimits",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationResult",
+          "exported": "BundleIntegrityVerificationResult",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleIntegrityVerificationStage",
+          "exported": "BundleIntegrityVerificationStage",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightAuthority",
+          "exported": "BundlePackagePreflightAuthority",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightDiagnostic",
+          "exported": "BundlePackagePreflightDiagnostic",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightDiagnosticCode",
+          "exported": "BundlePackagePreflightDiagnosticCode",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightLimits",
+          "exported": "BundlePackagePreflightLimits",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightResult",
+          "exported": "BundlePackagePreflightResult",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundlePackagePreflightStage",
+          "exported": "BundlePackagePreflightStage",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleReferencePreflightAuthority",
+          "exported": "BundleReferencePreflightAuthority",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleReferencePreflightDiagnostic",
+          "exported": "BundleReferencePreflightDiagnostic",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleReferencePreflightDiagnosticCode",
+          "exported": "BundleReferencePreflightDiagnosticCode",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleReferencePreflightLimits",
+          "exported": "BundleReferencePreflightLimits",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleReferencePreflightResult",
+          "exported": "BundleReferencePreflightResult",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleReferencePreflightStage",
+          "exported": "BundleReferencePreflightStage",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleSourceMaterial",
+          "exported": "BundleSourceMaterial",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStore",
+          "exported": "BundleStore",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreEntry",
+          "exported": "BundleStoreEntry",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreError",
+          "exported": "BundleStoreError",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "BundleStoreErrorCode",
+          "exported": "BundleStoreErrorCode",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStorePutResult",
+          "exported": "BundleStorePutResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "BundleStoreReadResult",
+          "exported": "BundleStoreReadResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+          "exported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "INVALID_BUNDLE_PACKAGE_AUTHORITY_CODE",
+          "exported": "INVALID_BUNDLE_PACKAGE_AUTHORITY_CODE",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "INVALID_INSTALLED_PACKAGE_CODE",
+          "exported": "INVALID_INSTALLED_PACKAGE_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "InstalledPackageArtifact",
+          "exported": "InstalledPackageArtifact",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "InstalledPackageCandidate",
+          "exported": "InstalledPackageCandidate",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+          "exported": "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+          "exported": "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+          "exported": "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "LOCAL_CONTROL_PLANE_LIMITS",
+          "exported": "LOCAL_CONTROL_PLANE_LIMITS",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+          "exported": "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "LocalControlPlane",
+          "exported": "LocalControlPlane",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneBundlePutResult",
+          "exported": "LocalControlPlaneBundlePutResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneBundleReadResult",
+          "exported": "LocalControlPlaneBundleReadResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneBundleRecord",
+          "exported": "LocalControlPlaneBundleRecord",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneChannelPutBody",
+          "exported": "LocalControlPlaneChannelPutBody",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneChannelPutResult",
+          "exported": "LocalControlPlaneChannelPutResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneChannelReadResult",
+          "exported": "LocalControlPlaneChannelReadResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneChannelRecord",
+          "exported": "LocalControlPlaneChannelRecord",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneError",
+          "exported": "LocalControlPlaneError",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "LocalControlPlaneErrorCode",
+          "exported": "LocalControlPlaneErrorCode",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneErrorDetail",
+          "exported": "LocalControlPlaneErrorDetail",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneErrorEnvelope",
+          "exported": "LocalControlPlaneErrorEnvelope",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneHttpStatusCode",
+          "exported": "LocalControlPlaneHttpStatusCode",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneInjectMethod",
+          "exported": "LocalControlPlaneInjectMethod",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneInjectRequest",
+          "exported": "LocalControlPlaneInjectRequest",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneInjectResponse",
+          "exported": "LocalControlPlaneInjectResponse",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneLimits",
+          "exported": "LocalControlPlaneLimits",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneListenResult",
+          "exported": "LocalControlPlaneListenResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneSourcePutResult",
+          "exported": "LocalControlPlaneSourcePutResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneSourceReadResult",
+          "exported": "LocalControlPlaneSourceReadResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "LocalControlPlaneSourceRecord",
+          "exported": "LocalControlPlaneSourceRecord",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "OpenBundleStoreOptions",
+          "exported": "OpenBundleStoreOptions",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "OpenLocalControlPlaneOptions",
+          "exported": "OpenLocalControlPlaneOptions",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "exported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+          "exported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "exported": "REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "exported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "VerifiedBundleSurfaceReferences",
+          "exported": "VerifiedBundleSurfaceReferences",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "VerifiedInstalledPackage",
+          "exported": "VerifiedInstalledPackage",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "imported": "openBundleStore",
+          "exported": "openBundleStore",
+          "module": "./bundle-store.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "openLocalControlPlane",
+          "exported": "openLocalControlPlane",
+          "module": "./local-control-plane.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "preflightBundlePackages",
+          "exported": "preflightBundlePackages",
+          "module": "./package-preflight.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "preflightBundleReferences",
+          "exported": "preflightBundleReferences",
+          "module": "./reference-preflight.js",
+          "typeOnly": false
+        },
+        {
+          "imported": "verifyBundleStoreEntry",
+          "exported": "verifyBundleStoreEntry",
+          "module": "./bundle-verification.js",
+          "typeOnly": false
+        }
+      ]
+    },
+    "traceRows": [
+      {
+        "id": "R-125",
+        "section": "28.2",
+        "line": 1510,
+        "anchor": "revision artifact itself never changes",
+        "summary": "Bundles and packages are content-addressed immutable artifacts while channels alone are mutable",
+        "owners": ["M03-T10", "M07-T01", "M07-T05"],
+        "tests": ["M03-T10", "M07-T10"],
+        "evidence": "Mutation attempts fail and channel updates point to new immutable revisions"
+      }
+    ],
+    "coverageTransitions": {
+      "normativeN019": "TESTED",
+      "proofMatrixP12": "NOT_PROVEN",
+      "findingPF074": "OPEN_WITH_LOCAL_PROFILE"
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "apps/control-plane-api/package.json",
+      "bytes": 1972,
+      "sha256": "fba38ac87e42c58c5965f32433e2391b8a52a10ec2ab4a90bc18a263840398e1"
+    },
+    {
+      "path": "apps/control-plane-api/src/index.ts",
+      "bytes": 3343,
+      "sha256": "f33d36872ebb0b320569c38d29f4397e81d459db085d2d9d92111a2795510e24"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-contract.ts",
+      "bytes": 16959,
+      "sha256": "d764ff037aacb422dbcbfd1c99ba768ec6f1ce9467ead3ded15b611b5a1e4b09"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-internal.ts",
+      "bytes": 37835,
+      "sha256": "f723a1c78b3eada3c957b5243907880e7b7241de3ad07f8c9d838273561f66fc"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-repository-internal.ts",
+      "bytes": 19610,
+      "sha256": "3da2371a0d54aa6be8816f9d44e8da059ddece6260dbde8db3439ce6eb61020c"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-sqlite-internal.ts",
+      "bytes": 28313,
+      "sha256": "e3315c14fdf65ca3d6b999d4a5b713657cbcd048fb55b88db14b35f39576546c"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane.ts",
+      "bytes": 9350,
+      "sha256": "469b3117c8ea4d71e3aa133e20dc3557d5e7448c4721d4a62c3d3ecd93fc22ba"
+    },
+    {
+      "path": "apps/control-plane-api/src/strict-json-internal.ts",
+      "bytes": 11874,
+      "sha256": "c7b099c22d67f6d812d5f12bd9dab1fbd7f1b0fd90c4ded803c03a2cecc33456"
+    },
+    {
+      "path": "apps/control-plane-api/test/local-control-plane.test.ts",
+      "bytes": 22299,
+      "sha256": "e74655bf3a6f2c818fd289a61f1b6e0a5d5b56e4795ce71dc9bf281d8e097678"
+    },
+    {
+      "path": "apps/control-plane-api/test/local-control-plane.types.ts",
+      "bytes": 4302,
+      "sha256": "27f37c555bfbf7df064d53c02c57f4ad931d83d1a69ee9a14cd5eda01b08e011"
+    },
+    {
+      "path": "docs/adr/0012-local-control-plane-transport-and-metadata.md",
+      "bytes": 7213,
+      "sha256": "48f2dfcc017f2d958ae7d64cb5a10d9022b6870a5674660da6e2b9f7d7d60c60"
+    },
+    {
+      "path": "scripts/generate-control-plane-local-api-proof.mjs",
+      "bytes": 807,
+      "sha256": "ea98f2361ff9bc323d6bb26cdfd3cc4e4ef433ccccd893717a45ad006a196fba"
+    },
+    {
+      "path": "scripts/verify-control-plane-local-api.mjs",
+      "bytes": 642,
+      "sha256": "3e1c8edf3b70bd20e421cdcd23d2d6360ee43c4dd037046c07d9b59b9ed4b511"
+    },
+    {
+      "path": "scripts/lib/control-plane-local-api-proof.mjs",
+      "bytes": 73915,
+      "sha256": "f66d40863a46dd7ed9e28afb2c78f8afbda8aee964e72d4fba60e65e55a351b3"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/control-plane-local-api.test.mjs",
+      "bytes": 17291,
+      "sha256": "490d4f922ea41dc7bca178cc54ab938ab136f0b922d7842af623001eabf60a65"
+    },
+    {
+      "path": "package.json",
+      "bytes": 60843,
+      "sha256": "c725d3daf2c09ac199edd816c02485e5f281984c2c9a2ff197e1b554196fa5b9"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "bytes": 816,
+      "sha256": "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 126374,
+      "sha256": "8bcb1d938712d22e752d03eefe325d352ed3e666cdbfd34fdca0f768a4a50bcf"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 47366,
+      "sha256": "ac96b317d49f031db23bd73995193c854249f66bcdcb6a04905d0e3ca0eb6b77"
+    },
+    {
+      "path": "scripts/ci/exhaustive-workload-inventory.mjs",
+      "bytes": 45691,
+      "sha256": "e71e53c6a94c798e28bbb2d41ee6556a7cdc28bfdf3bfdbb3c3d39e1d45872c0"
+    },
+    {
+      "path": "scripts/ci/shared-state-authority.mjs",
+      "bytes": 46074,
+      "sha256": "92bfcc1367b3cad1184af780446dfb2bc9f7ce44d3f2dd5e258ab8efd3e7e196"
+    }
+  ],
+  "distribution": [
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts",
+      "bytes": 3244,
+      "sha256": "453e5c2b15d3faed0357193ffe5682e5c518b06b5ab9cf904361e76a785401bd"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts.map",
+      "bytes": 1537,
+      "sha256": "53fd5e67aa7236adf897f443611614c248a99beb436ccf3fdb827651de613428"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js",
+      "bytes": 1469,
+      "sha256": "166709a7330e573bf737e2d985fe0c0761c614215df3cadc71d6bbc783c9e777"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js.map",
+      "bytes": 723,
+      "sha256": "16112df85d0fe16f3767b17c28f36d0c8c3bc015f82114d4ab2b718c6d9567db"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-contract.d.ts",
+      "bytes": 13506,
+      "sha256": "2aaca4994f6a3435a114f78efdee27bbb74f352b3840607abac51521f4612e78"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-contract.d.ts.map",
+      "bytes": 6459,
+      "sha256": "598350d496d3da8841edcbd7079fad84952c8f272c230cc56d1d573e05021801"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-contract.js",
+      "bytes": 5137,
+      "sha256": "6b2823ca52d2857eac5f9a220ec78f4a494a061eaa2e9e24c97aeb4775be9d94"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-contract.js.map",
+      "bytes": 2037,
+      "sha256": "d2428f6d9b4caa1486329659163d85eba3034ec9f81fdef755ffb75ae7cdfb6a"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-internal.d.ts",
+      "bytes": 69,
+      "sha256": "212f526e05a87d7377954a39dae62f596685a017a4de11f2cf2bd9439f66015e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-internal.d.ts.map",
+      "bytes": 150,
+      "sha256": "1c659a91580a28886afcfe2b29120f9361c244acb471fb4fcc70cecdaa1e51e4"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-internal.js",
+      "bytes": 36207,
+      "sha256": "7699eff3acb401dcde53d06f717e1ccb0475f101d0f595cf34ece466bfd35a11"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-internal.js.map",
+      "bytes": 32139,
+      "sha256": "73e06e02ca795aee613e6c8f388b114af4906db099e839e69ae19e8898cd3519"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-repository-internal.d.ts",
+      "bytes": 80,
+      "sha256": "1e81ee580866f2e4db2346051920e815430881b4fabfb02cc73c9d7416abfdb0"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-repository-internal.d.ts.map",
+      "bytes": 172,
+      "sha256": "b943d798ba36779f9c959b7d47e3e98b246bf52535476d8209152130253f207c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-repository-internal.js",
+      "bytes": 14421,
+      "sha256": "c222aa4542a9b36358a1cd2ca88f58f27b44c08fae3d21dbe16a777ccec31efb"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-repository-internal.js.map",
+      "bytes": 12063,
+      "sha256": "8d7f5066bba9ef75ea03188931facceb6997fa625fc03660235a8aa302ee5cc6"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-sqlite-internal.d.ts",
+      "bytes": 76,
+      "sha256": "f6b9cb04ff690ed5e6257a7b8d30e64d38349e376bd4bd668677993e7c7b8458"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-sqlite-internal.d.ts.map",
+      "bytes": 164,
+      "sha256": "5d83e0cd2ce0ee839377792f196e00b65a4299b2ec97a3cf2886a0ce8f464a33"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-sqlite-internal.js",
+      "bytes": 26095,
+      "sha256": "e43c91fec171aa9ec47630ef08874c4f842a4fed507f99aa8de8c9ff41455259"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-sqlite-internal.js.map",
+      "bytes": 21902,
+      "sha256": "bc3ff7c6d474a2cb63807de7e86b9f74c98830ee2eccf1b1a066d1f06c0c33c3"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane.d.ts",
+      "bytes": 748,
+      "sha256": "39ebbee521ada1b11e4a72fb7a947a643e63108103543cccfb4b3235a8dd231f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane.d.ts.map",
+      "bytes": 289,
+      "sha256": "7ec69898d16648af2afc89700135060ea412279c3c40cb0a0c0efaaede83991b"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane.js",
+      "bytes": 9730,
+      "sha256": "298b69b12a50fcd29eaffaf30c16ef2a9388d5ff6d15509984f253ce872bbf0a"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane.js.map",
+      "bytes": 7760,
+      "sha256": "2f8005ea58d5eb7349cedd1224698a7342a9670e541586d85c83efcde0e5849e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/strict-json-internal.d.ts",
+      "bytes": 61,
+      "sha256": "805688d9ffacecd7c642ac7649dadaf5213dfdc939d015dc072a3575142b96c7"
+    },
+    {
+      "path": "apps/control-plane-api/dist/strict-json-internal.d.ts.map",
+      "bytes": 134,
+      "sha256": "cc4bc4947c07794de701fdda6bed6c73b136939dae9b086aac64aa1f6ab26ee3"
+    },
+    {
+      "path": "apps/control-plane-api/dist/strict-json-internal.js",
+      "bytes": 10415,
+      "sha256": "6812aaafdaef53daf374b519239b3fd6690e378e48971b266758ad7d35ea1993"
+    },
+    {
+      "path": "apps/control-plane-api/dist/strict-json-internal.js.map",
+      "bytes": 11920,
+      "sha256": "cfefb48b790d0abfe95c1a0c378a645d6efe69b7ac492a55e1e9de1f86d8586b"
+    }
+  ],
+  "tests": {
+    "packageRuntimeCases": 16,
+    "packageRuntimeCaseNames": [
+      "requires the same bearer failure for missing and incorrect credentials",
+      "rejects non-loopback hosts and browser origins outside the exact allowlist",
+      "stores and returns exact editable Source bytes under generation CAS",
+      "rejects missing, forged, aliased, and duplicate-key Source admission",
+      "enforces the Source raw body ceiling before strict parsing",
+      "keeps Bundle transport byte-exact and delegates first-writer immutability to M07-T01",
+      "moves a CAS channel only to an existing Bundle without changing Bundle bytes",
+      "rejects dangling channel targets and closed-body extensions",
+      "rejects query aliases, encoded paths, unsupported methods, media types, and encodings",
+      "answers only an exact allowlisted browser preflight without requiring the bearer value",
+      "snapshots injected bytes and revokes request admission after close",
+      "revokes an in-progress listener when close wins the lifecycle race",
+      "bounds shutdown while an authenticated TCP request body remains incomplete",
+      "drains an admitted inject request before closing owned metadata",
+      "keeps Source and channel generation exhaustion idempotent and non-mutating",
+      "defensively copies exact Source subviews and rejects stale CAS before observing bytes"
+    ],
+    "compileTimeNegativeCases": 18,
+    "compileTimeNegativeClaims": [
+      "Opening a control plane always requires a host-supplied bearer token.",
+      "The factory deliberately exposes no caller-selected host or remote bind option.",
+      "Listening accepts only a port; callers cannot select an address or socket.",
+      "Request bodies must be exact Uint8Array byte views.",
+      "M07-T05 grants no activation authority.",
+      "Runtime staging belongs to M07-T06.",
+      "Rollback belongs to the later activation and recovery boundary.",
+      "A channel pointer cannot set the active revision.",
+      "Previous-good state is not exposed by the local distribution API.",
+      "M07-T05 exposes no destructive delete operation.",
+      "Local storage identities cannot be enumerated through a list operation.",
+      "Public configuration is immutable after capture.",
+      "Source metadata fields are immutable at the contract boundary.",
+      "Exact Source byte-view properties cannot be replaced.",
+      "Immutable Bundle record fields cannot be replaced.",
+      "Channel metadata fields are immutable at the contract boundary.",
+      "Response byte-view properties cannot be replaced.",
+      "The listener address is fixed and immutable."
+    ],
+    "rootMutationCases": 16,
+    "rootMutationCaseNames": [
+      "[authority] builds the exact versioned M07-T05 artifact and local API receipt",
+      "[determinism] two independent evidence builds produce byte-identical artifacts",
+      "[authority] verifies exact artifact bytes and one final proof-document pin",
+      "[artifact] rejects one changed evidence byte",
+      "[proof] rejects pending, wrong, duplicate, or missing final pins",
+      "[prerequisites] rejects one changed byte in the exact M07-T01 prerequisite",
+      "[implementation] rejects transport, repository, SQLite, or public-factory source drift",
+      "[registration] rejects package-root, package-script, aggregate, or CI tuple drift",
+      "[traceability] rejects owner or identity drift in the exact rows",
+      "[runtime] rejects changed Source, restart, two-instance CAS, Bundle/channel, or security receipts",
+      "[tests] rejects skipped focused cases or removed compile-time negatives",
+      "[filesystem] rejects symlinked artifact and proof-document authority",
+      "[writer] atomically writes exact deterministic evidence bytes",
+      "[writer] preserves the old destination and removes a tampered temporary",
+      "[options] rejects unknown, accessor-backed, shared-memory, or hostile authority",
+      "[immutability] freezes the evidence graph and preserves honest later-task nonclaims"
+    ]
+  },
+  "nonclaims": [
+    "M07-T05 stores and distributes candidates; it does not authenticate a Bundle for runtime use.",
+    "A mutable channel is a discovery pointer and is never an active, staged, committed, recovered, or previous-good revision.",
+    "M07-T06 still owns staged runtime indexes and active/staged state separation.",
+    "M07-T07 still owns one durable transactional activeRevision and previousGoodRevision record.",
+    "M07-T08 through M07-T10 still own restart recovery, fault injection, invalid-candidate rejection, concurrent activation, and last-known-good behavior.",
+    "M07-T11 still owns channel consumption by the separately built reference host.",
+    "The built child runtime receipt uses Fastify injection; one focused lifecycle case opens only fixed loopback, and neither claims reverse-proxy, TLS, remote, public-service, or multi-tenant deployment behavior.",
+    "The local bearer token profile does not define public credential issuance, rotation, revocation, or desen.run service authentication.",
+    "P-12 remains NOT_PROVEN until the later staging, atomic activation, and recovery tasks close the full chain.",
+    "The current application surface is Web-first; native targets still require separately reviewed adapters and host integrations."
+  ],
+  "reproduction": [
+    "pnpm verify:control-plane-reference-preflight",
+    "pnpm --filter @desen/control-plane-api... build",
+    "pnpm --filter @desen/control-plane-api typecheck",
+    "pnpm --filter @desen/control-plane-api test:local-api",
+    "node scripts/generate-control-plane-local-api-proof.mjs",
+    "node scripts/verify-control-plane-local-api.mjs",
+    "node --test tests/control-plane-local-api.test.mjs"
+  ]
+}

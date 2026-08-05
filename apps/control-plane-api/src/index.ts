@@ -1,6 +1,7 @@
 /**
- * Local control-plane infrastructure for immutable DESEN Bundle storage, integrity verification,
- * exact installed-package preflight, and bounded surface-reference preflight.
+ * Local DESEN control-plane infrastructure for editable Source storage, immutable Bundle
+ * distribution, mutable channel discovery, integrity verification, exact installed-package
+ * preflight, and bounded surface-reference preflight.
  *
  * @packageDocumentation
  */
@@ -26,6 +27,15 @@ export {
 export { preflightBundleReferences } from "./reference-preflight.js";
 export { verifyBundleStoreEntry } from "./bundle-verification.js";
 export { openBundleStore } from "./bundle-store.js";
+export {
+  LOCAL_CONTROL_PLANE_ERROR_MESSAGES,
+  LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN,
+  LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE,
+  LOCAL_CONTROL_PLANE_LIMITS,
+  LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS,
+  LocalControlPlaneError,
+} from "./local-control-plane-contract.js";
+export { openLocalControlPlane } from "./local-control-plane.js";
 
 export type {
   BundleIntegrityAuthority,
@@ -64,3 +74,26 @@ export type {
   BundleStoreReadResult,
   OpenBundleStoreOptions,
 } from "./bundle-store-contract.js";
+export type {
+  LocalControlPlane,
+  LocalControlPlaneBundlePutResult,
+  LocalControlPlaneBundleReadResult,
+  LocalControlPlaneBundleRecord,
+  LocalControlPlaneChannelPutBody,
+  LocalControlPlaneChannelPutResult,
+  LocalControlPlaneChannelReadResult,
+  LocalControlPlaneChannelRecord,
+  LocalControlPlaneErrorCode,
+  LocalControlPlaneErrorDetail,
+  LocalControlPlaneErrorEnvelope,
+  LocalControlPlaneHttpStatusCode,
+  LocalControlPlaneInjectMethod,
+  LocalControlPlaneInjectRequest,
+  LocalControlPlaneInjectResponse,
+  LocalControlPlaneLimits,
+  LocalControlPlaneListenResult,
+  LocalControlPlaneSourcePutResult,
+  LocalControlPlaneSourceReadResult,
+  LocalControlPlaneSourceRecord,
+  OpenLocalControlPlaneOptions,
+} from "./local-control-plane-contract.js";
