@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████░░░░░░░░░░░░` **77 / 145 tasks complete (53%)**
+**Overall:** `█████████████░░░░░░░░░░░░` **78 / 145 tasks complete (54%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,9 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M07:** `███░░░░░░░░` **3 / 11 tasks complete (27%)**
+**M07:** `████░░░░░░` **4 / 11 tasks complete (36%)**
 
-**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T04` (ready, `NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T05` (ready, `NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -56,14 +56,26 @@ profile it snapshots the selected Catalog and all 80 real distribution artifacts
 reframes 81 entries, and closes Bundle requirement digest = Catalog self-digest = calculated
 package digest before returning an opaque immutable package authority. Missing, duplicate, newer,
 case/Unicode/whitespace-aliased, stale-digest, mutated-byte, hostile, or over-limit inputs fail
-closed without partial package, staging, channel, or activation power. M07-T04 will add
-surface/capability reference and whole-activation finite-limit preflight. The
+closed without partial package, staging, channel, or activation power. That authority feeds the
+separate M07-T04 reference/finite-profile boundary below. The
 [executable package-preflight proof](docs/proof/CONTROL-PLANE-PACKAGE-PREFLIGHT.md) is pinned by
 `sha256:79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628`.
 
+**M07-T04 checkpoint:** the control-plane now accepts only that exact package authority and walks
+the complete immutable Bundle under one fixed 13-field Reference Profile before staging. Entry,
+surface, component, behavior, resource, operation, event, navigation, refresh, command, nested
+settlement, predicate, repeat, and aggregate-work boundaries fail closed without substitution or
+truncation. Only a bounded-scan success that independently agrees with the cumulative semantic
+Validator yields a second opaque authority; it carries no Bundle, Catalog, obligation, runtime
+index, channel, commit, or activation power. All 13 limits have executable boundary or dominance
+evidence. P-17 is now `PROVEN`; P-12 remains `NOT_PROVEN`, and N-038/N-041 remain `PLANNED` for
+their later transactional and measured owners. The
+[executable reference-preflight proof](docs/proof/CONTROL-PLANE-REFERENCE-PREFLIGHT.md) is pinned by
+`sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`.
+
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
-61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current successor contains 134 workloads and 63
-proof pairs after M07-T03 registration. Exact shared-state classes, cancellation behavior,
+61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current successor contains 136 workloads and 64
+proof pairs after M07-T04 registration. Exact shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
 minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
@@ -75,14 +87,24 @@ artifacts and twenty-two live readers. Sequence 6 only advances the M06-T11 proo
 a bounded, explicit 20-second nested Vitest timeout; current head `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` still
 authenticates eleven frozen artifacts and twenty-two live readers. It changes no coverage,
 assertion, concurrency, frozen evidence, workload/proof count, progress, or plan digest, and
-sequences 1–5 remain byte- and hash-unchanged. The
+sequences 1–5 remain byte- and hash-unchanged. Reviewed sequence 7 links exactly from sequence 6
+head `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5` and authenticates thirteen
+frozen artifacts and twenty-six live readers. It adds the 34,612-byte M07-T04 artifact
+`sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`, its live proof/root
+readers, and current M05-T06 P-17 compatibility readers. It seals the exact final receipts of the
+complete twenty-six-reader live set after all T04 compatibility bridges and the reviewed CI timeout
+calibration, including current M05-T09, M06-T01/T05/T08/T09/T10/T11, and M07-T01/T02/T03 readers.
+The frozen M05-T06 artifact remains
+byte-identical and historically `PARTIAL`; only live P-17 is now `PROVEN`. Sequences 1–6 are
+unchanged. This is a reviewed local-reader checkpoint and does not claim a new hosted CI pass. The
 temporary shadow workflow and modular comparison adapter/test are removed, closing
 `DEBT-I07-008`. The sequential runner remains available only through explicit manual
 `legacy-rollback`; I07-02 adds no affected-path selector. Remaining reader and retirement work
 stays machine-owned by I07-04 and I07-05 in the
 [debt register](docs/plan/DEBT-REGISTER.md). Exact evidence is preserved in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json); implementation
-progress is 77/145 and M07-T04 is ready to start.
+progress is 78/145 and M07-T05 is ready to start.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

@@ -60,10 +60,10 @@ function target(relativePath, symbols) {
   });
 }
 
-function authority(id, removalOwner, deadline, targets) {
+function authority(id, removalOwner, deadline, targets, registeredBy = "I07-01") {
   return SAFE_OBJECT_FREEZE({
     id,
-    registeredBy: "I07-01",
+    registeredBy,
     removalOwner,
     deadline,
     targets: SAFE_OBJECT_FREEZE(targets),
@@ -80,12 +80,18 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
   authority("DEBT-I07-001", "I07-04", "G07", [
     target("scripts/lib/publisher-publish-result-proof.mjs", [
       "G05_COMPATIBILITY_OWNERSHIP_PATHS",
-      "REVIEWED_CURRENT_G05_RECEIPTS",
+      "REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY",
       "TRACKED_FILE_OVERRIDE_PATHS",
+      "reviewedHistory",
+      "latestReviewed",
+      "receiptIsReviewed",
     ]),
     target("tests/publisher-publish-result.test.mjs", [
+      "M07_T03_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+      "reconstructM07T03SourceAuditProof",
       "currentCompatibilityBytes",
-      "reviewedCurrentG05Receipts",
+      "compatibilityPaths",
+      "reviewedG05CompatibilityReceiptHistory",
       "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
     ]),
   ]),
@@ -93,18 +99,23 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
     target("scripts/lib/publisher-execution-preflight-proof.mjs", [
       "M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH",
       "M05_SOURCE_AUDIT_TEST_RELATIVE_PATH",
+      "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY",
       "APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS",
       "captureCompatibilitySourceBytes",
     ]),
     target("tests/publisher-execution-preflight.test.mjs", [
       "compatibilitySources",
       "compatibilitySourceBytes",
+      "currentBytes",
+      "currentSha256",
     ]),
   ]),
   authority("DEBT-I07-003", "I07-04", "G07", [
     target("scripts/lib/publisher-bundle-publication-proof.mjs", [
       "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
       "EXECUTION_PREFLIGHT_COMPATIBILITY_READER",
+      "EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST",
+      "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
       "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
       "APPROVED_CURRENT_COMPATIBILITY_PATHS",
       "assertApprovedCurrentCompatibilityBytes",
@@ -118,6 +129,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
       "[compatibility] externally tracks every current T02 through T08 proof reader",
       "[compatibility] detects tamper in each externally anchored T02 through T08 reader",
+      "[compatibility] admits only the exact current execution-preflight root reader",
       "[ci] admits only the exact required-workflow successor into frozen T09 evidence",
       "[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence",
     ]),
@@ -125,6 +137,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
   authority("DEBT-I07-004", "I07-04", "G07", [
     target("scripts/lib/publisher-invalid-source-matrix-proof.mjs", [
       "APPROVED_CURRENT_T09_SUCCESSOR_PATHS",
+      "APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY",
       "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
       "APPROVED_CURRENT_T10_SUCCESSOR_PATHS",
       "APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS",
@@ -254,14 +267,14 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
   ]),
   authority("DEBT-I07-009", "I07-04", "G07", [
     target("scripts/lib/reference-host-web-source-audit-proof.mjs", [
-      "M07_T03_CONTROL_PLANE_COORDINATION",
-      "M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK",
+      "M07_T04_CONTROL_PLANE_COORDINATION",
+      "M07_T04_CONTROL_PLANE_LOCKFILE_BLOCK",
       "normalizeCurrentRootPackageBytes",
       "inspectExactControlPlaneImporter",
       "normalizeCurrentLockfileBytes",
     ]),
     target("tests/reference-host-web-source-audit.test.mjs", [
-      "reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance",
+      "reviewed Publisher and M07-T04 coordination preserve root, package, and lockfile provenance",
     ]),
   ]),
   authority("DEBT-I07-010", "I07-04", "G07", [
@@ -278,6 +291,66 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       "rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift",
     ]),
   ]),
+  authority(
+    "DEBT-I07-011",
+    "I07-04",
+    "G07",
+    [
+      target("scripts/lib/runtime-react-failure-boundary-proof.mjs", [
+        "EXPECTED_CURRENT_P17_SUCCESSOR",
+        "p17HistoricalStatus",
+        "p17CurrentStatus",
+        "p17SuccessorArtifactSha256",
+      ]),
+      target("tests/runtime-react-failure-boundary.test.mjs", [
+        "SUCCESSOR_SHA256",
+        "SUCCESSOR_ARTIFACT_FILE_NAME",
+        "SUCCESSOR_EVIDENCE_TEXT",
+        "rejects N-037, monotonic P-17 successor, and PF-055 current-closure drift",
+      ]),
+      target("scripts/lib/control-plane-bundle-store-proof.mjs", [
+        "APPROVED_M07_T04_TRACKED_RECEIPTS",
+        "APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS",
+        "approvedM07T04",
+      ]),
+      target("tests/control-plane-bundle-store.test.mjs", [
+        "changedPackageByte",
+        "indexWithAppendedTail",
+      ]),
+      target("scripts/lib/control-plane-bundle-verification-proof.mjs", [
+        "APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T04_TRACKED_RECEIPTS",
+        "APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS",
+        "approvedM07T04",
+        "approvedM07T04Keys",
+        "reviewedSuccessor",
+      ]),
+      target("tests/control-plane-bundle-verification.test.mjs", [
+        "APP_INDEX",
+        "indexWithAppendedTail",
+      ]),
+      target("scripts/lib/control-plane-package-preflight-proof.mjs", [
+        "APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T04_TRACKED_RECEIPTS",
+        "APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS",
+        "approvedM07T04",
+        "taskTimeTail",
+        "successorIndex",
+        "reviewedSuccessor",
+        "reviewedSuccessorTail",
+        "pnpm verify:control-plane-reference-preflight",
+        "pnpm test:control-plane-reference-preflight",
+      ]),
+      target("tests/control-plane-package-preflight.test.mjs", [
+        "indexWithAppendedTail",
+        "unreviewed successor tail",
+      ]),
+    ],
+    "M07-T04",
+  ),
 ]);
 
 /**

@@ -60,6 +60,7 @@ const PROOF_LIBRARY = "scripts/lib/publisher-bundle-publication-proof.mjs";
 const ATOMIC_WRITER = "scripts/lib/atomic-proof-artifact.mjs";
 const EXECUTION_PREFLIGHT_COMPATIBILITY_READER =
   "scripts/lib/publisher-execution-preflight-proof.mjs";
+const EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST = "tests/publisher-execution-preflight.test.mjs";
 
 export const PUBLISHER_BUNDLE_PUBLICATION_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
@@ -184,22 +185,60 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   }),
 });
 
+const APPROVED_COMPATIBILITY_RECEIPT_HISTORY = Object.freeze({
+  [EXECUTION_PREFLIGHT_COMPATIBILITY_READER]: Object.freeze([
+    Object.freeze({
+      task: "M06-T09",
+      bytes: 62_112,
+      sha256: "e49e83e2edc9836bf42b98d05545391d23763c886bb90beae96826c6171cd4db",
+    }),
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 70_038,
+      sha256: "b203eb295bc4056f185416b8616c541f9d2cdebbfe74ed4ccb84e328d4da9c02",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 70_789,
+      sha256: "6c0d2fc7169a0ee7b3f13d65b6e97db17d14e67f1f4b480dc1d083e7ef37a9ee",
+    }),
+  ]),
+  [EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST]: Object.freeze([
+    Object.freeze({
+      task: "M06-T05",
+      bytes: 12_361,
+      sha256: "bd40e0d124504caabf172b4bba6143dad519b30af026a7dcf96e4b4bcf2cd9e0",
+    }),
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 17_284,
+      sha256: "0dbe37fefa1fccd4efbba954aa8a7e29e15cdfa3a2e2cb9453aa3d423ff35b23",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 17_767,
+      sha256: "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
+    }),
+  ]),
+});
+
 const APPROVED_CURRENT_COMPATIBILITY_RECEIPTS = Object.freeze({
-  [EXECUTION_PREFLIGHT_COMPATIBILITY_READER]: Object.freeze({
-    bytes: 70_038,
-    sha256: "b203eb295bc4056f185416b8616c541f9d2cdebbfe74ed4ccb84e328d4da9c02",
-  }),
+  [EXECUTION_PREFLIGHT_COMPATIBILITY_READER]:
+    APPROVED_COMPATIBILITY_RECEIPT_HISTORY[EXECUTION_PREFLIGHT_COMPATIBILITY_READER][2],
+  [EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST]:
+    APPROVED_COMPATIBILITY_RECEIPT_HISTORY[EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST][2],
 });
 const APPROVED_CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   EXECUTION_PREFLIGHT_COMPATIBILITY_READER,
+  EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST,
 ]);
 
-// I07-02 promotes the exhaustive scheduler without rewriting immutable M06-T09 evidence. The
-// live workflow must match this reviewed successor exactly before the task-time workflow receipt
-// may be projected into the frozen artifact.
+// The reviewed live exhaustive workflow may advance without rewriting immutable M06-T09 evidence.
+// It must match this exact scheduling successor before the task-time workflow receipt may be
+// projected into the frozen artifact.
 const APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT = Object.freeze({
   bytes: 4_994,
-  sha256: "4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0",
+  sha256: "04429211188d351ee720c1e64802d48e34e425348b397c4bb835ba5c1fe4ccf5",
 });
 
 const HISTORICAL_CI_RECEIPT = Object.freeze({
@@ -666,7 +705,7 @@ function readOverrideMap(map, relativePath, allowedPaths) {
   }
 }
 
-const TRACKED_SET = new Set(TRACKED);
+const TRACKED_OVERRIDE_SET = new Set([...TRACKED, ...APPROVED_CURRENT_COMPATIBILITY_PATHS]);
 const PREREQUISITE_SET = new Set(
   PUBLISHER_BUNDLE_PUBLICATION_PREREQUISITE_PINS.map(
     ({ path: prerequisitePath }) => prerequisitePath,
@@ -674,7 +713,7 @@ const PREREQUISITE_SET = new Set(
 );
 
 async function trackedInput(options, relativePath) {
-  const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+  const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_OVERRIDE_SET);
   return safeObjectFreeze({
     bytes: override ?? (await readRegularBytes(relativePath)),
     overridden: override !== undefined,
@@ -717,11 +756,13 @@ async function authenticateCurrentCompatibilityReaders(trackedPairs, options) {
       }
       trackedIndex += 1;
     }
-    if (approved === undefined || matched === undefined || matches !== 1) {
+    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
+    const expectedMatches = historical === undefined ? 0 : 1;
+    if (approved === undefined || matches !== expectedMatches) {
       fail(
         "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
-        "A reviewed current compatibility reader is missing or ambiguous.",
-        { relativePath, matches },
+        "A reviewed current compatibility authority is missing or ambiguous.",
+        { relativePath, matches, expectedMatches },
       );
     }
     const liveBytes = await readRegularBytes(
@@ -729,7 +770,11 @@ async function authenticateCurrentCompatibilityReaders(trackedPairs, options) {
       "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
     );
     assertApprovedCurrentCompatibilityBytes(liveBytes, approved, relativePath, "live-worktree");
-    const overrideBytes = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
+    const overrideBytes = readOverrideMap(
+      options.trackedFileBytes,
+      relativePath,
+      TRACKED_OVERRIDE_SET,
+    );
     if (overrideBytes !== undefined) {
       assertApprovedCurrentCompatibilityBytes(
         overrideBytes,
@@ -738,21 +783,15 @@ async function authenticateCurrentCompatibilityReaders(trackedPairs, options) {
         "tracked-byte-override",
       );
     }
-    assertApprovedCurrentCompatibilityBytes(
-      matched.bytes,
-      approved,
-      relativePath,
-      "tracked-candidate",
-    );
-    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-    if (historical === undefined) {
-      fail(
-        "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
-        "An approved current compatibility reader lost its task-time historical projection.",
-        { relativePath },
+    if (matched !== undefined) {
+      assertApprovedCurrentCompatibilityBytes(
+        matched.bytes,
+        approved,
+        relativePath,
+        "tracked-candidate",
       );
+      historicalProjections.set(relativePath, historical);
     }
-    historicalProjections.set(relativePath, historical);
     approvedIndex += 1;
   }
   return historicalProjections;
@@ -776,7 +815,7 @@ async function authenticateRequiredCiWorkflow(trackedPairs) {
   if (!matchesReceipt(liveBytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT)) {
     fail(
       "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT",
-      "The live hosted CI workflow differs from the exact reviewed I07-02 successor.",
+      "The live hosted CI workflow differs from the exact reviewed scheduling successor.",
       {
         expectedBytes: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.bytes,
         expectedSha256: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.sha256,

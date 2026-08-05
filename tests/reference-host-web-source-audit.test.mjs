@@ -323,10 +323,20 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.graphDynamicEdges, 0);
   assert.equal(result.packageBoundaryViolations, 0);
   assert.equal(result.coordination.result, "PASS");
-  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T03");
+  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T04");
   assert.equal(result.coordination.normalizedControlPlaneScriptKeys, true);
   assert.equal(result.coordination.normalizedControlPlanePipelineSegments, true);
   assert.equal(result.coordination.normalizedControlPlaneLockfileImporter, true);
+  assert.equal(result.coordination.normalizedControlPlanePackageTestScript, true);
+  assert.equal(result.coordination.normalizedControlPlaneValidatorImporter, true);
+  assert.deepEqual(result.coordination.controlPlanePackage, {
+    path: "apps/control-plane-api/package.json",
+    bytes: 1_846,
+    rawSha256: "sha256:5934807f1d66f001cf2173e3b1fa0a7b4e5f461df8822b16335cb8f53a83bf94",
+    testScript: "test:reference-preflight",
+    testCommand: "vitest run test/reference-preflight.test.ts",
+    validatorSpecifier: "workspace:*",
+  });
   assert.equal(
     result.coordination.rootPackageHistoricalSha256,
     "sha256:1f1d19b6bdb0652f0598ba01a8549eae5c6e8b1a8825cf2cb40503c196bad6da",
@@ -519,12 +529,13 @@ test("admits only the source-pinned M06-T05 Validator runtime successor", async 
   }
 });
 
-test("reviewed Publisher and M07-T03 coordination preserve root and lockfile provenance", async () => {
+test("reviewed Publisher and M07-T04 coordination preserve root, package, and lockfile provenance", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
-  const [rootPackageBytes, lockfileBytes] = await Promise.all([
+  const [rootPackageBytes, lockfileBytes, controlPlanePackageBytes] = await Promise.all([
     readFile(path.join(WORKSPACE_ROOT, "package.json")),
     readFile(path.join(WORKSPACE_ROOT, "pnpm-lock.yaml")),
+    readFile(path.join(WORKSPACE_ROOT, "apps/control-plane-api/package.json")),
   ]);
   const lockfileText = lockfileBytes.toString("utf8");
   assert.equal(
@@ -534,6 +545,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
         currentArtifact: current,
         rootPackageBytes,
         lockfileBytes,
+        controlPlanePackageBytes,
       })
     ).result,
     "PASS",
@@ -541,6 +553,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
   const verifyCoordination = async ({
     candidateRootBytes = rootPackageBytes,
     candidateLockBytes = lockfileBytes,
+    candidateControlPlanePackageBytes = controlPlanePackageBytes,
   }) => {
     const candidateArtifact = structuredClone(current);
     bindTrackedBytes(candidateArtifact, "package.json", candidateRootBytes);
@@ -550,6 +563,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
       currentArtifact: candidateArtifact,
       rootPackageBytes: candidateRootBytes,
       lockfileBytes: candidateLockBytes,
+      controlPlanePackageBytes: candidateControlPlanePackageBytes,
     });
   };
   const rejectRootManifest = async (mutate) => {
@@ -558,6 +572,15 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
     const candidateRootBytes = await canonicalPackageBytes(manifest);
     await assert.rejects(
       verifyCoordination({ candidateRootBytes }),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  };
+  const rejectControlPlanePackage = async (mutate) => {
+    const manifest = JSON.parse(controlPlanePackageBytes.toString("utf8"));
+    mutate(manifest);
+    const candidateControlPlanePackageBytes = await canonicalPackageBytes(manifest);
+    await assert.rejects(
+      verifyCoordination({ candidateControlPlanePackageBytes }),
       hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
     );
   };
@@ -580,25 +603,51 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
     manifest.scripts["verify:control-plane-package-preflight"] += " --unreviewed";
   });
   await rejectRootManifest((manifest) => {
+    delete manifest.scripts["generate:control-plane-reference-preflight"];
+  });
+  await rejectRootManifest((manifest) => {
+    delete manifest.scripts["test:control-plane-reference-preflight"];
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["verify:control-plane-reference-preflight"] += " --unreviewed";
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["generate:control-plane-reference-preflight"] = manifest.scripts[
+      "generate:control-plane-reference-preflight"
+    ].replace(
+      "pnpm --filter @desen/control-plane-api test:reference-preflight",
+      "pnpm --filter @desen/control-plane-api test:package-preflight",
+    );
+  });
+  await rejectRootManifest((manifest) => {
     manifest.scripts["verify:control-plane-decoy"] = "node scripts/decoy.mjs";
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.check = manifest.scripts.check.replace(
-      "pnpm verify:control-plane-package-preflight",
-      "pnpm verify:control-plane-package-preflight && pnpm verify:control-plane-package-preflight",
+      "pnpm verify:control-plane-reference-preflight",
+      "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-reference-preflight",
     );
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.check = manifest.scripts.check.replace(
-      "pnpm verify:control-plane-bundle-verification && pnpm verify:control-plane-package-preflight",
-      "pnpm verify:control-plane-package-preflight && pnpm verify:control-plane-bundle-verification",
+      "pnpm verify:control-plane-package-preflight && pnpm verify:control-plane-reference-preflight",
+      "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-package-preflight",
     );
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.test = manifest.scripts.test.replace(
-      "pnpm test:control-plane-package-preflight && turbo run test",
-      "pnpm test:control-plane-package-preflight && pnpm test:control-plane-decoy && turbo run test",
+      "pnpm test:control-plane-reference-preflight && turbo run test",
+      "pnpm test:control-plane-reference-preflight && pnpm test:control-plane-decoy && turbo run test",
     );
+  });
+  await rejectControlPlanePackage((manifest) => {
+    delete manifest.scripts["test:reference-preflight"];
+  });
+  await rejectControlPlanePackage((manifest) => {
+    manifest.scripts["test:reference-preflight"] = "vitest run test/package-preflight.test.ts";
+  });
+  await rejectControlPlanePackage((manifest) => {
+    manifest.dependencies["@desen/validator"] = "workspace:^";
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts["verify:publisher-decoy"] = "node scripts/publisher-decoy.mjs";
@@ -731,6 +780,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
         currentArtifact: futureArtifact,
         rootPackageBytes: futureRootPackageBytes,
         lockfileBytes: futureLockfileBytes,
+        controlPlanePackageBytes,
       })
     ).result,
     "PASS",
@@ -815,6 +865,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
       currentArtifact: current,
       rootPackageBytes: futureRootPackageBytes,
       lockfileBytes,
+      controlPlanePackageBytes,
     }),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
@@ -829,6 +880,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
         currentArtifact: malformedArtifact,
         rootPackageBytes,
         lockfileBytes: malformedBytes,
+        controlPlanePackageBytes,
       }),
       (error) => {
         assert.ok(error instanceof ReferenceHostWebSourceAuditEvidenceError);
@@ -863,6 +915,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
         currentArtifact: validBoundaryScalarArtifact,
         rootPackageBytes,
         lockfileBytes: validBoundaryScalarBytes,
+        controlPlanePackageBytes,
       })
     ).result,
     "PASS",
@@ -880,6 +933,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
         currentArtifact: validQuotedVersionArtifact,
         rootPackageBytes,
         lockfileBytes: validQuotedVersionBytes,
+        controlPlanePackageBytes,
       })
     ).result,
     "PASS",
@@ -897,6 +951,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
         currentArtifact: validQuotedIndicatorArtifact,
         rootPackageBytes,
         lockfileBytes: validQuotedIndicatorBytes,
+        controlPlanePackageBytes,
       })
     ).result,
     "PASS",
@@ -1030,6 +1085,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
       currentArtifact: toolchainArtifact,
       rootPackageBytes: toolchainBytes,
       lockfileBytes,
+      controlPlanePackageBytes,
     }),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
@@ -1046,6 +1102,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
       currentArtifact: lockSettingsArtifact,
       rootPackageBytes,
       lockfileBytes: lockSettingsBytes,
+      controlPlanePackageBytes,
     }),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
@@ -1065,6 +1122,7 @@ test("reviewed Publisher and M07-T03 coordination preserve root and lockfile pro
       currentArtifact: duplicatePublisherArtifact,
       rootPackageBytes,
       lockfileBytes: duplicatePublisherBytes,
+      controlPlanePackageBytes,
     }),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );

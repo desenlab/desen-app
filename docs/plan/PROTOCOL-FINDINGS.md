@@ -2914,3 +2914,54 @@ This file records implementation discoveries without changing the frozen DESEN 0
   restarted, raced, or otherwise modified material cannot become active. If a later implementation
   moves installation across processes or into a persistent package store, it needs an
   authenticated installed-package store/handle rather than arbitrary caller callbacks or paths.
+
+## PF-073 — Activation reference admission needs a conservative dynamic-limit projection
+
+- Status: OPEN
+- Blocks proof: No; M07-T04 can define one deterministic Reference Profile projection without
+  changing frozen protocol bytes, resolving dynamic values early, or claiming staging authority.
+- Protocol location: SPEC Sections 5.7, 17.6–17.7, 20, 24.1, and 27.8; `PIPE-007`, `PIPE-014`,
+  `R-008`, `R-123`, and `D-035`; related findings `PF-037`, `PF-043`, `PF-071`, and `PF-072`
+- Observation: DESEN 0.1.0 requires finite activation limits and names 5,000 nodes per surface
+  after repeats, source depth 64, 1,000 instances per repeat, 64 actions per turn, settlement depth
+  16, and 64 predicate arguments. It does not define whether the source root has depth zero or one,
+  how activation preflight should bound a repeat whose item array is still dynamic, or whether a
+  declared repeat limit above the active runtime profile is rejected or clamped. Activation step 6
+  also names surface/capability reference preflight separately from step 7 runtime-index staging;
+  treating T04 as execution-contract or staging authority would collapse that trust separation.
+- Implementation decision: M07-T04 accepts only the exact live M07-T03 package authority. Before
+  invoking an exhaustive semantic agreement fence, it performs one deterministic iterative walk
+  over the private immutable Bundle and selected Catalog snapshots. The walk checks entry and
+  surface identity, the complete surface-wide node/behavior identity namespace, category-correct
+  component/behavior/resource/operation capabilities, declared handler events, navigation
+  surfaces, resource-refresh aliases, component-command targets and names, and recursively nested
+  operation references. Fixed aggregate node, action, predicate, and reference budgets prevent the
+  walk or retained audit output from becoming unbounded.
+
+  The source root has depth zero, so depth 64 passes and 65 fails. Repeat admission uses the same
+  effective bound as the proved runtime: `min(declared limit ?? 1,000, 1,000)`. A literal item array
+  uses its actual length and fails when that length exceeds the effective bound; a dynamic item
+  value conservatively contributes the effective maximum. Saturating ancestor multiplication
+  treats conditions as possibly true and includes component children nested in behavior slots.
+  A surface whose maximum possible materialized-node count exceeds 5,000 fails atomically with
+  `BUNDLE_LIMIT_EXCEEDED`; no branch truncates nodes or actions.
+
+  Only a successful bounded scan reaches `validateDesenBundleSemantics`. Its independent immutable
+  result must have the same RFC 8785 canonical content as the authenticated Bundle. M07-T02 already
+  bounds and validates the complete structural graph, and M07-T03 authenticates the exact Catalog
+  set, so the agreement call receives no caller-owned graph and every task-owned semantic
+  reference issue has already passed the first-issue scan. A throw, invalid disagreement, or
+  different success snapshot becomes one redacted internal rejection.
+
+  Success exposes only a frozen profile/revision/per-surface audit handle backed by package-private
+  identity. It carries no Bundle, Catalog, artifacts, dynamic obligations, runtime indexes,
+  callbacks, staging operation, channel mutation, commit, or activation power. M07-T06 separately
+  owns execution-contract preparation and staged indexes; M07-T07 must authenticate and join the
+  exact T04 and T06 branches before any durable activation record can change.
+
+- Future action: M07-T06 must stage from the exact private package snapshots and independently own
+  runtime execution contracts. M07-T07 through M07-T10 must prove that every reference or limit
+  failure remains pre-commit and cannot alter active/previous-good state. M12-T05 must measure the
+  complete cross-system limit profile, including real materialized node counts, before N-041 can
+  leave `PLANNED`. A later protocol revision should standardize the depth convention and dynamic
+  activation projection if cross-implementation parity is required.

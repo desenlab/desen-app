@@ -265,12 +265,13 @@ termination for every registered group. Later signals may escalate to SIGKILL bu
 the first cause. Results settle only after every active child emits `close` and isolation cleanup is
 awaited.
 
-The complete runner owns a 15-minute soft terminal deadline in addition to each workload timeout.
-It still awaits child `close`, cleanup, and boundary capture rather than fabricating a completed
-receipt. The hosted command therefore adds an 18-minute process ceiling with a 30-second kill grace,
-inside a 25-minute job ceiling. An uncooperative hang is stopped by that outer process boundary and
-cannot qualify as promotion evidence; dependency setup and contract checks retain separate hosted
-headroom.
+I07-02 established a 15-minute soft terminal deadline. After the live inventory grew from 130 to
+136 workloads, M07-T04 recalibrated only the complete-runner deadline to 17 minutes while retaining
+the 15-minute per-workload timeout. The runner still awaits child `close`, cleanup, and boundary
+capture rather than fabricating a completed receipt. The hosted command therefore keeps its
+18-minute process ceiling with a 30-second kill grace, inside a 25-minute job ceiling. An
+uncooperative hang is stopped by that outer process boundary and cannot qualify as promotion
+evidence; dependency setup and contract checks retain separate hosted headroom.
 
 Three independent closing guards remain mandatory for the required runner:
 

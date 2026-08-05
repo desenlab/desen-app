@@ -154,11 +154,11 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
     sha256: "d0b48ae54c4c4cbcdbd1b6e2522ab5aeaa9dac4fb1810845fd9fd1ec958c2bae",
   }),
 });
-// I07-02 changes only the hosted coordination successor. Exact live authentication preserves the
-// immutable M06-T10 workflow projection without regenerating task-time proof bytes.
+// Exact authentication of the reviewed live scheduling successor preserves the immutable M06-T10
+// workflow projection without regenerating task-time proof bytes.
 const APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT = Object.freeze({
   bytes: 4_994,
-  sha256: "4146f610ce30a973a84c02279254058a7f044eb4415619c09addb577d9f11fb0",
+  sha256: "04429211188d351ee720c1e64802d48e34e425348b397c4bb835ba5c1fe4ccf5",
 });
 const TRACKED_SET = new Set(TRACKED);
 const PREREQUISITE_SET = new Set(
@@ -589,7 +589,7 @@ async function authenticateRequiredCiWorkflow(trackedPairs) {
   if (!matchesReceipt(liveBytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT)) {
     fail(
       "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
-      "The live hosted CI workflow differs from the exact reviewed I07-02 successor.",
+      "The live hosted CI workflow differs from the exact reviewed scheduling successor.",
       {
         expectedBytes: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.bytes,
         expectedSha256: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.sha256,

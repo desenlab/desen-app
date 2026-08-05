@@ -92,6 +92,7 @@ function taskBoard(overrides = {}) {
   const statuses = {
     "I07-01": "IN_PROGRESS",
     "I07-02": "DONE",
+    "M07-T04": "IN_PROGRESS",
     "I07-04": "NOT_STARTED",
     "I07-05": "NOT_STARTED",
     G07: "NOT_STARTED",
@@ -197,6 +198,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       { id: "DEBT-I07-008", status: "CLOSED" },
       { id: "DEBT-I07-009", status: "OPEN" },
       { id: "DEBT-I07-010", status: "OPEN" },
+      { id: "DEBT-I07-011", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -259,6 +261,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         removalOwner: "I07-04",
         deadline: "G07",
       },
+      {
+        id: "DEBT-I07-011",
+        registeredBy: "M07-T04",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
     ],
   );
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
@@ -269,6 +277,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
   ]);
   assert.deepEqual(manifest.entries[3].targets[0].symbols, [
     "APPROVED_CURRENT_T09_SUCCESSOR_PATHS",
+    "APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY",
     "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
     "APPROVED_CURRENT_T10_SUCCESSOR_PATHS",
     "APPROVED_CURRENT_T10_SUCCESSOR_RECEIPTS",
@@ -290,6 +299,18 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "authenticateRequiredCiWorkflow",
     "authenticatedM07T01Prefix",
   ]);
+  assert.deepEqual(manifest.entries[2].targets[0].symbols.slice(0, 6), [
+    "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
+    "EXECUTION_PREFLIGHT_COMPATIBILITY_READER",
+    "EXECUTION_PREFLIGHT_COMPATIBILITY_ROOT_TEST",
+    "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
+    "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
+    "APPROVED_CURRENT_COMPATIBILITY_PATHS",
+  ]);
+  assert.equal(
+    manifest.entries[2].targets[1].symbols[3],
+    "[compatibility] admits only the exact current execution-preflight root reader",
+  );
   assert.equal(
     manifest.entries[2].targets[1].symbols.at(-1),
     "[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence",
@@ -308,6 +329,40 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "currentT09RootTestBytes",
     "currentT10ProofBytes",
     "currentT10RootTestBytes",
+  ]);
+  assert.deepEqual(manifest.entries[3].targets[0].symbols.slice(0, 3), [
+    "APPROVED_CURRENT_T09_SUCCESSOR_PATHS",
+    "APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY",
+    "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
+  ]);
+  assert.deepEqual(manifest.entries[0].targets[0].symbols, [
+    "G05_COMPATIBILITY_OWNERSHIP_PATHS",
+    "REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY",
+    "TRACKED_FILE_OVERRIDE_PATHS",
+    "reviewedHistory",
+    "latestReviewed",
+    "receiptIsReviewed",
+  ]);
+  assert.deepEqual(manifest.entries[0].targets[1].symbols, [
+    "M07_T03_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+    "reconstructM07T03SourceAuditProof",
+    "currentCompatibilityBytes",
+    "compatibilityPaths",
+    "reviewedG05CompatibilityReceiptHistory",
+    "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
+  ]);
+  assert.deepEqual(manifest.entries[1].targets[0].symbols, [
+    "M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH",
+    "M05_SOURCE_AUDIT_TEST_RELATIVE_PATH",
+    "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY",
+    "APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS",
+    "captureCompatibilitySourceBytes",
+  ]);
+  assert.deepEqual(manifest.entries[1].targets[1].symbols, [
+    "compatibilitySources",
+    "compatibilitySourceBytes",
+    "currentBytes",
+    "currentSha256",
   ]);
   assert.deepEqual(manifest.entries[4].targets[0].symbols, [
     "HISTORICAL_COMPATIBILITY_READERS",
@@ -364,8 +419,8 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "scripts/ci/test/modular-quality-gate.test.mjs",
   );
   assert.deepEqual(manifest.entries[8].targets[0].symbols, [
-    "M07_T03_CONTROL_PLANE_COORDINATION",
-    "M07_T03_CONTROL_PLANE_LOCKFILE_BLOCK",
+    "M07_T04_CONTROL_PLANE_COORDINATION",
+    "M07_T04_CONTROL_PLANE_LOCKFILE_BLOCK",
     "normalizeCurrentRootPackageBytes",
     "inspectExactControlPlaneImporter",
     "normalizeCurrentLockfileBytes",
@@ -388,6 +443,75 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         "SUCCESSOR_EVIDENCE_TEXT",
         "rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift",
       ],
+    },
+  ]);
+  assert.deepEqual(manifest.entries[10].targets, [
+    {
+      path: "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+      symbols: [
+        "EXPECTED_CURRENT_P17_SUCCESSOR",
+        "p17HistoricalStatus",
+        "p17CurrentStatus",
+        "p17SuccessorArtifactSha256",
+      ],
+    },
+    {
+      path: "tests/runtime-react-failure-boundary.test.mjs",
+      symbols: [
+        "SUCCESSOR_SHA256",
+        "SUCCESSOR_ARTIFACT_FILE_NAME",
+        "SUCCESSOR_EVIDENCE_TEXT",
+        "rejects N-037, monotonic P-17 successor, and PF-055 current-closure drift",
+      ],
+    },
+    {
+      path: "scripts/lib/control-plane-bundle-store-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T04_TRACKED_RECEIPTS",
+        "APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS",
+        "approvedM07T04",
+      ],
+    },
+    {
+      path: "tests/control-plane-bundle-store.test.mjs",
+      symbols: ["changedPackageByte", "indexWithAppendedTail"],
+    },
+    {
+      path: "scripts/lib/control-plane-bundle-verification-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T04_TRACKED_RECEIPTS",
+        "APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS",
+        "approvedM07T04",
+        "approvedM07T04Keys",
+        "reviewedSuccessor",
+      ],
+    },
+    {
+      path: "tests/control-plane-bundle-verification.test.mjs",
+      symbols: ["APP_INDEX", "indexWithAppendedTail"],
+    },
+    {
+      path: "scripts/lib/control-plane-package-preflight-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T04_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T04_TRACKED_RECEIPTS",
+        "APPROVED_M07_T04_INDEX_DISTRIBUTION_RECEIPTS",
+        "approvedM07T04",
+        "taskTimeTail",
+        "successorIndex",
+        "reviewedSuccessor",
+        "reviewedSuccessorTail",
+        "pnpm verify:control-plane-reference-preflight",
+        "pnpm test:control-plane-reference-preflight",
+      ],
+    },
+    {
+      path: "tests/control-plane-package-preflight.test.mjs",
+      symbols: ["indexWithAppendedTail", "unreviewed successor tail"],
     },
   ]);
   assert.ok(Object.isFrozen(manifest.entries[0].targets[0].symbols));
@@ -516,7 +640,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 9,
+      OPEN: 10,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -626,7 +750,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 9,
+      OPEN: 10,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -662,7 +786,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 8,
+      OPEN: 9,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

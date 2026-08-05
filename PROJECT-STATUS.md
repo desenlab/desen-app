@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-03
+Last updated: 2026-08-05
 
 ## Plain-language status
 
@@ -458,6 +458,15 @@ and real artifacts, and independently recalculates the current Web–React packa
 three-way digest equality yields a frozen, byte-free package authority. P-03, P-05, and P-11 are
 `PROVEN`; P-17 remains `PARTIAL`; N-011, N-016, and N-020 are `TESTED`; N-010, N-018, N-038,
 N-041, and the Publisher conformance target remain `PLANNED`.
+M07-T04 now accepts only that exact live package authority and performs a deterministic, bounded
+whole-Bundle scan before any staging can exist. It closes entry and navigation surfaces, shared
+node/behavior identity, category-correct component/behavior/resource/operation capabilities,
+handler events, refresh aliases, component command targets/names, and nested operation-settlement
+programs. Thirteen immutable ceilings cover every static expansion and reference dimension; no
+crossing is truncated or partially accepted. The cumulative semantic Validator must independently
+agree with the bounded snapshot before a private identity-backed, byte-free authority is returned.
+P-17 is now `PROVEN`; P-12 remains `NOT_PROVEN`; N-038 and N-041 remain `PLANNED` because staging,
+channel mutation, activation, and dynamic runtime enforcement still belong to later M07 tasks.
 
 I07-01 is complete historical evidence. It separated immutable task-time evidence from a
 current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
@@ -486,7 +495,17 @@ artifacts and twenty-two live readers. Sequence 6 only advances the M06-T11 proo
 a bounded, explicit 20-second nested Vitest timeout; current head `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` still
 authenticates eleven frozen artifacts and twenty-two live readers. It changes no coverage,
 assertion, concurrency, frozen evidence, workload/proof count, progress, or plan digest, and
-sequences 1–5 remain byte- and hash-unchanged. The
+sequences 1–5 remain byte- and hash-unchanged. Reviewed sequence 7 links the exact sequence 6 head
+`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to current head
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5`, authenticating thirteen
+frozen artifacts and twenty-six live readers. It adds the 34,612-byte M07-T04 artifact
+`sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`, its live proof/root
+readers, and current M05-T06 P-17 compatibility readers. It seals the exact final receipts of the
+complete twenty-six-reader live set after all T04 compatibility bridges and the reviewed CI timeout
+calibration, including current M05-T09, M06-T01/T05/T08/T09/T10/T11, and M07-T01/T02/T03 readers.
+The frozen M05-T06 artifact remains byte-identical with its historical `PARTIAL` projection while
+live P-17 is `PROVEN`. Sequences 1–6 are unchanged, and this local reviewed checkpoint does not
+claim a new hosted CI pass. The
 temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
 archived in the
@@ -495,8 +514,8 @@ archived in the
 The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
 no affected-path selector and does not retire the sequential runner, which remains an explicit
 manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T03 is now `DONE`; its proof pair extends the live successor to 134
-workloads and 63 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T04 is next.
+retirement by G12. M07-T04 is now `DONE`; its proof pair extends the live successor to 136
+workloads and 64 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T05 is next.
 
 ## Current milestone
 
@@ -504,11 +523,11 @@ workloads and 63 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `77 / 145 tasks complete (53%)`
+- Overall implementation progress: `78 / 145 tasks complete (54%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `3 / 11 tasks complete (27%)`
+- M07 progress: `4 / 11 tasks complete (36%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -571,13 +590,14 @@ workloads and 63 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `M06-T11 — Invalid-source matrix proves no bundle is emitted`,
   `M07-T01 — Content-addressed bundle store with immutable revision entries`,
   `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`,
-  `M07-T03 — Exact package target/version/digest resolution and preflight`
+  `M07-T03 — Exact package target/version/digest resolution and preflight`,
+  `M07-T04 — Surface/capability reference and finite-limit preflight`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
-  `M07-T04 — Surface/capability reference and finite-limit preflight`
-- Status: M07-T03 and I07-02 are complete; M07-T04 is `NOT_STARTED`, its dependencies are
+  `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable channel pointers`
+- Status: M07-T04 and I07-02 are complete; M07-T05 is `NOT_STARTED`, its M07-T01 dependency is
   satisfied, and it is ready to start; G07 remains open
 
 ## Completed preparation
@@ -943,20 +963,16 @@ trusts no cached success, and executes the fresh complete workload. The legacy s
 manual rollback only; affected selection remains future work and every unknown or ambiguous
 selector condition must eventually expand to `EXHAUSTIVE`.
 
-M07-T03 is complete. Only an authenticated M07-T02 authority can reach the installed-package
-inventory. Every requirement resolves by literal id, exact SemVer, and literal target to exactly
-one physical candidate; no range, normalization, newest/best match, candidate ordering, location,
-callback, or loader can substitute another package. For the current static `web-react` profile,
-the selected inert Catalog and 80 actual distribution artifacts are snapshotted under fixed
-limits, independently framed, and required to close the Bundle digest, Catalog self-digest, and
-calculated byte digest before opaque package authority exists.
+M07-T04 is complete. Only the exact M07-T03 package authority reaches its bounded deterministic
+scan. The scan closes every task-owned static surface/capability/event/action target and all 13
+fixed Reference Profile ceilings before one independent semantic agreement fence. Unknown or
+over-limit input yields no partial authority, and complete success exposes only immutable safe
+audit metadata. It creates no staging, channel, commit, activation, or last-known-good power.
 
-Implement
-`M07-T04 — Surface/capability reference and finite-limit preflight`. It must consume the authentic
-M07-T03 package authority, prove all Bundle surface and capability references against the selected
-Catalog set, and apply whole-activation finite ceilings before any staging or activation authority.
-Channels, staging, activation, last-known-good state, and recovery remain with their later M07
-owners.
+Implement `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable
+channel pointers`. It must compose the already proved immutable store with explicit editable
+Source and mutable channel responsibilities without collapsing publication, reference preflight,
+staging, or activation authorities.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1880,6 +1896,40 @@ M07-T03 evidence:
 - coverage decision: M07-T03 becomes `DONE`; P-05 becomes `PROVEN`; N-011 and N-020 become
   `TESTED`; N-010, N-038, and N-041 remain `PLANNED`; P-12 remains `NOT_PROVEN`; overall progress
   is 77/145 and M07-T04 owns surface/capability reference and whole-activation limit preflight next
+
+M07-T04 evidence:
+
+- `docs/proof/CONTROL-PLANE-REFERENCE-PREFLIGHT.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json`
+- artifact SHA-256:
+  `29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`
+- exact boundary: only one runtime-authenticated M07-T03 package authority can enter; clones,
+  casts, Proxies, revoked proxies, replacement Bundle/Catalog values, callbacks, loaders, paths,
+  networks, and caller-selected limits grant no authority
+- reference profile: deterministic code-unit traversal closes entry/navigation surfaces,
+  surface identity, shared node/behavior identity, category-correct capabilities, handler events,
+  refresh aliases, command targets/names, and recursively nested operation programs
+- finite profile: 13 immutable limits cover surface count, source/materialized node counts, source
+  depth, repeat instances, direct/aggregate actions, settlement depth, predicate
+  arity/expression/aggregate counts, and aggregate references; every limit has executable
+  exact/one-over or dominance evidence and no branch truncates
+- semantic agreement: only a guard-successful bounded immutable graph reaches the cumulative
+  semantic Validator; failure, throw, malformed success, or canonical-content disagreement becomes
+  one redacted internal rejection
+- authority profile: success exposes only exact revision/profile/per-surface counts backed by
+  private identity; Bundle, Catalog, artifacts, obligations, runtime indexes, staging, channel,
+  commit, activation, and adapter authority remain absent
+- executable evidence: 22 focused runtime cases, 12 compiler-negative cases, 16 independent root
+  proof/mutation cases, five prerequisite pins, five exact trace rows, and the official two-surface
+  Web–React package chain
+- reviewed reader checkpoint: sequence 7 authenticates 13 frozen artifacts and 26 live readers at
+  `d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5`; it adds the 34,612-byte
+  T04 artifact plus live T04 proof/root and current M05-T06 compatibility readers, then seals the
+  final 26-reader receipts after the T04 bridges and reviewed CI timeout calibration without
+  changing sequences 1–6 or claiming hosted CI
+- coverage decision: M07-T04 becomes `DONE`; P-17 becomes `PROVEN`; P-12 remains `NOT_PROVEN`;
+  N-038 and N-041 remain `PLANNED`; overall progress is 78/145 and M07-T05 owns the local
+  editable-Source/immutable-Bundle/channel API next
 
 ## Status vocabulary
 

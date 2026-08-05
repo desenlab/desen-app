@@ -671,12 +671,26 @@ metadata and positional requirement indexes. A package-private `WeakMap` retains
 Catalog/artifact snapshots for later preflight and staging owners; cloning or casting the public
 shape cannot authenticate it.
 
-M07-T04 owns surface/capability references and whole-activation limits. M07-T05 owns editable
-sources, mutable channels, and the transport API; M07-T06 through M07-T10 own staging,
-transactional activation, last-known-good recovery, and fault behavior; M07-T11 owns reference-host
-channel consumption. A stored entry is persistence evidence, an M07-T02 authority is integrity
-evidence, and an M07-T03 authority is exact installed-package evidence—none is activation
-authority.
+M07-T04 consumes only that exact M07-T03 identity. A deterministic iterative guard walks the
+private immutable Bundle and selected Catalogs before exhaustive semantic agreement. It closes
+entry/surface identity, the surface-wide node/behavior namespace, category-correct component,
+behavior, resource, and operation capabilities, declared handler events, navigation surfaces,
+resource-refresh aliases, component-command targets/names, and nested operation programs. Root
+depth zero through 64, 1,000 effective repeat instances, 5,000 conservative possible materialized
+nodes per surface, 64 actions per event or settlement turn, settlement depth 16, predicate arity,
+and fixed aggregate work ceilings are enforced without truncation. Literal repeat arrays use their
+real length; dynamic arrays conservatively use `min(declared limit ?? 1,000, 1,000)` and saturating
+ancestor multiplication.
+
+Only guard-successful data reaches `validateDesenBundleSemantics`; its independent snapshot must
+remain canonically identical. Success yields a second opaque identity with only safe revision,
+profile, and per-surface counts. It deliberately does not prepare execution contracts or runtime
+indexes: M07-T06 owns that parallel staged branch directly from the exact M07-T03 package snapshots,
+and M07-T07 must join both authentic branches before commit. M07-T05 owns editable sources, mutable
+channels, and the transport API; M07-T07 through M07-T10 own transactional activation,
+last-known-good recovery, and fault behavior; M07-T11 owns reference-host channel consumption. A
+stored entry, integrity authority, package authority, reference authority, and staging authority
+are distinct evidence; none alone is durable activation authority.
 
 ### DESEN Developer Platform (`desen.run`)
 

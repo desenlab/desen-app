@@ -26,9 +26,9 @@ Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding s�
 kontrolden çıkmasını engeller.
 
 `I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
-61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T03 eklendikten sonra GitHub'daki resmi
-`Quality gate` güncel 134 işin ve 63 kanıt çiftinin tamamını yeni sistemle zorunlu olarak çalıştırır. Ortak dosya,
-çıktı, port ve geçici-dizin kullanımı kodla sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
+61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T04 eklendikten sonra güncel zorunlu
+plan 136 işin ve 64 kanıt çiftinin tamamını yeni sistemle çalıştırır. Ortak dosya, çıktı, port ve
+geçici-dizin kullanımı kodla sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
 başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
 otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
 Tarihsel okuyucu checkpoint'i sıra 4, on değişmez kanıt eserini ve yirmi canlı okuyucuyu
@@ -40,17 +40,29 @@ sınırlı ve açık 20 saniyelik iç içe Vitest zaman aşımı için ilerletir
 `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` yine on bir değişmez kanıt eserini ve yirmi iki canlı okuyucuyu
 doğrular. Kapsam, assertion, eşzamanlılık, dondurulmuş kanıt, iş yükü/kanıt sayısı, ilerleme
 veya plan digest'i değişmez; sıra 1–5 bayt ve hash olarak aynı kalır.
+İncelenmiş sıra 7, sıra 6'nın
+`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` başından yeni
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5` başına birebir bağlanır;
+13 değişmez kanıt eserini ve 26 canlı okuyucuyu doğrular. Bu ek; 34.612 baytlık M07-T04 eserini
+(`sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`), canlı T04 kanıt/kök
+okuyucularını ve güncel M05-T06 P-17 uyumluluk okuyucularını kapsar. Tüm T04 uyumluluk köprüleri ve
+incelenmiş CI zaman aşımı kalibrasyonu sonrasında M05-T09, M06-T01/T05/T08/T09/T10/T11 ve
+M07-T01/T02/T03 dahil 26 canlı okuyucunun kesin son alındılarını mühürler. Dondurulmuş M05-T06 eseri
+bayt olarak aynıdır ve tarihsel kaydında `PARTIAL`
+kalır; güncel canlı P-17 ise `PROVEN` durumundadır. Sıra 1–6 değişmemiştir ve bu yerel inceleme
+kaydı yeni bir hosted CI başarısı iddia etmez.
 Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
 bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
 kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından
 kontrol edilir. Teknik karar, güvenlik kapıları ve kesin kanıt
 [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) ile
 [`I07-02 baseline`](../proof/baselines/i07-02-required-exhaustive-equivalence.json) içinde kayıtlıdır.
-`M07-T03` tamamlandı: yalnızca `M07-T02` tarafından doğrulanmış Bundle yetkisi kabul ediliyor;
-Bundle'ın istediği her paket tam kimlik, sürüm ve hedef ile tek bir kurulu adayla eşleşiyor ve gerçek
-Catalog ile dağıtım baytları istenen digest'i yeniden üretmeden paket yetkisi verilmiyor. Şimdilik
-yalnızca statik `web-react` profili destekleniyor. Sıradaki görev, doğrulanmış paketlerdeki yüzey ve
-capability referanslarını bütün aktivasyon limitleriyle denetleyecek `M07-T04`'tür.
+`M07-T04` tamamlandı: yalnızca `M07-T03` tarafından doğrulanmış tam paket yetkisi kabul ediliyor.
+Bundle içindeki bütün statik yüzey, capability, event, navigation, resource, operation ve command
+referansları sabit limitlerle taranıyor; bilinmeyen bir anlam için tahmin veya yedek bileşen
+kullanılmıyor. Başarı yalnızca yeni bir opak ön-kontrol yetkisi veriyor; staging, channel, commit ve
+aktivasyon gücü vermiyor. Sıradaki görev `M07-T05`: düzenlenebilir Source'lar, değişmez Bundle'lar
+ve değişebilir channel pointer'ları için yerel kontrol-düzlemi API'sini kuracağız.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

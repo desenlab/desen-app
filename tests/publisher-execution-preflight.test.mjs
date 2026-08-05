@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -88,16 +89,25 @@ test("two independent evidence builds are byte-identical and retain stages 8, 9,
       url: new URL("../scripts/lib/reference-host-web-source-audit-proof.mjs", import.meta.url),
       historicalBytes: 228_873,
       historicalSha256: "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1",
+      currentBytes: 252_188,
+      currentSha256: "94d1d9f02af9d564ebe4dd2c5b36fc0f7bab4d28cad87ca144ddb41756dd1c17",
     },
     {
       path: "tests/reference-host-web-source-audit.test.mjs",
       url: new URL("./reference-host-web-source-audit.test.mjs", import.meta.url),
       historicalBytes: 70_344,
       historicalSha256: "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f",
+      currentBytes: 83_937,
+      currentSha256: "1690d26b0a301b2528413b4bcfa9fc2e3f32171db284e6fced82726669c16840",
     },
   ];
   for (const [index, compatibilitySource] of compatibilitySources.entries()) {
     const currentBytes = await readFile(compatibilitySource.url);
+    assert.equal(currentBytes.byteLength, compatibilitySource.currentBytes);
+    assert.equal(
+      createHash("sha256").update(currentBytes).digest("hex"),
+      compatibilitySource.currentSha256,
+    );
     const approved = await buildPublisherExecutionPreflightEvidence({
       compatibilitySourceBytes: {
         [compatibilitySource.path]: currentBytes,

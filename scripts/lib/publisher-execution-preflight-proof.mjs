@@ -200,15 +200,38 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   }),
 });
 
+const APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY = Object.freeze({
+  [M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH]: Object.freeze([
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 246_554,
+      sha256: "2bf728948372d8366f7badc7f2d7a36f6b8799b0dcc45baef92c29c90bdd2114",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 252_188,
+      sha256: "94d1d9f02af9d564ebe4dd2c5b36fc0f7bab4d28cad87ca144ddb41756dd1c17",
+    }),
+  ]),
+  [M05_SOURCE_AUDIT_TEST_RELATIVE_PATH]: Object.freeze([
+    Object.freeze({
+      task: "M07-T03",
+      bytes: 81_283,
+      sha256: "499888c12d43b62d81a0cdaaf0c6248bfb0b7956eca9cce3c478d0ab7f39b5cd",
+    }),
+    Object.freeze({
+      task: "M07-T04",
+      bytes: 83_937,
+      sha256: "1690d26b0a301b2528413b4bcfa9fc2e3f32171db284e6fced82726669c16840",
+    }),
+  ]),
+});
+
 const APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS = Object.freeze({
-  [M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH]: Object.freeze({
-    bytes: 246_554,
-    sha256: "2bf728948372d8366f7badc7f2d7a36f6b8799b0dcc45baef92c29c90bdd2114",
-  }),
-  [M05_SOURCE_AUDIT_TEST_RELATIVE_PATH]: Object.freeze({
-    bytes: 81_283,
-    sha256: "499888c12d43b62d81a0cdaaf0c6248bfb0b7956eca9cce3c478d0ab7f39b5cd",
-  }),
+  [M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH]:
+    APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH][1],
+  [M05_SOURCE_AUDIT_TEST_RELATIVE_PATH]:
+    APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_TEST_RELATIVE_PATH][1],
 });
 
 const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([

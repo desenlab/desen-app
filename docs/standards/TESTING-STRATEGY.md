@@ -53,9 +53,9 @@ authoritative. Its local and hosted results are preserved evidence, not proof of
 required-workflow cutover.
 
 I07-02 established the scheduler-neutral 130-node, 61-proof-unit cutover inventory independently
-from both schedulers. M07-T03 appends the second post-cutover verifier/root-test pair, so the live
-successor contains 134 nodes and 63 proof units without rewriting that frozen baseline. Contract
-and hostile-input
+from both schedulers. M07-T03 appended the second post-cutover verifier/root-test pair; M07-T04
+appends the third for surface/capability reference preflight. The live successor therefore contains
+136 nodes and 64 proof units without rewriting that frozen baseline. Contract and hostile-input
 tests cover exact ordered ids, labels, commands, arguments,
 dependencies, execution classes, and shared-state records; omission, duplication, reorder,
 substitution, cycles, unknown classes, shell syntax, writer insertion, and affected-only metadata
@@ -64,11 +64,16 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 67 `PROOF_READ_ONLY`, 48
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 68 `PROOF_READ_ONLY`, 49
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 52 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 53 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
+
+The M07-T04 `control-plane-reference-preflight` verifier is an ordinary `PROOF_READ_ONLY` step.
+Its root mutation test is `PROOF_OS_TEMP_ISOLATED`: it may write only inside its runner-owned temp
+root, receives no workspace-write, port, native-addon, or verifier runtime-probe authority, and
+does not introduce a scheduler barrier.
 
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
@@ -82,7 +87,7 @@ permitted only for the exact `reference-host-web-source-audit` verifier/root-tes
 other unlisted step remain denied; the source-audit verifier remains workspace-read-only.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution: 116 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
+distribution: 118 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
 external-source, symlink-parent, unreviewed-workspace-target, and unsupported-option escapes.
@@ -144,3 +149,15 @@ bounded, explicit 20-second nested Vitest timeout; current head `790ad28b6fd441e
 authenticates eleven artifacts and twenty-two readers. It changes no coverage, assertion,
 concurrency, frozen evidence, workload/proof count, progress, or plan digest, and sequences 1–5
 remain byte- and hash-unchanged.
+
+Reviewed sequence 7 links predecessor head
+`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to current head
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5`, authenticating 13 frozen
+artifacts and 26 live readers. It adds the 34,612-byte M07-T04 artifact
+`sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`, live T04 proof/root and
+current M05-T06 compatibility readers. It seals the exact final receipts of the complete 26-reader
+live set after all T04 compatibility bridges and the reviewed CI timeout calibration, including
+current M05-T09, M06-T01/T05/T08/T09/T10/T11, and M07-T01/T02/T03 readers. The frozen M05-T06
+artifact remains byte-identical with its historical
+`PARTIAL` projection; live P-17 is `PROVEN`. Sequences 1–6 remain unchanged. This is a reviewed
+local-reader checkpoint, not a new hosted CI result.
