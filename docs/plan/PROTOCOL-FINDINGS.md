@@ -2907,13 +2907,14 @@ This file records implementation discoveries without changing the frozen DESEN 0
   channel mutation, or activation operation. Caller mutation therefore cannot alter the bytes
   verified by M07-T03. Those copied arrays are nevertheless trusted package-private process state,
   not an immutable external package store, and M07-T03 neither stages nor activates them.
-- Future action: M07-T04 must consume only the authenticated M07-T03 authority when checking
-  surface and capability references. M07-T06 must stage from the private verified snapshots—or
-  copy them into equivalently closed immutable runtime indexes—and reclose identity and authority
-  immediately at the staging boundary. M07-T07 through M07-T10 must prove that stale, failed,
-  restarted, raced, or otherwise modified material cannot become active. If a later implementation
-  moves installation across processes or into a persistent package store, it needs an
-  authenticated installed-package store/handle rather than arbitrary caller callbacks or paths.
+- Future action: M07-T04 now consumes only the authenticated M07-T03 authority when checking
+  surface and capability references. M07-T06 now stages from the private verified snapshots, copies
+  artifact bytes into an independently closed candidate lifetime, recalculates their package
+  digests, and binds the resulting indexes to a new opaque identity. M07-T07 through M07-T10 must
+  prove that stale, failed, restarted, raced, or otherwise modified material cannot become active.
+  If a later implementation moves installation across processes or into a persistent package
+  store, it needs an authenticated installed-package store/handle rather than arbitrary caller
+  callbacks or paths.
 
 ## PF-073 — Activation reference admission needs a conservative dynamic-limit projection
 
@@ -2959,11 +2960,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   owns execution-contract preparation and staged indexes; M07-T07 must authenticate and join the
   exact T04 and T06 branches before any durable activation record can change.
 
-- Future action: M07-T06 must stage from the exact private package snapshots and independently own
-  runtime execution contracts. M07-T07 through M07-T10 must prove that every reference or limit
-  failure remains pre-commit and cannot alter active/previous-good state. M12-T05 must measure the
-  complete cross-system limit profile, including real materialized node counts, before N-041 can
-  leave `PLANNED`. A later protocol revision should standardize the depth convention and dynamic
+- Future action: M07-T06 now stages from the exact private package snapshots and independently owns
+  runtime execution contracts, sorted dynamic obligations, and bounded callback-free runtime
+  indexes. M07-T07 through M07-T10 must prove that every reference or limit failure remains
+  pre-commit and cannot alter active/previous-good state. M12-T05 must measure the complete
+  cross-system limit profile, including real materialized node counts, before N-041 can leave
+  `PLANNED`. A later protocol revision should standardize the depth convention and dynamic
   activation projection if cross-implementation parity is required.
 
 ## PF-074 — Mutable control-plane channels are discovery pointers, not activation records
@@ -3000,10 +3002,44 @@ This file records implementation discoveries without changing the frozen DESEN 0
   redacted. SQLite remains behind replaceable repository contracts and stores only Source/channel
   metadata; the content-addressed Bundle tree remains authoritative for immutable artifacts.
 
-- Future action: M07-T06 must stage independently from authenticated M07-T03 package snapshots.
-  M07-T07 must commit active and previous-good revisions as one separate durable record after
-  authenticating the T04 and T06 branches. M07-T09 and M07-T10 must prove that an invalid revision
-  discoverable through a channel never becomes active and cannot destroy last-known-good state.
-  M07-T11 must consume the channel from the separately built reference host without treating it as
-  activation evidence. A later protocol revision should standardize channel identity and
-  concurrency only if cross-implementation transport interoperability is required.
+- Future action: M07-T06 now stages independently from authenticated M07-T03 package snapshots and
+  neither reads nor mutates channel metadata. M07-T07 must commit active and previous-good revisions
+  as one separate durable record after authenticating the T04 and T06 branches. M07-T09 and M07-T10
+  must prove that an invalid revision discoverable through a channel never becomes active and
+  cannot destroy last-known-good state. M07-T11 must consume the channel from the separately built
+  reference host without treating it as activation evidence. A later protocol revision should
+  standardize channel identity and concurrency only if cross-implementation transport
+  interoperability is required.
+
+## PF-075 — A staged runtime index is candidate authority, not an active-state slot
+
+- Status: OPEN
+- Blocks proof: No; M07-T06 can close one implementation-owned staging lifetime without changing
+  frozen protocol bytes or claiming atomic activation, recovery, or last-known-good behavior.
+- Protocol location: SPEC Sections 6.3, 24.1, 28.1, 28.3, and 28.4; `PIPE-006`, `PIPE-015`, `R-124`,
+  `R-126`, and `R-127`; related findings `PF-071`–`PF-074`
+- Observation: DESEN 0.1.0 orders runtime-index staging before atomic activation and requires users
+  not to observe a half-applied Bundle. It does not define whether a host keeps one mutable global
+  “staged revision,” creates an independent candidate per attempt, or how an in-process staging
+  result proves its exact package-byte and execution-contract identity to the later commit owner.
+  A mutable global slot could let concurrent or retried work replace the candidate that reference
+  preflight actually admitted, while exposing active-style fields on a staging result would collapse
+  the required pre-commit boundary.
+- Implementation decision: M07-T06 accepts only the exact live M07-T03 package authority and creates
+  an independent opaque authority for every complete attempt. Package bytes are copied into the new
+  lifetime and re-digested; the exact execution Catalog set, canonically identical execution-valid
+  Bundle, sorted dynamic obligations, prepared inert action programs, and immutable runtime indexes
+  remain package-private. The visible result is recursively frozen, callback-free audit metadata.
+  It has an explicit `stagedRevision` but no active revision, previous-good revision, generation,
+  channel, loader, adapter, commit, activation, rollback, recovery, or host-effect authority. Two
+  deterministic attempts can expose equal audit summaries while retaining distinct private
+  identities, so neither silently overwrites a process-global staged or active record.
+- Future action: M07-T07 must authenticate the exact M07-T04 reference authority and M07-T06 staging
+  authority together, then publish active/previous-good state only through its durable atomic
+  record. T07 must also define a bounded consume/reject lifetime for caller-retained candidate
+  handles; T06 bounds each candidate and weakly owns its private state but does not create a
+  process-wide retained-handle quota. M07-T09 and M07-T10 must inject faults and races around that
+  join and prove that stale or failed candidates cannot become active. M07-T08 must recover only
+  durable committed authority, never an abandoned in-process candidate. A later protocol revision
+  should standardize staged candidate identity and lifetime only if cross-implementation activation
+  interoperability needs more than the current observable atomicity rules.

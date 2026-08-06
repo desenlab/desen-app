@@ -313,6 +313,20 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
     }),
     expectedError("REGISTRATION_DRIFT"),
   );
+
+  const changedStagingExport = (await workspaceBytes(APP_INDEX))
+    .toString("utf8")
+    .replace(
+      'export { stageBundleRuntime } from "./runtime-staging.js";',
+      'export { stageBundleRuntime as stageBundleRuntimeChanged } from "./runtime-staging.js";',
+    );
+  await assert.rejects(
+    buildControlPlaneBundleVerificationEvidence({
+      trackedFileBytes: { [APP_INDEX]: Buffer.from(changedStagingExport) },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
 });
 
 test("[traceability] rejects owner or identity drift in all nine exact rows", async () => {
@@ -392,6 +406,12 @@ test("[runtime] rejects changed official authority or diagnostic receipts", asyn
     },
     (receipt) => {
       receipt.failFastStructuralGuard.exhaustiveBundleCalls = 1;
+    },
+    (receipt) => {
+      receipt.publicModuleKeys.push("unreviewedRuntimeSuccessor");
+    },
+    (receipt) => {
+      receipt.packageSelfReference.keys.push("unreviewedRuntimeSuccessor");
     },
   ];
   for (const mutate of mutations) {

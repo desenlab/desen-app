@@ -52,9 +52,10 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e",
   "146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c",
   "3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078",
+  "b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
-  6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14,
+  6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -232,6 +233,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/control-plane-local-api-proof.mjs",
     "tests/control-plane-local-api.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M07-T06",
+    {
+      path: "docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json",
+      bytes: 47_622,
+      sha256: "d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494",
+    },
+    "scripts/lib/control-plane-runtime-staging-proof.mjs",
+    "tests/control-plane-runtime-staging.test.mjs",
   ),
 ]);
 

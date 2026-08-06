@@ -301,6 +301,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       (source) => source.replace("preflightBundlePackages }", "preflightBundlePackages as run }"),
     ],
     [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          'export { stageBundleRuntime } from "./runtime-staging.js";',
+          'export { stageBundleRuntime as stageBundleRuntimeChanged } from "./runtime-staging.js";',
+        ),
+    ],
+    [
       ROOT_PACKAGE,
       (source) =>
         source.replace(
@@ -314,6 +322,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         source.replace(
           "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-local-api",
           "pnpm verify:control-plane-reference-preflight",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-local-api && pnpm verify:control-plane-runtime-staging",
+          "pnpm verify:control-plane-local-api && pnpm verify:control-plane-runtime-staging-decoy",
         ),
     ],
     [
@@ -402,6 +418,9 @@ test("[runtime] rejects changed exact-match, digest, precedence, or authority re
     },
     (receipt) => {
       receipt.orderedExtraAfter.packages[0].version = "0.1.1";
+    },
+    (receipt) => {
+      receipt.publicModuleKeys.push("unreviewedRuntimeSuccessor");
     },
   ];
   for (const mutate of mutations) {

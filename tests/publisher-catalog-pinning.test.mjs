@@ -136,12 +136,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-local-api && pnpm lint",
-    "pnpm verify:control-plane-local-api && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-staging && pnpm lint",
+    "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-local-api && turbo run test",
-    "pnpm test:control-plane-local-api && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-staging && turbo run test",
+    "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);

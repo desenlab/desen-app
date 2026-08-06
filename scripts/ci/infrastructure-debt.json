@@ -343,9 +343,9 @@
         {
           "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
           "symbols": [
-            "M07_T05_CONTROL_PLANE_COORDINATION",
-            "M07_T05_CONTROL_PLANE_LOCKFILE_BLOCK",
-            "APPROVED_M07_T05_DEPENDENCY_POLICY_SUCCESSOR",
+            "M07_T06_CONTROL_PLANE_COORDINATION",
+            "M07_T06_CONTROL_PLANE_LOCKFILE_BLOCK",
+            "APPROVED_M07_T06_DEPENDENCY_POLICY_SUCCESSOR",
             "normalizeCurrentRootPackageBytes",
             "inspectExactControlPlaneImporter",
             "normalizeCurrentLockfileBytes"
@@ -354,7 +354,7 @@
         {
           "path": "tests/reference-host-web-source-audit.test.mjs",
           "symbols": [
-            "reviewed Publisher and M07-T05 coordination preserve root, package, and lockfile provenance"
+            "reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance"
           ]
         }
       ]
@@ -530,18 +530,12 @@
           "path": "tests/control-plane-bundle-store.test.mjs",
           "symbols": [
             "[registration] rejects package-root, public-export, aggregate, or CI tuple drift",
-            "pnpm verify:control-plane-local-api && pnpm lint",
-            "pnpm test:control-plane-local-api && turbo run test",
             "REGISTRATION_DRIFT"
           ]
         },
         {
           "path": "tests/publisher-catalog-pinning.test.mjs",
-          "symbols": [
-            "appendValidRootSuccessor",
-            "pnpm verify:control-plane-local-api && pnpm lint",
-            "pnpm test:control-plane-local-api && turbo run test"
-          ]
+          "symbols": ["appendValidRootSuccessor"]
         },
         {
           "path": "scripts/lib/control-plane-local-api-proof.mjs",
@@ -558,6 +552,119 @@
             "APP_STRICT_JSON",
             "ADR",
             "[implementation] rejects transport, repository, SQLite, or public-factory source drift"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-013",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "M07-T06",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "symbols": [
+            "RUNTIME_STAGING_VALUE_EXPORTS",
+            "RUNTIME_STAGING_TYPE_EXPORTS",
+            "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+            "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+            "APPROVED_M07_T06_TRACKED_RECEIPTS",
+            "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS"
+          ]
+        },
+        {
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "symbols": [
+            "stageBundleRuntimeChanged",
+            "unreviewedRuntimeSuccessor",
+            "export { stageBundleRuntime } from \"./runtime-staging.js\";",
+            "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-successor && pnpm lint",
+            "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-successor && turbo run test"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "symbols": [
+            "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+            "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+            "APPROVED_M07_T06_TRACKED_RECEIPTS",
+            "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS"
+          ]
+        },
+        {
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "symbols": [
+            "changedStagingExport",
+            "stageBundleRuntimeChanged",
+            "unreviewedRuntimeSuccessor"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "symbols": [
+            "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+            "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+            "APPROVED_M07_T06_TRACKED_RECEIPTS",
+            "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+            "M07_T06_AGGREGATE_SUCCESSOR_COMMANDS"
+          ]
+        },
+        {
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "symbols": [
+            "stageBundleRuntimeChanged",
+            "pnpm verify:control-plane-runtime-staging-decoy",
+            "unreviewedRuntimeSuccessor"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "symbols": [
+            "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+            "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+            "APPROVED_M07_T06_TRACKED_RECEIPTS",
+            "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+            "reviewedLaterSuccessor"
+          ]
+        },
+        {
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "symbols": [
+            "stageBundleRuntimeChanged",
+            "pnpm verify:control-plane-runtime-staging-decoy",
+            "unreviewedRuntimeSuccessor"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "symbols": [
+            "M07_T06_TRACKED_RECEIPT_BRIDGE",
+            "M07_T06_INDEX_DISTRIBUTION_RECEIPT_BRIDGE",
+            "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+            "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS"
+          ]
+        },
+        {
+          "path": "tests/control-plane-local-api.test.mjs",
+          "symbols": [
+            "runControlPlaneLocalApiProbe",
+            "LOCKFILE",
+            "SHARED_STATE_AUTHORITY",
+            "liveRuntimeReceipt",
+            "successorBuild",
+            "successorKeyMutations",
+            "stageBundleRuntimeUnsafe",
+            "unreviewedRuntimeExport"
+          ]
+        },
+        {
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "symbols": [
+            "pnpm verify:control-plane-runtime-staging && pnpm lint",
+            "pnpm test:control-plane-runtime-staging && turbo run test"
           ]
         }
       ]

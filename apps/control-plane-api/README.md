@@ -2,8 +2,9 @@
 
 A local-first control-plane application for editable sources, immutable Bundles, and mutable
 channel pointers. Publication stays in `@desen/publisher`; this application stores publication
-outputs and will later coordinate verification and activation. It is proof-environment
-infrastructure, not the public `desen.run` developer API.
+outputs, verifies candidate inputs, and prepares active-separated runtime indexes before the later
+activation boundary. It is proof-environment infrastructure, not the public `desen.run` developer
+API.
 
 ## Status
 
@@ -14,7 +15,9 @@ complete installed Web–React package set. M07-T04 consumes only that exact pac
 preflights its M07-T04 static surface, capability, event, navigation, resource, command, and
 operation references under one fixed finite profile. M07-T05 adds the authenticated local
 transport and persistent editable-Source/channel metadata while keeping channel discovery separate
-from staging and activation. Those latter two boundaries remain later M07 work.
+from staging and activation. M07-T06 separately consumes the exact M07-T03 package authority,
+re-closes its private package snapshots, validates execution contracts, and prepares callback-free
+runtime indexes without changing active state. Durable activation remains later M07 work.
 
 The current implementation is a local POSIX filesystem profile. The low-level Bundle store treats
 validation as a caller precondition; the T05 transport deliberately permits unverified candidate
@@ -35,6 +38,7 @@ import {
   openLocalControlPlane,
   preflightBundlePackages,
   preflightBundleReferences,
+  stageBundleRuntime,
   verifyBundleStoreEntry,
 } from "@desen/control-plane-api";
 
@@ -83,8 +87,9 @@ if (read.status === "found") {
     ]);
     if (packagePreflight.status === "preflighted") {
       const references = preflightBundleReferences(packagePreflight.authority);
-      if (references.status === "preflighted") {
-        // M07-T07 will join this opaque authority with independent M07-T06 staging authority.
+      const staging = stageBundleRuntime(packagePreflight.authority);
+      if (references.status === "preflighted" && staging.status === "staged") {
+        // M07-T07 will authenticate and join these two independent opaque authorities.
       }
     }
   }
@@ -100,12 +105,12 @@ if (read.status === "found") {
 
 The root must already exist as an absolute, application-owned local directory; the store does not
 create or choose that authority for the caller. The package root exports the storage and integrity
-values above plus the package and reference preflight functions, their frozen finite profiles,
-stable diagnostic constants, the closed local transport, and documented types. Filesystem paths,
-file handles, partially parsed documents, internal authority readers, test fault hooks, list/delete
-operations, loaders, and executable callbacks do not cross that root. The complete authenticated
-Bundle snapshot is carried only by private preflight state; accepted Catalogs and artifact snapshots
-remain package-private.
+values above plus the package, reference, and runtime-staging operations, their frozen finite
+profiles, stable diagnostic constants, the closed local transport, and documented types.
+Filesystem paths, file handles, partially parsed documents, internal authority readers, test fault
+hooks, list/delete operations, loaders, and executable callbacks do not cross that root. The
+complete authenticated Bundle snapshot, accepted Catalogs, staged artifact copies, runtime
+obligations, and indexes remain package-private.
 
 ## Local Source, Bundle, and channel transport
 
@@ -299,6 +304,44 @@ execution-contract, runtime-index, staging, channel, activation, durable-commit,
 adapter authority; M07-T06 independently owns staging and M07-T07 must authenticate and join both
 authorities before any durable commit.
 
+## Runtime-index staging boundary
+
+`stageBundleRuntime(packageAuthority)` is the parallel M07-T06 branch from the exact M07-T03
+authority. It does not accept an integrity authority, reference authority, channel record,
+caller-selected Bundle or Catalog, loader, callback, package path, network location, active record,
+or limit override. A copied, cast, Proxy-backed, revoked, or unknown public shape fails before any
+staging port is observed.
+
+The operation copies the already verified private artifact snapshots into a new candidate lifetime
+and independently recalculates every Web–React package digest. It then authenticates the execution
+Catalog set, validates the Bundle's complete static execution contracts, retains the sorted dynamic
+runtime obligations, and prepares component and behavior action programs through runtime-core.
+Private immutable indexes cover exact package artifacts, capabilities by category, surfaces, source
+nodes, behaviors, state entries, resource aliases, handler selectors, operation aliases, and the
+entry surface. Artifact bytes remain inert data; staging performs no dynamic import, target-adapter
+lookup, render, host effect, or callback execution.
+
+The fixed `BUNDLE_RUNTIME_STAGING_LIMITS` profile bounds package and artifact retention, aggregate
+artifact bytes, capability entries, surfaces, source nodes, state entries, behaviors, prepared
+handler programs, resource and operation aliases, and dynamic obligations. A limit crossing rejects
+the whole candidate rather than returning a truncated index. Package-byte drift, trusted-validator
+disagreement, failed action-program preparation, and unexpected internal errors likewise return one
+closed redacted rejection with no partial staged authority.
+
+Only complete success returns a frozen `BundleRuntimeStagingAuthority`. Its visible surface contains
+the candidate revision, profile identity, document/entry identifiers, byte-free package and surface
+audit summaries, and obligation count. A package-private identity retains the exact staged data for
+later trusted composition. Every call creates an independent candidate; no mutable process-global
+`staged` slot exists. The handle exposes no active revision, previous-good revision, generation,
+channel, commit, rollback, recovery, adapter, loader, or host authority. M07-T04 reference admission
+and M07-T06 runtime staging intentionally remain parallel; M07-T07 must authenticate and join both
+exact identities before any durable activation record may change.
+
+Each candidate is finite and package-private state is weakly owned by its public handle, so an
+unreachable candidate can be reclaimed. M07-T06 does not impose a process-wide count on handles an
+application deliberately retains. Activation orchestration must not use abandoned candidates as a
+cache; M07-T07 owns the explicit consume/reject lifetime for joined candidates.
+
 ## Storage layout
 
 An exact revision `sha256:<64 hex>` maps only to:
@@ -383,14 +426,16 @@ repository implementation with equivalent no-clobber and durability semantics.
 
 ## Explicitly deferred
 
-M07-T01 through M07-T05 prove immutable exact-byte persistence, Bundle integrity, exact
-installed-package preflight, bounded surface/capability reference preflight, and the authenticated
-local Source/Bundle/channel transport. They do not yet provide:
+M07-T01 through M07-T06 establish immutable exact-byte persistence, Bundle integrity, exact
+installed-package preflight, bounded surface/capability reference preflight, authenticated local
+Source/Bundle/channel transport, and active-separated runtime-index staging. They do not yet
+provide:
 
-- M07-T06 through M07-T10 staging, transactional activation, last-known-good state, recovery, and
-  fault matrices; or
+- M07-T07 through M07-T10 transactional activation, last-known-good state, recovery, and fault
+  matrices; or
 - M07-T11 reference-host channel consumption.
 
 Callers must not treat a successful M07-T01/T05 Bundle write or a channel pointer as integrity
 verification, an M07-T02 integrity authority as package authority, an M07-T03 package authority as
-reference authority, or an M07-T04 reference authority as staging, commit, or activation authority.
+reference authority, an M07-T04 reference authority as staging authority, or an M07-T06 staged
+authority as committed or active state.

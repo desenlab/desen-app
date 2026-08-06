@@ -894,6 +894,11 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 137_856,
       sha256: "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6",
     }),
+    Object.freeze({
+      task: "M07-T06",
+      bytes: 138_164,
+      sha256: "3e0492155d08b2d1140adfc5ba78df4b71fbf944717f1b853b5be41bd64fa7e0",
+    }),
   ]),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze([
     Object.freeze({
@@ -916,13 +921,18 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 63_859,
       sha256: "ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d",
     }),
+    Object.freeze({
+      task: "M07-T06",
+      bytes: 63_883,
+      sha256: "a464849fe555ae4b76ca0644efce0bdbd07044c9468220dbae137a8ab347eeac",
+    }),
   ]),
 });
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][3],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][4],
   [BUNDLE_PUBLICATION_ROOT_TEST]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][3],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][4],
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
   OFFICIAL_GOLDEN_PROOF_LIBRARY,
@@ -961,9 +971,12 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "6c0d2fc7169a0ee7b3f13d65b6e97db17d14e67f1f4b480dc1d083e7ef37a9ee",
   "bytes: 71_098",
   "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791",
+  "bytes: 71_407",
+  "bd3bfc693676bf5bf4dc5439173d25025042955293616eaf9136780575e4c6d5",
   "bytes: 17_767",
   "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
   "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea",
+  "9c2e5b0f71fce28d824b3591c60f83f58dbe78f8f94a1b555b34b07423f86cff",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',

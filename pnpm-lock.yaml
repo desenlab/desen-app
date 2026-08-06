@@ -56,6 +56,9 @@ importers:
       '@desen/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
+      '@desen/runtime-core':
+        specifier: workspace:*
+        version: link:../../packages/runtime-core
       '@desen/validator':
         specifier: workspace:*
         version: link:../../packages/validator
