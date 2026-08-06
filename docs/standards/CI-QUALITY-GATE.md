@@ -238,7 +238,7 @@ frozen artifact remain unchanged. This is a reviewed local-reader checkpoint and
 CI claim.
 
 Reviewed checkpoint sequence 12 links the exact sequence 11 head
-`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to current head
+`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to its then-current head
 `85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` with the same 14 unchanged
 frozen artifacts and 28 readers. Only indexes `[26, 27]` change: the M07-T05 proof reader is 77,507
 bytes at `sha256:e2050408c5bf3e084eacd6e42880310dafbfdf03b79821500cc0567b998f7d66`,
@@ -247,6 +247,17 @@ and its root reader is 17,716 bytes at
 the exact ADR token-bound documentation update while the M07-T05 artifact and every other frozen
 artifact remain unchanged. This is reviewed local-reader evidence; hosted CI has not yet been
 claimed, and I07-04 still owns the compatibility-reader debt.
+
+Reviewed checkpoint sequence 13 links the exact sequence 12 head
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` to current head
+`146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` with the same 14 unchanged
+frozen artifacts and 28 readers. Only index `[9]` changes: the M06-T09
+publisher-bundle-publication root reader is 63,859 bytes at
+`sha256:ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d`. A hosted
+required-exhaustive attempt exposed two stale M07 successor/current-receipt assertions in that
+reader; after the narrow reader-only correction, its focused root passes 112/112 and the frozen
+M06-T09 artifact remains unchanged. This is reviewed local-reader evidence, does not claim hosted
+CI success, and leaves the compatibility-reader debt with I07-04.
 
 ### I07-02 required-exhaustive architecture and completed cutover
 
@@ -295,9 +306,11 @@ runner-owned OS temp root. Neither side receives workspace-write, port, or nativ
 and the verifier receives no child-runtime-probe grant.
 
 The added `control-plane-local-api` pair is also ordinary and non-barrier. Both its verifier and
-root mutation test are `PROOF_OS_TEMP_ISOLATED`. They receive no workspace-write, child-runtime,
-or port authority; only those two exact workloads receive the native-addon grant required to load
-the reviewed SQLite binding. Their OS-temp roots remain runner-owned and identity-checked.
+root mutation test are `PROOF_OS_TEMP_ISOLATED`. The verifier receives the exact
+`VERIFIER_RUNTIME_PROBE` child-process policy, while the root receives only the ordinary
+`NODE_TEST_HARNESS` policy. Neither workload receives workspace-write or port authority. Only
+those two exact workloads receive the native-addon grant required to load the reviewed SQLite
+binding. Their OS-temp roots remain runner-owned and identity-checked.
 
 Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
 
@@ -306,7 +319,8 @@ Only these verifier proofs receive both runner-owned temp-write and child-runtim
 - `publisher-official-golden`;
 - `publisher-invalid-source-matrix`;
 - `control-plane-bundle-store`; and
-- `control-plane-bundle-verification`.
+- `control-plane-bundle-verification`; and
+- `control-plane-local-api`.
 
 Native-addon authority is limited to the exact `reference-host-web-source-audit`
 verifier/root-test pair, the `publisher-invalid-source-matrix` root test, and the exact
@@ -323,7 +337,7 @@ workload record grants them. Inherited `NODE_OPTIONS` is rejected, and a mandato
 TCP and UDP listener binding. The runner authenticates temp identity again before cleanup.
 
 Eighteen root-test records also own an orthogonal schema-v2 Node-permission compatibility policy:
-118 workloads are `NONE`, two are `FIXTURE_COPY`, fifteen are `REVIEWED_SYMLINK`, and one is
+120 workloads are `NONE`, two are `FIXTURE_COPY`, fifteen are `REVIEWED_SYMLINK`, and one is
 `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy is limited to the exact code-owned workspace
 source, a no-follow destination inside the workload's own temp root, two reviewed recursive option
 shapes, bounded regular trees, and matching source/destination fingerprints. Symlink handling

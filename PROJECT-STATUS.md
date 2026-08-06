@@ -559,7 +559,7 @@ proof reader is 77,034 bytes at
 Sequences 1–10 and every frozen artifact remain unchanged. This is a reviewed local-reader
 checkpoint and makes no hosted CI claim. The
 reviewed sequence 12 append links exact sequence 11 head
-`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to current head
+`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to its then-current head
 `85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` with the same fourteen
 unchanged frozen artifacts and twenty-eight readers. Only indexes `[26, 27]` change: the M07-T05
 proof reader is 77,507 bytes at
@@ -568,6 +568,16 @@ proof reader is 77,507 bytes at
 This successor authenticates the exact ADR token-bound documentation update while the M07-T05
 artifact and every other frozen artifact remain unchanged. This is reviewed local-reader evidence;
 hosted CI has not yet been claimed, and I07-04 still owns the compatibility-reader debt. The
+reviewed sequence 13 append links exact sequence 12 head
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` to current head
+`146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` with the same fourteen
+unchanged frozen artifacts and twenty-eight readers. Only index `[9]` changes: the M06-T09
+publisher-bundle-publication root reader is 63,859 bytes at
+`sha256:ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d`. A hosted
+required-exhaustive attempt exposed two stale M07 successor/current-receipt assertions in that
+reader; after the narrow reader-only correction, its focused root passes 112/112 and the frozen
+M06-T09 artifact remains unchanged. This is reviewed local-reader evidence, does not claim hosted
+CI success, and leaves the compatibility-reader debt with I07-04. The
 temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
 archived in the
@@ -2039,6 +2049,13 @@ M07-T05 evidence:
   at `85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e`; only the exact T05
   proof/root receipts change to authenticate the ADR token-bound documentation successor, while
   the M07-T05 artifact and every other frozen artifact remain unchanged
+- current reviewed reader checkpoint: sequence 13 authenticates the same 14 frozen artifacts and
+  28 readers at `146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c`;
+  only M06-T09 root-reader index `[9]` changes to 63,859 bytes at
+  `sha256:ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d` after a hosted attempt
+  exposed two stale M07 successor/current-receipt assertions; the focused root now passes 112/112,
+  the frozen M06-T09 artifact remains unchanged, no hosted CI success is claimed, and I07-04 still
+  owns the compatibility-reader debt
 - dependency safety: Fastify 5.11.2 and better-sqlite3 13.0.3 are locked; native-addon import
   authority is isolated to the exact proof pair and the production audit reports no known
   vulnerabilities

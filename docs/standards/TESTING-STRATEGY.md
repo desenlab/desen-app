@@ -76,9 +76,11 @@ root, receives no workspace-write, port, native-addon, or verifier runtime-probe
 does not introduce a scheduler barrier.
 
 The M07-T05 `control-plane-local-api` verifier and root mutation test are ordinary
-`PROOF_OS_TEMP_ISOLATED` steps. Each may use only its runner-owned temp root. They receive no
-workspace-write, child-runtime, or port grant and do not introduce a barrier; the exact pair alone
-receives the native-addon authority required by the reviewed SQLite binding.
+`PROOF_OS_TEMP_ISOLATED` steps. Each may use only its runner-owned temp root. The verifier receives
+the exact `VERIFIER_RUNTIME_PROBE` child-process policy, while the root receives only the ordinary
+`NODE_TEST_HARNESS` policy. Neither receives workspace-write or port authority, and neither
+introduces a barrier. Only those two exact workloads receive the native-addon authority required
+by the reviewed SQLite binding.
 
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
@@ -86,7 +88,8 @@ inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and identity-checke
 runtime probes are permitted only for the verifier side of
 `publisher-catalog-pinning`, `publisher-bundle-publication`, `publisher-official-golden`,
 `publisher-invalid-source-matrix`, `control-plane-bundle-store`, and
-`control-plane-bundle-verification`. Native-addon authority is permitted only for the exact
+`control-plane-bundle-verification`, and `control-plane-local-api`. Native-addon authority is
+permitted only for the exact
 `reference-host-web-source-audit` verifier/root-test pair, the `publisher-invalid-source-matrix`
 root test, and the exact `control-plane-local-api` verifier/root-test pair. Regression tests prove
 that every unlisted step remains denied; the source-audit verifier remains workspace-read-only.
@@ -94,7 +97,7 @@ The reviewed production dependency audit for locked Fastify 5.11.2 and better-sq
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution: 118 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
+distribution: 120 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
 external-source, symlink-parent, unreviewed-workspace-target, and unsupported-option escapes.
@@ -220,7 +223,7 @@ frozen artifact remain unchanged. This is a reviewed local-reader checkpoint and
 CI claim.
 
 Reviewed sequence 12 links the exact sequence 11 head
-`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to current head
+`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to its then-current head
 `85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` with the same 14 unchanged
 frozen artifacts and 28 readers. Only indexes `[26, 27]` change: the M07-T05 proof reader is 77,507
 bytes at `sha256:e2050408c5bf3e084eacd6e42880310dafbfdf03b79821500cc0567b998f7d66`,
@@ -229,3 +232,14 @@ and its root reader is 17,716 bytes at
 the exact ADR token-bound documentation update while the M07-T05 artifact and every other frozen
 artifact remain unchanged. This is reviewed local-reader evidence; hosted CI has not yet been
 claimed, and I07-04 still owns the compatibility-reader debt.
+
+Reviewed sequence 13 links the exact sequence 12 head
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` to current head
+`146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` with the same 14 unchanged
+frozen artifacts and 28 readers. Only index `[9]` changes: the M06-T09
+publisher-bundle-publication root reader is 63,859 bytes at
+`sha256:ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d`. A hosted
+required-exhaustive attempt exposed two stale M07 successor/current-receipt assertions in that
+reader; after the narrow reader-only correction, its focused root passes 112/112 and the frozen
+M06-T09 artifact remains unchanged. This is reviewed local-reader evidence, does not claim hosted
+CI success, and leaves the compatibility-reader debt with I07-04.
