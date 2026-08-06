@@ -2965,3 +2965,45 @@ This file records implementation discoveries without changing the frozen DESEN 0
   complete cross-system limit profile, including real materialized node counts, before N-041 can
   leave `PLANNED`. A later protocol revision should standardize the depth convention and dynamic
   activation projection if cross-implementation parity is required.
+
+## PF-074 — Mutable control-plane channels are discovery pointers, not activation records
+
+- Status: OPEN
+- Blocks proof: No; M07-T05 defines a bounded local repository and HTTP profile without changing
+  frozen protocol bytes or granting staging and activation authority.
+- Protocol location: SPEC Sections 13.2, 24.1, 28.2, and 28.3; `R-125` and `N-019`; related
+  findings `PF-070`–`PF-073`; related decision `ADR 0012`
+- Observation: DESEN 0.1.0 permits a mutable channel to point at a current revision while requiring
+  the revision artifact itself to remain immutable. It does not define a channel-name grammar,
+  repository identity, optimistic-concurrency token, HTTP security profile, or relationship
+  between a distribution channel and the separately staged/active/previous-good records. Calling
+  a mutable channel “active” would bypass the specified preflight and atomic activation stages.
+- Implementation decision: M07-T05 keeps three distinct namespaces. Editable Source bytes use a
+  local key and monotonic compare-and-set generation. Bundle bytes continue through M07-T01's
+  exact first-writer-wins store. A channel stores only a strict local name, one existing immutable
+  revision, and a generation in separate SQLite metadata. Create requires an absent-record
+  precondition; update requires the exact current generation; stale and exhausted generations
+  make no change. Byte-identical Source writes and identical channel targets at the current
+  generation are idempotent and do not advance the generation.
+
+  Channel selection proves only that the exact revision exists in the immutable store. It may
+  deliberately point at bytes later rejected by M07-T02 through M07-T04, because discovery is not
+  integrity or activation. No T05 result contains an active revision, previous-good revision,
+  staged index, authority handle, callback, loader, or activation operation. Source writes do not
+  publish or move a channel; Bundle writes do not move a channel; channel writes do not touch the
+  referenced Bundle inode or bytes.
+
+  The local Fastify transport binds only loopback through its closed listener, authenticates every
+  data route with a host-supplied bearer token, denies browser origins by default, and accepts only
+  exact configured origins for fixed CORS preflight. Source and Bundle ingress preserve exact raw
+  bytes under fixed limits; channel input is one closed JSON envelope. Errors are stable and
+  redacted. SQLite remains behind replaceable repository contracts and stores only Source/channel
+  metadata; the content-addressed Bundle tree remains authoritative for immutable artifacts.
+
+- Future action: M07-T06 must stage independently from authenticated M07-T03 package snapshots.
+  M07-T07 must commit active and previous-good revisions as one separate durable record after
+  authenticating the T04 and T06 branches. M07-T09 and M07-T10 must prove that an invalid revision
+  discoverable through a channel never becomes active and cannot destroy last-known-good state.
+  M07-T11 must consume the channel from the separately built reference host without treating it as
+  activation evidence. A later protocol revision should standardize channel identity and
+  concurrency only if cross-implementation transport interoperability is required.

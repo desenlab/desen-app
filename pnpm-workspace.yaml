@@ -2,7 +2,18 @@ packages:
   - "apps/*"
   - "packages/*"
 
+allowBuilds:
+  # v13 ships reviewed prebuilt artifacts; deny its implicit node-gyp fallback.
+  better-sqlite3: false
+
+autoInstallPeers: false
+engineStrict: true
+linkWorkspacePackages: true
+saveExact: true
+strictPeerDependencies: true
+
 minimumReleaseAgeExclude:
+  - better-sqlite3@13.0.3
   - "@typescript-eslint/eslint-plugin@8.65.0"
   - "@typescript-eslint/parser@8.65.0"
   - "@typescript-eslint/project-service@8.65.0"
@@ -15,5 +26,3 @@ minimumReleaseAgeExclude:
   - "@typescript-eslint/visitor-keys@8.65.0"
   - prettier@3.9.6
   - typescript-eslint@8.65.0
-
-onlyBuiltDependencies: []

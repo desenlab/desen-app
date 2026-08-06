@@ -102,6 +102,7 @@ export const PROOF_IDS = Object.freeze([
   "control-plane-bundle-verification",
   "control-plane-package-preflight",
   "control-plane-reference-preflight",
+  "control-plane-local-api",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -129,13 +130,20 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "publisher-invalid-source-matrix",
   "control-plane-bundle-store",
   "control-plane-bundle-verification",
+  "control-plane-local-api",
 ]);
 
-/** The exact proof whose verifier and root test load a reviewed native Rolldown addon. */
-export const NATIVE_ADDON_PROOF_IDS = Object.freeze(["reference-host-web-source-audit"]);
+/** Exact proofs whose verifier and root test load one reviewed native addon. */
+export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
+  "reference-host-web-source-audit",
+  "control-plane-local-api",
+]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
-export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze(["test-publisher-invalid-source-matrix"]);
+export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze([
+  "test-publisher-invalid-source-matrix",
+  "test-control-plane-local-api",
+]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
 export const FILESYSTEM_COMPATIBILITY_ROOT_STEP_IDS = Object.freeze(
@@ -247,6 +255,7 @@ const CHILD_PROCESS_POLICIES = Object.freeze({
   TOOLCHAIN_EXCLUSIVE: "TOOLCHAIN_EXCLUSIVE",
 });
 const NATIVE_ADDON_POLICIES = Object.freeze({
+  CONTROL_PLANE_LOCAL_API_SQLITE: "CONTROL_PLANE_LOCAL_API_SQLITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -368,7 +377,9 @@ for (const proofId of PROOF_IDS) {
         ? CHILD_PROCESS_POLICIES.VERIFIER_RUNTIME_PROBE
         : CHILD_PROCESS_POLICIES.NONE,
       nativeAddonPolicy: NATIVE_ADDON_PROOF_ID_SET.has(proofId)
-        ? NATIVE_ADDON_POLICIES.REFERENCE_HOST_WEB_SOURCE_AUDIT
+        ? proofId === "control-plane-local-api"
+          ? NATIVE_ADDON_POLICIES.CONTROL_PLANE_LOCAL_API_SQLITE
+          : NATIVE_ADDON_POLICIES.REFERENCE_HOST_WEB_SOURCE_AUDIT
         : NATIVE_ADDON_POLICIES.NONE,
     }),
   );
@@ -418,7 +429,9 @@ for (const proofId of PROOF_IDS) {
         tempKey: testStepId,
         childProcessPolicy: CHILD_PROCESS_POLICIES.NODE_TEST_HARNESS,
         nativeAddonPolicy: NATIVE_ADDON_ROOT_STEP_ID_SET.has(testStepId)
-          ? NATIVE_ADDON_POLICIES.PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE
+          ? testStepId === "test-control-plane-local-api"
+            ? NATIVE_ADDON_POLICIES.CONTROL_PLANE_LOCAL_API_SQLITE
+            : NATIVE_ADDON_POLICIES.PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE
           : NATIVE_ADDON_POLICIES.NONE,
         filesystemCompatibilityPolicy: filesystemCompatibilityPolicyForStep(testStepId),
         barrier: trackedAliasExclusive,
@@ -427,8 +440,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 136) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 136 steps.", {
+if (METADATA_BY_STEP_ID.size !== 138) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 138 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

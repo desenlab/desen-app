@@ -467,6 +467,13 @@ crossing is truncated or partially accepted. The cumulative semantic Validator m
 agree with the bounded snapshot before a private identity-backed, byte-free authority is returned.
 P-17 is now `PROVEN`; P-12 remains `NOT_PROVEN`; N-038 and N-041 remain `PLANNED` because staging,
 channel mutation, activation, and dynamic runtime enforcement still belong to later M07 tasks.
+M07-T05 now provides the local fixed-loopback, bearer-authenticated Fastify boundary. SQLite stores
+editable Source bytes under generation compare-and-swap and mutable channel discovery pointers;
+immutable Bundle writes delegate to the M07-T01 repository. Exact allowed origins can read `ETag`,
+and finite 5-second inactivity, 15-second request, and 5-second keep-alive timeouts bound partial
+clients and shutdown. This transport grants no verification, staging, commit, activation, or
+runtime authority. N-019 is now `TESTED`; P-12 remains `NOT_PROVEN`, G07 remains open, and PF-074
+remains `OPEN`.
 
 I07-01 is complete historical evidence. It separated immutable task-time evidence from a
 current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
@@ -492,11 +499,11 @@ artifacts and twenty live readers. A corrective M05-T04 current-reader append af
 established historical sequence 5; its head
 `7df3631d509ed7e65c571566a825d6d3cd52d336e1a74512bf3e8e26920749b3` authenticates eleven frozen
 artifacts and twenty-two live readers. Sequence 6 only advances the M06-T11 proof/test receipts for
-a bounded, explicit 20-second nested Vitest timeout; current head `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` still
+a bounded, explicit 20-second nested Vitest timeout; its then-current head `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` still
 authenticates eleven frozen artifacts and twenty-two live readers. It changes no coverage,
 assertion, concurrency, frozen evidence, workload/proof count, progress, or plan digest, and
 sequences 1–5 remain byte- and hash-unchanged. Reviewed sequence 7 links the exact sequence 6 head
-`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to current head
+`790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to its then-current head
 `d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5`, authenticating thirteen
 frozen artifacts and twenty-six live readers. It adds the 34,612-byte M07-T04 artifact
 `sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`, its live proof/root
@@ -506,6 +513,82 @@ calibration, including current M05-T09, M06-T01/T05/T08/T09/T10/T11, and M07-T01
 The frozen M05-T06 artifact remains byte-identical with its historical `PARTIAL` projection while
 live P-17 is `PROVEN`. Sequences 1–6 are unchanged, and this local reviewed checkpoint does not
 claim a new hosted CI pass. The
+reviewed sequence 8 append links exact sequence 7 head
+`d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5` to its then-current head
+`f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a`, authenticating fourteen
+frozen artifacts and twenty-eight live readers. It adds the 41,945-byte M07-T05 artifact
+`sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`, its 73,915-byte proof
+reader `sha256:f66d40863a46dd7ed9e28afb2c78f8afbda8aee964e72d4fba60e65e55a351b3`, and its 17,291-byte root
+reader `sha256:490d4f922ea41dc7bca178cc54ab938ab136f0b922d7842af623001eabf60a65`. Prior live receipts,
+including current M07-T01 through M07-T04 and reference-host source-audit compatibility readers,
+are resealed after the T05 compatibility changes. Sequences 1–7 and predecessor frozen artifacts
+remain unchanged. This reviewed local checkpoint makes no new hosted CI claim, and I07-04 retains
+ownership of the remaining compatibility-reader debt. Reviewed sequence 9 links exact sequence 8
+head `f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a` to its then-current head
+`94f48160552a6e0de702f71200e56c23d61bab8692d43f3ac1104dcfa681568b` with the same fourteen frozen
+artifacts and twenty-eight readers. Exactly reader indexes `[16, 17, 18, 19]` change: M07-T02 proof
+94,612 bytes / `sha256:4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9`;
+M07-T02 root 20,959 bytes / `sha256:fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed`;
+M07-T03 proof 86,174 bytes / `sha256:5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab`;
+and M07-T03 root 21,119 bytes /
+`sha256:10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11`.
+These minimal T05 compatibility bridges authenticate the current shared strict-JSON internal
+source/distribution and exact T03 → T04 → T05 aggregate adjacency while still projecting unchanged
+frozen T02/T03 artifacts. Sequences 1–8 and all frozen artifacts remain unchanged. This is reviewed
+local evidence only, not a hosted CI claim; `DEBT-I07-012` cleanup remains owned by I07-04. The
+reviewed sequence 10 append links exact sequence 9 head
+`94f48160552a6e0de702f71200e56c23d61bab8692d43f3ac1104dcfa681568b` to its then-current head
+`bd3f5b90656f0e41d7f6aa439fdc01889e9ebeada26cd3caf8624c3ce1db7d07` with the same fourteen frozen
+artifacts and twenty-eight readers. Exactly reader indexes `[7, 14, 15]` change: the M06-T08 catalog
+root `tests/publisher-catalog-pinning.test.mjs` is 38,530 bytes at
+`sha256:bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116`; the M07-T01 proof reader
+is 99,672 bytes at `sha256:d9d9edd6379357dde229999ce461a0dc66bf58dc0d7900eb6f5ece177a9b3fba`;
+and its root reader is 26,679 bytes at
+`sha256:6b3a7869962046a3594a788095faad640c76fec660a59aee7b26844e831851ff`. These minimal test-fixture
+successors recognize the local-API aggregate tail and updated catalog-root receipt while frozen
+catalog and T01 artifacts remain unchanged. The final strictly sequential local catalog and T01
+checks pass 51/51 and 16/16. Sequences 1–9 remain immutable. This is reviewed local evidence only,
+not a hosted CI claim; `DEBT-I07-012` cleanup remains owned by I07-04. The
+reviewed sequence 11 append links exact sequence 10 head
+`bd3f5b90656f0e41d7f6aa439fdc01889e9ebeada26cd3caf8624c3ce1db7d07` to its then-current head
+`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` with the same fourteen
+unchanged frozen artifacts and twenty-eight readers. Only indexes `[26, 27]` change: the M07-T05
+proof reader is 77,034 bytes at
+`sha256:c704e25024eaf7bdf317cc144f6b85922a3fe73a24c9c91e639ede032e22eb6f`, and its root reader is
+17,578 bytes at `sha256:4871c406390c4c9b36bff1c417a6c8dd22798736ea8daad1c63a3cbd0a978389`.
+Sequences 1–10 and every frozen artifact remain unchanged. This is a reviewed local-reader
+checkpoint and makes no hosted CI claim. The
+reviewed sequence 12 append links exact sequence 11 head
+`63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8` to its then-current head
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` with the same fourteen
+unchanged frozen artifacts and twenty-eight readers. Only indexes `[26, 27]` change: the M07-T05
+proof reader is 77,507 bytes at
+`sha256:e2050408c5bf3e084eacd6e42880310dafbfdf03b79821500cc0567b998f7d66`, and its root reader is
+17,716 bytes at `sha256:061b40ea20e0f7ee362f26bd54db954c3caea338df5e2f090ce34a4618ac37cc`.
+This successor authenticates the exact ADR token-bound documentation update while the M07-T05
+artifact and every other frozen artifact remain unchanged. This is reviewed local-reader evidence;
+hosted CI has not yet been claimed, and I07-04 still owns the compatibility-reader debt. The
+reviewed sequence 13 append links exact sequence 12 head
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` to its then-current head
+`146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` with the same fourteen
+unchanged frozen artifacts and twenty-eight readers. Only index `[9]` changes: the M06-T09
+publisher-bundle-publication root reader is 63,859 bytes at
+`sha256:ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d`. A hosted
+required-exhaustive attempt exposed two stale M07 successor/current-receipt assertions in that
+reader; after the narrow reader-only correction, its focused root passes 112/112 and the frozen
+M06-T09 artifact remains unchanged. This is reviewed local-reader evidence, does not claim hosted
+CI success, and leaves the compatibility-reader debt with I07-04. The reviewed sequence 14 append
+links exact sequence 13 head
+`146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` to current head
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` with the same fourteen
+unchanged frozen artifacts and twenty-eight readers. Only indexes `[10, 11, 14]` change: the
+M06-T11 proof reader is 166,563 bytes at
+`sha256:06eb59602a768c13f19cc83289a574823d191aa3b62ed8fb7149381b326de802`, its root reader is
+60,572 bytes at `sha256:29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531`,
+and the M07-T01 proof reader is 99,672 bytes at
+`sha256:888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6`. This narrow CI-reader
+successor changes no frozen artifact. The latest hosted run remains failed, so this is local-reader
+evidence rather than hosted CI success; I07-04 still owns the compatibility-reader debt. The
 temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
 archived in the
@@ -514,8 +597,8 @@ archived in the
 The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
 no affected-path selector and does not retire the sequential runner, which remains an explicit
 manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T04 is now `DONE`; its proof pair extends the live successor to 136
-workloads and 64 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T05 is next.
+retirement by G12. M07-T05 is now `DONE`; its proof pair extends the live successor to 138
+workloads and 65 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T06 is next.
 
 ## Current milestone
 
@@ -523,11 +606,11 @@ workloads and 64 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `78 / 145 tasks complete (54%)`
+- Overall implementation progress: `79 / 145 tasks complete (54%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `4 / 11 tasks complete (36%)`
+- M07 progress: `5 / 11 tasks complete (45%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -591,14 +674,15 @@ workloads and 64 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `M07-T01 — Content-addressed bundle store with immutable revision entries`,
   `M07-T02 — Protocol, revision, available source digest, and bundle-size verification`,
   `M07-T03 — Exact package target/version/digest resolution and preflight`,
-  `M07-T04 — Surface/capability reference and finite-limit preflight`
+  `M07-T04 — Surface/capability reference and finite-limit preflight`,
+  `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable channel pointers`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
-  `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable channel pointers`
-- Status: M07-T04 and I07-02 are complete; M07-T05 is `NOT_STARTED`, its M07-T01 dependency is
-  satisfied, and it is ready to start; G07 remains open
+  `M07-T06 — Staged runtime indexes and active/staged state separation`
+- Status: M07-T05 and I07-02 are complete; M07-T06 is `NOT_STARTED`, its M07-T03–M07-T05
+  dependencies are satisfied, and it is ready to start; G07 remains open
 
 ## Completed preparation
 
@@ -963,22 +1047,46 @@ trusts no cached success, and executes the fresh complete workload. The legacy s
 manual rollback only; affected selection remains future work and every unknown or ambiguous
 selector condition must eventually expand to `EXHAUSTIVE`.
 
-M07-T04 is complete. Only the exact M07-T03 package authority reaches its bounded deterministic
-scan. The scan closes every task-owned static surface/capability/event/action target and all 13
-fixed Reference Profile ceilings before one independent semantic agreement fence. Unknown or
-over-limit input yields no partial authority, and complete success exposes only immutable safe
-audit metadata. It creates no staging, channel, commit, activation, or last-known-good power.
+M07-T05 is complete. The fixed-loopback, bearer-authenticated Fastify API composes generation-CAS
+editable Sources, immutable M07-T01 Bundle storage, and mutable SQLite channel discovery pointers
+without collapsing their authorities. Exact-origin `ETag` exposure, strict bounded JSON, stable
+redacted errors, durable SQLite operations, and finite connection/request/keep-alive timeouts are
+covered by executable evidence. It creates no staging, commit, activation, or last-known-good
+power.
 
-Implement `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable
-channel pointers`. It must compose the already proved immutable store with explicit editable
-Source and mutable channel responsibilities without collapsing publication, reference preflight,
-staging, or activation authorities.
+Implement `M07-T06 — Staged runtime indexes and active/staged state separation`. It must build the
+parallel staged branch from the exact M07-T03 package snapshots while keeping staged data separate
+from durable active state; M07-T07 will later join that branch with the M07-T04 reference authority.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
 to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fell from 59 minutes
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
+
+The current M07-T05 code-owned CI authority contains 138 workloads and 65 verifier/root-test
+pairs: 54 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
+423 segments and 2,209 ordered leaf invocations covering 215 distinct workloads. The current pins
+are:
+
+- prerequisite inventory:
+  `106b40cbcb85dd63833cdf7da29ca4b87d30e6fdced7d8b6e7ce91742b5e98d1`
+- ordered leaves: `a4ca5e101bab7ba21ea56dccc9c2e9306aaad3cb60e3b540ba32d70a0f587b9f`
+- distinct workloads: `af7be654a83989448ba8db76c8e9f22ba4ce515f46834853f95f4ac14a56cb90`
+- workspace manifest:
+  `6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9`
+- neutral inventory: `d26e9fa74f85be06852cd4f667467606735687e851ab03a6ef5611700c9ccc92`
+- retained plan/projection:
+  `bcf9a4465fe246f547e1254464d6d30f4d3a9e50601655c967e4645e7ba863e1`
+- required plan: `4d26089fc10902513950f0051fb0d860a82c14374e426fd40b3259a43a63b466`
+- shadow plan: `442f9035b06b5177d6965fc6ec906304329259b04da760da67a5e0a9810159ea`
+- workload-id set: `4d222d3a6f8a37b17473922f2f822c32f9a7f7360cae896a9d763684afd6dc19`
+- equivalence projection:
+  `bb11b9e4d1d1f1223e3b6f01aac88c2560b0b5f6468bcffe976fd5f35c0514d8`
+
+The new local-API proof pair remains ordinary and OS-temp-isolated; native-addon import authority
+is granted only to its two exact workloads. This is reviewed local/code-owned evidence and makes
+no new hosted CI claim.
 
 M04-T12 extends the current reviewed CI inventory to 121 distinct workloads, 35 proof verifiers, 35
 root proof files, and a pinned 78-step plan with 35 proof-test steps. Its equivalent legacy
@@ -1930,6 +2038,46 @@ M07-T04 evidence:
 - coverage decision: M07-T04 becomes `DONE`; P-17 becomes `PROVEN`; P-12 remains `NOT_PROVEN`;
   N-038 and N-041 remain `PLANNED`; overall progress is 78/145 and M07-T05 owns the local
   editable-Source/immutable-Bundle/channel API next
+
+M07-T05 evidence:
+
+- `docs/proof/CONTROL-PLANE-LOCAL-API.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-local-api.json`
+- artifact size: `41,945 bytes`
+- artifact SHA-256:
+  `144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`
+- transport boundary: fixed loopback, bearer authentication, exact-origin CORS, exposed `ETag`,
+  bounded request bodies, strict JSON, and stable redacted errors
+- persistence boundary: SQLite-backed Source generation CAS and channel discovery pointers;
+  immutable Bundle writes delegate to the already proved M07-T01 first-writer-wins store
+- lifecycle boundary: 5-second inactivity, 15-second request, and 5-second keep-alive timeouts;
+  partial-body clients cannot keep shutdown open indefinitely
+- authority profile: Source editing and channel discovery grant no package verification, reference
+  preflight, staging, durable commit, activation, or runtime authority
+- executable evidence: 16 focused runtime cases, 18 compiler-negative cases, and 16 independent
+  root proof/mutation cases
+- reviewed reader checkpoint: sequence 12 authenticates the same 14 frozen artifacts and 28 readers
+  at `85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e`; only the exact T05
+  proof/root receipts change to authenticate the ADR token-bound documentation successor, while
+  the M07-T05 artifact and every other frozen artifact remain unchanged
+- reviewed reader checkpoint: sequence 13 authenticates the same 14 frozen artifacts and
+  28 readers at `146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c`;
+  only M06-T09 root-reader index `[9]` changes to 63,859 bytes at
+  `sha256:ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d` after a hosted attempt
+  exposed two stale M07 successor/current-receipt assertions; the focused root now passes 112/112,
+  the frozen M06-T09 artifact remains unchanged, no hosted CI success is claimed, and I07-04 still
+  owns the compatibility-reader debt
+- current reviewed reader checkpoint: sequence 14 authenticates the same 14 frozen artifacts and
+  28 readers at `3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078`;
+  only reader indexes `[10, 11, 14]` change to the narrow M06-T11 proof/root and M07-T01 proof
+  successors; every frozen artifact remains unchanged, the latest hosted run is still failed, no
+  hosted CI success is claimed, and I07-04 still owns the compatibility-reader debt
+- dependency safety: Fastify 5.11.2 and better-sqlite3 13.0.3 are locked; native-addon import
+  authority is isolated to the exact proof pair and the production audit reports no known
+  vulnerabilities
+- coverage decision: M07-T05 becomes `DONE`; N-019 becomes `TESTED`; P-12 remains `NOT_PROVEN`,
+  G07 remains open, PF-074 remains `OPEN`, overall progress is 79/145, and M07-T06 owns staged
+  runtime indexes and active/staged separation next
 
 ## Status vocabulary
 

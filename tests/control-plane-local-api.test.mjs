@@ -12,38 +12,41 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import {
-  CONTROL_PLANE_REFERENCE_PREFLIGHT_PREREQUISITE_PINS,
-  ControlPlaneReferencePreflightEvidenceError,
-  buildControlPlaneReferencePreflightEvidence,
-  verifyControlPlaneReferencePreflightEvidence,
-  writeControlPlaneReferencePreflightEvidence,
-} from "../scripts/lib/control-plane-reference-preflight-proof.mjs";
+  CONTROL_PLANE_LOCAL_API_PREREQUISITE_PINS,
+  DEFAULT_CONTROL_PLANE_LOCAL_API_ARTIFACT_PATH,
+  ControlPlaneLocalApiEvidenceError,
+  buildControlPlaneLocalApiEvidence,
+  verifyControlPlaneLocalApiEvidence,
+  writeControlPlaneLocalApiEvidence,
+} from "../scripts/lib/control-plane-local-api-proof.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json";
+const ROOT = path.resolve(import.meta.dirname, "..");
+const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json";
+const ADR = "docs/adr/0012-local-control-plane-transport-and-metadata.md";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const APP_PACKAGE = "apps/control-plane-api/package.json";
 const APP_INDEX = "apps/control-plane-api/src/index.ts";
-const APP_CONTRACT = "apps/control-plane-api/src/reference-preflight-contract.ts";
-const APP_INTERNAL = "apps/control-plane-api/src/reference-preflight-internal.ts";
-const APP_IMPLEMENTATION = "apps/control-plane-api/src/reference-preflight.ts";
-const APP_RUNTIME_TEST = "apps/control-plane-api/test/reference-preflight.test.ts";
-const APP_TYPE_TEST = "apps/control-plane-api/test/reference-preflight.types.ts";
+const APP_CONTRACT = "apps/control-plane-api/src/local-control-plane-contract.ts";
+const APP_INTERNAL = "apps/control-plane-api/src/local-control-plane-internal.ts";
+const APP_REPOSITORY = "apps/control-plane-api/src/local-control-plane-repository-internal.ts";
+const APP_SQLITE = "apps/control-plane-api/src/local-control-plane-sqlite-internal.ts";
+const APP_FACTORY = "apps/control-plane-api/src/local-control-plane.ts";
+const APP_STRICT_JSON = "apps/control-plane-api/src/strict-json-internal.ts";
+const APP_RUNTIME_TEST = "apps/control-plane-api/test/local-control-plane.test.ts";
+const APP_TYPE_TEST = "apps/control-plane-api/test/local-control-plane.types.ts";
 const ROOT_PACKAGE = "package.json";
 const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const CI_INVENTORY = "scripts/ci/exhaustive-workload-inventory.mjs";
-const ROOT_TEST = "tests/control-plane-reference-preflight.test.mjs";
+const ROOT_TEST = "tests/control-plane-local-api.test.mjs";
 
 let built;
 let proofDocument;
 const temporaryDirectories = [];
 
 function expectedError(code) {
-  return (error) =>
-    error instanceof ControlPlaneReferencePreflightEvidenceError && error.code === code;
+  return (error) => error instanceof ControlPlaneLocalApiEvidenceError && error.code === code;
 }
 
 async function workspaceBytes(relativePath) {
@@ -58,7 +61,7 @@ function changedByte(bytes) {
 
 function exactProofDocument(artifactSha256) {
   return [
-    "# Test-only M07-T04 proof authority",
+    "# Test-only M07-T05 proof authority",
     "",
     `Artifact: \`${ARTIFACT}\``,
     "",
@@ -75,8 +78,9 @@ async function makeTemporaryDirectory(prefix) {
 
 async function trackedMutation(relativePath, transform) {
   const source = await workspaceBytes(relativePath);
-  const transformed = transform(source.toString("utf8"));
-  assert.notEqual(transformed, source.toString("utf8"));
+  const sourceText = source.toString("utf8");
+  const transformed = transform(sourceText);
+  assert.notEqual(transformed, sourceText, `Mutation did not alter ${relativePath}`);
   return {
     trackedFileBytes: { [relativePath]: Buffer.from(transformed, "utf8") },
     runtimeReceipt: built.runtimeReceipt,
@@ -90,14 +94,31 @@ function mutateTraceOwner(value, traceId) {
   }
   if (value !== null && typeof value === "object") {
     if (value.id === traceId && Array.isArray(value.owners)) {
-      value.owners = value.owners.filter((owner) => owner !== "M07-T04");
+      value.owners = value.owners.filter((owner) => owner !== "M07-T05");
     }
     for (const child of Object.values(value)) mutateTraceOwner(child, traceId);
   }
 }
 
+function deeplyFrozen(root) {
+  const pending = [root];
+  const seen = new Set();
+  while (pending.length > 0) {
+    const value = pending.pop();
+    if (typeof value !== "object" || value === null || seen.has(value)) continue;
+    seen.add(value);
+    if (!Object.isFrozen(value)) return false;
+    for (const key of Reflect.ownKeys(value)) {
+      if (Array.isArray(value) && key === "length") continue;
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor !== undefined && "value" in descriptor) pending.push(descriptor.value);
+    }
+  }
+  return true;
+}
+
 before(async () => {
-  built = await buildControlPlaneReferencePreflightEvidence();
+  built = await buildControlPlaneLocalApiEvidence();
   proofDocument = exactProofDocument(built.artifactSha256);
 });
 
@@ -107,69 +128,43 @@ after(async () => {
   );
 });
 
-test("[authority] builds the exact versioned M07-T04 artifact and official reference receipt", () => {
+test("[authority] builds the exact versioned M07-T05 artifact and local API receipt", () => {
+  assert.equal(DEFAULT_CONTROL_PLANE_LOCAL_API_ARTIFACT_PATH, path.join(ROOT, ARTIFACT));
   assert.equal(built.artifact.schemaVersion, 1);
-  assert.equal(built.artifact.profile, "desen.control-plane.reference-preflight-proof.v1");
-  assert.equal(built.artifact.task, "M07-T04");
+  assert.equal(built.artifact.profile, "desen.control-plane.local-api-proof.v1");
+  assert.equal(built.artifact.task, "M07-T05");
   assert.equal(built.artifact.result, "PASS");
-  assert.deepEqual(built.artifact.claims.officialSuccess.surfaces, [
-    {
-      id: "home",
-      sourceNodeCount: 2,
-      maximumMaterializedNodeCount: 2,
-      sourceTreeDepth: 1,
-      capabilityReferenceCount: 2,
-      actionCount: 0,
-      predicateNodeCount: 0,
-      settlementDepth: 0,
-    },
-    {
-      id: "sign-in",
-      sourceNodeCount: 6,
-      maximumMaterializedNodeCount: 6,
-      sourceTreeDepth: 1,
-      capabilityReferenceCount: 7,
-      actionCount: 4,
-      predicateNodeCount: 1,
-      settlementDepth: 1,
-    },
-  ]);
-  assert.equal(built.artifact.claims.semanticAgreement.executionContractsPrepared, false);
-  assert.equal(built.artifact.claims.semanticAgreement.runtimeObligationsRetained, false);
-  assert.equal(built.artifact.tests.packageRuntimeCases, 22);
-  assert.equal(built.artifact.tests.compileTimeNegativeCases, 12);
+  assert.equal(built.artifact.tests.packageRuntimeCases, 16);
+  assert.equal(built.artifact.tests.compileTimeNegativeCases, 18);
   assert.equal(built.artifact.tests.rootMutationCases, 16);
   assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 
 test("[determinism] two independent evidence builds produce byte-identical artifacts", async () => {
-  const second = await buildControlPlaneReferencePreflightEvidence();
+  const second = await buildControlPlaneLocalApiEvidence();
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
   assert.equal(second.artifactSha256, built.artifactSha256);
   assert.notEqual(second.runtimeReceipt, built.runtimeReceipt);
 });
 
 test("[authority] verifies exact artifact bytes and one final proof-document pin", async () => {
-  const result = await verifyControlPlaneReferencePreflightEvidence({
+  const result = await verifyControlPlaneLocalApiEvidence({
     artifactBytes: built.artifactBytes,
     proofDocument,
     runtimeReceipt: built.runtimeReceipt,
   });
-  assert.deepEqual(result, {
-    task: "M07-T04",
-    result: "PASS",
-    artifactSha256: built.artifactSha256,
-    packageRuntimeCases: 22,
-    compileTimeNegativeCases: 12,
-    rootMutationCases: 16,
-    surfaces: 2,
-  });
+  assert.equal(result.task, "M07-T05");
+  assert.equal(result.result, "PASS");
+  assert.equal(result.artifactSha256, built.artifactSha256);
+  assert.equal(result.packageRuntimeCases, 16);
+  assert.equal(result.compileTimeNegativeCases, 18);
+  assert.equal(result.rootMutationCases, 16);
   assert.ok(Object.isFrozen(result));
 });
 
 test("[artifact] rejects one changed evidence byte", async () => {
   await assert.rejects(
-    verifyControlPlaneReferencePreflightEvidence({
+    verifyControlPlaneLocalApiEvidence({
       artifactBytes: changedByte(built.artifactBytes),
       proofDocument,
       runtimeReceipt: built.runtimeReceipt,
@@ -187,7 +182,7 @@ test("[proof] rejects pending, wrong, duplicate, or missing final pins", async (
   ];
   for (const candidate of variants) {
     await assert.rejects(
-      verifyControlPlaneReferencePreflightEvidence({
+      verifyControlPlaneLocalApiEvidence({
         artifactBytes: built.artifactBytes,
         proofDocument: candidate,
         runtimeReceipt: built.runtimeReceipt,
@@ -197,12 +192,14 @@ test("[proof] rejects pending, wrong, duplicate, or missing final pins", async (
   }
 });
 
-test("[prerequisites] rejects one changed byte in every direct prerequisite", async () => {
-  for (const prerequisite of CONTROL_PLANE_REFERENCE_PREFLIGHT_PREREQUISITE_PINS) {
-    const bytes = await workspaceBytes(prerequisite.path);
+test("[prerequisites] rejects one changed byte in the exact M07-T01 prerequisite", async () => {
+  assert.equal(CONTROL_PLANE_LOCAL_API_PREREQUISITE_PINS.length, 1);
+  for (const prerequisite of CONTROL_PLANE_LOCAL_API_PREREQUISITE_PINS) {
     await assert.rejects(
-      buildControlPlaneReferencePreflightEvidence({
-        prerequisiteBytes: { [prerequisite.path]: changedByte(bytes) },
+      buildControlPlaneLocalApiEvidence({
+        prerequisiteBytes: {
+          [prerequisite.path]: changedByte(await workspaceBytes(prerequisite.path)),
+        },
         runtimeReceipt: built.runtimeReceipt,
       }),
       expectedError("PREREQUISITE_DRIFT"),
@@ -210,48 +207,46 @@ test("[prerequisites] rejects one changed byte in every direct prerequisite", as
   }
 });
 
-test("[implementation] rejects changed authority, traversal, limit, or public-entry receipts", async () => {
+test("[implementation] rejects transport, repository, SQLite, or public-factory source drift", async () => {
   const mutations = [
     [
       APP_CONTRACT,
-      (source) => source.replace("readonly maxSourceTreeDepth: number;", "readonly depth: number;"),
+      (source) => source.replace("readonly rootDirectory: string;", "readonly directory: string;"),
     ],
+    [APP_INTERNAL, (source) => source.replace("trustProxy: false,", "trustProxy: true,")],
     [
-      APP_INTERNAL,
+      APP_REPOSITORY,
       (source) =>
         source.replace(
-          "readBundlePackagePreflightAuthority(packageAuthority)",
-          "readBundlePackagePreflightAuthority(Object(packageAuthority))",
+          "current.generation !== expectedGeneration",
+          "current.generation < expectedGeneration",
         ),
     ],
     [
-      APP_INTERNAL,
+      APP_SQLITE,
+      (source) => source.replace('database.pragma("synchronous = FULL")', "void database"),
+    ],
+    [
+      APP_FACTORY,
       (source) =>
         source.replace(
-          "validateBundleSemantics: validateDesenBundleSemantics",
-          '["validateBundleSemantics"]: validateDesenBundleSemantics',
+          "path.join(canonicalRoot, METADATA_FILE_NAME)",
+          "path.join(captured.rootDirectory, METADATA_FILE_NAME)",
         ),
     ],
     [
-      APP_INTERNAL,
+      APP_STRICT_JSON,
       (source) =>
         source.replace(
-          "BUNDLE_REFERENCE_PREFLIGHT_LIMITS.maxReferenceOccurrences",
-          "BUNDLE_REFERENCE_PREFLIGHT_LIMITS.maxSourceNodes",
+          'return { kind: "duplicate", path: memberPath };',
+          'return { kind: "invalid", path: memberPath };',
         ),
     ],
-    [
-      APP_IMPLEMENTATION,
-      (source) =>
-        source.replace(
-          "preflightBundleReferencesInternal(authority)",
-          "preflightBundleReferencesInternal(Object(authority))",
-        ),
-    ],
+    [ADR, (source) => source.replace("32–256", "32–255")],
   ];
   for (const [relativePath, transform] of mutations) {
     await assert.rejects(
-      buildControlPlaneReferencePreflightEvidence(await trackedMutation(relativePath, transform)),
+      buildControlPlaneLocalApiEvidence(await trackedMutation(relativePath, transform)),
       expectedError("IMPLEMENTATION_DRIFT"),
     );
   }
@@ -259,57 +254,39 @@ test("[implementation] rejects changed authority, traversal, limit, or public-en
 
 test("[registration] rejects package-root, package-script, aggregate, or CI tuple drift", async () => {
   const mutations = [
-    [
-      APP_PACKAGE,
-      (source) => source.replace('"test:reference-preflight":', '"test:reference-preflight-old":'),
-    ],
+    [APP_PACKAGE, (source) => source.replace('"test:local-api":', '"test:local-api-removed":')],
     [
       APP_INDEX,
       (source) =>
-        source.replace("preflightBundleReferences }", "preflightBundleReferences as run }"),
+        source.replace(
+          'export { openLocalControlPlane } from "./local-control-plane.js";',
+          'export { openLocalControlPlane as openUnsafe } from "./local-control-plane.js";',
+        ),
     ],
     [
       ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-local-api",
-          "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-decoy && pnpm verify:control-plane-local-api",
-        ),
+      (source) => source.replace("pnpm verify:control-plane-local-api && pnpm lint", "pnpm lint"),
     ],
-    [
-      CI_SOURCE,
-      (source) =>
-        source.replace(
-          '      "control-plane-reference-preflight",',
-          '      "removed-reference-preflight",',
-        ),
-    ],
-    [
-      CI_INVENTORY,
-      (source) =>
-        source.replace(
-          '    "control-plane-reference-preflight",',
-          '    "removed-reference-preflight",',
-        ),
-    ],
+    [CI_SOURCE, (source) => source.replace('"control-plane-local-api"', '"local-api-removed"')],
+    [CI_INVENTORY, (source) => source.replace('"control-plane-local-api"', '"local-api-removed"')],
   ];
   for (const [relativePath, transform] of mutations) {
     await assert.rejects(
-      buildControlPlaneReferencePreflightEvidence(await trackedMutation(relativePath, transform)),
+      buildControlPlaneLocalApiEvidence(await trackedMutation(relativePath, transform)),
       expectedError("REGISTRATION_DRIFT"),
     );
   }
 });
 
-test("[traceability] rejects owner or identity drift in all five exact rows", async () => {
+test("[traceability] rejects owner or identity drift in the exact rows", async () => {
   const trace = JSON.parse(await workspaceBytes(TRACEABILITY));
   const traceIds = built.artifact.claims.traceRows.map(({ id }) => id);
-  assert.equal(traceIds.length, 5);
+  assert.deepEqual(traceIds, ["R-125"]);
   for (const traceId of traceIds) {
     const changed = structuredClone(trace);
     mutateTraceOwner(changed, traceId);
     await assert.rejects(
-      buildControlPlaneReferencePreflightEvidence({
+      buildControlPlaneLocalApiEvidence({
         trackedFileBytes: {
           [TRACEABILITY]: Buffer.from(`${JSON.stringify(changed, null, 2)}\n`, "utf8"),
         },
@@ -320,32 +297,35 @@ test("[traceability] rejects owner or identity drift in all five exact rows", as
   }
 });
 
-test("[runtime] rejects changed success, reference, precedence, or internal-failure receipts", async () => {
+test("[runtime] rejects changed Source, restart, two-instance CAS, Bundle/channel, or security receipts", async () => {
   const mutations = [
     (receipt) => {
-      receipt.exactSuccess.authenticated = false;
+      receipt.officialSource.firstReadExact = false;
     },
     (receipt) => {
-      receipt.exactSuccess.surfaces[0].sourceNodeCount = 3;
+      receipt.officialSource.restartExact = false;
     },
     (receipt) => {
-      receipt.unknownComponent.codes = ["ENTRY_NOT_FOUND"];
+      receipt.officialSource.twoInstanceCas.winners = 2;
     },
     (receipt) => {
-      receipt.forgedAuthority.observations = 1;
+      receipt.invalidBundles.first.inodePreserved = false;
     },
     (receipt) => {
-      receipt.internalFailure.stage = "surface-capability-references";
+      receipt.channel.activationFieldsAbsent = false;
     },
     (receipt) => {
-      receipt.limits.maxSourceTreeDepth = 65;
+      receipt.security.tokenRedacted = false;
+    },
+    (receipt) => {
+      receipt.separation.activeRevisionPublic = true;
     },
   ];
   for (const mutate of mutations) {
     const receipt = structuredClone(built.runtimeReceipt);
     mutate(receipt);
     await assert.rejects(
-      buildControlPlaneReferencePreflightEvidence({ runtimeReceipt: receipt }),
+      buildControlPlaneLocalApiEvidence({ runtimeReceipt: receipt }),
       expectedError("RUNTIME_PROBE_MISMATCH"),
     );
   }
@@ -354,9 +334,9 @@ test("[runtime] rejects changed success, reference, precedence, or internal-fail
 test("[tests] rejects skipped focused cases or removed compile-time negatives", async () => {
   const runtimeSource = (await workspaceBytes(APP_RUNTIME_TEST)).toString("utf8");
   await assert.rejects(
-    buildControlPlaneReferencePreflightEvidence({
+    buildControlPlaneLocalApiEvidence({
       trackedFileBytes: {
-        [APP_RUNTIME_TEST]: Buffer.from(runtimeSource.replaceAll("it(", "it.skip(")),
+        [APP_RUNTIME_TEST]: Buffer.from(runtimeSource.replaceAll("it(", "it.skip("), "utf8"),
       },
       runtimeReceipt: built.runtimeReceipt,
     }),
@@ -364,9 +344,12 @@ test("[tests] rejects skipped focused cases or removed compile-time negatives", 
   );
   const typeSource = (await workspaceBytes(APP_TYPE_TEST)).toString("utf8");
   await assert.rejects(
-    buildControlPlaneReferencePreflightEvidence({
+    buildControlPlaneLocalApiEvidence({
       trackedFileBytes: {
-        [APP_TYPE_TEST]: Buffer.from(typeSource.replaceAll("// @ts-expect-error", "// removed")),
+        [APP_TYPE_TEST]: Buffer.from(
+          typeSource.replaceAll("// @ts-expect-error", "// removed"),
+          "utf8",
+        ),
       },
       runtimeReceipt: built.runtimeReceipt,
     }),
@@ -374,9 +357,9 @@ test("[tests] rejects skipped focused cases or removed compile-time negatives", 
   );
   const rootSource = (await workspaceBytes(ROOT_TEST)).toString("utf8");
   await assert.rejects(
-    buildControlPlaneReferencePreflightEvidence({
+    buildControlPlaneLocalApiEvidence({
       trackedFileBytes: {
-        [ROOT_TEST]: Buffer.from(rootSource.replaceAll('test("[', 'test.skip("[')),
+        [ROOT_TEST]: Buffer.from(rootSource.replaceAll('test("[', 'test.skip("['), "utf8"),
       },
       runtimeReceipt: built.runtimeReceipt,
     }),
@@ -385,7 +368,7 @@ test("[tests] rejects skipped focused cases or removed compile-time negatives", 
 });
 
 test("[filesystem] rejects symlinked artifact and proof-document authority", async () => {
-  const directory = await makeTemporaryDirectory("desen-m07-t04-symlink-");
+  const directory = await makeTemporaryDirectory("desen-m07-t05-symlink-");
   const realArtifact = path.join(directory, "artifact.real.json");
   const artifactLink = path.join(directory, "artifact.json");
   const realProof = path.join(directory, "proof.real.md");
@@ -395,7 +378,7 @@ test("[filesystem] rejects symlinked artifact and proof-document authority", asy
   await symlink(realArtifact, artifactLink);
   await symlink(realProof, proofLink);
   await assert.rejects(
-    verifyControlPlaneReferencePreflightEvidence({
+    verifyControlPlaneLocalApiEvidence({
       artifactPath: artifactLink,
       proofDocument,
       runtimeReceipt: built.runtimeReceipt,
@@ -403,7 +386,7 @@ test("[filesystem] rejects symlinked artifact and proof-document authority", asy
     expectedError("UNSAFE_AUTHORITY"),
   );
   await assert.rejects(
-    verifyControlPlaneReferencePreflightEvidence({
+    verifyControlPlaneLocalApiEvidence({
       artifactBytes: built.artifactBytes,
       proofDocumentPath: proofLink,
       runtimeReceipt: built.runtimeReceipt,
@@ -416,7 +399,7 @@ test("[filesystem] rejects symlinked artifact and proof-document authority", asy
   await writeFile(path.join(realParent, "artifact.json"), built.artifactBytes);
   await symlink(realParent, linkedParent);
   await assert.rejects(
-    verifyControlPlaneReferencePreflightEvidence({
+    verifyControlPlaneLocalApiEvidence({
       artifactPath: path.join(linkedParent, "artifact.json"),
       proofDocument,
       runtimeReceipt: built.runtimeReceipt,
@@ -426,21 +409,21 @@ test("[filesystem] rejects symlinked artifact and proof-document authority", asy
 });
 
 test("[writer] atomically writes exact deterministic evidence bytes", async () => {
-  const directory = await makeTemporaryDirectory("desen-m07-t04-writer-");
+  const directory = await makeTemporaryDirectory("desen-m07-t05-writer-");
   const artifactPath = path.join(directory, "artifact.json");
-  const result = await writeControlPlaneReferencePreflightEvidence({ artifactPath });
+  const result = await writeControlPlaneLocalApiEvidence({ artifactPath });
   assert.equal(result.artifactSha256, built.artifactSha256);
   assert.deepEqual(await readFile(artifactPath), built.artifactBytes);
   assert.ok(Object.isFrozen(result));
 });
 
 test("[writer] preserves the old destination and removes a tampered temporary", async () => {
-  const directory = await makeTemporaryDirectory("desen-m07-t04-writer-tamper-");
+  const directory = await makeTemporaryDirectory("desen-m07-t05-writer-tamper-");
   const artifactPath = path.join(directory, "artifact.json");
   const oldBytes = Buffer.from("old-authority\n");
   await writeFile(artifactPath, oldBytes);
   await assert.rejects(
-    writeControlPlaneReferencePreflightEvidence({
+    writeControlPlaneLocalApiEvidence({
       artifactPath,
       beforeAtomicRename: async ({ temporaryPath }) => {
         await writeFile(temporaryPath, Buffer.from("tampered\n"));
@@ -454,7 +437,7 @@ test("[writer] preserves the old destination and removes a tampered temporary", 
 
 test("[options] rejects unknown, accessor-backed, shared-memory, or hostile authority", async () => {
   await assert.rejects(
-    buildControlPlaneReferencePreflightEvidence({ unknown: true }),
+    buildControlPlaneLocalApiEvidence({ unknown: true }),
     expectedError("INVALID_OPTIONS"),
   );
   const active = {};
@@ -464,17 +447,14 @@ test("[options] rejects unknown, accessor-backed, shared-memory, or hostile auth
       throw new Error("must not execute");
     },
   });
+  await assert.rejects(buildControlPlaneLocalApiEvidence(active), expectedError("INVALID_OPTIONS"));
   await assert.rejects(
-    buildControlPlaneReferencePreflightEvidence(active),
-    expectedError("INVALID_OPTIONS"),
-  );
-  await assert.rejects(
-    buildControlPlaneReferencePreflightEvidence(new Proxy({}, {})),
+    buildControlPlaneLocalApiEvidence(new Proxy({}, {})),
     expectedError("INVALID_OPTIONS"),
   );
   const shared = new Uint8Array(new SharedArrayBuffer(1));
   await assert.rejects(
-    verifyControlPlaneReferencePreflightEvidence({
+    verifyControlPlaneLocalApiEvidence({
       artifactBytes: shared,
       proofDocument,
       runtimeReceipt: built.runtimeReceipt,
@@ -492,7 +472,7 @@ test("[options] rejects unknown, accessor-backed, shared-memory, or hostile auth
       },
     });
   }
-  const verified = await verifyControlPlaneReferencePreflightEvidence({
+  const verified = await verifyControlPlaneLocalApiEvidence({
     artifactBytes: hostileBytes,
     proofDocument,
     runtimeReceipt: built.runtimeReceipt,
@@ -503,17 +483,10 @@ test("[options] rejects unknown, accessor-backed, shared-memory, or hostile auth
 
 test("[immutability] freezes the evidence graph and preserves honest later-task nonclaims", () => {
   assert.ok(Object.isFrozen(built));
-  assert.ok(Object.isFrozen(built.artifact));
-  assert.ok(Object.isFrozen(built.artifact.claims));
-  assert.ok(Object.isFrozen(built.artifact.claims.officialSuccess.surfaces));
-  assert.ok(Object.isFrozen(built.artifact.trackedFiles));
-  assert.ok(Object.isFrozen(built.runtimeReceipt));
-  assert.equal(built.artifact.nonclaims.length, 8);
-  assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("M07-T05")));
+  assert.ok(deeplyFrozen(built.artifact));
+  assert.ok(deeplyFrozen(built.runtimeReceipt));
   assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("M07-T06")));
   assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("M07-T07")));
-  assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("P-12")));
-  assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("M12-T05")));
-  assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("native targets")));
+  assert.ok(built.artifact.nonclaims.some((claim) => claim.includes("activation")));
   assert.equal(JSON.stringify(built.artifact).includes("function"), false);
 });

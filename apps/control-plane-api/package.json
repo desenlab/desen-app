@@ -2,7 +2,7 @@
   "name": "@desen/control-plane-api",
   "version": "0.0.0",
   "private": true,
-  "description": "Local control-plane infrastructure for immutable DESEN Bundle storage, integrity verification, installed-package preflight, and bounded reference preflight.",
+  "description": "Local DESEN control plane for editable Source material, immutable Bundles, mutable channels, and activation preflight.",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -25,6 +25,7 @@
     "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
+    "test:local-api": "vitest run test/local-control-plane.test.ts",
     "test:package-preflight": "vitest run test/package-preflight.test.ts test/package-preflight-schema-guard.test.ts",
     "test:reference-preflight": "vitest run test/reference-preflight.test.ts",
     "test:bundle-verification": "vitest run test/bundle-verification.test.ts test/bundle-verification-guard.test.ts",
@@ -35,10 +36,13 @@
   },
   "dependencies": {
     "@desen/protocol": "workspace:*",
-    "@desen/validator": "workspace:*"
+    "@desen/validator": "workspace:*",
+    "better-sqlite3": "13.0.3",
+    "fastify": "5.11.2"
   },
   "devDependencies": {
     "@desen/publisher": "workspace:*",
+    "@types/better-sqlite3": "9.6.0",
     "ajv": "8.20.0",
     "prettier": "3.9.6",
     "vitest": "4.1.10"

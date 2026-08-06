@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5",
+  "headSha256": "3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078",
   "checkpoints": [
     {
       "sequence": 1,
@@ -1416,6 +1416,2022 @@
           "path": "tests/runtime-react-failure-boundary.test.mjs",
           "bytes": 26562,
           "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        }
+      ]
+    },
+    {
+      "sequence": 8,
+      "predecessorSha256": "d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 255778,
+          "sha256": "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 85044,
+          "sha256": "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 58744,
+          "sha256": "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 33936,
+          "sha256": "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 71098,
+          "sha256": "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 17767,
+          "sha256": "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 102413,
+          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 38570,
+          "sha256": "ba2fbea51ec39ef2701bcb488f0859891aa8eb12e311da1f9330b5962bb3ce68"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 137856,
+          "sha256": "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 63899,
+          "sha256": "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 166095,
+          "sha256": "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 60612,
+          "sha256": "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 58144,
+          "sha256": "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 37617,
+          "sha256": "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 99672,
+          "sha256": "09ff1f5238aa9f13b85908eac24983327a13f944e0e5023e188f09b283f69181"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 26715,
+          "sha256": "01755009324aa0cb9dd10212ff98e8806857a1f580375224b67b8fce5f1d96bb"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 92918,
+          "sha256": "69f87d80f041def40a57a443849dd27f68c542972d84e02797871a90fe36fd74"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 20507,
+          "sha256": "eac86934b25c43d5a1ad901d09e23cb726f3d3c75254401ac3dbcc6803d0dbc5"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 85460,
+          "sha256": "cfa763fba5e9ee8361e67a9723960816e3efc8ec5a9333b0c645bc25247f61b9"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 20876,
+          "sha256": "53fc78929883db63e349a46a0194d06e41da9f8b8ebf97d12f6532954e1c9cdc"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 43165,
+          "sha256": "fe63392a323f41311024a00b8cfe9e6579726616509cdf4ee8743d6bb65be3e1"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20198,
+          "sha256": "6a650ea4889808f894ef68f5fd2310643b9c3a997914f08d44cf897ad4ad2080"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 71053,
+          "sha256": "07d4a8b3c6a1fbc28f55754abd6624445d3766898fa64030774b06e086b97f55"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 18265,
+          "sha256": "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 50104,
+          "sha256": "b873271eb35f8ebe835e7557bf6148ddadf78bc77ee1196ce9078aab547ac5de"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 26562,
+          "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 73915,
+          "sha256": "f66d40863a46dd7ed9e28afb2c78f8afbda8aee964e72d4fba60e65e55a351b3"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 17291,
+          "sha256": "490d4f922ea41dc7bca178cc54ab938ab136f0b922d7842af623001eabf60a65"
+        }
+      ]
+    },
+    {
+      "sequence": 9,
+      "predecessorSha256": "f707fb4c3338aeda79eb6242b645b5e864ce54b1e3955373e8edebcd7e026b8a",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 255778,
+          "sha256": "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 85044,
+          "sha256": "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 58744,
+          "sha256": "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 33936,
+          "sha256": "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 71098,
+          "sha256": "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 17767,
+          "sha256": "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 102413,
+          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 38570,
+          "sha256": "ba2fbea51ec39ef2701bcb488f0859891aa8eb12e311da1f9330b5962bb3ce68"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 137856,
+          "sha256": "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 63899,
+          "sha256": "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 166095,
+          "sha256": "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 60612,
+          "sha256": "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 58144,
+          "sha256": "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 37617,
+          "sha256": "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 99672,
+          "sha256": "09ff1f5238aa9f13b85908eac24983327a13f944e0e5023e188f09b283f69181"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 26715,
+          "sha256": "01755009324aa0cb9dd10212ff98e8806857a1f580375224b67b8fce5f1d96bb"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 94612,
+          "sha256": "4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 20959,
+          "sha256": "fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 86174,
+          "sha256": "5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 21119,
+          "sha256": "10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 43165,
+          "sha256": "fe63392a323f41311024a00b8cfe9e6579726616509cdf4ee8743d6bb65be3e1"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20198,
+          "sha256": "6a650ea4889808f894ef68f5fd2310643b9c3a997914f08d44cf897ad4ad2080"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 71053,
+          "sha256": "07d4a8b3c6a1fbc28f55754abd6624445d3766898fa64030774b06e086b97f55"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 18265,
+          "sha256": "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 50104,
+          "sha256": "b873271eb35f8ebe835e7557bf6148ddadf78bc77ee1196ce9078aab547ac5de"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 26562,
+          "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 73915,
+          "sha256": "f66d40863a46dd7ed9e28afb2c78f8afbda8aee964e72d4fba60e65e55a351b3"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 17291,
+          "sha256": "490d4f922ea41dc7bca178cc54ab938ab136f0b922d7842af623001eabf60a65"
+        }
+      ]
+    },
+    {
+      "sequence": 10,
+      "predecessorSha256": "94f48160552a6e0de702f71200e56c23d61bab8692d43f3ac1104dcfa681568b",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 255778,
+          "sha256": "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 85044,
+          "sha256": "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 58744,
+          "sha256": "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 33936,
+          "sha256": "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 71098,
+          "sha256": "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 17767,
+          "sha256": "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 102413,
+          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 38530,
+          "sha256": "bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 137856,
+          "sha256": "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 63899,
+          "sha256": "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 166095,
+          "sha256": "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 60612,
+          "sha256": "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 58144,
+          "sha256": "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 37617,
+          "sha256": "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 99672,
+          "sha256": "d9d9edd6379357dde229999ce461a0dc66bf58dc0d7900eb6f5ece177a9b3fba"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 26679,
+          "sha256": "6b3a7869962046a3594a788095faad640c76fec660a59aee7b26844e831851ff"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 94612,
+          "sha256": "4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 20959,
+          "sha256": "fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 86174,
+          "sha256": "5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 21119,
+          "sha256": "10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 43165,
+          "sha256": "fe63392a323f41311024a00b8cfe9e6579726616509cdf4ee8743d6bb65be3e1"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20198,
+          "sha256": "6a650ea4889808f894ef68f5fd2310643b9c3a997914f08d44cf897ad4ad2080"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 71053,
+          "sha256": "07d4a8b3c6a1fbc28f55754abd6624445d3766898fa64030774b06e086b97f55"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 18265,
+          "sha256": "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 50104,
+          "sha256": "b873271eb35f8ebe835e7557bf6148ddadf78bc77ee1196ce9078aab547ac5de"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 26562,
+          "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 73915,
+          "sha256": "f66d40863a46dd7ed9e28afb2c78f8afbda8aee964e72d4fba60e65e55a351b3"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 17291,
+          "sha256": "490d4f922ea41dc7bca178cc54ab938ab136f0b922d7842af623001eabf60a65"
+        }
+      ]
+    },
+    {
+      "sequence": 11,
+      "predecessorSha256": "bd3f5b90656f0e41d7f6aa439fdc01889e9ebeada26cd3caf8624c3ce1db7d07",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 255778,
+          "sha256": "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 85044,
+          "sha256": "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 58744,
+          "sha256": "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 33936,
+          "sha256": "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 71098,
+          "sha256": "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 17767,
+          "sha256": "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 102413,
+          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 38530,
+          "sha256": "bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 137856,
+          "sha256": "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 63899,
+          "sha256": "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 166095,
+          "sha256": "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 60612,
+          "sha256": "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 58144,
+          "sha256": "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 37617,
+          "sha256": "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 99672,
+          "sha256": "d9d9edd6379357dde229999ce461a0dc66bf58dc0d7900eb6f5ece177a9b3fba"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 26679,
+          "sha256": "6b3a7869962046a3594a788095faad640c76fec660a59aee7b26844e831851ff"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 94612,
+          "sha256": "4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 20959,
+          "sha256": "fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 86174,
+          "sha256": "5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 21119,
+          "sha256": "10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 43165,
+          "sha256": "fe63392a323f41311024a00b8cfe9e6579726616509cdf4ee8743d6bb65be3e1"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20198,
+          "sha256": "6a650ea4889808f894ef68f5fd2310643b9c3a997914f08d44cf897ad4ad2080"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 71053,
+          "sha256": "07d4a8b3c6a1fbc28f55754abd6624445d3766898fa64030774b06e086b97f55"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 18265,
+          "sha256": "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 50104,
+          "sha256": "b873271eb35f8ebe835e7557bf6148ddadf78bc77ee1196ce9078aab547ac5de"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 26562,
+          "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 77034,
+          "sha256": "c704e25024eaf7bdf317cc144f6b85922a3fe73a24c9c91e639ede032e22eb6f"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 17578,
+          "sha256": "4871c406390c4c9b36bff1c417a6c8dd22798736ea8daad1c63a3cbd0a978389"
+        }
+      ]
+    },
+    {
+      "sequence": 12,
+      "predecessorSha256": "63b8af4da431f0918c7ea9480564750bd12057af2bc83c294d962113ce7c9be8",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 255778,
+          "sha256": "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 85044,
+          "sha256": "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 58744,
+          "sha256": "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 33936,
+          "sha256": "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 71098,
+          "sha256": "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 17767,
+          "sha256": "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 102413,
+          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 38530,
+          "sha256": "bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 137856,
+          "sha256": "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 63899,
+          "sha256": "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 166095,
+          "sha256": "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 60612,
+          "sha256": "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 58144,
+          "sha256": "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 37617,
+          "sha256": "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 99672,
+          "sha256": "d9d9edd6379357dde229999ce461a0dc66bf58dc0d7900eb6f5ece177a9b3fba"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 26679,
+          "sha256": "6b3a7869962046a3594a788095faad640c76fec660a59aee7b26844e831851ff"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 94612,
+          "sha256": "4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 20959,
+          "sha256": "fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 86174,
+          "sha256": "5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 21119,
+          "sha256": "10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 43165,
+          "sha256": "fe63392a323f41311024a00b8cfe9e6579726616509cdf4ee8743d6bb65be3e1"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20198,
+          "sha256": "6a650ea4889808f894ef68f5fd2310643b9c3a997914f08d44cf897ad4ad2080"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 71053,
+          "sha256": "07d4a8b3c6a1fbc28f55754abd6624445d3766898fa64030774b06e086b97f55"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 18265,
+          "sha256": "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 50104,
+          "sha256": "b873271eb35f8ebe835e7557bf6148ddadf78bc77ee1196ce9078aab547ac5de"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 26562,
+          "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 77507,
+          "sha256": "e2050408c5bf3e084eacd6e42880310dafbfdf03b79821500cc0567b998f7d66"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 17716,
+          "sha256": "061b40ea20e0f7ee362f26bd54db954c3caea338df5e2f090ce34a4618ac37cc"
+        }
+      ]
+    },
+    {
+      "sequence": 13,
+      "predecessorSha256": "85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 255778,
+          "sha256": "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 85044,
+          "sha256": "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 58744,
+          "sha256": "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 33936,
+          "sha256": "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 71098,
+          "sha256": "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 17767,
+          "sha256": "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 102413,
+          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 38530,
+          "sha256": "bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 137856,
+          "sha256": "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 63859,
+          "sha256": "ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 166095,
+          "sha256": "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 60612,
+          "sha256": "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 58144,
+          "sha256": "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 37617,
+          "sha256": "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 99672,
+          "sha256": "d9d9edd6379357dde229999ce461a0dc66bf58dc0d7900eb6f5ece177a9b3fba"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 26679,
+          "sha256": "6b3a7869962046a3594a788095faad640c76fec660a59aee7b26844e831851ff"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 94612,
+          "sha256": "4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 20959,
+          "sha256": "fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 86174,
+          "sha256": "5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 21119,
+          "sha256": "10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 43165,
+          "sha256": "fe63392a323f41311024a00b8cfe9e6579726616509cdf4ee8743d6bb65be3e1"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20198,
+          "sha256": "6a650ea4889808f894ef68f5fd2310643b9c3a997914f08d44cf897ad4ad2080"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 71053,
+          "sha256": "07d4a8b3c6a1fbc28f55754abd6624445d3766898fa64030774b06e086b97f55"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 18265,
+          "sha256": "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 50104,
+          "sha256": "b873271eb35f8ebe835e7557bf6148ddadf78bc77ee1196ce9078aab547ac5de"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 26562,
+          "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 77507,
+          "sha256": "e2050408c5bf3e084eacd6e42880310dafbfdf03b79821500cc0567b998f7d66"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 17716,
+          "sha256": "061b40ea20e0f7ee362f26bd54db954c3caea338df5e2f090ce34a4618ac37cc"
+        }
+      ]
+    },
+    {
+      "sequence": 14,
+      "predecessorSha256": "146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c",
+      "artifacts": [
+        {
+          "task": "M05-T09",
+          "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+          "bytes": 59871,
+          "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+        },
+        {
+          "task": "M06-T01",
+          "path": "docs/proof/artifacts/publisher-0.1.0-publish-result.json",
+          "bytes": 11756,
+          "sha256": "aefed86741562bfa0f4bcbe163af50c8471dd6bf5979b7da36d681728536ff63"
+        },
+        {
+          "task": "M06-T05",
+          "path": "docs/proof/artifacts/publisher-0.1.0-execution-preflight.json",
+          "bytes": 21310,
+          "sha256": "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67"
+        },
+        {
+          "task": "M06-T08",
+          "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+          "bytes": 10688,
+          "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+        },
+        {
+          "task": "M06-T09",
+          "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+          "bytes": 17320,
+          "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+        },
+        {
+          "task": "M06-T11",
+          "path": "docs/proof/artifacts/publisher-0.1.0-invalid-source-matrix.json",
+          "bytes": 95467,
+          "sha256": "fc5904ea6ec4e6495629fc4de8009fee66155938013068b709dd1ff40c1e98d8"
+        },
+        {
+          "task": "M06-T10",
+          "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+          "bytes": 13179,
+          "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+        },
+        {
+          "task": "M07-T01",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+          "bytes": 22396,
+          "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+        },
+        {
+          "task": "M07-T02",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+          "bytes": 48642,
+          "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+        },
+        {
+          "task": "M07-T03",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+          "bytes": 62743,
+          "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+        },
+        {
+          "task": "M05-T04",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-interactions.json",
+          "bytes": 52430,
+          "sha256": "9bb23cf55d5167300ef19aa6f250795f70c9c1bf500a3466d985f65f51f14ab0"
+        },
+        {
+          "task": "M07-T04",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+          "bytes": 34612,
+          "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+        },
+        {
+          "task": "M05-T06",
+          "path": "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json",
+          "bytes": 9534,
+          "sha256": "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723"
+        },
+        {
+          "task": "M07-T05",
+          "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+          "bytes": 41945,
+          "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+        }
+      ],
+      "readers": [
+        {
+          "task": "M05-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "bytes": 255778,
+          "sha256": "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f"
+        },
+        {
+          "task": "M05-T09",
+          "role": "root-test",
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "bytes": 85044,
+          "sha256": "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979"
+        },
+        {
+          "task": "M06-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "bytes": 58744,
+          "sha256": "b3d8e1b500f8e286838cf78b3563e7c2ff01f7328cad5903a3d82afd79401b62"
+        },
+        {
+          "task": "M06-T01",
+          "role": "root-test",
+          "path": "tests/publisher-publish-result.test.mjs",
+          "bytes": 33936,
+          "sha256": "77c696b6be56932b23ecbc91b278c822ea7a51a6c28f8b1515c0d71b65f43aac"
+        },
+        {
+          "task": "M06-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "bytes": 71098,
+          "sha256": "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791"
+        },
+        {
+          "task": "M06-T05",
+          "role": "root-test",
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "bytes": 17767,
+          "sha256": "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea"
+        },
+        {
+          "task": "M06-T08",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
+          "bytes": 102413,
+          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+        },
+        {
+          "task": "M06-T08",
+          "role": "root-test",
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "bytes": 38530,
+          "sha256": "bb3038a8c5bb241c863daa6c7f41c1d8ab210da81fdbe52697f33a3c14909116"
+        },
+        {
+          "task": "M06-T09",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "bytes": 137856,
+          "sha256": "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6"
+        },
+        {
+          "task": "M06-T09",
+          "role": "root-test",
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "bytes": 63859,
+          "sha256": "ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d"
+        },
+        {
+          "task": "M06-T11",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "bytes": 166563,
+          "sha256": "06eb59602a768c13f19cc83289a574823d191aa3b62ed8fb7149381b326de802"
+        },
+        {
+          "task": "M06-T11",
+          "role": "root-test",
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "bytes": 60572,
+          "sha256": "29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531"
+        },
+        {
+          "task": "M06-T10",
+          "role": "proof-library",
+          "path": "scripts/lib/publisher-official-golden-proof.mjs",
+          "bytes": 58144,
+          "sha256": "ec9d5f0901a89c6026bf209dea2de82315c753d57e3046aea3a35f7180e1d245"
+        },
+        {
+          "task": "M06-T10",
+          "role": "root-test",
+          "path": "tests/publisher-official-golden.test.mjs",
+          "bytes": 37617,
+          "sha256": "760e7d282423b81dc5c2658e80901475c7ce0e7df41aa7237a4009e775090ea9"
+        },
+        {
+          "task": "M07-T01",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "bytes": 99672,
+          "sha256": "888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6"
+        },
+        {
+          "task": "M07-T01",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "bytes": 26679,
+          "sha256": "6b3a7869962046a3594a788095faad640c76fec660a59aee7b26844e831851ff"
+        },
+        {
+          "task": "M07-T02",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "bytes": 94612,
+          "sha256": "4c69fa253ba2d9432a75c6c6aaa2ad69e23c3683c43dae9c92dc73b3208937d9"
+        },
+        {
+          "task": "M07-T02",
+          "role": "root-test",
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "bytes": 20959,
+          "sha256": "fdcfc8c4868c1ee084b652e42c7dab4750bc569c4c05928dde7136118b4689ed"
+        },
+        {
+          "task": "M07-T03",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "bytes": 86174,
+          "sha256": "5624b06d8d0962d18c9a920a34a95b0023f4909d8c7b7812057bedcdc62ab5ab"
+        },
+        {
+          "task": "M07-T03",
+          "role": "root-test",
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "bytes": 21119,
+          "sha256": "10c1a677b88b5c6bd4389e659ce38f11a627ae92de4aafe4ffade0de23790f11"
+        },
+        {
+          "task": "M05-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-interactions-proof.mjs",
+          "bytes": 43165,
+          "sha256": "fe63392a323f41311024a00b8cfe9e6579726616509cdf4ee8743d6bb65be3e1"
+        },
+        {
+          "task": "M05-T04",
+          "role": "root-test",
+          "path": "tests/runtime-react-interactions.test.mjs",
+          "bytes": 20198,
+          "sha256": "6a650ea4889808f894ef68f5fd2310643b9c3a997914f08d44cf897ad4ad2080"
+        },
+        {
+          "task": "M07-T04",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "bytes": 71053,
+          "sha256": "07d4a8b3c6a1fbc28f55754abd6624445d3766898fa64030774b06e086b97f55"
+        },
+        {
+          "task": "M07-T04",
+          "role": "root-test",
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "bytes": 18265,
+          "sha256": "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9"
+        },
+        {
+          "task": "M05-T06",
+          "role": "proof-library",
+          "path": "scripts/lib/runtime-react-failure-boundary-proof.mjs",
+          "bytes": 50104,
+          "sha256": "b873271eb35f8ebe835e7557bf6148ddadf78bc77ee1196ce9078aab547ac5de"
+        },
+        {
+          "task": "M05-T06",
+          "role": "root-test",
+          "path": "tests/runtime-react-failure-boundary.test.mjs",
+          "bytes": 26562,
+          "sha256": "37ce784982279f7acc9739dd5665af3b24be5962f69a818459a2e0a6a205b6f7"
+        },
+        {
+          "task": "M07-T05",
+          "role": "proof-library",
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "bytes": 77507,
+          "sha256": "e2050408c5bf3e084eacd6e42880310dafbfdf03b79821500cc0567b998f7d66"
+        },
+        {
+          "task": "M07-T05",
+          "role": "root-test",
+          "path": "tests/control-plane-local-api.test.mjs",
+          "bytes": 17716,
+          "sha256": "061b40ea20e0f7ee362f26bd54db954c3caea338df5e2f090ce34a4618ac37cc"
         }
       ]
     }

@@ -1356,3 +1356,31 @@ consumption remain M07-T05 through M07-T11.
 
 `docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json`
 `sha256:29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394`.
+
+## M07-T05 — Local control-plane transport and persistence
+
+M07-T05 exposes one fixed-loopback, bearer-authenticated Fastify service over three separate
+repositories. Editable Source bytes use SQLite-backed monotonic generations and compare-and-swap;
+a stale generation cannot replace a newer winner. Immutable Bundle routes delegate unchanged to
+the M07-T01 first-writer-wins repository. Mutable channel pointers persist discovery metadata only
+and confer no integrity, package, reference, staging, commit, activation, or runtime authority.
+
+Exact allowed origins receive CORS permission and can read the response `ETag`; all other origins
+fail closed. Bounded strict JSON, fixed body limits, stable redacted error envelopes, and durable
+SQLite transactions cover malformed input, oversize input, concurrent writers, restart, and
+mutation cases. The server bounds inactive connections at 5 seconds, complete requests at 15
+seconds, and keep-alive at 5 seconds; a real partial-body TCP case proves shutdown cannot wait
+indefinitely. Native-addon import authority is isolated to this exact proof pair, and the reviewed
+production dependency audit reports no known vulnerability.
+
+The evidence contains 16 focused runtime cases, 18 compiler-negative cases, and 16 independent
+root proof/mutation cases. The 41,945-byte artifact authenticates the public API contract,
+transport, SQLite persistence, immutable Bundle delegation, generated distribution, exact
+prerequisite receipts, lifecycle behavior, and nonclaims.
+
+This advances `N-019` to `TESTED`. `P-12` remains `NOT_PROVEN`; transactional activation,
+last-known-good and restart recovery, fault injection, concurrency, and separately built host
+consumption remain M07-T06 through M07-T11. G07 remains open and `PF-074` remains `OPEN`.
+
+`docs/proof/artifacts/control-plane-api-0.1.0-local-api.json`
+`sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`.
