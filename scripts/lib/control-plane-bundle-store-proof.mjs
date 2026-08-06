@@ -199,16 +199,16 @@ const APPROVED_M07_T05_TRACKED_RECEIPTS = Object.freeze({
     sha256: "fc078870e74e58d17ac3479c2d178143721b82e9c7846e0187805e11e6fa54f6",
   }),
   "tests/publisher-bundle-publication.test.mjs": Object.freeze({
-    bytes: 63_899,
-    sha256: "c3050c09f4d74177de07dabc0bd4339cf1ac055a40074676f70029c5e09d114f",
+    bytes: 63_859,
+    sha256: "ae7b688d904b4c77632fd78e0ee23b2264eae1574b4350306b5e2ec1b9974b8d",
   }),
   "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
-    bytes: 166_095,
-    sha256: "fe4291e55ee7a5436692b0b2234d25ab6e2ca846cd37e94f7262bce3061e4d08",
+    bytes: 166_563,
+    sha256: "06eb59602a768c13f19cc83289a574823d191aa3b62ed8fb7149381b326de802",
   }),
   "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
-    bytes: 60_612,
-    sha256: "f3b5a757f33774aad833e26f49da186c34ee97f9ff630cdfa6d458030f9cd14d",
+    bytes: 60_572,
+    sha256: "29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531",
   }),
 });
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;

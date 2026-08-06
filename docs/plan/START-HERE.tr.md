@@ -106,7 +106,7 @@ token sınırı belge düzeltmesini doğrular; M07-T05 eseri ve diğer bütün d
 Bu yalnızca incelenmiş yerel okuyucu kanıtıdır; henüz hosted CI iddiası yoktur ve uyumluluk okuyucusu
 borcunun sahibi I07-04'tür.
 İncelenmiş sıra 13, sıra 12'nin
-`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` başından güncel
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` başından o zamanki
 `146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` başına bağlanır; aynı 14
 değişmemiş dondurulmuş eseri ve 28 okuyucuyu doğrular. Yalnızca `[9]` indeksi değişir: M06-T09
 publisher-bundle-publication kök okuyucusu 63.859 bayt /
@@ -115,6 +115,17 @@ required-exhaustive denemesi bu okuyucuda M07 ardılı/güncel makbuzuna ilişki
 ortaya çıkardı; dar okuyucu düzeltmesinden sonra odaklı kök test dizisi 112/112 geçiyor ve
 dondurulmuş M06-T09 eseri değişmedi. Bu incelenmiş yerel okuyucu kanıtıdır, henüz hosted CI başarı
 iddiası değildir ve uyumluluk okuyucusu borcunun sahibi I07-04 olarak kalır.
+İncelenmiş sıra 14, sıra 13'ün
+`146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` başından güncel
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` başına bağlanır; aynı 14
+değişmemiş dondurulmuş eseri ve 28 okuyucuyu doğrular. Yalnızca `[10, 11, 14]` indeksleri değişir:
+M06-T11 kanıt okuyucusu 166.563 bayt /
+`sha256:06eb59602a768c13f19cc83289a574823d191aa3b62ed8fb7149381b326de802`, kök okuyucusu 60.572
+bayt / `sha256:29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531` ve M07-T01 kanıt
+okuyucusu 99.672 bayt /
+`sha256:888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6` olur. Bu dar CI-okuyucu
+ardılı hiçbir dondurulmuş eseri değiştirmez. Son hosted çalışma hâlâ başarısızdır; bu nedenle hosted
+CI başarı iddiası yoktur ve uyumluluk okuyucusu borcunun sahibi I07-04 olarak kalır.
 Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
 bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
 kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından

@@ -689,7 +689,7 @@ artifact remain unchanged. This is reviewed local-reader evidence; hosted CI has
 claimed, and I07-04 still owns the compatibility-reader debt.
 
 Reviewed reader checkpoint sequence 13 links the exact sequence 12 head
-`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` to current head
+`85c49a0d79346bf2ea92b716f6b43c5d95d164209e3d67af34871a334686e10e` to its then-current head
 `146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` with the same 14 unchanged
 frozen artifacts and 28 readers. Only index `[9]` changes: the M06-T09
 publisher-bundle-publication root reader is 63,859 bytes at
@@ -698,6 +698,18 @@ required-exhaustive attempt exposed two stale M07 successor/current-receipt asse
 reader; after the narrow reader-only correction, its focused root passes 112/112 and the frozen
 M06-T09 artifact remains unchanged. This is reviewed local-reader evidence, does not claim hosted
 CI success, and leaves the compatibility-reader debt with I07-04.
+
+Reviewed reader checkpoint sequence 14 links the exact sequence 13 head
+`146b04f1c8209be64168afb451ceee2c422da0cdced116f8d08beafe795c533c` to current head
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` with the same 14 unchanged
+frozen artifacts and 28 readers. Only indexes `[10, 11, 14]` change: the M06-T11 proof reader is
+166,563 bytes at `sha256:06eb59602a768c13f19cc83289a574823d191aa3b62ed8fb7149381b326de802`,
+its root reader is 60,572 bytes at
+`sha256:29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531`, and the M07-T01 proof
+reader is 99,672 bytes at
+`sha256:888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6`. This narrow CI-reader
+successor changes no frozen artifact. The latest hosted run remains failed, so this is local-reader
+evidence rather than hosted CI success; I07-04 still owns the compatibility-reader debt.
 
 ## M08 — Framework-neutral editor core
 
