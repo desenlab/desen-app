@@ -223,6 +223,11 @@ const REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY = Object.freeze({
       bytes: 255_778,
       sha256: "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f",
     }),
+    Object.freeze({
+      task: "M07-T06",
+      bytes: 257_943,
+      sha256: "927201fd9e9067a1d03ca1b274724bb065ca97f47755348338a979e4c2f2f74a",
+    }),
   ]),
   "tests/reference-host-web-source-audit.test.mjs": Object.freeze([
     Object.freeze({
@@ -239,6 +244,11 @@ const REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY = Object.freeze({
       task: "M07-T05",
       bytes: 85_044,
       sha256: "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979",
+    }),
+    Object.freeze({
+      task: "M07-T06",
+      bytes: 86_740,
+      sha256: "ec7aabd8e3446f58ca397e55f0b4580bee193e21e692c46fe89c3f4a60902ac9",
     }),
   ]),
 });

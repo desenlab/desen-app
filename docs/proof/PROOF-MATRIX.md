@@ -1384,3 +1384,51 @@ consumption remain M07-T06 through M07-T11. G07 remains open and `PF-074` remain
 
 `docs/proof/artifacts/control-plane-api-0.1.0-local-api.json`
 `sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`.
+
+## M07-T06 — Staged runtime indexes and active/staged separation
+
+M07-T06 consumes only the exact opaque M07-T03 package authority. It takes a second immutable copy
+of every authenticated artifact, recalculates per-artifact and complete Web–React package digests,
+validates the exact execution Catalog and Bundle contracts, and prepares inert component/behavior
+handler programs. Complete success builds deterministic package, capability, surface, source-node,
+attached-behavior, state, resource-alias, operation-alias, and seven sorted dynamic-obligation
+indexes for the official two-surface candidate.
+
+The staging operation accepts no caller-selected Bundle, Catalog, artifacts, loaders, callbacks,
+channels, active record, reference authority, target adapter, or limit override. It loads no package
+code, renders nothing, invokes no effect, and writes no mutable staged slot, channel, active
+revision, previous-good revision, generation, commit, recovery, or host notification. M07-T04 and
+M07-T06 therefore remain independent pre-commit branches over one exact M07-T03 identity; M07-T07
+must authenticate and join both authorities before a durable activation transaction.
+
+All 14 staging-profile ceilings have exact/one-over or executable dominance evidence. Thirteen
+focused runtime cases, 13 compiler-negative cases, and 17 independent root proof/mutation cases
+cover package reclosure, handler selectors, nested operation aliases, the real nonzero
+behavior/resource path, forged-authority precedence, byte drift, trusted-port disagreement,
+mutation resistance, deterministic regeneration, no-follow reads, and atomic artifact writes. The
+artifact also pins trace rows `PIPE-006`, `PIPE-015`, `R-124`, `R-126`, and `R-127` and the exact
+M07-T03/T04/T05 predecessor artifacts plus the M02-T11 Validator execution-contract and M04-T13
+runtime-core action-turn artifacts. Normative rows `N-038` and `N-041` now name and authenticate
+their limited M07-T06 contributions while remaining `PLANNED` for later transactional and measured
+owners.
+
+Reviewed reader checkpoint sequence 15 links sequence 14 head
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` to
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5`. It authenticates 15 frozen
+artifacts and 30 live readers, including the 47,622-byte T06 artifact at the SHA-256 below; reseals
+reader indexes `[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27]`; and
+appends the T06 proof/root readers at `[28, 29]`. Reader index 14 is the final 105,203-byte M07-T01
+proof reader at `sha256:fda6c679ce74201a90483f36d26702f5478bc67561ea632315541d542697f80b`;
+reader index 15 is the final 27,154-byte M07-T01 root reader at
+`sha256:ab25e94ed1880b79dfb22f98a3da67fa5b777fdfaa86b3f02739bed6af29a45c`. Sequences 1–14 and
+predecessor artifact bytes remain unchanged. This is local-reader evidence and makes no hosted
+M07-T06 claim. `DEBT-I07-009` and `DEBT-I07-013` record the temporary compatibility-reader bridges
+under I07-04 for removal by G07.
+
+`P-12` remains `NOT_PROVEN`; `N-038` and `N-041` remain `PLANNED`; G07 remains open; and `PF-075`
+remains `OPEN` for the candidate consume/reject lifetime. Durable activation, last-known-good and
+restart recovery, fault injection, concurrency, and separately built host consumption remain
+M07-T07 through M07-T11.
+
+`docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json`
+`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`.

@@ -76,11 +76,11 @@ const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm boundaries",
 ]);
 const EXPECTED_PREREQUISITE_SHA256 =
-  "106b40cbcb85dd63833cdf7da29ca4b87d30e6fdced7d8b6e7ce91742b5e98d1";
+  "094716a406f09e608d66856f5ae2e3a83bcbfbca13fdea3ae7b27d24eb230c27";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "a4ca5e101bab7ba21ea56dccc9c2e9306aaad3cb60e3b540ba32d70a0f587b9f";
+  "f061a9c1cc9e6ad248782c57be26d194e9d56e5297a63a534ecb5e70e80e5be0";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "af7be654a83989448ba8db76c8e9f22ba4ce515f46834853f95f4ac14a56cb90";
+  "fd2ab1c53f58d8f2f4782fd67943afba51165dd21d58d006bbc48651ea684315";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -407,6 +407,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "control-plane-local-api",
     "scripts/verify-control-plane-local-api.mjs",
     "tests/control-plane-local-api.test.mjs",
+  ],
+  [
+    "control-plane-runtime-staging",
+    "scripts/verify-control-plane-runtime-staging.mjs",
+    "tests/control-plane-runtime-staging.test.mjs",
   ],
 ]);
 
@@ -1275,7 +1280,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "d26e9fa74f85be06852cd4f667467606735687e851ab03a6ef5611700c9ccc92";
+  "c6aa56d9cd8a89168863c0e3f98ed5078fd254319d44db05f947a6768d57dd96";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

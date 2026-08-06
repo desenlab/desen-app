@@ -43,7 +43,14 @@ const allowedPackageDependencies = {
 
 /** @type {Record<string, readonly string[]>} */
 const allowedApplicationDependencies = {
-  "control-plane-api": ["protocol", "validator", "publisher", "catalog-sdk", "testkit"],
+  "control-plane-api": [
+    "protocol",
+    "validator",
+    "publisher",
+    "catalog-sdk",
+    "runtime-core",
+    "testkit",
+  ],
   "desen-app": [
     "protocol",
     "validator",

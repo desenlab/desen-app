@@ -1,7 +1,7 @@
 /**
  * Local DESEN control-plane infrastructure for editable Source storage, immutable Bundle
  * distribution, mutable channel discovery, integrity verification, exact installed-package
- * preflight, and bounded surface-reference preflight.
+ * preflight, bounded surface-reference preflight, and isolated runtime-index staging.
  *
  * @packageDocumentation
  */
@@ -25,6 +25,14 @@ export {
   REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE,
 } from "./reference-preflight-contract.js";
 export { preflightBundleReferences } from "./reference-preflight.js";
+export {
+  BUNDLE_RUNTIME_STAGING_LIMITS,
+  INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE,
+  RUNTIME_STAGING_INTERNAL_FAILURE_CODE,
+  RUNTIME_STAGING_LIMIT_EXCEEDED_CODE,
+  RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE,
+} from "./runtime-staging-contract.js";
+export { stageBundleRuntime } from "./runtime-staging.js";
 export { verifyBundleStoreEntry } from "./bundle-verification.js";
 export { openBundleStore } from "./bundle-store.js";
 export {
@@ -66,6 +74,15 @@ export type {
   BundleReferencePreflightStage,
   VerifiedBundleSurfaceReferences,
 } from "./reference-preflight-contract.js";
+export type {
+  BundleRuntimeStagingAuthority,
+  BundleRuntimeStagingDiagnostic,
+  BundleRuntimeStagingLimits,
+  BundleRuntimeStagingResult,
+  BundleRuntimeStagingStage,
+  StagedRuntimePackageSummary,
+  StagedRuntimeSurfaceSummary,
+} from "./runtime-staging-contract.js";
 export type {
   BundleStore,
   BundleStoreEntry,

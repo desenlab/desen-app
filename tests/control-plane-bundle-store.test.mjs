@@ -229,6 +229,14 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
     ],
     [APP_INDEX, (source) => `${source}\nexport const deleteBundle = true;\n`],
     [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          'export { stageBundleRuntime } from "./runtime-staging.js";',
+          'export { stageBundleRuntime as stageBundleRuntimeChanged } from "./runtime-staging.js";',
+        ),
+    ],
+    [
       APP_PACKAGE,
       (source) =>
         source.replace(
@@ -344,12 +352,12 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-local-api && pnpm lint",
-        "pnpm verify:control-plane-local-api && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm verify:control-plane-runtime-staging && pnpm lint",
+        "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-local-api && turbo run test",
-        "pnpm test:control-plane-local-api && pnpm test:control-plane-successor && turbo run test",
+        "pnpm test:control-plane-runtime-staging && turbo run test",
+        "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-successor && turbo run test",
       ),
   );
   const successor = await buildControlPlaneBundleStoreEvidence(successorOptions);
@@ -454,6 +462,12 @@ test("[runtime] rejects overwrite, alias, copy, concurrency, or public-boundary 
     },
     (receipt) => {
       receipt.storedLinks = 2;
+    },
+    (receipt) => {
+      receipt.publicModuleKeys.push("unreviewedRuntimeSuccessor");
+    },
+    (receipt) => {
+      receipt.packageSelfReference.keys.push("unreviewedRuntimeSuccessor");
     },
   ];
   for (const mutate of mutations) {

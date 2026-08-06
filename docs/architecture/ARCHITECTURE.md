@@ -685,12 +685,33 @@ ancestor multiplication.
 Only guard-successful data reaches `validateDesenBundleSemantics`; its independent snapshot must
 remain canonically identical. Success yields a second opaque identity with only safe revision,
 profile, and per-surface counts. It deliberately does not prepare execution contracts or runtime
-indexes: M07-T06 owns that parallel staged branch directly from the exact M07-T03 package snapshots,
-and M07-T07 must join both authentic branches before commit. M07-T05 owns editable sources, mutable
-channels, and the transport API; M07-T07 through M07-T10 own transactional activation,
-last-known-good recovery, and fault behavior; M07-T11 owns reference-host channel consumption. A
-stored entry, integrity authority, package authority, reference authority, and staging authority
-are distinct evidence; none alone is durable activation authority.
+indexes: M07-T06 now implements that parallel staged branch directly from the exact M07-T03 package
+snapshots, and M07-T07 must join both authentic branches before commit. M07-T05 owns editable
+sources, mutable channels, and the transport API; M07-T07 through M07-T10 own transactional
+activation, last-known-good recovery, and fault behavior; M07-T11 owns reference-host channel
+consumption. A stored entry, integrity authority, package authority, reference authority, and
+staging authority are distinct evidence; none alone is durable activation authority.
+
+M07-T06 authenticates the exact M07-T03 package authority before observing private data. It copies
+the already verified artifact snapshots into a second closed staged lifetime and independently
+recalculates every package digest, so caller mutation and package-private time-of-check/time-of-use
+drift cannot change the prepared candidate silently. Exact execution Catalog validation and Bundle
+execution-contract validation run on the authenticated snapshots. Their canonically identical
+Bundle result, sorted dynamic obligations, and runtime-core-prepared inert action programs then feed
+immutable indexes for package artifacts, capability categories, surfaces, source nodes, behaviors,
+state, resources, handlers, operation aliases, and the entry surface.
+
+The staged result is a callback-free opaque candidate with safe byte-free summaries. Its private
+identity retains the exact package authority, copied artifact bytes, execution contracts,
+obligations, and indexes, but no loader or target adapter. Fixed aggregate ceilings reject the
+complete candidate instead of truncating any plan. Each successful call creates an independent
+authority rather than writing a mutable global staged slot; it reads and writes no channel, active
+revision, previous-good revision, generation, durable record, or host state. Reference admission
+therefore remains the parallel M07-T04 branch. M07-T07 must authenticate the exact reference and
+staging identities together before one durable activation transaction can publish either branch.
+Each candidate is individually finite and private state is weakly owned by its public handle, but
+T06 deliberately creates no process-global retention quota. T07 activation orchestration must
+define the consume/reject lifetime and must not retain abandoned candidates indefinitely.
 
 M07-T05 realizes the local transport without widening any earlier authority. One Fastify server
 binds only to the fixed loopback profile, authenticates an exact bearer token, accepts exact
@@ -709,9 +730,9 @@ restart/concurrency tests protect the admitted local profile.
 
 This API is deliberately an application-owned local control plane rather than a remotely exposed
 multi-tenant service. It grants no network discovery, package loading, reference-preflight,
-staging, activation, or last-known-good authority. M07-T06 owns staged runtime indexes and the
-active/staged separation, and M07-T07 must still join authentic reference and staging branches in
-one durable activation transaction.
+staging, activation, or last-known-good authority. The separate package-root M07-T06 operation owns
+staged runtime indexes and the active/staged separation, and M07-T07 must still join authentic
+reference and staging branches in one durable activation transaction.
 
 ### DESEN Developer Platform (`desen.run`)
 

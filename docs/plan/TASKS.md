@@ -55,12 +55,13 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
-and proved the 130-workload, 61-proof-pair cutover baseline. The reviewed M07-T05 live successor
-contains 138 workloads and 65 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
-frozen cutover evidence. The retained sequential runner is available only through explicit manual
-`legacy-rollback`. Exact cutover workload, result, cancellation, tracked-workspace, hosted, and
-shared-state equivalence remains archived in the unchanged I07-02 baseline. M07-T05 is `DONE`, and
-M07-T06 is next.
+and proved the 130-workload, 61-proof-pair cutover baseline. The M07-T06 working-tree successor
+contains 140 workloads and 66 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
+frozen cutover evidence. Its 55 ordinary pairs and 11 exclusive barriers project to 431 legacy
+prerequisite segments, 2,337 ordered leaf invocations, and 218 distinct leaf workloads. The retained
+sequential runner is available only through explicit manual `legacy-rollback`. Exact cutover
+workload, result, cancellation, tracked-workspace, hosted, and shared-state equivalence remains
+archived in the unchanged I07-02 baseline. M07-T06 is `DONE`, and M07-T07 is next.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -480,8 +481,8 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | M07-T03 | DONE        | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
 | M07-T04 | DONE        | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
 | M07-T05 | DONE        | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
-| M07-T06 | NOT_STARTED | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
-| M07-T07 | NOT_STARTED | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision}` as one consistent record                    |
+| M07-T06 | DONE        | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
+| M07-T07 | NOT_STARTED | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision, generation}` as one consistent record        |
 | M07-T08 | NOT_STARTED | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
 | M07-T09 | NOT_STARTED | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
 | M07-T10 | NOT_STARTED | M07-T09                 | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
@@ -615,6 +616,32 @@ Evidence: `docs/proof/CONTROL-PLANE-LOCAL-API.md` and
 `docs/proof/artifacts/control-plane-api-0.1.0-local-api.json`
 `sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`.
 
+M07-T06 adds one bounded execution-staging branch over the exact opaque M07-T03 package authority.
+It independently recloses the retained package bytes, validates execution Catalogs and Bundle
+contracts, prepares inert component and behavior action programs, and constructs deterministic
+package, capability, surface, source-node, behavior, state, resource-alias, operation-alias, and
+dynamic-obligation indexes. It neither consumes the parallel M07-T04 reference authority nor
+loads package code, invokes a target adapter, renders, mutates a channel, or writes active,
+previous-good, generation, or durable-commit state.
+
+All 14 implementation-owned staging limits have exact/one-over or executable dominance evidence.
+The registered suites pass 13 focused runtime cases, 13 compiler-negative cases, and 17 independent
+root proof/mutation cases. The official candidate closes to the exact M07-T03 package identity and
+seven sorted dynamic obligations; forged authorities, byte drift, contract disagreement, limit
+crossings, public mutation, and partial/active authority all fail closed. P-12 remains
+`NOT_PROVEN`; N-038 and N-041 remain `PLANNED`; G07 remains open; and `PF-075` remains `OPEN` for
+the M07-T07 consume/reject lifetime. Overall progress is 80/145, M07 is 6/11, and M07-T07 owns the
+authenticated T04/T06 join plus one durable activation transaction next.
+
+Evidence: `docs/proof/CONTROL-PLANE-RUNTIME-STAGING.md` and
+`docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json`
+`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`.
+
+The M07-T06 CI registration produces the exact 140-workload, 66-proof-pair successor: 55 ordinary
+pairs, 11 exclusive barriers, 431 retained prerequisite segments, 2,337 ordered legacy leaf
+invocations, and 218 distinct leaves. All 127 CI contract cases pass. This is current working-tree
+evidence; no hosted M07-T06 result is claimed.
+
 Reviewed reader checkpoint sequence 7 links predecessor head
 `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to
 `d50b5ee4fb265f241bac7652b979af0146d530528ba6db8fc98c8fb3225a5ba5` and authenticates 13 frozen
@@ -708,8 +735,20 @@ its root reader is 60,572 bytes at
 `sha256:29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531`, and the M07-T01 proof
 reader is 99,672 bytes at
 `sha256:888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6`. This narrow CI-reader
-successor changes no frozen artifact. The latest hosted run remains failed, so this is local-reader
-evidence rather than hosted CI success; I07-04 still owns the compatibility-reader debt.
+successor changes no frozen artifact. Subsequent M07-T05 pull-request and `main`
+required-exhaustive runs passed in hosted CI; sequence 14 itself remains local-reader evidence, and
+I07-04 still owns the compatibility-reader debt.
+
+Reviewed checkpoint sequence 15 links exact sequence 14 head
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` to current head
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` and authenticates 15 frozen
+artifacts plus 30 live readers. It appends the 47,622-byte M07-T06 artifact
+`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`, reseals indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27]`, and appends the T06
+proof/root readers at `[28, 29]`.
+Sequences 1–14 and predecessor artifact bytes remain unchanged. This is reviewed local-reader
+evidence and claims no hosted M07-T06 result. `DEBT-I07-009` and `DEBT-I07-013` record the temporary
+compatibility-reader bridges under I07-04 for removal by G07.
 
 ## M08 — Framework-neutral editor core
 

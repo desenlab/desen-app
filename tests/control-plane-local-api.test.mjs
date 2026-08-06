@@ -18,6 +18,7 @@ import {
   DEFAULT_CONTROL_PLANE_LOCAL_API_ARTIFACT_PATH,
   ControlPlaneLocalApiEvidenceError,
   buildControlPlaneLocalApiEvidence,
+  runControlPlaneLocalApiProbe,
   verifyControlPlaneLocalApiEvidence,
   writeControlPlaneLocalApiEvidence,
 } from "../scripts/lib/control-plane-local-api-proof.mjs";
@@ -37,11 +38,14 @@ const APP_STRICT_JSON = "apps/control-plane-api/src/strict-json-internal.ts";
 const APP_RUNTIME_TEST = "apps/control-plane-api/test/local-control-plane.test.ts";
 const APP_TYPE_TEST = "apps/control-plane-api/test/local-control-plane.types.ts";
 const ROOT_PACKAGE = "package.json";
+const LOCKFILE = "pnpm-lock.yaml";
 const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const CI_INVENTORY = "scripts/ci/exhaustive-workload-inventory.mjs";
+const SHARED_STATE_AUTHORITY = "scripts/ci/shared-state-authority.mjs";
 const ROOT_TEST = "tests/control-plane-local-api.test.mjs";
 
 let built;
+let liveRuntimeReceipt;
 let proofDocument;
 const temporaryDirectories = [];
 
@@ -118,7 +122,8 @@ function deeplyFrozen(root) {
 }
 
 before(async () => {
-  built = await buildControlPlaneLocalApiEvidence();
+  liveRuntimeReceipt = await runControlPlaneLocalApiProbe();
+  built = await buildControlPlaneLocalApiEvidence({ runtimeReceipt: liveRuntimeReceipt });
   proofDocument = exactProofDocument(built.artifactSha256);
 });
 
@@ -256,6 +261,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
   const mutations = [
     [APP_PACKAGE, (source) => source.replace('"test:local-api":', '"test:local-api-removed":')],
     [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
+          '"@desen/runtime-core": "workspace:*",',
+          '"@desen/runtime-core": "workspace:^",',
+        ),
+    ],
+    [
       APP_INDEX,
       (source) =>
         source.replace(
@@ -264,11 +277,45 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          'export { stageBundleRuntime } from "./runtime-staging.js";',
+          'export { stageBundleRuntime as stageBundleRuntimeUnsafe } from "./runtime-staging.js";',
+        ),
+    ],
+    [
       ROOT_PACKAGE,
-      (source) => source.replace("pnpm verify:control-plane-local-api && pnpm lint", "pnpm lint"),
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-local-api && pnpm verify:control-plane-runtime-staging",
+          "pnpm verify:control-plane-runtime-staging",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace("pnpm verify:control-plane-runtime-staging && pnpm lint", "pnpm lint"),
     ],
     [CI_SOURCE, (source) => source.replace('"control-plane-local-api"', '"local-api-removed"')],
+    [
+      CI_SOURCE,
+      (source) => source.replace('"control-plane-runtime-staging"', '"runtime-staging-removed"'),
+    ],
     [CI_INVENTORY, (source) => source.replace('"control-plane-local-api"', '"local-api-removed"')],
+    [
+      CI_INVENTORY,
+      (source) => source.replace('"control-plane-runtime-staging"', '"runtime-staging-removed"'),
+    ],
+    [
+      LOCKFILE,
+      (source) =>
+        source.replace(
+          "version: link:../../packages/runtime-core",
+          "version: link:../../packages/runtime-core-drifted",
+        ),
+    ],
+    [SHARED_STATE_AUTHORITY, (source) => source.replace('  "control-plane-runtime-staging",', "")],
   ];
   for (const [relativePath, transform] of mutations) {
     await assert.rejects(
@@ -298,6 +345,30 @@ test("[traceability] rejects owner or identity drift in the exact rows", async (
 });
 
 test("[runtime] rejects changed Source, restart, two-instance CAS, Bundle/channel, or security receipts", async () => {
+  const successorBuild = await buildControlPlaneLocalApiEvidence({
+    runtimeReceipt: liveRuntimeReceipt,
+  });
+  assert.deepEqual(successorBuild.artifactBytes, built.artifactBytes);
+  assert.ok(liveRuntimeReceipt.publicModuleKeys.includes("stageBundleRuntime"));
+  assert.equal(built.runtimeReceipt.publicModuleKeys.includes("stageBundleRuntime"), false);
+  const successorKeyMutations = [
+    (receipt) => {
+      receipt.publicModuleKeys = receipt.publicModuleKeys.filter(
+        (key) => key !== "stageBundleRuntime",
+      );
+    },
+    (receipt) => {
+      receipt.publicModuleKeys = [...receipt.publicModuleKeys, "unreviewedRuntimeExport"].sort();
+    },
+  ];
+  for (const mutate of successorKeyMutations) {
+    const receipt = structuredClone(liveRuntimeReceipt);
+    mutate(receipt);
+    await assert.rejects(
+      buildControlPlaneLocalApiEvidence({ runtimeReceipt: receipt }),
+      expectedError("RUNTIME_PROBE_MISMATCH"),
+    );
+  }
   const mutations = [
     (receipt) => {
       receipt.officialSource.firstReadExact = false;

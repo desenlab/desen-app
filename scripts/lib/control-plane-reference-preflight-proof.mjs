@@ -643,6 +643,55 @@ const APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS = Object.freeze(
     .map(({ exported }) => exported)
     .sort(),
 );
+const APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS = Object.freeze(
+  [
+    ...APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS,
+    ...[
+      "BUNDLE_RUNTIME_STAGING_LIMITS",
+      "INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE",
+      "RUNTIME_STAGING_INTERNAL_FAILURE_CODE",
+      "RUNTIME_STAGING_LIMIT_EXCEEDED_CODE",
+      "RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE",
+    ].map((name) =>
+      Object.freeze({
+        imported: name,
+        exported: name,
+        module: "./runtime-staging-contract.js",
+        typeOnly: false,
+      }),
+    ),
+    Object.freeze({
+      imported: "stageBundleRuntime",
+      exported: "stageBundleRuntime",
+      module: "./runtime-staging.js",
+      typeOnly: false,
+    }),
+    ...[
+      "BundleRuntimeStagingAuthority",
+      "BundleRuntimeStagingDiagnostic",
+      "BundleRuntimeStagingLimits",
+      "BundleRuntimeStagingResult",
+      "BundleRuntimeStagingStage",
+      "StagedRuntimePackageSummary",
+      "StagedRuntimeSurfaceSummary",
+    ].map((name) =>
+      Object.freeze({
+        imported: name,
+        exported: name,
+        module: "./runtime-staging-contract.js",
+        typeOnly: true,
+      }),
+    ),
+  ].sort((left, right) => {
+    const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
+    return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
+  }),
+);
+const APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS = Object.freeze(
+  APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly)
+    .map(({ exported }) => exported)
+    .sort(),
+);
 
 const HISTORICAL_M07_T04_TRACKED_RECEIPTS = Object.freeze({
   [APP_PACKAGE]: Object.freeze({
@@ -732,6 +781,32 @@ const APPROVED_M07_T05_TRACKED_RECEIPTS = Object.freeze({
     sha256: "3678abe07029b24e3c0e54cfcadc30cde1ded54e7f563fa9790c212a8cc244e9",
   }),
 });
+const APPROVED_M07_T06_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 2_082,
+    sha256: "342be659bad35bcec910a5c5cd97d4b1bde03c63e7d5873d0d8806084aa495d4",
+  }),
+  [APP_INDEX]: Object.freeze({
+    bytes: 3_968,
+    sha256: "113272b4dc95be0c625d30956bfe9cf696cc0dd8a29f8b6c7b40c62497575860",
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 61_860,
+    sha256: "e864438135c2734984e8c16f61da88824f3cdd7c644cbf5b7af7b090ee1db49f",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 47_530,
+    sha256: "120a757310ce4fb01be00e2cf0f83760deb23649e931054af0a84c75e1f0df47",
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    bytes: 45_845,
+    sha256: "9e27595b7161c60de768ff821a1301e9ed1fa0edbbec5a93c3dc8f85463ca787",
+  }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 18_894,
+    sha256: "5bfe5a85e7b70babc93c4def358466400456d6eb990810a0553390293896c03d",
+  }),
+});
 const HISTORICAL_M07_T04_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.d.ts": Object.freeze({
     bytes: 2_144,
@@ -768,6 +843,24 @@ const APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
     sha256: "16112df85d0fe16f3767b17c28f36d0c8c3bc015f82114d4ab2b718c6d9567db",
   }),
 });
+const APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
+  "index.d.ts": Object.freeze({
+    bytes: 3_845,
+    sha256: "2bffa5987fc90b787a4b160dbe1cb5fbf645b18361581457796636c5dfe71555",
+  }),
+  "index.d.ts.map": Object.freeze({
+    bytes: 1_804,
+    sha256: "bad847ad240a81f9dae10804c46cdd1b5a16b369ea5c57cf350335d574b5ee6c",
+  }),
+  "index.js": Object.freeze({
+    bytes: 1_812,
+    sha256: "2ba6d6a07cf5ebf252accf2f7527e7b60d72a246f33c605e3c49d9855f24839a",
+  }),
+  "index.js.map": Object.freeze({
+    bytes: 866,
+    sha256: "e701d456882b7c895652e780c73ba349bc150fc044645d1e872f150a44a34be2",
+  }),
+});
 
 function publicExportInventory(source, relativePath) {
   const sourceFile = parseTypescript(source, relativePath, "REGISTRATION_DRIFT");
@@ -793,7 +886,8 @@ function publicExportInventory(source, relativePath) {
   const serialized = JSON.stringify(inventory);
   if (
     serialized !== JSON.stringify(EXPECTED_PUBLIC_SOURCE_EXPORTS) &&
-    serialized !== JSON.stringify(APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS)
+    serialized !== JSON.stringify(APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS) &&
+    serialized !== JSON.stringify(APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T04 public package-root inventory drifted.");
   }
@@ -812,7 +906,14 @@ function exactTupleCount(source, tuple) {
   return count;
 }
 
-function assertAggregateTail(script, predecessor, current, terminal, reviewedSuccessor) {
+function assertAggregateTail(
+  script,
+  predecessor,
+  current,
+  terminal,
+  reviewedSuccessor,
+  reviewedLaterSuccessor,
+) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
   const predecessorIndex = commands.indexOf(predecessor);
@@ -822,12 +923,20 @@ function assertAggregateTail(script, predecessor, current, terminal, reviewedSuc
   const taskTimeTail = terminalIndex === currentIndex + 1;
   const successorTail =
     reviewedSuccessorIndex === currentIndex + 1 && terminalIndex === reviewedSuccessorIndex + 1;
+  const reviewedLaterSuccessorIndex = commands.indexOf(reviewedLaterSuccessor);
+  const laterSuccessorTail =
+    reviewedSuccessorIndex === currentIndex + 1 &&
+    reviewedLaterSuccessorIndex === reviewedSuccessorIndex + 1 &&
+    terminalIndex === reviewedLaterSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
-    (!taskTimeTail && !successorTail) ||
+    (!taskTimeTail && !successorTail && !laterSuccessorTail) ||
     commands.lastIndexOf(current) !== currentIndex ||
-    (successorTail && commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex)
+    (successorTail && commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex) ||
+    (laterSuccessorTail &&
+      (commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex ||
+        commands.lastIndexOf(reviewedLaterSuccessor) !== reviewedLaterSuccessorIndex))
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T04 aggregate tail drifted.");
   }
@@ -860,6 +969,7 @@ async function trackedFileReceipts(overrides) {
     const overridden = Object.hasOwn(overrides, relativePath);
     const historical = HISTORICAL_M07_T04_TRACKED_RECEIPTS[relativePath];
     const approvedM07T05 = APPROVED_M07_T05_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T06 = APPROVED_M07_T06_TRACKED_RECEIPTS[relativePath];
     const observedSha256 = sha256(bytes);
     if (
       relativePath !== PROOF_LIBRARY &&
@@ -868,7 +978,10 @@ async function trackedFileReceipts(overrides) {
         (bytes.byteLength === historical.bytes && observedSha256 === historical.sha256) ||
         (approvedM07T05 !== undefined &&
           bytes.byteLength === approvedM07T05.bytes &&
-          observedSha256 === approvedM07T05.sha256)
+          observedSha256 === approvedM07T05.sha256) ||
+        (approvedM07T06 !== undefined &&
+          bytes.byteLength === approvedM07T06.bytes &&
+          observedSha256 === approvedM07T06.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed M07-T05 successor bytes drifted.", {
@@ -912,6 +1025,7 @@ async function distributionReceipts() {
         const bytes = await safeReadAbsolute(path.join(ROOT, relativePath));
         const historical = HISTORICAL_M07_T04_INDEX_DISTRIBUTION_RECEIPTS[name];
         const approvedM07T05 = APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS[name];
+        const approvedM07T06 = APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS[name];
         const observedSha256 = sha256(bytes);
         if (
           historical !== undefined &&
@@ -919,7 +1033,10 @@ async function distributionReceipts() {
             (bytes.byteLength === historical.bytes && observedSha256 === historical.sha256) ||
             (approvedM07T05 !== undefined &&
               bytes.byteLength === approvedM07T05.bytes &&
-              observedSha256 === approvedM07T05.sha256)
+              observedSha256 === approvedM07T05.sha256) ||
+            (approvedM07T06 !== undefined &&
+              bytes.byteLength === approvedM07T06.bytes &&
+              observedSha256 === approvedM07T06.sha256)
           )
         ) {
           fail("DISTRIBUTION_DRIFT", "The reviewed M07-T05 package-root distribution drifted.", {
@@ -986,6 +1103,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-reference-preflight",
     "pnpm lint",
     "pnpm verify:control-plane-local-api",
+    "pnpm verify:control-plane-runtime-staging",
   );
   assertAggregateTail(
     rootPackage.scripts?.test,
@@ -993,6 +1111,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-reference-preflight",
     "turbo run test",
     "pnpm test:control-plane-local-api",
+    "pnpm test:control-plane-runtime-staging",
   );
   if (
     exactTupleCount(fatalText(ciBytes, CI_SOURCE), CI_TUPLE) !== 1 ||
@@ -1387,7 +1506,9 @@ export async function runControlPlaneReferencePreflightProbe() {
 function assertRuntimeReceipt(observedReceipt) {
   const receipt =
     JSON.stringify(observedReceipt.publicModuleKeys) ===
-    JSON.stringify(APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS)
+      JSON.stringify(APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS) ||
+    JSON.stringify(observedReceipt.publicModuleKeys) ===
+      JSON.stringify(APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS)
       ? { ...observedReceipt, publicModuleKeys: EXPECTED_PUBLIC_RUNTIME_KEYS }
       : observedReceipt;
   const expectedKeys = [

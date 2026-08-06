@@ -94,6 +94,7 @@ function taskBoard(overrides = {}) {
     "I07-02": "DONE",
     "M07-T04": "IN_PROGRESS",
     "M07-T05": "IN_PROGRESS",
+    "M07-T06": "IN_PROGRESS",
     "I07-04": "NOT_STARTED",
     "I07-05": "NOT_STARTED",
     G07: "NOT_STARTED",
@@ -201,6 +202,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       { id: "DEBT-I07-010", status: "OPEN" },
       { id: "DEBT-I07-011", status: "OPEN" },
       { id: "DEBT-I07-012", status: "OPEN" },
+      { id: "DEBT-I07-013", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -272,6 +274,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       {
         id: "DEBT-I07-012",
         registeredBy: "M07-T05",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
+      {
+        id: "DEBT-I07-013",
+        registeredBy: "M07-T06",
         removalOwner: "I07-04",
         deadline: "G07",
       },
@@ -427,15 +435,15 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     "scripts/ci/test/modular-quality-gate.test.mjs",
   );
   assert.deepEqual(manifest.entries[8].targets[0].symbols, [
-    "M07_T05_CONTROL_PLANE_COORDINATION",
-    "M07_T05_CONTROL_PLANE_LOCKFILE_BLOCK",
-    "APPROVED_M07_T05_DEPENDENCY_POLICY_SUCCESSOR",
+    "M07_T06_CONTROL_PLANE_COORDINATION",
+    "M07_T06_CONTROL_PLANE_LOCKFILE_BLOCK",
+    "APPROVED_M07_T06_DEPENDENCY_POLICY_SUCCESSOR",
     "normalizeCurrentRootPackageBytes",
     "inspectExactControlPlaneImporter",
     "normalizeCurrentLockfileBytes",
   ]);
   assert.deepEqual(manifest.entries[8].targets[1].symbols, [
-    "reviewed Publisher and M07-T05 coordination preserve root, package, and lockfile provenance",
+    "reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance",
   ]);
   assert.deepEqual(manifest.entries[9].targets, [
     {
@@ -585,18 +593,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       path: "tests/control-plane-bundle-store.test.mjs",
       symbols: [
         "[registration] rejects package-root, public-export, aggregate, or CI tuple drift",
-        "pnpm verify:control-plane-local-api && pnpm lint",
-        "pnpm test:control-plane-local-api && turbo run test",
         "REGISTRATION_DRIFT",
       ],
     },
     {
       path: "tests/publisher-catalog-pinning.test.mjs",
-      symbols: [
-        "appendValidRootSuccessor",
-        "pnpm verify:control-plane-local-api && pnpm lint",
-        "pnpm test:control-plane-local-api && turbo run test",
-      ],
+      symbols: ["appendValidRootSuccessor"],
     },
     {
       path: "scripts/lib/control-plane-local-api-proof.mjs",
@@ -613,6 +615,107 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         "APP_STRICT_JSON",
         "ADR",
         "[implementation] rejects transport, repository, SQLite, or public-factory source drift",
+      ],
+    },
+  ]);
+  assert.deepEqual(manifest.entries[12].targets, [
+    {
+      path: "scripts/lib/control-plane-bundle-store-proof.mjs",
+      symbols: [
+        "RUNTIME_STAGING_VALUE_EXPORTS",
+        "RUNTIME_STAGING_TYPE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+      ],
+    },
+    {
+      path: "tests/control-plane-bundle-store.test.mjs",
+      symbols: [
+        "stageBundleRuntimeChanged",
+        "unreviewedRuntimeSuccessor",
+        'export { stageBundleRuntime } from "./runtime-staging.js";',
+        "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-successor && turbo run test",
+      ],
+    },
+    {
+      path: "scripts/lib/control-plane-bundle-verification-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+      ],
+    },
+    {
+      path: "tests/control-plane-bundle-verification.test.mjs",
+      symbols: ["changedStagingExport", "stageBundleRuntimeChanged", "unreviewedRuntimeSuccessor"],
+    },
+    {
+      path: "scripts/lib/control-plane-package-preflight-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+        "M07_T06_AGGREGATE_SUCCESSOR_COMMANDS",
+      ],
+    },
+    {
+      path: "tests/control-plane-package-preflight.test.mjs",
+      symbols: [
+        "stageBundleRuntimeChanged",
+        "pnpm verify:control-plane-runtime-staging-decoy",
+        "unreviewedRuntimeSuccessor",
+      ],
+    },
+    {
+      path: "scripts/lib/control-plane-reference-preflight-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+        "reviewedLaterSuccessor",
+      ],
+    },
+    {
+      path: "tests/control-plane-reference-preflight.test.mjs",
+      symbols: [
+        "stageBundleRuntimeChanged",
+        "pnpm verify:control-plane-runtime-staging-decoy",
+        "unreviewedRuntimeSuccessor",
+      ],
+    },
+    {
+      path: "scripts/lib/control-plane-local-api-proof.mjs",
+      symbols: [
+        "M07_T06_TRACKED_RECEIPT_BRIDGE",
+        "M07_T06_INDEX_DISTRIBUTION_RECEIPT_BRIDGE",
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+      ],
+    },
+    {
+      path: "tests/control-plane-local-api.test.mjs",
+      symbols: [
+        "runControlPlaneLocalApiProbe",
+        "LOCKFILE",
+        "SHARED_STATE_AUTHORITY",
+        "liveRuntimeReceipt",
+        "successorBuild",
+        "successorKeyMutations",
+        "stageBundleRuntimeUnsafe",
+        "unreviewedRuntimeExport",
+      ],
+    },
+    {
+      path: "tests/publisher-catalog-pinning.test.mjs",
+      symbols: [
+        "pnpm verify:control-plane-runtime-staging && pnpm lint",
+        "pnpm test:control-plane-runtime-staging && turbo run test",
       ],
     },
   ]);
@@ -742,13 +845,14 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 11,
+      OPEN: 12,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
     assert.equal(receipt.taskStatuses["I07-01"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["I07-02"], "DONE");
     assert.equal(receipt.taskStatuses["M07-T05"], "IN_PROGRESS");
+    assert.equal(receipt.taskStatuses["M07-T06"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["I07-05"], "NOT_STARTED");
   } finally {
     await fixture.cleanup();
@@ -853,7 +957,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 11,
+      OPEN: 12,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -889,7 +993,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 10,
+      OPEN: 11,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

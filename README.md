@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `█████████████░░░░░░░░░░░░` **79 / 145 tasks complete (54%)**
+**Overall:** `██████████████░░░░░░░░░░░` **80 / 145 tasks complete (55%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,9 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M07:** `█████░░░░░░` **5 / 11 tasks complete (45%)**
+**M07:** `██████░░░░░` **6 / 11 tasks complete (55%)**
 
-**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T06` (ready, `NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T07` (`NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -85,9 +85,22 @@ P-12 remains `NOT_PROVEN`, G07 remains open, and `PF-074` remains `OPEN`. The
 [executable local-API proof](docs/proof/CONTROL-PLANE-LOCAL-API.md) is pinned by the 41,945-byte
 artifact `sha256:144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9`.
 
+**M07-T06 checkpoint:** the built control-plane package now turns only an authentic M07-T03
+package authority into a bounded, immutable runtime-staging candidate. It independently recloses
+the package bytes, validates execution contracts, prepares inert handler programs, and builds
+deterministic package, capability, surface, state, resource, operation-alias, and obligation indexes
+without loading code or changing any channel, staged slot, active revision, previous-good revision,
+or durable record. All 14 staging limits have executable evidence. Thirteen focused runtime cases,
+13 compiler-negative cases, and 17 independent root proof/mutation cases pass. P-12 remains
+`NOT_PROVEN`; N-038 and N-041 remain `PLANNED`; G07 and `PF-075` remain open. The
+[executable runtime-staging proof](docs/proof/CONTROL-PLANE-RUNTIME-STAGING.md) is pinned by
+`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`.
+
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
-61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current successor contains 138 workloads and 65
-proof pairs after M07-T05 registration. Exact shared-state classes, cancellation behavior,
+61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current working-tree successor contains 140
+workloads and 66 proof pairs after M07-T06 registration: 55 ordinary pairs and 11 exclusive
+barriers. Its retained legacy projection expands to 431 prerequisite segments and 2,337 ordered
+leaf invocations covering 218 distinct leaves. Exact shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
 minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
@@ -185,15 +198,25 @@ M06-T11 proof reader is 166,563 bytes at
 60,572 bytes at `sha256:29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531`,
 and the M07-T01 proof reader is 99,672 bytes at
 `sha256:888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6`. This narrow CI-reader
-successor changes no frozen artifact. The latest hosted run remains failed, so this is local-reader
-evidence rather than hosted CI success; I07-04 still owns the compatibility-reader debt. The
+successor changes no frozen artifact. Subsequent M07-T05 pull-request and `main`
+required-exhaustive runs passed in hosted CI; sequence 14 itself remains local-reader evidence and
+I07-04 still owns the compatibility-reader debt. Reviewed sequence 15 links exact sequence 14 head
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` to current head
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5`, authenticating fifteen
+frozen artifacts and thirty live readers. It appends the 47,622-byte M07-T06 artifact
+`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`, reseals reader indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27]`, and appends the T06
+proof/root readers at `[28, 29]`.
+Sequences 1–14 and predecessor artifact bytes remain unchanged. This is local-reader evidence and
+claims no hosted M07-T06 result. `DEBT-I07-009` records the M05 source-audit successor bridge and
+`DEBT-I07-013` records the historical staging-reader bridges under I07-04 for removal by G07. The
 temporary shadow workflow and modular comparison adapter/test are removed, closing
 `DEBT-I07-008`. The sequential runner remains available only through explicit manual
 `legacy-rollback`; I07-02 adds no affected-path selector. Remaining reader and retirement work
 stays machine-owned by I07-04 and I07-05 in the
 [debt register](docs/plan/DEBT-REGISTER.md). Exact evidence is preserved in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json); implementation
-progress is 79/145 and M07-T06 is ready to start.
+progress is 80/145 and M07-T07 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

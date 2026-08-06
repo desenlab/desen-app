@@ -2,7 +2,7 @@
   "name": "@desen/control-plane-api",
   "version": "0.0.0",
   "private": true,
-  "description": "Local DESEN control plane for editable Source material, immutable Bundles, mutable channels, and activation preflight.",
+  "description": "Local DESEN control plane for editable Sources, immutable Bundles, mutable channels, and staged runtime candidates.",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -28,6 +28,7 @@
     "test:local-api": "vitest run test/local-control-plane.test.ts",
     "test:package-preflight": "vitest run test/package-preflight.test.ts test/package-preflight-schema-guard.test.ts",
     "test:reference-preflight": "vitest run test/reference-preflight.test.ts",
+    "test:runtime-staging": "vitest run test/runtime-staging.test.ts",
     "test:bundle-verification": "vitest run test/bundle-verification.test.ts test/bundle-verification-guard.test.ts",
     "test:bundle-store": "vitest run test/bundle-store.test.ts",
     "verify:bundle-verification-guards": "node scripts/verify-bundle-verification-guards.mjs",
@@ -36,6 +37,7 @@
   },
   "dependencies": {
     "@desen/protocol": "workspace:*",
+    "@desen/runtime-core": "workspace:*",
     "@desen/validator": "workspace:*",
     "better-sqlite3": "13.0.3",
     "fastify": "5.11.2"

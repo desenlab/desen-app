@@ -10,7 +10,7 @@ CI-01 sequential runner remains available only through explicit manual rollback.
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   138-node, 65-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   140-node, 66-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -91,8 +91,24 @@ M06-T11 proof reader is 166,563 bytes at
 60,572 bytes at `sha256:29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531`,
 and the M07-T01 proof reader is 99,672 bytes at
 `sha256:888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6`. This narrow CI-reader
-successor changes no frozen artifact. The latest hosted run remains failed, so this is local-reader
-evidence rather than hosted CI success; I07-04 still owns the compatibility-reader debt.
+successor changes no frozen artifact. Subsequent M07-T05 pull-request and `main`
+required-exhaustive runs passed in hosted CI; sequence 14 itself remains local-reader evidence, and
+I07-04 still owns the compatibility-reader debt.
+
+Reviewed sequence 15 links exact sequence 14 head
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` to current head
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5`. It authenticates 15 frozen
+artifacts and 30 live readers, appends the 47,622-byte M07-T06 artifact
+`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`, reseals reader indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27]`, and appends T06
+readers `[28, 29]`. Sequences 1–14 remain unchanged. Reader index 14 is the final 105,203-byte
+M07-T01 proof reader at
+`sha256:fda6c679ce74201a90483f36d26702f5478bc67561ea632315541d542697f80b`; index 15 is the final
+27,154-byte M07-T01 root reader at
+`sha256:ab25e94ed1880b79dfb22f98a3da67fa5b777fdfaa86b3f02739bed6af29a45c`. Predecessor artifact
+bytes remain unchanged. This is reviewed local-reader evidence and claims no hosted M07-T06
+result. `DEBT-I07-009` and `DEBT-I07-013` register the temporary compatibility-reader bridges under
+I07-04 for removal by G07.
 
 ## Historical I07-01 checkpoint
 
@@ -121,18 +137,18 @@ manual `legacy-rollback`. The temporary shadow workflow and comparison adapter/t
 after the accepted same-revision comparison and successful hosted cutover.
 
 The archived I07-02 baseline remains the immutable 130-workload/61-proof cutover receipt. The live
-authority is an append-only successor: M07-T02 through M07-T05 each add one verifier/root-test pair
-without rewriting that historical baseline. The preceding M07-T04 then-current receipt contained
-136 workloads, 64 proof pairs, 415 prerequisite segments, 2,089 ordered leaf invocations, and 212
-distinct leaf workloads. Its inventory was
-`sha256:c4ee9d861f263757b6240a448b062896dcf358c42d499d338bc39d442750314e`, and its required plan is
-historically pinned as
-`sha256:6ca8631e4d3622c31259ffce82e1a29092789496a8c8479ba12d629efec63ed5`. The current M07-T05
-successor contains 138 workloads, 65 proof pairs, 423 prerequisite segments, 2,209 ordered leaf
-invocations, and 215 distinct leaf workloads. Its inventory is
-`sha256:d26e9fa74f85be06852cd4f667467606735687e851ab03a6ef5611700c9ccc92`, and its required plan is
-`sha256:4d26089fc10902513950f0051fb0d860a82c14374e426fd40b3259a43a63b466`. These are reviewed
-local/code-owned successor pins; they do not claim a new hosted CI run has passed.
+authority is an append-only successor: M07-T02 through M07-T06 each add one verifier/root-test pair
+without rewriting that historical baseline. The preceding M07-T05 receipt contained 138 workloads,
+65 proof pairs, 423 prerequisite segments, 2,209 ordered leaf invocations, and 215 distinct leaf
+workloads. Its inventory was
+`sha256:d26e9fa74f85be06852cd4f667467606735687e851ab03a6ef5611700c9ccc92`, and its required plan was
+`sha256:4d26089fc10902513950f0051fb0d860a82c14374e426fd40b3259a43a63b466`. The current M07-T06
+working-tree successor contains 140 workloads, 66 proof pairs, 431 prerequisite segments, 2,337
+ordered leaf invocations, and 218 distinct leaf workloads. Its inventory is
+`sha256:c6aa56d9cd8a89168863c0e3f98ed5078fd254319d44db05f947a6768d57dd96`, and its required plan is
+`sha256:b3044605fad5cdc17f3d48be12336dc8c6cf4f0b363e92b2952408403137a73d`. All 127 CI contract cases
+pass. M07-T05 pull-request and `main` hosted CI passed; these current pins make no hosted M07-T06
+claim.
 
 Every workload has exactly one code-owned shared-state class:
 
@@ -141,12 +157,12 @@ Every workload has exactly one code-owned shared-state class:
 | `GLOBAL_EXCLUSIVE`               |     6 | Repository-wide integrity and boundary barriers      |
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Workspace build/typecheck output writer              |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
-| `PROOF_READ_ONLY`                |    68 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    51 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_READ_ONLY`                |    69 | Proof work with no shared workspace writes           |
+| `PROOF_OS_TEMP_ISOLATED`         |    52 | Proof work restricted to a runner-owned OS temp root |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
-Fifty-four proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
+Fifty-five proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
 pass. Ten real tracked-alias pairs and `reference-host-web-source-audit` are the eleven exclusive
 proof-pair barriers. Within every pair, the root test still depends on its verifier.
 
@@ -161,6 +177,11 @@ policy, while the root receives only the ordinary `NODE_TEST_HARNESS` policy. Ne
 workspace-write or port authority. Only those two exact workloads receive the
 `CONTROL_PLANE_LOCAL_API_SQLITE` native-addon policy, and both OS-temp roots remain runner-owned
 and identity-checked.
+
+The M07-T06 `control-plane-runtime-staging` pair is ordinary and non-barrier. Its verifier is
+`PROOF_READ_ONLY`; its root proof/mutation test is `PROOF_OS_TEMP_ISOLATED` and receives only the
+ordinary `NODE_TEST_HARNESS` policy. Neither workload receives workspace-write, port, native-addon,
+or verifier runtime-probe authority.
 
 The only verifier runtime-probe exceptions, each with isolated temp and child-process authority,
 are:
@@ -180,7 +201,7 @@ sole workspace-temp barrier. The publisher root loads only the reviewed Rolldown
 local-API pair loads only the reviewed SQLite binding.
 
 Node 24 requires an orthogonal schema-v2 compatibility policy for eighteen exact root tests. The
-distribution across all 138 workloads is 120 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across all 140 workloads is 122 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
 code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
 symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
@@ -218,7 +239,7 @@ command in an 18-minute operating-system ceiling with a 30-second kill grace, in
 hosted job. An outer-ceiling failure is never accepted as promotion evidence.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
-bytes, executable modes, tracked-file count, and Git index object ids before and after all 138
+bytes, executable modes, tracked-file count, and Git index object ids before and after all 140
 steps, including failure paths. The shared-state boundary also seals every reviewed build/Turbo
 output root across the proof phase and compares non-ignored untracked state across the complete
 execution region. A dependency download cache may save network time; no build, test, checkpoint,

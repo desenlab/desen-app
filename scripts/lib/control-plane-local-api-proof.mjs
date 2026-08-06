@@ -220,6 +220,122 @@ const M07_T05_STRICT_JSON_FORMATTING_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze
     }),
   }),
 });
+// M07-T06 extends the same package with an isolated staging boundary. Authenticate only the
+// reviewed task-time receipts while projecting the frozen M07-T05 receipts into this artifact.
+const M07_T06_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 1_972,
+      sha256: "fba38ac87e42c58c5965f32433e2391b8a52a10ec2ab4a90bc18a263840398e1",
+    }),
+    successor: Object.freeze({
+      bytes: 2_082,
+      sha256: "342be659bad35bcec910a5c5cd97d4b1bde03c63e7d5873d0d8806084aa495d4",
+    }),
+  }),
+  [APP_INDEX]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 3_343,
+      sha256: "f33d36872ebb0b320569c38d29f4397e81d459db085d2d9d92111a2795510e24",
+    }),
+    successor: Object.freeze({
+      bytes: 3_968,
+      sha256: "113272b4dc95be0c625d30956bfe9cf696cc0dd8a29f8b6c7b40c62497575860",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 60_843,
+      sha256: "c725d3daf2c09ac199edd816c02485e5f281984c2c9a2ff197e1b554196fa5b9",
+    }),
+    successor: Object.freeze({
+      bytes: 61_860,
+      sha256: "e864438135c2734984e8c16f61da88824f3cdd7c644cbf5b7af7b090ee1db49f",
+    }),
+  }),
+  [LOCKFILE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 126_374,
+      sha256: "8bcb1d938712d22e752d03eefe325d352ed3e666cdbfd34fdca0f768a4a50bcf",
+    }),
+    successor: Object.freeze({
+      bytes: 126_484,
+      sha256: "d02ae480916dc321fb1b7a60775768eb806cbd09f106e7515c3c7a08fc70e2ea",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 47_366,
+      sha256: "ac96b317d49f031db23bd73995193c854249f66bcdcb6a04905d0e3ca0eb6b77",
+    }),
+    successor: Object.freeze({
+      bytes: 47_530,
+      sha256: "120a757310ce4fb01be00e2cf0f83760deb23649e931054af0a84c75e1f0df47",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 45_691,
+      sha256: "e71e53c6a94c798e28bbb2d41ee6556a7cdc28bfdf3bfdbb3c3d39e1d45872c0",
+    }),
+    successor: Object.freeze({
+      bytes: 45_845,
+      sha256: "9e27595b7161c60de768ff821a1301e9ed1fa0edbbec5a93c3dc8f85463ca787",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 46_074,
+      sha256: "92bfcc1367b3cad1184af780446dfb2bc9f7ce44d3f2dd5e258ab8efd3e7e196",
+    }),
+    successor: Object.freeze({
+      bytes: 46_109,
+      sha256: "e800fef41095f5044038b7797fd06db4342a22d3e0fd62bd2110203443346d5f",
+    }),
+  }),
+});
+const M07_T06_INDEX_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
+  "index.d.ts": Object.freeze({
+    historical: Object.freeze({
+      bytes: 3_244,
+      sha256: "453e5c2b15d3faed0357193ffe5682e5c518b06b5ab9cf904361e76a785401bd",
+    }),
+    successor: Object.freeze({
+      bytes: 3_845,
+      sha256: "2bffa5987fc90b787a4b160dbe1cb5fbf645b18361581457796636c5dfe71555",
+    }),
+  }),
+  "index.d.ts.map": Object.freeze({
+    historical: Object.freeze({
+      bytes: 1_537,
+      sha256: "53fd5e67aa7236adf897f443611614c248a99beb436ccf3fdb827651de613428",
+    }),
+    successor: Object.freeze({
+      bytes: 1_804,
+      sha256: "bad847ad240a81f9dae10804c46cdd1b5a16b369ea5c57cf350335d574b5ee6c",
+    }),
+  }),
+  "index.js": Object.freeze({
+    historical: Object.freeze({
+      bytes: 1_469,
+      sha256: "166709a7330e573bf737e2d985fe0c0761c614215df3cadc71d6bbc783c9e777",
+    }),
+    successor: Object.freeze({
+      bytes: 1_812,
+      sha256: "2ba6d6a07cf5ebf252accf2f7527e7b60d72a246f33c605e3c49d9855f24839a",
+    }),
+  }),
+  "index.js.map": Object.freeze({
+    historical: Object.freeze({
+      bytes: 723,
+      sha256: "16112df85d0fe16f3767b17c28f36d0c8c3bc015f82114d4ab2b718c6d9567db",
+    }),
+    successor: Object.freeze({
+      bytes: 866,
+      sha256: "e701d456882b7c895652e780c73ba349bc150fc044645d1e872f150a44a34be2",
+    }),
+  }),
+});
 // Reader receipts cannot self-pin without recursion. Proof-reader checkpoints authenticate the
 // live bytes; this projection keeps the already frozen M07-T05 artifact receipt byte-identical.
 const M07_T05_FORMATTING_READER_RECEIPT_PROJECTION = Object.freeze({
@@ -637,6 +753,53 @@ const EXPECTED_PUBLIC_RUNTIME_KEYS = Object.freeze(
     .map(({ exported }) => exported)
     .sort(),
 );
+const APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS = Object.freeze(
+  [
+    ...EXPECTED_PUBLIC_SOURCE_EXPORTS,
+    ...[
+      "BUNDLE_RUNTIME_STAGING_LIMITS",
+      "INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE",
+      "RUNTIME_STAGING_INTERNAL_FAILURE_CODE",
+      "RUNTIME_STAGING_LIMIT_EXCEEDED_CODE",
+      "RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE",
+    ].map((name) => ({
+      imported: name,
+      exported: name,
+      module: "./runtime-staging-contract.js",
+      typeOnly: false,
+    })),
+    {
+      imported: "stageBundleRuntime",
+      exported: "stageBundleRuntime",
+      module: "./runtime-staging.js",
+      typeOnly: false,
+    },
+    ...[
+      "BundleRuntimeStagingAuthority",
+      "BundleRuntimeStagingDiagnostic",
+      "BundleRuntimeStagingLimits",
+      "BundleRuntimeStagingResult",
+      "BundleRuntimeStagingStage",
+      "StagedRuntimePackageSummary",
+      "StagedRuntimeSurfaceSummary",
+    ].map((name) => ({
+      imported: name,
+      exported: name,
+      module: "./runtime-staging-contract.js",
+      typeOnly: true,
+    })),
+  ]
+    .sort((left, right) => {
+      const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
+      return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
+    })
+    .map(Object.freeze),
+);
+const APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS = Object.freeze(
+  APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly)
+    .map(({ exported }) => exported)
+    .sort(),
+);
 
 function publicExportInventory(source, relativePath) {
   const sourceFile = parseTypescript(source, relativePath, "REGISTRATION_DRIFT");
@@ -659,10 +822,16 @@ function publicExportInventory(source, relativePath) {
     const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
-  if (JSON.stringify(inventory) !== JSON.stringify(EXPECTED_PUBLIC_SOURCE_EXPORTS)) {
+  const serialized = JSON.stringify(inventory);
+  if (
+    serialized !== JSON.stringify(EXPECTED_PUBLIC_SOURCE_EXPORTS) &&
+    serialized !== JSON.stringify(APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS)
+  ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T05 public package-root inventory drifted.");
   }
-  return deepFreeze(inventory);
+  // M07-T05 owns only its task-time exports. The exact M07-T06 extension is authenticated above,
+  // then projected away so the historical proof artifact remains byte-identical.
+  return EXPECTED_PUBLIC_SOURCE_EXPORTS;
 }
 
 function exactTupleCount(source, tuple) {
@@ -677,19 +846,24 @@ function exactTupleCount(source, tuple) {
   return count;
 }
 
-function assertAggregateTail(script, predecessor, current, terminal) {
+function assertAggregateTail(script, predecessor, current, successor, terminal) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
   const predecessorIndex = commands.indexOf(predecessor);
   const currentIndex = commands.indexOf(current);
+  const successorIndex = commands.indexOf(successor);
   const terminalIndex = commands.indexOf(terminal);
+  const historicalTail = terminalIndex === currentIndex + 1 && successorIndex < 0;
+  const reviewedSuccessorTail =
+    successorIndex === currentIndex + 1 && terminalIndex === successorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
-    terminalIndex !== currentIndex + 1 ||
-    commands.lastIndexOf(current) !== currentIndex
+    (!historicalTail && !reviewedSuccessorTail) ||
+    commands.lastIndexOf(current) !== currentIndex ||
+    (successorIndex >= 0 && commands.lastIndexOf(successor) !== successorIndex)
   ) {
-    fail("REGISTRATION_DRIFT", "The exact M07-T05 aggregate tail drifted.");
+    fail("REGISTRATION_DRIFT", "The exact M07-T05 to M07-T06 aggregate tail drifted.");
   }
 }
 
@@ -718,7 +892,9 @@ async function trackedFileReceipts(overrides) {
     await Promise.all(
       TRACKED_TASK_FILES.map(async (relativePath) => {
         const bytes = await authorityBytes(relativePath, overrides);
+        const m07T06Bridge = M07_T06_TRACKED_RECEIPT_BRIDGE[relativePath];
         const bridge =
+          m07T06Bridge ??
           M07_T05_STRICT_JSON_FORMATTING_TRACKED_RECEIPT_BRIDGE[relativePath] ??
           M07_T05_ADR_TOKEN_BOUNDS_TRACKED_RECEIPT_BRIDGE[relativePath];
         const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
@@ -731,9 +907,11 @@ async function trackedFileReceipts(overrides) {
               observed.sha256 === bridge.successor.sha256)
           )
         ) {
-          fail("IMPLEMENTATION_DRIFT", "The reviewed M07-T05 tracked successor drifted.", {
-            path: relativePath,
-          });
+          fail(
+            m07T06Bridge === undefined ? "IMPLEMENTATION_DRIFT" : "REGISTRATION_DRIFT",
+            "A reviewed M07-T05 successor receipt drifted.",
+            { path: relativePath },
+          );
         }
         const projected =
           bridge?.historical ??
@@ -781,7 +959,9 @@ async function distributionReceipts() {
       observed.map(async (name) => {
         const relativePath = `${APP_DIRECTORY}/dist/${name}`;
         const bytes = await safeReadAbsolute(path.join(ROOT, relativePath));
-        const bridge = M07_T05_STRICT_JSON_FORMATTING_DISTRIBUTION_RECEIPT_BRIDGE[name];
+        const bridge =
+          M07_T06_INDEX_DISTRIBUTION_RECEIPT_BRIDGE[name] ??
+          M07_T05_STRICT_JSON_FORMATTING_DISTRIBUTION_RECEIPT_BRIDGE[name];
         const receipt = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
         if (
           bridge !== undefined &&
@@ -791,11 +971,9 @@ async function distributionReceipts() {
             (receipt.bytes === bridge.successor.bytes && receipt.sha256 === bridge.successor.sha256)
           )
         ) {
-          fail(
-            "DISTRIBUTION_DRIFT",
-            "The reviewed strict-JSON formatting distribution successor drifted.",
-            { path: relativePath },
-          );
+          fail("DISTRIBUTION_DRIFT", "A reviewed M07-T05 distribution successor receipt drifted.", {
+            path: relativePath,
+          });
         }
         const projected = bridge?.historical ?? receipt;
         return Object.freeze({
@@ -875,12 +1053,14 @@ async function registrationProjection(overrides) {
     rootPackage.scripts?.check,
     "pnpm verify:control-plane-reference-preflight",
     "pnpm verify:control-plane-local-api",
+    "pnpm verify:control-plane-runtime-staging",
     "pnpm lint",
   );
   assertAggregateTail(
     rootPackage.scripts?.test,
     "pnpm test:control-plane-reference-preflight",
     "pnpm test:control-plane-local-api",
+    "pnpm test:control-plane-runtime-staging",
     "turbo run test",
   );
   if (
@@ -1691,10 +1871,18 @@ function expectedRuntimeReceipt() {
 }
 
 function assertRuntimeReceipt(receipt) {
-  if (JSON.stringify(receipt) !== JSON.stringify(expectedRuntimeReceipt())) {
+  const currentRuntimeKeys = JSON.stringify(receipt.publicModuleKeys);
+  const reviewedSuccessor =
+    currentRuntimeKeys === JSON.stringify(APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS);
+  const projected = reviewedSuccessor
+    ? { ...receipt, publicModuleKeys: EXPECTED_PUBLIC_RUNTIME_KEYS }
+    : receipt;
+  if (JSON.stringify(projected) !== JSON.stringify(expectedRuntimeReceipt())) {
     fail("RUNTIME_PROBE_MISMATCH", "The exact M07-T05 built local API runtime receipt drifted.");
   }
-  return deepFreeze(receipt);
+  // The built M07-T06 package adds only its reviewed public staging keys to this probe. Return the
+  // historical key projection so the frozen M07-T05 artifact and caller receipt remain unchanged.
+  return deepFreeze(projected);
 }
 
 export async function buildControlPlaneLocalApiEvidence(options) {

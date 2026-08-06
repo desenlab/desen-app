@@ -267,15 +267,15 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
   ]),
   authority("DEBT-I07-009", "I07-04", "G07", [
     target("scripts/lib/reference-host-web-source-audit-proof.mjs", [
-      "M07_T05_CONTROL_PLANE_COORDINATION",
-      "M07_T05_CONTROL_PLANE_LOCKFILE_BLOCK",
-      "APPROVED_M07_T05_DEPENDENCY_POLICY_SUCCESSOR",
+      "M07_T06_CONTROL_PLANE_COORDINATION",
+      "M07_T06_CONTROL_PLANE_LOCKFILE_BLOCK",
+      "APPROVED_M07_T06_DEPENDENCY_POLICY_SUCCESSOR",
       "normalizeCurrentRootPackageBytes",
       "inspectExactControlPlaneImporter",
       "normalizeCurrentLockfileBytes",
     ]),
     target("tests/reference-host-web-source-audit.test.mjs", [
-      "reviewed Publisher and M07-T05 coordination preserve root, package, and lockfile provenance",
+      "reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance",
     ]),
   ]),
   authority("DEBT-I07-010", "I07-04", "G07", [
@@ -395,15 +395,9 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       ]),
       target("tests/control-plane-bundle-store.test.mjs", [
         "[registration] rejects package-root, public-export, aggregate, or CI tuple drift",
-        "pnpm verify:control-plane-local-api && pnpm lint",
-        "pnpm test:control-plane-local-api && turbo run test",
         "REGISTRATION_DRIFT",
       ]),
-      target("tests/publisher-catalog-pinning.test.mjs", [
-        "appendValidRootSuccessor",
-        "pnpm verify:control-plane-local-api && pnpm lint",
-        "pnpm test:control-plane-local-api && turbo run test",
-      ]),
+      target("tests/publisher-catalog-pinning.test.mjs", ["appendValidRootSuccessor"]),
       target("scripts/lib/control-plane-local-api-proof.mjs", [
         "M07_T05_STRICT_JSON_FORMATTING_TRACKED_RECEIPT_BRIDGE",
         "M07_T05_STRICT_JSON_FORMATTING_DISTRIBUTION_RECEIPT_BRIDGE",
@@ -417,6 +411,84 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       ]),
     ],
     "M07-T05",
+  ),
+  authority(
+    "DEBT-I07-013",
+    "I07-04",
+    "G07",
+    [
+      target("scripts/lib/control-plane-bundle-store-proof.mjs", [
+        "RUNTIME_STAGING_VALUE_EXPORTS",
+        "RUNTIME_STAGING_TYPE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+      ]),
+      target("tests/control-plane-bundle-store.test.mjs", [
+        "stageBundleRuntimeChanged",
+        "unreviewedRuntimeSuccessor",
+        'export { stageBundleRuntime } from "./runtime-staging.js";',
+        "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-successor && turbo run test",
+      ]),
+      target("scripts/lib/control-plane-bundle-verification-proof.mjs", [
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+      ]),
+      target("tests/control-plane-bundle-verification.test.mjs", [
+        "changedStagingExport",
+        "stageBundleRuntimeChanged",
+        "unreviewedRuntimeSuccessor",
+      ]),
+      target("scripts/lib/control-plane-package-preflight-proof.mjs", [
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+        "M07_T06_AGGREGATE_SUCCESSOR_COMMANDS",
+      ]),
+      target("tests/control-plane-package-preflight.test.mjs", [
+        "stageBundleRuntimeChanged",
+        "pnpm verify:control-plane-runtime-staging-decoy",
+        "unreviewedRuntimeSuccessor",
+      ]),
+      target("scripts/lib/control-plane-reference-preflight-proof.mjs", [
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+        "APPROVED_M07_T06_TRACKED_RECEIPTS",
+        "APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS",
+        "reviewedLaterSuccessor",
+      ]),
+      target("tests/control-plane-reference-preflight.test.mjs", [
+        "stageBundleRuntimeChanged",
+        "pnpm verify:control-plane-runtime-staging-decoy",
+        "unreviewedRuntimeSuccessor",
+      ]),
+      target("scripts/lib/control-plane-local-api-proof.mjs", [
+        "M07_T06_TRACKED_RECEIPT_BRIDGE",
+        "M07_T06_INDEX_DISTRIBUTION_RECEIPT_BRIDGE",
+        "APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS",
+        "APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS",
+      ]),
+      target("tests/control-plane-local-api.test.mjs", [
+        "runControlPlaneLocalApiProbe",
+        "LOCKFILE",
+        "SHARED_STATE_AUTHORITY",
+        "liveRuntimeReceipt",
+        "successorBuild",
+        "successorKeyMutations",
+        "stageBundleRuntimeUnsafe",
+        "unreviewedRuntimeExport",
+      ]),
+      target("tests/publisher-catalog-pinning.test.mjs", [
+        "pnpm verify:control-plane-runtime-staging && pnpm lint",
+        "pnpm test:control-plane-runtime-staging && turbo run test",
+      ]),
+    ],
+    "M07-T06",
   ),
 ]);
 

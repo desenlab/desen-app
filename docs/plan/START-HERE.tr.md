@@ -26,9 +26,11 @@ Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding s�
 kontrolden çıkmasını engeller.
 
 `I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
-61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T05 eklendikten sonra güncel zorunlu
-plan 138 işin ve 65 kanıt çiftinin tamamını yeni sistemle çalıştırır. Ortak dosya, çıktı, port ve
-geçici-dizin kullanımı kodla sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
+61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T06 eklendikten sonra çalışma
+alanındaki güncel zorunlu plan 140 işin ve 66 kanıt çiftinin tamamını yeni sistemle çalıştırır: 55
+normal çift ve 11 özel bariyer. Eski planın aynı kapsamdaki açılımı 431 önkoşul parçası, 2.337 sıralı
+yaprak çağrısı ve 218 farklı yaprak iştir. Ortak dosya, çıktı, port ve geçici-dizin kullanımı kodla
+sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
 başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
 otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
 Tarihsel okuyucu checkpoint'i sıra 4, on değişmez kanıt eserini ve yirmi canlı okuyucuyu
@@ -124,25 +126,39 @@ M06-T11 kanıt okuyucusu 166.563 bayt /
 bayt / `sha256:29b407c2f7f1b17d17bff450185a9304c3186caea4a98973df3f1e3e4f684531` ve M07-T01 kanıt
 okuyucusu 99.672 bayt /
 `sha256:888d5e81bda7ca2cdcc58bb063d49409cad5f5d73bdd9baaa16dc199e566e5c6` olur. Bu dar CI-okuyucu
-ardılı hiçbir dondurulmuş eseri değiştirmez. Son hosted çalışma hâlâ başarısızdır; bu nedenle hosted
-CI başarı iddiası yoktur ve uyumluluk okuyucusu borcunun sahibi I07-04 olarak kalır.
+ardılı hiçbir dondurulmuş eseri değiştirmez. Daha sonra M07-T05 pull request ve `main`
+required-exhaustive çalışmaları hosted CI'da geçti; sıra 14'ün kendisi yine yerel okuyucu kanıtıdır
+ve uyumluluk okuyucusu borcunun sahibi I07-04 olarak kalır.
+İncelenmiş sıra 15, sıra 14'ün
+`3d2dd7a48ee2573d14fb1dbea18ef8b4e3498c6a26f82d76ea589dba3c821078` başından güncel
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` başına bağlanır; 15
+değişmez eseri ve 30 canlı okuyucuyu doğrular. 47.622 baytlık M07-T06 eserini
+(`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`) ekler, okuyucu
+indeksleri `[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27]` için
+güncel
+alındıları yeniden mühürler ve T06 kanıt/kök okuyucularını `[28, 29]` olarak ekler. Sıra 1–14 ve
+önceki eser baytları değişmez. Bu incelenmiş yerel okuyucu kanıtıdır; hosted M07-T06 başarısı iddia
+etmez. Geçici M05 kaynak-denetim ve tarihsel staging okuyucusu köprüleri `DEBT-I07-009` ve
+`DEBT-I07-013` olarak I07-04'e, en geç G07'de kaldırılmak üzere kaydedilmiştir.
 Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
 bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
 kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından
 kontrol edilir. Teknik karar, güvenlik kapıları ve kesin kanıt
 [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) ile
 [`I07-02 baseline`](../proof/baselines/i07-02-required-exhaustive-equivalence.json) içinde kayıtlıdır.
-`M07-T05` tamamlandı: yalnızca bilgisayarın kendi sabit yerel adresinde çalışan ve bearer anahtarı
-isteyen Fastify API'si düzenlenebilir Source'ları, değişmez Bundle'ları ve değişebilir channel
-pointer'larını birbirinden ayırıyor. Source değişiklikleri SQLite içinde nesil numarasıyla güvenli
-karşılaştırma yapıyor; eski bir düzenleme yenisini ezemiyor. Bundle yazımı daha önce kanıtlanan
-M07-T01 deposuna gidiyor. Channel yalnızca hangi revision'ın keşfedileceğini söylüyor; staging,
-commit veya aktivasyon yetkisi vermiyor. Doğru origin `ETag` değerini okuyabiliyor; bağlantı,
-istek ve keep-alive süreleri sırasıyla 5, 15 ve 5 saniyeyle sınırlı. `N-019` artık `TESTED`, fakat
-P-12 hâlâ `NOT_PROVEN`, G07 açık ve PF-074 `OPEN`. Sıradaki görev `M07-T06`: doğrulanmış paket
-snapshot'larından staged runtime index'lerini kurup staged ve active durumlarını kesin olarak ayrı
-tutacağız. Güncel ilerleme 79/145 görev (%54), M07 içinde 5/11 görev (%45) ve kanıt kapılarında
-7/13'tür.
+`M07-T06` tamamlandı: sistem yalnızca M07-T03'ün doğruladığı gerçek paket yetkisini kabul ediyor,
+paket baytlarını yeniden doğruluyor ve çalıştırma için gereken paket, capability, surface, state,
+resource, operation ve obligation indekslerini değişmez bir aday olarak hazırlıyor. Henüz hiçbir
+paket kodunu çalıştırmıyor, ekran çizmiyor, channel'ı değiştirmiyor ve active/previous-good kaydı
+yazmıyor. Böylece “hazırlanan aday” ile “kullanıcıya aktif olarak sunulan sürüm” kesin biçimde ayrı
+kalıyor. On dört sabit staging sınırının tamamı çalıştırılabilir kanıtla kapatıldı; 13 uygulama testi,
+13 derleyici-negatif testi ve 17 bağımsız kök kanıt/mutasyon testi geçti. Kanıt eseri
+`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494` ile sabittir. P-12 hâlâ
+`NOT_PROVEN`, N-038/N-041 `PLANNED`, G07 açık ve PF-075 `OPEN`. CI sözleşme testleri 127/127 geçiyor;
+hosted M07-T06 başarısı henüz iddia edilmiyor. Sıradaki görev `M07-T07`: M07-T04 referans kanıtı ile
+M07-T06 staging adayını doğrulayıp `{activeRevision, previousGoodRevision, generation}` kaydını tek
+dayanıklı işlemde yazmak. Güncel ilerleme 80/145 görev (%55), M07 içinde 6/11 görev (%55) ve kanıt
+kapılarında 7/13'tür.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

@@ -103,6 +103,7 @@ export const PROOF_IDS = Object.freeze([
   "control-plane-package-preflight",
   "control-plane-reference-preflight",
   "control-plane-local-api",
+  "control-plane-runtime-staging",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -440,8 +441,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 138) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 138 steps.", {
+if (METADATA_BY_STEP_ID.size !== 140) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 140 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
