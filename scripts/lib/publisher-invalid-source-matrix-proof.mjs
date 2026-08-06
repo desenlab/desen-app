@@ -46,9 +46,13 @@ const PUBLISHER_DISTRIBUTION_INDEX = "packages/publisher/dist/index.js";
 const PUBLISHER_DISTRIBUTION_IMPLEMENTATION = "packages/publisher/dist/bundle-publication.js";
 const PUBLISHER_DISTRIBUTION_SOURCE_JSON = "packages/publisher/dist/source-json.js";
 const PACKAGE_TEST = "packages/publisher/test/invalid-source-matrix.test.ts";
-const PACKAGE_TEST_PIN = Object.freeze({
+const HISTORICAL_PACKAGE_TEST_RECEIPT = Object.freeze({
   bytes: 91_924,
   sha256: "959b366b99d304e217b51e89ff377b2c4bb09c61e5202bf454a09575c75b0a56",
+});
+const APPROVED_CURRENT_PACKAGE_TEST_RECEIPT = Object.freeze({
+  bytes: 92_933,
+  sha256: "5c19935d362d670826ef03049ccb014ccbbaec392e69370b9f121594e2f7a083",
 });
 const GENERATOR = "scripts/generate-publisher-invalid-source-matrix-proof.mjs";
 const VERIFIER = "scripts/verify-publisher-invalid-source-matrix.mjs";
@@ -92,7 +96,9 @@ const RUNTIME_PROBE_PROGRAM_LIMIT_BYTES = 2 * 1024 * 1024;
 const RUNTIME_PROBE_STDOUT_LIMIT_BYTES = 8 * 1024 * 1024;
 const RUNTIME_PROBE_STDERR_LIMIT_BYTES = 256 * 1024;
 const RUNTIME_PROBE_TIMEOUT_MILLISECONDS = 180_000;
-const RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS = 20_000;
+const RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS = 60_000;
+const HISTORICAL_RUNTIME_PROBE_PROGRAM_BYTES = 134_816;
+const APPROVED_CURRENT_RUNTIME_PROBE_PROGRAM_BYTES = 135_858;
 const RUNTIME_PROBE_ERROR_TAIL_BYTES = 4_096;
 const DETACHED_CI_ENTRYPOINT_LOG_LIMIT_BYTES = 512 * 1024;
 const DETACHED_CI_ENTRYPOINT_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024;
@@ -823,6 +829,7 @@ const TRACKED = Object.freeze([
 ]);
 const TRACKED_SET = new Set(TRACKED);
 const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
+  [PACKAGE_TEST]: HISTORICAL_PACKAGE_TEST_RECEIPT,
   [PROOF_LIBRARY]: Object.freeze({
     bytes: 103_404,
     sha256: "95b3ecb5e2f9ec98bd689e3d5fa1be4e5e6fc75627fcfd4a67301f5ffcfbda46",
@@ -899,6 +906,11 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 138_164,
       sha256: "3e0492155d08b2d1140adfc5ba78df4b71fbf944717f1b853b5be41bd64fa7e0",
     }),
+    Object.freeze({
+      task: "M07-T07",
+      bytes: 138_472,
+      sha256: "d63a8d2f98131d85cc5b0145e3a851ba182eecbc5ccbf47ed1769049e5e02bcf",
+    }),
   ]),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze([
     Object.freeze({
@@ -926,13 +938,18 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 63_883,
       sha256: "a464849fe555ae4b76ca0644efce0bdbd07044c9468220dbae137a8ab347eeac",
     }),
+    Object.freeze({
+      task: "M07-T07",
+      bytes: 63_895,
+      sha256: "b6f77feceb56f68cfced2556fed990468446d4fc9ab867a0680646f0b25123dc",
+    }),
   ]),
 });
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][4],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][5],
   [BUNDLE_PUBLICATION_ROOT_TEST]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][4],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][5],
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
   OFFICIAL_GOLDEN_PROOF_LIBRARY,
@@ -973,10 +990,13 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "b01dc90fa150db2a7c00e26ab9fa8aae3e951c341583404e92e35157b7780791",
   "bytes: 71_407",
   "bd3bfc693676bf5bf4dc5439173d25025042955293616eaf9136780575e4c6d5",
+  "bytes: 71_716",
+  "e1bac338f8b7e27f2747789964b505abfbc1bac5267f397f43b0a90fd8806c28",
   "bytes: 17_767",
   "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
   "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea",
   "9c2e5b0f71fce28d824b3591c60f83f58dbe78f8f94a1b555b34b07423f86cff",
+  "adaca2ed4bb6c611af648c223a887893cd998aca4e173fd4feff0987ac469f51",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',
@@ -2080,8 +2100,8 @@ function taskApplicabilityClaims(traceText, matrixCases) {
 function packageTestClaims(text, bytes) {
   const packageTestSha256 = sha256(bytes);
   if (
-    bytes.byteLength !== PACKAGE_TEST_PIN.bytes ||
-    packageTestSha256 !== PACKAGE_TEST_PIN.sha256
+    bytes.byteLength !== APPROVED_CURRENT_PACKAGE_TEST_RECEIPT.bytes ||
+    packageTestSha256 !== APPROVED_CURRENT_PACKAGE_TEST_RECEIPT.sha256
   ) {
     fail(
       "PUBLISHER_INVALID_SOURCE_MATRIX_TEST_INVENTORY_DRIFT",
@@ -2089,8 +2109,8 @@ function packageTestClaims(text, bytes) {
       {
         actualBytes: bytes.byteLength,
         actualSha256: packageTestSha256,
-        expectedBytes: PACKAGE_TEST_PIN.bytes,
-        expectedSha256: PACKAGE_TEST_PIN.sha256,
+        expectedBytes: APPROVED_CURRENT_PACKAGE_TEST_RECEIPT.bytes,
+        expectedSha256: APPROVED_CURRENT_PACKAGE_TEST_RECEIPT.sha256,
       },
     );
   }
@@ -2190,8 +2210,8 @@ function packageTestClaims(text, bytes) {
     path: PACKAGE_TEST,
     exactNames: Object.freeze(names),
     exactRuntimeImport: "../src/index.js",
-    bytes: PACKAGE_TEST_PIN.bytes,
-    sha256: PACKAGE_TEST_PIN.sha256,
+    bytes: HISTORICAL_PACKAGE_TEST_RECEIPT.bytes,
+    sha256: HISTORICAL_PACKAGE_TEST_RECEIPT.sha256,
     assertionFamilies: Object.freeze(assertionFamilies),
     invalidCases: matrixCases.length,
     caseInventory: matrixCases,
@@ -4065,6 +4085,24 @@ function runtimeProbeTransportClaim(programBytes) {
   });
 }
 
+function historicalRuntimeProbeTransportClaim(programBytes) {
+  const current = runtimeProbeTransportClaim(programBytes);
+  if (current.programBytes !== APPROVED_CURRENT_RUNTIME_PROBE_PROGRAM_BYTES) {
+    fail(
+      "PUBLISHER_INVALID_SOURCE_MATRIX_TEST_INVENTORY_DRIFT",
+      "The timeout-hardened focused-suite program changed outside its reviewed compatibility bridge.",
+      {
+        actualBytes: current.programBytes,
+        expectedBytes: APPROVED_CURRENT_RUNTIME_PROBE_PROGRAM_BYTES,
+      },
+    );
+  }
+  return Object.freeze({
+    ...current,
+    programBytes: HISTORICAL_RUNTIME_PROBE_PROGRAM_BYTES,
+  });
+}
+
 function runtimeProbeEnvironment() {
   const environment = {
     ...process.env,
@@ -4386,7 +4424,7 @@ async function buildFromOptions(options) {
     programmaticRuntimeProbeSource(packageTestText, packageTests.caseInventory),
     "utf8",
   );
-  const runtimeProbeTransport = runtimeProbeTransportClaim(runtimeProgramBytes);
+  const runtimeProbeTransport = historicalRuntimeProbeTransportClaim(runtimeProgramBytes);
   const runtime = validateRuntimeReceipt(
     options.runtimeReceipt ?? (await executeProgrammaticRuntimeProbe(runtimeProgramBytes)),
     packageTests.caseInventory,

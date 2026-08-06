@@ -95,6 +95,56 @@ const EXPECTED_PUBLIC_RUNTIME_KEYS = Object.freeze([
   "stageBundleRuntime",
   "verifyBundleStoreEntry",
 ]);
+const APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS = Object.freeze(
+  [
+    ...[
+      "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+      "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+      "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+      "RuntimeActivationError",
+    ].map((name) => ({
+      imported: name,
+      exported: name,
+      module: "./runtime-activation-contract.js",
+      typeOnly: false,
+    })),
+    {
+      imported: "openBundleRuntimeActivation",
+      exported: "openBundleRuntimeActivation",
+      module: "./runtime-activation.js",
+      typeOnly: false,
+    },
+    ...[
+      "BundleRuntimeActivation",
+      "BundleRuntimeActivationAuthority",
+      "BundleRuntimeActivationDiagnostic",
+      "BundleRuntimeActivationResult",
+      "BundleRuntimeActivationStage",
+      "BundleRuntimeActivationState",
+      "OpenBundleRuntimeActivationOptions",
+      "RuntimeActivationErrorCode",
+      "RuntimeActivationRecord",
+    ].map((name) => ({
+      imported: name,
+      exported: name,
+      module: "./runtime-activation-contract.js",
+      typeOnly: true,
+    })),
+  ]
+    .sort((left, right) => {
+      const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
+      return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
+    })
+    .map(Object.freeze),
+);
+const APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS = Object.freeze(
+  [
+    ...EXPECTED_PUBLIC_RUNTIME_KEYS,
+    ...APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly).map(
+      ({ exported }) => exported,
+    ),
+  ].sort(),
+);
 
 const EXPECTED_LIMITS = Object.freeze({
   maxPackages: 256,
@@ -164,6 +214,16 @@ const NORMATIVE_COVERAGE_EXPECTATIONS = Object.freeze([
       "M07-T06 adds one immutable 14-field Runtime Staging Profile with exact-boundary or executable dominance coverage for every field; overflow rejects the complete candidate without truncation or partial authority.",
   }),
 ]);
+const M07_T07_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
+  "N-038": Object.freeze({
+    bytes: 2_834,
+    sha256: "4b21105f2ce96f9914cedbcf6f4334cb41a43a7849d21b30772c9671cf1f6477",
+  }),
+  "N-041": Object.freeze({
+    bytes: 2_826,
+    sha256: "b31e41558d905e4fd2b0d07b50631a4b8ace5438f04357a7503e200e181e158f",
+  }),
+});
 const EXPECTED_RUNTIME_TEST_NAMES = Object.freeze([
   "stages the exact official package snapshot as callback-free active-separated authority",
   "retains exact execution identity, staged byte copies, indexes, and sorted obligations privately",
@@ -272,6 +332,140 @@ const TRACKED_TASK_FILES = Object.freeze([
   CI_SOURCE,
   CI_INVENTORY,
 ]);
+const M07_T07_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 2_082,
+      sha256: "342be659bad35bcec910a5c5cd97d4b1bde03c63e7d5873d0d8806084aa495d4",
+    }),
+    successor: Object.freeze({
+      bytes: 2_159,
+      sha256: "2511a9dfaba16880d5591a68adb2dcbbd6d84a90298d38218f2434bb06416627",
+    }),
+  }),
+  [APP_INDEX]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 3_968,
+      sha256: "113272b4dc95be0c625d30956bfe9cf696cc0dd8a29f8b6c7b40c62497575860",
+    }),
+    successor: Object.freeze({
+      bytes: 4_606,
+      sha256: "e7ef3e595fc15b2374cca9d265c2891d1ccf304052f34ec3a706b67608f59d16",
+    }),
+  }),
+  [APP_INTERNAL]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 46_932,
+      sha256: "f119b5553d0dcfc3cbacb5584e7a732692ddd50c9c7fee435986a4060688e1d9",
+    }),
+    successor: Object.freeze({
+      bytes: 47_768,
+      sha256: "ea20880ed17156ebd7bab6e6c6294f040e782c8b0122dfcd10fa9c67bf27f52d",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 61_860,
+      sha256: "e864438135c2734984e8c16f61da88824f3cdd7c644cbf5b7af7b090ee1db49f",
+    }),
+    successor: Object.freeze({
+      bytes: 62_928,
+      sha256: "8f47985e6d774a72042261e65c2c2d86c9c5526d27d91be846d3ce38d88beaa0",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 47_530,
+      sha256: "120a757310ce4fb01be00e2cf0f83760deb23649e931054af0a84c75e1f0df47",
+    }),
+    successor: Object.freeze({
+      bytes: 47_703,
+      sha256: "f6703693b1cce00a35666790b27542f140aa17ecc89d6646d135641f6543041d",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 45_845,
+      sha256: "9e27595b7161c60de768ff821a1301e9ed1fa0edbbec5a93c3dc8f85463ca787",
+    }),
+    successor: Object.freeze({
+      bytes: 46_008,
+      sha256: "d05a7e824d5d4787e3ec422896c3ce2ecf3d478390b862200a8ae01adbbf1d22",
+    }),
+  }),
+});
+const M07_T07_READER_RECEIPT_PROJECTION = Object.freeze({
+  [PROOF_LIBRARY]: Object.freeze({
+    bytes: 77_139,
+    sha256: "4e15a16c61eba16825ddafc3c5218af8740e8ceda4e410feea8242a64cf751e7",
+  }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 23_831,
+    sha256: "5182b67f3d9bcc92fc3ec956b71fc7c26731711d0ac411b5b4139500311ccafd",
+  }),
+});
+const M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
+  "index.d.ts": Object.freeze({
+    historical: Object.freeze({
+      bytes: 3_845,
+      sha256: "2bffa5987fc90b787a4b160dbe1cb5fbf645b18361581457796636c5dfe71555",
+    }),
+    successor: Object.freeze({
+      bytes: 4_457,
+      sha256: "8911f27f0c5c11d09cd1116f99ea12f323ef37ee56c63693000e119e999f2ecd",
+    }),
+  }),
+  "index.d.ts.map": Object.freeze({
+    historical: Object.freeze({
+      bytes: 1_804,
+      sha256: "bad847ad240a81f9dae10804c46cdd1b5a16b369ea5c57cf350335d574b5ee6c",
+    }),
+    successor: Object.freeze({
+      bytes: 2_084,
+      sha256: "fd308fb24c1823a6156c7149076c82534f0dcff8517c83aaff02d043a4ad6ce7",
+    }),
+  }),
+  "index.js": Object.freeze({
+    historical: Object.freeze({
+      bytes: 1_812,
+      sha256: "2ba6d6a07cf5ebf252accf2f7527e7b60d72a246f33c605e3c49d9855f24839a",
+    }),
+    successor: Object.freeze({
+      bytes: 2_093,
+      sha256: "037d35f0354064e41a7b8a89361d4c0bc75fd2e830e4bdaea74941bf669bd618",
+    }),
+  }),
+  "index.js.map": Object.freeze({
+    historical: Object.freeze({
+      bytes: 866,
+      sha256: "e701d456882b7c895652e780c73ba349bc150fc044645d1e872f150a44a34be2",
+    }),
+    successor: Object.freeze({
+      bytes: 996,
+      sha256: "d011e413c2f446114640487305f094642a5a78a4ee635b79ec69f9937d0cf93a",
+    }),
+  }),
+  "runtime-staging-internal.js": Object.freeze({
+    historical: Object.freeze({
+      bytes: 38_326,
+      sha256: "4db6990b43438210f8e1083954b2c43c6753fb52e3f9bbcf894c135df1e4690c",
+    }),
+    successor: Object.freeze({
+      bytes: 39_081,
+      sha256: "27907d7c55a4903cea4a611f2f2472ae7f8d7b065b20fb3d91b0ca8933701c03",
+    }),
+  }),
+  "runtime-staging-internal.js.map": Object.freeze({
+    historical: Object.freeze({
+      bytes: 35_817,
+      sha256: "610c375aa0e2b58f8fa55ed8143bedeb9c1dfbe7306dad013ace3fdd69a131f6",
+    }),
+    successor: Object.freeze({
+      bytes: 36_149,
+      sha256: "54b27ed79096c8fc3b281bc941e23cd286cf522119c93e2dd5176bd9778fefb7",
+    }),
+  }),
+});
 
 export const DEFAULT_CONTROL_PLANE_RUNTIME_STAGING_ARTIFACT_PATH = path.join(ROOT, ARTIFACT);
 
@@ -604,7 +798,16 @@ function publicExportInventory(source, relativePath) {
     const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
-  const staging = inventory.filter(({ module }) => module.startsWith("./runtime-staging"));
+  const activation = inventory.filter(({ module }) => module.startsWith("./runtime-activation"));
+  const reviewedM07T07Activation =
+    JSON.stringify(activation) === JSON.stringify(APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS);
+  if (activation.length > 0 && !reviewedM07T07Activation) {
+    fail("REGISTRATION_DRIFT", "The exact M07-T07 activation export extension drifted.");
+  }
+  const projectedInventory = reviewedM07T07Activation
+    ? inventory.filter(({ module }) => !module.startsWith("./runtime-activation"))
+    : inventory;
+  const staging = projectedInventory.filter(({ module }) => module.startsWith("./runtime-staging"));
   const expectedStaging = [
     ["BUNDLE_RUNTIME_STAGING_LIMITS", "./runtime-staging-contract.js", false],
     ["BundleRuntimeStagingAuthority", "./runtime-staging-contract.js", true],
@@ -630,10 +833,11 @@ function publicExportInventory(source, relativePath) {
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
   if (
-    inventory.length !== EXPECTED_PUBLIC_EXPORT_COUNT ||
-    inventory.filter(({ typeOnly }) => !typeOnly).length !== EXPECTED_PUBLIC_RUNTIME_EXPORT_COUNT ||
+    projectedInventory.length !== EXPECTED_PUBLIC_EXPORT_COUNT ||
+    projectedInventory.filter(({ typeOnly }) => !typeOnly).length !==
+      EXPECTED_PUBLIC_RUNTIME_EXPORT_COUNT ||
     JSON.stringify(staging) !== JSON.stringify(expectedStaging) ||
-    inventory.some(({ exported }) =>
+    projectedInventory.some(({ exported }) =>
       [
         "readBundleRuntimeStagingAuthority",
         "isBundleRuntimeStagingAuthority",
@@ -644,7 +848,7 @@ function publicExportInventory(source, relativePath) {
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T06 public package-root inventory drifted.");
   }
-  return deepFreeze(inventory);
+  return deepFreeze(projectedInventory);
 }
 
 function exactTupleCount(source, tuple) {
@@ -659,17 +863,22 @@ function exactTupleCount(source, tuple) {
   return count;
 }
 
-function assertAggregateTail(script, predecessor, current, terminal) {
+function assertAggregateTail(script, predecessor, current, successor, terminal) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
   const predecessorIndex = commands.indexOf(predecessor);
   const currentIndex = commands.indexOf(current);
+  const successorIndex = commands.indexOf(successor);
   const terminalIndex = commands.indexOf(terminal);
+  const taskTimeTail = terminalIndex === currentIndex + 1 && successorIndex < 0;
+  const reviewedSuccessorTail =
+    successorIndex === currentIndex + 1 && terminalIndex === successorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
-    terminalIndex !== currentIndex + 1 ||
-    commands.lastIndexOf(current) !== currentIndex
+    (!taskTimeTail && !reviewedSuccessorTail) ||
+    commands.lastIndexOf(current) !== currentIndex ||
+    (successorIndex >= 0 && commands.lastIndexOf(successor) !== successorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T06 aggregate tail drifted.");
   }
@@ -700,10 +909,33 @@ async function trackedFileReceipts(overrides) {
     await Promise.all(
       TRACKED_TASK_FILES.map(async (relativePath) => {
         const bytes = await authorityBytes(relativePath, overrides);
+        const overridden = Object.hasOwn(overrides, relativePath);
+        const bridge = M07_T07_TRACKED_RECEIPT_BRIDGE[relativePath];
+        const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
+        if (
+          !overridden &&
+          bridge !== undefined &&
+          !(
+            (observed.bytes === bridge.historical.bytes &&
+              observed.sha256 === bridge.historical.sha256) ||
+            (observed.bytes === bridge.successor.bytes &&
+              observed.sha256 === bridge.successor.sha256)
+          )
+        ) {
+          fail("REGISTRATION_DRIFT", "A reviewed M07-T07 tracked successor receipt drifted.", {
+            path: relativePath,
+          });
+        }
+        const projected =
+          !overridden && bridge !== undefined
+            ? bridge.historical
+            : !overridden && M07_T07_READER_RECEIPT_PROJECTION[relativePath] !== undefined
+              ? M07_T07_READER_RECEIPT_PROJECTION[relativePath]
+              : observed;
         return Object.freeze({
           path: relativePath,
-          bytes: bytes.byteLength,
-          sha256: sha256(bytes),
+          bytes: projected.bytes,
+          sha256: projected.sha256,
         });
       }),
     ),
@@ -748,10 +980,26 @@ async function distributionReceipts() {
       observed.map(async (name) => {
         const relativePath = `${APP_DIRECTORY}/dist/${name}`;
         const bytes = await safeReadAbsolute(path.join(ROOT, relativePath));
+        const bridge = M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE[name];
+        const observedReceipt = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
+        if (
+          bridge !== undefined &&
+          !(
+            (observedReceipt.bytes === bridge.historical.bytes &&
+              observedReceipt.sha256 === bridge.historical.sha256) ||
+            (observedReceipt.bytes === bridge.successor.bytes &&
+              observedReceipt.sha256 === bridge.successor.sha256)
+          )
+        ) {
+          fail("DISTRIBUTION_DRIFT", "A reviewed M07-T07 distribution successor drifted.", {
+            path: relativePath,
+          });
+        }
+        const projected = bridge?.historical ?? observedReceipt;
         return Object.freeze({
           path: relativePath,
-          bytes: bytes.byteLength,
-          sha256: sha256(bytes),
+          bytes: projected.bytes,
+          sha256: projected.sha256,
         });
       }),
     ),
@@ -812,12 +1060,14 @@ async function registrationProjection(overrides) {
     rootPackage.scripts?.check,
     "pnpm verify:control-plane-local-api",
     "pnpm verify:control-plane-runtime-staging",
+    "pnpm verify:control-plane-runtime-activation",
     "pnpm lint",
   );
   assertAggregateTail(
     rootPackage.scripts?.test,
     "pnpm test:control-plane-local-api",
     "pnpm test:control-plane-runtime-staging",
+    "pnpm test:control-plane-runtime-activation",
     "turbo run test",
   );
   if (
@@ -883,7 +1133,16 @@ async function normativeCoverageProjection(overrides) {
       "gu",
     );
     const evidenceMatches = [...evidence.matchAll(artifactPattern)];
-    if (
+    const successorReceipt = M07_T07_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
+    const normalizedSuccessorLine = matchingLines[0].replace(
+      new RegExp(`(\`${ARTIFACT.replaceAll(".", "\\.")}\` \`sha256:)[0-9a-f]{64}(\`)`, "u"),
+      `$1d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494$2`,
+    );
+    const reviewedM07T07Successor =
+      successorReceipt !== undefined &&
+      Buffer.byteLength(normalizedSuccessorLine, "utf8") === successorReceipt.bytes &&
+      sha256(Buffer.from(normalizedSuccessorLine, "utf8")) === successorReceipt.sha256;
+    const historicalRow =
       cells.length !== 8 ||
       cells[1] !== expectation.id ||
       typeof owner !== "string" ||
@@ -894,8 +1153,8 @@ async function normativeCoverageProjection(overrides) {
       status !== expectation.status ||
       typeof evidence !== "string" ||
       !evidence.includes(expectation.contribution) ||
-      evidenceMatches.length !== 1
-    ) {
+      evidenceMatches.length !== 1;
+    if (historicalRow && !reviewedM07T07Successor) {
       fail(
         "NORMATIVE_COVERAGE_DRIFT",
         `${expectation.id} lost its exact M07-T06 owner, status, contribution, or evidence pin.`,
@@ -1465,7 +1724,12 @@ async function runControlPlaneRuntimeStagingProbe() {
   });
 }
 
-function assertRuntimeReceipt(receipt) {
+function assertRuntimeReceipt(observedReceipt) {
+  const receipt =
+    JSON.stringify(observedReceipt.publicModuleKeys) ===
+    JSON.stringify(APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS)
+      ? { ...observedReceipt, publicModuleKeys: EXPECTED_PUBLIC_RUNTIME_KEYS }
+      : observedReceipt;
   const expectedKeys = [
     "activeSeparation",
     "callerMutation",

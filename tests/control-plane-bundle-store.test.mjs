@@ -227,6 +227,14 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
           'export { openBundleStoreInternal } from "./bundle-store-internal.js";',
         ),
     ],
+    [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          'export { openBundleRuntimeActivation } from "./runtime-activation.js";',
+          'export { openBundleRuntimeActivation as openBundleRuntimeActivationChanged } from "./runtime-activation.js";',
+        ),
+    ],
     [APP_INDEX, (source) => `${source}\nexport const deleteBundle = true;\n`],
     [
       APP_INDEX,
@@ -352,12 +360,12 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-runtime-staging && pnpm lint",
-        "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm verify:control-plane-runtime-activation && pnpm lint",
+        "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-runtime-staging && turbo run test",
-        "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-successor && turbo run test",
+        "pnpm test:control-plane-runtime-activation && turbo run test",
+        "pnpm test:control-plane-runtime-activation && pnpm test:control-plane-successor && turbo run test",
       ),
   );
   const successor = await buildControlPlaneBundleStoreEvidence(successorOptions);

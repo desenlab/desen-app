@@ -277,11 +277,27 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          'export { openBundleRuntimeActivation } from "./runtime-activation.js";',
+          'export { openBundleRuntimeActivation as openBundleRuntimeActivationChanged } from "./runtime-activation.js";',
+        ),
+    ],
+    [
       ROOT_PACKAGE,
       (source) =>
         source.replace(
           "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-local-api",
           "pnpm verify:control-plane-reference-preflight && pnpm verify:control-plane-decoy && pnpm verify:control-plane-local-api",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation",
+          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation-decoy",
         ),
     ],
     [

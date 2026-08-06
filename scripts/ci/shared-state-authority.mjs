@@ -104,6 +104,7 @@ export const PROOF_IDS = Object.freeze([
   "control-plane-reference-preflight",
   "control-plane-local-api",
   "control-plane-runtime-staging",
+  "control-plane-runtime-activation",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -132,18 +133,21 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "control-plane-bundle-store",
   "control-plane-bundle-verification",
   "control-plane-local-api",
+  "control-plane-runtime-activation",
 ]);
 
 /** Exact proofs whose verifier and root test load one reviewed native addon. */
 export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "reference-host-web-source-audit",
   "control-plane-local-api",
+  "control-plane-runtime-activation",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
 export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze([
   "test-publisher-invalid-source-matrix",
   "test-control-plane-local-api",
+  "test-control-plane-runtime-activation",
 ]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
@@ -181,8 +185,6 @@ if (FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS.length !== 10) {
 const READ_ONLY_ROOT_PROOF_ID_SET = new Set(READ_ONLY_ROOT_PROOF_IDS);
 const WORKSPACE_TEMP_ROOT_PROOF_ID_SET = new Set(WORKSPACE_TEMP_ROOT_PROOF_IDS);
 const CHILD_PROCESS_VERIFIER_PROOF_ID_SET = new Set(CHILD_PROCESS_VERIFIER_PROOF_IDS);
-const NATIVE_ADDON_PROOF_ID_SET = new Set(NATIVE_ADDON_PROOF_IDS);
-const NATIVE_ADDON_ROOT_STEP_ID_SET = new Set(NATIVE_ADDON_ROOT_STEP_IDS);
 const FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_ID_SET = new Set(
   FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS,
 );
@@ -257,9 +259,24 @@ const CHILD_PROCESS_POLICIES = Object.freeze({
 });
 const NATIVE_ADDON_POLICIES = Object.freeze({
   CONTROL_PLANE_LOCAL_API_SQLITE: "CONTROL_PLANE_LOCAL_API_SQLITE",
+  CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE: "CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
+});
+
+const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
+  "reference-host-web-source-audit": NATIVE_ADDON_POLICIES.REFERENCE_HOST_WEB_SOURCE_AUDIT,
+  "control-plane-local-api": NATIVE_ADDON_POLICIES.CONTROL_PLANE_LOCAL_API_SQLITE,
+  "control-plane-runtime-activation": NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE,
+});
+
+const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
+  "test-publisher-invalid-source-matrix":
+    NATIVE_ADDON_POLICIES.PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE,
+  "test-control-plane-local-api": NATIVE_ADDON_POLICIES.CONTROL_PLANE_LOCAL_API_SQLITE,
+  "test-control-plane-runtime-activation":
+    NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE,
 });
 
 /** Stable failure raised when shared-state authority cannot be established safely. */
@@ -377,11 +394,7 @@ for (const proofId of PROOF_IDS) {
       childProcessPolicy: verifierUsesRuntimeProbe
         ? CHILD_PROCESS_POLICIES.VERIFIER_RUNTIME_PROBE
         : CHILD_PROCESS_POLICIES.NONE,
-      nativeAddonPolicy: NATIVE_ADDON_PROOF_ID_SET.has(proofId)
-        ? proofId === "control-plane-local-api"
-          ? NATIVE_ADDON_POLICIES.CONTROL_PLANE_LOCAL_API_SQLITE
-          : NATIVE_ADDON_POLICIES.REFERENCE_HOST_WEB_SOURCE_AUDIT
-        : NATIVE_ADDON_POLICIES.NONE,
+      nativeAddonPolicy: NATIVE_ADDON_POLICY_BY_PROOF_ID[proofId] ?? NATIVE_ADDON_POLICIES.NONE,
     }),
   );
 
@@ -429,11 +442,8 @@ for (const proofId of PROOF_IDS) {
         tempPolicy: TEMP_POLICIES.RUNNER_SCOPED_OS,
         tempKey: testStepId,
         childProcessPolicy: CHILD_PROCESS_POLICIES.NODE_TEST_HARNESS,
-        nativeAddonPolicy: NATIVE_ADDON_ROOT_STEP_ID_SET.has(testStepId)
-          ? testStepId === "test-control-plane-local-api"
-            ? NATIVE_ADDON_POLICIES.CONTROL_PLANE_LOCAL_API_SQLITE
-            : NATIVE_ADDON_POLICIES.PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE
-          : NATIVE_ADDON_POLICIES.NONE,
+        nativeAddonPolicy:
+          NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID[testStepId] ?? NATIVE_ADDON_POLICIES.NONE,
         filesystemCompatibilityPolicy: filesystemCompatibilityPolicyForStep(testStepId),
         barrier: trackedAliasExclusive,
       }),
@@ -441,8 +451,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 140) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 140 steps.", {
+if (METADATA_BY_STEP_ID.size !== 142) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 142 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

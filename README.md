@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████░░░░░░░░░░░` **80 / 145 tasks complete (55%)**
+**Overall:** `██████████████░░░░░░░░░░░` **81 / 145 tasks complete (56%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,9 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M07:** `██████░░░░░` **6 / 11 tasks complete (55%)**
+**M07:** `███████░░░░` **7 / 11 tasks complete (64%)**
 
-**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T07` (`NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T08` (`NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -96,11 +96,33 @@ or durable record. All 14 staging limits have executable evidence. Thirteen focu
 [executable runtime-staging proof](docs/proof/CONTROL-PLANE-RUNTIME-STAGING.md) is pinned by
 `sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`.
 
+**M07-T07 checkpoint:** the built control-plane now accepts only the exact private M07-T04
+reference authority joined to the exact private M07-T06 staging authority. After that join, it
+consumes the staging candidate before the first await or I/O, recloses the complete Bundle from the
+same-root BundleStore, and requires full Bundle equality before committing. One durable atomic
+compare-and-swap record owns `activeRevision`, `previousGoodRevision`, and `generation`: the first
+commit starts at generation 0, later commits preserve the true previous-good revision, and the
+counter cannot wrap past the safe-integer ceiling. The Web adapter uses a separate SQLite database
+with lazy native loading. A pre-existing or indeterminate record fails into explicit
+recovery-required state instead of being trusted. A durable row that disappears after publication
+also revokes the live authority and blocks generation reset. The transaction separately verifies
+the caller generation and the controller's complete authenticated current record, so a
+same-generation external rewrite cannot masquerade as the current state. Recovery discovered
+while Bundle I/O is pending remains sticky. Exact schema/version checks run under the writer lock,
+so a trigger added after open is rejected before DML; statement-acquisition failure closes the
+partial SQLite open before returning a redacted error. Twenty-one focused runtime cases, 25
+compiler-negative cases, and 18 independent root proof/mutation cases pass. P-12 remains
+`NOT_PROVEN`; N-004, N-038, and N-041 remain `PLANNED`; restart recovery, fault injection,
+activation matrices, and host consumption remain M07-T08 through M07-T11. The
+[executable runtime-activation proof](docs/proof/CONTROL-PLANE-RUNTIME-ACTIVATION.md) is pinned by
+the 49,892-byte artifact
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`.
+
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
-61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current working-tree successor contains 140
-workloads and 66 proof pairs after M07-T06 registration: 55 ordinary pairs and 11 exclusive
-barriers. Its retained legacy projection expands to 431 prerequisite segments and 2,337 ordered
-leaf invocations covering 218 distinct leaves. Exact shared-state classes, cancellation behavior,
+61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current working-tree successor contains 142
+workloads and 67 proof pairs after M07-T07 registration: 56 ordinary pairs and 11 exclusive
+barriers. Its retained legacy projection expands to 439 prerequisite segments and 2,473 ordered
+leaf invocations covering 221 distinct leaves. Exact shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
 minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
@@ -210,13 +232,22 @@ proof/root readers at `[28, 29]`.
 Sequences 1–14 and predecessor artifact bytes remain unchanged. This is local-reader evidence and
 claims no hosted M07-T06 result. `DEBT-I07-009` records the M05 source-audit successor bridge and
 `DEBT-I07-013` records the historical staging-reader bridges under I07-04 for removal by G07. The
+reviewed sequence 16 append links exact sequence 15 head
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` to current head
+`f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd`, authenticating sixteen
+frozen artifacts and thirty-two live readers. It appends the 49,892-byte M07-T07 artifact
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`, reseals reader indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31]`,
+and appends the T07 proof/root readers at `[30, 31]`. Sequences 1–15 and every predecessor frozen
+artifact remain unchanged. This is reviewed local-reader evidence and claims no hosted M07-T07
+result; the historical activation-reader bridges remain owned by I07-04 for removal by G07. The
 temporary shadow workflow and modular comparison adapter/test are removed, closing
 `DEBT-I07-008`. The sequential runner remains available only through explicit manual
 `legacy-rollback`; I07-02 adds no affected-path selector. Remaining reader and retirement work
 stays machine-owned by I07-04 and I07-05 in the
 [debt register](docs/plan/DEBT-REGISTER.md). Exact evidence is preserved in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json); implementation
-progress is 80/145 and M07-T07 is next.
+progress is 81/145 and M07-T08 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

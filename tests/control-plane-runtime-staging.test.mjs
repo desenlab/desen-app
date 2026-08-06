@@ -300,11 +300,27 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         source.replace("export { stageBundleRuntime }", "export { stageBundleRuntime as stage }"),
     ],
     [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          'export { openBundleRuntimeActivation } from "./runtime-activation.js";',
+          'export { openBundleRuntimeActivation as openBundleRuntimeActivationChanged } from "./runtime-activation.js";',
+        ),
+    ],
+    [
       ROOT_PACKAGE,
       (source) =>
         source.replace(
           "pnpm verify:control-plane-local-api && pnpm verify:control-plane-runtime-staging",
           "pnpm verify:control-plane-local-api && pnpm verify:control-plane-decoy && pnpm verify:control-plane-runtime-staging",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation",
+          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation-decoy",
         ),
     ],
     [
@@ -400,6 +416,34 @@ test("[traceability] rejects exact trace owners and normative coverage rows", as
 });
 
 test("[runtime] rejects changed identity, index, active-separation, or mutation receipts", async () => {
+  const successorReceipt = structuredClone(built.runtimeReceipt);
+  successorReceipt.publicModuleKeys = [
+    ...successorReceipt.publicModuleKeys,
+    "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+    "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+    "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+    "RuntimeActivationError",
+    "openBundleRuntimeActivation",
+  ].sort();
+  const successorBuild = await buildControlPlaneRuntimeStagingEvidence({
+    runtimeReceipt: successorReceipt,
+  });
+  assert.deepEqual(successorBuild.artifactBytes, built.artifactBytes);
+  assert.equal(
+    successorBuild.runtimeReceipt.publicModuleKeys.includes("openBundleRuntimeActivation"),
+    false,
+  );
+  for (const mutateKeys of [
+    (keys) => keys.filter((key) => key !== "openBundleRuntimeActivation"),
+    (keys) => [...keys, "unreviewedRuntimeSuccessor"].sort(),
+  ]) {
+    const receipt = structuredClone(successorReceipt);
+    receipt.publicModuleKeys = mutateKeys(receipt.publicModuleKeys);
+    await assert.rejects(
+      buildControlPlaneRuntimeStagingEvidence({ runtimeReceipt: receipt }),
+      expectedError("RUNTIME_PROBE_MISMATCH"),
+    );
+  }
   const mutations = [
     (receipt) => {
       receipt.exactSuccess.authenticated = false;

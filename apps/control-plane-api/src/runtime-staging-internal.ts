@@ -1241,6 +1241,23 @@ export function readBundleRuntimeStagingAuthority(
     : undefined;
 }
 
+/**
+ * @internal Atomically consumes one exact live M07-T06 authority for a later trusted stage.
+ *
+ * @remarks JavaScript module evaluation is single-threaded between asynchronous boundaries. The
+ * activation layer calls this only after completing the private T04/T06 lineage join and before
+ * its first asynchronous operation, so two concurrent attempts cannot both acquire the same
+ * candidate record.
+ */
+export function consumeBundleRuntimeStagingAuthority(
+  authority: unknown,
+): BundleRuntimeStagingAuthorityRecord | undefined {
+  if (typeof authority !== "object" || authority === null) return undefined;
+  const stagingAuthority = authority as BundleRuntimeStagingAuthority;
+  const record = AUTHORITIES.get(stagingAuthority);
+  return record !== undefined && AUTHORITIES.delete(stagingAuthority) ? record : undefined;
+}
+
 /** @internal Returns whether a value is an exact live M07-T06 staging authority. */
 export function isBundleRuntimeStagingAuthority(
   value: unknown,

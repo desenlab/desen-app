@@ -26,10 +26,10 @@ Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding s�
 kontrolden çıkmasını engeller.
 
 `I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
-61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T06 eklendikten sonra çalışma
-alanındaki güncel zorunlu plan 140 işin ve 66 kanıt çiftinin tamamını yeni sistemle çalıştırır: 55
-normal çift ve 11 özel bariyer. Eski planın aynı kapsamdaki açılımı 431 önkoşul parçası, 2.337 sıralı
-yaprak çağrısı ve 218 farklı yaprak iştir. Ortak dosya, çıktı, port ve geçici-dizin kullanımı kodla
+61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T07 eklendikten sonra çalışma
+alanındaki güncel zorunlu plan 142 işin ve 67 kanıt çiftinin tamamını yeni sistemle çalıştırır: 56
+normal çift ve 11 özel bariyer. Eski planın aynı kapsamdaki açılımı 439 önkoşul parçası, 2.473 sıralı
+yaprak çağrısı ve 221 farklı yaprak iştir. Ortak dosya, çıktı, port ve geçici-dizin kullanımı kodla
 sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
 başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
 otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
@@ -140,25 +140,44 @@ alındıları yeniden mühürler ve T06 kanıt/kök okuyucularını `[28, 29]` o
 önceki eser baytları değişmez. Bu incelenmiş yerel okuyucu kanıtıdır; hosted M07-T06 başarısı iddia
 etmez. Geçici M05 kaynak-denetim ve tarihsel staging okuyucusu köprüleri `DEBT-I07-009` ve
 `DEBT-I07-013` olarak I07-04'e, en geç G07'de kaldırılmak üzere kaydedilmiştir.
+İncelenmiş sıra 16, sıra 15'in
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` başından güncel
+`f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd` başına bağlanır; 16
+değişmez eseri ve 32 canlı okuyucuyu doğrular. 49.892 baytlık M07-T07 eserini
+(`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`) ekler, okuyucu
+indeksleri `[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29,
+30, 31]` için güncel alındıları yeniden mühürler ve T07 kanıt/kök okuyucularını `[30, 31]`
+olarak ekler. Sıra 1–15 ve önceki dondurulmuş eser baytları değişmez. Bu incelenmiş yerel okuyucu
+kanıtıdır; hosted M07-T07 başarısı iddia etmez. Tarihsel aktivasyon-okuyucusu uyumluluk köprülerini
+en geç G07'de kaldırma sorumluluğu I07-04'tedir.
 Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
 bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
 kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından
 kontrol edilir. Teknik karar, güvenlik kapıları ve kesin kanıt
 [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) ile
 [`I07-02 baseline`](../proof/baselines/i07-02-required-exhaustive-equivalence.json) içinde kayıtlıdır.
-`M07-T06` tamamlandı: sistem yalnızca M07-T03'ün doğruladığı gerçek paket yetkisini kabul ediyor,
-paket baytlarını yeniden doğruluyor ve çalıştırma için gereken paket, capability, surface, state,
-resource, operation ve obligation indekslerini değişmez bir aday olarak hazırlıyor. Henüz hiçbir
-paket kodunu çalıştırmıyor, ekran çizmiyor, channel'ı değiştirmiyor ve active/previous-good kaydı
-yazmıyor. Böylece “hazırlanan aday” ile “kullanıcıya aktif olarak sunulan sürüm” kesin biçimde ayrı
-kalıyor. On dört sabit staging sınırının tamamı çalıştırılabilir kanıtla kapatıldı; 13 uygulama testi,
-13 derleyici-negatif testi ve 17 bağımsız kök kanıt/mutasyon testi geçti. Kanıt eseri
-`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494` ile sabittir. P-12 hâlâ
-`NOT_PROVEN`, N-038/N-041 `PLANNED`, G07 açık ve PF-075 `OPEN`. CI sözleşme testleri 127/127 geçiyor;
-hosted M07-T06 başarısı henüz iddia edilmiyor. Sıradaki görev `M07-T07`: M07-T04 referans kanıtı ile
-M07-T06 staging adayını doğrulayıp `{activeRevision, previousGoodRevision, generation}` kaydını tek
-dayanıklı işlemde yazmak. Güncel ilerleme 80/145 görev (%55), M07 içinde 6/11 görev (%55) ve kanıt
-kapılarında 7/13'tür.
+`M07-T07` tamamlandı: sistem M07-T04'ün referans kanıtı ile M07-T06'nın hazırlanmış adayını yalnızca
+aynı paket ve Bundle kimliğine aitlerse birleştiriyor. Bu birleşimden sonra staging adayını ilk
+bekleme veya disk işleminden önce tek kullanımlık hale getiriyor, aynı BundleStore kökünden Bundle'ı
+yeniden okuyup tamamını karşılaştırıyor. Ardından `activeRevision`, `previousGoodRevision` ve
+`generation` değerlerini tek atomik kayıt olarak yazıyor. İlk nesil 0'dan başlıyor, gerçek önceki
+iyi sürüm korunuyor ve sayaç güvenli tam sayı sınırını aşıp başa dönemiyor. Web adaptörü ayrı bir
+SQLite veritabanı kullanıyor ve native bağımlılığı yalnızca gerektiğinde yüklüyor. Önceden var
+olan veya sonucu belirsiz bir kayıt otomatik olarak güvenilir sayılmıyor; açıkça kurtarma gerekiyor
+durumuna geçiyor. Aktif kayıt sonradan kaybolursa sistem bunu yeni ve boş bir başlangıç saymıyor;
+canlı yetkiyi iptal edip kurtarma istiyor, böylece nesil sayacı sıfırlanamıyor. Normal bir eski
+nesil isteği ile sistemin son doğruladığı tam kaydın silinmesi veya aynı nesil numarasıyla
+değiştirilmesi birbirinden ayrılıyor. Bundle okunurken fark edilen kurtarma durumu kalıcı kalıyor;
+bekleyen işlem sistemi yeniden aktif yapamıyor. SQLite şeması ve sürümü yazma kilidi altında tekrar
+doğrulandığı için sonradan eklenen bir trigger yazmadan önce reddediliyor. SQLite sorgularının
+hazırlanması da aynı güvenli açılış ve temizlik sınırı içinde kalıyor. 21 uygulama testi, 25
+derleyici-negatif testi ve 18 bağımsız kök
+kanıt/mutasyon testi geçti. Kanıt eseri 49.892 bayt ve
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334` ile sabittir. P-12 hâlâ
+`NOT_PROVEN`; N-004, N-038 ve N-041 `PLANNED`; G07 açıktır. Hosted M07-T07 başarısı henüz
+iddia edilmiyor. Sıradaki görev `M07-T08`: uygulama yeniden başladığında bu işlem kaydını yeniden
+doğrulamak ve güvenli biçimde geri yüklemek. Güncel ilerleme 81/145 görev (%56), M07 içinde 7/11
+görev (%64) ve kanıt kapılarında 7/13'tür.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

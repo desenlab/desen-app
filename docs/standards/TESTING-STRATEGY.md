@@ -53,11 +53,11 @@ authoritative. Its local and hosted results are preserved evidence, not proof of
 required-workflow cutover.
 
 I07-02 established the scheduler-neutral 130-node, 61-proof-unit cutover inventory independently
-from both schedulers. M07-T05 appended the fourth post-cutover verifier/root-test pair; M07-T06
-appends the fifth for runtime staging. The working-tree successor therefore contains 140 nodes and
-66 proof units without rewriting that frozen baseline. Its retained legacy projection contains 431
-prerequisite segments, 2,337 ordered leaf invocations, and 218 distinct leaves. All 127 CI contract
-cases pass. Contract and hostile-input
+from both schedulers. M07-T06 appended the fifth post-cutover verifier/root-test pair; M07-T07
+appends the sixth for durable runtime activation. The working-tree successor therefore contains 142
+nodes and 67 proof units without rewriting that frozen baseline. Its retained legacy projection
+contains 439 prerequisite segments, 2,473 ordered leaf invocations, and 221 distinct leaves.
+Contract and hostile-input
 tests cover exact ordered ids, labels, commands, arguments,
 dependencies, execution classes, and shared-state records; omission, duplication, reorder,
 substitution, cycles, unknown classes, shell syntax, writer insertion, and affected-only metadata
@@ -66,9 +66,9 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 52
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 54
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 55 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 56 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -89,22 +89,30 @@ proof/mutation test is `PROOF_OS_TEMP_ISOLATED`, receives only the ordinary `NOD
 child policy, and introduces no scheduler barrier. Neither workload receives workspace-write,
 port, native-addon, or verifier runtime-probe authority.
 
+The M07-T07 `control-plane-runtime-activation` verifier and root are ordinary
+`PROOF_OS_TEMP_ISOLATED` steps. The verifier receives the exact `VERIFIER_RUNTIME_PROBE` child
+policy and the root receives only `NODE_TEST_HARNESS`; both receive the narrow
+`CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE` native-addon policy. Neither receives workspace-write or
+port authority, and the pair introduces no scheduler barrier.
+
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
 inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and identity-checked cleanup. Child
 runtime probes are permitted only for the verifier side of
 `publisher-catalog-pinning`, `publisher-bundle-publication`, `publisher-official-golden`,
 `publisher-invalid-source-matrix`, `control-plane-bundle-store`, and
-`control-plane-bundle-verification`, and `control-plane-local-api`. Native-addon authority is
+`control-plane-bundle-verification`, `control-plane-local-api`, and
+`control-plane-runtime-activation`. Native-addon authority is
 permitted only for the exact
 `reference-host-web-source-audit` verifier/root-test pair, the `publisher-invalid-source-matrix`
-root test, and the exact `control-plane-local-api` verifier/root-test pair. Regression tests prove
+root test, and the exact `control-plane-local-api` and `control-plane-runtime-activation`
+verifier/root-test pairs. Regression tests prove
 that every unlisted step remains denied; the source-audit verifier remains workspace-read-only.
 The reviewed production dependency audit for locked Fastify 5.11.2 and better-sqlite3 13.0.3
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution: 122 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
+distribution: 124 `NONE`, two `FIXTURE_COPY`, fifteen `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
 external-source, symlink-parent, unreviewed-workspace-target, and unsupported-option escapes.
@@ -273,3 +281,13 @@ artifacts and 30 live readers, appends the 47,622-byte M07-T06 artifact
 readers `[28, 29]`. Sequences 1–14 and predecessor artifact bytes remain unchanged. This is
 reviewed local-reader evidence and claims no hosted M07-T06 result. `DEBT-I07-009` and
 `DEBT-I07-013` register the temporary compatibility-reader bridges under I07-04 for removal by G07.
+
+Reviewed checkpoint sequence 16 links exact sequence 15 head
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` to current head
+`f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd`. It authenticates 16 frozen
+artifacts and 32 live readers, appends the 49,892-byte M07-T07 artifact
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`, reseals reader indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31]`,
+and appends T07 readers `[30, 31]`. Sequences 1–15 and predecessor artifact bytes remain unchanged.
+This is reviewed local-reader evidence and claims no hosted M07-T07 result. `DEBT-I07-014`
+registers the temporary activation-reader bridges under I07-04 for removal by G07.

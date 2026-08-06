@@ -483,6 +483,23 @@ host notification. Thirteen focused runtime cases, 13 compiler-negative cases, a
 root proof/mutation cases pass. P-12 remains `NOT_PROVEN`; N-038/N-041 remain `PLANNED`; G07 and
 PF-075 remain open. M07-T07 owns the authenticated M07-T04/M07-T06 join and durable activation
 transaction next.
+M07-T07 now joins only the exact private M07-T04 reference authority and exact private M07-T06
+staging authority for the same package and Bundle identity. A successful join consumes the staging
+candidate before the first await or I/O, then independently rereads and recloses the complete
+Bundle from the same-root BundleStore. One atomic compare-and-swap record commits the active
+revision, true previous-good revision, and generation together; the initial generation is 0,
+same-revision commits still advance it, and it cannot wrap past the safe-integer ceiling. Durable
+commit precedes in-memory publication. The separate SQLite Web adapter loads its native dependency
+lazily, and any pre-existing or indeterminate record becomes explicit recovery-required state
+rather than authenticated runtime authority. A published record that later disappears revokes the
+live authority and cannot reset generation to zero. The same transaction distinguishes stale
+caller input from deletion or a same-generation rewrite of the controller's complete authenticated
+baseline. Recovery discovered during Bundle I/O is sticky, and exact schema/version checks under
+the writer lock reject a live trigger before DML. Statement acquisition remains inside guarded
+SQLite cleanup. Twenty-one focused runtime cases, 25 compiler-negative cases, and 18 independent
+root proof/mutation cases pass. P-12 remains `NOT_PROVEN`; N-004, N-038,
+and N-041 remain `PLANNED`; G07 remains open. Restart recovery, fault injection, activation
+matrices, and separately built host consumption remain M07-T08 through M07-T11.
 
 I07-01 is complete historical evidence. It separated immutable task-time evidence from a
 current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
@@ -610,7 +627,16 @@ M07-T01 proof reader at
 27,154-byte M07-T01 root reader at
 `sha256:ab25e94ed1880b79dfb22f98a3da67fa5b777fdfaa86b3f02739bed6af29a45c`. Predecessor artifact
 bytes remain unchanged. This is local-reader evidence, claims no hosted M07-T06 result, and
-registers `DEBT-I07-009` and `DEBT-I07-013` under I07-04 for removal by G07. The
+registers `DEBT-I07-009` and `DEBT-I07-013` under I07-04 for removal by G07. Reviewed sequence 16
+links exact sequence 15 head
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` to current head
+`f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd`, authenticating sixteen
+frozen artifacts and thirty-two readers. It appends the 49,892-byte M07-T07 artifact
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`, reseals reader indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31]`, and
+appends T07 readers `[30, 31]`. Sequences 1–15 and all predecessor frozen artifact bytes remain
+unchanged. This is local-reader evidence and claims no hosted M07-T07 result; the historical
+activation-reader compatibility bridges remain owned by I07-04 for removal by G07. The
 temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
 archived in the
@@ -619,8 +645,8 @@ archived in the
 The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
 no affected-path selector and does not retire the sequential runner, which remains an explicit
 manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T06 is now `DONE`; its proof pair extends the working-tree successor to 140
-workloads and 66 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T07 is next.
+retirement by G12. M07-T07 is now `DONE`; its proof pair extends the working-tree successor to 142
+workloads and 67 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T08 is next.
 
 ## Current milestone
 
@@ -628,11 +654,11 @@ workloads and 66 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `80 / 145 tasks complete (55%)`
+- Overall implementation progress: `81 / 145 tasks complete (56%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `6 / 11 tasks complete (55%)`
+- M07 progress: `7 / 11 tasks complete (64%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -698,14 +724,15 @@ workloads and 66 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `M07-T03 — Exact package target/version/digest resolution and preflight`,
   `M07-T04 — Surface/capability reference and finite-limit preflight`,
   `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable channel pointers`,
-  `M07-T06 — Staged runtime indexes and active/staged state separation`
+  `M07-T06 — Staged runtime indexes and active/staged state separation`,
+  `M07-T07 — Durable transactional commit of the active, previous-good, and generation record`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
-  `M07-T07 — Durable transactional commit of the active, previous-good, and generation record`
-- Status: M07-T06 and I07-02 are complete; M07-T07 is `NOT_STARTED`, its M07-T04 and M07-T06
-  dependencies are satisfied, and G07 remains open
+  `M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`
+- Status: M07-T07 and I07-02 are complete; M07-T08 is `NOT_STARTED`, its M07-T07 dependency is
+  satisfied, and G07 remains open
 
 ## Completed preparation
 
@@ -1070,18 +1097,20 @@ trusts no cached success, and executes the fresh complete workload. The legacy s
 manual rollback only; affected selection remains future work and every unknown or ambiguous
 selector condition must eventually expand to `EXHAUSTIVE`.
 
-M07-T06 is complete. The built package now creates an immutable runtime-staging candidate only from
-the exact M07-T03 package authority. It independently recloses package bytes, validates execution
-contracts, prepares inert handlers, and builds deterministic bounded indexes without loading code
-or creating channel, commit, active, previous-good, recovery, or host authority. The executable
-artifact is pinned at
-`sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`.
+M07-T07 is complete. The built package now authenticates and joins the exact private M07-T04
+reference authority with the exact private M07-T06 staging authority, consumes the candidate before
+its first await or I/O, and recloses the complete Bundle from the same-root BundleStore. One atomic
+compare-and-swap record commits active revision, true previous-good revision, and generation. Its
+separate SQLite Web adapter fails pre-existing or indeterminate data into recovery-required state
+rather than treating raw storage as runtime authority. It also atomically rejects deletion,
+same-generation rewrite, sticky-recovery revival, and live schema-trigger drift. The 49,892-byte executable artifact is
+pinned at `sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`.
 
 Implement
-`M07-T07 — Durable transactional commit of {activeRevision, previousGoodRevision, generation} as one consistent record`.
-It must authenticate and join the exact M07-T04 reference authority with the exact M07-T06 staging
-authority, define the PF-075 candidate consume/reject lifetime, and publish no partial activation
-state.
+`M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`.
+It must authenticate the durable record and both referenced revisions before restoring any
+in-memory activation authority, while preserving explicit recovery-required behavior for ambiguous
+or invalid storage.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1089,33 +1118,34 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-The current M07-T06 working-tree CI authority contains 140 workloads and 66 verifier/root-test
-pairs: 55 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
-431 segments and 2,337 ordered leaf invocations covering 218 distinct workloads. All 127 CI contract
-cases pass. The current pins
+The current M07-T07 working-tree CI authority contains 142 workloads and 67 verifier/root-test
+pairs: 56 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
+439 segments and 2,473 ordered leaf invocations covering 221 distinct workloads. All 128 CI contract
+tests pass, and all 142 registered workloads close `PASS`. The current pins
 are:
 
 - prerequisite inventory:
-  `094716a406f09e608d66856f5ae2e3a83bcbfbca13fdea3ae7b27d24eb230c27`
-- ordered leaves: `f061a9c1cc9e6ad248782c57be26d194e9d56e5297a63a534ecb5e70e80e5be0`
-- distinct workloads: `fd2ab1c53f58d8f2f4782fd67943afba51165dd21d58d006bbc48651ea684315`
+  `18e186fda7fab28e4e2d88367745acd7cd6bf76362c1b9313e75605ab094c294`
+- ordered leaves: `f6979930481c872fb0c24fcdf5f803ec7b6262dca4235faaf8930d82af47a5f1`
+- distinct workloads: `00894e3a5412218e82cc9013866a73f0d812c1cb7a6ee7d45a296175a45df249`
 - workspace manifest:
   `6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9`
 - workspace package tests:
   `5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4`
-- neutral inventory: `c6aa56d9cd8a89168863c0e3f98ed5078fd254319d44db05f947a6768d57dd96`
+- neutral inventory: `d96ae1ea891c10f9a1b7f364d67e82beaea8c5914d9152ef203a636ef2a89cca`
 - retained plan/projection:
-  `10a0f8d16fe8a98ad540598c9adc4f2c749cf30df83d03bf1d12fecd2e98b2e4`
-- required plan: `b3044605fad5cdc17f3d48be12336dc8c6cf4f0b363e92b2952408403137a73d`
-- shadow plan: `e8d24c5ad71cc2fd32d34498605644eb75a4933639fdbafc168c2e19625bdd8b`
-- workload-id set: `505fe959faa35507012e6c9588c6b245132eb9bd5db666f21d4c846d0bc458f3`
+  `ef9aa6c3e8594681bffb933a13faf67f02217321f482e18b671af04383dfa22a`
+- required plan: `3f0a68109c6293075658ef4695475fbce5df0093319418f14905182cd90f1f2e`
+- shadow plan: `d905fd8bd91bc4c789131759e8f64b3d2b326fa0ee3fe693fc96da3443cfd915`
+- workload-id set: `552ca2f50d9298ff8106b198b4e135e7cd16228b2be61dc426136fb80d580fb1`
 - equivalence projection:
-  `b1b8dad52217a207ecb08721c8dd95bb1223ba5f6059ffc27d897544f707110f`
+  `bd57fc11f947b158d0d67f99d75084e1bb723cccdebde78661e8e835cf88457d`
 
-The runtime-staging verifier is read-only and its root proof is OS-temp-isolated; neither receives
-workspace-write, port, native-addon, or verifier runtime-probe authority. The preceding M07-T05
-pull-request and `main` required-exhaustive runs passed in hosted CI. This M07-T06 working-tree
-authority makes no hosted M07-T06 claim.
+The runtime-activation proof pair is OS-temp-isolated. Its verifier alone receives the exact
+runtime-probe child policy, its root receives only the Node test harness, and both receive the
+narrow SQLite native-addon policy; neither receives workspace-write or port authority. The
+preceding M07-T06 pull-request and `main` required-exhaustive runs passed in hosted CI. This
+M07-T07 working-tree authority makes no hosted M07-T07 claim.
 
 M04-T12 extends the current reviewed CI inventory to 121 distinct workloads, 35 proof verifiers, 35
 root proof files, and a pinned 78-step plan with 35 proof-test steps. Its equivalent legacy
@@ -2149,6 +2179,50 @@ M07-T06 evidence:
 - coverage decision: M07-T06 becomes `DONE`; P-12 remains `NOT_PROVEN`; N-038 and N-041 remain
   `PLANNED`; G07 and PF-075 remain open; overall progress is 80/145, M07 progress is 6/11, and
   M07-T07 owns the authenticated T04/T06 join and durable activation transaction next
+
+M07-T07 evidence:
+
+- `docs/proof/CONTROL-PLANE-RUNTIME-ACTIVATION.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-runtime-activation.json`
+- 49,892-byte artifact SHA-256:
+  `3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`
+- exact authority join: only the private M07-T04 reference authority and private M07-T06 staging
+  authority for the same package and Bundle identity are accepted
+- consume boundary: the joined staging candidate is consumed before the first await or I/O;
+  mismatched and already-busy attempts do not consume it, while terminal later failures cannot
+  replay it
+- independent reclosure: the complete Bundle is reread from the same-root BundleStore and must be
+  exactly equal before any durable commit
+- durable state: one atomic compare-and-swap record owns `activeRevision`,
+  `previousGoodRevision`, and `generation`; the initial generation is 0, same-revision activation
+  advances it, true previous-good state is preserved, and the safe-integer ceiling cannot wrap
+- publication and persistence: durable commit precedes synchronized in-memory publication; the
+  separate SQLite Web adapter lazily loads its native dependency and one controller admits only
+  one in-flight activation
+- fail-closed recovery boundary: pre-existing, indeterminate, and disappeared-after-publication
+  records become recovery-required; a same-generation rewrite also fails the complete
+  authenticated-baseline check, recovery observed during Bundle I/O is sticky, live authority is
+  revoked, and raw durable data never authenticates itself
+- live SQLite boundary: schema/version reauthentication occurs under the writer lock before DML,
+  post-commit state is checked before publication, and statement acquisition stays inside guarded
+  cleanup
+- executable evidence: 21 focused runtime cases, 25 compiler-negative cases, and 18 independent
+  root proof/mutation cases
+- CI authority: 142 workloads and 67 proof pairs (56 ordinary, 11 barriers), 439 prerequisite
+  segments, 2,473 ordered legacy leaves, and 221 distinct leaves
+- current reviewed reader checkpoint: sequence 16 links sequence 15 head
+  `b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` to
+  `f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd`; it authenticates 16 frozen
+  artifacts and 32 readers, appends the 49,892-byte T07 artifact at the SHA-256 above, reseals
+  indexes `[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29,
+30, 31]`, and appends T07 readers `[30, 31]`; sequences 1–15 and predecessor frozen artifact bytes
+  remain unchanged, no hosted M07-T07 result is claimed, and I07-04 owns the historical
+  activation-reader compatibility bridges for removal by G07
+- authority nonclaims: no channel mutation, package loader, renderer, adapter, host callback,
+  rollback, restart recovery, or recovery authorization
+- coverage decision: M07-T07 becomes `DONE`; P-12 remains `NOT_PROVEN`; N-004, N-038, and N-041
+  remain `PLANNED`; G07 and PF-075/PF-076 remain open; overall progress is 81/145, M07 progress is
+  7/11, and M07-T08 owns restart validation and restore next
 
 ## Status vocabulary
 
