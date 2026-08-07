@@ -916,6 +916,11 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 138_780,
       sha256: "33e2683251e7bb515e090325b67dd4b2e5ce6be608b32955d9597b426a414cef",
     }),
+    Object.freeze({
+      task: "M07-T09",
+      bytes: 139_088,
+      sha256: "7680e332fe8c9c5e585022c3b05b885d6d40722a882f67f3a2646554f5413a46",
+    }),
   ]),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze([
     Object.freeze({
@@ -953,13 +958,18 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 63_887,
       sha256: "3cad2a4ea3b18ecadd6baa0c46c4e75b28b3bd059efef2ac57fc0f785c4ac5f3",
     }),
+    Object.freeze({
+      task: "M07-T09",
+      bytes: 74_554,
+      sha256: "0919d7a79dd353b23d1491cdec7c50a1fa58ab867a3ba9fc64a337cec2343e25",
+    }),
   ]),
 });
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][6],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][7],
   [BUNDLE_PUBLICATION_ROOT_TEST]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][6],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][7],
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
   OFFICIAL_GOLDEN_PROOF_LIBRARY,
@@ -1004,15 +1014,19 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "e1bac338f8b7e27f2747789964b505abfbc1bac5267f397f43b0a90fd8806c28",
   "bytes: 72_025",
   "b4d55e0da2a2992bcc311254bfc47c2c69287f9e049ed8e84bb9b50c8886d2a4",
+  "bytes: 72_334",
+  "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
   "bytes: 17_767",
   "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
   "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea",
   "9c2e5b0f71fce28d824b3591c60f83f58dbe78f8f94a1b555b34b07423f86cff",
   "adaca2ed4bb6c611af648c223a887893cd998aca4e173fd4feff0987ac469f51",
   "8ab35ee609d175377ccb2beb679f6d76f93c9c2cf4bc749df0d94a7ff7e47e74",
+  "bytes: 24_873",
+  "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
-  'test("[compatibility] detects tamper in each externally anchored T02 through T08 reader"',
+  'test("[compatibility] detects tamper in each externally anchored T02 through T09 reader"',
   'test("[compatibility] admits only the exact current execution-preflight root reader"',
   'test("[ci] admits only the exact required-workflow successor into frozen T09 evidence"',
   "// unreviewed compatibility successor",
@@ -1020,6 +1034,23 @@ const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   "const originalObjectEntries = Object.entries;",
   "const originalArrayFilter = Array.prototype.filter;",
   "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
+  "M07_T09_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
+  "M07_T09_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
+  "function applyExactRollbackPatch(currentBytes, encodedPatch)",
+  'const patchText = brotliDecompressSync(Buffer.from(encodedPatch, "base64")).toString("utf8");',
+  "assert.equal(currentLines[currentIndex], content);",
+  "assert.equal(currentCount, expectedCurrentCount);",
+  "assert.equal(rollbackCount, expectedRollbackCount);",
+  "reviewedCurrentBytes.byteLength, 72_334",
+  "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
+  "predecessorM07T08Bytes.byteLength, 72_025",
+  "b4d55e0da2a2992bcc311254bfc47c2c69287f9e049ed8e84bb9b50c8886d2a4",
+  "trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T08Bytes }",
+  "currentBytes.byteLength, 24_873",
+  "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+  "predecessorM07T08Bytes.byteLength, 17_767",
+  "8ab35ee609d175377ccb2beb679f6d76f93c9c2cf4bc749df0d94a7ff7e47e74",
+  "trackedFileBytes: { [readerPath]: predecessorM07T08Bytes }",
 ]);
 const PREREQUISITE_SET = new Set(
   PUBLISHER_INVALID_SOURCE_MATRIX_PREREQUISITE_PINS.map(

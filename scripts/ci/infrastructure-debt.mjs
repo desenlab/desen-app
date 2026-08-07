@@ -127,8 +127,8 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
     ]),
     target("tests/publisher-bundle-publication.test.mjs", [
       "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
-      "[compatibility] externally tracks every current T02 through T08 proof reader",
-      "[compatibility] detects tamper in each externally anchored T02 through T08 reader",
+      "[compatibility] externally tracks every current T02 through T09 proof reader",
+      "[compatibility] detects tamper in each externally anchored T02 through T09 reader",
       "[compatibility] admits only the exact current execution-preflight root reader",
       "[ci] admits only the exact required-workflow successor into frozen T09 evidence",
       "[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence",

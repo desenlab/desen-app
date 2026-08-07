@@ -296,7 +296,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[20],
-    "d3abd2c8c7e4eb6d89395668c1ce8b8eecaf940a9c1281847a69e8348c3c04f6",
+    "4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1445,7 +1445,8 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
     sha256: "524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1",
   });
   const changedReaderIndexes = [
-    14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+    0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32, 33,
+    34, 35,
   ];
   assert.deepEqual(
     sequenceTwentyOne.readers.flatMap((reader, index) =>
@@ -1457,11 +1458,81 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
     changedReaderIndexes.map((index) => sequenceTwentyOne.readers[index]),
     [
       {
+        task: "M05-T09",
+        role: "proof-library",
+        path: "scripts/lib/reference-host-web-source-audit-proof.mjs",
+        bytes: 266698,
+        sha256: "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
+      },
+      {
+        task: "M05-T09",
+        role: "root-test",
+        path: "tests/reference-host-web-source-audit.test.mjs",
+        bytes: 90209,
+        sha256: "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
+      },
+      {
+        task: "M06-T01",
+        role: "proof-library",
+        path: "scripts/lib/publisher-publish-result-proof.mjs",
+        bytes: 59980,
+        sha256: "dcf7dbe1b4bfcda4c83ce3dc93ab2ae41e42893f4ae8ec197b221e494009aa09",
+      },
+      {
+        task: "M06-T01",
+        role: "root-test",
+        path: "tests/publisher-publish-result.test.mjs",
+        bytes: 50786,
+        sha256: "75145e262363ceacd930806afe3f786b69b0a65910060de239f11b99c3d3cff5",
+      },
+      {
+        task: "M06-T05",
+        role: "proof-library",
+        path: "scripts/lib/publisher-execution-preflight-proof.mjs",
+        bytes: 72334,
+        sha256: "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
+      },
+      {
+        task: "M06-T05",
+        role: "root-test",
+        path: "tests/publisher-execution-preflight.test.mjs",
+        bytes: 24873,
+        sha256: "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+      },
+      {
+        task: "M06-T09",
+        role: "proof-library",
+        path: "scripts/lib/publisher-bundle-publication-proof.mjs",
+        bytes: 139088,
+        sha256: "7680e332fe8c9c5e585022c3b05b885d6d40722a882f67f3a2646554f5413a46",
+      },
+      {
+        task: "M06-T09",
+        role: "root-test",
+        path: "tests/publisher-bundle-publication.test.mjs",
+        bytes: 74554,
+        sha256: "0919d7a79dd353b23d1491cdec7c50a1fa58ab867a3ba9fc64a337cec2343e25",
+      },
+      {
+        task: "M06-T11",
+        role: "proof-library",
+        path: "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+        bytes: 170585,
+        sha256: "eb1929fa1ad3f468ee9b38b47fe7727ba7e0202042b63574bd411c93a344c014",
+      },
+      {
+        task: "M06-T11",
+        role: "root-test",
+        path: "tests/publisher-invalid-source-matrix.test.mjs",
+        bytes: 76636,
+        sha256: "c697bcad81cc36392db37be25f2cc7eda525494023cf78743b4b55331895b97a",
+      },
+      {
         task: "M07-T01",
         role: "proof-library",
         path: "scripts/lib/control-plane-bundle-store-proof.mjs",
-        bytes: 116907,
-        sha256: "26b36b9f6285bf08818d2f49a4224ffc88dc9dd69a16951a8ebbc1ecb4e41f72",
+        bytes: 118651,
+        sha256: "409560cda371b52e3a1a6e2ad8a32f1b90a5dd2198ab4ebfff21fb3421f5ed27",
       },
       {
         task: "M07-T01",
@@ -1591,7 +1662,7 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceTwentyOne),
-    "d3abd2c8c7e4eb6d89395668c1ce8b8eecaf940a9c1281847a69e8348c3c04f6",
+    "4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f",
   );
 });
 

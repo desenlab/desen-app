@@ -200,9 +200,9 @@ yerel okuyucu kanıtıdır; hosted M07-T08 sonucu iddia etmez. Geçici uyumluluk
 
 İncelenmiş sıra 21, sıra 20'nin
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başından güncel
-`d3abd2c8c7e4eb6d89395668c1ce8b8eecaf940a9c1281847a69e8348c3c04f6` başına bağlanır. Sıra
+`4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f` başına bağlanır. Sıra
 1–20'yi ve önceki tüm eser baytlarını aynen korur; 64.493 baytlık M07-T09 eserini
-(`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`) ekler, 16 tarihsel
+(`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`) ekler, 26 tarihsel
 uyumluluk okuyucusunu yeniden mühürler ve 54.361 baytlık kanıt okuyucusunu
 (`sha256:9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2`) ile 14.927 baytlık kök
 okuyucusunu (`sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`) ekler. Zincir artık

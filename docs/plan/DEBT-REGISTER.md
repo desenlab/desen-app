@@ -155,8 +155,8 @@ the full gate. A cleanup is complete only when:
     - `authenticatedM07T01Prefix`
   - `tests/publisher-bundle-publication.test.mjs`
     - `PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS`
-    - `[compatibility] externally tracks every current T02 through T08 proof reader`
-    - `[compatibility] detects tamper in each externally anchored T02 through T08 reader`
+    - `[compatibility] externally tracks every current T02 through T09 proof reader`
+    - `[compatibility] detects tamper in each externally anchored T02 through T09 reader`
     - `[compatibility] admits only the exact current execution-preflight root reader`
     - `[ci] admits only the exact required-workflow successor into frozen T09 evidence`
     - `[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence`
@@ -174,7 +174,7 @@ the full gate. A cleanup is complete only when:
   - `node scripts/verify-publisher-bundle-publication.mjs`
   - `node --test tests/publisher-bundle-publication.test.mjs`
   - `node scripts/verify-publisher-execution-preflight.mjs`
-  - `rg -n "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS|EXECUTION_PREFLIGHT_COMPATIBILITY_(READER|ROOT_TEST)|APPROVED_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_CURRENT_COMPATIBILITY_PATHS|assertApprovedCurrentCompatibilityBytes|authenticateCurrentCompatibilityReaders|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|authenticatedM07T01Prefix|\[compatibility\] externally tracks every current T02 through T08 proof reader|\[compatibility\] detects tamper in each externally anchored T02 through T08 reader|\[compatibility\] admits only the exact current execution-preflight root reader|\[ci\] admits only the exact required-workflow successor into frozen T09 evidence|\[ci\] accepts an append-only M07 successor without rewriting frozen T09 evidence" scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs`
+  - `rg -n "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS|EXECUTION_PREFLIGHT_COMPATIBILITY_(READER|ROOT_TEST)|APPROVED_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_CURRENT_COMPATIBILITY_PATHS|assertApprovedCurrentCompatibilityBytes|authenticateCurrentCompatibilityReaders|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|authenticatedM07T01Prefix|\[compatibility\] externally tracks every current T02 through T09 proof reader|\[compatibility\] detects tamper in each externally anchored T02 through T09 reader|\[compatibility\] admits only the exact current execution-preflight root reader|\[ci\] admits only the exact required-workflow successor into frozen T09 evidence|\[ci\] accepts an append-only M07 successor without rewriting frozen T09 evidence" scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs`
     must return no matches after removal. The checkpoint may retain the seven exact paths under new
     checkpoint-owned symbols.
 - Closure evidence: `PENDING` — record commit, pull request, seven-reader checkpoint receipt

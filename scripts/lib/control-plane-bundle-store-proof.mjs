@@ -378,6 +378,46 @@ const APPROVED_M07_T09_TRACKED_RECEIPTS = Object.freeze({
     bytes: 2_319,
     sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
   }),
+  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
+    bytes: 266_698,
+    sha256: "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
+  }),
+  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
+    bytes: 90_209,
+    sha256: "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
+  }),
+  "scripts/lib/publisher-publish-result-proof.mjs": Object.freeze({
+    bytes: 59_980,
+    sha256: "dcf7dbe1b4bfcda4c83ce3dc93ab2ae41e42893f4ae8ec197b221e494009aa09",
+  }),
+  "tests/publisher-publish-result.test.mjs": Object.freeze({
+    bytes: 50_786,
+    sha256: "75145e262363ceacd930806afe3f786b69b0a65910060de239f11b99c3d3cff5",
+  }),
+  "scripts/lib/publisher-execution-preflight-proof.mjs": Object.freeze({
+    bytes: 72_334,
+    sha256: "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
+  }),
+  "tests/publisher-execution-preflight.test.mjs": Object.freeze({
+    bytes: 24_873,
+    sha256: "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+  }),
+  "scripts/lib/publisher-bundle-publication-proof.mjs": Object.freeze({
+    bytes: 139_088,
+    sha256: "7680e332fe8c9c5e585022c3b05b885d6d40722a882f67f3a2646554f5413a46",
+  }),
+  "tests/publisher-bundle-publication.test.mjs": Object.freeze({
+    bytes: 74_554,
+    sha256: "0919d7a79dd353b23d1491cdec7c50a1fa58ab867a3ba9fc64a337cec2343e25",
+  }),
+  "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
+    bytes: 170_585,
+    sha256: "eb1929fa1ad3f468ee9b38b47fe7727ba7e0202042b63574bd411c93a344c014",
+  }),
+  "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
+    bytes: 76_636,
+    sha256: "c697bcad81cc36392db37be25f2cc7eda525494023cf78743b4b55331895b97a",
+  }),
 });
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS = fileConstants.O_RDONLY | fileConstants.O_NOFOLLOW | fileConstants.O_NONBLOCK;
