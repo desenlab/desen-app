@@ -1,10 +1,10 @@
 # Control Plane API
 
-A local-first control-plane application for editable sources, immutable Bundles, and mutable
-channel pointers. Publication stays in `@desen/publisher`; this application stores publication
-outputs, verifies candidate inputs, and prepares active-separated runtime indexes before the later
-activation boundary. It is proof-environment infrastructure, not the public `desen.run` developer
-API.
+A local-first control-plane application for editable sources, immutable Bundles, mutable channel
+pointers, and durable runtime activation. Publication stays in `@desen/publisher`; this application
+stores publication outputs, verifies candidate inputs, prepares active-separated runtime indexes,
+and commits an exact preflight-joined candidate through one atomic activation record. It is
+proof-environment infrastructure, not the public `desen.run` developer API.
 
 ## Status
 
@@ -17,7 +17,11 @@ operation references under one fixed finite profile. M07-T05 adds the authentica
 transport and persistent editable-Source/channel metadata while keeping channel discovery separate
 from staging and activation. M07-T06 separately consumes the exact M07-T03 package authority,
 re-closes its private package snapshots, validates execution contracts, and prepares callback-free
-runtime indexes without changing active state. Durable activation remains later M07 work.
+runtime indexes without changing active state. M07-T07 authenticates and joins the independent T04
+and T06 private lineages, re-closes the complete Bundle from the same application-owned store, and
+commits `{ activeRevision, previousGoodRevision, generation }` as one compare-and-set record before
+publishing an in-process activation authority. Restart restoration, the exhaustive fault and race
+matrices, and reference-host consumption remain later M07 work.
 
 The current implementation is a local POSIX filesystem profile. The low-level Bundle store treats
 validation as a caller precondition; the T05 transport deliberately permits unverified candidate
@@ -35,6 +39,7 @@ distribution artifacts; DESEN deliberately exposes no package loader or discover
 import {
   BundleStoreError,
   openBundleStore,
+  openBundleRuntimeActivation,
   openLocalControlPlane,
   preflightBundlePackages,
   preflightBundleReferences,
@@ -55,6 +60,10 @@ const listener = await localApi.listen(0);
 // listener.address is always 127.0.0.1; callers cannot choose a remote bind address.
 
 const store = await openBundleStore({
+  rootDirectory: "/absolute/application-owned/desen-data",
+});
+
+const activation = await openBundleRuntimeActivation({
   rootDirectory: "/absolute/application-owned/desen-data",
 });
 
@@ -89,7 +98,14 @@ if (read.status === "found") {
       const references = preflightBundleReferences(packagePreflight.authority);
       const staging = stageBundleRuntime(packagePreflight.authority);
       if (references.status === "preflighted" && staging.status === "staged") {
-        // M07-T07 will authenticate and join these two independent opaque authorities.
+        const result = await activation.activate(
+          references.authority,
+          staging.authority,
+          null, // The first commit expects no durable activation record.
+        );
+        if (result.status === "activated") {
+          // result.authority is current only for this open controller lifetime.
+        }
       }
     }
   }
@@ -103,14 +119,15 @@ if (read.status === "found") {
 - `getBundle(revision)` returns either `{ status: "missing" }` or a frozen `found` result whose
   entry contains a fresh byte copy. Mutating that returned copy cannot mutate stored content.
 
-The root must already exist as an absolute, application-owned local directory; the store does not
-create or choose that authority for the caller. The package root exports the storage and integrity
-values above plus the package, reference, and runtime-staging operations, their frozen finite
-profiles, stable diagnostic constants, the closed local transport, and documented types.
+The root must already exist as an absolute, application-owned local directory; neither service
+creates or chooses that authority for the caller. The package root exports the storage and
+integrity values above plus the package, reference, runtime-staging, and runtime-activation
+operations, their frozen finite profiles, stable diagnostic constants, the closed local transport,
+and documented types.
 Filesystem paths, file handles, partially parsed documents, internal authority readers, test fault
-hooks, list/delete operations, loaders, and executable callbacks do not cross that root. The
-complete authenticated Bundle snapshot, accepted Catalogs, staged artifact copies, runtime
-obligations, and indexes remain package-private.
+hooks, list/delete operations, loaders, repositories, SQLite handles, and executable callbacks do
+not cross that root. The complete authenticated Bundle snapshot, accepted Catalogs, staged artifact
+copies, runtime obligations, indexes, and live activation identity remain package-private.
 
 ## Local Source, Bundle, and channel transport
 
@@ -301,8 +318,9 @@ Success returns a frozen, runtime-authenticated `BundleReferencePreflightAuthori
 the exact revision, stable profile identity, and safe per-surface counts. The package authority,
 Bundle, Catalogs, artifact bytes, and reference relation remain private. The handle grants no
 execution-contract, runtime-index, staging, channel, activation, durable-commit, recovery, or
-adapter authority; M07-T06 independently owns staging and M07-T07 must authenticate and join both
-authorities before any durable commit.
+adapter authority; M07-T06 independently owns staging. M07-T07 now performs the required exact
+private-identity join between those two branches before a durable commit; an equal visible revision
+is not a substitute.
 
 ## Runtime-index staging boundary
 
@@ -334,13 +352,68 @@ audit summaries, and obligation count. A package-private identity retains the ex
 later trusted composition. Every call creates an independent candidate; no mutable process-global
 `staged` slot exists. The handle exposes no active revision, previous-good revision, generation,
 channel, commit, rollback, recovery, adapter, loader, or host authority. M07-T04 reference admission
-and M07-T06 runtime staging intentionally remain parallel; M07-T07 must authenticate and join both
-exact identities before any durable activation record may change.
+and M07-T06 runtime staging intentionally remain parallel; the M07-T07 activation boundary
+authenticates and joins both exact identities before changing the durable activation record, then
+consumes the staged identity before its first asynchronous store read.
 
 Each candidate is finite and package-private state is weakly owned by its public handle, so an
 unreachable candidate can be reclaimed. M07-T06 does not impose a process-wide count on handles an
 application deliberately retains. Activation orchestration must not use abandoned candidates as a
-cache; M07-T07 owns the explicit consume/reject lifetime for joined candidates.
+cache; M07-T07 implements a one-shot consume/reject lifetime for each joined candidate.
+
+## Durable runtime activation boundary
+
+`openBundleRuntimeActivation({ rootDirectory })` opens the M07-T07 controller over the same
+application-owned root as the immutable Bundle store and a separate internal
+`runtime-activation.sqlite3` repository. It accepts no injected store, repository, database path,
+active revision, previous-good revision, package loader, adapter, renderer, channel, or callback.
+Importing the package root does not load the native SQLite adapter; opening this service loads it
+lazily.
+
+`activate(referenceAuthority, stagingAuthority, expectedGeneration)` authenticates both opaque
+handles and requires their package-private M07-T03 authority and record identities to match. A
+forged, copied, consumed, or mismatched pair fails before Bundle-store I/O and does not consume a
+valid waiting candidate. Once the exact join succeeds, the staged authority is synchronously
+consumed before the first asynchronous read. A later Bundle reclosure rejection, stale
+compare-and-set result, generation exhaustion, or definite storage failure cannot reuse it.
+Captured attempts are recognized only through an own discriminator field, so inherited
+`Object.prototype` pollution cannot turn a forged-pair rejection into repository authority.
+
+The controller then rereads the staged revision from the same immutable store, runs the integrity
+boundary with Source explicitly unavailable, and requires equality with the complete private T04
+and T06 Bundle snapshots, including `publication`. Only then may the repository derive and commit
+one record:
+
+```text
+{ activeRevision, previousGoodRevision, generation }
+```
+
+The first commit requires `expectedGeneration: null` and produces generation `0` with no
+previous-good revision. A later exact-generation commit increments the generation, moves a
+different former active revision to `previousGoodRevision`, and preserves the existing
+previous-good value for a same-revision recommit. Stale expectations and generation exhaustion do
+not write; generations are safe integers and never wrap. The caller cannot independently choose
+either revision field.
+
+The controller separately binds every admitted attempt to its complete authenticated current
+record before Bundle I/O. The SQLite transaction checks caller generation first, then requires that
+full baseline to match before any write. A normal stale caller receives the actual durable record;
+a deleted, inserted, or same-generation externally rewritten record requires recovery and cannot
+reset or silently replace activation state. Recovery discovered while Bundle I/O is pending is
+sticky and the consumed attempt cannot revive the controller.
+
+The Web adapter reauthenticates schema version and exact schema under its `BEGIN IMMEDIATE` writer
+lock before DML, then checks the exact committed row and schema before authority publication. A
+trigger or table added after repository open therefore cannot manufacture a false successful
+activation. Future Android and iOS repositories must preserve the same observable atomicity and
+recovery rules without inheriting this SQLite implementation choice.
+
+Only a certain durable commit publishes a current in-process
+`BundleRuntimeActivationAuthority`. `readState()` returns `active` only for authority created by
+that open controller. A preexisting durable record or an indeterminate commit returns
+`recovery-required`; raw persisted fields are never promoted to runtime authority. M07-T08 still
+owns record revalidation and authority reconstruction after restart, while M07-T09 and M07-T10 own
+the exhaustive precommit fault and race matrices.
 
 ## Storage layout
 
@@ -426,16 +499,18 @@ repository implementation with equivalent no-clobber and durability semantics.
 
 ## Explicitly deferred
 
-M07-T01 through M07-T06 establish immutable exact-byte persistence, Bundle integrity, exact
+M07-T01 through M07-T07 establish immutable exact-byte persistence, Bundle integrity, exact
 installed-package preflight, bounded surface/capability reference preflight, authenticated local
-Source/Bundle/channel transport, and active-separated runtime-index staging. They do not yet
-provide:
+Source/Bundle/channel transport, active-separated runtime-index staging, and one durable atomic
+activation-record transition. They do not yet provide:
 
-- M07-T07 through M07-T10 transactional activation, last-known-good state, recovery, and fault
+- M07-T08 through M07-T10 restart restoration plus exhaustive last-known-good, fault, and race
   matrices; or
 - M07-T11 reference-host channel consumption.
 
 Callers must not treat a successful M07-T01/T05 Bundle write or a channel pointer as integrity
 verification, an M07-T02 integrity authority as package authority, an M07-T03 package authority as
 reference authority, an M07-T04 reference authority as staging authority, or an M07-T06 staged
-authority as committed or active state.
+authority as committed or active state. A raw durable T07 record is not recovered runtime
+authority, and T07 alone does not prove invalid-candidate preservation across every fault, race,
+or restart boundary.

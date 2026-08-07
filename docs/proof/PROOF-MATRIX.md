@@ -1432,3 +1432,49 @@ M07-T07 through M07-T11.
 
 `docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json`
 `sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`.
+
+## M07-T07 — Durable transactional runtime activation record
+
+M07-T07 authenticates and joins the exact private M07-T04 reference-preflight and M07-T06
+runtime-staging identities from one M07-T03 lineage. It rejects a forged, copied, consumed, or
+equal-revision-but-unrelated pair before Bundle-store I/O. Once the exact join succeeds, it
+synchronously consumes the staged identity before the first asynchronous read, so a later
+reclosure rejection, stale compare-and-set result, generation exhaustion, or definite storage
+failure cannot reuse the candidate.
+
+The controller independently rereads the candidate revision from the same application-owned
+M07-T01 store, repeats the M07-T02 integrity boundary with Source explicitly unavailable, and
+requires the complete canonical Bundle—including `publication`—to equal both private candidate
+snapshots. It then supplies the authenticated candidate revision, caller's expected generation,
+and the complete authenticated current-record-or-absence baseline to a platform-neutral
+repository. One atomic transition derives and commits
+`{ activeRevision, previousGoodRevision, generation }`: the first commit is generation zero, a
+different successor retains the former active revision as previous-good, a same-revision recommit
+preserves the real fallback, stale caller expectations return the actual durable record without
+writing, complete authenticated-baseline drift requires recovery, and generation exhaustion never
+wraps. Deletion and same-generation external rewrite cannot become a fresh or matching state, and
+recovery observed while Bundle I/O is pending is sticky.
+
+The first Web repository is an application-internal, lazily loaded SQLite adapter using a
+single-row `STRICT` schema, prepared statements, `BEGIN IMMEDIATE`, WAL,
+`synchronous=FULL`, safe-integer generation constraints, and database/sidecar identity checks.
+Schema/version are reauthenticated under the writer lock before DML, and the exact committed row
+is checked before authority publication. A live trigger added after open therefore fails before
+write. A certain durable commit precedes publication of the current in-process authority. A preexisting
+record or indeterminate commit yields only `recovery-required`; persisted fields are not promoted
+to authenticated runtime authority. M07-T08 therefore still owns restart revalidation and
+reconstruction.
+
+The evidence authenticates 21 focused runtime cases, 25 compiler-negative public-contract cases,
+18 independent root proof/mutation classes, three exact direct prerequisite artifacts, and trace
+rows `PIPE-007`, `PIPE-016`, `PIPE-017`, `R-008`, `R-102`, `R-126`, `A-008`, and `A-009`.
+
+This is the exact atomic-record contribution to `N-004`, not completion of that clause. `N-004`,
+`N-038`, and `N-041` remain `PLANNED`; M07-T09 still owns the complete precommit fault matrix,
+M07-T10 owns invalid-candidate, concurrency, race, and restart matrices, and M12-T05 owns the final
+measured cross-system limit profile. `P-12` remains `NOT_PROVEN` until restart recovery,
+last-known-good fault/race behavior, separately built host consumption, and M10-T07 product-level
+recovery behavior are complete. G07 remains open.
+
+`docs/proof/artifacts/control-plane-api-0.1.0-runtime-activation.json`
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`.

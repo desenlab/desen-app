@@ -280,6 +280,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       APP_INDEX,
       (source) =>
         source.replace(
+          'export { openBundleRuntimeActivation } from "./runtime-activation.js";',
+          'export { openBundleRuntimeActivation as openBundleRuntimeActivationUnsafe } from "./runtime-activation.js";',
+        ),
+    ],
+    [
+      APP_INDEX,
+      (source) =>
+        source.replace(
           'export { stageBundleRuntime } from "./runtime-staging.js";',
           'export { stageBundleRuntime as stageBundleRuntimeUnsafe } from "./runtime-staging.js";',
         ),
@@ -295,7 +303,7 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
     [
       ROOT_PACKAGE,
       (source) =>
-        source.replace("pnpm verify:control-plane-runtime-staging && pnpm lint", "pnpm lint"),
+        source.replace("pnpm verify:control-plane-runtime-activation && pnpm lint", "pnpm lint"),
     ],
     [CI_SOURCE, (source) => source.replace('"control-plane-local-api"', '"local-api-removed"')],
     [
@@ -350,11 +358,21 @@ test("[runtime] rejects changed Source, restart, two-instance CAS, Bundle/channe
   });
   assert.deepEqual(successorBuild.artifactBytes, built.artifactBytes);
   assert.ok(liveRuntimeReceipt.publicModuleKeys.includes("stageBundleRuntime"));
+  assert.ok(liveRuntimeReceipt.publicModuleKeys.includes("openBundleRuntimeActivation"));
   assert.equal(built.runtimeReceipt.publicModuleKeys.includes("stageBundleRuntime"), false);
+  assert.equal(
+    built.runtimeReceipt.publicModuleKeys.includes("openBundleRuntimeActivation"),
+    false,
+  );
   const successorKeyMutations = [
     (receipt) => {
       receipt.publicModuleKeys = receipt.publicModuleKeys.filter(
         (key) => key !== "stageBundleRuntime",
+      );
+    },
+    (receipt) => {
+      receipt.publicModuleKeys = receipt.publicModuleKeys.filter(
+        (key) => key !== "openBundleRuntimeActivation",
       );
     },
     (receipt) => {

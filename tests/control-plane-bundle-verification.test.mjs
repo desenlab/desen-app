@@ -327,6 +327,20 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
     }),
     expectedError("REGISTRATION_DRIFT"),
   );
+
+  const changedActivationExport = (await workspaceBytes(APP_INDEX))
+    .toString("utf8")
+    .replace(
+      'export { openBundleRuntimeActivation } from "./runtime-activation.js";',
+      'export { openBundleRuntimeActivation as openBundleRuntimeActivationChanged } from "./runtime-activation.js";',
+    );
+  await assert.rejects(
+    buildControlPlaneBundleVerificationEvidence({
+      trackedFileBytes: { [APP_INDEX]: Buffer.from(changedActivationExport) },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
 });
 
 test("[traceability] rejects owner or identity drift in all nine exact rows", async () => {

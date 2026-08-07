@@ -1,0 +1,1215 @@
+{
+  "schemaVersion": 1,
+  "proofId": "control-plane-runtime-activation",
+  "profile": "desen.control-plane.runtime-activation-proof.v1",
+  "task": "M07-T07",
+  "result": "PASS",
+  "summary": "The built Web control plane authenticates one exact T04/T06 private lineage, consumes its staged authority before asynchronous work, recloses the complete Bundle from the same immutable T01 store, and commits active, previous-good, and generation as one repository-derived durable record before publishing in-process authority.",
+  "prerequisites": [
+    {
+      "task": "M07-T01",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+      "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795",
+      "bytes": 22396
+    },
+    {
+      "task": "M07-T04",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+      "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394",
+      "bytes": 34612
+    },
+    {
+      "task": "M07-T06",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json",
+      "sha256": "d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494",
+      "bytes": 47622
+    }
+  ],
+  "claims": {
+    "authorityJoin": {
+      "exactPrivateLineage": true,
+      "stagedCandidateConsumedBeforeFirstAwait": true,
+      "successfulCandidateConsumed": true,
+      "mismatchedCandidateNotConsumed": true,
+      "busyCandidateNotConsumed": true,
+      "admittedRejectedCandidateConsumed": true,
+      "supersededActivationAuthorityRevoked": true
+    },
+    "sameApplicationBundleReclosure": {
+      "immutableStorePrerequisite": "M07-T01",
+      "completeCanonicalEquality": true,
+      "missingEntryRejectedBeforeCommit": true,
+      "missingEntryLeftRepositoryEmpty": true
+    },
+    "officialFirstActivation": {
+      "storeStatus": "stored",
+      "beforeState": "empty",
+      "status": "activated",
+      "record": {
+        "activeRevision": "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb",
+        "previousGoodRevision": null,
+        "generation": 0
+      },
+      "authorityKeys": [
+        "activeRevision",
+        "documentId",
+        "entrySurfaceId",
+        "generation",
+        "previousGoodRevision",
+        "profile",
+        "profileVersion",
+        "protocolVersion"
+      ],
+      "authorityFrozen": true,
+      "exactPrivateJoin": true,
+      "stagedConsumed": true,
+      "canonicalReclosureExact": true,
+      "activeStateSameAuthority": true
+    },
+    "sameRevisionActivation": {
+      "status": "activated",
+      "record": {
+        "activeRevision": "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb",
+        "previousGoodRevision": null,
+        "generation": 1
+      },
+      "stagedConsumed": true,
+      "stagedRecordTransferredExact": true,
+      "supersededAuthorityRevoked": true,
+      "currentAuthorityAuthenticated": true
+    },
+    "durableTransitions": {
+      "firstA": {
+        "activeRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "previousGoodRevision": null,
+        "generation": 0
+      },
+      "aToB": {
+        "activeRevision": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "previousGoodRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "generation": 1
+      },
+      "sameB": {
+        "activeRevision": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "previousGoodRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "generation": 2
+      },
+      "bToA": {
+        "activeRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "previousGoodRevision": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "generation": 3
+      },
+      "staleStatus": "precondition-failed",
+      "staleCurrent": {
+        "activeRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "previousGoodRevision": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "generation": 3
+      },
+      "staleNoWrite": true,
+      "exhaustedStatus": "generation-exhausted",
+      "exhaustedCurrent": {
+        "activeRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "previousGoodRevision": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "generation": 9007199254740991
+      },
+      "exhaustedNoWrite": true
+    },
+    "rollbackAndRecovery": {
+      "precommitFailureCode": "STORAGE_IO_FAILURE",
+      "precommitRollbackStatus": "missing",
+      "statementAcquisitionFailureCode": "STORAGE_IO_FAILURE",
+      "statementsPreparedBeforeFailure": ["read"],
+      "statementAcquisitionReopenStatus": "missing",
+      "indeterminateStatus": "recovery-required",
+      "indeterminateRepositoryRevokedCode": "ACTIVATION_CLOSED",
+      "recoveredRecord": {
+        "activeRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "previousGoodRevision": null,
+        "generation": 0
+      },
+      "databaseRegular": true,
+      "databaseSingleLink": true,
+      "unsafeSidecarCode": "UNSAFE_STORAGE_PATH",
+      "preexistingRawRecord": {
+        "preexistingStatus": "recovery-required",
+        "preexistingRecord": {
+          "activeRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "previousGoodRevision": null,
+          "generation": 0
+        },
+        "activeAuthorityAbsent": true,
+        "vanishedStatus": "recovery-required",
+        "vanishedRecord": null,
+        "vanishedAuthorityRevoked": true,
+        "blockedActivationStatus": "recovery-required",
+        "blockedCandidateNotConsumed": true,
+        "directDeletionStatus": "recovery-required",
+        "directDeletionCandidateConsumed": true,
+        "directDeletionAuthorityRevoked": true,
+        "directDeletionDurableStatus": "missing"
+      },
+      "activeAuthorityPublishedForRawRecord": false
+    },
+    "publicBoundary": {
+      "factoryPresent": true,
+      "privateFactoriesAbsent": true,
+      "serviceKeys": ["activate", "close", "readState"],
+      "serviceFrozen": true
+    },
+    "lazyNativeImport": { "beforeOpen": 0, "loadedByPublicFactory": true },
+    "implementation": {
+      "authorityJoin": "exact shared T03 packageAuthority and packageRecord identity, then one-shot T06 consume",
+      "bundleReclosure": "same-root immutable T01 read plus complete canonical T02 integrity reclosure",
+      "repository": "caller supplies expected generation while the controller supplies its authenticated complete baseline; repository derives one complete successor record",
+      "transitions": {
+        "firstGeneration": 0,
+        "differentRevisionPreservesCurrentAsPreviousGood": true,
+        "sameRevisionAdvancesAndPreservesPreviousGood": true,
+        "stalePresenceMismatchAndExhaustionWriteNothing": true,
+        "authenticatedBaselineDriftRequiresRecovery": true
+      },
+      "sqlite": {
+        "fileName": "runtime-activation.sqlite3",
+        "schemaVersion": 1,
+        "strictSingletonRow": true,
+        "journalMode": "WAL",
+        "synchronous": "FULL",
+        "trustedSchema": false,
+        "busyTimeoutMilliseconds": 5000,
+        "immediateCas": true,
+        "liveSchemaReauthenticatedUnderWriterLock": true,
+        "parentDatabaseAndSidecarsRevalidated": true,
+        "precommitRollback": true,
+        "indeterminateCommitRevokesRepository": true
+      },
+      "nativeSqliteImportLazy": true,
+      "hostileStorageErrorsAuthenticatedWithoutAccessors": true,
+      "operationalBundleStoreFailuresPropagateAsRedactedRuntimeErrors": true,
+      "failedControllerInitializationClosesOwnedRepository": true,
+      "explicitAnyTypes": 0,
+      "documentedActivationSourceExports": [
+        "BundleRuntimeActivation",
+        "BundleRuntimeActivationAuthority",
+        "BundleRuntimeActivationDiagnostic",
+        "BundleRuntimeActivationResult",
+        "BundleRuntimeActivationStage",
+        "BundleRuntimeActivationState",
+        "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+        "OpenBundleRuntimeActivationOptions",
+        "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+        "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+        "RuntimeActivationError",
+        "RuntimeActivationErrorCode",
+        "RuntimeActivationRecord",
+        "createOwnedBundleRuntimeActivationInternal",
+        "openBundleRuntimeActivation"
+      ]
+    },
+    "registrations": {
+      "applicationScript": "vitest run test/runtime-activation.test.ts",
+      "rootScripts": {
+        "generate": "pnpm verify:control-plane-runtime-staging && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-activation && node scripts/generate-control-plane-runtime-activation-proof.mjs",
+        "verify": "pnpm verify:control-plane-runtime-staging && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-activation && node scripts/verify-control-plane-runtime-activation.mjs",
+        "test": "pnpm verify:control-plane-runtime-staging && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-activation && node --test tests/control-plane-runtime-activation.test.mjs"
+      },
+      "aggregateImmediatePredecessor": "control-plane-runtime-staging",
+      "aggregateImmediateSuccessors": { "check": "lint", "test": "turbo run test" },
+      "ciTuple": [
+        "control-plane-runtime-activation",
+        "scripts/verify-control-plane-runtime-activation.mjs",
+        "tests/control-plane-runtime-activation.test.mjs"
+      ],
+      "ciTupleExactInRunnerAndInventory": true,
+      "verifierChildProcessAuthority": true,
+      "nativeAddonAuthority": "CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE",
+      "publicExports": [
+        {
+          "exported": "BUNDLE_INTEGRITY_LIMITS",
+          "imported": "BUNDLE_INTEGRITY_LIMITS",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+          "imported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "BUNDLE_REFERENCE_PREFLIGHT_LIMITS",
+          "imported": "BUNDLE_REFERENCE_PREFLIGHT_LIMITS",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "BUNDLE_RUNTIME_STAGING_LIMITS",
+          "imported": "BUNDLE_RUNTIME_STAGING_LIMITS",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "BundleIntegrityAuthority",
+          "imported": "BundleIntegrityAuthority",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleIntegrityDiagnostic",
+          "imported": "BundleIntegrityDiagnostic",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleIntegrityDiagnosticCode",
+          "imported": "BundleIntegrityDiagnosticCode",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleIntegrityLimits",
+          "imported": "BundleIntegrityLimits",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleIntegrityVerificationResult",
+          "imported": "BundleIntegrityVerificationResult",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleIntegrityVerificationStage",
+          "imported": "BundleIntegrityVerificationStage",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundlePackagePreflightAuthority",
+          "imported": "BundlePackagePreflightAuthority",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundlePackagePreflightDiagnostic",
+          "imported": "BundlePackagePreflightDiagnostic",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundlePackagePreflightDiagnosticCode",
+          "imported": "BundlePackagePreflightDiagnosticCode",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundlePackagePreflightLimits",
+          "imported": "BundlePackagePreflightLimits",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundlePackagePreflightResult",
+          "imported": "BundlePackagePreflightResult",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundlePackagePreflightStage",
+          "imported": "BundlePackagePreflightStage",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleReferencePreflightAuthority",
+          "imported": "BundleReferencePreflightAuthority",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleReferencePreflightDiagnostic",
+          "imported": "BundleReferencePreflightDiagnostic",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleReferencePreflightDiagnosticCode",
+          "imported": "BundleReferencePreflightDiagnosticCode",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleReferencePreflightLimits",
+          "imported": "BundleReferencePreflightLimits",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleReferencePreflightResult",
+          "imported": "BundleReferencePreflightResult",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleReferencePreflightStage",
+          "imported": "BundleReferencePreflightStage",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeActivation",
+          "imported": "BundleRuntimeActivation",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeActivationAuthority",
+          "imported": "BundleRuntimeActivationAuthority",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeActivationDiagnostic",
+          "imported": "BundleRuntimeActivationDiagnostic",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeActivationResult",
+          "imported": "BundleRuntimeActivationResult",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeActivationStage",
+          "imported": "BundleRuntimeActivationStage",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeActivationState",
+          "imported": "BundleRuntimeActivationState",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeStagingAuthority",
+          "imported": "BundleRuntimeStagingAuthority",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeStagingDiagnostic",
+          "imported": "BundleRuntimeStagingDiagnostic",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeStagingLimits",
+          "imported": "BundleRuntimeStagingLimits",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeStagingResult",
+          "imported": "BundleRuntimeStagingResult",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleRuntimeStagingStage",
+          "imported": "BundleRuntimeStagingStage",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleSourceMaterial",
+          "imported": "BundleSourceMaterial",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleStore",
+          "imported": "BundleStore",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleStoreEntry",
+          "imported": "BundleStoreEntry",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleStoreError",
+          "imported": "BundleStoreError",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "BundleStoreErrorCode",
+          "imported": "BundleStoreErrorCode",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleStorePutResult",
+          "imported": "BundleStorePutResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "BundleStoreReadResult",
+          "imported": "BundleStoreReadResult",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "InstalledPackageArtifact",
+          "imported": "InstalledPackageArtifact",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "InstalledPackageCandidate",
+          "imported": "InstalledPackageCandidate",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+          "imported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "INVALID_BUNDLE_PACKAGE_AUTHORITY_CODE",
+          "imported": "INVALID_BUNDLE_PACKAGE_AUTHORITY_CODE",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "INVALID_INSTALLED_PACKAGE_CODE",
+          "imported": "INVALID_INSTALLED_PACKAGE_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+          "imported": "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE",
+          "imported": "INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+          "imported": "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+          "imported": "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+          "imported": "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "LOCAL_CONTROL_PLANE_LIMITS",
+          "imported": "LOCAL_CONTROL_PLANE_LIMITS",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+          "imported": "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "LocalControlPlane",
+          "imported": "LocalControlPlane",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneBundlePutResult",
+          "imported": "LocalControlPlaneBundlePutResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneBundleReadResult",
+          "imported": "LocalControlPlaneBundleReadResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneBundleRecord",
+          "imported": "LocalControlPlaneBundleRecord",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneChannelPutBody",
+          "imported": "LocalControlPlaneChannelPutBody",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneChannelPutResult",
+          "imported": "LocalControlPlaneChannelPutResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneChannelReadResult",
+          "imported": "LocalControlPlaneChannelReadResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneChannelRecord",
+          "imported": "LocalControlPlaneChannelRecord",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneError",
+          "imported": "LocalControlPlaneError",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "LocalControlPlaneErrorCode",
+          "imported": "LocalControlPlaneErrorCode",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneErrorDetail",
+          "imported": "LocalControlPlaneErrorDetail",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneErrorEnvelope",
+          "imported": "LocalControlPlaneErrorEnvelope",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneHttpStatusCode",
+          "imported": "LocalControlPlaneHttpStatusCode",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneInjectMethod",
+          "imported": "LocalControlPlaneInjectMethod",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneInjectRequest",
+          "imported": "LocalControlPlaneInjectRequest",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneInjectResponse",
+          "imported": "LocalControlPlaneInjectResponse",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneLimits",
+          "imported": "LocalControlPlaneLimits",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneListenResult",
+          "imported": "LocalControlPlaneListenResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneSourcePutResult",
+          "imported": "LocalControlPlaneSourcePutResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneSourceReadResult",
+          "imported": "LocalControlPlaneSourceReadResult",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "LocalControlPlaneSourceRecord",
+          "imported": "LocalControlPlaneSourceRecord",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "openBundleRuntimeActivation",
+          "imported": "openBundleRuntimeActivation",
+          "module": "./runtime-activation.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "OpenBundleRuntimeActivationOptions",
+          "imported": "OpenBundleRuntimeActivationOptions",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "openBundleStore",
+          "imported": "openBundleStore",
+          "module": "./bundle-store.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "OpenBundleStoreOptions",
+          "imported": "OpenBundleStoreOptions",
+          "module": "./bundle-store-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "openLocalControlPlane",
+          "imported": "openLocalControlPlane",
+          "module": "./local-control-plane.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "OpenLocalControlPlaneOptions",
+          "imported": "OpenLocalControlPlaneOptions",
+          "module": "./local-control-plane-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "imported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+          "imported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "preflightBundlePackages",
+          "imported": "preflightBundlePackages",
+          "module": "./package-preflight.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "preflightBundleReferences",
+          "imported": "preflightBundleReferences",
+          "module": "./reference-preflight.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "imported": "REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+          "imported": "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+          "imported": "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "RUNTIME_STAGING_INTERNAL_FAILURE_CODE",
+          "imported": "RUNTIME_STAGING_INTERNAL_FAILURE_CODE",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "RUNTIME_STAGING_LIMIT_EXCEEDED_CODE",
+          "imported": "RUNTIME_STAGING_LIMIT_EXCEEDED_CODE",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE",
+          "imported": "RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "RuntimeActivationError",
+          "imported": "RuntimeActivationError",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "RuntimeActivationErrorCode",
+          "imported": "RuntimeActivationErrorCode",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "RuntimeActivationRecord",
+          "imported": "RuntimeActivationRecord",
+          "module": "./runtime-activation-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "imported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+          "module": "./bundle-verification-contract.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "stageBundleRuntime",
+          "imported": "stageBundleRuntime",
+          "module": "./runtime-staging.js",
+          "typeOnly": false
+        },
+        {
+          "exported": "StagedRuntimePackageSummary",
+          "imported": "StagedRuntimePackageSummary",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "StagedRuntimeSurfaceSummary",
+          "imported": "StagedRuntimeSurfaceSummary",
+          "module": "./runtime-staging-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "VerifiedBundleSurfaceReferences",
+          "imported": "VerifiedBundleSurfaceReferences",
+          "module": "./reference-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "VerifiedInstalledPackage",
+          "imported": "VerifiedInstalledPackage",
+          "module": "./package-preflight-contract.js",
+          "typeOnly": true
+        },
+        {
+          "exported": "verifyBundleStoreEntry",
+          "imported": "verifyBundleStoreEntry",
+          "module": "./bundle-verification.js",
+          "typeOnly": false
+        }
+      ]
+    },
+    "traceRows": [
+      {
+        "id": "PIPE-007",
+        "section": "6.3",
+        "line": 302,
+        "anchor": "preflights and atomically activates",
+        "summary": "Lifecycle step 7: preflight and atomically activate",
+        "owners": ["M07-T04", "M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "No pre-commit fault changes the active record"
+      },
+      {
+        "id": "PIPE-016",
+        "section": "24.1",
+        "line": 1311,
+        "anchor": "atomically mark the revision active",
+        "summary": "Activation step 8: atomically commit active revision",
+        "owners": ["M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Active and previous-good pointers commit as one record"
+      },
+      {
+        "id": "PIPE-017",
+        "section": "24.1",
+        "line": 1312,
+        "anchor": "preserve the previous active revision",
+        "summary": "Activation step 9: preserve last known good",
+        "owners": ["M07-T07", "M07-T08"],
+        "tests": ["M07-T10", "M10-T07"],
+        "evidence": "Restart and invalid activation restore a compatible prior revision"
+      },
+      {
+        "id": "R-008",
+        "section": "5.7",
+        "line": 250,
+        "anchor": "only after preflight checks pass",
+        "summary": "Atomic activation occurs only after successful preflight",
+        "owners": ["M07-T04", "M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Fault injection before commit leaves active revision unchanged",
+        "bcp14": ["N-004"]
+      },
+      {
+        "id": "R-102",
+        "section": "24.1",
+        "line": 1314,
+        "anchor": "failure before step 8",
+        "summary": "Any activation failure before durable commit leaves the active revision unchanged",
+        "owners": ["M07-T07", "M07-T09"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Boundary fault injection proves the invariant at every pre-commit stage"
+      },
+      {
+        "id": "R-126",
+        "section": "28.3",
+        "line": 1514,
+        "anchor": "Users never observe a half-applied bundle",
+        "summary": "A revision stages separately and switches active state only after preflight",
+        "owners": ["M07-T06", "M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Concurrent readers never observe partial activation state"
+      },
+      {
+        "id": "A-008",
+        "section": "Appendix A",
+        "line": 1841,
+        "anchor": "Atomic activation",
+        "summary": "A revision activates only after successful preflight",
+        "owners": ["M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Transactional activation fault matrix"
+      },
+      {
+        "id": "A-009",
+        "section": "Appendix A",
+        "line": 1842,
+        "anchor": "Last-known-good safety",
+        "summary": "Activation failure preserves a compatible active revision",
+        "owners": ["M07-T07", "M07-T08"],
+        "tests": ["M07-T10", "M10-T07"],
+        "evidence": "Invalid revision and restart recovery tests"
+      }
+    ],
+    "coverageTransitions": {
+      "proofMatrixP12": "NOT_PROVEN",
+      "normativeN004": "PLANNED",
+      "normativeN004Contribution": "M07-T07 proves one exact preflight-joined, complete-Bundle-reclosed atomic record transition; M07-T09 still owns every precommit fault boundary before N-004 can advance.",
+      "normativeN038": "PLANNED",
+      "normativeN041": "PLANNED",
+      "findingPF075": "OPEN",
+      "findingPF076": "OPEN"
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "apps/control-plane-api/package.json",
+      "bytes": 2159,
+      "sha256": "2511a9dfaba16880d5591a68adb2dcbbd6d84a90298d38218f2434bb06416627"
+    },
+    {
+      "path": "apps/control-plane-api/src/index.ts",
+      "bytes": 4606,
+      "sha256": "e7ef3e595fc15b2374cca9d265c2891d1ccf304052f34ec3a706b67608f59d16"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-contract.ts",
+      "bytes": 8962,
+      "sha256": "3a9958660f9c5a1163c229d68826d13e53fb68b30f56371dada9ecafd8342d07"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-internal.ts",
+      "bytes": 16625,
+      "sha256": "2dd919d08c93d8d38d2a74dea5eecb3cb68f4fa15276430bce75610407e47b28"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-repository-internal.ts",
+      "bytes": 9799,
+      "sha256": "9f18e742ae78eabc4215d1c981444e4c5f4c8cc48175e1c81407a9395d7e655a"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-sqlite-internal.ts",
+      "bytes": 22424,
+      "sha256": "1d5c24cf26e8f58ed3fb13f844be2197e1bb5306619dbf2f9e3b4e3e2bab6d74"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation.ts",
+      "bytes": 5524,
+      "sha256": "7f7d83d65efa0eee60312acd315b55e63dbd8690f178df984d68ff3e48b2b809"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-staging-internal.ts",
+      "bytes": 47768,
+      "sha256": "ea20880ed17156ebd7bab6e6c6294f040e782c8b0122dfcd10fa9c67bf27f52d"
+    },
+    {
+      "path": "apps/control-plane-api/test/runtime-activation.test.ts",
+      "bytes": 46126,
+      "sha256": "2fbf5f4773e8090ac06d5b812f2c85809e7056edc091a4e35342fc3e5ccd1698"
+    },
+    {
+      "path": "apps/control-plane-api/test/runtime-activation.types.ts",
+      "bytes": 5056,
+      "sha256": "f1516e9fc0558790a5de909d5b6bde82ca2764f6b5a028b7625fe1640d906e8f"
+    },
+    {
+      "path": "docs/adr/0013-durable-runtime-activation-record.md",
+      "bytes": 10384,
+      "sha256": "f3edf39e82d1b12d4feaf0f89946e6a40e07fd364721dc92a29baaf77a85c9ba"
+    },
+    {
+      "path": "scripts/generate-control-plane-runtime-activation-proof.mjs",
+      "bytes": 847,
+      "sha256": "eb6d1a14a21fb60899deb37b0cb5ea247bec8dfed16be000a221e0b3f444b805"
+    },
+    {
+      "path": "scripts/verify-control-plane-runtime-activation.mjs",
+      "bytes": 687,
+      "sha256": "ab733a8e1bd04d47714379fe4e8329687906094001efec8791cb7b5ea2a10600"
+    },
+    {
+      "path": "scripts/lib/control-plane-runtime-activation-proof.mjs",
+      "bytes": 85644,
+      "sha256": "99332dca08781d8b86282efb23a19b17ee14913c4d8886a08a7a9d4368f39b78"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "tests/control-plane-runtime-activation.test.mjs",
+      "bytes": 26039,
+      "sha256": "4c88c51945a53e0730d0305b260048e676528edc692d079ddc1711726ee5208e"
+    },
+    {
+      "path": "package.json",
+      "bytes": 62928,
+      "sha256": "8f47985e6d774a72042261e65c2c2d86c9c5526d27d91be846d3ce38d88beaa0"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 47703,
+      "sha256": "f6703693b1cce00a35666790b27542f140aa17ecc89d6646d135641f6543041d"
+    },
+    {
+      "path": "scripts/ci/exhaustive-workload-inventory.mjs",
+      "bytes": 46008,
+      "sha256": "d05a7e824d5d4787e3ec422896c3ce2ecf3d478390b862200a8ae01adbbf1d22"
+    },
+    {
+      "path": "scripts/ci/shared-state-authority.mjs",
+      "bytes": 46537,
+      "sha256": "39ccbafa0947cb40e3d4232caf218e2a00247232e5cadc310892c2ecb2dad63c"
+    }
+  ],
+  "distribution": [
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-contract.d.ts",
+      "bytes": 8048,
+      "sha256": "79b5818d1578109e5fb74a37e3b68fd97d869a095e5b55493b95efff1a3202a2"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-contract.d.ts.map",
+      "bytes": 3011,
+      "sha256": "85976ef76ec27f8ee1347bd1a9665d3e959a3b33763cb73c6ab8d4ebc42f5d9a"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-contract.js",
+      "bytes": 1905,
+      "sha256": "4147503300c6cfa710c1f8a2b5526028bfb517fca516b5105b3176105d2b3664"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-contract.js.map",
+      "bytes": 784,
+      "sha256": "dbae75f9a2631dfa5094c4757f25540738355400811cdee0623d8bc368066b82"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-internal.d.ts",
+      "bytes": 68,
+      "sha256": "9fa369d4bbc9ed25df91c9d39f0784a96bd78302df9842a381813f2539cd44cf"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-internal.d.ts.map",
+      "bytes": 148,
+      "sha256": "f2fe6879339892669e8771d583222ce33413413d9f5b5baa99de31ca3f0fd010"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-internal.js",
+      "bytes": 13899,
+      "sha256": "2c8f2bceaf65be9671ba5bfc653238483a9c6f75da4bd69d408a054c3809ba2f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-internal.js.map",
+      "bytes": 11127,
+      "sha256": "c58f12d779d7536497fe46bd3ec72b5d687d88d1e72cc1bad0747c8d1c7541da"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-repository-internal.d.ts",
+      "bytes": 324,
+      "sha256": "2a29042c3bce9c3fc42242f33400e8e3504ee0fec6942d168b8d1cd02249d108"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-repository-internal.d.ts.map",
+      "bytes": 274,
+      "sha256": "9ba5e1602e582da736ebab0f193257cc770e29d87d13422bf07b10a51214ad67"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-repository-internal.js",
+      "bytes": 7201,
+      "sha256": "496b3ef9d593f0dc69cd1ea8b7adbcf7ebfdcf9fcd3472b086ed4e89e07b458f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-repository-internal.js.map",
+      "bytes": 5670,
+      "sha256": "a57392521d93bbab6564bbd5bcc8fb7d6a41a5bc922af5fa7bcf5f0628e652cb"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-sqlite-internal.d.ts",
+      "bytes": 259,
+      "sha256": "fd5948e6c1e6a872e4ba0475699b3d2b867b772feaf222cef46d8a591a8152d7"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-sqlite-internal.d.ts.map",
+      "bytes": 251,
+      "sha256": "ba8d0c85d4c4dde95896ad4966f90a00b97746fbb93fe3525dc52b0d0910331e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+      "bytes": 21624,
+      "sha256": "0523f5a56325ac76150d1755ad1cbe3b0be66a5cc47831c7790f8222dc3ff78c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-sqlite-internal.js.map",
+      "bytes": 17778,
+      "sha256": "67ad22a81128b382957af9799445a367058a3ce13dc8370ba7be3864eb61afc3"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation.d.ts",
+      "bytes": 844,
+      "sha256": "87410cd73370f87ad068d92516dfcccc80d889903f52e3b6225c2c25b08fa701"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation.d.ts.map",
+      "bytes": 323,
+      "sha256": "d800f264678b7063b8e8d103f1c5448a96695cac1971f59160d43a3c2f42ca18"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation.js",
+      "bytes": 5327,
+      "sha256": "798e9a52ddf31881eebd7d0014b345c1947335e73b3799c97b48afcbded5a8af"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation.js.map",
+      "bytes": 3810,
+      "sha256": "aa1e6bd122307b40ffafb71409cbce731e2809fa3b0d0b7231320cd6a0c1ee93"
+    }
+  ],
+  "tests": {
+    "packageRuntimeCases": 21,
+    "packageRuntimeCaseNames": [
+      "commits generation zero and transfers the exact staged authority out of T06",
+      "rejects equal-revision authorities from distinct private T03 lineages without consuming T06",
+      "rejects forged, cloned, proxied, and already consumed pairs before Bundle-store I/O",
+      "authenticates storage failures without inspecting hostile values or trusting a forged name",
+      "admits only one in-flight attempt and does not consume a busy candidate",
+      "terminally consumes a valid candidate when the same-root Bundle cannot be reclosed",
+      "propagates Bundle-store operational failures without writing or disguising them as reclosure",
+      "rejects same-key bytes whose embedded revision and staged content do not reclose",
+      "increments same-revision commits, derives previous-good, and revokes superseded authorities",
+      "preserves the authenticated current authority on a definite stale CAS loss",
+      "opens a preexisting record only as recovery-required and blocks activation without consumption",
+      "reopens a public durable record as raw recovery state rather than active authority",
+      "enters sticky recovery when authenticated durable state disappears or is rewritten",
+      "rolls back a definite before-COMMIT failure and admits a fresh candidate retry",
+      "turns a post-COMMIT failure into recovery-required and revokes the prior current authority",
+      "allows one winner across two SQLite connections at the same expected generation",
+      "consumes a generation-exhausted candidate without changing the authenticated current slot",
+      "keeps generation exhaustion and repository close deterministic",
+      "redacts statement-acquisition failure and closes the partially opened repository",
+      "rejects unsafe SQLite leaves and sidecars plus schema drift and corruption",
+      "rejects malformed roots and revokes service operations after close"
+    ],
+    "compileTimeNegativeCases": 25,
+    "compileTimeNegativeClaims": [
+      "A visible record cannot forge the private activation-authority brand.",
+      "Caller cannot replace the transaction-derived active revision.",
+      "Caller cannot replace the transaction-derived previous-good revision.",
+      "Activation authority exposes no staged Bundle or runtime index.",
+      "Activation authority exposes no package loader.",
+      "Activation authority exposes no mutable release channel.",
+      "Activation authority exposes no repository handle.",
+      "Activation authority exposes no SQLite handle.",
+      "Activation authority grants no recovery or rollback operation.",
+      "Restart recovery belongs to M07-T08, not this authority.",
+      "A raw recovered record is deliberately not authenticated as an authority.",
+      "The caller cannot submit active or previous-good revisions.",
+      "Expected generation must be a nonnegative number or null.",
+      "T04 authority cannot replace the T06 staging branch.",
+      "T06 authority cannot replace the T04 reference branch.",
+      "Public opening accepts no arbitrary database path.",
+      "Public opening accepts no caller-provided repository.",
+      "Public opening accepts no caller-provided Bundle store seam.",
+      "Public opening accepts no caller-selected active revision.",
+      "Package-private repository construction is not exported publicly.",
+      "Package-private SQLite opening is not exported publicly.",
+      "Package-private authority inspection is not exported publicly.",
+      "Package-private owned-resource assembly is not exported publicly.",
+      "Package-private storage errors are not exported publicly.",
+      "Package-private storage-error authentication is not exported publicly."
+    ],
+    "rootMutationCases": 18,
+    "rootMutationCaseNames": [
+      "[authority] builds the exact versioned M07-T07 artifact and activation receipt",
+      "[determinism] two independent evidence builds produce byte-identical artifacts",
+      "[authority] verifies exact artifact bytes and one final proof-document pin",
+      "[artifact] rejects one changed evidence byte",
+      "[proof] rejects pending, wrong, duplicate, or missing final pins",
+      "[prerequisites] rejects one changed byte in all three direct immutable artifacts",
+      "[implementation] rejects authority-join, consume, reclosure, CAS, or recovery drift",
+      "[registration] rejects package-root, package-script, aggregate, CI, or policy drift",
+      "[traceability] rejects exact activation trace-owner drift",
+      "[coverage] rejects P-12, N-004/N-038/N-041, or PF-075/PF-076 truth drift",
+      "[runtime] rejects changed join, transition, rollback, recovery, or native-load receipts",
+      "[tests] rejects skipped focused cases or removed compile-time negatives",
+      "[platform] rejects public-export, TSDoc, private-export, or native-import drift",
+      "[filesystem] rejects symlinked artifact and proof-document authority",
+      "[writer] atomically writes exact deterministic evidence bytes",
+      "[writer] preserves the old destination and removes a tampered temporary",
+      "[options] rejects unknown, accessor-backed, shared-memory, or hostile authority",
+      "[immutability] freezes the evidence graph and preserves T08-T11 nonclaims"
+    ]
+  },
+  "nonclaims": [
+    "M07-T08 still owns validation and reconstruction of durable activation authority after restart or an indeterminate commit.",
+    "M07-T09 still owns exhaustive boundary fault injection before, during, and after durable commit.",
+    "M07-T10 still owns the complete A → invalid B → valid C, concurrent-writer, race, and restart matrices.",
+    "M07-T11 still owns mutable-channel consumption and reference-host notification without treating discovery metadata as activation authority.",
+    "P-12 remains NOT_PROVEN because invalid activation preservation across restart requires M07-T08 through M07-T11 and M10-T07.",
+    "N-004 remains PLANNED: M07-T07 proves one exact atomic record transition, while M07-T09 still owns every precommit fault boundary required to advance the clause.",
+    "N-038 and N-041 remain PLANNED; this task proves the exact transactional slice, not every invalid precommit boundary or final measured cross-system limit profile.",
+    "PF-075 and PF-076 remain OPEN implementation findings while their local one-shot and durable-CAS decisions are executable here.",
+    "The activation record grants no rollback method, package loader, adapter execution, rendering, channel mutation, host callback, signing, network distribution, or npm publication authority.",
+    "SQLite is the Web application adapter only; Android and iOS require native repositories preserving the same observable record, CAS, atomicity, and recovery rules."
+  ],
+  "reproduction": [
+    "pnpm verify:control-plane-runtime-staging",
+    "pnpm --filter @desen/control-plane-api... build",
+    "pnpm --filter @desen/control-plane-api typecheck",
+    "pnpm --filter @desen/control-plane-api test:runtime-activation",
+    "node scripts/generate-control-plane-runtime-activation-proof.mjs",
+    "node scripts/verify-control-plane-runtime-activation.mjs",
+    "node --test tests/control-plane-runtime-activation.test.mjs"
+  ]
+}

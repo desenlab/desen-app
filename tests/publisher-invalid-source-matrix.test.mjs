@@ -188,12 +188,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-staging && pnpm lint",
-    "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-activation && pnpm lint",
+    "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-staging && turbo run test",
-    "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-activation && turbo run test",
+    "pnpm test:control-plane-runtime-activation && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1132,10 +1132,49 @@ test("[authority] detects focused package-test byte drift", async () => {
   );
 });
 
+test("[authority] authenticates the bounded focused-suite timeout successor", async () => {
+  const packageTestBytes = await sourceBytes(PACKAGE_TEST);
+  const packageTest = packageTestBytes.toString("utf8");
+  const proofLibrary = await sourceText(PROOF_LIBRARY);
+  const historicalTrackedReceipt = baseline.artifact.trackedFiles.find(
+    ({ path: trackedPath }) => trackedPath === PACKAGE_TEST,
+  );
+
+  assert.equal(packageTestBytes.byteLength, 92_933);
+  assert.equal(
+    createHash("sha256").update(packageTestBytes).digest("hex"),
+    "5c19935d362d670826ef03049ccb014ccbbaec392e69370b9f121594e2f7a083",
+  );
+  assert.equal(packageTest.split("INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS").length - 1, 10);
+  assert.equal(
+    packageTest.split("const INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS = 60_000;").length - 1,
+    1,
+  );
+  assert.match(proofLibrary, /const RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS = 60_000;/u);
+  assert.match(proofLibrary, /const APPROVED_CURRENT_RUNTIME_PROBE_PROGRAM_BYTES = 135_858;/u);
+  assert.match(proofLibrary, /historicalRuntimeProbeTransportClaim/u);
+  assert.deepEqual(
+    {
+      bytes: baseline.artifact.claims.packageTests.bytes,
+      sha256: baseline.artifact.claims.packageTests.sha256,
+    },
+    {
+      bytes: 91_924,
+      sha256: "959b366b99d304e217b51e89ff377b2c4bb09c61e5202bf454a09575c75b0a56",
+    },
+  );
+  assert.equal(baseline.artifact.claims.runtimeProbeTransport.programBytes, 134_816);
+  assert.deepEqual(historicalTrackedReceipt, {
+    path: PACKAGE_TEST,
+    bytes: 91_924,
+    sha256: "959b366b99d304e217b51e89ff377b2c4bb09c61e5202bf454a09575c75b0a56",
+  });
+});
+
 test("[authority] pins the explicit isolated Vitest timeout", async () => {
   const options = await trackedMutation(PROOF_LIBRARY, (text) =>
     text.replace(
-      "const RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS = 20_000;",
+      "const RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS = 60_000;",
       "const RUNTIME_PROBE_TEST_TIMEOUT_MILLISECONDS = 5_000;",
     ),
   );

@@ -2,7 +2,7 @@
 
 This register tracks temporary compatibility structures registered by I07-01 and later
 task-specific successors while immutable task evidence is separated from current-checkpoint
-authentication and CI execution orchestration. Twelve entries remain open; DEBT-I07-008 is closed
+authentication and CI execution orchestration. Thirteen entries remain open; DEBT-I07-008 is closed
 with authenticated removal evidence. An open entry records planned removal work and does not claim
 that its cleanup has already been implemented.
 
@@ -49,6 +49,7 @@ the full gate. A cleanup is complete only when:
 | DEBT-I07-011 | OPEN   | M07-T04 current-reader and P-17 successor bridges        | M07-T04       | I07-04        | G07           |
 | DEBT-I07-012 | OPEN   | M07-T05 historical control-plane reader bridges          | M07-T05       | I07-04        | G07           |
 | DEBT-I07-013 | OPEN   | M07-T06 historical staging reader bridges                | M07-T06       | I07-04        | G07           |
+| DEBT-I07-014 | OPEN   | M07-T07 historical activation reader bridges             | M07-T07       | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -727,8 +728,6 @@ the full gate. A cleanup is complete only when:
     - `stageBundleRuntimeChanged`
     - `unreviewedRuntimeSuccessor`
     - `export { stageBundleRuntime } from "./runtime-staging.js";`
-    - `pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-successor && pnpm lint`
-    - `pnpm test:control-plane-runtime-staging && pnpm test:control-plane-successor && turbo run test`
   - `scripts/lib/control-plane-bundle-verification-proof.mjs`
     - `APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS`
     - `APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS`
@@ -772,16 +771,13 @@ the full gate. A cleanup is complete only when:
     - `successorKeyMutations`
     - `stageBundleRuntimeUnsafe`
     - `unreviewedRuntimeExport`
-  - `tests/publisher-catalog-pinning.test.mjs`
-    - `pnpm verify:control-plane-runtime-staging && pnpm lint`
-    - `pnpm test:control-plane-runtime-staging && turbo run test`
 - Reason retained: the frozen M07-T01 through M07-T05 readers preserve task-time package,
   public-export, runtime-key, aggregate, distribution, and CI projections. M07-T06 legitimately
   adds the runtime-staging boundary and its `@desen/runtime-core` dependency to the same application,
   so each historical reader carries one narrowly pinned T05-to-T06 successor branch while its
-  frozen artifact remains byte-identical. The frozen M06-T08 Catalog-pinning successor fixture also
-  advances only its exact aggregate command tail to T06 while the helper itself remains tracked by
-  DEBT-I07-012. Reviewed sequence 15 owns the exact current receipts; the reader-local bridges
+  frozen artifact remains byte-identical. The superseded T06 Catalog-pinning command-tail markers
+  have moved forward under DEBT-I07-014 rather than remaining falsely listed as live T06
+  references. Reviewed sequence 15 owns the exact current receipts; the remaining reader-local bridges
   remain temporary until I07-04 centralizes current authentication.
 - Objective removal trigger: sequence 15 or its reviewed replacement authenticates the exact
   M07-T06 package, tracked files, public exports, runtime keys, generated distribution, aggregate
@@ -811,3 +807,148 @@ the full gate. A cleanup is complete only when:
 - Closure evidence: `PENDING` — record commit, pull request, replacement reader-checkpoint SHA-256,
   frozen M07-T01 through M07-T06 artifact SHA-256 values, and hosted required-exhaustive
   equivalence run URL.
+
+## DEBT-I07-014 — M07-T07 historical activation reader bridges
+
+- Status: `OPEN`
+- Registered by infrastructure task: `M07-T07`
+- Removal owner: `I07-04`
+- Exact paths and symbols:
+  - `scripts/lib/reference-host-web-source-audit-proof.mjs`
+    - `M07_T07_CONTROL_PLANE_COORDINATION`
+  - `scripts/lib/control-plane-bundle-store-proof.mjs`
+    - `RUNTIME_ACTIVATION_VALUE_EXPORTS`
+    - `RUNTIME_ACTIVATION_TYPE_EXPORTS`
+    - `APPROVED_M07_T07_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T07_INDEX_DISTRIBUTION_RECEIPTS`
+  - `tests/control-plane-bundle-store.test.mjs`
+    - `openBundleRuntimeActivationChanged`
+    - `pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-successor && pnpm lint`
+    - `pnpm test:control-plane-runtime-activation && pnpm test:control-plane-successor && turbo run test`
+  - `scripts/lib/control-plane-bundle-verification-proof.mjs`
+    - `APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T07_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T07_INDEX_DISTRIBUTION_RECEIPTS`
+  - `tests/control-plane-bundle-verification.test.mjs`
+    - `changedActivationExport`
+  - `scripts/lib/control-plane-package-preflight-proof.mjs`
+    - `APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T07_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T07_INDEX_DISTRIBUTION_RECEIPTS`
+    - `M07_T07_AGGREGATE_SUCCESSOR_COMMANDS`
+  - `tests/control-plane-package-preflight.test.mjs`
+    - `openBundleRuntimeActivationChanged`
+    - `pnpm verify:control-plane-runtime-activation-decoy`
+  - `scripts/lib/control-plane-reference-preflight-proof.mjs`
+    - `APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS`
+    - `APPROVED_M07_T07_TRACKED_RECEIPTS`
+    - `APPROVED_M07_T07_INDEX_DISTRIBUTION_RECEIPTS`
+  - `tests/control-plane-reference-preflight.test.mjs`
+    - `openBundleRuntimeActivationChanged`
+    - `pnpm verify:control-plane-runtime-activation-decoy`
+  - `scripts/lib/control-plane-local-api-proof.mjs`
+    - `M07_T07_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE`
+    - `APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS`
+    - `APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS`
+  - `tests/control-plane-local-api.test.mjs`
+    - `openBundleRuntimeActivationUnsafe`
+    - `successorBuild`
+  - `scripts/lib/control-plane-runtime-staging-proof.mjs`
+    - `APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS`
+    - `APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS`
+    - `M07_T07_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS`
+    - `M07_T07_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T07_READER_RECEIPT_PROJECTION`
+    - `M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE`
+    - `normalizedSuccessorLine`
+    - `reviewedM07T07Successor`
+    - `historicalRow`
+  - `tests/control-plane-runtime-staging.test.mjs`
+    - `successorReceipt`
+    - `successorBuild`
+  - `scripts/lib/publisher-publish-result-proof.mjs`
+    - `REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY`
+  - `tests/publisher-publish-result.test.mjs`
+    - `M07_T06_SOURCE_AUDIT_RECONSTRUCTION_PATCH`
+    - `reconstructM07T03SourceAuditProof`
+  - `scripts/lib/publisher-execution-preflight-proof.mjs`
+    - `APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY`
+    - `APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS`
+  - `tests/publisher-execution-preflight.test.mjs`
+    - `compatibilitySources`
+  - `scripts/lib/publisher-bundle-publication-proof.mjs`
+    - `APPROVED_COMPATIBILITY_RECEIPT_HISTORY`
+    - `APPROVED_CURRENT_COMPATIBILITY_RECEIPTS`
+  - `tests/publisher-bundle-publication.test.mjs`
+    - `appendValidRootSuccessor`
+  - `tests/publisher-catalog-pinning.test.mjs`
+    - `appendValidRootSuccessor`
+  - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
+    - `APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY`
+    - `APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS`
+    - `REQUIRED_CURRENT_T09_PROOF_MARKERS`
+    - `HISTORICAL_PACKAGE_TEST_RECEIPT`
+    - `APPROVED_CURRENT_PACKAGE_TEST_RECEIPT`
+    - `HISTORICAL_RUNTIME_PROBE_PROGRAM_BYTES`
+    - `APPROVED_CURRENT_RUNTIME_PROBE_PROGRAM_BYTES`
+    - `historicalRuntimeProbeTransportClaim`
+  - `tests/publisher-invalid-source-matrix.test.mjs`
+    - `appendValidRootSuccessor`
+    - `[authority] authenticates the bounded focused-suite timeout successor`
+- Reason retained: M07-T07 legitimately advances the public package surface, aggregate tails,
+  runtime receipts, generated distribution, normative-coverage pins, source-audit coordination,
+  and Publisher compatibility receipts while every M07-T01 through M07-T06 artifact remains
+  immutable. These reader-local successor branches are exact and fail closed, but they duplicate
+  the current-receipt authority now authenticated by proof-reader checkpoint sequence 16. The
+  same bridge also authenticates a 60-second focused-suite timeout successor after the 20-second
+  task-time envelope proved vulnerable to wall-clock contention: all 127 invalid cases, eight
+  positive guards, inputs, two-run determinism checks, and pass criteria remain unchanged, while
+  the frozen M06-T11 artifact retains its historical package-test and embedded-program receipts.
+- Objective removal trigger: sequence 16 or its reviewed replacement is the sole current-byte
+  authority for all 32 readers and the M07-T07 artifact; the historical readers consume the
+  checkpoint result without embedding T07 receipt histories, public-export allowlists, aggregate
+  successors, reconstruction patches, source markers, or parallel historical/current timeout
+  receipts; the focused package and built-root suites retain their explicit 60-second test timeout
+  under one current authority; all transition poison tests remain fail-closed; and the seven
+  M07-T01 through M07-T07 artifacts remain byte-identical.
+- Must close by gate: `G07`
+- Exact verification and zero-reference rule:
+  - `node scripts/verify-reference-host-web-source-audit.mjs`
+  - `node scripts/verify-control-plane-bundle-store.mjs`
+  - `node --test tests/control-plane-bundle-store.test.mjs`
+  - `node scripts/verify-control-plane-bundle-verification.mjs`
+  - `node --test tests/control-plane-bundle-verification.test.mjs`
+  - `node scripts/verify-control-plane-package-preflight.mjs`
+  - `node --test tests/control-plane-package-preflight.test.mjs`
+  - `node scripts/verify-control-plane-reference-preflight.mjs`
+  - `node --test tests/control-plane-reference-preflight.test.mjs`
+  - `node scripts/verify-control-plane-local-api.mjs`
+  - `node --test tests/control-plane-local-api.test.mjs`
+  - `node scripts/verify-control-plane-runtime-staging.mjs`
+  - `node --test tests/control-plane-runtime-staging.test.mjs`
+  - `node scripts/verify-publisher-publish-result.mjs`
+  - `node --test tests/publisher-publish-result.test.mjs`
+  - `node scripts/verify-publisher-execution-preflight.mjs`
+  - `node --test tests/publisher-execution-preflight.test.mjs`
+  - `node scripts/verify-publisher-bundle-publication.mjs`
+  - `node --test tests/publisher-bundle-publication.test.mjs`
+  - `node --test tests/publisher-catalog-pinning.test.mjs`
+  - `node scripts/verify-publisher-invalid-source-matrix.mjs`
+  - `pnpm --filter @desen/publisher test:invalid-source-matrix`
+  - `node --test tests/publisher-invalid-source-matrix.test.mjs`
+  - `node scripts/ci/verify-proof-reader-checkpoints.mjs`
+  - `rg -n "M07_T07_CONTROL_PLANE_COORDINATION|RUNTIME_ACTIVATION_(VALUE|TYPE)_EXPORTS|APPROVED_M07_T07_(TRACKED_RECEIPTS|PUBLIC_SOURCE_EXPORTS|PUBLIC_RUNTIME_KEYS|INDEX_DISTRIBUTION_RECEIPTS|ACTIVATION_SOURCE_EXPORTS)|M07_T07_(AGGREGATE_SUCCESSOR_COMMANDS|TRACKED_RECEIPT_BRIDGE|INDEX_DISTRIBUTION_RECEIPT_BRIDGE|NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS|READER_RECEIPT_PROJECTION)|changedActivationExport|openBundleRuntimeActivation(Changed|Unsafe)|normalizedSuccessorLine|reviewedM07T07Successor|historicalRow|successorReceipt|successorBuild" scripts/lib/reference-host-web-source-audit-proof.mjs scripts/lib/control-plane-bundle-store-proof.mjs tests/control-plane-bundle-store.test.mjs scripts/lib/control-plane-bundle-verification-proof.mjs tests/control-plane-bundle-verification.test.mjs scripts/lib/control-plane-package-preflight-proof.mjs tests/control-plane-package-preflight.test.mjs scripts/lib/control-plane-reference-preflight-proof.mjs tests/control-plane-reference-preflight.test.mjs scripts/lib/control-plane-local-api-proof.mjs tests/control-plane-local-api.test.mjs scripts/lib/control-plane-runtime-staging-proof.mjs tests/control-plane-runtime-staging.test.mjs`
+    must return no matches after removal.
+  - `rg -n "REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY|M07_T06_SOURCE_AUDIT_RECONSTRUCTION_PATCH|reconstructM07T03SourceAuditProof|APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS|compatibilitySources|APPROVED_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY|APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS|REQUIRED_CURRENT_T09_PROOF_MARKERS|HISTORICAL_PACKAGE_TEST_RECEIPT|APPROVED_CURRENT_PACKAGE_TEST_RECEIPT|HISTORICAL_RUNTIME_PROBE_PROGRAM_BYTES|APPROVED_CURRENT_RUNTIME_PROBE_PROGRAM_BYTES|historicalRuntimeProbeTransportClaim|appendValidRootSuccessor|\[authority\] authenticates the bounded focused-suite timeout successor" scripts/lib/publisher-publish-result-proof.mjs tests/publisher-publish-result.test.mjs scripts/lib/publisher-execution-preflight-proof.mjs tests/publisher-execution-preflight.test.mjs scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs tests/publisher-catalog-pinning.test.mjs scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs`
+    must return no matches after removal. Immutable task-time receipt fields may remain only in
+    frozen artifact bytes; the replacement checkpoint may retain current receipts under
+    checkpoint-owned symbols.
+- Closure evidence: `PENDING` — record commit, pull request, sequence-16 replacement checkpoint
+  SHA-256, all seven frozen M07 artifact SHA-256 values, and hosted required-exhaustive equivalence
+  run URL.

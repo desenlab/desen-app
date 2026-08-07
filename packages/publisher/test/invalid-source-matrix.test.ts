@@ -97,6 +97,7 @@ const SOURCE_NODE_POINTER_SLOT_CODE_UNITS = 128;
 const SOURCE_NODE_POINTER_STACK_COUNT = 31;
 const SOURCE_NODE_AGGREGATE_CHILDREN = 15_000;
 const SOURCE_NODE_AGGREGATE_DOCUMENT_ID_CODE_UNITS = 256;
+const INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS = 60_000;
 
 const EXPECTED_PUBLISHER_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.publisher/INVALID_SOURCE_JSON",
@@ -2524,212 +2525,244 @@ describe("M06-T11 public invalid-Source no-Bundle matrix", () => {
       expectFailure(second, testCase);
       expect(JSON.stringify(second)).toBe(JSON.stringify(first));
     },
-    20_000,
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
   );
 
-  it("pins exact trace coverage without inventing public data negatives for total stages", () => {
-    expect(new Set(INVALID_PUBLICATION_CASES.map(({ trace }) => trace))).toEqual(
-      new Set([
-        "PIPE-025",
-        "PIPE-026",
-        "PIPE-027",
-        "PIPE-028",
-        "PIPE-029",
-        "PIPE-030",
-        "PIPE-031",
-        "PIPE-032",
-        "PIPE-033",
-        "PIPE-034",
-        "PIPE-037",
-        "PIPE-039",
-      ]),
-    );
-    const rejectedStages = new Set(INVALID_PUBLICATION_CASES.map(({ stage }) => stage));
-    for (const stage of TOTAL_PUBLIC_STAGES_WITHOUT_DATA_NEGATIVES) {
-      expect(rejectedStages.has(stage)).toBe(false);
-    }
-
-    const registryCodes = PUBLISHER_DIAGNOSTIC_REGISTRY.map(({ code }) => code);
-    const registryCodeSet = new Set<string>(registryCodes);
-    expect(registryCodes).toEqual(EXPECTED_PUBLISHER_DIAGNOSTIC_CODES);
-    expect(registryCodeSet.size).toBe(PUBLISHER_DIAGNOSTIC_REGISTRY.length);
-    expect(Object.isFrozen(PUBLISHER_DIAGNOSTIC_REGISTRY)).toBe(true);
-    for (const definition of PUBLISHER_DIAGNOSTIC_REGISTRY) {
-      expect(Object.isFrozen(definition)).toBe(true);
-      expect(isPublisherDiagnosticCode(definition.code)).toBe(true);
-      expect(getPublisherDiagnosticDefinition(definition.code)).toBe(definition);
-    }
-    expect(isPublisherDiagnosticCode("run.desen.publisher/UNKNOWN")).toBe(false);
-    expect(getPublisherDiagnosticDefinition("run.desen.publisher/UNKNOWN")).toBeUndefined();
-
-    const emittedPublisherCodes = new Set(
-      INVALID_PUBLICATION_CASES.map(({ code }) => code).filter((code) =>
-        code.startsWith("run.desen.publisher/"),
-      ),
-    );
-    for (const code of emittedPublisherCodes) {
-      expect(registryCodeSet.has(code)).toBe(true);
-    }
-  });
-
-  it("publishes the unmodified official golden through every total public stage", () => {
-    const first = publishWithoutInputMutation(officialInput());
-    const second = publishWithoutInputMutation(officialInput());
-    expectSuccess(first, "official golden");
-    expectSuccess(second, "repeated official golden");
-    expect(first.diagnostics).toEqual([]);
-    expect(first.bundle.revision).toBe(
-      "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
-    );
-    expect(first.bundle.sourceDigest).toBe(
-      "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
-    );
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
-
-  it("publishes a dynamic context.runtimeTitle obligation without guessing its value", () => {
-    const makeInput = (): PublicationInput =>
-      officialInput((source) => {
-        writeAt(source, ["surfaces", "home", "root", "slots", "default", 0, "props", "text"], {
-          $ref: "context.runtimeTitle",
-          fallback: "Welcome",
-        });
-      });
-    const first = publishWithoutInputMutation(makeInput());
-    const second = publishWithoutInputMutation(makeInput());
-    expectSuccess(first, "dynamic context obligation");
-    expectSuccess(second, "repeated dynamic context obligation");
-    expect(
-      valueAt(first.bundle, ["surfaces", "home", "root", "slots", "default", 0, "props", "text"]),
-    ).toEqual({
-      $ref: "context.runtimeTitle",
-      fallback: "Welcome",
-    });
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
-
-  it("publishes the exact 4,096-obligation positive boundary without exposing obligations", () => {
-    expect(EXACT_EMAIL_WRITE_ACTIONS + OFFICIAL_NON_EMAIL_WRITE_OBLIGATIONS).toBe(
-      RUNTIME_OBLIGATION_LIMIT,
-    );
-    const firstInput = fixtureInput(sourceWithEmailWriteActions(EXACT_EMAIL_WRITE_ACTIONS));
-    const secondInput = fixtureInput(sourceWithEmailWriteActions(EXACT_EMAIL_WRITE_ACTIONS));
-    const first = publishWithoutInputMutation(firstInput);
-    const second = publishWithoutInputMutation(secondInput);
-    expectSuccess(first, "exact runtime-obligation boundary");
-    expectSuccess(second, "repeated exact runtime-obligation boundary");
-    expect(first.diagnostics).toEqual([]);
-    expect(
-      array(
-        valueAt(first.bundle, [
-          "surfaces",
-          "sign-in",
-          "root",
-          "slots",
-          "default",
-          1,
-          "on",
-          "change",
+  it(
+    "pins exact trace coverage without inventing public data negatives for total stages",
+    () => {
+      expect(new Set(INVALID_PUBLICATION_CASES.map(({ trace }) => trace))).toEqual(
+        new Set([
+          "PIPE-025",
+          "PIPE-026",
+          "PIPE-027",
+          "PIPE-028",
+          "PIPE-029",
+          "PIPE-030",
+          "PIPE-031",
+          "PIPE-032",
+          "PIPE-033",
+          "PIPE-034",
+          "PIPE-037",
+          "PIPE-039",
         ]),
-      ),
-    ).toHaveLength(EXACT_EMAIL_WRITE_ACTIONS);
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
+      );
+      const rejectedStages = new Set(INVALID_PUBLICATION_CASES.map(({ stage }) => stage));
+      for (const stage of TOTAL_PUBLIC_STAGES_WITHOUT_DATA_NEGATIVES) {
+        expect(rejectedStages.has(stage)).toBe(false);
+      }
 
-  it("publishes an obligation pointer at exactly 4,096 code units", () => {
-    expect(
-      HOME_TITLE_PROP_POINTER_PREFIX.length + EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS,
-    ).toBe(RUNTIME_OBLIGATION_POINTER_LIMIT);
-    const first = publishWithoutInputMutation(
-      obligationPropInput(0, EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS),
-    );
-    const second = publishWithoutInputMutation(
-      obligationPropInput(0, EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS),
-    );
-    expectSuccess(first, "exact obligation-pointer boundary");
-    expectSuccess(second, "repeated exact obligation-pointer boundary");
-    const key = obligationPropKey(0, EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS);
-    expect(
-      valueAt(first.bundle, ["surfaces", "home", "root", "slots", "default", 0, "props", key]),
-    ).toEqual({
-      $ref: "context.runtimeTitle",
-      fallback: "Welcome",
-    });
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
+      const registryCodes = PUBLISHER_DIAGNOSTIC_REGISTRY.map(({ code }) => code);
+      const registryCodeSet = new Set<string>(registryCodes);
+      expect(registryCodes).toEqual(EXPECTED_PUBLISHER_DIAGNOSTIC_CODES);
+      expect(registryCodeSet.size).toBe(PUBLISHER_DIAGNOSTIC_REGISTRY.length);
+      expect(Object.isFrozen(PUBLISHER_DIAGNOSTIC_REGISTRY)).toBe(true);
+      for (const definition of PUBLISHER_DIAGNOSTIC_REGISTRY) {
+        expect(Object.isFrozen(definition)).toBe(true);
+        expect(isPublisherDiagnosticCode(definition.code)).toBe(true);
+        expect(getPublisherDiagnosticDefinition(definition.code)).toBe(definition);
+      }
+      expect(isPublisherDiagnosticCode("run.desen.publisher/UNKNOWN")).toBe(false);
+      expect(getPublisherDiagnosticDefinition("run.desen.publisher/UNKNOWN")).toBeUndefined();
 
-  it("publishes obligations at exactly 1,048,576 aggregate code units", () => {
-    expect(
-      OFFICIAL_RUNTIME_OBLIGATION_AGGREGATE_CODE_UNITS +
-        MAX_POINTER_AGGREGATE_PROP_COUNT *
-          (HOME_TITLE_COMPONENT_PROP_CONTEXT_CODE_UNITS + RUNTIME_OBLIGATION_POINTER_LIMIT) +
-        HOME_TITLE_COMPONENT_PROP_CONTEXT_CODE_UNITS +
-        HOME_TITLE_PROP_POINTER_PREFIX.length +
-        EXACT_AGGREGATE_TAIL_PROP_KEY_CODE_UNITS,
-    ).toBe(RUNTIME_OBLIGATION_AGGREGATE_LIMIT);
-    const first = publishWithoutInputMutation(
-      obligationPropInput(
-        MAX_POINTER_AGGREGATE_PROP_COUNT,
-        EXACT_AGGREGATE_TAIL_PROP_KEY_CODE_UNITS,
-      ),
-    );
-    const second = publishWithoutInputMutation(
-      obligationPropInput(
-        MAX_POINTER_AGGREGATE_PROP_COUNT,
-        EXACT_AGGREGATE_TAIL_PROP_KEY_CODE_UNITS,
-      ),
-    );
-    expectSuccess(first, "exact obligation-aggregate boundary");
-    expectSuccess(second, "repeated exact obligation-aggregate boundary");
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
+      const emittedPublisherCodes = new Set(
+        INVALID_PUBLICATION_CASES.map(({ code }) => code).filter((code) =>
+          code.startsWith("run.desen.publisher/"),
+        ),
+      );
+      for (const code of emittedPublisherCodes) {
+        expect(registryCodeSet.has(code)).toBe(true);
+      }
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
 
-  it("publishes the exact largest payload admitted by final Bundle validation", () => {
-    const makeInput = (): PublicationInput =>
-      officialInput((source) => {
-        source.extensions = {
-          payload: "x".repeat(FINAL_BUNDLE_MAX_SUCCESS_PAYLOAD_CODE_UNITS),
-        };
+  it(
+    "publishes the unmodified official golden through every total public stage",
+    () => {
+      const first = publishWithoutInputMutation(officialInput());
+      const second = publishWithoutInputMutation(officialInput());
+      expectSuccess(first, "official golden");
+      expectSuccess(second, "repeated official golden");
+      expect(first.diagnostics).toEqual([]);
+      expect(first.bundle.revision).toBe(
+        "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
+      );
+      expect(first.bundle.sourceDigest).toBe(
+        "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
+      );
+      expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
+
+  it(
+    "publishes a dynamic context.runtimeTitle obligation without guessing its value",
+    () => {
+      const makeInput = (): PublicationInput =>
+        officialInput((source) => {
+          writeAt(source, ["surfaces", "home", "root", "slots", "default", 0, "props", "text"], {
+            $ref: "context.runtimeTitle",
+            fallback: "Welcome",
+          });
+        });
+      const first = publishWithoutInputMutation(makeInput());
+      const second = publishWithoutInputMutation(makeInput());
+      expectSuccess(first, "dynamic context obligation");
+      expectSuccess(second, "repeated dynamic context obligation");
+      expect(
+        valueAt(first.bundle, ["surfaces", "home", "root", "slots", "default", 0, "props", "text"]),
+      ).toEqual({
+        $ref: "context.runtimeTitle",
+        fallback: "Welcome",
       });
-    const first = publishWithoutInputMutation(makeInput());
-    const second = publishWithoutInputMutation(makeInput());
-    expectSuccess(first, "exact final-Bundle payload boundary");
-    expectSuccess(second, "repeated final-Bundle payload boundary");
-    expect(String(valueAt(first.bundle, ["extensions", "payload"]))).toHaveLength(
-      FINAL_BUNDLE_MAX_SUCCESS_PAYLOAD_CODE_UNITS,
-    );
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
+      expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
 
-  it("emits only fixed sanitized deprecation warnings on complete success", () => {
-    const makeInput = (): PublicationInput =>
-      officialInput(undefined, (catalog) => {
-        const stack = record(
-          valueAt(catalog, ["components", "com.example.ui/Stack"]),
-          "Stack Catalog declaration",
-        );
-        stack.deprecated = "PRIVATE RETIREMENT TEXT";
-        stack.replacement = "private/replacement";
+  it(
+    "publishes the exact 4,096-obligation positive boundary without exposing obligations",
+    () => {
+      expect(EXACT_EMAIL_WRITE_ACTIONS + OFFICIAL_NON_EMAIL_WRITE_OBLIGATIONS).toBe(
+        RUNTIME_OBLIGATION_LIMIT,
+      );
+      const firstInput = fixtureInput(sourceWithEmailWriteActions(EXACT_EMAIL_WRITE_ACTIONS));
+      const secondInput = fixtureInput(sourceWithEmailWriteActions(EXACT_EMAIL_WRITE_ACTIONS));
+      const first = publishWithoutInputMutation(firstInput);
+      const second = publishWithoutInputMutation(secondInput);
+      expectSuccess(first, "exact runtime-obligation boundary");
+      expectSuccess(second, "repeated exact runtime-obligation boundary");
+      expect(first.diagnostics).toEqual([]);
+      expect(
+        array(
+          valueAt(first.bundle, [
+            "surfaces",
+            "sign-in",
+            "root",
+            "slots",
+            "default",
+            1,
+            "on",
+            "change",
+          ]),
+        ),
+      ).toHaveLength(EXACT_EMAIL_WRITE_ACTIONS);
+      expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
+
+  it(
+    "publishes an obligation pointer at exactly 4,096 code units",
+    () => {
+      expect(
+        HOME_TITLE_PROP_POINTER_PREFIX.length + EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS,
+      ).toBe(RUNTIME_OBLIGATION_POINTER_LIMIT);
+      const first = publishWithoutInputMutation(
+        obligationPropInput(0, EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS),
+      );
+      const second = publishWithoutInputMutation(
+        obligationPropInput(0, EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS),
+      );
+      expectSuccess(first, "exact obligation-pointer boundary");
+      expectSuccess(second, "repeated exact obligation-pointer boundary");
+      const key = obligationPropKey(0, EXACT_RUNTIME_OBLIGATION_PROP_KEY_CODE_UNITS);
+      expect(
+        valueAt(first.bundle, ["surfaces", "home", "root", "slots", "default", 0, "props", key]),
+      ).toEqual({
+        $ref: "context.runtimeTitle",
+        fallback: "Welcome",
       });
-    const first = publishWithoutInputMutation(makeInput());
-    const second = publishWithoutInputMutation(makeInput());
-    expectSuccess(first, "deprecated-capability warning vector");
-    expectSuccess(second, "repeated deprecated-capability warning vector");
-    expect(first.diagnostics).toHaveLength(2);
-    expect(first.diagnostics.map(({ pointer }) => pointer)).toEqual([
-      "/surfaces/home/root/use",
-      "/surfaces/sign-in/root/use",
-    ]);
-    for (const diagnostic of first.diagnostics) {
-      expect(diagnostic).toMatchObject({
-        code: DEPRECATED_CAPABILITY_CODE,
-        message: "Source data uses a deprecated Catalog capability.",
-        severity: "warning",
-        stage: "capability-contracts",
-      });
-    }
-    expect(JSON.stringify(first.diagnostics)).not.toContain("PRIVATE RETIREMENT TEXT");
-    expect(JSON.stringify(first.diagnostics)).not.toContain("private/replacement");
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
+      expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
+
+  it(
+    "publishes obligations at exactly 1,048,576 aggregate code units",
+    () => {
+      expect(
+        OFFICIAL_RUNTIME_OBLIGATION_AGGREGATE_CODE_UNITS +
+          MAX_POINTER_AGGREGATE_PROP_COUNT *
+            (HOME_TITLE_COMPONENT_PROP_CONTEXT_CODE_UNITS + RUNTIME_OBLIGATION_POINTER_LIMIT) +
+          HOME_TITLE_COMPONENT_PROP_CONTEXT_CODE_UNITS +
+          HOME_TITLE_PROP_POINTER_PREFIX.length +
+          EXACT_AGGREGATE_TAIL_PROP_KEY_CODE_UNITS,
+      ).toBe(RUNTIME_OBLIGATION_AGGREGATE_LIMIT);
+      const first = publishWithoutInputMutation(
+        obligationPropInput(
+          MAX_POINTER_AGGREGATE_PROP_COUNT,
+          EXACT_AGGREGATE_TAIL_PROP_KEY_CODE_UNITS,
+        ),
+      );
+      const second = publishWithoutInputMutation(
+        obligationPropInput(
+          MAX_POINTER_AGGREGATE_PROP_COUNT,
+          EXACT_AGGREGATE_TAIL_PROP_KEY_CODE_UNITS,
+        ),
+      );
+      expectSuccess(first, "exact obligation-aggregate boundary");
+      expectSuccess(second, "repeated exact obligation-aggregate boundary");
+      expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
+
+  it(
+    "publishes the exact largest payload admitted by final Bundle validation",
+    () => {
+      const makeInput = (): PublicationInput =>
+        officialInput((source) => {
+          source.extensions = {
+            payload: "x".repeat(FINAL_BUNDLE_MAX_SUCCESS_PAYLOAD_CODE_UNITS),
+          };
+        });
+      const first = publishWithoutInputMutation(makeInput());
+      const second = publishWithoutInputMutation(makeInput());
+      expectSuccess(first, "exact final-Bundle payload boundary");
+      expectSuccess(second, "repeated final-Bundle payload boundary");
+      expect(String(valueAt(first.bundle, ["extensions", "payload"]))).toHaveLength(
+        FINAL_BUNDLE_MAX_SUCCESS_PAYLOAD_CODE_UNITS,
+      );
+      expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
+
+  it(
+    "emits only fixed sanitized deprecation warnings on complete success",
+    () => {
+      const makeInput = (): PublicationInput =>
+        officialInput(undefined, (catalog) => {
+          const stack = record(
+            valueAt(catalog, ["components", "com.example.ui/Stack"]),
+            "Stack Catalog declaration",
+          );
+          stack.deprecated = "PRIVATE RETIREMENT TEXT";
+          stack.replacement = "private/replacement";
+        });
+      const first = publishWithoutInputMutation(makeInput());
+      const second = publishWithoutInputMutation(makeInput());
+      expectSuccess(first, "deprecated-capability warning vector");
+      expectSuccess(second, "repeated deprecated-capability warning vector");
+      expect(first.diagnostics).toHaveLength(2);
+      expect(first.diagnostics.map(({ pointer }) => pointer)).toEqual([
+        "/surfaces/home/root/use",
+        "/surfaces/sign-in/root/use",
+      ]);
+      for (const diagnostic of first.diagnostics) {
+        expect(diagnostic).toMatchObject({
+          code: DEPRECATED_CAPABILITY_CODE,
+          message: "Source data uses a deprecated Catalog capability.",
+          severity: "warning",
+          stage: "capability-contracts",
+        });
+      }
+      expect(JSON.stringify(first.diagnostics)).not.toContain("PRIVATE RETIREMENT TEXT");
+      expect(JSON.stringify(first.diagnostics)).not.toContain("private/replacement");
+      expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    },
+    INVALID_SOURCE_MATRIX_TEST_TIMEOUT_MILLISECONDS,
+  );
 });

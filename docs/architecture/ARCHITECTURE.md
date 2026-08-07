@@ -957,10 +957,42 @@ crash before commit leaves the prior activation record untouched. A crash after 
 the in-memory notification recovers the committed revision on restart; it never constructs a
 partially updated pointer set.
 
-Concurrent activations use an expected generation or equivalent compare-and-swap guard so a stale
-stage cannot overwrite a newer committed revision. Fault-injection tests cover failure before
-every stage, transaction abort and quota failure, crash immediately before and after commit, stale
-concurrent writers, and restart recovery.
+M07-T07 authenticates the parallel T04 reference authority and T06 staged authority by their exact
+shared M07-T03 package-authority and private-record identities. Equal visible revisions or audit
+summaries do not establish that join. Once the join succeeds, the staged authority transfers out of
+the T06 lifetime synchronously before the first asynchronous store read. It is one-shot even when a
+later store check, generation conflict, or definite commit failure rejects the attempt. Invalid or
+mismatched pairs and a busy controller do not consume a candidate.
+
+Before commit, the controller rereads the staged revision from the same application-owned immutable
+Bundle store, repeats integrity verification, and requires the complete canonical Bundle to equal
+the joined candidate. Durable activation therefore depends on exact store membership as well as
+in-process preflight authority.
+
+The public caller supplies an expected generation and authenticated candidate revision, not
+caller-selected active or previous-good fields. The controller separately supplies its complete
+authenticated current record or authenticated absence. A first commit creates generation zero
+with no previous-good revision. A later different revision advances the generation and moves the
+current active revision to previous-good. Recommitting the same revision also advances the
+generation but preserves the existing previous-good revision. A stale caller expectation returns
+the actual durable record without writing; deletion, insertion, or same-generation replacement of
+the controller's baseline requires recovery. Exhausted safe-integer generation also performs no
+write.
+
+The Web profile implements this contract in a dedicated app-internal
+`runtime-activation.sqlite3` database with one constrained `STRICT` row, WAL,
+`synchronous=FULL`, and an immediate compare-and-swap transaction. The exact schema and version
+are reauthenticated under the writer lock before DML, and a certain success is checked against the
+post-commit row before authority publication. The persistent contract is not SQLite-specific:
+future Android and iOS hosts may use native storage that preserves the same atomic record and
+transition rules.
+
+Only a successful durable commit is synchronously installed into the controller's single current
+in-memory slot. An uncertain commit outcome exposes no active candidate and requires recovery.
+Opening over an existing durable record also requires M07-T08 to revalidate and reconstruct active
+runtime authority; a persisted revision alone is never treated as recovered indexes. M07-T09 and
+M07-T10 retain the complete boundary-fault, A → invalid B → valid C, concurrent-writer, and
+restart matrices, while M07-T11 retains channel consumption and host notification.
 
 ## Mobile expansion
 

@@ -55,13 +55,13 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
-and proved the 130-workload, 61-proof-pair cutover baseline. The M07-T06 working-tree successor
-contains 140 workloads and 66 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
-frozen cutover evidence. Its 55 ordinary pairs and 11 exclusive barriers project to 431 legacy
-prerequisite segments, 2,337 ordered leaf invocations, and 218 distinct leaf workloads. The retained
+and proved the 130-workload, 61-proof-pair cutover baseline. The M07-T07 working-tree successor
+contains 142 workloads and 67 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
+frozen cutover evidence. Its 56 ordinary pairs and 11 exclusive barriers project to 439 legacy
+prerequisite segments, 2,473 ordered leaf invocations, and 221 distinct leaf workloads. The retained
 sequential runner is available only through explicit manual `legacy-rollback`. Exact cutover
 workload, result, cancellation, tracked-workspace, hosted, and shared-state equivalence remains
-archived in the unchanged I07-02 baseline. M07-T06 is `DONE`, and M07-T07 is next.
+archived in the unchanged I07-02 baseline. M07-T07 is `DONE`, and M07-T08 is next.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -482,7 +482,7 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | M07-T04 | DONE        | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
 | M07-T05 | DONE        | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
 | M07-T06 | DONE        | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
-| M07-T07 | NOT_STARTED | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision, generation}` as one consistent record        |
+| M07-T07 | DONE        | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision, generation}` as one consistent record        |
 | M07-T08 | NOT_STARTED | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
 | M07-T09 | NOT_STARTED | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
 | M07-T10 | NOT_STARTED | M07-T09                 | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
@@ -637,10 +637,48 @@ Evidence: `docs/proof/CONTROL-PLANE-RUNTIME-STAGING.md` and
 `docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json`
 `sha256:d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494`.
 
-The M07-T06 CI registration produces the exact 140-workload, 66-proof-pair successor: 55 ordinary
-pairs, 11 exclusive barriers, 431 retained prerequisite segments, 2,337 ordered legacy leaf
-invocations, and 218 distinct leaves. All 127 CI contract cases pass. This is current working-tree
-evidence; no hosted M07-T06 result is claimed.
+M07-T07 joins only the exact private M07-T04 reference authority and exact private M07-T06 staging
+authority for the same package and Bundle identity. A valid join consumes the staging candidate
+before the first await or I/O; mismatched or already-busy attempts leave it unconsumed, while a
+later terminal failure cannot replay it. The controller independently rereads and recloses the
+complete Bundle from the same-root BundleStore and requires exact Bundle equality before any
+durable write.
+
+One atomic compare-and-swap record commits `activeRevision`, `previousGoodRevision`, and
+`generation` together. The first activation starts at generation 0, later activations retain the
+true previous-good revision, same-revision commits still advance the generation, and the safe
+integer ceiling cannot wrap. The Web adapter stores that record in a separate SQLite database and
+loads its native dependency lazily. A pre-existing or indeterminate record becomes explicit
+recovery-required state; raw durable data is never accepted as authenticated runtime authority.
+The repository atomically distinguishes a normal stale caller generation from drift against the
+controller's complete authenticated current record. A disappeared or same-generation rewritten
+row cannot reset or replace authority, and recovery discovered while Bundle I/O is pending is
+sticky. Exact schema/version checks run under the SQLite writer lock before DML, so live trigger
+drift cannot produce false publication. All statement acquisition stays inside the guarded SQLite
+open/cleanup boundary. Durable commit precedes in-memory publication, and one controller permits
+only one in-flight activation.
+
+The registered suites pass 21 focused runtime cases, 25 compiler-negative cases, and 18 independent
+root proof/mutation cases. P-12 remains `NOT_PROVEN`; N-004, N-038, and N-041 remain `PLANNED` for
+their remaining owners; G07 remains open; and PF-075/PF-076 remain `OPEN`. Restart recovery, fault
+injection, activation matrices, and separately built host consumption remain M07-T08 through
+M07-T11. Overall progress is 81/145, M07 is 7/11, and M07-T08 owns restart validation and restore
+next.
+
+M07-T10 must also decide and execute the remaining non-blocking storage-profile race: whether a
+live external mutation of database-level `journal_mode` requires rechecking the complete SQLite
+connection profile inside the writer transaction. It must not silently disappear from the race
+matrix even if the final decision is that application ownership makes the mutation out of scope.
+
+Evidence: `docs/proof/CONTROL-PLANE-RUNTIME-ACTIVATION.md` and
+`docs/proof/artifacts/control-plane-api-0.1.0-runtime-activation.json`
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`.
+
+The M07-T07 CI registration produces the exact 142-workload, 67-proof-pair successor: 56 ordinary
+pairs, 11 exclusive barriers, 439 retained prerequisite segments, 2,473 ordered legacy leaf
+invocations, and 221 distinct leaves. All 128 CI contract tests pass, and all 142 registered
+workloads close `PASS`.
+This is current working-tree evidence; no hosted M07-T07 result is claimed.
 
 Reviewed reader checkpoint sequence 7 links predecessor head
 `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to
@@ -749,6 +787,16 @@ proof/root readers at `[28, 29]`.
 Sequences 1–14 and predecessor artifact bytes remain unchanged. This is reviewed local-reader
 evidence and claims no hosted M07-T06 result. `DEBT-I07-009` and `DEBT-I07-013` record the temporary
 compatibility-reader bridges under I07-04 for removal by G07.
+
+Reviewed checkpoint sequence 16 links exact sequence 15 head
+`b75a2580d1d6820392aa74ba5b7671b01baed1740fe2097c2a78e24663b5e4d5` to current head
+`f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd` and authenticates 16 frozen
+artifacts plus 32 live readers. It appends the 49,892-byte M07-T07 artifact
+`sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`, reseals indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31]`, and
+appends the T07 proof/root readers at `[30, 31]`. Sequences 1–15 and predecessor artifact bytes
+remain unchanged. This is reviewed local-reader evidence and claims no hosted M07-T07 result; the
+historical activation-reader compatibility bridges remain owned by I07-04 for removal by G07.
 
 ## M08 — Framework-neutral editor core
 

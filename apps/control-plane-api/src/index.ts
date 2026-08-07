@@ -33,6 +33,13 @@ export {
   RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE,
 } from "./runtime-staging-contract.js";
 export { stageBundleRuntime } from "./runtime-staging.js";
+export {
+  INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE,
+  RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE,
+  RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE,
+  RuntimeActivationError,
+} from "./runtime-activation-contract.js";
+export { openBundleRuntimeActivation } from "./runtime-activation.js";
 export { verifyBundleStoreEntry } from "./bundle-verification.js";
 export { openBundleStore } from "./bundle-store.js";
 export {
@@ -83,6 +90,17 @@ export type {
   StagedRuntimePackageSummary,
   StagedRuntimeSurfaceSummary,
 } from "./runtime-staging-contract.js";
+export type {
+  BundleRuntimeActivation,
+  BundleRuntimeActivationAuthority,
+  BundleRuntimeActivationDiagnostic,
+  BundleRuntimeActivationResult,
+  BundleRuntimeActivationStage,
+  BundleRuntimeActivationState,
+  OpenBundleRuntimeActivationOptions,
+  RuntimeActivationErrorCode,
+  RuntimeActivationRecord,
+} from "./runtime-activation-contract.js";
 export type {
   BundleStore,
   BundleStoreEntry,

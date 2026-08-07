@@ -3034,12 +3034,63 @@ This file records implementation discoveries without changing the frozen DESEN 0
   channel, loader, adapter, commit, activation, rollback, recovery, or host-effect authority. Two
   deterministic attempts can expose equal audit summaries while retaining distinct private
   identities, so neither silently overwrites a process-global staged or active record.
-- Future action: M07-T07 must authenticate the exact M07-T04 reference authority and M07-T06 staging
-  authority together, then publish active/previous-good state only through its durable atomic
-  record. T07 must also define a bounded consume/reject lifetime for caller-retained candidate
-  handles; T06 bounds each candidate and weakly owns its private state but does not create a
-  process-wide retained-handle quota. M07-T09 and M07-T10 must inject faults and races around that
-  join and prove that stale or failed candidates cannot become active. M07-T08 must recover only
-  durable committed authority, never an abandoned in-process candidate. A later protocol revision
-  should standardize staged candidate identity and lifetime only if cross-implementation activation
-  interoperability needs more than the current observable atomicity rules.
+- Future action: M07-T07's accepted design authenticates the exact M07-T04 reference authority and
+  M07-T06 staging authority through their shared M07-T03 object identities. A successfully joined
+  T06 handle transfers synchronously and one-shot out of the staged lifetime before asynchronous
+  store work; invalid, mismatched, or controller-busy attempts do not consume it. Once admitted, a
+  store rejection, compare-and-swap conflict, generation exhaustion, or definite persistence
+  failure still requires a fresh staging attempt. This bounds controller-admitted work but does not
+  create a process-wide quota for T06 handles that callers never submit. M07-T09 and M07-T10 must
+  still inject faults and races around the implemented join and prove that stale or failed
+  candidates cannot become active. M07-T08 must recover only durable committed authority, never an
+  abandoned in-process candidate. A later protocol revision should standardize staged candidate
+  identity and lifetime only if cross-implementation activation interoperability needs more than
+  the current observable atomicity rules.
+
+## PF-076 — Durable activation needs an explicit identity, CAS, and recovery profile
+
+- Status: OPEN
+- Blocks proof: No; M07-T07 can define one fail-closed local persistence profile without changing
+  frozen protocol bytes or claiming restart recovery, exhaustive fault behavior, or host
+  consumption.
+- Protocol location: SPEC Sections 5.7, 6.3, 24.1, 26.6, and 28.3; Appendix A invariants 8 and 9;
+  `PIPE-007`, `PIPE-016`, `PIPE-017`, `R-008`, `R-102`, `R-126`, `A-008`, and `A-009`; related
+  findings `PF-031` and `PF-072`–`PF-075`; related decisions `ADR 0012` and `ADR 0013`
+- Observation: DESEN 0.1.0 requires an atomic active-pointer switch and preservation of a
+  last-known-good revision, but it does not define the persistent record schema, first generation,
+  same-revision transition, compare-and-swap conflict result, commit-indeterminate outcome, or
+  relationship between an in-process staged handle and restart recovery. Letting the caller choose
+  `previousGoodRevision`, or treating a persisted revision as reconstructed runtime authority,
+  would silently bypass those missing lifecycle decisions.
+- Implementation decision: M07-T07 uses one repository-owned
+  `{activeRevision, previousGoodRevision, generation}` record. The activation boundary first joins
+  exact T04 and T06 authorities by shared M07-T03 object identity, consumes the staged handle
+  one-shot, and recloses its complete Bundle against the same application-owned immutable store.
+  Callers provide only an expected generation. The controller separately provides its complete
+  authenticated current record or authenticated absence. The repository derives both revision
+  fields inside one atomic transaction: the first commit is generation zero with no previous-good
+  revision; a different successor preserves the current active revision as previous-good; and a
+  same-revision successor advances generation while retaining the real previous-good revision. A
+  stale caller generation returns the actual durable record without writing. Deletion, insertion,
+  or a same-generation rewrite against the authenticated baseline requires recovery; exhausted
+  generations also make no write.
+
+  The Web implementation uses a dedicated app-internal `runtime-activation.sqlite3` adapter with
+  one constrained `STRICT` row, WAL, full synchronous durability, fixed schema and busy bounds, and
+  immediate transactions. Exact schema and version are reauthenticated under the writer lock
+  before DML, and the committed row is checked before authority publication. SQLite is not part of
+  the protocol-observable contract: future Android and iOS hosts may use a native repository that
+  preserves the same atomic record and CAS rules. In-memory active authority changes only after the
+  durable commit. A commit whose outcome cannot be proven exposes no active candidate and moves the
+  controller to recovery-required state; recovery observed during Bundle I/O is sticky.
+
+- Future action: M07-T08 must validate an existing durable record and rebuild active runtime
+  authority after restart or an indeterminate commit; no abandoned staged candidate crosses that
+  boundary. M07-T09 must inject faults at every pre-commit and commit phase. M07-T10 must prove
+  A → invalid B → valid C, same- and different-candidate races, generation fencing, and restart
+  behavior. Its race matrix must explicitly decide whether a live external change to database-level
+  `journal_mode` requires full connection-profile reauthentication inside the writer transaction.
+  M07-T11 must consume a mutable channel from the separately built reference host without
+  treating that discovery pointer as activation evidence. A later protocol revision should
+  standardize persistence and recovery only if cross-implementation lifecycle interoperability
+  requires more than the observable atomicity and last-known-good invariants.

@@ -197,12 +197,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-staging && pnpm lint",
-    "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-activation && pnpm lint",
+    "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-staging && turbo run test",
-    "pnpm test:control-plane-runtime-staging && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-activation && turbo run test",
+    "pnpm test:control-plane-runtime-activation && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1553,7 +1553,7 @@ test("[compatibility] admits only the exact current execution-preflight root rea
   assert.equal(currentBytes.byteLength, 17_767);
   assert.equal(
     createHash("sha256").update(currentBytes).digest("hex"),
-    "9c2e5b0f71fce28d824b3591c60f83f58dbe78f8f94a1b555b34b07423f86cff",
+    "adaca2ed4bb6c611af648c223a887893cd998aca4e173fd4feff0987ac469f51",
   );
 
   const approved = await buildPublisherBundlePublicationEvidence(
