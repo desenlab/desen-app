@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████░░░░░░░░░░░` **82 / 145 tasks complete (57%)**
+**Overall:** `██████████████░░░░░░░░░░░` **83 / 145 tasks complete (57%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,9 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M07:** `████████░░░` **8 / 11 tasks complete (73%)**
+**M07:** `█████████░░` **9 / 11 tasks complete (82%)**
 
-**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T09` (`NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Active infrastructure:** none · **Next implementation:** `M07-T10` (`NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -142,11 +142,26 @@ exact 36-key built runtime module surface, reads proof authorities through bound
 handles with stable file and parent identity, and proves that recovery leaves both the durable
 record and SQLite bytes unchanged.
 
+**M07-T09 checkpoint:** the control-plane's immutable-fetch, integrity, package, reference,
+staging, durable-commit, and restart-recovery boundaries now have one closed, named fault matrix.
+Nineteen fault cases prove that every rejection before `COMMIT` preserves the authenticated
+baseline and publishes no partial authority; a fault after a certain `COMMIT` instead enters the
+explicit indeterminate recovery path, where the committed winner must be reauthenticated before
+publication. Recovery faults publish no lineage, and a final external durable-record drift remains
+authoritative rather than being overwritten. Twenty focused runtime cases, 10 compiler-negative
+cases, and 11 independent root proof/mutation cases pass. N-004 is now `TESTED`; P-12 remains
+`NOT_PROVEN`, and the remaining ordered fault sequences/races and host-consumption proof belong to
+M07-T10 and M07-T11. This bounded matrix does not claim every possible fault ordering, hostile
+administrator resistance, or an external anti-rollback anchor. The
+[executable runtime fault-injection proof](docs/proof/CONTROL-PLANE-RUNTIME-FAULT-INJECTION.md) is
+pinned by the 64,493-byte artifact
+`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`.
+
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
-61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current working-tree successor contains 144
-workloads and 68 proof pairs after M07-T08 registration: 57 ordinary pairs and 11 exclusive
-barriers. Its retained legacy projection expands to 447 prerequisite segments and 2,617 ordered
-leaf invocations covering 224 distinct leaves. Exact shared-state classes, cancellation behavior,
+61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current working-tree successor contains 146
+workloads and 69 proof pairs after M07-T09 registration: 58 ordinary pairs and 11 exclusive
+barriers. Its retained legacy projection expands to 455 prerequisite segments and 2,769 ordered
+leaf invocations covering 227 distinct leaves. Exact shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
 minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
@@ -298,7 +313,7 @@ unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 cl
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 20 links exact sequence 19 head
-`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to current head
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e`. It preserves all 17 frozen
 artifacts and all 34 reader identities while resealing only reader index `[30]` to 106,509 bytes
 (`sha256:d322bf867930215d0f9e0f532bdacbea4ba50145dfa5df38f2e559102cc080ef`). The fail-closed T07
@@ -309,13 +324,25 @@ this receipt repair changed no production behavior. Sequences 1–19 and every a
 unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 claim; the temporary
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
+Reviewed checkpoint sequence 21 links the exact sequence 20 head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
+`d3abd2c8c7e4eb6d89395668c1ce8b8eecaf940a9c1281847a69e8348c3c04f6`. It preserves sequences
+1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
+`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`, reseals 16 historical
+compatibility readers, and appends the 54,361-byte proof reader
+`sha256:9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2` plus the 14,927-byte root
+reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The chain now
+authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
+not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
+removal by G07.
+
 The temporary shadow workflow and modular comparison adapter/test are removed, closing
 `DEBT-I07-008`. The sequential runner remains available only through explicit manual
 `legacy-rollback`; I07-02 adds no affected-path selector. Remaining reader and retirement work
 stays machine-owned by I07-04 and I07-05 in the
 [debt register](docs/plan/DEBT-REGISTER.md). Exact evidence is preserved in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json); implementation
-progress is 82/145 and M07-T09 is next. No hosted M07-T08 result is claimed here.
+progress is 83/145 and M07-T10 is next. No hosted M07-T09 result is claimed here.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

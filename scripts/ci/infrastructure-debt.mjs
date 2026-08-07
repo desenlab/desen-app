@@ -674,7 +674,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "M07_T08_RECOVERY_PUBLIC_EXPORTS",
         "M07_T08_ACTIVATION_PUBLIC_EXPORTS",
         "M07_T08_RECOVERY_PUBLIC_EXPORT_NAMES",
-        "assertAdjacent(script, predecessor, current, reviewedSuccessor, terminal)",
+        "function assertAdjacent(",
         "M07_T07_PUBLIC_RUNTIME_KEYS",
         "M07_T08_PUBLIC_RUNTIME_KEYS",
         "M07_T07_ACTIVATION_SERVICE_KEYS",
@@ -687,6 +687,96 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       ]),
     ],
     "M07-T08",
+  ),
+  authority(
+    "DEBT-I07-016",
+    "I07-04",
+    "G07",
+    [
+      target("scripts/lib/control-plane-bundle-store-proof.mjs", [
+        "APPROVED_M07_T09_TRACKED_RECEIPTS",
+        "approvedM07T09",
+      ]),
+      target("tests/control-plane-bundle-store.test.mjs", [
+        "test/runtime-fault-injection-decoy.test.ts",
+      ]),
+      target("scripts/lib/control-plane-bundle-verification-proof.mjs", [
+        "APPROVED_M07_T09_TRACKED_RECEIPTS",
+        "approvedM07T09",
+      ]),
+      target("tests/control-plane-bundle-verification.test.mjs", [
+        "faultInjectionScriptDrift",
+        "faultInjectionAggregateDrift",
+        "control-plane-runtime-fault-injection-decoy",
+      ]),
+      target("scripts/lib/control-plane-package-preflight-proof.mjs", [
+        "APPROVED_M07_T09_TRACKED_RECEIPTS",
+        "M07_T09_AGGREGATE_SUCCESSOR_COMMANDS",
+        "approvedM07T09",
+        "reviewedFaultInjectionSuccessor",
+      ]),
+      target("tests/control-plane-package-preflight.test.mjs", [
+        "test/runtime-fault-injection-decoy.test.ts",
+        "control-plane-runtime-fault-injection-decoy",
+      ]),
+      target("scripts/lib/control-plane-reference-preflight-proof.mjs", [
+        "APPROVED_M07_T09_TRACKED_RECEIPTS",
+        "approvedM07T09",
+        "reviewedFaultInjectionSuccessor",
+      ]),
+      target("tests/control-plane-reference-preflight.test.mjs", [
+        "test/runtime-fault-injection-decoy.test.ts",
+        "control-plane-runtime-fault-injection-decoy",
+      ]),
+      target("scripts/lib/control-plane-local-api-proof.mjs", [
+        "M07_T09_TRACKED_RECEIPT_BRIDGE",
+        "m07T09Bridge",
+        "faultInjectionSuccessor",
+        "reviewedFaultInjectionSuccessorTail",
+      ]),
+      target("tests/control-plane-local-api.test.mjs", [
+        "test/runtime-fault-injection-decoy.test.ts",
+        "control-plane-runtime-fault-injection-decoy",
+      ]),
+      target("scripts/lib/control-plane-runtime-staging-proof.mjs", [
+        "M07_T09_TRACKED_RECEIPT_BRIDGE",
+        "M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS",
+        "m07T09Bridge",
+        "reviewedM07T09Tail",
+        "reviewedM07T09Successor",
+      ]),
+      target("tests/control-plane-runtime-staging.test.mjs", [
+        "test/runtime-fault-injection-decoy.test.ts",
+        "control-plane-runtime-fault-injection-decoy",
+        "M07-T09 claims",
+      ]),
+      target("scripts/lib/control-plane-runtime-activation-proof.mjs", [
+        "M07_T09_TRACKED_RECEIPT_BRIDGE",
+        "M07_T09_N004_SUCCESSOR_RECEIPT",
+        "faultInjectionBridge",
+        "approvedFaultInjectionCurrent",
+        "approvedM07T09N004",
+      ]),
+      target("tests/control-plane-runtime-activation.test.mjs", [
+        "test/runtime-fault-injection-decoy.test.ts",
+        "control-plane-runtime-fault-injection-decoy",
+        "| IMPLEMENTED |",
+      ]),
+      target("scripts/lib/control-plane-runtime-recovery-proof.mjs", [
+        "M07_T09_REGISTRATION_AUTHORITY_RECEIPTS",
+        "M07_T09_TEST_AUTHORITY_RECEIPTS",
+        "M07_T09_TRACKED_RECEIPT_BRIDGE",
+        "M07_T09_READER_RECEIPT_PROJECTION",
+        "trackedFileReceipts",
+        "reviewed M07-T09 CI registration set",
+      ]),
+      target("tests/control-plane-runtime-recovery.test.mjs", [
+        "test/runtime-fault-injection-decoy.test.ts",
+        "control-plane-runtime-fault-injection-decoy",
+        "M07-T09 claims without proof",
+      ]),
+    ],
+    "M07-T09",
   ),
 ]);
 

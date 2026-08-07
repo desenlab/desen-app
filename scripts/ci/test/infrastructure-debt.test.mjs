@@ -97,6 +97,7 @@ function taskBoard(overrides = {}) {
     "M07-T06": "IN_PROGRESS",
     "M07-T07": "IN_PROGRESS",
     "M07-T08": "DONE",
+    "M07-T09": "DONE",
     "I07-04": "NOT_STARTED",
     "I07-05": "NOT_STARTED",
     G07: "NOT_STARTED",
@@ -207,6 +208,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       { id: "DEBT-I07-013", status: "OPEN" },
       { id: "DEBT-I07-014", status: "OPEN" },
       { id: "DEBT-I07-015", status: "OPEN" },
+      { id: "DEBT-I07-016", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -299,6 +301,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         removalOwner: "I07-04",
         deadline: "G07",
       },
+      {
+        id: "DEBT-I07-016",
+        registeredBy: "M07-T09",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
     ],
   );
   assert.deepEqual(
@@ -311,6 +319,22 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       "INVALID_RECOVERY_AUTHORITY_CODE",
       "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
       "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-activation",
+    ],
+  });
+  assert.deepEqual(
+    manifest.entries[15].targets.map(({ path, symbols }) => ({ path, symbols })),
+    INFRASTRUCTURE_DEBT_AUTHORITY[15].targets.map(({ path, symbols }) => ({ path, symbols })),
+  );
+  assert.deepEqual(manifest.entries[15].targets[0], {
+    path: "scripts/lib/control-plane-bundle-store-proof.mjs",
+    symbols: ["APPROVED_M07_T09_TRACKED_RECEIPTS", "approvedM07T09"],
+  });
+  assert.deepEqual(manifest.entries[15].targets.at(-1), {
+    path: "tests/control-plane-runtime-recovery.test.mjs",
+    symbols: [
+      "test/runtime-fault-injection-decoy.test.ts",
+      "control-plane-runtime-fault-injection-decoy",
+      "M07-T09 claims without proof",
     ],
   });
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
@@ -1019,7 +1043,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 14,
+      OPEN: 15,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -1133,7 +1157,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 14,
+      OPEN: 15,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -1169,7 +1193,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 13,
+      OPEN: 14,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

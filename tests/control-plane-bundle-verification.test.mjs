@@ -265,6 +265,19 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
     expectedError("REGISTRATION_DRIFT"),
   );
 
+  const faultInjectionScriptDrift = JSON.parse(await workspaceBytes(APP_PACKAGE));
+  faultInjectionScriptDrift.scripts["test:runtime-fault-injection"] =
+    "vitest run test/runtime-fault-injection-decoy.test.ts";
+  await assert.rejects(
+    buildControlPlaneBundleVerificationEvidence({
+      trackedFileBytes: {
+        [APP_PACKAGE]: Buffer.from(`${JSON.stringify(faultInjectionScriptDrift, null, 2)}\n`),
+      },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
+
   const rootPackage = JSON.parse(await workspaceBytes(ROOT_PACKAGE));
   rootPackage.scripts.check = rootPackage.scripts.check.replace(
     "pnpm verify:control-plane-bundle-verification",
@@ -278,12 +291,44 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
     expectedError("REGISTRATION_DRIFT"),
   );
 
+  const faultInjectionAggregateDrift = JSON.parse(await workspaceBytes(ROOT_PACKAGE));
+  faultInjectionAggregateDrift.scripts.check = faultInjectionAggregateDrift.scripts.check.replace(
+    "pnpm verify:control-plane-runtime-fault-injection",
+    "pnpm verify:control-plane-runtime-fault-injection-decoy",
+  );
+  await assert.rejects(
+    buildControlPlaneBundleVerificationEvidence({
+      trackedFileBytes: {
+        [ROOT_PACKAGE]: Buffer.from(`${JSON.stringify(faultInjectionAggregateDrift, null, 2)}\n`),
+      },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
+
   for (const relativePath of [CI_SOURCE, CI_INVENTORY]) {
     const source = await workspaceBytes(relativePath);
     const changed = Buffer.from(
       source
         .toString("utf8")
         .replace("control-plane-bundle-verification", "control-plane-bundle-verification-x"),
+    );
+    await assert.rejects(
+      buildControlPlaneBundleVerificationEvidence({
+        trackedFileBytes: { [relativePath]: changed },
+        runtimeReceipt: built.runtimeReceipt,
+      }),
+      expectedError("REGISTRATION_DRIFT"),
+    );
+  }
+
+  for (const relativePath of [CI_SOURCE, CI_INVENTORY]) {
+    const source = (await workspaceBytes(relativePath)).toString("utf8");
+    const changed = Buffer.from(
+      source.replace(
+        "control-plane-runtime-fault-injection",
+        "control-plane-runtime-fault-injection-decoy",
+      ),
     );
     await assert.rejects(
       buildControlPlaneBundleVerificationEvidence({

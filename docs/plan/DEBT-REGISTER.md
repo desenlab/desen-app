@@ -2,7 +2,7 @@
 
 This register tracks temporary compatibility structures registered by I07-01 and later
 task-specific successors while immutable task evidence is separated from current-checkpoint
-authentication and CI execution orchestration. Fourteen entries remain open; DEBT-I07-008 is closed
+authentication and CI execution orchestration. Fifteen entries remain open; DEBT-I07-008 is closed
 with authenticated removal evidence. An open entry records planned removal work and does not claim
 that its cleanup has already been implemented.
 
@@ -51,6 +51,7 @@ the full gate. A cleanup is complete only when:
 | DEBT-I07-013 | OPEN   | M07-T06 historical staging reader bridges                | M07-T06       | I07-04        | G07           |
 | DEBT-I07-014 | OPEN   | M07-T07 historical activation reader bridges             | M07-T07       | I07-04        | G07           |
 | DEBT-I07-015 | OPEN   | M07-T08 historical recovery reader bridges               | M07-T08       | I07-04        | G07           |
+| DEBT-I07-016 | OPEN   | M07-T09 historical fault-injection successor bridges     | M07-T09       | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -1028,7 +1029,7 @@ the full gate. A cleanup is complete only when:
     - `M07_T08_RECOVERY_PUBLIC_EXPORTS`
     - `M07_T08_ACTIVATION_PUBLIC_EXPORTS`
     - `M07_T08_RECOVERY_PUBLIC_EXPORT_NAMES`
-    - `assertAdjacent(script, predecessor, current, reviewedSuccessor, terminal)`
+    - `function assertAdjacent(`
     - `M07_T07_PUBLIC_RUNTIME_KEYS`
     - `M07_T08_PUBLIC_RUNTIME_KEYS`
     - `M07_T07_ACTIVATION_SERVICE_KEYS`
@@ -1070,7 +1071,7 @@ the full gate. A cleanup is complete only when:
   - `node scripts/verify-control-plane-runtime-recovery.mjs`
   - `node --test tests/control-plane-runtime-recovery.test.mjs`
   - `node scripts/ci/verify-proof-reader-checkpoints.mjs`
-  - `rg -n "M07_T08_(CONTROL_PLANE_COORDINATION|SOURCE_AUDIT_RECONSTRUCTION_PATCH)|APPROVED_M07_T08_(TRACKED_RECEIPTS|PUBLIC_SOURCE_EXPORTS|PUBLIC_RUNTIME_KEYS|INDEX_DISTRIBUTION_RECEIPTS|ACTIVATION_SOURCE_EXPORTS)|M07_T08_(AGGREGATE_SUCCESSOR_COMMANDS|TRACKED_RECEIPT_BRIDGE|INDEX_DISTRIBUTION_RECEIPT_BRIDGE|NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS|READER_RECEIPT_PROJECTION|ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE|RUNTIME_TEST_NAMES|DOCUMENTED_ACTIVATION_SOURCE_EXPORTS|RECOVERY_PUBLIC_EXPORTS|ACTIVATION_PUBLIC_EXPORTS|RECOVERY_PUBLIC_EXPORT_NAMES|PUBLIC_RUNTIME_KEYS|ACTIVATION_SERVICE_KEYS)|M07_T07_(DOCUMENTED_ACTIVATION_SOURCE_EXPORTS|ACTIVATION_PUBLIC_EXPORTS|PUBLIC_RUNTIME_KEYS|ACTIVATION_SERVICE_KEYS)|approvedM07T08(Keys)?|m07T08Bridge|m07T08SuccessorReceipt|reviewedM07T08(Activation|Tail|Successor)|currentSuccessorIndex|reviewedCurrentSuccessorTail|assertAdjacent\(script, predecessor, current, reviewedSuccessor, terminal\)" scripts/lib/reference-host-web-source-audit-proof.mjs tests/publisher-publish-result.test.mjs scripts/lib/control-plane-bundle-store-proof.mjs scripts/lib/control-plane-bundle-verification-proof.mjs scripts/lib/control-plane-package-preflight-proof.mjs scripts/lib/control-plane-reference-preflight-proof.mjs scripts/lib/control-plane-local-api-proof.mjs scripts/lib/control-plane-runtime-staging-proof.mjs scripts/lib/control-plane-runtime-activation-proof.mjs`
+  - `rg -n "M07_T08_(CONTROL_PLANE_COORDINATION|SOURCE_AUDIT_RECONSTRUCTION_PATCH)|APPROVED_M07_T08_(TRACKED_RECEIPTS|PUBLIC_SOURCE_EXPORTS|PUBLIC_RUNTIME_KEYS|INDEX_DISTRIBUTION_RECEIPTS|ACTIVATION_SOURCE_EXPORTS)|M07_T08_(AGGREGATE_SUCCESSOR_COMMANDS|TRACKED_RECEIPT_BRIDGE|INDEX_DISTRIBUTION_RECEIPT_BRIDGE|NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS|READER_RECEIPT_PROJECTION|ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE|RUNTIME_TEST_NAMES|DOCUMENTED_ACTIVATION_SOURCE_EXPORTS|RECOVERY_PUBLIC_EXPORTS|ACTIVATION_PUBLIC_EXPORTS|RECOVERY_PUBLIC_EXPORT_NAMES|PUBLIC_RUNTIME_KEYS|ACTIVATION_SERVICE_KEYS)|M07_T07_(DOCUMENTED_ACTIVATION_SOURCE_EXPORTS|ACTIVATION_PUBLIC_EXPORTS|PUBLIC_RUNTIME_KEYS|ACTIVATION_SERVICE_KEYS)|approvedM07T08(Keys)?|m07T08Bridge|m07T08SuccessorReceipt|reviewedM07T08(Activation|Tail|Successor)|currentSuccessorIndex|reviewedCurrentSuccessorTail|function assertAdjacent\(" scripts/lib/reference-host-web-source-audit-proof.mjs tests/publisher-publish-result.test.mjs scripts/lib/control-plane-bundle-store-proof.mjs scripts/lib/control-plane-bundle-verification-proof.mjs scripts/lib/control-plane-package-preflight-proof.mjs scripts/lib/control-plane-reference-preflight-proof.mjs scripts/lib/control-plane-local-api-proof.mjs scripts/lib/control-plane-runtime-staging-proof.mjs scripts/lib/control-plane-runtime-activation-proof.mjs`
     must return no matches after removal.
   - `rg -n "INVALID_RUNTIME_RECOVERY_AUTHORITY_CODE_CHANGED|INVALID_RECOVERY_AUTHORITY_CODE|recoverySuccessor(Receipt|Build)|unreviewedRecoverySuccessor|pnpm verify:control-plane-runtime-recovery-decoy|pnpm (verify|test):control-plane-runtime-recovery && pnpm (verify|test):control-plane-successor|pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-activation" tests/control-plane-bundle-store.test.mjs tests/control-plane-local-api.test.mjs tests/control-plane-runtime-staging.test.mjs tests/control-plane-runtime-activation.test.mjs`
     must return no matches after removal. Production recovery APIs, focused M07-T08 evidence, and
@@ -1079,3 +1080,113 @@ the full gate. A cleanup is complete only when:
 - Closure evidence: `PENDING` — record commit, pull request, sequence-20 checkpoint
   SHA-256, all eight frozen M07-T01 through M07-T08 artifact SHA-256 values, zero-reference output,
   and hosted required-exhaustive run URL.
+
+## DEBT-I07-016 — M07-T09 historical fault-injection successor bridges
+
+- Status: `OPEN`
+- Registered by infrastructure task: `M07-T09`
+- Removal owner: `I07-04`
+- Exact paths and symbols:
+  - `scripts/lib/control-plane-bundle-store-proof.mjs`
+    - `APPROVED_M07_T09_TRACKED_RECEIPTS`
+    - `approvedM07T09`
+  - `tests/control-plane-bundle-store.test.mjs`
+    - `test/runtime-fault-injection-decoy.test.ts`
+  - `scripts/lib/control-plane-bundle-verification-proof.mjs`
+    - `APPROVED_M07_T09_TRACKED_RECEIPTS`
+    - `approvedM07T09`
+  - `tests/control-plane-bundle-verification.test.mjs`
+    - `faultInjectionScriptDrift`
+    - `faultInjectionAggregateDrift`
+    - `control-plane-runtime-fault-injection-decoy`
+  - `scripts/lib/control-plane-package-preflight-proof.mjs`
+    - `APPROVED_M07_T09_TRACKED_RECEIPTS`
+    - `M07_T09_AGGREGATE_SUCCESSOR_COMMANDS`
+    - `approvedM07T09`
+    - `reviewedFaultInjectionSuccessor`
+  - `tests/control-plane-package-preflight.test.mjs`
+    - `test/runtime-fault-injection-decoy.test.ts`
+    - `control-plane-runtime-fault-injection-decoy`
+  - `scripts/lib/control-plane-reference-preflight-proof.mjs`
+    - `APPROVED_M07_T09_TRACKED_RECEIPTS`
+    - `approvedM07T09`
+    - `reviewedFaultInjectionSuccessor`
+  - `tests/control-plane-reference-preflight.test.mjs`
+    - `test/runtime-fault-injection-decoy.test.ts`
+    - `control-plane-runtime-fault-injection-decoy`
+  - `scripts/lib/control-plane-local-api-proof.mjs`
+    - `M07_T09_TRACKED_RECEIPT_BRIDGE`
+    - `m07T09Bridge`
+    - `faultInjectionSuccessor`
+    - `reviewedFaultInjectionSuccessorTail`
+  - `tests/control-plane-local-api.test.mjs`
+    - `test/runtime-fault-injection-decoy.test.ts`
+    - `control-plane-runtime-fault-injection-decoy`
+  - `scripts/lib/control-plane-runtime-staging-proof.mjs`
+    - `M07_T09_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS`
+    - `m07T09Bridge`
+    - `reviewedM07T09Tail`
+    - `reviewedM07T09Successor`
+  - `tests/control-plane-runtime-staging.test.mjs`
+    - `test/runtime-fault-injection-decoy.test.ts`
+    - `control-plane-runtime-fault-injection-decoy`
+    - `M07-T09 claims`
+  - `scripts/lib/control-plane-runtime-activation-proof.mjs`
+    - `M07_T09_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T09_N004_SUCCESSOR_RECEIPT`
+    - `faultInjectionBridge`
+    - `approvedFaultInjectionCurrent`
+    - `approvedM07T09N004`
+  - `tests/control-plane-runtime-activation.test.mjs`
+    - `test/runtime-fault-injection-decoy.test.ts`
+    - `control-plane-runtime-fault-injection-decoy`
+    - `| IMPLEMENTED |`
+  - `scripts/lib/control-plane-runtime-recovery-proof.mjs`
+    - `M07_T09_REGISTRATION_AUTHORITY_RECEIPTS`
+    - `M07_T09_TEST_AUTHORITY_RECEIPTS`
+    - `M07_T09_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T09_READER_RECEIPT_PROJECTION`
+    - `trackedFileReceipts`
+    - `reviewed M07-T09 CI registration set`
+  - `tests/control-plane-runtime-recovery.test.mjs`
+    - `test/runtime-fault-injection-decoy.test.ts`
+    - `control-plane-runtime-fault-injection-decoy`
+    - `M07-T09 claims without proof`
+- Reason retained: M07-T09 adds the exact fault-injection proof pair and changes the control-plane
+  package registration, root aggregate scripts, quality-gate runner, exhaustive inventory,
+  shared-state authority, ADR 0014, and normative N-004, N-038, and N-041 rows while the eight
+  M07-T01 through M07-T08 artifacts remain immutable. Their historical readers therefore need
+  temporary, fail-closed bridges that authenticate only the exact reviewed M07-T09 successor and
+  project each reader's task-time receipts without weakening its frozen artifact.
+- Objective removal trigger: proof-reader checkpoint sequence 21 is the sole current-byte
+  authority for all 36 readers and all 18 artifacts; I07-04 removes every reader-local M07-T09
+  receipt map, successor branch, projection, and mutation alias listed above; all nine M07-T01
+  through M07-T09 artifacts remain byte-identical; successor and poison mutations remain
+  fail-closed; and a fresh hosted `REQUIRED + EXHAUSTIVE` run authenticates the resulting state.
+- Must close by gate: `G07`
+- Exact verification and zero-reference rule:
+  - `node scripts/verify-control-plane-bundle-store.mjs`
+  - `node --test tests/control-plane-bundle-store.test.mjs`
+  - `node scripts/verify-control-plane-bundle-verification.mjs`
+  - `node --test tests/control-plane-bundle-verification.test.mjs`
+  - `node scripts/verify-control-plane-package-preflight.mjs`
+  - `node --test tests/control-plane-package-preflight.test.mjs`
+  - `node scripts/verify-control-plane-reference-preflight.mjs`
+  - `node --test tests/control-plane-reference-preflight.test.mjs`
+  - `node scripts/verify-control-plane-local-api.mjs`
+  - `node --test tests/control-plane-local-api.test.mjs`
+  - `node scripts/verify-control-plane-runtime-staging.mjs`
+  - `node --test tests/control-plane-runtime-staging.test.mjs`
+  - `node scripts/verify-control-plane-runtime-activation.mjs`
+  - `node --test tests/control-plane-runtime-activation.test.mjs`
+  - `node scripts/verify-control-plane-runtime-recovery.mjs`
+  - `node --test tests/control-plane-runtime-recovery.test.mjs`
+  - `node scripts/ci/verify-proof-reader-checkpoints.mjs`
+  - `rg -n "APPROVED_M07_T09_TRACKED_RECEIPTS|M07_T09_(AGGREGATE_SUCCESSOR_COMMANDS|TRACKED_RECEIPT_BRIDGE|NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS|N004_SUCCESSOR_RECEIPT|REGISTRATION_AUTHORITY_RECEIPTS|TEST_AUTHORITY_RECEIPTS|READER_RECEIPT_PROJECTION)|approvedM07T09(N004)?|reviewedFaultInjectionSuccessor(Tail)?|faultInjection(ScriptDrift|AggregateDrift|Successor|Bridge)|m07T09Bridge|reviewedM07T09(Tail|Successor)|approvedFaultInjectionCurrent|trackedFileReceipts|reviewed M07-T09 CI registration set|test/runtime-fault-injection-decoy\.test\.ts|control-plane-runtime-fault-injection-decoy|M07-T09 claims( without proof)?|\| IMPLEMENTED \|" scripts/lib/control-plane-bundle-store-proof.mjs tests/control-plane-bundle-store.test.mjs scripts/lib/control-plane-bundle-verification-proof.mjs tests/control-plane-bundle-verification.test.mjs scripts/lib/control-plane-package-preflight-proof.mjs tests/control-plane-package-preflight.test.mjs scripts/lib/control-plane-reference-preflight-proof.mjs tests/control-plane-reference-preflight.test.mjs scripts/lib/control-plane-local-api-proof.mjs tests/control-plane-local-api.test.mjs scripts/lib/control-plane-runtime-staging-proof.mjs tests/control-plane-runtime-staging.test.mjs scripts/lib/control-plane-runtime-activation-proof.mjs tests/control-plane-runtime-activation.test.mjs scripts/lib/control-plane-runtime-recovery-proof.mjs tests/control-plane-runtime-recovery.test.mjs`
+    must return no matches after removal. The M07-T09 proof implementation, focused evidence,
+    frozen artifact bytes, and checkpoint-owned current receipts outside these scoped historical
+    reader and test files are not part of this zero-reference rule.
+- Closure evidence: `PENDING` — record commit, pull request, sequence-21 checkpoint SHA-256, all
+  nine frozen M07-T01 through M07-T09 artifact SHA-256 values, zero-reference output, and hosted
+  required-exhaustive run URL.

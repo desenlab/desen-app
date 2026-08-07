@@ -741,6 +741,24 @@ const APPROVED_M07_T08_TRACKED_RECEIPTS = Object.freeze({
     sha256: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
   }),
 });
+const APPROVED_M07_T09_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 2_319,
+    sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 65_109,
+    sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 48_058,
+    sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    bytes: 46_343,
+    sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
+  }),
+});
 const HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.d.ts": Object.freeze({
     bytes: 899,
@@ -1385,6 +1403,7 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T06 = APPROVED_M07_T06_TRACKED_RECEIPTS[relativePath];
     const approvedM07T07 = APPROVED_M07_T07_TRACKED_RECEIPTS[relativePath];
     const approvedM07T08 = APPROVED_M07_T08_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T09 = APPROVED_M07_T09_TRACKED_RECEIPTS[relativePath];
     const observedSha256 = sha256(bytes);
     if (
       (approvedM07T03 !== undefined ||
@@ -1392,7 +1411,8 @@ async function trackedFileReceipts(overrides) {
         approvedM07T05 !== undefined ||
         approvedM07T06 !== undefined ||
         approvedM07T07 !== undefined ||
-        approvedM07T08 !== undefined) &&
+        approvedM07T08 !== undefined ||
+        approvedM07T09 !== undefined) &&
       !(
         (bytes.byteLength === historical?.bytes && observedSha256 === historical.sha256) ||
         (approvedM07T03 !== undefined &&
@@ -1412,7 +1432,10 @@ async function trackedFileReceipts(overrides) {
           observedSha256 === approvedM07T07.sha256) ||
         (approvedM07T08 !== undefined &&
           bytes.byteLength === approvedM07T08.bytes &&
-          observedSha256 === approvedM07T08.sha256)
+          observedSha256 === approvedM07T08.sha256) ||
+        (approvedM07T09 !== undefined &&
+          bytes.byteLength === approvedM07T09.bytes &&
+          observedSha256 === approvedM07T09.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed package successor bytes drifted.", {

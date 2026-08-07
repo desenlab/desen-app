@@ -680,7 +680,7 @@ unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 cl
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 20 links exact sequence 19 head
-`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to current head
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e`. It preserves all 17 frozen
 artifacts and all 34 reader identities while resealing only reader index `[30]` to 106,509 bytes
 (`sha256:d322bf867930215d0f9e0f532bdacbea4ba50145dfa5df38f2e559102cc080ef`). The fail-closed T07
@@ -691,6 +691,18 @@ this receipt repair changed no production behavior. Sequences 1–19 and every a
 unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 claim; the temporary
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
+Reviewed checkpoint sequence 21 links the exact sequence 20 head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
+`d3abd2c8c7e4eb6d89395668c1ce8b8eecaf940a9c1281847a69e8348c3c04f6`. It preserves sequences
+1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
+`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`, reseals 16 historical
+compatibility readers, and appends the 54,361-byte proof reader
+`sha256:9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2` plus the 14,927-byte root
+reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The chain now
+authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
+not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
+removal by G07.
+
 The temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
 archived in the
@@ -699,9 +711,9 @@ archived in the
 The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
 no affected-path selector and does not retire the sequential runner, which remains an explicit
 manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T08 is now `DONE`; its proof pair extends the working-tree successor to 144
-workloads and 68 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T09 is next;
-no hosted M07-T08 result is claimed.
+retirement by G12. M07-T09 is now `DONE`; its proof pair extends the working-tree successor to 146
+workloads and 69 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T10 is next;
+no hosted M07-T09 result is claimed.
 
 ## Current milestone
 
@@ -709,11 +721,11 @@ no hosted M07-T08 result is claimed.
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `82 / 145 tasks complete (57%)`
+- Overall implementation progress: `83 / 145 tasks complete (57%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `8 / 11 tasks complete (73%)`
+- M07 progress: `9 / 11 tasks complete (82%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -781,13 +793,14 @@ no hosted M07-T08 result is claimed.
   `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable channel pointers`,
   `M07-T06 — Staged runtime indexes and active/staged state separation`,
   `M07-T07 — Durable transactional commit of the active, previous-good, and generation record`,
-  `M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`
+  `M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`,
+  `M07-T09 — Fault injection from discovery and immutable fetch through durable commit and recovery`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
-  `M07-T09 — Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries`
-- Status: M07-T08 and I07-02 are complete; M07-T09 is `NOT_STARTED`, its dependencies are
+  `M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`
+- Status: M07-T09 and I07-02 are complete; M07-T10 is `NOT_STARTED`, its dependencies are
   satisfied, and G07 remains open
 
 ## Completed preparation
@@ -1167,10 +1180,18 @@ CI/shared-state flow. The proof checks the exact 36-key built runtime surface, r
 through bounded no-follow handles with stable file and parent identity, and verifies identical
 durable-record fields and SQLite bytes before and after recovery.
 
+M07-T09 is complete. Its bounded matrix injects 19 distinct failures across channel discovery,
+immutable fetch, integrity, package resolution, reference admission, staging, definite pre-commit,
+post-commit indeterminate state, and restart recovery. Every definite pre-commit failure publishes
+no candidate authority and preserves the exact baseline durable record. Recovery rejection never
+publishes either lineage; when external durable drift is the cause, the final record observation
+wins without a repair write. A post-commit uncertainty publishes no candidate authority but may
+have durably committed the new winner; it is resolved only by recovering that exact durable winner.
+N-004 is now `TESTED`; P-12 remains `NOT_PROVEN`, while N-038 and N-041 remain `PLANNED` for their
+later owners.
+
 Implement
-`M07-T09 — Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries`.
-It must prove that every controlled precommit and recovery-boundary failure leaves a valid durable
-activation record and publishes no invalid runtime authority.
+`M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1178,35 +1199,33 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-The current M07-T08 working-tree CI authority contains 144 workloads and 68 verifier/root-test
-pairs: 57 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
-447 segments and 2,617 ordered leaf invocations covering 224 distinct workloads. The nine official
-CI contract commands pass 128/128 locally; the broader combined contract run passes 152/152. The
+The current M07-T09 working-tree CI authority contains 146 workloads and 69 verifier/root-test
+pairs: 58 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
+455 segments and 2,769 ordered leaf invocations covering 227 distinct workloads. The
 current pins
 are:
 
 - prerequisite inventory:
-  `35642ae4ffca34f99bb29ad7b5755688d0a9b7fb06c8dc8088ad6fc64b4e73b8`
-- ordered leaves: `93e3ed9932a42d63d9704ebb0cabb51a1b1e1178f8dc2e0599aef739848b1bf5`
-- distinct workloads: `2f301318958c9910b13f546681a89e683cf9bc39480bcaebcefa896d4bae1cc8`
+  `3d48423eafd03a1492451fc23bbaaf9c954b80119bb6c031a871d3afea5ee74a`
+- ordered leaves: `461d33056bc152b60fc5e8bba1509508b264051090a7c10551b5cd74a55eb22e`
+- distinct workloads: `9106b8a4a9d4065eedcfdab7e40cb513792991352cca2680edf210954f119916`
 - workspace manifest:
   `6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9`
 - workspace package tests:
   `5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4`
-- neutral inventory: `0ab340012732cb7416598fb9be4ae46c95dac5837b771e88e8c04dd3e10f7a59`
+- neutral inventory: `3328b640fdb9428cb52a2453a95e2838338ddc7788d56a95089fa67b021484d8`
 - retained plan/projection:
-  `3637387c2189acbcf05a88288c741fa32746d05800860f90e4b4f77e7a61cbca`
-- required plan: `e863eba541e3cbd8c3bc4d181a3969db02efe1f633e37804a73254e021be6f2c`
-- shadow plan: `d20ec226f461b7e4df73b1e7335a5951e6d8c5615496a925e7fb9d8640fe129e`
-- workload-id set: `76c1bcf4ab24d6898f683e5f0078324cd39b6f8e3f521db02c78f20ac4bcee20`
+  `97195b80c1c718d7f42cbf0f40873758f09129254ae1be677cbece63256b00b7`
+- required plan: `73ec61f03fbd5f0899862a3bb94e85fdd3c273ce793f99f7c72a1c30fb158acc`
+- shadow plan: `5bd33848d4207e157cc3410e78971d5a22af708f1f57cba930922e5dd4e80519`
+- workload-id set: `4beb1d481994cbd519299c5f9b12f2d94fa39ed35995b1d6156444317e67e460`
 - equivalence projection:
-  `06a596f6958fc044155a42b356ff03192889a13b7c94264fc2eb97796d653adb`
+  `9362dae4fa749a5f0510a3f5bce869c93059d60403a0790ee12d32327bf1bae9`
 
-The runtime-recovery proof pair is OS-temp-isolated. Its verifier alone receives the exact
+The runtime-fault-injection proof pair is OS-temp-isolated. Its verifier alone receives the exact
 runtime-probe child policy, its root receives only the Node test harness, and both receive the
-separate narrow recovery SQLite native-addon policy; neither receives workspace-write or port
-authority. The preceding M07-T06 pull-request and `main` required-exhaustive runs passed in hosted
-CI. This M07-T08 working-tree authority makes no hosted M07-T08 claim.
+separate narrow fault-injection SQLite native-addon policy; neither receives workspace-write or
+port authority. This M07-T09 working-tree authority makes no hosted M07-T09 claim.
 
 M04-T12 extends the current reviewed CI inventory to 121 distinct workloads, 35 proof verifiers, 35
 root proof files, and a pinned 78-step plan with 35 proof-test steps. Its equivalent legacy
@@ -2343,8 +2362,8 @@ M07-T08 evidence:
   verifier caught equal-length final T08 N-038/N-041 normative wording with stale semantic hashes;
   sequences 1–18 and every artifact byte remain unchanged, no hosted M07-T08 result is claimed, and
   the temporary bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07
-- current reviewed reader checkpoint: sequence 20 links exact sequence 19 head
-  `abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to current head
+- reviewed reader checkpoint successor: sequence 20 links exact sequence 19 head
+  `abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to sequence 20 head
   `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e`; it preserves all 17 frozen
   artifacts and all 34 reader identities while resealing only reader index `[30]` to 106,509 bytes
   (`sha256:d322bf867930215d0f9e0f532bdacbea4ba50145dfa5df38f2e559102cc080ef`); the fail-closed T07
@@ -2360,6 +2379,45 @@ M07-T08 evidence:
 - coverage decision: M07-T08 becomes `DONE`; P-12 remains `NOT_PROVEN`; N-004, N-038, and N-041
   remain `PLANNED`; G07 and PF-076 remain open; overall progress is 82/145, M07 progress is 8/11,
   and M07-T09 owns exhaustive boundary fault injection next
+
+M07-T09 evidence:
+
+- `docs/proof/CONTROL-PLANE-RUNTIME-FAULT-INJECTION.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json`
+- 64,493-byte artifact SHA-256:
+  `524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`
+- closed fault inventory: 19 stable boundary-fault ids plus one exact-inventory runtime test cover
+  discovery, immutable fetch, integrity, package, reference, staging, durable commit, restart
+  recovery, final durable-record drift, and authority-publication boundaries
+- transactional result: every injected fault before `COMMIT` preserves the authenticated durable
+  baseline and publishes no partial authority; the post-`COMMIT` fault is explicitly
+  indeterminate, consumes the attempt, and requires exact reconstruction of the committed winner
+  before authority can be published
+- recovery result: package, reference, staging, Bundle reclosure, and final-record faults publish
+  neither active nor fallback lineage; externally changed final durable state wins and is never
+  silently replaced
+- executable evidence: 20 focused runtime cases, 10 compiler-negative cases, and 11 independent
+  root proof/mutation cases; the artifact also pins eight predecessor prerequisites and 22 ordered
+  trace rows
+- public-boundary evidence: the exact 105-entry package-root export inventory and exact 36-key
+  built runtime module surface remain pinned; fault injection uses package-private test seams and
+  adds no public production export
+- CI authority: the working-tree successor contains 146 workloads and 69 proof pairs (58 ordinary,
+  11 barriers), 455 retained prerequisite segments, 2,769 ordered legacy leaves, and 227 distinct
+  leaves; these are local code-owned values and no hosted M07-T09 pass is claimed yet
+- current reviewed reader checkpoint: sequence 21 links exact sequence 20 head
+  `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to
+  `d3abd2c8c7e4eb6d89395668c1ce8b8eecaf940a9c1281847a69e8348c3c04f6`; sequences 1–20 and every
+  predecessor artifact byte remain unchanged, the exact T09 artifact becomes artifact 18, 16
+  historical compatibility readers are resealed, and T09's proof/root readers become indexes
+  `[34, 35]`, yielding 36 current readers; this is local-reader evidence only, no hosted M07-T09
+  result is claimed, and `DEBT-I07-016` assigns the temporary bridges to I07-04 for removal by G07
+- scope nonclaims: this is a bounded closed boundary matrix, not every possible fault ordering or
+  race; it adds no hostile-administrator, external anti-rollback, renderer, host-consumption, or
+  platform-adapter claim
+- coverage decision: M07-T09 becomes `DONE`; N-004 becomes `TESTED`; P-12 remains `NOT_PROVEN`;
+  N-038 and N-041 remain `PLANNED` for their remaining owners; G07 remains open; overall progress
+  is 83/145, M07 progress is 9/11, and M07-T10 owns ordered fault sequences and races next
 
 ## Status vocabulary
 

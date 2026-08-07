@@ -155,6 +155,10 @@ const EXPECTED_ROOT_TEST_NAMES = Object.freeze([
   "[options] rejects unknown, accessor-backed, shared-memory, or hostile authority",
   "[immutability] freezes the evidence graph and preserves T08-T11 nonclaims",
 ]);
+const M07_T09_N004_SUCCESSOR_RECEIPT = Object.freeze({
+  bytes: 2_526,
+  sha256: "7db46db83c4e55ea83204f730443622404b2e32e48b087f0f0a13edf7efeccd4",
+});
 
 const M07_T07_DOCUMENTED_ACTIVATION_SOURCE_EXPORTS = Object.freeze(
   [
@@ -370,6 +374,43 @@ const M07_T08_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     successor: Object.freeze({
       bytes: 46_971,
       sha256: "a6aab2fbefa3392b8614c92799d75429ca5b1b6f812c45b73cb7167fc4be9f16",
+    }),
+  }),
+});
+const M07_T09_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 2_319,
+      sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 65_109,
+      sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_058,
+      sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_343,
+      sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
+    successor: Object.freeze({
+      bytes: 47_479,
+      sha256: "9b15cef3b2d795c268945c2f4bee670c037878bd43967c1ce71a41342d463140",
     }),
   }),
 });
@@ -975,28 +1016,46 @@ function exactTupleCount(source, tuple) {
   return count;
 }
 
-function assertAdjacent(script, predecessor, current, reviewedSuccessor, terminal) {
+function assertAdjacent(
+  script,
+  predecessor,
+  current,
+  reviewedSuccessor,
+  reviewedFaultInjectionSuccessor,
+  terminal,
+) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
   const predecessorIndex = commands.indexOf(predecessor);
   const currentIndex = commands.indexOf(current);
   const reviewedSuccessorIndex = commands.indexOf(reviewedSuccessor);
+  const reviewedFaultInjectionSuccessorIndex = commands.indexOf(reviewedFaultInjectionSuccessor);
   const terminalIndex = commands.indexOf(terminal);
   const historical =
     currentIndex === predecessorIndex + 1 &&
     terminalIndex === currentIndex + 1 &&
-    reviewedSuccessorIndex < 0;
+    reviewedSuccessorIndex < 0 &&
+    reviewedFaultInjectionSuccessorIndex < 0;
   const approvedCurrent =
     currentIndex === predecessorIndex + 1 &&
     reviewedSuccessorIndex === currentIndex + 1 &&
     terminalIndex === reviewedSuccessorIndex + 1;
+  const approvedFaultInjectionCurrent =
+    currentIndex === predecessorIndex + 1 &&
+    reviewedSuccessorIndex === currentIndex + 1 &&
+    reviewedFaultInjectionSuccessorIndex === reviewedSuccessorIndex + 1 &&
+    terminalIndex === reviewedFaultInjectionSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
-    (!historical && !approvedCurrent) ||
+    (!historical && !approvedCurrent && !approvedFaultInjectionCurrent) ||
     commands.lastIndexOf(predecessor) !== predecessorIndex ||
     commands.lastIndexOf(current) !== currentIndex ||
     commands.lastIndexOf(terminal) !== terminalIndex ||
-    (approvedCurrent && commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex)
+    ((approvedCurrent || approvedFaultInjectionCurrent) &&
+      commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex) ||
+    (approvedFaultInjectionCurrent &&
+      commands.lastIndexOf(reviewedFaultInjectionSuccessor) !==
+        reviewedFaultInjectionSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T07 aggregate adjacency drifted.");
   }
@@ -1025,24 +1084,35 @@ async function prerequisiteReceipts(overrides) {
 async function trackedFileReceipts(overrides) {
   let historicalState = false;
   let successorState = false;
+  let faultInjectionHistoricalState = false;
+  let faultInjectionSuccessorState = false;
   const receipts = [];
   for (const relativePath of TRACKED_TASK_FILES) {
     const bytes = await authorityBytes(relativePath, overrides);
     const overridden = Object.hasOwn(overrides, relativePath);
     const bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const faultInjectionBridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
     const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    if (!overridden && bridge !== undefined) {
+    if ((!overridden || faultInjectionBridge !== undefined) && bridge !== undefined) {
       const historicalMatch =
         observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
       const successorMatch =
         observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
-      if (!historicalMatch && !successorMatch) {
+      const faultInjectionMatch =
+        faultInjectionBridge !== undefined &&
+        observed.bytes === faultInjectionBridge.successor.bytes &&
+        observed.sha256 === faultInjectionBridge.successor.sha256;
+      if (!historicalMatch && !successorMatch && !faultInjectionMatch) {
         fail("REGISTRATION_DRIFT", "A reviewed M07-T08 tracked successor receipt drifted.", {
           path: relativePath,
         });
       }
       if (historicalMatch && !successorMatch) historicalState = true;
-      if (successorMatch && !historicalMatch) successorState = true;
+      if ((successorMatch || faultInjectionMatch) && !historicalMatch) successorState = true;
+      if (faultInjectionBridge !== undefined) {
+        if (successorMatch && !faultInjectionMatch) faultInjectionHistoricalState = true;
+        if (faultInjectionMatch && !successorMatch) faultInjectionSuccessorState = true;
+      }
     }
     const projected =
       !overridden && bridge !== undefined
@@ -1060,6 +1130,9 @@ async function trackedFileReceipts(overrides) {
   }
   if (historicalState && successorState) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T08 tracked successor set is incoherent.");
+  }
+  if (faultInjectionHistoricalState && faultInjectionSuccessorState) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T09 tracked successor set is incoherent.");
   }
   return deepFreeze(receipts);
 }
@@ -1165,6 +1238,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-staging",
     "pnpm verify:control-plane-runtime-activation",
     "pnpm verify:control-plane-runtime-recovery",
+    "pnpm verify:control-plane-runtime-fault-injection",
     "pnpm lint",
   );
   assertAdjacent(
@@ -1172,6 +1246,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-staging",
     "pnpm test:control-plane-runtime-activation",
     "pnpm test:control-plane-runtime-recovery",
+    "pnpm test:control-plane-runtime-fault-injection",
     "turbo run test",
   );
   if (
@@ -1280,8 +1355,13 @@ async function coverageProjection(overrides) {
   const p12 = markdownTableRow(matrix, "P-12", "P-12");
   const pf075 = findingStatus(findings, "PF-075");
   const pf076 = findingStatus(findings, "PF-076");
+  const historicalN004 = /\| PLANNED\s+\|/u.test(n004);
+  const approvedM07T09N004 =
+    /\| TESTED\s+\|/u.test(n004) &&
+    Buffer.byteLength(n004, "utf8") === M07_T09_N004_SUCCESSOR_RECEIPT.bytes &&
+    sha256(Buffer.from(n004, "utf8")) === M07_T09_N004_SUCCESSOR_RECEIPT.sha256;
   if (
-    !/\| PLANNED\s+\|/u.test(n004) ||
+    (!historicalN004 && !approvedM07T09N004) ||
     !/\| PLANNED\s+\|/u.test(n038) ||
     !/\| PLANNED\s+\|/u.test(n041) ||
     !/\| NOT_PROVEN\s+\|/u.test(p12) ||

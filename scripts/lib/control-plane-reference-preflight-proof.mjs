@@ -938,6 +938,24 @@ const APPROVED_M07_T08_TRACKED_RECEIPTS = Object.freeze({
     sha256: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
   }),
 });
+const APPROVED_M07_T09_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 2_319,
+    sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 65_109,
+    sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 48_058,
+    sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    bytes: 46_343,
+    sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
+  }),
+});
 const HISTORICAL_M07_T04_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.d.ts": Object.freeze({
     bytes: 2_144,
@@ -1084,6 +1102,7 @@ function assertAggregateTail(
   reviewedLaterSuccessor,
   reviewedLatestSuccessor,
   reviewedCurrentSuccessor,
+  reviewedFaultInjectionSuccessor,
 ) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
@@ -1112,6 +1131,14 @@ function assertAggregateTail(
     reviewedLatestSuccessorIndex === reviewedLaterSuccessorIndex + 1 &&
     reviewedCurrentSuccessorIndex === reviewedLatestSuccessorIndex + 1 &&
     terminalIndex === reviewedCurrentSuccessorIndex + 1;
+  const reviewedFaultInjectionSuccessorIndex = commands.indexOf(reviewedFaultInjectionSuccessor);
+  const faultInjectionSuccessorTail =
+    reviewedSuccessorIndex === currentIndex + 1 &&
+    reviewedLaterSuccessorIndex === reviewedSuccessorIndex + 1 &&
+    reviewedLatestSuccessorIndex === reviewedLaterSuccessorIndex + 1 &&
+    reviewedCurrentSuccessorIndex === reviewedLatestSuccessorIndex + 1 &&
+    reviewedFaultInjectionSuccessorIndex === reviewedCurrentSuccessorIndex + 1 &&
+    terminalIndex === reviewedFaultInjectionSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
@@ -1119,7 +1146,8 @@ function assertAggregateTail(
       !successorTail &&
       !laterSuccessorTail &&
       !latestSuccessorTail &&
-      !currentSuccessorTail) ||
+      !currentSuccessorTail &&
+      !faultInjectionSuccessorTail) ||
     commands.lastIndexOf(current) !== currentIndex ||
     (successorTail && commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex) ||
     (laterSuccessorTail &&
@@ -1133,7 +1161,14 @@ function assertAggregateTail(
       (commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex ||
         commands.lastIndexOf(reviewedLaterSuccessor) !== reviewedLaterSuccessorIndex ||
         commands.lastIndexOf(reviewedLatestSuccessor) !== reviewedLatestSuccessorIndex ||
-        commands.lastIndexOf(reviewedCurrentSuccessor) !== reviewedCurrentSuccessorIndex))
+        commands.lastIndexOf(reviewedCurrentSuccessor) !== reviewedCurrentSuccessorIndex)) ||
+    (faultInjectionSuccessorTail &&
+      (commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex ||
+        commands.lastIndexOf(reviewedLaterSuccessor) !== reviewedLaterSuccessorIndex ||
+        commands.lastIndexOf(reviewedLatestSuccessor) !== reviewedLatestSuccessorIndex ||
+        commands.lastIndexOf(reviewedCurrentSuccessor) !== reviewedCurrentSuccessorIndex ||
+        commands.lastIndexOf(reviewedFaultInjectionSuccessor) !==
+          reviewedFaultInjectionSuccessorIndex))
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T04 aggregate tail drifted.");
   }
@@ -1169,6 +1204,7 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T06 = APPROVED_M07_T06_TRACKED_RECEIPTS[relativePath];
     const approvedM07T07 = APPROVED_M07_T07_TRACKED_RECEIPTS[relativePath];
     const approvedM07T08 = APPROVED_M07_T08_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T09 = APPROVED_M07_T09_TRACKED_RECEIPTS[relativePath];
     const observedSha256 = sha256(bytes);
     if (
       relativePath !== PROOF_LIBRARY &&
@@ -1187,7 +1223,10 @@ async function trackedFileReceipts(overrides) {
           observedSha256 === approvedM07T07.sha256) ||
         (approvedM07T08 !== undefined &&
           bytes.byteLength === approvedM07T08.bytes &&
-          observedSha256 === approvedM07T08.sha256)
+          observedSha256 === approvedM07T08.sha256) ||
+        (approvedM07T09 !== undefined &&
+          bytes.byteLength === approvedM07T09.bytes &&
+          observedSha256 === approvedM07T09.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed M07-T05 successor bytes drifted.", {
@@ -1320,6 +1359,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-staging",
     "pnpm verify:control-plane-runtime-activation",
     "pnpm verify:control-plane-runtime-recovery",
+    "pnpm verify:control-plane-runtime-fault-injection",
   );
   assertAggregateTail(
     rootPackage.scripts?.test,
@@ -1330,6 +1370,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-staging",
     "pnpm test:control-plane-runtime-activation",
     "pnpm test:control-plane-runtime-recovery",
+    "pnpm test:control-plane-runtime-fault-injection",
   );
   if (
     exactTupleCount(fatalText(ciBytes, CI_SOURCE), CI_TUPLE) !== 1 ||

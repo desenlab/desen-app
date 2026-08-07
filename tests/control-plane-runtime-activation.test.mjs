@@ -385,6 +385,14 @@ test("[registration] rejects package-root, package-script, aggregate, CI, or pol
       (source) => source.replace('"test:runtime-activation":', '"test:runtime-activation-old":'),
     ],
     [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
+        ),
+    ],
+    [
       APP_INDEX,
       (source) =>
         source.replace(
@@ -409,6 +417,14 @@ test("[registration] rejects package-root, package-script, aggregate, CI, or pol
         ),
     ],
     [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
+        ),
+    ],
+    [
       CI_SOURCE,
       (source) =>
         source.replace('      "control-plane-runtime-activation",', '      "removed-activation",'),
@@ -419,11 +435,35 @@ test("[registration] rejects package-root, package-script, aggregate, CI, or pol
         source.replace('    "control-plane-runtime-activation",', '    "removed-activation",'),
     ],
     [
+      CI_SOURCE,
+      (source) =>
+        source.replace(
+          '      "control-plane-runtime-fault-injection",',
+          '      "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
+    [
+      CI_INVENTORY,
+      (source) =>
+        source.replace(
+          '    "control-plane-runtime-fault-injection",',
+          '    "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
+    [
       SHARED_STATE_AUTHORITY,
       (source) =>
         source.replace(
           'CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE: "CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE"',
           'CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE: "NONE"',
+        ),
+    ],
+    [
+      SHARED_STATE_AUTHORITY,
+      (source) =>
+        source.replace(
+          '  "control-plane-runtime-fault-injection",',
+          '  "control-plane-runtime-fault-injection-decoy",',
         ),
     ],
   ];
@@ -467,7 +507,7 @@ test("[coverage] rejects P-12, N-004/N-038/N-041, or PF-075/PF-076 truth drift",
   const mutations = [
     [
       NORMATIVE_COVERAGE,
-      (source) => source.replace(/^(\| N-004 \|.*)\| PLANNED\s+\|/mu, "$1| TESTED |"),
+      (source) => source.replace(/^(\| N-004 \|.*)\| TESTED\s+\|/mu, "$1| IMPLEMENTED |"),
     ],
     [
       NORMATIVE_COVERAGE,

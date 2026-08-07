@@ -373,6 +373,12 @@ const APPROVED_M07_T08_TRACKED_RECEIPTS = Object.freeze({
     sha256: "423e720c5740d1a21acd2fcb8e19d80e6801aff631becff52afe4240f05b30f4",
   }),
 });
+const APPROVED_M07_T09_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 2_319,
+    sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+  }),
+});
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS = fileConstants.O_RDONLY | fileConstants.O_NOFOLLOW | fileConstants.O_NONBLOCK;
 const execFileAsync = promisify(execFile);
@@ -2250,6 +2256,7 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T06 = APPROVED_M07_T06_TRACKED_RECEIPTS[relativePath];
     const approvedM07T07 = APPROVED_M07_T07_TRACKED_RECEIPTS[relativePath];
     const approvedM07T08 = APPROVED_M07_T08_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T09 = APPROVED_M07_T09_TRACKED_RECEIPTS[relativePath];
     const observedSha256 = sha256(bytes);
     if (
       (approvedM07T02 !== undefined ||
@@ -2258,7 +2265,8 @@ async function trackedFileReceipts(overrides) {
         approvedM07T05 !== undefined ||
         approvedM07T06 !== undefined ||
         approvedM07T07 !== undefined ||
-        approvedM07T08 !== undefined) &&
+        approvedM07T08 !== undefined ||
+        approvedM07T09 !== undefined) &&
       !(
         (bytes.byteLength === taskTime?.bytes && observedSha256 === taskTime.sha256) ||
         (approvedM07T02 !== undefined &&
@@ -2281,7 +2289,10 @@ async function trackedFileReceipts(overrides) {
           observedSha256 === approvedM07T07.sha256) ||
         (approvedM07T08 !== undefined &&
           bytes.byteLength === approvedM07T08.bytes &&
-          observedSha256 === approvedM07T08.sha256)
+          observedSha256 === approvedM07T08.sha256) ||
+        (approvedM07T09 !== undefined &&
+          bytes.byteLength === approvedM07T09.bytes &&
+          observedSha256 === approvedM07T09.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed package successor bytes drifted.", {
