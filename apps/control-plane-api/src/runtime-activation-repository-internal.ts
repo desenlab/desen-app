@@ -160,7 +160,8 @@ export function captureRuntimeActivationRecord(value: unknown): RuntimeActivatio
       previousGoodRevision === activeRevision ||
       typeof generation !== "number" ||
       !Number.isSafeInteger(generation) ||
-      generation < 0
+      generation < 0 ||
+      (generation === 0 && previousGoodRevision !== null)
     ) {
       throw new TypeError("Invalid activation record.");
     }

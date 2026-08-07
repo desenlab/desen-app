@@ -393,11 +393,19 @@ test("[registration] rejects package-root, package-script, aggregate, CI, or pol
         ),
     ],
     [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          "  INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE,",
+          "  INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE as INVALID_RECOVERY_AUTHORITY_CODE,",
+        ),
+    ],
+    [
       ROOT_PACKAGE,
       (source) =>
         source.replace(
-          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation && pnpm lint",
-          "pnpm verify:control-plane-runtime-staging && pnpm lint && pnpm verify:control-plane-runtime-activation",
+          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-activation",
         ),
     ],
     [

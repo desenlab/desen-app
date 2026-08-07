@@ -303,7 +303,10 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
     [
       ROOT_PACKAGE,
       (source) =>
-        source.replace("pnpm verify:control-plane-runtime-activation && pnpm lint", "pnpm lint"),
+        source.replace(
+          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
+          "pnpm verify:control-plane-runtime-recovery",
+        ),
     ],
     [CI_SOURCE, (source) => source.replace('"control-plane-local-api"', '"local-api-removed"')],
     [

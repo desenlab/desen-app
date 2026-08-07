@@ -308,6 +308,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [
+      APP_INDEX,
+      (source) =>
+        source.replace(
+          "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE,",
+          "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE as INVALID_RUNTIME_RECOVERY_AUTHORITY_CODE_CHANGED,",
+        ),
+    ],
+    [
       ROOT_PACKAGE,
       (source) =>
         source.replace(
@@ -321,6 +329,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         source.replace(
           "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation",
           "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation-decoy",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
+          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery-decoy",
         ),
     ],
     [
@@ -368,7 +384,7 @@ test("[traceability] rejects exact trace owners and normative coverage rows", as
     const mutations = [
       (line) => line.replace("M07-T06", "M07-T99"),
       (line) => line.replace(/\| PLANNED\s+\|/u, "| TESTED |"),
-      (line) => line.replace(/M07-T06 (authenticates|adds)/u, "M07-T06 claims"),
+      (line) => line.replace(/M07-T08 (rejects|reruns)/u, "M07-T08 claims"),
       (line) => line.replace(ARTIFACT, "docs/proof/artifacts/removed-runtime-staging.json"),
     ];
     for (const mutate of mutations) {
@@ -416,28 +432,58 @@ test("[traceability] rejects exact trace owners and normative coverage rows", as
 });
 
 test("[runtime] rejects changed identity, index, active-separation, or mutation receipts", async () => {
-  const successorReceipt = structuredClone(built.runtimeReceipt);
-  successorReceipt.publicModuleKeys = [
-    ...successorReceipt.publicModuleKeys,
+  const activationSuccessorReceipt = structuredClone(built.runtimeReceipt);
+  activationSuccessorReceipt.publicModuleKeys = [
+    ...activationSuccessorReceipt.publicModuleKeys,
     "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
     "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
     "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
     "RuntimeActivationError",
     "openBundleRuntimeActivation",
   ].sort();
-  const successorBuild = await buildControlPlaneRuntimeStagingEvidence({
-    runtimeReceipt: successorReceipt,
+  const activationSuccessorBuild = await buildControlPlaneRuntimeStagingEvidence({
+    runtimeReceipt: activationSuccessorReceipt,
   });
-  assert.deepEqual(successorBuild.artifactBytes, built.artifactBytes);
+  assert.deepEqual(activationSuccessorBuild.artifactBytes, built.artifactBytes);
   assert.equal(
-    successorBuild.runtimeReceipt.publicModuleKeys.includes("openBundleRuntimeActivation"),
+    activationSuccessorBuild.runtimeReceipt.publicModuleKeys.includes(
+      "openBundleRuntimeActivation",
+    ),
+    false,
+  );
+  const recoverySuccessorReceipt = structuredClone(activationSuccessorReceipt);
+  recoverySuccessorReceipt.publicModuleKeys = [
+    ...recoverySuccessorReceipt.publicModuleKeys,
+    "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
+    "RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE",
+    "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE",
+  ].sort();
+  const recoverySuccessorBuild = await buildControlPlaneRuntimeStagingEvidence({
+    runtimeReceipt: recoverySuccessorReceipt,
+  });
+  assert.deepEqual(recoverySuccessorBuild.artifactBytes, built.artifactBytes);
+  assert.equal(
+    recoverySuccessorBuild.runtimeReceipt.publicModuleKeys.includes(
+      "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
+    ),
     false,
   );
   for (const mutateKeys of [
     (keys) => keys.filter((key) => key !== "openBundleRuntimeActivation"),
     (keys) => [...keys, "unreviewedRuntimeSuccessor"].sort(),
   ]) {
-    const receipt = structuredClone(successorReceipt);
+    const receipt = structuredClone(activationSuccessorReceipt);
+    receipt.publicModuleKeys = mutateKeys(receipt.publicModuleKeys);
+    await assert.rejects(
+      buildControlPlaneRuntimeStagingEvidence({ runtimeReceipt: receipt }),
+      expectedError("RUNTIME_PROBE_MISMATCH"),
+    );
+  }
+  for (const mutateKeys of [
+    (keys) => keys.filter((key) => key !== "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE"),
+    (keys) => [...keys, "unreviewedRecoverySuccessor"].sort(),
+  ]) {
+    const receipt = structuredClone(recoverySuccessorReceipt);
     receipt.publicModuleKeys = mutateKeys(receipt.publicModuleKeys);
     await assert.rejects(
       buildControlPlaneRuntimeStagingEvidence({ runtimeReceipt: receipt }),

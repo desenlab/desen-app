@@ -989,10 +989,31 @@ transition rules.
 
 Only a successful durable commit is synchronously installed into the controller's single current
 in-memory slot. An uncertain commit outcome exposes no active candidate and requires recovery.
-Opening over an existing durable record also requires M07-T08 to revalidate and reconstruct active
-runtime authority; a persisted revision alone is never treated as recovered indexes. M07-T09 and
-M07-T10 retain the complete boundary-fault, A → invalid B → valid C, concurrent-writer, and
-restart matrices, while M07-T11 retains channel consumption and host notification.
+Opening over an existing durable record does not treat persisted revisions as runtime indexes.
+
+Restart recovery accepts only the exact T03 authority for the durable active revision and, when
+present, the exact T03 authority for the durable previous-good revision. It rebuilds T04 reference
+admission and T06 indexes internally for both roles, consumes those internal T06 lifetimes before
+the first asynchronous read, and recloses every required Bundle from the same immutable store.
+Only after a final repository read exactly matches all three original fields may active authority
+be reconstructed. The previous-good lineage remains package-private.
+
+Recovery does not write the durable record, increment generation, or promote previous-good
+automatically. Generation zero with a non-null previous-good revision is corrupt. A null
+indeterminate record requires the application to reopen the same root and observe the durable
+winner rather than guessing empty state. The recovery and activation operations share one
+controller-level in-flight guard, and close prevents pending reconstruction from publishing.
+
+These rules are storage-platform-neutral. SQLite is the first Web adapter, while native hosts may
+provide an equivalent repository. The current local profile trusts an application-owned canonical
+root; without an independently trusted cryptographic anchor or monotonic sentinel, an internally
+consistent historical or fully replaced valid-looking database cannot be distinguished from the
+latest genuine state. The implementation therefore does not claim tamper-proof persistence or
+resistance to a hostile local administrator.
+
+M07-T09 and M07-T10 retain the complete boundary-fault, A → invalid B → valid C,
+concurrent-writer, restart, and storage-profile race matrices, including the explicit
+`journal_mode` decision, while M07-T11 retains channel consumption and host notification.
 
 ## Mobile expansion
 

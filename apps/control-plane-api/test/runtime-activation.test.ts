@@ -468,20 +468,39 @@ describe("M07-T07 durable runtime activation", () => {
     readFailure.close();
 
     const closeHostile = hostileThrownValue();
+    let closeCalls = 0;
+    const closeRepository = createInMemoryRuntimeActivationRepository();
     const closeFailure = createBundleRuntimeActivationInternal({
-      bundleStore: memoryBundleStore([]),
+      bundleStore: memoryBundleStore([
+        { revision: officialBundle.revision, bytes: canonicalizeJsonBytes(officialBundle) },
+      ]),
       repository: Object.freeze({
-        get: () => Object.freeze({ status: "missing" as const }),
-        commit: () => Object.freeze({ status: "recovery-required" as const }),
+        get: closeRepository.get,
+        commit: closeRepository.commit,
         close: () => {
+          closeCalls += 1;
           throw closeHostile.value;
         },
       }),
     });
+    const closePair = activationPair();
+    const closeAuthority = requireActivated(
+      await closeFailure.activate(closePair.reference, closePair.staging, null),
+    );
+    expect(readBundleRuntimeActivationAuthority(closeAuthority)).toBeDefined();
     expect(() => closeFailure.close()).toThrowError(
       expect.objectContaining({ code: "STORAGE_IO_FAILURE" }),
     );
     expect(closeHostile.accesses()).toBe(0);
+    expect(readBundleRuntimeActivationAuthority(closeAuthority)).toBeUndefined();
+    expect(() => closeFailure.readState()).toThrowError(
+      expect.objectContaining({ code: "ACTIVATION_CLOSED" }),
+    );
+    await expect(closeFailure.recover({} as never, null)).rejects.toMatchObject({
+      code: "ACTIVATION_CLOSED",
+    });
+    expect(() => closeFailure.close()).not.toThrow();
+    expect(closeCalls).toBe(1);
   });
 
   it("admits only one in-flight attempt and does not consume a busy candidate", async () => {
@@ -512,6 +531,9 @@ describe("M07-T07 durable runtime activation", () => {
     await expect(activation.activate(busy.reference, busy.staging, null)).rejects.toMatchObject({
       code: "ACTIVATION_BUSY",
     });
+    await expect(
+      activation.recover(packageAuthorityFor(officialBundle), null),
+    ).rejects.toMatchObject({ code: "ACTIVATION_BUSY" });
     expect(storeReads).toBe(1);
     expect(readBundleRuntimeStagingAuthority(busy.staging)).toBeDefined();
     pending.resolve(Object.freeze({ status: "found", entry }));
@@ -1042,6 +1064,36 @@ describe("M07-T07 durable runtime activation", () => {
     });
     repository.close();
     expect(() => repository.get()).toThrow("closed");
+  });
+
+  it("rejects a generation-zero record that already claims a previous-good revision", async () => {
+    const invalidRecord = {
+      activeRevision: officialBundle.revision,
+      previousGoodRevision: variantBundle.revision,
+      generation: 0,
+    };
+
+    expect(() =>
+      createInMemoryRuntimeActivationRepository({ initialRecord: invalidRecord }),
+    ).toThrow("Invalid activation record.");
+
+    const root = await temporaryRoot();
+    const databasePath = join(root, "runtime-activation.sqlite3");
+    const initialized = openRuntimeActivationSqliteRepository(databasePath);
+    initialized.close();
+    const externalConnection = new Database(databasePath);
+    externalConnection
+      .prepare(
+        "INSERT INTO runtime_activation (singleton, active_revision, previous_good_revision, generation) VALUES (1, ?, ?, 0)",
+      )
+      .run(officialBundle.revision, variantBundle.revision);
+    externalConnection.close();
+
+    const reopened = openRuntimeActivationSqliteRepository(databasePath);
+    expect(() => reopened.get()).toThrowError(
+      expect.objectContaining({ code: "ACTIVATION_CORRUPT" }),
+    );
+    reopened.close();
   });
 
   it("redacts statement-acquisition failure and closes the partially opened repository", async () => {

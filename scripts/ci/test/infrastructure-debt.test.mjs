@@ -96,6 +96,7 @@ function taskBoard(overrides = {}) {
     "M07-T05": "IN_PROGRESS",
     "M07-T06": "IN_PROGRESS",
     "M07-T07": "IN_PROGRESS",
+    "M07-T08": "DONE",
     "I07-04": "NOT_STARTED",
     "I07-05": "NOT_STARTED",
     G07: "NOT_STARTED",
@@ -205,6 +206,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       { id: "DEBT-I07-012", status: "OPEN" },
       { id: "DEBT-I07-013", status: "OPEN" },
       { id: "DEBT-I07-014", status: "OPEN" },
+      { id: "DEBT-I07-015", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -291,8 +293,26 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         removalOwner: "I07-04",
         deadline: "G07",
       },
+      {
+        id: "DEBT-I07-015",
+        registeredBy: "M07-T08",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
     ],
   );
+  assert.deepEqual(
+    manifest.entries[14].targets.map(({ path, symbols }) => ({ path, symbols })),
+    INFRASTRUCTURE_DEBT_AUTHORITY[14].targets.map(({ path, symbols }) => ({ path, symbols })),
+  );
+  assert.deepEqual(manifest.entries[14].targets.at(-1), {
+    path: "tests/control-plane-runtime-activation.test.mjs",
+    symbols: [
+      "INVALID_RECOVERY_AUTHORITY_CODE",
+      "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
+      "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-activation",
+    ],
+  });
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
     "CI v2 shadow",
     "modular-shadow",
@@ -736,11 +756,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     },
     {
       path: "tests/control-plane-bundle-store.test.mjs",
-      symbols: [
-        "openBundleRuntimeActivationChanged",
-        "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-successor && pnpm lint",
-        "pnpm test:control-plane-runtime-activation && pnpm test:control-plane-successor && turbo run test",
-      ],
+      symbols: ["openBundleRuntimeActivationChanged"],
     },
     {
       path: "scripts/lib/control-plane-bundle-verification-proof.mjs",
@@ -808,16 +824,11 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         "APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS",
         "M07_T07_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS",
         "M07_T07_TRACKED_RECEIPT_BRIDGE",
-        "M07_T07_READER_RECEIPT_PROJECTION",
         "M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE",
         "normalizedSuccessorLine",
         "reviewedM07T07Successor",
         "historicalRow",
       ],
-    },
-    {
-      path: "tests/control-plane-runtime-staging.test.mjs",
-      symbols: ["successorReceipt", "successorBuild"],
     },
     {
       path: "scripts/lib/publisher-publish-result-proof.mjs",
@@ -874,6 +885,14 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       ],
     },
   ]);
+  assert.deepEqual(manifest.entries[14].targets[0], {
+    path: "scripts/lib/reference-host-web-source-audit-proof.mjs",
+    symbols: ["M07_T08_CONTROL_PLANE_COORDINATION"],
+  });
+  assert.deepEqual(manifest.entries[14].targets[1], {
+    path: "tests/publisher-publish-result.test.mjs",
+    symbols: ["M07_T08_SOURCE_AUDIT_RECONSTRUCTION_PATCH"],
+  });
   assert.ok(Object.isFrozen(manifest.entries[0].targets[0].symbols));
 });
 
@@ -1000,7 +1019,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 13,
+      OPEN: 14,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -1009,6 +1028,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
     assert.equal(receipt.taskStatuses["M07-T05"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T06"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T07"], "IN_PROGRESS");
+    assert.equal(receipt.taskStatuses["M07-T08"], "DONE");
     assert.equal(receipt.taskStatuses["I07-05"], "NOT_STARTED");
   } finally {
     await fixture.cleanup();
@@ -1113,7 +1133,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 13,
+      OPEN: 14,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -1149,7 +1169,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 12,
+      OPEN: 13,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

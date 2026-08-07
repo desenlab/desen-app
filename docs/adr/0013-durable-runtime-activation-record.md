@@ -64,10 +64,12 @@ The durable contract contains exactly one optional record:
 
 `activeRevision` is an exact lowercase SHA-256 revision, `previousGoodRevision` is either a
 different exact revision or `null`, and `generation` is a safe integer from zero through
-`Number.MAX_SAFE_INTEGER`. Public callers supply only the expected generation and the exact
-authenticated candidate. The controller separately supplies its complete authenticated current
-record—or authenticated absence—to the package-private repository. Callers cannot select either
-revision field or manufacture that baseline.
+`Number.MAX_SAFE_INTEGER`. Generation zero must have `previousGoodRevision: null`; a non-null
+previous-good value at generation zero cannot be produced by this transition and is corrupt.
+Public callers supply only the expected generation and the exact authenticated candidate. The
+controller separately supplies its complete authenticated current record—or authenticated
+absence—to the package-private repository. Callers cannot select either revision field or
+manufacture that baseline.
 
 The repository calculates the transition inside one immediate transaction:
 
@@ -107,6 +109,12 @@ semantics or a requirement for future Android and iOS hosts. A native host may u
 repository only if it preserves the same record, atomicity, compare-and-swap, generation, and
 commit-outcome rules.
 
+This profile trusts the canonical local root as application-owned. Its path, schema, identity, and
+transaction checks are fail-closed integrity controls, not an external cryptographic anchor. A
+fully replaced but internally consistent historical database and matching Bundle store cannot be
+distinguished from the latest genuine state without an independently trusted signature, monotonic
+sentinel, or equivalent commitment. No tamper-proof or hostile-administrator claim is made.
+
 ### Durable state precedes observable active state
 
 The controller never exposes a staged candidate as active. A successful repository commit returns
@@ -129,9 +137,11 @@ as `COMMIT_OUTCOME_INDETERMINATE`; it is never downgraded to a rejection or conf
 candidate is exposed as active. The controller then requires recovery before another activation.
 
 Opening a controller over an existing durable record likewise produces a recovery-required state,
-not an active in-memory authority. M07-T08 must revalidate and reconstruct committed runtime
-authority from durable revisions. It also owns reconciliation after a crash or indeterminate
-commit. An abandoned in-process T06 candidate is never recovery evidence.
+not an active in-memory authority. M07-T08, specified by ADR 0014, revalidates the exact active and
+optional previous-good T03 lineages, reruns T04/T06 internally, recloses both required Bundles, and
+reauthenticates all three durable fields before reconstructing authority. An abandoned in-process
+T06 candidate is never recovery evidence. A null indeterminate outcome requires reopening the same
+root before the durable winner can be reconstructed.
 
 After an in-process authority has been published, a definitive disappearance of its durable row is
 also recovery-required rather than a new empty database. The controller revokes the in-process
@@ -152,10 +162,10 @@ acquisition failure closes the native connection before the error crosses the st
 - Recommitting the same active revision advances concurrency state without destroying the actual
   previous-good revision.
 - Mutable channels remain discovery metadata and cannot select or mutate the activation record.
-- The current implementation can prove the durable T04/T06 join without claiming restart recovery,
-  exhaustive fault behavior, or reference-host consumption.
-- M07-T08 still owns restart validation and restoration; M07-T09 owns boundary fault injection;
-  M07-T10 owns A → invalid B → valid C, races, and restart matrices; and M07-T11 owns channel
+- ADR 0014 adds restart validation and restoration without rewriting this durable transition or
+  introducing automatic rollback.
+- M07-T09 owns boundary fault injection; M07-T10 owns A → invalid B → valid C, races, restart
+  matrices, and the pending `journal_mode` storage-profile decision; and M07-T11 owns channel
   consumption by the separately built reference host.
 - The boundary grants no module loading, adapter invocation, rendering, host notification, rollback
   policy, signing, network distribution, npm archive, or native-target conformance authority.

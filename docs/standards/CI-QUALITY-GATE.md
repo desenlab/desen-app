@@ -20,13 +20,13 @@ The gate runs from a fresh workspace in this order:
 3. verify generated structural-validator bytes;
 4. build and typecheck the workspace once through a cache-read-disabled Turbo graph;
 5. run every package's complete test suite once with controlled concurrency;
-6. run all 67 proof verifiers directly in the reviewed order, ending with the M07-T07 runtime
-   activation proof;
-7. run all 67 root proof and mutation files as separate fail-fast processes; and
+6. run all 68 proof verifiers directly in the reviewed order, ending with the M07-T08 runtime
+   recovery proof;
+7. run all 68 root proof and mutation files as separate fail-fast processes; and
 8. run the dependency graph and hostile boundary fixtures.
 
-The current legacy expansion contains 2,473 leaf process invocations but only 221 distinct
-workloads. The optimized gate covers all 221 distinct workloads. Repeated prerequisite checks
+The current legacy expansion contains 2,617 leaf process invocations but only 224 distinct
+workloads. The optimized gate covers all 224 distinct workloads. Repeated prerequisite checks
 inside proof builders remain intact because those checks are evidence, not orchestration overhead.
 The measurement recursively expands exact root-level `pnpm <script>` references beginning at
 `check`; commands with no further local root-script indirection are leaves, and the distinct
@@ -36,9 +36,9 @@ inventory is sorted before hashing.
 
 The gate refuses to run when any of these conditions changes without an explicit review:
 
-- the 67 task IDs, verifier files, root test files, or their order;
-- any of the 439 legacy prerequisite command segments;
-- the exact 142-step normalized execution plan;
+- the 68 task IDs, verifier files, root test files, or their order;
+- any of the 447 legacy prerequisite command segments;
+- the exact 144-step normalized execution plan;
 - a focused package test that is no longer included by its full package suite;
 - any drift in the reviewed `test` command of any workspace package, including packages without a
   focused prerequisite;
@@ -57,28 +57,28 @@ Proof generators and evidence writers are never CI inputs. Proof output and succ
 from cache. Timing data is observational and cannot influence pass or fail.
 
 The reviewed live prerequisite inventory is pinned as
-`sha256:18e186fda7fab28e4e2d88367745acd7cd6bf76362c1b9313e75605ab094c294`.
-The ordered 2,473-entry legacy leaf-invocation inventory is pinned as
-`sha256:f6979930481c872fb0c24fcdf5f803ec7b6262dca4235faaf8930d82af47a5f1`; its sorted
-221-entry distinct-workload inventory is pinned as
-`sha256:00894e3a5412218e82cc9013866a73f0d812c1cb7a6ee7d45a296175a45df249`. The retained
+`sha256:35642ae4ffca34f99bb29ad7b5755688d0a9b7fb06c8dc8088ad6fc64b4e73b8`.
+The ordered 2,617-entry legacy leaf-invocation inventory is pinned as
+`sha256:93e3ed9932a42d63d9704ebb0cabb51a1b1e1178f8dc2e0599aef739848b1bf5`; its sorted
+224-entry distinct-workload inventory is pinned as
+`sha256:2f301318958c9910b13f546681a89e683cf9bc39480bcaebcefa896d4bae1cc8`. The retained
 plan/projection is pinned as
-`sha256:ef9aa6c3e8594681bffb933a13faf67f02217321f482e18b671af04383dfa22a`.
+`sha256:3637387c2189acbcf05a88288c741fa32746d05800860f90e4b4f77e7a61cbca`.
 The scheduler-neutral live successor inventory is independently pinned as
-`sha256:d96ae1ea891c10f9a1b7f364d67e82beaea8c5914d9152ef203a636ef2a89cca`.
+`sha256:0ab340012732cb7416598fb9be4ae46c95dac5837b771e88e8c04dd3e10f7a59`.
 Its exact live workload-id set is pinned as
-`sha256:552ca2f50d9298ff8106b198b4e135e7cd16228b2be61dc426136fb80d580fb1`, and its ordered
+`sha256:76c1bcf4ab24d6898f683e5f0078324cd39b6f8e3f521db02c78f20ac4bcee20`, and its ordered
 id/label/command/argument equivalence projection is pinned as
-`sha256:bd57fc11f947b158d0d67f99d75084e1bb723cccdebde78661e8e835cf88457d`.
+`sha256:06a596f6958fc044155a42b356ff03192889a13b7c94264fc2eb97796d653adb`.
 The preceding M07-T03 retained/neutral workload-set equality receipt remains historically pinned as
 `sha256:49977fca154b0bf06639b8e3f0b667d04e060603cc14ec99660c8c434b7f5edb`, and its ordered
 projection is pinned as
 `sha256:0cf74075304304385594ae6c7def89c76f22a82be3059bc0841f408682f198f8`; it is not the current
 M07-T07 live authority. The authority-specific
 required plan is pinned as
-`sha256:3f0a68109c6293075658ef4695475fbce5df0093319418f14905182cd90f1f2e`; the non-authoritative
+`sha256:e863eba541e3cbd8c3bc4d181a3969db02efe1f633e37804a73254e021be6f2c`; the non-authoritative
 shadow form is pinned separately as
-`sha256:d905fd8bd91bc4c789131759e8f64b3d2b326fa0ee3fe693fc96da3443cfd915`.
+`sha256:d20ec226f461b7e4df73b1e7335a5951e6d8c5615496a925e7fb9d8640fe129e`.
 
 The reviewed workspace package-test inventory contains 14 Vitest commands and is pinned as
 `sha256:5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4`. Two
@@ -97,11 +97,11 @@ prerequisite inventory is pinned as
 historical digests remain in the immutable I07-02 baseline and ADR 0011 rather than the live pins
 above.
 
-The preceding M07-T06 successor contained 66 proofs and 140 normalized single-pass steps. The
-M07-T07 working-tree successor contains 67 proofs, 439 prerequisite segments, 2,473 ordered leaf
-invocations, 221 distinct leaf workloads, and 142 normalized single-pass steps. The immutable
+The preceding M07-T07 successor contained 67 proofs and 142 normalized single-pass steps. The
+M07-T08 working-tree successor contains 68 proofs, 447 prerequisite segments, 2,617 ordered leaf
+invocations, 224 distinct leaf workloads, and 144 normalized single-pass steps. The immutable
 I07-02/M07-T01 receipts retain their original 61/130 values; no post-cutover successor rewrites
-them. These pins describe the M07-T07 local/code-owned successor and do not claim a hosted M07-T07
+them. These pins describe the M07-T08 local/code-owned successor and do not claim a hosted M07-T08
 result.
 
 `SIGINT` and `SIGTERM` become permanent cancellation state, are forwarded to the active process
@@ -292,17 +292,65 @@ and appends T07 readers `[30, 31]`. Sequences 1–15 and predecessor artifact by
 This is reviewed local-reader evidence and claims no hosted M07-T07 result. `DEBT-I07-014`
 registers the temporary activation-reader bridges under I07-04 for removal by G07.
 
+Reviewed checkpoint sequence 17 links exact sequence 16 head
+`f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd` to current head
+`cc7227fe73f0b03fa56e18c075de5bc8bb2f87c4425aa669fd437ed2cc09730e`. It authenticates 17 frozen
+artifacts and 34 live readers, appends the 44,224-byte M07-T08 artifact
+`sha256:c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9`, reseals reader indexes
+`[14, 15, 16, 18, 22, 26, 27, 28, 29, 30, 31]`, and appends the 84,219-byte T08 proof reader at
+`[32]` (`sha256:08f143107430dde90cf1865c21d7ce1ec854897b0c1c4306b96525bdd0d18daa`) plus the 24,939-byte root
+reader at `[33]` (`sha256:b97e7991e0ac20e7232112594228fdd829a536e81d16d06fd3f909e7e3a02492`).
+Sequences 1–16 and all 16 predecessor artifact files remain byte-identical. This reviewed local
+reader checkpoint makes no hosted M07-T08 claim. `DEBT-I07-015` assigns the temporary historical
+recovery-reader bridges to I07-04 for removal by G07.
+
+Reviewed checkpoint sequence 18 links exact sequence 17 head
+`cc7227fe73f0b03fa56e18c075de5bc8bb2f87c4425aa669fd437ed2cc09730e` to sequence 18 head
+`4e9ac8adac57d058444bfe2113fbb5dd364cd24d6052ad5f2cd8910a13c22b45`. It preserves all 17 frozen
+artifacts and all 34 reader identities while resealing reader indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14]` after the final fail-closed T08 compatibility-reader
+upgrade. Sequence 17 and every artifact byte remain unchanged. This is reviewed local-reader
+evidence and makes no hosted M07-T08 claim; the temporary compatibility bridges remain registered
+for I07-04 removal by G07.
+
+Reviewed checkpoint sequence 19 links exact sequence 18 head
+`4e9ac8adac57d058444bfe2113fbb5dd364cd24d6052ad5f2cd8910a13c22b45` to sequence 19 head
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3`. It preserves all 17 frozen
+artifacts and all 34 reader identities while resealing only reader index `[28]` to 93,916 bytes
+(`sha256:d0b6ec50df131066283619a01fa41fffdbb2a68c409d3c8d1a816f625f658521`). The fail-closed staging
+verifier caught equal-length final T08 N-038/N-041 normative wording with stale semantic hashes;
+sequence 19 records the corrected reader receipt. Sequences 1–18 and every artifact byte remain
+unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 claim; the temporary
+compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
+
+Reviewed checkpoint sequence 20 links exact sequence 19 head
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to current head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e`. It preserves all 17 frozen
+artifacts and all 34 reader identities while resealing only reader index `[30]` to 106,509 bytes
+(`sha256:d322bf867930215d0f9e0f532bdacbea4ba50145dfa5df38f2e559102cc080ef`). The fail-closed T07
+activation reader exposed stale T08 successor receipts after terminal close-race hardening changed
+the runtime-activation-internal source, focused tests, and generated JavaScript/source map. The
+exact successor receipts were repaired; the activation verifier and 18/18 root tests pass, and
+this receipt repair changed no production behavior. Sequences 1–19 and every artifact byte remain
+unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 claim; the temporary
+compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
+
+The T08 proof reader authenticates exact AST structures for both executable CI registrations and
+shared-state mappings, then binds their effective flow with code-owned exact source receipts. It
+uses the same exact-receipt rule for the direct 12-case runtime, 14-case compiler-negative, and
+9-case root sources; all authority-file inputs cross bounded identity-safe reads.
+
 ### I07-02 required-exhaustive architecture and completed cutover
 
 `exhaustive-workload-inventory.mjs` is now the neutral executable authority. It validates the
-repository inputs and owns all 142 ids, labels, shell-free command/argument vectors, dependencies,
+repository inputs and owns all 144 ids, labels, shell-free command/argument vectors, dependencies,
 execution classes, and inert shared-state records without importing either scheduler. The retained
 legacy sequential implementation is a rollback mirror. The rollback-only
 `required-exhaustive-equivalence.mjs` adapter compares its exact ordered plan against the neutral
 inventory, proves set equality and exactly-once ownership, and retains the reviewed plan digest.
 It cannot turn either source into executable authority.
 
-The equivalence adapter also normalizes terminal receipts. PASS requires all 142 exact workloads
+The equivalence adapter also normalizes terminal receipts. PASS requires all 144 exact workloads
 to report PASS after an observed close and requires the tracked-workspace digest to remain
 unchanged. Missing, duplicated, skipped, not-run, cancelled, timed-out, failed, or unclosed work
 fails closed. Inventory, workload, workspace, cancellation, and timeout are distinct terminal
@@ -317,7 +365,7 @@ The retained sequential runner is not an automatic peer: it runs only when a tru
 manually dispatches `legacy-rollback`. Event name and mode are part of the concurrency key, so a
 rollback exercise cannot cancel a pull-request or `main` authority run.
 
-All 142 workloads have one exact shared-state class:
+All 144 workloads have one exact shared-state class:
 
 | Execution class                  | Count | Scheduling rule                                      |
 | -------------------------------- | ----: | ---------------------------------------------------- |
@@ -325,11 +373,11 @@ All 142 workloads have one exact shared-state class:
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Sole workspace build/typecheck writer                |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Drained complete package-test barrier                |
 | `PROOF_READ_ONLY`                |    69 | No shared workspace writes                           |
-| `PROOF_OS_TEMP_ISOLATED`         |    54 | Writes only to a workload-owned OS temp root         |
+| `PROOF_OS_TEMP_ISOLATED`         |    56 | Writes only to a workload-owned OS temp root         |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases under a drained scheduler       |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | Direct source-audit workspace-temp root-test barrier |
 
-Fifty-six proof pairs may overlap pair-by-pair at concurrency two after their predecessors pass. A
+Fifty-seven proof pairs may overlap pair-by-pair at concurrency two after their predecessors pass. A
 pair's root test still follows its verifier. Ten real tracked-alias pairs and the
 `reference-host-web-source-audit` pair are the eleven exclusive barriers.
 
@@ -356,6 +404,12 @@ root receives only `NODE_TEST_HARNESS`; both receive the narrow
 `CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE` native-addon policy. Neither receives workspace-write or
 port authority.
 
+The added `control-plane-runtime-recovery` pair is ordinary and non-barrier. Both workloads are
+`PROOF_OS_TEMP_ISOLATED`. The verifier receives the exact `VERIFIER_RUNTIME_PROBE` policy and the
+root receives only `NODE_TEST_HARNESS`; both receive the separate narrow
+`CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE` native-addon policy. Neither receives workspace-write or
+port authority.
+
 Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
 
 - `publisher-catalog-pinning`;
@@ -365,17 +419,18 @@ Only these verifier proofs receive both runner-owned temp-write and child-runtim
 - `control-plane-bundle-store`; and
 - `control-plane-bundle-verification`; and
 - `control-plane-local-api`; and
-- `control-plane-runtime-activation`.
+- `control-plane-runtime-activation`; and
+- `control-plane-runtime-recovery`.
 
 Native-addon authority is limited to the exact `reference-host-web-source-audit`
 verifier/root-test pair, the `publisher-invalid-source-matrix` root test, and the exact
-`control-plane-local-api` and `control-plane-runtime-activation` verifier/root-test pairs. The
-Publisher probe loads the reviewed Rolldown binding; the control-plane pairs load the locked SQLite
-binding. The source-audit verifier remains workspace-read-only; its root test owns the single
-exclusive workspace-temp exception.
+`control-plane-local-api`, `control-plane-runtime-activation`, and
+`control-plane-runtime-recovery` verifier/root-test pairs. The Publisher probe loads the reviewed
+Rolldown binding; the control-plane pairs load the locked SQLite binding. The source-audit verifier
+remains workspace-read-only; its root test owns the single exclusive workspace-temp exception.
 Fastify 5.11.2 and better-sqlite3 13.0.3 are exact lockfile inputs, and the reviewed production
 dependency audit reports no known vulnerability. That dependency statement remains local evidence;
-M07-T05 and M07-T06 subsequently passed hosted CI, while no hosted M07-T07 result is claimed here.
+M07-T05 and M07-T06 subsequently passed hosted CI. No hosted M07-T08 result is claimed here.
 
 Every proof process gets a fresh, identity-checked temp root and generated Node permissions.
 Direct workspace-write grants, child processes, and addons are absent unless the code-owned
@@ -383,7 +438,7 @@ workload record grants them. Inherited `NODE_OPTIONS` is rejected, and a mandato
 TCP and UDP listener binding. The runner authenticates temp identity again before cleanup.
 
 Eighteen root-test records also own an orthogonal schema-v2 Node-permission compatibility policy:
-124 workloads are `NONE`, two are `FIXTURE_COPY`, fifteen are `REVIEWED_SYMLINK`, and one is
+126 workloads are `NONE`, two are `FIXTURE_COPY`, fifteen are `REVIEWED_SYMLINK`, and one is
 `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy is limited to the exact code-owned workspace
 source, a no-follow destination inside the workload's own temp root, two reviewed recursive option
 shapes, bounded regular trees, and matching source/destination fingerprints. Symlink handling
@@ -422,7 +477,7 @@ headroom.
 The required execution design layers three closing guards:
 
 - a no-follow seal across the 33 reviewed build and Turbo output roots around the proof phase;
-- a bounded digest of every non-ignored untracked entry around the full 142-step region; and
+- a bounded digest of every non-ignored untracked entry around the full 144-step region; and
 - a tracked-workspace boundary covering bytes, executable modes, file count, and Git index object
   ids around the full run, including failure and cancellation paths.
 

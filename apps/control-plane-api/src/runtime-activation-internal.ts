@@ -7,12 +7,18 @@ import {
   INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE,
   RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE,
   RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE,
+  RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE,
   RuntimeActivationError,
 } from "./runtime-activation-contract.js";
 import {
   consumeBundleRuntimeStagingAuthority,
   readBundleRuntimeStagingAuthority,
 } from "./runtime-staging-internal.js";
+import {
+  captureBundleRuntimeRecovery,
+  isBundleRuntimeRecoveryRejection,
+  recloseBundleRuntimeRecovery,
+} from "./runtime-recovery-internal.js";
 
 import type { BundleStore } from "./bundle-store-contract.js";
 import type { BundleStoreErrorCode } from "./bundle-store-contract.js";
@@ -26,10 +32,15 @@ import type {
   BundleRuntimeActivationResult,
   BundleRuntimeActivationStage,
   BundleRuntimeActivationState,
+  BundleRuntimeRecoveryResult,
   RuntimeActivationRecord,
 } from "./runtime-activation-contract.js";
 import { readRuntimeActivationStorageErrorCode } from "./runtime-activation-repository-internal.js";
 import type { RuntimeActivationRepository } from "./runtime-activation-repository-internal.js";
+import type {
+  BundleRuntimeRecoveryLineageRecord,
+  ReclosedBundleRuntimeRecovery,
+} from "./runtime-recovery-internal.js";
 import type { BundleRuntimeStagingAuthority } from "./runtime-staging-contract.js";
 import type { BundleRuntimeStagingAuthorityRecord } from "./runtime-staging-internal.js";
 
@@ -41,12 +52,14 @@ export interface BundleRuntimeActivationInternalOptions {
   readonly repository: RuntimeActivationRepository;
 }
 
-/** Complete private authority retained after one certain durable commit. @internal */
+/** Complete private authority retained after a certain commit or exact restart reconstruction. */
 export interface BundleRuntimeActivationAuthorityRecord {
   readonly activationRecord: RuntimeActivationRecord;
   readonly referenceRecord: BundleReferencePreflightAuthorityRecord;
   readonly stagingRecord: BundleRuntimeStagingAuthorityRecord;
   readonly reclosedIntegrityAuthority: BundleIntegrityAuthority;
+  /** Independently revalidated prior lineage, retained privately and never promoted implicitly. */
+  readonly previousGoodRecord: BundleRuntimeRecoveryLineageRecord | null;
 }
 
 interface CapturedActivationAttempt {
@@ -170,29 +183,68 @@ function publicRecord(record: RuntimeActivationRecord): RuntimeActivationRecord 
   });
 }
 
-function createAuthority(
-  attempt: CapturedActivationAttempt,
+function createAuthorityValue(
   record: RuntimeActivationRecord,
-  reclosedIntegrityAuthority: BundleIntegrityAuthority,
-): BundleRuntimeActivationResult {
+  activeRecord: BundleRuntimeRecoveryLineageRecord,
+  previousGoodRecord: BundleRuntimeRecoveryLineageRecord | null,
+): BundleRuntimeActivationAuthority {
   const authority = Object.freeze({
     profile: "desen.runtime-activation",
     profileVersion: 1,
     protocolVersion: "0.1.0",
-    documentId: attempt.stagingRecord.bundle.id,
-    entrySurfaceId: attempt.stagingRecord.bundle.entry,
+    documentId: activeRecord.stagingRecord.bundle.id,
+    entrySurfaceId: activeRecord.stagingRecord.bundle.entry,
     ...publicRecord(record),
   }) as BundleRuntimeActivationAuthority;
   AUTHORITIES.set(
     authority,
     Object.freeze({
       activationRecord: publicRecord(record),
+      referenceRecord: activeRecord.referenceRecord,
+      stagingRecord: activeRecord.stagingRecord,
+      reclosedIntegrityAuthority: activeRecord.reclosedIntegrityAuthority,
+      previousGoodRecord,
+    }),
+  );
+  return authority;
+}
+
+function createAuthority(
+  attempt: CapturedActivationAttempt,
+  record: RuntimeActivationRecord,
+  reclosedIntegrityAuthority: BundleIntegrityAuthority,
+  previousGoodRecord: BundleRuntimeRecoveryLineageRecord | null,
+): BundleRuntimeActivationResult {
+  const authority = createAuthorityValue(
+    record,
+    Object.freeze({
       referenceRecord: attempt.referenceRecord,
       stagingRecord: attempt.stagingRecord,
       reclosedIntegrityAuthority,
     }),
+    previousGoodRecord,
   );
   return Object.freeze({ status: "activated", authority });
+}
+
+function activeLineage(
+  record: BundleRuntimeActivationAuthorityRecord,
+): BundleRuntimeRecoveryLineageRecord {
+  return Object.freeze({
+    referenceRecord: record.referenceRecord,
+    stagingRecord: record.stagingRecord,
+    reclosedIntegrityAuthority: record.reclosedIntegrityAuthority,
+  });
+}
+
+function previousGoodLineageForActivation(
+  current: BundleRuntimeActivationAuthorityRecord | undefined,
+  candidateRevision: string,
+): BundleRuntimeRecoveryLineageRecord | null {
+  if (current === undefined) return null;
+  return current.activationRecord.activeRevision === candidateRevision
+    ? current.previousGoodRecord
+    : activeLineage(current);
 }
 
 function readBundleStoreErrorCode(error: unknown): BundleStoreErrorCode | undefined {
@@ -242,6 +294,7 @@ async function activateCaptured(
   options: BundleRuntimeActivationInternalOptions,
   attempt: CapturedActivationAttempt,
   authenticatedCurrent: RuntimeActivationRecord | null,
+  previousGoodRecord: BundleRuntimeRecoveryLineageRecord | null,
   canCommit: () => boolean,
   publish: (authority: BundleRuntimeActivationAuthority) => void,
 ): Promise<BundleRuntimeActivationResult> {
@@ -278,7 +331,12 @@ async function activateCaptured(
     );
     switch (committed.status) {
       case "activated": {
-        const activated = createAuthority(attempt, committed.record, reclosed.authority);
+        const activated = createAuthority(
+          attempt,
+          committed.record,
+          reclosed.authority,
+          previousGoodRecord,
+        );
         if (activated.status !== "activated") return internalRejection();
         publish(activated.authority);
         return activated;
@@ -303,7 +361,40 @@ async function activateCaptured(
   }
 }
 
-/** @internal Authenticates and reads one exact in-process M07-T07 activation authority. */
+function sameRecord(left: RuntimeActivationRecord, right: RuntimeActivationRecord): boolean {
+  return (
+    left.activeRevision === right.activeRevision &&
+    left.previousGoodRevision === right.previousGoodRevision &&
+    left.generation === right.generation
+  );
+}
+
+function recoveryInternalRejection(): BundleRuntimeRecoveryResult {
+  return Object.freeze({
+    status: "rejected",
+    role: "active",
+    stage: "internal",
+    diagnostics: Object.freeze([
+      diagnostic(
+        RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE,
+        "Runtime recovery could not complete its trusted implementation path.",
+      ),
+    ]),
+  });
+}
+
+function createRecoveredAuthority(
+  recovered: ReclosedBundleRuntimeRecovery,
+): BundleRuntimeRecoveryResult {
+  const authority = createAuthorityValue(
+    recovered.activationRecord,
+    recovered.active,
+    recovered.previousGood,
+  );
+  return Object.freeze({ status: "recovered", authority });
+}
+
+/** @internal Authenticates one exact current in-process activation or recovery authority. */
 export function readBundleRuntimeActivationAuthority(
   authority: unknown,
 ): BundleRuntimeActivationAuthorityRecord | undefined {
@@ -396,10 +487,15 @@ export function createBundleRuntimeActivationInternal(
     }
     const authenticatedCurrent =
       currentAuthority === undefined ? null : publicRecord(currentAuthority);
+    const currentPrivate =
+      currentAuthority === undefined ? undefined : AUTHORITIES.get(currentAuthority);
+    const candidateRevision = captured.stagingRecord.packageRecord.integrityRecord.revision;
+    const previousGoodRecord = previousGoodLineageForActivation(currentPrivate, candidateRevision);
     return activateCaptured(
       options,
       captured,
       authenticatedCurrent,
+      previousGoodRecord,
       () => {
         if (closed) throw new RuntimeActivationError("ACTIVATION_CLOSED");
         return recoveryRecord === undefined;
@@ -427,12 +523,99 @@ export function createBundleRuntimeActivationInternal(
       });
   };
 
+  const recover: BundleRuntimeActivation["recover"] = (
+    activePackageAuthority,
+    previousGoodPackageAuthority,
+  ) => {
+    if (closed) return Promise.reject(new RuntimeActivationError("ACTIVATION_CLOSED"));
+    if (inFlight) return Promise.reject(new RuntimeActivationError("ACTIVATION_BUSY"));
+    if (recoveryRecord === undefined) {
+      return Promise.resolve(
+        Object.freeze({
+          status: "not-required",
+          state: currentAuthority === undefined ? "empty" : "active",
+        }),
+      );
+    }
+    // A null record represents a post-commit outcome that this open repository cannot resolve.
+    // Do not inspect or consume inputs; callers must reopen the root and recover the actual row.
+    if (recoveryRecord === null) {
+      return Promise.resolve(Object.freeze({ status: "recovery-required", record: null }));
+    }
+
+    inFlight = true;
+    const expectedRecord = publicRecord(recoveryRecord);
+    let captured;
+    try {
+      captured = captureBundleRuntimeRecovery(
+        expectedRecord,
+        activePackageAuthority,
+        previousGoodPackageAuthority,
+      );
+    } catch {
+      inFlight = false;
+      return Promise.resolve(recoveryInternalRejection());
+    }
+    if (isBundleRuntimeRecoveryRejection(captured)) {
+      inFlight = false;
+      return Promise.resolve(captured);
+    }
+
+    return recloseBundleRuntimeRecovery(options.bundleStore, captured, () => {
+      if (closed) throw new RuntimeActivationError("ACTIVATION_CLOSED");
+    })
+      .then((reclosed): BundleRuntimeRecoveryResult => {
+        if (closed) throw new RuntimeActivationError("ACTIVATION_CLOSED");
+        if (recoveryRecord === undefined || recoveryRecord === null) {
+          return Object.freeze({
+            status: "recovery-required",
+            record: recoveryRecord === null ? null : expectedRecord,
+          });
+        }
+
+        let latest: RuntimeActivationRecord | null;
+        try {
+          const read = options.repository.get();
+          latest = read.status === "missing" ? null : publicRecord(read.record);
+        } catch (error) {
+          const mapped = mapStorageError(error);
+          if (mapped !== undefined) throw mapped;
+          return recoveryInternalRejection();
+        }
+        if (latest === null || !sameRecord(expectedRecord, latest)) {
+          enterRecovery(latest);
+          return Object.freeze({ status: "recovery-required", record: latest });
+        }
+        // Reauthenticate the complete durable row even when Bundle reclosure rejected. Durable
+        // drift is newer state and must win so the controller cannot remain pinned to a stale
+        // recovery record after an asynchronous failure.
+        if (isBundleRuntimeRecoveryRejection(reclosed)) return reclosed;
+
+        const result = createRecoveredAuthority(reclosed);
+        if (result.status !== "recovered") return recoveryInternalRejection();
+        revokeCurrent();
+        currentAuthority = result.authority;
+        recoveryRecord = undefined;
+        return result;
+      })
+      .catch((error: unknown) => {
+        if (error instanceof RuntimeActivationError) throw error;
+        return recoveryInternalRejection();
+      })
+      .finally(() => {
+        inFlight = false;
+      });
+  };
+
   const close: BundleRuntimeActivation["close"] = () => {
     if (closed) return;
+    // Closing is a terminal controller transition even when native repository cleanup fails. Set
+    // the guard and revoke authority first so pending asynchronous recovery cannot publish after a
+    // caller has requested close, and so a repeated close remains an inert no-op.
+    closed = true;
+    revokeCurrent();
     try {
       options.repository.close();
-      revokeCurrent();
-      closed = true;
     } catch (error) {
       const mapped = mapStorageError(error);
       if (mapped !== undefined) throw mapped;
@@ -440,5 +623,5 @@ export function createBundleRuntimeActivationInternal(
     }
   };
 
-  return Object.freeze({ readState, activate, close });
+  return Object.freeze({ readState, activate, recover, close });
 }

@@ -3,8 +3,8 @@
 A local-first control-plane application for editable sources, immutable Bundles, mutable channel
 pointers, and durable runtime activation. Publication stays in `@desen/publisher`; this application
 stores publication outputs, verifies candidate inputs, prepares active-separated runtime indexes,
-and commits an exact preflight-joined candidate through one atomic activation record. It is
-proof-environment infrastructure, not the public `desen.run` developer API.
+and commits or reconstructs an exact preflight-joined candidate against one atomic activation
+record. It is proof-environment infrastructure, not the public `desen.run` developer API.
 
 ## Status
 
@@ -20,8 +20,11 @@ re-closes its private package snapshots, validates execution contracts, and prep
 runtime indexes without changing active state. M07-T07 authenticates and joins the independent T04
 and T06 private lineages, re-closes the complete Bundle from the same application-owned store, and
 commits `{ activeRevision, previousGoodRevision, generation }` as one compare-and-set record before
-publishing an in-process activation authority. Restart restoration, the exhaustive fault and race
-matrices, and reference-host consumption remain later M07 work.
+publishing an in-process activation authority. M07-T08 recovers only that unchanged durable record:
+it accepts exact M07-T03 package authorities for the record's active and optional previous-good
+roles, internally reruns T04 and T06, recloses every referenced Bundle, and reauthenticates all
+three durable fields before reconstructing active authority. Exhaustive fault and race matrices plus
+reference-host consumption remain later M07 work.
 
 The current implementation is a local POSIX filesystem profile. The low-level Bundle store treats
 validation as a caller precondition; the T05 transport deliberately permits unverified candidate
@@ -33,7 +36,9 @@ authority to later M07 stages.
 
 The following is composition pseudocode. `applicationOwnedPackageInventory` represents a
 host-owned integration that must supply the exact Catalog and all 80 reviewed Web–React
-distribution artifacts; DESEN deliberately exposes no package loader or discovery helper.
+distribution artifacts. `applicationOwnedRecoveryAuthorities` represents exact M07-T03
+authorities rebuilt through the same boundary for the durable record's roles; DESEN deliberately
+exposes no package loader or discovery helper.
 
 ```ts
 import {
@@ -108,6 +113,21 @@ if (read.status === "found") {
         }
       }
     }
+  }
+}
+
+const restartState = activation.readState();
+if (restartState.status === "recovery-required" && restartState.record !== null) {
+  // Host-owned composition rebuilds exact M07-T03 package authorities for the two revisions
+  // selected by restartState.record. It cannot choose a different revision or pass raw storage.
+  const activePackageAuthority = applicationOwnedRecoveryAuthorities.active;
+  const previousGoodPackageAuthority = applicationOwnedRecoveryAuthorities.previousGood;
+  const recovered = await activation.recover(
+    activePackageAuthority,
+    previousGoodPackageAuthority, // Must be null when the durable field is null.
+  );
+  if (recovered.status === "recovered") {
+    // recovered.authority is current only for this open controller lifetime.
   }
 }
 ```
@@ -411,9 +431,42 @@ recovery rules without inheriting this SQLite implementation choice.
 Only a certain durable commit publishes a current in-process
 `BundleRuntimeActivationAuthority`. `readState()` returns `active` only for authority created by
 that open controller. A preexisting durable record or an indeterminate commit returns
-`recovery-required`; raw persisted fields are never promoted to runtime authority. M07-T08 still
-owns record revalidation and authority reconstruction after restart, while M07-T09 and M07-T10 own
+`recovery-required`; raw persisted fields are never promoted to runtime authority. M07-T08 now
+owns the separate revalidation and reconstruction boundary below, while M07-T09 and M07-T10 own
 the exhaustive precommit fault and race matrices.
+
+## Restart-recovery boundary
+
+`recover(activePackageAuthority, previousGoodPackageAuthority)` operates only while `readState()`
+is recovery-required with a non-null record. Its two arguments are exact opaque M07-T03 package
+authorities rebuilt from application-approved installed package material. The active authority
+must match the durable `activeRevision`; the second must match `previousGoodRevision`, or must be
+`null` when that durable field is null. Missing, extra, swapped, copied, forged, proxied, or
+revision-mismatched roles reject before Bundle-store I/O. A raw record, caller-selected revision,
+T04 authority, T06 staged handle, path, store, loader, channel, callback, repository, SQLite handle,
+or activation authority is not accepted as a substitute.
+
+For every required role, recovery internally reruns `preflightBundleReferences` and
+`stageBundleRuntime` over the authenticated package authority. It verifies the exact private
+T03/T04/T06 lineage and synchronously consumes every internally created staging handle before the
+first asynchronous store operation. It then rereads the active Bundle and, when present, the
+previous-good Bundle from the same immutable store, repeats integrity verification with Source
+unavailable, and requires complete equality with all retained snapshots. Both roles must succeed;
+the controller never publishes active alone as a fallback for failed previous-good validation.
+
+After those asynchronous reads, recovery rereads the repository and requires exact equality of
+`activeRevision`, `previousGoodRevision`, and `generation` with the record that selected the roles.
+Only then does it reconstruct current active authority. The validated previous-good lineage stays
+package-private and grants no public rollback or loader. Recovery performs no durable write,
+generation increment, pointer swap, or automatic fallback promotion. Closing the controller or
+drift in any durable field prevents publication. Activation and recovery share one in-flight guard.
+
+An empty or already active controller returns `not-required` without inspecting the supplied
+inputs. An indeterminate `{ status: "recovery-required", record: null }` result cannot be guessed;
+the caller must close and reopen the same root, observe the durable winner, and then supply its
+exact package authority or authorities. A generation-zero record with a non-null previous-good
+revision is corrupt because the T07 writer cannot produce it. Recovery at
+`Number.MAX_SAFE_INTEGER` is valid and unchanged; only a later activation is generation-exhausted.
 
 ## Storage layout
 
@@ -497,20 +550,27 @@ around filesystem operations, but hostile same-UID or privileged mutation betwee
 path-based Node.js system calls is outside M07-T01. Remote/object storage requires another
 repository implementation with equivalent no-clobber and durability semantics.
 
+Recovery preserves that trust boundary. Filesystem, SQLite, Bundle, package-lineage, and final-row
+checks detect the specified drift and corruption classes, but the local root is not an external
+authenticity anchor. Without a separately stored signature, monotonic sentinel, or equivalent
+cryptographic commitment, an internally consistent historical or fully replaced database plus
+matching Bundles cannot be distinguished from legitimate historical state. M07-T08 therefore
+makes no tamper-proof, hostile-administrator, or anti-rollback claim.
+
 ## Explicitly deferred
 
-M07-T01 through M07-T07 establish immutable exact-byte persistence, Bundle integrity, exact
+M07-T01 through M07-T08 establish immutable exact-byte persistence, Bundle integrity, exact
 installed-package preflight, bounded surface/capability reference preflight, authenticated local
 Source/Bundle/channel transport, active-separated runtime-index staging, and one durable atomic
-activation-record transition. They do not yet provide:
+activation-record transition plus exact restart reconstruction of an unchanged record. They do not
+yet provide:
 
-- M07-T08 through M07-T10 restart restoration plus exhaustive last-known-good, fault, and race
-  matrices; or
+- M07-T09 through M07-T10 exhaustive last-known-good, fault, and race matrices; or
 - M07-T11 reference-host channel consumption.
 
 Callers must not treat a successful M07-T01/T05 Bundle write or a channel pointer as integrity
 verification, an M07-T02 integrity authority as package authority, an M07-T03 package authority as
 reference authority, an M07-T04 reference authority as staging authority, or an M07-T06 staged
 authority as committed or active state. A raw durable T07 record is not recovered runtime
-authority, and T07 alone does not prove invalid-candidate preservation across every fault, race,
-or restart boundary.
+authority, and successful T08 reconstruction does not prove invalid-candidate preservation across
+every fault or race boundary.

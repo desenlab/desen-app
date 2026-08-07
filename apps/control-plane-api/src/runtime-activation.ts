@@ -111,7 +111,8 @@ export function createOwnedBundleRuntimeActivationInternal(
 }
 
 /**
- * Opens the M07-T07 transactional activation service beneath one application-owned local root.
+ * Opens the transactional activation and restart-recovery service beneath one application-owned
+ * local root.
  *
  * @remarks The factory reopens the same immutable T01 Bundle store and creates an independent
  * `runtime-activation.sqlite3` singleton record. The pinned native SQLite adapter is loaded only

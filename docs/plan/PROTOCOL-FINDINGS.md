@@ -3055,7 +3055,7 @@ This file records implementation discoveries without changing the frozen DESEN 0
   consumption.
 - Protocol location: SPEC Sections 5.7, 6.3, 24.1, 26.6, and 28.3; Appendix A invariants 8 and 9;
   `PIPE-007`, `PIPE-016`, `PIPE-017`, `R-008`, `R-102`, `R-126`, `A-008`, and `A-009`; related
-  findings `PF-031` and `PF-072`–`PF-075`; related decisions `ADR 0012` and `ADR 0013`
+  findings `PF-031` and `PF-072`–`PF-075`; related decisions `ADR 0012`, `ADR 0013`, and `ADR 0014`
 - Observation: DESEN 0.1.0 requires an atomic active-pointer switch and preservation of a
   last-known-good revision, but it does not define the persistent record schema, first generation,
   same-revision transition, compare-and-swap conflict result, commit-indeterminate outcome, or
@@ -3084,9 +3084,23 @@ This file records implementation discoveries without changing the frozen DESEN 0
   durable commit. A commit whose outcome cannot be proven exposes no active candidate and moves the
   controller to recovery-required state; recovery observed during Bundle I/O is sticky.
 
-- Future action: M07-T08 must validate an existing durable record and rebuild active runtime
-  authority after restart or an indeterminate commit; no abandoned staged candidate crosses that
-  boundary. M07-T09 must inject faults at every pre-commit and commit phase. M07-T10 must prove
+  M07-T08 recovery accepts only the exact T03 package authority for the durable active revision and
+  the optional exact T03 authority selected by `previousGoodRevision`. It rebuilds T04 and T06
+  internally, consumes every internally created T06 lifetime before asynchronous work, recloses
+  both required Bundles, and requires a final exact match of all three durable fields before
+  authority publication. The previous-good lineage remains private. Recovery neither writes the
+  record nor increments generation or performs automatic rollback. Generation zero with a
+  non-null previous-good revision is corrupt, while a null indeterminate record requires reopening
+  the same root before the winner can be observed.
+
+  The persistence contract remains platform-neutral; SQLite is only the first Web adapter. The
+  local profile trusts its canonical root as application-owned. Without an independently trusted
+  signature, monotonic sentinel, or equivalent cryptographic commitment, an internally consistent
+  historical database or fully replaced valid-looking database and Bundle set cannot be
+  distinguished from the genuine latest state. The implementation makes no tamper-proof or
+  hostile-administrator claim.
+
+- Future action: M07-T09 must inject faults at every pre-commit and commit phase. M07-T10 must prove
   A → invalid B → valid C, same- and different-candidate races, generation fencing, and restart
   behavior. Its race matrix must explicitly decide whether a live external change to database-level
   `journal_mode` requires full connection-profile reauthentication inside the writer transaction.
