@@ -165,21 +165,23 @@ compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
-`803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0`. It preserves sequences
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
-`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`, reseals 27 historical
-compatibility readers, and appends the 56,129-byte proof reader
-`sha256:23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc` plus the 14,927-byte root
-reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The chain now
+`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`, reseals 27 historical
+compatibility readers, and appends the 64,932-byte proof reader
+`sha256:da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f` plus the 17,341-byte root
+reader `sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`. The chain now
 authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
 
-The CI contract batch runs the complete M07-T09 verifier once through its exact proof isolation
-before exhaustive scheduling. That verifier uses the current Node executable plus the
-repository-local Vitest entrypoint and an owner-only step-temp config; it never depends on
-Corepack, a package-manager shim, or `PATH` lookup. The inherited permission boundary remains in
-force, cross-file/cache parallelism is disabled, and `finally` removes the temporary config.
+The CI contract batch runs a dependency-free one-test M07-T09 Vitest probe through the exact proof
+isolation before exhaustive scheduling. The shared launcher uses the current Node executable plus
+the repository-local Vitest entrypoint and owner-only package/workspace/config/test files under the
+step temp root; it never depends on Corepack, a package-manager shim, `PATH` lookup, or ignored
+`dist` output. The inherited permission boundary remains in force, cross-file/cache parallelism is
+disabled, and cleanup is unconditional. The full T09 verifier remains an exhaustive workload after
+its build-producing dependencies.
 
 The final T08 reader validates exact AST structures for executable CI registrations, shared-state
 mappings, and direct 12-runtime/14-type/9-root test inventories. Code-owned exact source receipts

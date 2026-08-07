@@ -157,7 +157,7 @@ const EXPECTED_ROOT_TEST_NAMES = Object.freeze([
 ]);
 const M07_T09_N004_SUCCESSOR_RECEIPT = Object.freeze({
   bytes: 2_526,
-  sha256: "57188821801175c3a4d3282a0a989be82f08b189ec8a2d3ae5ba4455441060e5",
+  sha256: "885b985c43c8e4dced2f1361d8e08728a63fa055b29df84e7cccaf16ba5e11de",
 });
 
 const M07_T07_DOCUMENTED_ACTIVATION_SOURCE_EXPORTS = Object.freeze(

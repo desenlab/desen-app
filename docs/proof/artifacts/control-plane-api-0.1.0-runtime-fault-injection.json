@@ -1304,8 +1304,8 @@
       },
       "root": {
         "path": "tests/control-plane-runtime-fault-injection.test.mjs",
-        "bytes": 14927,
-        "sha256": "2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673"
+        "bytes": 17341,
+        "sha256": "f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6"
       }
     }
   },
@@ -1507,8 +1507,8 @@
     },
     {
       "path": "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
-      "bytes": 56129,
-      "sha256": "23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc"
+      "bytes": 64932,
+      "sha256": "da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f"
     },
     {
       "path": "scripts/run-ci-quality-gate.mjs",
@@ -1522,8 +1522,8 @@
     },
     {
       "path": "tests/control-plane-runtime-fault-injection.test.mjs",
-      "bytes": 14927,
-      "sha256": "2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673"
+      "bytes": 17341,
+      "sha256": "f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6"
     }
   ],
   "distribution": [

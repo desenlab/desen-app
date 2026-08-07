@@ -693,12 +693,12 @@ compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
-`803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0`. It preserves sequences
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
-`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`, reseals 27 historical
-compatibility readers, and appends the 56,129-byte proof reader
-`sha256:23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc` plus the 14,927-byte root
-reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The chain now
+`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`, reseals 27 historical
+compatibility readers, and appends the 64,932-byte proof reader
+`sha256:da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f` plus the 17,341-byte root
+reader `sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`. The chain now
 authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
@@ -1194,7 +1194,8 @@ have durably committed the new winner; it is resolved only by recovering that ex
 N-004 is now `TESTED`; P-12 remains `NOT_PROVEN`, while N-038 and N-041 remain `PLANNED` for their
 later owners.
 
-Implement
+First complete
+`I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`, then implement
 `M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`.
 
 CI-01 is complete. The archived hosted comparison is
@@ -2389,7 +2390,7 @@ M07-T09 evidence:
 - `docs/proof/CONTROL-PLANE-RUNTIME-FAULT-INJECTION.md`
 - `docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json`
 - 64,493-byte artifact SHA-256:
-  `0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`
+  `9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`
 - closed fault inventory: 19 stable boundary-fault ids plus one exact-inventory runtime test cover
   discovery, immutable fetch, integrity, package, reference, staging, durable commit, restart
   recovery, final durable-record drift, and authority-publication boundaries
@@ -2411,7 +2412,7 @@ M07-T09 evidence:
   leaves; these are local code-owned values and no hosted M07-T09 pass is claimed yet
 - current reviewed reader checkpoint: sequence 21 links exact sequence 20 head
   `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to
-  `803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0`; sequences 1–20 and every
+  `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`; sequences 1–20 and every
   predecessor artifact byte remain unchanged, the exact T09 artifact becomes artifact 18, 27
   historical compatibility readers are resealed, and T09's proof/root readers become indexes
   `[34, 35]`, yielding 36 current readers; this is local-reader evidence only, no hosted M07-T09

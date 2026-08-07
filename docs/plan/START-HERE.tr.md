@@ -200,12 +200,12 @@ yerel okuyucu kanıtıdır; hosted M07-T08 sonucu iddia etmez. Geçici uyumluluk
 
 İncelenmiş sıra 21, sıra 20'nin
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başından güncel
-`803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0` başına bağlanır. Sıra
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` başına bağlanır. Sıra
 1–20'yi ve önceki tüm eser baytlarını aynen korur; 64.493 baytlık M07-T09 eserini
-(`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`) ekler, 27 tarihsel
-uyumluluk okuyucusunu yeniden mühürler ve 56.129 baytlık kanıt okuyucusunu
-(`sha256:23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc`) ile 14.927 baytlık kök
-okuyucusunu (`sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`) ekler. Zincir artık
+(`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`) ekler, 27 tarihsel
+uyumluluk okuyucusunu yeniden mühürler ve 64.932 baytlık kanıt okuyucusunu
+(`sha256:da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f`) ile 17.341 baytlık kök
+okuyucusunu (`sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`) ekler. Zincir artık
 18 değişmez eseri ve 36 güncel okuyucuyu doğrular. Bu incelenmiş yerel okuyucu kanıtıdır, hosted
 M07-T09 iddiası değildir; geçici ardıl köprüleri G07'de I07-04 tarafından kaldırılmak üzere
 `DEBT-I07-016` kaydındadır.
@@ -269,7 +269,7 @@ Kurtarma hataları iki rolün hiçbirini kısmi olarak yayınlamıyor ve son kal
 
 20 uygulama testi, 10 derleyici-negatif testi ve 11 bağımsız kök kanıt/mutasyon testi geçti. Kanıt
 eseri 64.493 bayt ve
-`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f` ile sabittir. Son kanıt;
+`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9` ile sabittir. Son kanıt;
 105 öğelik public dışa aktarım envanterini, 36 anahtarlık derlenmiş runtime yüzeyini, çalıştırılabilir
 CI/ortak-durum kayıtlarını, sekiz önceki M07 eserini ve göreve atanmış 22 trace satırını kesin
 olarak doğrular. Public fault hook, repository, SQLite handle veya yükleyici eklenmedi. N-004 artık

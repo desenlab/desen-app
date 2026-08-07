@@ -275,11 +275,11 @@ const M07_T08_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
 const M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
   "N-038": Object.freeze({
     bytes: 2_534,
-    sha256: "3f97ef80326fda0d4a2b002104b4062447f781d42798fe7953f20c216867c74c",
+    sha256: "59da4a30b68fae8ed18201e3ccc203623fa45dc30e60a0bb1c6b5b24a71a71f7",
   }),
   "N-041": Object.freeze({
     bytes: 2_528,
-    sha256: "336622933527da65f5bdf581f7c3eb8456851603dccf22ad477aba4f550473df",
+    sha256: "bf60acd5e5c80e40234af853bb59dedf85daa86c05ea56968845a968cf18aff1",
   }),
 });
 const EXPECTED_RUNTIME_TEST_NAMES = Object.freeze([

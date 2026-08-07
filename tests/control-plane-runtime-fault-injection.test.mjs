@@ -9,6 +9,7 @@ import {
   CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS,
   ControlPlaneRuntimeFaultInjectionEvidenceError,
   buildControlPlaneRuntimeFaultInjectionEvidence,
+  summarizeControlPlaneRuntimeFaultInjectionSuiteFailure,
   verifyControlPlaneRuntimeFaultInjectionEvidence,
   writeControlPlaneRuntimeFaultInjectionEvidence,
 } from "../scripts/lib/control-plane-runtime-fault-injection-proof.mjs";
@@ -195,6 +196,75 @@ test("[runtime] rejects one changed executable fault-suite receipt field", async
     buildControlPlaneRuntimeFaultInjectionEvidence({ runtimeSuiteReceipt: changed }),
     expectedError("RUNTIME_SUITE_MISMATCH"),
   );
+
+  const secretPath = "/private/diagnostic-path-must-not-escape";
+  const failedTitle = suiteReceipt().tests[0].title;
+  const failure = summarizeControlPlaneRuntimeFaultInjectionSuiteFailure({
+    code: 1,
+    killed: false,
+    signal: null,
+    stderr: `Access to this API has been restricted. Use --allow-fs-read. ${secretPath}`,
+    stdout: JSON.stringify({
+      numFailedTestSuites: 1,
+      numFailedTests: 1,
+      testResults: [
+        {
+          assertionResults: [
+            {
+              failureMessages: [`ERR_ACCESS_DENIED ${secretPath}`],
+              status: "failed",
+              title: failedTitle,
+            },
+          ],
+          message: `arbitrary reporter text ${secretPath}`,
+          status: "failed",
+        },
+      ],
+    }),
+  });
+  assert.equal(failure.category, "ACCESS_DENIED");
+  assert.equal(failure.deniedAuthority, "FS_READ");
+  assert.deepEqual(failure.failedCaseIds, ["channel-invalid-discovery"]);
+  assert.equal(failure.failedSuiteCount, 1);
+  assert.equal(failure.failedTestCount, 1);
+  assert.equal(failure.reportObserved, true);
+  assert.equal(JSON.stringify(failure).includes(secretPath), false);
+
+  const unknown = summarizeControlPlaneRuntimeFaultInjectionSuiteFailure({
+    code: 1,
+    signal: secretPath,
+    stdout: secretPath,
+  });
+  assert.equal(unknown.category, "CHILD_PROCESS_FAILED");
+  assert.deepEqual(unknown.failedCaseIds, []);
+  assert.equal(unknown.reportObserved, false);
+  assert.equal(unknown.signal, null);
+  assert.equal(JSON.stringify(unknown).includes(secretPath), false);
+
+  const knownSignal = summarizeControlPlaneRuntimeFaultInjectionSuiteFailure({
+    code: 1,
+    signal: "SIGTERM",
+  });
+  assert.equal(knownSignal.signal, "SIGTERM");
+
+  const missingBuildOutput = summarizeControlPlaneRuntimeFaultInjectionSuiteFailure({
+    code: 1,
+    stdout: JSON.stringify({
+      numFailedTestSuites: 1,
+      numFailedTests: 0,
+      testResults: [
+        {
+          assertionResults: [],
+          message: 'Failed to resolve entry for package "@desen/protocol".',
+          status: "failed",
+        },
+      ],
+    }),
+  });
+  assert.equal(missingBuildOutput.category, "MODULE_RESOLUTION_FAILED");
+  assert.equal(missingBuildOutput.failedSuiteCount, 1);
+  assert.equal(missingBuildOutput.failedTestCount, 0);
+  assert.equal(missingBuildOutput.reportObserved, true);
 });
 
 test("[implementation] rejects public-export growth and removal of one fault boundary", async () => {

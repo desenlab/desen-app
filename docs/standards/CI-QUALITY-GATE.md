@@ -337,21 +337,23 @@ compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
-`803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0`. It preserves sequences
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
-`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`, reseals 27 historical
-compatibility readers, and appends the 56,129-byte proof reader
-`sha256:23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc` plus the 14,927-byte root
-reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The chain now
+`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`, reseals 27 historical
+compatibility readers, and appends the 64,932-byte proof reader
+`sha256:da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f` plus the 17,341-byte root
+reader `sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`. The chain now
 authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
 
-The contract preflight now executes the complete M07-T09 verifier under its production proof-step
-isolation. The verifier invokes the repository-local Vitest CLI with `process.execPath`, writes an
-owner-only explicit config only inside the step temp root, preserves the scheduler-owned Node
-permission boundary, and performs unconditional cleanup. This catches package-manager lookup,
-permission, and config-discovery regressions before the 146-workload exhaustive phase.
+The contract preflight now executes a dependency-free one-test M07-T09 Vitest probe under the
+production proof-step isolation. The shared launcher invokes the repository-local Vitest CLI with
+`process.execPath`, writes owner-only package/workspace/config/test files only inside the step temp
+root, preserves the scheduler-owned Node permission boundary, and performs unconditional cleanup.
+This catches package-manager lookup, permission, and config-discovery regressions before ignored
+build outputs exist. The full T09 verifier remains in the 146-workload exhaustive phase after its
+build-producing prerequisites.
 
 The T08 proof reader authenticates exact AST structures for both executable CI registrations and
 shared-state mappings, then binds their effective flow with code-owned exact source receipts. It

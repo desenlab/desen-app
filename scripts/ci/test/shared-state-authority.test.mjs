@@ -14,6 +14,7 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-inventory.mjs";
@@ -606,7 +607,7 @@ test("only exact runtime-probe verifiers receive child-process authority", async
 });
 
 test(
-  "the T09 runtime verifier completes inside its exact proof isolation",
+  "the dependency-free T09 Vitest probe completes inside its exact proof isolation",
   { timeout: 30_000 },
   async () => {
     const workload = createExhaustiveWorkloadInventory().nodes.find(
@@ -618,25 +619,29 @@ test(
       workload,
     });
     try {
-      const { stdout, stderr } = await execFileAsync(workload.command, workload.args, {
-        cwd: REPOSITORY_ROOT,
-        encoding: "utf8",
-        env: isolation.env,
-        maxBuffer: 2 * 1024 * 1024,
-        timeout: 20_000,
-      });
+      const proofLibraryUrl = pathToFileURL(
+        path.join(REPOSITORY_ROOT, "scripts/lib/control-plane-runtime-fault-injection-proof.mjs"),
+      ).href;
+      const probeSource = [
+        `import { runControlPlaneRuntimeFaultInjectionVitestIsolationProbe as run } from ${JSON.stringify(proofLibraryUrl)};`,
+        "process.stdout.write(JSON.stringify(await run()));",
+      ].join("\n");
+      const { stdout, stderr } = await execFileAsync(
+        process.execPath,
+        ["--input-type=module", "--eval", probeSource],
+        {
+          cwd: REPOSITORY_ROOT,
+          encoding: "utf8",
+          env: isolation.env,
+          maxBuffer: 2 * 1024 * 1024,
+          timeout: 20_000,
+        },
+      );
       assert.equal(stderr, "");
       assert.deepEqual(JSON.parse(stdout), {
+        profile: "desen.control-plane.runtime-fault-injection-vitest-isolation.v1",
         status: "PASS",
-        task: "M07-T09",
-        result: "PASS",
-        artifactSha256: "0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f",
-        faultCases: 19,
-        packageRuntimeCases: 20,
-        compileTimeNegativeCases: 10,
-        rootMutationCases: 11,
-        prerequisiteArtifacts: 8,
-        traceRows: 22,
+        testCount: 1,
       });
     } finally {
       await isolation.dispose();

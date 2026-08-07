@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
 import { lstat, mkdtemp, open, realpath, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { constants as osConstants, tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify, types as utilTypes } from "node:util";
@@ -36,8 +36,23 @@ const DIST_TYPES = `${APP_DIRECTORY}/dist/index.d.ts`;
 const VITEST_CLI = path.join(ROOT, "node_modules/vitest/vitest.mjs");
 const VITEST_CONFIG_SOURCE =
   "export default { test: { cache: false, fileParallelism: false, maxWorkers: 1 } };\n";
+const VITEST_ISOLATION_PROBE_CONFIG_SOURCE =
+  "export default { test: { cache: false, fileParallelism: false, globals: true, maxWorkers: 1 } };\n";
+const VITEST_ISOLATION_PROBE_PROFILE =
+  "desen.control-plane.runtime-fault-injection-vitest-isolation.v1";
+const VITEST_ISOLATION_PROBE_TEST_NAME =
+  "runs one dependency-free test through the T09 Vitest process boundary";
+const VITEST_ISOLATION_PROBE_SOURCE = `test(${JSON.stringify(VITEST_ISOLATION_PROBE_TEST_NAME)}, () => { expect(1).toBe(1); });\n`;
+const VITEST_ISOLATION_PROBE_PACKAGE_SOURCE = '{"private":true,"type":"module"}\n';
+const VITEST_ISOLATION_PROBE_WORKSPACE_SOURCE = "packages: []\n";
 
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
+const MAX_RUNTIME_SUITE_DIAGNOSTIC_BYTES = 8 * 1_024 * 1_024;
+const KNOWN_RUNTIME_SUITE_SIGNALS = Object.freeze(
+  Object.keys(osConstants.signals)
+    .filter((signal) => /^SIG[A-Z0-9]+$/u.test(signal))
+    .sort(),
+);
 const MAX_INERT_JSON_NODES = 200_000;
 const MAX_INERT_JSON_DEPTH = 512;
 const READ_FLAGS =
@@ -63,7 +78,7 @@ const APP_SUITE_NAME = "M07-T09 bounded activation fault matrix";
 const APP_TEST_SHA256 = "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3d47047f67";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212";
-const ROOT_TEST_SHA256 = "2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673";
+const ROOT_TEST_SHA256 = "f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
 
@@ -938,27 +953,165 @@ function expectedSuiteReceipt(value) {
   return deepFreeze(receipt);
 }
 
-function runtimeSuiteFailureDetails(error) {
-  const candidate = error !== null && typeof error === "object" ? error : {};
-  const stderr = typeof candidate.stderr === "string" ? candidate.stderr : "";
-  const category = stderr.includes("ERR_ACCESS_DENIED")
-    ? "ACCESS_DENIED"
-    : stderr.includes("Promise resolution is still pending")
-      ? "PENDING_PROMISE"
-      : candidate.killed === true
-        ? "TIMEOUT_OR_TERMINATION"
-        : "CHILD_PROCESS_FAILED";
-  return {
-    category,
-    exitCode: Number.isSafeInteger(candidate.code) ? candidate.code : null,
-    signal: typeof candidate.signal === "string" ? candidate.signal : null,
-  };
+function runtimeSuiteErrorData(error, key) {
+  if (error === null || typeof error !== "object") return undefined;
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(error, key);
+    return descriptor && "value" in descriptor ? descriptor.value : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
-export async function runControlPlaneRuntimeFaultInjectionSuite() {
-  let stdout;
+function runtimeSuiteOutput(value) {
+  if (typeof value !== "string") {
+    return Object.freeze({ bytes: 0, sha256: sha256(Buffer.from("", "utf8")), text: "" });
+  }
+  const bytes = Buffer.byteLength(value, "utf8");
+  if (bytes > MAX_RUNTIME_SUITE_DIAGNOSTIC_BYTES) {
+    return Object.freeze({ bytes, sha256: null, text: "" });
+  }
+  return Object.freeze({ bytes, sha256: sha256(Buffer.from(value, "utf8")), text: value });
+}
+
+function runtimeSuiteFailureReport(stdout) {
+  let report;
+  try {
+    report = JSON.parse(stdout);
+  } catch {
+    return Object.freeze({
+      failedCaseIds: Object.freeze([]),
+      failedSuiteCount: null,
+      failedTestCount: null,
+      observed: false,
+    });
+  }
+  if (report === null || typeof report !== "object" || Array.isArray(report)) {
+    return Object.freeze({
+      failedCaseIds: Object.freeze([]),
+      failedSuiteCount: null,
+      failedTestCount: null,
+      observed: false,
+    });
+  }
+  const failedCaseIds = [];
+  if (Array.isArray(report.testResults) && report.testResults.length <= 4) {
+    for (const result of report.testResults) {
+      if (!Array.isArray(result?.assertionResults) || result.assertionResults.length > 64) continue;
+      for (const assertion of result.assertionResults) {
+        if (assertion?.status !== "failed" || typeof assertion.title !== "string") continue;
+        const testIndex = EXPECTED_RUNTIME_TEST_NAMES.indexOf(assertion.title);
+        if (testIndex < 0) continue;
+        const caseId = EXPECTED_FAULT_CASE_IDS[testIndex] ?? "closed-fault-inventory-assertion";
+        if (!failedCaseIds.includes(caseId)) failedCaseIds.push(caseId);
+      }
+    }
+  }
+  const failedSuiteCount =
+    Number.isSafeInteger(report.numFailedTestSuites) &&
+    report.numFailedTestSuites >= 0 &&
+    report.numFailedTestSuites <= 4
+      ? report.numFailedTestSuites
+      : null;
+  const failedTestCount =
+    Number.isSafeInteger(report.numFailedTests) &&
+    report.numFailedTests >= 0 &&
+    report.numFailedTests <= EXPECTED_RUNTIME_TEST_NAMES.length
+      ? report.numFailedTests
+      : null;
+  return Object.freeze({
+    failedCaseIds: Object.freeze(failedCaseIds),
+    failedSuiteCount,
+    failedTestCount,
+    observed: true,
+  });
+}
+
+function runtimeSuiteFailureCategory(errorCode, killed, diagnosticText, report) {
+  if (killed === true || errorCode === "ETIMEDOUT") return "TIMEOUT_OR_TERMINATION";
+  if (
+    errorCode === "ERR_ACCESS_DENIED" ||
+    errorCode === "EACCES" ||
+    errorCode === "EPERM" ||
+    /ERR_ACCESS_DENIED|Access to this API has been restricted|\bEACCES\b|\bEPERM\b|permission denied/iu.test(
+      diagnosticText,
+    )
+  ) {
+    return "ACCESS_DENIED";
+  }
+  if (/Promise resolution is still pending/iu.test(diagnosticText)) return "PENDING_PROMISE";
+  if (
+    /ERR_DLOPEN_FAILED|better_sqlite3\.node|Could not locate the bindings file|invalid ELF header|wrong ELF class/iu.test(
+      diagnosticText,
+    )
+  ) {
+    return "NATIVE_ADDON_LOAD_FAILED";
+  }
+  if (
+    /ERR_MODULE_NOT_FOUND|MODULE_NOT_FOUND|Cannot find (?:module|package)|Failed to resolve entry for package/iu.test(
+      diagnosticText,
+    )
+  ) {
+    return "MODULE_RESOLUTION_FAILED";
+  }
+  if (/\bSQLITE_(?:BUSY|CANTOPEN|CORRUPT|IOERR|LOCKED|NOTADB|READONLY)\b/iu.test(diagnosticText)) {
+    return "SQLITE_FAILED";
+  }
+  if (/ERR_WORKER|Failed to start worker|Worker exited unexpectedly/iu.test(diagnosticText)) {
+    return "WORKER_BOOTSTRAP_FAILED";
+  }
+  if ((report.failedTestCount ?? 0) > 0) return "TEST_ASSERTION_FAILED";
+  if ((report.failedSuiteCount ?? 0) > 0) return "TEST_SUITE_FAILED";
+  return "CHILD_PROCESS_FAILED";
+}
+
+function runtimeSuiteDeniedAuthority(category, diagnosticText) {
+  if (category !== "ACCESS_DENIED") return null;
+  if (/--allow-fs-read|FileSystemRead/iu.test(diagnosticText)) return "FS_READ";
+  if (/--allow-fs-write|FileSystemWrite/iu.test(diagnosticText)) return "FS_WRITE";
+  if (/--allow-child-process|ChildProcess/iu.test(diagnosticText)) return "CHILD_PROCESS";
+  if (/--allow-worker|WorkerThreads/iu.test(diagnosticText)) return "WORKER_THREADS";
+  if (/--allow-addons|Addons/iu.test(diagnosticText)) return "NATIVE_ADDONS";
+  return "UNKNOWN";
+}
+
+/**
+ * Reduces a nested Vitest process failure to bounded, path-free diagnostics.
+ *
+ * Free-form reporter messages and stacks are used only for fixed category matching. The returned
+ * case ids come exclusively from the code-owned 20-test inventory; arbitrary text is represented
+ * only by byte counts and SHA-256 fingerprints.
+ */
+export function summarizeControlPlaneRuntimeFaultInjectionSuiteFailure(error) {
+  const stdout = runtimeSuiteOutput(runtimeSuiteErrorData(error, "stdout"));
+  const stderr = runtimeSuiteOutput(runtimeSuiteErrorData(error, "stderr"));
+  const report = runtimeSuiteFailureReport(stdout.text);
+  const errorCode = runtimeSuiteErrorData(error, "code");
+  const killed = runtimeSuiteErrorData(error, "killed");
+  const diagnosticText = `${stderr.text}\n${stdout.text}`;
+  const category = runtimeSuiteFailureCategory(errorCode, killed, diagnosticText, report);
+  const signal = runtimeSuiteErrorData(error, "signal");
+  return Object.freeze({
+    category,
+    deniedAuthority: runtimeSuiteDeniedAuthority(category, diagnosticText),
+    exitCode: Number.isSafeInteger(errorCode) ? errorCode : null,
+    failedCaseIds: report.failedCaseIds,
+    failedSuiteCount: report.failedSuiteCount,
+    failedTestCount: report.failedTestCount,
+    reportObserved: report.observed,
+    signal:
+      typeof signal === "string" && KNOWN_RUNTIME_SUITE_SIGNALS.includes(signal) ? signal : null,
+    stderrBytes: stderr.bytes,
+    stderrSha256: stderr.sha256,
+    stdoutBytes: stdout.bytes,
+    stdoutSha256: stdout.sha256,
+  });
+}
+
+async function executeControlPlaneRuntimeFaultInjectionVitest(profile) {
   let configDirectory;
-  let suiteError;
+  let processError;
+  let result;
   const environment = { ...process.env, CI: "1" };
   delete environment.NODE_PATH;
   try {
@@ -966,13 +1119,39 @@ export async function runControlPlaneRuntimeFaultInjectionSuite() {
       await mkdtemp(path.join(tmpdir(), "desen-m07-t09-vitest-config-")),
     );
     const configPath = path.join(configDirectory, "vitest.config.mjs");
-    await writeFile(configPath, VITEST_CONFIG_SOURCE, { flag: "wx", mode: 0o600 });
-    ({ stdout } = await execFileAsync(
+    const isolationProbe = profile === "isolation-probe";
+    if (!isolationProbe && profile !== "runtime-suite") {
+      throw new TypeError("Unknown M07-T09 Vitest execution profile.");
+    }
+    await writeFile(
+      configPath,
+      isolationProbe ? VITEST_ISOLATION_PROBE_CONFIG_SOURCE : VITEST_CONFIG_SOURCE,
+      { flag: "wx", mode: 0o600 },
+    );
+    const testPath = isolationProbe
+      ? path.join(configDirectory, "isolation-probe.test.js")
+      : "test/runtime-fault-injection.test.ts";
+    if (isolationProbe) {
+      await Promise.all([
+        writeFile(testPath, VITEST_ISOLATION_PROBE_SOURCE, { flag: "wx", mode: 0o600 }),
+        writeFile(
+          path.join(configDirectory, "package.json"),
+          VITEST_ISOLATION_PROBE_PACKAGE_SOURCE,
+          { flag: "wx", mode: 0o600 },
+        ),
+        writeFile(
+          path.join(configDirectory, "pnpm-workspace.yaml"),
+          VITEST_ISOLATION_PROBE_WORKSPACE_SOURCE,
+          { flag: "wx", mode: 0o600 },
+        ),
+      ]);
+    }
+    result = await execFileAsync(
       process.execPath,
       [
         VITEST_CLI,
         "run",
-        "test/runtime-fault-injection.test.ts",
+        testPath,
         "--reporter=json",
         "--config",
         configPath,
@@ -983,29 +1162,81 @@ export async function runControlPlaneRuntimeFaultInjectionSuite() {
         "--pool=forks",
       ],
       {
-        cwd: path.join(ROOT, APP_DIRECTORY),
+        cwd: isolationProbe ? configDirectory : path.join(ROOT, APP_DIRECTORY),
         encoding: "utf8",
         env: environment,
         maxBuffer: 8 * 1_024 * 1_024,
         timeout: 180_000,
       },
-    ));
+    );
   } catch (error) {
-    suiteError = error;
+    processError = error;
   } finally {
     if (configDirectory !== undefined) {
       try {
         await rm(configDirectory, { force: false, recursive: true });
       } catch (error) {
-        suiteError ??= error;
+        processError ??= error;
       }
     }
   }
-  if (suiteError !== undefined) {
+  if (processError !== undefined) throw processError;
+  return result;
+}
+
+export async function runControlPlaneRuntimeFaultInjectionVitestIsolationProbe() {
+  let stdout;
+  try {
+    ({ stdout } = await executeControlPlaneRuntimeFaultInjectionVitest("isolation-probe"));
+  } catch (error) {
+    fail(
+      "RUNTIME_SUITE_ISOLATION_PROBE_FAILED",
+      "The dependency-free M07-T09 Vitest isolation probe did not pass.",
+      summarizeControlPlaneRuntimeFaultInjectionSuiteFailure(error),
+    );
+  }
+  let report;
+  try {
+    report = JSON.parse(stdout);
+  } catch {
+    fail(
+      "RUNTIME_SUITE_ISOLATION_PROBE_FAILED",
+      "The M07-T09 Vitest isolation probe receipt was not valid JSON.",
+    );
+  }
+  const assertions = report?.testResults?.[0]?.assertionResults;
+  if (
+    report?.success !== true ||
+    report?.numTotalTests !== 1 ||
+    report?.numPassedTests !== 1 ||
+    !Array.isArray(report?.testResults) ||
+    report.testResults.length !== 1 ||
+    !Array.isArray(assertions) ||
+    assertions.length !== 1 ||
+    assertions[0]?.status !== "passed" ||
+    assertions[0]?.title !== VITEST_ISOLATION_PROBE_TEST_NAME
+  ) {
+    fail(
+      "RUNTIME_SUITE_ISOLATION_PROBE_FAILED",
+      "The M07-T09 Vitest isolation probe result was incomplete.",
+    );
+  }
+  return Object.freeze({
+    profile: VITEST_ISOLATION_PROBE_PROFILE,
+    status: "PASS",
+    testCount: 1,
+  });
+}
+
+export async function runControlPlaneRuntimeFaultInjectionSuite() {
+  let stdout;
+  try {
+    ({ stdout } = await executeControlPlaneRuntimeFaultInjectionVitest("runtime-suite"));
+  } catch (error) {
     fail(
       "RUNTIME_SUITE_FAILED",
       "The focused M07-T09 Vitest process did not pass.",
-      runtimeSuiteFailureDetails(suiteError),
+      summarizeControlPlaneRuntimeFaultInjectionSuiteFailure(error),
     );
   }
   let report;
