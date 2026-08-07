@@ -2408,7 +2408,7 @@ M07-T09 evidence:
 - current reviewed reader checkpoint: sequence 21 links exact sequence 20 head
   `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to
   `09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b`; sequences 1–20 and every
-  predecessor artifact byte remain unchanged, the exact T09 artifact becomes artifact 18, 26
+  predecessor artifact byte remain unchanged, the exact T09 artifact becomes artifact 18, 27
   historical compatibility readers are resealed, and T09's proof/root readers become indexes
   `[34, 35]`, yielding 36 current readers; this is local-reader evidence only, no hosted M07-T09
   result is claimed, and `DEBT-I07-016` assigns the temporary bridges to I07-04 for removal by G07
