@@ -296,7 +296,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[20],
-    "34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d",
+    "803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1442,7 +1442,7 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
     task: "M07-T09",
     path: "docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json",
     bytes: 64493,
-    sha256: "524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1",
+    sha256: "0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f",
   });
   const changedReaderIndexes = [
     0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32,
@@ -1609,7 +1609,7 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
         role: "proof-library",
         path: "scripts/lib/control-plane-runtime-staging-proof.mjs",
         bytes: 96719,
-        sha256: "0d4ba9cd3f992a750a406502470fa3152c12835b2892f1a7afa3eb4a72c21542",
+        sha256: "f0d48d65397388903d4cc199d1e40187726459c0b654005130b8e497fa1ef4fb",
       },
       {
         task: "M07-T06",
@@ -1623,7 +1623,7 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
         role: "proof-library",
         path: "scripts/lib/control-plane-runtime-activation-proof.mjs",
         bytes: 109975,
-        sha256: "870b9755f4c215f2ef58621549b7c14a89c069989010ab1433c9765fb5f66abf",
+        sha256: "e865eba83efd3e906bc36dac03ea9e3b5c43176cdac622fd99838613607f6536",
       },
       {
         task: "M07-T07",
@@ -1650,8 +1650,8 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
         task: "M07-T09",
         role: "proof-library",
         path: "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
-        bytes: 54361,
-        sha256: "9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2",
+        bytes: 56129,
+        sha256: "23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc",
       },
       {
         task: "M07-T09",
@@ -1669,7 +1669,7 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceTwentyOne),
-    "34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d",
+    "803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0",
   );
 });
 

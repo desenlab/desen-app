@@ -200,11 +200,11 @@ yerel okuyucu kanıtıdır; hosted M07-T08 sonucu iddia etmez. Geçici uyumluluk
 
 İncelenmiş sıra 21, sıra 20'nin
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başından güncel
-`34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d` başına bağlanır. Sıra
+`803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0` başına bağlanır. Sıra
 1–20'yi ve önceki tüm eser baytlarını aynen korur; 64.493 baytlık M07-T09 eserini
-(`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`) ekler, 27 tarihsel
-uyumluluk okuyucusunu yeniden mühürler ve 54.361 baytlık kanıt okuyucusunu
-(`sha256:9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2`) ile 14.927 baytlık kök
+(`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`) ekler, 27 tarihsel
+uyumluluk okuyucusunu yeniden mühürler ve 56.129 baytlık kanıt okuyucusunu
+(`sha256:23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc`) ile 14.927 baytlık kök
 okuyucusunu (`sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`) ekler. Zincir artık
 18 değişmez eseri ve 36 güncel okuyucuyu doğrular. Bu incelenmiş yerel okuyucu kanıtıdır, hosted
 M07-T09 iddiası değildir; geçici ardıl köprüleri G07'de I07-04 tarafından kaldırılmak üzere
@@ -269,16 +269,18 @@ Kurtarma hataları iki rolün hiçbirini kısmi olarak yayınlamıyor ve son kal
 
 20 uygulama testi, 10 derleyici-negatif testi ve 11 bağımsız kök kanıt/mutasyon testi geçti. Kanıt
 eseri 64.493 bayt ve
-`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1` ile sabittir. Son kanıt;
+`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f` ile sabittir. Son kanıt;
 105 öğelik public dışa aktarım envanterini, 36 anahtarlık derlenmiş runtime yüzeyini, çalıştırılabilir
 CI/ortak-durum kayıtlarını, sekiz önceki M07 eserini ve göreve atanmış 22 trace satırını kesin
 olarak doğrular. Public fault hook, repository, SQLite handle veya yükleyici eklenmedi. N-004 artık
 `TESTED`; P-12 `NOT_PROVEN`, N-038 ve N-041 `PLANNED`, G07 ise açıktır. Bu çalışma alanı kanıtıdır;
 henüz hosted M07-T09 sonucu iddia edilmez.
 
-Sıradaki görev `M07-T10`: A → geçersiz B → geçerli C, eşzamanlı aktivasyon ve yeniden başlatma
-davranışı. Güncel ilerleme 83/145 görev (%57), M07 içinde 9/11 görev (%82) ve kanıt kapılarında
-7/13'tür.
+Sıradaki çalışma, 145 uygulama görevi sayacına dahil olmayan `I07-03`: seçmeli CI kararını henüz
+zorunlu kılmadan, bilinmeyen her durumu tam teste genişleten shadow affected-selector'ı ve gözlem
+eşiğini dondurmak. Bunun ardından sıradaki uygulama görevi `M07-T10`, yani A → geçersiz B → geçerli
+C, eşzamanlı aktivasyon ve yeniden başlatma davranışıdır. Güncel ilerleme 83/145 görev (%57), M07
+içinde 9/11 görev (%82) ve kanıt kapılarında 7/13'tür.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

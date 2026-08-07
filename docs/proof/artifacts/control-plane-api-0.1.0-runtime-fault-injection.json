@@ -1507,8 +1507,8 @@
     },
     {
       "path": "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
-      "bytes": 54361,
-      "sha256": "9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2"
+      "bytes": 56129,
+      "sha256": "23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc"
     },
     {
       "path": "scripts/run-ci-quality-gate.mjs",

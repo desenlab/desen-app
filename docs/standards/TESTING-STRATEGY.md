@@ -353,15 +353,21 @@ compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
-`34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d`. It preserves sequences
+`803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
-`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`, reseals 27 historical
-compatibility readers, and appends the 54,361-byte proof reader
-`sha256:9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2` plus the 14,927-byte root
+`sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`, reseals 27 historical
+compatibility readers, and appends the 56,129-byte proof reader
+`sha256:23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc` plus the 14,927-byte root
 reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The chain now
 authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
+
+M07-T09's child Vitest probe is also a CI-contract preflight. It uses `process.execPath`, the
+repository-local Vitest entrypoint, and an owner-only config under the exact step temp root while
+retaining the scheduler-owned Node permission policy. No package-manager or `PATH` resolution is
+involved, file/cache parallelism is disabled, cleanup is unconditional, and the exact isolated
+verifier must pass before required-exhaustive execution begins.
 
 The final T08 reader does not infer coverage from matching strings. Exact AST structures identify
 the executable CI registrations, shared-state mappings, and direct 12-runtime/9-root test

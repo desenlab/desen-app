@@ -1,7 +1,8 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants as fileConstants } from "node:fs";
-import { lstat, open, realpath } from "node:fs/promises";
+import { lstat, mkdtemp, open, realpath, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify, types as utilTypes } from "node:util";
@@ -32,6 +33,9 @@ const ATOMIC_WRITER = "scripts/lib/atomic-proof-artifact.mjs";
 const ROOT_TEST = "tests/control-plane-runtime-fault-injection.test.mjs";
 const DIST_INDEX = `${APP_DIRECTORY}/dist/index.js`;
 const DIST_TYPES = `${APP_DIRECTORY}/dist/index.d.ts`;
+const VITEST_CLI = path.join(ROOT, "node_modules/vitest/vitest.mjs");
+const VITEST_CONFIG_SOURCE =
+  "export default { test: { cache: false, fileParallelism: false, maxWorkers: 1 } };\n";
 
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const MAX_INERT_JSON_NODES = 200_000;
@@ -934,30 +938,75 @@ function expectedSuiteReceipt(value) {
   return deepFreeze(receipt);
 }
 
+function runtimeSuiteFailureDetails(error) {
+  const candidate = error !== null && typeof error === "object" ? error : {};
+  const stderr = typeof candidate.stderr === "string" ? candidate.stderr : "";
+  const category = stderr.includes("ERR_ACCESS_DENIED")
+    ? "ACCESS_DENIED"
+    : stderr.includes("Promise resolution is still pending")
+      ? "PENDING_PROMISE"
+      : candidate.killed === true
+        ? "TIMEOUT_OR_TERMINATION"
+        : "CHILD_PROCESS_FAILED";
+  return {
+    category,
+    exitCode: Number.isSafeInteger(candidate.code) ? candidate.code : null,
+    signal: typeof candidate.signal === "string" ? candidate.signal : null,
+  };
+}
+
 export async function runControlPlaneRuntimeFaultInjectionSuite() {
   let stdout;
+  let configDirectory;
+  let suiteError;
+  const environment = { ...process.env, CI: "1" };
+  delete environment.NODE_PATH;
   try {
+    configDirectory = await realpath(
+      await mkdtemp(path.join(tmpdir(), "desen-m07-t09-vitest-config-")),
+    );
+    const configPath = path.join(configDirectory, "vitest.config.mjs");
+    await writeFile(configPath, VITEST_CONFIG_SOURCE, { flag: "wx", mode: 0o600 });
     ({ stdout } = await execFileAsync(
-      "pnpm",
+      process.execPath,
       [
-        "--filter",
-        "@desen/control-plane-api",
-        "exec",
-        "vitest",
+        VITEST_CLI,
         "run",
         "test/runtime-fault-injection.test.ts",
         "--reporter=json",
+        "--config",
+        configPath,
+        "--configLoader=native",
+        "--no-cache",
+        "--no-file-parallelism",
+        "--maxWorkers=1",
+        "--pool=forks",
       ],
       {
-        cwd: ROOT,
+        cwd: path.join(ROOT, APP_DIRECTORY),
         encoding: "utf8",
-        env: { ...process.env, CI: "1" },
+        env: environment,
         maxBuffer: 8 * 1_024 * 1_024,
         timeout: 180_000,
       },
     ));
-  } catch {
-    fail("RUNTIME_SUITE_FAILED", "The focused M07-T09 Vitest process did not pass.");
+  } catch (error) {
+    suiteError = error;
+  } finally {
+    if (configDirectory !== undefined) {
+      try {
+        await rm(configDirectory, { force: false, recursive: true });
+      } catch (error) {
+        suiteError ??= error;
+      }
+    }
+  }
+  if (suiteError !== undefined) {
+    fail(
+      "RUNTIME_SUITE_FAILED",
+      "The focused M07-T09 Vitest process did not pass.",
+      runtimeSuiteFailureDetails(suiteError),
+    );
   }
   let report;
   try {

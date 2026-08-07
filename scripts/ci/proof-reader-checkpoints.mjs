@@ -58,7 +58,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "4e9ac8adac57d058444bfe2113fbb5dd364cd24d6052ad5f2cd8910a13c22b45",
   "abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3",
   "8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e",
-  "34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d",
+  "803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18,
@@ -275,7 +275,7 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     {
       path: "docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json",
       bytes: 64_493,
-      sha256: "524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1",
+      sha256: "0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f",
     },
     "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
     "tests/control-plane-runtime-fault-injection.test.mjs",

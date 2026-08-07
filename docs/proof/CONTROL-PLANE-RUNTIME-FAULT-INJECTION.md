@@ -10,7 +10,7 @@ candidate authority; only full restart recovery may authenticate the durable win
 
 Artifact: `docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json`
 
-Final receipt: `sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`
+Final receipt: `sha256:0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f`
 
 Artifact size: 64,493 bytes.
 
@@ -111,14 +111,21 @@ the effective shared-state classification. Its verifier runs in isolated OS temp
 bounded child-process and reviewed SQLite native-addon authority; the root proof uses the matching
 isolated Node test policy.
 
+The focused runtime suite launches with the current Node executable and the repository-local
+Vitest entrypoint, never through Corepack, `pnpm`, `npx`, or `PATH` lookup. It receives one
+owner-only config inside the step's isolated temporary root, retains the code-owned Node permission
+boundary, disables cross-file/cache concurrency, and removes that config in `finally`. The CI
+contract preflight executes the complete T09 verifier through this exact isolation, so permission
+or runner-resolution drift fails before the long exhaustive phase.
+
 ## Reviewed reader checkpoint
 
 Checkpoint sequence 21 links the exact sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
-`34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d`. It leaves sequences
+`803ca2cf9b8aa94a2ec231910378fc0175173cc6ad325cb6d97499962ffac7a0`. It leaves sequences
 1–20 and every predecessor artifact byte unchanged, appends this 64,493-byte artifact, reseals 27
-historical compatibility readers, and appends the 54,361-byte proof reader
-`sha256:9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2` plus the 14,927-byte root
+historical compatibility readers, and appends the 56,129-byte proof reader
+`sha256:23fc44802f67344dc77dbfc83a448617a237715feee2b2622be8cc9281c713fc` plus the 14,927-byte root
 reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The current chain
 authenticates 18 frozen artifacts and 36 readers. This checkpoint is reviewed local-reader
 evidence, not a hosted M07-T09 claim. `DEBT-I07-016` assigns the temporary T09 successor bridges to

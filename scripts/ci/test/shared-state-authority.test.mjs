@@ -16,6 +16,7 @@ import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
+import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-inventory.mjs";
 import {
   BUILD_OUTPUT_ROOTS,
   CHILD_PROCESS_VERIFIER_PROOF_IDS,
@@ -603,6 +604,45 @@ test("only exact runtime-probe verifiers receive child-process authority", async
     (error) => error.code === "SHARED_STATE_METADATA_DRIFT",
   );
 });
+
+test(
+  "the T09 runtime verifier completes inside its exact proof isolation",
+  { timeout: 30_000 },
+  async () => {
+    const workload = createExhaustiveWorkloadInventory().nodes.find(
+      ({ id }) => id === "verify-control-plane-runtime-fault-injection",
+    );
+    assert.notEqual(workload, undefined);
+    const isolation = await createProofStepIsolationContext({
+      workspaceRoot: REPOSITORY_ROOT,
+      workload,
+    });
+    try {
+      const { stdout, stderr } = await execFileAsync(workload.command, workload.args, {
+        cwd: REPOSITORY_ROOT,
+        encoding: "utf8",
+        env: isolation.env,
+        maxBuffer: 2 * 1024 * 1024,
+        timeout: 20_000,
+      });
+      assert.equal(stderr, "");
+      assert.deepEqual(JSON.parse(stdout), {
+        status: "PASS",
+        task: "M07-T09",
+        result: "PASS",
+        artifactSha256: "0c617b12116bade191b7f252be32aed80bf05f9fb3e0df4565d3ec1a6ac64f3f",
+        faultCases: 19,
+        packageRuntimeCases: 20,
+        compileTimeNegativeCases: 10,
+        rootMutationCases: 11,
+        prerequisiteArtifacts: 8,
+        traceRows: 22,
+      });
+    } finally {
+      await isolation.dispose();
+    }
+  },
+);
 
 test("only the eleven exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
