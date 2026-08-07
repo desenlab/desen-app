@@ -1,7 +1,8 @@
 /**
  * Local DESEN control-plane infrastructure for editable Source storage, immutable Bundle
  * distribution, mutable channel discovery, integrity verification, exact installed-package
- * preflight, bounded surface-reference preflight, and isolated runtime-index staging.
+ * preflight, bounded surface-reference preflight, isolated runtime-index staging, transactional
+ * activation, and restart reconstruction.
  *
  * @packageDocumentation
  */
@@ -35,8 +36,11 @@ export {
 export { stageBundleRuntime } from "./runtime-staging.js";
 export {
   INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE,
+  INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE,
   RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE,
   RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE,
+  RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE,
+  RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE,
   RuntimeActivationError,
 } from "./runtime-activation-contract.js";
 export { openBundleRuntimeActivation } from "./runtime-activation.js";
@@ -97,6 +101,9 @@ export type {
   BundleRuntimeActivationResult,
   BundleRuntimeActivationStage,
   BundleRuntimeActivationState,
+  BundleRuntimeRecoveryResult,
+  BundleRuntimeRecoveryRole,
+  BundleRuntimeRecoveryStage,
   OpenBundleRuntimeActivationOptions,
   RuntimeActivationErrorCode,
   RuntimeActivationRecord,

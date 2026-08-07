@@ -381,17 +381,19 @@ function databaseGeneration(value: unknown): number {
 }
 
 function databaseRecord(row: ActivationDatabaseRow): RuntimeActivationRecord {
+  const generation = databaseGeneration(row.generation);
   if (
     !isSha256Digest(row.activeRevision) ||
     (row.previousGoodRevision !== null && !isSha256Digest(row.previousGoodRevision)) ||
-    row.previousGoodRevision === row.activeRevision
+    row.previousGoodRevision === row.activeRevision ||
+    (generation === 0 && row.previousGoodRevision !== null)
   ) {
     throw new RuntimeActivationStorageError("ACTIVATION_CORRUPT");
   }
   return Object.freeze({
     activeRevision: row.activeRevision,
     previousGoodRevision: row.previousGoodRevision,
-    generation: databaseGeneration(row.generation),
+    generation,
   });
 }
 

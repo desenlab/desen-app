@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Plain-language status
 
@@ -500,6 +500,17 @@ SQLite cleanup. Twenty-one focused runtime cases, 25 compiler-negative cases, an
 root proof/mutation cases pass. P-12 remains `NOT_PROVEN`; N-004, N-038,
 and N-041 remain `PLANNED`; G07 remains open. Restart recovery, fault injection, activation
 matrices, and separately built host consumption remain M07-T08 through M07-T11.
+M07-T08 now reconstructs authority only for the exact durable record already selected by T07.
+The active and optional previous-good roles must each supply an exact M07-T03 package authority;
+recovery internally reruns T04 reference admission and T06 staging, consumes its internal staging
+handles before asynchronous work, recloses every referenced Bundle from the same immutable store,
+and reauthenticates active revision, previous-good revision, and generation immediately before
+publication. Success leaves the durable record and generation unchanged, publishes only active
+authority, and retains the validated fallback lineage privately. Missing, unsafe, rejected,
+deleted, or drifted lineage publishes neither authority. Twelve focused runtime cases, 14
+compiler-negative cases, and 9 root proof/mutation cases pass. P-12 remains `NOT_PROVEN`; N-004,
+N-038, and N-041 remain `PLANNED`; G07 remains open. The application-owned local root remains
+trusted, so this task makes no tamper-proof, hostile-administrator, or anti-rollback claim.
 
 I07-01 is complete historical evidence. It separated immutable task-time evidence from a
 current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
@@ -636,8 +647,51 @@ frozen artifacts and thirty-two readers. It appends the 49,892-byte M07-T07 arti
 `[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31]`, and
 appends T07 readers `[30, 31]`. Sequences 1–15 and all predecessor frozen artifact bytes remain
 unchanged. This is local-reader evidence and claims no hosted M07-T07 result; the historical
-activation-reader compatibility bridges remain owned by I07-04 for removal by G07. The
-temporary shadow workflow and modular comparison
+activation-reader compatibility bridges remain owned by I07-04 for removal by G07. Reviewed
+sequence 17 links exact sequence 16 head
+`f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd` to current head
+`cc7227fe73f0b03fa56e18c075de5bc8bb2f87c4425aa669fd437ed2cc09730e`, authenticating seventeen
+frozen artifacts and thirty-four readers. It appends the 44,224-byte M07-T08 artifact
+`sha256:c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9`, reseals reader indexes
+`[14, 15, 16, 18, 22, 26, 27, 28, 29, 30, 31]`, and appends the 84,219-byte proof reader at `[32]`
+(`sha256:08f143107430dde90cf1865c21d7ce1ec854897b0c1c4306b96525bdd0d18daa`) and the 24,939-byte root
+reader at `[33]` (`sha256:b97e7991e0ac20e7232112594228fdd829a536e81d16d06fd3f909e7e3a02492`).
+Sequences 1–16 and all sixteen predecessor artifact files remain byte-identical. This is local
+reader evidence and claims no hosted M07-T08 result; `DEBT-I07-015` assigns the historical
+recovery-reader bridges to I07-04 for removal by G07.
+
+Reviewed checkpoint sequence 18 links exact sequence 17 head
+`cc7227fe73f0b03fa56e18c075de5bc8bb2f87c4425aa669fd437ed2cc09730e` to sequence 18 head
+`4e9ac8adac57d058444bfe2113fbb5dd364cd24d6052ad5f2cd8910a13c22b45`. It preserves all 17 frozen
+artifacts and all 34 reader identities while resealing reader indexes
+`[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14]` after the final fail-closed T08 compatibility-reader
+upgrade. Sequence 17 and every artifact byte remain unchanged. This is reviewed local-reader
+evidence and makes no hosted M07-T08 claim; the temporary compatibility bridges remain registered
+for I07-04 removal by G07.
+
+Reviewed checkpoint sequence 19 links exact sequence 18 head
+`4e9ac8adac57d058444bfe2113fbb5dd364cd24d6052ad5f2cd8910a13c22b45` to sequence 19 head
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3`. It preserves all 17 frozen
+artifacts and all 34 reader identities while resealing only reader index `[28]` to 93,916 bytes
+(`sha256:d0b6ec50df131066283619a01fa41fffdbb2a68c409d3c8d1a816f625f658521`). The fail-closed staging
+verifier caught equal-length final T08 N-038/N-041 normative wording with stale semantic hashes;
+sequence 19 records the corrected reader receipt. Sequences 1–18 and every artifact byte remain
+unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 claim; the temporary
+compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
+
+Reviewed checkpoint sequence 20 links exact sequence 19 head
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to current head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e`. It preserves all 17 frozen
+artifacts and all 34 reader identities while resealing only reader index `[30]` to 106,509 bytes
+(`sha256:d322bf867930215d0f9e0f532bdacbea4ba50145dfa5df38f2e559102cc080ef`). The fail-closed T07
+activation reader exposed stale T08 successor receipts after terminal close-race hardening changed
+the runtime-activation-internal source, focused tests, and generated JavaScript/source map. The
+exact successor receipts were repaired; the activation verifier and 18/18 root tests pass, and
+this receipt repair changed no production behavior. Sequences 1–19 and every artifact byte remain
+unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 claim; the temporary
+compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
+
+The temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
 archived in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json).
@@ -645,8 +699,9 @@ archived in the
 The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
 no affected-path selector and does not retire the sequential runner, which remains an explicit
 manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T07 is now `DONE`; its proof pair extends the working-tree successor to 142
-workloads and 67 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T08 is next.
+retirement by G12. M07-T08 is now `DONE`; its proof pair extends the working-tree successor to 144
+workloads and 68 proof pairs without rewriting the frozen 130/61 I07-02 baseline. M07-T09 is next;
+no hosted M07-T08 result is claimed.
 
 ## Current milestone
 
@@ -654,11 +709,11 @@ workloads and 67 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `81 / 145 tasks complete (56%)`
+- Overall implementation progress: `82 / 145 tasks complete (57%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `7 / 11 tasks complete (64%)`
+- M07 progress: `8 / 11 tasks complete (73%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -725,13 +780,14 @@ workloads and 67 proof pairs without rewriting the frozen 130/61 I07-02 baseline
   `M07-T04 — Surface/capability reference and finite-limit preflight`,
   `M07-T05 — Local control-plane API for editable sources, immutable bundles, and mutable channel pointers`,
   `M07-T06 — Staged runtime indexes and active/staged state separation`,
-  `M07-T07 — Durable transactional commit of the active, previous-good, and generation record`
+  `M07-T07 — Durable transactional commit of the active, previous-good, and generation record`,
+  `M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
 - Next implementation task:
-  `M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`
-- Status: M07-T07 and I07-02 are complete; M07-T08 is `NOT_STARTED`, its M07-T07 dependency is
+  `M07-T09 — Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries`
+- Status: M07-T08 and I07-02 are complete; M07-T09 is `NOT_STARTED`, its dependencies are
   satisfied, and G07 remains open
 
 ## Completed preparation
@@ -1097,20 +1153,24 @@ trusts no cached success, and executes the fresh complete workload. The legacy s
 manual rollback only; affected selection remains future work and every unknown or ambiguous
 selector condition must eventually expand to `EXHAUSTIVE`.
 
-M07-T07 is complete. The built package now authenticates and joins the exact private M07-T04
-reference authority with the exact private M07-T06 staging authority, consumes the candidate before
-its first await or I/O, and recloses the complete Bundle from the same-root BundleStore. One atomic
-compare-and-swap record commits active revision, true previous-good revision, and generation. Its
-separate SQLite Web adapter fails pre-existing or indeterminate data into recovery-required state
-rather than treating raw storage as runtime authority. It also atomically rejects deletion,
-same-generation rewrite, sticky-recovery revival, and live schema-trigger drift. The 49,892-byte executable artifact is
-pinned at `sha256:3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334`.
+M07-T08 is complete. The restarted controller accepts only exact M07-T03 package authorities for
+the durable record's active and optional previous-good roles. It rebuilds each lineage through T04
+and T06, consumes its internally created staging handles before asynchronous work, recloses both
+complete Bundles from the same-root BundleStore, and rereads all three durable fields immediately
+before publication. Successful recovery publishes only current active authority and leaves the
+record and generation unchanged. The 44,224-byte executable artifact is pinned at
+`sha256:c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9`.
+Its final hardening receipt pins exact AST structures for all 105 package-root exports, executable
+CI registrations, shared-state mappings, and the direct 12-case runtime plus 9-case root test
+inventories. Code-owned exact source receipts bind the executable test bodies and effective
+CI/shared-state flow. The proof checks the exact 36-key built runtime surface, reads authorities
+through bounded no-follow handles with stable file and parent identity, and verifies identical
+durable-record fields and SQLite bytes before and after recovery.
 
 Implement
-`M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`.
-It must authenticate the durable record and both referenced revisions before restoring any
-in-memory activation authority, while preserving explicit recovery-required behavior for ambiguous
-or invalid storage.
+`M07-T09 — Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries`.
+It must prove that every controlled precommit and recovery-boundary failure leaves a valid durable
+activation record and publishes no invalid runtime authority.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1118,34 +1178,35 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-The current M07-T07 working-tree CI authority contains 142 workloads and 67 verifier/root-test
-pairs: 56 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
-439 segments and 2,473 ordered leaf invocations covering 221 distinct workloads. All 128 CI contract
-tests pass, and all 142 registered workloads close `PASS`. The current pins
+The current M07-T08 working-tree CI authority contains 144 workloads and 68 verifier/root-test
+pairs: 57 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
+447 segments and 2,617 ordered leaf invocations covering 224 distinct workloads. The nine official
+CI contract commands pass 128/128 locally; the broader combined contract run passes 152/152. The
+current pins
 are:
 
 - prerequisite inventory:
-  `18e186fda7fab28e4e2d88367745acd7cd6bf76362c1b9313e75605ab094c294`
-- ordered leaves: `f6979930481c872fb0c24fcdf5f803ec7b6262dca4235faaf8930d82af47a5f1`
-- distinct workloads: `00894e3a5412218e82cc9013866a73f0d812c1cb7a6ee7d45a296175a45df249`
+  `35642ae4ffca34f99bb29ad7b5755688d0a9b7fb06c8dc8088ad6fc64b4e73b8`
+- ordered leaves: `93e3ed9932a42d63d9704ebb0cabb51a1b1e1178f8dc2e0599aef739848b1bf5`
+- distinct workloads: `2f301318958c9910b13f546681a89e683cf9bc39480bcaebcefa896d4bae1cc8`
 - workspace manifest:
   `6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9`
 - workspace package tests:
   `5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4`
-- neutral inventory: `d96ae1ea891c10f9a1b7f364d67e82beaea8c5914d9152ef203a636ef2a89cca`
+- neutral inventory: `0ab340012732cb7416598fb9be4ae46c95dac5837b771e88e8c04dd3e10f7a59`
 - retained plan/projection:
-  `ef9aa6c3e8594681bffb933a13faf67f02217321f482e18b671af04383dfa22a`
-- required plan: `3f0a68109c6293075658ef4695475fbce5df0093319418f14905182cd90f1f2e`
-- shadow plan: `d905fd8bd91bc4c789131759e8f64b3d2b326fa0ee3fe693fc96da3443cfd915`
-- workload-id set: `552ca2f50d9298ff8106b198b4e135e7cd16228b2be61dc426136fb80d580fb1`
+  `3637387c2189acbcf05a88288c741fa32746d05800860f90e4b4f77e7a61cbca`
+- required plan: `e863eba541e3cbd8c3bc4d181a3969db02efe1f633e37804a73254e021be6f2c`
+- shadow plan: `d20ec226f461b7e4df73b1e7335a5951e6d8c5615496a925e7fb9d8640fe129e`
+- workload-id set: `76c1bcf4ab24d6898f683e5f0078324cd39b6f8e3f521db02c78f20ac4bcee20`
 - equivalence projection:
-  `bd57fc11f947b158d0d67f99d75084e1bb723cccdebde78661e8e835cf88457d`
+  `06a596f6958fc044155a42b356ff03192889a13b7c94264fc2eb97796d653adb`
 
-The runtime-activation proof pair is OS-temp-isolated. Its verifier alone receives the exact
+The runtime-recovery proof pair is OS-temp-isolated. Its verifier alone receives the exact
 runtime-probe child policy, its root receives only the Node test harness, and both receive the
-narrow SQLite native-addon policy; neither receives workspace-write or port authority. The
-preceding M07-T06 pull-request and `main` required-exhaustive runs passed in hosted CI. This
-M07-T07 working-tree authority makes no hosted M07-T07 claim.
+separate narrow recovery SQLite native-addon policy; neither receives workspace-write or port
+authority. The preceding M07-T06 pull-request and `main` required-exhaustive runs passed in hosted
+CI. This M07-T08 working-tree authority makes no hosted M07-T08 claim.
 
 M04-T12 extends the current reviewed CI inventory to 121 distinct workloads, 35 proof verifiers, 35
 root proof files, and a pinned 78-step plan with 35 proof-test steps. Its equivalent legacy
@@ -2223,6 +2284,82 @@ M07-T07 evidence:
 - coverage decision: M07-T07 becomes `DONE`; P-12 remains `NOT_PROVEN`; N-004, N-038, and N-041
   remain `PLANNED`; G07 and PF-075/PF-076 remain open; overall progress is 81/145, M07 progress is
   7/11, and M07-T08 owns restart validation and restore next
+
+M07-T08 evidence:
+
+- `docs/proof/CONTROL-PLANE-RUNTIME-RECOVERY.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-runtime-recovery.json`
+- 44,224-byte artifact SHA-256:
+  `c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9`
+- durable role authority: recovery accepts only exact M07-T03 package authorities matching the
+  active and optional previous-good revisions already selected by the durable record; missing,
+  extra, swapped, forged, cloned, proxied, or mismatched roles reject before Bundle-store I/O
+- complete reconstruction: each required role independently reruns M07-T04 reference admission and
+  M07-T06 runtime staging, authenticates the private T03/T04/T06 lineage, and consumes its internal
+  staged handle before asynchronous work
+- same-root reclosure: active and optional previous-good Bundles are independently reread and must
+  exactly equal the complete retained snapshots; either role failing publishes no authority
+- final durable fence: active revision, previous-good revision, and generation are reread and must
+  all equal the role-selecting record immediately before publication; field drift and deletion
+  remain recovery-required
+- no-write invariant: successful recovery publishes only current active authority, keeps the
+  validated fallback lineage private, and performs no record write, generation increment, pointer
+  swap, fallback promotion, or rollback
+- state behavior: empty/active controllers return `not-required` without input inspection; null
+  indeterminate state requires reopening the same root; activation and recovery share one in-flight
+  guard; close prevents later I/O and publication
+- executable evidence: 12 focused runtime cases, 14 compiler-negative cases, and 9 independent
+  root proof/mutation cases
+- public/runtime hardening: exact AST structures pin the 105 package-root exports, executable CI
+  registrations, shared-state mappings, and direct 12-case runtime plus 9-case root registrations;
+  code-owned exact source receipts bind executable test bodies and effective CI/shared-state flow,
+  the 36-key built runtime module inventory is pinned, proof-authority reads are bounded and
+  identity-safe, and the durable record and database bytes are identical before and after recovery
+- CI authority: 144 workloads and 68 proof pairs (57 ordinary, 11 barriers), 447 prerequisite
+  segments, 2,617 ordered legacy leaves, and 224 distinct leaves; local CI contract suites pass,
+  and no hosted M07-T08 result is claimed
+- reviewed reader checkpoint: sequence 17 links predecessor
+  `f9e77791148c7f89e586b6eb8964338185a35c11900b69262a159002af0838cd` to current head
+  `cc7227fe73f0b03fa56e18c075de5bc8bb2f87c4425aa669fd437ed2cc09730e`; it authenticates 17 frozen
+  artifacts and 34 readers, appends the 44,224-byte T08 artifact, reseals indexes
+  `[14, 15, 16, 18, 22, 26, 27, 28, 29, 30, 31]`, and appends the 84,219-byte proof reader at
+  `[32]` (`sha256:08f143107430dde90cf1865c21d7ce1ec854897b0c1c4306b96525bdd0d18daa`) and 24,939-byte root
+  reader at `[33]` (`sha256:b97e7991e0ac20e7232112594228fdd829a536e81d16d06fd3f909e7e3a02492`);
+  sequences 1–16 and the previous 16 artifact files remain byte-identical, `DEBT-I07-015` remains
+  owned by I07-04 for G07 cleanup, and no hosted M07-T08 result is claimed
+- reviewed reader checkpoint successor: sequence 18 links exact sequence 17 head
+  `cc7227fe73f0b03fa56e18c075de5bc8bb2f87c4425aa669fd437ed2cc09730e` to sequence 18 head
+  `4e9ac8adac57d058444bfe2113fbb5dd364cd24d6052ad5f2cd8910a13c22b45`; it preserves all 17 frozen
+  artifacts and all 34 reader identities while resealing indexes
+  `[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14]` after the final fail-closed T08 compatibility-reader
+  upgrade; sequence 17 and every artifact byte remain unchanged, this is local-reader evidence
+  only, no hosted M07-T08 result is claimed, and the temporary bridges remain registered for
+  I07-04 removal by G07
+- reviewed reader checkpoint successor: sequence 19 links exact sequence 18 head
+  `4e9ac8adac57d058444bfe2113fbb5dd364cd24d6052ad5f2cd8910a13c22b45` to sequence 19 head
+  `abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3`; it preserves all 17 frozen
+  artifacts and all 34 reader identities while resealing only reader index `[28]` to 93,916 bytes
+  (`sha256:d0b6ec50df131066283619a01fa41fffdbb2a68c409d3c8d1a816f625f658521`); the fail-closed staging
+  verifier caught equal-length final T08 N-038/N-041 normative wording with stale semantic hashes;
+  sequences 1–18 and every artifact byte remain unchanged, no hosted M07-T08 result is claimed, and
+  the temporary bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07
+- current reviewed reader checkpoint: sequence 20 links exact sequence 19 head
+  `abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to current head
+  `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e`; it preserves all 17 frozen
+  artifacts and all 34 reader identities while resealing only reader index `[30]` to 106,509 bytes
+  (`sha256:d322bf867930215d0f9e0f532bdacbea4ba50145dfa5df38f2e559102cc080ef`); the fail-closed T07
+  activation reader exposed stale T08 successor receipts after terminal close-race hardening
+  changed the runtime-activation-internal source, focused tests, and generated JavaScript/source
+  map; exact successor receipts were repaired, the activation verifier and 18/18 root tests pass,
+  production behavior was not changed by this repair, sequences 1–19 and every artifact byte remain
+  unchanged, no hosted M07-T08 result is claimed, and the temporary bridges remain `DEBT-I07-015`,
+  owned by I07-04 for removal by G07
+- trust nonclaim: the application-owned local root is trusted; without an external cryptographic
+  anchor, a valid-looking historical or replaced database plus matching Bundles cannot be
+  distinguished from legitimate history, so there is no tamper-proof or anti-rollback claim
+- coverage decision: M07-T08 becomes `DONE`; P-12 remains `NOT_PROVEN`; N-004, N-038, and N-041
+  remain `PLANNED`; G07 and PF-076 remain open; overall progress is 82/145, M07 progress is 8/11,
+  and M07-T09 owns exhaustive boundary fault injection next
 
 ## Status vocabulary
 

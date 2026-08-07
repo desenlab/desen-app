@@ -530,6 +530,43 @@ const APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS = Object.freeze(
     .map(({ exported }) => exported)
     .sort(),
 );
+const APPROVED_M07_T08_PUBLIC_SOURCE_EXPORTS = Object.freeze(
+  [
+    ...APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS,
+    ...[
+      "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
+      "RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE",
+      "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE",
+    ].map((name) =>
+      Object.freeze({
+        imported: name,
+        exported: name,
+        module: "./runtime-activation-contract.js",
+        typeOnly: false,
+      }),
+    ),
+    ...[
+      "BundleRuntimeRecoveryResult",
+      "BundleRuntimeRecoveryRole",
+      "BundleRuntimeRecoveryStage",
+    ].map((name) =>
+      Object.freeze({
+        imported: name,
+        exported: name,
+        module: "./runtime-activation-contract.js",
+        typeOnly: true,
+      }),
+    ),
+  ].sort((left, right) => {
+    const exported = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
+    return exported === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : exported;
+  }),
+);
+const APPROVED_M07_T08_PUBLIC_RUNTIME_KEYS = Object.freeze(
+  APPROVED_M07_T08_PUBLIC_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly)
+    .map(({ exported }) => exported)
+    .sort(),
+);
 const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   [APP_PACKAGE]: Object.freeze({
     bytes: 1_285,
@@ -682,6 +719,28 @@ const APPROVED_M07_T07_TRACKED_RECEIPTS = Object.freeze({
     sha256: "d05a7e824d5d4787e3ec422896c3ce2ecf3d478390b862200a8ae01adbbf1d22",
   }),
 });
+const APPROVED_M07_T08_TRACKED_RECEIPTS = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    bytes: 2_232,
+    sha256: "b228b200dafda1d319429376b9cc6456fadd4a3db865269ec8c2675eb0e60e8c",
+  }),
+  [APP_INDEX]: Object.freeze({
+    bytes: 4_891,
+    sha256: "1295547b6c281ea2678583298648a4ad8287205109d670fa422450146da5031e",
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    bytes: 63_983,
+    sha256: "4f9c7431ba3df1be3e69bfd092a24421c14ed4a911baed2edbbb395aacca1cc8",
+  }),
+  [CI_SOURCE]: Object.freeze({
+    bytes: 47_870,
+    sha256: "c0312d1874917092f4300b7bdb789bc2a35a2d2f973a0bb214b551d86916fabe",
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    bytes: 46_165,
+    sha256: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
+  }),
+});
 const HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.d.ts": Object.freeze({
     bytes: 899,
@@ -810,6 +869,24 @@ const APPROVED_M07_T07_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.js.map": Object.freeze({
     bytes: 996,
     sha256: "d011e413c2f446114640487305f094642a5a78a4ee635b79ec69f9937d0cf93a",
+  }),
+});
+const APPROVED_M07_T08_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
+  "index.d.ts": Object.freeze({
+    bytes: 4_730,
+    sha256: "81ced4650dcf6f1fb05980c00c610923083c4262c231d604cda504f569171d56",
+  }),
+  "index.d.ts.map": Object.freeze({
+    bytes: 2_163,
+    sha256: "d10e151ff9124b072a4466c5b33e012c0f24496b900d89547209bb433a63962c",
+  }),
+  "index.js": Object.freeze({
+    bytes: 2_282,
+    sha256: "a97d3e83f6319627c78ad38b7d81b6879ac524408c7f8993c5c5f2a53cfbc02a",
+  }),
+  "index.js.map": Object.freeze({
+    bytes: 1_036,
+    sha256: "b075210c25f4659befbdeb9620842c2cd28d7f2075b11a99d83606f554330f36",
   }),
 });
 const ROOT_SCRIPT_COMMANDS = Object.freeze({
@@ -1167,7 +1244,8 @@ function publicExportInventory(source, relativePath) {
     serialized !== JSON.stringify(APPROVED_M07_T04_PUBLIC_SOURCE_EXPORTS) &&
     serialized !== JSON.stringify(APPROVED_M07_T05_PUBLIC_SOURCE_EXPORTS) &&
     serialized !== JSON.stringify(APPROVED_M07_T06_PUBLIC_SOURCE_EXPORTS) &&
-    serialized !== JSON.stringify(APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS)
+    serialized !== JSON.stringify(APPROVED_M07_T07_PUBLIC_SOURCE_EXPORTS) &&
+    serialized !== JSON.stringify(APPROVED_M07_T08_PUBLIC_SOURCE_EXPORTS)
   ) {
     fail("REGISTRATION_DRIFT", "The exact public package-root export inventory drifted.");
   }
@@ -1306,13 +1384,15 @@ async function trackedFileReceipts(overrides) {
       APPROVED_M07_T05_TRACKED_RECEIPTS[relativePath] ?? internalBridge?.successor;
     const approvedM07T06 = APPROVED_M07_T06_TRACKED_RECEIPTS[relativePath];
     const approvedM07T07 = APPROVED_M07_T07_TRACKED_RECEIPTS[relativePath];
+    const approvedM07T08 = APPROVED_M07_T08_TRACKED_RECEIPTS[relativePath];
     const observedSha256 = sha256(bytes);
     if (
       (approvedM07T03 !== undefined ||
         approvedM07T04 !== undefined ||
         approvedM07T05 !== undefined ||
         approvedM07T06 !== undefined ||
-        approvedM07T07 !== undefined) &&
+        approvedM07T07 !== undefined ||
+        approvedM07T08 !== undefined) &&
       !(
         (bytes.byteLength === historical?.bytes && observedSha256 === historical.sha256) ||
         (approvedM07T03 !== undefined &&
@@ -1329,7 +1409,10 @@ async function trackedFileReceipts(overrides) {
           observedSha256 === approvedM07T06.sha256) ||
         (approvedM07T07 !== undefined &&
           bytes.byteLength === approvedM07T07.bytes &&
-          observedSha256 === approvedM07T07.sha256)
+          observedSha256 === approvedM07T07.sha256) ||
+        (approvedM07T08 !== undefined &&
+          bytes.byteLength === approvedM07T08.bytes &&
+          observedSha256 === approvedM07T08.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed package successor bytes drifted.", {
@@ -1456,6 +1539,7 @@ async function distributionReceipts() {
           APPROVED_M07_T05_INDEX_DISTRIBUTION_RECEIPTS[name] ?? internalBridge?.successor;
         const approvedM07T06 = APPROVED_M07_T06_INDEX_DISTRIBUTION_RECEIPTS[name];
         const approvedM07T07 = APPROVED_M07_T07_INDEX_DISTRIBUTION_RECEIPTS[name];
+        const approvedM07T08 = APPROVED_M07_T08_INDEX_DISTRIBUTION_RECEIPTS[name];
         const observedSha256 = sha256(bytes);
         if (
           historical !== undefined &&
@@ -1475,7 +1559,10 @@ async function distributionReceipts() {
               observedSha256 === approvedM07T06.sha256) ||
             (approvedM07T07 !== undefined &&
               bytes.byteLength === approvedM07T07.bytes &&
-              observedSha256 === approvedM07T07.sha256)
+              observedSha256 === approvedM07T07.sha256) ||
+            (approvedM07T08 !== undefined &&
+              bytes.byteLength === approvedM07T08.bytes &&
+              observedSha256 === approvedM07T08.sha256)
           )
         ) {
           fail("DISTRIBUTION_DRIFT", "The reviewed package-root distribution drifted.", {
@@ -2118,6 +2205,7 @@ function assertRuntimeReceipt(observedReceipt) {
   const approvedM07T05Keys = JSON.stringify(APPROVED_M07_T05_PUBLIC_RUNTIME_KEYS);
   const approvedM07T06Keys = JSON.stringify(APPROVED_M07_T06_PUBLIC_RUNTIME_KEYS);
   const approvedM07T07Keys = JSON.stringify(APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS);
+  const approvedM07T08Keys = JSON.stringify(APPROVED_M07_T08_PUBLIC_RUNTIME_KEYS);
   const reviewedSuccessor =
     (currentRuntimeKeys === approvedM07T03Keys &&
       currentSelfReferenceKeys === approvedM07T03Keys) ||
@@ -2127,7 +2215,9 @@ function assertRuntimeReceipt(observedReceipt) {
       currentSelfReferenceKeys === approvedM07T05Keys) ||
     (currentRuntimeKeys === approvedM07T06Keys &&
       currentSelfReferenceKeys === approvedM07T06Keys) ||
-    (currentRuntimeKeys === approvedM07T07Keys && currentSelfReferenceKeys === approvedM07T07Keys);
+    (currentRuntimeKeys === approvedM07T07Keys &&
+      currentSelfReferenceKeys === approvedM07T07Keys) ||
+    (currentRuntimeKeys === approvedM07T08Keys && currentSelfReferenceKeys === approvedM07T08Keys);
   const receipt = reviewedSuccessor
     ? {
         ...observedReceipt,

@@ -3,6 +3,7 @@
 
 import type { DesenDiagnostic } from "@desen/protocol";
 
+import type { BundlePackagePreflightAuthority } from "./package-preflight-contract.js";
 import type { BundleReferencePreflightAuthority } from "./reference-preflight-contract.js";
 import type { BundleRuntimeStagingAuthority } from "./runtime-staging-contract.js";
 
@@ -19,6 +20,18 @@ export const RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE =
 /** Project-owned diagnostic for an unexpected trusted activation-path failure. */
 export const RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE =
   "run.desen.control-plane/RUNTIME_ACTIVATION_INTERNAL_FAILURE" as const;
+
+/** Project-owned diagnostic for a forged or revision-mismatched restart package authority. */
+export const INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE =
+  "run.desen.control-plane/INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY" as const;
+
+/** Project-owned diagnostic for a recovered Bundle that no longer closes to its package proof. */
+export const RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE =
+  "run.desen.control-plane/RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED" as const;
+
+/** Project-owned diagnostic for an unexpected trusted restart-recovery failure. */
+export const RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE =
+  "run.desen.control-plane/RUNTIME_RECOVERY_INTERNAL_FAILURE" as const;
 
 /** Stable failure classifications exposed while opening or operating durable activation state. */
 export type RuntimeActivationErrorCode =
@@ -63,15 +76,17 @@ export interface RuntimeActivationRecord {
 }
 
 /**
- * Opaque proof that one exact T04/T06 candidate join committed as a complete durable record.
+ * Opaque proof that one exact runtime lineage owns the complete durable active record.
  *
- * @remarks The visible fields are immutable audit metadata. The authority carries no Bundle,
- * Catalog, artifact bytes, loader, callback, channel mutation, rollback, recovery, adapter, or
- * host-effect operation. Package-private state retains the exact staged runtime indexes for later
- * host composition. Restart recovery is deliberately owned by M07-T08.
+ * @remarks The lineage is either committed in this process through M07-T07 or reconstructed after
+ * restart through M07-T08's complete recovery boundary. The visible fields are immutable audit
+ * metadata. The authority carries no Bundle, Catalog, artifact bytes, loader, callback, channel
+ * mutation, rollback, recovery, adapter, or host-effect operation. Package-private state retains
+ * the exact active runtime indexes and, when present, the independently revalidated previous-good
+ * lineage for later trusted composition.
  */
 export interface BundleRuntimeActivationAuthority extends RuntimeActivationRecord {
-  /** Stable implementation profile for the M07-T07 transactional activation boundary. */
+  /** Stable implementation profile for transactional activation and restart recovery. */
   readonly profile: "desen.runtime-activation";
   /** Version of the stable implementation profile. */
   readonly profileVersion: 1;
@@ -88,7 +103,7 @@ export interface BundleRuntimeActivationAuthority extends RuntimeActivationRecor
 export type BundleRuntimeActivationStage =
   "authority-join" | "candidate-lifetime" | "bundle-reclosure" | "internal";
 
-/** Stable immutable diagnostic emitted by M07-T07 runtime activation. */
+/** Stable immutable diagnostic emitted by runtime activation or restart recovery. */
 export type BundleRuntimeActivationDiagnostic = Readonly<DesenDiagnostic<string>>;
 
 /** Controlled result of one exact generation-guarded activation attempt. */
@@ -143,7 +158,45 @@ export type BundleRuntimeActivationState =
       readonly record: RuntimeActivationRecord | null;
     }>;
 
-/** Open host-owned transactional activation service over one local DESEN state root. */
+/** Durable revision role whose restart reconstruction terminally failed. */
+export type BundleRuntimeRecoveryRole = "active" | "previous-good";
+
+/** Stable recovery substage that terminally rejected one restart attempt. */
+export type BundleRuntimeRecoveryStage =
+  "package-authority" | "reference-preflight" | "runtime-staging" | "bundle-reclosure" | "internal";
+
+/** Controlled result of validating and reconstructing one durable activation record. */
+export type BundleRuntimeRecoveryResult =
+  | Readonly<{
+      /** Both durable revision lineages were revalidated and active authority was restored. */
+      readonly status: "recovered";
+      /** Exact in-process authority for the unchanged durable active record. */
+      readonly authority: BundleRuntimeActivationAuthority;
+    }>
+  | Readonly<{
+      /** The controller is empty or already owns authenticated active authority. */
+      readonly status: "not-required";
+      /** Stable current state for which restart reconstruction is unnecessary. */
+      readonly state: "empty" | "active";
+    }>
+  | Readonly<{
+      /** One supplied durable revision lineage failed closed without changing storage. */
+      readonly status: "rejected";
+      /** Durable revision role that could not be reconstructed. */
+      readonly role: BundleRuntimeRecoveryRole;
+      /** Exact causal boundary that rejected reconstruction. */
+      readonly stage: BundleRuntimeRecoveryStage;
+      /** Stable immutable diagnostics without private runtime or storage data. */
+      readonly diagnostics: readonly BundleRuntimeActivationDiagnostic[];
+    }>
+  | Readonly<{
+      /** Durable state is absent, changed, or indeterminate and still cannot be authenticated. */
+      readonly status: "recovery-required";
+      /** Detached latest durable record, or `null` when no certain record can be authenticated. */
+      readonly record: RuntimeActivationRecord | null;
+    }>;
+
+/** Open host-owned activation and restart-recovery service over one local DESEN state root. */
 export interface BundleRuntimeActivation {
   /**
    * Reads callback-free activation state without authenticating a record recovered from disk.
@@ -168,6 +221,22 @@ export interface BundleRuntimeActivation {
     stagingAuthority: BundleRuntimeStagingAuthority,
     expectedGeneration: number | null,
   ) => Promise<BundleRuntimeActivationResult>;
+  /**
+   * Reconstructs active and previous-good runtime lineages for one unchanged durable record.
+   *
+   * @remarks Callers supply only exact opaque M07-T03 authorities rebuilt from installed package
+   * material. Recovery independently reruns M07-T04 and M07-T06, consumes its internally created
+   * staging handles before asynchronous work, recloses every referenced Bundle from the same
+   * store, and reauthenticates all three durable fields immediately before publication. A non-null
+   * durable previous-good revision requires its matching package authority; otherwise this input
+   * must be `null`. Recovery never changes generation, rewrites the record, or promotes the
+   * previous-good revision automatically.
+   */
+  readonly recover: (
+    this: void,
+    activePackageAuthority: BundlePackagePreflightAuthority,
+    previousGoodPackageAuthority: BundlePackagePreflightAuthority | null,
+  ) => Promise<BundleRuntimeRecoveryResult>;
   /** Idempotently closes the owned activation database and revokes future operations. */
   readonly close: (this: void) => void;
 }

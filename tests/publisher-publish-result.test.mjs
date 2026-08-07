@@ -84,6 +84,31 @@ tpdlDo4TrSZkYFMn93IHliS05RiwBt/ygKeALF0Qgoa6PTNDgcLQQ3OmPoVG5NJmgoRMVspVfMsvv5+8
 Q4QIlezsGt+U7CbIvRJrDgs=
 `.replaceAll(/\s/gu, "");
 
+const M07_T08_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `
+GywfIJwFdsvH6V0ZvibWMWrsWCiNGlqDtKwo9D91OtfL9BJW7W8Kq1F5LK9B2VauCpAUIIjZlupHEmPfjL/xKkU2xBnP5hTaf5ma
+n9tEEO6g0/5pRHV9q9b+tRBGHRUdG/WBhYmS72a3d6pu790L4icVhuV3AWChEuG/jtEsRZz6IEyUzTbUzObbki6fAzJIQojhfT8a
+EXjzRDDXSRD+nIKIbTgvyLumWRy2WVqa49Biau7S2F/2WDzGK4zX7DX5cV0XQab2wSQLInG11vWVoednEMmHHJc7WHts+PzsAAbM
+IwIRKuWyncZVW+6z8WvDd5CDNRt6nI0YyfL4LlBx+tvnzQwzZUtdB4yuxv4hoJi2j+D0s6penNCstIfLv1qfrb/3aGDrttzLUcBX
+nV5XWVcwheetzO9UD6ioiZOHaLtb0qekBdxpfidzdL1cL5B2Q36ohcCLNEXJVNy2Eyl/X/OcKaOWgd8z5Fr7vuqkaf5Qq5lg1mTP
+TypjeQQJBIkdZkeFmG6QwZJlHqXAzfTRyhjGWBuRBHoaaLcSORFt8XcTWHJnYHLbjQ0hE6IuqH7RwY7eiMsHU5GGcoHM5Wfkem1e
+9QAUbSyI8jRucrLKcPE3u/4+xfzL2GH+eBJrlLa2xiST0eqSptmJyjmb5jgjy+qjr2rDFblneyrou8KNtmNORnLa67k8MpVDKAvZ
+c+tem1YIzN5BgMqGZUjKt7HUvwxA0whr04Z1KepG7BbrM3pemtmxFvwmIZvxpB7HJRdHhgOoLicM17LxTJFL2qO1COPQn/HG6m7D
+w5c0jTWbyVbi9DXT+kBBS3Y/QNFwZKLb9UFgf6MSJlB3cONBMIbZsmKmbh/M9dK6kPrIqD6rjLRBFEiUszoISsquZzochPuAiBUD
+3gETRXMIMaL/Jz722kGa+T2TpL3NzWJwyAxf1d6akTJOu7hONAN6qPNkrTxLySZXP9XW4qi74JXCkt4ygPT2uN1tk5UgmDz80e0I
+cUtvMSpQpe1BttVOR6Atm6dtkNdsB3xm3mAM5BTb+MLMs3SPplqZsQeAikRVmxCnuc6+XsNgN2uDrSJ/SVyhnvTjz+aXQdOru1vy
+mdAGy5XtYjWkUzk/yFPb8ze4LIqEP3rJmKqqmbsVSnxV89k3e9jB9AxnMz8wV9E0tNpCHFjigiOzfT3XbvJ/2BL7/fg+itz7siSG
+jAijANCKw4hP6h7CFyaWGPYxXHzRIT5nEvD25udsUn7Bod4+l/V5NAeG+zy84mxmjScbdVoRVYIoBVEl+gOrLfc0Tv3KiJb38dPo
+Hm1mqetC4pLDEo8rveeSSNO/k0tQvBezEWFmDQed8Y2dKVEZy5ZM7cr9dJ8qrAgmqmM2Rj0rclGnFRsp0wOwtIC62lWZ2dwmvXEb
+0uaCGEGevjjcXOyjqsTAbE2E31U+CBY3jYaXMVcgQmBLbBV76j4sf1HF1Jdy2ryrvd7BY3EgKiOoeDce3e47EwATlSAT+cXZg08s
+V/6KB2kzi4pftkDGET2BnmeXsLi5l706oYR1HsnK9iAqByZaPaz+He+F39G2hZRyD80VEoFA0SlqnxC6kifHN+THnXRpgIagHQw5
+yAE0S+BL3GCM2u//pUFOCERSk5MnXMjaCqjoSJzpgXaNfvnopwoLTOlSko9q7E2Kzcn4rOwm5EQ6vUm/XSGxEdRnDAGw0QuOHgiG
+sED2PLvy3mAFSAjPpqiqwUYjvI7bCrj+s2gqRMfjB4uX4NzdLe9i9MlYlOOU0WTwndGfRoQDM1kAhQuRSyTl3+PBsPrEJXB+TYbF
+VbruYrytJ3P0rXqSzuFz/J3dF4Pd9PcDvTjQqrT5E7GUMoXam3Kssfxe770SvbZiGm/HnIPtUbrZyQIvD709c3JVyvMeaNoDA2Ov
+9+5AMlfNtpIc6yhxR45BXJmEEGAPa6OiQTdQrXZw7BNzNTMBzQQTdzUzAc1EE3ucI5tpdjPE1aT+bMZU9NQvmcRqY6MhxEPRTfBO
+B25FYqhp7Il806ZpN7zyghsMdR+MGeaYllaya64ZMM7LLT8qoXBtSyxV71a25HHW2+p/m+kT7BbNVNRWCrGaBGS36IyS/Y7Cl+0+
+8o/bV9Af
+`.replaceAll(/\s/gu, "");
+
 function applySourceAuditReconstructionPatch(currentBytes, encodedPatch) {
   const patchText = brotliDecompressSync(Buffer.from(encodedPatch, "base64")).toString("utf8");
   const currentLines = currentBytes.toString("utf8").split("\n");
@@ -143,8 +168,17 @@ function applySourceAuditReconstructionPatch(currentBytes, encodedPatch) {
 }
 
 function reconstructM07T03SourceAuditProof(currentBytes) {
-  const staleM07T06Bytes = applySourceAuditReconstructionPatch(
+  const staleM07T07Bytes = applySourceAuditReconstructionPatch(
     currentBytes,
+    M07_T08_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
+  );
+  assert.equal(staleM07T07Bytes.byteLength, 261_145);
+  assert.equal(
+    createHash("sha256").update(staleM07T07Bytes).digest("hex"),
+    "a9e58b3f4c6aa70421121b285e9c576bc0d71dfcaa1ff90a2c37667b9a86cabe",
+  );
+  const staleM07T06Bytes = applySourceAuditReconstructionPatch(
+    staleM07T07Bytes,
     M07_T06_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
   );
   assert.equal(staleM07T06Bytes.byteLength, 257_943);
