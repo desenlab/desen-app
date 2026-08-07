@@ -402,6 +402,10 @@ const APPROVED_M07_T09_TRACKED_RECEIPTS = Object.freeze({
     bytes: 24_873,
     sha256: "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
   }),
+  "tests/publisher-catalog-pinning.test.mjs": Object.freeze({
+    bytes: 38_586,
+    sha256: "38eff5f01bdb54713446dda1898b87b5ca3da9064bae27937a1ebe9486ad52e5",
+  }),
   "scripts/lib/publisher-bundle-publication-proof.mjs": Object.freeze({
     bytes: 139_088,
     sha256: "7680e332fe8c9c5e585022c3b05b885d6d40722a882f67f3a2646554f5413a46",

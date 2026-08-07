@@ -200,7 +200,7 @@ yerel okuyucu kanıtıdır; hosted M07-T08 sonucu iddia etmez. Geçici uyumluluk
 
 İncelenmiş sıra 21, sıra 20'nin
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başından güncel
-`09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b` başına bağlanır. Sıra
+`34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d` başına bağlanır. Sıra
 1–20'yi ve önceki tüm eser baytlarını aynen korur; 64.493 baytlık M07-T09 eserini
 (`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`) ekler, 27 tarihsel
 uyumluluk okuyucusunu yeniden mühürler ve 54.361 baytlık kanıt okuyucusunu

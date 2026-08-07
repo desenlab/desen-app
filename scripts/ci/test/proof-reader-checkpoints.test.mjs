@@ -296,7 +296,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[20],
-    "09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b",
+    "34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1538,8 +1538,8 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
         task: "M07-T01",
         role: "proof-library",
         path: "scripts/lib/control-plane-bundle-store-proof.mjs",
-        bytes: 118651,
-        sha256: "409560cda371b52e3a1a6e2ad8a32f1b90a5dd2198ab4ebfff21fb3421f5ed27",
+        bytes: 118818,
+        sha256: "fdbc9cf4265b7119bd99fad60d844284c0f08733a7a1608ae26288637d334abc",
       },
       {
         task: "M07-T01",
@@ -1669,7 +1669,7 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceTwentyOne),
-    "09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b",
+    "34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d",
   );
 });
 

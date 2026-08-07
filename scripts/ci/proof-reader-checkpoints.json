@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b",
+  "headSha256": "34df85195c35243603642426a992b6f4966f11c2224cdff6f4936529f1005a5d",
   "checkpoints": [
     {
       "sequence": 1,
@@ -5679,8 +5679,8 @@
           "task": "M07-T01",
           "role": "proof-library",
           "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
-          "bytes": 118651,
-          "sha256": "409560cda371b52e3a1a6e2ad8a32f1b90a5dd2198ab4ebfff21fb3421f5ed27"
+          "bytes": 118818,
+          "sha256": "fdbc9cf4265b7119bd99fad60d844284c0f08733a7a1608ae26288637d334abc"
         },
         {
           "task": "M07-T01",
