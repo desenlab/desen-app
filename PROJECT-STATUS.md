@@ -693,9 +693,9 @@ compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
-`4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f`. It preserves sequences
+`09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
-`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`, reseals 26 historical
+`sha256:524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1`, reseals 27 historical
 compatibility readers, and appends the 54,361-byte proof reader
 `sha256:9c4addd96f0f8a6ebc6881294721308203164809749a1b284639fb681a00feb2` plus the 14,927-byte root
 reader `sha256:2ca667b80b65557dc0cbbf60b09d503ccb7aee14c36f4743c6798e3e7916a673`. The chain now
@@ -2407,7 +2407,7 @@ M07-T09 evidence:
   leaves; these are local code-owned values and no hosted M07-T09 pass is claimed yet
 - current reviewed reader checkpoint: sequence 21 links exact sequence 20 head
   `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to
-  `4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f`; sequences 1–20 and every
+  `09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b`; sequences 1–20 and every
   predecessor artifact byte remain unchanged, the exact T09 artifact becomes artifact 18, 26
   historical compatibility readers are resealed, and T09's proof/root readers become indexes
   `[34, 35]`, yielding 36 current readers; this is local-reader evidence only, no hosted M07-T09

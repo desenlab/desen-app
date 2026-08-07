@@ -296,7 +296,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[20],
-    "4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f",
+    "09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1445,8 +1445,8 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
     sha256: "524a9a4be5af6f334dc643272b2268fae63207c6e7bed3f2f688d2e778caf6a1",
   });
   const changedReaderIndexes = [
-    0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32, 33,
-    34, 35,
+    0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32,
+    33, 34, 35,
   ];
   assert.deepEqual(
     sequenceTwentyOne.readers.flatMap((reader, index) =>
@@ -1498,6 +1498,13 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
         path: "tests/publisher-execution-preflight.test.mjs",
         bytes: 24873,
         sha256: "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+      },
+      {
+        task: "M06-T08",
+        role: "root-test",
+        path: "tests/publisher-catalog-pinning.test.mjs",
+        bytes: 38586,
+        sha256: "38eff5f01bdb54713446dda1898b87b5ca3da9064bae27937a1ebe9486ad52e5",
       },
       {
         task: "M06-T09",
@@ -1662,7 +1669,7 @@ test("sequence twenty-one preserves its reviewed prefix, reseals compatibility r
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceTwentyOne),
-    "4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f",
+    "09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b",
   );
 });
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "4f7772ca1c307f364798836972ec7e8c634e8fcdedfe4e299a789880aecc484f",
+  "headSha256": "09dc18bb199058c02542aae4c6121868b39ebb23939c4c906fa04a8b4b6fa19b",
   "checkpoints": [
     {
       "sequence": 1,
@@ -5630,8 +5630,8 @@
           "task": "M06-T08",
           "role": "root-test",
           "path": "tests/publisher-catalog-pinning.test.mjs",
-          "bytes": 38558,
-          "sha256": "93854fbe1861fe7fdda98bbbe909a0b86f0195dbcf3437b5d15824ba0eed9c3e"
+          "bytes": 38586,
+          "sha256": "38eff5f01bdb54713446dda1898b87b5ca3da9064bae27937a1ebe9486ad52e5"
         },
         {
           "task": "M06-T09",
