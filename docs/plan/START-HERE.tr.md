@@ -26,10 +26,10 @@ Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding s�
 kontrolden çıkmasını engeller.
 
 `I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
-61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T08 eklendikten sonra çalışma
-alanındaki güncel zorunlu plan 144 işin ve 68 kanıt çiftinin tamamını yeni sistemle çalıştırır: 57
-normal çift ve 11 özel bariyer. Eski planın aynı kapsamdaki açılımı 447 önkoşul parçası, 2.617 sıralı
-yaprak çağrısı ve 224 farklı yaprak iştir. Ortak dosya, çıktı, port ve geçici-dizin kullanımı kodla
+61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T09 eklendikten sonra çalışma
+alanındaki güncel zorunlu plan 146 işin ve 69 kanıt çiftinin tamamını yeni sistemle çalıştırır: 58
+normal çift ve 11 özel bariyer. Eski planın aynı kapsamdaki açılımı 455 önkoşul parçası, 2.769 sıralı
+yaprak çağrısı ve 227 farklı yaprak iştir. Ortak dosya, çıktı, port ve geçici-dizin kullanımı kodla
 sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
 başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
 otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
@@ -185,7 +185,7 @@ okuyucu kanıtıdır; hosted M07-T08 sonucu iddia etmez. Geçici uyumluluk köpr
 `DEBT-I07-015` olarak I07-04'e, G07'de kaldırılmak üzere kayıtlı kalır.
 
 İncelenmiş sıra 20, sıra 19'un
-`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` başından güncel
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` başından sıra 20'nin
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başına bağlanır. 17
 değişmez eserin ve 34 okuyucu kimliğinin tamamını korurken yalnızca `[30]` okuyucu indeksini
 106.509 bayt ve
@@ -197,6 +197,18 @@ onarıldı; aktivasyon doğrulayıcısı ile 18/18 kök testi geçer ve bu alın
 davranışını değiştirmedi. Sıra 1–19 ve tüm eser baytları değişmez. Bu yalnızca incelenmiş
 yerel okuyucu kanıtıdır; hosted M07-T08 sonucu iddia etmez. Geçici uyumluluk köprüleri
 `DEBT-I07-015` olarak I07-04'e, G07'de kaldırılmak üzere kayıtlı kalır.
+
+İncelenmiş sıra 21, sıra 20'nin
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başından güncel
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` başına bağlanır. Sıra
+1–20'yi ve önceki tüm eser baytlarını aynen korur; 64.493 baytlık M07-T09 eserini
+(`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`) ekler, 27 tarihsel
+uyumluluk okuyucusunu yeniden mühürler ve 64.932 baytlık kanıt okuyucusunu
+(`sha256:da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f`) ile 17.341 baytlık kök
+okuyucusunu (`sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`) ekler. Zincir artık
+18 değişmez eseri ve 36 güncel okuyucuyu doğrular. Bu incelenmiş yerel okuyucu kanıtıdır, hosted
+M07-T09 iddiası değildir; geçici ardıl köprüleri G07'de I07-04 tarafından kaldırılmak üzere
+`DEBT-I07-016` kaydındadır.
 
 Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
 bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
@@ -245,17 +257,30 @@ eseri 44.224 bayt ve
 `sha256:c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9` ile sabittir. P-12 hâlâ
 `NOT_PROVEN`; N-004, N-038 ve N-041 `PLANNED`; G07 açıktır. Yerel kökün uygulamaya ait ve güvenilir
 olduğu varsayılır: dışarıda tutulan kriptografik bir çıpa olmadığından bu görev kurcalamaya karşı
-mutlak koruma, kötü niyetli yönetici veya eski sürüme zorlamayı engelleme iddiası taşımaz. Hosted
-M07-T08 sonucu henüz yoktur. Sıradaki görev `M07-T09`: bütün fetch, doğrulama, paket, referans,
-staging, kalıcı commit ve kurtarma sınırlarında kontrollü hata enjeksiyonu. Güncel ilerleme 82/145
-görev (%57), M07 içinde 8/11 görev (%73) ve kanıt kapılarında 7/13'tür.
-Son kanıt sertleştirmesi; kök paketin 105 öğelik dışa aktarım envanterini, çalıştırılabilir CI
-kayıtlarını, ortak-durum eşlemelerini ve doğrudan 12 runtime/9 kök test kaydını kesin AST yapılarıyla
-sabitler. Kodun sahibi olduğu kesin kaynak alındıları test gövdelerini ve gerçekten etkili
-CI/ortak-durum akışını bağlar; böylece ölü veya aldatıcı sözdizimi kanıtı geçiremez. Kanıt ayrıca
-derlenmiş modülün 36 anahtarlık kesin runtime yüzeyini, sınırlı ve dosya kimliğini koruyan güvenli
-okumaları, kurtarma öncesi ve sonrası kalıcı kayıt alanları ile SQLite baytlarının aynı kaldığını
-doğrular.
+mutlak koruma, kötü niyetli yönetici veya eski sürüme zorlamayı engelleme iddiası taşımaz.
+
+`M07-T09` tamamlandı: 19 benzersiz hata vakası ve bir kapsam koruması; channel'ın gösterdiği
+geçersiz adaydan değişmez fetch'e, bütünlük ve paket çözümünden referans/staging sınırlarına,
+kalıcı commit ve yeniden başlatma kurtarmasına kadar gerçek üretim zincirini çalıştırıyor. Kesin
+pre-commit hatalarının hiçbiri aday yetkisi yayınlamıyor ve diskteki A kaydını değiştirmiyor.
+COMMIT sonrasındaki belirsizlik ayrı sınıflandırılıyor: yeni kazanan diske yazılmış olabilir ama
+yeniden açılan controller tam kurtarma yapana kadar hiçbir aday aktif yetkisi yayınlanmıyor.
+Kurtarma hataları iki rolün hiçbirini kısmi olarak yayınlamıyor ve son kalıcı kayıt gözlemi kazanıyor.
+
+20 uygulama testi, 10 derleyici-negatif testi ve 11 bağımsız kök kanıt/mutasyon testi geçti. Kanıt
+eseri 64.493 bayt ve
+`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9` ile sabittir. Son kanıt;
+105 öğelik public dışa aktarım envanterini, 36 anahtarlık derlenmiş runtime yüzeyini, çalıştırılabilir
+CI/ortak-durum kayıtlarını, sekiz önceki M07 eserini ve göreve atanmış 22 trace satırını kesin
+olarak doğrular. Public fault hook, repository, SQLite handle veya yükleyici eklenmedi. N-004 artık
+`TESTED`; P-12 `NOT_PROVEN`, N-038 ve N-041 `PLANNED`, G07 ise açıktır. Bu çalışma alanı kanıtıdır;
+henüz hosted M07-T09 sonucu iddia edilmez.
+
+Sıradaki çalışma, 145 uygulama görevi sayacına dahil olmayan `I07-03`: seçmeli CI kararını henüz
+zorunlu kılmadan, bilinmeyen her durumu tam teste genişleten shadow affected-selector'ı ve gözlem
+eşiğini dondurmak. Bunun ardından sıradaki uygulama görevi `M07-T10`, yani A → geçersiz B → geçerli
+C, eşzamanlı aktivasyon ve yeniden başlatma davranışıdır. Güncel ilerleme 83/145 görev (%57), M07
+içinde 9/11 görev (%82) ve kanıt kapılarında 7/13'tür.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

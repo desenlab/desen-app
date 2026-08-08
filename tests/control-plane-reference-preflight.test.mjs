@@ -264,6 +264,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       (source) => source.replace('"test:reference-preflight":', '"test:reference-preflight-old":'),
     ],
     [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
+        ),
+    ],
+    [
       APP_INDEX,
       (source) =>
         source.replace("preflightBundleReferences }", "preflightBundleReferences as run }"),
@@ -296,6 +304,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       ROOT_PACKAGE,
       (source) =>
         source.replace(
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
           "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation",
           "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation-decoy",
         ),
@@ -322,6 +338,22 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         source.replace(
           '    "control-plane-reference-preflight",',
           '    "removed-reference-preflight",',
+        ),
+    ],
+    [
+      CI_SOURCE,
+      (source) =>
+        source.replace(
+          '      "control-plane-runtime-fault-injection",',
+          '      "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
+    [
+      CI_INVENTORY,
+      (source) =>
+        source.replace(
+          '    "control-plane-runtime-fault-injection",',
+          '    "control-plane-runtime-fault-injection-decoy",',
         ),
     ],
   ];

@@ -92,8 +92,8 @@
           "path": "tests/publisher-bundle-publication.test.mjs",
           "symbols": [
             "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS",
-            "[compatibility] externally tracks every current T02 through T08 proof reader",
-            "[compatibility] detects tamper in each externally anchored T02 through T08 reader",
+            "[compatibility] externally tracks every current T02 through T09 proof reader",
+            "[compatibility] detects tamper in each externally anchored T02 through T09 reader",
             "[compatibility] admits only the exact current execution-preflight root reader",
             "[ci] admits only the exact required-workflow successor into frozen T09 evidence",
             "[ci] accepts an append-only M07 successor without rewriting frozen T09 evidence"
@@ -942,7 +942,7 @@
             "M07_T08_RECOVERY_PUBLIC_EXPORTS",
             "M07_T08_ACTIVATION_PUBLIC_EXPORTS",
             "M07_T08_RECOVERY_PUBLIC_EXPORT_NAMES",
-            "assertAdjacent(script, predecessor, current, reviewedSuccessor, terminal)",
+            "function assertAdjacent(",
             "M07_T07_PUBLIC_RUNTIME_KEYS",
             "M07_T08_PUBLIC_RUNTIME_KEYS",
             "M07_T07_ACTIVATION_SERVICE_KEYS",
@@ -955,6 +955,138 @@
             "INVALID_RECOVERY_AUTHORITY_CODE",
             "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
             "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-activation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEBT-I07-016",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "M07-T09",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "symbols": ["APPROVED_M07_T09_TRACKED_RECEIPTS", "approvedM07T09"]
+        },
+        {
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "symbols": ["test/runtime-fault-injection-decoy.test.ts"]
+        },
+        {
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "symbols": ["APPROVED_M07_T09_TRACKED_RECEIPTS", "approvedM07T09"]
+        },
+        {
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "symbols": [
+            "faultInjectionScriptDrift",
+            "faultInjectionAggregateDrift",
+            "control-plane-runtime-fault-injection-decoy"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "symbols": [
+            "APPROVED_M07_T09_TRACKED_RECEIPTS",
+            "M07_T09_AGGREGATE_SUCCESSOR_COMMANDS",
+            "approvedM07T09",
+            "reviewedFaultInjectionSuccessor"
+          ]
+        },
+        {
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "symbols": [
+            "test/runtime-fault-injection-decoy.test.ts",
+            "control-plane-runtime-fault-injection-decoy"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "symbols": [
+            "APPROVED_M07_T09_TRACKED_RECEIPTS",
+            "approvedM07T09",
+            "reviewedFaultInjectionSuccessor"
+          ]
+        },
+        {
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "symbols": [
+            "test/runtime-fault-injection-decoy.test.ts",
+            "control-plane-runtime-fault-injection-decoy"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "symbols": [
+            "M07_T09_TRACKED_RECEIPT_BRIDGE",
+            "m07T09Bridge",
+            "faultInjectionSuccessor",
+            "reviewedFaultInjectionSuccessorTail"
+          ]
+        },
+        {
+          "path": "tests/control-plane-local-api.test.mjs",
+          "symbols": [
+            "test/runtime-fault-injection-decoy.test.ts",
+            "control-plane-runtime-fault-injection-decoy"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-runtime-staging-proof.mjs",
+          "symbols": [
+            "M07_T09_TRACKED_RECEIPT_BRIDGE",
+            "M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS",
+            "m07T09Bridge",
+            "reviewedM07T09Tail",
+            "reviewedM07T09Successor"
+          ]
+        },
+        {
+          "path": "tests/control-plane-runtime-staging.test.mjs",
+          "symbols": [
+            "test/runtime-fault-injection-decoy.test.ts",
+            "control-plane-runtime-fault-injection-decoy",
+            "M07-T09 claims"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-runtime-activation-proof.mjs",
+          "symbols": [
+            "M07_T09_TRACKED_RECEIPT_BRIDGE",
+            "M07_T09_N004_SUCCESSOR_RECEIPT",
+            "faultInjectionBridge",
+            "approvedFaultInjectionCurrent",
+            "approvedM07T09N004"
+          ]
+        },
+        {
+          "path": "tests/control-plane-runtime-activation.test.mjs",
+          "symbols": [
+            "test/runtime-fault-injection-decoy.test.ts",
+            "control-plane-runtime-fault-injection-decoy",
+            "| IMPLEMENTED |"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-runtime-recovery-proof.mjs",
+          "symbols": [
+            "M07_T09_REGISTRATION_AUTHORITY_RECEIPTS",
+            "M07_T09_TEST_AUTHORITY_RECEIPTS",
+            "M07_T09_TRACKED_RECEIPT_BRIDGE",
+            "M07_T09_READER_RECEIPT_PROJECTION",
+            "trackedFileReceipts",
+            "reviewed M07-T09 CI registration set"
+          ]
+        },
+        {
+          "path": "tests/control-plane-runtime-recovery.test.mjs",
+          "symbols": [
+            "test/runtime-fault-injection-decoy.test.ts",
+            "control-plane-runtime-fault-injection-decoy",
+            "M07-T09 claims without proof"
           ]
         }
       ]

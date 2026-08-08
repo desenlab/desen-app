@@ -295,6 +295,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       (source) => source.replace('"test:runtime-staging":', '"test:runtime-staging-old":'),
     ],
     [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
+        ),
+    ],
+    [
       APP_INDEX,
       (source) =>
         source.replace("export { stageBundleRuntime }", "export { stageBundleRuntime as stage }"),
@@ -327,6 +335,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       ROOT_PACKAGE,
       (source) =>
         source.replace(
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
           "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation",
           "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation-decoy",
         ),
@@ -351,6 +367,22 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       CI_INVENTORY,
       (source) =>
         source.replace('    "control-plane-runtime-staging",', '    "removed-runtime-staging",'),
+    ],
+    [
+      CI_SOURCE,
+      (source) =>
+        source.replace(
+          '      "control-plane-runtime-fault-injection",',
+          '      "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
+    [
+      CI_INVENTORY,
+      (source) =>
+        source.replace(
+          '    "control-plane-runtime-fault-injection",',
+          '    "control-plane-runtime-fault-injection-decoy",',
+        ),
     ],
   ];
   for (const [relativePath, transform] of mutations) {
@@ -384,7 +416,7 @@ test("[traceability] rejects exact trace owners and normative coverage rows", as
     const mutations = [
       (line) => line.replace("M07-T06", "M07-T99"),
       (line) => line.replace(/\| PLANNED\s+\|/u, "| TESTED |"),
-      (line) => line.replace(/M07-T08 (rejects|reruns)/u, "M07-T08 claims"),
+      (line) => line.replace(/M07-T09 (completes|executes)/u, "M07-T09 claims"),
       (line) => line.replace(ARTIFACT, "docs/proof/artifacts/removed-runtime-staging.json"),
     ];
     for (const mutate of mutations) {

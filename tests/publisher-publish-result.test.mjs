@@ -19,7 +19,7 @@ import {
   writePublisherPublishResultEvidence,
 } from "../scripts/lib/publisher-publish-result-proof.mjs";
 
-// Reconstructs exact stale M07-T06 through M07-T03 bytes from the live M07-T07 fixture so rollback
+// Reconstructs exact stale M07-T08 through M07-T03 bytes from the live M07-T09 fixture so rollback
 // regression remains cryptographic, deterministic, and independent from Git or child processes.
 const M07_T06_SOURCE_AUDIT_RECONSTRUCTION_PATCH =
   "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";
@@ -82,6 +82,51 @@ w+pQsrN7WViez0qvt+ogXsEJJ7aDq96o5Yehc31VdZ4FERQF5ITg9JL9Hkwvt/kIn7at4E9fvMLGIBSc
 tpdlDo4TrSZkYFMn93IHliS05RiwBt/ygKeALF0Qgoa6PTNDgcLQQ3OmPoVG5NJmgoRMVspVfMsvv5+87+3CCno4DOjyCwVvT6RN
 3VsLdJw61f7YvVVX866b9EXygDmefW4AnVC0Ov4jH3oIk3TuDg/RRNpKR+ykHzSIK7igAnkS7HL+sJMlwCnadBDrOEMOWxyckUP9
 Q4QIlezsGt+U7CbIvRJrDgs=
+`.replaceAll(/\s/gu, "");
+
+const M07_T09_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `
+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
+gBQ6BmD24IRiRlDGSH5YiUv2rvxpG8joJw==
+`.replaceAll(/\s/gu, "");
+
+const M07_T09_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH = `
+GzAVIJwHmZueZodSvBETkZWdv1ZT5H9TddcyvfuTJPvLvY+e0ioSkOCCOYGT3isgLTFtutDPKOJ/SQtwwJwrPJULmL9fa8ksMSRi
+OI353vtvP/P31BKQRGTXUYl4F8ueGEqzWkh5L7QLkZAqz6HufwWsiGiIfXtaGq3B/GYC8hrDRWpBEExlL3+qnCEMZ3GWJmQO72R2
+3HkIP3IkvH6zWjdczptlmtMDDnp9QfUzZjIuOKpUKqQ8N5+DWyyPk3eB7+D3eEw1ySBAJb4EaY1gUNOj+VaBAj6prFbYuTXq8H0U
+BfTUBadEB+v84ayBeWqUCczXbshXUU9GHoiB0QbtkCi/zRf1e1zUbj06Dma9fRQ0NXoDJ283R8ijCUFJpkfjOvvKzSNV0Na/lwnU
+/ypqw9sYT29jfvYs9cIYx0JasA4eWIZC8qEmxyw/gQUiyArWeFmLKhlfjpX97EXelsbVOPFoH3miCKdyuxgsSMTVbUDbC4A0a1bF
+L4Q4MH5DY0HCOV9zGme37WPhTG1ALqEdTFHl4neA/DsoP0TzpbXz2+dL8XnxfpqGH5F//6i1atpdmM6VjE+/o5q9tXnMqxt1e7gz
+OJkzja4OevW0762Hq0S0IIS4YOyVH4I+tw/PwkrQZ1iL8yGwsbu8WuGHFNbANv5h9jXA31ZT88/E1KXBUzUSzNamsCd+vJocxWu9
+R0vReGWncoqjsrurhnukbB95qw9j5HS/GW5T9cGa6IUXpGyWHJsQPu5xccBqC38wE40933BtVDkEZU44/krh1CmBAjNe/dfQfwrK
+dyTFOnvHlyh8It7EgLKFj5yxVkls8b00YnAJcQRti8pV8wHEJkfHYtHgs1nuxavg48ICrvEtoBSQgiuTQzsEYXcEP6GDZEDbiz4r
+bKEq/0HQEhX/GMQJJlP8RihwHQ8EFCfrQwVWxwSxKFehasO1ZDB1Lt6oUsPEQmBJUzLwzSTJThmMFkUYQeUSTuVGCplFkMVDyEnw
+iGXKilQDTt+oSyhy2/XUBMTQX1uwRxwO8QPXTeumPyzkrcDZUVEDZ3jMImfdEcxVONeYS+WVFZZLkXKlnsEgIilVocBGLk4N4aL+
+/IFtfPdW/I0OQio+fqAYR5nGKsCkX2mKZqQfaLTAVAjSJSLFE3onUfG3g/LhroWalaBM2b+CyiQC89myyAYSPRZGxQ6YwGHg9xWA
+x7xGnnq1slHjXPVM1SqAyuwrtFRQP1+1XvFAj1TF6bsTC6pLo4Nc+wkKIVtolHOJnsI3TElv61snyhHrw4xTpnA1k9/0cIDuhMJj
+CCoUyINJyYr7O3owNrCK+bDMJpcw+wQJ5VJBqgRiOom0UuYg1nMTqo2rmPykh5fgbvxCzk26DIRzmZ+U2DKhKmoSCc6gzbeshmM8
+gEpEBrlmhZXGpc48KCGbETVcjra1LOO0Gc8RdOQ9mBnoKCcpEh2/8o7m7UxWlQwrR+ajNhfnfmFSfuQEWhtjvDWb5sIkH0iR4Kih
+0hiJW1zUbHumEQ==
 `.replaceAll(/\s/gu, "");
 
 const M07_T08_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `
@@ -168,8 +213,17 @@ function applySourceAuditReconstructionPatch(currentBytes, encodedPatch) {
 }
 
 function reconstructM07T03SourceAuditProof(currentBytes) {
-  const staleM07T07Bytes = applySourceAuditReconstructionPatch(
+  const staleM07T08Bytes = applySourceAuditReconstructionPatch(
     currentBytes,
+    M07_T09_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
+  );
+  assert.equal(staleM07T08Bytes.byteLength, 263_857);
+  assert.equal(
+    createHash("sha256").update(staleM07T08Bytes).digest("hex"),
+    "bb8f2dde9a4f63a848003cf7be7b69c1c9681992d56c9a254653dee8cbd7bbe3",
+  );
+  const staleM07T07Bytes = applySourceAuditReconstructionPatch(
+    staleM07T08Bytes,
     M07_T08_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
   );
   assert.equal(staleM07T07Bytes.byteLength, 261_145);
@@ -208,6 +262,19 @@ function reconstructM07T03SourceAuditProof(currentBytes) {
     staleM07T04Bytes,
     M07_T03_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
   );
+}
+
+function reconstructM07T08SourceAuditTest(currentBytes) {
+  const staleM07T08Bytes = applySourceAuditReconstructionPatch(
+    currentBytes,
+    M07_T09_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,
+  );
+  assert.equal(staleM07T08Bytes.byteLength, 89_057);
+  assert.equal(
+    createHash("sha256").update(staleM07T08Bytes).digest("hex"),
+    "9442048b8b96f6aec06136b489dc08e01f159c46609eeb225aa2f949c98e3521",
+  );
+  return staleM07T08Bytes;
 }
 
 function hasEvidenceCode(expectedCode) {
@@ -270,6 +337,17 @@ test("two independent Publisher evidence builds are byte-identical", async () =>
   assert.deepEqual(projected.artifactBytes, first.artifactBytes);
 
   const sourceAuditProofPath = "scripts/lib/reference-host-web-source-audit-proof.mjs";
+  const sourceAuditTestPath = "tests/reference-host-web-source-audit.test.mjs";
+  assert.equal(currentCompatibilityBytes[sourceAuditProofPath].byteLength, 266_698);
+  assert.equal(
+    createHash("sha256").update(currentCompatibilityBytes[sourceAuditProofPath]).digest("hex"),
+    "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
+  );
+  assert.equal(currentCompatibilityBytes[sourceAuditTestPath].byteLength, 90_209);
+  assert.equal(
+    createHash("sha256").update(currentCompatibilityBytes[sourceAuditTestPath]).digest("hex"),
+    "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
+  );
   const staleM07T03Bytes = reconstructM07T03SourceAuditProof(
     currentCompatibilityBytes[sourceAuditProofPath],
   );
@@ -282,6 +360,16 @@ test("two independent Publisher evidence builds are byte-identical", async () =>
     buildPublisherPublishResultEvidence({
       verifySnapshot: false,
       trackedFileBytes: { [sourceAuditProofPath]: staleM07T03Bytes },
+    }),
+    hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
+  );
+  const staleM07T08TestBytes = reconstructM07T08SourceAuditTest(
+    currentCompatibilityBytes[sourceAuditTestPath],
+  );
+  await assert.rejects(
+    buildPublisherPublishResultEvidence({
+      verifySnapshot: false,
+      trackedFileBytes: { [sourceAuditTestPath]: staleM07T08TestBytes },
     }),
     hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
   );

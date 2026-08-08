@@ -264,6 +264,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       APP_PACKAGE,
       (source) =>
         source.replace(
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
+        ),
+    ],
+    [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
           '"@desen/runtime-core": "workspace:*",',
           '"@desen/runtime-core": "workspace:^",',
         ),
@@ -304,6 +312,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       ROOT_PACKAGE,
       (source) =>
         source.replace(
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
           "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
           "pnpm verify:control-plane-runtime-recovery",
         ),
@@ -314,6 +330,22 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       (source) => source.replace('"control-plane-runtime-staging"', '"runtime-staging-removed"'),
     ],
     [CI_INVENTORY, (source) => source.replace('"control-plane-local-api"', '"local-api-removed"')],
+    [
+      CI_SOURCE,
+      (source) =>
+        source.replace(
+          '      "control-plane-runtime-fault-injection",',
+          '      "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
+    [
+      CI_INVENTORY,
+      (source) =>
+        source.replace(
+          '    "control-plane-runtime-fault-injection",',
+          '    "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
     [
       CI_INVENTORY,
       (source) => source.replace('"control-plane-runtime-staging"', '"runtime-staging-removed"'),
@@ -327,6 +359,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [SHARED_STATE_AUTHORITY, (source) => source.replace('  "control-plane-runtime-staging",', "")],
+    [
+      SHARED_STATE_AUTHORITY,
+      (source) =>
+        source.replace(
+          '  "control-plane-runtime-fault-injection",',
+          '  "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
   ];
   for (const [relativePath, transform] of mutations) {
     await assert.rejects(

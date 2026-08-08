@@ -350,6 +350,56 @@ const M07_T08_CONTROL_PLANE_COORDINATION = Object.freeze({
   ]),
   lockfileImporter: M07_T07_CONTROL_PLANE_COORDINATION.lockfileImporter,
 });
+const M07_T09_CONTROL_PLANE_COORDINATION = Object.freeze({
+  task: "M07-T09",
+  scripts: Object.freeze({
+    ...M07_T08_CONTROL_PLANE_COORDINATION.scripts,
+    "generate:control-plane-runtime-fault-injection":
+      "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node scripts/generate-control-plane-runtime-fault-injection-proof.mjs",
+    "verify:control-plane-runtime-fault-injection":
+      "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node scripts/verify-control-plane-runtime-fault-injection.mjs",
+    "test:control-plane-runtime-fault-injection":
+      "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node --test tests/control-plane-runtime-fault-injection.test.mjs",
+  }),
+  packageTest: Object.freeze({
+    package: "@desen/control-plane-api",
+    path: "apps/control-plane-api/package.json",
+    bytes: 2_319,
+    sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+    script: "test:runtime-fault-injection",
+    command: "vitest run test/runtime-fault-injection.test.ts",
+    rootSegment: "pnpm --filter @desen/control-plane-api test:runtime-fault-injection",
+  }),
+  aggregateEdges: Object.freeze([
+    Object.freeze({
+      script: "check",
+      commandKind: "verify",
+      segments: 75,
+      sha256: "0c168fb8a3e573791b1e0d4b42fcd9237278ed76f1408e177821505ca204f805",
+      predecessor: "pnpm verify:control-plane-runtime-recovery",
+      segment: "pnpm verify:control-plane-runtime-fault-injection",
+      successor: "pnpm lint",
+      normalizedSegments: Object.freeze([
+        ...M07_T08_CONTROL_PLANE_COORDINATION.aggregateEdges[0].normalizedSegments,
+        "pnpm verify:control-plane-runtime-fault-injection",
+      ]),
+    }),
+    Object.freeze({
+      script: "test",
+      commandKind: "test",
+      segments: 70,
+      sha256: "3fa0c66c368ef4b0772d3fbca4780809f72c28ac0901d365210d848ff1da2a55",
+      predecessor: "pnpm test:control-plane-runtime-recovery",
+      segment: "pnpm test:control-plane-runtime-fault-injection",
+      successor: "turbo run test",
+      normalizedSegments: Object.freeze([
+        ...M07_T08_CONTROL_PLANE_COORDINATION.aggregateEdges[1].normalizedSegments,
+        "pnpm test:control-plane-runtime-fault-injection",
+      ]),
+    }),
+  ]),
+  lockfileImporter: M07_T08_CONTROL_PLANE_COORDINATION.lockfileImporter,
+});
 const M07_T06_CONTROL_PLANE_LOCKFILE_BLOCK = `  apps/control-plane-api:
     dependencies:
       '@desen/protocol':
@@ -5464,7 +5514,7 @@ async function inspectCurrentControlPlanePackageBytes(rawBytes) {
       "Current M05 control-plane package manifest is not canonical JSON.",
     );
   }
-  const expected = M07_T08_CONTROL_PLANE_COORDINATION.packageTest;
+  const expected = M07_T09_CONTROL_PLANE_COORDINATION.packageTest;
   const packageTestDescriptor = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
     manifest.scripts,
     expected.script,
@@ -5496,7 +5546,7 @@ async function inspectCurrentControlPlanePackageBytes(rawBytes) {
   ) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-      "Current M05 control-plane package lost the exact M07-T08 test or dependency authority.",
+      "Current M05 control-plane package lost the exact M07-T09 test or dependency authority.",
     );
   }
   return Object.freeze({
@@ -5539,7 +5589,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     );
   }
   const expectedControlPlaneScripts = SAFE_OBJECT_ENTRIES(
-    M07_T08_CONTROL_PLANE_COORDINATION.scripts,
+    M07_T09_CONTROL_PLANE_COORDINATION.scripts,
   );
   const observedControlPlaneScriptKeys = [];
   const expectedControlPlaneScriptKeys = [];
@@ -5572,7 +5622,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     ) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        "Current M05 root package lost the exact reviewed M07-T08 control-plane commands.",
+        "Current M05 root package lost the exact reviewed M07-T09 control-plane commands.",
       );
     }
     index += 1;
@@ -5582,14 +5632,14 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
   if (!isDeepStrictEqual(observedControlPlaneScriptKeys, expectedControlPlaneScriptKeys)) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-      "Current M05 root package lost the exact reviewed M07-T08 control-plane commands.",
+      "Current M05 root package lost the exact reviewed M07-T09 control-plane commands.",
     );
   }
-  const packageTestRootSegment = M07_T08_CONTROL_PLANE_COORDINATION.packageTest.rootSegment;
+  const packageTestRootSegment = M07_T09_CONTROL_PLANE_COORDINATION.packageTest.rootSegment;
   const packageTestRootScripts = [
-    "generate:control-plane-runtime-recovery",
-    "verify:control-plane-runtime-recovery",
-    "test:control-plane-runtime-recovery",
+    "generate:control-plane-runtime-fault-injection",
+    "verify:control-plane-runtime-fault-injection",
+    "test:control-plane-runtime-fault-injection",
   ];
   let packageTestScriptIndex = 0;
   while (packageTestScriptIndex < packageTestRootScripts.length) {
@@ -5604,14 +5654,14 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     if (occurrences !== 1) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        "Current M05 root package lost the exact M07-T08 package-test segment.",
+        "Current M05 root package lost the exact M07-T09 package-test segment.",
       );
     }
     packageTestScriptIndex += 1;
   }
   let edgeIndex = 0;
-  while (edgeIndex < M07_T08_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
-    const edge = M07_T08_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
+  while (edgeIndex < M07_T09_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
+    const edge = M07_T09_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
     const commandDescriptor = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
       manifest.scripts,
       edge.script,
@@ -5652,7 +5702,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     ) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        `Current M05 root ${edge.script} lost the exact reviewed M07-T08 aggregate edge.`,
+        `Current M05 root ${edge.script} lost the exact reviewed M07-T09 aggregate edge.`,
       );
     }
     edgeIndex += 1;
@@ -5669,7 +5719,7 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
         /^(?:generate|test|verify):publisher(?:-[a-z0-9]+)*$/u,
         [scriptName],
       ) &&
-      !SAFE_OBJECT_HAS_OWN(M07_T08_CONTROL_PLANE_COORDINATION.scripts, scriptName)
+      !SAFE_OBJECT_HAS_OWN(M07_T09_CONTROL_PLANE_COORDINATION.scripts, scriptName)
     ) {
       SAFE_OBJECT_DEFINE_PROPERTY(normalizedScripts, scriptName, {
         configurable: true,
@@ -5718,8 +5768,8 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
       }
       let isControlPlaneSegment = false;
       edgeIndex = 0;
-      while (edgeIndex < M07_T08_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
-        const edge = M07_T08_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
+      while (edgeIndex < M07_T09_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
+        const edge = M07_T09_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
         if (edge.script === scriptName) {
           let normalizedSegmentIndex = 0;
           while (normalizedSegmentIndex < edge.normalizedSegments.length) {
@@ -6473,7 +6523,7 @@ export async function verifyReferenceHostWebCurrentCoordinationPolicy(rawOptions
     normalizedPublisherScriptKeys: true,
     normalizedPublisherPipelineSegments: true,
     normalizedPublisherLockfileImporter: true,
-    admittedControlPlaneCoordination: M07_T08_CONTROL_PLANE_COORDINATION.task,
+    admittedControlPlaneCoordination: M07_T09_CONTROL_PLANE_COORDINATION.task,
     normalizedControlPlaneScriptKeys: true,
     normalizedControlPlanePipelineSegments: true,
     normalizedControlPlaneLockfileImporter: true,

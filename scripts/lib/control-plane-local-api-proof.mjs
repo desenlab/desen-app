@@ -382,6 +382,43 @@ const M07_T08_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     }),
   }),
 });
+const M07_T09_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 2_319,
+      sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 65_109,
+      sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_058,
+      sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_343,
+      sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
+    successor: Object.freeze({
+      bytes: 47_479,
+      sha256: "9b15cef3b2d795c268945c2f4bee670c037878bd43967c1ce71a41342d463140",
+    }),
+  }),
+});
 const M07_T06_INDEX_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
   "index.d.ts": Object.freeze({
     historical: Object.freeze({
@@ -1086,6 +1123,7 @@ function assertAggregateTail(
   successor,
   latestSuccessor,
   currentSuccessor,
+  faultInjectionSuccessor,
   terminal,
 ) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
@@ -1095,6 +1133,7 @@ function assertAggregateTail(
   const successorIndex = commands.indexOf(successor);
   const latestSuccessorIndex = commands.indexOf(latestSuccessor);
   const currentSuccessorIndex = commands.indexOf(currentSuccessor);
+  const faultInjectionSuccessorIndex = commands.indexOf(faultInjectionSuccessor);
   const terminalIndex = commands.indexOf(terminal);
   const historicalTail = terminalIndex === currentIndex + 1 && successorIndex < 0;
   const reviewedSuccessorTail =
@@ -1108,17 +1147,27 @@ function assertAggregateTail(
     latestSuccessorIndex === successorIndex + 1 &&
     currentSuccessorIndex === latestSuccessorIndex + 1 &&
     terminalIndex === currentSuccessorIndex + 1;
+  const reviewedFaultInjectionSuccessorTail =
+    successorIndex === currentIndex + 1 &&
+    latestSuccessorIndex === successorIndex + 1 &&
+    currentSuccessorIndex === latestSuccessorIndex + 1 &&
+    faultInjectionSuccessorIndex === currentSuccessorIndex + 1 &&
+    terminalIndex === faultInjectionSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
     (!historicalTail &&
       !reviewedSuccessorTail &&
       !reviewedLatestSuccessorTail &&
-      !reviewedCurrentSuccessorTail) ||
+      !reviewedCurrentSuccessorTail &&
+      !reviewedFaultInjectionSuccessorTail) ||
     commands.lastIndexOf(current) !== currentIndex ||
     (successorIndex >= 0 && commands.lastIndexOf(successor) !== successorIndex) ||
     (latestSuccessorIndex >= 0 && commands.lastIndexOf(latestSuccessor) !== latestSuccessorIndex) ||
-    (currentSuccessorIndex >= 0 && commands.lastIndexOf(currentSuccessor) !== currentSuccessorIndex)
+    (currentSuccessorIndex >= 0 &&
+      commands.lastIndexOf(currentSuccessor) !== currentSuccessorIndex) ||
+    (faultInjectionSuccessorIndex >= 0 &&
+      commands.lastIndexOf(faultInjectionSuccessor) !== faultInjectionSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T05 to M07-T06 aggregate tail drifted.");
   }
@@ -1152,7 +1201,9 @@ async function trackedFileReceipts(overrides) {
         const m07T06Bridge = M07_T06_TRACKED_RECEIPT_BRIDGE[relativePath];
         const m07T07Bridge = M07_T07_TRACKED_RECEIPT_BRIDGE[relativePath];
         const m07T08Bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
+        const m07T09Bridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
         const bridge =
+          m07T09Bridge ??
           m07T08Bridge ??
           m07T07Bridge ??
           m07T06Bridge ??
@@ -1161,6 +1212,7 @@ async function trackedFileReceipts(overrides) {
         const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
         const historicalM07T05 = m07T06Bridge?.historical;
         const approvedM07T06 = m07T07Bridge?.historical;
+        const approvedM07T07 = m07T08Bridge?.historical;
         if (
           bridge !== undefined &&
           !(
@@ -1171,6 +1223,9 @@ async function trackedFileReceipts(overrides) {
             (approvedM07T06 !== undefined &&
               observed.bytes === approvedM07T06.bytes &&
               observed.sha256 === approvedM07T06.sha256) ||
+            (approvedM07T07 !== undefined &&
+              observed.bytes === approvedM07T07.bytes &&
+              observed.sha256 === approvedM07T07.sha256) ||
             (historicalM07T05 !== undefined &&
               observed.bytes === historicalM07T05.bytes &&
               observed.sha256 === historicalM07T05.sha256)
@@ -1340,6 +1395,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-staging",
     "pnpm verify:control-plane-runtime-activation",
     "pnpm verify:control-plane-runtime-recovery",
+    "pnpm verify:control-plane-runtime-fault-injection",
     "pnpm lint",
   );
   assertAggregateTail(
@@ -1349,6 +1405,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-staging",
     "pnpm test:control-plane-runtime-activation",
     "pnpm test:control-plane-runtime-recovery",
+    "pnpm test:control-plane-runtime-fault-injection",
     "turbo run test",
   );
   if (

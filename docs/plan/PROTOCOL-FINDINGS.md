@@ -3002,11 +3002,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   redacted. SQLite remains behind replaceable repository contracts and stores only Source/channel
   metadata; the content-addressed Bundle tree remains authoritative for immutable artifacts.
 
-- Future action: M07-T06 now stages independently from authenticated M07-T03 package snapshots and
-  neither reads nor mutates channel metadata. M07-T07 must commit active and previous-good revisions
-  as one separate durable record after authenticating the T04 and T06 branches. M07-T09 and M07-T10
-  must prove that an invalid revision discoverable through a channel never becomes active and
-  cannot destroy last-known-good state. M07-T11 must consume the channel from the separately built
+- Future action: M07-T06 stages independently from authenticated M07-T03 package snapshots and
+  neither reads nor mutates channel metadata; M07-T07 commits active and previous-good revisions
+  as one separate durable record after authenticating the T04 and T06 branches. M07-T09 now proves
+  that an invalid revision discovered through a channel fails before authority and preserves the
+  exact durable active record. M07-T10 still owns the complete A → invalid B → valid C and race
+  matrix. M07-T11 must consume the channel from the separately built
   reference host without treating it as activation evidence. A later protocol revision should
   standardize channel identity and concurrency only if cross-implementation transport
   interoperability is required.
@@ -3040,10 +3041,10 @@ This file records implementation discoveries without changing the frozen DESEN 0
   store work; invalid, mismatched, or controller-busy attempts do not consume it. Once admitted, a
   store rejection, compare-and-swap conflict, generation exhaustion, or definite persistence
   failure still requires a fresh staging attempt. This bounds controller-admitted work but does not
-  create a process-wide quota for T06 handles that callers never submit. M07-T09 and M07-T10 must
-  still inject faults and races around the implemented join and prove that stale or failed
-  candidates cannot become active. M07-T08 must recover only durable committed authority, never an
-  abandoned in-process candidate. A later protocol revision should standardize staged candidate
+  create a process-wide quota for T06 handles that callers never submit. M07-T09 now injects the
+  reviewed staging and durable-boundary faults and proves that failed candidates cannot become
+  active. M07-T10 still owns stale-candidate and concurrent race behavior. M07-T08 recovers only
+  durable committed authority, never an abandoned in-process candidate. A later protocol revision should standardize staged candidate
   identity and lifetime only if cross-implementation activation interoperability needs more than
   the current observable atomicity rules.
 
@@ -3100,7 +3101,9 @@ This file records implementation discoveries without changing the frozen DESEN 0
   distinguished from the genuine latest state. The implementation makes no tamper-proof or
   hostile-administrator claim.
 
-- Future action: M07-T09 must inject faults at every pre-commit and commit phase. M07-T10 must prove
+- Future action: M07-T09 now injects bounded faults across discovery, fetch, integrity, package,
+  reference, staging, definite pre-commit, post-commit indeterminate, and recovery boundaries. The
+  exact durable winner remains the only recovery authority and N-004 is `TESTED`. M07-T10 must prove
   A → invalid B → valid C, same- and different-candidate races, generation fencing, and restart
   behavior. Its race matrix must explicitly decide whether a live external change to database-level
   `journal_mode` requires full connection-profile reauthentication inside the writer transaction.

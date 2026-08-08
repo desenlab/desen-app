@@ -253,6 +253,14 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
         ),
     ],
     [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
+        ),
+    ],
+    [
       ROOT_PACKAGE,
       (source) =>
         source.replace(
@@ -360,11 +368,11 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-runtime-recovery && pnpm lint",
+        "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
         "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-runtime-recovery && turbo run test",
+        "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-runtime-fault-injection && turbo run test",
         "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-successor && turbo run test",
       ),
   );

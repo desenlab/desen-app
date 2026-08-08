@@ -1,0 +1,1559 @@
+{
+  "schemaVersion": 1,
+  "proofId": "control-plane-runtime-fault-injection",
+  "profile": "desen.control-plane.runtime-fault-injection-proof.v1",
+  "task": "M07-T09",
+  "result": "PASS",
+  "summary": "The Web control plane executes a closed 19-boundary fault matrix across channel discovery, immutable fetch, integrity, package resolution, reference preflight, staging, durable commit, and restart recovery; every rejected precommit candidate leaves the authenticated A record active, while an indeterminate postcommit outcome publishes no candidate until complete recovery authenticates the durable winner.",
+  "prerequisites": [
+    {
+      "task": "M07-T01",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+      "bytes": 22396,
+      "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+    },
+    {
+      "task": "M07-T02",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+      "bytes": 48642,
+      "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+    },
+    {
+      "task": "M07-T03",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+      "bytes": 62743,
+      "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+    },
+    {
+      "task": "M07-T04",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+      "bytes": 34612,
+      "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+    },
+    {
+      "task": "M07-T05",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+      "bytes": 41945,
+      "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+    },
+    {
+      "task": "M07-T06",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json",
+      "bytes": 47622,
+      "sha256": "d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494"
+    },
+    {
+      "task": "M07-T07",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-activation.json",
+      "bytes": 49892,
+      "sha256": "3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334"
+    },
+    {
+      "task": "M07-T08",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-recovery.json",
+      "bytes": 44224,
+      "sha256": "c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9"
+    }
+  ],
+  "claims": {
+    "boundaryMatrix": {
+      "closed": true,
+      "duplicateFree": true,
+      "caseCount": 19,
+      "caseIds": [
+        "channel-invalid-discovery",
+        "immutable-fetch-missing",
+        "integrity-bundle-size",
+        "integrity-bundle-json",
+        "integrity-unsupported-protocol",
+        "integrity-revision-mismatch",
+        "integrity-source-digest-mismatch",
+        "package-resolution-missing",
+        "package-digest-mismatch",
+        "reference-capability-unknown",
+        "reference-depth-limit",
+        "staging-execution-contract",
+        "commit-definite-precommit",
+        "commit-postcommit-indeterminate",
+        "recovery-package-authority",
+        "recovery-reference-preflight",
+        "recovery-runtime-staging",
+        "recovery-previous-good-reclosure",
+        "recovery-final-record-drift"
+      ],
+      "executableTestCount": 20,
+      "stages": [
+        "channel-discovery",
+        "immutable-fetch",
+        "integrity",
+        "package-resolution",
+        "reference-preflight",
+        "runtime-staging",
+        "durable-commit",
+        "restart-recovery"
+      ]
+    },
+    "failureInvariant": {
+      "rejectedPrecommitCandidateNeverActive": true,
+      "authenticatedBaselineRemainsCurrent": true,
+      "durableBaselineRemainsUnchanged": true,
+      "definiteCommitFailureRollsBack": true,
+      "indeterminateCommitPublishesNoAuthority": true,
+      "indeterminateCommitRequiresCompleteWinnerRecovery": true,
+      "failedTwoLineageRecoveryPublishesNeitherRole": true,
+      "finalDurableObservationWins": true
+    },
+    "publicBoundary": {
+      "exports": {
+        "entries": [
+          {
+            "exported": "BUNDLE_INTEGRITY_LIMITS",
+            "imported": "BUNDLE_INTEGRITY_LIMITS",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+            "imported": "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "BUNDLE_REFERENCE_PREFLIGHT_LIMITS",
+            "imported": "BUNDLE_REFERENCE_PREFLIGHT_LIMITS",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "BUNDLE_RUNTIME_STAGING_LIMITS",
+            "imported": "BUNDLE_RUNTIME_STAGING_LIMITS",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "BundleIntegrityAuthority",
+            "imported": "BundleIntegrityAuthority",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleIntegrityDiagnostic",
+            "imported": "BundleIntegrityDiagnostic",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleIntegrityDiagnosticCode",
+            "imported": "BundleIntegrityDiagnosticCode",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleIntegrityLimits",
+            "imported": "BundleIntegrityLimits",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleIntegrityVerificationResult",
+            "imported": "BundleIntegrityVerificationResult",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleIntegrityVerificationStage",
+            "imported": "BundleIntegrityVerificationStage",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundlePackagePreflightAuthority",
+            "imported": "BundlePackagePreflightAuthority",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundlePackagePreflightDiagnostic",
+            "imported": "BundlePackagePreflightDiagnostic",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundlePackagePreflightDiagnosticCode",
+            "imported": "BundlePackagePreflightDiagnosticCode",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundlePackagePreflightLimits",
+            "imported": "BundlePackagePreflightLimits",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundlePackagePreflightResult",
+            "imported": "BundlePackagePreflightResult",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundlePackagePreflightStage",
+            "imported": "BundlePackagePreflightStage",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleReferencePreflightAuthority",
+            "imported": "BundleReferencePreflightAuthority",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleReferencePreflightDiagnostic",
+            "imported": "BundleReferencePreflightDiagnostic",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleReferencePreflightDiagnosticCode",
+            "imported": "BundleReferencePreflightDiagnosticCode",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleReferencePreflightLimits",
+            "imported": "BundleReferencePreflightLimits",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleReferencePreflightResult",
+            "imported": "BundleReferencePreflightResult",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleReferencePreflightStage",
+            "imported": "BundleReferencePreflightStage",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeActivation",
+            "imported": "BundleRuntimeActivation",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeActivationAuthority",
+            "imported": "BundleRuntimeActivationAuthority",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeActivationDiagnostic",
+            "imported": "BundleRuntimeActivationDiagnostic",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeActivationResult",
+            "imported": "BundleRuntimeActivationResult",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeActivationStage",
+            "imported": "BundleRuntimeActivationStage",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeActivationState",
+            "imported": "BundleRuntimeActivationState",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeRecoveryResult",
+            "imported": "BundleRuntimeRecoveryResult",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeRecoveryRole",
+            "imported": "BundleRuntimeRecoveryRole",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeRecoveryStage",
+            "imported": "BundleRuntimeRecoveryStage",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeStagingAuthority",
+            "imported": "BundleRuntimeStagingAuthority",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeStagingDiagnostic",
+            "imported": "BundleRuntimeStagingDiagnostic",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeStagingLimits",
+            "imported": "BundleRuntimeStagingLimits",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeStagingResult",
+            "imported": "BundleRuntimeStagingResult",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleRuntimeStagingStage",
+            "imported": "BundleRuntimeStagingStage",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleSourceMaterial",
+            "imported": "BundleSourceMaterial",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleStore",
+            "imported": "BundleStore",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleStoreEntry",
+            "imported": "BundleStoreEntry",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleStoreError",
+            "imported": "BundleStoreError",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "BundleStoreErrorCode",
+            "imported": "BundleStoreErrorCode",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleStorePutResult",
+            "imported": "BundleStorePutResult",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "BundleStoreReadResult",
+            "imported": "BundleStoreReadResult",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+            "imported": "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "INVALID_BUNDLE_PACKAGE_AUTHORITY_CODE",
+            "imported": "INVALID_BUNDLE_PACKAGE_AUTHORITY_CODE",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "INVALID_INSTALLED_PACKAGE_CODE",
+            "imported": "INVALID_INSTALLED_PACKAGE_CODE",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+            "imported": "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
+            "imported": "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE",
+            "imported": "INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "InstalledPackageArtifact",
+            "imported": "InstalledPackageArtifact",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "InstalledPackageCandidate",
+            "imported": "InstalledPackageCandidate",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+            "imported": "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+            "imported": "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+            "imported": "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "LOCAL_CONTROL_PLANE_LIMITS",
+            "imported": "LOCAL_CONTROL_PLANE_LIMITS",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+            "imported": "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "LocalControlPlane",
+            "imported": "LocalControlPlane",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneBundlePutResult",
+            "imported": "LocalControlPlaneBundlePutResult",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneBundleReadResult",
+            "imported": "LocalControlPlaneBundleReadResult",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneBundleRecord",
+            "imported": "LocalControlPlaneBundleRecord",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneChannelPutBody",
+            "imported": "LocalControlPlaneChannelPutBody",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneChannelPutResult",
+            "imported": "LocalControlPlaneChannelPutResult",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneChannelReadResult",
+            "imported": "LocalControlPlaneChannelReadResult",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneChannelRecord",
+            "imported": "LocalControlPlaneChannelRecord",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneError",
+            "imported": "LocalControlPlaneError",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "LocalControlPlaneErrorCode",
+            "imported": "LocalControlPlaneErrorCode",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneErrorDetail",
+            "imported": "LocalControlPlaneErrorDetail",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneErrorEnvelope",
+            "imported": "LocalControlPlaneErrorEnvelope",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneHttpStatusCode",
+            "imported": "LocalControlPlaneHttpStatusCode",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneInjectMethod",
+            "imported": "LocalControlPlaneInjectMethod",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneInjectRequest",
+            "imported": "LocalControlPlaneInjectRequest",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneInjectResponse",
+            "imported": "LocalControlPlaneInjectResponse",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneLimits",
+            "imported": "LocalControlPlaneLimits",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneListenResult",
+            "imported": "LocalControlPlaneListenResult",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneSourcePutResult",
+            "imported": "LocalControlPlaneSourcePutResult",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneSourceReadResult",
+            "imported": "LocalControlPlaneSourceReadResult",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "LocalControlPlaneSourceRecord",
+            "imported": "LocalControlPlaneSourceRecord",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "OpenBundleRuntimeActivationOptions",
+            "imported": "OpenBundleRuntimeActivationOptions",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "OpenBundleStoreOptions",
+            "imported": "OpenBundleStoreOptions",
+            "module": "./bundle-store-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "OpenLocalControlPlaneOptions",
+            "imported": "OpenLocalControlPlaneOptions",
+            "module": "./local-control-plane-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+            "imported": "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+            "imported": "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+            "imported": "REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+            "imported": "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+            "imported": "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE",
+            "imported": "RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE",
+            "imported": "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RUNTIME_STAGING_INTERNAL_FAILURE_CODE",
+            "imported": "RUNTIME_STAGING_INTERNAL_FAILURE_CODE",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RUNTIME_STAGING_LIMIT_EXCEEDED_CODE",
+            "imported": "RUNTIME_STAGING_LIMIT_EXCEEDED_CODE",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE",
+            "imported": "RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RuntimeActivationError",
+            "imported": "RuntimeActivationError",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "RuntimeActivationErrorCode",
+            "imported": "RuntimeActivationErrorCode",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "RuntimeActivationRecord",
+            "imported": "RuntimeActivationRecord",
+            "module": "./runtime-activation-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+            "imported": "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+            "module": "./bundle-verification-contract.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "StagedRuntimePackageSummary",
+            "imported": "StagedRuntimePackageSummary",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "StagedRuntimeSurfaceSummary",
+            "imported": "StagedRuntimeSurfaceSummary",
+            "module": "./runtime-staging-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "VerifiedBundleSurfaceReferences",
+            "imported": "VerifiedBundleSurfaceReferences",
+            "module": "./reference-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "VerifiedInstalledPackage",
+            "imported": "VerifiedInstalledPackage",
+            "module": "./package-preflight-contract.js",
+            "typeOnly": true
+          },
+          {
+            "exported": "openBundleRuntimeActivation",
+            "imported": "openBundleRuntimeActivation",
+            "module": "./runtime-activation.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "openBundleStore",
+            "imported": "openBundleStore",
+            "module": "./bundle-store.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "openLocalControlPlane",
+            "imported": "openLocalControlPlane",
+            "module": "./local-control-plane.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "preflightBundlePackages",
+            "imported": "preflightBundlePackages",
+            "module": "./package-preflight.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "preflightBundleReferences",
+            "imported": "preflightBundleReferences",
+            "module": "./reference-preflight.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "stageBundleRuntime",
+            "imported": "stageBundleRuntime",
+            "module": "./runtime-staging.js",
+            "typeOnly": false
+          },
+          {
+            "exported": "verifyBundleStoreEntry",
+            "imported": "verifyBundleStoreEntry",
+            "module": "./bundle-verification.js",
+            "typeOnly": false
+          }
+        ],
+        "count": 105,
+        "sha256": "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43"
+      },
+      "runtimeModuleKeys": [
+        "BUNDLE_INTEGRITY_LIMITS",
+        "BUNDLE_PACKAGE_PREFLIGHT_LIMITS",
+        "BUNDLE_REFERENCE_PREFLIGHT_LIMITS",
+        "BUNDLE_RUNTIME_STAGING_LIMITS",
+        "BundleStoreError",
+        "INVALID_BUNDLE_INTEGRITY_AUTHORITY_CODE",
+        "INVALID_BUNDLE_PACKAGE_AUTHORITY_CODE",
+        "INVALID_INSTALLED_PACKAGE_CODE",
+        "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
+        "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
+        "INVALID_RUNTIME_STAGING_PACKAGE_AUTHORITY_CODE",
+        "LOCAL_CONTROL_PLANE_ERROR_MESSAGES",
+        "LOCAL_CONTROL_PLANE_IDENTIFIER_PATTERN",
+        "LOCAL_CONTROL_PLANE_JSON_MEDIA_TYPE",
+        "LOCAL_CONTROL_PLANE_LIMITS",
+        "LOCAL_CONTROL_PLANE_LOOPBACK_ADDRESS",
+        "LocalControlPlaneError",
+        "PACKAGE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+        "PACKAGE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
+        "REFERENCE_PREFLIGHT_INTERNAL_FAILURE_CODE",
+        "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
+        "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
+        "RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE",
+        "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE",
+        "RUNTIME_STAGING_INTERNAL_FAILURE_CODE",
+        "RUNTIME_STAGING_LIMIT_EXCEEDED_CODE",
+        "RUNTIME_STAGING_PACKAGE_SNAPSHOT_MISMATCH_CODE",
+        "RuntimeActivationError",
+        "SOURCE_MATERIAL_LIMIT_EXCEEDED_CODE",
+        "openBundleRuntimeActivation",
+        "openBundleStore",
+        "openLocalControlPlane",
+        "preflightBundlePackages",
+        "preflightBundleReferences",
+        "stageBundleRuntime",
+        "verifyBundleStoreEntry"
+      ],
+      "noFaultHookExported": true
+    },
+    "registrations": {
+      "appRuntimeScript": "vitest run test/runtime-fault-injection.test.ts",
+      "rootScripts": {
+        "generate": "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node scripts/generate-control-plane-runtime-fault-injection-proof.mjs",
+        "verify": "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node scripts/verify-control-plane-runtime-fault-injection.mjs",
+        "test": "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node --test tests/control-plane-runtime-fault-injection.test.mjs"
+      },
+      "ciTuple": [
+        "control-plane-runtime-fault-injection",
+        "scripts/verify-control-plane-runtime-fault-injection.mjs",
+        "tests/control-plane-runtime-fault-injection.test.mjs"
+      ],
+      "workloadProofUnit": {
+        "id": "control-plane-runtime-fault-injection",
+        "verifierNodeId": "verify-control-plane-runtime-fault-injection",
+        "rootTestNodeId": "test-control-plane-runtime-fault-injection"
+      },
+      "sharedState": {
+        "proofId": "control-plane-runtime-fault-injection",
+        "barrier": false,
+        "verifier": {
+          "schemaVersion": 2,
+          "stepId": "verify-control-plane-runtime-fault-injection",
+          "executionClass": "PROOF_OS_TEMP_ISOLATED",
+          "workspaceReads": ["."],
+          "workspaceWrites": [],
+          "tempPolicy": "RUNNER_SCOPED_OS",
+          "tempKey": "verify-control-plane-runtime-fault-injection",
+          "ports": [],
+          "childProcessPolicy": "VERIFIER_RUNTIME_PROBE",
+          "nativeAddonPolicy": "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
+          "filesystemCompatibilityPolicy": "NONE",
+          "barrier": false
+        },
+        "rootTest": {
+          "schemaVersion": 2,
+          "stepId": "test-control-plane-runtime-fault-injection",
+          "executionClass": "PROOF_OS_TEMP_ISOLATED",
+          "workspaceReads": ["."],
+          "workspaceWrites": [],
+          "tempPolicy": "RUNNER_SCOPED_OS",
+          "tempKey": "test-control-plane-runtime-fault-injection",
+          "ports": [],
+          "childProcessPolicy": "NODE_TEST_HARNESS",
+          "nativeAddonPolicy": "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
+          "filesystemCompatibilityPolicy": "NONE",
+          "barrier": false
+        }
+      }
+    },
+    "traceRows": [
+      {
+        "id": "PIPE-006",
+        "section": "6.3",
+        "line": 301,
+        "anchor": "stages the bundle and resolves exact package digests",
+        "summary": "Lifecycle step 6: stage bundle and resolve exact packages",
+        "owners": ["M07-T03", "M07-T06"],
+        "tests": ["M07-T09"],
+        "evidence": "Fault injection covers tuple resolution and staging"
+      },
+      {
+        "id": "PIPE-007",
+        "section": "6.3",
+        "line": 302,
+        "anchor": "preflights and atomically activates",
+        "summary": "Lifecycle step 7: preflight and atomically activate",
+        "owners": ["M07-T04", "M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "No pre-commit fault changes the active record"
+      },
+      {
+        "id": "PIPE-009",
+        "section": "24.1",
+        "line": 1304,
+        "anchor": "fetch or receive the immutable bundle",
+        "summary": "Activation step 1: receive immutable bundle",
+        "owners": ["M07-T01", "M07-T11"],
+        "tests": ["M07-T09"],
+        "evidence": "Fetch failure preserves the durable active record"
+      },
+      {
+        "id": "PIPE-010",
+        "section": "24.1",
+        "line": 1305,
+        "anchor": "verify document syntax and supported protocol",
+        "summary": "Activation step 2: verify syntax and protocol version",
+        "owners": ["M07-T02"],
+        "tests": ["M07-T09"],
+        "evidence": "Malformed and unsupported bundles never stage"
+      },
+      {
+        "id": "PIPE-011",
+        "section": "24.1",
+        "line": 1306,
+        "anchor": "verify `revision`",
+        "summary": "Activation step 3: verify revision and publication integrity",
+        "owners": ["M07-T02"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Tampered revision fails before activation"
+      },
+      {
+        "id": "PIPE-012",
+        "section": "24.1",
+        "line": 1307,
+        "anchor": "resolve exact capability package tuples",
+        "summary": "Activation step 4: resolve exact packages",
+        "owners": ["M07-T03"],
+        "tests": ["M07-T09", "M10-T07"],
+        "evidence": "Unavailable or substituted tuple is rejected"
+      },
+      {
+        "id": "PIPE-013",
+        "section": "24.1",
+        "line": 1308,
+        "anchor": "verify package digests",
+        "summary": "Activation step 5: verify package digests",
+        "owners": ["M07-T03"],
+        "tests": ["M07-T09", "M10-T07"],
+        "evidence": "Catalog digest mismatch preserves last known good"
+      },
+      {
+        "id": "PIPE-014",
+        "section": "24.1",
+        "line": 1309,
+        "anchor": "preflight surface and capability references",
+        "summary": "Activation step 6: preflight bundle references",
+        "owners": ["M07-T04"],
+        "tests": ["M07-T09"],
+        "evidence": "Reference and limit failures occur before durable commit"
+      },
+      {
+        "id": "PIPE-015",
+        "section": "24.1",
+        "line": 1310,
+        "anchor": "stage runtime indexes",
+        "summary": "Activation step 7: stage runtime indexes and loading plans",
+        "owners": ["M07-T06"],
+        "tests": ["M07-T09"],
+        "evidence": "Staging remains separate from active state"
+      },
+      {
+        "id": "PIPE-016",
+        "section": "24.1",
+        "line": 1311,
+        "anchor": "atomically mark the revision active",
+        "summary": "Activation step 8: atomically commit active revision",
+        "owners": ["M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Active and previous-good pointers commit as one record"
+      },
+      {
+        "id": "R-008",
+        "section": "5.7",
+        "line": 250,
+        "anchor": "only after preflight checks pass",
+        "summary": "Atomic activation occurs only after successful preflight",
+        "owners": ["M07-T04", "M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Fault injection before commit leaves active revision unchanged",
+        "bcp14": ["N-004"]
+      },
+      {
+        "id": "R-016",
+        "section": "8.3",
+        "line": 404,
+        "endLine": 406,
+        "anchor": "exactly `0.1.0`",
+        "summary": "Documents use protocol 0.1.0 and package requirements do not use version ranges",
+        "owners": ["M02-T06", "M02-T07"],
+        "tests": ["M02-T13", "M07-T09"],
+        "evidence": "Reject unsupported protocol and ranged package versions",
+        "bcp14": ["N-008"]
+      },
+      {
+        "id": "R-031",
+        "section": "11.5",
+        "line": 539,
+        "anchor": "mismatch is an integrity error",
+        "summary": "Available digest material is verified and mismatch prevents activation",
+        "owners": ["M06-T09", "M07-T02"],
+        "tests": ["M07-T09", "M10-T07"],
+        "evidence": "Source or revision tampering never becomes active",
+        "bcp14": ["N-016"]
+      },
+      {
+        "id": "R-102",
+        "section": "24.1",
+        "line": 1314,
+        "anchor": "failure before step 8",
+        "summary": "Any activation failure before durable commit leaves the active revision unchanged",
+        "owners": ["M07-T07", "M07-T09"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Boundary fault injection proves the invariant at every pre-commit stage"
+      },
+      {
+        "id": "R-126",
+        "section": "28.3",
+        "line": 1514,
+        "anchor": "Users never observe a half-applied bundle",
+        "summary": "A revision stages separately and switches active state only after preflight",
+        "owners": ["M07-T06", "M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Concurrent readers never observe partial activation state"
+      },
+      {
+        "id": "R-127",
+        "section": "28.4",
+        "line": 1518,
+        "anchor": "never embedded in the bundle",
+        "summary": "Lazy code remains exact, preflight-known, and loaded only from trusted package distribution",
+        "owners": ["M07-T03", "M07-T06", "M12-T03"],
+        "tests": ["M07-T09", "M12-T03"],
+        "evidence": "Lazy package tests reject bundle-embedded or unpinned runtime code"
+      },
+      {
+        "id": "R-138",
+        "section": "30.4",
+        "line": 1629,
+        "anchor": "reject unsupported versions before activation",
+        "summary": "Runtimes declare supported protocol versions, reject unsupported input early, and never guess forward compatibility",
+        "owners": ["M02-T06", "M07-T02"],
+        "tests": ["M02-T13", "M07-T09"],
+        "evidence": "Unsupported version fails before staging or activation"
+      },
+      {
+        "id": "A-008",
+        "section": "Appendix A",
+        "line": 1841,
+        "anchor": "Atomic activation",
+        "summary": "A revision activates only after successful preflight",
+        "owners": ["M07-T07"],
+        "tests": ["M07-T09", "M07-T10"],
+        "evidence": "Transactional activation fault matrix"
+      },
+      {
+        "id": "D-030",
+        "section": "Appendix B",
+        "line": 1884,
+        "anchor": "REVISION_MISMATCH",
+        "summary": "Bundle revision differs from canonical content",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M02-T04", "M07-T02"],
+        "tests": ["M02-T04", "M07-T09"],
+        "evidence": "Canonical revision tamper vector"
+      },
+      {
+        "id": "D-031",
+        "section": "Appendix B",
+        "line": 1885,
+        "anchor": "SOURCE_DIGEST_MISMATCH",
+        "summary": "Bundle source digest differs from source",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M06-T08", "M07-T02"],
+        "tests": ["M06-T10", "M07-T09"],
+        "evidence": "Available-source digest mismatch vector"
+      },
+      {
+        "id": "D-034",
+        "section": "Appendix B",
+        "line": 1888,
+        "anchor": "UNSUPPORTED_PROTOCOL",
+        "summary": "Runtime does not support the document version",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M02-T06", "M07-T02"],
+        "tests": ["M02-T13", "M07-T09"],
+        "evidence": "Unsupported protocol validation and activation vectors"
+      },
+      {
+        "id": "D-035",
+        "section": "Appendix B",
+        "line": 1889,
+        "anchor": "BUNDLE_LIMIT_EXCEEDED",
+        "summary": "Bundle violates configured resource limits",
+        "registryOwner": "M02-T05",
+        "owners": ["M02-T05", "M07-T02", "M07-T04"],
+        "tests": ["M07-T09", "M12-T05"],
+        "evidence": "Bundle byte, depth, and materialization limit vectors"
+      }
+    ],
+    "coverageTruth": {
+      "normativeN004": "TESTED",
+      "normativeN038": "PLANNED",
+      "normativeN041": "PLANNED",
+      "proofMatrixP12": "NOT_PROVEN",
+      "gateG07": "NOT_STARTED"
+    }
+  },
+  "runtimeSuiteReceipt": {
+    "suiteName": "M07-T09 bounded activation fault matrix",
+    "caseIds": [
+      "channel-invalid-discovery",
+      "immutable-fetch-missing",
+      "integrity-bundle-size",
+      "integrity-bundle-json",
+      "integrity-unsupported-protocol",
+      "integrity-revision-mismatch",
+      "integrity-source-digest-mismatch",
+      "package-resolution-missing",
+      "package-digest-mismatch",
+      "reference-capability-unknown",
+      "reference-depth-limit",
+      "staging-execution-contract",
+      "commit-definite-precommit",
+      "commit-postcommit-indeterminate",
+      "recovery-package-authority",
+      "recovery-reference-preflight",
+      "recovery-runtime-staging",
+      "recovery-previous-good-reclosure",
+      "recovery-final-record-drift"
+    ],
+    "tests": [
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [channel-invalid-discovery] keeps an invalid channel candidate outside active authority",
+        "status": "passed",
+        "title": "[channel-invalid-discovery] keeps an invalid channel candidate outside active authority"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [immutable-fetch-missing] stops a disappeared channel target before integrity",
+        "status": "passed",
+        "title": "[immutable-fetch-missing] stops a disappeared channel target before integrity"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [integrity-bundle-size] rejects the raw byte ceiling before parsing",
+        "status": "passed",
+        "title": "[integrity-bundle-size] rejects the raw byte ceiling before parsing"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [integrity-bundle-json] rejects malformed immutable bytes before protocol checks",
+        "status": "passed",
+        "title": "[integrity-bundle-json] rejects malformed immutable bytes before protocol checks"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [integrity-unsupported-protocol] rejects forward-version guessing before revision work",
+        "status": "passed",
+        "title": "[integrity-unsupported-protocol] rejects forward-version guessing before revision work"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [integrity-revision-mismatch] rejects valid Bundle bytes under a substituted key",
+        "status": "passed",
+        "title": "[integrity-revision-mismatch] rejects valid Bundle bytes under a substituted key"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [integrity-source-digest-mismatch] rejects independently supplied Source drift",
+        "status": "passed",
+        "title": "[integrity-source-digest-mismatch] rejects independently supplied Source drift"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [package-resolution-missing] preserves A when the exact package tuple is unavailable",
+        "status": "passed",
+        "title": "[package-resolution-missing] preserves A when the exact package tuple is unavailable"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [package-digest-mismatch] preserves A when installed artifact bytes drift",
+        "status": "passed",
+        "title": "[package-digest-mismatch] preserves A when installed artifact bytes drift"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [reference-capability-unknown] rejects an unknown capability before staging",
+        "status": "passed",
+        "title": "[reference-capability-unknown] rejects an unknown capability before staging"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [reference-depth-limit] rejects depth 65 before runtime indexes",
+        "status": "passed",
+        "title": "[reference-depth-limit] rejects depth 65 before runtime indexes"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [staging-execution-contract] rejects static contract drift without partial indexes",
+        "status": "passed",
+        "title": "[staging-execution-contract] rejects static contract drift without partial indexes"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [commit-definite-precommit] rolls back real SQLite and keeps A current",
+        "status": "passed",
+        "title": "[commit-definite-precommit] rolls back real SQLite and keeps A current"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [commit-postcommit-indeterminate] recovers only the complete durable winner",
+        "status": "passed",
+        "title": "[commit-postcommit-indeterminate] recovers only the complete durable winner"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [recovery-package-authority] rejects swapped durable roles without writing",
+        "status": "passed",
+        "title": "[recovery-package-authority] rejects swapped durable roles without writing"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [recovery-reference-preflight] rejects an externally selected invalid reference lineage",
+        "status": "passed",
+        "title": "[recovery-reference-preflight] rejects an externally selected invalid reference lineage"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [recovery-runtime-staging] rejects an externally selected invalid execution lineage",
+        "status": "passed",
+        "title": "[recovery-runtime-staging] rejects an externally selected invalid execution lineage"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [recovery-previous-good-reclosure] publishes neither role when fallback bytes disappear",
+        "status": "passed",
+        "title": "[recovery-previous-good-reclosure] publishes neither role when fallback bytes disappear"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix [recovery-final-record-drift] lets the final durable observation win",
+        "status": "passed",
+        "title": "[recovery-final-record-drift] lets the final durable observation win"
+      },
+      {
+        "ancestorTitles": ["M07-T09 bounded activation fault matrix"],
+        "fullName": "M07-T09 bounded activation fault matrix keeps the exact fault-case inventory closed and duplicate-free",
+        "status": "passed",
+        "title": "keeps the exact fault-case inventory closed and duplicate-free"
+      }
+    ]
+  },
+  "tests": {
+    "packageRuntimeCases": 20,
+    "packageRuntimeCaseNames": [
+      "[channel-invalid-discovery] keeps an invalid channel candidate outside active authority",
+      "[immutable-fetch-missing] stops a disappeared channel target before integrity",
+      "[integrity-bundle-size] rejects the raw byte ceiling before parsing",
+      "[integrity-bundle-json] rejects malformed immutable bytes before protocol checks",
+      "[integrity-unsupported-protocol] rejects forward-version guessing before revision work",
+      "[integrity-revision-mismatch] rejects valid Bundle bytes under a substituted key",
+      "[integrity-source-digest-mismatch] rejects independently supplied Source drift",
+      "[package-resolution-missing] preserves A when the exact package tuple is unavailable",
+      "[package-digest-mismatch] preserves A when installed artifact bytes drift",
+      "[reference-capability-unknown] rejects an unknown capability before staging",
+      "[reference-depth-limit] rejects depth 65 before runtime indexes",
+      "[staging-execution-contract] rejects static contract drift without partial indexes",
+      "[commit-definite-precommit] rolls back real SQLite and keeps A current",
+      "[commit-postcommit-indeterminate] recovers only the complete durable winner",
+      "[recovery-package-authority] rejects swapped durable roles without writing",
+      "[recovery-reference-preflight] rejects an externally selected invalid reference lineage",
+      "[recovery-runtime-staging] rejects an externally selected invalid execution lineage",
+      "[recovery-previous-good-reclosure] publishes neither role when fallback bytes disappear",
+      "[recovery-final-record-drift] lets the final durable observation win",
+      "keeps the exact fault-case inventory closed and duplicate-free"
+    ],
+    "faultCaseIds": [
+      "channel-invalid-discovery",
+      "immutable-fetch-missing",
+      "integrity-bundle-size",
+      "integrity-bundle-json",
+      "integrity-unsupported-protocol",
+      "integrity-revision-mismatch",
+      "integrity-source-digest-mismatch",
+      "package-resolution-missing",
+      "package-digest-mismatch",
+      "reference-capability-unknown",
+      "reference-depth-limit",
+      "staging-execution-contract",
+      "commit-definite-precommit",
+      "commit-postcommit-indeterminate",
+      "recovery-package-authority",
+      "recovery-reference-preflight",
+      "recovery-runtime-staging",
+      "recovery-previous-good-reclosure",
+      "recovery-final-record-drift"
+    ],
+    "compilerNegativeCases": 10,
+    "compilerNegativeClaims": [
+      "Public callers cannot install transaction fault hooks.",
+      "Public callers cannot inject a commit fault into an activation attempt.",
+      "Public callers cannot inject durable state into restart recovery.",
+      "T03 package authority cannot stand in for T04 reference authority.",
+      "T04 reference authority cannot stand in for a recovery package authority.",
+      "An indeterminate commit outcome grants no active authority.",
+      "A failed reconstruction grants no recovered authority.",
+      "Internal activation construction is not a public fault-injection surface.",
+      "Internal SQLite repository opening is not publicly callable.",
+      "Transaction hooks are not exported as public protocol capability."
+    ],
+    "rootMutationCases": 11,
+    "rootMutationCaseNames": [
+      "[authority] builds the exact M07-T09 boundary-fault artifact from the executable suite",
+      "[determinism] two independent evidence builds are byte-identical",
+      "[prerequisites] rejects drift in every immutable M07-T01 through M07-T08 artifact",
+      "[runtime] rejects one changed executable fault-suite receipt field",
+      "[implementation] rejects public-export growth and removal of one fault boundary",
+      "[traceability] rejects every M07-T09 assignment mutation and one extra assignment",
+      "[artifact] verifies exact bytes and rejects one changed byte",
+      "[writer] atomically writes deterministic evidence and preserves the destination on failure",
+      "[options] rejects unknown, accessor, proxy, and shared-memory inputs",
+      "[filesystem] rejects artifact and proof symlinks plus invalid UTF-8 proof authority",
+      "[immutability] freezes the full graph and preserves M07-T10, M07-T11, and G07 nonclaims"
+    ],
+    "sourceReceipts": {
+      "runtime": {
+        "path": "apps/control-plane-api/test/runtime-fault-injection.test.ts",
+        "bytes": 27529,
+        "sha256": "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3d47047f67"
+      },
+      "support": {
+        "path": "apps/control-plane-api/test/runtime-fault-injection-support.ts",
+        "bytes": 12022,
+        "sha256": "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5"
+      },
+      "types": {
+        "path": "apps/control-plane-api/test/runtime-fault-injection.types.ts",
+        "bytes": 2584,
+        "sha256": "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212"
+      },
+      "root": {
+        "path": "tests/control-plane-runtime-fault-injection.test.mjs",
+        "bytes": 17341,
+        "sha256": "f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6"
+      }
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "apps/control-plane-api/package.json",
+      "bytes": 2319,
+      "sha256": "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-store-contract.ts",
+      "bytes": 4345,
+      "sha256": "e67b72e4d856922d484ffd7df41702e6581344eab91104c8a1b5c1d04236d858"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-store-internal.ts",
+      "bytes": 27817,
+      "sha256": "27492c6e3a924cd59d5c9df401c75b9f2c00ebe9cb72b6b217df170dd42d84db"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-store.ts",
+      "bytes": 831,
+      "sha256": "d9a82872d3a15b1aa40d8cbe8766f73ac40323d82c2316e44f5f36d911f5a4e1"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-contract.ts",
+      "bytes": 6480,
+      "sha256": "c1696631698a449e1dfb4dd83079c6892ea66a6d9bbc9b525a08f0db81c98b70"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-internal.ts",
+      "bytes": 17671,
+      "sha256": "5bf5f6234bcb710393af852fad67b9d914c0379a9aee934e92e2714a531e40d1"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-schema-guard.ts",
+      "bytes": 13220,
+      "sha256": "af11f9a19326b3e12d400ae4142284401630315c71a87bece6fe17dad78563f0"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification-standalone-runtime.ts",
+      "bytes": 1411,
+      "sha256": "f48d8ef9cf0edd6a34480eec7895bb3f78ff41d2c798658009d24edec33e26a6"
+    },
+    {
+      "path": "apps/control-plane-api/src/bundle-verification.ts",
+      "bytes": 1250,
+      "sha256": "1b1ed90b149f8a65f5895df6133c1991bd1e3c0e5b45e14b10a94d3c8499218f"
+    },
+    {
+      "path": "apps/control-plane-api/src/generated/0.1.0/bundle-verification-guards.ts",
+      "bytes": 730791,
+      "sha256": "96e9c9ed5912fb39879f9e49b15321cd1161878c67f9269d0fb41a5a3f58ff29"
+    },
+    {
+      "path": "apps/control-plane-api/src/generated/0.1.0/package-preflight-catalog-guard.ts",
+      "bytes": 456985,
+      "sha256": "443d1ce182f80c7a7375ae65f597d18dc458f6dc0203b519c8596b34ae7f4a0f"
+    },
+    {
+      "path": "apps/control-plane-api/src/index.ts",
+      "bytes": 4891,
+      "sha256": "1295547b6c281ea2678583298648a4ad8287205109d670fa422450146da5031e"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-contract.ts",
+      "bytes": 9590,
+      "sha256": "13cd8a3dbee84d160927f6022da255d7115361cf09a7f3042e8a67f2be9e3295"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-internal.ts",
+      "bytes": 32266,
+      "sha256": "f3c122ccd59ac78cea5d85e84c56f0209d9db98dbcb066614b9a568471c019bb"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-schema-guard.ts",
+      "bytes": 15370,
+      "sha256": "1cf0c7d14d629c2f2d166b5a8fc741206c58ebd29f0dc08fc14a2edeaa890ae4"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight-web-react.ts",
+      "bytes": 3729,
+      "sha256": "764e898c530fbe81161d5681b65a79841a212d4461469cbba99f971afb69d71d"
+    },
+    {
+      "path": "apps/control-plane-api/src/package-preflight.ts",
+      "bytes": 1577,
+      "sha256": "9ecdf0423656d550a3523a82c270739fce67cd152605024cbbc1f58de99c1640"
+    },
+    {
+      "path": "apps/control-plane-api/src/reference-preflight-contract.ts",
+      "bytes": 7119,
+      "sha256": "6011791b0f7eadcafc28224b35a56d71c46454829b54ae5249d738630efa07de"
+    },
+    {
+      "path": "apps/control-plane-api/src/reference-preflight-internal.ts",
+      "bytes": 30189,
+      "sha256": "c53e71a20a60ee28e6ea719187900e4d50835654ef178f5eb3c69f52f9412cc5"
+    },
+    {
+      "path": "apps/control-plane-api/src/reference-preflight.ts",
+      "bytes": 1261,
+      "sha256": "124c2738889c4cd17db3af162568780106430c36c8f7025ea7533f53edc678e5"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-contract.ts",
+      "bytes": 12799,
+      "sha256": "35602d69d66e24fe7a9171221b046c37abd1be42d2f3ab83eb76a70efeb7aa5b"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-internal.ts",
+      "bytes": 23409,
+      "sha256": "a166fc51237c4d7b3389282fd424b5156c2d782c3fceab37f424fead93629880"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-repository-internal.ts",
+      "bytes": 9860,
+      "sha256": "0c47b5b166d1dbe1226d2d4c312d81cb150d09e87005230c3f88f25c5a789d91"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation-sqlite-internal.ts",
+      "bytes": 22508,
+      "sha256": "a97191a6d508d4ff3c26e0f691e52b9c9215b4ecb69a014da4ecd03086a3beeb"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-activation.ts",
+      "bytes": 5540,
+      "sha256": "6455e6d9950d970057c68a2e1fe8349ebe4dd88c51ca2fc4d34576bc3146c6f6"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-recovery-internal.ts",
+      "bytes": 13614,
+      "sha256": "e561faf3f0ed389ee24cc8a8fc120f0f44146e87331457ac26a1b6c808ba77e4"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-staging-contract.ts",
+      "bytes": 8869,
+      "sha256": "5373625c150743c2542f6f74579a06fedc1450071201fbf82dd50bbd576ad146"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-staging-internal.ts",
+      "bytes": 47768,
+      "sha256": "ea20880ed17156ebd7bab6e6c6294f040e782c8b0122dfcd10fa9c67bf27f52d"
+    },
+    {
+      "path": "apps/control-plane-api/src/runtime-staging.ts",
+      "bytes": 1343,
+      "sha256": "f0d5389a650364e44b2b703fefb89792b2c0f3ee8471a994b3f57dd155ee2cf8"
+    },
+    {
+      "path": "apps/control-plane-api/src/strict-json-internal.ts",
+      "bytes": 11862,
+      "sha256": "93d61efdeae06c923de25613af2c75b10848e9b04fa65aa5462fc4aaf4800c2f"
+    },
+    {
+      "path": "apps/control-plane-api/test/runtime-fault-injection-support.ts",
+      "bytes": 12022,
+      "sha256": "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5"
+    },
+    {
+      "path": "apps/control-plane-api/test/runtime-fault-injection.test.ts",
+      "bytes": 27529,
+      "sha256": "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3d47047f67"
+    },
+    {
+      "path": "apps/control-plane-api/test/runtime-fault-injection.types.ts",
+      "bytes": 2584,
+      "sha256": "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212"
+    },
+    {
+      "path": "docs/proof/protocol-0.1.0-traceability.json",
+      "bytes": 134870,
+      "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+    },
+    {
+      "path": "package.json",
+      "bytes": 65109,
+      "sha256": "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2"
+    },
+    {
+      "path": "scripts/ci/exhaustive-workload-inventory.mjs",
+      "bytes": 46343,
+      "sha256": "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e"
+    },
+    {
+      "path": "scripts/ci/shared-state-authority.mjs",
+      "bytes": 47479,
+      "sha256": "9b15cef3b2d795c268945c2f4bee670c037878bd43967c1ce71a41342d463140"
+    },
+    {
+      "path": "scripts/generate-control-plane-runtime-fault-injection-proof.mjs",
+      "bytes": 873,
+      "sha256": "1d5f3870476c1dd8a1e3e5d30b30d6925043bbe21dd2f178d68984c49858802d"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
+      "bytes": 64932,
+      "sha256": "da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f"
+    },
+    {
+      "path": "scripts/run-ci-quality-gate.mjs",
+      "bytes": 48058,
+      "sha256": "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a"
+    },
+    {
+      "path": "scripts/verify-control-plane-runtime-fault-injection.mjs",
+      "bytes": 708,
+      "sha256": "785791eef1a8fe74211651d59ef0efc76e3d85d2089cf973438ce9699cdd690c"
+    },
+    {
+      "path": "tests/control-plane-runtime-fault-injection.test.mjs",
+      "bytes": 17341,
+      "sha256": "f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6"
+    }
+  ],
+  "distribution": [
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts",
+      "bytes": 4730,
+      "sha256": "81ced4650dcf6f1fb05980c00c610923083c4262c231d604cda504f569171d56"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js",
+      "bytes": 2282,
+      "sha256": "a97d3e83f6319627c78ad38b7d81b6879ac524408c7f8993c5c5f2a53cfbc02a"
+    }
+  ],
+  "nonclaims": [
+    "M07-T10 still owns the complete A to invalid B to valid C sequence, same- and different-candidate races, concurrent activation, explicit journal-mode decision, and restart race matrix.",
+    "M07-T11 still owns mutable-channel consumption and notification by the separately built reference host.",
+    "P-12 remains NOT_PROVEN until M07-T10, M07-T11, and M10-T07 close product-level invalid-publication recovery.",
+    "N-038 and N-041 remain PLANNED; this bounded matrix does not claim every later invalid-input sequence or the final measured whole-system limit profile.",
+    "G07 remains NOT_STARTED until every M07 task and the I07-04 historical-reader cleanup complete.",
+    "No public fault hook, transaction callback, repository, SQLite handle, package loader, or alternate activation API was added.",
+    "The application-owned local root remains trusted; this proof makes no tamper-proof, hostile-administrator, or independently anchored anti-rollback claim.",
+    "SQLite is the first Web persistence adapter only; future Android and iOS repositories must preserve the same observable atomicity and recovery invariants."
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/control-plane-api... build",
+    "pnpm --filter @desen/control-plane-api typecheck",
+    "pnpm --filter @desen/control-plane-api test:runtime-fault-injection",
+    "node scripts/generate-control-plane-runtime-fault-injection-proof.mjs",
+    "node scripts/verify-control-plane-runtime-fault-injection.mjs",
+    "node --test tests/control-plane-runtime-fault-injection.test.mjs"
+  ]
+}

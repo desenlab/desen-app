@@ -272,6 +272,16 @@ const M07_T08_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
     sha256: "978dc11827d307840659738195a6bfbc2b9db960d2f2d58d45e928616355cf6a",
   }),
 });
+const M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
+  "N-038": Object.freeze({
+    bytes: 2_534,
+    sha256: "59da4a30b68fae8ed18201e3ccc203623fa45dc30e60a0bb1c6b5b24a71a71f7",
+  }),
+  "N-041": Object.freeze({
+    bytes: 2_528,
+    sha256: "bf60acd5e5c80e40234af853bb59dedf85daa86c05ea56968845a968cf18aff1",
+  }),
+});
 const EXPECTED_RUNTIME_TEST_NAMES = Object.freeze([
   "stages the exact official package snapshot as callback-free active-separated authority",
   "retains exact execution identity, staged byte copies, indexes, and sorted obligations privately",
@@ -476,6 +486,36 @@ const M07_T08_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     successor: Object.freeze({
       bytes: 46_165,
       sha256: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
+    }),
+  }),
+});
+const M07_T09_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 2_319,
+      sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 65_109,
+      sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_058,
+      sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_343,
+      sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
     }),
   }),
 });
@@ -983,13 +1023,22 @@ function exactTupleCount(source, tuple) {
   return count;
 }
 
-function assertAggregateTail(script, predecessor, current, successor, latestSuccessor, terminal) {
+function assertAggregateTail(
+  script,
+  predecessor,
+  current,
+  successor,
+  latestSuccessor,
+  faultInjectionSuccessor,
+  terminal,
+) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
   const predecessorIndex = commands.indexOf(predecessor);
   const currentIndex = commands.indexOf(current);
   const successorIndex = commands.indexOf(successor);
   const latestSuccessorIndex = commands.indexOf(latestSuccessor);
+  const faultInjectionSuccessorIndex = commands.indexOf(faultInjectionSuccessor);
   const terminalIndex = commands.indexOf(terminal);
   const taskTimeTail =
     terminalIndex === currentIndex + 1 && successorIndex < 0 && latestSuccessorIndex < 0;
@@ -1001,13 +1050,20 @@ function assertAggregateTail(script, predecessor, current, successor, latestSucc
     successorIndex === currentIndex + 1 &&
     latestSuccessorIndex === successorIndex + 1 &&
     terminalIndex === latestSuccessorIndex + 1;
+  const reviewedM07T09Tail =
+    successorIndex === currentIndex + 1 &&
+    latestSuccessorIndex === successorIndex + 1 &&
+    faultInjectionSuccessorIndex === latestSuccessorIndex + 1 &&
+    terminalIndex === faultInjectionSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
-    (!taskTimeTail && !reviewedM07T07Tail && !reviewedM07T08Tail) ||
+    (!taskTimeTail && !reviewedM07T07Tail && !reviewedM07T08Tail && !reviewedM07T09Tail) ||
     commands.lastIndexOf(current) !== currentIndex ||
     (successorIndex >= 0 && commands.lastIndexOf(successor) !== successorIndex) ||
-    (latestSuccessorIndex >= 0 && commands.lastIndexOf(latestSuccessor) !== latestSuccessorIndex)
+    (latestSuccessorIndex >= 0 && commands.lastIndexOf(latestSuccessor) !== latestSuccessorIndex) ||
+    (faultInjectionSuccessorIndex >= 0 &&
+      commands.lastIndexOf(faultInjectionSuccessor) !== faultInjectionSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T06 aggregate tail drifted.");
   }
@@ -1041,12 +1097,14 @@ async function trackedFileReceipts(overrides) {
         const overridden = Object.hasOwn(overrides, relativePath);
         const m07T07Bridge = M07_T07_TRACKED_RECEIPT_BRIDGE[relativePath];
         const m07T08Bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
-        const bridge = m07T08Bridge ?? m07T07Bridge;
+        const m07T09Bridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
+        const bridge = m07T09Bridge ?? m07T08Bridge ?? m07T07Bridge;
         const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
         const historicalM07T06 = m07T07Bridge?.historical;
         const approvedM07T07 = m07T08Bridge?.historical;
+        const approvedM07T08 = m07T09Bridge?.historical;
         if (
-          !overridden &&
+          (!overridden || m07T09Bridge !== undefined) &&
           bridge !== undefined &&
           !(
             (observed.bytes === bridge.historical.bytes &&
@@ -1058,7 +1116,10 @@ async function trackedFileReceipts(overrides) {
               observed.sha256 === historicalM07T06.sha256) ||
             (approvedM07T07 !== undefined &&
               observed.bytes === approvedM07T07.bytes &&
-              observed.sha256 === approvedM07T07.sha256)
+              observed.sha256 === approvedM07T07.sha256) ||
+            (approvedM07T08 !== undefined &&
+              observed.bytes === approvedM07T08.bytes &&
+              observed.sha256 === approvedM07T08.sha256)
           )
         ) {
           fail("REGISTRATION_DRIFT", "A reviewed M07-T07/T08 tracked successor receipt drifted.", {
@@ -1213,6 +1274,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-staging",
     "pnpm verify:control-plane-runtime-activation",
     "pnpm verify:control-plane-runtime-recovery",
+    "pnpm verify:control-plane-runtime-fault-injection",
     "pnpm lint",
   );
   assertAggregateTail(
@@ -1221,6 +1283,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-staging",
     "pnpm test:control-plane-runtime-activation",
     "pnpm test:control-plane-runtime-recovery",
+    "pnpm test:control-plane-runtime-fault-injection",
     "turbo run test",
   );
   if (
@@ -1288,6 +1351,7 @@ async function normativeCoverageProjection(overrides) {
     const evidenceMatches = [...evidence.matchAll(artifactPattern)];
     const m07T07SuccessorReceipt = M07_T07_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
     const m07T08SuccessorReceipt = M07_T08_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
+    const m07T09SuccessorReceipt = M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
     const normalizedSuccessorLine = matchingLines[0].replace(
       new RegExp(`(\`${ARTIFACT.replaceAll(".", "\\.")}\` \`sha256:)[0-9a-f]{64}(\`)`, "u"),
       `$1d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494$2`,
@@ -1300,6 +1364,10 @@ async function normativeCoverageProjection(overrides) {
       m07T08SuccessorReceipt !== undefined &&
       Buffer.byteLength(normalizedSuccessorLine, "utf8") === m07T08SuccessorReceipt.bytes &&
       sha256(Buffer.from(normalizedSuccessorLine, "utf8")) === m07T08SuccessorReceipt.sha256;
+    const reviewedM07T09Successor =
+      m07T09SuccessorReceipt !== undefined &&
+      Buffer.byteLength(normalizedSuccessorLine, "utf8") === m07T09SuccessorReceipt.bytes &&
+      sha256(Buffer.from(normalizedSuccessorLine, "utf8")) === m07T09SuccessorReceipt.sha256;
     const historicalRow =
       cells.length !== 8 ||
       cells[1] !== expectation.id ||
@@ -1312,7 +1380,12 @@ async function normativeCoverageProjection(overrides) {
       typeof evidence !== "string" ||
       !evidence.includes(expectation.contribution) ||
       evidenceMatches.length !== 1;
-    if (historicalRow && !reviewedM07T07Successor && !reviewedM07T08Successor) {
+    if (
+      historicalRow &&
+      !reviewedM07T07Successor &&
+      !reviewedM07T08Successor &&
+      !reviewedM07T09Successor
+    ) {
       fail(
         "NORMATIVE_COVERAGE_DRIFT",
         `${expectation.id} lost its exact M07-T06 owner, status, contribution, or evidence pin.`,

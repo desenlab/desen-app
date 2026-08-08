@@ -4,6 +4,7 @@ import { mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/prom
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { brotliDecompressSync } from "node:zlib";
 
 import {
   PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS,
@@ -31,6 +32,81 @@ const RUNTIME_TEST = "packages/publisher/test/bundle-publication.test.ts";
 const ROOT_TEST = "tests/publisher-bundle-publication.test.mjs";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const ARTIFACT = "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json";
+
+// Reconstructs exact M07-T08 execution-preflight readers from their live M07-T09 successors so
+// rollback rejection remains deterministic and independent from Git or child processes.
+const M07_T09_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH = `
+G2EFICwKYyLThe+URexNXJSo0b78r+hdNUjLisJekekB8lJ9f85bJt+b0nwWCBB4yrJ3kFD6rwWindNqtX2UGIViIPGrriRMUdXE
+5fTHEnx84VecA2gsG/N8zAIsDMPAJuaPCQQSaBSIBYopqFdx9MUMUWvWzWx7e46tT+a6ooXrpy85nup6LUf//eXryRb25VV0lbYI
+e7Wd5cDFbSN/bHNsAG1RcIe609mvrFjxEmChtCbLV5M9it/f8usOpd5HbpdNXujrkyPLvhx/6MQx0pymVFfSUmqfLbKFWIduomCG
+g6WbI5NwHZnaY7SIrMe+Wv9tORQ3WxlMBOGfPP1bX1l2J93dHae2KjteWnEUSbkPpnSt9AmFE2kMaw2cm/ZBdWgqTlW3tjjmLDQD
+Ru/NJwyBlqNwdpszKRZAuy2Lrye+f4PDZfJ1KFiWDeArE+xd/e2Ts/f6YBrZBUCIgXZE6BJIHlS7F/r3kIiwkIaGyRTPXgSqBKmN
+XjQLTGDrJFIsMxDZHaeRddOsjEBOsnLviolnEGHrNrPCrNklugO5CAxOL4aF1dnn0kAaVr3WZAaXQmnRQZCyJ13ZDq7dL7ycWJ3X
+baywaNqXE383p9LG1mtK+pcli4y6U7JjIg5w4IB0XvHxBH3+eddye7lbgMeuqvNPoNjjcW72lHWda0IDsbcCmmyf84JRrfOHm2xv
+YwQ=
+`.replaceAll(/\s/gu, "");
+const M07_T09_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH = `
+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
+`.replaceAll(/\s/gu, "");
 
 const baseline = await buildPublisherBundlePublicationEvidence();
 const runtimeReceipt = baseline.artifact.claims.singleOfficialInputPublicRuntimeProbe;
@@ -66,6 +142,64 @@ async function sourceBytes(relativePath) {
 
 async function sourceText(relativePath) {
   return readFile(path.join(ROOT, relativePath), "utf8");
+}
+
+function applyExactRollbackPatch(currentBytes, encodedPatch) {
+  const patchText = brotliDecompressSync(Buffer.from(encodedPatch, "base64")).toString("utf8");
+  const currentLines = currentBytes.toString("utf8").split("\n");
+  const patchLines = patchText.split("\n");
+  const reconstructedLines = [];
+  let currentIndex = 0;
+  let patchIndex = 0;
+
+  while (patchIndex < patchLines.length) {
+    const header = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/u.exec(patchLines[patchIndex]);
+    if (header === null) {
+      patchIndex += 1;
+      continue;
+    }
+    const currentStart = Number(header[1]) - 1;
+    const expectedCurrentCount = Number(header[2] ?? "1");
+    const expectedRollbackCount = Number(header[4] ?? "1");
+    assert.ok(currentStart >= currentIndex);
+    reconstructedLines.push(...currentLines.slice(currentIndex, currentStart));
+    currentIndex = currentStart;
+    patchIndex += 1;
+    let currentCount = 0;
+    let rollbackCount = 0;
+
+    while (patchIndex < patchLines.length && !patchLines[patchIndex].startsWith("@@ ")) {
+      const patchLine = patchLines[patchIndex];
+      if (patchLine === "\\ No newline at end of file") {
+        patchIndex += 1;
+        continue;
+      }
+      const marker = patchLine[0];
+      const content = patchLine.slice(1);
+      if (marker === " ") {
+        assert.equal(currentLines[currentIndex], content);
+        reconstructedLines.push(content);
+        currentIndex += 1;
+        currentCount += 1;
+        rollbackCount += 1;
+      } else if (marker === "-") {
+        assert.equal(currentLines[currentIndex], content);
+        currentIndex += 1;
+        currentCount += 1;
+      } else if (marker === "+") {
+        reconstructedLines.push(content);
+        rollbackCount += 1;
+      } else {
+        break;
+      }
+      patchIndex += 1;
+    }
+    assert.equal(currentCount, expectedCurrentCount);
+    assert.equal(rollbackCount, expectedRollbackCount);
+  }
+
+  reconstructedLines.push(...currentLines.slice(currentIndex));
+  return Buffer.from(reconstructedLines.join("\n"), "utf8");
 }
 
 async function trackedMutation(relativePath, transform) {
@@ -197,12 +331,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-recovery && pnpm lint",
-    "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
+    "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-recovery && turbo run test",
-    "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-fault-injection && turbo run test",
+    "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -301,7 +435,7 @@ test("[authority] authenticates one isolated actual dist/index.js success and on
   assert.equal(runtimeReceipt.failureFirstDiagnosticStageMatchesResult, true);
 });
 
-test("[compatibility] externally tracks every current T02 through T08 proof reader", () => {
+test("[compatibility] externally tracks every current T02 through T09 proof reader", () => {
   assert.deepEqual(
     baseline.artifact.claims.compatibilityReaders.map(({ path: readerPath }) => readerPath),
     PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS,
@@ -1401,7 +1535,7 @@ test("[authority] rejects a root mutation inventory reduced below thirty cases",
   );
 });
 
-test("[compatibility] detects tamper in each externally anchored T02 through T08 reader", async () => {
+test("[compatibility] detects tamper in each externally anchored T02 through T09 reader", async () => {
   const reviewedCurrentPath = "scripts/lib/publisher-execution-preflight-proof.mjs";
   for (const readerPath of PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS) {
     const bytes = Buffer.from(await sourceBytes(readerPath));
@@ -1424,6 +1558,20 @@ test("[compatibility] detects tamper in each externally anchored T02 through T08
   }
 
   const reviewedCurrentBytes = await sourceBytes(reviewedCurrentPath);
+  assert.equal(reviewedCurrentBytes.byteLength, 72_334);
+  assert.equal(
+    createHash("sha256").update(reviewedCurrentBytes).digest("hex"),
+    "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
+  );
+  const predecessorM07T08Bytes = applyExactRollbackPatch(
+    reviewedCurrentBytes,
+    M07_T09_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH,
+  );
+  assert.equal(predecessorM07T08Bytes.byteLength, 72_025);
+  assert.equal(
+    createHash("sha256").update(predecessorM07T08Bytes).digest("hex"),
+    "b4d55e0da2a2992bcc311254bfc47c2c69287f9e049ed8e84bb9b50c8886d2a4",
+  );
   const approved = await buildPublisherBundlePublicationEvidence(
     fastOptions({
       trackedFileBytes: { [reviewedCurrentPath]: reviewedCurrentBytes },
@@ -1442,6 +1590,14 @@ test("[compatibility] detects tamper in each externally anchored T02 through T08
     buildPublisherBundlePublicationEvidence(
       fastOptions({
         trackedFileBytes: { [reviewedCurrentPath]: unreviewedCurrentBytes },
+      }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({
+        trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T08Bytes },
       }),
     ),
     expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
@@ -1550,9 +1706,18 @@ test("[compatibility] detects tamper in each externally anchored T02 through T08
 test("[compatibility] admits only the exact current execution-preflight root reader", async () => {
   const readerPath = "tests/publisher-execution-preflight.test.mjs";
   const currentBytes = await sourceBytes(readerPath);
-  assert.equal(currentBytes.byteLength, 17_767);
+  assert.equal(currentBytes.byteLength, 24_873);
   assert.equal(
     createHash("sha256").update(currentBytes).digest("hex"),
+    "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+  );
+  const predecessorM07T08Bytes = applyExactRollbackPatch(
+    currentBytes,
+    M07_T09_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH,
+  );
+  assert.equal(predecessorM07T08Bytes.byteLength, 17_767);
+  assert.equal(
+    createHash("sha256").update(predecessorM07T08Bytes).digest("hex"),
     "8ab35ee609d175377ccb2beb679f6d76f93c9c2cf4bc749df0d94a7ff7e47e74",
   );
 
@@ -1569,6 +1734,12 @@ test("[compatibility] admits only the exact current execution-preflight root rea
   await assert.rejects(
     buildPublisherBundlePublicationEvidence(
       fastOptions({ trackedFileBytes: { [readerPath]: unreviewedBytes } }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({ trackedFileBytes: { [readerPath]: predecessorM07T08Bytes } }),
     ),
     expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
   );

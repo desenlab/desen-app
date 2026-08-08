@@ -310,12 +310,30 @@ test("[implementation] rejects removal of the public recovery boundary", async (
       "REGISTRATION_DRIFT",
     ],
     [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
+          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
+        ),
+      "REGISTRATION_DRIFT",
+    ],
+    [
       ROOT_PACKAGE,
       (source) => {
         const manifest = JSON.parse(source);
         delete manifest.scripts["verify:control-plane-runtime-recovery"];
         return `${JSON.stringify(manifest, null, 2)}\n`;
       },
+      "REGISTRATION_DRIFT",
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
+          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
+        ),
       "REGISTRATION_DRIFT",
     ],
     [
@@ -337,13 +355,45 @@ test("[implementation] rejects removal of the public recovery boundary", async (
       "REGISTRATION_DRIFT",
     ],
     [
+      CI_SOURCE,
+      (source) =>
+        source.replace(
+          '      "control-plane-runtime-fault-injection",',
+          '      "control-plane-runtime-fault-injection-decoy",',
+        ),
+      "REGISTRATION_DRIFT",
+    ],
+    [
+      CI_INVENTORY,
+      (source) =>
+        source.replace(
+          '    "control-plane-runtime-fault-injection",',
+          '    "control-plane-runtime-fault-injection-decoy",',
+        ),
+      "REGISTRATION_DRIFT",
+    ],
+    [
       SHARED_STATE_AUTHORITY,
       (source) =>
         source.replace(
-          '  "control-plane-runtime-recovery",\n]);',
-          '  // "control-plane-runtime-recovery",\n]);',
+          '  "control-plane-runtime-recovery",',
+          '  // "control-plane-runtime-recovery",',
         ),
       "REGISTRATION_DRIFT",
+    ],
+    [
+      SHARED_STATE_AUTHORITY,
+      (source) =>
+        source.replace(
+          '  "control-plane-runtime-fault-injection",',
+          '  "control-plane-runtime-fault-injection-decoy",',
+        ),
+      "REGISTRATION_DRIFT",
+    ],
+    [
+      ADR,
+      (source) => source.replace("M07-T09 now proves", "M07-T09 claims without proof"),
+      "DOCUMENTATION_DRIFT",
     ],
     [
       SHARED_STATE_AUTHORITY,

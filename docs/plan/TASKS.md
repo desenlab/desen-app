@@ -55,14 +55,15 @@ check from fresh inputs, and must not trust path filters or cached proof success
 
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
-and proved the 130-workload, 61-proof-pair cutover baseline. The M07-T08 working-tree successor
-contains 144 workloads and 68 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
-frozen cutover evidence. Its 57 ordinary pairs and 11 exclusive barriers project to 447 legacy
-prerequisite segments, 2,617 ordered leaf invocations, and 224 distinct leaf workloads. The retained
+and proved the 130-workload, 61-proof-pair cutover baseline. The M07-T09 working-tree successor
+contains 146 workloads and 69 proof pairs as `REQUIRED + EXHAUSTIVE`; it does not rewrite that
+frozen cutover evidence. Its 58 ordinary pairs and 11 exclusive barriers project to 455 legacy
+prerequisite segments, 2,769 ordered leaf invocations, and 227 distinct leaf workloads. The retained
 sequential runner is available only through explicit manual `legacy-rollback`. Exact cutover
 workload, result, cancellation, tracked-workspace, hosted, and shared-state equivalence remains
-archived in the unchanged I07-02 baseline. M07-T08 is `DONE`, and M07-T09 is next. No hosted
-M07-T08 result is claimed.
+archived in the unchanged I07-02 baseline. M07-T09 is `DONE`. The working order next enters I07-03
+to freeze the shadow selector and observation threshold before M07-T10 supplies the first real
+change sample; M07-T10 remains the next implementation task. No hosted M07-T09 result is claimed.
 
 I07-03 may observe later real task changes without selecting the required workload. Its threshold
 must be frozen before observation begins and must include every selector category, zero false
@@ -485,7 +486,7 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | M07-T06 | DONE        | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
 | M07-T07 | DONE        | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision, generation}` as one consistent record        |
 | M07-T08 | DONE        | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
-| M07-T09 | NOT_STARTED | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
+| M07-T09 | DONE        | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
 | M07-T10 | NOT_STARTED | M07-T09                 | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
 | M07-T11 | NOT_STARTED | M07-T05, M07-T10        | Control-plane channel consumed by separately built reference host                                                    |
 | G07     | NOT_STARTED | M07-T01–M07-T11, I07-04 | Every pre-commit fault preserves a valid durable activation record and invalid revision never becomes active         |
@@ -699,8 +700,8 @@ and the safe-integer ceiling all fail closed without partial authority. Twelve f
 cases, 14 compiler-negative cases, and 9 independent root proof/mutation cases pass. P-12 remains
 `NOT_PROVEN`; N-004, N-038, and N-041 remain `PLANNED`; G07 and PF-076 remain open. The local root
 remains application-trusted: no external cryptographic anchor means this task makes no
-tamper-proof, hostile-administrator, or anti-rollback claim. Overall progress is 82/145, M07 is
-8/11, and M07-T09 owns exhaustive boundary fault injection next. The final evidence pins exact AST
+tamper-proof, hostile-administrator, or anti-rollback claim. Overall progress at this checkpoint
+was 82/145 and M07 was 8/11. The final evidence pins exact AST
 structures for the 105-entry package-root export inventory, executable CI registrations,
 shared-state mappings, and the direct 12-case runtime plus 9-case root test inventories. Code-owned
 exact source receipts bind executable test bodies and effective CI/shared-state flow. The same
@@ -714,8 +715,31 @@ Evidence: `docs/proof/CONTROL-PLANE-RUNTIME-RECOVERY.md` and
 The M07-T08 CI registration produces the exact 144-workload, 68-proof-pair successor: 57 ordinary
 pairs, 11 exclusive barriers, 447 retained prerequisite segments, 2,617 ordered legacy leaf
 invocations, and 224 distinct leaves. The nine official CI contract commands pass 128/128 locally;
-the broader combined contract run passes 152/152. This is current working-tree evidence; no hosted
-M07-T08 result is claimed.
+the broader combined contract run passes 152/152. At that checkpoint, this was local working-tree
+evidence; no hosted M07-T08 result is claimed.
+
+M07-T09 closes a bounded, named fault matrix across channel discovery, immutable Bundle fetch,
+integrity, package resolution, reference admission, staging, durable commit, restart recovery, and
+final durable-record publication. Nineteen stable fault ids plus one exact-inventory test prove
+that faults before `COMMIT` preserve the authenticated baseline and publish no partial authority.
+A post-`COMMIT` fault is explicitly indeterminate: it consumes the attempt and requires full
+reauthentication of the durable winner before publication. Recovery faults expose neither active
+nor fallback lineage, and an external final-record change is never overwritten. Twenty focused
+runtime cases, 10 compiler-negative cases, and 11 root proof/mutation cases pass. The proof pins
+eight exact predecessor prerequisites, 22 ordered trace rows, the 105 package-root exports, and the
+36-key built runtime module surface without adding a public fault-injection API. N-004 becomes
+`TESTED`; P-12 remains `NOT_PROVEN`; N-038/N-041 and G07 remain open. M07-T10 still owns all
+ordered-sequence and race claims, including the database-level `journal_mode` decision; M07-T11
+owns separately built host consumption. Overall progress becomes 83/145 and M07 becomes 9/11.
+
+Evidence: `docs/proof/CONTROL-PLANE-RUNTIME-FAULT-INJECTION.md` and
+`docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json`
+`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9` (64,493 bytes).
+
+The M07-T09 CI registration produces the exact 146-workload, 69-proof-pair successor: 58 ordinary
+pairs, 11 exclusive barriers, 455 retained prerequisite segments, 2,769 ordered legacy leaf
+invocations, and 227 distinct leaves. These are local code-owned successor values; no hosted
+M07-T09 result is claimed.
 
 Reviewed reader checkpoint sequence 7 links predecessor head
 `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to
@@ -867,7 +891,7 @@ unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 cl
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 20 links exact sequence 19 head
-`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to current head
+`abf161e5a85053e19ce218127aa3f7d3a3ac8480b68b01a4185618ac732393a3` to sequence 20 head
 `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e`. It preserves all 17 frozen
 artifacts and all 34 reader identities while resealing only reader index `[30]` to 106,509 bytes
 (`sha256:d322bf867930215d0f9e0f532bdacbea4ba50145dfa5df38f2e559102cc080ef`). The fail-closed T07
@@ -877,6 +901,18 @@ exact successor receipts were repaired; the activation verifier and 18/18 root t
 this receipt repair changed no production behavior. Sequences 1–19 and every artifact byte remain
 unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 claim; the temporary
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
+
+Reviewed checkpoint sequence 21 links the exact sequence 20 head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`. It preserves sequences
+1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
+`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`, reseals 27 historical
+compatibility readers, and appends the 64,932-byte proof reader
+`sha256:da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f` plus the 17,341-byte root
+reader `sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`. The chain now
+authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
+not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
+removal by G07.
 
 ## M08 — Framework-neutral editor core
 

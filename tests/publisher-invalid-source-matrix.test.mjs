@@ -4,6 +4,7 @@ import { mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/prom
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { brotliDecompressSync } from "node:zlib";
 
 import {
   PUBLISHER_INVALID_SOURCE_MATRIX_FIXTURE_PINS,
@@ -28,6 +29,114 @@ const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const BUNDLE_PUBLICATION_PROOF_LIBRARY = "scripts/lib/publisher-bundle-publication-proof.mjs";
 const BUNDLE_PUBLICATION_ROOT_TEST = "tests/publisher-bundle-publication.test.mjs";
+const M07_T09_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH = `
+G6YFAJwFOVluOp2U88QmVT9UNUjLisJttu/r26baedXZzkIChNwXL8U6Y4h9997SYdmbQ0lQE5fTHwsfH3AKvemDjDF48wM3lqYB
+BtJFk6dY54EkmskjBooN08sc9AldWxbOfn/3WvZO7dzk+wd759vgu9uxHA+9f/P1CBK0LXVCoxXgIpdAyxn7pN38xx6259zYAboo
+sFy/bgNIO895PQP+eVuvX58r8vubf71AMBLU85o3+vpqQm0X60GK1erJJkxgBlHFnKEWCS2koI2hU7Cnwm7dexFhqUl7781glkNn
+o/8nGShtqiqXRND+8eNXOOvapEsXDncTbU8SH1oYHUQSsQj1crYsqfSacWpRTZmSTQfVlrV6Eg9Dt6rJilIrnqJGysyzTeTwCbAA
+3vNk+PRyn9vx4NGdp0W8Og5i7YyLWnbG9S2ve95obbIYV20+EK2AvKXyeS5URKZBjag+Bf8nvCW2TBWJVAXEpRFHM2rBqKygUUSp
+sEUyLpMiyAs5ARFQRid8unpyUjDCBkGzI3Pz4DpfgPq9XgIKRy9FtUor5qVPbtkiQ60oGUoOuFQsjuBvPKJYfzx047HzY9877vST
+x+uVkZvHDNUew3L2PG32cXKf/PGQj+fU6Z+Hnm+XQJvvMjusMTWQ4YfoJW8sGrMz5cqtJwjIjET7Lw+dBQ==
+`.replaceAll(/\s/gu, "");
+const M07_T09_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH = `
+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
+`.replaceAll(/\s/gu, "");
 
 const baseline = await buildPublisherInvalidSourceMatrixEvidence();
 const runtimeReceipt = baseline.runtimeReceipt;
@@ -59,6 +168,64 @@ async function sourceBytes(relativePath) {
 
 async function sourceText(relativePath) {
   return readFile(path.join(ROOT, relativePath), "utf8");
+}
+
+function applyExactRollbackPatch(currentBytes, encodedPatch) {
+  const patchText = brotliDecompressSync(Buffer.from(encodedPatch, "base64")).toString("utf8");
+  const currentLines = currentBytes.toString("utf8").split("\n");
+  const patchLines = patchText.split("\n");
+  const reconstructedLines = [];
+  let currentIndex = 0;
+  let patchIndex = 0;
+
+  while (patchIndex < patchLines.length) {
+    const header = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/u.exec(patchLines[patchIndex]);
+    if (header === null) {
+      patchIndex += 1;
+      continue;
+    }
+    const currentStart = Number(header[1]) - 1;
+    const expectedCurrentCount = Number(header[2] ?? "1");
+    const expectedRollbackCount = Number(header[4] ?? "1");
+    assert.ok(currentStart >= currentIndex);
+    reconstructedLines.push(...currentLines.slice(currentIndex, currentStart));
+    currentIndex = currentStart;
+    patchIndex += 1;
+    let currentCount = 0;
+    let rollbackCount = 0;
+
+    while (patchIndex < patchLines.length && !patchLines[patchIndex].startsWith("@@ ")) {
+      const patchLine = patchLines[patchIndex];
+      if (patchLine === "\\ No newline at end of file") {
+        patchIndex += 1;
+        continue;
+      }
+      const marker = patchLine[0];
+      const content = patchLine.slice(1);
+      if (marker === " ") {
+        assert.equal(currentLines[currentIndex], content);
+        reconstructedLines.push(content);
+        currentIndex += 1;
+        currentCount += 1;
+        rollbackCount += 1;
+      } else if (marker === "-") {
+        assert.equal(currentLines[currentIndex], content);
+        currentIndex += 1;
+        currentCount += 1;
+      } else if (marker === "+") {
+        reconstructedLines.push(content);
+        rollbackCount += 1;
+      } else {
+        break;
+      }
+      patchIndex += 1;
+    }
+    assert.equal(currentCount, expectedCurrentCount);
+    assert.equal(rollbackCount, expectedRollbackCount);
+  }
+
+  reconstructedLines.push(...currentLines.slice(currentIndex));
+  return Buffer.from(reconstructedLines.join("\n"), "utf8");
 }
 
 async function trackedMutation(relativePath, transform) {
@@ -188,12 +355,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-recovery && pnpm lint",
-    "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
+    "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-recovery && turbo run test",
-    "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-fault-injection && turbo run test",
+    "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1191,6 +1358,34 @@ test("[authority] pins the explicit isolated Vitest timeout", async () => {
 test("[authority] distinguishes semantic coordination drift from frozen surface drift", async () => {
   const currentT09ProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
   const currentT09RootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  assert.equal(currentT09ProofBytes.byteLength, 139_088);
+  assert.equal(
+    createHash("sha256").update(currentT09ProofBytes).digest("hex"),
+    "7680e332fe8c9c5e585022c3b05b885d6d40722a882f67f3a2646554f5413a46",
+  );
+  assert.equal(currentT09RootTestBytes.byteLength, 74_554);
+  assert.equal(
+    createHash("sha256").update(currentT09RootTestBytes).digest("hex"),
+    "0919d7a79dd353b23d1491cdec7c50a1fa58ab867a3ba9fc64a337cec2343e25",
+  );
+  const predecessorT08ProofBytes = applyExactRollbackPatch(
+    currentT09ProofBytes,
+    M07_T09_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH,
+  );
+  const predecessorT08RootTestBytes = applyExactRollbackPatch(
+    currentT09RootTestBytes,
+    M07_T09_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH,
+  );
+  assert.equal(predecessorT08ProofBytes.byteLength, 138_780);
+  assert.equal(
+    createHash("sha256").update(predecessorT08ProofBytes).digest("hex"),
+    "33e2683251e7bb515e090325b67dd4b2e5ce6be608b32955d9597b426a414cef",
+  );
+  assert.equal(predecessorT08RootTestBytes.byteLength, 63_887);
+  assert.equal(
+    createHash("sha256").update(predecessorT08RootTestBytes).digest("hex"),
+    "3cad2a4ea3b18ecadd6baa0c46c4e75b28b3bd059efef2ac57fc0f785c4ac5f3",
+  );
   const currentT10ProofBytes = await sourceBytes("scripts/lib/publisher-official-golden-proof.mjs");
   const currentT10RootTestBytes = await sourceBytes("tests/publisher-official-golden.test.mjs");
   const approvedCurrentT09 = await buildPublisherInvalidSourceMatrixEvidence(
@@ -1205,6 +1400,18 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
   );
   assert.deepEqual(approvedCurrentT09.artifactBytes, baseline.artifactBytes);
   assert.equal(approvedCurrentT09.artifactSha256, baseline.artifactSha256);
+
+  for (const [relativePath, predecessorBytes] of [
+    [BUNDLE_PUBLICATION_PROOF_LIBRARY, predecessorT08ProofBytes],
+    [BUNDLE_PUBLICATION_ROOT_TEST, predecessorT08RootTestBytes],
+  ]) {
+    await assert.rejects(
+      buildPublisherInvalidSourceMatrixEvidence(
+        fastOptions({ trackedFileBytes: { [relativePath]: predecessorBytes } }),
+      ),
+      expectCode("PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_DRIFT"),
+    );
+  }
 
   for (const { path: relativePath } of PUBLISHER_INVALID_SOURCE_MATRIX_SUCCESSOR_SURFACES) {
     const options = await trackedMutation(relativePath, (text) => {

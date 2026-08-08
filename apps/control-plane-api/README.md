@@ -431,9 +431,10 @@ recovery rules without inheriting this SQLite implementation choice.
 Only a certain durable commit publishes a current in-process
 `BundleRuntimeActivationAuthority`. `readState()` returns `active` only for authority created by
 that open controller. A preexisting durable record or an indeterminate commit returns
-`recovery-required`; raw persisted fields are never promoted to runtime authority. M07-T08 now
-owns the separate revalidation and reconstruction boundary below, while M07-T09 and M07-T10 own
-the exhaustive precommit fault and race matrices.
+`recovery-required`; raw persisted fields are never promoted to runtime authority. M07-T08 proves
+the separate revalidation and reconstruction boundary below, and M07-T09 proves the bounded,
+closed pre- and post-commit boundary-fault matrix. M07-T10 retains ownership of the remaining
+ordered fault-sequence and race matrix.
 
 ## Restart-recovery boundary
 
@@ -559,18 +560,18 @@ makes no tamper-proof, hostile-administrator, or anti-rollback claim.
 
 ## Explicitly deferred
 
-M07-T01 through M07-T08 establish immutable exact-byte persistence, Bundle integrity, exact
+M07-T01 through M07-T09 establish immutable exact-byte persistence, Bundle integrity, exact
 installed-package preflight, bounded surface/capability reference preflight, authenticated local
 Source/Bundle/channel transport, active-separated runtime-index staging, and one durable atomic
-activation-record transition plus exact restart reconstruction of an unchanged record. They do not
-yet provide:
+activation-record transition, exact restart reconstruction of an unchanged record, and a bounded
+19-case fault matrix across discovery through recovery. They do not yet provide:
 
-- M07-T09 through M07-T10 exhaustive last-known-good, fault, and race matrices; or
+- M07-T10 complete A → invalid B → valid C, concurrent activation, and restart race matrices; or
 - M07-T11 reference-host channel consumption.
 
 Callers must not treat a successful M07-T01/T05 Bundle write or a channel pointer as integrity
 verification, an M07-T02 integrity authority as package authority, an M07-T03 package authority as
 reference authority, an M07-T04 reference authority as staging authority, or an M07-T06 staged
 authority as committed or active state. A raw durable T07 record is not recovered runtime
-authority, and successful T08 reconstruction does not prove invalid-candidate preservation across
-every fault or race boundary.
+authority. T09 proves the reviewed fault boundaries, but only T10 owns the complete ordered
+activation and concurrency matrix.
