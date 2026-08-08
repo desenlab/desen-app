@@ -210,12 +210,15 @@ okuyucusunu (`sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a
 M07-T09 iddiası değildir; geçici ardıl köprüleri G07'de I07-04 tarafından kaldırılmak üzere
 `DEBT-I07-016` kaydındadır.
 
-Geçici shadow iş akışı ve karşılaştırma adaptörü kaldırılmıştır. Bu aşama seçmeli CI yapmaz: bilinmeyen
-bir değişiklik için daha az test çalıştırma işi I07-03 ve I07-04'e aittir. Kalan geçici blokların
-kaldırma sahibi ve son tarihi [`DEBT-REGISTER.md`](DEBT-REGISTER.md) içinde makine tarafından
-kontrol edilir. Teknik karar, güvenlik kapıları ve kesin kanıt
-[`ADR 0011`](../adr/0011-modular-proof-infrastructure.md) ile
-[`I07-02 baseline`](../proof/baselines/i07-02-required-exhaustive-equivalence.json) içinde kayıtlıdır.
+Kesin `REQUIRED + EXHAUSTIVE` çalıştırıcı tek geçme/kalma otoritesi olarak aynen korunur. I07-03,
+yalnızca pull request'lerde çalışan ayrı bir `SHADOW + AFFECTED` gözlem işi ekler. İzlenen tüm
+yolların sahipliği kesindir; bilinmeyen, belirsiz, güvenilmeyen, politika, bağımlılık, dondurulmuş
+girdi veya desteklenmeyen değişiklikler tam `EXHAUSTIVE` çalışmaya genişler. Dar bir seçim yapılırsa
+da seçilen tüm işler taze girdilerden gerçekten çalışır; önbellekteki kanıt başarısı kullanılmaz.
+Teknik karar ve sınırlar [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md), yerel kanıt ise
+[`I07-03 baseline`](../proof/baselines/i07-03-affected-selector-shadow.json) içinde kayıtlıdır.
+`DEBT-I07-017`, yalnızca shadow'a ait iş, sarmalayıcı ve test bağlantılarını I07-04'e, en geç G07'de
+kaldırılmak üzere atar.
 `M07-T07` tamamlandı: sistem M07-T04'ün referans kanıtı ile M07-T06'nın hazırlanmış adayını yalnızca
 aynı paket ve Bundle kimliğine aitlerse birleştiriyor. Bu birleşimden sonra staging adayını ilk
 bekleme veya disk işleminden önce tek kullanımlık hale getiriyor, aynı BundleStore kökünden Bundle'ı
@@ -276,11 +279,15 @@ olarak doğrular. Public fault hook, repository, SQLite handle veya yükleyici e
 `TESTED`; P-12 `NOT_PROVEN`, N-038 ve N-041 `PLANNED`, G07 ise açıktır. Bu çalışma alanı kanıtıdır;
 henüz hosted M07-T09 sonucu iddia edilmez.
 
-Sıradaki çalışma, 145 uygulama görevi sayacına dahil olmayan `I07-03`: seçmeli CI kararını henüz
-zorunlu kılmadan, bilinmeyen her durumu tam teste genişleten shadow affected-selector'ı ve gözlem
-eşiğini dondurmak. Bunun ardından sıradaki uygulama görevi `M07-T10`, yani A → geçersiz B → geçerli
-C, eşzamanlı aktivasyon ve yeniden başlatma davranışıdır. Güncel ilerleme 83/145 görev (%57), M07
-içinde 9/11 görev (%82) ve kanıt kapılarında 7/13'tür.
+I07-03 tamamlandı ama hiçbir seçmeli sonuç henüz zorunlu değildir. Terfi için her seçici
+kategorisinin mutasyonla kapsanması, sıfır yanlış negatif ve aynı revizyonda en az 20 ardışık uygun
+hosted dar-seçim affected/exhaustive karşılaştırmasının uyuşması gerekir. Gözlem dürüstçe `0 / 20`
+başlar; salt-okunur defter bu hesabı ölçebilir ama tek başına terfi yetkisi üretemez. I07-04 ayrıca
+kesin GitHub run, job, revizyon ve receipt kökenini doğrulayıp sabitlemeden seçmeli çalışmayı zorunlu
+kılamaz. Bu nedenle I07-04 `NOT_STARTED` olarak eşiği bekler. `main`, sürüm ve manuel denetim
+çalışmaları daima `EXHAUSTIVE` kalır. Sıradaki uygulama görevi `M07-T10`, yani A → geçersiz
+B → geçerli C, eşzamanlı aktivasyon ve yeniden başlatma davranışıdır. Güncel ilerleme 83/145 görev
+(%57), M07 içinde 9/11 görev (%82) ve kanıt kapılarında 7/13'tür; I07-03 bu sayaçlara dahil değildir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

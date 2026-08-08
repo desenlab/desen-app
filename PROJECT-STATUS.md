@@ -708,14 +708,22 @@ adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cu
 archived in the
 [I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json).
 
-The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count. It introduces
-no affected-path selector and does not retire the sequential runner, which remains an explicit
-manual `legacy-rollback` path. I07-04 owns G07-due current-reader cleanup; I07-05 owns legacy
-retirement by G12. M07-T09 is now `DONE`; its proof pair extends the working-tree successor to 146
-workloads and 69 proof pairs without rewriting the frozen 130/61 I07-02 baseline. I07-03 is the
-next operational work item and will freeze the shadow affected-selector before M07-T10 supplies
-its first real observation; M07-T10 remains the next implementation task. No hosted M07-T09 result
-is claimed.
+The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count
+and does not retire the sequential runner, which remains an explicit manual `legacy-rollback`
+path. I07-03 is now `DONE`: the exact `REQUIRED + EXHAUSTIVE` runner remains the sole pass/fail
+authority while a separate pull-request-only `SHADOW + AFFECTED` job observes complete exact
+tracked-path ownership and fresh selected-workload execution. Every unknown, ambiguous, untrusted,
+policy, dependency, frozen-input, incomplete-diff, or unsupported condition expands to
+`EXHAUSTIVE`. Its frozen threshold starts honestly at `0 / 20`, so promotion is false and I07-04
+remains `NOT_STARTED` until every selector category has mutation coverage, false negatives remain
+zero, and at least 20 consecutive eligible same-revision hosted strict-subset comparisons agree.
+The I07-03 ledger can measure that arithmetic but can never authorize promotion from caller data;
+I07-04 must separately pin and authenticate the exact GitHub run, job, revision, and receipt
+provenance before it may change required execution.
+`main`, release, and manual-audit execution remains exhaustive. The local I07-03 checkpoint makes
+no hosted result claim. `DEBT-I07-017` assigns shadow-only cleanup to I07-04 for removal by G07;
+I07-05 owns legacy retirement by G12. M07-T09 remains `DONE`, and M07-T10 is the next implementation
+task.
 
 ## Current milestone
 
@@ -799,13 +807,14 @@ is claimed.
   `M07-T09 — Fault injection from discovery and immutable fetch through durable commit and recovery`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
-  `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`
-- Next operational and infrastructure task:
+  `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`
+- Next operational and infrastructure task:
+  `I07-04 — Required affected-selector promotion after the frozen observation threshold` (`0 / 20`)
 - Next implementation task:
   `M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`
-- Status: M07-T09 and I07-02 are complete; M07-T10 is `NOT_STARTED`, its dependencies are
-  satisfied, and G07 remains open
+- Status: M07-T09 and I07-03 are complete; I07-04 and M07-T10 are `NOT_STARTED`, affected
+  promotion is false, M07-T10's dependencies are satisfied, and G07 remains open
 
 ## Completed preparation
 
@@ -1165,10 +1174,12 @@ explicitly labeled as a Working Draft, and the release operation changed no froz
 ## Completed infrastructure work and next implementation task
 
 I07-02 completed exact legacy/modular coverage parity, code-owned shared-state classification, and
-the official `REQUIRED + EXHAUSTIVE` CI cutover. Required CI runs no proof generator or writer,
-trusts no cached success, and executes the fresh complete workload. The legacy sequential path is
-manual rollback only; affected selection remains future work and every unknown or ambiguous
-selector condition must eventually expand to `EXHAUSTIVE`.
+the official `REQUIRED + EXHAUSTIVE` CI cutover. I07-03 then added a separate pull-request-only
+`SHADOW + AFFECTED` observer without changing that pass/fail authority. Complete exact tracked-path
+ownership and fail-closed classification expand every unproven condition to `EXHAUSTIVE`; any
+selected strict subset still runs fresh under the real isolation and closing guards. Required CI
+runs no proof generator or writer and trusts no cached success. The legacy sequential path remains
+manual rollback only.
 
 M07-T08 is complete. The restarted controller accepts only exact M07-T03 package authorities for
 the durable record's active and optional previous-good roles. It rebuilds each lineage through T04
@@ -1194,8 +1205,12 @@ have durably committed the new winner; it is resolved only by recovering that ex
 N-004 is now `TESTED`; P-12 remains `NOT_PROVEN`, while N-038 and N-041 remain `PLANNED` for their
 later owners.
 
-First complete
-`I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`, then implement
+I07-03 is complete with local evidence at
+`docs/proof/baselines/i07-03-affected-selector-shadow.json`. Observation begins at `0 / 20` and
+promotion remains false; no hosted I07-03 result is claimed. I07-04 stays `NOT_STARTED` until zero
+false negatives, mutation coverage for every selector category, and at least 20 consecutive
+eligible same-revision hosted strict-subset affected/exhaustive comparisons pass, followed by an
+exact authenticated hosted-evidence review. Next implement
 `M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`.
 
 CI-01 is complete. The archived hosted comparison is
@@ -2423,7 +2438,10 @@ M07-T09 evidence:
 - coverage decision: M07-T09 becomes `DONE`; N-004 becomes `TESTED`; P-12 remains `NOT_PROVEN`;
   N-038 and N-041 remain `PLANNED` for their remaining owners; G07 remains open; overall progress
   is 83/145, M07 progress is 9/11, and M07-T10 owns the next implementation slice for ordered fault
-  sequences and races after I07-03 freezes the shadow selector
+  sequences and races
+- infrastructure decision: I07-03 is `DONE` outside the implementation count; the separate
+  pull-request shadow observer starts at `0 / 20`, promotion is false, I07-04 is `NOT_STARTED`, and
+  no hosted I07-03 result is claimed; proof-gate progress remains 7/13
 
 ## Status vocabulary
 

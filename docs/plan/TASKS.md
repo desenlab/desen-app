@@ -44,7 +44,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | CI-01  | DONE        | M04-T02, explicit user authorization | Secure single-pass CI orchestration that preserves every proof while removing recursive repetition                                                | `docs/proof/baselines/ci-01-single-pass.json`                      |
 | I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
 | I07-02 | DONE        | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
-| I07-03 | NOT_STARTED | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
+| I07-03 | DONE        | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
 | I07-04 | NOT_STARTED | I07-03                               | Promote proven PR selection, retain exhaustive main/release/manual coverage, and remove all G07-due current-reader compatibility shims            | `docs/proof/baselines/i07-04-affected-selector-promotion.json`     |
 | I07-05 | NOT_STARTED | I07-04                               | Retire the legacy sequential runner only after rollback, failure, cancellation, hosted, and zero-reference gates pass                             | `docs/proof/baselines/i07-05-legacy-retirement.json`               |
 
@@ -61,16 +61,22 @@ frozen cutover evidence. Its 58 ordinary pairs and 11 exclusive barriers project
 prerequisite segments, 2,769 ordered leaf invocations, and 227 distinct leaf workloads. The retained
 sequential runner is available only through explicit manual `legacy-rollback`. Exact cutover
 workload, result, cancellation, tracked-workspace, hosted, and shared-state equivalence remains
-archived in the unchanged I07-02 baseline. M07-T09 is `DONE`. The working order next enters I07-03
-to freeze the shadow selector and observation threshold before M07-T10 supplies the first real
-change sample; M07-T10 remains the next implementation task. No hosted M07-T09 result is claimed.
+archived in the unchanged I07-02 baseline. M07-T09 and I07-03 are `DONE`; M07-T10 remains the next
+implementation task. No hosted M07-T09 or I07-03 result is claimed.
 
-I07-03 may observe later real task changes without selecting the required workload. Its threshold
-must be frozen before observation begins and must include every selector category, zero false
-negatives, and at least 20 consecutive same-revision hosted comparisons. I07-04 may then promote
-`AFFECTED` selection for eligible pull requests. Unknown, ambiguous, policy, dependency,
-frozen-input, unowned-path, or incomplete-diff changes must always expand to `EXHAUSTIVE`. Fresh
-`EXHAUSTIVE` verification remains mandatory on `main`, releases, and manual audits.
+I07-03 leaves the exact `REQUIRED + EXHAUSTIVE` runner unchanged as the sole pass/fail authority
+and adds a separate pull-request-only `SHADOW + AFFECTED` observation job. Exact ownership covers
+the complete tracked path set. Unknown, ambiguous, untrusted, policy, dependency, frozen-input,
+unowned-path, incomplete-diff, or unsupported changes expand to `EXHAUSTIVE`. A strict subset still
+runs every selected workload from fresh inputs and cannot reuse cached proof success. The frozen
+promotion threshold requires zero false negatives, mutation coverage for every selector category,
+and at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive
+comparisons. Observation begins at `0 / 20`, promotion is false, and I07-04 remains `NOT_STARTED`
+until the threshold passes and an exact GitHub run/job/revision/receipt provenance review is pinned.
+The pure I07-03 ledger measures threshold arithmetic but cannot itself authorize promotion from
+caller-supplied data. Fresh `EXHAUSTIVE` verification remains mandatory on `main`, releases, and
+manual audits. `DEBT-I07-017` assigns the shadow-only job, wrapper, and test wiring to I07-04 for
+removal by G07.
 
 Every temporary compatibility reader, receipt bridge, legacy runner, or shadow-only component
 created or retained by this migration must have an exact owner, removal trigger, deadline, and

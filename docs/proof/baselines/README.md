@@ -22,6 +22,10 @@ program, the rejected common-drift attempt, exact shared-state ownership, the re
 cutover, the manual-only legacy rollback boundary, the second current-reader checkpoint, and the
 three removed temporary comparison targets. It closes no protocol claim and introduces no
 affected-path selection.
+`i07-03-affected-selector-shadow.json` records the local fail-closed `SHADOW + AFFECTED` selector,
+complete exact tracked-path ownership, fresh selected-workload execution, frozen promotion
+threshold, and initial `0 / 20` observation state. It makes no hosted comparison or promotion claim;
+the exact `REQUIRED + EXHAUSTIVE` runner remains authoritative, and I07-04 remains `NOT_STARTED`.
 
 Evidence files must state the command, scope, source commit when one exists, result, and known
 limitations. Generated proof artifacts additionally record SHA-256 hashes at their owning task.

@@ -1,0 +1,156 @@
+{
+  "task": "I07-03",
+  "date": "2026-08-07",
+  "repository": "https://github.com/desenlab/desen-app",
+  "pullRequest": {
+    "number": null,
+    "url": null,
+    "branch": "agent/i07-03-affected-selector",
+    "candidateCommit": null
+  },
+  "authority": {
+    "required": "REQUIRED + EXHAUSTIVE",
+    "requiredWorkflow": ".github/workflows/ci.yml",
+    "requiredJob": "Quality gate",
+    "shadow": "SHADOW + AFFECTED",
+    "shadowWorkflow": ".github/workflows/ci.yml",
+    "shadowJob": "Affected shadow observation",
+    "shadowCanAuthorizePass": false,
+    "requiredRunnerChanged": false,
+    "affectedPromoted": false
+  },
+  "inventory": {
+    "profile": "desen.ci.exhaustive-workload-inventory.v1",
+    "inventorySha256": "3328b640fdb9428cb52a2453a95e2838338ddc7788d56a95089fa67b021484d8",
+    "workloads": 146,
+    "proofPairs": 69,
+    "globalPrefixWorkloads": 6,
+    "globalSuffixWorkloads": 2
+  },
+  "changeBoundary": {
+    "profile": "desen.ci.affected-change-boundary.v1",
+    "sameRepositoryRequired": true,
+    "completeHistoryRequired": true,
+    "exactPullRequestMergeRequired": true,
+    "cleanTrackedTreeRequired": true,
+    "acceptedChangeKind": "same-mode regular-file modification",
+    "unsafeInputDisposition": "EXHAUSTIVE",
+    "opaqueReceiptIdentityRequired": true,
+    "callerCreatedOrClonedReceiptAccepted": false
+  },
+  "ownership": {
+    "profile": "desen.ci.affected-workload-ownership.v1",
+    "trackedPathCount": 979,
+    "trackedPathSetSha256": "d722fe60113281b1cb6d9542ef804b504e782189c8174896d740bf19c4aee168",
+    "proofOwnedPathCount": 138,
+    "ownershipSha256": "c0f01919fa6dbb288c9310e4436ba70eb255b08a70173e3168e0af1588088681",
+    "completeExactOneClassification": true,
+    "categories": {
+      "PROOF_UNIT": 138,
+      "CI_POLICY": 42,
+      "DEPENDENCY_POLICY": 30,
+      "FROZEN_INPUT": 112,
+      "PACKAGE_OR_APPLICATION": 375,
+      "SHARED_PROOF_INFRASTRUCTURE": 167,
+      "PROJECT_DOCUMENTATION": 104,
+      "REPOSITORY_POLICY": 11
+    },
+    "strictSubsetEligibleCategory": "PROOF_UNIT",
+    "allOtherCategoriesForceExhaustive": true
+  },
+  "impactGraph": {
+    "profile": "desen.ci.affected-impact-graph.v1",
+    "impactGraphSha256": "7f50b2f3802ddd8c309079c1c135901a18734e1729e98c761f7d4522629f797a",
+    "closure": "owners plus transitive prerequisites and dependents",
+    "globalChecksAlwaysIncluded": true,
+    "suffixDependencyPolicy": "SELECTED_ROOT_BARRIER",
+    "multiProofExecutionCovered": true
+  },
+  "selector": {
+    "profile": "desen.ci.shadow-affected-selector.v1",
+    "selectorSha256": "e61531119a8a538bdc84ed8266834376b37c626116486d4dc7d58bb44f712c84",
+    "comparisonAuthoritySourceCount": 18,
+    "comparisonAuthorityBindsAlgorithmsAndToolchain": true,
+    "output": "execution plan only",
+    "unknownToExhaustive": true,
+    "strictSubsetExecutionFresh": true,
+    "cachedProofSuccessRead": false
+  },
+  "observationThreshold": {
+    "profile": "desen.ci.affected-observation-threshold.v1",
+    "thresholdSha256": "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
+    "minimumConsecutiveEligibleComparisons": 20,
+    "maximumFalseNegatives": 0,
+    "sameRevisionWithinComparisonRequired": true,
+    "freshHostedExecutionsRequired": true,
+    "cachedSuccessAllowed": false,
+    "ownershipCategoriesMutationCovered": 8,
+    "decisionCategoriesMutationCovered": 8,
+    "eligibleComparisonsAtFreeze": 0,
+    "consecutiveEligibleComparisonsAtFreeze": 0,
+    "thresholdSatisfiedAtFreeze": false,
+    "hostedEvidenceAuthenticatedAtFreeze": false,
+    "authenticatedReviewRequired": true,
+    "pureLedgerCanAuthorizePromotion": false,
+    "promotionEligibleAtFreeze": false
+  },
+  "execution": {
+    "receiptProfile": "desen.ci.shadow-affected-execution.v1",
+    "fallbackRunsDuplicateExhaustiveWork": false,
+    "selectedWorkloadsAwaitObservedClose": true,
+    "trackedWorkspaceGuard": true,
+    "untrackedWorkspaceGuard": true,
+    "buildOutputSeal": true,
+    "firstTerminalFailureWins": true,
+    "cancellationAfterObservedCloseCanPass": false,
+    "closingGuardDiagnosticsPreserved": true,
+    "shadowCliAlwaysNonAuthoritative": true
+  },
+  "localVerification": {
+    "sourceRevision": null,
+    "contractCommand": "node --test scripts/ci/test/affected-change-boundary.test.mjs scripts/ci/test/affected-workload-ownership.test.mjs scripts/ci/test/affected-impact-graph.test.mjs scripts/ci/test/affected-observation-threshold.test.mjs scripts/ci/test/affected-workload-selector.test.mjs scripts/ci/test/shadow-affected-quality-gate.test.mjs scripts/ci/test/required-exhaustive-equivalence.test.mjs scripts/ci/test/infrastructure-debt.test.mjs",
+    "contractTests": 91,
+    "contractResult": "PASS",
+    "ciInfrastructureCommand": "node --test scripts/ci/test/*.test.mjs",
+    "ciInfrastructureTests": 202,
+    "ciInfrastructureResult": "PASS",
+    "requiredExhaustiveCommand": "node scripts/ci/run-required-exhaustive-quality-gate.mjs",
+    "requiredExhaustiveResult": "PENDING"
+  },
+  "hostedVerification": {
+    "candidateRun": null,
+    "finalRun": null,
+    "requiredConclusion": "PENDING",
+    "shadowConclusion": "PENDING",
+    "firstObservationCounted": false,
+    "reason": "The I07-03 bootstrap changes CI policy and selector authority, so its fail-closed exhaustive fallback is not an eligible strict-subset observation."
+  },
+  "infrastructureDebt": {
+    "profile": "desen.ci.infrastructure-debt.v1",
+    "entries": 17,
+    "open": 16,
+    "closed": 1,
+    "newEntry": "DEBT-I07-017",
+    "removalOwner": "I07-04",
+    "deadline": "G07"
+  },
+  "nonClaims": [
+    "I07-03 does not replace or weaken the required exhaustive quality gate.",
+    "The frozen threshold starts at 0/20; no selective-CI safety or promotion claim is made.",
+    "Threshold arithmetic alone cannot authorize promotion; I07-04 must authenticate and pin exact hosted run, job, revision, and receipt provenance.",
+    "Exhaustive fallbacks do not count as eligible observations.",
+    "Main, release, and manual-audit execution remains fresh and exhaustive.",
+    "The retained sequential runner is not retired; I07-05 owns its later removal.",
+    "Current-reader compatibility shims remain owned by I07-04.",
+    "No frozen protocol byte, protocol claim, implementation-task count, milestone count, or proof-gate count changes."
+  ],
+  "progress": {
+    "implementationTasksComplete": 83,
+    "implementationTasksTotal": 145,
+    "m07TasksComplete": 9,
+    "m07TasksTotal": 11,
+    "proofGatesComplete": 7,
+    "proofGatesTotal": 13
+  },
+  "next": "M07-T10; continue I07-03 observations toward I07-04 promotion in parallel"
+}

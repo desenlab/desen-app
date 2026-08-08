@@ -366,6 +366,35 @@ output root across the proof phase and compares non-ignored untracked state acro
 execution region. A dependency download cache may save network time; no build, test, checkpoint,
 mutation, or proof pass is reusable authority.
 
+## I07-03 shadow-affected observation
+
+I07-03 leaves `run-required-exhaustive-quality-gate.mjs` unchanged as the sole pass/fail authority.
+A separate pull-request-only job invokes `run-shadow-affected-quality-gate.mjs` with
+`SHADOW + AFFECTED`; it cannot make CI pass, skip an authoritative workload, or publish cached
+proof success.
+
+The selector authenticates the exact tracked-path set, the same-repository merge boundary, path
+ownership, and the affected dependency closure. Unknown, ambiguous, untrusted, policy, dependency,
+frozen-input, unowned, incomplete-diff, unsupported-kind, or unsupported-mode changes select
+`EXHAUSTIVE`. A strict subset is only a plan: every selected workload still runs from fresh inputs
+under the same isolation and closing guards. `main`, release, and manual-audit execution remains
+`REQUIRED + EXHAUSTIVE`.
+
+Only exact process-local boundary receipts may reach the selector; clones and self-digested
+lookalikes fail closed. A composite comparison-authority digest seals 18 exact boundary, selector,
+graph, ownership, threshold, shadow-runner, required-oracle, workflow, and toolchain sources, so
+algorithm drift resets observation continuity. The affected suffix uses an explicit
+`SELECTED_ROOT_BARRIER`: only roots that genuinely ran satisfy its ordering barrier.
+
+Promotion is frozen behind zero false negatives, mutation coverage for every selector category,
+and at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive
+comparisons. The initial observation count is `0 / 20` and promotion is false; I07-04 remains
+`NOT_STARTED` until that threshold passes. The pure ledger never grants promotion from supplied
+records; I07-04 must separately pin exact authenticated hosted run/job/revision/receipt evidence.
+The I07-03 baseline records local evidence only and
+makes no hosted-run claim. `DEBT-I07-017` assigns the shadow-only job, wrapper, and test wiring to
+I07-04 for removal by G07.
+
 ## Completed promotion boundary
 
 I07-02 recorded exact workload equality, exactly-once coverage, matching outcomes, clean
@@ -373,7 +402,8 @@ tracked-workspace parity, safe cancellation, shared-state classification, and lo
 evidence before completing the workflow cutover. The accepted evidence is
 `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json`. I07-02 implements no
 affected-path selector. Its promotion closed `DEBT-I07-008` by removing the temporary shadow
-workflow and modular comparison adapter/test. I07-03 may calculate `AFFECTED` plans only in shadow;
-any unknown or ambiguous input expands to `EXHAUSTIVE`. I07-04 owns selector promotion and G07-due
-reader cleanup. `DEBT-I07-007` keeps the sequential runner, equivalence adapter, and other
+workflow and modular comparison adapter/test. I07-03 now calculates `AFFECTED` plans only in the
+separate non-authoritative observer; any unproven input expands to `EXHAUSTIVE`. Its frozen
+threshold remains at `0 / 20`, so I07-04 owns both later selector promotion and G07-due reader and
+shadow-only cleanup. `DEBT-I07-007` keeps the sequential runner, equivalence adapter, and other
 rollback-only paths until I07-05 proves their removal gates.

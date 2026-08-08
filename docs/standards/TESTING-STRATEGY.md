@@ -167,11 +167,26 @@ temporary shadow workflow and modular comparison adapter/test. Under `DEBT-I07-0
 sequential runner and rollback-equivalence adapter remain test targets until I07-05 proves their
 exact removal conditions.
 
-Later `AFFECTED` planning cannot become a required shortcut until it has complete tracked-path
-ownership, reverse dependency closure, exact exhaustive comparison, and fail-closed
-unknown-to-exhaustive behavior. Even after promotion, `main`, release, and manual-audit runs remain
-exhaustive. No phase may trust cached build, test, mutation, checkpoint, or proof success; only
-immutable dependency downloads may be cached.
+I07-03 adds a separate pull-request-only `SHADOW + AFFECTED` observer while leaving the exact
+`REQUIRED + EXHAUSTIVE` runner as the sole pass/fail authority. Its tests prove complete exact
+tracked-path ownership, authenticated change boundaries, reverse dependency closure, and
+fail-closed expansion of unknown, ambiguous, untrusted, policy, dependency, frozen-input,
+incomplete-diff, or unsupported changes to `EXHAUSTIVE`. A strict-subset plan must still execute
+every selected workload from fresh inputs; no phase may trust cached build, test, mutation,
+checkpoint, or proof success. Only immutable dependency downloads may be cached.
+
+Mutation and race coverage additionally reject fabricated or cloned Git-boundary receipts, source
+authority drift, multi-proof ordering mismatches, absent-root dependency fabrication, cancellation
+at every region boundary, and replacement of a primary execution failure by a closing-guard error.
+
+Promotion remains false until every selector category is mutation-covered, false negatives remain
+zero, and at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive
+comparisons agree. Observation starts at `0 / 20`; I07-04 is `NOT_STARTED` until the frozen
+threshold passes and exact hosted provenance is independently authenticated. The pure ledger can
+report threshold arithmetic but always returns promotion false. Even after promotion, `main`,
+release, and manual-audit runs remain exhaustive.
+The I07-03 baseline records local evidence only and makes no hosted comparison claim.
+`DEBT-I07-017` assigns the shadow-only job, wrapper, and test wiring to I07-04 for removal by G07.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned

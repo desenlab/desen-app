@@ -26,6 +26,9 @@ const REQUIRED_EXHAUSTIVE_COMMAND =
   "timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-exhaustive-quality-gate.mjs";
 const RETAINED_LEGACY_COMMAND = "node scripts/run-ci-quality-gate.mjs";
 const REQUIRED_EXHAUSTIVE_ENTRYPOINT = "scripts/ci/run-required-exhaustive-quality-gate.mjs";
+const SHADOW_AFFECTED_COMMAND =
+  "timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-shadow-affected-quality-gate.mjs";
+const SHADOW_AFFECTED_ENTRYPOINT = "scripts/ci/run-shadow-affected-quality-gate.mjs";
 const RETAINED_LEGACY_ENTRYPOINT = "scripts/run-ci-quality-gate.mjs";
 
 const RETIRED_CUTOVER_PATHS = Object.freeze([
@@ -335,7 +338,7 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.equal(scalarValue(concurrency, "cancel-in-progress", 2), "true");
 
   const jobs = extractMappingBlock(workflow, "jobs", 0);
-  assert.deepEqual(directMappingKeys(jobs, 2), ["quality", "legacy-rollback"]);
+  assert.deepEqual(directMappingKeys(jobs, 2), ["quality", "affected-shadow", "legacy-rollback"]);
 
   const requiredJob = extractMappingBlock(jobs, "quality", 2);
   assert.equal(
@@ -344,7 +347,21 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   );
   assert.equal(exactRunCount(requiredJob, REQUIRED_EXHAUSTIVE_COMMAND), 1);
   assert.equal(exactRunCount(requiredJob, RETAINED_LEGACY_COMMAND), 0);
+  assert.equal(exactRunCount(requiredJob, SHADOW_AFFECTED_COMMAND), 0);
   assert.equal(scalarValue(requiredJob, "timeout-minutes", 4), "25");
+
+  const shadowJob = extractMappingBlock(jobs, "affected-shadow", 2);
+  assert.equal(scalarValue(shadowJob, "if", 4), "${{ github.event_name == 'pull_request' }}");
+  assert.equal(scalarValue(shadowJob, "continue-on-error", 4), "true");
+  assert.equal(scalarValue(shadowJob, "timeout-minutes", 4), "25");
+  assert.equal(exactRunCount(shadowJob, SHADOW_AFFECTED_COMMAND), 1);
+  assert.equal(exactRunCount(shadowJob, REQUIRED_EXHAUSTIVE_COMMAND), 0);
+  assert.equal(exactRunCount(shadowJob, RETAINED_LEGACY_COMMAND), 0);
+  assert.match(shadowJob, /fetch-depth: 0/u);
+  assert.match(shadowJob, /DESEN_CI_BASE_SHA/u);
+  assert.match(shadowJob, /DESEN_CI_HEAD_SHA/u);
+  assert.match(shadowJob, /DESEN_CI_SAME_REPOSITORY/u);
+  assert.doesNotMatch(shadowJob, /actions\/cache\/save/u);
 
   const legacyJob = extractMappingBlock(jobs, "legacy-rollback", 2);
   assert.equal(
@@ -355,8 +372,10 @@ test("official CI admits only required exhaustive authority and a manual legacy 
   assert.equal(exactRunCount(legacyJob, REQUIRED_EXHAUSTIVE_COMMAND), 0);
 
   assert.equal(exactRunCount(workflow, REQUIRED_EXHAUSTIVE_COMMAND), 1);
+  assert.equal(exactRunCount(workflow, SHADOW_AFFECTED_COMMAND), 1);
   assert.equal(exactRunCount(workflow, RETAINED_LEGACY_COMMAND), 1);
   assert.equal(exactTextCount(workflow, REQUIRED_EXHAUSTIVE_ENTRYPOINT), 1);
+  assert.equal(exactTextCount(workflow, SHADOW_AFFECTED_ENTRYPOINT), 1);
   assert.equal(exactTextCount(workflow, RETAINED_LEGACY_ENTRYPOINT), 1);
   assert.equal(workflow.includes("DESEN_CI_AUTHORITY"), false);
 

@@ -22,7 +22,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07:** `█████████░░` **9 / 11 tasks complete (82%)**
 
-**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-03` · **Next implementation:** `M07-T10` (`NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-04` (observation `0 / 20`) · **Next implementation:** `M07-T10` (`NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -336,15 +336,20 @@ authenticates 18 frozen artifacts and 36 current readers. This is reviewed local
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
 
-The temporary shadow workflow and modular comparison adapter/test are removed, closing
-`DEBT-I07-008`. The sequential runner remains available only through explicit manual
-`legacy-rollback`; I07-02 adds no affected-path selector. Remaining reader and retirement work
-stays machine-owned by I07-04 and I07-05 in the
-[debt register](docs/plan/DEBT-REGISTER.md). Exact evidence is preserved in the
-[I07-02 baseline](docs/proof/baselines/i07-02-required-exhaustive-equivalence.json); implementation
-progress is 83/145. The next working item is I07-03, which freezes the shadow affected-selector
-before M07-T10 supplies its first real observation; M07-T10 remains the next implementation task.
-No hosted M07-T09 result is claimed here.
+The exact `REQUIRED + EXHAUSTIVE` runner remains the sole pass/fail authority. I07-03 adds a
+separate pull-request-only `SHADOW + AFFECTED` observation job with complete exact tracked-path
+ownership. Unknown, ambiguous, untrusted, policy, dependency, frozen-input, or unsupported changes
+expand to `EXHAUSTIVE`; a strict subset still executes every selected workload from fresh inputs
+and cannot reuse cached proof success. Promotion requires zero false negatives, mutation coverage
+for every selector category, and at least 20 consecutive eligible same-revision hosted
+strict-subset comparisons. Observation starts honestly at `0 / 20`, so promotion is false and
+I07-04 remains `NOT_STARTED`. The pure ledger can measure the threshold but cannot authorize
+promotion; I07-04 must additionally authenticate the exact hosted run, job, revision, and receipt
+provenance. `main`, release, and manual-audit execution stays exhaustive. The
+[I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json) records this local
+checkpoint without claiming a hosted result. Shadow-only cleanup is open as `DEBT-I07-017`, owned
+by I07-04 for removal by G07; legacy retirement remains owned by I07-05. Implementation progress
+is unchanged at 83/145, and M07-T10 remains the next implementation task.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

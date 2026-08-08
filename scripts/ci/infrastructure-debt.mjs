@@ -778,6 +778,35 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
     ],
     "M07-T09",
   ),
+  authority(
+    "DEBT-I07-017",
+    "I07-04",
+    "G07",
+    [
+      target(".github/workflows/ci.yml", [
+        "affected-shadow",
+        "Affected shadow observation",
+        "Verify shadow affected contracts",
+        "Run non-authoritative affected shadow",
+        "DESEN_CI_BASE_SHA",
+        "DESEN_CI_HEAD_SHA",
+        "DESEN_CI_SAME_REPOSITORY",
+        "scripts/ci/run-shadow-affected-quality-gate.mjs",
+      ]),
+      target("scripts/ci/run-shadow-affected-quality-gate.mjs", [
+        "SHADOW_AFFECTED_RECEIPT_PROFILE",
+        "runShadowAffectedQualityGate",
+        "executeShadowAffectedQualityGate",
+        "printShadowAffectedReceipt",
+      ]),
+      target("scripts/ci/test/shadow-affected-quality-gate.test.mjs", [
+        "runs every selected command fresh and closes one exact strict subset",
+        "exhaustive fallback executes no duplicate shadow workload",
+        "a selected failure stops later work and remains non-authoritative",
+      ]),
+    ],
+    "I07-03",
+  ),
 ]);
 
 /**

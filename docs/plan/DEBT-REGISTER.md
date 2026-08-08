@@ -2,7 +2,7 @@
 
 This register tracks temporary compatibility structures registered by I07-01 and later
 task-specific successors while immutable task evidence is separated from current-checkpoint
-authentication and CI execution orchestration. Fifteen entries remain open; DEBT-I07-008 is closed
+authentication and CI execution orchestration. Sixteen entries remain open; DEBT-I07-008 is closed
 with authenticated removal evidence. An open entry records planned removal work and does not claim
 that its cleanup has already been implemented.
 
@@ -52,6 +52,7 @@ the full gate. A cleanup is complete only when:
 | DEBT-I07-014 | OPEN   | M07-T07 historical activation reader bridges             | M07-T07       | I07-04        | G07           |
 | DEBT-I07-015 | OPEN   | M07-T08 historical recovery reader bridges               | M07-T08       | I07-04        | G07           |
 | DEBT-I07-016 | OPEN   | M07-T09 historical fault-injection successor bridges     | M07-T09       | I07-04        | G07           |
+| DEBT-I07-017 | OPEN   | I07-03 affected-selector shadow-only CI wiring           | I07-03        | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -1190,3 +1191,58 @@ the full gate. A cleanup is complete only when:
 - Closure evidence: `PENDING` — record commit, pull request, sequence-21 checkpoint SHA-256, all
   nine frozen M07-T01 through M07-T09 artifact SHA-256 values, zero-reference output, and hosted
   required-exhaustive run URL.
+
+## DEBT-I07-017 — I07-03 affected-selector shadow-only CI wiring
+
+- Status: `OPEN`
+- Registered by infrastructure task: `I07-03`
+- Removal owner: `I07-04`
+- Exact paths and symbols:
+  - `.github/workflows/ci.yml`
+    - `affected-shadow`
+    - `Affected shadow observation`
+    - `Verify shadow affected contracts`
+    - `Run non-authoritative affected shadow`
+    - `DESEN_CI_BASE_SHA`
+    - `DESEN_CI_HEAD_SHA`
+    - `DESEN_CI_SAME_REPOSITORY`
+    - `scripts/ci/run-shadow-affected-quality-gate.mjs`
+  - `scripts/ci/run-shadow-affected-quality-gate.mjs`
+    - `SHADOW_AFFECTED_RECEIPT_PROFILE`
+    - `runShadowAffectedQualityGate`
+    - `executeShadowAffectedQualityGate`
+    - `printShadowAffectedReceipt`
+  - `scripts/ci/test/shadow-affected-quality-gate.test.mjs`
+    - `runs every selected command fresh and closes one exact strict subset`
+    - `exhaustive fallback executes no duplicate shadow workload`
+    - `a selected failure stops later work and remains non-authoritative`
+- Reason retained: I07-03 must collect real same-revision affected/exhaustive observations while
+  the official quality gate remains `REQUIRED + EXHAUSTIVE`. The separate pull-request job,
+  execution wrapper, receipt printer, and focused shadow assertions are deliberately
+  non-authoritative migration structures. The affected selector, tracked-path ownership, impact
+  graph, frozen threshold, and their hostile-input contracts are enduring safety authorities and
+  are intentionally outside this shadow-only cleanup entry.
+- Objective removal trigger: the frozen zero-of-twenty observation threshold reaches at least 20
+  consecutive eligible hosted same-revision `AFFECTED`/`EXHAUSTIVE` comparisons with zero false
+  negatives and complete selector plus ownership-category coverage; I07-04 then promotes affected
+  selection only for eligible pull requests. The shadow-only job, wrapper, receipt printer, and
+  named focused-test markers above are removed or replaced by required eligible-PR authority,
+  while `main`, release, and manual-audit execution remain fresh `REQUIRED + EXHAUSTIVE`.
+- Must close by gate: `G07`
+- Exact verification and zero-reference rule:
+  - `node scripts/ci/verify-infrastructure-debt.mjs`
+  - `node --test scripts/ci/test/infrastructure-debt.test.mjs`
+  - `node --test scripts/ci/test/affected-observation-threshold.test.mjs`
+  - `node --test scripts/ci/test/affected-workload-ownership.test.mjs`
+  - `node --test scripts/ci/test/affected-impact-graph.test.mjs`
+  - `node --test scripts/ci/test/affected-change-boundary.test.mjs`
+  - `node --test scripts/ci/test/affected-workload-selector.test.mjs`
+  - `node --test scripts/ci/test/shadow-affected-quality-gate.test.mjs`
+  - scoped zero-reference verification must inspect the three exact targets above, treating a
+    removed target as absent, and find none of the registered symbols after I07-04 promotion. The
+    enduring selector, ownership, graph, threshold, change-boundary, and required exhaustive
+    authorities are outside this zero-reference scope.
+- Closure evidence: `PENDING` — record the I07-04 commit and pull request, the frozen I07-03
+  threshold SHA-256, the 20 qualifying hosted comparison run pairs, category-coverage and
+  zero-false-negative receipts, exact zero-reference output, and the final hosted required
+  exhaustive `main` run URL.
