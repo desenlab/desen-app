@@ -380,6 +380,10 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         "a selected failure stops later work and remains non-authoritative",
       ],
     },
+    {
+      path: "scripts/lib/control-plane-bundle-store-proof.mjs",
+      symbols: ["APPROVED_I07_T03_TRACKED_RECEIPTS", "approvedI07T03"],
+    },
   ]);
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
     "CI v2 shadow",

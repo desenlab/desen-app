@@ -804,6 +804,10 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "exhaustive fallback executes no duplicate shadow workload",
         "a selected failure stops later work and remains non-authoritative",
       ]),
+      target("scripts/lib/control-plane-bundle-store-proof.mjs", [
+        "APPROVED_I07_T03_TRACKED_RECEIPTS",
+        "approvedI07T03",
+      ]),
     ],
     "I07-03",
   ),

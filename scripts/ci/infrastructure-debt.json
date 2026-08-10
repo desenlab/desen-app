@@ -1128,6 +1128,10 @@
             "exhaustive fallback executes no duplicate shadow workload",
             "a selected failure stops later work and remains non-authoritative"
           ]
+        },
+        {
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "symbols": ["APPROVED_I07_T03_TRACKED_RECEIPTS", "approvedI07T03"]
         }
       ]
     }
