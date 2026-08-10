@@ -8,8 +8,10 @@
   runner passed same-revision comparison; the official workflow now runs
   `REQUIRED + EXHAUSTIVE`. The temporary shadow workflow and modular comparison adapter/test are
   removed, closing `DEBT-I07-008`. I07-03 is complete: a separate pull-request-only
-  `SHADOW + AFFECTED` observer is frozen at `0 / 20` without changing required authority. No
-  hosted I07-03 result, affected promotion, current-reader cleanup, or legacy retirement is claimed
+  `SHADOW + AFFECTED` observer is frozen at `0 / 20` without changing required authority. Its
+  hosted bootstrap passed the authoritative Quality gate, while the shadow conservatively returned
+  `NOT_ELIGIBLE` and `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`; no eligible strict-subset
+  observation, affected promotion, current-reader cleanup, or legacy retirement is claimed
 
 ## Context
 
@@ -317,16 +319,31 @@ cannot mint a selection. One comparison-authority digest seals the exact boundar
 impact, threshold, selector, shadow-runner, required-oracle, workflow, and toolchain sources; any
 such source change resets later observation continuity. The affected graph explicitly projects the
 exhaustive all-root suffix barrier to the exact selected roots and validates every selected proof
-pair before execution.
+pair before execution. The frozen selector digest is
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` and binds 20 exact
+comparison-authority sources.
 
 The implemented observer owns the complete exact tracked-path set and runs only as a separate
 pull-request shadow job. The exact `REQUIRED + EXHAUSTIVE` runner remains unchanged and solely
 authoritative. The initial observation state is honestly `0 / 20`; promotion is false, so I07-04
 remains `NOT_STARTED` until Gate D's threshold passes. `main`, release, and manual-audit execution
-remain exhaustive. The local checkpoint is archived in
+remain exhaustive. In the hosted bootstrap, the authoritative Quality gate passed and the shadow
+job returned `NOT_ELIGIBLE` → `EXHAUSTIVE` because the bootstrap contained
+`UNSUPPORTED_CHANGE_KIND`. It therefore supplied no eligible strict-subset comparison and left the
+counter at `0 / 20`. Exact run, job, revision, and receipt identifiers are archived in
 [`i07-03-affected-selector-shadow.json`](../proof/baselines/i07-03-affected-selector-shadow.json);
-it makes no hosted comparison claim. `DEBT-I07-017` assigns the shadow-only job, wrapper, and test
-wiring to I07-04 for removal by G07.
+the baseline makes no promotion claim. Focused local contracts passed 91/91 and the complete CI
+infrastructure suite passed 203/203. The full local gate is
+`BLOCKED_BY_LOCAL_SANDBOX`: loopback `listen` returned `EPERM` in two pre-existing TCP lifecycle
+tests. That environment restriction is not a product regression; the passing hosted Quality gate
+remains authoritative. `DEBT-I07-017` assigns the shadow-only job, wrapper, and test wiring to
+I07-04 for removal by G07.
+
+I07-03 also appends reviewed current-reader checkpoint sequence 22 without rewriting sequence 21.
+It links predecessor head `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`
+to `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`, retains the same 18
+frozen artifacts and 36 reader identities, and reseals only workflow-dependent indexes
+`[8, 10, 11, 12, 14]`. Every frozen artifact byte remains unchanged.
 
 The I07-03 ledger is deliberately non-authoritative. It can report whether supplied observations
 meet the 20/20 arithmetic, but it always returns promotion false because inert caller data cannot
@@ -456,7 +473,8 @@ This ADR does not claim:
   I07-05 and Gate E;
 - that the protocol task count, proof-gate count, or protocol claims have changed;
 - that selective CI is safe before Gate D;
-- that I07-03 has a hosted comparison result or has advanced beyond `0 / 20` observations;
+- that I07-03's hosted bootstrap is an eligible strict-subset comparison or has advanced beyond
+  `0 / 20` observations;
 - that a cached proof result is acceptable;
 - that any frozen artifact may be regenerated from current source; or
 - that M07-T02 or any protocol claim has advanced.

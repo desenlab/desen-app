@@ -199,7 +199,7 @@ yerel okuyucu kanıtıdır; hosted M07-T08 sonucu iddia etmez. Geçici uyumluluk
 `DEBT-I07-015` olarak I07-04'e, G07'de kaldırılmak üzere kayıtlı kalır.
 
 İncelenmiş sıra 21, sıra 20'nin
-`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başından güncel
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` başından o zamanki
 `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` başına bağlanır. Sıra
 1–20'yi ve önceki tüm eser baytlarını aynen korur; 64.493 baytlık M07-T09 eserini
 (`sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`) ekler, 27 tarihsel
@@ -210,13 +210,30 @@ okuyucusunu (`sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a
 M07-T09 iddiası değildir; geçici ardıl köprüleri G07'de I07-04 tarafından kaldırılmak üzere
 `DEBT-I07-016` kaydındadır.
 
+İncelenmiş sıra 22, kesin sıra 21 başı
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` değerini
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` güncel başına bağlar. 18
+değişmez eserin tamamı ve 36 okuyucu kimliği korunur; yalnızca iş akışına bağımlı
+`[8, 10, 11, 12, 14]` okuyucu indeksleri yeniden mühürlenir ve hiçbir dondurulmuş eser baytı
+değişmez. Bu ek, I07-03 CI iş akışı alındılarının kesin yayılımını kaydeder; yeni bir kanıt iddiası
+oluşturmaz.
+
 Kesin `REQUIRED + EXHAUSTIVE` çalıştırıcı tek geçme/kalma otoritesi olarak aynen korunur. I07-03,
 yalnızca pull request'lerde çalışan ayrı bir `SHADOW + AFFECTED` gözlem işi ekler. İzlenen tüm
 yolların sahipliği kesindir; bilinmeyen, belirsiz, güvenilmeyen, politika, bağımlılık, dondurulmuş
 girdi veya desteklenmeyen değişiklikler tam `EXHAUSTIVE` çalışmaya genişler. Dar bir seçim yapılırsa
 da seçilen tüm işler taze girdilerden gerçekten çalışır; önbellekteki kanıt başarısı kullanılmaz.
-Teknik karar ve sınırlar [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md), yerel kanıt ise
-[`I07-03 baseline`](../proof/baselines/i07-03-affected-selector-shadow.json) içinde kayıtlıdır.
+Seçici 20 kaynaklı karşılaştırma otoritesiyle
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` değerine sabitlenmiştir.
+Teknik karar ve sınırlar [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md), kesin yerel ve
+hosted kanıt ise [`I07-03 baseline`](../proof/baselines/i07-03-affected-selector-shadow.json) içinde
+kayıtlıdır. Hosted başlangıç başarıyla çalıştı; shadow sonucu
+`NOT_ELIGIBLE → EXHAUSTIVE / UNSUPPORTED_CHANGE_KIND` olduğu için uygun bir dar-alt-küme gözlemi
+oluşmadı ve sayaç `0 / 20` kaldı. Yetkili hosted Quality gate geçti. Yerelde odaklı sözleşmeler
+91/91, CI altyapı testleri 203/203 geçti. Tam yerel `REQUIRED + EXHAUSTIVE` çalışması ise iki
+önceden var olan control-plane TCP yaşam döngüsü vakasında sandbox'ın `127.0.0.1` dinlemesini
+`EPERM` ile reddetmesi nedeniyle `BLOCKED_BY_LOCAL_SANDBOX` olarak kaydedildi; aynı depo otoritesi
+hosted gate'te geçti. Kesin run ve job kimlikleri baseline'dadır.
 `DEBT-I07-017`, yalnızca shadow'a ait iş, sarmalayıcı ve test bağlantılarını I07-04'e, en geç G07'de
 kaldırılmak üzere atar.
 `M07-T07` tamamlandı: sistem M07-T04'ün referans kanıtı ile M07-T06'nın hazırlanmış adayını yalnızca
@@ -282,7 +299,9 @@ henüz hosted M07-T09 sonucu iddia edilmez.
 I07-03 tamamlandı ama hiçbir seçmeli sonuç henüz zorunlu değildir. Terfi için her seçici
 kategorisinin mutasyonla kapsanması, sıfır yanlış negatif ve aynı revizyonda en az 20 ardışık uygun
 hosted dar-seçim affected/exhaustive karşılaştırmasının uyuşması gerekir. Gözlem dürüstçe `0 / 20`
-başlar; salt-okunur defter bu hesabı ölçebilir ama tek başına terfi yetkisi üretemez. I07-04 ayrıca
+kalır: ilk hosted shadow sonucu desteklenmeyen değişiklik türü nedeniyle tam çalışmaya genişledi ve
+uygun bir dar seçim değildi. Salt-okunur defter bu hesabı ölçebilir ama tek başına terfi yetkisi
+üretemez. I07-04 ayrıca
 kesin GitHub run, job, revizyon ve receipt kökenini doğrulayıp sabitlemeden seçmeli çalışmayı zorunlu
 kılamaz. Bu nedenle I07-04 `NOT_STARTED` olarak eşiği bekler. `main`, sürüm ve manuel denetim
 çalışmaları daima `EXHAUSTIVE` kalır. Sıradaki uygulama görevi `M07-T10`, yani A → geçersiz

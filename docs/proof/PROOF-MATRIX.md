@@ -1565,6 +1565,12 @@ authenticates 18 frozen artifacts and 36 current readers. This is reviewed local
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
 
+Reviewed checkpoint sequence 22 preserves sequence 21 as history and links predecessor head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. It authenticates the
+same 18 frozen artifacts and 36 reader identities, leaves every frozen byte unchanged, and reseals
+only workflow-dependent reader indexes `[8, 10, 11, 12, 14]`.
+
 The canonical local root remains application-owned and trusted. Without an external signature,
 monotonic sentinel, or equivalent independently stored cryptographic commitment, an internally
 consistent historical or fully replaced database plus matching Bundles cannot be distinguished
@@ -1630,3 +1636,19 @@ claim.
 
 `docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json`
 `sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9` (64,493 bytes).
+
+## I07-03 — Shadow affected selector bootstrap
+
+I07-03 does not advance a protocol claim or a proof gate. It freezes the fail-closed affected
+selector at
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f`, binding 20 exact
+comparison-authority sources, while leaving `REQUIRED + EXHAUSTIVE` as the sole pass/fail path.
+Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/203. The complete
+local gate is `BLOCKED_BY_LOCAL_SANDBOX` because loopback `listen` returned `EPERM` in two
+pre-existing TCP lifecycle tests; this is not a product regression.
+
+The hosted bootstrap passed the authoritative Quality gate. Its pull-request shadow returned
+`NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`, so no fresh strict-subset comparison
+occurred and no observation was eligible. Promotion remains false, the counter remains `0 / 20`,
+and I07-04 remains `NOT_STARTED`. Exact hosted run, job, revision, and receipt identifiers are in
+[`i07-03-affected-selector-shadow.json`](baselines/i07-03-affected-selector-shadow.json).

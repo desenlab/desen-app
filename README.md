@@ -325,7 +325,7 @@ unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 cl
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
-`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to its then-current head
 `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
 `sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`, reseals 27 historical
@@ -336,20 +336,35 @@ authenticates 18 frozen artifacts and 36 current readers. This is reviewed local
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
 
+Reviewed checkpoint sequence 22 links that exact sequence 21 head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. It preserves all 18
+frozen artifacts and all 36 reader identities while resealing only workflow-dependent reader
+indexes `[8, 10, 11, 12, 14]`; every frozen artifact remains byte-identical. This append records
+the exact I07-03 CI-workflow receipt propagation without changing any proof claim.
+
 The exact `REQUIRED + EXHAUSTIVE` runner remains the sole pass/fail authority. I07-03 adds a
 separate pull-request-only `SHADOW + AFFECTED` observation job with complete exact tracked-path
 ownership. Unknown, ambiguous, untrusted, policy, dependency, frozen-input, or unsupported changes
 expand to `EXHAUSTIVE`; a strict subset still executes every selected workload from fresh inputs
-and cannot reuse cached proof success. Promotion requires zero false negatives, mutation coverage
-for every selector category, and at least 20 consecutive eligible same-revision hosted
-strict-subset comparisons. Observation starts honestly at `0 / 20`, so promotion is false and
-I07-04 remains `NOT_STARTED`. The pure ledger can measure the threshold but cannot authorize
-promotion; I07-04 must additionally authenticate the exact hosted run, job, revision, and receipt
-provenance. `main`, release, and manual-audit execution stays exhaustive. The
-[I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json) records this local
-checkpoint without claiming a hosted result. Shadow-only cleanup is open as `DEBT-I07-017`, owned
-by I07-04 for removal by G07; legacy retirement remains owned by I07-05. Implementation progress
-is unchanged at 83/145, and M07-T10 remains the next implementation task.
+and cannot reuse cached proof success. The selector is pinned at
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across the 20 sources in
+its comparison authority. Promotion requires zero false negatives, mutation coverage for every selector
+category, and at least 20 consecutive eligible same-revision hosted strict-subset comparisons.
+The hosted bootstrap succeeded, but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE`
+with `UNSUPPORTED_CHANGE_KIND`; therefore it produced no eligible strict-subset observation and
+the count remains `0 / 20`. The authoritative hosted Quality gate passed. Locally, the focused
+I07-03 contract suite passed 91/91 and the complete CI-infrastructure suite passed 203/203. The
+full local `REQUIRED + EXHAUSTIVE` run is recorded as `BLOCKED_BY_LOCAL_SANDBOX`, because the
+sandbox denied `127.0.0.1` listening with `EPERM` in two pre-existing control-plane TCP lifecycle
+cases; the hosted gate proves the repository path itself passes. The pure ledger can measure the
+threshold but cannot authorize promotion, so I07-04 remains `NOT_STARTED` and must additionally
+authenticate the exact hosted run, job, revision, and receipt provenance. `main`, release, and
+manual-audit execution stays exhaustive. The
+[I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json) records the exact run
+and job identifiers. Shadow-only cleanup is open as `DEBT-I07-017`, owned by I07-04 for removal by
+G07; legacy retirement remains owned by I07-05. Implementation progress is unchanged at 83/145,
+and M07-T10 remains the next implementation task.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

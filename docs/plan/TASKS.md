@@ -62,7 +62,8 @@ prerequisite segments, 2,769 ordered leaf invocations, and 227 distinct leaf wor
 sequential runner is available only through explicit manual `legacy-rollback`. Exact cutover
 workload, result, cancellation, tracked-workspace, hosted, and shared-state equivalence remains
 archived in the unchanged I07-02 baseline. M07-T09 and I07-03 are `DONE`; M07-T10 remains the next
-implementation task. No hosted M07-T09 or I07-03 result is claimed.
+implementation task. No standalone hosted M07-T09 completion result is claimed. I07-03's hosted
+bootstrap and authoritative Quality-gate result are recorded in its exact baseline.
 
 I07-03 leaves the exact `REQUIRED + EXHAUSTIVE` runner unchanged as the sole pass/fail authority
 and adds a separate pull-request-only `SHADOW + AFFECTED` observation job. Exact ownership covers
@@ -75,8 +76,17 @@ comparisons. Observation begins at `0 / 20`, promotion is false, and I07-04 rema
 until the threshold passes and an exact GitHub run/job/revision/receipt provenance review is pinned.
 The pure I07-03 ledger measures threshold arithmetic but cannot itself authorize promotion from
 caller-supplied data. Fresh `EXHAUSTIVE` verification remains mandatory on `main`, releases, and
-manual audits. `DEBT-I07-017` assigns the shadow-only job, wrapper, and test wiring to I07-04 for
-removal by G07.
+manual audits. The selector is pinned at
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` and its comparison
+authority contains 20 sources. The hosted bootstrap succeeded, while the shadow correctly returned
+`NOT_ELIGIBLE → EXHAUSTIVE` with `UNSUPPORTED_CHANGE_KIND`; this was not an eligible strict-subset
+observation, so the counter stays `0 / 20`. The authoritative hosted Quality gate passed. Local
+evidence is 91/91 focused contracts and 203/203 CI-infrastructure tests. The full local
+`REQUIRED + EXHAUSTIVE` run is `BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned
+`EPERM` in two pre-existing control-plane TCP lifecycle cases; the hosted gate passed the same
+repository authority. Exact hosted run and job identifiers live in the
+[I07-03 baseline](../proof/baselines/i07-03-affected-selector-shadow.json). `DEBT-I07-017` assigns
+the shadow-only job, wrapper, and test wiring to I07-04 for removal by G07.
 
 Every temporary compatibility reader, receipt bridge, legacy runner, or shadow-only component
 created or retained by this migration must have an exact owner, removal trigger, deadline, and
@@ -909,7 +919,7 @@ unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 cl
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
-`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to its then-current head
 `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
 `sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`, reseals 27 historical
@@ -919,6 +929,13 @@ reader `sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`
 authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
+
+Reviewed checkpoint sequence 22 links that exact sequence 21 head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. It preserves all 18
+frozen artifacts and all 36 reader identities while resealing only workflow-dependent reader
+indexes `[8, 10, 11, 12, 14]`; every frozen artifact remains byte-identical. This append records
+the exact I07-03 CI-workflow receipt propagation without changing any proof claim.
 
 ## M08 — Framework-neutral editor core
 

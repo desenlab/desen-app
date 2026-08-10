@@ -692,7 +692,7 @@ unchanged. This is reviewed local-reader evidence and makes no hosted M07-T08 cl
 compatibility bridges remain `DEBT-I07-015`, owned by I07-04 for removal by G07.
 
 Reviewed checkpoint sequence 21 links the exact sequence 20 head
-`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to current head
+`8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to its then-current head
 `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`. It preserves sequences
 1–20 and every predecessor artifact byte, appends the 64,493-byte M07-T09 artifact
 `sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`, reseals 27 historical
@@ -702,6 +702,13 @@ reader `sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`
 authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
+
+Reviewed checkpoint sequence 22 links that exact sequence 21 head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. It preserves all 18
+frozen artifacts and all 36 reader identities while resealing only workflow-dependent reader
+indexes `[8, 10, 11, 12, 14]`; every frozen artifact remains byte-identical. This append records
+the exact I07-03 CI-workflow receipt propagation without changing any proof claim.
 
 The temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
@@ -714,16 +721,26 @@ path. I07-03 is now `DONE`: the exact `REQUIRED + EXHAUSTIVE` runner remains the
 authority while a separate pull-request-only `SHADOW + AFFECTED` job observes complete exact
 tracked-path ownership and fresh selected-workload execution. Every unknown, ambiguous, untrusted,
 policy, dependency, frozen-input, incomplete-diff, or unsupported condition expands to
-`EXHAUSTIVE`. Its frozen threshold starts honestly at `0 / 20`, so promotion is false and I07-04
-remains `NOT_STARTED` until every selector category has mutation coverage, false negatives remain
-zero, and at least 20 consecutive eligible same-revision hosted strict-subset comparisons agree.
+`EXHAUSTIVE`. The selector is pinned at
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across the 20 sources in
+its comparison authority. Its frozen threshold starts honestly at `0 / 20`, so promotion is false and
+I07-04 remains `NOT_STARTED` until every selector category has mutation coverage, false negatives
+remain zero, and at least 20 consecutive eligible same-revision hosted strict-subset comparisons
+agree.
 The I07-03 ledger can measure that arithmetic but can never authorize promotion from caller data;
 I07-04 must separately pin and authenticate the exact GitHub run, job, revision, and receipt
 provenance before it may change required execution.
-`main`, release, and manual-audit execution remains exhaustive. The local I07-03 checkpoint makes
-no hosted result claim. `DEBT-I07-017` assigns shadow-only cleanup to I07-04 for removal by G07;
-I07-05 owns legacy retirement by G12. M07-T09 remains `DONE`, and M07-T10 is the next implementation
-task.
+`main`, release, and manual-audit execution remains exhaustive. The hosted bootstrap succeeded,
+but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE` with `UNSUPPORTED_CHANGE_KIND`, so
+no eligible strict-subset observation was counted and the threshold remains `0 / 20`. The
+authoritative hosted Quality gate passed. Local focused contracts passed 91/91 and the complete
+CI-infrastructure suite passed 203/203. The full local `REQUIRED + EXHAUSTIVE` run is
+`BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned `EPERM` in two pre-existing
+control-plane TCP lifecycle cases; the hosted gate passed the repository authority. Exact run and
+job identifiers are pinned in the
+[I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json). `DEBT-I07-017`
+assigns shadow-only cleanup to I07-04 for removal by G07; I07-05 owns legacy retirement by G12.
+M07-T09 remains `DONE`, and M07-T10 is the next implementation task.
 
 ## Current milestone
 
@@ -1205,12 +1222,18 @@ have durably committed the new winner; it is resolved only by recovering that ex
 N-004 is now `TESTED`; P-12 remains `NOT_PROVEN`, while N-038 and N-041 remain `PLANNED` for their
 later owners.
 
-I07-03 is complete with local evidence at
-`docs/proof/baselines/i07-03-affected-selector-shadow.json`. Observation begins at `0 / 20` and
-promotion remains false; no hosted I07-03 result is claimed. I07-04 stays `NOT_STARTED` until zero
-false negatives, mutation coverage for every selector category, and at least 20 consecutive
-eligible same-revision hosted strict-subset affected/exhaustive comparisons pass, followed by an
-exact authenticated hosted-evidence review. Next implement
+I07-03 is complete with exact local and hosted evidence at
+`docs/proof/baselines/i07-03-affected-selector-shadow.json`. The selector is pinned at
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` over the 20 sources in its
+comparison authority. The hosted bootstrap succeeded; its shadow returned
+`NOT_ELIGIBLE → EXHAUSTIVE / UNSUPPORTED_CHANGE_KIND`, so no eligible strict-subset observation
+was counted and promotion remains false at `0 / 20`. The authoritative hosted Quality gate passed.
+Local focused contracts passed 91/91 and CI-infrastructure tests passed 203/203. The full local
+`REQUIRED + EXHAUSTIVE` run is `BLOCKED_BY_LOCAL_SANDBOX` only because `127.0.0.1` listen returned
+`EPERM` in two pre-existing control-plane TCP lifecycle cases; hosted execution passed. I07-04
+stays `NOT_STARTED` until zero false negatives, mutation coverage for every selector category, and
+at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive comparisons
+pass, followed by an exact authenticated hosted-evidence review. Next implement
 `M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`.
 
 CI-01 is complete. The archived hosted comparison is
@@ -2425,13 +2448,18 @@ M07-T09 evidence:
 - CI authority: the working-tree successor contains 146 workloads and 69 proof pairs (58 ordinary,
   11 barriers), 455 retained prerequisite segments, 2,769 ordered legacy leaves, and 227 distinct
   leaves; these are local code-owned values and no hosted M07-T09 pass is claimed yet
-- current reviewed reader checkpoint: sequence 21 links exact sequence 20 head
+- historical reviewed reader checkpoint: sequence 21 links exact sequence 20 head
   `8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e` to
   `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`; sequences 1–20 and every
   predecessor artifact byte remain unchanged, the exact T09 artifact becomes artifact 18, 27
   historical compatibility readers are resealed, and T09's proof/root readers become indexes
   `[34, 35]`, yielding 36 current readers; this is local-reader evidence only, no hosted M07-T09
   result is claimed, and `DEBT-I07-016` assigns the temporary bridges to I07-04 for removal by G07
+- current reviewed reader checkpoint: sequence 22 links exact sequence 21 head
+  `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to
+  `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`; it preserves all 18
+  frozen artifacts and all 36 reader identities, reseals only workflow-dependent indexes
+  `[8, 10, 11, 12, 14]`, and changes no frozen artifact byte
 - scope nonclaims: this is a bounded closed boundary matrix, not every possible fault ordering or
   race; it adds no hostile-administrator, external anti-rollback, renderer, host-consumption, or
   platform-adapter claim
@@ -2440,8 +2468,14 @@ M07-T09 evidence:
   is 83/145, M07 progress is 9/11, and M07-T10 owns the next implementation slice for ordered fault
   sequences and races
 - infrastructure decision: I07-03 is `DONE` outside the implementation count; the separate
-  pull-request shadow observer starts at `0 / 20`, promotion is false, I07-04 is `NOT_STARTED`, and
-  no hosted I07-03 result is claimed; proof-gate progress remains 7/13
+  pull-request shadow observer remains at `0 / 20`, promotion is false, and I07-04 is
+  `NOT_STARTED`; the hosted bootstrap succeeded but returned
+  `NOT_ELIGIBLE → EXHAUSTIVE / UNSUPPORTED_CHANGE_KIND`, so it counted no eligible strict-subset
+  observation, while the authoritative hosted Quality gate passed; exact hosted identifiers are
+  pinned in the I07-03 baseline; local focused contracts pass 91/91, all CI-infrastructure tests
+  pass 203/203, and full local `REQUIRED + EXHAUSTIVE` is `BLOCKED_BY_LOCAL_SANDBOX` only because
+  `127.0.0.1` listen returns `EPERM` in two pre-existing control-plane TCP lifecycle cases;
+  proof-gate progress remains 7/13
 
 ## Status vocabulary
 
