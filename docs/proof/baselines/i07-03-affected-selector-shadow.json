@@ -68,8 +68,8 @@
   },
   "selector": {
     "profile": "desen.ci.shadow-affected-selector.v1",
-    "selectorSha256": "e61531119a8a538bdc84ed8266834376b37c626116486d4dc7d58bb44f712c84",
-    "comparisonAuthoritySourceCount": 18,
+    "selectorSha256": "20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f",
+    "comparisonAuthoritySourceCount": 20,
     "comparisonAuthorityBindsAlgorithmsAndToolchain": true,
     "output": "execution plan only",
     "unknownToExhaustive": true,

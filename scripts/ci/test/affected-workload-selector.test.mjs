@@ -43,6 +43,8 @@ const EXPECTED_COMPARISON_AUTHORITY_PATHS = Object.freeze([
   "scripts/ci/affected-workload-selector.mjs",
   "scripts/ci/exhaustive-gate-boundary.mjs",
   "scripts/ci/exhaustive-workload-inventory.mjs",
+  "scripts/ci/no-proof-listener.cjs",
+  "scripts/ci/proof-filesystem-compatibility.cjs",
   "scripts/ci/run-required-exhaustive-quality-gate.mjs",
   "scripts/ci/run-shadow-affected-quality-gate.mjs",
   "scripts/ci/shared-state-authority.mjs",
