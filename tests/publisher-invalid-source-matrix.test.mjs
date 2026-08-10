@@ -1356,8 +1356,21 @@ test("[authority] pins the explicit isolated Vitest timeout", async () => {
 });
 
 test("[authority] distinguishes semantic coordination drift from frozen surface drift", async () => {
-  const currentT09ProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
+  const currentI07T03ProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
   const currentT09RootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  assert.equal(currentI07T03ProofBytes.byteLength, 139_088);
+  assert.equal(
+    createHash("sha256").update(currentI07T03ProofBytes).digest("hex"),
+    "7fa4303bb54205c35f08aca62cbb6b07efaa840cd79706b4c4787f2d7da09462",
+  );
+  const currentT09ProofText = currentI07T03ProofBytes
+    .toString("utf8")
+    .replace("bytes: 7_918", "bytes: 4_994")
+    .replace(
+      "0c41ddc296b5d7606a5b6bbc9e3637b72c31d3d7b68cab11c6ba9174827468cc",
+      "04429211188d351ee720c1e64802d48e34e425348b397c4bb835ba5c1fe4ccf5",
+    );
+  const currentT09ProofBytes = Buffer.from(currentT09ProofText, "utf8");
   assert.equal(currentT09ProofBytes.byteLength, 139_088);
   assert.equal(
     createHash("sha256").update(currentT09ProofBytes).digest("hex"),
@@ -1391,7 +1404,7 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
   const approvedCurrentT09 = await buildPublisherInvalidSourceMatrixEvidence(
     fastOptions({
       trackedFileBytes: {
-        [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentT09ProofBytes,
+        [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentI07T03ProofBytes,
         [BUNDLE_PUBLICATION_ROOT_TEST]: currentT09RootTestBytes,
         "scripts/lib/publisher-official-golden-proof.mjs": currentT10ProofBytes,
         "tests/publisher-official-golden.test.mjs": currentT10RootTestBytes,

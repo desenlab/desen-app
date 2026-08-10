@@ -287,8 +287,8 @@ const APPROVED_CURRENT_COMPATIBILITY_PATHS = Object.freeze([
 // It must match this exact scheduling successor before the task-time workflow receipt may be
 // projected into the frozen artifact.
 const APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT = Object.freeze({
-  bytes: 4_994,
-  sha256: "04429211188d351ee720c1e64802d48e34e425348b397c4bb835ba5c1fe4ccf5",
+  bytes: 7_918,
+  sha256: "0c41ddc296b5d7606a5b6bbc9e3637b72c31d3d7b68cab11c6ba9174827468cc",
 });
 
 const HISTORICAL_CI_RECEIPT = Object.freeze({

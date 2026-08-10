@@ -7,8 +7,11 @@
   neutral inventory, exact rollback-equivalence adapter, shared-state authority, and exhaustive
   runner passed same-revision comparison; the official workflow now runs
   `REQUIRED + EXHAUSTIVE`. The temporary shadow workflow and modular comparison adapter/test are
-  removed, closing `DEBT-I07-008`. No affected selector, current-reader cleanup, or legacy
-  retirement is claimed
+  removed, closing `DEBT-I07-008`. I07-03 is complete: a separate pull-request-only
+  `SHADOW + AFFECTED` observer is frozen at `0 / 20` without changing required authority. Its
+  hosted bootstrap passed the authoritative Quality gate, while the shadow conservatively returned
+  `NOT_ELIGIBLE` and `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`; no eligible strict-subset
+  observation, affected promotion, current-reader cleanup, or legacy retirement is claimed
 
 ## Context
 
@@ -287,14 +290,15 @@ remove them only after Gate E passes.
 
 ### Phase 3 — I07-03: `SHADOW + AFFECTED`
 
-The selector may plan a reduced graph only after required exhaustive equivalence is complete. It
+The selector plans a reduced graph only after required exhaustive equivalence is complete. It
 maps authenticated changed inputs to the transitive closure of owning nodes and always includes the
 global integrity checks required by that graph. Required CI still runs `EXHAUSTIVE` throughout
 I07-03.
 
-Before observation begins, I07-03 freezes a promotion threshold: every selector category must have
+I07-03 freezes the promotion threshold before observation: every selector category must have
 mutation coverage, unknown cases must choose `EXHAUSTIVE`, false negatives must remain zero, and at
-least 20 consecutive same-revision hosted affected/exhaustive comparisons must agree.
+least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive comparisons
+must agree.
 
 The following conditions select `EXHAUSTIVE`:
 
@@ -309,6 +313,42 @@ The following conditions select `EXHAUSTIVE`:
 Therefore `unknown => EXHAUSTIVE` is a protocol of the infrastructure, not a best-effort fallback.
 The selector returns an execution plan, never a success result. Every selected workload still runs
 from fresh inputs, and cached proof success remains forbidden.
+
+Boundary receipts carry process-local opaque provenance, so a caller-created or cloned record
+cannot mint a selection. One comparison-authority digest seals the exact boundary, ownership,
+impact, threshold, selector, shadow-runner, required-oracle, workflow, and toolchain sources; any
+such source change resets later observation continuity. The affected graph explicitly projects the
+exhaustive all-root suffix barrier to the exact selected roots and validates every selected proof
+pair before execution. The frozen selector digest is
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` and binds 20 exact
+comparison-authority sources.
+
+The implemented observer owns the complete exact tracked-path set and runs only as a separate
+pull-request shadow job. The exact `REQUIRED + EXHAUSTIVE` runner remains unchanged and solely
+authoritative. The initial observation state is honestly `0 / 20`; promotion is false, so I07-04
+remains `NOT_STARTED` until Gate D's threshold passes. `main`, release, and manual-audit execution
+remain exhaustive. In the hosted bootstrap, the authoritative Quality gate passed and the shadow
+job returned `NOT_ELIGIBLE` → `EXHAUSTIVE` because the bootstrap contained
+`UNSUPPORTED_CHANGE_KIND`. It therefore supplied no eligible strict-subset comparison and left the
+counter at `0 / 20`. Exact run, job, revision, and receipt identifiers are archived in
+[`i07-03-affected-selector-shadow.json`](../proof/baselines/i07-03-affected-selector-shadow.json);
+the baseline makes no promotion claim. Focused local contracts passed 91/91 and the complete CI
+infrastructure suite passed 203/203. The full local gate is
+`BLOCKED_BY_LOCAL_SANDBOX`: loopback `listen` returned `EPERM` in two pre-existing TCP lifecycle
+tests. That environment restriction is not a product regression; the passing hosted Quality gate
+remains authoritative. `DEBT-I07-017` assigns the shadow-only job, wrapper, and test wiring to
+I07-04 for removal by G07.
+
+I07-03 also appends reviewed current-reader checkpoint sequence 22 without rewriting sequence 21.
+It links predecessor head `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939`
+to `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`, retains the same 18
+frozen artifacts and 36 reader identities, and reseals only workflow-dependent indexes
+`[8, 10, 11, 12, 14]`. Every frozen artifact byte remains unchanged.
+
+The I07-03 ledger is deliberately non-authoritative. It can report whether supplied observations
+meet the 20/20 arithmetic, but it always returns promotion false because inert caller data cannot
+prove hosted provenance. I07-04 must add and pin an independent exact GitHub run, job, revision,
+and receipt review authority before required affected execution can be considered.
 
 ### Phase 4 — I07-04: `REQUIRED + AFFECTED`
 
@@ -366,7 +406,7 @@ The legacy system remains present until all applicable gates below have objectiv
 - A selected run cannot use a previous checkpoint, build, test, mutation, or proof pass.
 - `main`, release, and manual-audit `EXHAUSTIVE` runs remain required after selector rollout.
 - Every selector category has mutation evidence, false negatives remain zero, and at least 20
-  consecutive same-revision hosted affected/exhaustive comparisons agree.
+  consecutive eligible same-revision hosted strict-subset affected/exhaustive comparisons agree.
 
 ### Gate E — legacy retirement
 
@@ -426,12 +466,15 @@ This ADR does not claim:
 
 - that I07-01's exhaustive shadow is authoritative;
 - that its first same-revision comparison completes I07-02's required equivalence program;
-- that an `AFFECTED` selector or required affected mode currently exists;
+- that the shadow `AFFECTED` observer is authoritative or that required affected mode currently
+  exists;
 - that any debt-register entry other than `DEBT-I07-008` is closed by this cutover;
 - that the retained sequential runner or rollback-equivalence adapter may be removed before
   I07-05 and Gate E;
 - that the protocol task count, proof-gate count, or protocol claims have changed;
 - that selective CI is safe before Gate D;
+- that I07-03's hosted bootstrap is an eligible strict-subset comparison or has advanced beyond
+  `0 / 20` observations;
 - that a cached proof result is acceptable;
 - that any frozen artifact may be regenerated from current source; or
 - that M07-T02 or any protocol claim has advanced.

@@ -347,6 +347,13 @@ authenticates 18 frozen artifacts and 36 current readers. This is reviewed local
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
 
+Reviewed checkpoint sequence 22 preserves sequence 21 as immutable history and links predecessor
+head `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. It continues to
+authenticate the same 18 frozen artifacts and 36 reader identities. Every frozen artifact byte is
+unchanged; only workflow-dependent reader indexes `[8, 10, 11, 12, 14]` are resealed for I07-03.
+This append is current-reader compatibility evidence, not a rewritten historical proof.
+
 The contract preflight now executes a dependency-free one-test M07-T09 Vitest probe under the
 production proof-step isolation. The shared launcher invokes the repository-local Vitest CLI with
 `process.execPath`, writes owner-only package/workspace/config/test files only inside the step temp
@@ -531,12 +538,45 @@ shadow workflow ran. The exact program, including an earlier rejected common-dri
 archived in
 [`i07-02-required-exhaustive-equivalence.json`](../proof/baselines/i07-02-required-exhaustive-equivalence.json).
 
-I07-03 may calculate an `AFFECTED` plan only in shadow. Unknown paths, statuses, file modes,
-dependency or policy changes, missing Git authority, and any ambiguous classification must expand
-to `EXHAUSTIVE`. Promotion is reserved for I07-04 after ADR 0011's frozen threshold passes.
-`EXHAUSTIVE` fresh execution remains mandatory on `main`, release candidates, and manual audits.
-I07-02 implements no affected selector. Its completed promotion closed `DEBT-I07-008` by removing
-the temporary shadow workflow and modular comparison adapter/test. The current-reader bridges
-remain owned by I07-04. `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence
-adapter, and other rollback references under I07-05 until their exact machine-checked removal
-conditions in `docs/plan/DEBT-REGISTER.md` are satisfied.
+### I07-03 shadow-affected observation
+
+I07-03 adds a separate pull-request-only `SHADOW + AFFECTED` job. The exact
+`run-required-exhaustive-quality-gate.mjs` command remains unchanged as the sole pass/fail
+authority; the observer cannot make CI pass or suppress required work.
+
+The selector authenticates the same-repository revision boundary, complete exact tracked-path
+ownership, and affected dependency closure. Unknown paths, statuses, modes, owners, bases, or
+edges—and every ambiguous, untrusted, policy, dependency, frozen-input, incomplete-diff, or
+unsupported condition—expand to `EXHAUSTIVE`. A strict subset is only a plan: every selected
+workload executes from fresh inputs under the real isolation and closing guards. Cached build,
+test, mutation, checkpoint, or proof success remains forbidden.
+
+Only an opaque receipt minted by the real Git boundary may authorize selection. A composite digest
+binds the exact boundary, selector, impact, ownership, threshold, shadow-runner, required-oracle,
+workflow, and toolchain sources across observations. Its frozen selector digest is
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across 20 exact
+comparison-authority sources. Multi-proof execution validates every pair, and the explicit
+selected-root suffix barrier cannot treat an absent exhaustive root as completed.
+
+Promotion is reserved for I07-04 after every selector category is mutation-covered, false
+negatives remain zero, and at least 20 consecutive eligible same-revision hosted strict-subset
+affected/exhaustive comparisons agree. Observation starts at `0 / 20`, promotion is false, and
+I07-04 remains `NOT_STARTED`. Fresh `EXHAUSTIVE` execution stays mandatory on `main`, release
+candidates, and manual audits. The hosted bootstrap passed the authoritative Quality gate. Its
+shadow result was `NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`, so it was not an
+eligible strict-subset comparison and the observation count remains `0 / 20`. The exact hosted
+run/job/revision/receipt identifiers are pinned by the
+[`i07-03-affected-selector-shadow.json`](../proof/baselines/i07-03-affected-selector-shadow.json)
+baseline. Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/203. The
+full local gate is `BLOCKED_BY_LOCAL_SANDBOX` because loopback `listen` returned `EPERM` in two
+pre-existing TCP lifecycle tests; this is not a product regression, and the hosted Quality gate is
+authoritative. The pure I07-03 ledger cannot authenticate hosted provenance or grant promotion
+even when supplied records satisfy 20/20; I07-04 must pin an exact GitHub
+run/job/revision/receipt review authority. `DEBT-I07-017` assigns the shadow-only job, wrapper, and
+test wiring to I07-04 for removal by G07.
+
+I07-02's completed promotion closed `DEBT-I07-008` by removing its temporary shadow workflow and
+modular comparison adapter/test. The current-reader bridges remain owned by I07-04.
+`DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and other rollback
+references under I07-05 until their exact machine-checked removal conditions in
+`docs/plan/DEBT-REGISTER.md` are satisfied.

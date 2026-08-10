@@ -133,6 +133,13 @@ authenticates 18 frozen artifacts and 36 readers. This checkpoint is reviewed lo
 evidence, not a hosted M07-T09 claim. `DEBT-I07-016` assigns the temporary T09 successor bridges to
 I07-04 for removal by G07.
 
+Checkpoint sequence 22 preserves sequence 21 as immutable history and links predecessor head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. The chain still
+authenticates 18 frozen artifacts and 36 reader identities. Every frozen artifact byte remains
+unchanged; only workflow-dependent reader indexes `[8, 10, 11, 12, 14]` are resealed for I07-03.
+This is a current-reader compatibility append and does not alter the M07-T09 proof or its claims.
+
 ## Trace and coverage truth
 
 The evidence authenticates the exact owners and tests arrays of 22 rows assigned to M07-T09:

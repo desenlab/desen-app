@@ -92,6 +92,7 @@ function taskBoard(overrides = {}) {
   const statuses = {
     "I07-01": "IN_PROGRESS",
     "I07-02": "DONE",
+    "I07-03": "IN_PROGRESS",
     "M07-T04": "IN_PROGRESS",
     "M07-T05": "IN_PROGRESS",
     "M07-T06": "IN_PROGRESS",
@@ -209,6 +210,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       { id: "DEBT-I07-014", status: "OPEN" },
       { id: "DEBT-I07-015", status: "OPEN" },
       { id: "DEBT-I07-016", status: "OPEN" },
+      { id: "DEBT-I07-017", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -307,6 +309,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         removalOwner: "I07-04",
         deadline: "G07",
       },
+      {
+        id: "DEBT-I07-017",
+        registeredBy: "I07-03",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
     ],
   );
   assert.deepEqual(
@@ -337,6 +345,46 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       "M07-T09 claims without proof",
     ],
   });
+  assert.deepEqual(
+    manifest.entries[16].targets.map(({ path, symbols }) => ({ path, symbols })),
+    INFRASTRUCTURE_DEBT_AUTHORITY[16].targets.map(({ path, symbols }) => ({ path, symbols })),
+  );
+  assert.deepEqual(manifest.entries[16].targets, [
+    {
+      path: ".github/workflows/ci.yml",
+      symbols: [
+        "affected-shadow",
+        "Affected shadow observation",
+        "Verify shadow affected contracts",
+        "Run non-authoritative affected shadow",
+        "DESEN_CI_BASE_SHA",
+        "DESEN_CI_HEAD_SHA",
+        "DESEN_CI_SAME_REPOSITORY",
+        "scripts/ci/run-shadow-affected-quality-gate.mjs",
+      ],
+    },
+    {
+      path: "scripts/ci/run-shadow-affected-quality-gate.mjs",
+      symbols: [
+        "SHADOW_AFFECTED_RECEIPT_PROFILE",
+        "runShadowAffectedQualityGate",
+        "executeShadowAffectedQualityGate",
+        "printShadowAffectedReceipt",
+      ],
+    },
+    {
+      path: "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
+      symbols: [
+        "runs every selected command fresh and closes one exact strict subset",
+        "exhaustive fallback executes no duplicate shadow workload",
+        "a selected failure stops later work and remains non-authoritative",
+      ],
+    },
+    {
+      path: "scripts/lib/control-plane-bundle-store-proof.mjs",
+      symbols: ["APPROVED_I07_T03_TRACKED_RECEIPTS", "approvedI07T03"],
+    },
+  ]);
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
     "CI v2 shadow",
     "modular-shadow",
@@ -1043,12 +1091,13 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 15,
+      OPEN: 16,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
     assert.equal(receipt.taskStatuses["I07-01"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["I07-02"], "DONE");
+    assert.equal(receipt.taskStatuses["I07-03"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T05"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T06"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T07"], "IN_PROGRESS");
@@ -1157,7 +1206,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 15,
+      OPEN: 16,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -1193,7 +1242,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 14,
+      OPEN: 15,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

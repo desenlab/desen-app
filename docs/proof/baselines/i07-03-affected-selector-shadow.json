@@ -1,0 +1,271 @@
+{
+  "task": "I07-03",
+  "date": "2026-08-10",
+  "repository": "https://github.com/desenlab/desen-app",
+  "pullRequest": {
+    "number": 25,
+    "url": "https://github.com/desenlab/desen-app/pull/25",
+    "branch": "agent/i07-03-affected-selector",
+    "candidateCommit": "516f02d03d86520f592ab6e7b92a60ffa2506688"
+  },
+  "authority": {
+    "required": "REQUIRED + EXHAUSTIVE",
+    "requiredWorkflow": ".github/workflows/ci.yml",
+    "requiredJob": "Quality gate",
+    "shadow": "SHADOW + AFFECTED",
+    "shadowWorkflow": ".github/workflows/ci.yml",
+    "shadowJob": "Affected shadow observation",
+    "shadowCanAuthorizePass": false,
+    "requiredRunnerChanged": false,
+    "affectedPromoted": false
+  },
+  "inventory": {
+    "profile": "desen.ci.exhaustive-workload-inventory.v1",
+    "inventorySha256": "3328b640fdb9428cb52a2453a95e2838338ddc7788d56a95089fa67b021484d8",
+    "workloads": 146,
+    "proofPairs": 69,
+    "globalPrefixWorkloads": 6,
+    "globalSuffixWorkloads": 2
+  },
+  "changeBoundary": {
+    "profile": "desen.ci.affected-change-boundary.v1",
+    "sameRepositoryRequired": true,
+    "completeHistoryRequired": true,
+    "exactPullRequestMergeRequired": true,
+    "cleanTrackedTreeRequired": true,
+    "acceptedChangeKind": "same-mode regular-file modification",
+    "unsafeInputDisposition": "EXHAUSTIVE",
+    "opaqueReceiptIdentityRequired": true,
+    "callerCreatedOrClonedReceiptAccepted": false
+  },
+  "ownership": {
+    "profile": "desen.ci.affected-workload-ownership.v1",
+    "trackedPathCount": 979,
+    "trackedPathSetSha256": "d722fe60113281b1cb6d9542ef804b504e782189c8174896d740bf19c4aee168",
+    "proofOwnedPathCount": 138,
+    "ownershipSha256": "c0f01919fa6dbb288c9310e4436ba70eb255b08a70173e3168e0af1588088681",
+    "completeExactOneClassification": true,
+    "categories": {
+      "PROOF_UNIT": 138,
+      "CI_POLICY": 42,
+      "DEPENDENCY_POLICY": 30,
+      "FROZEN_INPUT": 112,
+      "PACKAGE_OR_APPLICATION": 375,
+      "SHARED_PROOF_INFRASTRUCTURE": 167,
+      "PROJECT_DOCUMENTATION": 104,
+      "REPOSITORY_POLICY": 11
+    },
+    "strictSubsetEligibleCategory": "PROOF_UNIT",
+    "allOtherCategoriesForceExhaustive": true
+  },
+  "impactGraph": {
+    "profile": "desen.ci.affected-impact-graph.v1",
+    "impactGraphSha256": "7f50b2f3802ddd8c309079c1c135901a18734e1729e98c761f7d4522629f797a",
+    "closure": "owners plus transitive prerequisites and dependents",
+    "globalChecksAlwaysIncluded": true,
+    "suffixDependencyPolicy": "SELECTED_ROOT_BARRIER",
+    "multiProofExecutionCovered": true
+  },
+  "selector": {
+    "profile": "desen.ci.shadow-affected-selector.v1",
+    "selectorSha256": "20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f",
+    "comparisonAuthoritySourceCount": 20,
+    "comparisonAuthorityBindsAlgorithmsAndToolchain": true,
+    "output": "execution plan only",
+    "unknownToExhaustive": true,
+    "strictSubsetExecutionFresh": true,
+    "cachedProofSuccessRead": false
+  },
+  "observationThreshold": {
+    "profile": "desen.ci.affected-observation-threshold.v1",
+    "thresholdSha256": "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
+    "minimumConsecutiveEligibleComparisons": 20,
+    "maximumFalseNegatives": 0,
+    "sameRevisionWithinComparisonRequired": true,
+    "freshHostedExecutionsRequired": true,
+    "cachedSuccessAllowed": false,
+    "ownershipCategoriesMutationCovered": 8,
+    "decisionCategoriesMutationCovered": 8,
+    "eligibleComparisonsAtFreeze": 0,
+    "consecutiveEligibleComparisonsAtFreeze": 0,
+    "thresholdSatisfiedAtFreeze": false,
+    "hostedEvidenceAuthenticatedAtFreeze": false,
+    "authenticatedReviewRequired": true,
+    "pureLedgerCanAuthorizePromotion": false,
+    "promotionEligibleAtFreeze": false
+  },
+  "execution": {
+    "receiptProfile": "desen.ci.shadow-affected-execution.v1",
+    "fallbackRunsDuplicateExhaustiveWork": false,
+    "selectedWorkloadsAwaitObservedClose": true,
+    "trackedWorkspaceGuard": true,
+    "untrackedWorkspaceGuard": true,
+    "buildOutputSeal": true,
+    "firstTerminalFailureWins": true,
+    "cancellationAfterObservedCloseCanPass": false,
+    "closingGuardDiagnosticsPreserved": true,
+    "shadowCliAlwaysNonAuthoritative": true
+  },
+  "localVerification": {
+    "sourceRevision": "516f02d03d86520f592ab6e7b92a60ffa2506688",
+    "contractCommand": "node --test scripts/ci/test/affected-change-boundary.test.mjs scripts/ci/test/affected-workload-ownership.test.mjs scripts/ci/test/affected-impact-graph.test.mjs scripts/ci/test/affected-observation-threshold.test.mjs scripts/ci/test/affected-workload-selector.test.mjs scripts/ci/test/shadow-affected-quality-gate.test.mjs scripts/ci/test/required-exhaustive-equivalence.test.mjs scripts/ci/test/infrastructure-debt.test.mjs",
+    "contractTests": 91,
+    "contractResult": "PASS",
+    "ciInfrastructureCommand": "node --test scripts/ci/test/*.test.mjs",
+    "ciInfrastructureTests": 203,
+    "ciInfrastructureResult": "PASS",
+    "requiredExhaustiveCommand": "node scripts/ci/run-required-exhaustive-quality-gate.mjs",
+    "requiredExhaustiveResult": "BLOCKED_BY_LOCAL_SANDBOX",
+    "requiredExhaustiveBlock": {
+      "code": "EPERM",
+      "operation": "listen",
+      "address": "127.0.0.1",
+      "affectedPackage": "@desen/control-plane-api",
+      "affectedTests": [
+        "revokes an in-progress listener when close wins the lifecycle race",
+        "bounds shutdown while an authenticated TCP request body remains incomplete"
+      ],
+      "packageResult": "183 passed, 2 blocked",
+      "productRegression": false,
+      "authoritativeHostedQualityGate": "PASS"
+    }
+  },
+  "hostedVerification": {
+    "candidateRun": {
+      "candidateCommit": "0d25cab6fb5664948d9a8024bdbf9d9e49b246c1",
+      "actualPullRequestMergeCheckout": "92aca21cb0dcca03662b94ea7fbd205bb8b13f43",
+      "runId": 31360843601,
+      "runUrl": "https://github.com/desenlab/desen-app/actions/runs/31360843601",
+      "requiredJob": {
+        "jobId": 93369275659,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31360843601/job/93369275659",
+        "conclusion": "failure",
+        "failureCode": "PUBLISHER_BUNDLE_PUBLICATION_CI_DRIFT"
+      },
+      "shadowJob": {
+        "jobId": 93369275713,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31360843601/job/93369275713",
+        "conclusion": "success"
+      },
+      "legacyRollbackJob": {
+        "jobId": 93369276424,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31360843601/job/93369276424",
+        "conclusion": "skipped"
+      },
+      "acceptedAsFinalEvidence": false,
+      "decision": "The workflow receipt drift was repaired through an append-only proof-reader checkpoint; the frozen proof artifacts were not rewritten."
+    },
+    "supersededRun": {
+      "candidateCommit": "84efc015050f46cdcc56fc92e963e3a7093c77c4",
+      "actualPullRequestMergeCheckout": "e3afc2e9239405e92f90ce33a591d1a518df77c0",
+      "runId": 31362745684,
+      "runUrl": "https://github.com/desenlab/desen-app/actions/runs/31362745684",
+      "requiredJob": {
+        "jobId": 93374743861,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31362745684/job/93374743861",
+        "conclusion": "success"
+      },
+      "shadowJob": {
+        "jobId": 93374743880,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31362745684/job/93374743880",
+        "conclusion": "success"
+      },
+      "legacyRollbackJob": {
+        "jobId": 93374744722,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31362745684/job/93374744722",
+        "conclusion": "skipped"
+      },
+      "acceptedAsFinalEvidence": false,
+      "decision": "A final audit added two directly executed isolation-policy sources to comparison authority before acceptance."
+    },
+    "finalRun": {
+      "candidateCommit": "516f02d03d86520f592ab6e7b92a60ffa2506688",
+      "actualPullRequestMergeCheckout": "98270d93052c1b562d51b6cddaa3ad644600a646",
+      "runId": 31363582614,
+      "runUrl": "https://github.com/desenlab/desen-app/actions/runs/31363582614",
+      "requiredJob": {
+        "jobId": 93377194232,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31363582614/job/93377194232",
+        "conclusion": "success"
+      },
+      "shadowJob": {
+        "jobId": 93377194183,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31363582614/job/93377194183",
+        "conclusion": "success"
+      },
+      "legacyRollbackJob": {
+        "jobId": 93377194625,
+        "jobUrl": "https://github.com/desenlab/desen-app/actions/runs/31363582614/job/93377194625",
+        "conclusion": "skipped"
+      },
+      "shadowReceipt": {
+        "schemaVersion": 1,
+        "profile": "desen.ci.shadow-affected-execution.v1",
+        "authority": "SHADOW",
+        "requestedScope": "AFFECTED",
+        "effectiveScope": "EXHAUSTIVE",
+        "decisionCategory": "UNSUPPORTED_CHANGE",
+        "reason": "UNSUPPORTED_CHANGE_KIND",
+        "status": "NOT_ELIGIBLE",
+        "executionRevision": null,
+        "selectorSha256": "20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f",
+        "ownershipSha256": "c0f01919fa6dbb288c9310e4436ba70eb255b08a70173e3168e0af1588088681",
+        "impactGraphSha256": "7f50b2f3802ddd8c309079c1c135901a18734e1729e98c761f7d4522629f797a",
+        "thresholdSha256": "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
+        "inventorySha256": "3328b640fdb9428cb52a2453a95e2838338ddc7788d56a95089fa67b021484d8",
+        "planSha256": "a3c76ea4a4273b81866c43bf3ce6974e7884c27b34a149d614861445ac0ed80c",
+        "changeSetSha256": null,
+        "strictSubset": false,
+        "freshExecution": false,
+        "cachedSuccessRead": false,
+        "selectedWorkloadCount": 146,
+        "selectedProofUnitCount": 0,
+        "observedClosedCount": 0
+      }
+    },
+    "requiredConclusion": "success",
+    "shadowConclusion": "success",
+    "firstObservationCounted": false,
+    "reason": "The I07-03 bootstrap changes CI policy and selector authority, so its fail-closed exhaustive fallback is not an eligible strict-subset observation."
+  },
+  "proofReaderCheckpoint": {
+    "profile": "desen.ci.proof-reader-checkpoints.v1",
+    "sequence": 22,
+    "predecessorSha256": "ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939",
+    "headSha256": "aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e",
+    "frozenArtifacts": 18,
+    "currentReaders": 36,
+    "changedReaderIndexes": [8, 10, 11, 12, 14],
+    "frozenArtifactBytesChanged": false,
+    "readerIdentitiesChanged": false,
+    "liveVerification": "PASS"
+  },
+  "infrastructureDebt": {
+    "profile": "desen.ci.infrastructure-debt.v1",
+    "entries": 17,
+    "open": 16,
+    "closed": 1,
+    "newEntry": "DEBT-I07-017",
+    "removalOwner": "I07-04",
+    "deadline": "G07"
+  },
+  "nonClaims": [
+    "I07-03 does not replace or weaken the required exhaustive quality gate.",
+    "The frozen threshold starts at 0/20; no selective-CI safety or promotion claim is made.",
+    "Threshold arithmetic alone cannot authorize promotion; I07-04 must authenticate and pin exact hosted run, job, revision, and receipt provenance.",
+    "Exhaustive fallbacks do not count as eligible observations.",
+    "Main, release, and manual-audit execution remains fresh and exhaustive.",
+    "The retained sequential runner is not retired; I07-05 owns its later removal.",
+    "Current-reader compatibility shims remain owned by I07-04.",
+    "No frozen protocol byte, protocol claim, implementation-task count, milestone count, or proof-gate count changes."
+  ],
+  "progress": {
+    "implementationTasksComplete": 83,
+    "implementationTasksTotal": 145,
+    "m07TasksComplete": 9,
+    "m07TasksTotal": 11,
+    "proofGatesComplete": 7,
+    "proofGatesTotal": 13
+  },
+  "next": "M07-T10; continue I07-03 observations toward I07-04 promotion in parallel"
+}

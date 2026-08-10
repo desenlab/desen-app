@@ -157,8 +157,8 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
 // Exact authentication of the reviewed live scheduling successor preserves the immutable M06-T10
 // workflow projection without regenerating task-time proof bytes.
 const APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT = Object.freeze({
-  bytes: 4_994,
-  sha256: "04429211188d351ee720c1e64802d48e34e425348b397c4bb835ba5c1fe4ccf5",
+  bytes: 7_918,
+  sha256: "0c41ddc296b5d7606a5b6bbc9e3637b72c31d3d7b68cab11c6ba9174827468cc",
 });
 const TRACKED_SET = new Set(TRACKED);
 const PREREQUISITE_SET = new Set(

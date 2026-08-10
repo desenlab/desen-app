@@ -1090,6 +1090,50 @@
           ]
         }
       ]
+    },
+    {
+      "id": "DEBT-I07-017",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "I07-03",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "affected-shadow",
+            "Affected shadow observation",
+            "Verify shadow affected contracts",
+            "Run non-authoritative affected shadow",
+            "DESEN_CI_BASE_SHA",
+            "DESEN_CI_HEAD_SHA",
+            "DESEN_CI_SAME_REPOSITORY",
+            "scripts/ci/run-shadow-affected-quality-gate.mjs"
+          ]
+        },
+        {
+          "path": "scripts/ci/run-shadow-affected-quality-gate.mjs",
+          "symbols": [
+            "SHADOW_AFFECTED_RECEIPT_PROFILE",
+            "runShadowAffectedQualityGate",
+            "executeShadowAffectedQualityGate",
+            "printShadowAffectedReceipt"
+          ]
+        },
+        {
+          "path": "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
+          "symbols": [
+            "runs every selected command fresh and closes one exact strict subset",
+            "exhaustive fallback executes no duplicate shadow workload",
+            "a selected failure stops later work and remains non-authoritative"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "symbols": ["APPROVED_I07_T03_TRACKED_RECEIPTS", "approvedI07T03"]
+        }
+      ]
     }
   ]
 }

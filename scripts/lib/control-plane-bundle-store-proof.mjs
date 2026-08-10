@@ -423,6 +423,20 @@ const APPROVED_M07_T09_TRACKED_RECEIPTS = Object.freeze({
     sha256: "c697bcad81cc36392db37be25f2cc7eda525494023cf78743b4b55331895b97a",
   }),
 });
+const APPROVED_I07_T03_TRACKED_RECEIPTS = Object.freeze({
+  "scripts/lib/publisher-bundle-publication-proof.mjs": Object.freeze({
+    bytes: 139_088,
+    sha256: "7fa4303bb54205c35f08aca62cbb6b07efaa840cd79706b4c4787f2d7da09462",
+  }),
+  "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
+    bytes: 170_739,
+    sha256: "2fd1e56ae45718f58a30c8eb8293d79e6bd7923d61da12131671964163614a90",
+  }),
+  "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
+    bytes: 77_231,
+    sha256: "074535d871037e8c082326e7be246290a357b6fae6c318a5c310cbf24c532ac3",
+  }),
+});
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS = fileConstants.O_RDONLY | fileConstants.O_NOFOLLOW | fileConstants.O_NONBLOCK;
 const execFileAsync = promisify(execFile);
@@ -2301,6 +2315,7 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T07 = APPROVED_M07_T07_TRACKED_RECEIPTS[relativePath];
     const approvedM07T08 = APPROVED_M07_T08_TRACKED_RECEIPTS[relativePath];
     const approvedM07T09 = APPROVED_M07_T09_TRACKED_RECEIPTS[relativePath];
+    const approvedI07T03 = APPROVED_I07_T03_TRACKED_RECEIPTS[relativePath];
     const observedSha256 = sha256(bytes);
     if (
       (approvedM07T02 !== undefined ||
@@ -2310,7 +2325,8 @@ async function trackedFileReceipts(overrides) {
         approvedM07T06 !== undefined ||
         approvedM07T07 !== undefined ||
         approvedM07T08 !== undefined ||
-        approvedM07T09 !== undefined) &&
+        approvedM07T09 !== undefined ||
+        approvedI07T03 !== undefined) &&
       !(
         (bytes.byteLength === taskTime?.bytes && observedSha256 === taskTime.sha256) ||
         (approvedM07T02 !== undefined &&
@@ -2336,7 +2352,10 @@ async function trackedFileReceipts(overrides) {
           observedSha256 === approvedM07T08.sha256) ||
         (approvedM07T09 !== undefined &&
           bytes.byteLength === approvedM07T09.bytes &&
-          observedSha256 === approvedM07T09.sha256)
+          observedSha256 === approvedM07T09.sha256) ||
+        (approvedI07T03 !== undefined &&
+          bytes.byteLength === approvedI07T03.bytes &&
+          observedSha256 === approvedI07T03.sha256)
       )
     ) {
       fail("REGISTRATION_DRIFT", "The reviewed package successor bytes drifted.", {

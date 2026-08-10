@@ -167,11 +167,34 @@ temporary shadow workflow and modular comparison adapter/test. Under `DEBT-I07-0
 sequential runner and rollback-equivalence adapter remain test targets until I07-05 proves their
 exact removal conditions.
 
-Later `AFFECTED` planning cannot become a required shortcut until it has complete tracked-path
-ownership, reverse dependency closure, exact exhaustive comparison, and fail-closed
-unknown-to-exhaustive behavior. Even after promotion, `main`, release, and manual-audit runs remain
-exhaustive. No phase may trust cached build, test, mutation, checkpoint, or proof success; only
-immutable dependency downloads may be cached.
+I07-03 adds a separate pull-request-only `SHADOW + AFFECTED` observer while leaving the exact
+`REQUIRED + EXHAUSTIVE` runner as the sole pass/fail authority. Its tests prove complete exact
+tracked-path ownership, authenticated change boundaries, reverse dependency closure, and
+fail-closed expansion of unknown, ambiguous, untrusted, policy, dependency, frozen-input,
+incomplete-diff, or unsupported changes to `EXHAUSTIVE`. A strict-subset plan must still execute
+every selected workload from fresh inputs; no phase may trust cached build, test, mutation,
+checkpoint, or proof success. Only immutable dependency downloads may be cached.
+
+Mutation and race coverage additionally reject fabricated or cloned Git-boundary receipts, source
+authority drift, multi-proof ordering mismatches, absent-root dependency fabrication, cancellation
+at every region boundary, and replacement of a primary execution failure by a closing-guard error.
+
+Promotion remains false until every selector category is mutation-covered, false negatives remain
+zero, and at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive
+comparisons agree. Observation starts at `0 / 20`; I07-04 is `NOT_STARTED` until the frozen
+threshold passes and exact hosted provenance is independently authenticated. The pure ledger can
+report threshold arithmetic but always returns promotion false. Even after promotion, `main`,
+release, and manual-audit runs remain exhaustive.
+The hosted bootstrap passed the authoritative Quality gate, while the shadow returned
+`NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`. Because no strict subset ran, that
+result is not an eligible observation and the counter remains `0 / 20`. Exact hosted identifiers
+are pinned in the
+[`i07-03-affected-selector-shadow.json`](../proof/baselines/i07-03-affected-selector-shadow.json)
+baseline. Focused local contracts pass 91/91 and the full CI infrastructure suite passes 203/203.
+The full local gate is `BLOCKED_BY_LOCAL_SANDBOX`: loopback `listen` returns `EPERM` in two
+pre-existing TCP lifecycle tests. This is an environment restriction, not a product regression;
+the passing hosted Quality gate is authoritative. `DEBT-I07-017` assigns the shadow-only job,
+wrapper, and test wiring to I07-04 for removal by G07.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned
@@ -362,6 +385,13 @@ reader `sha256:f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6`
 authenticates 18 frozen artifacts and 36 current readers. This is reviewed local-reader evidence,
 not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridges for I07-04
 removal by G07.
+
+Reviewed checkpoint sequence 22 keeps sequence 21 intact and links predecessor head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. The inventory remains
+18 frozen artifacts and 36 reader identities. Only workflow-dependent reader indexes
+`[8, 10, 11, 12, 14]` are resealed; every frozen artifact and every predecessor checkpoint remains
+unchanged.
 
 M07-T09's child Vitest launcher also has a build-independent CI-contract preflight. It uses
 `process.execPath`, the repository-local Vitest entrypoint, and owner-only package/workspace/config
