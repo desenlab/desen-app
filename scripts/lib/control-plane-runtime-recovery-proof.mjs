@@ -92,6 +92,12 @@ const M07_T09_TEST_AUTHORITY_RECEIPTS = Object.freeze({
     sha256: "d1c898e91d695972c6cdc14e9d5eb138c6655e43a5cbefb5c32bd819748a9eeb",
   }),
 });
+const M07_T10_TEST_AUTHORITY_RECEIPTS = Object.freeze({
+  [ROOT_TEST]: Object.freeze({
+    bytes: 28_220,
+    sha256: "968dadebad1b4f07ce9d6b277988788a07cb0cdeea06a1cc598a0d1e25f07dbc",
+  }),
+});
 const EXPECTED_REGISTRATION_AUTHORITY_SHA256 = Object.freeze({
   [CI_SOURCE]: "c0312d1874917092f4300b7bdb789bc2a35a2d2f973a0bb214b551d86916fabe",
   [CI_INVENTORY]: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
@@ -109,6 +115,20 @@ const M07_T09_REGISTRATION_AUTHORITY_RECEIPTS = Object.freeze({
   [SHARED_STATE_AUTHORITY]: Object.freeze({
     bytes: 47_479,
     sha256: "9b15cef3b2d795c268945c2f4bee670c037878bd43967c1ce71a41342d463140",
+  }),
+});
+const M07_T10_REGISTRATION_AUTHORITY_RECEIPTS = Object.freeze({
+  [CI_SOURCE]: Object.freeze({
+    bytes: 48_249,
+    sha256: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    bytes: 46_524,
+    sha256: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    bytes: 47_816,
+    sha256: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
   }),
 });
 const EXPECTED_RUNTIME_RECOVERY_SUITE_NAME = "M07-T08 restart recovery";
@@ -271,6 +291,54 @@ const M07_T09_TRACKED_RECEIPT_BRIDGE = Object.freeze({
   }),
 });
 
+const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 2_408,
+      sha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
+    }),
+  }),
+  [APP_SQLITE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 22_508,
+      sha256: "a97191a6d508d4ff3c26e0f691e52b9c9215b4ecb69a014da4ecd03086a3beeb",
+    }),
+    successor: Object.freeze({
+      bytes: 23_137,
+      sha256: "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5fac7493481f868be164",
+    }),
+  }),
+  [ADR]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[ADR].successor,
+    successor: Object.freeze({
+      bytes: 6_918,
+      sha256: "14d5c1e440b83771414663fdd4cb45cb6b95cb0e6598f2465b55df121f2692d8",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 66_267,
+      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[CI_SOURCE],
+    successor: M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[CI_SOURCE],
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[CI_INVENTORY],
+    successor: M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[CI_INVENTORY],
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[SHARED_STATE_AUTHORITY],
+    successor: M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[SHARED_STATE_AUTHORITY],
+  }),
+});
+
+// DEBT-I07-016 retains the historical diagnostic marker "reviewed M07-T09 CI registration set"
+// until I07-04 removes the M07-T09 reader bridge. Runtime failures use the current T10 wording.
 // A reader cannot embed its own current digest without recursion. The append-only proof-reader
 // checkpoint authenticates current reader bytes; this projection preserves the frozen T08 receipt.
 const M07_T09_READER_RECEIPT_PROJECTION = Object.freeze({
@@ -723,37 +791,49 @@ async function fileReceipts(paths, overrides) {
 }
 
 async function trackedFileReceipts(overrides) {
-  let historicalState = false;
-  let successorState = false;
+  let generationMask = 0b111;
   const receipts = [];
   for (const relativePath of [...TRACKED_TASK_FILES].sort()) {
     const bytes = await workspaceBytes(relativePath, overrides);
     const overridden = Object.hasOwn(overrides, relativePath);
     const bridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const t10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
     const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    if ((!overridden || relativePath !== ADR) && bridge !== undefined) {
-      const historicalMatch =
-        observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
-      const successorMatch =
-        observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
-      if (!historicalMatch && !successorMatch) {
-        fail("REGISTRATION_DRIFT", "A reviewed M07-T09 tracked successor receipt drifted.", {
+    if (
+      (!overridden || relativePath !== ADR) &&
+      (bridge !== undefined || t10Bridge !== undefined)
+    ) {
+      const taskTime = bridge?.historical ?? t10Bridge.historical;
+      const t09 = bridge?.successor ?? t10Bridge.historical;
+      const t10 = t10Bridge?.successor;
+      let observedGenerationMask = 0;
+      if (observed.bytes === taskTime.bytes && observed.sha256 === taskTime.sha256) {
+        observedGenerationMask |= 0b001;
+      }
+      if (observed.bytes === t09.bytes && observed.sha256 === t09.sha256) {
+        observedGenerationMask |= 0b010;
+      }
+      if (t10 !== undefined && observed.bytes === t10.bytes && observed.sha256 === t10.sha256) {
+        observedGenerationMask |= 0b100;
+      }
+      if (observedGenerationMask === 0) {
+        fail("REGISTRATION_DRIFT", "A reviewed M07-T10 tracked successor receipt drifted.", {
           path: relativePath,
         });
       }
-      if (historicalMatch) historicalState = true;
-      if (successorMatch) successorState = true;
+      generationMask &= observedGenerationMask;
     }
+    const taskTimeProjection = bridge?.historical ?? t10Bridge?.historical;
     const projected =
-      !overridden && bridge !== undefined
-        ? bridge.historical
+      !overridden && taskTimeProjection !== undefined
+        ? taskTimeProjection
         : !overridden && M07_T09_READER_RECEIPT_PROJECTION[relativePath] !== undefined
           ? M07_T09_READER_RECEIPT_PROJECTION[relativePath]
           : observed;
     receipts.push(Object.freeze({ path: relativePath, ...projected }));
   }
-  if (historicalState && successorState) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T09 tracked successor set is incoherent.");
+  if (generationMask === 0) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
   }
   return deepFreeze(receipts);
 }
@@ -1280,24 +1360,34 @@ function publicExportInventory(source) {
   return deepFreeze({ entries: inventory, count: inventory.length, sha256: inventorySha256 });
 }
 
-function assertAdjacent(script, predecessor, current, reviewedSuccessor, terminal) {
+function assertAdjacent(script, predecessor, current, reviewedSuccessor, laterSuccessor, terminal) {
   if (typeof script !== "string") {
     fail("REGISTRATION_DRIFT", "An aggregate root script is absent.");
   }
   const commands = script.split(" && ");
   const index = commands.indexOf(current);
   const reviewedSuccessorIndex = commands.indexOf(reviewedSuccessor);
+  const laterSuccessorIndex = commands.indexOf(laterSuccessor);
   const terminalIndex = commands.indexOf(terminal);
-  const historical = terminalIndex === index + 1 && reviewedSuccessorIndex < 0;
-  const approvedCurrent =
-    reviewedSuccessorIndex === index + 1 && terminalIndex === reviewedSuccessorIndex + 1;
+  const historical =
+    terminalIndex === index + 1 && reviewedSuccessorIndex < 0 && laterSuccessorIndex < 0;
+  const approvedT09 =
+    reviewedSuccessorIndex === index + 1 &&
+    terminalIndex === reviewedSuccessorIndex + 1 &&
+    laterSuccessorIndex < 0;
+  const approvedT10 =
+    reviewedSuccessorIndex === index + 1 &&
+    laterSuccessorIndex === reviewedSuccessorIndex + 1 &&
+    terminalIndex === laterSuccessorIndex + 1;
   if (
     index < 1 ||
     commands[index - 1] !== predecessor ||
-    (!historical && !approvedCurrent) ||
+    (!historical && !approvedT09 && !approvedT10) ||
     commands.lastIndexOf(current) !== index ||
     commands.lastIndexOf(terminal) !== terminalIndex ||
-    (approvedCurrent && commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex)
+    ((approvedT09 || approvedT10) &&
+      commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex) ||
+    (approvedT10 && commands.lastIndexOf(laterSuccessor) !== laterSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The T08 aggregate script position drifted.");
   }
@@ -1341,6 +1431,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-activation",
     "pnpm verify:control-plane-runtime-recovery",
     "pnpm verify:control-plane-runtime-fault-injection",
+    "pnpm verify:control-plane-runtime-transition-races",
     "pnpm lint",
   );
   assertAdjacent(
@@ -1348,6 +1439,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-activation",
     "pnpm test:control-plane-runtime-recovery",
     "pnpm test:control-plane-runtime-fault-injection",
+    "pnpm test:control-plane-runtime-transition-races",
     "turbo run test",
   );
 
@@ -1359,15 +1451,17 @@ async function registrationProjection(overrides) {
     [SHARED_STATE_AUTHORITY, sharedStateBytes],
   ].map(([relativePath, bytes]) => {
     const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    const current = M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[relativePath];
+    const t09 = M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[relativePath];
+    const t10 = M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[relativePath];
     if (observed.sha256 === EXPECTED_REGISTRATION_AUTHORITY_SHA256[relativePath]) {
       return "historical";
     }
-    if (observed.bytes === current.bytes && observed.sha256 === current.sha256) return "successor";
+    if (observed.bytes === t09.bytes && observed.sha256 === t09.sha256) return "t09";
+    if (observed.bytes === t10.bytes && observed.sha256 === t10.sha256) return "t10";
     fail("REGISTRATION_DRIFT", `${relativePath} reviewed source authority drifted.`);
   });
   if (new Set(registrationStates).size !== 1) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T09 CI registration set is incoherent.");
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 CI registration set is incoherent.");
   }
   executableProofTuples(ciSource, CI_SOURCE, "PROOF_ENTRIES", "mapped-object-freeze");
   executableProofTuples(inventorySource, CI_INVENTORY, "PROOF_UNIT_TUPLES", "safe-array-freeze");
@@ -1378,20 +1472,25 @@ async function registrationProjection(overrides) {
   const adr = fatalText(adrBytes, ADR);
   const adrReceipt = Object.freeze({ bytes: adrBytes.byteLength, sha256: sha256(adrBytes) });
   const adrBridge = M07_T09_TRACKED_RECEIPT_BRIDGE[ADR];
+  const t10AdrBridge = M07_T10_TRACKED_RECEIPT_BRIDGE[ADR];
   const historicalAdr =
     adrReceipt.bytes === adrBridge.historical.bytes &&
     adrReceipt.sha256 === adrBridge.historical.sha256;
   const successorAdr =
     adrReceipt.bytes === adrBridge.successor.bytes &&
     adrReceipt.sha256 === adrBridge.successor.sha256;
-  if (!historicalAdr && !successorAdr) {
-    fail("DOCUMENTATION_DRIFT", "ADR 0014 differs from both reviewed T08/T09 decisions.");
+  const t10Adr =
+    adrReceipt.bytes === t10AdrBridge.successor.bytes &&
+    adrReceipt.sha256 === t10AdrBridge.successor.sha256;
+  if (!historicalAdr && !successorAdr && !t10Adr) {
+    fail("DOCUMENTATION_DRIFT", "ADR 0014 differs from the reviewed T08/T09/T10 decisions.");
   }
   for (const marker of [
     "# ADR 0014: Reconstruct runtime authority from an unchanged durable record",
     "Recovery performs no durable write",
     "no tamper-proof, rollback-attack-resistant, or hostile",
-    ...(successorAdr ? ["M07-T09 now proves"] : []),
+    ...(successorAdr || t10Adr ? ["M07-T09 proves"] : []),
+    ...(t10Adr ? ["M07-T10 proves"] : []),
   ]) {
     if (!adr.includes(marker)) {
       fail(
@@ -1432,10 +1531,14 @@ async function testProjection(overrides) {
     [ROOT_TEST, rootBytes],
   ]) {
     const reviewedSuccessor = M07_T09_TEST_AUTHORITY_RECEIPTS[relativePath];
+    const reviewedT10Successor = M07_T10_TEST_AUTHORITY_RECEIPTS[relativePath];
     if (
-      reviewedSuccessor !== undefined &&
-      bytes.byteLength === reviewedSuccessor.bytes &&
-      sha256(bytes) === reviewedSuccessor.sha256
+      (reviewedSuccessor !== undefined &&
+        bytes.byteLength === reviewedSuccessor.bytes &&
+        sha256(bytes) === reviewedSuccessor.sha256) ||
+      (reviewedT10Successor !== undefined &&
+        bytes.byteLength === reviewedT10Successor.bytes &&
+        sha256(bytes) === reviewedT10Successor.sha256)
     ) {
       continue;
     }

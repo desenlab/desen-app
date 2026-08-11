@@ -90,12 +90,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
     ["control-plane-runtime-activation", ["control-plane-runtime-staging"]],
     ["control-plane-runtime-recovery", ["control-plane-runtime-activation"]],
     ["control-plane-runtime-fault-injection", ["control-plane-runtime-recovery"]],
+    ["control-plane-runtime-transition-races", ["control-plane-runtime-fault-injection"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "7f50b2f3802ddd8c309079c1c135901a18734e1729e98c761f7d4522629f797a";
+  "ce96e504dd8f14446519bd9a62d0935e61da9dc5ae3dbc866ad55856b2368579";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

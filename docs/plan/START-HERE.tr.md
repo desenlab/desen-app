@@ -26,10 +26,11 @@ Aynı anda yalnızca bir görev `IN_PROGRESS` olabilir. Bu kural, vibe coding s�
 kontrolden çıkmasını engeller.
 
 `I07-01` ve `I07-02` tamamlandı; aktif bir altyapı görevi yoktur. I07-02 geçiş anındaki 130 iş ve
-61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T09 eklendikten sonra çalışma
-alanındaki güncel zorunlu plan 146 işin ve 69 kanıt çiftinin tamamını yeni sistemle çalıştırır: 58
-normal çift ve 11 özel bariyer. Eski planın aynı kapsamdaki açılımı 455 önkoşul parçası, 2.769 sıralı
-yaprak çağrısı ve 227 farklı yaprak iştir. Ortak dosya, çıktı, port ve geçici-dizin kullanımı kodla
+61 kanıt çiftini değişmez tarihsel temel olarak saklar. M07-T09 checkpoint'i 146 iş ve 69 kanıt
+çiftiydi. M07-T10 eklendikten sonra çalışma alanındaki güncel zorunlu plan 148 işin ve 70 kanıt
+çiftinin tamamını yeni sistemle çalıştırır: 59 normal çift ve 11 özel bariyer. Eski planın aynı
+kapsamdaki açılımı 463 önkoşul parçası, 2.929 sıralı yaprak çağrısı ve 230 farklı yaprak iştir.
+Ortak dosya, çıktı, port ve geçici-dizin kullanımı kodla
 sınıflandırılmıştır; eski ve yeni yollar aynı sürümde
 başarılı olmuş, ardından resmi geçiş koşusu da 10 dakika 33 saniyede geçmiştir. Eski sıralı sistem
 otomatik çalışmaz; yalnızca acil durumda elle seçilen `legacy-rollback` seçeneği olarak korunur.
@@ -212,19 +213,30 @@ M07-T09 iddiası değildir; geçici ardıl köprüleri G07'de I07-04 tarafından
 
 İncelenmiş sıra 22, kesin sıra 21 başı
 `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` değerini
-`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` güncel başına bağlar. 18
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` o zamanki başına bağlar. 18
 değişmez eserin tamamı ve 36 okuyucu kimliği korunur; yalnızca iş akışına bağımlı
 `[8, 10, 11, 12, 14]` okuyucu indeksleri yeniden mühürlenir ve hiçbir dondurulmuş eser baytı
 değişmez. Bu ek, I07-03 CI iş akışı alındılarının kesin yayılımını kaydeder; yeni bir kanıt iddiası
 oluşturmaz.
+
+İncelenmiş sıra 23, kesin sıra 22 başı
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` değerini güncel
+`3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d` başına bağlar. Sıra
+1–22 ile önceki tüm eser baytlarını korur, 58.059 baytlık M07-T10 eserini ekler ve toplam 19
+değişmez eser ile 38 canlı okuyucuyu doğrular. T10 kanıt/kök okuyucuları iki yeni okuyucu
+kimliğidir. Bu ek için gereken tarihsel köprüler `DEBT-I07-018` olarak I07-04'e, en geç G07'de
+kaldırılmak üzere atanmıştır. Bu incelenmiş yerel okuyucu kanıtıdır; hosted M07-T10 sonucu iddia
+etmez.
 
 Kesin `REQUIRED + EXHAUSTIVE` çalıştırıcı tek geçme/kalma otoritesi olarak aynen korunur. I07-03,
 yalnızca pull request'lerde çalışan ayrı bir `SHADOW + AFFECTED` gözlem işi ekler. İzlenen tüm
 yolların sahipliği kesindir; bilinmeyen, belirsiz, güvenilmeyen, politika, bağımlılık, dondurulmuş
 girdi veya desteklenmeyen değişiklikler tam `EXHAUSTIVE` çalışmaya genişler. Dar bir seçim yapılırsa
 da seçilen tüm işler taze girdilerden gerçekten çalışır; önbellekteki kanıt başarısı kullanılmaz.
-Seçici 20 kaynaklı karşılaştırma otoritesiyle
-`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` değerine sabitlenmiştir.
+I07-03'ün tarihsel baseline seçicisi 20 kaynaklı karşılaştırma otoritesiyle
+`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` değerine sabitlenmiştir;
+M07-T10 çalışma alanındaki güncel seçici digest'i ise
+`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea` değeridir.
 Teknik karar ve sınırlar [`ADR 0011`](../adr/0011-modular-proof-infrastructure.md), kesin yerel ve
 hosted kanıt ise [`I07-03 baseline`](../proof/baselines/i07-03-affected-selector-shadow.json) içinde
 kayıtlıdır. Hosted başlangıç başarıyla çalıştı; shadow sonucu
@@ -296,6 +308,21 @@ olarak doğrular. Public fault hook, repository, SQLite handle veya yükleyici e
 `TESTED`; P-12 `NOT_PROVEN`, N-038 ve N-041 `PLANNED`, G07 ise açıktır. Bu çalışma alanı kanıtıdır;
 henüz hosted M07-T09 sonucu iddia edilmez.
 
+`M07-T10` tamamlandı: sistem artık A sürümü çalışırken geçersiz B'nin araya girmesini, ardından
+geçerli C'ye geçişi; aynı veya farklı adayların yarışmasını; aktivasyon ile kurtarmanın farklı
+sıralarını; yeniden başlatmayı ve gerçek SQLite journal değişimini adlandırılmış vakalarla sınar.
+Yazma kilidi alındıktan sonra ve commit sonrasında yayınlamadan önce SQLite'ın WAL,
+`synchronous=FULL`, foreign-key, trusted-schema ve busy-timeout ayarlarının tamamı yeniden
+doğrulanır. Bir ayar dışarıdan değiştirilmişse sistem onu gizlice düzeltmez; güvenli biçimde durur.
+15 geçiş vakası, 16 uygulama testi, 9 derleyici-negatif test, 12 bağımsız kök mutasyon sınıfı, 9
+önkoşul ve 15 sıralı trace satırı geçer. Kök kanıt native SQLite açamaz ve gerçek
+`ERR_DLOPEN_DISABLED` reddini gösterir; yalnızca doğrulayıcı gereken dar native yetkiyi alır.
+58.059 baytlık eser
+`sha256:f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39` ile sabittir. N-038 artık
+`TESTED`; N-041 `PLANNED`, P-12 `NOT_PROVEN` ve G07 açıktır. Bu kanıt kurcalamaya karşı mutlak
+koruma, eski sürüme döndürmeyi engelleme, hosted T10, host-channel veya native-conformance iddiası
+taşımaz.
+
 I07-03 tamamlandı ama hiçbir seçmeli sonuç henüz zorunlu değildir. Terfi için her seçici
 kategorisinin mutasyonla kapsanması, sıfır yanlış negatif ve aynı revizyonda en az 20 ardışık uygun
 hosted dar-seçim affected/exhaustive karşılaştırmasının uyuşması gerekir. Gözlem dürüstçe `0 / 20`
@@ -304,9 +331,10 @@ uygun bir dar seçim değildi. Salt-okunur defter bu hesabı ölçebilir ama tek
 üretemez. I07-04 ayrıca
 kesin GitHub run, job, revizyon ve receipt kökenini doğrulayıp sabitlemeden seçmeli çalışmayı zorunlu
 kılamaz. Bu nedenle I07-04 `NOT_STARTED` olarak eşiği bekler. `main`, sürüm ve manuel denetim
-çalışmaları daima `EXHAUSTIVE` kalır. Sıradaki uygulama görevi `M07-T10`, yani A → geçersiz
-B → geçerli C, eşzamanlı aktivasyon ve yeniden başlatma davranışıdır. Güncel ilerleme 83/145 görev
-(%57), M07 içinde 9/11 görev (%82) ve kanıt kapılarında 7/13'tür; I07-03 bu sayaçlara dahil değildir.
+çalışmaları daima `EXHAUSTIVE` kalır. Sıradaki uygulama görevi `M07-T11`; ayrı derlenmiş referans
+host'un control-plane channel'ını gerçekten tükettiğini kanıtlayacaktır. Güncel ilerleme 84/145
+görev (%58), M07 içinde 10/11 görev (%91) ve kanıt kapılarında 7/13'tür; I07-03 bu sayaçlara dahil
+değildir. I07-04 `0 / 20` gözlemle `NOT_STARTED`, seçici terfisi false ve G07 açıktır.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

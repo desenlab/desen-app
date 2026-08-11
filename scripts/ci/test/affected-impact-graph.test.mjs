@@ -14,8 +14,12 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 69);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 69);
+  assert.equal(graph.proofUnitCount, 70);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 70);
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
+    ["control-plane-runtime-fault-injection"],
+  );
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);
   assert.equal(Object.isFrozen(graph.entries), true);
@@ -27,6 +31,7 @@ test("impact closure includes prerequisites, dependents, and exact global barrie
   assert.equal(closure.proofUnitIds.includes("publisher-publish-result"), false);
   assert.equal(closure.proofUnitIds.includes("publisher-invalid-source-matrix"), true);
   assert.equal(closure.proofUnitIds.includes("control-plane-runtime-fault-injection"), true);
+  assert.equal(closure.proofUnitIds.includes("control-plane-runtime-transition-races"), true);
   assert.deepEqual(closure.nodeIds.slice(0, 6), [
     "orchestrator-contracts",
     "format",

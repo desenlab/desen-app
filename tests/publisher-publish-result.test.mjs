@@ -19,7 +19,7 @@ import {
   writePublisherPublishResultEvidence,
 } from "../scripts/lib/publisher-publish-result-proof.mjs";
 
-// Reconstructs exact stale M07-T08 through M07-T03 bytes from the live M07-T09 fixture so rollback
+// Reconstructs exact stale M07-T09 through M07-T03 bytes from the live M07-T10 fixture so rollback
 // regression remains cryptographic, deterministic, and independent from Git or child processes.
 const M07_T06_SOURCE_AUDIT_RECONSTRUCTION_PATCH =
   "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";
@@ -82,6 +82,51 @@ w+pQsrN7WViez0qvt+ogXsEJJ7aDq96o5Yehc31VdZ4FERQF5ITg9JL9Hkwvt/kIn7at4E9fvMLGIBSc
 tpdlDo4TrSZkYFMn93IHliS05RiwBt/ygKeALF0Qgoa6PTNDgcLQQ3OmPoVG5NJmgoRMVspVfMsvv5+87+3CCno4DOjyCwVvT6RN
 3VsLdJw61f7YvVVX866b9EXygDmefW4AnVC0Ov4jH3oIk3TuDg/RRNpKR+ykHzSIK7igAnkS7HL+sJMlwCnadBDrOEMOWxyckUP9
 Q4QIlezsGt+U7CbIvRJrDgs=
+`.replaceAll(/\s/gu, "");
+
+const M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `
+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
+`.replaceAll(/\s/gu, "");
+
+const M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH = `
+G/AVIJwHxs3yFiH0RtQogq2PkND8T53uXqZ3f3LgBwDGTCWUBa0Cis6SW84VkJanK/2Manxv4SvPnKMcyBVMzH37NRFNdBopnMd2
+Mzv739s7RzSJ6jfUIh6KZ7VUSJEQSfnTiIRYeX/Y//s0CUm8tvtqZY0B85uNyOoE56t7QTCWLfypM4bwdbIolI21qEOsnfYBwo4r
+YV7f2cx0DS5/a2Oaxvmi2QAV+cyMxhEnlUoFlesWC3CbeNvyzfkfmAdTqkkGBsrpErg1gkFJj+ZbBTL4Qu2kwuqdswK+lZKAnrrg
+lOhgwe+tdWCeOsoE6msnFKpolMYWiIBRB22byL/VF5VbnNDdeuyoJuvto6Cp0evcmfsooU42Rq2IHpXrpq+buaQK2rHnMgC1vog0
+YW6MplexP0eWemGMYyEt6AcPNEMh+VAnx3S/gAYi8ArW8bIsnTO6bGTcCHv8atCr9sijfuSeIp7z/USwwBHntwU9XQKkWbMqfiEE
+gfEb6g0S3od6o0H2+1YW3tYH5BK6gymqVPwCkH1HHUZovXTA/70+F58X79k6+lsUvn96duW2Vqob8E57qBxohKb6+ZrBGHBaavRt
+FstbPZtWWdYp4gynIgchLhh5lY9Av6tGeeE46DTmroKZ/IxgiSRW5z74YY+xQLN51QEwRiUioJk8mtPGMMWlp0TiDGhXJkrdO61b
+hVLUx2417zGfTg8zYvojt6sF1Z2Zhpuwe/HaDCONKI6RrdtLJM6d2eTtT7zE5f0gLhqbvq7G6nwEyqxwfJa85UYJIqj1Kr97/lNU
+eZeDzbNv0hqZkS+oHFA28Za3zmmFHX0unUXw3GEfujXqqqoToGuu5FxZMnw2C76kKvmgcIBjbYWuFFEEX0aH7hJ4/RnseI6cAnUx
+ap1wcljAgPESFv8UpCVMZ/hNYOBYXBAgzy7ECq2qKVJRzkJRR5KaQfW58kZfsUwsGRifsoF3lkq1zKM1QsYxVM7xpnqQgKYTZPHg
+c2JEYpXOfFWP0z9yHAsNa56aAhla1AWbxfGYPlDdkD7KJl6+Cr0aKmrgCq8R5J0/gblK5xgLpYN2zHMm0jGXlnmaQvaNNFw0fEV9
+/QNN+aad+FvjgaL09IPiGxkcqw7jpjR9M4ofaCTBpkBHGcMUT+4bCQ3wt8FRkHOblai0Od6CyjQCc+FoZGkIId1jYw1MAQF8OGoL
+kNn1PfV9ZUkmXvl8VieI8hma5ySRsKVarMihWWl5/g5rQdVsdHLVjaB84qNUiRwlT3yjgEz4K+Wqv59xohXOZ2qmhBLkw0lJREGV
+A9rTLqFJ151H6yLl6AVMe7wJA8vg/PrnuCwPS2t0aUMZjUHoDEXMeUyNlFAZPDW8oS2tbu2xyLOz4PvnqIoC8ghj4GgG+ajV0j+G
+dhoDRX/cVNLqHGthcGqSRY6dEhjLv9IEQPW4qc+hFGeJcFdYoOPxI5XkpJAzb81lOfXSm/Zua+xoEabpW+PyLsdX52iUusaTIm3R
+Awk9HAOo9AZUJxWNc59pDA==
 `.replaceAll(/\s/gu, "");
 
 const M07_T09_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `
@@ -212,9 +257,23 @@ function applySourceAuditReconstructionPatch(currentBytes, encodedPatch) {
   return Buffer.from(reconstructedLines.join("\n"), "utf8");
 }
 
-function reconstructM07T03SourceAuditProof(currentBytes) {
-  const staleM07T08Bytes = applySourceAuditReconstructionPatch(
+function reconstructM07T09SourceAuditProof(currentBytes) {
+  const staleM07T09Bytes = applySourceAuditReconstructionPatch(
     currentBytes,
+    M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
+  );
+  assert.equal(staleM07T09Bytes.byteLength, 266_698);
+  assert.equal(
+    createHash("sha256").update(staleM07T09Bytes).digest("hex"),
+    "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
+  );
+  return staleM07T09Bytes;
+}
+
+function reconstructM07T03SourceAuditProof(currentBytes) {
+  const staleM07T09Bytes = reconstructM07T09SourceAuditProof(currentBytes);
+  const staleM07T08Bytes = applySourceAuditReconstructionPatch(
+    staleM07T09Bytes,
     M07_T09_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
   );
   assert.equal(staleM07T08Bytes.byteLength, 263_857);
@@ -264,9 +323,23 @@ function reconstructM07T03SourceAuditProof(currentBytes) {
   );
 }
 
-function reconstructM07T08SourceAuditTest(currentBytes) {
-  const staleM07T08Bytes = applySourceAuditReconstructionPatch(
+function reconstructM07T09SourceAuditTest(currentBytes) {
+  const staleM07T09Bytes = applySourceAuditReconstructionPatch(
     currentBytes,
+    M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,
+  );
+  assert.equal(staleM07T09Bytes.byteLength, 90_209);
+  assert.equal(
+    createHash("sha256").update(staleM07T09Bytes).digest("hex"),
+    "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
+  );
+  return staleM07T09Bytes;
+}
+
+function reconstructM07T08SourceAuditTest(currentBytes) {
+  const staleM07T09Bytes = reconstructM07T09SourceAuditTest(currentBytes);
+  const staleM07T08Bytes = applySourceAuditReconstructionPatch(
+    staleM07T09Bytes,
     M07_T09_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,
   );
   assert.equal(staleM07T08Bytes.byteLength, 89_057);
@@ -338,15 +411,25 @@ test("two independent Publisher evidence builds are byte-identical", async () =>
 
   const sourceAuditProofPath = "scripts/lib/reference-host-web-source-audit-proof.mjs";
   const sourceAuditTestPath = "tests/reference-host-web-source-audit.test.mjs";
-  assert.equal(currentCompatibilityBytes[sourceAuditProofPath].byteLength, 266_698);
+  assert.equal(currentCompatibilityBytes[sourceAuditProofPath].byteLength, 269_572);
   assert.equal(
     createHash("sha256").update(currentCompatibilityBytes[sourceAuditProofPath]).digest("hex"),
-    "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
+    "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",
   );
-  assert.equal(currentCompatibilityBytes[sourceAuditTestPath].byteLength, 90_209);
+  assert.equal(currentCompatibilityBytes[sourceAuditTestPath].byteLength, 91_297);
   assert.equal(
     createHash("sha256").update(currentCompatibilityBytes[sourceAuditTestPath]).digest("hex"),
-    "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
+    "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",
+  );
+  const staleM07T09ProofBytes = reconstructM07T09SourceAuditProof(
+    currentCompatibilityBytes[sourceAuditProofPath],
+  );
+  await assert.rejects(
+    buildPublisherPublishResultEvidence({
+      verifySnapshot: false,
+      trackedFileBytes: { [sourceAuditProofPath]: staleM07T09ProofBytes },
+    }),
+    hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
   );
   const staleM07T03Bytes = reconstructM07T03SourceAuditProof(
     currentCompatibilityBytes[sourceAuditProofPath],
@@ -360,6 +443,16 @@ test("two independent Publisher evidence builds are byte-identical", async () =>
     buildPublisherPublishResultEvidence({
       verifySnapshot: false,
       trackedFileBytes: { [sourceAuditProofPath]: staleM07T03Bytes },
+    }),
+    hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
+  );
+  const staleM07T09TestBytes = reconstructM07T09SourceAuditTest(
+    currentCompatibilityBytes[sourceAuditTestPath],
+  );
+  await assert.rejects(
+    buildPublisherPublishResultEvidence({
+      verifySnapshot: false,
+      trackedFileBytes: { [sourceAuditTestPath]: staleM07T09TestBytes },
     }),
     hasEvidenceCode("PUBLISHER_G05_COMPATIBILITY_READER_DRIFT"),
   );

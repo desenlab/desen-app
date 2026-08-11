@@ -33,8 +33,20 @@ const ROOT_TEST = "tests/publisher-bundle-publication.test.mjs";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const ARTIFACT = "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json";
 
-// Reconstructs exact M07-T08 execution-preflight readers from their live M07-T09 successors so
-// rollback rejection remains deterministic and independent from Git or child processes.
+// Reconstructs exact M07-T09 and M07-T08 execution-preflight readers from their live M07-T10
+// successors so rollback rejection remains deterministic and independent from Git or child
+// processes.
+const M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH = `
+G4EGIKwKbHBZT5IW3bwqTzwd0mBw8e9Qulor/Rq1deoh+9eAr2ywe6ASTdAtICtneyWmB4jlLabfeCMzBOHNINoVmgA24NQTjwIe
+6L5JU5MzcU39KMDHJ36lbPvz9163vdiiwUoHljilnY9khAPDPazbAayGH3R+ftn7vOh+O/suSIP7s++ftC8R51//BbB+Geq48vX1
+rBf1Qxl7B8bS3BEvLzIcofkUwEQOBCDnYB0EUAf3Xcz+BvHk0LXzomRsuxQurdMQpR9NkK5FzzGXNpHeQoySag5H6dSf9fCj4lL/
+/ra+vkZmH13GmzvP+vq5SO31vJmFoItkznTHUo8xhWesoB3BroaitUF24xzDa+M09DVB18i91+2rzv/HY1B7UBCcZ3lKu4nya2p4
+cRwQqfxonei8/DJI0tfiKqSYgycPG03pEV4pOya6qeSykkGgw7TXGpXbZgvDABnvj7S3RBWCp5hEMGlwqLMFtzlrcPRy1qYB6ogj
+z4eEJ5i/5/IGpdor4SNDZs8QIR+5F+PmNaxHoZQZTl0FSaBRzf9BJslMLualimUgK3ugUbZH4kdOLz/uIQBXGfB2EtaxwadqTZex
+eksNo4adihTTKSYFAYxBpLUHLMZrSsvsoLIYHMldUnvSGDoLB97l2G0rHpJ+8Wkfvuzl76fv2wJYH0T74BHkP9xzP/gFsHYioclF
+4xpc283snVVfAURMASjjk88=
+`.replaceAll(/\s/gu, "");
+
 const M07_T09_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH = `
 G2EFICwKYyLThe+URexNXJSo0b78r+hdNUjLisJekekB8lJ9f85bJt+b0nwWCBB4yrJ3kFD6rwWindNqtX2UGIViIPGrriRMUdXE
 5fTHEnx84VecA2gsG/N8zAIsDMPAJuaPCQQSaBSIBYopqFdx9MUMUWvWzWx7e46tT+a6ooXrpy85nup6LUf//eXryRb25VV0lbYI
@@ -45,6 +57,67 @@ XjQLTGDrJFIsMxDZHaeRddOsjEBOsnLviolnEGHrNrPCrNklugO5CAxOL4aF1dnn0kAaVr3WZAaXQmnR
 baywaNqXE383p9LG1mtK+pcli4y6U7JjIg5w4IB0XvHxBH3+eddye7lbgMeuqvNPoNjjcW72lHWda0IDsbcCmmyf84JRrfOHm2xv
 YwQ=
 `.replaceAll(/\s/gu, "");
+const M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH = `
+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
+`.replaceAll(/\s/gu, "");
+
 const M07_T09_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH = `
 Gw8lIxHCxkFgG1M/jFok8IZRH3fEl5OPkFbKMM2ADf7bPhztgktWEVzRUiAth245N8t0vYk0Rni1ijiaV14DrQ/Msz/VBehbBNwA
 P1ui8hUKOGaNbfyHmfrx+/X7EdHQqLRfIqKxLSNn1jG1N3ee7GLSVJo1Gt4omVAIhUamNAuZEBuhJh5Dtd/eoyIS8oAlq+lyIZRM
@@ -331,12 +404,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
-    "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
+    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-fault-injection && turbo run test",
-    "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-transition-races && turbo run test",
+    "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1558,13 +1631,22 @@ test("[compatibility] detects tamper in each externally anchored T02 through T09
   }
 
   const reviewedCurrentBytes = await sourceBytes(reviewedCurrentPath);
-  assert.equal(reviewedCurrentBytes.byteLength, 72_334);
+  assert.equal(reviewedCurrentBytes.byteLength, 72_643);
   assert.equal(
     createHash("sha256").update(reviewedCurrentBytes).digest("hex"),
+    "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
+  );
+  const predecessorM07T09Bytes = applyExactRollbackPatch(
+    reviewedCurrentBytes,
+    M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH,
+  );
+  assert.equal(predecessorM07T09Bytes.byteLength, 72_334);
+  assert.equal(
+    createHash("sha256").update(predecessorM07T09Bytes).digest("hex"),
     "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
   );
   const predecessorM07T08Bytes = applyExactRollbackPatch(
-    reviewedCurrentBytes,
+    predecessorM07T09Bytes,
     M07_T09_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH,
   );
   assert.equal(predecessorM07T08Bytes.byteLength, 72_025);
@@ -1590,6 +1672,14 @@ test("[compatibility] detects tamper in each externally anchored T02 through T09
     buildPublisherBundlePublicationEvidence(
       fastOptions({
         trackedFileBytes: { [reviewedCurrentPath]: unreviewedCurrentBytes },
+      }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({
+        trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T09Bytes },
       }),
     ),
     expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
@@ -1706,13 +1796,22 @@ test("[compatibility] detects tamper in each externally anchored T02 through T09
 test("[compatibility] admits only the exact current execution-preflight root reader", async () => {
   const readerPath = "tests/publisher-execution-preflight.test.mjs";
   const currentBytes = await sourceBytes(readerPath);
-  assert.equal(currentBytes.byteLength, 24_873);
+  assert.equal(currentBytes.byteLength, 29_586);
   assert.equal(
     createHash("sha256").update(currentBytes).digest("hex"),
+    "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
+  );
+  const predecessorM07T09Bytes = applyExactRollbackPatch(
+    currentBytes,
+    M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH,
+  );
+  assert.equal(predecessorM07T09Bytes.byteLength, 24_873);
+  assert.equal(
+    createHash("sha256").update(predecessorM07T09Bytes).digest("hex"),
     "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
   );
   const predecessorM07T08Bytes = applyExactRollbackPatch(
-    currentBytes,
+    predecessorM07T09Bytes,
     M07_T09_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH,
   );
   assert.equal(predecessorM07T08Bytes.byteLength, 17_767);
@@ -1734,6 +1833,12 @@ test("[compatibility] admits only the exact current execution-preflight root rea
   await assert.rejects(
     buildPublisherBundlePublicationEvidence(
       fastOptions({ trackedFileBytes: { [readerPath]: unreviewedBytes } }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({ trackedFileBytes: { [readerPath]: predecessorM07T09Bytes } }),
     ),
     expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
   );

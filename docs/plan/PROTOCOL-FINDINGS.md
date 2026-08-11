@@ -2825,9 +2825,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   Evidence: `docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json`
   `sha256:698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795`.
 
-- Future action: M07-T05 must keep mutable channel metadata outside revision artifacts, and
-  M07-T06 through M07-T10 must preserve the same first-writer and retry semantics through staging,
-  activation, crash recovery, and fault injection. A later protocol revision should decide
+- Future action: M07-T05 keeps mutable channel metadata outside revision artifacts. M07-T06 through
+  M07-T10 now preserve the same first-writer and retry semantics through staging, activation,
+  crash recovery, bounded fault injection, ordered invalid candidates, and concurrent races.
+  M07-T11 must retain that separation while the separately built host consumes discovery. A later
+  protocol revision should decide
   whether publication metadata receives a separate artifact identifier, is always stored outside
   the revision-closed Bundle, or becomes part of a newly specified complete-byte identity.
 
@@ -2877,10 +2879,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   because the frozen revision projection excludes root `publication`; the verifier preserves and
   validates that complete Bundle while still enforcing its complete canonical size.
 
-- Future action: M07-T03 now consumes only authenticated integrity authority for exact installed
+- Future action: M07-T03 consumes only authenticated integrity authority for exact installed
   package preflight. M07-T04 adds reference and activation-limit checks; M07-T05 owns Source and
-  channel storage/API; M07-T06 through M07-T10 own staging, activation, recovery, and fault
-  behavior. A later protocol revision should define the normative Bundle-size metric explicitly.
+  channel storage/API; and M07-T06 through M07-T10 now prove staging, activation, recovery,
+  bounded faults, ordered invalid candidates, concurrent winners, and exact restart behavior.
+  M07-T11 must preserve this ingress order in separately built host consumption. A later protocol
+  revision should define the normative Bundle-size metric explicitly.
   If the same hostile-JSON boundary is needed elsewhere, extract the reviewed parser as a shared
   internal primitive without altering the frozen M06 Publisher evidence or weakening its limits.
 
@@ -2907,11 +2911,12 @@ This file records implementation discoveries without changing the frozen DESEN 0
   channel mutation, or activation operation. Caller mutation therefore cannot alter the bytes
   verified by M07-T03. Those copied arrays are nevertheless trusted package-private process state,
   not an immutable external package store, and M07-T03 neither stages nor activates them.
-- Future action: M07-T04 now consumes only the authenticated M07-T03 authority when checking
+- Future action: M07-T04 consumes only the authenticated M07-T03 authority when checking
   surface and capability references. M07-T06 now stages from the private verified snapshots, copies
   artifact bytes into an independently closed candidate lifetime, recalculates their package
-  digests, and binds the resulting indexes to a new opaque identity. M07-T07 through M07-T10 must
-  prove that stale, failed, restarted, raced, or otherwise modified material cannot become active.
+  digests, and binds the resulting indexes to a new opaque identity. M07-T07 through M07-T10 now
+  prove that stale, failed, restarted, raced, or otherwise modified material cannot become active;
+  a concurrent loser is consumed and requires a fresh staging authority before retry.
   If a later implementation moves installation across processes or into a persistent package
   store, it needs an authenticated installed-package store/handle rather than arbitrary caller
   callbacks or paths.
@@ -2960,10 +2965,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   owns execution-contract preparation and staged indexes; M07-T07 must authenticate and join the
   exact T04 and T06 branches before any durable activation record can change.
 
-- Future action: M07-T06 now stages from the exact private package snapshots and independently owns
+- Future action: M07-T06 stages from the exact private package snapshots and independently owns
   runtime execution contracts, sorted dynamic obligations, and bounded callback-free runtime
-  indexes. M07-T07 through M07-T10 must prove that every reference or limit failure remains
-  pre-commit and cannot alter active/previous-good state. M12-T05 must measure the complete
+  indexes. M07-T07 through M07-T10 now prove that every reference or limit failure remains
+  pre-commit, preserves the exact active/previous-good record, and does not prevent a later valid
+  candidate from activating and recovering. M12-T05 must measure the complete
   cross-system limit profile, including real materialized node counts, before N-041 can leave
   `PLANNED`. A later protocol revision should standardize the depth convention and dynamic
   activation projection if cross-implementation parity is required.
@@ -3006,8 +3012,9 @@ This file records implementation discoveries without changing the frozen DESEN 0
   neither reads nor mutates channel metadata; M07-T07 commits active and previous-good revisions
   as one separate durable record after authenticating the T04 and T06 branches. M07-T09 now proves
   that an invalid revision discovered through a channel fails before authority and preserves the
-  exact durable active record. M07-T10 still owns the complete A → invalid B → valid C and race
-  matrix. M07-T11 must consume the channel from the separately built
+  exact durable active record. M07-T10 now proves the complete A → invalid B → valid C and race
+  matrix without granting the discovery pointer any activation role. M07-T11 must consume the
+  channel from the separately built
   reference host without treating it as activation evidence. A later protocol revision should
   standardize channel identity and concurrency only if cross-implementation transport
   interoperability is required.
@@ -3043,7 +3050,8 @@ This file records implementation discoveries without changing the frozen DESEN 0
   failure still requires a fresh staging attempt. This bounds controller-admitted work but does not
   create a process-wide quota for T06 handles that callers never submit. M07-T09 now injects the
   reviewed staging and durable-boundary faults and proves that failed candidates cannot become
-  active. M07-T10 still owns stale-candidate and concurrent race behavior. M07-T08 recovers only
+  active. M07-T10 now proves stale-candidate and concurrent race behavior: exactly one writer wins,
+  every admitted loser is consumed, and only a fresh T06 lifetime may retry. M07-T08 recovers only
   durable committed authority, never an abandoned in-process candidate. A later protocol revision should standardize staged candidate
   identity and lifetime only if cross-implementation activation interoperability needs more than
   the current observable atomicity rules.
@@ -3101,13 +3109,15 @@ This file records implementation discoveries without changing the frozen DESEN 0
   distinguished from the genuine latest state. The implementation makes no tamper-proof or
   hostile-administrator claim.
 
-- Future action: M07-T09 now injects bounded faults across discovery, fetch, integrity, package,
+- Future action: M07-T09 injects bounded faults across discovery, fetch, integrity, package,
   reference, staging, definite pre-commit, post-commit indeterminate, and recovery boundaries. The
-  exact durable winner remains the only recovery authority and N-004 is `TESTED`. M07-T10 must prove
-  A → invalid B → valid C, same- and different-candidate races, generation fencing, and restart
-  behavior. Its race matrix must explicitly decide whether a live external change to database-level
-  `journal_mode` requires full connection-profile reauthentication inside the writer transaction.
-  M07-T11 must consume a mutable channel from the separately built reference host without
+  exact durable winner remains the only recovery authority and N-004 is `TESTED`. M07-T10 now
+  proves A → invalid B → valid C, same- and different-candidate races, generation fencing, both
+  recovery/activation orderings, and exact-winner restart. It requires the complete SQLite profile
+  to be reauthenticated inside the writer transaction before record access or DML and fails closed
+  without silently repairing `journal_mode` drift; the pinned adapter also proves that a second
+  live connection cannot change an already used WAL database. M07-T11 must consume a mutable
+  channel from the separately built reference host without
   treating that discovery pointer as activation evidence. A later protocol revision should
   standardize persistence and recovery only if cross-implementation lifecycle interoperability
   requires more than the observable atomicity and last-known-good invariants.

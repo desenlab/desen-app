@@ -81,6 +81,18 @@ async function sourceText(relativePath) {
   return readFile(path.join(ROOT, relativePath), "utf8");
 }
 
+async function m07T09AppPackageBytes() {
+  const appPackage = JSON.parse(await sourceBytes(APP_PACKAGE));
+  delete appPackage.scripts["test:runtime-transition-races"];
+  const bytes = Buffer.from(`${JSON.stringify(appPackage, null, 2)}\n`, "utf8");
+  assert.equal(bytes.byteLength, 2_319);
+  assert.equal(
+    createHash("sha256").update(bytes).digest("hex"),
+    "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+  );
+  return bytes;
+}
+
 async function trackedMutation(relativePath, transform) {
   const original = await sourceText(relativePath);
   const mutated = transform(original);
@@ -365,15 +377,18 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
     expectCode("REGISTRATION_DRIFT"),
   );
 
+  // DEBT-I07-015 keeps the exact M07-T08 mutation markers visible until I07-04 removes the
+  // historical reader bridge: pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-successor && pnpm lint
+  // and pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-successor && turbo run test.
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
-        "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
+        "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-runtime-fault-injection && turbo run test",
-        "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-successor && turbo run test",
+        "pnpm test:control-plane-runtime-transition-races && turbo run test",
+        "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-successor && turbo run test",
       ),
   );
   const successor = await buildControlPlaneBundleStoreEvidence(successorOptions);
@@ -448,6 +463,17 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
   await assert.rejects(
     buildControlPlaneBundleStoreEvidence(brokenEdgeOptions),
     expectCode("REGISTRATION_DRIFT"),
+  );
+
+  await assert.rejects(
+    buildControlPlaneBundleStoreEvidence(
+      fastOptions({ trackedFileBytes: { [APP_PACKAGE]: await m07T09AppPackageBytes() } }),
+    ),
+    (error) => {
+      expectCode("REGISTRATION_DRIFT")(error);
+      assert.equal(error.message, "The reviewed M07-T10 tracked successor set is incoherent.");
+      return true;
+    },
   );
 });
 

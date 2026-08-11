@@ -10,7 +10,7 @@ CI-01 sequential runner remains available only through explicit manual rollback.
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   146-node, 69-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   148-node, 70-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -189,6 +189,13 @@ step temp root; it never depends on Corepack, a package-manager shim, `PATH` loo
 disabled, and cleanup is unconditional. The full T09 verifier remains an exhaustive workload after
 its build-producing dependencies.
 
+The M07-T10 verifier similarly launches the complete transition/race suite with the current Node
+executable and repository-local Vitest entrypoint under an owner-only OS-temp config. It disables
+cache and file parallelism, fixes one worker, bounds JSON output and execution time, removes
+inherited `NODE_PATH`, redacts failures to code-owned identities and size/digest metadata, and
+cleans up in `finally`. The full verifier remains an exhaustive workload after its build-producing
+dependencies; no package-manager or `PATH`-resolved launcher becomes proof authority.
+
 The final T08 reader validates exact AST structures for executable CI registrations, shared-state
 mappings, and direct 12-runtime/14-type/9-root test inventories. Code-owned exact source receipts
 bind those structures to their executable bodies and effective flow; bounded identity-safe reads
@@ -221,38 +228,38 @@ manual `legacy-rollback`. The temporary shadow workflow and comparison adapter/t
 after the accepted same-revision comparison and successful hosted cutover.
 
 The archived I07-02 baseline remains the immutable 130-workload/61-proof cutover receipt. The live
-authority is an append-only successor: M07-T02 through M07-T09 each add one verifier/root-test pair
+authority is an append-only successor: M07-T02 through M07-T10 each add one verifier/root-test pair
 without rewriting that historical baseline. The preceding M07-T05 receipt contained 138 workloads,
 65 proof pairs, 423 prerequisite segments, 2,209 ordered leaf invocations, and 215 distinct leaf
 workloads. Its inventory was
 `sha256:d26e9fa74f85be06852cd4f667467606735687e851ab03a6ef5611700c9ccc92`, and its required plan was
-`sha256:4d26089fc10902513950f0051fb0d860a82c14374e426fd40b3259a43a63b466`. The current M07-T09
-working-tree successor contains 146 workloads, 69 proof pairs, 455 prerequisite segments, 2,769
-ordered leaf invocations, and 227 distinct leaf workloads. Its neutral inventory is
-`sha256:3328b640fdb9428cb52a2453a95e2838338ddc7788d56a95089fa67b021484d8`, and its required plan is
-`sha256:73ec61f03fbd5f0899862a3bb94e85fdd3c273ce793f99f7c72a1c30fb158acc`. These current pins make no
-hosted M07-T09 claim.
+`sha256:4d26089fc10902513950f0051fb0d860a82c14374e426fd40b3259a43a63b466`. The current M07-T10
+working-tree successor contains 148 workloads, 70 proof pairs, 463 prerequisite segments, 2,929
+ordered leaf invocations, and 230 distinct leaf workloads. Its neutral inventory is
+`sha256:7e4be77121123bc1fdf98e400b414d9f825a1dc04fc34b6b5dedb101a56999d1`, and its required plan is
+`sha256:18f7cb0ab88d0847afb6f030c80ef6367c3a599466a22b1cf8826055d5d44502`. These current pins make no
+hosted M07-T10 claim.
 
 The complete current reviewed digest set is:
 
 - prerequisite inventory:
-  `3d48423eafd03a1492451fc23bbaaf9c954b80119bb6c031a871d3afea5ee74a`;
+  `f5f60e179552d6255392149a57a442b4ea44dc225e66f432b85a81773251ea74`;
 - ordered legacy leaves:
-  `461d33056bc152b60fc5e8bba1509508b264051090a7c10551b5cd74a55eb22e`;
+  `8653310c9771194080d3f98d8f6412b46bc8456a34b14ecbdee28065fd3bb9ce`;
 - distinct leaf workloads:
-  `9106b8a4a9d4065eedcfdab7e40cb513792991352cca2680edf210954f119916`;
+  `943daf1c8f21c40bf8f33473c16d2ebc8cf4bf45436d76647306fc6db9c0e485`;
 - retained sequential plan:
-  `97195b80c1c718d7f42cbf0f40873758f09129254ae1be677cbece63256b00b7`;
+  `19c073be84a7c4112ad29ad1b7dd47f8bf6b28de8f25eb4edd40d9f165b6abc2`;
 - neutral inventory:
-  `3328b640fdb9428cb52a2453a95e2838338ddc7788d56a95089fa67b021484d8`;
+  `7e4be77121123bc1fdf98e400b414d9f825a1dc04fc34b6b5dedb101a56999d1`;
 - workload-id set:
-  `4beb1d481994cbd519299c5f9b12f2d94fa39ed35995b1d6156444317e67e460`;
+  `38b5239a71fb69ff263fbf838471d14f87401e3afd2a17ea5edeb3ccad5c787f`;
 - ordered equivalence projection:
-  `9362dae4fa749a5f0510a3f5bce869c93059d60403a0790ee12d32327bf1bae9`;
+  `57fed06a97b16f6198fbaada03e150e143a95f5b5f901c0d3950b702464106e1`;
 - required plan:
-  `73ec61f03fbd5f0899862a3bb94e85fdd3c273ce793f99f7c72a1c30fb158acc`; and
+  `18f7cb0ab88d0847afb6f030c80ef6367c3a599466a22b1cf8826055d5d44502`; and
 - shadow plan:
-  `5bd33848d4207e157cc3410e78971d5a22af708f1f57cba930922e5dd4e80519`.
+  `53924d0ad8cb850eab7cb9cfba93b70fc7fc04e31a4fefe3346c4ac107df53a4`.
 
 Every workload has exactly one code-owned shared-state class:
 
@@ -262,11 +269,11 @@ Every workload has exactly one code-owned shared-state class:
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Workspace build/typecheck output writer              |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
 | `PROOF_READ_ONLY`                |    69 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    58 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_OS_TEMP_ISOLATED`         |    60 | Proof work restricted to a runner-owned OS temp root |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
-Fifty-eight proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
+Fifty-nine proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
 pass. Ten real tracked-alias pairs and `reference-host-web-source-audit` are the eleven exclusive
 proof-pair barriers. Within every pair, the root test still depends on its verifier.
 
@@ -305,6 +312,13 @@ workloads are `PROOF_OS_TEMP_ISOLATED`; the verifier receives the bounded
 task-specific `CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE` native-addon policy. Neither receives
 workspace-write or port authority.
 
+The M07-T10 `control-plane-runtime-transition-races` pair is ordinary and non-barrier. Both
+workloads are `PROOF_OS_TEMP_ISOLATED`; the verifier receives the bounded
+`VERIFIER_RUNTIME_PROBE` policy plus the separate task-specific
+`CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE` native-addon policy. The root receives
+`NODE_TEST_HARNESS` and no native-addon authority because it injects the authenticated runtime
+receipt. Neither receives workspace-write or port authority.
+
 The only verifier runtime-probe exceptions, each with isolated temp and child-process authority,
 are:
 
@@ -317,18 +331,20 @@ are:
 - `control-plane-local-api`; and
 - `control-plane-runtime-activation`; and
 - `control-plane-runtime-recovery`; and
-- `control-plane-runtime-fault-injection`.
+- `control-plane-runtime-fault-injection`; and
+- `control-plane-runtime-transition-races`.
 
 Native-addon authority is limited to the exact `reference-host-web-source-audit` verifier/root-test
 pair, the `publisher-invalid-source-matrix` root test, and the exact `control-plane-local-api`,
 `control-plane-runtime-activation`, `control-plane-runtime-recovery`, and
-`control-plane-runtime-fault-injection` verifier/root-test pairs.
+`control-plane-runtime-fault-injection` verifier/root-test pairs plus only the
+`control-plane-runtime-transition-races` verifier. Its root proof receives no native-addon grant.
 The source-audit verifier remains workspace-read-only; its root test is the sole workspace-temp
 barrier. The publisher root loads only the reviewed Rolldown binding, and the control-plane pairs
 load only their reviewed SQLite binding.
 
 Node 24 requires an orthogonal schema-v2 compatibility policy for eighteen exact root tests. The
-distribution across all 146 workloads is 128 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across all 148 workloads is 130 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
 code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
 symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
@@ -366,7 +382,7 @@ command in an 18-minute operating-system ceiling with a 30-second kill grace, in
 hosted job. An outer-ceiling failure is never accepted as promotion evidence.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
-bytes, executable modes, tracked-file count, and Git index object ids before and after all 146
+bytes, executable modes, tracked-file count, and Git index object ids before and after all 148
 steps, including failure paths. The shared-state boundary also seals every reviewed build/Turbo
 output root across the proof phase and compares non-ignored untracked state across the complete
 execution region. A dependency download cache may save network time; no build, test, checkpoint,
@@ -387,11 +403,13 @@ under the same isolation and closing guards. `main`, release, and manual-audit e
 `REQUIRED + EXHAUSTIVE`.
 
 Only exact process-local boundary receipts may reach the selector; clones and self-digested
-lookalikes fail closed. The selector digest
-`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` seals 20 exact boundary,
+lookalikes fail closed. The current successor selector digest
+`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea` seals 20 exact boundary,
 selector, graph, ownership, threshold, shadow-runner, required-oracle, workflow, and toolchain
-sources, so algorithm drift resets observation continuity. The affected suffix uses an explicit
-`SELECTED_ROOT_BARRIER`: only roots that genuinely ran satisfy its ordering barrier.
+sources, so algorithm drift resets observation continuity. The frozen I07-03 bootstrap baseline
+retains its historical `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f`
+receipt. The affected suffix uses an explicit `SELECTED_ROOT_BARRIER`: only roots that genuinely
+ran satisfy its ordering barrier.
 
 Promotion is frozen behind zero false negatives, mutation coverage for every selector category,
 and at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive

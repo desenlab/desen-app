@@ -993,6 +993,36 @@ const APPROVED_M07_T09_TRACKED_RECEIPTS = Object.freeze({
     sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
   }),
 });
+const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: APPROVED_M07_T09_TRACKED_RECEIPTS[APP_PACKAGE],
+    successor: Object.freeze({
+      bytes: 2_408,
+      sha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: APPROVED_M07_T09_TRACKED_RECEIPTS[ROOT_PACKAGE],
+    successor: Object.freeze({
+      bytes: 66_267,
+      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: APPROVED_M07_T09_TRACKED_RECEIPTS[CI_SOURCE],
+    successor: Object.freeze({
+      bytes: 48_249,
+      sha256: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: APPROVED_M07_T09_TRACKED_RECEIPTS[CI_INVENTORY],
+    successor: Object.freeze({
+      bytes: 46_524,
+      sha256: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
+    }),
+  }),
+});
 const HISTORICAL_M07_T03_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.d.ts": Object.freeze({
     bytes: 1_570,
@@ -1121,6 +1151,10 @@ const M07_T09_AGGREGATE_SUCCESSOR_COMMANDS = Object.freeze({
   check: "pnpm verify:control-plane-runtime-fault-injection",
   test: "pnpm test:control-plane-runtime-fault-injection",
 });
+const M07_T10_AGGREGATE_SUCCESSOR_COMMANDS = Object.freeze({
+  check: "pnpm verify:control-plane-runtime-transition-races",
+  test: "pnpm test:control-plane-runtime-transition-races",
+});
 
 function publicExportInventory(source, relativePath) {
   const sourceFile = parseTypescript(source, relativePath, "REGISTRATION_DRIFT");
@@ -1181,6 +1215,7 @@ function assertAggregateTail(
   reviewedLatestSuccessor,
   reviewedCurrentSuccessor,
   reviewedFaultInjectionSuccessor,
+  reviewedTransitionRaceSuccessor,
 ) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
@@ -1248,6 +1283,23 @@ function assertAggregateTail(
     commands.lastIndexOf(reviewedLatestSuccessor) === latestSuccessorIndex &&
     commands.lastIndexOf(reviewedCurrentSuccessor) === currentSuccessorIndex &&
     commands.lastIndexOf(reviewedFaultInjectionSuccessor) === faultInjectionSuccessorIndex;
+  const transitionRaceSuccessorIndex = commands.indexOf(reviewedTransitionRaceSuccessor);
+  const reviewedTransitionRaceSuccessorTail =
+    successorIndex === currentIndex + 1 &&
+    laterSuccessorIndex === successorIndex + 1 &&
+    newestSuccessorIndex === laterSuccessorIndex + 1 &&
+    latestSuccessorIndex === newestSuccessorIndex + 1 &&
+    currentSuccessorIndex === latestSuccessorIndex + 1 &&
+    faultInjectionSuccessorIndex === currentSuccessorIndex + 1 &&
+    transitionRaceSuccessorIndex === faultInjectionSuccessorIndex + 1 &&
+    terminalIndex === transitionRaceSuccessorIndex + 1 &&
+    commands.lastIndexOf(reviewedSuccessor) === successorIndex &&
+    commands.lastIndexOf(reviewedLaterSuccessor) === laterSuccessorIndex &&
+    commands.lastIndexOf(reviewedNewestSuccessor) === newestSuccessorIndex &&
+    commands.lastIndexOf(reviewedLatestSuccessor) === latestSuccessorIndex &&
+    commands.lastIndexOf(reviewedCurrentSuccessor) === currentSuccessorIndex &&
+    commands.lastIndexOf(reviewedFaultInjectionSuccessor) === faultInjectionSuccessorIndex &&
+    commands.lastIndexOf(reviewedTransitionRaceSuccessor) === transitionRaceSuccessorIndex;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
@@ -1258,7 +1310,8 @@ function assertAggregateTail(
       !reviewedNewestSuccessorTail &&
       !reviewedLatestSuccessorTail &&
       !reviewedCurrentSuccessorTail &&
-      !reviewedFaultInjectionSuccessorTail)
+      !reviewedFaultInjectionSuccessorTail &&
+      !reviewedTransitionRaceSuccessorTail)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T03 aggregate tail drifted.");
   }
@@ -1285,6 +1338,8 @@ async function prerequisiteReceipts(overrides) {
 }
 
 async function trackedFileReceipts(overrides) {
+  let historicalSuccessorState = false;
+  let currentSuccessorState = false;
   const receipts = [];
   for (const relativePath of TRACKED_TASK_FILES) {
     const bytes = await authorityBytes(relativePath, overrides);
@@ -1296,8 +1351,23 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T07 = APPROVED_M07_T07_TRACKED_RECEIPTS[relativePath];
     const approvedM07T08 = APPROVED_M07_T08_TRACKED_RECEIPTS[relativePath];
     const approvedM07T09 = APPROVED_M07_T09_TRACKED_RECEIPTS[relativePath];
+    const m07T10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
     const observedSha256 = sha256(bytes);
-    if (
+    if (m07T10Bridge !== undefined) {
+      const historicalMatch =
+        bytes.byteLength === m07T10Bridge.historical.bytes &&
+        observedSha256 === m07T10Bridge.historical.sha256;
+      const successorMatch =
+        bytes.byteLength === m07T10Bridge.successor.bytes &&
+        observedSha256 === m07T10Bridge.successor.sha256;
+      if (!historicalMatch && !successorMatch) {
+        fail("REGISTRATION_DRIFT", "A reviewed M07-T10 tracked successor receipt drifted.", {
+          path: relativePath,
+        });
+      }
+      if (historicalMatch) historicalSuccessorState = true;
+      if (successorMatch) currentSuccessorState = true;
+    } else if (
       (approvedM07T04 !== undefined ||
         approvedM07T05 !== undefined ||
         approvedM07T06 !== undefined ||
@@ -1337,6 +1407,9 @@ async function trackedFileReceipts(overrides) {
         sha256: !overridden && historical !== undefined ? historical.sha256 : observedSha256,
       }),
     );
+  }
+  if (historicalSuccessorState && currentSuccessorState) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
   }
   return Object.freeze(receipts);
 }
@@ -1523,6 +1596,7 @@ async function registrationProjection(overrides) {
     M07_T07_AGGREGATE_SUCCESSOR_COMMANDS.check,
     M07_T08_AGGREGATE_SUCCESSOR_COMMANDS.check,
     M07_T09_AGGREGATE_SUCCESSOR_COMMANDS.check,
+    M07_T10_AGGREGATE_SUCCESSOR_COMMANDS.check,
   );
   assertAggregateTail(
     rootPackage.scripts?.test,
@@ -1535,6 +1609,7 @@ async function registrationProjection(overrides) {
     M07_T07_AGGREGATE_SUCCESSOR_COMMANDS.test,
     M07_T08_AGGREGATE_SUCCESSOR_COMMANDS.test,
     M07_T09_AGGREGATE_SUCCESSOR_COMMANDS.test,
+    M07_T10_AGGREGATE_SUCCESSOR_COMMANDS.test,
   );
   if (
     exactTupleCount(fatalText(ciBytes, CI_SOURCE), CI_TUPLE) !== 1 ||

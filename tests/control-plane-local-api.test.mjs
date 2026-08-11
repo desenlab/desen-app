@@ -272,6 +272,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       APP_PACKAGE,
       (source) =>
         source.replace(
+          '"test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts"',
+          '"test:runtime-transition-races": "vitest run test/runtime-transition-races-decoy.test.ts"',
+        ),
+    ],
+    [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
           '"@desen/runtime-core": "workspace:*",',
           '"@desen/runtime-core": "workspace:^",',
         ),
@@ -320,6 +328,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       ROOT_PACKAGE,
       (source) =>
         source.replace(
+          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races",
+          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races-decoy",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
           "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
           "pnpm verify:control-plane-runtime-recovery",
         ),
@@ -339,11 +355,27 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [
+      CI_SOURCE,
+      (source) =>
+        source.replace(
+          '      "control-plane-runtime-transition-races",',
+          '      "control-plane-runtime-transition-races-decoy",',
+        ),
+    ],
+    [
       CI_INVENTORY,
       (source) =>
         source.replace(
           '    "control-plane-runtime-fault-injection",',
           '    "control-plane-runtime-fault-injection-decoy",',
+        ),
+    ],
+    [
+      CI_INVENTORY,
+      (source) =>
+        source.replace(
+          '    "control-plane-runtime-transition-races",',
+          '    "control-plane-runtime-transition-races-decoy",',
         ),
     ],
     [
@@ -367,6 +399,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
           '  "control-plane-runtime-fault-injection-decoy",',
         ),
     ],
+    [
+      SHARED_STATE_AUTHORITY,
+      (source) =>
+        source.replace(
+          '  "control-plane-runtime-transition-races",',
+          '  "control-plane-runtime-transition-races-decoy",',
+        ),
+    ],
   ];
   for (const [relativePath, transform] of mutations) {
     await assert.rejects(
@@ -374,6 +414,20 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       expectedError("REGISTRATION_DRIFT"),
     );
   }
+
+  const currentAppPackage = (await workspaceBytes(APP_PACKAGE)).toString("utf8");
+  const historicalAppPackage = currentAppPackage.replace(
+    '    "test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts",\n',
+    "",
+  );
+  assert.notEqual(historicalAppPackage, currentAppPackage);
+  await assert.rejects(
+    buildControlPlaneLocalApiEvidence({
+      trackedFileBytes: { [APP_PACKAGE]: Buffer.from(historicalAppPackage, "utf8") },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
 });
 
 test("[traceability] rejects owner or identity drift in the exact rows", async () => {

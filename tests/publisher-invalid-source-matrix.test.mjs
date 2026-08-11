@@ -29,6 +29,16 @@ const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const BUNDLE_PUBLICATION_PROOF_LIBRARY = "scripts/lib/publisher-bundle-publication-proof.mjs";
 const BUNDLE_PUBLICATION_ROOT_TEST = "tests/publisher-bundle-publication.test.mjs";
+const M07_T10_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH = `
+G7sGIJwFdmtHkla09rfiKUOWDCavSO9dvv6Mulf1fydJIIQKX6E2U3UstboFZOXstbnUaUxUElp3X6dRe4tFZ+/E5fTHwid90Dd9
+kLnB39dsDnuCOF46gdLOM434DcPAsGF6CTO/oPOxVe0X+rfv3cyXNLh63uxql3sv7H6N57y4DOPCTsddX/vXrtsZ20/sk08pH2GX
+hqAPlrbbFkzEje503E3tlnBKB6sq3el83tqujnpznylb2S7HSes62BzdD7xv+5lKyGchZp5Fc/g7nPrJw7fwBfu/8+u60Hl0B54v
+eKOvVTvN6x1JNANc1IY6ukNjCM3uPptTgmXFyCCHQOeJCUUFTUSnDqnUk726/3gcNPlMEHwYeaqhG4svpA0bbnSGZICDzssrsAZO
+sGSFUDoPDhteXUBaSiwsSxnaCrW5d3Ej7By0qMpAAAbIvB9zbv0w7QPlfRQYT7zFLiGCkH3bMgGYdqniUyQYQfmuKecNKQPHe4x4
+PEwJyd6Dx+zFuobIzBJ6qgD9HxKro9RCdCebGIlLZbao1omGNcjAiR/9NZ+bjmDImKjYUZmbugsKdScgnOmpXbMigG1tIpRKRBF9
+zJgOBeNorW13WIqI5Bnu9Fah538dxKhpZoVwJot4ngva88+z7tsmAV7oG9+xC5WR3HavFVvxzZif8b7ZniIgcxKxrCLqGw==
+`.replaceAll(/\s/gu, "");
+
 const M07_T09_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH = `
 G6YFAJwFOVluOp2U88QmVT9UNUjLisJttu/r26baedXZzkIChNwXL8U6Y4h9997SYdmbQ0lQE5fTHwsfH3AKvemDjDF48wM3lqYB
 BtJFk6dY54EkmskjBooN08sc9AldWxbOfn/3WvZO7dzk+wd759vgu9uxHA+9f/P1CBK0LXVCoxXgIpdAyxn7pN38xx6259zYAboo
@@ -38,6 +48,97 @@ o/8nGShtqiqXRND+8eNXOOvapEsXDncTbU8SH1oYHUQSsQj1crYsqfSacWpRTZmSTQfVlrV6Eg9Dt6rJ
 sEUyLpMiyAs5ARFQRid8unpyUjDCBkGzI3Pz4DpfgPq9XgIKRy9FtUor5qVPbtkiQ60oGUoOuFQsjuBvPKJYfzx047HzY9877vST
 x+uVkZvHDNUew3L2PG32cXKf/PGQj+fU6Z+Hnm+XQJvvMjusMTWQ4YfoJW8sGrMz5cqtJwjIjET7Lw+dBQ==
 `.replaceAll(/\s/gu, "");
+const M07_T10_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH = `
+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
+`.replaceAll(/\s/gu, "");
+
 const M07_T09_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH = `
 G5E6IxHCxkEA8sZGAPWSoOUY2Dp4zVZEFQz7RB8L0OzUJwZqxWhGF51EQYjl9bG++NpfYVj/B/Vjs8XDbSURAitaEmSlpVdkeoD8
 r3PNskz/MiXPfOO1YunTNXQDrwDBlvYgaL821ynpjyRTVEvffGCe/akuCBHQ1wBvDmnKv/udZjZIDovD7ayyVyuApLCAOlnO8MH8
@@ -355,12 +456,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
-    "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
+    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-fault-injection && turbo run test",
-    "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-transition-races && turbo run test",
+    "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1356,8 +1457,26 @@ test("[authority] pins the explicit isolated Vitest timeout", async () => {
 });
 
 test("[authority] distinguishes semantic coordination drift from frozen surface drift", async () => {
-  const currentI07T03ProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
-  const currentT09RootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  const currentM07T10BundleProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
+  const currentM07T10BundleRootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  assert.equal(currentM07T10BundleProofBytes.byteLength, 139_396);
+  assert.equal(
+    createHash("sha256").update(currentM07T10BundleProofBytes).digest("hex"),
+    "89ff5dc4f35036164dd33f1fcf65220bd086ce02ff04e9068078cbf6713bcb48",
+  );
+  assert.equal(currentM07T10BundleRootTestBytes.byteLength, 82_563);
+  assert.equal(
+    createHash("sha256").update(currentM07T10BundleRootTestBytes).digest("hex"),
+    "4b1eb8e40281c0e12d94786042e34c85ec81737d07836b2e964fa9dc20eae185",
+  );
+  const currentI07T03ProofBytes = applyExactRollbackPatch(
+    currentM07T10BundleProofBytes,
+    M07_T10_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH,
+  );
+  const priorM07T10RootTestBytes = applyExactRollbackPatch(
+    currentM07T10BundleRootTestBytes,
+    M07_T10_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH,
+  );
   assert.equal(currentI07T03ProofBytes.byteLength, 139_088);
   assert.equal(
     createHash("sha256").update(currentI07T03ProofBytes).digest("hex"),
@@ -1375,6 +1494,17 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
   assert.equal(
     createHash("sha256").update(currentT09ProofBytes).digest("hex"),
     "7680e332fe8c9c5e585022c3b05b885d6d40722a882f67f3a2646554f5413a46",
+  );
+  assert.equal(priorM07T10RootTestBytes.byteLength, 74_558);
+  assert.equal(
+    createHash("sha256").update(priorM07T10RootTestBytes).digest("hex"),
+    "f67f72b1a79462090b7f82b873eb236b465c058bf00968e38804dd0a35961225",
+  );
+  const currentT10RootTestText = priorM07T10RootTestBytes.toString("utf8");
+  assert.equal(currentT10RootTestText.match(/runtime-transition-races/gu)?.length, 4);
+  const currentT09RootTestBytes = Buffer.from(
+    currentT10RootTestText.replaceAll("runtime-transition-races", "runtime-fault-injection"),
+    "utf8",
   );
   assert.equal(currentT09RootTestBytes.byteLength, 74_554);
   assert.equal(
@@ -1401,20 +1531,24 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
   );
   const currentT10ProofBytes = await sourceBytes("scripts/lib/publisher-official-golden-proof.mjs");
   const currentT10RootTestBytes = await sourceBytes("tests/publisher-official-golden.test.mjs");
-  const approvedCurrentT09 = await buildPublisherInvalidSourceMatrixEvidence(
+  const approvedCurrentSuccessor = await buildPublisherInvalidSourceMatrixEvidence(
     fastOptions({
       trackedFileBytes: {
-        [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentI07T03ProofBytes,
-        [BUNDLE_PUBLICATION_ROOT_TEST]: currentT09RootTestBytes,
+        [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentM07T10BundleProofBytes,
+        [BUNDLE_PUBLICATION_ROOT_TEST]: currentM07T10BundleRootTestBytes,
         "scripts/lib/publisher-official-golden-proof.mjs": currentT10ProofBytes,
         "tests/publisher-official-golden.test.mjs": currentT10RootTestBytes,
       },
     }),
   );
-  assert.deepEqual(approvedCurrentT09.artifactBytes, baseline.artifactBytes);
-  assert.equal(approvedCurrentT09.artifactSha256, baseline.artifactSha256);
+  assert.deepEqual(approvedCurrentSuccessor.artifactBytes, baseline.artifactBytes);
+  assert.equal(approvedCurrentSuccessor.artifactSha256, baseline.artifactSha256);
 
   for (const [relativePath, predecessorBytes] of [
+    [BUNDLE_PUBLICATION_PROOF_LIBRARY, currentI07T03ProofBytes],
+    [BUNDLE_PUBLICATION_ROOT_TEST, priorM07T10RootTestBytes],
+    [BUNDLE_PUBLICATION_PROOF_LIBRARY, currentT09ProofBytes],
+    [BUNDLE_PUBLICATION_ROOT_TEST, currentT09RootTestBytes],
     [BUNDLE_PUBLICATION_PROOF_LIBRARY, predecessorT08ProofBytes],
     [BUNDLE_PUBLICATION_ROOT_TEST, predecessorT08RootTestBytes],
   ]) {

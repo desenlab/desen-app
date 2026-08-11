@@ -303,6 +303,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [
+      APP_PACKAGE,
+      (source) =>
+        source.replace(
+          '"test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts"',
+          '"test:runtime-transition-races": "vitest run test/runtime-transition-races-decoy.test.ts"',
+        ),
+    ],
+    [
       APP_INDEX,
       (source) =>
         source.replace("export { stageBundleRuntime }", "export { stageBundleRuntime as stage }"),
@@ -329,6 +337,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         source.replace(
           "pnpm verify:control-plane-local-api && pnpm verify:control-plane-runtime-staging",
           "pnpm verify:control-plane-local-api && pnpm verify:control-plane-decoy && pnpm verify:control-plane-runtime-staging",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races",
+          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races-decoy",
         ),
     ],
     [
@@ -377,6 +393,22 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         ),
     ],
     [
+      CI_SOURCE,
+      (source) =>
+        source.replace(
+          '      "control-plane-runtime-transition-races",',
+          '      "control-plane-runtime-transition-races-decoy",',
+        ),
+    ],
+    [
+      CI_INVENTORY,
+      (source) =>
+        source.replace(
+          '    "control-plane-runtime-transition-races",',
+          '    "control-plane-runtime-transition-races-decoy",',
+        ),
+    ],
+    [
       CI_INVENTORY,
       (source) =>
         source.replace(
@@ -391,6 +423,20 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       expectedError("REGISTRATION_DRIFT"),
     );
   }
+
+  const currentAppPackage = (await workspaceBytes(APP_PACKAGE)).toString("utf8");
+  const historicalAppPackage = currentAppPackage.replace(
+    '    "test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts",\n',
+    "",
+  );
+  assert.notEqual(historicalAppPackage, currentAppPackage);
+  await assert.rejects(
+    buildControlPlaneRuntimeStagingEvidence({
+      trackedFileBytes: { [APP_PACKAGE]: Buffer.from(historicalAppPackage, "utf8") },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
 });
 
 test("[traceability] rejects exact trace owners and normative coverage rows", async () => {
@@ -415,8 +461,14 @@ test("[traceability] rejects exact trace owners and normative coverage rows", as
   for (const normativeId of ["N-038", "N-041"]) {
     const mutations = [
       (line) => line.replace("M07-T06", "M07-T99"),
-      (line) => line.replace(/\| PLANNED\s+\|/u, "| TESTED |"),
-      (line) => line.replace(/M07-T09 (completes|executes)/u, "M07-T09 claims"),
+      (line) =>
+        normativeId === "N-038"
+          ? line.replace(/\| TESTED\s+\|/u, "| IMPLEMENTED |")
+          : line.replace(/\| PLANNED\s+\|/u, "| TESTED |"),
+      (line) =>
+        normativeId === "N-038"
+          ? line.replace("M07-T10 completes", "M07-T10 claims")
+          : line.replace("M07-T09 executes", "M07-T09 claims"),
       (line) => line.replace(ARTIFACT, "docs/proof/artifacts/removed-runtime-staging.json"),
     ];
     for (const mutate of mutations) {

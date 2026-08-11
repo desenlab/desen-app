@@ -99,6 +99,7 @@ function taskBoard(overrides = {}) {
     "M07-T07": "IN_PROGRESS",
     "M07-T08": "DONE",
     "M07-T09": "DONE",
+    "M07-T10": "DONE",
     "I07-04": "NOT_STARTED",
     "I07-05": "NOT_STARTED",
     G07: "NOT_STARTED",
@@ -188,6 +189,8 @@ async function createFixture() {
 
 test("accepts the exact canonical code-owned debt inventory", () => {
   const manifest = parseInfrastructureDebtManifest(CANONICAL_MANIFEST_BYTES);
+  assert.equal(INFRASTRUCTURE_DEBT_AUTHORITY.length, 18);
+  assert.equal(manifest.entries.length, 18);
   assert.equal(
     manifest.entries
       .filter((entry) => entry.status === "OPEN")
@@ -211,6 +214,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       { id: "DEBT-I07-015", status: "OPEN" },
       { id: "DEBT-I07-016", status: "OPEN" },
       { id: "DEBT-I07-017", status: "OPEN" },
+      { id: "DEBT-I07-018", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -315,6 +319,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         removalOwner: "I07-04",
         deadline: "G07",
       },
+      {
+        id: "DEBT-I07-018",
+        registeredBy: "M07-T10",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
     ],
   );
   assert.deepEqual(
@@ -385,6 +395,60 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       symbols: ["APPROVED_I07_T03_TRACKED_RECEIPTS", "approvedI07T03"],
     },
   ]);
+  assert.deepEqual(
+    manifest.entries[17].targets.map(({ path, symbols }) => ({ path, symbols })),
+    INFRASTRUCTURE_DEBT_AUTHORITY[17].targets.map(({ path, symbols }) => ({ path, symbols })),
+  );
+  assert.deepEqual(
+    manifest.entries[17].targets.map(({ path }) => path),
+    [
+      "scripts/lib/reference-host-web-source-audit-proof.mjs",
+      "tests/reference-host-web-source-audit.test.mjs",
+      "scripts/lib/publisher-publish-result-proof.mjs",
+      "tests/publisher-publish-result.test.mjs",
+      "scripts/lib/publisher-execution-preflight-proof.mjs",
+      "tests/publisher-execution-preflight.test.mjs",
+      "tests/publisher-catalog-pinning.test.mjs",
+      "scripts/lib/publisher-bundle-publication-proof.mjs",
+      "tests/publisher-bundle-publication.test.mjs",
+      "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+      "tests/publisher-invalid-source-matrix.test.mjs",
+      "scripts/lib/control-plane-bundle-store-proof.mjs",
+      "tests/control-plane-bundle-store.test.mjs",
+      "scripts/lib/control-plane-bundle-verification-proof.mjs",
+      "tests/control-plane-bundle-verification.test.mjs",
+      "scripts/lib/control-plane-package-preflight-proof.mjs",
+      "tests/control-plane-package-preflight.test.mjs",
+      "scripts/lib/control-plane-reference-preflight-proof.mjs",
+      "tests/control-plane-reference-preflight.test.mjs",
+      "scripts/lib/control-plane-local-api-proof.mjs",
+      "tests/control-plane-local-api.test.mjs",
+      "scripts/lib/control-plane-runtime-staging-proof.mjs",
+      "tests/control-plane-runtime-staging.test.mjs",
+      "scripts/lib/control-plane-runtime-activation-proof.mjs",
+      "tests/control-plane-runtime-activation.test.mjs",
+      "scripts/lib/control-plane-runtime-recovery-proof.mjs",
+      "tests/control-plane-runtime-recovery.test.mjs",
+      "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
+      "tests/control-plane-runtime-fault-injection.test.mjs",
+    ],
+  );
+  assert.deepEqual(manifest.entries[17].targets[0], {
+    path: "scripts/lib/reference-host-web-source-audit-proof.mjs",
+    symbols: ["M07_T10_CONTROL_PLANE_COORDINATION"],
+  });
+  assert.deepEqual(manifest.entries[17].targets.at(-1), {
+    path: "tests/control-plane-runtime-fault-injection.test.mjs",
+    symbols: [
+      "APP_PACKAGE",
+      "APP_SQLITE",
+      "ROOT_PACKAGE",
+      "CI_SOURCE",
+      "CI_INVENTORY",
+      "SHARED_STATE_AUTHORITY",
+      "changedByte(await workspaceBytes(relativePath))",
+    ],
+  });
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
     "CI v2 shadow",
     "modular-shadow",
@@ -1091,10 +1155,11 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 16,
+      OPEN: 17,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
+    assert.equal(receipt.entries, 18);
     assert.equal(receipt.taskStatuses["I07-01"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["I07-02"], "DONE");
     assert.equal(receipt.taskStatuses["I07-03"], "IN_PROGRESS");
@@ -1102,6 +1167,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
     assert.equal(receipt.taskStatuses["M07-T06"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T07"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T08"], "DONE");
+    assert.equal(receipt.taskStatuses["M07-T10"], "DONE");
     assert.equal(receipt.taskStatuses["I07-05"], "NOT_STARTED");
   } finally {
     await fixture.cleanup();
@@ -1206,7 +1272,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 16,
+      OPEN: 17,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -1242,7 +1308,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 15,
+      OPEN: 16,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

@@ -13,38 +13,29 @@ import ts from "typescript";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json";
-const PROOF_DOCUMENT = "docs/proof/CONTROL-PLANE-RUNTIME-FAULT-INJECTION.md";
+const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-runtime-transition-races.json";
+const PROOF_DOCUMENT = "docs/proof/CONTROL-PLANE-RUNTIME-TRANSITION-RACES.md";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const APP_DIRECTORY = "apps/control-plane-api";
 const APP_PACKAGE = `${APP_DIRECTORY}/package.json`;
 const APP_INDEX = `${APP_DIRECTORY}/src/index.ts`;
-const APP_TEST = `${APP_DIRECTORY}/test/runtime-fault-injection.test.ts`;
+const APP_CONTROLLER_SOURCE = `${APP_DIRECTORY}/src/runtime-activation-internal.ts`;
+const APP_SQLITE_SOURCE = `${APP_DIRECTORY}/src/runtime-activation-sqlite-internal.ts`;
+const APP_TEST = `${APP_DIRECTORY}/test/runtime-transition-races.test.ts`;
 const APP_TEST_SUPPORT = `${APP_DIRECTORY}/test/runtime-fault-injection-support.ts`;
-const APP_TYPE_TEST = `${APP_DIRECTORY}/test/runtime-fault-injection.types.ts`;
+const APP_TYPE_TEST = `${APP_DIRECTORY}/test/runtime-transition-races.types.ts`;
 const ROOT_PACKAGE = "package.json";
 const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const CI_INVENTORY = "scripts/ci/exhaustive-workload-inventory.mjs";
 const SHARED_STATE_AUTHORITY = "scripts/ci/shared-state-authority.mjs";
-const GENERATOR = "scripts/generate-control-plane-runtime-fault-injection-proof.mjs";
-const VERIFIER = "scripts/verify-control-plane-runtime-fault-injection.mjs";
-const PROOF_LIBRARY = "scripts/lib/control-plane-runtime-fault-injection-proof.mjs";
+const GENERATOR = "scripts/generate-control-plane-runtime-transition-races-proof.mjs";
+const VERIFIER = "scripts/verify-control-plane-runtime-transition-races.mjs";
+const PROOF_LIBRARY = "scripts/lib/control-plane-runtime-transition-races-proof.mjs";
 const ATOMIC_WRITER = "scripts/lib/atomic-proof-artifact.mjs";
-const ROOT_TEST = "tests/control-plane-runtime-fault-injection.test.mjs";
+const ROOT_TEST = "tests/control-plane-runtime-transition-races.test.mjs";
 const DIST_INDEX = `${APP_DIRECTORY}/dist/index.js`;
 const DIST_TYPES = `${APP_DIRECTORY}/dist/index.d.ts`;
 const VITEST_CLI = path.join(ROOT, "node_modules/vitest/vitest.mjs");
-const VITEST_CONFIG_SOURCE =
-  "export default { test: { cache: false, fileParallelism: false, maxWorkers: 1 } };\n";
-const VITEST_ISOLATION_PROBE_CONFIG_SOURCE =
-  "export default { test: { cache: false, fileParallelism: false, globals: true, maxWorkers: 1 } };\n";
-const VITEST_ISOLATION_PROBE_PROFILE =
-  "desen.control-plane.runtime-fault-injection-vitest-isolation.v1";
-const VITEST_ISOLATION_PROBE_TEST_NAME =
-  "runs one dependency-free test through the T09 Vitest process boundary";
-const VITEST_ISOLATION_PROBE_SOURCE = `test(${JSON.stringify(VITEST_ISOLATION_PROBE_TEST_NAME)}, () => { expect(1).toBe(1); });\n`;
-const VITEST_ISOLATION_PROBE_PACKAGE_SOURCE = '{"private":true,"type":"module"}\n';
-const VITEST_ISOLATION_PROBE_WORKSPACE_SOURCE = "packages: []\n";
 
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const MAX_RUNTIME_SUITE_DIAGNOSTIC_BYTES = 8 * 1_024 * 1_024;
@@ -53,8 +44,8 @@ const KNOWN_RUNTIME_SUITE_SIGNALS = Object.freeze(
     .filter((signal) => /^SIG[A-Z0-9]+$/u.test(signal))
     .sort(),
 );
-const MAX_INERT_JSON_NODES = 200_000;
-const MAX_INERT_JSON_DEPTH = 512;
+const VITEST_CONFIG_SOURCE =
+  "export default { test: { cache: false, fileParallelism: false, maxWorkers: 1 } };\n";
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
@@ -73,66 +64,69 @@ const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
 const UINT8_ARRAY_SET = Uint8Array.prototype.set;
 const execFileAsync = promisify(execFile);
 
-const PROOF_ID = "control-plane-runtime-fault-injection";
-const APP_SUITE_NAME = "M07-T09 bounded activation fault matrix";
-const APP_TEST_SHA256 = "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3d47047f67";
+const PROOF_ID = "control-plane-runtime-transition-races";
+const APP_SUITE_NAME = "M07-T10 ordered activation transition and race matrix";
+
+// These exact executable receipts are filled only after the implementation and both test files
+// are final. They make a later same-shaped body rewrite visible instead of trusting names alone.
+const APP_CONTROLLER_SOURCE_SHA256 =
+  "a166fc51237c4d7b3389282fd424b5156c2d782c3fceab37f424fead93629880";
+const APP_SQLITE_SOURCE_SHA256 = "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5fac7493481f868be164";
+const APP_TEST_SHA256 = "4263aa47e7f6d647fe9e08acd19dc305fd53f0acc06383c9b300381a27a008f2";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
-const APP_TYPE_TEST_SHA256 = "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212";
-const ROOT_TEST_SHA256 = "2168ec05b7ff773c15531b00906056ef278ea0b00a4840023956f26a2b5c2af6";
+const APP_TYPE_TEST_SHA256 = "ddda51882a5783b9a3fe291da84fbddd7d7cb298a91c6f0a1ec4ae7515a8d0d8";
+const ROOT_TEST_SHA256 = "5b0bed4eeedf4971ca18d2f698f9e7702c4fc3d8ee728231ef3b30fff204dcbc";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
+const EXPECTED_REGISTRATION_AUTHORITY_SHA256 = Object.freeze({
+  [CI_SOURCE]: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
+  [CI_INVENTORY]: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
+  [SHARED_STATE_AUTHORITY]: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
+});
 
-const EXPECTED_FAULT_CASE_IDS = Object.freeze([
-  "channel-invalid-discovery",
-  "immutable-fetch-missing",
-  "integrity-bundle-size",
-  "integrity-bundle-json",
-  "integrity-unsupported-protocol",
-  "integrity-revision-mismatch",
-  "integrity-source-digest-mismatch",
-  "package-resolution-missing",
-  "package-digest-mismatch",
-  "reference-capability-unknown",
-  "reference-depth-limit",
-  "staging-execution-contract",
-  "commit-definite-precommit",
-  "commit-postcommit-indeterminate",
-  "recovery-package-authority",
-  "recovery-reference-preflight",
-  "recovery-runtime-staging",
-  "recovery-previous-good-reclosure",
-  "recovery-final-record-drift",
+const EXPECTED_TRANSITION_CASE_IDS = Object.freeze([
+  "ordered-unsupported-protocol",
+  "ordered-revision-mismatch",
+  "ordered-source-digest-mismatch",
+  "ordered-package-missing",
+  "ordered-package-digest-mismatch",
+  "ordered-reference-capability",
+  "ordered-reference-limit",
+  "ordered-staging-contract",
+  "same-candidate-race",
+  "different-candidate-race",
+  "recovery-activation-race",
+  "activation-recovery-race",
+  "restart-stale-reconstruction",
+  "journal-mode-external-transition",
+  "journal-mode-writer-reauthentication",
 ]);
 
 const EXPECTED_RUNTIME_TEST_NAMES = Object.freeze([
-  "[channel-invalid-discovery] keeps an invalid channel candidate outside active authority",
-  "[immutable-fetch-missing] stops a disappeared channel target before integrity",
-  "[integrity-bundle-size] rejects the raw byte ceiling before parsing",
-  "[integrity-bundle-json] rejects malformed immutable bytes before protocol checks",
-  "[integrity-unsupported-protocol] rejects forward-version guessing before revision work",
-  "[integrity-revision-mismatch] rejects valid Bundle bytes under a substituted key",
-  "[integrity-source-digest-mismatch] rejects independently supplied Source drift",
-  "[package-resolution-missing] preserves A when the exact package tuple is unavailable",
-  "[package-digest-mismatch] preserves A when installed artifact bytes drift",
-  "[reference-capability-unknown] rejects an unknown capability before staging",
-  "[reference-depth-limit] rejects depth 65 before runtime indexes",
-  "[staging-execution-contract] rejects static contract drift without partial indexes",
-  "[commit-definite-precommit] rolls back real SQLite and keeps A current",
-  "[commit-postcommit-indeterminate] recovers only the complete durable winner",
-  "[recovery-package-authority] rejects swapped durable roles without writing",
-  "[recovery-reference-preflight] rejects an externally selected invalid reference lineage",
-  "[recovery-runtime-staging] rejects an externally selected invalid execution lineage",
-  "[recovery-previous-good-reclosure] publishes neither role when fallback bytes disappear",
-  "[recovery-final-record-drift] lets the final durable observation win",
-  "keeps the exact fault-case inventory closed and duplicate-free",
+  "[ordered-unsupported-protocol] preserves A, rejects B, activates C, and recovers C over A",
+  "[ordered-revision-mismatch] preserves A, rejects B, activates C, and recovers C over A",
+  "[ordered-source-digest-mismatch] preserves A, rejects B, activates C, and recovers C over A",
+  "[ordered-package-missing] preserves A, rejects B, activates C, and recovers C over A",
+  "[ordered-package-digest-mismatch] preserves A, rejects B, activates C, and recovers C over A",
+  "[ordered-reference-capability] preserves A, rejects B, activates C, and recovers C over A",
+  "[ordered-reference-limit] preserves A, rejects B, activates C, and recovers C over A",
+  "[ordered-staging-contract] preserves A, rejects B, activates C, and recovers C over A",
+  "[same-candidate-race] commits one winner, fences one loser, and requires fresh staging",
+  "[different-candidate-race] commits one winner, fences one loser, and preserves exact lineage",
+  "[recovery-activation-race] rejects stale reconstruction after a concurrent durable winner",
+  "[activation-recovery-race] revokes recovered A after a delayed C commit wins",
+  "[restart-stale-reconstruction] publishes only the exact durable winner after restart",
+  "[journal-mode-external-transition] rejects a live external journal transition and continues safely",
+  "[journal-mode-writer-reauthentication] fails closed on transaction-time profile drift",
+  "keeps the exact transition-case inventory closed and duplicate-free",
 ]);
 
 const ROOT_SCRIPT_COMMANDS = Object.freeze({
   generate:
-    "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node scripts/generate-control-plane-runtime-fault-injection-proof.mjs",
+    "pnpm verify:control-plane-runtime-fault-injection && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-transition-races && node scripts/generate-control-plane-runtime-transition-races-proof.mjs",
   verify:
-    "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node scripts/verify-control-plane-runtime-fault-injection.mjs",
-  test: "pnpm verify:control-plane-runtime-recovery && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-fault-injection && node --test tests/control-plane-runtime-fault-injection.test.mjs",
+    "pnpm verify:control-plane-runtime-fault-injection && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-transition-races && node scripts/verify-control-plane-runtime-transition-races.mjs",
+  test: "pnpm verify:control-plane-runtime-fault-injection && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/control-plane-api test:runtime-transition-races && node --test tests/control-plane-runtime-transition-races.test.mjs",
 });
 
 const EXPECTED_RUNTIME_PUBLIC_MODULE_KEYS = Object.freeze([
@@ -175,128 +169,32 @@ const EXPECTED_RUNTIME_PUBLIC_MODULE_KEYS = Object.freeze([
 ]);
 
 const EXPECTED_TRACE_ROWS = Object.freeze([
-  Object.freeze({ id: "PIPE-006", owners: ["M07-T03", "M07-T06"], tests: ["M07-T09"] }),
+  Object.freeze({ id: "C-023", owners: ["M04-T16", "M07-T10"], tests: ["M10-T07", "M12-T08"] }),
+  Object.freeze({ id: "PIPE-005", owners: ["M06-T09", "M07-T01"], tests: ["M06-T10", "M07-T10"] }),
+  Object.freeze({ id: "PIPE-007", owners: ["M07-T04", "M07-T07"], tests: ["M07-T09", "M07-T10"] }),
+  Object.freeze({ id: "PIPE-011", owners: ["M07-T02"], tests: ["M07-T09", "M07-T10"] }),
+  Object.freeze({ id: "PIPE-016", owners: ["M07-T07"], tests: ["M07-T09", "M07-T10"] }),
+  Object.freeze({ id: "PIPE-017", owners: ["M07-T07", "M07-T08"], tests: ["M07-T10", "M10-T07"] }),
+  Object.freeze({ id: "R-007", owners: ["M06-T09", "M07-T02"], tests: ["M05-T08", "M07-T10"] }),
+  Object.freeze({ id: "R-008", owners: ["M07-T04", "M07-T07"], tests: ["M07-T09", "M07-T10"] }),
+  Object.freeze({ id: "R-012", owners: ["M06-T09", "M07-T01"], tests: ["M06-T10", "M07-T10"] }),
+  Object.freeze({ id: "R-102", owners: ["M07-T07", "M07-T09"], tests: ["M07-T09", "M07-T10"] }),
   Object.freeze({
-    id: "PIPE-007",
-    owners: ["M07-T04", "M07-T07"],
-    tests: ["M07-T09", "M07-T10"],
+    id: "R-125",
+    owners: ["M03-T10", "M07-T01", "M07-T05"],
+    tests: ["M03-T10", "M07-T10"],
   }),
-  Object.freeze({ id: "PIPE-009", owners: ["M07-T01", "M07-T11"], tests: ["M07-T09"] }),
-  Object.freeze({ id: "PIPE-010", owners: ["M07-T02"], tests: ["M07-T09"] }),
-  Object.freeze({
-    id: "PIPE-011",
-    owners: ["M07-T02"],
-    tests: ["M07-T09", "M07-T10"],
-  }),
-  Object.freeze({
-    id: "PIPE-012",
-    owners: ["M07-T03"],
-    tests: ["M07-T09", "M10-T07"],
-  }),
-  Object.freeze({
-    id: "PIPE-013",
-    owners: ["M07-T03"],
-    tests: ["M07-T09", "M10-T07"],
-  }),
-  Object.freeze({ id: "PIPE-014", owners: ["M07-T04"], tests: ["M07-T09"] }),
-  Object.freeze({ id: "PIPE-015", owners: ["M07-T06"], tests: ["M07-T09"] }),
-  Object.freeze({
-    id: "PIPE-016",
-    owners: ["M07-T07"],
-    tests: ["M07-T09", "M07-T10"],
-  }),
-  Object.freeze({
-    id: "R-008",
-    owners: ["M07-T04", "M07-T07"],
-    tests: ["M07-T09", "M07-T10"],
-  }),
-  Object.freeze({
-    id: "R-016",
-    owners: ["M02-T06", "M02-T07"],
-    tests: ["M02-T13", "M07-T09"],
-  }),
-  Object.freeze({
-    id: "R-031",
-    owners: ["M06-T09", "M07-T02"],
-    tests: ["M07-T09", "M10-T07"],
-  }),
-  Object.freeze({
-    id: "R-102",
-    owners: ["M07-T07", "M07-T09"],
-    tests: ["M07-T09", "M07-T10"],
-  }),
-  Object.freeze({
-    id: "R-126",
-    owners: ["M07-T06", "M07-T07"],
-    tests: ["M07-T09", "M07-T10"],
-  }),
-  Object.freeze({
-    id: "R-127",
-    owners: ["M07-T03", "M07-T06", "M12-T03"],
-    tests: ["M07-T09", "M12-T03"],
-  }),
-  Object.freeze({
-    id: "R-138",
-    owners: ["M02-T06", "M07-T02"],
-    tests: ["M02-T13", "M07-T09"],
-  }),
+  Object.freeze({ id: "R-126", owners: ["M07-T06", "M07-T07"], tests: ["M07-T09", "M07-T10"] }),
+  Object.freeze({ id: "A-007", owners: ["M03-T10", "M07-T01"], tests: ["M03-T10", "M07-T10"] }),
   Object.freeze({ id: "A-008", owners: ["M07-T07"], tests: ["M07-T09", "M07-T10"] }),
-  Object.freeze({
-    id: "D-030",
-    owners: ["M02-T05", "M02-T04", "M07-T02"],
-    tests: ["M02-T04", "M07-T09"],
-  }),
-  Object.freeze({
-    id: "D-031",
-    owners: ["M02-T05", "M06-T08", "M07-T02"],
-    tests: ["M06-T10", "M07-T09"],
-  }),
-  Object.freeze({
-    id: "D-034",
-    owners: ["M02-T05", "M02-T06", "M07-T02"],
-    tests: ["M02-T13", "M07-T09"],
-  }),
-  Object.freeze({
-    id: "D-035",
-    owners: ["M02-T05", "M07-T02", "M07-T04"],
-    tests: ["M07-T09", "M12-T05"],
-  }),
-]);
-
-const PIPELINE_SOURCE_FILES = Object.freeze([
-  `${APP_DIRECTORY}/src/strict-json-internal.ts`,
-  `${APP_DIRECTORY}/src/bundle-store-contract.ts`,
-  `${APP_DIRECTORY}/src/bundle-store-internal.ts`,
-  `${APP_DIRECTORY}/src/bundle-store.ts`,
-  `${APP_DIRECTORY}/src/bundle-verification-contract.ts`,
-  `${APP_DIRECTORY}/src/bundle-verification-internal.ts`,
-  `${APP_DIRECTORY}/src/bundle-verification-schema-guard.ts`,
-  `${APP_DIRECTORY}/src/bundle-verification-standalone-runtime.ts`,
-  `${APP_DIRECTORY}/src/bundle-verification.ts`,
-  `${APP_DIRECTORY}/src/generated/0.1.0/bundle-verification-guards.ts`,
-  `${APP_DIRECTORY}/src/generated/0.1.0/package-preflight-catalog-guard.ts`,
-  `${APP_DIRECTORY}/src/package-preflight-contract.ts`,
-  `${APP_DIRECTORY}/src/package-preflight-internal.ts`,
-  `${APP_DIRECTORY}/src/package-preflight-schema-guard.ts`,
-  `${APP_DIRECTORY}/src/package-preflight-web-react.ts`,
-  `${APP_DIRECTORY}/src/package-preflight.ts`,
-  `${APP_DIRECTORY}/src/reference-preflight-contract.ts`,
-  `${APP_DIRECTORY}/src/reference-preflight-internal.ts`,
-  `${APP_DIRECTORY}/src/reference-preflight.ts`,
-  `${APP_DIRECTORY}/src/runtime-staging-contract.ts`,
-  `${APP_DIRECTORY}/src/runtime-staging-internal.ts`,
-  `${APP_DIRECTORY}/src/runtime-staging.ts`,
-  `${APP_DIRECTORY}/src/runtime-activation-contract.ts`,
-  `${APP_DIRECTORY}/src/runtime-activation-internal.ts`,
-  `${APP_DIRECTORY}/src/runtime-activation-repository-internal.ts`,
-  `${APP_DIRECTORY}/src/runtime-activation-sqlite-internal.ts`,
-  `${APP_DIRECTORY}/src/runtime-activation.ts`,
-  `${APP_DIRECTORY}/src/runtime-recovery-internal.ts`,
+  Object.freeze({ id: "A-009", owners: ["M07-T07", "M07-T08"], tests: ["M07-T10", "M10-T07"] }),
 ]);
 
 const TRACKED_TASK_FILES = Object.freeze([
   APP_PACKAGE,
   APP_INDEX,
+  APP_CONTROLLER_SOURCE,
+  APP_SQLITE_SOURCE,
   APP_TEST,
   APP_TEST_SUPPORT,
   APP_TYPE_TEST,
@@ -310,89 +208,21 @@ const TRACKED_TASK_FILES = Object.freeze([
   PROOF_LIBRARY,
   ATOMIC_WRITER,
   ROOT_TEST,
-  ...PIPELINE_SOURCE_FILES,
 ]);
+// Generator/verifier infrastructure is recorded from the live workspace only. Unlike semantic
+// task inputs, these files have no inert projection that could authenticate supplied replacement
+// bytes, so the test override seam must not accept them.
+const TRACKED_FILE_OVERRIDE_PATHS = Object.freeze(
+  TRACKED_TASK_FILES.filter(
+    (relativePath) =>
+      relativePath !== GENERATOR &&
+      relativePath !== VERIFIER &&
+      relativePath !== PROOF_LIBRARY &&
+      relativePath !== ATOMIC_WRITER,
+  ),
+);
 
-// M07-T10 strengthens the existing SQLite transaction boundary and appends only its own proof
-// registration. Authenticate that one reviewed successor while continuing to emit the immutable
-// T09 receipts; current reader bytes are owned separately by the append-only reader checkpoint.
-const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 2_319,
-      sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
-    }),
-    successor: Object.freeze({
-      bytes: 2_408,
-      sha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
-    }),
-  }),
-  [`${APP_DIRECTORY}/src/runtime-activation-sqlite-internal.ts`]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 22_508,
-      sha256: "a97191a6d508d4ff3c26e0f691e52b9c9215b4ecb69a014da4ecd03086a3beeb",
-    }),
-    successor: Object.freeze({
-      bytes: 23_137,
-      sha256: "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5fac7493481f868be164",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 65_109,
-      sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
-    }),
-    successor: Object.freeze({
-      bytes: 66_267,
-      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 48_058,
-      sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
-    }),
-    successor: Object.freeze({
-      bytes: 48_249,
-      sha256: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 46_343,
-      sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
-    }),
-    successor: Object.freeze({
-      bytes: 46_524,
-      sha256: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
-    }),
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 47_479,
-      sha256: "9b15cef3b2d795c268945c2f4bee670c037878bd43967c1ce71a41342d463140",
-    }),
-    successor: Object.freeze({
-      bytes: 47_816,
-      sha256: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
-    }),
-  }),
-});
-
-// A reader cannot pin its own successor digest without creating a recursive hash. Sequence 23
-// authenticates the live proof-library and root-test bytes while this reader emits the T09 view.
-const M07_T10_READER_RECEIPT_PROJECTION = Object.freeze({
-  [PROOF_LIBRARY]: Object.freeze({
-    bytes: 64_932,
-    sha256: "da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f",
-  }),
-  [ROOT_TEST]: Object.freeze({
-    bytes: 17_341,
-    sha256: "f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6",
-  }),
-});
-
-export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS = Object.freeze([
+export const CONTROL_PLANE_RUNTIME_TRANSITION_RACES_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
     task: "M07-T01",
     path: "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
@@ -441,38 +271,45 @@ export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS = Object.fr
     bytes: 44_224,
     sha256: "c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9",
   }),
+  Object.freeze({
+    task: "M07-T09",
+    path: "docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json",
+    bytes: 64_493,
+    sha256: "9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9",
+  }),
 ]);
 
-export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_ROOT_TEST_NAMES = Object.freeze([
-  "[authority] builds the exact M07-T09 boundary-fault artifact from the executable suite",
+export const CONTROL_PLANE_RUNTIME_TRANSITION_RACES_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] builds the exact M07-T10 ordered-transition and two-way race artifact",
   "[determinism] two independent evidence builds are byte-identical",
-  "[prerequisites] rejects drift in every immutable M07-T01 through M07-T08 artifact",
-  "[runtime] rejects one changed executable fault-suite receipt field",
-  "[implementation] rejects public-export growth and removal of one fault boundary",
-  "[traceability] rejects every M07-T09 assignment mutation and one extra assignment",
+  "[prerequisites] rejects drift in every immutable M07-T01 through M07-T09 artifact",
+  "[runtime] rejects case-inventory drift and a changed executable suite receipt",
+  "[implementation] rejects profile-guard removal and public-export growth",
+  "[registration] binds every captured CI byte source to its executable authority",
+  "[traceability] rejects every missing M07-T10 assignment and one extra assignment",
   "[artifact] verifies exact bytes and rejects one changed byte",
   "[writer] atomically writes deterministic evidence and preserves the destination on failure",
-  "[options] rejects unknown, accessor, proxy, and shared-memory inputs",
+  "[options] rejects unknown, accessor, proxy, cyclic, and shared-memory inputs",
   "[filesystem] rejects artifact and proof symlinks plus invalid UTF-8 proof authority",
-  "[immutability] freezes the full graph and preserves M07-T10, M07-T11, and G07 nonclaims",
+  "[immutability] recursively freezes the graph and preserves later-scope nonclaims",
 ]);
 
-export const DEFAULT_CONTROL_PLANE_RUNTIME_FAULT_INJECTION_ARTIFACT_PATH = path.join(
+export const DEFAULT_CONTROL_PLANE_RUNTIME_TRANSITION_RACES_ARTIFACT_PATH = path.join(
   ROOT,
   ARTIFACT,
 );
 
-export class ControlPlaneRuntimeFaultInjectionEvidenceError extends Error {
+export class ControlPlaneRuntimeTransitionRacesEvidenceError extends Error {
   constructor(code, message, details = {}) {
     super(message);
-    this.name = "ControlPlaneRuntimeFaultInjectionEvidenceError";
+    this.name = "ControlPlaneRuntimeTransitionRacesEvidenceError";
     this.code = code;
     this.details = Object.freeze({ ...details });
   }
 }
 
 function fail(code, message, details = {}) {
-  throw new ControlPlaneRuntimeFaultInjectionEvidenceError(code, message, details);
+  throw new ControlPlaneRuntimeTransitionRacesEvidenceError(code, message, details);
 }
 
 function sha256(bytes) {
@@ -543,14 +380,14 @@ function captureBytes(value, label) {
     Reflect.apply(UINT8_ARRAY_SET, copy, [new Uint8Array(buffer, byteOffset, byteLength)]);
     return copy;
   } catch (error) {
-    if (error instanceof ControlPlaneRuntimeFaultInjectionEvidenceError) throw error;
+    if (error instanceof ControlPlaneRuntimeTransitionRacesEvidenceError) throw error;
     fail("INVALID_OPTIONS", `${label} could not be captured safely.`);
   }
 }
 
 function copyInertJson(value, label, active = new Set(), budget = { nodes: 0 }, depth = 0) {
   budget.nodes += 1;
-  if (depth > MAX_INERT_JSON_DEPTH || budget.nodes > MAX_INERT_JSON_NODES) {
+  if (depth > 512 || budget.nodes > 200_000) {
     fail("INVALID_OPTIONS", `${label} exceeds its finite inert-JSON budget.`);
   }
   if (value === null || typeof value === "string" || typeof value === "boolean") return value;
@@ -682,29 +519,28 @@ async function safeReadAbsolute(absolutePath, maximumBytes = MAX_AUTHORITY_BYTES
       if (bytesRead === 0) break;
       total += bytesRead;
     }
-    const after = await lstat(resolved, { bigint: true });
-    await canonicalParent(requestedParent, parentBefore);
-    if (
-      total !== expectedBytes ||
-      total > maximumBytes ||
-      !after.isFile() ||
-      after.isSymbolicLink() ||
-      after.nlink !== 1n ||
-      !sameAuthorityIdentity(after, opened)
-    ) {
+    const after = await handle.stat({ bigint: true });
+    if (total !== expectedBytes || total > maximumBytes || !sameAuthorityIdentity(after, opened)) {
       fail("UNSAFE_AUTHORITY", "A proof authority changed while reading.");
     }
-    return Uint8Array.from(target.subarray(0, total));
+    await canonicalParent(requestedParent, parentBefore);
+    return new Uint8Array(target.subarray(0, total));
   } catch (error) {
-    if (error instanceof ControlPlaneRuntimeFaultInjectionEvidenceError) throw error;
-    fail("AUTHORITY_IO_FAILURE", "A proof authority cannot be read safely.");
+    if (error instanceof ControlPlaneRuntimeTransitionRacesEvidenceError) throw error;
+    fail("AUTHORITY_IO_FAILURE", "A proof authority could not be read safely.");
   } finally {
-    await handle?.close().catch(() => undefined);
+    try {
+      await handle?.close();
+    } catch {
+      // The primary authority result is already determined.
+    }
   }
 }
 
 async function workspaceBytes(relativePath, overrides) {
-  return overrides[relativePath] ?? safeReadAbsolute(path.join(ROOT, relativePath));
+  return Object.hasOwn(overrides, relativePath)
+    ? overrides[relativePath]
+    : safeReadAbsolute(path.join(ROOT, relativePath));
 }
 
 function fatalText(bytes, label) {
@@ -719,7 +555,7 @@ function parseJsonBytes(bytes, label, code = "SOURCE_DRIFT") {
   try {
     return JSON.parse(fatalText(bytes, label));
   } catch (error) {
-    if (error instanceof ControlPlaneRuntimeFaultInjectionEvidenceError) throw error;
+    if (error instanceof ControlPlaneRuntimeTransitionRacesEvidenceError) throw error;
     fail(code, `${label} is not valid JSON.`);
   }
 }
@@ -730,8 +566,9 @@ function compareText(left, right) {
 
 function parseTypescript(source, relativePath, code = "SOURCE_DRIFT") {
   const sourceFile = ts.createSourceFile(relativePath, source, ts.ScriptTarget.Latest, true);
-  if (sourceFile.parseDiagnostics.length > 0)
+  if (sourceFile.parseDiagnostics.length > 0) {
     fail(code, `${relativePath} is not valid TypeScript.`);
+  }
   return sourceFile;
 }
 
@@ -808,9 +645,9 @@ function publicExportInventory(source) {
   return deepFreeze({ entries: inventory, count: inventory.length, sha256: inventorySha256 });
 }
 
-export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_EXPECTED_SUITE_RECEIPT = deepFreeze({
+export const CONTROL_PLANE_RUNTIME_TRANSITION_RACES_EXPECTED_SUITE_RECEIPT = deepFreeze({
   suiteName: APP_SUITE_NAME,
-  caseIds: [...EXPECTED_FAULT_CASE_IDS],
+  caseIds: [...EXPECTED_TRANSITION_CASE_IDS],
   tests: EXPECTED_RUNTIME_TEST_NAMES.map((title) => ({
     ancestorTitles: [APP_SUITE_NAME],
     fullName: `${APP_SUITE_NAME} ${title}`,
@@ -821,7 +658,7 @@ export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_EXPECTED_SUITE_RECEIPT = deep
 
 async function prerequisiteReceipts(overrides) {
   const receipts = [];
-  for (const pin of CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS) {
+  for (const pin of CONTROL_PLANE_RUNTIME_TRANSITION_RACES_PREREQUISITE_PINS) {
     const bytes = await workspaceBytes(pin.path, overrides);
     const actualSha256 = sha256(bytes);
     if (bytes.byteLength !== pin.bytes || actualSha256 !== pin.sha256) {
@@ -851,38 +688,6 @@ async function fileReceipts(paths, overrides) {
       }),
     ),
   );
-}
-
-async function trackedFileReceipts(overrides) {
-  let historicalState = false;
-  let successorState = false;
-  const receipts = [];
-  for (const relativePath of [...new Set(TRACKED_TASK_FILES)].sort()) {
-    const bytes = await workspaceBytes(relativePath, overrides);
-    const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    const bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
-    if (bridge === undefined) {
-      const projected = M07_T10_READER_RECEIPT_PROJECTION[relativePath] ?? observed;
-      receipts.push(Object.freeze({ path: relativePath, ...projected }));
-      continue;
-    }
-    const historicalMatch =
-      observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
-    const successorMatch =
-      observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
-    if (!historicalMatch && !successorMatch) {
-      fail("REGISTRATION_DRIFT", "A reviewed M07-T10 tracked successor receipt drifted.", {
-        path: relativePath,
-      });
-    }
-    if (historicalMatch) historicalState = true;
-    if (successorMatch) successorState = true;
-    receipts.push(Object.freeze({ path: relativePath, ...bridge.historical }));
-  }
-  if (historicalState && successorState) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
-  }
-  return deepFreeze(receipts);
 }
 
 function literalStringArray(initializer, label) {
@@ -934,11 +739,14 @@ function exactTopLevelConst(sourceFile, name) {
 function runtimeTestInventory(source) {
   const sourceFile = parseTypescript(source, APP_TEST, "TEST_AUTHORITY_DRIFT");
   const caseIds = literalStringArray(
-    exactTopLevelConst(sourceFile, "M07_T09_FAULT_CASE_IDS"),
-    "M07_T09_FAULT_CASE_IDS",
+    exactTopLevelConst(sourceFile, "TRANSITION_CASE_IDS"),
+    "TRANSITION_CASE_IDS",
   );
-  if (JSON.stringify(caseIds) !== JSON.stringify(EXPECTED_FAULT_CASE_IDS)) {
-    fail("TEST_AUTHORITY_DRIFT", "The exact 19-case M07-T09 boundary inventory drifted.");
+  if (
+    JSON.stringify(caseIds) !== JSON.stringify(EXPECTED_TRANSITION_CASE_IDS) ||
+    new Set(caseIds).size !== caseIds.length
+  ) {
+    fail("TEST_AUTHORITY_DRIFT", "The exact closed 15-case M07-T10 inventory drifted.");
   }
   const describes = allCalls(sourceFile, "describe");
   if (
@@ -947,27 +755,32 @@ function runtimeTestInventory(source) {
     !ts.isStringLiteral(describes[0].arguments[0]) ||
     describes[0].arguments[0].text !== APP_SUITE_NAME
   ) {
-    fail("TEST_AUTHORITY_DRIFT", "The exact focused M07-T09 describe authority drifted.");
+    fail("TEST_AUTHORITY_DRIFT", "The focused M07-T10 describe authority drifted.");
   }
   const names = allCalls(sourceFile, "it").map((call) => {
     if (call.arguments.length < 2 || !ts.isStringLiteral(call.arguments[0])) {
-      fail("TEST_AUTHORITY_DRIFT", "Every focused M07-T09 test must have one literal title.");
+      fail("TEST_AUTHORITY_DRIFT", "Every focused M07-T10 test needs one literal title.");
     }
     return call.arguments[0].text;
   });
   if (JSON.stringify(names) !== JSON.stringify(EXPECTED_RUNTIME_TEST_NAMES)) {
-    fail("TEST_AUTHORITY_DRIFT", "The exact 20-test M07-T09 executable inventory drifted.");
+    fail("TEST_AUTHORITY_DRIFT", "The exact 16-test M07-T10 executable inventory drifted.");
+  }
+  for (let index = 0; index < caseIds.length; index += 1) {
+    if (!names[index].startsWith(`[${caseIds[index]}]`)) {
+      fail("TEST_AUTHORITY_DRIFT", "A stable case id is not bound to its exact test title.");
+    }
   }
   return deepFreeze({ suiteName: APP_SUITE_NAME, caseIds, names });
 }
 
 function compilerNegativeInventory(source) {
   const sourceFile = parseTypescript(source, APP_TYPE_TEST, "TEST_AUTHORITY_DRIFT");
-  const directives = [];
-  const pattern = /@ts-expect-error\s+([^\r\n]+)/gu;
-  for (const match of source.matchAll(pattern)) directives.push(match[1].trim());
-  if (directives.length !== 10) {
-    fail("TEST_AUTHORITY_DRIFT", "The M07-T09 compiler-negative inventory must contain 10 cases.");
+  const directives = [...source.matchAll(/@ts-expect-error\s+([^\r\n]+)/gu)].map((match) =>
+    match[1].trim(),
+  );
+  if (directives.length !== 9 || new Set(directives).size !== directives.length) {
+    fail("TEST_AUTHORITY_DRIFT", "The M07-T10 compiler-negative inventory must contain 9 cases.");
   }
   const publicImports = sourceFile.statements.filter(
     (statement) =>
@@ -994,23 +807,23 @@ function rootTestInventory(source) {
     }
     const call = statement.expression;
     if (call.arguments.length < 2 || !ts.isStringLiteral(call.arguments[0])) {
-      fail("TEST_AUTHORITY_DRIFT", "Every root proof test must have one literal title.");
+      fail("TEST_AUTHORITY_DRIFT", "Every root proof test needs one literal title.");
     }
     names.push(call.arguments[0].text);
   }
   if (
     allCalls(sourceFile, "test").length !== names.length ||
-    JSON.stringify(names) !== JSON.stringify(CONTROL_PLANE_RUNTIME_FAULT_INJECTION_ROOT_TEST_NAMES)
+    JSON.stringify(names) !== JSON.stringify(CONTROL_PLANE_RUNTIME_TRANSITION_RACES_ROOT_TEST_NAMES)
   ) {
     fail("TEST_AUTHORITY_DRIFT", "The exact direct root mutation-test inventory drifted.");
   }
   return names;
 }
 
-function assertExactSourceSha(bytes, relativePath, expectedSha256) {
+function assertExactSourceSha(bytes, relativePath, expectedSha256, code = "SOURCE_RECEIPT_DRIFT") {
   const actualSha256 = sha256(bytes);
   if (actualSha256 !== expectedSha256) {
-    fail("TEST_AUTHORITY_DRIFT", `${relativePath} exact executable authority drifted.`, {
+    fail(code, `${relativePath} exact executable authority drifted.`, {
       path: relativePath,
       expectedSha256,
       actualSha256,
@@ -1018,29 +831,102 @@ function assertExactSourceSha(bytes, relativePath, expectedSha256) {
   }
 }
 
+function assertSameAuthorityBytes(expectedBytes, actualBytes, relativePath, code, phase) {
+  const expectedSha256 = sha256(expectedBytes);
+  const actualSha256 = sha256(actualBytes);
+  if (actualBytes.byteLength !== expectedBytes.byteLength || actualSha256 !== expectedSha256) {
+    fail(code, `${relativePath} changed across its ${phase} authority window.`, {
+      path: relativePath,
+      expectedBytes: expectedBytes.byteLength,
+      actualBytes: actualBytes.byteLength,
+      expectedSha256,
+      actualSha256,
+    });
+  }
+}
+
+function profileGuardProjection(source) {
+  const sourceFile = parseTypescript(source, APP_SQLITE_SOURCE, "IMPLEMENTATION_DRIFT");
+  const profileCalls = allCalls(sourceFile, "assertConnectionProfile");
+  const openDatabaseCalls = profileCalls.filter(
+    (call) => ts.isIdentifier(call.arguments[0]) && call.arguments[0].text === "openDatabase",
+  );
+  const initialDatabaseCalls = profileCalls.filter(
+    (call) => ts.isIdentifier(call.arguments[0]) && call.arguments[0].text === "database",
+  );
+  const beginRead = source.indexOf('openDatabase.exec("BEGIN");');
+  const beginWrite = source.indexOf('openDatabase.exec("BEGIN IMMEDIATE");');
+  const commit = source.indexOf('openDatabase.exec("COMMIT");', beginWrite);
+  const profilePositions = openDatabaseCalls.map((call) => call.getStart(sourceFile)).sort();
+  if (
+    profileCalls.length !== 4 ||
+    initialDatabaseCalls.length !== 1 ||
+    openDatabaseCalls.length !== 3 ||
+    beginRead < 0 ||
+    beginWrite < 0 ||
+    commit < 0 ||
+    !(beginRead < profilePositions[0] && profilePositions[0] < beginWrite) ||
+    !(beginWrite < profilePositions[1] && profilePositions[1] < commit) ||
+    !(commit < profilePositions[2]) ||
+    !source.includes('database.pragma("journal_mode", { simple: true }) !== "wal"') ||
+    !source.includes('database.pragma("journal_mode = WAL")')
+  ) {
+    fail(
+      "IMPLEMENTATION_DRIFT",
+      "The complete open/read/writer/postcommit SQLite profile guard placement drifted.",
+    );
+  }
+  return deepFreeze({
+    initialProfileChecks: initialDatabaseCalls.length,
+    transactionProfileChecks: openDatabaseCalls.length,
+    readTransactionReauthentication: true,
+    writerPreDmlReauthentication: true,
+    postCommitReauthentication: true,
+    journalModeEstablishedAsWal: true,
+    profileDriftFailsClosedWithoutRepair: true,
+  });
+}
+
 async function testProjection(overrides) {
-  const [appBytes, supportBytes, typeBytes, rootBytes] = await Promise.all([
-    workspaceBytes(APP_TEST, overrides),
-    workspaceBytes(APP_TEST_SUPPORT, overrides),
-    workspaceBytes(APP_TYPE_TEST, overrides),
-    workspaceBytes(ROOT_TEST, overrides),
-  ]);
+  const [controllerBytes, sqliteBytes, appBytes, supportBytes, typeBytes, rootBytes] =
+    await Promise.all([
+      workspaceBytes(APP_CONTROLLER_SOURCE, overrides),
+      workspaceBytes(APP_SQLITE_SOURCE, overrides),
+      workspaceBytes(APP_TEST, overrides),
+      workspaceBytes(APP_TEST_SUPPORT, overrides),
+      workspaceBytes(APP_TYPE_TEST, overrides),
+      workspaceBytes(ROOT_TEST, overrides),
+    ]);
+  const runtime = runtimeTestInventory(fatalText(appBytes, APP_TEST));
+  const compilerNegativeClaims = compilerNegativeInventory(fatalText(typeBytes, APP_TYPE_TEST));
+  const rootNames = rootTestInventory(fatalText(rootBytes, ROOT_TEST));
+  const profileGuards = profileGuardProjection(fatalText(sqliteBytes, APP_SQLITE_SOURCE));
+  assertExactSourceSha(controllerBytes, APP_CONTROLLER_SOURCE, APP_CONTROLLER_SOURCE_SHA256);
+  assertExactSourceSha(sqliteBytes, APP_SQLITE_SOURCE, APP_SQLITE_SOURCE_SHA256);
   assertExactSourceSha(appBytes, APP_TEST, APP_TEST_SHA256);
   assertExactSourceSha(supportBytes, APP_TEST_SUPPORT, APP_TEST_SUPPORT_SHA256);
   assertExactSourceSha(typeBytes, APP_TYPE_TEST, APP_TYPE_TEST_SHA256);
   assertExactSourceSha(rootBytes, ROOT_TEST, ROOT_TEST_SHA256);
-  const runtime = runtimeTestInventory(fatalText(appBytes, APP_TEST));
-  const compilerNegativeClaims = compilerNegativeInventory(fatalText(typeBytes, APP_TYPE_TEST));
-  const rootNames = rootTestInventory(fatalText(rootBytes, ROOT_TEST));
   return deepFreeze({
     packageRuntimeCases: runtime.names.length,
     packageRuntimeCaseNames: runtime.names,
-    faultCaseIds: runtime.caseIds,
+    transitionCaseIds: runtime.caseIds,
     compilerNegativeCases: compilerNegativeClaims.length,
     compilerNegativeClaims,
     rootMutationCases: rootNames.length,
     rootMutationCaseNames: rootNames,
+    profileGuards,
     sourceReceipts: {
+      controller: {
+        path: APP_CONTROLLER_SOURCE,
+        bytes: controllerBytes.byteLength,
+        sha256: sha256(controllerBytes),
+      },
+      sqlite: {
+        path: APP_SQLITE_SOURCE,
+        bytes: sqliteBytes.byteLength,
+        sha256: sha256(sqliteBytes),
+      },
       runtime: { path: APP_TEST, bytes: appBytes.byteLength, sha256: sha256(appBytes) },
       support: {
         path: APP_TEST_SUPPORT,
@@ -1048,7 +934,7 @@ async function testProjection(overrides) {
         sha256: sha256(supportBytes),
       },
       types: { path: APP_TYPE_TEST, bytes: typeBytes.byteLength, sha256: sha256(typeBytes) },
-      root: { path: ROOT_TEST, ...M07_T10_READER_RECEIPT_PROJECTION[ROOT_TEST] },
+      root: { path: ROOT_TEST, bytes: rootBytes.byteLength, sha256: sha256(rootBytes) },
     },
   });
 }
@@ -1057,9 +943,9 @@ function expectedSuiteReceipt(value) {
   const receipt = copyInertJson(value, "runtimeSuiteReceipt");
   if (
     JSON.stringify(receipt) !==
-    JSON.stringify(CONTROL_PLANE_RUNTIME_FAULT_INJECTION_EXPECTED_SUITE_RECEIPT)
+    JSON.stringify(CONTROL_PLANE_RUNTIME_TRANSITION_RACES_EXPECTED_SUITE_RECEIPT)
   ) {
-    fail("RUNTIME_SUITE_MISMATCH", "The exact executable M07-T09 Vitest receipt drifted.");
+    fail("RUNTIME_SUITE_MISMATCH", "The exact executable M07-T10 Vitest receipt drifted.");
   }
   return deepFreeze(receipt);
 }
@@ -1111,29 +997,27 @@ function runtimeSuiteFailureReport(stdout) {
       if (!Array.isArray(result?.assertionResults) || result.assertionResults.length > 64) continue;
       for (const assertion of result.assertionResults) {
         if (assertion?.status !== "failed" || typeof assertion.title !== "string") continue;
-        const testIndex = EXPECTED_RUNTIME_TEST_NAMES.indexOf(assertion.title);
-        if (testIndex < 0) continue;
-        const caseId = EXPECTED_FAULT_CASE_IDS[testIndex] ?? "closed-fault-inventory-assertion";
+        const index = EXPECTED_RUNTIME_TEST_NAMES.indexOf(assertion.title);
+        if (index < 0) continue;
+        const caseId = EXPECTED_TRANSITION_CASE_IDS[index] ?? "closed-transition-inventory";
         if (!failedCaseIds.includes(caseId)) failedCaseIds.push(caseId);
       }
     }
   }
-  const failedSuiteCount =
-    Number.isSafeInteger(report.numFailedTestSuites) &&
-    report.numFailedTestSuites >= 0 &&
-    report.numFailedTestSuites <= 4
-      ? report.numFailedTestSuites
-      : null;
-  const failedTestCount =
-    Number.isSafeInteger(report.numFailedTests) &&
-    report.numFailedTests >= 0 &&
-    report.numFailedTests <= EXPECTED_RUNTIME_TEST_NAMES.length
-      ? report.numFailedTests
-      : null;
   return Object.freeze({
     failedCaseIds: Object.freeze(failedCaseIds),
-    failedSuiteCount,
-    failedTestCount,
+    failedSuiteCount:
+      Number.isSafeInteger(report.numFailedTestSuites) &&
+      report.numFailedTestSuites >= 0 &&
+      report.numFailedTestSuites <= 4
+        ? report.numFailedTestSuites
+        : null,
+    failedTestCount:
+      Number.isSafeInteger(report.numFailedTests) &&
+      report.numFailedTests >= 0 &&
+      report.numFailedTests <= EXPECTED_RUNTIME_TEST_NAMES.length
+        ? report.numFailedTests
+        : null,
     observed: true,
   });
 }
@@ -1187,13 +1071,12 @@ function runtimeSuiteDeniedAuthority(category, diagnosticText) {
 }
 
 /**
- * Reduces a nested Vitest process failure to bounded, path-free diagnostics.
+ * Reduces a nested test-process failure to bounded, path-free diagnostics.
  *
- * Free-form reporter messages and stacks are used only for fixed category matching. The returned
- * case ids come exclusively from the code-owned 20-test inventory; arbitrary text is represented
- * only by byte counts and SHA-256 fingerprints.
+ * Reporter text is used only for fixed category matching. Returned identities come exclusively
+ * from the code-owned 16-test inventory; arbitrary output is represented by size and digest.
  */
-export function summarizeControlPlaneRuntimeFaultInjectionSuiteFailure(error) {
+export function summarizeControlPlaneRuntimeTransitionRacesSuiteFailure(error) {
   const stdout = runtimeSuiteOutput(runtimeSuiteErrorData(error, "stdout"));
   const stderr = runtimeSuiteOutput(runtimeSuiteErrorData(error, "stderr"));
   const report = runtimeSuiteFailureReport(stdout.text);
@@ -1219,7 +1102,7 @@ export function summarizeControlPlaneRuntimeFaultInjectionSuiteFailure(error) {
   });
 }
 
-async function executeControlPlaneRuntimeFaultInjectionVitest(profile) {
+async function executeControlPlaneRuntimeTransitionRacesVitest() {
   let configDirectory;
   let processError;
   let result;
@@ -1227,42 +1110,16 @@ async function executeControlPlaneRuntimeFaultInjectionVitest(profile) {
   delete environment.NODE_PATH;
   try {
     configDirectory = await realpath(
-      await mkdtemp(path.join(tmpdir(), "desen-m07-t09-vitest-config-")),
+      await mkdtemp(path.join(tmpdir(), "desen-m07-t10-vitest-config-")),
     );
     const configPath = path.join(configDirectory, "vitest.config.mjs");
-    const isolationProbe = profile === "isolation-probe";
-    if (!isolationProbe && profile !== "runtime-suite") {
-      throw new TypeError("Unknown M07-T09 Vitest execution profile.");
-    }
-    await writeFile(
-      configPath,
-      isolationProbe ? VITEST_ISOLATION_PROBE_CONFIG_SOURCE : VITEST_CONFIG_SOURCE,
-      { flag: "wx", mode: 0o600 },
-    );
-    const testPath = isolationProbe
-      ? path.join(configDirectory, "isolation-probe.test.js")
-      : "test/runtime-fault-injection.test.ts";
-    if (isolationProbe) {
-      await Promise.all([
-        writeFile(testPath, VITEST_ISOLATION_PROBE_SOURCE, { flag: "wx", mode: 0o600 }),
-        writeFile(
-          path.join(configDirectory, "package.json"),
-          VITEST_ISOLATION_PROBE_PACKAGE_SOURCE,
-          { flag: "wx", mode: 0o600 },
-        ),
-        writeFile(
-          path.join(configDirectory, "pnpm-workspace.yaml"),
-          VITEST_ISOLATION_PROBE_WORKSPACE_SOURCE,
-          { flag: "wx", mode: 0o600 },
-        ),
-      ]);
-    }
+    await writeFile(configPath, VITEST_CONFIG_SOURCE, { flag: "wx", mode: 0o600 });
     result = await execFileAsync(
       process.execPath,
       [
         VITEST_CLI,
         "run",
-        testPath,
+        "test/runtime-transition-races.test.ts",
         "--reporter=json",
         "--config",
         configPath,
@@ -1273,11 +1130,11 @@ async function executeControlPlaneRuntimeFaultInjectionVitest(profile) {
         "--pool=forks",
       ],
       {
-        cwd: isolationProbe ? configDirectory : path.join(ROOT, APP_DIRECTORY),
+        cwd: path.join(ROOT, APP_DIRECTORY),
         encoding: "utf8",
         env: environment,
-        maxBuffer: 8 * 1_024 * 1_024,
-        timeout: 180_000,
+        maxBuffer: MAX_RUNTIME_SUITE_DIAGNOSTIC_BYTES,
+        timeout: 240_000,
       },
     );
   } catch (error) {
@@ -1295,76 +1152,32 @@ async function executeControlPlaneRuntimeFaultInjectionVitest(profile) {
   return result;
 }
 
-export async function runControlPlaneRuntimeFaultInjectionVitestIsolationProbe() {
+export async function runControlPlaneRuntimeTransitionRacesSuite() {
   let stdout;
   try {
-    ({ stdout } = await executeControlPlaneRuntimeFaultInjectionVitest("isolation-probe"));
-  } catch (error) {
-    fail(
-      "RUNTIME_SUITE_ISOLATION_PROBE_FAILED",
-      "The dependency-free M07-T09 Vitest isolation probe did not pass.",
-      summarizeControlPlaneRuntimeFaultInjectionSuiteFailure(error),
-    );
-  }
-  let report;
-  try {
-    report = JSON.parse(stdout);
-  } catch {
-    fail(
-      "RUNTIME_SUITE_ISOLATION_PROBE_FAILED",
-      "The M07-T09 Vitest isolation probe receipt was not valid JSON.",
-    );
-  }
-  const assertions = report?.testResults?.[0]?.assertionResults;
-  if (
-    report?.success !== true ||
-    report?.numTotalTests !== 1 ||
-    report?.numPassedTests !== 1 ||
-    !Array.isArray(report?.testResults) ||
-    report.testResults.length !== 1 ||
-    !Array.isArray(assertions) ||
-    assertions.length !== 1 ||
-    assertions[0]?.status !== "passed" ||
-    assertions[0]?.title !== VITEST_ISOLATION_PROBE_TEST_NAME
-  ) {
-    fail(
-      "RUNTIME_SUITE_ISOLATION_PROBE_FAILED",
-      "The M07-T09 Vitest isolation probe result was incomplete.",
-    );
-  }
-  return Object.freeze({
-    profile: VITEST_ISOLATION_PROBE_PROFILE,
-    status: "PASS",
-    testCount: 1,
-  });
-}
-
-export async function runControlPlaneRuntimeFaultInjectionSuite() {
-  let stdout;
-  try {
-    ({ stdout } = await executeControlPlaneRuntimeFaultInjectionVitest("runtime-suite"));
+    ({ stdout } = await executeControlPlaneRuntimeTransitionRacesVitest());
   } catch (error) {
     fail(
       "RUNTIME_SUITE_FAILED",
-      "The focused M07-T09 Vitest process did not pass.",
-      summarizeControlPlaneRuntimeFaultInjectionSuiteFailure(error),
+      "The focused M07-T10 Vitest process did not pass.",
+      summarizeControlPlaneRuntimeTransitionRacesSuiteFailure(error),
     );
   }
   let report;
   try {
     report = JSON.parse(stdout);
   } catch {
-    fail("RUNTIME_SUITE_FAILED", "The focused M07-T09 Vitest receipt was not valid JSON.");
+    fail("RUNTIME_SUITE_FAILED", "The focused M07-T10 Vitest receipt was not valid JSON.");
   }
   if (
-    report.success !== true ||
+    report?.success !== true ||
     report.numTotalTests !== EXPECTED_RUNTIME_TEST_NAMES.length ||
     report.numPassedTests !== EXPECTED_RUNTIME_TEST_NAMES.length ||
     !Array.isArray(report.testResults) ||
     report.testResults.length !== 1 ||
     !Array.isArray(report.testResults[0]?.assertionResults)
   ) {
-    fail("RUNTIME_SUITE_FAILED", "The focused M07-T09 Vitest result was incomplete.");
+    fail("RUNTIME_SUITE_FAILED", "The focused M07-T10 Vitest result was incomplete.");
   }
   const tests = report.testResults[0].assertionResults.map((result) => ({
     ancestorTitles: result.ancestorTitles,
@@ -1374,7 +1187,7 @@ export async function runControlPlaneRuntimeFaultInjectionSuite() {
   }));
   return expectedSuiteReceipt({
     suiteName: APP_SUITE_NAME,
-    caseIds: EXPECTED_FAULT_CASE_IDS,
+    caseIds: EXPECTED_TRANSITION_CASE_IDS,
     tests,
   });
 }
@@ -1387,7 +1200,7 @@ function findTraceRows(value, found = []) {
   if (value === null || typeof value !== "object") return found;
   if (
     typeof value.id === "string" &&
-    (value.owners?.includes?.("M07-T09") || value.tests?.includes?.("M07-T09"))
+    (value.owners?.includes?.("M07-T10") || value.tests?.includes?.("M07-T10"))
   ) {
     found.push(value);
   }
@@ -1400,10 +1213,10 @@ async function traceProjection(overrides) {
   const authority = parseJsonBytes(bytes, TRACEABILITY, "TRACE_DRIFT");
   const rows = findTraceRows(authority);
   if (rows.length !== EXPECTED_TRACE_ROWS.length) {
-    fail("TRACE_DRIFT", "The exact M07-T09 trace-row cardinality drifted.");
+    fail("TRACE_DRIFT", "The exact M07-T10 trace-row cardinality drifted.");
   }
   const byId = new Map(rows.map((row) => [row.id, row]));
-  if (byId.size !== rows.length) fail("TRACE_DRIFT", "An M07-T09 trace identity is duplicated.");
+  if (byId.size !== rows.length) fail("TRACE_DRIFT", "An M07-T10 trace identity is duplicated.");
   const projection = [];
   for (const expected of EXPECTED_TRACE_ROWS) {
     const row = byId.get(expected.id);
@@ -1412,7 +1225,7 @@ async function traceProjection(overrides) {
       JSON.stringify(row.owners) !== JSON.stringify(expected.owners) ||
       JSON.stringify(row.tests) !== JSON.stringify(expected.tests)
     ) {
-      fail("TRACE_DRIFT", `The exact ${expected.id} M07-T09 assignment drifted.`);
+      fail("TRACE_DRIFT", `The exact ${expected.id} M07-T10 assignment drifted.`);
     }
     projection.push(copyInertJson(row, `trace row ${expected.id}`));
   }
@@ -1439,23 +1252,51 @@ function exactTupleCount(source, relativePath, expectedTuple) {
 }
 
 async function registrationProjection(overrides) {
-  const [rootPackageBytes, appPackageBytes, ciBytes, inventoryBytes] = await Promise.all([
-    workspaceBytes(ROOT_PACKAGE, overrides),
-    workspaceBytes(APP_PACKAGE, overrides),
-    workspaceBytes(CI_SOURCE, overrides),
-    workspaceBytes(CI_INVENTORY, overrides),
+  const [rootPackageBytes, appPackageBytes, ciBytes, inventoryBytes, sharedStateBytes] =
+    await Promise.all([
+      workspaceBytes(ROOT_PACKAGE, overrides),
+      workspaceBytes(APP_PACKAGE, overrides),
+      workspaceBytes(CI_SOURCE, overrides),
+      workspaceBytes(CI_INVENTORY, overrides),
+      workspaceBytes(SHARED_STATE_AUTHORITY, overrides),
+    ]);
+  // Semantic projections are executed from the live modules below. Bind every captured CI byte
+  // source to that reviewed executable generation first so an override cannot mix fake receipts
+  // with live behavior and manufacture internally inconsistent evidence.
+  for (const [relativePath, bytes] of [
+    [CI_SOURCE, ciBytes],
+    [CI_INVENTORY, inventoryBytes],
+    [SHARED_STATE_AUTHORITY, sharedStateBytes],
+  ]) {
+    assertExactSourceSha(
+      bytes,
+      relativePath,
+      EXPECTED_REGISTRATION_AUTHORITY_SHA256[relativePath],
+      "REGISTRATION_DRIFT",
+    );
+  }
+  const capturedRegistrationBytes = new Map([
+    [CI_SOURCE, ciBytes],
+    [CI_INVENTORY, inventoryBytes],
+    [SHARED_STATE_AUTHORITY, sharedStateBytes],
   ]);
+  for (const [relativePath, capturedBytes] of capturedRegistrationBytes) {
+    assertSameAuthorityBytes(
+      capturedBytes,
+      await safeReadAbsolute(path.join(ROOT, relativePath)),
+      relativePath,
+      "REGISTRATION_DRIFT",
+      "pre-import",
+    );
+  }
   const rootPackage = parseJsonBytes(rootPackageBytes, ROOT_PACKAGE, "REGISTRATION_DRIFT");
   const appPackage = parseJsonBytes(appPackageBytes, APP_PACKAGE, "REGISTRATION_DRIFT");
   if (
-    rootPackage.scripts?.["generate:control-plane-runtime-fault-injection"] !==
-      ROOT_SCRIPT_COMMANDS.generate ||
-    rootPackage.scripts?.["verify:control-plane-runtime-fault-injection"] !==
-      ROOT_SCRIPT_COMMANDS.verify ||
-    rootPackage.scripts?.["test:control-plane-runtime-fault-injection"] !==
-      ROOT_SCRIPT_COMMANDS.test ||
-    appPackage.scripts?.["test:runtime-fault-injection"] !==
-      "vitest run test/runtime-fault-injection.test.ts"
+    rootPackage.scripts?.[`generate:${PROOF_ID}`] !== ROOT_SCRIPT_COMMANDS.generate ||
+    rootPackage.scripts?.[`verify:${PROOF_ID}`] !== ROOT_SCRIPT_COMMANDS.verify ||
+    rootPackage.scripts?.[`test:${PROOF_ID}`] !== ROOT_SCRIPT_COMMANDS.test ||
+    appPackage.scripts?.["test:runtime-transition-races"] !==
+      "vitest run test/runtime-transition-races.test.ts"
   ) {
     fail("REGISTRATION_DRIFT", "The exact package-script registration drifted.");
   }
@@ -1467,13 +1308,26 @@ async function registrationProjection(overrides) {
   let sharedPair;
   try {
     const [inventoryModule, sharedModule] = await Promise.all([
-      import(`${pathToFileURL(path.join(ROOT, CI_INVENTORY)).href}?m07-t09-proof=1`),
-      import(`${pathToFileURL(path.join(ROOT, SHARED_STATE_AUTHORITY)).href}?m07-t09-proof=1`),
+      import(
+        `${pathToFileURL(path.join(ROOT, CI_INVENTORY)).href}?m07-t10-proof=${sha256(inventoryBytes)}`
+      ),
+      import(
+        `${pathToFileURL(path.join(ROOT, SHARED_STATE_AUTHORITY)).href}?m07-t10-proof=${sha256(sharedStateBytes)}`
+      ),
     ]);
     workloadInventory = inventoryModule.createExhaustiveWorkloadInventory();
     sharedPair = sharedModule.classifyProofPairState(PROOF_ID);
   } catch {
     fail("REGISTRATION_DRIFT", "Executable CI or shared-state registration could not be loaded.");
+  }
+  for (const [relativePath, capturedBytes] of capturedRegistrationBytes) {
+    assertSameAuthorityBytes(
+      capturedBytes,
+      await safeReadAbsolute(path.join(ROOT, relativePath)),
+      relativePath,
+      "REGISTRATION_DRIFT",
+      "post-import",
+    );
   }
   const proofUnits = workloadInventory.proofUnits.filter(({ id }) => id === PROOF_ID);
   if (
@@ -1496,7 +1350,7 @@ async function registrationProjection(overrides) {
       tempKey: `verify-${PROOF_ID}`,
       ports: [],
       childProcessPolicy: "VERIFIER_RUNTIME_PROBE",
-      nativeAddonPolicy: "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
+      nativeAddonPolicy: "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     },
@@ -1510,7 +1364,7 @@ async function registrationProjection(overrides) {
       tempKey: `test-${PROOF_ID}`,
       ports: [],
       childProcessPolicy: "NODE_TEST_HARNESS",
-      nativeAddonPolicy: "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
+      nativeAddonPolicy: "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     },
@@ -1519,7 +1373,7 @@ async function registrationProjection(overrides) {
     fail("REGISTRATION_DRIFT", "The exact shared-state proof-pair authority drifted.");
   }
   return deepFreeze({
-    appRuntimeScript: appPackage.scripts["test:runtime-fault-injection"],
+    appRuntimeScript: appPackage.scripts["test:runtime-transition-races"],
     rootScripts: { ...ROOT_SCRIPT_COMMANDS },
     ciTuple: tuple,
     workloadProofUnit: proofUnits[0],
@@ -1527,13 +1381,44 @@ async function registrationProjection(overrides) {
   });
 }
 
-async function publicBoundaryProjection(overrides) {
-  const indexBytes = await workspaceBytes(APP_INDEX, overrides);
+async function publicBoundaryAndDistributionProjection(overrides) {
+  const [packageBytes, indexBytes, distIndexBytes, distTypesBytes] = await Promise.all([
+    workspaceBytes(APP_PACKAGE, overrides),
+    workspaceBytes(APP_INDEX, overrides),
+    safeReadAbsolute(path.join(ROOT, DIST_INDEX)),
+    safeReadAbsolute(path.join(ROOT, DIST_TYPES)),
+  ]);
+  const packageManifest = parseJsonBytes(packageBytes, APP_PACKAGE, "PUBLIC_EXPORT_DRIFT");
+  const publicPackageShape = {
+    name: packageManifest.name,
+    version: packageManifest.version,
+    private: packageManifest.private,
+    type: packageManifest.type,
+    sideEffects: packageManifest.sideEffects,
+    main: packageManifest.main,
+    types: packageManifest.types,
+    exports: packageManifest.exports,
+    files: packageManifest.files,
+  };
+  const expectedPublicPackageShape = {
+    name: "@desen/control-plane-api",
+    version: "0.0.0",
+    private: true,
+    type: "module",
+    sideEffects: false,
+    main: "./dist/index.js",
+    types: "./dist/index.d.ts",
+    exports: { ".": { types: "./dist/index.d.ts", import: "./dist/index.js" } },
+    files: ["dist", "README.md"],
+  };
+  if (JSON.stringify(publicPackageShape) !== JSON.stringify(expectedPublicPackageShape)) {
+    fail("PUBLIC_EXPORT_DRIFT", "The exact package public-entry boundary drifted.");
+  }
   const exports = publicExportInventory(fatalText(indexBytes, APP_INDEX));
   let publicModuleKeys;
   try {
     const module = await import(
-      `${pathToFileURL(path.join(ROOT, DIST_INDEX)).href}?m07-t09-proof=1`
+      `${pathToFileURL(path.join(ROOT, DIST_INDEX)).href}?m07-t10-proof=${sha256(distIndexBytes)}`
     );
     publicModuleKeys = Object.keys(module).sort(compareText);
   } catch {
@@ -1542,18 +1427,41 @@ async function publicBoundaryProjection(overrides) {
   if (JSON.stringify(publicModuleKeys) !== JSON.stringify(EXPECTED_RUNTIME_PUBLIC_MODULE_KEYS)) {
     fail("PUBLIC_EXPORT_DRIFT", "The exact built runtime public-module surface drifted.");
   }
+  const [distIndexAfter, distTypesAfter] = await Promise.all([
+    safeReadAbsolute(path.join(ROOT, DIST_INDEX)),
+    safeReadAbsolute(path.join(ROOT, DIST_TYPES)),
+  ]);
+  assertSameAuthorityBytes(
+    distIndexBytes,
+    distIndexAfter,
+    DIST_INDEX,
+    "PUBLIC_EXPORT_DRIFT",
+    "runtime-import",
+  );
+  assertSameAuthorityBytes(
+    distTypesBytes,
+    distTypesAfter,
+    DIST_TYPES,
+    "PUBLIC_EXPORT_DRIFT",
+    "runtime-import",
+  );
   return deepFreeze({
-    exports,
-    runtimeModuleKeys: publicModuleKeys,
-    noFaultHookExported: !exports.entries.some(({ exported }) => /fault|hook/iu.test(exported)),
+    publicBoundary: {
+      packageShape: copyInertJson(publicPackageShape, "publicPackageShape"),
+      exports,
+      runtimeModuleKeys: publicModuleKeys,
+      noRaceOrSqliteSurfaceAdded: !exports.entries.some(({ exported }) =>
+        /race|sqlite|repository|journal|profile/iu.test(exported),
+      ),
+    },
+    distribution: [
+      { path: DIST_INDEX, bytes: distIndexBytes.byteLength, sha256: sha256(distIndexBytes) },
+      { path: DIST_TYPES, bytes: distTypesBytes.byteLength, sha256: sha256(distTypesBytes) },
+    ].sort((left, right) => compareText(left.path, right.path)),
   });
 }
 
-async function distributionProjection() {
-  return fileReceipts([DIST_INDEX, DIST_TYPES], Object.freeze({}));
-}
-
-export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
+export async function buildControlPlaneRuntimeTransitionRacesEvidence(options) {
   const captured = exactOwnDataOptions(
     options,
     new Set(["prerequisiteBytes", "runtimeSuiteReceipt", "trackedFileBytes"]),
@@ -1561,80 +1469,92 @@ export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
   );
   const prerequisiteBytes = captureByteOverrides(
     captured.prerequisiteBytes,
-    CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
+    CONTROL_PLANE_RUNTIME_TRANSITION_RACES_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
     "prerequisiteBytes",
   );
   const trackedFileBytes = captureByteOverrides(
     captured.trackedFileBytes,
-    TRACKED_TASK_FILES,
+    TRACKED_FILE_OVERRIDE_PATHS,
     "trackedFileBytes",
   );
   const runtimeSuiteReceipt = expectedSuiteReceipt(
     captured.runtimeSuiteReceipt === undefined
-      ? await runControlPlaneRuntimeFaultInjectionSuite()
+      ? await runControlPlaneRuntimeTransitionRacesSuite()
       : captured.runtimeSuiteReceipt,
   );
-  const [
-    prerequisites,
-    trackedFiles,
-    distribution,
-    publicBoundary,
-    registrations,
-    tests,
-    traceRows,
-  ] = await Promise.all([
-    prerequisiteReceipts(prerequisiteBytes),
-    trackedFileReceipts(trackedFileBytes),
-    distributionProjection(),
-    publicBoundaryProjection(trackedFileBytes),
-    registrationProjection(trackedFileBytes),
-    testProjection(trackedFileBytes),
-    traceProjection(trackedFileBytes),
-  ]);
+  const [prerequisites, trackedFiles, boundaryAndDistribution, registrations, tests, traceRows] =
+    await Promise.all([
+      prerequisiteReceipts(prerequisiteBytes),
+      fileReceipts(TRACKED_TASK_FILES, trackedFileBytes),
+      publicBoundaryAndDistributionProjection(trackedFileBytes),
+      registrationProjection(trackedFileBytes),
+      testProjection(trackedFileBytes),
+      traceProjection(trackedFileBytes),
+    ]);
+  const { distribution, publicBoundary } = boundaryAndDistribution;
 
   const artifact = deepFreeze({
     schemaVersion: 1,
     proofId: PROOF_ID,
-    profile: "desen.control-plane.runtime-fault-injection-proof.v1",
-    task: "M07-T09",
+    profile: "desen.control-plane.runtime-transition-races-proof.v1",
+    task: "M07-T10",
     result: "PASS",
     summary:
-      "The Web control plane executes a closed 19-boundary fault matrix across channel discovery, immutable fetch, integrity, package resolution, reference preflight, staging, durable commit, and restart recovery; every rejected precommit candidate leaves the authenticated A record active, while an indeterminate postcommit outcome publishes no candidate until complete recovery authenticates the durable winner.",
+      "The Web control plane proves a closed A-to-invalid-B-to-valid-C matrix, deterministic same- and different-candidate CAS races, both recovery/activation interleavings, exact restart reconstruction, and full SQLite profile reauthentication at every authority-bearing transaction boundary without adding a public race or persistence API.",
     prerequisites,
     claims: {
-      boundaryMatrix: {
+      transitionMatrix: {
         closed: true,
         duplicateFree: true,
-        caseCount: EXPECTED_FAULT_CASE_IDS.length,
-        caseIds: EXPECTED_FAULT_CASE_IDS,
+        caseCount: EXPECTED_TRANSITION_CASE_IDS.length,
+        caseIds: EXPECTED_TRANSITION_CASE_IDS,
         executableTestCount: runtimeSuiteReceipt.tests.length,
-        stages: [
-          "channel-discovery",
-          "immutable-fetch",
-          "integrity",
+        invalidCandidateStages: [
+          "bundle-protocol",
+          "bundle-revision",
+          "source-digest",
           "package-resolution",
-          "reference-preflight",
-          "runtime-staging",
-          "durable-commit",
-          "restart-recovery",
+          "package-digest",
+          "surface-capability-references",
+          "activation-limits",
+          "execution-contracts",
         ],
       },
-      failureInvariant: {
-        rejectedPrecommitCandidateNeverActive: true,
-        authenticatedBaselineRemainsCurrent: true,
-        durableBaselineRemainsUnchanged: true,
-        definiteCommitFailureRollsBack: true,
-        indeterminateCommitPublishesNoAuthority: true,
-        indeterminateCommitRequiresCompleteWinnerRecovery: true,
-        failedTwoLineageRecoveryPublishesNeitherRole: true,
-        finalDurableObservationWins: true,
+      orderedSequenceInvariant: {
+        validABecomesDurableAuthority: true,
+        invalidBNeverBecomesMemoryAuthority: true,
+        invalidBNeverChangesDurableAuthority: true,
+        invalidBDoesNotPoisonController: true,
+        validCBecomesActiveWithPreviousGoodA: true,
+        restartPublishesOnlyExactDurableCOverA: true,
+      },
+      concurrencyInvariant: {
+        sameCandidateHasOneDurableWinner: true,
+        differentCandidatesHaveOneDurableWinner: true,
+        loserReturnsExactCurrentRecord: true,
+        generationFencePreventsStaleCommit: true,
+        losingStagingAuthorityIsConsumed: true,
+        retryRequiresFreshStagingAuthority: true,
+        recoveryBeforeActivationCannotKeepStaleA: true,
+        activationBeforeRecoveryCannotPublishStaleA: true,
+        finalDurableWinnerIsRestartAuthority: true,
+      },
+      storageProfileDecision: {
+        databaseJournalMode: "WAL",
+        externalLiveTransitionObservedPolicy: "LOCKED_OR_REJECTED",
+        completeProfileReauthenticatedInsideReadTransaction: true,
+        completeProfileReauthenticatedInsideWriterTransactionBeforeDml: true,
+        completeProfileReauthenticatedAfterCommitBeforePublication: true,
+        profileDriftFailsClosed: true,
+        profileDriftIsNeverSilentlyRepaired: true,
+        implementation: tests.profileGuards,
       },
       publicBoundary,
       registrations,
       traceRows,
       coverageTruth: {
         normativeN004: "TESTED",
-        normativeN038: "PLANNED",
+        normativeN038: "TESTED",
         normativeN041: "PLANNED",
         proofMatrixP12: "NOT_PROVEN",
         gateG07: "NOT_STARTED",
@@ -1645,22 +1565,22 @@ export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
     trackedFiles,
     distribution,
     nonclaims: [
-      "M07-T10 still owns the complete A to invalid B to valid C sequence, same- and different-candidate races, concurrent activation, explicit journal-mode decision, and restart race matrix.",
       "M07-T11 still owns mutable-channel consumption and notification by the separately built reference host.",
-      "P-12 remains NOT_PROVEN until M07-T10, M07-T11, and M10-T07 close product-level invalid-publication recovery.",
-      "N-038 and N-041 remain PLANNED; this bounded matrix does not claim every later invalid-input sequence or the final measured whole-system limit profile.",
-      "G07 remains NOT_STARTED until every M07 task and the I07-04 historical-reader cleanup complete.",
-      "No public fault hook, transaction callback, repository, SQLite handle, package loader, or alternate activation API was added.",
+      "P-12 remains NOT_PROVEN until M07-T11 and M10-T07 close separately built host and product-level restart behavior.",
+      "N-041 remains PLANNED until the final measured whole-system finite limit profile is complete.",
+      "G07 remains NOT_STARTED until M07-T11 and the I07-04 historical-reader cleanup complete.",
+      "This task does not treat a mutable channel as activation authority and does not prove reference-host channel consumption.",
+      "No public race hook, transaction callback, repository, SQLite handle, profile setter, or alternate activation API was added.",
       "The application-owned local root remains trusted; this proof makes no tamper-proof, hostile-administrator, or independently anchored anti-rollback claim.",
-      "SQLite is the first Web persistence adapter only; future Android and iOS repositories must preserve the same observable atomicity and recovery invariants.",
+      "SQLite is the first Web persistence adapter only; future Android and iOS repositories must preserve the same observable atomicity, fencing, and recovery invariants.",
     ],
     reproduction: [
       "pnpm --filter @desen/control-plane-api... build",
       "pnpm --filter @desen/control-plane-api typecheck",
-      "pnpm --filter @desen/control-plane-api test:runtime-fault-injection",
-      "node scripts/generate-control-plane-runtime-fault-injection-proof.mjs",
-      "node scripts/verify-control-plane-runtime-fault-injection.mjs",
-      "node --test tests/control-plane-runtime-fault-injection.test.mjs",
+      "pnpm --filter @desen/control-plane-api test:runtime-transition-races",
+      "node scripts/generate-control-plane-runtime-transition-races-proof.mjs",
+      "node scripts/verify-control-plane-runtime-transition-races.mjs",
+      "node --test tests/control-plane-runtime-transition-races.test.mjs",
     ],
   });
   const artifactText = await format(JSON.stringify(artifact), { parser: "json", printWidth: 100 });
@@ -1704,7 +1624,7 @@ function proofDocumentHasExactPin(document, artifactSha256) {
   );
 }
 
-export async function verifyControlPlaneRuntimeFaultInjectionEvidence(options) {
+export async function verifyControlPlaneRuntimeTransitionRacesEvidence(options) {
   const captured = exactOwnDataOptions(
     options,
     new Set([
@@ -1718,7 +1638,7 @@ export async function verifyControlPlaneRuntimeFaultInjectionEvidence(options) {
     ]),
     "verify options",
   );
-  const built = await buildControlPlaneRuntimeFaultInjectionEvidence({
+  const built = await buildControlPlaneRuntimeTransitionRacesEvidence({
     ...(captured.prerequisiteBytes === undefined
       ? {}
       : { prerequisiteBytes: captured.prerequisiteBytes }),
@@ -1734,11 +1654,11 @@ export async function verifyControlPlaneRuntimeFaultInjectionEvidence(options) {
   const artifactBytes =
     captured.artifactBytes === undefined
       ? await safeReadAbsolute(
-          artifactPath ?? DEFAULT_CONTROL_PLANE_RUNTIME_FAULT_INJECTION_ARTIFACT_PATH,
+          artifactPath ?? DEFAULT_CONTROL_PLANE_RUNTIME_TRANSITION_RACES_ARTIFACT_PATH,
         )
       : captureBytes(captured.artifactBytes, "artifactBytes");
   if (!Buffer.from(artifactBytes).equals(Buffer.from(built.artifactBytes))) {
-    fail("ARTIFACT_DRIFT", "The committed M07-T09 fault-injection artifact is not reproducible.");
+    fail("ARTIFACT_DRIFT", "The committed M07-T10 transition-race artifact is not reproducible.");
   }
   const proofDocument =
     captured.proofDocument === undefined
@@ -1748,13 +1668,13 @@ export async function verifyControlPlaneRuntimeFaultInjectionEvidence(options) {
         )
       : captureProofDocument(captured.proofDocument);
   if (!proofDocumentHasExactPin(proofDocument, built.artifactSha256)) {
-    fail("PROOF_PIN_DRIFT", "The proof document lacks one exact final M07-T09 artifact pin.");
+    fail("PROOF_PIN_DRIFT", "The proof document lacks one exact final M07-T10 artifact pin.");
   }
   return Object.freeze({
-    task: "M07-T09",
+    task: "M07-T10",
     result: "PASS",
     artifactSha256: built.artifactSha256,
-    faultCases: built.artifact.claims.boundaryMatrix.caseCount,
+    transitionCases: built.artifact.claims.transitionMatrix.caseCount,
     packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
     compileTimeNegativeCases: built.artifact.tests.compilerNegativeCases,
     rootMutationCases: built.artifact.tests.rootMutationCases,
@@ -1763,7 +1683,7 @@ export async function verifyControlPlaneRuntimeFaultInjectionEvidence(options) {
   });
 }
 
-export async function writeControlPlaneRuntimeFaultInjectionEvidence(options) {
+export async function writeControlPlaneRuntimeTransitionRacesEvidence(options) {
   const captured = exactOwnDataOptions(
     options,
     new Set(["artifactPath", "beforeAtomicRename", "runtimeSuiteReceipt"]),
@@ -1771,14 +1691,14 @@ export async function writeControlPlaneRuntimeFaultInjectionEvidence(options) {
   );
   const artifactPath =
     captureOptionalPath(captured.artifactPath, "artifactPath") ??
-    DEFAULT_CONTROL_PLANE_RUNTIME_FAULT_INJECTION_ARTIFACT_PATH;
+    DEFAULT_CONTROL_PLANE_RUNTIME_TRANSITION_RACES_ARTIFACT_PATH;
   if (
     captured.beforeAtomicRename !== undefined &&
     typeof captured.beforeAtomicRename !== "function"
   ) {
     fail("INVALID_OPTIONS", "beforeAtomicRename must be a function when supplied.");
   }
-  const built = await buildControlPlaneRuntimeFaultInjectionEvidence({
+  const built = await buildControlPlaneRuntimeTransitionRacesEvidence({
     ...(captured.runtimeSuiteReceipt === undefined
       ? {}
       : { runtimeSuiteReceipt: captured.runtimeSuiteReceipt }),
@@ -1790,7 +1710,7 @@ export async function writeControlPlaneRuntimeFaultInjectionEvidence(options) {
       beforeAtomicRename: captured.beforeAtomicRename,
     });
   } catch {
-    fail("ARTIFACT_WRITE_FAILED", "The M07-T09 artifact could not be committed atomically.");
+    fail("ARTIFACT_WRITE_FAILED", "The M07-T10 artifact could not be committed atomically.");
   }
   return Object.freeze({ artifactPath, artifactSha256: built.artifactSha256 });
 }

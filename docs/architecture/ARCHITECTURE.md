@@ -982,10 +982,11 @@ write.
 The Web profile implements this contract in a dedicated app-internal
 `runtime-activation.sqlite3` database with one constrained `STRICT` row, WAL,
 `synchronous=FULL`, and an immediate compare-and-swap transaction. The exact schema and version
-are reauthenticated under the writer lock before DML, and a certain success is checked against the
-post-commit row before authority publication. The persistent contract is not SQLite-specific:
-future Android and iOS hosts may use native storage that preserves the same atomic record and
-transition rules.
+plus the complete connection profile are reauthenticated inside reads and under the writer lock
+before record access or DML. A certain success is checked against the profile, schema, and exact
+post-commit row before authority publication. Drift fails closed and is never silently repaired.
+The persistent contract is not SQLite-specific: future Android and iOS hosts may use native
+storage that preserves the same atomic record and transition rules.
 
 Only a successful durable commit is synchronously installed into the controller's single current
 in-memory slot. An uncertain commit outcome exposes no active candidate and requires recovery.
@@ -1011,9 +1012,11 @@ consistent historical or fully replaced valid-looking database cannot be disting
 latest genuine state. The implementation therefore does not claim tamper-proof persistence or
 resistance to a hostile local administrator.
 
-M07-T09 and M07-T10 retain the complete boundary-fault, A → invalid B → valid C,
-concurrent-writer, restart, and storage-profile race matrices, including the explicit
-`journal_mode` decision, while M07-T11 retains channel consumption and host notification.
+M07-T09 implements the closed discovery-through-recovery boundary-fault matrix. M07-T10 implements
+eight complete A → invalid B → valid C sequences, deterministic same- and different-candidate
+writer races, both recovery/activation orderings, consumed-loser freshness, exact winner restart,
+and the explicit fail-closed `journal_mode` decision. M07-T11 retains channel consumption and host
+notification.
 
 ## Mobile expansion
 

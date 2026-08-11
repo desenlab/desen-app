@@ -20,6 +20,51 @@ import {
   writePublisherExecutionPreflightEvidence,
 } from "../scripts/lib/publisher-execution-preflight-proof.mjs";
 
+const M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `
+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
+`.replaceAll(/\s/gu, "");
+
+const M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH = `
+G/AVIJwHxs3yFiH0RtQogq2PkND8T53uXqZ3f3LgBwDGTCWUBa0Cis6SW84VkJanK/2Manxv4SvPnKMcyBVMzH37NRFNdBopnMd2
+Mzv739s7RzSJ6jfUIh6KZ7VUSJEQSfnTiIRYeX/Y//s0CUm8tvtqZY0B85uNyOoE56t7QTCWLfypM4bwdbIolI21qEOsnfYBwo4r
+YV7f2cx0DS5/a2Oaxvmi2QAV+cyMxhEnlUoFlesWC3CbeNvyzfkfmAdTqkkGBsrpErg1gkFJj+ZbBTL4Qu2kwuqdswK+lZKAnrrg
+lOhgwe+tdWCeOsoE6msnFKpolMYWiIBRB22byL/VF5VbnNDdeuyoJuvto6Cp0evcmfsooU42Rq2IHpXrpq+buaQK2rHnMgC1vog0
+YW6MplexP0eWemGMYyEt6AcPNEMh+VAnx3S/gAYi8ArW8bIsnTO6bGTcCHv8atCr9sijfuSeIp7z/USwwBHntwU9XQKkWbMqfiEE
+gfEb6g0S3od6o0H2+1YW3tYH5BK6gymqVPwCkH1HHUZovXTA/70+F58X79k6+lsUvn96duW2Vqob8E57qBxohKb6+ZrBGHBaavRt
+FstbPZtWWdYp4gynIgchLhh5lY9Av6tGeeE46DTmroKZ/IxgiSRW5z74YY+xQLN51QEwRiUioJk8mtPGMMWlp0TiDGhXJkrdO61b
+hVLUx2417zGfTg8zYvojt6sF1Z2Zhpuwe/HaDCONKI6RrdtLJM6d2eTtT7zE5f0gLhqbvq7G6nwEyqxwfJa85UYJIqj1Kr97/lNU
+eZeDzbNv0hqZkS+oHFA28Za3zmmFHX0unUXw3GEfujXqqqoToGuu5FxZMnw2C76kKvmgcIBjbYWuFFEEX0aH7hJ4/RnseI6cAnUx
+ap1wcljAgPESFv8UpCVMZ/hNYOBYXBAgzy7ECq2qKVJRzkJRR5KaQfW58kZfsUwsGRifsoF3lkq1zKM1QsYxVM7xpnqQgKYTZPHg
+c2JEYpXOfFWP0z9yHAsNa56aAhla1AWbxfGYPlDdkD7KJl6+Cr0aKmrgCq8R5J0/gblK5xgLpYN2zHMm0jGXlnmaQvaNNFw0fEV9
+/QNN+aad+FvjgaL09IPiGxkcqw7jpjR9M4ofaCTBpkBHGcMUT+4bCQ3wt8FRkHOblai0Od6CyjQCc+FoZGkIId1jYw1MAQF8OGoL
+kNn1PfV9ZUkmXvl8VieI8hma5ySRsKVarMihWWl5/g5rQdVsdHLVjaB84qNUiRwlT3yjgEz4K+Wqv59xohXOZ2qmhBLkw0lJREGV
+A9rTLqFJ151H6yLl6AVMe7wJA8vg/PrnuCwPS2t0aUMZjUHoDEXMeUyNlFAZPDW8oS2tbu2xyLOz4PvnqIoC8ghj4GgG+ajV0j+G
+dhoDRX/cVNLqHGthcGqSRY6dEhjLv9IEQPW4qc+hFGeJcFdYoOPxI5XkpJAzb81lOfXSm/Zua+xoEabpW+PyLsdX52iUusaTIm3R
+Awk9HAOo9AZUJxWNc59pDA==
+`.replaceAll(/\s/gu, "");
+
 const M07_T09_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `
 G/UiQJwFOZnXeEmf810xndTZY4doOORP95ifUT+ntwtQgIcTl6WlYK9BWlYU+o9teudyemXK4GP1rJkfXUNJt1+xpGIg6qbs5dTy
 5OryZAdmWDJGkL1aK8OkCMpH+KijfxkgZX97p6erbvfunlmFQCU1vPuEKkDgSUe5SBvLwj8IF+Xi+2P++zcdvk6rEENyCUOc//TL
@@ -193,22 +238,40 @@ test("two independent evidence builds are byte-identical and retain stages 8, 9,
       url: new URL("../scripts/lib/reference-host-web-source-audit-proof.mjs", import.meta.url),
       historicalBytes: 228_873,
       historicalSha256: "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1",
-      predecessorBytes: 263_857,
-      predecessorSha256: "bb8f2dde9a4f63a848003cf7be7b69c1c9681992d56c9a254653dee8cbd7bbe3",
-      predecessorPatch: M07_T09_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
-      currentBytes: 266_698,
-      currentSha256: "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
+      predecessors: [
+        {
+          bytes: 266_698,
+          sha256: "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
+          patch: M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
+        },
+        {
+          bytes: 263_857,
+          sha256: "bb8f2dde9a4f63a848003cf7be7b69c1c9681992d56c9a254653dee8cbd7bbe3",
+          patch: M07_T09_SOURCE_AUDIT_RECONSTRUCTION_PATCH,
+        },
+      ],
+      currentBytes: 269_572,
+      currentSha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",
     },
     {
       path: "tests/reference-host-web-source-audit.test.mjs",
       url: new URL("./reference-host-web-source-audit.test.mjs", import.meta.url),
       historicalBytes: 70_344,
       historicalSha256: "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f",
-      predecessorBytes: 89_057,
-      predecessorSha256: "9442048b8b96f6aec06136b489dc08e01f159c46609eeb225aa2f949c98e3521",
-      predecessorPatch: M07_T09_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,
-      currentBytes: 90_209,
-      currentSha256: "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
+      predecessors: [
+        {
+          bytes: 90_209,
+          sha256: "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
+          patch: M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,
+        },
+        {
+          bytes: 89_057,
+          sha256: "9442048b8b96f6aec06136b489dc08e01f159c46609eeb225aa2f949c98e3521",
+          patch: M07_T09_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,
+        },
+      ],
+      currentBytes: 91_297,
+      currentSha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",
     },
   ];
   for (const [index, compatibilitySource] of compatibilitySources.entries()) {
@@ -218,15 +281,18 @@ test("two independent evidence builds are byte-identical and retain stages 8, 9,
       createHash("sha256").update(currentBytes).digest("hex"),
       compatibilitySource.currentSha256,
     );
-    const predecessorBytes = applySourceAuditReconstructionPatch(
-      currentBytes,
-      compatibilitySource.predecessorPatch,
-    );
-    assert.equal(predecessorBytes.byteLength, compatibilitySource.predecessorBytes);
-    assert.equal(
-      createHash("sha256").update(predecessorBytes).digest("hex"),
-      compatibilitySource.predecessorSha256,
-    );
+    const predecessorByteGenerations = [];
+    let predecessorInput = currentBytes;
+    for (const predecessor of compatibilitySource.predecessors) {
+      const predecessorBytes = applySourceAuditReconstructionPatch(
+        predecessorInput,
+        predecessor.patch,
+      );
+      assert.equal(predecessorBytes.byteLength, predecessor.bytes);
+      assert.equal(createHash("sha256").update(predecessorBytes).digest("hex"), predecessor.sha256);
+      predecessorByteGenerations.push(predecessorBytes);
+      predecessorInput = predecessorBytes;
+    }
     const approved = await buildPublisherExecutionPreflightEvidence({
       compatibilitySourceBytes: {
         [compatibilitySource.path]: currentBytes,
@@ -265,14 +331,16 @@ test("two independent evidence builds are byte-identical and retain stages 8, 9,
       }),
       hasCode("PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT"),
     );
-    await assert.rejects(
-      buildPublisherExecutionPreflightEvidence({
-        compatibilitySourceBytes: {
-          [compatibilitySource.path]: predecessorBytes,
-        },
-      }),
-      hasCode("PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT"),
-    );
+    for (const predecessorBytes of predecessorByteGenerations) {
+      await assert.rejects(
+        buildPublisherExecutionPreflightEvidence({
+          compatibilitySourceBytes: {
+            [compatibilitySource.path]: predecessorBytes,
+          },
+        }),
+        hasCode("PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT"),
+      );
+    }
     if (index === 0) {
       await assert.rejects(
         verifyPublisherExecutionPreflightEvidence({

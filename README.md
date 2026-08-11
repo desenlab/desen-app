@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████░░░░░░░░░░░` **83 / 145 tasks complete (57%)**
+**Overall:** `██████████████░░░░░░░░░░░` **84 / 145 tasks complete (58%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,9 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M07:** `█████████░░` **9 / 11 tasks complete (82%)**
+**M07:** `██████████░` **10 / 11 tasks complete (91%)**
 
-**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-04` (observation `0 / 20`) · **Next implementation:** `M07-T10` (`NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-04` (observation `0 / 20`) · **Next implementation:** `M07-T11` (`NOT_STARTED`)
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -157,11 +157,29 @@ administrator resistance, or an external anti-rollback anchor. The
 pinned by the 64,493-byte artifact
 `sha256:9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9`.
 
+**M07-T10 checkpoint:** the activation controller now reauthenticates the complete SQLite
+connection profile—WAL journal mode, `synchronous=FULL`, foreign keys enabled, trusted schema
+disabled, and the exact busy timeout—after acquiring the writer lock and again after commit before
+publication. A profile drift fails closed without silently repairing the database. Fifteen named
+transition cases cover A → invalid B → valid C, same- and different-candidate races, activation and
+recovery orderings, restart, a real journal transition, and deterministic writer-profile drift.
+The evidence passes 16 runtime tests, 9 compiler-negative tests, 12 independent root mutation
+classes, 9 predecessor checks, and 15 ordered trace rows. N-038 is now `TESTED`; N-041 remains
+`PLANNED`, P-12 remains `NOT_PROVEN`, and G07 remains open. The root proof has no native-addon
+authority and proves a real `ERR_DLOPEN_DISABLED` denial; only the verifier receives the narrow
+SQLite authority it needs. The proof binds the single public `.` package export and exact captured
+CI/distribution bytes to digest-checked pre/post live equality, and rejects receipt-only overrides.
+It makes no tamper-proof, anti-rollback, hosted T10, host-channel, or native-conformance claim. The
+[executable runtime-transition proof](docs/proof/CONTROL-PLANE-RUNTIME-TRANSITION-RACES.md) is
+pinned by the 58,059-byte artifact
+`sha256:f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39`.
+
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
-61-proof-pair plan as `REQUIRED + EXHAUSTIVE`; the current working-tree successor contains 146
-workloads and 69 proof pairs after M07-T09 registration: 58 ordinary pairs and 11 exclusive
-barriers. Its retained legacy projection expands to 455 prerequisite segments and 2,769 ordered
-leaf invocations covering 227 distinct leaves. Exact shared-state classes, cancellation behavior,
+61-proof-pair plan as `REQUIRED + EXHAUSTIVE`. The historical M07-T09 successor contained 146
+workloads and 69 proof pairs. The current M07-T10 successor contains 148 workloads and 70 proof
+pairs: 59 ordinary pairs and 11 exclusive barriers. Its retained legacy projection expands to 463
+prerequisite segments and 2,929 ordered leaf invocations covering 230 distinct leaves. Exact
+shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
 minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
@@ -337,20 +355,31 @@ not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridg
 removal by G07.
 
 Reviewed checkpoint sequence 22 links that exact sequence 21 head
-`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to its then-current head
 `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. It preserves all 18
 frozen artifacts and all 36 reader identities while resealing only workflow-dependent reader
 indexes `[8, 10, 11, 12, 14]`; every frozen artifact remains byte-identical. This append records
 the exact I07-03 CI-workflow receipt propagation without changing any proof claim.
 
+Reviewed checkpoint sequence 23 links that exact sequence 22 head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` to current head
+`3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d`. It preserves sequences
+1–22 and every predecessor artifact byte, appends the exact 58,059-byte M07-T10 artifact, and
+authenticates 19 frozen artifacts plus 38 live readers. The M07-T10 proof/root readers are the two
+new reader identities. Historical reader bridges needed by the append are registered as
+`DEBT-I07-018`, owned by I07-04 for removal no later than G07. This is reviewed local-reader
+evidence and makes no hosted M07-T10 claim.
+
 The exact `REQUIRED + EXHAUSTIVE` runner remains the sole pass/fail authority. I07-03 adds a
 separate pull-request-only `SHADOW + AFFECTED` observation job with complete exact tracked-path
 ownership. Unknown, ambiguous, untrusted, policy, dependency, frozen-input, or unsupported changes
 expand to `EXHAUSTIVE`; a strict subset still executes every selected workload from fresh inputs
-and cannot reuse cached proof success. The selector is pinned at
+and cannot reuse cached proof success. The frozen I07-03 baseline selector remains pinned at
 `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across the 20 sources in
-its comparison authority. Promotion requires zero false negatives, mutation coverage for every selector
-category, and at least 20 consecutive eligible same-revision hosted strict-subset comparisons.
+its historical comparison authority; the current M07-T10 successor selector digest is
+`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`. Promotion requires zero
+false negatives, mutation coverage for every selector category, and at least 20 consecutive
+eligible same-revision hosted strict-subset comparisons.
 The hosted bootstrap succeeded, but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE`
 with `UNSUPPORTED_CHANGE_KIND`; therefore it produced no eligible strict-subset observation and
 the count remains `0 / 20`. The authoritative hosted Quality gate passed. Locally, the focused
@@ -363,8 +392,9 @@ authenticate the exact hosted run, job, revision, and receipt provenance. `main`
 manual-audit execution stays exhaustive. The
 [I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json) records the exact run
 and job identifiers. Shadow-only cleanup is open as `DEBT-I07-017`, owned by I07-04 for removal by
-G07; legacy retirement remains owned by I07-05. Implementation progress is unchanged at 83/145,
-and M07-T10 remains the next implementation task.
+G07; `DEBT-I07-018` assigns the new historical-reader bridges to the same I07-04/G07 cleanup, and
+legacy retirement remains owned by I07-05. Implementation progress is now 84/145, and M07-T11 is
+the next implementation task.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

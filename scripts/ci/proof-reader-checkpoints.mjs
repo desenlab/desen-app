@@ -60,9 +60,10 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "8ba332b059e508dcb93aec4211edf3dcb10fb497d3a743b61ff7ee7e08c8a28e",
   "ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939",
   "aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e",
+  "3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
-  6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18,
+  6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -280,6 +281,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
     "tests/control-plane-runtime-fault-injection.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M07-T10",
+    {
+      path: "docs/proof/artifacts/control-plane-api-0.1.0-runtime-transition-races.json",
+      bytes: 58_059,
+      sha256: "f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39",
+    },
+    "scripts/lib/control-plane-runtime-transition-races-proof.mjs",
+    "tests/control-plane-runtime-transition-races.test.mjs",
   ),
 ]);
 

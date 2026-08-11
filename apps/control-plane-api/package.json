@@ -32,6 +32,7 @@
     "test:runtime-activation": "vitest run test/runtime-activation.test.ts",
     "test:runtime-recovery": "vitest run test/runtime-recovery.test.ts",
     "test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts",
+    "test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts",
     "test:bundle-verification": "vitest run test/bundle-verification.test.ts test/bundle-verification-guard.test.ts",
     "test:bundle-store": "vitest run test/bundle-store.test.ts",
     "verify:bundle-verification-guards": "node scripts/verify-bundle-verification-guards.mjs",

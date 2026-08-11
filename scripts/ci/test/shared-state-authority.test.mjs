@@ -95,30 +95,30 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 146 steps across the seven reviewed execution classes", () => {
+test("owns exactly 148 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 146);
-  assert.equal(new Set(ALL_STEP_IDS).size, 146);
+  assert.equal(ALL_STEP_IDS.length, 148);
+  assert.equal(new Set(ALL_STEP_IDS).size, 148);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 1,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 69,
-    PROOF_OS_TEMP_ISOLATED: 58,
+    PROOF_OS_TEMP_ISOLATED: 60,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
 });
 
 test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 69);
-  assert.equal(new Set(PROOF_IDS).size, 69);
+  assert.equal(PROOF_IDS.length, 70);
+  assert.equal(new Set(PROOF_IDS).size, 70);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 58);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 59);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -133,7 +133,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "runtime-core-state-navigation-actions",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 58);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 59);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -294,6 +294,38 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       barrier: false,
     },
   });
+  assert.deepEqual(classifyProofPairState("control-plane-runtime-transition-races"), {
+    proofId: "control-plane-runtime-transition-races",
+    barrier: false,
+    verifier: {
+      schemaVersion: 2,
+      stepId: "verify-control-plane-runtime-transition-races",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "verify-control-plane-runtime-transition-races",
+      ports: [],
+      childProcessPolicy: "VERIFIER_RUNTIME_PROBE",
+      nativeAddonPolicy: "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
+    rootTest: {
+      schemaVersion: 2,
+      stepId: "test-control-plane-runtime-transition-races",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "test-control-plane-runtime-transition-races",
+      ports: [],
+      childProcessPolicy: "NODE_TEST_HARNESS",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
+  });
   assert.deepEqual(CHILD_PROCESS_VERIFIER_PROOF_IDS, [
     "publisher-catalog-pinning",
     "publisher-bundle-publication",
@@ -305,6 +337,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "control-plane-runtime-activation",
     "control-plane-runtime-recovery",
     "control-plane-runtime-fault-injection",
+    "control-plane-runtime-transition-races",
   ]);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
@@ -326,7 +359,9 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
               ? "CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE"
               : proofId === "control-plane-runtime-fault-injection"
                 ? "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE"
-                : "NONE",
+                : proofId === "control-plane-runtime-transition-races"
+                  ? "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE"
+                  : "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
@@ -337,6 +372,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "control-plane-runtime-activation",
     "control-plane-runtime-recovery",
     "control-plane-runtime-fault-injection",
+    "control-plane-runtime-transition-races",
   ]);
   assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, [
     "test-publisher-invalid-source-matrix",
@@ -390,6 +426,15 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
   );
   assert.equal(
+    classifyWorkloadStateMetadata("verify-control-plane-runtime-transition-races")
+      .nativeAddonPolicy,
+    "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-control-plane-runtime-transition-races").nativeAddonPolicy,
+    "NONE",
+  );
+  assert.equal(
     classifyWorkloadStateMetadata("verify-publisher-invalid-source-matrix").nativeAddonPolicy,
     "NONE",
   );
@@ -400,7 +445,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    69,
+    70,
   );
 });
 
@@ -649,7 +694,7 @@ test(
   },
 );
 
-test("only the eleven exact reviewed steps receive native-addon authority", async (context) => {
+test("only the twelve exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({
@@ -707,6 +752,16 @@ test("only the eleven exact reviewed steps receive native-addon authority", asyn
     workload: "test-control-plane-runtime-fault-injection",
     baseEnvironment: {},
   });
+  const transitionRacesVerifier = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-control-plane-runtime-transition-races",
+    baseEnvironment: {},
+  });
+  const transitionRacesRoot = await createProofStepIsolationContext({
+    workspaceRoot: REPOSITORY_ROOT,
+    workload: "test-control-plane-runtime-transition-races",
+    baseEnvironment: {},
+  });
   context.after(async () => {
     await verifier.dispose();
     await rootTest.dispose();
@@ -719,6 +774,8 @@ test("only the eleven exact reviewed steps receive native-addon authority", asyn
     await recoveryRoot.dispose();
     await faultInjectionVerifier.dispose();
     await faultInjectionRoot.dispose();
+    await transitionRacesVerifier.dispose();
+    await transitionRacesRoot.dispose();
   });
 
   assert.equal(verifier.metadata.executionClass, "PROOF_READ_ONLY");
@@ -733,7 +790,20 @@ test("only the eleven exact reviewed steps receive native-addon authority", asyn
   assert.match(recoveryRoot.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.match(faultInjectionVerifier.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.match(faultInjectionRoot.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.match(transitionRacesVerifier.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.doesNotMatch(transitionRacesRoot.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.doesNotMatch(ordinary.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+
+  const sqliteModulePath = path.join(
+    REPOSITORY_ROOT,
+    "apps/control-plane-api/node_modules/better-sqlite3",
+  );
+  const deniedRootAddon = await runNode(
+    `const Database = require(${JSON.stringify(sqliteModulePath)}); new Database(":memory:");`,
+    transitionRacesRoot.env,
+  );
+  assert.notEqual(deniedRootAddon.code, 0);
+  assert.match(deniedRootAddon.stderr, /Cannot load native addon|ERR_DLOPEN_DISABLED/u);
 
   const widened = mutableMetadata("verify-protocol-snapshot");
   widened.nativeAddonPolicy = "REFERENCE_HOST_WEB_SOURCE_AUDIT";
@@ -800,7 +870,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 128,
+    NONE: 130,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,
