@@ -318,7 +318,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[22],
-    "1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e",
+    "3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -1773,8 +1773,8 @@ test("sequence twenty-three preserves its reviewed prefix, reseals exact compati
   const sequenceTwentyThree = baselineManifest.checkpoints[22];
   const identity = ({ task, role, path: readerPath }) => ({ task, role, path: readerPath });
   const changedReaderIndexes = [
-    0, 1, 7, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-    37,
+    0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32,
+    33, 34, 35, 36, 37,
   ];
 
   assert.equal(sequenceTwentyThree.sequence, 23);
@@ -1832,29 +1832,54 @@ test("sequence twenty-three preserves its reviewed prefix, reseals exact compati
         sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",
       },
       {
+        index: 2,
+        bytes: 60289,
+        sha256: "828aa1407a6dd790c0b0568d2a4a5c966cb1a43aa5d7aba16ae77c29819776b1",
+      },
+      {
+        index: 3,
+        bytes: 56537,
+        sha256: "d8f9ffd0798bf3196b5030eab5c389273113359b398cd01597b8d1c8d4374d47",
+      },
+      {
+        index: 4,
+        bytes: 72643,
+        sha256: "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
+      },
+      {
+        index: 5,
+        bytes: 29586,
+        sha256: "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
+      },
+      {
         index: 7,
         bytes: 38590,
         sha256: "f8644fba6a3ebc17ab09aa8396ee6c20574e7549082cd7f67df4bdc00b349a92",
       },
       {
+        index: 8,
+        bytes: 139396,
+        sha256: "89ff5dc4f35036164dd33f1fcf65220bd086ce02ff04e9068078cbf6713bcb48",
+      },
+      {
         index: 9,
-        bytes: 74558,
-        sha256: "f67f72b1a79462090b7f82b873eb236b465c058bf00968e38804dd0a35961225",
+        bytes: 82563,
+        sha256: "4b1eb8e40281c0e12d94786042e34c85ec81737d07836b2e964fa9dc20eae185",
       },
       {
         index: 10,
-        bytes: 170893,
-        sha256: "6ae7dd5d4b7f3ff80646bdfc440b2ea3859de350fa0c89be406de3562e489d12",
+        bytes: 171863,
+        sha256: "82f66664a5099e61367bc6a006f2bb59eec63eaf96c27dc95d207ae0741576bf",
       },
       {
         index: 11,
-        bytes: 77795,
-        sha256: "78b4f54e6baf43303e8e047fb9cf73a0ff3069c004742d54b74945fad25d2e6b",
+        bytes: 88591,
+        sha256: "09e84895310b254ca201aa5b6e87b87b1eadf602293eaaa7545c92eafd49ac51",
       },
       {
         index: 14,
         bytes: 125378,
-        sha256: "a6aafb24679988fca36ae4d396d456e27b72781cb7a2c5be6e274681901be5c9",
+        sha256: "bd0bd456e39497f5bd2d2fe21cd2e574b76d1fbf5c60bd77924d973633de2e85",
       },
       {
         index: 15,
@@ -1960,7 +1985,7 @@ test("sequence twenty-three preserves its reviewed prefix, reseals exact compati
   }
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceTwentyThree),
-    "1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e",
+    "3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d",
   );
 });
 

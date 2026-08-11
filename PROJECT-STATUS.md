@@ -724,7 +724,7 @@ the exact I07-03 CI-workflow receipt propagation without changing any proof clai
 
 Reviewed checkpoint sequence 23 links that exact sequence 22 head
 `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` to current head
-`1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`. Sequences 1–22 and all
+`3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d`. Sequences 1–22 and all
 predecessor artifact bytes remain unchanged. It appends the exact 58,059-byte M07-T10 artifact and
 authenticates 19 frozen artifacts plus 38 current readers, including the two new T10 proof/root
 readers. `DEBT-I07-018` assigns the required historical reader bridges to I07-04 for removal no
@@ -2552,7 +2552,7 @@ M07-T10 evidence:
   `010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`
 - current reviewed reader checkpoint: sequence 23 links exact sequence 22 head
   `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` to
-  `1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`; sequences 1–22 and all
+  `3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d`; sequences 1–22 and all
   predecessor artifact bytes remain unchanged, the T10 artifact becomes artifact 19, and its two
   proof/root readers yield 38 live readers
 - cleanup ownership: `DEBT-I07-018` remains `OPEN`, owned by I07-04 and due no later than G07

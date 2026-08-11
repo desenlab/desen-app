@@ -221,7 +221,7 @@ oluşturmaz.
 
 İncelenmiş sıra 23, kesin sıra 22 başı
 `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` değerini güncel
-`1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e` başına bağlar. Sıra
+`3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d` başına bağlar. Sıra
 1–22 ile önceki tüm eser baytlarını korur, 58.059 baytlık M07-T10 eserini ekler ve toplam 19
 değişmez eser ile 38 canlı okuyucuyu doğrular. T10 kanıt/kök okuyucuları iki yeni okuyucu
 kimliğidir. Bu ek için gereken tarihsel köprüler `DEBT-I07-018` olarak I07-04'e, en geç G07'de

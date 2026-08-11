@@ -213,7 +213,7 @@ the full gate. A cleanup is complete only when:
     - `currentT09RootTestBytes`
     - `currentT10ProofBytes`
     - `currentT10RootTestBytes`
-    - `approvedCurrentT09`
+    - `approvedCurrentSuccessor`
     - `unreviewedT09ProofBytes`
     - `[successor] accepts an append-only M07 task without rewriting frozen T11 evidence`
   - `scripts/lib/publisher-official-golden-proof.mjs`
@@ -245,7 +245,7 @@ the full gate. A cleanup is complete only when:
   - `node --test tests/publisher-bundle-publication.test.mjs`
   - `node scripts/verify-publisher-official-golden.mjs`
   - `node --test tests/publisher-official-golden.test.mjs`
-  - `rg -n "APPROVED_CURRENT_T(09|10)_SUCCESSOR_(PATHS|RECEIPTS)|APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY|REQUIRED_CURRENT_T09_(PROOF|TEST)_MARKERS|currentT(09|10)SuccessorReceipt|assertCurrentT10SuccessorBytes|authenticateLiveCurrentT(09|10)Successors|authenticateCurrentT(09|10)TrackedInputs|currentT10HistoricalReceipt|assertCurrentT09CompatibilityMarkers|\[authority\] distinguishes semantic coordination drift from frozen surface drift|BUNDLE_PUBLICATION_(PROOF_LIBRARY|ROOT_TEST)|currentT(09|10)(Proof|RootTest)Bytes|approvedCurrentT09|unreviewedT09ProofBytes|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T10 evidence" scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs scripts/lib/publisher-official-golden-proof.mjs tests/publisher-official-golden.test.mjs`
+  - `rg -n "APPROVED_CURRENT_T(09|10)_SUCCESSOR_(PATHS|RECEIPTS)|APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY|REQUIRED_CURRENT_T09_(PROOF|TEST)_MARKERS|currentT(09|10)SuccessorReceipt|assertCurrentT10SuccessorBytes|authenticateLiveCurrentT(09|10)Successors|authenticateCurrentT(09|10)TrackedInputs|currentT10HistoricalReceipt|assertCurrentT09CompatibilityMarkers|\[authority\] distinguishes semantic coordination drift from frozen surface drift|BUNDLE_PUBLICATION_(PROOF_LIBRARY|ROOT_TEST)|currentT(09|10)(Proof|RootTest)Bytes|approvedCurrentSuccessor|unreviewedT09ProofBytes|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T10 evidence" scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs scripts/lib/publisher-official-golden-proof.mjs tests/publisher-official-golden.test.mjs`
     must return no matches after removal.
 - Closure evidence: `PENDING` — record commit, pull request, structured T09/T10 checkpoint receipt
   SHA-256, frozen M06-T11 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
@@ -1274,18 +1274,38 @@ the full gate. A cleanup is complete only when:
     - `M07_T10_CONTROL_PLANE_COORDINATION`
   - `tests/reference-host-web-source-audit.test.mjs`
     - `reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance through T10`
+  - `scripts/lib/publisher-publish-result-proof.mjs`
+    - `task: "M07-T10"`
+  - `tests/publisher-publish-result.test.mjs`
+    - `M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH`
+    - `M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH`
+    - `reconstructM07T09SourceAuditProof`
+    - `reconstructM07T09SourceAuditTest`
+  - `scripts/lib/publisher-execution-preflight-proof.mjs`
+    - `task: "M07-T10"`
+  - `tests/publisher-execution-preflight.test.mjs`
+    - `M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH`
+    - `M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH`
   - `tests/publisher-catalog-pinning.test.mjs`
     - `appendValidRootSuccessor`
     - `pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint`
     - `pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test`
+  - `scripts/lib/publisher-bundle-publication-proof.mjs`
+    - `task: "M07-T10"`
   - `tests/publisher-bundle-publication.test.mjs`
     - `appendValidRootSuccessor`
+    - `M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH`
+    - `M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH`
     - `pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint`
     - `pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test`
   - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
     - `task: "M07-T10"`
   - `tests/publisher-invalid-source-matrix.test.mjs`
-    - `currentM07T10RootTestBytes`
+    - `M07_T10_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH`
+    - `M07_T10_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH`
+    - `currentM07T10BundleProofBytes`
+    - `currentM07T10BundleRootTestBytes`
+    - `priorM07T10RootTestBytes`
     - `currentT10RootTestText`
   - `scripts/lib/control-plane-bundle-store-proof.mjs`
     - `M07_T10_TRACKED_RECEIPT_BRIDGE`
@@ -1430,7 +1450,7 @@ the full gate. A cleanup is complete only when:
   task-time projections, aggregate-tail branches, and poison or mixed-generation mutations until
   the current checkpoint becomes their only live-byte authority.
 - Objective removal trigger: proof-reader checkpoint sequence 23, head
-  `1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`, is the sole
+  `3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d`, is the sole
   current-byte authority for all 38 readers and all 19 artifacts; I07-04 removes every
   reader-local M07-T10
   receipt map, reconstruction, successor branch, projection, and root mutation helper listed
@@ -1441,6 +1461,10 @@ the full gate. A cleanup is complete only when:
 - Exact verification and zero-reference rule:
   - `node scripts/verify-reference-host-web-source-audit.mjs`
   - `node --test tests/reference-host-web-source-audit.test.mjs`
+  - `node scripts/verify-publisher-publish-result.mjs`
+  - `node --test tests/publisher-publish-result.test.mjs`
+  - `node scripts/verify-publisher-execution-preflight.mjs`
+  - `node --test tests/publisher-execution-preflight.test.mjs`
   - `node scripts/verify-publisher-catalog-pinning.mjs`
   - `node --test tests/publisher-catalog-pinning.test.mjs`
   - `node scripts/verify-publisher-bundle-publication.mjs`
@@ -1469,11 +1493,11 @@ the full gate. A cleanup is complete only when:
   - `node --test scripts/ci/test/proof-reader-checkpoints.test.mjs`
   - `node scripts/ci/verify-infrastructure-debt.mjs`
   - `node --test scripts/ci/test/infrastructure-debt.test.mjs`
-  - scoped zero-reference verification must inspect the 24 exact targets above and find none of
+  - scoped zero-reference verification must inspect the 29 exact targets above and find none of
     their registered symbols after I07-04 cleanup. The M07-T10 production implementation,
     focused transition-race evidence, immutable artifact bytes, and append-only checkpoint history
     through sequence 23 are outside this zero-reference scope.
 - Closure evidence: `PENDING` — record the I07-04 commit and pull request, sequence-23 checkpoint
-  SHA-256 (`1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`), all 19
+  SHA-256 (`3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d`), all 19
   frozen artifact SHA-256 values, exact zero-reference output, and the final hosted
   required-exhaustive run URL.

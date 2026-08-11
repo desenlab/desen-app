@@ -140,7 +140,7 @@
             "currentT09RootTestBytes",
             "currentT10ProofBytes",
             "currentT10RootTestBytes",
-            "approvedCurrentT09",
+            "approvedCurrentSuccessor",
             "unreviewedT09ProofBytes",
             "[successor] accepts an append-only M07 task without rewriting frozen T11 evidence"
           ]
@@ -1154,6 +1154,30 @@
           ]
         },
         {
+          "path": "scripts/lib/publisher-publish-result-proof.mjs",
+          "symbols": ["task: \"M07-T10\""]
+        },
+        {
+          "path": "tests/publisher-publish-result.test.mjs",
+          "symbols": [
+            "M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+            "M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
+            "reconstructM07T09SourceAuditProof",
+            "reconstructM07T09SourceAuditTest"
+          ]
+        },
+        {
+          "path": "scripts/lib/publisher-execution-preflight-proof.mjs",
+          "symbols": ["task: \"M07-T10\""]
+        },
+        {
+          "path": "tests/publisher-execution-preflight.test.mjs",
+          "symbols": [
+            "M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+            "M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH"
+          ]
+        },
+        {
           "path": "tests/publisher-catalog-pinning.test.mjs",
           "symbols": [
             "appendValidRootSuccessor",
@@ -1162,9 +1186,15 @@
           ]
         },
         {
+          "path": "scripts/lib/publisher-bundle-publication-proof.mjs",
+          "symbols": ["task: \"M07-T10\""]
+        },
+        {
           "path": "tests/publisher-bundle-publication.test.mjs",
           "symbols": [
             "appendValidRootSuccessor",
+            "M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
+            "M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
             "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
             "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test"
           ]
@@ -1175,7 +1205,14 @@
         },
         {
           "path": "tests/publisher-invalid-source-matrix.test.mjs",
-          "symbols": ["currentM07T10RootTestBytes", "currentT10RootTestText"]
+          "symbols": [
+            "M07_T10_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
+            "M07_T10_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+            "currentM07T10BundleProofBytes",
+            "currentM07T10BundleRootTestBytes",
+            "priorM07T10RootTestBytes",
+            "currentT10RootTestText"
+          ]
         },
         {
           "path": "scripts/lib/control-plane-bundle-store-proof.mjs",

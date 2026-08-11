@@ -474,8 +474,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "dcf7dbe1b4bfcda4c83ce3dc93ab2ae41e42893f4ae8ec197b221e494009aa09",
     }),
     successor: Object.freeze({
-      bytes: 59_980,
-      sha256: "dcf7dbe1b4bfcda4c83ce3dc93ab2ae41e42893f4ae8ec197b221e494009aa09",
+      bytes: 60_289,
+      sha256: "828aa1407a6dd790c0b0568d2a4a5c966cb1a43aa5d7aba16ae77c29819776b1",
     }),
   }),
   "tests/publisher-publish-result.test.mjs": Object.freeze({
@@ -484,8 +484,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "75145e262363ceacd930806afe3f786b69b0a65910060de239f11b99c3d3cff5",
     }),
     successor: Object.freeze({
-      bytes: 50_786,
-      sha256: "75145e262363ceacd930806afe3f786b69b0a65910060de239f11b99c3d3cff5",
+      bytes: 56_537,
+      sha256: "d8f9ffd0798bf3196b5030eab5c389273113359b398cd01597b8d1c8d4374d47",
     }),
   }),
   "scripts/lib/publisher-execution-preflight-proof.mjs": Object.freeze({
@@ -494,8 +494,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
     }),
     successor: Object.freeze({
-      bytes: 72_334,
-      sha256: "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
+      bytes: 72_643,
+      sha256: "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
     }),
   }),
   "tests/publisher-execution-preflight.test.mjs": Object.freeze({
@@ -504,8 +504,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
     }),
     successor: Object.freeze({
-      bytes: 24_873,
-      sha256: "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+      bytes: 29_586,
+      sha256: "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
     }),
   }),
   "scripts/lib/publisher-catalog-pinning-proof.mjs": Object.freeze({
@@ -534,8 +534,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "7fa4303bb54205c35f08aca62cbb6b07efaa840cd79706b4c4787f2d7da09462",
     }),
     successor: Object.freeze({
-      bytes: 139_088,
-      sha256: "7fa4303bb54205c35f08aca62cbb6b07efaa840cd79706b4c4787f2d7da09462",
+      bytes: 139_396,
+      sha256: "89ff5dc4f35036164dd33f1fcf65220bd086ce02ff04e9068078cbf6713bcb48",
     }),
   }),
   "tests/publisher-bundle-publication.test.mjs": Object.freeze({
@@ -544,8 +544,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "0919d7a79dd353b23d1491cdec7c50a1fa58ab867a3ba9fc64a337cec2343e25",
     }),
     successor: Object.freeze({
-      bytes: 74_558,
-      sha256: "f67f72b1a79462090b7f82b873eb236b465c058bf00968e38804dd0a35961225",
+      bytes: 82_563,
+      sha256: "4b1eb8e40281c0e12d94786042e34c85ec81737d07836b2e964fa9dc20eae185",
     }),
   }),
   "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
@@ -554,8 +554,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "2fd1e56ae45718f58a30c8eb8293d79e6bd7923d61da12131671964163614a90",
     }),
     successor: Object.freeze({
-      bytes: 170_893,
-      sha256: "6ae7dd5d4b7f3ff80646bdfc440b2ea3859de350fa0c89be406de3562e489d12",
+      bytes: 171_863,
+      sha256: "82f66664a5099e61367bc6a006f2bb59eec63eaf96c27dc95d207ae0741576bf",
     }),
   }),
   "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
@@ -564,8 +564,8 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
       sha256: "074535d871037e8c082326e7be246290a357b6fae6c318a5c310cbf24c532ac3",
     }),
     successor: Object.freeze({
-      bytes: 77_795,
-      sha256: "78b4f54e6baf43303e8e047fb9cf73a0ff3069c004742d54b74945fad25d2e6b",
+      bytes: 88_591,
+      sha256: "09e84895310b254ca201aa5b6e87b87b1eadf602293eaaa7545c92eafd49ac51",
     }),
   }),
 });

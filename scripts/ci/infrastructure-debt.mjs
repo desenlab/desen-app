@@ -161,7 +161,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       "currentT09RootTestBytes",
       "currentT10ProofBytes",
       "currentT10RootTestBytes",
-      "approvedCurrentT09",
+      "approvedCurrentSuccessor",
       "unreviewedT09ProofBytes",
       "[successor] accepts an append-only M07 task without rewriting frozen T11 evidence",
     ]),
@@ -822,19 +822,38 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       target("tests/reference-host-web-source-audit.test.mjs", [
         "reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance through T10",
       ]),
+      target("scripts/lib/publisher-publish-result-proof.mjs", ['task: "M07-T10"']),
+      target("tests/publisher-publish-result.test.mjs", [
+        "M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+        "M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
+        "reconstructM07T09SourceAuditProof",
+        "reconstructM07T09SourceAuditTest",
+      ]),
+      target("scripts/lib/publisher-execution-preflight-proof.mjs", ['task: "M07-T10"']),
+      target("tests/publisher-execution-preflight.test.mjs", [
+        "M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+        "M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
+      ]),
       target("tests/publisher-catalog-pinning.test.mjs", [
         "appendValidRootSuccessor",
         "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
         "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
       ]),
+      target("scripts/lib/publisher-bundle-publication-proof.mjs", ['task: "M07-T10"']),
       target("tests/publisher-bundle-publication.test.mjs", [
         "appendValidRootSuccessor",
+        "M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
+        "M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
         "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
         "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
       ]),
       target("scripts/lib/publisher-invalid-source-matrix-proof.mjs", ['task: "M07-T10"']),
       target("tests/publisher-invalid-source-matrix.test.mjs", [
-        "currentM07T10RootTestBytes",
+        "M07_T10_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
+        "M07_T10_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+        "currentM07T10BundleProofBytes",
+        "currentM07T10BundleRootTestBytes",
+        "priorM07T10RootTestBytes",
         "currentT10RootTestText",
       ]),
       target("scripts/lib/control-plane-bundle-store-proof.mjs", [

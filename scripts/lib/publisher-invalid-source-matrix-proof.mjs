@@ -926,6 +926,11 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 139_088,
       sha256: "7fa4303bb54205c35f08aca62cbb6b07efaa840cd79706b4c4787f2d7da09462",
     }),
+    Object.freeze({
+      task: "M07-T10",
+      bytes: 139_396,
+      sha256: "89ff5dc4f35036164dd33f1fcf65220bd086ce02ff04e9068078cbf6713bcb48",
+    }),
   ]),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze([
     Object.freeze({
@@ -973,13 +978,18 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 74_558,
       sha256: "f67f72b1a79462090b7f82b873eb236b465c058bf00968e38804dd0a35961225",
     }),
+    Object.freeze({
+      task: "M07-T10",
+      bytes: 82_563,
+      sha256: "4b1eb8e40281c0e12d94786042e34c85ec81737d07836b2e964fa9dc20eae185",
+    }),
   ]),
 });
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][8],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][9],
   [BUNDLE_PUBLICATION_ROOT_TEST]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][8],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][9],
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
   OFFICIAL_GOLDEN_PROOF_LIBRARY,
@@ -1026,6 +1036,8 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "b4d55e0da2a2992bcc311254bfc47c2c69287f9e049ed8e84bb9b50c8886d2a4",
   "bytes: 72_334",
   "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
+  "bytes: 72_643",
+  "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
   "bytes: 17_767",
   "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
   "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea",
@@ -1034,6 +1046,8 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "8ab35ee609d175377ccb2beb679f6d76f93c9c2cf4bc749df0d94a7ff7e47e74",
   "bytes: 24_873",
   "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+  "bytes: 29_586",
+  "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T09 reader"',
@@ -1046,18 +1060,26 @@ const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT",
   "M07_T09_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
   "M07_T09_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
+  "M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
+  "M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
   "function applyExactRollbackPatch(currentBytes, encodedPatch)",
   'const patchText = brotliDecompressSync(Buffer.from(encodedPatch, "base64")).toString("utf8");',
   "assert.equal(currentLines[currentIndex], content);",
   "assert.equal(currentCount, expectedCurrentCount);",
   "assert.equal(rollbackCount, expectedRollbackCount);",
-  "reviewedCurrentBytes.byteLength, 72_334",
   "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
+  "reviewedCurrentBytes.byteLength, 72_643",
+  "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
+  "predecessorM07T09Bytes.byteLength, 72_334",
+  "trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T09Bytes }",
   "predecessorM07T08Bytes.byteLength, 72_025",
   "b4d55e0da2a2992bcc311254bfc47c2c69287f9e049ed8e84bb9b50c8886d2a4",
   "trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T08Bytes }",
-  "currentBytes.byteLength, 24_873",
   "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
+  "currentBytes.byteLength, 29_586",
+  "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
+  "predecessorM07T09Bytes.byteLength, 24_873",
+  "trackedFileBytes: { [readerPath]: predecessorM07T09Bytes }",
   "predecessorM07T08Bytes.byteLength, 17_767",
   "8ab35ee609d175377ccb2beb679f6d76f93c9c2cf4bc749df0d94a7ff7e47e74",
   "trackedFileBytes: { [readerPath]: predecessorM07T08Bytes }",

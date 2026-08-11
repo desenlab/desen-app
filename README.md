@@ -363,7 +363,7 @@ the exact I07-03 CI-workflow receipt propagation without changing any proof clai
 
 Reviewed checkpoint sequence 23 links that exact sequence 22 head
 `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` to current head
-`1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`. It preserves sequences
+`3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d`. It preserves sequences
 1–22 and every predecessor artifact byte, appends the exact 58,059-byte M07-T10 artifact, and
 authenticates 19 frozen artifacts plus 38 live readers. The M07-T10 proof/root readers are the two
 new reader identities. Historical reader bridges needed by the append are registered as

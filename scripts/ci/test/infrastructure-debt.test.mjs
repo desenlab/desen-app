@@ -404,7 +404,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     [
       "scripts/lib/reference-host-web-source-audit-proof.mjs",
       "tests/reference-host-web-source-audit.test.mjs",
+      "scripts/lib/publisher-publish-result-proof.mjs",
+      "tests/publisher-publish-result.test.mjs",
+      "scripts/lib/publisher-execution-preflight-proof.mjs",
+      "tests/publisher-execution-preflight.test.mjs",
       "tests/publisher-catalog-pinning.test.mjs",
+      "scripts/lib/publisher-bundle-publication-proof.mjs",
       "tests/publisher-bundle-publication.test.mjs",
       "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
       "tests/publisher-invalid-source-matrix.test.mjs",
