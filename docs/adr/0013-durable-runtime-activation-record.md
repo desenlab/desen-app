@@ -104,6 +104,18 @@ transaction, and post-commit success is checked against the exact committed row 
 authority publication. New database files and their parent directory are flushed, and the adapter
 revalidates the database and sidecar identities around operations.
 
+M07-T10 closes the remaining connection-profile race explicitly. The complete profile—database-
+level `journal_mode=WAL` plus connection-level `synchronous=FULL`, `foreign_keys=ON`,
+`trusted_schema=OFF`, and the fixed busy timeout—is authenticated again inside every read
+transaction, immediately after `BEGIN IMMEDIATE` acquires the writer lock and before any singleton
+read or DML, and again before post-commit authority publication. A mismatch is corruption: the
+adapter rolls back when the outcome is still definite, performs no write or publication, and never
+silently repairs a changed PRAGMA. With the pinned SQLite build, a second live connection cannot
+move an already used WAL database to rollback journaling and receives `SQLITE_BUSY`/`SQLITE_LOCKED`;
+the transaction-local recheck remains required because an external change can otherwise occur
+between repository acquisition and its first transaction, and because lock behavior is an adapter
+fact rather than a protocol guarantee.
+
 SQLite and `better-sqlite3` are application-internal Web adapter choices, not DESEN document
 semantics or a requirement for future Android and iOS hosts. A native host may use another durable
 repository only if it preserves the same record, atomicity, compare-and-swap, generation, and
@@ -164,8 +176,9 @@ acquisition failure closes the native connection before the error crosses the st
 - Mutable channels remain discovery metadata and cannot select or mutate the activation record.
 - ADR 0014 adds restart validation and restoration without rewriting this durable transition or
   introducing automatic rollback.
-- M07-T09 owns boundary fault injection; M07-T10 owns A → invalid B → valid C, races, restart
-  matrices, and the pending `journal_mode` storage-profile decision; and M07-T11 owns channel
-  consumption by the separately built reference host.
+- M07-T09 proves bounded boundary fault injection. M07-T10 proves A → invalid B → valid C,
+  same- and different-candidate races, both recovery/activation orderings, exact restart behavior,
+  generation fencing, consumed-loser freshness, and the fail-closed `journal_mode` profile
+  decision. M07-T11 owns channel consumption by the separately built reference host.
 - The boundary grants no module loading, adapter invocation, rendering, host notification, rollback
   policy, signing, network distribution, npm archive, or native-target conformance authority.

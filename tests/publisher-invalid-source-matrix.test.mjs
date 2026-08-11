@@ -355,12 +355,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
-    "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
+    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-fault-injection && turbo run test",
-    "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:control-plane-runtime-transition-races && turbo run test",
+    "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1357,7 +1357,7 @@ test("[authority] pins the explicit isolated Vitest timeout", async () => {
 
 test("[authority] distinguishes semantic coordination drift from frozen surface drift", async () => {
   const currentI07T03ProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
-  const currentT09RootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  const currentM07T10RootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
   assert.equal(currentI07T03ProofBytes.byteLength, 139_088);
   assert.equal(
     createHash("sha256").update(currentI07T03ProofBytes).digest("hex"),
@@ -1375,6 +1375,17 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
   assert.equal(
     createHash("sha256").update(currentT09ProofBytes).digest("hex"),
     "7680e332fe8c9c5e585022c3b05b885d6d40722a882f67f3a2646554f5413a46",
+  );
+  assert.equal(currentM07T10RootTestBytes.byteLength, 74_558);
+  assert.equal(
+    createHash("sha256").update(currentM07T10RootTestBytes).digest("hex"),
+    "f67f72b1a79462090b7f82b873eb236b465c058bf00968e38804dd0a35961225",
+  );
+  const currentT10RootTestText = currentM07T10RootTestBytes.toString("utf8");
+  assert.equal(currentT10RootTestText.match(/runtime-transition-races/gu)?.length, 4);
+  const currentT09RootTestBytes = Buffer.from(
+    currentT10RootTestText.replaceAll("runtime-transition-races", "runtime-fault-injection"),
+    "utf8",
   );
   assert.equal(currentT09RootTestBytes.byteLength, 74_554);
   assert.equal(
@@ -1405,7 +1416,7 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
     fastOptions({
       trackedFileBytes: {
         [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentI07T03ProofBytes,
-        [BUNDLE_PUBLICATION_ROOT_TEST]: currentT09RootTestBytes,
+        [BUNDLE_PUBLICATION_ROOT_TEST]: currentM07T10RootTestBytes,
         "scripts/lib/publisher-official-golden-proof.mjs": currentT10ProofBytes,
         "tests/publisher-official-golden.test.mjs": currentT10RootTestBytes,
       },

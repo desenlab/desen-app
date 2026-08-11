@@ -2,7 +2,7 @@
 
 This register tracks temporary compatibility structures registered by I07-01 and later
 task-specific successors while immutable task evidence is separated from current-checkpoint
-authentication and CI execution orchestration. Sixteen entries remain open; DEBT-I07-008 is closed
+authentication and CI execution orchestration. Seventeen entries remain open; DEBT-I07-008 is closed
 with authenticated removal evidence. An open entry records planned removal work and does not claim
 that its cleanup has already been implemented.
 
@@ -53,6 +53,7 @@ the full gate. A cleanup is complete only when:
 | DEBT-I07-015 | OPEN   | M07-T08 historical recovery reader bridges               | M07-T08       | I07-04        | G07           |
 | DEBT-I07-016 | OPEN   | M07-T09 historical fault-injection successor bridges     | M07-T09       | I07-04        | G07           |
 | DEBT-I07-017 | OPEN   | I07-03 shadow CI and current-reader receipt bridge       | I07-03        | I07-04        | G07           |
+| DEBT-I07-018 | OPEN   | M07-T10 historical transition-race successor bridges     | M07-T10       | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
@@ -1160,8 +1161,9 @@ the full gate. A cleanup is complete only when:
   M07-T01 through M07-T08 artifacts remain immutable. Their historical readers therefore need
   temporary, fail-closed bridges that authenticate only the exact reviewed M07-T09 successor and
   project each reader's task-time receipts without weakening its frozen artifact.
-- Objective removal trigger: proof-reader checkpoint sequence 21 is the sole current-byte
-  authority for all 36 readers and all 18 artifacts; I07-04 removes every reader-local M07-T09
+- Objective removal trigger: proof-reader checkpoint sequence 21 remains the immutable reviewed
+  M07-T09 generation inside the sequence 23 current-byte authority for all 38 readers and all 19
+  artifacts; I07-04 removes every reader-local M07-T09
   receipt map, successor branch, projection, and mutation alias listed above; all nine M07-T01
   through M07-T09 artifacts remain byte-identical; successor and poison mutations remain
   fail-closed; and a fresh hosted `REQUIRED + EXHAUSTIVE` run authenticates the resulting state.
@@ -1224,8 +1226,9 @@ the full gate. A cleanup is complete only when:
   execution wrapper, receipt printer, and focused shadow assertions are deliberately
   non-authoritative migration structures. Updating that workflow also changes exact bytes read by
   the immutable M07-T01 control-plane proof, so `APPROVED_I07_T03_TRACKED_RECEIPTS` temporarily
-  authenticates only the reviewed I07-03 successor until checkpoint sequence 22 is the sole
-  current-byte authority. The sequence-22 record and its reviewed-chain wiring are append-only
+  authenticates only the reviewed I07-03 successor until checkpoint sequence 22 is captured as an
+  immutable generation inside the sequence 23 current-byte authority. The sequence-22 record and
+  its reviewed-chain wiring are append-only
   evidence, not removable debt targets. The affected selector, tracked-path ownership, impact
   graph, frozen threshold, and their hostile-input contracts are enduring safety authorities and
   are intentionally outside this cleanup entry.
@@ -1234,8 +1237,9 @@ the full gate. A cleanup is complete only when:
   negatives and complete selector plus ownership-category coverage; I07-04 then promotes affected
   selection only for eligible pull requests. The shadow-only job, wrapper, receipt printer, and
   named focused-test markers above are removed or replaced by required eligible-PR authority. At
-  the same time, sequence 22 must remain the authenticated append-only current checkpoint while
-  the reader-local `APPROVED_I07_T03_TRACKED_RECEIPTS` branch and alias are removed. `main`,
+  the same time, sequence 22 must remain an authenticated append-only historical generation inside
+  the sequence 23 current checkpoint while the reader-local
+  `APPROVED_I07_T03_TRACKED_RECEIPTS` branch and alias are removed. `main`,
   release, and manual-audit execution remain fresh `REQUIRED + EXHAUSTIVE`.
 - Must close by gate: `G07`
 - Exact verification and zero-reference rule:
@@ -1259,3 +1263,217 @@ the full gate. A cleanup is complete only when:
   threshold SHA-256, the sequence-22 checkpoint SHA-256, the 20 qualifying hosted comparison run
   pairs, category-coverage and zero-false-negative receipts, exact zero-reference output, and the
   final hosted required exhaustive `main` run URL.
+
+## DEBT-I07-018 — M07-T10 historical transition-race successor bridges
+
+- Status: `OPEN`
+- Registered by infrastructure task: `M07-T10`
+- Removal owner: `I07-04`
+- Exact paths and symbols:
+  - `scripts/lib/reference-host-web-source-audit-proof.mjs`
+    - `M07_T10_CONTROL_PLANE_COORDINATION`
+  - `tests/reference-host-web-source-audit.test.mjs`
+    - `reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance through T10`
+  - `tests/publisher-catalog-pinning.test.mjs`
+    - `appendValidRootSuccessor`
+    - `pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint`
+    - `pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test`
+  - `tests/publisher-bundle-publication.test.mjs`
+    - `appendValidRootSuccessor`
+    - `pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint`
+    - `pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test`
+  - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
+    - `task: "M07-T10"`
+  - `tests/publisher-invalid-source-matrix.test.mjs`
+    - `currentM07T10RootTestBytes`
+    - `currentT10RootTestText`
+  - `scripts/lib/control-plane-bundle-store-proof.mjs`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `historicalSuccessorState`
+    - `currentSuccessorState`
+    - `m07T10Bridge`
+  - `tests/control-plane-bundle-store.test.mjs`
+    - `m07T09AppPackageBytes`
+    - `pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-successor && pnpm lint`
+    - `pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-successor && turbo run test`
+  - `scripts/lib/control-plane-bundle-verification-proof.mjs`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `historicalSuccessorState`
+    - `currentSuccessorState`
+    - `m07T10Bridge`
+  - `tests/control-plane-bundle-verification.test.mjs`
+    - `m07T09AppPackageBytes`
+  - `scripts/lib/control-plane-package-preflight-proof.mjs`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T10_AGGREGATE_SUCCESSOR_COMMANDS`
+    - `reviewedTransitionRaceSuccessor`
+    - `transitionRaceSuccessorIndex`
+    - `reviewedTransitionRaceSuccessorTail`
+    - `historicalSuccessorState`
+    - `currentSuccessorState`
+    - `m07T10Bridge`
+  - `tests/control-plane-package-preflight.test.mjs`
+    - `m07T09AppPackageBytes`
+  - `scripts/lib/control-plane-reference-preflight-proof.mjs`
+    - `APPROVED_M07_T10_TRACKED_RECEIPTS`
+    - `reviewedTransitionRaceSuccessor`
+    - `reviewedTransitionRaceSuccessorIndex`
+    - `transitionRaceSuccessorTail`
+    - `approvedM07T10`
+    - `m07T10HistoricalState`
+    - `m07T10SuccessorState`
+  - `tests/control-plane-reference-preflight.test.mjs`
+    - `test/runtime-transition-races-decoy.test.ts`
+    - `control-plane-runtime-transition-races-decoy`
+    - `currentAppPackage`
+    - `historicalAppPackage`
+  - `scripts/lib/control-plane-local-api-proof.mjs`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `transitionRacesSuccessor`
+    - `transitionRacesSuccessorIndex`
+    - `reviewedTransitionRacesSuccessorTail`
+    - `m07T10Bridge`
+    - `m07T10Generations`
+    - `approvedM07T08`
+  - `tests/control-plane-local-api.test.mjs`
+    - `test/runtime-transition-races-decoy.test.ts`
+    - `control-plane-runtime-transition-races-decoy`
+    - `currentAppPackage`
+    - `historicalAppPackage`
+  - `scripts/lib/control-plane-runtime-staging-proof.mjs`
+    - `M07_T10_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `transitionRaceSuccessor`
+    - `transitionRaceSuccessorIndex`
+    - `reviewedM07T10Tail`
+    - `m07T10Bridge`
+    - `m07T10Generations`
+    - `approvedM07T09`
+    - `m07T10SuccessorReceipt`
+    - `reviewedM07T10Successor`
+  - `tests/control-plane-runtime-staging.test.mjs`
+    - `test/runtime-transition-races-decoy.test.ts`
+    - `control-plane-runtime-transition-races-decoy`
+    - `currentAppPackage`
+    - `historicalAppPackage`
+    - `M07-T10 claims`
+    - `| IMPLEMENTED |`
+  - `scripts/lib/control-plane-runtime-activation-proof.mjs`
+    - `M07_T10_N038_SUCCESSOR_RECEIPT`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T10_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE`
+    - `reviewedTransitionRaceSuccessor`
+    - `reviewedTransitionRaceSuccessorIndex`
+    - `approvedTransitionRaceCurrent`
+    - `transitionRaceBridge`
+    - `transitionRaceHistoricalState`
+    - `transitionRaceSuccessorState`
+    - `transitionRaceMatch`
+    - `transitionHistoricalMatch`
+    - `adrReceipt`
+    - `approvedAdrReceipts`
+    - `approvedM07T10N038`
+    - `sqliteReader`
+    - `sqliteReaderProfile`
+    - `sqliteReaderSchema`
+    - `sqliteWriterProfile`
+    - `sqliteAfterCommit`
+    - `sqlitePostCommitProfile`
+    - `sqlitePostCommitSchema`
+    - `sqliteProfileCallCount`
+    - `historicalProfileAuthority`
+    - `transitionRaceProfileAuthority`
+  - `tests/control-plane-runtime-activation.test.mjs`
+    - `ADR`
+    - `test/runtime-transition-races-decoy.test.ts`
+    - `control-plane-runtime-transition-races-decoy`
+    - `The writer lock is the last safe point before durable authority is observed or changed.`
+    - `M07-T10 claims A`
+    - `| IMPLEMENTED |`
+  - `scripts/lib/control-plane-runtime-recovery-proof.mjs`
+    - `M07_T10_TEST_AUTHORITY_RECEIPTS`
+    - `M07_T10_REGISTRATION_AUTHORITY_RECEIPTS`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `generationMask`
+    - `observedGenerationMask`
+    - `taskTimeProjection`
+    - `t10Bridge`
+    - `laterSuccessor`
+    - `laterSuccessorIndex`
+    - `approvedT10`
+    - `t10AdrBridge`
+    - `t10Adr`
+    - `reviewedT10Successor`
+    - `M07-T10 proves`
+  - `tests/control-plane-runtime-recovery.test.mjs`
+    - `APP_SQLITE`
+    - `test/runtime-transition-races-decoy.test.ts`
+    - `control-plane-runtime-transition-races-decoy`
+    - `void openDatabase;`
+    - `M07-T10 claims without proof`
+  - `scripts/lib/control-plane-runtime-fault-injection-proof.mjs`
+    - `M07_T10_TRACKED_RECEIPT_BRIDGE`
+    - `M07_T10_READER_RECEIPT_PROJECTION`
+    - `trackedFileReceipts`
+  - `tests/control-plane-runtime-fault-injection.test.mjs`
+    - `APP_PACKAGE`
+    - `APP_SQLITE`
+    - `ROOT_PACKAGE`
+    - `CI_SOURCE`
+    - `CI_INVENTORY`
+    - `SHARED_STATE_AUTHORITY`
+    - `changedByte(await workspaceBytes(relativePath))`
+- Reason retained: M07-T10 appends the transition-race proof, strengthens SQLite profile
+  reauthentication, advances N-038, and changes package, root aggregate, CI, shared-state,
+  documentation, Publisher-reader, and historical-reader bytes. The existing M05, M06, and
+  M07-T01 through M07-T09 readers therefore carry exact, fail-closed successor receipts,
+  task-time projections, aggregate-tail branches, and poison or mixed-generation mutations until
+  the current checkpoint becomes their only live-byte authority.
+- Objective removal trigger: proof-reader checkpoint sequence 23, head
+  `1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`, is the sole
+  current-byte authority for all 38 readers and all 19 artifacts; I07-04 removes every
+  reader-local M07-T10
+  receipt map, reconstruction, successor branch, projection, and root mutation helper listed
+  above; all 19 frozen artifacts remain byte-identical; checkpoint-owned missing, reordered,
+  duplicated, substituted, mixed-generation, and poison mutations remain fail-closed; and a fresh
+  hosted `REQUIRED + EXHAUSTIVE` run authenticates the resulting state.
+- Must close by gate: `G07`
+- Exact verification and zero-reference rule:
+  - `node scripts/verify-reference-host-web-source-audit.mjs`
+  - `node --test tests/reference-host-web-source-audit.test.mjs`
+  - `node scripts/verify-publisher-catalog-pinning.mjs`
+  - `node --test tests/publisher-catalog-pinning.test.mjs`
+  - `node scripts/verify-publisher-bundle-publication.mjs`
+  - `node --test tests/publisher-bundle-publication.test.mjs`
+  - `node scripts/verify-publisher-invalid-source-matrix.mjs`
+  - `node --test tests/publisher-invalid-source-matrix.test.mjs`
+  - `node scripts/verify-control-plane-bundle-store.mjs`
+  - `node --test tests/control-plane-bundle-store.test.mjs`
+  - `node scripts/verify-control-plane-bundle-verification.mjs`
+  - `node --test tests/control-plane-bundle-verification.test.mjs`
+  - `node scripts/verify-control-plane-package-preflight.mjs`
+  - `node --test tests/control-plane-package-preflight.test.mjs`
+  - `node scripts/verify-control-plane-reference-preflight.mjs`
+  - `node --test tests/control-plane-reference-preflight.test.mjs`
+  - `node scripts/verify-control-plane-local-api.mjs`
+  - `node --test tests/control-plane-local-api.test.mjs`
+  - `node scripts/verify-control-plane-runtime-staging.mjs`
+  - `node --test tests/control-plane-runtime-staging.test.mjs`
+  - `node scripts/verify-control-plane-runtime-activation.mjs`
+  - `node --test tests/control-plane-runtime-activation.test.mjs`
+  - `node scripts/verify-control-plane-runtime-recovery.mjs`
+  - `node --test tests/control-plane-runtime-recovery.test.mjs`
+  - `node scripts/verify-control-plane-runtime-fault-injection.mjs`
+  - `node --test tests/control-plane-runtime-fault-injection.test.mjs`
+  - `node scripts/ci/verify-proof-reader-checkpoints.mjs`
+  - `node --test scripts/ci/test/proof-reader-checkpoints.test.mjs`
+  - `node scripts/ci/verify-infrastructure-debt.mjs`
+  - `node --test scripts/ci/test/infrastructure-debt.test.mjs`
+  - scoped zero-reference verification must inspect the 24 exact targets above and find none of
+    their registered symbols after I07-04 cleanup. The M07-T10 production implementation,
+    focused transition-race evidence, immutable artifact bytes, and append-only checkpoint history
+    through sequence 23 are outside this zero-reference scope.
+- Closure evidence: `PENDING` — record the I07-04 commit and pull request, sequence-23 checkpoint
+  SHA-256 (`1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`), all 19
+  frozen artifact SHA-256 values, exact zero-reference output, and the final hosted
+  required-exhaustive run URL.

@@ -1134,6 +1134,254 @@
           "symbols": ["APPROVED_I07_T03_TRACKED_RECEIPTS", "approvedI07T03"]
         }
       ]
+    },
+    {
+      "id": "DEBT-I07-018",
+      "status": "OPEN",
+      "evidence": null,
+      "registeredBy": "M07-T10",
+      "removalOwner": "I07-04",
+      "deadline": "G07",
+      "targets": [
+        {
+          "path": "scripts/lib/reference-host-web-source-audit-proof.mjs",
+          "symbols": ["M07_T10_CONTROL_PLANE_COORDINATION"]
+        },
+        {
+          "path": "tests/reference-host-web-source-audit.test.mjs",
+          "symbols": [
+            "reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance through T10"
+          ]
+        },
+        {
+          "path": "tests/publisher-catalog-pinning.test.mjs",
+          "symbols": [
+            "appendValidRootSuccessor",
+            "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
+            "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test"
+          ]
+        },
+        {
+          "path": "tests/publisher-bundle-publication.test.mjs",
+          "symbols": [
+            "appendValidRootSuccessor",
+            "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
+            "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test"
+          ]
+        },
+        {
+          "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+          "symbols": ["task: \"M07-T10\""]
+        },
+        {
+          "path": "tests/publisher-invalid-source-matrix.test.mjs",
+          "symbols": ["currentM07T10RootTestBytes", "currentT10RootTestText"]
+        },
+        {
+          "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
+          "symbols": [
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "historicalSuccessorState",
+            "currentSuccessorState",
+            "m07T10Bridge"
+          ]
+        },
+        {
+          "path": "tests/control-plane-bundle-store.test.mjs",
+          "symbols": [
+            "m07T09AppPackageBytes",
+            "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-successor && pnpm lint",
+            "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-successor && turbo run test"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-bundle-verification-proof.mjs",
+          "symbols": [
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "historicalSuccessorState",
+            "currentSuccessorState",
+            "m07T10Bridge"
+          ]
+        },
+        {
+          "path": "tests/control-plane-bundle-verification.test.mjs",
+          "symbols": ["m07T09AppPackageBytes"]
+        },
+        {
+          "path": "scripts/lib/control-plane-package-preflight-proof.mjs",
+          "symbols": [
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "M07_T10_AGGREGATE_SUCCESSOR_COMMANDS",
+            "reviewedTransitionRaceSuccessor",
+            "transitionRaceSuccessorIndex",
+            "reviewedTransitionRaceSuccessorTail",
+            "historicalSuccessorState",
+            "currentSuccessorState",
+            "m07T10Bridge"
+          ]
+        },
+        {
+          "path": "tests/control-plane-package-preflight.test.mjs",
+          "symbols": ["m07T09AppPackageBytes"]
+        },
+        {
+          "path": "scripts/lib/control-plane-reference-preflight-proof.mjs",
+          "symbols": [
+            "APPROVED_M07_T10_TRACKED_RECEIPTS",
+            "reviewedTransitionRaceSuccessor",
+            "reviewedTransitionRaceSuccessorIndex",
+            "transitionRaceSuccessorTail",
+            "approvedM07T10",
+            "m07T10HistoricalState",
+            "m07T10SuccessorState"
+          ]
+        },
+        {
+          "path": "tests/control-plane-reference-preflight.test.mjs",
+          "symbols": [
+            "test/runtime-transition-races-decoy.test.ts",
+            "control-plane-runtime-transition-races-decoy",
+            "currentAppPackage",
+            "historicalAppPackage"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-local-api-proof.mjs",
+          "symbols": [
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "transitionRacesSuccessor",
+            "transitionRacesSuccessorIndex",
+            "reviewedTransitionRacesSuccessorTail",
+            "m07T10Bridge",
+            "m07T10Generations",
+            "approvedM07T08"
+          ]
+        },
+        {
+          "path": "tests/control-plane-local-api.test.mjs",
+          "symbols": [
+            "test/runtime-transition-races-decoy.test.ts",
+            "control-plane-runtime-transition-races-decoy",
+            "currentAppPackage",
+            "historicalAppPackage"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-runtime-staging-proof.mjs",
+          "symbols": [
+            "M07_T10_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS",
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "transitionRaceSuccessor",
+            "transitionRaceSuccessorIndex",
+            "reviewedM07T10Tail",
+            "m07T10Bridge",
+            "m07T10Generations",
+            "approvedM07T09",
+            "m07T10SuccessorReceipt",
+            "reviewedM07T10Successor"
+          ]
+        },
+        {
+          "path": "tests/control-plane-runtime-staging.test.mjs",
+          "symbols": [
+            "test/runtime-transition-races-decoy.test.ts",
+            "control-plane-runtime-transition-races-decoy",
+            "currentAppPackage",
+            "historicalAppPackage",
+            "M07-T10 claims",
+            "| IMPLEMENTED |"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-runtime-activation-proof.mjs",
+          "symbols": [
+            "M07_T10_N038_SUCCESSOR_RECEIPT",
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "M07_T10_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE",
+            "reviewedTransitionRaceSuccessor",
+            "reviewedTransitionRaceSuccessorIndex",
+            "approvedTransitionRaceCurrent",
+            "transitionRaceBridge",
+            "transitionRaceHistoricalState",
+            "transitionRaceSuccessorState",
+            "transitionRaceMatch",
+            "transitionHistoricalMatch",
+            "adrReceipt",
+            "approvedAdrReceipts",
+            "approvedM07T10N038",
+            "sqliteReader",
+            "sqliteReaderProfile",
+            "sqliteReaderSchema",
+            "sqliteWriterProfile",
+            "sqliteAfterCommit",
+            "sqlitePostCommitProfile",
+            "sqlitePostCommitSchema",
+            "sqliteProfileCallCount",
+            "historicalProfileAuthority",
+            "transitionRaceProfileAuthority"
+          ]
+        },
+        {
+          "path": "tests/control-plane-runtime-activation.test.mjs",
+          "symbols": [
+            "ADR",
+            "test/runtime-transition-races-decoy.test.ts",
+            "control-plane-runtime-transition-races-decoy",
+            "The writer lock is the last safe point before durable authority is observed or changed.",
+            "M07-T10 claims A",
+            "| IMPLEMENTED |"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-runtime-recovery-proof.mjs",
+          "symbols": [
+            "M07_T10_TEST_AUTHORITY_RECEIPTS",
+            "M07_T10_REGISTRATION_AUTHORITY_RECEIPTS",
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "generationMask",
+            "observedGenerationMask",
+            "taskTimeProjection",
+            "t10Bridge",
+            "laterSuccessor",
+            "laterSuccessorIndex",
+            "approvedT10",
+            "t10AdrBridge",
+            "t10Adr",
+            "reviewedT10Successor",
+            "M07-T10 proves"
+          ]
+        },
+        {
+          "path": "tests/control-plane-runtime-recovery.test.mjs",
+          "symbols": [
+            "APP_SQLITE",
+            "test/runtime-transition-races-decoy.test.ts",
+            "control-plane-runtime-transition-races-decoy",
+            "void openDatabase;",
+            "M07-T10 claims without proof"
+          ]
+        },
+        {
+          "path": "scripts/lib/control-plane-runtime-fault-injection-proof.mjs",
+          "symbols": [
+            "M07_T10_TRACKED_RECEIPT_BRIDGE",
+            "M07_T10_READER_RECEIPT_PROJECTION",
+            "trackedFileReceipts"
+          ]
+        },
+        {
+          "path": "tests/control-plane-runtime-fault-injection.test.mjs",
+          "symbols": [
+            "APP_PACKAGE",
+            "APP_SQLITE",
+            "ROOT_PACKAGE",
+            "CI_SOURCE",
+            "CI_INVENTORY",
+            "SHARED_STATE_AUTHORITY",
+            "changedByte(await workspaceBytes(relativePath))"
+          ]
+        }
+      ]
     }
   ]
 }

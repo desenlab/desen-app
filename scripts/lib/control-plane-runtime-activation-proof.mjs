@@ -159,6 +159,10 @@ const M07_T09_N004_SUCCESSOR_RECEIPT = Object.freeze({
   bytes: 2_526,
   sha256: "885b985c43c8e4dced2f1361d8e08728a63fa055b29df84e7cccaf16ba5e11de",
 });
+const M07_T10_N038_SUCCESSOR_RECEIPT = Object.freeze({
+  bytes: 2_534,
+  sha256: "6c455b9798372973a45b57083f7413e2e7aa9242f28669a35fee790633d032c0",
+});
 
 const M07_T07_DOCUMENTED_ACTIVATION_SOURCE_EXPORTS = Object.freeze(
   [
@@ -414,6 +418,57 @@ const M07_T09_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     }),
   }),
 });
+const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [APP_PACKAGE]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 2_408,
+      sha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
+    }),
+  }),
+  [APP_SQLITE]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[APP_SQLITE].successor,
+    successor: Object.freeze({
+      bytes: 23_137,
+      sha256: "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5fac7493481f868be164",
+    }),
+  }),
+  [ADR]: Object.freeze({
+    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[ADR].successor,
+    successor: Object.freeze({
+      bytes: 12_308,
+      sha256: "8a98d42373b0a655b6f8b0a55a9ab4038868de7735ba32dca491f50e198a728c",
+    }),
+  }),
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 66_267,
+      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_249,
+      sha256: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_524,
+      sha256: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
+    successor: Object.freeze({
+      bytes: 47_816,
+      sha256: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
+    }),
+  }),
+});
 
 const M07_T08_READER_RECEIPT_PROJECTION = Object.freeze({
   [PROOF_LIBRARY]: Object.freeze({
@@ -619,6 +674,26 @@ const M07_T08_INDEX_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze(
     ]),
   ),
 );
+const M07_T10_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
+  "runtime-activation-sqlite-internal.js": Object.freeze({
+    historical:
+      M07_T08_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE["runtime-activation-sqlite-internal.js"]
+        .successor,
+    successor: Object.freeze({
+      bytes: 22_376,
+      sha256: "7eb443e770bb05b064a6b904142ed3efc4f33e1def8fe74a1d1aef973858045a",
+    }),
+  }),
+  "runtime-activation-sqlite-internal.js.map": Object.freeze({
+    historical:
+      M07_T08_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE["runtime-activation-sqlite-internal.js.map"]
+        .successor,
+    successor: Object.freeze({
+      bytes: 18_026,
+      sha256: "90ed8c9001563830d6584740ce3a5efb582b3e316d54f057dac8049fb393ee69",
+    }),
+  }),
+});
 
 export const DEFAULT_CONTROL_PLANE_RUNTIME_ACTIVATION_ARTIFACT_PATH = path.join(ROOT, ARTIFACT);
 
@@ -1022,6 +1097,7 @@ function assertAdjacent(
   current,
   reviewedSuccessor,
   reviewedFaultInjectionSuccessor,
+  reviewedTransitionRaceSuccessor,
   terminal,
 ) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
@@ -1030,32 +1106,49 @@ function assertAdjacent(
   const currentIndex = commands.indexOf(current);
   const reviewedSuccessorIndex = commands.indexOf(reviewedSuccessor);
   const reviewedFaultInjectionSuccessorIndex = commands.indexOf(reviewedFaultInjectionSuccessor);
+  const reviewedTransitionRaceSuccessorIndex = commands.indexOf(reviewedTransitionRaceSuccessor);
   const terminalIndex = commands.indexOf(terminal);
   const historical =
     currentIndex === predecessorIndex + 1 &&
     terminalIndex === currentIndex + 1 &&
     reviewedSuccessorIndex < 0 &&
-    reviewedFaultInjectionSuccessorIndex < 0;
+    reviewedFaultInjectionSuccessorIndex < 0 &&
+    reviewedTransitionRaceSuccessorIndex < 0;
   const approvedCurrent =
     currentIndex === predecessorIndex + 1 &&
     reviewedSuccessorIndex === currentIndex + 1 &&
-    terminalIndex === reviewedSuccessorIndex + 1;
+    terminalIndex === reviewedSuccessorIndex + 1 &&
+    reviewedFaultInjectionSuccessorIndex < 0 &&
+    reviewedTransitionRaceSuccessorIndex < 0;
   const approvedFaultInjectionCurrent =
     currentIndex === predecessorIndex + 1 &&
     reviewedSuccessorIndex === currentIndex + 1 &&
     reviewedFaultInjectionSuccessorIndex === reviewedSuccessorIndex + 1 &&
-    terminalIndex === reviewedFaultInjectionSuccessorIndex + 1;
+    terminalIndex === reviewedFaultInjectionSuccessorIndex + 1 &&
+    reviewedTransitionRaceSuccessorIndex < 0;
+  const approvedTransitionRaceCurrent =
+    currentIndex === predecessorIndex + 1 &&
+    reviewedSuccessorIndex === currentIndex + 1 &&
+    reviewedFaultInjectionSuccessorIndex === reviewedSuccessorIndex + 1 &&
+    reviewedTransitionRaceSuccessorIndex === reviewedFaultInjectionSuccessorIndex + 1 &&
+    terminalIndex === reviewedTransitionRaceSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
-    (!historical && !approvedCurrent && !approvedFaultInjectionCurrent) ||
+    (!historical &&
+      !approvedCurrent &&
+      !approvedFaultInjectionCurrent &&
+      !approvedTransitionRaceCurrent) ||
     commands.lastIndexOf(predecessor) !== predecessorIndex ||
     commands.lastIndexOf(current) !== currentIndex ||
     commands.lastIndexOf(terminal) !== terminalIndex ||
-    ((approvedCurrent || approvedFaultInjectionCurrent) &&
+    ((approvedCurrent || approvedFaultInjectionCurrent || approvedTransitionRaceCurrent) &&
       commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex) ||
-    (approvedFaultInjectionCurrent &&
+    ((approvedFaultInjectionCurrent || approvedTransitionRaceCurrent) &&
       commands.lastIndexOf(reviewedFaultInjectionSuccessor) !==
-        reviewedFaultInjectionSuccessorIndex)
+        reviewedFaultInjectionSuccessorIndex) ||
+    (approvedTransitionRaceCurrent &&
+      commands.lastIndexOf(reviewedTransitionRaceSuccessor) !==
+        reviewedTransitionRaceSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T07 aggregate adjacency drifted.");
   }
@@ -1086,12 +1179,15 @@ async function trackedFileReceipts(overrides) {
   let successorState = false;
   let faultInjectionHistoricalState = false;
   let faultInjectionSuccessorState = false;
+  let transitionRaceHistoricalState = false;
+  let transitionRaceSuccessorState = false;
   const receipts = [];
   for (const relativePath of TRACKED_TASK_FILES) {
     const bytes = await authorityBytes(relativePath, overrides);
     const overridden = Object.hasOwn(overrides, relativePath);
     const bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
     const faultInjectionBridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const transitionRaceBridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
     const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
     if ((!overridden || faultInjectionBridge !== undefined) && bridge !== undefined) {
       const historicalMatch =
@@ -1102,16 +1198,29 @@ async function trackedFileReceipts(overrides) {
         faultInjectionBridge !== undefined &&
         observed.bytes === faultInjectionBridge.successor.bytes &&
         observed.sha256 === faultInjectionBridge.successor.sha256;
-      if (!historicalMatch && !successorMatch && !faultInjectionMatch) {
+      const transitionRaceMatch =
+        transitionRaceBridge !== undefined &&
+        observed.bytes === transitionRaceBridge.successor.bytes &&
+        observed.sha256 === transitionRaceBridge.successor.sha256;
+      if (!historicalMatch && !successorMatch && !faultInjectionMatch && !transitionRaceMatch) {
         fail("REGISTRATION_DRIFT", "A reviewed M07-T08 tracked successor receipt drifted.", {
           path: relativePath,
         });
       }
       if (historicalMatch && !successorMatch) historicalState = true;
-      if ((successorMatch || faultInjectionMatch) && !historicalMatch) successorState = true;
+      if ((successorMatch || faultInjectionMatch || transitionRaceMatch) && !historicalMatch) {
+        successorState = true;
+      }
       if (faultInjectionBridge !== undefined) {
         if (successorMatch && !faultInjectionMatch) faultInjectionHistoricalState = true;
         if (faultInjectionMatch && !successorMatch) faultInjectionSuccessorState = true;
+      }
+      if (transitionRaceBridge !== undefined) {
+        const transitionHistoricalMatch =
+          observed.bytes === transitionRaceBridge.historical.bytes &&
+          observed.sha256 === transitionRaceBridge.historical.sha256;
+        if (transitionHistoricalMatch && !transitionRaceMatch) transitionRaceHistoricalState = true;
+        if (transitionRaceMatch && !transitionHistoricalMatch) transitionRaceSuccessorState = true;
       }
     }
     const projected =
@@ -1133,6 +1242,9 @@ async function trackedFileReceipts(overrides) {
   }
   if (faultInjectionHistoricalState && faultInjectionSuccessorState) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T09 tracked successor set is incoherent.");
+  }
+  if (transitionRaceHistoricalState && transitionRaceSuccessorState) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
   }
   return deepFreeze(receipts);
 }
@@ -1172,25 +1284,39 @@ async function distributionReceipts() {
   const receipts = [];
   let historicalState = false;
   let successorState = false;
+  let transitionRaceHistoricalState = false;
+  let transitionRaceSuccessorState = false;
   for (const relativePath of observed) {
     const bytes = await safeReadAbsolute(path.join(ROOT, APP_DIRECTORY, "dist", relativePath));
     const observedReceipt = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
     const bridge =
       M07_T08_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE[relativePath] ??
       M07_T08_INDEX_DISTRIBUTION_RECEIPT_BRIDGE[relativePath];
+    const transitionRaceBridge = M07_T10_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE[relativePath];
     const historicalMatch =
       observedReceipt.bytes === bridge.historical.bytes &&
       observedReceipt.sha256 === bridge.historical.sha256;
     const successorMatch =
       observedReceipt.bytes === bridge.successor.bytes &&
       observedReceipt.sha256 === bridge.successor.sha256;
-    if (!historicalMatch && !successorMatch) {
+    const transitionRaceMatch =
+      transitionRaceBridge !== undefined &&
+      observedReceipt.bytes === transitionRaceBridge.successor.bytes &&
+      observedReceipt.sha256 === transitionRaceBridge.successor.sha256;
+    if (!historicalMatch && !successorMatch && !transitionRaceMatch) {
       fail("DISTRIBUTION_DRIFT", "A reviewed M07-T08 distribution receipt drifted.", {
         path: `${APP_DIRECTORY}/dist/${relativePath}`,
       });
     }
     if (historicalMatch && !successorMatch) historicalState = true;
-    if (successorMatch && !historicalMatch) successorState = true;
+    if ((successorMatch || transitionRaceMatch) && !historicalMatch) successorState = true;
+    if (transitionRaceBridge !== undefined) {
+      const transitionHistoricalMatch =
+        observedReceipt.bytes === transitionRaceBridge.historical.bytes &&
+        observedReceipt.sha256 === transitionRaceBridge.historical.sha256;
+      if (transitionHistoricalMatch && !transitionRaceMatch) transitionRaceHistoricalState = true;
+      if (transitionRaceMatch && !transitionHistoricalMatch) transitionRaceSuccessorState = true;
+    }
     if (M07_T08_ACTIVATION_DISTRIBUTION_RECEIPT_BRIDGE[relativePath] !== undefined) {
       receipts.push(
         Object.freeze({
@@ -1204,24 +1330,42 @@ async function distributionReceipts() {
   if (historicalState && successorState) {
     fail("DISTRIBUTION_DRIFT", "The reviewed M07-T08 activation/index distribution is incoherent.");
   }
+  if (transitionRaceHistoricalState && transitionRaceSuccessorState) {
+    fail("DISTRIBUTION_DRIFT", "The reviewed M07-T10 activation distribution is incoherent.");
+  }
   return deepFreeze(receipts);
 }
 
 async function registrationProjection(overrides) {
-  const [appBytes, indexBytes, rootBytes, ciBytes, inventoryBytes, sharedStateBytes] =
+  const [appBytes, indexBytes, rootBytes, ciBytes, inventoryBytes, sharedStateBytes, adrBytes] =
     await Promise.all(
-      [APP_PACKAGE, APP_INDEX, ROOT_PACKAGE, CI_SOURCE, CI_INVENTORY, SHARED_STATE_AUTHORITY].map(
-        (relativePath) => authorityBytes(relativePath, overrides),
-      ),
+      [
+        APP_PACKAGE,
+        APP_INDEX,
+        ROOT_PACKAGE,
+        CI_SOURCE,
+        CI_INVENTORY,
+        SHARED_STATE_AUTHORITY,
+        ADR,
+      ].map((relativePath) => authorityBytes(relativePath, overrides)),
     );
   const app = parseJsonBytes(appBytes, APP_PACKAGE);
   const rootPackage = parseJsonBytes(rootBytes, ROOT_PACKAGE);
+  const adrReceipt = Object.freeze({ bytes: adrBytes.byteLength, sha256: sha256(adrBytes) });
+  const approvedAdrReceipts = [
+    M07_T08_TRACKED_RECEIPT_BRIDGE[ADR].historical,
+    M07_T08_TRACKED_RECEIPT_BRIDGE[ADR].successor,
+    M07_T10_TRACKED_RECEIPT_BRIDGE[ADR].successor,
+  ];
   if (
     app.name !== "@desen/control-plane-api" ||
     app.scripts?.["test:runtime-activation"] !== "vitest run test/runtime-activation.test.ts" ||
     app.dependencies?.["better-sqlite3"] !== "13.0.3" ||
     app.exports?.["."]?.import !== "./dist/index.js" ||
-    app.exports?.["."]?.types !== "./dist/index.d.ts"
+    app.exports?.["."]?.types !== "./dist/index.d.ts" ||
+    !approvedAdrReceipts.some(
+      (receipt) => receipt.bytes === adrReceipt.bytes && receipt.sha256 === adrReceipt.sha256,
+    )
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T07 application registration drifted.");
   }
@@ -1239,6 +1383,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-activation",
     "pnpm verify:control-plane-runtime-recovery",
     "pnpm verify:control-plane-runtime-fault-injection",
+    "pnpm verify:control-plane-runtime-transition-races",
     "pnpm lint",
   );
   assertAdjacent(
@@ -1247,6 +1392,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-activation",
     "pnpm test:control-plane-runtime-recovery",
     "pnpm test:control-plane-runtime-fault-injection",
+    "pnpm test:control-plane-runtime-transition-races",
     "turbo run test",
   );
   if (
@@ -1360,9 +1506,13 @@ async function coverageProjection(overrides) {
     /\| TESTED\s+\|/u.test(n004) &&
     Buffer.byteLength(n004, "utf8") === M07_T09_N004_SUCCESSOR_RECEIPT.bytes &&
     sha256(Buffer.from(n004, "utf8")) === M07_T09_N004_SUCCESSOR_RECEIPT.sha256;
+  const approvedM07T10N038 =
+    /\| TESTED\s+\|/u.test(n038) &&
+    Buffer.byteLength(n038, "utf8") === M07_T10_N038_SUCCESSOR_RECEIPT.bytes &&
+    sha256(Buffer.from(n038, "utf8")) === M07_T10_N038_SUCCESSOR_RECEIPT.sha256;
   if (
     (!historicalN004 && !approvedM07T09N004) ||
-    !/\| PLANNED\s+\|/u.test(n038) ||
+    (!/\| PLANNED\s+\|/u.test(n038) && !approvedM07T10N038) ||
     !/\| PLANNED\s+\|/u.test(n041) ||
     !/\| NOT_PROVEN\s+\|/u.test(p12) ||
     pf075.status !== "OPEN" ||
@@ -1537,7 +1687,7 @@ async function implementationProjection(overrides) {
       'database.pragma("journal_mode = WAL")',
       'database.pragma("synchronous = FULL")',
       'database.pragma("trusted_schema = OFF")',
-      'openDatabase.exec("BEGIN IMMEDIATE");\n      assertExactSchema(openDatabase);',
+      'openDatabase.exec("BEGIN IMMEDIATE")',
       'pragmaInteger(database, "user_version") !== SCHEMA_VERSION',
       "!sameRecord(current, capturedAuthenticatedCurrent)",
       "hooks.beforeCommit?.()",
@@ -1569,11 +1719,34 @@ async function implementationProjection(overrides) {
     repositoryCas,
   );
   const sqliteWriter = sqlite.indexOf('openDatabase.exec("BEGIN IMMEDIATE")');
+  const sqliteReader = sqlite.indexOf('openDatabase.exec("BEGIN");');
+  const sqliteReaderProfile = sqlite.indexOf("assertConnectionProfile(openDatabase)", sqliteReader);
+  const sqliteReaderSchema = sqlite.indexOf("assertExactSchema(openDatabase)", sqliteReader);
+  const sqliteWriterProfile = sqlite.indexOf("assertConnectionProfile(openDatabase)", sqliteWriter);
   const sqliteSchemaReauthentication = sqlite.indexOf(
     "assertExactSchema(openDatabase)",
     sqliteWriter,
   );
   const sqliteRead = sqlite.indexOf("const current = readCurrent();", sqliteWriter);
+  const sqliteAfterCommit = sqlite.indexOf("hooks.afterCommit?.()", sqliteWriter);
+  const sqlitePostCommitProfile = sqlite.indexOf(
+    "assertConnectionProfile(openDatabase)",
+    sqliteAfterCommit,
+  );
+  const sqlitePostCommitSchema = sqlite.indexOf(
+    "assertExactSchema(openDatabase)",
+    sqliteAfterCommit,
+  );
+  const sqliteProfileCallCount = sqlite.split("assertConnectionProfile(openDatabase)").length - 1;
+  const historicalProfileAuthority = sqliteProfileCallCount === 0;
+  const transitionRaceProfileAuthority =
+    sqliteProfileCallCount === 3 &&
+    sqliteReaderProfile > sqliteReader &&
+    sqliteReaderSchema > sqliteReaderProfile &&
+    sqliteWriterProfile > sqliteWriter &&
+    sqliteSchemaReauthentication > sqliteWriterProfile &&
+    sqlitePostCommitProfile > sqliteAfterCommit &&
+    sqlitePostCommitSchema > sqlitePostCommitProfile;
   const sqliteCas = sqlite.indexOf("(current === null && expectedGeneration !== null)", sqliteRead);
   const sqliteBaseline = sqlite.indexOf(
     "!sameRecord(current, capturedAuthenticatedCurrent)",
@@ -1587,6 +1760,7 @@ async function implementationProjection(overrides) {
     repositoryCas < 0 ||
     repositoryBaseline <= repositoryCas ||
     sqliteWriter < 0 ||
+    (!historicalProfileAuthority && !transitionRaceProfileAuthority) ||
     sqliteSchemaReauthentication <= sqliteWriter ||
     sqliteRead <= sqliteSchemaReauthentication ||
     sqliteCas <= sqliteRead ||

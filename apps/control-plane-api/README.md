@@ -24,7 +24,10 @@ publishing an in-process activation authority. M07-T08 recovers only that unchan
 it accepts exact M07-T03 package authorities for the record's active and optional previous-good
 roles, internally reruns T04 and T06, recloses every referenced Bundle, and reauthenticates all
 three durable fields before reconstructing active authority. Exhaustive fault and race matrices plus
-reference-host consumption remain later M07 work.
+M07-T09 then proves the closed discovery-through-recovery fault matrix. M07-T10 proves ordered
+invalid-candidate recovery, concurrent activation, both recovery/activation race orderings, exact
+winner restart, and the SQLite connection-profile decision. Separately built reference-host
+consumption remains M07-T11 work.
 
 The current implementation is a local POSIX filesystem profile. The low-level Bundle store treats
 validation as a caller precondition; the T05 transport deliberately permits unverified candidate
@@ -422,19 +425,24 @@ a deleted, inserted, or same-generation externally rewritten record requires rec
 reset or silently replace activation state. Recovery discovered while Bundle I/O is pending is
 sticky and the consumed attempt cannot revive the controller.
 
-The Web adapter reauthenticates schema version and exact schema under its `BEGIN IMMEDIATE` writer
-lock before DML, then checks the exact committed row and schema before authority publication. A
-trigger or table added after repository open therefore cannot manufacture a false successful
-activation. Future Android and iOS repositories must preserve the same observable atomicity and
-recovery rules without inheriting this SQLite implementation choice.
+The Web adapter reauthenticates the complete SQLite connection profile, schema version, and exact
+schema inside read transactions and under its `BEGIN IMMEDIATE` writer lock before any record read
+or DML. It then checks the profile, exact committed row, and schema again before authority
+publication. Profile or schema drift fails closed; the adapter never silently changes the PRAGMA
+state back. A trigger, table, or connection-profile change after repository open therefore cannot
+manufacture a false successful activation. Future Android and iOS repositories must preserve the
+same observable atomicity and recovery rules without inheriting this SQLite implementation choice.
 
 Only a certain durable commit publishes a current in-process
 `BundleRuntimeActivationAuthority`. `readState()` returns `active` only for authority created by
 that open controller. A preexisting durable record or an indeterminate commit returns
 `recovery-required`; raw persisted fields are never promoted to runtime authority. M07-T08 proves
-the separate revalidation and reconstruction boundary below, and M07-T09 proves the bounded,
-closed pre- and post-commit boundary-fault matrix. M07-T10 retains ownership of the remaining
-ordered fault-sequence and race matrix.
+the separate revalidation and reconstruction boundary below. M07-T09 proves the bounded, closed
+pre- and post-commit fault matrix. M07-T10 adds eight complete A → invalid B → valid C sequences,
+same- and different-candidate two-controller races, consumed-loser freshness, both
+recovery/activation orderings, exact restart reconstruction, a real live-journal transition probe,
+and transaction-time profile-drift rejection. Invalid B never becomes durable or in-memory
+authority; C commits as generation one with A as the actual previous-good revision.
 
 ## Restart-recovery boundary
 
@@ -560,18 +568,19 @@ makes no tamper-proof, hostile-administrator, or anti-rollback claim.
 
 ## Explicitly deferred
 
-M07-T01 through M07-T09 establish immutable exact-byte persistence, Bundle integrity, exact
+M07-T01 through M07-T10 establish immutable exact-byte persistence, Bundle integrity, exact
 installed-package preflight, bounded surface/capability reference preflight, authenticated local
 Source/Bundle/channel transport, active-separated runtime-index staging, and one durable atomic
 activation-record transition, exact restart reconstruction of an unchanged record, and a bounded
-19-case fault matrix across discovery through recovery. They do not yet provide:
+19-case fault matrix across discovery through recovery. The ordered transition/race proof adds 15
+closed cases covering eight invalid-B classes, concurrent winners and fenced losers, both
+recovery/activation orderings, exact restart, and the SQLite profile race. They do not yet provide:
 
-- M07-T10 complete A → invalid B → valid C, concurrent activation, and restart race matrices; or
 - M07-T11 reference-host channel consumption.
 
 Callers must not treat a successful M07-T01/T05 Bundle write or a channel pointer as integrity
 verification, an M07-T02 integrity authority as package authority, an M07-T03 package authority as
 reference authority, an M07-T04 reference authority as staging authority, or an M07-T06 staged
 authority as committed or active state. A raw durable T07 record is not recovered runtime
-authority. T09 proves the reviewed fault boundaries, but only T10 owns the complete ordered
-activation and concurrency matrix.
+authority. T09 and T10 prove the reviewed fault, ordered-transition, and concurrency boundaries;
+neither turns mutable channel discovery into activation authority or claims host consumption.

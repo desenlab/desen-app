@@ -54,7 +54,7 @@ const ACTIVATION_TABLE_SQL = [
   ") STRICT",
 ].join(" ");
 
-/** Deterministic transaction seams used only by focused M07-T07 package tests. @internal */
+/** Deterministic package-private transaction seams used only by focused activation proof tests. @internal */
 export interface RuntimeActivationSqliteHooks {
   /** Runs after each statement is prepared during repository acquisition. */
   readonly afterPrepareStatement?: (statement: "read" | "insert" | "update") => void;
@@ -526,6 +526,10 @@ export function openRuntimeActivationSqliteRepository(
     try {
       assertStorageIdentity(storage.path, storage.identity);
       openDatabase.exec("BEGIN");
+      // Reauthenticate the complete connection profile inside the transaction. The profile is
+      // established at open, but the transaction boundary is the authority used for this read;
+      // accepting a later PRAGMA drift here would create a time-of-check/time-of-use gap.
+      assertConnectionProfile(openDatabase);
       assertExactSchema(openDatabase);
       const current = readCurrent();
       assertExactSchema(openDatabase);
@@ -567,6 +571,9 @@ export function openRuntimeActivationSqliteRepository(
     try {
       assertStorageIdentity(storage.path, storage.identity);
       openDatabase.exec("BEGIN IMMEDIATE");
+      // The writer lock is the last safe point before durable authority is observed or changed.
+      // Recheck every profile field here and fail closed rather than silently repairing drift.
+      assertConnectionProfile(openDatabase);
       assertExactSchema(openDatabase);
       const current = readCurrent();
       if (
@@ -615,6 +622,7 @@ export function openRuntimeActivationSqliteRepository(
 
       try {
         hooks.afterCommit?.();
+        assertConnectionProfile(openDatabase);
         assertExactSchema(openDatabase);
         if (!sameRecord(readCurrent(), record)) {
           throw new RuntimeActivationStorageError("ACTIVATION_CORRUPT");

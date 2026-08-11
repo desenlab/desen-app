@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import {
   mkdir,
   mkdtemp,
@@ -62,6 +63,18 @@ function changedByte(bytes) {
   const copy = Uint8Array.from(bytes);
   copy[Math.floor(copy.byteLength / 2)] ^= 1;
   return copy;
+}
+
+async function m07T09AppPackageBytes() {
+  const appPackage = JSON.parse(await workspaceBytes(APP_PACKAGE));
+  delete appPackage.scripts["test:runtime-transition-races"];
+  const bytes = Buffer.from(`${JSON.stringify(appPackage, null, 2)}\n`, "utf8");
+  assert.equal(bytes.byteLength, 2_319);
+  assert.equal(
+    createHash("sha256").update(bytes).digest("hex"),
+    "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
+  );
+  return bytes;
 }
 
 function exactProofDocument(artifactSha256) {
@@ -422,6 +435,16 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       runtimeReceipt: built.runtimeReceipt,
     }),
     expectedError("REGISTRATION_DRIFT"),
+  );
+
+  await assert.rejects(
+    buildControlPlanePackagePreflightEvidence({
+      trackedFileBytes: { [APP_PACKAGE]: await m07T09AppPackageBytes() },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    (error) =>
+      expectedError("REGISTRATION_DRIFT")(error) &&
+      error.message === "The reviewed M07-T10 tracked successor set is incoherent.",
   );
 });
 

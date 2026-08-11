@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-07
+Last updated: 2026-08-11
 
 ## Plain-language status
 
@@ -511,6 +511,18 @@ deleted, or drifted lineage publishes neither authority. Twelve focused runtime 
 compiler-negative cases, and 9 root proof/mutation cases pass. P-12 remains `NOT_PROVEN`; N-004,
 N-038, and N-041 remain `PLANNED`; G07 remains open. The application-owned local root remains
 trusted, so this task makes no tamper-proof, hostile-administrator, or anti-rollback claim.
+M07-T09 now closes the bounded fault-injection matrix from channel discovery and immutable fetch
+through durable commit and restart recovery. Definite pre-commit failures preserve the exact
+authenticated baseline and publish no partial authority; post-commit uncertainty enters explicit
+recovery, and external durable drift is never repaired away. N-004 is now `TESTED`.
+M07-T10 now closes the ordered transition/race matrix. The SQLite writer reauthenticates WAL,
+`synchronous=FULL`, foreign keys, trusted schema, and busy timeout under its transaction lock and
+again after commit before publication. Any drift fails closed without repair. Fifteen named
+transitions, 16 runtime tests, 9 compiler-negative tests, 12 independent root mutation classes, 9
+prerequisites, and 15 trace rows pass. The root has no native-addon authority and proves a real
+`ERR_DLOPEN_DISABLED` denial; only the verifier receives narrow SQLite authority. N-038 is now
+`TESTED`; N-041 remains `PLANNED`; P-12 remains `NOT_PROVEN`; G07 remains open. This local proof
+makes no tamper-proof, anti-rollback, hosted T10, host-channel, or native-conformance claim.
 
 I07-01 is complete historical evidence. It separated immutable task-time evidence from a
 current-reader checkpoint and derived the 130-step execution schedule; on candidate commit
@@ -704,11 +716,19 @@ not a hosted M07-T09 claim; `DEBT-I07-016` records the temporary successor bridg
 removal by G07.
 
 Reviewed checkpoint sequence 22 links that exact sequence 21 head
-`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to current head
+`ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to its then-current head
 `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`. It preserves all 18
 frozen artifacts and all 36 reader identities while resealing only workflow-dependent reader
 indexes `[8, 10, 11, 12, 14]`; every frozen artifact remains byte-identical. This append records
 the exact I07-03 CI-workflow receipt propagation without changing any proof claim.
+
+Reviewed checkpoint sequence 23 links that exact sequence 22 head
+`aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` to current head
+`1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`. Sequences 1–22 and all
+predecessor artifact bytes remain unchanged. It appends the exact 58,059-byte M07-T10 artifact and
+authenticates 19 frozen artifacts plus 38 current readers, including the two new T10 proof/root
+readers. `DEBT-I07-018` assigns the required historical reader bridges to I07-04 for removal no
+later than G07. This is reviewed local-reader evidence and makes no hosted M07-T10 claim.
 
 The temporary shadow workflow and modular comparison
 adapter/test are removed, closing `DEBT-I07-008`. Exact accepted and rejected cutover evidence is
@@ -721,9 +741,11 @@ path. I07-03 is now `DONE`: the exact `REQUIRED + EXHAUSTIVE` runner remains the
 authority while a separate pull-request-only `SHADOW + AFFECTED` job observes complete exact
 tracked-path ownership and fresh selected-workload execution. Every unknown, ambiguous, untrusted,
 policy, dependency, frozen-input, incomplete-diff, or unsupported condition expands to
-`EXHAUSTIVE`. The selector is pinned at
+`EXHAUSTIVE`. The frozen I07-03 baseline selector is pinned at
 `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across the 20 sources in
-its comparison authority. Its frozen threshold starts honestly at `0 / 20`, so promotion is false and
+its historical comparison authority; the current M07-T10 successor selector digest is
+`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`. Its frozen threshold
+starts honestly at `0 / 20`, so promotion is false and
 I07-04 remains `NOT_STARTED` until every selector category has mutation coverage, false negatives
 remain zero, and at least 20 consecutive eligible same-revision hosted strict-subset comparisons
 agree.
@@ -739,8 +761,9 @@ CI-infrastructure suite passed 203/203. The full local `REQUIRED + EXHAUSTIVE` r
 control-plane TCP lifecycle cases; the hosted gate passed the repository authority. Exact run and
 job identifiers are pinned in the
 [I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json). `DEBT-I07-017`
-assigns shadow-only cleanup to I07-04 for removal by G07; I07-05 owns legacy retirement by G12.
-M07-T09 remains `DONE`, and M07-T10 is the next implementation task.
+assigns shadow-only cleanup to I07-04 for removal by G07; `DEBT-I07-018` assigns the new historical
+reader bridges to the same I07-04/G07 cleanup; I07-05 owns legacy retirement by G12. M07-T10 is
+`DONE`, and M07-T11 is the next implementation task.
 
 ## Current milestone
 
@@ -748,11 +771,11 @@ M07-T09 remains `DONE`, and M07-T10 is the next implementation task.
   `G06`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
-- Overall implementation progress: `83 / 145 tasks complete (57%)`
+- Overall implementation progress: `84 / 145 tasks complete (58%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
-- M07 progress: `9 / 11 tasks complete (82%)`
+- M07 progress: `10 / 11 tasks complete (91%)`
 - Proof-gate progress: `7 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -821,7 +844,8 @@ M07-T09 remains `DONE`, and M07-T10 is the next implementation task.
   `M07-T06 — Staged runtime indexes and active/staged state separation`,
   `M07-T07 — Durable transactional commit of the active, previous-good, and generation record`,
   `M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`,
-  `M07-T09 — Fault injection from discovery and immutable fetch through durable commit and recovery`
+  `M07-T09 — Fault injection from discovery and immutable fetch through durable commit and recovery`,
+  `M07-T10 — Ordered transition, activation/recovery race, restart, and SQLite profile-drift matrix`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
@@ -829,9 +853,10 @@ M07-T09 remains `DONE`, and M07-T10 is the next implementation task.
 - Next operational and infrastructure task:
   `I07-04 — Required affected-selector promotion after the frozen observation threshold` (`0 / 20`)
 - Next implementation task:
-  `M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`
-- Status: M07-T09 and I07-03 are complete; I07-04 and M07-T10 are `NOT_STARTED`, affected
-  promotion is false, M07-T10's dependencies are satisfied, and G07 remains open
+  `M07-T11 — Control-plane channel consumed by separately built reference host`
+- Status: M07-T10 and I07-03 are complete; I07-04 is `NOT_STARTED`, M07-T11 is `NOT_STARTED`,
+  affected promotion is false at `0 / 20`, M07-T11's dependencies are satisfied, and G07 remains
+  open
 
 ## Completed preparation
 
@@ -1222,10 +1247,27 @@ have durably committed the new winner; it is resolved only by recovering that ex
 N-004 is now `TESTED`; P-12 remains `NOT_PROVEN`, while N-038 and N-041 remain `PLANNED` for their
 later owners.
 
+M07-T10 is complete. Its 15-case ordered matrix covers A → invalid B → valid C, same- and
+different-candidate activation races, activation/recovery ordering, restart, real journal-mode
+transition, and deterministic writer-profile drift. The complete SQLite profile—WAL,
+`synchronous=FULL`, foreign keys enabled, trusted schema disabled, and exact busy timeout—is
+reauthenticated under the writer lock before DML and again after commit before publication. Drift
+fails closed without repair. The 58,059-byte artifact is pinned at
+`sha256:f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39`. Evidence passes 16
+runtime tests, 9 compiler-negative tests, 12 independent root mutation classes, 9 prerequisites,
+and 15 trace rows. The root proof has native-addon authority `NONE` and proves a real
+`ERR_DLOPEN_DISABLED` denial; only the verifier gets narrow SQLite authority. The proof binds the
+single public `.` export and captured CI/distribution bytes to digest-bound pre/post live equality,
+and rejects receipt-only overrides. N-038 is now `TESTED`; N-041 remains `PLANNED`; P-12 remains
+`NOT_PROVEN`; G07 remains open. No tamper-proof, anti-rollback, hosted T10, host-channel, or
+native-conformance claim is made.
+
 I07-03 is complete with exact local and hosted evidence at
-`docs/proof/baselines/i07-03-affected-selector-shadow.json`. The selector is pinned at
-`sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` over the 20 sources in its
-comparison authority. The hosted bootstrap succeeded; its shadow returned
+`docs/proof/baselines/i07-03-affected-selector-shadow.json`. Its frozen baseline selector is pinned
+at `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` over the 20 sources in its
+historical comparison authority; the current M07-T10 successor selector digest is
+`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`. The hosted bootstrap
+succeeded; its shadow returned
 `NOT_ELIGIBLE → EXHAUSTIVE / UNSUPPORTED_CHANGE_KIND`, so no eligible strict-subset observation
 was counted and promotion remains false at `0 / 20`. The authoritative hosted Quality gate passed.
 Local focused contracts passed 91/91 and CI-infrastructure tests passed 203/203. The full local
@@ -1234,7 +1276,7 @@ Local focused contracts passed 91/91 and CI-infrastructure tests passed 203/203.
 stays `NOT_STARTED` until zero false negatives, mutation coverage for every selector category, and
 at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive comparisons
 pass, followed by an exact authenticated hosted-evidence review. Next implement
-`M07-T10 — A → invalid B → valid C, concurrent activation, and restart behavior tests`.
+`M07-T11 — Control-plane channel consumed by separately built reference host`.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1242,11 +1284,10 @@ to 12 minutes 11 seconds, saving 47 minutes 11 seconds per run. The full job fel
 45 seconds to 12 minutes 30 seconds. All 91 distinct workloads, 25 proof verifiers, 25 root proof
 files, 358 root tests, and both boundary layers remained green.
 
-The current M07-T09 working-tree CI authority contains 146 workloads and 69 verifier/root-test
-pairs: 58 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contains
-455 segments and 2,769 ordered leaf invocations covering 227 distinct workloads. The
-current pins
-are:
+The historical M07-T09 working-tree CI authority contained 146 workloads and 69 verifier/root-test
+pairs: 58 ordinary pairs and 11 exclusive barriers. Its legacy prerequisite expansion contained
+455 segments and 2,769 ordered leaf invocations covering 227 distinct workloads. At that
+checkpoint, the pins were:
 
 - prerequisite inventory:
   `3d48423eafd03a1492451fc23bbaaf9c954b80119bb6c031a871d3afea5ee74a`
@@ -1268,7 +1309,15 @@ are:
 The runtime-fault-injection proof pair is OS-temp-isolated. Its verifier alone receives the exact
 runtime-probe child policy, its root receives only the Node test harness, and both receive the
 separate narrow fault-injection SQLite native-addon policy; neither receives workspace-write or
-port authority. This M07-T09 working-tree authority makes no hosted M07-T09 claim.
+port authority. This historical M07-T09 working-tree authority makes no hosted M07-T09 claim.
+
+The current M07-T10 successor contains 148 workloads and 70 proof pairs: 59 ordinary pairs and 11
+exclusive barriers. Its retained legacy projection expands to 463 prerequisite segments, 2,929
+ordered leaf invocations, and 230 distinct leaves. The current selector digest is
+`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`; the frozen I07-03
+baseline digest above remains historical. The T10 root proof receives no native-addon authority,
+while only its verifier receives the narrow SQLite authority. These are local code-owned successor
+facts and make no hosted M07-T10 claim.
 
 M04-T12 extends the current reviewed CI inventory to 121 distinct workloads, 35 proof verifiers, 35
 root proof files, and a pinned 78-step plan with 35 proof-test steps. Its equivalent legacy
@@ -2445,7 +2494,8 @@ M07-T09 evidence:
 - public-boundary evidence: the exact 105-entry package-root export inventory and exact 36-key
   built runtime module surface remain pinned; fault injection uses package-private test seams and
   adds no public production export
-- CI authority: the working-tree successor contains 146 workloads and 69 proof pairs (58 ordinary,
+- CI authority at the M07-T09 checkpoint: the working-tree successor contained 146 workloads and
+  69 proof pairs (58 ordinary,
   11 barriers), 455 retained prerequisite segments, 2,769 ordered legacy leaves, and 227 distinct
   leaves; these are local code-owned values and no hosted M07-T09 pass is claimed yet
 - historical reviewed reader checkpoint: sequence 21 links exact sequence 20 head
@@ -2455,7 +2505,7 @@ M07-T09 evidence:
   historical compatibility readers are resealed, and T09's proof/root readers become indexes
   `[34, 35]`, yielding 36 current readers; this is local-reader evidence only, no hosted M07-T09
   result is claimed, and `DEBT-I07-016` assigns the temporary bridges to I07-04 for removal by G07
-- current reviewed reader checkpoint: sequence 22 links exact sequence 21 head
+- historical reviewed reader checkpoint: sequence 22 links exact sequence 21 head
   `ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939` to
   `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e`; it preserves all 18
   frozen artifacts and all 36 reader identities, reseals only workflow-dependent indexes
@@ -2463,10 +2513,10 @@ M07-T09 evidence:
 - scope nonclaims: this is a bounded closed boundary matrix, not every possible fault ordering or
   race; it adds no hostile-administrator, external anti-rollback, renderer, host-consumption, or
   platform-adapter claim
-- coverage decision: M07-T09 becomes `DONE`; N-004 becomes `TESTED`; P-12 remains `NOT_PROVEN`;
-  N-038 and N-041 remain `PLANNED` for their remaining owners; G07 remains open; overall progress
-  is 83/145, M07 progress is 9/11, and M07-T10 owns the next implementation slice for ordered fault
-  sequences and races
+- historical coverage decision at the M07-T09 checkpoint: M07-T09 became `DONE`; N-004 became
+  `TESTED`; P-12 remained `NOT_PROVEN`; N-038 and N-041 remained `PLANNED` for their later owners;
+  G07 remained open; overall progress was 83/145, M07 progress was 9/11, and M07-T10 owned the
+  next implementation slice for ordered fault sequences and races
 - infrastructure decision: I07-03 is `DONE` outside the implementation count; the separate
   pull-request shadow observer remains at `0 / 20`, promotion is false, and I07-04 is
   `NOT_STARTED`; the hosted bootstrap succeeded but returned
@@ -2476,6 +2526,43 @@ M07-T09 evidence:
   pass 203/203, and full local `REQUIRED + EXHAUSTIVE` is `BLOCKED_BY_LOCAL_SANDBOX` only because
   `127.0.0.1` listen returns `EPERM` in two pre-existing control-plane TCP lifecycle cases;
   proof-gate progress remains 7/13
+
+M07-T10 evidence:
+
+- `docs/proof/CONTROL-PLANE-RUNTIME-TRANSITION-RACES.md`
+- `docs/proof/artifacts/control-plane-api-0.1.0-runtime-transition-races.json`
+- 58,059-byte artifact SHA-256:
+  `f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39`
+- closed transition inventory: 15 named cases cover A → invalid B → valid C, same- and
+  different-candidate races, activation/recovery orderings, restart, a real journal transition,
+  and deterministic writer-profile drift
+- transactional result: the complete SQLite connection profile—WAL, `synchronous=FULL`, foreign
+  keys enabled, trusted schema disabled, and exact busy timeout—is reauthenticated under the writer
+  lock before DML and after commit before publication; drift fails closed without silent repair
+- executable evidence: 16 runtime tests, 9 compiler-negative tests, 12 independent root mutation
+  classes, 9 exact prerequisites, and 15 ordered trace rows
+- proof hardening: the exact single public `.` package export is pinned; captured CI/distribution
+  bytes must remain digest-bound and equal before/after execution; receipt-only overrides are
+  rejected
+- least authority: the root proof receives native-addon authority `NONE` and verifies a real
+  `ERR_DLOPEN_DISABLED` denial; only the verifier receives the narrow SQLite native authority
+- CI authority: the local successor contains 148 workloads and 70 proof pairs (59 ordinary, 11
+  barriers), 463 retained prerequisite segments, 2,929 ordered legacy leaves, and 230 distinct
+  leaves; its selector digest is
+  `010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`
+- current reviewed reader checkpoint: sequence 23 links exact sequence 22 head
+  `aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e` to
+  `1edf24859a6c889a9861eb0f3273fa0dac7fedfefd752807c2c68fe0b611f92e`; sequences 1–22 and all
+  predecessor artifact bytes remain unchanged, the T10 artifact becomes artifact 19, and its two
+  proof/root readers yield 38 live readers
+- cleanup ownership: `DEBT-I07-018` remains `OPEN`, owned by I07-04 and due no later than G07
+- scope nonclaims: no tamper-proof, external anti-rollback, hosted T10, host-channel, or
+  native-conformance result is claimed
+- coverage decision: M07-T10 becomes `DONE`; N-038 becomes `TESTED`; N-041 remains `PLANNED`;
+  P-12 remains `NOT_PROVEN`; G07 remains open; overall progress is 84/145, M07 progress is 10/11,
+  proof-gate progress remains 7/13, and M07-T11 owns separately built host consumption next
+- infrastructure decision: I07-04 remains `NOT_STARTED` at `0 / 20`, affected promotion remains
+  false, and the frozen I07-03 baseline selector digest remains historical and unchanged
 
 ## Status vocabulary
 

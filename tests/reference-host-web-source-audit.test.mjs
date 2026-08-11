@@ -323,7 +323,7 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.graphDynamicEdges, 0);
   assert.equal(result.packageBoundaryViolations, 0);
   assert.equal(result.coordination.result, "PASS");
-  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T09");
+  assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T10");
   assert.equal(result.coordination.normalizedControlPlaneScriptKeys, true);
   assert.equal(result.coordination.normalizedControlPlanePipelineSegments, true);
   assert.equal(result.coordination.normalizedControlPlaneLockfileImporter, true);
@@ -331,10 +331,10 @@ test("runs the full current host audit while comparing every enduring M05 input"
   assert.equal(result.coordination.normalizedControlPlaneValidatorImporter, true);
   assert.deepEqual(result.coordination.controlPlanePackage, {
     path: "apps/control-plane-api/package.json",
-    bytes: 2_319,
-    rawSha256: "sha256:5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
-    testScript: "test:runtime-fault-injection",
-    testCommand: "vitest run test/runtime-fault-injection.test.ts",
+    bytes: 2_408,
+    rawSha256: "sha256:a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
+    testScript: "test:runtime-transition-races",
+    testCommand: "vitest run test/runtime-transition-races.test.ts",
     validatorSpecifier: "workspace:*",
     runtimeCoreSpecifier: "workspace:*",
   });
@@ -539,7 +539,7 @@ test("admits only the source-pinned M06-T05 Validator runtime successor", async 
   }
 });
 
-test("reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance through T09", async () => {
+test("reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance through T10", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
   const [rootPackageBytes, lockfileBytes, controlPlanePackageBytes] = await Promise.all([
@@ -715,6 +715,23 @@ test("reviewed Publisher and M07-T06 coordination preserve root, package, and lo
     );
   });
   await rejectRootManifest((manifest) => {
+    delete manifest.scripts["generate:control-plane-runtime-transition-races"];
+  });
+  await rejectRootManifest((manifest) => {
+    delete manifest.scripts["test:control-plane-runtime-transition-races"];
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["verify:control-plane-runtime-transition-races"] += " --unreviewed";
+  });
+  await rejectRootManifest((manifest) => {
+    manifest.scripts["generate:control-plane-runtime-transition-races"] = manifest.scripts[
+      "generate:control-plane-runtime-transition-races"
+    ].replace(
+      "pnpm --filter @desen/control-plane-api test:runtime-transition-races",
+      "pnpm --filter @desen/control-plane-api test:runtime-fault-injection",
+    );
+  });
+  await rejectRootManifest((manifest) => {
     manifest.scripts["verify:control-plane-decoy"] = "node scripts/decoy.mjs";
   });
   await rejectRootManifest((manifest) => {
@@ -731,14 +748,14 @@ test("reviewed Publisher and M07-T06 coordination preserve root, package, and lo
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.check = manifest.scripts.check.replace(
-      "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
-      "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-recovery && pnpm lint",
+      "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races && pnpm lint",
+      "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
     );
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.test = manifest.scripts.test.replace(
-      "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-runtime-fault-injection && turbo run test",
-      "pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-decoy && pnpm test:control-plane-runtime-fault-injection && turbo run test",
+      "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-runtime-transition-races && turbo run test",
+      "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-decoy && pnpm test:control-plane-runtime-transition-races && turbo run test",
     );
   });
   await rejectControlPlanePackage((manifest) => {
@@ -773,6 +790,13 @@ test("reviewed Publisher and M07-T06 coordination preserve root, package, and lo
   });
   await rejectControlPlanePackage((manifest) => {
     manifest.scripts["test:runtime-fault-injection"] = "vitest run test/runtime-recovery.test.ts";
+  });
+  await rejectControlPlanePackage((manifest) => {
+    delete manifest.scripts["test:runtime-transition-races"];
+  });
+  await rejectControlPlanePackage((manifest) => {
+    manifest.scripts["test:runtime-transition-races"] =
+      "vitest run test/runtime-fault-injection.test.ts";
   });
   await rejectControlPlanePackage((manifest) => {
     manifest.dependencies["@desen/runtime-core"] = "workspace:^";

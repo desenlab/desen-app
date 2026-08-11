@@ -54,12 +54,13 @@ required-workflow cutover.
 
 I07-02 established the scheduler-neutral 130-node, 61-proof-unit cutover inventory independently
 from both schedulers. M07-T07 appended the sixth post-cutover verifier/root-test pair for durable
-runtime activation; M07-T08 appends the seventh for exact restart recovery; and M07-T09 appends the
-eighth for its bounded, closed boundary-fault matrix. The working-tree successor therefore
-contains 146 nodes and 69 proof units without rewriting that frozen baseline. Its retained legacy projection
-contains 455 prerequisite segments, 2,769 ordered leaf invocations, and 227 distinct leaves. These
-are local code-owned successor values; no hosted M07-T09 result is claimed. Contract and
-hostile-input tests cover exact ordered ids, labels, commands, arguments,
+runtime activation; M07-T08 appended the seventh for exact restart recovery; M07-T09 appended the
+eighth for its bounded boundary-fault matrix; and M07-T10 appends the ninth for ordered transitions
+and two-way races. The working-tree successor therefore contains 148 nodes and 70 proof units
+without rewriting that frozen baseline. Its retained legacy projection contains 463 prerequisite
+segments, 2,929 ordered leaf invocations, and 230 distinct leaves. These are local code-owned
+successor values; no hosted M07-T10 result is claimed. Contract and hostile-input tests cover exact
+ordered ids, labels, commands, arguments,
 dependencies, execution classes, and shared-state records; omission, duplication, reorder,
 substitution, cycles, unknown classes, shell syntax, writer insertion, and affected-only metadata
 must fail closed. A separate rollback-only adapter proves exact equality with the retained
@@ -67,9 +68,9 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 58
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 60
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 58 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 59 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -108,6 +109,13 @@ policy and the root receives only `NODE_TEST_HARNESS`; both receive the task-spe
 `CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE` native-addon policy. Neither receives
 workspace-write or port authority, and the pair introduces no scheduler barrier.
 
+The M07-T10 `control-plane-runtime-transition-races` verifier and root are ordinary
+`PROOF_OS_TEMP_ISOLATED` steps. The verifier receives the bounded `VERIFIER_RUNTIME_PROBE` child
+policy plus the separate task-specific `CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE`
+native-addon policy. The root receives only `NODE_TEST_HARNESS` and no native-addon authority
+because it injects the authenticated runtime-suite receipt. Neither receives workspace-write or
+port authority, and the pair introduces no scheduler barrier.
+
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
 inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and identity-checked cleanup. Child
@@ -116,18 +124,22 @@ runtime probes are permitted only for the verifier side of
 `publisher-invalid-source-matrix`, `control-plane-bundle-store`, and
 `control-plane-bundle-verification`, `control-plane-local-api`, and
 `control-plane-runtime-activation`, `control-plane-runtime-recovery`, and
-`control-plane-runtime-fault-injection`. Native-addon authority is
+`control-plane-runtime-fault-injection`, and `control-plane-runtime-transition-races`.
+Native-addon authority is
 permitted only for the exact
 `reference-host-web-source-audit` verifier/root-test pair, the `publisher-invalid-source-matrix`
 root test, and the exact `control-plane-local-api` and `control-plane-runtime-activation`
 verifier/root-test pairs plus the exact `control-plane-runtime-recovery` and
-`control-plane-runtime-fault-injection` pairs. Regression tests prove
+`control-plane-runtime-fault-injection` pairs plus only the
+`control-plane-runtime-transition-races` verifier. The transition-race root proof is explicitly
+denied native-addon authority.
+Regression tests prove
 that every unlisted step remains denied; the source-audit verifier remains workspace-read-only.
 The reviewed production dependency audit for locked Fastify 5.11.2 and better-sqlite3 13.0.3
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution across the 146 workloads: 128 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across the 148 workloads: 130 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
@@ -399,6 +411,13 @@ and one-test files under the exact step temp root while retaining the scheduler-
 permission policy. No package-manager, `PATH`, or ignored `dist` output is involved; file/cache
 parallelism is disabled and cleanup is unconditional. The full T09 verifier still runs
 authoritatively in required-exhaustive execution after the dependency graph builds its inputs.
+
+M07-T10's full verifier launches its focused suite with `process.execPath` and the repository-local
+Vitest entrypoint under an owner-only temporary config. It disables cache and file parallelism,
+fixes one worker, bounds JSON-reporter output and execution time, removes inherited `NODE_PATH`,
+redacts failure output to code-owned identities and size/digest metadata, and deletes temporary
+state in `finally`. This is an authoritative exhaustive workload after its build prerequisites,
+not a package-manager or `PATH`-resolved shortcut.
 
 The final T08 reader does not infer coverage from matching strings. Exact AST structures identify
 the executable CI registrations, shared-state mappings, and direct 12-runtime/9-root test

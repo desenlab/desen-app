@@ -182,7 +182,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 69 ||
+    exhaustiveRootIds.length !== 70 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],
@@ -373,7 +373,7 @@ export async function runShadowAffectedQualityGate(
   }
 
   // The exhaustive SHADOW factory authenticates and marks the original workload objects. Its
-  // required sibling remains permanently fixed to all 146 nodes.
+  // required sibling remains permanently fixed to all 148 nodes.
   const exhaustivePlan = createRequiredExhaustivePlan({ authority: OPTIONAL_AUTHORITY });
   const nodeById = new Map(exhaustivePlan.nodes.map((workload) => [workload.id, workload]));
   const regions = selectedRegions(selection, nodeById);

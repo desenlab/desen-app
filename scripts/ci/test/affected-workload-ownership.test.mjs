@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 138,
+  PROOF_UNIT: 140,
   CI_POLICY: 42,
   DEPENDENCY_POLICY: 30,
-  FROZEN_INPUT: 112,
-  PACKAGE_OR_APPLICATION: 375,
-  SHARED_PROOF_INFRASTRUCTURE: 167,
-  PROJECT_DOCUMENTATION: 104,
+  FROZEN_INPUT: 113,
+  PACKAGE_OR_APPLICATION: 377,
+  SHARED_PROOF_INFRASTRUCTURE: 169,
+  PROJECT_DOCUMENTATION: 105,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 979 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 987 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 979 reviewed tracked paths", async () 
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 979);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 987);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 138);
+  assert.equal(proofEntries.length, 140);
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
     const verifier = nodeById.get(entry.verifierNodeId);

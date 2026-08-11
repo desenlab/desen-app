@@ -103,8 +103,7 @@ administrator claim.
 - Private previous-good lineage retention does not grant public rollback or loading authority.
 - A null indeterminate outcome requires a fresh repository open rather than a guessed winner.
 - SQLite remains one Web storage adapter, not protocol syntax or a native-platform requirement.
-- M07-T09 now proves the bounded discovery-through-recovery fault matrix and advances N-004 to
-  `TESTED`; M07-T10 still owns A → invalid B → valid C, concurrent-writer, restart, and
-  storage-profile race matrices, including the pending
-  `journal_mode` decision; and M07-T11 still owns separately built reference-host channel
-  consumption.
+- M07-T09 proves the bounded discovery-through-recovery fault matrix and advances N-004 to
+  `TESTED`. M07-T10 proves the ordered invalid-candidate sequence, concurrent writers, both
+  recovery/activation orderings, exact winner restart, and the transaction-local SQLite profile
+  decision; M07-T11 still owns separately built reference-host channel consumption.

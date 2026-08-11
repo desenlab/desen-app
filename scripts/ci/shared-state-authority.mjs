@@ -107,6 +107,7 @@ export const PROOF_IDS = Object.freeze([
   "control-plane-runtime-activation",
   "control-plane-runtime-recovery",
   "control-plane-runtime-fault-injection",
+  "control-plane-runtime-transition-races",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -138,15 +139,17 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "control-plane-runtime-activation",
   "control-plane-runtime-recovery",
   "control-plane-runtime-fault-injection",
+  "control-plane-runtime-transition-races",
 ]);
 
-/** Exact proofs whose verifier and root test load one reviewed native addon. */
+/** Exact proof ids whose verifier loads one reviewed native addon. */
 export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "reference-host-web-source-audit",
   "control-plane-local-api",
   "control-plane-runtime-activation",
   "control-plane-runtime-recovery",
   "control-plane-runtime-fault-injection",
+  "control-plane-runtime-transition-races",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -270,6 +273,7 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE: "CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE",
   CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE: "CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE",
   CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE: "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
+  CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE: "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -282,6 +286,8 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
   "control-plane-runtime-recovery": NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE,
   "control-plane-runtime-fault-injection":
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE,
+  "control-plane-runtime-transition-races":
+    NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
@@ -468,8 +474,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 146) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 146 steps.", {
+if (METADATA_BY_STEP_ID.size !== 148) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 148 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
