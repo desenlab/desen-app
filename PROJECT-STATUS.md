@@ -853,10 +853,12 @@ open for I07-04 at that checkpoint.
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T01 — Direct DESEN Source editor document model`
+- Current implementation task: `M08-T01 — Direct DESEN Source editor document model`
+  (`IN_PROGRESS` in the isolated editor-core worktree)
 - Status: M07 is 11/11, I07-04 and G07 are `DONE`, proof gates are 8/13, and implementation
   progress remains 85/145. All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN`
-  under I07-05.
+  under I07-05. M08-T01's direct immutable Source slice is implemented but does not yet claim task
+  completion.
 
 ## Completed preparation
 

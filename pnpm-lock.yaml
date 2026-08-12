@@ -157,7 +157,18 @@ importers:
 
   packages/desen: {}
 
-  packages/editor-core: {}
+  packages/editor-core:
+    dependencies:
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@desen/validator':
+        specifier: workspace:*
+        version: link:../validator
+    devDependencies:
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
 
   packages/editor-web: {}
 

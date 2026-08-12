@@ -1022,7 +1022,7 @@ hosted M07-T10 claim.
 
 | ID      | Status      | Depends on      | Deliverable / evidence                                               |
 | ------- | ----------- | --------------- | -------------------------------------------------------------------- |
-| M08-T01 | NOT_STARTED | G07             | Direct DESEN Source editor document model                            |
+| M08-T01 | IN_PROGRESS | G07             | Direct DESEN Source editor document model                            |
 | M08-T02 | NOT_STARTED | M08-T01         | Stable-ID allocator and insert command                               |
 | M08-T03 | NOT_STARTED | M08-T02         | Delete, slot move, and ordered reorder commands                      |
 | M08-T04 | NOT_STARTED | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
@@ -1033,6 +1033,13 @@ hosted M07-T10 claim.
 | M08-T09 | NOT_STARTED | M08-T03–M08-T07 | Continuous validation and invalid-node mapping                       |
 | M08-T10 | NOT_STARTED | M08-T01–M08-T09 | React/DOM boundary, stable identity, and deterministic command tests |
 | G08     | NOT_STARTED | M08-T01–M08-T10 | UI-independent editor core produces valid sources                    |
+
+M08-T01 implementation began in an isolated worktree by explicit user direction while I07-04's
+hosted observation threshold continues independently. This does not mark G07 complete or waive
+the task's formal G07 dependency. The current slice admits unknown inert JSON through the frozen
+Source structural validator and returns the direct detached immutable Source root, with no hidden
+AST or continuous semantic-validation claim. Task closure and any `DONE` status remain gated on
+the required evidence and G07 completion.
 
 ## M09 — Desen App Web MVP
 

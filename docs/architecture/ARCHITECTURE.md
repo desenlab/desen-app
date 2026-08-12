@@ -51,6 +51,21 @@ expose it.
 `dependency-cruiser.config.cjs` is the executable authority for this table. Any new edge requires
 an architecture review, a matching documentation change, and a negative boundary fixture.
 
+## Editor direct Source document boundary
+
+M08-T01 uses the frozen `desen.source` JSON graph as the editor document model itself. The public
+factory accepts unknown inert data, delegates root and embedded-schema admission to the existing
+DESEN 0.1.0 structural validator, and returns one detached recursively immutable Source snapshot.
+The result adds no wrapper root, normalized production projection, hidden AST, node index,
+executable authority, React value, DOM value, storage handle, or publication state.
+
+Structural admission is intentionally not continuous editor validation. A Source can enter this
+model while its Catalog-backed references are unresolved; M08-T09 owns semantic diagnostics and
+invalid-node mapping as the designer changes the document. Later editor commands must return new
+direct Source snapshots and preserve stable identities, but M08-T01 provides no mutation, ID
+allocation, persistence, selection, viewport, or authoring-state policy. `PF-078` records why
+producer ownership does not grant retained caller mutation authority.
+
 `runtime-core` accepts a verified bundle, exact catalog set, and host ports. It produces
 JSON-serializable state snapshots, diagnostics, and render plans. `runtime-react` translates those
 plans into registered React components. This keeps protocol execution semantics reusable by a

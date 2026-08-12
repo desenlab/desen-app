@@ -108,7 +108,7 @@ test("the current repository exactly matches the reviewed live proof inventory",
     distinctLeafWorkloadSha256: "6838b57e69d78fad6c0de08a9ffb7b9530dc5c50bc17ee2779e949cf86985fce",
     testConfigurationFileCount: 0,
     workspaceTestScriptCount: 15,
-    workspaceTestScriptSha256: "4ba2623716789078653d4c0f57848c57255385f4cc8c941a38de39b94bba5529",
+    workspaceTestScriptSha256: "0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
