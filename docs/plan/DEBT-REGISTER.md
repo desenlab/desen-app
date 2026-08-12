@@ -1543,6 +1543,7 @@ the full gate. A cleanup is complete only when:
   - `tests/publisher-invalid-source-matrix.test.mjs`
     - `M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH`
     - `M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH`
+    - `reconstructPreLintM07T11BundleRootTest`
     - `appendValidRootSuccessor`
   - `scripts/lib/control-plane-bundle-store-proof.mjs`
     - `M07_T11_TRACKED_RECEIPT_BRIDGE`
@@ -1613,10 +1614,10 @@ the full gate. A cleanup is complete only when:
   this one exact successor and project their historical receipts until checkpoint ownership is
   consolidated.
 - Objective removal trigger: proof-reader checkpoint sequence 24, head
-  `bbb62128928cf8bfb45bdfac9d773576da7ba1a67bc90fc641a4001a5382d9c3`, is the sole
+  `a69278848f1f5dd3630b5dca5b1274dfbd76fdd66125ee954e695abb7ea3ba48`, is the sole
   current-byte authority for all 40 readers and all 20 artifacts; its M07-T11 artifact receipt is
   exactly 39,307 bytes and
-  `e0296a7b3e3fb2a512742f7cabadee3a7131ecb1a914da012bcc2f6e0a385426`. I07-04 removes
+  `48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0`. I07-04 removes
   every reader-local M07-T11
   receipt map, projection, successor branch, and mutation marker listed above while all frozen
   artifacts remain byte-identical and checkpoint-owned missing, reordered, substituted, mixed,
@@ -1651,6 +1652,6 @@ the full gate. A cleanup is complete only when:
   - scoped zero-reference verification must inspect the 30 exact targets above and find none of
     their registered symbols after I07-04 cleanup.
 - Closure evidence: `PENDING` — record the I07-04 commit and pull request, sequence-24 checkpoint
-  SHA-256 (`bbb62128928cf8bfb45bdfac9d773576da7ba1a67bc90fc641a4001a5382d9c3`), all 20
+  SHA-256 (`a69278848f1f5dd3630b5dca5b1274dfbd76fdd66125ee954e695abb7ea3ba48`), all 20
   frozen artifact SHA-256 values, exact zero-reference output, and the final hosted
   required-exhaustive run URL.

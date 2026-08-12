@@ -365,6 +365,41 @@ function applyExactRollbackPatch(currentBytes, encodedPatch) {
   return Buffer.from(reconstructedLines.join("\n"), "utf8");
 }
 
+function reconstructPreLintM07T11BundleRootTest(currentBytes) {
+  let source = currentBytes.toString("utf8");
+  const replacements = [
+    [
+      String.raw`      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 279_237,\n {6}sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n {4}\}\),/u,`,
+      String.raw`      /\n    Object\.freeze\(\{\n      task: "M07-T11",\n      bytes: 279_237,\n      sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n    \}\),/u,`,
+    ],
+    [
+      String.raw`      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 93_464,\n {6}sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n {4}\}\),/u,`,
+      String.raw`      /\n    Object\.freeze\(\{\n      task: "M07-T11",\n      bytes: 93_464,\n      sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n    \}\),/u,`,
+    ],
+    [
+      String.raw`      / {8}\{\n {10}bytes: 269_572,\n {10}sha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",\n {10}patch: M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH,\n {8}\},\n/u,`,
+      String.raw`      /        \{\n          bytes: 269_572,\n          sha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",\n          patch: M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH,\n        \},\n/u,`,
+    ],
+    [
+      String.raw`      / {8}\{\n {10}bytes: 91_297,\n {10}sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",\n {10}patch: M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,\n {8}\},\n/u,`,
+      String.raw`      /        \{\n          bytes: 91_297,\n          sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",\n          patch: M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,\n        \},\n/u,`,
+    ],
+  ];
+  for (const [current, historical] of replacements) {
+    const replaced = source.replace(current, historical);
+    assert.notEqual(replaced, source);
+    assert.equal(replaced.replace(current, historical), replaced);
+    source = replaced;
+  }
+  const reconstructed = Buffer.from(source, "utf8");
+  assert.equal(reconstructed.byteLength, 86_520);
+  assert.equal(
+    createHash("sha256").update(reconstructed).digest("hex"),
+    "0ae7cc0e0ac91d8756838d1cd7783bf6dd11d32134034616b848f0d2e9ddbeb1",
+  );
+  return reconstructed;
+}
+
 async function trackedMutation(relativePath, transform) {
   const original = await sourceText(relativePath);
   const mutated = transform(original);
@@ -1500,17 +1535,17 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
     createHash("sha256").update(currentM07T11BundleProofBytes).digest("hex"),
     "a61af18578594c589be8ae07ee244fed05c21c2f865f91a53f3ef48f4daf44bd",
   );
-  assert.equal(currentM07T11BundleRootTestBytes.byteLength, 86_520);
+  assert.equal(currentM07T11BundleRootTestBytes.byteLength, 86_462);
   assert.equal(
     createHash("sha256").update(currentM07T11BundleRootTestBytes).digest("hex"),
-    "0ae7cc0e0ac91d8756838d1cd7783bf6dd11d32134034616b848f0d2e9ddbeb1",
+    "0952f4ceda976c2d393f5658c3006294515bce865b52ddc93f6cfed55947a098",
   );
   const currentM07T10BundleProofBytes = applyExactRollbackPatch(
     currentM07T11BundleProofBytes,
     M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH,
   );
   const currentM07T10BundleRootTestBytes = applyExactRollbackPatch(
-    currentM07T11BundleRootTestBytes,
+    reconstructPreLintM07T11BundleRootTest(currentM07T11BundleRootTestBytes),
     M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH,
   );
   assert.equal(currentM07T10BundleProofBytes.byteLength, 139_396);

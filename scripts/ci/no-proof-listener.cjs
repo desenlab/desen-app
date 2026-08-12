@@ -1,17 +1,12 @@
 "use strict";
 
 // CommonJS is required because this file is injected with Node's `--require` preload hook.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+/* eslint-disable @typescript-eslint/no-require-imports -- This bounded preload must load before ESM. */
 const childProcess = require("node:child_process");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { createHash, timingSafeEqual } = require("node:crypto");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dgram = require("node:dgram");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dns = require("node:dns");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dnsPromises = require("node:dns/promises");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   constants: fileConstants,
   closeSync,
@@ -21,14 +16,11 @@ const {
   readSync,
   realpathSync,
 } = require("node:fs");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const net = require("node:net");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { syncBuiltinESMExports } = require("node:module");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const path = require("node:path");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { types: utilTypes } = require("node:util");
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 const INSTALLATION_MARKER = Symbol.for("desen.ci.no-proof-listener.v2");
 const LISTENER_ERROR_CODE = "DESEN_CI_LISTENER_FORBIDDEN";
@@ -427,10 +419,9 @@ if (globalThis[INSTALLATION_MARKER] !== true) {
 
     replaceMethod(net.Server.prototype, "listen", function admittedLoopbackListen(...args) {
       if (!isExactLoopbackEphemeralListenArguments(args)) rejectListener();
-      const server = this;
       const onListening = () => {
-        server.removeListener("error", onError);
-        const address = server.address();
+        this.removeListener("error", onError);
+        const address = this.address();
         if (
           address === null ||
           typeof address === "string" ||
@@ -439,24 +430,24 @@ if (globalThis[INSTALLATION_MARKER] !== true) {
           address.port < 1 ||
           address.port > 65_535
         ) {
-          server.close();
+          this.close();
           rejectListener();
         }
         activePorts.set(address.port, (activePorts.get(address.port) ?? 0) + 1);
-        server.once("close", () => {
+        this.once("close", () => {
           const count = activePorts.get(address.port);
           if (count === 1) activePorts.delete(address.port);
           else if (count !== undefined) activePorts.set(address.port, count - 1);
         });
       };
-      const onError = () => server.removeListener("listening", onListening);
-      server.prependOnceListener("listening", onListening);
-      server.prependOnceListener("error", onError);
+      const onError = () => this.removeListener("listening", onListening);
+      this.prependOnceListener("listening", onListening);
+      this.prependOnceListener("error", onError);
       try {
-        return Reflect.apply(originalListen, server, args);
+        return Reflect.apply(originalListen, this, args);
       } catch (error) {
-        server.removeListener("listening", onListening);
-        server.removeListener("error", onError);
+        this.removeListener("listening", onListening);
+        this.removeListener("error", onError);
         throw error;
       }
     });

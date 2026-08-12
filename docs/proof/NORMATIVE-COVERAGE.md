@@ -92,7 +92,7 @@ and recovery chain. Its supporting host limits also extend N-041 evidence with b
 bodies, installed-package inventory, static assets, browser Bundle reads, refresh serialization,
 and retained delivery state. N-041 remains `PLANNED` because M12-T05 still owns the final measured
 cross-system profile. Evidence: `docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json`
-`sha256:e0296a7b3e3fb2a512742f7cabadee3a7131ecb1a914da012bcc2f6e0a385426`.
+`sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0`.
 
 ## Recommended clauses
 

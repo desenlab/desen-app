@@ -10,7 +10,7 @@ recovery boundaries before any Bundle is delivered to the browser.
 
 Artifact: `docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json`
 
-Final receipt: `sha256:e0296a7b3e3fb2a512742f7cabadee3a7131ecb1a914da012bcc2f6e0a385426`
+Final receipt: `sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0`
 
 The deterministic artifact was generated only after the independent server and browser builds,
 local non-socket executable checks, and the 13-case root mutation suite passed. The complete

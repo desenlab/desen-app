@@ -951,7 +951,7 @@ function safeEnvironment(baseEnvironment) {
     );
   }
   for (const key of LOOPBACK_CHILD_LISTENER_RESERVED_ENVIRONMENT_KEYS) {
-    delete environment[key];
+    Reflect.deleteProperty(environment, key);
   }
   return environment;
 }

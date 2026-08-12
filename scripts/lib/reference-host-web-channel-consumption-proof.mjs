@@ -1545,8 +1545,8 @@ export function createReferenceHostWebChannelConsumptionRuntimeEnvironment(
     environment[key] = descriptor.value;
   }
   environment.CI = "1";
-  delete environment.NODE_PATH;
-  delete environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.grant];
+  Reflect.deleteProperty(environment, "NODE_PATH");
+  Reflect.deleteProperty(environment, LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.grant);
 
   const authorityPath = environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.authorityPath];
   const token = environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.token];
@@ -1566,8 +1566,8 @@ export function createReferenceHostWebChannelConsumptionRuntimeEnvironment(
   if (delegated) {
     environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.grant] = token;
   } else {
-    delete environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.authorityPath];
-    delete environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.token];
+    Reflect.deleteProperty(environment, LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.authorityPath);
+    Reflect.deleteProperty(environment, LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.token);
   }
   return Object.freeze(environment);
 }

@@ -104,11 +104,11 @@ function reconstructM07T10ExecutionPreflightProof(currentBytes) {
   let source = currentBytes.toString("utf8");
   for (const [pattern, replacement] of [
     [
-      /\n    Object\.freeze\(\{\n      task: "M07-T11",\n      bytes: 279_237,\n      sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n    \}\),/u,
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 279_237,\n {6}sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n {4}\}\),/u,
       "",
     ],
     [
-      /\n    Object\.freeze\(\{\n      task: "M07-T11",\n      bytes: 93_464,\n      sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n    \}\),/u,
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 93_464,\n {6}sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n {4}\}\),/u,
       "",
     ],
     [

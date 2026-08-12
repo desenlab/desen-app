@@ -61,7 +61,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "ce12c066545e21779abf891898aaf0b09ceb1c0c1b51be382a0adabd5f86e939",
   "aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e",
   "3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d",
-  "bbb62128928cf8bfb45bdfac9d773576da7ba1a67bc90fc641a4001a5382d9c3",
+  "a69278848f1f5dd3630b5dca5b1274dfbd76fdd66125ee954e695abb7ea3ba48",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20,
@@ -298,7 +298,7 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     {
       path: "docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json",
       bytes: 39_307,
-      sha256: "e0296a7b3e3fb2a512742f7cabadee3a7131ecb1a914da012bcc2f6e0a385426",
+      sha256: "48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0",
     },
     "scripts/lib/reference-host-web-channel-consumption-proof.mjs",
     "tests/reference-host-web-channel-consumption.test.mjs",

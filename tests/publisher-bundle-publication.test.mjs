@@ -286,11 +286,11 @@ function reconstructM07T10ExecutionPreflightProof(currentBytes) {
   let source = currentBytes.toString("utf8");
   const replacements = [
     [
-      /\n    Object\.freeze\(\{\n      task: "M07-T11",\n      bytes: 279_237,\n      sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n    \}\),/u,
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 279_237,\n {6}sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n {4}\}\),/u,
       "",
     ],
     [
-      /\n    Object\.freeze\(\{\n      task: "M07-T11",\n      bytes: 93_464,\n      sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n    \}\),/u,
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 93_464,\n {6}sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n {4}\}\),/u,
       "",
     ],
     [
@@ -322,11 +322,11 @@ function reconstructM07T10ExecutionPreflightRootTest(currentBytes) {
       "",
     ],
     [
-      /        \{\n          bytes: 269_572,\n          sha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",\n          patch: M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH,\n        \},\n/u,
+      / {8}\{\n {10}bytes: 269_572,\n {10}sha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",\n {10}patch: M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH,\n {8}\},\n/u,
       "",
     ],
     [
-      /        \{\n          bytes: 91_297,\n          sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",\n          patch: M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,\n        \},\n/u,
+      / {8}\{\n {10}bytes: 91_297,\n {10}sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",\n {10}patch: M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,\n {8}\},\n/u,
       "",
     ],
     [/currentBytes: 279_237,/u, "currentBytes: 269_572,"],

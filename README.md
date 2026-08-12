@@ -185,7 +185,7 @@ publish. The browser imports no control-plane, SQLite, bearer, filesystem, Desen
 testkit authority. The [channel-consumption proof](docs/proof/REFERENCE-HOST-WEB-CHANNEL-CONSUMPTION.md)
 pins seven focused-suite files, 46 runtime tests, nine exact end-to-end case identities, 13 root
 mutation classes, and two browser type-test files. Its 39,307-byte artifact is
-`sha256:e0296a7b3e3fb2a512742f7cabadee3a7131ecb1a914da012bcc2f6e0a385426`. This local Web proof does
+`sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0`. This local Web proof does
 not claim remote or native deployment,
 real-browser performance, product-level restart, hostile-admin concurrent-root mutation
 resistance, or an external anti-rollback anchor. P-12 remains `NOT_PROVEN` until M10-T07 and N-041

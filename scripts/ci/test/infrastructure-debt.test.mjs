@@ -528,6 +528,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       symbols: [
         "M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
         "M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+        "reconstructPreLintM07T11BundleRootTest",
         "appendValidRootSuccessor",
       ],
     },

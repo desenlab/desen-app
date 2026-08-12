@@ -813,7 +813,7 @@ performance, Android/iOS conformance, nor a hosted M07-T11 pass.
 
 Evidence: `docs/proof/REFERENCE-HOST-WEB-CHANNEL-CONSUMPTION.md` and
 `docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json`
-`sha256:e0296a7b3e3fb2a512742f7cabadee3a7131ecb1a914da012bcc2f6e0a385426` (39,307 bytes).
+`sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0` (39,307 bytes).
 
 The M07-T11 CI registration produces the exact 150-workload, 71-proof-pair successor: 60 ordinary
 pairs, 11 exclusive barriers, 479 retained prerequisite segments, 3,113 ordered legacy leaf

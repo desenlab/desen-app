@@ -1057,6 +1057,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       target("tests/publisher-invalid-source-matrix.test.mjs", [
         "M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
         "M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+        "reconstructPreLintM07T11BundleRootTest",
         "appendValidRootSuccessor",
       ]),
       target("scripts/lib/control-plane-bundle-store-proof.mjs", [

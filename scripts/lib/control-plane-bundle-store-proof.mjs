@@ -632,8 +632,8 @@ const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     historical:
       M07_T10_TRACKED_RECEIPT_BRIDGE["tests/publisher-bundle-publication.test.mjs"].successor,
     successor: Object.freeze({
-      bytes: 86_520,
-      sha256: "0ae7cc0e0ac91d8756838d1cd7783bf6dd11d32134034616b848f0d2e9ddbeb1",
+      bytes: 86_462,
+      sha256: "0952f4ceda976c2d393f5658c3006294515bce865b52ddc93f6cfed55947a098",
     }),
   }),
   "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
@@ -642,15 +642,15 @@ const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
         .successor,
     successor: Object.freeze({
       bytes: 172_770,
-      sha256: "9ff7dbae4f7ba8df2d91aaf606ebdd0e49bdbb3444c87993fda81de75336aac8",
+      sha256: "9be1e6351af1d008fe529c6c2e3c2050ebbe8b17cb59922dad13c57931dd75d3",
     }),
   }),
   "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
     historical:
       M07_T10_TRACKED_RECEIPT_BRIDGE["tests/publisher-invalid-source-matrix.test.mjs"].successor,
     successor: Object.freeze({
-      bytes: 92_753,
-      sha256: "f1d2af5417719c3ad41e9b3b5b27c5505047bd15b2166238ae6e1f47e366de61",
+      bytes: 95_163,
+      sha256: "982127630683941a487731f907e58295f4cc53ef0a52864c01ac44815b90cbd0",
     }),
   }),
 });

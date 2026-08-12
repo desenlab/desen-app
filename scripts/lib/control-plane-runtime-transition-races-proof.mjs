@@ -124,8 +124,8 @@ const M07_T11_REGISTRATION_SUCCESSOR = Object.freeze({
       sha256: EXPECTED_REGISTRATION_AUTHORITY_SHA256[SHARED_STATE_AUTHORITY],
     }),
     successor: Object.freeze({
-      bytes: 51_626,
-      sha256: "0fd1695a90e8c9e6772413fea47a02129af025b7a1cfbc3cc7068560cb764721",
+      bytes: 51_643,
+      sha256: "4f17d0d68f742a6c56fc10e39dd1f47f0111ed03b0e2d45a5d75b5f07b804820",
     }),
   }),
 });

@@ -714,8 +714,8 @@
     },
     {
       "path": "scripts/lib/reference-host-web-channel-consumption-proof.mjs",
-      "bytes": 71848,
-      "sha256": "b7548b29b7b2245fc0cdc8e32bffca04e822c477bfc8a1f7d550d57caad7ece0"
+      "bytes": 71919,
+      "sha256": "c0ff3865c345bc119e9f80db415bf574eb9cc4f40f4104cf96bce76e39b7148b"
     },
     {
       "path": "scripts/verify-reference-host-web-channel-consumption.mjs",
