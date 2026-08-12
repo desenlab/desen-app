@@ -1041,8 +1041,12 @@ Source structural validator and returns the direct detached immutable Source roo
 AST or continuous semantic-validation claim. Seven direct package cases now cover exact success
 and failure shells, detached ownership on both branches, embedded schemas, unresolved semantics,
 and non-invocation of caller accessors or serialization hooks. A separate built-package runtime
-and declaration consumer guards the public export map. The fresh root proof pair, artifact, CI
-inventory reseal, task closure, and any `DONE` status remain gated on G07 completion.
+and declaration consumer now guards the exact export/dependency map, emitted platform boundary,
+ten runtime cases, and five compiler-negative cases. Seven additional in-memory proof-core cases
+reject wrapper, caller-retention, mutable-result, partial-failure, semantic-overreach, source,
+distribution, manifest, test-inventory, and hostile-option drift without creating new root proof
+authority. The fresh root proof pair, artifact, CI inventory reseal, task closure, and any `DONE`
+status remain gated on G07 completion.
 
 ## M09 — Desen App Web MVP
 

@@ -3175,7 +3175,10 @@ This file records implementation discoveries without changing the frozen DESEN 0
   partial document. Independent calls produce independent snapshots, while the caller's input is
   neither retained nor frozen. Accessor-backed input and serialization hooks are rejected without
   invocation, and the built package root exposes only this factory while its emitted declarations
-  preserve the same direct immutable Source result.
+  preserve the same direct immutable Source result. A fresh in-memory proof core also executes the
+  emitted public API and audits the exact source, distribution, manifest, TSDoc, test inventory,
+  and platform boundary. It deliberately writes no artifact and registers no root proof workload
+  until the formal G07 prerequisite exists.
 - Future action: M08-T02 through M08-T07 must express every edit as a deterministic transition to a
   new direct Source snapshot, retain ordinary stable identities, isolate authoring-only state, and
   preserve unknown extensions and semantic array order. M08-T08 owns persistence, M08-T09 owns

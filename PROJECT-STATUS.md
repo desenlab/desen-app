@@ -857,9 +857,10 @@ open for I07-04 at that checkpoint.
   (`IN_PROGRESS` in the isolated editor-core worktree)
 - Status: M07 is 11/11, I07-04 and G07 are `DONE`, proof gates are 8/13, and implementation
   progress remains 85/145. All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN`
-  under I07-05. M08-T01's direct immutable Source slice has seven focused behavior cases plus
-  built public-JavaScript and declaration-consumer checks, but does not yet claim task completion;
-  its fresh root proof and CI inventory integration remain pending.
+  under I07-05. M08-T01's direct immutable Source slice has seven focused behavior cases, ten
+  built public-JavaScript contract cases, five emitted declaration negatives, and seven in-memory
+  proof-core cases. The proof core writes no artifact and registers no root workload yet, so M08-T01
+  remains incomplete; its fresh root proof and CI inventory integration are pending.
 
 ## Completed preparation
 
