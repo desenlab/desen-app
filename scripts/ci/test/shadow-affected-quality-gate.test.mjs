@@ -366,6 +366,6 @@ test("required exhaustive invariants remain exact after shadow execution is impo
   const required = createRequiredExhaustivePlan();
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
-  assert.equal(required.stepCount, 148);
-  assert.equal(required.proofPairCount, 70);
+  assert.equal(required.stepCount, 150);
+  assert.equal(required.proofPairCount, 71);
 });

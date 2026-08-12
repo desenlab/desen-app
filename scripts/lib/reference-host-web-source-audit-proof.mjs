@@ -450,6 +450,65 @@ const M07_T10_CONTROL_PLANE_COORDINATION = Object.freeze({
   ]),
   lockfileImporter: M07_T09_CONTROL_PLANE_COORDINATION.lockfileImporter,
 });
+const M07_T11_REFERENCE_HOST_COORDINATION = Object.freeze({
+  task: "M07-T11",
+  scripts: Object.freeze({
+    "generate:reference-host-web-channel-consumption":
+      "pnpm verify:reference-host-web-source-audit && pnpm verify:control-plane-runtime-transition-races && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm --filter @desen/reference-host-web-server typecheck && pnpm --filter @desen/reference-host-web typecheck && pnpm --filter @desen/reference-host-web-server test:channel && pnpm --filter @desen/reference-host-web test:channel && node scripts/generate-reference-host-web-channel-consumption-proof.mjs",
+    "verify:reference-host-web-channel-consumption":
+      "pnpm verify:reference-host-web-source-audit && pnpm verify:control-plane-runtime-transition-races && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm --filter @desen/reference-host-web-server typecheck && pnpm --filter @desen/reference-host-web typecheck && pnpm --filter @desen/reference-host-web-server test:channel && pnpm --filter @desen/reference-host-web test:channel && node scripts/verify-reference-host-web-channel-consumption.mjs",
+    "test:reference-host-web-channel-consumption":
+      "pnpm verify:reference-host-web-source-audit && pnpm verify:control-plane-runtime-transition-races && pnpm --filter @desen/reference-host-web-server... build && pnpm --filter @desen/reference-host-web... build && pnpm --filter @desen/reference-host-web-server typecheck && pnpm --filter @desen/reference-host-web typecheck && pnpm --filter @desen/reference-host-web-server test:channel && pnpm --filter @desen/reference-host-web test:channel && node --test tests/reference-host-web-channel-consumption.test.mjs",
+  }),
+  aggregateEdges: Object.freeze([
+    Object.freeze({
+      script: "check",
+      segments: 77,
+      sha256: "bcc6db4e4d6d43de0c355138b5763ace23e8f9f43847843315e630821b7f1a67",
+      predecessor: "pnpm verify:control-plane-runtime-transition-races",
+      segment: "pnpm verify:reference-host-web-channel-consumption",
+      successor: "pnpm lint",
+    }),
+    Object.freeze({
+      script: "test",
+      segments: 72,
+      sha256: "e8e6336d7482bd9eabe52ea1dc9085fdd321c1cc6553cca34d9e7fd3e0f718dc",
+      predecessor: "pnpm test:control-plane-runtime-transition-races",
+      segment: "pnpm test:reference-host-web-channel-consumption",
+      successor: "turbo run test",
+    }),
+  ]),
+  lockfileImporter: Object.freeze({
+    path: "apps/reference-host-web-server",
+    groups: Object.freeze([
+      Object.freeze({
+        name: "dependencies",
+        packages: Object.freeze([
+          Object.freeze({
+            name: "@desen/control-plane-api",
+            specifier: "workspace:*",
+            version: "link:../control-plane-api",
+          }),
+        ]),
+      }),
+      Object.freeze({
+        name: "devDependencies",
+        packages: Object.freeze([
+          Object.freeze({
+            name: "@desen/protocol",
+            specifier: "workspace:*",
+            version: "link:../../packages/protocol",
+          }),
+          Object.freeze({
+            name: "vitest",
+            specifier: "4.1.10",
+            version: "4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)",
+          }),
+        ]),
+      }),
+    ]),
+  }),
+});
 const M07_T06_CONTROL_PLANE_LOCKFILE_BLOCK = `  apps/control-plane-api:
     dependencies:
       '@desen/protocol':
@@ -655,6 +714,18 @@ const M06_T05_VALIDATOR_SUCCESSOR = Object.freeze({
     }),
   ]),
 });
+const M07_T11_REFERENCE_HOST_SUCCESSOR = Object.freeze({
+  task: "M07-T11",
+  historicalProjectionSha256: "ab644bb509ba7100d920901615d3c9f3d14bdbdbf0c3ba626fed069a1f7d6b9f",
+  successorProjectionSha256: "73d202c572124fdb050413c49ed792f2aac520b1aec5486f8f5f9edafb975384",
+  sourceFiles: 13,
+  executableSourceFiles: 12,
+  importDeclarations: 56,
+  executableDescriptors: 644,
+  executableSurfaceSha256:
+    "sha256:aeb0b94d79d096c170cbe903daaea033a89b5889f4675fa3a91ed004446fc88a",
+  channelSource: "apps/reference-host-web/src/channel-delivery.ts",
+});
 const STATIC_TRACKED_PATHS = Object.freeze([
   "apps/reference-host-web/index.html",
   "apps/reference-host-web/package.json",
@@ -757,6 +828,7 @@ const ALLOWED_EXTERNAL_VALUE_IMPORTS = Object.freeze({
     "createRuntimeReactAdapterRegistry",
     "ignoreRuntimeReactRootCaughtError",
     "readRuntimeReactAdapterRegistry",
+    "renderRuntimeReactSurface",
     "useRuntimeReactSurface",
   ]),
   "@desen/runtime-web": Object.freeze([
@@ -770,6 +842,13 @@ const ALLOWED_EXTERNAL_VALUE_IMPORTS = Object.freeze({
   "react-dom/client": Object.freeze(["createRoot"]),
 });
 const ALLOWED_DOM_CALLS = Object.freeze({
+  "apps/reference-host-web/src/channel-delivery.ts": Object.freeze([
+    'new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode',
+    "abortController.abort",
+    "abortController?.abort",
+    "state.input.browser.clearTimeout",
+    "state.input.browser.setTimeout",
+  ]),
   "apps/reference-host-web/src/browser-profile.ts": Object.freeze([
     "browser.addEventListener",
     "browser.matchMedia",
@@ -874,7 +953,7 @@ const EXPECTED_REFERENCE_HOST_BOUNDARY_RULE = Object.freeze({
   }),
 });
 const EXPECTED_EXECUTABLE_SURFACE_SHA256 =
-  "25d2f89263aca58e14f1328f0b12cb49225624afee69a577b116f72cb286ff8a";
+  "aeb0b94d79d096c170cbe903daaea033a89b5889f4675fa3a91ed004446fc88a";
 const EXPECTED_INFRASTRUCTURE_CSS_SHA256 =
   "6d82529e07969d9033232aaa72924ec57eae0dd86736ebecdf700680046a7738";
 const ALLOWED_DATA_IMPORTS = Object.freeze([
@@ -2010,6 +2089,7 @@ function objectProperty(node, name) {
 function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, counter) {
   let directRenderCalls = 0;
   let registryCalls = 0;
+  let renderPreflightCalls = 0;
   let mountCalls = 0;
   let managedHookCalls = 0;
   let reactRootCalls = 0;
@@ -2305,6 +2385,30 @@ function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, count
           counter,
         );
       }
+      if (importedCall?.imported === "renderRuntimeReactSurface") {
+        renderPreflightCalls += 1;
+        assertion(
+          importedCall.local === "renderRuntimeReactSurface" &&
+            relativePath === "apps/reference-host-web/src/official-sign-in.ts" &&
+            hasExactImportedBinding(bindings, identifier, "@desen/runtime-react") &&
+            exactIdentifierImport(
+              checker,
+              node.expression,
+              "@desen/runtime-react",
+              "renderRuntimeReactSurface",
+            ) &&
+            node.arguments.length === 1 &&
+            ts.isObjectLiteralExpression(node.arguments[0]) &&
+            isDeepStrictEqual(objectLiteralKeys(node.arguments[0]).sort(), [
+              "catalogSet",
+              "registry",
+              "session",
+              "snapshot",
+            ]),
+          "The delivered Bundle preflight lost its exact public runtime-react render path.",
+          counter,
+        );
+      }
       if (importedCall?.imported === "mountRuntimeHeadlessSession") {
         mountCalls += 1;
         assertion(
@@ -2333,12 +2437,13 @@ function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, count
           const bundle = objectProperty(node.arguments[0], "bundle");
           const catalogs = objectProperty(node.arguments[0], "catalogs");
           assertion(
-            exactIdentifierImport(
+            (exactIdentifierImport(
               checker,
               bundle,
               "../../../examples/sign-in/official-derived.bundle.desen.json",
               "default",
-            ) &&
+            ) ||
+              bundle?.getText(sourceFile) === "bundlePolicy.bundle") &&
               ts.isArrayLiteralExpression(catalogs) &&
               catalogs.elements.length === 1 &&
               exactIdentifierImport(
@@ -2646,7 +2751,13 @@ function auditDangerousSyntax(sourceFile, relativePath, bindings, checker, count
     `${relativePath} contains an unexpected React root construction count.`,
     counter,
   );
-  return { registryCalls, mountCalls, managedHookCalls, reactRootCalls };
+  assertion(
+    renderPreflightCalls ===
+      (relativePath === "apps/reference-host-web/src/official-sign-in.ts" ? 1 : 0),
+    `${relativePath} contains an unexpected delivered-Bundle render-preflight count.`,
+    counter,
+  );
+  return { registryCalls, renderPreflightCalls, mountCalls, managedHookCalls, reactRootCalls };
 }
 
 function auditImports(sourceFile, relativePath, counter) {
@@ -2994,6 +3105,7 @@ function auditSemanticSource(workspaceRoot, sourcePaths, files) {
   const actualDataImports = [];
   const jsxByFile = Object.create(null);
   let registryCalls = 0;
+  let renderPreflightCalls = 0;
   let mountCalls = 0;
   let managedHookCalls = 0;
   let reactRootCalls = 0;
@@ -3016,6 +3128,7 @@ function auditSemanticSource(workspaceRoot, sourcePaths, files) {
       counter,
     );
     registryCalls += syntax.registryCalls;
+    renderPreflightCalls += syntax.renderPreflightCalls;
     mountCalls += syntax.mountCalls;
     managedHookCalls += syntax.managedHookCalls;
     reactRootCalls += syntax.reactRootCalls;
@@ -3044,6 +3157,11 @@ function auditSemanticSource(workspaceRoot, sourcePaths, files) {
   assertion(
     registryCalls === 1,
     "Production source must create exactly one public reference-adapter registry.",
+    counter,
+  );
+  assertion(
+    renderPreflightCalls === 1,
+    "Production source must preflight exactly one delivered Bundle through runtime-react.",
     counter,
   );
   assertion(
@@ -3103,6 +3221,7 @@ function auditSemanticSource(workspaceRoot, sourcePaths, files) {
     executableAuthoritySurface,
     css,
     publicAdapterRegistryCalls: registryCalls,
+    publicRuntimeReactRenderPreflightCalls: renderPreflightCalls,
     publicHeadlessMountCalls: mountCalls,
     publicRuntimeReactSurfaceCalls: managedHookCalls,
     publicReactRootCalls: reactRootCalls,
@@ -4372,6 +4491,7 @@ async function auditApplicationBuildEnvelope(workspaceRoot) {
       dev: "vite",
       lint: "eslint src test --max-warnings=0",
       test: "vitest run",
+      "test:channel": "vitest run test/channel-delivery.test.tsx test/main-lifecycle.test.tsx",
       "test:shell":
         "vitest run test/host-ports.test.ts test/root-policy.test.ts test/recovery-authority.test.ts test/root-lifecycle.test.tsx test/root-security.test.tsx",
       "test:sign-in":
@@ -5460,6 +5580,39 @@ export function verifyReferenceHostWebValidatorSuccessorSources(rawSourceBytes) 
   });
 }
 
+function enduringProjectionSha256(artifact) {
+  return sha256(SAFE_BUFFER_FROM(SAFE_JSON_STRINGIFY(artifact), "utf8"));
+}
+
+function normalizeReviewedReferenceHostChannelSuccessor(historical, current) {
+  const historicalSha256 = enduringProjectionSha256(historical);
+  const successorSha256 = enduringProjectionSha256(current);
+  const source = current.sourceAudit;
+  const channelRecords = current.evidence.trackedFiles.filter(
+    ({ path: relativePath }) => relativePath === M07_T11_REFERENCE_HOST_SUCCESSOR.channelSource,
+  );
+  if (
+    historicalSha256 !== M07_T11_REFERENCE_HOST_SUCCESSOR.historicalProjectionSha256 ||
+    successorSha256 !== M07_T11_REFERENCE_HOST_SUCCESSOR.successorProjectionSha256 ||
+    source.sourceFiles !== M07_T11_REFERENCE_HOST_SUCCESSOR.sourceFiles ||
+    source.executableSourceFiles !== M07_T11_REFERENCE_HOST_SUCCESSOR.executableSourceFiles ||
+    source.importDeclarations !== M07_T11_REFERENCE_HOST_SUCCESSOR.importDeclarations ||
+    source.executableAuthoritySurface?.descriptors !==
+      M07_T11_REFERENCE_HOST_SUCCESSOR.executableDescriptors ||
+    source.executableAuthoritySurface?.sha256 !==
+      M07_T11_REFERENCE_HOST_SUCCESSOR.executableSurfaceSha256 ||
+    source.publicRuntimeReactRenderPreflightCalls !== 1 ||
+    channelRecords.length !== 1
+  ) {
+    fail(
+      "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
+      "Current reference-host evidence is outside the exact reviewed M07-T11 channel successor.",
+      { historicalSha256, successorSha256 },
+    );
+  }
+  return historical;
+}
+
 /**
  * Compares two already-audited observations across every enduring M05 host claim and input.
  *
@@ -5482,9 +5635,20 @@ export function verifyReferenceHostWebCurrentEvidencePolicy(
   const successorSources = alreadyHistorical
     ? null
     : verifyReferenceHostWebValidatorSuccessorSources(successorSourceBytes);
-  const comparedCurrent = alreadyHistorical
-    ? current
-    : normalizeReviewedValidatorSuccessor(historical, current);
+  let successorTask = null;
+  let comparedCurrent = current;
+  if (!alreadyHistorical) {
+    if (
+      enduringProjectionSha256(current) ===
+      M07_T11_REFERENCE_HOST_SUCCESSOR.successorProjectionSha256
+    ) {
+      comparedCurrent = normalizeReviewedReferenceHostChannelSuccessor(historical, current);
+      successorTask = M07_T11_REFERENCE_HOST_SUCCESSOR.task;
+    } else {
+      comparedCurrent = normalizeReviewedValidatorSuccessor(historical, current);
+      successorTask = M06_T05_VALIDATOR_SUCCESSOR.task;
+    }
+  }
   if (!isDeepStrictEqual(historical, comparedCurrent)) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
@@ -5498,13 +5662,19 @@ export function verifyReferenceHostWebCurrentEvidencePolicy(
     successorSources,
     admittedSuccessor: alreadyHistorical
       ? null
-      : Object.freeze({
-          task: M06_T05_VALIDATOR_SUCCESSOR.task,
-          sourceFiles: Object.freeze(
-            M06_T05_VALIDATOR_SUCCESSOR.sourceFiles.map(({ path: relativePath }) => relativePath),
-          ),
-          modules: Object.freeze(M06_T05_VALIDATOR_SUCCESSOR.modules.map(({ id }) => id)),
-        }),
+      : successorTask === M07_T11_REFERENCE_HOST_SUCCESSOR.task
+        ? Object.freeze({
+            task: M07_T11_REFERENCE_HOST_SUCCESSOR.task,
+            channelSource: M07_T11_REFERENCE_HOST_SUCCESSOR.channelSource,
+            predecessor: M06_T05_VALIDATOR_SUCCESSOR.task,
+          })
+        : Object.freeze({
+            task: M06_T05_VALIDATOR_SUCCESSOR.task,
+            sourceFiles: Object.freeze(
+              M06_T05_VALIDATOR_SUCCESSOR.sourceFiles.map(({ path: relativePath }) => relativePath),
+            ),
+            modules: Object.freeze(M06_T05_VALIDATOR_SUCCESSOR.modules.map(({ id }) => id)),
+          }),
   });
 }
 
@@ -5711,10 +5881,11 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
   }
   let edgeIndex = 0;
   while (edgeIndex < M07_T10_CONTROL_PLANE_COORDINATION.aggregateEdges.length) {
-    const edge = M07_T10_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
+    const historicalEdge = M07_T10_CONTROL_PLANE_COORDINATION.aggregateEdges[edgeIndex];
+    const successorEdge = M07_T11_REFERENCE_HOST_COORDINATION.aggregateEdges[edgeIndex];
     const commandDescriptor = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
       manifest.scripts,
-      edge.script,
+      historicalEdge.script,
     );
     if (
       commandDescriptor === undefined ||
@@ -5724,35 +5895,32 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
     ) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        `Current M05 root ${edge.script} coordination script is missing.`,
+        `Current M05 root ${historicalEdge.script} coordination script is missing.`,
       );
     }
     const command = commandDescriptor.value;
     const segments = SAFE_REFLECT_APPLY(SAFE_STRING_SPLIT, command, [" && "]);
-    let segmentIndex = -1;
-    let segmentOccurrences = 0;
     let malformed = false;
     index = 0;
     while (index < segments.length) {
       if (segments[index].length === 0) malformed = true;
-      if (segments[index] === edge.segment) {
-        segmentIndex = index;
-        segmentOccurrences += 1;
-      }
       index += 1;
     }
-    if (
-      malformed ||
-      segments.length !== edge.segments ||
-      sha256(command) !== edge.sha256 ||
-      segmentOccurrences !== 1 ||
-      segmentIndex < 1 ||
-      segments[segmentIndex - 1] !== edge.predecessor ||
-      segments[segmentIndex + 1] !== edge.successor
-    ) {
+    const matchesEdge = (edge) => {
+      const segmentIndex = segments.indexOf(edge.segment);
+      return (
+        segments.length === edge.segments &&
+        sha256(command) === edge.sha256 &&
+        segmentIndex >= 1 &&
+        segments.lastIndexOf(edge.segment) === segmentIndex &&
+        segments[segmentIndex - 1] === edge.predecessor &&
+        segments[segmentIndex + 1] === edge.successor
+      );
+    };
+    if (malformed || (!matchesEdge(historicalEdge) && !matchesEdge(successorEdge))) {
       fail(
         "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
-        `Current M05 root ${edge.script} lost the exact reviewed M07-T10 aggregate edge.`,
+        `Current M05 root ${historicalEdge.script} lost the exact reviewed M07-T10/T11 aggregate edge.`,
       );
     }
     edgeIndex += 1;
@@ -5769,7 +5937,8 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
         /^(?:generate|test|verify):publisher(?:-[a-z0-9]+)*$/u,
         [scriptName],
       ) &&
-      !SAFE_OBJECT_HAS_OWN(M07_T10_CONTROL_PLANE_COORDINATION.scripts, scriptName)
+      !SAFE_OBJECT_HAS_OWN(M07_T10_CONTROL_PLANE_COORDINATION.scripts, scriptName) &&
+      !SAFE_OBJECT_HAS_OWN(M07_T11_REFERENCE_HOST_COORDINATION.scripts, scriptName)
     ) {
       SAFE_OBJECT_DEFINE_PROPERTY(normalizedScripts, scriptName, {
         configurable: true,
@@ -5831,6 +6000,10 @@ async function normalizeCurrentRootPackageBytes(rawBytes) {
         }
         edgeIndex += 1;
       }
+      const t11Edge = M07_T11_REFERENCE_HOST_COORDINATION.aggregateEdges.find(
+        ({ script: edgeScript }) => edgeScript === scriptName,
+      );
+      if (t11Edge?.segment === segment) isControlPlaneSegment = true;
       if (
         !SAFE_REFLECT_APPLY(SAFE_REGEXP_TEST, publisherSegment, [segment]) &&
         !isControlPlaneSegment
@@ -6294,59 +6467,56 @@ function validatePublisherImporterShape(lines, start, end) {
   }
 }
 
-function inspectExactControlPlaneImporter(lines, start, end) {
-  const expected = M07_T06_CONTROL_PLANE_COORDINATION.lockfileImporter;
+function inspectExactReviewedImporter(lines, start, end, expected, label) {
   const body = lines.slice(start + 1, end).filter((line) => line.length > 0);
   if (lines[start] !== `  ${expected.path}:` || body.length === 0) {
-    failCurrentLockfile("lost the reviewed M07-T06 control-plane importer");
+    failCurrentLockfile(`lost the reviewed ${label} importer`);
   }
   const groups = [];
   let index = 0;
   while (index < body.length) {
     const groupLine = body[index];
     if (!groupLine.startsWith("    ") || groupLine.startsWith("      ")) {
-      failCurrentLockfile("has an invalid M07-T06 control-plane dependency group");
+      failCurrentLockfile(`has an invalid ${label} dependency group`);
     }
-    const group = parseYamlMappingLine(groupLine.slice(4), "Control-plane dependency group");
+    const group = parseYamlMappingLine(groupLine.slice(4), `${label} dependency group`);
     if (!group.opensContainer) {
-      failCurrentLockfile("has a non-mapping M07-T06 control-plane dependency group");
+      failCurrentLockfile(`has a non-mapping ${label} dependency group`);
     }
     index += 1;
     const packages = [];
     while (index < body.length && body[index].startsWith("      ")) {
       if (body[index].startsWith("        ")) {
-        failCurrentLockfile("has an orphan M07-T06 control-plane dependency field");
+        failCurrentLockfile(`has an orphan ${label} dependency field`);
       }
-      const dependency = parseYamlMappingLine(body[index].slice(6), "Control-plane dependency");
+      const dependency = parseYamlMappingLine(body[index].slice(6), `${label} dependency`);
       if (!dependency.opensContainer) {
-        failCurrentLockfile("has a non-mapping M07-T06 control-plane dependency");
+        failCurrentLockfile(`has a non-mapping ${label} dependency`);
       }
       validatePublisherDependencyName(dependency.key);
       index += 1;
       const fields = {};
       const fieldKeys = [];
       while (index < body.length && body[index].startsWith("        ")) {
-        const field = parseYamlMappingLine(body[index].slice(8), "Control-plane dependency field");
+        const field = parseYamlMappingLine(body[index].slice(8), `${label} dependency field`);
         if (
           field.opensContainer ||
           field.valueKind !== "scalar" ||
           !["specifier", "version"].includes(field.key)
         ) {
-          failCurrentLockfile("has an invalid M07-T06 control-plane dependency field");
+          failCurrentLockfile(`has an invalid ${label} dependency field`);
         }
         SAFE_OBJECT_DEFINE_PROPERTY(fields, field.key, {
           configurable: true,
           enumerable: true,
           writable: true,
-          value: validatePublisherStringScalar(field.value, `Control-plane ${field.key}`),
+          value: validatePublisherStringScalar(field.value, `${label} ${field.key}`),
         });
         fieldKeys.push(field.key);
         index += 1;
       }
       if (!isDeepStrictEqual(fieldKeys, ["specifier", "version"])) {
-        failCurrentLockfile(
-          "must pin each M07-T06 control-plane specifier and version exactly once",
-        );
+        failCurrentLockfile(`must pin each ${label} specifier and version exactly once`);
       }
       packages.push({
         name: dependency.key,
@@ -6357,8 +6527,28 @@ function inspectExactControlPlaneImporter(lines, start, end) {
     groups.push({ name: group.key, packages });
   }
   if (!isDeepStrictEqual(groups, expected.groups)) {
-    failCurrentLockfile("changed the exact reviewed M07-T06 control-plane importer");
+    failCurrentLockfile(`changed the exact reviewed ${label} importer`);
   }
+}
+
+function inspectExactControlPlaneImporter(lines, start, end) {
+  inspectExactReviewedImporter(
+    lines,
+    start,
+    end,
+    M07_T06_CONTROL_PLANE_COORDINATION.lockfileImporter,
+    "M07-T06 control-plane",
+  );
+}
+
+function inspectExactReferenceHostServerImporter(lines, start, end) {
+  inspectExactReviewedImporter(
+    lines,
+    start,
+    end,
+    M07_T11_REFERENCE_HOST_COORDINATION.lockfileImporter,
+    "M07-T11 reference-host server",
+  );
 }
 
 function containsForbiddenYamlControl(text, allowLineFeed = true) {
@@ -6444,11 +6634,26 @@ function normalizeCurrentLockfileBytes(rawBytes) {
     M07_T06_CONTROL_PLANE_COORDINATION.lockfileImporter.path,
     false,
   );
+  const referenceHostServer = importerRange(
+    M07_T11_REFERENCE_HOST_COORDINATION.lockfileImporter.path,
+    false,
+  );
   validatePublisherImporterShape(lines, publisher.start, publisher.end);
   inspectExactControlPlaneImporter(lines, controlPlane.start, controlPlane.end);
+  inspectExactReferenceHostServerImporter(
+    lines,
+    referenceHostServer.start,
+    referenceHostServer.end,
+  );
   const normalized = [...lines];
-  for (const range of [publisher, controlPlane].sort((left, right) => right.start - left.start)) {
-    normalized.splice(range.start, range.end - range.start, `  ${range.relativePath}: {}`, "");
+  for (const range of [publisher, controlPlane, referenceHostServer].sort(
+    (left, right) => right.start - left.start,
+  )) {
+    if (range === referenceHostServer) {
+      normalized.splice(range.start, range.end - range.start);
+    } else {
+      normalized.splice(range.start, range.end - range.start, `  ${range.relativePath}: {}`, "");
+    }
   }
   return Buffer.from(normalized.join("\n"), "utf8");
 }
@@ -6486,14 +6691,21 @@ function assertCurrentRawRecord(record, bytes) {
 function assertHistoricalCoordinationProjection(
   record,
   normalizedBytes,
-  approvedSuccessor = undefined,
+  approvedSuccessors = undefined,
 ) {
   const actualSha256 = `sha256:${sha256(normalizedBytes)}`;
   const historical = record.bytes === normalizedBytes.length && record.sha256 === actualSha256;
-  const reviewedSuccessor =
-    approvedSuccessor !== undefined &&
-    approvedSuccessor.bytes === normalizedBytes.length &&
-    approvedSuccessor.sha256 === actualSha256;
+  const reviewed =
+    approvedSuccessors === undefined
+      ? []
+      : Array.isArray(approvedSuccessors)
+        ? approvedSuccessors
+        : [approvedSuccessors];
+  const reviewedSuccessor = reviewed.some(
+    (approvedSuccessor) =>
+      approvedSuccessor.bytes === normalizedBytes.length &&
+      approvedSuccessor.sha256 === actualSha256,
+  );
   if (!historical && !reviewedSuccessor) {
     fail(
       "REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT",
@@ -6574,6 +6786,7 @@ export async function verifyReferenceHostWebCurrentCoordinationPolicy(rawOptions
     normalizedPublisherPipelineSegments: true,
     normalizedPublisherLockfileImporter: true,
     admittedControlPlaneCoordination: M07_T10_CONTROL_PLANE_COORDINATION.task,
+    admittedReferenceHostCoordination: M07_T11_REFERENCE_HOST_COORDINATION.task,
     normalizedControlPlaneScriptKeys: true,
     normalizedControlPlanePipelineSegments: true,
     normalizedControlPlaneLockfileImporter: true,

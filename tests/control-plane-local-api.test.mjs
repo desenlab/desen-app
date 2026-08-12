@@ -336,6 +336,14 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       ROOT_PACKAGE,
       (source) =>
         source.replace(
+          "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
+          "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+        ),
+    ],
+    [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
           "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
           "pnpm verify:control-plane-runtime-recovery",
         ),

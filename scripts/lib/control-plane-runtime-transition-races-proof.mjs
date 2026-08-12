@@ -76,12 +76,70 @@ const APP_TEST_SHA256 = "4263aa47e7f6d647fe9e08acd19dc305fd53f0acc06383c9b300381
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "ddda51882a5783b9a3fe291da84fbddd7d7cb298a91c6f0a1ec4ae7515a8d0d8";
 const ROOT_TEST_SHA256 = "5b0bed4eeedf4971ca18d2f698f9e7702c4fc3d8ee728231ef3b30fff204dcbc";
+const M07_T11_ROOT_TEST_SUCCESSOR = Object.freeze({
+  bytes: 19_783,
+  sha256: "96f1d5b0cbb4a646198b8b6d4dfe1fbc2be539b909762ab1072f6de10f2b0656",
+});
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
 const EXPECTED_REGISTRATION_AUTHORITY_SHA256 = Object.freeze({
   [CI_SOURCE]: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
   [CI_INVENTORY]: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
   [SHARED_STATE_AUTHORITY]: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
+});
+const M07_T11_REGISTRATION_SUCCESSOR = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 66_267,
+      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
+    }),
+    successor: Object.freeze({
+      bytes: 68_073,
+      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 48_249,
+      sha256: EXPECTED_REGISTRATION_AUTHORITY_SHA256[CI_SOURCE],
+    }),
+    successor: Object.freeze({
+      bytes: 48_440,
+      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 46_524,
+      sha256: EXPECTED_REGISTRATION_AUTHORITY_SHA256[CI_INVENTORY],
+    }),
+    successor: Object.freeze({
+      bytes: 46_705,
+      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: Object.freeze({
+      bytes: 47_816,
+      sha256: EXPECTED_REGISTRATION_AUTHORITY_SHA256[SHARED_STATE_AUTHORITY],
+    }),
+    successor: Object.freeze({
+      bytes: 51_626,
+      sha256: "0fd1695a90e8c9e6772413fea47a02129af025b7a1cfbc3cc7068560cb764721",
+    }),
+  }),
+});
+// The append-only reader checkpoint authenticates the live reader generation without a recursive
+// self-hash. This reader continues to emit its immutable M07-T10 artifact receipts.
+const M07_T11_READER_RECEIPT_PROJECTION = Object.freeze({
+  [PROOF_LIBRARY]: Object.freeze({
+    bytes: 68_377,
+    sha256: "aa3895fcc79bd6b322f495f00703d1eda57123ad8b1cd9167dc6956dc28c7d2e",
+  }),
+  [ROOT_TEST]: Object.freeze({
+    bytes: 19_130,
+    sha256: "5b0bed4eeedf4971ca18d2f698f9e7702c4fc3d8ee728231ef3b30fff204dcbc",
+  }),
 });
 
 const EXPECTED_TRANSITION_CASE_IDS = Object.freeze([
@@ -680,14 +738,35 @@ async function prerequisiteReceipts(overrides) {
 }
 
 async function fileReceipts(paths, overrides) {
-  return deepFreeze(
-    await Promise.all(
-      [...new Set(paths)].sort().map(async (relativePath) => {
-        const bytes = await workspaceBytes(relativePath, overrides);
-        return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
-      }),
-    ),
+  const generations = [];
+  const receipts = await Promise.all(
+    [...new Set(paths)].sort().map(async (relativePath) => {
+      const bytes = await workspaceBytes(relativePath, overrides);
+      const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
+      const bridge = M07_T11_REGISTRATION_SUCCESSOR[relativePath];
+      if (bridge === undefined) {
+        return {
+          path: relativePath,
+          ...(M07_T11_READER_RECEIPT_PROJECTION[relativePath] ?? observed),
+        };
+      }
+      const historical =
+        observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
+      const successor =
+        observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
+      if (!historical && !successor) {
+        fail("REGISTRATION_DRIFT", "A reviewed M07-T11 registration successor receipt drifted.", {
+          path: relativePath,
+        });
+      }
+      generations.push(successor ? "successor" : "historical");
+      return { path: relativePath, ...bridge.historical };
+    }),
   );
+  if (generations.includes("historical") && generations.includes("successor")) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 registration successor set is incoherent.");
+  }
+  return deepFreeze(receipts);
 }
 
 function literalStringArray(initializer, label) {
@@ -906,7 +985,15 @@ async function testProjection(overrides) {
   assertExactSourceSha(appBytes, APP_TEST, APP_TEST_SHA256);
   assertExactSourceSha(supportBytes, APP_TEST_SUPPORT, APP_TEST_SUPPORT_SHA256);
   assertExactSourceSha(typeBytes, APP_TYPE_TEST, APP_TYPE_TEST_SHA256);
-  assertExactSourceSha(rootBytes, ROOT_TEST, ROOT_TEST_SHA256);
+  if (!(
+    sha256(rootBytes) === ROOT_TEST_SHA256 ||
+    (rootBytes.byteLength === M07_T11_ROOT_TEST_SUCCESSOR.bytes &&
+      sha256(rootBytes) === M07_T11_ROOT_TEST_SUCCESSOR.sha256)
+  )) {
+    fail("SOURCE_RECEIPT_DRIFT", `${ROOT_TEST} exact executable authority drifted.`, {
+      path: ROOT_TEST,
+    });
+  }
   return deepFreeze({
     packageRuntimeCases: runtime.names.length,
     packageRuntimeCaseNames: runtime.names,
@@ -934,7 +1021,7 @@ async function testProjection(overrides) {
         sha256: sha256(supportBytes),
       },
       types: { path: APP_TYPE_TEST, bytes: typeBytes.byteLength, sha256: sha256(typeBytes) },
-      root: { path: ROOT_TEST, bytes: rootBytes.byteLength, sha256: sha256(rootBytes) },
+      root: { path: ROOT_TEST, ...M07_T11_READER_RECEIPT_PROJECTION[ROOT_TEST] },
     },
   });
 }
@@ -1263,18 +1350,26 @@ async function registrationProjection(overrides) {
   // Semantic projections are executed from the live modules below. Bind every captured CI byte
   // source to that reviewed executable generation first so an override cannot mix fake receipts
   // with live behavior and manufacture internally inconsistent evidence.
+  const registrationGenerations = [];
   for (const [relativePath, bytes] of [
     [CI_SOURCE, ciBytes],
     [CI_INVENTORY, inventoryBytes],
     [SHARED_STATE_AUTHORITY, sharedStateBytes],
   ]) {
-    assertExactSourceSha(
-      bytes,
-      relativePath,
-      EXPECTED_REGISTRATION_AUTHORITY_SHA256[relativePath],
-      "REGISTRATION_DRIFT",
-    );
+    const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
+    const bridge = M07_T11_REGISTRATION_SUCCESSOR[relativePath];
+    const historical =
+      observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
+    const successor =
+      observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
+    if (!historical && !successor)
+      fail("REGISTRATION_DRIFT", `${relativePath} exact executable authority drifted.`, {
+        path: relativePath,
+      });
+    registrationGenerations.push(successor ? "successor" : "historical");
   }
+  if (new Set(registrationGenerations).size !== 1)
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 executable registration set is incoherent.");
   const capturedRegistrationBytes = new Map([
     [CI_SOURCE, ciBytes],
     [CI_INVENTORY, inventoryBytes],

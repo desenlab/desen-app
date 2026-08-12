@@ -29,6 +29,42 @@ const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const BUNDLE_PUBLICATION_PROOF_LIBRARY = "scripts/lib/publisher-bundle-publication-proof.mjs";
 const BUNDLE_PUBLICATION_ROOT_TEST = "tests/publisher-bundle-publication.test.mjs";
+const M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH = `
+G9wFIBwHuRnrqkquOk5s0mMN0rKicEuX1XFTea4KeSxphckDUEeexWduFp2tPfN/M21zoJFmGtgeHBVvoLE0gnFj+gY/v56f+0c8
+22zbqNEoMBgUTjm/iQhFLbHNeH33uqyczi7l+4f2ri/Sa4srx8/ev/m6R0C6gC9IM+KJpBOJ6ejoVqlurt/ef1rfgy3fEJjVZPBe
+T0inCxcslPAYcT6aFnS+cGFuFuG7J3Z3wZYnCDsePS6/v/WvJ4w25dR/8eurTKIn825oQagCHt5CerVkraQ6KCCwR3MepUfKODhj
+rRS1CJM1cRmjQOxY8zzP/w/mPA5sEAU7/en7T0kII21kCNG1egZVtgR5tJzAug3BlGuvJZtypmI10mA3H5msldbLsEKQteZWDQoB
+oj+/rKcBQofbg0dX80s83Nxeq1sYzOoWEfPYc7XSQ4LydEwwkfkxys6AYhPXVXtlKGzcOTNxNsNca3AIVQFh7bVnyn20BlYYWjYW
+kdYoaXsbiMqAYROKrw0gp95rk5Gd2QVHl5R6MUOi5FwVcxHPmqIZOeYMvdU+djRBDKzc91qBidt/Ma+xxpap41JErr16+erNB08e
+z2d1awNSPnfL/nNPccEaCxlbZpBb4vz3iufsA/JWrRYwRcUmEnjEE28ZzTsb7nXFgdRw43/mQ3UC
+`.replaceAll(/\\s/gu, "");
+const M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH = `
+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
+Zs6KAC7ILHGw9UuGqbXPv/Moe5rjAA==
+`.replaceAll(/\\s/gu, "");
+
 const M07_T10_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH = `
 G7sGIJwFdmtHkla09rfiKUOWDCavSO9dvv6Mulf1fydJIIQKX6E2U3UstboFZOXstbnUaUxUElp3X6dRe4tFZ+/E5fTHwid90Dd9
 kLnB39dsDnuCOF46gdLOM434DcPAsGF6CTO/oPOxVe0X+rfv3cyXNLh63uxql3sv7H6N57y4DOPCTsddX/vXrtsZ20/sk08pH2GX
@@ -456,12 +492,12 @@ function appendValidRootSuccessor(source) {
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
   manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
-    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
+    "pnpm verify:reference-host-web-channel-consumption && pnpm lint",
+    "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-append-only-probe && pnpm lint",
   );
   manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-transition-races && turbo run test",
-    "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
+    "pnpm test:reference-host-web-channel-consumption && turbo run test",
+    "pnpm test:reference-host-web-channel-consumption && pnpm test:control-plane-append-only-probe && turbo run test",
   );
   assert.notEqual(manifest.scripts.check, originalCheck);
   assert.notEqual(manifest.scripts.test, originalTest);
@@ -1457,8 +1493,26 @@ test("[authority] pins the explicit isolated Vitest timeout", async () => {
 });
 
 test("[authority] distinguishes semantic coordination drift from frozen surface drift", async () => {
-  const currentM07T10BundleProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
-  const currentM07T10BundleRootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  const currentM07T11BundleProofBytes = await sourceBytes(BUNDLE_PUBLICATION_PROOF_LIBRARY);
+  const currentM07T11BundleRootTestBytes = await sourceBytes(BUNDLE_PUBLICATION_ROOT_TEST);
+  assert.equal(currentM07T11BundleProofBytes.byteLength, 139_704);
+  assert.equal(
+    createHash("sha256").update(currentM07T11BundleProofBytes).digest("hex"),
+    "a61af18578594c589be8ae07ee244fed05c21c2f865f91a53f3ef48f4daf44bd",
+  );
+  assert.equal(currentM07T11BundleRootTestBytes.byteLength, 86_520);
+  assert.equal(
+    createHash("sha256").update(currentM07T11BundleRootTestBytes).digest("hex"),
+    "0ae7cc0e0ac91d8756838d1cd7783bf6dd11d32134034616b848f0d2e9ddbeb1",
+  );
+  const currentM07T10BundleProofBytes = applyExactRollbackPatch(
+    currentM07T11BundleProofBytes,
+    M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH,
+  );
+  const currentM07T10BundleRootTestBytes = applyExactRollbackPatch(
+    currentM07T11BundleRootTestBytes,
+    M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH,
+  );
   assert.equal(currentM07T10BundleProofBytes.byteLength, 139_396);
   assert.equal(
     createHash("sha256").update(currentM07T10BundleProofBytes).digest("hex"),
@@ -1534,8 +1588,8 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
   const approvedCurrentSuccessor = await buildPublisherInvalidSourceMatrixEvidence(
     fastOptions({
       trackedFileBytes: {
-        [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentM07T10BundleProofBytes,
-        [BUNDLE_PUBLICATION_ROOT_TEST]: currentM07T10BundleRootTestBytes,
+        [BUNDLE_PUBLICATION_PROOF_LIBRARY]: currentM07T11BundleProofBytes,
+        [BUNDLE_PUBLICATION_ROOT_TEST]: currentM07T11BundleRootTestBytes,
         "scripts/lib/publisher-official-golden-proof.mjs": currentT10ProofBytes,
         "tests/publisher-official-golden.test.mjs": currentT10RootTestBytes,
       },
@@ -1545,6 +1599,8 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
   assert.equal(approvedCurrentSuccessor.artifactSha256, baseline.artifactSha256);
 
   for (const [relativePath, predecessorBytes] of [
+    [BUNDLE_PUBLICATION_PROOF_LIBRARY, currentM07T10BundleProofBytes],
+    [BUNDLE_PUBLICATION_ROOT_TEST, currentM07T10BundleRootTestBytes],
     [BUNDLE_PUBLICATION_PROOF_LIBRARY, currentI07T03ProofBytes],
     [BUNDLE_PUBLICATION_ROOT_TEST, priorM07T10RootTestBytes],
     [BUNDLE_PUBLICATION_PROOF_LIBRARY, currentT09ProofBytes],

@@ -1,6 +1,10 @@
 import "./styles.css";
 
-import { activateReferenceHostOfficialSignIn } from "./official-sign-in.js";
+import {
+  createReferenceHostChannelDelivery,
+  disposeReferenceHostChannelDelivery,
+  refreshReferenceHostChannel,
+} from "./channel-delivery.js";
 import { createReferenceHostRoot, disposeReferenceHostRoot } from "./root.js";
 import { createReferenceHostSignInHttpBinding } from "./sign-in-http-handler.js";
 
@@ -17,20 +21,27 @@ const referenceHostRoot = createReferenceHostRoot({
 const signIn = createReferenceHostSignInHttpBinding((resource, init) =>
   window.fetch(resource, init),
 );
-const activation = activateReferenceHostOfficialSignIn(referenceHostRoot, {
+const channelDelivery = createReferenceHostChannelDelivery({
   browser: window,
+  fetch: (resource, init) => window.fetch(resource, init),
+  root: referenceHostRoot,
   signIn,
   reportDiagnostic: () => undefined,
 });
-if (activation.status !== "activated") {
-  disposeReferenceHostRoot(referenceHostRoot);
-  throw new TypeError("The reference sign-in application could not activate safely.");
+
+function refreshAfterPageShow(event: PageTransitionEvent): void {
+  if (!event.persisted) return;
+  void refreshReferenceHostChannel(channelDelivery);
 }
 
 function disposeOnFinalPageHide(event: PageTransitionEvent): void {
   if (event.persisted) return;
   window.removeEventListener("pagehide", disposeOnFinalPageHide);
+  window.removeEventListener("pageshow", refreshAfterPageShow);
+  disposeReferenceHostChannelDelivery(channelDelivery);
   disposeReferenceHostRoot(referenceHostRoot);
 }
 
+window.addEventListener("pageshow", refreshAfterPageShow);
 window.addEventListener("pagehide", disposeOnFinalPageHide);
+void refreshReferenceHostChannel(channelDelivery);

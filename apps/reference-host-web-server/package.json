@@ -1,0 +1,35 @@
+{
+  "name": "@desen/reference-host-web-server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Loopback Web reference host consuming activated DESEN Bundles from the local control plane.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src test test-d --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:channel": "vitest run test/control-plane-client.test.ts test/installed-package-inventory.test.ts test/channel-activation-controller.test.ts test/server.test.ts"
+  },
+  "dependencies": {
+    "@desen/control-plane-api": "workspace:*"
+  },
+  "devDependencies": {
+    "@desen/protocol": "workspace:*",
+    "vitest": "4.1.10"
+  }
+}

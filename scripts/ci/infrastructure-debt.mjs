@@ -844,8 +844,6 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "appendValidRootSuccessor",
         "M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
         "M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
-        "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
-        "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
       ]),
       target("scripts/lib/publisher-invalid-source-matrix-proof.mjs", ['task: "M07-T10"']),
       target("tests/publisher-invalid-source-matrix.test.mjs", [
@@ -1008,6 +1006,142 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       ]),
     ],
     "M07-T10",
+  ),
+  authority(
+    "DEBT-I07-019",
+    "I07-04",
+    "G07",
+    [
+      target("scripts/lib/reference-host-web-source-audit-proof.mjs", [
+        "M07_T11_REFERENCE_HOST_COORDINATION",
+        "M07_T11_REFERENCE_HOST_SUCCESSOR",
+        "normalizeReviewedReferenceHostChannelSuccessor",
+        "inspectExactReferenceHostServerImporter",
+      ]),
+      target("tests/reference-host-web-source-audit.test.mjs", [
+        "pins the exact T11 delivery decoder, timeout, and render-preflight call shapes",
+      ]),
+      target("scripts/lib/publisher-publish-result-proof.mjs", [
+        "REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY",
+      ]),
+      target("tests/publisher-publish-result.test.mjs", [
+        "M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+        "M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
+        "reconstructM07T10SourceAuditProof",
+        "reconstructM07T10SourceAuditTest",
+      ]),
+      target("scripts/lib/publisher-execution-preflight-proof.mjs", [
+        "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY",
+        "APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS",
+      ]),
+      target("tests/publisher-execution-preflight.test.mjs", [
+        "M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+        "M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
+      ]),
+      target("scripts/lib/publisher-bundle-publication-proof.mjs", [
+        "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
+        "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
+      ]),
+      target("tests/publisher-bundle-publication.test.mjs", [
+        "reconstructM07T10ExecutionPreflightProof",
+        "reconstructM07T10ExecutionPreflightRootTest",
+        "replaceExactOnce",
+        "appendValidRootSuccessor",
+      ]),
+      target("scripts/lib/publisher-invalid-source-matrix-proof.mjs", [
+        "APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY",
+        "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
+        "REQUIRED_CURRENT_T09_PROOF_MARKERS",
+        "REQUIRED_CURRENT_T09_TEST_MARKERS",
+      ]),
+      target("tests/publisher-invalid-source-matrix.test.mjs", [
+        "M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
+        "M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+        "appendValidRootSuccessor",
+      ]),
+      target("scripts/lib/control-plane-bundle-store-proof.mjs", [
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "m07T11HistoricalState",
+        "m07T11CurrentState",
+      ]),
+      target("tests/control-plane-bundle-store.test.mjs", [
+        "reconstructM07T10ExecutionPreflightProof",
+        "The reviewed M07-T11 tracked successor set is incoherent.",
+      ]),
+      target("scripts/lib/control-plane-bundle-verification-proof.mjs", [
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "m07T11Generations",
+      ]),
+      target("tests/control-plane-bundle-verification.test.mjs", ["channelSuccessorDrift"]),
+      target("scripts/lib/control-plane-package-preflight-proof.mjs", [
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "M07_T11_AGGREGATE_SUCCESSOR_COMMANDS",
+        "reviewedChannelSuccessorTail",
+        "m07T11Generations",
+      ]),
+      target("tests/control-plane-package-preflight.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+      target("scripts/lib/control-plane-reference-preflight-proof.mjs", [
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "channelSuccessorTail",
+        "m07T11Generations",
+      ]),
+      target("tests/control-plane-reference-preflight.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+      target("scripts/lib/control-plane-local-api-proof.mjs", [
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "reviewedChannelSuccessorTail",
+        "m07T11Generations",
+      ]),
+      target("tests/control-plane-local-api.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+      target("scripts/lib/control-plane-runtime-staging-proof.mjs", [
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "reviewedM07T11Tail",
+        "m07T11Generations",
+      ]),
+      target("tests/control-plane-runtime-staging.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+      target("scripts/lib/control-plane-runtime-activation-proof.mjs", [
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "approvedChannelCurrent",
+        "m07T11Generations",
+      ]),
+      target("tests/control-plane-runtime-activation.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+      target("scripts/lib/control-plane-runtime-recovery-proof.mjs", [
+        "M07_T11_TEST_AUTHORITY_RECEIPTS",
+        "M07_T11_REGISTRATION_AUTHORITY_RECEIPTS",
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "approvedT11",
+      ]),
+      target("tests/control-plane-runtime-recovery.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+      target("scripts/lib/control-plane-runtime-fault-injection-proof.mjs", [
+        "M07_T11_ROOT_TEST_SUCCESSOR",
+        "M07_T11_TRACKED_RECEIPT_BRIDGE",
+        "m07T11Generations",
+      ]),
+      target("tests/control-plane-runtime-fault-injection.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+      target("scripts/lib/control-plane-runtime-transition-races-proof.mjs", [
+        "M07_T11_ROOT_TEST_SUCCESSOR",
+        "M07_T11_REGISTRATION_SUCCESSOR",
+        "M07_T11_READER_RECEIPT_PROJECTION",
+        "registrationGenerations",
+      ]),
+      target("tests/control-plane-runtime-transition-races.test.mjs", [
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+      ]),
+    ],
+    "M07-T11",
   ),
 ]);
 

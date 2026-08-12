@@ -1,0 +1,890 @@
+{
+  "schemaVersion": 1,
+  "proofId": "reference-host-web-channel-consumption",
+  "profile": "desen.reference-host-web.channel-consumption-proof.v1",
+  "task": "M07-T11",
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M05-T07",
+      "path": "docs/proof/artifacts/reference-host-web-0.1.0-shell.json",
+      "bytes": 16213,
+      "sha256": "cafaf8e9ec0b8be207344b25e076541b395c83e348f665dc7b97e5c4cb4000f2"
+    },
+    {
+      "task": "M05-T08",
+      "path": "docs/proof/artifacts/reference-host-web-0.1.0-sign-in.json",
+      "bytes": 21847,
+      "sha256": "a7c83d438190ee45dae4714bd092e56282cb3db4c69c72eeaca44e2647683adb"
+    },
+    {
+      "task": "M05-T09",
+      "path": "docs/proof/artifacts/reference-host-web-0.1.0-source-audit.json",
+      "bytes": 59871,
+      "sha256": "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89"
+    },
+    {
+      "task": "M07-T01",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-store.json",
+      "bytes": 22396,
+      "sha256": "698be7d5610d1732ad991bf7e58131e81d2c34ffa888f65ec3c7916334f54795"
+    },
+    {
+      "task": "M07-T02",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json",
+      "bytes": 48642,
+      "sha256": "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a"
+    },
+    {
+      "task": "M07-T03",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-package-preflight.json",
+      "bytes": 62743,
+      "sha256": "79ec5f2d285868ecd7e08b4649b160087810b08346d7741796c09d14749f4628"
+    },
+    {
+      "task": "M07-T04",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-reference-preflight.json",
+      "bytes": 34612,
+      "sha256": "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394"
+    },
+    {
+      "task": "M07-T05",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+      "bytes": 41945,
+      "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+    },
+    {
+      "task": "M07-T06",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-staging.json",
+      "bytes": 47622,
+      "sha256": "d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494"
+    },
+    {
+      "task": "M07-T07",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-activation.json",
+      "bytes": 49892,
+      "sha256": "3129a8e40c837a1c49d7fe206de794e0f7f7e130dc7e5e90a012b9e38bf07334"
+    },
+    {
+      "task": "M07-T08",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-recovery.json",
+      "bytes": 44224,
+      "sha256": "c65d4f2de1407fffb891b5d3ba2fc8a3a8d4e3f0fb76c8b8f2719be6b310b3f9"
+    },
+    {
+      "task": "M07-T09",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-fault-injection.json",
+      "bytes": 64493,
+      "sha256": "9d0f764e35f5400fa662874784fba6f6492a39a0e60557fe1a9c7d7eab5407c9"
+    },
+    {
+      "task": "M07-T10",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-runtime-transition-races.json",
+      "bytes": 58059,
+      "sha256": "f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39"
+    }
+  ],
+  "claims": {
+    "compositionBoundary": {
+      "serverAndBrowserBuiltSeparately": true,
+      "serverImportsOnlyPublicControlPlaneRoot": true,
+      "browserImportsNoControlPlaneOrSecretAuthority": true,
+      "packageBoundaries": {
+        "serverDependencies": ["@desen/control-plane-api"],
+        "clientDependencies": [
+          "@desen/reference-catalog-web",
+          "@desen/runtime-core",
+          "@desen/runtime-react",
+          "@desen/runtime-web",
+          "react",
+          "react-dom"
+        ]
+      },
+      "serverImports": [
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./channel-activation-controller.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./control-plane-client.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./installed-package-inventory.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./server.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./channel-activation-controller.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./control-plane-client.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./installed-package-inventory.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/index.ts",
+          "specifier": "./server.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/control-plane-client.ts",
+          "specifier": "@desen/control-plane-api"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+          "specifier": "node:fs"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+          "specifier": "node:fs/promises"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+          "specifier": "node:path"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+          "specifier": "@desen/control-plane-api"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+          "specifier": "@desen/control-plane-api"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+          "specifier": "node:fs"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/channel-activation-controller.ts",
+          "specifier": "@desen/control-plane-api"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/channel-activation-controller.ts",
+          "specifier": "./control-plane-client.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/channel-activation-controller.ts",
+          "specifier": "./installed-package-inventory.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/channel-activation-controller.ts",
+          "specifier": "@desen/control-plane-api"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/channel-activation-controller.ts",
+          "specifier": "./control-plane-client.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/server.ts",
+          "specifier": "node:http"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/server.ts",
+          "specifier": "node:fs/promises"
+        },
+        { "relativePath": "apps/reference-host-web-server/src/server.ts", "specifier": "node:fs" },
+        {
+          "relativePath": "apps/reference-host-web-server/src/server.ts",
+          "specifier": "node:path"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/server.ts",
+          "specifier": "./channel-activation-controller.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web-server/src/server.ts",
+          "specifier": "node:http"
+        },
+        { "relativePath": "apps/reference-host-web-server/src/server.ts", "specifier": "node:fs" },
+        {
+          "relativePath": "apps/reference-host-web-server/src/server.ts",
+          "specifier": "./channel-activation-controller.js"
+        }
+      ],
+      "browserImports": [
+        {
+          "relativePath": "apps/reference-host-web/src/channel-delivery.ts",
+          "specifier": "./official-sign-in.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/channel-delivery.ts",
+          "specifier": "@desen/reference-catalog-web/host-operations"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/channel-delivery.ts",
+          "specifier": "./official-sign-in.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/channel-delivery.ts",
+          "specifier": "./root.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/reference-catalog-web/catalog.json"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/reference-catalog-web/host-operations"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/reference-catalog-web/react-adapters"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/runtime-core"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/runtime-react"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/runtime-web"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "../../../examples/sign-in/official-derived.bundle.desen.json"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "./host-ports.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "./root.js"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/runtime-core"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "@desen/runtime-react"
+        },
+        {
+          "relativePath": "apps/reference-host-web/src/official-sign-in.ts",
+          "specifier": "./root.js"
+        },
+        { "relativePath": "apps/reference-host-web/src/main.tsx", "specifier": "./styles.css" },
+        {
+          "relativePath": "apps/reference-host-web/src/main.tsx",
+          "specifier": "./channel-delivery.js"
+        },
+        { "relativePath": "apps/reference-host-web/src/main.tsx", "specifier": "./root.js" },
+        {
+          "relativePath": "apps/reference-host-web/src/main.tsx",
+          "specifier": "./sign-in-http-handler.js"
+        }
+      ]
+    },
+    "channelConsumption": {
+      "fixedHostOwnedChannel": true,
+      "realLoopbackBearerHttp": true,
+      "channelSnapshotIsDiscoveryOnly": true,
+      "completePublicVerificationPreflightStagingActivationRecoveryChain": true,
+      "exactBundleBytesEmbeddedWithoutReencoding": true,
+      "exactControlPlaneAndHostMediaTypesRequired": true,
+      "responseEnvelope": "{activation:{generation,revision},bundle}",
+      "strongEtagBindsGenerationAndRevision": true
+    },
+    "sequence": {
+      "order": ["valid A", "invalid B", "valid C"],
+      "invalidBNeverBecomesAuthority": true,
+      "invalidBPreservesExactAResponseAndEtag": true,
+      "validCAtomicallyReplacesA": true
+    },
+    "lifecycle": {
+      "durableGenerationPersists": true,
+      "restartRecoversBeforeDelivery": true,
+      "staleRefreshCannotPublish": true,
+      "lateRefreshAfterCloseCannotPublish": true
+    },
+    "browser": {
+      "existingMountDelegatesToFixedActivator": true,
+      "productionEntryRefreshAndLifecycleWiringTested": true,
+      "homeDeepLinkServesTheBuiltEntry": true,
+      "failedOrUnavailableRefreshPreservesLastKnownGoodSurface": true,
+      "noManualComponentTreeAuthority": true
+    },
+    "installedPackageInventory": {
+      "pathComesOnlyFromHostConfiguration": true,
+      "bounded": true,
+      "canonicalRootRequired": true,
+      "symbolicLinksAndSpecialFilesRejected": true,
+      "hardLinksRejected": true
+    },
+    "traceRows": [
+      {
+        "id": "PIPE-009",
+        "section": "24.1",
+        "line": 1304,
+        "anchor": "fetch or receive the immutable bundle",
+        "summary": "Activation step 1: receive immutable bundle",
+        "owners": ["M07-T01", "M07-T11"],
+        "tests": ["M07-T09"],
+        "evidence": "Fetch failure preserves the durable active record"
+      }
+    ],
+    "coverageTruth": {
+      "normativeN038": "TESTED",
+      "normativeN041": "PLANNED",
+      "proofMatrixP12": "NOT_PROVEN",
+      "gateG07": "OPEN_PENDING_I07_04"
+    }
+  },
+  "runtimeSuiteReceipt": {
+    "schemaVersion": 1,
+    "profile": "desen.reference-host-web.channel-consumption-suite.v1",
+    "status": "PASS",
+    "caseCount": 9,
+    "caseIds": [
+      "valid-a-activation-delivery",
+      "invalid-b-preserves-a",
+      "valid-c-replaces-a",
+      "restart-recovers-before-delivery",
+      "stale-refresh-fenced",
+      "late-refresh-after-close-fenced",
+      "loopback-bearer-enforced",
+      "installed-inventory-symlink-rejected",
+      "browser-mount-preserves-good"
+    ],
+    "testCount": 46,
+    "testTitles": [
+      "[browser-mount-preserves-good] preserves A when a higher-generation Bundle fails the real session mount",
+      "[installed-inventory-symlink-rejected] rejects a linked dist artifact",
+      "[invalid-b-preserves-a] retains the authenticated A delivery",
+      "[late-refresh-after-close-fenced] prevents publication after disposal",
+      "[loopback-bearer-enforced] authenticates both fixed T05 reads",
+      "[restart-recovers-before-delivery] withholds C until complete reconstruction",
+      "[stale-refresh-fenced] retries once against the newer channel snapshot",
+      "[valid-a-activation-delivery] activates and exposes the first valid candidate",
+      "[valid-c-replaces-a] commits C with A as previous-good",
+      "cancels an unread response body when exact response identity is rejected",
+      "cancels an unread response body when its declared length is invalid",
+      "cleans host and session authorities when root activation cannot transfer ownership",
+      "coalesces concurrent refresh calls into one request and one promise",
+      "contains a pending same-document authority after exact session and host replacement",
+      "deduplicates the current durable identity and rejects a regressing generation",
+      "denies an empty-password contract input before I/O and keeps service failure generic",
+      "exercises A-B-C preservation and restart recovery without socket authority",
+      "keeps the application authentication backend outside the reference server",
+      "keeps the current surface for malformed, redirected, encoded, and rejected responses",
+      "keeps the host boot surface instead of falling back to the historical static Bundle",
+      "loads the exact official Catalog and complete sorted dist inventory",
+      "pins the exact controlled document and revision identities",
+      "pins the exact official response media type independently for each T05 read route",
+      "preserves the production composition across BFCache entry and disposes on final pagehide",
+      "redacts rejected host failures, permits explicit retry, and ignores late disposal results",
+      "rejects a BOM-prefixed channel body instead of normalizing its framing",
+      "rejects a finite aggregate package overflow before reading all artifacts",
+      "rejects a finite static inventory overflow before opening activation state",
+      "rejects a hard-linked Catalog outside the package root",
+      "rejects a hard-linked dist artifact outside the package root",
+      "rejects a hard-linked static file before opening activation state",
+      "rejects accessor-backed composition input without invoking it",
+      "rejects accessor-backed or extended delivered package policy without replacing A",
+      "rejects an immediate installed-package directory fan-out at its entry ceiling",
+      "rejects cross-origin, body-bearing, query, and wrong-method refresh requests",
+      "rejects non-loopback origins and malformed trusted inputs before network work",
+      "rejects too many empty static directories before opening activation state",
+      "rejects too many static directory entries before opening activation state",
+      "replaces the mounted authority only after a newer delivery mounts successfully",
+      "requests only the fixed bodyless same-origin endpoint and activates the exact Bundle",
+      "runs pending, declared failure, edited retry, success, and navigation through real adapters",
+      "runs the production HTTP binding through runtime, real adapters, retry, and navigation",
+      "serves the exact active envelope and keeps server authorities out of the response",
+      "settles disposal immediately and fences a fetch response that arrives late",
+      "shares concurrent close completion until the listener is stopped",
+      "times out a fetch that ignores abort and admits a later clean refresh"
+    ],
+    "suiteFiles": [
+      "apps/reference-host-web-server/test/control-plane-client.test.ts",
+      "apps/reference-host-web-server/test/installed-package-inventory.test.ts",
+      "apps/reference-host-web-server/test/channel-activation-controller.test.ts",
+      "apps/reference-host-web-server/test/server.test.ts",
+      "apps/reference-host-web/test/channel-delivery.test.tsx",
+      "apps/reference-host-web/test/main-lifecycle.test.tsx",
+      "apps/reference-host-web/test/official-sign-in.test.tsx"
+    ]
+  },
+  "tests": {
+    "runtimeCaseCount": 9,
+    "runtimeCaseIds": [
+      "valid-a-activation-delivery",
+      "invalid-b-preserves-a",
+      "valid-c-replaces-a",
+      "restart-recovers-before-delivery",
+      "stale-refresh-fenced",
+      "late-refresh-after-close-fenced",
+      "loopback-bearer-enforced",
+      "installed-inventory-symlink-rejected",
+      "browser-mount-preserves-good"
+    ],
+    "runtimeTestCount": 46,
+    "runtimeTestsByFile": {
+      "apps/reference-host-web-server/test/control-plane-client.test.ts": [
+        "[loopback-bearer-enforced] authenticates both fixed T05 reads",
+        "rejects non-loopback origins and malformed trusted inputs before network work",
+        "pins the exact official response media type independently for each T05 read route",
+        "cancels an unread response body when exact response identity is rejected",
+        "cancels an unread response body when its declared length is invalid",
+        "rejects a BOM-prefixed channel body instead of normalizing its framing"
+      ],
+      "apps/reference-host-web-server/test/installed-package-inventory.test.ts": [
+        "loads the exact official Catalog and complete sorted dist inventory",
+        "[installed-inventory-symlink-rejected] rejects a linked dist artifact",
+        "rejects a hard-linked dist artifact outside the package root",
+        "rejects a hard-linked Catalog outside the package root",
+        "rejects a finite aggregate package overflow before reading all artifacts",
+        "rejects an immediate installed-package directory fan-out at its entry ceiling"
+      ],
+      "apps/reference-host-web-server/test/channel-activation-controller.test.ts": [
+        "[valid-a-activation-delivery] activates and exposes the first valid candidate",
+        "[invalid-b-preserves-a] retains the authenticated A delivery",
+        "[valid-c-replaces-a] commits C with A as previous-good",
+        "[restart-recovers-before-delivery] withholds C until complete reconstruction",
+        "[stale-refresh-fenced] retries once against the newer channel snapshot",
+        "[late-refresh-after-close-fenced] prevents publication after disposal",
+        "exercises A-B-C preservation and restart recovery without socket authority"
+      ],
+      "apps/reference-host-web-server/test/server.test.ts": [
+        "serves the exact active envelope and keeps server authorities out of the response",
+        "rejects cross-origin, body-bearing, query, and wrong-method refresh requests",
+        "keeps the application authentication backend outside the reference server",
+        "shares concurrent close completion until the listener is stopped",
+        "rejects a finite static inventory overflow before opening activation state",
+        "rejects too many empty static directories before opening activation state",
+        "rejects too many static directory entries before opening activation state",
+        "rejects a hard-linked static file before opening activation state"
+      ],
+      "apps/reference-host-web/test/channel-delivery.test.tsx": [
+        "requests only the fixed bodyless same-origin endpoint and activates the exact Bundle",
+        "coalesces concurrent refresh calls into one request and one promise",
+        "keeps the current surface for malformed, redirected, encoded, and rejected responses",
+        "[browser-mount-preserves-good] preserves A when a higher-generation Bundle fails the real session mount",
+        "deduplicates the current durable identity and rejects a regressing generation",
+        "replaces the mounted authority only after a newer delivery mounts successfully",
+        "times out a fetch that ignores abort and admits a later clean refresh",
+        "settles disposal immediately and fences a fetch response that arrives late"
+      ],
+      "apps/reference-host-web/test/main-lifecycle.test.tsx": [
+        "preserves the production composition across BFCache entry and disposes on final pagehide",
+        "keeps the host boot surface instead of falling back to the historical static Bundle"
+      ],
+      "apps/reference-host-web/test/official-sign-in.test.tsx": [
+        "runs pending, declared failure, edited retry, success, and navigation through real adapters",
+        "runs the production HTTP binding through runtime, real adapters, retry, and navigation",
+        "denies an empty-password contract input before I/O and keeps service failure generic",
+        "contains a pending same-document authority after exact session and host replacement",
+        "redacts rejected host failures, permits explicit retry, and ignores late disposal results",
+        "cleans host and session authorities when root activation cannot transfer ownership",
+        "rejects accessor-backed composition input without invoking it",
+        "rejects accessor-backed or extended delivered package policy without replacing A",
+        "pins the exact controlled document and revision identities"
+      ]
+    },
+    "rootMutationCaseCount": 13,
+    "rootMutationCaseNames": [
+      "[authority] builds the exact M07-T11 separately built channel-consumption artifact",
+      "[determinism] two independent evidence builds are byte-identical",
+      "[prerequisites] rejects drift in every immutable M05 and M07 artifact",
+      "[runtime] rejects missing, duplicate, failed, and additional case identities",
+      "[server-boundary] rejects private imports and weakened static or CSP guards",
+      "[client-boundary] rejects control-plane, secret, editor, testkit, and manual-tree authority",
+      "[inventory] rejects weakened bounded and symlink-safe package inventory guards",
+      "[traceability] accepts only the exact PIPE-009 assignment",
+      "[artifact] verifies exact bytes and rejects one changed byte",
+      "[writer] atomically writes evidence and preserves the destination on failure",
+      "[options] rejects unknown, accessor, proxy, cyclic, and shared-memory inputs",
+      "[filesystem] rejects artifact and proof symlinks plus invalid UTF-8 proof authority",
+      "[immutability] recursively freezes the graph and preserves later-scope nonclaims"
+    ],
+    "sourceReceipts": {
+      "apps/reference-host-web-server/src/channel-activation-controller.ts": {
+        "bytes": 19208,
+        "sha256": "5e865ba6060b0b4f45a4633c7eb2ca401915336853d1b71baeefa290025818bf"
+      },
+      "apps/reference-host-web-server/src/control-plane-client.ts": {
+        "bytes": 10575,
+        "sha256": "4ef74a46dfe3301997f86f4b87256dfa07c13d1226669a865c07a6b624e8435a"
+      },
+      "apps/reference-host-web-server/src/index.ts": {
+        "bytes": 1257,
+        "sha256": "550e03f02882d3b7242557969724a73ca3f301486469a1e655f3a19e4a01f656"
+      },
+      "apps/reference-host-web-server/src/installed-package-inventory.ts": {
+        "bytes": 10626,
+        "sha256": "f63c07bee866bbef99ab9fb6462c24a4db05b405b7be789395c5dd04ee6d1ae4"
+      },
+      "apps/reference-host-web-server/src/server.ts": {
+        "bytes": 21770,
+        "sha256": "77d4458beb4b535c67f10b0c68e8c4011429e258d887b5c9e22658681301dcd1"
+      },
+      "apps/reference-host-web-server/test-d/production-boundary.test-d.ts": {
+        "bytes": 2368,
+        "sha256": "7c400b40f653852802216b8780fffc8f2895078d123ac5d0545ee188927b3eb5"
+      },
+      "apps/reference-host-web-server/test/channel-activation-controller.test.ts": {
+        "bytes": 14074,
+        "sha256": "a5e979fff6d60beca672b6f9d7c9d2de3446e2cabd2bf409559a313f2e1e440e"
+      },
+      "apps/reference-host-web-server/test/control-plane-client.test.ts": {
+        "bytes": 9648,
+        "sha256": "72e519c0270ed1c413a6ca4c75c77a5e283dc129faad24a637ba94b7190694dd"
+      },
+      "apps/reference-host-web-server/test/installed-package-inventory.test.ts": {
+        "bytes": 7197,
+        "sha256": "864bba833cf08614aee25692890df8b1c37e7f67675b1bb90ff9d341b6dd1d2b"
+      },
+      "apps/reference-host-web-server/test/server.test.ts": {
+        "bytes": 12418,
+        "sha256": "c48911cdd8d7d1944e502d6d1036eaf99e0d2a4cf79be6b839270e0a7f5ec3a9"
+      },
+      "apps/reference-host-web/src/channel-delivery.ts": {
+        "bytes": 27819,
+        "sha256": "7e85c02be80245e2f1b015166beedc7d91eb38daea842e167c9f5639fe5a19b7"
+      },
+      "apps/reference-host-web/src/main.tsx": {
+        "bytes": 1613,
+        "sha256": "ecc080cff09c3c414501c34a638764a86789e035e008abe4d54555b929bf43f2"
+      },
+      "apps/reference-host-web/src/official-sign-in.ts": {
+        "bytes": 19394,
+        "sha256": "3945954bbf3f9a53b2b3023b01881f67ccaec9b015d2f1d08061906323b584c0"
+      },
+      "apps/reference-host-web/test/channel-delivery.test.tsx": {
+        "bytes": 13770,
+        "sha256": "3fdfe09333500f963c0970a3d194e0f18fdaac45e067eabcc086efcc8d6ff9dd"
+      },
+      "apps/reference-host-web/test/channel-delivery.types.ts": {
+        "bytes": 2467,
+        "sha256": "ade811b14537d15664cc955d41331207e746d0791ccce7625ebc81280149f092"
+      },
+      "apps/reference-host-web/test/main-lifecycle.test.tsx": {
+        "bytes": 4735,
+        "sha256": "7d611272fcff01479413dbb2d39bc20f41ee6b0e6fdab4e20c262c6d82fe51bf"
+      },
+      "apps/reference-host-web/test/official-sign-in.test.tsx": {
+        "bytes": 18093,
+        "sha256": "f1f7d46478622535fd52cd3bac8a122eac30cab3572ac1a3ecf307798a167121"
+      },
+      "apps/reference-host-web/test/official-sign-in.types.ts": {
+        "bytes": 2990,
+        "sha256": "6a084e6956d217ce776c07423114a694d4880bb1c86b66d5681886078549cee5"
+      },
+      "tests/reference-host-web-channel-consumption.test.mjs": {
+        "bytes": 20656,
+        "sha256": "1a2f276ae2c0f91e0ef5a16cb0c86c6a181c4ef63b58bd17017f3fab0d30524e"
+      }
+    }
+  },
+  "trackedFiles": [
+    {
+      "path": "apps/reference-host-web-server/package.json",
+      "bytes": 1012,
+      "sha256": "e0183641e83c812538aafd61387cb11e4fd9d73adaf291910d32349b79196106"
+    },
+    {
+      "path": "apps/reference-host-web-server/src/channel-activation-controller.ts",
+      "bytes": 19208,
+      "sha256": "5e865ba6060b0b4f45a4633c7eb2ca401915336853d1b71baeefa290025818bf"
+    },
+    {
+      "path": "apps/reference-host-web-server/src/control-plane-client.ts",
+      "bytes": 10575,
+      "sha256": "4ef74a46dfe3301997f86f4b87256dfa07c13d1226669a865c07a6b624e8435a"
+    },
+    {
+      "path": "apps/reference-host-web-server/src/index.ts",
+      "bytes": 1257,
+      "sha256": "550e03f02882d3b7242557969724a73ca3f301486469a1e655f3a19e4a01f656"
+    },
+    {
+      "path": "apps/reference-host-web-server/src/installed-package-inventory.ts",
+      "bytes": 10626,
+      "sha256": "f63c07bee866bbef99ab9fb6462c24a4db05b405b7be789395c5dd04ee6d1ae4"
+    },
+    {
+      "path": "apps/reference-host-web-server/src/server.ts",
+      "bytes": 21770,
+      "sha256": "77d4458beb4b535c67f10b0c68e8c4011429e258d887b5c9e22658681301dcd1"
+    },
+    {
+      "path": "apps/reference-host-web-server/test-d/production-boundary.test-d.ts",
+      "bytes": 2368,
+      "sha256": "7c400b40f653852802216b8780fffc8f2895078d123ac5d0545ee188927b3eb5"
+    },
+    {
+      "path": "apps/reference-host-web-server/test/channel-activation-controller.test.ts",
+      "bytes": 14074,
+      "sha256": "a5e979fff6d60beca672b6f9d7c9d2de3446e2cabd2bf409559a313f2e1e440e"
+    },
+    {
+      "path": "apps/reference-host-web-server/test/control-plane-client.test.ts",
+      "bytes": 9648,
+      "sha256": "72e519c0270ed1c413a6ca4c75c77a5e283dc129faad24a637ba94b7190694dd"
+    },
+    {
+      "path": "apps/reference-host-web-server/test/installed-package-inventory.test.ts",
+      "bytes": 7197,
+      "sha256": "864bba833cf08614aee25692890df8b1c37e7f67675b1bb90ff9d341b6dd1d2b"
+    },
+    {
+      "path": "apps/reference-host-web-server/test/server.test.ts",
+      "bytes": 12418,
+      "sha256": "c48911cdd8d7d1944e502d6d1036eaf99e0d2a4cf79be6b839270e0a7f5ec3a9"
+    },
+    {
+      "path": "apps/reference-host-web-server/tsconfig.build.json",
+      "bytes": 304,
+      "sha256": "38f9a6acefc5bdbbf88d23ec5a0a8ebc52965ae41f94bdd04b2e38fd42f99adf"
+    },
+    {
+      "path": "apps/reference-host-web-server/tsconfig.json",
+      "bytes": 158,
+      "sha256": "5adc018c0067ff420f22812e5e6c92682bc1e56caff5693fd1a523c7ad90656d"
+    },
+    {
+      "path": "apps/reference-host-web/package.json",
+      "bytes": 1249,
+      "sha256": "0332a4002595c0812059352cf69a6d704903b5f49d9ff9362e6654e45000cdc1"
+    },
+    {
+      "path": "apps/reference-host-web/src/channel-delivery.ts",
+      "bytes": 27819,
+      "sha256": "7e85c02be80245e2f1b015166beedc7d91eb38daea842e167c9f5639fe5a19b7"
+    },
+    {
+      "path": "apps/reference-host-web/src/main.tsx",
+      "bytes": 1613,
+      "sha256": "ecc080cff09c3c414501c34a638764a86789e035e008abe4d54555b929bf43f2"
+    },
+    {
+      "path": "apps/reference-host-web/src/official-sign-in.ts",
+      "bytes": 19394,
+      "sha256": "3945954bbf3f9a53b2b3023b01881f67ccaec9b015d2f1d08061906323b584c0"
+    },
+    {
+      "path": "apps/reference-host-web/test/channel-delivery.test.tsx",
+      "bytes": 13770,
+      "sha256": "3fdfe09333500f963c0970a3d194e0f18fdaac45e067eabcc086efcc8d6ff9dd"
+    },
+    {
+      "path": "apps/reference-host-web/test/channel-delivery.types.ts",
+      "bytes": 2467,
+      "sha256": "ade811b14537d15664cc955d41331207e746d0791ccce7625ebc81280149f092"
+    },
+    {
+      "path": "apps/reference-host-web/test/main-lifecycle.test.tsx",
+      "bytes": 4735,
+      "sha256": "7d611272fcff01479413dbb2d39bc20f41ee6b0e6fdab4e20c262c6d82fe51bf"
+    },
+    {
+      "path": "apps/reference-host-web/test/official-sign-in.test.tsx",
+      "bytes": 18093,
+      "sha256": "f1f7d46478622535fd52cd3bac8a122eac30cab3572ac1a3ecf307798a167121"
+    },
+    {
+      "path": "apps/reference-host-web/test/official-sign-in.types.ts",
+      "bytes": 2990,
+      "sha256": "6a084e6956d217ce776c07423114a694d4880bb1c86b66d5681886078549cee5"
+    },
+    {
+      "path": "docs/proof/protocol-0.1.0-traceability.json",
+      "bytes": 134870,
+      "sha256": "40d091d7acbe1f6ae6dbc9570c8ebc9b70dc32a42b7e46b39095ad6d562cd147"
+    },
+    {
+      "path": "scripts/generate-reference-host-web-channel-consumption-proof.mjs",
+      "bytes": 889,
+      "sha256": "52b224cd8dc6e64185ce0750ba7b95345d6390abbdc35db742d4e23c424f5bfd"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/reference-host-web-channel-consumption-proof.mjs",
+      "bytes": 71848,
+      "sha256": "b7548b29b7b2245fc0cdc8e32bffca04e822c477bfc8a1f7d550d57caad7ece0"
+    },
+    {
+      "path": "scripts/verify-reference-host-web-channel-consumption.mjs",
+      "bytes": 713,
+      "sha256": "f502c04b6a167e24a6522cdc4f114e608ad94e8408d6947e579d55a897e683a4"
+    },
+    {
+      "path": "tests/reference-host-web-channel-consumption.test.mjs",
+      "bytes": 20656,
+      "sha256": "1a2f276ae2c0f91e0ef5a16cb0c86c6a181c4ef63b58bd17017f3fab0d30524e"
+    }
+  ],
+  "distributions": {
+    "server": {
+      "profile": "desen.reference-host-web-server.dist.v1",
+      "root": "apps/reference-host-web-server/dist",
+      "entryCount": 20,
+      "fileCount": 20,
+      "totalBytes": 119238,
+      "inventorySha256": "01f7a8ed5527f0ce9be9fd25fcabedba1ecf25895ed259ec02c026a848fdfc45",
+      "files": [
+        {
+          "path": "channel-activation-controller.d.ts",
+          "bytes": 3677,
+          "sha256": "b7002833093b502ca799c60726b84169dde96567e3f8e6e5e428cbe809aad57d"
+        },
+        {
+          "path": "channel-activation-controller.d.ts.map",
+          "bytes": 1576,
+          "sha256": "5100f126db98214e2e69f92703ce532f1f43e9b4757925d983a2c4d3b22b4271"
+        },
+        {
+          "path": "channel-activation-controller.js",
+          "bytes": 15863,
+          "sha256": "cd2dff8735374b63c5376b9fcd9daf05042f9c1645a84aa894dc2ac41dd8cddf"
+        },
+        {
+          "path": "channel-activation-controller.js.map",
+          "bytes": 13274,
+          "sha256": "578a249bdd793a5e9c124b2668a1c7dfded95333768412bfc76c7cfd226eacc5"
+        },
+        {
+          "path": "control-plane-client.d.ts",
+          "bytes": 2519,
+          "sha256": "c40e92c16e19fff0e53555e04c6d883feeae47ad4e00592e6ec3975982cb3b4c"
+        },
+        {
+          "path": "control-plane-client.d.ts.map",
+          "bytes": 1227,
+          "sha256": "f48371d4748c3d7423e8107ff864826e90c20de017be3a3d9d710261fb2fd52c"
+        },
+        {
+          "path": "control-plane-client.js",
+          "bytes": 8521,
+          "sha256": "abf7764650e097bb81b6ed3267a9a5cc64c5fdd942f8281746385452786d0e9f"
+        },
+        {
+          "path": "control-plane-client.js.map",
+          "bytes": 7611,
+          "sha256": "97f9439b4ae97bf90a33d7ab3650d73ecc521b02694d7e49bfbba8f5648024c2"
+        },
+        {
+          "path": "index.d.ts",
+          "bytes": 1258,
+          "sha256": "6e0e03c0c5972b44f151a2ce3327bec878384583997f93c0fa3b2688ec895985"
+        },
+        {
+          "path": "index.d.ts.map",
+          "bytes": 631,
+          "sha256": "88891ee1cbbe4e9a1bb683ae34bc33474a06902ae6f48080a67cd1a6c79a98d3"
+        },
+        {
+          "path": "index.js",
+          "bytes": 556,
+          "sha256": "9fddd8f00d7ac8cd43e8413ca0fd4f43e99af5ce056f8ec84185e2857c00b06b"
+        },
+        {
+          "path": "index.js.map",
+          "bytes": 318,
+          "sha256": "d01abbbd014718443e49a0a58be650a28c3e29c3858d362eac6d1734027416b4"
+        },
+        {
+          "path": "installed-package-inventory.d.ts",
+          "bytes": 1050,
+          "sha256": "699887f1e6d1089faf6735843d6dbb64a2ed0bc7d11e000e23b31f5a93d48148"
+        },
+        {
+          "path": "installed-package-inventory.d.ts.map",
+          "bytes": 385,
+          "sha256": "139f5a3b8e261ac0f9e6dba37857a6aeb383fc257e53dd29c73a8edc4a014525"
+        },
+        {
+          "path": "installed-package-inventory.js",
+          "bytes": 10432,
+          "sha256": "3fba32f425f50386fe7d718185b80021c57ebe48a6c58f95d9f24f8255dd4bba"
+        },
+        {
+          "path": "installed-package-inventory.js.map",
+          "bytes": 8593,
+          "sha256": "b0c345eb6507ae0b78787defd8574914a21df02191122c57b2db24d3224dd658"
+        },
+        {
+          "path": "server.d.ts",
+          "bytes": 2429,
+          "sha256": "aa187456f5db1acdab2e2c5d754e7bde8c8dd3a2fa45c5b7efa8390f51db782d"
+        },
+        {
+          "path": "server.d.ts.map",
+          "bytes": 1024,
+          "sha256": "4f0623368e03868b49fe096d98f66e08c1c4dd797903e3ee17217ef0ee446605"
+        },
+        {
+          "path": "server.js",
+          "bytes": 20823,
+          "sha256": "43183f310b1a454c29b36446b1115a2cfc8a86ea2d8118f159777b0fa1fb74f6"
+        },
+        {
+          "path": "server.js.map",
+          "bytes": 17471,
+          "sha256": "9634aad8e77b9cf50d2f304b20b2bb475dad24694e11cf0c7ab2e8039f8432fb"
+        }
+      ]
+    },
+    "browser": {
+      "profile": "desen.reference-host-web.browser-dist.v1",
+      "root": "apps/reference-host-web/dist",
+      "entryCount": 4,
+      "fileCount": 3,
+      "totalBytes": 1061011,
+      "inventorySha256": "804e2d2c8e1c3d8a4811d3ffa7fa47e8ad2d88e48a9d13f663bce0e94763e6bc",
+      "files": [
+        {
+          "path": "assets/index-ClMarVVR.css",
+          "bytes": 1637,
+          "sha256": "bbfe758b463bca14d58440da1cd0b7c60b3ac4f427ba4c8b41ac7744e2cd1672"
+        },
+        {
+          "path": "assets/index-ucEn175g.js",
+          "bytes": 1058894,
+          "sha256": "c7ef833d08ff88b606421a40f84c4510acf8eda5cb4146f4e0cdb78d06248616"
+        },
+        {
+          "path": "index.html",
+          "bytes": 480,
+          "sha256": "232e2b68d2a07af91d5a41befc58b99cba458497d59b038901e46a23bdaf2e1f"
+        }
+      ]
+    }
+  },
+  "nonclaims": [
+    "This proof does not standardize channel transport, notification cadence, or deployment topology for other DESEN hosts.",
+    "This proof does not establish remote, multi-tenant, TLS, bearer-credential lifecycle, or Internet-facing service security.",
+    "This proof does not establish Bundle signing, hostile-administrator tamper resistance, independently anchored anti-rollback, or automatic rollback.",
+    "This proof admits one fixed application-installed Web–React package; it does not prove arbitrary package discovery, installation, or execution.",
+    "This reference server does not implement or proxy the application POST /api/sign-in backend; deployment authentication remains outside M07-T11 and fails closed as unavailable.",
+    "The browser case runs through the DOM test host; it is not a real-browser interoperability or performance claim.",
+    "P-12 remains NOT_PROVEN until M10-T07 proves product-level restart preservation in Desen App.",
+    "N-041 remains PLANNED until M12-T05 closes the measured whole-system finite-limit profile.",
+    "G07 remains open until the separately tracked I07-04 historical-reader cleanup is complete.",
+    "No Android, iOS, or other native-host conformance is claimed by this Web reference-host proof."
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/reference-host-web-server build",
+    "pnpm --filter @desen/reference-host-web build",
+    "pnpm --filter @desen/reference-host-web-server typecheck",
+    "pnpm --filter @desen/reference-host-web typecheck",
+    "pnpm --filter @desen/reference-host-web-server test:channel",
+    "node scripts/generate-reference-host-web-channel-consumption-proof.mjs",
+    "node scripts/verify-reference-host-web-channel-consumption.mjs",
+    "node --test tests/reference-host-web-channel-consumption.test.mjs"
+  ]
+}

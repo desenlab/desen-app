@@ -85,6 +85,15 @@ component-contract stage distinguishes immediately checkable literals from dynam
 That shared prose ownership does not add `M02-T08` to the BCP 14 runtime obligation in `N-027` and
 does not claim that dynamic data has been validated before an adapter receives it.
 
+M07-T11 closes the separately built Web-host portion of N-038 without changing its `TESTED`
+status: a mutable channel is only discovery, invalid B never becomes durable, server-delivery, or
+browser-mount authority, and a later valid C plus restart must pass the complete public activation
+and recovery chain. Its supporting host limits also extend N-041 evidence with bounded loopback
+bodies, installed-package inventory, static assets, browser Bundle reads, refresh serialization,
+and retained delivery state. N-041 remains `PLANNED` because M12-T05 still owns the final measured
+cross-system profile. Evidence: `docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json`
+`sha256:e0296a7b3e3fb2a512742f7cabadee3a7131ecb1a914da012bcc2f6e0a385426`.
+
 ## Recommended clauses
 
 | ID    |                                                                                                      SPEC line | Recommendation                                                                       | Owner task(s)             | Status       | Evidence / deviation                                                                                                                                                                           |

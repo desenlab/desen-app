@@ -361,6 +361,15 @@ test("[implementation] rejects removal of the public recovery boundary", async (
       "REGISTRATION_DRIFT",
     ],
     [
+      ROOT_PACKAGE,
+      (source) =>
+        source.replace(
+          "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
+          "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+        ),
+      "REGISTRATION_DRIFT",
+    ],
+    [
       CI_SOURCE,
       (source) =>
         `${source.replace(

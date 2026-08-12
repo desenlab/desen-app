@@ -11,6 +11,7 @@ const configuration = path.join(workspaceRoot, "dependency-cruiser.config.cjs");
 const cases = [
   { name: "allowed-validator-protocol", expectedRule: null },
   { name: "allowed-runtime-react-validator", expectedRule: null },
+  { name: "allowed-reference-host-server-control-plane-root", expectedRule: null },
   {
     name: "protocol-imports-runtime",
     expectedRule: "package-protocol-allowed-dependencies",
@@ -50,6 +51,18 @@ const cases = [
   {
     name: "reference-host-imports-desen-app",
     expectedRule: "reference-host-has-no-application-dependencies",
+  },
+  {
+    name: "reference-host-server-imports-control-plane-private",
+    expectedRule: "reference-host-server-control-plane-public-root-only",
+  },
+  {
+    name: "reference-host-server-production-imports-protocol",
+    expectedRule: "reference-host-server-production-has-no-package-dependencies",
+  },
+  {
+    name: "reference-host-server-imports-desen-app",
+    expectedRule: "reference-host-server-has-no-other-application-dependencies",
   },
 ];
 

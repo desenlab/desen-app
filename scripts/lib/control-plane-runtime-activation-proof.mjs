@@ -469,6 +469,36 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     }),
   }),
 });
+const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 68_073,
+      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_440,
+      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_705,
+      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
+    successor: Object.freeze({
+      bytes: 51_626,
+      sha256: "0fd1695a90e8c9e6772413fea47a02129af025b7a1cfbc3cc7068560cb764721",
+    }),
+  }),
+});
 
 const M07_T08_READER_RECEIPT_PROJECTION = Object.freeze({
   [PROOF_LIBRARY]: Object.freeze({
@@ -1098,6 +1128,7 @@ function assertAdjacent(
   reviewedSuccessor,
   reviewedFaultInjectionSuccessor,
   reviewedTransitionRaceSuccessor,
+  reviewedChannelSuccessor,
   terminal,
 ) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
@@ -1107,6 +1138,7 @@ function assertAdjacent(
   const reviewedSuccessorIndex = commands.indexOf(reviewedSuccessor);
   const reviewedFaultInjectionSuccessorIndex = commands.indexOf(reviewedFaultInjectionSuccessor);
   const reviewedTransitionRaceSuccessorIndex = commands.indexOf(reviewedTransitionRaceSuccessor);
+  const reviewedChannelSuccessorIndex = commands.indexOf(reviewedChannelSuccessor);
   const terminalIndex = commands.indexOf(terminal);
   const historical =
     currentIndex === predecessorIndex + 1 &&
@@ -1132,23 +1164,36 @@ function assertAdjacent(
     reviewedFaultInjectionSuccessorIndex === reviewedSuccessorIndex + 1 &&
     reviewedTransitionRaceSuccessorIndex === reviewedFaultInjectionSuccessorIndex + 1 &&
     terminalIndex === reviewedTransitionRaceSuccessorIndex + 1;
+  const approvedChannelCurrent =
+    currentIndex === predecessorIndex + 1 &&
+    reviewedSuccessorIndex === currentIndex + 1 &&
+    reviewedFaultInjectionSuccessorIndex === reviewedSuccessorIndex + 1 &&
+    reviewedTransitionRaceSuccessorIndex === reviewedFaultInjectionSuccessorIndex + 1 &&
+    reviewedChannelSuccessorIndex === reviewedTransitionRaceSuccessorIndex + 1 &&
+    terminalIndex === reviewedChannelSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     (!historical &&
       !approvedCurrent &&
       !approvedFaultInjectionCurrent &&
-      !approvedTransitionRaceCurrent) ||
+      !approvedTransitionRaceCurrent &&
+      !approvedChannelCurrent) ||
     commands.lastIndexOf(predecessor) !== predecessorIndex ||
     commands.lastIndexOf(current) !== currentIndex ||
     commands.lastIndexOf(terminal) !== terminalIndex ||
-    ((approvedCurrent || approvedFaultInjectionCurrent || approvedTransitionRaceCurrent) &&
+    ((approvedCurrent ||
+      approvedFaultInjectionCurrent ||
+      approvedTransitionRaceCurrent ||
+      approvedChannelCurrent) &&
       commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex) ||
-    ((approvedFaultInjectionCurrent || approvedTransitionRaceCurrent) &&
+    ((approvedFaultInjectionCurrent || approvedTransitionRaceCurrent || approvedChannelCurrent) &&
       commands.lastIndexOf(reviewedFaultInjectionSuccessor) !==
         reviewedFaultInjectionSuccessorIndex) ||
-    (approvedTransitionRaceCurrent &&
+    ((approvedTransitionRaceCurrent || approvedChannelCurrent) &&
       commands.lastIndexOf(reviewedTransitionRaceSuccessor) !==
-        reviewedTransitionRaceSuccessorIndex)
+        reviewedTransitionRaceSuccessorIndex) ||
+    (approvedChannelCurrent &&
+      commands.lastIndexOf(reviewedChannelSuccessor) !== reviewedChannelSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T07 aggregate adjacency drifted.");
   }
@@ -1181,6 +1226,7 @@ async function trackedFileReceipts(overrides) {
   let faultInjectionSuccessorState = false;
   let transitionRaceHistoricalState = false;
   let transitionRaceSuccessorState = false;
+  const m07T11Generations = [];
   const receipts = [];
   for (const relativePath of TRACKED_TASK_FILES) {
     const bytes = await authorityBytes(relativePath, overrides);
@@ -1188,6 +1234,7 @@ async function trackedFileReceipts(overrides) {
     const bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
     const faultInjectionBridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
     const transitionRaceBridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const channelBridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
     const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
     if ((!overridden || faultInjectionBridge !== undefined) && bridge !== undefined) {
       const historicalMatch =
@@ -1202,13 +1249,26 @@ async function trackedFileReceipts(overrides) {
         transitionRaceBridge !== undefined &&
         observed.bytes === transitionRaceBridge.successor.bytes &&
         observed.sha256 === transitionRaceBridge.successor.sha256;
-      if (!historicalMatch && !successorMatch && !faultInjectionMatch && !transitionRaceMatch) {
+      const channelMatch =
+        channelBridge !== undefined &&
+        observed.bytes === channelBridge.successor.bytes &&
+        observed.sha256 === channelBridge.successor.sha256;
+      if (
+        !historicalMatch &&
+        !successorMatch &&
+        !faultInjectionMatch &&
+        !transitionRaceMatch &&
+        !channelMatch
+      ) {
         fail("REGISTRATION_DRIFT", "A reviewed M07-T08 tracked successor receipt drifted.", {
           path: relativePath,
         });
       }
       if (historicalMatch && !successorMatch) historicalState = true;
-      if ((successorMatch || faultInjectionMatch || transitionRaceMatch) && !historicalMatch) {
+      if (
+        (successorMatch || faultInjectionMatch || transitionRaceMatch || channelMatch) &&
+        !historicalMatch
+      ) {
         successorState = true;
       }
       if (faultInjectionBridge !== undefined) {
@@ -1221,6 +1281,14 @@ async function trackedFileReceipts(overrides) {
           observed.sha256 === transitionRaceBridge.historical.sha256;
         if (transitionHistoricalMatch && !transitionRaceMatch) transitionRaceHistoricalState = true;
         if (transitionRaceMatch && !transitionHistoricalMatch) transitionRaceSuccessorState = true;
+      }
+      if (channelBridge !== undefined) {
+        const channelHistoricalMatch =
+          observed.bytes === channelBridge.historical.bytes &&
+          observed.sha256 === channelBridge.historical.sha256;
+        m07T11Generations.push(
+          channelMatch && !channelHistoricalMatch ? "successor" : "historical",
+        );
       }
     }
     const projected =
@@ -1245,6 +1313,9 @@ async function trackedFileReceipts(overrides) {
   }
   if (transitionRaceHistoricalState && transitionRaceSuccessorState) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
+  }
+  if (m07T11Generations.includes("historical") && m07T11Generations.includes("successor")) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
   }
   return deepFreeze(receipts);
 }
@@ -1384,6 +1455,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-recovery",
     "pnpm verify:control-plane-runtime-fault-injection",
     "pnpm verify:control-plane-runtime-transition-races",
+    "pnpm verify:reference-host-web-channel-consumption",
     "pnpm lint",
   );
   assertAdjacent(
@@ -1393,6 +1465,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-recovery",
     "pnpm test:control-plane-runtime-fault-injection",
     "pnpm test:control-plane-runtime-transition-races",
+    "pnpm test:reference-host-web-channel-consumption",
     "turbo run test",
   );
   if (

@@ -556,6 +556,29 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     }),
   }),
 });
+const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 68_073,
+      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_440,
+      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_705,
+      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
+    }),
+  }),
+});
 // Reader receipts cannot self-pin without recursion. Sequence 17 of the proof-reader checkpoint
 // chain authenticates the live reader bytes; this projection preserves the frozen M07-T06 bytes.
 const M07_T08_READER_RECEIPT_PROJECTION = Object.freeze({
@@ -1068,6 +1091,7 @@ function assertAggregateTail(
   latestSuccessor,
   faultInjectionSuccessor,
   transitionRaceSuccessor,
+  channelSuccessor,
   terminal,
 ) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
@@ -1078,13 +1102,15 @@ function assertAggregateTail(
   const latestSuccessorIndex = commands.indexOf(latestSuccessor);
   const faultInjectionSuccessorIndex = commands.indexOf(faultInjectionSuccessor);
   const transitionRaceSuccessorIndex = commands.indexOf(transitionRaceSuccessor);
+  const channelSuccessorIndex = commands.indexOf(channelSuccessor);
   const terminalIndex = commands.indexOf(terminal);
   const taskTimeTail =
     terminalIndex === currentIndex + 1 &&
     successorIndex < 0 &&
     latestSuccessorIndex < 0 &&
     faultInjectionSuccessorIndex < 0 &&
-    transitionRaceSuccessorIndex < 0;
+    transitionRaceSuccessorIndex < 0 &&
+    channelSuccessorIndex < 0;
   const reviewedM07T07Tail =
     successorIndex === currentIndex + 1 &&
     terminalIndex === successorIndex + 1 &&
@@ -1109,6 +1135,13 @@ function assertAggregateTail(
     faultInjectionSuccessorIndex === latestSuccessorIndex + 1 &&
     transitionRaceSuccessorIndex === faultInjectionSuccessorIndex + 1 &&
     terminalIndex === transitionRaceSuccessorIndex + 1;
+  const reviewedM07T11Tail =
+    successorIndex === currentIndex + 1 &&
+    latestSuccessorIndex === successorIndex + 1 &&
+    faultInjectionSuccessorIndex === latestSuccessorIndex + 1 &&
+    transitionRaceSuccessorIndex === faultInjectionSuccessorIndex + 1 &&
+    channelSuccessorIndex === transitionRaceSuccessorIndex + 1 &&
+    terminalIndex === channelSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
@@ -1116,14 +1149,16 @@ function assertAggregateTail(
       !reviewedM07T07Tail &&
       !reviewedM07T08Tail &&
       !reviewedM07T09Tail &&
-      !reviewedM07T10Tail) ||
+      !reviewedM07T10Tail &&
+      !reviewedM07T11Tail) ||
     commands.lastIndexOf(current) !== currentIndex ||
     (successorIndex >= 0 && commands.lastIndexOf(successor) !== successorIndex) ||
     (latestSuccessorIndex >= 0 && commands.lastIndexOf(latestSuccessor) !== latestSuccessorIndex) ||
     (faultInjectionSuccessorIndex >= 0 &&
       commands.lastIndexOf(faultInjectionSuccessor) !== faultInjectionSuccessorIndex) ||
     (transitionRaceSuccessorIndex >= 0 &&
-      commands.lastIndexOf(transitionRaceSuccessor) !== transitionRaceSuccessorIndex)
+      commands.lastIndexOf(transitionRaceSuccessor) !== transitionRaceSuccessorIndex) ||
+    (channelSuccessorIndex >= 0 && commands.lastIndexOf(channelSuccessor) !== channelSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T06 aggregate tail drifted.");
   }
@@ -1151,6 +1186,7 @@ async function prerequisiteReceipts(overrides) {
 
 async function trackedFileReceipts(overrides) {
   const m07T10Generations = [];
+  const m07T11Generations = [];
   const receipts = await Promise.all(
     TRACKED_TASK_FILES.map(async (relativePath) => {
       const bytes = await authorityBytes(relativePath, overrides);
@@ -1159,7 +1195,8 @@ async function trackedFileReceipts(overrides) {
       const m07T08Bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
       const m07T09Bridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
       const m07T10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
-      const bridge = m07T10Bridge ?? m07T09Bridge ?? m07T08Bridge ?? m07T07Bridge;
+      const m07T11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
+      const bridge = m07T11Bridge ?? m07T10Bridge ?? m07T09Bridge ?? m07T08Bridge ?? m07T07Bridge;
       const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
       const historicalM07T06 = m07T07Bridge?.historical;
       const approvedM07T07 = m07T08Bridge?.historical;
@@ -1170,10 +1207,23 @@ async function trackedFileReceipts(overrides) {
           observed.bytes === m07T10Bridge.historical.bytes &&
           observed.sha256 === m07T10Bridge.historical.sha256;
         const successorMatch =
-          observed.bytes === m07T10Bridge.successor.bytes &&
-          observed.sha256 === m07T10Bridge.successor.sha256;
+          (observed.bytes === m07T10Bridge.successor.bytes &&
+            observed.sha256 === m07T10Bridge.successor.sha256) ||
+          (m07T11Bridge !== undefined &&
+            observed.bytes === m07T11Bridge.successor.bytes &&
+            observed.sha256 === m07T11Bridge.successor.sha256);
         if (historicalMatch && !successorMatch) m07T10Generations.push("historical");
         if (successorMatch && !historicalMatch) m07T10Generations.push("successor");
+      }
+      if (m07T11Bridge !== undefined) {
+        const historicalMatch =
+          observed.bytes === m07T11Bridge.historical.bytes &&
+          observed.sha256 === m07T11Bridge.historical.sha256;
+        const successorMatch =
+          observed.bytes === m07T11Bridge.successor.bytes &&
+          observed.sha256 === m07T11Bridge.successor.sha256;
+        if (historicalMatch && !successorMatch) m07T11Generations.push("historical");
+        if (successorMatch && !historicalMatch) m07T11Generations.push("successor");
       }
       if (
         (!overridden || m07T10Bridge !== undefined) &&
@@ -1183,6 +1233,9 @@ async function trackedFileReceipts(overrides) {
             observed.sha256 === bridge.historical.sha256) ||
           (observed.bytes === bridge.successor.bytes &&
             observed.sha256 === bridge.successor.sha256) ||
+          (m07T10Bridge !== undefined &&
+            observed.bytes === m07T10Bridge.successor.bytes &&
+            observed.sha256 === m07T10Bridge.successor.sha256) ||
           (historicalM07T06 !== undefined &&
             observed.bytes === historicalM07T06.bytes &&
             observed.sha256 === historicalM07T06.sha256) ||
@@ -1220,6 +1273,9 @@ async function trackedFileReceipts(overrides) {
   );
   if (m07T10Generations.includes("historical") && m07T10Generations.includes("successor")) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
+  }
+  if (m07T11Generations.includes("historical") && m07T11Generations.includes("successor")) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
   }
   return Object.freeze(receipts);
 }
@@ -1356,6 +1412,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-recovery",
     "pnpm verify:control-plane-runtime-fault-injection",
     "pnpm verify:control-plane-runtime-transition-races",
+    "pnpm verify:reference-host-web-channel-consumption",
     "pnpm lint",
   );
   assertAggregateTail(
@@ -1366,6 +1423,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-recovery",
     "pnpm test:control-plane-runtime-fault-injection",
     "pnpm test:control-plane-runtime-transition-races",
+    "pnpm test:reference-host-web-channel-consumption",
     "turbo run test",
   );
   if (

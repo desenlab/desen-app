@@ -458,6 +458,43 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     }),
   }),
 });
+const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 68_073,
+      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_440,
+      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_705,
+      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
+    successor: Object.freeze({
+      bytes: 51_626,
+      sha256: "0fd1695a90e8c9e6772413fea47a02129af025b7a1cfbc3cc7068560cb764721",
+    }),
+  }),
+  [LOCKFILE]: Object.freeze({
+    historical: M07_T06_TRACKED_RECEIPT_BRIDGE[LOCKFILE].successor,
+    successor: Object.freeze({
+      bytes: 126_895,
+      sha256: "060032f72e765663574f97d8cc2d82b97fc5758343025ba8005f132ab4075b2d",
+    }),
+  }),
+});
 const M07_T06_INDEX_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
   "index.d.ts": Object.freeze({
     historical: Object.freeze({
@@ -1164,6 +1201,7 @@ function assertAggregateTail(
   currentSuccessor,
   faultInjectionSuccessor,
   transitionRacesSuccessor,
+  channelSuccessor,
   terminal,
 ) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
@@ -1175,6 +1213,7 @@ function assertAggregateTail(
   const currentSuccessorIndex = commands.indexOf(currentSuccessor);
   const faultInjectionSuccessorIndex = commands.indexOf(faultInjectionSuccessor);
   const transitionRacesSuccessorIndex = commands.indexOf(transitionRacesSuccessor);
+  const channelSuccessorIndex = commands.indexOf(channelSuccessor);
   const terminalIndex = commands.indexOf(terminal);
   const historicalTail = terminalIndex === currentIndex + 1 && successorIndex < 0;
   const reviewedSuccessorTail =
@@ -1201,6 +1240,14 @@ function assertAggregateTail(
     faultInjectionSuccessorIndex === currentSuccessorIndex + 1 &&
     transitionRacesSuccessorIndex === faultInjectionSuccessorIndex + 1 &&
     terminalIndex === transitionRacesSuccessorIndex + 1;
+  const reviewedChannelSuccessorTail =
+    successorIndex === currentIndex + 1 &&
+    latestSuccessorIndex === successorIndex + 1 &&
+    currentSuccessorIndex === latestSuccessorIndex + 1 &&
+    faultInjectionSuccessorIndex === currentSuccessorIndex + 1 &&
+    transitionRacesSuccessorIndex === faultInjectionSuccessorIndex + 1 &&
+    channelSuccessorIndex === transitionRacesSuccessorIndex + 1 &&
+    terminalIndex === channelSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
@@ -1209,7 +1256,8 @@ function assertAggregateTail(
       !reviewedLatestSuccessorTail &&
       !reviewedCurrentSuccessorTail &&
       !reviewedFaultInjectionSuccessorTail &&
-      !reviewedTransitionRacesSuccessorTail) ||
+      !reviewedTransitionRacesSuccessorTail &&
+      !reviewedChannelSuccessorTail) ||
     commands.lastIndexOf(current) !== currentIndex ||
     (successorIndex >= 0 && commands.lastIndexOf(successor) !== successorIndex) ||
     (latestSuccessorIndex >= 0 && commands.lastIndexOf(latestSuccessor) !== latestSuccessorIndex) ||
@@ -1218,7 +1266,8 @@ function assertAggregateTail(
     (faultInjectionSuccessorIndex >= 0 &&
       commands.lastIndexOf(faultInjectionSuccessor) !== faultInjectionSuccessorIndex) ||
     (transitionRacesSuccessorIndex >= 0 &&
-      commands.lastIndexOf(transitionRacesSuccessor) !== transitionRacesSuccessorIndex)
+      commands.lastIndexOf(transitionRacesSuccessor) !== transitionRacesSuccessorIndex) ||
+    (channelSuccessorIndex >= 0 && commands.lastIndexOf(channelSuccessor) !== channelSuccessorIndex)
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T05 to M07-T06 aggregate tail drifted.");
   }
@@ -1246,6 +1295,7 @@ async function prerequisiteReceipts(overrides) {
 
 async function trackedFileReceipts(overrides) {
   const m07T10Generations = [];
+  const m07T11Generations = [];
   const receipts = await Promise.all(
     TRACKED_TASK_FILES.map(async (relativePath) => {
       const bytes = await authorityBytes(relativePath, overrides);
@@ -1254,7 +1304,9 @@ async function trackedFileReceipts(overrides) {
       const m07T08Bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
       const m07T09Bridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
       const m07T10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
+      const m07T11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
       const bridge =
+        m07T11Bridge ??
         m07T10Bridge ??
         m07T09Bridge ??
         m07T08Bridge ??
@@ -1272,10 +1324,23 @@ async function trackedFileReceipts(overrides) {
           observed.bytes === m07T10Bridge.historical.bytes &&
           observed.sha256 === m07T10Bridge.historical.sha256;
         const successorMatch =
-          observed.bytes === m07T10Bridge.successor.bytes &&
-          observed.sha256 === m07T10Bridge.successor.sha256;
+          (observed.bytes === m07T10Bridge.successor.bytes &&
+            observed.sha256 === m07T10Bridge.successor.sha256) ||
+          (m07T11Bridge !== undefined &&
+            observed.bytes === m07T11Bridge.successor.bytes &&
+            observed.sha256 === m07T11Bridge.successor.sha256);
         if (historicalMatch && !successorMatch) m07T10Generations.push("historical");
         if (successorMatch && !historicalMatch) m07T10Generations.push("successor");
+      }
+      if (m07T11Bridge !== undefined) {
+        const historicalMatch =
+          observed.bytes === m07T11Bridge.historical.bytes &&
+          observed.sha256 === m07T11Bridge.historical.sha256;
+        const successorMatch =
+          observed.bytes === m07T11Bridge.successor.bytes &&
+          observed.sha256 === m07T11Bridge.successor.sha256;
+        if (historicalMatch && !successorMatch) m07T11Generations.push("historical");
+        if (successorMatch && !historicalMatch) m07T11Generations.push("successor");
       }
       if (
         bridge !== undefined &&
@@ -1284,6 +1349,9 @@ async function trackedFileReceipts(overrides) {
             observed.sha256 === bridge.historical.sha256) ||
           (observed.bytes === bridge.successor.bytes &&
             observed.sha256 === bridge.successor.sha256) ||
+          (m07T10Bridge !== undefined &&
+            observed.bytes === m07T10Bridge.successor.bytes &&
+            observed.sha256 === m07T10Bridge.successor.sha256) ||
           (approvedM07T06 !== undefined &&
             observed.bytes === approvedM07T06.bytes &&
             observed.sha256 === approvedM07T06.sha256) ||
@@ -1318,6 +1386,9 @@ async function trackedFileReceipts(overrides) {
   );
   if (m07T10Generations.includes("historical") && m07T10Generations.includes("successor")) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
+  }
+  if (m07T11Generations.includes("historical") && m07T11Generations.includes("successor")) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
   }
   return Object.freeze(receipts);
 }
@@ -1467,6 +1538,7 @@ async function registrationProjection(overrides) {
     "pnpm verify:control-plane-runtime-recovery",
     "pnpm verify:control-plane-runtime-fault-injection",
     "pnpm verify:control-plane-runtime-transition-races",
+    "pnpm verify:reference-host-web-channel-consumption",
     "pnpm lint",
   );
   assertAggregateTail(
@@ -1478,6 +1550,7 @@ async function registrationProjection(overrides) {
     "pnpm test:control-plane-runtime-recovery",
     "pnpm test:control-plane-runtime-fault-injection",
     "pnpm test:control-plane-runtime-transition-races",
+    "pnpm test:reference-host-web-channel-consumption",
     "turbo run test",
   );
   if (

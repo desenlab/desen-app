@@ -323,6 +323,21 @@ doğrulanır. Bir ayar dışarıdan değiştirilmişse sistem onu gizlice düzel
 koruma, eski sürüme döndürmeyi engelleme, hosted T10, host-channel veya native-conformance iddiası
 taşımaz.
 
+`M07-T11` tamamlandı: tarayıcı artık değiştirilebilir channel kaydını doğrudan yetki saymıyor.
+Ayrı derlenen Node host sunucusu sabit channel'ı gerçek bearer-korumalı loopback API üzerinden
+okuyor; Bundle bütünlüğünü, kurulu paketi, referansları, staging'i, aktivasyonu ve yeniden başlatma
+kurtarmasını baştan doğruluyor. Tarayıcıya yalnızca doğrulanmış etkin Bundle ile dayanıklı
+generation/revision kimliği veriliyor. Geçerli A gösteriliyor; geçersiz B A'yı değiştiremiyor;
+geçerli C doğru previous-good kaydıyla A'nın yerini alıyor; yeniden açılışta kalıcı kazanan ilk
+teslimden önce doğrulanıyor. Eski kalan veya kapandıktan sonra biten yenilemeler yayınlanamıyor ve
+başarısız bir yenileme tarayıcıdaki son iyi yüzeyi koruyor. Dokuz adlandırılmış çalışma vakası ve
+13 bağımsız mutasyon sınıfı bu zinciri bağlıyor.
+
+Bu, yerel Web kanıtıdır. Uzak/multi-tenant/TLS dağıtımı, gerçek tarayıcı performansı, Desen App ürün
+yeniden başlatması, kötü niyetli yöneticinin eşzamanlı kök değiştirmesine direnç, bağımsız
+anti-rollback, Android veya iOS conformance iddiası taşımaz. P-12 M10-T07'ye kadar `NOT_PROVEN`,
+N-041 M12-T05'e kadar `PLANNED` kalır.
+
 I07-03 tamamlandı ama hiçbir seçmeli sonuç henüz zorunlu değildir. Terfi için her seçici
 kategorisinin mutasyonla kapsanması, sıfır yanlış negatif ve aynı revizyonda en az 20 ardışık uygun
 hosted dar-seçim affected/exhaustive karşılaştırmasının uyuşması gerekir. Gözlem dürüstçe `0 / 20`
@@ -331,10 +346,9 @@ uygun bir dar seçim değildi. Salt-okunur defter bu hesabı ölçebilir ama tek
 üretemez. I07-04 ayrıca
 kesin GitHub run, job, revizyon ve receipt kökenini doğrulayıp sabitlemeden seçmeli çalışmayı zorunlu
 kılamaz. Bu nedenle I07-04 `NOT_STARTED` olarak eşiği bekler. `main`, sürüm ve manuel denetim
-çalışmaları daima `EXHAUSTIVE` kalır. Sıradaki uygulama görevi `M07-T11`; ayrı derlenmiş referans
-host'un control-plane channel'ını gerçekten tükettiğini kanıtlayacaktır. Güncel ilerleme 84/145
-görev (%58), M07 içinde 10/11 görev (%91) ve kanıt kapılarında 7/13'tür; I07-03 bu sayaçlara dahil
-değildir. I07-04 `0 / 20` gözlemle `NOT_STARTED`, seçici terfisi false ve G07 açıktır.
+çalışmaları daima `EXHAUSTIVE` kalır. Güncel ilerleme 85/145 görev (%59), M07 içinde 11/11 görev
+(%100) ve kanıt kapılarında 7/13'tür; I07-03 bu sayaçlara dahil değildir. I07-04 `0 / 20` gözlemle
+`NOT_STARTED`, seçici terfisi false ve G07 açıktır.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

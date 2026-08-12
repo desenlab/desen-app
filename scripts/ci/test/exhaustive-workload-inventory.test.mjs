@@ -15,7 +15,7 @@ import {
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
 const COMPATIBILITY_PROJECTION_SHA256 =
-  "19c073be84a7c4112ad29ad1b7dd47f8bf6b28de8f25eb4edd40d9f165b6abc2";
+  "8a08431ea00f10137c5d5e9cc69484d1aed5f7f9ba7370cd74af0e447e0e8e75";
 
 function cloneInventory() {
   return structuredClone(createExhaustiveWorkloadInventory());
@@ -83,19 +83,19 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 148-workload successor projection", () => {
+test("the neutral inventory preserves the exact 150-workload successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 148);
-  assert.equal(inventory.proofUnitCount, 70);
+  assert.equal(inventory.workloadCount, 150);
+  assert.equal(inventory.proofUnitCount, 71);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "7e4be77121123bc1fdf98e400b414d9f825a1dc04fc34b6b5dedb101a56999d1",
+    "e0259cb3288fbaec7faccabf2186ecf1c921de29d5187de7e88f80a85b3abdb4",
   );
   assert.equal(projectionSha256, COMPATIBILITY_PROJECTION_SHA256);
   assert.deepEqual(
@@ -110,11 +110,11 @@ test("the neutral inventory preserves the exact 148-workload successor projectio
     ],
   );
   assert.equal(
-    inventory.nodes.slice(6, 76).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(6, 77).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(76, 146).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(77, 148).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -122,9 +122,9 @@ test("the neutral inventory preserves the exact 148-workload successor projectio
     ["dependency-boundaries", "boundary-fixtures"],
   );
   assert.deepEqual(inventory.proofUnits.at(-1), {
-    id: "control-plane-runtime-transition-races",
-    verifierNodeId: "verify-control-plane-runtime-transition-races",
-    rootTestNodeId: "test-control-plane-runtime-transition-races",
+    id: "reference-host-web-channel-consumption",
+    verifierNodeId: "verify-reference-host-web-channel-consumption",
+    rootTestNodeId: "test-reference-host-web-channel-consumption",
   });
   assert.equal(validateExhaustiveWorkloadInventory(inventory), inventory);
 });
@@ -134,18 +134,18 @@ test("repository manifests and discovered proof files retain the reviewed parity
   const receipt = validateRepositoryWorkloadInputs(inputs);
 
   assert.deepEqual(receipt, {
-    proofCount: 70,
-    verifierCount: 70,
-    rootTestCount: 70,
-    legacyPrerequisiteCount: 463,
-    legacyPrerequisiteSha256: "f5f60e179552d6255392149a57a442b4ea44dc225e66f432b85a81773251ea74",
-    legacyLeafInvocationCount: 2929,
-    legacyLeafInvocationSha256: "8653310c9771194080d3f98d8f6412b46bc8456a34b14ecbdee28065fd3bb9ce",
-    distinctLeafWorkloadCount: 230,
-    distinctLeafWorkloadSha256: "943daf1c8f21c40bf8f33473c16d2ebc8cf4bf45436d76647306fc6db9c0e485",
+    proofCount: 71,
+    verifierCount: 71,
+    rootTestCount: 71,
+    legacyPrerequisiteCount: 479,
+    legacyPrerequisiteSha256: "4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e",
+    legacyLeafInvocationCount: 3113,
+    legacyLeafInvocationSha256: "bac4fe3874e13ffafde163e8a396d3d4156e9cd583b0d66ca634bfb3e9ab308c",
+    distinctLeafWorkloadCount: 236,
+    distinctLeafWorkloadSha256: "6838b57e69d78fad6c0de08a9ffb7b9530dc5c50bc17ee2779e949cf86985fce",
     testConfigurationFileCount: 0,
-    workspaceTestScriptCount: 14,
-    workspaceTestScriptSha256: "5f3ee5e9ff2b0f09c06578db7ecf48c7c8a9eafd679c98a6e3af20318c4943c4",
+    workspaceTestScriptCount: 15,
+    workspaceTestScriptSha256: "4ba2623716789078653d4c0f57848c57255385f4cc8c941a38de39b94bba5529",
     workspaceManifestSha256: "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9",
     workspacePackageGlobs: ["apps/*", "packages/*"],
   });
@@ -212,7 +212,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
     ports: "NONE",
   });
   assert.equal(packageTests.sharedState.buildOutputs, "SHARED_READ_AFTER_PREFIX");
-  assert.equal(boundaries.dependencies.length, 70);
+  assert.equal(boundaries.dependencies.length, 71);
 
   for (const unit of inventory.proofUnits) {
     const verifier = nodeById.get(unit.verifierNodeId);

@@ -1018,6 +1018,23 @@ writer races, both recovery/activation orderings, consumed-loser freshness, exac
 and the explicit fail-closed `journal_mode` decision. M07-T11 retains channel consumption and host
 notification.
 
+M07-T11 adds a separately built Node companion for the client-only reference host. This server is
+the only reviewed application composition that imports the public `@desen/control-plane-api` root;
+the browser build retains no control-plane dependency. The server consumes a fixed M07-T05 channel
+and exact Bundle over authenticated loopback HTTP, supplies one bounded host-owned installed-package
+inventory, and composes T02 → T03 → T04 → T06 → T07/T08 before delivery. Channel
+generation remains discovery concurrency metadata and never substitutes for durable activation
+generation.
+
+The browser can request one same-origin refresh but cannot choose a channel, upstream origin,
+package root, token, active revision, previous-good revision, generation, adapter, or executable
+module. A successful server response carries only the exact currently authenticated Bundle and a
+durable activation identity. The client independently mounts that Bundle through the fixed
+reference Catalog, fixed Web–React adapter registry, and fixed sign-in host binding before the
+generic root replaces its current surface. Any server rejection, malformed delivery, failed mount,
+or disposed late response preserves the previous surface. ADR 0015 records the exact boundary and
+its local Web-only nonclaims.
+
 ## Mobile expansion
 
 DESEN 0.1.0 proves exactly `web-react`. A future native implementation adds a target-specific
