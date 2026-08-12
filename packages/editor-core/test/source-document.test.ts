@@ -107,6 +107,28 @@ describe("createDesenEditorDocument", () => {
     expectDeepFrozen(result);
   });
 
+  it("rejects an invalid embedded schema instead of admitting a root-only Source", () => {
+    const input = clone(validSource);
+    const surfaces = record(record(input).surfaces);
+    const signIn = record(surfaces["sign-in"]);
+    const state = record(signIn.state);
+    const email = record(state.email);
+    email.schema = { type: "string", pattern: "[" };
+
+    const result = createDesenEditorDocument(input);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new TypeError("Expected the invalid embedded schema to be rejected.");
+    expect(Object.hasOwn(result, "document")).toBe(false);
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({
+        code: "SCHEMA_INVALID",
+        pointer: "/surfaces/sign-in/state/email/schema/pattern",
+      }),
+    ]);
+    expectDeepFrozen(result);
+  });
+
   it("rejects executable or non-JSON input before it can enter the document model", () => {
     const input = clone(validSource) as MutableRecord;
     input.authoring = { executable: () => "not data" };
