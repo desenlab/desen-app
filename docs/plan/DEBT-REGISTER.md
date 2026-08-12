@@ -667,6 +667,7 @@ the full gate. A cleanup is complete only when:
     - `[registration] rejects package-root, public-export, aggregate, or CI tuple drift`
     - `REGISTRATION_DRIFT`
   - `tests/publisher-catalog-pinning.test.mjs`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
   - `scripts/lib/control-plane-local-api-proof.mjs`
     - `M07_T05_STRICT_JSON_FORMATTING_TRACKED_RECEIPT_BRIDGE`
@@ -885,8 +886,10 @@ the full gate. A cleanup is complete only when:
     - `APPROVED_COMPATIBILITY_RECEIPT_HISTORY`
     - `APPROVED_CURRENT_COMPATIBILITY_RECEIPTS`
   - `tests/publisher-bundle-publication.test.mjs`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
   - `tests/publisher-catalog-pinning.test.mjs`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
   - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
     - `APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY`
@@ -898,6 +901,7 @@ the full gate. A cleanup is complete only when:
     - `APPROVED_CURRENT_RUNTIME_PROBE_PROGRAM_BYTES`
     - `historicalRuntimeProbeTransportClaim`
   - `tests/publisher-invalid-source-matrix.test.mjs`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
     - `[authority] authenticates the bounded focused-suite timeout successor`
 - Reason retained: M07-T07 legitimately advances the public package surface, aggregate tails,
@@ -1288,12 +1292,12 @@ the full gate. A cleanup is complete only when:
     - `M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH`
     - `M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH`
   - `tests/publisher-catalog-pinning.test.mjs`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
-    - `pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint`
-    - `pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test`
   - `scripts/lib/publisher-bundle-publication-proof.mjs`
     - `task: "M07-T10"`
   - `tests/publisher-bundle-publication.test.mjs`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
     - `M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH`
     - `M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH`
@@ -1527,6 +1531,13 @@ the full gate. A cleanup is complete only when:
   - `tests/publisher-execution-preflight.test.mjs`
     - `M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH`
     - `M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH`
+  - `scripts/lib/publisher-catalog-pinning-proof.mjs`
+    - `APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT`
+    - `authenticateM07T11RootTestSuccessor`
+  - `tests/publisher-catalog-pinning.test.mjs`
+    - `appendBeforeExactTail`
+    - `appendValidRootSuccessor`
+    - `anchors the current M06-T02 reader and exact root successor in evidence`
   - `scripts/lib/publisher-bundle-publication-proof.mjs`
     - `APPROVED_COMPATIBILITY_RECEIPT_HISTORY`
     - `APPROVED_CURRENT_COMPATIBILITY_RECEIPTS`
@@ -1534,6 +1545,7 @@ the full gate. A cleanup is complete only when:
     - `reconstructM07T10ExecutionPreflightProof`
     - `reconstructM07T10ExecutionPreflightRootTest`
     - `replaceExactOnce`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
   - `scripts/lib/publisher-invalid-source-matrix-proof.mjs`
     - `APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY`
@@ -1543,7 +1555,10 @@ the full gate. A cleanup is complete only when:
   - `tests/publisher-invalid-source-matrix.test.mjs`
     - `M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH`
     - `M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH`
+    - `M07_T11_DURABLE_ROOT_HELPER_ROLLBACK_PATCH`
     - `reconstructPreLintM07T11BundleRootTest`
+    - `reconstructPreDurableM07T11BundleRootTest`
+    - `appendBeforeExactTail`
     - `appendValidRootSuccessor`
   - `scripts/lib/control-plane-bundle-store-proof.mjs`
     - `M07_T11_TRACKED_RECEIPT_BRIDGE`
@@ -1614,7 +1629,7 @@ the full gate. A cleanup is complete only when:
   this one exact successor and project their historical receipts until checkpoint ownership is
   consolidated.
 - Objective removal trigger: proof-reader checkpoint sequence 24, head
-  `a69278848f1f5dd3630b5dca5b1274dfbd76fdd66125ee954e695abb7ea3ba48`, is the sole
+  `f7dcc3f74653e739a46434b8fa746f177a9b33cabb874ad9910747dcd46310de`, is the sole
   current-byte authority for all 40 readers and all 20 artifacts; its M07-T11 artifact receipt is
   exactly 39,307 bytes and
   `48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0`. I07-04 removes
@@ -1649,9 +1664,9 @@ the full gate. A cleanup is complete only when:
   - `node --test scripts/ci/test/proof-reader-checkpoints.test.mjs`
   - `node scripts/ci/verify-infrastructure-debt.mjs`
   - `node --test scripts/ci/test/infrastructure-debt.test.mjs`
-  - scoped zero-reference verification must inspect the 30 exact targets above and find none of
+  - scoped zero-reference verification must inspect the 32 exact targets above and find none of
     their registered symbols after I07-04 cleanup.
 - Closure evidence: `PENDING` — record the I07-04 commit and pull request, sequence-24 checkpoint
-  SHA-256 (`a69278848f1f5dd3630b5dca5b1274dfbd76fdd66125ee954e695abb7ea3ba48`), all 20
+  SHA-256 (`f7dcc3f74653e739a46434b8fa746f177a9b33cabb874ad9910747dcd46310de`), all 20
   frozen artifact SHA-256 values, exact zero-reference output, and the final hosted
   required-exhaustive run URL.

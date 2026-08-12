@@ -397,7 +397,10 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "[registration] rejects package-root, public-export, aggregate, or CI tuple drift",
         "REGISTRATION_DRIFT",
       ]),
-      target("tests/publisher-catalog-pinning.test.mjs", ["appendValidRootSuccessor"]),
+      target("tests/publisher-catalog-pinning.test.mjs", [
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+      ]),
       target("scripts/lib/control-plane-local-api-proof.mjs", [
         "M07_T05_STRICT_JSON_FORMATTING_TRACKED_RECEIPT_BRIDGE",
         "M07_T05_STRICT_JSON_FORMATTING_DISTRIBUTION_RECEIPT_BRIDGE",
@@ -565,8 +568,14 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
         "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
       ]),
-      target("tests/publisher-bundle-publication.test.mjs", ["appendValidRootSuccessor"]),
-      target("tests/publisher-catalog-pinning.test.mjs", ["appendValidRootSuccessor"]),
+      target("tests/publisher-bundle-publication.test.mjs", [
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+      ]),
+      target("tests/publisher-catalog-pinning.test.mjs", [
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+      ]),
       target("scripts/lib/publisher-invalid-source-matrix-proof.mjs", [
         "APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY",
         "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
@@ -578,6 +587,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "historicalRuntimeProbeTransportClaim",
       ]),
       target("tests/publisher-invalid-source-matrix.test.mjs", [
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
         "[authority] authenticates the bounded focused-suite timeout successor",
       ]),
@@ -835,12 +845,12 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "M07_T10_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
       ]),
       target("tests/publisher-catalog-pinning.test.mjs", [
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
-        "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
-        "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
       ]),
       target("scripts/lib/publisher-bundle-publication-proof.mjs", ['task: "M07-T10"']),
       target("tests/publisher-bundle-publication.test.mjs", [
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
         "M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
         "M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
@@ -1038,6 +1048,15 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
         "M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
       ]),
+      target("scripts/lib/publisher-catalog-pinning-proof.mjs", [
+        "APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT",
+        "authenticateM07T11RootTestSuccessor",
+      ]),
+      target("tests/publisher-catalog-pinning.test.mjs", [
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+        "anchors the current M06-T02 reader and exact root successor in evidence",
+      ]),
       target("scripts/lib/publisher-bundle-publication-proof.mjs", [
         "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
         "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
@@ -1046,6 +1065,7 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
         "reconstructM07T10ExecutionPreflightProof",
         "reconstructM07T10ExecutionPreflightRootTest",
         "replaceExactOnce",
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
       ]),
       target("scripts/lib/publisher-invalid-source-matrix-proof.mjs", [
@@ -1057,7 +1077,10 @@ export const INFRASTRUCTURE_DEBT_AUTHORITY = SAFE_OBJECT_FREEZE([
       target("tests/publisher-invalid-source-matrix.test.mjs", [
         "M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
         "M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+        "M07_T11_DURABLE_ROOT_HELPER_ROLLBACK_PATCH",
         "reconstructPreLintM07T11BundleRootTest",
+        "reconstructPreDurableM07T11BundleRootTest",
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
       ]),
       target("scripts/lib/control-plane-bundle-store-proof.mjs", [

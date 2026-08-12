@@ -114,6 +114,14 @@ const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
   }),
 });
 
+// M06-T08 evidence remains byte-for-byte historical while later root-suite additions are
+// accepted only through this exact, reviewed successor receipt. The bridge must be removed
+// with the I07-04 historical-reader retirement rather than widened to accept arbitrary roots.
+const APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT = Object.freeze({
+  bytes: 39_954,
+  sha256: "e442dc376f4787d35941f2676e78f34a859d7eee9a0374449260dd35328b5502",
+});
+
 const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
   "DEPRECATED_CAPABILITY_CODE",
   "INVALID_SOURCE_JSON_CODE",
@@ -325,6 +333,27 @@ function sha256(bytes) {
 
 function byteEqual(left, right) {
   return Buffer.from(left).equals(Buffer.from(right));
+}
+
+function authenticateM07T11RootTestSuccessor(bytes) {
+  const actualBytes = bytes.byteLength;
+  const actualSha256 = sha256(bytes);
+  if (
+    actualBytes !== APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT.bytes ||
+    actualSha256 !== APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT.sha256
+  ) {
+    fail(
+      "PUBLISHER_CATALOG_PINNING_COMPATIBILITY_DRIFT",
+      "The current Catalog-pinning root suite differs from its exact reviewed successor.",
+      {
+        relativePath: ROOT_TEST,
+        expectedBytes: APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT.bytes,
+        expectedSha256: APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT.sha256,
+        actualBytes,
+        actualSha256,
+      },
+    );
+  }
 }
 
 function exactOwnDataOptions(rawOptions) {
@@ -2554,7 +2583,7 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
     distributionImplementation,
     runtimeTestText,
     typeTestText,
-    rootTestText,
+    rootTestBytes,
     packageJsonText,
     publisherPackageJsonText,
     ciSourceBytes,
@@ -2568,7 +2597,7 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
     trackedBytes(options, DISTRIBUTION).then((bytes) => bytes.toString("utf8")),
     trackedBytes(options, RUNTIME_TEST).then((bytes) => bytes.toString("utf8")),
     trackedBytes(options, TYPE_TEST).then((bytes) => bytes.toString("utf8")),
-    trackedBytes(options, ROOT_TEST).then((bytes) => bytes.toString("utf8")),
+    trackedBytes(options, ROOT_TEST),
     trackedBytes(options, ROOT_PACKAGE).then((bytes) => bytes.toString("utf8")),
     trackedBytes(options, PUBLISHER_PACKAGE).then((bytes) => bytes.toString("utf8")),
     trackedBytes(options, CI_SOURCE),
@@ -2579,6 +2608,12 @@ export async function buildPublisherCatalogPinningEvidence(rawOptions = undefine
     ciSourceBytes,
     "PUBLISHER_CATALOG_PINNING_REGISTRATION_DRIFT",
     "Single-pass CI source",
+  );
+  authenticateM07T11RootTestSuccessor(rootTestBytes);
+  const rootTestText = decodeUtf8(
+    rootTestBytes,
+    "PUBLISHER_CATALOG_PINNING_COMPATIBILITY_DRIFT",
+    "Catalog-pinning root suite",
   );
 
   const source = parseJson(

@@ -470,7 +470,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       "inspectExactReferenceHostServerImporter",
     ],
   });
-  assert.deepEqual(manifest.entries[18].targets.slice(2, 12), [
+  assert.deepEqual(manifest.entries[18].targets.slice(2, 14), [
     {
       path: "scripts/lib/publisher-publish-result-proof.mjs",
       symbols: ["REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY"],
@@ -499,6 +499,21 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       ],
     },
     {
+      path: "scripts/lib/publisher-catalog-pinning-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT",
+        "authenticateM07T11RootTestSuccessor",
+      ],
+    },
+    {
+      path: "tests/publisher-catalog-pinning.test.mjs",
+      symbols: [
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+        "anchors the current M06-T02 reader and exact root successor in evidence",
+      ],
+    },
+    {
       path: "scripts/lib/publisher-bundle-publication-proof.mjs",
       symbols: [
         "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
@@ -511,6 +526,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
         "reconstructM07T10ExecutionPreflightProof",
         "reconstructM07T10ExecutionPreflightRootTest",
         "replaceExactOnce",
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
       ],
     },
@@ -528,7 +544,10 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       symbols: [
         "M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
         "M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+        "M07_T11_DURABLE_ROOT_HELPER_ROLLBACK_PATCH",
         "reconstructPreLintM07T11BundleRootTest",
+        "reconstructPreDurableM07T11BundleRootTest",
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
       ],
     },
@@ -863,7 +882,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     },
     {
       path: "tests/publisher-catalog-pinning.test.mjs",
-      symbols: ["appendValidRootSuccessor"],
+      symbols: ["appendBeforeExactTail", "appendValidRootSuccessor"],
     },
     {
       path: "scripts/lib/control-plane-local-api-proof.mjs",
@@ -1095,11 +1114,11 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     },
     {
       path: "tests/publisher-bundle-publication.test.mjs",
-      symbols: ["appendValidRootSuccessor"],
+      symbols: ["appendBeforeExactTail", "appendValidRootSuccessor"],
     },
     {
       path: "tests/publisher-catalog-pinning.test.mjs",
-      symbols: ["appendValidRootSuccessor"],
+      symbols: ["appendBeforeExactTail", "appendValidRootSuccessor"],
     },
     {
       path: "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
@@ -1117,6 +1136,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     {
       path: "tests/publisher-invalid-source-matrix.test.mjs",
       symbols: [
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
         "[authority] authenticates the bounded focused-suite timeout successor",
       ],

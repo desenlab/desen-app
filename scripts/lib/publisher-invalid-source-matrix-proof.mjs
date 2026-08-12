@@ -990,8 +990,8 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
     }),
     Object.freeze({
       task: "M07-T11",
-      bytes: 86_462,
-      sha256: "0952f4ceda976c2d393f5658c3006294515bce865b52ddc93f6cfed55947a098",
+      bytes: 87_397,
+      sha256: "26df77e97181faf11c98ca352cb83ee2b8f2f54cf2e07abc2d0a76df9d1eb813",
     }),
   ]),
 });

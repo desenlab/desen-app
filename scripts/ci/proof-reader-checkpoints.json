@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "a69278848f1f5dd3630b5dca5b1274dfbd76fdd66125ee954e695abb7ea3ba48",
+  "headSha256": "f7dcc3f74653e739a46434b8fa746f177a9b33cabb874ad9910747dcd46310de",
   "checkpoints": [
     {
       "sequence": 1,
@@ -6759,15 +6759,15 @@
           "task": "M06-T08",
           "role": "proof-library",
           "path": "scripts/lib/publisher-catalog-pinning-proof.mjs",
-          "bytes": 102413,
-          "sha256": "ea98c9c6b70230aa5cae60ef12c3194872449d73b7e7e48c833096a8f89e341f"
+          "bytes": 103727,
+          "sha256": "4371b3d878564e8d34032b1c7f901b3c17e092dbd8f9acfca1b53687a255e6c8"
         },
         {
           "task": "M06-T08",
           "role": "root-test",
           "path": "tests/publisher-catalog-pinning.test.mjs",
-          "bytes": 38590,
-          "sha256": "f8644fba6a3ebc17ab09aa8396ee6c20574e7549082cd7f67df4bdc00b349a92"
+          "bytes": 39954,
+          "sha256": "e442dc376f4787d35941f2676e78f34a859d7eee9a0374449260dd35328b5502"
         },
         {
           "task": "M06-T09",
@@ -6780,22 +6780,22 @@
           "task": "M06-T09",
           "role": "root-test",
           "path": "tests/publisher-bundle-publication.test.mjs",
-          "bytes": 86462,
-          "sha256": "0952f4ceda976c2d393f5658c3006294515bce865b52ddc93f6cfed55947a098"
+          "bytes": 87397,
+          "sha256": "26df77e97181faf11c98ca352cb83ee2b8f2f54cf2e07abc2d0a76df9d1eb813"
         },
         {
           "task": "M06-T11",
           "role": "proof-library",
           "path": "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
           "bytes": 172770,
-          "sha256": "9be1e6351af1d008fe529c6c2e3c2050ebbe8b17cb59922dad13c57931dd75d3"
+          "sha256": "1aec8cefc757303b5eeb6a9f5f61241f3b3c5b087ecccba9d3edcb45b1dd64de"
         },
         {
           "task": "M06-T11",
           "role": "root-test",
           "path": "tests/publisher-invalid-source-matrix.test.mjs",
-          "bytes": 95163,
-          "sha256": "982127630683941a487731f907e58295f4cc53ef0a52864c01ac44815b90cbd0"
+          "bytes": 97713,
+          "sha256": "cf5e4ca357b4f6e2aa5c636303e3d6a3b9cd3fcd401d8bce991f33441227644e"
         },
         {
           "task": "M06-T10",
@@ -6815,8 +6815,8 @@
           "task": "M07-T01",
           "role": "proof-library",
           "path": "scripts/lib/control-plane-bundle-store-proof.mjs",
-          "bytes": 129770,
-          "sha256": "f5843fd112a9299efc98e70898f39a7036a8e43bc7fb680bb0adac45d266f720"
+          "bytes": 130737,
+          "sha256": "65d6b5491404c6f7422931a731df82757b2122d4f227af91265a001ccd80e40b"
         },
         {
           "task": "M07-T01",

@@ -38,6 +38,9 @@ oj+/rKcBQofbg0dX80s83Nxeq1sYzOoWEfPYc7XSQ4LydEwwkfkxys6AYhPXVXtlKGzcOTNxNsNca3AI
 kdYoaXsbiMqAYROKrw0gp95rk5Gd2QVHl5R6MUOi5FwVcxHPmqIZOeYMvdU+djRBDKzc91qBidt/Ma+xxpap41JErr16+erNB08e
 z2d1awNSPnfL/nNPccEaCxlbZpBb4vz3iufsA/JWrRYwRcUmEnjEE28ZzTsb7nXFgdRw43/mQ3UC
 `.replaceAll(/\\s/gu, "");
+const M07_T11_DURABLE_ROOT_HELPER_ROLLBACK_PATCH = `
+G2gMAMT/purOMj3jFDj4Lq1saZtLRZFkG+ksnPS/H3O3hiRyoJanE/O2Bs2+ISLNsmgm7ug8hrPqb0oUjEX/5xh4HojeA4d91pnEJVlpP9L+Zo9nQzGIZ8i+WOYSJthxJJje02Gq3i5/3Gcy+UL9UDBFv/mKlVKJEZEGz8mUUlr82uuBStWCLtegHtcKJYA1faxtLcRxwCrDYLfS0bITwXV4blLzrxOJX4aemGSheCZ9l/4Y8YtDQJloDLFa/hRYa47DcwJT87wJ/wyMVKAsg+PhTd52wVksNaStYS4ZPcCLK0PQZYZ4+TGJjNdzV6BISHLvv85lk7oRncSu7isEyeOMCGdXSatYKQpu7SBHB5BjADU6PmPGgDgoXG53TiVAVcZn0b5RdTt4eKAVIlMD/wk26DQuRQnY/kun3iS7LQg+BJeajh6fLpsp+rI1n3g1LpHimSlvnWmj/E5ruA0XaBfSx+bxR99B6U4FN95k3T316U8V0k4WXCAdo6m2Y0lJSzyuq5wMzfeVJ2NfsXwkwOShlnb4LJTJOO6nhoM742R3MplpRY/52BoqiIrOgRAbPQjWcmc9u6JU03CI9JxFBSYWUo5BkexYRUq9kpVl0L7yTqp6qi3dBUVCD572CVD9N+XfSNp4/Om2+O6UN+7QyJVdIFCLUJUDdZ3pWQ//M2LFNIzJa31rqSxe6x4ZLgIzE8bmjhC3m0x9SPWPnQqZNi/vr4lEpi72McEQBd9H15nEfZwOYIsLfriFuLZOUIslSRGLU508neJrtDd8hTYDAPAOMRaRzH4shqC62w/XAdTb1FOeiDOJynYj/HqNc/uGJOd50K7vgC3om3PBHwse2/iCc2Ad1wBAKYt0CsWWlUJAL/0zZqKaWsmlj80wzz01U3ELQerSJ3ZXYWprMU4Nwgl9mj2137ZTWxSyhBn5rZO1WTF2Bp1GAeT3+82yrfLp30p3u+4jXG/WZLZ9ELwVp/26jOo/AXKzTi7dj0qL25zoesJW+2RU+T6wkRv/huQpR9m3UXY1m10IHpPNdjCVtdS06QTetwhp7wI=
+`.replaceAll(/\s/gu, "");
 const M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH = `
 G8sdQCwOzNM/RUU2uWE0Ld/OIKAEWWm5VNXZWqY/2EmIiGABC0jrkL7afQN4F5SXOiS2pK/tfeUhKPo4w2OG4MJWTz7bB0iTIAo+
 8N/OaZXN9m+YOVGSxEbP73+//9X/cc8kPGTxGN/MnjOP8zC3e+fKd0nQXgWP3giR1b10UvSQ7yKJhkilfZOhWoad/jtdA4l9IHlC
@@ -400,6 +403,19 @@ function reconstructPreLintM07T11BundleRootTest(currentBytes) {
   return reconstructed;
 }
 
+function reconstructPreDurableM07T11BundleRootTest(currentBytes) {
+  const reconstructed = applyExactRollbackPatch(
+    currentBytes,
+    M07_T11_DURABLE_ROOT_HELPER_ROLLBACK_PATCH,
+  );
+  assert.equal(reconstructed.byteLength, 86_462);
+  assert.equal(
+    createHash("sha256").update(reconstructed).digest("hex"),
+    "0952f4ceda976c2d393f5658c3006294515bce865b52ddc93f6cfed55947a098",
+  );
+  return reconstructed;
+}
+
 async function trackedMutation(relativePath, transform) {
   const original = await sourceText(relativePath);
   const mutated = transform(original);
@@ -518,24 +534,58 @@ function appendValidCiSuccessor(source, rootPackageSource) {
   return Object.freeze({ ciSource: fullyPinnedCiSource });
 }
 
+function appendBeforeExactTail(script, exactTail, successorCommand) {
+  assert.equal(typeof script, "string");
+  assert.ok(Array.isArray(exactTail));
+  assert.ok(exactTail.length > 0);
+  assert.ok(
+    exactTail.every(
+      (command) =>
+        typeof command === "string" &&
+        command.length > 0 &&
+        command.trim() === command &&
+        !command.includes(" && "),
+    ),
+  );
+  assert.equal(new Set(exactTail).size, exactTail.length);
+  assert.equal(typeof successorCommand, "string");
+  assert.ok(
+    successorCommand.length > 0 &&
+      successorCommand.trim() === successorCommand &&
+      !successorCommand.includes(" && "),
+  );
+  const commands = script.split(" && ");
+  assert.ok(commands.length > 1);
+  assert.ok(commands.every((command) => command.length > 0 && command.trim() === command));
+  assert.deepEqual(commands.slice(-exactTail.length), exactTail);
+  assert.equal(
+    commands.filter((_, index) =>
+      exactTail.every((command, tailIndex) => commands[index + tailIndex] === command),
+    ).length,
+    1,
+  );
+  assert.equal(commands.includes(successorCommand), false);
+  assert.equal(exactTail.includes(successorCommand), false);
+  commands.splice(commands.length - exactTail.length, 0, successorCommand);
+  return commands.join(" && ");
+}
+
 function appendValidRootSuccessor(source) {
   const manifest = JSON.parse(source);
-  const originalCheck = manifest.scripts.check;
-  const originalTest = manifest.scripts.test;
   manifest.scripts["verify:control-plane-append-only-probe"] =
     "node scripts/verify-control-plane-append-only-probe.mjs";
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
-  manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:reference-host-web-channel-consumption && pnpm lint",
-    "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-append-only-probe && pnpm lint",
+  manifest.scripts.check = appendBeforeExactTail(
+    manifest.scripts.check,
+    ["pnpm lint", "pnpm typecheck", "pnpm build", "pnpm test", "pnpm boundaries"],
+    "pnpm verify:control-plane-append-only-probe",
   );
-  manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:reference-host-web-channel-consumption && turbo run test",
-    "pnpm test:reference-host-web-channel-consumption && pnpm test:control-plane-append-only-probe && turbo run test",
+  manifest.scripts.test = appendBeforeExactTail(
+    manifest.scripts.test,
+    ["turbo run test"],
+    "pnpm test:control-plane-append-only-probe",
   );
-  assert.notEqual(manifest.scripts.check, originalCheck);
-  assert.notEqual(manifest.scripts.test, originalTest);
   return JSON.stringify(manifest);
 }
 
@@ -1535,17 +1585,19 @@ test("[authority] distinguishes semantic coordination drift from frozen surface 
     createHash("sha256").update(currentM07T11BundleProofBytes).digest("hex"),
     "a61af18578594c589be8ae07ee244fed05c21c2f865f91a53f3ef48f4daf44bd",
   );
-  assert.equal(currentM07T11BundleRootTestBytes.byteLength, 86_462);
+  assert.equal(currentM07T11BundleRootTestBytes.byteLength, 87_397);
   assert.equal(
     createHash("sha256").update(currentM07T11BundleRootTestBytes).digest("hex"),
-    "0952f4ceda976c2d393f5658c3006294515bce865b52ddc93f6cfed55947a098",
+    "26df77e97181faf11c98ca352cb83ee2b8f2f54cf2e07abc2d0a76df9d1eb813",
   );
   const currentM07T10BundleProofBytes = applyExactRollbackPatch(
     currentM07T11BundleProofBytes,
     M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH,
   );
   const currentM07T10BundleRootTestBytes = applyExactRollbackPatch(
-    reconstructPreLintM07T11BundleRootTest(currentM07T11BundleRootTestBytes),
+    reconstructPreLintM07T11BundleRootTest(
+      reconstructPreDurableM07T11BundleRootTest(currentM07T11BundleRootTestBytes),
+    ),
     M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH,
   );
   assert.equal(currentM07T10BundleProofBytes.byteLength, 139_396);
