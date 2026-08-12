@@ -1,6 +1,6 @@
 import { ProtocolTypesError, verifyProtocolTypes } from "./lib/protocol-types.mjs";
 
-// I07-04 hosted observation trigger: 06/20; lane C.
+// I07-04 hosted observation trigger: 14/20; lane C.
 try {
   const result = await verifyProtocolTypes();
   process.stdout.write(`${JSON.stringify({ status: "PASS", ...result }, null, 2)}\n`);
