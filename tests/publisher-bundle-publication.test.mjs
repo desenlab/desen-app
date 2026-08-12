@@ -275,6 +275,83 @@ function applyExactRollbackPatch(currentBytes, encodedPatch) {
   return Buffer.from(reconstructedLines.join("\n"), "utf8");
 }
 
+function replaceExactOnce(source, pattern, replacement) {
+  const replaced = source.replace(pattern, replacement);
+  assert.notEqual(replaced, source);
+  assert.equal(replaced.replace(pattern, replacement), replaced);
+  return replaced;
+}
+
+function reconstructM07T10ExecutionPreflightProof(currentBytes) {
+  let source = currentBytes.toString("utf8");
+  const replacements = [
+    [
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 279_237,\n {6}sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n {4}\}\),/u,
+      "",
+    ],
+    [
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 93_464,\n {6}sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n {4}\}\),/u,
+      "",
+    ],
+    [
+      /APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY\[M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH\]\[8\]/u,
+      "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH][7]",
+    ],
+    [
+      /APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY\[M05_SOURCE_AUDIT_TEST_RELATIVE_PATH\]\[8\]/u,
+      "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_TEST_RELATIVE_PATH][7]",
+    ],
+  ];
+  for (const [pattern, replacement] of replacements) {
+    source = replaceExactOnce(source, pattern, replacement);
+  }
+  const reconstructed = Buffer.from(source, "utf8");
+  assert.equal(reconstructed.byteLength, 72_643);
+  assert.equal(
+    createHash("sha256").update(reconstructed).digest("hex"),
+    "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
+  );
+  return reconstructed;
+}
+
+function reconstructM07T10ExecutionPreflightRootTest(currentBytes) {
+  let source = currentBytes.toString("utf8");
+  const replacements = [
+    [
+      /const M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH = `[\s\S]*?(?=const M07_T10_SOURCE_AUDIT_RECONSTRUCTION_PATCH)/u,
+      "",
+    ],
+    [
+      / {8}\{\n {10}bytes: 269_572,\n {10}sha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",\n {10}patch: M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH,\n {8}\},\n/u,
+      "",
+    ],
+    [
+      / {8}\{\n {10}bytes: 91_297,\n {10}sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",\n {10}patch: M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH,\n {8}\},\n/u,
+      "",
+    ],
+    [/currentBytes: 279_237,/u, "currentBytes: 269_572,"],
+    [
+      /currentSha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",/u,
+      'currentSha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",',
+    ],
+    [/currentBytes: 93_464,/u, "currentBytes: 91_297,"],
+    [
+      /currentSha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",/u,
+      'currentSha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",',
+    ],
+  ];
+  for (const [pattern, replacement] of replacements) {
+    source = replaceExactOnce(source, pattern, replacement);
+  }
+  const reconstructed = Buffer.from(source, "utf8");
+  assert.equal(reconstructed.byteLength, 29_586);
+  assert.equal(
+    createHash("sha256").update(reconstructed).digest("hex"),
+    "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
+  );
+  return reconstructed;
+}
+
 async function trackedMutation(relativePath, transform) {
   const original = await sourceText(relativePath);
   const mutated = transform(original);
@@ -395,24 +472,58 @@ function appendValidCiSuccessor(source, rootPackageSource) {
   return Object.freeze({ ciSource: fullyPinnedCiSource });
 }
 
+function appendBeforeExactTail(script, exactTail, successorCommand) {
+  assert.equal(typeof script, "string");
+  assert.ok(Array.isArray(exactTail));
+  assert.ok(exactTail.length > 0);
+  assert.ok(
+    exactTail.every(
+      (command) =>
+        typeof command === "string" &&
+        command.length > 0 &&
+        command.trim() === command &&
+        !command.includes(" && "),
+    ),
+  );
+  assert.equal(new Set(exactTail).size, exactTail.length);
+  assert.equal(typeof successorCommand, "string");
+  assert.ok(
+    successorCommand.length > 0 &&
+      successorCommand.trim() === successorCommand &&
+      !successorCommand.includes(" && "),
+  );
+  const commands = script.split(" && ");
+  assert.ok(commands.length > 1);
+  assert.ok(commands.every((command) => command.length > 0 && command.trim() === command));
+  assert.deepEqual(commands.slice(-exactTail.length), exactTail);
+  assert.equal(
+    commands.filter((_, index) =>
+      exactTail.every((command, tailIndex) => commands[index + tailIndex] === command),
+    ).length,
+    1,
+  );
+  assert.equal(commands.includes(successorCommand), false);
+  assert.equal(exactTail.includes(successorCommand), false);
+  commands.splice(commands.length - exactTail.length, 0, successorCommand);
+  return commands.join(" && ");
+}
+
 function appendValidRootSuccessor(source) {
   const manifest = JSON.parse(source);
-  const originalCheck = manifest.scripts.check;
-  const originalTest = manifest.scripts.test;
   manifest.scripts["verify:control-plane-append-only-probe"] =
     "node scripts/verify-control-plane-append-only-probe.mjs";
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
-  manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
-    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
+  manifest.scripts.check = appendBeforeExactTail(
+    manifest.scripts.check,
+    ["pnpm lint", "pnpm typecheck", "pnpm build", "pnpm test", "pnpm boundaries"],
+    "pnpm verify:control-plane-append-only-probe",
   );
-  manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-transition-races && turbo run test",
-    "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
+  manifest.scripts.test = appendBeforeExactTail(
+    manifest.scripts.test,
+    ["turbo run test"],
+    "pnpm test:control-plane-append-only-probe",
   );
-  assert.notEqual(manifest.scripts.check, originalCheck);
-  assert.notEqual(manifest.scripts.test, originalTest);
   return JSON.stringify(manifest);
 }
 
@@ -1631,13 +1742,14 @@ test("[compatibility] detects tamper in each externally anchored T02 through T09
   }
 
   const reviewedCurrentBytes = await sourceBytes(reviewedCurrentPath);
-  assert.equal(reviewedCurrentBytes.byteLength, 72_643);
+  assert.equal(reviewedCurrentBytes.byteLength, 72_952);
   assert.equal(
     createHash("sha256").update(reviewedCurrentBytes).digest("hex"),
-    "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
+    "a0664730afda307e7f513acecba764a2b7c93f4878fa27dbdebf7b20a6cadc70",
   );
+  const predecessorM07T10Bytes = reconstructM07T10ExecutionPreflightProof(reviewedCurrentBytes);
   const predecessorM07T09Bytes = applyExactRollbackPatch(
-    reviewedCurrentBytes,
+    predecessorM07T10Bytes,
     M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH,
   );
   assert.equal(predecessorM07T09Bytes.byteLength, 72_334);
@@ -1672,6 +1784,14 @@ test("[compatibility] detects tamper in each externally anchored T02 through T09
     buildPublisherBundlePublicationEvidence(
       fastOptions({
         trackedFileBytes: { [reviewedCurrentPath]: unreviewedCurrentBytes },
+      }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({
+        trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T10Bytes },
       }),
     ),
     expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
@@ -1796,13 +1916,14 @@ test("[compatibility] detects tamper in each externally anchored T02 through T09
 test("[compatibility] admits only the exact current execution-preflight root reader", async () => {
   const readerPath = "tests/publisher-execution-preflight.test.mjs";
   const currentBytes = await sourceBytes(readerPath);
-  assert.equal(currentBytes.byteLength, 29_586);
+  assert.equal(currentBytes.byteLength, 40_529);
   assert.equal(
     createHash("sha256").update(currentBytes).digest("hex"),
-    "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
+    "f0282eecd5fa844851fe533eb77122384c61ab58a639d7281aa0edceb2751191",
   );
+  const predecessorM07T10Bytes = reconstructM07T10ExecutionPreflightRootTest(currentBytes);
   const predecessorM07T09Bytes = applyExactRollbackPatch(
-    currentBytes,
+    predecessorM07T10Bytes,
     M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH,
   );
   assert.equal(predecessorM07T09Bytes.byteLength, 24_873);
@@ -1833,6 +1954,12 @@ test("[compatibility] admits only the exact current execution-preflight root rea
   await assert.rejects(
     buildPublisherBundlePublicationEvidence(
       fastOptions({ trackedFileBytes: { [readerPath]: unreviewedBytes } }),
+    ),
+    expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
+  );
+  await assert.rejects(
+    buildPublisherBundlePublicationEvidence(
+      fastOptions({ trackedFileBytes: { [readerPath]: predecessorM07T10Bytes } }),
     ),
     expectCode("PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_DRIFT"),
   );

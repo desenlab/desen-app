@@ -56,14 +56,15 @@ check from fresh inputs, and must not trust path filters or cached proof success
 `I07-01` and `I07-02` preceded `M07-T02` in the working order without changing the 145-task
 implementation total or proof-gate counts. Both infrastructure tasks are complete. I07-02 froze
 and proved the 130-workload, 61-proof-pair cutover baseline. The historical M07-T09 successor
-contained 146 workloads and 69 proof pairs. The current M07-T10 working-tree successor contains
-148 workloads and 70 proof pairs as `REQUIRED + EXHAUSTIVE`; neither successor rewrites that frozen
-cutover evidence. Its 59 ordinary pairs and 11 exclusive barriers project to 463 legacy
-prerequisite segments, 2,929 ordered leaf invocations, and 230 distinct leaf workloads. The retained
+contained 146 workloads and 69 proof pairs. The current M07-T11 working-tree successor contains
+150 workloads and 71 proof pairs as `REQUIRED + EXHAUSTIVE`; neither successor rewrites that frozen
+cutover evidence. Its 60 ordinary pairs and 11 exclusive barriers project to 479 legacy
+prerequisite segments, 3,113 ordered leaf invocations, and 236 distinct leaf workloads. The retained
 sequential runner is available only through explicit manual `legacy-rollback`. Exact cutover
 workload, result, cancellation, tracked-workspace, hosted, and shared-state equivalence remains
-archived in the unchanged I07-02 baseline. M07-T09, M07-T10, and I07-03 are `DONE`; M07-T11 is the
-next implementation task. No standalone hosted M07-T10 completion result is claimed. I07-03's hosted
+archived in the unchanged I07-02 baseline. M07-T09, M07-T10, M07-T11, and I07-03 are `DONE`.
+G07 remains `NOT_STARTED` because I07-04 is still at `0 / 20`. No standalone hosted M07-T11
+completion result is claimed. I07-03's hosted
 bootstrap and authoritative Quality-gate result are recorded in its exact baseline.
 
 I07-03 leaves the exact `REQUIRED + EXHAUSTIVE` runner unchanged as the sole pass/fail authority
@@ -79,8 +80,8 @@ The pure I07-03 ledger measures threshold arithmetic but cannot itself authorize
 caller-supplied data. Fresh `EXHAUSTIVE` verification remains mandatory on `main`, releases, and
 manual audits. The frozen I07-03 baseline selector is pinned at
 `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` and its historical
-comparison authority contains 20 sources. The current M07-T10 successor selector digest is
-`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`. The hosted bootstrap
+comparison authority contains 20 sources. The current M07-T11 successor selector digest is
+`sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`. The hosted bootstrap
 succeeded, while the shadow correctly returned
 `NOT_ELIGIBLE → EXHAUSTIVE` with `UNSUPPORTED_CHANGE_KIND`; this was not an eligible strict-subset
 observation, so the counter stays `0 / 20`. The authoritative hosted Quality gate passed. Local
@@ -507,7 +508,7 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 | M07-T08 | DONE        | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
 | M07-T09 | DONE        | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
 | M07-T10 | DONE        | M07-T09                 | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
-| M07-T11 | NOT_STARTED | M07-T05, M07-T10        | Control-plane channel consumed by separately built reference host                                                    |
+| M07-T11 | DONE        | M07-T05, M07-T10        | Control-plane channel consumed by separately built reference host                                                    |
 | G07     | NOT_STARTED | M07-T01–M07-T11, I07-04 | Every pre-commit fault preserves a valid durable activation record and invalid revision never becomes active         |
 
 M07-T01 adds the built `@desen/control-plane-api` package root and one local POSIX repository that
@@ -773,10 +774,10 @@ mutation classes, 9 exact prerequisites, and 15 ordered trace rows. The root pro
 addon authority and proves a real `ERR_DLOPEN_DISABLED` denial; only the verifier receives narrow
 SQLite native authority. The proof binds the exact single public `.` package export and captured
 CI/distribution bytes to digest-bound pre/post live equality, and rejects receipt-only overrides.
-N-038 becomes `TESTED`; N-041 remains `PLANNED`; P-12 remains `NOT_PROVEN`; G07 remains open; and
-M07-T11 owns separately built channel consumption next. This task makes no tamper-proof,
-anti-rollback, hosted T10, host-channel, or native-conformance claim. Overall progress is 84/145
-and M07 is 10/11.
+At the T10 checkpoint N-038 became `TESTED`; N-041 remained `PLANNED`; P-12 remained
+`NOT_PROVEN`; G07 remained open; and M07-T11 owned the next slice. T10 made no tamper-proof,
+anti-rollback, hosted, host-channel, or native-conformance claim. Historical progress there was
+84/145 and M07 was 10/11.
 
 Evidence: `docs/proof/CONTROL-PLANE-RUNTIME-TRANSITION-RACES.md` and
 `docs/proof/artifacts/control-plane-api-0.1.0-runtime-transition-races.json`
@@ -788,6 +789,38 @@ invocations, and 230 distinct leaves. The current selector digest is
 `sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`; the frozen I07-03
 baseline selector digest remains historical and unchanged. These are local code-owned successor
 values; no hosted M07-T10 result is claimed.
+
+M07-T11 closes the implementation milestone with a distinct Node composition server and browser
+build. The server owns the fixed channel, bearer-authenticated loopback client, installed-package
+inventory, durable activation root, and same-origin refresh route. It treats channel data only as
+discovery, reruns the public M07 integrity-through-recovery chain, and delivers only the exact
+authenticated active Bundle with a strong durable generation/revision ETag. The browser keeps an
+already mounted valid surface when refresh or mount fails and fences stale and post-disposal work.
+Seven focused-suite files contain 46 runtime tests plus two browser type-test files. The nine-case
+sequence proves valid A, invalid B preserving A, valid C replacing A, restart
+recovery before delivery, two lifetime fences, bearer enforcement, installed-inventory symlink
+rejection, and last-known-good browser mounting. Hard links, special files, parent/file identity
+drift, oversized material, invalid media types, BOM-prefixed JSON, and unsafe static requests fail
+closed in the supporting suites.
+
+This completes M07's 11 implementation tasks and advances overall progress to 85/145 (59%). G07
+does not close: I07-04 remains `NOT_STARTED` at `0 / 20` and must satisfy the frozen hosted
+strict-subset observation threshold plus remove every G07-due compatibility reader. P-12 remains
+`NOT_PROVEN` until M10-T07 proves Desen App product-level restart preservation, and N-041 remains
+`PLANNED` until M12-T05. The local proof claims neither remote/multi-tenant/TLS deployment,
+hostile-admin concurrent mutation resistance, independent anti-rollback, real-browser
+performance, Android/iOS conformance, nor a hosted M07-T11 pass.
+
+Evidence: `docs/proof/REFERENCE-HOST-WEB-CHANNEL-CONSUMPTION.md` and
+`docs/proof/artifacts/reference-host-web-0.1.0-channel-consumption.json`
+`sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0` (39,307 bytes).
+
+The M07-T11 CI registration produces the exact 150-workload, 71-proof-pair successor: 60 ordinary
+pairs, 11 exclusive barriers, 479 retained prerequisite segments, 3,113 ordered legacy leaf
+invocations, and 236 distinct leaves. The current selector digest is
+`sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`; the frozen I07-03
+baseline selector digest remains historical and unchanged. These are local code-owned successor
+values; no hosted M07-T11 result is claimed.
 
 Reviewed reader checkpoint sequence 7 links predecessor head
 `790ad28b6fd441e6d5f40f277a97e8de36a178a9e50fff3e208e6c27588915fd` to

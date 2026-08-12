@@ -3121,3 +3121,31 @@ This file records implementation discoveries without changing the frozen DESEN 0
   treating that discovery pointer as activation evidence. A later protocol revision should
   standardize persistence and recovery only if cross-implementation lifecycle interoperability
   requires more than the observable atomicity and last-known-good invariants.
+
+## PF-077 — A channel snapshot is activation intent, not host runtime authority
+
+- Status: OPEN
+- Blocks proof: No; M07-T11 can define one local Web host composition profile without changing
+  frozen protocol bytes or claiming a universal transport and notification contract.
+- Protocol location: SPEC Sections 13.2, 24.1, 28.2, and 28.3; `PIPE-009`; related findings
+  `PF-074`–`PF-076`; related decision `ADR 0015`
+- Observation: DESEN 0.1.0 orders channel fetch before immutable Bundle verification, package and
+  reference preflight, staging, and atomic activation, but it does not define how a separately
+  built host obtains channel metadata, authenticates a notification, serializes overlapping
+  refreshes, or delivers a newly committed Bundle to a browser process. Treating a channel GET or
+  matching `{generation, revision}` pair as active authority would skip every later boundary and
+  could let an invalid or stale candidate replace the last-known-good surface.
+- Implementation decision: M07-T11 uses a separately built Node reference-host server. The server
+  reads one fixed channel and its exact Bundle bytes through the authenticated M07-T05 loopback
+  transport, then composes the public T02, T03, T04, T06, T07, and T08 boundaries. Its installed
+  package root, channel name, upstream origin, and bearer secret are host-owned configuration;
+  Bundle data selects none of them. Only a certain durable activation or complete restart recovery
+  can update the server's immutable delivery snapshot. The browser receives that exact Bundle
+  through a fixed same-origin endpoint and independently mounts it with the static reference
+  Catalog and adapter registry. Invalid, stale, malformed, oversized, failed, or late candidates
+  preserve the current server delivery and browser surface.
+- Future action: M10-T07 must prove the same last-known-good property through the Desen App product
+  restart path before P-12 can become `PROVEN`. M12-T05 must measure the complete cross-system
+  limits before N-041 can leave `PLANNED`. A later protocol revision should standardize channel
+  notification and host-delivery interoperability only if independent implementations need a
+  shared transport contract beyond the observable activation invariants.

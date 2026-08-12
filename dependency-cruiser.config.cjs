@@ -66,6 +66,7 @@ const allowedApplicationDependencies = {
   ],
   "desen-run": ["protocol", "validator", "testkit", "desen"],
   "reference-host-web": ["runtime-core", "runtime-react", "runtime-web", "reference-catalog-web"],
+  "reference-host-web-server": ["protocol"],
 };
 
 const neutralProductionSourcePath =
@@ -211,6 +212,34 @@ module.exports = {
         "The independent proof host cannot import Desen App or another application composition root.",
       from: { path: "^apps/reference-host-web/(?:src|app)/" },
       to: { path: "^apps/(?!reference-host-web/)" },
+    },
+    {
+      name: "reference-host-server-production-has-no-package-dependencies",
+      severity: "error",
+      comment:
+        "The host server production root composes the public control-plane app only; direct package imports remain test-only.",
+      from: { path: "^apps/reference-host-web-server/(?:src|app)/" },
+      to: { path: "^packages/" },
+    },
+    {
+      name: "reference-host-server-control-plane-public-root-only",
+      severity: "error",
+      comment:
+        "The host server may compose only the reviewed public control-plane root, never a private control-plane module.",
+      from: { path: "^apps/reference-host-web-server/(?:src|app)/" },
+      to: {
+        path: "^apps/control-plane-api/(?!src/index\\.ts$|dist/index\\.(?:d\\.ts|js)$)",
+      },
+    },
+    {
+      name: "reference-host-server-has-no-other-application-dependencies",
+      severity: "error",
+      comment:
+        "The host server has one reviewed app composition edge and cannot acquire a browser host, Desen App, or another application root.",
+      from: { path: "^apps/reference-host-web-server/(?:src|app)/" },
+      to: {
+        path: "^apps/(?!reference-host-web-server/|control-plane-api/(?:src/index\\.ts$|dist/index\\.(?:d\\.ts|js)$))",
+      },
     },
   ],
   options: {

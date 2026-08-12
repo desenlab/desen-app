@@ -4,7 +4,7 @@ import referenceCatalog from "@desen/reference-catalog-web/catalog.json";
 import type { SignInHostOperationBinding } from "@desen/reference-catalog-web/host-operations";
 import { REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT } from "@desen/reference-catalog-web/react-adapters";
 import { disposeRuntimeHeadlessSession, mountRuntimeHeadlessSession } from "@desen/runtime-core";
-import { createRuntimeReactAdapterRegistry } from "@desen/runtime-react";
+import { createRuntimeReactAdapterRegistry, renderRuntimeReactSurface } from "@desen/runtime-react";
 import { disposeRuntimeWebHostAuthority, readRuntimeWebHostAuthority } from "@desen/runtime-web";
 
 import officialDerivedSignInBundle from "../../../examples/sign-in/official-derived.bundle.desen.json";
@@ -35,6 +35,11 @@ export const REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID = "com.example.account-
 export const REFERENCE_HOST_OFFICIAL_SIGN_IN_REVISION =
   "sha256:2dc98d276a3b4102c2891de1519bda86ea2978f5429fd8ea91831f36f8b73ffb";
 
+const REFERENCE_PACKAGE_ID = "run.desen.reference.sign-in";
+const REFERENCE_PACKAGE_VERSION = "0.1.0";
+const REFERENCE_PACKAGE_TARGET = "web-react";
+const REFERENCE_PACKAGE_DIGEST =
+  "sha256:acdbbfe9ad4c1fce8093b0b68036bc7f5678e8b2a603357dbe25f2413a3db6f0";
 const SIGN_IN_SURFACE_ID = "sign-in";
 const HOME_SURFACE_ID = "home";
 const SIGN_IN_INVOCATION_ALIAS = "signIn";
@@ -44,6 +49,7 @@ const DENIED_HOST_CALL = Object.freeze({ status: "denied" } as const);
 const DENIED_NAVIGATION = Object.freeze({ status: "denied" } as const);
 const SUCCEEDED_NAVIGATION = Object.freeze({ status: "succeeded" } as const);
 const EMPTY_OBJECT = Object.freeze({}) as RuntimeJsonObject;
+const ARRAY_PROTOTYPE = Object.getPrototypeOf([]) as object;
 const NOOP = () => undefined;
 
 /** Redacted application-level projection of one runtime diagnostic. */
@@ -68,6 +74,12 @@ export interface ReferenceHostOfficialSignInActivationInput {
   readonly reportDiagnostic: ReferenceHostOfficialSignInDiagnosticReporter;
 }
 
+/** Closed trusted input for activating one server-delivered reference sign-in Bundle. */
+export interface ReferenceHostDeliveredSignInActivationInput extends ReferenceHostOfficialSignInActivationInput {
+  /** Untrusted Bundle data delivered only after the server's durable activation boundary. */
+  readonly bundle: unknown;
+}
+
 /** Controlled activation outcome without session, registry, Catalog, port, or callback authority. */
 export type ReferenceHostOfficialSignInActivationResult =
   | Readonly<{
@@ -79,7 +91,9 @@ export type ReferenceHostOfficialSignInActivationResult =
       readonly reason:
         | "host-creation-failed"
         | "host-read-failed"
+        | "bundle-policy-rejected"
         | "malformed-input"
+        | "render-preflight-failed"
         | "registry-creation-failed"
         | "root-activation-failed"
         | "session-mount-failed";
@@ -91,6 +105,12 @@ interface CapturedActivationInput {
   readonly reportDiagnostic: ReferenceHostOfficialSignInDiagnosticReporter;
 }
 
+interface CapturedBundlePolicy {
+  readonly bundle: unknown;
+  readonly documentId: typeof REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID;
+  readonly revision: string;
+}
+
 interface CapturedSignInInput {
   readonly email: string;
   readonly password: string;
@@ -99,6 +119,7 @@ interface CapturedSignInInput {
 function ownDataRecord(
   value: unknown,
   requiredKeys: readonly string[],
+  optionalKeys: readonly string[] = [],
 ): Readonly<Record<string, unknown>> | undefined {
   try {
     if (value === null || typeof value !== "object" || Array.isArray(value)) return undefined;
@@ -106,13 +127,17 @@ function ownDataRecord(
     if (prototype !== Object.prototype && prototype !== null) return undefined;
     const keys = Reflect.ownKeys(value);
     if (
-      keys.length !== requiredKeys.length ||
-      keys.some((key) => typeof key !== "string" || !requiredKeys.includes(key))
+      requiredKeys.some((key) => !keys.includes(key)) ||
+      keys.some(
+        (key) =>
+          typeof key !== "string" || (!requiredKeys.includes(key) && !optionalKeys.includes(key)),
+      )
     ) {
       return undefined;
     }
     const captured: Record<string, unknown> = Object.create(null);
-    for (const key of requiredKeys) {
+    for (const key of keys) {
+      if (typeof key !== "string") return undefined;
       const descriptor = Object.getOwnPropertyDescriptor(value, key);
       if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) {
         return undefined;
@@ -146,12 +171,80 @@ function captureActivationInput(input: unknown): CapturedActivationInput | undef
   });
 }
 
-function captureRequestContext(value: unknown, surfaceId: string): boolean {
+function captureBundlePolicy(bundle: unknown): CapturedBundlePolicy | undefined {
+  try {
+    const capturedBundle = ownDataRecord(
+      bundle,
+      ["kind", "desen", "id", "revision", "sourceDigest", "requires", "entry", "surfaces"],
+      ["publication", "extensions"],
+    );
+    if (capturedBundle === undefined) return undefined;
+    const documentId = capturedBundle.id;
+    const revision = capturedBundle.revision;
+    const sourceDigest = capturedBundle.sourceDigest;
+    const requires = ownDataRecord(capturedBundle.requires, ["catalogs"]);
+    const catalogs = requires?.catalogs;
+    if (
+      capturedBundle.kind !== "desen.bundle" ||
+      capturedBundle.desen !== "0.1.0" ||
+      documentId !== REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID ||
+      typeof revision !== "string" ||
+      !/^sha256:[0-9a-f]{64}$/u.test(revision) ||
+      typeof sourceDigest !== "string" ||
+      !/^sha256:[0-9a-f]{64}$/u.test(sourceDigest) ||
+      capturedBundle.entry !== SIGN_IN_SURFACE_ID ||
+      !Array.isArray(catalogs) ||
+      Object.getPrototypeOf(catalogs) !== ARRAY_PROTOTYPE
+    ) {
+      return undefined;
+    }
+    const catalogKeys = Reflect.ownKeys(catalogs);
+    if (catalogKeys.length !== 2 || !catalogKeys.includes("0") || !catalogKeys.includes("length")) {
+      return undefined;
+    }
+    const item = Object.getOwnPropertyDescriptor(catalogs, "0");
+    const length = Object.getOwnPropertyDescriptor(catalogs, "length");
+    if (
+      item === undefined ||
+      length === undefined ||
+      item.enumerable !== true ||
+      !("value" in item) ||
+      length.enumerable !== false ||
+      !("value" in length) ||
+      length.value !== 1
+    ) {
+      return undefined;
+    }
+    const requirement = ownDataRecord(
+      item.value,
+      ["id", "version", "target", "digest"],
+      ["extensions"],
+    );
+    if (
+      requirement === undefined ||
+      requirement.id !== REFERENCE_PACKAGE_ID ||
+      requirement.version !== REFERENCE_PACKAGE_VERSION ||
+      requirement.target !== REFERENCE_PACKAGE_TARGET ||
+      requirement.digest !== REFERENCE_PACKAGE_DIGEST
+    ) {
+      return undefined;
+    }
+    return Object.freeze({ bundle, documentId, revision });
+  } catch {
+    return undefined;
+  }
+}
+
+function captureRequestContext(
+  value: unknown,
+  surfaceId: string,
+  identity: CapturedBundlePolicy,
+): boolean {
   const context = ownDataRecord(value, ["documentId", "revision", "surfaceId", "requestId"]);
   return (
     context !== undefined &&
-    context.documentId === REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID &&
-    context.revision === REFERENCE_HOST_OFFICIAL_SIGN_IN_REVISION &&
+    context.documentId === identity.documentId &&
+    context.revision === identity.revision &&
     context.surfaceId === surfaceId &&
     typeof context.requestId === "string" &&
     context.requestId.length > 0 &&
@@ -175,6 +268,7 @@ function captureSignInInput(value: unknown): CapturedSignInInput | undefined {
 function captureSignInRequest(
   value: RuntimeOperationRequest,
   operationId: string,
+  identity: CapturedBundlePolicy,
 ): CapturedSignInInput | undefined {
   const request = ownDataRecord(value, [
     "context",
@@ -185,7 +279,7 @@ function captureSignInRequest(
   ]);
   if (
     request === undefined ||
-    !captureRequestContext(request.context, SIGN_IN_SURFACE_ID) ||
+    !captureRequestContext(request.context, SIGN_IN_SURFACE_ID, identity) ||
     request.capabilityId !== operationId ||
     request.invocationAlias !== SIGN_IN_INVOCATION_ALIAS ||
     request.effect !== SIGN_IN_EFFECT
@@ -195,10 +289,13 @@ function captureSignInRequest(
   return captureSignInInput(request.input);
 }
 
-function createSignInOperationPort(binding: SignInHostOperationBinding): RuntimeOperationPort {
+function createSignInOperationPort(
+  binding: SignInHostOperationBinding,
+  identity: CapturedBundlePolicy,
+): RuntimeOperationPort {
   return Object.freeze({
     invoke(request: RuntimeOperationRequest): RuntimeAwaitable<RuntimeHostCallResult> {
-      const input = captureSignInRequest(request, binding.operationId);
+      const input = captureSignInRequest(request, binding.operationId, identity);
       if (input === undefined) return DENIED_HOST_CALL;
       return Reflect.apply(binding.invoke, undefined, [
         input,
@@ -212,13 +309,16 @@ function isEmptyParams(value: unknown): boolean {
   return params !== undefined;
 }
 
-function createNavigationPort(browser: Window): RuntimeNavigationPort {
+function createNavigationPort(
+  browser: Window,
+  identity: CapturedBundlePolicy,
+): RuntimeNavigationPort {
   return Object.freeze({
     navigate(request: RuntimeNavigationRequest) {
       const captured = ownDataRecord(request, ["context", "targetSurfaceId", "params"]);
       if (
         captured === undefined ||
-        !captureRequestContext(captured.context, SIGN_IN_SURFACE_ID) ||
+        !captureRequestContext(captured.context, SIGN_IN_SURFACE_ID, identity) ||
         captured.targetSurfaceId !== HOME_SURFACE_ID ||
         !isEmptyParams(captured.params)
       ) {
@@ -314,21 +414,33 @@ function safelyDisposeCreatedAuthorities(
 }
 
 /**
- * Activates the controlled official-derived sign-in Bundle through the real reference adapters.
+ * Activates one server-delivered sign-in Bundle through the real fixed reference adapters.
  *
- * @remarks The caller can supply only browser infrastructure, the exact fixed-capability trusted
- * binding, and a redacted diagnostic sink. Bundle, Catalog, registry, capability id, route,
- * managed React tree, recovery key, and host policy are closed module-owned choices. Successful
- * activation transfers the created session and Web host authority to the reference root. Every
- * rejected path terminally disposes the authorities it created.
+ * @remarks The caller supplies one untrusted Bundle plus browser infrastructure, the exact
+ * fixed-capability trusted binding, and a redacted diagnostic sink. Catalog, registry, capability
+ * id, route, managed React tree, recovery key, and host policy are closed module-owned choices.
+ * Successful activation transfers the created session and Web host authority to the reference
+ * root. Every rejected path terminally disposes the authorities it created.
  */
-export function activateReferenceHostOfficialSignIn(
+export function activateReferenceHostDeliveredSignIn(
   root: ReferenceHostRootHandle,
-  input: ReferenceHostOfficialSignInActivationInput,
+  input: ReferenceHostDeliveredSignInActivationInput,
 ): ReferenceHostOfficialSignInActivationResult {
-  const captured = captureActivationInput(input);
+  const capturedRecord = ownDataRecord(input, ["browser", "signIn", "reportDiagnostic", "bundle"]);
+  if (capturedRecord === undefined) {
+    return Object.freeze({ status: "rejected", reason: "malformed-input" });
+  }
+  const captured = captureActivationInput({
+    browser: capturedRecord.browser,
+    signIn: capturedRecord.signIn,
+    reportDiagnostic: capturedRecord.reportDiagnostic,
+  });
   if (captured === undefined) {
     return Object.freeze({ status: "rejected", reason: "malformed-input" });
+  }
+  const bundlePolicy = captureBundlePolicy(capturedRecord.bundle);
+  if (bundlePolicy === undefined) {
+    return Object.freeze({ status: "rejected", reason: "bundle-policy-rejected" });
   }
 
   const registry = createRuntimeReactAdapterRegistry(REFERENCE_WEB_REACT_ADAPTER_REGISTRY_INPUT);
@@ -338,11 +450,11 @@ export function activateReferenceHostOfficialSignIn(
 
   const host = createReferenceHostWebPorts({
     browser: captured.browser,
-    documentId: REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID,
-    revision: REFERENCE_HOST_OFFICIAL_SIGN_IN_REVISION,
-    navigation: createNavigationPort(captured.browser),
+    documentId: bundlePolicy.documentId,
+    revision: bundlePolicy.revision,
+    navigation: createNavigationPort(captured.browser, bundlePolicy),
     storage: createStoragePort(),
-    operations: createSignInOperationPort(captured.signIn),
+    operations: createSignInOperationPort(captured.signIn, bundlePolicy),
     resources: createResourcePort(),
     tokens: createTokenPort(),
     context: createContextPort(),
@@ -359,7 +471,7 @@ export function activateReferenceHostOfficialSignIn(
   }
 
   const mounted = mountRuntimeHeadlessSession({
-    bundle: officialDerivedSignInBundle,
+    bundle: bundlePolicy.bundle,
     catalogs: [referenceCatalog],
     hostPorts: hostRead.hostPorts,
   });
@@ -374,6 +486,16 @@ export function activateReferenceHostOfficialSignIn(
     serverSnapshot: mounted.snapshot,
     catalogSet: mounted.catalogSet,
   }) satisfies RuntimeReactLiveSurfaceInput;
+  const preflight = renderRuntimeReactSurface({
+    registry: registry.handle,
+    session: mounted.handle,
+    snapshot: mounted.snapshot,
+    catalogSet: mounted.catalogSet,
+  });
+  if (preflight.status !== "rendered") {
+    safelyDisposeCreatedAuthorities(host.handle, mounted.handle);
+    return Object.freeze({ status: "rejected", reason: "render-preflight-failed" });
+  }
   const activated = activateReferenceHostSurface(root, {
     surface,
     hostAuthority: host.handle,
@@ -385,5 +507,27 @@ export function activateReferenceHostOfficialSignIn(
   return Object.freeze({
     status: "activated",
     relationship: activated.relationship,
+  });
+}
+
+/**
+ * Activates the historical official-derived Bundle through the dynamic policy-closed seam.
+ *
+ * @remarks This compatibility wrapper remains available to the M05 host tests. The production
+ * entry no longer uses it as an implicit fallback when the channel delivery path is unavailable.
+ */
+export function activateReferenceHostOfficialSignIn(
+  root: ReferenceHostRootHandle,
+  input: ReferenceHostOfficialSignInActivationInput,
+): ReferenceHostOfficialSignInActivationResult {
+  const captured = captureActivationInput(input);
+  if (captured === undefined) {
+    return Object.freeze({ status: "rejected", reason: "malformed-input" });
+  }
+  return activateReferenceHostDeliveredSignIn(root, {
+    browser: captured.browser,
+    signIn: captured.signIn,
+    reportDiagnostic: captured.reportDiagnostic,
+    bundle: officialDerivedSignInBundle,
   });
 }

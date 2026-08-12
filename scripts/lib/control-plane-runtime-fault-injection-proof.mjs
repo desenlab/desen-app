@@ -79,6 +79,10 @@ const APP_TEST_SHA256 = "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212";
 const ROOT_TEST_SHA256 = "2168ec05b7ff773c15531b00906056ef278ea0b00a4840023956f26a2b5c2af6";
+const M07_T11_ROOT_TEST_SUCCESSOR = Object.freeze({
+  bytes: 18_770,
+  sha256: "f19a6709377d685aedbce20e0f795fc38245bb63256fb3cab5a7a50d7263d065",
+});
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
 
@@ -375,6 +379,36 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     successor: Object.freeze({
       bytes: 47_816,
       sha256: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
+    }),
+  }),
+});
+const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 68_073,
+      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_440,
+      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_705,
+      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
+    }),
+  }),
+  [SHARED_STATE_AUTHORITY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
+    successor: Object.freeze({
+      bytes: 51_643,
+      sha256: "4f17d0d68f742a6c56fc10e39dd1f47f0111ed03b0e2d45a5d75b5f07b804820",
     }),
   }),
 });
@@ -856,11 +890,13 @@ async function fileReceipts(paths, overrides) {
 async function trackedFileReceipts(overrides) {
   let historicalState = false;
   let successorState = false;
+  const m07T11Generations = [];
   const receipts = [];
   for (const relativePath of [...new Set(TRACKED_TASK_FILES)].sort()) {
     const bytes = await workspaceBytes(relativePath, overrides);
     const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
     const bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const t11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
     if (bridge === undefined) {
       const projected = M07_T10_READER_RECEIPT_PROJECTION[relativePath] ?? observed;
       receipts.push(Object.freeze({ path: relativePath, ...projected }));
@@ -870,17 +906,26 @@ async function trackedFileReceipts(overrides) {
       observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
     const successorMatch =
       observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
-    if (!historicalMatch && !successorMatch) {
+    const t11SuccessorMatch =
+      t11Bridge !== undefined &&
+      observed.bytes === t11Bridge.successor.bytes &&
+      observed.sha256 === t11Bridge.successor.sha256;
+    if (!historicalMatch && !successorMatch && !t11SuccessorMatch) {
       fail("REGISTRATION_DRIFT", "A reviewed M07-T10 tracked successor receipt drifted.", {
         path: relativePath,
       });
     }
     if (historicalMatch) historicalState = true;
-    if (successorMatch) successorState = true;
+    if (successorMatch || t11SuccessorMatch) successorState = true;
+    if (t11Bridge !== undefined)
+      m07T11Generations.push(t11SuccessorMatch ? "successor" : "historical");
     receipts.push(Object.freeze({ path: relativePath, ...bridge.historical }));
   }
   if (historicalState && successorState) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
+  }
+  if (m07T11Generations.includes("historical") && m07T11Generations.includes("successor")) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
   }
   return deepFreeze(receipts);
 }
@@ -1028,7 +1073,15 @@ async function testProjection(overrides) {
   assertExactSourceSha(appBytes, APP_TEST, APP_TEST_SHA256);
   assertExactSourceSha(supportBytes, APP_TEST_SUPPORT, APP_TEST_SUPPORT_SHA256);
   assertExactSourceSha(typeBytes, APP_TYPE_TEST, APP_TYPE_TEST_SHA256);
-  assertExactSourceSha(rootBytes, ROOT_TEST, ROOT_TEST_SHA256);
+  if (!(
+    sha256(rootBytes) === ROOT_TEST_SHA256 ||
+    (rootBytes.byteLength === M07_T11_ROOT_TEST_SUCCESSOR.bytes &&
+      sha256(rootBytes) === M07_T11_ROOT_TEST_SUCCESSOR.sha256)
+  )) {
+    fail("TEST_AUTHORITY_DRIFT", `${ROOT_TEST} exact executable authority drifted.`, {
+      path: ROOT_TEST,
+    });
+  }
   const runtime = runtimeTestInventory(fatalText(appBytes, APP_TEST));
   const compilerNegativeClaims = compilerNegativeInventory(fatalText(typeBytes, APP_TYPE_TEST));
   const rootNames = rootTestInventory(fatalText(rootBytes, ROOT_TEST));

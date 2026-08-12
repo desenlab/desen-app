@@ -931,6 +931,11 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 139_396,
       sha256: "89ff5dc4f35036164dd33f1fcf65220bd086ce02ff04e9068078cbf6713bcb48",
     }),
+    Object.freeze({
+      task: "M07-T11",
+      bytes: 139_704,
+      sha256: "a61af18578594c589be8ae07ee244fed05c21c2f865f91a53f3ef48f4daf44bd",
+    }),
   ]),
   [BUNDLE_PUBLICATION_ROOT_TEST]: Object.freeze([
     Object.freeze({
@@ -983,13 +988,18 @@ const APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY = Object.freeze({
       bytes: 82_563,
       sha256: "4b1eb8e40281c0e12d94786042e34c85ec81737d07836b2e964fa9dc20eae185",
     }),
+    Object.freeze({
+      task: "M07-T11",
+      bytes: 87_397,
+      sha256: "26df77e97181faf11c98ca352cb83ee2b8f2f54cf2e07abc2d0a76df9d1eb813",
+    }),
   ]),
 });
 const APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS = Object.freeze({
   [BUNDLE_PUBLICATION_PROOF_LIBRARY]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][9],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_PROOF_LIBRARY][10],
   [BUNDLE_PUBLICATION_ROOT_TEST]:
-    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][9],
+    APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY[BUNDLE_PUBLICATION_ROOT_TEST][10],
 });
 const APPROVED_CURRENT_T10_SUCCESSOR_PATHS = Object.freeze([
   OFFICIAL_GOLDEN_PROOF_LIBRARY,
@@ -1038,6 +1048,8 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
   "bytes: 72_643",
   "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
+  "bytes: 72_952",
+  "a0664730afda307e7f513acecba764a2b7c93f4878fa27dbdebf7b20a6cadc70",
   "bytes: 17_767",
   "ad3cfb227f61ffcbb9ece035b4a04d2d1f5b7b6c54c19f72cb61431e5e82e4af",
   "9b9d9efbd7135668bdf7431925cac8e15e3b37bbf65dfd174de4fdd63e01adea",
@@ -1048,6 +1060,8 @@ const REQUIRED_CURRENT_T09_PROOF_MARKERS = Object.freeze([
   "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
   "bytes: 29_586",
   "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
+  "bytes: 40_529",
+  "f0282eecd5fa844851fe533eb77122384c61ab58a639d7281aa0edceb2751191",
 ]);
 const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   'test("[compatibility] detects tamper in each externally anchored T02 through T09 reader"',
@@ -1062,13 +1076,18 @@ const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   "M07_T09_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
   "M07_T10_EXECUTION_PREFLIGHT_PROOF_ROLLBACK_PATCH",
   "M07_T10_EXECUTION_PREFLIGHT_ROOT_TEST_ROLLBACK_PATCH",
+  "function reconstructM07T10ExecutionPreflightProof(currentBytes)",
+  "function reconstructM07T10ExecutionPreflightRootTest(currentBytes)",
+  "function replaceExactOnce(source, pattern, replacement)",
   "function applyExactRollbackPatch(currentBytes, encodedPatch)",
   'const patchText = brotliDecompressSync(Buffer.from(encodedPatch, "base64")).toString("utf8");',
   "assert.equal(currentLines[currentIndex], content);",
   "assert.equal(currentCount, expectedCurrentCount);",
   "assert.equal(rollbackCount, expectedRollbackCount);",
   "9d1b048513ac4cc0170dae2cc61c5e0befd3ed5c0d4c764e0f5f0199a6a39fea",
-  "reviewedCurrentBytes.byteLength, 72_643",
+  "reviewedCurrentBytes.byteLength, 72_952",
+  "a0664730afda307e7f513acecba764a2b7c93f4878fa27dbdebf7b20a6cadc70",
+  "reconstructed.byteLength, 72_643",
   "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
   "predecessorM07T09Bytes.byteLength, 72_334",
   "trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T09Bytes }",
@@ -1076,8 +1095,10 @@ const REQUIRED_CURRENT_T09_TEST_MARKERS = Object.freeze([
   "b4d55e0da2a2992bcc311254bfc47c2c69287f9e049ed8e84bb9b50c8886d2a4",
   "trackedFileBytes: { [reviewedCurrentPath]: predecessorM07T08Bytes }",
   "5e0e7c2d7362f7a83996ef953ac45c0e4f249f844cc5b64de48a961df12553b1",
-  "currentBytes.byteLength, 29_586",
+  "reconstructed.byteLength, 29_586",
   "ec40b474e4a424a771acc94952c50546ecea2aefdd07b40da74555dd236d1ac9",
+  "currentBytes.byteLength, 40_529",
+  "f0282eecd5fa844851fe533eb77122384c61ab58a639d7281aa0edceb2751191",
   "predecessorM07T09Bytes.byteLength, 24_873",
   "trackedFileBytes: { [readerPath]: predecessorM07T09Bytes }",
   "predecessorM07T08Bytes.byteLength, 17_767",

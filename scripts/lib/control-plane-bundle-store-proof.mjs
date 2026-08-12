@@ -569,6 +569,107 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     }),
   }),
 });
+const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["scripts/lib/reference-host-web-source-audit-proof.mjs"]
+        .successor,
+    successor: Object.freeze({
+      bytes: 279_237,
+      sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",
+    }),
+  }),
+  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["tests/reference-host-web-source-audit.test.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 93_464,
+      sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",
+    }),
+  }),
+  "scripts/lib/publisher-publish-result-proof.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["scripts/lib/publisher-publish-result-proof.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 60_598,
+      sha256: "5b2178f6b90a8b830c613cf228512e3e2c6fa7b1545cca0abbe343e45ba2b749",
+    }),
+  }),
+  "tests/publisher-publish-result.test.mjs": Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE["tests/publisher-publish-result.test.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 68_032,
+      sha256: "b2964ee7a2dedc285fc5da5050732525ed38c4ff6cdba4acc0f668d4462407d2",
+    }),
+  }),
+  "scripts/lib/publisher-execution-preflight-proof.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["scripts/lib/publisher-execution-preflight-proof.mjs"]
+        .successor,
+    successor: Object.freeze({
+      bytes: 72_952,
+      sha256: "a0664730afda307e7f513acecba764a2b7c93f4878fa27dbdebf7b20a6cadc70",
+    }),
+  }),
+  "tests/publisher-execution-preflight.test.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["tests/publisher-execution-preflight.test.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 40_529,
+      sha256: "f0282eecd5fa844851fe533eb77122384c61ab58a639d7281aa0edceb2751191",
+    }),
+  }),
+  "scripts/lib/publisher-catalog-pinning-proof.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["scripts/lib/publisher-catalog-pinning-proof.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 103_727,
+      sha256: "4371b3d878564e8d34032b1c7f901b3c17e092dbd8f9acfca1b53687a255e6c8",
+    }),
+  }),
+  "tests/publisher-catalog-pinning.test.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["tests/publisher-catalog-pinning.test.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 39_954,
+      sha256: "e442dc376f4787d35941f2676e78f34a859d7eee9a0374449260dd35328b5502",
+    }),
+  }),
+  "scripts/lib/publisher-bundle-publication-proof.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["scripts/lib/publisher-bundle-publication-proof.mjs"]
+        .successor,
+    successor: Object.freeze({
+      bytes: 139_704,
+      sha256: "a61af18578594c589be8ae07ee244fed05c21c2f865f91a53f3ef48f4daf44bd",
+    }),
+  }),
+  "tests/publisher-bundle-publication.test.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["tests/publisher-bundle-publication.test.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 87_397,
+      sha256: "26df77e97181faf11c98ca352cb83ee2b8f2f54cf2e07abc2d0a76df9d1eb813",
+    }),
+  }),
+  "scripts/lib/publisher-invalid-source-matrix-proof.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["scripts/lib/publisher-invalid-source-matrix-proof.mjs"]
+        .successor,
+    successor: Object.freeze({
+      bytes: 172_770,
+      sha256: "1aec8cefc757303b5eeb6a9f5f61241f3b3c5b087ecccba9d3edcb45b1dd64de",
+    }),
+  }),
+  "tests/publisher-invalid-source-matrix.test.mjs": Object.freeze({
+    historical:
+      M07_T10_TRACKED_RECEIPT_BRIDGE["tests/publisher-invalid-source-matrix.test.mjs"].successor,
+    successor: Object.freeze({
+      bytes: 97_713,
+      sha256: "cf5e4ca357b4f6e2aa5c636303e3d6a3b9cd3fcd401d8bce991f33441227644e",
+    }),
+  }),
+});
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS = fileConstants.O_RDONLY | fileConstants.O_NOFOLLOW | fileConstants.O_NONBLOCK;
 const execFileAsync = promisify(execFile);
@@ -2435,6 +2536,8 @@ function collectTraceRows(value, found = []) {
 async function trackedFileReceipts(overrides) {
   let historicalSuccessorState = false;
   let currentSuccessorState = false;
+  let m07T11HistoricalState = false;
+  let m07T11CurrentState = false;
   const receipts = [];
   for (const relativePath of TRACKED_TASK_FILES) {
     const bytes = await authorityBytes(relativePath, overrides);
@@ -2451,8 +2554,28 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T09 = APPROVED_M07_T09_TRACKED_RECEIPTS[relativePath];
     const approvedI07T03 = APPROVED_I07_T03_TRACKED_RECEIPTS[relativePath];
     const m07T10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const m07T11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
     const observedSha256 = sha256(bytes);
-    if (m07T10Bridge !== undefined) {
+    if (m07T11Bridge !== undefined) {
+      const historicalMatch =
+        bytes.byteLength === m07T11Bridge.historical.bytes &&
+        observedSha256 === m07T11Bridge.historical.sha256;
+      const successorMatch =
+        bytes.byteLength === m07T11Bridge.successor.bytes &&
+        observedSha256 === m07T11Bridge.successor.sha256;
+      if (!historicalMatch && !successorMatch) {
+        fail("REGISTRATION_DRIFT", "A reviewed M07-T11 tracked successor receipt drifted.", {
+          path: relativePath,
+        });
+      }
+      if (historicalMatch && !successorMatch) m07T11HistoricalState = true;
+      if (successorMatch && !historicalMatch) m07T11CurrentState = true;
+      // Either reviewed T11 generation is already on the M07-T10 successor side of the older
+      // bridge. Preserve that older coherence signal even after this path gains a newer bridge.
+      if (m07T10Bridge !== undefined && (historicalMatch || successorMatch)) {
+        currentSuccessorState = true;
+      }
+    } else if (m07T10Bridge !== undefined) {
       const historicalMatch =
         bytes.byteLength === m07T10Bridge.historical.bytes &&
         observedSha256 === m07T10Bridge.historical.sha256;
@@ -2521,6 +2644,9 @@ async function trackedFileReceipts(overrides) {
   }
   if (historicalSuccessorState && currentSuccessorState) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
+  }
+  if (m07T11HistoricalState && m07T11CurrentState) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
   }
   return Object.freeze(receipts);
 }

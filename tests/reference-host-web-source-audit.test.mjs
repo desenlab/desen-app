@@ -48,6 +48,7 @@ const SOURCE_ROOT = "apps/reference-host-web/src";
 const ROOT_SOURCE = `${SOURCE_ROOT}/root.tsx`;
 const APPLICATION_SOURCE = `${SOURCE_ROOT}/application.tsx`;
 const BROWSER_PROFILE_SOURCE = `${SOURCE_ROOT}/browser-profile.ts`;
+const CHANNEL_SOURCE = `${SOURCE_ROOT}/channel-delivery.ts`;
 const OFFICIAL_SOURCE = `${SOURCE_ROOT}/official-sign-in.ts`;
 const MAIN_SOURCE = `${SOURCE_ROOT}/main.tsx`;
 const VALIDATOR_SUCCESSOR_SOURCE_PATHS = Object.freeze([
@@ -225,14 +226,15 @@ test("builds a deterministic real Vite graph and semantic TypeScript inventory",
   assert.equal(first.artifact.claim.g05Closed, true);
   assert.equal(first.artifact.claim.p07Status, "PARTIAL");
   assert.equal(first.artifact.sourceAudit.compilerAuthority, "TypeScript Program and TypeChecker");
-  assert.equal(first.artifact.sourceAudit.sourceFiles, 12);
+  assert.equal(first.artifact.sourceAudit.sourceFiles, 13);
+  assert.equal(first.artifact.sourceAudit.publicRuntimeReactRenderPreflightCalls, 1);
   assert.equal(first.artifact.sourceAudit.jsxElements, 18);
   assert.equal(first.artifact.runtimeResolution.tool, "vite@8.1.5");
   assert.equal(first.artifact.runtimeResolution.observer, "moduleParsed");
   assert.equal(first.artifact.runtimeResolution.independentBuilds, 2);
   assert.equal(first.artifact.runtimeResolution.deterministic, true);
   assert.equal(first.artifact.runtimeResolution.dynamicEdges, 0);
-  assert.equal(first.artifact.runtimeResolution.backingFiles, 102);
+  assert.equal(first.artifact.runtimeResolution.backingFiles, 103);
   assert.equal(first.artifact.runtimeResolution.backingModulesStableAcrossSecondObservation, true);
   assert.equal(first.artifact.runtimeResolution.backingSnapshotObservations, 3);
   assert.equal(
@@ -241,7 +243,7 @@ test("builds a deterministic real Vite graph and semantic TypeScript inventory",
   );
   assert.equal(first.artifact.buildEnvelope.htmlParser, "jsdom@29.1.1 exact canonical AST");
   assert.deepEqual(first.artifact.evidence.snapshotConsistency, {
-    checkedPaths: 32,
+    checkedPaths: 33,
     prePostIdentityMatched: true,
     sourceAndEnvelopeStableAcrossAudit: true,
   });
@@ -260,19 +262,12 @@ test("runs the full current host audit while comparing every enduring M05 input"
     result.historicalArtifactSha256,
     "cb54702266260a6e139950808b520bc139d35cebbde03ea93a187d2340a17e89",
   );
-  assert.equal(result.trackedFiles, 24);
+  assert.equal(result.trackedFiles, 25);
   assert.equal(result.comparedTrackedFiles, 18);
   assert.deepEqual(result.admittedSuccessor, {
-    task: "M06-T05",
-    sourceFiles: VALIDATOR_SUCCESSOR_SOURCE_PATHS,
-    modules: [
-      "packages/validator/dist/binding-contract-validation.js",
-      "packages/validator/dist/execution-contract-validation.js",
-      "packages/validator/dist/index.js",
-      "packages/validator/dist/interaction-contract-validation.js",
-      "packages/validator/dist/semantic-validation.js",
-      "packages/validator/dist/structural-validation.js",
-    ],
+    task: "M07-T11",
+    channelSource: CHANNEL_SOURCE,
+    predecessor: "M06-T05",
   });
   assert.deepEqual(result.successorSources, {
     result: "PASS",
@@ -318,12 +313,13 @@ test("runs the full current host audit while comparing every enduring M05 input"
     "scripts/verify-reference-host-web-source-audit.mjs",
     "tests/reference-host-web-source-audit.test.mjs",
   ]);
-  assert.equal(result.sourceFiles, 12);
-  assert.equal(result.graphModules, 103);
+  assert.equal(result.sourceFiles, 13);
+  assert.equal(result.graphModules, 104);
   assert.equal(result.graphDynamicEdges, 0);
   assert.equal(result.packageBoundaryViolations, 0);
   assert.equal(result.coordination.result, "PASS");
   assert.equal(result.coordination.admittedControlPlaneCoordination, "M07-T10");
+  assert.equal(result.coordination.admittedReferenceHostCoordination, "M07-T11");
   assert.equal(result.coordination.normalizedControlPlaneScriptKeys, true);
   assert.equal(result.coordination.normalizedControlPlanePipelineSegments, true);
   assert.equal(result.coordination.normalizedControlPlaneLockfileImporter, true);
@@ -378,6 +374,32 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
     () => verifyPolicy(hostSourceDrift),
     hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
   );
+
+  const missingChannel = structuredClone(current);
+  missingChannel.evidence.trackedFiles = missingChannel.evidence.trackedFiles.filter(
+    ({ path: relativePath }) => relativePath !== CHANNEL_SOURCE,
+  );
+  const reorderedChannel = structuredClone(current);
+  const channelIndex = reorderedChannel.evidence.trackedFiles.findIndex(
+    ({ path: relativePath }) => relativePath === CHANNEL_SOURCE,
+  );
+  const [channelRecord] = reorderedChannel.evidence.trackedFiles.splice(channelIndex, 1);
+  reorderedChannel.evidence.trackedFiles.push(channelRecord);
+  const preflightCountDrift = structuredClone(current);
+  preflightCountDrift.sourceAudit.publicRuntimeReactRenderPreflightCalls = 0;
+  const executableSurfacePoison = structuredClone(current);
+  executableSurfacePoison.sourceAudit.executableAuthoritySurface.sha256 = `sha256:${"9".repeat(64)}`;
+  for (const candidate of [
+    missingChannel,
+    reorderedChannel,
+    preflightCountDrift,
+    executableSurfacePoison,
+  ]) {
+    assert.throws(
+      () => verifyPolicy(candidate),
+      hasEvidenceCode("REFERENCE_HOST_SOURCE_AUDIT_CURRENT_DRIFT"),
+    );
+  }
 
   const dependencyBoundaryReceiptDrift = structuredClone(current);
   dependencyBoundaryReceiptDrift.evidence.trackedFiles.find(
@@ -441,15 +463,18 @@ test("current-evidence policy excludes only coordination bytes and rejects all e
   );
 });
 
-test("admits only the source-pinned M06-T05 Validator runtime successor", async () => {
+test("admits only the source-pinned M06-T05 Validator runtime successor and exact M07-T11 host successor", async () => {
   const historical = (await buildReferenceHostWebSourceAuditEvidence()).artifact;
   const current = (await buildCurrentReferenceHostWebSourceAuditEvidence()).artifact;
   const successorSourceBytes = await validatorSuccessorSourceBytes();
   const verifyPolicy = (candidate, sources = successorSourceBytes) =>
     verifyReferenceHostWebCurrentEvidencePolicy(historical, candidate, sources);
   const policy = verifyPolicy(current);
-  assert.equal(policy.admittedSuccessor.task, "M06-T05");
-  assert.equal(policy.admittedSuccessor.modules.length, 6);
+  assert.deepEqual(policy.admittedSuccessor, {
+    task: "M07-T11",
+    channelSource: CHANNEL_SOURCE,
+    predecessor: "M06-T05",
+  });
   assert.equal(policy.successorSources.result, "PASS");
   assert.equal(
     verifyReferenceHostWebValidatorSuccessorSources(successorSourceBytes).result,
@@ -748,14 +773,14 @@ test("reviewed Publisher and M07-T06 coordination preserve root, package, and lo
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.check = manifest.scripts.check.replace(
-      "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races && pnpm lint",
-      "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-runtime-fault-injection && pnpm lint",
+      "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption && pnpm lint",
+      "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races && pnpm lint",
     );
   });
   await rejectRootManifest((manifest) => {
     manifest.scripts.test = manifest.scripts.test.replace(
-      "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-runtime-transition-races && turbo run test",
-      "pnpm test:control-plane-runtime-fault-injection && pnpm test:control-plane-decoy && pnpm test:control-plane-runtime-transition-races && turbo run test",
+      "pnpm test:control-plane-runtime-transition-races && pnpm test:reference-host-web-channel-consumption && turbo run test",
+      "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-decoy && pnpm test:reference-host-web-channel-consumption && turbo run test",
     );
   });
   await rejectControlPlanePackage((manifest) => {
@@ -1298,12 +1323,13 @@ test("reviewed Publisher and M07-T06 coordination preserve root, package, and lo
 
 test("pins exact JSX ownership and leaves every other production module JSX-free", async () => {
   const result = await inspectReferenceHostWebSourceAudit();
-  assert.equal(result.sourceFiles, 12);
-  assert.equal(result.executableSourceFiles, 11);
+  assert.equal(result.sourceFiles, 13);
+  assert.equal(result.executableSourceFiles, 12);
   assert.equal(result.jsxElements, 18);
   assert.deepEqual(Object.keys(result.jsxByFile).sort(), [
     `${SOURCE_ROOT}/application.tsx`,
     `${SOURCE_ROOT}/browser-profile.ts`,
+    CHANNEL_SOURCE,
     `${SOURCE_ROOT}/failure-view.tsx`,
     `${SOURCE_ROOT}/host-ports.ts`,
     `${SOURCE_ROOT}/main.tsx`,
@@ -1382,6 +1408,37 @@ test("rejects createElement JSX-runtime fake-element and plan-shaped escapes", a
     (text) =>
       `${text}\nconst hidden = { capabilityId: "com.example.hidden", component: "Hidden", props: {} };\nvoid hidden;\n`,
     /plan, capability, or Source-node-shaped literal/u,
+  );
+});
+
+test("pins the exact T11 delivery decoder, timeout, and render-preflight call shapes", async () => {
+  await rejectMutation(
+    CHANNEL_SOURCE,
+    (text) =>
+      text.replace(
+        'new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode',
+        'new TextDecoder("utf-8", { fatal: true }).decode',
+      ),
+    /DOM method outside the exact infrastructure allowlist/u,
+  );
+  await rejectMutation(
+    CHANNEL_SOURCE,
+    (text) => text.replace("state.input.browser.setTimeout", "state.input.browser.setInterval"),
+    /DOM method outside the exact infrastructure allowlist/u,
+  );
+  await rejectMutation(
+    OFFICIAL_SOURCE,
+    (text) =>
+      text
+        .replace(
+          "createRuntimeReactAdapterRegistry, renderRuntimeReactSurface",
+          "createRuntimeReactAdapterRegistry, renderRuntimeReactSurface as renderDeliveredSurface",
+        )
+        .replace(
+          "const preflight = renderRuntimeReactSurface(",
+          "const preflight = renderDeliveredSurface(",
+        ),
+    /render path/u,
   );
 });
 
@@ -1465,7 +1522,7 @@ test("rejects aliased factories re-exports and sensitive runtime-call indirectio
           "const registry = createRuntimeReactAdapterRegistry(",
           "const registry = hiddenRegistry(",
         ),
-    /public reference-adapter registry path/u,
+    /public reference-adapter registry(?: path|\.)/u,
   );
   await rejectMutation(
     OFFICIAL_SOURCE,
@@ -1513,7 +1570,7 @@ test("authenticates registry Bundle and Catalog identifiers to exact import symb
         'import officialDerivedSignInBundle from "../../../examples/sign-in/official-derived.bundle.desen.json";',
         'import "../../../examples/sign-in/official-derived.bundle.desen.json";\nconst officialDerivedSignInBundle = Object.freeze({});',
       ),
-    /controlled Bundle and Catalog/u,
+    /controlled Bundle and Catalog|closed executable call\/property-write authority surface/u,
   );
   await rejectMutation(
     OFFICIAL_SOURCE,

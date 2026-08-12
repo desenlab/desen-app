@@ -789,6 +789,32 @@ const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
     }),
   }),
 });
+// M07-T11 appends one reference-host proof unit to the root and modular-CI registration
+// authorities. Admit only that exact reviewed generation while projecting the immutable T02
+// receipts into the historical artifact.
+const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
+  [ROOT_PACKAGE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
+    successor: Object.freeze({
+      bytes: 68_073,
+      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
+    }),
+  }),
+  [CI_SOURCE]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
+    successor: Object.freeze({
+      bytes: 48_440,
+      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
+    }),
+  }),
+  [CI_INVENTORY]: Object.freeze({
+    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
+    successor: Object.freeze({
+      bytes: 46_705,
+      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
+    }),
+  }),
+});
 const HISTORICAL_INDEX_DISTRIBUTION_RECEIPTS = Object.freeze({
   "index.d.ts": Object.freeze({
     bytes: 899,
@@ -1419,6 +1445,7 @@ async function trackedFileReceipts(overrides) {
   ];
   let historicalSuccessorState = false;
   let currentSuccessorState = false;
+  const m07T11Generations = [];
   const receipts = [];
   for (const relativePath of paths) {
     const bytes = await authorityBytes(relativePath, overrides);
@@ -1437,6 +1464,7 @@ async function trackedFileReceipts(overrides) {
     const approvedM07T08 = APPROVED_M07_T08_TRACKED_RECEIPTS[relativePath];
     const approvedM07T09 = APPROVED_M07_T09_TRACKED_RECEIPTS[relativePath];
     const m07T10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
+    const m07T11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
     const observedSha256 = sha256(bytes);
     if (m07T10Bridge !== undefined) {
       const historicalMatch =
@@ -1445,13 +1473,20 @@ async function trackedFileReceipts(overrides) {
       const successorMatch =
         bytes.byteLength === m07T10Bridge.successor.bytes &&
         observedSha256 === m07T10Bridge.successor.sha256;
-      if (!historicalMatch && !successorMatch) {
+      const t11SuccessorMatch =
+        m07T11Bridge !== undefined &&
+        bytes.byteLength === m07T11Bridge.successor.bytes &&
+        observedSha256 === m07T11Bridge.successor.sha256;
+      if (!historicalMatch && !successorMatch && !t11SuccessorMatch) {
         fail("REGISTRATION_DRIFT", "A reviewed M07-T10 tracked successor receipt drifted.", {
           path: relativePath,
         });
       }
       if (historicalMatch) historicalSuccessorState = true;
-      if (successorMatch) currentSuccessorState = true;
+      if (successorMatch || t11SuccessorMatch) currentSuccessorState = true;
+      if (m07T11Bridge !== undefined) {
+        m07T11Generations.push(t11SuccessorMatch ? "successor" : "historical");
+      }
     } else if (
       (approvedM07T03 !== undefined ||
         approvedM07T04 !== undefined ||
@@ -1499,6 +1534,9 @@ async function trackedFileReceipts(overrides) {
   }
   if (historicalSuccessorState && currentSuccessorState) {
     fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
+  }
+  if (m07T11Generations.includes("historical") && m07T11Generations.includes("successor")) {
+    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
   }
   return Object.freeze(receipts);
 }

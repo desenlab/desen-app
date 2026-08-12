@@ -1,6 +1,15 @@
 import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
-import { lstat, mkdtemp, readFile, readdir, readlink, realpath, rm } from "node:fs/promises";
+import { createHash, randomBytes } from "node:crypto";
+import {
+  lstat,
+  mkdtemp,
+  readFile,
+  readdir,
+  readlink,
+  realpath,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -24,6 +33,17 @@ const {
 const DEFAULT_MAX_FILES = 50_000;
 const DEFAULT_MAX_BYTES = 536_870_912;
 const DEFAULT_GIT_OUTPUT_BYTES = 8_388_608;
+const LOOPBACK_CHILD_LISTENER_STEP_ID = "verify-reference-host-web-channel-consumption";
+const LOOPBACK_CHILD_LISTENER_AUTHORITY_FILE = ".desen-ci-loopback-child-listener-authority.json";
+const LOOPBACK_CHILD_LISTENER_AUTHORITY_PROFILE = "desen.ci.loopback-child-listener-authority.v1";
+const LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS = Object.freeze({
+  authorityPath: "DESEN_CI_LOOPBACK_CHILD_LISTENER_AUTHORITY_PATH",
+  grant: "DESEN_CI_LOOPBACK_CHILD_LISTENER_GRANT",
+  token: "DESEN_CI_LOOPBACK_CHILD_LISTENER_TOKEN",
+});
+const LOOPBACK_CHILD_LISTENER_RESERVED_ENVIRONMENT_KEYS = Object.freeze(
+  Object.values(LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS),
+);
 
 /** Stable execution classes owned by the I07-02 shared-state authority. */
 export const EXECUTION_CLASSES = Object.freeze({
@@ -108,6 +128,7 @@ export const PROOF_IDS = Object.freeze([
   "control-plane-runtime-recovery",
   "control-plane-runtime-fault-injection",
   "control-plane-runtime-transition-races",
+  "reference-host-web-channel-consumption",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -140,6 +161,12 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "control-plane-runtime-recovery",
   "control-plane-runtime-fault-injection",
   "control-plane-runtime-transition-races",
+  "reference-host-web-channel-consumption",
+]);
+
+/** Sole verifier step eligible to delegate an authenticated loopback port-zero child runtime. */
+export const LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS = Object.freeze([
+  LOOPBACK_CHILD_LISTENER_STEP_ID,
 ]);
 
 /** Exact proof ids whose verifier loads one reviewed native addon. */
@@ -150,6 +177,7 @@ export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "control-plane-runtime-recovery",
   "control-plane-runtime-fault-injection",
   "control-plane-runtime-transition-races",
+  "reference-host-web-channel-consumption",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -229,6 +257,8 @@ export const BUILD_OUTPUT_ROOTS = Object.freeze([
   "apps/desen-run/.turbo",
   "apps/reference-host-web/dist",
   "apps/reference-host-web/.turbo",
+  "apps/reference-host-web-server/dist",
+  "apps/reference-host-web-server/.turbo",
   "packages/catalog-sdk/dist",
   "packages/catalog-sdk/.turbo",
   "packages/desen/dist",
@@ -274,6 +304,7 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE: "CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE",
   CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE: "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
   CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE: "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE",
+  REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE: "REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -288,6 +319,8 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE,
   "control-plane-runtime-transition-races":
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE,
+  "reference-host-web-channel-consumption":
+    NATIVE_ADDON_POLICIES.REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
@@ -474,8 +507,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 148) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 148 steps.", {
+if (METADATA_BY_STEP_ID.size !== 150) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 150 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
@@ -917,7 +950,57 @@ function safeEnvironment(baseEnvironment) {
       "Proof isolation rejects inherited NODE_OPTIONS authority.",
     );
   }
+  for (const key of LOOPBACK_CHILD_LISTENER_RESERVED_ENVIRONMENT_KEYS) {
+    Reflect.deleteProperty(environment, key);
+  }
   return environment;
+}
+
+async function createLoopbackChildListenerAuthority(metadata, temp, workspace) {
+  if (!LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS.includes(metadata.stepId)) return undefined;
+  if (
+    metadata.stepId !== LOOPBACK_CHILD_LISTENER_STEP_ID ||
+    metadata.childProcessPolicy !== CHILD_PROCESS_POLICIES.VERIFIER_RUNTIME_PROBE ||
+    metadata.tempPolicy !== TEMP_POLICIES.RUNNER_SCOPED_OS
+  ) {
+    fail(
+      "SHARED_STATE_LISTENER_AUTHORITY_INVALID",
+      "The loopback child-listener authority requires the exact isolated verifier policy.",
+      { stepId: metadata.stepId },
+    );
+  }
+
+  const token = randomBytes(32).toString("hex");
+  const authorityPath = path.join(temp.path, LOOPBACK_CHILD_LISTENER_AUTHORITY_FILE);
+  const authority = Object.freeze({
+    profile: LOOPBACK_CHILD_LISTENER_AUTHORITY_PROFILE,
+    stepId: LOOPBACK_CHILD_LISTENER_STEP_ID,
+    runtime: "VITEST_CHILD_PROCESS_TREE",
+    transport: "TCP",
+    family: "IPv4",
+    address: "127.0.0.1",
+    port: 0,
+    workspaceRoot: workspace.path,
+    tokenSha256: createHash("sha256").update(token).digest("hex"),
+  });
+  const bytes = Buffer.from(`${JSON.stringify(authority)}\n`);
+  await writeFile(authorityPath, bytes, { flag: "wx", mode: 0o600 });
+  const entry = await lstat(authorityPath, { bigint: true });
+  if (
+    !entry.isFile() ||
+    entry.isSymbolicLink() ||
+    entry.nlink !== 1n ||
+    Number(entry.mode & 0o777n) !== 0o600 ||
+    entry.size !== BigInt(bytes.byteLength) ||
+    (await realpath(authorityPath)) !== authorityPath
+  ) {
+    fail(
+      "SHARED_STATE_LISTENER_AUTHORITY_INVALID",
+      "The loopback child-listener authority file could not be authenticated.",
+      { stepId: metadata.stepId },
+    );
+  }
+  return Object.freeze({ authorityPath, token });
 }
 
 /**
@@ -938,6 +1021,7 @@ export async function createProofStepIsolationContext({
 }) {
   const metadata = classifyWorkloadStateMetadata(workload);
   proofWorkloadKind(metadata.stepId);
+  const environment = safeEnvironment(baseEnvironment);
   const workspace = await canonicalDirectory(workspaceRoot, "Workspace root");
   const filesystemCompatibilityPath =
     metadata.filesystemCompatibilityPolicy === FILESYSTEM_COMPATIBILITY_POLICIES.NONE
@@ -946,11 +1030,27 @@ export async function createProofStepIsolationContext({
   const tempBase = await canonicalDirectory(tempBaseDirectory, "Temp base directory");
   const createdTemp = await mkdtemp(path.join(tempBase.path, `desen-ci-${metadata.stepId}-`));
   const temp = await canonicalDirectory(createdTemp, "Runner-owned step temp root");
-  const environment = safeEnvironment(baseEnvironment);
   environment.TMPDIR = temp.path;
   environment.TMP = temp.path;
   environment.TEMP = temp.path;
   environment.DESEN_CI_STEP_ID = metadata.stepId;
+  let loopbackChildListenerAuthority;
+  try {
+    loopbackChildListenerAuthority = await createLoopbackChildListenerAuthority(
+      metadata,
+      temp,
+      workspace,
+    );
+  } catch (error) {
+    await rm(temp.path, { recursive: true, force: false }).catch(() => undefined);
+    throw error;
+  }
+  if (loopbackChildListenerAuthority !== undefined) {
+    environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.authorityPath] =
+      loopbackChildListenerAuthority.authorityPath;
+    environment[LOOPBACK_CHILD_LISTENER_ENVIRONMENT_KEYS.token] =
+      loopbackChildListenerAuthority.token;
+  }
 
   const nodeOptions = [
     "--permission",

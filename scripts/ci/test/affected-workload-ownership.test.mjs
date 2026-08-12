@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 140,
+  PROOF_UNIT: 142,
   CI_POLICY: 42,
-  DEPENDENCY_POLICY: 30,
-  FROZEN_INPUT: 113,
-  PACKAGE_OR_APPLICATION: 377,
-  SHARED_PROOF_INFRASTRUCTURE: 169,
-  PROJECT_DOCUMENTATION: 105,
+  DEPENDENCY_POLICY: 31,
+  FROZEN_INPUT: 114,
+  PACKAGE_OR_APPLICATION: 393,
+  SHARED_PROOF_INFRASTRUCTURE: 179,
+  PROJECT_DOCUMENTATION: 107,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 987 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1019 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 987 reviewed tracked paths", async () 
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 987);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1019);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,16 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 140);
+  assert.equal(proofEntries.length, 142);
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-reference-host-web-channel-consumption.mjs",
+      "tests/reference-host-web-channel-consumption.test.mjs",
+    ],
+  );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
     const verifier = nodeById.get(entry.verifierNodeId);

@@ -89,6 +89,19 @@ importers:
 
   apps/desen-run: {}
 
+  apps/reference-host-web-server:
+    dependencies:
+      '@desen/control-plane-api':
+        specifier: workspace:*
+        version: link:../control-plane-api
+    devDependencies:
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
+
   apps/reference-host-web:
     dependencies:
       '@desen/reference-catalog-web':

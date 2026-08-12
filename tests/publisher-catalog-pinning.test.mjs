@@ -127,24 +127,58 @@ function appendValidCiSuccessor(source) {
   return withPlan;
 }
 
+function appendBeforeExactTail(script, exactTail, successorCommand) {
+  assert.equal(typeof script, "string");
+  assert.ok(Array.isArray(exactTail));
+  assert.ok(exactTail.length > 0);
+  assert.ok(
+    exactTail.every(
+      (command) =>
+        typeof command === "string" &&
+        command.length > 0 &&
+        command.trim() === command &&
+        !command.includes(" && "),
+    ),
+  );
+  assert.equal(new Set(exactTail).size, exactTail.length);
+  assert.equal(typeof successorCommand, "string");
+  assert.ok(
+    successorCommand.length > 0 &&
+      successorCommand.trim() === successorCommand &&
+      !successorCommand.includes(" && "),
+  );
+  const commands = script.split(" && ");
+  assert.ok(commands.length > 1);
+  assert.ok(commands.every((command) => command.length > 0 && command.trim() === command));
+  assert.deepEqual(commands.slice(-exactTail.length), exactTail);
+  assert.equal(
+    commands.filter((_, index) =>
+      exactTail.every((command, tailIndex) => commands[index + tailIndex] === command),
+    ).length,
+    1,
+  );
+  assert.equal(commands.includes(successorCommand), false);
+  assert.equal(exactTail.includes(successorCommand), false);
+  commands.splice(commands.length - exactTail.length, 0, successorCommand);
+  return commands.join(" && ");
+}
+
 function appendValidRootSuccessor(source) {
   const manifest = JSON.parse(source);
-  const originalCheck = manifest.scripts.check;
-  const originalTest = manifest.scripts.test;
   manifest.scripts["verify:control-plane-append-only-probe"] =
     "node scripts/verify-control-plane-append-only-probe.mjs";
   manifest.scripts["test:control-plane-append-only-probe"] =
     "node --test tests/control-plane-append-only-probe.test.mjs";
-  manifest.scripts.check = manifest.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
-    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-append-only-probe && pnpm lint",
+  manifest.scripts.check = appendBeforeExactTail(
+    manifest.scripts.check,
+    ["pnpm lint", "pnpm typecheck", "pnpm build", "pnpm test", "pnpm boundaries"],
+    "pnpm verify:control-plane-append-only-probe",
   );
-  manifest.scripts.test = manifest.scripts.test.replace(
-    "pnpm test:control-plane-runtime-transition-races && turbo run test",
-    "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-append-only-probe && turbo run test",
+  manifest.scripts.test = appendBeforeExactTail(
+    manifest.scripts.test,
+    ["turbo run test"],
+    "pnpm test:control-plane-append-only-probe",
   );
-  assert.notEqual(manifest.scripts.check, originalCheck);
-  assert.notEqual(manifest.scripts.test, originalTest);
   return JSON.stringify(manifest);
 }
 
@@ -888,7 +922,7 @@ test("rejects non-UTF-8 CI source bytes before executable observation", async ()
   );
 });
 
-test("anchors the current M06-T02 historical compatibility reader in successor evidence", async () => {
+test("anchors the current M06-T02 reader and exact root successor in evidence", async () => {
   const built = await buildPublisherCatalogPinningEvidence();
   const relativePath = "scripts/lib/publisher-catalog-resolution-proof.mjs";
   const current = await readFile(new URL(`../${relativePath}`, import.meta.url));
@@ -901,6 +935,17 @@ test("anchors the current M06-T02 historical compatibility reader in successor e
       trackedFileBytes: { [relativePath]: tampered },
     }),
     hasCode("PUBLISHER_CATALOG_PINNING_ARTIFACT_DRIFT"),
+  );
+
+  const rootRelativePath = "tests/publisher-catalog-pinning.test.mjs";
+  const currentRoot = await readFile(new URL(`../${rootRelativePath}`, import.meta.url));
+  await assert.rejects(
+    buildPublisherCatalogPinningEvidence({
+      trackedFileBytes: {
+        [rootRelativePath]: Buffer.concat([currentRoot, Buffer.from("// unreviewed successor\n")]),
+      },
+    }),
+    hasCode("PUBLISHER_CATALOG_PINNING_COMPATIBILITY_DRIFT"),
   );
 });
 

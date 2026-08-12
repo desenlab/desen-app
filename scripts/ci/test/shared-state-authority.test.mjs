@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
+  chmod,
+  link,
   lstat,
   mkdir,
   mkdtemp,
@@ -18,6 +21,7 @@ import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-inventory.mjs";
+import { createReferenceHostWebChannelConsumptionRuntimeEnvironment } from "../../lib/reference-host-web-channel-consumption-proof.mjs";
 import {
   BUILD_OUTPUT_ROOTS,
   CHILD_PROCESS_VERIFIER_PROOF_IDS,
@@ -28,6 +32,7 @@ import {
   FILESYSTEM_COMPATIBILITY_WORKSPACE_SYMLINK_RULES,
   NATIVE_ADDON_PROOF_IDS,
   NATIVE_ADDON_ROOT_STEP_IDS,
+  LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS,
   OS_TEMP_ROOT_PROOF_IDS,
   PROOF_IDS,
   READ_ONLY_ROOT_PROOF_IDS,
@@ -51,6 +56,11 @@ const COMPATIBILITY_PRELOAD_PATH = path.join(
   REPOSITORY_ROOT,
   "scripts/ci/proof-filesystem-compatibility.cjs",
 );
+const LISTENER_GUARD_PATH = path.join(REPOSITORY_ROOT, "scripts/ci/no-proof-listener.cjs");
+const VITEST_CLI_PATH = path.join(REPOSITORY_ROOT, "node_modules/vitest/vitest.mjs");
+const LOOPBACK_AUTHORITY_PATH_KEY = "DESEN_CI_LOOPBACK_CHILD_LISTENER_AUTHORITY_PATH";
+const LOOPBACK_GRANT_KEY = "DESEN_CI_LOOPBACK_CHILD_LISTENER_GRANT";
+const LOOPBACK_TOKEN_KEY = "DESEN_CI_LOOPBACK_CHILD_LISTENER_TOKEN";
 
 async function temporaryDirectory(prefix) {
   return await mkdtemp(path.join(tmpdir(), prefix));
@@ -95,30 +105,30 @@ const ALL_STEP_IDS = Object.freeze([
   "boundary-fixtures",
 ]);
 
-test("owns exactly 148 steps across the seven reviewed execution classes", () => {
+test("owns exactly 150 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 148);
-  assert.equal(new Set(ALL_STEP_IDS).size, 148);
+  assert.equal(ALL_STEP_IDS.length, 150);
+  assert.equal(new Set(ALL_STEP_IDS).size, 150);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 1,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 69,
-    PROOF_OS_TEMP_ISOLATED: 60,
+    PROOF_OS_TEMP_ISOLATED: 62,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
 });
 
 test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
-  assert.equal(PROOF_IDS.length, 70);
-  assert.equal(new Set(PROOF_IDS).size, 70);
+  assert.equal(PROOF_IDS.length, 71);
+  assert.equal(new Set(PROOF_IDS).size, 71);
   const proofPairs = PROOF_IDS.map((proofId) => classifyProofPairState(proofId));
-  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 59);
+  assert.equal(proofPairs.filter(({ barrier }) => !barrier).length, 60);
   assert.equal(proofPairs.filter(({ barrier }) => barrier).length, 11);
   assert.deepEqual(READ_ONLY_ROOT_PROOF_IDS, [
     "protocol-canonicalization",
@@ -133,7 +143,7 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "runtime-core-state-navigation-actions",
   ]);
   assert.deepEqual(WORKSPACE_TEMP_ROOT_PROOF_IDS, ["reference-host-web-source-audit"]);
-  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 59);
+  assert.equal(OS_TEMP_ROOT_PROOF_IDS.length, 60);
   assert.deepEqual(classifyProofPairState("control-plane-reference-preflight"), {
     proofId: "control-plane-reference-preflight",
     barrier: false,
@@ -326,6 +336,38 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       barrier: false,
     },
   });
+  assert.deepEqual(classifyProofPairState("reference-host-web-channel-consumption"), {
+    proofId: "reference-host-web-channel-consumption",
+    barrier: false,
+    verifier: {
+      schemaVersion: 2,
+      stepId: "verify-reference-host-web-channel-consumption",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "verify-reference-host-web-channel-consumption",
+      ports: [],
+      childProcessPolicy: "VERIFIER_RUNTIME_PROBE",
+      nativeAddonPolicy: "REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
+    rootTest: {
+      schemaVersion: 2,
+      stepId: "test-reference-host-web-channel-consumption",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
+      workspaceReads: ["."],
+      workspaceWrites: [],
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "test-reference-host-web-channel-consumption",
+      ports: [],
+      childProcessPolicy: "NODE_TEST_HARNESS",
+      nativeAddonPolicy: "NONE",
+      filesystemCompatibilityPolicy: "NONE",
+      barrier: false,
+    },
+  });
   assert.deepEqual(CHILD_PROCESS_VERIFIER_PROOF_IDS, [
     "publisher-catalog-pinning",
     "publisher-bundle-publication",
@@ -338,7 +380,9 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "control-plane-runtime-recovery",
     "control-plane-runtime-fault-injection",
     "control-plane-runtime-transition-races",
+    "reference-host-web-channel-consumption",
   ]);
+  assert.equal(CHILD_PROCESS_VERIFIER_PROOF_IDS.length, 12);
   for (const proofId of CHILD_PROCESS_VERIFIER_PROOF_IDS) {
     assert.deepEqual(classifyWorkloadStateMetadata(`verify-${proofId}`), {
       schemaVersion: 2,
@@ -361,7 +405,9 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
                 ? "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE"
                 : proofId === "control-plane-runtime-transition-races"
                   ? "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE"
-                  : "NONE",
+                  : proofId === "reference-host-web-channel-consumption"
+                    ? "REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE"
+                    : "NONE",
       filesystemCompatibilityPolicy: "NONE",
       barrier: false,
     });
@@ -373,7 +419,9 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "control-plane-runtime-recovery",
     "control-plane-runtime-fault-injection",
     "control-plane-runtime-transition-races",
+    "reference-host-web-channel-consumption",
   ]);
+  assert.equal(NATIVE_ADDON_PROOF_IDS.length, 7);
   assert.deepEqual(NATIVE_ADDON_ROOT_STEP_IDS, [
     "test-publisher-invalid-source-matrix",
     "test-control-plane-local-api",
@@ -381,6 +429,16 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "test-control-plane-runtime-recovery",
     "test-control-plane-runtime-fault-injection",
   ]);
+  assert.equal(
+    new Set([
+      ...NATIVE_ADDON_PROOF_IDS.flatMap((proofId) => [
+        `verify-${proofId}`,
+        ...(proofId === "reference-host-web-source-audit" ? [`test-${proofId}`] : []),
+      ]),
+      ...NATIVE_ADDON_ROOT_STEP_IDS,
+    ]).size,
+    13,
+  );
   assert.equal(
     classifyWorkloadStateMetadata("verify-reference-host-web-source-audit").nativeAddonPolicy,
     "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -435,17 +493,29 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     "NONE",
   );
   assert.equal(
+    classifyWorkloadStateMetadata("verify-reference-host-web-channel-consumption")
+      .nativeAddonPolicy,
+    "REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE",
+  );
+  assert.equal(
+    classifyWorkloadStateMetadata("test-reference-host-web-channel-consumption").nativeAddonPolicy,
+    "NONE",
+  );
+  assert.equal(
     classifyWorkloadStateMetadata("verify-publisher-invalid-source-matrix").nativeAddonPolicy,
     "NONE",
   );
   assert.equal(classifyWorkloadStateMetadata("verify-protocol-snapshot").nativeAddonPolicy, "NONE");
+  assert.deepEqual(LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS, [
+    "verify-reference-host-web-channel-consumption",
+  ]);
   assert.equal(
     new Set([
       ...READ_ONLY_ROOT_PROOF_IDS,
       ...OS_TEMP_ROOT_PROOF_IDS,
       ...WORKSPACE_TEMP_ROOT_PROOF_IDS,
     ]).size,
-    70,
+    71,
   );
 });
 
@@ -652,6 +722,253 @@ test("only exact runtime-probe verifiers receive child-process authority", async
 });
 
 test(
+  "only the exact M07-T11 Vitest child tree receives authenticated loopback port-zero authority",
+  { timeout: 30_000 },
+  async (context) => {
+    const poisonedBaseEnvironment = {
+      DESEN_CI_LOOPBACK_CHILD_LISTENER_AUTHORITY_PATH: "/tmp/ambient-authority.json",
+      DESEN_CI_LOOPBACK_CHILD_LISTENER_GRANT: "a".repeat(64),
+      DESEN_CI_LOOPBACK_CHILD_LISTENER_TOKEN: "a".repeat(64),
+    };
+    const first = await createProofStepIsolationContext({
+      workspaceRoot: REPOSITORY_ROOT,
+      workload: "verify-reference-host-web-channel-consumption",
+      baseEnvironment: poisonedBaseEnvironment,
+    });
+    const second = await createProofStepIsolationContext({
+      workspaceRoot: REPOSITORY_ROOT,
+      workload: "verify-reference-host-web-channel-consumption",
+      baseEnvironment: {},
+    });
+    const third = await createProofStepIsolationContext({
+      workspaceRoot: REPOSITORY_ROOT,
+      workload: "verify-reference-host-web-channel-consumption",
+      baseEnvironment: {},
+    });
+    const rootTest = await createProofStepIsolationContext({
+      workspaceRoot: REPOSITORY_ROOT,
+      workload: "test-reference-host-web-channel-consumption",
+      baseEnvironment: poisonedBaseEnvironment,
+    });
+    const otherVerifier = await createProofStepIsolationContext({
+      workspaceRoot: REPOSITORY_ROOT,
+      workload: "verify-control-plane-runtime-transition-races",
+      baseEnvironment: poisonedBaseEnvironment,
+    });
+    context.after(async () => {
+      await first.dispose();
+      await second.dispose();
+      await third.dispose();
+      await rootTest.dispose();
+      await otherVerifier.dispose();
+    });
+
+    const authorityPath = first.env[LOOPBACK_AUTHORITY_PATH_KEY];
+    const token = first.env[LOOPBACK_TOKEN_KEY];
+    assert.equal(path.dirname(authorityPath), first.tempRoot);
+    assert.equal(path.basename(authorityPath), ".desen-ci-loopback-child-listener-authority.json");
+    assert.match(token, /^[0-9a-f]{64}$/u);
+    assert.notEqual(token, poisonedBaseEnvironment[LOOPBACK_TOKEN_KEY]);
+    assert.notEqual(token, second.env[LOOPBACK_TOKEN_KEY]);
+    assert.equal(first.env[LOOPBACK_GRANT_KEY], undefined);
+    assert.equal(rootTest.env[LOOPBACK_AUTHORITY_PATH_KEY], undefined);
+    assert.equal(rootTest.env[LOOPBACK_TOKEN_KEY], undefined);
+    assert.equal(rootTest.env[LOOPBACK_GRANT_KEY], undefined);
+    assert.equal(otherVerifier.env[LOOPBACK_AUTHORITY_PATH_KEY], undefined);
+    assert.equal(otherVerifier.env[LOOPBACK_TOKEN_KEY], undefined);
+    assert.equal(otherVerifier.env[LOOPBACK_GRANT_KEY], undefined);
+
+    const authorityEntry = await lstat(authorityPath, { bigint: true });
+    assert.equal(authorityEntry.isFile(), true);
+    assert.equal(authorityEntry.isSymbolicLink(), false);
+    assert.equal(authorityEntry.nlink, 1n);
+    assert.equal(Number(authorityEntry.mode & 0o777n), 0o600);
+    assert.equal(await realpath(authorityPath), authorityPath);
+    assert.deepEqual(JSON.parse(await readFile(authorityPath, "utf8")), {
+      profile: "desen.ci.loopback-child-listener-authority.v1",
+      stepId: "verify-reference-host-web-channel-consumption",
+      runtime: "VITEST_CHILD_PROCESS_TREE",
+      transport: "TCP",
+      family: "IPv4",
+      address: "127.0.0.1",
+      port: 0,
+      workspaceRoot: REPOSITORY_ROOT,
+      tokenSha256: createHash("sha256").update(token).digest("hex"),
+    });
+
+    const parent = await runNode(
+      [
+        `process.env.${LOOPBACK_GRANT_KEY} = process.env.${LOOPBACK_TOKEN_KEY};`,
+        'require("node:net").createServer().listen(0, "127.0.0.1");',
+      ].join("\n"),
+      first.env,
+    );
+    assert.notEqual(parent.code, 0);
+    assert.match(parent.stderr, /Proof workloads may not bind network listeners/u);
+
+    const childEnvironment = createReferenceHostWebChannelConsumptionRuntimeEnvironment(first.env);
+    assert.equal(childEnvironment.NODE_OPTIONS, first.env.NODE_OPTIONS);
+    assert.equal(childEnvironment[LOOPBACK_GRANT_KEY], token);
+    assert.equal(childEnvironment[LOOPBACK_AUTHORITY_PATH_KEY], authorityPath);
+    assert.equal(childEnvironment[LOOPBACK_TOKEN_KEY], token);
+    const childProbe = await runNode(
+      [
+        `const guard = require(${JSON.stringify(LISTENER_GUARD_PATH)});`,
+        'if (!guard.listenerAuthorityActive) throw new Error("listener authority inactive");',
+        `if (process.env.${LOOPBACK_GRANT_KEY} !== process.env.${LOOPBACK_TOKEN_KEY}) throw new Error("grant inheritance drift");`,
+        'if (!process.env.NODE_OPTIONS.includes("no-proof-listener.cjs")) throw new Error("NODE_OPTIONS drift");',
+        'if (!guard.isExactLoopbackEphemeralListenArguments([0, "127.0.0.1"])) throw new Error("positional listener denied");',
+        'if (!guard.isExactLoopbackEphemeralListenArguments([{host: "127.0.0.1", port: 0, cb() {}}])) throw new Error("Fastify listener denied");',
+        'for (const args of [[0], [0, "localhost"], [0, "::1"], [0, "0.0.0.0"], [4317, "127.0.0.1"], [{host: "127.0.0.1", port: 0, exclusive: true}], ["/tmp/socket"]]) if (guard.isExactLoopbackEphemeralListenArguments(args)) throw new Error("listener widening");',
+        'for (const args of [[4317, "127.0.0.1"], [0, "localhost"], [0, "0.0.0.0"], ["/tmp/socket"]]) { try { require("node:net").createServer().listen(...args); throw new Error("invalid listener admitted"); } catch (error) { if (error.code !== guard.LISTENER_ERROR_CODE) throw error; } }',
+        'const normalized = [{highWaterMark: 65536, path: undefined, localAddress: null, port: "4317", host: "127.0.0.1"}, null];',
+        'Object.defineProperty(normalized, Symbol("normalizedArgs"), {value: true, enumerable: true, configurable: true, writable: true});',
+        'if (!guard.isExactActiveLoopbackConnectArguments([normalized], new Set([4317]))) throw new Error("owned loopback connect denied");',
+        'if (guard.isExactActiveLoopbackConnectArguments([normalized], new Set([4318]))) throw new Error("unowned connect admitted");',
+        'normalized[0].host = "8.8.8.8";',
+        'if (guard.isExactActiveLoopbackConnectArguments([normalized], new Set([4317]))) throw new Error("public connect admitted");',
+        'try { require("node:net").connect({host: "8.8.8.8", port: 53}); throw new Error("external TCP admitted"); } catch (error) { if (error.code !== guard.NETWORK_ERROR_CODE) throw error; }',
+        'try { require("node:net").connect({host: "127.0.0.1", port: 4317}); throw new Error("unowned loopback TCP admitted"); } catch (error) { if (error.code !== guard.NETWORK_ERROR_CODE) throw error; }',
+        'try { require("node:dgram").createSocket("udp4").bind(0); throw new Error("UDP admitted"); } catch (error) { if (error.code !== guard.LISTENER_ERROR_CODE) throw error; }',
+        "let numericLookupCompleted = false;",
+        'require("node:dns").lookup("127.0.0.1", {all: true}, (error, addresses) => { if (error !== null || JSON.stringify(addresses) !== JSON.stringify([{address: "127.0.0.1", family: 4}])) throw new Error("numeric loopback lookup drift"); numericLookupCompleted = true; });',
+        'for (const args of [["example.com", {all: true}, () => {}], ["127.0.0.2", {all: true}, () => {}], ["::1", {all: true}, () => {}], ["127.0.0.1", {all: false}, () => {}], ["127.0.0.1", {all: true, family: 4}, () => {}]]) { try { require("node:dns").lookup(...args); throw new Error("DNS lookup widening admitted"); } catch (error) { if (error.code !== guard.NETWORK_ERROR_CODE) throw error; } }',
+        'try { require("node:dns").resolve("example.com", () => {}); throw new Error("DNS admitted"); } catch (error) { if (error.code !== guard.NETWORK_ERROR_CODE) throw error; }',
+        'try { require("node:dns/promises").resolve("example.com"); throw new Error("promise DNS admitted"); } catch (error) { if (error.code !== guard.NETWORK_ERROR_CODE) throw error; }',
+        'try { require("node:child_process").spawnSync("curl", ["https://example.com"]); throw new Error("external child admitted"); } catch (error) { if (error.code !== guard.CHILD_PROCESS_ERROR_CODE) throw error; }',
+        'setImmediate(() => { if (!numericLookupCompleted) throw new Error("numeric loopback lookup was not asynchronous"); process.stdout.write("child-policy-ok"); });',
+      ].join("\n"),
+      childEnvironment,
+    );
+    assert.equal(childProbe.code, 0, childProbe.stderr);
+    assert.equal(childProbe.stdout, "child-policy-ok");
+
+    const wrongGrant = await runNode(
+      `const guard = require(${JSON.stringify(LISTENER_GUARD_PATH)}); if (guard.listenerAuthorityActive) throw new Error("wrong grant admitted"); process.stdout.write("denied");`,
+      { ...first.env, [LOOPBACK_GRANT_KEY]: "0".repeat(64) },
+    );
+    assert.equal(wrongGrant.code, 0, wrongGrant.stderr);
+    assert.equal(wrongGrant.stdout, "denied");
+
+    const changedStep = await runNode(
+      `const guard = require(${JSON.stringify(LISTENER_GUARD_PATH)}); if (guard.listenerAuthorityActive) throw new Error("wrong step admitted"); process.stdout.write("denied");`,
+      { ...childEnvironment, DESEN_CI_STEP_ID: "verify-control-plane-runtime-transition-races" },
+    );
+    assert.equal(changedStep.code, 0, changedStep.stderr);
+    assert.equal(changedStep.stdout, "denied");
+
+    const hardLinkPath = path.join(first.tempRoot, "linked-authority.json");
+    await link(authorityPath, hardLinkPath);
+    const linkedAuthority = await runNode(
+      `const guard = require(${JSON.stringify(LISTENER_GUARD_PATH)}); if (guard.listenerAuthorityActive) throw new Error("linked authority admitted"); process.stdout.write("denied");`,
+      childEnvironment,
+    );
+    assert.equal(linkedAuthority.code, 0, linkedAuthority.stderr);
+    assert.equal(linkedAuthority.stdout, "denied");
+
+    const secondAuthorityPath = second.env[LOOPBACK_AUTHORITY_PATH_KEY];
+    await chmod(secondAuthorityPath, 0o644);
+    const relaxedMode = await runNode(
+      `const guard = require(${JSON.stringify(LISTENER_GUARD_PATH)}); if (guard.listenerAuthorityActive) throw new Error("relaxed authority admitted"); process.stdout.write("denied");`,
+      createReferenceHostWebChannelConsumptionRuntimeEnvironment(second.env),
+    );
+    assert.equal(relaxedMode.code, 0, relaxedMode.stderr);
+    assert.equal(relaxedMode.stdout, "denied");
+
+    const thirdAuthorityPath = third.env[LOOPBACK_AUTHORITY_PATH_KEY];
+    const thirdAuthorityBytes = await readFile(thirdAuthorityPath, "utf8");
+    await writeFile(thirdAuthorityPath, `${thirdAuthorityBytes}\n`, { mode: 0o600 });
+    const noncanonicalAuthority = await runNode(
+      `const guard = require(${JSON.stringify(LISTENER_GUARD_PATH)}); if (guard.listenerAuthorityActive) throw new Error("noncanonical authority admitted"); process.stdout.write("denied");`,
+      createReferenceHostWebChannelConsumptionRuntimeEnvironment(third.env),
+    );
+    assert.equal(noncanonicalAuthority.code, 0, noncanonicalAuthority.stderr);
+    assert.equal(noncanonicalAuthority.stdout, "denied");
+  },
+);
+
+test(
+  "the M07-T11 Vitest fork inherits the unchanged guarded NODE_OPTIONS and child grant",
+  { timeout: 30_000 },
+  async (context) => {
+    const isolation = await createProofStepIsolationContext({
+      workspaceRoot: REPOSITORY_ROOT,
+      workload: "verify-reference-host-web-channel-consumption",
+      baseEnvironment: {},
+    });
+    context.after(() => isolation.dispose());
+    const testPath = path.join(isolation.tempRoot, "listener-authority-inheritance.test.mjs");
+    const configPath = path.join(isolation.tempRoot, "vitest.config.mjs");
+    await writeFile(
+      testPath,
+      [
+        'import { createRequire } from "node:module";',
+        "const require = createRequire(import.meta.url);",
+        `const guard = require(${JSON.stringify(LISTENER_GUARD_PATH)});`,
+        'it("inherits the exact child listener authority", () => {',
+        "  expect(guard.listenerAuthorityActive).toBe(true);",
+        `  expect(process.env.${LOOPBACK_GRANT_KEY}).toBe(process.env.${LOOPBACK_TOKEN_KEY});`,
+        `  expect(process.env.TMPDIR).toBe(${JSON.stringify(isolation.tempRoot)});`,
+        '  expect(process.env.NODE_OPTIONS).toContain("--require=");',
+        '  expect(process.env.NODE_OPTIONS).toContain("no-proof-listener.cjs");',
+        '  expect(guard.isExactLoopbackEphemeralListenArguments([0, "127.0.0.1"])).toBe(true);',
+        '  expect(() => require("node:child_process").spawnSync("curl", ["https://example.com"])).toThrow(expect.objectContaining({code: guard.CHILD_PROCESS_ERROR_CODE}));',
+        "});",
+        "",
+      ].join("\n"),
+      { flag: "wx", mode: 0o600 },
+    );
+    await writeFile(
+      configPath,
+      'export default { test: { cache: false, fileParallelism: false, globals: true, maxWorkers: 1, pool: "forks" } };\n',
+      { flag: "wx", mode: 0o600 },
+    );
+    await writeFile(
+      path.join(isolation.tempRoot, "package.json"),
+      '{"private":true,"type":"module"}\n',
+      {
+        flag: "wx",
+        mode: 0o600,
+      },
+    );
+    await writeFile(path.join(isolation.tempRoot, "pnpm-workspace.yaml"), "packages: []\n", {
+      flag: "wx",
+      mode: 0o600,
+    });
+    const runtimeEnvironment = createReferenceHostWebChannelConsumptionRuntimeEnvironment({
+      ...isolation.env,
+      NODE_PATH: "/unreviewed/node/path",
+    });
+    assert.equal(runtimeEnvironment.NODE_PATH, undefined);
+    assert.equal(runtimeEnvironment.NODE_OPTIONS, isolation.env.NODE_OPTIONS);
+    const { stdout, stderr } = await execFileAsync(
+      process.execPath,
+      [
+        VITEST_CLI_PATH,
+        "run",
+        testPath,
+        "--config",
+        configPath,
+        "--configLoader=native",
+        "--no-cache",
+        "--no-file-parallelism",
+        "--maxWorkers=1",
+        "--pool=forks",
+      ],
+      {
+        cwd: isolation.tempRoot,
+        encoding: "utf8",
+        env: runtimeEnvironment,
+        maxBuffer: 2 * 1024 * 1024,
+        timeout: 20_000,
+      },
+    );
+    assert.match(stdout, /1 passed/u);
+    assert.equal(stderr, "");
+  },
+);
+
+test(
   "the dependency-free T09 Vitest probe completes inside its exact proof isolation",
   { timeout: 30_000 },
   async () => {
@@ -694,7 +1011,7 @@ test(
   },
 );
 
-test("only the twelve exact reviewed steps receive native-addon authority", async (context) => {
+test("only the thirteen exact reviewed steps receive native-addon authority", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-native-addon-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const verifier = await createProofStepIsolationContext({
@@ -762,6 +1079,16 @@ test("only the twelve exact reviewed steps receive native-addon authority", asyn
     workload: "test-control-plane-runtime-transition-races",
     baseEnvironment: {},
   });
+  const channelConsumptionVerifier = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-reference-host-web-channel-consumption",
+    baseEnvironment: {},
+  });
+  const channelConsumptionRoot = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "test-reference-host-web-channel-consumption",
+    baseEnvironment: {},
+  });
   context.after(async () => {
     await verifier.dispose();
     await rootTest.dispose();
@@ -776,6 +1103,8 @@ test("only the twelve exact reviewed steps receive native-addon authority", asyn
     await faultInjectionRoot.dispose();
     await transitionRacesVerifier.dispose();
     await transitionRacesRoot.dispose();
+    await channelConsumptionVerifier.dispose();
+    await channelConsumptionRoot.dispose();
   });
 
   assert.equal(verifier.metadata.executionClass, "PROOF_READ_ONLY");
@@ -792,6 +1121,8 @@ test("only the twelve exact reviewed steps receive native-addon authority", asyn
   assert.match(faultInjectionRoot.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.match(transitionRacesVerifier.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.doesNotMatch(transitionRacesRoot.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.match(channelConsumptionVerifier.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
+  assert.doesNotMatch(channelConsumptionRoot.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
   assert.doesNotMatch(ordinary.env.NODE_OPTIONS, /(?:^| )--allow-addons(?: |$)/u);
 
   const sqliteModulePath = path.join(
@@ -870,7 +1201,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 130,
+    NONE: 132,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,
@@ -1368,7 +1699,7 @@ test("only the exact source-audit root test receives a direct workspace-write gr
   assert.equal(await readFile(destination, "utf8"), "allowed");
 });
 
-test("the preload denies TCP and UDP listener binding", async (context) => {
+test("the default preload denies TCP and UDP listener binding", async (context) => {
   const workspaceRoot = await temporaryDirectory("desen-shared-state-listener-");
   context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
   const isolation = await createProofStepIsolationContext({
@@ -1447,8 +1778,8 @@ test("runner temp cleanup removes files and is idempotent", async (context) => {
 });
 
 test("build-output seals cover every exact app/package dist and Turbo root", async (context) => {
-  assert.equal(BUILD_OUTPUT_ROOTS.length, 33);
-  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 33);
+  assert.equal(BUILD_OUTPUT_ROOTS.length, 35);
+  assert.equal(new Set(BUILD_OUTPUT_ROOTS).size, 35);
   assert.equal(BUILD_OUTPUT_ROOTS.includes(".turbo"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("apps/reference-host-web/dist"), true);
   assert.equal(BUILD_OUTPUT_ROOTS.includes("packages/validator/.turbo"), true);

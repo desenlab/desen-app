@@ -55,11 +55,12 @@ required-workflow cutover.
 I07-02 established the scheduler-neutral 130-node, 61-proof-unit cutover inventory independently
 from both schedulers. M07-T07 appended the sixth post-cutover verifier/root-test pair for durable
 runtime activation; M07-T08 appended the seventh for exact restart recovery; M07-T09 appended the
-eighth for its bounded boundary-fault matrix; and M07-T10 appends the ninth for ordered transitions
-and two-way races. The working-tree successor therefore contains 148 nodes and 70 proof units
-without rewriting that frozen baseline. Its retained legacy projection contains 463 prerequisite
-segments, 2,929 ordered leaf invocations, and 230 distinct leaves. These are local code-owned
-successor values; no hosted M07-T10 result is claimed. Contract and hostile-input tests cover exact
+eighth for its bounded boundary-fault matrix; M07-T10 appended the ninth for ordered transitions
+and two-way races; and M07-T11 appends the tenth for separately built host channel consumption.
+The working-tree successor therefore contains 150 nodes and 71 proof units without rewriting that
+frozen baseline. Its retained legacy projection contains 479 prerequisite segments, 3,113 ordered
+leaf invocations, and 236 distinct leaves. These are local code-owned successor values; no hosted
+M07-T11 result is claimed. Contract and hostile-input tests cover exact
 ordered ids, labels, commands, arguments,
 dependencies, execution classes, and shared-state records; omission, duplication, reorder,
 substitution, cycles, unknown classes, shell syntax, writer insertion, and affected-only metadata
@@ -68,9 +69,9 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 60
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 62
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 59 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 60 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -116,9 +117,23 @@ native-addon policy. The root receives only `NODE_TEST_HARNESS` and no native-ad
 because it injects the authenticated runtime-suite receipt. Neither receives workspace-write or
 port authority, and the pair introduces no scheduler barrier.
 
+The M07-T11 `reference-host-web-channel-consumption` verifier and root are ordinary
+`PROOF_OS_TEMP_ISOLATED` steps. Both use runner-owned OS-temp roots and receive only the bounded
+child/runtime and native SQLite policies assigned by the code-owned authority. Neither receives a
+shared workspace-write or fixed/shared listener-port grant from the scheduler, and the pair
+introduces no barrier. Its verifier alone owns the code-registered
+`desen.ci.loopback-child-listener-authority.v1` child-network profile. The verifier parent
+stays listener-denied; a runner-created mode-`0600`, singly linked authority plus random token is
+delegated only to its Vitest process tree through the unchanged guarded `NODE_OPTIONS`. That tree
+may bind only TCP on literal IPv4 `127.0.0.1` with requested port `0` and connect only to a port it
+opened. UDP, DNS, hostnames, IPv6, public addresses, Unix sockets, and fixed ports remain denied.
+Hosted CI is required for the real loopback-listener cases because the local sandbox returns
+`EPERM` on `127.0.0.1` bind.
+
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
-inherited-`NODE_OPTIONS` rejection, TCP/UDP listener denial, and identity-checked cleanup. Child
+inherited-`NODE_OPTIONS` rejection, default TCP/UDP listener denial, the sole authenticated T11
+Vitest-child exception, and identity-checked cleanup. Child
 runtime probes are permitted only for the verifier side of
 `publisher-catalog-pinning`, `publisher-bundle-publication`, `publisher-official-golden`,
 `publisher-invalid-source-matrix`, `control-plane-bundle-store`, and
@@ -131,15 +146,15 @@ permitted only for the exact
 root test, and the exact `control-plane-local-api` and `control-plane-runtime-activation`
 verifier/root-test pairs plus the exact `control-plane-runtime-recovery` and
 `control-plane-runtime-fault-injection` pairs plus only the
-`control-plane-runtime-transition-races` verifier. The transition-race root proof is explicitly
-denied native-addon authority.
+`control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers.
+Both roots are explicitly denied native-addon authority.
 Regression tests prove
 that every unlisted step remains denied; the source-audit verifier remains workspace-read-only.
 The reviewed production dependency audit for locked Fastify 5.11.2 and better-sqlite3 13.0.3
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution across the 148 workloads: 130 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across the 150 workloads: 132 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,

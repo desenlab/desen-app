@@ -19,6 +19,7 @@ const APP_PACKAGE = "apps/control-plane-api/package.json";
 const APP_INDEX = "apps/control-plane-api/src/index.ts";
 const APP_SQLITE = "apps/control-plane-api/src/runtime-activation-sqlite-internal.ts";
 const APP_TEST = "apps/control-plane-api/test/runtime-transition-races.test.ts";
+const ROOT_PACKAGE = "package.json";
 const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const CI_INVENTORY = "scripts/ci/exhaustive-workload-inventory.mjs";
 const SHARED_STATE_AUTHORITY = "scripts/ci/shared-state-authority.mjs";
@@ -330,6 +331,22 @@ test("[registration] binds every captured CI byte source to its executable autho
       expectedError("REGISTRATION_DRIFT"),
     );
   }
+  await assert.rejects(
+    buildControlPlaneRuntimeTransitionRacesEvidence({
+      runtimeSuiteReceipt: suiteReceipt(),
+      trackedFileBytes: {
+        [ROOT_PACKAGE]: Buffer.from(
+          (await workspaceBytes(ROOT_PACKAGE))
+            .toString("utf8")
+            .replace(
+              "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
+              "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+            ),
+        ),
+      },
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
 });
 
 test("[traceability] rejects every missing M07-T10 assignment and one extra assignment", async () => {

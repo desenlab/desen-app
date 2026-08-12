@@ -14,11 +14,15 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 70);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 70);
+  assert.equal(graph.proofUnitCount, 71);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 71);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
+  );
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "reference-host-web-channel-consumption")?.prerequisites,
+    ["reference-host-web-source-audit", "control-plane-runtime-transition-races"],
   );
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);

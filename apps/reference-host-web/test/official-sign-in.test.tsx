@@ -5,7 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bindReferenceSignInHostOperation } from "@desen/reference-catalog-web/host-operations";
 
+import officialDerivedSignInBundle from "../../../examples/sign-in/official-derived.bundle.desen.json";
 import {
+  activateReferenceHostDeliveredSignIn,
   activateReferenceHostOfficialSignIn,
   REFERENCE_HOST_OFFICIAL_SIGN_IN_DOCUMENT_ID,
   REFERENCE_HOST_OFFICIAL_SIGN_IN_REVISION,
@@ -432,6 +434,50 @@ describe("official-derived sign-in in the independent reference host", () => {
       reason: "malformed-input",
     });
     expect(getterCalls).toBe(0);
+  });
+
+  it("rejects accessor-backed or extended delivered package policy without replacing A", async () => {
+    const diagnostics: ReferenceHostOfficialSignInDiagnostic[] = [];
+    await renderSignIn(root, () => undefined, diagnostics);
+    const email = screen.getByLabelText("Email") as HTMLInputElement;
+    await changeField("Email", "preserved-a@example.com");
+
+    const accessorBundle = structuredClone(officialDerivedSignInBundle) as Record<string, unknown>;
+    let getterCalls = 0;
+    Object.defineProperty(accessorBundle, "requires", {
+      configurable: true,
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return officialDerivedSignInBundle.requires;
+      },
+    });
+    expect(
+      activateReferenceHostDeliveredSignIn(root, {
+        browser: window,
+        bundle: accessorBundle,
+        signIn: bindReferenceSignInHostOperation(() => undefined),
+        reportDiagnostic: () => undefined,
+      }),
+    ).toEqual({ status: "rejected", reason: "bundle-policy-rejected" });
+    expect(getterCalls).toBe(0);
+
+    const extendedBundle = structuredClone(officialDerivedSignInBundle) as Record<string, unknown>;
+    const requires = extendedBundle.requires as { catalogs: Record<string, unknown>[] };
+    requires.catalogs[0] = {
+      ...requires.catalogs[0],
+      module: "bundle-selected-module-must-not-run",
+    };
+    expect(
+      activateReferenceHostDeliveredSignIn(root, {
+        browser: window,
+        bundle: extendedBundle,
+        signIn: bindReferenceSignInHostOperation(() => undefined),
+        reportDiagnostic: () => undefined,
+      }),
+    ).toEqual({ status: "rejected", reason: "bundle-policy-rejected" });
+    expect(email).toHaveProperty("value", "preserved-a@example.com");
+    expect(container.textContent).not.toContain("bundle-selected-module-must-not-run");
   });
 
   it("pins the exact controlled document and revision identities", () => {

@@ -233,33 +233,37 @@ without rewriting that historical baseline. The preceding M07-T05 receipt contai
 65 proof pairs, 423 prerequisite segments, 2,209 ordered leaf invocations, and 215 distinct leaf
 workloads. Its inventory was
 `sha256:d26e9fa74f85be06852cd4f667467606735687e851ab03a6ef5611700c9ccc92`, and its required plan was
-`sha256:4d26089fc10902513950f0051fb0d860a82c14374e426fd40b3259a43a63b466`. The current M07-T10
-working-tree successor contains 148 workloads, 70 proof pairs, 463 prerequisite segments, 2,929
-ordered leaf invocations, and 230 distinct leaf workloads. Its neutral inventory is
-`sha256:7e4be77121123bc1fdf98e400b414d9f825a1dc04fc34b6b5dedb101a56999d1`, and its required plan is
-`sha256:18f7cb0ab88d0847afb6f030c80ef6367c3a599466a22b1cf8826055d5d44502`. These current pins make no
-hosted M07-T10 claim.
+`sha256:4d26089fc10902513950f0051fb0d860a82c14374e426fd40b3259a43a63b466`. The current M07-T11
+working-tree successor contains 150 workloads, 71 proof pairs, 479 prerequisite segments, 3,113
+ordered leaf invocations, and 236 distinct leaf workloads. Its neutral inventory is
+`sha256:e0259cb3288fbaec7faccabf2186ecf1c921de29d5187de7e88f80a85b3abdb4`, and its required plan is
+`sha256:c73c8d06268188a6697e5c8923435cf7192cb452a433ce5e9bf676f48a34be12`. These current pins make no
+hosted M07-T11 claim.
+
+The current shadow-selector comparison authority is
+`sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`.
+The frozen I07-03 baseline selector remains historical; promotion remains false at `0 / 20`.
 
 The complete current reviewed digest set is:
 
 - prerequisite inventory:
-  `f5f60e179552d6255392149a57a442b4ea44dc225e66f432b85a81773251ea74`;
+  `4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e`;
 - ordered legacy leaves:
-  `8653310c9771194080d3f98d8f6412b46bc8456a34b14ecbdee28065fd3bb9ce`;
+  `bac4fe3874e13ffafde163e8a396d3d4156e9cd583b0d66ca634bfb3e9ab308c`;
 - distinct leaf workloads:
-  `943daf1c8f21c40bf8f33473c16d2ebc8cf4bf45436d76647306fc6db9c0e485`;
+  `6838b57e69d78fad6c0de08a9ffb7b9530dc5c50bc17ee2779e949cf86985fce`;
 - retained sequential plan:
-  `19c073be84a7c4112ad29ad1b7dd47f8bf6b28de8f25eb4edd40d9f165b6abc2`;
+  `8a08431ea00f10137c5d5e9cc69484d1aed5f7f9ba7370cd74af0e447e0e8e75`;
 - neutral inventory:
-  `7e4be77121123bc1fdf98e400b414d9f825a1dc04fc34b6b5dedb101a56999d1`;
+  `e0259cb3288fbaec7faccabf2186ecf1c921de29d5187de7e88f80a85b3abdb4`;
 - workload-id set:
-  `38b5239a71fb69ff263fbf838471d14f87401e3afd2a17ea5edeb3ccad5c787f`;
+  `c02f945ad3d655226ebf1d4547e91f156b5877ae26c32d1a1f78b10bf3f36165`;
 - ordered equivalence projection:
-  `57fed06a97b16f6198fbaada03e150e143a95f5b5f901c0d3950b702464106e1`;
+  `c4717c9db7a184595be7b6c2b30f0536c965837fcfa6fdd909cb0ec3bc3844a1`;
 - required plan:
-  `18f7cb0ab88d0847afb6f030c80ef6367c3a599466a22b1cf8826055d5d44502`; and
+  `c73c8d06268188a6697e5c8923435cf7192cb452a433ce5e9bf676f48a34be12`; and
 - shadow plan:
-  `53924d0ad8cb850eab7cb9cfba93b70fc7fc04e31a4fefe3346c4ac107df53a4`.
+  `9d0244aca4c94c17249215bc0e720b421f164312e9c125cecbbe593903ac2087`.
 
 Every workload has exactly one code-owned shared-state class:
 
@@ -269,11 +273,11 @@ Every workload has exactly one code-owned shared-state class:
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     1 | Workspace build/typecheck output writer              |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
 | `PROOF_READ_ONLY`                |    69 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    60 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_OS_TEMP_ISOLATED`         |    62 | Proof work restricted to a runner-owned OS temp root |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
-Fifty-nine proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
+Sixty proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
 pass. Ten real tracked-alias pairs and `reference-host-web-source-audit` are the eleven exclusive
 proof-pair barriers. Within every pair, the root test still depends on its verifier.
 
@@ -319,6 +323,21 @@ workloads are `PROOF_OS_TEMP_ISOLATED`; the verifier receives the bounded
 `NODE_TEST_HARNESS` and no native-addon authority because it injects the authenticated runtime
 receipt. Neither receives workspace-write or port authority.
 
+The M07-T11 `reference-host-web-channel-consumption` pair is ordinary and non-barrier. Both
+workloads are `PROOF_OS_TEMP_ISOLATED`. The verifier receives the bounded
+`VERIFIER_RUNTIME_PROBE` child policy and its task-specific
+`REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE` native-addon authority; the root receives only
+`NODE_TEST_HARNESS` and no native-addon authority. Neither receives workspace-write or a fixed or
+shared scheduler port. The verifier alone owns the code-registered
+`desen.ci.loopback-child-listener-authority.v1` child-network profile. Its parent process
+remains under the default listener denial; a mode-`0600`, singly linked, runner-temp authority and
+random token activate only the spawned Vitest process tree. That child tree may bind only TCP over
+literal IPv4 `127.0.0.1` with requested port `0`, and may connect only to an ephemeral port it
+actually opened. Hostnames, IPv6, public addresses, fixed ports, Unix sockets, DNS, and UDP remain
+denied. The complete proof pins seven focused-suite files, 46 runtime tests, nine exact end-to-end
+case identities, 13 root mutation classes, and two browser type-test files. Real loopback listener
+cases require hosted execution because the local sandbox returns `EPERM` on bind.
+
 The only verifier runtime-probe exceptions, each with isolated temp and child-process authority,
 are:
 
@@ -332,19 +351,21 @@ are:
 - `control-plane-runtime-activation`; and
 - `control-plane-runtime-recovery`; and
 - `control-plane-runtime-fault-injection`; and
-- `control-plane-runtime-transition-races`.
+- `control-plane-runtime-transition-races`; and
+- `reference-host-web-channel-consumption`.
 
 Native-addon authority is limited to the exact `reference-host-web-source-audit` verifier/root-test
 pair, the `publisher-invalid-source-matrix` root test, and the exact `control-plane-local-api`,
 `control-plane-runtime-activation`, `control-plane-runtime-recovery`, and
 `control-plane-runtime-fault-injection` verifier/root-test pairs plus only the
-`control-plane-runtime-transition-races` verifier. Its root proof receives no native-addon grant.
+`control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers.
+Both root proofs receive no native-addon grant.
 The source-audit verifier remains workspace-read-only; its root test is the sole workspace-temp
 barrier. The publisher root loads only the reviewed Rolldown binding, and the control-plane pairs
 load only their reviewed SQLite binding.
 
-Node 24 requires an orthogonal schema-v2 compatibility policy for eighteen exact root tests. The
-distribution across all 148 workloads is 130 `NONE`, two `FIXTURE_COPY`, fifteen
+Node 24 requires an orthogonal filesystem-compatibility policy for eighteen exact root tests. The
+distribution across all 150 workloads is 132 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
 code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
 symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
@@ -360,8 +381,9 @@ the enforcement appropriate to this CI boundary.
 Each proof process receives a fresh authenticated temp root and generated Node permission policy.
 Direct workspace-write grants, child processes, and native addons are denied unless the exact
 workload classification grants them; inherited `NODE_OPTIONS` is rejected. A required preload
-denies TCP and UDP listener binding. Cleanup authenticates the temp directory identity before
-removing it.
+denies TCP and UDP listener binding by default. The sole authenticated M07-T11 Vitest child-policy
+exception is the loopback port-zero boundary above; it leaves UDP and external networking denied.
+Cleanup authenticates the temp directory identity before removing it.
 
 Required authority cannot be fabricated through the injected callbacks used by the focused test
 harness. Only the default shell-free process runner can emit an accepted required close receipt;
@@ -382,7 +404,7 @@ command in an 18-minute operating-system ceiling with a 30-second kill grace, in
 hosted job. An outer-ceiling failure is never accepted as promotion evidence.
 
 The execution boundary authenticates the repository revision and inventory and compares tracked
-bytes, executable modes, tracked-file count, and Git index object ids before and after all 148
+bytes, executable modes, tracked-file count, and Git index object ids before and after all 150
 steps, including failure paths. The shared-state boundary also seals every reviewed build/Turbo
 output root across the proof phase and compares non-ignored untracked state across the complete
 execution region. A dependency download cache may save network time; no build, test, checkpoint,

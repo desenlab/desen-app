@@ -319,6 +319,21 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
     expectedError("REGISTRATION_DRIFT"),
   );
 
+  const channelSuccessorDrift = JSON.parse(await workspaceBytes(ROOT_PACKAGE));
+  channelSuccessorDrift.scripts.check = channelSuccessorDrift.scripts.check.replace(
+    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
+    "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+  );
+  await assert.rejects(
+    buildControlPlaneBundleVerificationEvidence({
+      trackedFileBytes: {
+        [ROOT_PACKAGE]: Buffer.from(`${JSON.stringify(channelSuccessorDrift, null, 2)}\n`),
+      },
+      runtimeReceipt: built.runtimeReceipt,
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
+
   for (const relativePath of [CI_SOURCE, CI_INVENTORY]) {
     const source = await workspaceBytes(relativePath);
     const changed = Buffer.from(

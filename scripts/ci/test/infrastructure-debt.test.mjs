@@ -100,6 +100,7 @@ function taskBoard(overrides = {}) {
     "M07-T08": "DONE",
     "M07-T09": "DONE",
     "M07-T10": "DONE",
+    "M07-T11": "DONE",
     "I07-04": "NOT_STARTED",
     "I07-05": "NOT_STARTED",
     G07: "NOT_STARTED",
@@ -189,8 +190,8 @@ async function createFixture() {
 
 test("accepts the exact canonical code-owned debt inventory", () => {
   const manifest = parseInfrastructureDebtManifest(CANONICAL_MANIFEST_BYTES);
-  assert.equal(INFRASTRUCTURE_DEBT_AUTHORITY.length, 18);
-  assert.equal(manifest.entries.length, 18);
+  assert.equal(INFRASTRUCTURE_DEBT_AUTHORITY.length, 19);
+  assert.equal(manifest.entries.length, 19);
   assert.equal(
     manifest.entries
       .filter((entry) => entry.status === "OPEN")
@@ -215,6 +216,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       { id: "DEBT-I07-016", status: "OPEN" },
       { id: "DEBT-I07-017", status: "OPEN" },
       { id: "DEBT-I07-018", status: "OPEN" },
+      { id: "DEBT-I07-019", status: "OPEN" },
     ],
   );
   assert.deepEqual(
@@ -322,6 +324,12 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       {
         id: "DEBT-I07-018",
         registeredBy: "M07-T10",
+        removalOwner: "I07-04",
+        deadline: "G07",
+      },
+      {
+        id: "DEBT-I07-019",
+        registeredBy: "M07-T11",
         removalOwner: "I07-04",
         deadline: "G07",
       },
@@ -447,6 +455,118 @@ test("accepts the exact canonical code-owned debt inventory", () => {
       "CI_INVENTORY",
       "SHARED_STATE_AUTHORITY",
       "changedByte(await workspaceBytes(relativePath))",
+    ],
+  });
+  assert.deepEqual(
+    manifest.entries[18].targets.map(({ path, symbols }) => ({ path, symbols })),
+    INFRASTRUCTURE_DEBT_AUTHORITY[18].targets.map(({ path, symbols }) => ({ path, symbols })),
+  );
+  assert.deepEqual(manifest.entries[18].targets[0], {
+    path: "scripts/lib/reference-host-web-source-audit-proof.mjs",
+    symbols: [
+      "M07_T11_REFERENCE_HOST_COORDINATION",
+      "M07_T11_REFERENCE_HOST_SUCCESSOR",
+      "normalizeReviewedReferenceHostChannelSuccessor",
+      "inspectExactReferenceHostServerImporter",
+    ],
+  });
+  assert.deepEqual(manifest.entries[18].targets.slice(2, 14), [
+    {
+      path: "scripts/lib/publisher-publish-result-proof.mjs",
+      symbols: ["REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY"],
+    },
+    {
+      path: "tests/publisher-publish-result.test.mjs",
+      symbols: [
+        "M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+        "M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
+        "reconstructM07T10SourceAuditProof",
+        "reconstructM07T10SourceAuditTest",
+      ],
+    },
+    {
+      path: "scripts/lib/publisher-execution-preflight-proof.mjs",
+      symbols: [
+        "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY",
+        "APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS",
+      ],
+    },
+    {
+      path: "tests/publisher-execution-preflight.test.mjs",
+      symbols: [
+        "M07_T11_SOURCE_AUDIT_RECONSTRUCTION_PATCH",
+        "M07_T11_SOURCE_AUDIT_TEST_RECONSTRUCTION_PATCH",
+      ],
+    },
+    {
+      path: "scripts/lib/publisher-catalog-pinning-proof.mjs",
+      symbols: [
+        "APPROVED_M07_T11_ROOT_TEST_SUCCESSOR_RECEIPT",
+        "authenticateM07T11RootTestSuccessor",
+      ],
+    },
+    {
+      path: "tests/publisher-catalog-pinning.test.mjs",
+      symbols: [
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+        "anchors the current M06-T02 reader and exact root successor in evidence",
+      ],
+    },
+    {
+      path: "scripts/lib/publisher-bundle-publication-proof.mjs",
+      symbols: [
+        "APPROVED_COMPATIBILITY_RECEIPT_HISTORY",
+        "APPROVED_CURRENT_COMPATIBILITY_RECEIPTS",
+      ],
+    },
+    {
+      path: "tests/publisher-bundle-publication.test.mjs",
+      symbols: [
+        "reconstructM07T10ExecutionPreflightProof",
+        "reconstructM07T10ExecutionPreflightRootTest",
+        "replaceExactOnce",
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+      ],
+    },
+    {
+      path: "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
+      symbols: [
+        "APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY",
+        "APPROVED_CURRENT_T09_SUCCESSOR_RECEIPTS",
+        "REQUIRED_CURRENT_T09_PROOF_MARKERS",
+        "REQUIRED_CURRENT_T09_TEST_MARKERS",
+      ],
+    },
+    {
+      path: "tests/publisher-invalid-source-matrix.test.mjs",
+      symbols: [
+        "M07_T11_BUNDLE_PUBLICATION_PROOF_ROLLBACK_PATCH",
+        "M07_T11_BUNDLE_PUBLICATION_ROOT_TEST_ROLLBACK_PATCH",
+        "M07_T11_DURABLE_ROOT_HELPER_ROLLBACK_PATCH",
+        "reconstructPreLintM07T11BundleRootTest",
+        "reconstructPreDurableM07T11BundleRootTest",
+        "appendBeforeExactTail",
+        "appendValidRootSuccessor",
+      ],
+    },
+    {
+      path: "scripts/lib/control-plane-bundle-store-proof.mjs",
+      symbols: ["M07_T11_TRACKED_RECEIPT_BRIDGE", "m07T11HistoricalState", "m07T11CurrentState"],
+    },
+    {
+      path: "tests/control-plane-bundle-store.test.mjs",
+      symbols: [
+        "reconstructM07T10ExecutionPreflightProof",
+        "The reviewed M07-T11 tracked successor set is incoherent.",
+      ],
+    },
+  ]);
+  assert.deepEqual(manifest.entries[18].targets.at(-1), {
+    path: "tests/control-plane-runtime-transition-races.test.mjs",
+    symbols: [
+      "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
     ],
   });
   assert.deepEqual(manifest.entries[7].targets[0].symbols, [
@@ -762,7 +882,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     },
     {
       path: "tests/publisher-catalog-pinning.test.mjs",
-      symbols: ["appendValidRootSuccessor"],
+      symbols: ["appendBeforeExactTail", "appendValidRootSuccessor"],
     },
     {
       path: "scripts/lib/control-plane-local-api-proof.mjs",
@@ -994,11 +1114,11 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     },
     {
       path: "tests/publisher-bundle-publication.test.mjs",
-      symbols: ["appendValidRootSuccessor"],
+      symbols: ["appendBeforeExactTail", "appendValidRootSuccessor"],
     },
     {
       path: "tests/publisher-catalog-pinning.test.mjs",
-      symbols: ["appendValidRootSuccessor"],
+      symbols: ["appendBeforeExactTail", "appendValidRootSuccessor"],
     },
     {
       path: "scripts/lib/publisher-invalid-source-matrix-proof.mjs",
@@ -1016,6 +1136,7 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     {
       path: "tests/publisher-invalid-source-matrix.test.mjs",
       symbols: [
+        "appendBeforeExactTail",
         "appendValidRootSuccessor",
         "[authority] authenticates the bounded focused-suite timeout successor",
       ],
@@ -1155,11 +1276,11 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
   try {
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 17,
+      OPEN: 18,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
-    assert.equal(receipt.entries, 18);
+    assert.equal(receipt.entries, 19);
     assert.equal(receipt.taskStatuses["I07-01"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["I07-02"], "DONE");
     assert.equal(receipt.taskStatuses["I07-03"], "IN_PROGRESS");
@@ -1168,6 +1289,7 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
     assert.equal(receipt.taskStatuses["M07-T07"], "IN_PROGRESS");
     assert.equal(receipt.taskStatuses["M07-T08"], "DONE");
     assert.equal(receipt.taskStatuses["M07-T10"], "DONE");
+    assert.equal(receipt.taskStatuses["M07-T11"], "DONE");
     assert.equal(receipt.taskStatuses["I07-05"], "NOT_STARTED");
   } finally {
     await fixture.cleanup();
@@ -1272,7 +1394,7 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     await writeRelative(fixture.root, target.path, "replacement owns current compatibility\n");
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 17,
+      OPEN: 18,
       READY_FOR_REMOVAL: 0,
       CLOSED: 1,
     });
@@ -1308,7 +1430,7 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     }
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 16,
+      OPEN: 17,
       READY_FOR_REMOVAL: 0,
       CLOSED: 2,
     });

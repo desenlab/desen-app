@@ -318,6 +318,23 @@ test("[implementation] rejects public-export growth and removal of one fault bou
       expectedError("REGISTRATION_DRIFT"),
     );
   }
+
+  await assert.rejects(
+    buildControlPlaneRuntimeFaultInjectionEvidence({
+      runtimeSuiteReceipt: suiteReceipt(),
+      trackedFileBytes: {
+        [ROOT_PACKAGE]: Buffer.from(
+          (await workspaceBytes(ROOT_PACKAGE))
+            .toString("utf8")
+            .replace(
+              "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
+              "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+            ),
+        ),
+      },
+    }),
+    expectedError("REGISTRATION_DRIFT"),
+  );
 });
 
 test("[traceability] rejects every M07-T09 assignment mutation and one extra assignment", async () => {

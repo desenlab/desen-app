@@ -1,6 +1,9 @@
 import { bindReferenceSignInHostOperation } from "@desen/reference-catalog-web/host-operations";
 
-import { activateReferenceHostOfficialSignIn } from "../src/official-sign-in.js";
+import {
+  activateReferenceHostDeliveredSignIn,
+  activateReferenceHostOfficialSignIn,
+} from "../src/official-sign-in.js";
 
 import type { ReferenceHostRootHandle } from "../src/root.js";
 
@@ -15,6 +18,12 @@ const signIn = bindReferenceSignInHostOperation(() =>
 );
 const valid = activateReferenceHostOfficialSignIn(root, {
   browser,
+  signIn,
+  reportDiagnostic: () => undefined,
+});
+const delivered = activateReferenceHostDeliveredSignIn(root, {
+  browser,
+  bundle: {},
   signIn,
   reportDiagnostic: () => undefined,
 });
@@ -74,3 +83,32 @@ activateReferenceHostOfficialSignIn(root, {
   browser,
   reportDiagnostic: () => undefined,
 });
+
+activateReferenceHostDeliveredSignIn(root, {
+  browser,
+  bundle: {},
+  signIn,
+  reportDiagnostic: () => undefined,
+  // @ts-expect-error M07-T11-N07 Delivered data cannot select a Catalog.
+  catalogs: [],
+});
+
+activateReferenceHostDeliveredSignIn(root, {
+  browser,
+  bundle: {},
+  signIn,
+  reportDiagnostic: () => undefined,
+  // @ts-expect-error M07-T11-N08 Delivered data cannot select an adapter registry.
+  registry: {},
+});
+
+activateReferenceHostDeliveredSignIn(root, {
+  browser,
+  bundle: {},
+  signIn,
+  reportDiagnostic: () => undefined,
+  // @ts-expect-error M07-T11-N09 Delivered data cannot select an operation capability.
+  operationId: "custom.operation",
+});
+
+void delivered;

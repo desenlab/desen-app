@@ -93,6 +93,44 @@ async function m07T09AppPackageBytes() {
   return bytes;
 }
 
+function replaceExactOnce(source, pattern, replacement) {
+  const replaced = source.replace(pattern, replacement);
+  assert.notEqual(replaced, source);
+  assert.equal(replaced.replace(pattern, replacement), replaced);
+  return replaced;
+}
+
+function reconstructM07T10ExecutionPreflightProof(currentBytes) {
+  let source = currentBytes.toString("utf8");
+  for (const [pattern, replacement] of [
+    [
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 279_237,\n {6}sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",\n {4}\}\),/u,
+      "",
+    ],
+    [
+      /\n {4}Object\.freeze\(\{\n {6}task: "M07-T11",\n {6}bytes: 93_464,\n {6}sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",\n {4}\}\),/u,
+      "",
+    ],
+    [
+      /APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY\[M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH\]\[8\]/u,
+      "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH][7]",
+    ],
+    [
+      /APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY\[M05_SOURCE_AUDIT_TEST_RELATIVE_PATH\]\[8\]/u,
+      "APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_TEST_RELATIVE_PATH][7]",
+    ],
+  ]) {
+    source = replaceExactOnce(source, pattern, replacement);
+  }
+  const reconstructed = Buffer.from(source, "utf8");
+  assert.equal(reconstructed.byteLength, 72_643);
+  assert.equal(
+    createHash("sha256").update(reconstructed).digest("hex"),
+    "f6b10c50898d95ec737db3cf29091e9d84fbe93a1f4a1cc29cb5427d585ffb09",
+  );
+  return reconstructed;
+}
+
 async function trackedMutation(relativePath, transform) {
   const original = await sourceText(relativePath);
   const mutated = transform(original);
@@ -380,15 +418,18 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
   // DEBT-I07-015 keeps the exact M07-T08 mutation markers visible until I07-04 removes the
   // historical reader bridge: pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-successor && pnpm lint
   // and pnpm test:control-plane-runtime-recovery && pnpm test:control-plane-successor && turbo run test.
+  // DEBT-I07-018 likewise retains the replaced M07-T10 tail as an exact removal marker:
+  // pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-successor && pnpm lint
+  // and pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-successor && turbo run test.
   const successorOptions = await trackedMutation(ROOT_PACKAGE, (source) =>
     source
       .replace(
-        "pnpm verify:control-plane-runtime-transition-races && pnpm lint",
-        "pnpm verify:control-plane-runtime-transition-races && pnpm verify:control-plane-successor && pnpm lint",
+        "pnpm verify:reference-host-web-channel-consumption && pnpm lint",
+        "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-successor && pnpm lint",
       )
       .replace(
-        "pnpm test:control-plane-runtime-transition-races && turbo run test",
-        "pnpm test:control-plane-runtime-transition-races && pnpm test:control-plane-successor && turbo run test",
+        "pnpm test:reference-host-web-channel-consumption && turbo run test",
+        "pnpm test:reference-host-web-channel-consumption && pnpm test:control-plane-successor && turbo run test",
       ),
   );
   const successor = await buildControlPlaneBundleStoreEvidence(successorOptions);
@@ -472,6 +513,21 @@ test("[registration] rejects package-root, public-export, aggregate, or CI tuple
     (error) => {
       expectCode("REGISTRATION_DRIFT")(error);
       assert.equal(error.message, "The reviewed M07-T10 tracked successor set is incoherent.");
+      return true;
+    },
+  );
+
+  const executionReader = "scripts/lib/publisher-execution-preflight-proof.mjs";
+  const predecessorM07T10 = reconstructM07T10ExecutionPreflightProof(
+    await sourceBytes(executionReader),
+  );
+  await assert.rejects(
+    buildControlPlaneBundleStoreEvidence(
+      fastOptions({ trackedFileBytes: { [executionReader]: predecessorM07T10 } }),
+    ),
+    (error) => {
+      expectCode("REGISTRATION_DRIFT")(error);
+      assert.equal(error.message, "The reviewed M07-T11 tracked successor set is incoherent.");
       return true;
     },
   );

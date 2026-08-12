@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `██████████████░░░░░░░░░░░` **84 / 145 tasks complete (58%)**
+**Overall:** `███████████████░░░░░░░░░░` **85 / 145 tasks complete (59%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -20,9 +20,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M06 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M07:** `██████████░` **10 / 11 tasks complete (91%)**
+**M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-04` (observation `0 / 20`) · **Next implementation:** `M07-T11` (`NOT_STARTED`)
+**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-04` (observation `0 / 20`) · **G07:** `NOT_STARTED` until I07-04 completes
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -174,11 +174,28 @@ It makes no tamper-proof, anti-rollback, hosted T10, host-channel, or native-con
 pinned by the 58,059-byte artifact
 `sha256:f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39`.
 
+**M07-T11 checkpoint:** the separately compiled Web reference host now consumes one fixed mutable
+channel through a server-owned boundary instead of trusting discovery data in the browser. The
+server reads the real bearer-authenticated loopback API, reruns integrity, installed-package,
+reference, staging, activation, and restart-recovery checks, then exposes only the authenticated
+active Bundle and a strong generation/revision ETag through one same-origin refresh route. Valid A
+is delivered, invalid B leaves A byte-for-byte mounted, valid C atomically replaces A, restart
+reauthenticates the durable winner before delivery, and stale or post-close refreshes cannot
+publish. The browser imports no control-plane, SQLite, bearer, filesystem, Desen App, Publisher, or
+testkit authority. The [channel-consumption proof](docs/proof/REFERENCE-HOST-WEB-CHANNEL-CONSUMPTION.md)
+pins seven focused-suite files, 46 runtime tests, nine exact end-to-end case identities, 13 root
+mutation classes, and two browser type-test files. Its 39,307-byte artifact is
+`sha256:48bd9f85bd2da413fc72c1973a33732cc091796f9afc2863ec1eec15054314e0`. This local Web proof does
+not claim remote or native deployment,
+real-browser performance, product-level restart, hostile-admin concurrent-root mutation
+resistance, or an external anti-rollback anchor. P-12 remains `NOT_PROVEN` until M10-T07 and N-041
+remains `PLANNED` until M12-T05.
+
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
 61-proof-pair plan as `REQUIRED + EXHAUSTIVE`. The historical M07-T09 successor contained 146
-workloads and 69 proof pairs. The current M07-T10 successor contains 148 workloads and 70 proof
-pairs: 59 ordinary pairs and 11 exclusive barriers. Its retained legacy projection expands to 463
-prerequisite segments and 2,929 ordered leaf invocations covering 230 distinct leaves. Exact
+workloads and 69 proof pairs. The current M07-T11 successor contains 150 workloads and 71 proof
+pairs: 60 ordinary pairs and 11 exclusive barriers. Its retained legacy projection expands to 479
+prerequisite segments and 3,113 ordered leaf invocations covering 236 distinct leaves. Exact
 shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
@@ -376,8 +393,8 @@ ownership. Unknown, ambiguous, untrusted, policy, dependency, frozen-input, or u
 expand to `EXHAUSTIVE`; a strict subset still executes every selected workload from fresh inputs
 and cannot reuse cached proof success. The frozen I07-03 baseline selector remains pinned at
 `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across the 20 sources in
-its historical comparison authority; the current M07-T10 successor selector digest is
-`sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea`. Promotion requires zero
+its historical comparison authority; the current M07-T11 successor selector digest is
+`sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`. Promotion requires zero
 false negatives, mutation coverage for every selector category, and at least 20 consecutive
 eligible same-revision hosted strict-subset comparisons.
 The hosted bootstrap succeeded, but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE`
@@ -392,9 +409,10 @@ authenticate the exact hosted run, job, revision, and receipt provenance. `main`
 manual-audit execution stays exhaustive. The
 [I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json) records the exact run
 and job identifiers. Shadow-only cleanup is open as `DEBT-I07-017`, owned by I07-04 for removal by
-G07; `DEBT-I07-018` assigns the new historical-reader bridges to the same I07-04/G07 cleanup, and
-legacy retirement remains owned by I07-05. Implementation progress is now 84/145, and M07-T11 is
-the next implementation task.
+G07; all M07 compatibility-reader entries, including the T11 successor bridge, remain assigned to
+the same I07-04/G07 cleanup, and legacy retirement remains owned by I07-05. Implementation
+progress is now 85/145; all 11 M07 implementation tasks are complete, while G07 remains open until
+I07-04 satisfies its frozen observation and cleanup requirements.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
