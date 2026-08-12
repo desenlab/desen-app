@@ -1,7 +1,7 @@
 import { ProtocolTypesError, verifyProtocolTypes } from "./lib/protocol-types.mjs";
 
 // Keep this entry point as a receipt serializer: all evidence decisions stay inside the verifier.
-// I07-04 hosted observation trigger: 03/20.
+// I07-04 hosted observation trigger: 04/20.
 try {
   const result = await verifyProtocolTypes();
   process.stdout.write(`${JSON.stringify({ status: "PASS", ...result }, null, 2)}\n`);
