@@ -38,6 +38,7 @@ describe("createDesenEditorDocument", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) throw new TypeError("Expected the official Source to be admitted.");
 
+    expect(Object.keys(result).sort()).toEqual(["diagnostics", "document", "ok"]);
     expect(result.document).toEqual(input);
     expect(Object.keys(result.document).sort()).toEqual(Object.keys(input).sort());
     expect(Object.hasOwn(result.document, "source")).toBe(false);
@@ -94,6 +95,7 @@ describe("createDesenEditorDocument", () => {
   it("rejects invalid Source structure with frozen diagnostics and no partial document", () => {
     const input = clone(validSource);
     record(input).kind = "desen.bundle";
+    const surfaces = record(record(input).surfaces);
 
     const result = createDesenEditorDocument(input);
 
@@ -105,6 +107,13 @@ describe("createDesenEditorDocument", () => {
       expect.objectContaining({ code: "SCHEMA_INVALID", pointer: "/kind" }),
     );
     expectDeepFrozen(result);
+
+    expect(Object.isFrozen(input)).toBe(false);
+    expect(Object.isFrozen(surfaces)).toBe(false);
+    record(input).id = "invalid-caller-mutated";
+    surfaces.extra = clone(surfaces["sign-in"]);
+    expect(record(input).id).toBe("invalid-caller-mutated");
+    expect(surfaces.extra).toEqual(surfaces["sign-in"]);
   });
 
   it("rejects an invalid embedded schema instead of admitting a root-only Source", () => {
@@ -141,5 +150,39 @@ describe("createDesenEditorDocument", () => {
       expect.objectContaining({ code: "SCHEMA_INVALID", pointer: "" }),
     ]);
     expect(Object.hasOwn(result, "document")).toBe(false);
+  });
+
+  it("rejects accessor and serialization hooks without invoking caller code", () => {
+    let getterInvocations = 0;
+    let toJsonInvocations = 0;
+    const accessorInput = Object.defineProperty({}, "kind", {
+      enumerable: true,
+      get() {
+        getterInvocations += 1;
+        return "desen.source";
+      },
+    });
+    const serializationHookInput = {
+      toJSON() {
+        toJsonInvocations += 1;
+        return clone(validSource);
+      },
+    };
+
+    for (const input of [accessorInput, serializationHookInput]) {
+      const result = createDesenEditorDocument(input);
+
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new TypeError("Expected an active caller hook to be rejected.");
+      expect(Object.keys(result).sort()).toEqual(["diagnostics", "ok"]);
+      expect(Object.hasOwn(result, "document")).toBe(false);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({ code: "SCHEMA_INVALID", pointer: "" }),
+      ]);
+      expectDeepFrozen(result);
+    }
+
+    expect(getterInvocations).toBe(0);
+    expect(toJsonInvocations).toBe(0);
   });
 });

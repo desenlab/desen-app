@@ -1038,8 +1038,11 @@ M08-T01 implementation began in an isolated worktree by explicit user direction 
 hosted observation threshold continues independently. This does not mark G07 complete or waive
 the task's formal G07 dependency. The current slice admits unknown inert JSON through the frozen
 Source structural validator and returns the direct detached immutable Source root, with no hidden
-AST or continuous semantic-validation claim. Task closure and any `DONE` status remain gated on
-the required evidence and G07 completion.
+AST or continuous semantic-validation claim. Seven direct package cases now cover exact success
+and failure shells, detached ownership on both branches, embedded schemas, unresolved semantics,
+and non-invocation of caller accessors or serialization hooks. A separate built-package runtime
+and declaration consumer guards the public export map. The fresh root proof pair, artifact, CI
+inventory reseal, task closure, and any `DONE` status remain gated on G07 completion.
 
 ## M09 — Desen App Web MVP
 

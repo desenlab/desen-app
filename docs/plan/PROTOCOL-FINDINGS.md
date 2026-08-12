@@ -3173,7 +3173,9 @@ This file records implementation discoveries without changing the frozen DESEN 0
   projection, hidden AST, node index, executable value, platform object, persistence handle, or
   publication authority. A failure carries the existing frozen structural diagnostics and no
   partial document. Independent calls produce independent snapshots, while the caller's input is
-  neither retained nor frozen.
+  neither retained nor frozen. Accessor-backed input and serialization hooks are rejected without
+  invocation, and the built package root exposes only this factory while its emitted declarations
+  preserve the same direct immutable Source result.
 - Future action: M08-T02 through M08-T07 must express every edit as a deterministic transition to a
   new direct Source snapshot, retain ordinary stable identities, isolate authoring-only state, and
   preserve unknown extensions and semantic array order. M08-T08 owns persistence, M08-T09 owns

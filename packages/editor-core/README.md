@@ -41,4 +41,9 @@ tracked by M08-T02 through M08-T07.
 
 ## Quality
 
-Use the root workspace quality gate: `pnpm check`.
+Run the direct model suite with
+`pnpm --filter @desen/editor-core test:source-document`. The separate
+`pnpm --filter @desen/editor-core test:public-package` check builds the package, resolves the
+public root through its export map, exercises the emitted JavaScript, and compiles a consumer
+against the emitted declarations. Use `pnpm check` for the root workspace quality gate after the
+formal G07 prerequisite opens.
