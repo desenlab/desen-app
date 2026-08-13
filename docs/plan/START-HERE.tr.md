@@ -338,17 +338,16 @@ yeniden başlatması, kötü niyetli yöneticinin eşzamanlı kök değiştirmes
 anti-rollback, Android veya iOS conformance iddiası taşımaz. P-12 M10-T07'ye kadar `NOT_PROVEN`,
 N-041 M12-T05'e kadar `PLANNED` kalır.
 
-I07-03 tamamlandı ama hiçbir seçmeli sonuç henüz zorunlu değildir. Terfi için her seçici
-kategorisinin mutasyonla kapsanması, sıfır yanlış negatif ve aynı revizyonda en az 20 ardışık uygun
-hosted dar-seçim affected/exhaustive karşılaştırmasının uyuşması gerekir. Gözlem dürüstçe `0 / 20`
-kalır: ilk hosted shadow sonucu desteklenmeyen değişiklik türü nedeniyle tam çalışmaya genişledi ve
-uygun bir dar seçim değildi. Salt-okunur defter bu hesabı ölçebilir ama tek başına terfi yetkisi
-üretemez. I07-04 ayrıca
-kesin GitHub run, job, revizyon ve receipt kökenini doğrulayıp sabitlemeden seçmeli çalışmayı zorunlu
-kılamaz. Bu nedenle I07-04 `NOT_STARTED` olarak eşiği bekler. `main`, sürüm ve manuel denetim
-çalışmaları daima `EXHAUSTIVE` kalır. Güncel ilerleme 85/145 görev (%59), M07 içinde 11/11 görev
-(%100) ve kanıt kapılarında 7/13'tür; I07-03 bu sayaçlara dahil değildir. I07-04 `0 / 20` gözlemle
-`NOT_STARTED`, seçici terfisi false ve G07 açıktır.
+I07-04 kampanyası artık 20 ardışık uygun hosted karşılaştırmanın tamamını sıfır yanlış negatifle
+doğruladı. Kesin GitHub run, job, revizyon ve receipt kimlikleri; değiştirilemez tarihsel kampanya
+özeti; seçici eşdeğerliği ve required-runner yetkisi I07-04 baseline'ında sabittir. Uygun ve aynı
+repodaki pull request yalnız kendi gerçek dar kapsamını taze `REQUIRED + AFFECTED` olarak
+çalıştırabilir. İzlenen dosya kümesi değişirse veya herhangi bir belirsizlik oluşursa sistem hata
+gizlemez; bir kez `REQUIRED + EXHAUSTIVE` çalışmaya genişler. `main`, sürüm ve manuel denetim daima
+tam çalışır. On yedi G07 borcunun kod referansları yerelde sıfıra indirildi ve sequence 28 ile 25
+donmuş artifact/50 güncel reader doğrulandı. I07-04 `IN_PROGRESS`, G07 ise yalnız hosted cutover ve
+kapanış kanıtı bekliyor. Güncel uygulama ilerlemesi 85/145 görevdir (%59); kapanışa kadar kanıt
+kapıları 7/13 kalır.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

@@ -10,6 +10,10 @@ import { promisify, types as utilTypes } from "node:util";
 import { format } from "prettier";
 import ts from "typescript";
 
+import {
+  readCheckpointedFrozenArtifact,
+  verifyProofReaderCheckpoints,
+} from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -75,72 +79,9 @@ const APP_SQLITE_SOURCE_SHA256 = "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5f
 const APP_TEST_SHA256 = "4263aa47e7f6d647fe9e08acd19dc305fd53f0acc06383c9b300381a27a008f2";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "ddda51882a5783b9a3fe291da84fbddd7d7cb298a91c6f0a1ec4ae7515a8d0d8";
-const ROOT_TEST_SHA256 = "5b0bed4eeedf4971ca18d2f698f9e7702c4fc3d8ee728231ef3b30fff204dcbc";
-const M07_T11_ROOT_TEST_SUCCESSOR = Object.freeze({
-  bytes: 19_783,
-  sha256: "96f1d5b0cbb4a646198b8b6d4dfe1fbc2be539b909762ab1072f6de10f2b0656",
-});
+const ROOT_TEST_SHA256 = "5a607fdd2e713a31076fa5d73c7c789224d85829230f2d3e6b2d43b1095edc6e";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
-const EXPECTED_REGISTRATION_AUTHORITY_SHA256 = Object.freeze({
-  [CI_SOURCE]: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
-  [CI_INVENTORY]: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
-  [SHARED_STATE_AUTHORITY]: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
-});
-const M07_T11_REGISTRATION_SUCCESSOR = Object.freeze({
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 66_267,
-      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
-    }),
-    successor: Object.freeze({
-      bytes: 68_073,
-      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 48_249,
-      sha256: EXPECTED_REGISTRATION_AUTHORITY_SHA256[CI_SOURCE],
-    }),
-    successor: Object.freeze({
-      bytes: 48_440,
-      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 46_524,
-      sha256: EXPECTED_REGISTRATION_AUTHORITY_SHA256[CI_INVENTORY],
-    }),
-    successor: Object.freeze({
-      bytes: 46_705,
-      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
-    }),
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 47_816,
-      sha256: EXPECTED_REGISTRATION_AUTHORITY_SHA256[SHARED_STATE_AUTHORITY],
-    }),
-    successor: Object.freeze({
-      bytes: 51_643,
-      sha256: "4f17d0d68f742a6c56fc10e39dd1f47f0111ed03b0e2d45a5d75b5f07b804820",
-    }),
-  }),
-});
-// The append-only reader checkpoint authenticates the live reader generation without a recursive
-// self-hash. This reader continues to emit its immutable M07-T10 artifact receipts.
-const M07_T11_READER_RECEIPT_PROJECTION = Object.freeze({
-  [PROOF_LIBRARY]: Object.freeze({
-    bytes: 68_377,
-    sha256: "aa3895fcc79bd6b322f495f00703d1eda57123ad8b1cd9167dc6956dc28c7d2e",
-  }),
-  [ROOT_TEST]: Object.freeze({
-    bytes: 19_130,
-    sha256: "5b0bed4eeedf4971ca18d2f698f9e7702c4fc3d8ee728231ef3b30fff204dcbc",
-  }),
-});
 
 const EXPECTED_TRANSITION_CASE_IDS = Object.freeze([
   "ordered-unsupported-protocol",
@@ -340,6 +281,7 @@ export const CONTROL_PLANE_RUNTIME_TRANSITION_RACES_PREREQUISITE_PINS = Object.f
 export const CONTROL_PLANE_RUNTIME_TRANSITION_RACES_ROOT_TEST_NAMES = Object.freeze([
   "[authority] builds the exact M07-T10 ordered-transition and two-way race artifact",
   "[determinism] two independent evidence builds are byte-identical",
+  "[checkpoint] reconstructs only the centrally authenticated immutable M07-T10 artifact",
   "[prerequisites] rejects drift in every immutable M07-T01 through M07-T09 artifact",
   "[runtime] rejects case-inventory drift and a changed executable suite receipt",
   "[implementation] rejects profile-guard removal and public-export growth",
@@ -618,6 +560,46 @@ function parseJsonBytes(bytes, label, code = "SOURCE_DRIFT") {
   }
 }
 
+function frozenReceiptMap(receipts, expectedPaths, label) {
+  const paths = [...new Set(expectedPaths)].sort();
+  if (!Array.isArray(receipts) || receipts.length !== paths.length) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} receipt inventory drifted.`);
+  }
+  const byPath = new Map();
+  for (const receipt of receipts) {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      Array.isArray(receipt) ||
+      typeof receipt.path !== "string" ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes <= 0 ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
+      byPath.has(receipt.path)
+    ) {
+      fail("ARTIFACT_DRIFT", `The authenticated ${label} contains an invalid receipt.`);
+    }
+    byPath.set(receipt.path, Object.freeze({ bytes: receipt.bytes, sha256: receipt.sha256 }));
+  }
+  if (JSON.stringify([...byPath.keys()].sort()) !== JSON.stringify(paths)) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} path set drifted.`);
+  }
+  return byPath;
+}
+
+async function authenticatedFrozenArtifactProjection() {
+  await verifyProofReaderCheckpoints();
+  const frozen = await readCheckpointedFrozenArtifact("M07-T10");
+  if (frozen.path !== ARTIFACT) {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T10 artifact path drifted.");
+  }
+  const artifact = parseJsonBytes(frozen.bytes, ARTIFACT, "ARTIFACT_DRIFT");
+  if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T10" || artifact.result !== "PASS") {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T10 artifact identity drifted.");
+  }
+  return artifact;
+}
+
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -737,36 +719,26 @@ async function prerequisiteReceipts(overrides) {
   return deepFreeze(receipts);
 }
 
-async function fileReceipts(paths, overrides) {
-  const generations = [];
-  const receipts = await Promise.all(
-    [...new Set(paths)].sort().map(async (relativePath) => {
-      const bytes = await workspaceBytes(relativePath, overrides);
-      const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-      const bridge = M07_T11_REGISTRATION_SUCCESSOR[relativePath];
-      if (bridge === undefined) {
+async function fileReceipts(paths, overrides, frozenReceipts) {
+  const projection =
+    frozenReceipts === undefined
+      ? undefined
+      : frozenReceiptMap(frozenReceipts, paths, "tracked-file");
+  return deepFreeze(
+    await Promise.all(
+      [...new Set(paths)].sort().map(async (relativePath) => {
+        const bytes = await workspaceBytes(relativePath, overrides);
+        const frozenReceipt = Object.hasOwn(overrides, relativePath)
+          ? undefined
+          : projection?.get(relativePath);
         return {
           path: relativePath,
-          ...(M07_T11_READER_RECEIPT_PROJECTION[relativePath] ?? observed),
+          bytes: frozenReceipt?.bytes ?? bytes.byteLength,
+          sha256: frozenReceipt?.sha256 ?? sha256(bytes),
         };
-      }
-      const historical =
-        observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
-      const successor =
-        observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
-      if (!historical && !successor) {
-        fail("REGISTRATION_DRIFT", "A reviewed M07-T11 registration successor receipt drifted.", {
-          path: relativePath,
-        });
-      }
-      generations.push(successor ? "successor" : "historical");
-      return { path: relativePath, ...bridge.historical };
-    }),
+      }),
+    ),
   );
-  if (generations.includes("historical") && generations.includes("successor")) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 registration successor set is incoherent.");
-  }
-  return deepFreeze(receipts);
 }
 
 function literalStringArray(initializer, label) {
@@ -966,7 +938,7 @@ function profileGuardProjection(source) {
   });
 }
 
-async function testProjection(overrides) {
+async function testProjection(overrides, frozenTests) {
   const [controllerBytes, sqliteBytes, appBytes, supportBytes, typeBytes, rootBytes] =
     await Promise.all([
       workspaceBytes(APP_CONTROLLER_SOURCE, overrides),
@@ -976,54 +948,17 @@ async function testProjection(overrides) {
       workspaceBytes(APP_TYPE_TEST, overrides),
       workspaceBytes(ROOT_TEST, overrides),
     ]);
-  const runtime = runtimeTestInventory(fatalText(appBytes, APP_TEST));
-  const compilerNegativeClaims = compilerNegativeInventory(fatalText(typeBytes, APP_TYPE_TEST));
-  const rootNames = rootTestInventory(fatalText(rootBytes, ROOT_TEST));
-  const profileGuards = profileGuardProjection(fatalText(sqliteBytes, APP_SQLITE_SOURCE));
+  runtimeTestInventory(fatalText(appBytes, APP_TEST));
+  compilerNegativeInventory(fatalText(typeBytes, APP_TYPE_TEST));
+  rootTestInventory(fatalText(rootBytes, ROOT_TEST));
+  profileGuardProjection(fatalText(sqliteBytes, APP_SQLITE_SOURCE));
   assertExactSourceSha(controllerBytes, APP_CONTROLLER_SOURCE, APP_CONTROLLER_SOURCE_SHA256);
   assertExactSourceSha(sqliteBytes, APP_SQLITE_SOURCE, APP_SQLITE_SOURCE_SHA256);
   assertExactSourceSha(appBytes, APP_TEST, APP_TEST_SHA256);
   assertExactSourceSha(supportBytes, APP_TEST_SUPPORT, APP_TEST_SUPPORT_SHA256);
   assertExactSourceSha(typeBytes, APP_TYPE_TEST, APP_TYPE_TEST_SHA256);
-  if (!(
-    sha256(rootBytes) === ROOT_TEST_SHA256 ||
-    (rootBytes.byteLength === M07_T11_ROOT_TEST_SUCCESSOR.bytes &&
-      sha256(rootBytes) === M07_T11_ROOT_TEST_SUCCESSOR.sha256)
-  )) {
-    fail("SOURCE_RECEIPT_DRIFT", `${ROOT_TEST} exact executable authority drifted.`, {
-      path: ROOT_TEST,
-    });
-  }
-  return deepFreeze({
-    packageRuntimeCases: runtime.names.length,
-    packageRuntimeCaseNames: runtime.names,
-    transitionCaseIds: runtime.caseIds,
-    compilerNegativeCases: compilerNegativeClaims.length,
-    compilerNegativeClaims,
-    rootMutationCases: rootNames.length,
-    rootMutationCaseNames: rootNames,
-    profileGuards,
-    sourceReceipts: {
-      controller: {
-        path: APP_CONTROLLER_SOURCE,
-        bytes: controllerBytes.byteLength,
-        sha256: sha256(controllerBytes),
-      },
-      sqlite: {
-        path: APP_SQLITE_SOURCE,
-        bytes: sqliteBytes.byteLength,
-        sha256: sha256(sqliteBytes),
-      },
-      runtime: { path: APP_TEST, bytes: appBytes.byteLength, sha256: sha256(appBytes) },
-      support: {
-        path: APP_TEST_SUPPORT,
-        bytes: supportBytes.byteLength,
-        sha256: sha256(supportBytes),
-      },
-      types: { path: APP_TYPE_TEST, bytes: typeBytes.byteLength, sha256: sha256(typeBytes) },
-      root: { path: ROOT_TEST, ...M07_T11_READER_RECEIPT_PROJECTION[ROOT_TEST] },
-    },
-  });
+  assertExactSourceSha(rootBytes, ROOT_TEST, ROOT_TEST_SHA256);
+  return deepFreeze(copyInertJson(frozenTests, "authenticated frozen artifact tests"));
 }
 
 function expectedSuiteReceipt(value) {
@@ -1347,29 +1282,8 @@ async function registrationProjection(overrides) {
       workspaceBytes(CI_INVENTORY, overrides),
       workspaceBytes(SHARED_STATE_AUTHORITY, overrides),
     ]);
-  // Semantic projections are executed from the live modules below. Bind every captured CI byte
-  // source to that reviewed executable generation first so an override cannot mix fake receipts
-  // with live behavior and manufacture internally inconsistent evidence.
-  const registrationGenerations = [];
-  for (const [relativePath, bytes] of [
-    [CI_SOURCE, ciBytes],
-    [CI_INVENTORY, inventoryBytes],
-    [SHARED_STATE_AUTHORITY, sharedStateBytes],
-  ]) {
-    const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    const bridge = M07_T11_REGISTRATION_SUCCESSOR[relativePath];
-    const historical =
-      observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
-    const successor =
-      observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
-    if (!historical && !successor)
-      fail("REGISTRATION_DRIFT", `${relativePath} exact executable authority drifted.`, {
-        path: relativePath,
-      });
-    registrationGenerations.push(successor ? "successor" : "historical");
-  }
-  if (new Set(registrationGenerations).size !== 1)
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 executable registration set is incoherent.");
+  // Bind every captured CI byte source to the executable generation imported below. This admits
+  // reviewed later registrations without embedding another task's whole-file receipts here.
   const capturedRegistrationBytes = new Map([
     [CI_SOURCE, ciBytes],
     [CI_INVENTORY, inventoryBytes],
@@ -1476,7 +1390,7 @@ async function registrationProjection(overrides) {
   });
 }
 
-async function publicBoundaryAndDistributionProjection(overrides) {
+async function publicBoundaryAndDistributionProjection(overrides, frozenReceipts) {
   const [packageBytes, indexBytes, distIndexBytes, distTypesBytes] = await Promise.all([
     workspaceBytes(APP_PACKAGE, overrides),
     workspaceBytes(APP_INDEX, overrides),
@@ -1540,6 +1454,11 @@ async function publicBoundaryAndDistributionProjection(overrides) {
     "PUBLIC_EXPORT_DRIFT",
     "runtime-import",
   );
+  const distributionProjection = frozenReceiptMap(
+    frozenReceipts,
+    [DIST_INDEX, DIST_TYPES],
+    "distribution",
+  );
   return deepFreeze({
     publicBoundary: {
       packageShape: copyInertJson(publicPackageShape, "publicPackageShape"),
@@ -1550,8 +1469,8 @@ async function publicBoundaryAndDistributionProjection(overrides) {
       ),
     },
     distribution: [
-      { path: DIST_INDEX, bytes: distIndexBytes.byteLength, sha256: sha256(distIndexBytes) },
-      { path: DIST_TYPES, bytes: distTypesBytes.byteLength, sha256: sha256(distTypesBytes) },
+      { path: DIST_INDEX, ...distributionProjection.get(DIST_INDEX) },
+      { path: DIST_TYPES, ...distributionProjection.get(DIST_TYPES) },
     ].sort((left, right) => compareText(left.path, right.path)),
   });
 }
@@ -1562,6 +1481,7 @@ export async function buildControlPlaneRuntimeTransitionRacesEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeSuiteReceipt", "trackedFileBytes"]),
     "build options",
   );
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const prerequisiteBytes = captureByteOverrides(
     captured.prerequisiteBytes,
     CONTROL_PLANE_RUNTIME_TRANSITION_RACES_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
@@ -1580,10 +1500,10 @@ export async function buildControlPlaneRuntimeTransitionRacesEvidence(options) {
   const [prerequisites, trackedFiles, boundaryAndDistribution, registrations, tests, traceRows] =
     await Promise.all([
       prerequisiteReceipts(prerequisiteBytes),
-      fileReceipts(TRACKED_TASK_FILES, trackedFileBytes),
-      publicBoundaryAndDistributionProjection(trackedFileBytes),
+      fileReceipts(TRACKED_TASK_FILES, trackedFileBytes, frozenArtifact.trackedFiles),
+      publicBoundaryAndDistributionProjection(trackedFileBytes, frozenArtifact.distribution),
       registrationProjection(trackedFileBytes),
-      testProjection(trackedFileBytes),
+      testProjection(trackedFileBytes, frozenArtifact.tests),
       traceProjection(trackedFileBytes),
     ]);
   const { distribution, publicBoundary } = boundaryAndDistribution;

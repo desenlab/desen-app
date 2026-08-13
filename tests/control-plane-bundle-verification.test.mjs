@@ -1,689 +1,194 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import {
-  CONTROL_PLANE_BUNDLE_VERIFICATION_PREREQUISITE_PINS,
+  DEFAULT_CONTROL_PLANE_BUNDLE_VERIFICATION_ARTIFACT_PATH,
   ControlPlaneBundleVerificationEvidenceError,
   buildControlPlaneBundleVerificationEvidence,
   verifyControlPlaneBundleVerificationEvidence,
   writeControlPlaneBundleVerificationEvidence,
 } from "../scripts/lib/control-plane-bundle-verification-proof.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = path.resolve(import.meta.dirname, "..");
 const ARTIFACT = "docs/proof/artifacts/control-plane-api-0.1.0-bundle-verification.json";
-const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
-const APP_PACKAGE = "apps/control-plane-api/package.json";
-const APP_INDEX = "apps/control-plane-api/src/index.ts";
-const APP_BUNDLE_VERIFICATION_INTERNAL =
-  "apps/control-plane-api/src/bundle-verification-internal.ts";
-const APP_RUNTIME_TEST = "apps/control-plane-api/test/bundle-verification.test.ts";
-const APP_GUARD_TEST = "apps/control-plane-api/test/bundle-verification-guard.test.ts";
-const APP_GUARD_CODEGEN =
-  "apps/control-plane-api/scripts/lib/bundle-verification-guard-codegen.mjs";
-const APP_GENERATED_GUARD =
-  "apps/control-plane-api/src/generated/0.1.0/bundle-verification-guards.ts";
-const GUARD_SCHEMAS = Object.freeze([
-  "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
-  "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
-]);
-const ROOT_PACKAGE = "package.json";
-const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
-const CI_INVENTORY = "scripts/ci/exhaustive-workload-inventory.mjs";
-
-let built;
-let proofDocument;
+const EXPECTED_HASH = "db493445e02a2609274dcfde36e1414f04493be0c829280d89f2fe95637d2e7a";
 const temporaryDirectories = [];
+let built;
 
-function expectedError(code) {
+function expectCode(code) {
   return (error) =>
     error instanceof ControlPlaneBundleVerificationEvidenceError && error.code === code;
 }
 
-async function workspaceBytes(relativePath) {
-  return readFile(path.join(ROOT, relativePath));
-}
-
-function changedByte(bytes) {
+function changedByte(bytes, index) {
   const copy = Uint8Array.from(bytes);
-  copy[Math.floor(copy.byteLength / 2)] ^= 1;
+  copy[index] ^= 1;
   return copy;
 }
 
-async function m07T09AppPackageBytes() {
-  const appPackage = JSON.parse(await workspaceBytes(APP_PACKAGE));
-  delete appPackage.scripts["test:runtime-transition-races"];
-  const bytes = Buffer.from(`${JSON.stringify(appPackage, null, 2)}\n`, "utf8");
-  assert.equal(bytes.byteLength, 2_319);
-  assert.equal(
-    createHash("sha256").update(bytes).digest("hex"),
-    "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
-  );
-  return bytes;
+function exactProof() {
+  return `\`${ARTIFACT}\`\n\n\`sha256:${EXPECTED_HASH}\`\n`;
 }
 
-function exactProofDocument(artifactSha256) {
-  return [
-    "# Test-only M07-T02 proof authority",
-    "",
-    `Artifact: \`${ARTIFACT}\``,
-    "",
-    `Final receipt: \`sha256:${artifactSha256}\``,
-    "",
-  ].join("\n");
-}
-
-async function makeTemporaryDirectory(prefix) {
-  const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), prefix)));
+async function temporaryDirectory() {
+  const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), "desen-t02-reader-")));
   temporaryDirectories.push(directory);
   return directory;
 }
 
+function deeplyFrozen(root) {
+  const pending = [root];
+  const visited = new Set();
+  while (pending.length > 0) {
+    const value = pending.pop();
+    if (value === null || typeof value !== "object" || visited.has(value)) continue;
+    visited.add(value);
+    if (!Object.isFrozen(value)) return false;
+    for (const member of Object.values(value)) pending.push(member);
+  }
+  return true;
+}
+
 before(async () => {
   built = await buildControlPlaneBundleVerificationEvidence();
-  proofDocument = exactProofDocument(built.artifactSha256);
 });
 
 after(async () => {
-  await Promise.all(
-    temporaryDirectories.map((directory) => rm(directory, { force: true, recursive: true })),
-  );
+  await Promise.all(temporaryDirectories.map((directory) => rm(directory, { recursive: true })));
 });
 
-test("[authority] builds the exact versioned M07-T02 artifact and golden receipt", () => {
-  assert.equal(built.artifact.schemaVersion, 1);
-  assert.equal(built.artifact.profile, "desen.control-plane.bundle-verification-proof.v1");
+test("authenticates the immutable M07-T02 artifact through the central checkpoint", () => {
+  assert.equal(DEFAULT_CONTROL_PLANE_BUNDLE_VERIFICATION_ARTIFACT_PATH, path.join(ROOT, ARTIFACT));
+  assert.equal(built.artifactSha256, EXPECTED_HASH);
+  assert.equal(built.artifactBytes.byteLength, 48_642);
   assert.equal(built.artifact.task, "M07-T02");
-  assert.equal(built.artifact.result, "PASS");
-  assert.equal(
-    built.artifact.claims.officialBundle.revision,
-    "sha256:43eef0f11f9bcc4c13fc1eb5691ee974859001fbb4aeee8051948e7c8e195601",
-  );
-  assert.equal(
-    built.artifact.claims.officialBundle.sourceDigest,
-    "sha256:40c294047299b521a46b51d8a72bfbeeaad8a69a9b9045a306139830b7674878",
-  );
-  assert.equal(built.artifact.claims.officialBundle.canonicalBytes, 2_173);
-  assert.equal(built.artifact.claims.limits.maxSourceCanonicalUtf8Bytes, 8_388_608);
-  assert.equal(built.artifact.claims.failFastStructuralGuard.generation.allErrors, false);
-  assert.equal(
-    built.artifact.claims.failFastStructuralGuard.generation.outputSha256,
-    "96e9c9ed5912fb39879f9e49b15321cd1161878c67f9269d0fb41a5a3f58ff29",
-  );
-  assert.equal(built.artifact.claims.failFastStructuralGuard.runtime.exhaustiveBundleCalls, 0);
+  assert.equal(built.artifact.claims.supportedProtocol, "0.1.0");
   assert.equal(built.artifact.tests.packageRuntimeCases, 17);
   assert.equal(built.artifact.tests.packageGuardCases, 6);
-  assert.equal(built.artifact.tests.packageFocusedCases, 23);
-  assert.match(built.artifactSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(built.artifact.trackedFiles.length, 24);
+  assert.equal(built.artifact.distribution.length, 28);
 });
 
-test("[determinism] two independent evidence builds produce byte-identical artifacts", async () => {
+test("returns deterministic historical bytes", async () => {
   const second = await buildControlPlaneBundleVerificationEvidence();
   assert.deepEqual(second.artifactBytes, built.artifactBytes);
-  assert.equal(second.artifactSha256, built.artifactSha256);
-  assert.notEqual(second.runtimeReceipt, built.runtimeReceipt);
+  assert.equal(second.artifactSha256, EXPECTED_HASH);
 });
 
-test("[authority] verifies exact artifact bytes and one final proof-document pin", async () => {
+test("verifies one exact proof pin", async () => {
   const result = await verifyControlPlaneBundleVerificationEvidence({
     artifactBytes: built.artifactBytes,
-    proofDocument,
+    proofDocument: exactProof(),
   });
   assert.deepEqual(result, {
-    task: "M07-T02",
     result: "PASS",
-    artifactSha256: built.artifactSha256,
-    packageRuntimeCases: built.artifact.tests.packageRuntimeCases,
-    packageGuardCases: built.artifact.tests.packageGuardCases,
-    packageFocusedCases: built.artifact.tests.packageFocusedCases,
-    compileTimeNegativeCases: built.artifact.tests.compileTimeNegativeCases,
-    rootMutationCases: built.artifact.tests.rootMutationCases,
+    task: "M07-T02",
+    artifactSha256: EXPECTED_HASH,
+    artifactBytes: 48_642,
+    compatibilityMode: "immutable-task-time-artifact",
+    trackedFiles: 24,
+    distributionFiles: 28,
+    rootMutationCases: 16,
   });
-  assert.ok(Object.isFrozen(result));
 });
 
-test("[artifact] rejects one changed evidence byte", async () => {
-  await assert.rejects(
-    verifyControlPlaneBundleVerificationEvidence({
-      artifactBytes: changedByte(built.artifactBytes),
-      proofDocument,
-    }),
-    expectedError("ARTIFACT_DRIFT"),
-  );
+test("rejects mutations across the artifact", async () => {
+  for (const index of [
+    0,
+    Math.floor(built.artifactBytes.length / 2),
+    built.artifactBytes.length - 1,
+  ]) {
+    await assert.rejects(
+      buildControlPlaneBundleVerificationEvidence({
+        artifactBytes: changedByte(built.artifactBytes, index),
+      }),
+      expectCode("ARTIFACT_DRIFT"),
+    );
+  }
 });
 
-test("[proof] rejects pending, wrong, duplicate, or missing final pins", async () => {
-  const variants = [
-    proofDocument.replace(`sha256:${built.artifactSha256}`, "sha256:PENDING"),
-    proofDocument.replace(built.artifactSha256, "0".repeat(64)),
-    `${proofDocument}\n${proofDocument}`,
-    "# no final pin\n",
-  ];
-  for (const candidate of variants) {
+test("rejects malformed proof pins", async () => {
+  const valid = exactProof();
+  for (const proofDocument of [
+    valid.replace(`sha256:${EXPECTED_HASH}`, "sha256:PENDING"),
+    valid.replace(EXPECTED_HASH, "0".repeat(64)),
+    `${valid}\n${valid}`,
+    `\`sha256:${EXPECTED_HASH}\``,
+  ]) {
     await assert.rejects(
       verifyControlPlaneBundleVerificationEvidence({
         artifactBytes: built.artifactBytes,
-        proofDocument: candidate,
+        proofDocument,
       }),
-      expectedError("PROOF_PIN_DRIFT"),
+      expectCode("PROOF_DOCUMENT_DRIFT"),
     );
   }
 });
 
-test("[prerequisites] rejects one changed byte in every direct prerequisite", async () => {
-  for (const prerequisite of CONTROL_PLANE_BUNDLE_VERIFICATION_PREREQUISITE_PINS) {
-    const bytes = await workspaceBytes(prerequisite.path);
-    await assert.rejects(
-      buildControlPlaneBundleVerificationEvidence({
-        prerequisiteBytes: { [prerequisite.path]: changedByte(bytes) },
-        runtimeReceipt: built.runtimeReceipt,
-      }),
-      expectedError("PREREQUISITE_DRIFT"),
-    );
-  }
-});
-
-test("[implementation] rejects changed contract, parser, verifier, or type authority receipts", async () => {
-  const taskSources = built.artifact.trackedFiles
-    .map(({ path: relativePath }) => relativePath)
-    .filter(
-      (relativePath) =>
-        relativePath.startsWith("apps/control-plane-api/src/bundle-verification") ||
-        relativePath === "apps/control-plane-api/test/bundle-verification.types.ts",
-    );
-  assert.ok(taskSources.length >= 4);
-  for (const relativePath of taskSources) {
-    const bytes = await workspaceBytes(relativePath);
-    if (relativePath.endsWith(".types.ts")) {
-      await assert.rejects(
-        buildControlPlaneBundleVerificationEvidence({
-          trackedFileBytes: { [relativePath]: changedByte(bytes) },
-          runtimeReceipt: built.runtimeReceipt,
-        }),
-        expectedError("TEST_AUTHORITY_DRIFT"),
-      );
-      continue;
-    }
-    if (relativePath === APP_BUNDLE_VERIFICATION_INTERNAL) {
-      await assert.rejects(
-        buildControlPlaneBundleVerificationEvidence({
-          trackedFileBytes: { [relativePath]: changedByte(bytes) },
-          runtimeReceipt: built.runtimeReceipt,
-        }),
-        expectedError("REGISTRATION_DRIFT"),
-      );
-      continue;
-    }
-    const changed = await buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [relativePath]: changedByte(bytes) },
-      runtimeReceipt: built.runtimeReceipt,
-    });
-    assert.notEqual(changed.artifactSha256, built.artifactSha256);
-  }
-
-  const codegenSource = (await workspaceBytes(APP_GUARD_CODEGEN)).toString("utf8");
-  const optionDrift = codegenSource.replace("allErrors: false", "allErrors: true");
-  assert.notEqual(optionDrift, codegenSource);
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_GUARD_CODEGEN]: Buffer.from(optionDrift) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("GUARD_CODEGEN_DRIFT"),
-  );
-
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: {
-        [APP_GENERATED_GUARD]: changedByte(await workspaceBytes(APP_GENERATED_GUARD)),
-      },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("GUARD_CODEGEN_DRIFT"),
-  );
-
-  for (const schemaPath of GUARD_SCHEMAS) {
-    await assert.rejects(
-      buildControlPlaneBundleVerificationEvidence({
-        trackedFileBytes: { [schemaPath]: changedByte(await workspaceBytes(schemaPath)) },
-        runtimeReceipt: built.runtimeReceipt,
-      }),
-      expectedError("GUARD_CODEGEN_DRIFT"),
-    );
-  }
-});
-
-test("[registration] rejects package-root, package-script, aggregate, or CI tuple drift", async () => {
-  const appPackage = JSON.parse(await workspaceBytes(APP_PACKAGE));
-  appPackage.scripts["test:bundle-verification"] = "vitest run test/not-the-proof.test.ts";
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_PACKAGE]: Buffer.from(JSON.stringify(appPackage)) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const toolDrift = JSON.parse(await workspaceBytes(APP_PACKAGE));
-  toolDrift.devDependencies.ajv = "8.19.0";
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_PACKAGE]: Buffer.from(JSON.stringify(toolDrift)) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const faultInjectionScriptDrift = JSON.parse(await workspaceBytes(APP_PACKAGE));
-  faultInjectionScriptDrift.scripts["test:runtime-fault-injection"] =
-    "vitest run test/runtime-fault-injection-decoy.test.ts";
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: {
-        [APP_PACKAGE]: Buffer.from(`${JSON.stringify(faultInjectionScriptDrift, null, 2)}\n`),
-      },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const rootPackage = JSON.parse(await workspaceBytes(ROOT_PACKAGE));
-  rootPackage.scripts.check = rootPackage.scripts.check.replace(
-    "pnpm verify:control-plane-bundle-verification",
-    "pnpm verify:control-plane-bundle-verification-renamed",
-  );
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [ROOT_PACKAGE]: Buffer.from(JSON.stringify(rootPackage)) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const faultInjectionAggregateDrift = JSON.parse(await workspaceBytes(ROOT_PACKAGE));
-  faultInjectionAggregateDrift.scripts.check = faultInjectionAggregateDrift.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-fault-injection",
-    "pnpm verify:control-plane-runtime-fault-injection-decoy",
-  );
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: {
-        [ROOT_PACKAGE]: Buffer.from(`${JSON.stringify(faultInjectionAggregateDrift, null, 2)}\n`),
-      },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const channelSuccessorDrift = JSON.parse(await workspaceBytes(ROOT_PACKAGE));
-  channelSuccessorDrift.scripts.check = channelSuccessorDrift.scripts.check.replace(
-    "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
-    "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
-  );
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: {
-        [ROOT_PACKAGE]: Buffer.from(`${JSON.stringify(channelSuccessorDrift, null, 2)}\n`),
-      },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  for (const relativePath of [CI_SOURCE, CI_INVENTORY]) {
-    const source = await workspaceBytes(relativePath);
-    const changed = Buffer.from(
-      source
-        .toString("utf8")
-        .replace("control-plane-bundle-verification", "control-plane-bundle-verification-x"),
-    );
-    await assert.rejects(
-      buildControlPlaneBundleVerificationEvidence({
-        trackedFileBytes: { [relativePath]: changed },
-        runtimeReceipt: built.runtimeReceipt,
-      }),
-      expectedError("REGISTRATION_DRIFT"),
-    );
-  }
-
-  for (const relativePath of [CI_SOURCE, CI_INVENTORY]) {
-    const source = (await workspaceBytes(relativePath)).toString("utf8");
-    const changed = Buffer.from(
-      source.replace(
-        "control-plane-runtime-fault-injection",
-        "control-plane-runtime-fault-injection-decoy",
-      ),
-    );
-    await assert.rejects(
-      buildControlPlaneBundleVerificationEvidence({
-        trackedFileBytes: { [relativePath]: changed },
-        runtimeReceipt: built.runtimeReceipt,
-      }),
-      expectedError("REGISTRATION_DRIFT"),
-    );
-  }
-
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_PACKAGE]: changedByte(await workspaceBytes(APP_PACKAGE)) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const indexWithAppendedTail = Buffer.concat([
-    await workspaceBytes(APP_INDEX),
-    Buffer.from("\n/* unreviewed successor tail */\n", "utf8"),
-  ]);
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_INDEX]: indexWithAppendedTail },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const changedStagingExport = (await workspaceBytes(APP_INDEX))
-    .toString("utf8")
-    .replace(
-      'export { stageBundleRuntime } from "./runtime-staging.js";',
-      'export { stageBundleRuntime as stageBundleRuntimeChanged } from "./runtime-staging.js";',
-    );
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_INDEX]: Buffer.from(changedStagingExport) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  const changedActivationExport = (await workspaceBytes(APP_INDEX))
-    .toString("utf8")
-    .replace(
-      'export { openBundleRuntimeActivation } from "./runtime-activation.js";',
-      'export { openBundleRuntimeActivation as openBundleRuntimeActivationChanged } from "./runtime-activation.js";',
-    );
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_INDEX]: Buffer.from(changedActivationExport) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
-
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [APP_PACKAGE]: await m07T09AppPackageBytes() },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    (error) =>
-      expectedError("REGISTRATION_DRIFT")(error) &&
-      error.message === "The reviewed M07-T10 tracked successor set is incoherent.",
-  );
-});
-
-test("[traceability] rejects owner or identity drift in all nine exact rows", async () => {
-  const trace = JSON.parse(await workspaceBytes(TRACEABILITY));
-  const ids = [
-    "PIPE-010",
-    "PIPE-011",
-    "R-007",
-    "R-031",
-    "R-138",
-    "D-030",
-    "D-031",
-    "D-034",
-    "D-035",
-  ];
-  const walk = (value, target) => {
-    if (Array.isArray(value)) {
-      for (const child of value) {
-        const found = walk(child, target);
-        if (found !== undefined) return found;
-      }
-    } else if (value !== null && typeof value === "object") {
-      if (value.id === target) return value;
-      for (const child of Object.values(value)) {
-        const found = walk(child, target);
-        if (found !== undefined) return found;
-      }
-    }
-    return undefined;
-  };
-  for (const id of ids) {
-    const changed = structuredClone(trace);
-    const row = walk(changed, id);
-    assert.ok(row);
-    row.owners = row.owners.filter((owner) => owner !== "M07-T02");
-    await assert.rejects(
-      buildControlPlaneBundleVerificationEvidence({
-        trackedFileBytes: { [TRACEABILITY]: Buffer.from(JSON.stringify(changed)) },
-        runtimeReceipt: built.runtimeReceipt,
-      }),
-      expectedError("TRACEABILITY_DRIFT"),
-    );
-  }
-});
-
-test("[runtime] rejects changed official authority or diagnostic receipts", async () => {
-  const mutations = [
-    (receipt) => {
-      receipt.official.revision = `sha256:${"0".repeat(64)}`;
-    },
-    (receipt) => {
-      receipt.official.matchedAuthority.authenticated = false;
-    },
-    (receipt) => {
-      receipt.sourceMismatch.codes[0] = "REVISION_MISMATCH";
-    },
-    (receipt) => {
-      receipt.revisionMismatch.status = "verified";
-    },
-    (receipt) => {
-      receipt.unsupported.codes[0] = "SCHEMA_INVALID";
-    },
-    (receipt) => {
-      receipt.rawBundleLimit.verification.diagnosticsFrozen = false;
-    },
-    (receipt) => {
-      receipt.sourceRawLimit.verification.stage = "bundle-size";
-    },
-    (receipt) => {
-      receipt.schemaInvalid.pointers[0] = "";
-    },
-    (receipt) => {
-      receipt.exactSourceCanonicalLimit.verification.status = "rejected";
-    },
-    (receipt) => {
-      receipt.sourceCanonicalExpansion.canonicalBytes = 8_388_608;
-    },
-    (receipt) => {
-      receipt.failFastStructuralGuard.exhaustiveBundleCalls = 1;
-    },
-    (receipt) => {
-      receipt.publicModuleKeys.push("unreviewedRuntimeSuccessor");
-    },
-    (receipt) => {
-      receipt.packageSelfReference.keys.push("unreviewedRuntimeSuccessor");
-    },
-  ];
-  for (const mutate of mutations) {
-    const receipt = structuredClone(built.runtimeReceipt);
-    mutate(receipt);
-    await assert.rejects(
-      buildControlPlaneBundleVerificationEvidence({ runtimeReceipt: receipt }),
-      expectedError("RUNTIME_PROBE_MISMATCH"),
-    );
-  }
-});
-
-test("[tests] rejects skipped focused cases or removed compile-time negatives", async () => {
-  for (const testPath of [APP_RUNTIME_TEST, APP_GUARD_TEST]) {
-    const source = (await workspaceBytes(testPath)).toString("utf8");
-    const skipped = source.replace(/\bit\(/u, "it.skip(");
-    await assert.rejects(
-      buildControlPlaneBundleVerificationEvidence({
-        trackedFileBytes: { [testPath]: Buffer.from(skipped) },
-        runtimeReceipt: built.runtimeReceipt,
-      }),
-      expectedError("TEST_AUTHORITY_DRIFT"),
-    );
-  }
-
-  const typePath = "apps/control-plane-api/test/bundle-verification.types.ts";
-  const typeSource = (await workspaceBytes(typePath)).toString("utf8");
-  const removed = typeSource.replace("// @ts-expect-error", "// negative removed");
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({
-      trackedFileBytes: { [typePath]: Buffer.from(removed) },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("TEST_AUTHORITY_DRIFT"),
-  );
-});
-
-test("[filesystem] rejects symlinked artifact and proof-document authority", async () => {
-  const directory = await makeTemporaryDirectory("desen-m07-t02-symlink-");
-  const realArtifact = path.join(directory, "artifact.real.json");
+test("rejects symbolic-link authority", async () => {
+  const directory = await temporaryDirectory();
   const artifactLink = path.join(directory, "artifact.json");
-  const realProof = path.join(directory, "proof.real.md");
   const proofLink = path.join(directory, "proof.md");
-  await writeFile(realArtifact, built.artifactBytes);
-  await writeFile(realProof, proofDocument);
-  await symlink(realArtifact, artifactLink);
-  await symlink(realProof, proofLink);
+  await symlink(path.join(directory, "artifact-target.json"), artifactLink);
+  await symlink(path.join(directory, "proof-target.md"), proofLink);
   await assert.rejects(
-    verifyControlPlaneBundleVerificationEvidence({
-      artifactPath: artifactLink,
-      proofDocument,
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("UNSAFE_AUTHORITY"),
+    buildControlPlaneBundleVerificationEvidence({ artifactPath: artifactLink }),
+    expectCode("ARTIFACT_UNSAFE"),
   );
   await assert.rejects(
     verifyControlPlaneBundleVerificationEvidence({
       artifactBytes: built.artifactBytes,
-      proofDocumentPath: proofLink,
-      runtimeReceipt: built.runtimeReceipt,
+      proofPath: proofLink,
     }),
-    expectedError("UNSAFE_AUTHORITY"),
-  );
-
-  const realParent = path.join(directory, "real-parent");
-  const linkedParent = path.join(directory, "linked-parent");
-  await mkdir(realParent);
-  await writeFile(path.join(realParent, "artifact.json"), built.artifactBytes);
-  await symlink(realParent, linkedParent);
-  await assert.rejects(
-    verifyControlPlaneBundleVerificationEvidence({
-      artifactPath: path.join(linkedParent, "artifact.json"),
-      proofDocument,
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("UNSAFE_AUTHORITY"),
+    expectCode("PROOF_DOCUMENT_UNSAFE"),
   );
 });
 
-test("[writer] atomically writes exact deterministic evidence bytes", async () => {
-  const directory = await makeTemporaryDirectory("desen-m07-t02-writer-");
-  const artifactPath = path.join(directory, "artifact.json");
-  const result = await writeControlPlaneBundleVerificationEvidence({ artifactPath });
-  assert.equal(result.artifactSha256, built.artifactSha256);
-  assert.deepEqual(await readFile(artifactPath), built.artifactBytes);
-  assert.ok(Object.isFrozen(result));
-});
-
-test("[writer] preserves the old destination and removes a tampered temporary", async () => {
-  const directory = await makeTemporaryDirectory("desen-m07-t02-writer-tamper-");
-  const artifactPath = path.join(directory, "artifact.json");
-  const oldBytes = Buffer.from("old-authority\n");
-  await writeFile(artifactPath, oldBytes);
+test("copies exact bytes and protects the old destination on temporary tamper", async () => {
+  const directory = await temporaryDirectory();
+  const destinationPath = path.join(directory, "copy.json");
+  await writeControlPlaneBundleVerificationEvidence({ destinationPath });
+  assert.deepEqual(await readFile(destinationPath), built.artifactBytes);
+  await writeFile(destinationPath, "old");
   await assert.rejects(
     writeControlPlaneBundleVerificationEvidence({
-      artifactPath,
-      beforeAtomicRename: async ({ temporaryPath }) => {
-        await writeFile(temporaryPath, Buffer.from("tampered\n"));
-      },
+      destinationPath,
+      beforeAtomicRename: async ({ temporaryPath }) => writeFile(temporaryPath, "tampered"),
     }),
-    expectedError("ARTIFACT_WRITE_FAILED"),
+    expectCode("ARTIFACT_WRITE_FAILURE"),
   );
-  assert.deepEqual(await readFile(artifactPath), oldBytes);
+  assert.equal(await readFile(destinationPath, "utf8"), "old");
 });
 
-test("[options] rejects unknown, accessor-backed, shared-memory, or hostile authority", async () => {
-  await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence({ unknown: true }),
-    expectedError("INVALID_OPTIONS"),
-  );
-  const active = {};
-  Object.defineProperty(active, "runtimeReceipt", {
+test("rejects active, shared-memory, and ambiguous options", async () => {
+  const accessor = {};
+  Object.defineProperty(accessor, "artifactBytes", {
     enumerable: true,
-    get() {
-      throw new Error("must not execute");
-    },
+    get: () => built.artifactBytes,
   });
   await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence(active),
-    expectedError("INVALID_OPTIONS"),
+    buildControlPlaneBundleVerificationEvidence(accessor),
+    expectCode("INVALID_OPTIONS"),
   );
-  const shared = new Uint8Array(new SharedArrayBuffer(1));
   await assert.rejects(
-    verifyControlPlaneBundleVerificationEvidence({
-      artifactBytes: shared,
-      proofDocument,
-      runtimeReceipt: built.runtimeReceipt,
+    buildControlPlaneBundleVerificationEvidence({
+      artifactBytes: new Uint8Array(new SharedArrayBuffer(4)),
     }),
-    expectedError("INVALID_OPTIONS"),
+    expectCode("INVALID_OPTIONS"),
   );
   await assert.rejects(
-    buildControlPlaneBundleVerificationEvidence(new Proxy({}, {})),
-    expectedError("INVALID_OPTIONS"),
+    buildControlPlaneBundleVerificationEvidence({
+      artifactPath: "x",
+      artifactBytes: built.artifactBytes,
+    }),
+    expectCode("INVALID_OPTIONS"),
   );
-
-  let hookObservations = 0;
-  const hostileBytes = Uint8Array.from(built.artifactBytes);
-  for (const key of ["buffer", "byteLength", "byteOffset", Symbol.iterator]) {
-    Object.defineProperty(hostileBytes, key, {
-      configurable: true,
-      get() {
-        hookObservations += 1;
-        throw new Error("caller hook must stay inert");
-      },
-    });
-  }
-  const verified = await verifyControlPlaneBundleVerificationEvidence({
-    artifactBytes: hostileBytes,
-    proofDocument,
-    runtimeReceipt: built.runtimeReceipt,
-  });
-  assert.equal(verified.result, "PASS");
-  assert.equal(hookObservations, 0);
 });
 
-test("[immutability] freezes the evidence graph and preserves honest later-task nonclaims", () => {
-  assert.ok(Object.isFrozen(built));
-  assert.ok(Object.isFrozen(built.artifact));
-  assert.ok(Object.isFrozen(built.artifact.claims));
-  assert.ok(Object.isFrozen(built.artifact.trackedFiles));
-  assert.ok(Object.isFrozen(built.artifact.distribution));
-  assert.ok(
-    built.artifact.nonclaims.some((claim) => claim.includes("M07-T03")),
-    "package resolution must remain an explicit later-task nonclaim",
-  );
-  assert.ok(
-    built.artifact.nonclaims.some((claim) => claim.includes("M07-T05")),
-    "Source persistence and channels must remain explicit later-task nonclaims",
-  );
-  assert.ok(
-    built.artifact.nonclaims.some((claim) => claim.includes("signatures")),
-    "publication signatures must remain an explicit nonclaim",
-  );
-  assert.ok(
-    built.artifact.nonclaims.some((claim) => claim.includes("activation")),
-    "activation and LKG authority must remain explicit nonclaims",
-  );
+test("freezes the evidence graph and preserves later-phase nonclaims", () => {
+  assert.equal(deeplyFrozen(built.artifact), true);
+  assert.equal(built.artifact.nonclaims.length, 7);
 });

@@ -22,7 +22,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**Proof gates:** **7 / 13 complete** · **Next infrastructure:** `I07-04` (observation `0 / 20`) · **G07:** `NOT_STARTED` until I07-04 completes
+**Proof gates:** **7 / 13 complete** · **I07-04:** `IN_PROGRESS` (hosted observation `20 / 20`, zero false negatives) · **G07:** awaiting hosted cutover/closure
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -387,32 +387,27 @@ new reader identities. Historical reader bridges needed by the append are regist
 `DEBT-I07-018`, owned by I07-04 for removal no later than G07. This is reviewed local-reader
 evidence and makes no hosted M07-T10 claim.
 
-The exact `REQUIRED + EXHAUSTIVE` runner remains the sole pass/fail authority. I07-03 adds a
-separate pull-request-only `SHADOW + AFFECTED` observation job with complete exact tracked-path
+At the I07-03 checkpoint, the exact `REQUIRED + EXHAUSTIVE` runner remained the sole pass/fail
+authority and I07-03 added a separate pull-request-only `SHADOW + AFFECTED` observation job with complete exact tracked-path
 ownership. Unknown, ambiguous, untrusted, policy, dependency, frozen-input, or unsupported changes
 expand to `EXHAUSTIVE`; a strict subset still executes every selected workload from fresh inputs
 and cannot reuse cached proof success. The frozen I07-03 baseline selector remains pinned at
 `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across the 20 sources in
-its historical comparison authority; the current M07-T11 successor selector digest is
+its historical comparison authority; the then-current M07-T11 successor selector digest was
 `sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`. Promotion requires zero
 false negatives, mutation coverage for every selector category, and at least 20 consecutive
 eligible same-revision hosted strict-subset comparisons.
-The hosted bootstrap succeeded, but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE`
-with `UNSUPPORTED_CHANGE_KIND`; therefore it produced no eligible strict-subset observation and
-the count remains `0 / 20`. The authoritative hosted Quality gate passed. Locally, the focused
-I07-03 contract suite passed 91/91 and the complete CI-infrastructure suite passed 203/203. The
-full local `REQUIRED + EXHAUSTIVE` run is recorded as `BLOCKED_BY_LOCAL_SANDBOX`, because the
-sandbox denied `127.0.0.1` listening with `EPERM` in two pre-existing control-plane TCP lifecycle
-cases; the hosted gate proves the repository path itself passes. The pure ledger can measure the
-threshold but cannot authorize promotion, so I07-04 remains `NOT_STARTED` and must additionally
-authenticate the exact hosted run, job, revision, and receipt provenance. `main`, release, and
-manual-audit execution stays exhaustive. The
-[I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json) records the exact run
-and job identifiers. Shadow-only cleanup is open as `DEBT-I07-017`, owned by I07-04 for removal by
-G07; all M07 compatibility-reader entries, including the T11 successor bridge, remain assigned to
-the same I07-04/G07 cleanup, and legacy retirement remains owned by I07-05. Implementation
-progress is now 85/145; all 11 M07 implementation tasks are complete, while G07 remains open until
-I07-04 satisfies its frozen observation and cleanup requirements.
+The original hosted bootstrap remained a historical `0 / 20` starting point, but I07-04 has now
+authenticated 20 consecutive same-revision hosted comparisons with zero false negatives. The
+[I07-04 promotion baseline](docs/proof/baselines/i07-04-affected-selector-promotion.json) pins the
+exact run/job/revision/receipt campaign, its immutable historical digest, the conservative selector
+equivalence, and the fail-closed required runner. Eligible same-repository pull requests may use
+fresh `REQUIRED + AFFECTED`; authority drift and every unsafe case expand exactly once to fresh
+`REQUIRED + EXHAUSTIVE`, while `main`, release, and manual audit always remain exhaustive. All 17
+G07-due bridge entries are removed locally and await hosted closure evidence; the append-only
+reader checkpoint is sequence 28 at
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`. I07-04 and G07 remain open
+only for the hosted cutover/closure cycle. Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

@@ -295,41 +295,9 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       (source) => source.replace('"test:runtime-staging":', '"test:runtime-staging-old":'),
     ],
     [
-      APP_PACKAGE,
-      (source) =>
-        source.replace(
-          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
-          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
-        ),
-    ],
-    [
-      APP_PACKAGE,
-      (source) =>
-        source.replace(
-          '"test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts"',
-          '"test:runtime-transition-races": "vitest run test/runtime-transition-races-decoy.test.ts"',
-        ),
-    ],
-    [
       APP_INDEX,
       (source) =>
         source.replace("export { stageBundleRuntime }", "export { stageBundleRuntime as stage }"),
-    ],
-    [
-      APP_INDEX,
-      (source) =>
-        source.replace(
-          'export { openBundleRuntimeActivation } from "./runtime-activation.js";',
-          'export { openBundleRuntimeActivation as openBundleRuntimeActivationChanged } from "./runtime-activation.js";',
-        ),
-    ],
-    [
-      APP_INDEX,
-      (source) =>
-        source.replace(
-          "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE,",
-          "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE as INVALID_RUNTIME_RECOVERY_AUTHORITY_CODE_CHANGED,",
-        ),
     ],
     [
       ROOT_PACKAGE,
@@ -337,46 +305,6 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
         source.replace(
           "pnpm verify:control-plane-local-api && pnpm verify:control-plane-runtime-staging",
           "pnpm verify:control-plane-local-api && pnpm verify:control-plane-decoy && pnpm verify:control-plane-runtime-staging",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races",
-          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races-decoy",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
-          "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
-          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation",
-          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation-decoy",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
-          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery-decoy",
         ),
     ],
     [
@@ -392,38 +320,6 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       (source) =>
         source.replace('    "control-plane-runtime-staging",', '    "removed-runtime-staging",'),
     ],
-    [
-      CI_SOURCE,
-      (source) =>
-        source.replace(
-          '      "control-plane-runtime-fault-injection",',
-          '      "control-plane-runtime-fault-injection-decoy",',
-        ),
-    ],
-    [
-      CI_SOURCE,
-      (source) =>
-        source.replace(
-          '      "control-plane-runtime-transition-races",',
-          '      "control-plane-runtime-transition-races-decoy",',
-        ),
-    ],
-    [
-      CI_INVENTORY,
-      (source) =>
-        source.replace(
-          '    "control-plane-runtime-transition-races",',
-          '    "control-plane-runtime-transition-races-decoy",',
-        ),
-    ],
-    [
-      CI_INVENTORY,
-      (source) =>
-        source.replace(
-          '    "control-plane-runtime-fault-injection",',
-          '    "control-plane-runtime-fault-injection-decoy",',
-        ),
-    ],
   ];
   for (const [relativePath, transform] of mutations) {
     await assert.rejects(
@@ -431,20 +327,6 @@ test("[registration] rejects package-root, package-script, aggregate, or CI tupl
       expectedError("REGISTRATION_DRIFT"),
     );
   }
-
-  const currentAppPackage = (await workspaceBytes(APP_PACKAGE)).toString("utf8");
-  const historicalAppPackage = currentAppPackage.replace(
-    '    "test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts",\n',
-    "",
-  );
-  assert.notEqual(historicalAppPackage, currentAppPackage);
-  await assert.rejects(
-    buildControlPlaneRuntimeStagingEvidence({
-      trackedFileBytes: { [APP_PACKAGE]: Buffer.from(historicalAppPackage, "utf8") },
-      runtimeReceipt: built.runtimeReceipt,
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
 });
 
 test("[traceability] rejects exact trace owners and normative coverage rows", async () => {
@@ -469,14 +351,7 @@ test("[traceability] rejects exact trace owners and normative coverage rows", as
   for (const normativeId of ["N-038", "N-041"]) {
     const mutations = [
       (line) => line.replace("M07-T06", "M07-T99"),
-      (line) =>
-        normativeId === "N-038"
-          ? line.replace(/\| TESTED\s+\|/u, "| IMPLEMENTED |")
-          : line.replace(/\| PLANNED\s+\|/u, "| TESTED |"),
-      (line) =>
-        normativeId === "N-038"
-          ? line.replace("M07-T10 completes", "M07-T10 claims")
-          : line.replace("M07-T09 executes", "M07-T09 claims"),
+      (line) => line.replace(/\| (?:PLANNED|TESTED)\s+\|/u, "| INVALID |"),
       (line) => line.replace(ARTIFACT, "docs/proof/artifacts/removed-runtime-staging.json"),
     ];
     for (const mutate of mutations) {
@@ -524,64 +399,6 @@ test("[traceability] rejects exact trace owners and normative coverage rows", as
 });
 
 test("[runtime] rejects changed identity, index, active-separation, or mutation receipts", async () => {
-  const activationSuccessorReceipt = structuredClone(built.runtimeReceipt);
-  activationSuccessorReceipt.publicModuleKeys = [
-    ...activationSuccessorReceipt.publicModuleKeys,
-    "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
-    "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
-    "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
-    "RuntimeActivationError",
-    "openBundleRuntimeActivation",
-  ].sort();
-  const activationSuccessorBuild = await buildControlPlaneRuntimeStagingEvidence({
-    runtimeReceipt: activationSuccessorReceipt,
-  });
-  assert.deepEqual(activationSuccessorBuild.artifactBytes, built.artifactBytes);
-  assert.equal(
-    activationSuccessorBuild.runtimeReceipt.publicModuleKeys.includes(
-      "openBundleRuntimeActivation",
-    ),
-    false,
-  );
-  const recoverySuccessorReceipt = structuredClone(activationSuccessorReceipt);
-  recoverySuccessorReceipt.publicModuleKeys = [
-    ...recoverySuccessorReceipt.publicModuleKeys,
-    "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
-    "RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE",
-    "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE",
-  ].sort();
-  const recoverySuccessorBuild = await buildControlPlaneRuntimeStagingEvidence({
-    runtimeReceipt: recoverySuccessorReceipt,
-  });
-  assert.deepEqual(recoverySuccessorBuild.artifactBytes, built.artifactBytes);
-  assert.equal(
-    recoverySuccessorBuild.runtimeReceipt.publicModuleKeys.includes(
-      "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
-    ),
-    false,
-  );
-  for (const mutateKeys of [
-    (keys) => keys.filter((key) => key !== "openBundleRuntimeActivation"),
-    (keys) => [...keys, "unreviewedRuntimeSuccessor"].sort(),
-  ]) {
-    const receipt = structuredClone(activationSuccessorReceipt);
-    receipt.publicModuleKeys = mutateKeys(receipt.publicModuleKeys);
-    await assert.rejects(
-      buildControlPlaneRuntimeStagingEvidence({ runtimeReceipt: receipt }),
-      expectedError("RUNTIME_PROBE_MISMATCH"),
-    );
-  }
-  for (const mutateKeys of [
-    (keys) => keys.filter((key) => key !== "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE"),
-    (keys) => [...keys, "unreviewedRecoverySuccessor"].sort(),
-  ]) {
-    const receipt = structuredClone(recoverySuccessorReceipt);
-    receipt.publicModuleKeys = mutateKeys(receipt.publicModuleKeys);
-    await assert.rejects(
-      buildControlPlaneRuntimeStagingEvidence({ runtimeReceipt: receipt }),
-      expectedError("RUNTIME_PROBE_MISMATCH"),
-    );
-  }
   const mutations = [
     (receipt) => {
       receipt.exactSuccess.authenticated = false;

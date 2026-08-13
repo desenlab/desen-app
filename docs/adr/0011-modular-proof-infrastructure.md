@@ -326,7 +326,8 @@ comparison-authority sources.
 The implemented observer owns the complete exact tracked-path set and runs only as a separate
 pull-request shadow job. The exact `REQUIRED + EXHAUSTIVE` runner remains unchanged and solely
 authoritative. The initial observation state is honestly `0 / 20`; promotion is false, so I07-04
-remains `NOT_STARTED` until Gate D's threshold passes. `main`, release, and manual-audit execution
+remains `NOT_STARTED` until Gate D's threshold passes. `main` and manual-audit execution, including
+the release process routed through those authorities,
 remain exhaustive. In the hosted bootstrap, the authoritative Quality gate passed and the shadow
 job returned `NOT_ELIGIBLE` → `EXHAUSTIVE` because the bootstrap contained
 `UNSUPPORTED_CHANGE_KIND`. It therefore supplied no eligible strict-subset comparison and left the
@@ -353,8 +354,16 @@ and receipt review authority before required affected execution can be considere
 ### Phase 4 — I07-04: `REQUIRED + AFFECTED`
 
 Only eligible pull requests may adopt affected execution after the frozen I07-03 threshold passes.
-`main`, releases, and manual audits remain required and exhaustive. I07-04 also removes every
+`main` and manual audits, including the release process routed through them, remain required and
+exhaustive. I07-04 also removes every
 G07-due current-reader compatibility shim after its entry-specific closure checks pass.
+
+The authenticated campaign reached 20/20 with zero false negatives. Promotion is bound to the
+fixed historical campaign digest, one same-read current comparison snapshot, an exact tracked-tree
+ownership delta, and a code-owned runner authority. A changed tracked tree cannot inherit affected
+authority: it produces `NOT_ELIGIBLE` and exactly one exhaustive fallback. The local cleanup and
+append-only checkpoint are complete; Phase 4 remains active until PR and post-merge hosted evidence
+are pinned and every G07-due debt entry advances from `REMOVED_PENDING_HOSTED_PROOF` to `CLOSED`.
 
 ### Phase 5 — I07-05: legacy retirement
 
@@ -404,14 +413,17 @@ The legacy system remains present until all applicable gates below have objectiv
 - Every unknown, missing, malformed, ambiguous, or unsupported case demonstrably selects
   `EXHAUSTIVE`.
 - A selected run cannot use a previous checkpoint, build, test, mutation, or proof pass.
-- `main`, release, and manual-audit `EXHAUSTIVE` runs remain required after selector rollout.
+- `main` and manual-audit `EXHAUSTIVE` runs—including the release process routed through those
+  authorities—remain required after selector rollout.
 - Every selector category has mutation evidence, false negatives remain zero, and at least 20
   consecutive eligible same-revision hosted strict-subset affected/exhaustive comparisons agree.
 
 ### Gate E — legacy retirement
 
 - Gates A through D have archived local and hosted evidence.
-- Every relevant entry in `docs/plan/DEBT-REGISTER.md` is `READY_FOR_REMOVAL` or `CLOSED`.
+- Every relevant entry in `docs/plan/DEBT-REGISTER.md` is `READY_FOR_REMOVAL`,
+  `REMOVED_PENDING_HOSTED_PROOF`, or `CLOSED`; the intermediate state already requires zero scoped
+  references and exists only to capture the cleanup commit's hosted evidence.
 - The legacy path has completed one rollback exercise after modular exhaustive execution became
   authoritative.
 - Removing legacy code and workflow wiring passes the entry-specific zero-reference rules, the

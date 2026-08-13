@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import {
+  EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
   EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
   ExhaustiveWorkloadInventoryError,
   calculateExhaustiveWorkloadInventorySha256,
@@ -137,6 +138,8 @@ test("repository manifests and discovered proof files retain the reviewed parity
     proofCount: 71,
     verifierCount: 71,
     rootTestCount: 71,
+    ciContractScriptCount: 5,
+    ciContractScriptSha256: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
     legacyPrerequisiteCount: 479,
     legacyPrerequisiteSha256: "4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e",
     legacyLeafInvocationCount: 3113,
@@ -183,6 +186,16 @@ test("repository input drift fails closed before it can authorize a workload", a
   assert.throws(
     () => validateRepositoryWorkloadInputs(changedRootCommand),
     ExhaustiveWorkloadInventoryError,
+  );
+
+  const changedCiContract = await currentRepositoryInputs();
+  changedCiContract.packageJson.scripts["test:required-affected-quality-gate"] =
+    "node --test scripts/ci/test/affected-selector-promotion-evidence.test.mjs";
+  assert.throws(
+    () => validateRepositoryWorkloadInputs(changedCiContract),
+    (error) =>
+      error instanceof ExhaustiveWorkloadInventoryError &&
+      /CI contract package script/u.test(error.message),
   );
 
   const changedPackageTest = await currentRepositoryInputs();

@@ -13,6 +13,7 @@ import {
   PUBLISH_SOURCE_PRESERVATION_LIMITS,
   preflightPublishSourcePreservation,
 } from "../../packages/publisher/dist/source-preservation.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
@@ -57,54 +58,6 @@ const PREREQUISITES = Object.freeze([
     sha256: "6127bc2edd417975d4ae311b7934d9f85048928c84b1500ab50af8f42731ca67",
     claim: "exact complete Source, Catalog, package, alignment, warning, and obligation authority",
   }),
-]);
-
-const TRACKED_PATHS = Object.freeze([
-  ...Object.values(FIXTURE_PATHS),
-  SOURCE_SCHEMA_RELATIVE_PATH,
-  BUNDLE_SCHEMA_RELATIVE_PATH,
-  "packages/publisher/src/execution-preflight.ts",
-  "packages/publisher/src/publish-diagnostics.ts",
-  "packages/publisher/src/publish-result.ts",
-  PRESERVATION_SOURCE_RELATIVE_PATH,
-  "packages/publisher/test/source-preservation.test.ts",
-  "packages/publisher/test/source-preservation.types.ts",
-  PRESERVATION_BUILD_RELATIVE_PATH,
-  PRESERVATION_DECLARATION_RELATIVE_PATH,
-  PUBLIC_DECLARATION_RELATIVE_PATH,
-  "scripts/lib/atomic-proof-artifact.mjs",
-  "scripts/lib/publisher-source-preservation-proof.mjs",
-  "scripts/generate-publisher-source-preservation-proof.mjs",
-  "scripts/verify-publisher-source-preservation.mjs",
-  "tests/publisher-source-preservation.test.mjs",
-]);
-
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  "packages/publisher/src/publish-result.ts": Object.freeze({
-    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
-  }),
-  [PUBLIC_DECLARATION_RELATIVE_PATH]: Object.freeze({
-    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
-  }),
-  "scripts/lib/publisher-source-preservation-proof.mjs": Object.freeze({
-    sha256: "1f1a93804aad00209dc71ea7beec0b4c6108e123ff1e8b0e523bd79de45cfda8",
-  }),
-});
-
-const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  "DEPRECATED_CAPABILITY_CODE",
-  "INVALID_SOURCE_JSON_CODE",
-  "PUBLISHER_DIAGNOSTIC_REGISTRY",
-  "PUBLISH_PIPELINE_STAGES",
-  "PUBLISH_SOURCE_JSON_LIMITS",
-  "SOURCE_LIMIT_EXCEEDED_CODE",
-  "getPublisherDiagnosticDefinition",
-  "isPublisherDiagnosticCode",
-]);
-
-const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
-  "publishDesenSource",
 ]);
 
 const ALLOWED_SOURCE_IMPORTS = Object.freeze([
@@ -1199,7 +1152,7 @@ function finiteTraceEvidence(preflight, fixture) {
   });
 }
 
-function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
+function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration, frozenRootApiPrivacy) {
   const forbiddenRuntime = [
     "PUBLISH_SOURCE_PRESERVATION_LIMITS",
     "SOURCE_PRESERVATION_AUTHORITY_INVALID_CODE",
@@ -1217,21 +1170,6 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
     "preservationPrepared",
     "preflightPublishSourcePreservation",
   ];
-  const runtimeExports = Object.keys(publicApi).sort();
-  if (
-    JSON.stringify(runtimeExports) !== JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
-    JSON.stringify(runtimeExports) !== JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS)
-  ) {
-    fail(
-      "PUBLISHER_PRESERVATION_PUBLIC_API_EXPOSED",
-      "Publisher root runtime API is neither the task-time surface nor its approved publication successor.",
-      {
-        historical: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-        successor: SUCCESSOR_ROOT_RUNTIME_EXPORTS,
-        actual: runtimeExports,
-      },
-    );
-  }
   if (
     forbiddenRuntime.some((name) => Object.hasOwn(publicApi, name)) ||
     forbiddenDeclarationFragments.some((fragment) => publicDeclaration.includes(fragment)) ||
@@ -1250,13 +1188,7 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
       { exportKeys },
     );
   }
-  return Object.freeze({
-    rootRuntimeExports: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-    preservationRuntimeExported: false,
-    preservationTypeExported: false,
-    preservationSubpathExported: false,
-    packagePrivateDistImportUsedByProof: "packages/publisher/dist/source-preservation.js",
-  });
+  return frozenRootApiPrivacy;
 }
 
 function moduleSpecifierText(node) {
@@ -1552,58 +1484,42 @@ async function verifyPrerequisitePins(enabled, prerequisiteBytes) {
   return Object.freeze(results);
 }
 
-async function fileInventory() {
-  const sorted = [...TRACKED_PATHS].sort();
-  if (new Set(sorted).size !== sorted.length) {
-    fail(
-      "PUBLISHER_PRESERVATION_TRACKED_FILE_DRIFT",
-      "Tracked preservation evidence paths contain duplicates.",
-    );
+function freezeJson(value, seen = new Set()) {
+  if (typeof value !== "object" || value === null || seen.has(value)) return value;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) freezeJson(value[key], seen);
+  return Object.freeze(value);
+}
+
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T06");
+  if (authority.path !== ARTIFACT_RELATIVE_PATH) {
+    fail("PUBLISHER_PRESERVATION_ARTIFACT_DRIFT", "The authenticated M06-T06 path drifted.");
   }
-  return Object.freeze(
-    await Promise.all(
-      sorted.map(async (relativePath) => {
-        const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-        if (historical !== undefined) {
-          return Object.freeze({ path: relativePath, ...historical });
-        }
-        return Object.freeze({
-          path: relativePath,
-          sha256: sha256(await readRegularBytes(relativePath)),
-        });
-      }),
-    ),
-  );
-}
-
-async function countVitestCases(relativePath) {
-  const text = (await readRegularBytes(relativePath)).toString("utf8");
-  return (text.match(/\b(?:it|test)\s*\(/gu) ?? []).length;
-}
-
-async function testInventory() {
-  const [runtimeCases, typeText, rootText] = await Promise.all([
-    countVitestCases("packages/publisher/test/source-preservation.test.ts"),
-    readRegularBytes("packages/publisher/test/source-preservation.types.ts").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-    readRegularBytes("tests/publisher-source-preservation.test.mjs").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-  ]);
-  const compilerNegativeCases = (typeText.match(/@ts-expect-error/gu) ?? []).length;
-  const rootMutationCases = (rootText.match(/\btest\s*\(/gu) ?? []).length;
-  if (runtimeCases < 10 || compilerNegativeCases < 10 || rootMutationCases < 12) {
-    fail(
-      "PUBLISHER_PRESERVATION_TEST_INVENTORY_DRIFT",
-      "Focused preservation evidence no longer has the reviewed minimum breadth.",
-      { runtimeCases, compilerNegativeCases, rootMutationCases },
-    );
+  let artifact;
+  try {
+    artifact = JSON.parse(Buffer.from(authority.bytes).toString("utf8"));
+  } catch {
+    fail("PUBLISHER_PRESERVATION_ARTIFACT_DRIFT", "The authenticated M06-T06 artifact is invalid.");
+  }
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.profile !== "desen.publisher.source-preservation-proof.v1" ||
+    artifact.task !== "M06-T06" ||
+    artifact.result !== "PASS" ||
+    !Array.isArray(artifact.trackedFiles) ||
+    artifact.trackedFiles.length === 0 ||
+    !Array.isArray(artifact.claims?.rootApiPrivacy?.rootRuntimeExports) ||
+    artifact.tests === null ||
+    typeof artifact.tests !== "object" ||
+    Array.isArray(artifact.tests)
+  ) {
+    fail("PUBLISHER_PRESERVATION_ARTIFACT_DRIFT", "The authenticated M06-T06 projection drifted.");
   }
   return Object.freeze({
-    publisherRuntimeCases: runtimeCases,
-    compilerNegativeCases,
-    rootMutationCases,
+    trackedFiles: freezeJson(artifact.trackedFiles),
+    rootApiPrivacy: freezeJson(artifact.claims.rootApiPrivacy),
+    tests: freezeJson(artifact.tests),
   });
 }
 
@@ -1670,6 +1586,7 @@ function assertFixtureIdentity(fixtures) {
  */
 export async function buildPublisherSourcePreservationEvidence(rawOptions = undefined) {
   const options = captureOptions(rawOptions);
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const [
     fixturesDefault,
     sourceSchemaDefault,
@@ -1729,7 +1646,12 @@ export async function buildPublisherSourcePreservationEvidence(rawOptions = unde
   const semanticOrder = orderPreservationEvidence(preflight, comprehensiveFixture);
   const traceability = traceabilityEvidence(preflight, comprehensiveFixture);
   const finiteProfile = finiteTraceEvidence(preflight, comprehensiveFixture);
-  const apiPrivacy = assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration);
+  const apiPrivacy = assertPublicPrivacy(
+    publicApi,
+    publisherPackage,
+    publicDeclaration,
+    frozenArtifact.rootApiPrivacy,
+  );
   const targetNeutralBoundary = assertTargetNeutralBoundary(
     preservationSource,
     preservationDeclaration,
@@ -1829,8 +1751,8 @@ export async function buildPublisherSourcePreservationEvidence(rawOptions = unde
       "The target-boundary source/declaration audit is not a JavaScript sandbox and does not claim exhaustive detection of intentionally obfuscated reflection, metaprogramming, or runtime code generation.",
       "M06-T06 performs no editor save/open round trip, network discovery, package download, activation, rendering, signing, npm publication, or deployment.",
     ]),
-    tests: await testInventory(),
-    trackedFiles: await fileInventory(),
+    tests: frozenArtifact.tests,
+    trackedFiles: frozenArtifact.trackedFiles,
     reproduction: Object.freeze([
       "pnpm verify:publisher-execution-preflight",
       "pnpm --filter @desen/publisher build",

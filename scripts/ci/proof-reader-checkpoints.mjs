@@ -62,15 +62,21 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "aef9881c8fc540873f889a09754e5f2c19adc3c19934ba0fcfcf5e6a12b2da9e",
   "3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d",
   "f7dcc3f74653e739a46434b8fa746f177a9b33cabb874ad9910747dcd46310de",
+  "d6bcdf4a26c4b4fd7ea51c83b92f551ff76a98802381284537516d2969b70137",
+  "0027f8c18eb1837e9998a5c5a998072e8eebec54e4e8edef974129b910134f5b",
+  "bf21a7a600ca9d569d90a8711e4fe857e91beb933d8a3c7289ebfbf0b8a2d87a",
+  "2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
-  6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20,
+  6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
+  25, 25, 25,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
 const MAX_AUTHORITY_BYTES = 16 * 1024 * 1024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
+const DIRECTORY_READ_FLAGS = READ_FLAGS | (fileConstants.O_DIRECTORY ?? 0);
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 
 const ROOT_KEYS = SAFE_OBJECT_FREEZE(["schemaVersion", "profile", "headSha256", "checkpoints"]);
@@ -82,7 +88,7 @@ const CHECKPOINT_KEYS = SAFE_OBJECT_FREEZE([
 ]);
 const ARTIFACT_KEYS = SAFE_OBJECT_FREEZE(["task", "path", "bytes", "sha256"]);
 const READER_KEYS = SAFE_OBJECT_FREEZE(["task", "role", "path", "bytes", "sha256"]);
-const OPTION_KEYS = SAFE_OBJECT_FREEZE(["checkpointBytes", "workspaceRoot"]);
+const OPTION_KEYS = SAFE_OBJECT_FREEZE(["beforeAuthorityOpen", "checkpointBytes", "workspaceRoot"]);
 
 function freezeTaskAuthority(task, artifact, proofLibrary, rootTest) {
   return SAFE_OBJECT_FREEZE({
@@ -302,6 +308,56 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/reference-host-web-channel-consumption-proof.mjs",
     "tests/reference-host-web-channel-consumption.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M06-T02",
+    {
+      path: "docs/proof/artifacts/publisher-0.1.0-catalog-resolution.json",
+      bytes: 10_936,
+      sha256: "02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6",
+    },
+    "scripts/lib/publisher-catalog-resolution-proof.mjs",
+    "tests/publisher-catalog-resolution.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M06-T03",
+    {
+      path: "docs/proof/artifacts/publisher-0.1.0-source-preflight.json",
+      bytes: 12_499,
+      sha256: "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387",
+    },
+    "scripts/lib/publisher-source-preflight-proof.mjs",
+    "tests/publisher-source-preflight.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M06-T04",
+    {
+      path: "docs/proof/artifacts/publisher-0.1.0-capability-preflight.json",
+      bytes: 20_474,
+      sha256: "2c55593b69fd5203d3fe2aeaeb8e59dc70cb4a89c4168605c581c17fd1aad56e",
+    },
+    "scripts/lib/publisher-capability-preflight-proof.mjs",
+    "tests/publisher-capability-preflight.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M06-T06",
+    {
+      path: "docs/proof/artifacts/publisher-0.1.0-source-preservation.json",
+      bytes: 21_723,
+      sha256: "261b820b381a0d0c8005a7baf85e33464f2558bfa2a263b94dcb6fd28ddd38ff",
+    },
+    "scripts/lib/publisher-source-preservation-proof.mjs",
+    "tests/publisher-source-preservation.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M06-T07",
+    {
+      path: "docs/proof/artifacts/publisher-0.1.0-source-normalization.json",
+      bytes: 8_715,
+      sha256: "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e",
+    },
+    "scripts/lib/publisher-source-normalization-proof.mjs",
+    "tests/publisher-source-normalization.test.mjs",
   ),
 ]);
 
@@ -1032,6 +1088,16 @@ function captureOptions(rawOptions) {
       MAX_CHECKPOINT_BYTES,
     );
   }
+  if (
+    captured.beforeAuthorityOpen !== undefined &&
+    (typeof captured.beforeAuthorityOpen !== "function" ||
+      SAFE_UTIL_IS_PROXY(captured.beforeAuthorityOpen))
+  ) {
+    fail(
+      "PROOF_READER_CHECKPOINT_OPTIONS_INVALID",
+      "beforeAuthorityOpen must be one non-proxy test callback.",
+    );
+  }
   return captured;
 }
 
@@ -1057,7 +1123,86 @@ async function canonicalWorkspaceRoot(candidate) {
   return resolved;
 }
 
-async function readRegularAuthority(workspaceRoot, relativePath, maximumBytes) {
+function sameDirectoryIdentity(left, right) {
+  return (
+    left.dev === right.dev &&
+    left.ino === right.ino &&
+    left.mode === right.mode &&
+    left.nlink === right.nlink &&
+    left.size === right.size
+  );
+}
+
+async function openCanonicalDirectory(directoryPath, relativePath, label) {
+  let before;
+  let canonical;
+  let handle;
+  try {
+    before = await lstat(directoryPath);
+    canonical = await realpath(directoryPath);
+    if (!before.isDirectory() || before.isSymbolicLink() || canonical !== directoryPath) {
+      fail(
+        "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
+        `${label} must be one canonical non-symbolic directory.`,
+        { relativePath },
+      );
+    }
+    handle = await open(directoryPath, DIRECTORY_READ_FLAGS);
+    const opened = await handle.stat();
+    if (!opened.isDirectory() || !sameDirectoryIdentity(before, opened)) {
+      fail("PROOF_READER_CHECKPOINT_FILE_UNSAFE", `${label} changed identity while opening.`, {
+        relativePath,
+      });
+    }
+    return { path: directoryPath, handle, opened, label, relativePath };
+  } catch (error) {
+    await handle?.close().catch(() => undefined);
+    if (error instanceof ProofReaderCheckpointError) throw error;
+    fail("PROOF_READER_CHECKPOINT_FILE_UNSAFE", `${label} could not be opened safely.`, {
+      relativePath,
+    });
+  }
+}
+
+async function assertCanonicalDirectoryUnchanged(capture) {
+  let handleAfter;
+  let namedAfter;
+  let canonicalAfter;
+  try {
+    [handleAfter, namedAfter, canonicalAfter] = await Promise.all([
+      capture.handle.stat(),
+      lstat(capture.path),
+      realpath(capture.path),
+    ]);
+  } catch {
+    fail(
+      "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
+      `${capture.label} became unavailable during the authority read.`,
+      { relativePath: capture.relativePath },
+    );
+  }
+  if (
+    !handleAfter.isDirectory() ||
+    !sameDirectoryIdentity(capture.opened, handleAfter) ||
+    !namedAfter.isDirectory() ||
+    namedAfter.isSymbolicLink() ||
+    !sameDirectoryIdentity(capture.opened, namedAfter) ||
+    canonicalAfter !== capture.path
+  ) {
+    fail(
+      "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
+      `${capture.label} changed identity or canonicality during the authority read.`,
+      { relativePath: capture.relativePath },
+    );
+  }
+}
+
+async function readRegularAuthority(
+  workspaceRoot,
+  relativePath,
+  maximumBytes,
+  beforeAuthorityOpen,
+) {
   const absolutePath = path.resolve(workspaceRoot, relativePath);
   const relative = path.relative(workspaceRoot, absolutePath);
   if (
@@ -1072,57 +1217,45 @@ async function readRegularAuthority(workspaceRoot, relativePath, maximumBytes) {
       { relativePath },
     );
   }
-  let canonicalParent;
-  try {
-    canonicalParent = await realpath(path.dirname(absolutePath));
-  } catch {
-    fail(
-      "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
-      "A checkpoint authority parent is missing or unreadable.",
-      { relativePath },
-    );
-  }
-  if (canonicalParent !== path.dirname(absolutePath)) {
-    fail(
-      "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
-      "A checkpoint authority crosses a symbolic parent directory.",
-      { relativePath },
-    );
-  }
-
+  let rootCapture;
+  let parentCapture;
   let before;
-  try {
-    before = await lstat(absolutePath);
-  } catch {
-    fail(
-      "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
-      "A checkpoint authority file is missing or unreadable.",
-      { relativePath },
-    );
-  }
-  if (
-    !before.isFile() ||
-    before.isSymbolicLink() ||
-    before.size <= 0 ||
-    before.size > maximumBytes
-  ) {
-    fail(
-      "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
-      "A checkpoint authority must be one nonempty bounded regular non-symbolic file.",
-      { relativePath },
-    );
-  }
-
   let handle;
   try {
+    rootCapture = await openCanonicalDirectory(
+      workspaceRoot,
+      relativePath,
+      "Checkpoint workspace root",
+    );
+    parentCapture = await openCanonicalDirectory(
+      path.dirname(absolutePath),
+      relativePath,
+      "Checkpoint authority parent",
+    );
+    before = await lstat(absolutePath);
+    if (
+      !before.isFile() ||
+      before.isSymbolicLink() ||
+      before.nlink !== 1 ||
+      before.size <= 0 ||
+      before.size > maximumBytes
+    ) {
+      fail(
+        "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
+        "A checkpoint authority must be one nonempty bounded regular non-symbolic file.",
+        { relativePath },
+      );
+    }
+    await beforeAuthorityOpen?.({ absolutePath, relativePath });
     handle = await open(absolutePath, READ_FLAGS);
     const opened = await handle.stat();
     if (
       !opened.isFile() ||
       opened.dev !== before.dev ||
       opened.ino !== before.ino ||
-      opened.nlink < 1 ||
-      opened.size !== before.size
+      opened.nlink !== 1 ||
+      opened.size !== before.size ||
+      opened.mode !== before.mode
     ) {
       fail(
         "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
@@ -1130,15 +1263,39 @@ async function readRegularAuthority(workspaceRoot, relativePath, maximumBytes) {
         { relativePath },
       );
     }
-    const bytes = await handle.readFile();
+    const capacity = Math.min(opened.size, maximumBytes) + 1;
+    const bounded = Buffer.alloc(capacity);
+    let offset = 0;
+    while (offset < capacity) {
+      const { bytesRead } = await handle.read(bounded, offset, capacity - offset, null);
+      if (bytesRead === 0) break;
+      offset += bytesRead;
+    }
+    if (offset > maximumBytes) {
+      fail(
+        "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
+        "A checkpoint authority exceeded its byte budget while being read.",
+        { relativePath },
+      );
+    }
+    const bytes = bounded.subarray(0, offset);
     const after = await handle.stat();
+    const namedAfter = await lstat(absolutePath);
     if (
       !after.isFile() ||
       after.dev !== opened.dev ||
       after.ino !== opened.ino ||
-      after.nlink < 1 ||
+      after.nlink !== 1 ||
       after.size !== bytes.byteLength ||
-      after.size !== opened.size
+      after.size !== opened.size ||
+      after.mode !== opened.mode ||
+      !namedAfter.isFile() ||
+      namedAfter.isSymbolicLink() ||
+      namedAfter.dev !== opened.dev ||
+      namedAfter.ino !== opened.ino ||
+      namedAfter.nlink !== 1 ||
+      namedAfter.size !== opened.size ||
+      namedAfter.mode !== opened.mode
     ) {
       fail(
         "PROOF_READER_CHECKPOINT_FILE_UNSAFE",
@@ -1146,6 +1303,8 @@ async function readRegularAuthority(workspaceRoot, relativePath, maximumBytes) {
         { relativePath },
       );
     }
+    await assertCanonicalDirectoryUnchanged(parentCapture);
+    await assertCanonicalDirectoryUnchanged(rootCapture);
     return bytes;
   } catch (error) {
     if (error instanceof ProofReaderCheckpointError) throw error;
@@ -1156,6 +1315,8 @@ async function readRegularAuthority(workspaceRoot, relativePath, maximumBytes) {
     );
   } finally {
     await handle?.close().catch(() => undefined);
+    await parentCapture?.handle.close().catch(() => undefined);
+    await rootCapture?.handle.close().catch(() => undefined);
   }
 }
 
@@ -1182,14 +1343,24 @@ export async function verifyProofReaderCheckpoints(rawOptions = undefined) {
   const workspaceRoot = await canonicalWorkspaceRoot(options.workspaceRoot);
   const checkpointBytes =
     options.checkpointBytes ??
-    (await readRegularAuthority(workspaceRoot, CHECKPOINT_RELATIVE_PATH, MAX_CHECKPOINT_BYTES));
+    (await readRegularAuthority(
+      workspaceRoot,
+      CHECKPOINT_RELATIVE_PATH,
+      MAX_CHECKPOINT_BYTES,
+      options.beforeAuthorityOpen,
+    ));
   const manifest = validateProofReaderCheckpointBytes(checkpointBytes);
   const head = manifest.checkpoints[manifest.checkpoints.length - 1];
 
   let artifactIndex = 0;
   while (artifactIndex < head.artifacts.length) {
     const receipt = head.artifacts[artifactIndex];
-    const bytes = await readRegularAuthority(workspaceRoot, receipt.path, MAX_AUTHORITY_BYTES);
+    const bytes = await readRegularAuthority(
+      workspaceRoot,
+      receipt.path,
+      MAX_AUTHORITY_BYTES,
+      options.beforeAuthorityOpen,
+    );
     assertLiveReceipt(bytes, receipt, "PROOF_READER_CHECKPOINT_ARTIFACT_DRIFT", "frozen artifact");
     artifactIndex += 1;
   }
@@ -1197,7 +1368,12 @@ export async function verifyProofReaderCheckpoints(rawOptions = undefined) {
   let readerIndex = 0;
   while (readerIndex < head.readers.length) {
     const receipt = head.readers[readerIndex];
-    const bytes = await readRegularAuthority(workspaceRoot, receipt.path, MAX_AUTHORITY_BYTES);
+    const bytes = await readRegularAuthority(
+      workspaceRoot,
+      receipt.path,
+      MAX_AUTHORITY_BYTES,
+      options.beforeAuthorityOpen,
+    );
     assertLiveReceipt(bytes, receipt, "PROOF_READER_CHECKPOINT_READER_DRIFT", "proof reader");
     readerIndex += 1;
   }
@@ -1209,5 +1385,51 @@ export async function verifyProofReaderCheckpoints(rawOptions = undefined) {
     checkpoints: manifest.checkpoints.length,
     frozenArtifacts: head.artifacts.length,
     currentReaders: head.readers.length,
+  });
+}
+
+/**
+ * Authenticates the reviewed checkpoint and returns one immutable frozen-artifact projection.
+ * Historical readers use this instead of carrying reader-local task-time receipt maps.
+ */
+export async function readCheckpointedFrozenArtifact(task, rawOptions = undefined) {
+  if (typeof task !== "string" || task.length === 0) {
+    fail("PROOF_READER_CHECKPOINT_OPTIONS_INVALID", "Frozen artifact task must be non-empty.");
+  }
+  const options = captureOptions(rawOptions);
+  const workspaceRoot = await canonicalWorkspaceRoot(options.workspaceRoot);
+  const checkpointBytes =
+    options.checkpointBytes ??
+    (await readRegularAuthority(
+      workspaceRoot,
+      CHECKPOINT_RELATIVE_PATH,
+      MAX_CHECKPOINT_BYTES,
+      options.beforeAuthorityOpen,
+    ));
+  const manifest = validateProofReaderCheckpointBytes(checkpointBytes);
+  const head = manifest.checkpoints[manifest.checkpoints.length - 1];
+  const matches = head.artifacts.filter((receipt) => receipt.task === task);
+  if (matches.length !== 1) {
+    fail(
+      "PROOF_READER_CHECKPOINT_ARTIFACT_IDENTITY_DRIFT",
+      `Checkpoint must own one frozen artifact for task "${task}".`,
+      { task, matches: matches.length },
+    );
+  }
+  const receipt = matches[0];
+  const bytes = await readRegularAuthority(
+    workspaceRoot,
+    receipt.path,
+    MAX_AUTHORITY_BYTES,
+    options.beforeAuthorityOpen,
+  );
+  assertLiveReceipt(bytes, receipt, "PROOF_READER_CHECKPOINT_ARTIFACT_DRIFT", "frozen artifact");
+  return SAFE_OBJECT_FREEZE({
+    task: receipt.task,
+    path: receipt.path,
+    bytes: captureInertBytes(bytes, "frozen artifact", MAX_AUTHORITY_BYTES),
+    byteLength: receipt.bytes,
+    sha256: receipt.sha256,
+    checkpointHeadSha256: manifest.headSha256,
   });
 }

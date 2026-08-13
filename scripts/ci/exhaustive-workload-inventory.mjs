@@ -75,6 +75,26 @@ const EXPECTED_CHECK_SUFFIX = SAFE_OBJECT_FREEZE([
   "pnpm test",
   "pnpm boundaries",
 ]);
+const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
+  [
+    ["ci:required", "node scripts/ci/run-required-affected-quality-gate.mjs"],
+    ["test:ci-quality-gate", "node --test scripts/test/ci-quality-gate.test.mjs"],
+    [
+      "verify:affected-selector-promotion-evidence",
+      "node scripts/ci/verify-affected-selector-promotion-evidence.mjs",
+    ],
+    [
+      "test:affected-selector-promotion-evidence",
+      "node --test scripts/ci/test/affected-selector-promotion-evidence.test.mjs",
+    ],
+    [
+      "test:required-affected-quality-gate",
+      "node --test scripts/ci/test/required-affected-quality-gate.test.mjs",
+    ],
+  ].map(([name, command]) => SAFE_OBJECT_FREEZE({ name, command })),
+);
+export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
+  "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
   "4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
@@ -600,6 +620,27 @@ function splitRootScript(script, label) {
     fail(label + " is missing or exceeds its bound.");
   }
   return script.split(" && ").map((command) => command.trim());
+}
+
+function validateCiContractScripts(scripts) {
+  const projection = EXPECTED_CI_CONTRACT_SCRIPTS.map(({ name, command }) => {
+    const actual = scripts[name];
+    if (actual !== command) {
+      fail("The CI contract package script " + name + " drifted from review.", {
+        expected: command,
+        actual,
+      });
+    }
+    return { name, command: actual };
+  });
+  const sha256 = createHash("sha256").update(SAFE_JSON_STRINGIFY(projection)).digest("hex");
+  if (sha256 !== EXPECTED_CI_CONTRACT_SCRIPT_SHA256) {
+    fail("The reviewed CI contract package-script inventory drifted.", {
+      expected: EXPECTED_CI_CONTRACT_SCRIPT_SHA256,
+      actual: sha256,
+    });
+  }
+  return { count: projection.length, sha256 };
 }
 
 function expandRootScript(scripts, scriptName, ancestors = []) {
@@ -1141,6 +1182,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
   );
   const proofIndexById = new Map(proofIds.map((id, index) => [id, index]));
   const prerequisiteInventory = [];
+  const ciContractScripts = validateCiContractScripts(scripts);
 
   assertUnique(proofIds, "Proof ids");
   assertUnique(expectedVerifierFiles, "Proof verifier files");
@@ -1284,6 +1326,8 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
     proofCount: proofIds.length,
     verifierCount: verifierFiles.length,
     rootTestCount: rootTestFiles.length,
+    ciContractScriptCount: ciContractScripts.count,
+    ciContractScriptSha256: ciContractScripts.sha256,
     legacyPrerequisiteCount: prerequisiteInventory.reduce(
       (count, entry) => count + entry.verify.length + entry.test.length,
       0,

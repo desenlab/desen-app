@@ -12,7 +12,9 @@ export async function main() {
   const counts = receipt.statusCounts;
   process.stdout.write(
     `Infrastructure debt verified: ${receipt.entries} entries ` +
-      `(${counts.OPEN} open, ${counts.READY_FOR_REMOVAL} ready, ${counts.CLOSED} closed).\n`,
+      `(${counts.OPEN} open, ${counts.READY_FOR_REMOVAL} ready, ` +
+      `${counts.REMOVED_PENDING_HOSTED_PROOF} removed pending hosted proof, ` +
+      `${counts.CLOSED} closed).\n`,
   );
   return receipt;
 }

@@ -5,7 +5,7 @@ import {
   fstatSync,
   lstatSync,
   openSync,
-  readFileSync,
+  readSync,
 } from "node:fs";
 import path from "node:path";
 import { types as utilTypes } from "node:util";
@@ -120,6 +120,7 @@ export const SHADOW_AFFECTED_COMPARISON_AUTHORITY_PATHS = SAFE_OBJECT_FREEZE([
   "turbo.json",
   "dependency-cruiser.config.cjs",
   "scripts/ci/affected-change-boundary.mjs",
+  "scripts/ci/affected-selector-promotion-evidence.mjs",
   "scripts/ci/affected-impact-graph.mjs",
   "scripts/ci/affected-observation-threshold.json",
   "scripts/ci/affected-observation-threshold.mjs",
@@ -130,7 +131,7 @@ export const SHADOW_AFFECTED_COMPARISON_AUTHORITY_PATHS = SAFE_OBJECT_FREEZE([
   "scripts/ci/no-proof-listener.cjs",
   "scripts/ci/proof-filesystem-compatibility.cjs",
   "scripts/ci/run-required-exhaustive-quality-gate.mjs",
-  "scripts/ci/run-shadow-affected-quality-gate.mjs",
+  "scripts/ci/run-required-affected-quality-gate.mjs",
   "scripts/ci/shared-state-authority.mjs",
 ]);
 
@@ -260,7 +261,7 @@ function captureComparisonAuthoritySource(relativePath) {
   let descriptor;
   try {
     const pathBefore = lstatSync(absolutePath, { bigint: true });
-    if (!pathBefore.isFile() || pathBefore.isSymbolicLink()) {
+    if (!pathBefore.isFile() || pathBefore.isSymbolicLink() || pathBefore.nlink !== 1n) {
       fail(
         "AFFECTED_SELECTOR_SOURCE_UNSAFE",
         `Comparison-authority source "${relativePath}" is not a regular non-symbolic file.`,
@@ -268,7 +269,7 @@ function captureComparisonAuthoritySource(relativePath) {
     }
     descriptor = openSync(absolutePath, SOURCE_READ_FLAGS);
     const before = fstatSync(descriptor, { bigint: true });
-    if (!before.isFile() || !sameSourceStat(pathBefore, before)) {
+    if (!before.isFile() || before.nlink !== 1n || !sameSourceStat(pathBefore, before)) {
       fail(
         "AFFECTED_SELECTOR_SOURCE_DRIFT",
         `Comparison-authority source "${relativePath}" changed before it could be read.`,
@@ -280,15 +281,32 @@ function captureComparisonAuthoritySource(relativePath) {
         `Comparison-authority source "${relativePath}" exceeds the byte limit.`,
       );
     }
-    const bytes = readFileSync(descriptor);
+    const capacity = Number(before.size) + 1;
+    const bounded = Buffer.alloc(capacity);
+    let offset = 0;
+    while (offset < capacity) {
+      const bytesRead = readSync(descriptor, bounded, offset, capacity - offset, null);
+      if (bytesRead === 0) break;
+      offset += bytesRead;
+    }
+    if (offset > MAXIMUM_COMPARISON_SOURCE_BYTES) {
+      fail(
+        "AFFECTED_SELECTOR_SOURCE_LIMIT",
+        `Comparison-authority source "${relativePath}" exceeded the byte limit while reading.`,
+      );
+    }
+    const bytes = bounded.subarray(0, offset);
     const after = fstatSync(descriptor, { bigint: true });
     const pathAfter = lstatSync(absolutePath, { bigint: true });
     if (
       !pathAfter.isFile() ||
       pathAfter.isSymbolicLink() ||
+      after.nlink !== 1n ||
+      pathAfter.nlink !== 1n ||
       !sameSourceStat(before, after) ||
       !sameSourceStat(after, pathAfter) ||
-      BigInt(bytes.byteLength) !== after.size
+      BigInt(bytes.byteLength) !== after.size ||
+      bytes.byteLength > MAXIMUM_COMPARISON_SOURCE_BYTES
     ) {
       fail(
         "AFFECTED_SELECTOR_SOURCE_DRIFT",

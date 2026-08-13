@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -19,7 +20,6 @@ const APP_PACKAGE = "apps/control-plane-api/package.json";
 const APP_INDEX = "apps/control-plane-api/src/index.ts";
 const APP_SQLITE = "apps/control-plane-api/src/runtime-activation-sqlite-internal.ts";
 const APP_TEST = "apps/control-plane-api/test/runtime-transition-races.test.ts";
-const ROOT_PACKAGE = "package.json";
 const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
 const CI_INVENTORY = "scripts/ci/exhaustive-workload-inventory.mjs";
 const SHARED_STATE_AUTHORITY = "scripts/ci/shared-state-authority.mjs";
@@ -214,6 +214,19 @@ test("[determinism] two independent evidence builds are byte-identical", async (
   assert.notEqual(second.runtimeSuiteReceipt, built.runtimeSuiteReceipt);
 });
 
+test("[checkpoint] reconstructs only the centrally authenticated immutable M07-T10 artifact", async () => {
+  const committedArtifact = await workspaceBytes(ARTIFACT);
+  assert.equal(
+    createHash("sha256").update(committedArtifact).digest("hex"),
+    "f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39",
+  );
+  assert.equal(
+    built.artifactSha256,
+    "f5f10dd422f9e1fc7ca4445b84bf192280e59fb747d8d2ed40357cba3ebc0f39",
+  );
+  assert.deepEqual(built.artifactBytes, committedArtifact);
+});
+
 test("[prerequisites] rejects drift in every immutable M07-T01 through M07-T09 artifact", async () => {
   for (const prerequisite of CONTROL_PLANE_RUNTIME_TRANSITION_RACES_PREREQUISITE_PINS) {
     await assert.rejects(
@@ -331,22 +344,6 @@ test("[registration] binds every captured CI byte source to its executable autho
       expectedError("REGISTRATION_DRIFT"),
     );
   }
-  await assert.rejects(
-    buildControlPlaneRuntimeTransitionRacesEvidence({
-      runtimeSuiteReceipt: suiteReceipt(),
-      trackedFileBytes: {
-        [ROOT_PACKAGE]: Buffer.from(
-          (await workspaceBytes(ROOT_PACKAGE))
-            .toString("utf8")
-            .replace(
-              "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
-              "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
-            ),
-        ),
-      },
-    }),
-    expectedError("REGISTRATION_DRIFT"),
-  );
 });
 
 test("[traceability] rejects every missing M07-T10 assignment and one extra assignment", async () => {

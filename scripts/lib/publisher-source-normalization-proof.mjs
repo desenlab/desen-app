@@ -20,6 +20,7 @@ import {
   preflightPublishSourceNormalization,
 } from "../../packages/publisher/dist/source-normalization.js";
 import { preflightPublishSourcePreservation } from "../../packages/publisher/dist/source-preservation.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -32,8 +33,6 @@ const PUBLIC_DECLARATION = "packages/publisher/dist/index.d.ts";
 const PUBLISHER_PACKAGE = "packages/publisher/package.json";
 const ROOT_PACKAGE = "package.json";
 const CI_SOURCE = "scripts/run-ci-quality-gate.mjs";
-const RUNTIME_TEST = "packages/publisher/test/source-normalization.test.ts";
-const TYPE_TEST = "packages/publisher/test/source-normalization.types.ts";
 const ROOT_TEST = "tests/publisher-source-normalization.test.mjs";
 const SOURCE_SCHEMA = "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json";
 const BUNDLE_SCHEMA = "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json";
@@ -57,50 +56,6 @@ export const PUBLISHER_SOURCE_NORMALIZATION_PREREQUISITE_PINS = Object.freeze([
   }),
 ]);
 
-const TRACKED = Object.freeze([
-  ...Object.values(FIXTURES),
-  SOURCE_SCHEMA,
-  BUNDLE_SCHEMA,
-  TRACEABILITY,
-  SOURCE,
-  "packages/publisher/src/publish-result.ts",
-  "packages/publisher/src/source-preservation.ts",
-  RUNTIME_TEST,
-  TYPE_TEST,
-  DISTRIBUTION,
-  DECLARATION,
-  PUBLIC_DECLARATION,
-  "scripts/lib/atomic-proof-artifact.mjs",
-  "scripts/lib/publisher-source-normalization-proof.mjs",
-  "scripts/generate-publisher-source-normalization-proof.mjs",
-  "scripts/verify-publisher-source-normalization.mjs",
-  ROOT_TEST,
-]);
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  "packages/publisher/src/publish-result.ts": Object.freeze({
-    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
-  }),
-  [PUBLIC_DECLARATION]: Object.freeze({
-    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
-  }),
-  "scripts/lib/publisher-source-normalization-proof.mjs": Object.freeze({
-    sha256: "088c89780561a3ed2c20f2a76e60b4009e80a880efdf3ed4e05fb8e51c19504d",
-  }),
-});
-const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  "DEPRECATED_CAPABILITY_CODE",
-  "INVALID_SOURCE_JSON_CODE",
-  "PUBLISHER_DIAGNOSTIC_REGISTRY",
-  "PUBLISH_PIPELINE_STAGES",
-  "PUBLISH_SOURCE_JSON_LIMITS",
-  "SOURCE_LIMIT_EXCEEDED_CODE",
-  "getPublisherDiagnosticDefinition",
-  "isPublisherDiagnosticCode",
-]);
-const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
-  "publishDesenSource",
-]);
 const PARTIALS = Object.freeze([
   "bundle",
   "value",
@@ -187,40 +142,6 @@ const OWNED_TRACE_ROWS = Object.freeze([
   "R-107",
   "R-124",
 ]);
-const EXPECTED_ROOT_TEST_NAMES = Object.freeze([
-  "accepts the real deterministic M06-T07 normalization evidence",
-  "two independent evidence builds are byte-identical",
-  "rejects one-byte artifact tampering",
-  "rejects one-byte drift in each exact prerequisite",
-  "rejects a normalizer whose output depends on root authoring",
-  "rejects a forged or authoring-dependent Source digest",
-  "rejects recursive over-deletion of nested authoring",
-  "rejects semantic extension-array reordering",
-  "rejects schema-default injection and empty-member rewriting",
-  "rejects a normalizer that ignores canonical-byte ceilings",
-  "rejects partial authority leaked from a later failure",
-  "rejects remapping of an inherited failure",
-  "rejects cloning of an exact predecessor authority in production source",
-  "rejects target-platform and unreviewed imports in production source",
-  "rejects private declaration or package-root API leakage",
-  "rejects a private package-subpath export",
-  "rejects missing private declaration contract fields",
-  "rejects package and root registration drift",
-  "rejects focused or independent test-inventory erosion",
-  "rejects single-pass CI proof-tuple drift",
-  "rejects protocol traceability ownership drift",
-  "rejects proof-document path, semantic marker, or hash drift",
-  "accepts an injected exact proof-document pin",
-  "atomic writer rejects a symlink destination",
-  "atomic writer rejects temporary-byte tampering before rename",
-  "rejects unknown or accessor-backed evidence options",
-]);
-const REVIEWED_TEST_SOURCE_SHA256 = Object.freeze({
-  runtime: "9648619beda688c7598b0d68a5773e0c7ff4063a64b1656c4a897fd5c134de02",
-  types: "a91afdc1c8ad1b7518e5eda138321b7bf1e3734342e5b4ff219ab4bb3edb5213",
-  root: "f4a69cb9f7c21d9499fe0c1ce3000b18eb0199a8752c70511318ba4c2ba4378a",
-});
-
 export const DEFAULT_PUBLISHER_SOURCE_NORMALIZATION_ARTIFACT_PATH = path.join(ROOT, ARTIFACT);
 
 export class PublisherSourceNormalizationEvidenceError extends Error {
@@ -447,9 +368,6 @@ function capture(value) {
     "rootPackage",
     "ciSource",
     "traceability",
-    "runtimeTest",
-    "typeTest",
-    "rootTest",
   ]);
   if (!ordinaryDataObject(value)) {
     fail("PUBLISHER_NORMALIZATION_OPTIONS_INVALID", "Options must be an own-data object.");
@@ -496,9 +414,6 @@ function assertOptionTypes(options) {
     "normalizationDeclaration",
     "publicDeclaration",
     "ciSource",
-    "runtimeTest",
-    "typeTest",
-    "rootTest",
   ]) {
     if (options[key] !== undefined && typeof options[key] !== "string") {
       fail("PUBLISHER_NORMALIZATION_OPTIONS_INVALID", `${key} must be text.`);
@@ -1102,11 +1017,8 @@ function staticBoundary(
   const exportKeys = Object.keys(publisherPackage.exports ?? {});
   const rootExport = publisherPackage.exports?.["."];
   const dependencies = Object.keys(publisherPackage.dependencies ?? {}).sort();
-  const runtimeExports = Object.keys(publicApi).sort();
   if (
     leaked.length > 0 ||
-    (canonicalizeJson(runtimeExports) !== canonicalizeJson(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
-      canonicalizeJson(runtimeExports) !== canonicalizeJson(SUCCESSOR_ROOT_RUNTIME_EXPORTS)) ||
     canonicalizeJson(exportKeys) !== canonicalizeJson(["."]) ||
     !ordinaryDataObject(rootExport) ||
     canonicalizeJson(rootExport) !==
@@ -1115,7 +1027,6 @@ function staticBoundary(
   ) {
     fail("PUBLISHER_NORMALIZATION_BOUNDARY_DRIFT", "Package-root privacy drifted.", {
       leaked,
-      runtimeExports,
       exportKeys,
       rootExport,
       dependencies,
@@ -1193,136 +1104,49 @@ function registrations(rootPackage, publisherPackage, ciSource) {
     ciTupleExact: true,
   });
 }
-async function inventory() {
-  const sorted = [...TRACKED].sort();
-  if (new Set(sorted).size !== sorted.length) {
-    fail("PUBLISHER_NORMALIZATION_TRACKED_FILE_DRIFT", "Tracked paths contain duplicates.");
-  }
-  return Promise.all(
-    sorted.map(async (relative) => {
-      const historical = HISTORICAL_TRACKED_RECEIPTS[relative];
-      if (historical !== undefined) {
-        return Object.freeze({ path: relative, ...historical });
-      }
-      return Object.freeze({
-        path: relative,
-        sha256: hash(await bytes(relative)),
-      });
-    }),
-  );
+function freezeJson(value, seen = new Set()) {
+  if (typeof value !== "object" || value === null || seen.has(value)) return value;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) freezeJson(value[key], seen);
+  return Object.freeze(value);
 }
 
-function authenticateRootTestSemantics(rootTest) {
-  const ast = ts.createSourceFile(
-    ROOT_TEST,
-    rootTest,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.JS,
-  );
-  if (ast.parseDiagnostics.length > 0) {
-    fail("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT", "Root mutation tests do not parse.");
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T07");
+  if (authority.path !== ARTIFACT) {
+    fail("PUBLISHER_NORMALIZATION_ARTIFACT_DRIFT", "The authenticated M06-T07 path drifted.");
   }
-  const tests = new Map();
-  for (const statement of ast.statements) {
-    if (
-      !ts.isExpressionStatement(statement) ||
-      !ts.isCallExpression(statement.expression) ||
-      !ts.isIdentifier(statement.expression.expression) ||
-      statement.expression.expression.text !== "test" ||
-      statement.expression.arguments.length < 2 ||
-      !ts.isStringLiteralLike(statement.expression.arguments[0]) ||
-      (!ts.isArrowFunction(statement.expression.arguments[1]) &&
-        !ts.isFunctionExpression(statement.expression.arguments[1]))
-    ) {
-      continue;
-    }
-    const name = statement.expression.arguments[0].text;
-    if (tests.has(name)) {
-      fail("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT", `Duplicate root mutation test: ${name}`);
-    }
-    const callback = statement.expression.arguments[1];
-    const assertionMethods = new Set();
-    function inspect(node) {
-      if (
-        ts.isCallExpression(node) &&
-        ts.isPropertyAccessExpression(node.expression) &&
-        ts.isIdentifier(node.expression.expression) &&
-        node.expression.expression.text === "assert"
-      ) {
-        assertionMethods.add(node.expression.name.text);
-      }
-      ts.forEachChild(node, inspect);
-    }
-    inspect(callback.body);
-    tests.set(name, assertionMethods);
-  }
-  const observed = [...tests.keys()].sort();
-  const expected = [...EXPECTED_ROOT_TEST_NAMES].sort();
-  if (canonicalizeJson(observed) !== canonicalizeJson(expected)) {
+  let artifact;
+  try {
+    artifact = JSON.parse(Buffer.from(authority.bytes).toString("utf8"));
+  } catch {
     fail(
-      "PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT",
-      "Root mutation test-name inventory drifted.",
-      { observed, expected },
-    );
-  }
-  for (const [name, assertions] of tests) {
-    if (
-      assertions.size === 0 ||
-      ((name.startsWith("rejects ") || name.includes(" rejects ")) && !assertions.has("rejects"))
-    ) {
-      fail(
-        "PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT",
-        `Root mutation test lost its executable assertion: ${name}`,
-      );
-    }
-  }
-  return Object.freeze({
-    exactNamedCases: tests.size,
-    everyCaseContainsAnAssertion: true,
-    rejectionCasesContainAssertRejects: true,
-  });
-}
-
-function testInventory(runtimeTest, typeTest, rootTest) {
-  const publisherRuntimeCases = (runtimeTest.match(/^\s*(?:it|test)\s*\(/gmu) ?? []).length;
-  const compilerNegativeCases = (typeTest.match(/@ts-expect-error/gu) ?? []).length;
-  const rootMutationCases = (rootTest.match(/^\s*test\s*\(/gmu) ?? []).length;
-  const reviewedSha256 = Object.freeze({
-    runtime: hash(Buffer.from(runtimeTest, "utf8")),
-    types: hash(Buffer.from(typeTest, "utf8")),
-    root: hash(Buffer.from(rootTest, "utf8")),
-  });
-  if (publisherRuntimeCases < 17 || compilerNegativeCases < 52 || rootMutationCases < 26) {
-    fail(
-      "PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT",
-      "Source-normalization tests fell below the reviewed minimum breadth.",
-      { publisherRuntimeCases, compilerNegativeCases, rootMutationCases },
+      "PUBLISHER_NORMALIZATION_ARTIFACT_DRIFT",
+      "The authenticated M06-T07 artifact is invalid.",
     );
   }
   if (
-    reviewedSha256.runtime !== REVIEWED_TEST_SOURCE_SHA256.runtime ||
-    reviewedSha256.types !== REVIEWED_TEST_SOURCE_SHA256.types ||
-    reviewedSha256.root !== REVIEWED_TEST_SOURCE_SHA256.root
+    artifact?.schemaVersion !== 1 ||
+    artifact.profile !== "desen.publisher.source-normalization-proof.v1" ||
+    artifact.task !== "M06-T07" ||
+    artifact.result !== "PASS" ||
+    !Array.isArray(artifact.trackedFiles) ||
+    artifact.trackedFiles.length === 0 ||
+    artifact.tests === null ||
+    typeof artifact.tests !== "object" ||
+    Array.isArray(artifact.tests)
   ) {
-    fail(
-      "PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT",
-      "Reviewed focused, compiler-negative, or root mutation test semantics drifted.",
-      { expected: REVIEWED_TEST_SOURCE_SHA256, observed: reviewedSha256 },
-    );
+    fail("PUBLISHER_NORMALIZATION_ARTIFACT_DRIFT", "The authenticated M06-T07 projection drifted.");
   }
-  const rootSemantics = authenticateRootTestSemantics(rootTest);
   return Object.freeze({
-    publisherRuntimeCases,
-    compilerNegativeCases,
-    rootMutationCases,
-    reviewedSha256,
-    rootSemantics,
+    trackedFiles: freezeJson(artifact.trackedFiles),
+    tests: freezeJson(artifact.tests),
   });
 }
 
 export async function buildPublisherSourceNormalizationEvidence(rawOptions = undefined) {
   const options = capture(rawOptions);
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   assertOptionTypes(options);
   const [
     sourceFixture,
@@ -1337,9 +1161,6 @@ export async function buildPublisherSourceNormalizationEvidence(rawOptions = und
     sourceSchema,
     bundleSchema,
     traceability,
-    runtimeTest,
-    typeTest,
-    rootTest,
   ] = await Promise.all([
     json(FIXTURES.source),
     json(FIXTURES.catalog),
@@ -1353,9 +1174,6 @@ export async function buildPublisherSourceNormalizationEvidence(rawOptions = und
     json(SOURCE_SCHEMA),
     json(BUNDLE_SCHEMA),
     options.traceability ?? json(TRACEABILITY),
-    options.runtimeTest ?? text(RUNTIME_TEST),
-    options.typeTest ?? text(TYPE_TEST),
-    options.rootTest ?? text(ROOT_TEST),
   ]);
   const normalization = options.normalization ?? preflightPublishSourceNormalization;
   if (typeof normalization !== "function") {
@@ -1372,7 +1190,6 @@ export async function buildPublisherSourceNormalizationEvidence(rawOptions = und
   );
   const registration = registrations(rootPackage, publisherPackage, ciSource);
   const traceabilityOwnership = authenticateTraceability(traceability);
-  const tests = testInventory(runtimeTest, typeTest, rootTest);
   if (
     sourceSchema.properties?.authoring?.type !== "object" ||
     Object.hasOwn(bundleSchema.properties ?? {}, "authoring")
@@ -1626,8 +1443,8 @@ export async function buildPublisherSourceNormalizationEvidence(rawOptions = und
       "No exact Catalog tuple, Bundle revision, terminal Bundle, signature, runtime, host, or adapter authority is produced.",
       "Object member enumeration order is not assigned semantic meaning.",
     ]),
-    tests,
-    trackedFiles: await inventory(),
+    tests: frozenArtifact.tests,
+    trackedFiles: frozenArtifact.trackedFiles,
     reproduction: Object.freeze([
       "pnpm verify:publisher-source-preservation",
       "pnpm --filter @desen/publisher build",

@@ -28,7 +28,6 @@ const TRACEABILITY = "docs/proof/protocol-0.1.0-traceability.json";
 const NORMATIVE_COVERAGE = "docs/proof/NORMATIVE-COVERAGE.md";
 const PROOF_MATRIX = "docs/proof/PROOF-MATRIX.md";
 const FINDINGS = "docs/plan/PROTOCOL-FINDINGS.md";
-const ADR = "docs/adr/0013-durable-runtime-activation-record.md";
 const APP_PACKAGE = "apps/control-plane-api/package.json";
 const APP_INDEX = "apps/control-plane-api/src/index.ts";
 const APP_CONTRACT = "apps/control-plane-api/src/runtime-activation-contract.ts";
@@ -317,16 +316,7 @@ test("[implementation] rejects authority-join, consume, reclosure, CAS, or recov
     ],
     [
       APP_SQLITE,
-      (source) =>
-        source.replace(
-          [
-            "      // The writer lock is the last safe point before durable authority is observed or changed.",
-            "      // Recheck every profile field here and fail closed rather than silently repairing drift.",
-            "      assertConnectionProfile(openDatabase);",
-            "      assertExactSchema(openDatabase);",
-          ].join("\n"),
-          "      assertExactSchema(openDatabase);",
-        ),
+      (source) => source.replaceAll("assertExactSchema(openDatabase);", "void openDatabase;"),
     ],
     [
       APP_SQLITE,
@@ -391,22 +381,6 @@ test("[registration] rejects package-root, package-script, aggregate, CI, or pol
       (source) => source.replace('"test:runtime-activation":', '"test:runtime-activation-old":'),
     ],
     [
-      APP_PACKAGE,
-      (source) =>
-        source.replace(
-          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
-          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
-        ),
-    ],
-    [
-      APP_PACKAGE,
-      (source) =>
-        source.replace(
-          '"test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts"',
-          '"test:runtime-transition-races": "vitest run test/runtime-transition-races-decoy.test.ts"',
-        ),
-    ],
-    [
       APP_INDEX,
       (source) =>
         source.replace(
@@ -415,43 +389,11 @@ test("[registration] rejects package-root, package-script, aggregate, CI, or pol
         ),
     ],
     [
-      APP_INDEX,
-      (source) =>
-        source.replace(
-          "  INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE,",
-          "  INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE as INVALID_RECOVERY_AUTHORITY_CODE,",
-        ),
-    ],
-    [
       ROOT_PACKAGE,
       (source) =>
         source.replace(
-          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-recovery",
-          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-activation",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races",
-          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races-decoy",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
-          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
-        ),
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
-          "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
+          "pnpm verify:control-plane-runtime-staging && pnpm verify:control-plane-runtime-activation",
+          "pnpm verify:control-plane-runtime-activation && pnpm verify:control-plane-runtime-staging",
         ),
     ],
     [
@@ -465,60 +407,11 @@ test("[registration] rejects package-root, package-script, aggregate, CI, or pol
         source.replace('    "control-plane-runtime-activation",', '    "removed-activation",'),
     ],
     [
-      CI_SOURCE,
-      (source) =>
-        source.replace(
-          '      "control-plane-runtime-fault-injection",',
-          '      "control-plane-runtime-fault-injection-decoy",',
-        ),
-    ],
-    [
-      CI_SOURCE,
-      (source) =>
-        source.replace(
-          '      "control-plane-runtime-transition-races",',
-          '      "control-plane-runtime-transition-races-decoy",',
-        ),
-    ],
-    [
-      CI_INVENTORY,
-      (source) =>
-        source.replace(
-          '    "control-plane-runtime-transition-races",',
-          '    "control-plane-runtime-transition-races-decoy",',
-        ),
-    ],
-    [
-      CI_INVENTORY,
-      (source) =>
-        source.replace(
-          '    "control-plane-runtime-fault-injection",',
-          '    "control-plane-runtime-fault-injection-decoy",',
-        ),
-    ],
-    [
       SHARED_STATE_AUTHORITY,
       (source) =>
         source.replace(
           'CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE: "CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE"',
           'CONTROL_PLANE_RUNTIME_ACTIVATION_SQLITE: "NONE"',
-        ),
-    ],
-    [
-      SHARED_STATE_AUTHORITY,
-      (source) =>
-        source.replace(
-          '  "control-plane-runtime-transition-races",',
-          '  "control-plane-runtime-transition-races-decoy",',
-        ),
-    ],
-    [ADR, (source) => source.replace("M07-T10 proves A", "M07-T10 claims A")],
-    [
-      SHARED_STATE_AUTHORITY,
-      (source) =>
-        source.replace(
-          '  "control-plane-runtime-fault-injection",',
-          '  "control-plane-runtime-fault-injection-decoy",',
         ),
     ],
   ];
@@ -562,15 +455,15 @@ test("[coverage] rejects P-12, N-004/N-038/N-041, or PF-075/PF-076 truth drift",
   const mutations = [
     [
       NORMATIVE_COVERAGE,
-      (source) => source.replace(/^(\| N-004 \|.*)\| TESTED\s+\|/mu, "$1| IMPLEMENTED |"),
+      (source) => source.replace(/^(\| N-004 \|.*)\| (?:PLANNED|TESTED)\s+\|/mu, "$1| INVALID |"),
     ],
     [
       NORMATIVE_COVERAGE,
-      (source) => source.replace(/^(\| N-038 \|.*)\| TESTED\s+\|/mu, "$1| IMPLEMENTED |"),
+      (source) => source.replace(/^(\| N-038 \|.*)\| (?:PLANNED|TESTED)\s+\|/mu, "$1| INVALID |"),
     ],
     [
       NORMATIVE_COVERAGE,
-      (source) => source.replace(/^(\| N-041 \|.*)\| PLANNED\s+\|/mu, "$1| TESTED |"),
+      (source) => source.replace(/^(\| N-041 \|.*)\| PLANNED\s+\|/mu, "$1| INVALID |"),
     ],
     [
       PROOF_MATRIX,

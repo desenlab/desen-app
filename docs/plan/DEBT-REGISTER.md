@@ -2,9 +2,10 @@
 
 This register tracks temporary compatibility structures registered by I07-01 and later
 task-specific successors while immutable task evidence is separated from current-checkpoint
-authentication and CI execution orchestration. Eighteen entries remain open; DEBT-I07-008 is closed
-with authenticated removal evidence. An open entry records planned removal work and does not claim
-that its cleanup has already been implemented.
+authentication and CI execution orchestration. One entry remains open, seventeen I07-04-owned
+entries have removed their scoped references and await the cleanup commit's hosted proof, and
+DEBT-I07-008 is closed with authenticated removal evidence. A pending-hosted entry records real
+zero-reference cleanup without claiming a run that cannot exist until the commit is published.
 
 This is an engineering-maintenance register, not a protocol finding or Proof Matrix. Removing an
 entry may not rewrite a frozen artifact, weaken a proof, turn an unknown input into a skipped
@@ -15,6 +16,9 @@ check, or treat an earlier successful run as current evidence.
 - `OPEN`: the temporary structure is still required by the current implementation.
 - `READY_FOR_REMOVAL`: every objective trigger is satisfied, but the legacy structure and its
   tests have not yet been removed.
+- `REMOVED_PENDING_HOSTED_PROOF`: the removal owner is `IN_PROGRESS`, all scoped legacy
+  references are absent, and final closure waits only for the cleanup commit's own hosted run.
+  This prevents a commit from claiming a run URL that cannot exist until after that commit.
 - `CLOSED`: the legacy structure is absent, the zero-reference rule passes, and closure evidence
   is recorded below.
 
@@ -34,31 +38,31 @@ the full gate. A cleanup is complete only when:
 
 ## Lifecycle summary
 
-| ID           | Status | Temporary structure                                      | Registered by | Removal owner | Must close by |
-| ------------ | ------ | -------------------------------------------------------- | ------------- | ------------- | ------------- |
-| DEBT-I07-001 | OPEN   | M06-T01 current G05 receipt ownership                    | I07-01        | I07-04        | G07           |
-| DEBT-I07-002 | OPEN   | M06-T05 duplicate current M05 receipts                   | I07-01        | I07-04        | G07           |
-| DEBT-I07-003 | OPEN   | M06-T09 predecessor compatibility helpers                | I07-01        | I07-04        | G07           |
-| DEBT-I07-004 | OPEN   | M06-T11 current T09/T10 receipts and source markers      | I07-01        | I07-04        | G07           |
-| DEBT-I07-005 | OPEN   | M07-T01 historical projection for checkpointed readers   | I07-01        | I07-04        | G07           |
-| DEBT-I07-006 | OPEN   | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
-| DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
-| DEBT-I07-008 | CLOSED | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
-| DEBT-I07-009 | OPEN   | M05-T09 current M07-T06 coordination projection          | I07-01        | I07-04        | G07           |
-| DEBT-I07-010 | OPEN   | M05-T04 current M07-T03 P-05 successor projection        | I07-01        | I07-04        | G07           |
-| DEBT-I07-011 | OPEN   | M07-T04 current-reader and P-17 successor bridges        | M07-T04       | I07-04        | G07           |
-| DEBT-I07-012 | OPEN   | M07-T05 historical control-plane reader bridges          | M07-T05       | I07-04        | G07           |
-| DEBT-I07-013 | OPEN   | M07-T06 historical staging reader bridges                | M07-T06       | I07-04        | G07           |
-| DEBT-I07-014 | OPEN   | M07-T07 historical activation reader bridges             | M07-T07       | I07-04        | G07           |
-| DEBT-I07-015 | OPEN   | M07-T08 historical recovery reader bridges               | M07-T08       | I07-04        | G07           |
-| DEBT-I07-016 | OPEN   | M07-T09 historical fault-injection successor bridges     | M07-T09       | I07-04        | G07           |
-| DEBT-I07-017 | OPEN   | I07-03 shadow CI and current-reader receipt bridge       | I07-03        | I07-04        | G07           |
-| DEBT-I07-018 | OPEN   | M07-T10 historical transition-race successor bridges     | M07-T10       | I07-04        | G07           |
-| DEBT-I07-019 | OPEN   | M07-T11 historical channel-consumption successor bridges | M07-T11       | I07-04        | G07           |
+| ID           | Status                       | Temporary structure                                      | Registered by | Removal owner | Must close by |
+| ------------ | ---------------------------- | -------------------------------------------------------- | ------------- | ------------- | ------------- |
+| DEBT-I07-001 | REMOVED_PENDING_HOSTED_PROOF | M06-T01 current G05 receipt ownership                    | I07-01        | I07-04        | G07           |
+| DEBT-I07-002 | REMOVED_PENDING_HOSTED_PROOF | M06-T05 duplicate current M05 receipts                   | I07-01        | I07-04        | G07           |
+| DEBT-I07-003 | REMOVED_PENDING_HOSTED_PROOF | M06-T09 predecessor compatibility helpers                | I07-01        | I07-04        | G07           |
+| DEBT-I07-004 | REMOVED_PENDING_HOSTED_PROOF | M06-T11 current T09/T10 receipts and source markers      | I07-01        | I07-04        | G07           |
+| DEBT-I07-005 | REMOVED_PENDING_HOSTED_PROOF | M07-T01 historical projection for checkpointed readers   | I07-01        | I07-04        | G07           |
+| DEBT-I07-006 | REMOVED_PENDING_HOSTED_PROOF | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
+| DEBT-I07-007 | OPEN                         | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
+| DEBT-I07-008 | CLOSED                       | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
+| DEBT-I07-009 | REMOVED_PENDING_HOSTED_PROOF | M05-T09 current M07-T06 coordination projection          | I07-01        | I07-04        | G07           |
+| DEBT-I07-010 | REMOVED_PENDING_HOSTED_PROOF | M05-T04 current M07-T03 P-05 successor projection        | I07-01        | I07-04        | G07           |
+| DEBT-I07-011 | REMOVED_PENDING_HOSTED_PROOF | M07-T04 current-reader and P-17 successor bridges        | M07-T04       | I07-04        | G07           |
+| DEBT-I07-012 | REMOVED_PENDING_HOSTED_PROOF | M07-T05 historical control-plane reader bridges          | M07-T05       | I07-04        | G07           |
+| DEBT-I07-013 | REMOVED_PENDING_HOSTED_PROOF | M07-T06 historical staging reader bridges                | M07-T06       | I07-04        | G07           |
+| DEBT-I07-014 | REMOVED_PENDING_HOSTED_PROOF | M07-T07 historical activation reader bridges             | M07-T07       | I07-04        | G07           |
+| DEBT-I07-015 | REMOVED_PENDING_HOSTED_PROOF | M07-T08 historical recovery reader bridges               | M07-T08       | I07-04        | G07           |
+| DEBT-I07-016 | REMOVED_PENDING_HOSTED_PROOF | M07-T09 historical fault-injection successor bridges     | M07-T09       | I07-04        | G07           |
+| DEBT-I07-017 | REMOVED_PENDING_HOSTED_PROOF | I07-03 shadow CI and current-reader receipt bridge       | I07-03        | I07-04        | G07           |
+| DEBT-I07-018 | REMOVED_PENDING_HOSTED_PROOF | M07-T10 historical transition-race successor bridges     | M07-T10       | I07-04        | G07           |
+| DEBT-I07-019 | REMOVED_PENDING_HOSTED_PROOF | M07-T11 historical channel-consumption successor bridges | M07-T11       | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -100,7 +104,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-002 — M06-T05 duplicate current M05 receipts
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -139,7 +143,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-003 — M06-T09 predecessor and workflow compatibility helpers
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -185,7 +189,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-004 — M06-T11 current T09/T10 receipts and source-string markers
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -253,7 +257,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-005 — M07-T01 inventory of twelve live readers
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -302,7 +306,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-006 — M05-T09 embedded M06-T05 Validator successor
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -473,7 +477,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-009 — M05-T09 current M07-T06 coordination projection
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -509,7 +513,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-010 — M05-T04 current M07-T03 P-05 successor projection
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -546,7 +550,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-011 — M07-T04 current-reader and P-17 successor bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T04`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -629,7 +633,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-012 — M07-T05 historical control-plane reader bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T05`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -719,7 +723,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-013 — M07-T06 historical staging reader bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T06`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -816,7 +820,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-014 — M07-T07 historical activation reader bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T07`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -958,7 +962,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-015 — M07-T08 historical recovery reader bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T08`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1090,7 +1094,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-016 — M07-T09 historical fault-injection successor bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T09`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1201,7 +1205,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-017 — I07-03 affected-selector shadow CI and current-reader bridge
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `I07-03`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1271,7 +1275,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-018 — M07-T10 historical transition-race successor bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T10`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1507,7 +1511,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-019 — M07-T11 historical channel-consumption successor bridges
 
-- Status: `OPEN`
+- Status: `REMOVED_PENDING_HOSTED_PROOF`
 - Registered by infrastructure task: `M07-T11`
 - Removal owner: `I07-04`
 - Exact paths and symbols:

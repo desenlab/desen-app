@@ -458,67 +458,13 @@ test("rejects package and root registration drift", async () => {
   );
 });
 
-test("rejects focused or independent test-inventory erosion", async () => {
-  await assert.rejects(
-    buildPublisherSourceNormalizationEvidence({ runtimeTest: 'it("only one", () => {});' }),
-    hasCode("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT"),
-  );
-  await assert.rejects(
-    buildPublisherSourceNormalizationEvidence({ typeTest: "// @ts-expect-error\nvoid 0;" }),
-    hasCode("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT"),
-  );
-  await assert.rejects(
-    buildPublisherSourceNormalizationEvidence({ rootTest: 'test("only one", () => {});' }),
-    hasCode("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT"),
-  );
-  const currentRootTest = await currentText("tests/publisher-source-normalization.test.mjs");
-  await assert.rejects(
-    buildPublisherSourceNormalizationEvidence({
-      rootTest: currentRootTest.replaceAll("assert.rejects(", "Promise.resolve("),
-    }),
-    hasCode("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT"),
-  );
-
-  const runtimeNoops = [
-    'import { describe, it } from "vitest";',
-    'describe("unrelated", () => {',
-    ...Array.from({ length: 17 }, (_, index) => `it("noop ${index}", () => {});`),
-    "});",
-    "",
-  ].join("\n");
-  await assert.rejects(
-    buildPublisherSourceNormalizationEvidence({ runtimeTest: runtimeNoops }),
-    hasCode("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT"),
-  );
-
-  const unrelatedTypeErrors = Array.from(
-    { length: 52 },
-    (_, index) =>
-      `// @ts-expect-error unrelated reviewed-contract replacement\nconst unrelated${index}: never = ${index};`,
-  ).join("\n");
-  await assert.rejects(
-    buildPublisherSourceNormalizationEvidence({ typeTest: unrelatedTypeErrors }),
-    hasCode("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT"),
-  );
-
-  const rootNames = [...currentRootTest.matchAll(/^test\("([^"]+)"/gmu)].map((match) => match[1]);
-  assert.equal(rootNames.length, 26);
-  const unrelatedRootBodies = [
-    'import assert from "node:assert/strict";',
-    'import test from "node:test";',
-    ...rootNames.map((name) =>
-      name.startsWith("rejects ") || name.includes(" rejects ")
-        ? `test(${JSON.stringify(
-            name,
-          )}, async () => { await assert.rejects(Promise.reject(new Error("unrelated"))); });`
-        : `test(${JSON.stringify(name)}, () => { assert.ok(true); });`,
-    ),
-    "",
-  ].join("\n");
-  await assert.rejects(
-    buildPublisherSourceNormalizationEvidence({ rootTest: unrelatedRootBodies }),
-    hasCode("PUBLISHER_NORMALIZATION_TEST_INVENTORY_DRIFT"),
-  );
+test("rejects retired reader-local test-inventory overrides", async () => {
+  for (const key of ["runtimeTest", "typeTest", "rootTest"]) {
+    await assert.rejects(
+      buildPublisherSourceNormalizationEvidence({ [key]: "retired" }),
+      hasCode("PUBLISHER_NORMALIZATION_OPTIONS_INVALID"),
+    );
+  }
 });
 
 test("rejects single-pass CI proof-tuple drift", async () => {

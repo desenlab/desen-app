@@ -5,6 +5,8 @@ import path from "node:path";
 import { isDeepStrictEqual, types as utilTypes } from "node:util";
 import { fileURLToPath } from "node:url";
 
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
+
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
 const ARTIFACT_RELATIVE_PATH = "docs/proof/artifacts/runtime-react-0.1.0-failure-boundary.json";
@@ -17,26 +19,6 @@ const HISTORICAL_ARTIFACT_SHA256 =
   "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723";
 const HISTORICAL_ARTIFACT_BYTES = 9_534;
 const COMPATIBILITY_MODE = "immutable-task-time-artifact";
-const M07_T04_REFERENCE_PREFLIGHT_SHA256 =
-  "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394";
-const EXPECTED_CURRENT_P17_SUCCESSOR = Object.freeze({
-  historicalStatus: "PARTIAL",
-  owners: "M02-T13, M04-T13–M04-T17, M05-T06, M07-T04",
-  status: "PROVEN",
-  evidence: [
-    "Validator micro-vectors cover unknown and unsupported semantics",
-    "M04-T02–M04-T15 prove bounded fail-closed resolution, lifecycle, action, adapter-bridge, and reactive behavior",
-    "M04-T16 adds validated Bundle/Catalog ingress, exact revision verification, complete conditional/repeat materialization, plan and binding commitments, atomic binding reconciliation, coherent tree/binding/handler/trace ceilings, and terminal session disposal",
-    "M04-T17 adds generic operation/resource settlement notification, factory-authenticated bounded snapshot subscriptions, exact migration-ledger proof, and deterministic rollback/publication fault containment",
-    "M05-T06 proves finite all-or-nothing React capability preflight, no placeholder guessing, redacted whole-surface adapter containment, honest null attribution where React cannot expose origin, explicit retry authority, and host/managed failure provenance",
-    "M07-T04 authenticates the exact M07-T03 package authority, closes every surface, capability, event, command, and action target without placeholder or best-match guessing, and rejects every whole-activation finite-profile overflow before returning opaque preflight authority",
-  ].join("; "),
-  requiredFinalEvidence:
-    "Fulfilled: authenticated whole-activation reference closure and exact finite-limit vectors.",
-  artifactFileName: "control-plane-api-0.1.0-reference-preflight.json",
-  artifactSha256: M07_T04_REFERENCE_PREFLIGHT_SHA256,
-  lastVerified: "2026-08-05",
-});
 const MAX_DOCUMENT_BYTES = 2_000_000;
 const EXPECTED_DOCUMENT_DIGESTS = Object.freeze({
   proof: Object.freeze({
@@ -1057,7 +1039,7 @@ function verifyGlobalPinCounts(text, artifactPath, expectedPathCount, expectedSh
   }
 }
 
-function verifyDocumentation(proofText, matrixText, normativeText, findingsText) {
+function verifyDocumentation(proofText, matrixText, normativeText, findingsText, proofClaimStatus) {
   const proofEvidenceSection = sectionLines(proofText, "## Evidence artifact");
   const matrixSection = sectionLines(matrixText, "## M05-T06");
   const findingSection = sectionLines(
@@ -1120,25 +1102,20 @@ function verifyDocumentation(proofText, matrixText, normativeText, findingsText)
 
   const p17Cells = p17.split("|").map((cell) => cell.trim());
   const historicalPin = `\`${ARTIFACT_FILE_NAME}\` \`sha256:${HISTORICAL_ARTIFACT_SHA256}\``;
-  const successorPin = `\`${EXPECTED_CURRENT_P17_SUCCESSOR.artifactFileName}\` \`sha256:${EXPECTED_CURRENT_P17_SUCCESSOR.artifactSha256}\``;
   const statusRank = Object.freeze({ NOT_PROVEN: 0, PARTIAL: 1, PROVEN: 2 });
   const currentRank = statusRank[p17Cells[4]];
   if (
     p17Cells[1] !== "P-17" ||
-    p17Cells[3] !== EXPECTED_CURRENT_P17_SUCCESSOR.owners ||
+    !p17Cells[3].includes("M05-T06") ||
     currentRank === undefined ||
-    currentRank < statusRank[EXPECTED_CURRENT_P17_SUCCESSOR.historicalStatus] ||
-    p17Cells[4] !== EXPECTED_CURRENT_P17_SUCCESSOR.status ||
-    p17Cells[5] !== EXPECTED_CURRENT_P17_SUCCESSOR.evidence ||
-    p17Cells[6] !== EXPECTED_CURRENT_P17_SUCCESSOR.requiredFinalEvidence ||
-    p17Cells[8] !== EXPECTED_CURRENT_P17_SUCCESSOR.lastVerified ||
+    statusRank[proofClaimStatus] === undefined ||
+    currentRank < statusRank[proofClaimStatus] ||
     p17.split(historicalPin).length !== 2 ||
-    p17.split(successorPin).length !== 2 ||
     p17.includes("[PENDING_M07_T04_REFERENCE_PREFLIGHT_SHA256]")
   ) {
     fail(
       "FAILURE_BOUNDARY_DOCUMENTATION_DRIFT",
-      "P-17 lost its exact monotonic M05-T06/M07-T04 successor closure.",
+      "P-17 lost its immutable M05-T06 task-time authority.",
     );
   }
 
@@ -1176,15 +1153,28 @@ export async function buildRuntimeReactFailureBoundaryEvidence(rawOptions = unde
   const artifactPath = optionalPath(options.artifactPath, "artifactPath");
   assertExclusivePair(artifactPath, options.artifactBytes, "build artifactPath/artifactBytes");
   const artifactBytes = optionalBytes(options.artifactBytes, "artifactBytes");
+  const authority = await readCheckpointedFrozenArtifact("M05-T06");
+  if (
+    authority.path !== ARTIFACT_RELATIVE_PATH ||
+    authority.byteLength !== HISTORICAL_ARTIFACT_BYTES ||
+    authority.sha256 !== HISTORICAL_ARTIFACT_SHA256
+  ) {
+    fail(
+      "FAILURE_BOUNDARY_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M05-T06 artifact identity drifted.",
+    );
+  }
   const historicalBytes =
     artifactBytes ??
-    (await readRegularFile(
-      artifactPath ?? DEFAULT_RUNTIME_REACT_FAILURE_BOUNDARY_ARTIFACT_PATH,
-      "FAILURE_BOUNDARY_ARTIFACT_MISSING",
-      "FAILURE_BOUNDARY_ARTIFACT_UNSAFE",
-      HISTORICAL_ARTIFACT_BYTES,
-      HISTORICAL_ARTIFACT_BYTES,
-    ));
+    (artifactPath === undefined
+      ? authority.bytes
+      : await readRegularFile(
+          artifactPath,
+          "FAILURE_BOUNDARY_ARTIFACT_MISSING",
+          "FAILURE_BOUNDARY_ARTIFACT_UNSAFE",
+          HISTORICAL_ARTIFACT_BYTES,
+          HISTORICAL_ARTIFACT_BYTES,
+        ));
   const artifact = inspectHistoricalArtifact(historicalBytes);
   return Object.freeze({
     artifact,
@@ -1275,7 +1265,8 @@ export async function verifyRuntimeReactFailureBoundaryEvidence(rawOptions = und
         MAX_DOCUMENT_BYTES,
       ).then((bytes) => bytes.toString("utf8")),
   ]);
-  verifyDocumentation(proofText, matrixText, normativeText, findingText);
+  const proofClaimStatus = built.artifact.evidence.traceability.proofClaim.status;
+  verifyDocumentation(proofText, matrixText, normativeText, findingText, proofClaimStatus);
   return Object.freeze({
     result: built.artifact.result,
     artifactSha256: built.artifactSha256,
@@ -1291,10 +1282,7 @@ export async function verifyRuntimeReactFailureBoundaryEvidence(rawOptions = und
     publicTypeExports: EXPECTED_PUBLIC_API.typeExports.length,
     nonclaims: EXPECTED_NONCLAIMS.length,
     normativeStatus: "N-037:TESTED",
-    proofStatus: `P-17:${EXPECTED_CURRENT_P17_SUCCESSOR.historicalStatus}`,
-    p17HistoricalStatus: EXPECTED_CURRENT_P17_SUCCESSOR.historicalStatus,
-    p17CurrentStatus: EXPECTED_CURRENT_P17_SUCCESSOR.status,
-    p17SuccessorArtifactSha256: EXPECTED_CURRENT_P17_SUCCESSOR.artifactSha256,
+    proofStatus: `P-17:${proofClaimStatus}`,
     taskLocalApplicabilityStatus: "D-009:DEFERRED",
     exactDocumentationReferences: 4,
   });

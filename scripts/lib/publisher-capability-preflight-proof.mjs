@@ -16,6 +16,7 @@ import {
   preflightPublishSource,
 } from "../../packages/publisher/dist/source-preflight.js";
 import * as validatorPublicApi from "../../packages/validator/dist/index.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
@@ -65,86 +66,6 @@ const PREREQUISITES = Object.freeze([
     sha256: "07537cc034d99dec3cb887805381f58a550de3a0dcb694564ab6a20ac760a387",
     claim: "exact prepared Source, Catalog package, and requirement-alignment authority",
   }),
-]);
-
-const TRACKED_PATHS = Object.freeze([
-  ...Object.values(FIXTURE_PATHS),
-  PUBLISHER_PACKAGE_RELATIVE_PATH,
-  "packages/publisher/src/index.ts",
-  "packages/publisher/src/publish-diagnostics.ts",
-  "packages/publisher/src/publish-result.ts",
-  "packages/publisher/src/source-preflight.ts",
-  CAPABILITY_SOURCE_RELATIVE_PATH,
-  "packages/publisher/test/capability-preflight.test.ts",
-  "packages/publisher/test/capability-preflight.types.ts",
-  "packages/publisher/dist/capability-preflight.js",
-  CAPABILITY_DECLARATION_RELATIVE_PATH,
-  PUBLIC_DECLARATION_RELATIVE_PATH,
-  "packages/validator/src/index.ts",
-  "packages/validator/src/component-contract-validation.ts",
-  "packages/validator/src/interaction-contract-validation.ts",
-  "packages/validator/test/component-contracts.test.ts",
-  "packages/validator/test/interaction-contracts.test.ts",
-  "packages/validator/test/diagnostic-micro-vectors.test.ts",
-  "package.json",
-  "scripts/run-ci-quality-gate.mjs",
-  "scripts/test/ci-quality-gate.test.mjs",
-  "scripts/lib/atomic-proof-artifact.mjs",
-  "scripts/lib/publisher-capability-preflight-proof.mjs",
-  "scripts/generate-publisher-capability-preflight-proof.mjs",
-  "scripts/verify-publisher-capability-preflight.mjs",
-  "tests/publisher-capability-preflight.test.mjs",
-]);
-
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  "package.json": Object.freeze({
-    bytes: 52_201,
-    sha256: "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a",
-  }),
-  [PUBLISHER_PACKAGE_RELATIVE_PATH]: Object.freeze({
-    bytes: 1_375,
-    sha256: "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7",
-  }),
-  "packages/publisher/src/index.ts": Object.freeze({
-    bytes: 911,
-    sha256: "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30",
-  }),
-  "packages/publisher/src/publish-result.ts": Object.freeze({
-    bytes: 10_665,
-    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
-  }),
-  [PUBLIC_DECLARATION_RELATIVE_PATH]: Object.freeze({
-    bytes: 902,
-    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
-  }),
-  "scripts/run-ci-quality-gate.mjs": Object.freeze({
-    bytes: 45_050,
-    sha256: "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360",
-  }),
-  "scripts/test/ci-quality-gate.test.mjs": Object.freeze({
-    bytes: 24_068,
-    sha256: "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf",
-  }),
-  "scripts/lib/publisher-capability-preflight-proof.mjs": Object.freeze({
-    bytes: 62_137,
-    sha256: "5aa8c82170b93d5c3eca9c7801c5a562d706b2f59ed2af956c998893aef3479d",
-  }),
-});
-
-const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  "DEPRECATED_CAPABILITY_CODE",
-  "INVALID_SOURCE_JSON_CODE",
-  "PUBLISHER_DIAGNOSTIC_REGISTRY",
-  "PUBLISH_PIPELINE_STAGES",
-  "PUBLISH_SOURCE_JSON_LIMITS",
-  "SOURCE_LIMIT_EXCEEDED_CODE",
-  "getPublisherDiagnosticDefinition",
-  "isPublisherDiagnosticCode",
-]);
-
-const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
-  "publishDesenSource",
 ]);
 
 const ALLOWED_CAPABILITY_IMPORTS = Object.freeze([
@@ -1166,7 +1087,7 @@ function finiteDiagnosticEvidence(preflight, warnings) {
   });
 }
 
-function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
+function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration, frozenRootApiPrivacy) {
   const forbidden = [
     "CAPABILITY_PREFLIGHT_LIMIT_EXCEEDED_CODE",
     "PublishCapabilityPreflightResult",
@@ -1174,20 +1095,6 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
     "preflightPublishCapabilities",
   ];
   const runtimeExports = Object.keys(publicApi).sort();
-  if (
-    JSON.stringify(runtimeExports) !== JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
-    JSON.stringify(runtimeExports) !== JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS)
-  ) {
-    fail(
-      "PUBLISHER_CAPABILITY_PUBLIC_API_EXPOSED",
-      "Publisher root runtime API is neither the task-time surface nor its approved publication successor.",
-      {
-        historical: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-        successor: SUCCESSOR_ROOT_RUNTIME_EXPORTS,
-        actual: runtimeExports,
-      },
-    );
-  }
   if (
     forbidden.some((name) => runtimeExports.includes(name)) ||
     forbidden.some((name) => publicDeclaration.includes(name))
@@ -1219,16 +1126,7 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
       "Publisher package exports expose a partial capability-preflight subpath.",
     );
   }
-  return Object.freeze({
-    rootRuntimeExports: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-    preflightRuntimeExported: false,
-    preflightTypeExported: false,
-    preflightSubpathExported: false,
-    warningCodePublic: true,
-    warningRegistryStage: CAPABILITY_STAGE,
-    warningRegistrySeverity: "warning",
-    packagePrivateDistImportUsedByProof: "packages/publisher/dist/capability-preflight.js",
-  });
+  return frozenRootApiPrivacy;
 }
 
 function assertTargetNeutralBoundary(source, publisherPackage) {
@@ -1412,55 +1310,42 @@ async function verifyPrerequisitePins(enabled) {
   return Object.freeze(evidence);
 }
 
-async function fileInventory() {
-  const inventory = [];
-  for (const relativePath of [...new Set(TRACKED_PATHS)].sort()) {
-    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-    if (historical !== undefined) {
-      inventory.push(Object.freeze({ path: relativePath, ...historical }));
-      continue;
-    }
-    const bytes = await readRegularBytes(relativePath);
-    inventory.push(
-      Object.freeze({
-        path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
-    );
-  }
-  return Object.freeze(inventory);
+function freezeJson(value, seen = new Set()) {
+  if (typeof value !== "object" || value === null || seen.has(value)) return value;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) freezeJson(value[key], seen);
+  return Object.freeze(value);
 }
 
-async function testInventory() {
-  const [packageTest, typeTest, rootTest, componentTest, interactionTest, microTest] =
-    await Promise.all([
-      readRegularBytes("packages/publisher/test/capability-preflight.test.ts").then((bytes) =>
-        bytes.toString("utf8"),
-      ),
-      readRegularBytes("packages/publisher/test/capability-preflight.types.ts").then((bytes) =>
-        bytes.toString("utf8"),
-      ),
-      readRegularBytes("tests/publisher-capability-preflight.test.mjs").then((bytes) =>
-        bytes.toString("utf8"),
-      ),
-      readRegularBytes("packages/validator/test/component-contracts.test.ts").then((bytes) =>
-        bytes.toString("utf8"),
-      ),
-      readRegularBytes("packages/validator/test/interaction-contracts.test.ts").then((bytes) =>
-        bytes.toString("utf8"),
-      ),
-      readRegularBytes("packages/validator/test/diagnostic-micro-vectors.test.ts").then((bytes) =>
-        bytes.toString("utf8"),
-      ),
-    ]);
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T04");
+  if (authority.path !== ARTIFACT_RELATIVE_PATH) {
+    fail("PUBLISHER_CAPABILITY_ARTIFACT_DRIFT", "The authenticated M06-T04 path drifted.");
+  }
+  let artifact;
+  try {
+    artifact = JSON.parse(Buffer.from(authority.bytes).toString("utf8"));
+  } catch {
+    fail("PUBLISHER_CAPABILITY_ARTIFACT_DRIFT", "The authenticated M06-T04 artifact is invalid.");
+  }
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.profile !== "desen.publisher.capability-preflight-proof.v1" ||
+    artifact.task !== "M06-T04" ||
+    artifact.result !== "PASS" ||
+    !Array.isArray(artifact.trackedFiles) ||
+    artifact.trackedFiles.length === 0 ||
+    !Array.isArray(artifact.claims?.rootApiPrivacy?.rootRuntimeExports) ||
+    artifact.tests === null ||
+    typeof artifact.tests !== "object" ||
+    Array.isArray(artifact.tests)
+  ) {
+    fail("PUBLISHER_CAPABILITY_ARTIFACT_DRIFT", "The authenticated M06-T04 projection drifted.");
+  }
   return Object.freeze({
-    publisherRuntimeCases: (packageTest.match(/^\s*it\("/gmu) ?? []).length,
-    compilerNegativeCases: (typeTest.match(/@ts-expect-error/gu) ?? []).length,
-    validatorComponentCases: (componentTest.match(/^\s*it\("/gmu) ?? []).length,
-    validatorInteractionCases: (interactionTest.match(/^\s*it\("/gmu) ?? []).length,
-    validatorDiagnosticMicroVectorCases: (microTest.match(/^\s*it\("/gmu) ?? []).length,
-    rootMutationCases: (rootTest.match(/^test\("/gmu) ?? []).length,
+    trackedFiles: freezeJson(artifact.trackedFiles),
+    rootApiPrivacy: freezeJson(artifact.claims.rootApiPrivacy),
+    tests: freezeJson(artifact.tests),
   });
 }
 
@@ -1537,6 +1422,7 @@ function assertFixtureIdentity(fixtures) {
  */
 export async function buildPublisherCapabilityPreflightEvidence(rawOptions = undefined) {
   const options = captureOptions(rawOptions);
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const [
     fixturesDefault,
     publisherPackageDefault,
@@ -1598,7 +1484,12 @@ export async function buildPublisherCapabilityPreflightEvidence(rawOptions = und
     fixtures,
     capabilitySource,
   );
-  const apiPrivacy = assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration);
+  const apiPrivacy = assertPublicPrivacy(
+    publicApi,
+    publisherPackage,
+    publicDeclaration,
+    frozenArtifact.rootApiPrivacy,
+  );
   const targetNeutralBoundary = assertTargetNeutralBoundary(capabilitySource, publisherPackage);
 
   if (
@@ -1677,8 +1568,8 @@ export async function buildPublisherCapabilityPreflightEvidence(rawOptions = und
       "The target-boundary source audit is not a JavaScript sandbox and does not claim exhaustive detection of intentionally obfuscated reflection, metaprogramming, or runtime code generation.",
       "M06-T04 performs no network discovery, package download, activation, rendering, signing, npm publication, or deployment.",
     ]),
-    tests: await testInventory(),
-    trackedFiles: await fileInventory(),
+    tests: frozenArtifact.tests,
+    trackedFiles: frozenArtifact.trackedFiles,
     reproduction: Object.freeze([
       "pnpm --filter @desen/validator build",
       "pnpm --filter @desen/validator test:component-contracts",

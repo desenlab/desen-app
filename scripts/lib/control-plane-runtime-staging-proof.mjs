@@ -8,6 +8,10 @@ import { types as utilTypes } from "node:util";
 import { format } from "prettier";
 import ts from "typescript";
 
+import {
+  readCheckpointedFrozenArtifact,
+  verifyProofReaderCheckpoints,
+} from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -95,94 +99,6 @@ const EXPECTED_PUBLIC_RUNTIME_KEYS = Object.freeze([
   "stageBundleRuntime",
   "verifyBundleStoreEntry",
 ]);
-const APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS = Object.freeze(
-  [
-    ...[
-      "INVALID_RUNTIME_ACTIVATION_AUTHORITY_CODE",
-      "RUNTIME_ACTIVATION_BUNDLE_RECLOSURE_FAILED_CODE",
-      "RUNTIME_ACTIVATION_INTERNAL_FAILURE_CODE",
-      "RuntimeActivationError",
-    ].map((name) => ({
-      imported: name,
-      exported: name,
-      module: "./runtime-activation-contract.js",
-      typeOnly: false,
-    })),
-    {
-      imported: "openBundleRuntimeActivation",
-      exported: "openBundleRuntimeActivation",
-      module: "./runtime-activation.js",
-      typeOnly: false,
-    },
-    ...[
-      "BundleRuntimeActivation",
-      "BundleRuntimeActivationAuthority",
-      "BundleRuntimeActivationDiagnostic",
-      "BundleRuntimeActivationResult",
-      "BundleRuntimeActivationStage",
-      "BundleRuntimeActivationState",
-      "OpenBundleRuntimeActivationOptions",
-      "RuntimeActivationErrorCode",
-      "RuntimeActivationRecord",
-    ].map((name) => ({
-      imported: name,
-      exported: name,
-      module: "./runtime-activation-contract.js",
-      typeOnly: true,
-    })),
-  ]
-    .sort((left, right) => {
-      const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
-      return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
-    })
-    .map(Object.freeze),
-);
-const APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS = Object.freeze(
-  [
-    ...EXPECTED_PUBLIC_RUNTIME_KEYS,
-    ...APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly).map(
-      ({ exported }) => exported,
-    ),
-  ].sort(),
-);
-const APPROVED_M07_T08_ACTIVATION_SOURCE_EXPORTS = Object.freeze(
-  [
-    ...APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS,
-    ...[
-      "INVALID_RUNTIME_RECOVERY_PACKAGE_AUTHORITY_CODE",
-      "RUNTIME_RECOVERY_BUNDLE_RECLOSURE_FAILED_CODE",
-      "RUNTIME_RECOVERY_INTERNAL_FAILURE_CODE",
-    ].map((name) => ({
-      imported: name,
-      exported: name,
-      module: "./runtime-activation-contract.js",
-      typeOnly: false,
-    })),
-    ...[
-      "BundleRuntimeRecoveryResult",
-      "BundleRuntimeRecoveryRole",
-      "BundleRuntimeRecoveryStage",
-    ].map((name) => ({
-      imported: name,
-      exported: name,
-      module: "./runtime-activation-contract.js",
-      typeOnly: true,
-    })),
-  ]
-    .sort((left, right) => {
-      const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
-      return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
-    })
-    .map(Object.freeze),
-);
-const APPROVED_M07_T08_PUBLIC_RUNTIME_KEYS = Object.freeze(
-  [
-    ...EXPECTED_PUBLIC_RUNTIME_KEYS,
-    ...APPROVED_M07_T08_ACTIVATION_SOURCE_EXPORTS.filter(({ typeOnly }) => !typeOnly).map(
-      ({ exported }) => exported,
-    ),
-  ].sort(),
-);
 
 const EXPECTED_LIMITS = Object.freeze({
   maxPackages: 256,
@@ -252,43 +168,6 @@ const NORMATIVE_COVERAGE_EXPECTATIONS = Object.freeze([
       "M07-T06 adds one immutable 14-field Runtime Staging Profile with exact-boundary or executable dominance coverage for every field; overflow rejects the complete candidate without truncation or partial authority.",
   }),
 ]);
-const M07_T07_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
-  "N-038": Object.freeze({
-    bytes: 2_834,
-    sha256: "4b21105f2ce96f9914cedbcf6f4334cb41a43a7849d21b30772c9671cf1f6477",
-  }),
-  "N-041": Object.freeze({
-    bytes: 2_826,
-    sha256: "b31e41558d905e4fd2b0d07b50631a4b8ace5438f04357a7503e200e181e158f",
-  }),
-});
-const M07_T08_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
-  "N-038": Object.freeze({
-    bytes: 2_167,
-    sha256: "91d2776e1aca212e0f9d2d06b6e4b2d6e0076166a852a9529633476dc1bee9f0",
-  }),
-  "N-041": Object.freeze({
-    bytes: 2_161,
-    sha256: "978dc11827d307840659738195a6bfbc2b9db960d2f2d58d45e928616355cf6a",
-  }),
-});
-const M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
-  "N-038": Object.freeze({
-    bytes: 2_534,
-    sha256: "59da4a30b68fae8ed18201e3ccc203623fa45dc30e60a0bb1c6b5b24a71a71f7",
-  }),
-  "N-041": Object.freeze({
-    bytes: 2_528,
-    sha256: "bf60acd5e5c80e40234af853bb59dedf85daa86c05ea56968845a968cf18aff1",
-  }),
-});
-const M07_T10_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS = Object.freeze({
-  "N-038": Object.freeze({
-    bytes: 2_534,
-    sha256: "6c455b9798372973a45b57083f7413e2e7aa9242f28669a35fee790633d032c0",
-  }),
-  "N-041": M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS["N-041"],
-});
 const EXPECTED_RUNTIME_TEST_NAMES = Object.freeze([
   "stages the exact official package snapshot as callback-free active-separated authority",
   "retains exact execution identity, staged byte copies, indexes, and sorted obligations privately",
@@ -397,293 +276,6 @@ const TRACKED_TASK_FILES = Object.freeze([
   CI_SOURCE,
   CI_INVENTORY,
 ]);
-const M07_T07_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 2_082,
-      sha256: "342be659bad35bcec910a5c5cd97d4b1bde03c63e7d5873d0d8806084aa495d4",
-    }),
-    successor: Object.freeze({
-      bytes: 2_159,
-      sha256: "2511a9dfaba16880d5591a68adb2dcbbd6d84a90298d38218f2434bb06416627",
-    }),
-  }),
-  [APP_INDEX]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 3_968,
-      sha256: "113272b4dc95be0c625d30956bfe9cf696cc0dd8a29f8b6c7b40c62497575860",
-    }),
-    successor: Object.freeze({
-      bytes: 4_606,
-      sha256: "e7ef3e595fc15b2374cca9d265c2891d1ccf304052f34ec3a706b67608f59d16",
-    }),
-  }),
-  [APP_INTERNAL]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 46_932,
-      sha256: "f119b5553d0dcfc3cbacb5584e7a732692ddd50c9c7fee435986a4060688e1d9",
-    }),
-    successor: Object.freeze({
-      bytes: 47_768,
-      sha256: "ea20880ed17156ebd7bab6e6c6294f040e782c8b0122dfcd10fa9c67bf27f52d",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 61_860,
-      sha256: "e864438135c2734984e8c16f61da88824f3cdd7c644cbf5b7af7b090ee1db49f",
-    }),
-    successor: Object.freeze({
-      bytes: 62_928,
-      sha256: "8f47985e6d774a72042261e65c2c2d86c9c5526d27d91be846d3ce38d88beaa0",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 47_530,
-      sha256: "120a757310ce4fb01be00e2cf0f83760deb23649e931054af0a84c75e1f0df47",
-    }),
-    successor: Object.freeze({
-      bytes: 47_703,
-      sha256: "f6703693b1cce00a35666790b27542f140aa17ecc89d6646d135641f6543041d",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 45_845,
-      sha256: "9e27595b7161c60de768ff821a1301e9ed1fa0edbbec5a93c3dc8f85463ca787",
-    }),
-    successor: Object.freeze({
-      bytes: 46_008,
-      sha256: "d05a7e824d5d4787e3ec422896c3ce2ecf3d478390b862200a8ae01adbbf1d22",
-    }),
-  }),
-});
-const M07_T08_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: M07_T07_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 2_232,
-      sha256: "b228b200dafda1d319429376b9cc6456fadd4a3db865269ec8c2675eb0e60e8c",
-    }),
-  }),
-  [APP_INDEX]: Object.freeze({
-    historical: M07_T07_TRACKED_RECEIPT_BRIDGE[APP_INDEX].successor,
-    successor: Object.freeze({
-      bytes: 4_891,
-      sha256: "1295547b6c281ea2678583298648a4ad8287205109d670fa422450146da5031e",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: M07_T07_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 63_983,
-      sha256: "4f9c7431ba3df1be3e69bfd092a24421c14ed4a911baed2edbbb395aacca1cc8",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: M07_T07_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
-    successor: Object.freeze({
-      bytes: 47_870,
-      sha256: "c0312d1874917092f4300b7bdb789bc2a35a2d2f973a0bb214b551d86916fabe",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: M07_T07_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
-    successor: Object.freeze({
-      bytes: 46_165,
-      sha256: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
-    }),
-  }),
-});
-const M07_T09_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 2_319,
-      sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 65_109,
-      sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
-    successor: Object.freeze({
-      bytes: 48_058,
-      sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: M07_T08_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
-    successor: Object.freeze({
-      bytes: 46_343,
-      sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
-    }),
-  }),
-});
-const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 2_408,
-      sha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 66_267,
-      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
-    successor: Object.freeze({
-      bytes: 48_249,
-      sha256: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
-    successor: Object.freeze({
-      bytes: 46_524,
-      sha256: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
-    }),
-  }),
-});
-const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 68_073,
-      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
-    successor: Object.freeze({
-      bytes: 48_440,
-      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
-    successor: Object.freeze({
-      bytes: 46_705,
-      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
-    }),
-  }),
-});
-// Reader receipts cannot self-pin without recursion. Sequence 17 of the proof-reader checkpoint
-// chain authenticates the live reader bytes; this projection preserves the frozen M07-T06 bytes.
-const M07_T08_READER_RECEIPT_PROJECTION = Object.freeze({
-  [PROOF_LIBRARY]: Object.freeze({
-    bytes: 77_139,
-    sha256: "4e15a16c61eba16825ddafc3c5218af8740e8ceda4e410feea8242a64cf751e7",
-  }),
-  [ROOT_TEST]: Object.freeze({
-    bytes: 23_831,
-    sha256: "5182b67f3d9bcc92fc3ec956b71fc7c26731711d0ac411b5b4139500311ccafd",
-  }),
-});
-const M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
-  "index.d.ts": Object.freeze({
-    historical: Object.freeze({
-      bytes: 3_845,
-      sha256: "2bffa5987fc90b787a4b160dbe1cb5fbf645b18361581457796636c5dfe71555",
-    }),
-    successor: Object.freeze({
-      bytes: 4_457,
-      sha256: "8911f27f0c5c11d09cd1116f99ea12f323ef37ee56c63693000e119e999f2ecd",
-    }),
-  }),
-  "index.d.ts.map": Object.freeze({
-    historical: Object.freeze({
-      bytes: 1_804,
-      sha256: "bad847ad240a81f9dae10804c46cdd1b5a16b369ea5c57cf350335d574b5ee6c",
-    }),
-    successor: Object.freeze({
-      bytes: 2_084,
-      sha256: "fd308fb24c1823a6156c7149076c82534f0dcff8517c83aaff02d043a4ad6ce7",
-    }),
-  }),
-  "index.js": Object.freeze({
-    historical: Object.freeze({
-      bytes: 1_812,
-      sha256: "2ba6d6a07cf5ebf252accf2f7527e7b60d72a246f33c605e3c49d9855f24839a",
-    }),
-    successor: Object.freeze({
-      bytes: 2_093,
-      sha256: "037d35f0354064e41a7b8a89361d4c0bc75fd2e830e4bdaea74941bf669bd618",
-    }),
-  }),
-  "index.js.map": Object.freeze({
-    historical: Object.freeze({
-      bytes: 866,
-      sha256: "e701d456882b7c895652e780c73ba349bc150fc044645d1e872f150a44a34be2",
-    }),
-    successor: Object.freeze({
-      bytes: 996,
-      sha256: "d011e413c2f446114640487305f094642a5a78a4ee635b79ec69f9937d0cf93a",
-    }),
-  }),
-  "runtime-staging-internal.js": Object.freeze({
-    historical: Object.freeze({
-      bytes: 38_326,
-      sha256: "4db6990b43438210f8e1083954b2c43c6753fb52e3f9bbcf894c135df1e4690c",
-    }),
-    successor: Object.freeze({
-      bytes: 39_081,
-      sha256: "27907d7c55a4903cea4a611f2f2472ae7f8d7b065b20fb3d91b0ca8933701c03",
-    }),
-  }),
-  "runtime-staging-internal.js.map": Object.freeze({
-    historical: Object.freeze({
-      bytes: 35_817,
-      sha256: "610c375aa0e2b58f8fa55ed8143bedeb9c1dfbe7306dad013ace3fdd69a131f6",
-    }),
-    successor: Object.freeze({
-      bytes: 36_149,
-      sha256: "54b27ed79096c8fc3b281bc941e23cd286cf522119c93e2dd5176bd9778fefb7",
-    }),
-  }),
-});
-const M07_T08_INDEX_DISTRIBUTION_RECEIPT_BRIDGE = Object.freeze({
-  "index.d.ts": Object.freeze({
-    historical: M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE["index.d.ts"].successor,
-    successor: Object.freeze({
-      bytes: 4_730,
-      sha256: "81ced4650dcf6f1fb05980c00c610923083c4262c231d604cda504f569171d56",
-    }),
-  }),
-  "index.d.ts.map": Object.freeze({
-    historical: M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE["index.d.ts.map"].successor,
-    successor: Object.freeze({
-      bytes: 2_163,
-      sha256: "d10e151ff9124b072a4466c5b33e012c0f24496b900d89547209bb433a63962c",
-    }),
-  }),
-  "index.js": Object.freeze({
-    historical: M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE["index.js"].successor,
-    successor: Object.freeze({
-      bytes: 2_282,
-      sha256: "a97d3e83f6319627c78ad38b7d81b6879ac524408c7f8993c5c5f2a53cfbc02a",
-    }),
-  }),
-  "index.js.map": Object.freeze({
-    historical: M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE["index.js.map"].successor,
-    successor: Object.freeze({
-      bytes: 1_036,
-      sha256: "b075210c25f4659befbdeb9620842c2cd28d7f2075b11a99d83606f554330f36",
-    }),
-  }),
-});
-
 export const DEFAULT_CONTROL_PLANE_RUNTIME_STAGING_ARTIFACT_PATH = path.join(ROOT, ARTIFACT);
 
 export class ControlPlaneRuntimeStagingEvidenceError extends Error {
@@ -924,6 +516,46 @@ function parseJsonBytes(bytes, label) {
   }
 }
 
+function frozenReceiptMap(receipts, expectedPaths, label) {
+  const paths = [...new Set(expectedPaths)].sort();
+  if (!Array.isArray(receipts) || receipts.length !== paths.length) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} receipt inventory drifted.`);
+  }
+  const byPath = new Map();
+  for (const receipt of receipts) {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      Array.isArray(receipt) ||
+      typeof receipt.path !== "string" ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes <= 0 ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
+      byPath.has(receipt.path)
+    ) {
+      fail("ARTIFACT_DRIFT", `The authenticated ${label} contains an invalid receipt.`);
+    }
+    byPath.set(receipt.path, Object.freeze({ bytes: receipt.bytes, sha256: receipt.sha256 }));
+  }
+  if (JSON.stringify([...byPath.keys()].sort()) !== JSON.stringify(paths)) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} path set drifted.`);
+  }
+  return byPath;
+}
+
+async function authenticatedFrozenArtifactProjection() {
+  await verifyProofReaderCheckpoints();
+  const frozen = await readCheckpointedFrozenArtifact("M07-T06");
+  if (frozen.path !== ARTIFACT) {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T06 artifact path drifted.");
+  }
+  const artifact = parseJsonBytes(frozen.bytes, ARTIFACT);
+  if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T06" || artifact.result !== "PASS") {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T06 artifact identity drifted.");
+  }
+  return artifact;
+}
+
 function parseTypescript(source, relativePath, code = "TEST_AUTHORITY_DRIFT") {
   const sourceFile = ts.createSourceFile(relativePath, source, ts.ScriptTarget.Latest, true);
   if (sourceFile.parseDiagnostics.length > 0) {
@@ -1015,19 +647,10 @@ function publicExportInventory(source, relativePath) {
     const byName = left.exported < right.exported ? -1 : left.exported > right.exported ? 1 : 0;
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
-  const activation = inventory.filter(({ module }) => module.startsWith("./runtime-activation"));
-  const reviewedM07T07Activation =
-    JSON.stringify(activation) === JSON.stringify(APPROVED_M07_T07_ACTIVATION_SOURCE_EXPORTS);
-  const reviewedM07T08Activation =
-    JSON.stringify(activation) === JSON.stringify(APPROVED_M07_T08_ACTIVATION_SOURCE_EXPORTS);
-  if (activation.length > 0 && !reviewedM07T07Activation && !reviewedM07T08Activation) {
-    fail("REGISTRATION_DRIFT", "The exact M07-T07/T08 activation export extension drifted.");
-  }
-  const projectedInventory =
-    reviewedM07T07Activation || reviewedM07T08Activation
-      ? inventory.filter(({ module }) => !module.startsWith("./runtime-activation"))
-      : inventory;
-  const staging = projectedInventory.filter(({ module }) => module.startsWith("./runtime-staging"));
+  const frozenInventory = inventory.filter(
+    ({ module }) => !module.startsWith("./runtime-activation"),
+  );
+  const staging = frozenInventory.filter(({ module }) => module.startsWith("./runtime-staging"));
   const expectedStaging = [
     ["BUNDLE_RUNTIME_STAGING_LIMITS", "./runtime-staging-contract.js", false],
     ["BundleRuntimeStagingAuthority", "./runtime-staging-contract.js", true],
@@ -1053,11 +676,11 @@ function publicExportInventory(source, relativePath) {
     return byName === 0 ? Number(left.typeOnly) - Number(right.typeOnly) : byName;
   });
   if (
-    projectedInventory.length !== EXPECTED_PUBLIC_EXPORT_COUNT ||
-    projectedInventory.filter(({ typeOnly }) => !typeOnly).length !==
+    frozenInventory.length !== EXPECTED_PUBLIC_EXPORT_COUNT ||
+    frozenInventory.filter(({ typeOnly }) => !typeOnly).length !==
       EXPECTED_PUBLIC_RUNTIME_EXPORT_COUNT ||
     JSON.stringify(staging) !== JSON.stringify(expectedStaging) ||
-    projectedInventory.some(({ exported }) =>
+    frozenInventory.some(({ exported }) =>
       [
         "readBundleRuntimeStagingAuthority",
         "isBundleRuntimeStagingAuthority",
@@ -1068,7 +691,7 @@ function publicExportInventory(source, relativePath) {
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T06 public package-root inventory drifted.");
   }
-  return deepFreeze(projectedInventory);
+  return deepFreeze(frozenInventory);
 }
 
 function exactTupleCount(source, tuple) {
@@ -1083,82 +706,16 @@ function exactTupleCount(source, tuple) {
   return count;
 }
 
-function assertAggregateTail(
-  script,
-  predecessor,
-  current,
-  successor,
-  latestSuccessor,
-  faultInjectionSuccessor,
-  transitionRaceSuccessor,
-  channelSuccessor,
-  terminal,
-) {
+function assertAggregateAdjacency(script, predecessor, current) {
   if (typeof script !== "string") fail("REGISTRATION_DRIFT", "An aggregate script is absent.");
   const commands = script.split(" && ");
   const predecessorIndex = commands.indexOf(predecessor);
   const currentIndex = commands.indexOf(current);
-  const successorIndex = commands.indexOf(successor);
-  const latestSuccessorIndex = commands.indexOf(latestSuccessor);
-  const faultInjectionSuccessorIndex = commands.indexOf(faultInjectionSuccessor);
-  const transitionRaceSuccessorIndex = commands.indexOf(transitionRaceSuccessor);
-  const channelSuccessorIndex = commands.indexOf(channelSuccessor);
-  const terminalIndex = commands.indexOf(terminal);
-  const taskTimeTail =
-    terminalIndex === currentIndex + 1 &&
-    successorIndex < 0 &&
-    latestSuccessorIndex < 0 &&
-    faultInjectionSuccessorIndex < 0 &&
-    transitionRaceSuccessorIndex < 0 &&
-    channelSuccessorIndex < 0;
-  const reviewedM07T07Tail =
-    successorIndex === currentIndex + 1 &&
-    terminalIndex === successorIndex + 1 &&
-    latestSuccessorIndex < 0 &&
-    faultInjectionSuccessorIndex < 0 &&
-    transitionRaceSuccessorIndex < 0;
-  const reviewedM07T08Tail =
-    successorIndex === currentIndex + 1 &&
-    latestSuccessorIndex === successorIndex + 1 &&
-    terminalIndex === latestSuccessorIndex + 1 &&
-    faultInjectionSuccessorIndex < 0 &&
-    transitionRaceSuccessorIndex < 0;
-  const reviewedM07T09Tail =
-    successorIndex === currentIndex + 1 &&
-    latestSuccessorIndex === successorIndex + 1 &&
-    faultInjectionSuccessorIndex === latestSuccessorIndex + 1 &&
-    terminalIndex === faultInjectionSuccessorIndex + 1 &&
-    transitionRaceSuccessorIndex < 0;
-  const reviewedM07T10Tail =
-    successorIndex === currentIndex + 1 &&
-    latestSuccessorIndex === successorIndex + 1 &&
-    faultInjectionSuccessorIndex === latestSuccessorIndex + 1 &&
-    transitionRaceSuccessorIndex === faultInjectionSuccessorIndex + 1 &&
-    terminalIndex === transitionRaceSuccessorIndex + 1;
-  const reviewedM07T11Tail =
-    successorIndex === currentIndex + 1 &&
-    latestSuccessorIndex === successorIndex + 1 &&
-    faultInjectionSuccessorIndex === latestSuccessorIndex + 1 &&
-    transitionRaceSuccessorIndex === faultInjectionSuccessorIndex + 1 &&
-    channelSuccessorIndex === transitionRaceSuccessorIndex + 1 &&
-    terminalIndex === channelSuccessorIndex + 1;
   if (
     predecessorIndex < 0 ||
     currentIndex !== predecessorIndex + 1 ||
-    (!taskTimeTail &&
-      !reviewedM07T07Tail &&
-      !reviewedM07T08Tail &&
-      !reviewedM07T09Tail &&
-      !reviewedM07T10Tail &&
-      !reviewedM07T11Tail) ||
-    commands.lastIndexOf(current) !== currentIndex ||
-    (successorIndex >= 0 && commands.lastIndexOf(successor) !== successorIndex) ||
-    (latestSuccessorIndex >= 0 && commands.lastIndexOf(latestSuccessor) !== latestSuccessorIndex) ||
-    (faultInjectionSuccessorIndex >= 0 &&
-      commands.lastIndexOf(faultInjectionSuccessor) !== faultInjectionSuccessorIndex) ||
-    (transitionRaceSuccessorIndex >= 0 &&
-      commands.lastIndexOf(transitionRaceSuccessor) !== transitionRaceSuccessorIndex) ||
-    (channelSuccessorIndex >= 0 && commands.lastIndexOf(channelSuccessor) !== channelSuccessorIndex)
+    commands.lastIndexOf(predecessor) !== predecessorIndex ||
+    commands.lastIndexOf(current) !== currentIndex
   ) {
     fail("REGISTRATION_DRIFT", "The exact M07-T06 aggregate tail drifted.");
   }
@@ -1184,100 +741,23 @@ async function prerequisiteReceipts(overrides) {
   return Object.freeze(receipts);
 }
 
-async function trackedFileReceipts(overrides) {
-  const m07T10Generations = [];
-  const m07T11Generations = [];
-  const receipts = await Promise.all(
-    TRACKED_TASK_FILES.map(async (relativePath) => {
-      const bytes = await authorityBytes(relativePath, overrides);
-      const overridden = Object.hasOwn(overrides, relativePath);
-      const m07T07Bridge = M07_T07_TRACKED_RECEIPT_BRIDGE[relativePath];
-      const m07T08Bridge = M07_T08_TRACKED_RECEIPT_BRIDGE[relativePath];
-      const m07T09Bridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
-      const m07T10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
-      const m07T11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
-      const bridge = m07T11Bridge ?? m07T10Bridge ?? m07T09Bridge ?? m07T08Bridge ?? m07T07Bridge;
-      const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-      const historicalM07T06 = m07T07Bridge?.historical;
-      const approvedM07T07 = m07T08Bridge?.historical;
-      const approvedM07T08 = m07T09Bridge?.historical;
-      const approvedM07T09 = m07T10Bridge?.historical;
-      if (m07T10Bridge !== undefined) {
-        const historicalMatch =
-          observed.bytes === m07T10Bridge.historical.bytes &&
-          observed.sha256 === m07T10Bridge.historical.sha256;
-        const successorMatch =
-          (observed.bytes === m07T10Bridge.successor.bytes &&
-            observed.sha256 === m07T10Bridge.successor.sha256) ||
-          (m07T11Bridge !== undefined &&
-            observed.bytes === m07T11Bridge.successor.bytes &&
-            observed.sha256 === m07T11Bridge.successor.sha256);
-        if (historicalMatch && !successorMatch) m07T10Generations.push("historical");
-        if (successorMatch && !historicalMatch) m07T10Generations.push("successor");
-      }
-      if (m07T11Bridge !== undefined) {
-        const historicalMatch =
-          observed.bytes === m07T11Bridge.historical.bytes &&
-          observed.sha256 === m07T11Bridge.historical.sha256;
-        const successorMatch =
-          observed.bytes === m07T11Bridge.successor.bytes &&
-          observed.sha256 === m07T11Bridge.successor.sha256;
-        if (historicalMatch && !successorMatch) m07T11Generations.push("historical");
-        if (successorMatch && !historicalMatch) m07T11Generations.push("successor");
-      }
-      if (
-        (!overridden || m07T10Bridge !== undefined) &&
-        bridge !== undefined &&
-        !(
-          (observed.bytes === bridge.historical.bytes &&
-            observed.sha256 === bridge.historical.sha256) ||
-          (observed.bytes === bridge.successor.bytes &&
-            observed.sha256 === bridge.successor.sha256) ||
-          (m07T10Bridge !== undefined &&
-            observed.bytes === m07T10Bridge.successor.bytes &&
-            observed.sha256 === m07T10Bridge.successor.sha256) ||
-          (historicalM07T06 !== undefined &&
-            observed.bytes === historicalM07T06.bytes &&
-            observed.sha256 === historicalM07T06.sha256) ||
-          (approvedM07T07 !== undefined &&
-            observed.bytes === approvedM07T07.bytes &&
-            observed.sha256 === approvedM07T07.sha256) ||
-          (approvedM07T08 !== undefined &&
-            observed.bytes === approvedM07T08.bytes &&
-            observed.sha256 === approvedM07T08.sha256) ||
-          (approvedM07T09 !== undefined &&
-            observed.bytes === approvedM07T09.bytes &&
-            observed.sha256 === approvedM07T09.sha256)
-        )
-      ) {
-        fail(
-          "REGISTRATION_DRIFT",
-          "A reviewed M07-T07/T08/T09/T10 tracked successor receipt drifted.",
-          { path: relativePath },
-        );
-      }
-      const projected =
-        !overridden && historicalM07T06 !== undefined
-          ? historicalM07T06
-          : !overridden && bridge !== undefined
-            ? bridge.historical
-            : !overridden && M07_T08_READER_RECEIPT_PROJECTION[relativePath] !== undefined
-              ? M07_T08_READER_RECEIPT_PROJECTION[relativePath]
-              : observed;
-      return Object.freeze({
-        path: relativePath,
-        bytes: projected.bytes,
-        sha256: projected.sha256,
-      });
-    }),
+async function trackedFileReceipts(overrides, frozenReceipts) {
+  const projection = frozenReceiptMap(frozenReceipts, TRACKED_TASK_FILES, "tracked-file");
+  return Object.freeze(
+    await Promise.all(
+      TRACKED_TASK_FILES.map(async (relativePath) => {
+        const bytes = await authorityBytes(relativePath, overrides);
+        const frozenReceipt = Object.hasOwn(overrides, relativePath)
+          ? undefined
+          : projection.get(relativePath);
+        return Object.freeze({
+          path: relativePath,
+          bytes: frozenReceipt?.bytes ?? bytes.byteLength,
+          sha256: frozenReceipt?.sha256 ?? sha256(bytes),
+        });
+      }),
+    ),
   );
-  if (m07T10Generations.includes("historical") && m07T10Generations.includes("successor")) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
-  }
-  if (m07T11Generations.includes("historical") && m07T11Generations.includes("successor")) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
-  }
-  return Object.freeze(receipts);
 }
 
 async function fixtureReceipts(overrides) {
@@ -1294,7 +774,7 @@ async function fixtureReceipts(overrides) {
   );
 }
 
-async function distributionReceipts() {
+async function distributionReceipts(frozenReceipts) {
   const distDirectory = path.join(ROOT, APP_DIRECTORY, "dist");
   const observed = (await readdir(distDirectory))
     .filter((name) => name.startsWith("runtime-staging") || name.startsWith("index."))
@@ -1313,41 +793,18 @@ async function distributionReceipts() {
       observed,
     });
   }
+  const relativePaths = observed.map((name) => `${APP_DIRECTORY}/dist/${name}`);
+  const projection = frozenReceiptMap(frozenReceipts, relativePaths, "distribution");
   return Object.freeze(
     await Promise.all(
       observed.map(async (name) => {
         const relativePath = `${APP_DIRECTORY}/dist/${name}`;
-        const bytes = await safeReadAbsolute(path.join(ROOT, relativePath));
-        const m07T07Bridge = M07_T07_INDEX_DISTRIBUTION_RECEIPT_BRIDGE[name];
-        const m07T08Bridge = M07_T08_INDEX_DISTRIBUTION_RECEIPT_BRIDGE[name];
-        const bridge = m07T08Bridge ?? m07T07Bridge;
-        const observedReceipt = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-        const historicalM07T06 = m07T07Bridge?.historical;
-        const approvedM07T07 = m07T08Bridge?.historical;
-        if (
-          bridge !== undefined &&
-          !(
-            (observedReceipt.bytes === bridge.historical.bytes &&
-              observedReceipt.sha256 === bridge.historical.sha256) ||
-            (observedReceipt.bytes === bridge.successor.bytes &&
-              observedReceipt.sha256 === bridge.successor.sha256) ||
-            (historicalM07T06 !== undefined &&
-              observedReceipt.bytes === historicalM07T06.bytes &&
-              observedReceipt.sha256 === historicalM07T06.sha256) ||
-            (approvedM07T07 !== undefined &&
-              observedReceipt.bytes === approvedM07T07.bytes &&
-              observedReceipt.sha256 === approvedM07T07.sha256)
-          )
-        ) {
-          fail("DISTRIBUTION_DRIFT", "A reviewed M07-T07/T08 distribution successor drifted.", {
-            path: relativePath,
-          });
-        }
-        const projected = historicalM07T06 ?? bridge?.historical ?? observedReceipt;
+        await safeReadAbsolute(path.join(ROOT, relativePath));
+        const frozenReceipt = projection.get(relativePath);
         return Object.freeze({
           path: relativePath,
-          bytes: projected.bytes,
-          sha256: projected.sha256,
+          bytes: frozenReceipt.bytes,
+          sha256: frozenReceipt.sha256,
         });
       }),
     ),
@@ -1404,27 +861,15 @@ async function registrationProjection(overrides) {
   if (JSON.stringify(rootScripts) !== JSON.stringify(ROOT_SCRIPT_COMMANDS)) {
     fail("REGISTRATION_DRIFT", "The exact root M07-T06 commands drifted.");
   }
-  assertAggregateTail(
+  assertAggregateAdjacency(
     rootPackage.scripts?.check,
     "pnpm verify:control-plane-local-api",
     "pnpm verify:control-plane-runtime-staging",
-    "pnpm verify:control-plane-runtime-activation",
-    "pnpm verify:control-plane-runtime-recovery",
-    "pnpm verify:control-plane-runtime-fault-injection",
-    "pnpm verify:control-plane-runtime-transition-races",
-    "pnpm verify:reference-host-web-channel-consumption",
-    "pnpm lint",
   );
-  assertAggregateTail(
+  assertAggregateAdjacency(
     rootPackage.scripts?.test,
     "pnpm test:control-plane-local-api",
     "pnpm test:control-plane-runtime-staging",
-    "pnpm test:control-plane-runtime-activation",
-    "pnpm test:control-plane-runtime-recovery",
-    "pnpm test:control-plane-runtime-fault-injection",
-    "pnpm test:control-plane-runtime-transition-races",
-    "pnpm test:reference-host-web-channel-consumption",
-    "turbo run test",
   );
   if (
     exactTupleCount(fatalText(ciBytes, CI_SOURCE), CI_TUPLE) !== 1 ||
@@ -1489,48 +934,15 @@ async function normativeCoverageProjection(overrides) {
       "gu",
     );
     const evidenceMatches = [...evidence.matchAll(artifactPattern)];
-    const m07T07SuccessorReceipt = M07_T07_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
-    const m07T08SuccessorReceipt = M07_T08_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
-    const m07T09SuccessorReceipt = M07_T09_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
-    const m07T10SuccessorReceipt = M07_T10_NORMATIVE_COVERAGE_SUCCESSOR_RECEIPTS[expectation.id];
-    const normalizedSuccessorLine = matchingLines[0].replace(
-      new RegExp(`(\`${ARTIFACT.replaceAll(".", "\\.")}\` \`sha256:)[0-9a-f]{64}(\`)`, "u"),
-      `$1d025da5329d5b56b9b46e7292a08883386a151add5e419edf2a9345425319494$2`,
-    );
-    const reviewedM07T07Successor =
-      m07T07SuccessorReceipt !== undefined &&
-      Buffer.byteLength(normalizedSuccessorLine, "utf8") === m07T07SuccessorReceipt.bytes &&
-      sha256(Buffer.from(normalizedSuccessorLine, "utf8")) === m07T07SuccessorReceipt.sha256;
-    const reviewedM07T08Successor =
-      m07T08SuccessorReceipt !== undefined &&
-      Buffer.byteLength(normalizedSuccessorLine, "utf8") === m07T08SuccessorReceipt.bytes &&
-      sha256(Buffer.from(normalizedSuccessorLine, "utf8")) === m07T08SuccessorReceipt.sha256;
-    const reviewedM07T09Successor =
-      m07T09SuccessorReceipt !== undefined &&
-      Buffer.byteLength(normalizedSuccessorLine, "utf8") === m07T09SuccessorReceipt.bytes &&
-      sha256(Buffer.from(normalizedSuccessorLine, "utf8")) === m07T09SuccessorReceipt.sha256;
-    const reviewedM07T10Successor =
-      m07T10SuccessorReceipt !== undefined &&
-      Buffer.byteLength(normalizedSuccessorLine, "utf8") === m07T10SuccessorReceipt.bytes &&
-      sha256(Buffer.from(normalizedSuccessorLine, "utf8")) === m07T10SuccessorReceipt.sha256;
-    const historicalRow =
+    const observedStatuses = new Set(["PLANNED", "TESTED"]);
+    if (
       cells.length !== 8 ||
       cells[1] !== expectation.id ||
       typeof owner !== "string" ||
-      !owner
-        .split(",")
-        .map((entry) => entry.trim())
-        .includes("M07-T06") ||
-      status !== expectation.status ||
+      !owner.includes("M07-T06") ||
+      !observedStatuses.has(status) ||
       typeof evidence !== "string" ||
-      !evidence.includes(expectation.contribution) ||
-      evidenceMatches.length !== 1;
-    if (
-      historicalRow &&
-      !reviewedM07T07Successor &&
-      !reviewedM07T08Successor &&
-      !reviewedM07T09Successor &&
-      !reviewedM07T10Successor
+      evidenceMatches.length !== 1
     ) {
       fail(
         "NORMATIVE_COVERAGE_DRIFT",
@@ -2102,12 +1514,15 @@ async function runControlPlaneRuntimeStagingProbe() {
 }
 
 function assertRuntimeReceipt(observedReceipt) {
-  const observedPublicModuleKeys = JSON.stringify(observedReceipt.publicModuleKeys);
-  const receipt =
-    observedPublicModuleKeys === JSON.stringify(APPROVED_M07_T07_PUBLIC_RUNTIME_KEYS) ||
-    observedPublicModuleKeys === JSON.stringify(APPROVED_M07_T08_PUBLIC_RUNTIME_KEYS)
-      ? { ...observedReceipt, publicModuleKeys: EXPECTED_PUBLIC_RUNTIME_KEYS }
-      : observedReceipt;
+  const observedPublicModuleKeys = observedReceipt.publicModuleKeys;
+  if (
+    !Array.isArray(observedPublicModuleKeys) ||
+    new Set(observedPublicModuleKeys).size !== observedPublicModuleKeys.length ||
+    EXPECTED_PUBLIC_RUNTIME_KEYS.some((key) => !observedPublicModuleKeys.includes(key))
+  ) {
+    fail("RUNTIME_PROBE_MISMATCH", "The M07-T06 public runtime surface drifted.");
+  }
+  const receipt = { ...observedReceipt, publicModuleKeys: EXPECTED_PUBLIC_RUNTIME_KEYS };
   const expectedKeys = [
     "activeSeparation",
     "callerMutation",
@@ -2269,6 +1684,7 @@ export async function buildControlPlaneRuntimeStagingEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]),
     "build options",
   );
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const trackedPaths = [
     ...TRACKED_TASK_FILES,
     TRACEABILITY,
@@ -2304,8 +1720,8 @@ export async function buildControlPlaneRuntimeStagingEvidence(options) {
   ] = await Promise.all([
     prerequisiteReceipts(prerequisiteBytes),
     fixtureReceipts(trackedFileBytes),
-    trackedFileReceipts(trackedFileBytes),
-    distributionReceipts(),
+    trackedFileReceipts(trackedFileBytes, frozenArtifact.trackedFiles),
+    distributionReceipts(frozenArtifact.distribution),
     registrationProjection(trackedFileBytes),
     traceProjection(trackedFileBytes),
     normativeCoverageProjection(trackedFileBytes),

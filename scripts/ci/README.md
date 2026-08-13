@@ -240,9 +240,12 @@ ordered leaf invocations, and 236 distinct leaf workloads. Its neutral inventory
 `sha256:c73c8d06268188a6697e5c8923435cf7192cb452a433ce5e9bf676f48a34be12`. These current pins make no
 hosted M07-T11 claim.
 
-The current shadow-selector comparison authority is
+The pre-promotion M07-T11 shadow-selector comparison authority was
 `sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`.
-The frozen I07-03 baseline selector remains historical; promotion remains false at `0 / 20`.
+The frozen I07-03 baseline remains historical. I07-04 has independently authenticated `20 / 20`
+eligible hosted comparisons with zero false negatives; promotion is authorized and required hosted
+cutover remains `IN_PROGRESS`. The exact current promoted digest is owned by the I07-04 baseline
+and verifier rather than this explanatory document.
 
 The complete current reviewed digest set is:
 
@@ -421,11 +424,11 @@ The selector authenticates the exact tracked-path set, the same-repository merge
 ownership, and the affected dependency closure. Unknown, ambiguous, untrusted, policy, dependency,
 frozen-input, unowned, incomplete-diff, unsupported-kind, or unsupported-mode changes select
 `EXHAUSTIVE`. A strict subset is only a plan: every selected workload still runs from fresh inputs
-under the same isolation and closing guards. `main`, release, and manual-audit execution remains
-`REQUIRED + EXHAUSTIVE`.
+under the same isolation and closing guards. `main` and manual-audit execution—including the
+release process routed through them—remains `REQUIRED + EXHAUSTIVE`.
 
 Only exact process-local boundary receipts may reach the selector; clones and self-digested
-lookalikes fail closed. The current successor selector digest
+lookalikes fail closed. At the I07-03 checkpoint, the then-current successor selector digest
 `sha256:010ef43efb4f4414d315ef4702324ae111c4666c38b3290f1a4891bebb3b98ea` seals 20 exact boundary,
 selector, graph, ownership, threshold, shadow-runner, required-oracle, workflow, and toolchain
 sources, so algorithm drift resets observation continuity. The frozen I07-03 bootstrap baseline
@@ -433,14 +436,15 @@ retains its historical `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed
 receipt. The affected suffix uses an explicit `SELECTED_ROOT_BARRIER`: only roots that genuinely
 ran satisfy its ordering barrier.
 
-Promotion is frozen behind zero false negatives, mutation coverage for every selector category,
+At that checkpoint, promotion was frozen behind zero false negatives, mutation coverage for every selector category,
 and at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive
-comparisons. The initial observation count is `0 / 20` and promotion is false; I07-04 remains
-`NOT_STARTED` until that threshold passes. The pure ledger never grants promotion from supplied
+comparisons. The initial observation count was `0 / 20` and promotion was false; I07-04 was
+`NOT_STARTED`. The pure ledger never grants promotion from supplied
 records; I07-04 must separately pin exact authenticated hosted run/job/revision/receipt evidence.
 The hosted bootstrap passed the authoritative Quality gate. Its shadow outcome was
 `NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`; no strict subset ran, so the result
-does not count and the counter remains `0 / 20`. The exact hosted run/job/revision/receipt
+did not count and the counter remained `0 / 20` then. I07-04 has since authenticated `20 / 20`
+eligible comparisons with zero false negatives and is `IN_PROGRESS` through hosted cutover. The exact bootstrap run/job/revision/receipt
 identifiers are in
 [`i07-03-affected-selector-shadow.json`](../../docs/proof/baselines/i07-03-affected-selector-shadow.json).
 Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/203. The full local
@@ -456,8 +460,20 @@ tracked-workspace parity, safe cancellation, shared-state classification, and lo
 evidence before completing the workflow cutover. The accepted evidence is
 `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json`. I07-02 implements no
 affected-path selector. Its promotion closed `DEBT-I07-008` by removing the temporary shadow
-workflow and modular comparison adapter/test. I07-03 now calculates `AFFECTED` plans only in the
-separate non-authoritative observer; any unproven input expands to `EXHAUSTIVE`. Its frozen
-threshold remains at `0 / 20`, so I07-04 owns both later selector promotion and G07-due reader and
+workflow and modular comparison adapter/test. At its checkpoint, I07-03 calculated `AFFECTED` plans
+only in the separate non-authoritative observer; any unproven input expanded to `EXHAUSTIVE`. Its
+frozen threshold started at `0 / 20`, so I07-04 owned both later selector promotion and G07-due reader and
 shadow-only cleanup. `DEBT-I07-007` keeps the sequential runner, equivalence adapter, and other
 rollback-only paths until I07-05 proves their removal gates.
+
+## I07-04 promotion in progress
+
+The independent I07-04 campaign subsequently reached 20/20 hosted same-revision comparisons with
+zero false negatives. `affected-selector-promotion-evidence.mjs` pins the immutable historical
+campaign, derives one same-read current comparison authority, proves the exact conservative
+ownership/selector transition, and seals the required dispatcher. The dispatcher runs a strict
+subset only for an authenticated eligible same-repository PR; every uncertain or drifted boundary
+falls back exactly once to fresh exhaustive execution. `main`, releases, and manual audits remain
+fresh exhaustive. All 17 G07-due compatibility/shadow targets are locally absent and the current
+reader authority is append-only checkpoint sequence 28; hosted cutover/closure evidence is still
+required before I07-04 or G07 becomes `DONE`.

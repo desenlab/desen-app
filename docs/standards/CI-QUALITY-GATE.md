@@ -540,7 +540,7 @@ archived in
 
 ### I07-03 shadow-affected observation
 
-I07-03 adds a separate pull-request-only `SHADOW + AFFECTED` job. The exact
+At the I07-03 checkpoint, a separate pull-request-only `SHADOW + AFFECTED` job was added. The exact
 `run-required-exhaustive-quality-gate.mjs` command remains unchanged as the sole pass/fail
 authority; the observer cannot make CI pass or suppress required work.
 
@@ -558,13 +558,13 @@ workflow, and toolchain sources across observations. Its frozen selector digest 
 comparison-authority sources. Multi-proof execution validates every pair, and the explicit
 selected-root suffix barrier cannot treat an absent exhaustive root as completed.
 
-Promotion is reserved for I07-04 after every selector category is mutation-covered, false
+At that checkpoint, promotion was reserved for I07-04 after every selector category was mutation-covered, false
 negatives remain zero, and at least 20 consecutive eligible same-revision hosted strict-subset
-affected/exhaustive comparisons agree. Observation starts at `0 / 20`, promotion is false, and
-I07-04 remains `NOT_STARTED`. Fresh `EXHAUSTIVE` execution stays mandatory on `main`, release
-candidates, and manual audits. The hosted bootstrap passed the authoritative Quality gate. Its
+affected/exhaustive comparisons agreed. Observation started at `0 / 20`, promotion was false, and
+I07-04 was `NOT_STARTED`. Fresh `EXHAUSTIVE` execution remained mandatory on `main` and manual
+audits, including the release process routed through those authorities. The hosted bootstrap passed the authoritative Quality gate. Its
 shadow result was `NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`, so it was not an
-eligible strict-subset comparison and the observation count remains `0 / 20`. The exact hosted
+eligible strict-subset comparison and the observation count remained `0 / 20` then. The exact hosted
 run/job/revision/receipt identifiers are pinned by the
 [`i07-03-affected-selector-shadow.json`](../proof/baselines/i07-03-affected-selector-shadow.json)
 baseline. Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/203. The
@@ -574,6 +574,16 @@ authoritative. The pure I07-03 ledger cannot authenticate hosted provenance or g
 even when supplied records satisfy 20/20; I07-04 must pin an exact GitHub
 run/job/revision/receipt review authority. `DEBT-I07-017` assigns the shadow-only job, wrapper, and
 test wiring to I07-04 for removal by G07.
+
+I07-04 has now satisfied that separate requirement: 20 consecutive hosted comparisons are
+authenticated with zero false negatives in
+`docs/proof/baselines/i07-04-affected-selector-promotion.json`. The required dispatcher admits
+affected execution only for one exact same-repository pull-request boundary and one verified
+promotion receipt. Any path-set, ownership, policy, provenance, or diff uncertainty produces
+`NOT_ELIGIBLE` and exactly one fresh exhaustive fallback. `main` and manual execution, including
+the release process routed through those authorities,
+remain unconditionally fresh exhaustive. The cutover remains `IN_PROGRESS` until its PR and
+post-merge hosted runs are pinned and the 17 G07-due entries close.
 
 I07-02's completed promotion closed `DEBT-I07-008` by removing its temporary shadow workflow and
 modular comparison adapter/test. The current-reader bridges remain owned by I07-04.

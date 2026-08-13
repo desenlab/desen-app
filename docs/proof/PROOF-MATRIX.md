@@ -1709,8 +1709,10 @@ BOM-prefixed JSON, unsafe refresh requests, and unreviewed static paths.
 
 This closes all 11 M07 implementation tasks and keeps N-038 `TESTED`. P-12 remains `NOT_PROVEN`
 only for M10-T07's Desen App product-level restart proof. N-041 remains `PLANNED` for M12-T05's
-measured cross-system limit profile. G07 remains `NOT_STARTED` because I07-04 is still at `0 / 20`
-and owns all G07-due compatibility-reader cleanup.
+measured cross-system limit profile. I07-04 has authenticated `20 / 20` hosted comparisons with
+zero false negatives and removed the G07-due reader/shadow bridges locally. G07 remains
+`NOT_STARTED` only until required-affected cutover and post-merge hosted closure evidence are
+pinned; this working tree does not pre-claim that hosted result.
 
 The local socket suite cannot bind `127.0.0.1` in this sandbox (`EPERM`), so this document does not
 claim a hosted M07-T11 result. It also makes no remote/multi-tenant/TLS, credential-lifecycle,
@@ -1730,8 +1732,10 @@ Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/
 local gate is `BLOCKED_BY_LOCAL_SANDBOX` because loopback `listen` returned `EPERM` in two
 pre-existing TCP lifecycle tests; this is not a product regression.
 
-The hosted bootstrap passed the authoritative Quality gate. Its pull-request shadow returned
+At the I07-03 bootstrap checkpoint, the authoritative Quality gate passed. Its pull-request shadow returned
 `NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`, so no fresh strict-subset comparison
-occurred and no observation was eligible. Promotion remains false, the counter remains `0 / 20`,
-and I07-04 remains `NOT_STARTED`. Exact hosted run, job, revision, and receipt identifiers are in
+occurred and no observation was eligible. Promotion was false, the counter was `0 / 20`, and
+I07-04 was `NOT_STARTED` at that checkpoint. I07-04 has since authenticated `20 / 20` eligible
+hosted comparisons with zero false negatives and is `IN_PROGRESS` through required cutover and
+hosted closure. Exact bootstrap run, job, revision, and receipt identifiers are in
 [`i07-03-affected-selector-shadow.json`](baselines/i07-03-affected-selector-shadow.json).

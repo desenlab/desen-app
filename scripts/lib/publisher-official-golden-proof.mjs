@@ -8,6 +8,7 @@ import { promisify, types as utilTypes } from "node:util";
 
 import { format } from "prettier";
 
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -121,45 +122,6 @@ const TRACKED = Object.freeze([
   ROOT_TEST,
 ]);
 
-// M06-T10 remains immutable evidence while M06-T11 extends only the reviewed coordination
-// surfaces below. Current bytes are still parsed and authenticated as one exact approved
-// successor; these task-time receipts preserve the byte-for-byte T10 artifact projection.
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  [ROOT_PACKAGE]: Object.freeze({
-    bytes: 54_258,
-    sha256: "2404aea7cc4f94601d3d8eb8dd97921b6e0eceefa9e95bc5091ca467a00f4a0c",
-  }),
-  [PUBLISHER_PACKAGE]: Object.freeze({
-    bytes: 1_523,
-    sha256: "4be90e5670e99034cc330eb506c44007ceeb1bac0db4b2343c03f82517ef8437",
-  }),
-  [CI_SOURCE]: Object.freeze({
-    bytes: 45_646,
-    sha256: "20dcd61bbf1921b154793990ea4f80d66d1be419e3183799fe2c4445ad311fc3",
-  }),
-  [CI_CONTRACT_TEST]: Object.freeze({
-    bytes: 24_068,
-    sha256: "5c48cf2a16ffd0d205a63c5e854c53914a898844a0441d5b9fa68b64d9ca10c6",
-  }),
-  [CI_WORKFLOW]: Object.freeze({
-    bytes: 2_168,
-    sha256: "d94e840ac09f8166ff62d1fe43be0045457a23b6b1155fbe5a1df13ddf91797e",
-  }),
-  [PROOF_LIBRARY]: Object.freeze({
-    bytes: 50_687,
-    sha256: "8858f51cab48544624ea01cffdfdfe1615c47f76ff4aa256d37ddc142e1fe10b",
-  }),
-  [ROOT_TEST]: Object.freeze({
-    bytes: 34_560,
-    sha256: "d0b48ae54c4c4cbcdbd1b6e2522ab5aeaa9dac4fb1810845fd9fd1ec958c2bae",
-  }),
-});
-// Exact authentication of the reviewed live scheduling successor preserves the immutable M06-T10
-// workflow projection without regenerating task-time proof bytes.
-const APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT = Object.freeze({
-  bytes: 7_918,
-  sha256: "0c41ddc296b5d7606a5b6bbc9e3637b72c31d3d7b68cab11c6ba9174827468cc",
-});
 const TRACKED_SET = new Set(TRACKED);
 const PREREQUISITE_SET = new Set(
   PUBLISHER_OFFICIAL_GOLDEN_PREREQUISITE_PINS.map(({ path: prerequisitePath }) => prerequisitePath),
@@ -206,77 +168,6 @@ const BUNDLE_KEYS = Object.freeze([
   "sourceDigest",
   "surfaces",
 ]);
-const EXPECTED_PUBLISHER_RUNTIME_TEST_NAMES = Object.freeze([
-  "matches the frozen official Bundle after removing exactly root publication",
-  "publishes two fresh independent fixture graphs to byte-identical immutable Bundles",
-  "gives root object-member allocation order no publication authority",
-  "keeps root authoring outside both the official digest and terminal Bundle",
-  "projects no field except root publication from official-golden authority",
-  "uses only the public Publisher package root",
-]);
-const REQUIRED_ROOT_TEST_NAMES = Object.freeze([
-  "[authority] verifies fresh in-memory artifact bytes and one exact proof pin",
-  "[authority] rejects one changed artifact byte",
-  "[proof] rejects a PENDING proof-document pin",
-  "[options] rejects a transparent Proxy options record without invoking traps",
-  "[options] the builder rejects verifier-only artifact authority",
-  "[options] the verifier rejects writer-only hook authority",
-  "[options] rejects a transparent Proxy tracked byte without invoking traps",
-  "[options] controls a revoked Proxy prerequisite byte authority",
-  "[prerequisite] rejects exact drift in every direct prerequisite",
-  "[fixture] rejects one changed byte in every frozen official input",
-  "[runtime] rejects a changed first canonical byte output",
-  "[runtime] rejects a changed second canonical byte output",
-  "[runtime] rejects a changed official canonical byte output",
-  "[runtime] rejects shared fresh input identities",
-  "[runtime] rejects shared publication result graphs",
-  "[runtime] rejects shared input-output graphs",
-  "[runtime] controls a revoked Proxy nested in receipt keys",
-  "[runtime] rejects a nested key accessor without invoking it",
-  "[registration] rejects focused Publisher command drift",
-  "[registration] rejects root verifier command drift",
-  "[ci] rejects removal of the exact T10 single-pass inventory id",
-  "[writer] atomically writes exact official evidence bytes",
-  "[writer] preserves the old destination and removes a tampered temporary",
-  "[symlink] rejects an atomic-writer destination symlink",
-  "[symlink] rejects a verifier artifact symlink through the no-follow reader",
-  "[symlink] rejects a proof-document symlink through the no-follow reader",
-  "[proof] fatally rejects invalid UTF-8 in a proof-document file",
-  "[writer] rejects semantic overrides on the official write path",
-]);
-const REQUIRED_SUCCESSOR_ROOT_TEST_NAMES = Object.freeze([
-  "[registration] rejects removal of the exact T11 successor package script",
-  "[registration] rejects T11 successor root command drift",
-  "[registration] rejects removal of the aggregate T11 successor",
-  "[registration] rejects a non-immediate aggregate T10 to T11 edge",
-  "[ci] rejects tampering with the exact T11 successor tuple",
-]);
-const HISTORICAL_REGISTRATION_CLAIMS = Object.freeze({
-  package: "vitest run test/official-golden.test.ts",
-  generate:
-    "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/generate-publisher-official-golden-proof.mjs",
-  verify:
-    "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node scripts/verify-publisher-official-golden.mjs",
-  test: "pnpm verify:publisher-bundle-publication && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:official-golden && node --test tests/publisher-official-golden.test.mjs",
-  aggregateImmediatePredecessor: "publisher-bundle-publication",
-  ci: Object.freeze({
-    id: "publisher-official-golden",
-    verifierFile: VERIFIER,
-    rootTestFile: ROOT_TEST,
-    tupleExact: true,
-  }),
-  hostedWorkflowSinglePass: true,
-});
-const HISTORICAL_TEST_CLAIMS = Object.freeze({
-  publisherRuntimeCases: 6,
-  publisherRuntimeCaseNames: EXPECTED_PUBLISHER_RUNTIME_TEST_NAMES,
-  rootMutationCases: 71,
-  requiredRootCaseNames: REQUIRED_ROOT_TEST_NAMES,
-  minimumRootMutationCases: 25,
-  hostileOptionsAndBytes: true,
-  symlinkReadersAndWriter: true,
-  atomicWriterTamperContainment: true,
-});
 const RUNTIME_RECEIPT_KEYS = new Set([
   "apiKeys",
   "authoringAbsentBoth",
@@ -520,6 +411,78 @@ function parseJson(text, code, label) {
   }
 }
 
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T10");
+  if (authority.path !== ARTIFACT) {
+    fail(
+      "PUBLISHER_OFFICIAL_GOLDEN_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T10 artifact path drifted.",
+    );
+  }
+  const artifact = parseJson(
+    decodeUtf8(
+      authority.bytes,
+      "PUBLISHER_OFFICIAL_GOLDEN_ARTIFACT_DRIFT",
+      "Checkpoint-authenticated M06-T10 artifact",
+    ),
+    "PUBLISHER_OFFICIAL_GOLDEN_ARTIFACT_DRIFT",
+    "Checkpoint-authenticated M06-T10 artifact",
+  );
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.profile !== "desen.publisher.official-golden-proof.v1" ||
+    artifact.task !== "M06-T10" ||
+    artifact.result !== "PASS" ||
+    !Array.isArray(artifact.trackedFiles) ||
+    artifact.trackedFiles.length !== TRACKED.length ||
+    artifact.claims?.registrations === null ||
+    typeof artifact.claims?.registrations !== "object" ||
+    Array.isArray(artifact.claims?.registrations) ||
+    artifact.tests === null ||
+    typeof artifact.tests !== "object" ||
+    Array.isArray(artifact.tests) ||
+    !Array.isArray(artifact.tests.publisherRuntimeCaseNames) ||
+    artifact.tests.publisherRuntimeCaseNames.length === 0 ||
+    !Array.isArray(artifact.tests.requiredRootCaseNames) ||
+    artifact.tests.requiredRootCaseNames.length === 0 ||
+    !Number.isSafeInteger(artifact.tests.minimumRootMutationCases) ||
+    artifact.tests.minimumRootMutationCases <= 0
+  ) {
+    fail(
+      "PUBLISHER_OFFICIAL_GOLDEN_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T10 artifact identity or inventory drifted.",
+    );
+  }
+  const trackedFiles = artifact.trackedFiles.map((receipt, index) => {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      Array.isArray(receipt) ||
+      receipt.path !== TRACKED[index] ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes <= 0 ||
+      typeof receipt.sha256 !== "string" ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+    ) {
+      fail(
+        "PUBLISHER_OFFICIAL_GOLDEN_ARTIFACT_DRIFT",
+        "A checkpoint-authenticated M06-T10 tracked receipt drifted.",
+        { index },
+      );
+    }
+    return Object.freeze({
+      path: receipt.path,
+      bytes: receipt.bytes,
+      sha256: receipt.sha256,
+    });
+  });
+  return Object.freeze({
+    trackedFiles: Object.freeze(trackedFiles),
+    registrations: deepFreeze(artifact.claims.registrations),
+    tests: deepFreeze(artifact.tests),
+  });
+}
+
 async function readRegularAbsoluteBytes(absolutePath, code, label, details = {}) {
   let before;
   try {
@@ -569,43 +532,6 @@ async function readRegularBytes(relativePath, code = "PUBLISHER_OFFICIAL_GOLDEN_
     "Official-golden evidence input",
     { relativePath },
   );
-}
-
-function matchesReceipt(bytes, receipt) {
-  return bytes.byteLength === receipt.bytes && sha256(bytes) === receipt.sha256;
-}
-
-async function authenticateRequiredCiWorkflow(trackedPairs) {
-  const matches = trackedPairs.filter(({ relativePath }) => relativePath === CI_WORKFLOW);
-  if (matches.length !== 1) {
-    fail(
-      "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
-      "The reviewed hosted CI workflow is missing or ambiguous.",
-      { count: matches.length },
-    );
-  }
-  const tracked = matches[0];
-  const liveBytes = await readRegularBytes(CI_WORKFLOW, "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT");
-  if (!matchesReceipt(liveBytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT)) {
-    fail(
-      "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
-      "The live hosted CI workflow differs from the exact reviewed scheduling successor.",
-      {
-        expectedBytes: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.bytes,
-        expectedSha256: APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT.sha256,
-        actualBytes: liveBytes.byteLength,
-        actualSha256: sha256(liveBytes),
-      },
-    );
-  }
-  const trackedIsApproved = matchesReceipt(tracked.bytes, APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT);
-  if (!tracked.overridden && !trackedIsApproved) {
-    fail(
-      "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
-      "The captured hosted CI workflow differs from its authenticated live bytes.",
-    );
-  }
-  return trackedIsApproved ? HISTORICAL_TRACKED_RECEIPTS[CI_WORKFLOW] : undefined;
 }
 
 function readOverrideMap(map, relativePath, allowedPaths) {
@@ -1153,7 +1079,13 @@ function assertImmediateSingleRootScriptEdge(script, predecessor, successor, lab
   }
 }
 
-function registrationClaims(rootPackageText, publisherPackageText, ciSourceText, workflowText) {
+function registrationClaims(
+  rootPackageText,
+  publisherPackageText,
+  ciSourceText,
+  workflowText,
+  frozenClaims,
+) {
   const rootPackage = parseJson(
     rootPackageText,
     "PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT",
@@ -1172,31 +1104,15 @@ function registrationClaims(rootPackageText, publisherPackageText, ciSourceText,
     verify: `${focusedPrerequisites}node scripts/verify-publisher-official-golden.mjs`,
     test: `${focusedPrerequisites}node --test tests/publisher-official-golden.test.mjs`,
   });
-  const successorPrerequisites =
-    "pnpm verify:publisher-official-golden && pnpm --filter @desen/publisher... build && pnpm --filter @desen/publisher typecheck && pnpm --filter @desen/publisher test:invalid-source-matrix && ";
-  const expectedSuccessor = Object.freeze({
-    package: "vitest run test/invalid-source-matrix.test.ts",
-    generate: `${successorPrerequisites}node scripts/generate-publisher-invalid-source-matrix-proof.mjs`,
-    verify: `${successorPrerequisites}node scripts/verify-publisher-invalid-source-matrix.mjs`,
-    test: `${successorPrerequisites}node --test tests/publisher-invalid-source-matrix.test.mjs`,
-  });
   const rootScripts = ownData(rootPackage, "scripts");
   const publisherScripts = ownData(publisherPackage, "scripts");
   if (
     ownData(publisherScripts, "test:official-golden") !== expected.package ||
     ownData(rootScripts, "generate:publisher-official-golden") !== expected.generate ||
     ownData(rootScripts, "verify:publisher-official-golden") !== expected.verify ||
-    ownData(rootScripts, "test:publisher-official-golden") !== expected.test ||
-    ownData(publisherScripts, "test:invalid-source-matrix") !== expectedSuccessor.package ||
-    ownData(rootScripts, "generate:publisher-invalid-source-matrix") !==
-      expectedSuccessor.generate ||
-    ownData(rootScripts, "verify:publisher-invalid-source-matrix") !== expectedSuccessor.verify ||
-    ownData(rootScripts, "test:publisher-invalid-source-matrix") !== expectedSuccessor.test
+    ownData(rootScripts, "test:publisher-official-golden") !== expected.test
   ) {
-    fail(
-      "PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT",
-      "The focused T10 commands or exact approved T11 successor commands changed.",
-    );
+    fail("PUBLISHER_OFFICIAL_GOLDEN_REGISTRATION_DRIFT", "The focused T10 commands changed.");
   }
   assertImmediateSingleRootScriptEdge(
     ownData(rootScripts, "test"),
@@ -1210,42 +1126,14 @@ function registrationClaims(rootPackageText, publisherPackageText, ciSourceText,
     "pnpm verify:publisher-official-golden",
     "Aggregate check",
   );
-  assertImmediateSingleRootScriptEdge(
-    ownData(rootScripts, "test"),
-    "pnpm test:publisher-official-golden",
-    "pnpm test:publisher-invalid-source-matrix",
-    "Aggregate test successor",
-  );
-  assertImmediateSingleRootScriptEdge(
-    ownData(rootScripts, "check"),
-    "pnpm verify:publisher-official-golden",
-    "pnpm verify:publisher-invalid-source-matrix",
-    "Aggregate check successor",
-  );
   const t10TuplePattern =
     /\[\s*"publisher-official-golden",\s*"scripts\/verify-publisher-official-golden\.mjs",\s*"tests\/publisher-official-golden\.test\.mjs",?\s*\]/gu;
-  const t11TuplePattern =
-    /\[\s*"publisher-invalid-source-matrix",\s*"scripts\/verify-publisher-invalid-source-matrix\.mjs",\s*"tests\/publisher-invalid-source-matrix\.test\.mjs",?\s*\]/gu;
   const t10TupleMatches = [...ciSourceText.matchAll(t10TuplePattern)];
-  const t11TupleMatches = [...ciSourceText.matchAll(t11TuplePattern)];
-  const immediateSuccessorMatches = [
-    ...ciSourceText.matchAll(
-      /\[\s*"publisher-official-golden",\s*"scripts\/verify-publisher-official-golden\.mjs",\s*"tests\/publisher-official-golden\.test\.mjs",?\s*\]\s*,?\s*\[\s*"publisher-invalid-source-matrix",\s*"scripts\/verify-publisher-invalid-source-matrix\.mjs",\s*"tests\/publisher-invalid-source-matrix\.test\.mjs",?\s*\]/gu,
-    ),
-  ];
-  if (
-    t10TupleMatches.length !== 1 ||
-    t11TupleMatches.length !== 1 ||
-    immediateSuccessorMatches.length !== 1
-  ) {
+  if (t10TupleMatches.length !== 1) {
     fail(
       "PUBLISHER_OFFICIAL_GOLDEN_CI_DRIFT",
-      "The reviewed single-pass CI inventory must contain one exact T11 tuple immediately after T10.",
-      {
-        t10Count: t10TupleMatches.length,
-        t11Count: t11TupleMatches.length,
-        immediateSuccessorCount: immediateSuccessorMatches.length,
-      },
+      "The reviewed single-pass CI inventory must contain one exact T10 tuple.",
+      { t10Count: t10TupleMatches.length },
     );
   }
   const workflowInvocations =
@@ -1257,7 +1145,7 @@ function registrationClaims(rootPackageText, publisherPackageText, ciSourceText,
       { count: workflowInvocations.length },
     );
   }
-  return HISTORICAL_REGISTRATION_CLAIMS;
+  return frozenClaims;
 }
 
 function deepFreeze(value, seen = new Set()) {
@@ -1271,15 +1159,15 @@ function deepFreeze(value, seen = new Set()) {
 }
 
 async function buildFromOptions(options) {
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const prerequisites = await prerequisiteClaims(options);
   const trackedPairs = await Promise.all(
     TRACKED.map(async (relativePath) => {
       const override = readOverrideMap(options.trackedFileBytes, relativePath, TRACKED_SET);
       const bytes = override ?? (await readRegularBytes(relativePath));
-      return Object.freeze({ relativePath, bytes, overridden: override !== undefined });
+      return Object.freeze({ relativePath, bytes });
     }),
   );
-  const historicalCiWorkflowProjection = await authenticateRequiredCiWorkflow(trackedPairs);
   const bytesByPath = new Map(trackedPairs.map(({ relativePath, bytes }) => [relativePath, bytes]));
   const frozenInputs = assertFrozenInputs(bytesByPath);
   const trackedText = (relativePath, label) =>
@@ -1291,6 +1179,7 @@ async function buildFromOptions(options) {
     trackedText(PUBLISHER_PACKAGE, "Publisher package manifest"),
     trackedText(CI_SOURCE, "Single-pass CI source"),
     trackedText(CI_WORKFLOW, "Hosted CI workflow"),
+    frozenArtifact.registrations,
   );
   const runtime = validateRuntimeReceipt(
     options.runtimeReceipt ??
@@ -1315,48 +1204,30 @@ async function buildFromOptions(options) {
       { relativePath: RUNTIME_TEST },
     ),
   );
-  const missingRequiredRootTests = REQUIRED_ROOT_TEST_NAMES.filter(
-    (name) => !rootTestNames.includes(name),
-  );
-  const missingRequiredSuccessorRootTests = REQUIRED_SUCCESSOR_ROOT_TEST_NAMES.filter(
+  const missingRequiredRootTests = frozenArtifact.tests.requiredRootCaseNames.filter(
     (name) => !rootTestNames.includes(name),
   );
   if (
-    rootTestNames.length < 25 ||
-    missingRequiredRootTests.length > 0 ||
-    missingRequiredSuccessorRootTests.length > 0
+    rootTestNames.length < frozenArtifact.tests.minimumRootMutationCases ||
+    missingRequiredRootTests.length > 0
   ) {
     fail(
       "PUBLISHER_OFFICIAL_GOLDEN_TEST_INVENTORY_DRIFT",
-      "The independent T10 root suite must retain its task-time cases and exact T11 successor mutation controls.",
+      "The independent T10 root suite must retain its checkpoint-authenticated task-time cases.",
       {
         rootMutationCases: rootTestNames.length,
         missingRequiredRootTests,
-        missingRequiredSuccessorRootTests,
       },
     );
   }
-  if (!sameStrings(publisherRuntimeTestNames, EXPECTED_PUBLISHER_RUNTIME_TEST_NAMES)) {
+  if (!sameStrings(publisherRuntimeTestNames, frozenArtifact.tests.publisherRuntimeCaseNames)) {
     fail(
       "PUBLISHER_OFFICIAL_GOLDEN_TEST_INVENTORY_DRIFT",
       "The focused Publisher T10 suite must retain its exact named official-golden cases.",
       { publisherRuntimeTestNames },
     );
   }
-  const trackedFiles = Object.freeze(
-    trackedPairs.map(({ relativePath, bytes, overridden }) => {
-      const historical =
-        (relativePath === CI_WORKFLOW ? historicalCiWorkflowProjection : undefined) ??
-        (overridden ? undefined : HISTORICAL_TRACKED_RECEIPTS[relativePath]);
-      return historical === undefined
-        ? Object.freeze({
-            path: relativePath,
-            bytes: bytes.byteLength,
-            sha256: sha256(bytes),
-          })
-        : Object.freeze({ path: relativePath, ...historical });
-    }),
-  );
+  const trackedFiles = frozenArtifact.trackedFiles;
   const artifact = deepFreeze({
     schemaVersion: 1,
     profile: "desen.publisher.official-golden-proof.v1",
@@ -1376,7 +1247,7 @@ async function buildFromOptions(options) {
       },
     },
     trackedFiles,
-    tests: HISTORICAL_TEST_CLAIMS,
+    tests: frozenArtifact.tests,
     nonclaims: [
       "M06-T10 proves only the frozen official valid Source/Catalog/Bundle golden and two fresh successful publications; M06-T11 owns the complete invalid-source no-Bundle matrix.",
       "The proof does not add publication metadata and does not prove signing, storage, activation, deployment, runtime, host, adapter, editor, or control-plane behavior.",

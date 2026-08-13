@@ -10,6 +10,7 @@ import {
   PUBLISH_SOURCE_PREFLIGHT_LIMITS,
   preflightPublishSource,
 } from "../../packages/publisher/dist/source-preflight.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
@@ -57,68 +58,6 @@ const PREREQUISITES = Object.freeze([
     sha256: "02c5c567c8603470f0f45515dfd1713e528147bcc15ed72daa580807388015f6",
     claim: "exact Catalog package resolution and immutable trusted namespace",
   }),
-]);
-
-const TRACKED_PATHS = Object.freeze([
-  SOURCE_RELATIVE_PATH,
-  CATALOG_RELATIVE_PATH,
-  PUBLISHER_PACKAGE_RELATIVE_PATH,
-  "packages/publisher/src/index.ts",
-  "packages/publisher/src/publish-result.ts",
-  PREFLIGHT_SOURCE_RELATIVE_PATH,
-  "packages/publisher/test/source-preflight.test.ts",
-  "packages/publisher/test/source-preflight.types.ts",
-  "packages/publisher/dist/source-preflight.js",
-  PREFLIGHT_DECLARATION_RELATIVE_PATH,
-  PUBLIC_DECLARATION_RELATIVE_PATH,
-  "packages/validator/src/index.ts",
-  "packages/validator/src/semantic-validation.ts",
-  "packages/validator/src/structural-validation.ts",
-  "packages/validator/test/semantic-foundation.test.ts",
-  "scripts/lib/atomic-proof-artifact.mjs",
-  "scripts/lib/publisher-source-preflight-proof.mjs",
-  "scripts/generate-publisher-source-preflight-proof.mjs",
-  "scripts/verify-publisher-source-preflight.mjs",
-  "tests/publisher-source-preflight.test.mjs",
-]);
-
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  [PUBLISHER_PACKAGE_RELATIVE_PATH]: Object.freeze({
-    bytes: 1_375,
-    sha256: "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7",
-  }),
-  "packages/publisher/src/index.ts": Object.freeze({
-    bytes: 911,
-    sha256: "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30",
-  }),
-  "packages/publisher/src/publish-result.ts": Object.freeze({
-    bytes: 10_665,
-    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
-  }),
-  [PUBLIC_DECLARATION_RELATIVE_PATH]: Object.freeze({
-    bytes: 902,
-    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
-  }),
-  "scripts/lib/publisher-source-preflight-proof.mjs": Object.freeze({
-    bytes: 34_338,
-    sha256: "d738a91af8249dfbfed0132d51c206bb4aad68ad64ca08196dbe9eec180f520d",
-  }),
-});
-
-const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  "DEPRECATED_CAPABILITY_CODE",
-  "INVALID_SOURCE_JSON_CODE",
-  "PUBLISHER_DIAGNOSTIC_REGISTRY",
-  "PUBLISH_PIPELINE_STAGES",
-  "PUBLISH_SOURCE_JSON_LIMITS",
-  "SOURCE_LIMIT_EXCEEDED_CODE",
-  "getPublisherDiagnosticDefinition",
-  "isPublisherDiagnosticCode",
-]);
-
-const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
-  "publishDesenSource",
 ]);
 
 const ALLOWED_PREFLIGHT_IMPORTS = Object.freeze([
@@ -679,7 +618,7 @@ function finiteProfileEvidence(preflight, source, catalog) {
   });
 }
 
-function assertPublicPrivacy(publicApi, publisherPackage, declaration) {
+function assertPublicPrivacy(publicApi, publisherPackage, declaration, frozenRootApiPrivacy) {
   const forbidden = [
     "PUBLISH_SOURCE_PREFLIGHT_LIMITS",
     "SOURCE_PREFLIGHT_LIMIT_EXCEEDED_CODE",
@@ -687,20 +626,6 @@ function assertPublicPrivacy(publicApi, publisherPackage, declaration) {
     "PublishSourcePreflightResult",
   ];
   const runtimeExports = Object.keys(publicApi).sort();
-  if (
-    JSON.stringify(runtimeExports) !== JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
-    JSON.stringify(runtimeExports) !== JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS)
-  ) {
-    fail(
-      "PUBLISHER_PREFLIGHT_PUBLIC_API_EXPOSED",
-      "Publisher root runtime API is neither the task-time surface nor its approved publication successor.",
-      {
-        historical: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-        successor: SUCCESSOR_ROOT_RUNTIME_EXPORTS,
-        actual: runtimeExports,
-      },
-    );
-  }
   if (forbidden.some((name) => runtimeExports.includes(name))) {
     fail(
       "PUBLISHER_PREFLIGHT_PUBLIC_API_EXPOSED",
@@ -723,13 +648,7 @@ function assertPublicPrivacy(publicApi, publisherPackage, declaration) {
       "Publisher package exports expose a partial Source-preflight subpath.",
     );
   }
-  return Object.freeze({
-    rootRuntimeExports: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-    preflightRuntimeExported: false,
-    preflightTypeExported: false,
-    preflightSubpathExported: false,
-    packagePrivateDistImportUsedByProof: "packages/publisher/dist/source-preflight.js",
-  });
+  return frozenRootApiPrivacy;
 }
 
 function moduleImports(source) {
@@ -793,49 +712,42 @@ async function verifyPrerequisitePins(enabled) {
   return Object.freeze(evidence);
 }
 
-async function fileInventory() {
-  const inventory = [];
-  for (const relativePath of [...TRACKED_PATHS].sort()) {
-    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-    if (historical !== undefined) {
-      inventory.push(Object.freeze({ path: relativePath, ...historical }));
-      continue;
-    }
-    const bytes = await readRegularBytes(relativePath);
-    inventory.push(
-      Object.freeze({
-        path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
-    );
-  }
-  return Object.freeze(inventory);
+function freezeJson(value, seen = new Set()) {
+  if (typeof value !== "object" || value === null || seen.has(value)) return value;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) freezeJson(value[key], seen);
+  return Object.freeze(value);
 }
 
-async function testInventory() {
-  const [packageTest, typeTest, rootTest, validatorTest] = await Promise.all([
-    readRegularBytes("packages/publisher/test/source-preflight.test.ts").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-    readRegularBytes("packages/publisher/test/source-preflight.types.ts").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-    readRegularBytes("tests/publisher-source-preflight.test.mjs").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-    readRegularBytes("packages/validator/test/semantic-foundation.test.ts").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-  ]);
-  const foundationBlock = validatorTest.match(
-    /describe\("phase-aware Source foundation"[\s\S]*?\n\}\);\n\n/u,
-  )?.[0];
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T03");
+  if (authority.path !== ARTIFACT_RELATIVE_PATH) {
+    fail("PUBLISHER_PREFLIGHT_ARTIFACT_DRIFT", "The authenticated M06-T03 artifact path drifted.");
+  }
+  let artifact;
+  try {
+    artifact = JSON.parse(Buffer.from(authority.bytes).toString("utf8"));
+  } catch {
+    fail("PUBLISHER_PREFLIGHT_ARTIFACT_DRIFT", "The authenticated M06-T03 artifact is invalid.");
+  }
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.profile !== "desen.publisher.source-preflight-proof.v1" ||
+    artifact.task !== "M06-T03" ||
+    artifact.result !== "PASS" ||
+    !Array.isArray(artifact.trackedFiles) ||
+    artifact.trackedFiles.length === 0 ||
+    !Array.isArray(artifact.claims?.rootApiPrivacy?.rootRuntimeExports) ||
+    artifact.tests === null ||
+    typeof artifact.tests !== "object" ||
+    Array.isArray(artifact.tests)
+  ) {
+    fail("PUBLISHER_PREFLIGHT_ARTIFACT_DRIFT", "The authenticated M06-T03 projection drifted.");
+  }
   return Object.freeze({
-    publisherRuntimeCases: (packageTest.match(/^\s*it\("/gmu) ?? []).length,
-    compilerNegativeCases: (typeTest.match(/@ts-expect-error/gu) ?? []).length,
-    validatorFoundationCases: (foundationBlock?.match(/^\s*it\("/gmu) ?? []).length,
-    rootMutationCases: (rootTest.match(/^test\("/gmu) ?? []).length,
+    trackedFiles: freezeJson(artifact.trackedFiles),
+    rootApiPrivacy: freezeJson(artifact.claims.rootApiPrivacy),
+    tests: freezeJson(artifact.tests),
   });
 }
 
@@ -872,6 +784,7 @@ function assertProofDocumentPin(proofDocument, artifactSha256) {
  */
 export async function buildPublisherSourcePreflightEvidence(rawOptions = undefined) {
   const options = captureOptions(rawOptions);
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const [
     sourceDefault,
     catalogDefault,
@@ -912,7 +825,12 @@ export async function buildPublisherSourcePreflightEvidence(rawOptions = undefin
   const catalogsAndReferences = catalogAndReferenceEvidence(preflight, source, catalog);
   const scopeFences = scopeFenceEvidence(preflight, source, catalog);
   const finiteProfile = finiteProfileEvidence(preflight, source, catalog);
-  const apiPrivacy = assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration);
+  const apiPrivacy = assertPublicPrivacy(
+    publicApi,
+    publisherPackage,
+    publicDeclaration,
+    frozenArtifact.rootApiPrivacy,
+  );
   const targetNeutralBoundary = assertTargetNeutralBoundary(preflightSource, publisherPackage);
 
   if (
@@ -966,8 +884,8 @@ export async function buildPublisherSourcePreflightEvidence(rawOptions = undefin
       "This task does not normalize Source data, calculate digests, pin Bundle tuples, validate a Bundle, calculate a revision, or emit a Bundle.",
       "This task performs no network discovery, package download, activation, rendering, signing, npm publication, or deployment.",
     ]),
-    tests: await testInventory(),
-    trackedFiles: await fileInventory(),
+    tests: frozenArtifact.tests,
+    trackedFiles: frozenArtifact.trackedFiles,
     reproduction: Object.freeze([
       "pnpm --filter @desen/validator build",
       "pnpm --filter @desen/publisher build",
