@@ -6,10 +6,12 @@ The hosted CI gate must prove the same safety properties as the cumulative task 
 restarting identical builds and tests through every historical prerequisite wrapper.
 
 The task-specific `verify:*`, `test:*`, aggregate `test`, and aggregate `check` scripts remain the
-reviewed compatibility surface. GitHub Actions first verifies the required-exhaustive contracts,
-then invokes `scripts/ci/run-required-exhaustive-quality-gate.mjs` as the official
-`REQUIRED + EXHAUSTIVE` authority. `scripts/run-ci-quality-gate.mjs` is retained only behind the
-explicit manual `legacy-rollback` workflow mode.
+reviewed compatibility surface. GitHub Actions first verifies the required gate contracts, then
+invokes `scripts/ci/run-required-affected-quality-gate.mjs` as the official dispatcher. Only an
+authenticated eligible same-repository pull request may reach fresh `REQUIRED + AFFECTED`; every
+unsafe boundary, plus `main`, release, and manual audit, runs fresh `REQUIRED + EXHAUSTIVE`.
+`scripts/run-ci-quality-gate.mjs` is retained only behind the explicit manual `legacy-rollback`
+workflow mode.
 
 ## Single-pass order
 
@@ -582,11 +584,22 @@ affected execution only for one exact same-repository pull-request boundary and 
 promotion receipt. Any path-set, ownership, policy, provenance, or diff uncertainty produces
 `NOT_ELIGIBLE` and exactly one fresh exhaustive fallback. `main` and manual execution, including
 the release process routed through those authorities,
-remain unconditionally fresh exhaustive. The cutover remains `IN_PROGRESS` until its PR and
-post-merge hosted runs are pinned and the 17 G07-due entries close.
+remain unconditionally fresh exhaustive. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
+passed fresh `REQUIRED + EXHAUSTIVE` in
+[run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
+and its landed `main` revision `6d87889bc088e45e219f430ee67e10c901c1a2fb` passed again in
+[run 31675234655, job 94368259305](https://github.com/desenlab/desen-app/actions/runs/31675234655/job/94368259305).
+The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
+`REQUIRED + AFFECTED` in 3m54s in
+[run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935):
+10 selected workloads, one proof unit, 10 observed closes, `strictSubset: true`,
+`freshExecution: true`, and `cachedSuccessRead: false`.
 
 I07-02's completed promotion closed `DEBT-I07-008` by removing its temporary shadow workflow and
-modular comparison adapter/test. The current-reader bridges remain owned by I07-04.
+modular comparison adapter/test. I07-04 closes all 17 G07-due bridge entries and completes G07;
+checkpoint sequence 28 head
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
+artifacts and 50 current readers.
 `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and other rollback
 references under I07-05 until their exact machine-checked removal conditions in
 `docs/plan/DEBT-REGISTER.md` are satisfied.

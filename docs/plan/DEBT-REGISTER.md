@@ -2,10 +2,11 @@
 
 This register tracks temporary compatibility structures registered by I07-01 and later
 task-specific successors while immutable task evidence is separated from current-checkpoint
-authentication and CI execution orchestration. One entry remains open, seventeen I07-04-owned
-entries have removed their scoped references and await the cleanup commit's hosted proof, and
-DEBT-I07-008 is closed with authenticated removal evidence. A pending-hosted entry records real
-zero-reference cleanup without claiming a run that cannot exist until the commit is published.
+authentication and CI execution orchestration. One entry remains open. All seventeen I07-04-owned
+entries and DEBT-I07-008 are closed with authenticated removal evidence: cleanup PR 36 at
+`0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, its fresh required-exhaustive hosted run, the
+post-merge main run, the fresh required-affected canary in PR 37, and proof-reader checkpoint
+sequence 28.
 
 This is an engineering-maintenance register, not a protocol finding or Proof Matrix. Removing an
 entry may not rewrite a frozen artifact, weaken a proof, turn an unknown input into a skipped
@@ -38,31 +39,31 @@ the full gate. A cleanup is complete only when:
 
 ## Lifecycle summary
 
-| ID           | Status                       | Temporary structure                                      | Registered by | Removal owner | Must close by |
-| ------------ | ---------------------------- | -------------------------------------------------------- | ------------- | ------------- | ------------- |
-| DEBT-I07-001 | REMOVED_PENDING_HOSTED_PROOF | M06-T01 current G05 receipt ownership                    | I07-01        | I07-04        | G07           |
-| DEBT-I07-002 | REMOVED_PENDING_HOSTED_PROOF | M06-T05 duplicate current M05 receipts                   | I07-01        | I07-04        | G07           |
-| DEBT-I07-003 | REMOVED_PENDING_HOSTED_PROOF | M06-T09 predecessor compatibility helpers                | I07-01        | I07-04        | G07           |
-| DEBT-I07-004 | REMOVED_PENDING_HOSTED_PROOF | M06-T11 current T09/T10 receipts and source markers      | I07-01        | I07-04        | G07           |
-| DEBT-I07-005 | REMOVED_PENDING_HOSTED_PROOF | M07-T01 historical projection for checkpointed readers   | I07-01        | I07-04        | G07           |
-| DEBT-I07-006 | REMOVED_PENDING_HOSTED_PROOF | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
-| DEBT-I07-007 | OPEN                         | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
-| DEBT-I07-008 | CLOSED                       | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
-| DEBT-I07-009 | REMOVED_PENDING_HOSTED_PROOF | M05-T09 current M07-T06 coordination projection          | I07-01        | I07-04        | G07           |
-| DEBT-I07-010 | REMOVED_PENDING_HOSTED_PROOF | M05-T04 current M07-T03 P-05 successor projection        | I07-01        | I07-04        | G07           |
-| DEBT-I07-011 | REMOVED_PENDING_HOSTED_PROOF | M07-T04 current-reader and P-17 successor bridges        | M07-T04       | I07-04        | G07           |
-| DEBT-I07-012 | REMOVED_PENDING_HOSTED_PROOF | M07-T05 historical control-plane reader bridges          | M07-T05       | I07-04        | G07           |
-| DEBT-I07-013 | REMOVED_PENDING_HOSTED_PROOF | M07-T06 historical staging reader bridges                | M07-T06       | I07-04        | G07           |
-| DEBT-I07-014 | REMOVED_PENDING_HOSTED_PROOF | M07-T07 historical activation reader bridges             | M07-T07       | I07-04        | G07           |
-| DEBT-I07-015 | REMOVED_PENDING_HOSTED_PROOF | M07-T08 historical recovery reader bridges               | M07-T08       | I07-04        | G07           |
-| DEBT-I07-016 | REMOVED_PENDING_HOSTED_PROOF | M07-T09 historical fault-injection successor bridges     | M07-T09       | I07-04        | G07           |
-| DEBT-I07-017 | REMOVED_PENDING_HOSTED_PROOF | I07-03 shadow CI and current-reader receipt bridge       | I07-03        | I07-04        | G07           |
-| DEBT-I07-018 | REMOVED_PENDING_HOSTED_PROOF | M07-T10 historical transition-race successor bridges     | M07-T10       | I07-04        | G07           |
-| DEBT-I07-019 | REMOVED_PENDING_HOSTED_PROOF | M07-T11 historical channel-consumption successor bridges | M07-T11       | I07-04        | G07           |
+| ID           | Status | Temporary structure                                      | Registered by | Removal owner | Must close by |
+| ------------ | ------ | -------------------------------------------------------- | ------------- | ------------- | ------------- |
+| DEBT-I07-001 | CLOSED | M06-T01 current G05 receipt ownership                    | I07-01        | I07-04        | G07           |
+| DEBT-I07-002 | CLOSED | M06-T05 duplicate current M05 receipts                   | I07-01        | I07-04        | G07           |
+| DEBT-I07-003 | CLOSED | M06-T09 predecessor compatibility helpers                | I07-01        | I07-04        | G07           |
+| DEBT-I07-004 | CLOSED | M06-T11 current T09/T10 receipts and source markers      | I07-01        | I07-04        | G07           |
+| DEBT-I07-005 | CLOSED | M07-T01 historical projection for checkpointed readers   | I07-01        | I07-04        | G07           |
+| DEBT-I07-006 | CLOSED | M05-T09 embedded M06-T05 Validator successor description | I07-01        | I07-04        | G07           |
+| DEBT-I07-007 | OPEN   | Legacy runner, rollback adapter, and manual workflow     | I07-01        | I07-05        | G12           |
+| DEBT-I07-008 | CLOSED | Shadow workflow and legacy-authority adapter             | I07-01        | I07-02        | G07           |
+| DEBT-I07-009 | CLOSED | M05-T09 current M07-T06 coordination projection          | I07-01        | I07-04        | G07           |
+| DEBT-I07-010 | CLOSED | M05-T04 current M07-T03 P-05 successor projection        | I07-01        | I07-04        | G07           |
+| DEBT-I07-011 | CLOSED | M07-T04 current-reader and P-17 successor bridges        | M07-T04       | I07-04        | G07           |
+| DEBT-I07-012 | CLOSED | M07-T05 historical control-plane reader bridges          | M07-T05       | I07-04        | G07           |
+| DEBT-I07-013 | CLOSED | M07-T06 historical staging reader bridges                | M07-T06       | I07-04        | G07           |
+| DEBT-I07-014 | CLOSED | M07-T07 historical activation reader bridges             | M07-T07       | I07-04        | G07           |
+| DEBT-I07-015 | CLOSED | M07-T08 historical recovery reader bridges               | M07-T08       | I07-04        | G07           |
+| DEBT-I07-016 | CLOSED | M07-T09 historical fault-injection successor bridges     | M07-T09       | I07-04        | G07           |
+| DEBT-I07-017 | CLOSED | I07-03 shadow CI and current-reader receipt bridge       | I07-03        | I07-04        | G07           |
+| DEBT-I07-018 | CLOSED | M07-T10 historical transition-race successor bridges     | M07-T10       | I07-04        | G07           |
+| DEBT-I07-019 | CLOSED | M07-T11 historical channel-consumption successor bridges | M07-T11       | I07-04        | G07           |
 
 ## DEBT-I07-001 — M06-T01 current G05 receipts
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -99,12 +100,14 @@ the full gate. A cleanup is complete only when:
   - `rg -n "G05_COMPATIBILITY_OWNERSHIP_PATHS|REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY|TRACKED_FILE_OVERRIDE_PATHS|reviewedHistory|latestReviewed|receiptIsReviewed|M07_T03_SOURCE_AUDIT_RECONSTRUCTION_PATCH|reconstructM07T03SourceAuditProof|currentCompatibilityBytes|compatibilityPaths|reviewedG05CompatibilityReceiptHistory|PUBLISHER_G05_COMPATIBILITY_READER_DRIFT" scripts/lib/publisher-publish-result-proof.mjs tests/publisher-publish-result.test.mjs`
     must return no matches after removal. Historical path strings inside immutable task-receipt
     projections are not part of this zero-reference rule.
-- Closure evidence: `PENDING` — record commit, pull request, replacement checkpoint receipt
-  SHA-256, frozen M06-T01 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-002 — M06-T05 duplicate current M05 receipts
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -138,12 +141,14 @@ the full gate. A cleanup is complete only when:
   - `rg -n "M05_SOURCE_AUDIT_(PROOF|TEST)_RELATIVE_PATH|APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS|captureCompatibilitySourceBytes|compatibilitySources|compatibilitySourceBytes|currentBytes|currentSha256" scripts/lib/publisher-execution-preflight-proof.mjs tests/publisher-execution-preflight.test.mjs`
     must return no matches after removal. Immutable historical receipt records may retain their
     exact M05-T09 paths and hashes.
-- Closure evidence: `PENDING` — record commit, pull request, replacement checkpoint receipt
-  SHA-256, frozen M06-T05 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-003 — M06-T09 predecessor and workflow compatibility helpers
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -184,12 +189,14 @@ the full gate. A cleanup is complete only when:
   - `rg -n "PUBLISHER_BUNDLE_PUBLICATION_COMPATIBILITY_READERS|EXECUTION_PREFLIGHT_COMPATIBILITY_(READER|ROOT_TEST)|APPROVED_COMPATIBILITY_RECEIPT_HISTORY|APPROVED_CURRENT_COMPATIBILITY_RECEIPTS|APPROVED_CURRENT_COMPATIBILITY_PATHS|assertApprovedCurrentCompatibilityBytes|authenticateCurrentCompatibilityReaders|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|authenticatedM07T01Prefix|\[compatibility\] externally tracks every current T02 through T09 proof reader|\[compatibility\] detects tamper in each externally anchored T02 through T09 reader|\[compatibility\] admits only the exact current execution-preflight root reader|\[ci\] admits only the exact required-workflow successor into frozen T09 evidence|\[ci\] accepts an append-only M07 successor without rewriting frozen T09 evidence" scripts/lib/publisher-bundle-publication-proof.mjs tests/publisher-bundle-publication.test.mjs`
     must return no matches after removal. The checkpoint may retain the seven exact paths under new
     checkpoint-owned symbols.
-- Closure evidence: `PENDING` — record commit, pull request, seven-reader checkpoint receipt
-  SHA-256, frozen M06-T09 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-004 — M06-T11 current T09/T10 receipts and source-string markers
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -252,12 +259,14 @@ the full gate. A cleanup is complete only when:
   - `node --test tests/publisher-official-golden.test.mjs`
   - `rg -n "APPROVED_CURRENT_T(09|10)_SUCCESSOR_(PATHS|RECEIPTS)|APPROVED_T09_SUCCESSOR_RECEIPT_HISTORY|REQUIRED_CURRENT_T09_(PROOF|TEST)_MARKERS|currentT(09|10)SuccessorReceipt|assertCurrentT10SuccessorBytes|authenticateLiveCurrentT(09|10)Successors|authenticateCurrentT(09|10)TrackedInputs|currentT10HistoricalReceipt|assertCurrentT09CompatibilityMarkers|\[authority\] distinguishes semantic coordination drift from frozen surface drift|BUNDLE_PUBLICATION_(PROOF_LIBRARY|ROOT_TEST)|currentT(09|10)(Proof|RootTest)Bytes|approvedCurrentSuccessor|unreviewedT09ProofBytes|APPROVED_REQUIRED_CI_WORKFLOW_RECEIPT|matchesReceipt|authenticateRequiredCiWorkflow|\[ci\] admits only the exact required-workflow successor into frozen T10 evidence" scripts/lib/publisher-invalid-source-matrix-proof.mjs tests/publisher-invalid-source-matrix.test.mjs scripts/lib/publisher-official-golden-proof.mjs tests/publisher-official-golden.test.mjs`
     must return no matches after removal.
-- Closure evidence: `PENDING` — record commit, pull request, structured T09/T10 checkpoint receipt
-  SHA-256, frozen M06-T11 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-005 — M07-T01 inventory of twelve live readers
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -301,12 +310,14 @@ the full gate. A cleanup is complete only when:
   - `rg -n "HISTORICAL_COMPATIBILITY_READERS|HISTORICAL_TRACKED_RECEIPTS|currentReaderPaths" scripts/lib/control-plane-bundle-store-proof.mjs tests/control-plane-bundle-store.test.mjs`
     must return no matches after removal. The twelve paths may appear once in the replacement
     current-checkpoint manifest and in frozen historical projections.
-- Closure evidence: `PENDING` — record commit, pull request, eighteen-reader checkpoint manifest
-  SHA-256, frozen M07-T01 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-006 — M05-T09 embedded M06-T05 Validator successor
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -344,9 +355,10 @@ the full gate. A cleanup is complete only when:
   - `rg -n "M06_T05_VALIDATOR_SUCCESSOR|uniqueRuntimeResolutionModule|assertPinnedRuntimeResolutionDigest|normalizeReviewedValidatorSuccessor|verifyReferenceHostWebValidatorSuccessorSources" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
     must return no matches after removal. The replacement checkpoint may retain the exact successor
     records under checkpoint-owned symbols.
-- Closure evidence: `PENDING` — record commit, pull request, Validator-successor checkpoint
-  receipt SHA-256, frozen M05-T09 artifact SHA-256, and hosted required-exhaustive equivalence run
-  URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-007 — Legacy sequential runner and workflow path
 
@@ -477,7 +489,7 @@ the full gate. A cleanup is complete only when:
 
 ## DEBT-I07-009 — M05-T09 current M07-T06 coordination projection
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -508,12 +520,14 @@ the full gate. A cleanup is complete only when:
   - `rg -n "M07_T06_CONTROL_PLANE_(COORDINATION|LOCKFILE_BLOCK)|APPROVED_M07_T06_DEPENDENCY_POLICY_SUCCESSOR|normalizeCurrentRootPackageBytes|inspectExactControlPlaneImporter|normalizeCurrentLockfileBytes|reviewed Publisher and M07-T06 coordination preserve root, package, and lockfile provenance" scripts/lib/reference-host-web-source-audit-proof.mjs tests/reference-host-web-source-audit.test.mjs`
     must return no matches after removal. The replacement checkpoint may retain exact M07-T06
     receipts under checkpoint-owned symbols.
-- Closure evidence: `PENDING` — record commit, pull request, replacement coordination-checkpoint
-  SHA-256, frozen M05-T09 artifact SHA-256, and hosted required-exhaustive equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-010 — M05-T04 current M07-T03 P-05 successor projection
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-01`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -544,13 +558,14 @@ the full gate. A cleanup is complete only when:
   - `rg -n "EXPECTED_CURRENT_P05_SUCCESSOR|p05HistoricalStatus|p05CurrentStatus|p05SuccessorArtifactSha256|SUCCESSOR_SHA256|SUCCESSOR_ARTIFACT_FILE_NAME|SUCCESSOR_EVIDENCE_TEXT|rejects P-05 monotonic M07-T03 successor closure or P-06 historical pin drift" scripts/lib/runtime-react-interactions-proof.mjs tests/runtime-react-interactions.test.mjs`
     must return no matches after removal. The replacement checkpoint may retain the exact M07-T03
     semantic successor and M05-T04 reader receipts under checkpoint-owned symbols.
-- Closure evidence: `PENDING` — record commit, pull request, replacement semantic-checkpoint
-  SHA-256, frozen M05-T04 and M07-T03 artifact SHA-256 values, and hosted required-exhaustive
-  equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-011 — M07-T04 current-reader and P-17 successor bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T04`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -627,13 +642,14 @@ the full gate. A cleanup is complete only when:
     must return no matches after removal. The replacement checkpoint may retain the exact M07-T04
     semantic successor, M05-T06 reader receipts, and control-plane transition under
     checkpoint-owned symbols.
-- Closure evidence: `PENDING` — record commit, pull request, replacement semantic-checkpoint
-  SHA-256, frozen M05-T06 plus M07-T01 through M07-T04 artifact SHA-256 values, and hosted
-  required-exhaustive equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-012 — M07-T05 historical control-plane reader bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T05`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -717,13 +733,14 @@ the full gate. A cleanup is complete only when:
     transition receipts under checkpoint-owned symbols. The bundle-store registration error is
     scoped to the named registration test above; unrelated error taxonomies are not part of this
     entry.
-- Closure evidence: `PENDING` — record commit, pull request, replacement reader-checkpoint
-  SHA-256, frozen M07-T01 through M07-T05 artifact SHA-256 values, and hosted required-exhaustive
-  equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-013 — M07-T06 historical staging reader bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T06`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -814,13 +831,14 @@ the full gate. A cleanup is complete only when:
     must return no matches after removal. The replacement checkpoint may retain exact receipts under
     checkpoint-owned symbols; production M07-T06 staging names outside these scoped historical
     reader files are not part of this zero-reference rule.
-- Closure evidence: `PENDING` — record commit, pull request, replacement reader-checkpoint SHA-256,
-  frozen M07-T01 through M07-T06 artifact SHA-256 values, and hosted required-exhaustive
-  equivalence run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-014 — M07-T07 historical activation reader bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T07`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -956,13 +974,14 @@ the full gate. A cleanup is complete only when:
     must return no matches after removal. Immutable task-time receipt fields may remain only in
     frozen artifact bytes; the replacement checkpoint may retain current receipts under
     checkpoint-owned symbols.
-- Closure evidence: `PENDING` — record commit, pull request, sequence-16 replacement checkpoint
-  SHA-256, all seven frozen M07 artifact SHA-256 values, and hosted required-exhaustive equivalence
-  run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-015 — M07-T08 historical recovery reader bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T08`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1088,13 +1107,14 @@ the full gate. A cleanup is complete only when:
     must return no matches after removal. Production recovery APIs, focused M07-T08 evidence, and
     checkpoint-owned current receipts outside these scoped historical reader/test files are not
     part of this zero-reference rule.
-- Closure evidence: `PENDING` — record commit, pull request, sequence-20 checkpoint
-  SHA-256, all eight frozen M07-T01 through M07-T08 artifact SHA-256 values, zero-reference output,
-  and hosted required-exhaustive run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-016 — M07-T09 historical fault-injection successor bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T09`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1199,13 +1219,14 @@ the full gate. A cleanup is complete only when:
     must return no matches after removal. The M07-T09 proof implementation, focused evidence,
     frozen artifact bytes, and checkpoint-owned current receipts outside these scoped historical
     reader and test files are not part of this zero-reference rule.
-- Closure evidence: `PENDING` — record commit, pull request, sequence-21 checkpoint SHA-256, all
-  nine frozen M07-T01 through M07-T09 artifact SHA-256 values, zero-reference output, and hosted
-  required-exhaustive run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-017 — I07-03 affected-selector shadow CI and current-reader bridge
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `I07-03`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1268,14 +1289,14 @@ the full gate. A cleanup is complete only when:
     removed target as absent, and find none of the registered symbols after I07-04 promotion. The
     append-only sequence-22 checkpoint and enduring selector, ownership, graph, threshold,
     change-boundary, and required exhaustive authorities are outside this zero-reference scope.
-- Closure evidence: `PENDING` — record the I07-04 commit and pull request, the frozen I07-03
-  threshold SHA-256, the sequence-22 checkpoint SHA-256, the 20 qualifying hosted comparison run
-  pairs, category-coverage and zero-false-negative receipts, exact zero-reference output, and the
-  final hosted required exhaustive `main` run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-018 — M07-T10 historical transition-race successor bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T10`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1504,14 +1525,14 @@ the full gate. A cleanup is complete only when:
     their registered symbols after I07-04 cleanup. The M07-T10 production implementation,
     focused transition-race evidence, immutable artifact bytes, and append-only checkpoint history
     through sequence 23 are outside this zero-reference scope.
-- Closure evidence: `PENDING` — record the I07-04 commit and pull request, sequence-23 checkpoint
-  SHA-256 (`3308da059b521c2b5f5fe75d036303221cace805094445f2d64383384831d45d`), all 19
-  frozen artifact SHA-256 values, exact zero-reference output, and the final hosted
-  required-exhaustive run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.
 
 ## DEBT-I07-019 — M07-T11 historical channel-consumption successor bridges
 
-- Status: `REMOVED_PENDING_HOSTED_PROOF`
+- Status: `CLOSED`
 - Registered by infrastructure task: `M07-T11`
 - Removal owner: `I07-04`
 - Exact paths and symbols:
@@ -1670,7 +1691,7 @@ the full gate. A cleanup is complete only when:
   - `node --test scripts/ci/test/infrastructure-debt.test.mjs`
   - scoped zero-reference verification must inspect the 32 exact targets above and find none of
     their registered symbols after I07-04 cleanup.
-- Closure evidence: `PENDING` — record the I07-04 commit and pull request, sequence-24 checkpoint
-  SHA-256 (`f7dcc3f74653e739a46434b8fa746f177a9b33cabb874ad9910747dcd46310de`), all 20
-  frozen artifact SHA-256 values, exact zero-reference output, and the final hosted
-  required-exhaustive run URL.
+- Closure evidence: `CLOSURE` — I07-04 baseline SHA-256
+  `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`, cleanup commit
+  `0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb`, PR 36, hosted run 31674300000, and checkpoint
+  sequence 28 head `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`.

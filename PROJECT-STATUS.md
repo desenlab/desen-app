@@ -762,21 +762,21 @@ job identifiers are pinned in the
 [I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json). `DEBT-I07-017`
 assigns shadow-only cleanup to I07-04 for removal by G07; `DEBT-I07-018` assigns the new historical
 reader bridges to the same I07-04/G07 cleanup; I07-05 owns legacy retirement by G12. M07-T10 is
-`DONE`. M07-T11 is also `DONE`; all M07 implementation work is complete, while G07 remains open
-for I07-04.
+`DONE`. M07-T11 is also `DONE`; all M07 implementation work was complete, while G07 still remained
+open for I07-04 at that checkpoint.
 
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
-  `G06`
+  `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
-- Current milestone: `M07 — Atomic activation, last-known-good, and local control plane`
+- Current milestone: `M08 — UI-independent editor core`
 - Overall implementation progress: `85 / 145 tasks complete (59%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- Proof-gate progress: `7 / 13 complete`
+- Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
   `M02-T04 — RFC 8785-compatible canonicalization and SHA-256 golden tests`,
@@ -850,14 +850,13 @@ for I07-04.
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
-  `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`
-- Next operational and infrastructure task:
+  `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
-  (`IN_PROGRESS`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: none inside M07; all 11 implementation tasks are complete
-- Status: M07-T11 and I07-03 are complete; I07-04 has authenticated `20 / 20` hosted comparisons,
-  locally removed all 17 G07-due bridge families, and is waiting only for hosted cutover/closure;
-  G07 remains `NOT_STARTED` until that evidence is merged
+  (`DONE`, hosted campaign `20 / 20`, zero false negatives)
+- Next implementation task: `M08-T01 — Direct DESEN Source editor document model`
+- Status: M07 is 11/11, I07-04 and G07 are `DONE`, proof gates are 8/13, and implementation
+  progress remains 85/145. All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN`
+  under I07-05.
 
 ## Completed preparation
 
@@ -1282,10 +1281,9 @@ The local sandbox cannot bind loopback sockets (`EPERM`), so this working-tree c
 hosted or locally socket-executed completion claim; hosted CI remains the authority for those
 socket cases.
 
-This completes M07 at 11/11 and moves overall progress to 85/145. P-12 remains `NOT_PROVEN` until
-M10-T07 proves Desen App product-level restart preservation, N-041 remains `PLANNED` until M12-T05,
-and G07 remains `NOT_STARTED` while I07-04 completes hosted cutover after an independently
-authenticated `20 / 20` campaign with zero false negatives. The proof does not claim
+This completes M07 at 11/11 and leaves overall implementation progress at 85/145. P-12 remains
+`NOT_PROVEN` until M10-T07 proves Desen App product-level restart preservation, and N-041 remains
+`PLANNED` until M12-T05. The proof does not claim
 remote/multi-tenant/TLS deployment, credential lifecycle, hostile-admin concurrent installed/static
 root mutation resistance, independent anti-rollback, real-browser performance, Android/iOS, or
 other native-host conformance.
@@ -1298,14 +1296,25 @@ historical comparison authority; the pre-promotion M07-T11 successor selector di
 succeeded; its shadow returned
 `NOT_ELIGIBLE → EXHAUSTIVE / UNSUPPORTED_CHANGE_KIND`, so no eligible strict-subset observation
 was counted and promotion was false at `0 / 20` at that checkpoint. The later I07-04 campaign is
-now independently authenticated at `20 / 20` with zero false negatives and promotion authorized;
-required hosted cutover and closure evidence are still `IN_PROGRESS`. The bootstrap Quality gate passed.
+independently authenticated at `20 / 20` with zero false negatives and promotion authorized. The
+[cleanup PR #36](https://github.com/desenlab/desen-app/pull/36) passed
+`REQUIRED + EXHAUSTIVE` in
+[run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
+then landed on `main` at `6d87889bc088e45e219f430ee67e10c901c1a2fb`; the post-merge
+[run 31675234655, job 94368259305](https://github.com/desenlab/desen-app/actions/runs/31675234655/job/94368259305)
+also passed `REQUIRED + EXHAUSTIVE`. The one-file
+[canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
+`REQUIRED + AFFECTED` in 3m54s in
+[run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
+closing 10/10 selected workloads for one proof unit as a strict subset without cached success. The
+bootstrap Quality gate also passed.
 Local focused contracts passed 91/91 and CI-infrastructure tests passed 203/203. The full local
 `REQUIRED + EXHAUSTIVE` run is `BLOCKED_BY_LOCAL_SANDBOX` only because `127.0.0.1` listen returned
-`EPERM` in two pre-existing control-plane TCP lifecycle cases; hosted execution passed. I07-04 is
-`IN_PROGRESS`: threshold, category coverage, authenticated review, zero-reference cleanup, and
-checkpoint migration are complete locally; required cutover and post-merge hosted closure remain.
-M07's implementation tasks are complete; G07 remains open for that hosted closure.
+`EPERM` in two pre-existing control-plane TCP lifecycle cases; hosted execution passed. Sequence
+28 at `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`
+authenticates 25 frozen artifacts and 50 current readers. All 17 G07-due debt entries are `CLOSED`,
+while `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07 are `DONE`; proof gates are 8/13,
+and M08-T01 is next.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds

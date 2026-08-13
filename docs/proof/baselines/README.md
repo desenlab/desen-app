@@ -38,8 +38,23 @@ all 18 frozen artifacts, and all 36 reader identities while resealing only index
 campaign with zero false negatives. Its fixed historical campaign digest binds every run, job,
 revision, receipt, threshold, controller, and decision identity; its live authorities prove the
 conservative selector transition and fail-closed required runner. The file currently records
-`PENDING_HOSTED_CUTOVER`: it authorizes no claim that the cleanup commit has passed or that G07 is
-closed until the follow-up hosted evidence is written.
+`HOSTED_CUTOVER_VERIFIED`. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36) passed
+fresh `REQUIRED + EXHAUSTIVE` in
+[run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
+and its landed `main` revision passed the same authority in
+[run 31675234655, job 94368259305](https://github.com/desenlab/desen-app/actions/runs/31675234655/job/94368259305).
+The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
+`REQUIRED + AFFECTED` in 3m54s in
+[run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
+selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
+The baseline also binds checkpoint sequence 28 (25 frozen artifacts, 50 current readers) and the
+closure of all 17 G07-due debt entries. `DEBT-I07-007` remains `OPEN` for I07-05; I07-04 and G07
+are `DONE`.
+
+The baseline's `nonClaims` array belongs to the byte-frozen, pre-cutover campaign projection. Its
+conditional statement that G07 and I07-04 remain open _until_ hosted closure passes records that
+historical boundary; the verified `cutover` object above proves that the condition has since been
+satisfied and is the current status authority.
 
 Evidence files must state the command, scope, source commit when one exists, result, and known
 limitations. Generated proof artifacts additionally record SHA-256 hashes at their owning task.

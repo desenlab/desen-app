@@ -230,6 +230,23 @@ function completeHostedCutover(value) {
   return value.cutover;
 }
 
+function pendingHostedCutover(value) {
+  value.cutover = {
+    status: "PENDING_HOSTED_CUTOVER",
+    cleanup: null,
+    main: null,
+    affectedCanary: null,
+    proofReaderCheckpoint: structuredClone(value.cutover.proofReaderCheckpoint),
+    infrastructureDebt: {
+      ...structuredClone(value.cutover.infrastructureDebt),
+      status: "REMOVED_PENDING_HOSTED_PROOF",
+      removedPendingHostedProofCount: 17,
+      closedCount: 1,
+    },
+  };
+  return value.cutover;
+}
+
 async function rejectsCompletedCutover(mutate, code = "AFFECTED_PROMOTION_CUTOVER_DRIFT") {
   await rejects(code, (value) => mutate(completeHostedCutover(value), value));
 }
@@ -250,8 +267,8 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
       promotionAuthorized: true,
     },
   );
-  assert.equal(receipt.cutoverStatus, "PENDING_HOSTED_CUTOVER");
-  assert.equal(receipt.hostedCutoverVerified, false);
+  assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
+  assert.equal(receipt.hostedCutoverVerified, true);
 });
 
 test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
@@ -413,6 +430,22 @@ test("accepts only one complete hosted cutover with exhaustive cleanup/main and 
   assert.equal(receipt.hostedCutoverVerified, true);
 });
 
+test("retains the pending builder projection without accepting a partial hosted cutover", async () => {
+  const candidate = structuredClone(await evidence());
+  pendingHostedCutover(candidate);
+  const receipt = validateAffectedSelectorPromotionEvidence(candidate);
+  assert.equal(receipt.cutoverStatus, "PENDING_HOSTED_CUTOVER");
+  assert.equal(receipt.hostedCutoverVerified, false);
+
+  candidate.cutover.cleanup = completeHostedCutover(structuredClone(candidate)).cleanup;
+  assert.throws(
+    () => validateAffectedSelectorPromotionEvidence(candidate),
+    (error) =>
+      error instanceof AffectedSelectorPromotionEvidenceError &&
+      error.code === "AFFECTED_PROMOTION_CUTOVER_DRIFT",
+  );
+});
+
 test("rejects unknown fields and every pending/completed cutover hybrid", async () => {
   await rejects("AFFECTED_PROMOTION_EVIDENCE_INVALID", (value) => {
     value.unreviewed = true;
@@ -421,7 +454,7 @@ test("rejects unknown fields and every pending/completed cutover hybrid", async 
     value.observations[0].quality.unreviewed = true;
   });
   await rejects("AFFECTED_PROMOTION_CUTOVER_DRIFT", (value) => {
-    value.cutover.status = "HOSTED_CUTOVER_VERIFIED";
+    value.cutover.status = "PENDING_HOSTED_CUTOVER";
   });
   await rejects("AFFECTED_PROMOTION_CUTOVER_DRIFT", (value) => {
     value.cutover.cleanup = completeHostedCutover(structuredClone(value)).cleanup;
@@ -604,7 +637,7 @@ test("rejects checkpoint and exact 17-entry G07 closure-debt projection drift", 
     cutover.infrastructureDebt.closedCount = 17;
   });
   await rejects("AFFECTED_PROMOTION_CUTOVER_DRIFT", (value) => {
-    value.cutover.infrastructureDebt.status = "CLOSED";
+    value.cutover.infrastructureDebt.status = "REMOVED_PENDING_HOSTED_PROOF";
   });
 });
 

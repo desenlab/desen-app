@@ -344,10 +344,17 @@ doğruladı. Kesin GitHub run, job, revizyon ve receipt kimlikleri; değiştiril
 repodaki pull request yalnız kendi gerçek dar kapsamını taze `REQUIRED + AFFECTED` olarak
 çalıştırabilir. İzlenen dosya kümesi değişirse veya herhangi bir belirsizlik oluşursa sistem hata
 gizlemez; bir kez `REQUIRED + EXHAUSTIVE` çalışmaya genişler. `main`, sürüm ve manuel denetim daima
-tam çalışır. On yedi G07 borcunun kod referansları yerelde sıfıra indirildi ve sequence 28 ile 25
-donmuş artifact/50 güncel reader doğrulandı. I07-04 `IN_PROGRESS`, G07 ise yalnız hosted cutover ve
-kapanış kanıtı bekliyor. Güncel uygulama ilerlemesi 85/145 görevdir (%59); kapanışa kadar kanıt
-kapıları 7/13 kalır.
+tam çalışır. [Temizlik PR #36](https://github.com/desenlab/desen-app/pull/36)
+`REQUIRED + EXHAUSTIVE` olarak geçti; `main`e inen
+`6d87889bc088e45e219f430ee67e10c901c1a2fb` revizyonu da aynı tam kapsamla yeşil kaldı. Tek dosyalı
+[canary PR #37](https://github.com/desenlab/desen-app/pull/37),
+[run 31676049922 / job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935)
+içinde 3 dakika 54 saniyede taze `REQUIRED + AFFECTED` geçti: 10 iş yükü, bir kanıt birimi ve 10
+kapanış; dar kapsam gerçekti ve önbellekten başarı okunmadı. On yedi G07 borcu `CLOSED` oldu;
+`DEBT-I07-007` I07-05 için `OPEN` kalır. Sequence 28,
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` başıyla 25 donmuş
+artifact/50 güncel reader doğrular. I07-04 ve G07 artık `DONE`; kanıt kapıları 8/13, uygulama
+ilerlemesi değişmeden 85/145 görevdir (%59) ve sıradaki iş M08-T01'dir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

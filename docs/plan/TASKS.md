@@ -45,7 +45,7 @@ document may claim the corresponding clean-checkout or remote-CI evidence.
 | I07-01 | DONE        | M07-T01, explicit user authorization | Current-reader checkpoint, machine-enforced cleanup register, and a non-authoritative `SHADOW + EXHAUSTIVE` modular candidate                     | `docs/proof/baselines/i07-01-modular-proof-shadow.json`            |
 | I07-02 | DONE        | I07-01                               | Exact legacy/modular equivalence, shared-state classification, and required-CI cutover to `REQUIRED + EXHAUSTIVE` execution                       | `docs/proof/baselines/i07-02-required-exhaustive-equivalence.json` |
 | I07-03 | DONE        | I07-02                               | Fail-closed `SHADOW + AFFECTED` selector with complete tracked-path ownership, unknown-to-exhaustive fallback, and a frozen observation threshold | `docs/proof/baselines/i07-03-affected-selector-shadow.json`        |
-| I07-04 | IN_PROGRESS | I07-03                               | Promote proven PR selection, retain exhaustive main/release/manual coverage, and remove all G07-due current-reader compatibility shims            | `docs/proof/baselines/i07-04-affected-selector-promotion.json`     |
+| I07-04 | DONE        | I07-03                               | Promote proven PR selection, retain exhaustive main/release/manual coverage, and remove all G07-due current-reader compatibility shims            | `docs/proof/baselines/i07-04-affected-selector-promotion.json`     |
 | I07-05 | NOT_STARTED | I07-04                               | Retire the legacy sequential runner only after rollback, failure, cancellation, hosted, and zero-reference gates pass                             | `docs/proof/baselines/i07-05-legacy-retirement.json`               |
 
 `CI-01` temporarily precedes `M04-T03` in the working order but does not change the protocol task
@@ -63,10 +63,11 @@ prerequisite segments, 3,113 ordered leaf invocations, and 236 distinct leaf wor
 sequential runner is available only through explicit manual `legacy-rollback`. Exact cutover
 workload, result, cancellation, tracked-workspace, hosted, and shared-state equivalence remains
 archived in the unchanged I07-02 baseline. M07-T09, M07-T10, M07-T11, and I07-03 are `DONE`.
-G07 remains `NOT_STARTED` while I07-04 records its completed `20 / 20` hosted campaign, promotes
-eligible pull requests, removes all G07-due bridges, and captures the cleanup commit's hosted
-proof. No standalone hosted M07-T11 completion result is claimed. I07-03's hosted
-bootstrap and authoritative Quality-gate result are recorded in its exact baseline.
+G07 and I07-04 are `DONE`. The authenticated campaign completed `20 / 20` comparisons with zero
+false negatives; cleanup PR 36 removed every G07-due bridge and passed fresh
+`REQUIRED + EXHAUSTIVE` execution, the landed main revision passed another fresh exhaustive run,
+and PR 37 proved the promoted fresh `REQUIRED + AFFECTED` strict subset. No standalone hosted
+M07-T11 completion result is claimed. Exact identities are recorded in the I07-04 baseline.
 
 At its checkpoint, I07-03 left the exact `REQUIRED + EXHAUSTIVE` runner unchanged as the sole
 pass/fail authority and added a separate pull-request-only `SHADOW + AFFECTED` observation job. Exact ownership covered
@@ -76,9 +77,8 @@ ran every selected workload from fresh inputs and could not reuse cached proof s
 promotion threshold required zero false negatives, mutation coverage for every selector category,
 and at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive
 comparisons. The independently authenticated campaign reached `20 / 20` with zero false negatives;
-I07-04 is `IN_PROGRESS` while the promoted REQUIRED authority, checkpoint cleanup, and hosted
-cutover evidence are finalized. The exact GitHub run/job/revision/receipt provenance is pinned in
-the I07-04 baseline.
+the promoted REQUIRED authority, sequence-28 checkpoint cleanup, and hosted cutover evidence are
+complete. The exact GitHub run/job/revision/receipt provenance is pinned in the I07-04 baseline.
 The pure I07-03 ledger measures threshold arithmetic but cannot itself authorize promotion from
 caller-supplied data. Fresh `EXHAUSTIVE` verification remains mandatory on `main` and manual
 audits, including the release process routed through those authorities. At the I07-03 bootstrap
@@ -90,7 +90,7 @@ succeeded, while the shadow correctly returned
 `NOT_ELIGIBLE → EXHAUSTIVE` with `UNSUPPORTED_CHANGE_KIND`; this was not an eligible strict-subset
 observation, so the counter was `0 / 20` at that checkpoint. The subsequent independently
 authenticated I07-04 campaign reached `20 / 20` with zero false negatives; the promoted comparison
-authority and hosted cutover remain `IN_PROGRESS`. The authoritative bootstrap Quality gate passed. Local
+authority and hosted cutover are `DONE`. The authoritative bootstrap Quality gate passed. Local
 evidence is 91/91 focused contracts and 203/203 CI-infrastructure tests. The full local
 `REQUIRED + EXHAUSTIVE` run is `BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned
 `EPERM` in two pre-existing control-plane TCP lifecycle cases; the hosted gate passed the same
@@ -502,20 +502,20 @@ immutable content-addressed Bundle storage, whose completed evidence appears bel
 
 ## M07 — Atomic activation, last-known-good, and local control plane
 
-| ID      | Status      | Depends on              | Deliverable / evidence                                                                                               |
-| ------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| M07-T01 | DONE        | G06                     | Content-addressed bundle store with immutable revision entries                                                       |
-| M07-T02 | DONE        | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
-| M07-T03 | DONE        | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
-| M07-T04 | DONE        | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
-| M07-T05 | DONE        | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
-| M07-T06 | DONE        | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
-| M07-T07 | DONE        | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision, generation}` as one consistent record        |
-| M07-T08 | DONE        | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
-| M07-T09 | DONE        | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
-| M07-T10 | DONE        | M07-T09                 | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
-| M07-T11 | DONE        | M07-T05, M07-T10        | Control-plane channel consumed by separately built reference host                                                    |
-| G07     | NOT_STARTED | M07-T01–M07-T11, I07-04 | Every pre-commit fault preserves a valid durable activation record and invalid revision never becomes active         |
+| ID      | Status | Depends on              | Deliverable / evidence                                                                                               |
+| ------- | ------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| M07-T01 | DONE   | G06                     | Content-addressed bundle store with immutable revision entries                                                       |
+| M07-T02 | DONE   | M07-T01, I07-02         | Protocol, revision, available source digest, and bundle-size verification                                            |
+| M07-T03 | DONE   | M07-T02                 | Exact package target/version/digest resolution and preflight                                                         |
+| M07-T04 | DONE   | M07-T02–M07-T03         | Surface/capability reference and finite-limit preflight                                                              |
+| M07-T05 | DONE   | M07-T01                 | Local control-plane API for editable sources, immutable bundles, and mutable channel pointers                        |
+| M07-T06 | DONE   | M07-T03–M07-T05         | Staged runtime indexes and active/staged state separation                                                            |
+| M07-T07 | DONE   | M07-T04, M07-T06        | Durable transactional commit of `{activeRevision, previousGoodRevision, generation}` as one consistent record        |
+| M07-T08 | DONE   | M07-T07                 | Restart recovery validates and restores the transactional active/previous-good record                                |
+| M07-T09 | DONE   | M07-T07–M07-T08         | Fault injection at fetch, integrity, package resolution, preflight, staging, durable commit, and recovery boundaries |
+| M07-T10 | DONE   | M07-T09                 | A → invalid B → valid C, concurrent activation, and restart behavior tests                                           |
+| M07-T11 | DONE   | M07-T05, M07-T10        | Control-plane channel consumed by separately built reference host                                                    |
+| G07     | DONE   | M07-T01–M07-T11, I07-04 | Every pre-commit fault preserves a valid durable activation record and invalid revision never becomes active         |
 
 M07-T01 adds the built `@desen/control-plane-api` package root and one local POSIX repository that
 stores exact complete Bundle bytes under a strict lowercase SHA-256 revision path. The first
@@ -810,9 +810,9 @@ drift, oversized material, invalid media types, BOM-prefixed JSON, and unsafe st
 closed in the supporting suites.
 
 This completes M07's 11 implementation tasks and advances overall progress to 85/145 (59%). The
-I07-04 campaign has satisfied the frozen `20 / 20` hosted strict-subset threshold with zero false
-negatives; G07 remains open only until the promoted cutover, zero-reference checkpoint cleanup, and
-their own hosted closure evidence complete. P-12 remains
+I07-04 campaign satisfied the frozen `20 / 20` hosted strict-subset threshold with zero false
+negatives. The promoted cutover, sequence-28 zero-reference checkpoint cleanup, cleanup/main
+required-exhaustive runs, and fresh required-affected canary close G07. P-12 remains
 `NOT_PROVEN` until M10-T07 proves Desen App product-level restart preservation, and N-041 remains
 `PLANNED` until M12-T05. The local proof claims neither remote/multi-tenant/TLS deployment,
 hostile-admin concurrent mutation resistance, independent anti-rollback, real-browser

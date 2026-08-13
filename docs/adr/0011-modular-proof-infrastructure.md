@@ -11,7 +11,10 @@
   `SHADOW + AFFECTED` observer is frozen at `0 / 20` without changing required authority. Its
   hosted bootstrap passed the authoritative Quality gate, while the shadow conservatively returned
   `NOT_ELIGIBLE` and `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`; no eligible strict-subset
-  observation, affected promotion, current-reader cleanup, or legacy retirement is claimed
+  observation, affected promotion, current-reader cleanup, or legacy retirement was claimed at
+  that checkpoint. I07-04 is now complete: its independent campaign reached `20 / 20` with zero
+  false negatives, required affected execution passed its hosted canary, and G07 is `DONE`.
+  Legacy retirement remains assigned to I07-05
 
 ## Context
 
@@ -362,8 +365,15 @@ The authenticated campaign reached 20/20 with zero false negatives. Promotion is
 fixed historical campaign digest, one same-read current comparison snapshot, an exact tracked-tree
 ownership delta, and a code-owned runner authority. A changed tracked tree cannot inherit affected
 authority: it produces `NOT_ELIGIBLE` and exactly one exhaustive fallback. The local cleanup and
-append-only checkpoint are complete; Phase 4 remains active until PR and post-merge hosted evidence
-are pinned and every G07-due debt entry advances from `REMOVED_PENDING_HOSTED_PROOF` to `CLOSED`.
+append-only checkpoint are complete. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
+and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`; the exact one-file
+[canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
+`REQUIRED + AFFECTED` in 3m54s, selecting and closing 10 workloads for one proof unit as a strict
+subset without cached success. The exact run, job, revision, and receipt identities are pinned in
+`docs/proof/baselines/i07-04-affected-selector-promotion.json`. Sequence 28 head
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
+artifacts and 50 current readers. Every one of the 17 G07-due debt entries is `CLOSED`;
+`DEBT-I07-007` remains `OPEN` for Phase 5. Phase 4, I07-04, and G07 are complete.
 
 ### Phase 5 — I07-05: legacy retirement
 

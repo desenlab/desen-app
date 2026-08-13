@@ -4,8 +4,15 @@
   "entries": [
     {
       "id": "DEBT-I07-001",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -36,8 +43,15 @@
     },
     {
       "id": "DEBT-I07-002",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -65,8 +79,15 @@
     },
     {
       "id": "DEBT-I07-003",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -103,8 +124,15 @@
     },
     {
       "id": "DEBT-I07-004",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -163,8 +191,15 @@
     },
     {
       "id": "DEBT-I07-005",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -189,8 +224,15 @@
     },
     {
       "id": "DEBT-I07-006",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -334,8 +376,15 @@
     },
     {
       "id": "DEBT-I07-009",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -361,8 +410,15 @@
     },
     {
       "id": "DEBT-I07-010",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -389,8 +445,15 @@
     },
     {
       "id": "DEBT-I07-011",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T04",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -466,8 +529,15 @@
     },
     {
       "id": "DEBT-I07-012",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T05",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -558,8 +628,15 @@
     },
     {
       "id": "DEBT-I07-013",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T06",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -662,8 +739,15 @@
     },
     {
       "id": "DEBT-I07-014",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T07",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -821,8 +905,15 @@
     },
     {
       "id": "DEBT-I07-015",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T08",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -962,8 +1053,15 @@
     },
     {
       "id": "DEBT-I07-016",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T09",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -1094,8 +1192,15 @@
     },
     {
       "id": "DEBT-I07-017",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "I07-03",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -1138,8 +1243,15 @@
     },
     {
       "id": "DEBT-I07-018",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T10",
       "removalOwner": "I07-04",
       "deadline": "G07",
@@ -1418,8 +1530,15 @@
     },
     {
       "id": "DEBT-I07-019",
-      "status": "REMOVED_PENDING_HOSTED_PROOF",
-      "evidence": null,
+      "status": "CLOSED",
+      "evidence": {
+        "kind": "CLOSURE",
+        "commitSha": "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+        "pullRequestUrl": "https://github.com/desenlab/desen-app/pull/36",
+        "evidencePath": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        "evidenceSha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+        "hostedRunUrl": "https://github.com/desenlab/desen-app/actions/runs/31674300000"
+      },
       "registeredBy": "M07-T11",
       "removalOwner": "I07-04",
       "deadline": "G07",
