@@ -90,20 +90,20 @@ function debtRegister(manifest) {
 
 function taskBoard(overrides = {}) {
   const statuses = {
-    "I07-01": "IN_PROGRESS",
+    "I07-01": "DONE",
     "I07-02": "DONE",
-    "I07-03": "IN_PROGRESS",
-    "M07-T04": "IN_PROGRESS",
-    "M07-T05": "IN_PROGRESS",
-    "M07-T06": "IN_PROGRESS",
-    "M07-T07": "IN_PROGRESS",
+    "I07-03": "DONE",
+    "M07-T04": "DONE",
+    "M07-T05": "DONE",
+    "M07-T06": "DONE",
+    "M07-T07": "DONE",
     "M07-T08": "DONE",
     "M07-T09": "DONE",
     "M07-T10": "DONE",
     "M07-T11": "DONE",
-    "I07-04": "IN_PROGRESS",
+    "I07-04": "DONE",
     "I07-05": "NOT_STARTED",
-    G07: "NOT_STARTED",
+    G07: "DONE",
     G12: "NOT_STARTED",
     ...overrides,
   };
@@ -204,13 +204,36 @@ test("accepts the exact canonical code-owned debt inventory", () => {
     [
       ...Array.from({ length: 6 }, (_, index) => ({
         id: `DEBT-I07-00${index + 1}`,
-        status: "REMOVED_PENDING_HOSTED_PROOF",
+        status: "CLOSED",
       })),
       { id: "DEBT-I07-007", status: "OPEN" },
       { id: "DEBT-I07-008", status: "CLOSED" },
       ...Array.from({ length: 11 }, (_, index) => ({
         id: `DEBT-I07-${String(index + 9).padStart(3, "0")}`,
-        status: "REMOVED_PENDING_HOSTED_PROOF",
+        status: "CLOSED",
+      })),
+    ],
+  );
+  const g07ClosureEvidence = {
+    kind: "CLOSURE",
+    commitSha: "0ec3e98551bb5aed7c0bc78dca28b696e5aa34fb",
+    pullRequestUrl: "https://github.com/desenlab/desen-app/pull/36",
+    evidencePath: "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+    evidenceSha256: "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+    hostedRunUrl: "https://github.com/desenlab/desen-app/actions/runs/31674300000",
+  };
+  assert.deepEqual(
+    manifest.entries
+      .filter((entry) => entry.removalOwner === "I07-04")
+      .map((entry) => ({ id: entry.id, evidence: entry.evidence })),
+    [
+      ...Array.from({ length: 6 }, (_, index) => ({
+        id: `DEBT-I07-00${index + 1}`,
+        evidence: g07ClosureEvidence,
+      })),
+      ...Array.from({ length: 11 }, (_, index) => ({
+        id: `DEBT-I07-${String(index + 9).padStart(3, "0")}`,
+        evidence: g07ClosureEvidence,
       })),
     ],
   );
@@ -1281,16 +1304,16 @@ test("authenticates matching tracked documentation, lifecycle rows, and targets"
     assert.deepEqual(receipt.statusCounts, {
       OPEN: 1,
       READY_FOR_REMOVAL: 0,
-      REMOVED_PENDING_HOSTED_PROOF: 17,
-      CLOSED: 1,
+      REMOVED_PENDING_HOSTED_PROOF: 0,
+      CLOSED: 18,
     });
     assert.equal(receipt.entries, 19);
-    assert.equal(receipt.taskStatuses["I07-01"], "IN_PROGRESS");
+    assert.equal(receipt.taskStatuses["I07-01"], "DONE");
     assert.equal(receipt.taskStatuses["I07-02"], "DONE");
-    assert.equal(receipt.taskStatuses["I07-03"], "IN_PROGRESS");
-    assert.equal(receipt.taskStatuses["M07-T05"], "IN_PROGRESS");
-    assert.equal(receipt.taskStatuses["M07-T06"], "IN_PROGRESS");
-    assert.equal(receipt.taskStatuses["M07-T07"], "IN_PROGRESS");
+    assert.equal(receipt.taskStatuses["I07-03"], "DONE");
+    assert.equal(receipt.taskStatuses["M07-T05"], "DONE");
+    assert.equal(receipt.taskStatuses["M07-T06"], "DONE");
+    assert.equal(receipt.taskStatuses["M07-T07"], "DONE");
     assert.equal(receipt.taskStatuses["M07-T08"], "DONE");
     assert.equal(receipt.taskStatuses["M07-T10"], "DONE");
     assert.equal(receipt.taskStatuses["M07-T11"], "DONE");
@@ -1308,8 +1331,8 @@ test("rejects stale summary and section projections independently", async () => 
     await writeFile(
       registerPath,
       original.replace(
-        "| DEBT-I07-001 | REMOVED_PENDING_HOSTED_PROOF | fixture | I07-01 | I07-04 | G07 |",
-        "| DEBT-I07-001 | REMOVED_PENDING_HOSTED_PROOF | fixture | I07-01 | I07-05 | G07 |",
+        "| DEBT-I07-001 | CLOSED | fixture | I07-01 | I07-04 | G07 |",
+        "| DEBT-I07-001 | CLOSED | fixture | I07-01 | I07-05 | G07 |",
       ),
     );
     await assert.rejects(
@@ -1328,7 +1351,7 @@ test("rejects stale summary and section projections independently", async () => 
 
     await writeFile(
       registerPath,
-      original.replace("- Closure evidence: `PENDING`", "- Closure evidence: `CLOSURE`"),
+      original.replace("- Closure evidence: `CLOSURE`", "- Closure evidence: `PENDING`"),
     );
     await assert.rejects(
       verifyInfrastructureDebt({ workspaceRoot: fixture.root }),
@@ -1375,9 +1398,9 @@ test("fails an open entry when its removal owner or deadline is DONE", async () 
 test("does not confuse registration completion with an overdue removal", async () => {
   const fixture = await createFixture();
   try {
-    await writeRelative(fixture.root, "docs/plan/TASKS.md", taskBoard({ "I07-01": "DONE" }));
+    await writeRelative(fixture.root, "docs/plan/TASKS.md", taskBoard({ "I07-01": "IN_PROGRESS" }));
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
-    assert.equal(receipt.taskStatuses["I07-01"], "DONE");
+    assert.equal(receipt.taskStatuses["I07-01"], "IN_PROGRESS");
   } finally {
     await fixture.cleanup();
   }
@@ -1400,8 +1423,8 @@ test("enforces scoped zero references while retaining CLOSED authority records",
     assert.deepEqual(receipt.statusCounts, {
       OPEN: 1,
       READY_FOR_REMOVAL: 0,
-      REMOVED_PENDING_HOSTED_PROOF: 17,
-      CLOSED: 1,
+      REMOVED_PENDING_HOSTED_PROOF: 0,
+      CLOSED: 18,
     });
     // Authority and documentation intentionally retain the closed symbols; only scoped targets
     // are subject to the zero-reference rule.
@@ -1437,8 +1460,8 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
     assert.deepEqual(receipt.statusCounts, {
       OPEN: 0,
       READY_FOR_REMOVAL: 0,
-      REMOVED_PENDING_HOSTED_PROOF: 17,
-      CLOSED: 2,
+      REMOVED_PENDING_HOSTED_PROOF: 0,
+      CLOSED: 19,
     });
   } finally {
     await fixture.cleanup();
@@ -1448,13 +1471,13 @@ test("keeps both rollback-only equivalence paths in DEBT-I07-007 until legacy cl
 test("requires active removal ownership and authentic evidence bytes for lifecycle advances", async () => {
   const readyFixture = await createFixture();
   try {
-    readyFixture.manifest.entries[0].status = "READY_FOR_REMOVAL";
-    await readyFixture.recordEvidence(0, "READINESS");
+    readyFixture.manifest.entries[6].status = "READY_FOR_REMOVAL";
+    await readyFixture.recordEvidence(6, "READINESS");
     await readyFixture.rewriteManifestAndRegister();
     await writeRelative(
       readyFixture.root,
       "docs/plan/TASKS.md",
-      taskBoard({ "I07-04": "NOT_STARTED" }),
+      taskBoard({ "I07-05": "NOT_STARTED", G12: "NOT_STARTED" }),
     );
     await assert.rejects(
       verifyInfrastructureDebt({ workspaceRoot: readyFixture.root }),
@@ -1463,9 +1486,9 @@ test("requires active removal ownership and authentic evidence bytes for lifecyc
     await writeRelative(
       readyFixture.root,
       "docs/plan/TASKS.md",
-      taskBoard({ "I07-04": "IN_PROGRESS" }),
+      taskBoard({ "I07-05": "IN_PROGRESS", G12: "NOT_STARTED" }),
     );
-    const evidencePath = readyFixture.manifest.entries[0].evidence.evidencePath;
+    const evidencePath = readyFixture.manifest.entries[6].evidence.evidencePath;
     await unlink(path.join(readyFixture.root, ...evidencePath.split("/")));
     await assert.rejects(
       verifyInfrastructureDebt({ workspaceRoot: readyFixture.root }),
@@ -1482,9 +1505,9 @@ test("requires active removal ownership and authentic evidence bytes for lifecyc
 
   const closedFixture = await createFixture();
   try {
-    closedFixture.manifest.entries[0].status = "CLOSED";
-    await closedFixture.recordEvidence(0, "CLOSURE");
-    for (const target of closedFixture.manifest.entries[0].targets) {
+    closedFixture.manifest.entries[6].status = "CLOSED";
+    await closedFixture.recordEvidence(6, "CLOSURE");
+    for (const target of closedFixture.manifest.entries[6].targets) {
       await writeRelative(closedFixture.root, target.path, "replacement\n");
     }
     await closedFixture.rewriteManifestAndRegister();
@@ -1500,19 +1523,33 @@ test("requires active removal ownership and authentic evidence bytes for lifecyc
 test("removed-pending-hosted-proof requires active ownership and zero scoped references", async () => {
   const fixture = await createFixture();
   try {
-    const entry = fixture.manifest.entries[16];
-    await writeRelative(fixture.root, "docs/plan/TASKS.md", taskBoard({ "I07-04": "NOT_STARTED" }));
+    const entry = fixture.manifest.entries[6];
+    entry.status = "REMOVED_PENDING_HOSTED_PROOF";
+    entry.evidence = null;
+    for (const target of entry.targets) {
+      await writeRelative(fixture.root, target.path, "replacement\n");
+    }
+    await fixture.rewriteManifestAndRegister();
+    await writeRelative(
+      fixture.root,
+      "docs/plan/TASKS.md",
+      taskBoard({ "I07-05": "NOT_STARTED", G12: "NOT_STARTED" }),
+    );
     await assert.rejects(
       verifyInfrastructureDebt({ workspaceRoot: fixture.root }),
       expectCode("INFRASTRUCTURE_DEBT_LIFECYCLE_INVALID"),
     );
-    await writeRelative(fixture.root, "docs/plan/TASKS.md", taskBoard({ "I07-04": "IN_PROGRESS" }));
+    await writeRelative(
+      fixture.root,
+      "docs/plan/TASKS.md",
+      taskBoard({ "I07-05": "IN_PROGRESS", G12: "NOT_STARTED" }),
+    );
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
     assert.deepEqual(receipt.statusCounts, {
-      OPEN: 1,
+      OPEN: 0,
       READY_FOR_REMOVAL: 0,
-      REMOVED_PENDING_HOSTED_PROOF: 17,
-      CLOSED: 1,
+      REMOVED_PENDING_HOSTED_PROOF: 1,
+      CLOSED: 18,
     });
 
     const target = entry.targets[0];
@@ -1545,7 +1582,7 @@ test("rejects a CLOSED target deleted only from the worktree while still index-t
       cwd: fixture.root,
     });
     const receipt = await verifyInfrastructureDebt({ workspaceRoot: fixture.root });
-    assert.equal(receipt.statusCounts.CLOSED, 1);
+    assert.equal(receipt.statusCounts.CLOSED, 18);
   } finally {
     await fixture.cleanup();
   }

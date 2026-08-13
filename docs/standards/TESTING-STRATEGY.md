@@ -44,8 +44,11 @@ internally when that repetition is itself the evidence, such as independent buil
 comparison, mutation, or atomic-write checks.
 
 CI must never generate or repair tracked proof artifacts before verifying them. It must not trust
-changed-file filters, cached proof success, or timing output. A change to the legacy prerequisite
-inventory or exact execution plan requires an explicit reviewed pin update.
+unauthenticated or incomplete changed-file inputs, cached proof success, or timing output. An
+eligible affected selection requires the exact authenticated Git boundary, complete tracked-path
+ownership, conservative dependency closure, and the frozen promotion receipt; uncertainty expands
+exactly once to exhaustive execution. A change to the legacy prerequisite inventory or exact
+execution plan requires an explicit reviewed pin update.
 
 I07 introduces modular execution in evidence-first phases. I07-01's historical
 `SHADOW + EXHAUSTIVE` candidate ran every validated workload while the sequential gate remained
@@ -227,8 +230,14 @@ The later I07-04 campaign reached `20 / 20` with zero false negatives. Its indep
 binds the exact hosted identities, the immutable historical campaign digest, the conservative
 selector transition, and the required-runner authority. Local cleanup has removed all 17 G07-due
 bridge families; sequence 28 authenticates 25 frozen artifacts and 50 current readers. These are
-not yet a claim that G07 is closed: the cleanup PR, post-merge exhaustive run, and eligible affected
-canary must still pass and be recorded.
+now joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
+and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
+[canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
+`REQUIRED + AFFECTED` in 3m54s in
+[run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
+selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
+All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07
+are `DONE`; proof gates are 8/13, implementation progress remains 85/145, and M08-T01 is next.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned

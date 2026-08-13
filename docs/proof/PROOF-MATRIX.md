@@ -1710,9 +1710,9 @@ BOM-prefixed JSON, unsafe refresh requests, and unreviewed static paths.
 This closes all 11 M07 implementation tasks and keeps N-038 `TESTED`. P-12 remains `NOT_PROVEN`
 only for M10-T07's Desen App product-level restart proof. N-041 remains `PLANNED` for M12-T05's
 measured cross-system limit profile. I07-04 has authenticated `20 / 20` hosted comparisons with
-zero false negatives and removed the G07-due reader/shadow bridges locally. G07 remains
-`NOT_STARTED` only until required-affected cutover and post-merge hosted closure evidence are
-pinned; this working tree does not pre-claim that hosted result.
+zero false negatives. At the M07-T11 checkpoint, the G07-due reader/shadow bridges had been
+removed locally but G07 still awaited required-affected cutover and post-merge hosted evidence;
+that checkpoint did not pre-claim the later hosted result.
 
 The local socket suite cannot bind `127.0.0.1` in this sandbox (`EPERM`), so this document does not
 claim a hosted M07-T11 result. It also makes no remote/multi-tenant/TLS, credential-lifecycle,
@@ -1735,7 +1735,30 @@ pre-existing TCP lifecycle tests; this is not a product regression.
 At the I07-03 bootstrap checkpoint, the authoritative Quality gate passed. Its pull-request shadow returned
 `NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`, so no fresh strict-subset comparison
 occurred and no observation was eligible. Promotion was false, the counter was `0 / 20`, and
-I07-04 was `NOT_STARTED` at that checkpoint. I07-04 has since authenticated `20 / 20` eligible
-hosted comparisons with zero false negatives and is `IN_PROGRESS` through required cutover and
-hosted closure. Exact bootstrap run, job, revision, and receipt identifiers are in
+I07-04 was `NOT_STARTED` at that checkpoint. I07-04 later authenticated `20 / 20` eligible hosted
+comparisons with zero false negatives and completed required cutover and hosted closure. Exact
+bootstrap run, job, revision, and receipt identifiers are in
 [`i07-03-affected-selector-shadow.json`](baselines/i07-03-affected-selector-shadow.json).
+
+## I07-04 / G07 — Required affected promotion and hosted closure
+
+The independent campaign closed at `20 / 20` eligible same-revision hosted comparisons with zero
+false negatives. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36) passed fresh
+`REQUIRED + EXHAUSTIVE` in
+[run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
+with receipt `sha256:1b30b24e65a4cc601023a2abf2c46751fe85e2fed237bccd623ec36d3f08d1d9`.
+Its landed `main` revision `6d87889bc088e45e219f430ee67e10c901c1a2fb` passed fresh
+`REQUIRED + EXHAUSTIVE` again in
+[run 31675234655, job 94368259305](https://github.com/desenlab/desen-app/actions/runs/31675234655/job/94368259305),
+with receipt `sha256:36139e5d65643dae255ca1305abb492270e21ca4ef5c76ac1dfc022071f128e6`.
+
+The exact one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) then passed fresh
+`REQUIRED + AFFECTED` in 3m54s in
+[run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
+with receipt `sha256:4ac6f159f1487a1f9a969f88bd26be575ecf28ce6c66574206395afb659518f2`.
+It selected and closed exactly 10 workloads for one proof unit, remained a strict subset, and read
+no cached success. Sequence 28 at
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
+artifacts and 50 current readers. All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains
+`OPEN` for I07-05. I07-04 and G07 are `DONE`, advancing proof gates to 8/13 without changing the
+85/145 implementation count. P-12 remains `NOT_PROVEN`; M08-T01 is next.

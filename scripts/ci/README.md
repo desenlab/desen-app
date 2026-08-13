@@ -1,8 +1,10 @@
 # Proof infrastructure
 
-This directory contains the I07 proof-execution authority. I07-02 completed the hosted cutover:
-the official `Quality gate` now executes the required exhaustive runner defined here, while the
-CI-01 sequential runner remains available only through explicit manual rollback.
+This directory contains the I07 proof-execution authority. I07-02 completed the exhaustive hosted
+cutover, and I07-04 completed required affected promotion: the official `Quality gate` now uses the
+required dispatcher defined here. An authenticated eligible same-repository pull request may run
+fresh affected scope; every unsafe boundary, plus `main`, release, and manual audit, remains fresh
+exhaustive. The CI-01 sequential runner remains available only through explicit manual rollback.
 
 ## Trust layers
 
@@ -10,7 +12,7 @@ CI-01 sequential runner remains available only through explicit manual rollback.
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   148-node, 70-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   150-node, 71-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -243,9 +245,9 @@ hosted M07-T11 claim.
 The pre-promotion M07-T11 shadow-selector comparison authority was
 `sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`.
 The frozen I07-03 baseline remains historical. I07-04 has independently authenticated `20 / 20`
-eligible hosted comparisons with zero false negatives; promotion is authorized and required hosted
-cutover remains `IN_PROGRESS`. The exact current promoted digest is owned by the I07-04 baseline
-and verifier rather than this explanatory document.
+eligible hosted comparisons with zero false negatives; promotion and hosted cutover are complete.
+The exact current promoted digest is owned by the I07-04 baseline and verifier rather than this
+explanatory document.
 
 The complete current reviewed digest set is:
 
@@ -443,8 +445,8 @@ comparisons. The initial observation count was `0 / 20` and promotion was false;
 records; I07-04 must separately pin exact authenticated hosted run/job/revision/receipt evidence.
 The hosted bootstrap passed the authoritative Quality gate. Its shadow outcome was
 `NOT_ELIGIBLE` → `EXHAUSTIVE` for `UNSUPPORTED_CHANGE_KIND`; no strict subset ran, so the result
-did not count and the counter remained `0 / 20` then. I07-04 has since authenticated `20 / 20`
-eligible comparisons with zero false negatives and is `IN_PROGRESS` through hosted cutover. The exact bootstrap run/job/revision/receipt
+did not count and the counter remained `0 / 20` then. I07-04 later authenticated `20 / 20`
+eligible comparisons with zero false negatives and completed hosted cutover. The exact bootstrap run/job/revision/receipt
 identifiers are in
 [`i07-03-affected-selector-shadow.json`](../../docs/proof/baselines/i07-03-affected-selector-shadow.json).
 Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/203. The full local
@@ -466,7 +468,7 @@ frozen threshold started at `0 / 20`, so I07-04 owned both later selector promot
 shadow-only cleanup. `DEBT-I07-007` keeps the sequential runner, equivalence adapter, and other
 rollback-only paths until I07-05 proves their removal gates.
 
-## I07-04 promotion in progress
+## I07-04 promotion complete
 
 The independent I07-04 campaign subsequently reached 20/20 hosted same-revision comparisons with
 zero false negatives. `affected-selector-promotion-evidence.mjs` pins the immutable historical
@@ -475,5 +477,16 @@ ownership/selector transition, and seals the required dispatcher. The dispatcher
 subset only for an authenticated eligible same-repository PR; every uncertain or drifted boundary
 falls back exactly once to fresh exhaustive execution. `main`, releases, and manual audits remain
 fresh exhaustive. All 17 G07-due compatibility/shadow targets are locally absent and the current
-reader authority is append-only checkpoint sequence 28; hosted cutover/closure evidence is still
-required before I07-04 or G07 becomes `DONE`.
+reader authority is append-only checkpoint sequence 28 at
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
+artifacts and 50 current readers. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
+passed fresh `REQUIRED + EXHAUSTIVE` in
+[run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
+and its landed `main` revision passed the same authority in
+[run 31675234655, job 94368259305](https://github.com/desenlab/desen-app/actions/runs/31675234655/job/94368259305).
+The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
+`REQUIRED + AFFECTED` in 3m54s in
+[run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
+selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
+All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07 are
+`DONE`; proof gates are 8/13, implementation remains 85/145, and M08-T01 is next.

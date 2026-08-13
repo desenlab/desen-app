@@ -22,7 +22,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**Proof gates:** **7 / 13 complete** · **I07-04:** `IN_PROGRESS` (hosted observation `20 / 20`, zero false negatives) · **G07:** awaiting hosted cutover/closure
+**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T01`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -403,11 +403,20 @@ authenticated 20 consecutive same-revision hosted comparisons with zero false ne
 exact run/job/revision/receipt campaign, its immutable historical digest, the conservative selector
 equivalence, and the fail-closed required runner. Eligible same-repository pull requests may use
 fresh `REQUIRED + AFFECTED`; authority drift and every unsafe case expand exactly once to fresh
-`REQUIRED + EXHAUSTIVE`, while `main`, release, and manual audit always remain exhaustive. All 17
-G07-due bridge entries are removed locally and await hosted closure evidence; the append-only
-reader checkpoint is sequence 28 at
-`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`. I07-04 and G07 remain open
-only for the hosted cutover/closure cycle. Legacy retirement remains owned by I07-05.
+`REQUIRED + EXHAUSTIVE`, while `main`, release, and manual audit always remain exhaustive. The
+[cleanup PR #36](https://github.com/desenlab/desen-app/pull/36) passed fresh
+`REQUIRED + EXHAUSTIVE` in [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
+and landed on `main` as `6d87889bc088e45e219f430ee67e10c901c1a2fb`; that revision passed the
+same authority in [run 31675234655, job 94368259305](https://github.com/desenlab/desen-app/actions/runs/31675234655/job/94368259305).
+The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) then passed fresh
+`REQUIRED + AFFECTED` in 3m54s in
+[run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935):
+10 workloads, one proof unit, 10 observed closes, a strict subset, and no cached success. All 17
+G07-due debt entries are `CLOSED`; `DEBT-I07-007` deliberately remains `OPEN` for I07-05. The
+append-only reader checkpoint remains sequence 28 at
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
+artifacts and 50 current readers. I07-04 and G07 are `DONE`; proof gates are 8/13, implementation
+progress remains 85/145, and M08-T01 is next. Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge
