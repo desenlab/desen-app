@@ -38,11 +38,15 @@ jobs:
     timeout-minutes: 25
     env:
       CI: "true"
+      DESEN_REQUIRED_BASE_REVISION: ${{ github.event.pull_request.base.sha || '' }}
+      DESEN_REQUIRED_HEAD_REVISION: ${{ github.event.pull_request.head.sha || '' }}
+      DESEN_REQUIRED_SAME_REPOSITORY: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up Node.js
@@ -86,10 +90,12 @@ jobs:
           node --test scripts/ci/test/affected-impact-graph.test.mjs
           node --test scripts/ci/test/affected-observation-threshold.test.mjs
           node --test scripts/ci/test/affected-workload-selector.test.mjs
-          node --test scripts/ci/test/shadow-affected-quality-gate.test.mjs
+          node scripts/ci/verify-affected-selector-promotion-evidence.mjs
+          node --test scripts/ci/test/affected-selector-promotion-evidence.test.mjs
+          node --test scripts/ci/test/required-affected-quality-gate.test.mjs
 
-      - name: Run required exhaustive quality gate
-        run: timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-exhaustive-quality-gate.mjs
+      - name: Run required quality gate
+        run: timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-required-affected-quality-gate.mjs
 
       - name: Save trusted pnpm store
         if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.pnpm-cache.outputs.cache-hit != 'true' }}
@@ -97,63 +103,6 @@ jobs:
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ steps.pnpm-cache.outputs.cache-primary-key }}
-
-  # I07-03 observation only: this job cannot decide repository status, never replaces Quality
-  # gate, and skips duplicate execution whenever selection expands to EXHAUSTIVE.
-  affected-shadow:
-    if: ${{ github.event_name == 'pull_request' }}
-    name: Affected shadow observation
-    runs-on: ubuntu-24.04
-    continue-on-error: true
-    timeout-minutes: 25
-    env:
-      CI: "true"
-      DESEN_CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-      DESEN_CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-      DESEN_CI_SAME_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-
-    steps:
-      - name: Check out complete comparison graph
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.10.0
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Read shadow pnpm store path
-        id: shadow-pnpm-store
-        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
-
-      - name: Restore trusted pnpm store for shadow
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ${{ steps.shadow-pnpm-store.outputs.path }}
-          key: ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-node-24.10.0-pnpm-11.15.1-
-
-      - name: Install exact dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify shadow affected contracts
-        run: |
-          node --test scripts/ci/test/affected-change-boundary.test.mjs
-          node --test scripts/ci/test/affected-workload-ownership.test.mjs
-          node --test scripts/ci/test/affected-impact-graph.test.mjs
-          node --test scripts/ci/test/affected-observation-threshold.test.mjs
-          node --test scripts/ci/test/affected-workload-selector.test.mjs
-          node --test scripts/ci/test/shadow-affected-quality-gate.test.mjs
-
-      - name: Run non-authoritative affected shadow
-        run: timeout --signal=TERM --kill-after=30s 18m node scripts/ci/run-shadow-affected-quality-gate.mjs
 
   legacy-rollback:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'legacy-rollback' }}

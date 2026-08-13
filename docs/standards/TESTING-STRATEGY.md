@@ -223,6 +223,13 @@ pre-existing TCP lifecycle tests. This is an environment restriction, not a prod
 the passing hosted Quality gate is authoritative. `DEBT-I07-017` assigns the shadow-only job,
 wrapper, and test wiring to I07-04 for removal by G07.
 
+The later I07-04 campaign reached `20 / 20` with zero false negatives. Its independent baseline
+binds the exact hosted identities, the immutable historical campaign digest, the conservative
+selector transition, and the required-runner authority. Local cleanup has removed all 17 G07-due
+bridge families; sequence 28 authenticates 25 frozen artifacts and 50 current readers. These are
+not yet a claim that G07 is closed: the cleanup PR, post-merge exhaustive run, and eligible affected
+canary must still pass and be recorded.
+
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned
 checkpoint digest, frozen artifact, claim/nonclaim scope, and historical projection remains

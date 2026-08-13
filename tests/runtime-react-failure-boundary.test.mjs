@@ -24,16 +24,6 @@ import {
 const HISTORICAL_SHA256 = "3192e4af418a370a65d7d815b1bdbf0140fa42914859f1baa76dd68641818723";
 const HISTORICAL_BYTES = 9_534;
 const ARTIFACT_FILE_NAME = "runtime-react-0.1.0-failure-boundary.json";
-const SUCCESSOR_ARTIFACT_FILE_NAME = "control-plane-api-0.1.0-reference-preflight.json";
-const SUCCESSOR_SHA256 = "29555326d51073c50937519d8706049ad17287079cc3ef4dc7060bb3a3225394";
-const SUCCESSOR_EVIDENCE_TEXT = [
-  "Validator micro-vectors cover unknown and unsupported semantics",
-  "M04-T02–M04-T15 prove bounded fail-closed resolution, lifecycle, action, adapter-bridge, and reactive behavior",
-  "M04-T16 adds validated Bundle/Catalog ingress, exact revision verification, complete conditional/repeat materialization, plan and binding commitments, atomic binding reconciliation, coherent tree/binding/handler/trace ceilings, and terminal session disposal",
-  "M04-T17 adds generic operation/resource settlement notification, factory-authenticated bounded snapshot subscriptions, exact migration-ledger proof, and deterministic rollback/publication fault containment",
-  "M05-T06 proves finite all-or-nothing React capability preflight, no placeholder guessing, redacted whole-surface adapter containment, honest null attribution where React cannot expose origin, explicit retry authority, and host/managed failure provenance",
-  "M07-T04 authenticates the exact M07-T03 package authority, closes every surface, capability, event, command, and action target without placeholder or best-match guessing, and rejects every whole-activation finite-profile overflow before returning opaque preflight authority",
-].join("; ");
 const ARTIFACT_RELATIVE_PATH = `docs/proof/artifacts/${ARTIFACT_FILE_NAME}`;
 const ARTIFACT_URL = new URL(`../${ARTIFACT_RELATIVE_PATH}`, import.meta.url);
 const PROOF_URL = new URL("../docs/proof/RUNTIME-REACT-FAILURE-BOUNDARY.md", import.meta.url);
@@ -99,9 +89,6 @@ test("accepts immutable task-time M05-T06 failure-boundary evidence", async () =
     nonclaims: 10,
     normativeStatus: "N-037:TESTED",
     proofStatus: "P-17:PARTIAL",
-    p17HistoricalStatus: "PARTIAL",
-    p17CurrentStatus: "PROVEN",
-    p17SuccessorArtifactSha256: SUCCESSOR_SHA256,
     taskLocalApplicabilityStatus: "D-009:DEFERRED",
     exactDocumentationReferences: 4,
   });
@@ -398,11 +385,10 @@ test("accepts formatter-only P-17 and N-037 column-padding changes", async () =>
   });
   assert.equal(result.result, "PASS");
   assert.equal(result.proofStatus, "P-17:PARTIAL");
-  assert.equal(result.p17CurrentStatus, "PROVEN");
   assert.equal(result.normativeStatus, "N-037:TESTED");
 });
 
-test("rejects N-037, monotonic P-17 successor, and PF-055 current-closure drift", async () => {
+test("rejects N-037, P-17 task-time pin, and PF-055 drift", async () => {
   const texts = await documentationTexts();
   for (const normativeCoverageText of [
     replaceRow(texts.normativeCoverageText, "N-037", (row) =>
@@ -433,36 +419,14 @@ test("rejects N-037, monotonic P-17 successor, and PF-055 current-closure drift"
 
   for (const proofMatrixText of [
     replaceRow(texts.proofMatrixText, "P-17", (row) =>
-      replaceExactOnce(row, "| PROVEN         |", "| PARTIAL        |"),
-    ),
-    replaceRow(texts.proofMatrixText, "P-17", (row) =>
-      replaceExactOnce(row, SUCCESSOR_ARTIFACT_FILE_NAME, `evil/${SUCCESSOR_ARTIFACT_FILE_NAME}`),
-    ),
-    replaceRow(texts.proofMatrixText, "P-17", (row) =>
-      replaceExactOnce(row, SUCCESSOR_SHA256, "b".repeat(64)),
-    ),
-    replaceRow(texts.proofMatrixText, "P-17", (row) =>
-      replaceExactOnce(row, SUCCESSOR_EVIDENCE_TEXT, "M07-T04 successor evidence removed"),
-    ),
-    replaceRow(texts.proofMatrixText, "P-17", (row) =>
       replaceExactOnce(
         row,
         "M02-T13, M04-T13–M04-T17, M05-T06, M07-T04",
-        "M02-T13, M04-T13–M04-T17, M05-T06, M07-T99",
-      ),
-    ),
-    replaceRow(texts.proofMatrixText, "P-17", (row) =>
-      replaceExactOnce(
-        row,
-        "Fulfilled: authenticated whole-activation reference closure and exact finite-limit vectors.",
-        "M07-T04 final evidence is still missing.",
+        "M02-T13, M04-T13–M04-T17, M07-T04",
       ),
     ),
     replaceRow(texts.proofMatrixText, "P-17", (row) =>
       replaceExactOnce(row, ARTIFACT_FILE_NAME, "missing.json"),
-    ),
-    replaceRow(texts.proofMatrixText, "P-17", (row) =>
-      row.replace("M05-T06 proves finite", "M05-T06 proves nothing. M05-T06 proves finite"),
     ),
   ]) {
     await assert.rejects(

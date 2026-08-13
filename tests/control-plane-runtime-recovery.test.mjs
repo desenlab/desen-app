@@ -31,7 +31,6 @@ const APP_PACKAGE = "apps/control-plane-api/package.json";
 const APP_INDEX = "apps/control-plane-api/src/index.ts";
 const APP_CONTRACT = "apps/control-plane-api/src/runtime-activation-contract.ts";
 const APP_INTERNAL = "apps/control-plane-api/src/runtime-activation-internal.ts";
-const APP_SQLITE = "apps/control-plane-api/src/runtime-activation-sqlite-internal.ts";
 const APP_RECOVERY_TEST = "apps/control-plane-api/test/runtime-recovery.test.ts";
 const APP_RECOVERY_TYPE_TEST = "apps/control-plane-api/test/runtime-recovery.types.ts";
 const ROOT_PACKAGE = "package.json";
@@ -311,62 +310,12 @@ test("[implementation] rejects removal of the public recovery boundary", async (
       "REGISTRATION_DRIFT",
     ],
     [
-      APP_PACKAGE,
-      (source) =>
-        source.replace(
-          '"test:runtime-transition-races": "vitest run test/runtime-transition-races.test.ts"',
-          '"test:runtime-transition-races": "vitest run test/runtime-transition-races-decoy.test.ts"',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      APP_SQLITE,
-      (source) => source.replace("assertConnectionProfile(openDatabase);", "void openDatabase;"),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      APP_PACKAGE,
-      (source) =>
-        source.replace(
-          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection.test.ts"',
-          '"test:runtime-fault-injection": "vitest run test/runtime-fault-injection-decoy.test.ts"',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
       ROOT_PACKAGE,
       (source) => {
         const manifest = JSON.parse(source);
         delete manifest.scripts["verify:control-plane-runtime-recovery"];
         return `${JSON.stringify(manifest, null, 2)}\n`;
       },
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races",
-          "pnpm verify:control-plane-runtime-fault-injection && pnpm verify:control-plane-runtime-transition-races-decoy",
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection",
-          "pnpm verify:control-plane-runtime-recovery && pnpm verify:control-plane-runtime-fault-injection-decoy",
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      ROOT_PACKAGE,
-      (source) =>
-        source.replace(
-          "pnpm verify:control-plane-runtime-transition-races && pnpm verify:reference-host-web-channel-consumption",
-          "pnpm verify:reference-host-web-channel-consumption && pnpm verify:control-plane-runtime-transition-races",
-        ),
       "REGISTRATION_DRIFT",
     ],
     [
@@ -388,74 +337,13 @@ test("[implementation] rejects removal of the public recovery boundary", async (
       "REGISTRATION_DRIFT",
     ],
     [
-      CI_SOURCE,
-      (source) =>
-        source.replace(
-          '      "control-plane-runtime-transition-races",',
-          '      "control-plane-runtime-transition-races-decoy",',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      CI_INVENTORY,
-      (source) =>
-        source.replace(
-          '    "control-plane-runtime-transition-races",',
-          '    "control-plane-runtime-transition-races-decoy",',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      CI_SOURCE,
-      (source) =>
-        source.replace(
-          '      "control-plane-runtime-fault-injection",',
-          '      "control-plane-runtime-fault-injection-decoy",',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      CI_INVENTORY,
-      (source) =>
-        source.replace(
-          '    "control-plane-runtime-fault-injection",',
-          '    "control-plane-runtime-fault-injection-decoy",',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
       SHARED_STATE_AUTHORITY,
       (source) =>
         source.replace(
-          '  "control-plane-runtime-recovery",',
-          '  // "control-plane-runtime-recovery",',
+          '  "control-plane-runtime-recovery",\n',
+          '  // "control-plane-runtime-recovery",\n',
         ),
       "REGISTRATION_DRIFT",
-    ],
-    [
-      SHARED_STATE_AUTHORITY,
-      (source) =>
-        source.replace(
-          '  "control-plane-runtime-transition-races",',
-          '  "control-plane-runtime-transition-races-decoy",',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      SHARED_STATE_AUTHORITY,
-      (source) =>
-        source.replace(
-          '  "control-plane-runtime-fault-injection",',
-          '  "control-plane-runtime-fault-injection-decoy",',
-        ),
-      "REGISTRATION_DRIFT",
-    ],
-    [
-      ADR,
-      // DEBT-I07-016 retains the superseded mutation marker "M07-T09 claims without proof"
-      // until I07-04 removes the historical M07-T09 reader bridge.
-      (source) => source.replace("M07-T10 proves", "M07-T10 claims without proof"),
-      "DOCUMENTATION_DRIFT",
     ],
     [
       SHARED_STATE_AUTHORITY,
@@ -549,7 +437,7 @@ test("[implementation] rejects removal of the public recovery boundary", async (
       "DOCUMENTATION_DRIFT",
     ],
   ];
-  for (const [relativePath, transform, code] of cases) {
+  for (const [caseIndex, [relativePath, transform, code]] of cases.entries()) {
     const current = (await workspaceBytes(relativePath)).toString("utf8");
     const changed = transform(current);
     assert.notEqual(changed, current, `${relativePath} mutation must change its authority`);
@@ -559,6 +447,7 @@ test("[implementation] rejects removal of the public recovery boundary", async (
         trackedFileBytes: { [relativePath]: Buffer.from(changed, "utf8") },
       }),
       expectedError(code),
+      `${relativePath} mutation ${caseIndex} must be rejected`,
     );
   }
 });

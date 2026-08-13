@@ -4,7 +4,7 @@
   "entries": [
     {
       "id": "DEBT-I07-001",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -36,7 +36,7 @@
     },
     {
       "id": "DEBT-I07-002",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -65,7 +65,7 @@
     },
     {
       "id": "DEBT-I07-003",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -103,7 +103,7 @@
     },
     {
       "id": "DEBT-I07-004",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -163,7 +163,7 @@
     },
     {
       "id": "DEBT-I07-005",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -189,7 +189,7 @@
     },
     {
       "id": "DEBT-I07-006",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -334,7 +334,7 @@
     },
     {
       "id": "DEBT-I07-009",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -361,7 +361,7 @@
     },
     {
       "id": "DEBT-I07-010",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-01",
       "removalOwner": "I07-04",
@@ -389,7 +389,7 @@
     },
     {
       "id": "DEBT-I07-011",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T04",
       "removalOwner": "I07-04",
@@ -466,7 +466,7 @@
     },
     {
       "id": "DEBT-I07-012",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T05",
       "removalOwner": "I07-04",
@@ -558,7 +558,7 @@
     },
     {
       "id": "DEBT-I07-013",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T06",
       "removalOwner": "I07-04",
@@ -662,7 +662,7 @@
     },
     {
       "id": "DEBT-I07-014",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T07",
       "removalOwner": "I07-04",
@@ -821,7 +821,7 @@
     },
     {
       "id": "DEBT-I07-015",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T08",
       "removalOwner": "I07-04",
@@ -962,7 +962,7 @@
     },
     {
       "id": "DEBT-I07-016",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T09",
       "removalOwner": "I07-04",
@@ -1094,7 +1094,7 @@
     },
     {
       "id": "DEBT-I07-017",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "I07-03",
       "removalOwner": "I07-04",
@@ -1138,7 +1138,7 @@
     },
     {
       "id": "DEBT-I07-018",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T10",
       "removalOwner": "I07-04",
@@ -1418,7 +1418,7 @@
     },
     {
       "id": "DEBT-I07-019",
-      "status": "OPEN",
+      "status": "REMOVED_PENDING_HOSTED_PROOF",
       "evidence": null,
       "registeredBy": "M07-T11",
       "removalOwner": "I07-04",

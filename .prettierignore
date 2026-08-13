@@ -9,3 +9,5 @@ packages/protocol/upstream
 # Exact upstream A2UI schema bytes are hash-pinned proof fixtures.
 tests/fixtures/standards/a2ui/0.9.1/common_types.json
 tests/fixtures/standards/a2ui/0.9.1/server_to_client.json
+# Canonical hosted-campaign evidence is byte- and SHA-pinned by its verifier.
+docs/proof/baselines/i07-04-affected-selector-promotion.json

@@ -10,6 +10,10 @@ import { promisify, types as utilTypes } from "node:util";
 import { format } from "prettier";
 import ts from "typescript";
 
+import {
+  readCheckpointedFrozenArtifact,
+  verifyProofReaderCheckpoints,
+} from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -78,11 +82,7 @@ const APP_SUITE_NAME = "M07-T09 bounded activation fault matrix";
 const APP_TEST_SHA256 = "c654b23a18d1386b287073796d5f6a887dead9fd2c891efdd8aa2e3d47047f67";
 const APP_TEST_SUPPORT_SHA256 = "4b9d00a34bc6fe6fa0c31e7f32e8f2fa835da9c01745e723a77a3f9bcd5cffc5";
 const APP_TYPE_TEST_SHA256 = "70ba16f2896f97a8957d8e47ad07f76536e42dcacfe23d8afe34e05d2f726212";
-const ROOT_TEST_SHA256 = "2168ec05b7ff773c15531b00906056ef278ea0b00a4840023956f26a2b5c2af6";
-const M07_T11_ROOT_TEST_SUCCESSOR = Object.freeze({
-  bytes: 18_770,
-  sha256: "f19a6709377d685aedbce20e0f795fc38245bb63256fb3cab5a7a50d7263d065",
-});
+const ROOT_TEST_SHA256 = "a9aa2e79bd1f323bcb2a9976b6dc9be2da8590cd2708fcafda0bbf72034c63bb";
 const EXPECTED_PUBLIC_EXPORT_INVENTORY_SHA256 =
   "c3daff8c4df98edc5beaa3f64cb8805613ed5cb29b55aed771346ba3b8949e43";
 
@@ -317,115 +317,6 @@ const TRACKED_TASK_FILES = Object.freeze([
   ...PIPELINE_SOURCE_FILES,
 ]);
 
-// M07-T10 strengthens the existing SQLite transaction boundary and appends only its own proof
-// registration. Authenticate that one reviewed successor while continuing to emit the immutable
-// T09 receipts; current reader bytes are owned separately by the append-only reader checkpoint.
-const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 2_319,
-      sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
-    }),
-    successor: Object.freeze({
-      bytes: 2_408,
-      sha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
-    }),
-  }),
-  [`${APP_DIRECTORY}/src/runtime-activation-sqlite-internal.ts`]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 22_508,
-      sha256: "a97191a6d508d4ff3c26e0f691e52b9c9215b4ecb69a014da4ecd03086a3beeb",
-    }),
-    successor: Object.freeze({
-      bytes: 23_137,
-      sha256: "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5fac7493481f868be164",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 65_109,
-      sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
-    }),
-    successor: Object.freeze({
-      bytes: 66_267,
-      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 48_058,
-      sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
-    }),
-    successor: Object.freeze({
-      bytes: 48_249,
-      sha256: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 46_343,
-      sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
-    }),
-    successor: Object.freeze({
-      bytes: 46_524,
-      sha256: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
-    }),
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 47_479,
-      sha256: "9b15cef3b2d795c268945c2f4bee670c037878bd43967c1ce71a41342d463140",
-    }),
-    successor: Object.freeze({
-      bytes: 47_816,
-      sha256: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
-    }),
-  }),
-});
-const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 68_073,
-      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
-    successor: Object.freeze({
-      bytes: 48_440,
-      sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
-    }),
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
-    successor: Object.freeze({
-      bytes: 46_705,
-      sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
-    }),
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
-    successor: Object.freeze({
-      bytes: 51_643,
-      sha256: "4f17d0d68f742a6c56fc10e39dd1f47f0111ed03b0e2d45a5d75b5f07b804820",
-    }),
-  }),
-});
-
-// A reader cannot pin its own successor digest without creating a recursive hash. Sequence 23
-// authenticates the live proof-library and root-test bytes while this reader emits the T09 view.
-const M07_T10_READER_RECEIPT_PROJECTION = Object.freeze({
-  [PROOF_LIBRARY]: Object.freeze({
-    bytes: 64_932,
-    sha256: "da3fed33227c78eef872d06a3aedaf98a4e87e91de12893a21aceb5a9365216f",
-  }),
-  [ROOT_TEST]: Object.freeze({
-    bytes: 17_341,
-    sha256: "f50017b668eb7f4a60d596a2d87a7e5b067989a9e1fe9a00270e685c44a4b8f6",
-  }),
-});
-
 export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
     task: "M07-T01",
@@ -480,6 +371,7 @@ export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS = Object.fr
 export const CONTROL_PLANE_RUNTIME_FAULT_INJECTION_ROOT_TEST_NAMES = Object.freeze([
   "[authority] builds the exact M07-T09 boundary-fault artifact from the executable suite",
   "[determinism] two independent evidence builds are byte-identical",
+  "[checkpoint] reconstructs only the centrally authenticated immutable M07-T09 artifact",
   "[prerequisites] rejects drift in every immutable M07-T01 through M07-T08 artifact",
   "[runtime] rejects one changed executable fault-suite receipt field",
   "[implementation] rejects public-export growth and removal of one fault boundary",
@@ -758,6 +650,46 @@ function parseJsonBytes(bytes, label, code = "SOURCE_DRIFT") {
   }
 }
 
+function frozenReceiptMap(receipts, expectedPaths, label) {
+  const paths = [...new Set(expectedPaths)].sort();
+  if (!Array.isArray(receipts) || receipts.length !== paths.length) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} receipt inventory drifted.`);
+  }
+  const byPath = new Map();
+  for (const receipt of receipts) {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      Array.isArray(receipt) ||
+      typeof receipt.path !== "string" ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes <= 0 ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
+      byPath.has(receipt.path)
+    ) {
+      fail("ARTIFACT_DRIFT", `The authenticated ${label} contains an invalid receipt.`);
+    }
+    byPath.set(receipt.path, Object.freeze({ bytes: receipt.bytes, sha256: receipt.sha256 }));
+  }
+  if (JSON.stringify([...byPath.keys()].sort()) !== JSON.stringify(paths)) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} path set drifted.`);
+  }
+  return byPath;
+}
+
+async function authenticatedFrozenArtifactProjection() {
+  await verifyProofReaderCheckpoints();
+  const frozen = await readCheckpointedFrozenArtifact("M07-T09");
+  if (frozen.path !== ARTIFACT) {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T09 artifact path drifted.");
+  }
+  const artifact = parseJsonBytes(frozen.bytes, ARTIFACT, "ARTIFACT_DRIFT");
+  if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T09" || artifact.result !== "PASS") {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T09 artifact identity drifted.");
+  }
+  return artifact;
+}
+
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -876,58 +808,26 @@ async function prerequisiteReceipts(overrides) {
   return deepFreeze(receipts);
 }
 
-async function fileReceipts(paths, overrides) {
+async function fileReceipts(paths, overrides, frozenReceipts) {
+  const projection =
+    frozenReceipts === undefined
+      ? undefined
+      : frozenReceiptMap(frozenReceipts, paths, "tracked-file");
   return deepFreeze(
     await Promise.all(
       [...new Set(paths)].sort().map(async (relativePath) => {
         const bytes = await workspaceBytes(relativePath, overrides);
-        return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
+        const frozenReceipt = Object.hasOwn(overrides, relativePath)
+          ? undefined
+          : projection?.get(relativePath);
+        return {
+          path: relativePath,
+          bytes: frozenReceipt?.bytes ?? bytes.byteLength,
+          sha256: frozenReceipt?.sha256 ?? sha256(bytes),
+        };
       }),
     ),
   );
-}
-
-async function trackedFileReceipts(overrides) {
-  let historicalState = false;
-  let successorState = false;
-  const m07T11Generations = [];
-  const receipts = [];
-  for (const relativePath of [...new Set(TRACKED_TASK_FILES)].sort()) {
-    const bytes = await workspaceBytes(relativePath, overrides);
-    const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    const bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
-    const t11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
-    if (bridge === undefined) {
-      const projected = M07_T10_READER_RECEIPT_PROJECTION[relativePath] ?? observed;
-      receipts.push(Object.freeze({ path: relativePath, ...projected }));
-      continue;
-    }
-    const historicalMatch =
-      observed.bytes === bridge.historical.bytes && observed.sha256 === bridge.historical.sha256;
-    const successorMatch =
-      observed.bytes === bridge.successor.bytes && observed.sha256 === bridge.successor.sha256;
-    const t11SuccessorMatch =
-      t11Bridge !== undefined &&
-      observed.bytes === t11Bridge.successor.bytes &&
-      observed.sha256 === t11Bridge.successor.sha256;
-    if (!historicalMatch && !successorMatch && !t11SuccessorMatch) {
-      fail("REGISTRATION_DRIFT", "A reviewed M07-T10 tracked successor receipt drifted.", {
-        path: relativePath,
-      });
-    }
-    if (historicalMatch) historicalState = true;
-    if (successorMatch || t11SuccessorMatch) successorState = true;
-    if (t11Bridge !== undefined)
-      m07T11Generations.push(t11SuccessorMatch ? "successor" : "historical");
-    receipts.push(Object.freeze({ path: relativePath, ...bridge.historical }));
-  }
-  if (historicalState && successorState) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
-  }
-  if (m07T11Generations.includes("historical") && m07T11Generations.includes("successor")) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T11 tracked successor set is incoherent.");
-  }
-  return deepFreeze(receipts);
 }
 
 function literalStringArray(initializer, label) {
@@ -1063,7 +963,7 @@ function assertExactSourceSha(bytes, relativePath, expectedSha256) {
   }
 }
 
-async function testProjection(overrides) {
+async function testProjection(overrides, frozenTests) {
   const [appBytes, supportBytes, typeBytes, rootBytes] = await Promise.all([
     workspaceBytes(APP_TEST, overrides),
     workspaceBytes(APP_TEST_SUPPORT, overrides),
@@ -1073,37 +973,11 @@ async function testProjection(overrides) {
   assertExactSourceSha(appBytes, APP_TEST, APP_TEST_SHA256);
   assertExactSourceSha(supportBytes, APP_TEST_SUPPORT, APP_TEST_SUPPORT_SHA256);
   assertExactSourceSha(typeBytes, APP_TYPE_TEST, APP_TYPE_TEST_SHA256);
-  if (!(
-    sha256(rootBytes) === ROOT_TEST_SHA256 ||
-    (rootBytes.byteLength === M07_T11_ROOT_TEST_SUCCESSOR.bytes &&
-      sha256(rootBytes) === M07_T11_ROOT_TEST_SUCCESSOR.sha256)
-  )) {
-    fail("TEST_AUTHORITY_DRIFT", `${ROOT_TEST} exact executable authority drifted.`, {
-      path: ROOT_TEST,
-    });
-  }
-  const runtime = runtimeTestInventory(fatalText(appBytes, APP_TEST));
-  const compilerNegativeClaims = compilerNegativeInventory(fatalText(typeBytes, APP_TYPE_TEST));
-  const rootNames = rootTestInventory(fatalText(rootBytes, ROOT_TEST));
-  return deepFreeze({
-    packageRuntimeCases: runtime.names.length,
-    packageRuntimeCaseNames: runtime.names,
-    faultCaseIds: runtime.caseIds,
-    compilerNegativeCases: compilerNegativeClaims.length,
-    compilerNegativeClaims,
-    rootMutationCases: rootNames.length,
-    rootMutationCaseNames: rootNames,
-    sourceReceipts: {
-      runtime: { path: APP_TEST, bytes: appBytes.byteLength, sha256: sha256(appBytes) },
-      support: {
-        path: APP_TEST_SUPPORT,
-        bytes: supportBytes.byteLength,
-        sha256: sha256(supportBytes),
-      },
-      types: { path: APP_TYPE_TEST, bytes: typeBytes.byteLength, sha256: sha256(typeBytes) },
-      root: { path: ROOT_TEST, ...M07_T10_READER_RECEIPT_PROJECTION[ROOT_TEST] },
-    },
-  });
+  assertExactSourceSha(rootBytes, ROOT_TEST, ROOT_TEST_SHA256);
+  runtimeTestInventory(fatalText(appBytes, APP_TEST));
+  compilerNegativeInventory(fatalText(typeBytes, APP_TYPE_TEST));
+  rootTestInventory(fatalText(rootBytes, ROOT_TEST));
+  return deepFreeze(copyInertJson(frozenTests, "authenticated frozen artifact tests"));
 }
 
 function expectedSuiteReceipt(value) {
@@ -1602,8 +1476,8 @@ async function publicBoundaryProjection(overrides) {
   });
 }
 
-async function distributionProjection() {
-  return fileReceipts([DIST_INDEX, DIST_TYPES], Object.freeze({}));
+async function distributionProjection(frozenReceipts) {
+  return fileReceipts([DIST_INDEX, DIST_TYPES], Object.freeze({}), frozenReceipts);
 }
 
 export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
@@ -1612,6 +1486,7 @@ export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeSuiteReceipt", "trackedFileBytes"]),
     "build options",
   );
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const prerequisiteBytes = captureByteOverrides(
     captured.prerequisiteBytes,
     CONTROL_PLANE_RUNTIME_FAULT_INJECTION_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
@@ -1637,11 +1512,11 @@ export async function buildControlPlaneRuntimeFaultInjectionEvidence(options) {
     traceRows,
   ] = await Promise.all([
     prerequisiteReceipts(prerequisiteBytes),
-    trackedFileReceipts(trackedFileBytes),
-    distributionProjection(),
+    fileReceipts(TRACKED_TASK_FILES, trackedFileBytes, frozenArtifact.trackedFiles),
+    distributionProjection(frozenArtifact.distribution),
     publicBoundaryProjection(trackedFileBytes),
     registrationProjection(trackedFileBytes),
-    testProjection(trackedFileBytes),
+    testProjection(trackedFileBytes, frozenArtifact.tests),
     traceProjection(trackedFileBytes),
   ]);
 

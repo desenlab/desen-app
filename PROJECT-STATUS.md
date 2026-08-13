@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 ## Plain-language status
 
@@ -737,24 +737,23 @@ archived in the
 
 The I07-02 cutover itself changes no protocol claim, implementation-task count, or proof-gate count
 and does not retire the sequential runner, which remains an explicit manual `legacy-rollback`
-path. I07-03 is now `DONE`: the exact `REQUIRED + EXHAUSTIVE` runner remains the sole pass/fail
+path. At the I07-03 completion checkpoint, the exact `REQUIRED + EXHAUSTIVE` runner remained the sole pass/fail
 authority while a separate pull-request-only `SHADOW + AFFECTED` job observes complete exact
 tracked-path ownership and fresh selected-workload execution. Every unknown, ambiguous, untrusted,
 policy, dependency, frozen-input, incomplete-diff, or unsupported condition expands to
 `EXHAUSTIVE`. The frozen I07-03 baseline selector is pinned at
 `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` across the 20 sources in
-its historical comparison authority; the current M07-T11 successor selector digest is
+its historical comparison authority; the then-current M07-T11 successor selector digest was
 `sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`. Its frozen threshold
-starts honestly at `0 / 20`, so promotion is false and
-I07-04 remains `NOT_STARTED` until every selector category has mutation coverage, false negatives
-remain zero, and at least 20 consecutive eligible same-revision hosted strict-subset comparisons
-agree.
+started honestly at `0 / 20`, so promotion was false and I07-04 was `NOT_STARTED` at that
+checkpoint.
 The I07-03 ledger can measure that arithmetic but can never authorize promotion from caller data;
 I07-04 must separately pin and authenticate the exact GitHub run, job, revision, and receipt
 provenance before it may change required execution.
-`main`, release, and manual-audit execution remains exhaustive. The hosted bootstrap succeeded,
+`main` and manual-audit execution—including the release process routed through them—remained
+exhaustive. The hosted bootstrap succeeded,
 but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE` with `UNSUPPORTED_CHANGE_KIND`, so
-no eligible strict-subset observation was counted and the threshold remains `0 / 20`. The
+no eligible strict-subset observation was counted and the threshold was `0 / 20` then. The
 authoritative hosted Quality gate passed. Local focused contracts passed 91/91 and the complete
 CI-infrastructure suite passed 203/203. The full local `REQUIRED + EXHAUSTIVE` run is
 `BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned `EPERM` in two pre-existing
@@ -853,10 +852,12 @@ for I07-04.
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`
 - Next operational and infrastructure task:
-  `I07-04 — Required affected-selector promotion after the frozen observation threshold` (`0 / 20`)
+  `I07-04 — Required affected-selector promotion after the frozen observation threshold`
+  (`IN_PROGRESS`, hosted campaign `20 / 20`, zero false negatives)
 - Next implementation task: none inside M07; all 11 implementation tasks are complete
-- Status: M07-T11 and I07-03 are complete; I07-04 is `NOT_STARTED`, affected promotion is false at
-  `0 / 20`, and G07 remains `NOT_STARTED` until I07-04 completes
+- Status: M07-T11 and I07-03 are complete; I07-04 has authenticated `20 / 20` hosted comparisons,
+  locally removed all 17 G07-due bridge families, and is waiting only for hosted cutover/closure;
+  G07 remains `NOT_STARTED` until that evidence is merged
 
 ## Completed preparation
 
@@ -1283,7 +1284,8 @@ socket cases.
 
 This completes M07 at 11/11 and moves overall progress to 85/145. P-12 remains `NOT_PROVEN` until
 M10-T07 proves Desen App product-level restart preservation, N-041 remains `PLANNED` until M12-T05,
-and G07 remains `NOT_STARTED` while I07-04 is at `0 / 20`. The proof does not claim
+and G07 remains `NOT_STARTED` while I07-04 completes hosted cutover after an independently
+authenticated `20 / 20` campaign with zero false negatives. The proof does not claim
 remote/multi-tenant/TLS deployment, credential lifecycle, hostile-admin concurrent installed/static
 root mutation resistance, independent anti-rollback, real-browser performance, Android/iOS, or
 other native-host conformance.
@@ -1291,18 +1293,19 @@ other native-host conformance.
 I07-03 is complete with exact local and hosted evidence at
 `docs/proof/baselines/i07-03-affected-selector-shadow.json`. Its frozen baseline selector is pinned
 at `sha256:20a78069ed829649ab9198cad68b5d7fede22dc3b6ec391ed84f5dd1f0afa86f` over the 20 sources in its
-historical comparison authority; the current M07-T11 successor selector digest is
+historical comparison authority; the pre-promotion M07-T11 successor selector digest was
 `sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`. The hosted bootstrap
 succeeded; its shadow returned
 `NOT_ELIGIBLE → EXHAUSTIVE / UNSUPPORTED_CHANGE_KIND`, so no eligible strict-subset observation
-was counted and promotion remains false at `0 / 20`. The authoritative hosted Quality gate passed.
+was counted and promotion was false at `0 / 20` at that checkpoint. The later I07-04 campaign is
+now independently authenticated at `20 / 20` with zero false negatives and promotion authorized;
+required hosted cutover and closure evidence are still `IN_PROGRESS`. The bootstrap Quality gate passed.
 Local focused contracts passed 91/91 and CI-infrastructure tests passed 203/203. The full local
 `REQUIRED + EXHAUSTIVE` run is `BLOCKED_BY_LOCAL_SANDBOX` only because `127.0.0.1` listen returned
-`EPERM` in two pre-existing control-plane TCP lifecycle cases; hosted execution passed. I07-04
-stays `NOT_STARTED` until zero false negatives, mutation coverage for every selector category, and
-at least 20 consecutive eligible same-revision hosted strict-subset affected/exhaustive comparisons
-pass, followed by an exact authenticated hosted-evidence review. M07's implementation tasks are
-complete; G07 remains open for this infrastructure evidence and cleanup.
+`EPERM` in two pre-existing control-plane TCP lifecycle cases; hosted execution passed. I07-04 is
+`IN_PROGRESS`: threshold, category coverage, authenticated review, zero-reference cleanup, and
+checkpoint migration are complete locally; required cutover and post-merge hosted closure remain.
+M07's implementation tasks are complete; G07 remains open for that hosted closure.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -1337,9 +1340,9 @@ runtime-probe child policy, its root receives only the Node test harness, and bo
 separate narrow fault-injection SQLite native-addon policy; neither receives workspace-write or
 port authority. This historical M07-T09 working-tree authority makes no hosted M07-T09 claim.
 
-The current M07-T11 successor contains 150 workloads and 71 proof pairs: 60 ordinary pairs and 11
+The pre-promotion M07-T11 successor contained 150 workloads and 71 proof pairs: 60 ordinary pairs and 11
 exclusive barriers. Its retained legacy projection expands to 479 prerequisite segments, 3,113
-ordered leaf invocations, and 236 distinct leaves. The current selector digest is
+ordered leaf invocations, and 236 distinct leaves. Its then-current selector digest was
 `sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`; the frozen I07-03
 baseline digest above remains historical. These are local code-owned successor facts and make no
 hosted M07-T11 claim.

@@ -25,9 +25,9 @@ const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   PROOF_UNIT: 142,
-  CI_POLICY: 42,
+  CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 114,
+  FROZEN_INPUT: 115,
   PACKAGE_OR_APPLICATION: 393,
   SHARED_PROOF_INFRASTRUCTURE: 179,
   PROJECT_DOCUMENTATION: 107,
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1019 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1023 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1019 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1019);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1023);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -137,6 +137,48 @@ test("permits strict selection only for exact verifier and root-test proof input
     assert.equal(entry.verifierNodeId, null);
     assert.equal(entry.rootTestNodeId, null);
   }
+});
+
+test("I07-04 changes only force-exhaustive authority paths and preserves historical ownership", async () => {
+  const currentPaths = await currentTrackedPaths();
+  const current = createAffectedWorkloadOwnership(currentPaths);
+  const promotedPaths = [
+    "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+    "scripts/ci/affected-selector-promotion-evidence.mjs",
+    "scripts/ci/run-required-affected-quality-gate.mjs",
+    "scripts/ci/test/affected-selector-promotion-evidence.test.mjs",
+    "scripts/ci/test/required-affected-quality-gate.test.mjs",
+    "scripts/ci/verify-affected-selector-promotion-evidence.mjs",
+  ];
+  for (const promotedPath of promotedPaths) {
+    const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
+    assert.ok(entry, `${promotedPath} must be tracked by the promoted authority`);
+    assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.FORCE_EXHAUSTIVE);
+    assert.equal(entry.proofUnitId, null);
+  }
+
+  const historicalPaths = currentPaths.filter((candidate) => !promotedPaths.includes(candidate));
+  historicalPaths.push(
+    "scripts/ci/run-shadow-affected-quality-gate.mjs",
+    "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
+  );
+  historicalPaths.sort((left, right) => Buffer.from(left).compare(Buffer.from(right)));
+  assert.deepEqual(calculateAffectedWorkloadOwnershipReview(historicalPaths), {
+    trackedPathCount: 1019,
+    trackedPathSetSha256: "d752922fa22db81f3f76fc93d4562a17b65589e614f3281844287aa8d6656679",
+    proofOwnedPathCount: 142,
+    categoryCounts: {
+      PROOF_UNIT: 142,
+      CI_POLICY: 42,
+      DEPENDENCY_POLICY: 31,
+      FROZEN_INPUT: 114,
+      PACKAGE_OR_APPLICATION: 393,
+      SHARED_PROOF_INFRASTRUCTURE: 179,
+      PROJECT_DOCUMENTATION: 107,
+      REPOSITORY_POLICY: 11,
+    },
+    ownershipSha256: "729b84436be134709db7bf8793e232bee4dab4a27efcb61e61cd0afeaed83ee8",
+  });
 });
 
 test("keeps all eight threshold categories populated and mutually exclusive", async () => {

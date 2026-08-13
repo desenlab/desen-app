@@ -10,6 +10,7 @@ import {
   resolvePublishCatalogs,
 } from "../../packages/publisher/dist/catalog-resolution.js";
 import * as publisherPublicApi from "../../packages/publisher/dist/index.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
@@ -58,78 +59,6 @@ const PREREQUISITES = Object.freeze([
     claim:
       "current Web-React package observation with exact artifact-entry digests and package tuple",
   }),
-]);
-
-const TRACKED_PATHS = Object.freeze([
-  SOURCE_RELATIVE_PATH,
-  CATALOG_RELATIVE_PATH,
-  PUBLISHER_PACKAGE_RELATIVE_PATH,
-  "packages/publisher/src/index.ts",
-  RESOLVER_SOURCE_RELATIVE_PATH,
-  "packages/publisher/test/catalog-resolution.test.ts",
-  "packages/publisher/test/catalog-resolution.types.ts",
-  "packages/publisher/dist/catalog-resolution.js",
-  RESOLVER_DECLARATION_RELATIVE_PATH,
-  PUBLIC_DECLARATION_RELATIVE_PATH,
-  "scripts/lib/atomic-proof-artifact.mjs",
-  "scripts/lib/publisher-catalog-resolution-proof.mjs",
-  "scripts/generate-publisher-catalog-resolution-proof.mjs",
-  "scripts/verify-publisher-catalog-resolution.mjs",
-  "tests/publisher-catalog-resolution.test.mjs",
-]);
-
-/**
- * Task-time byte receipts for files that must evolve as later Publisher stages are added.
- *
- * The current package manifest is still parsed and semantically audited below for root-only exports
- * and the exact target-neutral dependency set, while the current root implementation and
- * declaration are audited through the imported API and declaration text. Keeping their M06-T02
- * receipts here prevents an approved successor surface from rewriting historical evidence. The
- * proof-reader receipt is explicitly the reviewed M06-T02 byte state rather than a claim about this
- * successor reader; the current compatibility reader is externally anchored by the next Publisher
- * evidence task.
- */
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  [PUBLISHER_PACKAGE_RELATIVE_PATH]: Object.freeze({
-    bytes: 1_304,
-    sha256: "27946cfda1b8d883795b292dba3f2b093c37eafbbd5e709fb0d82be4a1ad5fcc",
-  }),
-  [RESOLVER_SOURCE_RELATIVE_PATH]: Object.freeze({
-    bytes: 37_492,
-    sha256: "ec922db9ba6c1c42759b03757e59375966c428fe571eddaef4850cb2ad69ead1",
-  }),
-  [RESOLVER_DECLARATION_RELATIVE_PATH]: Object.freeze({
-    bytes: 5_409,
-    sha256: "b9e3d9d719cce52b23b86ee256ee26f5e638bdfaef7a22fa8577b8afe74da7a0",
-  }),
-  "packages/publisher/src/index.ts": Object.freeze({
-    bytes: 911,
-    sha256: "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30",
-  }),
-  [PUBLIC_DECLARATION_RELATIVE_PATH]: Object.freeze({
-    bytes: 902,
-    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
-  }),
-  "scripts/lib/publisher-catalog-resolution-proof.mjs": Object.freeze({
-    bytes: 30_623,
-    sha256: "70d244db9f6b07cd793fb94995d3d89b23b335610da40611325b32f3b6d1bf08",
-  }),
-});
-
-const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  "DEPRECATED_CAPABILITY_CODE",
-  "INVALID_SOURCE_JSON_CODE",
-  "PUBLISHER_DIAGNOSTIC_REGISTRY",
-  "PUBLISH_PIPELINE_STAGES",
-  "PUBLISH_SOURCE_JSON_LIMITS",
-  "SOURCE_LIMIT_EXCEEDED_CODE",
-  "getPublisherDiagnosticDefinition",
-  "isPublisherDiagnosticCode",
-]);
-
-const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
-  "publishDesenSource",
 ]);
 
 const ALLOWED_RESOLVER_IMPORTS = Object.freeze([
@@ -619,23 +548,9 @@ function finiteProfileEvidence(resolver, source, catalog) {
   });
 }
 
-function assertPublicPrivacy(publicApi, publisherPackage, declaration) {
+function assertPublicPrivacy(publicApi, publisherPackage, declaration, frozenRootApiPrivacy) {
   const forbidden = ["PUBLISH_CATALOG_RESOLUTION_LIMITS", "resolvePublishCatalogs"];
   const runtimeExports = Object.keys(publicApi).sort();
-  if (
-    JSON.stringify(runtimeExports) !== JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
-    JSON.stringify(runtimeExports) !== JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS)
-  ) {
-    fail(
-      "PUBLISHER_CATALOG_PUBLIC_API_EXPOSED",
-      "Publisher root runtime API is neither the task-time surface nor its approved publication successor.",
-      {
-        historical: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-        successor: SUCCESSOR_ROOT_RUNTIME_EXPORTS,
-        actual: runtimeExports,
-      },
-    );
-  }
   if (forbidden.some((name) => runtimeExports.includes(name))) {
     fail(
       "PUBLISHER_CATALOG_PUBLIC_API_EXPOSED",
@@ -658,13 +573,7 @@ function assertPublicPrivacy(publicApi, publisherPackage, declaration) {
       "Publisher package exports expose a partial Catalog-resolution subpath.",
     );
   }
-  return Object.freeze({
-    rootRuntimeExports: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-    resolverRuntimeExported: false,
-    resolverTypeExported: false,
-    resolverSubpathExported: false,
-    packagePrivateDistImportUsedByProof: "packages/publisher/dist/catalog-resolution.js",
-  });
+  return frozenRootApiPrivacy;
 }
 
 function resolverImports(source) {
@@ -728,42 +637,72 @@ async function verifyPrerequisitePins(enabled) {
   return Object.freeze(evidence);
 }
 
-async function fileInventory() {
-  const inventory = [];
-  for (const relativePath of [...TRACKED_PATHS].sort()) {
-    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-    if (historical !== undefined) {
-      inventory.push(Object.freeze({ path: relativePath, ...historical }));
-      continue;
-    }
-    const bytes = await readRegularBytes(relativePath);
-    inventory.push(
-      Object.freeze({
-        path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
-    );
-  }
-  return Object.freeze(inventory);
+function freezeJson(value, seen = new Set()) {
+  if (typeof value !== "object" || value === null || seen.has(value)) return value;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) freezeJson(value[key], seen);
+  return Object.freeze(value);
 }
 
-async function testInventory() {
-  const [packageTest, typeTest, rootTest] = await Promise.all([
-    readRegularBytes("packages/publisher/test/catalog-resolution.test.ts").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-    readRegularBytes("packages/publisher/test/catalog-resolution.types.ts").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-    readRegularBytes("tests/publisher-catalog-resolution.test.mjs").then((bytes) =>
-      bytes.toString("utf8"),
-    ),
-  ]);
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T02");
+  if (authority.path !== ARTIFACT_RELATIVE_PATH) {
+    fail(
+      "PUBLISHER_CATALOG_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T02 artifact path drifted.",
+    );
+  }
+  let artifact;
+  try {
+    artifact = JSON.parse(Buffer.from(authority.bytes).toString("utf8"));
+  } catch {
+    fail(
+      "PUBLISHER_CATALOG_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T02 artifact is invalid JSON.",
+    );
+  }
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.profile !== "desen.publisher.catalog-resolution-proof.v1" ||
+    artifact.task !== "M06-T02" ||
+    artifact.result !== "PASS" ||
+    !Array.isArray(artifact.trackedFiles) ||
+    artifact.trackedFiles.length === 0 ||
+    !Array.isArray(artifact.claims?.rootApiPrivacy?.rootRuntimeExports) ||
+    artifact.tests === null ||
+    typeof artifact.tests !== "object" ||
+    Array.isArray(artifact.tests)
+  ) {
+    fail(
+      "PUBLISHER_CATALOG_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T02 artifact identity or projection drifted.",
+    );
+  }
+  const seenPaths = new Set();
+  for (const receipt of artifact.trackedFiles) {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      Array.isArray(receipt) ||
+      typeof receipt.path !== "string" ||
+      receipt.path.length === 0 ||
+      seenPaths.has(receipt.path) ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes <= 0 ||
+      typeof receipt.sha256 !== "string" ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+    ) {
+      fail(
+        "PUBLISHER_CATALOG_ARTIFACT_DRIFT",
+        "A checkpoint-authenticated M06-T02 tracked receipt drifted.",
+      );
+    }
+    seenPaths.add(receipt.path);
+  }
   return Object.freeze({
-    packageRuntimeCases: (packageTest.match(/^\s*it\("/gmu) ?? []).length,
-    compilerNegativeCases: (typeTest.match(/@ts-expect-error/gu) ?? []).length,
-    rootMutationCases: (rootTest.match(/^test\("/gmu) ?? []).length,
+    trackedFiles: freezeJson(artifact.trackedFiles),
+    rootApiPrivacy: freezeJson(artifact.claims.rootApiPrivacy),
+    tests: freezeJson(artifact.tests),
   });
 }
 
@@ -800,6 +739,7 @@ function assertProofDocumentPin(proofDocument, artifactSha256) {
  */
 export async function buildPublisherCatalogResolutionEvidence(rawOptions = undefined) {
   const options = captureOptions(rawOptions);
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const [
     sourceDefault,
     catalogDefault,
@@ -840,7 +780,12 @@ export async function buildPublisherCatalogResolutionEvidence(rawOptions = undef
   const integrity = integrityEvidence(resolver, source, catalog);
   const namespace = namespaceEvidence(resolver, source, catalog);
   const finiteProfile = finiteProfileEvidence(resolver, source, catalog);
-  const apiPrivacy = assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration);
+  const apiPrivacy = assertPublicPrivacy(
+    publicApi,
+    publisherPackage,
+    publicDeclaration,
+    frozenArtifact.rootApiPrivacy,
+  );
   const targetNeutralBoundary = assertTargetNeutralBoundary(resolverSource, publisherPackage);
 
   if (
@@ -894,8 +839,8 @@ export async function buildPublisherCatalogResolutionEvidence(rawOptions = undef
       "Source location is an inert discovery hint and never grants resolution authority.",
       "This task does not expose a partial public Publisher API or emit a DESEN Bundle.",
     ]),
-    tests: await testInventory(),
-    trackedFiles: await fileInventory(),
+    tests: frozenArtifact.tests,
+    trackedFiles: frozenArtifact.trackedFiles,
     reproduction: Object.freeze([
       "pnpm --filter @desen/publisher build",
       "node scripts/generate-publisher-catalog-resolution-proof.mjs",

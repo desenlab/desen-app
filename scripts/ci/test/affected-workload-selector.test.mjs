@@ -36,6 +36,7 @@ const EXPECTED_COMPARISON_AUTHORITY_PATHS = Object.freeze([
   "turbo.json",
   "dependency-cruiser.config.cjs",
   "scripts/ci/affected-change-boundary.mjs",
+  "scripts/ci/affected-selector-promotion-evidence.mjs",
   "scripts/ci/affected-impact-graph.mjs",
   "scripts/ci/affected-observation-threshold.json",
   "scripts/ci/affected-observation-threshold.mjs",
@@ -46,7 +47,7 @@ const EXPECTED_COMPARISON_AUTHORITY_PATHS = Object.freeze([
   "scripts/ci/no-proof-listener.cjs",
   "scripts/ci/proof-filesystem-compatibility.cjs",
   "scripts/ci/run-required-exhaustive-quality-gate.mjs",
-  "scripts/ci/run-shadow-affected-quality-gate.mjs",
+  "scripts/ci/run-required-affected-quality-gate.mjs",
   "scripts/ci/shared-state-authority.mjs",
 ]);
 

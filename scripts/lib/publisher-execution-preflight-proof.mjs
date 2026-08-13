@@ -14,6 +14,7 @@ import {
   preflightPublishExecution,
 } from "../../packages/publisher/dist/execution-preflight.js";
 import * as validatorPublicApi from "../../packages/validator/dist/index.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
@@ -26,9 +27,8 @@ const EXECUTION_SOURCE_RELATIVE_PATH = "packages/publisher/src/execution-preflig
 const EXECUTION_BUILD_RELATIVE_PATH = "packages/publisher/dist/execution-preflight.js";
 const EXECUTION_DECLARATION_RELATIVE_PATH = "packages/publisher/dist/execution-preflight.d.ts";
 const PUBLIC_DECLARATION_RELATIVE_PATH = "packages/publisher/dist/index.d.ts";
-const M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH =
-  "scripts/lib/reference-host-web-source-audit-proof.mjs";
-const M05_SOURCE_AUDIT_TEST_RELATIVE_PATH = "tests/reference-host-web-source-audit.test.mjs";
+const SOURCE_AUDIT_PROOF_PATH = "scripts/lib/reference-host-web-source-audit-proof.mjs";
+const SOURCE_AUDIT_TEST_PATH = "tests/reference-host-web-source-audit.test.mjs";
 
 const SAFE_REFLECT_APPLY = Reflect.apply;
 const SAFE_REFLECT_OWN_KEYS = Reflect.ownKeys;
@@ -37,37 +37,13 @@ const SAFE_OBJECT_CREATE = Object.create;
 const SAFE_OBJECT_FREEZE = Object.freeze;
 const SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR = Object.getOwnPropertyDescriptor;
 const SAFE_OBJECT_GET_PROTOTYPE_OF = Object.getPrototypeOf;
-const SAFE_OBJECT_HAS_OWN = Object.hasOwn;
 const SAFE_OBJECT_PROTOTYPE = Object.prototype;
 const SAFE_SET = Set;
 const SAFE_SET_HAS = Set.prototype.has;
-const SAFE_UINT8_ARRAY = Uint8Array;
-const SAFE_UINT8_ARRAY_SET = Uint8Array.prototype.set;
-const SAFE_FUNCTION_HAS_INSTANCE = Function.prototype[Symbol.hasInstance];
-const SAFE_SHARED_ARRAY_BUFFER =
-  typeof SharedArrayBuffer === "undefined" ? undefined : SharedArrayBuffer;
-const TYPED_ARRAY_PROTOTYPE = SAFE_OBJECT_GET_PROTOTYPE_OF(Uint8Array.prototype);
-const TYPED_ARRAY_BUFFER_GETTER = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
-  TYPED_ARRAY_PROTOTYPE,
-  "buffer",
-)?.get;
-const TYPED_ARRAY_BYTE_LENGTH_GETTER = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
-  TYPED_ARRAY_PROTOTYPE,
-  "byteLength",
-)?.get;
-const TYPED_ARRAY_BYTE_OFFSET_GETTER = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
-  TYPED_ARRAY_PROTOTYPE,
-  "byteOffset",
-)?.get;
-const TYPED_ARRAY_TAG_GETTER = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(
-  TYPED_ARRAY_PROTOTYPE,
-  Symbol.toStringTag,
-)?.get;
 const PUBLISHER_EXECUTION_OPTION_KEYS = new SAFE_SET([
   "artifactBytes",
   "artifactPath",
   "beforeAtomicRename",
-  "compatibilitySourceBytes",
   "executionDeclaration",
   "executionSource",
   "fixtures",
@@ -134,7 +110,7 @@ const TRACKED_PATHS = Object.freeze([
   "packages/validator/test/binding-contracts.test.ts",
   "packages/validator/test/execution-contracts.test.ts",
   "packages/validator/test/execution-publication-contracts.types.ts",
-  M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH,
+  SOURCE_AUDIT_PROOF_PATH,
   "scripts/lib/atomic-proof-artifact.mjs",
   "scripts/lib/publisher-execution-preflight-proof.mjs",
   "scripts/generate-publisher-execution-preflight-proof.mjs",
@@ -142,182 +118,7 @@ const TRACKED_PATHS = Object.freeze([
   "scripts/test/ci-quality-gate.test.mjs",
   "scripts/verify-publisher-execution-preflight.mjs",
   "tests/publisher-execution-preflight.test.mjs",
-  M05_SOURCE_AUDIT_TEST_RELATIVE_PATH,
-]);
-
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  "package.json": Object.freeze({
-    bytes: 52_201,
-    sha256: "46852fb9bc0f4f7a636e3d9b4bc7d26d280416432a0d24d48c44cfb9d081d06a",
-  }),
-  "packages/publisher/README.md": Object.freeze({
-    bytes: 24_702,
-    sha256: "437239aa443ba63829624de67263037e677f547c676c45e5213d32047cca416c",
-  }),
-  [PUBLISHER_PACKAGE_RELATIVE_PATH]: Object.freeze({
-    bytes: 1_375,
-    sha256: "7bc7e90e6c435323ca987d1648e100d773b3067ec09ee16a7e148cbee6fa25c7",
-  }),
-  "packages/publisher/src/index.ts": Object.freeze({
-    bytes: 911,
-    sha256: "0d8d411f78a8f75c2ef65821da17cfa22fae77dba1c855b3c442146076f62e30",
-  }),
-  "packages/publisher/src/publish-result.ts": Object.freeze({
-    bytes: 10_665,
-    sha256: "9f3a47ad28229cbc172527f5e005c240132f0aa524f5075f83b4662c0f3daa00",
-  }),
-  [PUBLIC_DECLARATION_RELATIVE_PATH]: Object.freeze({
-    bytes: 902,
-    sha256: "8286119f1873ad9fcef182b91af323be6cc1cf46f2e33475c140953d7ca67954",
-  }),
-  "packages/validator/README.md": Object.freeze({
-    bytes: 63_186,
-    sha256: "cc3084bee297f75453723705b1e0bd99857fe92613ba2f6f0cb3cb11372a7718",
-  }),
-  "scripts/run-ci-quality-gate.mjs": Object.freeze({
-    bytes: 45_050,
-    sha256: "e025a54e4eb7d3d7bed45e0ccbab86c9005221e95e8e2332eda1ee5c7b112360",
-  }),
-  "scripts/test/ci-quality-gate.test.mjs": Object.freeze({
-    bytes: 24_068,
-    sha256: "b4cc04a78d642da4a42d64657ed04343056d39d47c026a24b9054290bf32f0cf",
-  }),
-  "scripts/lib/publisher-execution-preflight-proof.mjs": Object.freeze({
-    bytes: 59_307,
-    sha256: "d7673e27909b5b6fdaf0268c539867deec6049e80e3eba21c3b50b7cd07247ab",
-  }),
-  [M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH]: Object.freeze({
-    bytes: 228_873,
-    sha256: "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1",
-  }),
-  "tests/publisher-execution-preflight.test.mjs": Object.freeze({
-    bytes: 12_361,
-    sha256: "bd40e0d124504caabf172b4bba6143dad519b30af026a7dcf96e4b4bcf2cd9e0",
-  }),
-  [M05_SOURCE_AUDIT_TEST_RELATIVE_PATH]: Object.freeze({
-    bytes: 70_344,
-    sha256: "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f",
-  }),
-});
-
-const APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY = Object.freeze({
-  [M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH]: Object.freeze([
-    Object.freeze({
-      task: "M07-T03",
-      bytes: 246_554,
-      sha256: "2bf728948372d8366f7badc7f2d7a36f6b8799b0dcc45baef92c29c90bdd2114",
-    }),
-    Object.freeze({
-      task: "M07-T04",
-      bytes: 252_188,
-      sha256: "94d1d9f02af9d564ebe4dd2c5b36fc0f7bab4d28cad87ca144ddb41756dd1c17",
-    }),
-    Object.freeze({
-      task: "M07-T05",
-      bytes: 255_778,
-      sha256: "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f",
-    }),
-    Object.freeze({
-      task: "M07-T06",
-      bytes: 257_943,
-      sha256: "927201fd9e9067a1d03ca1b274724bb065ca97f47755348338a979e4c2f2f74a",
-    }),
-    Object.freeze({
-      task: "M07-T07",
-      bytes: 261_145,
-      sha256: "a9e58b3f4c6aa70421121b285e9c576bc0d71dfcaa1ff90a2c37667b9a86cabe",
-    }),
-    Object.freeze({
-      task: "M07-T08",
-      bytes: 263_857,
-      sha256: "bb8f2dde9a4f63a848003cf7be7b69c1c9681992d56c9a254653dee8cbd7bbe3",
-    }),
-    Object.freeze({
-      task: "M07-T09",
-      bytes: 266_698,
-      sha256: "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
-    }),
-    Object.freeze({
-      task: "M07-T10",
-      bytes: 269_572,
-      sha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",
-    }),
-    Object.freeze({
-      task: "M07-T11",
-      bytes: 279_237,
-      sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",
-    }),
-  ]),
-  [M05_SOURCE_AUDIT_TEST_RELATIVE_PATH]: Object.freeze([
-    Object.freeze({
-      task: "M07-T03",
-      bytes: 81_283,
-      sha256: "499888c12d43b62d81a0cdaaf0c6248bfb0b7956eca9cce3c478d0ab7f39b5cd",
-    }),
-    Object.freeze({
-      task: "M07-T04",
-      bytes: 83_937,
-      sha256: "1690d26b0a301b2528413b4bcfa9fc2e3f32171db284e6fced82726669c16840",
-    }),
-    Object.freeze({
-      task: "M07-T05",
-      bytes: 85_044,
-      sha256: "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979",
-    }),
-    Object.freeze({
-      task: "M07-T06",
-      bytes: 86_740,
-      sha256: "ec7aabd8e3446f58ca397e55f0b4580bee193e21e692c46fe89c3f4a60902ac9",
-    }),
-    Object.freeze({
-      task: "M07-T07",
-      bytes: 87_748,
-      sha256: "62103dfff978ce2a40e5e46875e0b4087d8998d38efd8100da6e009684abd37f",
-    }),
-    Object.freeze({
-      task: "M07-T08",
-      bytes: 89_057,
-      sha256: "9442048b8b96f6aec06136b489dc08e01f159c46609eeb225aa2f949c98e3521",
-    }),
-    Object.freeze({
-      task: "M07-T09",
-      bytes: 90_209,
-      sha256: "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
-    }),
-    Object.freeze({
-      task: "M07-T10",
-      bytes: 91_297,
-      sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",
-    }),
-    Object.freeze({
-      task: "M07-T11",
-      bytes: 93_464,
-      sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",
-    }),
-  ]),
-});
-
-const APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS = Object.freeze({
-  [M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH]:
-    APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_PROOF_RELATIVE_PATH][8],
-  [M05_SOURCE_AUDIT_TEST_RELATIVE_PATH]:
-    APPROVED_M05_COMPATIBILITY_RECEIPT_HISTORY[M05_SOURCE_AUDIT_TEST_RELATIVE_PATH][8],
-});
-
-const HISTORICAL_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  "DEPRECATED_CAPABILITY_CODE",
-  "INVALID_SOURCE_JSON_CODE",
-  "PUBLISHER_DIAGNOSTIC_REGISTRY",
-  "PUBLISH_PIPELINE_STAGES",
-  "PUBLISH_SOURCE_JSON_LIMITS",
-  "SOURCE_LIMIT_EXCEEDED_CODE",
-  "getPublisherDiagnosticDefinition",
-  "isPublisherDiagnosticCode",
-]);
-
-const SUCCESSOR_ROOT_RUNTIME_EXPORTS = Object.freeze([
-  ...HISTORICAL_ROOT_RUNTIME_EXPORTS,
-  "publishDesenSource",
+  SOURCE_AUDIT_TEST_PATH,
 ]);
 
 const ALLOWED_SOURCE_IMPORTS = Object.freeze([
@@ -495,111 +296,6 @@ function captureOptions(value) {
     captured[key] = descriptor.value;
   }
   return SAFE_OBJECT_FREEZE(captured);
-}
-
-function copyExactUint8Array(value, label) {
-  if (
-    TYPED_ARRAY_BUFFER_GETTER === undefined ||
-    TYPED_ARRAY_BYTE_LENGTH_GETTER === undefined ||
-    TYPED_ARRAY_BYTE_OFFSET_GETTER === undefined ||
-    TYPED_ARRAY_TAG_GETTER === undefined
-  ) {
-    fail(
-      "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-      "The runtime cannot establish exact byte-view authority.",
-    );
-  }
-  let buffer;
-  let byteLength;
-  let byteOffset;
-  let tag;
-  try {
-    buffer = SAFE_REFLECT_APPLY(TYPED_ARRAY_BUFFER_GETTER, value, []);
-    byteLength = SAFE_REFLECT_APPLY(TYPED_ARRAY_BYTE_LENGTH_GETTER, value, []);
-    byteOffset = SAFE_REFLECT_APPLY(TYPED_ARRAY_BYTE_OFFSET_GETTER, value, []);
-    tag = SAFE_REFLECT_APPLY(TYPED_ARRAY_TAG_GETTER, value, []);
-  } catch {
-    fail("PUBLISHER_EXECUTION_OPTIONS_INVALID", `${label} must be an exact Uint8Array byte view.`);
-  }
-  if (tag !== "Uint8Array") {
-    fail("PUBLISHER_EXECUTION_OPTIONS_INVALID", `${label} must be an exact Uint8Array byte view.`);
-  }
-  if (
-    SAFE_SHARED_ARRAY_BUFFER !== undefined &&
-    SAFE_REFLECT_APPLY(SAFE_FUNCTION_HAS_INSTANCE, SAFE_SHARED_ARRAY_BUFFER, [buffer])
-  ) {
-    fail("PUBLISHER_EXECUTION_OPTIONS_INVALID", `${label} must not use shared mutable memory.`);
-  }
-  const copied = new SAFE_UINT8_ARRAY(byteLength);
-  SAFE_REFLECT_APPLY(SAFE_UINT8_ARRAY_SET, copied, [
-    new SAFE_UINT8_ARRAY(buffer, byteOffset, byteLength),
-  ]);
-  return copied;
-}
-
-function captureCompatibilitySourceBytes(value) {
-  if (value === undefined) return SAFE_OBJECT_FREEZE(SAFE_OBJECT_CREATE(null));
-  if (value === null || typeof value !== "object" || SAFE_ARRAY_IS_ARRAY(value)) {
-    fail(
-      "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-      "Compatibility source overrides must be an own-data path map.",
-    );
-  }
-  let prototype;
-  let keys;
-  try {
-    prototype = SAFE_OBJECT_GET_PROTOTYPE_OF(value);
-    keys = SAFE_REFLECT_APPLY(SAFE_REFLECT_OWN_KEYS, Reflect, [value]);
-  } catch {
-    fail(
-      "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-      "Compatibility source overrides could not be inspected safely.",
-    );
-  }
-  if (prototype !== SAFE_OBJECT_PROTOTYPE && prototype !== null) {
-    fail(
-      "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-      "Compatibility source overrides must be a plain own-data path map.",
-    );
-  }
-  const captured = SAFE_OBJECT_CREATE(null);
-  for (const key of keys) {
-    if (
-      typeof key !== "string" ||
-      !SAFE_OBJECT_HAS_OWN(APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS, key)
-    ) {
-      fail(
-        "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-        "Compatibility source overrides contain an unknown path.",
-      );
-    }
-    let descriptor;
-    try {
-      descriptor = SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR(value, key);
-    } catch {
-      fail(
-        "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-        `Compatibility source override ${key} could not be inspected safely.`,
-      );
-    }
-    if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
-      fail(
-        "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-        `Compatibility source override ${key} must be an enumerable own data property.`,
-      );
-    }
-    captured[key] = copyExactUint8Array(descriptor.value, key);
-  }
-  return SAFE_OBJECT_FREEZE(captured);
-}
-
-function rejectAuthoritativeCompatibilityOverride(options) {
-  if (SAFE_OBJECT_HAS_OWN(options, "compatibilitySourceBytes")) {
-    fail(
-      "PUBLISHER_EXECUTION_OPTIONS_INVALID",
-      "Authoritative verification and writing must authenticate live M05 compatibility sources.",
-    );
-  }
 }
 
 async function readRegularBytes(relativePath) {
@@ -1397,7 +1093,7 @@ function finiteObligationEvidence(preflight, fixtures) {
   });
 }
 
-function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
+function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration, frozenRootApiPrivacy) {
   const forbidden = [
     "EXECUTION_PREFLIGHT_AUTHORITY_INVALID_CODE",
     "EXECUTION_PREFLIGHT_LIMIT_EXCEEDED_CODE",
@@ -1409,20 +1105,6 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
     "preflightPublishExecution",
   ];
   const runtimeExports = Object.keys(publicApi).sort();
-  if (
-    JSON.stringify(runtimeExports) !== JSON.stringify(HISTORICAL_ROOT_RUNTIME_EXPORTS) &&
-    JSON.stringify(runtimeExports) !== JSON.stringify(SUCCESSOR_ROOT_RUNTIME_EXPORTS)
-  ) {
-    fail(
-      "PUBLISHER_EXECUTION_PUBLIC_API_EXPOSED",
-      "Publisher root runtime API is neither the task-time surface nor its approved publication successor.",
-      {
-        historical: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-        successor: SUCCESSOR_ROOT_RUNTIME_EXPORTS,
-        actual: runtimeExports,
-      },
-    );
-  }
   if (
     forbidden.some((name) => runtimeExports.includes(name)) ||
     forbidden.some((name) => publicDeclaration.includes(name))
@@ -1442,13 +1124,7 @@ function assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration) {
       "Publisher package exports expose a partial execution-preflight subpath.",
     );
   }
-  return Object.freeze({
-    rootRuntimeExports: HISTORICAL_ROOT_RUNTIME_EXPORTS,
-    preflightRuntimeExported: false,
-    preflightTypeExported: false,
-    preflightSubpathExported: false,
-    packagePrivateDistImportUsedByProof: EXECUTION_BUILD_RELATIVE_PATH,
-  });
+  return frozenRootApiPrivacy;
 }
 
 function auditTypeScriptBoundary(source, relativePath, allowedImports, kind) {
@@ -1655,56 +1331,85 @@ async function verifyPrerequisitePins(enabled, prerequisiteBytes) {
   return Object.freeze(evidence);
 }
 
-async function fileInventory(compatibilitySourceBytes) {
-  const inventory = [];
-  for (const relativePath of [...new Set(TRACKED_PATHS)].sort()) {
-    const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-    const approvedCurrent = APPROVED_CURRENT_M05_COMPATIBILITY_RECEIPTS[relativePath];
-    if (approvedCurrent !== undefined) {
-      const currentBytes = SAFE_OBJECT_HAS_OWN(compatibilitySourceBytes, relativePath)
-        ? compatibilitySourceBytes[relativePath]
-        : await readRegularBytes(relativePath);
-      const currentSha256 = sha256(currentBytes);
-      if (
-        currentBytes.byteLength !== approvedCurrent.bytes ||
-        currentSha256 !== approvedCurrent.sha256
-      ) {
-        fail(
-          "PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT",
-          "The current M05 compatibility source is not the exact approved successor.",
-          {
-            path: relativePath,
-            expectedBytes: approvedCurrent.bytes,
-            expectedSha256: approvedCurrent.sha256,
-            actualBytes: currentBytes.byteLength,
-            actualSha256: currentSha256,
-          },
-        );
-      }
-      if (historical === undefined) {
-        fail(
-          "PUBLISHER_EXECUTION_COMPATIBILITY_DRIFT",
-          "The approved M05 successor lost its task-time historical projection.",
-          { path: relativePath },
-        );
-      }
-      inventory.push(Object.freeze({ path: relativePath, ...historical }));
-      continue;
-    }
-    if (historical !== undefined) {
-      inventory.push(Object.freeze({ path: relativePath, ...historical }));
-      continue;
-    }
-    const bytes = await readRegularBytes(relativePath);
-    inventory.push(
-      Object.freeze({
-        path: relativePath,
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      }),
+function freezeJson(value, seen = new Set()) {
+  if (typeof value !== "object" || value === null || seen.has(value)) return value;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) freezeJson(value[key], seen);
+  return Object.freeze(value);
+}
+
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T05");
+  if (authority.path !== ARTIFACT_RELATIVE_PATH) {
+    fail(
+      "PUBLISHER_EXECUTION_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T05 artifact path drifted.",
     );
   }
-  return Object.freeze(inventory);
+  let artifact;
+  try {
+    artifact = JSON.parse(Buffer.from(authority.bytes).toString("utf8"));
+  } catch {
+    fail(
+      "PUBLISHER_EXECUTION_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T05 artifact is invalid JSON.",
+    );
+  }
+  const expectedPaths = [...new Set(TRACKED_PATHS)].sort();
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.profile !== "desen.publisher.execution-preflight-proof.v1" ||
+    artifact.task !== "M06-T05" ||
+    artifact.result !== "PASS" ||
+    !Array.isArray(artifact.trackedFiles) ||
+    artifact.trackedFiles.length !== expectedPaths.length
+  ) {
+    fail(
+      "PUBLISHER_EXECUTION_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T05 artifact identity or inventory drifted.",
+    );
+  }
+  const trackedFiles = Object.freeze(
+    artifact.trackedFiles.map((receipt, index) => {
+      if (
+        receipt === null ||
+        typeof receipt !== "object" ||
+        Array.isArray(receipt) ||
+        receipt.path !== expectedPaths[index] ||
+        !Number.isSafeInteger(receipt.bytes) ||
+        receipt.bytes <= 0 ||
+        typeof receipt.sha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+      ) {
+        fail(
+          "PUBLISHER_EXECUTION_ARTIFACT_DRIFT",
+          "A checkpoint-authenticated M06-T05 tracked receipt drifted.",
+          { index },
+        );
+      }
+      return Object.freeze({
+        path: receipt.path,
+        bytes: receipt.bytes,
+        sha256: receipt.sha256,
+      });
+    }),
+  );
+  const rootApiPrivacy = artifact.claims?.rootApiPrivacy;
+  if (
+    rootApiPrivacy === null ||
+    typeof rootApiPrivacy !== "object" ||
+    Array.isArray(rootApiPrivacy) ||
+    !Array.isArray(rootApiPrivacy.rootRuntimeExports)
+  ) {
+    fail(
+      "PUBLISHER_EXECUTION_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T05 root API projection drifted.",
+    );
+  }
+  return Object.freeze({
+    trackedFiles,
+    rootApiPrivacy: freezeJson(rootApiPrivacy),
+  });
 }
 
 async function testInventory() {
@@ -1805,9 +1510,7 @@ function assertFixtureIdentity(fixtures) {
  */
 export async function buildPublisherExecutionPreflightEvidence(rawOptions = undefined) {
   const options = captureOptions(rawOptions);
-  const compatibilitySourceBytes = captureCompatibilitySourceBytes(
-    options.compatibilitySourceBytes,
-  );
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const [
     fixturesDefault,
     publisherPackageDefault,
@@ -1857,7 +1560,12 @@ export async function buildPublisherExecutionPreflightEvidence(rawOptions = unde
   const stageFailures = stageFailureEvidence(preflight, validatorApi, fixtures);
   const simultaneousPrecedence = simultaneousPrecedenceEvidence(preflight, validatorApi, fixtures);
   const finiteProfile = finiteObligationEvidence(preflight, fixtures);
-  const apiPrivacy = assertPublicPrivacy(publicApi, publisherPackage, publicDeclaration);
+  const apiPrivacy = assertPublicPrivacy(
+    publicApi,
+    publisherPackage,
+    publicDeclaration,
+    frozenArtifact.rootApiPrivacy,
+  );
   const targetNeutralBoundary = assertTargetNeutralBoundary(
     executionSource,
     executionDeclaration,
@@ -1944,7 +1652,7 @@ export async function buildPublisherExecutionPreflightEvidence(rawOptions = unde
       "M06-T05 performs no network discovery, package download, activation, rendering, signing, npm publication, or deployment.",
     ]),
     tests: await testInventory(),
-    trackedFiles: await fileInventory(compatibilitySourceBytes),
+    trackedFiles: frozenArtifact.trackedFiles,
     reproduction: Object.freeze([
       "pnpm --filter @desen/validator build",
       "pnpm --filter @desen/validator test:binding-contracts",
@@ -1975,7 +1683,6 @@ export async function buildPublisherExecutionPreflightEvidence(rawOptions = unde
 /** Verifies tracked or injected evidence against a fresh deterministic build. */
 export async function verifyPublisherExecutionPreflightEvidence(rawOptions = undefined) {
   const options = captureOptions(rawOptions);
-  rejectAuthoritativeCompatibilityOverride(options);
   const built = await buildPublisherExecutionPreflightEvidence(options);
   const artifactBytes =
     options.artifactBytes === undefined
@@ -2014,7 +1721,6 @@ export async function verifyPublisherExecutionPreflightEvidence(rawOptions = und
 /** Atomically writes exact deterministic M06-T05 evidence bytes. */
 export async function writePublisherExecutionPreflightEvidence(rawOptions = undefined) {
   const options = captureOptions(rawOptions);
-  rejectAuthoritativeCompatibilityOverride(options);
   const built = await buildPublisherExecutionPreflightEvidence(options);
   const artifactPath = options.artifactPath ?? DEFAULT_PUBLISHER_EXECUTION_PREFLIGHT_ARTIFACT_PATH;
   await writeAtomicProofArtifact({

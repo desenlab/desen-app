@@ -17,6 +17,7 @@ import {
   SOURCE_LIMIT_EXCEEDED_CODE,
 } from "../../packages/publisher/dist/index.js";
 import { parseSourceJson } from "../../packages/publisher/dist/source-json.js";
+import { readCheckpointedFrozenArtifact } from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 import {
   DEFAULT_SNAPSHOT_ROOT,
@@ -160,148 +161,6 @@ const VERIFIED_PRODUCTION_PATHS = Object.freeze([
   "packages/publisher/src/publish-diagnostics.ts",
   "packages/publisher/src/source-json.ts",
 ]);
-
-const G05_COMPATIBILITY_OWNERSHIP_PATHS = Object.freeze([
-  "scripts/generate-reference-host-web-source-audit-proof.mjs",
-  "scripts/lib/reference-host-web-source-audit-proof.mjs",
-  "scripts/verify-reference-host-web-source-audit.mjs",
-  "tests/reference-host-web-source-audit.test.mjs",
-]);
-
-const TRACKED_EVIDENCE_PATHS = Object.freeze([
-  "packages/publisher/test/publish-result.test.ts",
-  "packages/publisher/test/publish-result.types.ts",
-  ...G05_COMPATIBILITY_OWNERSHIP_PATHS,
-  "scripts/lib/publisher-publish-result-proof.mjs",
-  "scripts/generate-publisher-publish-result-proof.mjs",
-  "scripts/verify-publisher-publish-result.mjs",
-  "tests/publisher-publish-result.test.mjs",
-]);
-
-/**
- * Immutable M06-T01 receipts for evidence readers that legitimately evolve after task completion.
- *
- * The current M05 reader and root test are authenticated against the closed reviewed-successor
- * histories below before these historical records are emitted. The T01 reader and root test
- * cannot self-authenticate their current bytes without a circular receipt, so later checkpoints
- * externally anchor their current files while this reader preserves the exact task-time artifact
- * projection.
- */
-const HISTORICAL_TRACKED_RECEIPTS = Object.freeze({
-  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze({
-    bytes: 228_873,
-    sha256: "5f3ee52f48e19e8ccefc6f64b07e73e2fe04aa8edb17deb389f0bfbaf4def2d1",
-  }),
-  "tests/reference-host-web-source-audit.test.mjs": Object.freeze({
-    bytes: 70_344,
-    sha256: "268d8ccec567fb05f07a24746d227ddd76d672525768c2b92faff747a870575f",
-  }),
-  "scripts/lib/publisher-publish-result-proof.mjs": Object.freeze({
-    bytes: 49_227,
-    sha256: "11dd9ea20b2607527a4846296b82a12ae6e754bd35884a9211177d5978591649",
-  }),
-  "tests/publisher-publish-result.test.mjs": Object.freeze({
-    bytes: 14_115,
-    sha256: "fae2e18ee715e2eebd2b261627adcb33786eaa90f4c4e33d145cf666a2b4e076",
-  }),
-});
-
-const REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY = Object.freeze({
-  "scripts/lib/reference-host-web-source-audit-proof.mjs": Object.freeze([
-    Object.freeze({
-      task: "M07-T03",
-      bytes: 246_554,
-      sha256: "2bf728948372d8366f7badc7f2d7a36f6b8799b0dcc45baef92c29c90bdd2114",
-    }),
-    Object.freeze({
-      task: "M07-T04",
-      bytes: 252_188,
-      sha256: "94d1d9f02af9d564ebe4dd2c5b36fc0f7bab4d28cad87ca144ddb41756dd1c17",
-    }),
-    Object.freeze({
-      task: "M07-T05",
-      bytes: 255_778,
-      sha256: "63dda01b718dc75feb12e006cece2ada5c75f951f306c3265f3e1dcf745f164f",
-    }),
-    Object.freeze({
-      task: "M07-T06",
-      bytes: 257_943,
-      sha256: "927201fd9e9067a1d03ca1b274724bb065ca97f47755348338a979e4c2f2f74a",
-    }),
-    Object.freeze({
-      task: "M07-T07",
-      bytes: 261_145,
-      sha256: "a9e58b3f4c6aa70421121b285e9c576bc0d71dfcaa1ff90a2c37667b9a86cabe",
-    }),
-    Object.freeze({
-      task: "M07-T08",
-      bytes: 263_857,
-      sha256: "bb8f2dde9a4f63a848003cf7be7b69c1c9681992d56c9a254653dee8cbd7bbe3",
-    }),
-    Object.freeze({
-      task: "M07-T09",
-      bytes: 266_698,
-      sha256: "3e105e24dd9771a578cd43d8e82f884dd0a2ef04fb1dcc7af1d617ed05ec9ffe",
-    }),
-    Object.freeze({
-      task: "M07-T10",
-      bytes: 269_572,
-      sha256: "e7c2497ee3aa128dc3d3c6cb297887a94f8d176549e6a4c205c65beeca9f6db4",
-    }),
-    Object.freeze({
-      task: "M07-T11",
-      bytes: 279_237,
-      sha256: "b7f17df2ac1256217897072ece67e0eb8522521b6e44b80f8d76bce5c01bd08c",
-    }),
-  ]),
-  "tests/reference-host-web-source-audit.test.mjs": Object.freeze([
-    Object.freeze({
-      task: "M07-T03",
-      bytes: 81_283,
-      sha256: "499888c12d43b62d81a0cdaaf0c6248bfb0b7956eca9cce3c478d0ab7f39b5cd",
-    }),
-    Object.freeze({
-      task: "M07-T04",
-      bytes: 83_937,
-      sha256: "1690d26b0a301b2528413b4bcfa9fc2e3f32171db284e6fced82726669c16840",
-    }),
-    Object.freeze({
-      task: "M07-T05",
-      bytes: 85_044,
-      sha256: "4d07f2cd62be4f47fd2bad5090ef620e380abb9f822d20889896fb85e0066979",
-    }),
-    Object.freeze({
-      task: "M07-T06",
-      bytes: 86_740,
-      sha256: "ec7aabd8e3446f58ca397e55f0b4580bee193e21e692c46fe89c3f4a60902ac9",
-    }),
-    Object.freeze({
-      task: "M07-T07",
-      bytes: 87_748,
-      sha256: "62103dfff978ce2a40e5e46875e0b4087d8998d38efd8100da6e009684abd37f",
-    }),
-    Object.freeze({
-      task: "M07-T08",
-      bytes: 89_057,
-      sha256: "9442048b8b96f6aec06136b489dc08e01f159c46609eeb225aa2f949c98e3521",
-    }),
-    Object.freeze({
-      task: "M07-T09",
-      bytes: 90_209,
-      sha256: "34427c9fe31f3ec6bca14a661d5ea092058aa2e4d24d93a33e551a604e9bc162",
-    }),
-    Object.freeze({
-      task: "M07-T10",
-      bytes: 91_297,
-      sha256: "d7801ea603f72435cf07d55ad74cebf4ac62b0f95128d728d28200cc225afc0e",
-    }),
-    Object.freeze({
-      task: "M07-T11",
-      bytes: 93_464,
-      sha256: "888c1cf5235340bd5e7a27229eedb74250bfefe054078ecd8956e233ce74de70",
-    }),
-  ]),
-});
 
 const EXPECTED_TEST_INVENTORY = Object.freeze({
   packageTests: 13,
@@ -457,45 +316,16 @@ const BUILD_OPTION_KEYS = new Set([
   "snapshotRoot",
   "sourceLimits",
   "trace",
-  "trackedFileBytes",
   "verifySnapshot",
   "workspacePackage",
 ]);
-const TRACKED_FILE_OVERRIDE_PATHS = new Set(
-  Object.keys(REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY),
-);
-const SAFE_ARRAY_BUFFER_IS_VIEW = ArrayBuffer.isView;
-const SAFE_ARRAY_BUFFER_PROTOTYPE = ArrayBuffer.prototype;
 const SAFE_ARRAY_IS_ARRAY = Array.isArray;
-const SAFE_BUFFER_FROM = Buffer.from.bind(Buffer);
-const SAFE_NUMBER_IS_SAFE_INTEGER = Number.isSafeInteger;
 const SAFE_OBJECT_CREATE = Object.create;
-const SAFE_OBJECT_ENTRIES = Object.entries;
 const SAFE_OBJECT_FREEZE = Object.freeze;
 const SAFE_OBJECT_GET_OWN_PROPERTY_DESCRIPTOR = Object.getOwnPropertyDescriptor;
 const SAFE_OBJECT_GET_PROTOTYPE_OF = Object.getPrototypeOf;
-const SAFE_OBJECT_HAS_OWN = Object.hasOwn;
 const SAFE_OBJECT_PROTOTYPE = Object.prototype;
-const SAFE_REFLECT_APPLY = Reflect.apply;
 const SAFE_REFLECT_OWN_KEYS = Reflect.ownKeys;
-const SAFE_UINT8_ARRAY = Uint8Array;
-const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
-const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(
-  TYPED_ARRAY_PROTOTYPE,
-  "buffer",
-)?.get;
-const TYPED_ARRAY_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
-  TYPED_ARRAY_PROTOTYPE,
-  "byteLength",
-)?.get;
-const TYPED_ARRAY_BYTE_OFFSET_GETTER = Object.getOwnPropertyDescriptor(
-  TYPED_ARRAY_PROTOTYPE,
-  "byteOffset",
-)?.get;
-const TYPED_ARRAY_TAG_GETTER = Object.getOwnPropertyDescriptor(
-  TYPED_ARRAY_PROTOTYPE,
-  Symbol.toStringTag,
-)?.get;
 
 function captureOwnDataRecord(value, allowedKeys, label) {
   let validRecord = false;
@@ -535,52 +365,9 @@ function captureOwnDataRecord(value, allowedKeys, label) {
   return captured;
 }
 
-function captureExactBytes(value, label) {
-  try {
-    if (
-      !SAFE_ARRAY_BUFFER_IS_VIEW(value) ||
-      TYPED_ARRAY_BUFFER_GETTER === undefined ||
-      TYPED_ARRAY_BYTE_LENGTH_GETTER === undefined ||
-      TYPED_ARRAY_BYTE_OFFSET_GETTER === undefined ||
-      TYPED_ARRAY_TAG_GETTER === undefined
-    ) {
-      throw new TypeError();
-    }
-    const tag = SAFE_REFLECT_APPLY(TYPED_ARRAY_TAG_GETTER, value, []);
-    const buffer = SAFE_REFLECT_APPLY(TYPED_ARRAY_BUFFER_GETTER, value, []);
-    const byteLength = SAFE_REFLECT_APPLY(TYPED_ARRAY_BYTE_LENGTH_GETTER, value, []);
-    const byteOffset = SAFE_REFLECT_APPLY(TYPED_ARRAY_BYTE_OFFSET_GETTER, value, []);
-    if (
-      tag !== "Uint8Array" ||
-      SAFE_OBJECT_GET_PROTOTYPE_OF(buffer) !== SAFE_ARRAY_BUFFER_PROTOTYPE ||
-      !SAFE_NUMBER_IS_SAFE_INTEGER(byteLength) ||
-      !SAFE_NUMBER_IS_SAFE_INTEGER(byteOffset) ||
-      byteLength < 0 ||
-      byteOffset < 0
-    ) {
-      throw new TypeError();
-    }
-    return SAFE_BUFFER_FROM(new SAFE_UINT8_ARRAY(buffer, byteOffset, byteLength));
-  } catch {
-    fail("PUBLISHER_OPTIONS_INVALID", `${label} must be exact unshared Uint8Array bytes.`);
-  }
-}
-
 function captureBuildOptions(value) {
   if (value === undefined) return SAFE_OBJECT_FREEZE(SAFE_OBJECT_CREATE(null));
   const captured = captureOwnDataRecord(value, BUILD_OPTION_KEYS, "Evidence options");
-  if (captured.trackedFileBytes !== undefined) {
-    const rawOverrides = captureOwnDataRecord(
-      captured.trackedFileBytes,
-      TRACKED_FILE_OVERRIDE_PATHS,
-      "trackedFileBytes",
-    );
-    const overrides = SAFE_OBJECT_CREATE(null);
-    for (const [relativePath, bytes] of SAFE_OBJECT_ENTRIES(rawOverrides)) {
-      overrides[relativePath] = captureExactBytes(bytes, `trackedFileBytes.${relativePath}`);
-    }
-    captured.trackedFileBytes = SAFE_OBJECT_FREEZE(overrides);
-  }
   return SAFE_OBJECT_FREEZE(captured);
 }
 
@@ -1347,63 +1134,73 @@ async function readVerifiedProductionSource() {
   return Object.freeze({ files: VERIFIED_PRODUCTION_PATHS, text: texts.join("\n") });
 }
 
-async function trackedFileEvidence(overrides = SAFE_OBJECT_FREEZE(SAFE_OBJECT_CREATE(null))) {
-  return Promise.all(
-    TRACKED_EVIDENCE_PATHS.map(async (relativePath) => {
-      const bytes = SAFE_OBJECT_HAS_OWN(overrides, relativePath)
-        ? SAFE_BUFFER_FROM(overrides[relativePath])
-        : await readRegularFile(
-            path.join(WORKSPACE_ROOT, relativePath),
-            "PUBLISHER_TRACKED_FILE_MISSING",
-            "PUBLISHER_TRACKED_FILE_UNSAFE",
-          );
-      const actual = SAFE_OBJECT_FREEZE({
-        bytes: bytes.byteLength,
-        sha256: sha256(bytes),
-      });
-      const historical = HISTORICAL_TRACKED_RECEIPTS[relativePath];
-      const reviewedHistory = REVIEWED_G05_COMPATIBILITY_RECEIPT_HISTORY[relativePath];
-      let receiptIsReviewed = historical !== undefined && isDeepStrictEqual(actual, historical);
-      if (reviewedHistory !== undefined && historical === undefined) {
-        fail(
-          "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
-          "A reviewed G05 successor lost its task-time historical projection.",
-          { path: relativePath },
-        );
-      }
-      if (!receiptIsReviewed && reviewedHistory !== undefined) {
-        const latestReviewed = reviewedHistory[reviewedHistory.length - 1];
-        if (latestReviewed === undefined) {
-          fail(
-            "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
-            "A reviewed G05 successor history lost its exact latest receipt.",
-            { path: relativePath },
-          );
-        }
-        receiptIsReviewed =
-          actual.bytes === latestReviewed.bytes && actual.sha256 === latestReviewed.sha256;
-      }
-      if (reviewedHistory !== undefined && !receiptIsReviewed) {
-        fail(
-          "PUBLISHER_G05_COMPATIBILITY_READER_DRIFT",
-          "The current G05 compatibility reader differs from its task-time and latest reviewed receipt.",
-          {
-            path: relativePath,
-            actual,
-            historical,
-            reviewedHistory,
-          },
-        );
-      }
-      if (historical !== undefined) {
-        return SAFE_OBJECT_FREEZE({ path: relativePath, ...historical });
-      }
-      return SAFE_OBJECT_FREEZE({
-        path: relativePath,
-        ...actual,
-      });
-    }),
-  );
+async function authenticatedFrozenArtifactProjection() {
+  const authority = await readCheckpointedFrozenArtifact("M06-T01");
+  if (authority.path !== ARTIFACT_RELATIVE_PATH) {
+    fail("PUBLISHER_ARTIFACT_DRIFT", "The checkpoint-authenticated M06-T01 path drifted.");
+  }
+  let artifact;
+  try {
+    artifact = JSON.parse(Buffer.from(authority.bytes).toString("utf8"));
+  } catch {
+    fail("PUBLISHER_ARTIFACT_DRIFT", "The checkpoint-authenticated M06-T01 artifact is invalid.");
+  }
+  const trackedFiles = artifact?.evidence?.trackedFiles;
+  const compatibilityOwnershipPaths = artifact?.prerequisite?.currentCompatibilityOwnershipPaths;
+  if (
+    artifact?.schemaVersion !== 1 ||
+    artifact.task !== "M06-T01" ||
+    artifact.result !== "PASS" ||
+    artifact.profile !== "desen-publisher-publish-result-v1" ||
+    !Array.isArray(trackedFiles) ||
+    trackedFiles.length === 0 ||
+    !Array.isArray(compatibilityOwnershipPaths) ||
+    compatibilityOwnershipPaths.length === 0
+  ) {
+    fail(
+      "PUBLISHER_ARTIFACT_DRIFT",
+      "The checkpoint-authenticated M06-T01 artifact identity or projection drifted.",
+    );
+  }
+  const seen = new Set();
+  const receipts = trackedFiles.map((receipt) => {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      Array.isArray(receipt) ||
+      typeof receipt.path !== "string" ||
+      receipt.path.length === 0 ||
+      seen.has(receipt.path) ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes <= 0 ||
+      typeof receipt.sha256 !== "string" ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256)
+    ) {
+      fail("PUBLISHER_ARTIFACT_DRIFT", "An authenticated M06-T01 tracked receipt drifted.");
+    }
+    seen.add(receipt.path);
+    return SAFE_OBJECT_FREEZE({
+      path: receipt.path,
+      bytes: receipt.bytes,
+      sha256: receipt.sha256,
+    });
+  });
+  const ownershipPaths = compatibilityOwnershipPaths.map((relativePath) => {
+    if (typeof relativePath !== "string" || !seen.has(relativePath)) {
+      fail(
+        "PUBLISHER_ARTIFACT_DRIFT",
+        "An authenticated M06-T01 compatibility ownership path drifted.",
+      );
+    }
+    return relativePath;
+  });
+  if (new Set(ownershipPaths).size !== ownershipPaths.length) {
+    fail("PUBLISHER_ARTIFACT_DRIFT", "M06-T01 compatibility ownership paths are not unique.");
+  }
+  return SAFE_OBJECT_FREEZE({
+    trackedFiles: SAFE_OBJECT_FREEZE(receipts),
+    compatibilityOwnershipPaths: SAFE_OBJECT_FREEZE(ownershipPaths),
+  });
 }
 
 function verifyPrerequisite(bytes) {
@@ -1456,6 +1253,7 @@ function exactDocumentationPin(text, heading, artifactSha256, code, suffix = "")
 /** Builds deterministic M06-T01 evidence in memory. */
 export async function buildPublisherPublishResultEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   if (options.verifySnapshot !== false) {
     await verifyProtocolSnapshot(options.snapshotRoot ?? DEFAULT_SNAPSHOT_ROOT);
   }
@@ -1568,7 +1366,7 @@ export async function buildPublisherPublishResultEvidence(rawOptions = undefined
       path: PREREQUISITE_RELATIVE_PATH,
       sha256: PREREQUISITE_SHA256,
       historicalArtifactRewritten: false,
-      currentCompatibilityOwnershipPaths: G05_COMPATIBILITY_OWNERSHIP_PATHS,
+      currentCompatibilityOwnershipPaths: frozenArtifact.compatibilityOwnershipPaths,
     },
     frozenProtocol: {
       sourceCommit: EXPECTED_PROTOCOL_SNAPSHOT.sourceCommit,
@@ -1615,7 +1413,7 @@ export async function buildPublisherPublishResultEvidence(rawOptions = undefined
     },
     evidence: {
       ...testInventory,
-      trackedFiles: await trackedFileEvidence(options.trackedFileBytes),
+      trackedFiles: frozenArtifact.trackedFiles,
       commands: [
         "pnpm verify:publisher-publish-result",
         "pnpm test:publisher-publish-result",

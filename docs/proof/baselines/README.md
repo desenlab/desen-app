@@ -34,5 +34,12 @@ authority. It also pins append-only reader checkpoint sequence 22, which preserv
 all 18 frozen artifacts, and all 36 reader identities while resealing only indexes
 `[8, 10, 11, 12, 14]`.
 
+`i07-04-affected-selector-promotion.json` records the independently authenticated 20/20 hosted
+campaign with zero false negatives. Its fixed historical campaign digest binds every run, job,
+revision, receipt, threshold, controller, and decision identity; its live authorities prove the
+conservative selector transition and fail-closed required runner. The file currently records
+`PENDING_HOSTED_CUTOVER`: it authorizes no claim that the cleanup commit has passed or that G07 is
+closed until the follow-up hosted evidence is written.
+
 Evidence files must state the command, scope, source commit when one exists, result, and known
 limitations. Generated proof artifacts additionally record SHA-256 hashes at their owning task.

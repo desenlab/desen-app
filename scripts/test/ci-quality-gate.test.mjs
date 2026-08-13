@@ -98,6 +98,8 @@ test("the current repository exactly matches the reviewed live proof inventory",
     proofCount: 71,
     verifierCount: 71,
     rootTestCount: 71,
+    ciContractScriptCount: 5,
+    ciContractScriptSha256: "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014",
     legacyPrerequisiteCount: 479,
     legacyPrerequisiteSha256: "4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e",
     legacyLeafInvocationCount: 3113,
@@ -154,6 +156,37 @@ test("inventory validation rejects verifier and test wiring drift", async () => 
   testInventory.packageJson.scripts["test:protocol-snapshot"] =
     "node --test tests/protocol-types.test.mjs";
   assert.throws(() => validateProofInventory(testInventory), QualityGateError);
+});
+
+test("inventory validation pins promoted CI entry points and their focused contracts", async () => {
+  const expectedScripts = {
+    "ci:required": "node scripts/ci/run-required-affected-quality-gate.mjs",
+    "test:ci-quality-gate": "node --test scripts/test/ci-quality-gate.test.mjs",
+    "verify:affected-selector-promotion-evidence":
+      "node scripts/ci/verify-affected-selector-promotion-evidence.mjs",
+    "test:affected-selector-promotion-evidence":
+      "node --test scripts/ci/test/affected-selector-promotion-evidence.test.mjs",
+    "test:required-affected-quality-gate":
+      "node --test scripts/ci/test/required-affected-quality-gate.test.mjs",
+  };
+  const inventory = await currentInventory();
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.keys(expectedScripts).map((name) => [name, inventory.packageJson.scripts[name]]),
+    ),
+    expectedScripts,
+  );
+
+  for (const name of Object.keys(expectedScripts)) {
+    const drifted = await currentInventory();
+    drifted.packageJson = clone(drifted.packageJson);
+    drifted.packageJson.scripts[name] += " --unreviewed";
+    assert.throws(
+      () => validateProofInventory(drifted),
+      (error) =>
+        error instanceof QualityGateError && /CI contract package script/u.test(error.message),
+    );
+  }
 });
 
 test("inventory validation rejects added, removed, or unclassified legacy prerequisites", async () => {

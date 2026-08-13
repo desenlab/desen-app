@@ -50,7 +50,12 @@ const EVIDENCE_KEYS = SAFE_OBJECT_FREEZE([
   "hostedRunUrl",
 ]);
 const OPTION_KEYS = SAFE_OBJECT_FREEZE(["workspaceRoot"]);
-const ALLOWED_STATUSES = SAFE_OBJECT_FREEZE(["OPEN", "READY_FOR_REMOVAL", "CLOSED"]);
+const ALLOWED_STATUSES = SAFE_OBJECT_FREEZE([
+  "OPEN",
+  "READY_FOR_REMOVAL",
+  "REMOVED_PENDING_HOSTED_PROOF",
+  "CLOSED",
+]);
 const TASK_STATUSES = SAFE_OBJECT_FREEZE(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE"]);
 
 function target(relativePath, symbols) {
@@ -1358,11 +1363,11 @@ function normalizeTarget(rawTarget, expected, entryId, targetIndex) {
 }
 
 function normalizeEvidence(rawEvidence, status, entryId) {
-  if (status === "OPEN") {
+  if (status === "OPEN" || status === "REMOVED_PENDING_HOSTED_PROOF") {
     if (rawEvidence !== null) {
       fail(
         "INFRASTRUCTURE_DEBT_EVIDENCE_INVALID",
-        `${entryId} is OPEN and therefore must carry null evidence.`,
+        `${entryId} is ${status} and therefore must carry null evidence.`,
         { id: entryId },
       );
     }
@@ -2094,6 +2099,13 @@ function assertLifecycleCeilings(entries, statuses) {
         { id: entry.id, removalOwner: entry.removalOwner, removalOwnerStatus: ownerStatus },
       );
     }
+    if (entry.status === "REMOVED_PENDING_HOSTED_PROOF" && ownerStatus !== "IN_PROGRESS") {
+      fail(
+        "INFRASTRUCTURE_DEBT_LIFECYCLE_INVALID",
+        `${entry.id} may be REMOVED_PENDING_HOSTED_PROOF only while its removal owner is active.`,
+        { id: entry.id, removalOwner: entry.removalOwner, removalOwnerStatus: ownerStatus },
+      );
+    }
     if (entry.status === "CLOSED" && ownerStatus !== "DONE") {
       fail(
         "INFRASTRUCTURE_DEBT_LIFECYCLE_INVALID",
@@ -2102,7 +2114,8 @@ function assertLifecycleCeilings(entries, statuses) {
       );
     }
     if (
-      (entry.status === "OPEN" && ownerStatus === "DONE") ||
+      (["OPEN", "READY_FOR_REMOVAL", "REMOVED_PENDING_HOSTED_PROOF"].includes(entry.status) &&
+        ownerStatus === "DONE") ||
       (entry.status !== "CLOSED" && deadlineStatus === "DONE")
     ) {
       fail(
@@ -2252,7 +2265,10 @@ export async function verifyInfrastructureDebt(options = {}) {
     let targetIndex = 0;
     while (targetIndex < entry.targets.length) {
       const targetEntry = entry.targets[targetIndex];
-      const allowMissing = entry.status === "CLOSED";
+      const referencesMustBeAbsent = ["REMOVED_PENDING_HOSTED_PROOF", "CLOSED"].includes(
+        entry.status,
+      );
+      const allowMissing = referencesMustBeAbsent;
       const bytes = await readSecureFile(
         workspaceRoot,
         canonicalRoot,
@@ -2262,7 +2278,7 @@ export async function verifyInfrastructureDebt(options = {}) {
       );
       if (bytes !== undefined) {
         assertTrackedRegular(tracked, targetEntry.path);
-        if (entry.status === "CLOSED") {
+        if (referencesMustBeAbsent) {
           assertNoClosedReferences(
             entry,
             decodeUtf8(bytes, `${entry.id} cleanup target`),
@@ -2278,7 +2294,7 @@ export async function verifyInfrastructureDebt(options = {}) {
       } else if (tracked.has(targetEntry.path)) {
         fail(
           "INFRASTRUCTURE_DEBT_TRACKED_PATH_INVALID",
-          `Closed debt path "${targetEntry.path}" is absent from the worktree but remains in the Git index.`,
+          `Removed debt path "${targetEntry.path}" is absent from the worktree but remains in the Git index.`,
           { id: entry.id, path: targetEntry.path, mode: tracked.get(targetEntry.path) },
         );
       }
@@ -2287,7 +2303,12 @@ export async function verifyInfrastructureDebt(options = {}) {
     entryIndex += 1;
   }
 
-  const statusCounts = { OPEN: 0, READY_FOR_REMOVAL: 0, CLOSED: 0 };
+  const statusCounts = {
+    OPEN: 0,
+    READY_FOR_REMOVAL: 0,
+    REMOVED_PENDING_HOSTED_PROOF: 0,
+    CLOSED: 0,
+  };
   let countIndex = 0;
   while (countIndex < manifest.entries.length) {
     statusCounts[manifest.entries[countIndex].status] += 1;

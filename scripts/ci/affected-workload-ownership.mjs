@@ -82,16 +82,16 @@ const CI_POLICY_EXACT_PATHS = new Set([
 ]);
 const PROJECT_DOCUMENTATION_ROOT_PATHS = new Set(["PROJECT-STATUS.md", "README.md"]);
 
-/** Reviewed count of tracked paths after the M07-T11 proof unit joined the selector authority. */
-export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1019;
+/** Reviewed count after the I07-04 promotion evidence authority joined the tracked tree. */
+export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1023;
 
 /** Reviewed SHA-256 of the ordered complete tracked-path set. */
 export const EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256 =
-  "d752922fa22db81f3f76fc93d4562a17b65589e614f3281844287aa8d6656679";
+  "65fe59b176e8f0a7bbaef8fdd1b3c13d09057fff3a3019fd445bce9e9fb801c4";
 
 /** Reviewed SHA-256 of every exact path, category, disposition, and proof owner. */
 export const EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256 =
-  "729b84436be134709db7bf8793e232bee4dab4a27efcb61e61cd0afeaed83ee8";
+  "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8";
 
 /** Exact number of verifier/root-test inputs owned by the current 71 proof units. */
 export const EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT = 142;

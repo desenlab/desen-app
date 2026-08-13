@@ -380,6 +380,24 @@ const EXPECTED_CHECK_SUFFIX = Object.freeze([
   "pnpm test",
   "pnpm boundaries",
 ]);
+const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
+  [
+    ["ci:required", "node scripts/ci/run-required-affected-quality-gate.mjs"],
+    ["test:ci-quality-gate", "node --test scripts/test/ci-quality-gate.test.mjs"],
+    [
+      "verify:affected-selector-promotion-evidence",
+      "node scripts/ci/verify-affected-selector-promotion-evidence.mjs",
+    ],
+    [
+      "test:affected-selector-promotion-evidence",
+      "node --test scripts/ci/test/affected-selector-promotion-evidence.test.mjs",
+    ],
+    [
+      "test:required-affected-quality-gate",
+      "node --test scripts/ci/test/required-affected-quality-gate.test.mjs",
+    ],
+  ].map(([name, command]) => Object.freeze({ name, command })),
+);
 
 const LEGACY_PREREQUISITE_SHA256 =
   "4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e";
@@ -387,6 +405,8 @@ const LEGACY_LEAF_INVOCATION_SHA256 =
   "bac4fe3874e13ffafde163e8a396d3d4156e9cd583b0d66ca634bfb3e9ab308c";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
   "6838b57e69d78fad6c0de08a9ffb7b9530dc5c50bc17ee2779e949cf86985fce";
+const CI_CONTRACT_SCRIPT_SHA256 =
+  "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const QUALITY_GATE_PLAN_SHA256 = "8a08431ea00f10137c5d5e9cc69484d1aed5f7f9ba7370cd74af0e447e0e8e75";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
@@ -487,6 +507,27 @@ function assertUnique(values, label) {
       duplicates: [...new Set(duplicates)],
     });
   }
+}
+
+function validateCiContractScripts(scripts) {
+  const projection = EXPECTED_CI_CONTRACT_SCRIPTS.map(({ name, command }) => {
+    const actual = scripts[name];
+    if (actual !== command) {
+      throw new QualityGateError(
+        `The CI contract package script ${name} drifted from the frozen inventory.`,
+        { expected: command, actual },
+      );
+    }
+    return { name, command: actual };
+  });
+  const sha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
+  if (sha256 !== CI_CONTRACT_SCRIPT_SHA256) {
+    throw new QualityGateError("The reviewed CI contract package-script inventory drifted.", {
+      expected: CI_CONTRACT_SCRIPT_SHA256,
+      actual: sha256,
+    });
+  }
+  return { count: projection.length, sha256 };
 }
 
 function parseVitestRun(script, label) {
@@ -694,6 +735,7 @@ export function validateProofInventory({
   );
   const proofIndexById = new Map(proofIds.map((id, index) => [id, index]));
   const legacyPrerequisiteInventory = [];
+  const ciContractScripts = validateCiContractScripts(scripts);
 
   assertUnique(proofIds, "Proof ids");
   assertUnique(expectedVerifierFiles, "Proof verifier files");
@@ -851,6 +893,8 @@ export function validateProofInventory({
     proofCount: proofIds.length,
     verifierCount: verifierFiles.length,
     rootTestCount: rootTestFiles.length,
+    ciContractScriptCount: ciContractScripts.count,
+    ciContractScriptSha256: ciContractScripts.sha256,
     legacyPrerequisiteCount: legacyPrerequisiteInventory.reduce(
       (count, entry) => count + entry.verify.length + entry.test.length,
       0,

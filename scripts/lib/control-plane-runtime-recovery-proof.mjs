@@ -10,6 +10,10 @@ import { promisify, types as utilTypes } from "node:util";
 import { format } from "prettier";
 import ts from "typescript";
 
+import {
+  readCheckpointedFrozenArtifact,
+  verifyProofReaderCheckpoints,
+} from "../ci/proof-reader-checkpoints.mjs";
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -84,72 +88,6 @@ const EXPECTED_IMPLEMENTATION_SEMANTIC_SHA256 = Object.freeze({
 const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
   [APP_RECOVERY_TEST]: "904b0495417f5978c4eb71f3d3be18c5cab3dc9e9027b6e37721d4a630baadde",
   [APP_RECOVERY_TYPE_TEST]: "0760afa5ac944fbfcb5b5e46fffe416286214d7dc8c0111058c276de31b8cf52",
-  [ROOT_TEST]: "b97e7991e0ac20e7232112594228fdd829a536e81d16d06fd3f909e7e3a02492",
-});
-const M07_T09_TEST_AUTHORITY_RECEIPTS = Object.freeze({
-  [ROOT_TEST]: Object.freeze({
-    bytes: 26_432,
-    sha256: "d1c898e91d695972c6cdc14e9d5eb138c6655e43a5cbefb5c32bd819748a9eeb",
-  }),
-});
-const M07_T10_TEST_AUTHORITY_RECEIPTS = Object.freeze({
-  [ROOT_TEST]: Object.freeze({
-    bytes: 28_220,
-    sha256: "968dadebad1b4f07ce9d6b277988788a07cb0cdeea06a1cc598a0d1e25f07dbc",
-  }),
-});
-const M07_T11_TEST_AUTHORITY_RECEIPTS = Object.freeze({
-  [ROOT_TEST]: Object.freeze({
-    bytes: 28_570,
-    sha256: "5c0f08c766adf6cb45c68e8d3d406d964c98db3f4c3b662ce0e6319b90815d8e",
-  }),
-});
-const EXPECTED_REGISTRATION_AUTHORITY_SHA256 = Object.freeze({
-  [CI_SOURCE]: "c0312d1874917092f4300b7bdb789bc2a35a2d2f973a0bb214b551d86916fabe",
-  [CI_INVENTORY]: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
-  [SHARED_STATE_AUTHORITY]: "a6aab2fbefa3392b8614c92799d75429ca5b1b6f812c45b73cb7167fc4be9f16",
-});
-const M07_T09_REGISTRATION_AUTHORITY_RECEIPTS = Object.freeze({
-  [CI_SOURCE]: Object.freeze({
-    bytes: 48_058,
-    sha256: "cae746df78f6036db3b1bf092ef03f367994a27316757ee52d86b7607a46423a",
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    bytes: 46_343,
-    sha256: "554584fff74af5d2ba1e268b18bd901c8f228cdffe046789fbd02f1f9da5f69e",
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    bytes: 47_479,
-    sha256: "9b15cef3b2d795c268945c2f4bee670c037878bd43967c1ce71a41342d463140",
-  }),
-});
-const M07_T10_REGISTRATION_AUTHORITY_RECEIPTS = Object.freeze({
-  [CI_SOURCE]: Object.freeze({
-    bytes: 48_249,
-    sha256: "fdb79dcf8e5fa46e6a22e07e04fc1623214ea0af164b3dde2d876531479177f3",
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    bytes: 46_524,
-    sha256: "3b411b2866820003896a7fe6e41fb5fca2db84300687e07d10ab92ce5fdb407f",
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    bytes: 47_816,
-    sha256: "f7827f300a9a53edc6a0c41bf1246df53d5ab21c4cd4e67c6452a2cb95c74e99",
-  }),
-});
-const M07_T11_REGISTRATION_AUTHORITY_RECEIPTS = Object.freeze({
-  [CI_SOURCE]: Object.freeze({
-    bytes: 48_440,
-    sha256: "68fcfacafb2765db2b60b717089a0c1c237f28efb32a5512b4fe38e986f7d459",
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    bytes: 46_705,
-    sha256: "c290e7fbcf0adf9d56efa039209e140fb56e31a7a8e2b84e90b2e73330031805",
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    bytes: 51_643,
-    sha256: "4f17d0d68f742a6c56fc10e39dd1f47f0111ed03b0e2d45a5d75b5f07b804820",
-  }),
 });
 const EXPECTED_RUNTIME_RECOVERY_SUITE_NAME = "M07-T08 restart recovery";
 const EXPECTED_RUNTIME_PUBLIC_MODULE_KEYS = Object.freeze([
@@ -256,143 +194,6 @@ const TRACKED_TASK_FILES = Object.freeze([
   ATOMIC_WRITER,
   ROOT_TEST,
 ]);
-
-const M07_T09_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 2_232,
-      sha256: "b228b200dafda1d319429376b9cc6456fadd4a3db865269ec8c2675eb0e60e8c",
-    }),
-    successor: Object.freeze({
-      bytes: 2_319,
-      sha256: "5c4495f06ecb1394fee2c14c2e57bc1bf76fe9a99ee1cb56c0ce4ff0874388c3",
-    }),
-  }),
-  [ADR]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 6_844,
-      sha256: "1d9769bfb0d8a649388b1c91f8ccb079b963e919ff23995d88e1d9910ce4e330",
-    }),
-    successor: Object.freeze({
-      bytes: 6_902,
-      sha256: "c49ad785bf0018ee93115b18a31644505ac97cdc69b8f177b6843ee21f77a98a",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 63_983,
-      sha256: "4f9c7431ba3df1be3e69bfd092a24421c14ed4a911baed2edbbb395aacca1cc8",
-    }),
-    successor: Object.freeze({
-      bytes: 65_109,
-      sha256: "4df33d2b8b54754c8b4686c52ae9566d29c3979a15b1c4ece9845c7c0c8ea2c2",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 47_870,
-      sha256: "c0312d1874917092f4300b7bdb789bc2a35a2d2f973a0bb214b551d86916fabe",
-    }),
-    successor: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[CI_SOURCE],
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 46_165,
-      sha256: "00b6b4601e526a9d71465700e5f50d68c84265c211de1ed7f5e9ccee8670b62b",
-    }),
-    successor: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[CI_INVENTORY],
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 46_971,
-      sha256: "a6aab2fbefa3392b8614c92799d75429ca5b1b6f812c45b73cb7167fc4be9f16",
-    }),
-    successor: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[SHARED_STATE_AUTHORITY],
-  }),
-});
-
-const M07_T10_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [APP_PACKAGE]: Object.freeze({
-    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[APP_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 2_408,
-      sha256: "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2",
-    }),
-  }),
-  [APP_SQLITE]: Object.freeze({
-    historical: Object.freeze({
-      bytes: 22_508,
-      sha256: "a97191a6d508d4ff3c26e0f691e52b9c9215b4ecb69a014da4ecd03086a3beeb",
-    }),
-    successor: Object.freeze({
-      bytes: 23_137,
-      sha256: "cec7d1437d7e222facdc5681ae720ec6bc3b77fe3f9f5fac7493481f868be164",
-    }),
-  }),
-  [ADR]: Object.freeze({
-    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[ADR].successor,
-    successor: Object.freeze({
-      bytes: 6_918,
-      sha256: "14d5c1e440b83771414663fdd4cb45cb6b95cb0e6598f2465b55df121f2692d8",
-    }),
-  }),
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: M07_T09_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 66_267,
-      sha256: "c0029dc0bc1057f2130a93220479618eee018777d2f1fcc315e2251d829b0e02",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[CI_SOURCE],
-    successor: M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[CI_SOURCE],
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[CI_INVENTORY],
-    successor: M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[CI_INVENTORY],
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    historical: M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[SHARED_STATE_AUTHORITY],
-    successor: M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[SHARED_STATE_AUTHORITY],
-  }),
-});
-const M07_T11_TRACKED_RECEIPT_BRIDGE = Object.freeze({
-  [ROOT_PACKAGE]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[ROOT_PACKAGE].successor,
-    successor: Object.freeze({
-      bytes: 68_073,
-      sha256: "110ffffddf7677f6a578c44a0fba31fa15cc7bf08c8b66224cb0ef47e49b4d2b",
-    }),
-  }),
-  [CI_SOURCE]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_SOURCE].successor,
-    successor: M07_T11_REGISTRATION_AUTHORITY_RECEIPTS[CI_SOURCE],
-  }),
-  [CI_INVENTORY]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[CI_INVENTORY].successor,
-    successor: M07_T11_REGISTRATION_AUTHORITY_RECEIPTS[CI_INVENTORY],
-  }),
-  [SHARED_STATE_AUTHORITY]: Object.freeze({
-    historical: M07_T10_TRACKED_RECEIPT_BRIDGE[SHARED_STATE_AUTHORITY].successor,
-    successor: M07_T11_REGISTRATION_AUTHORITY_RECEIPTS[SHARED_STATE_AUTHORITY],
-  }),
-});
-
-// DEBT-I07-016 retains the historical diagnostic marker "reviewed M07-T09 CI registration set"
-// until I07-04 removes the M07-T09 reader bridge. Runtime failures use the current T10 wording.
-// A reader cannot embed its own current digest without recursion. The append-only proof-reader
-// checkpoint authenticates current reader bytes; this projection preserves the frozen T08 receipt.
-const M07_T09_READER_RECEIPT_PROJECTION = Object.freeze({
-  [PROOF_LIBRARY]: Object.freeze({
-    bytes: 84_219,
-    sha256: "08f143107430dde90cf1865c21d7ce1ec854897b0c1c4306b96525bdd0d18daa",
-  }),
-  [ROOT_TEST]: Object.freeze({
-    bytes: 24_939,
-    sha256: "b97e7991e0ac20e7232112594228fdd829a536e81d16d06fd3f909e7e3a02492",
-  }),
-});
-
 const DISTRIBUTION_FILES = Object.freeze([
   `${APP_DIRECTORY}/dist/index.js`,
   `${APP_DIRECTORY}/dist/index.d.ts`,
@@ -797,6 +598,46 @@ function parseJsonBytes(bytes, label) {
   }
 }
 
+function frozenReceiptMap(receipts, expectedPaths, label) {
+  const paths = [...new Set(expectedPaths)].sort();
+  if (!Array.isArray(receipts) || receipts.length !== paths.length) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} receipt inventory drifted.`);
+  }
+  const byPath = new Map();
+  for (const receipt of receipts) {
+    if (
+      receipt === null ||
+      typeof receipt !== "object" ||
+      Array.isArray(receipt) ||
+      typeof receipt.path !== "string" ||
+      !Number.isSafeInteger(receipt.bytes) ||
+      receipt.bytes <= 0 ||
+      !/^[0-9a-f]{64}$/u.test(receipt.sha256) ||
+      byPath.has(receipt.path)
+    ) {
+      fail("ARTIFACT_DRIFT", `The authenticated ${label} contains an invalid receipt.`);
+    }
+    byPath.set(receipt.path, Object.freeze({ bytes: receipt.bytes, sha256: receipt.sha256 }));
+  }
+  if (JSON.stringify([...byPath.keys()].sort()) !== JSON.stringify(paths)) {
+    fail("ARTIFACT_DRIFT", `The authenticated ${label} path set drifted.`);
+  }
+  return byPath;
+}
+
+async function authenticatedFrozenArtifactProjection() {
+  await verifyProofReaderCheckpoints();
+  const frozen = await readCheckpointedFrozenArtifact("M07-T08");
+  if (frozen.path !== ARTIFACT) {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T08 artifact path drifted.");
+  }
+  const artifact = parseJsonBytes(frozen.bytes, ARTIFACT);
+  if (artifact.schemaVersion !== 1 || artifact.task !== "M07-T08" || artifact.result !== "PASS") {
+    fail("ARTIFACT_DRIFT", "The checkpoint-authenticated M07-T08 artifact identity drifted.");
+  }
+  return artifact;
+}
+
 async function prerequisiteReceipts(overrides) {
   const receipts = [];
   for (const pin of CONTROL_PLANE_RUNTIME_RECOVERY_PREREQUISITE_PINS) {
@@ -820,76 +661,26 @@ async function prerequisiteReceipts(overrides) {
   return deepFreeze(receipts);
 }
 
-async function fileReceipts(paths, overrides) {
+async function fileReceipts(paths, overrides, frozenReceipts) {
+  const projection =
+    frozenReceipts === undefined
+      ? undefined
+      : frozenReceiptMap(frozenReceipts, paths, "tracked-file");
   return deepFreeze(
     await Promise.all(
       [...paths].sort().map(async (relativePath) => {
         const bytes = await workspaceBytes(relativePath, overrides);
-        return { path: relativePath, bytes: bytes.byteLength, sha256: sha256(bytes) };
+        const frozenReceipt = Object.hasOwn(overrides, relativePath)
+          ? undefined
+          : projection?.get(relativePath);
+        return {
+          path: relativePath,
+          bytes: frozenReceipt?.bytes ?? bytes.byteLength,
+          sha256: frozenReceipt?.sha256 ?? sha256(bytes),
+        };
       }),
     ),
   );
-}
-
-async function trackedFileReceipts(overrides) {
-  let generationMask = 0b1111;
-  const receipts = [];
-  for (const relativePath of [...TRACKED_TASK_FILES].sort()) {
-    const bytes = await workspaceBytes(relativePath, overrides);
-    const overridden = Object.hasOwn(overrides, relativePath);
-    const bridge = M07_T09_TRACKED_RECEIPT_BRIDGE[relativePath];
-    const t10Bridge = M07_T10_TRACKED_RECEIPT_BRIDGE[relativePath];
-    const t11Bridge = M07_T11_TRACKED_RECEIPT_BRIDGE[relativePath];
-    const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    if (
-      (!overridden || relativePath !== ADR) &&
-      (bridge !== undefined || t10Bridge !== undefined || t11Bridge !== undefined)
-    ) {
-      const taskTime = bridge?.historical ?? t10Bridge?.historical ?? t11Bridge.historical;
-      const t09 = bridge?.successor ?? t10Bridge?.historical ?? t11Bridge.historical;
-      const t10 = t10Bridge?.successor ?? t11Bridge?.historical;
-      const t11 = t11Bridge?.successor;
-      let observedGenerationMask = 0;
-      if (observed.bytes === taskTime.bytes && observed.sha256 === taskTime.sha256) {
-        observedGenerationMask |= 0b001;
-      }
-      if (observed.bytes === t09.bytes && observed.sha256 === t09.sha256) {
-        observedGenerationMask |= 0b010;
-      }
-      if (t10 !== undefined && observed.bytes === t10.bytes && observed.sha256 === t10.sha256) {
-        observedGenerationMask |= 0b100;
-      }
-      if (t11 !== undefined && observed.bytes === t11.bytes && observed.sha256 === t11.sha256) {
-        observedGenerationMask |= 0b1000;
-      }
-      if (
-        t11 === undefined &&
-        t10 !== undefined &&
-        observed.bytes === t10.bytes &&
-        observed.sha256 === t10.sha256
-      ) {
-        observedGenerationMask |= 0b1000;
-      }
-      if (observedGenerationMask === 0) {
-        fail("REGISTRATION_DRIFT", "A reviewed M07-T10 tracked successor receipt drifted.", {
-          path: relativePath,
-        });
-      }
-      generationMask &= observedGenerationMask;
-    }
-    const taskTimeProjection = bridge?.historical ?? t10Bridge?.historical ?? t11Bridge?.historical;
-    const projected =
-      !overridden && taskTimeProjection !== undefined
-        ? taskTimeProjection
-        : !overridden && M07_T09_READER_RECEIPT_PROJECTION[relativePath] !== undefined
-          ? M07_T09_READER_RECEIPT_PROJECTION[relativePath]
-          : observed;
-    receipts.push(Object.freeze({ path: relativePath, ...projected }));
-  }
-  if (generationMask === 0) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 tracked successor set is incoherent.");
-  }
-  return deepFreeze(receipts);
 }
 
 function compareText(left, right) {
@@ -1060,6 +851,68 @@ function executableProofTuples(source, relativePath, declarationName, profile) {
   return deepFreeze(tuples);
 }
 
+function assertCiRegistrationDerivations(ciSource, inventorySource, sharedStateSource) {
+  const ciFile = parseTypescript(ciSource, CI_SOURCE);
+  const validators = ciFile.statements.filter(
+    (statement) =>
+      ts.isFunctionDeclaration(statement) && statement.name?.text === "validateProofInventory",
+  );
+  const proofEntriesBinding = validators[0]?.parameters
+    .flatMap((parameter) =>
+      ts.isObjectBindingPattern(parameter.name) ? parameter.name.elements : [],
+    )
+    .filter(
+      (element) =>
+        ts.isIdentifier(element.name) &&
+        element.name.text === "proofEntries" &&
+        ts.isIdentifier(element.initializer) &&
+        element.initializer.text === "PROOF_ENTRIES",
+    );
+  if (validators.length !== 1 || proofEntriesBinding.length !== 1) {
+    fail("REGISTRATION_DRIFT", "CI validation must derive from the complete PROOF_ENTRIES set.");
+  }
+
+  const inventoryFile = parseTypescript(inventorySource, CI_INVENTORY);
+  const verifierDeclarations = [];
+  const visit = (node) => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === "verifiers"
+    ) {
+      verifierDeclarations.push(node);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(inventoryFile);
+  if (
+    verifierDeclarations.length !== 1 ||
+    !ts.isCallExpression(verifierDeclarations[0].initializer) ||
+    callTarget(verifierDeclarations[0].initializer) !== "PROOF_UNIT_TUPLES.map"
+  ) {
+    fail(
+      "REGISTRATION_DRIFT",
+      "The exhaustive verifier plan must map every PROOF_UNIT_TUPLES row.",
+    );
+  }
+
+  const sharedFile = parseTypescript(sharedStateSource, SHARED_STATE_AUTHORITY);
+  const childSet = exactTopLevelVariable(sharedFile, "CHILD_PROCESS_VERIFIER_PROOF_ID_SET");
+  if (
+    !ts.isNewExpression(childSet.initializer) ||
+    !ts.isIdentifier(childSet.initializer.expression) ||
+    childSet.initializer.expression.text !== "Set" ||
+    childSet.initializer.arguments?.length !== 1 ||
+    !ts.isIdentifier(childSet.initializer.arguments[0]) ||
+    childSet.initializer.arguments[0].text !== "CHILD_PROCESS_VERIFIER_PROOF_IDS"
+  ) {
+    fail(
+      "REGISTRATION_DRIFT",
+      "Shared-state child-process classification must derive from its complete proof-id set.",
+    );
+  }
+}
+
 function frozenStringArray(sourceFile, declarationName) {
   const declaration = exactTopLevelVariable(sourceFile, declarationName, { exported: true });
   const array = frozenInitializerArgument(declaration.initializer, "Object.freeze");
@@ -1172,6 +1025,19 @@ function executableTestName(call, callee, relativePath) {
     callback.body.statements.length === 0
   ) {
     fail("TEST_COVERAGE_DRIFT", `${relativePath} contains an empty or indirect ${callee} case.`);
+  }
+  let executableCalls = 0;
+  let rootAssertions = 0;
+  const visit = (node) => {
+    if (ts.isCallExpression(node)) {
+      executableCalls += 1;
+      if (callTarget(node)?.startsWith("assert.")) rootAssertions += 1;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(callback.body);
+  if (executableCalls === 0 || (relativePath === ROOT_TEST && rootAssertions === 0)) {
+    fail("TEST_COVERAGE_DRIFT", `${relativePath} contains an inert ${callee} case body.`);
   }
   return name;
 }
@@ -1414,50 +1280,17 @@ function publicExportInventory(source) {
   return deepFreeze({ entries: inventory, count: inventory.length, sha256: inventorySha256 });
 }
 
-function assertAdjacent(
-  script,
-  predecessor,
-  current,
-  reviewedSuccessor,
-  laterSuccessor,
-  channelSuccessor,
-  terminal,
-) {
+function assertAdjacent(script, predecessor, current) {
   if (typeof script !== "string") {
     fail("REGISTRATION_DRIFT", "An aggregate root script is absent.");
   }
   const commands = script.split(" && ");
   const index = commands.indexOf(current);
-  const reviewedSuccessorIndex = commands.indexOf(reviewedSuccessor);
-  const laterSuccessorIndex = commands.indexOf(laterSuccessor);
-  const channelSuccessorIndex = commands.indexOf(channelSuccessor);
-  const terminalIndex = commands.indexOf(terminal);
-  const historical =
-    terminalIndex === index + 1 && reviewedSuccessorIndex < 0 && laterSuccessorIndex < 0;
-  const approvedT09 =
-    reviewedSuccessorIndex === index + 1 &&
-    terminalIndex === reviewedSuccessorIndex + 1 &&
-    laterSuccessorIndex < 0;
-  const approvedT10 =
-    reviewedSuccessorIndex === index + 1 &&
-    laterSuccessorIndex === reviewedSuccessorIndex + 1 &&
-    terminalIndex === laterSuccessorIndex + 1;
-  const approvedT11 =
-    reviewedSuccessorIndex === index + 1 &&
-    laterSuccessorIndex === reviewedSuccessorIndex + 1 &&
-    channelSuccessorIndex === laterSuccessorIndex + 1 &&
-    terminalIndex === channelSuccessorIndex + 1;
   if (
     index < 1 ||
     commands[index - 1] !== predecessor ||
-    (!historical && !approvedT09 && !approvedT10 && !approvedT11) ||
-    commands.lastIndexOf(current) !== index ||
-    commands.lastIndexOf(terminal) !== terminalIndex ||
-    ((approvedT09 || approvedT10 || approvedT11) &&
-      commands.lastIndexOf(reviewedSuccessor) !== reviewedSuccessorIndex) ||
-    ((approvedT10 || approvedT11) &&
-      commands.lastIndexOf(laterSuccessor) !== laterSuccessorIndex) ||
-    (approvedT11 && commands.lastIndexOf(channelSuccessor) !== channelSuccessorIndex)
+    commands.lastIndexOf(predecessor) !== index - 1 ||
+    commands.lastIndexOf(current) !== index
   ) {
     fail("REGISTRATION_DRIFT", "The T08 aggregate script position drifted.");
   }
@@ -1500,71 +1333,29 @@ async function registrationProjection(overrides) {
     rootPackage.scripts?.check,
     "pnpm verify:control-plane-runtime-activation",
     "pnpm verify:control-plane-runtime-recovery",
-    "pnpm verify:control-plane-runtime-fault-injection",
-    "pnpm verify:control-plane-runtime-transition-races",
-    "pnpm verify:reference-host-web-channel-consumption",
     "pnpm lint",
   );
   assertAdjacent(
     rootPackage.scripts?.test,
     "pnpm test:control-plane-runtime-activation",
     "pnpm test:control-plane-runtime-recovery",
-    "pnpm test:control-plane-runtime-fault-injection",
-    "pnpm test:control-plane-runtime-transition-races",
-    "pnpm test:reference-host-web-channel-consumption",
     "turbo run test",
   );
 
   const ciSource = fatalText(ciBytes, CI_SOURCE);
   const inventorySource = fatalText(inventoryBytes, CI_INVENTORY);
-  const registrationStates = [
-    [CI_SOURCE, ciBytes],
-    [CI_INVENTORY, inventoryBytes],
-    [SHARED_STATE_AUTHORITY, sharedStateBytes],
-  ].map(([relativePath, bytes]) => {
-    const observed = Object.freeze({ bytes: bytes.byteLength, sha256: sha256(bytes) });
-    const t09 = M07_T09_REGISTRATION_AUTHORITY_RECEIPTS[relativePath];
-    const t10 = M07_T10_REGISTRATION_AUTHORITY_RECEIPTS[relativePath];
-    const t11 = M07_T11_REGISTRATION_AUTHORITY_RECEIPTS[relativePath];
-    if (observed.sha256 === EXPECTED_REGISTRATION_AUTHORITY_SHA256[relativePath]) {
-      return "historical";
-    }
-    if (observed.bytes === t09.bytes && observed.sha256 === t09.sha256) return "t09";
-    if (observed.bytes === t10.bytes && observed.sha256 === t10.sha256) return "t10";
-    if (observed.bytes === t11.bytes && observed.sha256 === t11.sha256) return "t11";
-    fail("REGISTRATION_DRIFT", `${relativePath} reviewed source authority drifted.`);
-  });
-  if (new Set(registrationStates).size !== 1) {
-    fail("REGISTRATION_DRIFT", "The reviewed M07-T10 CI registration set is incoherent.");
-  }
   executableProofTuples(ciSource, CI_SOURCE, "PROOF_ENTRIES", "mapped-object-freeze");
   executableProofTuples(inventorySource, CI_INVENTORY, "PROOF_UNIT_TUPLES", "safe-array-freeze");
 
   const sharedState = fatalText(sharedStateBytes, SHARED_STATE_AUTHORITY);
   assertExactSharedStateRegistration(sharedState);
+  assertCiRegistrationDerivations(ciSource, inventorySource, sharedState);
 
   const adr = fatalText(adrBytes, ADR);
-  const adrReceipt = Object.freeze({ bytes: adrBytes.byteLength, sha256: sha256(adrBytes) });
-  const adrBridge = M07_T09_TRACKED_RECEIPT_BRIDGE[ADR];
-  const t10AdrBridge = M07_T10_TRACKED_RECEIPT_BRIDGE[ADR];
-  const historicalAdr =
-    adrReceipt.bytes === adrBridge.historical.bytes &&
-    adrReceipt.sha256 === adrBridge.historical.sha256;
-  const successorAdr =
-    adrReceipt.bytes === adrBridge.successor.bytes &&
-    adrReceipt.sha256 === adrBridge.successor.sha256;
-  const t10Adr =
-    adrReceipt.bytes === t10AdrBridge.successor.bytes &&
-    adrReceipt.sha256 === t10AdrBridge.successor.sha256;
-  if (!historicalAdr && !successorAdr && !t10Adr) {
-    fail("DOCUMENTATION_DRIFT", "ADR 0014 differs from the reviewed T08/T09/T10 decisions.");
-  }
   for (const marker of [
     "# ADR 0014: Reconstruct runtime authority from an unchanged durable record",
     "Recovery performs no durable write",
     "no tamper-proof, rollback-attack-resistant, or hostile",
-    ...(successorAdr || t10Adr ? ["M07-T09 proves"] : []),
-    ...(t10Adr ? ["M07-T10 proves"] : []),
   ]) {
     if (!adr.includes(marker)) {
       fail(
@@ -1602,24 +1393,7 @@ async function testProjection(overrides) {
   for (const [relativePath, bytes] of [
     [APP_RECOVERY_TEST, runtimeBytes],
     [APP_RECOVERY_TYPE_TEST, typeBytes],
-    [ROOT_TEST, rootBytes],
   ]) {
-    const reviewedSuccessor = M07_T09_TEST_AUTHORITY_RECEIPTS[relativePath];
-    const reviewedT10Successor = M07_T10_TEST_AUTHORITY_RECEIPTS[relativePath];
-    const reviewedT11Successor = M07_T11_TEST_AUTHORITY_RECEIPTS[relativePath];
-    if (
-      (reviewedSuccessor !== undefined &&
-        bytes.byteLength === reviewedSuccessor.bytes &&
-        sha256(bytes) === reviewedSuccessor.sha256) ||
-      (reviewedT10Successor !== undefined &&
-        bytes.byteLength === reviewedT10Successor.bytes &&
-        sha256(bytes) === reviewedT10Successor.sha256) ||
-      (reviewedT11Successor !== undefined &&
-        bytes.byteLength === reviewedT11Successor.bytes &&
-        sha256(bytes) === reviewedT11Successor.sha256)
-    ) {
-      continue;
-    }
     assertExactSourceAuthority(
       bytes,
       relativePath,
@@ -1855,8 +1629,8 @@ async function implementationProjection(overrides, runtimeReceipt) {
   });
 }
 
-async function distributionProjection() {
-  const receipts = await fileReceipts(DISTRIBUTION_FILES, Object.freeze({}));
+async function distributionProjection(frozenReceipts) {
+  const receipts = await fileReceipts(DISTRIBUTION_FILES, Object.freeze({}), frozenReceipts);
   const declaration = fatalText(
     await safeReadAbsolute(
       path.join(ROOT, `${APP_DIRECTORY}/dist/runtime-activation-contract.d.ts`),
@@ -2261,6 +2035,7 @@ export async function buildControlPlaneRuntimeRecoveryEvidence(options) {
     new Set(["prerequisiteBytes", "runtimeReceipt", "trackedFileBytes"]),
     "build options",
   );
+  const frozenArtifact = await authenticatedFrozenArtifactProjection();
   const prerequisiteBytes = captureByteOverrides(
     captured.prerequisiteBytes,
     CONTROL_PLANE_RUNTIME_RECOVERY_PREREQUISITE_PINS.map(({ path: pinPath }) => pinPath),
@@ -2286,8 +2061,8 @@ export async function buildControlPlaneRuntimeRecoveryEvidence(options) {
     traceRows,
   ] = await Promise.all([
     prerequisiteReceipts(prerequisiteBytes),
-    trackedFileReceipts(trackedFileBytes),
-    distributionProjection(),
+    fileReceipts(TRACKED_TASK_FILES, trackedFileBytes, frozenArtifact.trackedFiles),
+    distributionProjection(frozenArtifact.distribution?.files),
     implementationProjection(trackedFileBytes, runtimeReceipt),
     registrationProjection(trackedFileBytes),
     testProjection(trackedFileBytes),
