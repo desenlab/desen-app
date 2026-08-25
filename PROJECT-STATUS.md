@@ -2692,9 +2692,10 @@ M08-T01 evidence:
   `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b` authenticates 26 frozen
   artifacts and 52 readers while preserving historical sequence 28
 - local validation truth: editor-core package tests pass 7/7, public-package tests pass 17/17,
-  root adversarial tests pass 13/13, and generator/verifier, typecheck, and lint pass; a local retry
-  of the legacy process-group suite passes 25/25. The full `pnpm check` was interrupted for proof
-  hardening and is still pending, so no complete local-gate or hosted M08-T01 result is claimed here
+  root adversarial tests pass 13/13, and generator/verifier, typecheck, lint, the 27/27 shared-state
+  suite, and the 28/28 selector/promotion suite pass. PR #39 hosted Quality gate passes on head
+  `65cacf6` in run `32878437248`; the redundant serial local `pnpm check` replay was stopped after
+  M07-T01, so no complete local-gate PASS is claimed
 - scope nonclaims: no edit-command, stable-ID allocation, persistence, continuous semantic
   validation, invalid-node mapping, terminal M08 React/DOM boundary, production activation, or
   publication result is claimed
