@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile } from "node:fs/promises";
+import { constants as fileConstants } from "node:fs";
+import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
 import { isDeepStrictEqual, types as utilTypes } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -8,6 +9,8 @@ import { format } from "prettier";
 import ts from "typescript";
 
 import * as editorCorePublicApi from "../../packages/editor-core/dist/index.js";
+
+import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const WORKSPACE_ROOT = path.resolve(SCRIPT_DIRECTORY, "../..");
@@ -24,6 +27,46 @@ const PACKAGE_TEST_PATH = "packages/editor-core/test/source-document.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/source-document.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
+const GENERATOR_PATH = "scripts/generate-editor-core-source-document-proof.mjs";
+const VERIFIER_PATH = "scripts/verify-editor-core-source-document.mjs";
+const PROOF_LIBRARY_PATH = "scripts/lib/editor-core-source-document-proof.mjs";
+const ATOMIC_WRITER_PATH = "scripts/lib/atomic-proof-artifact.mjs";
+const ROOT_TEST_PATH = "tests/editor-core-source-document.test.mjs";
+const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md";
+const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-source-document.json";
+const I07_04_PREREQUISITE_PATH = "docs/proof/baselines/i07-04-affected-selector-promotion.json";
+const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
+const READ_FLAGS =
+  fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
+
+export const EDITOR_CORE_SOURCE_DOCUMENT_PREREQUISITE_PIN = Object.freeze({
+  task: "I07-04",
+  gate: "G07",
+  path: I07_04_PREREQUISITE_PATH,
+  bytes: 88_341,
+  sha256: "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+});
+
+export const EDITOR_CORE_SOURCE_DOCUMENT_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] builds final M08-T01 evidence from the exact G07/I07-04 prerequisite",
+  "[determinism] two final evidence builds are byte-identical",
+  "[prerequisite] rejects changed I07-04 bytes and incomplete hosted closure",
+  "[behavior] rejects wrappers, mutation authority, partial failure, and semantic overreach",
+  "[boundary] rejects source, TSDoc, import, distribution, and manifest drift",
+  "[inventory] rejects package, public, and root test-authority drift",
+  "[artifact] verifies exact bytes and the exact proof-document pin",
+  "[writer] atomically writes exact bytes and preserves an existing destination on failure",
+  "[writer-filesystem] rejects linked and non-file artifact destinations",
+  "[options] rejects unknown, accessor, inherited, symbol, proxy, and shared inputs",
+  "[filesystem] rejects linked prerequisite, artifact, and proof authorities",
+  "[utf8] rejects invalid proof UTF-8 without normalization",
+  "[immutability] freezes final evidence and keeps later M08 scope explicit",
+]);
+
+export const DEFAULT_EDITOR_CORE_SOURCE_DOCUMENT_ARTIFACT_PATH = path.join(
+  WORKSPACE_ROOT,
+  ARTIFACT_PATH,
+);
 
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorDocument"]);
 const EXPECTED_TYPE_EXPORTS = Object.freeze([
@@ -60,7 +103,11 @@ const EXPECTED_TRACKED_PATHS = Object.freeze(
     DIST_SOURCE_DECLARATION_PATH,
     "packages/editor-core/dist/source-document.d.ts.map",
     "packages/editor-core/dist/source-document.js.map",
-    "scripts/lib/editor-core-source-document-proof.mjs",
+    GENERATOR_PATH,
+    VERIFIER_PATH,
+    PROOF_LIBRARY_PATH,
+    ATOMIC_WRITER_PATH,
+    ROOT_TEST_PATH,
   ].sort(),
 );
 const FORBIDDEN_IDENTIFIER_NAMES = Object.freeze([
@@ -92,13 +139,13 @@ const FORBIDDEN_IDENTIFIER_NAMES = Object.freeze([
   "window",
 ]);
 
-/** Controlled failure emitted by the in-memory M08-T01 proof core. */
+/** Controlled failure emitted by the final deterministic M08-T01 proof. */
 export class EditorCoreSourceDocumentProofError extends Error {
   constructor(code, message, details = undefined) {
     super(message);
     this.name = "EditorCoreSourceDocumentProofError";
     this.code = code;
-    this.details = details;
+    this.details = deepFreeze(details);
   }
 }
 
@@ -108,6 +155,20 @@ function fail(code, message, details = undefined) {
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+function deepFreeze(value, visited = new Set()) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    ArrayBuffer.isView(value) ||
+    visited.has(value)
+  ) {
+    return value;
+  }
+  visited.add(value);
+  for (const child of Object.values(value)) deepFreeze(child, visited);
+  return Object.freeze(value);
 }
 
 function cloneJson(value) {
@@ -157,17 +218,39 @@ function captureOwnDataRecord(value, label, allowedKeys = undefined) {
   return Object.freeze(captured);
 }
 
-function captureOptions(rawOptions) {
-  if (rawOptions === undefined) {
-    return Object.freeze({
-      fileOverrides: Object.freeze(Object.create(null)),
-      runtimeApi: captureRuntimeApi(undefined),
-    });
+function captureByteView(value, label) {
+  if (value === null || typeof value !== "object" || utilTypes.isProxy(value)) {
+    fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} must be copied bytes.`);
   }
-  const options = captureOwnDataRecord(rawOptions, "proof options", [
-    "fileOverrides",
-    "runtimeApi",
-  ]);
+  let prototype;
+  let backingBuffer;
+  try {
+    prototype = Object.getPrototypeOf(value);
+    backingBuffer = value.buffer;
+  } catch {
+    fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} could not be captured safely.`);
+  }
+  if (prototype !== Buffer.prototype && prototype !== Uint8Array.prototype) {
+    fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} must be Buffer or Uint8Array bytes.`);
+  }
+  if (typeof SharedArrayBuffer === "function" && backingBuffer instanceof SharedArrayBuffer) {
+    fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} must not use shared memory.`);
+  }
+  try {
+    return Buffer.from(value);
+  } catch {
+    fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} could not be copied safely.`);
+  }
+}
+
+function capturePath(value, label) {
+  if (typeof value !== "string" || value.length === 0 || value.includes("\0")) {
+    fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} must be a non-empty path string.`);
+  }
+  return path.resolve(value);
+}
+
+function normalizeBuildOptions(options) {
   const rawOverrides = options.fileOverrides;
   const overrides = Object.create(null);
   if (rawOverrides !== undefined) {
@@ -185,37 +268,183 @@ function captureOptions(rawOptions) {
           `fileOverrides.${relativePath} must be text or Buffer bytes.`,
         );
       }
-      overrides[relativePath] = Buffer.from(value);
+      overrides[relativePath] =
+        typeof value === "string"
+          ? Buffer.from(value)
+          : captureByteView(value, `fileOverrides.${relativePath}`);
     }
   }
   return Object.freeze({
     fileOverrides: Object.freeze(overrides),
     runtimeApi: captureRuntimeApi(options.runtimeApi),
+    prerequisiteBytes:
+      options.prerequisiteBytes === undefined
+        ? undefined
+        : captureByteView(options.prerequisiteBytes, "prerequisiteBytes"),
+    prerequisitePath:
+      options.prerequisitePath === undefined
+        ? path.join(WORKSPACE_ROOT, I07_04_PREREQUISITE_PATH)
+        : capturePath(options.prerequisitePath, "prerequisitePath"),
   });
+}
+
+function captureBuildOptions(rawOptions) {
+  if (rawOptions === undefined) return normalizeBuildOptions(Object.freeze(Object.create(null)));
+  return normalizeBuildOptions(
+    captureOwnDataRecord(rawOptions, "build options", [
+      "fileOverrides",
+      "runtimeApi",
+      "prerequisiteBytes",
+      "prerequisitePath",
+    ]),
+  );
+}
+
+function captureVerifyOptions(rawOptions) {
+  const options =
+    rawOptions === undefined
+      ? Object.freeze(Object.create(null))
+      : captureOwnDataRecord(rawOptions, "verify options", [
+          "artifactBytes",
+          "artifactPath",
+          "fileOverrides",
+          "prerequisiteBytes",
+          "prerequisitePath",
+          "proofDocument",
+          "proofDocumentPath",
+          "runtimeApi",
+        ]);
+  const build = normalizeBuildOptions(options);
+  return Object.freeze({
+    build,
+    artifactBytes:
+      options.artifactBytes === undefined
+        ? undefined
+        : captureByteView(options.artifactBytes, "artifactBytes"),
+    artifactPath:
+      options.artifactPath === undefined
+        ? DEFAULT_EDITOR_CORE_SOURCE_DOCUMENT_ARTIFACT_PATH
+        : capturePath(options.artifactPath, "artifactPath"),
+    proofDocument: options.proofDocument,
+    proofDocumentPath:
+      options.proofDocumentPath === undefined
+        ? path.join(WORKSPACE_ROOT, PROOF_DOCUMENT_PATH)
+        : capturePath(options.proofDocumentPath, "proofDocumentPath"),
+  });
+}
+
+function captureWriteOptions(rawOptions) {
+  const options =
+    rawOptions === undefined
+      ? Object.freeze(Object.create(null))
+      : captureOwnDataRecord(rawOptions, "write options", [
+          "artifactPath",
+          "beforeAtomicRename",
+          "buildOptions",
+        ]);
+  if (
+    options.beforeAtomicRename !== undefined &&
+    typeof options.beforeAtomicRename !== "function"
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID",
+      "beforeAtomicRename must be a function when provided.",
+    );
+  }
+  return Object.freeze({
+    artifactPath:
+      options.artifactPath === undefined
+        ? DEFAULT_EDITOR_CORE_SOURCE_DOCUMENT_ARTIFACT_PATH
+        : capturePath(options.artifactPath, "artifactPath"),
+    beforeAtomicRename: options.beforeAtomicRename,
+    build: captureBuildOptions(options.buildOptions),
+  });
+}
+
+async function readRegularAuthority(absolutePath, label, maximumBytes = MAX_AUTHORITY_BYTES) {
+  const resolvedInput = path.resolve(absolutePath);
+  let canonicalParent;
+  try {
+    canonicalParent = await realpath(path.dirname(resolvedInput));
+  } catch (error) {
+    fail("EDITOR_SOURCE_DOCUMENT_AUTHORITY_UNSAFE", `${label} parent is unavailable.`, {
+      cause: String(error),
+    });
+  }
+  const canonicalPath = path.join(canonicalParent, path.basename(resolvedInput));
+  if (canonicalPath !== resolvedInput) {
+    fail("EDITOR_SOURCE_DOCUMENT_AUTHORITY_UNSAFE", `${label} must not traverse a linked parent.`);
+  }
+  let before;
+  let handle;
+  try {
+    before = await lstat(canonicalPath);
+    if (
+      !before.isFile() ||
+      before.isSymbolicLink() ||
+      before.nlink !== 1 ||
+      before.size > maximumBytes
+    ) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_AUTHORITY_UNSAFE",
+        `${label} must be one bounded regular non-linked file.`,
+      );
+    }
+    handle = await open(canonicalPath, READ_FLAGS);
+    const opened = await handle.stat();
+    if (
+      !opened.isFile() ||
+      opened.nlink !== 1 ||
+      opened.size !== before.size ||
+      opened.dev !== before.dev ||
+      opened.ino !== before.ino
+    ) {
+      fail("EDITOR_SOURCE_DOCUMENT_AUTHORITY_UNSAFE", `${label} identity changed before read.`);
+    }
+    const bytes = await handle.readFile();
+    const after = await lstat(canonicalPath);
+    if (
+      !after.isFile() ||
+      after.nlink !== 1 ||
+      bytes.byteLength !== opened.size ||
+      bytes.byteLength > maximumBytes ||
+      after.dev !== opened.dev ||
+      after.ino !== opened.ino ||
+      after.size !== opened.size ||
+      after.mtimeMs !== opened.mtimeMs ||
+      after.ctimeMs !== opened.ctimeMs
+    ) {
+      fail("EDITOR_SOURCE_DOCUMENT_AUTHORITY_UNSAFE", `${label} changed while it was read.`);
+    }
+    return bytes;
+  } catch (error) {
+    if (error instanceof EditorCoreSourceDocumentProofError) throw error;
+    fail("EDITOR_SOURCE_DOCUMENT_AUTHORITY_UNSAFE", `${label} could not be read safely.`, {
+      cause: String(error),
+    });
+  } finally {
+    await handle?.close().catch(() => undefined);
+  }
+}
+
+function fatalUtf8(bytes, label) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    fail("EDITOR_SOURCE_DOCUMENT_UTF8_INVALID", `${label} is not valid UTF-8.`);
+  }
 }
 
 async function readTrackedBytes(relativePath, overrides) {
   if (Object.hasOwn(overrides, relativePath)) return Buffer.from(overrides[relativePath]);
-  const absolutePath = path.join(WORKSPACE_ROOT, relativePath);
-  let entry;
-  try {
-    entry = await lstat(absolutePath);
-  } catch (error) {
-    fail("EDITOR_SOURCE_DOCUMENT_FILE_MISSING", `Required file is missing: ${relativePath}.`, {
-      cause: String(error),
-    });
-  }
-  if (!entry.isFile() || entry.isSymbolicLink()) {
-    fail(
-      "EDITOR_SOURCE_DOCUMENT_FILE_UNSAFE",
-      `Required path must be a regular non-symlink file: ${relativePath}.`,
-    );
-  }
-  return readFile(absolutePath);
+  return readRegularAuthority(
+    path.join(WORKSPACE_ROOT, relativePath),
+    `Required file ${relativePath}`,
+  );
 }
 
 async function readTrackedText(relativePath, overrides) {
-  return (await readTrackedBytes(relativePath, overrides)).toString("utf8");
+  return fatalUtf8(await readTrackedBytes(relativePath, overrides), relativePath);
 }
 
 function parseJson(text, relativePath) {
@@ -843,7 +1072,34 @@ function verifySourceAndDistributionContract(files, packageManifest) {
 }
 
 function verifyTestInventory(files) {
-  const inventory = Object.freeze({
+  const rootSourceFile = ts.createSourceFile(
+    ROOT_TEST_PATH,
+    files[ROOT_TEST_PATH],
+    ts.ScriptTarget.ES2023,
+    true,
+    ts.ScriptKind.JS,
+  );
+  if (rootSourceFile.parseDiagnostics.length !== 0) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_TEST_INVENTORY_DRIFT",
+      "The M08-T01 root proof test contains parse diagnostics.",
+    );
+  }
+  const rootTestNames = [];
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "test" &&
+      node.arguments.length > 0 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      rootTestNames.push(node.arguments[0].text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(rootSourceFile);
+  const inventory = deepFreeze({
     packageRuntimeCases: (files[PACKAGE_TEST_PATH].match(/^\s*it\("/gmu) ?? []).length,
     sourceCompilerNegativeCases: (files[PACKAGE_TYPES_PATH].match(/@ts-expect-error/gu) ?? [])
       .length,
@@ -852,6 +1108,9 @@ function verifyTestInventory(files) {
     ).length,
     publicCompilerNegativeCases: (files[PUBLIC_TYPES_PATH].match(/@ts-expect-error/gu) ?? [])
       .length,
+    publicProofCoreCases: (files[PUBLIC_TEST_PATH].match(/^test\("\[proof-core\]/gmu) ?? []).length,
+    rootProofCases: rootTestNames.length,
+    rootTestNames,
   });
   if (
     !exactJson(inventory, {
@@ -859,6 +1118,9 @@ function verifyTestInventory(files) {
       sourceCompilerNegativeCases: 5,
       publicRuntimeContractCases: 10,
       publicCompilerNegativeCases: 5,
+      publicProofCoreCases: 7,
+      rootProofCases: EDITOR_CORE_SOURCE_DOCUMENT_ROOT_TEST_NAMES.length,
+      rootTestNames: EDITOR_CORE_SOURCE_DOCUMENT_ROOT_TEST_NAMES,
     })
   ) {
     fail(
@@ -881,14 +1143,150 @@ async function trackedInventory(overrides) {
   return Object.freeze(entries);
 }
 
-/**
- * Builds deterministic in-memory M08-T01 proof-core evidence from the emitted public package.
- *
- * @remarks This preparation deliberately writes no artifact, reads no G07 promotion receipt, and
- * registers no root proof workload. Those authority-bearing steps remain gated on I07-04/G07.
- */
+async function authenticatePrerequisite(options) {
+  const bytes =
+    options.prerequisiteBytes ??
+    (await readRegularAuthority(options.prerequisitePath, "I07-04/G07 prerequisite"));
+  const pin = EDITOR_CORE_SOURCE_DOCUMENT_PREREQUISITE_PIN;
+  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PREREQUISITE_DRIFT",
+      "The exact I07-04/G07 prerequisite bytes drifted.",
+      {
+        expectedBytes: pin.bytes,
+        actualBytes: bytes.byteLength,
+        expectedSha256: pin.sha256,
+        actualSha256: sha256(bytes),
+      },
+    );
+  }
+  let authority;
+  try {
+    authority = JSON.parse(fatalUtf8(bytes, I07_04_PREREQUISITE_PATH));
+  } catch (error) {
+    if (error instanceof EditorCoreSourceDocumentProofError) throw error;
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PREREQUISITE_DRIFT",
+      "The exact I07-04/G07 prerequisite is not valid JSON.",
+    );
+  }
+  const cutover = authority.cutover;
+  if (
+    authority.schemaVersion !== 1 ||
+    authority.profile !== "desen.ci.affected-selector-promotion-evidence.v1" ||
+    authority.task !== "I07-04" ||
+    authority.repository !== "https://github.com/desenlab/desen-app" ||
+    !Array.isArray(authority.observations) ||
+    authority.observations.length !== 20 ||
+    authority.observations.some(
+      (observation) =>
+        observation?.quality?.status !== "PASS" ||
+        observation.quality.authority !== "REQUIRED" ||
+        observation.quality.scope !== "EXHAUSTIVE" ||
+        observation?.affected?.status !== "PASS" ||
+        observation.affected.freshExecution !== true ||
+        observation.affected.cachedSuccessRead !== false,
+    ) ||
+    authority.threshold?.minimumConsecutiveEligibleComparisons !== 20 ||
+    authority.threshold.eligibleComparisons !== 20 ||
+    authority.threshold.consecutiveEligibleComparisons !== 20 ||
+    authority.threshold.falseNegatives !== 0 ||
+    authority.threshold.sameRevisionWithinComparison !== true ||
+    authority.threshold.freshHostedExecution !== true ||
+    authority.threshold.cachedSuccessAllowed !== false ||
+    authority.threshold.satisfied !== true ||
+    authority.decision?.status !== "PROMOTION_AUTHORIZED" ||
+    authority.decision.affectedPromotionAuthorized !== true ||
+    authority.decision.eligiblePullRequests !== "REQUIRED_AFFECTED" ||
+    authority.decision.unsafePullRequests !== "REQUIRED_EXHAUSTIVE" ||
+    authority.decision.main !== "REQUIRED_EXHAUSTIVE" ||
+    authority.decision.release !== "REQUIRED_EXHAUSTIVE" ||
+    authority.decision.manualAudit !== "REQUIRED_EXHAUSTIVE" ||
+    cutover?.status !== "HOSTED_CUTOVER_VERIFIED" ||
+    cutover?.cleanup?.status !== "PASS" ||
+    cutover.cleanup.authority !== "REQUIRED" ||
+    cutover.cleanup.scope !== "EXHAUSTIVE" ||
+    cutover?.main?.status !== "PASS" ||
+    cutover.main.authority !== "REQUIRED" ||
+    cutover.main.scope !== "EXHAUSTIVE" ||
+    cutover?.affectedCanary?.status !== "PASS" ||
+    cutover.affectedCanary.authority !== "REQUIRED" ||
+    cutover.affectedCanary.effectiveScope !== "AFFECTED" ||
+    cutover.affectedCanary.freshExecution !== true ||
+    cutover.affectedCanary.cachedSuccessRead !== false ||
+    cutover?.proofReaderCheckpoint?.liveVerification !== "PASS" ||
+    cutover?.infrastructureDebt?.status !== "CLOSED" ||
+    cutover.infrastructureDebt.zeroReferences !== "PASS" ||
+    cutover.infrastructureDebt.removedPendingHostedProofCount !== 0
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PREREQUISITE_DRIFT",
+      "The pinned I07-04 authority does not close the formal G07 prerequisite.",
+    );
+  }
+  return deepFreeze({
+    ...pin,
+    result: "PASS",
+    status: "DONE",
+    authority: {
+      profile: authority.profile,
+      observations: authority.observations.length,
+      falseNegatives: authority.threshold.falseNegatives,
+      promotion: authority.decision.status,
+      cutover: cutover.status,
+      cleanup: {
+        revision: cutover.cleanup.receiptRevision,
+        runId: cutover.cleanup.runId,
+        jobId: cutover.cleanup.jobId,
+        receiptSha256: cutover.cleanup.receiptSha256,
+        authority: cutover.cleanup.authority,
+        scope: cutover.cleanup.scope,
+        result: cutover.cleanup.status,
+      },
+      main: {
+        revision: cutover.main.receiptRevision,
+        runId: cutover.main.runId,
+        jobId: cutover.main.jobId,
+        receiptSha256: cutover.main.receiptSha256,
+        authority: cutover.main.authority,
+        scope: cutover.main.scope,
+        result: cutover.main.status,
+      },
+      affectedCanary: {
+        revision: cutover.affectedCanary.executionRevision,
+        runId: cutover.affectedCanary.runId,
+        jobId: cutover.affectedCanary.jobId,
+        receiptSha256: cutover.affectedCanary.receiptSha256,
+        authority: cutover.affectedCanary.authority,
+        scope: cutover.affectedCanary.effectiveScope,
+        freshExecution: cutover.affectedCanary.freshExecution,
+        cachedSuccessRead: cutover.affectedCanary.cachedSuccessRead,
+        result: cutover.affectedCanary.status,
+      },
+      proofReaderCheckpoint: cutover.proofReaderCheckpoint,
+      infrastructureDebt: {
+        status: cutover.infrastructureDebt.status,
+        zeroReferences: cutover.infrastructureDebt.zeroReferences,
+        removedPendingHostedProofCount: cutover.infrastructureDebt.removedPendingHostedProofCount,
+        liveVerification: cutover.infrastructureDebt.liveVerification,
+      },
+    },
+  });
+}
+
+function buildOptionsFromCapture(options) {
+  return {
+    fileOverrides: options.fileOverrides,
+    runtimeApi: options.runtimeApi,
+    ...(options.prerequisiteBytes === undefined
+      ? { prerequisitePath: options.prerequisitePath }
+      : { prerequisiteBytes: options.prerequisiteBytes }),
+  };
+}
+
+/** Builds final deterministic M08-T01 evidence from the emitted public package. */
 export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefined) {
-  const options = captureOptions(rawOptions);
+  const options = captureBuildOptions(rawOptions);
   const paths = [
     FIXTURE_PATH,
     PACKAGE_PATH,
@@ -902,6 +1300,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     PACKAGE_TYPES_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
+    ROOT_TEST_PATH,
   ];
   const texts = await Promise.all(
     paths.map((relativePath) => readTrackedText(relativePath, options.fileOverrides)),
@@ -916,40 +1315,54 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
   const boundary = verifySourceAndDistributionContract(files, packageManifest);
   const tests = verifyTestInventory(files);
   const trackedFiles = await trackedInventory(options.fileOverrides);
+  const prerequisite = await authenticatePrerequisite(options);
 
-  const artifact = Object.freeze({
+  const artifact = deepFreeze({
     schemaVersion: 1,
-    profile: "desen.editor-core.source-document-proof-core.v1",
+    proofId: "editor-core-source-document",
+    profile: "desen.editor-core.source-document-proof.v1",
     task: "M08-T01",
     result: "PASS",
-    claim: Object.freeze({
+    prerequisite,
+    claim: {
       protocol: "0.1.0",
       platform: "platform-neutral",
       directSourceRoot: true,
       structuralAdmissionOnly: true,
       semanticValidation: false,
-      taskStatus: "IN_PROGRESS",
-    }),
-    publicApi: Object.freeze({
+      taskStatus: "DONE",
+      prerequisiteGate: "G07",
+      prerequisiteStatus: "DONE",
+    },
+    publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
       publicDeclarations: boundary.publicDeclarations,
       tsdocDeclarations: boundary.tsdocDeclarations,
-    }),
+    },
     documentModel,
-    structuralAdmission: Object.freeze({
+    structuralAdmission: {
       officialFixture: FIXTURE_PATH,
       exactFixtureIdentity: true,
       unresolvedSemanticReferenceAccepted: true,
       failureExposesPartialDocument: false,
-    }),
+    },
     boundary,
-    evidence: Object.freeze({ tests, trackedFiles }),
-    deferred: Object.freeze([
-      "The exact I07-04 promotion receipt and G07 DONE authority do not exist yet.",
-      "No tracked artifact, proof-document pin, root verifier/test pair, or CI inventory reseal is claimed.",
-      "Stable-ID commands, persistence, continuous validation, and the terminal M08 proof remain assigned to M08-T02 through M08-T10.",
-    ]),
+    evidence: { tests, trackedFiles },
+    nonclaims: [
+      "M08-T01 defines admission and immutable ownership only; mutation commands and stable-ID allocation remain assigned to M08-T02 through M08-T06.",
+      "Persistence and authoring-extension round trips remain assigned to M08-T07 and M08-T08.",
+      "Continuous semantic validation and invalid-node mapping remain assigned to M08-T09.",
+      "The React/DOM boundary and terminal editor determinism proof remain assigned to M08-T10 and G08.",
+    ],
+    reproduction: [
+      "pnpm --filter @desen/editor-core build",
+      "pnpm --filter @desen/editor-core test:source-document",
+      "pnpm --filter @desen/editor-core test:public-package",
+      "node scripts/generate-editor-core-source-document-proof.mjs",
+      "node scripts/verify-editor-core-source-document.mjs",
+      "node --test tests/editor-core-source-document.test.mjs",
+    ],
   });
   const artifactText = await format(JSON.stringify(artifact), {
     parser: "json",
@@ -962,5 +1375,117 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     artifact,
     artifactBytes,
     artifactSha256: sha256(artifactBytes),
+  });
+}
+
+function proofDocumentHasExactPin(document, artifactSha256) {
+  const artifactLine = `Artifact: \`${ARTIFACT_PATH}\``;
+  const receiptLine = `Final receipt: \`sha256:${artifactSha256}\``;
+  return (
+    typeof document === "string" &&
+    document.split(artifactLine).length - 1 === 1 &&
+    document.split(receiptLine).length - 1 === 1 &&
+    document.match(/Final receipt: `sha256:[0-9a-f]{64}`/gu)?.length === 1 &&
+    !document.includes("sha256:PENDING")
+  );
+}
+
+/** Rebuilds M08-T01 and verifies exact artifact bytes plus the human proof digest pin. */
+export async function verifyEditorCoreSourceDocumentEvidence(rawOptions = undefined) {
+  const options = captureVerifyOptions(rawOptions);
+  if (options.proofDocument !== undefined && typeof options.proofDocument !== "string") {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID",
+      "proofDocument must be UTF-8 text when provided.",
+    );
+  }
+  const built = await buildEditorCoreSourceDocumentEvidence(buildOptionsFromCapture(options.build));
+  const artifactBytes =
+    options.artifactBytes ??
+    (await readRegularAuthority(options.artifactPath, "M08-T01 proof artifact"));
+  if (!Buffer.from(artifactBytes).equals(Buffer.from(built.artifactBytes))) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_ARTIFACT_DRIFT",
+      "The committed M08-T01 artifact is not exactly reproducible.",
+    );
+  }
+  const proofDocument =
+    options.proofDocument ??
+    fatalUtf8(
+      await readRegularAuthority(options.proofDocumentPath, "M08-T01 proof document"),
+      PROOF_DOCUMENT_PATH,
+    );
+  if (!proofDocumentHasExactPin(proofDocument, built.artifactSha256)) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PROOF_PIN_DRIFT",
+      "The M08-T01 proof document lacks one exact final artifact pin.",
+    );
+  }
+  return deepFreeze({
+    task: "M08-T01",
+    result: "PASS",
+    artifactSha256: built.artifactSha256,
+    prerequisiteTask: built.artifact.prerequisite.task,
+    prerequisiteGate: built.artifact.prerequisite.gate,
+    trackedFiles: built.artifact.evidence.trackedFiles.length,
+    rootProofCases: built.artifact.evidence.tests.rootProofCases,
+  });
+}
+
+async function assertSafeWriteDestination(artifactPath) {
+  const parent = await realpath(path.dirname(artifactPath)).catch(() => undefined);
+  if (parent === undefined || path.join(parent, path.basename(artifactPath)) !== artifactPath) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_ARTIFACT_WRITE_FAILED",
+      "The M08-T01 artifact destination parent must be canonical.",
+    );
+  }
+  let entry;
+  try {
+    entry = await lstat(artifactPath);
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_ARTIFACT_WRITE_FAILED",
+      "The M08-T01 artifact destination could not be inspected.",
+    );
+  }
+  if (!entry.isFile() || entry.isSymbolicLink() || entry.nlink !== 1) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_ARTIFACT_WRITE_FAILED",
+      "The M08-T01 artifact destination must be one regular non-linked file.",
+    );
+  }
+}
+
+/** Atomically commits exact M08-T01 artifact bytes after a complete successful build. */
+export async function writeEditorCoreSourceDocumentEvidence(rawOptions = undefined) {
+  const options = captureWriteOptions(rawOptions);
+  const built = await buildEditorCoreSourceDocumentEvidence(buildOptionsFromCapture(options.build));
+  await assertSafeWriteDestination(options.artifactPath);
+  try {
+    await writeAtomicProofArtifact({
+      artifactPath: options.artifactPath,
+      artifactBytes: built.artifactBytes,
+      beforeAtomicRename: options.beforeAtomicRename,
+    });
+  } catch {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_ARTIFACT_WRITE_FAILED",
+      "The M08-T01 artifact could not be committed atomically.",
+    );
+  }
+  const committed = await readRegularAuthority(options.artifactPath, "M08-T01 proof artifact");
+  if (!committed.equals(built.artifactBytes)) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_ARTIFACT_WRITE_FAILED",
+      "The committed M08-T01 artifact bytes changed after atomic write.",
+    );
+  }
+  return deepFreeze({
+    task: "M08-T01",
+    result: "PASS",
+    artifactPath: options.artifactPath,
+    artifactSha256: built.artifactSha256,
   });
 }

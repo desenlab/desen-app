@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "proofId": "editor-core-source-document",
+  "profile": "desen.editor-core.source-document-proof.v1",
+  "task": "M08-T01",
+  "result": "PASS",
+  "prerequisite": {
+    "task": "I07-04",
+    "gate": "G07",
+    "path": "docs/proof/baselines/i07-04-affected-selector-promotion.json",
+    "bytes": 88341,
+    "sha256": "76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549",
+    "result": "PASS",
+    "status": "DONE",
+    "authority": {
+      "profile": "desen.ci.affected-selector-promotion-evidence.v1",
+      "observations": 20,
+      "falseNegatives": 0,
+      "promotion": "PROMOTION_AUTHORIZED",
+      "cutover": "HOSTED_CUTOVER_VERIFIED",
+      "cleanup": {
+        "revision": "aa7c78315fc24bde7b8ab0166f3c0a7cab19cbf6",
+        "runId": 31674300000,
+        "jobId": 94365383803,
+        "receiptSha256": "1b30b24e65a4cc601023a2abf2c46751fe85e2fed237bccd623ec36d3f08d1d9",
+        "authority": "REQUIRED",
+        "scope": "EXHAUSTIVE",
+        "result": "PASS"
+      },
+      "main": {
+        "revision": "6d87889bc088e45e219f430ee67e10c901c1a2fb",
+        "runId": 31675234655,
+        "jobId": 94368259305,
+        "receiptSha256": "36139e5d65643dae255ca1305abb492270e21ca4ef5c76ac1dfc022071f128e6",
+        "authority": "REQUIRED",
+        "scope": "EXHAUSTIVE",
+        "result": "PASS"
+      },
+      "affectedCanary": {
+        "revision": "e06291fc11b4cf6c7fcf8ce603f73a7d6d75812b",
+        "runId": 31676049922,
+        "jobId": 94370743935,
+        "receiptSha256": "4ac6f159f1487a1f9a969f88bd26be575ecf28ce6c66574206395afb659518f2",
+        "authority": "REQUIRED",
+        "scope": "AFFECTED",
+        "freshExecution": true,
+        "cachedSuccessRead": false,
+        "result": "PASS"
+      },
+      "proofReaderCheckpoint": {
+        "profile": "desen.ci.proof-reader-checkpoints.v1",
+        "sequence": 28,
+        "headSha256": "2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546",
+        "frozenArtifactCount": 25,
+        "currentReaderCount": 50,
+        "liveVerification": "PASS"
+      },
+      "infrastructureDebt": {
+        "status": "CLOSED",
+        "zeroReferences": "PASS",
+        "removedPendingHostedProofCount": 0,
+        "liveVerification": "PASS"
+      }
+    }
+  },
+  "claim": {
+    "protocol": "0.1.0",
+    "platform": "platform-neutral",
+    "directSourceRoot": true,
+    "structuralAdmissionOnly": true,
+    "semanticValidation": false,
+    "taskStatus": "DONE",
+    "prerequisiteGate": "G07",
+    "prerequisiteStatus": "DONE"
+  },
+  "publicApi": {
+    "runtimeExports": ["createDesenEditorDocument"],
+    "typeExports": [
+      "DesenEditorDocument",
+      "DesenEditorDocumentCreationFailure",
+      "DesenEditorDocumentCreationResult",
+      "DesenEditorDocumentCreationSuccess"
+    ],
+    "publicDeclarations": 5,
+    "tsdocDeclarations": 5
+  },
+  "documentModel": {
+    "directSourceRoot": true,
+    "hiddenModelKeys": [],
+    "detached": true,
+    "independentSnapshots": true,
+    "deeplyFrozenPlainOwnData": true,
+    "callerUnfrozen": true,
+    "unresolvedSemanticsAdmitted": true,
+    "rejectedVectors": [
+      { "vector": "invalid-root", "code": "SCHEMA_INVALID", "pointer": "/kind" },
+      {
+        "vector": "invalid-embedded-schema",
+        "code": "SCHEMA_INVALID",
+        "pointer": "/surfaces/sign-in/state/email/schema/pattern"
+      },
+      { "vector": "executable-non-json", "code": "SCHEMA_INVALID", "pointer": "" },
+      { "vector": "accessor", "code": "SCHEMA_INVALID", "pointer": "" },
+      { "vector": "serialization-hook", "code": "SCHEMA_INVALID", "pointer": "" }
+    ]
+  },
+  "structuralAdmission": {
+    "officialFixture": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+    "exactFixtureIdentity": true,
+    "unresolvedSemanticReferenceAccepted": true,
+    "failureExposesPartialDocument": false
+  },
+  "boundary": {
+    "runtimeExports": ["createDesenEditorDocument"],
+    "typeExports": [
+      "DesenEditorDocument",
+      "DesenEditorDocumentCreationFailure",
+      "DesenEditorDocumentCreationResult",
+      "DesenEditorDocumentCreationSuccess"
+    ],
+    "publicDeclarations": 5,
+    "tsdocDeclarations": 5,
+    "runtimeImports": ["@desen/validator"],
+    "typeImports": ["@desen/protocol", "@desen/validator"],
+    "productionDependencies": ["@desen/protocol", "@desen/validator"],
+    "platformImports": 0,
+    "executableAuthority": 0
+  },
+  "evidence": {
+    "tests": {
+      "packageRuntimeCases": 7,
+      "sourceCompilerNegativeCases": 5,
+      "publicRuntimeContractCases": 10,
+      "publicCompilerNegativeCases": 5,
+      "publicProofCoreCases": 7,
+      "rootProofCases": 13,
+      "rootTestNames": [
+        "[authority] builds final M08-T01 evidence from the exact G07/I07-04 prerequisite",
+        "[determinism] two final evidence builds are byte-identical",
+        "[prerequisite] rejects changed I07-04 bytes and incomplete hosted closure",
+        "[behavior] rejects wrappers, mutation authority, partial failure, and semantic overreach",
+        "[boundary] rejects source, TSDoc, import, distribution, and manifest drift",
+        "[inventory] rejects package, public, and root test-authority drift",
+        "[artifact] verifies exact bytes and the exact proof-document pin",
+        "[writer] atomically writes exact bytes and preserves an existing destination on failure",
+        "[writer-filesystem] rejects linked and non-file artifact destinations",
+        "[options] rejects unknown, accessor, inherited, symbol, proxy, and shared inputs",
+        "[filesystem] rejects linked prerequisite, artifact, and proof authorities",
+        "[utf8] rejects invalid proof UTF-8 without normalization",
+        "[immutability] freezes final evidence and keeps later M08 scope explicit"
+      ]
+    },
+    "trackedFiles": [
+      {
+        "path": "packages/editor-core/README.md",
+        "bytes": 2461,
+        "sha256": "e2489e7ddc2f1cee2761adbabd015ab7e5329654045378ab878a58454d0fe094"
+      },
+      {
+        "path": "packages/editor-core/dist/index.d.ts",
+        "bytes": 399,
+        "sha256": "1bc1a7f36b29d309f3db5ea3471907be6674a87a830f5080d657b35614f7c159"
+      },
+      {
+        "path": "packages/editor-core/dist/index.d.ts.map",
+        "bytes": 245,
+        "sha256": "c59f561428a75e60ff9fec9787baa8e4b8e1346e9a6d643f73f6486add66dfb8"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js",
+        "bytes": 224,
+        "sha256": "9fa69e47375e0726b70cbd3b371245c12ee5bbfe94f88c5bd868889350ea7803"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js.map",
+        "bytes": 158,
+        "sha256": "da8e679be07e16b2bfe2d84cefad537ddd29ed010aab5def145e512fc55cc31e"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.d.ts",
+        "bytes": 2091,
+        "sha256": "e9244f005b7ec432a7f6b556ec8af4b81e7ce59b0525bf1cab747cba50ad752a"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.d.ts.map",
+        "bytes": 783,
+        "sha256": "521d1f5c2334de4ef00d02de2ee8750380bba3b5b4ccc284131b09ec155000e6"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js",
+        "bytes": 842,
+        "sha256": "6b38f237b884a9f33ca12622ee038adf93f93a30dff005903103ceb0e1101381"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js.map",
+        "bytes": 599,
+        "sha256": "0031f544c158ef14f9dd78ce55df5ae73e2632c5c19ec2c145c53a823239d680"
+      },
+      {
+        "path": "packages/editor-core/package.json",
+        "bytes": 988,
+        "sha256": "f872240fae7ac8cb347f8f761c50faf9aa900b872fc39119a0c80c56d63e8e13"
+      },
+      {
+        "path": "packages/editor-core/src/index.ts",
+        "bytes": 374,
+        "sha256": "fe5df7e0b417cd65b4e4115a41670eead43f548779a2d7af6252678f94ae166c"
+      },
+      {
+        "path": "packages/editor-core/src/source-document.ts",
+        "bytes": 2418,
+        "sha256": "9228d41e1d8db82c52e9883e01516d79e9cefb7e348a0c1354a2e78f44d46686"
+      },
+      {
+        "path": "packages/editor-core/test/public-package.mjs",
+        "bytes": 16559,
+        "sha256": "1af15706c05b900b5eae9bbb73c68c0d1a03848631b71d93a4c4ce20059125e1"
+      },
+      {
+        "path": "packages/editor-core/test/public-package.types.mts",
+        "bytes": 1620,
+        "sha256": "843ec41ab9d5ed8171ae107993ac3b8e8a8ca3fab81c91869aabc57aabb4708b"
+      },
+      {
+        "path": "packages/editor-core/test/source-document.test.ts",
+        "bytes": 7295,
+        "sha256": "3e032d38875f234a5effa3e8379f67b64280818eafe95b05e42b2551aca0f36d"
+      },
+      {
+        "path": "packages/editor-core/test/source-document.types.ts",
+        "bytes": 1186,
+        "sha256": "69a3e450d55a86bbb26a7b59a2cea84e5f85dfacb51aff3d32097fd81fddbf3e"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.public-package.json",
+        "bytes": 147,
+        "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+        "bytes": 4719,
+        "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+      },
+      {
+        "path": "scripts/generate-editor-core-source-document-proof.mjs",
+        "bytes": 852,
+        "sha256": "e2d2bc674d654f7d92ec8da71e9246bdedb7125cf6a49a671d0f7e5b5aa52181"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/editor-core-source-document-proof.mjs",
+        "bytes": 53054,
+        "sha256": "a97e94e3d7b0e7da139e4243fe24e52dbb42ee46c32feb6ab43386424c57ba52"
+      },
+      {
+        "path": "scripts/verify-editor-core-source-document.mjs",
+        "bytes": 656,
+        "sha256": "1dc833fe6a8a3fa0cf63562a3d4bbbe5190b8e09ca9002a62f462d0e0eabac3b"
+      },
+      {
+        "path": "tests/editor-core-source-document.test.mjs",
+        "bytes": 18422,
+        "sha256": "7011da0af443e324ebc48636e793ecb88c51b75fbc15fa551a6f9af1d26178f3"
+      }
+    ]
+  },
+  "nonclaims": [
+    "M08-T01 defines admission and immutable ownership only; mutation commands and stable-ID allocation remain assigned to M08-T02 through M08-T06.",
+    "Persistence and authoring-extension round trips remain assigned to M08-T07 and M08-T08.",
+    "Continuous semantic validation and invalid-node mapping remain assigned to M08-T09.",
+    "The React/DOM boundary and terminal editor determinism proof remain assigned to M08-T10 and G08."
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/editor-core build",
+    "pnpm --filter @desen/editor-core test:source-document",
+    "pnpm --filter @desen/editor-core test:public-package",
+    "node scripts/generate-editor-core-source-document-proof.mjs",
+    "node scripts/verify-editor-core-source-document.mjs",
+    "node --test tests/editor-core-source-document.test.mjs"
+  ]
+}

@@ -233,7 +233,7 @@ test("the emitted factory rejects getter and toJSON hooks without invoking calle
   assert.equal(toJsonInvocations, 0);
 });
 
-test("[proof-core] two fresh in-memory builds are byte-identical and preserve honest scope", async () => {
+test("[proof-core] two fresh final builds are byte-identical and preserve honest scope", async () => {
   const first = await buildEditorCoreSourceDocumentEvidence();
   const second = await buildEditorCoreSourceDocumentEvidence();
 
@@ -241,8 +241,15 @@ test("[proof-core] two fresh in-memory builds are byte-identical and preserve ho
   assert.equal(first.artifactSha256, second.artifactSha256);
   assert.equal(first.artifact.task, "M08-T01");
   assert.equal(first.artifact.result, "PASS");
-  assert.equal(first.artifact.claim.taskStatus, "IN_PROGRESS");
+  assert.equal(first.artifact.profile, "desen.editor-core.source-document-proof.v1");
+  assert.equal(first.artifact.claim.taskStatus, "DONE");
+  assert.equal(first.artifact.claim.prerequisiteGate, "G07");
+  assert.equal(first.artifact.claim.prerequisiteStatus, "DONE");
   assert.equal(first.artifact.claim.semanticValidation, false);
+  assert.equal(first.artifact.prerequisite.task, "I07-04");
+  assert.equal(first.artifact.prerequisite.result, "PASS");
+  assert.equal(first.artifact.prerequisite.status, "DONE");
+  assert.equal(first.artifact.prerequisite.authority.cutover, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(first.artifact.documentModel.directSourceRoot, true);
   assert.equal(first.artifact.documentModel.detached, true);
   assert.equal(first.artifact.boundary.platformImports, 0);
@@ -250,9 +257,11 @@ test("[proof-core] two fresh in-memory builds are byte-identical and preserve ho
   assert.equal(first.artifact.evidence.tests.publicRuntimeContractCases, 10);
   assert.equal(first.artifact.evidence.tests.sourceCompilerNegativeCases, 5);
   assert.equal(first.artifact.evidence.tests.publicCompilerNegativeCases, 5);
-  assert.equal(first.artifact.evidence.trackedFiles.length, 20);
-  assert.match(first.artifact.deferred.join("\n"), /G07/u);
-  assert.match(first.artifact.deferred.join("\n"), /No tracked artifact/u);
+  assert.equal(first.artifact.evidence.tests.publicProofCoreCases, 7);
+  assert.equal(first.artifact.evidence.tests.rootProofCases, 13);
+  assert.equal(first.artifact.evidence.trackedFiles.length, 24);
+  assert.match(first.artifact.nonclaims.join("\n"), /M08-T10/u);
+  assert.match(first.artifact.nonclaims.join("\n"), /G08/u);
 });
 
 test("[proof-core] rejects a wrapper-returning or mutable public runtime", async () => {
