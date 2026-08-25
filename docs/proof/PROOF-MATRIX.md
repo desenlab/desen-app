@@ -1790,7 +1790,7 @@ bytes, Node runtime, loader, and process remain trusted authorities; this is not
 hostile-JavaScript capability sandbox.
 
 The current append-only reader successor is sequence 29 at
-`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
+`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
 artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
 unchanged.
 

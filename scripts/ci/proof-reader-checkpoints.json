@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58",
+  "headSha256": "ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b",
   "checkpoints": [
     {
       "sequence": 1,
@@ -9298,8 +9298,8 @@
           "task": "M07-T01",
           "role": "root-test",
           "path": "tests/control-plane-bundle-store.test.mjs",
-          "bytes": 12822,
-          "sha256": "6dc372192d6f07b00841068425cbb67708b8d468041e0bc7061e87e2c2c134f1"
+          "bytes": 13558,
+          "sha256": "e4b1f457067a3b94f3f3e5bd5e663445d5450d414f9369279afd320e503af9b1"
         },
         {
           "task": "M07-T02",

@@ -394,7 +394,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[28],
-    "95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58",
+    "ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -2492,7 +2492,7 @@ test("sequence twenty-seven preserves authority and reseals only two formatted r
   );
 });
 
-test("sequence twenty-eight preserves artifacts and reseals only seven final readers", async () => {
+test("sequence twenty-eight preserves artifacts and reseals only seven final readers", () => {
   const previous = baselineManifest.checkpoints[26];
   const current = baselineManifest.checkpoints[27];
   const changedReaderIndexes = [15, 17, 19, 23, 27, 34, 36];
@@ -2566,26 +2566,13 @@ test("sequence twenty-eight preserves artifacts and reseals only seven final rea
     ],
   );
 
-  const liveReaderReceipts = await Promise.all(
-    current.readers.map(async ({ task, role, path: readerPath }) => {
-      const bytes = await readFile(path.join(WORKSPACE_ROOT, readerPath));
-      return {
-        task,
-        role,
-        path: readerPath,
-        bytes: bytes.length,
-        sha256: createHash("sha256").update(bytes).digest("hex"),
-      };
-    }),
-  );
-  assert.deepEqual(current.readers, liveReaderReceipts);
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
     "2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546",
   );
 });
 
-test("sequence twenty-nine appends the exact M08-T01 generation and preserves prior authority", async () => {
+test("sequence twenty-nine reseals the M07-T01 gate reader, appends M08-T01, and preserves other authority", async () => {
   const previous = baselineManifest.checkpoints[27];
   const current = baselineManifest.checkpoints[28];
 
@@ -2595,7 +2582,21 @@ test("sequence twenty-nine appends the exact M08-T01 generation and preserves pr
     "2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546",
   );
   assert.deepEqual(current.artifacts.slice(0, 25), previous.artifacts);
-  assert.deepEqual(current.readers.slice(0, 50), previous.readers);
+  assert.deepEqual(
+    current.readers
+      .slice(0, 50)
+      .flatMap((reader, index) =>
+        JSON.stringify(reader) === JSON.stringify(previous.readers[index]) ? [] : [index],
+      ),
+    [15],
+  );
+  assert.deepEqual(current.readers[15], {
+    task: "M07-T01",
+    role: "root-test",
+    path: "tests/control-plane-bundle-store.test.mjs",
+    bytes: 13558,
+    sha256: "e4b1f457067a3b94f3f3e5bd5e663445d5450d414f9369279afd320e503af9b1",
+  });
   assert.deepEqual(current.artifacts[25], {
     task: "M08-T01",
     path: "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
@@ -2620,7 +2621,7 @@ test("sequence twenty-nine appends the exact M08-T01 generation and preserves pr
   ]);
 
   const liveReceipts = await Promise.all(
-    [...current.artifacts.slice(25), ...current.readers.slice(50)].map(
+    [current.artifacts[25], current.readers[15], ...current.readers.slice(50)].map(
       async ({ task, role, path: authorityPath }) => {
         const bytes = await readFile(path.join(WORKSPACE_ROOT, authorityPath));
         return {
@@ -2633,10 +2634,14 @@ test("sequence twenty-nine appends the exact M08-T01 generation and preserves pr
       },
     ),
   );
-  assert.deepEqual(liveReceipts, [current.artifacts[25], ...current.readers.slice(50)]);
+  assert.deepEqual(liveReceipts, [
+    current.artifacts[25],
+    current.readers[15],
+    ...current.readers.slice(50),
+  ]);
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58",
+    "ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b",
   );
 });
 

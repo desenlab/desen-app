@@ -623,7 +623,7 @@ modular comparison adapter/test. I07-04 closed all 17 G07-due bridge entries and
 Historical closure checkpoint sequence 28 head
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
 artifacts and 50 readers. The current append-only successor is sequence 29 at
-`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
+`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
 artifacts and 52 current readers. Implementation progress is 86/145, and M08-T02 is next.
 `DEBT-I07-007` keeps the sequential runner, rollback-only equivalence adapter, and other rollback
 references under I07-05 until their exact machine-checked removal conditions in

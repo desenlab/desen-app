@@ -1049,7 +1049,7 @@ claiming a general hostile-JavaScript sandbox. The exact 153-workload/72-proof-p
 registers that proof. Together they pin
 the reviewed scope in `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md` and
 `docs/proof/artifacts/editor-core-0.1.0-source-document.json`. Append-only reader checkpoint
-sequence 29 at `95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`
+sequence 29 at `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`
 authenticates 26 frozen artifacts and 52 current readers; the historical I07-04/G07 sequence-28
 closure remains unchanged.
 

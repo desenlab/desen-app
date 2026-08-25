@@ -1346,7 +1346,7 @@ next; commands, persistence, continuous semantic validation, and terminal editor
 not claimed by M08-T01.
 
 The current append-only reader successor is sequence 29 at
-`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
+`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
 artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
 unchanged.
 
@@ -2689,7 +2689,7 @@ M08-T01 evidence:
 - workspace test inventory: 15 scripts at
   `sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`
 - current reader authority: append-only sequence 29 at
-  `95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58` authenticates 26 frozen
+  `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b` authenticates 26 frozen
   artifacts and 52 readers while preserving historical sequence 28
 - local validation truth: editor-core package tests pass 7/7, public-package tests pass 17/17,
   root adversarial tests pass 13/13, and generator/verifier, typecheck, and lint pass; a local retry

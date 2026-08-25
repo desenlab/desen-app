@@ -494,7 +494,7 @@ fresh exhaustive. All 17 G07-due compatibility/shadow targets are locally absent
 closure checkpoint sequence 28 at
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
 artifacts and 50 readers. The current append-only authority is sequence 29 at
-`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
+`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
 artifacts and 52 current readers. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 passed fresh `REQUIRED + EXHAUSTIVE` in
 [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),

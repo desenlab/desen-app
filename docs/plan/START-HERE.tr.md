@@ -368,7 +368,7 @@ bağımlılık baytları, Node runtime, loader ve process güvenilen otoritelerd
 JavaScript sandbox sonucu iddia edilmez. Kanıt
 [`EDITOR-CORE-SOURCE-DOCUMENT.md`](../proof/EDITOR-CORE-SOURCE-DOCUMENT.md) ve izlenen artifact'ta
 sabittir. Güncel append-only reader ardılı sequence 29'dur;
-`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58` başıyla 26 donmuş
+`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b` başıyla 26 donmuş
 artifact ve 52 güncel reader doğrular. Bu sonuç düzenleme komutlarını, authoring izolasyonunu,
 bilinmeyen extension korumasını, persistence'ı, sürekli semantik doğrulamayı veya M08 terminal
 React/DOM sınırını kanıtlamaz; bu sahiplikler sırasıyla M08-T02–T06, M08-T07, M08-T08, M08-T09 ve
