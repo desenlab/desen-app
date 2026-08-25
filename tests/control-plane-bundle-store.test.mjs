@@ -74,7 +74,25 @@ after(async () => {
 });
 
 test("authenticates the immutable M07-T01 artifact through the central checkpoint", () => {
-  assert.equal(createQualityGateSteps().length, 150);
+  const qualityGateSteps = createQualityGateSteps();
+  assert.equal(Object.isFrozen(qualityGateSteps), true);
+  const controlPlaneBundleStoreSteps = qualityGateSteps.filter(({ id }) =>
+    ["verify-control-plane-bundle-store", "test-control-plane-bundle-store"].includes(id),
+  );
+  assert.deepEqual(controlPlaneBundleStoreSteps, [
+    {
+      id: "verify-control-plane-bundle-store",
+      label: "Proof verifier: control-plane-bundle-store",
+      command: "node",
+      args: ["scripts/verify-control-plane-bundle-store.mjs"],
+    },
+    {
+      id: "test-control-plane-bundle-store",
+      label: "Root proof and mutation test: control-plane-bundle-store",
+      command: "node",
+      args: ["--test", "--test-concurrency=1", "tests/control-plane-bundle-store.test.mjs"],
+    },
+  ]);
   assert.equal(DEFAULT_CONTROL_PLANE_BUNDLE_STORE_ARTIFACT_PATH, path.join(ROOT, ARTIFACT));
   assert.equal(built.artifactSha256, EXPECTED_HASH);
   assert.equal(built.artifactBytes.byteLength, 22_396);

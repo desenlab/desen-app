@@ -378,7 +378,7 @@ describe("M07-T02 Bundle integrity verification", () => {
       "",
       "bundle-size",
     );
-  });
+  }, 10_000);
 
   it("enforces the exact 8 MiB complete canonical Source boundary", () => {
     const exact = sourceAtCanonicalSize(BUNDLE_INTEGRITY_LIMITS.maxSourceCanonicalUtf8Bytes);

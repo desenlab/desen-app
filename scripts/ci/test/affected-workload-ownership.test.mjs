@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 142,
+  PROOF_UNIT: 144,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 115,
-  PACKAGE_OR_APPLICATION: 393,
-  SHARED_PROOF_INFRASTRUCTURE: 179,
-  PROJECT_DOCUMENTATION: 107,
+  FROZEN_INPUT: 116,
+  PACKAGE_OR_APPLICATION: 399,
+  SHARED_PROOF_INFRASTRUCTURE: 181,
+  PROJECT_DOCUMENTATION: 108,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1023 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1035 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1023 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1023);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1035);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 142);
+  assert.equal(proofEntries.length, 144);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -109,6 +109,15 @@ test("permits strict selection only for exact verifier and root-test proof input
     [
       "scripts/verify-reference-host-web-channel-consumption.mjs",
       "tests/reference-host-web-channel-consumption.test.mjs",
+    ],
+  );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "editor-core-source-document")
+      .map(({ path: trackedPath }) => trackedPath),
+    [
+      "scripts/verify-editor-core-source-document.mjs",
+      "tests/editor-core-source-document.test.mjs",
     ],
   );
   for (const entry of proofEntries) {
@@ -139,7 +148,7 @@ test("permits strict selection only for exact verifier and root-test proof input
   }
 });
 
-test("I07-04 changes only force-exhaustive authority paths and preserves historical ownership", async () => {
+test("the reviewed M08 successor preserves the historical I07-04 ownership projection", async () => {
   const currentPaths = await currentTrackedPaths();
   const current = createAffectedWorkloadOwnership(currentPaths);
   const promotedPaths = [
@@ -150,6 +159,20 @@ test("I07-04 changes only force-exhaustive authority paths and preserves histori
     "scripts/ci/test/required-affected-quality-gate.test.mjs",
     "scripts/ci/verify-affected-selector-promotion-evidence.mjs",
   ];
+  const successorPaths = [
+    "docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md",
+    "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
+    "packages/editor-core/src/source-document.ts",
+    "packages/editor-core/test/public-package.mjs",
+    "packages/editor-core/test/public-package.types.mts",
+    "packages/editor-core/test/source-document.test.ts",
+    "packages/editor-core/test/source-document.types.ts",
+    "packages/editor-core/tsconfig.public-package.json",
+    "scripts/generate-editor-core-source-document-proof.mjs",
+    "scripts/lib/editor-core-source-document-proof.mjs",
+    "scripts/verify-editor-core-source-document.mjs",
+    "tests/editor-core-source-document.test.mjs",
+  ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);
     assert.ok(entry, `${promotedPath} must be tracked by the promoted authority`);
@@ -157,7 +180,16 @@ test("I07-04 changes only force-exhaustive authority paths and preserves histori
     assert.equal(entry.proofUnitId, null);
   }
 
-  const historicalPaths = currentPaths.filter((candidate) => !promotedPaths.includes(candidate));
+  for (const successorPath of successorPaths) {
+    assert.ok(
+      current.entries.some(({ path: candidate }) => candidate === successorPath),
+      `${successorPath} must be tracked by the reviewed M08 successor`,
+    );
+  }
+
+  const historicalPaths = currentPaths.filter(
+    (candidate) => !promotedPaths.includes(candidate) && !successorPaths.includes(candidate),
+  );
   historicalPaths.push(
     "scripts/ci/run-shadow-affected-quality-gate.mjs",
     "scripts/ci/test/shadow-affected-quality-gate.test.mjs",

@@ -282,10 +282,11 @@ test("runs every selected command fresh and closes one exact strict subset", asy
   assert.equal(receipt.authority, "TEST");
   assert.equal(receipt.freshExecution, true);
   assert.equal(receipt.cachedSuccessRead, false);
-  assert.equal(receipt.selectedWorkloadCount, 10);
-  assert.equal(receipt.observedClosedCount, 10);
-  assert.deepEqual(events.slice(0, 6), selection.nodeIds.slice(0, 6));
-  assert.equal(events[6], "[build-output-seal-open]");
+  assert.equal(receipt.selectedWorkloadCount, 11);
+  assert.equal(receipt.observedClosedCount, 11);
+  assert.deepEqual(events.slice(0, 7), selection.nodeIds.slice(0, 7));
+  assert.equal(events[6], "editor-core-public-package-contract");
+  assert.equal(events[7], "[build-output-seal-open]");
   assert.equal(events.at(-3), "[build-output-seal-close]");
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
@@ -318,9 +319,9 @@ test("runs canonical multi-proof selections without inventing dependency complet
   const receipt = await runRequiredAffectedQualityGate(selection, { runStep: runner() });
 
   assert.equal(selection.proofUnitCount, 2);
-  assert.equal(selection.workloadCount, 12);
+  assert.equal(selection.workloadCount, 13);
   assert.equal(receipt.status, "PASS");
-  assert.equal(receipt.observedClosedCount, 12);
+  assert.equal(receipt.observedClosedCount, 13);
   assert.deepEqual(
     receipt.steps.map(({ id }) => id),
     selection.nodeIds,
@@ -359,8 +360,8 @@ test("a selected failure stops later work and cannot authorize a pass", async ()
   assert.equal(receipt.status, "FAIL");
   assert.equal(receipt.authority, "TEST");
   assert.equal(receipt.error.message, "fixture failure");
-  assert.equal(calls, 7);
-  assert.equal(receipt.observedClosedCount, 6);
+  assert.equal(calls, 8);
+  assert.equal(receipt.observedClosedCount, 7);
 });
 
 test("the first proof failure remains primary when the closing build guard also fails", async () => {
@@ -437,8 +438,8 @@ test("cancellation between regions stops every later workload and preserves the 
     },
   });
   assert.equal(receipt.status, "FAIL");
-  assert.equal(calls, 6);
-  assert.equal(receipt.observedClosedCount, 6);
+  assert.equal(calls, 7);
+  assert.equal(receipt.observedClosedCount, 7);
   assert.equal(terminal.winner(), winner);
   assert.equal(receipt.error.message, winner.reason.message);
 });
@@ -584,8 +585,8 @@ test("required exhaustive invariants remain exact after required execution is im
   const required = createRequiredExhaustivePlan();
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
-  assert.equal(required.stepCount, 150);
-  assert.equal(required.proofPairCount, 71);
+  assert.equal(required.stepCount, 153);
+  assert.equal(required.proofPairCount, 72);
 });
 
 test("only pull requests may attempt affected execution and every ineligible plan falls back", () => {

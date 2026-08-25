@@ -1022,7 +1022,7 @@ hosted M07-T10 claim.
 
 | ID      | Status      | Depends on      | Deliverable / evidence                                               |
 | ------- | ----------- | --------------- | -------------------------------------------------------------------- |
-| M08-T01 | NOT_STARTED | G07             | Direct DESEN Source editor document model                            |
+| M08-T01 | DONE        | G07             | Direct DESEN Source editor document model                            |
 | M08-T02 | NOT_STARTED | M08-T01         | Stable-ID allocator and insert command                               |
 | M08-T03 | NOT_STARTED | M08-T02         | Delete, slot move, and ordered reorder commands                      |
 | M08-T04 | NOT_STARTED | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
@@ -1033,6 +1033,32 @@ hosted M07-T10 claim.
 | M08-T09 | NOT_STARTED | M08-T03–M08-T07 | Continuous validation and invalid-node mapping                       |
 | M08-T10 | NOT_STARTED | M08-T01–M08-T09 | React/DOM boundary, stable identity, and deterministic command tests |
 | G08     | NOT_STARTED | M08-T01–M08-T10 | UI-independent editor core produces valid sources                    |
+
+M08-T01 is `DONE` after authenticating its completed I07-04/G07 prerequisite. The built package
+admits unknown inert JSON through the frozen Source and embedded-schema structural validator and
+returns the direct detached recursively immutable Source root. It adds no wrapper, normalized
+projection, hidden AST, node index, executable authority, or partial document on rejection. Seven
+focused behavior cases, ten built public-runtime contract cases, five source compiler negatives,
+five emitted-declaration consumer negatives, and seven fail-closed public proof-core cases cover
+success, failure, ownership, unresolved semantics, package/distribution boundaries, and hostile
+input or proof drift. The independent root proof adds 13 adversarial cases and 47 tracked-file
+receipts, including an exact 24-file static ESM runtime closure. Its 19 dependency modules are
+authenticated before import by 11 still-current M02-T11 receipts plus 8 disjoint M08 successor
+receipts; the exact dependency bytes, Node runtime, loader, and process remain trusted rather than
+claiming a general hostile-JavaScript sandbox. The exact 153-workload/72-proof-pair CI successor
+registers that proof. Together they pin
+the reviewed scope in `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md` and
+`docs/proof/artifacts/editor-core-0.1.0-source-document.json`. Append-only reader checkpoint
+sequence 29 at `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`
+authenticates 26 frozen artifacts and 52 current readers; the historical I07-04/G07 sequence-28
+closure remains unchanged.
+
+This task proves structural admission and the direct immutable Source graph only. Stable-ID and
+mutation commands remain M08-T02–M08-T06, authoring isolation and unknown-extension preservation
+remain M08-T07, persistence remains M08-T08, continuous semantic validation and invalid-node
+mapping remain M08-T09, and the terminal editor-core React/DOM and deterministic-command boundary
+remains M08-T10. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. Overall implementation
+progress is 86/145 (59%), M08 is 1/10, proof gates remain 8/13, and M08-T02 is next.
 
 ## M09 — Desen App Web MVP
 

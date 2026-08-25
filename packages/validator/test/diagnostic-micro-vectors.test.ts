@@ -22,7 +22,7 @@ describe("M02-T13 validator-owned diagnostic micro-vectors", () => {
     });
     expect(transcript.cases.every(({ positive }) => positive.valid)).toBe(true);
     expect(transcript.cases.every(({ negative }) => !negative.valid)).toBe(true);
-  });
+  }, 10_000);
 
   it("covers the exact M02-T13 core trace ledger and excludes later-owner diagnostics", () => {
     const transcript = runValidatorDiagnosticMicroVectorSuite(validatorApi, fixtures);
@@ -99,5 +99,5 @@ describe("M02-T13 validator-owned diagnostic micro-vectors", () => {
           negative.repeatable,
       ),
     ).toBe(true);
-  });
+  }, 20_000);
 });

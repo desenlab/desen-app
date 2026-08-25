@@ -187,6 +187,27 @@ const PROMOTION_REMOVED_TRACKED_PATHS = Object.freeze([
   "scripts/ci/run-shadow-affected-quality-gate.mjs",
   "scripts/ci/test/shadow-affected-quality-gate.test.mjs",
 ]);
+const M08_T01_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
+  "docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md",
+  "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
+  "packages/editor-core/src/source-document.ts",
+  "packages/editor-core/test/public-package.mjs",
+  "packages/editor-core/test/public-package.types.mts",
+  "packages/editor-core/test/source-document.test.ts",
+  "packages/editor-core/test/source-document.types.ts",
+  "packages/editor-core/tsconfig.public-package.json",
+  "scripts/generate-editor-core-source-document-proof.mjs",
+  "scripts/lib/editor-core-source-document-proof.mjs",
+  "scripts/verify-editor-core-source-document.mjs",
+  "tests/editor-core-source-document.test.mjs",
+]);
+const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
+  selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
+  ownershipSha256: "8a9904c93964f6b5e979bb1369e58bb84abaa110137e47b9b839222d8e82d7d8",
+  impactGraphSha256: "47ef701b607f618e48692b33c99e0231705c1bccfdc8c3ff608587fee8e62940",
+  thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
+  inventorySha256: "e0259cb3288fbaec7faccabf2186ecf1c921de29d5187de7e88f80a85b3abdb4",
+});
 const HISTORICAL_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathCount: 1019,
   trackedPathSetSha256: "d752922fa22db81f3f76fc93d4562a17b65589e614f3281844287aa8d6656679",
@@ -204,9 +225,9 @@ const HISTORICAL_OWNERSHIP_REVIEW = Object.freeze({
   ownershipSha256: "729b84436be134709db7bf8793e232bee4dab4a27efcb61e61cd0afeaed83ee8",
 });
 const PROMOTED_OWNERSHIP_REVIEW = Object.freeze({
-  trackedPathCount: EXPECTED_AFFECTED_TRACKED_PATH_COUNT,
-  trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
-  proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
+  trackedPathCount: 1023,
+  trackedPathSetSha256: "65fe59b176e8f0a7bbaef8fdd1b3c13d09057fff3a3019fd445bce9e9fb801c4",
+  proofOwnedPathCount: 142,
   categoryCounts: Object.freeze({
     PROOF_UNIT: 142,
     CI_POLICY: 45,
@@ -215,6 +236,22 @@ const PROMOTED_OWNERSHIP_REVIEW = Object.freeze({
     PACKAGE_OR_APPLICATION: 393,
     SHARED_PROOF_INFRASTRUCTURE: 179,
     PROJECT_DOCUMENTATION: 107,
+    REPOSITORY_POLICY: 11,
+  }),
+  ownershipSha256: I07_04_PROMOTED_AUTHORITIES.ownershipSha256,
+});
+const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
+  trackedPathCount: EXPECTED_AFFECTED_TRACKED_PATH_COUNT,
+  trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
+  proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
+  categoryCounts: Object.freeze({
+    PROOF_UNIT: 144,
+    CI_POLICY: 45,
+    DEPENDENCY_POLICY: 31,
+    FROZEN_INPUT: 116,
+    PACKAGE_OR_APPLICATION: 399,
+    SHARED_PROOF_INFRASTRUCTURE: 181,
+    PROJECT_DOCUMENTATION: 108,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -360,9 +397,9 @@ const EXPECTED_OWNERSHIP_DELTA = Object.freeze({
   historicalTrackedPathCount: 1019,
   historicalTrackedPathSetSha256: HISTORICAL_OWNERSHIP_REVIEW.trackedPathSetSha256,
   historicalOwnershipSha256: HISTORICAL_OWNERSHIP_REVIEW.ownershipSha256,
-  promotedTrackedPathCount: EXPECTED_AFFECTED_TRACKED_PATH_COUNT,
-  promotedTrackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
-  promotedOwnershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
+  promotedTrackedPathCount: PROMOTED_OWNERSHIP_REVIEW.trackedPathCount,
+  promotedTrackedPathSetSha256: PROMOTED_OWNERSHIP_REVIEW.trackedPathSetSha256,
+  promotedOwnershipSha256: PROMOTED_OWNERSHIP_REVIEW.ownershipSha256,
   netExpansion: 4,
   commonPathCount: 1017,
   selectedProofOwnerDelta: 0,
@@ -594,6 +631,14 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
   headSha256: "2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546",
   frozenArtifactCount: 25,
   currentReaderCount: 50,
+  liveVerification: "PASS",
+});
+const M08_T01_PROOF_READER_CHECKPOINT = Object.freeze({
+  profile: "desen.ci.proof-reader-checkpoints.v1",
+  sequence: 29,
+  headSha256: "ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b",
+  frozenArtifactCount: 26,
+  currentReaderCount: 52,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -969,15 +1014,34 @@ function createBoundaryOwnershipDelta(rawBoundary) {
   if (boundary.selection !== "AFFECTED") {
     fail("AFFECTED_PROMOTION_BOUNDARY_REQUIRED", "Promotion boundary selection is unknown.");
   }
-  const promotedAuthority = createAffectedWorkloadOwnership(boundary.trackedPaths);
-  const promotedReview = ownershipReviewProjection(promotedAuthority);
+  const successorAuthority = createAffectedWorkloadOwnership(boundary.trackedPaths);
+  const successorReview = ownershipReviewProjection(successorAuthority);
+  if (!isDeepStrictEqual(successorReview, CURRENT_SUCCESSOR_OWNERSHIP_REVIEW)) {
+    fail(
+      "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+      "The authenticated boundary does not reproduce the reviewed current ownership successor.",
+    );
+  }
+  const successorPaths = successorAuthority.entries.map(({ path: trackedPath }) => trackedPath);
+  for (const trackedPath of M08_T01_SUCCESSOR_ADDED_TRACKED_PATHS) {
+    if (!successorPaths.includes(trackedPath)) {
+      fail(
+        "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
+        "The authenticated boundary omitted one exact M08-T01 successor path.",
+        { path: trackedPath },
+      );
+    }
+  }
+  const promotedPaths = successorPaths.filter(
+    (trackedPath) => !M08_T01_SUCCESSOR_ADDED_TRACKED_PATHS.includes(trackedPath),
+  );
+  const promotedReview = calculateAffectedWorkloadOwnershipReview(promotedPaths);
   if (!isDeepStrictEqual(promotedReview, PROMOTED_OWNERSHIP_REVIEW)) {
     fail(
       "AFFECTED_PROMOTION_OWNERSHIP_EQUIVALENCE_DRIFT",
-      "The authenticated boundary does not reproduce the promoted ownership authority.",
+      "Removing the exact M08-T01 append does not reproduce the promoted I07-04 ownership authority.",
     );
   }
-  const promotedPaths = promotedAuthority.entries.map(({ path: trackedPath }) => trackedPath);
   for (const trackedPath of PROMOTION_ADDED_TRACKED_PATHS) {
     if (!promotedPaths.includes(trackedPath)) {
       fail(
@@ -1005,7 +1069,7 @@ function createBoundaryOwnershipDelta(rawBoundary) {
     );
   }
   const addedPathAuthorities = PROMOTION_ADDED_TRACKED_PATHS.map((trackedPath) => {
-    const entry = promotedAuthority.entries.find(
+    const entry = successorAuthority.entries.find(
       ({ path: candidate }) => candidate === trackedPath,
     );
     if (
@@ -1729,11 +1793,11 @@ export function validateAffectedSelectorPromotionEvidence(rawEvidence) {
     "promotedAuthorities",
   );
   for (const [key, expected] of [
-    ["selectorSha256", EXPECTED_SHADOW_AFFECTED_SELECTOR_SHA256],
-    ["ownershipSha256", EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256],
-    ["impactGraphSha256", EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256],
-    ["thresholdSha256", EXPECTED_AFFECTED_OBSERVATION_THRESHOLD_SHA256],
-    ["inventorySha256", EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256],
+    ["selectorSha256", I07_04_PROMOTED_AUTHORITIES.selectorSha256],
+    ["ownershipSha256", I07_04_PROMOTED_AUTHORITIES.ownershipSha256],
+    ["impactGraphSha256", I07_04_PROMOTED_AUTHORITIES.impactGraphSha256],
+    ["thresholdSha256", I07_04_PROMOTED_AUTHORITIES.thresholdSha256],
+    ["inventorySha256", I07_04_PROMOTED_AUTHORITIES.inventorySha256],
   ]) {
     exactString(promotedAuthorities[key], expected, `promotedAuthorities.${key}`);
   }
@@ -1764,7 +1828,7 @@ export function validateAffectedSelectorPromotionEvidence(rawEvidence) {
   );
   exactString(
     selectionEquivalence.promotedComparisonAuthoritySha256,
-    EXPECTED_SHADOW_AFFECTED_SELECTOR_SHA256,
+    I07_04_PROMOTED_AUTHORITIES.selectorSha256,
     "selectionSemanticsEquivalence.promotedComparisonAuthoritySha256",
   );
   const measuredSources = exactArray(
@@ -1780,7 +1844,7 @@ export function validateAffectedSelectorPromotionEvidence(rawEvidence) {
   if (
     !isDeepStrictEqual(measuredSources, HISTORICAL_COMPARISON_SOURCES) ||
     comparisonAuthoritySha256(measuredSources) !== MEASURED_COMPARISON_AUTHORITY_SHA256 ||
-    comparisonAuthoritySha256(promotedSources) !== EXPECTED_SHADOW_AFFECTED_SELECTOR_SHA256 ||
+    comparisonAuthoritySha256(promotedSources) !== I07_04_PROMOTED_AUTHORITIES.selectorSha256 ||
     !isDeepStrictEqual(
       selectionEquivalence.unchangedSelectionSourcePaths,
       UNCHANGED_SELECTION_SOURCE_PATHS,
@@ -1819,7 +1883,7 @@ export function validateAffectedSelectorPromotionEvidence(rawEvidence) {
   );
   if (
     !isDeepStrictEqual(inventoryGraph, {
-      inventorySha256: EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
+      inventorySha256: I07_04_PROMOTED_AUTHORITIES.inventorySha256,
       workloadCount: 150,
       proofUnitCount: 71,
     }) ||
@@ -2004,28 +2068,45 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
       await options.beforeComparisonSourceOpen?.(source);
     },
   );
+  if (
+    comparisonAuthoritySha256(currentAuthority.sources) !== EXPECTED_SHADOW_AFFECTED_SELECTOR_SHA256
+  ) {
+    fail(
+      "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
+      "Current comparison-source receipts do not reproduce the reviewed M08-T01 successor.",
+    );
+  }
   const selectorBytes = capturedSourceBytes(currentAuthority, SELECTOR_SOURCE_PATH);
   validateSelectorPatchSet(selectorBytes);
-  const liveSelectionEquivalence = await createSelectionSemanticsEquivalence(
-    workspaceRoot,
-    currentAuthority,
-  );
-  if (!isDeepStrictEqual(evidence.selectionSemanticsEquivalence, liveSelectionEquivalence)) {
+  const currentInventory = createExhaustiveWorkloadInventory();
+  if (
+    currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
+    currentInventory.workloadCount !== 153 ||
+    currentInventory.proofUnitCount !== 72
+  ) {
     fail(
-      "AFFECTED_PROMOTION_ALGORITHM_EQUIVALENCE_DRIFT",
-      "Promotion evidence does not match the live conservative selection-equivalence authority.",
+      "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
+      "The current workload graph is not the exact reviewed M08-T01 append-only successor.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);
-  if (!isDeepStrictEqual(evidence.runnerAuthority, liveRunnerAuthority)) {
-    fail(
-      "AFFECTED_PROMOTION_RUNNER_AUTHORITY_DRIFT",
-      "Promotion evidence does not match the live required-runner authority.",
-    );
-  }
   const liveProofReaderCheckpoint = await verifyProofReaderCheckpoints({ workspaceRoot });
   validateAffectedSelectorPromotionLiveCheckpoint(liveProofReaderCheckpoint);
-  const verified = Object.freeze({ ...receipt, bytes: bytes.length, sha256: sha256(bytes) });
+  const currentPromotedAuthorities = Object.freeze({
+    selectorSha256: EXPECTED_SHADOW_AFFECTED_SELECTOR_SHA256,
+    ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
+    impactGraphSha256: EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256,
+    thresholdSha256: EXPECTED_AFFECTED_OBSERVATION_THRESHOLD_SHA256,
+    inventorySha256: EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
+    selectionEquivalenceSha256: receipt.promotedAuthorities.selectionEquivalenceSha256,
+    runnerAuthoritySha256: liveRunnerAuthority.authoritySha256,
+  });
+  const verified = Object.freeze({
+    ...receipt,
+    promotedAuthorities: currentPromotedAuthorities,
+    bytes: bytes.length,
+    sha256: sha256(bytes),
+  });
   VERIFIED_PROMOTION_RECEIPTS.set(
     verified,
     Object.freeze({
@@ -2052,11 +2133,11 @@ export function validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt) {
           liveVerification: liveReceipt.status,
         }
       : null;
-  if (!isDeepStrictEqual(projection, G07_PROOF_READER_CHECKPOINT)) {
+  if (!isDeepStrictEqual(projection, M08_T01_PROOF_READER_CHECKPOINT)) {
     fail(
       "AFFECTED_PROMOTION_CUTOVER_DRIFT",
       "Promotion evidence does not match the live proof-reader checkpoint authority.",
-      { expected: G07_PROOF_READER_CHECKPOINT, actual: projection },
+      { expected: M08_T01_PROOF_READER_CHECKPOINT, actual: projection },
     );
   }
   return liveReceipt;

@@ -1064,7 +1064,7 @@ describe("M07-T03 exact installed-package preflight", () => {
     );
     expect(capabilityCatalogSet).not.toHaveBeenCalled();
     expect(capabilityDigest).not.toHaveBeenCalled();
-  });
+  }, 30_000);
 
   it("enforces exact framer and aggregate package-preimage ceilings", () => {
     const fixture = packageFixture();

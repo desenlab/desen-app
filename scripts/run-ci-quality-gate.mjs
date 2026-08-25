@@ -359,6 +359,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-reference-host-web-channel-consumption.mjs",
       "tests/reference-host-web-channel-consumption.test.mjs",
     ],
+    [
+      "editor-core-source-document",
+      "scripts/verify-editor-core-source-document.mjs",
+      "tests/editor-core-source-document.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -400,14 +405,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e";
+  "1fcadf7c4ce238a0cddc8397735803a95175b09590fb51c411967852f2c3cde6";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "bac4fe3874e13ffafde163e8a396d3d4156e9cd583b0d66ca634bfb3e9ab308c";
+  "bbbe83b8d7c8160760938e5ef8acdc7eed921c6c1b7353cc1119b0710f5cb741";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "6838b57e69d78fad6c0de08a9ffb7b9530dc5c50bc17ee2779e949cf86985fce";
+  "c4630c749e992b6a4d294a3c8e2900dd33d4c21b1389224b4f9c899507a6637d";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "8a08431ea00f10137c5d5e9cc69484d1aed5f7f9ba7370cd74af0e447e0e8e75";
+const QUALITY_GATE_PLAN_SHA256 = "edc62f2aee78d26486db76cff754b489f6ea72e974ee5fd3bf4edc495f7a96ef";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -415,7 +420,7 @@ const QUALITY_GATE_PLAN_SHA256 = "8a08431ea00f10137c5d5e9cc69484d1aed5f7f9ba7370
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "4ba2623716789078653d4c0f57848c57255385f4cc8c941a38de39b94bba5529";
+  "0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
@@ -702,6 +707,22 @@ function classifyLegacyPrerequisite({
       });
     }
     return "package-test";
+  }
+
+  if (task === "test:public-package") {
+    const expectedScript =
+      "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
+    if (
+      currentProofId !== "editor-core-source-document" ||
+      packageName !== "@desen/editor-core" ||
+      packageManifest.scripts?.[task] !== expectedScript
+    ) {
+      throw new QualityGateError(
+        `${currentProofId} uses an unreviewed public-package contract test.`,
+        { command, actual: packageManifest.scripts?.[task] },
+      );
+    }
+    return "public-package-contract-test";
   }
 
   if (task.startsWith("test:")) {
@@ -1004,6 +1025,12 @@ export function createQualityGateSteps() {
       "run",
       "test",
     ]),
+    commandStep(
+      "editor-core-public-package-contract",
+      "Editor core public-package contract",
+      "pnpm",
+      ["--filter", "@desen/editor-core", "test:public-package"],
+    ),
     ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
       commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),
     ),

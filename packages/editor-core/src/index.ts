@@ -4,4 +4,11 @@
  * @packageDocumentation
  */
 
-export {};
+export { createDesenEditorDocument } from "./source-document.js";
+
+export type {
+  DesenEditorDocument,
+  DesenEditorDocumentCreationFailure,
+  DesenEditorDocumentCreationResult,
+  DesenEditorDocumentCreationSuccess,
+} from "./source-document.js";

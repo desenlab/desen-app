@@ -3149,3 +3149,45 @@ This file records implementation discoveries without changing the frozen DESEN 0
   limits before N-041 can leave `PLANNED`. A later protocol revision should standardize channel
   notification and host-delivery interoperability only if independent implementations need a
   shared transport contract beyond the observable activation invariants.
+
+## PF-078 — Producer ownership does not require retained mutable object identity
+
+- Status: OPEN
+- Blocks proof: No; M08-T01 defines one direct immutable in-memory Source profile without changing
+  frozen protocol bytes or claiming mutation-command, persistence, or continuous-validation
+  behavior.
+- Protocol location: SPEC Sections 5.3, 6.1.1, 6.2, and 11.2; `R-011`; related findings `PF-060`,
+  `PF-065`, and `PF-066`
+- Observation: DESEN 0.1.0 defines `desen.source` as the editable, producer-owned project
+  representation, but it does not prescribe whether a JavaScript producer retains mutable object
+  identity, whether an editor wraps Source in a private AST, or whether initial editor admission
+  includes Catalog-backed semantic validation. Retaining caller identity would let external
+  mutation bypass deterministic editor commands. A private parallel AST would contradict the
+  planned direct-Source model and create a second synchronization authority. Requiring complete
+  semantic validity at admission would also prevent the later continuous-validation layer from
+  representing structurally valid unresolved work.
+- Implementation decision: M08-T01 uses the recursively immutable `DesenSource` graph as the
+  editor document itself. `createDesenEditorDocument` accepts unknown inert data and delegates only
+  root and embedded-schema admission to the existing frozen 0.1.0 structural validator. A success
+  returns the validator's detached snapshot directly; it adds no wrapper root, normalized
+  projection, hidden AST, node index, executable value, platform object, persistence handle, or
+  publication authority. A failure carries the existing frozen structural diagnostics and no
+  partial document. Independent calls produce independent snapshots, while the caller's input is
+  neither retained nor frozen. Accessor-backed input and serialization hooks are rejected without
+  invocation, and the built package root exposes only this factory while its emitted declarations
+  preserve the same direct immutable Source result. A fresh in-memory proof core also executes the
+  emitted public API and audits the exact source, distribution, manifest, TSDoc, test inventory,
+  and platform boundary. After authenticating the completed I07-04/G07 prerequisite, the
+  13-case independent root proof now pins that exact scope and 47 tracked-file receipts in the
+  M08-T01 artifact and rejects behavior, source, distribution, manifest, test-inventory,
+  prerequisite, artifact, and hostile proof-option drift. The receipts include an exact 24-file
+  static ESM runtime closure whose 19 dependency modules are authenticated before import by 11
+  still-current M02-T11 receipts plus 8 disjoint M08 successor receipts. The exact dependency
+  bytes, Node runtime, loader, and process remain trusted authorities; no general
+  hostile-JavaScript sandbox is claimed. This completes only the direct Source
+  admission decision; it changes no `P-*`, `N-*`, `S-*`, or proof-gate status.
+- Future action: M08-T02 through M08-T07 must express every edit as a deterministic transition to a
+  new direct Source snapshot, retain ordinary stable identities, isolate authoring-only state, and
+  preserve unknown extensions and semantic array order. M08-T08 owns persistence, M08-T09 owns
+  continuous semantic validation and invalid-node mapping, and M08-T10 must independently prove
+  the complete direct-artifact round trip and React/DOM boundary.

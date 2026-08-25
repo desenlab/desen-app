@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-13
+Last updated: 2026-08-25
 
 ## Plain-language status
 
@@ -755,9 +755,10 @@ exhaustive. The hosted bootstrap succeeded,
 but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE` with `UNSUPPORTED_CHANGE_KIND`, so
 no eligible strict-subset observation was counted and the threshold was `0 / 20` then. The
 authoritative hosted Quality gate passed. Local focused contracts passed 91/91 and the complete
-CI-infrastructure suite passed 203/203. The full local `REQUIRED + EXHAUSTIVE` run is
-`BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned `EPERM` in two pre-existing
-control-plane TCP lifecycle cases; the hosted gate passed the repository authority. Exact run and
+CI-infrastructure suite passed 203/203. At that historical checkpoint, the full local
+`REQUIRED + EXHAUSTIVE` run was `BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned
+`EPERM` in two pre-existing control-plane TCP lifecycle cases; the hosted gate passed the
+repository authority. Exact run and
 job identifiers are pinned in the
 [I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json). `DEBT-I07-017`
 assigns shadow-only cleanup to I07-04 for removal by G07; `DEBT-I07-018` assigns the new historical
@@ -765,17 +766,31 @@ reader bridges to the same I07-04/G07 cleanup; I07-05 owns legacy retirement by 
 `DONE`. M07-T11 is also `DONE`; all M07 implementation work was complete, while G07 still remained
 open for I07-04 at that checkpoint.
 
+M08-T01 now establishes the first framework-neutral editor-core slice. The built package admits
+unknown inert JSON through the frozen Source and embedded-schema structural validator and returns
+the direct detached recursively immutable Source graph. It neither retains nor freezes caller
+input, exposes no partial document on rejection, accepts structurally valid unresolved Catalog
+semantics, and adds no wrapper, normalized projection, hidden AST, node index, executable
+authority, platform value, persistence handle, or publication state. Seven focused behavior
+cases, ten built public-runtime contract cases, two independent groups of five compiler negatives,
+seven public proof-core cases, and a 13-case independent tracked root proof close this exact
+boundary. The artifact carries 47 tracked-file receipts, including the exact 24-file runtime
+closure. The evidence changes no `P-*`, `N-*`,
+`S-*`, or proof-gate status. Commands, persistence, continuous semantic validation, and the
+terminal editor integration boundary remain assigned to M08-T02–M08-T10.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `85 / 145 tasks complete (59%)`
+- Overall implementation progress: `86 / 145 tasks complete (59%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
+- M08 progress: `1 / 10 tasks complete (10%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -846,17 +861,19 @@ open for I07-04 at that checkpoint.
   `M07-T08 — Restart recovery validates and restores the transactional active/previous-good record`,
   `M07-T09 — Fault injection from discovery and immutable fetch through durable commit and recovery`,
   `M07-T10 — Ordered transition, activation/recovery race, restart, and SQLite profile-drift matrix`,
-  `M07-T11 — Control-plane channel consumed by separately built reference host`
+  `M07-T11 — Control-plane channel consumed by separately built reference host`,
+  `M08-T01 — Direct DESEN Source editor document model`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T01 — Direct DESEN Source editor document model`
-- Status: M07 is 11/11, I07-04 and G07 are `DONE`, proof gates are 8/13, and implementation
-  progress remains 85/145. All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN`
-  under I07-05.
+- Next implementation task: `M08-T02 — Stable-ID allocator and insert command`
+- Status: M08 is 1/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 86/145. All 17 G07-due entries remain `CLOSED`;
+  `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 is `DONE` with tracked artifact, independent
+  root proof, and CI inventory registration; its exact evidence and nonclaims are recorded below.
 
 ## Completed preparation
 
@@ -1310,11 +1327,28 @@ closing 10/10 selected workloads for one proof unit as a strict subset without c
 bootstrap Quality gate also passed.
 Local focused contracts passed 91/91 and CI-infrastructure tests passed 203/203. The full local
 `REQUIRED + EXHAUSTIVE` run is `BLOCKED_BY_LOCAL_SANDBOX` only because `127.0.0.1` listen returned
-`EPERM` in two pre-existing control-plane TCP lifecycle cases; hosted execution passed. Sequence
-28 at `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`
+`EPERM` in two pre-existing control-plane TCP lifecycle cases; hosted execution passed. At the
+I07-04/G07 closure checkpoint, sequence 28 at
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`
 authenticates 25 frozen artifacts and 50 current readers. All 17 G07-due debt entries are `CLOSED`,
 while `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07 are `DONE`; proof gates are 8/13,
-and M08-T01 is next.
+and M08-T01 was next at that closure checkpoint.
+
+M08-T01 is now complete. `createDesenEditorDocument` admits only inert structurally valid DESEN
+0.1.0 Source input and returns the direct detached recursively immutable Source graph. Invalid
+root or embedded-schema structure returns frozen diagnostics without partial document authority;
+structurally valid unresolved Catalog references remain representable for M08-T09. The built
+package exposes only the reviewed factory and remains platform-neutral. The tracked artifact and
+independent root proof close behavior, source, distribution, manifest, TSDoc, test-inventory,
+prerequisite, and artifact drift. This advances implementation progress to 86/145 (59%) and M08
+to 1/10 without changing the 8/13 proof-gate count or any `P-*`, `N-*`, or `S-*` status. M08-T02 is
+next; commands, persistence, continuous semantic validation, and terminal editor integration are
+not claimed by M08-T01.
+
+The current append-only reader successor is sequence 29 at
+`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
+artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
+unchanged.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -2623,6 +2657,50 @@ M07-T11 evidence:
 - coverage decision: M07-T11 is `DONE`; M07 is 11/11; overall progress is 85/145; N-038 stays
   `TESTED`; N-041 stays `PLANNED`; P-12 stays `NOT_PROVEN`; G07 stays `NOT_STARTED` because I07-04
   remains at `0 / 20`
+
+M08-T01 evidence:
+
+- `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md`
+- `docs/proof/artifacts/editor-core-0.1.0-source-document.json`
+- direct model result: one structurally admitted, detached, recursively immutable DESEN Source
+  graph with no wrapper, normalized projection, hidden AST, node index, executable authority,
+  platform value, persistence handle, publication state, or partial rejection document
+- focused inventory: 7 package behavior cases, 10 built public-runtime contract cases, 5 source
+  compiler negatives, 5 emitted-declaration consumer negatives, and 7 public proof-core cases
+- independent closure: the root proof authenticates the completed I07-04/G07 prerequisite, verifies
+  47 tracked-file receipts from fresh inputs, and uses 13 adversarial cases to reject behavior,
+  source, distribution, manifest, TSDoc, test-inventory, prerequisite, artifact, and hostile
+  proof-option drift
+- runtime closure: 3 exact manifests and 21 static ESM modules total 24 receipted files and
+  1,392,921 bytes; the 19 dependency modules are authenticated before import by 11 still-current
+  M02-T11 receipts plus 8 disjoint M08 successor receipts. The exact dependency bytes, Node
+  runtime, loader, and process remain trusted; no general hostile-JavaScript sandbox is claimed
+- CI authority: `editor-core-source-document` follows `protocol-structural-validation` in the
+  exact 153-workload, 72-proof-pair successor (61 ordinary pairs and 11 barriers); focused CI
+  contracts pass 148/148, and the 15/15 ownership reseal covers 1,035 tracked paths with 144
+  proof-owned paths
+- retained projection: 489 prerequisite segments, 3,129 ordered legacy leaves, and 242 distinct
+  leaves; the exact shared-state classes are 6 `GLOBAL_EXCLUSIVE`, 2
+  `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 64
+  `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+  `PROOF_WORKSPACE_TEMP_EXCLUSIVE`
+- filesystem compatibility: 135 `NONE`, 2 `FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1
+  `FIXTURE_COPY_AND_REVIEWED_SYMLINK`
+- workspace test inventory: 15 scripts at
+  `sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`
+- current reader authority: append-only sequence 29 at
+  `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b` authenticates 26 frozen
+  artifacts and 52 readers while preserving historical sequence 28
+- local validation truth: editor-core package tests pass 7/7, public-package tests pass 17/17,
+  root adversarial tests pass 13/13, and generator/verifier, typecheck, lint, the 27/27 shared-state
+  suite, and the 28/28 selector/promotion suite pass. PR #39 hosted Quality gate passes on head
+  `65cacf6` in run `32878437248`; the redundant serial local `pnpm check` replay was stopped after
+  M07-T01, so no complete local-gate PASS is claimed
+- scope nonclaims: no edit-command, stable-ID allocation, persistence, continuous semantic
+  validation, invalid-node mapping, terminal M08 React/DOM boundary, production activation, or
+  publication result is claimed
+- coverage decision: M08-T01 is `DONE`; overall progress is 86/145 (59%); M08 is 1/10; proof gates
+  remain 8/13; no `P-*`, `N-*`, or `S-*` status changes; M08-T02 owns the next slice
 
 ## Status vocabulary
 

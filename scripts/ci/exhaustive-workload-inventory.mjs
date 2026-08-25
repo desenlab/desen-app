@@ -96,13 +96,13 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "4117c52c0e7a8e64a49c66a0ab576fd4d14cb2e8a431c6d7896d0bb53488b59e";
+  "1fcadf7c4ce238a0cddc8397735803a95175b09590fb51c411967852f2c3cde6";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "bac4fe3874e13ffafde163e8a396d3d4156e9cd583b0d66ca634bfb3e9ab308c";
+  "bbbe83b8d7c8160760938e5ef8acdc7eed921c6c1b7353cc1119b0710f5cb741";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "6838b57e69d78fad6c0de08a9ffb7b9530dc5c50bc17ee2779e949cf86985fce";
+  "c4630c749e992b6a4d294a3c8e2900dd33d4c21b1389224b4f9c899507a6637d";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "4ba2623716789078653d4c0f57848c57255385f4cc8c941a38de39b94bba5529";
+  "0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
@@ -457,6 +457,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "reference-host-web-channel-consumption",
     "scripts/verify-reference-host-web-channel-consumption.mjs",
     "tests/reference-host-web-channel-consumption.test.mjs",
+  ],
+  [
+    "editor-core-source-document",
+    "scripts/verify-editor-core-source-document.mjs",
+    "tests/editor-core-source-document.test.mjs",
   ],
 ]);
 
@@ -830,6 +835,21 @@ function classifyPrerequisite({
     if (!packageScripts.test) fail(packageName + " no longer defines its full test suite.");
     return "package-test";
   }
+  if (task === "test:public-package") {
+    const expectedScript =
+      "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
+    if (
+      currentProofId !== "editor-core-source-document" ||
+      packageName !== "@desen/editor-core" ||
+      packageScripts[task] !== expectedScript
+    ) {
+      fail(currentProofId + " uses an unreviewed public-package contract test.", {
+        command,
+        actual: packageScripts[task],
+      });
+    }
+    return "public-package-contract-test";
+  }
   if (task.startsWith("test:")) {
     assertFocusedTestCovered(packageManifest, task);
     return "focused-package-test";
@@ -1077,6 +1097,15 @@ function buildCanonicalInventory() {
       "SERIAL_GLOBAL",
       SHARED_BUILD_READER,
     ),
+    node(
+      "editor-core-public-package-contract",
+      "Editor core public-package contract",
+      "pnpm",
+      ["--filter", "@desen/editor-core", "test:public-package"],
+      ["package-tests"],
+      "SERIAL_BUILD_WRITER",
+      SHARED_BUILD_WRITER,
+    ),
   ];
   const verifiers = PROOF_UNIT_TUPLES.map(([id, verifierFile]) =>
     node(
@@ -1084,7 +1113,11 @@ function buildCanonicalInventory() {
       "Proof verifier: " + id,
       "node",
       [verifierFile],
-      ["package-tests"],
+      [
+        id === "editor-core-source-document"
+          ? "editor-core-public-package-contract"
+          : "package-tests",
+      ],
       "CONCURRENT_PROOF",
       SHARED_BUILD_READER,
     ),
@@ -1349,7 +1382,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "e0259cb3288fbaec7faccabf2186ecf1c921de29d5187de7e88f80a85b3abdb4";
+  "2e25f738ec948ca47c6d50fba2dbdab487cfd41ae3701d86e206c473b477d201";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {
