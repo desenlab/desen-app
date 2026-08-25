@@ -1757,8 +1757,40 @@ The exact one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 with receipt `sha256:4ac6f159f1487a1f9a969f88bd26be575ecf28ce6c66574206395afb659518f2`.
 It selected and closed exactly 10 workloads for one proof unit, remained a strict subset, and read
-no cached success. Sequence 28 at
+no cached success. At the I07-04/G07 closure checkpoint, sequence 28 at
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
 artifacts and 50 current readers. All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains
 `OPEN` for I07-05. I07-04 and G07 are `DONE`, advancing proof gates to 8/13 without changing the
-85/145 implementation count. P-12 remains `NOT_PROVEN`; M08-T01 is next.
+85/145 implementation count at that closure checkpoint. P-12 remains `NOT_PROVEN`.
+
+## M08-T01 — Direct DESEN Source editor document model
+
+The built `@desen/editor-core` root now admits unknown inert JSON through the frozen DESEN 0.1.0
+Source and embedded-schema structural validator. Success returns the direct detached recursively
+immutable Source graph without a wrapper, normalized production projection, hidden AST, node
+index, executable authority, platform value, persistence handle, or publication state. Rejection
+returns frozen structural diagnostics without a partial document. Structurally valid unresolved
+Catalog semantics remain admissible for later continuous validation.
+
+Seven focused package cases, ten built public-runtime contract cases, five source compiler
+negatives, five emitted-declaration consumer negatives, and seven public proof-core cases cover
+the reviewed behavior, type, package, distribution, and platform boundary. The independent root
+proof authenticates the completed I07-04/G07 prerequisite, verifies 24 tracked-file receipts, and
+uses 13 adversarial cases to fail closed on behavior, source, distribution, manifest,
+test-inventory, prerequisite, artifact, and hostile proof-option drift. CI registers
+`editor-core-source-document` after
+`protocol-structural-validation` in the exact 152-workload/72-proof-pair successor. Exact evidence lives in
+[`EDITOR-CORE-SOURCE-DOCUMENT.md`](EDITOR-CORE-SOURCE-DOCUMENT.md) and
+`artifacts/editor-core-0.1.0-source-document.json`.
+
+The current append-only reader successor is sequence 29 at
+`ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`, authenticating 26 frozen
+artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
+unchanged.
+
+M08-T01 is `DONE`, advancing implementation progress to 86/145 (59%) and M08 to 1/10. Proof gates
+remain 8/13 and no `P-*`, `N-*`, or `S-*` status changes. Stable-ID allocation and editing commands
+remain M08-T02–M08-T06, authoring isolation and unknown-extension preservation remain M08-T07,
+persistence remains M08-T08, continuous semantic validation and invalid-node mapping remain
+M08-T09, and the terminal independent editor-core React/DOM boundary remains M08-T10. M08-T02 is
+next.

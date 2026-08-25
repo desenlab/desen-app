@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████░░░░░░░░░░` **85 / 145 tasks complete (59%)**
+**Overall:** `███████████████░░░░░░░░░░` **86 / 145 tasks complete (59%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -22,7 +22,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T01`
+**M08:** `█░░░░░░░░░` **1 / 10 tasks complete (10%)**
+
+**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -413,10 +415,12 @@ The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) then
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935):
 10 workloads, one proof unit, 10 observed closes, a strict subset, and no cached success. All 17
 G07-due debt entries are `CLOSED`; `DEBT-I07-007` deliberately remains `OPEN` for I07-05. The
-append-only reader checkpoint remains sequence 28 at
+historical I07-04/G07 closure checkpoint was sequence 28 at
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
-artifacts and 50 current readers. I07-04 and G07 are `DONE`; proof gates are 8/13, implementation
-progress remains 85/145, and M08-T01 is next. Legacy retirement remains owned by I07-05.
+artifacts and 50 readers. The current append-only successor is sequence 29 at
+`ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`, authenticating 26 frozen
+artifacts and 52 current readers. I07-04 and G07 remain `DONE`; proof gates remain 8/13,
+implementation progress is 86/145, and M08-T02 is next. Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

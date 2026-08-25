@@ -1022,7 +1022,7 @@ hosted M07-T10 claim.
 
 | ID      | Status      | Depends on      | Deliverable / evidence                                               |
 | ------- | ----------- | --------------- | -------------------------------------------------------------------- |
-| M08-T01 | IN_PROGRESS | G07             | Direct DESEN Source editor document model                            |
+| M08-T01 | DONE        | G07             | Direct DESEN Source editor document model                            |
 | M08-T02 | NOT_STARTED | M08-T01         | Stable-ID allocator and insert command                               |
 | M08-T03 | NOT_STARTED | M08-T02         | Delete, slot move, and ordered reorder commands                      |
 | M08-T04 | NOT_STARTED | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
@@ -1034,19 +1034,27 @@ hosted M07-T10 claim.
 | M08-T10 | NOT_STARTED | M08-T01–M08-T09 | React/DOM boundary, stable identity, and deterministic command tests |
 | G08     | NOT_STARTED | M08-T01–M08-T10 | UI-independent editor core produces valid sources                    |
 
-M08-T01 implementation began in an isolated worktree by explicit user direction while I07-04's
-hosted observation threshold continues independently. This does not mark G07 complete or waive
-the task's formal G07 dependency. The current slice admits unknown inert JSON through the frozen
-Source structural validator and returns the direct detached immutable Source root, with no hidden
-AST or continuous semantic-validation claim. Seven direct package cases now cover exact success
-and failure shells, detached ownership on both branches, embedded schemas, unresolved semantics,
-and non-invocation of caller accessors or serialization hooks. A separate built-package runtime
-and declaration consumer now guards the exact export/dependency map, emitted platform boundary,
-ten runtime cases, and five compiler-negative cases. Seven additional in-memory proof-core cases
-reject wrapper, caller-retention, mutable-result, partial-failure, semantic-overreach, source,
-distribution, manifest, test-inventory, and hostile-option drift without creating new root proof
-authority. The fresh root proof pair, artifact, CI inventory reseal, task closure, and any `DONE`
-status remain gated on G07 completion.
+M08-T01 is `DONE` after authenticating its completed I07-04/G07 prerequisite. The built package
+admits unknown inert JSON through the frozen Source and embedded-schema structural validator and
+returns the direct detached recursively immutable Source root. It adds no wrapper, normalized
+projection, hidden AST, node index, executable authority, or partial document on rejection. Seven
+focused behavior cases, ten built public-runtime contract cases, five source compiler negatives,
+five emitted-declaration consumer negatives, and seven fail-closed public proof-core cases cover
+success, failure, ownership, unresolved semantics, package/distribution boundaries, and hostile
+input or proof drift. The independent root proof adds 13 adversarial cases and 24 tracked-file
+receipts; the exact 152-workload/72-proof-pair CI successor registers that proof. Together they pin
+the reviewed scope in `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md` and
+`docs/proof/artifacts/editor-core-0.1.0-source-document.json`. Append-only reader checkpoint
+sequence 29 at `ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`
+authenticates 26 frozen artifacts and 52 current readers; the historical I07-04/G07 sequence-28
+closure remains unchanged.
+
+This task proves structural admission and the direct immutable Source graph only. Stable-ID and
+mutation commands remain M08-T02–M08-T06, authoring isolation and unknown-extension preservation
+remain M08-T07, persistence remains M08-T08, continuous semantic validation and invalid-node
+mapping remain M08-T09, and the terminal editor-core React/DOM and deterministic-command boundary
+remains M08-T10. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. Overall implementation
+progress is 86/145 (59%), M08 is 1/10, proof gates remain 8/13, and M08-T02 is next.
 
 ## M09 — Desen App Web MVP
 

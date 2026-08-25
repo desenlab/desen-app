@@ -31,8 +31,8 @@ No React, DOM, canvas UI, production activation, or hidden document model.
 
 ## Status
 
-Private. The direct Source document model is implemented under M08-T01; editor commands remain
-tracked by M08-T02 through M08-T07.
+Private. M08-T01's direct Source document model is complete; stable-ID allocation and insert
+commands remain next under M08-T02, followed by the other tracked editor command tasks.
 
 ## Protocol and target support
 
@@ -47,5 +47,9 @@ Run the direct model suite with
 public root through its export map, runs ten emitted-JavaScript contract cases, compiles five
 negative assertions against the emitted declarations, and exercises seven fail-closed in-memory
 proof-core cases. The proof core audits the exact source, distribution, manifest, TSDoc, test
-inventory, and platform boundary without writing an artifact or registering a root proof workload.
-Those authority-bearing steps and `pnpm check` remain gated on the formal G07 prerequisite.
+inventory, and platform boundary. After authenticating the exact completed I07-04/G07 prerequisite,
+`node scripts/generate-editor-core-source-document-proof.mjs` writes the tracked artifact,
+`node scripts/verify-editor-core-source-document.mjs` verifies it, and
+`node --test tests/editor-core-source-document.test.mjs` runs 13 independent adversarial cases over
+24 tracked-file receipts. `pnpm check` includes the same proof. The evidence document is
+`docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md`.

@@ -3177,8 +3177,11 @@ This file records implementation discoveries without changing the frozen DESEN 0
   invocation, and the built package root exposes only this factory while its emitted declarations
   preserve the same direct immutable Source result. A fresh in-memory proof core also executes the
   emitted public API and audits the exact source, distribution, manifest, TSDoc, test inventory,
-  and platform boundary. It deliberately writes no artifact and registers no root proof workload
-  until the formal G07 prerequisite exists.
+  and platform boundary. After authenticating the completed I07-04/G07 prerequisite, the
+  13-case independent root proof now pins that exact scope and 24 tracked-file receipts in the
+  M08-T01 artifact and rejects behavior, source, distribution, manifest, test-inventory,
+  prerequisite, artifact, and hostile proof-option drift. This completes only the direct Source
+  admission decision; it changes no `P-*`, `N-*`, `S-*`, or proof-gate status.
 - Future action: M08-T02 through M08-T07 must express every edit as a deterministic transition to a
   new direct Source snapshot, retain ordinary stable identities, isolate authoring-only state, and
   preserve unknown extensions and semantic array order. M08-T08 owns persistence, M08-T09 owns

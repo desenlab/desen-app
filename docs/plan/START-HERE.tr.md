@@ -351,10 +351,25 @@ tam çalışır. [Temizlik PR #36](https://github.com/desenlab/desen-app/pull/36
 [run 31676049922 / job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935)
 içinde 3 dakika 54 saniyede taze `REQUIRED + AFFECTED` geçti: 10 iş yükü, bir kanıt birimi ve 10
 kapanış; dar kapsam gerçekti ve önbellekten başarı okunmadı. On yedi G07 borcu `CLOSED` oldu;
-`DEBT-I07-007` I07-05 için `OPEN` kalır. Sequence 28,
+`DEBT-I07-007` I07-05 için `OPEN` kalır. I07-04/G07 kapanışındaki tarihsel sequence 28,
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` başıyla 25 donmuş
 artifact/50 güncel reader doğrular. I07-04 ve G07 artık `DONE`; kanıt kapıları 8/13, uygulama
-ilerlemesi değişmeden 85/145 görevdir (%59) ve sıradaki iş M08-T01'dir.
+ilerlemesi bu kapanış noktasında 85/145 görevdir (%59).
+
+M08-T01 de tamamlandı. `@desen/editor-core`, bilinmeyen inert JSON'u donmuş Source ve gömülü
+şema yapısal doğrulayıcısından geçirir; başarıda sarmalayıcı, gizli AST veya düğüm dizini
+eklemeden doğrudan ayrık ve özyinelemeli değişmez `desen.source` kökünü verir. Başarısızlık
+kısmi belge yetkisi vermez. Yedi odak davranış testi ile on built public-runtime vakası, iki
+ayrı beşer compiler-negative grubu, yedi public proof-core vakası ve 24 izlenen dosya receipt'ini
+doğrulayan 13 vakalı bağımsız root kanıtı bu dar kapsamı korur. Kanıt
+[`EDITOR-CORE-SOURCE-DOCUMENT.md`](../proof/EDITOR-CORE-SOURCE-DOCUMENT.md) ve izlenen artifact'ta
+sabittir. Güncel append-only reader ardılı sequence 29'dur;
+`ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9` başıyla 26 donmuş
+artifact ve 52 güncel reader doğrular. Bu sonuç düzenleme komutlarını, authoring izolasyonunu,
+bilinmeyen extension korumasını, persistence'ı, sürekli semantik doğrulamayı veya M08 terminal
+React/DOM sınırını kanıtlamaz; bu sahiplikler sırasıyla M08-T02–T06, M08-T07, M08-T08, M08-T09 ve
+M08-T10'da kalır. Genel ilerleme 86/145 (%59), M08 ilerlemesi 1/10, kanıt kapıları 8/13'tür;
+sıradaki iş M08-T02'dir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

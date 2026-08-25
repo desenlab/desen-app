@@ -66,6 +66,11 @@ direct Source snapshots and preserve stable identities, but M08-T01 provides no 
 allocation, persistence, selection, viewport, or authoring-state policy. `PF-078` records why
 producer ownership does not grant retained caller mutation authority.
 
+The M08-T01 proof closes this boundary against the emitted public package as well as the source:
+the package exposes one runtime factory, depends only on `protocol` and `validator`, and has zero
+platform imports or executable authority. This is not the terminal M08 platform-boundary claim;
+M08-T10 still owns the independent editor-core artifact and React/DOM integration proof.
+
 `runtime-core` accepts a verified bundle, exact catalog set, and host ports. It produces
 JSON-serializable state snapshots, diagnostics, and render plans. `runtime-react` translates those
 plans into registered React components. This keeps protocol execution semantics reusable by a
