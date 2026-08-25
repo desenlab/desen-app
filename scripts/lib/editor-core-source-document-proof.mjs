@@ -159,7 +159,10 @@ function captureOwnDataRecord(value, label, allowedKeys = undefined) {
 
 function captureOptions(rawOptions) {
   if (rawOptions === undefined) {
-    return Object.freeze({ fileOverrides: Object.freeze(Object.create(null)) });
+    return Object.freeze({
+      fileOverrides: Object.freeze(Object.create(null)),
+      runtimeApi: captureRuntimeApi(undefined),
+    });
   }
   const options = captureOwnDataRecord(rawOptions, "proof options", [
     "fileOverrides",
@@ -187,7 +190,7 @@ function captureOptions(rawOptions) {
   }
   return Object.freeze({
     fileOverrides: Object.freeze(overrides),
-    ...(options.runtimeApi === undefined ? {} : { runtimeApi: options.runtimeApi }),
+    runtimeApi: captureRuntimeApi(options.runtimeApi),
   });
 }
 
@@ -227,51 +230,117 @@ function sorted(values) {
   return [...values].sort((left, right) => left.localeCompare(right, "en"));
 }
 
-function assertPlainOwnDataFrozen(root, label) {
-  const pending = [root];
+function inspectFrozenInertJson(root, label) {
+  const pending = [{ value: root, pointer: "" }];
   const visited = new Set();
+  const objects = new Set();
   while (pending.length > 0) {
-    const value = pending.pop();
-    if (value === null || typeof value !== "object" || visited.has(value)) continue;
-    if (utilTypes.isProxy(value)) {
-      fail("EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT", `${label} contains a Proxy.`);
-    }
-    visited.add(value);
-    if (
-      !Object.isFrozen(value) ||
-      Object.getPrototypeOf(value) !==
-        (Array.isArray(value) ? Array.prototype : Object.prototype) ||
-      Object.getOwnPropertySymbols(value).length !== 0
-    ) {
+    const { value, pointer } = pending.pop();
+    if (value === null || typeof value === "string" || typeof value === "boolean") continue;
+    if (typeof value === "number") {
+      if (Number.isFinite(value)) continue;
       fail(
         "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
-        `${label} must be deeply frozen plain JSON data.`,
+        `${label}${pointer} contains a non-finite number.`,
       );
     }
-    for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
-      if (!("value" in descriptor) || (!descriptor.enumerable && key !== "length")) {
+    if (typeof value !== "object") {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} contains a non-JSON ${typeof value} value.`,
+      );
+    }
+    if (utilTypes.isProxy(value)) {
+      fail("EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT", `${label}${pointer} contains a Proxy.`);
+    }
+    if (visited.has(value)) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} contains a cycle or aliased JSON object.`,
+      );
+    }
+    visited.add(value);
+    objects.add(value);
+    let prototype;
+    let keys;
+    try {
+      prototype = Object.getPrototypeOf(value);
+      keys = Reflect.ownKeys(value);
+    } catch {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} could not be inspected safely.`,
+      );
+    }
+    const array = Array.isArray(value);
+    if (!Object.isFrozen(value) || prototype !== (array ? Array.prototype : Object.prototype)) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} must be frozen plain JSON data.`,
+      );
+    }
+    if (keys.some((key) => typeof key !== "string")) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} contains a symbol property.`,
+      );
+    }
+    const expectedArrayKeys = array
+      ? [...Array.from({ length: value.length }, (_, index) => String(index)), "length"]
+      : undefined;
+    if (array && !exactJson(keys, expectedArrayKeys)) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} must be a dense JSON array with only index keys and length.`,
+      );
+    }
+    for (const key of keys) {
+      let descriptor;
+      try {
+        descriptor = Object.getOwnPropertyDescriptor(value, key);
+      } catch {
         fail(
           "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
-          `${label}.${key} is not an enumerable own-data value.`,
+          `${label}${pointer}/${key} could not be inspected safely.`,
         );
       }
-      pending.push(descriptor.value);
+      const arrayLength = array && key === "length";
+      if (
+        descriptor === undefined ||
+        !("value" in descriptor) ||
+        descriptor.enumerable === arrayLength
+      ) {
+        fail(
+          "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+          `${label}${pointer}/${key} is not an exact own-data JSON property.`,
+        );
+      }
+      if (!arrayLength) pending.push({ value: descriptor.value, pointer: `${pointer}/${key}` });
     }
   }
+  return Object.freeze({ objects });
 }
 
 function captureRuntimeApi(value) {
-  if (value === undefined) return editorCorePublicApi;
-  const api = captureOwnDataRecord(value, "runtimeApi");
-  return api;
+  const candidate =
+    value === undefined
+      ? { createDesenEditorDocument: editorCorePublicApi.createDesenEditorDocument }
+      : value;
+  const api = captureOwnDataRecord(candidate, "runtimeApi", ["createDesenEditorDocument"]);
+  if (typeof api.createDesenEditorDocument !== "function") {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID",
+      "runtimeApi.createDesenEditorDocument must be a function.",
+    );
+  }
+  return Object.freeze({ createDesenEditorDocument: api.createDesenEditorDocument });
 }
 
 function assertRejected(result, pointer, label) {
+  const inspected = inspectFrozenInertJson(result, `${label} result`);
   if (
-    result === null ||
-    typeof result !== "object" ||
     result.ok !== false ||
-    !exactJson(sorted(Object.keys(result)), ["diagnostics", "ok"]) ||
+    !exactJson(Reflect.ownKeys(result), ["ok", "diagnostics"]) ||
     Object.hasOwn(result, "document") ||
     !Array.isArray(result.diagnostics) ||
     result.diagnostics.length !== 1 ||
@@ -283,7 +352,69 @@ function assertRejected(result, pointer, label) {
       `${label} no longer rejects with the exact closed diagnostic shell.`,
     );
   }
-  assertPlainOwnDataFrozen(result, `${label} result`);
+  return inspected;
+}
+
+function assertCallerGraphUnfrozenAndDetached(input, outputObjects, label) {
+  const pending = [{ value: input, pointer: "" }];
+  const visited = new Set();
+  while (pending.length > 0) {
+    const { value, pointer } = pending.pop();
+    if (value === null || typeof value !== "object" || visited.has(value)) continue;
+    if (utilTypes.isProxy(value)) {
+      fail("EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT", `${label}${pointer} contains a Proxy.`);
+    }
+    visited.add(value);
+    if (Object.isFrozen(value)) {
+      fail("EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT", `${label}${pointer} was frozen by admission.`);
+    }
+    if (outputObjects.has(value)) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} is retained by the admitted result.`,
+      );
+    }
+    let keys;
+    try {
+      keys = Reflect.ownKeys(value);
+    } catch {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        `${label}${pointer} could not be inspected safely.`,
+      );
+    }
+    for (const key of keys) {
+      if (typeof key !== "string" || (Array.isArray(value) && key === "length")) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor !== undefined && "value" in descriptor) {
+        pending.push({ value: descriptor.value, pointer: `${pointer}/${key}` });
+      }
+    }
+  }
+}
+
+function assertSuccessfulAdmission(result, input, expectedDocument, label) {
+  const inspected = inspectFrozenInertJson(result, `${label} result`);
+  if (
+    result.ok !== true ||
+    !exactJson(Reflect.ownKeys(result), ["ok", "document", "diagnostics"]) ||
+    !isDeepStrictEqual(result.document, expectedDocument) ||
+    !exactJson(result.diagnostics, []) ||
+    Object.hasOwn(result.document, "source") ||
+    Object.hasOwn(result.document, "nodes") ||
+    Object.hasOwn(result.document, "index") ||
+    Object.hasOwn(result.document, "ast")
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+      `${label} lost its exact direct Source success contract.`,
+    );
+  }
+  assertCallerGraphUnfrozenAndDetached(input, inspected.objects, `${label} caller`);
+  return Object.freeze({
+    objects: inspected.objects,
+    documentObjects: inspectFrozenInertJson(result.document, `${label} document`).objects,
+  });
 }
 
 function verifyRuntimeBehavior(runtimeApi, officialSource) {
@@ -301,30 +432,26 @@ function verifyRuntimeBehavior(runtimeApi, officialSource) {
   const secondInput = cloneJson(officialSource);
   const first = createDocument(firstInput);
   const second = createDocument(secondInput);
-  if (
-    first?.ok !== true ||
-    second?.ok !== true ||
-    !exactJson(sorted(Object.keys(first)), ["diagnostics", "document", "ok"]) ||
-    !isDeepStrictEqual(first.document, officialSource) ||
-    !isDeepStrictEqual(second.document, officialSource) ||
-    first.document === firstInput ||
-    first.document === second.document ||
-    first.document?.surfaces === firstInput.surfaces ||
-    first.document?.surfaces === second.document?.surfaces ||
-    Object.isFrozen(firstInput) ||
-    Object.isFrozen(firstInput.surfaces) ||
-    Object.hasOwn(first.document, "source") ||
-    Object.hasOwn(first.document, "nodes") ||
-    Object.hasOwn(first.document, "index") ||
-    Object.hasOwn(first.document, "ast") ||
-    !exactJson(first.diagnostics, [])
-  ) {
-    fail(
-      "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
-      "The emitted factory lost its direct detached Source snapshot contract.",
-    );
+  const firstGraph = assertSuccessfulAdmission(
+    first,
+    firstInput,
+    officialSource,
+    "first admission",
+  );
+  const secondGraph = assertSuccessfulAdmission(
+    second,
+    secondInput,
+    officialSource,
+    "second admission",
+  );
+  for (const object of firstGraph.documentObjects) {
+    if (secondGraph.documentObjects.has(object)) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
+        "Independent admissions share document graph identity.",
+      );
+    }
   }
-  assertPlainOwnDataFrozen(first, "successful admission");
   firstInput.id = "caller-mutated-after-admission";
   firstInput.surfaces.extra = cloneJson(officialSource.surfaces["sign-in"]);
   if (
@@ -341,32 +468,38 @@ function verifyRuntimeBehavior(runtimeApi, officialSource) {
   const unresolved = cloneJson(officialSource);
   unresolved.surfaces["sign-in"].root.use = "com.example.unresolved/Unknown";
   const unresolvedResult = createDocument(unresolved);
-  if (
-    unresolvedResult?.ok !== true ||
-    unresolvedResult.document?.surfaces?.["sign-in"]?.root?.use !== "com.example.unresolved/Unknown"
-  ) {
-    fail(
-      "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",
-      "Structural admission became semantically stricter than M08-T01 permits.",
-    );
-  }
+  assertSuccessfulAdmission(
+    unresolvedResult,
+    unresolved,
+    unresolved,
+    "unresolved semantic admission",
+  );
 
   const invalidRoot = cloneJson(officialSource);
   invalidRoot.kind = "desen.bundle";
-  assertRejected(createDocument(invalidRoot), "/kind", "invalid Source root");
-  if (Object.isFrozen(invalidRoot)) {
-    fail("EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT", "Rejected caller input was frozen.");
-  }
+  const invalidRootResult = createDocument(invalidRoot);
+  const invalidRootGraph = assertRejected(invalidRootResult, "/kind", "invalid Source root");
+  assertCallerGraphUnfrozenAndDetached(
+    invalidRoot,
+    invalidRootGraph.objects,
+    "invalid root caller",
+  );
 
   const invalidEmbeddedSchema = cloneJson(officialSource);
   invalidEmbeddedSchema.surfaces["sign-in"].state.email.schema = {
     type: "string",
     pattern: "[",
   };
-  assertRejected(
-    createDocument(invalidEmbeddedSchema),
+  const invalidEmbeddedResult = createDocument(invalidEmbeddedSchema);
+  const invalidEmbeddedGraph = assertRejected(
+    invalidEmbeddedResult,
     "/surfaces/sign-in/state/email/schema/pattern",
     "invalid embedded schema",
+  );
+  assertCallerGraphUnfrozenAndDetached(
+    invalidEmbeddedSchema,
+    invalidEmbeddedGraph.objects,
+    "invalid embedded-schema caller",
   );
 
   const executable = cloneJson(officialSource);
