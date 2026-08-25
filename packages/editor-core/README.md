@@ -51,5 +51,8 @@ inventory, and platform boundary. After authenticating the exact completed I07-0
 `node scripts/generate-editor-core-source-document-proof.mjs` writes the tracked artifact,
 `node scripts/verify-editor-core-source-document.mjs` verifies it, and
 `node --test tests/editor-core-source-document.test.mjs` runs 13 independent adversarial cases over
-24 tracked-file receipts. `pnpm check` includes the same proof. The evidence document is
+47 tracked-file receipts. Those receipts include the exact 24-file editor/validator/protocol
+runtime closure executed from an isolated temporary package graph. A composed frozen authority
+uses the M02-T11 baseline plus eight reviewed M08 successor receipts to authenticate its 19
+dependency modules. `pnpm check` includes the same proof. The evidence document is
 `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md`.

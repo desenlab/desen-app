@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { URL } from "node:url";
@@ -13,6 +14,12 @@ import {
 
 function cloneFixture() {
   return JSON.parse(JSON.stringify(validSource));
+}
+
+function changedByte(bytes) {
+  const changed = Buffer.from(bytes);
+  changed[Math.floor(changed.byteLength / 2)] ^= 1;
+  return changed;
 }
 
 function assertPlainOwnDataFrozen(root) {
@@ -41,13 +48,23 @@ function assertPlainOwnDataFrozen(root) {
   }
 }
 
-function assertRejected(result, pointer) {
+function assertRejected(result, pointer, message) {
   assert.equal(result.ok, false);
-  assert.deepEqual(Object.keys(result).sort(), ["diagnostics", "ok"]);
+  assert.deepEqual(Reflect.ownKeys(result), ["ok", "diagnostics"]);
   assert.equal(Object.hasOwn(result, "document"), false);
   assert.equal(result.diagnostics.length, 1);
-  assert.equal(result.diagnostics[0].code, "SCHEMA_INVALID");
-  assert.equal(result.diagnostics[0].pointer, pointer);
+  assert.deepEqual(Reflect.ownKeys(result.diagnostics[0]), [
+    "code",
+    "classification",
+    "message",
+    "pointer",
+  ]);
+  assert.deepEqual(result.diagnostics[0], {
+    code: "SCHEMA_INVALID",
+    classification: "schema",
+    message,
+    pointer,
+  });
   assertPlainOwnDataFrozen(result);
 }
 
@@ -78,6 +95,31 @@ function runtimeThatFreezesRejectedCaller(vector) {
   };
 }
 
+function runtimeThatMutatesInvalidRootDiagnostic(project) {
+  return {
+    createDesenEditorDocument(input) {
+      const result = editorCore.createDesenEditorDocument(input);
+      if (result.ok || input?.kind !== "desen.bundle") return result;
+      return project(result);
+    },
+  };
+}
+
+function runtimeThatMutatesRejectedCallerGraph() {
+  return {
+    createDesenEditorDocument(input) {
+      const result = editorCore.createDesenEditorDocument(input);
+      if (input?.kind === "desen.bundle") {
+        Object.defineProperty(input, "proofMutation", {
+          value: true,
+          configurable: true,
+        });
+      }
+      return result;
+    },
+  };
+}
+
 function hasProofCode(expectedCode) {
   return (error) => {
     assert.ok(error instanceof EditorCoreSourceDocumentProofError);
@@ -92,16 +134,57 @@ function staticModuleSpecifiers(source) {
   ].map((match) => match[1]);
 }
 
+function replaceLast(source, search, replacement) {
+  const index = source.lastIndexOf(search);
+  assert.notEqual(index, -1);
+  return `${source.slice(0, index)}${replacement}${source.slice(index + search.length)}`;
+}
+
+function replaceRegistrationCallbackWithNoop(source, marker, nextMarker = undefined) {
+  const registrationStart = source.indexOf(marker);
+  const registrationEnd =
+    nextMarker === undefined ? source.length : source.indexOf(nextMarker, registrationStart + 1);
+  assert.notEqual(registrationStart, -1);
+  assert.notEqual(registrationEnd, -1);
+  const callbackStart = source.indexOf("() => {", registrationStart);
+  const callbackEnd = source.lastIndexOf("});", registrationEnd);
+  assert.ok(callbackStart >= registrationStart && callbackStart < registrationEnd);
+  assert.ok(callbackEnd > callbackStart);
+  return `${source.slice(0, callbackStart)}() => { void 0; }${source.slice(callbackEnd + 1)}`;
+}
+
 test("the package manifest keeps one exact root export and the declared runtime dependencies", () => {
-  assert.deepEqual(packageManifest.exports, {
-    ".": {
-      types: "./dist/index.d.ts",
-      import: "./dist/index.js",
+  assert.deepEqual(packageManifest, {
+    name: "@desen/editor-core",
+    version: "0.0.0",
+    private: true,
+    description:
+      "Framework-neutral immutable commands for editing a DESEN Source with stable identity.",
+    license: "Apache-2.0",
+    type: "module",
+    sideEffects: false,
+    files: ["dist"],
+    exports: {
+      ".": {
+        types: "./dist/index.d.ts",
+        import: "./dist/index.js",
+      },
     },
-  });
-  assert.deepEqual(packageManifest.dependencies, {
-    "@desen/protocol": "workspace:*",
-    "@desen/validator": "workspace:*",
+    scripts: {
+      build: "tsc -p tsconfig.build.json",
+      lint: "eslint src test --max-warnings=0",
+      typecheck: "tsc -p tsconfig.json --noEmit",
+      test: "vitest run",
+      "test:public-package":
+        "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
+      "test:source-document": "vitest run test/source-document.test.ts",
+      "test:coverage": "vitest run --coverage",
+    },
+    dependencies: {
+      "@desen/protocol": "workspace:*",
+      "@desen/validator": "workspace:*",
+    },
+    devDependencies: { vitest: "4.1.10" },
   });
 });
 
@@ -211,7 +294,7 @@ test("the emitted factory rejects an invalid Source root without a partial docum
 
   const result = editorCore.createDesenEditorDocument(input);
 
-  assertRejected(result, "/kind");
+  assertRejected(result, "/kind", "The document violates its const schema constraint.");
   assert.equal(Object.isFrozen(input), false);
   input.id = "rejected-caller-remains-writable";
   assert.equal(input.id, "rejected-caller-remains-writable");
@@ -223,7 +306,11 @@ test("the emitted factory rejects an invalid embedded schema at its exact pointe
 
   const result = editorCore.createDesenEditorDocument(input);
 
-  assertRejected(result, "/surfaces/sign-in/state/email/schema/pattern");
+  assertRejected(
+    result,
+    "/surfaces/sign-in/state/email/schema/pattern",
+    "An embedded schema contains an invalid regular expression.",
+  );
 });
 
 test("the emitted factory rejects executable non-JSON data without a partial document", () => {
@@ -232,7 +319,7 @@ test("the emitted factory rejects executable non-JSON data without a partial doc
 
   const result = editorCore.createDesenEditorDocument(input);
 
-  assertRejected(result, "");
+  assertRejected(result, "", "Input must be inert RFC 8785-compatible JSON data.");
 });
 
 test("the emitted factory rejects getter and toJSON hooks without invoking caller code", () => {
@@ -253,7 +340,11 @@ test("the emitted factory rejects getter and toJSON hooks without invoking calle
   };
 
   for (const input of [accessorInput, serializationHookInput]) {
-    assertRejected(editorCore.createDesenEditorDocument(input), "");
+    assertRejected(
+      editorCore.createDesenEditorDocument(input),
+      "",
+      "Input must be inert RFC 8785-compatible JSON data.",
+    );
   }
 
   assert.equal(getterInvocations, 0);
@@ -279,6 +370,22 @@ test("[proof-core] two fresh final builds are byte-identical and preserve honest
   assert.equal(first.artifact.prerequisite.authority.cutover, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(first.artifact.documentModel.directSourceRoot, true);
   assert.equal(first.artifact.documentModel.detached, true);
+  assert.equal(first.artifact.executionAuthority.exactReceiptedBytes, true);
+  assert.equal(first.artifact.executionAuthority.runtimeOverridesCanPass, false);
+  assert.equal(first.artifact.executionAuthority.fileOverridesCanPass, false);
+  assert.deepEqual(first.artifact.executionAuthority.dependencyAuthority.coverage, {
+    runtimeReceipts: 19,
+    disjoint: true,
+    exactCurrentBytes: true,
+  });
+  assert.equal(first.artifact.executionAuthority.dependencyAuthority.baseline.task, "M02-T11");
+  assert.equal(first.artifact.executionAuthority.dependencyAuthority.baseline.result, "PASS");
+  assert.equal(
+    first.artifact.executionAuthority.dependencyAuthority.baseline.sha256,
+    "f7dc050b8a9e4e5d9ec2531312ca3ad68d0d03c46bda5c44ebf930884554f505",
+  );
+  assert.equal(first.artifact.executionAuthority.dependencyAuthority.baseline.runtimeReceipts, 11);
+  assert.equal(first.artifact.executionAuthority.dependencyAuthority.successor.runtimeReceipts, 8);
   assert.equal(first.artifact.boundary.platformImports, 0);
   assert.equal(first.artifact.evidence.tests.packageRuntimeCases, 7);
   assert.equal(first.artifact.evidence.tests.publicRuntimeContractCases, 10);
@@ -286,9 +393,27 @@ test("[proof-core] two fresh final builds are byte-identical and preserve honest
   assert.equal(first.artifact.evidence.tests.publicCompilerNegativeCases, 5);
   assert.equal(first.artifact.evidence.tests.publicProofCoreCases, 7);
   assert.equal(first.artifact.evidence.tests.rootProofCases, 13);
-  assert.equal(first.artifact.evidence.trackedFiles.length, 24);
+  assert.equal(first.artifact.evidence.trackedFiles.length, 47);
+  assert.equal(first.artifact.executionAuthority.receiptedRuntimeFiles, 24);
+  assert.equal(first.artifact.executionAuthority.proofOwnedHarnessFiles, 1);
+  assert.equal(first.artifact.boundary.runtimeClosure.receiptedRuntimeFiles, 24);
+  assert.equal(first.artifact.boundary.runtimeClosure.modules.length, 21);
+  assert.equal(first.artifact.boundary.runtimeClosure.unknownStaticEsmEdges, 0);
+  assert.equal(first.artifact.boundary.lifecycleScripts, 0);
+  assert.deepEqual(first.artifact.boundary.typescript.effective.build, {
+    strict: true,
+    noEmit: false,
+    declaration: true,
+    declarationMap: true,
+    sourceMap: true,
+    rootDir: "src",
+    outDir: "dist",
+    types: [],
+  });
+  assert.equal(first.artifact.boundary.typescript.effective.publicPackage.noEmit, true);
   assert.match(first.artifact.nonclaims.join("\n"), /M08-T10/u);
   assert.match(first.artifact.nonclaims.join("\n"), /G08/u);
+  assert.match(first.artifact.nonclaims.join("\n"), /hostile-JavaScript capability sandbox/u);
 });
 
 test("[proof-core] rejects a wrapper-returning or mutable public runtime", async () => {
@@ -338,6 +463,26 @@ test("[proof-core] rejects caller retention and partial failure authority", asyn
   for (const runtimeApi of [
     retainedCallerRuntime,
     partialFailureRuntime,
+    runtimeThatMutatesInvalidRootDiagnostic((result) =>
+      Object.freeze({
+        ok: false,
+        diagnostics: Object.freeze([
+          Object.freeze({ ...result.diagnostics[0], classification: "semantic" }),
+        ]),
+      }),
+    ),
+    runtimeThatMutatesInvalidRootDiagnostic((result) =>
+      Object.freeze({
+        ok: false,
+        diagnostics: Object.freeze([
+          Object.freeze({ ...result.diagnostics[0], message: "A different failure." }),
+        ]),
+      }),
+    ),
+    runtimeThatMutatesInvalidRootDiagnostic((result) =>
+      Object.freeze({ diagnostics: result.diagnostics, ok: false }),
+    ),
+    runtimeThatMutatesRejectedCallerGraph(),
     runtimeThatFreezesRejectedCaller("executable"),
     runtimeThatFreezesRejectedCaller("selection"),
     runtimeThatFreezesRejectedCaller("toJSON"),
@@ -375,20 +520,71 @@ test("[proof-core] rejects admission that becomes semantically too strict", asyn
 });
 
 test("[proof-core] rejects source, TSDoc, import, distribution, and manifest drift", async () => {
-  const [source, index, distSource, declaration, manifest] = await Promise.all([
+  const [
+    source,
+    index,
+    distSource,
+    declaration,
+    manifest,
+    baseConfigText,
+    packageConfigText,
+    buildConfigText,
+    publicConfigText,
+    dependencyAuthorityBytes,
+  ] = await Promise.all([
     readFile(new URL("../src/source-document.ts", import.meta.url), "utf8"),
     readFile(new URL("../src/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../dist/source-document.js", import.meta.url), "utf8"),
     readFile(new URL("../dist/source-document.d.ts", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
+    readFile(new URL("../../../tsconfig.base.json", import.meta.url), "utf8"),
+    readFile(new URL("../tsconfig.json", import.meta.url), "utf8"),
+    readFile(new URL("../tsconfig.build.json", import.meta.url), "utf8"),
+    readFile(new URL("../tsconfig.public-package.json", import.meta.url), "utf8"),
+    readFile(
+      new URL(
+        "../../../docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
+        import.meta.url,
+      ),
+    ),
   ]);
+  const parsedManifest = JSON.parse(manifest);
   const manifestWithPlatformDependency = JSON.stringify({
-    ...JSON.parse(manifest),
+    ...parsedManifest,
     dependencies: {
-      ...JSON.parse(manifest).dependencies,
+      ...parsedManifest.dependencies,
       react: "19.0.0",
     },
   });
+  const manifestWithScriptDrift = JSON.stringify({
+    ...parsedManifest,
+    scripts: {
+      ...parsedManifest.scripts,
+      "test:public-package": "node --test test/public-package.mjs",
+    },
+  });
+  const manifestWithLifecycle = JSON.stringify({
+    ...parsedManifest,
+    scripts: { ...parsedManifest.scripts, prepack: "node ./prepack.mjs" },
+  });
+  const manifestWithBin = JSON.stringify({ ...parsedManifest, bin: "./dist/cli.js" });
+  const manifestWithBrowser = JSON.stringify({
+    ...parsedManifest,
+    browser: "./dist/browser.js",
+  });
+  const manifestWithImports = JSON.stringify({
+    ...parsedManifest,
+    imports: { "#runtime": "./dist/source-document.js" },
+  });
+  const manifestWithUnknownKey = JSON.stringify({ ...parsedManifest, proofBypass: true });
+  const baseConfig = JSON.parse(baseConfigText);
+  baseConfig.compilerOptions.strict = false;
+  const packageConfig = JSON.parse(packageConfigText);
+  packageConfig.extends = "../../tsconfig.node.json";
+  const buildConfig = JSON.parse(buildConfigText);
+  buildConfig.extends = "../../tsconfig.base.json";
+  const publicConfig = JSON.parse(publicConfigText);
+  publicConfig.compilerOptions.noEmit = false;
   const mutations = [
     {
       path: "packages/editor-core/src/source-document.ts",
@@ -399,6 +595,27 @@ test("[proof-core] rejects source, TSDoc, import, distribution, and manifest dri
       value: `import "node:fs";\n${source}`,
     },
     {
+      path: "packages/editor-core/src/source-document.ts",
+      value: source.replace(
+        "const validation = validateDesenSource(input);",
+        "const validation = (document, validateDesenSource)(input);",
+      ),
+    },
+    {
+      path: "packages/editor-core/src/source-document.ts",
+      value: source.replace(
+        "const validation = validateDesenSource(input);",
+        'const validation = require("@desen/validator").validateDesenSource(input);',
+      ),
+    },
+    {
+      path: "packages/editor-core/src/source-document.ts",
+      value: source.replace(
+        "const validation = validateDesenSource(input);",
+        "const validation = module.exports.validateDesenSource(input);",
+      ),
+    },
+    {
       path: "packages/editor-core/src/index.ts",
       value: `${index}\nexport const hiddenAuthority = true;\n`,
     },
@@ -407,12 +624,42 @@ test("[proof-core] rejects source, TSDoc, import, distribution, and manifest dri
       value: `${distSource}\nwindow.document;\n`,
     },
     {
+      path: "packages/editor-core/dist/source-document.js",
+      value: `${distSource}\n// receipt-only drift\n`,
+    },
+    {
       path: "packages/editor-core/dist/source-document.d.ts",
       value: declaration.replace("export type DesenEditorDocument", "type DesenEditorDocument"),
     },
     {
+      path: "packages/editor-core/dist/source-document.d.ts",
+      value: declaration.replace(
+        "export type DesenEditorDocument = ImmutableJson<DesenSource>;",
+        'export type DesenEditorDocument = ImmutableJson<DesenSource> & import("react").ReactNode;',
+      ),
+    },
+    {
       path: "packages/editor-core/package.json",
       value: manifestWithPlatformDependency,
+    },
+    {
+      path: "packages/editor-core/package.json",
+      value: manifestWithScriptDrift,
+    },
+    {
+      path: "packages/editor-core/package.json",
+      value: manifestWithLifecycle,
+    },
+    { path: "packages/editor-core/package.json", value: manifestWithBin },
+    { path: "packages/editor-core/package.json", value: manifestWithBrowser },
+    { path: "packages/editor-core/package.json", value: manifestWithImports },
+    { path: "packages/editor-core/package.json", value: manifestWithUnknownKey },
+    { path: "tsconfig.base.json", value: JSON.stringify(baseConfig) },
+    { path: "packages/editor-core/tsconfig.json", value: JSON.stringify(packageConfig) },
+    { path: "packages/editor-core/tsconfig.build.json", value: JSON.stringify(buildConfig) },
+    {
+      path: "packages/editor-core/tsconfig.public-package.json",
+      value: JSON.stringify(publicConfig),
     },
   ];
 
@@ -424,14 +671,67 @@ test("[proof-core] rejects source, TSDoc, import, distribution, and manifest dri
       EditorCoreSourceDocumentProofError,
     );
   }
+  const receiptMutation = JSON.parse(dependencyAuthorityBytes.toString("utf8"));
+  const baselineReceipt = receiptMutation.implementation.trackedFiles.find(
+    (receipt) => receipt.path === "packages/protocol/dist/canonicalization.js",
+  );
+  assert.ok(baselineReceipt);
+  baselineReceipt.sha256 = "0".repeat(64);
+  for (const mutatedDependencyAuthorityBytes of [
+    changedByte(dependencyAuthorityBytes),
+    Buffer.from(`${JSON.stringify(receiptMutation, null, 2)}\n`),
+  ]) {
+    await assert.rejects(
+      buildEditorCoreSourceDocumentEvidence({
+        dependencyAuthorityBytes: mutatedDependencyAuthorityBytes,
+      }),
+      hasProofCode("EDITOR_SOURCE_DOCUMENT_RUNTIME_AUTHORITY_DRIFT"),
+    );
+  }
 });
 
 test("[proof-core] rejects focused-test inventory drift", async () => {
-  const packageTest = await readFile(new URL("./source-document.test.ts", import.meta.url), "utf8");
-  const publicTypes = await readFile(
-    new URL("./public-package.types.mts", import.meta.url),
-    "utf8",
+  const [packageTest, packageTypes, publicTest, publicTypes, rootTest] = await Promise.all([
+    readFile(new URL("./source-document.test.ts", import.meta.url), "utf8"),
+    readFile(new URL("./source-document.types.ts", import.meta.url), "utf8"),
+    readFile(new URL("./public-package.mjs", import.meta.url), "utf8"),
+    readFile(new URL("./public-package.types.mts", import.meta.url), "utf8"),
+    readFile(
+      new URL("../../../tests/editor-core-source-document.test.mjs", import.meta.url),
+      "utf8",
+    ),
+  ]);
+  const nestedRootTest = `${replaceLast(
+    rootTest,
+    'test("[immutability] freezes final evidence and keeps later M08 scope explicit", () => {',
+    'if (false) {\n  test("[immutability] freezes final evidence and keeps later M08 scope explicit", () => {',
+  )}\n}\n`;
+  const packageNoop = replaceRegistrationCallbackWithNoop(
+    packageTest,
+    '  it("admits the official Source directly without a hidden document wrapper", () => {',
+    '  it("detaches independent snapshots without freezing or retaining caller input", () => {',
   );
+  const publicNoop = replaceRegistrationCallbackWithNoop(
+    publicTest,
+    'test("the package manifest keeps one exact root export and the declared runtime dependencies", () => {',
+    'test("the emitted public module graph stays platform-neutral and execution-closed", async () => {',
+  );
+  const rootNoop = replaceRegistrationCallbackWithNoop(
+    rootTest,
+    'test("[immutability] freezes final evidence and keeps later M08 scope explicit", () => {',
+  );
+  const packageDirectiveDecoy = packageTypes.replace(
+    "// @ts-expect-error the direct editor document is recursively immutable",
+    'const directiveDecoy = "// @ts-expect-error";',
+  );
+  const publicDirectiveDecoy = publicTypes.replace(
+    "// @ts-expect-error emitted declarations keep the direct document recursively immutable",
+    'const directiveDecoy = "// @ts-expect-error";',
+  );
+  const unusedDirectiveAuthority = `declare const value: unknown;\n\n${Array.from(
+    { length: 5 },
+    (_, index) => `// @ts-expect-error unused directive ${index + 1}\nvoid value;`,
+  ).join("\n\n")}\n`;
 
   for (const [path, value] of [
     [
@@ -442,8 +742,32 @@ test("[proof-core] rejects focused-test inventory drift", async () => {
       ),
     ],
     [
-      "packages/editor-core/test/public-package.types.mts",
-      publicTypes.replace("// @ts-expect-error", "// compiler assertion removed"),
+      "packages/editor-core/test/source-document.test.ts",
+      packageTest.replace(
+        '  it("admits the official Source',
+        '  it.skip("admits the official Source',
+      ),
+    ],
+    ["packages/editor-core/test/source-document.test.ts", packageNoop],
+    [
+      "packages/editor-core/test/public-package.mjs",
+      publicTest.replace(
+        'import test from "node:test";',
+        'import nodeTest from "node:test";\nconst test = nodeTest;',
+      ),
+    ],
+    ["packages/editor-core/test/public-package.mjs", publicNoop],
+    ["packages/editor-core/test/source-document.types.ts", packageDirectiveDecoy],
+    ["packages/editor-core/test/public-package.types.mts", publicDirectiveDecoy],
+    ["packages/editor-core/test/public-package.types.mts", unusedDirectiveAuthority],
+    ["tests/editor-core-source-document.test.mjs", nestedRootTest],
+    ["tests/editor-core-source-document.test.mjs", rootNoop],
+    [
+      "tests/editor-core-source-document.test.mjs",
+      rootTest.replace(
+        'import { after, before, test } from "node:test";',
+        'import { after, before } from "node:test";\nconst test = () => undefined;',
+      ),
     ],
   ]) {
     await assert.rejects(
@@ -486,6 +810,14 @@ test("[proof-core] rejects accessor, inherited, symbol, and Proxy options withou
       ),
     ),
   );
+  const dependencyAuthorityBytes = new Uint8Array(
+    await readFile(
+      new URL(
+        "../../../docs/proof/artifacts/protocol-0.1.0-execution-contracts.json",
+        import.meta.url,
+      ),
+    ),
+  );
   const shadowedBuffer = new Uint8Array(prerequisiteBytes);
   Object.defineProperty(shadowedBuffer, "buffer", {
     get() {
@@ -500,12 +832,29 @@ test("[proof-core] rejects accessor, inherited, symbol, and Proxy options withou
       return prerequisiteBytes.byteLength;
     },
   });
+  const shadowedDependencyAuthority = new Uint8Array(dependencyAuthorityBytes);
+  Object.defineProperty(shadowedDependencyAuthority, "byteLength", {
+    get() {
+      getterCalls += 1;
+      return dependencyAuthorityBytes.byteLength;
+    },
+  });
 
   for (const options of [
     accessor,
     inherited,
     symbol,
     proxy,
+    {
+      runtimeApi: {
+        createDesenEditorDocument: editorCore.createDesenEditorDocument,
+      },
+    },
+    { fileOverrides: {} },
+    { fileOverrides: { "packages/editor-core/README.md": "# mutation-only override\n" } },
+    { fileOverrides: { "packages/validator/dist/index.js": "export {};\n" } },
+    { fileOverrides: { "packages/validator/package.json": "{}\n" } },
+    { dependencyAuthorityBytes: shadowedDependencyAuthority },
     { prerequisiteBytes: shadowedBuffer },
     { prerequisiteBytes: shadowedLength },
   ]) {
