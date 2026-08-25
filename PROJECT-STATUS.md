@@ -755,9 +755,10 @@ exhaustive. The hosted bootstrap succeeded,
 but the shadow correctly returned `NOT_ELIGIBLE → EXHAUSTIVE` with `UNSUPPORTED_CHANGE_KIND`, so
 no eligible strict-subset observation was counted and the threshold was `0 / 20` then. The
 authoritative hosted Quality gate passed. Local focused contracts passed 91/91 and the complete
-CI-infrastructure suite passed 203/203. The full local `REQUIRED + EXHAUSTIVE` run is
-`BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned `EPERM` in two pre-existing
-control-plane TCP lifecycle cases; the hosted gate passed the repository authority. Exact run and
+CI-infrastructure suite passed 203/203. At that historical checkpoint, the full local
+`REQUIRED + EXHAUSTIVE` run was `BLOCKED_BY_LOCAL_SANDBOX` because `127.0.0.1` listen returned
+`EPERM` in two pre-existing control-plane TCP lifecycle cases; the hosted gate passed the
+repository authority. Exact run and
 job identifiers are pinned in the
 [I07-03 baseline](docs/proof/baselines/i07-03-affected-selector-shadow.json). `DEBT-I07-017`
 assigns shadow-only cleanup to I07-04 for removal by G07; `DEBT-I07-018` assigns the new historical
@@ -773,7 +774,8 @@ semantics, and adds no wrapper, normalized projection, hidden AST, node index, e
 authority, platform value, persistence handle, or publication state. Seven focused behavior
 cases, ten built public-runtime contract cases, two independent groups of five compiler negatives,
 seven public proof-core cases, and a 13-case independent tracked root proof close this exact
-boundary. The artifact carries 24 tracked-file receipts. The evidence changes no `P-*`, `N-*`,
+boundary. The artifact carries 47 tracked-file receipts, including the exact 24-file runtime
+closure. The evidence changes no `P-*`, `N-*`,
 `S-*`, or proof-gate status. Commands, persistence, continuous semantic validation, and the
 terminal editor integration boundary remain assigned to M08-T02–M08-T10.
 
@@ -1344,7 +1346,7 @@ next; commands, persistence, continuous semantic validation, and terminal editor
 not claimed by M08-T01.
 
 The current append-only reader successor is sequence 29 at
-`ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`, authenticating 26 frozen
+`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
 artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
 unchanged.
 
@@ -2666,20 +2668,33 @@ M08-T01 evidence:
 - focused inventory: 7 package behavior cases, 10 built public-runtime contract cases, 5 source
   compiler negatives, 5 emitted-declaration consumer negatives, and 7 public proof-core cases
 - independent closure: the root proof authenticates the completed I07-04/G07 prerequisite, verifies
-  24 tracked-file receipts from fresh inputs, and uses 13 adversarial cases to reject behavior,
+  47 tracked-file receipts from fresh inputs, and uses 13 adversarial cases to reject behavior,
   source, distribution, manifest, TSDoc, test-inventory, prerequisite, artifact, and hostile
   proof-option drift
+- runtime closure: 3 exact manifests and 21 static ESM modules total 24 receipted files and
+  1,392,921 bytes; the 19 dependency modules are authenticated before import by 11 still-current
+  M02-T11 receipts plus 8 disjoint M08 successor receipts. The exact dependency bytes, Node
+  runtime, loader, and process remain trusted; no general hostile-JavaScript sandbox is claimed
 - CI authority: `editor-core-source-document` follows `protocol-structural-validation` in the
   exact 153-workload, 72-proof-pair successor (61 ordinary pairs and 11 barriers); focused CI
   contracts pass 148/148, and the 15/15 ownership reseal covers 1,035 tracked paths with 144
   proof-owned paths
+- retained projection: 489 prerequisite segments, 3,129 ordered legacy leaves, and 242 distinct
+  leaves; the exact shared-state classes are 6 `GLOBAL_EXCLUSIVE`, 2
+  `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 70 `PROOF_READ_ONLY`, 63
+  `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+  `PROOF_WORKSPACE_TEMP_EXCLUSIVE`
+- filesystem compatibility: 135 `NONE`, 2 `FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1
+  `FIXTURE_COPY_AND_REVIEWED_SYMLINK`
+- workspace test inventory: 15 scripts at
+  `sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`
 - current reader authority: append-only sequence 29 at
-  `ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9` authenticates 26 frozen
+  `95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58` authenticates 26 frozen
   artifacts and 52 readers while preserving historical sequence 28
 - local validation truth: editor-core package tests pass 7/7, public-package tests pass 17/17,
-  root adversarial tests pass 13/13, and generator/verifier, typecheck, and lint pass; the local
-  legacy process-group suite is 24/25 because one macOS `kill` call returns `EPERM`, so no hosted
-  or complete `pnpm check` result is claimed here
+  root adversarial tests pass 13/13, and generator/verifier, typecheck, and lint pass; a local retry
+  of the legacy process-group suite passes 25/25. The full `pnpm check` was interrupted for proof
+  hardening and is still pending, so no complete local-gate or hosted M08-T01 result is claimed here
 - scope nonclaims: no edit-command, stable-ID allocation, persistence, continuous semantic
   validation, invalid-node mapping, terminal M08 React/DOM boundary, production activation, or
   publication result is claimed

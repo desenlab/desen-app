@@ -195,12 +195,21 @@ remains `PLANNED` until M12-T05.
 
 **I07-02 infrastructure checkpoint:** the cutover froze and proved the code-owned 130-workload,
 61-proof-pair plan as `REQUIRED + EXHAUSTIVE`. The historical M07-T09 successor contained 146
-workloads and 69 proof pairs. The current M07-T11 successor contains 150 workloads and 71 proof
-pairs: 60 ordinary pairs and 11 exclusive barriers. Its retained legacy projection expands to 479
-prerequisite segments and 3,113 ordered leaf invocations covering 236 distinct leaves. Exact
-shared-state classes, cancellation behavior,
+workloads and 69 proof pairs. The historical pre-M08 M07-T11 successor contained 150 workloads and
+71 proof pairs, 479 prerequisite segments, 3,113 ordered leaf invocations, and 236 distinct leaves.
+The current M08-T01 successor contains 153 workloads and 72 proof pairs: 61 ordinary pairs and 11
+exclusive barriers. Its retained legacy projection expands to 489 prerequisite segments and 3,129
+ordered leaf invocations covering 242 distinct leaves. Shared-state counts are exactly 6
+`GLOBAL_EXCLUSIVE`, 2 `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 70
+`PROOF_READ_ONLY`, 63 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem compatibility is exactly 135 `NONE`, 2
+`FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1 combined policy. Its 15 workspace test scripts are
+pinned by
+`sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. These current M08-T01
+successor pins are local code-owned authority and make no hosted M08-T01 claim. For the frozen
+130-workload I07-02 cutover, the then-current exact shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
-passed locally and in hosted CI at the frozen cutover. The cutover run passed in 10
+passed locally and in hosted CI. The cutover run passed in 10
 minutes 33 seconds; the legacy job was correctly skipped because rollback was not requested. The
 historical reviewed checkpoint sequence 4 contains ten frozen artifacts and twenty live readers at
 `ee2d72c3529d9295945d339fb214c41dbbf906ffa6613a7ad6e766ec79c1bcf5`. A corrective M05-T04
@@ -418,7 +427,7 @@ G07-due debt entries are `CLOSED`; `DEBT-I07-007` deliberately remains `OPEN` fo
 historical I07-04/G07 closure checkpoint was sequence 28 at
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
 artifacts and 50 readers. The current append-only successor is sequence 29 at
-`ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`, authenticating 26 frozen
+`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
 artifacts and 52 current readers. I07-04 and G07 remain `DONE`; proof gates remain 8/13,
 implementation progress is 86/145, and M08-T02 is next. Legacy retirement remains owned by I07-05.
 

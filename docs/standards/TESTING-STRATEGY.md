@@ -59,11 +59,16 @@ I07-02 established the scheduler-neutral 130-node, 61-proof-unit cutover invento
 from both schedulers. M07-T07 appended the sixth post-cutover verifier/root-test pair for durable
 runtime activation; M07-T08 appended the seventh for exact restart recovery; M07-T09 appended the
 eighth for its bounded boundary-fault matrix; M07-T10 appended the ninth for ordered transitions
-and two-way races; and M07-T11 appends the tenth for separately built host channel consumption.
-The working-tree successor therefore contains 150 nodes and 71 proof units without rewriting that
-frozen baseline. Its retained legacy projection contains 479 prerequisite segments, 3,113 ordered
-leaf invocations, and 236 distinct leaves. These are local code-owned successor values; no hosted
-M07-T11 result is claimed. Contract and hostile-input tests cover exact
+and two-way races; and M07-T11 appended the tenth for separately built host channel consumption.
+That historical M07-T11 successor contained 150 workloads, 71 proof pairs, 479 prerequisite
+segments, 3,113 ordered leaf invocations, and 236 distinct leaves. M08-T01 appends the direct
+editor-core Source-document proof pair plus its serial public-package contract. The current
+successor contains 153 workloads and 72 proof pairs without rewriting the frozen cutover, with 489
+prerequisite segments, 3,129 ordered leaf invocations, and 242 distinct leaves. These are local
+code-owned successor values; no hosted M08-T01 result is claimed. The 15 reviewed workspace test
+scripts are pinned by
+`sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. Contract and
+hostile-input tests cover exact
 ordered ids, labels, commands, arguments,
 dependencies, execution classes, and shared-state records; omission, duplication, reorder,
 substitution, cycles, unknown classes, shell syntax, writer insertion, and affected-only metadata
@@ -71,10 +76,10 @@ must fail closed. A separate rollback-only adapter proves exact equality with th
 sequential plan and rejects PASS receipts containing missing, duplicated, skipped, not-run,
 cancelled, timed-out, failed, or unclosed work.
 
-Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 1
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 62
+Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 2
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 70 `PROOF_READ_ONLY`, 63
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 60 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 61 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -133,6 +138,14 @@ opened. UDP, DNS, hostnames, IPv6, public addresses, Unix sockets, and fixed por
 Hosted CI is required for the real loopback-listener cases because the local sandbox returns
 `EPERM` on `127.0.0.1` bind.
 
+The M08-T01 `editor-core-source-document` verifier is an ordinary `PROOF_READ_ONLY` step after the
+semantic `protocol-structural-validation` predecessor. Its independent root mutation test is
+`PROOF_OS_TEMP_ISOLATED` and writes only inside its runner-owned OS temp root. Neither workload
+receives workspace-write, port, or native-addon authority. The verifier receives no
+child-runtime-probe grant, while the root receives only the ordinary `NODE_TEST_HARNESS` policy.
+The separate serial `editor-core-public-package-contract` prefix owns the repeated `dist` write and
+runs the exact package export-map, compiler, and emitted-runtime contract before the verifier.
+
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
 inherited-`NODE_OPTIONS` rejection, default TCP/UDP listener denial, the sole authenticated T11
@@ -157,7 +170,7 @@ The reviewed production dependency audit for locked Fastify 5.11.2 and better-sq
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution across the 150 workloads: 132 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across the 153 workloads: 135 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
@@ -221,23 +234,25 @@ result is not an eligible observation and the counter remains `0 / 20`. Exact ho
 are pinned in the
 [`i07-03-affected-selector-shadow.json`](../proof/baselines/i07-03-affected-selector-shadow.json)
 baseline. Focused local contracts pass 91/91 and the full CI infrastructure suite passes 203/203.
-The full local gate is `BLOCKED_BY_LOCAL_SANDBOX`: loopback `listen` returns `EPERM` in two
-pre-existing TCP lifecycle tests. This is an environment restriction, not a product regression;
-the passing hosted Quality gate is authoritative. `DEBT-I07-017` assigns the shadow-only job,
+At that historical checkpoint, the full local gate was `BLOCKED_BY_LOCAL_SANDBOX`: loopback
+`listen` returned `EPERM` in two pre-existing TCP lifecycle tests. This was an environment
+restriction, not a product regression; the passing hosted Quality gate was authoritative.
+`DEBT-I07-017` assigns the shadow-only job,
 wrapper, and test wiring to I07-04 for removal by G07.
 
 The later I07-04 campaign reached `20 / 20` with zero false negatives. Its independent baseline
 binds the exact hosted identities, the immutable historical campaign digest, the conservative
-selector transition, and the required-runner authority. Local cleanup has removed all 17 G07-due
-bridge families; sequence 28 authenticates 25 frozen artifacts and 50 current readers. These are
-now joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
+selector transition, and the required-runner authority. Local cleanup removed all 17 G07-due
+bridge families. Historical closure sequence 28 authenticates 25 frozen artifacts and 50 readers;
+the current append-only sequence 29 authenticates 26 frozen artifacts and 52 current readers.
+These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
 [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
 `REQUIRED + AFFECTED` in 3m54s in
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07
-are `DONE`; proof gates are 8/13, implementation progress remains 85/145, and M08-T01 is next.
+are `DONE`; proof gates are 8/13, implementation progress is 86/145, and M08-T02 is next.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned

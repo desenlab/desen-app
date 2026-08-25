@@ -66,7 +66,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "0027f8c18eb1837e9998a5c5a998072e8eebec54e4e8edef974129b910134f5b",
   "bf21a7a600ca9d569d90a8711e4fe857e91beb933d8a3c7289ebfbf0b8a2d87a",
   "2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546",
-  "ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9",
+  "95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -364,8 +364,8 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     "M08-T01",
     {
       path: "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
-      bytes: 11_206,
-      sha256: "0f08a0cbfd67b9e774633bf69cc38cbf280cdd0ffffa219b13b6b2ff9b4ddd66",
+      bytes: 23_270,
+      sha256: "aaa3a2447b71361361f471a822bba78e90a3f97f493b23ad3314f51c62ad4025",
     },
     "scripts/lib/editor-core-source-document-proof.mjs",
     "tests/editor-core-source-document.test.mjs",

@@ -394,7 +394,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[28],
-    "ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9",
+    "95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -2599,23 +2599,23 @@ test("sequence twenty-nine appends the exact M08-T01 generation and preserves pr
   assert.deepEqual(current.artifacts[25], {
     task: "M08-T01",
     path: "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
-    bytes: 11206,
-    sha256: "0f08a0cbfd67b9e774633bf69cc38cbf280cdd0ffffa219b13b6b2ff9b4ddd66",
+    bytes: 23270,
+    sha256: "aaa3a2447b71361361f471a822bba78e90a3f97f493b23ad3314f51c62ad4025",
   });
   assert.deepEqual(current.readers.slice(50), [
     {
       task: "M08-T01",
       role: "proof-library",
       path: "scripts/lib/editor-core-source-document-proof.mjs",
-      bytes: 55072,
-      sha256: "532872af3eae0abff5ae2719bb86751d41bfb5e21c457cd675705c75f547eb06",
+      bytes: 103051,
+      sha256: "e26c6e6fbc757202e2ab476120921df0eb4e5f5b611d24db7e130a2f6d92af9f",
     },
     {
       task: "M08-T01",
       role: "root-test",
       path: "tests/editor-core-source-document.test.mjs",
-      bytes: 20866,
-      sha256: "bb97e93343df925aa22bcb5de01bde95e917e2da4b86ca74f0d3d0fbb451022e",
+      bytes: 42244,
+      sha256: "e791be0263f0bb4c0cec9016fe68a0dee0cda43e9f7b8260f2fc098948e6d7f7",
     },
   ]);
 
@@ -2636,7 +2636,7 @@ test("sequence twenty-nine appends the exact M08-T01 generation and preserves pr
   assert.deepEqual(liveReceipts, [current.artifacts[25], ...current.readers.slice(50)]);
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9",
+    "95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58",
   );
 });
 

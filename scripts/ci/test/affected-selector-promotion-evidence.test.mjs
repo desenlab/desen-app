@@ -270,13 +270,13 @@ test("authenticates the exact 20/20 hosted promotion campaign", async () => {
   assert.equal(receipt.cutoverStatus, "HOSTED_CUTOVER_VERIFIED");
   assert.equal(receipt.hostedCutoverVerified, true);
   assert.deepEqual(receipt.promotedAuthorities, {
-    selectorSha256: "ac97207a8dc2e62db6b1b617f7a3c46a4be9a8178c2c84101cfaa48499358225",
+    selectorSha256: "a9d5128d296afc932fddb0fa875d6216b7c972c0ea2815e81f466b577fa95223",
     ownershipSha256: "1d3b653560714f1347d1ca055a09623a659de53f6fc0d0928ae28a34177976e3",
     impactGraphSha256: "99a2f9585fcb50c1c6dfb1a3d8a0571547cfcfd38668b47823cf5e0181f425ca",
     thresholdSha256: "ca6ee4128f2dbc581d033ebabe8e437268c8f7c5b29d6fbc7f9e3fb031b6c23c",
     inventorySha256: "2e25f738ec948ca47c6d50fba2dbdab487cfd41ae3701d86e206c473b477d201",
     selectionEquivalenceSha256: "97cc1b29553f1bf3d92386e399c76f2f9c21e73a1c8073a15a9465f7c4fcf698",
-    runnerAuthoritySha256: "48a32849ca40bcddb66f695fe233ecba5bcdc5156d669706ca8149f5c5eba897",
+    runnerAuthoritySha256: "522d6625df2bb97113ddf96e4324f9978f3721066848f602b06344f9e52975d1",
   });
 });
 
@@ -284,7 +284,7 @@ test("rejects a stale or widened live proof-reader checkpoint receipt", () => {
   const liveReceipt = {
     status: "PASS",
     profile: "desen.ci.proof-reader-checkpoints.v1",
-    headSha256: "ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9",
+    headSha256: "95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58",
     checkpoints: 29,
     frozenArtifacts: 26,
     currentReaders: 52,

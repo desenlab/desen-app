@@ -1041,11 +1041,15 @@ projection, hidden AST, node index, executable authority, or partial document on
 focused behavior cases, ten built public-runtime contract cases, five source compiler negatives,
 five emitted-declaration consumer negatives, and seven fail-closed public proof-core cases cover
 success, failure, ownership, unresolved semantics, package/distribution boundaries, and hostile
-input or proof drift. The independent root proof adds 13 adversarial cases and 24 tracked-file
-receipts; the exact 153-workload/72-proof-pair CI successor registers that proof. Together they pin
+input or proof drift. The independent root proof adds 13 adversarial cases and 47 tracked-file
+receipts, including an exact 24-file static ESM runtime closure. Its 19 dependency modules are
+authenticated before import by 11 still-current M02-T11 receipts plus 8 disjoint M08 successor
+receipts; the exact dependency bytes, Node runtime, loader, and process remain trusted rather than
+claiming a general hostile-JavaScript sandbox. The exact 153-workload/72-proof-pair CI successor
+registers that proof. Together they pin
 the reviewed scope in `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md` and
 `docs/proof/artifacts/editor-core-0.1.0-source-document.json`. Append-only reader checkpoint
-sequence 29 at `ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`
+sequence 29 at `95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`
 authenticates 26 frozen artifacts and 52 current readers; the historical I07-04/G07 sequence-28
 closure remains unchanged.
 

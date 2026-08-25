@@ -10,7 +10,7 @@ frozen diagnostic shell and no partial document.
 
 Artifact: `docs/proof/artifacts/editor-core-0.1.0-source-document.json`
 
-Final receipt: `sha256:0f08a0cbfd67b9e774633bf69cc38cbf280cdd0ffffa219b13b6b2ff9b4ddd66`
+Final receipt: `sha256:aaa3a2447b71361361f471a822bba78e90a3f97f493b23ad3314f51c62ad4025`
 
 ## Exact prerequisite authority
 
@@ -42,7 +42,8 @@ The evidence audits the exact source declarations, TSDoc inventory, emitted Java
 declarations, package export map, and production dependencies. The only runtime export is
 `createDesenEditorDocument`; the four reviewed type exports stay declaration-only. Runtime code
 imports only `@desen/validator`, while protocol and validator types remain type-only. React, DOM,
-CSS, browser, application, dynamic-import, and executable-evaluation authority are absent.
+CSS, browser, application, dynamic-import, and executable-evaluation authority are absent from the
+reviewed module graph.
 
 Seven package behavior cases, five package compiler-negative assertions, ten built public runtime
 cases, five built declaration compiler-negative assertions, and seven public proof-core cases are
@@ -53,10 +54,19 @@ and recursive immutability.
 
 ## Deterministic and fail-closed evidence
 
-Twenty-four task files are recorded by path, byte count, and SHA-256 digest. Authority reads are
-bounded, no-follow, canonical-parent, single-link reads whose file identity is checked before and
-after acquisition. Options must be own enumerable data; inherited, accessor, symbol, Proxy, and
-shared-memory inputs fail before executable hooks or mutable byte aliases can become authority.
+Forty-seven tracked task files are recorded by path, byte count, and SHA-256 digest. They include
+the exact 24-file runtime closure: three package manifests and 21 static ESM modules totaling
+1,392,921 bytes, executed from a proof-owned isolated package graph. Its 19 dependency modules are
+authenticated by one composed frozen authority: 11 still-current receipts from the exact M02-T11
+execution-contract artifact plus eight disjoint reviewed M08 successor receipts. Any dependency
+byte drift therefore fails before the public package import.
+
+`unknownStaticEsmEdges: 0` closes only the exact static ESM graph. The byte-pinned dependencies,
+Node runtime, module loader, and process environment remain trusted authorities; this evidence is
+not a general hostile-JavaScript capability sandbox. Authority reads are bounded, no-follow,
+canonical-parent, single-link reads whose file identity is checked before and after acquisition.
+Options must be own enumerable data; inherited, accessor, symbol, Proxy, and shared-memory inputs
+fail before executable hooks or mutable byte aliases can become authority.
 
 Generation writes already deterministic bytes through an exclusive same-directory temporary,
 syncs and rechecks the open inode and bytes, then atomically renames and reads the committed file

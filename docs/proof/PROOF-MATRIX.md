@@ -1775,7 +1775,7 @@ Catalog semantics remain admissible for later continuous validation.
 Seven focused package cases, ten built public-runtime contract cases, five source compiler
 negatives, five emitted-declaration consumer negatives, and seven public proof-core cases cover
 the reviewed behavior, type, package, distribution, and platform boundary. The independent root
-proof authenticates the completed I07-04/G07 prerequisite, verifies 24 tracked-file receipts, and
+proof authenticates the completed I07-04/G07 prerequisite, verifies 47 tracked-file receipts, and
 uses 13 adversarial cases to fail closed on behavior, source, distribution, manifest,
 test-inventory, prerequisite, artifact, and hostile proof-option drift. CI registers
 `editor-core-source-document` after
@@ -1783,8 +1783,14 @@ test-inventory, prerequisite, artifact, and hostile proof-option drift. CI regis
 [`EDITOR-CORE-SOURCE-DOCUMENT.md`](EDITOR-CORE-SOURCE-DOCUMENT.md) and
 `artifacts/editor-core-0.1.0-source-document.json`.
 
+The receipts include the exact 24-file runtime closure: three manifests and 21 static ESM modules
+totaling 1,392,921 bytes. Eleven still-current M02-T11 receipts plus eight disjoint reviewed M08
+successor receipts authenticate all 19 dependency modules before import. The exact dependency
+bytes, Node runtime, loader, and process remain trusted authorities; this is not a general
+hostile-JavaScript capability sandbox.
+
 The current append-only reader successor is sequence 29 at
-`ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`, authenticating 26 frozen
+`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
 artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
 unchanged.
 

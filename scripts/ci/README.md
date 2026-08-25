@@ -260,6 +260,8 @@ The complete current reviewed digest set is:
   `bbbe83b8d7c8160760938e5ef8acdc7eed921c6c1b7353cc1119b0710f5cb741`;
 - distinct leaf workloads:
   `c4630c749e992b6a4d294a3c8e2900dd33d4c21b1389224b4f9c899507a6637d`;
+- 15 workspace test scripts:
+  `0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`;
 - retained sequential plan:
   `edc62f2aee78d26486db76cff754b489f6ea72e974ee5fd3bf4edc495f7a96ef`;
 - neutral inventory:
@@ -349,7 +351,8 @@ cases require hosted execution because the local sandbox returns `EPERM` on bind
 The M08-T01 `editor-core-source-document` pair is ordinary and non-barrier and follows the semantic
 `protocol-structural-validation` predecessor. Its verifier is `PROOF_READ_ONLY`; its independent
 root mutation test is `PROOF_OS_TEMP_ISOLATED` and writes only inside its runner-owned OS temp root.
-Neither workload receives workspace-write, child-process, port, or native-addon authority.
+Neither workload receives workspace-write, port, or native-addon authority. The verifier receives
+no child-runtime-probe grant, while the root receives only the ordinary `NODE_TEST_HARNESS` policy.
 The separate serial `editor-core-public-package-contract` prefix runs the exact package export-map,
 compiler, and emitted-runtime contract before that verifier and owns its repeated `dist` write.
 
@@ -459,10 +462,11 @@ did not count and the counter remained `0 / 20` then. I07-04 later authenticated
 eligible comparisons with zero false negatives and completed hosted cutover. The exact bootstrap run/job/revision/receipt
 identifiers are in
 [`i07-03-affected-selector-shadow.json`](../../docs/proof/baselines/i07-03-affected-selector-shadow.json).
-Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/203. The full local
-gate is `BLOCKED_BY_LOCAL_SANDBOX` because loopback `listen` returned `EPERM` in two pre-existing
-TCP lifecycle tests. That environment limitation is not a product regression; the hosted Quality
-gate remains authoritative. `DEBT-I07-017` assigns the shadow-only job, wrapper, and test wiring to
+Focused local contracts passed 91/91 and all CI infrastructure tests passed 203/203. At that
+historical checkpoint, the full local gate was `BLOCKED_BY_LOCAL_SANDBOX` because loopback
+`listen` returned `EPERM` in two pre-existing TCP lifecycle tests. That environment limitation was
+not a product regression; the hosted Quality gate remained authoritative. `DEBT-I07-017` assigns
+the shadow-only job, wrapper, and test wiring to
 I07-04 for removal by G07.
 
 ## Completed promotion boundary
@@ -486,10 +490,12 @@ campaign, derives one same-read current comparison authority, proves the exact c
 ownership/selector transition, and seals the required dispatcher. The dispatcher runs a strict
 subset only for an authenticated eligible same-repository PR; every uncertain or drifted boundary
 falls back exactly once to fresh exhaustive execution. `main`, releases, and manual audits remain
-fresh exhaustive. All 17 G07-due compatibility/shadow targets are locally absent and the current
-reader authority is append-only checkpoint sequence 28 at
-`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
-artifacts and 50 current readers. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
+fresh exhaustive. All 17 G07-due compatibility/shadow targets are locally absent. Historical
+closure checkpoint sequence 28 at
+`2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546` authenticates 25 frozen
+artifacts and 50 readers. The current append-only authority is sequence 29 at
+`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58`, authenticating 26 frozen
+artifacts and 52 current readers. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 passed fresh `REQUIRED + EXHAUSTIVE` in
 [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
 and its landed `main` revision passed the same authority in
@@ -499,4 +505,4 @@ The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) pass
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07 are
-`DONE`; proof gates are 8/13, implementation remains 85/145, and M08-T01 is next.
+`DONE`; proof gates are 8/13, implementation is 86/145, and M08-T02 is next.

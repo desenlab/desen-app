@@ -3178,9 +3178,13 @@ This file records implementation discoveries without changing the frozen DESEN 0
   preserve the same direct immutable Source result. A fresh in-memory proof core also executes the
   emitted public API and audits the exact source, distribution, manifest, TSDoc, test inventory,
   and platform boundary. After authenticating the completed I07-04/G07 prerequisite, the
-  13-case independent root proof now pins that exact scope and 24 tracked-file receipts in the
+  13-case independent root proof now pins that exact scope and 47 tracked-file receipts in the
   M08-T01 artifact and rejects behavior, source, distribution, manifest, test-inventory,
-  prerequisite, artifact, and hostile proof-option drift. This completes only the direct Source
+  prerequisite, artifact, and hostile proof-option drift. The receipts include an exact 24-file
+  static ESM runtime closure whose 19 dependency modules are authenticated before import by 11
+  still-current M02-T11 receipts plus 8 disjoint M08 successor receipts. The exact dependency
+  bytes, Node runtime, loader, and process remain trusted authorities; no general
+  hostile-JavaScript sandbox is claimed. This completes only the direct Source
   admission decision; it changes no `P-*`, `N-*`, `S-*`, or proof-gate status.
 - Future action: M08-T02 through M08-T07 must express every edit as a deterministic transition to a
   new direct Source snapshot, retain ordinary stable identities, isolate authoring-only state, and

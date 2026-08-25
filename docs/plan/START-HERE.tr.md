@@ -360,11 +360,15 @@ M08-T01 de tamamlandı. `@desen/editor-core`, bilinmeyen inert JSON'u donmuş So
 şema yapısal doğrulayıcısından geçirir; başarıda sarmalayıcı, gizli AST veya düğüm dizini
 eklemeden doğrudan ayrık ve özyinelemeli değişmez `desen.source` kökünü verir. Başarısızlık
 kısmi belge yetkisi vermez. Yedi odak davranış testi ile on built public-runtime vakası, iki
-ayrı beşer compiler-negative grubu, yedi public proof-core vakası ve 24 izlenen dosya receipt'ini
-doğrulayan 13 vakalı bağımsız root kanıtı bu dar kapsamı korur. Kanıt
+ayrı beşer compiler-negative grubu, yedi public proof-core vakası ve 47 izlenen dosya receipt'ini
+doğrulayan 13 vakalı bağımsız root kanıtı bu dar kapsamı korur. Receipt'ler, üç manifest ile 21
+statik ESM modülünden oluşan exact 24 dosyalık runtime kapanışını da içerir; 19 bağımlılık modülü
+import öncesinde 11 güncel M02-T11 receipt'i ve ayrık 8 M08 successor receipt'iyle doğrulanır. Exact
+bağımlılık baytları, Node runtime, loader ve process güvenilen otoritelerdir; genel bir hostile
+JavaScript sandbox sonucu iddia edilmez. Kanıt
 [`EDITOR-CORE-SOURCE-DOCUMENT.md`](../proof/EDITOR-CORE-SOURCE-DOCUMENT.md) ve izlenen artifact'ta
 sabittir. Güncel append-only reader ardılı sequence 29'dur;
-`ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9` başıyla 26 donmuş
+`95c175c67352c3fc0d2fbe420446a3e5283087eb00c5d0ff4c3313703489eb58` başıyla 26 donmuş
 artifact ve 52 güncel reader doğrular. Bu sonuç düzenleme komutlarını, authoring izolasyonunu,
 bilinmeyen extension korumasını, persistence'ı, sürekli semantik doğrulamayı veya M08 terminal
 React/DOM sınırını kanıtlamaz; bu sahiplikler sırasıyla M08-T02–T06, M08-T07, M08-T08, M08-T09 ve
