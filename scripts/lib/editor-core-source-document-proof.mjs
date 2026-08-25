@@ -38,6 +38,13 @@ const I07_04_PREREQUISITE_PATH = "docs/proof/baselines/i07-04-affected-selector-
 const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
+const TYPED_ARRAY_PROTOTYPE = Object.getPrototypeOf(Uint8Array.prototype);
+const TYPED_ARRAY_INTRINSICS = Object.freeze({
+  buffer: Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "buffer")?.get,
+  byteLength: Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "byteLength")?.get,
+  byteOffset: Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "byteOffset")?.get,
+});
+const SHADOWABLE_BYTE_VIEW_FIELDS = Object.freeze(["buffer", "byteLength", "byteOffset", "length"]);
 
 export const EDITOR_CORE_SOURCE_DOCUMENT_PREREQUISITE_PIN = Object.freeze({
   task: "I07-04",
@@ -224,9 +231,34 @@ function captureByteView(value, label) {
   }
   let prototype;
   let backingBuffer;
+  let byteLength;
+  let byteOffset;
   try {
     prototype = Object.getPrototypeOf(value);
-    backingBuffer = value.buffer;
+    if (
+      SHADOWABLE_BYTE_VIEW_FIELDS.some(
+        (field) => Object.getOwnPropertyDescriptor(value, field) !== undefined,
+      ) ||
+      Object.getOwnPropertySymbols(value).length !== 0
+    ) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID",
+        `${label} must not shadow intrinsic byte-view state.`,
+      );
+    }
+    if (
+      typeof TYPED_ARRAY_INTRINSICS.buffer !== "function" ||
+      typeof TYPED_ARRAY_INTRINSICS.byteLength !== "function" ||
+      typeof TYPED_ARRAY_INTRINSICS.byteOffset !== "function"
+    ) {
+      fail(
+        "EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID",
+        `${label} byte-view intrinsics are unavailable.`,
+      );
+    }
+    backingBuffer = Reflect.apply(TYPED_ARRAY_INTRINSICS.buffer, value, []);
+    byteLength = Reflect.apply(TYPED_ARRAY_INTRINSICS.byteLength, value, []);
+    byteOffset = Reflect.apply(TYPED_ARRAY_INTRINSICS.byteOffset, value, []);
   } catch {
     fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} could not be captured safely.`);
   }
@@ -237,7 +269,7 @@ function captureByteView(value, label) {
     fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} must not use shared memory.`);
   }
   try {
-    return Buffer.from(value);
+    return Buffer.from(new Uint8Array(backingBuffer, byteOffset, byteLength));
   } catch {
     fail("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID", `${label} could not be copied safely.`);
   }
@@ -733,7 +765,9 @@ function verifyRuntimeBehavior(runtimeApi, officialSource) {
 
   const executable = cloneJson(officialSource);
   executable.authoring = { executable: () => "not inert JSON" };
-  assertRejected(createDocument(executable), "", "executable input");
+  const executableResult = createDocument(executable);
+  const executableGraph = assertRejected(executableResult, "", "executable input");
+  assertCallerGraphUnfrozenAndDetached(executable, executableGraph.objects, "executable caller");
 
   let getterCalls = 0;
   let toJsonCalls = 0;
@@ -750,8 +784,20 @@ function verifyRuntimeBehavior(runtimeApi, officialSource) {
     toJsonCalls += 1;
     return cloneJson(officialSource);
   };
-  assertRejected(createDocument(accessor), "", "accessor input");
-  assertRejected(createDocument(serializationHook), "", "serialization-hook input");
+  const accessorResult = createDocument(accessor);
+  const accessorGraph = assertRejected(accessorResult, "", "accessor input");
+  assertCallerGraphUnfrozenAndDetached(accessor, accessorGraph.objects, "accessor caller");
+  const serializationHookResult = createDocument(serializationHook);
+  const serializationHookGraph = assertRejected(
+    serializationHookResult,
+    "",
+    "serialization-hook input",
+  );
+  assertCallerGraphUnfrozenAndDetached(
+    serializationHook,
+    serializationHookGraph.objects,
+    "serialization-hook caller",
+  );
   if (getterCalls !== 0 || toJsonCalls !== 0) {
     fail(
       "EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT",

@@ -74,6 +74,33 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const child of Object.values(value)) assertDeepFrozen(child, visited);
 }
 
+function runtimeThatFreezesRejectedCaller(vector) {
+  return {
+    createDesenEditorDocument(input) {
+      const authoring =
+        input !== null && typeof input === "object"
+          ? Object.getOwnPropertyDescriptor(input, "authoring")?.value
+          : undefined;
+      const authoringDescriptor =
+        authoring !== null && typeof authoring === "object"
+          ? Object.getOwnPropertyDescriptor(authoring, vector)
+          : undefined;
+      const rootDescriptor =
+        input !== null && typeof input === "object"
+          ? Object.getOwnPropertyDescriptor(input, vector)
+          : undefined;
+      const matches =
+        vector === "selection"
+          ? authoringDescriptor !== undefined && !("value" in authoringDescriptor)
+          : vector === "executable"
+            ? typeof authoringDescriptor?.value === "function"
+            : typeof rootDescriptor?.value === "function";
+      if (matches) Object.freeze(input);
+      return editorCore.createDesenEditorDocument(input);
+    },
+  };
+}
+
 before(async () => {
   built = await buildEditorCoreSourceDocumentEvidence();
 });
@@ -196,6 +223,9 @@ test("[behavior] rejects wrappers, mutation authority, partial failure, and sema
         return editorCore.createDesenEditorDocument(input);
       },
     },
+    runtimeThatFreezesRejectedCaller("executable"),
+    runtimeThatFreezesRejectedCaller("selection"),
+    runtimeThatFreezesRejectedCaller("toJSON"),
   ];
 
   for (const runtimeApi of runtimes) {
@@ -376,17 +406,58 @@ test("[options] rejects unknown, accessor, inherited, symbol, proxy, and shared 
       },
     },
   );
-  for (const options of [{ unexpected: true }, accessor, inherited, symbol, proxy]) {
+  const prerequisiteBytes = new Uint8Array(await workspaceBytes(PREREQUISITE));
+  const shadowedBuffer = new Uint8Array(prerequisiteBytes);
+  Object.defineProperty(shadowedBuffer, "buffer", {
+    get() {
+      getterCalls += 1;
+      return new ArrayBuffer(0);
+    },
+  });
+  const shadowedArtifactLength = new Uint8Array(built.artifactBytes);
+  Object.defineProperty(shadowedArtifactLength, "length", {
+    get() {
+      getterCalls += 1;
+      return built.artifactBytes.byteLength;
+    },
+  });
+  for (const options of [
+    { unexpected: true },
+    accessor,
+    inherited,
+    symbol,
+    proxy,
+    { prerequisiteBytes: shadowedBuffer },
+  ]) {
     await assert.rejects(
       buildEditorCoreSourceDocumentEvidence(options),
       expectedError("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID"),
     );
   }
+  await assert.rejects(
+    verifyEditorCoreSourceDocumentEvidence({
+      artifactBytes: shadowedArtifactLength,
+      proofDocument: exactProofDocument(built.artifactSha256),
+    }),
+    expectedError("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID"),
+  );
   if (typeof SharedArrayBuffer === "function") {
+    const sharedBytes = new Uint8Array(new SharedArrayBuffer(prerequisiteBytes.byteLength));
+    sharedBytes.set(prerequisiteBytes);
+    Object.defineProperty(sharedBytes, "buffer", {
+      get() {
+        getterCalls += 1;
+        return new ArrayBuffer(0);
+      },
+    });
     await assert.rejects(
       buildEditorCoreSourceDocumentEvidence({
         prerequisiteBytes: new Uint8Array(new SharedArrayBuffer(8)),
       }),
+      expectedError("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID"),
+    );
+    await assert.rejects(
+      buildEditorCoreSourceDocumentEvidence({ prerequisiteBytes: sharedBytes }),
       expectedError("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID"),
     );
   }

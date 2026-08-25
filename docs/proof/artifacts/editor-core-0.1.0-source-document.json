@@ -213,8 +213,8 @@
       },
       {
         "path": "packages/editor-core/test/public-package.mjs",
-        "bytes": 16559,
-        "sha256": "1af15706c05b900b5eae9bbb73c68c0d1a03848631b71d93a4c4ce20059125e1"
+        "bytes": 18962,
+        "sha256": "1fe7e6987731aa904d72123e80f68bd013aa1363d69f7db20d9fa572504e7e61"
       },
       {
         "path": "packages/editor-core/test/public-package.types.mts",
@@ -258,8 +258,8 @@
       },
       {
         "path": "scripts/lib/editor-core-source-document-proof.mjs",
-        "bytes": 53054,
-        "sha256": "a97e94e3d7b0e7da139e4243fe24e52dbb42ee46c32feb6ab43386424c57ba52"
+        "bytes": 55072,
+        "sha256": "532872af3eae0abff5ae2719bb86751d41bfb5e21c457cd675705c75f547eb06"
       },
       {
         "path": "scripts/verify-editor-core-source-document.mjs",
@@ -268,8 +268,8 @@
       },
       {
         "path": "tests/editor-core-source-document.test.mjs",
-        "bytes": 18422,
-        "sha256": "7011da0af443e324ebc48636e793ecb88c51b75fbc15fa551a6f9af1d26178f3"
+        "bytes": 20866,
+        "sha256": "bb97e93343df925aa22bcb5de01bde95e917e2da4b86ca74f0d3d0fbb451022e"
       }
     ]
   },

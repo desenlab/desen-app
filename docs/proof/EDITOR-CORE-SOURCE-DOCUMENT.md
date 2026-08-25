@@ -10,7 +10,7 @@ frozen diagnostic shell and no partial document.
 
 Artifact: `docs/proof/artifacts/editor-core-0.1.0-source-document.json`
 
-Final receipt: `sha256:4f1ca45f9e7a4bee96dcd3acef8a3b7c390d7cf16f7a669f4ec4ed68f9ae435c`
+Final receipt: `sha256:0f08a0cbfd67b9e774633bf69cc38cbf280cdd0ffffa219b13b6b2ff9b4ddd66`
 
 ## Exact prerequisite authority
 

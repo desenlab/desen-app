@@ -51,6 +51,33 @@ function assertRejected(result, pointer) {
   assertPlainOwnDataFrozen(result);
 }
 
+function runtimeThatFreezesRejectedCaller(vector) {
+  return {
+    createDesenEditorDocument(input) {
+      const authoring =
+        input !== null && typeof input === "object"
+          ? Object.getOwnPropertyDescriptor(input, "authoring")?.value
+          : undefined;
+      const authoringDescriptor =
+        authoring !== null && typeof authoring === "object"
+          ? Object.getOwnPropertyDescriptor(authoring, vector)
+          : undefined;
+      const rootDescriptor =
+        input !== null && typeof input === "object"
+          ? Object.getOwnPropertyDescriptor(input, vector)
+          : undefined;
+      const matches =
+        vector === "selection"
+          ? authoringDescriptor !== undefined && !("value" in authoringDescriptor)
+          : vector === "executable"
+            ? typeof authoringDescriptor?.value === "function"
+            : typeof rootDescriptor?.value === "function";
+      if (matches) Object.freeze(input);
+      return editorCore.createDesenEditorDocument(input);
+    },
+  };
+}
+
 function hasProofCode(expectedCode) {
   return (error) => {
     assert.ok(error instanceof EditorCoreSourceDocumentProofError);
@@ -308,7 +335,13 @@ test("[proof-core] rejects caller retention and partial failure authority", asyn
     },
   };
 
-  for (const runtimeApi of [retainedCallerRuntime, partialFailureRuntime]) {
+  for (const runtimeApi of [
+    retainedCallerRuntime,
+    partialFailureRuntime,
+    runtimeThatFreezesRejectedCaller("executable"),
+    runtimeThatFreezesRejectedCaller("selection"),
+    runtimeThatFreezesRejectedCaller("toJSON"),
+  ]) {
     await assert.rejects(
       buildEditorCoreSourceDocumentEvidence({ runtimeApi }),
       hasProofCode("EDITOR_SOURCE_DOCUMENT_BEHAVIOR_DRIFT"),
@@ -445,10 +478,53 @@ test("[proof-core] rejects accessor, inherited, symbol, and Proxy options withou
       },
     },
   );
+  const prerequisiteBytes = new Uint8Array(
+    await readFile(
+      new URL(
+        "../../../docs/proof/baselines/i07-04-affected-selector-promotion.json",
+        import.meta.url,
+      ),
+    ),
+  );
+  const shadowedBuffer = new Uint8Array(prerequisiteBytes);
+  Object.defineProperty(shadowedBuffer, "buffer", {
+    get() {
+      getterCalls += 1;
+      return new ArrayBuffer(0);
+    },
+  });
+  const shadowedLength = new Uint8Array(prerequisiteBytes);
+  Object.defineProperty(shadowedLength, "length", {
+    get() {
+      getterCalls += 1;
+      return prerequisiteBytes.byteLength;
+    },
+  });
 
-  for (const options of [accessor, inherited, symbol, proxy]) {
+  for (const options of [
+    accessor,
+    inherited,
+    symbol,
+    proxy,
+    { prerequisiteBytes: shadowedBuffer },
+    { prerequisiteBytes: shadowedLength },
+  ]) {
     await assert.rejects(
       buildEditorCoreSourceDocumentEvidence(options),
+      hasProofCode("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID"),
+    );
+  }
+  if (typeof SharedArrayBuffer === "function") {
+    const sharedBytes = new Uint8Array(new SharedArrayBuffer(prerequisiteBytes.byteLength));
+    sharedBytes.set(prerequisiteBytes);
+    Object.defineProperty(sharedBytes, "buffer", {
+      get() {
+        getterCalls += 1;
+        return new ArrayBuffer(0);
+      },
+    });
+    await assert.rejects(
+      buildEditorCoreSourceDocumentEvidence({ prerequisiteBytes: sharedBytes }),
       hasProofCode("EDITOR_SOURCE_DOCUMENT_OPTIONS_INVALID"),
     );
   }
