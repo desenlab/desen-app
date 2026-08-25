@@ -2670,7 +2670,7 @@ M08-T01 evidence:
   source, distribution, manifest, TSDoc, test-inventory, prerequisite, artifact, and hostile
   proof-option drift
 - CI authority: `editor-core-source-document` follows `protocol-structural-validation` in the
-  exact 152-workload, 72-proof-pair successor (61 ordinary pairs and 11 barriers); focused CI
+  exact 153-workload, 72-proof-pair successor (61 ordinary pairs and 11 barriers); focused CI
   contracts pass 148/148, and the 15/15 ownership reseal covers 1,035 tracked paths with 144
   proof-owned paths
 - current reader authority: append-only sequence 29 at

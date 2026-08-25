@@ -215,7 +215,7 @@ test("an exact proof-unit modification yields a strict shadow subset", async () 
   assert.equal(plan.strictSubset, true);
   assert.deepEqual(plan.ownerProofUnitIds, ["protocol-canonicalization"]);
   assert.deepEqual(plan.affectedProofUnitIds, ["protocol-canonicalization"]);
-  assert.equal(plan.workloadCount, 10);
+  assert.equal(plan.workloadCount, 11);
   assert.equal(validateShadowAffectedSelection(plan), plan);
   assert.equal(Object.isFrozen(plan), true);
   assert.equal(Object.isFrozen(plan.nodeIds), true);
@@ -252,7 +252,7 @@ test("policy, package, documentation, and shared inputs always expand to exhaust
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, "POLICY_DRIFT");
     assert.equal(plan.strictSubset, false);
-    assert.equal(plan.workloadCount, 152);
+    assert.equal(plan.workloadCount, 153);
   }
 });
 
@@ -285,7 +285,7 @@ test("all boundary uncertainty classes expand to exhaustive without partial path
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, category);
     assert.deepEqual(plan.changedPaths, []);
-    assert.equal(plan.workloadCount, 152);
+    assert.equal(plan.workloadCount, 153);
   }
 });
 

@@ -1779,7 +1779,7 @@ proof authenticates the completed I07-04/G07 prerequisite, verifies 24 tracked-f
 uses 13 adversarial cases to fail closed on behavior, source, distribution, manifest,
 test-inventory, prerequisite, artifact, and hostile proof-option drift. CI registers
 `editor-core-source-document` after
-`protocol-structural-validation` in the exact 152-workload/72-proof-pair successor. Exact evidence lives in
+`protocol-structural-validation` in the exact 153-workload/72-proof-pair successor. Exact evidence lives in
 [`EDITOR-CORE-SOURCE-DOCUMENT.md`](EDITOR-CORE-SOURCE-DOCUMENT.md) and
 `artifacts/editor-core-0.1.0-source-document.json`.
 

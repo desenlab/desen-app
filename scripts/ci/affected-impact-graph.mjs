@@ -32,6 +32,7 @@ const PREFIX_NODE_IDS = SAFE_OBJECT_FREEZE([
   "structural-validator-artifacts",
   "workspace-graph",
   "package-tests",
+  "editor-core-public-package-contract",
 ]);
 const SUFFIX_NODE_IDS = SAFE_OBJECT_FREEZE(["dependency-boundaries", "boundary-fixtures"]);
 
@@ -101,7 +102,7 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "95c3f7766466fd969f6e06cab49b5a29036f559b33eb7ee224ef1824ff8064d5";
+  "99a2f9585fcb50c1c6dfb1a3d8a0571547cfcfd38668b47823cf5e0181f425ca";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {

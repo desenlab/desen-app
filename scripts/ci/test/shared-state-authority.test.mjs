@@ -99,28 +99,43 @@ const ALL_STEP_IDS = Object.freeze([
   "structural-validator-artifacts",
   "workspace-graph",
   "package-tests",
+  "editor-core-public-package-contract",
   ...PROOF_IDS.map((id) => `verify-${id}`),
   ...PROOF_IDS.map((id) => `test-${id}`),
   "dependency-boundaries",
   "boundary-fixtures",
 ]);
 
-test("owns exactly 152 steps across the seven reviewed execution classes", () => {
+test("owns exactly 153 steps across the seven reviewed execution classes", () => {
   const counts = Object.fromEntries(Object.values(EXECUTION_CLASSES).map((id) => [id, 0]));
   for (const stepId of ALL_STEP_IDS) {
     counts[classifyWorkloadStateMetadata(stepId).executionClass] += 1;
   }
 
-  assert.equal(ALL_STEP_IDS.length, 152);
-  assert.equal(new Set(ALL_STEP_IDS).size, 152);
+  assert.equal(ALL_STEP_IDS.length, 153);
+  assert.equal(new Set(ALL_STEP_IDS).size, 153);
   assert.deepEqual(counts, {
     GLOBAL_EXCLUSIVE: 6,
-    WORKSPACE_OUTPUT_EXCLUSIVE: 1,
+    WORKSPACE_OUTPUT_EXCLUSIVE: 2,
     PACKAGE_TEST_EXCLUSIVE: 1,
     PROOF_READ_ONLY: 70,
     PROOF_OS_TEMP_ISOLATED: 63,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
+  });
+  assert.deepEqual(classifyWorkloadStateMetadata("editor-core-public-package-contract"), {
+    schemaVersion: 2,
+    stepId: "editor-core-public-package-contract",
+    executionClass: "WORKSPACE_OUTPUT_EXCLUSIVE",
+    workspaceReads: ["."],
+    workspaceWrites: ["."],
+    tempPolicy: "NONE",
+    tempKey: null,
+    ports: [],
+    childProcessPolicy: "TOOLCHAIN_EXCLUSIVE",
+    nativeAddonPolicy: "NONE",
+    filesystemCompatibilityPolicy: "NONE",
+    barrier: true,
   });
 });
 
@@ -1233,7 +1248,7 @@ test("filesystem compatibility is limited to eighteen reviewed workloads and exa
     policyCounts[classifyWorkloadStateMetadata(stepId).filesystemCompatibilityPolicy] += 1;
   }
   assert.deepEqual(policyCounts, {
-    NONE: 134,
+    NONE: 135,
     FIXTURE_COPY: 2,
     REVIEWED_SYMLINK: 15,
     FIXTURE_COPY_AND_REVIEWED_SYMLINK: 1,

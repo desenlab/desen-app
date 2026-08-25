@@ -40,23 +40,24 @@ test("impact closure includes prerequisites, dependents, and exact global barrie
   assert.equal(closure.proofUnitIds.includes("publisher-invalid-source-matrix"), true);
   assert.equal(closure.proofUnitIds.includes("control-plane-runtime-fault-injection"), true);
   assert.equal(closure.proofUnitIds.includes("control-plane-runtime-transition-races"), true);
-  assert.deepEqual(closure.nodeIds.slice(0, 6), [
+  assert.deepEqual(closure.nodeIds.slice(0, 7), [
     "orchestrator-contracts",
     "format",
     "lint",
     "structural-validator-artifacts",
     "workspace-graph",
     "package-tests",
+    "editor-core-public-package-contract",
   ]);
   assert.deepEqual(closure.nodeIds.slice(-2), ["dependency-boundaries", "boundary-fixtures"]);
-  assert.equal(closure.workloadCount, 6 + closure.proofUnitCount * 2 + 2);
+  assert.equal(closure.workloadCount, 7 + closure.proofUnitCount * 2 + 2);
   assert.match(closure.impactSha256, /^[0-9a-f]{64}$/u);
 });
 
 test("independent proof units remain a strict subset", () => {
   const closure = createAffectedImpactClosure(["protocol-canonicalization"]);
   assert.deepEqual(closure.proofUnitIds, ["protocol-canonicalization"]);
-  assert.equal(closure.workloadCount, 10);
+  assert.equal(closure.workloadCount, 11);
 });
 
 test("the editor Source document closes over its structural predecessor", () => {
@@ -65,7 +66,7 @@ test("the editor Source document closes over its structural predecessor", () => 
     "protocol-structural-validation",
     "editor-core-source-document",
   ]);
-  assert.equal(closure.workloadCount, 12);
+  assert.equal(closure.workloadCount, 13);
 });
 
 test("unknown, duplicate, empty, proxy, and sparse owner inputs fail closed", () => {

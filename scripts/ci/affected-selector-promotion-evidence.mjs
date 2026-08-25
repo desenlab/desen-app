@@ -2081,7 +2081,7 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 152 ||
+    currentInventory.workloadCount !== 153 ||
     currentInventory.proofUnitCount !== 72
   ) {
     fail(

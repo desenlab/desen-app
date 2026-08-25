@@ -378,8 +378,21 @@ test("inventory validation pins the exact pnpm workspace manifest and package gl
 
 test("the execution plan contains no generator, writer, shell, or changed-file shortcut", () => {
   const steps = createQualityGateSteps();
-  assert.equal(steps.length, 152);
+  assert.equal(steps.length, 153);
   assert.equal(steps.filter(({ id }) => id.startsWith("test-")).length, 72);
+  assert.deepEqual(
+    steps.find(({ id }) => id === "editor-core-public-package-contract"),
+    {
+      id: "editor-core-public-package-contract",
+      label: "Editor core public-package contract",
+      command: "pnpm",
+      args: ["--filter", "@desen/editor-core", "test:public-package"],
+    },
+  );
+  assert.equal(
+    steps.findIndex(({ id }) => id === "editor-core-public-package-contract"),
+    steps.findIndex(({ id }) => id === "package-tests") + 1,
+  );
   for (const step of steps) {
     assert.doesNotThrow(() => assertSafeStep(step));
   }
@@ -400,8 +413,8 @@ test("the execution plan contains no generator, writer, shell, or changed-file s
 test("the exact single-pass plan rejects command removal and duplicate root coverage", () => {
   const steps = createQualityGateSteps();
   assert.deepEqual(validateQualityGatePlan(steps), {
-    stepCount: 152,
-    planSha256: "6754e221238ee16f9be5cacb690c444490d28cce00808b1312a05bfe4908c3c8",
+    stepCount: 153,
+    planSha256: "edc62f2aee78d26486db76cff754b489f6ea72e974ee5fd3bf4edc495f7a96ef",
   });
 
   const missingTypecheck = clone(steps);

@@ -412,7 +412,7 @@ const DISTINCT_LEAF_WORKLOAD_SHA256 =
   "c4630c749e992b6a4d294a3c8e2900dd33d4c21b1389224b4f9c899507a6637d";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "6754e221238ee16f9be5cacb690c444490d28cce00808b1312a05bfe4908c3c8";
+const QUALITY_GATE_PLAN_SHA256 = "edc62f2aee78d26486db76cff754b489f6ea72e974ee5fd3bf4edc495f7a96ef";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -1025,6 +1025,12 @@ export function createQualityGateSteps() {
       "run",
       "test",
     ]),
+    commandStep(
+      "editor-core-public-package-contract",
+      "Editor core public-package contract",
+      "pnpm",
+      ["--filter", "@desen/editor-core", "test:public-package"],
+    ),
     ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
       commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),
     ),

@@ -16,7 +16,7 @@ import {
 
 const WORKSPACE_ROOT = resolve(import.meta.dirname, "../../..");
 const COMPATIBILITY_PROJECTION_SHA256 =
-  "6754e221238ee16f9be5cacb690c444490d28cce00808b1312a05bfe4908c3c8";
+  "edc62f2aee78d26486db76cff754b489f6ea72e974ee5fd3bf4edc495f7a96ef";
 
 function cloneInventory() {
   return structuredClone(createExhaustiveWorkloadInventory());
@@ -84,23 +84,23 @@ async function currentRepositoryInputs() {
   };
 }
 
-test("the neutral inventory preserves the exact 152-workload successor projection", () => {
+test("the neutral inventory preserves the exact 153-workload successor projection", () => {
   const inventory = createExhaustiveWorkloadInventory();
   const projection = inventory.nodes.map(({ id, command, args }) => ({ id, command, args }));
   const projectionSha256 = createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 
   assert.equal(inventory.schemaVersion, 1);
   assert.equal(inventory.profile, "desen.ci.exhaustive-workload-inventory.v1");
-  assert.equal(inventory.workloadCount, 152);
+  assert.equal(inventory.workloadCount, 153);
   assert.equal(inventory.proofUnitCount, 72);
   assert.equal(inventory.inventorySha256, EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256);
   assert.equal(
     EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    "c932d5ef109c06cc2d42a6cfd659ea48d6579594f4ceead49f36e1603943e61b",
+    "2e25f738ec948ca47c6d50fba2dbdab487cfd41ae3701d86e206c473b477d201",
   );
   assert.equal(projectionSha256, COMPATIBILITY_PROJECTION_SHA256);
   assert.deepEqual(
-    inventory.nodes.slice(0, 6).map(({ id }) => id),
+    inventory.nodes.slice(0, 7).map(({ id }) => id),
     [
       "orchestrator-contracts",
       "format",
@@ -108,14 +108,15 @@ test("the neutral inventory preserves the exact 152-workload successor projectio
       "structural-validator-artifacts",
       "workspace-graph",
       "package-tests",
+      "editor-core-public-package-contract",
     ],
   );
   assert.equal(
-    inventory.nodes.slice(6, 78).every(({ id }) => id.startsWith("verify-")),
+    inventory.nodes.slice(7, 79).every(({ id }) => id.startsWith("verify-")),
     true,
   );
   assert.equal(
-    inventory.nodes.slice(78, 150).every(({ id }) => id.startsWith("test-")),
+    inventory.nodes.slice(79, 151).every(({ id }) => id.startsWith("test-")),
     true,
   );
   assert.deepEqual(
@@ -214,6 +215,7 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
   const nodeById = new Map(inventory.nodes.map((workload) => [workload.id, workload]));
   const workspaceGraph = nodeById.get("workspace-graph");
   const packageTests = nodeById.get("package-tests");
+  const publicPackageContract = nodeById.get("editor-core-public-package-contract");
   const boundaries = nodeById.get("dependency-boundaries");
 
   assert.deepEqual(workspaceGraph.dependencies, ["structural-validator-artifacts"]);
@@ -225,6 +227,20 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
     ports: "NONE",
   });
   assert.equal(packageTests.sharedState.buildOutputs, "SHARED_READ_AFTER_PREFIX");
+  assert.deepEqual(publicPackageContract, {
+    id: "editor-core-public-package-contract",
+    label: "Editor core public-package contract",
+    command: "pnpm",
+    args: ["--filter", "@desen/editor-core", "test:public-package"],
+    dependencies: ["package-tests"],
+    executionClass: "SERIAL_BUILD_WRITER",
+    sharedState: {
+      trackedWorkspace: "READ_ONLY_GUARDED",
+      buildOutputs: "SHARED_WRITE_SERIALIZED",
+      temporaryPaths: "TOOL_SCOPED",
+      ports: "NONE",
+    },
+  });
   assert.equal(boundaries.dependencies.length, 72);
 
   for (const unit of inventory.proofUnits) {
@@ -232,7 +248,11 @@ test("dependencies, execution classes, and shared-state ownership are explicit",
     const rootTest = nodeById.get(unit.rootTestNodeId);
     assert.equal(verifier.executionClass, "CONCURRENT_PROOF");
     assert.equal(rootTest.executionClass, "CONCURRENT_PROOF");
-    assert.deepEqual(verifier.dependencies, ["package-tests"]);
+    assert.deepEqual(verifier.dependencies, [
+      unit.id === "editor-core-source-document"
+        ? "editor-core-public-package-contract"
+        : "package-tests",
+    ]);
     assert.deepEqual(rootTest.dependencies, [verifier.id]);
     assert.equal(verifier.sharedState.buildOutputs, "SHARED_READ_AFTER_PREFIX");
     assert.equal(rootTest.sharedState.temporaryPaths, "PROCESS_ISOLATED");

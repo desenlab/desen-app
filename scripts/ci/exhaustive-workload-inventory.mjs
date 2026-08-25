@@ -1097,6 +1097,15 @@ function buildCanonicalInventory() {
       "SERIAL_GLOBAL",
       SHARED_BUILD_READER,
     ),
+    node(
+      "editor-core-public-package-contract",
+      "Editor core public-package contract",
+      "pnpm",
+      ["--filter", "@desen/editor-core", "test:public-package"],
+      ["package-tests"],
+      "SERIAL_BUILD_WRITER",
+      SHARED_BUILD_WRITER,
+    ),
   ];
   const verifiers = PROOF_UNIT_TUPLES.map(([id, verifierFile]) =>
     node(
@@ -1104,7 +1113,11 @@ function buildCanonicalInventory() {
       "Proof verifier: " + id,
       "node",
       [verifierFile],
-      ["package-tests"],
+      [
+        id === "editor-core-source-document"
+          ? "editor-core-public-package-contract"
+          : "package-tests",
+      ],
       "CONCURRENT_PROOF",
       SHARED_BUILD_READER,
     ),
@@ -1369,7 +1382,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "c932d5ef109c06cc2d42a6cfd659ea48d6579594f4ceead49f36e1603943e61b";
+  "2e25f738ec948ca47c6d50fba2dbdab487cfd41ae3701d86e206c473b477d201";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

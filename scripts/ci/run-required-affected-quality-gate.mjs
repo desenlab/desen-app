@@ -46,6 +46,7 @@ const PREFIX_IDS = Object.freeze([
   "structural-validator-artifacts",
   "workspace-graph",
   "package-tests",
+  "editor-core-public-package-contract",
 ]);
 const SUFFIX_IDS = Object.freeze(["dependency-boundaries", "boundary-fixtures"]);
 export const REQUIRED_AFFECTED_SUFFIX_DEPENDENCY_POLICY = "SELECTED_ROOT_BARRIER";
@@ -373,11 +374,15 @@ function selectedRegions(selection, nodeById) {
   for (const proofId of selection.affectedProofUnitIds) {
     const verifier = nodeById.get(`verify-${proofId}`);
     const rootTest = nodeById.get(`test-${proofId}`);
+    const expectedVerifierDependency =
+      proofId === "editor-core-source-document"
+        ? "editor-core-public-package-contract"
+        : "package-tests";
     if (
       verifier === undefined ||
       rootTest === undefined ||
       verifier.dependencies.length !== 1 ||
-      verifier.dependencies[0] !== "package-tests" ||
+      verifier.dependencies[0] !== expectedVerifierDependency ||
       rootTest.dependencies.length !== 1 ||
       rootTest.dependencies[0] !== verifier.id
     ) {

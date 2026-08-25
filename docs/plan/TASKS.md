@@ -1042,7 +1042,7 @@ focused behavior cases, ten built public-runtime contract cases, five source com
 five emitted-declaration consumer negatives, and seven fail-closed public proof-core cases cover
 success, failure, ownership, unresolved semantics, package/distribution boundaries, and hostile
 input or proof drift. The independent root proof adds 13 adversarial cases and 24 tracked-file
-receipts; the exact 152-workload/72-proof-pair CI successor registers that proof. Together they pin
+receipts; the exact 153-workload/72-proof-pair CI successor registers that proof. Together they pin
 the reviewed scope in `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md` and
 `docs/proof/artifacts/editor-core-0.1.0-source-document.json`. Append-only reader checkpoint
 sequence 29 at `ccb53276d40241dfce6278c2e4ed6c430f9a615000fd58608754b70b8f3ea0a9`

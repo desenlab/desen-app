@@ -244,7 +244,10 @@ const GLOBAL_EXCLUSIVE_STEP_IDS = Object.freeze([
   "dependency-boundaries",
   "boundary-fixtures",
 ]);
-const WORKSPACE_OUTPUT_EXCLUSIVE_STEP_IDS = Object.freeze(["workspace-graph"]);
+const WORKSPACE_OUTPUT_EXCLUSIVE_STEP_IDS = Object.freeze([
+  "workspace-graph",
+  "editor-core-public-package-contract",
+]);
 const PACKAGE_TEST_EXCLUSIVE_STEP_IDS = Object.freeze(["package-tests"]);
 
 /** Exact build and Turbo output roots guarded by the shared build-output seal. */
@@ -508,8 +511,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 152) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 152 steps.", {
+if (METADATA_BY_STEP_ID.size !== 153) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 153 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
