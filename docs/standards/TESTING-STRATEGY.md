@@ -77,7 +77,7 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 2
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 70 `PROOF_READ_ONLY`, 63
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 64
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
 `PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 61 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
@@ -138,11 +138,11 @@ opened. UDP, DNS, hostnames, IPv6, public addresses, Unix sockets, and fixed por
 Hosted CI is required for the real loopback-listener cases because the local sandbox returns
 `EPERM` on `127.0.0.1` bind.
 
-The M08-T01 `editor-core-source-document` verifier is an ordinary `PROOF_READ_ONLY` step after the
-semantic `protocol-structural-validation` predecessor. Its independent root mutation test is
-`PROOF_OS_TEMP_ISOLATED` and writes only inside its runner-owned OS temp root. Neither workload
-receives workspace-write, port, or native-addon authority. The verifier receives no
-child-runtime-probe grant, while the root receives only the ordinary `NODE_TEST_HARNESS` policy.
+The M08-T01 `editor-core-source-document` verifier and independent root mutation test are ordinary
+`PROOF_OS_TEMP_ISOLATED` steps after the semantic `protocol-structural-validation` predecessor.
+Each writes only inside its separate runner-owned OS temp root. Neither receives workspace-write,
+port, or native-addon authority. The verifier receives no child-runtime-probe grant, while the root
+receives only the ordinary `NODE_TEST_HARNESS` policy.
 The separate serial `editor-core-public-package-contract` prefix owns the repeated `dist` write and
 runs the exact package export-map, compiler, and emitted-runtime contract before the verifier.
 

@@ -33,6 +33,7 @@ import {
   NATIVE_ADDON_PROOF_IDS,
   NATIVE_ADDON_ROOT_STEP_IDS,
   LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS,
+  OS_TEMP_ONLY_VERIFIER_PROOF_IDS,
   OS_TEMP_ROOT_PROOF_IDS,
   PROOF_IDS,
   READ_ONLY_ROOT_PROOF_IDS,
@@ -118,8 +119,8 @@ test("owns exactly 153 steps across the seven reviewed execution classes", () =>
     GLOBAL_EXCLUSIVE: 6,
     WORKSPACE_OUTPUT_EXCLUSIVE: 2,
     PACKAGE_TEST_EXCLUSIVE: 1,
-    PROOF_READ_ONLY: 70,
-    PROOF_OS_TEMP_ISOLATED: 63,
+    PROOF_READ_ONLY: 69,
+    PROOF_OS_TEMP_ISOLATED: 64,
     PROOF_TRACKED_ALIAS_EXCLUSIVE: 10,
     PROOF_WORKSPACE_TEMP_EXCLUSIVE: 1,
   });
@@ -197,11 +198,11 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
     verifier: {
       schemaVersion: 2,
       stepId: "verify-editor-core-source-document",
-      executionClass: "PROOF_READ_ONLY",
+      executionClass: "PROOF_OS_TEMP_ISOLATED",
       workspaceReads: ["."],
       workspaceWrites: [],
-      tempPolicy: "NONE",
-      tempKey: null,
+      tempPolicy: "RUNNER_SCOPED_OS",
+      tempKey: "verify-editor-core-source-document",
       ports: [],
       childProcessPolicy: "NONE",
       nativeAddonPolicy: "NONE",
@@ -459,6 +460,21 @@ test("pins the exact ten read-only and sole workspace-temp proof ids", () => {
       barrier: false,
     });
   }
+  assert.deepEqual(OS_TEMP_ONLY_VERIFIER_PROOF_IDS, ["editor-core-source-document"]);
+  assert.deepEqual(classifyWorkloadStateMetadata("verify-editor-core-source-document"), {
+    schemaVersion: 2,
+    stepId: "verify-editor-core-source-document",
+    executionClass: "PROOF_OS_TEMP_ISOLATED",
+    workspaceReads: ["."],
+    workspaceWrites: [],
+    tempPolicy: "RUNNER_SCOPED_OS",
+    tempKey: "verify-editor-core-source-document",
+    ports: [],
+    childProcessPolicy: "NONE",
+    nativeAddonPolicy: "NONE",
+    filesystemCompatibilityPolicy: "NONE",
+    barrier: false,
+  });
   assert.deepEqual(NATIVE_ADDON_PROOF_IDS, [
     "reference-host-web-source-audit",
     "control-plane-local-api",
@@ -722,6 +738,33 @@ test("proof isolation preserves the reviewed command and argument vector", async
   assert.equal(isolation.env.TEMP, isolation.tempRoot);
   assert.match(isolation.env.NODE_OPTIONS, /--permission/u);
   assert.doesNotMatch(isolation.env.NODE_OPTIONS, /--allow-fs-write=/u);
+});
+
+test("the editor verifier receives only its runner-owned temp-write authority", async (context) => {
+  const workspaceRoot = await temporaryDirectory("desen-shared-state-editor-verifier-");
+  context.after(() => rm(workspaceRoot, { recursive: true, force: true }));
+  const isolation = await createProofStepIsolationContext({
+    workspaceRoot,
+    workload: "verify-editor-core-source-document",
+    baseEnvironment: {},
+  });
+  context.after(() => isolation.dispose());
+
+  assert.match(isolation.env.NODE_OPTIONS, /--allow-fs-write=/u);
+  assert.doesNotMatch(isolation.env.NODE_OPTIONS, /(?:^| )--allow-child-process(?: |$)/u);
+  const ownPath = path.join(isolation.tempRoot, "runtime-copy.mjs");
+  const ownWrite = await runNode(
+    `require("node:fs").writeFileSync(${JSON.stringify(ownPath)}, "export {}")`,
+    isolation.env,
+  );
+  assert.equal(ownWrite.code, 0, ownWrite.stderr);
+  assert.equal(await readFile(ownPath, "utf8"), "export {}");
+
+  const workspaceWrite = await runNode(
+    `require("node:fs").writeFileSync(${JSON.stringify(path.join(workspaceRoot, "forbidden"))}, "no")`,
+    isolation.env,
+  );
+  assert.notEqual(workspaceWrite.code, 0);
 });
 
 test("only exact runtime-probe verifiers receive child-process authority", async (context) => {

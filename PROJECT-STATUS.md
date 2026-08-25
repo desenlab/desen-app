@@ -2681,7 +2681,7 @@ M08-T01 evidence:
   proof-owned paths
 - retained projection: 489 prerequisite segments, 3,129 ordered legacy leaves, and 242 distinct
   leaves; the exact shared-state classes are 6 `GLOBAL_EXCLUSIVE`, 2
-  `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 70 `PROOF_READ_ONLY`, 63
+  `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 64
   `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
   `PROOF_WORKSPACE_TEMP_EXCLUSIVE`
 - filesystem compatibility: 135 `NONE`, 2 `FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1

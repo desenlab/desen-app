@@ -402,8 +402,8 @@ All 153 workloads have one exact shared-state class:
 | `GLOBAL_EXCLUSIVE`               |     6 | Drained repository-wide barrier                      |
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     2 | Workspace and public-package output writers          |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Drained complete package-test barrier                |
-| `PROOF_READ_ONLY`                |    70 | No shared workspace writes                           |
-| `PROOF_OS_TEMP_ISOLATED`         |    63 | Writes only to a workload-owned OS temp root         |
+| `PROOF_READ_ONLY`                |    69 | No shared workspace writes                           |
+| `PROOF_OS_TEMP_ISOLATED`         |    64 | Writes only to a workload-owned OS temp root         |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases under a drained scheduler       |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | Direct source-audit workspace-temp root-test barrier |
 
@@ -457,11 +457,11 @@ SQLite, and authenticated loopback-child policies. Its root receives only `NODE_
 Neither receives workspace-write or a fixed/shared port grant.
 
 The M08-T01 `editor-core-source-document` pair is ordinary and non-barrier after
-`protocol-structural-validation`. Its verifier is `PROOF_READ_ONLY`; its root is
-`PROOF_OS_TEMP_ISOLATED`. The verifier receives no child-runtime-probe grant, while the root
-receives only the ordinary `NODE_TEST_HARNESS` policy. Neither receives workspace-write, port, or
-native-addon authority. The separate serial `editor-core-public-package-contract` prefix owns its
-repeated `dist` write and must close before the verifier.
+`protocol-structural-validation`. Both workloads are `PROOF_OS_TEMP_ISOLATED` with separate
+runner-owned roots. The verifier receives no child-runtime-probe grant, while the root receives only
+the ordinary `NODE_TEST_HARNESS` policy. Neither receives workspace-write, port, or native-addon
+authority. The separate serial `editor-core-public-package-contract` prefix owns its repeated
+`dist` write and must close before the verifier.
 
 Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
 

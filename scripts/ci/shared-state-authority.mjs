@@ -165,6 +165,9 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
   "reference-host-web-channel-consumption",
 ]);
 
+/** Exact verifier proof ids that write only inside runner-owned OS temp without spawning children. */
+export const OS_TEMP_ONLY_VERIFIER_PROOF_IDS = Object.freeze(["editor-core-source-document"]);
+
 /** Sole verifier step eligible to delegate an authenticated loopback port-zero child runtime. */
 export const LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS = Object.freeze([
   LOOPBACK_CHILD_LISTENER_STEP_ID,
@@ -225,6 +228,7 @@ if (FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS.length !== 10) {
 const READ_ONLY_ROOT_PROOF_ID_SET = new Set(READ_ONLY_ROOT_PROOF_IDS);
 const WORKSPACE_TEMP_ROOT_PROOF_ID_SET = new Set(WORKSPACE_TEMP_ROOT_PROOF_IDS);
 const CHILD_PROCESS_VERIFIER_PROOF_ID_SET = new Set(CHILD_PROCESS_VERIFIER_PROOF_IDS);
+const OS_TEMP_ONLY_VERIFIER_PROOF_ID_SET = new Set(OS_TEMP_ONLY_VERIFIER_PROOF_IDS);
 const FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_ID_SET = new Set(
   FILESYSTEM_COMPATIBILITY_TRACKED_ALIAS_STEP_IDS,
 );
@@ -442,15 +446,17 @@ for (const stepId of PACKAGE_TEST_EXCLUSIVE_STEP_IDS) {
 for (const proofId of PROOF_IDS) {
   const verifierStepId = `verify-${proofId}`;
   const verifierUsesRuntimeProbe = CHILD_PROCESS_VERIFIER_PROOF_ID_SET.has(proofId);
+  const verifierUsesOsTemp =
+    verifierUsesRuntimeProbe || OS_TEMP_ONLY_VERIFIER_PROOF_ID_SET.has(proofId);
   METADATA_BY_STEP_ID.set(
     verifierStepId,
     createMetadata({
       stepId: verifierStepId,
-      executionClass: verifierUsesRuntimeProbe
+      executionClass: verifierUsesOsTemp
         ? EXECUTION_CLASSES.PROOF_OS_TEMP_ISOLATED
         : EXECUTION_CLASSES.PROOF_READ_ONLY,
-      tempPolicy: verifierUsesRuntimeProbe ? TEMP_POLICIES.RUNNER_SCOPED_OS : TEMP_POLICIES.NONE,
-      tempKey: verifierUsesRuntimeProbe ? verifierStepId : null,
+      tempPolicy: verifierUsesOsTemp ? TEMP_POLICIES.RUNNER_SCOPED_OS : TEMP_POLICIES.NONE,
+      tempKey: verifierUsesOsTemp ? verifierStepId : null,
       childProcessPolicy: verifierUsesRuntimeProbe
         ? CHILD_PROCESS_POLICIES.VERIFIER_RUNTIME_PROBE
         : CHILD_PROCESS_POLICIES.NONE,

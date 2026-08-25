@@ -282,8 +282,8 @@ Every workload has exactly one code-owned shared-state class:
 | `GLOBAL_EXCLUSIVE`               |     6 | Repository-wide integrity and boundary barriers      |
 | `WORKSPACE_OUTPUT_EXCLUSIVE`     |     2 | Workspace and public-package output writers          |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
-| `PROOF_READ_ONLY`                |    70 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    63 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_READ_ONLY`                |    69 | Proof work with no shared workspace writes           |
+| `PROOF_OS_TEMP_ISOLATED`         |    64 | Proof work restricted to a runner-owned OS temp root |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
@@ -349,10 +349,10 @@ case identities, 13 root mutation classes, and two browser type-test files. Real
 cases require hosted execution because the local sandbox returns `EPERM` on bind.
 
 The M08-T01 `editor-core-source-document` pair is ordinary and non-barrier and follows the semantic
-`protocol-structural-validation` predecessor. Its verifier is `PROOF_READ_ONLY`; its independent
-root mutation test is `PROOF_OS_TEMP_ISOLATED` and writes only inside its runner-owned OS temp root.
-Neither workload receives workspace-write, port, or native-addon authority. The verifier receives
-no child-runtime-probe grant, while the root receives only the ordinary `NODE_TEST_HARNESS` policy.
+`protocol-structural-validation` predecessor. Both workloads are `PROOF_OS_TEMP_ISOLATED` and write
+only inside their separate runner-owned OS temp roots. Neither receives workspace-write, port, or
+native-addon authority. The verifier receives no child-runtime-probe grant, while the root receives
+only the ordinary `NODE_TEST_HARNESS` policy.
 The separate serial `editor-core-public-package-contract` prefix runs the exact package export-map,
 compiler, and emitted-runtime contract before that verifier and owns its repeated `dist` write.
 

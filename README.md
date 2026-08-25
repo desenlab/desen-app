@@ -200,8 +200,8 @@ workloads and 69 proof pairs. The historical pre-M08 M07-T11 successor contained
 The current M08-T01 successor contains 153 workloads and 72 proof pairs: 61 ordinary pairs and 11
 exclusive barriers. Its retained legacy projection expands to 489 prerequisite segments and 3,129
 ordered leaf invocations covering 242 distinct leaves. Shared-state counts are exactly 6
-`GLOBAL_EXCLUSIVE`, 2 `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 70
-`PROOF_READ_ONLY`, 63 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+`GLOBAL_EXCLUSIVE`, 2 `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69
+`PROOF_READ_ONLY`, 64 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
 `PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem compatibility is exactly 135 `NONE`, 2
 `FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1 combined policy. Its 15 workspace test scripts are
 pinned by
