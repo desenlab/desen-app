@@ -1939,7 +1939,7 @@ ordered leaf invocations, and 251 distinct leaves. Shared-state counts are 6
 code-owned/current receipts and make no hosted M08-T04 claim.
 
 Append-only reader checkpoint sequence 32 at
-`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
+`9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` authenticates 29 frozen
 artifacts and 58 readers. Historical sequence 31 at
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`, all earlier entries, and
 every predecessor artifact byte remain unchanged.

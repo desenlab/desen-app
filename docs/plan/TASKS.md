@@ -1147,7 +1147,7 @@ inventory is `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe
 `sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`.
 
 Append-only reader successor sequence 32 at
-`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
+`9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` authenticates 29 frozen
 artifacts and 58 readers while historical sequence 31 and every predecessor artifact remain
 unchanged. This is local code-owned/current evidence and makes no hosted M08-T04 claim. `N-014`
 remains `TESTED`; `S-002` remains `PLANNED` for terminal M08-T10 integration; no `P-*`, `N-*`,

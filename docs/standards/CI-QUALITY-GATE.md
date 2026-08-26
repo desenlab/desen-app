@@ -651,7 +651,7 @@ artifacts and 50 readers. Historical sequence 30 remains pinned at
 `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`. Historical sequence 31 is
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The current append-only
 successor is sequence 32 at
-`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574`, authenticating 29 frozen
+`9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424`, authenticating 29 frozen
 artifacts and 58 current readers. The exact 26,988-byte M08-T04 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-content-edits.json` at
 `sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`; its reviewed report is

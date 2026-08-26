@@ -1422,7 +1422,7 @@ hostile-JavaScript/no-code-execution membrane is claimed. The exact 26,988-byte 
 code-owned CI authority is 159 workloads and 75 proof pairs—64 ordinary and 11 barriers—with 519
 prerequisite segments, 3,237 ordered leaf invocations, and 251 distinct leaves. The append-only
 reader successor is sequence 32 at
-`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574`, authenticating 29 frozen
+`9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424`, authenticating 29 frozen
 artifacts and 58 readers while historical sequence 31 remains unchanged. No hosted M08-T04 result
 is claimed. `N-014` remains `TESTED`; `S-002` remains `PLANNED`; no `P-*`, `N-*`, `S-*`, or
 proof-gate status changes. Implementation progress is 89/145 (61%), M08 is 4/10, proof gates remain
@@ -2892,7 +2892,7 @@ M08-T04 evidence:
   `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c` and required plan
   `sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`
 - reader authority: append-only sequence 32 at
-  `112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
+  `9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` authenticates 29 frozen
   artifacts and 58 readers; historical sequence 31, its head, and every predecessor artifact byte
   remain unchanged
 - evidence boundary: these are local code-owned/current results and make no hosted M08-T04 claim

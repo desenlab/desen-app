@@ -331,7 +331,7 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted condition and variant lifecycle commands preserve ordered semantics",
   "the emitted delete and variant-update commands retain emptied own containers",
   "the emitted content commands reject missing, ambiguous, invalid, and structural paths atomically",
-  "all emitted content commands reject active or authority-expanding command input",
+  "the emitted content commands enforce own-data shapes and contain Proxy reflection failures atomically",
   "the emitted content commands are deterministic, immutable, and Catalog-unresolved",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",

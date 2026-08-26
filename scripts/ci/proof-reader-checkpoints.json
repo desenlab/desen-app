@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574",
+  "headSha256": "9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424",
   "checkpoints": [
     {
       "sequence": 1,
@@ -11233,8 +11233,8 @@
           "task": "M08-T03",
           "role": "proof-library",
           "path": "scripts/lib/editor-core-structural-edits-proof.mjs",
-          "bytes": 76785,
-          "sha256": "026d4bae21ef491da9939b1e738ad34f7c1480a0fc1b0a19e257313501594159"
+          "bytes": 76807,
+          "sha256": "37c6f891d5836513330ea9a98e82c807e9a673d3be63da139c0709a1d5c7921d"
         },
         {
           "task": "M08-T03",

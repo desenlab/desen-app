@@ -252,7 +252,7 @@ eligible hosted comparisons with zero false negatives; promotion and hosted cuto
 The I07-04 baseline remains byte-identical and historical. Its verifier authenticates that frozen
 promotion receipt first, then separately admits only the exact M08-T04 current-authority successor,
 whose comparison digest is
-`sha256:9b72593512eb36a8f13963188cd037d1c5b9374023eba2737b332c0bb5950155`.
+`sha256:9bd6f1030634e5b345b47754110769dc2caad53825e494a661cd3f4b616d77cc`.
 
 The complete current reviewed digest set is:
 
@@ -518,7 +518,7 @@ artifacts and 50 readers. Historical sequence 30 remains pinned at
 `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`. Historical sequence 31 is
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The current append-only
 authority is sequence 32 at
-`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574`, authenticating 29 frozen
+`9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424`, authenticating 29 frozen
 artifacts and 58 current readers. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 passed fresh `REQUIRED + EXHAUSTIVE` in
 [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),

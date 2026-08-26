@@ -416,7 +416,7 @@ oluşur. Nötr envanter
 `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`, zorunlu plan ise
 `sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51` ile sabittir. Append-only
 okuyucu ardılı sequence 32,
-`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` başıyla 29 donmuş artifact
+`9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` başıyla 29 donmuş artifact
 ve 58 reader doğrular; tarihsel sequence 31 ve bütün öncül artifact baytları değişmez. Bunlar yerel
 kod-otoriteli güncel kanıttır; hosted M08-T04 başarısı iddia edilmez. `N-014` `TESTED`, `S-002`
 `PLANNED` kalır; hiçbir `P-*`, `N-*`, `S-*` veya kanıt-kapısı statüsü değişmez. Genel ilerleme

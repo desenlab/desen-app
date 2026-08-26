@@ -427,7 +427,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[31],
-    "112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574",
+    "9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -2864,8 +2864,8 @@ test("sequence thirty-two reseals every current editor reader and appends exact 
       task: "M08-T03",
       role: "proof-library",
       path: "scripts/lib/editor-core-structural-edits-proof.mjs",
-      bytes: 76785,
-      sha256: "026d4bae21ef491da9939b1e738ad34f7c1480a0fc1b0a19e257313501594159",
+      bytes: 76807,
+      sha256: "37c6f891d5836513330ea9a98e82c807e9a673d3be63da139c0709a1d5c7921d",
     },
     {
       task: "M08-T03",
@@ -2906,7 +2906,7 @@ test("sequence thirty-two reseals every current editor reader and appends exact 
   assert.deepEqual(liveReceipts, authorities);
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574",
+    "9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424",
   );
 });
 

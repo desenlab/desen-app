@@ -260,7 +260,7 @@ bridge families. Historical closure sequence 28 authenticates 25 frozen artifact
 historical sequence 30 authenticates 27 frozen artifacts and 54 readers. Historical sequence 31 at
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d` authenticates 28 frozen
 artifacts and 56 then-current readers. The current append-only sequence 32 at
-`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
+`9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` authenticates 29 frozen
 artifacts and 58 current readers.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
