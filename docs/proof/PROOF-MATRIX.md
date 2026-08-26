@@ -1935,10 +1935,10 @@ ordered leaf invocations, and 251 distinct leaves. Shared-state counts are 6
 `PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem policies are 141 `NONE`, 2 `FIXTURE_COPY`, 15
 `REVIEWED_SYMLINK`, and 1 combined policy. The neutral inventory is
 `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`, and the required plan is
-`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`. These are local
-code-owned/current receipts and make no hosted M08-T04 claim.
+`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`. These are historical
+local code-owned M08-T04-checkpoint receipts and make no hosted M08-T04 claim.
 
-Append-only reader checkpoint sequence 32 at
+Historical append-only reader checkpoint sequence 32 at
 `9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` authenticates 29 frozen
 artifacts and 58 readers. Historical sequence 31 at
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`, all earlier entries, and
@@ -1952,3 +1952,86 @@ persistence, and validation work; and M08-T10 retains the independent terminal e
 React/DOM boundary. This proof does not claim Catalog slot acceptance/cardinality, undo/redo,
 selection, viewport, a hostile-JavaScript/no-code-execution membrane, P-18, or G08. M08-T05 is
 next.
+
+## M08-T05 — State declaration and binding editing commands
+
+The built `@desen/editor-core` package now exposes eight atomic immutable state and binding
+commands. State declarations can be inserted or deleted, and an existing declaration's complete
+schema or initial value can be replaced. Existing node repeats accept complete `items` or `key`
+replacement while preserving alias, limit, extensions, and the untouched repeat member. Named
+resource inputs can be created, replaced, or deleted while retaining the required own input map
+when empty. State deletion likewise retains the required own state map and deliberately performs
+no reference or action cascade. Dotted state names remain literal root declaration keys;
+prototype-sensitive names remain own data. Binding values, schemas, and initial data are captured
+whole without parsing, evaluation, normalization, or reference rewriting.
+
+Every success returns a fresh detached recursively frozen direct Source, preserves every existing
+identity and unrelated semantic order, and keeps structurally valid unresolved authoring content
+representable for M08-T09. Six state/binding diagnostic classes cover malformed commands, fixed
+limit crossings, missing paths, ambiguous targets, existing targets, and missing targets.
+Underlying structural rejection retains its original diagnostic authority. Required command fields
+are exact enumerable own data; inherited, accessor, symbol, extra-field, function, own-`toJSON`,
+sparse/decorated-array, malformed-Unicode, unsafe-index, and every atomic failure path are covered.
+Accessors and own `toJSON` hooks are rejected without invocation. Necessary reflection may execute
+arbitrary `Proxy` traps, an admissible forwarding `Proxy` may be accepted, and a throwing trap is
+contained as a controlled failure. This is not a hostile-JavaScript/no-code-execution membrane.
+The finite profile admits the exact 8,388,608-byte canonical Source, 25,000 selected-surface
+identities, and root-at-zero depth 64 while rejecting one-unit crossings; it does not claim
+streaming or preallocation memory-DoS resistance.
+
+The cumulative editor-core package suite passes 69/69, including 14/14 focused state/binding cases
+and 14 focused compiler-negative assertions. The cumulative built public-package suite passes
+38/38 with 48 public consumer compiler-negative assertions; the independent root proof passes
+10/10. The public package has 27 runtime exports and 55 type exports, and all 23 task declarations
+carry TSDoc. Exact evidence lives in
+[`EDITOR-CORE-STATE-BINDING-EDITS.md`](EDITOR-CORE-STATE-BINDING-EDITS.md) and the 30,014-byte
+[`editor-core-0.1.0-state-binding-edits.json`](artifacts/editor-core-0.1.0-state-binding-edits.json)
+at `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`.
+
+The proof directly authenticates only the exact frozen 19,561-byte M08-T02 prerequisite at
+`sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`. It separately
+authenticates the frozen 26,988-byte M08-T04 artifact at
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066` for current-graph
+compatibility without widening the official prerequisite. It verifies 74 current tracked-file
+receipts. Behavior begins only after seven editor files and twenty-one authenticated dependencies
+are copied into an isolated 28-file ESM graph whose fourteen static import edges are closed. Node,
+its ESM loader, and the process environment remain trusted; no general hostile-JavaScript sandbox
+is claimed.
+
+CI registers `editor-core-state-binding-edits` after stable-ID insertion, current content-edit
+compatibility, and the serial public-package contract in the exact 161-workload/76-proof-pair
+successor: 65 ordinary pairs and 11 exclusive barriers. Its retained projection contains 529
+prerequisite segments, 3,293 ordered leaf invocations, and 254 distinct leaves. Shared-state counts
+are 6
+`GLOBAL_EXCLUSIVE`, 2 `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69
+`PROOF_READ_ONLY`, 72 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem policies are 143 `NONE`, 2 `FIXTURE_COPY`, 15
+`REVIEWED_SYMLINK`, and 1 combined policy. The scheduler-neutral inventory is
+`sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`, and the selector-only
+impact graph is `sha256:9fb786d80ac21bef4dc89c9a77986f91dd50c9ff53dd2d54c7a52d5c4ac8738f`.
+The required plan is `sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`.
+Affected ownership covers 1,071 tracked paths at
+`sha256:ae070076003f9ae641a6682aab6280336b7d2ccf6ccd6b96d15b3c10c6cd6c18`; 152 are proof-owned,
+and the complete ownership projection is
+`sha256:d793913bca281e2127151c83ce570ce415c995da42013226731d030b337fc2c0`. These are local
+code-owned/current receipts and make no hosted M08-T05 claim.
+
+Append-only reader checkpoint sequence 33 at
+`64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871` links exact sequence 32
+head `9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` and authenticates 30
+frozen artifacts plus 60 current readers. It appends the T05 artifact and the 82,175-byte proof
+reader at `sha256:6f238144f8bf793f02aec25117406fb28c2ecf44b01579a7d4ae68cf6ebfce86` plus the
+23,903-byte root reader at
+`sha256:6c888764911696a8c81476bac516fed3b43fd96362353d3b0fbe37582dba8510`. Reader indexes
+`[50, 51, 52, 53, 54, 56]` are resealed for current compatibility; new readers occupy `[58, 59]`.
+Historical sequence 32, all earlier entries, and every predecessor artifact byte remain unchanged.
+The dedicated checkpoint suite passes 56/56.
+
+M08-T05 is `DONE`, advancing implementation progress to 90/145 (62%) and M08 to 5/10. Proof gates
+remain 8/13. `N-014` remains `TESTED`, and `S-002` remains `PLANNED` until terminal M08-T10
+stable-identity integration. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. Event and
+closed-action editing remains M08-T06; M08-T07–M08-T09 retain authoring isolation, persistence,
+continuous semantic validation, and invalid-node mapping; M08-T10 retains the independent terminal
+editor-core React/DOM boundary. This proof does not claim schema/initial compatibility, dotted-state
+reachability, repeat or resource-input semantics, undo/redo, selection, viewport, a
+hostile-JavaScript/no-code-execution membrane, P-18, or G08. M08-T06 is next.

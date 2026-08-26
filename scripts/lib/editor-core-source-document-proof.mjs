@@ -25,14 +25,18 @@ const SOURCE_PATH = "packages/editor-core/src/source-document.ts";
 const INDEX_PATH = "packages/editor-core/src/index.ts";
 const STRUCTURAL_EDITS_SOURCE_PATH = "packages/editor-core/src/structural-edits.ts";
 const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
+const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-edits.ts";
 const DIST_SOURCE_PATH = "packages/editor-core/dist/source-document.js";
 const DIST_INDEX_PATH = "packages/editor-core/dist/index.js";
 const DIST_STRUCTURAL_EDITS_PATH = "packages/editor-core/dist/structural-edits.js";
 const DIST_CONTENT_EDITS_PATH = "packages/editor-core/dist/content-edits.js";
+const DIST_STATE_BINDING_EDITS_PATH = "packages/editor-core/dist/state-binding-edits.js";
 const DIST_SOURCE_DECLARATION_PATH = "packages/editor-core/dist/source-document.d.ts";
 const DIST_INDEX_DECLARATION_PATH = "packages/editor-core/dist/index.d.ts";
 const DIST_STRUCTURAL_EDITS_DECLARATION_PATH = "packages/editor-core/dist/structural-edits.d.ts";
 const DIST_CONTENT_EDITS_DECLARATION_PATH = "packages/editor-core/dist/content-edits.d.ts";
+const DIST_STATE_BINDING_EDITS_DECLARATION_PATH =
+  "packages/editor-core/dist/state-binding-edits.d.ts";
 const VALIDATOR_PACKAGE_PATH = "packages/validator/package.json";
 const PROTOCOL_PACKAGE_PATH = "packages/protocol/package.json";
 const VALIDATOR_RUNTIME_PATHS = Object.freeze([
@@ -288,6 +292,37 @@ const EXPECTED_CONTENT_EDIT_TYPE_EXPORTS = Object.freeze(
     "DesenEditorVariantStylePropertySetCommand",
   ].sort(),
 );
+const EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "deleteDesenEditorResourceInput",
+    "deleteDesenEditorStateDeclaration",
+    "insertDesenEditorStateDeclaration",
+    "setDesenEditorNodeRepeatItems",
+    "setDesenEditorNodeRepeatKey",
+    "setDesenEditorResourceInput",
+    "setDesenEditorStateInitial",
+    "setDesenEditorStateSchema",
+  ].sort(),
+);
+const EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorBindingValue",
+    "DesenEditorNodeRepeatItemsSetCommand",
+    "DesenEditorNodeRepeatKeySetCommand",
+    "DesenEditorResourceInputDeleteCommand",
+    "DesenEditorResourceInputSetCommand",
+    "DesenEditorStateBindingEditDiagnostic",
+    "DesenEditorStateBindingEditDiagnosticCode",
+    "DesenEditorStateBindingEditFailure",
+    "DesenEditorStateBindingEditResult",
+    "DesenEditorStateBindingEditSuccess",
+    "DesenEditorStateDeclaration",
+    "DesenEditorStateDeclarationDeleteCommand",
+    "DesenEditorStateDeclarationInsertCommand",
+    "DesenEditorStateInitialSetCommand",
+    "DesenEditorStateSchemaSetCommand",
+  ].sort(),
+);
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "createDesenEditorDocument",
@@ -296,6 +331,7 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
     "moveDesenEditorNode",
     "reorderDesenEditorNode",
     ...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
+    ...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
   ].sort(),
 );
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
@@ -319,6 +355,7 @@ const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
     "DesenEditorStructuralEditResult",
     "DesenEditorStructuralEditSuccess",
     ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
+    ...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
   ].sort(),
 );
 const EXPECTED_PACKAGE_SCRIPTS = Object.freeze({
@@ -1879,6 +1916,18 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     files[DIST_CONTENT_EDITS_PATH],
     DIST_CONTENT_EDITS_PATH,
   );
+  const stateBindingEditsSource = declarationInventory(
+    files[STATE_BINDING_EDITS_SOURCE_PATH],
+    STATE_BINDING_EDITS_SOURCE_PATH,
+  );
+  const stateBindingEditsDeclaration = declarationInventory(
+    files[DIST_STATE_BINDING_EDITS_DECLARATION_PATH],
+    DIST_STATE_BINDING_EDITS_DECLARATION_PATH,
+  );
+  const stateBindingEditsRuntime = declarationInventory(
+    files[DIST_STATE_BINDING_EDITS_PATH],
+    DIST_STATE_BINDING_EDITS_PATH,
+  );
   const sourcePrivateStatements = source.sourceFile.statements.filter(
     (statement) =>
       !ts.isImportDeclaration(statement) &&
@@ -1923,6 +1972,28 @@ function verifySourceAndDistributionContract(files, packageManifest) {
         declarationRuntime: contentEditsDeclaration.runtime,
         declarationTypes: contentEditsDeclaration.types,
         emittedRuntime: contentEditsRuntime.runtime,
+      },
+    );
+  }
+  if (
+    !exactJson(stateBindingEditsSource.runtime, EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS) ||
+    !exactJson(stateBindingEditsSource.types, EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS) ||
+    stateBindingEditsSource.missingTsdoc.length !== 0 ||
+    !exactJson(stateBindingEditsDeclaration.runtime, EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS) ||
+    !exactJson(stateBindingEditsDeclaration.types, EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS) ||
+    stateBindingEditsDeclaration.missingTsdoc.length !== 0 ||
+    !exactJson(stateBindingEditsRuntime.runtime, EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS) ||
+    stateBindingEditsRuntime.types.length !== 0
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PUBLIC_API_DRIFT",
+      "The additive M08-T05 state/binding-edit module lost its reviewed declarations or TSDoc.",
+      {
+        sourceRuntime: stateBindingEditsSource.runtime,
+        sourceTypes: stateBindingEditsSource.types,
+        declarationRuntime: stateBindingEditsDeclaration.runtime,
+        declarationTypes: stateBindingEditsDeclaration.types,
+        emittedRuntime: stateBindingEditsRuntime.runtime,
       },
     );
   }
@@ -1982,6 +2053,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "./source-document.js",
       "./stable-id-insert.js",
       "./stable-id-insert.js",
+      "./state-binding-edits.js",
+      "./state-binding-edits.js",
       "./structural-edits.js",
       "./structural-edits.js",
     ]) ||
@@ -1991,6 +2064,7 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "./content-edits.js",
       "./source-document.js",
       "./stable-id-insert.js",
+      "./state-binding-edits.js",
       "./structural-edits.js",
     ]) ||
     !exactJson(declarationIndex.runtime, EXPECTED_CURRENT_RUNTIME_EXPORTS) ||
@@ -2002,6 +2076,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "./source-document.js",
       "./stable-id-insert.js",
       "./stable-id-insert.js",
+      "./state-binding-edits.js",
+      "./state-binding-edits.js",
       "./structural-edits.js",
       "./structural-edits.js",
     ])
@@ -2108,6 +2184,9 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     structuralEditsSource.sourceFile,
     structuralEditsDeclaration.sourceFile,
     structuralEditsRuntime.sourceFile,
+    stateBindingEditsSource.sourceFile,
+    stateBindingEditsDeclaration.sourceFile,
+    stateBindingEditsRuntime.sourceFile,
     sourceIndex.sourceFile,
     distIndex.sourceFile,
     declaration.sourceFile,
@@ -2221,18 +2300,34 @@ function verifySourceAndDistributionContract(files, packageManifest) {
         tsdocDeclarations:
           EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length,
       }),
+      Object.freeze({
+        task: "M08-T05",
+        sourcePath: STATE_BINDING_EDITS_SOURCE_PATH,
+        runtimePath: DIST_STATE_BINDING_EDITS_PATH,
+        declarationPath: DIST_STATE_BINDING_EDITS_DECLARATION_PATH,
+        runtimeExports: EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
+        typeExports: EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
+        publicDeclarations:
+          EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS.length +
+          EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS.length,
+        tsdocDeclarations:
+          EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS.length +
+          EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS.length,
+      }),
     ]),
     additiveSuccessor: Object.freeze({
-      task: "M08-T04",
-      sourcePath: CONTENT_EDITS_SOURCE_PATH,
-      runtimePath: DIST_CONTENT_EDITS_PATH,
-      declarationPath: DIST_CONTENT_EDITS_DECLARATION_PATH,
-      runtimeExports: EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
-      typeExports: EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
+      task: "M08-T05",
+      sourcePath: STATE_BINDING_EDITS_SOURCE_PATH,
+      runtimePath: DIST_STATE_BINDING_EDITS_PATH,
+      declarationPath: DIST_STATE_BINDING_EDITS_DECLARATION_PATH,
+      runtimeExports: EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
+      typeExports: EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
       publicDeclarations:
-        EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length,
+        EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS.length +
+        EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS.length,
       tsdocDeclarations:
-        EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length,
+        EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS.length +
+        EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS.length,
     }),
     publicDeclarations: EXPECTED_SOURCE_EXPORTS.length,
     tsdocDeclarations: EXPECTED_SOURCE_EXPORTS.length,
@@ -2795,14 +2890,17 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     INDEX_PATH,
     STRUCTURAL_EDITS_SOURCE_PATH,
     CONTENT_EDITS_SOURCE_PATH,
+    STATE_BINDING_EDITS_SOURCE_PATH,
     DIST_SOURCE_PATH,
     DIST_INDEX_PATH,
     DIST_STRUCTURAL_EDITS_PATH,
     DIST_CONTENT_EDITS_PATH,
+    DIST_STATE_BINDING_EDITS_PATH,
     DIST_SOURCE_DECLARATION_PATH,
     DIST_INDEX_DECLARATION_PATH,
     DIST_STRUCTURAL_EDITS_DECLARATION_PATH,
     DIST_CONTENT_EDITS_DECLARATION_PATH,
+    DIST_STATE_BINDING_EDITS_DECLARATION_PATH,
     PACKAGE_TEST_PATH,
     PACKAGE_TYPES_PATH,
     PUBLIC_TEST_PATH,

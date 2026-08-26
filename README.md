@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████░░░░░░░░░░` **89 / 145 tasks complete (61%)**
+**Overall:** `████████████████░░░░░░░░░` **90 / 145 tasks complete (62%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -22,9 +22,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M08:** `████░░░░░░` **4 / 10 tasks complete (40%)**
+**M08:** `█████░░░░░` **5 / 10 tasks complete (50%)**
 
-**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T05`
+**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T06`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -199,19 +199,25 @@ workloads and 69 proof pairs. The historical pre-M08 M07-T11 successor contained
 71 proof pairs, 479 prerequisite segments, 3,113 ordered leaf invocations, and 236 distinct leaves.
 The historical M08-T01 successor contained 153 workloads and 72 proof pairs, the historical
 M08-T02 successor contained 155 workloads and 73 proof pairs, and the historical M08-T03 successor
-contained 157 workloads and 74 proof pairs. The current M08-T04 successor contains 159 workloads
-and 75 proof pairs: 64 ordinary pairs and 11 exclusive barriers. Its retained legacy projection
+contained 157 workloads and 74 proof pairs. The historical M08-T04 successor contained 159
+workloads and 75 proof pairs: 64 ordinary pairs and 11 exclusive barriers. Its retained legacy projection
 expands to 519 prerequisite segments and 3,237 ordered leaf invocations covering 251 distinct
-leaves. Shared-state counts are exactly 6
+leaves. Its shared-state counts were exactly 6
 `GLOBAL_EXCLUSIVE`, 2 `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69
 `PROOF_READ_ONLY`, 70 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem compatibility is exactly 141 `NONE`, 2
-`FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1 combined policy. Its 15 workspace test scripts are
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem compatibility was exactly 141 `NONE`, 2
+`FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1 combined policy. Its 15 workspace test scripts were
 pinned by
-`sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. The neutral inventory is
-`sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`, and the required plan is
-`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`. These current M08-T04
-successor pins are local code-owned authority and make no hosted M08-T04 claim. For the frozen
+`sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. The neutral inventory was
+`sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`, and the required plan was
+`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`. These historical M08-T04
+successor pins are local code-owned authority and make no hosted M08-T04 claim. The current
+M08-T05 successor contains 161 workloads and 76 proof pairs: 65 ordinary pairs and 11 exclusive
+barriers. Its shared-state counts are 6/2/1/69/72/10/1, filesystem-policy counts are 143/2/15/1,
+and 15 workspace packages expose a `test` script. Its scheduler-neutral inventory is
+`sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`, and its required plan is
+`sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`. This is local code-owned
+authority and makes no hosted M08-T05 claim. For the frozen
 130-workload I07-02 cutover, the then-current exact shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI. The cutover run passed in 10
@@ -433,23 +439,34 @@ historical I07-04/G07 closure checkpoint was sequence 28 at
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
 artifacts and 50 readers. Historical sequence 30 remains pinned at
 `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`; historical sequence 31 is
-`181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The current append-only
-successor is sequence 32 at
+`181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The historical M08-T04
+append-only successor is sequence 32 at
 `9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424`, authenticating 29 frozen
-artifacts and 58 readers. M08-T03's delete/move/reorder proof is the exact 22,402-byte
+artifacts and 58 readers. The current M08-T05 successor is sequence 33 at
+`64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871`, authenticating 30 frozen
+artifacts and 60 current readers while preserving every sequence-32 and earlier byte; its dedicated
+checkpoint suite passes 56/56. M08-T03's delete/move/reorder proof is the exact 22,402-byte
 `docs/proof/artifacts/editor-core-0.1.0-structural-edits.json` at
 `sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. It closes `N-014` as
 `TESTED`. M08-T04's fourteen immutable prop, style, condition, and ordered-variant commands are
 proved by the 26,988-byte
 [`editor-core-0.1.0-content-edits.json`](docs/proof/artifacts/editor-core-0.1.0-content-edits.json)
 at `sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`; the reviewed report is
-[`EDITOR-CORE-CONTENT-EDITS.md`](docs/proof/EDITOR-CORE-CONTENT-EDITS.md). `N-014` remains `TESTED`,
+[`EDITOR-CORE-CONTENT-EDITS.md`](docs/proof/EDITOR-CORE-CONTENT-EDITS.md). `N-014` remains `TESTED`.
 The tested command boundary rejects inherited, accessor, symbol, extra-field, function,
 own-`toJSON`, sparse/decorated-array, malformed-Unicode, and unsafe-index shapes; accessor getters
 and `toJSON` hooks are not invoked. Necessary reflection may execute arbitrary `Proxy` traps, and
 an admissible forwarding `Proxy` may be accepted, so this is neither a hostile-JavaScript sandbox
-nor a no-code-execution membrane. I07-04 and G07 remain `DONE`; proof gates remain 8/13,
-implementation progress is 89/145, M08 is 4/10, and M08-T05 state declaration and binding editing
+nor a no-code-execution membrane. M08-T05's eight immutable state declaration, schema/initial,
+repeat, and resource-input commands are proved by the 30,014-byte
+[`editor-core-0.1.0-state-binding-edits.json`](docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json)
+at `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; the reviewed report is
+[`EDITOR-CORE-STATE-BINDING-EDITS.md`](docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md). The focused
+suite passes 14/14 with 14 compiler-negative assertions, the public-package suite passes 38/38
+with 48 public compiler-negative assertions, and the independent root proof passes 10/10.
+Semantic compatibility and continuous invalid-node diagnostics remain M08-T09; the terminal
+React/DOM boundary and G08 are not yet proven. I07-04 and G07 remain `DONE`; proof gates remain
+8/13, implementation progress is 90/145, M08 is 5/10, and M08-T06 event and closed-action editing
 is next. Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN

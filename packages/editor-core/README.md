@@ -105,16 +105,40 @@ validation and invalid-node mapping. The content commands reuse the fixed 8 MiB 
 25,000 selected-surface identity, and root-at-zero depth-64 profile. `PF-081` records the exact path,
 empty-container, ordering, atomicity, and diagnostic choices that DESEN 0.1.0 leaves open.
 
+## State declaration and binding edits
+
+M08-T05 adds eight whole-value commands:
+
+- `insertDesenEditorStateDeclaration` and `deleteDesenEditorStateDeclaration` manage complete
+  surface-local declarations without renaming or cascading into references and actions;
+- `setDesenEditorStateSchema` and `setDesenEditorStateInitial` replace one existing declaration's
+  complete schema or inert initial JSON value;
+- `setDesenEditorNodeRepeatItems` and `setDesenEditorNodeRepeatKey` replace the corresponding
+  ValueSpec roots on a uniquely identified component node with an existing repeat; and
+- `setDesenEditorResourceInput` and `deleteDesenEditorResourceInput` create, replace, or remove one
+  complete resource-input ValueSpec while retaining the required input map.
+
+Dotted state names remain literal declaration keys. Marker-shaped state initial objects remain
+inert JSON rather than becoming executable bindings. Repeat commands preserve the coupled alias,
+limit, extensions, and untouched value; resource-input names, including prototype-sensitive names,
+are created as own data. The same exact-command, detached immutable success, atomic failure, stable
+identity, Proxy-reflection honesty, and 8 MiB/25,000/depth-64 profile applies. Structural schema and
+ValueSpec rejection is preserved as frozen protocol diagnostics. Initial/schema compatibility,
+dotted reference reachability, repeat semantics, and Catalog resource-input contracts remain
+M08-T09 continuous-validation responsibilities. `PF-082` records these lifecycle and whole-value
+decisions.
+
 ## Explicit non-responsibilities
 
-No React, DOM, canvas UI, production activation, Catalog-semantic validation, state/binding/event/
-action editing, persistence, authoring selection/viewport policy, or hidden document model.
+No React, DOM, canvas UI, production activation, Catalog-semantic validation, event/action editing,
+persistence, authoring selection/viewport policy, or hidden document model.
 
 ## Status
 
 Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, M08-T03
-delete/move/ordered-reorder commands, and M08-T04 prop/style/condition/variant commands are present.
-The remaining editor commands stay assigned to their tracked M08 tasks. `N-014` is `TESTED`;
+delete/move/ordered-reorder commands, M08-T04 prop/style/condition/variant commands, and M08-T05
+state-declaration/repeat/resource-input commands are present. The remaining editor commands stay
+assigned to their tracked M08 tasks. `N-014` is `TESTED`;
 `S-002` remains `PLANNED` through terminal M08-T10 integration.
 
 ## Protocol and target support
@@ -128,7 +152,7 @@ Run the direct model suite with
 `pnpm --filter @desen/editor-core test:source-document` and the insert suite with
 `pnpm --filter @desen/editor-core test:stable-id-insert`. The separate
 `pnpm --filter @desen/editor-core test:public-package` check builds the package, resolves the
-public root through its export map, runs the exact current 32 runtime/root cases, and compiles the
+public root through its export map, runs the exact current 38 runtime/root cases, and compiles the
 reviewed `@ts-expect-error` assertions against the emitted declarations. The proof cores audit the
 exact source, distribution, manifest, TSDoc, test inventory, and platform boundary. After
 authenticating the exact completed
@@ -172,3 +196,16 @@ throwing-Proxy failure, forwarding-Proxy admission, immutability, deterministic 
 identity, and unresolved Catalog semantics. The completed task-specific generator, verifier, root
 proof, final artifact hash, and exact receipt inventory are recorded in
 `docs/proof/EDITOR-CORE-CONTENT-EDITS.md` and the referenced frozen artifact.
+
+For M08-T05, run `pnpm --filter @desen/editor-core test:state-binding-edits`, then
+`node scripts/generate-editor-core-state-binding-edits-proof.mjs`,
+`node scripts/verify-editor-core-state-binding-edits.mjs`, and
+`node --test tests/editor-core-state-binding-edits.test.mjs`. The focused suite has fourteen
+behavior cases and fourteen compiler-negative assertions; the cumulative public suite has 38
+runtime/root cases and 48 compiler-negative assertions. The ten-case root proof authenticates the
+formal M08-T02 prerequisite separately from the frozen M08-T04 current-graph compatibility
+authority, executes an isolated 28-file ESM graph, and records 74 exact tracked-file receipts. The
+30,014-byte artifact is
+`docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; its evidence document is
+`docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md`.

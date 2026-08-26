@@ -27,6 +27,16 @@ export {
   setDesenEditorVariantProp,
   setDesenEditorVariantStyleProperty,
 } from "./content-edits.js";
+export {
+  deleteDesenEditorResourceInput,
+  deleteDesenEditorStateDeclaration,
+  insertDesenEditorStateDeclaration,
+  setDesenEditorNodeRepeatItems,
+  setDesenEditorNodeRepeatKey,
+  setDesenEditorResourceInput,
+  setDesenEditorStateInitial,
+  setDesenEditorStateSchema,
+} from "./state-binding-edits.js";
 
 export type {
   DesenEditorDocument,
@@ -79,3 +89,21 @@ export type {
   DesenEditorVariantStylePropertyDeleteCommand,
   DesenEditorVariantStylePropertySetCommand,
 } from "./content-edits.js";
+
+export type {
+  DesenEditorBindingValue,
+  DesenEditorNodeRepeatItemsSetCommand,
+  DesenEditorNodeRepeatKeySetCommand,
+  DesenEditorResourceInputDeleteCommand,
+  DesenEditorResourceInputSetCommand,
+  DesenEditorStateBindingEditDiagnostic,
+  DesenEditorStateBindingEditDiagnosticCode,
+  DesenEditorStateBindingEditFailure,
+  DesenEditorStateBindingEditResult,
+  DesenEditorStateBindingEditSuccess,
+  DesenEditorStateDeclaration,
+  DesenEditorStateDeclarationDeleteCommand,
+  DesenEditorStateDeclarationInsertCommand,
+  DesenEditorStateInitialSetCommand,
+  DesenEditorStateSchemaSetCommand,
+} from "./state-binding-edits.js";

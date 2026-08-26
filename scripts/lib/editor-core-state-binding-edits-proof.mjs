@@ -7,6 +7,7 @@ import path from "node:path";
 import { types as utilTypes } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
@@ -17,30 +18,25 @@ const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const DIRECTORY_READ_FLAGS = READ_FLAGS | (fileConstants.O_DIRECTORY ?? 0);
-const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-content-edits.json";
-const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-CONTENT-EDITS.md";
+const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json";
+const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md";
 const T02_ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json";
-const T03_ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json";
+const T04_ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-content-edits.json";
 const FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json";
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
-const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
 const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-edits.ts";
-const PACKAGE_TEST_PATH = "packages/editor-core/test/content-edits.test.ts";
-const PACKAGE_TYPES_PATH = "packages/editor-core/test/content-edits.types.ts";
+const PACKAGE_TEST_PATH = "packages/editor-core/test/state-binding-edits.test.ts";
+const PACKAGE_TYPES_PATH = "packages/editor-core/test/state-binding-edits.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
-const ROOT_TEST_PATH = "tests/editor-core-content-edits.test.mjs";
-const PROOF_LIBRARY_PATH = "scripts/lib/editor-core-content-edits-proof.mjs";
-const GENERATOR_PATH = "scripts/generate-editor-core-content-edits-proof.mjs";
-const VERIFIER_PATH = "scripts/verify-editor-core-content-edits.mjs";
+const ROOT_TEST_PATH = "tests/editor-core-state-binding-edits.test.mjs";
+const PROOF_LIBRARY_PATH = "scripts/lib/editor-core-state-binding-edits-proof.mjs";
+const GENERATOR_PATH = "scripts/generate-editor-core-state-binding-edits-proof.mjs";
+const VERIFIER_PATH = "scripts/verify-editor-core-state-binding-edits.mjs";
 const ATOMIC_WRITER_PATH = "scripts/lib/atomic-proof-artifact.mjs";
 const DOCUMENT_LIMIT = 8_388_608;
-const FROZEN_ARTIFACT_PIN = Object.freeze({
-  bytes: 26_988,
-  sha256: "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066",
-});
 
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -84,6 +80,7 @@ const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
   "packages/editor-core/dist/stable-id-insert.js",
   "packages/editor-core/dist/structural-edits.js",
+  "packages/editor-core/dist/content-edits.js",
 ]);
 const ISOLATED_RUNTIME_PATHS = Object.freeze([
   ...CURRENT_EDITOR_RUNTIME_PATHS,
@@ -114,7 +111,7 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/src/source-document.ts",
   "packages/editor-core/src/stable-id-insert.ts",
   "packages/editor-core/src/structural-edits.ts",
-  CONTENT_EDITS_SOURCE_PATH,
+  "packages/editor-core/src/content-edits.ts",
   STATE_BINDING_EDITS_SOURCE_PATH,
   INDEX_SOURCE_PATH,
   ...DIST_PATHS,
@@ -124,6 +121,8 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/test/stable-id-insert.types.ts",
   "packages/editor-core/test/structural-edits.test.ts",
   "packages/editor-core/test/structural-edits.types.ts",
+  "packages/editor-core/test/content-edits.test.ts",
+  "packages/editor-core/test/content-edits.types.ts",
   PACKAGE_TEST_PATH,
   PACKAGE_TYPES_PATH,
   PUBLIC_TEST_PATH,
@@ -136,29 +135,7 @@ const TRACKED_PATHS = Object.freeze([
   ROOT_TEST_PATH,
 ]);
 const TRACKED_PATH_SET = new Set(TRACKED_PATHS);
-const RETAINED_T04_RECEIPT_PATHS = Object.freeze(
-  TRACKED_PATHS.filter(
-    (relativePath) =>
-      ![
-        PACKAGE_PATH,
-        INDEX_SOURCE_PATH,
-        STATE_BINDING_EDITS_SOURCE_PATH,
-        "packages/editor-core/dist/index.d.ts",
-        "packages/editor-core/dist/index.d.ts.map",
-        "packages/editor-core/dist/index.js",
-        "packages/editor-core/dist/index.js.map",
-        "packages/editor-core/dist/state-binding-edits.d.ts",
-        "packages/editor-core/dist/state-binding-edits.d.ts.map",
-        "packages/editor-core/dist/state-binding-edits.js",
-        "packages/editor-core/dist/state-binding-edits.js.map",
-        PUBLIC_TEST_PATH,
-        PUBLIC_TYPES_PATH,
-        PROOF_LIBRARY_PATH,
-        ROOT_TEST_PATH,
-      ].includes(relativePath),
-  ),
-);
-const RETAINED_T03_RECEIPT_PATHS = Object.freeze([
+const RETAINED_T04_RECEIPT_PATHS = Object.freeze([
   FIXTURE_PATH,
   "tsconfig.base.json",
   "packages/editor-core/tsconfig.json",
@@ -167,6 +144,7 @@ const RETAINED_T03_RECEIPT_PATHS = Object.freeze([
   "packages/editor-core/src/source-document.ts",
   "packages/editor-core/src/stable-id-insert.ts",
   "packages/editor-core/src/structural-edits.ts",
+  "packages/editor-core/src/content-edits.ts",
   "packages/editor-core/dist/source-document.d.ts",
   "packages/editor-core/dist/source-document.d.ts.map",
   "packages/editor-core/dist/source-document.js",
@@ -179,17 +157,23 @@ const RETAINED_T03_RECEIPT_PATHS = Object.freeze([
   "packages/editor-core/dist/structural-edits.d.ts.map",
   "packages/editor-core/dist/structural-edits.js",
   "packages/editor-core/dist/structural-edits.js.map",
+  "packages/editor-core/dist/content-edits.d.ts",
+  "packages/editor-core/dist/content-edits.d.ts.map",
+  "packages/editor-core/dist/content-edits.js",
+  "packages/editor-core/dist/content-edits.js.map",
   "packages/editor-core/test/source-document.test.ts",
   "packages/editor-core/test/source-document.types.ts",
   "packages/editor-core/test/stable-id-insert.test.ts",
   "packages/editor-core/test/stable-id-insert.types.ts",
   "packages/editor-core/test/structural-edits.test.ts",
   "packages/editor-core/test/structural-edits.types.ts",
+  "packages/editor-core/test/content-edits.test.ts",
+  "packages/editor-core/test/content-edits.types.ts",
   ...DEPENDENCY_RUNTIME_PATHS,
   ATOMIC_WRITER_PATH,
 ]);
 
-const CONTENT_RUNTIME_EXPORTS = Object.freeze(
+const RETAINED_CONTENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "clearDesenEditorNodeCondition",
     "deleteDesenEditorOwnerProp",
@@ -207,6 +191,18 @@ const CONTENT_RUNTIME_EXPORTS = Object.freeze(
     "setDesenEditorVariantStyleProperty",
   ].sort(compareText),
 );
+const STATE_BINDING_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "deleteDesenEditorResourceInput",
+    "deleteDesenEditorStateDeclaration",
+    "insertDesenEditorStateDeclaration",
+    "setDesenEditorNodeRepeatItems",
+    "setDesenEditorNodeRepeatKey",
+    "setDesenEditorResourceInput",
+    "setDesenEditorStateInitial",
+    "setDesenEditorStateSchema",
+  ].sort(compareText),
+);
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze(
   [
     "createDesenEditorDocument",
@@ -214,7 +210,8 @@ const EXPECTED_RUNTIME_EXPORTS = Object.freeze(
     "insertDesenEditorNode",
     "moveDesenEditorNode",
     "reorderDesenEditorNode",
-    ...CONTENT_RUNTIME_EXPORTS,
+    ...RETAINED_CONTENT_RUNTIME_EXPORTS,
+    ...STATE_BINDING_RUNTIME_EXPORTS,
   ].sort(compareText),
 );
 const EXPECTED_TYPE_EXPORTS = Object.freeze(
@@ -259,49 +256,6 @@ const EXPECTED_TYPE_EXPORTS = Object.freeze(
     "DesenEditorVariantReorderCommand",
     "DesenEditorVariantStylePropertyDeleteCommand",
     "DesenEditorVariantStylePropertySetCommand",
-  ].sort(compareText),
-);
-const EXPECTED_CONTENT_EXPORTS = Object.freeze(
-  [
-    ...CONTENT_RUNTIME_EXPORTS,
-    "DesenEditorContentEditDiagnostic",
-    "DesenEditorContentEditDiagnosticCode",
-    "DesenEditorContentEditFailure",
-    "DesenEditorContentEditResult",
-    "DesenEditorContentEditSuccess",
-    "DesenEditorContentPredicate",
-    "DesenEditorContentValue",
-    "DesenEditorContentVariant",
-    "DesenEditorNodeConditionClearCommand",
-    "DesenEditorNodeConditionSetCommand",
-    "DesenEditorOwnerPropDeleteCommand",
-    "DesenEditorOwnerPropSetCommand",
-    "DesenEditorOwnerStylePropertyDeleteCommand",
-    "DesenEditorOwnerStylePropertySetCommand",
-    "DesenEditorVariantConditionSetCommand",
-    "DesenEditorVariantDeleteCommand",
-    "DesenEditorVariantInsertCommand",
-    "DesenEditorVariantPropDeleteCommand",
-    "DesenEditorVariantPropSetCommand",
-    "DesenEditorVariantReorderCommand",
-    "DesenEditorVariantStylePropertyDeleteCommand",
-    "DesenEditorVariantStylePropertySetCommand",
-  ].sort(compareText),
-);
-const STATE_BINDING_RUNTIME_EXPORTS = Object.freeze(
-  [
-    "deleteDesenEditorResourceInput",
-    "deleteDesenEditorStateDeclaration",
-    "insertDesenEditorStateDeclaration",
-    "setDesenEditorNodeRepeatItems",
-    "setDesenEditorNodeRepeatKey",
-    "setDesenEditorResourceInput",
-    "setDesenEditorStateInitial",
-    "setDesenEditorStateSchema",
-  ].sort(compareText),
-);
-const STATE_BINDING_TYPE_EXPORTS = Object.freeze(
-  [
     "DesenEditorBindingValue",
     "DesenEditorNodeRepeatItemsSetCommand",
     "DesenEditorNodeRepeatKeySetCommand",
@@ -320,39 +274,48 @@ const STATE_BINDING_TYPE_EXPORTS = Object.freeze(
   ].sort(compareText),
 );
 const EXPECTED_STATE_BINDING_EXPORTS = Object.freeze(
-  [...STATE_BINDING_RUNTIME_EXPORTS, ...STATE_BINDING_TYPE_EXPORTS].sort(compareText),
-);
-const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
-  [...EXPECTED_RUNTIME_EXPORTS, ...STATE_BINDING_RUNTIME_EXPORTS].sort(compareText),
-);
-const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
-  [...EXPECTED_TYPE_EXPORTS, ...STATE_BINDING_TYPE_EXPORTS].sort(compareText),
+  [
+    ...STATE_BINDING_RUNTIME_EXPORTS,
+    "DesenEditorBindingValue",
+    "DesenEditorNodeRepeatItemsSetCommand",
+    "DesenEditorNodeRepeatKeySetCommand",
+    "DesenEditorResourceInputDeleteCommand",
+    "DesenEditorResourceInputSetCommand",
+    "DesenEditorStateBindingEditDiagnostic",
+    "DesenEditorStateBindingEditDiagnosticCode",
+    "DesenEditorStateBindingEditFailure",
+    "DesenEditorStateBindingEditResult",
+    "DesenEditorStateBindingEditSuccess",
+    "DesenEditorStateDeclaration",
+    "DesenEditorStateDeclarationDeleteCommand",
+    "DesenEditorStateDeclarationInsertCommand",
+    "DesenEditorStateInitialSetCommand",
+    "DesenEditorStateSchemaSetCommand",
+  ].sort(compareText),
 );
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
-  "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
-  "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
-  "run.desen.editor/CONTENT_EDIT_PATH_NOT_FOUND",
-  "run.desen.editor/CONTENT_EDIT_POSITION_INVALID",
-  "run.desen.editor/CONTENT_EDIT_TARGET_AMBIGUOUS",
-  "run.desen.editor/CONTENT_EDIT_TARGET_NOT_FOUND",
+  "run.desen.editor/STATE_BINDING_EDIT_COMMAND_INVALID",
+  "run.desen.editor/STATE_BINDING_EDIT_LIMIT_EXCEEDED",
+  "run.desen.editor/STATE_BINDING_EDIT_PATH_NOT_FOUND",
+  "run.desen.editor/STATE_BINDING_EDIT_TARGET_AMBIGUOUS",
+  "run.desen.editor/STATE_BINDING_EDIT_TARGET_EXISTS",
+  "run.desen.editor/STATE_BINDING_EDIT_TARGET_NOT_FOUND",
 ]);
 const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
-  "sets and deletes base node props without retaining inputs or removing the empty container",
-  "edits behavior props and prototype-sensitive prop names as own data",
-  "sets and deletes node and behavior style leaves while preserving empty state and part maps",
-  "sets and clears only component-node base conditions",
-  "inserts variants at exact boundaries and preserves unresolved Catalog semantics",
-  "deletes variants and retains an empty own variants array",
-  "reorders variants by post-removal final index including a fresh no-op",
-  "sets variant conditions and rejects absent variant indices atomically",
-  "sets and deletes variant props while allowing the last prop to leave an empty map",
-  "sets and deletes variant style leaves while retaining empty style containers",
-  "rejects deletion of every missing path without returning a partial document",
-  "rejects missing and ambiguous surface-local owner identities",
-  "rejects non-data command shapes without invoking hooks and contains throwing Proxy traps atomically",
-  "rejects malformed-Unicode prop names with controlled command diagnostics",
-  "preserves structural diagnostics when a content value would make the Source invalid",
-  "enforces depth, identity-count, and 8 MiB document boundaries",
+  "inserts complete dotted and prototype-sensitive state declarations as detached own data",
+  "sets state schema and inert initial values, then deletes without cascading references",
+  "retains the required empty state map after deleting the final declaration",
+  "replaces repeat items and key while preserving alias, limit, extensions, order, and identities",
+  "creates, replaces, and deletes prototype-sensitive resource-input leaves as own data",
+  "reports duplicate, missing target, and missing path failures without partial authority",
+  "requires one unique component-node identity for repeat edits",
+  "preserves structural diagnostics for invalid schemas and binding forms atomically",
+  "rejects active, executable, sparse, inherited, symbol, extra, and malformed command data without hooks",
+  "accepts an honest forwarding Proxy and contains throwing reflection traps atomically",
+  "is deterministic, detached, deeply frozen, atomic, and stable-ID preserving",
+  "accepts component depth 64 and rejects depth 65 before mutation",
+  "accepts exactly 25,000 surface identities and rejects the next occurrence",
+  "accepts an exact 8 MiB post-edit Source and rejects a one-byte crossing",
 ]);
 const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the package manifest keeps one exact root export and the declared runtime dependencies",
@@ -400,8 +363,8 @@ const BUILD_OPTION_KEYS = Object.freeze([
   "fileOverrides",
   "t02PrerequisiteBytes",
   "t02PrerequisitePath",
-  "t03PrerequisiteBytes",
-  "t03PrerequisitePath",
+  "t04CompatibilityBytes",
+  "t04CompatibilityPath",
   "runtime",
 ]);
 const VERIFY_OPTION_KEYS = Object.freeze([
@@ -419,25 +382,33 @@ const BYTE_VIEW_INTRINSICS = Object.freeze({
   byteOffset: Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "byteOffset")?.get,
 });
 
-export const EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS = Object.freeze([
+export const EDITOR_CORE_STATE_BINDING_EDITS_PREREQUISITE_PINS = Object.freeze([
   Object.freeze({
     task: "M08-T02",
     path: T02_ARTIFACT_PATH,
     bytes: 19_561,
     sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
   }),
-  Object.freeze({
-    task: "M08-T03",
-    path: T03_ARTIFACT_PATH,
-    bytes: 22_402,
-    sha256: "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
-  }),
 ]);
 
-export const EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES = Object.freeze([
-  "[authority] authenticates exact frozen M08-T02/T03 artifacts and the isolated runtime graph",
-  "[determinism] two fresh M08-T04 builds are byte-identical",
-  "[behavior] proves all fourteen content commands, stable identity, limits, and atomic diagnostics",
+export const EDITOR_CORE_STATE_BINDING_EDITS_CURRENT_GRAPH_COMPATIBILITY_PIN = Object.freeze({
+  task: "M08-T04",
+  path: T04_ARTIFACT_PATH,
+  bytes: 26_988,
+  sha256: "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066",
+});
+
+const EMBEDDED_T03_CHAIN_PIN = Object.freeze({
+  task: "M08-T03",
+  path: "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+  bytes: 22_402,
+  sha256: "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+});
+
+export const EDITOR_CORE_STATE_BINDING_EDITS_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] authenticates exact M08-T02 prerequisite, M08-T04 graph compatibility, and isolated runtime",
+  "[determinism] two fresh M08-T05 builds are byte-identical",
+  "[behavior] proves eight state/binding commands, stable identity, limits, and atomic diagnostics",
   "[mutation] rejects runtime substitution and tracked boundary mutation",
   "[artifact] verifies exact artifact bytes and one exact final proof pin",
   "[writer] atomically commits exact bytes and preserves the previous destination on failure",
@@ -447,22 +418,22 @@ export const EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES = Object.freeze([
   "[immutability] freezes evidence and states the exact nonclaim boundary",
 ]);
 
-export const DEFAULT_EDITOR_CORE_CONTENT_EDITS_ARTIFACT_PATH = path.join(
+export const DEFAULT_EDITOR_CORE_STATE_BINDING_EDITS_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   ARTIFACT_PATH,
 );
 
-export class EditorCoreContentEditsProofError extends Error {
+export class EditorCoreStateBindingEditsProofError extends Error {
   constructor(code, message, details = undefined) {
     super(message);
-    this.name = "EditorCoreContentEditsProofError";
+    this.name = "EditorCoreStateBindingEditsProofError";
     this.code = code;
     this.details = details;
   }
 }
 
 function fail(code, message, details = undefined) {
-  throw new EditorCoreContentEditsProofError(code, message, details);
+  throw new EditorCoreStateBindingEditsProofError(code, message, details);
 }
 
 function compareText(left, right) {
@@ -558,7 +529,7 @@ function captureFileOverrides(raw) {
 
 function captureRuntime(raw) {
   if (raw === undefined) return undefined;
-  const keys = ["createDesenEditorDocument", ...CONTENT_RUNTIME_EXPORTS];
+  const keys = ["createDesenEditorDocument", ...STATE_BINDING_RUNTIME_EXPORTS];
   const source = captureExactObject(raw, keys, "buildOptions.runtime");
   for (const key of keys) {
     if (typeof source[key] !== "function" || utilTypes.isProxy(source[key])) {
@@ -570,7 +541,7 @@ function captureRuntime(raw) {
 
 function captureBuildOptions(raw) {
   const source = captureExactObject(raw, BUILD_OPTION_KEYS, "buildOptions");
-  for (const key of ["t02PrerequisitePath", "t03PrerequisitePath"]) {
+  for (const key of ["t02PrerequisitePath", "t04CompatibilityPath"]) {
     if (source[key] !== undefined && typeof source[key] !== "string") {
       fail("OPTIONS_INVALID", `buildOptions.${key} must be a string.`);
     }
@@ -590,11 +561,11 @@ function captureBuildOptions(raw) {
         ? undefined
         : captureByteInput(source.t02PrerequisiteBytes, "buildOptions.t02PrerequisiteBytes"),
     t02PrerequisitePath: source.t02PrerequisitePath,
-    t03PrerequisiteBytes:
-      source.t03PrerequisiteBytes === undefined
+    t04CompatibilityBytes:
+      source.t04CompatibilityBytes === undefined
         ? undefined
-        : captureByteInput(source.t03PrerequisiteBytes, "buildOptions.t03PrerequisiteBytes"),
-    t03PrerequisitePath: source.t03PrerequisitePath,
+        : captureByteInput(source.t04CompatibilityBytes, "buildOptions.t04CompatibilityBytes"),
+    t04CompatibilityPath: source.t04CompatibilityPath,
     runtime: captureRuntime(source.runtime),
   });
 }
@@ -619,7 +590,7 @@ async function openCanonicalDirectory(directoryPath, label) {
     return Object.freeze({ directoryPath, handle, label, opened });
   } catch (error) {
     await handle?.close().catch(() => undefined);
-    if (error instanceof EditorCoreContentEditsProofError) throw error;
+    if (error instanceof EditorCoreStateBindingEditsProofError) throw error;
     fail("FILESYSTEM_UNSAFE", `${label} cannot be opened safely.`, String(error));
   }
 }
@@ -642,7 +613,7 @@ async function assertCanonicalDirectoryUnchanged(capture) {
       fail("FILESYSTEM_UNSAFE", `${capture.label} changed identity during the authority read.`);
     }
   } catch (error) {
-    if (error instanceof EditorCoreContentEditsProofError) throw error;
+    if (error instanceof EditorCoreStateBindingEditsProofError) throw error;
     fail("FILESYSTEM_UNSAFE", `${capture.label} became unavailable during the authority read.`);
   }
 }
@@ -703,7 +674,7 @@ async function readNoFollow(
     await assertCanonicalDirectoryUnchanged(rootCapture);
     return bytes;
   } catch (error) {
-    if (error instanceof EditorCoreContentEditsProofError) throw error;
+    if (error instanceof EditorCoreStateBindingEditsProofError) throw error;
     fail("FILESYSTEM_UNSAFE", `${label} cannot be read safely.`, String(error));
   } finally {
     await handle?.close().catch(() => undefined);
@@ -724,7 +695,7 @@ function parseJson(bytes, label) {
   try {
     return JSON.parse(decodeUtf8(bytes, label));
   } catch (error) {
-    if (error instanceof EditorCoreContentEditsProofError) throw error;
+    if (error instanceof EditorCoreStateBindingEditsProofError) throw error;
     fail("JSON_INVALID", `${label} is not valid JSON.`, String(error));
   }
 }
@@ -847,22 +818,24 @@ function verifyBoundary(files) {
       JSON.stringify({ ".": { types: "./dist/index.d.ts", import: "./dist/index.js" } }) ||
     JSON.stringify(manifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
-    manifest.scripts?.["test:content-edits"] !== "vitest run test/content-edits.test.ts" ||
     manifest.scripts?.["test:state-binding-edits"] !== "vitest run test/state-binding-edits.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
 
-  const sourceText = decodeUtf8(files.get(CONTENT_EDITS_SOURCE_PATH), CONTENT_EDITS_SOURCE_PATH);
-  const sourceExports = exportedNames(sourceText, CONTENT_EDITS_SOURCE_PATH);
+  const sourceText = decodeUtf8(
+    files.get(STATE_BINDING_EDITS_SOURCE_PATH),
+    STATE_BINDING_EDITS_SOURCE_PATH,
+  );
+  const sourceExports = exportedNames(sourceText, STATE_BINDING_EDITS_SOURCE_PATH);
   exactArray(
     sourceExports.names,
-    EXPECTED_CONTENT_EXPORTS,
+    EXPECTED_STATE_BINDING_EXPORTS,
     "SOURCE_DRIFT",
-    "Content-edit source exports",
+    "State/binding source exports",
   );
-  if (sourceExports.tsdocDeclarations !== EXPECTED_CONTENT_EXPORTS.length) {
-    fail("TSDOC_DRIFT", "Every public content-edit declaration must retain TSDoc.");
+  if (sourceExports.tsdocDeclarations !== EXPECTED_STATE_BINDING_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Every public state-binding-edit declaration must retain TSDoc.");
   }
   for (const literal of ["8_388_608", "25_000", "maxSourceTreeDepth: 64"]) {
     if (!sourceText.includes(literal)) fail("LIMIT_DRIFT", `Missing fixed limit: ${literal}`);
@@ -871,32 +844,12 @@ function verifyBoundary(files) {
     if (!sourceText.includes(`"${code}"`)) fail("DIAGNOSTIC_DRIFT", `Missing code: ${code}`);
   }
 
-  const stateBindingText = decodeUtf8(
-    files.get(STATE_BINDING_EDITS_SOURCE_PATH),
-    STATE_BINDING_EDITS_SOURCE_PATH,
-  );
-  const stateBindingExports = exportedNames(stateBindingText, STATE_BINDING_EDITS_SOURCE_PATH);
-  exactArray(
-    stateBindingExports.names,
-    EXPECTED_STATE_BINDING_EXPORTS,
-    "SOURCE_DRIFT",
-    "State/binding-edit source exports",
-  );
-  if (stateBindingExports.tsdocDeclarations !== EXPECTED_STATE_BINDING_EXPORTS.length) {
-    fail("TSDOC_DRIFT", "Every public state/binding-edit declaration must retain TSDoc.");
-  }
-
   const sourceIndex = reexportedNames(
     decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH),
     INDEX_SOURCE_PATH,
   );
-  exactArray(
-    sourceIndex.runtime,
-    EXPECTED_CURRENT_RUNTIME_EXPORTS,
-    "SOURCE_DRIFT",
-    "Runtime exports",
-  );
-  exactArray(sourceIndex.types, EXPECTED_CURRENT_TYPE_EXPORTS, "SOURCE_DRIFT", "Type exports");
+  exactArray(sourceIndex.runtime, EXPECTED_RUNTIME_EXPORTS, "SOURCE_DRIFT", "Runtime exports");
+  exactArray(sourceIndex.types, EXPECTED_TYPE_EXPORTS, "SOURCE_DRIFT", "Type exports");
   exactArray(
     sourceIndex.modules,
     [
@@ -917,8 +870,6 @@ function verifyBoundary(files) {
 
   const distIndexPath = "packages/editor-core/dist/index.js";
   const distIndexDeclarationPath = "packages/editor-core/dist/index.d.ts";
-  const distContentPath = "packages/editor-core/dist/content-edits.js";
-  const distContentDeclarationPath = "packages/editor-core/dist/content-edits.d.ts";
   const distStateBindingPath = "packages/editor-core/dist/state-binding-edits.js";
   const distStateBindingDeclarationPath = "packages/editor-core/dist/state-binding-edits.d.ts";
   const distIndex = decodeUtf8(files.get(distIndexPath), distIndexPath);
@@ -927,37 +878,19 @@ function verifyBoundary(files) {
     decodeUtf8(files.get(distIndexDeclarationPath), distIndexDeclarationPath),
     distIndexDeclarationPath,
   );
-  exactArray(
-    emittedIndex.runtime,
-    EXPECTED_CURRENT_RUNTIME_EXPORTS,
-    "EMITTED_DRIFT",
-    "Emitted exports",
-  );
+  exactArray(emittedIndex.runtime, EXPECTED_RUNTIME_EXPORTS, "EMITTED_DRIFT", "Emitted exports");
   exactArray(
     emittedIndexDeclaration.runtime,
-    EXPECTED_CURRENT_RUNTIME_EXPORTS,
+    EXPECTED_RUNTIME_EXPORTS,
     "EMITTED_DRIFT",
     "Declaration runtime exports",
   );
   exactArray(
     emittedIndexDeclaration.types,
-    EXPECTED_CURRENT_TYPE_EXPORTS,
+    EXPECTED_TYPE_EXPORTS,
     "EMITTED_DRIFT",
     "Declaration type exports",
   );
-  const emittedContent = exportedNames(
-    decodeUtf8(files.get(distContentDeclarationPath), distContentDeclarationPath),
-    distContentDeclarationPath,
-  );
-  exactArray(
-    emittedContent.names,
-    EXPECTED_CONTENT_EXPORTS,
-    "EMITTED_DRIFT",
-    "Emitted content declarations",
-  );
-  if (emittedContent.tsdocDeclarations !== EXPECTED_CONTENT_EXPORTS.length) {
-    fail("TSDOC_DRIFT", "Emitted content declarations lost TSDoc.");
-  }
   const emittedStateBinding = exportedNames(
     decodeUtf8(files.get(distStateBindingDeclarationPath), distStateBindingDeclarationPath),
     distStateBindingDeclarationPath,
@@ -986,7 +919,7 @@ function verifyBoundary(files) {
     ["packages/editor-core/dist/source-document.js", ["@desen/validator"]],
     ["packages/editor-core/dist/stable-id-insert.js", ["@desen/protocol", "./source-document.js"]],
     ["packages/editor-core/dist/structural-edits.js", ["@desen/protocol", "./source-document.js"]],
-    [distContentPath, ["@desen/protocol", "./source-document.js"]],
+    ["packages/editor-core/dist/content-edits.js", ["@desen/protocol", "./source-document.js"]],
     [distStateBindingPath, ["@desen/protocol", "./source-document.js"]],
   ];
   for (const [relativePath, expected] of emittedModules) {
@@ -1022,8 +955,8 @@ function verifyBoundary(files) {
   const focusedTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PACKAGE_TYPES_PATH), PACKAGE_TYPES_PATH),
   );
-  if (focusedTypeAssertions !== 6) {
-    fail("TEST_INVENTORY_DRIFT", "Focused compiler-negative inventory must remain six.");
+  if (focusedTypeAssertions !== 14) {
+    fail("TEST_INVENTORY_DRIFT", "Focused compiler-negative inventory must remain fourteen.");
   }
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   exactArray(
@@ -1041,7 +974,7 @@ function verifyBoundary(files) {
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
     rootTests,
-    EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES,
+    EDITOR_CORE_STATE_BINDING_EDITS_ROOT_TEST_NAMES,
     "TEST_INVENTORY_DRIFT",
     "Root proof inventory",
   );
@@ -1049,20 +982,8 @@ function verifyBoundary(files) {
   return deepFreeze({
     runtimeExports: [...EXPECTED_RUNTIME_EXPORTS],
     typeExports: [...EXPECTED_TYPE_EXPORTS],
-    currentPackageRuntimeExports: [...EXPECTED_CURRENT_RUNTIME_EXPORTS],
-    currentPackageTypeExports: [...EXPECTED_CURRENT_TYPE_EXPORTS],
-    additiveRuntimeExports: [...STATE_BINDING_RUNTIME_EXPORTS],
-    additiveTypeExports: [...STATE_BINDING_TYPE_EXPORTS],
-    additiveSuccessor: {
-      task: "M08-T05",
-      sourcePath: STATE_BINDING_EDITS_SOURCE_PATH,
-      runtimePath: distStateBindingPath,
-      declarationPath: distStateBindingDeclarationPath,
-      runtimeExports: [...STATE_BINDING_RUNTIME_EXPORTS],
-      typeExports: [...STATE_BINDING_TYPE_EXPORTS],
-    },
-    contentPublicDeclarations: EXPECTED_CONTENT_EXPORTS.length,
-    contentTsdocDeclarations: sourceExports.tsdocDeclarations,
+    stateBindingPublicDeclarations: EXPECTED_STATE_BINDING_EXPORTS.length,
+    stateBindingTsdocDeclarations: sourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
     staticEsmEdges: 14,
     unknownStaticEsmEdges: 0,
@@ -1071,14 +992,15 @@ function verifyBoundary(files) {
     focusedCompilerNegativeAssertions: focusedTypeAssertions,
     publicRuntimeAndRootCases: EXPECTED_PUBLIC_TEST_NAMES.length,
     publicCompilerNegativeAssertions: publicTypeAssertions,
-    rootProofCases: EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES.length,
+    rootProofCases: EDITOR_CORE_STATE_BINDING_EDITS_ROOT_TEST_NAMES.length,
   });
 }
 
 async function authenticatePrerequisites(options) {
-  const [t02Pin, t03Pin] = EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS;
+  const [t02Pin] = EDITOR_CORE_STATE_BINDING_EDITS_PREREQUISITE_PINS;
   const authorities = [
     {
+      role: "prerequisite",
       pin: t02Pin,
       path: options.t02PrerequisitePath ?? T02_ARTIFACT_PATH,
       suppliedBytes: options.t02PrerequisiteBytes,
@@ -1092,17 +1014,18 @@ async function authenticatePrerequisites(options) {
       expectedClaim: "immutableInsertCommand",
     },
     {
-      pin: t03Pin,
-      path: options.t03PrerequisitePath ?? T03_ARTIFACT_PATH,
-      suppliedBytes: options.t03PrerequisiteBytes,
-      expectedProofId: "editor-core-structural-edits",
-      expectedProfile: "desen.editor-core.structural-edits-proof.v1",
-      expectedFiles: 60,
-      expectedRuntimeFiles: 26,
-      expectedEditorFiles: 5,
-      expectedPublicCases: 26,
+      role: "current-graph-compatibility",
+      pin: EDITOR_CORE_STATE_BINDING_EDITS_CURRENT_GRAPH_COMPATIBILITY_PIN,
+      path: options.t04CompatibilityPath ?? T04_ARTIFACT_PATH,
+      suppliedBytes: options.t04CompatibilityBytes,
+      expectedProofId: "editor-core-content-edits",
+      expectedProfile: "desen.editor-core.content-edits-proof.v1",
+      expectedFiles: 67,
+      expectedRuntimeFiles: 27,
+      expectedEditorFiles: 6,
+      expectedPublicCases: 32,
       expectedPublicField: "publicRuntimeAndRootCases",
-      expectedClaim: "immutableDeleteMoveReorderCommands",
+      expectedClaim: "immutableContentEditCommands",
     },
   ];
   const authenticated = [];
@@ -1111,7 +1034,7 @@ async function authenticatePrerequisites(options) {
       authority.suppliedBytes ??
       (await readNoFollow(
         authority.path,
-        `frozen ${authority.pin.task} prerequisite`,
+        `frozen ${authority.pin.task} ${authority.role}`,
         MAX_AUTHORITY_BYTES,
         options.beforeAuthorityRecheck,
       ));
@@ -1121,7 +1044,7 @@ async function authenticatePrerequisites(options) {
         `The exact frozen ${authority.pin.task} artifact receipt did not match.`,
       );
     }
-    const artifact = parseJson(bytes, `frozen ${authority.pin.task} prerequisite`);
+    const artifact = parseJson(bytes, `frozen ${authority.pin.task} ${authority.role}`);
     const receipts = artifact.trackedBoundary?.receipts;
     if (
       artifact.schemaVersion !== 1 ||
@@ -1150,29 +1073,44 @@ async function authenticatePrerequisites(options) {
     }
     authenticated.push(deepFreeze(artifact));
   }
-  const t03Prerequisite = authenticated[1].prerequisite;
-  if (
-    t03Prerequisite?.task !== "M08-T02" ||
-    t03Prerequisite?.path !== t02Pin.path ||
-    t03Prerequisite?.bytes !== t02Pin.bytes ||
-    t03Prerequisite?.sha256 !== t02Pin.sha256 ||
-    t03Prerequisite?.result !== "PASS"
-  ) {
-    fail("PREREQUISITE_DRIFT", "M08-T03 no longer authenticates the exact frozen M08-T02 link.");
+  const t04Artifact = authenticated[1];
+  const embeddedChain = t04Artifact.prerequisites;
+  const expectedChain = [t02Pin, EMBEDDED_T03_CHAIN_PIN];
+  if (!Array.isArray(embeddedChain) || embeddedChain.length !== expectedChain.length) {
+    fail("PREREQUISITE_DRIFT", "M08-T04 no longer exposes its exact embedded predecessor chain.");
+  }
+  for (let index = 0; index < expectedChain.length; index += 1) {
+    const actual = embeddedChain[index];
+    const expected = expectedChain[index];
+    if (
+      actual?.task !== expected.task ||
+      actual?.path !== expected.path ||
+      actual?.bytes !== expected.bytes ||
+      actual?.sha256 !== expected.sha256 ||
+      actual?.result !== "PASS" ||
+      actual?.authentication !== "DIRECT_NO_FOLLOW_EXACT_BYTES" ||
+      actual?.liveProofReaderInput !== false ||
+      actual?.checkpointHeadInput !== false
+    ) {
+      fail("PREREQUISITE_DRIFT", `M08-T04 embedded chain entry ${index} drifted.`);
+    }
   }
   if (
     options.t02PrerequisiteBytes !== undefined ||
     options.t02PrerequisitePath !== undefined ||
-    options.t03PrerequisiteBytes !== undefined ||
-    options.t03PrerequisitePath !== undefined
+    options.t04CompatibilityBytes !== undefined ||
+    options.t04CompatibilityPath !== undefined
   ) {
-    fail("PREREQUISITE_OVERRIDE_REJECTED", "Caller-supplied prerequisites cannot issue PASS.");
+    fail(
+      "PREREQUISITE_OVERRIDE_REJECTED",
+      "Caller-supplied prerequisite or compatibility bytes cannot issue PASS.",
+    );
   }
   return Object.freeze({
     t02Artifact: authenticated[0],
-    t03Artifact: authenticated[1],
+    t04Artifact,
     evidence: deepFreeze(
-      EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS.map((pin) => ({
+      EDITOR_CORE_STATE_BINDING_EDITS_PREREQUISITE_PINS.map((pin) => ({
         ...pin,
         result: "PASS",
         authentication: "DIRECT_NO_FOLLOW_EXACT_BYTES",
@@ -1180,6 +1118,18 @@ async function authenticatePrerequisites(options) {
         checkpointHeadInput: false,
       })),
     ),
+    currentGraphCompatibility: deepFreeze({
+      ...EDITOR_CORE_STATE_BINDING_EDITS_CURRENT_GRAPH_COMPATIBILITY_PIN,
+      result: "PASS",
+      authentication: "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      embeddedPrerequisiteChain: expectedChain.map((pin) => ({
+        task: pin.task,
+        path: pin.path,
+        bytes: pin.bytes,
+        sha256: pin.sha256,
+      })),
+      widensOfficialPrerequisites: false,
+    }),
   });
 }
 
@@ -1204,11 +1154,11 @@ function prerequisiteReceipt(prerequisite, relativePath, collection) {
   return candidate;
 }
 
-function assertRetainedT03Receipts(prerequisite, files) {
+function assertRetainedT04Receipts(prerequisite, files) {
   const receipts = new Map(
     prerequisite.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
   );
-  for (const relativePath of RETAINED_T03_RECEIPT_PATHS) {
+  for (const relativePath of RETAINED_T04_RECEIPT_PATHS) {
     const authority = receipts.get(relativePath);
     const bytes = files.get(relativePath);
     if (
@@ -1217,14 +1167,23 @@ function assertRetainedT03Receipts(prerequisite, files) {
       authority.bytes !== bytes.byteLength ||
       authority.sha256 !== sha256(bytes)
     ) {
-      fail("BOUNDARY_DRIFT", `A retained M08-T03 receipt drifted: ${relativePath}`);
+      fail("BOUNDARY_DRIFT", `A retained M08-T04 receipt drifted: ${relativePath}`);
     }
   }
 }
 
-function authenticateRuntimeClosure(prerequisite, prerequisiteEvidence, files) {
+function authenticateRuntimeClosure(
+  compatibilityArtifact,
+  prerequisiteEvidence,
+  compatibilityEvidence,
+  files,
+) {
   const dependencyReceipts = DEPENDENCY_RUNTIME_PATHS.map((relativePath) => {
-    const authority = prerequisiteReceipt(prerequisite, relativePath, "dependencyReceipts");
+    const authority = prerequisiteReceipt(
+      compatibilityArtifact,
+      relativePath,
+      "dependencyReceipts",
+    );
     const bytes = files.get(relativePath);
     if (authority.bytes !== bytes.byteLength || authority.sha256 !== sha256(bytes)) {
       fail("RUNTIME_AUTHORITY_DRIFT", `Dependency byte drifted: ${relativePath}`);
@@ -1232,7 +1191,7 @@ function authenticateRuntimeClosure(prerequisite, prerequisiteEvidence, files) {
     return receipt(relativePath, bytes);
   }).sort((left, right) => compareText(left.path, right.path));
   for (const relativePath of RETAINED_EDITOR_RUNTIME_PATHS) {
-    const authority = prerequisiteReceipt(prerequisite, relativePath, "editorReceipts");
+    const authority = prerequisiteReceipt(compatibilityArtifact, relativePath, "editorReceipts");
     const bytes = files.get(relativePath);
     if (authority.bytes !== bytes.byteLength || authority.sha256 !== sha256(bytes)) {
       fail("RUNTIME_AUTHORITY_DRIFT", `Retained editor runtime drifted: ${relativePath}`);
@@ -1257,6 +1216,12 @@ function authenticateRuntimeClosure(prerequisite, prerequisiteEvidence, files) {
       path: artifactPath,
       sha256: digest,
     })),
+    currentGraphCompatibility: {
+      task: compatibilityEvidence.task,
+      path: compatibilityEvidence.path,
+      sha256: compatibilityEvidence.sha256,
+      widensOfficialPrerequisites: false,
+    },
     editorReceipts,
     dependencyReceipts,
     trustedAuthorities: ["NODE_RUNTIME", "ESM_LOADER", "PROCESS_ENVIRONMENT"],
@@ -1272,7 +1237,7 @@ function isolatedDestination(directory, relativePath) {
 }
 
 async function importReceiptedRuntime(files) {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m08-t04-runtime-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m08-t05-runtime-"));
   try {
     const copies = ISOLATED_RUNTIME_PATHS.map((relativePath) => ({
       bytes: files.get(relativePath),
@@ -1299,7 +1264,7 @@ async function importReceiptedRuntime(files) {
     const imported = await import(pathToFileURL(entryPath).href);
     exactArray(
       Object.keys(imported.editorCore).sort(compareText),
-      EXPECTED_CURRENT_RUNTIME_EXPORTS,
+      EXPECTED_RUNTIME_EXPORTS,
       "PUBLIC_API_DRIFT",
       "Isolated runtime exports",
     );
@@ -1315,7 +1280,7 @@ async function importReceiptedRuntime(files) {
       ),
     });
   } catch (error) {
-    if (error instanceof EditorCoreContentEditsProofError) throw error;
+    if (error instanceof EditorCoreStateBindingEditsProofError) throw error;
     fail(
       "RUNTIME_AUTHORITY_DRIFT",
       "The exact receipted editor runtime graph could not be imported in isolation.",
@@ -1405,199 +1370,151 @@ function sizedSource(validSource, canonicalizeJsonBytes, extraBytes) {
 
 function behaviorFixture(validSource) {
   const input = clone(validSource);
-  const root = input.surfaces["sign-in"].root;
-  root.behaviors = [
-    {
-      id: "sign-in.behavior",
-      use: "com.example.interactions/Preview",
-      props: { axis: "vertical" },
-      style: { base: { indicator: { color: "blue" } } },
-    },
-  ];
-  root.slots.default[0].variants = [
-    { when: { op: "truthy", args: [true] }, props: { text: "first" } },
-    {
-      when: { op: "truthy", args: [false] },
-      style: { base: { text: { color: "gray" } } },
-    },
-    { when: { op: "truthy", args: [true] }, props: { text: "third" } },
-  ];
+  const surface = input.surfaces["sign-in"];
+  surface.resources.data = {
+    use: "com.example.data/List",
+    input: {},
+    policy: "manual",
+    extensions: { "com.example.resource": { retained: true } },
+  };
+  surface.root.slots.default[0].repeat = {
+    items: { $ref: "resource.data.value", fallback: [] },
+    as: "row",
+    key: { $ref: "item.row.id" },
+    limit: 10,
+    extensions: { "com.example.repeat": { retained: true } },
+  };
   return input;
 }
 
 function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
-  for (const name of ["createDesenEditorDocument", ...CONTENT_RUNTIME_EXPORTS]) {
+  for (const name of ["createDesenEditorDocument", ...STATE_BINDING_RUNTIME_EXPORTS]) {
     if (typeof runtime?.[name] !== "function") {
-      fail("BEHAVIOR_DRIFT", `The isolated runtime lost ${name}.`);
+      fail("BEHAVIOR_DRIFT", "The isolated runtime lost " + name + ".");
     }
   }
 
-  const truePredicate = { op: "truthy", args: [true] };
   const baseline = createDocument(runtime, validSource, behaviorFixture(validSource));
-  const baselineBytes = canonicalizeJsonBytes(baseline);
+  const baselineBytes = Buffer.from(canonicalizeJsonBytes(baseline));
   const baselineIds = surfaceIdentities(baseline);
   const executed = [];
-  let current = baseline;
+  let currentDocument = baseline;
+
   function execute(name, command, label = name) {
-    const previous = current;
+    const previous = currentDocument;
     const result = expectSuccess(runtime[name](previous, command), label);
     if (result.document === previous || result.document.surfaces === previous.surfaces) {
-      fail("BEHAVIOR_DRIFT", `${label} did not return a fresh detached Source.`);
+      fail("BEHAVIOR_DRIFT", label + " did not return a fresh detached Source.");
     }
     executed.push(name);
-    current = result.document;
+    currentDocument = result.document;
     return result.document;
   }
 
-  const retainedValue = { safe: true };
-  execute("setDesenEditorOwnerProp", {
-    surfaceId: "sign-in",
-    ownerId: "sign-in.behavior",
-    name: "__proto__",
-    value: retainedValue,
-  });
-  retainedValue.safe = false;
-  const behaviorProps = current.surfaces["sign-in"].root.behaviors[0].props;
-  if (!Object.hasOwn(behaviorProps, "__proto__") || behaviorProps.__proto__.safe !== true) {
-    fail("BEHAVIOR_DRIFT", "Prototype-sensitive behavior props or caller detachment drifted.");
-  }
-  execute("deleteDesenEditorOwnerProp", {
-    surfaceId: "sign-in",
-    ownerId: "sign-in.behavior",
-    name: "__proto__",
-  });
-  execute("setDesenEditorOwnerStyleProperty", {
-    surfaceId: "sign-in",
-    ownerId: "sign-in.title",
-    state: "preview",
-    part: "constructor",
-    property: "toString",
-    value: { $token: "color.preview" },
-  });
-  execute("deleteDesenEditorOwnerStyleProperty", {
-    surfaceId: "sign-in",
-    ownerId: "sign-in.title",
-    state: "preview",
-    part: "constructor",
-    property: "toString",
-  });
-  const emptiedPart = current.surfaces["sign-in"].root.slots.default[0].style.preview.constructor;
-  if (
-    !Object.hasOwn(
-      current.surfaces["sign-in"].root.slots.default[0].style.preview,
-      "constructor",
-    ) ||
-    Reflect.ownKeys(emptiedPart).length !== 0
-  ) {
-    fail("BEHAVIOR_DRIFT", "Style deletion no longer retains the exact empty own part map.");
-  }
-  execute("setDesenEditorNodeCondition", {
-    surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    when: truePredicate,
-  });
-  execute("clearDesenEditorNodeCondition", {
-    surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-  });
-  execute("insertDesenEditorVariant", {
-    surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    index: 1,
-    variant: {
-      when: { op: "exists", args: [{ $ref: "state.future" }] },
-      props: { unresolved: true },
-      extensions: { "com.example/opaque": { retained: true } },
+  const declaration = {
+    schema: {
+      type: "object",
+      properties: { value: { type: "string" } },
+      required: ["value"],
     },
-  });
-  execute("deleteDesenEditorVariant", {
+    initial: { value: "original" },
+    extensions: { "com.example.state": { retained: true } },
+  };
+  execute("insertDesenEditorStateDeclaration", {
     surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    index: 1,
+    name: "profile.name",
+    declaration,
   });
-  execute("reorderDesenEditorVariant", {
-    surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    variantIndex: 0,
-    index: 2,
-  });
-  const variantOrder = current.surfaces["sign-in"].root.slots.default[0].variants.map(
-    (variant) => variant.props?.text,
-  );
-  exactArray(
-    variantOrder,
-    [undefined, "third", "first"],
-    "BEHAVIOR_DRIFT",
-    "Variant post-removal final order",
-  );
-  execute("setDesenEditorVariantCondition", {
-    surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    index: 1,
-    when: truePredicate,
-  });
-  execute("setDesenEditorVariantProp", {
-    surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    index: 0,
-    name: "constructor",
-    value: "temporary",
-  });
-  execute("deleteDesenEditorVariantProp", {
-    surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    index: 0,
-    name: "constructor",
-  });
-  const emptiedVariantProps = current.surfaces["sign-in"].root.slots.default[0].variants[0].props;
-  if (Reflect.ownKeys(emptiedVariantProps).length !== 0) {
-    fail("BEHAVIOR_DRIFT", "Variant prop deletion no longer retains an empty map.");
+  declaration.initial.value = "caller-mutated";
+  if (currentDocument.surfaces["sign-in"].state["profile.name"].initial.value !== "original") {
+    fail("BEHAVIOR_DRIFT", "Inserted state declaration retained caller authority.");
   }
-  execute("setDesenEditorVariantStyleProperty", {
+
+  execute("setDesenEditorStateSchema", {
+    surfaceId: "sign-in",
+    name: "email",
+    schema: { type: "number", minimum: 0 },
+  });
+  const markerInitial = { $ref: "state.password", fallback: { nested: true } };
+  execute("setDesenEditorStateInitial", {
+    surfaceId: "sign-in",
+    name: "email",
+    initial: markerInitial,
+  });
+  markerInitial.fallback.nested = false;
+  if (currentDocument.surfaces["sign-in"].state.email.initial.fallback.nested !== true) {
+    fail("BEHAVIOR_DRIFT", "State initial data was retained or interpreted as a binding.");
+  }
+
+  execute("setDesenEditorNodeRepeatItems", {
     surfaceId: "sign-in",
     nodeId: "sign-in.title",
-    index: 0,
-    state: "preview",
-    part: "constructor",
-    property: "toString",
-    value: "red",
+    items: { $ref: "resource.data.value", fallback: [{ id: "fallback" }] },
   });
-  const prototypePart = current.surfaces["sign-in"].root.slots.default[0].variants[0].style.preview;
+  execute("setDesenEditorNodeRepeatKey", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    key: { $ref: "item.row.slug", fallback: 0 },
+  });
+  execute("setDesenEditorResourceInput", {
+    surfaceId: "sign-in",
+    resourceId: "data",
+    name: "__proto__",
+    value: { $ref: "state.password", fallback: ["safe"] },
+  });
+  const resourceInput = currentDocument.surfaces["sign-in"].resources.data.input;
   if (
-    !Object.hasOwn(prototypePart, "constructor") ||
-    prototypePart.constructor.toString !== "red"
+    !Object.hasOwn(resourceInput, "__proto__") ||
+    resourceInput.__proto__.fallback[0] !== "safe"
   ) {
-    fail("BEHAVIOR_DRIFT", "Prototype-sensitive variant style paths are not exact own data.");
+    fail("BEHAVIOR_DRIFT", "Prototype-sensitive resource input was not exact own data.");
   }
-  execute("deleteDesenEditorVariantStyleProperty", {
+  execute("deleteDesenEditorResourceInput", {
     surfaceId: "sign-in",
-    nodeId: "sign-in.title",
-    index: 0,
-    state: "preview",
-    part: "constructor",
-    property: "toString",
+    resourceId: "data",
+    name: "__proto__",
   });
+  execute("deleteDesenEditorStateDeclaration", {
+    surfaceId: "sign-in",
+    name: "email",
+  });
+
   exactArray(
-    executed.sort(compareText),
-    CONTENT_RUNTIME_EXPORTS,
+    executed.slice().sort(compareText),
+    STATE_BINDING_RUNTIME_EXPORTS,
     "BEHAVIOR_DRIFT",
-    "Executed commands",
+    "Executed state/binding commands",
   );
-  exactArray(surfaceIdentities(current), baselineIds, "BEHAVIOR_DRIFT", "Stable identities");
+  exactArray(
+    surfaceIdentities(currentDocument),
+    baselineIds,
+    "BEHAVIOR_DRIFT",
+    "Stable identities",
+  );
+  const finalSurface = currentDocument.surfaces["sign-in"];
+  const repeat = finalSurface.root.slots.default[0].repeat;
+  if (
+    repeat.as !== "row" ||
+    repeat.limit !== 10 ||
+    repeat.extensions["com.example.repeat"].retained !== true ||
+    Reflect.ownKeys(finalSurface.resources.data.input).length !== 0 ||
+    finalSurface.root.slots.default[1].props.value.$ref !== "state.email"
+  ) {
+    fail("BEHAVIOR_DRIFT", "State/binding edits widened their exact lifecycle boundary.");
+  }
 
   const deterministicCommand = {
     surfaceId: "sign-in",
-    ownerId: "sign-in.title",
-    name: "deterministic",
-    value: { $ref: "state.future", fallback: false },
+    nodeId: "sign-in.title",
+    key: { $ref: "item.row.key", fallback: "missing" },
   };
   const deterministicFirst = expectSuccess(
-    runtime.setDesenEditorOwnerProp(baseline, deterministicCommand),
-    "deterministic content edit",
+    runtime.setDesenEditorNodeRepeatKey(baseline, deterministicCommand),
+    "deterministic state/binding edit",
   );
   const deterministicSecond = expectSuccess(
-    runtime.setDesenEditorOwnerProp(baseline, clone(deterministicCommand)),
-    "repeated deterministic content edit",
+    runtime.setDesenEditorNodeRepeatKey(baseline, clone(deterministicCommand)),
+    "repeated deterministic state/binding edit",
   );
   if (
     !Buffer.from(canonicalizeJsonBytes(deterministicFirst.document)).equals(
@@ -1609,47 +1526,61 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
   }
 
   expectFailure(
-    runtime.deleteDesenEditorOwnerProp(baseline, {
+    runtime.insertDesenEditorStateDeclaration(baseline, {
       surfaceId: "sign-in",
-      ownerId: "sign-in.title",
-      name: "missing",
+      name: "email",
+      declaration: { schema: { type: "string" }, initial: "" },
     }),
-    "run.desen.editor/CONTENT_EDIT_PATH_NOT_FOUND",
-    "missing content path",
+    "run.desen.editor/STATE_BINDING_EDIT_TARGET_EXISTS",
+    "existing state declaration",
   );
   expectFailure(
-    runtime.setDesenEditorOwnerProp(baseline, {
+    runtime.deleteDesenEditorResourceInput(baseline, {
       surfaceId: "sign-in",
-      ownerId: "missing.owner",
-      name: "text",
-      value: "changed",
+      resourceId: "data",
+      name: "missing",
     }),
-    "run.desen.editor/CONTENT_EDIT_TARGET_NOT_FOUND",
-    "missing owner",
+    "run.desen.editor/STATE_BINDING_EDIT_PATH_NOT_FOUND",
+    "missing resource-input path",
   );
-  const ambiguousInput = clone(validSource);
+  expectFailure(
+    runtime.setDesenEditorResourceInput(baseline, {
+      surfaceId: "sign-in",
+      resourceId: "missing",
+      name: "value",
+      value: true,
+    }),
+    "run.desen.editor/STATE_BINDING_EDIT_TARGET_NOT_FOUND",
+    "missing resource target",
+  );
+
+  const ambiguousInput = behaviorFixture(validSource);
   ambiguousInput.surfaces["sign-in"].root.behaviors = [
     { id: "sign-in.title", use: "com.example.interactions/Duplicate" },
   ];
   expectFailure(
-    runtime.setDesenEditorOwnerProp(createDocument(runtime, validSource, ambiguousInput), {
+    runtime.setDesenEditorNodeRepeatItems(createDocument(runtime, validSource, ambiguousInput), {
       surfaceId: "sign-in",
-      ownerId: "sign-in.title",
-      name: "text",
-      value: "changed",
+      nodeId: "sign-in.title",
+      items: [],
     }),
-    "run.desen.editor/CONTENT_EDIT_TARGET_AMBIGUOUS",
-    "ambiguous target",
+    "run.desen.editor/STATE_BINDING_EDIT_TARGET_AMBIGUOUS",
+    "ambiguous repeat target",
+  );
+  expectFailure(
+    runtime.setDesenEditorNodeRepeatItems(baseline, {
+      surfaceId: "sign-in",
+      nodeId: "sign-in.title",
+      items: { $ref: "unknown.value" },
+    }),
+    "SCHEMA_INVALID",
+    "structural diagnostic pass-through",
   );
 
   let getterInvoked = false;
-  let toJSONInvoked = false;
-  const accessorCommand = {
-    surfaceId: "sign-in",
-    ownerId: "sign-in.title",
-    name: "text",
-  };
-  Object.defineProperty(accessorCommand, "value", {
+  let toJsonInvoked = false;
+  const accessorCommand = { surfaceId: "sign-in", name: "email" };
+  Object.defineProperty(accessorCommand, "initial", {
     enumerable: true,
     get() {
       getterInvoked = true;
@@ -1657,40 +1588,39 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     },
   });
   expectFailure(
-    runtime.setDesenEditorOwnerProp(baseline, accessorCommand),
-    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    runtime.setDesenEditorStateInitial(baseline, accessorCommand),
+    "run.desen.editor/STATE_BINDING_EDIT_COMMAND_INVALID",
     "accessor command",
   );
-  if (getterInvoked) fail("BEHAVIOR_DRIFT", "Command validation invoked an accessor.");
-
   expectFailure(
-    runtime.setDesenEditorOwnerProp(baseline, {
+    runtime.setDesenEditorStateInitial(baseline, {
       surfaceId: "sign-in",
-      ownerId: "sign-in.title",
-      name: "text",
-      value: {
+      name: "email",
+      initial: {
         inert: true,
         toJSON() {
-          toJSONInvoked = true;
+          toJsonInvoked = true;
           return { serialized: "authority" };
         },
       },
     }),
-    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    "run.desen.editor/STATE_BINDING_EDIT_COMMAND_INVALID",
     "toJSON command value",
   );
-  if (toJSONInvoked) fail("BEHAVIOR_DRIFT", "Command validation invoked a toJSON hook.");
+  if (getterInvoked || toJsonInvoked) {
+    fail("BEHAVIOR_DRIFT", "Command capture invoked an accessor or toJSON hook.");
+  }
 
   const forwardingTraps = [];
   const forwardingTarget = {
     surfaceId: "sign-in",
-    ownerId: "sign-in.title",
-    name: "text",
-    value: "forwarded",
+    resourceId: "data",
+    name: "forwarded",
+    value: { $ref: "state.email" },
   };
   const forwardingProxy = new Proxy(forwardingTarget, {
     getOwnPropertyDescriptor(target, key) {
-      forwardingTraps.push(`getOwnPropertyDescriptor:${String(key)}`);
+      forwardingTraps.push("getOwnPropertyDescriptor:" + String(key));
       return Reflect.getOwnPropertyDescriptor(target, key);
     },
     getPrototypeOf(target) {
@@ -1703,17 +1633,19 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     },
   });
   const forwarded = expectSuccess(
-    runtime.setDesenEditorOwnerProp(baseline, forwardingProxy),
+    runtime.setDesenEditorResourceInput(baseline, forwardingProxy),
     "forwarding Proxy command",
   );
-  if (forwarded.document.surfaces["sign-in"].root.slots.default[0].props.text !== "forwarded") {
-    fail("BEHAVIOR_DRIFT", "A forwarding Proxy no longer exposes the required own-data shape.");
+  if (
+    forwarded.document.surfaces["sign-in"].resources.data.input.forwarded.$ref !== "state.email"
+  ) {
+    fail("BEHAVIOR_DRIFT", "A forwarding Proxy no longer exposes admissible own data.");
   }
   const expectedForwardingTraps = [
     "getPrototypeOf",
     "ownKeys",
     "getOwnPropertyDescriptor:name",
-    "getOwnPropertyDescriptor:ownerId",
+    "getOwnPropertyDescriptor:resourceId",
     "getOwnPropertyDescriptor:surfaceId",
     "getOwnPropertyDescriptor:value",
   ];
@@ -1732,8 +1664,8 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     },
   });
   expectFailure(
-    runtime.setDesenEditorOwnerProp(baseline, throwingProxy),
-    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    runtime.setDesenEditorResourceInput(baseline, throwingProxy),
+    "run.desen.editor/STATE_BINDING_EDIT_COMMAND_INVALID",
     "throwing Proxy command",
   );
   const expectedThrowingTraps = ["getPrototypeOf"];
@@ -1743,65 +1675,40 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     "BEHAVIOR_DRIFT",
     "Throwing Proxy reflection traps",
   );
-  if (!Buffer.from(canonicalizeJsonBytes(baseline)).equals(Buffer.from(baselineBytes))) {
-    fail("BEHAVIOR_DRIFT", "A throwing Proxy failure mutated the current Source.");
-  }
-
-  expectFailure(
-    runtime.insertDesenEditorVariant(baseline, {
-      surfaceId: "sign-in",
-      nodeId: "sign-in.title",
-      index: 4,
-      variant: { when: truePredicate },
-    }),
-    "run.desen.editor/CONTENT_EDIT_POSITION_INVALID",
-    "invalid variant position",
-  );
-  expectFailure(
-    runtime.setDesenEditorNodeCondition(baseline, {
-      surfaceId: "sign-in",
-      nodeId: "sign-in.title",
-      when: { op: "not", args: [true, false] },
-    }),
-    "SCHEMA_INVALID",
-    "structural diagnostic pass-through",
-  );
 
   const exactDepth = sourceWithTreeDepth(validSource, 64);
   expectSuccess(
-    runtime.setDesenEditorOwnerProp(createDocument(runtime, validSource, exactDepth.input), {
+    runtime.setDesenEditorStateInitial(createDocument(runtime, validSource, exactDepth.input), {
       surfaceId: "sign-in",
-      ownerId: exactDepth.ownerId,
-      name: "value",
-      value: true,
+      name: "email",
+      initial: "",
     }),
     "exact depth ceiling",
   );
   const crossingDepth = sourceWithTreeDepth(validSource, 65);
   expectFailure(
-    runtime.setDesenEditorOwnerProp(createDocument(runtime, validSource, crossingDepth.input), {
+    runtime.setDesenEditorStateInitial(createDocument(runtime, validSource, crossingDepth.input), {
       surfaceId: "sign-in",
-      ownerId: crossingDepth.ownerId,
-      name: "value",
-      value: true,
+      name: "email",
+      initial: "",
     }),
-    "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
+    "run.desen.editor/STATE_BINDING_EDIT_LIMIT_EXCEEDED",
     "depth crossing",
   );
 
   expectSuccess(
-    runtime.setDesenEditorOwnerProp(
+    runtime.setDesenEditorStateInitial(
       createDocument(runtime, validSource, sourceWithIdentityCount(validSource, 25_000)),
-      { surfaceId: "sign-in", ownerId: "sign-in.layout", name: "value", value: true },
+      { surfaceId: "sign-in", name: "email", initial: "" },
     ),
     "exact identity ceiling",
   );
   expectFailure(
-    runtime.setDesenEditorOwnerProp(
+    runtime.setDesenEditorStateInitial(
       createDocument(runtime, validSource, sourceWithIdentityCount(validSource, 25_001)),
-      { surfaceId: "sign-in", ownerId: "sign-in.layout", name: "value", value: true },
+      { surfaceId: "sign-in", name: "email", initial: "" },
     ),
-    "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
+    "run.desen.editor/STATE_BINDING_EDIT_LIMIT_EXCEEDED",
     "identity crossing",
   );
 
@@ -1814,49 +1721,44 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     fail("BEHAVIOR_DRIFT", "The exact canonical byte fixture is not 8 MiB.");
   }
   expectSuccess(
-    runtime.setDesenEditorOwnerProp(exactByteDocument, {
+    runtime.setDesenEditorStateInitial(exactByteDocument, {
       surfaceId: "sign-in",
-      ownerId: "sign-in.title",
-      name: "x",
-      value: false,
+      name: "email",
+      initial: "",
     }),
     "exact canonical-byte ceiling",
   );
   expectFailure(
-    runtime.setDesenEditorOwnerProp(
+    runtime.setDesenEditorStateInitial(
       createDocument(runtime, validSource, sizedSource(validSource, canonicalizeJsonBytes, 1)),
-      {
-        surfaceId: "sign-in",
-        ownerId: "sign-in.title",
-        name: "x",
-        value: false,
-      },
+      { surfaceId: "sign-in", name: "email", initial: "" },
     ),
-    "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
+    "run.desen.editor/STATE_BINDING_EDIT_LIMIT_EXCEEDED",
     "canonical-byte crossing",
   );
 
   if (
-    !Buffer.from(canonicalizeJsonBytes(baseline)).equals(Buffer.from(baselineBytes)) ||
+    !Buffer.from(canonicalizeJsonBytes(baseline)).equals(baselineBytes) ||
     Object.prototype.constructor !== Object
   ) {
-    fail("BEHAVIOR_DRIFT", "A failed content edit mutated the current Source.");
+    fail("BEHAVIOR_DRIFT", "A state/binding failure mutated the current Source.");
   }
 
   return deepFreeze({
     commands: {
-      functions: [...CONTENT_RUNTIME_EXPORTS],
-      executed: CONTENT_RUNTIME_EXPORTS.length,
-      nodeAndBehaviorOwners: true,
-      basePropsAndStyleLeaves: true,
-      nodeConditions: true,
+      functions: [...STATE_BINDING_RUNTIME_EXPORTS],
+      executed: STATE_BINDING_RUNTIME_EXPORTS.length,
+      stateDeclarationLifecycle: true,
+      repeatItemsAndKey: true,
+      resourceInputSetAndDelete: true,
     },
-    variants: {
-      insertDeleteConditionPropAndStyle: true,
-      indexSemantics: "POST_REMOVAL_FINAL_POSITION",
-      finalOrder: variantOrder.map((value) => value ?? null),
-      emptyContainersRetained: true,
-      unresolvedCatalogSemanticsPreserved: true,
+    stateAndBindings: {
+      dottedDeclarationsRemainData: true,
+      initialMarkerShapesRemainInert: true,
+      noReferenceOrActionCascade: true,
+      repeatAliasLimitAndExtensionsPreserved: true,
+      emptyRequiredMapsRetained: true,
+      unresolvedSemanticsPreservedForM08T09: true,
     },
     identityAndData: {
       stableIdsUnchanged: true,
@@ -1875,7 +1777,7 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     diagnostics: {
       editorCodes: [...EXPECTED_DIAGNOSTIC_CODES],
       structuralPassThrough: "SCHEMA_INVALID",
-      missingAmbiguousPathAndPositionFailClosed: true,
+      missingExistingAmbiguousAndPathFailClosed: true,
       commandShapeBoundary: "OWN_ENUMERABLE_DATA_DESCRIPTORS",
       accessorAndToJsonHooksRejectedWithoutInvocation: true,
       proxyReflectionMayInvokeTraps: true,
@@ -1896,82 +1798,26 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
   });
 }
 
-async function authenticateFrozenArtifact() {
-  const bytes = await readNoFollow(ARTIFACT_PATH, "frozen M08-T04 proof artifact");
-  if (
-    bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
-    sha256(bytes) !== FROZEN_ARTIFACT_PIN.sha256
-  ) {
-    fail("ARTIFACT_DRIFT", "The frozen M08-T04 artifact bytes differ from their exact receipt.");
-  }
-  const artifact = parseJson(bytes, "frozen M08-T04 proof artifact");
-  const receipts = artifact.trackedBoundary?.receipts;
-  if (
-    artifact.schemaVersion !== 1 ||
-    artifact.proofId !== "editor-core-content-edits" ||
-    artifact.profile !== "desen.editor-core.content-edits-proof.v1" ||
-    artifact.task !== "M08-T04" ||
-    artifact.result !== "PASS" ||
-    artifact.claim?.taskStatus !== "DONE" ||
-    artifact.claim?.immutableContentEditCommands !== true ||
-    artifact.trackedBoundary?.files !== 67 ||
-    !Array.isArray(receipts) ||
-    receipts.length !== 67 ||
-    new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length ||
-    artifact.executionAuthority?.mode !== "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH" ||
-    artifact.executionAuthority?.runtimeFiles !== 27 ||
-    artifact.executionAuthority?.editorFiles !== 6 ||
-    artifact.executionAuthority?.dependencyFiles !== 21 ||
-    artifact.testAuthority?.focusedBehaviorCases !== 16 ||
-    artifact.testAuthority?.focusedCompilerNegativeAssertions !== 6 ||
-    artifact.testAuthority?.publicRuntimeAndRootCases !== 32 ||
-    artifact.testAuthority?.publicCompilerNegativeAssertions !== 36 ||
-    artifact.testAuthority?.rootProofCases !== EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES.length
-  ) {
-    fail("ARTIFACT_DRIFT", "The frozen M08-T04 artifact identity or retained claim drifted.");
-  }
-  return Object.freeze({
-    artifact: deepFreeze(artifact),
-    artifactBytes: Buffer.from(bytes),
-    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
-  });
+async function artifactBytes(artifact) {
+  return Buffer.from(await format(`${JSON.stringify(artifact)}\n`, { parser: "json" }), "utf8");
 }
 
-function assertRetainedT04Receipts(frozenArtifact, files) {
-  const receipts = new Map(
-    frozenArtifact.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
-  );
-  for (const relativePath of RETAINED_T04_RECEIPT_PATHS) {
-    const authority = receipts.get(relativePath);
-    const bytes = files.get(relativePath);
-    if (
-      authority === undefined ||
-      bytes === undefined ||
-      authority.bytes !== bytes.byteLength ||
-      authority.sha256 !== sha256(bytes)
-    ) {
-      fail("BOUNDARY_DRIFT", `A retained M08-T04 receipt drifted: ${relativePath}`);
-    }
-  }
-}
-
-export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined) {
+export async function buildEditorCoreStateBindingEditsEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
-  const frozen = await authenticateFrozenArtifact();
   const authenticatedPrerequisites = await authenticatePrerequisites(options);
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
   const boundary = verifyBoundary(files);
-  assertRetainedT03Receipts(authenticatedPrerequisites.t03Artifact, files);
-  assertRetainedT04Receipts(frozen.artifact, files);
+  assertRetainedT04Receipts(authenticatedPrerequisites.t04Artifact, files);
   const executionAuthority = authenticateRuntimeClosure(
-    authenticatedPrerequisites.t03Artifact,
+    authenticatedPrerequisites.t04Artifact,
     authenticatedPrerequisites.evidence,
+    authenticatedPrerequisites.currentGraphCompatibility,
     files,
   );
   const isolatedRuntime = await importReceiptedRuntime(files);
@@ -1981,47 +1827,40 @@ export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined
     validSource,
     isolatedRuntime.canonicalizeJsonBytes,
   );
-  if (JSON.stringify(behavior) !== JSON.stringify(frozen.artifact.behavior)) {
-    fail("BEHAVIOR_DRIFT", "The retained M08-T04 runtime behavior left its frozen claim.");
-  }
   if (options.fileOverrides.size !== 0) {
-    fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue content-edit evidence.");
+    fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue state-binding-edit evidence.");
   }
   if (options.beforeAuthorityRecheck !== undefined) {
     fail(
       "AUTHORITY_HOOK_REJECTED",
-      "A caller-supplied authority-read hook cannot issue content-edit evidence.",
+      "A caller-supplied authority-read hook cannot issue state-binding-edit evidence.",
     );
   }
-  const currentReceipts = [...files.entries()]
+  const receipts = [...files.entries()]
     .map(([relativePath, bytes]) => receipt(relativePath, bytes))
     .sort((left, right) => compareText(left.path, right.path));
-  const currentCompatibility = deepFreeze({
+  const artifact = deepFreeze({
     schemaVersion: 1,
-    proofId: "editor-core-content-edits",
-    profile: "desen.editor-core.content-edits-proof.v1",
-    task: "M08-T04",
+    proofId: "editor-core-state-binding-edits",
+    profile: "desen.editor-core.state-binding-edits-proof.v1",
+    task: "M08-T05",
     result: "PASS",
     prerequisites: authenticatedPrerequisites.evidence,
+    currentGraphCompatibility: authenticatedPrerequisites.currentGraphCompatibility,
     claim: {
       protocol: "0.1.0",
       platform: "platform-neutral",
-      immutableContentEditCommands: true,
+      immutableStateBindingEditCommands: true,
       stableIdentityPreserved: true,
       taskStatus: "DONE",
-      prerequisiteTasks: ["M08-T02", "M08-T03"],
-      prerequisiteStatuses: ["DONE", "DONE"],
+      prerequisiteTasks: ["M08-T02"],
+      prerequisiteStatuses: ["DONE"],
     },
     publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
-      currentPackageRuntimeExports: boundary.currentPackageRuntimeExports,
-      currentPackageTypeExports: boundary.currentPackageTypeExports,
-      additiveRuntimeExports: boundary.additiveRuntimeExports,
-      additiveTypeExports: boundary.additiveTypeExports,
-      additiveSuccessor: boundary.additiveSuccessor,
-      contentPublicDeclarations: boundary.contentPublicDeclarations,
-      contentTsdocDeclarations: boundary.contentTsdocDeclarations,
+      stateBindingPublicDeclarations: boundary.stateBindingPublicDeclarations,
+      stateBindingTsdocDeclarations: boundary.stateBindingTsdocDeclarations,
     },
     behavior,
     executionAuthority,
@@ -2040,19 +1879,13 @@ export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,
     },
-    trackedBoundary: { files: currentReceipts.length, receipts: currentReceipts },
-    frozenAuthority: {
-      path: ARTIFACT_PATH,
-      bytes: FROZEN_ARTIFACT_PIN.bytes,
-      sha256: FROZEN_ARTIFACT_PIN.sha256,
-      retainedTaskTimeReceipts: RETAINED_T04_RECEIPT_PATHS.length,
-    },
+    trackedBoundary: { files: receipts.length, receipts },
     nonclaims: [
-      "CATALOG_SLOT_ACCEPTANCE_AND_CARDINALITY",
+      "EVENT_AND_CLOSED_ACTION_EDITING_M08_T06",
+      "AUTHORING_ISOLATION_AND_UNKNOWN_EXTENSION_PROOF_M08_T07",
+      "PERSISTENCE_M08_T08",
+      "STATE_SCHEMA_INITIAL_REFERENCE_REPEAT_AND_CATALOG_SEMANTICS_M08_T09",
       "UNDO_REDO_SELECTION_AND_VIEWPORT_POLICY",
-      "M08_T05_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T04_CLAIM_AUTHORITY",
-      "M08_T06_THROUGH_T08_AUTHORING_AND_PERSISTENCE",
-      "M08-T09_CATALOG_SEMANTICS_AND_CONTINUOUS_DIAGNOSTICS",
       "M08-T10_AND_G08_TERMINAL_UI_BOUNDARY",
       "HOSTILE_JAVASCRIPT_SANDBOX",
       "NO_PROXY_TRAP_EXECUTION_MEMBRANE",
@@ -2062,19 +1895,19 @@ export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined
     ],
     reproduction: [
       "pnpm --filter @desen/editor-core build",
-      "pnpm --filter @desen/editor-core test:content-edits",
+      "pnpm --filter @desen/editor-core test:state-binding-edits",
       "pnpm --filter @desen/editor-core test:public-package",
-      "node scripts/generate-editor-core-content-edits-proof.mjs",
-      "node scripts/verify-editor-core-content-edits.mjs",
-      "node --test tests/editor-core-content-edits.test.mjs",
+      "node scripts/generate-editor-core-state-binding-edits-proof.mjs",
+      "node scripts/verify-editor-core-state-binding-edits.mjs",
+      "node --test tests/editor-core-state-binding-edits.test.mjs",
     ],
   });
+  const bytes = await artifactBytes(artifact);
   return deepFreeze({
-    artifact: frozen.artifact,
-    artifactBytes: frozen.artifactBytes,
-    artifactSha256: frozen.artifactSha256,
-    currentCompatibility,
-    task: "M08-T04",
+    artifact,
+    artifactBytes: bytes,
+    artifactSha256: sha256(bytes),
+    task: "M08-T05",
   });
 }
 
@@ -2224,22 +2057,22 @@ function proofDocumentHasContradictoryStatus(visibleLines) {
   return false;
 }
 
-export async function verifyEditorCoreContentEditsEvidence(rawOptions = undefined) {
+export async function verifyEditorCoreStateBindingEditsEvidence(rawOptions = undefined) {
   const options = captureVerifyOptions(rawOptions);
-  const built = await buildEditorCoreContentEditsEvidence(options.buildOptions);
+  const built = await buildEditorCoreStateBindingEditsEvidence(options.buildOptions);
   const committed =
     options.artifactBytes ??
-    (await readNoFollow(options.artifactPath ?? ARTIFACT_PATH, "M08-T04 proof artifact"));
+    (await readNoFollow(options.artifactPath ?? ARTIFACT_PATH, "M08-T05 proof artifact"));
   if (!committed.equals(built.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "The committed M08-T04 artifact is not the exact fresh build.");
+    fail("ARTIFACT_DRIFT", "The committed M08-T05 artifact is not the exact fresh build.");
   }
   const proofBytes =
     options.proofDocumentBytes ??
     (await readNoFollow(
       options.proofDocumentPath ?? PROOF_DOCUMENT_PATH,
-      "M08-T04 proof document",
+      "M08-T05 proof document",
     ));
-  const proof = decodeUtf8(proofBytes, "M08-T04 proof document");
+  const proof = decodeUtf8(proofBytes, "M08-T05 proof document");
   const exactPin = `Final artifact: \`sha256:${built.artifactSha256}\``;
   const { visible: visibleLines, htmlAuthority, rawHtml } = visibleProofDocumentLines(proof);
   const visiblePinLines = visibleLines.filter((line) => line.startsWith("Final artifact:"));
@@ -2258,10 +2091,12 @@ export async function verifyEditorCoreContentEditsEvidence(rawOptions = undefine
     artifactPath: ARTIFACT_PATH,
     artifactBytes: committed.byteLength,
     artifactSha256: built.artifactSha256,
-    prerequisiteSha256: EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS[1].sha256,
-    prerequisiteSha256s: EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS.map(
+    prerequisiteSha256: EDITOR_CORE_STATE_BINDING_EDITS_PREREQUISITE_PINS[0].sha256,
+    prerequisiteSha256s: EDITOR_CORE_STATE_BINDING_EDITS_PREREQUISITE_PINS.map(
       (prerequisite) => prerequisite.sha256,
     ),
+    currentGraphCompatibilitySha256:
+      EDITOR_CORE_STATE_BINDING_EDITS_CURRENT_GRAPH_COMPATIBILITY_PIN.sha256,
   });
 }
 
@@ -2281,7 +2116,7 @@ async function assertSafeDestination(destinationPath) {
       fail("FILESYSTEM_UNSAFE", "Existing artifact destination must be one regular file.");
     }
   } catch (error) {
-    if (error instanceof EditorCoreContentEditsProofError) throw error;
+    if (error instanceof EditorCoreStateBindingEditsProofError) throw error;
     if (error?.code !== "ENOENT") {
       fail("FILESYSTEM_UNSAFE", "Artifact destination cannot be inspected.", String(error));
     }
@@ -2304,20 +2139,20 @@ function captureWriteOptions(raw) {
   return Object.freeze(source);
 }
 
-export async function writeEditorCoreContentEditsEvidence(rawOptions = undefined) {
+export async function writeEditorCoreStateBindingEditsEvidence(rawOptions = undefined) {
   const options = captureWriteOptions(rawOptions);
-  const built = await buildEditorCoreContentEditsEvidence();
+  const built = await buildEditorCoreStateBindingEditsEvidence();
   const destinationPath = await assertSafeDestination(
-    options.destinationPath ?? DEFAULT_EDITOR_CORE_CONTENT_EDITS_ARTIFACT_PATH,
+    options.destinationPath ?? DEFAULT_EDITOR_CORE_STATE_BINDING_EDITS_ARTIFACT_PATH,
   );
   await writeAtomicProofArtifact({
     artifactPath: destinationPath,
     artifactBytes: built.artifactBytes,
     beforeAtomicRename: options.beforeAtomicRename,
   });
-  const committed = await readNoFollow(destinationPath, "committed M08-T04 proof artifact");
+  const committed = await readNoFollow(destinationPath, "committed M08-T05 proof artifact");
   if (!committed.equals(built.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "Atomic writer committed non-exact M08-T04 bytes.");
+    fail("ARTIFACT_DRIFT", "Atomic writer committed non-exact M08-T05 bytes.");
   }
   return deepFreeze({
     task: built.task,

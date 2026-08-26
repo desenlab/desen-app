@@ -423,6 +423,37 @@ kod-otoriteli güncel kanıttır; hosted M08-T04 başarısı iddia edilmez. `N-0
 89/145 (%61), M08 ilerlemesi 4/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T05 state declaration
 ve binding düzenleme komutlarıdır.
 
+M08-T05 de tamamlandı. Paket; state tanımı ekleme/silme, state schema ve başlangıç değeri değiştirme,
+var olan repeat'in items/key alanlarını değiştirme ve adlandırılmış resource input ekleme/silme için
+sekiz atomik, immutable komut sunar. State silme, referansları veya action'ları otomatik olarak
+yeniden yazmaz ve zorunlu boş state map'ini korur. Repeat düzenlemeleri alias, limit ve extension
+verilerini; resource-input silme ise zorunlu boş input map'ini korur. Noktalı state adları,
+prototype ile çakışan adlar, schema'lar, başlangıç değerleri ve binding'ler değerlendirilmeden veri
+olarak kalır. Başarı yeni, ayrık ve tamamen donmuş doğrudan Source verir; hata kısmi belge vermeden
+atomik olarak kapanır.
+
+Komut alanları kesin enumerable own-data descriptor olmalıdır. Accessor ve own-`toJSON` hook'ları
+çalıştırılmadan reddedilir. Gerekli reflection arbitrary `Proxy` trap'lerini çalıştırabilir; uygun
+bir forwarding `Proxy` kabul edilebilir ve hata atan trap kontrollü komut hatasına çevrilir. Bu,
+hostile-JavaScript veya no-code-execution membrane kanıtı değildir. 14/14 odak vaka ve 14
+derleyici-negatif doğrulama, 38/38 public-package vakası ve 48 public derleyici-negatif doğrulama,
+ayrıca 10/10 bağımsız kök kanıtı geçer. 30.014 baytlık artifact
+[`editor-core-0.1.0-state-binding-edits.json`](../proof/artifacts/editor-core-0.1.0-state-binding-edits.json)
+dosyasıdır ve
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8` ile sabittir; incelenen
+rapor [`EDITOR-CORE-STATE-BINDING-EDITS.md`](../proof/EDITOR-CORE-STATE-BINDING-EDITS.md) içindedir.
+Güncel yerel CI ardılı 161 iş yükü ve 76 kanıt çiftinden oluşur: 65 sıradan çift ve 11 bariyer.
+Sequence 33 checkpoint'i
+`64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871` başında 30 değişmez
+artifact ile 60 güncel okuyucuyu doğrular; sequence 32 ve önceki tüm baytlar korunur.
+
+Yapısal kabul geçersiz bir Draft 2020-12 state schema'sını şimdiden reddeder; initial/schema
+uyumluluğu, noktalı state erişilebilirliği, repeat semantiği, Catalog resource-input sözleşmeleri ve
+sürekli invalid-node tanıları M08-T09'da; terminal
+React/DOM sınırı ve G08 ise M08-T10/G08'de kalır. Hiçbir `P-*`, `N-*`, `S-*` veya kanıt-kapısı
+statüsü değişmez. Genel ilerleme 90/145 (%62), M08 ilerlemesi 5/10, kanıt kapıları 8/13'tür;
+sıradaki iş M08-T06 event ve kapalı action düzenleme komutlarıdır.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

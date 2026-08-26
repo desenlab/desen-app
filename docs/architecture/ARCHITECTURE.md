@@ -98,15 +98,28 @@ invalid positions, structural re-admission, and limit overflow likewise fail ato
 preserves every identity and unaffected semantic order and returns a fresh detached recursively
 frozen direct Source. `PF-081` records the profile choices that the frozen protocol does not define.
 
-Insertion, structural edits, and content edits remain structurally authoritative rather than
-Catalog-semantic: structurally valid unresolved capabilities, slots, props, style parts, visual
-states, tokens, and references may remain in the authoring graph for M08-T09 to diagnose. The
-common profile keeps canonical documents at 8 MiB, selected surfaces at 25,000 identity
-occurrences, component depth at 64 with root at zero, and capability IDs at 4,096 code units where
-a command carries one. `N-014` remains `TESTED` by exact ordered edits and stable unaffected order.
-`S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration. State, binding,
-event, and action edits remain owned by M08-T05 through M08-T06. Persistence, selection, viewport,
-authoring-state policy, continuous validation, and invalid-node mapping remain outside M08-T04.
+M08-T05 adds eight whole-value state and binding transitions over the same direct graph. State
+declarations have explicit insert/delete lifecycle, while schema and initial edits replace one
+complete existing member. Repeat commands replace only `items` or `key` on an existing repeat and
+preserve its alias, limit, extensions, and untouched value. Resource-input commands create,
+replace, or delete one complete ValueSpec and retain the required own input map when empty.
+Deletion never cascades into references or actions. Binding values and inert state data are stored
+whole without parsing, evaluation, normalization, or reference rewriting. Prototype-sensitive
+input names remain own data; dotted state names remain literal declaration keys rather than a new
+reference-resolution rule. Exact command shapes, detached frozen success, atomic diagnostic-only
+failure, stable identity, Proxy-reflection honesty, and the common finite profile remain unchanged.
+`PF-082` records the lifecycle and whole-value choices left open by DESEN 0.1.0.
+
+Insertion, structural edits, content edits, and state/binding edits remain structurally
+authoritative rather than Catalog-semantic: structurally valid unresolved capabilities, slots,
+props, style parts, visual states, tokens, references, repeats, and resource inputs may remain in
+the authoring graph for M08-T09 to diagnose. The common profile keeps canonical documents at 8
+MiB, selected surfaces at 25,000 identity occurrences, component depth at 64 with root at zero,
+and capability IDs at 4,096 code units where a command carries one. `N-014` remains `TESTED` by
+exact ordered edits and stable unaffected order. `S-002` remains `PLANNED` until M08-T10 closes
+terminal stable-identity integration. Event and closed-action edits remain M08-T06. Persistence,
+selection, viewport, authoring-state policy, continuous validation, and invalid-node mapping remain
+outside M08-T05.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
 source. The package depends only on `protocol` and `validator` and has zero platform imports or

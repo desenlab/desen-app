@@ -4,23 +4,32 @@ import {
   deleteDesenEditorNode,
   deleteDesenEditorOwnerProp,
   deleteDesenEditorOwnerStyleProperty,
+  deleteDesenEditorResourceInput,
+  deleteDesenEditorStateDeclaration,
   deleteDesenEditorVariant,
   deleteDesenEditorVariantProp,
   deleteDesenEditorVariantStyleProperty,
   insertDesenEditorNode,
+  insertDesenEditorStateDeclaration,
   insertDesenEditorVariant,
   moveDesenEditorNode,
   reorderDesenEditorNode,
   reorderDesenEditorVariant,
   setDesenEditorNodeCondition,
+  setDesenEditorNodeRepeatItems,
+  setDesenEditorNodeRepeatKey,
   setDesenEditorOwnerProp,
   setDesenEditorOwnerStyleProperty,
+  setDesenEditorResourceInput,
+  setDesenEditorStateInitial,
+  setDesenEditorStateSchema,
   setDesenEditorVariantCondition,
   setDesenEditorVariantProp,
   setDesenEditorVariantStyleProperty,
 } from "@desen/editor-core";
 
 import type {
+  DesenEditorBindingValue,
   DesenEditorContentEditDiagnostic,
   DesenEditorContentEditDiagnosticCode,
   DesenEditorContentEditFailure,
@@ -41,11 +50,25 @@ import type {
   DesenEditorNodeInsertResult,
   DesenEditorNodeInsertSuccess,
   DesenEditorNodeMoveCommand,
+  DesenEditorNodeRepeatItemsSetCommand,
+  DesenEditorNodeRepeatKeySetCommand,
   DesenEditorNodeReorderCommand,
   DesenEditorOwnerPropDeleteCommand,
   DesenEditorOwnerPropSetCommand,
   DesenEditorOwnerStylePropertyDeleteCommand,
   DesenEditorOwnerStylePropertySetCommand,
+  DesenEditorResourceInputDeleteCommand,
+  DesenEditorResourceInputSetCommand,
+  DesenEditorStateBindingEditDiagnostic,
+  DesenEditorStateBindingEditDiagnosticCode,
+  DesenEditorStateBindingEditFailure,
+  DesenEditorStateBindingEditResult,
+  DesenEditorStateBindingEditSuccess,
+  DesenEditorStateDeclaration,
+  DesenEditorStateDeclarationDeleteCommand,
+  DesenEditorStateDeclarationInsertCommand,
+  DesenEditorStateInitialSetCommand,
+  DesenEditorStateSchemaSetCommand,
   DesenEditorStructuralEditFailure,
   DesenEditorStructuralEditResult,
   DesenEditorStructuralEditSuccess,
@@ -407,3 +430,125 @@ const invalidContentDiagnosticCode: DesenEditorContentEditDiagnosticCode = "SCHE
 
 void contentDiagnostic;
 void invalidContentDiagnosticCode;
+
+const bindingValue: DesenEditorBindingValue = { $ref: "state.email" };
+const stateDeclaration: DesenEditorStateDeclaration = {
+  schema: { type: "string" },
+  initial: "",
+};
+const stateBindingDiagnosticCode: DesenEditorStateBindingEditDiagnosticCode =
+  "run.desen.editor/STATE_BINDING_EDIT_PATH_NOT_FOUND";
+const stateBindingDiagnostic: DesenEditorStateBindingEditDiagnostic = {
+  code: stateBindingDiagnosticCode,
+  message: "The selected state/binding path does not exist.",
+};
+
+const stateInsertCommand: DesenEditorStateDeclarationInsertCommand = {
+  surfaceId: "main",
+  name: "profile",
+  declaration: stateDeclaration,
+};
+const stateDeleteCommand: DesenEditorStateDeclarationDeleteCommand = {
+  surfaceId: "main",
+  name: "profile",
+};
+const stateSchemaCommand: DesenEditorStateSchemaSetCommand = {
+  surfaceId: "main",
+  name: "profile",
+  schema: { type: "object" },
+};
+const stateInitialCommand: DesenEditorStateInitialSetCommand = {
+  surfaceId: "main",
+  name: "profile",
+  initial: { $ref: "state.email", literal: true },
+};
+const repeatItemsCommand: DesenEditorNodeRepeatItemsSetCommand = {
+  surfaceId: "main",
+  nodeId: "main.item",
+  items: bindingValue,
+};
+const repeatKeyCommand: DesenEditorNodeRepeatKeySetCommand = {
+  surfaceId: "main",
+  nodeId: "main.item",
+  key: { $ref: "item.row.id" },
+};
+const resourceInputSetCommand: DesenEditorResourceInputSetCommand = {
+  surfaceId: "main",
+  resourceId: "profile",
+  name: "query",
+  value: bindingValue,
+};
+const resourceInputDeleteCommand: DesenEditorResourceInputDeleteCommand = {
+  surfaceId: "main",
+  resourceId: "profile",
+  name: "query",
+};
+
+const stateBindingEdits: readonly DesenEditorStateBindingEditResult[] = [
+  insertDesenEditorStateDeclaration(document, stateInsertCommand),
+  deleteDesenEditorStateDeclaration(document, stateDeleteCommand),
+  setDesenEditorStateSchema(document, stateSchemaCommand),
+  setDesenEditorStateInitial(document, stateInitialCommand),
+  setDesenEditorNodeRepeatItems(document, repeatItemsCommand),
+  setDesenEditorNodeRepeatKey(document, repeatKeyCommand),
+  setDesenEditorResourceInput(document, resourceInputSetCommand),
+  deleteDesenEditorResourceInput(document, resourceInputDeleteCommand),
+];
+
+for (const stateBindingEdit of stateBindingEdits) {
+  if (stateBindingEdit.ok) {
+    const success: DesenEditorStateBindingEditSuccess = stateBindingEdit;
+    const next: DesenEditorDocument = success.document;
+    const diagnostics: readonly [] = success.diagnostics;
+
+    // @ts-expect-error state/binding successes keep the next Source immutable
+    success.document.entry = "mutated";
+
+    // @ts-expect-error state/binding success diagnostics are empty
+    const impossibleDiagnostic = success.diagnostics[0];
+
+    void next;
+    void diagnostics;
+    void impossibleDiagnostic;
+  } else {
+    const failure: DesenEditorStateBindingEditFailure = stateBindingEdit;
+    const diagnosticCode: string = failure.diagnostics[0].code;
+
+    // @ts-expect-error state/binding failures expose no partial Source
+    const partialDocument = failure.document;
+
+    void diagnosticCode;
+    void partialDocument;
+  }
+}
+
+// @ts-expect-error state declaration-insert command fields remain readonly
+stateInsertCommand.declaration = stateDeclaration;
+
+// @ts-expect-error state declaration-delete command fields remain readonly
+stateDeleteCommand.name = "other";
+
+// @ts-expect-error state schema-set command fields remain readonly
+stateSchemaCommand.schema = { type: "number" };
+
+// @ts-expect-error state initial-set command fields remain readonly
+stateInitialCommand.initial = null;
+
+// @ts-expect-error repeat items-set command fields remain readonly
+repeatItemsCommand.items = { $ref: "state.other" };
+
+// @ts-expect-error repeat key-set command fields remain readonly
+repeatKeyCommand.key = { $ref: "item.row.other" };
+
+// @ts-expect-error resource input-set command fields remain readonly
+resourceInputSetCommand.value = "mutated";
+
+// @ts-expect-error resource input-delete command fields remain readonly
+resourceInputDeleteCommand.name = "other";
+
+// @ts-expect-error structural validator codes are not project-owned state/binding edit codes
+const invalidStateBindingDiagnosticCode: DesenEditorStateBindingEditDiagnosticCode =
+  "SCHEMA_INVALID";
+
+void stateBindingDiagnostic;
+void invalidStateBindingDiagnosticCode;

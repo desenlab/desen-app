@@ -818,18 +818,35 @@ the independent root proof passes 10/10. The 26,988-byte artifact is pinned at
 or proof-gate status changes. State declaration and binding editing is assigned to M08-T05; the
 remaining editor work stays assigned to M08-T06–M08-T10.
 
+M08-T05 completes immutable state declaration and binding editing. Eight atomic commands insert or
+delete state declarations, replace state schemas or initial values, replace existing node repeat
+items or keys, and set or delete named resource inputs. State and input deletion retain their
+required empty maps, state deletion performs no reference/action cascade, and repeat edits preserve
+the existing alias, limit, and extensions. Whole inert values and prototype-sensitive own names
+remain data; every success returns a fresh detached recursively immutable direct Source while every
+failure is atomic. Exact enumerable own-data command fields are required. Accessors and own
+`toJSON` hooks are rejected without invocation; arbitrary `Proxy` reflection traps may run, an
+admissible forwarding `Proxy` may pass, and a throwing trap is contained. The 14/14 focused cases,
+14 focused compiler negatives, 38/38 public-package cases, 48 public compiler negatives, and 10/10
+independent root proof pass. The 30,014-byte artifact is pinned at
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`. Structural admission
+already rejects an invalid Draft 2020-12 state schema; initial/schema compatibility,
+reference/repeat/resource semantics, continuous invalid-node
+diagnostics, and terminal integration remain M08-T09–M08-T10. No `P-*`, `N-*`, `S-*`, or
+proof-gate status changes; event and closed-action editing is assigned to M08-T06.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `89 / 145 tasks complete (61%)`
+- Overall implementation progress: `90 / 145 tasks complete (62%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `4 / 10 tasks complete (40%)`
+- M08 progress: `5 / 10 tasks complete (50%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -904,20 +921,22 @@ remaining editor work stays assigned to M08-T06–M08-T10.
   `M08-T01 — Direct DESEN Source editor document model`,
   `M08-T02 — Stable-ID allocator and insert command`,
   `M08-T03 — Delete, slot move, and ordered reorder commands`,
-  `M08-T04 — Prop, style-part, condition, and variant editing commands`
+  `M08-T04 — Prop, style-part, condition, and variant editing commands`,
+  `M08-T05 — State declaration and binding editing commands`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T05 — State declaration and binding editing commands`
-- Status: M08 is 4/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 89/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M08-T06 — Event and closed-action editing commands`
+- Status: M08 is 5/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 90/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
-  its tracked content-edit artifact, independent root proof, and CI registration; exact evidence
-  and nonclaims are recorded below.
+  its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
+  `DONE` with its tracked state/binding artifact, independent root proof, and CI registration;
+  exact evidence and nonclaims are recorded below.
 
 ## Completed preparation
 
@@ -1427,6 +1446,22 @@ artifacts and 58 readers while historical sequence 31 remains unchanged. No host
 is claimed. `N-014` remains `TESTED`; `S-002` remains `PLANNED`; no `P-*`, `N-*`, `S-*`, or
 proof-gate status changes. Implementation progress is 89/145 (61%), M08 is 4/10, proof gates remain
 8/13, and M08-T05 state declaration and binding editing is next.
+
+M08-T05 is now complete. Eight immutable commands cover state declaration insertion/deletion,
+state schema/initial replacement, existing repeat items/key replacement, and resource-input
+set/delete. They retain required empty maps, preserve unrelated order and every identity, capture
+whole inert values, and fail atomically under six state/binding diagnostic classes or unchanged
+structural diagnostics. Exact enumerable own-data command fields are required; accessors and own
+`toJSON` hooks are rejected without invocation. Arbitrary `Proxy` traps may run during reflection,
+an admissible forwarding `Proxy` may pass, and a throwing trap is contained; no hostile-JavaScript
+or no-code-execution membrane is claimed. The focused suite passes 14/14 with 14 compiler-negative
+assertions, the public-package suite passes 38/38 with 48 public compiler-negative assertions, and
+the independent root proof passes 10/10. The exact 30,014-byte artifact is
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`. The proof authenticates
+the exact frozen M08-T02 prerequisite and separately authenticates frozen M08-T04 current-graph
+compatibility without widening that prerequisite. No `P-*`, `N-*`, `S-*`, or proof-gate status
+changes. Implementation progress is 90/145 (62%), M08 is 5/10, proof gates remain 8/13, and M08-T06
+event and closed-action editing is next.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -2904,6 +2939,56 @@ M08-T04 evidence:
 - coverage decision: M08-T04 is `DONE`; `N-014` remains `TESTED`; `S-002` remains `PLANNED`; no
   `P-*`, `N-*`, `S-*`, or proof-gate status changes; overall progress is 89/145 (61%); M08 is 4/10;
   proof gates remain 8/13; M08-T05 owns state declaration and binding editing next
+
+M08-T05 evidence:
+
+- `docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md`
+- `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json`, 30,014 bytes at
+  `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`
+- command boundary: eight immutable commands insert/delete state declarations, replace state
+  schemas/initial values, replace existing node repeat items/keys, and set/delete named resource
+  inputs; every success returns a fresh detached recursively frozen direct Source
+- preservation boundary: state deletion performs no reference or action cascade and retains the
+  required empty state map; repeat edits preserve alias, limit, and extensions; resource-input
+  deletion retains the required empty input map; identities and unrelated semantic order remain
+  unchanged
+- authoring boundary: dotted state names, prototype-sensitive declaration/input names, marker-like
+  initial values, schemas, and binding values remain inert data rather than being evaluated,
+  rewritten, or normalized
+- authority hardening: all six state/binding diagnostic classes, unchanged structural diagnostics,
+  exact enumerable own-data command capture, detached nested values, missing/existing/ambiguous
+  targets, missing paths, malformed input, and fixed-profile overflow fail closed without a partial
+  Source; accessors and own `toJSON` hooks are rejected without invocation
+- JavaScript reflection boundary: arbitrary `Proxy` traps may execute, an admissible forwarding
+  `Proxy` may pass, and a throwing reflection trap is contained as a command failure; no
+  hostile-JavaScript or no-code-execution membrane is claimed
+- fixed profile: canonical input/output Source at most 8,388,608 bytes, at most 25,000
+  selected-surface identities, and component depth 64 with root at zero; exact ceilings and
+  one-unit crossings are covered without claiming streaming/preallocation memory-DoS resistance
+- execution authority: behavior runs from an isolated authenticated 28-file ESM graph; the proof
+  authenticates the exact frozen M08-T02 prerequisite and separately authenticates frozen M08-T04
+  current-graph compatibility without widening the official prerequisite, verifies 74 tracked-file
+  receipts, and retains Node, its ESM loader, and the process environment as trusted authorities
+- local proof: focused state/binding cases pass 14/14 with 14 compiler-negative assertions;
+  cumulative public-package cases pass 38/38 with 48 public compiler-negative assertions;
+  generator/verifier and the 10/10 independent root proof pass
+- CI authority: 161 workloads / 76 proof pairs, with 65 ordinary pairs and 11 barriers;
+  shared-state counts are 6/2/1/69/72/10/1, filesystem-policy counts are 143/2/15/1, and the
+  workspace package-test inventory remains 15 scripts; the scheduler-neutral inventory is
+  `sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`, and the required plan is
+  `sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`
+- checkpoint authority: append-only sequence 33 at
+  `64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871` authenticates 30 frozen
+  artifacts and 60 current readers; sequence 32 and every earlier byte remain unchanged, and the
+  dedicated checkpoint suite passes 56/56
+- evidence boundary: these are local code-owned/current results and make no hosted M08-T05 claim
+- scope nonclaims: no event/action editing, authoring-isolation proof, persistence,
+  initial/schema compatibility, dotted-state reachability, repeat semantics,
+  Catalog resource-input contracts, continuous invalid-node diagnostics, terminal React/DOM
+  boundary, P-18, or G08 claim
+- coverage decision: M08-T05 is `DONE`; no `P-*`, `N-*`, `S-*`, or proof-gate status changes;
+  overall progress is 90/145 (62%); M08 is 5/10; proof gates remain 8/13; M08-T06 owns event and
+  closed-action editing next
 
 ## Status vocabulary
 
