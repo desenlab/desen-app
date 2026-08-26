@@ -1024,7 +1024,7 @@ hosted M07-T10 claim.
 | ------- | ----------- | --------------- | -------------------------------------------------------------------- |
 | M08-T01 | DONE        | G07             | Direct DESEN Source editor document model                            |
 | M08-T02 | DONE        | M08-T01         | Stable-ID allocator and insert command                               |
-| M08-T03 | NOT_STARTED | M08-T02         | Delete, slot move, and ordered reorder commands                      |
+| M08-T03 | DONE        | M08-T02         | Delete, slot move, and ordered reorder commands                      |
 | M08-T04 | NOT_STARTED | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
 | M08-T05 | NOT_STARTED | M08-T02         | State declaration and binding editing commands                       |
 | M08-T06 | NOT_STARTED | M08-T05         | Event and closed-action editing commands                             |
@@ -1088,6 +1088,37 @@ stable-identity plus React/DOM boundary evidence remains M08-T10. This task does
 streaming or preallocation memory-DoS resistance, a hostile-JavaScript sandbox, P-18, or G08. No
 `P-*`, `N-*`, `S-*`, or proof-gate status changes. Overall implementation progress is 87/145
 (60%), M08 is 2/10, proof gates remain 8/13, and M08-T03 is next.
+
+M08-T03 is `DONE`. The emitted `deleteDesenEditorNode`, `moveDesenEditorNode`, and
+`reorderDesenEditorNode` commands remove one selected subtree, move it across owners or slots, or
+place it at a post-removal final index within the same slot. Delete preserves the emptied slot key
+and empty array; move creates an absent destination only at index zero. Node and behavior owners,
+prototype-overlapping slot names, structurally valid unresolved semantics, root/cycle/ambiguity/
+missing-target rejection, same-slot command separation, stable surviving identities, and exact
+array order are covered. Success returns a fresh detached recursively frozen direct Source;
+failure is atomic and returns only frozen diagnostics. The fixed 8 MiB, 25,000-identity, depth-64,
+and 4,096-code-unit limits remain fail-closed, and command inputs reject accessor, prototype,
+symbol, or extra-key authority.
+
+The focused structural-edit suite passes 16/16, the cumulative built public-package suite passes
+26/26, and the independent root proof passes 10/10. Exact evidence is pinned in
+`docs/proof/EDITOR-CORE-STRUCTURAL-EDITS.md` and the 22,402-byte artifact
+`docs/proof/artifacts/editor-core-0.1.0-structural-edits.json` at
+`sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. The proof directly
+authenticates the frozen M08-T02 artifact, verifies 60 tracked-file receipts, and executes behavior
+from an isolated authenticated 26-file ESM graph. CI registers the pair in the exact
+157-workload/74-proof-pair successor: 63 ordinary pairs and 11 exclusive barriers. The current
+append-only reader successor is sequence 31 at
+`181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`, authenticating 28 frozen
+artifacts and 56 readers; historical sequence 30 remains unchanged.
+
+This closes editor semantic-array ordering coverage, so `N-014` is `TESTED`. `S-002` remains
+`PLANNED`: M08-T03 proves surviving identity preservation for delete/move/reorder, while terminal
+stable-identity integration remains M08-T10. Prop, style-part, condition, and variant commands
+remain M08-T04; the later authoring/persistence/validation/integration work remains M08-T05–M08-T10.
+No P-18, G08, hostile-JavaScript sandbox, streaming, or preallocation memory-DoS claim is made.
+Overall implementation progress is 88/145 (61%), M08 is 3/10, proof gates remain 8/13, and M08-T04
+is next.
 
 ## M09 — Desen App Web MVP
 

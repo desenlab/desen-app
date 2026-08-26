@@ -47,15 +47,37 @@ an 8 MiB canonical editor document. `PF-079` records the editor-specific allocat
 atomicity, limit, and
 diagnostic choices that DESEN 0.1.0 leaves open.
 
+## Structural edits
+
+`deleteDesenEditorNode(document, command)` removes the addressed non-root node and its complete
+subtree while preserving the vacated slot as an own key with `[]`.
+`moveDesenEditorNode(document, command)` moves one intact subtree only to a different owner or
+slot; a missing destination slot may be created only at index zero.
+`reorderDesenEditorNode(document, command)` applies only within one owner and slot, and its `index`
+is the child's final position after removal from the original array.
+
+All three commands preserve every surviving ID and the exact order of unaffected children. Node
+and behavior instances may own destination slots, including own-data slot names such as
+`constructor`. Move rejects root targets, cycles, self-descendant destinations, missing or
+ambiguous identities, and same-slot use; reorder rejects cross-owner/slot use. Structurally valid
+unresolved semantics remain authorable. Success is a fresh detached recursively frozen direct
+Source; every command or structural failure is atomic and returns only frozen diagnostics.
+
+The structural commands reuse the 8 MiB canonical Source, 25,000 selected-surface identities, and
+root-at-zero depth-64 profile. They carry no capability-ID input, so the authenticated
+4,096-code-unit capability ceiling is retained without being widened. Command objects must be
+exact inert own data: inherited, accessor, symbol, and extra fields fail closed.
+
 ## Explicit non-responsibilities
 
 No React, DOM, canvas UI, production activation, or hidden document model.
 
 ## Status
 
-Private. M08-T01's direct Source document model and M08-T02 stable-ID allocation/insertion are
-complete. Delete, move, and ordered reorder commands are next under M08-T03; the remaining editor
-commands stay assigned to their tracked M08 tasks.
+Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, and
+M08-T03 delete/move/ordered-reorder commands are complete. Prop, style-part, condition, and variant
+commands are next under M08-T04; the remaining editor commands stay assigned to their tracked M08
+tasks. `N-014` is `TESTED`; `S-002` remains `PLANNED` through terminal M08-T10 integration.
 
 ## Protocol and target support
 
@@ -68,10 +90,10 @@ Run the direct model suite with
 `pnpm --filter @desen/editor-core test:source-document` and the insert suite with
 `pnpm --filter @desen/editor-core test:stable-id-insert`. The separate
 `pnpm --filter @desen/editor-core test:public-package` check builds the package, resolves the
-public root through its export map, runs fifteen emitted-JavaScript contract cases plus seven
-fail-closed in-memory proof-core cases for 22 Node tests, and compiles eleven `@ts-expect-error`
-assertions against the emitted declarations. The proof cores audit the exact source, distribution,
-manifest, TSDoc, test inventory, and platform boundary. After authenticating the exact completed
+public root through its export map, runs the exact current 26 runtime/root cases, and compiles the
+reviewed `@ts-expect-error` assertions against the emitted declarations. The proof cores audit the
+exact source, distribution, manifest, TSDoc, test inventory, and platform boundary. After
+authenticating the exact completed
 I07-04/G07 prerequisite,
 `node scripts/generate-editor-core-source-document-proof.mjs` writes the tracked artifact,
 `node scripts/verify-editor-core-source-document.mjs` verifies it, and
@@ -91,3 +113,14 @@ remain trusted authorities rather than a hostile-JavaScript sandbox. The artifac
 tracked-file receipts, including the 21-file protocol/validator dependency closure authenticated
 against the frozen M08-T01 artifact. The evidence document is
 `docs/proof/EDITOR-CORE-STABLE-ID-INSERT.md`.
+
+For M08-T03, run `pnpm --filter @desen/editor-core test:structural-edits`, then
+`node scripts/generate-editor-core-structural-edits-proof.mjs`,
+`node scripts/verify-editor-core-structural-edits.mjs`, and
+`node --test tests/editor-core-structural-edits.test.mjs`. The focused suite has sixteen behavior
+cases plus ten compiler-negative assertions; the independent root proof has ten cases. It verifies
+60 exact tracked-file receipts and runs behavior only from an isolated authenticated 26-file ESM
+graph. The 22,402-byte artifact is
+`docs/proof/artifacts/editor-core-0.1.0-structural-edits.json` at
+`sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`; its evidence document is
+`docs/proof/EDITOR-CORE-STRUCTURAL-EDITS.md`.

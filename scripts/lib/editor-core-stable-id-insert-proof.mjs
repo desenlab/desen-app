@@ -7,7 +7,6 @@ import path from "node:path";
 import { types as utilTypes } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
@@ -24,6 +23,7 @@ const FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json";
 const INSERT_SOURCE_PATH = "packages/editor-core/src/stable-id-insert.ts";
 const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
+const STRUCTURAL_EDITS_SOURCE_PATH = "packages/editor-core/src/structural-edits.ts";
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/stable-id-insert.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/stable-id-insert.types.ts";
@@ -35,11 +35,17 @@ const GENERATOR_PATH = "scripts/generate-editor-core-stable-id-insert-proof.mjs"
 const VERIFIER_PATH = "scripts/verify-editor-core-stable-id-insert.mjs";
 const ATOMIC_WRITER_PATH = "scripts/lib/atomic-proof-artifact.mjs";
 const DOCUMENT_LIMIT = 8_388_608;
-const EDITOR_RUNTIME_PATHS = Object.freeze([
-  PACKAGE_PATH,
-  "packages/editor-core/dist/index.js",
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 19_561,
+  sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
+});
+const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
   "packages/editor-core/dist/stable-id-insert.js",
+]);
+const STRUCTURAL_EDITS_DIST_PATHS = Object.freeze([
+  "packages/editor-core/dist/structural-edits.d.ts",
+  "packages/editor-core/dist/structural-edits.js",
 ]);
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -71,7 +77,7 @@ const DEPENDENCY_RUNTIME_PATHS = Object.freeze([
   ...VALIDATOR_RUNTIME_PATHS,
 ]);
 const ISOLATED_RUNTIME_PATHS = Object.freeze([
-  ...EDITOR_RUNTIME_PATHS,
+  ...RETAINED_EDITOR_RUNTIME_PATHS,
   ...DEPENDENCY_RUNTIME_PATHS,
 ]);
 
@@ -132,6 +138,31 @@ const EXPECTED_INSERT_EXPORTS = Object.freeze([
   "DesenEditorNodeInsertSuccess",
   "insertDesenEditorNode",
 ]);
+const EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS = Object.freeze([
+  "deleteDesenEditorNode",
+  "moveDesenEditorNode",
+  "reorderDesenEditorNode",
+]);
+const EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS = Object.freeze([
+  "DesenEditorNodeDeleteCommand",
+  "DesenEditorNodeMoveCommand",
+  "DesenEditorNodeReorderCommand",
+  "DesenEditorStructuralEditDiagnostic",
+  "DesenEditorStructuralEditDiagnosticCode",
+  "DesenEditorStructuralEditFailure",
+  "DesenEditorStructuralEditResult",
+  "DesenEditorStructuralEditSuccess",
+]);
+const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze([
+  "createDesenEditorDocument",
+  "deleteDesenEditorNode",
+  "insertDesenEditorNode",
+  "moveDesenEditorNode",
+  "reorderDesenEditorNode",
+]);
+const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
+  [...EXPECTED_TYPE_EXPORTS, ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS].sort(compareText),
+);
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/INSERT_COMMAND_INVALID",
   "run.desen.editor/INSERT_LIMIT_EXCEEDED",
@@ -156,6 +187,43 @@ const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
   "accepts source depth 64 and rejects an insertion that would create depth 65",
   "admits exactly 25,000 surface identities and rejects the next one",
   "admits an exact 8 MiB post-insert document and rejects a one-byte crossing",
+]);
+const RETAINED_T02_PUBLIC_TEST_NAMES = Object.freeze([
+  "the package manifest keeps one exact root export and the declared runtime dependencies",
+  "the emitted public module graph stays platform-neutral and execution-closed",
+  "the built public package resolves through its export map and exposes the reviewed runtime exports",
+  "the emitted factory returns the direct plain frozen Source without a hidden model",
+  "the emitted factory detaches caller input and creates independent snapshots",
+  "the emitted factory admits structurally valid unresolved capability use",
+  "the emitted factory rejects an invalid Source root without a partial document",
+  "the emitted factory rejects an invalid embedded schema at its exact pointer",
+  "the emitted factory rejects executable non-JSON data without a partial document",
+  "the emitted factory rejects getter and toJSON hooks without invoking caller code",
+  "the emitted insert command allocates a stable id and returns one new direct Source",
+  "the emitted insert command is deterministic and keeps identity allocation surface-local",
+  "the emitted insert command creates Object.prototype-named slots as own data",
+  "the emitted insert command rejects missing, ambiguous, and invalid positions atomically",
+  "the emitted insert command rejects active or authority-expanding command input",
+  "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
+  "[proof-core] rejects a wrapper-returning or mutable public runtime",
+  "[proof-core] rejects caller retention and partial failure authority",
+  "[proof-core] rejects admission that becomes semantically too strict",
+  "[proof-core] rejects source, TSDoc, import, distribution, and manifest drift",
+  "[proof-core] rejects focused-test inventory drift",
+  "[proof-core] rejects accessor, inherited, symbol, and Proxy options without hooks",
+]);
+const RETAINED_T02_PUBLIC_TYPE_CLAIMS = Object.freeze([
+  "emitted declarations keep the direct document recursively immutable",
+  "emitted declarations do not permit replacing nested Source maps",
+  "emitted declarations expose the Source root itself, not a wrapper",
+  "a successful admission has no structural diagnostic entries",
+  "a rejected admission exposes no partial editor document",
+  "emitted command successes keep the next Source immutable",
+  "emitted success diagnostics are empty",
+  "emitted failures expose no partial Source",
+  "emitted failures expose no allocated identity",
+  "emitted command fields remain readonly",
+  "callers cannot bypass emitted allocator ownership",
 ]);
 const DIST_PATHS = Object.freeze([
   "packages/editor-core/dist/index.d.ts",
@@ -195,7 +263,29 @@ const TRACKED_PATHS = Object.freeze([
   VERIFIER_PATH,
   ROOT_TEST_PATH,
 ]);
-const TRACKED_PATH_SET = new Set(TRACKED_PATHS);
+const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
+  ...TRACKED_PATHS,
+  STRUCTURAL_EDITS_SOURCE_PATH,
+  ...STRUCTURAL_EDITS_DIST_PATHS,
+]);
+const TRACKED_PATH_SET = new Set(CURRENT_COMPATIBILITY_PATHS);
+const RETAINED_T02_RECEIPT_PATHS = Object.freeze(
+  TRACKED_PATHS.filter(
+    (relativePath) =>
+      ![
+        PACKAGE_PATH,
+        INDEX_SOURCE_PATH,
+        "packages/editor-core/dist/index.d.ts",
+        "packages/editor-core/dist/index.d.ts.map",
+        "packages/editor-core/dist/index.js",
+        "packages/editor-core/dist/index.js.map",
+        PUBLIC_TEST_PATH,
+        PUBLIC_TYPES_PATH,
+        PROOF_LIBRARY_PATH,
+        ROOT_TEST_PATH,
+      ].includes(relativePath),
+  ),
+);
 const BUILD_OPTION_KEYS = Object.freeze([
   "fileOverrides",
   "prerequisiteBytes",
@@ -304,7 +394,7 @@ function captureExactObject(raw, allowedKeys, label) {
 
 function captureFileOverrides(raw) {
   if (raw === undefined) return new Map();
-  const source = captureExactObject(raw, TRACKED_PATHS, "fileOverrides");
+  const source = captureExactObject(raw, CURRENT_COMPATIBILITY_PATHS, "fileOverrides");
   const captured = new Map();
   for (const [relativePath, value] of Object.entries(source)) {
     if (!TRACKED_PATH_SET.has(relativePath)) {
@@ -467,6 +557,44 @@ function exportedNames(sourceText) {
   return { names: names.sort(compareText), tsdocDeclarations };
 }
 
+function reexportedNames(sourceText, fileName) {
+  const sourceFile = ts.createSourceFile(
+    fileName,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    fileName.endsWith(".js") ? ts.ScriptKind.JS : ts.ScriptKind.TS,
+  );
+  if (sourceFile.parseDiagnostics.length !== 0) {
+    fail("SOURCE_DRIFT", `${fileName} contains parse diagnostics.`);
+  }
+  const runtime = [];
+  const types = [];
+  const modules = [];
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isExportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.exportClause === undefined ||
+      !ts.isNamedExports(statement.exportClause)
+    ) {
+      fail("SOURCE_DRIFT", `${fileName} may contain only explicit named re-exports.`);
+    }
+    modules.push(statement.moduleSpecifier.text);
+    for (const element of statement.exportClause.elements) {
+      if (element.propertyName !== undefined) {
+        fail("SOURCE_DRIFT", `${fileName} must not alias public exports.`);
+      }
+      (statement.isTypeOnly || element.isTypeOnly ? types : runtime).push(element.name.text);
+    }
+  }
+  return Object.freeze({
+    runtime: Object.freeze(runtime.sort(compareText)),
+    types: Object.freeze(types.sort(compareText)),
+    modules: Object.freeze(modules.sort(compareText)),
+  });
+}
+
 function testNames(source) {
   return [...source.matchAll(/^\s*(?:it|test)\(\s*["']([^"']+)["']/gm)].map((match) => match[1]);
 }
@@ -487,7 +615,8 @@ function verifyBoundary(files) {
       JSON.stringify({ ".": { types: "./dist/index.d.ts", import: "./dist/index.js" } }) ||
     JSON.stringify(manifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
-    manifest.scripts?.["test:stable-id-insert"] !== "vitest run test/stable-id-insert.test.ts"
+    manifest.scripts?.["test:stable-id-insert"] !== "vitest run test/stable-id-insert.test.ts" ||
+    manifest.scripts?.["test:structural-edits"] !== "vitest run test/structural-edits.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -510,16 +639,53 @@ function verifyBoundary(files) {
     if (!insertSource.includes(`"${code}"`)) fail("DIAGNOSTIC_DRIFT", `Missing code: ${code}`);
   }
 
+  const structuralEditsSource = decodeUtf8(
+    files.get(STRUCTURAL_EDITS_SOURCE_PATH),
+    STRUCTURAL_EDITS_SOURCE_PATH,
+  );
+  const structuralSourceExports = exportedNames(structuralEditsSource);
+  exactArray(
+    structuralSourceExports.names,
+    [...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS, ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS].sort(
+      compareText,
+    ),
+    "SOURCE_DRIFT",
+    "Structural-edit exports",
+  );
+  if (
+    structuralSourceExports.tsdocDeclarations !==
+    EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS.length + EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Every public structural-edit declaration must retain TSDoc.");
+  }
+
   const indexSource = decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH);
-  for (const runtimeExport of EXPECTED_RUNTIME_EXPORTS) {
-    if (!indexSource.includes(`export { ${runtimeExport} }`)) {
-      fail("SOURCE_DRIFT", `Missing runtime export: ${runtimeExport}`);
-    }
-  }
-  for (const typeExport of EXPECTED_TYPE_EXPORTS) {
-    if (!indexSource.includes(typeExport))
-      fail("SOURCE_DRIFT", `Missing type export: ${typeExport}`);
-  }
+  const sourceIndexExports = reexportedNames(indexSource, INDEX_SOURCE_PATH);
+  exactArray(
+    sourceIndexExports.runtime,
+    EXPECTED_CURRENT_RUNTIME_EXPORTS,
+    "SOURCE_DRIFT",
+    "Current package runtime exports",
+  );
+  exactArray(
+    sourceIndexExports.types,
+    EXPECTED_CURRENT_TYPE_EXPORTS,
+    "SOURCE_DRIFT",
+    "Current package type exports",
+  );
+  exactArray(
+    sourceIndexExports.modules,
+    [
+      "./source-document.js",
+      "./source-document.js",
+      "./stable-id-insert.js",
+      "./stable-id-insert.js",
+      "./structural-edits.js",
+      "./structural-edits.js",
+    ],
+    "SOURCE_DRIFT",
+    "Current source index edges",
+  );
 
   const distIndex = decodeUtf8(
     files.get("packages/editor-core/dist/index.js"),
@@ -533,9 +699,43 @@ function verifyBoundary(files) {
     files.get("packages/editor-core/dist/stable-id-insert.js"),
     "packages/editor-core/dist/stable-id-insert.js",
   );
+  const distStructuralEdits = decodeUtf8(
+    files.get("packages/editor-core/dist/structural-edits.js"),
+    "packages/editor-core/dist/structural-edits.js",
+  );
+  const distStructuralEditsDeclaration = decodeUtf8(
+    files.get("packages/editor-core/dist/structural-edits.d.ts"),
+    "packages/editor-core/dist/structural-edits.d.ts",
+  );
+  const distIndexExports = reexportedNames(distIndex, "packages/editor-core/dist/index.js");
+  const distIndexDeclarationExports = reexportedNames(
+    decodeUtf8(
+      files.get("packages/editor-core/dist/index.d.ts"),
+      "packages/editor-core/dist/index.d.ts",
+    ),
+    "packages/editor-core/dist/index.d.ts",
+  );
+  exactArray(
+    distIndexExports.runtime,
+    EXPECTED_CURRENT_RUNTIME_EXPORTS,
+    "EMITTED_DRIFT",
+    "Current emitted runtime exports",
+  );
+  exactArray(
+    distIndexDeclarationExports.runtime,
+    EXPECTED_CURRENT_RUNTIME_EXPORTS,
+    "EMITTED_DRIFT",
+    "Current emitted declaration runtime exports",
+  );
+  exactArray(
+    distIndexDeclarationExports.types,
+    EXPECTED_CURRENT_TYPE_EXPORTS,
+    "EMITTED_DRIFT",
+    "Current emitted declaration type exports",
+  );
   exactArray(
     staticModuleSpecifiers(distIndex),
-    ["./source-document.js", "./stable-id-insert.js"],
+    ["./source-document.js", "./stable-id-insert.js", "./structural-edits.js"],
     "EMITTED_DRIFT",
     "Emitted index edges",
   );
@@ -551,7 +751,28 @@ function verifyBoundary(files) {
     "EMITTED_DRIFT",
     "Emitted insert edges",
   );
-  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}`;
+  exactArray(
+    staticModuleSpecifiers(distStructuralEdits),
+    ["@desen/protocol", "./source-document.js"],
+    "EMITTED_DRIFT",
+    "Emitted structural-edit edges",
+  );
+  const structuralDeclarationExports = exportedNames(distStructuralEditsDeclaration);
+  exactArray(
+    structuralDeclarationExports.names,
+    [...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS, ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS].sort(
+      compareText,
+    ),
+    "EMITTED_DRIFT",
+    "Emitted structural-edit declarations",
+  );
+  if (
+    structuralDeclarationExports.tsdocDeclarations !==
+    EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS.length + EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Emitted structural-edit declarations lost TSDoc.");
+  }
+  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}\n${distStructuralEdits}`;
   for (const forbidden of [
     /\bimport\s*\(/u,
     /\beval\s*\(/u,
@@ -580,21 +801,43 @@ function verifyBoundary(files) {
     "TEST_INVENTORY_DRIFT",
     "Root proof inventory",
   );
+  const publicTestNames = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
+  if (RETAINED_T02_PUBLIC_TEST_NAMES.some((name) => !publicTestNames.includes(name))) {
+    fail("TEST_INVENTORY_DRIFT", "The public package lost a retained M08-T02 runnable case.");
+  }
+  const publicTypes = decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH);
+  if (
+    RETAINED_T02_PUBLIC_TYPE_CLAIMS.some(
+      (claim) => !publicTypes.includes(`// @ts-expect-error ${claim}`),
+    )
+  ) {
+    fail("TEST_INVENTORY_DRIFT", "The public package lost a retained M08-T02 type claim.");
+  }
 
   return deepFreeze({
     runtimeExports: [...EXPECTED_RUNTIME_EXPORTS],
     typeExports: [...EXPECTED_TYPE_EXPORTS],
+    currentPackageRuntimeExports: [...EXPECTED_CURRENT_RUNTIME_EXPORTS],
+    currentPackageTypeExports: [...EXPECTED_CURRENT_TYPE_EXPORTS],
+    additiveRuntimeExports: [...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS],
+    additiveTypeExports: [...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS],
+    additiveSuccessor: {
+      task: "M08-T03",
+      sourcePath: STRUCTURAL_EDITS_SOURCE_PATH,
+      runtimePath: "packages/editor-core/dist/structural-edits.js",
+      declarationPath: "packages/editor-core/dist/structural-edits.d.ts",
+      runtimeExports: [...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS],
+      typeExports: [...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS],
+    },
     publicDeclarations: EXPECTED_INSERT_EXPORTS.length,
     tsdocDeclarations: exports.tsdocDeclarations,
-    staticEsmEdges: 5,
+    staticEsmEdges: 8,
     unknownStaticEsmEdges: 0,
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length,
     focusedCompilerNegativeAssertions: 8,
-    publicRuntimeCases: testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH)).length,
-    publicCompilerNegativeAssertions: countTypeAssertions(
-      decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
-    ),
+    publicRuntimeCases: publicTestNames.length,
+    publicCompilerNegativeAssertions: countTypeAssertions(publicTypes),
     rootProofCases: EDITOR_CORE_STABLE_ID_INSERT_ROOT_TEST_NAMES.length,
   });
 }
@@ -640,7 +883,7 @@ function authenticateRuntimeClosure(prerequisiteArtifact, files) {
     }
     return receipt(relativePath, bytes);
   }).sort((left, right) => compareText(left.path, right.path));
-  const editorReceipts = EDITOR_RUNTIME_PATHS.map((relativePath) =>
+  const editorReceipts = RETAINED_EDITOR_RUNTIME_PATHS.map((relativePath) =>
     receipt(relativePath, files.get(relativePath)),
   ).sort((left, right) => compareText(left.path, right.path));
 
@@ -687,8 +930,10 @@ async function importReceiptedRuntime(files) {
     copies.push({
       bytes: Buffer.from(
         [
-          'import * as editorCore from "@desen/editor-core";',
+          'import { createDesenEditorDocument } from "./node_modules/@desen/editor-core/dist/source-document.js";',
+          'import { insertDesenEditorNode } from "./node_modules/@desen/editor-core/dist/stable-id-insert.js";',
           'import { canonicalizeJsonBytes } from "@desen/protocol";',
+          "const editorCore = Object.freeze({ createDesenEditorDocument, insertDesenEditorNode });",
           "export { canonicalizeJsonBytes, editorCore };",
           "",
         ].join("\n"),
@@ -1113,8 +1358,67 @@ async function authenticatePrerequisite(options) {
   });
 }
 
-async function artifactBytes(artifact) {
-  return Buffer.from(await format(`${JSON.stringify(artifact)}\n`, { parser: "json" }), "utf8");
+async function authenticateFrozenArtifact() {
+  const bytes = await readNoFollow(ARTIFACT_PATH, "frozen M08-T02 proof artifact");
+  if (
+    bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(bytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T02 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(bytes, "frozen M08-T02 proof artifact");
+  const receipts = artifact.trackedBoundary?.receipts;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.proofId !== "editor-core-stable-id-insert" ||
+    artifact.profile !== "desen.editor-core.stable-id-insert-proof.v1" ||
+    artifact.task !== "M08-T02" ||
+    artifact.result !== "PASS" ||
+    JSON.stringify(artifact.publicApi?.runtimeExports) !==
+      JSON.stringify(EXPECTED_RUNTIME_EXPORTS) ||
+    JSON.stringify(artifact.publicApi?.typeExports) !== JSON.stringify(EXPECTED_TYPE_EXPORTS) ||
+    artifact.claim?.stableIdAllocator !== true ||
+    artifact.claim?.immutableInsertCommand !== true ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.executionAuthority?.mode !== "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH" ||
+    artifact.executionAuthority?.runtimeFiles !== 25 ||
+    artifact.executionAuthority?.editorFiles !== 4 ||
+    artifact.executionAuthority?.dependencyFiles !== 21 ||
+    artifact.trackedBoundary?.files !== 53 ||
+    !Array.isArray(receipts) ||
+    receipts.length !== 53 ||
+    new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length ||
+    artifact.testAuthority?.focusedBehaviorCases !== 16 ||
+    artifact.testAuthority?.focusedCompilerNegativeAssertions !== 8 ||
+    artifact.testAuthority?.publicRuntimeCases !== 22 ||
+    artifact.testAuthority?.publicCompilerNegativeAssertions !== 11 ||
+    artifact.testAuthority?.rootProofCases !== EDITOR_CORE_STABLE_ID_INSERT_ROOT_TEST_NAMES.length
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T02 artifact identity or retained claim drifted.");
+  }
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedT02Receipts(frozenArtifact, files) {
+  const receipts = new Map(
+    frozenArtifact.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_T02_RECEIPT_PATHS) {
+    const authority = receipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M08-T02 task-time receipt drifted: ${relativePath}.`);
+    }
+  }
 }
 
 export async function buildEditorCoreStableIdInsertEvidence(rawOptions = undefined) {
@@ -1122,12 +1426,14 @@ export async function buildEditorCoreStableIdInsertEvidence(rawOptions = undefin
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
+  const frozen = await authenticateFrozenArtifact();
   const authenticatedPrerequisite = await authenticatePrerequisite(options);
   const files = new Map();
-  for (const relativePath of TRACKED_PATHS) {
+  for (const relativePath of CURRENT_COMPATIBILITY_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
   const boundary = verifyBoundary(files);
+  assertRetainedT02Receipts(frozen.artifact, files);
   const executionAuthority = authenticateRuntimeClosure(authenticatedPrerequisite.artifact, files);
   const isolatedRuntime = await importReceiptedRuntime(files);
   const validSource = parseJson(files.get(FIXTURE_PATH), FIXTURE_PATH);
@@ -1136,25 +1442,20 @@ export async function buildEditorCoreStableIdInsertEvidence(rawOptions = undefin
     validSource,
     isolatedRuntime.canonicalizeJsonBytes,
   );
-  const receipts = [...files.entries()]
-    .map(([relativePath, bytes]) => receipt(relativePath, bytes))
-    .sort((left, right) => compareText(left.path, right.path));
-  const artifact = deepFreeze({
+  if (JSON.stringify(behavior) !== JSON.stringify(frozen.artifact.behavior)) {
+    fail("BEHAVIOR_DRIFT", "The retained M08-T02 runtime behavior left its frozen claim.");
+  }
+  if (options.fileOverrides.size !== 0) {
+    fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue current compatibility evidence.");
+  }
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "editor-core-stable-id-insert",
     profile: "desen.editor-core.stable-id-insert-proof.v1",
     task: "M08-T02",
     result: "PASS",
     prerequisite: authenticatedPrerequisite.evidence,
-    claim: {
-      protocol: "0.1.0",
-      platform: "platform-neutral",
-      stableIdAllocator: true,
-      immutableInsertCommand: true,
-      taskStatus: "DONE",
-      prerequisiteTask: "M08-T01",
-      prerequisiteStatus: "DONE",
-    },
+    claim: frozen.artifact.claim,
     publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
@@ -1164,13 +1465,16 @@ export async function buildEditorCoreStableIdInsertEvidence(rawOptions = undefin
     behavior,
     executionAuthority,
     packageBoundary: {
-      currentEmittedFiles: DIST_PATHS.length,
+      frozenTaskTimeEmittedFiles: DIST_PATHS.length,
+      retainedRuntimeModuleFiles: RETAINED_EDITOR_RUNTIME_PATHS.length,
+      additiveEmittedFiles: STRUCTURAL_EDITS_DIST_PATHS.length,
       staticEsmEdges: boundary.staticEsmEdges,
       unknownStaticEsmEdges: boundary.unknownStaticEsmEdges,
       platformNeutral: boundary.platformNeutral,
       manifestExportRoots: ["."],
       productionDependencies: ["@desen/protocol", "@desen/validator"],
     },
+    boundary,
     testAuthority: {
       focusedBehaviorCases: boundary.focusedBehaviorCases,
       focusedCompilerNegativeAssertions: boundary.focusedCompilerNegativeAssertions,
@@ -1178,35 +1482,18 @@ export async function buildEditorCoreStableIdInsertEvidence(rawOptions = undefin
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,
     },
-    trackedBoundary: {
-      files: receipts.length,
-      receipts,
+    frozenAuthority: {
+      path: ARTIFACT_PATH,
+      bytes: FROZEN_ARTIFACT_PIN.bytes,
+      sha256: FROZEN_ARTIFACT_PIN.sha256,
+      retainedTaskTimeReceipts: RETAINED_T02_RECEIPT_PATHS.length,
     },
-    nonclaims: [
-      "M08-T03_DELETE_MOVE_AND_ORDERED_REORDER",
-      "LATER_AUTHORING_SELECTION_VIEWPORT_POLICY",
-      "M08_T04_THROUGH_T08_AUTHORING_AND_PERSISTENCE",
-      "M08-T09_CATALOG_SEMANTICS_AND_CONTINUOUS_DIAGNOSTICS",
-      "M08-T10_AND_G08_TERMINAL_UI_BOUNDARY",
-      "HOSTILE_JAVASCRIPT_SANDBOX",
-      "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
-      "STREAMING_OR_PREALLOCATION_MEMORY_DOS_BOUND",
-      "P18_OR_G08_ADVANCEMENT",
-    ],
-    reproduction: [
-      "pnpm --filter @desen/editor-core build",
-      "pnpm --filter @desen/editor-core test:stable-id-insert",
-      "pnpm --filter @desen/editor-core test:public-package",
-      "node scripts/generate-editor-core-stable-id-insert-proof.mjs",
-      "node scripts/verify-editor-core-stable-id-insert.mjs",
-      "node --test tests/editor-core-stable-id-insert.test.mjs",
-    ],
   });
-  const bytes = await artifactBytes(artifact);
-  return deepFreeze({
-    artifact,
-    artifactBytes: bytes,
-    artifactSha256: sha256(bytes),
+  return Object.freeze({
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
     task: "M08-T02",
   });
 }

@@ -6,6 +6,11 @@
 
 export { createDesenEditorDocument } from "./source-document.js";
 export { insertDesenEditorNode } from "./stable-id-insert.js";
+export {
+  deleteDesenEditorNode,
+  moveDesenEditorNode,
+  reorderDesenEditorNode,
+} from "./structural-edits.js";
 
 export type {
   DesenEditorDocument,
@@ -22,3 +27,14 @@ export type {
   DesenEditorNodeInsertResult,
   DesenEditorNodeInsertSuccess,
 } from "./stable-id-insert.js";
+
+export type {
+  DesenEditorNodeDeleteCommand,
+  DesenEditorNodeMoveCommand,
+  DesenEditorNodeReorderCommand,
+  DesenEditorStructuralEditDiagnostic,
+  DesenEditorStructuralEditDiagnosticCode,
+  DesenEditorStructuralEditFailure,
+  DesenEditorStructuralEditResult,
+  DesenEditorStructuralEditSuccess,
+} from "./structural-edits.js";

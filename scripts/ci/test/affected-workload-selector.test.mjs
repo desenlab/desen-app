@@ -252,7 +252,7 @@ test("policy, package, documentation, and shared inputs always expand to exhaust
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, "POLICY_DRIFT");
     assert.equal(plan.strictSubset, false);
-    assert.equal(plan.workloadCount, 155);
+    assert.equal(plan.workloadCount, 157);
   }
 });
 
@@ -285,7 +285,7 @@ test("all boundary uncertainty classes expand to exhaustive without partial path
     assert.equal(plan.effectiveScope, "EXHAUSTIVE");
     assert.equal(plan.decisionCategory, category);
     assert.deepEqual(plan.changedPaths, []);
-    assert.equal(plan.workloadCount, 155);
+    assert.equal(plan.workloadCount, 157);
   }
 });
 

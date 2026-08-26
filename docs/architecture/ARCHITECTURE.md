@@ -70,11 +70,25 @@ broader mutation payload. `PF-078` records why producer ownership does not grant
 mutation authority; `PF-079` records the deterministic editor profile for allocation, targeting,
 atomic failure, and finite limits that DESEN 0.1.0 does not otherwise prescribe.
 
-This insertion is structural rather than Catalog-semantic: a structurally valid unresolved
-capability or undeclared slot may remain in the authoring graph for M08-T09 to diagnose. Delete,
-move, reorder, prop, style, condition, variant, state, binding, event, and action edits remain owned
-by M08-T03 through M08-T06. Persistence, selection, viewport, and authoring-state policy also remain
-outside M08-T02.
+M08-T03 extends that same direct immutable graph with three separated structural transitions.
+Delete removes exactly one addressed non-root subtree while preserving the vacated own slot key
+and `[]`. Move retains the subtree intact and may cross node/behavior owners or named slots; an
+absent destination is created only at index zero. Reorder applies only within one owner/slot and
+uses the post-removal final index. This separation makes same-slot move and cross-slot reorder
+explicit errors. Root mutation, cycles, self-descendant targets, missing or ambiguous identity,
+prototype-chain slot authority, accessor/symbol/extra command fields, and limit overflow all fail
+atomically. Every success preserves surviving IDs and returns a fresh detached recursively frozen
+direct Source.
+
+Insertion, delete, move, and reorder are structural rather than Catalog-semantic: a structurally
+valid unresolved capability or undeclared slot may remain in the authoring graph for M08-T09 to
+diagnose. The common profile keeps canonical documents at 8 MiB, selected surfaces at 25,000
+identity occurrences, component depth at 64 with root at zero, and capability IDs at 4,096 code
+units where a command carries one. `N-014` is now `TESTED` by exact post-removal ordering and
+stable unaffected order. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity
+integration. Prop, style, condition, variant, state, binding, event, and action edits remain owned
+by M08-T04 through M08-T06. Persistence, selection, viewport, and authoring-state policy remain
+outside M08-T03.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
 source. The package depends only on `protocol` and `validator` and has zero platform imports or

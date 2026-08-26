@@ -1,29 +1,38 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
-import { link, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import {
+  link,
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rename,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 
 import * as editorCore from "../packages/editor-core/dist/index.js";
 import {
-  EDITOR_CORE_STABLE_ID_INSERT_PREREQUISITE_PIN,
-  EDITOR_CORE_STABLE_ID_INSERT_ROOT_TEST_NAMES,
-  EditorCoreStableIdInsertProofError,
-  buildEditorCoreStableIdInsertEvidence,
-  verifyEditorCoreStableIdInsertEvidence,
-  writeEditorCoreStableIdInsertEvidence,
-} from "../scripts/lib/editor-core-stable-id-insert-proof.mjs";
+  EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN,
+  EDITOR_CORE_STRUCTURAL_EDITS_ROOT_TEST_NAMES,
+  EditorCoreStructuralEditsProofError,
+  buildEditorCoreStructuralEditsEvidence,
+  verifyEditorCoreStructuralEditsEvidence,
+  writeEditorCoreStructuralEditsEvidence,
+} from "../scripts/lib/editor-core-structural-edits-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const INSERT_SOURCE = "packages/editor-core/src/stable-id-insert.ts";
-const STRUCTURAL_EDITS_SOURCE = "packages/editor-core/src/structural-edits.ts";
+const STRUCTURAL_SOURCE = "packages/editor-core/src/structural-edits.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const temporaryDirectories = [];
 let built;
 
 function expectedError(code) {
-  return (error) => error instanceof EditorCoreStableIdInsertProofError && error.code === code;
+  return (error) => error instanceof EditorCoreStructuralEditsProofError && error.code === code;
 }
 
 function changedByte(bytes) {
@@ -57,7 +66,7 @@ function assertDeepFrozen(value, visited = new Set()) {
 }
 
 before(async () => {
-  built = await buildEditorCoreStableIdInsertEvidence();
+  built = await buildEditorCoreStructuralEditsEvidence();
 });
 
 after(async () => {
@@ -66,70 +75,47 @@ after(async () => {
   );
 });
 
-test("[authority] authenticates the exact frozen M08-T01 artifact without a live reader input", async () => {
-  assert.equal(built.artifactBytes.byteLength, 19_561);
-  assert.equal(
-    built.artifactSha256,
-    "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
-  );
+test("[authority] authenticates the exact frozen M08-T02 artifact and isolated runtime graph", async () => {
   assert.equal(built.artifact.schemaVersion, 1);
-  assert.equal(built.artifact.proofId, "editor-core-stable-id-insert");
-  assert.equal(built.artifact.profile, "desen.editor-core.stable-id-insert-proof.v1");
-  assert.equal(built.artifact.task, "M08-T02");
+  assert.equal(built.artifact.proofId, "editor-core-structural-edits");
+  assert.equal(built.artifact.profile, "desen.editor-core.structural-edits-proof.v1");
+  assert.equal(built.artifact.task, "M08-T03");
   assert.equal(built.artifact.result, "PASS");
   assert.deepEqual(built.artifact.prerequisite, {
-    ...EDITOR_CORE_STABLE_ID_INSERT_PREREQUISITE_PIN,
+    ...EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN,
     result: "PASS",
     authentication: "DIRECT_NO_FOLLOW_EXACT_BYTES",
     liveProofReaderInput: false,
-    sequence29HeadInput: false,
+    sequence30HeadInput: false,
   });
-  assert.equal(
-    built.artifact.trackedBoundary.receipts.some(({ path: receiptPath }) =>
-      receiptPath.includes("proof-reader"),
-    ),
-    false,
-  );
   assert.deepEqual(built.artifact.executionAuthority, {
     ...built.artifact.executionAuthority,
     mode: "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH",
     exactReceiptedBytes: true,
     importAfterReceipt: true,
     workspaceModuleCacheUsed: false,
-    runtimeFiles: 25,
-    editorFiles: 4,
+    runtimeFiles: 26,
+    editorFiles: 5,
+    retainedPredecessorEditorFiles: 2,
     dependencyFiles: 21,
     dependencyModules: 19,
     dependencyManifests: 2,
     prerequisite: {
-      task: "M08-T01",
-      path: EDITOR_CORE_STABLE_ID_INSERT_PREREQUISITE_PIN.path,
-      sha256: EDITOR_CORE_STABLE_ID_INSERT_PREREQUISITE_PIN.sha256,
+      task: "M08-T02",
+      path: EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.path,
+      sha256: EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.sha256,
     },
     trustedAuthorities: ["NODE_RUNTIME", "ESM_LOADER", "PROCESS_ENVIRONMENT"],
   });
-  assert.equal(built.artifact.executionAuthority.editorReceipts.length, 4);
+  assert.equal(built.artifact.executionAuthority.editorReceipts.length, 5);
   assert.equal(built.artifact.executionAuthority.dependencyReceipts.length, 21);
-  assert.equal(
-    built.artifact.executionAuthority.dependencyReceipts.some(
-      ({ path: receiptPath }) => receiptPath === "packages/validator/dist/index.js",
-    ),
-    true,
-  );
+
   const prerequisite = JSON.parse(
-    await readFile(path.join(ROOT, EDITOR_CORE_STABLE_ID_INSERT_PREREQUISITE_PIN.path), "utf8"),
+    await readFile(path.join(ROOT, EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.path), "utf8"),
   );
-  const dependencyPaths = new Set(
-    built.artifact.executionAuthority.dependencyReceipts.map(
-      ({ path: receiptPath }) => receiptPath,
-    ),
-  );
-  const prerequisiteDependencyReceipts = prerequisite.evidence.trackedFiles
-    .filter(({ path: receiptPath }) => dependencyPaths.has(receiptPath))
-    .sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
   assert.deepEqual(
     built.artifact.executionAuthority.dependencyReceipts,
-    prerequisiteDependencyReceipts,
+    prerequisite.executionAuthority.dependencyReceipts,
   );
   const trackedReceipts = new Map(
     built.artifact.trackedBoundary.receipts.map((receipt) => [receipt.path, receipt]),
@@ -140,86 +126,55 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
   ]) {
     assert.deepEqual(trackedReceipts.get(receipt.path), receipt);
   }
-  assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
-    "deleteDesenEditorNode",
-    "moveDesenEditorNode",
-    "reorderDesenEditorNode",
-  ]);
-  assert.deepEqual(built.currentCompatibility.boundary.additiveTypeExports, [
-    "DesenEditorNodeDeleteCommand",
-    "DesenEditorNodeMoveCommand",
-    "DesenEditorNodeReorderCommand",
-    "DesenEditorStructuralEditDiagnostic",
-    "DesenEditorStructuralEditDiagnosticCode",
-    "DesenEditorStructuralEditFailure",
-    "DesenEditorStructuralEditResult",
-    "DesenEditorStructuralEditSuccess",
-  ]);
-  assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T03",
-    sourcePath: "packages/editor-core/src/structural-edits.ts",
-    runtimePath: "packages/editor-core/dist/structural-edits.js",
-    declarationPath: "packages/editor-core/dist/structural-edits.d.ts",
-    runtimeExports: ["deleteDesenEditorNode", "moveDesenEditorNode", "reorderDesenEditorNode"],
-    typeExports: [
-      "DesenEditorNodeDeleteCommand",
-      "DesenEditorNodeMoveCommand",
-      "DesenEditorNodeReorderCommand",
-      "DesenEditorStructuralEditDiagnostic",
-      "DesenEditorStructuralEditDiagnosticCode",
-      "DesenEditorStructuralEditFailure",
-      "DesenEditorStructuralEditResult",
-      "DesenEditorStructuralEditSuccess",
-    ],
-  });
-  assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
-  assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
-  assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 26);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 18);
-  assert.deepEqual(built.currentCompatibility.frozenAuthority, {
-    path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
-    bytes: 19_561,
-    sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
-    retainedTaskTimeReceipts: 43,
-  });
 });
 
-test("[determinism] two fresh M08-T02 builds are byte-identical", async () => {
-  const first = await buildEditorCoreStableIdInsertEvidence();
-  const second = await buildEditorCoreStableIdInsertEvidence();
+test("[determinism] two fresh M08-T03 builds are byte-identical", async () => {
+  const first = await buildEditorCoreStructuralEditsEvidence();
+  const second = await buildEditorCoreStructuralEditsEvidence();
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifactSha256, second.artifactSha256);
-  assert.deepEqual(first.currentCompatibility, second.currentCompatibility);
 });
 
-test("[behavior] proves allocation, ordering, node and behavior targets, limits, and atomic failures", () => {
-  assert.deepEqual(built.artifact.behavior.allocation, {
-    base: "sign-in.help",
-    lowestFreeCollision: "sign-in.title-3",
-    surfaceLocal: "sign-in.title",
-    behaviorReserved: "sign-in.sortable-2",
+test("[behavior] proves delete, move, reorder, stable identity, limits, and atomic diagnostics", () => {
+  assert.deepEqual(built.artifact.behavior.deletion, {
+    completeSubtree: true,
+    emptiedSourceSlotRetained: true,
+    remainingIdentities: ["sign-in.layout"],
   });
-  assert.deepEqual(built.artifact.behavior.insertion, {
-    exactOrderedBoundary: 2,
-    insertedNodeKeys: ["id", "use"],
-    nodeTarget: true,
-    behaviorTarget: true,
-    absentSlotAtZero: true,
+  assert.deepEqual(built.artifact.behavior.movement, {
+    crossOwner: true,
+    crossSlot: true,
+    subtreePreserved: true,
+    behaviorOwnerTarget: true,
     prototypeNamedSlotOwnData: true,
+    absentDestinationAtZero: true,
+    sameOwnerSameSlotReservedForReorder: true,
+    cyclesRejected: true,
+  });
+  assert.deepEqual(built.artifact.behavior.reorder, {
+    indexSemantics: "POST_REMOVAL_FINAL_POSITION",
+    finalOrder: [
+      "sign-in.email",
+      "sign-in.password",
+      "sign-in.error",
+      "sign-in.submit",
+      "sign-in.title",
+    ],
+    noOpReturnsFreshSnapshot: true,
   });
   assert.deepEqual(built.artifact.behavior.limits, {
     capabilityIdCodeUnits: 4_096,
+    capabilityCommandInput: "NOT_APPLICABLE_TO_STRUCTURAL_COMMANDS",
     canonicalDocumentBytes: 8_388_608,
     identitiesPerTargetSurface: 25_000,
     sourceTreeDepth: 64,
     rootDepth: 0,
     exactCeilingsPass: true,
     oneUnitCrossingsFail: true,
-    exactIdentityResultCount: 25_000,
   });
+  assert.equal(built.artifact.behavior.identityAndOrder.nodeAndBehaviorIdsUnchangedByMove, true);
+  assert.equal(built.artifact.behavior.diagnostics.structuralPassThrough, "SCHEMA_INVALID");
   assert.equal(built.artifact.behavior.immutability.atomicFailure, true);
-  assert.equal(built.artifact.behavior.diagnostics.failuresExposeNoDocumentOrIdentity, true);
 });
 
 test("[mutation] rejects runtime substitution and tracked boundary mutation", async () => {
@@ -229,36 +184,35 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
       runtimeExecuted = true;
       return editorCore.createDesenEditorDocument(input);
     },
-    insertDesenEditorNode(document, command) {
+    deleteDesenEditorNode(editorDocument, command) {
       runtimeExecuted = true;
-      const result = editorCore.insertDesenEditorNode(document, command);
-      if (!result.ok) return result;
-      return { ...result, insertedNodeId: "mutated.id" };
+      return editorCore.deleteDesenEditorNode(editorDocument, command);
+    },
+    moveDesenEditorNode(editorDocument, command) {
+      runtimeExecuted = true;
+      return editorCore.moveDesenEditorNode(editorDocument, command);
+    },
+    reorderDesenEditorNode(editorDocument, command) {
+      runtimeExecuted = true;
+      return editorCore.reorderDesenEditorNode(editorDocument, command);
     },
   };
   await assert.rejects(
-    buildEditorCoreStableIdInsertEvidence({ runtime }),
+    buildEditorCoreStructuralEditsEvidence({ runtime }),
     expectedError("RUNTIME_OVERRIDE_REJECTED"),
   );
   assert.equal(runtimeExecuted, false);
 
-  const source = await readFile(path.join(ROOT, INSERT_SOURCE));
-  const structuralEditsSource = await readFile(path.join(ROOT, STRUCTURAL_EDITS_SOURCE));
+  const source = await readFile(path.join(ROOT, STRUCTURAL_SOURCE));
   const dependency = await readFile(path.join(ROOT, PROTOCOL_RUNTIME));
   await assert.rejects(
-    buildEditorCoreStableIdInsertEvidence({
-      fileOverrides: { [INSERT_SOURCE]: changedByte(source) },
+    buildEditorCoreStructuralEditsEvidence({
+      fileOverrides: { [STRUCTURAL_SOURCE]: changedByte(source) },
     }),
     expectedError("BOUNDARY_DRIFT"),
   );
   await assert.rejects(
-    buildEditorCoreStableIdInsertEvidence({
-      fileOverrides: { [STRUCTURAL_EDITS_SOURCE]: changedByte(structuralEditsSource) },
-    }),
-    expectedError("BOUNDARY_DRIFT"),
-  );
-  await assert.rejects(
-    buildEditorCoreStableIdInsertEvidence({
+    buildEditorCoreStructuralEditsEvidence({
       fileOverrides: { [PROTOCOL_RUNTIME]: changedByte(dependency) },
     }),
     expectedError("BOUNDARY_DRIFT"),
@@ -267,7 +221,7 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
 
 test("[artifact] verifies exact artifact bytes and one exact final proof pin", async () => {
   const proofDocumentBytes = exactProofDocument(built.artifactSha256);
-  const verified = await verifyEditorCoreStableIdInsertEvidence({
+  const verified = await verifyEditorCoreStructuralEditsEvidence({
     artifactBytes: built.artifactBytes,
     proofDocumentBytes,
   });
@@ -275,14 +229,14 @@ test("[artifact] verifies exact artifact bytes and one exact final proof pin", a
   assert.equal(verified.artifactSha256, built.artifactSha256);
 
   await assert.rejects(
-    verifyEditorCoreStableIdInsertEvidence({
+    verifyEditorCoreStructuralEditsEvidence({
       artifactBytes: changedByte(built.artifactBytes),
       proofDocumentBytes,
     }),
     expectedError("ARTIFACT_DRIFT"),
   );
   await assert.rejects(
-    verifyEditorCoreStableIdInsertEvidence({
+    verifyEditorCoreStructuralEditsEvidence({
       artifactBytes: built.artifactBytes,
       proofDocumentBytes: `${proofDocumentBytes}${proofDocumentBytes}`,
     }),
@@ -291,11 +245,11 @@ test("[artifact] verifies exact artifact bytes and one exact final proof pin", a
 });
 
 test("[writer] atomically commits exact bytes and preserves the previous destination on failure", async () => {
-  const directory = await temporaryDirectory("desen-m08-t02-writer-");
+  const directory = await temporaryDirectory("desen-m08-t03-writer-");
   const destinationPath = path.join(directory, "artifact.json");
   await writeFile(destinationPath, "previous\n");
   await assert.rejects(
-    writeEditorCoreStableIdInsertEvidence({
+    writeEditorCoreStructuralEditsEvidence({
       destinationPath,
       beforeAtomicRename() {
         throw new Error("blocked before rename");
@@ -305,13 +259,13 @@ test("[writer] atomically commits exact bytes and preserves the previous destina
   );
   assert.equal(await readFile(destinationPath, "utf8"), "previous\n");
 
-  const result = await writeEditorCoreStableIdInsertEvidence({ destinationPath });
+  const result = await writeEditorCoreStructuralEditsEvidence({ destinationPath });
   assert.equal(result.artifactSha256, built.artifactSha256);
   assert.deepEqual(await readFile(destinationPath), built.artifactBytes);
 });
 
 test("[writer-filesystem] rejects symlink, hard-link, and non-file destinations", async () => {
-  const directory = await temporaryDirectory("desen-m08-t02-destination-");
+  const directory = await temporaryDirectory("desen-m08-t03-destination-");
   const target = path.join(directory, "target.json");
   const symbolic = path.join(directory, "symbolic.json");
   const hard = path.join(directory, "hard.json");
@@ -322,29 +276,70 @@ test("[writer-filesystem] rejects symlink, hard-link, and non-file destinations"
   await mkdir(nonFile);
   for (const destinationPath of [symbolic, hard, nonFile]) {
     await assert.rejects(
-      writeEditorCoreStableIdInsertEvidence({ destinationPath }),
+      writeEditorCoreStructuralEditsEvidence({ destinationPath }),
       expectedError("FILESYSTEM_UNSAFE"),
     );
   }
 });
 
 test("[filesystem] rejects linked prerequisite, artifact, and proof authorities", async () => {
-  const directory = await temporaryDirectory("desen-m08-t02-authority-");
-  const prerequisite = path.join(ROOT, EDITOR_CORE_STABLE_ID_INSERT_PREREQUISITE_PIN.path);
+  const directory = await temporaryDirectory("desen-m08-t03-authority-");
+  const prerequisite = path.join(ROOT, EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.path);
+  const prerequisiteBytes = await readFile(prerequisite);
   const prerequisiteCopy = path.join(directory, "prerequisite-copy.json");
   const prerequisiteLink = path.join(directory, "prerequisite.json");
-  await writeFile(prerequisiteCopy, await readFile(prerequisite));
+  await writeFile(prerequisiteCopy, prerequisiteBytes);
   await symlink(prerequisiteCopy, prerequisiteLink);
   await assert.rejects(
-    buildEditorCoreStableIdInsertEvidence({ prerequisitePath: prerequisiteLink }),
+    buildEditorCoreStructuralEditsEvidence({ prerequisitePath: prerequisiteLink }),
     expectedError("FILESYSTEM_UNSAFE"),
   );
   const prerequisiteHardLink = path.join(directory, "prerequisite-hard.json");
   await link(prerequisiteCopy, prerequisiteHardLink);
   await assert.rejects(
-    buildEditorCoreStableIdInsertEvidence({ prerequisitePath: prerequisiteHardLink }),
+    buildEditorCoreStructuralEditsEvidence({ prerequisitePath: prerequisiteHardLink }),
     expectedError("FILESYSTEM_UNSAFE"),
   );
+
+  const swappedAuthority = path.join(directory, "swapped-authority.json");
+  const heldAuthority = path.join(directory, "held-authority.json");
+  const replacementAuthority = path.join(directory, "replacement-authority.json");
+  await writeFile(swappedAuthority, prerequisiteBytes);
+  await writeFile(replacementAuthority, "replacement\n");
+  let swapped = false;
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      prerequisitePath: swappedAuthority,
+      async beforeAuthorityRecheck({ absolutePath }) {
+        if (absolutePath !== swappedAuthority || swapped) return;
+        swapped = true;
+        await rename(swappedAuthority, heldAuthority);
+        await rename(replacementAuthority, swappedAuthority);
+      },
+    }),
+    expectedError("FILESYSTEM_UNSAFE"),
+  );
+  assert.equal(swapped, true);
+
+  const authorityParent = path.join(directory, "authority-parent");
+  const heldParent = path.join(directory, "held-parent");
+  const parentAuthority = path.join(authorityParent, "prerequisite.json");
+  await mkdir(authorityParent);
+  await writeFile(parentAuthority, prerequisiteBytes);
+  let parentRenamed = false;
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      prerequisitePath: parentAuthority,
+      async beforeAuthorityRecheck({ absolutePath }) {
+        if (absolutePath !== parentAuthority || parentRenamed) return;
+        parentRenamed = true;
+        await rename(authorityParent, heldParent);
+        await symlink(heldParent, authorityParent);
+      },
+    }),
+    expectedError("FILESYSTEM_UNSAFE"),
+  );
+  assert.equal(parentRenamed, true);
 
   const artifactTarget = path.join(directory, "artifact-target.json");
   const artifactLink = path.join(directory, "artifact-link.json");
@@ -355,14 +350,14 @@ test("[filesystem] rejects linked prerequisite, artifact, and proof authorities"
   await symlink(artifactTarget, artifactLink);
   await symlink(proofTarget, proofLink);
   await assert.rejects(
-    verifyEditorCoreStableIdInsertEvidence({
+    verifyEditorCoreStructuralEditsEvidence({
       artifactPath: artifactLink,
       proofDocumentPath: proofTarget,
     }),
     expectedError("FILESYSTEM_UNSAFE"),
   );
   await assert.rejects(
-    verifyEditorCoreStableIdInsertEvidence({
+    verifyEditorCoreStructuralEditsEvidence({
       artifactPath: artifactTarget,
       proofDocumentPath: proofLink,
     }),
@@ -392,10 +387,9 @@ test("[options] rejects unknown, accessor, inherited, symbol, proxy, and shared 
       return editorCore.createDesenEditorDocument;
     },
   });
-  Object.defineProperty(runtimeAccessor, "insertDesenEditorNode", {
-    enumerable: true,
-    value: editorCore.insertDesenEditorNode,
-  });
+  for (const name of ["deleteDesenEditorNode", "moveDesenEditorNode", "reorderDesenEditorNode"]) {
+    Object.defineProperty(runtimeAccessor, name, { enumerable: true, value: editorCore[name] });
+  }
   for (const options of [
     { unknown: true },
     accessor,
@@ -404,27 +398,36 @@ test("[options] rejects unknown, accessor, inherited, symbol, proxy, and shared 
     proxy,
     { prerequisiteBytes: shared },
     { runtime: runtimeAccessor },
+    { beforeAuthorityRecheck: new Proxy(() => undefined, {}) },
   ]) {
     await assert.rejects(
-      buildEditorCoreStableIdInsertEvidence(options),
+      buildEditorCoreStructuralEditsEvidence(options),
       expectedError("OPTIONS_INVALID"),
     );
   }
   await assert.rejects(
-    writeEditorCoreStableIdInsertEvidence({
+    writeEditorCoreStructuralEditsEvidence({
       beforeAtomicRename: new Proxy(() => undefined, {}),
     }),
     expectedError("OPTIONS_INVALID"),
+  );
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      beforeAuthorityRecheck() {
+        return undefined;
+      },
+    }),
+    expectedError("AUTHORITY_HOOK_REJECTED"),
   );
   assert.equal(getterInvocations, 0);
 });
 
 test("[immutability] freezes evidence and states the exact nonclaim boundary", () => {
   assertDeepFrozen(built.artifact);
-  assertDeepFrozen(built.currentCompatibility);
   assert.deepEqual(built.artifact.nonclaims, [
-    "M08-T03_DELETE_MOVE_AND_ORDERED_REORDER",
-    "LATER_AUTHORING_SELECTION_VIEWPORT_POLICY",
+    "CATALOG_SLOT_ACCEPTANCE_AND_CARDINALITY",
+    "CROSS_SURFACE_STRUCTURAL_MOVE",
+    "UNDO_REDO_SELECTION_AND_VIEWPORT_POLICY",
     "M08_T04_THROUGH_T08_AUTHORING_AND_PERSISTENCE",
     "M08-T09_CATALOG_SEMANTICS_AND_CONTINUOUS_DIAGNOSTICS",
     "M08-T10_AND_G08_TERMINAL_UI_BOUNDARY",
@@ -434,7 +437,7 @@ test("[immutability] freezes evidence and states the exact nonclaim boundary", (
     "P18_OR_G08_ADVANCEMENT",
   ]);
   assert.deepEqual(
-    EDITOR_CORE_STABLE_ID_INSERT_ROOT_TEST_NAMES,
-    EDITOR_CORE_STABLE_ID_INSERT_ROOT_TEST_NAMES.slice(),
+    EDITOR_CORE_STRUCTURAL_EDITS_ROOT_TEST_NAMES,
+    EDITOR_CORE_STRUCTURAL_EDITS_ROOT_TEST_NAMES.slice(),
   );
 });

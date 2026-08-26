@@ -1842,3 +1842,52 @@ M08-T03; M08-T04–M08-T08 retain the remaining authoring and persistence comman
 catalog semantics and continuous diagnostics; and M08-T10 retains terminal stable-identity and
 React/DOM boundary evidence. This proof does not claim streaming or preallocation memory-DoS
 resistance, a general hostile-JavaScript sandbox, P-18, or G08. M08-T03 is next.
+
+## M08-T03 — Delete, slot move, and ordered reorder commands
+
+The built `@desen/editor-core` package now exposes three separated atomic structural commands.
+`deleteDesenEditorNode` removes exactly one selected non-root subtree and preserves the vacated
+slot as an own key with `[]`. `moveDesenEditorNode` transfers one intact subtree only across owners
+or slots, supporting node and behavior destinations and creating an absent destination only at
+index zero. `reorderDesenEditorNode` applies only within one owner/slot and interprets `index` as
+the child's final post-removal position. Existing IDs never change, target subtrees remain intact
+for move/reorder, and unaffected semantic array order is preserved.
+
+The proof covers exact no-op and forward/backward reorder, cross-owner and cross-slot move,
+behavior-owned and prototype-overlapping destination slots, structurally valid unresolved
+semantics, and deletion to an empty retained slot. It rejects root delete/move, cycles,
+self-descendant destinations, missing or ambiguous targets, same-slot move, cross-slot reorder,
+invalid indices, prototype-chain authority, accessor/inherited/symbol/extra command keys, and
+structurally invalid inputs. Every failure returns frozen diagnostics and no partial document; each
+success returns a fresh detached recursively frozen direct Source.
+
+The focused package suite passes 16/16 behavior cases plus ten compiler-negative assertions, the
+cumulative built public-package suite passes its exact 26 runtime/root cases, and the independent
+root proof passes 10/10. The retained finite profile covers exact and overflowing 8,388,608-byte
+canonical documents, 25,000 selected-surface identities, and component depth 64 with root at zero.
+The 4,096-code-unit capability-ID discipline remains authenticated through M08-T02 because these
+commands introduce no capability-ID input. Structural diagnostic pass-through is unchanged.
+
+Exact evidence lives in
+[`EDITOR-CORE-STRUCTURAL-EDITS.md`](EDITOR-CORE-STRUCTURAL-EDITS.md) and the 22,402-byte
+[`editor-core-0.1.0-structural-edits.json`](artifacts/editor-core-0.1.0-structural-edits.json) at
+`sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. The artifact directly
+authenticates the exact 19,561-byte M08-T02 artifact at
+`sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`, verifies 60 current
+tracked-file receipts, and executes behavior only after copying five editor files and twenty-one
+authenticated dependencies into an isolated 26-file ESM graph. Node, its ESM loader, and the
+process environment remain trusted; no general hostile-JavaScript sandbox is claimed.
+
+CI registers `editor-core-structural-edits` after `editor-core-stable-id-insert` and the serial
+public-package predecessor in the exact 157-workload/74-proof-pair successor: 63 ordinary pairs
+and 11 exclusive barriers. Append-only reader checkpoint sequence 31 at
+`181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d` authenticates 28 frozen
+artifacts and 56 current readers; historical sequence 30 remains unchanged.
+
+M08-T03 is `DONE`, advancing implementation progress to 88/145 (61%) and M08 to 3/10. Proof gates
+remain 8/13. Exact structural ordering closes `N-014` as `TESTED`; `S-002` remains `PLANNED` until
+M08-T10 closes terminal stable-identity integration. Prop, style-part, condition, and variant
+commands remain M08-T04; M08-T05–M08-T09 retain later authoring, persistence, and validation work;
+M08-T10 retains the independent terminal editor-core React/DOM boundary. This proof does not claim
+streaming or preallocation memory-DoS resistance, a general hostile-JavaScript sandbox, P-18, or
+G08. M08-T04 is next.
