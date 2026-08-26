@@ -364,6 +364,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-editor-core-source-document.mjs",
       "tests/editor-core-source-document.test.mjs",
     ],
+    [
+      "editor-core-stable-id-insert",
+      "scripts/verify-editor-core-stable-id-insert.mjs",
+      "tests/editor-core-stable-id-insert.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -405,14 +410,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "1fcadf7c4ce238a0cddc8397735803a95175b09590fb51c411967852f2c3cde6";
+  "0e4031fb92d5fca303d0e6e6cfa0a175503166ceb8c6426a49c372a62ada317d";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "bbbe83b8d7c8160760938e5ef8acdc7eed921c6c1b7353cc1119b0710f5cb741";
+  "60d2ece0dda9b266a3df259fac1e5977b3da592b265839d8bc58b86f25d29e6f";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "c4630c749e992b6a4d294a3c8e2900dd33d4c21b1389224b4f9c899507a6637d";
+  "4d9b00c2080fd1c9693d8ca9e939bcb1910c20a42e7d50a73f9bd9c2cf053ceb";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "edc62f2aee78d26486db76cff754b489f6ea72e974ee5fd3bf4edc495f7a96ef";
+const QUALITY_GATE_PLAN_SHA256 = "13d51b2512dd3d10264a7a329f4b4923461c368d71400310647e4adc9933d2c5";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -713,7 +718,7 @@ function classifyLegacyPrerequisite({
     const expectedScript =
       "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
     if (
-      currentProofId !== "editor-core-source-document" ||
+      !["editor-core-source-document", "editor-core-stable-id-insert"].includes(currentProofId) ||
       packageName !== "@desen/editor-core" ||
       packageManifest.scripts?.[task] !== expectedScript
     ) {

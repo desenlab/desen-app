@@ -61,15 +61,25 @@ executable authority, React value, DOM value, storage handle, or publication sta
 
 Structural admission is intentionally not continuous editor validation. A Source can enter this
 model while its Catalog-backed references are unresolved; M08-T09 owns semantic diagnostics and
-invalid-node mapping as the designer changes the document. Later editor commands must return new
-direct Source snapshots and preserve stable identities, but M08-T01 provides no mutation, ID
-allocation, persistence, selection, viewport, or authoring-state policy. `PF-078` records why
-producer ownership does not grant retained caller mutation authority.
+invalid-node mapping as the designer changes the document. M08-T02 adds one platform-neutral
+atomic insert transition over that direct graph. It addresses a node- or behavior-owned slot by
+surface-local stable identity, allocates the exact requested base or the lowest free numeric
+suffix in the shared node/behavior namespace, preserves every previous identity and semantic array
+order, and returns a new direct frozen Source snapshot. The command cannot supply an explicit ID or
+broader mutation payload. `PF-078` records why producer ownership does not grant retained caller
+mutation authority; `PF-079` records the deterministic editor profile for allocation, targeting,
+atomic failure, and finite limits that DESEN 0.1.0 does not otherwise prescribe.
 
-The M08-T01 proof closes this boundary against the emitted public package as well as the source:
-the package exposes one runtime factory, depends only on `protocol` and `validator`, and has zero
-platform imports or executable authority. This is not the terminal M08 platform-boundary claim;
-M08-T10 still owns the independent editor-core artifact and React/DOM integration proof.
+This insertion is structural rather than Catalog-semantic: a structurally valid unresolved
+capability or undeclared slot may remain in the authoring graph for M08-T09 to diagnose. Delete,
+move, reorder, prop, style, condition, variant, state, binding, event, and action edits remain owned
+by M08-T03 through M08-T06. Persistence, selection, viewport, and authoring-state policy also remain
+outside M08-T02.
+
+The cumulative M08 proof closes each boundary against the emitted public package as well as the
+source. The package depends only on `protocol` and `validator` and has zero platform imports or
+executable authority. This is not the terminal M08 platform-boundary claim; M08-T10 still owns the
+independent editor-core artifact and React/DOM integration proof.
 
 `runtime-core` accepts a verified bundle, exact catalog set, and host ports. It produces
 JSON-serializable state snapshots, diagnostics, and render plans. `runtime-react` translates those

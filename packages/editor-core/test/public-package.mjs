@@ -178,6 +178,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       "test:public-package":
         "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
       "test:source-document": "vitest run test/source-document.test.ts",
+      "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
       "test:coverage": "vitest run --coverage",
     },
     dependencies: {
@@ -190,7 +191,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
 
 test("the emitted public module graph stays platform-neutral and execution-closed", async () => {
   const emittedModules = await Promise.all(
-    ["index.js", "source-document.js"].map(async (file) => ({
+    ["index.js", "source-document.js", "stable-id-insert.js"].map(async (file) => ({
       file,
       source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
     })),
@@ -202,13 +203,24 @@ test("the emitted public module graph stays platform-neutral and execution-close
       specifiers: staticModuleSpecifiers(source),
     })),
     [
-      { file: "index.js", specifiers: ["./source-document.js"] },
+      {
+        file: "index.js",
+        specifiers: ["./source-document.js", "./stable-id-insert.js"],
+      },
       { file: "source-document.js", specifiers: ["@desen/validator"] },
+      {
+        file: "stable-id-insert.js",
+        specifiers: ["@desen/protocol", "./source-document.js"],
+      },
     ],
   );
   assert.match(
     emittedModules[0].source,
     /export\s*\{\s*createDesenEditorDocument\s*\}\s*from\s*["']\.\/source-document\.js["']/,
+  );
+  assert.match(
+    emittedModules[0].source,
+    /export\s*\{\s*insertDesenEditorNode\s*\}\s*from\s*["']\.\/stable-id-insert\.js["']/,
   );
 
   const emittedGraph = emittedModules.map(({ source }) => source).join("\n");
@@ -223,12 +235,12 @@ test("the emitted public module graph stays platform-neutral and execution-close
   }
 });
 
-test("the built public package resolves through its export map and exposes one runtime export", () => {
+test("the built public package resolves through its export map and exposes the reviewed runtime exports", () => {
   assert.equal(
     import.meta.resolve("@desen/editor-core"),
     new URL("../dist/index.js", import.meta.url).href,
   );
-  assert.deepEqual(Object.keys(editorCore), ["createDesenEditorDocument"]);
+  assert.deepEqual(Object.keys(editorCore), ["createDesenEditorDocument", "insertDesenEditorNode"]);
 });
 
 test("the emitted factory returns the direct plain frozen Source without a hidden model", () => {
@@ -349,6 +361,170 @@ test("the emitted factory rejects getter and toJSON hooks without invoking calle
 
   assert.equal(getterInvocations, 0);
   assert.equal(toJsonInvocations, 0);
+});
+
+test("the emitted insert command allocates a stable id and returns one new direct Source", () => {
+  const creation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public Source factory to succeed.");
+
+  const result = editorCore.insertDesenEditorNode(creation.document, {
+    surfaceId: "sign-in",
+    parentId: "sign-in.layout",
+    slot: "default",
+    index: 1,
+    idBase: "sign-in.title",
+    use: "com.example.ui/Text",
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected public insertion to succeed.");
+  assert.equal(result.insertedNodeId, "sign-in.title-2");
+  assert.deepEqual(result.diagnostics, []);
+  assert.deepEqual(
+    result.document.surfaces["sign-in"].root.slots.default.map(({ id }) => id),
+    [
+      "sign-in.title",
+      "sign-in.title-2",
+      "sign-in.email",
+      "sign-in.password",
+      "sign-in.error",
+      "sign-in.submit",
+    ],
+  );
+  assert.deepEqual(result.document.surfaces["sign-in"].root.slots.default[1], {
+    id: "sign-in.title-2",
+    use: "com.example.ui/Text",
+  });
+  assert.notStrictEqual(result.document, creation.document);
+  assert.deepEqual(creation.document, validSource);
+  assertPlainOwnDataFrozen(result);
+});
+
+test("the emitted insert command is deterministic and keeps identity allocation surface-local", () => {
+  const creation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public Source factory to succeed.");
+  const command = {
+    surfaceId: "home",
+    parentId: "home.layout",
+    slot: "default",
+    index: 0,
+    idBase: "sign-in.title",
+    use: "com.example.unresolved/Unknown",
+  };
+
+  const first = editorCore.insertDesenEditorNode(creation.document, command);
+  const second = editorCore.insertDesenEditorNode(creation.document, { ...command });
+
+  assert.equal(first.ok, true);
+  assert.equal(second.ok, true);
+  if (!first.ok || !second.ok) throw new TypeError("Expected deterministic public inserts.");
+  assert.equal(first.insertedNodeId, "sign-in.title");
+  assert.equal(second.insertedNodeId, "sign-in.title");
+  assert.deepEqual(first.document, second.document);
+  assert.notStrictEqual(first.document, second.document);
+  assertPlainOwnDataFrozen(first);
+  assertPlainOwnDataFrozen(second);
+});
+
+test("the emitted insert command creates Object.prototype-named slots as own data", () => {
+  const creation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public Source factory to succeed.");
+  const inheritedConstructor = Object.prototype.constructor;
+
+  const result = editorCore.insertDesenEditorNode(creation.document, {
+    surfaceId: "sign-in",
+    parentId: "sign-in.layout",
+    slot: "constructor",
+    index: 0,
+    idBase: "sign-in.prototype-safe",
+    use: "com.example.ui/Text",
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected prototype-named public insertion to succeed.");
+  const slots = result.document.surfaces["sign-in"].root.slots;
+  assert.equal(Object.hasOwn(slots, "constructor"), true);
+  assert.deepEqual(slots.constructor, [
+    { id: "sign-in.prototype-safe", use: "com.example.ui/Text" },
+  ]);
+  assert.equal(Object.prototype.constructor, inheritedConstructor);
+  assertPlainOwnDataFrozen(result);
+});
+
+test("the emitted insert command rejects missing, ambiguous, and invalid positions atomically", () => {
+  const input = cloneFixture();
+  input.surfaces["sign-in"].root.slots.default[1].id =
+    input.surfaces["sign-in"].root.slots.default[0].id;
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected structural Source admission.");
+  const base = {
+    surfaceId: "sign-in",
+    parentId: input.surfaces["sign-in"].root.slots.default[0].id,
+    slot: "default",
+    index: 0,
+    idBase: "sign-in.inserted",
+    use: "com.example.ui/Text",
+  };
+
+  const ambiguous = editorCore.insertDesenEditorNode(creation.document, base);
+  const missing = editorCore.insertDesenEditorNode(creation.document, {
+    ...base,
+    parentId: "missing.parent",
+  });
+  const invalidPosition = editorCore.insertDesenEditorNode(creation.document, {
+    ...base,
+    parentId: "sign-in.layout",
+    slot: "absent",
+    index: 1,
+  });
+
+  for (const [result, code] of [
+    [ambiguous, "run.desen.editor/INSERT_TARGET_AMBIGUOUS"],
+    [missing, "run.desen.editor/INSERT_TARGET_NOT_FOUND"],
+    [invalidPosition, "run.desen.editor/INSERT_POSITION_INVALID"],
+  ]) {
+    assert.equal(result.ok, false);
+    assert.equal(result.diagnostics[0].code, code);
+    assert.equal(Object.hasOwn(result, "document"), false);
+    assert.equal(Object.hasOwn(result, "insertedNodeId"), false);
+    assertPlainOwnDataFrozen(result);
+  }
+});
+
+test("the emitted insert command rejects active or authority-expanding command input", () => {
+  const creation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public Source factory to succeed.");
+  const base = {
+    surfaceId: "sign-in",
+    parentId: "sign-in.layout",
+    slot: "default",
+    index: 0,
+    idBase: "sign-in.inserted",
+    use: "com.example.ui/Text",
+  };
+  let getterInvocations = 0;
+  const accessor = { ...base };
+  Object.defineProperty(accessor, "idBase", {
+    enumerable: true,
+    get() {
+      getterInvocations += 1;
+      return "active";
+    },
+  });
+
+  for (const command of [accessor, { ...base, id: "explicit-bypass" }]) {
+    const result = editorCore.insertDesenEditorNode(creation.document, command);
+    assert.equal(result.ok, false);
+    assert.equal(result.diagnostics[0].code, "run.desen.editor/INSERT_COMMAND_INVALID");
+    assert.equal(Object.hasOwn(result, "document"), false);
+    assert.equal(Object.hasOwn(result, "insertedNodeId"), false);
+  }
+  assert.equal(getterInvocations, 0);
 });
 
 test("[proof-core] two fresh final builds are byte-identical and preserve honest scope", async () => {

@@ -5,6 +5,7 @@
  */
 
 export { createDesenEditorDocument } from "./source-document.js";
+export { insertDesenEditorNode } from "./stable-id-insert.js";
 
 export type {
   DesenEditorDocument,
@@ -12,3 +13,12 @@ export type {
   DesenEditorDocumentCreationResult,
   DesenEditorDocumentCreationSuccess,
 } from "./source-document.js";
+
+export type {
+  DesenEditorInsertDiagnostic,
+  DesenEditorInsertDiagnosticCode,
+  DesenEditorNodeInsertCommand,
+  DesenEditorNodeInsertFailure,
+  DesenEditorNodeInsertResult,
+  DesenEditorNodeInsertSuccess,
+} from "./stable-id-insert.js";

@@ -1023,7 +1023,7 @@ hosted M07-T10 claim.
 | ID      | Status      | Depends on      | Deliverable / evidence                                               |
 | ------- | ----------- | --------------- | -------------------------------------------------------------------- |
 | M08-T01 | DONE        | G07             | Direct DESEN Source editor document model                            |
-| M08-T02 | NOT_STARTED | M08-T01         | Stable-ID allocator and insert command                               |
+| M08-T02 | DONE        | M08-T01         | Stable-ID allocator and insert command                               |
 | M08-T03 | NOT_STARTED | M08-T02         | Delete, slot move, and ordered reorder commands                      |
 | M08-T04 | NOT_STARTED | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
 | M08-T05 | NOT_STARTED | M08-T02         | State declaration and binding editing commands                       |
@@ -1048,9 +1048,9 @@ receipts; the exact dependency bytes, Node runtime, loader, and process remain t
 claiming a general hostile-JavaScript sandbox. The exact 153-workload/72-proof-pair CI successor
 registers that proof. Together they pin
 the reviewed scope in `docs/proof/EDITOR-CORE-SOURCE-DOCUMENT.md` and
-`docs/proof/artifacts/editor-core-0.1.0-source-document.json`. Append-only reader checkpoint
+`docs/proof/artifacts/editor-core-0.1.0-source-document.json`. At the M08-T01 checkpoint, append-only reader
 sequence 29 at `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`
-authenticates 26 frozen artifacts and 52 current readers; the historical I07-04/G07 sequence-28
+authenticates 26 frozen artifacts and 52 then-current readers; the historical I07-04/G07 sequence-28
 closure remains unchanged.
 
 This task proves structural admission and the direct immutable Source graph only. Stable-ID and
@@ -1058,7 +1058,36 @@ mutation commands remain M08-T02–M08-T06, authoring isolation and unknown-exte
 remain M08-T07, persistence remains M08-T08, continuous semantic validation and invalid-node
 mapping remain M08-T09, and the terminal editor-core React/DOM and deterministic-command boundary
 remains M08-T10. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. Overall implementation
-progress is 86/145 (59%), M08 is 1/10, proof gates remain 8/13, and M08-T02 is next.
+progress at the M08-T01 checkpoint was 86/145 (59%), M08 was 1/10, proof gates remained 8/13, and
+M08-T02 was next.
+
+M08-T02 is `DONE`. The emitted `insertDesenEditorNode` command allocates the preferred ID when it
+is free and otherwise the lowest free ordinal suffix in the selected surface's case-sensitive
+shared node/behavior namespace. It inserts one minimal `{ id, use }` leaf at the exact requested
+component-node or behavior-instance slot boundary, preserves every prior identity and the order of
+all existing children, and creates an absent slot only at index zero. Success returns a fresh
+detached recursively frozen direct Source and the allocated ID; all five insert diagnostic classes
+plus unchanged structural diagnostics fail atomically without a partial document or allocated ID.
+The reviewed profile fixes capability IDs at 4,096 code units, canonical post-insert Sources at
+8,388,608 bytes, surface-local identity occurrences at 25,000, and component depth at 64 with the
+surface root at depth zero. The focused stable-ID package suite passes 16/16, the cumulative public
+package suite passes 22/22, and the independent root proof passes 10/10. Behavior executes only
+after loading an isolated 25-file ESM graph copied from authenticated bytes; its 21 dependency
+files match the frozen M08-T01 receipts while Node, the ESM loader, and process remain trusted.
+Exact evidence is pinned
+in `docs/proof/EDITOR-CORE-STABLE-ID-INSERT.md` and the 19,561-byte artifact
+`docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json` at
+`sha256:3d7d7ce269744b6f382b17c3cc34d721faec70d2ba7f59201a7fc3f6618ea39d`.
+Append-only reader checkpoint sequence 30 at
+`1887996f51318a3a0f7f753d12c0a78b22df30fb005daaa2a69897999d05b654` authenticates 27 frozen
+artifacts and 54 current readers while leaving historical sequence 29 unchanged.
+
+Delete, move, and ordered-reorder commands remain M08-T03; the other authoring and persistence
+commands remain M08-T04–M08-T08; continuous semantic diagnostics remain M08-T09; and terminal
+stable-identity plus React/DOM boundary evidence remains M08-T10. This task does not claim
+streaming or preallocation memory-DoS resistance, a hostile-JavaScript sandbox, P-18, or G08. No
+`P-*`, `N-*`, `S-*`, or proof-gate status changes. Overall implementation progress is 87/145
+(60%), M08 is 2/10, proof gates remain 8/13, and M08-T03 is next.
 
 ## M09 — Desen App Web MVP
 

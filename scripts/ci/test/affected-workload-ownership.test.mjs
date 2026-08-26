@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 144,
+  PROOF_UNIT: 146,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 116,
-  PACKAGE_OR_APPLICATION: 399,
-  SHARED_PROOF_INFRASTRUCTURE: 181,
-  PROJECT_DOCUMENTATION: 108,
+  FROZEN_INPUT: 117,
+  PACKAGE_OR_APPLICATION: 402,
+  SHARED_PROOF_INFRASTRUCTURE: 183,
+  PROJECT_DOCUMENTATION: 109,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1035 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1044 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1035 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1035);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1044);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 144);
+  assert.equal(proofEntries.length, 146);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -172,6 +172,15 @@ test("the reviewed M08 successor preserves the historical I07-04 ownership proje
     "scripts/lib/editor-core-source-document-proof.mjs",
     "scripts/verify-editor-core-source-document.mjs",
     "tests/editor-core-source-document.test.mjs",
+    "docs/proof/EDITOR-CORE-STABLE-ID-INSERT.md",
+    "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
+    "packages/editor-core/src/stable-id-insert.ts",
+    "packages/editor-core/test/stable-id-insert.test.ts",
+    "packages/editor-core/test/stable-id-insert.types.ts",
+    "scripts/generate-editor-core-stable-id-insert-proof.mjs",
+    "scripts/lib/editor-core-stable-id-insert-proof.mjs",
+    "scripts/verify-editor-core-stable-id-insert.mjs",
+    "tests/editor-core-stable-id-insert.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

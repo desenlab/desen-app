@@ -14,8 +14,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 72);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 72);
+  assert.equal(graph.proofUnitCount, 73);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 73);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -27,6 +27,10 @@ test("the reviewed impact graph owns every proof unit exactly once", () => {
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "editor-core-source-document")?.prerequisites,
     ["protocol-structural-validation"],
+  );
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "editor-core-stable-id-insert")?.prerequisites,
+    ["editor-core-source-document"],
   );
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);
@@ -60,13 +64,14 @@ test("independent proof units remain a strict subset", () => {
   assert.equal(closure.workloadCount, 11);
 });
 
-test("the editor Source document closes over its structural predecessor", () => {
-  const closure = createAffectedImpactClosure(["editor-core-source-document"]);
+test("the editor stable-ID insert closes over its Source and structural predecessors", () => {
+  const closure = createAffectedImpactClosure(["editor-core-stable-id-insert"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
     "editor-core-source-document",
+    "editor-core-stable-id-insert",
   ]);
-  assert.equal(closure.workloadCount, 13);
+  assert.equal(closure.workloadCount, 15);
 });
 
 test("unknown, duplicate, empty, proxy, and sparse owner inputs fail closed", () => {

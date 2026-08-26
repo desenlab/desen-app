@@ -130,6 +130,7 @@ export const PROOF_IDS = Object.freeze([
   "control-plane-runtime-transition-races",
   "reference-host-web-channel-consumption",
   "editor-core-source-document",
+  "editor-core-stable-id-insert",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -166,7 +167,10 @@ export const CHILD_PROCESS_VERIFIER_PROOF_IDS = Object.freeze([
 ]);
 
 /** Exact verifier proof ids that write only inside runner-owned OS temp without spawning children. */
-export const OS_TEMP_ONLY_VERIFIER_PROOF_IDS = Object.freeze(["editor-core-source-document"]);
+export const OS_TEMP_ONLY_VERIFIER_PROOF_IDS = Object.freeze([
+  "editor-core-source-document",
+  "editor-core-stable-id-insert",
+]);
 
 /** Sole verifier step eligible to delegate an authenticated loopback port-zero child runtime. */
 export const LOOPBACK_CHILD_LISTENER_VERIFIER_STEP_IDS = Object.freeze([
@@ -517,8 +521,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 153) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 153 steps.", {
+if (METADATA_BY_STEP_ID.size !== 155) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 155 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }
