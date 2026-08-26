@@ -790,18 +790,30 @@ the 19,561-byte artifact is pinned at
 reorder, remaining authoring commands, persistence, continuous semantic validation, and the
 terminal React/DOM boundary remain assigned to M08-T03–M08-T10.
 
+M08-T03 completes the structural edit command set. `deleteDesenEditorNode` removes one selected
+subtree while retaining the emptied slot key; `moveDesenEditorNode` transfers a subtree across
+owners or slots; and `reorderDesenEditorNode` places a child at its post-removal final index within
+one slot. The commands preserve every surviving identity and exact semantic array order, support
+node and behavior owners plus prototype-overlapping slot names, reject root delete/move, cycles,
+ambiguous/missing targets, wrong same-slot command use, and malformed command authority, and fail
+atomically. The 16/16 focused suite, cumulative 26/26 public-package suite, and 10/10 independent
+root proof pass. The 22,402-byte artifact is pinned at
+`sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. This moves `N-014` to
+`TESTED`; `S-002` stays `PLANNED` through terminal M08-T10 integration. The remaining editor work
+stays assigned to M08-T04–M08-T10.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `87 / 145 tasks complete (60%)`
+- Overall implementation progress: `88 / 145 tasks complete (61%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `2 / 10 tasks complete (20%)`
+- M08 progress: `3 / 10 tasks complete (30%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -874,17 +886,18 @@ terminal React/DOM boundary remain assigned to M08-T03–M08-T10.
   `M07-T10 — Ordered transition, activation/recovery race, restart, and SQLite profile-drift matrix`,
   `M07-T11 — Control-plane channel consumed by separately built reference host`,
   `M08-T01 — Direct DESEN Source editor document model`,
-  `M08-T02 — Stable-ID allocator and insert command`
+  `M08-T02 — Stable-ID allocator and insert command`,
+  `M08-T03 — Delete, slot move, and ordered reorder commands`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T03 — Delete, slot move, and ordered reorder commands`
-- Status: M08 is 2/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 87/145. All 17 G07-due entries remain `CLOSED`;
-  `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 and M08-T02 are `DONE` with tracked
+- Next implementation task: `M08-T04 — Prop, style-part, condition, and variant editing commands`
+- Status: M08 is 3/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 88/145. All 17 G07-due entries remain `CLOSED`;
+  `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration; their exact evidence and
   nonclaims are recorded below.
 
@@ -1363,6 +1376,20 @@ append-only reader successor is sequence 30 at
 `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`, authenticating 27 frozen
 artifacts and 54 current readers. Historical sequences 28 and 29 remain unchanged. Implementation
 progress is 87/145 (60%), M08 is 2/10, proof gates remain 8/13, and M08-T03 is next.
+
+M08-T03 is now complete. Delete removes the selected subtree while preserving the vacated slot
+key, cross-owner or cross-slot move keeps the subtree intact, and same-slot reorder uses the exact
+post-removal final position. All surviving IDs remain unchanged. Root, cycle, self-descendant,
+missing, ambiguous, same-slot-move, and cross-slot-reorder attempts fail atomically; node and
+behavior destinations, prototype-overlapping slots, unresolved semantics, and the fixed finite
+profile are covered. The exact 22,402-byte artifact is
+`sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. The current append-only
+reader successor is sequence 31 at
+`181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`, authenticating 28 frozen
+artifacts and 56 readers, while historical sequences 28–30 remain unchanged. CI now owns
+157 workloads and 74 proof pairs—63 ordinary and 11 barriers. `N-014` is `TESTED`; `S-002` remains
+`PLANNED`. Implementation progress is 88/145 (61%), M08 is 3/10, proof gates remain 8/13, and
+M08-T04 is next.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -2757,6 +2784,41 @@ M08-T02 evidence:
   memory-DoS resistance, terminal React/DOM boundary, P-18, or G08 claim
 - coverage decision: M08-T02 is `DONE`; overall progress is 87/145 (60%); M08 is 2/10; proof gates
   remain 8/13; no `P-*`, `N-*`, or `S-*` status changes; M08-T03 owns the next slice
+
+M08-T03 evidence:
+
+- `docs/proof/EDITOR-CORE-STRUCTURAL-EDITS.md`
+- `docs/proof/artifacts/editor-core-0.1.0-structural-edits.json`, 22,402 bytes at
+  `sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`
+- delete boundary: removes exactly the addressed non-root node and its subtree, preserves the
+  vacated slot as an own key with `[]`, and leaves unrelated identities and array order unchanged
+- move boundary: transfers one intact subtree only across owners or slots, supports node and
+  behavior destinations, permits an absent destination only at index zero, and rejects cycles,
+  self-descendants, root targets, ambiguity, missing targets, and same-slot misuse
+- reorder boundary: applies only within one owner/slot and interprets `index` as the final
+  post-removal position; exact no-op and forward/backward cases preserve every identity
+- authority hardening: prototype-overlapping slot names remain own data; structurally valid
+  unresolved semantics remain authorable; accessor, inherited, symbol, and extra command fields
+  fail closed; all failures return frozen diagnostics without a partial document
+- fixed profile: canonical post-edit Source at most 8,388,608 bytes, at most 25,000 selected-surface
+  identities, component depth 64 with root at zero, and capability IDs at most 4,096 code units;
+  exact ceilings, overflows, and structural diagnostic pass-through are covered
+- execution authority: behavior runs from an isolated authenticated 26-file ESM graph; the proof
+  authenticates the exact frozen M08-T02 artifact and 60 current tracked-file receipts while
+  retaining Node, its ESM loader, and the process environment as explicit trusted authorities
+- local proof: editor-core typecheck/build, 16/16 focused structural-edit cases, 26/26 cumulative
+  public-package cases, generator/verifier, and the 10/10 independent root proof pass
+- CI authority: 157 workloads / 74 proof pairs, with 63 ordinary pairs and 11 barriers; the new
+  structural-edit pair follows stable-ID insertion and the serial public-package contract
+- reader authority: the current append-only successor is sequence 31 at
+  `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`, authenticating 28 frozen
+  artifacts and 56 readers; the exact historical sequence-30 head and all older entries remain
+  unchanged
+- scope nonclaims: no prop/style/condition/variant, state/binding, event/action, persistence,
+  continuous semantic validation, invalid-node mapping, hostile-JavaScript sandbox,
+  streaming/preallocation memory-DoS resistance, terminal React/DOM boundary, P-18, or G08 claim
+- coverage decision: M08-T03 is `DONE`; `N-014` is `TESTED`; `S-002` remains `PLANNED`; overall
+  progress is 88/145 (61%); M08 is 3/10; proof gates remain 8/13; M08-T04 owns the next slice
 
 ## Status vocabulary
 

@@ -376,6 +376,21 @@ sıralamayı, kalan authoring komutlarını, persistence'ı, sürekli semantik d
 React/DOM sınırını kanıtlamaz. Bunlar M08-T03–M08-T10'da kalır. Genel ilerleme 87/145 (%60), M08
 ilerlemesi 2/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T03'tür.
 
+M08-T03 de tamamlandı. `deleteDesenEditorNode` seçilen kök-olmayan alt ağacı silerken boşalan slot
+anahtarını `[]` olarak korur; `moveDesenEditorNode` alt ağacı yalnız farklı sahip ya da slot'a
+taşır; `reorderDesenEditorNode` aynı slot içinde silme-sonrası nihai indeksi uygular. Sağ kalan tüm
+kimlikler ve semantik dizi sırası değişmeden kalır. Node/behavior hedefleri, prototype ile çakışan
+slot adları, çözümlenmemiş yapısal semantik, exact no-op, sabit limit tavanları ve atomik
+root/cycle/ambiguity/missing reddi kanıtlandı. 16/16 odak paket testi, kümülatif 26/26
+public-package testi ve 10/10 bağımsız kök kanıtı geçti. 22.402 baytlık artifact
+`sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b` ile sabittir. Güncel
+CI ardılı 157 iş yükü ve 74 kanıt çiftinden oluşur: 63 sıradan çift ve 11 bariyer. Güncel
+append-only okuyucu ardılı sequence 31'dir;
+`181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d` başıyla 28 donmuş artifact
+ve 56 reader doğrular; tarihsel sequence 30 değişmez. `N-014` artık `TESTED`,
+`S-002` ise terminal M08-T10 entegrasyonu beklediği için `PLANNED` kalır. Genel ilerleme 88/145
+(%61), M08 ilerlemesi 3/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T04'tür.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

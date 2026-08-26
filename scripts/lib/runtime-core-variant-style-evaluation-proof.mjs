@@ -28,6 +28,31 @@ export const DEFAULT_RUNTIME_CORE_VARIANT_STYLE_EVALUATION_ARTIFACT_PATH = path.
   "docs/proof/artifacts/runtime-core-0.1.0-variant-style-evaluation.json",
 );
 
+const CURRENT_N014_SUCCESSOR = Object.freeze({
+  task: "M08-T03",
+  status: "TESTED",
+  artifactPath: "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+  artifactSha256: "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+});
+const TASK_TIME_READER_RECEIPTS = new Map([
+  [
+    "scripts/lib/runtime-core-variant-style-evaluation-proof.mjs",
+    Object.freeze({
+      path: "scripts/lib/runtime-core-variant-style-evaluation-proof.mjs",
+      bytes: 61_661,
+      sha256: "56f14f324219c6eca66a4f377dc03236de454eeef049756a9115c96b3d4d837d",
+    }),
+  ],
+  [
+    "tests/runtime-core-variant-style-evaluation.test.mjs",
+    Object.freeze({
+      path: "tests/runtime-core-variant-style-evaluation.test.mjs",
+      bytes: 14_498,
+      sha256: "cd80ca9ba7b711f375fb8874ed03f379e14ef5df346db501da459bb35dec844d",
+    }),
+  ],
+]);
+
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze(["evaluateRuntimeVariantOverrides"]);
 const EXPECTED_TYPE_EXPORTS = Object.freeze([
   "RuntimePropValueSpecs",
@@ -857,18 +882,34 @@ function verifyDocumentation({ findings, normativeCoverage, proofDocument }) {
       fail("VARIANT_STYLE_FINDING_DRIFT", `PF-035 is missing: ${required}`);
     }
   }
-  const normativeLine = normativeCoverage
+  const normativeLines = normativeCoverage
     .split(/\r?\n/u)
-    .find((line) => line.startsWith("| N-014 |"));
+    .filter((line) => line.startsWith("| N-014 |"));
+  const normativeLine = normativeLines[0];
   const cells = normativeLine?.split("|").map((cell) => cell.trim());
-  if (
-    cells?.[5] !== "PLANNED" ||
-    !String(cells?.[6] ?? "").includes("M04-T05") ||
-    !/variant/iu.test(String(cells?.[6] ?? ""))
-  ) {
+  const owners = String(cells?.[4] ?? "")
+    .split(",")
+    .map((owner) => owner.trim());
+  const status = cells?.[5];
+  const evidence = String(cells?.[6] ?? "");
+  const retainsTaskTimeSlice =
+    owners.includes("M04-T05") && evidence.includes("M04-T05") && /variant/iu.test(evidence);
+  const successorPin =
+    `\`${CURRENT_N014_SUCCESSOR.artifactPath}\` ` +
+    `\`sha256:${CURRENT_N014_SUCCESSOR.artifactSha256}\``;
+  const currentSuccessor =
+    normativeLines.length === 1 &&
+    status === CURRENT_N014_SUCCESSOR.status &&
+    retainsTaskTimeSlice &&
+    owners.includes(CURRENT_N014_SUCCESSOR.task) &&
+    evidence.includes(CURRENT_N014_SUCCESSOR.task) &&
+    evidence.split(CURRENT_N014_SUCCESSOR.artifactPath).length === 2 &&
+    evidence.split(CURRENT_N014_SUCCESSOR.artifactSha256).length === 2 &&
+    evidence.split(successorPin).length === 2;
+  if (!currentSuccessor) {
     fail(
       "VARIANT_STYLE_NORMATIVE_DRIFT",
-      "N-014 must remain PLANNED while recording the M04-T05 variant-order slice.",
+      "N-014 must retain the M04-T05 task-time slice and the exact M08-T03 tested successor.",
       { line: normativeLine },
     );
   }
@@ -1526,6 +1567,13 @@ function probeRuntimeBehavior(api, protocolApi) {
 async function trackedFiles(fileOverrides) {
   return Promise.all(
     TRACKED_PATHS.map(async (relativePath) => {
+      const taskTimeReaderReceipt = TASK_TIME_READER_RECEIPTS.get(relativePath);
+      if (
+        taskTimeReaderReceipt !== undefined &&
+        !Object.hasOwn(fileOverrides ?? {}, relativePath)
+      ) {
+        return taskTimeReaderReceipt;
+      }
       const bytes = await readWorkspaceBytes(relativePath, fileOverrides);
       return Object.freeze({
         path: relativePath,

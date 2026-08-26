@@ -23,6 +23,7 @@
     "test:public-package": "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
     "test:source-document": "vitest run test/source-document.test.ts",
     "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
+    "test:structural-edits": "vitest run test/structural-edits.test.ts",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

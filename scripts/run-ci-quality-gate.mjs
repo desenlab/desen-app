@@ -369,6 +369,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-editor-core-stable-id-insert.mjs",
       "tests/editor-core-stable-id-insert.test.mjs",
     ],
+    [
+      "editor-core-structural-edits",
+      "scripts/verify-editor-core-structural-edits.mjs",
+      "tests/editor-core-structural-edits.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -410,14 +415,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "0e4031fb92d5fca303d0e6e6cfa0a175503166ceb8c6426a49c372a62ada317d";
+  "f9469ec960639a89a502f571a8ec74ef8277b8ee88dcf967a1aef478e70d7041";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "60d2ece0dda9b266a3df259fac1e5977b3da592b265839d8bc58b86f25d29e6f";
+  "0e236e3b6c1cbf188ca34cf010a1d4a8e79f2a3bd66b090fa3ed1ec27380fe05";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "4d9b00c2080fd1c9693d8ca9e939bcb1910c20a42e7d50a73f9bd9c2cf053ceb";
+  "f993dfa52e251290d9eb4c27efc1482d67088a4612e309043ae063912c5dd479";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "13d51b2512dd3d10264a7a329f4b4923461c368d71400310647e4adc9933d2c5";
+const QUALITY_GATE_PLAN_SHA256 = "63495628ad91a7c60b38243367dfef22c53e208d5dbfc688d33144b721f4a5f5";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -718,7 +723,11 @@ function classifyLegacyPrerequisite({
     const expectedScript =
       "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
     if (
-      !["editor-core-source-document", "editor-core-stable-id-insert"].includes(currentProofId) ||
+      ![
+        "editor-core-source-document",
+        "editor-core-stable-id-insert",
+        "editor-core-structural-edits",
+      ].includes(currentProofId) ||
       packageName !== "@desen/editor-core" ||
       packageManifest.scripts?.[task] !== expectedScript
     ) {

@@ -309,7 +309,35 @@ test("rejects trace, PF-035, N-014, and proof-document boundary drift", async ()
     },
     {
       path: "docs/proof/NORMATIVE-COVERAGE.md",
-      mutate: (text) => text.replace(/^(\| N-014 \|.*?\| )PLANNED(\s+\|)/mu, "$1TESTED$2"),
+      mutate: (text) => text.replace(/^(\| N-014 \|.*?\| )TESTED(\s+\|)/mu, "$1PLANNED$2"),
+      code: "VARIANT_STYLE_NORMATIVE_DRIFT",
+    },
+    {
+      path: "docs/proof/NORMATIVE-COVERAGE.md",
+      mutate: (text) => text.replace(/^(\| N-014 \|.*?M06-T06–M06-T07), M08-T03(\s+\|)/mu, "$1$2"),
+      code: "VARIANT_STYLE_NORMATIVE_DRIFT",
+    },
+    {
+      path: "docs/proof/NORMATIVE-COVERAGE.md",
+      mutate: (text) =>
+        text.replace(
+          "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+          "docs/proof/artifacts/editor-core-0.1.0-structural-edits-drift.json",
+        ),
+      code: "VARIANT_STYLE_NORMATIVE_DRIFT",
+    },
+    {
+      path: "docs/proof/NORMATIVE-COVERAGE.md",
+      mutate: (text) =>
+        text.replace(
+          "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+          "0".repeat(64),
+        ),
+      code: "VARIANT_STYLE_NORMATIVE_DRIFT",
+    },
+    {
+      path: "docs/proof/NORMATIVE-COVERAGE.md",
+      mutate: (text) => text.replace(/^(\| N-014 \|.*)$/mu, "$1\n$1"),
       code: "VARIANT_STYLE_NORMATIVE_DRIFT",
     },
     {
@@ -320,9 +348,11 @@ test("rejects trace, PF-035, N-014, and proof-document boundary drift", async ()
   ];
   for (const mutation of mutations) {
     const original = await readFile(path.resolve(import.meta.dirname, "..", mutation.path), "utf8");
+    const mutated = mutation.mutate(original);
+    assert.notEqual(mutated, original);
     await assert.rejects(
       buildRuntimeCoreVariantStyleEvaluationEvidence({
-        fileOverrides: { [mutation.path]: mutation.mutate(original) },
+        fileOverrides: { [mutation.path]: mutated },
         verifyPrerequisites: false,
       }),
       hasEvidenceCode(mutation.code),

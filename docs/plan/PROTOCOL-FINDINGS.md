@@ -3230,3 +3230,44 @@ This file records implementation discoveries without changing the frozen DESEN 0
   cross-command determinism and the React/DOM boundary. A later protocol revision should
   standardize allocator and insertion semantics only if interoperable command logs become a
   protocol requirement.
+
+## PF-080 — Structural delete, move, and reorder need deterministic editor-only position rules
+
+- Status: OPEN
+- Blocks proof: No; M08-T03 defines conservative platform-neutral Source transitions without
+  changing frozen protocol bytes or claiming Catalog-backed acceptance, cardinality, or continuous
+  semantic validation.
+- Protocol location: SPEC Sections 5.3, 10.5, 17.3, and 23.5; `C-002`, `R-097`, and `A-010`;
+  normative rows `N-014` and `S-002`; related findings `PF-078` and `PF-079`
+- Observation: DESEN 0.1.0 makes slot-array order semantic, recommends stable ordinary-edit
+  identities, and asks editors to expose named-slot manipulation, but it does not define command
+  addressing, root handling, subtree deletion, source-slot retention, move-versus-reorder
+  separation, destination-index interpretation, absent destination slots, cyclic moves, duplicate
+  identity behavior, semantic no-ops, or structural-edit diagnostics. Independent editors could
+  therefore produce different Source bytes from the same apparent manipulation unless the editor
+  profile fixes those choices.
+- Implementation decision: M08-T03 exposes exact inert `deleteDesenEditorNode`,
+  `moveDesenEditorNode`, and `reorderDesenEditorNode` transitions over one selected surface. Delete
+  removes one uniquely identified non-root component subtree and retains its now-empty source slot.
+  Move transfers one uniquely identified non-root subtree to a different owner or slot without
+  rewriting any node or behavior identity; its index addresses the destination array before
+  insertion, and an absent destination slot may be created only at index zero. Same-owner,
+  same-slot movement is reserved for reorder. Reorder addresses a unique direct child by stable ID
+  and interprets its index as the final position after removal; a semantic no-op still returns a
+  fresh snapshot. Node and behavior instances may own destination slots, including own-data keys
+  named like `Object.prototype` properties. Surface roots cannot be deleted or moved, and a node
+  cannot move into itself or any node/behavior within its subtree. Zero matches fail as not found;
+  duplicate target or owner identities fail as ambiguous rather than selecting the first match.
+  Success returns a detached recursively frozen direct Source; failure exposes no partial Source.
+  Commands reuse the fixed 8 MiB canonical-document, 25,000 surface-identity, and depth-64 profile.
+  Project-owned failures use `run.desen.editor/STRUCTURAL_EDIT_COMMAND_INVALID`,
+  `STRUCTURAL_EDIT_TARGET_NOT_FOUND`, `STRUCTURAL_EDIT_TARGET_AMBIGUOUS`,
+  `STRUCTURAL_EDIT_POSITION_INVALID`, `STRUCTURAL_EDIT_ROOT_FORBIDDEN`,
+  `STRUCTURAL_EDIT_CYCLE_FORBIDDEN`, or `STRUCTURAL_EDIT_LIMIT_EXCEEDED`; structural re-admission
+  retains frozen protocol diagnostics. Catalog slot declaration, acceptance, and cardinality remain
+  unresolved authoring semantics for M08-T09 and M09-T07.
+- Future action: M08-T04 through M08-T06 must retain the same exact-command, atomic direct-Source,
+  stable-identity discipline. M08-T07 must prove authoring isolation and unknown-extension
+  preservation, M08-T09 must add continuous semantic validation, and M08-T10 must independently
+  prove cross-command determinism and the React/DOM boundary. A later protocol revision should
+  standardize these command semantics only if interoperable editor command logs become normative.

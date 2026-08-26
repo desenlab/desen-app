@@ -179,6 +179,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
         "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
       "test:source-document": "vitest run test/source-document.test.ts",
       "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
+      "test:structural-edits": "vitest run test/structural-edits.test.ts",
       "test:coverage": "vitest run --coverage",
     },
     dependencies: {
@@ -191,10 +192,12 @@ test("the package manifest keeps one exact root export and the declared runtime 
 
 test("the emitted public module graph stays platform-neutral and execution-closed", async () => {
   const emittedModules = await Promise.all(
-    ["index.js", "source-document.js", "stable-id-insert.js"].map(async (file) => ({
-      file,
-      source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
-    })),
+    ["index.js", "source-document.js", "stable-id-insert.js", "structural-edits.js"].map(
+      async (file) => ({
+        file,
+        source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
+      }),
+    ),
   );
 
   assert.deepEqual(
@@ -205,11 +208,15 @@ test("the emitted public module graph stays platform-neutral and execution-close
     [
       {
         file: "index.js",
-        specifiers: ["./source-document.js", "./stable-id-insert.js"],
+        specifiers: ["./source-document.js", "./stable-id-insert.js", "./structural-edits.js"],
       },
       { file: "source-document.js", specifiers: ["@desen/validator"] },
       {
         file: "stable-id-insert.js",
+        specifiers: ["@desen/protocol", "./source-document.js"],
+      },
+      {
+        file: "structural-edits.js",
         specifiers: ["@desen/protocol", "./source-document.js"],
       },
     ],
@@ -221,6 +228,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
   assert.match(
     emittedModules[0].source,
     /export\s*\{\s*insertDesenEditorNode\s*\}\s*from\s*["']\.\/stable-id-insert\.js["']/,
+  );
+  assert.match(
+    emittedModules[0].source,
+    /export\s*\{\s*deleteDesenEditorNode,\s*moveDesenEditorNode,\s*reorderDesenEditorNode\s*,?\s*\}\s*from\s*["']\.\/structural-edits\.js["']/,
   );
 
   const emittedGraph = emittedModules.map(({ source }) => source).join("\n");
@@ -240,7 +251,13 @@ test("the built public package resolves through its export map and exposes the r
     import.meta.resolve("@desen/editor-core"),
     new URL("../dist/index.js", import.meta.url).href,
   );
-  assert.deepEqual(Object.keys(editorCore), ["createDesenEditorDocument", "insertDesenEditorNode"]);
+  assert.deepEqual(Object.keys(editorCore), [
+    "createDesenEditorDocument",
+    "deleteDesenEditorNode",
+    "insertDesenEditorNode",
+    "moveDesenEditorNode",
+    "reorderDesenEditorNode",
+  ]);
 });
 
 test("the emitted factory returns the direct plain frozen Source without a hidden model", () => {
@@ -523,6 +540,189 @@ test("the emitted insert command rejects active or authority-expanding command i
     assert.equal(result.diagnostics[0].code, "run.desen.editor/INSERT_COMMAND_INVALID");
     assert.equal(Object.hasOwn(result, "document"), false);
     assert.equal(Object.hasOwn(result, "insertedNodeId"), false);
+  }
+  assert.equal(getterInvocations, 0);
+});
+
+test("the emitted structural commands delete, move, and reorder without rewriting identities", () => {
+  const creation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public Source factory to succeed.");
+
+  const reordered = editorCore.reorderDesenEditorNode(creation.document, {
+    surfaceId: "sign-in",
+    parentId: "sign-in.layout",
+    slot: "default",
+    nodeId: "sign-in.submit",
+    index: 0,
+  });
+  assert.equal(reordered.ok, true);
+  if (!reordered.ok) throw new TypeError("Expected public reorder to succeed.");
+  assert.deepEqual(
+    reordered.document.surfaces["sign-in"].root.slots.default.map(({ id }) => id),
+    ["sign-in.submit", "sign-in.title", "sign-in.email", "sign-in.password", "sign-in.error"],
+  );
+
+  const moved = editorCore.moveDesenEditorNode(reordered.document, {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.email",
+    parentId: "sign-in.title",
+    slot: "content",
+    index: 0,
+  });
+  assert.equal(moved.ok, true);
+  if (!moved.ok) throw new TypeError("Expected public move to succeed.");
+  assert.deepEqual(
+    moved.document.surfaces["sign-in"].root.slots.default.map(({ id }) => id),
+    ["sign-in.submit", "sign-in.title", "sign-in.password", "sign-in.error"],
+  );
+  assert.equal(
+    moved.document.surfaces["sign-in"].root.slots.default[1].slots.content[0].id,
+    "sign-in.email",
+  );
+
+  const deleted = editorCore.deleteDesenEditorNode(moved.document, {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.error",
+  });
+  assert.equal(deleted.ok, true);
+  if (!deleted.ok) throw new TypeError("Expected public delete to succeed.");
+  assert.deepEqual(
+    deleted.document.surfaces["sign-in"].root.slots.default.map(({ id }) => id),
+    ["sign-in.submit", "sign-in.title", "sign-in.password"],
+  );
+  assert.deepEqual(creation.document, validSource);
+  assert.notStrictEqual(reordered.document, creation.document);
+  assert.notStrictEqual(moved.document, reordered.document);
+  assert.notStrictEqual(deleted.document, moved.document);
+  assertPlainOwnDataFrozen(reordered);
+  assertPlainOwnDataFrozen(moved);
+  assertPlainOwnDataFrozen(deleted);
+});
+
+test("the emitted move command targets behavior slots and creates prototype-named own data", () => {
+  const input = cloneFixture();
+  input.surfaces["sign-in"].root.behaviors = [
+    {
+      id: "sign-in.sortable",
+      use: "com.example.interactions/Sortable",
+      slots: {},
+    },
+  ];
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the behavior fixture to be admitted.");
+  const inheritedConstructor = Object.prototype.constructor;
+
+  const result = editorCore.moveDesenEditorNode(creation.document, {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.password",
+    parentId: "sign-in.sortable",
+    slot: "constructor",
+    index: 0,
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected behavior-slot move to succeed.");
+  const behaviorSlots = result.document.surfaces["sign-in"].root.behaviors[0].slots;
+  assert.equal(Object.hasOwn(behaviorSlots, "constructor"), true);
+  assert.deepEqual(
+    behaviorSlots.constructor.map(({ id }) => id),
+    ["sign-in.password"],
+  );
+  assert.equal(Object.prototype.constructor, inheritedConstructor);
+  assertPlainOwnDataFrozen(result);
+});
+
+test("the emitted structural commands reject roots, cycles, and invalid positions atomically", () => {
+  const creation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public Source factory to succeed.");
+
+  const failures = [
+    [
+      editorCore.deleteDesenEditorNode(creation.document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.layout",
+      }),
+      "run.desen.editor/STRUCTURAL_EDIT_ROOT_FORBIDDEN",
+    ],
+    [
+      editorCore.moveDesenEditorNode(creation.document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        parentId: "sign-in.title",
+        slot: "content",
+        index: 0,
+      }),
+      "run.desen.editor/STRUCTURAL_EDIT_CYCLE_FORBIDDEN",
+    ],
+    [
+      editorCore.moveDesenEditorNode(creation.document, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        parentId: "sign-in.layout",
+        slot: "default",
+        index: 1,
+      }),
+      "run.desen.editor/STRUCTURAL_EDIT_POSITION_INVALID",
+    ],
+    [
+      editorCore.reorderDesenEditorNode(creation.document, {
+        surfaceId: "sign-in",
+        parentId: "sign-in.title",
+        slot: "content",
+        nodeId: "sign-in.email",
+        index: 0,
+      }),
+      "run.desen.editor/STRUCTURAL_EDIT_TARGET_NOT_FOUND",
+    ],
+  ];
+
+  for (const [result, code] of failures) {
+    assert.equal(result.ok, false);
+    assert.equal(result.diagnostics[0].code, code);
+    assert.equal(Object.hasOwn(result, "document"), false);
+    assertPlainOwnDataFrozen(result);
+  }
+  assert.deepEqual(creation.document, validSource);
+});
+
+test("the emitted structural commands reject active and authority-expanding command input", () => {
+  const creation = editorCore.createDesenEditorDocument(cloneFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the public Source factory to succeed.");
+  let getterInvocations = 0;
+  const activeDelete = { surfaceId: "sign-in", nodeId: "sign-in.title" };
+  Object.defineProperty(activeDelete, "nodeId", {
+    enumerable: true,
+    get() {
+      getterInvocations += 1;
+      return "sign-in.title";
+    },
+  });
+
+  for (const result of [
+    editorCore.deleteDesenEditorNode(creation.document, activeDelete),
+    editorCore.moveDesenEditorNode(creation.document, {
+      surfaceId: "sign-in",
+      nodeId: "sign-in.title",
+      parentId: "sign-in.layout",
+      slot: "default",
+      index: 0,
+      retainedAuthority: true,
+    }),
+    editorCore.reorderDesenEditorNode(creation.document, {
+      surfaceId: "sign-in",
+      parentId: "sign-in.layout",
+      slot: "default",
+      nodeId: "sign-in.title",
+      index: -1,
+    }),
+  ]) {
+    assert.equal(result.ok, false);
+    assert.equal(result.diagnostics[0].code, "run.desen.editor/STRUCTURAL_EDIT_COMMAND_INVALID");
+    assert.equal(Object.hasOwn(result, "document"), false);
   }
   assert.equal(getterInvocations, 0);
 });

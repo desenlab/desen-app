@@ -1,14 +1,26 @@
-import { createDesenEditorDocument, insertDesenEditorNode } from "@desen/editor-core";
+import {
+  createDesenEditorDocument,
+  deleteDesenEditorNode,
+  insertDesenEditorNode,
+  moveDesenEditorNode,
+  reorderDesenEditorNode,
+} from "@desen/editor-core";
 
 import type {
   DesenEditorDocument,
   DesenEditorDocumentCreationFailure,
   DesenEditorDocumentCreationResult,
   DesenEditorDocumentCreationSuccess,
+  DesenEditorNodeDeleteCommand,
   DesenEditorNodeInsertCommand,
   DesenEditorNodeInsertFailure,
   DesenEditorNodeInsertResult,
   DesenEditorNodeInsertSuccess,
+  DesenEditorNodeMoveCommand,
+  DesenEditorNodeReorderCommand,
+  DesenEditorStructuralEditFailure,
+  DesenEditorStructuralEditResult,
+  DesenEditorStructuralEditSuccess,
 } from "@desen/editor-core";
 
 declare const input: unknown;
@@ -98,3 +110,69 @@ const explicitIdBypass: DesenEditorNodeInsertCommand = {
   id: "main.explicit",
 };
 void explicitIdBypass;
+
+const deleteCommand: DesenEditorNodeDeleteCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+};
+const moveCommand: DesenEditorNodeMoveCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  parentId: "main.column",
+  slot: "content",
+  index: 0,
+};
+const reorderCommand: DesenEditorNodeReorderCommand = {
+  surfaceId: "main",
+  parentId: "main.root",
+  slot: "default",
+  nodeId: "main.text",
+  index: 0,
+};
+const deletion: DesenEditorStructuralEditResult = deleteDesenEditorNode(document, deleteCommand);
+const movement: DesenEditorStructuralEditResult = moveDesenEditorNode(document, moveCommand);
+const reordering: DesenEditorStructuralEditResult = reorderDesenEditorNode(
+  document,
+  reorderCommand,
+);
+
+for (const structuralEdit of [deletion, movement, reordering]) {
+  if (structuralEdit.ok) {
+    const success: DesenEditorStructuralEditSuccess = structuralEdit;
+    const next: DesenEditorDocument = success.document;
+
+    // @ts-expect-error structural-edit successes keep the next Source immutable
+    success.document.entry = "mutated";
+
+    // @ts-expect-error structural-edit success diagnostics are empty
+    const impossibleDiagnostic = success.diagnostics[0];
+
+    void next;
+    void impossibleDiagnostic;
+  } else {
+    const failure: DesenEditorStructuralEditFailure = structuralEdit;
+    const diagnosticCode: string = failure.diagnostics[0].code;
+
+    // @ts-expect-error structural-edit failures expose no partial Source
+    const partialDocument = failure.document;
+
+    void diagnosticCode;
+    void partialDocument;
+  }
+}
+
+// @ts-expect-error emitted delete-command fields remain readonly
+deleteCommand.nodeId = "main.other";
+
+// @ts-expect-error emitted move-command fields remain readonly
+moveCommand.index = 1;
+
+// @ts-expect-error emitted reorder-command fields remain readonly
+reorderCommand.slot = "other";
+
+const crossSurfaceAuthority: DesenEditorNodeMoveCommand = {
+  ...moveCommand,
+  // @ts-expect-error structural moves expose one selected surface, not a second authority
+  destinationSurfaceId: "other",
+};
+void crossSurfaceAuthority;

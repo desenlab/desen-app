@@ -39,6 +39,16 @@ const COMMAND_EVENT_PREREQUISITE = Object.freeze({
   artifact: "runtime-core-0.1.0-command-event-actions.json",
   sha256: "8098184e5c25857a108e93dd4638556f1af0446fad9847b8ce44c9f8c2d79be4",
 });
+const N014_SUCCESSOR_AUTHORITY = Object.freeze({
+  task: "M08-T03",
+  path: "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+  sha256: "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+});
+const CURRENT_NORMATIVE_STATUSES = Object.freeze([
+  Object.freeze({ id: "N-014", status: "TESTED" }),
+  Object.freeze({ id: "N-032", status: "TESTED" }),
+  Object.freeze({ id: "N-041", status: "PLANNED" }),
+]);
 
 const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
   "RUNTIME_ACTION_TURN_LIMITS",
@@ -1210,29 +1220,47 @@ function verifyTrace(trace) {
 }
 
 function verifyNormativeCoverage(normativeText) {
-  const rows = Object.fromEntries(
-    normativeText
-      .split("\n")
-      .filter((line) => /^\| N-(?:014|032|041) \|/u.test(line))
-      .map((line) => {
-        const cells = line.split("|").map((cell) => cell.trim());
-        return [cells[1], { status: cells[5], text: line }];
-      }),
-  );
-  if (
-    rows["N-014"]?.status !== "PLANNED" ||
-    rows["N-032"]?.status !== "TESTED" ||
-    rows["N-041"]?.status !== "PLANNED"
-  ) {
-    fail("ACTION_TURN_NORMATIVE_DRIFT", "M04-T13 normative status boundaries drifted.", {
-      rows,
+  const rows = new Map();
+  for (const line of normativeText.split("\n")) {
+    if (!/^\| N-(?:014|032|041) \|/u.test(line)) continue;
+    const cells = line.split("|").map((cell) => cell.trim());
+    const id = cells[1];
+    if (rows.has(id)) {
+      fail("ACTION_TURN_NORMATIVE_DRIFT", `The current normative ledger duplicates ${id}.`);
+    }
+    rows.set(id, {
+      owners: (cells[4] ?? "")
+        .split(",")
+        .map((owner) => owner.trim())
+        .filter(Boolean),
+      status: cells[5],
+      text: line,
     });
   }
+  for (const { id, status } of CURRENT_NORMATIVE_STATUSES) {
+    const actual = rows.get(id)?.status;
+    if (actual !== status) {
+      fail("ACTION_TURN_NORMATIVE_DRIFT", `${id} current successor status drifted.`, {
+        expected: status,
+        actual,
+      });
+    }
+  }
   for (const id of ["N-014", "N-032", "N-041"]) {
-    if (!rows[id]?.text.includes("M04-T13")) {
+    if (!rows.get(id)?.text.includes("M04-T13")) {
       fail("ACTION_TURN_NORMATIVE_DRIFT", `${id} omits M04-T13 evidence.`);
     }
   }
+  const n014 = rows.get("N-014");
+  if (
+    !n014.owners.includes(N014_SUCCESSOR_AUTHORITY.task) ||
+    !n014.text.includes(`\`${N014_SUCCESSOR_AUTHORITY.path}\``) ||
+    !n014.text.includes(`\`sha256:${N014_SUCCESSOR_AUTHORITY.sha256}\``)
+  ) {
+    fail("ACTION_TURN_NORMATIVE_DRIFT", "N-014 omits the exact M08-T03 successor authority.");
+  }
+  // The committed M04-T13 artifact retains its task-time projection. Only the live ledger is
+  // allowed to advance N-014 through the exact M08-T03 successor authority checked above.
   return Object.freeze({
     tested: Object.freeze(["N-032"]),
     planned: Object.freeze(["N-014", "N-041"]),

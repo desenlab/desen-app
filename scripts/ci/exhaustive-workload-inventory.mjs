@@ -96,11 +96,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "0e4031fb92d5fca303d0e6e6cfa0a175503166ceb8c6426a49c372a62ada317d";
+  "f9469ec960639a89a502f571a8ec74ef8277b8ee88dcf967a1aef478e70d7041";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "60d2ece0dda9b266a3df259fac1e5977b3da592b265839d8bc58b86f25d29e6f";
+  "0e236e3b6c1cbf188ca34cf010a1d4a8e79f2a3bd66b090fa3ed1ec27380fe05";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "4d9b00c2080fd1c9693d8ca9e939bcb1910c20a42e7d50a73f9bd9c2cf053ceb";
+  "f993dfa52e251290d9eb4c27efc1482d67088a4612e309043ae063912c5dd479";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -467,6 +467,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "editor-core-stable-id-insert",
     "scripts/verify-editor-core-stable-id-insert.mjs",
     "tests/editor-core-stable-id-insert.test.mjs",
+  ],
+  [
+    "editor-core-structural-edits",
+    "scripts/verify-editor-core-structural-edits.mjs",
+    "tests/editor-core-structural-edits.test.mjs",
   ],
 ]);
 
@@ -844,7 +849,11 @@ function classifyPrerequisite({
     const expectedScript =
       "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
     if (
-      !["editor-core-source-document", "editor-core-stable-id-insert"].includes(currentProofId) ||
+      ![
+        "editor-core-source-document",
+        "editor-core-stable-id-insert",
+        "editor-core-structural-edits",
+      ].includes(currentProofId) ||
       packageName !== "@desen/editor-core" ||
       packageScripts[task] !== expectedScript
     ) {
@@ -1119,7 +1128,9 @@ function buildCanonicalInventory() {
       "node",
       [verifierFile],
       [
-        id === "editor-core-source-document" || id === "editor-core-stable-id-insert"
+        id === "editor-core-source-document" ||
+        id === "editor-core-stable-id-insert" ||
+        id === "editor-core-structural-edits"
           ? "editor-core-public-package-contract"
           : "package-tests",
       ],
@@ -1387,7 +1398,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "c834f3d962f11245c3a053c4e31b60d8afb7f92c14d6faa35132cd79e9064e7a";
+  "81bf1879e949dc9d43efa0beea5114f66651dee45918b1355c35b1cee21051ae";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

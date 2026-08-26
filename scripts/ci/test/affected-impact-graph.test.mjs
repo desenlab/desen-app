@@ -14,8 +14,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 73);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 73);
+  assert.equal(graph.proofUnitCount, 74);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 74);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -31,6 +31,10 @@ test("the reviewed impact graph owns every proof unit exactly once", () => {
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "editor-core-stable-id-insert")?.prerequisites,
     ["editor-core-source-document"],
+  );
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "editor-core-structural-edits")?.prerequisites,
+    ["editor-core-stable-id-insert"],
   );
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);
@@ -64,14 +68,26 @@ test("independent proof units remain a strict subset", () => {
   assert.equal(closure.workloadCount, 11);
 });
 
-test("the editor stable-ID insert closes over its Source and structural predecessors", () => {
+test("the editor stable-ID insert closes over its Source predecessor and structural successor", () => {
   const closure = createAffectedImpactClosure(["editor-core-stable-id-insert"]);
   assert.deepEqual(closure.proofUnitIds, [
     "protocol-structural-validation",
     "editor-core-source-document",
     "editor-core-stable-id-insert",
+    "editor-core-structural-edits",
   ]);
-  assert.equal(closure.workloadCount, 15);
+  assert.equal(closure.workloadCount, 17);
+});
+
+test("the editor structural edits close over stable insertion and Source admission", () => {
+  const closure = createAffectedImpactClosure(["editor-core-structural-edits"]);
+  assert.deepEqual(closure.proofUnitIds, [
+    "protocol-structural-validation",
+    "editor-core-source-document",
+    "editor-core-stable-id-insert",
+    "editor-core-structural-edits",
+  ]);
+  assert.equal(closure.workloadCount, 17);
 });
 
 test("unknown, duplicate, empty, proxy, and sparse owner inputs fail closed", () => {
