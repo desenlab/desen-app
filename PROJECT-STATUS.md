@@ -1360,7 +1360,7 @@ M08-T02 is now complete. `insertDesenEditorNode` deterministically allocates a s
 atomically inserts one minimal leaf at the exact requested slot boundary. It preserves existing
 identities and order and returns no partial Source or allocated ID on failure. The current
 append-only reader successor is sequence 30 at
-`1887996f51318a3a0f7f753d12c0a78b22df30fb005daaa2a69897999d05b654`, authenticating 27 frozen
+`20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b`, authenticating 27 frozen
 artifacts and 54 current readers. Historical sequences 28 and 29 remain unchanged. Implementation
 progress is 87/145 (60%), M08 is 2/10, proof gates remain 8/13, and M08-T03 is next.
 
@@ -2750,7 +2750,7 @@ M08-T02 evidence:
 - CI contract validation: the combined inventory, ownership, selector, promotion, checkpoint,
   affected/exhaustive, shared-state, equivalence, and legacy-quality-gate suite passes 227/227
 - current reader authority: append-only sequence 30 at
-  `1887996f51318a3a0f7f753d12c0a78b22df30fb005daaa2a69897999d05b654` authenticates 27 frozen
+  `20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b` authenticates 27 frozen
   artifacts and 54 current readers while preserving historical sequence 29
 - scope nonclaims: no delete, move, reorder, remaining authoring command, persistence, continuous
   semantic validation, invalid-node mapping, hostile-JavaScript sandbox, streaming/preallocation

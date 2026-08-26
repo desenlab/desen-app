@@ -1079,7 +1079,7 @@ in `docs/proof/EDITOR-CORE-STABLE-ID-INSERT.md` and the 19,561-byte artifact
 `docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json` at
 `sha256:3d7d7ce269744b6f382b17c3cc34d721faec70d2ba7f59201a7fc3f6618ea39d`.
 Append-only reader checkpoint sequence 30 at
-`1887996f51318a3a0f7f753d12c0a78b22df30fb005daaa2a69897999d05b654` authenticates 27 frozen
+`20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b` authenticates 27 frozen
 artifacts and 54 current readers while leaving historical sequence 29 unchanged.
 
 Delete, move, and ordered-reorder commands remain M08-T03; the other authoring and persistence

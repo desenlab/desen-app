@@ -370,7 +370,7 @@ donmuş doğrudan Source'u, hata ise kısmi belge ya da ayrılmış kimlik verme
 16/16 odak paket testi, 22/22 public-package testi ve 10/10 bağımsız kök kanıtı geçti. 19.561 baytlık
 artifact `sha256:3d7d7ce269744b6f382b17c3cc34d721faec70d2ba7f59201a7fc3f6618ea39d`
 ile sabittir. Güncel append-only okuyucu ardılı sequence 30'dur;
-`1887996f51318a3a0f7f753d12c0a78b22df30fb005daaa2a69897999d05b654` başıyla 27 donmuş artifact
+`20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b` başıyla 27 donmuş artifact
 ve 54 güncel reader doğrular; tarihsel sequence 29 değişmez. Bu sonuç silme, taşıma ve yeniden
 sıralamayı, kalan authoring komutlarını, persistence'ı, sürekli semantik doğrulamayı veya terminal
 React/DOM sınırını kanıtlamaz. Bunlar M08-T03–M08-T10'da kalır. Genel ilerleme 87/145 (%60), M08

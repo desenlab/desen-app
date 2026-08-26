@@ -323,7 +323,7 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     ),
     true,
   );
-  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 14);
+  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 15);
   assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 11);
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {
     const bytes = await workspaceBytes(receipt.path);

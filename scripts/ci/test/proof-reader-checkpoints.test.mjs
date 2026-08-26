@@ -405,7 +405,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[29],
-    "1887996f51318a3a0f7f753d12c0a78b22df30fb005daaa2a69897999d05b654",
+    "20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -2674,7 +2674,7 @@ test("sequence thirty reseals M08-T01, appends M08-T02, and authenticates the li
       role: "root-test",
       path: "tests/editor-core-source-document.test.mjs",
       bytes: 42979,
-      sha256: "5e1e21c7955a71611965ce3884eed6623dabf5cf459de212713bfb7f45db99f9",
+      sha256: "af28ef3688d8c8a8f15f00a245ae7e9ce7516321a9b673dc9a00a9b14fab167c",
     },
     {
       task: "M08-T02",
@@ -2709,7 +2709,7 @@ test("sequence thirty reseals M08-T01, appends M08-T02, and authenticates the li
   assert.deepEqual(liveReceipts, [current.artifacts[26], ...current.readers.slice(50)]);
   assert.equal(
     calculateProofReaderCheckpointSha256(current),
-    "1887996f51318a3a0f7f753d12c0a78b22df30fb005daaa2a69897999d05b654",
+    "20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b",
   );
 });
 
