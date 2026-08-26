@@ -428,7 +428,7 @@ G07-due debt entries are `CLOSED`; `DEBT-I07-007` deliberately remains `OPEN` fo
 historical I07-04/G07 closure checkpoint was sequence 28 at
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
 artifacts and 50 readers. The current append-only successor is sequence 30 at
-`20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b`, authenticating 27 frozen
+`f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`, authenticating 27 frozen
 artifacts and 54 current readers. I07-04 and G07 remain `DONE`; proof gates remain 8/13,
 implementation progress is 87/145, and M08-T03 is next. Legacy retirement remains owned by I07-05.
 

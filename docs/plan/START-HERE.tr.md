@@ -368,9 +368,9 @@ alanında exact tabanı veya en düşük boş `-2`, `-3`, ... son ekini seçer; 
 slot'un istenen sıralı sınırına yalnız `{id, use}` yaprağı ekler. Başarı yeni ayrık ve tamamen
 donmuş doğrudan Source'u, hata ise kısmi belge ya da ayrılmış kimlik vermeyen donmuş tanıyı döndürür.
 16/16 odak paket testi, 22/22 public-package testi ve 10/10 bağımsız kök kanıtı geçti. 19.561 baytlık
-artifact `sha256:3d7d7ce269744b6f382b17c3cc34d721faec70d2ba7f59201a7fc3f6618ea39d`
+artifact `sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`
 ile sabittir. Güncel append-only okuyucu ardılı sequence 30'dur;
-`20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b` başıyla 27 donmuş artifact
+`f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970` başıyla 27 donmuş artifact
 ve 54 güncel reader doğrular; tarihsel sequence 29 değişmez. Bu sonuç silme, taşıma ve yeniden
 sıralamayı, kalan authoring komutlarını, persistence'ı, sürekli semantik doğrulamayı veya terminal
 React/DOM sınırını kanıtlamaz. Bunlar M08-T03–M08-T10'da kalır. Genel ilerleme 87/145 (%60), M08

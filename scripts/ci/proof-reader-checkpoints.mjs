@@ -67,7 +67,7 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "bf21a7a600ca9d569d90a8711e4fe857e91beb933d8a3c7289ebfbf0b8a2d87a",
   "2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546",
   "ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b",
-  "20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b",
+  "f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
@@ -376,7 +376,7 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     {
       path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
       bytes: 19_561,
-      sha256: "3d7d7ce269744b6f382b17c3cc34d721faec70d2ba7f59201a7fc3f6618ea39d",
+      sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
     },
     "scripts/lib/editor-core-stable-id-insert-proof.mjs",
     "tests/editor-core-stable-id-insert.test.mjs",

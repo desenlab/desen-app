@@ -274,15 +274,15 @@ test("[writer-filesystem] rejects symlink, hard-link, and non-file destinations"
 test("[filesystem] rejects linked prerequisite, artifact, and proof authorities", async () => {
   const directory = await temporaryDirectory("desen-m08-t02-authority-");
   const prerequisite = path.join(ROOT, EDITOR_CORE_STABLE_ID_INSERT_PREREQUISITE_PIN.path);
+  const prerequisiteCopy = path.join(directory, "prerequisite-copy.json");
   const prerequisiteLink = path.join(directory, "prerequisite.json");
-  await symlink(prerequisite, prerequisiteLink);
+  await writeFile(prerequisiteCopy, await readFile(prerequisite));
+  await symlink(prerequisiteCopy, prerequisiteLink);
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({ prerequisitePath: prerequisiteLink }),
     expectedError("FILESYSTEM_UNSAFE"),
   );
-  const prerequisiteCopy = path.join(directory, "prerequisite-copy.json");
   const prerequisiteHardLink = path.join(directory, "prerequisite-hard.json");
-  await writeFile(prerequisiteCopy, await readFile(prerequisite));
   await link(prerequisiteCopy, prerequisiteHardLink);
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({ prerequisitePath: prerequisiteHardLink }),

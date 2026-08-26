@@ -8,7 +8,7 @@ Result: `PASS`
 
 Artifact: `docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json`
 
-Final artifact: `sha256:3d7d7ce269744b6f382b17c3cc34d721faec70d2ba7f59201a7fc3f6618ea39d`
+Final artifact: `sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`
 
 ## Direct frozen prerequisite
 

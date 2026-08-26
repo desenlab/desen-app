@@ -1077,9 +1077,9 @@ files match the frozen M08-T01 receipts while Node, the ESM loader, and process 
 Exact evidence is pinned
 in `docs/proof/EDITOR-CORE-STABLE-ID-INSERT.md` and the 19,561-byte artifact
 `docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json` at
-`sha256:3d7d7ce269744b6f382b17c3cc34d721faec70d2ba7f59201a7fc3f6618ea39d`.
+`sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`.
 Append-only reader checkpoint sequence 30 at
-`20fd4340b912214484e8fdf4a0c17693c4503ff83f8360f0649c480f1389e39b` authenticates 27 frozen
+`f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970` authenticates 27 frozen
 artifacts and 54 current readers while leaving historical sequence 29 unchanged.
 
 Delete, move, and ordered-reorder commands remain M08-T03; the other authoring and persistence
