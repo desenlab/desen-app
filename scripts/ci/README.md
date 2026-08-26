@@ -252,7 +252,7 @@ eligible hosted comparisons with zero false negatives; promotion and hosted cuto
 The I07-04 baseline remains byte-identical and historical. Its verifier authenticates that frozen
 promotion receipt first, then separately admits only the exact M08-T04 current-authority successor,
 whose comparison digest is
-`sha256:b999572b8e190e6790a47bc6018de41ea56eaae354b8bc605e8bcca05f1fc446`.
+`sha256:9b72593512eb36a8f13963188cd037d1c5b9374023eba2737b332c0bb5950155`.
 
 The complete current reviewed digest set is:
 
@@ -374,8 +374,8 @@ The M08-T04 `editor-core-content-edits` pair is ordinary and non-barrier. Both w
 `PROOF_OS_TEMP_ISOLATED`, follow stable-ID insertion and structural edits plus the same serial
 public-package predecessor, and retain verifier-before-root ordering. Neither receives
 workspace-write, port, native-addon, or verifier runtime-probe authority; only the root receives
-the ordinary `NODE_TEST_HARNESS` child policy. It verifies the exact 26,382-byte artifact at
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`.
+the ordinary `NODE_TEST_HARNESS` child policy. It verifies the exact 26,988-byte artifact at
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`.
 
 The only verifier runtime-probe exceptions, each with isolated temp and child-process authority,
 are:
@@ -518,7 +518,7 @@ artifacts and 50 readers. Historical sequence 30 remains pinned at
 `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`. Historical sequence 31 is
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The current append-only
 authority is sequence 32 at
-`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee`, authenticating 29 frozen
+`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574`, authenticating 29 frozen
 artifacts and 58 current readers. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 passed fresh `REQUIRED + EXHAUSTIVE` in
 [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
@@ -530,8 +530,8 @@ The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) pass
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07 are
 `DONE`; proof gates are 8/13, implementation is 89/145, M08 is 4/10, `N-014` remains `TESTED`,
-`S-002` remains `PLANNED`, and M08-T05 is next. The exact 26,382-byte M08-T04 artifact is
+`S-002` remains `PLANNED`, and M08-T05 is next. The exact 26,988-byte M08-T04 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-content-edits.json` at
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`, with reviewed report
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`, with reviewed report
 `docs/proof/EDITOR-CORE-CONTENT-EDITS.md`. These are local code-owned/current results and make no
 hosted M08-T04 claim; no `P-*`, `N-*`, `S-*`, or proof-gate status changes.

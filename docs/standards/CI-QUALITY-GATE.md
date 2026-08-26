@@ -485,8 +485,8 @@ The M08-T04 `editor-core-content-edits` pair is ordinary and non-barrier. Both w
 `PROOF_OS_TEMP_ISOLATED`, follow the stable-ID and structural-edit prerequisites plus the serial
 public-package predecessor, and retain verifier-before-root ordering. Neither receives
 workspace-write, port, native-addon, or verifier runtime-probe authority; only the root receives
-the ordinary `NODE_TEST_HARNESS` child policy. The pair verifies the exact 26,382-byte content-edit
-artifact at `sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`.
+the ordinary `NODE_TEST_HARNESS` child policy. The pair verifies the exact 26,988-byte content-edit
+artifact at `sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`.
 
 Only these verifier proofs receive both runner-owned temp-write and child-runtime-probe authority:
 
@@ -651,10 +651,10 @@ artifacts and 50 readers. Historical sequence 30 remains pinned at
 `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`. Historical sequence 31 is
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The current append-only
 successor is sequence 32 at
-`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee`, authenticating 29 frozen
-artifacts and 58 current readers. The exact 26,382-byte M08-T04 artifact is
+`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574`, authenticating 29 frozen
+artifacts and 58 current readers. The exact 26,988-byte M08-T04 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-content-edits.json` at
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`; its reviewed report is
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`; its reviewed report is
 `docs/proof/EDITOR-CORE-CONTENT-EDITS.md`. These are local code-owned/current receipts and make no
 hosted M08-T04 claim. Implementation progress is 89/145, M08 is 4/10, proof gates remain 8/13,
 `N-014` is `TESTED`, `S-002` remains `PLANNED`, no `P-*`, `N-*`, `S-*`, or proof-gate status

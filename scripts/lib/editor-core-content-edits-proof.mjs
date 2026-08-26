@@ -276,7 +276,7 @@ const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
   "sets and deletes variant style leaves while retaining empty style containers",
   "rejects deletion of every missing path without returning a partial document",
   "rejects missing and ambiguous surface-local owner identities",
-  "rejects extra authority, symbols, prototypes, sparse values, and accessors without invocation",
+  "rejects non-data command shapes without invoking hooks and contains throwing Proxy traps atomically",
   "rejects malformed-Unicode prop names with controlled command diagnostics",
   "preserves structural diagnostics when a content value would make the Source invalid",
   "enforces depth, identity-count, and 8 MiB document boundaries",
@@ -305,7 +305,7 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted condition and variant lifecycle commands preserve ordered semantics",
   "the emitted delete and variant-update commands retain emptied own containers",
   "the emitted content commands reject missing, ambiguous, invalid, and structural paths atomically",
-  "all emitted content commands reject active or authority-expanding command input",
+  "the emitted content commands enforce own-data shapes and contain Proxy reflection failures atomically",
   "the emitted content commands are deterministic, immutable, and Catalog-unresolved",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",
@@ -1507,6 +1507,7 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
   );
 
   let getterInvoked = false;
+  let toJSONInvoked = false;
   const accessorCommand = {
     surfaceId: "sign-in",
     ownerId: "sign-in.title",
@@ -1525,6 +1526,90 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     "accessor command",
   );
   if (getterInvoked) fail("BEHAVIOR_DRIFT", "Command validation invoked an accessor.");
+
+  expectFailure(
+    runtime.setDesenEditorOwnerProp(baseline, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      name: "text",
+      value: {
+        inert: true,
+        toJSON() {
+          toJSONInvoked = true;
+          return { serialized: "authority" };
+        },
+      },
+    }),
+    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    "toJSON command value",
+  );
+  if (toJSONInvoked) fail("BEHAVIOR_DRIFT", "Command validation invoked a toJSON hook.");
+
+  const forwardingTraps = [];
+  const forwardingTarget = {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    name: "text",
+    value: "forwarded",
+  };
+  const forwardingProxy = new Proxy(forwardingTarget, {
+    getOwnPropertyDescriptor(target, key) {
+      forwardingTraps.push(`getOwnPropertyDescriptor:${String(key)}`);
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+    getPrototypeOf(target) {
+      forwardingTraps.push("getPrototypeOf");
+      return Reflect.getPrototypeOf(target);
+    },
+    ownKeys(target) {
+      forwardingTraps.push("ownKeys");
+      return Reflect.ownKeys(target);
+    },
+  });
+  const forwarded = expectSuccess(
+    runtime.setDesenEditorOwnerProp(baseline, forwardingProxy),
+    "forwarding Proxy command",
+  );
+  if (forwarded.document.surfaces["sign-in"].root.slots.default[0].props.text !== "forwarded") {
+    fail("BEHAVIOR_DRIFT", "A forwarding Proxy no longer exposes the required own-data shape.");
+  }
+  const expectedForwardingTraps = [
+    "getPrototypeOf",
+    "ownKeys",
+    "getOwnPropertyDescriptor:name",
+    "getOwnPropertyDescriptor:ownerId",
+    "getOwnPropertyDescriptor:surfaceId",
+    "getOwnPropertyDescriptor:value",
+  ];
+  exactArray(
+    forwardingTraps,
+    expectedForwardingTraps,
+    "BEHAVIOR_DRIFT",
+    "Forwarding Proxy reflection traps",
+  );
+
+  const throwingTraps = [];
+  const throwingProxy = new Proxy(forwardingTarget, {
+    getPrototypeOf() {
+      throwingTraps.push("getPrototypeOf");
+      throw new TypeError("controlled Proxy reflection failure");
+    },
+  });
+  expectFailure(
+    runtime.setDesenEditorOwnerProp(baseline, throwingProxy),
+    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    "throwing Proxy command",
+  );
+  const expectedThrowingTraps = ["getPrototypeOf"];
+  exactArray(
+    throwingTraps,
+    expectedThrowingTraps,
+    "BEHAVIOR_DRIFT",
+    "Throwing Proxy reflection traps",
+  );
+  if (!Buffer.from(canonicalizeJsonBytes(baseline)).equals(Buffer.from(baselineBytes))) {
+    fail("BEHAVIOR_DRIFT", "A throwing Proxy failure mutated the current Source.");
+  }
 
   expectFailure(
     runtime.insertDesenEditorVariant(baseline, {
@@ -1655,7 +1740,14 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
       editorCodes: [...EXPECTED_DIAGNOSTIC_CODES],
       structuralPassThrough: "SCHEMA_INVALID",
       missingAmbiguousPathAndPositionFailClosed: true,
-      activeAndAuthorityExpandingCommandsRejectedWithoutInvocation: true,
+      commandShapeBoundary: "OWN_ENUMERABLE_DATA_DESCRIPTORS",
+      accessorAndToJsonHooksRejectedWithoutInvocation: true,
+      proxyReflectionMayInvokeTraps: true,
+      forwardingProxyAdmitted: true,
+      forwardingProxyTrapOrder: expectedForwardingTraps,
+      throwingProxyContainedAsCommandInvalid: true,
+      throwingProxyTrapOrder: expectedThrowingTraps,
+      throwingProxyFailureLeavesPriorSourceUnchanged: true,
       failuresExposeNoDocument: true,
     },
     immutability: {
@@ -1755,6 +1847,7 @@ export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined
       "M08-T09_CATALOG_SEMANTICS_AND_CONTINUOUS_DIAGNOSTICS",
       "M08-T10_AND_G08_TERMINAL_UI_BOUNDARY",
       "HOSTILE_JAVASCRIPT_SANDBOX",
+      "NO_PROXY_TRAP_EXECUTION_MEMBRANE",
       "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
       "STREAMING_OR_PREALLOCATION_MEMORY_DOS_BOUND",
       "P18_OR_G08_ADVANCEMENT",

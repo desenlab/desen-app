@@ -490,9 +490,11 @@ describe("M08-T04 content edits", () => {
     });
   });
 
-  it("rejects extra authority, symbols, prototypes, sparse values, and accessors without invocation", () => {
+  it("rejects non-data command shapes without invoking hooks and contains throwing Proxy traps atomically", () => {
     const document = createDocument();
+    const before = canonicalizeJsonBytes(document);
     const getter = vi.fn(() => "active");
+    const toJSON = vi.fn(() => ({ serialized: "authority" }));
     const accessor = {
       surfaceId: "sign-in",
       ownerId: "sign-in.title",
@@ -513,6 +515,34 @@ describe("M08-T04 content edits", () => {
       readonly value = "changed";
     }
     const sparse = new Array(1);
+    const forwardingTraps: string[] = [];
+    const forwardingTarget = {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      name: "text",
+      value: "forwarded",
+    };
+    const forwardingProxy = new Proxy(forwardingTarget, {
+      getOwnPropertyDescriptor(target, key) {
+        forwardingTraps.push(`getOwnPropertyDescriptor:${String(key)}`);
+        return Reflect.getOwnPropertyDescriptor(target, key);
+      },
+      getPrototypeOf(target) {
+        forwardingTraps.push("getPrototypeOf");
+        return Reflect.getPrototypeOf(target);
+      },
+      ownKeys(target) {
+        forwardingTraps.push("ownKeys");
+        return Reflect.ownKeys(target);
+      },
+    });
+    const throwingTraps: string[] = [];
+    const throwingProxy = new Proxy(forwardingTarget, {
+      getPrototypeOf() {
+        throwingTraps.push("getPrototypeOf");
+        throw new TypeError("controlled Proxy reflection failure");
+      },
+    });
     const failures = [
       setDesenEditorOwnerProp(document, accessor as never),
       setDesenEditorOwnerProp(document, symbolic as never),
@@ -527,17 +557,45 @@ describe("M08-T04 content edits", () => {
         surfaceId: "sign-in",
         ownerId: "sign-in.title",
         name: "text",
+        value: () => "executable",
+      } as never),
+      setDesenEditorOwnerProp(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        name: "text",
+        value: { inert: true, toJSON },
+      } as never),
+      setDesenEditorOwnerProp(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        name: "text",
         value: "changed",
         policy: "force",
       } as never),
+      setDesenEditorOwnerProp(document, throwingProxy),
     ];
     expect(getter).not.toHaveBeenCalled();
+    expect(toJSON).not.toHaveBeenCalled();
     for (const failure of failures) {
       expect(failure).toMatchObject({
         ok: false,
         diagnostics: [{ code: "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID" }],
       });
+      expect("document" in failure).toBe(false);
     }
+    expect(throwingTraps).toEqual(["getPrototypeOf"]);
+    expect(canonicalizeJsonBytes(document)).toEqual(before);
+
+    const forwarded = successful(setDesenEditorOwnerProp(document, forwardingProxy));
+    expect(forwarded.surfaces["sign-in"]?.root.slots?.default?.[0]?.props?.text).toBe("forwarded");
+    expect(forwardingTraps).toEqual([
+      "getPrototypeOf",
+      "ownKeys",
+      "getOwnPropertyDescriptor:name",
+      "getOwnPropertyDescriptor:ownerId",
+      "getOwnPropertyDescriptor:surfaceId",
+      "getOwnPropertyDescriptor:value",
+    ]);
   });
 
   it("rejects malformed-Unicode prop names with controlled command diagnostics", () => {

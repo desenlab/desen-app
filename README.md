@@ -435,19 +435,22 @@ artifacts and 50 readers. Historical sequence 30 remains pinned at
 `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`; historical sequence 31 is
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The current append-only
 successor is sequence 32 at
-`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee`, authenticating 29 frozen
+`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574`, authenticating 29 frozen
 artifacts and 58 readers. M08-T03's delete/move/reorder proof is the exact 22,402-byte
 `docs/proof/artifacts/editor-core-0.1.0-structural-edits.json` at
 `sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. It closes `N-014` as
 `TESTED`. M08-T04's fourteen immutable prop, style, condition, and ordered-variant commands are
-proved by the 26,382-byte
+proved by the 26,988-byte
 [`editor-core-0.1.0-content-edits.json`](docs/proof/artifacts/editor-core-0.1.0-content-edits.json)
-at `sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`; the reviewed report is
+at `sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`; the reviewed report is
 [`EDITOR-CORE-CONTENT-EDITS.md`](docs/proof/EDITOR-CORE-CONTENT-EDITS.md). `N-014` remains `TESTED`,
-and `S-002` remains `PLANNED` through M08-T10. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
-I07-04 and G07 remain `DONE`; proof gates remain 8/13, implementation progress is 89/145, M08 is
-4/10, and M08-T05 state declaration and binding editing is next. Legacy retirement remains owned
-by I07-05.
+The tested command boundary rejects inherited, accessor, symbol, extra-field, function,
+own-`toJSON`, sparse/decorated-array, malformed-Unicode, and unsafe-index shapes; accessor getters
+and `toJSON` hooks are not invoked. Necessary reflection may execute arbitrary `Proxy` traps, and
+an admissible forwarding `Proxy` may be accepted, so this is neither a hostile-JavaScript sandbox
+nor a no-code-execution membrane. I07-04 and G07 remain `DONE`; proof gates remain 8/13,
+implementation progress is 89/145, M08 is 4/10, and M08-T05 state declaration and binding editing
+is next. Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

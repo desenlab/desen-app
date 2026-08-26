@@ -1906,18 +1906,21 @@ authorable.
 Six content-edit diagnostic classes cover malformed commands, fixed-limit crossings, missing
 paths, invalid positions, ambiguous targets, and missing targets. Underlying structural rejection
 retains its original diagnostic authority. Exact command own-data capture, detached nested values,
-prototype-sensitive names as own data, malformed Unicode, accessors without invocation,
-inheritance, symbols, sparse data, extra authority, and every atomic failure path are covered. The
-finite profile admits the exact 8,388,608-byte canonical Source, 25,000 selected-surface identities,
-and root-at-zero depth 64 while rejecting one-unit crossings. These bounds do not claim streaming
-or preallocation memory-DoS resistance.
+prototype-sensitive names as own data, malformed Unicode, inheritance, accessors, symbols, extra
+fields, function values, own `toJSON` hooks, sparse/decorated arrays, unsafe indexes, and every
+atomic failure path are covered. Required command fields are exact enumerable own data; accessor
+getters and `toJSON` hooks are not invoked. Necessary reflection may execute arbitrary `Proxy`
+traps, and an admissible forwarding `Proxy` may be accepted; this is not a
+hostile-JavaScript/no-code-execution membrane. The finite profile admits the exact 8,388,608-byte
+canonical Source, 25,000 selected-surface identities, and root-at-zero depth 64 while rejecting
+one-unit crossings. These bounds do not claim streaming or preallocation memory-DoS resistance.
 
 The cumulative editor-core package suite passes 55/55, including 16/16 focused content-edit cases;
 the cumulative built public-package suite passes 32/32; and the independent root proof passes
 10/10. Exact evidence lives in
-[`EDITOR-CORE-CONTENT-EDITS.md`](EDITOR-CORE-CONTENT-EDITS.md) and the 26,382-byte
+[`EDITOR-CORE-CONTENT-EDITS.md`](EDITOR-CORE-CONTENT-EDITS.md) and the 26,988-byte
 [`editor-core-0.1.0-content-edits.json`](artifacts/editor-core-0.1.0-content-edits.json) at
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. The proof directly
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`. The proof directly
 authenticates the exact frozen M08-T02 and M08-T03 artifacts and verifies 67 current tracked-file
 receipts. Behavior begins only after six editor files and twenty-one authenticated dependencies are
 copied into an isolated 27-file ESM graph. Node, its ESM loader, and the process environment remain
@@ -1936,7 +1939,7 @@ ordered leaf invocations, and 251 distinct leaves. Shared-state counts are 6
 code-owned/current receipts and make no hosted M08-T04 claim.
 
 Append-only reader checkpoint sequence 32 at
-`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` authenticates 29 frozen
+`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
 artifacts and 58 readers. Historical sequence 31 at
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`, all earlier entries, and
 every predecessor artifact byte remain unchanged.
@@ -1947,4 +1950,5 @@ stable-identity integration. No `P-*`, `N-*`, `S-*`, or proof-gate status change
 declaration and binding commands remain M08-T05; M08-T06–M08-T09 retain later authoring,
 persistence, and validation work; and M08-T10 retains the independent terminal editor-core
 React/DOM boundary. This proof does not claim Catalog slot acceptance/cardinality, undo/redo,
-selection, viewport, P-18, or G08. M08-T05 is next.
+selection, viewport, a hostile-JavaScript/no-code-execution membrane, P-18, or G08. M08-T05 is
+next.

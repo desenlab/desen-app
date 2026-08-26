@@ -165,7 +165,21 @@
       ],
       "structuralPassThrough": "SCHEMA_INVALID",
       "missingAmbiguousPathAndPositionFailClosed": true,
-      "activeAndAuthorityExpandingCommandsRejectedWithoutInvocation": true,
+      "commandShapeBoundary": "OWN_ENUMERABLE_DATA_DESCRIPTORS",
+      "accessorAndToJsonHooksRejectedWithoutInvocation": true,
+      "proxyReflectionMayInvokeTraps": true,
+      "forwardingProxyAdmitted": true,
+      "forwardingProxyTrapOrder": [
+        "getPrototypeOf",
+        "ownKeys",
+        "getOwnPropertyDescriptor:name",
+        "getOwnPropertyDescriptor:ownerId",
+        "getOwnPropertyDescriptor:surfaceId",
+        "getOwnPropertyDescriptor:value"
+      ],
+      "throwingProxyContainedAsCommandInvalid": true,
+      "throwingProxyTrapOrder": ["getPrototypeOf"],
+      "throwingProxyFailureLeavesPriorSourceUnchanged": true,
       "failuresExposeNoDocument": true
     },
     "immutability": {
@@ -490,8 +504,8 @@
       },
       {
         "path": "packages/editor-core/test/content-edits.test.ts",
-        "bytes": 23299,
-        "sha256": "b21cf61efe98f6036a2bb2d64077f134cf0fb0a23520cb4bf0e329ec051de54e"
+        "bytes": 25435,
+        "sha256": "83db0beb0f74fb3e4a59ec7f94aa1a32487553f4f0aeaf9c5c0c9a512eaf8e91"
       },
       {
         "path": "packages/editor-core/test/content-edits.types.ts",
@@ -500,8 +514,8 @@
       },
       {
         "path": "packages/editor-core/test/public-package.mjs",
-        "bytes": 63974,
-        "sha256": "167b69fbafe7ecc7fd50f6289ccad39001d5b51e4a0aaae391da0e44c28d9771"
+        "bytes": 66162,
+        "sha256": "197d261e1c12c36053cab917e107273963c8e78107fa702ed2981726d01ce26f"
       },
       {
         "path": "packages/editor-core/test/public-package.types.mts",
@@ -675,8 +689,8 @@
       },
       {
         "path": "scripts/lib/editor-core-content-edits-proof.mjs",
-        "bytes": 76036,
-        "sha256": "eff6221217a81e938ed1fa7436b7f28db0b7a8a2f1f4c4d4cc8879f40702161c"
+        "bytes": 79063,
+        "sha256": "fcbab15b0ba9ba086f6ddb431fb8f0319208783760e3c00eecce4e9952353a71"
       },
       {
         "path": "scripts/verify-editor-core-content-edits.mjs",
@@ -685,8 +699,8 @@
       },
       {
         "path": "tests/editor-core-content-edits.test.mjs",
-        "bytes": 21358,
-        "sha256": "f5c56204486a028cac6866b06261f5144fae5459a52a1e4ac344e22acac9c9fb"
+        "bytes": 21923,
+        "sha256": "1857b5bd7b033b5721202f6f68989c9e2cd4183c4d580b1de1d3408edb432e3e"
       },
       {
         "path": "tsconfig.base.json",
@@ -702,6 +716,7 @@
     "M08-T09_CATALOG_SEMANTICS_AND_CONTINUOUS_DIAGNOSTICS",
     "M08-T10_AND_G08_TERMINAL_UI_BOUNDARY",
     "HOSTILE_JAVASCRIPT_SANDBOX",
+    "NO_PROXY_TRAP_EXECUTION_MEMBRANE",
     "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
     "STREAMING_OR_PREALLOCATION_MEMORY_DOS_BOUND",
     "P18_OR_G08_ADVANCEMENT"

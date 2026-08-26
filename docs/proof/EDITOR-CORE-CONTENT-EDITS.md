@@ -8,7 +8,7 @@ Result: `PASS`
 
 Artifact: `docs/proof/artifacts/editor-core-0.1.0-content-edits.json`
 
-Final artifact: `sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`
+Final artifact: `sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`
 
 ## Direct frozen prerequisites
 
@@ -38,10 +38,16 @@ values are copied before mutation, so later caller changes cannot alter the resu
 ## Atomic diagnostics and fixed limits
 
 Missing and ambiguous surface-local identities, missing paths, invalid variant positions, malformed
-Unicode, extra authority, inherited properties, symbols, sparse values, accessors, and non-plain
-commands fail closed. Accessors are rejected without invocation. Failure returns a frozen diagnostic
-result and never exposes a partial Source. Structurally invalid output retains the underlying
-`SCHEMA_INVALID` authority rather than being relabeled as a content-command failure.
+Unicode, inherited fields, accessors, symbols, extra fields, function values, own `toJSON` hooks,
+and sparse arrays fail closed. Required command fields must be exposed by JavaScript reflection as
+enumerable own data descriptors. Accessor getters and `toJSON` hooks are rejected without
+invocation. Necessary JavaScript reflection over an arbitrary `Proxy` may execute its traps: the
+focused and emitted package cases record the trap execution, admit a forwarding Proxy that exposes
+the required shape, and contain a throwing reflection trap as `CONTENT_EDIT_COMMAND_INVALID`. That failure returns a
+frozen diagnostic result, never exposes a partial Source, and leaves the prior Source unchanged.
+This platform-neutral boundary is not a hostile-JavaScript or no-code-execution membrane.
+Structurally invalid output retains the underlying `SCHEMA_INVALID` authority rather than being
+relabeled as a content-command failure.
 
 The evidence exercises the exact 8,388,608-byte canonical Source, 25,000 target-surface identity,
 and root-at-zero depth-64 ceilings plus one-unit crossings. These are canonical input/output bounds,
@@ -73,9 +79,10 @@ failed pre-rename hook preserves the previous complete destination.
 
 Verification rebuilds independently, compares exact artifact bytes, and requires exactly one
 visible exact final SHA-256 line. Pins hidden in HTML comments or fenced code blocks and duplicate
-visible pins do not issue PASS. Build, write, and verify options accept only exact own enumerable
-data properties. Unknown, inherited, accessor, symbol, Proxy, shared-byte, replacement-race, and
-caller-supplied runtime authority is rejected.
+visible pins do not issue PASS. Separately from the platform-neutral editor runtime, the Node-only
+proof tooling authenticates build, write, and verify options as exact own enumerable data
+properties. It rejects unknown, inherited, accessor, symbol, Proxy, shared-byte, replacement-race,
+and caller-supplied runtime authority.
 
 ## Honest remaining scope
 

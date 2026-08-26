@@ -3299,11 +3299,18 @@ This file records implementation discoveries without changing the frozen DESEN 0
   style deletion retains each emptied state/part parent, deleting the final variant retains an own
   empty `variants` array, and condition clear removes the `when` key. Zero target matches fail as
   not found and duplicate identity matches fail as ambiguous rather than selecting the first.
-  Every command accepts only its exact own enumerable data fields, captures nested values without
-  executing accessors or serialization hooks, and rejects inherited, accessor, symbol, extra,
-  executable, malformed, or unsafe-index authority. Success preserves every node and behavior ID,
-  every unaffected semantic-array order, and the caller's prior document while returning a fresh
-  detached recursively frozen direct Source. Failure is atomic and exposes no partial document.
+  Every command requires its exact fields to be exposed by JavaScript reflection as enumerable own
+  data descriptors. Inherited, accessor, symbol, extra-field, function-valued, own-`toJSON`,
+  sparse-array, malformed-Unicode, and unsafe-index shapes are rejected; accessor getters and
+  `toJSON` hooks are not invoked. This is an inert captured-data guarantee, not a side-effect-free
+  classification of arbitrary JavaScript objects: necessary reflection over a `Proxy` may execute
+  its traps, and a forwarding Proxy that presents the admissible shape may be accepted. A throwing
+  reflection trap is contained as `CONTENT_EDIT_COMMAND_INVALID`, exposes no partial document, and
+  leaves the prior Source unchanged. The platform-neutral editor runtime therefore claims no
+  hostile-JavaScript or no-code-execution membrane. Success preserves every node and behavior ID,
+  every unaffected semantic-array order, and the caller's prior document while returning a fresh detached
+  recursively frozen direct Source. Other failures are likewise atomic and expose no partial
+  document.
   Each candidate is structurally re-admitted, but undeclared prop, style-part, visual-state, token,
   reference, and other Catalog semantics remain authorable for M08-T09 to diagnose continuously.
   The fixed profile limits the canonical document to 8 MiB, a selected surface to 25,000

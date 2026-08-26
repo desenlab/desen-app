@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "profile": "desen.ci.proof-reader-checkpoints.v1",
-  "headSha256": "ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee",
+  "headSha256": "112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574",
   "checkpoints": [
     {
       "sequence": 1,
@@ -10846,8 +10846,8 @@
         {
           "task": "M08-T04",
           "path": "docs/proof/artifacts/editor-core-0.1.0-content-edits.json",
-          "bytes": 26382,
-          "sha256": "eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34"
+          "bytes": 26988,
+          "sha256": "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066"
         }
       ],
       "readers": [
@@ -11247,15 +11247,15 @@
           "task": "M08-T04",
           "role": "proof-library",
           "path": "scripts/lib/editor-core-content-edits-proof.mjs",
-          "bytes": 76036,
-          "sha256": "eff6221217a81e938ed1fa7436b7f28db0b7a8a2f1f4c4d4cc8879f40702161c"
+          "bytes": 79063,
+          "sha256": "fcbab15b0ba9ba086f6ddb431fb8f0319208783760e3c00eecce4e9952353a71"
         },
         {
           "task": "M08-T04",
           "role": "root-test",
           "path": "tests/editor-core-content-edits.test.mjs",
-          "bytes": 21358,
-          "sha256": "f5c56204486a028cac6866b06261f5144fae5459a52a1e4ac344e22acac9c9fb"
+          "bytes": 21923,
+          "sha256": "1857b5bd7b033b5721202f6f68989c9e2cd4183c4d580b1de1d3408edb432e3e"
         }
       ]
     }

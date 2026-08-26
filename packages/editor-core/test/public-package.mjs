@@ -1080,10 +1080,11 @@ test("the emitted content commands reject missing, ambiguous, invalid, and struc
   assert.deepEqual(ambiguousCreation.document, ambiguousInput);
 });
 
-test("all emitted content commands reject active or authority-expanding command input", () => {
+test("the emitted content commands enforce own-data shapes and contain Proxy reflection failures atomically", () => {
   const creation = editorCore.createDesenEditorDocument(contentEditFixture());
   assert.equal(creation.ok, true);
   if (!creation.ok) throw new TypeError("Expected the content-edit fixture to be admitted.");
+  const before = JSON.stringify(creation.document);
   const base = { surfaceId: "sign-in" };
   const commands = [
     [
@@ -1170,8 +1171,9 @@ test("all emitted content commands reject active or authority-expanding command 
   }
 
   let getterInvocations = 0;
-  const active = { surfaceId: "sign-in", ownerId: "sign-in.title", name: "text", value: "x" };
-  Object.defineProperty(active, "name", {
+  let toJSONInvocations = 0;
+  const accessor = { surfaceId: "sign-in", ownerId: "sign-in.title", name: "text", value: "x" };
+  Object.defineProperty(accessor, "name", {
     enumerable: true,
     get() {
       getterInvocations += 1;
@@ -1185,15 +1187,79 @@ test("all emitted content commands reject active or authority-expanding command 
   };
   const inheritedCommand = Object.create({ surfaceId: "sign-in" });
   Object.assign(inheritedCommand, { nodeId: "sign-in.error" });
+  const forwardingTraps = [];
+  const forwardingTarget = {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    name: "text",
+    value: "forwarded",
+  };
+  const forwardingProxy = new Proxy(forwardingTarget, {
+    getOwnPropertyDescriptor(target, key) {
+      forwardingTraps.push(`getOwnPropertyDescriptor:${String(key)}`);
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+    getPrototypeOf(target) {
+      forwardingTraps.push("getPrototypeOf");
+      return Reflect.getPrototypeOf(target);
+    },
+    ownKeys(target) {
+      forwardingTraps.push("ownKeys");
+      return Reflect.ownKeys(target);
+    },
+  });
+  const throwingTraps = [];
+  const throwingProxy = new Proxy(forwardingTarget, {
+    getPrototypeOf() {
+      throwingTraps.push("getPrototypeOf");
+      throw new TypeError("controlled Proxy reflection failure");
+    },
+  });
+  const throwingFailure = editorCore.setDesenEditorOwnerProp(creation.document, throwingProxy);
 
   for (const result of [
-    editorCore.setDesenEditorOwnerProp(creation.document, active),
+    editorCore.setDesenEditorOwnerProp(creation.document, accessor),
     editorCore.clearDesenEditorNodeCondition(creation.document, symbolCommand),
     editorCore.clearDesenEditorNodeCondition(creation.document, inheritedCommand),
+    editorCore.setDesenEditorOwnerProp(creation.document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      name: "text",
+      value: () => "executable",
+    }),
+    editorCore.setDesenEditorOwnerProp(creation.document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      name: "text",
+      value: {
+        inert: true,
+        toJSON() {
+          toJSONInvocations += 1;
+          return { serialized: "authority" };
+        },
+      },
+    }),
+    throwingFailure,
   ]) {
     expectContentEditFailure(result, "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID");
   }
   assert.equal(getterInvocations, 0);
+  assert.equal(toJSONInvocations, 0);
+  assert.deepEqual(throwingTraps, ["getPrototypeOf"]);
+  assert.equal(JSON.stringify(creation.document), before);
+
+  const forwarded = expectContentEditSuccess(
+    editorCore.setDesenEditorOwnerProp(creation.document, forwardingProxy),
+  );
+  assert.equal(forwarded.surfaces["sign-in"].root.slots.default[0].props.text, "forwarded");
+  assert.deepEqual(forwardingTraps, [
+    "getPrototypeOf",
+    "ownKeys",
+    "getOwnPropertyDescriptor:name",
+    "getOwnPropertyDescriptor:ownerId",
+    "getOwnPropertyDescriptor:surfaceId",
+    "getOwnPropertyDescriptor:value",
+  ]);
 });
 
 test("the emitted content commands are deterministic, immutable, and Catalog-unresolved", () => {

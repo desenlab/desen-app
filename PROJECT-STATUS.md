@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-26
+Last updated: 2026-08-27
 
 ## Plain-language status
 
@@ -806,10 +806,14 @@ M08-T04 completes immutable content editing. Fourteen atomic commands edit node 
 and style leaves plus node conditions and ordered variants while preserving unrelated semantic
 order, deliberately empty own containers, structurally valid Catalog-unresolved content, and every
 existing identity. Six content-edit diagnostic classes plus unchanged structural pass-through fail
-closed without partial Source authority. The cumulative package suite passes 55/55, including
-16/16 focused cases; the public-package suite passes 32/32; and the independent root proof passes
-10/10. The 26,382-byte artifact is pinned at
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. `N-014` remains
+closed without partial Source authority. Required command fields must be exact enumerable own data
+descriptors. Inherited, accessor, symbol, extra-field, function, own-`toJSON`, sparse/decorated-array,
+malformed-Unicode, and unsafe-index shapes are rejected; accessor getters and `toJSON` hooks are not
+invoked. Necessary reflection on an arbitrary `Proxy` may execute traps, and an admissible forwarding
+`Proxy` may be accepted; this is not a hostile-JavaScript/no-code-execution membrane. The cumulative
+package suite passes 55/55, including 16/16 focused cases; the public-package suite passes 32/32; and
+the independent root proof passes 10/10. The 26,988-byte artifact is pinned at
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`. `N-014` remains
 `TESTED`; `S-002` remains `PLANNED` through terminal M08-T10 integration; no `P-*`, `N-*`, `S-*`,
 or proof-gate status changes. State declaration and binding editing is assigned to M08-T05; the
 remaining editor work stays assigned to M08-T06–M08-T10.
@@ -1408,13 +1412,17 @@ M08-T04 is next.
 M08-T04 is now complete. Fourteen immutable commands cover base node/behavior props and style
 leaves, node conditions, and ordered node variants. They preserve unrelated order, empty own
 containers, unresolved Catalog content, and stable identities; malformed or over-limit requests
-fail atomically under six content-edit diagnostics or unchanged structural diagnostics. The exact
-26,382-byte artifact is
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. Current local
+fail atomically under six content-edit diagnostics or unchanged structural diagnostics. Exact
+enumerable own-data command fields are required; inherited, accessor, symbol, extra-field,
+function, own-`toJSON`, sparse/decorated-array, malformed-Unicode, and unsafe-index shapes are the
+tested rejection boundary, with accessor getters and `toJSON` hooks left uninvoked. Arbitrary
+`Proxy` traps may run during reflection, and an admissible forwarding `Proxy` may pass; no
+hostile-JavaScript/no-code-execution membrane is claimed. The exact 26,988-byte artifact is
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`. Current local
 code-owned CI authority is 159 workloads and 75 proof pairs—64 ordinary and 11 barriers—with 519
 prerequisite segments, 3,237 ordered leaf invocations, and 251 distinct leaves. The append-only
 reader successor is sequence 32 at
-`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee`, authenticating 29 frozen
+`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574`, authenticating 29 frozen
 artifacts and 58 readers while historical sequence 31 remains unchanged. No hosted M08-T04 result
 is claimed. `N-014` remains `TESTED`; `S-002` remains `PLANNED`; no `P-*`, `N-*`, `S-*`, or
 proof-gate status changes. Implementation progress is 89/145 (61%), M08 is 4/10, proof gates remain
@@ -2852,8 +2860,8 @@ M08-T03 evidence:
 M08-T04 evidence:
 
 - `docs/proof/EDITOR-CORE-CONTENT-EDITS.md`
-- `docs/proof/artifacts/editor-core-0.1.0-content-edits.json`, 26,382 bytes at
-  `sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`
+- `docs/proof/artifacts/editor-core-0.1.0-content-edits.json`, 26,988 bytes at
+  `sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`
 - command boundary: fourteen immutable commands edit node/behavior props and base style leaves,
   node conditions, and ordered node variants; variant deletion/reorder uses post-removal final
   positions, deliberately empty own containers remain present, unrelated order remains unchanged,
@@ -2863,8 +2871,10 @@ M08-T04 evidence:
   cardinality claim
 - authority hardening: all six content-edit diagnostic classes, unchanged structural diagnostics,
   exact command own-data capture, detached nested values, prototype-sensitive own keys, missing or
-  ambiguous targets, missing paths, invalid positions, malformed Unicode, accessors, inheritance,
-  symbols, sparse data, and extra command authority fail closed without a partial Source
+  ambiguous targets, missing paths, invalid positions, malformed Unicode, inherited fields,
+  accessors, symbols, extra fields, function values, own `toJSON` hooks, sparse/decorated arrays,
+  and unsafe indexes fail closed without a partial Source; accessor getters and `toJSON` hooks are
+  not invoked
 - fixed profile: canonical input/output Source at most 8,388,608 bytes, at most 25,000
   selected-surface identities, and component depth 64 with root at zero; exact ceilings and
   one-unit crossings are covered without claiming streaming/preallocation memory-DoS resistance
@@ -2882,13 +2892,15 @@ M08-T04 evidence:
   `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c` and required plan
   `sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`
 - reader authority: append-only sequence 32 at
-  `ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` authenticates 29 frozen
+  `112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
   artifacts and 58 readers; historical sequence 31, its head, and every predecessor artifact byte
   remain unchanged
 - evidence boundary: these are local code-owned/current results and make no hosted M08-T04 claim
 - scope nonclaims: no state/binding, event/action, persistence, continuous semantic validation,
-  invalid-node mapping, undo/redo, selection, viewport, hostile-JavaScript sandbox, terminal
-  React/DOM boundary, P-18, or G08 claim
+  invalid-node mapping, undo/redo, selection, viewport, terminal React/DOM boundary, P-18, or G08
+  claim; necessary JavaScript reflection may execute arbitrary `Proxy` traps, an admissible
+  forwarding `Proxy` may be accepted, and no hostile-JavaScript/no-code-execution membrane is
+  claimed
 - coverage decision: M08-T04 is `DONE`; `N-014` remains `TESTED`; `S-002` remains `PLANNED`; no
   `P-*`, `N-*`, `S-*`, or proof-gate status changes; overall progress is 89/145 (61%); M08 is 4/10;
   proof gates remain 8/13; M08-T05 owns state declaration and binding editing next

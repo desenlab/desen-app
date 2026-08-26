@@ -260,7 +260,7 @@ bridge families. Historical closure sequence 28 authenticates 25 frozen artifact
 historical sequence 30 authenticates 27 frozen artifacts and 54 readers. Historical sequence 31 at
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d` authenticates 28 frozen
 artifacts and 56 then-current readers. The current append-only sequence 32 at
-`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` authenticates 29 frozen
+`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
 artifacts and 58 current readers.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
@@ -270,9 +270,9 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07
 are `DONE`; proof gates are 8/13, implementation progress is 89/145, M08 is 4/10, `N-014` remains
-`TESTED`, `S-002` remains `PLANNED`, and M08-T05 is next. The exact 26,382-byte M08-T04 artifact is
+`TESTED`, `S-002` remains `PLANNED`, and M08-T05 is next. The exact 26,988-byte M08-T04 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-content-edits.json` at
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`; the report is
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`; the report is
 `docs/proof/EDITOR-CORE-CONTENT-EDITS.md`. These T04 results are local code-owned/current evidence
 and make no hosted M08-T04 claim; no `P-*`, `N-*`, `S-*`, or proof-gate status changes.
 

@@ -86,11 +86,17 @@ base conditional presence and every variant command address a uniquely identifie
 support complete indexed insert/delete, post-removal reorder, condition replacement, and prop/style
 leaf updates. Set creates missing containers, while delete requires an existing path and preserves
 own empty `props`, `style` state/part, and `variants` containers. Condition clear removes the
-existing `when` member. Exact inert command input, missing or ambiguous identity, missing paths,
-invalid positions, structural re-admission, limit overflow, and active or extra authority all fail
-atomically. Success preserves every identity and unaffected semantic order and returns a fresh
-detached recursively frozen direct Source. `PF-081` records the profile choices that the frozen
-protocol does not define.
+existing `when` member. Required fields must be exposed by JavaScript reflection as exact
+enumerable own data descriptors. Inherited, accessor, symbol, extra-field, function-valued,
+own-`toJSON`, sparse-array, malformed-Unicode, and unsafe-index shapes fail atomically; accessor
+getters and `toJSON` hooks are not invoked. Reflection on an arbitrary `Proxy` may execute traps. A
+forwarding Proxy that exposes the admissible shape may be accepted, while a throwing reflection
+trap is contained as a controlled failure with no partial document and no change to the prior
+Source. This platform-neutral boundary is not a
+hostile-JavaScript or no-code-execution membrane. Missing or ambiguous identity, missing paths,
+invalid positions, structural re-admission, and limit overflow likewise fail atomically. Success
+preserves every identity and unaffected semantic order and returns a fresh detached recursively
+frozen direct Source. `PF-081` records the profile choices that the frozen protocol does not define.
 
 Insertion, structural edits, and content edits remain structurally authoritative rather than
 Catalog-semantic: structurally valid unresolved capabilities, slots, props, style parts, visual

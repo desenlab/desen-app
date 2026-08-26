@@ -1127,14 +1127,18 @@ retain deliberately emptied own containers, preserve unrelated semantic order an
 identity, and keep structurally valid Catalog-unresolved content authorable. All six content-edit
 diagnostic classes, unchanged structural-diagnostic pass-through, exact command ownership,
 prototype-sensitive names as own data, detached caller values, missing/ambiguous targets and paths,
-invalid positions, malformed Unicode, hostile objects, and the fixed 8 MiB, 25,000-identity, and
-depth-64 limits fail closed without exposing a partial Source.
+invalid positions, malformed Unicode, inherited/accessor/symbol/extra fields, function values, own
+`toJSON` hooks, sparse/decorated arrays, unsafe indexes, and the fixed 8 MiB, 25,000-identity, and
+depth-64 limits fail closed without exposing a partial Source. Required command fields are exact
+enumerable own data; accessor getters and `toJSON` hooks are not invoked. Necessary reflection may
+execute arbitrary `Proxy` traps, and an admissible forwarding `Proxy` may be accepted; this is not
+a hostile-JavaScript/no-code-execution membrane.
 
 The cumulative editor-core package suite passes 55/55, including the 16/16 focused content-edit
 cases; the built public-package suite passes 32/32; and the independent root proof passes 10/10.
-Exact evidence is pinned in `docs/proof/EDITOR-CORE-CONTENT-EDITS.md` and the 26,382-byte artifact
+Exact evidence is pinned in `docs/proof/EDITOR-CORE-CONTENT-EDITS.md` and the 26,988-byte artifact
 `docs/proof/artifacts/editor-core-0.1.0-content-edits.json` at
-`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. The proof directly
+`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`. The proof directly
 authenticates the exact frozen M08-T02 and M08-T03 artifacts, verifies 67 tracked-file receipts, and
 executes behavior from an isolated authenticated 27-file ESM graph. CI registers the new pair in
 the exact 159-workload/75-proof-pair successor: 64 ordinary pairs and 11 exclusive barriers, with
@@ -1143,14 +1147,15 @@ inventory is `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe
 `sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`.
 
 Append-only reader successor sequence 32 at
-`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` authenticates 29 frozen
+`112e966b350b019557274e1f76a915db15c04109793429b3b885ff7d18843574` authenticates 29 frozen
 artifacts and 58 readers while historical sequence 31 and every predecessor artifact remain
 unchanged. This is local code-owned/current evidence and makes no hosted M08-T04 claim. `N-014`
 remains `TESTED`; `S-002` remains `PLANNED` for terminal M08-T10 integration; no `P-*`, `N-*`,
 `S-*`, or proof-gate status changes. M08-T04 does not claim Catalog slot acceptance/cardinality,
 undo/redo, selection, viewport, streaming/preallocation memory-DoS resistance, a hostile-JavaScript
-sandbox, P-18, or G08. Overall implementation progress is 89/145 (61%), M08 is 4/10, proof gates
-remain 8/13, and M08-T05 state declaration and binding editing is next.
+sandbox or no-code-execution membrane, P-18, or G08. Overall implementation progress is 89/145
+(61%), M08 is 4/10, proof gates remain 8/13, and M08-T05 state declaration and binding editing is
+next.
 
 ## M09 — Desen App Web MVP
 

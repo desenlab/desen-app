@@ -89,9 +89,15 @@ only at index zero. Reorder uses the selected variant's final index after remova
 create missing prop/style containers. Delete commands require the selected leaf to exist and retain
 own empty `props`, nested style state/part, and `variants` containers; condition clear removes the
 existing `when` member. Every success preserves all node and behavior IDs plus unaffected semantic
-array order and returns a fresh detached recursively frozen Source. Missing or ambiguous targets,
-missing paths, invalid positions, malformed/active/extra command authority, limit overflow, and
-structural re-admission failure are atomic and expose no partial document.
+array order and returns a fresh detached recursively frozen Source. Required fields must be exposed
+by JavaScript reflection as enumerable own data descriptors. Inherited, accessor, symbol,
+extra-field, function-valued, own-`toJSON`, sparse-array, malformed-Unicode, and unsafe-index shapes
+are rejected; accessor getters and `toJSON` hooks are not invoked. Reflection over an arbitrary
+JavaScript `Proxy` may execute traps. A forwarding Proxy that exposes the admissible shape may be
+accepted; a throwing reflection trap becomes `CONTENT_EDIT_COMMAND_INVALID`, exposes no partial document,
+and leaves the prior Source unchanged. This is an inert captured-data boundary, not a
+hostile-JavaScript or no-code-execution membrane. Missing or ambiguous targets, missing paths,
+invalid positions, limit overflow, and structural re-admission failure are likewise atomic.
 
 These are structural authoring commands. Prop names, style parts, visual states, tokens, bindings,
 and other Catalog-backed meanings may remain unresolved until M08-T09 supplies continuous semantic
@@ -161,7 +167,8 @@ For M08-T04, run `pnpm --filter @desen/editor-core test:content-edits` and
 `pnpm --filter @desen/editor-core test:public-package`. The cumulative emitted-package suite has 32
 runtime/root cases and 36 compiler-negative assertions. It executes all fourteen public content
 commands across base node/behavior edits, node conditions, ordered variant lifecycle and updates,
-empty-container deletion, missing/ambiguous/invalid/hostile failures, immutability, deterministic
-output, stable identity, and unresolved Catalog semantics. The task-specific generator, verifier,
-root proof, artifact hash, and exact receipt inventory are recorded by the M08-T04 proof lane rather
-than claimed here before final evidence exists.
+empty-container deletion, missing/ambiguous/invalid failures, exact own-data rejection, controlled
+throwing-Proxy failure, forwarding-Proxy admission, immutability, deterministic output, stable
+identity, and unresolved Catalog semantics. The completed task-specific generator, verifier, root
+proof, final artifact hash, and exact receipt inventory are recorded in
+`docs/proof/EDITOR-CORE-CONTENT-EDITS.md` and the referenced frozen artifact.
