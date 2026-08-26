@@ -356,24 +356,25 @@ kapanış; dar kapsam gerçekti ve önbellekten başarı okunmadı. On yedi G07 
 artifact/50 güncel reader doğrular. I07-04 ve G07 artık `DONE`; kanıt kapıları 8/13, uygulama
 ilerlemesi bu kapanış noktasında 85/145 görevdir (%59).
 
-M08-T01 de tamamlandı. `@desen/editor-core`, bilinmeyen inert JSON'u donmuş Source ve gömülü
-şema yapısal doğrulayıcısından geçirir; başarıda sarmalayıcı, gizli AST veya düğüm dizini
-eklemeden doğrudan ayrık ve özyinelemeli değişmez `desen.source` kökünü verir. Başarısızlık
-kısmi belge yetkisi vermez. Yedi odak davranış testi ile on built public-runtime vakası, iki
-ayrı beşer compiler-negative grubu, yedi public proof-core vakası ve 47 izlenen dosya receipt'ini
-doğrulayan 13 vakalı bağımsız root kanıtı bu dar kapsamı korur. Receipt'ler, üç manifest ile 21
-statik ESM modülünden oluşan exact 24 dosyalık runtime kapanışını da içerir; 19 bağımlılık modülü
-import öncesinde 11 güncel M02-T11 receipt'i ve ayrık 8 M08 successor receipt'iyle doğrulanır. Exact
-bağımlılık baytları, Node runtime, loader ve process güvenilen otoritelerdir; genel bir hostile
-JavaScript sandbox sonucu iddia edilmez. Kanıt
+M08-T01 tamamlandı. `@desen/editor-core`, bilinmeyen inert JSON'u donmuş Source ve gömülü şema
+yapısal doğrulayıcısından geçirir; başarıda sarmalayıcı, gizli AST veya düğüm dizini eklemeden
+doğrudan ayrık ve özyinelemeli değişmez `desen.source` kökünü verir. Başarısızlık kısmi belge
+yetkisi vermez. Bu dar sınırın exact kanıtı
 [`EDITOR-CORE-SOURCE-DOCUMENT.md`](../proof/EDITOR-CORE-SOURCE-DOCUMENT.md) ve izlenen artifact'ta
-sabittir. Güncel append-only reader ardılı sequence 29'dur;
-`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b` başıyla 26 donmuş
-artifact ve 52 güncel reader doğrular. Bu sonuç düzenleme komutlarını, authoring izolasyonunu,
-bilinmeyen extension korumasını, persistence'ı, sürekli semantik doğrulamayı veya M08 terminal
-React/DOM sınırını kanıtlamaz; bu sahiplikler sırasıyla M08-T02–T06, M08-T07, M08-T08, M08-T09 ve
-M08-T10'da kalır. Genel ilerleme 86/145 (%59), M08 ilerlemesi 1/10, kanıt kapıları 8/13'tür;
-sıradaki iş M08-T02'dir.
+korunur.
+
+M08-T02 de tamamlandı. `insertDesenEditorNode`, seçili surface içindeki ortak node/behavior kimlik
+alanında exact tabanı veya en düşük boş `-2`, `-3`, ... son ekini seçer; node ya da behavior'a ait
+slot'un istenen sıralı sınırına yalnız `{id, use}` yaprağı ekler. Başarı yeni ayrık ve tamamen
+donmuş doğrudan Source'u, hata ise kısmi belge ya da ayrılmış kimlik vermeyen donmuş tanıyı döndürür.
+16/16 odak paket testi, 22/22 public-package testi ve 10/10 bağımsız kök kanıtı geçti. 19.561 baytlık
+artifact `sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`
+ile sabittir. Güncel append-only okuyucu ardılı sequence 30'dur;
+`f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970` başıyla 27 donmuş artifact
+ve 54 güncel reader doğrular; tarihsel sequence 29 değişmez. Bu sonuç silme, taşıma ve yeniden
+sıralamayı, kalan authoring komutlarını, persistence'ı, sürekli semantik doğrulamayı veya terminal
+React/DOM sınırını kanıtlamaz. Bunlar M08-T03–M08-T10'da kalır. Genel ilerleme 87/145 (%60), M08
+ilerlemesi 2/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T03'tür.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

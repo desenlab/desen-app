@@ -1789,14 +1789,56 @@ successor receipts authenticate all 19 dependency modules before import. The exa
 bytes, Node runtime, loader, and process remain trusted authorities; this is not a general
 hostile-JavaScript capability sandbox.
 
-The current append-only reader successor is sequence 29 at
+At the M08-T01 checkpoint, the append-only reader successor was sequence 29 at
 `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
-artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
+artifacts and 52 then-current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
 unchanged.
 
 M08-T01 is `DONE`, advancing implementation progress to 86/145 (59%) and M08 to 1/10. Proof gates
 remain 8/13 and no `P-*`, `N-*`, or `S-*` status changes. Stable-ID allocation and editing commands
 remain M08-T02–M08-T06, authoring isolation and unknown-extension preservation remain M08-T07,
 persistence remains M08-T08, continuous semantic validation and invalid-node mapping remain
-M08-T09, and the terminal independent editor-core React/DOM boundary remains M08-T10. M08-T02 is
-next.
+M08-T09, and the terminal independent editor-core React/DOM boundary remains M08-T10. At that
+checkpoint, M08-T02 was next.
+
+## M08-T02 — Stable-ID allocator and insert command
+
+The built `@desen/editor-core` package now exposes one atomic `insertDesenEditorNode` command. It
+allocates the exact preferred ID when free and otherwise the lowest free `-2`, `-3`, or later
+ordinal, truncating only the preferred base needed to keep the 128-character identifier ceiling.
+Allocation is case-sensitive and surface-local across the shared node and behavior-instance
+namespace. The command inserts one minimal `{ id, use }` leaf at the requested component-node or
+behavior-instance slot index, preserves every existing identity and semantic array order, and
+creates an absent slot only at index zero. Structurally valid unresolved capability and slot
+semantics remain admissible for M08-T09's catalog-backed continuous validation.
+
+Success returns a fresh detached recursively frozen direct Source plus the allocated identity.
+Failure returns neither a partial Source nor an allocated identity. The focused package suite
+passes 16/16 across deterministic allocation, shared namespaces, slot and index boundaries,
+ownership, atomicity, diagnostics, public types, and fixed limits; the cumulative built public
+package suite passes 22/22; and the independent root proof passes 10/10. Those limits cover both
+the exact ceiling and one-unit overflow for 4,096 capability-id code units, an 8,388,608-byte
+canonical post-insert Source, 25,000 identity occurrences in the selected surface, and component
+depth 64 with the surface root at depth zero. The proof also authenticates all five insert
+diagnostic codes plus unchanged structural-diagnostic pass-through.
+
+Behavior executes only after receipt collection from an isolated 25-file ESM graph copied from
+exact bytes: four editor files plus 21 dependency files whose receipts match the frozen M08-T01
+authority. Node, its ESM loader, and the process environment remain trusted; the proof does not
+claim a general hostile-JavaScript sandbox.
+
+Exact evidence lives in
+[`EDITOR-CORE-STABLE-ID-INSERT.md`](EDITOR-CORE-STABLE-ID-INSERT.md) and the 19,561-byte
+[`editor-core-0.1.0-stable-id-insert.json`](artifacts/editor-core-0.1.0-stable-id-insert.json) at
+`sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`. The artifact directly
+authenticates the frozen M08-T01 artifact rather than using sequence 29 as an input. After that
+proof closes, append-only reader checkpoint sequence 30 at
+`f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970` authenticates 27 frozen
+artifacts and 54 current readers; historical sequence 29 remains unchanged.
+
+M08-T02 is `DONE`, advancing implementation progress to 87/145 (60%) and M08 to 2/10. Proof gates
+remain 8/13 and no `P-*`, `N-*`, or `S-*` status changes. Delete, move, and ordered reorder remain
+M08-T03; M08-T04–M08-T08 retain the remaining authoring and persistence commands; M08-T09 retains
+catalog semantics and continuous diagnostics; and M08-T10 retains terminal stable-identity and
+React/DOM boundary evidence. This proof does not claim streaming or preallocation memory-DoS
+resistance, a general hostile-JavaScript sandbox, P-18, or G08. M08-T03 is next.

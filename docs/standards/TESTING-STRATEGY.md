@@ -61,11 +61,12 @@ runtime activation; M07-T08 appended the seventh for exact restart recovery; M07
 eighth for its bounded boundary-fault matrix; M07-T10 appended the ninth for ordered transitions
 and two-way races; and M07-T11 appended the tenth for separately built host channel consumption.
 That historical M07-T11 successor contained 150 workloads, 71 proof pairs, 479 prerequisite
-segments, 3,113 ordered leaf invocations, and 236 distinct leaves. M08-T01 appends the direct
-editor-core Source-document proof pair plus its serial public-package contract. The current
-successor contains 153 workloads and 72 proof pairs without rewriting the frozen cutover, with 489
-prerequisite segments, 3,129 ordered leaf invocations, and 242 distinct leaves. These are local
-code-owned successor values; no hosted M08-T01 result is claimed. The 15 reviewed workspace test
+segments, 3,113 ordered leaf invocations, and 236 distinct leaves. M08-T01 appended the direct
+editor-core Source-document proof pair plus its serial public-package contract. M08-T02 appends the
+stable-ID insertion verifier/root pair behind that same serial predecessor. The current successor
+contains 155 workloads and 73 proof pairs without rewriting the frozen cutover, with 499
+prerequisite segments, 3,155 ordered leaf invocations, and 245 distinct leaves. These are local
+code-owned successor values; no hosted M08-T02 result is claimed. The 15 reviewed workspace test
 scripts are pinned by
 `sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. Contract and
 hostile-input tests cover exact
@@ -77,9 +78,9 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 2
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 64
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 66
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 61 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 62 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -170,7 +171,7 @@ The reviewed production dependency audit for locked Fastify 5.11.2 and better-sq
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution across the 153 workloads: 135 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across the 155 workloads: 137 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
@@ -244,7 +245,7 @@ The later I07-04 campaign reached `20 / 20` with zero false negatives. Its indep
 binds the exact hosted identities, the immutable historical campaign digest, the conservative
 selector transition, and the required-runner authority. Local cleanup removed all 17 G07-due
 bridge families. Historical closure sequence 28 authenticates 25 frozen artifacts and 50 readers;
-the current append-only sequence 29 authenticates 26 frozen artifacts and 52 current readers.
+the current append-only sequence 30 authenticates 27 frozen artifacts and 54 current readers.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
 [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
@@ -252,7 +253,7 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07
-are `DONE`; proof gates are 8/13, implementation progress is 86/145, and M08-T02 is next.
+are `DONE`; proof gates are 8/13, implementation progress is 87/145, and M08-T03 is next.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned

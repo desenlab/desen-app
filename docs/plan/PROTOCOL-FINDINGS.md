@@ -3191,3 +3191,42 @@ This file records implementation discoveries without changing the frozen DESEN 0
   preserve unknown extensions and semantic array order. M08-T08 owns persistence, M08-T09 owns
   continuous semantic validation and invalid-node mapping, and M08-T10 must independently prove
   the complete direct-artifact round trip and React/DOM boundary.
+
+## PF-079 — Stable-ID allocation and structural insertion require a deterministic editor profile
+
+- Status: OPEN
+- Blocks proof: No; M08-T02 defines one conservative platform-neutral insertion profile without
+  changing frozen protocol bytes or claiming the broader M08 command, semantic-validation, or
+  terminal editor-boundary scope.
+- Protocol location: SPEC Sections 5.3, 6.1.1, 6.2, 10.1, 11.2, and 20.3; `C-002`, `R-063`, and
+  `A-010`; related finding `PF-078`
+- Observation: DESEN 0.1.0 requires stable local identities, surface-local uniqueness, and
+  semantically ordered slot arrays, but it does not prescribe an editor's identity seed, collision
+  suffix, maximum-length truncation, collision exhaustion behavior, insertion target address,
+  absent-slot rule, duplicate-parent behavior, command atomicity, finite execution profile, or
+  editor-specific diagnostics. Choosing the first duplicate target or accepting a caller-supplied
+  final ID would make structurally forged input and allocate-then-insert races observable. Leaving
+  slot creation and index semantics implicit would also make independent editor implementations
+  produce different Source bytes from the same command.
+- Implementation decision: M08-T02 exposes one atomic `insertDesenEditorNode` transition. The
+  command contains exact inert `surfaceId`, `parentId`, `slot`, `index`, `idBase`, and `use` fields
+  and no explicit final identity or wider node payload. Within the selected surface's shared
+  node-and-behavior identity namespace, the allocator chooses the exact base when free and
+  otherwise the lowest free `-2`, `-3`, ... candidate, truncating the base from the right only as
+  required by the 128-character local-ID ceiling. Matching is case-sensitive. A node or behavior
+  may own the target slot; zero matches fail as not found and multiple matches fail as ambiguous.
+  Existing slots accept an exact boundary from zero through their length, while an absent slot may
+  be created only at index zero. Success inserts only `{id, use}` and returns a new detached frozen
+  direct Source snapshot. Failure exposes neither a partial document nor an allocated identity.
+  Unknown but structurally valid capability and slot semantics remain representable for M08-T09.
+  The fixed profile limits a capability ID to 4,096 code units, a canonical document to 8 MiB, a
+  surface to 25,000 node/behavior identity occurrences, and target-surface component depth to 64
+  with the root at zero. Project-owned failures use `run.desen.editor/INSERT_COMMAND_INVALID`,
+  `INSERT_TARGET_NOT_FOUND`, `INSERT_TARGET_AMBIGUOUS`, `INSERT_POSITION_INVALID`, or
+  `INSERT_LIMIT_EXCEEDED`; structural re-admission retains the frozen protocol diagnostics.
+- Future action: M08-T03 through M08-T06 must reuse the same atomic direct-Source and stable-identity
+  discipline for their broader command sets. M08-T07 must prove authoring isolation and unknown
+  extension preservation, M08-T09 must add continuous semantic validation, and M08-T10 must prove
+  cross-command determinism and the React/DOM boundary. A later protocol revision should
+  standardize allocator and insertion semantics only if interoperable command logs become a
+  protocol requirement.

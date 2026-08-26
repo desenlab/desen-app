@@ -375,7 +375,7 @@ function selectedRegions(selection, nodeById) {
     const verifier = nodeById.get(`verify-${proofId}`);
     const rootTest = nodeById.get(`test-${proofId}`);
     const expectedVerifierDependency =
-      proofId === "editor-core-source-document"
+      proofId === "editor-core-source-document" || proofId === "editor-core-stable-id-insert"
         ? "editor-core-public-package-contract"
         : "package-tests";
     if (
@@ -408,7 +408,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 72 ||
+    exhaustiveRootIds.length !== 73 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],

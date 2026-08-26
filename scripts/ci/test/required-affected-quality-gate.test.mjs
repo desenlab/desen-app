@@ -585,8 +585,8 @@ test("required exhaustive invariants remain exact after required execution is im
   const required = createRequiredExhaustivePlan();
   assert.equal(required.authority, "REQUIRED");
   assert.equal(required.scope, "EXHAUSTIVE");
-  assert.equal(required.stepCount, 153);
-  assert.equal(required.proofPairCount, 72);
+  assert.equal(required.stepCount, 155);
+  assert.equal(required.proofPairCount, 73);
 });
 
 test("only pull requests may attempt affected execution and every ineligible plan falls back", () => {

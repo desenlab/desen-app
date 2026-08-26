@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-25
+Last updated: 2026-08-26
 
 ## Plain-language status
 
@@ -779,18 +779,29 @@ closure. The evidence changes no `P-*`, `N-*`,
 `S-*`, or proof-gate status. Commands, persistence, continuous semantic validation, and the
 terminal editor integration boundary remain assigned to M08-T02–M08-T10.
 
+M08-T02 adds the first deterministic editor mutation. `insertDesenEditorNode` allocates within a
+surface-local shared node/behavior identity namespace, inserts one minimal leaf at the exact
+node- or behavior-owned slot boundary, and returns a fresh detached recursively immutable direct
+Source. It preserves prior identities and semantic array order; every failure is atomic. Fixed
+limits cover capability length, canonical document bytes, identity occurrences, and depth. The
+16/16 focused package suite, 22/22 public-package suite, and 10/10 independent root proof pass;
+the 19,561-byte artifact is pinned at
+`sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`. Delete, move,
+reorder, remaining authoring commands, persistence, continuous semantic validation, and the
+terminal React/DOM boundary remain assigned to M08-T03–M08-T10.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `86 / 145 tasks complete (59%)`
+- Overall implementation progress: `87 / 145 tasks complete (60%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `1 / 10 tasks complete (10%)`
+- M08 progress: `2 / 10 tasks complete (20%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -862,18 +873,20 @@ terminal editor integration boundary remain assigned to M08-T02–M08-T10.
   `M07-T09 — Fault injection from discovery and immutable fetch through durable commit and recovery`,
   `M07-T10 — Ordered transition, activation/recovery race, restart, and SQLite profile-drift matrix`,
   `M07-T11 — Control-plane channel consumed by separately built reference host`,
-  `M08-T01 — Direct DESEN Source editor document model`
+  `M08-T01 — Direct DESEN Source editor document model`,
+  `M08-T02 — Stable-ID allocator and insert command`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T02 — Stable-ID allocator and insert command`
-- Status: M08 is 1/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 86/145. All 17 G07-due entries remain `CLOSED`;
-  `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 is `DONE` with tracked artifact, independent
-  root proof, and CI inventory registration; its exact evidence and nonclaims are recorded below.
+- Next implementation task: `M08-T03 — Delete, slot move, and ordered reorder commands`
+- Status: M08 is 2/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 87/145. All 17 G07-due entries remain `CLOSED`;
+  `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 and M08-T02 are `DONE` with tracked
+  artifacts, independent root proofs, and CI inventory registration; their exact evidence and
+  nonclaims are recorded below.
 
 ## Completed preparation
 
@@ -1340,15 +1353,16 @@ root or embedded-schema structure returns frozen diagnostics without partial doc
 structurally valid unresolved Catalog references remain representable for M08-T09. The built
 package exposes only the reviewed factory and remains platform-neutral. The tracked artifact and
 independent root proof close behavior, source, distribution, manifest, TSDoc, test-inventory,
-prerequisite, and artifact drift. This advances implementation progress to 86/145 (59%) and M08
-to 1/10 without changing the 8/13 proof-gate count or any `P-*`, `N-*`, or `S-*` status. M08-T02 is
-next; commands, persistence, continuous semantic validation, and terminal editor integration are
-not claimed by M08-T01.
+prerequisite, and artifact drift. At that checkpoint implementation progress was 86/145 (59%) and
+M08 was 1/10 without changing the 8/13 proof-gate count or any `P-*`, `N-*`, or `S-*` status.
 
-The current append-only reader successor is sequence 29 at
-`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
-artifacts and 52 current readers. Historical sequence 28 and its I07-04/G07 closure receipts remain
-unchanged.
+M08-T02 is now complete. `insertDesenEditorNode` deterministically allocates a stable identity and
+atomically inserts one minimal leaf at the exact requested slot boundary. It preserves existing
+identities and order and returns no partial Source or allocated ID on failure. The current
+append-only reader successor is sequence 30 at
+`f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`, authenticating 27 frozen
+artifacts and 54 current readers. Historical sequences 28 and 29 remain unchanged. Implementation
+progress is 87/145 (60%), M08 is 2/10, proof gates remain 8/13, and M08-T03 is next.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -2688,19 +2702,61 @@ M08-T01 evidence:
   `FIXTURE_COPY_AND_REVIEWED_SYMLINK`
 - workspace test inventory: 15 scripts at
   `sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`
-- current reader authority: append-only sequence 29 at
+- M08-T01 checkpoint reader authority: append-only sequence 29 at
   `ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b` authenticates 26 frozen
   artifacts and 52 readers while preserving historical sequence 28
 - local validation truth: editor-core package tests pass 7/7, public-package tests pass 17/17,
   root adversarial tests pass 13/13, and generator/verifier, typecheck, lint, the 27/27 shared-state
   suite, and the 28/28 selector/promotion suite pass. PR #39 hosted Quality gate passes on head
-  `65cacf6` in run `32878437248`; the redundant serial local `pnpm check` replay was stopped after
-  M07-T01, so no complete local-gate PASS is claimed
+  `65cacf6` in run `32878437248`; the post-merge `main` Quality gate also passes on
+  `b5bdd0e2a76c1ccc9dec71d8875d585906faf275` in run `32882756903`. The previously skipped clean-main
+  local gate was then completed once without interruption at that exact commit: `pnpm check` ran
+  from `2026-08-26T16:34:48+0300` through `2026-08-26T19:14:52+0300` for 9,604 seconds and exited 0.
+  The worktree was clean before and after; the 31,610-line, 1,396,559-byte local log receipt is
+  `sha256:d2d43e426064c97162ec24e4e912e618cc3c16fdc94e3eb86a2bf541be55cfd6`
 - scope nonclaims: no edit-command, stable-ID allocation, persistence, continuous semantic
   validation, invalid-node mapping, terminal M08 React/DOM boundary, production activation, or
   publication result is claimed
 - coverage decision: M08-T01 is `DONE`; overall progress is 86/145 (59%); M08 is 1/10; proof gates
   remain 8/13; no `P-*`, `N-*`, or `S-*` status changes; M08-T02 owns the next slice
+
+M08-T02 evidence:
+
+- `docs/proof/EDITOR-CORE-STABLE-ID-INSERT.md`
+- `docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json`, 19,561 bytes at
+  `sha256:edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547`
+- deterministic command boundary: exact inert `surfaceId`, `parentId`, `slot`, `index`, `idBase`,
+  and `use`; no caller-supplied final ID or broader mutation payload
+- stable allocation: exact base or the lowest free `-2`, `-3`, ... suffix, with suffix-aware
+  right truncation at 128 characters in a case-sensitive surface-local shared node/behavior
+  namespace
+- structural insert: one minimal `{ id, use }` leaf at an exact existing slot boundary, or a new
+  absent slot only at index zero; node and behavior owners are both supported and prior semantic
+  array order is preserved
+- atomic result: a fresh detached recursively frozen direct Source plus allocated identity on
+  success; frozen diagnostics and neither partial Source nor identity on every failure
+- fixed profile: 4,096 capability-id code units, 8,388,608 canonical post-insert bytes, 25,000
+  identity occurrences per selected surface, and component depth 64 with root at zero; exact
+  ceilings and one-unit crossings are covered
+- execution authority: behavior runs only after receipt collection from an isolated 25-file ESM
+  graph copied from exact bytes—4 editor files plus 21 dependency files whose receipts match the
+  frozen M08-T01 authority; Node, its ESM loader, and the process environment remain trusted
+- local proof: editor-core typecheck, 16/16 focused stable-ID tests, 22/22 cumulative public-package
+  tests, unchanged M08-T01 13/13 root proof, exact verifier, and M08-T02 10/10 independent root
+  proof pass
+- CI authority: 155 workloads / 73 proof pairs, with 62 ordinary pairs and 11 barriers; 499
+  prerequisite segments, 3,155 ordered leaves, and 245 distinct leaves; ownership covers 1,044
+  tracked paths and 146 proof-owned paths
+- CI contract validation: the combined inventory, ownership, selector, promotion, checkpoint,
+  affected/exhaustive, shared-state, equivalence, and legacy-quality-gate suite passes 227/227
+- current reader authority: append-only sequence 30 at
+  `f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970` authenticates 27 frozen
+  artifacts and 54 current readers while preserving historical sequence 29
+- scope nonclaims: no delete, move, reorder, remaining authoring command, persistence, continuous
+  semantic validation, invalid-node mapping, hostile-JavaScript sandbox, streaming/preallocation
+  memory-DoS resistance, terminal React/DOM boundary, P-18, or G08 claim
+- coverage decision: M08-T02 is `DONE`; overall progress is 87/145 (60%); M08 is 2/10; proof gates
+  remain 8/13; no `P-*`, `N-*`, or `S-*` status changes; M08-T03 owns the next slice
 
 ## Status vocabulary
 

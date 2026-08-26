@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `███████████████░░░░░░░░░░` **86 / 145 tasks complete (59%)**
+**Overall:** `███████████████░░░░░░░░░░` **87 / 145 tasks complete (60%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -22,9 +22,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M08:** `█░░░░░░░░░` **1 / 10 tasks complete (10%)**
+**M08:** `██░░░░░░░░` **2 / 10 tasks complete (20%)**
 
-**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T02`
+**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T03`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -197,16 +197,17 @@ remains `PLANNED` until M12-T05.
 61-proof-pair plan as `REQUIRED + EXHAUSTIVE`. The historical M07-T09 successor contained 146
 workloads and 69 proof pairs. The historical pre-M08 M07-T11 successor contained 150 workloads and
 71 proof pairs, 479 prerequisite segments, 3,113 ordered leaf invocations, and 236 distinct leaves.
-The current M08-T01 successor contains 153 workloads and 72 proof pairs: 61 ordinary pairs and 11
-exclusive barriers. Its retained legacy projection expands to 489 prerequisite segments and 3,129
-ordered leaf invocations covering 242 distinct leaves. Shared-state counts are exactly 6
+The historical M08-T01 successor contained 153 workloads and 72 proof pairs. The current M08-T02
+successor contains 155 workloads and 73 proof pairs: 62 ordinary pairs and 11 exclusive barriers.
+Its retained legacy projection expands to 499 prerequisite segments and 3,155 ordered leaf
+invocations covering 245 distinct leaves. Shared-state counts are exactly 6
 `GLOBAL_EXCLUSIVE`, 2 `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69
-`PROOF_READ_ONLY`, 64 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem compatibility is exactly 135 `NONE`, 2
+`PROOF_READ_ONLY`, 66 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem compatibility is exactly 137 `NONE`, 2
 `FIXTURE_COPY`, 15 `REVIEWED_SYMLINK`, and 1 combined policy. Its 15 workspace test scripts are
 pinned by
-`sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. These current M08-T01
-successor pins are local code-owned authority and make no hosted M08-T01 claim. For the frozen
+`sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. These current M08-T02
+successor pins are local code-owned authority and make no hosted M08-T02 claim. For the frozen
 130-workload I07-02 cutover, the then-current exact shared-state classes, cancellation behavior,
 tracked/untracked workspace guards, and same-revision equality with the retained sequential runner
 passed locally and in hosted CI. The cutover run passed in 10
@@ -426,10 +427,10 @@ The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) then
 G07-due debt entries are `CLOSED`; `DEBT-I07-007` deliberately remains `OPEN` for I07-05. The
 historical I07-04/G07 closure checkpoint was sequence 28 at
 `2577962251a9e6fa86993bd0e8bda1ed901f850a3b93678486c0445aed035546`, authenticating 25 frozen
-artifacts and 50 readers. The current append-only successor is sequence 29 at
-`ccd4a58913585da39e71ea360714c69e70a94188e0b5643e521d61bf246f1a2b`, authenticating 26 frozen
-artifacts and 52 current readers. I07-04 and G07 remain `DONE`; proof gates remain 8/13,
-implementation progress is 86/145, and M08-T02 is next. Legacy retirement remains owned by I07-05.
+artifacts and 50 readers. The current append-only successor is sequence 30 at
+`f5598749a14e7d5eed27cb07e92a83f2bec28b5404f4480600e687d960f04970`, authenticating 27 frozen
+artifacts and 54 current readers. I07-04 and G07 remain `DONE`; proof gates remain 8/13,
+implementation progress is 87/145, and M08-T03 is next. Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

@@ -211,6 +211,11 @@ after(async () => {
 });
 
 test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prerequisite", async () => {
+  assert.equal(
+    built.artifactSha256,
+    "aaa3a2447b71361361f471a822bba78e90a3f97f493b23ad3314f51c62ad4025",
+  );
+  assert.equal(built.artifactBytes.byteLength, 23_270);
   assert.equal(built.artifact.schemaVersion, 1);
   assert.equal(built.artifact.proofId, "editor-core-source-document");
   assert.equal(built.artifact.profile, "desen.editor-core.source-document-proof.v1");
@@ -306,6 +311,20 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
   assert.equal(built.artifact.boundary.runtimeClosure.proofOwnedHarnessFiles, 1);
   assert.equal(built.artifact.boundary.runtimeClosure.modules.length, 21);
   assert.equal(built.artifact.boundary.runtimeClosure.unknownStaticEsmEdges, 0);
+  assert.deepEqual(built.currentCompatibility.boundary.runtimeExports, [
+    "createDesenEditorDocument",
+  ]);
+  assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
+    "insertDesenEditorNode",
+  ]);
+  assert.equal(
+    built.currentCompatibility.boundary.currentPackageTypeExports.includes(
+      "DesenEditorNodeInsertResult",
+    ),
+    true,
+  );
+  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 15);
+  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 11);
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {
     const bytes = await workspaceBytes(receipt.path);
     assert.equal(bytes.byteLength, receipt.bytes);
