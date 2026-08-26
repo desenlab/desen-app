@@ -50,15 +50,15 @@ const CLOSED_STATUSES = SAFE_OBJECT_FREEZE(["PASS", "FAIL", "CANCELLED", "TIMED_
 const NOT_STARTED_STATUSES = SAFE_OBJECT_FREEZE(["SKIPPED", "NOT_RUN"]);
 const SIGNALS = SAFE_OBJECT_FREEZE(["SIGINT", "SIGTERM", "ABORT"]);
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
-const REQUIRED_WORKLOAD_COUNT = 157;
+const REQUIRED_WORKLOAD_COUNT = 159;
 
 /** Retained sequential-plan digest used only as an equivalence and rollback anchor. */
 export const EXPECTED_RETAINED_PLAN_SHA256 =
-  "63495628ad91a7c60b38243367dfef22c53e208d5dbfc688d33144b721f4a5f5";
+  "c8c90a4b9ede0c8a943657e27872fc7e91d0ce6f033a14c82e8fb43f8028b426";
 
-/** Digest of all 157 workload ids in their canonical inventory order. */
+/** Digest of all 159 workload ids in their canonical inventory order. */
 export const EXPECTED_REQUIRED_WORKLOAD_SET_SHA256 =
-  "ae13315504a6014f4a529469aca59f024f1cecf462abf91f149e29a18fa9b9c2";
+  "59590ce000046edaa3235aae6b0662a865a24b4b7019be98825863193982839a";
 
 /** Error raised when exhaustive inventories or terminal receipts are not equivalent. */
 export class RequiredExhaustiveEquivalenceError extends Error {
@@ -481,7 +481,7 @@ export function normalizeRequiredExecutionReceipt(rawReceipt) {
     ) {
       fail(
         "REQUIRED_EQUIVALENCE_FALSE_PASS",
-        "A passing receipt requires all 157 workloads closed with PASS and an unchanged workspace.",
+        "A passing receipt requires all 159 workloads closed with PASS and an unchanged workspace.",
       );
     }
   } else {

@@ -3271,3 +3271,57 @@ This file records implementation discoveries without changing the frozen DESEN 0
   preservation, M08-T09 must add continuous semantic validation, and M08-T10 must independently
   prove cross-command determinism and the React/DOM boundary. A later protocol revision should
   standardize these command semantics only if interoperable editor command logs become normative.
+
+## PF-081 — Content edits need exact paths and ordered variant mechanics
+
+- Status: OPEN
+- Blocks proof: No; M08-T04 defines one conservative platform-neutral content-edit profile without
+  changing frozen protocol bytes or claiming Catalog-backed authoring validity, state/binding/event
+  edits, or the terminal editor boundary.
+- Protocol location: SPEC Sections 10.5, 14, 15, 17.2, 17.4–17.5, 18.1–18.3, and 23.5;
+  `C-002`, `R-011`, `R-034`, `R-063`, and `A-010`; normative rows `N-014` and `S-002`; related
+  findings `PF-078`–`PF-080`
+- Observation: DESEN 0.1.0 defines props, conditional presence, semantic style parts, visual states,
+  and ordered variants, but it does not prescribe an editor's command shapes, owner addressing,
+  set-versus-delete separation, missing-path behavior, empty-container policy, variant insertion or
+  reorder indices, command atomicity, finite profile, or editor-specific diagnostics. In particular,
+  independent editors could collapse an intentionally emptied map, silently ignore a missing leaf,
+  or interpret the same forward variant reorder against different pre- and post-removal positions.
+- Implementation decision: M08-T04 exposes fourteen exact inert transitions. Base prop and
+  visual-state/style-part/property set/delete commands address one unique component node or behavior
+  by `surfaceId` and surface-local `ownerId`. Base condition set/clear addresses only a unique
+  component node. Variant insert, delete, and reorder address a unique node and exact numeric index;
+  insert supplies one complete inert variant at an existing array boundary, creates an absent
+  `variants` array only at index zero, and reorder interprets `index` as the final position after
+  removing `variantIndex`. The remaining variant commands replace its condition or set/delete one
+  prop or visual-state/style-part/property leaf. Set creates missing prop/style containers. Delete
+  and clear require the selected path to exist: prop deletion retains an own empty `props` object,
+  style deletion retains each emptied state/part parent, deleting the final variant retains an own
+  empty `variants` array, and condition clear removes the `when` key. Zero target matches fail as
+  not found and duplicate identity matches fail as ambiguous rather than selecting the first.
+  Every command requires its exact fields to be exposed by JavaScript reflection as enumerable own
+  data descriptors. Inherited, accessor, symbol, extra-field, function-valued, own-`toJSON`,
+  sparse-array, malformed-Unicode, and unsafe-index shapes are rejected; accessor getters and
+  `toJSON` hooks are not invoked. This is an inert captured-data guarantee, not a side-effect-free
+  classification of arbitrary JavaScript objects: necessary reflection over a `Proxy` may execute
+  its traps, and a forwarding Proxy that presents the admissible shape may be accepted. A throwing
+  reflection trap is contained as `CONTENT_EDIT_COMMAND_INVALID`, exposes no partial document, and
+  leaves the prior Source unchanged. The platform-neutral editor runtime therefore claims no
+  hostile-JavaScript or no-code-execution membrane. Success preserves every node and behavior ID,
+  every unaffected semantic-array order, and the caller's prior document while returning a fresh detached
+  recursively frozen direct Source. Other failures are likewise atomic and expose no partial
+  document.
+  Each candidate is structurally re-admitted, but undeclared prop, style-part, visual-state, token,
+  reference, and other Catalog semantics remain authorable for M08-T09 to diagnose continuously.
+  The fixed profile limits the canonical document to 8 MiB, a selected surface to 25,000
+  node/behavior identity occurrences, and component depth to 64 with the root at zero. Project-owned
+  failures use `run.desen.editor/CONTENT_EDIT_COMMAND_INVALID`,
+  `CONTENT_EDIT_TARGET_NOT_FOUND`, `CONTENT_EDIT_TARGET_AMBIGUOUS`,
+  `CONTENT_EDIT_PATH_NOT_FOUND`, `CONTENT_EDIT_POSITION_INVALID`, or
+  `CONTENT_EDIT_LIMIT_EXCEEDED`; structural re-admission retains the frozen protocol diagnostics.
+- Future action: M08-T05 and M08-T06 must retain the same exact-command, atomic direct-Source, and
+  stable-identity discipline for state/binding/event/action edits. M08-T07 must prove authoring
+  isolation and unknown-extension preservation, M08-T09 must add Catalog-backed continuous
+  validation and invalid-node mapping, and M08-T10 must independently prove cross-command
+  determinism and the React/DOM boundary. A later protocol revision should standardize content-edit
+  command mechanics only if interoperable editor command logs become normative.

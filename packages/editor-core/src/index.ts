@@ -11,6 +11,22 @@ export {
   moveDesenEditorNode,
   reorderDesenEditorNode,
 } from "./structural-edits.js";
+export {
+  clearDesenEditorNodeCondition,
+  deleteDesenEditorOwnerProp,
+  deleteDesenEditorOwnerStyleProperty,
+  deleteDesenEditorVariant,
+  deleteDesenEditorVariantProp,
+  deleteDesenEditorVariantStyleProperty,
+  insertDesenEditorVariant,
+  reorderDesenEditorVariant,
+  setDesenEditorNodeCondition,
+  setDesenEditorOwnerProp,
+  setDesenEditorOwnerStyleProperty,
+  setDesenEditorVariantCondition,
+  setDesenEditorVariantProp,
+  setDesenEditorVariantStyleProperty,
+} from "./content-edits.js";
 
 export type {
   DesenEditorDocument,
@@ -38,3 +54,28 @@ export type {
   DesenEditorStructuralEditResult,
   DesenEditorStructuralEditSuccess,
 } from "./structural-edits.js";
+
+export type {
+  DesenEditorContentEditDiagnostic,
+  DesenEditorContentEditDiagnosticCode,
+  DesenEditorContentEditFailure,
+  DesenEditorContentEditResult,
+  DesenEditorContentEditSuccess,
+  DesenEditorContentPredicate,
+  DesenEditorContentValue,
+  DesenEditorContentVariant,
+  DesenEditorNodeConditionClearCommand,
+  DesenEditorNodeConditionSetCommand,
+  DesenEditorOwnerPropDeleteCommand,
+  DesenEditorOwnerPropSetCommand,
+  DesenEditorOwnerStylePropertyDeleteCommand,
+  DesenEditorOwnerStylePropertySetCommand,
+  DesenEditorVariantConditionSetCommand,
+  DesenEditorVariantDeleteCommand,
+  DesenEditorVariantInsertCommand,
+  DesenEditorVariantPropDeleteCommand,
+  DesenEditorVariantPropSetCommand,
+  DesenEditorVariantReorderCommand,
+  DesenEditorVariantStylePropertyDeleteCommand,
+  DesenEditorVariantStylePropertySetCommand,
+} from "./content-edits.js";

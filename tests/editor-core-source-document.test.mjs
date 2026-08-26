@@ -315,10 +315,24 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     "createDesenEditorDocument",
   ]);
   assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
+    "clearDesenEditorNodeCondition",
     "deleteDesenEditorNode",
+    "deleteDesenEditorOwnerProp",
+    "deleteDesenEditorOwnerStyleProperty",
+    "deleteDesenEditorVariant",
+    "deleteDesenEditorVariantProp",
+    "deleteDesenEditorVariantStyleProperty",
     "insertDesenEditorNode",
+    "insertDesenEditorVariant",
     "moveDesenEditorNode",
     "reorderDesenEditorNode",
+    "reorderDesenEditorVariant",
+    "setDesenEditorNodeCondition",
+    "setDesenEditorOwnerProp",
+    "setDesenEditorOwnerStyleProperty",
+    "setDesenEditorVariantCondition",
+    "setDesenEditorVariantProp",
+    "setDesenEditorVariantStyleProperty",
   ]);
   assert.equal(
     built.currentCompatibility.boundary.currentPackageTypeExports.includes(
@@ -327,26 +341,56 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     true,
   );
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T03",
-    sourcePath: "packages/editor-core/src/structural-edits.ts",
-    runtimePath: "packages/editor-core/dist/structural-edits.js",
-    declarationPath: "packages/editor-core/dist/structural-edits.d.ts",
-    runtimeExports: ["deleteDesenEditorNode", "moveDesenEditorNode", "reorderDesenEditorNode"],
-    typeExports: [
-      "DesenEditorNodeDeleteCommand",
-      "DesenEditorNodeMoveCommand",
-      "DesenEditorNodeReorderCommand",
-      "DesenEditorStructuralEditDiagnostic",
-      "DesenEditorStructuralEditDiagnosticCode",
-      "DesenEditorStructuralEditFailure",
-      "DesenEditorStructuralEditResult",
-      "DesenEditorStructuralEditSuccess",
+    task: "M08-T04",
+    sourcePath: "packages/editor-core/src/content-edits.ts",
+    runtimePath: "packages/editor-core/dist/content-edits.js",
+    declarationPath: "packages/editor-core/dist/content-edits.d.ts",
+    runtimeExports: [
+      "clearDesenEditorNodeCondition",
+      "deleteDesenEditorOwnerProp",
+      "deleteDesenEditorOwnerStyleProperty",
+      "deleteDesenEditorVariant",
+      "deleteDesenEditorVariantProp",
+      "deleteDesenEditorVariantStyleProperty",
+      "insertDesenEditorVariant",
+      "reorderDesenEditorVariant",
+      "setDesenEditorNodeCondition",
+      "setDesenEditorOwnerProp",
+      "setDesenEditorOwnerStyleProperty",
+      "setDesenEditorVariantCondition",
+      "setDesenEditorVariantProp",
+      "setDesenEditorVariantStyleProperty",
     ],
-    publicDeclarations: 11,
-    tsdocDeclarations: 11,
+    typeExports: [
+      "DesenEditorContentEditDiagnostic",
+      "DesenEditorContentEditDiagnosticCode",
+      "DesenEditorContentEditFailure",
+      "DesenEditorContentEditResult",
+      "DesenEditorContentEditSuccess",
+      "DesenEditorContentPredicate",
+      "DesenEditorContentValue",
+      "DesenEditorContentVariant",
+      "DesenEditorNodeConditionClearCommand",
+      "DesenEditorNodeConditionSetCommand",
+      "DesenEditorOwnerPropDeleteCommand",
+      "DesenEditorOwnerPropSetCommand",
+      "DesenEditorOwnerStylePropertyDeleteCommand",
+      "DesenEditorOwnerStylePropertySetCommand",
+      "DesenEditorVariantConditionSetCommand",
+      "DesenEditorVariantDeleteCommand",
+      "DesenEditorVariantInsertCommand",
+      "DesenEditorVariantPropDeleteCommand",
+      "DesenEditorVariantPropSetCommand",
+      "DesenEditorVariantReorderCommand",
+      "DesenEditorVariantStylePropertyDeleteCommand",
+      "DesenEditorVariantStylePropertySetCommand",
+    ],
+    publicDeclarations: 36,
+    tsdocDeclarations: 36,
   });
-  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 19);
-  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 18);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 2);
+  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 25);
+  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 36);
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {
     const bytes = await workspaceBytes(receipt.path);
     assert.equal(bytes.byteLength, receipt.bytes);

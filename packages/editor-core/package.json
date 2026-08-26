@@ -24,6 +24,7 @@
     "test:source-document": "vitest run test/source-document.test.ts",
     "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
     "test:structural-edits": "vitest run test/structural-edits.test.ts",
+    "test:content-edits": "vitest run test/content-edits.test.ts",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

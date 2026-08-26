@@ -242,6 +242,25 @@ test("[artifact] verifies exact artifact bytes and one exact final proof pin", a
     }),
     expectedError("PROOF_PIN_DRIFT"),
   );
+  for (const invalidProofDocumentBytes of [
+    `<!-- Final artifact: \`sha256:${built.artifactSha256}\` -->\n`,
+    `\`\`\`text\nFinal artifact: \`sha256:${built.artifactSha256}\`\n\`\`\`\n`,
+    `    Final artifact: \`sha256:${built.artifactSha256}\`\n`,
+    `\tFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
+    `<template>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</template>\n`,
+    `<div hidden>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</div>\n`,
+    `<details>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</details>\n`,
+    `Status: FAIL\nFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
+    `sha256:PENDING\nFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
+  ]) {
+    await assert.rejects(
+      verifyEditorCoreStructuralEditsEvidence({
+        artifactBytes: built.artifactBytes,
+        proofDocumentBytes: invalidProofDocumentBytes,
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+  }
 });
 
 test("[writer] atomically commits exact bytes and preserves the previous destination on failure", async () => {

@@ -80,15 +80,33 @@ prototype-chain slot authority, accessor/symbol/extra command fields, and limit 
 atomically. Every success preserves surviving IDs and returns a fresh detached recursively frozen
 direct Source.
 
-Insertion, delete, move, and reorder are structural rather than Catalog-semantic: a structurally
-valid unresolved capability or undeclared slot may remain in the authoring graph for M08-T09 to
-diagnose. The common profile keeps canonical documents at 8 MiB, selected surfaces at 25,000
-identity occurrences, component depth at 64 with root at zero, and capability IDs at 4,096 code
-units where a command carries one. `N-014` is now `TESTED` by exact post-removal ordering and
-stable unaffected order. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity
-integration. Prop, style, condition, variant, state, binding, event, and action edits remain owned
-by M08-T04 through M08-T06. Persistence, selection, viewport, and authoring-state policy remain
-outside M08-T03.
+M08-T04 adds fourteen separated content transitions without adding a mutable editor model. Base
+prop and visual-state/style-part/property commands address a uniquely identified node or behavior;
+base conditional presence and every variant command address a uniquely identified node. Variants
+support complete indexed insert/delete, post-removal reorder, condition replacement, and prop/style
+leaf updates. Set creates missing containers, while delete requires an existing path and preserves
+own empty `props`, `style` state/part, and `variants` containers. Condition clear removes the
+existing `when` member. Required fields must be exposed by JavaScript reflection as exact
+enumerable own data descriptors. Inherited, accessor, symbol, extra-field, function-valued,
+own-`toJSON`, sparse-array, malformed-Unicode, and unsafe-index shapes fail atomically; accessor
+getters and `toJSON` hooks are not invoked. Reflection on an arbitrary `Proxy` may execute traps. A
+forwarding Proxy that exposes the admissible shape may be accepted, while a throwing reflection
+trap is contained as a controlled failure with no partial document and no change to the prior
+Source. This platform-neutral boundary is not a
+hostile-JavaScript or no-code-execution membrane. Missing or ambiguous identity, missing paths,
+invalid positions, structural re-admission, and limit overflow likewise fail atomically. Success
+preserves every identity and unaffected semantic order and returns a fresh detached recursively
+frozen direct Source. `PF-081` records the profile choices that the frozen protocol does not define.
+
+Insertion, structural edits, and content edits remain structurally authoritative rather than
+Catalog-semantic: structurally valid unresolved capabilities, slots, props, style parts, visual
+states, tokens, and references may remain in the authoring graph for M08-T09 to diagnose. The
+common profile keeps canonical documents at 8 MiB, selected surfaces at 25,000 identity
+occurrences, component depth at 64 with root at zero, and capability IDs at 4,096 code units where
+a command carries one. `N-014` remains `TESTED` by exact ordered edits and stable unaffected order.
+`S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration. State, binding,
+event, and action edits remain owned by M08-T05 through M08-T06. Persistence, selection, viewport,
+authoring-state policy, continuous validation, and invalid-node mapping remain outside M08-T04.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
 source. The package depends only on `protocol` and `validator` and has zero platform imports or

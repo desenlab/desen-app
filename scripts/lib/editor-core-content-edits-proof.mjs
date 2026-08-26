@@ -7,6 +7,7 @@ import path from "node:path";
 import { types as utilTypes } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
@@ -17,31 +18,25 @@ const MAX_AUTHORITY_BYTES = 16 * 1_024 * 1_024;
 const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const DIRECTORY_READ_FLAGS = READ_FLAGS | (fileConstants.O_DIRECTORY ?? 0);
-const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json";
-const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-STRUCTURAL-EDITS.md";
+const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-content-edits.json";
+const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-CONTENT-EDITS.md";
 const T02_ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json";
+const T03_ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json";
 const FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json";
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
-const STRUCTURAL_EDITS_SOURCE_PATH = "packages/editor-core/src/structural-edits.ts";
 const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
-const CONTENT_EDITS_TEST_PATH = "packages/editor-core/test/content-edits.test.ts";
-const CONTENT_EDITS_TYPES_PATH = "packages/editor-core/test/content-edits.types.ts";
-const PACKAGE_TEST_PATH = "packages/editor-core/test/structural-edits.test.ts";
-const PACKAGE_TYPES_PATH = "packages/editor-core/test/structural-edits.types.ts";
+const PACKAGE_TEST_PATH = "packages/editor-core/test/content-edits.test.ts";
+const PACKAGE_TYPES_PATH = "packages/editor-core/test/content-edits.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
-const ROOT_TEST_PATH = "tests/editor-core-structural-edits.test.mjs";
-const PROOF_LIBRARY_PATH = "scripts/lib/editor-core-structural-edits-proof.mjs";
-const GENERATOR_PATH = "scripts/generate-editor-core-structural-edits-proof.mjs";
-const VERIFIER_PATH = "scripts/verify-editor-core-structural-edits.mjs";
+const ROOT_TEST_PATH = "tests/editor-core-content-edits.test.mjs";
+const PROOF_LIBRARY_PATH = "scripts/lib/editor-core-content-edits-proof.mjs";
+const GENERATOR_PATH = "scripts/generate-editor-core-content-edits-proof.mjs";
+const VERIFIER_PATH = "scripts/verify-editor-core-content-edits.mjs";
 const ATOMIC_WRITER_PATH = "scripts/lib/atomic-proof-artifact.mjs";
 const DOCUMENT_LIMIT = 8_388_608;
-const FROZEN_ARTIFACT_PIN = Object.freeze({
-  bytes: 22_402,
-  sha256: "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
-});
 
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -83,6 +78,7 @@ const CURRENT_EDITOR_RUNTIME_PATHS = Object.freeze([
 const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
   "packages/editor-core/dist/stable-id-insert.js",
+  "packages/editor-core/dist/structural-edits.js",
 ]);
 const ISOLATED_RUNTIME_PATHS = Object.freeze([
   ...CURRENT_EDITOR_RUNTIME_PATHS,
@@ -107,7 +103,7 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/tsconfig.public-package.json",
   "packages/editor-core/src/source-document.ts",
   "packages/editor-core/src/stable-id-insert.ts",
-  STRUCTURAL_EDITS_SOURCE_PATH,
+  "packages/editor-core/src/structural-edits.ts",
   CONTENT_EDITS_SOURCE_PATH,
   INDEX_SOURCE_PATH,
   ...DIST_PATHS,
@@ -115,10 +111,10 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/test/source-document.types.ts",
   "packages/editor-core/test/stable-id-insert.test.ts",
   "packages/editor-core/test/stable-id-insert.types.ts",
+  "packages/editor-core/test/structural-edits.test.ts",
+  "packages/editor-core/test/structural-edits.types.ts",
   PACKAGE_TEST_PATH,
   PACKAGE_TYPES_PATH,
-  CONTENT_EDITS_TEST_PATH,
-  CONTENT_EDITS_TYPES_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -129,29 +125,6 @@ const TRACKED_PATHS = Object.freeze([
   ROOT_TEST_PATH,
 ]);
 const TRACKED_PATH_SET = new Set(TRACKED_PATHS);
-const RETAINED_T02_RECEIPT_PATHS = Object.freeze([
-  FIXTURE_PATH,
-  "tsconfig.base.json",
-  "packages/editor-core/tsconfig.json",
-  "packages/editor-core/tsconfig.build.json",
-  "packages/editor-core/tsconfig.public-package.json",
-  "packages/editor-core/src/source-document.ts",
-  "packages/editor-core/src/stable-id-insert.ts",
-  "packages/editor-core/dist/source-document.d.ts",
-  "packages/editor-core/dist/source-document.d.ts.map",
-  "packages/editor-core/dist/source-document.js",
-  "packages/editor-core/dist/source-document.js.map",
-  "packages/editor-core/dist/stable-id-insert.d.ts",
-  "packages/editor-core/dist/stable-id-insert.d.ts.map",
-  "packages/editor-core/dist/stable-id-insert.js",
-  "packages/editor-core/dist/stable-id-insert.js.map",
-  "packages/editor-core/test/source-document.test.ts",
-  "packages/editor-core/test/source-document.types.ts",
-  "packages/editor-core/test/stable-id-insert.test.ts",
-  "packages/editor-core/test/stable-id-insert.types.ts",
-  ...DEPENDENCY_RUNTIME_PATHS,
-  ATOMIC_WRITER_PATH,
-]);
 const RETAINED_T03_RECEIPT_PATHS = Object.freeze([
   FIXTURE_PATH,
   "tsconfig.base.json",
@@ -160,7 +133,7 @@ const RETAINED_T03_RECEIPT_PATHS = Object.freeze([
   "packages/editor-core/tsconfig.public-package.json",
   "packages/editor-core/src/source-document.ts",
   "packages/editor-core/src/stable-id-insert.ts",
-  STRUCTURAL_EDITS_SOURCE_PATH,
+  "packages/editor-core/src/structural-edits.ts",
   "packages/editor-core/dist/source-document.d.ts",
   "packages/editor-core/dist/source-document.d.ts.map",
   "packages/editor-core/dist/source-document.js",
@@ -177,19 +150,40 @@ const RETAINED_T03_RECEIPT_PATHS = Object.freeze([
   "packages/editor-core/test/source-document.types.ts",
   "packages/editor-core/test/stable-id-insert.test.ts",
   "packages/editor-core/test/stable-id-insert.types.ts",
-  PACKAGE_TEST_PATH,
-  PACKAGE_TYPES_PATH,
+  "packages/editor-core/test/structural-edits.test.ts",
+  "packages/editor-core/test/structural-edits.types.ts",
   ...DEPENDENCY_RUNTIME_PATHS,
   ATOMIC_WRITER_PATH,
 ]);
 
-const EXPECTED_RUNTIME_EXPORTS = Object.freeze([
-  "createDesenEditorDocument",
-  "deleteDesenEditorNode",
-  "insertDesenEditorNode",
-  "moveDesenEditorNode",
-  "reorderDesenEditorNode",
-]);
+const CONTENT_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "clearDesenEditorNodeCondition",
+    "deleteDesenEditorOwnerProp",
+    "deleteDesenEditorOwnerStyleProperty",
+    "deleteDesenEditorVariant",
+    "deleteDesenEditorVariantProp",
+    "deleteDesenEditorVariantStyleProperty",
+    "insertDesenEditorVariant",
+    "reorderDesenEditorVariant",
+    "setDesenEditorNodeCondition",
+    "setDesenEditorOwnerProp",
+    "setDesenEditorOwnerStyleProperty",
+    "setDesenEditorVariantCondition",
+    "setDesenEditorVariantProp",
+    "setDesenEditorVariantStyleProperty",
+  ].sort(compareText),
+);
+const EXPECTED_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "createDesenEditorDocument",
+    "deleteDesenEditorNode",
+    "insertDesenEditorNode",
+    "moveDesenEditorNode",
+    "reorderDesenEditorNode",
+    ...CONTENT_RUNTIME_EXPORTS,
+  ].sort(compareText),
+);
 const EXPECTED_TYPE_EXPORTS = Object.freeze(
   [
     "DesenEditorDocument",
@@ -210,43 +204,6 @@ const EXPECTED_TYPE_EXPORTS = Object.freeze(
     "DesenEditorStructuralEditFailure",
     "DesenEditorStructuralEditResult",
     "DesenEditorStructuralEditSuccess",
-  ].sort(compareText),
-);
-const EXPECTED_STRUCTURAL_EXPORTS = Object.freeze(
-  [
-    "deleteDesenEditorNode",
-    "moveDesenEditorNode",
-    "reorderDesenEditorNode",
-    "DesenEditorNodeDeleteCommand",
-    "DesenEditorNodeMoveCommand",
-    "DesenEditorNodeReorderCommand",
-    "DesenEditorStructuralEditDiagnostic",
-    "DesenEditorStructuralEditDiagnosticCode",
-    "DesenEditorStructuralEditFailure",
-    "DesenEditorStructuralEditResult",
-    "DesenEditorStructuralEditSuccess",
-  ].sort(compareText),
-);
-const EXPECTED_CONTENT_RUNTIME_EXPORTS = Object.freeze(
-  [
-    "clearDesenEditorNodeCondition",
-    "deleteDesenEditorOwnerProp",
-    "deleteDesenEditorOwnerStyleProperty",
-    "deleteDesenEditorVariant",
-    "deleteDesenEditorVariantProp",
-    "deleteDesenEditorVariantStyleProperty",
-    "insertDesenEditorVariant",
-    "reorderDesenEditorVariant",
-    "setDesenEditorNodeCondition",
-    "setDesenEditorOwnerProp",
-    "setDesenEditorOwnerStyleProperty",
-    "setDesenEditorVariantCondition",
-    "setDesenEditorVariantProp",
-    "setDesenEditorVariantStyleProperty",
-  ].sort(compareText),
-);
-const EXPECTED_CONTENT_TYPE_EXPORTS = Object.freeze(
-  [
     "DesenEditorContentEditDiagnostic",
     "DesenEditorContentEditDiagnosticCode",
     "DesenEditorContentEditFailure",
@@ -272,40 +229,57 @@ const EXPECTED_CONTENT_TYPE_EXPORTS = Object.freeze(
   ].sort(compareText),
 );
 const EXPECTED_CONTENT_EXPORTS = Object.freeze(
-  [...EXPECTED_CONTENT_RUNTIME_EXPORTS, ...EXPECTED_CONTENT_TYPE_EXPORTS].sort(compareText),
-);
-const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
-  [...EXPECTED_RUNTIME_EXPORTS, ...EXPECTED_CONTENT_RUNTIME_EXPORTS].sort(compareText),
-);
-const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
-  [...EXPECTED_TYPE_EXPORTS, ...EXPECTED_CONTENT_TYPE_EXPORTS].sort(compareText),
+  [
+    ...CONTENT_RUNTIME_EXPORTS,
+    "DesenEditorContentEditDiagnostic",
+    "DesenEditorContentEditDiagnosticCode",
+    "DesenEditorContentEditFailure",
+    "DesenEditorContentEditResult",
+    "DesenEditorContentEditSuccess",
+    "DesenEditorContentPredicate",
+    "DesenEditorContentValue",
+    "DesenEditorContentVariant",
+    "DesenEditorNodeConditionClearCommand",
+    "DesenEditorNodeConditionSetCommand",
+    "DesenEditorOwnerPropDeleteCommand",
+    "DesenEditorOwnerPropSetCommand",
+    "DesenEditorOwnerStylePropertyDeleteCommand",
+    "DesenEditorOwnerStylePropertySetCommand",
+    "DesenEditorVariantConditionSetCommand",
+    "DesenEditorVariantDeleteCommand",
+    "DesenEditorVariantInsertCommand",
+    "DesenEditorVariantPropDeleteCommand",
+    "DesenEditorVariantPropSetCommand",
+    "DesenEditorVariantReorderCommand",
+    "DesenEditorVariantStylePropertyDeleteCommand",
+    "DesenEditorVariantStylePropertySetCommand",
+  ].sort(compareText),
 );
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
-  "run.desen.editor/STRUCTURAL_EDIT_COMMAND_INVALID",
-  "run.desen.editor/STRUCTURAL_EDIT_CYCLE_FORBIDDEN",
-  "run.desen.editor/STRUCTURAL_EDIT_LIMIT_EXCEEDED",
-  "run.desen.editor/STRUCTURAL_EDIT_POSITION_INVALID",
-  "run.desen.editor/STRUCTURAL_EDIT_ROOT_FORBIDDEN",
-  "run.desen.editor/STRUCTURAL_EDIT_TARGET_AMBIGUOUS",
-  "run.desen.editor/STRUCTURAL_EDIT_TARGET_NOT_FOUND",
+  "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+  "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
+  "run.desen.editor/CONTENT_EDIT_PATH_NOT_FOUND",
+  "run.desen.editor/CONTENT_EDIT_POSITION_INVALID",
+  "run.desen.editor/CONTENT_EDIT_TARGET_AMBIGUOUS",
+  "run.desen.editor/CONTENT_EDIT_TARGET_NOT_FOUND",
 ]);
 const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
-  "deletes a complete node subtree while retaining the emptied source-slot key",
-  "moves the exact subtree to a different owner slot without rewriting any identity",
-  "moves to a behavior-owned slot and creates an absent destination only at index zero",
-  "moves across slots of one owner and inserts at an existing destination boundary",
-  "reorders by the post-removal final position and returns a fresh result for a no-op",
-  "reorders a direct child inside a behavior-owned slot",
-  "rejects deleting or moving a surface root and rejects same-slot move ambiguity",
-  "rejects moving a node into itself, a descendant node, or a descendant behavior",
-  "requires unique surface-wide target and owner identities without choosing a first match",
-  "requires reorder membership and validates both move and reorder positions atomically",
-  "rejects malformed commands, extra authority, symbols, prototypes, and active properties",
-  "creates and addresses Object.prototype-named slots only as own data",
-  "preserves structural diagnostics for a forged current Source",
-  "accepts a resulting depth of 64 and rejects a move that would create depth 65",
-  "admits exactly 25,000 surface identities and rejects the next occurrence",
-  "admits an exact 8 MiB Source and rejects a one-byte crossing before mutation",
+  "sets and deletes base node props without retaining inputs or removing the empty container",
+  "edits behavior props and prototype-sensitive prop names as own data",
+  "sets and deletes node and behavior style leaves while preserving empty state and part maps",
+  "sets and clears only component-node base conditions",
+  "inserts variants at exact boundaries and preserves unresolved Catalog semantics",
+  "deletes variants and retains an empty own variants array",
+  "reorders variants by post-removal final index including a fresh no-op",
+  "sets variant conditions and rejects absent variant indices atomically",
+  "sets and deletes variant props while allowing the last prop to leave an empty map",
+  "sets and deletes variant style leaves while retaining empty style containers",
+  "rejects deletion of every missing path without returning a partial document",
+  "rejects missing and ambiguous surface-local owner identities",
+  "rejects non-data command shapes without invoking hooks and contains throwing Proxy traps atomically",
+  "rejects malformed-Unicode prop names with controlled command diagnostics",
+  "preserves structural diagnostics when a content value would make the Source invalid",
+  "enforces depth, identity-count, and 8 MiB document boundaries",
 ]);
 const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the package manifest keeps one exact root export and the declared runtime dependencies",
@@ -345,8 +319,10 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
 const BUILD_OPTION_KEYS = Object.freeze([
   "beforeAuthorityRecheck",
   "fileOverrides",
-  "prerequisiteBytes",
-  "prerequisitePath",
+  "t02PrerequisiteBytes",
+  "t02PrerequisitePath",
+  "t03PrerequisiteBytes",
+  "t03PrerequisitePath",
   "runtime",
 ]);
 const VERIFY_OPTION_KEYS = Object.freeze([
@@ -364,42 +340,50 @@ const BYTE_VIEW_INTRINSICS = Object.freeze({
   byteOffset: Object.getOwnPropertyDescriptor(TYPED_ARRAY_PROTOTYPE, "byteOffset")?.get,
 });
 
-export const EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN = Object.freeze({
-  task: "M08-T02",
-  path: T02_ARTIFACT_PATH,
-  bytes: 19_561,
-  sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
-});
+export const EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS = Object.freeze([
+  Object.freeze({
+    task: "M08-T02",
+    path: T02_ARTIFACT_PATH,
+    bytes: 19_561,
+    sha256: "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
+  }),
+  Object.freeze({
+    task: "M08-T03",
+    path: T03_ARTIFACT_PATH,
+    bytes: 22_402,
+    sha256: "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+  }),
+]);
 
-export const EDITOR_CORE_STRUCTURAL_EDITS_ROOT_TEST_NAMES = Object.freeze([
-  "[authority] authenticates the exact frozen M08-T02 artifact and isolated runtime graph",
-  "[determinism] two fresh M08-T03 builds are byte-identical",
-  "[behavior] proves delete, move, reorder, stable identity, limits, and atomic diagnostics",
+export const EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES = Object.freeze([
+  "[authority] authenticates exact frozen M08-T02/T03 artifacts and the isolated runtime graph",
+  "[determinism] two fresh M08-T04 builds are byte-identical",
+  "[behavior] proves all fourteen content commands, stable identity, limits, and atomic diagnostics",
   "[mutation] rejects runtime substitution and tracked boundary mutation",
   "[artifact] verifies exact artifact bytes and one exact final proof pin",
   "[writer] atomically commits exact bytes and preserves the previous destination on failure",
   "[writer-filesystem] rejects symlink, hard-link, and non-file destinations",
-  "[filesystem] rejects linked prerequisite, artifact, and proof authorities",
+  "[filesystem] rejects linked artifact/proof and linked, replaced, or raced prerequisites",
   "[options] rejects unknown, accessor, inherited, symbol, proxy, and shared inputs",
   "[immutability] freezes evidence and states the exact nonclaim boundary",
 ]);
 
-export const DEFAULT_EDITOR_CORE_STRUCTURAL_EDITS_ARTIFACT_PATH = path.join(
+export const DEFAULT_EDITOR_CORE_CONTENT_EDITS_ARTIFACT_PATH = path.join(
   WORKSPACE_ROOT,
   ARTIFACT_PATH,
 );
 
-export class EditorCoreStructuralEditsProofError extends Error {
+export class EditorCoreContentEditsProofError extends Error {
   constructor(code, message, details = undefined) {
     super(message);
-    this.name = "EditorCoreStructuralEditsProofError";
+    this.name = "EditorCoreContentEditsProofError";
     this.code = code;
     this.details = details;
   }
 }
 
 function fail(code, message, details = undefined) {
-  throw new EditorCoreStructuralEditsProofError(code, message, details);
+  throw new EditorCoreContentEditsProofError(code, message, details);
 }
 
 function compareText(left, right) {
@@ -495,12 +479,7 @@ function captureFileOverrides(raw) {
 
 function captureRuntime(raw) {
   if (raw === undefined) return undefined;
-  const keys = [
-    "createDesenEditorDocument",
-    "deleteDesenEditorNode",
-    "moveDesenEditorNode",
-    "reorderDesenEditorNode",
-  ];
+  const keys = ["createDesenEditorDocument", ...CONTENT_RUNTIME_EXPORTS];
   const source = captureExactObject(raw, keys, "buildOptions.runtime");
   for (const key of keys) {
     if (typeof source[key] !== "function" || utilTypes.isProxy(source[key])) {
@@ -512,8 +491,10 @@ function captureRuntime(raw) {
 
 function captureBuildOptions(raw) {
   const source = captureExactObject(raw, BUILD_OPTION_KEYS, "buildOptions");
-  if (source.prerequisitePath !== undefined && typeof source.prerequisitePath !== "string") {
-    fail("OPTIONS_INVALID", "buildOptions.prerequisitePath must be a string.");
+  for (const key of ["t02PrerequisitePath", "t03PrerequisitePath"]) {
+    if (source[key] !== undefined && typeof source[key] !== "string") {
+      fail("OPTIONS_INVALID", `buildOptions.${key} must be a string.`);
+    }
   }
   if (
     source.beforeAuthorityRecheck !== undefined &&
@@ -525,11 +506,16 @@ function captureBuildOptions(raw) {
   return Object.freeze({
     beforeAuthorityRecheck: source.beforeAuthorityRecheck,
     fileOverrides: captureFileOverrides(source.fileOverrides),
-    prerequisiteBytes:
-      source.prerequisiteBytes === undefined
+    t02PrerequisiteBytes:
+      source.t02PrerequisiteBytes === undefined
         ? undefined
-        : captureByteInput(source.prerequisiteBytes, "buildOptions.prerequisiteBytes"),
-    prerequisitePath: source.prerequisitePath,
+        : captureByteInput(source.t02PrerequisiteBytes, "buildOptions.t02PrerequisiteBytes"),
+    t02PrerequisitePath: source.t02PrerequisitePath,
+    t03PrerequisiteBytes:
+      source.t03PrerequisiteBytes === undefined
+        ? undefined
+        : captureByteInput(source.t03PrerequisiteBytes, "buildOptions.t03PrerequisiteBytes"),
+    t03PrerequisitePath: source.t03PrerequisitePath,
     runtime: captureRuntime(source.runtime),
   });
 }
@@ -554,7 +540,7 @@ async function openCanonicalDirectory(directoryPath, label) {
     return Object.freeze({ directoryPath, handle, label, opened });
   } catch (error) {
     await handle?.close().catch(() => undefined);
-    if (error instanceof EditorCoreStructuralEditsProofError) throw error;
+    if (error instanceof EditorCoreContentEditsProofError) throw error;
     fail("FILESYSTEM_UNSAFE", `${label} cannot be opened safely.`, String(error));
   }
 }
@@ -577,7 +563,7 @@ async function assertCanonicalDirectoryUnchanged(capture) {
       fail("FILESYSTEM_UNSAFE", `${capture.label} changed identity during the authority read.`);
     }
   } catch (error) {
-    if (error instanceof EditorCoreStructuralEditsProofError) throw error;
+    if (error instanceof EditorCoreContentEditsProofError) throw error;
     fail("FILESYSTEM_UNSAFE", `${capture.label} became unavailable during the authority read.`);
   }
 }
@@ -638,7 +624,7 @@ async function readNoFollow(
     await assertCanonicalDirectoryUnchanged(rootCapture);
     return bytes;
   } catch (error) {
-    if (error instanceof EditorCoreStructuralEditsProofError) throw error;
+    if (error instanceof EditorCoreContentEditsProofError) throw error;
     fail("FILESYSTEM_UNSAFE", `${label} cannot be read safely.`, String(error));
   } finally {
     await handle?.close().catch(() => undefined);
@@ -659,7 +645,7 @@ function parseJson(bytes, label) {
   try {
     return JSON.parse(decodeUtf8(bytes, label));
   } catch (error) {
-    if (error instanceof EditorCoreStructuralEditsProofError) throw error;
+    if (error instanceof EditorCoreContentEditsProofError) throw error;
     fail("JSON_INVALID", `${label} is not valid JSON.`, String(error));
   }
 }
@@ -782,25 +768,21 @@ function verifyBoundary(files) {
       JSON.stringify({ ".": { types: "./dist/index.d.ts", import: "./dist/index.js" } }) ||
     JSON.stringify(manifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
-    manifest.scripts?.["test:structural-edits"] !== "vitest run test/structural-edits.test.ts" ||
     manifest.scripts?.["test:content-edits"] !== "vitest run test/content-edits.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
 
-  const sourceText = decodeUtf8(
-    files.get(STRUCTURAL_EDITS_SOURCE_PATH),
-    STRUCTURAL_EDITS_SOURCE_PATH,
-  );
-  const sourceExports = exportedNames(sourceText, STRUCTURAL_EDITS_SOURCE_PATH);
+  const sourceText = decodeUtf8(files.get(CONTENT_EDITS_SOURCE_PATH), CONTENT_EDITS_SOURCE_PATH);
+  const sourceExports = exportedNames(sourceText, CONTENT_EDITS_SOURCE_PATH);
   exactArray(
     sourceExports.names,
-    EXPECTED_STRUCTURAL_EXPORTS,
+    EXPECTED_CONTENT_EXPORTS,
     "SOURCE_DRIFT",
-    "Structural-edit source exports",
+    "Content-edit source exports",
   );
-  if (sourceExports.tsdocDeclarations !== EXPECTED_STRUCTURAL_EXPORTS.length) {
-    fail("TSDOC_DRIFT", "Every public structural-edit declaration must retain TSDoc.");
+  if (sourceExports.tsdocDeclarations !== EXPECTED_CONTENT_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Every public content-edit declaration must retain TSDoc.");
   }
   for (const literal of ["8_388_608", "25_000", "maxSourceTreeDepth: 64"]) {
     if (!sourceText.includes(literal)) fail("LIMIT_DRIFT", `Missing fixed limit: ${literal}`);
@@ -809,29 +791,12 @@ function verifyBoundary(files) {
     if (!sourceText.includes(`"${code}"`)) fail("DIAGNOSTIC_DRIFT", `Missing code: ${code}`);
   }
 
-  const contentText = decodeUtf8(files.get(CONTENT_EDITS_SOURCE_PATH), CONTENT_EDITS_SOURCE_PATH);
-  const contentExports = exportedNames(contentText, CONTENT_EDITS_SOURCE_PATH);
-  exactArray(
-    contentExports.names,
-    EXPECTED_CONTENT_EXPORTS,
-    "SOURCE_DRIFT",
-    "Content-edit source exports",
-  );
-  if (contentExports.tsdocDeclarations !== EXPECTED_CONTENT_EXPORTS.length) {
-    fail("TSDOC_DRIFT", "Every public content-edit declaration must retain TSDoc.");
-  }
-
   const sourceIndex = reexportedNames(
     decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH),
     INDEX_SOURCE_PATH,
   );
-  exactArray(
-    sourceIndex.runtime,
-    EXPECTED_CURRENT_RUNTIME_EXPORTS,
-    "SOURCE_DRIFT",
-    "Runtime exports",
-  );
-  exactArray(sourceIndex.types, EXPECTED_CURRENT_TYPE_EXPORTS, "SOURCE_DRIFT", "Type exports");
+  exactArray(sourceIndex.runtime, EXPECTED_RUNTIME_EXPORTS, "SOURCE_DRIFT", "Runtime exports");
+  exactArray(sourceIndex.types, EXPECTED_TYPE_EXPORTS, "SOURCE_DRIFT", "Type exports");
   exactArray(
     sourceIndex.modules,
     [
@@ -850,8 +815,6 @@ function verifyBoundary(files) {
 
   const distIndexPath = "packages/editor-core/dist/index.js";
   const distIndexDeclarationPath = "packages/editor-core/dist/index.d.ts";
-  const distStructuralPath = "packages/editor-core/dist/structural-edits.js";
-  const distStructuralDeclarationPath = "packages/editor-core/dist/structural-edits.d.ts";
   const distContentPath = "packages/editor-core/dist/content-edits.js";
   const distContentDeclarationPath = "packages/editor-core/dist/content-edits.d.ts";
   const distIndex = decodeUtf8(files.get(distIndexPath), distIndexPath);
@@ -860,37 +823,19 @@ function verifyBoundary(files) {
     decodeUtf8(files.get(distIndexDeclarationPath), distIndexDeclarationPath),
     distIndexDeclarationPath,
   );
-  exactArray(
-    emittedIndex.runtime,
-    EXPECTED_CURRENT_RUNTIME_EXPORTS,
-    "EMITTED_DRIFT",
-    "Emitted exports",
-  );
+  exactArray(emittedIndex.runtime, EXPECTED_RUNTIME_EXPORTS, "EMITTED_DRIFT", "Emitted exports");
   exactArray(
     emittedIndexDeclaration.runtime,
-    EXPECTED_CURRENT_RUNTIME_EXPORTS,
+    EXPECTED_RUNTIME_EXPORTS,
     "EMITTED_DRIFT",
     "Declaration runtime exports",
   );
   exactArray(
     emittedIndexDeclaration.types,
-    EXPECTED_CURRENT_TYPE_EXPORTS,
+    EXPECTED_TYPE_EXPORTS,
     "EMITTED_DRIFT",
     "Declaration type exports",
   );
-  const emittedStructural = exportedNames(
-    decodeUtf8(files.get(distStructuralDeclarationPath), distStructuralDeclarationPath),
-    distStructuralDeclarationPath,
-  );
-  exactArray(
-    emittedStructural.names,
-    EXPECTED_STRUCTURAL_EXPORTS,
-    "EMITTED_DRIFT",
-    "Emitted structural declarations",
-  );
-  if (emittedStructural.tsdocDeclarations !== EXPECTED_STRUCTURAL_EXPORTS.length) {
-    fail("TSDOC_DRIFT", "Emitted structural declarations lost TSDoc.");
-  }
   const emittedContent = exportedNames(
     decodeUtf8(files.get(distContentDeclarationPath), distContentDeclarationPath),
     distContentDeclarationPath,
@@ -917,7 +862,7 @@ function verifyBoundary(files) {
     ],
     ["packages/editor-core/dist/source-document.js", ["@desen/validator"]],
     ["packages/editor-core/dist/stable-id-insert.js", ["@desen/protocol", "./source-document.js"]],
-    [distStructuralPath, ["@desen/protocol", "./source-document.js"]],
+    ["packages/editor-core/dist/structural-edits.js", ["@desen/protocol", "./source-document.js"]],
     [distContentPath, ["@desen/protocol", "./source-document.js"]],
   ];
   for (const [relativePath, expected] of emittedModules) {
@@ -953,8 +898,8 @@ function verifyBoundary(files) {
   const focusedTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PACKAGE_TYPES_PATH), PACKAGE_TYPES_PATH),
   );
-  if (focusedTypeAssertions !== 10) {
-    fail("TEST_INVENTORY_DRIFT", "Focused compiler-negative inventory must remain ten.");
+  if (focusedTypeAssertions !== 6) {
+    fail("TEST_INVENTORY_DRIFT", "Focused compiler-negative inventory must remain six.");
   }
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   exactArray(
@@ -972,7 +917,7 @@ function verifyBoundary(files) {
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
     rootTests,
-    EDITOR_CORE_STRUCTURAL_EDITS_ROOT_TEST_NAMES,
+    EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES,
     "TEST_INVENTORY_DRIFT",
     "Root proof inventory",
   );
@@ -980,20 +925,8 @@ function verifyBoundary(files) {
   return deepFreeze({
     runtimeExports: [...EXPECTED_RUNTIME_EXPORTS],
     typeExports: [...EXPECTED_TYPE_EXPORTS],
-    currentPackageRuntimeExports: [...EXPECTED_CURRENT_RUNTIME_EXPORTS],
-    currentPackageTypeExports: [...EXPECTED_CURRENT_TYPE_EXPORTS],
-    additiveRuntimeExports: [...EXPECTED_CONTENT_RUNTIME_EXPORTS],
-    additiveTypeExports: [...EXPECTED_CONTENT_TYPE_EXPORTS],
-    additiveSuccessor: {
-      task: "M08-T04",
-      sourcePath: CONTENT_EDITS_SOURCE_PATH,
-      runtimePath: distContentPath,
-      declarationPath: distContentDeclarationPath,
-      runtimeExports: [...EXPECTED_CONTENT_RUNTIME_EXPORTS],
-      typeExports: [...EXPECTED_CONTENT_TYPE_EXPORTS],
-    },
-    structuralPublicDeclarations: EXPECTED_STRUCTURAL_EXPORTS.length,
-    structuralTsdocDeclarations: sourceExports.tsdocDeclarations,
+    contentPublicDeclarations: EXPECTED_CONTENT_EXPORTS.length,
+    contentTsdocDeclarations: sourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
     staticEsmEdges: 11,
     unknownStaticEsmEdges: 0,
@@ -1002,60 +935,115 @@ function verifyBoundary(files) {
     focusedCompilerNegativeAssertions: focusedTypeAssertions,
     publicRuntimeAndRootCases: EXPECTED_PUBLIC_TEST_NAMES.length,
     publicCompilerNegativeAssertions: publicTypeAssertions,
-    rootProofCases: EDITOR_CORE_STRUCTURAL_EDITS_ROOT_TEST_NAMES.length,
+    rootProofCases: EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES.length,
   });
 }
 
-async function authenticatePrerequisite(options) {
-  const prerequisitePath = options.prerequisitePath ?? T02_ARTIFACT_PATH;
-  const bytes =
-    options.prerequisiteBytes ??
-    (await readNoFollow(
-      prerequisitePath,
-      "frozen M08-T02 prerequisite",
-      MAX_AUTHORITY_BYTES,
-      options.beforeAuthorityRecheck,
-    ));
-  const pin = EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN;
-  if (bytes.byteLength !== pin.bytes || sha256(bytes) !== pin.sha256) {
-    fail("PREREQUISITE_DRIFT", "The exact frozen M08-T02 artifact receipt did not match.");
+async function authenticatePrerequisites(options) {
+  const [t02Pin, t03Pin] = EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS;
+  const authorities = [
+    {
+      pin: t02Pin,
+      path: options.t02PrerequisitePath ?? T02_ARTIFACT_PATH,
+      suppliedBytes: options.t02PrerequisiteBytes,
+      expectedProofId: "editor-core-stable-id-insert",
+      expectedProfile: "desen.editor-core.stable-id-insert-proof.v1",
+      expectedFiles: 53,
+      expectedRuntimeFiles: 25,
+      expectedEditorFiles: 4,
+      expectedPublicCases: 22,
+      expectedPublicField: "publicRuntimeCases",
+      expectedClaim: "immutableInsertCommand",
+    },
+    {
+      pin: t03Pin,
+      path: options.t03PrerequisitePath ?? T03_ARTIFACT_PATH,
+      suppliedBytes: options.t03PrerequisiteBytes,
+      expectedProofId: "editor-core-structural-edits",
+      expectedProfile: "desen.editor-core.structural-edits-proof.v1",
+      expectedFiles: 60,
+      expectedRuntimeFiles: 26,
+      expectedEditorFiles: 5,
+      expectedPublicCases: 26,
+      expectedPublicField: "publicRuntimeAndRootCases",
+      expectedClaim: "immutableDeleteMoveReorderCommands",
+    },
+  ];
+  const authenticated = [];
+  for (const authority of authorities) {
+    const bytes =
+      authority.suppliedBytes ??
+      (await readNoFollow(
+        authority.path,
+        `frozen ${authority.pin.task} prerequisite`,
+        MAX_AUTHORITY_BYTES,
+        options.beforeAuthorityRecheck,
+      ));
+    if (bytes.byteLength !== authority.pin.bytes || sha256(bytes) !== authority.pin.sha256) {
+      fail(
+        "PREREQUISITE_DRIFT",
+        `The exact frozen ${authority.pin.task} artifact receipt did not match.`,
+      );
+    }
+    const artifact = parseJson(bytes, `frozen ${authority.pin.task} prerequisite`);
+    const receipts = artifact.trackedBoundary?.receipts;
+    if (
+      artifact.schemaVersion !== 1 ||
+      artifact.proofId !== authority.expectedProofId ||
+      artifact.profile !== authority.expectedProfile ||
+      artifact.task !== authority.pin.task ||
+      artifact.result !== "PASS" ||
+      artifact.claim?.taskStatus !== "DONE" ||
+      artifact.claim?.[authority.expectedClaim] !== true ||
+      artifact.trackedBoundary?.files !== authority.expectedFiles ||
+      !Array.isArray(receipts) ||
+      receipts.length !== authority.expectedFiles ||
+      new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length ||
+      artifact.executionAuthority?.mode !== "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH" ||
+      artifact.executionAuthority?.runtimeFiles !== authority.expectedRuntimeFiles ||
+      artifact.executionAuthority?.editorFiles !== authority.expectedEditorFiles ||
+      artifact.executionAuthority?.dependencyFiles !== 21 ||
+      artifact.testAuthority?.focusedBehaviorCases !== 16 ||
+      artifact.testAuthority?.[authority.expectedPublicField] !== authority.expectedPublicCases ||
+      artifact.testAuthority?.rootProofCases !== 10
+    ) {
+      fail(
+        "PREREQUISITE_DRIFT",
+        `The frozen ${authority.pin.task} artifact is not its reviewed PASS profile.`,
+      );
+    }
+    authenticated.push(deepFreeze(artifact));
   }
-  const artifact = parseJson(bytes, "frozen M08-T02 prerequisite");
-  const receipts = artifact.trackedBoundary?.receipts;
+  const t03Prerequisite = authenticated[1].prerequisite;
   if (
-    artifact.schemaVersion !== 1 ||
-    artifact.proofId !== "editor-core-stable-id-insert" ||
-    artifact.profile !== "desen.editor-core.stable-id-insert-proof.v1" ||
-    artifact.task !== "M08-T02" ||
-    artifact.result !== "PASS" ||
-    artifact.claim?.taskStatus !== "DONE" ||
-    artifact.claim?.immutableInsertCommand !== true ||
-    artifact.trackedBoundary?.files !== 53 ||
-    !Array.isArray(receipts) ||
-    receipts.length !== 53 ||
-    new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length ||
-    artifact.executionAuthority?.mode !== "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH" ||
-    artifact.executionAuthority?.runtimeFiles !== 25 ||
-    artifact.executionAuthority?.editorFiles !== 4 ||
-    artifact.executionAuthority?.dependencyFiles !== 21 ||
-    artifact.testAuthority?.focusedBehaviorCases !== 16 ||
-    artifact.testAuthority?.publicRuntimeCases !== 22 ||
-    artifact.testAuthority?.rootProofCases !== 10
+    t03Prerequisite?.task !== "M08-T02" ||
+    t03Prerequisite?.path !== t02Pin.path ||
+    t03Prerequisite?.bytes !== t02Pin.bytes ||
+    t03Prerequisite?.sha256 !== t02Pin.sha256 ||
+    t03Prerequisite?.result !== "PASS"
   ) {
-    fail("PREREQUISITE_DRIFT", "The frozen M08-T02 artifact is not its reviewed PASS profile.");
+    fail("PREREQUISITE_DRIFT", "M08-T03 no longer authenticates the exact frozen M08-T02 link.");
   }
-  if (options.prerequisiteBytes !== undefined || options.prerequisitePath !== undefined) {
-    fail("PREREQUISITE_OVERRIDE_REJECTED", "A caller-supplied prerequisite cannot issue PASS.");
+  if (
+    options.t02PrerequisiteBytes !== undefined ||
+    options.t02PrerequisitePath !== undefined ||
+    options.t03PrerequisiteBytes !== undefined ||
+    options.t03PrerequisitePath !== undefined
+  ) {
+    fail("PREREQUISITE_OVERRIDE_REJECTED", "Caller-supplied prerequisites cannot issue PASS.");
   }
   return Object.freeze({
-    artifact: deepFreeze(artifact),
-    evidence: deepFreeze({
-      ...pin,
-      result: "PASS",
-      authentication: "DIRECT_NO_FOLLOW_EXACT_BYTES",
-      liveProofReaderInput: false,
-      sequence30HeadInput: false,
-    }),
+    t02Artifact: authenticated[0],
+    t03Artifact: authenticated[1],
+    evidence: deepFreeze(
+      EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS.map((pin) => ({
+        ...pin,
+        result: "PASS",
+        authentication: "DIRECT_NO_FOLLOW_EXACT_BYTES",
+        liveProofReaderInput: false,
+        checkpointHeadInput: false,
+      })),
+    ),
   });
 }
 
@@ -1080,27 +1068,9 @@ function prerequisiteReceipt(prerequisite, relativePath, collection) {
   return candidate;
 }
 
-function assertRetainedT02Receipts(prerequisite, files) {
+function assertRetainedT03Receipts(prerequisite, files) {
   const receipts = new Map(
     prerequisite.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
-  );
-  for (const relativePath of RETAINED_T02_RECEIPT_PATHS) {
-    const authority = receipts.get(relativePath);
-    const bytes = files.get(relativePath);
-    if (
-      authority === undefined ||
-      bytes === undefined ||
-      authority.bytes !== bytes.byteLength ||
-      authority.sha256 !== sha256(bytes)
-    ) {
-      fail("BOUNDARY_DRIFT", `A retained M08-T02 receipt drifted: ${relativePath}`);
-    }
-  }
-}
-
-function assertRetainedT03Receipts(frozenArtifact, files) {
-  const receipts = new Map(
-    frozenArtifact.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
   );
   for (const relativePath of RETAINED_T03_RECEIPT_PATHS) {
     const authority = receipts.get(relativePath);
@@ -1116,7 +1086,7 @@ function assertRetainedT03Receipts(frozenArtifact, files) {
   }
 }
 
-function authenticateRuntimeClosure(prerequisite, files) {
+function authenticateRuntimeClosure(prerequisite, prerequisiteEvidence, files) {
   const dependencyReceipts = DEPENDENCY_RUNTIME_PATHS.map((relativePath) => {
     const authority = prerequisiteReceipt(prerequisite, relativePath, "dependencyReceipts");
     const bytes = files.get(relativePath);
@@ -1146,11 +1116,11 @@ function authenticateRuntimeClosure(prerequisite, files) {
     dependencyFiles: dependencyReceipts.length,
     dependencyModules: PROTOCOL_RUNTIME_PATHS.length + VALIDATOR_RUNTIME_PATHS.length,
     dependencyManifests: 2,
-    prerequisite: {
-      task: EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.task,
-      path: EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.path,
-      sha256: EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.sha256,
-    },
+    prerequisites: prerequisiteEvidence.map(({ task, path: artifactPath, sha256: digest }) => ({
+      task,
+      path: artifactPath,
+      sha256: digest,
+    })),
     editorReceipts,
     dependencyReceipts,
     trustedAuthorities: ["NODE_RUNTIME", "ESM_LOADER", "PROCESS_ENVIRONMENT"],
@@ -1166,7 +1136,7 @@ function isolatedDestination(directory, relativePath) {
 }
 
 async function importReceiptedRuntime(files) {
-  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m08-t03-runtime-"));
+  const directory = await mkdtemp(path.join(os.tmpdir(), "desen-m08-t04-runtime-"));
   try {
     const copies = ISOLATED_RUNTIME_PATHS.map((relativePath) => ({
       bytes: files.get(relativePath),
@@ -1193,7 +1163,7 @@ async function importReceiptedRuntime(files) {
     const imported = await import(pathToFileURL(entryPath).href);
     exactArray(
       Object.keys(imported.editorCore).sort(compareText),
-      EXPECTED_CURRENT_RUNTIME_EXPORTS,
+      EXPECTED_RUNTIME_EXPORTS,
       "PUBLIC_API_DRIFT",
       "Isolated runtime exports",
     );
@@ -1204,12 +1174,12 @@ async function importReceiptedRuntime(files) {
       canonicalizeJsonBytes: imported.canonicalizeJsonBytes,
       editorCore: Object.freeze(
         Object.fromEntries(
-          EXPECTED_CURRENT_RUNTIME_EXPORTS.map((name) => [name, imported.editorCore[name]]),
+          EXPECTED_RUNTIME_EXPORTS.map((name) => [name, imported.editorCore[name]]),
         ),
       ),
     });
   } catch (error) {
-    if (error instanceof EditorCoreStructuralEditsProofError) throw error;
+    if (error instanceof EditorCoreContentEditsProofError) throw error;
     fail(
       "RUNTIME_AUTHORITY_DRIFT",
       "The exact receipted editor runtime graph could not be imported in isolation.",
@@ -1267,329 +1237,435 @@ function surfaceIdentities(editorDocument, surfaceId = "sign-in") {
   return identities.sort(compareText);
 }
 
-function sourceWithDestinationDepth(validSource, depth) {
+function sourceWithTreeDepth(validSource, depth) {
   const input = clone(validSource);
   const root = input.surfaces["sign-in"].root;
-  const target = { id: "depth.target", use: "com.example.ui/Text" };
-  const chainRoot = { id: "depth.1", use: "com.example.ui/Stack", slots: {} };
-  root.slots = { target: [target], chain: [chainRoot] };
-  let parent = chainRoot;
-  for (let index = 2; index <= depth; index += 1) {
+  let parent = root;
+  for (let index = 1; index <= depth; index += 1) {
     const child = { id: `depth.${index}`, use: "com.example.ui/Stack", slots: {} };
     parent.slots = { default: [child] };
     parent = child;
   }
-  return { input, parentId: parent.id };
+  return { input, ownerId: parent.id };
 }
 
 function sourceWithIdentityCount(validSource, count) {
   const input = clone(validSource);
-  input.surfaces["sign-in"].root.slots = {
-    default: Array.from({ length: count - 1 }, (_, index) => ({
-      id: `item.${index}`,
-      use: "com.example.ui/Text",
-    })),
-  };
+  input.surfaces["sign-in"].root.behaviors = Array.from({ length: count - 6 }, (_, index) => ({
+    id: `identity.behavior.${index}`,
+    use: "com.example.interactions/Preview",
+  }));
   return input;
 }
 
 function sizedSource(validSource, canonicalizeJsonBytes, extraBytes) {
   const input = clone(validSource);
+  input.surfaces["sign-in"].root.slots.default[0].props.x = false;
   input.authoring = { padding: "" };
   const baseLength = canonicalizeJsonBytes(input).byteLength;
   input.authoring.padding = "x".repeat(DOCUMENT_LIMIT - baseLength + extraBytes);
   return input;
 }
 
+function behaviorFixture(validSource) {
+  const input = clone(validSource);
+  const root = input.surfaces["sign-in"].root;
+  root.behaviors = [
+    {
+      id: "sign-in.behavior",
+      use: "com.example.interactions/Preview",
+      props: { axis: "vertical" },
+      style: { base: { indicator: { color: "blue" } } },
+    },
+  ];
+  root.slots.default[0].variants = [
+    { when: { op: "truthy", args: [true] }, props: { text: "first" } },
+    {
+      when: { op: "truthy", args: [false] },
+      style: { base: { text: { color: "gray" } } },
+    },
+    { when: { op: "truthy", args: [true] }, props: { text: "third" } },
+  ];
+  return input;
+}
+
 function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
-  for (const name of [
-    "createDesenEditorDocument",
-    "deleteDesenEditorNode",
-    "moveDesenEditorNode",
-    "reorderDesenEditorNode",
-  ]) {
+  for (const name of ["createDesenEditorDocument", ...CONTENT_RUNTIME_EXPORTS]) {
     if (typeof runtime?.[name] !== "function") {
       fail("BEHAVIOR_DRIFT", `The isolated runtime lost ${name}.`);
     }
   }
 
-  const deletionInput = clone(validSource);
-  deletionInput.surfaces["sign-in"].root.slots = {
-    disposable: [
-      {
-        id: "delete.target",
-        use: "com.example.ui/Stack",
-        behaviors: [{ id: "delete.behavior", use: "com.example.interactions/Sortable" }],
-        slots: { nested: [{ id: "delete.child", use: "com.example.unresolved/Unknown" }] },
-      },
-    ],
-  };
-  const deletionDocument = createDocument(runtime, validSource, deletionInput);
-  const deletionBefore = canonicalizeJsonBytes(deletionDocument);
-  const deleted = expectSuccess(
-    runtime.deleteDesenEditorNode(deletionDocument, {
-      surfaceId: "sign-in",
-      nodeId: "delete.target",
-    }),
-    "subtree deletion",
-  );
-  const deletedSlots = deleted.document.surfaces["sign-in"].root.slots;
-  if (
-    !Object.hasOwn(deletedSlots, "disposable") ||
-    deletedSlots.disposable.length !== 0 ||
-    JSON.stringify(surfaceIdentities(deleted.document)) !== JSON.stringify(["sign-in.layout"]) ||
-    !canonicalizeJsonBytes(deletionDocument).every((byte, index) => byte === deletionBefore[index])
-  ) {
-    fail("BEHAVIOR_DRIFT", "Subtree deletion or empty-slot retention drifted.");
-  }
-
-  const moveInput = clone(validSource);
-  moveInput.surfaces["sign-in"].root.slots = {
-    source: [
-      {
-        id: "move.target",
-        use: "com.example.ui/Stack",
-        behaviors: [{ id: "move.behavior", use: "com.example.interactions/Sortable" }],
-        slots: { nested: [{ id: "move.child", use: "com.example.ui/Text" }] },
-      },
-    ],
-    owners: [{ id: "move.destination", use: "com.example.ui/Stack" }],
-    unrelated: [
-      { id: "unrelated.first", use: "com.example.ui/Text" },
-      { id: "unrelated.last", use: "com.example.ui/Text" },
-    ],
-  };
-  const moveDocument = createDocument(runtime, validSource, moveInput);
-  const moveIds = surfaceIdentities(moveDocument);
-  const moveCommand = {
-    surfaceId: "sign-in",
-    nodeId: "move.target",
-    parentId: "move.destination",
-    slot: "unresolvedSlot",
-    index: 0,
-  };
-  const moved = expectSuccess(
-    runtime.moveDesenEditorNode(moveDocument, moveCommand),
-    "cross-owner move",
-  );
-  moveCommand.parentId = "caller.changed";
-  const movedRoot = moved.document.surfaces["sign-in"].root;
-  if (
-    movedRoot.slots.source.length !== 0 ||
-    movedRoot.slots.owners[0].slots.unresolvedSlot[0].id !== "move.target" ||
-    movedRoot.slots.owners[0].slots.unresolvedSlot[0].slots.nested[0].id !== "move.child" ||
-    JSON.stringify(movedRoot.slots.unrelated.map((node) => node.id)) !==
-      JSON.stringify(["unrelated.first", "unrelated.last"]) ||
-    JSON.stringify(surfaceIdentities(moved.document)) !== JSON.stringify(moveIds)
-  ) {
-    fail("BEHAVIOR_DRIFT", "Cross-owner subtree move or stable identity drifted.");
-  }
-
-  const behaviorInput = clone(validSource);
-  behaviorInput.surfaces["sign-in"].root.behaviors = [
-    { id: "sign-in.sortable", use: "com.example.interactions/Sortable", slots: {} },
-  ];
-  const behaviorDocument = createDocument(runtime, validSource, behaviorInput);
-  const behaviorMove = expectSuccess(
-    runtime.moveDesenEditorNode(behaviorDocument, {
-      surfaceId: "sign-in",
-      nodeId: "sign-in.title",
-      parentId: "sign-in.sortable",
-      slot: "constructor",
-      index: 0,
-    }),
-    "behavior prototype-slot move",
-  );
-  const behaviorSlots = behaviorMove.document.surfaces["sign-in"].root.behaviors[0].slots;
-  if (
-    !Object.hasOwn(behaviorSlots, "constructor") ||
-    behaviorSlots.constructor[0].id !== "sign-in.title" ||
-    Object.prototype.constructor !== Object
-  ) {
-    fail("BEHAVIOR_DRIFT", "Behavior-owned prototype-named slot handling drifted.");
-  }
-
-  const baseline = createDocument(runtime, validSource);
+  const truePredicate = { op: "truthy", args: [true] };
+  const baseline = createDocument(runtime, validSource, behaviorFixture(validSource));
   const baselineBytes = canonicalizeJsonBytes(baseline);
-  const reordered = expectSuccess(
-    runtime.reorderDesenEditorNode(baseline, {
-      surfaceId: "sign-in",
-      parentId: "sign-in.layout",
-      slot: "default",
-      nodeId: "sign-in.title",
-      index: 4,
-    }),
-    "post-removal reorder",
+  const baselineIds = surfaceIdentities(baseline);
+  const executed = [];
+  let current = baseline;
+  function execute(name, command, label = name) {
+    const previous = current;
+    const result = expectSuccess(runtime[name](previous, command), label);
+    if (result.document === previous || result.document.surfaces === previous.surfaces) {
+      fail("BEHAVIOR_DRIFT", `${label} did not return a fresh detached Source.`);
+    }
+    executed.push(name);
+    current = result.document;
+    return result.document;
+  }
+
+  const retainedValue = { safe: true };
+  execute("setDesenEditorOwnerProp", {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.behavior",
+    name: "__proto__",
+    value: retainedValue,
+  });
+  retainedValue.safe = false;
+  const behaviorProps = current.surfaces["sign-in"].root.behaviors[0].props;
+  if (!Object.hasOwn(behaviorProps, "__proto__") || behaviorProps.__proto__.safe !== true) {
+    fail("BEHAVIOR_DRIFT", "Prototype-sensitive behavior props or caller detachment drifted.");
+  }
+  execute("deleteDesenEditorOwnerProp", {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.behavior",
+    name: "__proto__",
+  });
+  execute("setDesenEditorOwnerStyleProperty", {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    state: "preview",
+    part: "constructor",
+    property: "toString",
+    value: { $token: "color.preview" },
+  });
+  execute("deleteDesenEditorOwnerStyleProperty", {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    state: "preview",
+    part: "constructor",
+    property: "toString",
+  });
+  const emptiedPart = current.surfaces["sign-in"].root.slots.default[0].style.preview.constructor;
+  if (
+    !Object.hasOwn(
+      current.surfaces["sign-in"].root.slots.default[0].style.preview,
+      "constructor",
+    ) ||
+    Reflect.ownKeys(emptiedPart).length !== 0
+  ) {
+    fail("BEHAVIOR_DRIFT", "Style deletion no longer retains the exact empty own part map.");
+  }
+  execute("setDesenEditorNodeCondition", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    when: truePredicate,
+  });
+  execute("clearDesenEditorNodeCondition", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+  });
+  execute("insertDesenEditorVariant", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    index: 1,
+    variant: {
+      when: { op: "exists", args: [{ $ref: "state.future" }] },
+      props: { unresolved: true },
+      extensions: { "com.example/opaque": { retained: true } },
+    },
+  });
+  execute("deleteDesenEditorVariant", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    index: 1,
+  });
+  execute("reorderDesenEditorVariant", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    variantIndex: 0,
+    index: 2,
+  });
+  const variantOrder = current.surfaces["sign-in"].root.slots.default[0].variants.map(
+    (variant) => variant.props?.text,
   );
   exactArray(
-    reordered.document.surfaces["sign-in"].root.slots.default.map((node) => node.id),
-    ["sign-in.email", "sign-in.password", "sign-in.error", "sign-in.submit", "sign-in.title"],
+    variantOrder,
+    [undefined, "third", "first"],
     "BEHAVIOR_DRIFT",
-    "Post-removal final order",
+    "Variant post-removal final order",
   );
-  const noOp = expectSuccess(
-    runtime.reorderDesenEditorNode(baseline, {
-      surfaceId: "sign-in",
-      parentId: "sign-in.layout",
-      slot: "default",
-      nodeId: "sign-in.submit",
-      index: 4,
-    }),
-    "reorder no-op",
+  execute("setDesenEditorVariantCondition", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    index: 1,
+    when: truePredicate,
+  });
+  execute("setDesenEditorVariantProp", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    index: 0,
+    name: "constructor",
+    value: "temporary",
+  });
+  execute("deleteDesenEditorVariantProp", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    index: 0,
+    name: "constructor",
+  });
+  const emptiedVariantProps = current.surfaces["sign-in"].root.slots.default[0].variants[0].props;
+  if (Reflect.ownKeys(emptiedVariantProps).length !== 0) {
+    fail("BEHAVIOR_DRIFT", "Variant prop deletion no longer retains an empty map.");
+  }
+  execute("setDesenEditorVariantStyleProperty", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    index: 0,
+    state: "preview",
+    part: "constructor",
+    property: "toString",
+    value: "red",
+  });
+  const prototypePart = current.surfaces["sign-in"].root.slots.default[0].variants[0].style.preview;
+  if (
+    !Object.hasOwn(prototypePart, "constructor") ||
+    prototypePart.constructor.toString !== "red"
+  ) {
+    fail("BEHAVIOR_DRIFT", "Prototype-sensitive variant style paths are not exact own data.");
+  }
+  execute("deleteDesenEditorVariantStyleProperty", {
+    surfaceId: "sign-in",
+    nodeId: "sign-in.title",
+    index: 0,
+    state: "preview",
+    part: "constructor",
+    property: "toString",
+  });
+  exactArray(
+    executed.sort(compareText),
+    CONTENT_RUNTIME_EXPORTS,
+    "BEHAVIOR_DRIFT",
+    "Executed commands",
+  );
+  exactArray(surfaceIdentities(current), baselineIds, "BEHAVIOR_DRIFT", "Stable identities");
+
+  const deterministicCommand = {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    name: "deterministic",
+    value: { $ref: "state.future", fallback: false },
+  };
+  const deterministicFirst = expectSuccess(
+    runtime.setDesenEditorOwnerProp(baseline, deterministicCommand),
+    "deterministic content edit",
+  );
+  const deterministicSecond = expectSuccess(
+    runtime.setDesenEditorOwnerProp(baseline, clone(deterministicCommand)),
+    "repeated deterministic content edit",
   );
   if (
-    JSON.stringify(noOp.document) !== JSON.stringify(baseline) ||
-    noOp.document === baseline ||
-    noOp.document.surfaces === baseline.surfaces
+    !Buffer.from(canonicalizeJsonBytes(deterministicFirst.document)).equals(
+      Buffer.from(canonicalizeJsonBytes(deterministicSecond.document)),
+    ) ||
+    deterministicFirst.document === deterministicSecond.document
   ) {
-    fail("BEHAVIOR_DRIFT", "The reorder no-op did not return a fresh detached Source.");
+    fail("BEHAVIOR_DRIFT", "Equal commands are not deterministic fresh snapshots.");
   }
 
   expectFailure(
-    runtime.deleteDesenEditorNode(baseline, {
+    runtime.deleteDesenEditorOwnerProp(baseline, {
       surfaceId: "sign-in",
-      nodeId: "sign-in.layout",
+      ownerId: "sign-in.title",
+      name: "missing",
     }),
-    "run.desen.editor/STRUCTURAL_EDIT_ROOT_FORBIDDEN",
-    "root delete",
+    "run.desen.editor/CONTENT_EDIT_PATH_NOT_FOUND",
+    "missing content path",
   );
   expectFailure(
-    runtime.moveDesenEditorNode(baseline, {
+    runtime.setDesenEditorOwnerProp(baseline, {
       surfaceId: "sign-in",
-      nodeId: "sign-in.layout",
-      parentId: "sign-in.title",
-      slot: "content",
-      index: 0,
+      ownerId: "missing.owner",
+      name: "text",
+      value: "changed",
     }),
-    "run.desen.editor/STRUCTURAL_EDIT_ROOT_FORBIDDEN",
-    "root move",
-  );
-  expectFailure(
-    runtime.reorderDesenEditorNode(baseline, {
-      surfaceId: "sign-in",
-      parentId: "sign-in.layout",
-      slot: "default",
-      nodeId: "sign-in.layout",
-      index: 0,
-    }),
-    "run.desen.editor/STRUCTURAL_EDIT_ROOT_FORBIDDEN",
-    "root reorder",
-  );
-  expectFailure(
-    runtime.moveDesenEditorNode(baseline, {
-      surfaceId: "sign-in",
-      nodeId: "sign-in.title",
-      parentId: "sign-in.title",
-      slot: "content",
-      index: 0,
-    }),
-    "run.desen.editor/STRUCTURAL_EDIT_CYCLE_FORBIDDEN",
-    "self cycle",
-  );
-  const cycleInput = clone(validSource);
-  cycleInput.surfaces["sign-in"].root.slots = {
-    default: [
-      {
-        id: "cycle.target",
-        use: "com.example.ui/Stack",
-        behaviors: [{ id: "cycle.behavior", use: "com.example.interactions/Sortable" }],
-        slots: { default: [{ id: "cycle.child", use: "com.example.ui/Stack" }] },
-      },
-    ],
-  };
-  const cycleDocument = createDocument(runtime, validSource, cycleInput);
-  for (const parentId of ["cycle.child", "cycle.behavior"]) {
-    expectFailure(
-      runtime.moveDesenEditorNode(cycleDocument, {
-        surfaceId: "sign-in",
-        nodeId: "cycle.target",
-        parentId,
-        slot: "content",
-        index: 0,
-      }),
-      "run.desen.editor/STRUCTURAL_EDIT_CYCLE_FORBIDDEN",
-      `descendant cycle ${parentId}`,
-    );
-  }
-  expectFailure(
-    runtime.moveDesenEditorNode(baseline, {
-      surfaceId: "sign-in",
-      nodeId: "sign-in.title",
-      parentId: "sign-in.layout",
-      slot: "default",
-      index: 1,
-    }),
-    "run.desen.editor/STRUCTURAL_EDIT_POSITION_INVALID",
-    "same-slot separation",
-  );
-  expectFailure(
-    runtime.deleteDesenEditorNode(baseline, { surfaceId: "sign-in", nodeId: "missing.node" }),
-    "run.desen.editor/STRUCTURAL_EDIT_TARGET_NOT_FOUND",
-    "missing target",
+    "run.desen.editor/CONTENT_EDIT_TARGET_NOT_FOUND",
+    "missing owner",
   );
   const ambiguousInput = clone(validSource);
-  ambiguousInput.surfaces["sign-in"].root.slots.default[1].id = "sign-in.title";
+  ambiguousInput.surfaces["sign-in"].root.behaviors = [
+    { id: "sign-in.title", use: "com.example.interactions/Duplicate" },
+  ];
   expectFailure(
-    runtime.deleteDesenEditorNode(createDocument(runtime, validSource, ambiguousInput), {
+    runtime.setDesenEditorOwnerProp(createDocument(runtime, validSource, ambiguousInput), {
       surfaceId: "sign-in",
-      nodeId: "sign-in.title",
+      ownerId: "sign-in.title",
+      name: "text",
+      value: "changed",
     }),
-    "run.desen.editor/STRUCTURAL_EDIT_TARGET_AMBIGUOUS",
+    "run.desen.editor/CONTENT_EDIT_TARGET_AMBIGUOUS",
     "ambiguous target",
   );
+
+  let getterInvoked = false;
+  let toJSONInvoked = false;
+  const accessorCommand = {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    name: "text",
+  };
+  Object.defineProperty(accessorCommand, "value", {
+    enumerable: true,
+    get() {
+      getterInvoked = true;
+      return "active";
+    },
+  });
   expectFailure(
-    runtime.deleteDesenEditorNode(baseline, {
+    runtime.setDesenEditorOwnerProp(baseline, accessorCommand),
+    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    "accessor command",
+  );
+  if (getterInvoked) fail("BEHAVIOR_DRIFT", "Command validation invoked an accessor.");
+
+  expectFailure(
+    runtime.setDesenEditorOwnerProp(baseline, {
       surfaceId: "sign-in",
-      nodeId: "sign-in.title",
-      recursive: true,
+      ownerId: "sign-in.title",
+      name: "text",
+      value: {
+        inert: true,
+        toJSON() {
+          toJSONInvoked = true;
+          return { serialized: "authority" };
+        },
+      },
     }),
-    "run.desen.editor/STRUCTURAL_EDIT_COMMAND_INVALID",
-    "extra command authority",
+    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    "toJSON command value",
+  );
+  if (toJSONInvoked) fail("BEHAVIOR_DRIFT", "Command validation invoked a toJSON hook.");
+
+  const forwardingTraps = [];
+  const forwardingTarget = {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.title",
+    name: "text",
+    value: "forwarded",
+  };
+  const forwardingProxy = new Proxy(forwardingTarget, {
+    getOwnPropertyDescriptor(target, key) {
+      forwardingTraps.push(`getOwnPropertyDescriptor:${String(key)}`);
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+    getPrototypeOf(target) {
+      forwardingTraps.push("getPrototypeOf");
+      return Reflect.getPrototypeOf(target);
+    },
+    ownKeys(target) {
+      forwardingTraps.push("ownKeys");
+      return Reflect.ownKeys(target);
+    },
+  });
+  const forwarded = expectSuccess(
+    runtime.setDesenEditorOwnerProp(baseline, forwardingProxy),
+    "forwarding Proxy command",
+  );
+  if (forwarded.document.surfaces["sign-in"].root.slots.default[0].props.text !== "forwarded") {
+    fail("BEHAVIOR_DRIFT", "A forwarding Proxy no longer exposes the required own-data shape.");
+  }
+  const expectedForwardingTraps = [
+    "getPrototypeOf",
+    "ownKeys",
+    "getOwnPropertyDescriptor:name",
+    "getOwnPropertyDescriptor:ownerId",
+    "getOwnPropertyDescriptor:surfaceId",
+    "getOwnPropertyDescriptor:value",
+  ];
+  exactArray(
+    forwardingTraps,
+    expectedForwardingTraps,
+    "BEHAVIOR_DRIFT",
+    "Forwarding Proxy reflection traps",
   );
 
-  const exactDepth = sourceWithDestinationDepth(validSource, 63);
-  expectSuccess(
-    runtime.moveDesenEditorNode(createDocument(runtime, validSource, exactDepth.input), {
+  const throwingTraps = [];
+  const throwingProxy = new Proxy(forwardingTarget, {
+    getPrototypeOf() {
+      throwingTraps.push("getPrototypeOf");
+      throw new TypeError("controlled Proxy reflection failure");
+    },
+  });
+  expectFailure(
+    runtime.setDesenEditorOwnerProp(baseline, throwingProxy),
+    "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
+    "throwing Proxy command",
+  );
+  const expectedThrowingTraps = ["getPrototypeOf"];
+  exactArray(
+    throwingTraps,
+    expectedThrowingTraps,
+    "BEHAVIOR_DRIFT",
+    "Throwing Proxy reflection traps",
+  );
+  if (!Buffer.from(canonicalizeJsonBytes(baseline)).equals(Buffer.from(baselineBytes))) {
+    fail("BEHAVIOR_DRIFT", "A throwing Proxy failure mutated the current Source.");
+  }
+
+  expectFailure(
+    runtime.insertDesenEditorVariant(baseline, {
       surfaceId: "sign-in",
-      nodeId: "depth.target",
-      parentId: exactDepth.parentId,
-      slot: "content",
-      index: 0,
+      nodeId: "sign-in.title",
+      index: 4,
+      variant: { when: truePredicate },
+    }),
+    "run.desen.editor/CONTENT_EDIT_POSITION_INVALID",
+    "invalid variant position",
+  );
+  expectFailure(
+    runtime.setDesenEditorNodeCondition(baseline, {
+      surfaceId: "sign-in",
+      nodeId: "sign-in.title",
+      when: { op: "not", args: [true, false] },
+    }),
+    "SCHEMA_INVALID",
+    "structural diagnostic pass-through",
+  );
+
+  const exactDepth = sourceWithTreeDepth(validSource, 64);
+  expectSuccess(
+    runtime.setDesenEditorOwnerProp(createDocument(runtime, validSource, exactDepth.input), {
+      surfaceId: "sign-in",
+      ownerId: exactDepth.ownerId,
+      name: "value",
+      value: true,
     }),
     "exact depth ceiling",
   );
-  const crossingDepth = sourceWithDestinationDepth(validSource, 64);
+  const crossingDepth = sourceWithTreeDepth(validSource, 65);
   expectFailure(
-    runtime.moveDesenEditorNode(createDocument(runtime, validSource, crossingDepth.input), {
+    runtime.setDesenEditorOwnerProp(createDocument(runtime, validSource, crossingDepth.input), {
       surfaceId: "sign-in",
-      nodeId: "depth.target",
-      parentId: crossingDepth.parentId,
-      slot: "content",
-      index: 0,
+      ownerId: crossingDepth.ownerId,
+      name: "value",
+      value: true,
     }),
-    "run.desen.editor/STRUCTURAL_EDIT_LIMIT_EXCEEDED",
+    "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
     "depth crossing",
   );
 
   expectSuccess(
-    runtime.reorderDesenEditorNode(
+    runtime.setDesenEditorOwnerProp(
       createDocument(runtime, validSource, sourceWithIdentityCount(validSource, 25_000)),
-      {
-        surfaceId: "sign-in",
-        parentId: "sign-in.layout",
-        slot: "default",
-        nodeId: "item.24998",
-        index: 24_998,
-      },
+      { surfaceId: "sign-in", ownerId: "sign-in.layout", name: "value", value: true },
     ),
     "exact identity ceiling",
   );
   expectFailure(
-    runtime.deleteDesenEditorNode(
+    runtime.setDesenEditorOwnerProp(
       createDocument(runtime, validSource, sourceWithIdentityCount(validSource, 25_001)),
-      { surfaceId: "sign-in", nodeId: "item.24999" },
+      { surfaceId: "sign-in", ownerId: "sign-in.layout", name: "value", value: true },
     ),
-    "run.desen.editor/STRUCTURAL_EDIT_LIMIT_EXCEEDED",
+    "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
     "identity crossing",
   );
 
@@ -1602,70 +1678,57 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     fail("BEHAVIOR_DRIFT", "The exact canonical byte fixture is not 8 MiB.");
   }
   expectSuccess(
-    runtime.reorderDesenEditorNode(exactByteDocument, {
+    runtime.setDesenEditorOwnerProp(exactByteDocument, {
       surfaceId: "sign-in",
-      parentId: "sign-in.layout",
-      slot: "default",
-      nodeId: "sign-in.submit",
-      index: 4,
+      ownerId: "sign-in.title",
+      name: "x",
+      value: false,
     }),
     "exact canonical-byte ceiling",
   );
   expectFailure(
-    runtime.reorderDesenEditorNode(
+    runtime.setDesenEditorOwnerProp(
       createDocument(runtime, validSource, sizedSource(validSource, canonicalizeJsonBytes, 1)),
       {
         surfaceId: "sign-in",
-        parentId: "sign-in.layout",
-        slot: "default",
-        nodeId: "sign-in.submit",
-        index: 4,
+        ownerId: "sign-in.title",
+        name: "x",
+        value: false,
       },
     ),
-    "run.desen.editor/STRUCTURAL_EDIT_LIMIT_EXCEEDED",
+    "run.desen.editor/CONTENT_EDIT_LIMIT_EXCEEDED",
     "canonical-byte crossing",
   );
 
-  const forged = clone(validSource);
-  forged.kind = "desen.bundle";
-  expectFailure(
-    runtime.deleteDesenEditorNode(forged, { surfaceId: "sign-in", nodeId: "sign-in.title" }),
-    "SCHEMA_INVALID",
-    "structural diagnostic pass-through",
-  );
-  if (!canonicalizeJsonBytes(baseline).every((byte, index) => byte === baselineBytes[index])) {
-    fail("BEHAVIOR_DRIFT", "A failed structural edit mutated the current Source.");
+  if (
+    !Buffer.from(canonicalizeJsonBytes(baseline)).equals(Buffer.from(baselineBytes)) ||
+    Object.prototype.constructor !== Object
+  ) {
+    fail("BEHAVIOR_DRIFT", "A failed content edit mutated the current Source.");
   }
 
   return deepFreeze({
-    deletion: {
-      completeSubtree: true,
-      emptiedSourceSlotRetained: true,
-      remainingIdentities: surfaceIdentities(deleted.document),
+    commands: {
+      functions: [...CONTENT_RUNTIME_EXPORTS],
+      executed: CONTENT_RUNTIME_EXPORTS.length,
+      nodeAndBehaviorOwners: true,
+      basePropsAndStyleLeaves: true,
+      nodeConditions: true,
     },
-    movement: {
-      crossOwner: true,
-      crossSlot: true,
-      subtreePreserved: true,
-      behaviorOwnerTarget: true,
-      prototypeNamedSlotOwnData: true,
-      absentDestinationAtZero: true,
-      sameOwnerSameSlotReservedForReorder: true,
-      cyclesRejected: true,
-    },
-    reorder: {
+    variants: {
+      insertDeleteConditionPropAndStyle: true,
       indexSemantics: "POST_REMOVAL_FINAL_POSITION",
-      finalOrder: reordered.document.surfaces["sign-in"].root.slots.default.map((node) => node.id),
-      noOpReturnsFreshSnapshot: true,
+      finalOrder: variantOrder.map((value) => value ?? null),
+      emptyContainersRetained: true,
+      unresolvedCatalogSemanticsPreserved: true,
     },
-    identityAndOrder: {
-      nodeAndBehaviorIdsUnchangedByMove: true,
-      targetSubtreeOrderPreserved: true,
-      unrelatedOrderPreserved: true,
+    identityAndData: {
+      stableIdsUnchanged: true,
+      identities: baselineIds,
+      prototypeSensitiveNamesAreOwnData: true,
+      callerInputsDetached: true,
     },
     limits: {
-      capabilityIdCodeUnits: 4_096,
-      capabilityCommandInput: "NOT_APPLICABLE_TO_STRUCTURAL_COMMANDS",
       canonicalDocumentBytes: DOCUMENT_LIMIT,
       identitiesPerTargetSurface: 25_000,
       sourceTreeDepth: 64,
@@ -1676,7 +1739,15 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     diagnostics: {
       editorCodes: [...EXPECTED_DIAGNOSTIC_CODES],
       structuralPassThrough: "SCHEMA_INVALID",
-      missingAndAmbiguousFailClosed: true,
+      missingAmbiguousPathAndPositionFailClosed: true,
+      commandShapeBoundary: "OWN_ENUMERABLE_DATA_DESCRIPTORS",
+      accessorAndToJsonHooksRejectedWithoutInvocation: true,
+      proxyReflectionMayInvokeTraps: true,
+      forwardingProxyAdmitted: true,
+      forwardingProxyTrapOrder: expectedForwardingTraps,
+      throwingProxyContainedAsCommandInvalid: true,
+      throwingProxyTrapOrder: expectedThrowingTraps,
+      throwingProxyFailureLeavesPriorSourceUnchanged: true,
       failuresExposeNoDocument: true,
     },
     immutability: {
@@ -1689,62 +1760,27 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
   });
 }
 
-async function authenticateFrozenArtifact() {
-  const bytes = await readNoFollow(ARTIFACT_PATH, "frozen M08-T03 proof artifact");
-  if (
-    bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
-    sha256(bytes) !== FROZEN_ARTIFACT_PIN.sha256
-  ) {
-    fail("ARTIFACT_DRIFT", "The frozen M08-T03 artifact bytes differ from their exact receipt.");
-  }
-  const artifact = parseJson(bytes, "frozen M08-T03 proof artifact");
-  const receipts = artifact.trackedBoundary?.receipts;
-  if (
-    artifact.schemaVersion !== 1 ||
-    artifact.proofId !== "editor-core-structural-edits" ||
-    artifact.profile !== "desen.editor-core.structural-edits-proof.v1" ||
-    artifact.task !== "M08-T03" ||
-    artifact.result !== "PASS" ||
-    artifact.claim?.taskStatus !== "DONE" ||
-    artifact.claim?.immutableDeleteMoveReorderCommands !== true ||
-    artifact.trackedBoundary?.files !== 60 ||
-    !Array.isArray(receipts) ||
-    receipts.length !== 60 ||
-    new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length ||
-    artifact.executionAuthority?.mode !== "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH" ||
-    artifact.executionAuthority?.runtimeFiles !== 26 ||
-    artifact.executionAuthority?.editorFiles !== 5 ||
-    artifact.executionAuthority?.dependencyFiles !== 21 ||
-    artifact.testAuthority?.focusedBehaviorCases !== 16 ||
-    artifact.testAuthority?.focusedCompilerNegativeAssertions !== 10 ||
-    artifact.testAuthority?.publicRuntimeAndRootCases !== 26 ||
-    artifact.testAuthority?.publicCompilerNegativeAssertions !== 18 ||
-    artifact.testAuthority?.rootProofCases !== EDITOR_CORE_STRUCTURAL_EDITS_ROOT_TEST_NAMES.length
-  ) {
-    fail("ARTIFACT_DRIFT", "The frozen M08-T03 artifact identity or retained claim drifted.");
-  }
-  return Object.freeze({
-    artifact: deepFreeze(artifact),
-    artifactBytes: Buffer.from(bytes),
-    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
-  });
+async function artifactBytes(artifact) {
+  return Buffer.from(await format(`${JSON.stringify(artifact)}\n`, { parser: "json" }), "utf8");
 }
 
-export async function buildEditorCoreStructuralEditsEvidence(rawOptions = undefined) {
+export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined) {
   const options = captureBuildOptions(rawOptions);
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
-  const frozen = await authenticateFrozenArtifact();
-  const authenticatedPrerequisite = await authenticatePrerequisite(options);
+  const authenticatedPrerequisites = await authenticatePrerequisites(options);
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
   const boundary = verifyBoundary(files);
-  assertRetainedT02Receipts(authenticatedPrerequisite.artifact, files);
-  assertRetainedT03Receipts(frozen.artifact, files);
-  const executionAuthority = authenticateRuntimeClosure(authenticatedPrerequisite.artifact, files);
+  assertRetainedT03Receipts(authenticatedPrerequisites.t03Artifact, files);
+  const executionAuthority = authenticateRuntimeClosure(
+    authenticatedPrerequisites.t03Artifact,
+    authenticatedPrerequisites.evidence,
+    files,
+  );
   const isolatedRuntime = await importReceiptedRuntime(files);
   const validSource = parseJson(files.get(FIXTURE_PATH), FIXTURE_PATH);
   const behavior = verifyBehavior(
@@ -1752,39 +1788,39 @@ export async function buildEditorCoreStructuralEditsEvidence(rawOptions = undefi
     validSource,
     isolatedRuntime.canonicalizeJsonBytes,
   );
-  if (JSON.stringify(behavior) !== JSON.stringify(frozen.artifact.behavior)) {
-    fail("BEHAVIOR_DRIFT", "The retained M08-T03 runtime behavior left its frozen claim.");
-  }
   if (options.fileOverrides.size !== 0) {
-    fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue structural-edit evidence.");
+    fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue content-edit evidence.");
   }
   if (options.beforeAuthorityRecheck !== undefined) {
     fail(
       "AUTHORITY_HOOK_REJECTED",
-      "A caller-supplied authority-read hook cannot issue structural-edit evidence.",
+      "A caller-supplied authority-read hook cannot issue content-edit evidence.",
     );
   }
-  const currentCompatibility = deepFreeze({
+  const receipts = [...files.entries()]
+    .map(([relativePath, bytes]) => receipt(relativePath, bytes))
+    .sort((left, right) => compareText(left.path, right.path));
+  const artifact = deepFreeze({
     schemaVersion: 1,
-    proofId: "editor-core-structural-edits",
-    profile: "desen.editor-core.structural-edits-proof.v1",
-    task: "M08-T03",
+    proofId: "editor-core-content-edits",
+    profile: "desen.editor-core.content-edits-proof.v1",
+    task: "M08-T04",
     result: "PASS",
-    prerequisite: authenticatedPrerequisite.evidence,
+    prerequisites: authenticatedPrerequisites.evidence,
     claim: {
       protocol: "0.1.0",
       platform: "platform-neutral",
-      immutableDeleteMoveReorderCommands: true,
+      immutableContentEditCommands: true,
       stableIdentityPreserved: true,
       taskStatus: "DONE",
-      prerequisiteTask: "M08-T02",
-      prerequisiteStatus: "DONE",
+      prerequisiteTasks: ["M08-T02", "M08-T03"],
+      prerequisiteStatuses: ["DONE", "DONE"],
     },
     publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
-      structuralPublicDeclarations: boundary.structuralPublicDeclarations,
-      structuralTsdocDeclarations: boundary.structuralTsdocDeclarations,
+      contentPublicDeclarations: boundary.contentPublicDeclarations,
+      contentTsdocDeclarations: boundary.contentTsdocDeclarations,
     },
     behavior,
     executionAuthority,
@@ -1803,19 +1839,34 @@ export async function buildEditorCoreStructuralEditsEvidence(rawOptions = undefi
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,
     },
-    frozenAuthority: {
-      path: ARTIFACT_PATH,
-      bytes: FROZEN_ARTIFACT_PIN.bytes,
-      sha256: FROZEN_ARTIFACT_PIN.sha256,
-      retainedTaskTimeReceipts: RETAINED_T03_RECEIPT_PATHS.length,
-    },
+    trackedBoundary: { files: receipts.length, receipts },
+    nonclaims: [
+      "CATALOG_SLOT_ACCEPTANCE_AND_CARDINALITY",
+      "UNDO_REDO_SELECTION_AND_VIEWPORT_POLICY",
+      "M08_T05_THROUGH_T08_AUTHORING_AND_PERSISTENCE",
+      "M08-T09_CATALOG_SEMANTICS_AND_CONTINUOUS_DIAGNOSTICS",
+      "M08-T10_AND_G08_TERMINAL_UI_BOUNDARY",
+      "HOSTILE_JAVASCRIPT_SANDBOX",
+      "NO_PROXY_TRAP_EXECUTION_MEMBRANE",
+      "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
+      "STREAMING_OR_PREALLOCATION_MEMORY_DOS_BOUND",
+      "P18_OR_G08_ADVANCEMENT",
+    ],
+    reproduction: [
+      "pnpm --filter @desen/editor-core build",
+      "pnpm --filter @desen/editor-core test:content-edits",
+      "pnpm --filter @desen/editor-core test:public-package",
+      "node scripts/generate-editor-core-content-edits-proof.mjs",
+      "node scripts/verify-editor-core-content-edits.mjs",
+      "node --test tests/editor-core-content-edits.test.mjs",
+    ],
   });
+  const bytes = await artifactBytes(artifact);
   return deepFreeze({
-    artifact: frozen.artifact,
-    artifactBytes: frozen.artifactBytes,
-    artifactSha256: frozen.artifactSha256,
-    currentCompatibility,
-    task: "M08-T03",
+    artifact,
+    artifactBytes: bytes,
+    artifactSha256: sha256(bytes),
+    task: "M08-T04",
   });
 }
 
@@ -1841,19 +1892,61 @@ function captureVerifyOptions(raw) {
   });
 }
 
-function visibleProofAuthority(document) {
+function visibleHtmlSegments(line, containers) {
+  const voidElements = new Set([
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+  ]);
+  const tagPattern = /<\s*(\/?)\s*([A-Za-z][\w:-]*)([^>]*)>/gu;
+  let cursor = 0;
+  let visible = "";
+  let excluded = "";
+  for (const match of line.matchAll(tagPattern)) {
+    if (containers.length === 0) visible += line.slice(cursor, match.index);
+    else excluded += line.slice(cursor, match.index);
+    const closing = match[1] === "/";
+    const name = match[2].toLowerCase();
+    const attributes = match[3];
+    if (closing) {
+      const matchingIndex = containers.findLastIndex((container) => container.name === name);
+      if (matchingIndex >= 0) containers.splice(matchingIndex);
+    } else if (!attributes.trimEnd().endsWith("/") && !voidElements.has(name)) {
+      containers.push({ name });
+    }
+    cursor = match.index + match[0].length;
+  }
+  if (containers.length === 0) visible += line.slice(cursor);
+  else excluded += line.slice(cursor);
+  return { visible, excluded };
+}
+
+function visibleProofDocumentLines(document) {
   const visible = [];
+  const htmlAuthority = [];
   const rawAuthority = [];
   let fence;
   let insideComment = false;
+  const htmlContainers = [];
   for (const rawLine of document.split(/\r?\n/u)) {
     if (fence !== undefined) {
-      const closing = rawLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+      const fenceMatch = rawLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
       if (
-        closing !== null &&
-        closing[1][0] === fence.marker &&
-        closing[1].length >= fence.length &&
-        closing[2].trim() === ""
+        fenceMatch !== null &&
+        fenceMatch[1][0] === fence.marker &&
+        fenceMatch[1].length >= fence.length &&
+        fenceMatch[2].trim() === ""
       ) {
         fence = undefined;
       }
@@ -1863,83 +1956,91 @@ function visibleProofAuthority(document) {
     let line = "";
     while (remainder.length > 0) {
       if (insideComment) {
-        const end = remainder.indexOf("-->");
-        if (end < 0) remainder = "";
-        else {
+        const commentEnd = remainder.indexOf("-->");
+        if (commentEnd < 0) {
+          remainder = "";
+        } else {
           insideComment = false;
-          remainder = remainder.slice(end + 3);
+          remainder = remainder.slice(commentEnd + 3);
         }
         continue;
       }
-      const start = remainder.indexOf("<!--");
-      if (start < 0) {
+      const commentStart = remainder.indexOf("<!--");
+      if (commentStart < 0) {
         line += remainder;
         remainder = "";
       } else {
-        line += remainder.slice(0, start);
+        line += remainder.slice(0, commentStart);
         insideComment = true;
-        remainder = remainder.slice(start + 4);
+        remainder = remainder.slice(commentStart + 4);
       }
     }
     if (/^(?: {4}|\t)/u.test(line)) continue;
-    const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
-    if (opening !== null) {
-      fence = { marker: opening[1][0], length: opening[1].length };
+    const htmlSegments = visibleHtmlSegments(line, htmlContainers);
+    const htmlVisibleLine = htmlSegments.visible;
+    if (htmlSegments.excluded.trim() !== "") htmlAuthority.push(htmlSegments.excluded);
+    const fenceMatch = htmlVisibleLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+    if (fenceMatch !== null) {
+      fence = { marker: fenceMatch[1][0], length: fenceMatch[1].length };
       continue;
     }
     rawAuthority.push(line);
-    visible.push(line.trimEnd());
+    visible.push(htmlVisibleLine.trimEnd());
   }
   return {
     visible,
+    htmlAuthority,
     rawHtml: /<\s*\/?\s*[A-Za-z][\s\S]*?>/u.test(rawAuthority.join("\n")),
   };
 }
 
 function proofDocumentHasContradictoryStatus(visibleLines) {
-  return visibleLines.some((line) => {
+  for (const line of visibleLines) {
     const normalized = line
       .replace(/\\([`*_~])/gu, "$1")
       .replace(/[`*_~]/gu, "")
       .replace(/\s+/gu, " ")
       .trim();
     const field = normalized.match(/\b(?:result|status)\s*:\s*(.*)$/iu);
-    if (field === null) return false;
+    if (field === null) continue;
     const value = field[1].trim();
-    return (
+    if (
       !/^(?:PASS|DONE)\b/iu.test(value) ||
       /\b(?:BLOCKED|ERROR|FAIL(?:ED|URE)?|INCOMPLETE|IN[ _-]?PROGRESS|NOT[ _-]?STARTED|PENDING|SKIPPED|TODO|UNKNOWN)\b/iu.test(
         value,
       )
-    );
-  });
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
-export async function verifyEditorCoreStructuralEditsEvidence(rawOptions = undefined) {
+export async function verifyEditorCoreContentEditsEvidence(rawOptions = undefined) {
   const options = captureVerifyOptions(rawOptions);
-  const built = await buildEditorCoreStructuralEditsEvidence(options.buildOptions);
+  const built = await buildEditorCoreContentEditsEvidence(options.buildOptions);
   const committed =
     options.artifactBytes ??
-    (await readNoFollow(options.artifactPath ?? ARTIFACT_PATH, "M08-T03 proof artifact"));
+    (await readNoFollow(options.artifactPath ?? ARTIFACT_PATH, "M08-T04 proof artifact"));
   if (!committed.equals(built.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "The committed M08-T03 artifact is not the exact fresh build.");
+    fail("ARTIFACT_DRIFT", "The committed M08-T04 artifact is not the exact fresh build.");
   }
   const proofBytes =
     options.proofDocumentBytes ??
     (await readNoFollow(
       options.proofDocumentPath ?? PROOF_DOCUMENT_PATH,
-      "M08-T03 proof document",
+      "M08-T04 proof document",
     ));
-  const proof = decodeUtf8(proofBytes, "M08-T03 proof document");
+  const proof = decodeUtf8(proofBytes, "M08-T04 proof document");
   const exactPin = `Final artifact: \`sha256:${built.artifactSha256}\``;
-  const { visible, rawHtml } = visibleProofAuthority(proof);
-  const pinLines = visible.filter((line) => line.startsWith("Final artifact:"));
+  const { visible: visibleLines, htmlAuthority, rawHtml } = visibleProofDocumentLines(proof);
+  const visiblePinLines = visibleLines.filter((line) => line.startsWith("Final artifact:"));
   if (
-    pinLines.length !== 1 ||
-    pinLines[0] !== exactPin ||
+    visiblePinLines.length !== 1 ||
+    visiblePinLines[0] !== exactPin ||
     rawHtml ||
-    proofDocumentHasContradictoryStatus(visible) ||
-    visible.join("\n").includes("sha256:PENDING")
+    proofDocumentHasContradictoryStatus([...visibleLines, ...htmlAuthority]) ||
+    visibleLines.join("\n").includes("sha256:PENDING")
   ) {
     fail("PROOF_PIN_DRIFT", "The proof document final pin drifted.");
   }
@@ -1949,7 +2050,10 @@ export async function verifyEditorCoreStructuralEditsEvidence(rawOptions = undef
     artifactPath: ARTIFACT_PATH,
     artifactBytes: committed.byteLength,
     artifactSha256: built.artifactSha256,
-    prerequisiteSha256: EDITOR_CORE_STRUCTURAL_EDITS_PREREQUISITE_PIN.sha256,
+    prerequisiteSha256: EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS[1].sha256,
+    prerequisiteSha256s: EDITOR_CORE_CONTENT_EDITS_PREREQUISITE_PINS.map(
+      (prerequisite) => prerequisite.sha256,
+    ),
   });
 }
 
@@ -1969,7 +2073,7 @@ async function assertSafeDestination(destinationPath) {
       fail("FILESYSTEM_UNSAFE", "Existing artifact destination must be one regular file.");
     }
   } catch (error) {
-    if (error instanceof EditorCoreStructuralEditsProofError) throw error;
+    if (error instanceof EditorCoreContentEditsProofError) throw error;
     if (error?.code !== "ENOENT") {
       fail("FILESYSTEM_UNSAFE", "Artifact destination cannot be inspected.", String(error));
     }
@@ -1992,20 +2096,20 @@ function captureWriteOptions(raw) {
   return Object.freeze(source);
 }
 
-export async function writeEditorCoreStructuralEditsEvidence(rawOptions = undefined) {
+export async function writeEditorCoreContentEditsEvidence(rawOptions = undefined) {
   const options = captureWriteOptions(rawOptions);
-  const built = await buildEditorCoreStructuralEditsEvidence();
+  const built = await buildEditorCoreContentEditsEvidence();
   const destinationPath = await assertSafeDestination(
-    options.destinationPath ?? DEFAULT_EDITOR_CORE_STRUCTURAL_EDITS_ARTIFACT_PATH,
+    options.destinationPath ?? DEFAULT_EDITOR_CORE_CONTENT_EDITS_ARTIFACT_PATH,
   );
   await writeAtomicProofArtifact({
     artifactPath: destinationPath,
     artifactBytes: built.artifactBytes,
     beforeAtomicRename: options.beforeAtomicRename,
   });
-  const committed = await readNoFollow(destinationPath, "committed M08-T03 proof artifact");
+  const committed = await readNoFollow(destinationPath, "committed M08-T04 proof artifact");
   if (!committed.equals(built.artifactBytes)) {
-    fail("ARTIFACT_DRIFT", "Atomic writer committed non-exact M08-T03 bytes.");
+    fail("ARTIFACT_DRIFT", "Atomic writer committed non-exact M08-T04 bytes.");
   }
   return deepFreeze({
     task: built.task,
