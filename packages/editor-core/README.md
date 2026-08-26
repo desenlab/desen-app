@@ -68,16 +68,48 @@ root-at-zero depth-64 profile. They carry no capability-ID input, so the authent
 4,096-code-unit capability ceiling is retained without being widened. Command objects must be
 exact inert own data: inherited, accessor, symbol, and extra fields fail closed.
 
+## Content edits
+
+M08-T04 adds fourteen commands over the same direct Source boundary:
+
+- `setDesenEditorOwnerProp` and `deleteDesenEditorOwnerProp` edit base props on a uniquely
+  identified component node or behavior;
+- `setDesenEditorOwnerStyleProperty` and `deleteDesenEditorOwnerStyleProperty` edit one exact
+  visual-state/style-part/property leaf on a node or behavior;
+- `setDesenEditorNodeCondition` and `clearDesenEditorNodeCondition` edit component-node conditional
+  presence; and
+- `insertDesenEditorVariant`, `deleteDesenEditorVariant`, `reorderDesenEditorVariant`,
+  `setDesenEditorVariantCondition`, `setDesenEditorVariantProp`,
+  `deleteDesenEditorVariantProp`, `setDesenEditorVariantStyleProperty`, and
+  `deleteDesenEditorVariantStyleProperty` provide complete indexed variant lifecycle and leaf
+  updates.
+
+Variant insertion addresses an existing array boundary and may create an absent `variants` array
+only at index zero. Reorder uses the selected variant's final index after removal. Set commands
+create missing prop/style containers. Delete commands require the selected leaf to exist and retain
+own empty `props`, nested style state/part, and `variants` containers; condition clear removes the
+existing `when` member. Every success preserves all node and behavior IDs plus unaffected semantic
+array order and returns a fresh detached recursively frozen Source. Missing or ambiguous targets,
+missing paths, invalid positions, malformed/active/extra command authority, limit overflow, and
+structural re-admission failure are atomic and expose no partial document.
+
+These are structural authoring commands. Prop names, style parts, visual states, tokens, bindings,
+and other Catalog-backed meanings may remain unresolved until M08-T09 supplies continuous semantic
+validation and invalid-node mapping. The content commands reuse the fixed 8 MiB canonical-document,
+25,000 selected-surface identity, and root-at-zero depth-64 profile. `PF-081` records the exact path,
+empty-container, ordering, atomicity, and diagnostic choices that DESEN 0.1.0 leaves open.
+
 ## Explicit non-responsibilities
 
-No React, DOM, canvas UI, production activation, or hidden document model.
+No React, DOM, canvas UI, production activation, Catalog-semantic validation, state/binding/event/
+action editing, persistence, authoring selection/viewport policy, or hidden document model.
 
 ## Status
 
-Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, and
-M08-T03 delete/move/ordered-reorder commands are complete. Prop, style-part, condition, and variant
-commands are next under M08-T04; the remaining editor commands stay assigned to their tracked M08
-tasks. `N-014` is `TESTED`; `S-002` remains `PLANNED` through terminal M08-T10 integration.
+Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, M08-T03
+delete/move/ordered-reorder commands, and M08-T04 prop/style/condition/variant commands are present.
+The remaining editor commands stay assigned to their tracked M08 tasks. `N-014` is `TESTED`;
+`S-002` remains `PLANNED` through terminal M08-T10 integration.
 
 ## Protocol and target support
 
@@ -90,7 +122,7 @@ Run the direct model suite with
 `pnpm --filter @desen/editor-core test:source-document` and the insert suite with
 `pnpm --filter @desen/editor-core test:stable-id-insert`. The separate
 `pnpm --filter @desen/editor-core test:public-package` check builds the package, resolves the
-public root through its export map, runs the exact current 26 runtime/root cases, and compiles the
+public root through its export map, runs the exact current 32 runtime/root cases, and compiles the
 reviewed `@ts-expect-error` assertions against the emitted declarations. The proof cores audit the
 exact source, distribution, manifest, TSDoc, test inventory, and platform boundary. After
 authenticating the exact completed
@@ -124,3 +156,12 @@ graph. The 22,402-byte artifact is
 `docs/proof/artifacts/editor-core-0.1.0-structural-edits.json` at
 `sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`; its evidence document is
 `docs/proof/EDITOR-CORE-STRUCTURAL-EDITS.md`.
+
+For M08-T04, run `pnpm --filter @desen/editor-core test:content-edits` and
+`pnpm --filter @desen/editor-core test:public-package`. The cumulative emitted-package suite has 32
+runtime/root cases and 36 compiler-negative assertions. It executes all fourteen public content
+commands across base node/behavior edits, node conditions, ordered variant lifecycle and updates,
+empty-container deletion, missing/ambiguous/invalid/hostile failures, immutability, deterministic
+output, stable identity, and unresolved Catalog semantics. The task-specific generator, verifier,
+root proof, artifact hash, and exact receipt inventory are recorded by the M08-T04 proof lane rather
+than claimed here before final evidence exists.

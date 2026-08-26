@@ -391,6 +391,34 @@ ve 56 reader doğrular; tarihsel sequence 30 değişmez. `N-014` artık `TESTED`
 `S-002` ise terminal M08-T10 entegrasyonu beklediği için `PLANNED` kalır. Genel ilerleme 88/145
 (%61), M08 ilerlemesi 3/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T04'tür.
 
+M08-T04 de tamamlandı. Paket; node/behavior prop'ları ve temel stil yaprakları ile node koşulları
+ve sıralı varyantlar için on dört atomik, immutable komut sunar. Komutlar alakasız anlamsal sırayı,
+bilerek boş bırakılan own container'ları, Catalog çözümü bekleyen yapısal olarak geçerli içeriği ve
+mevcut bütün kimlikleri korur. Altı content-edit tanısı ile değişmeden aktarılan yapısal tanılar;
+eksik veya belirsiz hedefleri, eksik yolları, geçersiz konumları, bozuk Unicode'u, hostile object
+yetkisini ve sabit 8 MiB / 25.000 kimlik / derinlik 64 sınır aşımlarını kısmi Source vermeden
+reddeder. Kümülatif paket testleri 55/55 (odaklı content-edit 16/16), public-package testleri 32/32
+ve bağımsız kök kanıtı 10/10 geçer. İncelenen rapor
+[`EDITOR-CORE-CONTENT-EDITS.md`](../proof/EDITOR-CORE-CONTENT-EDITS.md), 26.382 baytlık artifact ise
+[`editor-core-0.1.0-content-edits.json`](../proof/artifacts/editor-core-0.1.0-content-edits.json)
+dosyasıdır ve
+`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34` ile sabittir. Kanıt,
+donmuş M08-T02 ve M08-T03 artifact'larını doğrudan doğrular; 67 güncel dosya receipt'i toplar ve
+davranışı 27 dosyalık izole ESM grafında çalıştırır.
+
+Güncel yerel kod-otoriteli CI ardılı 159 iş yükü ve 75 kanıt çiftidir: 64 sıradan çift ve 11
+bariyer; tutulan projeksiyon 519 önkoşul segmenti, 3.237 sıralı leaf çağrısı ve 251 farklı leaf'ten
+oluşur. Nötr envanter
+`sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`, zorunlu plan ise
+`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51` ile sabittir. Append-only
+okuyucu ardılı sequence 32,
+`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` başıyla 29 donmuş artifact
+ve 58 reader doğrular; tarihsel sequence 31 ve bütün öncül artifact baytları değişmez. Bunlar yerel
+kod-otoriteli güncel kanıttır; hosted M08-T04 başarısı iddia edilmez. `N-014` `TESTED`, `S-002`
+`PLANNED` kalır; hiçbir `P-*`, `N-*`, `S-*` veya kanıt-kapısı statüsü değişmez. Genel ilerleme
+89/145 (%61), M08 ilerlemesi 4/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T05 state declaration
+ve binding düzenleme komutlarıdır.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

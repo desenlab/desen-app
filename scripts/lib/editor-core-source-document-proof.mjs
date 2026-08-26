@@ -24,12 +24,15 @@ const RUNTIME_DEPENDENCY_AUTHORITY_PATH =
 const SOURCE_PATH = "packages/editor-core/src/source-document.ts";
 const INDEX_PATH = "packages/editor-core/src/index.ts";
 const STRUCTURAL_EDITS_SOURCE_PATH = "packages/editor-core/src/structural-edits.ts";
+const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
 const DIST_SOURCE_PATH = "packages/editor-core/dist/source-document.js";
 const DIST_INDEX_PATH = "packages/editor-core/dist/index.js";
 const DIST_STRUCTURAL_EDITS_PATH = "packages/editor-core/dist/structural-edits.js";
+const DIST_CONTENT_EDITS_PATH = "packages/editor-core/dist/content-edits.js";
 const DIST_SOURCE_DECLARATION_PATH = "packages/editor-core/dist/source-document.d.ts";
 const DIST_INDEX_DECLARATION_PATH = "packages/editor-core/dist/index.d.ts";
 const DIST_STRUCTURAL_EDITS_DECLARATION_PATH = "packages/editor-core/dist/structural-edits.d.ts";
+const DIST_CONTENT_EDITS_DECLARATION_PATH = "packages/editor-core/dist/content-edits.d.ts";
 const VALIDATOR_PACKAGE_PATH = "packages/validator/package.json";
 const PROTOCOL_PACKAGE_PATH = "packages/protocol/package.json";
 const VALIDATOR_RUNTIME_PATHS = Object.freeze([
@@ -241,33 +244,83 @@ const EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS = Object.freeze([
   "DesenEditorStructuralEditResult",
   "DesenEditorStructuralEditSuccess",
 ]);
-const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze([
-  "createDesenEditorDocument",
-  "deleteDesenEditorNode",
-  "insertDesenEditorNode",
-  "moveDesenEditorNode",
-  "reorderDesenEditorNode",
-]);
-const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze([
-  "DesenEditorDocument",
-  "DesenEditorDocumentCreationFailure",
-  "DesenEditorDocumentCreationResult",
-  "DesenEditorDocumentCreationSuccess",
-  "DesenEditorInsertDiagnostic",
-  "DesenEditorInsertDiagnosticCode",
-  "DesenEditorNodeDeleteCommand",
-  "DesenEditorNodeInsertCommand",
-  "DesenEditorNodeInsertFailure",
-  "DesenEditorNodeInsertResult",
-  "DesenEditorNodeInsertSuccess",
-  "DesenEditorNodeMoveCommand",
-  "DesenEditorNodeReorderCommand",
-  "DesenEditorStructuralEditDiagnostic",
-  "DesenEditorStructuralEditDiagnosticCode",
-  "DesenEditorStructuralEditFailure",
-  "DesenEditorStructuralEditResult",
-  "DesenEditorStructuralEditSuccess",
-]);
+const EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "clearDesenEditorNodeCondition",
+    "deleteDesenEditorOwnerProp",
+    "deleteDesenEditorOwnerStyleProperty",
+    "deleteDesenEditorVariant",
+    "deleteDesenEditorVariantProp",
+    "deleteDesenEditorVariantStyleProperty",
+    "insertDesenEditorVariant",
+    "reorderDesenEditorVariant",
+    "setDesenEditorNodeCondition",
+    "setDesenEditorOwnerProp",
+    "setDesenEditorOwnerStyleProperty",
+    "setDesenEditorVariantCondition",
+    "setDesenEditorVariantProp",
+    "setDesenEditorVariantStyleProperty",
+  ].sort(),
+);
+const EXPECTED_CONTENT_EDIT_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorContentEditDiagnostic",
+    "DesenEditorContentEditDiagnosticCode",
+    "DesenEditorContentEditFailure",
+    "DesenEditorContentEditResult",
+    "DesenEditorContentEditSuccess",
+    "DesenEditorContentPredicate",
+    "DesenEditorContentValue",
+    "DesenEditorContentVariant",
+    "DesenEditorNodeConditionClearCommand",
+    "DesenEditorNodeConditionSetCommand",
+    "DesenEditorOwnerPropDeleteCommand",
+    "DesenEditorOwnerPropSetCommand",
+    "DesenEditorOwnerStylePropertyDeleteCommand",
+    "DesenEditorOwnerStylePropertySetCommand",
+    "DesenEditorVariantConditionSetCommand",
+    "DesenEditorVariantDeleteCommand",
+    "DesenEditorVariantInsertCommand",
+    "DesenEditorVariantPropDeleteCommand",
+    "DesenEditorVariantPropSetCommand",
+    "DesenEditorVariantReorderCommand",
+    "DesenEditorVariantStylePropertyDeleteCommand",
+    "DesenEditorVariantStylePropertySetCommand",
+  ].sort(),
+);
+const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "createDesenEditorDocument",
+    "deleteDesenEditorNode",
+    "insertDesenEditorNode",
+    "moveDesenEditorNode",
+    "reorderDesenEditorNode",
+    ...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
+  ].sort(),
+);
+const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorDocument",
+    "DesenEditorDocumentCreationFailure",
+    "DesenEditorDocumentCreationResult",
+    "DesenEditorDocumentCreationSuccess",
+    "DesenEditorInsertDiagnostic",
+    "DesenEditorInsertDiagnosticCode",
+    "DesenEditorNodeDeleteCommand",
+    "DesenEditorNodeInsertCommand",
+    "DesenEditorNodeInsertFailure",
+    "DesenEditorNodeInsertResult",
+    "DesenEditorNodeInsertSuccess",
+    "DesenEditorNodeMoveCommand",
+    "DesenEditorNodeReorderCommand",
+    "DesenEditorStructuralEditDiagnostic",
+    "DesenEditorStructuralEditDiagnosticCode",
+    "DesenEditorStructuralEditFailure",
+    "DesenEditorStructuralEditResult",
+    "DesenEditorStructuralEditSuccess",
+    ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
+  ].sort(),
+);
 const EXPECTED_PACKAGE_SCRIPTS = Object.freeze({
   build: "tsc -p tsconfig.build.json",
   lint: "eslint src test --max-warnings=0",
@@ -1814,6 +1867,18 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     files[DIST_STRUCTURAL_EDITS_PATH],
     DIST_STRUCTURAL_EDITS_PATH,
   );
+  const contentEditsSource = declarationInventory(
+    files[CONTENT_EDITS_SOURCE_PATH],
+    CONTENT_EDITS_SOURCE_PATH,
+  );
+  const contentEditsDeclaration = declarationInventory(
+    files[DIST_CONTENT_EDITS_DECLARATION_PATH],
+    DIST_CONTENT_EDITS_DECLARATION_PATH,
+  );
+  const contentEditsRuntime = declarationInventory(
+    files[DIST_CONTENT_EDITS_PATH],
+    DIST_CONTENT_EDITS_PATH,
+  );
   const sourcePrivateStatements = source.sourceFile.statements.filter(
     (statement) =>
       !ts.isImportDeclaration(statement) &&
@@ -1837,6 +1902,28 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       "EDITOR_SOURCE_DOCUMENT_SOURCE_CONTRACT_DRIFT",
       "The source document public declaration or TSDoc inventory drifted.",
       { runtime: source.runtime, types: source.types, missingTsdoc: source.missingTsdoc },
+    );
+  }
+  if (
+    !exactJson(contentEditsSource.runtime, EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS) ||
+    !exactJson(contentEditsSource.types, EXPECTED_CONTENT_EDIT_TYPE_EXPORTS) ||
+    contentEditsSource.missingTsdoc.length !== 0 ||
+    !exactJson(contentEditsDeclaration.runtime, EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS) ||
+    !exactJson(contentEditsDeclaration.types, EXPECTED_CONTENT_EDIT_TYPE_EXPORTS) ||
+    contentEditsDeclaration.missingTsdoc.length !== 0 ||
+    !exactJson(contentEditsRuntime.runtime, EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS) ||
+    contentEditsRuntime.types.length !== 0
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_PUBLIC_API_DRIFT",
+      "The additive M08-T04 content-edit module lost its reviewed declarations or TSDoc.",
+      {
+        sourceRuntime: contentEditsSource.runtime,
+        sourceTypes: contentEditsSource.types,
+        declarationRuntime: contentEditsDeclaration.runtime,
+        declarationTypes: contentEditsDeclaration.types,
+        emittedRuntime: contentEditsRuntime.runtime,
+      },
     );
   }
   if (
@@ -1889,6 +1976,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     !exactJson(sourceIndex.runtime, EXPECTED_CURRENT_RUNTIME_EXPORTS) ||
     !exactJson(sourceIndex.types, EXPECTED_CURRENT_TYPE_EXPORTS) ||
     !exactJson(sourceIndex.modules, [
+      "./content-edits.js",
+      "./content-edits.js",
       "./source-document.js",
       "./source-document.js",
       "./stable-id-insert.js",
@@ -1899,6 +1988,7 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     !exactJson(distIndex.runtime, EXPECTED_CURRENT_RUNTIME_EXPORTS) ||
     distIndex.types.length !== 0 ||
     !exactJson(distIndex.modules, [
+      "./content-edits.js",
       "./source-document.js",
       "./stable-id-insert.js",
       "./structural-edits.js",
@@ -1906,6 +1996,8 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     !exactJson(declarationIndex.runtime, EXPECTED_CURRENT_RUNTIME_EXPORTS) ||
     !exactJson(declarationIndex.types, EXPECTED_CURRENT_TYPE_EXPORTS) ||
     !exactJson(declarationIndex.modules, [
+      "./content-edits.js",
+      "./content-edits.js",
       "./source-document.js",
       "./source-document.js",
       "./stable-id-insert.js",
@@ -2102,19 +2194,45 @@ function verifySourceAndDistributionContract(files, packageManifest) {
     additiveTypeExports: Object.freeze(
       sourceIndex.types.filter((name) => !EXPECTED_TYPE_EXPORTS.includes(name)),
     ),
+    additiveSuccessors: Object.freeze([
+      Object.freeze({
+        task: "M08-T03",
+        sourcePath: STRUCTURAL_EDITS_SOURCE_PATH,
+        runtimePath: DIST_STRUCTURAL_EDITS_PATH,
+        declarationPath: DIST_STRUCTURAL_EDITS_DECLARATION_PATH,
+        runtimeExports: EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS,
+        typeExports: EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS,
+        publicDeclarations:
+          EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS.length +
+          EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS.length,
+        tsdocDeclarations:
+          EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS.length +
+          EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS.length,
+      }),
+      Object.freeze({
+        task: "M08-T04",
+        sourcePath: CONTENT_EDITS_SOURCE_PATH,
+        runtimePath: DIST_CONTENT_EDITS_PATH,
+        declarationPath: DIST_CONTENT_EDITS_DECLARATION_PATH,
+        runtimeExports: EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
+        typeExports: EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
+        publicDeclarations:
+          EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length,
+        tsdocDeclarations:
+          EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length,
+      }),
+    ]),
     additiveSuccessor: Object.freeze({
-      task: "M08-T03",
-      sourcePath: STRUCTURAL_EDITS_SOURCE_PATH,
-      runtimePath: DIST_STRUCTURAL_EDITS_PATH,
-      declarationPath: DIST_STRUCTURAL_EDITS_DECLARATION_PATH,
-      runtimeExports: EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS,
-      typeExports: EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS,
+      task: "M08-T04",
+      sourcePath: CONTENT_EDITS_SOURCE_PATH,
+      runtimePath: DIST_CONTENT_EDITS_PATH,
+      declarationPath: DIST_CONTENT_EDITS_DECLARATION_PATH,
+      runtimeExports: EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
+      typeExports: EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
       publicDeclarations:
-        EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS.length +
-        EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS.length,
+        EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length,
       tsdocDeclarations:
-        EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS.length +
-        EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS.length,
+        EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length,
     }),
     publicDeclarations: EXPECTED_SOURCE_EXPORTS.length,
     tsdocDeclarations: EXPECTED_SOURCE_EXPORTS.length,
@@ -2676,12 +2794,15 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     SOURCE_PATH,
     INDEX_PATH,
     STRUCTURAL_EDITS_SOURCE_PATH,
+    CONTENT_EDITS_SOURCE_PATH,
     DIST_SOURCE_PATH,
     DIST_INDEX_PATH,
     DIST_STRUCTURAL_EDITS_PATH,
+    DIST_CONTENT_EDITS_PATH,
     DIST_SOURCE_DECLARATION_PATH,
     DIST_INDEX_DECLARATION_PATH,
     DIST_STRUCTURAL_EDITS_DECLARATION_PATH,
+    DIST_CONTENT_EDITS_DECLARATION_PATH,
     PACKAGE_TEST_PATH,
     PACKAGE_TYPES_PATH,
     PUBLIC_TEST_PATH,

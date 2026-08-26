@@ -1025,7 +1025,7 @@ hosted M07-T10 claim.
 | M08-T01 | DONE        | G07             | Direct DESEN Source editor document model                            |
 | M08-T02 | DONE        | M08-T01         | Stable-ID allocator and insert command                               |
 | M08-T03 | DONE        | M08-T02         | Delete, slot move, and ordered reorder commands                      |
-| M08-T04 | NOT_STARTED | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
+| M08-T04 | DONE        | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
 | M08-T05 | NOT_STARTED | M08-T02         | State declaration and binding editing commands                       |
 | M08-T06 | NOT_STARTED | M08-T05         | Event and closed-action editing commands                             |
 | M08-T07 | NOT_STARTED | M08-T01–M08-T06 | Authoring isolation and unknown-extension round-trip preservation    |
@@ -1119,6 +1119,38 @@ remain M08-T04; the later authoring/persistence/validation/integration work rema
 No P-18, G08, hostile-JavaScript sandbox, streaming, or preallocation memory-DoS claim is made.
 Overall implementation progress is 88/145 (61%), M08 is 3/10, proof gates remain 8/13, and M08-T04
 is next.
+
+M08-T04 is `DONE`. The public package exposes fourteen atomic immutable content commands for node
+or behavior props and base style leaves plus node conditions and ordered node variants. Variant
+insert, delete, reorder, condition, prop, and style commands use exact post-removal positions,
+retain deliberately emptied own containers, preserve unrelated semantic order and every existing
+identity, and keep structurally valid Catalog-unresolved content authorable. All six content-edit
+diagnostic classes, unchanged structural-diagnostic pass-through, exact command ownership,
+prototype-sensitive names as own data, detached caller values, missing/ambiguous targets and paths,
+invalid positions, malformed Unicode, hostile objects, and the fixed 8 MiB, 25,000-identity, and
+depth-64 limits fail closed without exposing a partial Source.
+
+The cumulative editor-core package suite passes 55/55, including the 16/16 focused content-edit
+cases; the built public-package suite passes 32/32; and the independent root proof passes 10/10.
+Exact evidence is pinned in `docs/proof/EDITOR-CORE-CONTENT-EDITS.md` and the 26,382-byte artifact
+`docs/proof/artifacts/editor-core-0.1.0-content-edits.json` at
+`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. The proof directly
+authenticates the exact frozen M08-T02 and M08-T03 artifacts, verifies 67 tracked-file receipts, and
+executes behavior from an isolated authenticated 27-file ESM graph. CI registers the new pair in
+the exact 159-workload/75-proof-pair successor: 64 ordinary pairs and 11 exclusive barriers, with
+519 prerequisite segments, 3,237 ordered leaf invocations, and 251 distinct leaves. The neutral
+inventory is `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`; the required plan is
+`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`.
+
+Append-only reader successor sequence 32 at
+`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` authenticates 29 frozen
+artifacts and 58 readers while historical sequence 31 and every predecessor artifact remain
+unchanged. This is local code-owned/current evidence and makes no hosted M08-T04 claim. `N-014`
+remains `TESTED`; `S-002` remains `PLANNED` for terminal M08-T10 integration; no `P-*`, `N-*`,
+`S-*`, or proof-gate status changes. M08-T04 does not claim Catalog slot acceptance/cardinality,
+undo/redo, selection, viewport, streaming/preallocation memory-DoS resistance, a hostile-JavaScript
+sandbox, P-18, or G08. Overall implementation progress is 89/145 (61%), M08 is 4/10, proof gates
+remain 8/13, and M08-T05 state declaration and binding editing is next.
 
 ## M09 — Desen App Web MVP
 

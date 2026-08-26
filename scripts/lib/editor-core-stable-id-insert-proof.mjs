@@ -24,6 +24,7 @@ const FIXTURE_PATH =
 const INSERT_SOURCE_PATH = "packages/editor-core/src/stable-id-insert.ts";
 const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
 const STRUCTURAL_EDITS_SOURCE_PATH = "packages/editor-core/src/structural-edits.ts";
+const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/stable-id-insert.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/stable-id-insert.types.ts";
@@ -46,6 +47,10 @@ const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
 const STRUCTURAL_EDITS_DIST_PATHS = Object.freeze([
   "packages/editor-core/dist/structural-edits.d.ts",
   "packages/editor-core/dist/structural-edits.js",
+]);
+const CONTENT_EDITS_DIST_PATHS = Object.freeze([
+  "packages/editor-core/dist/content-edits.d.ts",
+  "packages/editor-core/dist/content-edits.js",
 ]);
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -153,15 +158,66 @@ const EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS = Object.freeze([
   "DesenEditorStructuralEditResult",
   "DesenEditorStructuralEditSuccess",
 ]);
-const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze([
-  "createDesenEditorDocument",
-  "deleteDesenEditorNode",
-  "insertDesenEditorNode",
-  "moveDesenEditorNode",
-  "reorderDesenEditorNode",
-]);
+const EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "clearDesenEditorNodeCondition",
+    "deleteDesenEditorOwnerProp",
+    "deleteDesenEditorOwnerStyleProperty",
+    "deleteDesenEditorVariant",
+    "deleteDesenEditorVariantProp",
+    "deleteDesenEditorVariantStyleProperty",
+    "insertDesenEditorVariant",
+    "reorderDesenEditorVariant",
+    "setDesenEditorNodeCondition",
+    "setDesenEditorOwnerProp",
+    "setDesenEditorOwnerStyleProperty",
+    "setDesenEditorVariantCondition",
+    "setDesenEditorVariantProp",
+    "setDesenEditorVariantStyleProperty",
+  ].sort(compareText),
+);
+const EXPECTED_CONTENT_EDIT_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorContentEditDiagnostic",
+    "DesenEditorContentEditDiagnosticCode",
+    "DesenEditorContentEditFailure",
+    "DesenEditorContentEditResult",
+    "DesenEditorContentEditSuccess",
+    "DesenEditorContentPredicate",
+    "DesenEditorContentValue",
+    "DesenEditorContentVariant",
+    "DesenEditorNodeConditionClearCommand",
+    "DesenEditorNodeConditionSetCommand",
+    "DesenEditorOwnerPropDeleteCommand",
+    "DesenEditorOwnerPropSetCommand",
+    "DesenEditorOwnerStylePropertyDeleteCommand",
+    "DesenEditorOwnerStylePropertySetCommand",
+    "DesenEditorVariantConditionSetCommand",
+    "DesenEditorVariantDeleteCommand",
+    "DesenEditorVariantInsertCommand",
+    "DesenEditorVariantPropDeleteCommand",
+    "DesenEditorVariantPropSetCommand",
+    "DesenEditorVariantReorderCommand",
+    "DesenEditorVariantStylePropertyDeleteCommand",
+    "DesenEditorVariantStylePropertySetCommand",
+  ].sort(compareText),
+);
+const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "createDesenEditorDocument",
+    "deleteDesenEditorNode",
+    "insertDesenEditorNode",
+    "moveDesenEditorNode",
+    "reorderDesenEditorNode",
+    ...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
+  ].sort(compareText),
+);
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
-  [...EXPECTED_TYPE_EXPORTS, ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS].sort(compareText),
+  [
+    ...EXPECTED_TYPE_EXPORTS,
+    ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS,
+    ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
+  ].sort(compareText),
 );
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/INSERT_COMMAND_INVALID",
@@ -267,6 +323,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ...TRACKED_PATHS,
   STRUCTURAL_EDITS_SOURCE_PATH,
   ...STRUCTURAL_EDITS_DIST_PATHS,
+  CONTENT_EDITS_SOURCE_PATH,
+  ...CONTENT_EDITS_DIST_PATHS,
 ]);
 const TRACKED_PATH_SET = new Set(CURRENT_COMPATIBILITY_PATHS);
 const RETAINED_T02_RECEIPT_PATHS = Object.freeze(
@@ -616,7 +674,8 @@ function verifyBoundary(files) {
     JSON.stringify(manifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
     manifest.scripts?.["test:stable-id-insert"] !== "vitest run test/stable-id-insert.test.ts" ||
-    manifest.scripts?.["test:structural-edits"] !== "vitest run test/structural-edits.test.ts"
+    manifest.scripts?.["test:structural-edits"] !== "vitest run test/structural-edits.test.ts" ||
+    manifest.scripts?.["test:content-edits"] !== "vitest run test/content-edits.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -659,6 +718,26 @@ function verifyBoundary(files) {
     fail("TSDOC_DRIFT", "Every public structural-edit declaration must retain TSDoc.");
   }
 
+  const contentEditsSource = decodeUtf8(
+    files.get(CONTENT_EDITS_SOURCE_PATH),
+    CONTENT_EDITS_SOURCE_PATH,
+  );
+  const contentSourceExports = exportedNames(contentEditsSource);
+  exactArray(
+    contentSourceExports.names,
+    [...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS, ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS].sort(
+      compareText,
+    ),
+    "SOURCE_DRIFT",
+    "Content-edit exports",
+  );
+  if (
+    contentSourceExports.tsdocDeclarations !==
+    EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Every public content-edit declaration must retain TSDoc.");
+  }
+
   const indexSource = decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH);
   const sourceIndexExports = reexportedNames(indexSource, INDEX_SOURCE_PATH);
   exactArray(
@@ -676,6 +755,8 @@ function verifyBoundary(files) {
   exactArray(
     sourceIndexExports.modules,
     [
+      "./content-edits.js",
+      "./content-edits.js",
       "./source-document.js",
       "./source-document.js",
       "./stable-id-insert.js",
@@ -707,6 +788,14 @@ function verifyBoundary(files) {
     files.get("packages/editor-core/dist/structural-edits.d.ts"),
     "packages/editor-core/dist/structural-edits.d.ts",
   );
+  const distContentEdits = decodeUtf8(
+    files.get("packages/editor-core/dist/content-edits.js"),
+    "packages/editor-core/dist/content-edits.js",
+  );
+  const distContentEditsDeclaration = decodeUtf8(
+    files.get("packages/editor-core/dist/content-edits.d.ts"),
+    "packages/editor-core/dist/content-edits.d.ts",
+  );
   const distIndexExports = reexportedNames(distIndex, "packages/editor-core/dist/index.js");
   const distIndexDeclarationExports = reexportedNames(
     decodeUtf8(
@@ -735,7 +824,12 @@ function verifyBoundary(files) {
   );
   exactArray(
     staticModuleSpecifiers(distIndex),
-    ["./source-document.js", "./stable-id-insert.js", "./structural-edits.js"],
+    [
+      "./source-document.js",
+      "./stable-id-insert.js",
+      "./structural-edits.js",
+      "./content-edits.js",
+    ],
     "EMITTED_DRIFT",
     "Emitted index edges",
   );
@@ -772,7 +866,28 @@ function verifyBoundary(files) {
   ) {
     fail("TSDOC_DRIFT", "Emitted structural-edit declarations lost TSDoc.");
   }
-  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}\n${distStructuralEdits}`;
+  exactArray(
+    staticModuleSpecifiers(distContentEdits),
+    ["@desen/protocol", "./source-document.js"],
+    "EMITTED_DRIFT",
+    "Emitted content-edit edges",
+  );
+  const contentDeclarationExports = exportedNames(distContentEditsDeclaration);
+  exactArray(
+    contentDeclarationExports.names,
+    [...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS, ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS].sort(
+      compareText,
+    ),
+    "EMITTED_DRIFT",
+    "Emitted content-edit declarations",
+  );
+  if (
+    contentDeclarationExports.tsdocDeclarations !==
+    EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS.length + EXPECTED_CONTENT_EDIT_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Emitted content-edit declarations lost TSDoc.");
+  }
+  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}\n${distStructuralEdits}\n${distContentEdits}`;
   for (const forbidden of [
     /\bimport\s*\(/u,
     /\beval\s*\(/u,
@@ -819,19 +934,43 @@ function verifyBoundary(files) {
     typeExports: [...EXPECTED_TYPE_EXPORTS],
     currentPackageRuntimeExports: [...EXPECTED_CURRENT_RUNTIME_EXPORTS],
     currentPackageTypeExports: [...EXPECTED_CURRENT_TYPE_EXPORTS],
-    additiveRuntimeExports: [...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS],
-    additiveTypeExports: [...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS],
+    additiveTypeExports: [
+      ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS,
+      ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
+    ].sort(compareText),
+    additiveRuntimeExports: [
+      ...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS,
+      ...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
+    ].sort(compareText),
+    additiveSuccessors: [
+      {
+        task: "M08-T03",
+        sourcePath: STRUCTURAL_EDITS_SOURCE_PATH,
+        runtimePath: "packages/editor-core/dist/structural-edits.js",
+        declarationPath: "packages/editor-core/dist/structural-edits.d.ts",
+        runtimeExports: [...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS],
+        typeExports: [...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS],
+      },
+      {
+        task: "M08-T04",
+        sourcePath: CONTENT_EDITS_SOURCE_PATH,
+        runtimePath: "packages/editor-core/dist/content-edits.js",
+        declarationPath: "packages/editor-core/dist/content-edits.d.ts",
+        runtimeExports: [...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS],
+        typeExports: [...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS],
+      },
+    ],
     additiveSuccessor: {
-      task: "M08-T03",
-      sourcePath: STRUCTURAL_EDITS_SOURCE_PATH,
-      runtimePath: "packages/editor-core/dist/structural-edits.js",
-      declarationPath: "packages/editor-core/dist/structural-edits.d.ts",
-      runtimeExports: [...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS],
-      typeExports: [...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS],
+      task: "M08-T04",
+      sourcePath: CONTENT_EDITS_SOURCE_PATH,
+      runtimePath: "packages/editor-core/dist/content-edits.js",
+      declarationPath: "packages/editor-core/dist/content-edits.d.ts",
+      runtimeExports: [...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS],
+      typeExports: [...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS],
     },
     publicDeclarations: EXPECTED_INSERT_EXPORTS.length,
     tsdocDeclarations: exports.tsdocDeclarations,
-    staticEsmEdges: 8,
+    staticEsmEdges: 11,
     unknownStaticEsmEdges: 0,
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length,
@@ -1467,7 +1606,7 @@ export async function buildEditorCoreStableIdInsertEvidence(rawOptions = undefin
     packageBoundary: {
       frozenTaskTimeEmittedFiles: DIST_PATHS.length,
       retainedRuntimeModuleFiles: RETAINED_EDITOR_RUNTIME_PATHS.length,
-      additiveEmittedFiles: STRUCTURAL_EDITS_DIST_PATHS.length,
+      additiveEmittedFiles: STRUCTURAL_EDITS_DIST_PATHS.length + CONTENT_EDITS_DIST_PATHS.length,
       staticEsmEdges: boundary.staticEsmEdges,
       unknownStaticEsmEdges: boundary.unknownStaticEsmEdges,
       platformNeutral: boundary.platformNeutral,
@@ -1520,6 +1659,80 @@ function captureVerifyOptions(raw) {
   });
 }
 
+function visibleProofAuthority(document) {
+  const visible = [];
+  const rawAuthority = [];
+  let fence;
+  let insideComment = false;
+  for (const rawLine of document.split(/\r?\n/u)) {
+    if (fence !== undefined) {
+      const closing = rawLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+      if (
+        closing !== null &&
+        closing[1][0] === fence.marker &&
+        closing[1].length >= fence.length &&
+        closing[2].trim() === ""
+      ) {
+        fence = undefined;
+      }
+      continue;
+    }
+    let remainder = rawLine;
+    let line = "";
+    while (remainder.length > 0) {
+      if (insideComment) {
+        const end = remainder.indexOf("-->");
+        if (end < 0) remainder = "";
+        else {
+          insideComment = false;
+          remainder = remainder.slice(end + 3);
+        }
+        continue;
+      }
+      const start = remainder.indexOf("<!--");
+      if (start < 0) {
+        line += remainder;
+        remainder = "";
+      } else {
+        line += remainder.slice(0, start);
+        insideComment = true;
+        remainder = remainder.slice(start + 4);
+      }
+    }
+    if (/^(?: {4}|\t)/u.test(line)) continue;
+    const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+    if (opening !== null) {
+      fence = { marker: opening[1][0], length: opening[1].length };
+      continue;
+    }
+    rawAuthority.push(line);
+    visible.push(line.trimEnd());
+  }
+  return {
+    visible,
+    rawHtml: /<\s*\/?\s*[A-Za-z][\s\S]*?>/u.test(rawAuthority.join("\n")),
+  };
+}
+
+function proofDocumentHasContradictoryStatus(visibleLines) {
+  return visibleLines.some((line) => {
+    const normalized = line
+      .replace(/\\([`*_~])/gu, "$1")
+      .replace(/[`*_~]/gu, "")
+      .replace(/\s+/gu, " ")
+      .trim();
+    const field = normalized.match(/\b(?:result|status)\s*:\s*(.*)$/iu);
+    if (field === null) return false;
+    const value = field[1].trim();
+    return (
+      !/^(?:PASS|DONE)\b/iu.test(value) ||
+      /\b(?:BLOCKED|ERROR|FAIL(?:ED|URE)?|INCOMPLETE|IN[ _-]?PROGRESS|NOT[ _-]?STARTED|PENDING|SKIPPED|TODO|UNKNOWN)\b/iu.test(
+        value,
+      )
+    );
+  });
+}
+
 export async function verifyEditorCoreStableIdInsertEvidence(rawOptions = undefined) {
   const options = captureVerifyOptions(rawOptions);
   const built = await buildEditorCoreStableIdInsertEvidence(options.buildOptions);
@@ -1537,14 +1750,15 @@ export async function verifyEditorCoreStableIdInsertEvidence(rawOptions = undefi
     ));
   const proof = decodeUtf8(proofBytes, "M08-T02 proof document");
   const exactPin = `Final artifact: \`sha256:${built.artifactSha256}\``;
-  if (proof.split(exactPin).length !== 2) {
-    fail(
-      "PROOF_PIN_DRIFT",
-      "The proof document must contain exactly one exact final artifact pin.",
-    );
-  }
-  const allPins = [...proof.matchAll(/Final artifact:\s*`sha256:([0-9a-f]{64})`/g)];
-  if (allPins.length !== 1 || allPins[0][1] !== built.artifactSha256) {
+  const { visible, rawHtml } = visibleProofAuthority(proof);
+  const pinLines = visible.filter((line) => line.startsWith("Final artifact:"));
+  if (
+    pinLines.length !== 1 ||
+    pinLines[0] !== exactPin ||
+    rawHtml ||
+    proofDocumentHasContradictoryStatus(visible) ||
+    visible.join("\n").includes("sha256:PENDING")
+  ) {
     fail("PROOF_PIN_DRIFT", "The proof document final pin drifted.");
   }
   return deepFreeze({

@@ -1,16 +1,40 @@
 import {
+  clearDesenEditorNodeCondition,
   createDesenEditorDocument,
   deleteDesenEditorNode,
+  deleteDesenEditorOwnerProp,
+  deleteDesenEditorOwnerStyleProperty,
+  deleteDesenEditorVariant,
+  deleteDesenEditorVariantProp,
+  deleteDesenEditorVariantStyleProperty,
   insertDesenEditorNode,
+  insertDesenEditorVariant,
   moveDesenEditorNode,
   reorderDesenEditorNode,
+  reorderDesenEditorVariant,
+  setDesenEditorNodeCondition,
+  setDesenEditorOwnerProp,
+  setDesenEditorOwnerStyleProperty,
+  setDesenEditorVariantCondition,
+  setDesenEditorVariantProp,
+  setDesenEditorVariantStyleProperty,
 } from "@desen/editor-core";
 
 import type {
+  DesenEditorContentEditDiagnostic,
+  DesenEditorContentEditDiagnosticCode,
+  DesenEditorContentEditFailure,
+  DesenEditorContentEditResult,
+  DesenEditorContentEditSuccess,
+  DesenEditorContentPredicate,
+  DesenEditorContentValue,
+  DesenEditorContentVariant,
   DesenEditorDocument,
   DesenEditorDocumentCreationFailure,
   DesenEditorDocumentCreationResult,
   DesenEditorDocumentCreationSuccess,
+  DesenEditorNodeConditionClearCommand,
+  DesenEditorNodeConditionSetCommand,
   DesenEditorNodeDeleteCommand,
   DesenEditorNodeInsertCommand,
   DesenEditorNodeInsertFailure,
@@ -18,9 +42,21 @@ import type {
   DesenEditorNodeInsertSuccess,
   DesenEditorNodeMoveCommand,
   DesenEditorNodeReorderCommand,
+  DesenEditorOwnerPropDeleteCommand,
+  DesenEditorOwnerPropSetCommand,
+  DesenEditorOwnerStylePropertyDeleteCommand,
+  DesenEditorOwnerStylePropertySetCommand,
   DesenEditorStructuralEditFailure,
   DesenEditorStructuralEditResult,
   DesenEditorStructuralEditSuccess,
+  DesenEditorVariantConditionSetCommand,
+  DesenEditorVariantDeleteCommand,
+  DesenEditorVariantInsertCommand,
+  DesenEditorVariantPropDeleteCommand,
+  DesenEditorVariantPropSetCommand,
+  DesenEditorVariantReorderCommand,
+  DesenEditorVariantStylePropertyDeleteCommand,
+  DesenEditorVariantStylePropertySetCommand,
 } from "@desen/editor-core";
 
 declare const input: unknown;
@@ -176,3 +212,198 @@ const crossSurfaceAuthority: DesenEditorNodeMoveCommand = {
   destinationSurfaceId: "other",
 };
 void crossSurfaceAuthority;
+
+const contentValue: DesenEditorContentValue = { $ref: "state.email", fallback: "" };
+const contentPredicate: DesenEditorContentPredicate = {
+  op: "truthy",
+  args: [contentValue],
+};
+const contentVariant: DesenEditorContentVariant = {
+  when: contentPredicate,
+  props: { label: "Compact" },
+};
+const contentDiagnosticCode: DesenEditorContentEditDiagnosticCode =
+  "run.desen.editor/CONTENT_EDIT_PATH_NOT_FOUND";
+const contentDiagnostic: DesenEditorContentEditDiagnostic = {
+  code: contentDiagnosticCode,
+  message: "The selected content path does not exist.",
+};
+
+const ownerPropSetCommand: DesenEditorOwnerPropSetCommand = {
+  surfaceId: "main",
+  ownerId: "main.text",
+  name: "label",
+  value: contentValue,
+};
+const ownerPropDeleteCommand: DesenEditorOwnerPropDeleteCommand = {
+  surfaceId: "main",
+  ownerId: "main.text",
+  name: "label",
+};
+const ownerStyleSetCommand: DesenEditorOwnerStylePropertySetCommand = {
+  surfaceId: "main",
+  ownerId: "main.text",
+  state: "base",
+  part: "root",
+  property: "color",
+  value: { $token: "color.content.primary" },
+};
+const ownerStyleDeleteCommand: DesenEditorOwnerStylePropertyDeleteCommand = {
+  surfaceId: "main",
+  ownerId: "main.text",
+  state: "base",
+  part: "root",
+  property: "color",
+};
+const nodeConditionSetCommand: DesenEditorNodeConditionSetCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  when: contentPredicate,
+};
+const nodeConditionClearCommand: DesenEditorNodeConditionClearCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+};
+const variantInsertCommand: DesenEditorVariantInsertCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  index: 0,
+  variant: contentVariant,
+};
+const variantDeleteCommand: DesenEditorVariantDeleteCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  index: 0,
+};
+const variantReorderCommand: DesenEditorVariantReorderCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  variantIndex: 0,
+  index: 1,
+};
+const variantConditionSetCommand: DesenEditorVariantConditionSetCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  index: 0,
+  when: contentPredicate,
+};
+const variantPropSetCommand: DesenEditorVariantPropSetCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  index: 0,
+  name: "label",
+  value: "Compact",
+};
+const variantPropDeleteCommand: DesenEditorVariantPropDeleteCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  index: 0,
+  name: "label",
+};
+const variantStyleSetCommand: DesenEditorVariantStylePropertySetCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  index: 0,
+  state: "base",
+  part: "root",
+  property: "opacity",
+  value: 0.5,
+};
+const variantStyleDeleteCommand: DesenEditorVariantStylePropertyDeleteCommand = {
+  surfaceId: "main",
+  nodeId: "main.text",
+  index: 0,
+  state: "base",
+  part: "root",
+  property: "opacity",
+};
+
+const contentEdits: readonly DesenEditorContentEditResult[] = [
+  setDesenEditorOwnerProp(document, ownerPropSetCommand),
+  deleteDesenEditorOwnerProp(document, ownerPropDeleteCommand),
+  setDesenEditorOwnerStyleProperty(document, ownerStyleSetCommand),
+  deleteDesenEditorOwnerStyleProperty(document, ownerStyleDeleteCommand),
+  setDesenEditorNodeCondition(document, nodeConditionSetCommand),
+  clearDesenEditorNodeCondition(document, nodeConditionClearCommand),
+  insertDesenEditorVariant(document, variantInsertCommand),
+  deleteDesenEditorVariant(document, variantDeleteCommand),
+  reorderDesenEditorVariant(document, variantReorderCommand),
+  setDesenEditorVariantCondition(document, variantConditionSetCommand),
+  setDesenEditorVariantProp(document, variantPropSetCommand),
+  deleteDesenEditorVariantProp(document, variantPropDeleteCommand),
+  setDesenEditorVariantStyleProperty(document, variantStyleSetCommand),
+  deleteDesenEditorVariantStyleProperty(document, variantStyleDeleteCommand),
+];
+
+for (const contentEdit of contentEdits) {
+  if (contentEdit.ok) {
+    const success: DesenEditorContentEditSuccess = contentEdit;
+    const next: DesenEditorDocument = success.document;
+
+    // @ts-expect-error content-edit successes keep the next Source immutable
+    success.document.entry = "mutated";
+
+    // @ts-expect-error content-edit success diagnostics are empty
+    const impossibleDiagnostic = success.diagnostics[0];
+
+    void next;
+    void impossibleDiagnostic;
+  } else {
+    const failure: DesenEditorContentEditFailure = contentEdit;
+    const diagnosticCode: string = failure.diagnostics[0].code;
+
+    // @ts-expect-error content-edit failures expose no partial Source
+    const partialDocument = failure.document;
+
+    void diagnosticCode;
+    void partialDocument;
+  }
+}
+
+// @ts-expect-error owner prop-set command fields remain readonly
+ownerPropSetCommand.value = "mutated";
+
+// @ts-expect-error owner prop-delete command fields remain readonly
+ownerPropDeleteCommand.name = "mutated";
+
+// @ts-expect-error owner style-set command fields remain readonly
+ownerStyleSetCommand.property = "mutated";
+
+// @ts-expect-error owner style-delete command fields remain readonly
+ownerStyleDeleteCommand.state = "mutated";
+
+// @ts-expect-error node condition-set command fields remain readonly
+nodeConditionSetCommand.when = { op: "truthy", args: [false] };
+
+// @ts-expect-error node condition-clear command fields remain readonly
+nodeConditionClearCommand.nodeId = "main.other";
+
+// @ts-expect-error variant insert command fields remain readonly
+variantInsertCommand.index = 1;
+
+// @ts-expect-error variant delete command fields remain readonly
+variantDeleteCommand.index = 1;
+
+// @ts-expect-error variant reorder command fields remain readonly
+variantReorderCommand.variantIndex = 1;
+
+// @ts-expect-error variant condition-set command fields remain readonly
+variantConditionSetCommand.when = { op: "truthy", args: [false] };
+
+// @ts-expect-error variant prop-set command fields remain readonly
+variantPropSetCommand.value = "mutated";
+
+// @ts-expect-error variant prop-delete command fields remain readonly
+variantPropDeleteCommand.name = "mutated";
+
+// @ts-expect-error variant style-set command fields remain readonly
+variantStyleSetCommand.property = "mutated";
+
+// @ts-expect-error variant style-delete command fields remain readonly
+variantStyleDeleteCommand.state = "mutated";
+
+// @ts-expect-error structural validator codes are not project-owned content-edit codes
+const invalidContentDiagnosticCode: DesenEditorContentEditDiagnosticCode = "SCHEMA_INVALID";
+
+void contentDiagnostic;
+void invalidContentDiagnosticCode;

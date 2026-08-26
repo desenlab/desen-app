@@ -802,18 +802,30 @@ root proof pass. The 22,402-byte artifact is pinned at
 `TESTED`; `S-002` stays `PLANNED` through terminal M08-T10 integration. The remaining editor work
 stays assigned to M08-T04–M08-T10.
 
+M08-T04 completes immutable content editing. Fourteen atomic commands edit node or behavior props
+and style leaves plus node conditions and ordered variants while preserving unrelated semantic
+order, deliberately empty own containers, structurally valid Catalog-unresolved content, and every
+existing identity. Six content-edit diagnostic classes plus unchanged structural pass-through fail
+closed without partial Source authority. The cumulative package suite passes 55/55, including
+16/16 focused cases; the public-package suite passes 32/32; and the independent root proof passes
+10/10. The 26,382-byte artifact is pinned at
+`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. `N-014` remains
+`TESTED`; `S-002` remains `PLANNED` through terminal M08-T10 integration; no `P-*`, `N-*`, `S-*`,
+or proof-gate status changes. State declaration and binding editing is assigned to M08-T05; the
+remaining editor work stays assigned to M08-T06–M08-T10.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `88 / 145 tasks complete (61%)`
+- Overall implementation progress: `89 / 145 tasks complete (61%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `3 / 10 tasks complete (30%)`
+- M08 progress: `4 / 10 tasks complete (40%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -887,19 +899,21 @@ stays assigned to M08-T04–M08-T10.
   `M07-T11 — Control-plane channel consumed by separately built reference host`,
   `M08-T01 — Direct DESEN Source editor document model`,
   `M08-T02 — Stable-ID allocator and insert command`,
-  `M08-T03 — Delete, slot move, and ordered reorder commands`
+  `M08-T03 — Delete, slot move, and ordered reorder commands`,
+  `M08-T04 — Prop, style-part, condition, and variant editing commands`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T04 — Prop, style-part, condition, and variant editing commands`
-- Status: M08 is 3/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 88/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M08-T05 — State declaration and binding editing commands`
+- Status: M08 is 4/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 89/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
-  artifacts, independent root proofs, and CI inventory registration; their exact evidence and
-  nonclaims are recorded below.
+  artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
+  its tracked content-edit artifact, independent root proof, and CI registration; exact evidence
+  and nonclaims are recorded below.
 
 ## Completed preparation
 
@@ -1390,6 +1404,21 @@ artifacts and 56 readers, while historical sequences 28–30 remain unchanged. C
 157 workloads and 74 proof pairs—63 ordinary and 11 barriers. `N-014` is `TESTED`; `S-002` remains
 `PLANNED`. Implementation progress is 88/145 (61%), M08 is 3/10, proof gates remain 8/13, and
 M08-T04 is next.
+
+M08-T04 is now complete. Fourteen immutable commands cover base node/behavior props and style
+leaves, node conditions, and ordered node variants. They preserve unrelated order, empty own
+containers, unresolved Catalog content, and stable identities; malformed or over-limit requests
+fail atomically under six content-edit diagnostics or unchanged structural diagnostics. The exact
+26,382-byte artifact is
+`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. Current local
+code-owned CI authority is 159 workloads and 75 proof pairs—64 ordinary and 11 barriers—with 519
+prerequisite segments, 3,237 ordered leaf invocations, and 251 distinct leaves. The append-only
+reader successor is sequence 32 at
+`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee`, authenticating 29 frozen
+artifacts and 58 readers while historical sequence 31 remains unchanged. No hosted M08-T04 result
+is claimed. `N-014` remains `TESTED`; `S-002` remains `PLANNED`; no `P-*`, `N-*`, `S-*`, or
+proof-gate status changes. Implementation progress is 89/145 (61%), M08 is 4/10, proof gates remain
+8/13, and M08-T05 state declaration and binding editing is next.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -2819,6 +2848,50 @@ M08-T03 evidence:
   streaming/preallocation memory-DoS resistance, terminal React/DOM boundary, P-18, or G08 claim
 - coverage decision: M08-T03 is `DONE`; `N-014` is `TESTED`; `S-002` remains `PLANNED`; overall
   progress is 88/145 (61%); M08 is 3/10; proof gates remain 8/13; M08-T04 owns the next slice
+
+M08-T04 evidence:
+
+- `docs/proof/EDITOR-CORE-CONTENT-EDITS.md`
+- `docs/proof/artifacts/editor-core-0.1.0-content-edits.json`, 26,382 bytes at
+  `sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`
+- command boundary: fourteen immutable commands edit node/behavior props and base style leaves,
+  node conditions, and ordered node variants; variant deletion/reorder uses post-removal final
+  positions, deliberately empty own containers remain present, unrelated order remains unchanged,
+  and every existing node/behavior identity is preserved
+- authoring boundary: structurally valid Catalog-unresolved values, predicates, variants, style
+  parts, and extension data remain admissible; the proof makes no Catalog slot-acceptance or
+  cardinality claim
+- authority hardening: all six content-edit diagnostic classes, unchanged structural diagnostics,
+  exact command own-data capture, detached nested values, prototype-sensitive own keys, missing or
+  ambiguous targets, missing paths, invalid positions, malformed Unicode, accessors, inheritance,
+  symbols, sparse data, and extra command authority fail closed without a partial Source
+- fixed profile: canonical input/output Source at most 8,388,608 bytes, at most 25,000
+  selected-surface identities, and component depth 64 with root at zero; exact ceilings and
+  one-unit crossings are covered without claiming streaming/preallocation memory-DoS resistance
+- execution authority: behavior runs from an isolated authenticated 27-file ESM graph; the proof
+  authenticates exact frozen M08-T02 and M08-T03 artifacts plus 67 current tracked-file receipts
+  while retaining Node, its ESM loader, and the process environment as trusted authorities
+- local proof: cumulative editor-core package tests pass 55/55, including 16/16 focused
+  content-edit cases; public-package cases pass 32/32; generator/verifier and the 10/10 independent
+  root proof pass
+- CI authority: 159 workloads / 75 proof pairs, with 64 ordinary pairs and 11 barriers; the
+  retained projection has 519 prerequisite segments, 3,237 ordered leaf invocations, and 251
+  distinct leaves; shared-state counts are 6/2/1/69/70/10/1 and filesystem-policy counts are
+  141/2/15/1
+- current CI pins: neutral inventory
+  `sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c` and required plan
+  `sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`
+- reader authority: append-only sequence 32 at
+  `ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` authenticates 29 frozen
+  artifacts and 58 readers; historical sequence 31, its head, and every predecessor artifact byte
+  remain unchanged
+- evidence boundary: these are local code-owned/current results and make no hosted M08-T04 claim
+- scope nonclaims: no state/binding, event/action, persistence, continuous semantic validation,
+  invalid-node mapping, undo/redo, selection, viewport, hostile-JavaScript sandbox, terminal
+  React/DOM boundary, P-18, or G08 claim
+- coverage decision: M08-T04 is `DONE`; `N-014` remains `TESTED`; `S-002` remains `PLANNED`; no
+  `P-*`, `N-*`, `S-*`, or proof-gate status changes; overall progress is 89/145 (61%); M08 is 4/10;
+  proof gates remain 8/13; M08-T05 owns state declaration and binding editing next
 
 ## Status vocabulary
 

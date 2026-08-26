@@ -374,6 +374,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-editor-core-structural-edits.mjs",
       "tests/editor-core-structural-edits.test.mjs",
     ],
+    [
+      "editor-core-content-edits",
+      "scripts/verify-editor-core-content-edits.mjs",
+      "tests/editor-core-content-edits.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -415,14 +420,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "f9469ec960639a89a502f571a8ec74ef8277b8ee88dcf967a1aef478e70d7041";
+  "415a954a1b05f17f27ad33711c03cd7a3a2ccd86095611437e30083dea75e7b1";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "0e236e3b6c1cbf188ca34cf010a1d4a8e79f2a3bd66b090fa3ed1ec27380fe05";
+  "ed766cc0193d06627b6107ff5f4d7a6230dfaa6db21ed301d3d92ec4ea1a4adb";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "f993dfa52e251290d9eb4c27efc1482d67088a4612e309043ae063912c5dd479";
+  "c7fa968c47fc8cc1088b209e5fd89a4e1c86e866b4efac59febddda59cf0fa0b";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "63495628ad91a7c60b38243367dfef22c53e208d5dbfc688d33144b721f4a5f5";
+const QUALITY_GATE_PLAN_SHA256 = "c8c90a4b9ede0c8a943657e27872fc7e91d0ce6f033a14c82e8fb43f8028b426";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -727,6 +732,7 @@ function classifyLegacyPrerequisite({
         "editor-core-source-document",
         "editor-core-stable-id-insert",
         "editor-core-structural-edits",
+        "editor-core-content-edits",
       ].includes(currentProofId) ||
       packageName !== "@desen/editor-core" ||
       packageManifest.scripts?.[task] !== expectedScript

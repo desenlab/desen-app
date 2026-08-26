@@ -18,7 +18,48 @@ import {
 const ROOT = path.resolve(import.meta.dirname, "..");
 const INSERT_SOURCE = "packages/editor-core/src/stable-id-insert.ts";
 const STRUCTURAL_EDITS_SOURCE = "packages/editor-core/src/structural-edits.ts";
+const CONTENT_EDITS_SOURCE = "packages/editor-core/src/content-edits.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
+const CONTENT_RUNTIME_EXPORTS = Object.freeze([
+  "clearDesenEditorNodeCondition",
+  "deleteDesenEditorOwnerProp",
+  "deleteDesenEditorOwnerStyleProperty",
+  "deleteDesenEditorVariant",
+  "deleteDesenEditorVariantProp",
+  "deleteDesenEditorVariantStyleProperty",
+  "insertDesenEditorVariant",
+  "reorderDesenEditorVariant",
+  "setDesenEditorNodeCondition",
+  "setDesenEditorOwnerProp",
+  "setDesenEditorOwnerStyleProperty",
+  "setDesenEditorVariantCondition",
+  "setDesenEditorVariantProp",
+  "setDesenEditorVariantStyleProperty",
+]);
+const CONTENT_TYPE_EXPORTS = Object.freeze([
+  "DesenEditorContentEditDiagnostic",
+  "DesenEditorContentEditDiagnosticCode",
+  "DesenEditorContentEditFailure",
+  "DesenEditorContentEditResult",
+  "DesenEditorContentEditSuccess",
+  "DesenEditorContentPredicate",
+  "DesenEditorContentValue",
+  "DesenEditorContentVariant",
+  "DesenEditorNodeConditionClearCommand",
+  "DesenEditorNodeConditionSetCommand",
+  "DesenEditorOwnerPropDeleteCommand",
+  "DesenEditorOwnerPropSetCommand",
+  "DesenEditorOwnerStylePropertyDeleteCommand",
+  "DesenEditorOwnerStylePropertySetCommand",
+  "DesenEditorVariantConditionSetCommand",
+  "DesenEditorVariantDeleteCommand",
+  "DesenEditorVariantInsertCommand",
+  "DesenEditorVariantPropDeleteCommand",
+  "DesenEditorVariantPropSetCommand",
+  "DesenEditorVariantReorderCommand",
+  "DesenEditorVariantStylePropertyDeleteCommand",
+  "DesenEditorVariantStylePropertySetCommand",
+]);
 const temporaryDirectories = [];
 let built;
 
@@ -140,43 +181,33 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
   ]) {
     assert.deepEqual(trackedReceipts.get(receipt.path), receipt);
   }
-  assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
-    "deleteDesenEditorNode",
-    "moveDesenEditorNode",
-    "reorderDesenEditorNode",
-  ]);
-  assert.deepEqual(built.currentCompatibility.boundary.additiveTypeExports, [
-    "DesenEditorNodeDeleteCommand",
-    "DesenEditorNodeMoveCommand",
-    "DesenEditorNodeReorderCommand",
-    "DesenEditorStructuralEditDiagnostic",
-    "DesenEditorStructuralEditDiagnosticCode",
-    "DesenEditorStructuralEditFailure",
-    "DesenEditorStructuralEditResult",
-    "DesenEditorStructuralEditSuccess",
-  ]);
+  assert.deepEqual(
+    built.currentCompatibility.boundary.additiveRuntimeExports,
+    [
+      ...CONTENT_RUNTIME_EXPORTS,
+      "deleteDesenEditorNode",
+      "moveDesenEditorNode",
+      "reorderDesenEditorNode",
+    ].sort(),
+  );
+  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 30);
+  for (const name of CONTENT_TYPE_EXPORTS) {
+    assert.equal(built.currentCompatibility.boundary.additiveTypeExports.includes(name), true);
+  }
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T03",
-    sourcePath: "packages/editor-core/src/structural-edits.ts",
-    runtimePath: "packages/editor-core/dist/structural-edits.js",
-    declarationPath: "packages/editor-core/dist/structural-edits.d.ts",
-    runtimeExports: ["deleteDesenEditorNode", "moveDesenEditorNode", "reorderDesenEditorNode"],
-    typeExports: [
-      "DesenEditorNodeDeleteCommand",
-      "DesenEditorNodeMoveCommand",
-      "DesenEditorNodeReorderCommand",
-      "DesenEditorStructuralEditDiagnostic",
-      "DesenEditorStructuralEditDiagnosticCode",
-      "DesenEditorStructuralEditFailure",
-      "DesenEditorStructuralEditResult",
-      "DesenEditorStructuralEditSuccess",
-    ],
+    task: "M08-T04",
+    sourcePath: CONTENT_EDITS_SOURCE,
+    runtimePath: "packages/editor-core/dist/content-edits.js",
+    declarationPath: "packages/editor-core/dist/content-edits.d.ts",
+    runtimeExports: CONTENT_RUNTIME_EXPORTS,
+    typeExports: CONTENT_TYPE_EXPORTS,
   });
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 2);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
   assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 26);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 18);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 32);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 36);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
     bytes: 19_561,
@@ -244,6 +275,7 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
 
   const source = await readFile(path.join(ROOT, INSERT_SOURCE));
   const structuralEditsSource = await readFile(path.join(ROOT, STRUCTURAL_EDITS_SOURCE));
+  const contentEditsSource = await readFile(path.join(ROOT, CONTENT_EDITS_SOURCE));
   const dependency = await readFile(path.join(ROOT, PROTOCOL_RUNTIME));
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({
@@ -254,6 +286,12 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({
       fileOverrides: { [STRUCTURAL_EDITS_SOURCE]: changedByte(structuralEditsSource) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStableIdInsertEvidence({
+      fileOverrides: { [CONTENT_EDITS_SOURCE]: changedByte(contentEditsSource) },
     }),
     expectedError("BOUNDARY_DRIFT"),
   );
@@ -288,6 +326,25 @@ test("[artifact] verifies exact artifact bytes and one exact final proof pin", a
     }),
     expectedError("PROOF_PIN_DRIFT"),
   );
+  for (const invalidProofDocumentBytes of [
+    `<!-- Final artifact: \`sha256:${built.artifactSha256}\` -->\n`,
+    `\`\`\`text\nFinal artifact: \`sha256:${built.artifactSha256}\`\n\`\`\`\n`,
+    `    Final artifact: \`sha256:${built.artifactSha256}\`\n`,
+    `\tFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
+    `<template>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</template>\n`,
+    `<div hidden>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</div>\n`,
+    `<details>\nFinal artifact: \`sha256:${built.artifactSha256}\`\n</details>\n`,
+    `Status: FAIL\nFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
+    `sha256:PENDING\nFinal artifact: \`sha256:${built.artifactSha256}\`\n`,
+  ]) {
+    await assert.rejects(
+      verifyEditorCoreStableIdInsertEvidence({
+        artifactBytes: built.artifactBytes,
+        proofDocumentBytes: invalidProofDocumentBytes,
+      }),
+      expectedError("PROOF_PIN_DRIFT"),
+    );
+  }
 });
 
 test("[writer] atomically commits exact bytes and preserves the previous destination on failure", async () => {

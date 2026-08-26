@@ -1891,3 +1891,60 @@ commands remain M08-T04; M08-T05–M08-T09 retain later authoring, persistence, 
 M08-T10 retains the independent terminal editor-core React/DOM boundary. This proof does not claim
 streaming or preallocation memory-DoS resistance, a general hostile-JavaScript sandbox, P-18, or
 G08. M08-T04 is next.
+
+## M08-T04 — Prop, style-part, condition, and variant editing commands
+
+The built `@desen/editor-core` package now exposes fourteen atomic immutable content commands.
+Base node or behavior props and style leaves can be set or deleted; node conditions can be set or
+cleared; and ordered node variants can be inserted, deleted, reordered, or updated at their
+condition, prop, and style leaves. Variant reorder uses the final post-removal position. Deliberately
+empty props, style, state, part, and variants containers remain own data. Every success returns a
+fresh detached recursively frozen direct Source, preserves unrelated semantic order and all
+existing identities, and keeps structurally valid Catalog-unresolved content and extension data
+authorable.
+
+Six content-edit diagnostic classes cover malformed commands, fixed-limit crossings, missing
+paths, invalid positions, ambiguous targets, and missing targets. Underlying structural rejection
+retains its original diagnostic authority. Exact command own-data capture, detached nested values,
+prototype-sensitive names as own data, malformed Unicode, accessors without invocation,
+inheritance, symbols, sparse data, extra authority, and every atomic failure path are covered. The
+finite profile admits the exact 8,388,608-byte canonical Source, 25,000 selected-surface identities,
+and root-at-zero depth 64 while rejecting one-unit crossings. These bounds do not claim streaming
+or preallocation memory-DoS resistance.
+
+The cumulative editor-core package suite passes 55/55, including 16/16 focused content-edit cases;
+the cumulative built public-package suite passes 32/32; and the independent root proof passes
+10/10. Exact evidence lives in
+[`EDITOR-CORE-CONTENT-EDITS.md`](EDITOR-CORE-CONTENT-EDITS.md) and the 26,382-byte
+[`editor-core-0.1.0-content-edits.json`](artifacts/editor-core-0.1.0-content-edits.json) at
+`sha256:eb79a60f2454f8a15044abd920fc87b24b068b6b42088c39b5af2c7214594e34`. The proof directly
+authenticates the exact frozen M08-T02 and M08-T03 artifacts and verifies 67 current tracked-file
+receipts. Behavior begins only after six editor files and twenty-one authenticated dependencies are
+copied into an isolated 27-file ESM graph. Node, its ESM loader, and the process environment remain
+trusted; no general hostile-JavaScript sandbox is claimed.
+
+CI registers `editor-core-content-edits` after the stable-ID and structural-edit prerequisites plus
+the serial public-package contract in the exact 159-workload/75-proof-pair successor: 64 ordinary
+pairs and 11 exclusive barriers. Its retained projection contains 519 prerequisite segments, 3,237
+ordered leaf invocations, and 251 distinct leaves. Shared-state counts are 6
+`GLOBAL_EXCLUSIVE`, 2 `WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69
+`PROOF_READ_ONLY`, 70 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`; filesystem policies are 141 `NONE`, 2 `FIXTURE_COPY`, 15
+`REVIEWED_SYMLINK`, and 1 combined policy. The neutral inventory is
+`sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`, and the required plan is
+`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`. These are local
+code-owned/current receipts and make no hosted M08-T04 claim.
+
+Append-only reader checkpoint sequence 32 at
+`ef02e9a20725159352950131c8e9a575a7b4185a55968fd1ec22f42a85571aee` authenticates 29 frozen
+artifacts and 58 readers. Historical sequence 31 at
+`181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`, all earlier entries, and
+every predecessor artifact byte remain unchanged.
+
+M08-T04 is `DONE`, advancing implementation progress to 89/145 (61%) and M08 to 4/10. Proof gates
+remain 8/13. `N-014` remains `TESTED`, and `S-002` remains `PLANNED` until terminal M08-T10
+stable-identity integration. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. State
+declaration and binding commands remain M08-T05; M08-T06–M08-T09 retain later authoring,
+persistence, and validation work; and M08-T10 retains the independent terminal editor-core
+React/DOM boundary. This proof does not claim Catalog slot acceptance/cardinality, undo/redo,
+selection, viewport, P-18, or G08. M08-T05 is next.
