@@ -745,15 +745,30 @@ test("detects task-owned byte, trace, normative, and proof-document drift", asyn
   );
 
   const normative = await readFile(NORMATIVE, "utf8");
-  await rejectsCode(
-    () =>
-      buildRuntimeCoreActionTurnsEvidence({
-        fileOverrides: {
-          "docs/proof/NORMATIVE-COVERAGE.md": normative.replace("| N-032 |", "| N-032-MUTATED |"),
-        },
-      }),
-    "ACTION_TURN_NORMATIVE_DRIFT",
-  );
+  const normativeMutations = [
+    normative.replace("| N-032 |", "| N-032-MUTATED |"),
+    normative.replace(/^(\| N-014 \|.*?\| )TESTED(\s+\|)/mu, "$1PLANNED$2"),
+    normative.replace(/^(\| N-032 \|.*?\| )TESTED(\s+\|)/mu, "$1PLANNED$2"),
+    normative.replace(/^(\| N-041 \|.*?\| )PLANNED(\s+\|)/mu, "$1TESTED$2"),
+    normative.replace(/^(\| N-014 \|.*?\| .*?), M08-T03(\s+\| TESTED\s+\|)/mu, "$1$2"),
+    normative.replace(
+      "sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+      "sha256:1d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+    ),
+    normative.replace(/^(\| N-014 \|.*)$/mu, "$1\n$1"),
+  ];
+  for (const mutatedNormative of normativeMutations) {
+    assert.notEqual(mutatedNormative, normative);
+    await rejectsCode(
+      () =>
+        buildRuntimeCoreActionTurnsEvidence({
+          fileOverrides: {
+            "docs/proof/NORMATIVE-COVERAGE.md": mutatedNormative,
+          },
+        }),
+      "ACTION_TURN_NORMATIVE_DRIFT",
+    );
+  }
 
   const [findings, proof] = await Promise.all([
     readFile(FINDINGS, "utf8"),
