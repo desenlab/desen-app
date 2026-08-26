@@ -3325,3 +3325,75 @@ This file records implementation discoveries without changing the frozen DESEN 0
   validation and invalid-node mapping, and M08-T10 must independently prove cross-command
   determinism and the React/DOM boundary. A later protocol revision should standardize content-edit
   command mechanics only if interoperable editor command logs become normative.
+
+## PF-082 — State declarations and binding roots need exact lifecycle and whole-value edits
+
+- Status: OPEN
+- Blocks proof: No; M08-T05 defines one conservative platform-neutral state-and-binding edit
+  profile without changing frozen protocol bytes or claiming event/action editing, semantic
+  validity, or the terminal editor boundary.
+- Protocol location: SPEC Sections 7.2, 8.1, 10.1–10.3, 14, 16.1–16.2, 17.6, and 23.5; `C-002`,
+  `R-011`, and `A-010`; related findings `PF-019` and `PF-078`–`PF-081`
+- Observation: DESEN 0.1.0 defines state declarations, resource-input bindings, and repeat
+  item/key bindings, but it does not prescribe editor command shapes, declaration lifecycle,
+  complete-value replacement, missing-container behavior, reference rewrites, atomicity, finite
+  limits, or editor-specific diagnostics. State declaration names also admit dots even though the
+  reference and action-path grammar assigns the first segment as the complete state root.
+- Implementation decision: M08-T05 exposes exactly eight inert transitions:
+  `insertDesenEditorStateDeclaration({surfaceId, name, declaration})`,
+  `deleteDesenEditorStateDeclaration({surfaceId, name})`,
+  `setDesenEditorStateSchema({surfaceId, name, schema})`,
+  `setDesenEditorStateInitial({surfaceId, name, initial})`,
+  `setDesenEditorNodeRepeatItems({surfaceId, nodeId, items})`,
+  `setDesenEditorNodeRepeatKey({surfaceId, nodeId, key})`,
+  `setDesenEditorResourceInput({surfaceId, resourceId, name, value})`, and
+  `deleteDesenEditorResourceInput({surfaceId, resourceId, name})`. State insertion requires an
+  absent exact local-identifier key and one complete structurally admissible `StateSpec`; delete,
+  schema set, and initial set require the declaration to exist. Delete retains the required own
+  `state` map even when it becomes empty. Schema replacement stores one complete inert object that
+  must survive frozen Source structural admission. Initial replacement stores complete inert JSON,
+  not a `ValueSpec`; marker-shaped objects remain literal state data. Neither operation renames a
+  declaration nor cascades into references or actions.
+
+  The two repeat commands replace one complete `ValueSpec` at `repeat.items` or `repeat.key` on one
+  uniquely identified component node. They require an existing `repeat` object and never synthesize
+  its coupled `items`, `as`, and `key` members or alter `as`, `limit`, or `extensions`. Resource-input
+  set creates or replaces one complete `ValueSpec`; delete requires the exact own input member and
+  retains the required own `input` map when empty. A resource ID is an exact local identifier, while
+  an input member name is any well-formed JSON string, including empty and prototype-overlapping
+  names, and is always materialized as own data. Every complete `ValueSpec` is stored without
+  parsing, normalizing, or rewriting a `$ref`.
+
+  Command fields must be exact enumerable own data descriptors. Inherited, accessor, symbol,
+  extra-field, function-valued, own-`toJSON`, sparse/decorated-array, malformed-Unicode, and unsafe
+  index shapes are rejected; accessor getters and `toJSON` hooks are not invoked. Necessary
+  reflection over an arbitrary JavaScript `Proxy` may execute its traps, and a forwarding Proxy
+  that presents the admissible shape may be accepted. A throwing reflection trap is contained as
+  `STATE_BINDING_EDIT_COMMAND_INVALID`, exposes no partial document, and leaves the prior Source
+  unchanged. This is not a hostile-JavaScript or no-code-execution membrane.
+
+  Every success preserves all node and behavior identities plus unrelated semantic order and
+  returns a fresh detached recursively frozen direct Source. Every failure is atomic and exposes no
+  partial document. The common profile retains the 8 MiB canonical-document limit, 25,000
+  node/behavior identity occurrences in the selected surface, and component depth 64 with the root
+  at zero. Project-owned failures use
+  `run.desen.editor/STATE_BINDING_EDIT_COMMAND_INVALID`,
+  `STATE_BINDING_EDIT_LIMIT_EXCEEDED`, `STATE_BINDING_EDIT_PATH_NOT_FOUND`,
+  `STATE_BINDING_EDIT_TARGET_AMBIGUOUS`, `STATE_BINDING_EDIT_TARGET_EXISTS`, or
+  `STATE_BINDING_EDIT_TARGET_NOT_FOUND`; whole-candidate structural re-admission retains the frozen
+  protocol diagnostics.
+
+  Frozen structural admission continues to reject an invalid embedded Draft 2020-12 schema.
+  Initial/schema compatibility, dangling or unreachable references, repeat collection/key/alias
+  semantics, and Catalog resource-input contracts remain authorable conditions for M08-T09 to
+  diagnose. `PF-019` remains authoritative: `state.profile.name`
+  addresses state root `profile` and then nested member `name`, not a declaration named
+  `profile.name`. Dotted declarations remain structurally legal, while these commands make no
+  reachability claim and perform no longest-prefix or backtracking lookup.
+
+- Future action: M08-T06 owns event maps and every closed action, guard, payload, input, and nested
+  success/failure action edit. M08-T07 must prove authoring isolation and unknown-extension
+  preservation, M08-T09 must add continuous semantic validation and invalid-node mapping, and
+  M08-T10 must independently prove cross-command determinism and the React/DOM boundary. A later
+  protocol revision should align state-name and reference grammars and standardize these editor
+  transitions only if interoperable command logs become normative.

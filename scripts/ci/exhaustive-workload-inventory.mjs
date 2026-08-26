@@ -96,11 +96,11 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "415a954a1b05f17f27ad33711c03cd7a3a2ccd86095611437e30083dea75e7b1";
+  "fefcdb176405d3dc66930f01b8b6586e00b5a81ab271add0e5f8aac20ce39a75";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "ed766cc0193d06627b6107ff5f4d7a6230dfaa6db21ed301d3d92ec4ea1a4adb";
+  "24d534858d325d5a0799c45c0adb9872cb54167adf92a2244ab798a49b57c25e";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "c7fa968c47fc8cc1088b209e5fd89a4e1c86e866b4efac59febddda59cf0fa0b";
+  "c7754b1ca350563560e508916af68882da43bf7c85d27f05648cdaa4a4f47ffd";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
   "0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
@@ -477,6 +477,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "editor-core-content-edits",
     "scripts/verify-editor-core-content-edits.mjs",
     "tests/editor-core-content-edits.test.mjs",
+  ],
+  [
+    "editor-core-state-binding-edits",
+    "scripts/verify-editor-core-state-binding-edits.mjs",
+    "tests/editor-core-state-binding-edits.test.mjs",
   ],
 ]);
 
@@ -859,6 +864,7 @@ function classifyPrerequisite({
         "editor-core-stable-id-insert",
         "editor-core-structural-edits",
         "editor-core-content-edits",
+        "editor-core-state-binding-edits",
       ].includes(currentProofId) ||
       packageName !== "@desen/editor-core" ||
       packageScripts[task] !== expectedScript
@@ -1137,7 +1143,8 @@ function buildCanonicalInventory() {
         id === "editor-core-source-document" ||
         id === "editor-core-stable-id-insert" ||
         id === "editor-core-structural-edits" ||
-        id === "editor-core-content-edits"
+        id === "editor-core-content-edits" ||
+        id === "editor-core-state-binding-edits"
           ? "editor-core-public-package-contract"
           : "package-tests",
       ],
@@ -1405,7 +1412,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c";
+  "ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

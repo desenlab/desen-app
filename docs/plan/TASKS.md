@@ -1026,7 +1026,7 @@ hosted M07-T10 claim.
 | M08-T02 | DONE        | M08-T01         | Stable-ID allocator and insert command                               |
 | M08-T03 | DONE        | M08-T02         | Delete, slot move, and ordered reorder commands                      |
 | M08-T04 | DONE        | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
-| M08-T05 | NOT_STARTED | M08-T02         | State declaration and binding editing commands                       |
+| M08-T05 | DONE        | M08-T02         | State declaration and binding editing commands                       |
 | M08-T06 | NOT_STARTED | M08-T05         | Event and closed-action editing commands                             |
 | M08-T07 | NOT_STARTED | M08-T01–M08-T06 | Authoring isolation and unknown-extension round-trip preservation    |
 | M08-T08 | NOT_STARTED | M08-T01         | Persistence port and local source adapter                            |
@@ -1156,6 +1156,50 @@ undo/redo, selection, viewport, streaming/preallocation memory-DoS resistance, a
 sandbox or no-code-execution membrane, P-18, or G08. Overall implementation progress is 89/145
 (61%), M08 is 4/10, proof gates remain 8/13, and M08-T05 state declaration and binding editing is
 next.
+
+M08-T05 is `DONE`. The public package exposes eight atomic immutable commands for inserting and
+deleting state declarations, replacing state schemas and initial values, replacing node repeat
+items and keys, and setting or deleting named resource inputs. State deletion deliberately does
+not cascade into references or actions and retains the required empty state map. Repeat edits
+require an existing repeat and preserve its alias, limit, and extensions. Resource-input deletion
+retains the required empty input map, while prototype-sensitive declaration and input names remain
+own data. Binding values, state schemas, and initial values are captured whole without evaluation,
+reference rewriting, or semantic normalization. Every success returns a fresh detached recursively
+frozen direct Source while preserving every existing identity and unrelated semantic order;
+failure is atomic and exposes no partial document.
+
+The focused state-and-binding suite passes 14/14, with 14 focused compiler-negative assertions.
+The cumulative built public-package suite passes 38/38, with 48 public consumer compiler-negative
+assertions, and the independent root proof passes 10/10. Exact evidence is pinned in
+`docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md` and the 30,014-byte artifact
+`docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`. The proof directly
+authenticates the exact frozen M08-T02 artifact, separately authenticates the frozen M08-T04
+artifact for current-graph compatibility without widening the official prerequisite, verifies 74
+tracked-file receipts, and executes behavior from an isolated authenticated 28-file ESM graph.
+
+CI registers the verifier/root pair in the exact 161-workload/76-proof-pair successor: 65 ordinary
+pairs and 11 barriers, with 529 prerequisite segments, 3,293 ordered leaf invocations, and 254
+distinct leaves. The scheduler-neutral inventory is
+`sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`; the required plan is
+`sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`. Append-only reader
+checkpoint sequence 33 at
+`64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871` authenticates 30 frozen
+artifacts and 60 current readers while preserving sequence 32 and every earlier byte. Its dedicated
+checkpoint suite passes 56/56. These are local code-owned/current receipts and make no hosted
+M08-T05 claim.
+
+Exact enumerable own-data command fields are required. Accessors and own `toJSON` hooks are
+rejected without invocation. Necessary reflection may execute arbitrary `Proxy` traps, an
+admissible forwarding `Proxy` may pass, and a throwing reflection trap is contained as a command
+failure; no hostile-JavaScript or no-code-execution membrane is claimed. The fixed 8 MiB,
+25,000-identity, and depth-64 limits remain fail-closed. Structural admission rejects an invalid
+Draft 2020-12 state schema; initial/schema compatibility, dotted-state reachability, repeat semantics, Catalog resource-input
+contracts, continuous diagnostics, and invalid-node mapping remain M08-T09. Event and closed-action
+editing remains M08-T06; later authoring, persistence, and terminal integration work remains
+M08-T07–M08-T10. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. Overall implementation
+progress is 90/145 (62%), M08 is 5/10, proof gates remain 8/13, and M08-T06 event and closed-action
+editing is next.
 
 ## M09 — Desen App Web MVP
 

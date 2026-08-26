@@ -64,14 +64,19 @@ That historical M07-T11 successor contained 150 workloads, 71 proof pairs, 479 p
 segments, 3,113 ordered leaf invocations, and 236 distinct leaves. M08-T01 appended the direct
 editor-core Source-document proof pair plus its serial public-package contract. M08-T02 appended
 the stable-ID insertion verifier/root pair behind that same serial predecessor. M08-T03 appended
-the structural-edit verifier/root pair behind stable-ID insertion, and M08-T04 appends the
-content-edit pair behind both frozen edit prerequisites. The current successor contains 159
-workloads and 75 proof pairs without rewriting the frozen cutover, with 519 prerequisite segments,
-3,237 ordered leaf invocations, and 251 distinct leaves. The neutral inventory is
-`sha256:3879dcd4c9716b7f08746953c62170de7bd33c786f747849b8aed38e0fe1e62c`; the required plan is
-`sha256:30a193cbc27316792bd577dcecdc87c10e680e2e033698ceb90787c2cbcf1b51`. These are local
-code-owned successor values; no hosted M08-T04 result is claimed. The 15 reviewed workspace test
-scripts are pinned by
+the structural-edit verifier/root pair behind stable-ID insertion, M08-T04 appended the
+content-edit pair behind both frozen edit prerequisites, and M08-T05 appends the state/binding pair
+behind stable-ID insertion plus current content-edit compatibility. The current successor contains
+161 workloads and 76 proof pairs without rewriting the frozen cutover, with 529 prerequisite
+segments, 3,293 ordered leaf invocations, and 254 distinct leaves. The neutral inventory is
+`sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`; the selector-only impact
+graph is `sha256:9fb786d80ac21bef4dc89c9a77986f91dd50c9ff53dd2d54c7a52d5c4ac8738f`; the required plan is
+`sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`. These are local
+code-owned successor values. Affected ownership covers 1,071 tracked paths at
+`sha256:ae070076003f9ae641a6682aab6280336b7d2ccf6ccd6b96d15b3c10c6cd6c18`, including 152
+proof-owned paths; the complete ownership projection is
+`sha256:d793913bca281e2127151c83ce570ce415c995da42013226731d030b337fc2c0`. No hosted M08-T05 result
+is claimed. The 15 reviewed workspace test scripts remain pinned by
 `sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. Contract and
 hostile-input tests cover exact
 ordered ids, labels, commands, arguments,
@@ -82,9 +87,9 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 2
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 70
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 72
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 64 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 65 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -151,13 +156,24 @@ receives only the ordinary `NODE_TEST_HARNESS` policy.
 The separate serial `editor-core-public-package-contract` prefix owns the repeated `dist` write and
 runs the exact package export-map, compiler, and emitted-runtime contract before the verifier.
 
-The M08-T02 `editor-core-stable-id-insert`, M08-T03 `editor-core-structural-edits`, and M08-T04
-`editor-core-content-edits` verifier/root pairs are ordinary and non-barrier. Each follows the same
-serial public-package contract; structural edits also follows stable-ID insertion, while content
-edits follows both frozen edit prerequisites. All six workloads are
-`PROOF_OS_TEMP_ISOLATED` with separate runner-owned roots and verifier-before-root ordering.
-Neither pair receives workspace-write, port, native-addon, or verifier runtime-probe authority;
-only each root receives the ordinary `NODE_TEST_HARNESS` child policy.
+The M08-T02 `editor-core-stable-id-insert`, M08-T03 `editor-core-structural-edits`, M08-T04
+`editor-core-content-edits`, and M08-T05 `editor-core-state-binding-edits` verifier/root pairs are
+ordinary and non-barrier. Each follows the same serial public-package contract. Structural edits
+also follow stable-ID insertion; content edits follow both frozen edit prerequisites; state and
+binding edits follow stable-ID insertion plus current content-edit compatibility. All eight
+workloads are `PROOF_OS_TEMP_ISOLATED` with separate runner-owned roots and verifier-before-root
+ordering.
+No pair receives workspace-write, port, native-addon, or verifier runtime-probe authority; only
+each root receives the ordinary `NODE_TEST_HARNESS` child policy.
+
+The M08-T05 focused package layer passes 14/14 runtime cases and 14 compiler-negative assertions.
+The cumulative package suite passes 69/69. The emitted public-package layer passes 38/38 runtime
+cases and 48 consumer compiler-negative assertions over 27 runtime exports, 55 type exports, and
+23 task declarations with TSDoc. The independent root proof passes 10/10 and authenticates 74
+tracked receipts plus an isolated 28-file ESM graph with fourteen closed static edges. Its exact
+30,014-byte artifact is
+`docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`.
 
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
@@ -183,7 +199,7 @@ The reviewed production dependency audit for locked Fastify 5.11.2 and better-sq
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution across the 159 workloads: 141 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across the 161 workloads: 143 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
@@ -259,9 +275,12 @@ selector transition, and the required-runner authority. Local cleanup removed al
 bridge families. Historical closure sequence 28 authenticates 25 frozen artifacts and 50 readers;
 historical sequence 30 authenticates 27 frozen artifacts and 54 readers. Historical sequence 31 at
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d` authenticates 28 frozen
-artifacts and 56 then-current readers. The current append-only sequence 32 at
+artifacts and 56 then-current readers. Historical append-only sequence 32 at
 `9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` authenticates 29 frozen
-artifacts and 58 current readers.
+artifacts and 58 then-current readers. The current append-only sequence 33 at
+`64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871` authenticates 30 frozen
+artifacts and 60 current readers while preserving sequence 32 and every predecessor artifact byte.
+The dedicated checkpoint suite passes 56/56.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
 [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
@@ -269,12 +288,12 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07
-are `DONE`; proof gates are 8/13, implementation progress is 89/145, M08 is 4/10, `N-014` remains
-`TESTED`, `S-002` remains `PLANNED`, and M08-T05 is next. The exact 26,988-byte M08-T04 artifact is
-`docs/proof/artifacts/editor-core-0.1.0-content-edits.json` at
-`sha256:1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066`; the report is
-`docs/proof/EDITOR-CORE-CONTENT-EDITS.md`. These T04 results are local code-owned/current evidence
-and make no hosted M08-T04 claim; no `P-*`, `N-*`, `S-*`, or proof-gate status changes.
+are `DONE`; proof gates are 8/13, implementation progress is 90/145, M08 is 5/10, `N-014` remains
+`TESTED`, `S-002` remains `PLANNED`, and M08-T06 is next. The exact 30,014-byte M08-T05 artifact is
+`docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; the report is
+`docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md`. These T05 results are local code-owned/current
+evidence and make no hosted M08-T05 claim; no `P-*`, `N-*`, `S-*`, or proof-gate status changes.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned

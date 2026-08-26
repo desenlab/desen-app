@@ -19,6 +19,7 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const INSERT_SOURCE = "packages/editor-core/src/stable-id-insert.ts";
 const STRUCTURAL_EDITS_SOURCE = "packages/editor-core/src/structural-edits.ts";
 const CONTENT_EDITS_SOURCE = "packages/editor-core/src/content-edits.ts";
+const STATE_BINDING_EDITS_SOURCE = "packages/editor-core/src/state-binding-edits.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const CONTENT_RUNTIME_EXPORTS = Object.freeze([
   "clearDesenEditorNodeCondition",
@@ -59,6 +60,33 @@ const CONTENT_TYPE_EXPORTS = Object.freeze([
   "DesenEditorVariantReorderCommand",
   "DesenEditorVariantStylePropertyDeleteCommand",
   "DesenEditorVariantStylePropertySetCommand",
+]);
+const STATE_BINDING_RUNTIME_EXPORTS = Object.freeze([
+  "deleteDesenEditorResourceInput",
+  "deleteDesenEditorStateDeclaration",
+  "insertDesenEditorStateDeclaration",
+  "setDesenEditorNodeRepeatItems",
+  "setDesenEditorNodeRepeatKey",
+  "setDesenEditorResourceInput",
+  "setDesenEditorStateInitial",
+  "setDesenEditorStateSchema",
+]);
+const STATE_BINDING_TYPE_EXPORTS = Object.freeze([
+  "DesenEditorBindingValue",
+  "DesenEditorNodeRepeatItemsSetCommand",
+  "DesenEditorNodeRepeatKeySetCommand",
+  "DesenEditorResourceInputDeleteCommand",
+  "DesenEditorResourceInputSetCommand",
+  "DesenEditorStateBindingEditDiagnostic",
+  "DesenEditorStateBindingEditDiagnosticCode",
+  "DesenEditorStateBindingEditFailure",
+  "DesenEditorStateBindingEditResult",
+  "DesenEditorStateBindingEditSuccess",
+  "DesenEditorStateDeclaration",
+  "DesenEditorStateDeclarationDeleteCommand",
+  "DesenEditorStateDeclarationInsertCommand",
+  "DesenEditorStateInitialSetCommand",
+  "DesenEditorStateSchemaSetCommand",
 ]);
 const temporaryDirectories = [];
 let built;
@@ -185,29 +213,30 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
     built.currentCompatibility.boundary.additiveRuntimeExports,
     [
       ...CONTENT_RUNTIME_EXPORTS,
+      ...STATE_BINDING_RUNTIME_EXPORTS,
       "deleteDesenEditorNode",
       "moveDesenEditorNode",
       "reorderDesenEditorNode",
     ].sort(),
   );
-  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 30);
-  for (const name of CONTENT_TYPE_EXPORTS) {
+  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 45);
+  for (const name of [...CONTENT_TYPE_EXPORTS, ...STATE_BINDING_TYPE_EXPORTS]) {
     assert.equal(built.currentCompatibility.boundary.additiveTypeExports.includes(name), true);
   }
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T04",
-    sourcePath: CONTENT_EDITS_SOURCE,
-    runtimePath: "packages/editor-core/dist/content-edits.js",
-    declarationPath: "packages/editor-core/dist/content-edits.d.ts",
-    runtimeExports: CONTENT_RUNTIME_EXPORTS,
-    typeExports: CONTENT_TYPE_EXPORTS,
+    task: "M08-T05",
+    sourcePath: STATE_BINDING_EDITS_SOURCE,
+    runtimePath: "packages/editor-core/dist/state-binding-edits.js",
+    declarationPath: "packages/editor-core/dist/state-binding-edits.d.ts",
+    runtimeExports: STATE_BINDING_RUNTIME_EXPORTS,
+    typeExports: STATE_BINDING_TYPE_EXPORTS,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 2);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 3);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
   assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 32);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 36);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 38);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 48);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
     bytes: 19_561,

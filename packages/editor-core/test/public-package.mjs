@@ -47,6 +47,25 @@ function contentEditFixture() {
   return input;
 }
 
+function stateBindingEditFixture() {
+  const input = cloneFixture();
+  const surface = input.surfaces["sign-in"];
+  const title = surface.root.slots.default.find(({ id }) => id === "sign-in.title");
+  assert.ok(title);
+  title.repeat = {
+    items: { $ref: "resource.profile.value" },
+    as: "profile",
+    key: { $ref: "item.profile.id" },
+    limit: 10,
+  };
+  surface.resources.profile = {
+    use: "com.example.data/profile",
+    input: { existing: { $ref: "state.email" } },
+    policy: "mount",
+  };
+  return input;
+}
+
 function expectContentEditSuccess(result) {
   assert.equal(result.ok, true);
   if (!result.ok) throw new TypeError("Expected the emitted content edit to succeed.");
@@ -59,6 +78,24 @@ function expectContentEditSuccess(result) {
 function expectContentEditFailure(result, code) {
   assert.equal(result.ok, false);
   if (result.ok) throw new TypeError("Expected the emitted content edit to fail.");
+  assert.deepEqual(Reflect.ownKeys(result), ["ok", "diagnostics"]);
+  assert.equal(result.diagnostics[0].code, code);
+  assert.equal(Object.hasOwn(result, "document"), false);
+  assertPlainOwnDataFrozen(result);
+}
+
+function expectStateBindingEditSuccess(result) {
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected the emitted state/binding edit to succeed.");
+  assert.deepEqual(Reflect.ownKeys(result), ["ok", "document", "diagnostics"]);
+  assert.deepEqual(result.diagnostics, []);
+  assertPlainOwnDataFrozen(result);
+  return result.document;
+}
+
+function expectStateBindingEditFailure(result, code) {
+  assert.equal(result.ok, false);
+  if (result.ok) throw new TypeError("Expected the emitted state/binding edit to fail.");
   assert.deepEqual(Reflect.ownKeys(result), ["ok", "diagnostics"]);
   assert.equal(result.diagnostics[0].code, code);
   assert.equal(Object.hasOwn(result, "document"), false);
@@ -245,6 +282,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       "test:public-package":
         "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
       "test:content-edits": "vitest run test/content-edits.test.ts",
+      "test:state-binding-edits": "vitest run test/state-binding-edits.test.ts",
       "test:source-document": "vitest run test/source-document.test.ts",
       "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
       "test:structural-edits": "vitest run test/structural-edits.test.ts",
@@ -266,6 +304,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
       "stable-id-insert.js",
       "structural-edits.js",
       "content-edits.js",
+      "state-binding-edits.js",
     ].map(async (file) => ({
       file,
       source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
@@ -285,6 +324,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
           "./stable-id-insert.js",
           "./structural-edits.js",
           "./content-edits.js",
+          "./state-binding-edits.js",
         ],
       },
       { file: "source-document.js", specifiers: ["@desen/validator"] },
@@ -298,6 +338,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
       },
       {
         file: "content-edits.js",
+        specifiers: ["@desen/protocol", "./source-document.js"],
+      },
+      {
+        file: "state-binding-edits.js",
         specifiers: ["@desen/protocol", "./source-document.js"],
       },
     ],
@@ -317,6 +361,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
   assert.match(
     emittedModules[0].source,
     /export\s*\{\s*clearDesenEditorNodeCondition,\s*deleteDesenEditorOwnerProp,\s*deleteDesenEditorOwnerStyleProperty,\s*deleteDesenEditorVariant,\s*deleteDesenEditorVariantProp,\s*deleteDesenEditorVariantStyleProperty,\s*insertDesenEditorVariant,\s*reorderDesenEditorVariant,\s*setDesenEditorNodeCondition,\s*setDesenEditorOwnerProp,\s*setDesenEditorOwnerStyleProperty,\s*setDesenEditorVariantCondition,\s*setDesenEditorVariantProp,\s*setDesenEditorVariantStyleProperty\s*,?\s*\}\s*from\s*["']\.\/content-edits\.js["']/,
+  );
+  assert.match(
+    emittedModules[0].source,
+    /export\s*\{\s*deleteDesenEditorResourceInput,\s*deleteDesenEditorStateDeclaration,\s*insertDesenEditorStateDeclaration,\s*setDesenEditorNodeRepeatItems,\s*setDesenEditorNodeRepeatKey,\s*setDesenEditorResourceInput,\s*setDesenEditorStateInitial,\s*setDesenEditorStateSchema\s*,?\s*\}\s*from\s*["']\.\/state-binding-edits\.js["']/,
   );
 
   const emittedGraph = emittedModules.map(({ source }) => source).join("\n");
@@ -342,17 +390,25 @@ test("the built public package resolves through its export map and exposes the r
     "deleteDesenEditorNode",
     "deleteDesenEditorOwnerProp",
     "deleteDesenEditorOwnerStyleProperty",
+    "deleteDesenEditorResourceInput",
+    "deleteDesenEditorStateDeclaration",
     "deleteDesenEditorVariant",
     "deleteDesenEditorVariantProp",
     "deleteDesenEditorVariantStyleProperty",
     "insertDesenEditorNode",
+    "insertDesenEditorStateDeclaration",
     "insertDesenEditorVariant",
     "moveDesenEditorNode",
     "reorderDesenEditorNode",
     "reorderDesenEditorVariant",
     "setDesenEditorNodeCondition",
+    "setDesenEditorNodeRepeatItems",
+    "setDesenEditorNodeRepeatKey",
     "setDesenEditorOwnerProp",
     "setDesenEditorOwnerStyleProperty",
+    "setDesenEditorResourceInput",
+    "setDesenEditorStateInitial",
+    "setDesenEditorStateSchema",
     "setDesenEditorVariantCondition",
     "setDesenEditorVariantProp",
     "setDesenEditorVariantStyleProperty",
@@ -1319,6 +1375,344 @@ test("the emitted content commands are deterministic, immutable, and Catalog-unr
     first.surfaces["sign-in"].root.slots.default[4].variants[1].props.futureVariantProp,
     true,
   );
+});
+
+test("the emitted state declaration commands preserve exact lifecycle and whole schema-initial values", () => {
+  const input = stateBindingEditFixture();
+  input.surfaces["sign-in"].state = {};
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the state/binding fixture to be admitted.");
+  const identities = surfaceIdentities(creation.document, "sign-in");
+  const declaration = { schema: { type: "string" }, initial: "seed" };
+
+  let document = expectStateBindingEditSuccess(
+    editorCore.insertDesenEditorStateDeclaration(creation.document, {
+      surfaceId: "sign-in",
+      name: "profile.name",
+      declaration,
+    }),
+  );
+  declaration.initial = "caller-mutated";
+  assert.equal(document.surfaces["sign-in"].state["profile.name"].initial, "seed");
+  document = expectStateBindingEditSuccess(
+    editorCore.setDesenEditorStateSchema(document, {
+      surfaceId: "sign-in",
+      name: "profile.name",
+      schema: { type: "number" },
+    }),
+  );
+  document = expectStateBindingEditSuccess(
+    editorCore.setDesenEditorStateInitial(document, {
+      surfaceId: "sign-in",
+      name: "profile.name",
+      initial: { $ref: "state.email", nested: { literal: true } },
+    }),
+  );
+
+  assert.deepEqual(document.surfaces["sign-in"].state["profile.name"], {
+    schema: { type: "number" },
+    initial: { $ref: "state.email", nested: { literal: true } },
+  });
+  assert.equal(Object.hasOwn(document.surfaces["sign-in"].state, "profile"), false);
+  assert.deepEqual(surfaceIdentities(document, "sign-in"), identities);
+
+  document = expectStateBindingEditSuccess(
+    editorCore.deleteDesenEditorStateDeclaration(document, {
+      surfaceId: "sign-in",
+      name: "profile.name",
+    }),
+  );
+  assert.equal(Object.hasOwn(document.surfaces["sign-in"], "state"), true);
+  assert.deepEqual(document.surfaces["sign-in"].state, {});
+  assert.deepEqual(creation.document, input);
+});
+
+test("the emitted repeat commands replace whole item and key bindings without changing coupled fields", () => {
+  const input = stateBindingEditFixture();
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the state/binding fixture to be admitted.");
+  const identities = surfaceIdentities(creation.document, "sign-in");
+  const items = { $ref: "state.futureItems", fallback: [] };
+
+  let document = expectStateBindingEditSuccess(
+    editorCore.setDesenEditorNodeRepeatItems(creation.document, {
+      surfaceId: "sign-in",
+      nodeId: "sign-in.title",
+      items,
+    }),
+  );
+  items.$ref = "caller.mutated";
+  document = expectStateBindingEditSuccess(
+    editorCore.setDesenEditorNodeRepeatKey(document, {
+      surfaceId: "sign-in",
+      nodeId: "sign-in.title",
+      key: { $ref: "item.profile.futureId" },
+    }),
+  );
+
+  assert.deepEqual(document.surfaces["sign-in"].root.slots.default[0].repeat, {
+    items: { $ref: "state.futureItems", fallback: [] },
+    as: "profile",
+    key: { $ref: "item.profile.futureId" },
+    limit: 10,
+  });
+  assert.deepEqual(surfaceIdentities(document, "sign-in"), identities);
+  assert.deepEqual(creation.document, input);
+});
+
+test("the emitted resource input commands create and delete own prototype-sensitive bindings", () => {
+  const input = stateBindingEditFixture();
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the state/binding fixture to be admitted.");
+  const identities = surfaceIdentities(creation.document, "sign-in");
+
+  let document = expectStateBindingEditSuccess(
+    editorCore.setDesenEditorResourceInput(creation.document, {
+      surfaceId: "sign-in",
+      resourceId: "profile",
+      name: "__proto__",
+      value: { $ref: "state.profile.name" },
+    }),
+  );
+  document = expectStateBindingEditSuccess(
+    editorCore.setDesenEditorResourceInput(document, {
+      surfaceId: "sign-in",
+      resourceId: "profile",
+      name: "",
+      value: { $token: "future.catalog.token" },
+    }),
+  );
+  const populated = document.surfaces["sign-in"].resources.profile.input;
+  assert.equal(Object.getPrototypeOf(populated), Object.prototype);
+  assert.equal(Object.hasOwn(populated, "__proto__"), true);
+  assert.deepEqual(Object.getOwnPropertyDescriptor(populated, "__proto__")?.value, {
+    $ref: "state.profile.name",
+  });
+  assert.equal(Object.hasOwn(populated, ""), true);
+
+  for (const name of ["existing", "__proto__", ""]) {
+    document = expectStateBindingEditSuccess(
+      editorCore.deleteDesenEditorResourceInput(document, {
+        surfaceId: "sign-in",
+        resourceId: "profile",
+        name,
+      }),
+    );
+  }
+  assert.equal(Object.hasOwn(document.surfaces["sign-in"].resources.profile, "input"), true);
+  assert.deepEqual(document.surfaces["sign-in"].resources.profile.input, {});
+  assert.deepEqual(surfaceIdentities(document, "sign-in"), identities);
+  assert.deepEqual(creation.document, input);
+});
+
+test("the emitted state and binding commands reject missing, duplicate, ambiguous, and structural failures atomically", () => {
+  const input = stateBindingEditFixture();
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the state/binding fixture to be admitted.");
+  const ambiguousInput = stateBindingEditFixture();
+  ambiguousInput.surfaces["sign-in"].root.slots.default[1].id = "sign-in.title";
+  const ambiguousCreation = editorCore.createDesenEditorDocument(ambiguousInput);
+  assert.equal(ambiguousCreation.ok, true);
+  if (!ambiguousCreation.ok) throw new TypeError("Expected ambiguous structural admission.");
+
+  expectStateBindingEditFailure(
+    editorCore.insertDesenEditorStateDeclaration(creation.document, {
+      surfaceId: "sign-in",
+      name: "email",
+      declaration: { schema: { type: "string" }, initial: "duplicate" },
+    }),
+    "run.desen.editor/STATE_BINDING_EDIT_TARGET_EXISTS",
+  );
+  expectStateBindingEditFailure(
+    editorCore.deleteDesenEditorStateDeclaration(creation.document, {
+      surfaceId: "sign-in",
+      name: "missing",
+    }),
+    "run.desen.editor/STATE_BINDING_EDIT_TARGET_NOT_FOUND",
+  );
+  expectStateBindingEditFailure(
+    editorCore.setDesenEditorNodeRepeatItems(creation.document, {
+      surfaceId: "sign-in",
+      nodeId: "sign-in.submit",
+      items: { $ref: "state.items" },
+    }),
+    "run.desen.editor/STATE_BINDING_EDIT_PATH_NOT_FOUND",
+  );
+  expectStateBindingEditFailure(
+    editorCore.setDesenEditorResourceInput(creation.document, {
+      surfaceId: "sign-in",
+      resourceId: "missing",
+      name: "query",
+      value: "value",
+    }),
+    "run.desen.editor/STATE_BINDING_EDIT_TARGET_NOT_FOUND",
+  );
+  expectStateBindingEditFailure(
+    editorCore.deleteDesenEditorResourceInput(creation.document, {
+      surfaceId: "sign-in",
+      resourceId: "profile",
+      name: "missing",
+    }),
+    "run.desen.editor/STATE_BINDING_EDIT_PATH_NOT_FOUND",
+  );
+  expectStateBindingEditFailure(
+    editorCore.setDesenEditorNodeRepeatKey(ambiguousCreation.document, {
+      surfaceId: "sign-in",
+      nodeId: "sign-in.title",
+      key: { $ref: "item.profile.id" },
+    }),
+    "run.desen.editor/STATE_BINDING_EDIT_TARGET_AMBIGUOUS",
+  );
+  expectStateBindingEditFailure(
+    editorCore.setDesenEditorStateSchema(creation.document, {
+      surfaceId: "sign-in",
+      name: "email",
+      schema: { type: "not-a-json-schema-type" },
+    }),
+    "SCHEMA_INVALID",
+  );
+  assert.deepEqual(creation.document, input);
+  assert.deepEqual(ambiguousCreation.document, ambiguousInput);
+});
+
+test("the emitted state and binding commands enforce own-data shapes and contain Proxy reflection failures atomically", () => {
+  const creation = editorCore.createDesenEditorDocument(stateBindingEditFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the state/binding fixture to be admitted.");
+  const before = JSON.stringify(creation.document);
+  const base = { surfaceId: "sign-in", name: "email", schema: { type: "string" } };
+  let getterInvocations = 0;
+  let toJSONInvocations = 0;
+  const accessor = { surfaceId: "sign-in", name: "email" };
+  Object.defineProperty(accessor, "schema", {
+    enumerable: true,
+    get() {
+      getterInvocations += 1;
+      return { type: "string" };
+    },
+  });
+  const inherited = Object.create({ surfaceId: "sign-in" });
+  Object.assign(inherited, { name: "email", schema: { type: "string" } });
+  const forwardingTraps = [];
+  const forwardingProxy = new Proxy(base, {
+    getOwnPropertyDescriptor(target, key) {
+      forwardingTraps.push(`getOwnPropertyDescriptor:${String(key)}`);
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+    getPrototypeOf(target) {
+      forwardingTraps.push("getPrototypeOf");
+      return Reflect.getPrototypeOf(target);
+    },
+    ownKeys(target) {
+      forwardingTraps.push("ownKeys");
+      return Reflect.ownKeys(target);
+    },
+  });
+  const throwingTraps = [];
+  const throwingProxy = new Proxy(base, {
+    getPrototypeOf() {
+      throwingTraps.push("getPrototypeOf");
+      throw new TypeError("controlled Proxy reflection failure");
+    },
+  });
+
+  for (const result of [
+    editorCore.setDesenEditorStateSchema(creation.document, { ...base, extra: true }),
+    editorCore.setDesenEditorStateSchema(creation.document, accessor),
+    editorCore.setDesenEditorStateSchema(creation.document, inherited),
+    editorCore.setDesenEditorStateSchema(creation.document, {
+      ...base,
+      [Symbol("authority")]: true,
+    }),
+    editorCore.setDesenEditorStateSchema(creation.document, {
+      ...base,
+      schema: {
+        type: "string",
+        toJSON() {
+          toJSONInvocations += 1;
+          return { type: "number" };
+        },
+      },
+    }),
+    editorCore.setDesenEditorStateSchema(creation.document, throwingProxy),
+  ]) {
+    expectStateBindingEditFailure(result, "run.desen.editor/STATE_BINDING_EDIT_COMMAND_INVALID");
+  }
+  assert.equal(getterInvocations, 0);
+  assert.equal(toJSONInvocations, 0);
+  assert.deepEqual(throwingTraps, ["getPrototypeOf"]);
+  assert.equal(JSON.stringify(creation.document), before);
+
+  const forwarded = expectStateBindingEditSuccess(
+    editorCore.setDesenEditorStateSchema(creation.document, forwardingProxy),
+  );
+  assert.deepEqual(forwarded.surfaces["sign-in"].state.email.schema, { type: "string" });
+  assert.deepEqual(forwardingTraps, [
+    "getPrototypeOf",
+    "ownKeys",
+    "getOwnPropertyDescriptor:name",
+    "getOwnPropertyDescriptor:schema",
+    "getOwnPropertyDescriptor:surfaceId",
+  ]);
+});
+
+test("the emitted state and binding commands are deterministic, immutable, and semantically unresolved", () => {
+  const input = stateBindingEditFixture();
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the state/binding fixture to be admitted.");
+  const identities = surfaceIdentities(creation.document, "sign-in");
+  const edit = (document) => {
+    let next = expectStateBindingEditSuccess(
+      editorCore.insertDesenEditorStateDeclaration(document, {
+        surfaceId: "sign-in",
+        name: "future.state",
+        declaration: {
+          schema: { type: "number" },
+          initial: { $ref: "state.unresolved", literal: true },
+        },
+      }),
+    );
+    next = expectStateBindingEditSuccess(
+      editorCore.setDesenEditorResourceInput(next, {
+        surfaceId: "sign-in",
+        resourceId: "profile",
+        name: "futureCatalogInput",
+        value: { $ref: "state.future.state" },
+      }),
+    );
+    next = expectStateBindingEditSuccess(
+      editorCore.setDesenEditorNodeRepeatItems(next, {
+        surfaceId: "sign-in",
+        nodeId: "sign-in.title",
+        items: { $ref: "resource.profile.future" },
+      }),
+    );
+    return expectStateBindingEditSuccess(
+      editorCore.deleteDesenEditorStateDeclaration(next, {
+        surfaceId: "sign-in",
+        name: "future.state",
+      }),
+    );
+  };
+
+  const first = edit(creation.document);
+  const second = edit(creation.document);
+  assert.deepEqual(first, second);
+  assert.notStrictEqual(first, second);
+  assert.deepEqual(surfaceIdentities(first, "sign-in"), identities);
+  assert.equal(Object.hasOwn(first.surfaces["sign-in"].state, "future.state"), false);
+  assert.deepEqual(first.surfaces["sign-in"].resources.profile.input.futureCatalogInput, {
+    $ref: "state.future.state",
+  });
+  assert.deepEqual(first.surfaces["sign-in"].root.slots.default[0].repeat.items, {
+    $ref: "resource.profile.future",
+  });
+  assert.deepEqual(creation.document, input);
 });
 
 test("[proof-core] two fresh final builds are byte-identical and preserve honest scope", async () => {
