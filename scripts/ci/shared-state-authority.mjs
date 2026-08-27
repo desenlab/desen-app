@@ -139,6 +139,7 @@ export const PROOF_IDS = Object.freeze([
   "editor-core-persistence",
   "editor-core-continuous-validation",
   "editor-core-terminal-integration",
+  "desen-app-shell-navigation",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -543,8 +544,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 172) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 172 steps.", {
+if (METADATA_BY_STEP_ID.size !== 174) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 174 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

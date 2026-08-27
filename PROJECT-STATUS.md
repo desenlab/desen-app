@@ -904,18 +904,31 @@ dynamic-import, evaluation, or function-constructor authority. The 325,549-byte 
 at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`. This advances
 `S-002` to `TESTED`, P-18 to `PROVEN`, G08 to `DONE`, proof gates to 9/13, and M08 to 10/10.
 
+M09-T01 now establishes the first React/Vite Desen App shell without borrowing editor behavior from
+later tasks. It provides a full-viewport project gallery, project-level surface galleries, a
+centered inert surface frame, three exact project/surface route forms, same-origin History API
+navigation, fixed inert fixture search, explicit fail-closed recovery, responsive presentation,
+and keyboard/accessibility behavior. The M09 UX wireframe informs information architecture and task
+boundaries, while the earlier Desen product exploration informs the visual language. Neither Figma
+source is executable input or proof authority. The exact 12,118-byte artifact is
+`sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`; the app suite passes
+43/43, the independent mutation suite passes 8/8, and checkpoint sequence 40 passes 63/63 at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`. These are local
+receipts and do not claim a required-gate or hosted-CI pass.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`, `G08`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M09 — Desen App Web MVP`
-- Overall implementation progress: `95 / 145 tasks complete (66%)`
+- Overall implementation progress: `96 / 145 tasks complete (66%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
 - M08 progress: `10 / 10 tasks complete (100%)`
+- M09 progress: `1 / 14 tasks complete (7%)`
 - Proof-gate progress: `9 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -996,16 +1009,17 @@ at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`. Th
   `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`,
   `M08-T08 — Persistence port and local source adapter`,
   `M08-T09 — Continuous validation and invalid-node mapping`,
-  `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`
+  `M08-T10 — React/DOM boundary, stable identity, and deterministic command tests`,
+  `M09-T01 — Desen App shell and project navigation`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M09-T01 — Desen App shell and project navigation`
-- Status: M08 is 10/10, M07 is 11/11, I07-04, G07, and G08 are `DONE`, proof gates are 9/13,
-  and implementation progress is 95/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M09-T02 — Catalog-driven component panel and layer tree`
+- Status: M08 is 10/10, M09 is 1/14, M07 is 11/11, I07-04, G07, G08, and M09-T01 are `DONE`,
+  proof gates are 9/13, and implementation progress is 96/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
@@ -1019,7 +1033,9 @@ at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`. Th
   170-workload/80-pair CI registration, and sequence-37 reader checkpoint. Exact evidence and
   nonclaims are recorded below. M08-T10 is `DONE` with the deterministic 32-step terminal
   transcript, stable-identity ledger, M08-T09 validation and M08-T08 save/open round trip,
-  independent emitted-graph AST platform audit, and exact terminal-integration artifact.
+  independent emitted-graph AST platform audit, and exact terminal-integration artifact. M09-T01
+  is `DONE` with its exact shell/navigation artifact, 43/43 focused cases, 8/8 independent
+  mutation cases, 174-workload/82-pair CI registration, and sequence-40 reader checkpoint.
 
 ## Completed preparation
 
@@ -3351,6 +3367,44 @@ M08-T10 / G08 evidence:
   execution, hostile-JavaScript sandbox, or streaming/preallocation memory-DoS guarantee is added
 - coverage decision: M08-T10 and G08 are `DONE`; `S-002` is `TESTED`, P-18 is `PROVEN`, proof gates
   are 9/13, overall progress is 95/145 (66%), M08 is 10/10, and M09-T01 is next
+
+M09-T01 evidence:
+
+- `docs/proof/DESEN-APP-SHELL-NAVIGATION.md`
+- `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json`, exactly 12,118 bytes at
+  `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`
+- prerequisite authority: the exact completed 325,549-byte M08-T10/G08 terminal-integration
+  artifact is authenticated before any M09-T01 task claim
+- shell authority: the private React 19/Vite 8 application owns a full-viewport project gallery,
+  project-level surface galleries, a centered inert surface frame, and only `/projects`,
+  `/projects/:projectId`, and `/projects/:projectId/surfaces/:surfaceId`
+- navigation boundary: same-origin History API transitions and browser traversal preserve exact
+  canonical routes; ambiguous, encoded-alias, query, fragment, credential, cross-origin, and
+  unknown inputs fail closed with explicit recovery
+- fixture boundary: two inert fixed project summaries and their exact surfaces drive search and
+  navigation; user project creation remains disabled and explained
+- UX boundary: responsive layouts, landmarks, native controls, current-page semantics, a skip
+  target, route-heading focus, visible keyboard focus, and reduced-motion handling are present;
+  the M09 UX wireframe supplied information architecture and task-boundary input, while the earlier
+  Desen product exploration supplied visual-language input; neither is executable or proof
+  authority
+- package boundary: the app has only React and React DOM runtime dependencies; TypeScript AST
+  inspection pins every static import/re-export to reviewed packages or tracked relative
+  TS/TSX/CSS/SVG targets and rejects dynamic/indirect import authority plus extra executable HTML
+  entries; the five repository-owned SVGs add no icon-package dependency
+- local proof: build, typecheck, and lint pass; the focused app suite passes 43/43 and the
+  independent deterministic mutation suite passes 8/8 across 24 tracked task files
+- CI authority: the current successor contains 174 workloads and 82 proof pairs, split into 71
+  ordinary pairs and 11 barriers; sequence 40 passes 63/63 and authenticates 36 frozen artifacts
+  plus 72 readers at
+  `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`
+- evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or
+  hosted-CI result is inferred before its own execution
+- scope nonclaims: no Catalog-driven panel or layer tree, real adapter canvas, selection/inspector,
+  Source mutation, diagnostics, persistence, user-created project storage, Design/Run execution,
+  publication, channel activation, multi-user collaboration, or browser E2E is implemented
+- coverage decision: M09-T01 is `DONE`; no `P-*`, `N-*`, `S-*`, `G*`, or proof-gate status changes;
+  overall progress is 96/145 (66%), M09 is 1/14, proof gates remain 9/13, and M09-T02 is next
 
 ## Status vocabulary
 

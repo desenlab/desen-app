@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████░░░░░░░░░` **95 / 145 tasks complete (66%)**
+**Overall:** `█████████████████░░░░░░░░` **96 / 145 tasks complete (66%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -24,7 +24,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M08 complete:** `██████████` **10 / 10 tasks complete (100%)**
 
-**Proof gates:** **9 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T01`
+**M09:** `█░░░░░░░░░░░░░` **1 / 14 tasks complete (7%)**
+
+**Proof gates:** **9 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G08:** `DONE` · **Next:** `M09-T02`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -602,9 +604,26 @@ evidence is recorded in
 [`editor-core-0.1.0-terminal-integration.json`](docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json)
 at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`.
 
-M08-T10 and G08 are `DONE`; `S-002` is `TESTED`, P-18 is `PROVEN`, proof gates are 9/13,
-implementation progress is 95/145 (66%), M08 is 10/10, and M09-T01 is next. Legacy retirement
-remains owned by I07-05.
+M08-T10 and G08 remain `DONE`; `S-002` is `TESTED`, P-18 is `PROVEN`, and proof gates remain 9/13.
+Legacy retirement remains owned by I07-05.
+
+M09-T01 adds the first React/Vite Desen App shell: a full-viewport project gallery, project-level
+surface galleries, a centered inert surface frame, exact project and surface routes, same-origin
+History API navigation, fixed inert fixture search, explicit not-found recovery, responsive
+presentation, and keyboard/accessibility behavior. The M09 UX wireframe informed information
+architecture and task boundaries, while the earlier Desen product exploration informed the visual
+language. Neither Figma source is executable input or proof authority.
+
+The focused application suite passes 43/43 and the independent mutation suite passes 8/8. Exact
+evidence is the 12,118-byte
+[`desen-app-0.1.0-shell-navigation.json`](docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json)
+at `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`; sequence 40 closes at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` with 36 frozen
+artifacts and 72 readers. These are local receipts, not a required-gate or hosted-CI result. This
+slice does not claim a Catalog panel, layer tree, real adapter canvas, Source editing, persistence,
+Design/Run execution, publication, or activation.
+
+M09-T01 is `DONE`; implementation progress is 96/145 (66%), M09 is 1/14, and M09-T02 is next.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN
 remains independent; A2UI is complementary, with only a deliberately narrow fail-closed bridge

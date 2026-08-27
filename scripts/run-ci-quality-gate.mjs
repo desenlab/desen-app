@@ -409,6 +409,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-editor-core-terminal-integration.mjs",
       "tests/editor-core-terminal-integration.test.mjs",
     ],
+    [
+      "desen-app-shell-navigation",
+      "scripts/verify-desen-app-shell-navigation.mjs",
+      "tests/desen-app-shell-navigation.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -450,14 +455,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "5604fc3f76736614f8b7741c1a6e1d103dfa18f626a6c140f33e9d02c1b47f96";
+  "99cd8deb90ca33e409f7c94099c20a561310353b7c9242115fd001aff0c524e5";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "d7745b8bd83e1d041ca2df40fe65d274130a2670d9245b2e9cf2195b41adccc4";
+  "f5ec4def7813e640bf0162cabb6614fc1f138fa4127b588285caf2a0dbdd6479";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "f4807acfc06f4d2cdd92f44d677aa1c9fbf47a800bc84cadaf3caa69b87e970f";
+  "b1ed3947955c9309a854296504a8141f805c3a7a63a392a89e427bc992f52e60";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "e40f2bacba499f37ca115370d30ac5e1ff83e6058b515dccc63439a87e3949af";
+const QUALITY_GATE_PLAN_SHA256 = "daee065ac1caf04715b728191cbae6cc8b64783f4633b8c583797883712df3da";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -465,7 +470,7 @@ const QUALITY_GATE_PLAN_SHA256 = "e40f2bacba499f37ca115370d30ac5e1ff83e6058b515d
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "86f2dbb30344f9fcafbc656627b9a5bd70a4854405066d6e1c9b33594869e47b";
+  "4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);

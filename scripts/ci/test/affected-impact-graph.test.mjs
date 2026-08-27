@@ -14,8 +14,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 81);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 81);
+  assert.equal(graph.proofUnitCount, 82);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 82);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -82,6 +82,10 @@ test("the reviewed impact graph owns every proof unit exactly once", () => {
       "editor-core-continuous-validation",
     ],
   );
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "desen-app-shell-navigation")?.prerequisites,
+    ["editor-core-terminal-integration"],
+  );
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);
   assert.equal(Object.isFrozen(graph.entries), true);
@@ -130,8 +134,9 @@ test("the editor stable-ID insert closes over its Source predecessor and structu
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
 });
 
 test("the editor structural edits close over stable insertion and Source admission", () => {
@@ -150,8 +155,9 @@ test("the editor structural edits close over stable insertion and Source admissi
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
 });
 
 test("editor content edits close over both immutable T02 and T03 prerequisites", () => {
@@ -170,8 +176,9 @@ test("editor content edits close over both immutable T02 and T03 prerequisites",
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
 });
 
 test("editor state/binding edits close over the formal T02 and current T04 graph", () => {
@@ -190,8 +197,9 @@ test("editor state/binding edits close over the formal T02 and current T04 graph
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
 });
 
 test("editor event/action edits close over the formal state/binding predecessor", () => {
@@ -210,8 +218,9 @@ test("editor event/action edits close over the formal state/binding predecessor"
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
 });
 
 test("editor authoring round-trip closes over the formal event/action predecessor", () => {
@@ -230,8 +239,9 @@ test("editor authoring round-trip closes over the formal event/action predecesso
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
 });
 
 test("editor persistence closes over the complete neutral authoring predecessor", () => {
@@ -250,8 +260,9 @@ test("editor persistence closes over the complete neutral authoring predecessor"
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
   assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
 });
 
@@ -271,8 +282,9 @@ test("continuous validation closes over T03-T07 without making persistence a for
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
   assert.equal(
     createAffectedImpactGraph()
       .entries.find(({ id }) => id === "editor-core-continuous-validation")
@@ -281,7 +293,7 @@ test("continuous validation closes over T03-T07 without making persistence a for
   );
   assert.equal(
     closure.impactSha256,
-    "a117c9c6e1a79cc4c696c3aebe06f634d3a5b255bd991c1634e96cc5502b1211",
+    "15c9d7218081d93fdb468dd7a5dec04baa43ef6d21e2067b5750d230e89beb7a",
   );
 });
 
@@ -301,12 +313,24 @@ test("terminal integration closes over all M08 predecessors and the frozen P-18 
     "editor-core-persistence",
     "editor-core-continuous-validation",
     "editor-core-terminal-integration",
+    "desen-app-shell-navigation",
   ]);
-  assert.equal(closure.workloadCount, 36);
+  assert.equal(closure.workloadCount, 38);
   assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
   assert.equal(
     closure.impactSha256,
-    "d4b5c5ec94499023eeaf8c021ba69b40af0e77fe9deb9531d4f9d5896cbed66e",
+    "c2a9c125f06deff14bcd26e0a566d9a35e932705f886989cb168e16dc5669931",
+  );
+});
+
+test("Desen App shell navigation closes over the exact terminal editor parent", () => {
+  const closure = createAffectedImpactClosure(["desen-app-shell-navigation"]);
+  assert.equal(closure.proofUnitIds.at(-1), "desen-app-shell-navigation");
+  assert.equal(closure.proofUnitIds.includes("editor-core-terminal-integration"), true);
+  assert.equal(closure.workloadCount, 38);
+  assert.equal(
+    closure.impactSha256,
+    "b57b585d815423ebfbf927122963aeb2c266a132e0551acc238b0ca28d2c3975",
   );
 });
 

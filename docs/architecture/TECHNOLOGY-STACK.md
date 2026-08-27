@@ -11,11 +11,12 @@ every dependency to have a documented responsibility.
 - Turborepo 2.10.5
 - ESLint 10.7.0 and Prettier 3.9.6
 - Vitest 4.1.10
-- React 19.2.8 and React DOM 19.2.8 for `runtime-react`, the Web reference adapters, and the
-  independent reference host
-- Vite 8.1.5 for the independent reference host's zero-configuration production build and
-  programmatic resolved-module-graph audit
-- Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable component semantics
+- React 19.2.8 and React DOM 19.2.8 for `runtime-react`, the Web reference adapters, the independent
+  reference host, and the Desen App shell
+- Vite 8.1.5 for independent reference-host and Desen App production builds and the reference
+  host's programmatic resolved-module-graph audit
+- Testing Library React 16.3.2 and jsdom 29.1.1 for user-observable adapter, host, and Desen App
+  shell semantics
 - Fastify 5.11.2 for the fixed-loopback, bearer-authenticated local control-plane transport
 - better-sqlite3 13.0.3 behind the local Source-generation and channel-pointer repositories; its
   native import is isolated to the exact control-plane local-API proof pair
@@ -29,7 +30,6 @@ every dependency to have a documented responsibility.
 
 | Area                     | Choice                                  | Reason                                                              |
 | ------------------------ | --------------------------------------- | ------------------------------------------------------------------- |
-| Desen App client         | React 19 and Vite 8                     | Client-heavy editor with a simple, explicit Web build               |
 | Protocol validation      | Ajv Draft 2020-12                       | Direct execution of canonical JSON Schema without a second contract |
 | Protocol type projection | json-schema-to-typescript 15.0.4        | Deterministic build-only declarations from the frozen schema roots  |
 | Unit/integration tests   | Vitest                                  | Fast TypeScript-native package tests                                |
@@ -42,6 +42,15 @@ every dependency to have a documented responsibility.
 
 Map provider, drag-and-drop adapter, router, query cache, and UI component dependencies are chosen
 only by their owning tasks and require an ADR when they affect public capability contracts.
+
+## Desen App M09-T01 profile
+
+The first Desen App slice uses React's external-store contract over an application-owned History
+API helper. It adds no router, query cache, UI kit, icon package, or CSS framework. Routes and inert
+fixtures are deliberately finite. Five repository-owned inert SVG assets provide shell icons
+without adding an icon-package or executable dependency, and CSS Modules plus `--desen-app-*`
+variables keep application chrome separate from future Catalog-rendered canvas tokens. This choice
+is internal to the Web application and does not alter a public capability contract.
 
 ## Explicit constraints
 

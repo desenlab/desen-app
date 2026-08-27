@@ -1406,7 +1406,7 @@ is next.
 
 | ID      | Status      | Depends on               | Deliverable / evidence                                                          |
 | ------- | ----------- | ------------------------ | ------------------------------------------------------------------------------- |
-| M09-T01 | NOT_STARTED | G08                      | Desen App shell and project navigation                                          |
+| M09-T01 | DONE        | G08                      | Desen App shell and project navigation                                          |
 | M09-T02 | NOT_STARTED | M09-T01                  | Catalog-driven component panel and layer tree                                   |
 | M09-T03 | NOT_STARTED | M09-T01, G05             | Canvas uses the exact React adapters used by the reference host                 |
 | M09-T04 | NOT_STARTED | M09-T03                  | Selection overlays remain outside capability subtrees; no private-DOM authoring |
@@ -1421,6 +1421,32 @@ is next.
 | M09-T13 | NOT_STARTED | M09-T04–M09-T11          | Node-linked diagnostics and selectable invalid placeholders                     |
 | M09-T14 | NOT_STARTED | M09-T10–M09-T13, G07     | Publish to control plane and reference-host channel activation                  |
 | G09     | NOT_STARTED | M09-T01–M09-T14          | User authors, tests, saves, and publishes sign-in visually                      |
+
+M09-T01 establishes the first application-owned React/Vite shell behind the exact completed G08
+prerequisite. It provides a full-viewport project gallery, project-level surface galleries, a
+centered inert surface frame, the closed `/projects`, `/projects/:projectId`, and
+`/projects/:projectId/surfaces/:surfaceId` route profile, same-origin History API navigation,
+browser traversal, fixed inert fixture search, explicit fail-closed not-found recovery, responsive
+presentation, and keyboard/accessibility behavior. The M09 UX wireframe informed information
+architecture and task boundaries, while the earlier Desen product exploration informed the visual
+language. Neither Figma source is executable input, architecture, or proof authority.
+
+The application build, typecheck, and lint pass locally; the focused application suite passes
+43/43 and the independent mutation suite passes 8/8. The exact 12,118-byte artifact is
+`docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
+`sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`, covering 24 tracked
+files, including five repository-owned SVG assets, and 43 runtime cases. Append-only checkpoint
+sequence 40 passes 63/63 and closes at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`, authenticating 36
+frozen artifacts and 72 readers. The current CI successor contains 174 workloads and 82 proof
+pairs, split into 71 ordinary pairs and 11 barriers. These local receipts make no required-gate or
+hosted-CI claim.
+
+This slice does not implement a Catalog-driven component panel, layer tree, real adapter canvas,
+selection or inspector state, Source mutation, diagnostics, persistence UI, user-created project
+persistence, Design/Run execution, publication, or channel activation. It changes no frozen DESEN
+0.1.0 byte and advances no `P-*`, `N-*`, `S-*`, or proof-gate status. M09-T01 is `DONE`; overall
+implementation progress is 96/145 (66%), M09 is 1/14, proof gates remain 9/13, and M09-T02 is next.
 
 ## M10 — First end-to-end proof
 

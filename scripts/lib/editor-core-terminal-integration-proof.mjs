@@ -145,12 +145,13 @@ const TRACKED_PATHS = Object.freeze([
   ROOT_TEST_PATH,
 ]);
 const CURRENT_COMPATIBILITY_ONLY_PATHS = Object.freeze([
+  ROOT_PACKAGE_PATH,
   PACKAGE_README_PATH,
   PROOF_LIBRARY_PATH,
   ROOT_TEST_PATH,
 ]);
 const CURRENT_PACKAGE_README_COMPLETION_CLAUSE =
-  "M08-T10 terminal integration and G08 are `DONE`; `N-012`, `N-014`, `N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, M08 is 10/10, and M09-T01 is next.";
+  "M08-T10 terminal integration and G08 are `DONE`; `N-012`, `N-014`, `N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, and M08 is 10/10. M09 follows the completed editor-core closeout; global next-task ownership remains in project status documents.";
 const CURRENT_PACKAGE_README_TERMINAL_CLAUSE =
   "M08-T10 is a proof-only closure over the existing API and adds no production helper or public export.";
 const RETAINED_T10_RECEIPT_PATHS = Object.freeze(

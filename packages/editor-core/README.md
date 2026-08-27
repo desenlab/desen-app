@@ -270,7 +270,8 @@ delete/move/ordered-reorder commands, M08-T04 prop/style/condition/variant comma
 state-declaration/repeat/resource-input commands, M08-T06 event/closed-action commands, and M08-T07
 authoring-isolation/extension-round-trip proof, M08-T08 platform-neutral persistence port, and M08-T09
 continuous validation are present. M08-T10 terminal integration and G08 are `DONE`; `N-012`, `N-014`,
-`N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, M08 is 10/10, and M09-T01 is next.
+`N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, and M08 is 10/10. M09 follows the
+completed editor-core closeout; global next-task ownership remains in project status documents.
 
 ## Protocol and target support
 

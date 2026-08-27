@@ -172,7 +172,7 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
       s002Status: "TESTED",
       p18Status: "PROVEN",
       m08Progress: "10/10",
-      nextTask: "M09-T01",
+      nextTask: "PROJECT_STATUS_DOCUMENTS",
     },
   );
   assert.deepEqual(

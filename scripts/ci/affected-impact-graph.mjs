@@ -133,12 +133,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
         "editor-core-continuous-validation",
       ],
     ],
+    ["desen-app-shell-navigation", ["editor-core-terminal-integration"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "3c4c890b7777d7bbd93cbb13a1acfc110274f4e8cf468391b612365d36b89502";
+  "f3b3f8532709f17addf3895357e8e6d5a96b8a149c2aa60cde731f733e58c639";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {
