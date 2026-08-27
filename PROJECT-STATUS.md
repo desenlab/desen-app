@@ -835,18 +835,34 @@ reference/repeat/resource semantics, continuous invalid-node
 diagnostics, and terminal integration remain M08-T09–M08-T10. No `P-*`, `N-*`, `S-*`, or
 proof-gate status changes; event and closed-action editing is assigned to M08-T06.
 
+M08-T06 completes immutable event-handler and closed-action editing. Six atomic commands insert or
+delete event handlers and insert, replace, delete, or reorder actions for one unique surface-local
+node or behavior owner. Canonical owner-relative RFC 6901 pointers address root event lists and
+recursive `operation.invoke` settlement lists; reorder uses the post-removal final index and final
+deletion retains empty event maps and arrays. All seven DESEN 0.1.0 action variants, including
+guards, parameters, inputs, payloads, nested actions, and extensions, remain whole inert data.
+Exact own-data command capture, structural re-admission, detached recursively immutable success,
+and atomic failure preserve the earlier editor boundary. The focused 16/16 cases and 19 compiler
+negatives, cumulative 85/85 editor cases, 44/44 public-package cases and 69 public compiler
+negatives, and 10/10 independent root proof pass. The 31,310-byte artifact is pinned at
+`sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`. Its sole direct
+official prerequisite is frozen M08-T05; the proof records 81 exact receipts and runs from an
+isolated 29-file ESM graph with 17 static edges. M08-T07 retains authoring isolation/extensions,
+M08-T08 persistence, M08-T09 semantic diagnostics, and M08-T10 the terminal React/DOM boundary and
+G08. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `90 / 145 tasks complete (62%)`
+- Overall implementation progress: `91 / 145 tasks complete (63%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `5 / 10 tasks complete (50%)`
+- M08 progress: `6 / 10 tasks complete (60%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -922,21 +938,24 @@ proof-gate status changes; event and closed-action editing is assigned to M08-T0
   `M08-T02 — Stable-ID allocator and insert command`,
   `M08-T03 — Delete, slot move, and ordered reorder commands`,
   `M08-T04 — Prop, style-part, condition, and variant editing commands`,
-  `M08-T05 — State declaration and binding editing commands`
+  `M08-T05 — State declaration and binding editing commands`,
+  `M08-T06 — Event and closed-action editing commands`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T06 — Event and closed-action editing commands`
-- Status: M08 is 5/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 90/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`
+- Status: M08 is 6/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 91/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
-  `DONE` with its tracked state/binding artifact, independent root proof, and CI registration;
-  exact evidence and nonclaims are recorded below.
+  `DONE` with its tracked state/binding artifact, independent root proof, and CI registration.
+  M08-T06 is `DONE` with its tracked event/action artifact, independent root proof, exact
+  163-workload/77-pair CI registration, and sequence-34 reader checkpoint. Exact evidence and
+  nonclaims are recorded below.
 
 ## Completed preparation
 
@@ -1462,6 +1481,28 @@ the exact frozen M08-T02 prerequisite and separately authenticates frozen M08-T0
 compatibility without widening that prerequisite. No `P-*`, `N-*`, `S-*`, or proof-gate status
 changes. Implementation progress is 90/145 (62%), M08 is 5/10, proof gates remain 8/13, and M08-T06
 event and closed-action editing is next.
+
+M08-T06 is now complete. Six immutable commands cover event-handler insert/delete and action
+insert/replace/delete/reorder. They address one unique surface-local node or behavior owner through
+canonical owner-relative pointers, retain deliberate empty event/action/settlement containers, and
+use post-removal final indexes. All seven closed action variants, nested settlement actions,
+guards, parameters, inputs, payloads, and extensions remain inert data. Exact own-data command
+fields are required; accessors and own `toJSON` hooks are rejected without invocation. Arbitrary
+`Proxy` traps may run during reflection, an admissible forwarding `Proxy` may pass, and a throwing
+trap is contained; no hostile-JavaScript or no-code-execution membrane is claimed. The focused
+suite passes 16/16 with 19 compiler-negative assertions, the cumulative editor suite passes 85/85,
+the public-package suite passes 44/44 with 69 public compiler-negative assertions, and the
+independent root proof passes 10/10. The exact 31,310-byte artifact is
+`sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`. The proof's sole
+direct official prerequisite is frozen M08-T05; its 81 receipts close an isolated 29-file graph of
+eight editor and 21 dependency files with 17 static edges. The reviewed CI successor topology is
+163 workloads and 77 proof pairs—66 ordinary and 11 barriers. Current sequence 34 at
+`f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
+artifacts and 62 current readers while preserving sequence 33 and every earlier byte; the
+checkpoint suite passes 57/57. Targeted CI infrastructure passes 235/235, required-affected passes
+27/27, and promotion contracts pass 19/19. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
+Implementation progress is 91/145 (63%), M08 is 6/10, proof gates remain 8/13, and M08-T07
+authoring isolation and unknown-extension round-trip preservation is next.
 
 CI-01 is complete. The archived hosted comparison is
 `docs/proof/baselines/ci-01-single-pass.json`: the quality-gate step fell from 59 minutes 22 seconds
@@ -2989,6 +3030,80 @@ M08-T05 evidence:
 - coverage decision: M08-T05 is `DONE`; no `P-*`, `N-*`, `S-*`, or proof-gate status changes;
   overall progress is 90/145 (62%); M08 is 5/10; proof gates remain 8/13; M08-T06 owns event and
   closed-action editing next
+
+M08-T06 evidence:
+
+- `docs/proof/EDITOR-CORE-EVENT-ACTION-EDITS.md`
+- `docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json`, 31,310 bytes at
+  `sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`
+- command boundary: six immutable commands insert/delete event handlers and
+  insert/replace/delete/reorder actions for one unique surface-local node or behavior owner; every
+  success returns a fresh detached recursively frozen direct Source
+- pointer and order boundary: canonical owner-relative RFC 6901 pointers address root event lists
+  and recursive `operation.invoke` `onSuccess`/`onFailure` lists; reorder uses the post-removal
+  final index, and deleting final values retains empty event maps, action arrays, and settlement
+  arrays
+- inert-data boundary: all seven DESEN 0.1.0 action variants are captured whole; guards,
+  navigation parameters, operation/component inputs, event payloads, nested actions, and
+  extensions are not executed or semantically resolved
+- authority hardening: exact enumerable own-data command capture, missing/duplicate targets,
+  ambiguous owners, invalid positions/pointers, malformed commands, fixed-profile overflow, and
+  structural re-admission failures are atomic and expose no partial Source; accessors and own
+  `toJSON` hooks are rejected without invocation
+- JavaScript reflection boundary: arbitrary `Proxy` traps may execute, an honest forwarding
+  `Proxy` may pass, and a throwing trap is contained as a controlled command failure; no
+  hostile-JavaScript or no-code-execution membrane is claimed
+- fixed profile: canonical input/output Source at most 8,388,608 bytes, at most 25,000
+  selected-surface identities, at most 25,000 selected-owner action occurrences, source depth 64
+  with root at zero, and action nesting depth 64 with root actions at zero; exact ceilings and
+  one-unit crossings are covered without claiming streaming/preallocation memory-DoS resistance
+- execution authority: the sole direct official prerequisite is the exact frozen M08-T05 artifact;
+  behavior runs from an isolated authenticated 29-file ESM graph of eight editor and 21 dependency
+  files with 17 exact static edges; 81 exact tracked-file receipts are verified, while Node, its
+  ESM loader, and the process environment remain trusted authorities
+- local proof: focused event/action cases pass 16/16 with 19 compiler-negative assertions;
+  cumulative editor cases pass 85/85; public-package cases pass 44/44 with 69 public
+  compiler-negative assertions; generator/verifier and the 10/10 independent root proof pass
+- public declaration inventory: 33 runtime exports and 69 type exports; M08-T06 contributes six
+  runtime commands and 14 public types, and all 20 task-owned declarations retain TSDoc in source
+  and emitted declarations
+- CI authority: 163 workloads / 77 proof pairs, with 66 ordinary pairs and 11 barriers; the legacy
+  projection has 539 prerequisite segments at
+  `sha256:8f831e16aad57191e44f2850eec950ecc68bbd2aa4f6922ca126a3e5b64b4019`, 3,359 ordered leaf
+  invocations at `sha256:a6b54fa7883e6692c863e3ebc052892c84cded4568c9c9fe5dd530fa94a64f36`, and 257 distinct
+  leaves at `sha256:775ff6a7f8351d47b4911cc11b96b3750a18a700914f70742d402e2ea1211a53`; the retained quality
+  plan is `sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`
+- CI digest set: neutral inventory
+  `sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cfc1f53`, impact graph
+  `sha256:f7be1ee5bc35a7b0ea2cdcdabacf13f4525fcdabeb97e8854513ed4343e4aab3`, workload set
+  `sha256:56c04c534906197d7597c7854ba792d0c96001612f13346a1a104371910fc22a`, ordered projection
+  `sha256:868d2a59cdf5e95badd7d0cce601003e26280609f44167c831e251595779e6e4`, required plan
+  `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3ff3`, and shadow plan
+  `sha256:533bdab2a511433e0c1bdb4fab1be27430914489d722918d7d789bdf294d4caf`
+- affected authority: 1,080 tracked paths at
+  `sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
+  proof-owned paths, with ownership projection
+  `sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`; current selector
+  `sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975`, required runner
+  `sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`, and promotion artifact
+  `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549` are exact
+- scheduler authority: shared-state counts are 6/2/1/69/74/10/1, filesystem-policy counts are
+  145/2/15/1, and the workspace package-test inventory remains 15 scripts
+- checkpoint authority: append-only sequence 34 at
+  `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
+  artifacts and 62 current readers; sequence 33 and every earlier byte remain unchanged, existing
+  reader indexes `[50, 51, 52, 53, 54, 56, 58]` are resealed, new readers occupy `[60, 61]`, and
+  the dedicated checkpoint suite passes 57/57
+- CI validation: the targeted infrastructure batch passes 235/235, required-affected contracts
+  pass 27/27, and promotion contracts pass 19/19
+- evidence boundary: these are local code-owned proof results and make no hosted M08-T06 claim
+- scope nonclaims: M08-T07 retains authoring isolation and unknown-extension round-trip proof;
+  M08-T08 retains persistence; M08-T09 retains event/action semantics, continuous diagnostics, and
+  invalid-node mapping; M08-T10 retains the terminal React/DOM boundary and G08; action execution,
+  undo/redo, selection, viewport, P-18, and G08 remain unclaimed
+- coverage decision: M08-T06 is `DONE`; no `P-*`, `N-*`, `S-*`, or proof-gate status changes;
+  overall progress is 91/145 (63%); M08 is 6/10; proof gates remain 8/13; M08-T07 owns authoring
+  isolation and unknown-extension round-trip preservation next
 
 ## Status vocabulary
 

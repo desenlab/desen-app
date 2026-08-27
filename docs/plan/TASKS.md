@@ -1027,7 +1027,7 @@ hosted M07-T10 claim.
 | M08-T03 | DONE        | M08-T02         | Delete, slot move, and ordered reorder commands                      |
 | M08-T04 | DONE        | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
 | M08-T05 | DONE        | M08-T02         | State declaration and binding editing commands                       |
-| M08-T06 | NOT_STARTED | M08-T05         | Event and closed-action editing commands                             |
+| M08-T06 | DONE        | M08-T05         | Event and closed-action editing commands                             |
 | M08-T07 | NOT_STARTED | M08-T01–M08-T06 | Authoring isolation and unknown-extension round-trip preservation    |
 | M08-T08 | NOT_STARTED | M08-T01         | Persistence port and local source adapter                            |
 | M08-T09 | NOT_STARTED | M08-T03–M08-T07 | Continuous validation and invalid-node mapping                       |
@@ -1200,6 +1200,69 @@ editing remains M08-T06; later authoring, persistence, and terminal integration 
 M08-T07–M08-T10. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. Overall implementation
 progress is 90/145 (62%), M08 is 5/10, proof gates remain 8/13, and M08-T06 event and closed-action
 editing is next.
+
+M08-T06 is `DONE`. The public package exposes six atomic immutable commands for inserting and
+deleting event handlers and inserting, replacing, deleting, and reordering closed actions. They
+address one unique surface-local node or behavior owner. Canonical owner-relative RFC 6901
+pointers select root event lists and recursive `operation.invoke` `onSuccess`/`onFailure` lists;
+reorder uses the post-removal final index. Removing a final entry deliberately retains empty event
+maps, action arrays, and settlement arrays. All seven DESEN 0.1.0 action variants are captured
+whole as inert data, including guards, parameters, inputs, payloads, nested actions, and
+extensions. No action is executed or semantically resolved. Every success returns a fresh detached
+recursively frozen direct Source; malformed commands, missing or ambiguous targets, invalid paths
+or positions, profile overflow, and structural re-admission failures remain atomic and expose no
+partial document.
+
+The focused event/action suite passes 16/16, with 19 focused compiler-negative assertions. The
+cumulative editor-core package suite passes 85/85; the built public-package suite passes 44/44,
+with 69 public consumer compiler-negative assertions; and the independent root proof passes
+10/10. The public package exposes 33 runtime and 69 type exports. M08-T06 contributes six runtime
+commands and fourteen public types, and all 20 task-owned declarations retain TSDoc in source and
+emitted declarations. Exact evidence is pinned in
+`docs/proof/EDITOR-CORE-EVENT-ACTION-EDITS.md` and the 31,310-byte artifact
+`docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json` at
+`sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`.
+
+The proof's sole direct official prerequisite is the exact frozen M08-T05 artifact. It verifies 81
+exact tracked-file receipts and executes behavior only after copying authenticated bytes into an
+isolated 29-file ESM graph: eight editor files and 21 dependency files, connected by 17 exact
+static edges. The current M08-T06 CI successor contains 163 workloads and 77 proof pairs: 66
+ordinary pairs and 11 barriers. Its retained quality plan is
+`sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`; the neutral inventory,
+impact graph, workload set, and ordered projection are respectively
+`sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cfc1f53`,
+`sha256:f7be1ee5bc35a7b0ea2cdcdabacf13f4525fcdabeb97e8854513ed4343e4aab3`,
+`sha256:56c04c534906197d7597c7854ba792d0c96001612f13346a1a104371910fc22a`, and
+`sha256:868d2a59cdf5e95badd7d0cce601003e26280609f44167c831e251595779e6e4`. Required and shadow
+plans are `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3ff3` and
+`sha256:533bdab2a511433e0c1bdb4fab1be27430914489d722918d7d789bdf294d4caf`.
+
+Affected ownership covers 1,080 tracked paths at
+`sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
+proof-owned paths, with complete projection
+`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. Current selector and
+required-runner authorities are
+`sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` and
+`sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; the promotion artifact
+is `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`. Append-only checkpoint
+sequence 34 at `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
+artifacts and 62 current readers while preserving sequence 33 and every earlier byte. It reseals
+reader indexes `[50, 51, 52, 53, 54, 56, 58]`, appends new readers at `[60, 61]`, and its
+dedicated suite passes 57/57. Targeted CI infrastructure passes 235/235, required-affected passes
+27/27, and promotion contracts pass 19/19. These are local code-owned receipts and make no hosted
+M08-T06-success claim.
+
+Exact enumerable own-data command fields are required. Accessors and own `toJSON` hooks are
+rejected without invocation. Necessary reflection may execute arbitrary `Proxy` traps; an honest
+forwarding `Proxy` may pass, and a throwing reflection trap is contained as a command failure. No
+hostile-JavaScript or no-code-execution membrane is claimed. The profile admits exactly 8 MiB of
+canonical Source data, 25,000 identities per selected surface, 25,000 action occurrences per
+selected owner, source depth 64 with the root at zero, and action nesting depth 64 with root
+actions at zero. M08-T07 retains authoring isolation and complete unknown-extension round-trip
+proof, M08-T08 retains persistence, M08-T09 retains action/event semantics and continuous
+diagnostic mapping, and M08-T10 retains the terminal React/DOM boundary and G08. No `P-*`, `N-*`,
+`S-*`, or proof-gate status changes. Overall implementation progress is 91/145 (63%), M08 is 6/10,
+proof gates remain 8/13, and M08-T07 is next.
 
 ## M09 — Desen App Web MVP
 

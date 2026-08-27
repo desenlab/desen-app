@@ -71,10 +71,11 @@ export const PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256 = SAFE_OBJECT_FREEZE(
   "181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d",
   "9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424",
   "64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871",
+  "f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674",
 ]);
 export const PROOF_READER_CHECKPOINT_REVIEWED_TASK_COUNTS = SAFE_OBJECT_FREEZE([
   6, 8, 9, 10, 11, 11, 13, 14, 14, 14, 14, 14, 14, 14, 15, 16, 17, 17, 17, 17, 18, 18, 19, 20, 25,
-  25, 25, 25, 26, 27, 28, 29, 30,
+  25, 25, 25, 26, 27, 28, 29, 30, 31,
 ]);
 export const EXPECTED_GENESIS_CHECKPOINT_SHA256 = PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[0];
 const MAX_CHECKPOINT_BYTES = 2 * 1024 * 1024;
@@ -413,6 +414,16 @@ export const PROOF_READER_CHECKPOINT_TASK_AUTHORITY = SAFE_OBJECT_FREEZE([
     },
     "scripts/lib/editor-core-state-binding-edits-proof.mjs",
     "tests/editor-core-state-binding-edits.test.mjs",
+  ),
+  freezeTaskAuthority(
+    "M08-T06",
+    {
+      path: "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+      bytes: 31_310,
+      sha256: "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7",
+    },
+    "scripts/lib/editor-core-event-action-edits-proof.mjs",
+    "tests/editor-core-event-action-edits.test.mjs",
   ),
 ]);
 

@@ -19,7 +19,7 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const INSERT_SOURCE = "packages/editor-core/src/stable-id-insert.ts";
 const STRUCTURAL_EDITS_SOURCE = "packages/editor-core/src/structural-edits.ts";
 const CONTENT_EDITS_SOURCE = "packages/editor-core/src/content-edits.ts";
-const STATE_BINDING_EDITS_SOURCE = "packages/editor-core/src/state-binding-edits.ts";
+const EVENT_ACTION_EDITS_SOURCE = "packages/editor-core/src/event-action-edits.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const CONTENT_RUNTIME_EXPORTS = Object.freeze([
   "clearDesenEditorNodeCondition",
@@ -87,6 +87,30 @@ const STATE_BINDING_TYPE_EXPORTS = Object.freeze([
   "DesenEditorStateDeclarationInsertCommand",
   "DesenEditorStateInitialSetCommand",
   "DesenEditorStateSchemaSetCommand",
+]);
+const EVENT_ACTION_RUNTIME_EXPORTS = Object.freeze([
+  "deleteDesenEditorAction",
+  "deleteDesenEditorEventHandler",
+  "insertDesenEditorAction",
+  "insertDesenEditorEventHandler",
+  "reorderDesenEditorAction",
+  "replaceDesenEditorAction",
+]);
+const EVENT_ACTION_TYPE_EXPORTS = Object.freeze([
+  "DesenEditorAction",
+  "DesenEditorActionDeleteCommand",
+  "DesenEditorActionInsertCommand",
+  "DesenEditorActionListPointer",
+  "DesenEditorActionPointer",
+  "DesenEditorActionReorderCommand",
+  "DesenEditorActionReplaceCommand",
+  "DesenEditorEventActionEditDiagnostic",
+  "DesenEditorEventActionEditDiagnosticCode",
+  "DesenEditorEventActionEditFailure",
+  "DesenEditorEventActionEditResult",
+  "DesenEditorEventActionEditSuccess",
+  "DesenEditorEventHandlerDeleteCommand",
+  "DesenEditorEventHandlerInsertCommand",
 ]);
 const temporaryDirectories = [];
 let built;
@@ -214,29 +238,34 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
     [
       ...CONTENT_RUNTIME_EXPORTS,
       ...STATE_BINDING_RUNTIME_EXPORTS,
+      ...EVENT_ACTION_RUNTIME_EXPORTS,
       "deleteDesenEditorNode",
       "moveDesenEditorNode",
       "reorderDesenEditorNode",
     ].sort(),
   );
-  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 45);
-  for (const name of [...CONTENT_TYPE_EXPORTS, ...STATE_BINDING_TYPE_EXPORTS]) {
+  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 59);
+  for (const name of [
+    ...CONTENT_TYPE_EXPORTS,
+    ...STATE_BINDING_TYPE_EXPORTS,
+    ...EVENT_ACTION_TYPE_EXPORTS,
+  ]) {
     assert.equal(built.currentCompatibility.boundary.additiveTypeExports.includes(name), true);
   }
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T05",
-    sourcePath: STATE_BINDING_EDITS_SOURCE,
-    runtimePath: "packages/editor-core/dist/state-binding-edits.js",
-    declarationPath: "packages/editor-core/dist/state-binding-edits.d.ts",
-    runtimeExports: STATE_BINDING_RUNTIME_EXPORTS,
-    typeExports: STATE_BINDING_TYPE_EXPORTS,
+    task: "M08-T06",
+    sourcePath: EVENT_ACTION_EDITS_SOURCE,
+    runtimePath: "packages/editor-core/dist/event-action-edits.js",
+    declarationPath: "packages/editor-core/dist/event-action-edits.d.ts",
+    runtimeExports: EVENT_ACTION_RUNTIME_EXPORTS,
+    typeExports: EVENT_ACTION_TYPE_EXPORTS,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 3);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 4);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
   assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 38);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 48);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 44);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 69);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
     bytes: 19_561,

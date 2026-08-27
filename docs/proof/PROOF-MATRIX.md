@@ -2035,3 +2035,83 @@ continuous semantic validation, and invalid-node mapping; M08-T10 retains the in
 editor-core React/DOM boundary. This proof does not claim schema/initial compatibility, dotted-state
 reachability, repeat or resource-input semantics, undo/redo, selection, viewport, a
 hostile-JavaScript/no-code-execution membrane, P-18, or G08. M08-T06 is next.
+
+## M08-T06 — Event and closed-action editing commands
+
+The built `@desen/editor-core` package now exposes six atomic immutable event/action commands.
+Event handlers can be inserted or deleted, and closed actions can be inserted, replaced, deleted,
+or reordered. Commands address one unique surface-local node or behavior owner. Canonical
+owner-relative RFC 6901 pointers select root event lists and recursive `operation.invoke`
+`onSuccess`/`onFailure` settlement lists; reorder uses the post-removal final index. Removing the
+last handler or action deliberately retains empty event maps, event action arrays, and settlement
+arrays. All seven DESEN 0.1.0 action variants are captured whole as inert data. Guards, navigation
+parameters, operation and component inputs, event payloads, nested settlement actions, and
+extensions are neither executed nor semantically resolved.
+
+Every success returns a fresh detached recursively frozen direct Source and preserves existing
+identities and unaffected semantic order. Missing or duplicate targets, ambiguous owners, invalid
+positions or pointers, malformed commands, finite-profile overflow, and structural re-admission
+fail atomically without exposing a partial document. Required fields are exact enumerable own
+data. Accessors and own `toJSON` hooks are rejected without invocation. Necessary reflection may
+execute arbitrary `Proxy` traps; an honest forwarding `Proxy` may pass, and a throwing trap is
+contained as `EVENT_ACTION_EDIT_COMMAND_INVALID`. This is not a hostile-JavaScript or
+no-code-execution membrane. The profile admits exactly 8,388,608 canonical Source bytes, 25,000
+identities per selected surface, 25,000 action occurrences per selected owner, source depth 64
+with the root at zero, and action nesting depth 64 with root actions at zero. Each one-unit
+crossing fails before mutation; no streaming or preallocation memory-DoS guarantee is claimed.
+
+The cumulative editor-core package suite passes 85/85, including 16/16 focused event/action cases
+and 19 focused compiler-negative assertions. The cumulative built public-package suite passes
+44/44 with 69 public consumer compiler-negative assertions, and the independent root proof passes
+10/10. The public root exposes 33 runtime and 69 type exports. M08-T06 contributes six runtime
+commands and fourteen public types; all 20 task-owned declarations retain TSDoc in source and
+emitted declarations. Exact evidence lives in
+[`EDITOR-CORE-EVENT-ACTION-EDITS.md`](EDITOR-CORE-EVENT-ACTION-EDITS.md) and the 31,310-byte
+[`editor-core-0.1.0-event-action-edits.json`](artifacts/editor-core-0.1.0-event-action-edits.json)
+at `sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`.
+
+The proof's sole direct official prerequisite is the exact frozen 30,014-byte M08-T05 artifact at
+`sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`. It verifies 81
+exact tracked-file receipts. Behavior begins only after eight editor files and 21 dependency files
+are copied from authenticated bytes into an isolated 29-file ESM graph whose 17 exact static
+edges are closed. Retained predecessor runtime files match M08-T05 receipts before import. Node,
+its ESM loader, and the process environment remain trusted authorities; the workspace module cache
+is not execution authority.
+
+The current M08-T06 CI successor contains 163 workloads and 77 proof pairs: 66 ordinary pairs and
+11 exclusive barriers. Its retained legacy projection contains 539 prerequisite segments, 3,359
+ordered leaf invocations, and 257 distinct leaves. The retained quality plan is
+`sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`. Scheduler-neutral
+inventory, selector-only impact graph, exact workload set, and ordered equivalence projection are
+respectively `sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cfc1f53`,
+`sha256:f7be1ee5bc35a7b0ea2cdcdabacf13f4525fcdabeb97e8854513ed4343e4aab3`,
+`sha256:56c04c534906197d7597c7854ba792d0c96001612f13346a1a104371910fc22a`, and
+`sha256:868d2a59cdf5e95badd7d0cce601003e26280609f44167c831e251595779e6e4`. Required and shadow
+plans are `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3ff3` and
+`sha256:533bdab2a511433e0c1bdb4fab1be27430914489d722918d7d789bdf294d4caf`.
+
+Affected ownership covers 1,080 tracked paths at
+`sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
+proof-owned paths; the complete projection is
+`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. Current selector and
+required-runner authorities are
+`sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` and
+`sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; the authenticated
+promotion artifact is
+`sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`.
+
+Append-only checkpoint sequence 34 at
+`f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
+artifacts and 62 current readers while preserving sequence 33, every earlier checkpoint, and every
+predecessor artifact byte. Existing reader indexes `[50, 51, 52, 53, 54, 56, 58]` are resealed and
+new readers occupy `[60, 61]`. The dedicated checkpoint suite passes 57/57; the targeted CI
+infrastructure batch passes 235/235, required-affected contracts pass 27/27, and promotion
+contracts pass 19/19. These are local code-owned receipts and make no hosted M08-T06-success claim.
+
+M08-T06 is `DONE`, advancing implementation progress to 91/145 (63%) and M08 to 6/10. Proof gates
+remain 8/13. No `P-*`, `N-*`, `S-*`, or proof-gate status changes. M08-T07 retains authoring
+isolation and complete unknown-extension round-trip proof; M08-T08 retains persistence; M08-T09
+retains event/action reference resolution, Catalog compatibility, state/operation/resource/
+component semantics, continuous diagnostics, and invalid-node mapping; and M08-T10 retains the
+terminal React/DOM boundary and G08. Action execution and runtime turns, undo/redo, selection,
+viewport policy, P-18, and G08 remain unclaimed. M08-T07 is next.

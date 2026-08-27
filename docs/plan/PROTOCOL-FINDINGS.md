@@ -3397,3 +3397,75 @@ This file records implementation discoveries without changing the frozen DESEN 0
   M08-T10 must independently prove cross-command determinism and the React/DOM boundary. A later
   protocol revision should align state-name and reference grammars and standardize these editor
   transitions only if interoperable command logs become normative.
+
+## PF-083 — Event maps and recursively nested closed actions need exact editor lifecycle and addressing
+
+- Status: OPEN
+- Blocks proof: No; M08-T06 defines one conservative platform-neutral event/action edit profile
+  without changing frozen protocol bytes or claiming Catalog-semantic validity, action execution,
+  or the terminal editor boundary.
+- Protocol location: SPEC Sections 17.7, 20, 21.4, and 23.5; `A-006`, `A-010`, and `R-011`;
+  related findings `PF-014`, `PF-020`, `PF-041`, `PF-043`, and `PF-078`–`PF-082`
+- Observation: DESEN 0.1.0 defines owner event maps, seven closed action variants, guards, and
+  recursively nested operation settlement lists, but it does not prescribe editor command shapes,
+  absent-versus-empty container lifecycle, recursive action addresses, replacement semantics,
+  insertion or reorder indexes, authoring traversal limits, atomicity, or editor diagnostics.
+- Implementation decision: M08-T06 exposes six inert transitions:
+  `insertDesenEditorEventHandler`, `deleteDesenEditorEventHandler`,
+  `insertDesenEditorAction`, `replaceDesenEditorAction`, `deleteDesenEditorAction`, and
+  `reorderDesenEditorAction`. An event owner is a component node or behavior resolved uniquely in
+  the selected surface's shared case-sensitive identity namespace. Event-handler insertion requires
+  an absent local-identifier key and may create an absent own `on` map; deletion requires the exact
+  handler and retains an own empty `on` map. Complete handler lists may be empty.
+
+  Action-list addresses are owner-relative typed RFC 6901 pointers. A root list is
+  `/on/<escaped-event>`. Each nested step appends `/<canonical-safe-index>/onSuccess` or
+  `/<canonical-safe-index>/onFailure` and may descend only through an `operation.invoke` action.
+  Action addresses append one final canonical safe index. Empty, absolute-document, noncanonical,
+  malformed-escape, arbitrary-field, negative, decimal, leading-zero, and unsafe-index forms fail
+  closed. Generic insertion requires an existing root event list. It may create an absent settlement
+  list only at index zero; deletion retains the selected own action array when it becomes empty.
+  Reorder uses the selected action's final index after removal. Event and action arrays are semantic
+  order; event-map and input/payload/params member order is not assigned semantics.
+
+  Insert and replace capture one complete closed `ActionSpec`. Whole replacement is the only field
+  mutation primitive: it atomically covers the discriminator, guard, path, value, target, command,
+  navigation params, operation input/concurrency/settlement lists, event payload, resource ID, and
+  extensions without producing an intermediate invalid discriminator/field combination. It neither
+  materializes a default concurrency nor parses, normalizes, evaluates, rewrites, or cascades any
+  reference, predicate, ValueSpec, action, or extension. The seven frozen action variants and their
+  structural admission remain authoritative; callbacks are never invented for resource actions.
+
+  Command fields must be exact enumerable own data descriptors. Inherited, accessor, symbol,
+  extra-field, function-valued, own-`toJSON`, sparse/decorated-array, malformed-Unicode, cyclic,
+  nonfinite, and unsafe-index shapes are rejected; accessor getters and `toJSON` hooks are not
+  invoked. Necessary reflection over an arbitrary JavaScript `Proxy` may execute its traps, an
+  admissible forwarding Proxy may pass, and a throwing reflection trap is contained as
+  `EVENT_ACTION_EDIT_COMMAND_INVALID`. This is not a hostile-JavaScript or no-code-execution
+  membrane.
+
+  Every success preserves all node and behavior identities plus unrelated semantic order and
+  returns a fresh detached recursively frozen direct Source. Every failure is atomic and exposes no
+  partial document. The common profile retains the 8 MiB canonical-document limit, 25,000
+  node/behavior identity occurrences in the selected surface, and component depth 64 with the root
+  at zero. Recursive action-address traversal is independently capped at 64 nested settlement
+  steps; the runtime's 64-actions-per-turn and settlement-depth-16 execution budgets are not reused
+  as authoring-list limits. Project-owned failures use
+  `run.desen.editor/EVENT_ACTION_EDIT_COMMAND_INVALID`,
+  `EVENT_ACTION_EDIT_LIMIT_EXCEEDED`, `EVENT_ACTION_EDIT_PATH_NOT_FOUND`,
+  `EVENT_ACTION_EDIT_POSITION_INVALID`, `EVENT_ACTION_EDIT_TARGET_AMBIGUOUS`,
+  `EVENT_ACTION_EDIT_TARGET_EXISTS`, or `EVENT_ACTION_EDIT_TARGET_NOT_FOUND`; whole-candidate
+  structural re-admission retains the frozen protocol diagnostics.
+
+  Structurally valid unknown state paths, surfaces, operations, resources, component targets,
+  commands, and emitted events remain authorable. Catalog event/command/payload/input contracts,
+  reference and alias resolution, `event.*` reachability, guard/value compatibility, action-turn
+  execution, effect order, concurrency, settlements, host allowlists, and liveness remain M08-T09
+  continuous-validation concerns. `PF-014` remains authoritative: event payload scope is immediate
+  and is not carried into a later operation settlement turn.
+
+- Future action: M08-T07 must prove authoring isolation and unknown-extension round-trip
+  preservation across all M08 commands. M08-T09 must add continuous semantic validation and
+  invalid-node mapping, and M08-T10 must independently prove deterministic cross-command behavior
+  and the React/DOM boundary. A later protocol revision should standardize event/action edit logs
+  only if interoperable editor command histories become normative.

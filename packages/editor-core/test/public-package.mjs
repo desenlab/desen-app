@@ -66,6 +66,56 @@ function stateBindingEditFixture() {
   return input;
 }
 
+function eventActionEditFixture() {
+  const input = cloneFixture();
+  input.surfaces["sign-in"].root.behaviors = [
+    {
+      id: "sign-in.preview",
+      use: "com.example.interactions/Preview",
+    },
+  ];
+  return input;
+}
+
+function closedPublicActions() {
+  return [
+    {
+      type: "state.set",
+      path: "future.value",
+      value: { $ref: "state.future", fallback: null },
+      when: { op: "truthy", args: [true] },
+    },
+    { type: "state.toggle", path: "future.enabled" },
+    {
+      type: "navigate",
+      surface: "future-surface",
+      params: { tab: { $ref: "state.future" } },
+    },
+    {
+      type: "operation.invoke",
+      operation: "com.example.future/Save",
+      as: "futureSave",
+      input: { value: { $ref: "state.future" } },
+      concurrency: "queue",
+      onSuccess: [{ type: "event.emit", name: "future.saved" }],
+      onFailure: [{ type: "resource.refresh", resource: "futureResource" }],
+    },
+    { type: "resource.refresh", resource: "futureResource" },
+    {
+      type: "component.command",
+      target: "future.component",
+      command: "futureCommand",
+      input: { value: { $ref: "state.future" } },
+    },
+    {
+      type: "event.emit",
+      name: "future.event",
+      payload: { value: { $ref: "state.future" } },
+      extensions: { "com.example.action": { retained: true } },
+    },
+  ];
+}
+
 function expectContentEditSuccess(result) {
   assert.equal(result.ok, true);
   if (!result.ok) throw new TypeError("Expected the emitted content edit to succeed.");
@@ -96,6 +146,24 @@ function expectStateBindingEditSuccess(result) {
 function expectStateBindingEditFailure(result, code) {
   assert.equal(result.ok, false);
   if (result.ok) throw new TypeError("Expected the emitted state/binding edit to fail.");
+  assert.deepEqual(Reflect.ownKeys(result), ["ok", "diagnostics"]);
+  assert.equal(result.diagnostics[0].code, code);
+  assert.equal(Object.hasOwn(result, "document"), false);
+  assertPlainOwnDataFrozen(result);
+}
+
+function expectEventActionEditSuccess(result) {
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected the emitted event/action edit to succeed.");
+  assert.deepEqual(Reflect.ownKeys(result), ["ok", "document", "diagnostics"]);
+  assert.deepEqual(result.diagnostics, []);
+  assertPlainOwnDataFrozen(result);
+  return result.document;
+}
+
+function expectEventActionEditFailure(result, code) {
+  assert.equal(result.ok, false);
+  if (result.ok) throw new TypeError("Expected the emitted event/action edit to fail.");
   assert.deepEqual(Reflect.ownKeys(result), ["ok", "diagnostics"]);
   assert.equal(result.diagnostics[0].code, code);
   assert.equal(Object.hasOwn(result, "document"), false);
@@ -282,6 +350,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       "test:public-package":
         "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
       "test:content-edits": "vitest run test/content-edits.test.ts",
+      "test:event-action-edits": "vitest run test/event-action-edits.test.ts",
       "test:state-binding-edits": "vitest run test/state-binding-edits.test.ts",
       "test:source-document": "vitest run test/source-document.test.ts",
       "test:stable-id-insert": "vitest run test/stable-id-insert.test.ts",
@@ -305,6 +374,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
       "structural-edits.js",
       "content-edits.js",
       "state-binding-edits.js",
+      "event-action-edits.js",
     ].map(async (file) => ({
       file,
       source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
@@ -325,6 +395,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
           "./structural-edits.js",
           "./content-edits.js",
           "./state-binding-edits.js",
+          "./event-action-edits.js",
         ],
       },
       { file: "source-document.js", specifiers: ["@desen/validator"] },
@@ -342,6 +413,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
       },
       {
         file: "state-binding-edits.js",
+        specifiers: ["@desen/protocol", "./source-document.js"],
+      },
+      {
+        file: "event-action-edits.js",
         specifiers: ["@desen/protocol", "./source-document.js"],
       },
     ],
@@ -366,6 +441,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
     emittedModules[0].source,
     /export\s*\{\s*deleteDesenEditorResourceInput,\s*deleteDesenEditorStateDeclaration,\s*insertDesenEditorStateDeclaration,\s*setDesenEditorNodeRepeatItems,\s*setDesenEditorNodeRepeatKey,\s*setDesenEditorResourceInput,\s*setDesenEditorStateInitial,\s*setDesenEditorStateSchema\s*,?\s*\}\s*from\s*["']\.\/state-binding-edits\.js["']/,
   );
+  assert.match(
+    emittedModules[0].source,
+    /export\s*\{\s*deleteDesenEditorAction,\s*deleteDesenEditorEventHandler,\s*insertDesenEditorAction,\s*insertDesenEditorEventHandler,\s*reorderDesenEditorAction,\s*replaceDesenEditorAction\s*,?\s*\}\s*from\s*["']\.\/event-action-edits\.js["']/,
+  );
 
   const emittedGraph = emittedModules.map(({ source }) => source).join("\n");
   for (const forbidden of [
@@ -387,6 +466,8 @@ test("the built public package resolves through its export map and exposes the r
   assert.deepEqual(Object.keys(editorCore), [
     "clearDesenEditorNodeCondition",
     "createDesenEditorDocument",
+    "deleteDesenEditorAction",
+    "deleteDesenEditorEventHandler",
     "deleteDesenEditorNode",
     "deleteDesenEditorOwnerProp",
     "deleteDesenEditorOwnerStyleProperty",
@@ -395,12 +476,16 @@ test("the built public package resolves through its export map and exposes the r
     "deleteDesenEditorVariant",
     "deleteDesenEditorVariantProp",
     "deleteDesenEditorVariantStyleProperty",
+    "insertDesenEditorAction",
+    "insertDesenEditorEventHandler",
     "insertDesenEditorNode",
     "insertDesenEditorStateDeclaration",
     "insertDesenEditorVariant",
     "moveDesenEditorNode",
+    "reorderDesenEditorAction",
     "reorderDesenEditorNode",
     "reorderDesenEditorVariant",
+    "replaceDesenEditorAction",
     "setDesenEditorNodeCondition",
     "setDesenEditorNodeRepeatItems",
     "setDesenEditorNodeRepeatKey",
@@ -1713,6 +1798,421 @@ test("the emitted state and binding commands are deterministic, immutable, and s
     $ref: "resource.profile.future",
   });
   assert.deepEqual(creation.document, input);
+});
+
+test("the emitted event-handler commands edit node and behavior owners with all seven closed actions", () => {
+  const input = eventActionEditFixture();
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the event/action fixture to be admitted.");
+  const identities = surfaceIdentities(creation.document, "sign-in");
+  const actions = closedPublicActions();
+
+  let document = expectEventActionEditSuccess(
+    editorCore.insertDesenEditorEventHandler(creation.document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      event: "future",
+      actions,
+    }),
+  );
+  actions[0].path = "caller.mutated";
+  document = expectEventActionEditSuccess(
+    editorCore.insertDesenEditorEventHandler(document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.preview",
+      event: "constructor",
+      actions: [],
+    }),
+  );
+
+  const [title] = document.surfaces["sign-in"].root.slots.default;
+  assert.deepEqual(
+    title.on.future.map(({ type }) => type),
+    [
+      "state.set",
+      "state.toggle",
+      "navigate",
+      "operation.invoke",
+      "resource.refresh",
+      "component.command",
+      "event.emit",
+    ],
+  );
+  assert.equal(title.on.future[0].path, "future.value");
+  assert.equal(title.on.future[2].surface, "future-surface");
+  assert.equal(title.on.future[5].target, "future.component");
+  const behaviorOn = document.surfaces["sign-in"].root.behaviors[0].on;
+  assert.equal(Object.hasOwn(behaviorOn, "constructor"), true);
+  assert.deepEqual(Object.getOwnPropertyDescriptor(behaviorOn, "constructor")?.value, []);
+  assert.deepEqual(surfaceIdentities(document, "sign-in"), identities);
+
+  document = expectEventActionEditSuccess(
+    editorCore.deleteDesenEditorEventHandler(document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.preview",
+      event: "constructor",
+    }),
+  );
+  assert.equal(Object.hasOwn(document.surfaces["sign-in"].root.behaviors[0], "on"), true);
+  assert.deepEqual(document.surfaces["sign-in"].root.behaviors[0].on, {});
+  assert.deepEqual(creation.document, input);
+});
+
+test("the emitted action insert command preserves root and nested settlement order", () => {
+  const creation = editorCore.createDesenEditorDocument(eventActionEditFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the event/action fixture to be admitted.");
+
+  let document = expectEventActionEditSuccess(
+    editorCore.insertDesenEditorAction(creation.document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.submit",
+      actionListPointer: "/on/press",
+      index: 1,
+      action: { type: "event.emit", name: "after.invoke" },
+    }),
+  );
+  document = expectEventActionEditSuccess(
+    editorCore.insertDesenEditorAction(document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.submit",
+      actionListPointer: "/on/press/0/onSuccess",
+      index: 0,
+      action: { type: "event.emit", name: "before.navigate" },
+    }),
+  );
+  document = expectEventActionEditSuccess(
+    editorCore.insertDesenEditorAction(document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.submit",
+      actionListPointer: "/on/press/0/onFailure",
+      index: 0,
+      action: { type: "resource.refresh", resource: "futureResource" },
+    }),
+  );
+
+  const submit = document.surfaces["sign-in"].root.slots.default.find(
+    ({ id }) => id === "sign-in.submit",
+  );
+  assert.ok(submit);
+  assert.deepEqual(
+    submit.on.press.map(({ type }) => type),
+    ["operation.invoke", "event.emit"],
+  );
+  assert.deepEqual(
+    submit.on.press[0].onSuccess.map(({ type }) => type),
+    ["event.emit", "navigate"],
+  );
+  assert.deepEqual(submit.on.press[0].onFailure, [
+    { type: "resource.refresh", resource: "futureResource" },
+  ]);
+  assert.deepEqual(creation.document, eventActionEditFixture());
+});
+
+test("the emitted replace, delete, and reorder commands address nested actions without collapsing arrays", () => {
+  const creation = editorCore.createDesenEditorDocument(eventActionEditFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the event/action fixture to be admitted.");
+  let document = expectEventActionEditSuccess(
+    editorCore.insertDesenEditorEventHandler(creation.document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      event: "ordered",
+      actions: [
+        {
+          type: "operation.invoke",
+          operation: "com.example.future/Ordered",
+          as: "ordered",
+          input: {},
+          onSuccess: [
+            { type: "event.emit", name: "first" },
+            { type: "resource.refresh", resource: "second" },
+            { type: "state.toggle", path: "third" },
+          ],
+        },
+        { type: "event.emit", name: "root.second" },
+      ],
+    }),
+  );
+  document = expectEventActionEditSuccess(
+    editorCore.replaceDesenEditorAction(document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      actionPointer: "/on/ordered/0/onSuccess/1",
+      action: {
+        type: "navigate",
+        surface: "future-surface",
+        params: { from: "replacement" },
+        when: { op: "truthy", args: [true] },
+        extensions: { "com.example.action": { retained: true } },
+      },
+    }),
+  );
+  document = expectEventActionEditSuccess(
+    editorCore.reorderDesenEditorAction(document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      actionPointer: "/on/ordered/0/onSuccess/0",
+      index: 2,
+    }),
+  );
+  for (const index of [1, 1, 0]) {
+    document = expectEventActionEditSuccess(
+      editorCore.deleteDesenEditorAction(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        actionPointer: `/on/ordered/0/onSuccess/${index}`,
+      }),
+    );
+  }
+  let title = document.surfaces["sign-in"].root.slots.default[0];
+  assert.equal(Object.hasOwn(title.on.ordered[0], "onSuccess"), true);
+  assert.deepEqual(title.on.ordered[0].onSuccess, []);
+
+  document = expectEventActionEditSuccess(
+    editorCore.reorderDesenEditorAction(document, {
+      surfaceId: "sign-in",
+      ownerId: "sign-in.title",
+      actionPointer: "/on/ordered/1",
+      index: 0,
+    }),
+  );
+  title = document.surfaces["sign-in"].root.slots.default[0];
+  assert.deepEqual(
+    title.on.ordered.map(({ type }) => type),
+    ["event.emit", "operation.invoke"],
+  );
+  assert.deepEqual(creation.document, eventActionEditFixture());
+});
+
+test("the emitted event and action commands preserve exact failure classes without partial authority", () => {
+  const creation = editorCore.createDesenEditorDocument(eventActionEditFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the event/action fixture to be admitted.");
+  const ambiguousInput = eventActionEditFixture();
+  ambiguousInput.surfaces["sign-in"].root.behaviors.push({
+    id: "sign-in.title",
+    use: "com.example.interactions/Duplicate",
+  });
+  const ambiguousCreation = editorCore.createDesenEditorDocument(ambiguousInput);
+  assert.equal(ambiguousCreation.ok, true);
+  if (!ambiguousCreation.ok) throw new TypeError("Expected ambiguous structural admission.");
+
+  for (const [result, code] of [
+    [
+      editorCore.insertDesenEditorEventHandler(creation.document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.email",
+        event: "change",
+        actions: [],
+      }),
+      "run.desen.editor/EVENT_ACTION_EDIT_TARGET_EXISTS",
+    ],
+    [
+      editorCore.insertDesenEditorEventHandler(creation.document, {
+        surfaceId: "sign-in",
+        ownerId: "missing.owner",
+        event: "future",
+        actions: [],
+      }),
+      "run.desen.editor/EVENT_ACTION_EDIT_TARGET_NOT_FOUND",
+    ],
+    [
+      editorCore.insertDesenEditorEventHandler(ambiguousCreation.document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        event: "future",
+        actions: [],
+      }),
+      "run.desen.editor/EVENT_ACTION_EDIT_TARGET_AMBIGUOUS",
+    ],
+    [
+      editorCore.insertDesenEditorAction(creation.document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.email",
+        actionListPointer: "/on/change/0/onSuccess",
+        index: 0,
+        action: { type: "event.emit", name: "future" },
+      }),
+      "run.desen.editor/EVENT_ACTION_EDIT_PATH_NOT_FOUND",
+    ],
+    [
+      editorCore.reorderDesenEditorAction(creation.document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.submit",
+        actionPointer: "/on/press/0",
+        index: 1,
+      }),
+      "run.desen.editor/EVENT_ACTION_EDIT_POSITION_INVALID",
+    ],
+    [
+      editorCore.deleteDesenEditorAction(creation.document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.submit",
+        actionPointer: "/on/press/00",
+      }),
+      "run.desen.editor/EVENT_ACTION_EDIT_COMMAND_INVALID",
+    ],
+    [
+      editorCore.replaceDesenEditorAction(creation.document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.submit",
+        actionPointer: "/on/press/0",
+        action: { type: "future.execute", value: true },
+      }),
+      "SCHEMA_INVALID",
+    ],
+  ]) {
+    expectEventActionEditFailure(result, code);
+  }
+  assert.deepEqual(creation.document, eventActionEditFixture());
+  assert.deepEqual(ambiguousCreation.document, ambiguousInput);
+});
+
+test("the emitted event and action commands enforce exact own data and contain Proxy traps", () => {
+  const creation = editorCore.createDesenEditorDocument(eventActionEditFixture());
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the event/action fixture to be admitted.");
+  const before = JSON.stringify(creation.document);
+  const base = {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.submit",
+    actionPointer: "/on/press/0/onSuccess/0",
+    action: { type: "event.emit", name: "forwarded" },
+  };
+  const forwardingTraps = [];
+  const forwarding = new Proxy(base, {
+    getOwnPropertyDescriptor(target, key) {
+      forwardingTraps.push(`getOwnPropertyDescriptor:${String(key)}`);
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+    getPrototypeOf(target) {
+      forwardingTraps.push("getPrototypeOf");
+      return Reflect.getPrototypeOf(target);
+    },
+    ownKeys(target) {
+      forwardingTraps.push("ownKeys");
+      return Reflect.ownKeys(target);
+    },
+  });
+  const forwarded = expectEventActionEditSuccess(
+    editorCore.replaceDesenEditorAction(creation.document, forwarding),
+  );
+  const submit = forwarded.surfaces["sign-in"].root.slots.default.find(
+    ({ id }) => id === "sign-in.submit",
+  );
+  assert.ok(submit);
+  assert.deepEqual(submit.on.press[0].onSuccess, [{ type: "event.emit", name: "forwarded" }]);
+  assert.ok(forwardingTraps.includes("getPrototypeOf"));
+  assert.ok(forwardingTraps.includes("ownKeys"));
+
+  let getterInvocations = 0;
+  let toJSONInvocations = 0;
+  const accessor = {
+    surfaceId: "sign-in",
+    ownerId: "sign-in.submit",
+    actionPointer: "/on/press/0",
+  };
+  Object.defineProperty(accessor, "action", {
+    enumerable: true,
+    get() {
+      getterInvocations += 1;
+      return { type: "event.emit", name: "active" };
+    },
+  });
+  const throwingTraps = [];
+  const throwing = new Proxy(base, {
+    getPrototypeOf() {
+      throwingTraps.push("getPrototypeOf");
+      throw new TypeError("controlled Proxy reflection failure");
+    },
+  });
+  for (const result of [
+    editorCore.replaceDesenEditorAction(creation.document, accessor),
+    editorCore.replaceDesenEditorAction(creation.document, { ...base, extra: true }),
+    editorCore.replaceDesenEditorAction(creation.document, {
+      ...base,
+      [Symbol("authority")]: true,
+    }),
+    editorCore.replaceDesenEditorAction(creation.document, {
+      ...base,
+      action: {
+        type: "event.emit",
+        name: "active",
+        toJSON() {
+          toJSONInvocations += 1;
+          return { type: "event.emit", name: "serialized" };
+        },
+      },
+    }),
+    editorCore.replaceDesenEditorAction(creation.document, throwing),
+  ]) {
+    expectEventActionEditFailure(result, "run.desen.editor/EVENT_ACTION_EDIT_COMMAND_INVALID");
+  }
+  assert.equal(getterInvocations, 0);
+  assert.equal(toJSONInvocations, 0);
+  assert.deepEqual(throwingTraps, ["getPrototypeOf"]);
+  assert.equal(JSON.stringify(creation.document), before);
+});
+
+test("the emitted event and action commands are deterministic, immutable, and semantically unresolved", () => {
+  const input = eventActionEditFixture();
+  const creation = editorCore.createDesenEditorDocument(input);
+  assert.equal(creation.ok, true);
+  if (!creation.ok) throw new TypeError("Expected the event/action fixture to be admitted.");
+  const identities = surfaceIdentities(creation.document, "sign-in");
+  const edit = (document) => {
+    let next = expectEventActionEditSuccess(
+      editorCore.insertDesenEditorEventHandler(document, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        event: "future",
+        actions: [
+          {
+            type: "operation.invoke",
+            operation: "com.example.unresolved/Future",
+            as: "futureAlias",
+            input: { value: { $ref: "state.unresolved" } },
+          },
+        ],
+      }),
+    );
+    next = expectEventActionEditSuccess(
+      editorCore.insertDesenEditorAction(next, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        actionListPointer: "/on/future/0/onFailure",
+        index: 0,
+        action: { type: "component.command", target: "unknown.node", command: "unknown" },
+      }),
+    );
+    return expectEventActionEditSuccess(
+      editorCore.insertDesenEditorAction(next, {
+        surfaceId: "sign-in",
+        ownerId: "sign-in.title",
+        actionListPointer: "/on/future",
+        index: 1,
+        action: { type: "event.emit", name: "unknown.host.event" },
+      }),
+    );
+  };
+
+  const first = edit(creation.document);
+  const second = edit(creation.document);
+  assert.deepEqual(first, second);
+  assert.notStrictEqual(first, second);
+  assert.deepEqual(surfaceIdentities(first, "sign-in"), identities);
+  assert.equal(
+    first.surfaces["sign-in"].root.slots.default[0].on.future[0].operation,
+    "com.example.unresolved/Future",
+  );
+  assert.equal(
+    first.surfaces["sign-in"].root.slots.default[0].on.future[0].onFailure[0].target,
+    "unknown.node",
+  );
+  assert.deepEqual(creation.document, input);
+  assertPlainOwnDataFrozen(first);
 });
 
 test("[proof-core] two fresh final builds are byte-identical and preserve honest scope", async () => {

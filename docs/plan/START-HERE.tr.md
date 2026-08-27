@@ -442,8 +442,8 @@ ayrıca 10/10 bağımsız kök kanıtı geçer. 30.014 baytlık artifact
 dosyasıdır ve
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8` ile sabittir; incelenen
 rapor [`EDITOR-CORE-STATE-BINDING-EDITS.md`](../proof/EDITOR-CORE-STATE-BINDING-EDITS.md) içindedir.
-Güncel yerel CI ardılı 161 iş yükü ve 76 kanıt çiftinden oluşur: 65 sıradan çift ve 11 bariyer.
-Sequence 33 checkpoint'i
+Son mühürlü M08-T05 yerel CI ardılı 161 iş yükü ve 76 kanıt çiftinden oluşur: 65 sıradan çift ve
+11 bariyer. Sequence 33 checkpoint'i
 `64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871` başında 30 değişmez
 artifact ile 60 güncel okuyucuyu doğrular; sequence 32 ve önceki tüm baytlar korunur.
 
@@ -453,6 +453,64 @@ sürekli invalid-node tanıları M08-T09'da; terminal
 React/DOM sınırı ve G08 ise M08-T10/G08'de kalır. Hiçbir `P-*`, `N-*`, `S-*` veya kanıt-kapısı
 statüsü değişmez. Genel ilerleme 90/145 (%62), M08 ilerlemesi 5/10, kanıt kapıları 8/13'tür;
 sıradaki iş M08-T06 event ve kapalı action düzenleme komutlarıdır.
+
+M08-T06 da tamamlandı. Paket; event handler ekleme/silme ile action ekleme/değiştirme/silme/yeniden
+sıralama için altı atomik ve immutable komut sunar. Komutlar yüzey içinde tekil bir node veya
+behavior sahibini hedefler. Kök event listeleri ve iç içe `operation.invoke`
+`onSuccess`/`onFailure` listeleri canonical, owner-relative RFC 6901 pointer'larıyla adreslenir;
+yeniden sıralama, çıkarma sonrası son indeksi kullanır. Son handler veya action silinse bile boş
+event map'leri, action dizileri ve settlement dizileri korunur. Yedi DESEN 0.1.0 action çeşidinin
+tamamı; guard'lar, parametreler, input'lar, payload'lar, iç içe action'lar ve extension'larla
+birlikte çalıştırılmadan ve semantik olarak çözümlenmeden bütün veri olarak taşınır.
+
+Komut alanları kesin enumerable own-data descriptor olmalıdır. Accessor ve own-`toJSON` hook'ları
+çalıştırılmadan reddedilir; gerekli JavaScript reflection arbitrary `Proxy` trap'lerini
+çalıştırabilir, uygun forwarding `Proxy` kabul edilebilir ve hata atan trap kontrollü komut
+hatasına çevrilir. Başarı yeni, ayrık ve tamamen donmuş doğrudan Source verir; hata kısmi belge
+vermeden atomik kapanır. Sabit profil 8.388.608 canonical Source baytı, seçili yüzey başına 25.000
+kimlik, seçili sahip başına 25.000 action occurrence, kökü sıfır sayılan 64 Source derinliği ve
+kök action'ları sıfır sayılan 64 action nesting derinliğidir.
+
+16/16 odak runtime vakası ile 19 derleyici-negatif doğrulama, kümülatif 85/85 editor vakası,
+44/44 public-package vakası ile 69 public derleyici-negatif doğrulama ve 10/10 bağımsız kök kanıtı
+geçer. Public paket 33 runtime ve 69 type export taşır; M08-T06 altı runtime komutuyla 14 public
+type, toplam 20 task-owned declaration ekler. 31.310 baytlık artifact
+[`editor-core-0.1.0-event-action-edits.json`](../proof/artifacts/editor-core-0.1.0-event-action-edits.json)
+dosyasıdır ve
+`sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7` ile sabittir; incelenen
+rapor [`EDITOR-CORE-EVENT-ACTION-EDITS.md`](../proof/EDITOR-CORE-EVENT-ACTION-EDITS.md) içindedir.
+Kanıtın tek doğrudan resmi önkoşulu donmuş M08-T05 artifact'ıdır; 81 exact receipt toplar ve
+davranışı 8 editor ile 21 dependency dosyasından oluşan 29 dosyalık izole ESM grafında, 17 exact
+statik kenarla çalıştırır.
+
+Güncel M08-T06 CI ardılı 163 iş yükü ve 77 kanıt çiftidir: 66 sıradan çift ve 11 bariyer. Tutulan
+quality plan `sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`; nötr envanter,
+impact graph, workload set ve ordered projection sırasıyla
+`sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cfc1f53`,
+`sha256:f7be1ee5bc35a7b0ea2cdcdabacf13f4525fcdabeb97e8854513ed4343e4aab3`,
+`sha256:56c04c534906197d7597c7854ba792d0c96001612f13346a1a104371910fc22a` ve
+`sha256:868d2a59cdf5e95badd7d0cce601003e26280609f44167c831e251595779e6e4` ile sabittir. Required ve
+shadow plan'ları `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3ff3` ve
+`sha256:533bdab2a511433e0c1bdb4fab1be27430914489d722918d7d789bdf294d4caf` değerlerindedir.
+
+Affected authority, 1.080 tracked path'i
+`sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8` ile mühürler; bunların
+154'ü proof-owned'dır ve ownership projection
+`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828` değerindedir. Güncel
+selector ve required-runner authority değerleri
+`sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` ve
+`sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; promotion artifact
+`sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549` değerindedir. Sequence
+34, `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` başında 31 donmuş
+artifact ve 62 güncel reader doğrular; sequence 33 ve önceki bütün baytları korur, mevcut reader
+index'leri `[50, 51, 52, 53, 54, 56, 58]` için yeniden mühürler ve yeni reader'ları `[60, 61]`
+index'lerine ekler. Checkpoint 57/57, hedef CI altyapı testleri 235/235, required-affected 27/27 ve
+promotion testleri 19/19 geçer.
+
+M08-T07 authoring isolation ve tam unknown-extension round-trip kanıtını, M08-T08 persistence'ı,
+M08-T09 action/event semantiği ile sürekli diagnostic/invalid-node mapping'i, M08-T10 ise terminal
+React/DOM sınırı ve G08'i taşır. Genel ilerleme 91/145 (%63), M08 ilerlemesi 6/10, kanıt kapıları
+8/13'tür; sıradaki iş M08-T07'dir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

@@ -379,7 +379,8 @@ function selectedRegions(selection, nodeById) {
       proofId === "editor-core-stable-id-insert" ||
       proofId === "editor-core-structural-edits" ||
       proofId === "editor-core-content-edits" ||
-      proofId === "editor-core-state-binding-edits"
+      proofId === "editor-core-state-binding-edits" ||
+      proofId === "editor-core-event-action-edits"
         ? "editor-core-public-package-contract"
         : "package-tests";
     if (
@@ -412,7 +413,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 76 ||
+    exhaustiveRootIds.length !== 77 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],

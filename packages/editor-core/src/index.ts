@@ -37,6 +37,14 @@ export {
   setDesenEditorStateInitial,
   setDesenEditorStateSchema,
 } from "./state-binding-edits.js";
+export {
+  deleteDesenEditorAction,
+  deleteDesenEditorEventHandler,
+  insertDesenEditorAction,
+  insertDesenEditorEventHandler,
+  reorderDesenEditorAction,
+  replaceDesenEditorAction,
+} from "./event-action-edits.js";
 
 export type {
   DesenEditorDocument,
@@ -107,3 +115,20 @@ export type {
   DesenEditorStateInitialSetCommand,
   DesenEditorStateSchemaSetCommand,
 } from "./state-binding-edits.js";
+
+export type {
+  DesenEditorAction,
+  DesenEditorActionDeleteCommand,
+  DesenEditorActionInsertCommand,
+  DesenEditorActionListPointer,
+  DesenEditorActionPointer,
+  DesenEditorActionReorderCommand,
+  DesenEditorActionReplaceCommand,
+  DesenEditorEventActionEditDiagnostic,
+  DesenEditorEventActionEditDiagnosticCode,
+  DesenEditorEventActionEditFailure,
+  DesenEditorEventActionEditResult,
+  DesenEditorEventActionEditSuccess,
+  DesenEditorEventHandlerDeleteCommand,
+  DesenEditorEventHandlerInsertCommand,
+} from "./event-action-edits.js";

@@ -110,16 +110,29 @@ reference-resolution rule. Exact command shapes, detached frozen success, atomic
 failure, stable identity, Proxy-reflection honesty, and the common finite profile remain unchanged.
 `PF-082` records the lifecycle and whole-value choices left open by DESEN 0.1.0.
 
-Insertion, structural edits, content edits, and state/binding edits remain structurally
+M08-T06 adds six immutable event-handler and closed-action transitions. Event-handler insert/delete
+and action insert/replace/delete/reorder address one unique surface-local node or behavior owner.
+Canonical owner-relative RFC 6901 pointers select root event lists and recursive
+`operation.invoke` `onSuccess`/`onFailure` settlement lists; reorder uses the post-removal final
+index. Removing the last value deliberately retains empty event maps, event action arrays, and
+settlement arrays. All seven DESEN 0.1.0 action variants remain whole inert data: guards, navigation
+parameters, operation and component inputs, event payloads, nested actions, and extensions are not
+executed or semantically resolved. Exact own-data command shapes, detached frozen success, atomic
+diagnostic-only failure, stable identity, structural re-admission, and Proxy-reflection honesty
+retain the earlier command boundary. The event/action profile additionally admits at most 25,000
+action occurrences per selected owner and action nesting depth 64 with root actions at zero.
+
+Insertion, structural edits, content edits, state/binding edits, and event/action edits remain structurally
 authoritative rather than Catalog-semantic: structurally valid unresolved capabilities, slots,
 props, style parts, visual states, tokens, references, repeats, and resource inputs may remain in
 the authoring graph for M08-T09 to diagnose. The common profile keeps canonical documents at 8
 MiB, selected surfaces at 25,000 identity occurrences, component depth at 64 with root at zero,
 and capability IDs at 4,096 code units where a command carries one. `N-014` remains `TESTED` by
 exact ordered edits and stable unaffected order. `S-002` remains `PLANNED` until M08-T10 closes
-terminal stable-identity integration. Event and closed-action edits remain M08-T06. Persistence,
-selection, viewport, authoring-state policy, continuous validation, and invalid-node mapping remain
-outside M08-T05.
+terminal stable-identity integration. Authoring isolation and complete unknown-extension
+round-trip preservation remain M08-T07, persistence remains M08-T08, semantic resolution and
+continuous diagnostics remain M08-T09, and the terminal React/DOM boundary and G08 remain
+M08-T10. Selection, viewport, undo/redo, and action execution remain outside M08-T06.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
 source. The package depends only on `protocol` and `validator` and has zero platform imports or

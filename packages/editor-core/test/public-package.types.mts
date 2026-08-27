@@ -1,6 +1,8 @@
 import {
   clearDesenEditorNodeCondition,
   createDesenEditorDocument,
+  deleteDesenEditorAction,
+  deleteDesenEditorEventHandler,
   deleteDesenEditorNode,
   deleteDesenEditorOwnerProp,
   deleteDesenEditorOwnerStyleProperty,
@@ -9,12 +11,16 @@ import {
   deleteDesenEditorVariant,
   deleteDesenEditorVariantProp,
   deleteDesenEditorVariantStyleProperty,
+  insertDesenEditorAction,
+  insertDesenEditorEventHandler,
   insertDesenEditorNode,
   insertDesenEditorStateDeclaration,
   insertDesenEditorVariant,
   moveDesenEditorNode,
+  reorderDesenEditorAction,
   reorderDesenEditorNode,
   reorderDesenEditorVariant,
+  replaceDesenEditorAction,
   setDesenEditorNodeCondition,
   setDesenEditorNodeRepeatItems,
   setDesenEditorNodeRepeatKey,
@@ -29,6 +35,13 @@ import {
 } from "@desen/editor-core";
 
 import type {
+  DesenEditorAction,
+  DesenEditorActionDeleteCommand,
+  DesenEditorActionInsertCommand,
+  DesenEditorActionListPointer,
+  DesenEditorActionPointer,
+  DesenEditorActionReorderCommand,
+  DesenEditorActionReplaceCommand,
   DesenEditorBindingValue,
   DesenEditorContentEditDiagnostic,
   DesenEditorContentEditDiagnosticCode,
@@ -42,6 +55,13 @@ import type {
   DesenEditorDocumentCreationFailure,
   DesenEditorDocumentCreationResult,
   DesenEditorDocumentCreationSuccess,
+  DesenEditorEventActionEditDiagnostic,
+  DesenEditorEventActionEditDiagnosticCode,
+  DesenEditorEventActionEditFailure,
+  DesenEditorEventActionEditResult,
+  DesenEditorEventActionEditSuccess,
+  DesenEditorEventHandlerDeleteCommand,
+  DesenEditorEventHandlerInsertCommand,
   DesenEditorNodeConditionClearCommand,
   DesenEditorNodeConditionSetCommand,
   DesenEditorNodeDeleteCommand,
@@ -552,3 +572,237 @@ const invalidStateBindingDiagnosticCode: DesenEditorStateBindingEditDiagnosticCo
 
 void stateBindingDiagnostic;
 void invalidStateBindingDiagnosticCode;
+
+const eventActionGuard = { op: "truthy", args: [true] } as const;
+const eventActions = [
+  {
+    type: "state.set",
+    path: "profile.name",
+    value: { $ref: "state.profile", fallback: null },
+    when: eventActionGuard,
+  },
+  { type: "state.toggle", path: "profile.enabled" },
+  { type: "navigate", surface: "future", params: { tab: "profile" } },
+  {
+    type: "operation.invoke",
+    operation: "com.example.profile/Save",
+    as: "saveProfile",
+    input: { profile: { $ref: "state.profile" } },
+    concurrency: "replace",
+    onSuccess: [{ type: "event.emit", name: "profile.saved" }],
+    onFailure: [{ type: "resource.refresh", resource: "profile" }],
+  },
+  { type: "resource.refresh", resource: "profile" },
+  {
+    type: "component.command",
+    target: "profile.form",
+    command: "focus",
+    input: { field: "name" },
+  },
+  {
+    type: "event.emit",
+    name: "profile.changed",
+    payload: { value: { $ref: "state.profile" } },
+    extensions: { "com.example.action": { retained: true } },
+  },
+] as const satisfies readonly DesenEditorAction[];
+
+const rootActionListPointer: DesenEditorActionListPointer = "/on/submit";
+const nestedActionListPointer: DesenEditorActionListPointer = "/on/submit/0/onSuccess";
+const rootActionPointer: DesenEditorActionPointer = "/on/submit/0";
+const nestedActionPointer: DesenEditorActionPointer = "/on/submit/0/onFailure/0";
+const eventActionDiagnosticCode: DesenEditorEventActionEditDiagnosticCode =
+  "run.desen.editor/EVENT_ACTION_EDIT_PATH_NOT_FOUND";
+const eventActionDiagnostic: DesenEditorEventActionEditDiagnostic = {
+  code: eventActionDiagnosticCode,
+  message: "The selected event/action path does not exist.",
+};
+
+const eventHandlerInsertCommand: DesenEditorEventHandlerInsertCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  event: "submit",
+  actions: eventActions,
+};
+const eventHandlerDeleteCommand: DesenEditorEventHandlerDeleteCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  event: "submit",
+};
+const actionInsertCommand: DesenEditorActionInsertCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  actionListPointer: nestedActionListPointer,
+  index: 0,
+  action: eventActions[6],
+};
+const actionReplaceCommand: DesenEditorActionReplaceCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  actionPointer: nestedActionPointer,
+  action: eventActions[2],
+};
+const actionDeleteCommand: DesenEditorActionDeleteCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  actionPointer: rootActionPointer,
+};
+const actionReorderCommand: DesenEditorActionReorderCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  actionPointer: rootActionPointer,
+  index: 1,
+};
+
+const eventActionEdits: readonly DesenEditorEventActionEditResult[] = [
+  insertDesenEditorEventHandler(document, eventHandlerInsertCommand),
+  deleteDesenEditorEventHandler(document, eventHandlerDeleteCommand),
+  insertDesenEditorAction(document, actionInsertCommand),
+  replaceDesenEditorAction(document, actionReplaceCommand),
+  deleteDesenEditorAction(document, actionDeleteCommand),
+  reorderDesenEditorAction(document, actionReorderCommand),
+];
+
+for (const eventActionEdit of eventActionEdits) {
+  if (eventActionEdit.ok) {
+    const success: DesenEditorEventActionEditSuccess = eventActionEdit;
+    const next: DesenEditorDocument = success.document;
+    const diagnostics: readonly [] = success.diagnostics;
+
+    // @ts-expect-error event/action successes keep the next Source immutable
+    success.document.entry = "mutated";
+
+    // @ts-expect-error event/action success diagnostics are empty
+    const impossibleDiagnostic = success.diagnostics[0];
+
+    void next;
+    void diagnostics;
+    void impossibleDiagnostic;
+  } else {
+    const failure: DesenEditorEventActionEditFailure = eventActionEdit;
+    const diagnosticCode: string = failure.diagnostics[0].code;
+
+    // @ts-expect-error event/action failures expose no partial Source
+    const partialDocument = failure.document;
+
+    void diagnosticCode;
+    void partialDocument;
+  }
+}
+
+// @ts-expect-error structural validator codes are not project-owned event/action edit codes
+const invalidEventActionDiagnosticCode: DesenEditorEventActionEditDiagnosticCode = "SCHEMA_INVALID";
+
+// @ts-expect-error event handler-insert command fields remain readonly
+eventHandlerInsertCommand.event = "replacement";
+
+// @ts-expect-error event handler action arrays remain readonly
+eventHandlerInsertCommand.actions.push(eventActions[0]);
+
+// @ts-expect-error event handler insertion requires a complete actions array
+const incompleteEventHandler: DesenEditorEventHandlerInsertCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  event: "submit",
+};
+void incompleteEventHandler;
+
+// @ts-expect-error action insertion requires an exact numeric position
+const incompleteActionInsert: DesenEditorActionInsertCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  actionListPointer: rootActionListPointer,
+  action: eventActions[0],
+};
+void incompleteActionInsert;
+
+// @ts-expect-error action replacement requires a complete replacement action
+const incompleteActionReplace: DesenEditorActionReplaceCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  actionPointer: rootActionPointer,
+};
+void incompleteActionReplace;
+
+// @ts-expect-error action deletion requires an exact action pointer
+const incompleteActionDelete: DesenEditorActionDeleteCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+};
+void incompleteActionDelete;
+
+// @ts-expect-error action reorder requires its post-removal final index
+const incompleteActionReorder: DesenEditorActionReorderCommand = {
+  surfaceId: "main",
+  ownerId: "main.form",
+  actionPointer: rootActionPointer,
+};
+void incompleteActionReorder;
+
+const broadEventHandlerAuthority: DesenEditorEventHandlerInsertCommand = {
+  ...eventHandlerInsertCommand,
+  // @ts-expect-error event handler insertion cannot declare Catalog event authority
+  declareEvent: true,
+};
+void broadEventHandlerAuthority;
+
+const broadActionAuthority: DesenEditorActionReplaceCommand = {
+  ...actionReplaceCommand,
+  // @ts-expect-error complete action replacement exposes no generic leaf-patch authority
+  valuePointer: "/payload/value",
+};
+void broadActionAuthority;
+
+const broadSettlementAuthority: DesenEditorActionInsertCommand = {
+  ...actionInsertCommand,
+  // @ts-expect-error settlement branches are addressed only by the owner-relative pointer
+  outcome: "onSuccess",
+};
+void broadSettlementAuthority;
+
+const executableEventPayload: DesenEditorAction = {
+  type: "event.emit",
+  name: "profile.changed",
+  payload: {
+    // @ts-expect-error event payload values are inert ValueSpecs, not executable callbacks
+    value: () => true,
+  },
+};
+void executableEventPayload;
+
+// @ts-expect-error a state.set action requires its complete value
+const incompleteStateSetAction: DesenEditorAction = {
+  type: "state.set",
+  path: "profile.name",
+};
+void incompleteStateSetAction;
+
+// @ts-expect-error operation.invoke requires a complete inert input map
+const incompleteOperationAction: DesenEditorAction = {
+  type: "operation.invoke",
+  operation: "com.example.profile/Save",
+  as: "saveProfile",
+};
+void incompleteOperationAction;
+
+// @ts-expect-error the emitted action union remains closed to seven DESEN 0.1.0 variants
+const openEventAction: DesenEditorAction = { type: "future.execute", value: true };
+void openEventAction;
+
+const executableActionCommand: DesenEditorActionInsertCommand = {
+  ...actionInsertCommand,
+  // @ts-expect-error emitted action commands cannot carry executable authority
+  action: () => "execute",
+};
+void executableActionCommand;
+
+// @ts-expect-error an action-list pointer must begin with the owner-relative /on root
+const malformedListPointer: DesenEditorActionListPointer = "on/submit";
+void malformedListPointer;
+
+// @ts-expect-error an action pointer must remain rooted in the owner-relative /on map
+const incompletePublicActionPointer: DesenEditorActionPointer = "/actions/0";
+void incompletePublicActionPointer;
+
+void eventActionDiagnostic;
+void invalidEventActionDiagnosticCode;
