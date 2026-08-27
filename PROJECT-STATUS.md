@@ -911,9 +911,9 @@ navigation, fixed inert fixture search, explicit fail-closed recovery, responsiv
 and keyboard/accessibility behavior. The M09 UX wireframe informs information architecture and task
 boundaries, while the earlier Desen product exploration informs the visual language. Neither Figma
 source is executable input or proof authority. The exact 12,118-byte artifact is
-`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`; the app suite passes
+`sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`; the app suite passes
 43/43, the independent mutation suite passes 8/8, and checkpoint sequence 40 passes 63/63 at
-`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`. These are local
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`. These are local
 receipts and do not claim a required-gate or hosted-CI pass.
 
 ## Current milestone
@@ -3372,7 +3372,7 @@ M09-T01 evidence:
 
 - `docs/proof/DESEN-APP-SHELL-NAVIGATION.md`
 - `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json`, exactly 12,118 bytes at
-  `sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`
+  `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`
 - prerequisite authority: the exact completed 325,549-byte M08-T10/G08 terminal-integration
   artifact is authenticated before any M09-T01 task claim
 - shell authority: the private React 19/Vite 8 application owns a full-viewport project gallery,
@@ -3397,7 +3397,7 @@ M09-T01 evidence:
 - CI authority: the current successor contains 174 workloads and 82 proof pairs, split into 71
   ordinary pairs and 11 barriers; sequence 40 passes 63/63 and authenticates 36 frozen artifacts
   plus 72 readers at
-  `sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`
+  `sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`
 - evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or
   hosted-CI result is inferred before its own execution
 - scope nonclaims: no Catalog-driven panel or layer tree, real adapter canvas, selection/inspector,

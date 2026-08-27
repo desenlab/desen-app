@@ -664,7 +664,7 @@ T09 root 15,066 bytes / `sha256:574467231c3dbf4fd60b350da7f39c008d39072d935f461c
 T10 proof 90,708 bytes / `sha256:53942712a9a1c40a1076b46912d13feb247eda59405790f4f211c495c44e895c`,
 and T10 root 14,830 bytes / `sha256:9cc2fb35ddb5d4b15371f8edcba07837e02a605169a609ef5eeb5da7e3ef0431`.
 M09-T01 appends sequence 40 at
-`b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`. It preserves
+`e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`. It preserves
 sequences 1–39 and all 35 predecessor artifact receipts byte-exact, appends the 12,118-byte
 M09-T01 artifact at index 35 and its proof/root readers at `[70, 71]`, advances live T09/T10
 source-reader indexes `[66, 67, 68]` for current README-bound source bytes, and reauthenticates the
@@ -711,7 +711,7 @@ The exact 325,549-byte M08-T10 artifact is
 root reader at `sha256:f1cd04fbccbba01469bfbacad3154c2ba99e130745dbbd1bcf0397230982dff9`.
 The exact 12,118-byte M09-T01 artifact is
 `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
-`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`, with reviewed report
+`sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`, with reviewed report
 `docs/proof/DESEN-APP-SHELL-NAVIGATION.md`. It records 24 tracked task files, including five
 repository-owned SVG assets, and 43 runtime cases. The focused application suite passes 43/43 and
 the independent root mutation suite passes 8/8. These local task receipts and sequence 40 make no

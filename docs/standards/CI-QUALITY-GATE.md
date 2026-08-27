@@ -837,9 +837,9 @@ The exact 325,549-byte M08-T10 artifact is
 root reader at `sha256:f1cd04fbccbba01469bfbacad3154c2ba99e130745dbbd1bcf0397230982dff9`.
 The exact 12,118-byte M09-T01 task artifact is
 `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
-`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`, with task report
+`sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`, with task report
 `docs/proof/DESEN-APP-SHELL-NAVIGATION.md`. Append-only checkpoint sequence 40 closes at
-`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806` with 36 frozen
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` with 36 frozen
 artifacts and 72 readers. It preserves sequences 1–39 and all 35 predecessor artifact receipts,
 appends the M09 artifact at index 35 and readers at `[70, 71]`, advances only live source-reader
 indexes `[66, 67, 68]`, and reauthenticates unchanged reader `[69]`.

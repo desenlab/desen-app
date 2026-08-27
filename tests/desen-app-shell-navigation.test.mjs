@@ -375,8 +375,10 @@ test("[writer] atomically writes exact evidence and preserves a destination on t
 
 test("[filesystem] rejects linked prerequisite, artifact, and proof authorities", async () => {
   const directory = await temporaryDirectory("desen-m09-t01-links-");
+  const prerequisiteTarget = path.join(directory, "prerequisite-target.json");
   const prerequisiteLink = path.join(directory, "prerequisite.json");
-  await symlink(path.join(ROOT, PREREQUISITE), prerequisiteLink);
+  await writeFile(prerequisiteTarget, await readFile(path.join(ROOT, PREREQUISITE)));
+  await symlink(prerequisiteTarget, prerequisiteLink);
   await assert.rejects(
     buildDesenAppShellNavigationEvidence({ prerequisitePath: prerequisiteLink }),
     expectedError("AUTHORITY_UNSAFE"),

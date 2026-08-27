@@ -515,7 +515,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[39],
-    "f7aa741f2a8a829950d7fd01dbaa0d413c7e49200a26985c7d772d269a988c58",
+    "e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -706,7 +706,7 @@ test("sequence forty preserves frozen receipts, reseals live editor readers, and
     task: "M09-T01",
     path: "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json",
     bytes: 12118,
-    sha256: "57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83",
+    sha256: "c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220",
   });
   assert.deepEqual(
     sequenceForty.readers.slice(0, sequenceThirtyNine.readers.length).map(identity),
@@ -759,13 +759,13 @@ test("sequence forty preserves frozen receipts, reseals live editor readers, and
       task: "M09-T01",
       role: "root-test",
       path: "tests/desen-app-shell-navigation.test.mjs",
-      bytes: 15313,
-      sha256: "6b6a62ea51b15c9ebb52596b3822479b2d714897bf28934c198ecd3892542d2c",
+      bytes: 15467,
+      sha256: "f4f3e120889379da8adb81d7b698ff2c4415e57fdfc06a729c79eb40a47b893a",
     },
   ]);
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceForty),
-    "f7aa741f2a8a829950d7fd01dbaa0d413c7e49200a26985c7d772d269a988c58",
+    "e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e",
   );
 });
 

@@ -300,8 +300,8 @@
       },
       {
         "path": "tests/desen-app-shell-navigation.test.mjs",
-        "bytes": 15313,
-        "sha256": "6b6a62ea51b15c9ebb52596b3822479b2d714897bf28934c198ecd3892542d2c"
+        "bytes": 15467,
+        "sha256": "f4f3e120889379da8adb81d7b698ff2c4415e57fdfc06a729c79eb40a47b893a"
       }
     ]
   },

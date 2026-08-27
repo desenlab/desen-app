@@ -617,8 +617,8 @@ language. Neither Figma source is executable input or proof authority.
 The focused application suite passes 43/43 and the independent mutation suite passes 8/8. Exact
 evidence is the 12,118-byte
 [`desen-app-0.1.0-shell-navigation.json`](docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json)
-at `sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`; sequence 40 closes at
-`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806` with 36 frozen
+at `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`; sequence 40 closes at
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e` with 36 frozen
 artifacts and 72 readers. These are local receipts, not a required-gate or hosted-CI result. This
 slice does not claim a Catalog panel, layer tree, real adapter canvas, Source editing, persistence,
 Design/Run execution, publication, or activation.

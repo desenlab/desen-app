@@ -1434,10 +1434,10 @@ language. Neither Figma source is executable input, architecture, or proof autho
 The application build, typecheck, and lint pass locally; the focused application suite passes
 43/43 and the independent mutation suite passes 8/8. The exact 12,118-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
-`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`, covering 24 tracked
+`sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`, covering 24 tracked
 files, including five repository-owned SVG assets, and 43 runtime cases. Append-only checkpoint
 sequence 40 passes 63/63 and closes at
-`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`, authenticating 36
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`, authenticating 36
 frozen artifacts and 72 readers. The current CI successor contains 174 workloads and 82 proof
 pairs, split into 71 ordinary pairs and 11 barriers. These local receipts make no required-gate or
 hosted-CI claim.

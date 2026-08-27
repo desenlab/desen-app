@@ -6,7 +6,7 @@ Status: DONE
 
 Artifact: `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json`
 
-Final artifact: `sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`
+Final artifact: `sha256:c3189ff9196f0da91311156893ab569a3c9f9c1ee62631b58286647f36d23220`
 
 ## Claim boundary
 
@@ -68,7 +68,7 @@ assets, and 43 runtime cases. These
 observed receipts make no independent root-suite, reader checkpoint, required-gate, or hosted CI
 claim by inference. The independent root mutation suite subsequently passes 8/8. Append-only reader
 checkpoint sequence 40 passes its 63/63 suite and closes at
-`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`, authenticating 36
+`sha256:e19eabc91c56c015b7fec7469d096b09a4bf42f5b6edc907c0207dd8c94feb0e`, authenticating 36
 frozen artifacts and 72 live readers. It preserves sequences 1–39 and all 35 predecessor artifact
 receipts byte-exact, appends the M09-T01 artifact at index 35 and its proof/root readers at indexes
 `[70, 71]`, advances the live T09/T10 source readers at `[66, 67, 68]` for current README bytes,
