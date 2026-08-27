@@ -58,6 +58,7 @@ const CONTINUOUS_VALIDATION_SUCCESSOR_PATHS = Object.freeze([
   CONTINUOUS_VALIDATION_TEST,
   CONTINUOUS_VALIDATION_TYPES,
 ]);
+const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const CONTINUOUS_VALIDATION_TYPE_EXPORTS = Object.freeze([
   "DesenEditorContinuousValidationReport",
   "DesenEditorContinuousValidator",
@@ -309,10 +310,21 @@ test("[authority] authenticates the exact M08-T05 prerequisite and isolated runt
     publicRuntimeCasesAdded: 1,
     publicCompilerNegativeAssertionsAdded: 6,
   });
+  assert.deepEqual(built.currentCompatibility.publicApi.terminalProofSuccessor, {
+    task: "M08-T10",
+    authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+    focusedTestPath: TERMINAL_INTEGRATION_TEST,
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    focusedRuntimeCases: 4,
+    publicRuntimeCasesAdded: 0,
+    publicCompilerNegativeAssertionsAdded: 0,
+  });
   assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 35);
   assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 88);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
+  assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
     bytes: 31_310,
@@ -330,6 +342,7 @@ test("[authority] authenticates the exact M08-T05 prerequisite and isolated runt
   for (const relativePath of CONTINUOUS_VALIDATION_SUCCESSOR_PATHS) {
     assert.equal(currentReceipts.has(relativePath), true);
   }
+  assert.equal(currentReceipts.has(TERMINAL_INTEGRATION_TEST), true);
 });
 
 test("[determinism] two fresh M08-T06 builds are byte-identical", async () => {

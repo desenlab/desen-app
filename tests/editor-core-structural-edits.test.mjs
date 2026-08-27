@@ -32,6 +32,7 @@ const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-tri
 const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
+const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST = "tests/editor-core-structural-edits.test.mjs";
@@ -169,6 +170,16 @@ test("[authority] authenticates the exact frozen M08-T02 artifact and isolated r
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
+  assert.deepEqual(built.currentCompatibility.boundary.terminalProofSuccessor, {
+    task: "M08-T10",
+    authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+    focusedTestPath: TERMINAL_INTEGRATION_TEST,
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    focusedRuntimeCases: 4,
+    publicRuntimeCasesAdded: 0,
+    publicCompilerNegativeAssertionsAdded: 0,
+  });
   assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 35);
   assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 88);
   assert.equal(built.currentCompatibility.boundary.emittedFiles, 36);
@@ -177,6 +188,7 @@ test("[authority] authenticates the exact frozen M08-T02 artifact and isolated r
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 10);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
+  assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
 });
 
 test("[determinism] two fresh M08-T03 builds are byte-identical", async () => {

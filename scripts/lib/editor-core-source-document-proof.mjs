@@ -95,6 +95,7 @@ const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const CONTINUOUS_VALIDATION_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
 const CONTINUOUS_VALIDATION_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
+const TERMINAL_INTEGRATION_TEST_PATH = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const GENERATOR_PATH = "scripts/generate-editor-core-source-document-proof.mjs";
@@ -242,6 +243,12 @@ const EXPECTED_PERSISTENCE_TEST_NAMES = Object.freeze([
   "accepts an exact 8 MiB Source and rejects a one-byte crossing on both open and save",
   "preserves atomic compare-and-set behavior when two opened generations race",
 ]);
+const EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES = Object.freeze([
+  "composes all 32 command APIs with immutable snapshots and an exact stable-identity ledger",
+  "replays two independent command runs byte-for-byte without sharing result identity",
+  "ends T09-valid with retained obligations and distinguishes authoring fingerprints from digests",
+  "round-trips the terminal document through an injected T08 persistence adapter",
+]);
 const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
   [PACKAGE_TEST_PATH]: "3e032d38875f234a5effa3e8379f67b64280818eafe95b05e42b2551aca0f36d",
   [PACKAGE_TYPES_PATH]: "69a3e450d55a86bbb26a7b59a2cea84e5f85dfacb51aff3d32097fd81fddbf3e",
@@ -251,9 +258,11 @@ const EXPECTED_TEST_AUTHORITY_SHA256 = Object.freeze({
     "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739",
   [PERSISTENCE_TEST_PATH]: "17d86804a38c243cbd75a97649b3e9f6716ea57206453851bd98216937b5bc54",
   [PERSISTENCE_TYPES_PATH]: "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2",
-  [PUBLIC_TEST_PATH]: "1eb2d878c95ea3655e89afc97e7f72d4f8b134cbf8c7022a268597efe4ed7cf4",
+  [PUBLIC_TEST_PATH]: "ec488542950775d642116d082eb80f4b883cc87050ca0876a1a65c8e4c91dfd1",
   [PUBLIC_TYPES_PATH]: "04a7b314398424563b765f1de60105c775aa13485c4b8913250edd21bd0f632a",
-  [ROOT_TEST_PATH]: "27dd4452d6432fad8b9207e74547938760e807eb16e20374b6af9fa6a0d9b1f8",
+  [ROOT_TEST_PATH]: "78d0b0a6927dfc3752a6ff03fb3d96b36c321732078130c03672b0cfaa831bf8",
+  [TERMINAL_INTEGRATION_TEST_PATH]:
+    "3d77bef07197e0a914b92e7f7b3a7cc65448c56f0ad03d303edfb6139170997b",
 });
 
 export const DEFAULT_EDITOR_CORE_SOURCE_DOCUMENT_ARTIFACT_PATH = path.join(
@@ -476,6 +485,7 @@ const EXPECTED_PACKAGE_SCRIPTS = Object.freeze({
   "test:authoring-round-trip": "vitest run test/authoring-round-trip.test.ts",
   "test:persistence": "vitest run test/persistence.test.ts",
   "test:continuous-validation": "vitest run test/continuous-validation.test.ts",
+  "test:terminal-integration": "vitest run test/terminal-integration.test.ts",
   "test:coverage": "vitest run --coverage",
 });
 const PACKAGE_LIFECYCLE_SCRIPT_NAMES = Object.freeze([
@@ -581,6 +591,7 @@ const EXPECTED_TRACKED_PATHS = Object.freeze(
     CONTINUOUS_VALIDATION_SOURCE_PATH,
     CONTINUOUS_VALIDATION_TEST_PATH,
     CONTINUOUS_VALIDATION_TYPES_PATH,
+    TERMINAL_INTEGRATION_TEST_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
     BUILD_TSCONFIG_PATH,
@@ -2661,6 +2672,16 @@ function verifySourceAndDistributionContract(files, packageManifest) {
       publicRuntimeCasesAdded: 2,
       publicCompilerNegativeAssertionsAdded: 6,
     }),
+    terminalProofSuccessor: Object.freeze({
+      task: "M08-T10",
+      authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+      focusedTestPath: TERMINAL_INTEGRATION_TEST_PATH,
+      runtimeExportsAdded: 0,
+      typeExportsAdded: 0,
+      focusedRuntimeCases: EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES.length,
+      publicRuntimeCasesAdded: 0,
+      publicCompilerNegativeAssertionsAdded: 0,
+    }),
     publicDeclarations: EXPECTED_SOURCE_EXPORTS.length,
     tsdocDeclarations: EXPECTED_SOURCE_EXPORTS.length,
     runtimeImports: Object.freeze(["@desen/validator"]),
@@ -2863,6 +2884,39 @@ function verifyTestInventory(files) {
     );
   }
 
+  const terminalSourceFile = parseTestAuthority(
+    files,
+    TERMINAL_INTEGRATION_TEST_PATH,
+    ts.ScriptKind.TS,
+  );
+  const terminalRegistrations = collectCalls(terminalSourceFile, "it").map((call) => {
+    const callback = call.arguments[1];
+    if (
+      !ts.isIdentifier(call.expression) ||
+      call.expression.text !== "it" ||
+      (call.arguments.length !== 2 && call.arguments.length !== 3) ||
+      !ts.isStringLiteral(call.arguments[0]) ||
+      (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback)) ||
+      callback.parameters.length !== 0 ||
+      !ts.isBlock(callback.body) ||
+      callback.body.statements.length === 0 ||
+      (call.arguments.length === 3 && !ts.isNumericLiteral(call.arguments[2]))
+    ) {
+      return undefined;
+    }
+    return { name: call.arguments[0].text, callback };
+  });
+  const terminalTestNames = terminalRegistrations.map((registration) => registration?.name);
+  if (
+    terminalRegistrations.some((registration) => registration === undefined) ||
+    !exactJson(terminalTestNames, EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES)
+  ) {
+    fail(
+      "EDITOR_SOURCE_DOCUMENT_TEST_INVENTORY_DRIFT",
+      "The M08-T10 terminal-integration runtime authority drifted.",
+    );
+  }
+
   const publicSourceFile = parseTestAuthority(files, PUBLIC_TEST_PATH, ts.ScriptKind.JS);
   const publicNodeTestImports = publicSourceFile.statements.filter(
     (statement) =>
@@ -2976,6 +3030,7 @@ function verifyTestInventory(files) {
     ),
     persistenceRuntimeCases: persistenceRegistrations.length,
     persistenceCompilerNegativeCases: persistenceTypeAssertions,
+    terminalIntegrationRuntimeCases: terminalRegistrations.length,
     publicRuntimeContractCases: publicRegistrations.filter(
       (registration) => !registration.name.startsWith("[proof-core]"),
     ).length,
@@ -2997,6 +3052,7 @@ function verifyTestInventory(files) {
     inventory.sourceCompilerNegativeCases !== 5 ||
     inventory.persistenceRuntimeCases !== EXPECTED_PERSISTENCE_TEST_NAMES.length ||
     inventory.persistenceCompilerNegativeCases !== 21 ||
+    inventory.terminalIntegrationRuntimeCases !== EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES.length ||
     inventory.publicRuntimeContractCases !== 43 ||
     inventory.publicCompilerNegativeCases !== 102 ||
     inventory.publicProofCoreCases !== 7 ||
@@ -3293,6 +3349,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
     PERSISTENCE_TYPES_PATH,
     CONTINUOUS_VALIDATION_TEST_PATH,
     CONTINUOUS_VALIDATION_TYPES_PATH,
+    TERMINAL_INTEGRATION_TEST_PATH,
     PUBLIC_TEST_PATH,
     PUBLIC_TYPES_PATH,
     ROOT_TEST_PATH,
@@ -3321,6 +3378,7 @@ export async function buildEditorCoreSourceDocumentEvidence(rawOptions = undefin
       AUTHORING_ROUND_TRIP_TYPES_PATH,
       PERSISTENCE_TEST_PATH,
       PERSISTENCE_TYPES_PATH,
+      TERMINAL_INTEGRATION_TEST_PATH,
       PUBLIC_TEST_PATH,
       PUBLIC_TYPES_PATH,
       ROOT_TEST_PATH,

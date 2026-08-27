@@ -184,19 +184,30 @@ in the authoring graph. M08-T09 diagnoses them against one captured Catalog set 
 the document or persistence generation. The common profile keeps canonical documents at 8
 MiB, selected surfaces at 25,000 identity occurrences, component depth at 64 with root at zero,
 and capability IDs at 4,096 code units where a command carries one. `N-012`, `N-014`, `N-018`,
-and `S-003` are `TESTED`; reverse-domain naming remains guidance rather than a new hard validator
-rule. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration. M08-T09
-keeps Catalog and complete-Source fingerprints separate, includes root `authoring` in the document
-identity, leaves subjectless diagnostics explicitly unmapped, and does not execute dynamic
-obligations. The terminal React/DOM boundary and G08 remain M08-T10. Selection, viewport,
-undo/redo, action execution, multi-user synchronization, and remote persistence remain outside the
-completed M08-T08/M08-T09 boundaries.
+`S-002`, and `S-003` are `TESTED`; reverse-domain naming remains guidance rather than a new hard
+validator rule. M08-T09 keeps Catalog and complete-Source fingerprints separate, includes root
+`authoring` in the document identity, leaves subjectless diagnostics explicitly unmapped, and does
+not execute dynamic obligations. Selection, viewport, undo/redo, action execution, multi-user
+synchronization, and remote persistence remain outside the completed M08 boundary.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
 source. Editor-core depends only on `protocol` and `validator` and has zero platform imports or
-executable authority; the concrete loopback transport remains in editor-web. This is not the
-terminal M08 platform-boundary claim; M08-T10 still owns the independent editor-core artifact and
-React/DOM integration proof, so P-18 remains `PARTIAL`.
+executable authority; the concrete loopback transport remains in editor-web. M08-T10 authenticates
+every frozen M08-T01–M08-T09 artifact, copies exact emitted bytes into two independent temporary ESM
+graphs, and executes the same deterministic 32-step command transcript in both. Its stable-identity
+ledger shows that insertion adds one identity, deletion removes only its selected prepared subtree,
+and all other transitions preserve the complete node/behavior identity multiset. The terminal
+Source validates with zero diagnostics and seven retained obligations and survives the M08-T08
+port's exact generation-one save/open round trip.
+
+The terminal platform audit parses all nine editor-core TypeScript source files, all nine emitted
+JavaScript files, and all nine emitted declaration files with the TypeScript AST. The graph contains
+only relative, `@desen/protocol`, and `@desen/validator` edges and no React, ReactDOM, DOM/browser,
+Node-platform, CSS, dynamic-import, evaluation, or function-constructor authority. Its complete
+callback-free trace is JSON-serializable and stable under RFC 8785 canonicalization. Together with
+the M01-T05, M04-T16, and M04-T17 prerequisites, this closes P-18 as `PROVEN` and G08 as `DONE`.
+It does not claim a React renderer or DOM behavior, a hostile-JavaScript sandbox, concrete durable
+storage/network authority, or editor selection, viewport, undo/redo, or collaboration policy.
 
 `runtime-core` accepts a verified bundle, exact catalog set, and host ports. It produces
 JSON-serializable state snapshots, diagnostics, and render plans. `runtime-react` translates those

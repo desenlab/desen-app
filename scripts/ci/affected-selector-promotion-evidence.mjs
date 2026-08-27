@@ -278,6 +278,13 @@ const M08_SUCCESSOR_ADDED_TRACKED_PATHS = Object.freeze([
   "scripts/lib/editor-core-continuous-validation-proof.mjs",
   "scripts/verify-editor-core-continuous-validation.mjs",
   "tests/editor-core-continuous-validation.test.mjs",
+  "docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md",
+  "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json",
+  "packages/editor-core/test/terminal-integration.test.ts",
+  "scripts/generate-editor-core-terminal-integration-proof.mjs",
+  "scripts/lib/editor-core-terminal-integration-proof.mjs",
+  "scripts/verify-editor-core-terminal-integration.mjs",
+  "tests/editor-core-terminal-integration.test.mjs",
 ]);
 const I07_04_PROMOTED_AUTHORITIES = Object.freeze({
   selectorSha256: "8b1a3e2751247660b6599459c54c2550cac280faa030ca239df6493883fc076e",
@@ -323,13 +330,13 @@ const CURRENT_SUCCESSOR_OWNERSHIP_REVIEW = Object.freeze({
   trackedPathSetSha256: EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256,
   proofOwnedPathCount: EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT,
   categoryCounts: Object.freeze({
-    PROOF_UNIT: 160,
+    PROOF_UNIT: 162,
     CI_POLICY: 45,
     DEPENDENCY_POLICY: 31,
-    FROZEN_INPUT: 124,
-    PACKAGE_OR_APPLICATION: 428,
-    SHARED_PROOF_INFRASTRUCTURE: 197,
-    PROJECT_DOCUMENTATION: 116,
+    FROZEN_INPUT: 125,
+    PACKAGE_OR_APPLICATION: 429,
+    SHARED_PROOF_INFRASTRUCTURE: 199,
+    PROJECT_DOCUMENTATION: 117,
     REPOSITORY_POLICY: 11,
   }),
   ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
@@ -711,12 +718,12 @@ const G07_PROOF_READER_CHECKPOINT = Object.freeze({
   currentReaderCount: 50,
   liveVerification: "PASS",
 });
-const M08_T09_PROOF_READER_CHECKPOINT = Object.freeze({
+const M08_T10_PROOF_READER_CHECKPOINT = Object.freeze({
   profile: "desen.ci.proof-reader-checkpoints.v1",
-  sequence: 37,
-  headSha256: "e43b48e2d4873b9212d4d0b1bf3e6fb03f56fcc350f8bc9ad65409891995c310",
-  frozenArtifactCount: 34,
-  currentReaderCount: 68,
+  sequence: 38,
+  headSha256: "64f7d6519589a5a8cb564af1215c2a12c44297f8ea855910613ea3b361cee6d0",
+  frozenArtifactCount: 35,
+  currentReaderCount: 70,
   liveVerification: "PASS",
 });
 const EXPECTED_LANES = Object.freeze(["A", "B", "C", "D", "E", "F", "G", "H"]);
@@ -2151,7 +2158,7 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "Current comparison-source receipts do not reproduce the reviewed M08-T09 successor.",
+      "Current comparison-source receipts do not reproduce the reviewed M08-T10 successor.",
     );
   }
   const selectorBytes = capturedSourceBytes(currentAuthority, SELECTOR_SOURCE_PATH);
@@ -2159,12 +2166,12 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
   const currentInventory = createExhaustiveWorkloadInventory();
   if (
     currentInventory.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 ||
-    currentInventory.workloadCount !== 170 ||
-    currentInventory.proofUnitCount !== 80
+    currentInventory.workloadCount !== 172 ||
+    currentInventory.proofUnitCount !== 81
   ) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current workload graph is not the exact reviewed M08-T09 append-only successor.",
+      "The current workload graph is not the exact reviewed M08-T10 append-only successor.",
     );
   }
   const currentProofPairClasses = currentInventory.proofUnits.reduce(
@@ -2174,10 +2181,10 @@ export async function verifyAffectedSelectorPromotionEvidence(options = {}) {
     },
     { ordinary: 0, barrier: 0 },
   );
-  if (currentProofPairClasses.ordinary !== 69 || currentProofPairClasses.barrier !== 11) {
+  if (currentProofPairClasses.ordinary !== 70 || currentProofPairClasses.barrier !== 11) {
     fail(
       "AFFECTED_PROMOTION_SUCCESSOR_AUTHORITY_DRIFT",
-      "The current M08-T09 proof-pair authority is not exactly 69 ordinary and 11 barrier pairs.",
+      "The current M08-T10 proof-pair authority is not exactly 70 ordinary and 11 barrier pairs.",
     );
   }
   const liveRunnerAuthority = await createRunnerAuthority(workspaceRoot, currentAuthority);
@@ -2224,11 +2231,11 @@ export function validateAffectedSelectorPromotionLiveCheckpoint(liveReceipt) {
           liveVerification: liveReceipt.status,
         }
       : null;
-  if (!isDeepStrictEqual(projection, M08_T09_PROOF_READER_CHECKPOINT)) {
+  if (!isDeepStrictEqual(projection, M08_T10_PROOF_READER_CHECKPOINT)) {
     fail(
       "AFFECTED_PROMOTION_CUTOVER_DRIFT",
       "Promotion evidence does not match the live proof-reader checkpoint authority.",
-      { expected: M08_T09_PROOF_READER_CHECKPOINT, actual: projection },
+      { expected: M08_T10_PROOF_READER_CHECKPOINT, actual: projection },
     );
   }
   return liveReceipt;

@@ -606,6 +606,41 @@ sequence 37 ise önceki artifact baytlarını koruyarak 34 artifact ve 68 reader
 `P-18` `PARTIAL` ve kanıt kapıları 8/13 kalır. Genel ilerleme 94/145 (%65), M08 ilerlemesi 9/10'dur;
 sıradaki iş M08-T10 terminal React/DOM sınırı, cross-command determinizm ve G08 kapanışıdır.
 
+M08-T10 ve G08 de tamamlandı. Terminal kanıt yeni bir production helper veya public export
+eklemeden, donmuş M08-T01–M08-T09 artifact'larının tamamını ve P-18'in M01-T05/M04-T16/M04-T17
+platform/JSON-trace önkoşullarını doğrular. Exact emitted editor-core graph'ı iki bağımsız geçici
+ESM graph'ına kopyalanır ve her ikisinde aynı sıralı 32-adımlı komut transcript'i çalıştırılır:
+insert, üç structural, on dört content, sekiz state/binding ve altı event/action komutu. Her başarılı
+geçiş yeni recursively frozen doğrudan Source döndürür ve önceki Source'u değiştirmez. Insert yalnız
+`sign-in.terminal` kimliğini ekler, delete yalnız hazırlanmış `sign-in.terminal-delete` alt ağacını
+çıkarır, diğer otuz geçiş bütün node/behavior kimlik multiset'ini korur. Araya yerleştirilen bir
+missing-target komutu kısmi belge vermeden kontrollü başarısız olur; sonraki geçerli komut byte-exact
+snapshot'tan devam eder.
+
+Terminal Source, M08-T09 validator'ından sıfır diagnostic, yedi korunmuş dynamic obligation ve sıfır
+invalid/unmapped subject ile geçer. Enjekte edilen in-memory compare-and-set adapter, M08-T08 portunu
+generation-one save/open ve exact canonical Source baytlarıyla doğrular. Yalnız kök `authoring`
+alanında farklı iki Source aynı protocol Source digest'ini korurken farklı complete-document
+fingerprint'leri alır. İki bağımsız graph terminal Source, kimlik ledger'ı, validation sonucu,
+persistence receipt'leri ve callback-free JSON/RFC 8785 trace commitment'lerinde byte-identical
+sonuç verir.
+
+Odak terminal suite 4/4, bütün editor-core paketi 144/144, public package 50/50 ve 102
+compiler-negatif, bağımsız kök kanıtı 10/10 ve exact verifier PASS'tir. TypeScript AST denetimi dokuz
+source, dokuz emitted JavaScript ve dokuz emitted declaration dosyasının tamamını kapsar; kabul
+edilen graph React, ReactDOM, DOM/browser, Node-platform, CSS, dynamic-import, `eval` veya
+function-constructor yetkisi taşımaz. Exact kanıt 325,549 baytlık
+[`editor-core-0.1.0-terminal-integration.json`](../proof/artifacts/editor-core-0.1.0-terminal-integration.json)
+artifact'ıdır ve
+`sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b` ile pinlenir; incelenen
+rapor [`EDITOR-CORE-TERMINAL-INTEGRATION.md`](../proof/EDITOR-CORE-TERMINAL-INTEGRATION.md)'dir.
+
+Bu kapanışla `S-002` `TESTED`, `P-18` `PROVEN`, G08 `DONE` ve kanıt kapıları 9/13 olur. Genel
+ilerleme 95/145 (%66), M08 ilerlemesi 10/10'dur; sıradaki iş M09-T01 Desen App shell ve proje
+navigation'dır. React renderer/DOM davranışı, selection/viewport/undo politikası, multi-user
+senkronizasyon, somut durable storage/network adapter'ı, dynamic obligation execution,
+hostile-JavaScript sandbox'ı ve streaming/preallocation memory-DoS sınırı bu kanıtın dışındadır.
+
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da
 uygulanır: `G03` sonrasında A2UI/DTCG karşılaştırması, `G10` sonrasında ise en az 10 gerçek ekip

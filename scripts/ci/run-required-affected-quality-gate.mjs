@@ -386,7 +386,8 @@ function selectedRegions(selection, nodeById) {
       proofId === "editor-core-state-binding-edits" ||
       proofId === "editor-core-event-action-edits" ||
       proofId === "editor-core-authoring-round-trip" ||
-      proofId === "editor-core-continuous-validation"
+      proofId === "editor-core-continuous-validation" ||
+      proofId === "editor-core-terminal-integration"
         ? "editor-core-public-package-contract"
         : proofId === "editor-core-persistence"
           ? "editor-web-public-package-contract"
@@ -421,7 +422,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 80 ||
+    exhaustiveRootIds.length !== 81 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],

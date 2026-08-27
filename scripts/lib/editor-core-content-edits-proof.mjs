@@ -38,6 +38,7 @@ const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const CONTINUOUS_VALIDATION_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
 const CONTINUOUS_VALIDATION_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
+const TERMINAL_INTEGRATION_TEST_PATH = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-content-edits.test.mjs";
@@ -150,6 +151,7 @@ const TRACKED_PATHS = Object.freeze([
   PERSISTENCE_TYPES_PATH,
   CONTINUOUS_VALIDATION_TEST_PATH,
   CONTINUOUS_VALIDATION_TYPES_PATH,
+  TERMINAL_INTEGRATION_TEST_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -198,6 +200,7 @@ const RETAINED_T04_RECEIPT_PATHS = Object.freeze(
         PERSISTENCE_TYPES_PATH,
         CONTINUOUS_VALIDATION_TEST_PATH,
         CONTINUOUS_VALIDATION_TYPES_PATH,
+        TERMINAL_INTEGRATION_TEST_PATH,
         PROOF_LIBRARY_PATH,
         ROOT_TEST_PATH,
       ].includes(relativePath),
@@ -488,6 +491,14 @@ const EXPECTED_PERSISTENCE_TEST_NAMES = Object.freeze([
   "accepts an exact 8 MiB Source and rejects a one-byte crossing on both open and save",
   "preserves atomic compare-and-set behavior when two opened generations race",
 ]);
+const EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES = Object.freeze([
+  "composes all 32 command APIs with immutable snapshots and an exact stable-identity ledger",
+  "replays two independent command runs byte-for-byte without sharing result identity",
+  "ends T09-valid with retained obligations and distinguishes authoring fingerprints from digests",
+  "round-trips the terminal document through an injected T08 persistence adapter",
+]);
+const EXPECTED_T10_TEST_AUTHORITY_SHA256 =
+  "3d77bef07197e0a914b92e7f7b3a7cc65448c56f0ad03d303edfb6139170997b";
 const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the package manifest keeps one exact root export and the declared runtime dependencies",
   "the emitted public module graph stays platform-neutral and execution-closed",
@@ -1002,7 +1013,9 @@ function verifyBoundary(files) {
       "vitest run test/authoring-round-trip.test.ts" ||
     manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
     manifest.scripts?.["test:continuous-validation"] !==
-      "vitest run test/continuous-validation.test.ts"
+      "vitest run test/continuous-validation.test.ts" ||
+    manifest.scripts?.["test:terminal-integration"] !==
+      "vitest run test/terminal-integration.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -1310,6 +1323,18 @@ function verifyBoundary(files) {
   if (persistenceTypeAssertions !== 21) {
     fail("TEST_INVENTORY_DRIFT", "Persistence compiler-negative inventory must remain twenty-one.");
   }
+  const terminalIntegrationTests = testNames(
+    decodeUtf8(files.get(TERMINAL_INTEGRATION_TEST_PATH), TERMINAL_INTEGRATION_TEST_PATH),
+  );
+  exactArray(
+    terminalIntegrationTests,
+    EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES,
+    "TEST_INVENTORY_DRIFT",
+    "Terminal-integration behavior inventory",
+  );
+  if (sha256(files.get(TERMINAL_INTEGRATION_TEST_PATH)) !== EXPECTED_T10_TEST_AUTHORITY_SHA256) {
+    fail("TEST_INVENTORY_DRIFT", "The exact M08-T10 terminal test authority drifted.");
+  }
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   exactArray(
     publicTests,
@@ -1369,6 +1394,16 @@ function verifyBoundary(files) {
       publicRuntimeCasesAdded: 2,
       publicCompilerNegativeAssertionsAdded: 6,
     },
+    terminalProofSuccessor: {
+      task: "M08-T10",
+      authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+      focusedTestPath: TERMINAL_INTEGRATION_TEST_PATH,
+      runtimeExportsAdded: 0,
+      typeExportsAdded: 0,
+      focusedRuntimeCases: EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES.length,
+      publicRuntimeCasesAdded: 0,
+      publicCompilerNegativeAssertionsAdded: 0,
+    },
     contentPublicDeclarations: EXPECTED_CONTENT_EXPORTS.length,
     contentTsdocDeclarations: sourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
@@ -1377,6 +1412,7 @@ function verifyBoundary(files) {
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length,
     focusedCompilerNegativeAssertions: focusedTypeAssertions,
+    terminalIntegrationRuntimeCases: terminalIntegrationTests.length,
     publicRuntimeAndRootCases: EXPECTED_PUBLIC_TEST_NAMES.length,
     publicCompilerNegativeAssertions: publicTypeAssertions,
     rootProofCases: EDITOR_CORE_CONTENT_EDITS_ROOT_TEST_NAMES.length,
@@ -2329,6 +2365,7 @@ export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined
       additiveTypeExports: boundary.additiveTypeExports,
       additiveSuccessor: boundary.additiveSuccessor,
       proofOnlySuccessor: boundary.proofOnlySuccessor,
+      terminalProofSuccessor: boundary.terminalProofSuccessor,
       contentPublicDeclarations: boundary.contentPublicDeclarations,
       contentTsdocDeclarations: boundary.contentTsdocDeclarations,
     },
@@ -2345,6 +2382,7 @@ export async function buildEditorCoreContentEditsEvidence(rawOptions = undefined
     testAuthority: {
       focusedBehaviorCases: boundary.focusedBehaviorCases,
       focusedCompilerNegativeAssertions: boundary.focusedCompilerNegativeAssertions,
+      terminalIntegrationRuntimeCases: boundary.terminalIntegrationRuntimeCases,
       publicRuntimeAndRootCases: boundary.publicRuntimeAndRootCases,
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,

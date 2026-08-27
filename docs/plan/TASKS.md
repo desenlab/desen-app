@@ -1020,19 +1020,19 @@ hosted M07-T10 claim.
 
 ## M08 — Framework-neutral editor core
 
-| ID      | Status      | Depends on                | Deliverable / evidence                                               |
-| ------- | ----------- | ------------------------- | -------------------------------------------------------------------- |
-| M08-T01 | DONE        | G07                       | Direct DESEN Source editor document model                            |
-| M08-T02 | DONE        | M08-T01                   | Stable-ID allocator and insert command                               |
-| M08-T03 | DONE        | M08-T02                   | Delete, slot move, and ordered reorder commands                      |
-| M08-T04 | DONE        | M08-T02–M08-T03           | Prop, style-part, condition, and variant editing commands            |
-| M08-T05 | DONE        | M08-T02                   | State declaration and binding editing commands                       |
-| M08-T06 | DONE        | M08-T05                   | Event and closed-action editing commands                             |
-| M08-T07 | DONE        | M08-T01–M08-T06           | Authoring isolation and unknown-extension round-trip preservation    |
-| M08-T08 | DONE        | M07-T05, M08-T01, M08-T07 | Persistence port and local source adapter                            |
-| M08-T09 | DONE        | M08-T03–M08-T07           | Continuous validation and invalid-node mapping                       |
-| M08-T10 | NOT_STARTED | M08-T01–M08-T09           | React/DOM boundary, stable identity, and deterministic command tests |
-| G08     | NOT_STARTED | M08-T01–M08-T10           | UI-independent editor core produces valid sources                    |
+| ID      | Status | Depends on                | Deliverable / evidence                                               |
+| ------- | ------ | ------------------------- | -------------------------------------------------------------------- |
+| M08-T01 | DONE   | G07                       | Direct DESEN Source editor document model                            |
+| M08-T02 | DONE   | M08-T01                   | Stable-ID allocator and insert command                               |
+| M08-T03 | DONE   | M08-T02                   | Delete, slot move, and ordered reorder commands                      |
+| M08-T04 | DONE   | M08-T02–M08-T03           | Prop, style-part, condition, and variant editing commands            |
+| M08-T05 | DONE   | M08-T02                   | State declaration and binding editing commands                       |
+| M08-T06 | DONE   | M08-T05                   | Event and closed-action editing commands                             |
+| M08-T07 | DONE   | M08-T01–M08-T06           | Authoring isolation and unknown-extension round-trip preservation    |
+| M08-T08 | DONE   | M07-T05, M08-T01, M08-T07 | Persistence port and local source adapter                            |
+| M08-T09 | DONE   | M08-T03–M08-T07           | Continuous validation and invalid-node mapping                       |
+| M08-T10 | DONE   | M08-T01–M08-T09           | React/DOM boundary, stable identity, and deterministic command tests |
+| G08     | DONE   | M08-T01–M08-T10           | UI-independent editor core produces valid sources                    |
 
 M08-T01 is `DONE` after authenticating its completed I07-04/G07 prerequisite. The built package
 admits unknown inert JSON through the frozen Source and embedded-schema structural validator and
@@ -1363,6 +1363,44 @@ earlier artifact byte.
 `N-012`, `N-014`, `N-018`, and `S-003` remain `TESTED`; `S-002` remains `PLANNED` for terminal
 integration, `P-18` remains `PARTIAL`, and no proof-gate or other normative status changes. Overall
 implementation progress is 94/145 (65%), M08 is 9/10, proof gates remain 8/13, and M08-T10 is next.
+
+M08-T10 and G08 are `DONE`. This terminal proof adds no production helper or public export. It
+authenticates every exact frozen M08-T01–M08-T09 artifact plus the M01-T05, M04-T16, and M04-T17
+platform/JSON-trace authorities, copies the exact emitted editor-core dependency graph into two
+independent temporary ESM graphs, and runs the same ordered 32-step transcript in each. The
+transcript covers the insert command, all three structural commands, all fourteen content
+commands, all eight state/binding commands, and all six event/action commands. Every successful
+transition returns a fresh recursively frozen direct Source and leaves its predecessor unchanged.
+Insertion adds only `sign-in.terminal`, deletion removes only the prepared
+`sign-in.terminal-delete` subtree, and the other thirty transitions preserve the complete
+node/behavior identity multiset. One interleaved missing-target command fails atomically without a
+partial document and the next valid command resumes from the byte-exact snapshot.
+
+The terminal Source passes the frozen M08-T09 Catalog-bound validator with zero diagnostics, seven
+retained dynamic obligations, and no invalid or unmapped subjects. An injected in-memory
+compare-and-set adapter exercises the M08-T08 port through generation-one save/open with exact
+canonical Source bytes. Two Sources that differ only in root `authoring` retain the same protocol
+Source digest and receive distinct complete-document fingerprints. Both independent graphs produce
+byte-identical terminal Sources, identity ledgers, validation reports, persistence receipts, and
+callback-free JSON/RFC 8785 trace commitments.
+
+The focused terminal suite passes 4/4; the full editor-core package passes 144/144; the public
+package remains 50/50 with 102 compiler-negative assertions; and the independent root proof passes
+10/10 with its exact verifier. TypeScript AST inspection covers all nine editor-core source files,
+all nine emitted JavaScript files, and all nine emitted declaration files. The accepted graph has
+only relative, `@desen/protocol`, and `@desen/validator` static edges and no React, ReactDOM,
+DOM/browser, Node-platform, CSS, dynamic-import, `eval`, or function-constructor authority. Exact
+evidence is the 325,549-byte
+`docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json` at
+`sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b` and the reviewed
+`docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md` report.
+
+This completes the UI-independent editor core and advances `S-002` to `TESTED`, P-18 to `PROVEN`,
+and G08 to `DONE`. It does not claim a React renderer or DOM behavior, selection/viewport/undo
+policy, multi-user synchronization, concrete durable storage or network transport, dynamic
+obligation execution, a hostile-JavaScript sandbox, or streaming/preallocation memory-DoS bounds.
+Overall implementation progress is 95/145 (66%), M08 is 10/10, proof gates are 9/13, and M09-T01
+is next.
 
 ## M09 — Desen App Web MVP
 

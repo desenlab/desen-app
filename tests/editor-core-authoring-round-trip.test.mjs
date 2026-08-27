@@ -58,6 +58,7 @@ const CONTINUOUS_VALIDATION_SUCCESSOR_PATHS = Object.freeze([
   CONTINUOUS_VALIDATION_TEST,
   CONTINUOUS_VALIDATION_TYPES,
 ]);
+const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const temporaryDirectories = [];
 let built;
 
@@ -195,6 +196,16 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
+  assert.deepEqual(built.currentCompatibility.publicApi.terminalProofSuccessor, {
+    task: "M08-T10",
+    authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+    focusedTestPath: TERMINAL_INTEGRATION_TEST,
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    focusedRuntimeCases: 4,
+    publicRuntimeCasesAdded: 0,
+    publicCompilerNegativeAssertionsAdded: 0,
+  });
   assert.deepEqual(built.currentCompatibility.publicApi.additiveSuccessors, [
     {
       task: "M08-T08",
@@ -257,7 +268,8 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
   assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 24);
   assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
-  assert.equal(built.currentCompatibility.trackedBoundary.files, 109);
+  assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
+  assert.equal(built.currentCompatibility.trackedBoundary.files, 110);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
     bytes: 62_304,
@@ -273,6 +285,7 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
   for (const relativePath of CONTINUOUS_VALIDATION_SUCCESSOR_PATHS) {
     assert.equal(currentReceipts.has(relativePath), true);
   }
+  assert.equal(currentReceipts.has(TERMINAL_INTEGRATION_TEST), true);
 });
 
 test("[determinism] two fresh M08-T07 builds are byte-identical", async () => {

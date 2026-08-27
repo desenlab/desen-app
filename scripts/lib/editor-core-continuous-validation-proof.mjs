@@ -7,7 +7,6 @@ import path from "node:path";
 import { types as utilTypes } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
@@ -19,6 +18,10 @@ const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-CONTINUOUS-VALIDATION.md";
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 40_099,
+  sha256: "7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a",
+});
 const SOURCE_FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json";
 const CATALOG_FIXTURE_PATH =
@@ -31,6 +34,7 @@ const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
 const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/continuous-validation.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/continuous-validation.types.ts";
+const TERMINAL_INTEGRATION_TEST_PATH = "packages/editor-core/test/terminal-integration.test.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const PROOF_LIBRARY_PATH = "scripts/lib/editor-core-continuous-validation-proof.mjs";
@@ -140,6 +144,7 @@ const TRACKED_PATHS = Object.freeze([
   ...EDITOR_SOURCE_PATHS,
   ...DIST_PATHS,
   ...EDITOR_TEST_PATHS,
+  TERMINAL_INTEGRATION_TEST_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -148,6 +153,25 @@ const TRACKED_PATHS = Object.freeze([
   GENERATOR_PATH,
   VERIFIER_PATH,
   ROOT_TEST_PATH,
+]);
+const RETAINED_T09_RECEIPT_PATHS = Object.freeze(
+  TRACKED_PATHS.filter(
+    (relativePath) =>
+      ![
+        PACKAGE_PATH,
+        PUBLIC_TEST_PATH,
+        TERMINAL_INTEGRATION_TEST_PATH,
+        PROOF_LIBRARY_PATH,
+        ROOT_TEST_PATH,
+      ].includes(relativePath),
+  ),
+);
+
+const EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES = Object.freeze([
+  "composes all 32 command APIs with immutable snapshots and an exact stable-identity ledger",
+  "replays two independent command runs byte-for-byte without sharing result identity",
+  "ends T09-valid with retained obligations and distinguishes authoring fingerprints from digests",
+  "round-trips the terminal document through an injected T08 persistence adapter",
 ]);
 
 const NEW_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorContinuousValidator"]);
@@ -634,7 +658,9 @@ function verifyBoundary(files, t07Artifact) {
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
     manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
     manifest.scripts?.["test:continuous-validation"] !==
-      "vitest run test/continuous-validation.test.ts"
+      "vitest run test/continuous-validation.test.ts" ||
+    manifest.scripts?.["test:terminal-integration"] !==
+      "vitest run test/terminal-integration.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core continuous-validation manifest boundary drifted.");
   }
@@ -851,6 +877,15 @@ function verifyBoundary(files, t07Artifact) {
       "The non-formal T08 current boundary must retain ten persistence cases and twenty-one compiler-negative assertions.",
     );
   }
+  const terminalIntegrationTests = testNames(
+    decodeUtf8(files.get(TERMINAL_INTEGRATION_TEST_PATH), TERMINAL_INTEGRATION_TEST_PATH),
+  );
+  exactArray(
+    terminalIntegrationTests,
+    EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES,
+    "TEST_INVENTORY_DRIFT",
+    "Terminal-integration behavior inventory",
+  );
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
@@ -889,6 +924,16 @@ function verifyBoundary(files, t07Artifact) {
     publicRuntimeAndRootCases: publicTests.length,
     publicCompilerNegativeAssertions: publicTypeAssertions,
     rootProofCases: rootTests.length,
+    terminalProofSuccessor: {
+      task: "M08-T10",
+      authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+      focusedTestPath: TERMINAL_INTEGRATION_TEST_PATH,
+      runtimeExportsAdded: 0,
+      typeExportsAdded: 0,
+      focusedRuntimeCases: terminalIntegrationTests.length,
+      publicRuntimeCasesAdded: 0,
+      publicCompilerNegativeAssertionsAdded: 0,
+    },
   });
 }
 
@@ -1353,11 +1398,65 @@ function verifyBehavior(runtime, validSource, validCatalog) {
   });
 }
 
-async function artifactBytes(artifact) {
-  return Buffer.from(
-    await format(`${JSON.stringify(artifact)}\n`, { parser: "json", printWidth: 100 }),
-    "utf8",
+async function authenticateFrozenArtifact() {
+  const bytes = await readNoFollow(ARTIFACT_PATH, "frozen M08-T09 proof artifact");
+  const digest = sha256(bytes);
+  if (bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes || digest !== FROZEN_ARTIFACT_PIN.sha256) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T09 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(bytes, "frozen M08-T09 proof artifact");
+  const receipts = artifact.trackedBoundary?.receipts;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.proofId !== "editor-core-continuous-validation" ||
+    artifact.profile !== "desen.editor-core.continuous-validation-proof.v1" ||
+    artifact.task !== "M08-T09" ||
+    artifact.result !== "PASS" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.catalogBoundContinuousValidation !== true ||
+    artifact.claim?.deterministicFrozenReports !== true ||
+    artifact.publicApi?.runtimeExports?.length !== 35 ||
+    artifact.publicApi?.typeExports?.length !== 88 ||
+    artifact.trackedBoundary?.files !== 99 ||
+    !Array.isArray(receipts) ||
+    receipts.length !== 99 ||
+    new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length ||
+    artifact.executionAuthority?.mode !== "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH" ||
+    artifact.executionAuthority?.runtimeFiles !== 31 ||
+    artifact.executionAuthority?.editorFiles !== 10 ||
+    artifact.executionAuthority?.dependencyFiles !== 21 ||
+    artifact.testAuthority?.focusedBehaviorCases !== 12 ||
+    artifact.testAuthority?.focusedCompilerNegativeAssertions !== 9 ||
+    artifact.testAuthority?.publicRuntimeAndRootCases !== 50 ||
+    artifact.testAuthority?.publicCompilerNegativeAssertions !== 102 ||
+    artifact.testAuthority?.rootProofCases !==
+      EDITOR_CORE_CONTINUOUS_VALIDATION_ROOT_TEST_NAMES.length
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T09 artifact identity or retained claim drifted.");
+  }
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: digest,
+  });
+}
+
+function assertRetainedT09Receipts(frozenArtifact, files) {
+  const receipts = new Map(
+    frozenArtifact.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
   );
+  for (const relativePath of RETAINED_T09_RECEIPT_PATHS) {
+    const authority = receipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M08-T09 receipt drifted: ${relativePath}`);
+    }
+  }
 }
 
 export async function buildEditorCoreContinuousValidationEvidence(rawOptions = undefined) {
@@ -1365,6 +1464,7 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
+  const frozen = await authenticateFrozenArtifact();
   const prerequisites = await authenticatePrerequisites(options);
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
@@ -1380,6 +1480,10 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
   const validSource = parseJson(files.get(SOURCE_FIXTURE_PATH), SOURCE_FIXTURE_PATH);
   const validCatalog = parseJson(files.get(CATALOG_FIXTURE_PATH), CATALOG_FIXTURE_PATH);
   const behavior = verifyBehavior(runtime, validSource, validCatalog);
+  if (JSON.stringify(behavior) !== JSON.stringify(frozen.artifact.behavior)) {
+    fail("BEHAVIOR_DRIFT", "The retained M08-T09 behavior left its frozen claim.");
+  }
+  assertRetainedT09Receipts(frozen.artifact, files);
   if (options.fileOverrides.size !== 0) {
     fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue continuous-validation evidence.");
   }
@@ -1387,7 +1491,7 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
   const receipts = [...files.entries()]
     .map(([relativePath, bytes]) => receipt(relativePath, bytes))
     .sort((left, right) => compareText(left.path, right.path));
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "editor-core-continuous-validation",
     profile: "desen.editor-core.continuous-validation-proof.v1",
@@ -1433,6 +1537,7 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
         "unmappedDiagnosticIndexes",
       ],
       mappingFields: ["surfaceId", "subject", "diagnosticIndexes", "occurrencePointers"],
+      terminalProofSuccessor: boundary.terminalProofSuccessor,
     },
     behavior,
     executionAuthority,
@@ -1457,6 +1562,7 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
       publicRuntimeAndRootCases: boundary.publicRuntimeAndRootCases,
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,
+      terminalIntegrationRuntimeCases: boundary.terminalProofSuccessor.focusedRuntimeCases,
     },
     trackedBoundary: { files: receipts.length, receipts },
     nonclaims: [
@@ -1466,7 +1572,8 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
       "CATALOG_FETCH_PACKAGE_LOADING_OR_ADAPTER_EXECUTION",
       "PERSISTENCE_STORAGE_OR_DURABILITY_AUTHORITY",
       "UNDO_REDO_SELECTION_OR_VIEWPORT_POLICY",
-      "M08_T10_REACT_DOM_TERMINAL_INTEGRATION_AND_G08",
+      "M08_T10_TERMINAL_BYTES_ARE_COMPATIBILITY_ONLY_NOT_M08_T09_CLAIM_AUTHORITY",
+      "REACT_RENDERER_COMPONENT_OR_DOM_BEHAVIOR",
       "HOSTILE_JAVASCRIPT_SANDBOX",
       "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
       "P18_OR_G08_ADVANCEMENT",
@@ -1475,16 +1582,26 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
       "pnpm --filter @desen/editor-core build",
       "pnpm --filter @desen/editor-core test:continuous-validation",
       "pnpm --filter @desen/editor-core test:public-package",
+      "pnpm --filter @desen/editor-core test:terminal-integration",
       "node scripts/generate-editor-core-continuous-validation-proof.mjs",
       "node scripts/verify-editor-core-continuous-validation.mjs",
       "node --test tests/editor-core-continuous-validation.test.mjs",
     ],
+    frozenAuthority: {
+      path: ARTIFACT_PATH,
+      bytes: FROZEN_ARTIFACT_PIN.bytes,
+      sha256: FROZEN_ARTIFACT_PIN.sha256,
+      retainedTaskTimeReceipts: RETAINED_T09_RECEIPT_PATHS.length,
+      formalPrerequisiteTasks: EDITOR_CORE_CONTINUOUS_VALIDATION_PREREQUISITE_PINS.map(
+        ({ task }) => task,
+      ),
+    },
   });
-  const bytes = await artifactBytes(artifact);
   return deepFreeze({
-    artifact,
-    artifactBytes: bytes,
-    artifactSha256: sha256(bytes),
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
     task: "M08-T09",
   });
 }

@@ -15,6 +15,7 @@ import {
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const PROOF_LIBRARY = "scripts/lib/editor-core-continuous-validation-proof.mjs";
+const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const temporaryDirectories = [];
 let built;
 
@@ -37,6 +38,20 @@ async function temporaryDirectory(prefix) {
   const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), prefix)));
   temporaryDirectories.push(directory);
   return directory;
+}
+
+function assertDeepFrozen(value, visited = new Set()) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    ArrayBuffer.isView(value) ||
+    visited.has(value)
+  ) {
+    return;
+  }
+  visited.add(value);
+  assert.equal(Object.isFrozen(value), true);
+  for (const child of Object.values(value)) assertDeepFrozen(child, visited);
 }
 
 before(async () => {
@@ -110,6 +125,39 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
   assert.equal(built.artifact.testAuthority.publicRuntimeAndRootCases, 50);
   assert.equal(built.artifact.testAuthority.publicCompilerNegativeAssertions, 102);
   assert.equal(built.artifact.trackedBoundary.files, 99);
+  assert.deepEqual(built.currentCompatibility.publicApi.terminalProofSuccessor, {
+    task: "M08-T10",
+    authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+    focusedTestPath: TERMINAL_INTEGRATION_TEST,
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    focusedRuntimeCases: 4,
+    publicRuntimeCasesAdded: 0,
+    publicCompilerNegativeAssertionsAdded: 0,
+  });
+  assert.equal(built.currentCompatibility.publicApi.runtimeExports.length, 35);
+  assert.equal(built.currentCompatibility.publicApi.typeExports.length, 88);
+  assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 36);
+  assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 24);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 50);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
+  assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
+  assert.equal(built.currentCompatibility.trackedBoundary.files, 100);
+  assert.equal(
+    built.currentCompatibility.trackedBoundary.receipts.some(
+      ({ path: relativePath }) => relativePath === TERMINAL_INTEGRATION_TEST,
+    ),
+    true,
+  );
+  assert.deepEqual(built.currentCompatibility.frozenAuthority, {
+    path: "docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json",
+    bytes: 40_099,
+    sha256: "7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a",
+    retainedTaskTimeReceipts: 95,
+    formalPrerequisiteTasks: ["M08-T03", "M08-T04", "M08-T05", "M08-T06", "M08-T07"],
+  });
+  assert.deepEqual(built.currentCompatibility.behavior, built.artifact.behavior);
+  assertDeepFrozen(built.currentCompatibility);
 });
 
 test("[determinism] two fresh M08-T09 builds are byte-identical", async () => {
@@ -117,6 +165,7 @@ test("[determinism] two fresh M08-T09 builds are byte-identical", async () => {
   const second = await buildEditorCoreContinuousValidationEvidence();
   assert.deepEqual(first.artifactBytes, second.artifactBytes);
   assert.equal(first.artifactSha256, second.artifactSha256);
+  assert.deepEqual(first.currentCompatibility, second.currentCompatibility);
   assert.match(first.artifactSha256, /^[0-9a-f]{64}$/u);
 });
 

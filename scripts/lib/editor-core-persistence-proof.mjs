@@ -44,6 +44,7 @@ const CONTINUOUS_VALIDATION_RUNTIME = "packages/editor-core/dist/continuous-vali
 const CONTINUOUS_VALIDATION_DECLARATION = "packages/editor-core/dist/continuous-validation.d.ts";
 const CONTINUOUS_VALIDATION_TEST = "packages/editor-core/test/continuous-validation.test.ts";
 const CONTINUOUS_VALIDATION_TYPES = "packages/editor-core/test/continuous-validation.types.ts";
+const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const SQLITE_FILE_NAME = "control-plane.sqlite3";
 const ORIGIN = "http://127.0.0.1:43127";
 const API_TOKEN = "m08-t08-persistence-proof-token-0000000001";
@@ -66,6 +67,19 @@ const CONTINUOUS_VALIDATION_PACKAGE_SCRIPTS = Object.freeze({
   "verify:editor-core-continuous-validation": `${CONTINUOUS_VALIDATION_PACKAGE_SCRIPT_PREFIX} && node scripts/verify-editor-core-continuous-validation.mjs`,
   "test:editor-core-continuous-validation": `${CONTINUOUS_VALIDATION_PACKAGE_SCRIPT_PREFIX} && node --test tests/editor-core-continuous-validation.test.mjs`,
 });
+const TERMINAL_INTEGRATION_PACKAGE_SCRIPT_PREFIX =
+  "pnpm verify:editor-core-continuous-validation && pnpm verify:editor-core-persistence && pnpm --filter @desen/editor-core... build && pnpm --filter @desen/editor-core typecheck && pnpm --filter @desen/editor-core test:terminal-integration && pnpm --filter @desen/editor-core test:public-package";
+const TERMINAL_INTEGRATION_PACKAGE_SCRIPTS = Object.freeze({
+  "generate:editor-core-terminal-integration": `${TERMINAL_INTEGRATION_PACKAGE_SCRIPT_PREFIX} && node scripts/generate-editor-core-terminal-integration-proof.mjs`,
+  "verify:editor-core-terminal-integration": `${TERMINAL_INTEGRATION_PACKAGE_SCRIPT_PREFIX} && node scripts/verify-editor-core-terminal-integration.mjs`,
+  "test:editor-core-terminal-integration": `${TERMINAL_INTEGRATION_PACKAGE_SCRIPT_PREFIX} && node --test tests/editor-core-terminal-integration.test.mjs`,
+});
+const EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES = Object.freeze([
+  "composes all 32 command APIs with immutable snapshots and an exact stable-identity ledger",
+  "replays two independent command runs byte-for-byte without sharing result identity",
+  "ends T09-valid with retained obligations and distinguishes authoring fingerprints from digests",
+  "round-trips the terminal document through an injected T08 persistence adapter",
+]);
 
 const PERSISTENCE_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorPersistencePort"]);
 const PERSISTENCE_TYPE_EXPORTS = Object.freeze(
@@ -156,6 +170,7 @@ const TRACKED_SOURCE_PATHS = Object.freeze([
   "packages/editor-core/src/persistence.ts",
   CONTINUOUS_VALIDATION_TEST,
   CONTINUOUS_VALIDATION_TYPES,
+  TERMINAL_INTEGRATION_TEST,
   "packages/editor-core/test/persistence.test.ts",
   "packages/editor-core/test/persistence.types.ts",
   "packages/editor-core/test/public-package.mjs",
@@ -682,6 +697,16 @@ function verifyEditorCoreCompatibility(files, t07Artifact) {
       tsdocDeclarations: 7,
       publicRuntimeCasesAdded: 1,
       publicCompilerNegativeAssertionsAdded: 6,
+    },
+    terminalProofSuccessor: {
+      task: "M08-T10",
+      authority: "PROOF_ONLY_CURRENT_TERMINAL_SUCCESSOR",
+      focusedTestPath: TERMINAL_INTEGRATION_TEST,
+      runtimeExportsAdded: 0,
+      typeExportsAdded: 0,
+      focusedRuntimeCases: EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES.length,
+      publicRuntimeCasesAdded: 0,
+      publicCompilerNegativeAssertionsAdded: 0,
     },
     currentEmittedFiles: EDITOR_CORE_EMITTED_PATHS.length,
     staticEsmEdges: staticEditorCoreEdges(files),
@@ -1364,6 +1389,9 @@ function verifyTestAuthority(files) {
     editorCoreContinuousValidationCompilerNegativeAssertions: countTypeAssertions(
       files.get(CONTINUOUS_VALIDATION_TYPES).toString("utf8"),
     ),
+    editorCoreTerminalIntegrationRuntimeCases: testNames(
+      files.get(TERMINAL_INTEGRATION_TEST).toString("utf8"),
+    ).length,
     editorCorePublicRuntimeCases: testNames(
       files.get("packages/editor-core/test/public-package.mjs").toString("utf8"),
     ).length,
@@ -1387,6 +1415,10 @@ function verifyTestAuthority(files) {
     tests.editorCoreFocusedCompilerNegativeAssertions !== 21 ||
     tests.editorCoreContinuousValidationRuntimeCases !== 12 ||
     tests.editorCoreContinuousValidationCompilerNegativeAssertions !== 9 ||
+    tests.editorCoreTerminalIntegrationRuntimeCases !==
+      EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES.length ||
+    JSON.stringify(testNames(files.get(TERMINAL_INTEGRATION_TEST).toString("utf8"))) !==
+      JSON.stringify(EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES) ||
     tests.editorCorePublicRuntimeCases !== 50 ||
     tests.editorCorePublicCompilerNegativeAssertions !== 102 ||
     tests.editorWebFocusedRuntimeCases !== 12 ||
@@ -1431,19 +1463,31 @@ function verifyPackageScriptAuthority(files) {
       return Object.freeze({ name, command });
     },
   );
+  const terminalProofSuccessor = Object.entries(TERMINAL_INTEGRATION_PACKAGE_SCRIPTS).map(
+    ([name, command]) => {
+      if (packageManifest.scripts[name] !== command) {
+        fail("PACKAGE_SCRIPT_DRIFT", `The M08-T10 compatibility script drifted: ${name}.`);
+      }
+      return Object.freeze({ name, command });
+    },
+  );
   if (
     editorCoreManifest?.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts" ||
     editorCoreManifest?.scripts?.["test:continuous-validation"] !==
-      "vitest run test/continuous-validation.test.ts"
+      "vitest run test/continuous-validation.test.ts" ||
+    editorCoreManifest?.scripts?.["test:terminal-integration"] !==
+      "vitest run test/terminal-integration.test.ts"
   ) {
-    fail("PACKAGE_SCRIPT_DRIFT", "The editor-core T08/T09 focused script surface drifted.");
+    fail("PACKAGE_SCRIPT_DRIFT", "The editor-core T08-T10 focused script surface drifted.");
   }
   return deepFreeze({
     retained,
     compatibilityOnlySuccessor,
+    terminalProofSuccessor,
     editorCore: {
       persistence: editorCoreManifest.scripts["test:persistence"],
       continuousValidation: editorCoreManifest.scripts["test:continuous-validation"],
+      terminalIntegration: editorCoreManifest.scripts["test:terminal-integration"],
     },
   });
 }
@@ -1514,6 +1558,7 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
       currentPackageRuntimeExports: editorCoreCompatibility.currentPackageRuntimeExports,
       currentPackageTypeExports: editorCoreCompatibility.currentPackageTypeExports,
       compatibilityOnlySuccessor: editorCoreCompatibility.additiveSuccessor,
+      terminalProofSuccessor: editorCoreCompatibility.terminalProofSuccessor,
     },
     packageBoundary: {
       currentEmittedFiles: editorCoreCompatibility.currentEmittedFiles,
@@ -1529,7 +1574,8 @@ export async function buildEditorCorePersistenceEvidence(rawOptions = undefined)
       "The Web adapter owns no filesystem path, SQLite handle, implicit global fetch, automatic retry, merge, list, or delete authority.",
       "An indeterminate PUT is resolved only by reopening; it is never converted into a definite failure or automatic retry.",
       "M08-T09 continuous-validation bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
-      "React/DOM integration, terminal command determinism, and G08 remain assigned to M08-T10.",
+      "M08-T10 terminal-integration bytes are compatibility-only successor authority and are not part of the frozen M08-T08 claim.",
+      "React renderer, DOM behavior, selection, and viewport policy remain outside M08-T08.",
       "Undo/redo, selection policy, viewport policy, multi-user synchronization, and remote persistence remain outside M08-T08.",
     ],
     reproduction: [

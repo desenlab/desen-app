@@ -3611,3 +3611,50 @@ This file records implementation discoveries without changing the frozen DESEN 0
   render the explicit mappings, but it must not replace subject authority with pointer heuristics
   or execute dynamic obligations as part of editor validation. Any interoperable diagnostic-index
   or editor-subscription protocol requires a later explicit profile.
+
+## PF-087 — Terminal editor evidence needs independent graphs, identity deltas, and an AST platform audit
+
+- Status: OPEN
+- Blocks proof: No; M08-T10 closes G08 and the independent editor-core half of P-18 without adding
+  a production helper or broadening the editor-core public surface.
+- Protocol location: SPEC Sections 5.3, 10.2, 12.4, 15.1, and 23.5; normative row `S-002`; proof
+  claim P-18; related findings `PF-078`–`PF-086`
+- Observation: individually deterministic commands do not by themselves prove that their complete
+  ordered composition preserves stable identity, produces an equal terminal Source in independent
+  executions, remains persistable and valid, or keeps the emitted package free of platform
+  authority. Source-regex scans also cannot distinguish executable imports and identifiers from
+  comments or strings with enough precision for the terminal React/DOM boundary.
+- Implementation decision: the M08-T10 proof authenticates every exact frozen M08-T01–M08-T09
+  artifact plus the M01-T05, M04-T16, and M04-T17 P-18 prerequisites. It copies the exact emitted
+  editor-core, protocol, and validator bytes into two independent temporary ESM graphs and runs the
+  same ordered 32-step transcript in each: one insert, three structural commands, fourteen content
+  commands, eight state/binding commands, and six event/action commands. Every successful step
+  returns a fresh recursively frozen direct Source and leaves its predecessor unchanged. The exact
+  identity ledger records only `node:sign-in.terminal` as added by insertion and only
+  `node:sign-in.terminal-delete` as removed by deletion; every other transition preserves the
+  complete node/behavior identity multiset. An interleaved missing-target structural command emits
+  one controlled failure with no partial document and the transcript resumes from the byte-exact
+  prior snapshot.
+
+  The terminal Source passes the frozen M08-T09 Catalog-bound validator with zero diagnostics,
+  seven retained dynamic obligations, and no invalid or unmapped subjects. An injected in-memory
+  compare-and-set adapter exercises the M08-T08 port through generation-one save/open with exact
+  canonical bytes. Sources differing only in root `authoring` preserve the same protocol Source
+  digest and receive different complete-document fingerprints. The independent graphs produce
+  byte-identical terminal Sources, identity ledgers, validation reports, persistence receipts, and
+  callback-free JSON traces; JSON parse/stringify and RFC 8785 canonicalization reproduce the same
+  commitments.
+
+  The platform audit parses all nine editor-core TypeScript source files, all nine emitted
+  JavaScript files, and all nine emitted declaration files with the TypeScript AST. Static module
+  specifiers, identifier references, dynamic imports, direct `eval`, and `Function` construction
+  are inspected without comment/string regex authority. Only relative, `@desen/protocol`, and
+  `@desen/validator` edges are admitted; React, ReactDOM, DOM/browser, Node-platform, CSS,
+  dynamic-import, evaluation, and function-constructor authority are absent.
+
+- Future action: M09 must consume the completed framework-neutral editor-core surface without
+  moving React, DOM, selection, viewport, undo/redo, collaboration, storage, network, or dynamic
+  obligation execution authority into the package. A React renderer or visual fidelity claim must
+  be established by its own M09 evidence. Node.js, the ESM loader, process environment, Proxy
+  traps, concrete durable adapters, and streaming/preallocation memory-DoS guarantees remain
+  outside this proof.
