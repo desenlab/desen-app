@@ -135,25 +135,25 @@ function expectEquivalenceError(code) {
   };
 }
 
-test("proves all 165 exact ordered commands and both reviewed digests", () => {
+test("proves all 168 exact ordered commands and both reviewed digests", () => {
   const result = verifyRequiredExhaustiveInventoryEquivalence();
 
   assert.deepEqual(result, {
     status: "PASS",
-    workloadCount: 165,
+    workloadCount: 168,
     exactlyOnce: true,
     retainedPlanSha256: EXPECTED_RETAINED_PLAN_SHA256,
     neutralInventorySha256: EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256,
-    orderedProjectionSha256: "fc588358d8fa3b2e7c2cd9f3a280715d7db34089a41a2fae2c3484d18c040278",
+    orderedProjectionSha256: "5342b9d8e5a6837da9068a42a0cceb4487dd7cd878d680bbd55972ddb8069b4c",
     workloadSetSha256: EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
   });
   assert.equal(
     EXPECTED_RETAINED_PLAN_SHA256,
-    "c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b07432e4a47de684e25d",
+    "810a62b3f6ff70011d8bc4f6ac7b3495671aa373313b6382e2eb0263f155444d",
   );
   assert.equal(
     EXPECTED_REQUIRED_WORKLOAD_SET_SHA256,
-    "9ea3b95ab6f034473765beb9edb1482532bb1a0b4e05f630c403d38d8df0daef",
+    "36177206bf056ccfebd2f1985c150bacc938edf9a745b9b137a4b8fc7068ea30",
   );
   assert.equal(Object.isFrozen(result), true);
 });
@@ -182,7 +182,7 @@ test("PASS requires every exact workload closed successfully and ignores arrival
   const normalized = normalizeRequiredExecutionReceipt(reversed);
 
   assert.equal(normalized.status, "PASS");
-  assert.equal(normalized.workloads.length, 165);
+  assert.equal(normalized.workloads.length, 168);
   assert.deepEqual(
     normalized.workloads.map(({ id }) => id),
     canonicalIds(),

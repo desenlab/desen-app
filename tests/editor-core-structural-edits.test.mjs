@@ -27,8 +27,14 @@ import {
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const STRUCTURAL_SOURCE = "packages/editor-core/src/structural-edits.ts";
+const PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
 const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
 const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
+const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
+const PUBLIC_TEST = "packages/editor-core/test/public-package.mjs";
+const PUBLIC_TYPES = "packages/editor-core/test/public-package.types.mts";
+const ROOT_TEST = "tests/editor-core-structural-edits.test.mjs";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const temporaryDirectories = [];
 let built;
@@ -128,7 +134,32 @@ test("[authority] authenticates the exact frozen M08-T02 artifact and isolated r
   ]) {
     assert.deepEqual(trackedReceipts.get(receipt.path), receipt);
   }
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessor.task, "M08-T06");
+  assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
+    task: "M08-T08",
+    sourcePath: PERSISTENCE_SOURCE,
+    runtimePath: "packages/editor-core/dist/persistence.js",
+    declarationPath: "packages/editor-core/dist/persistence.d.ts",
+    focusedTestPath: PERSISTENCE_TEST,
+    focusedTypesPath: PERSISTENCE_TYPES,
+    runtimeExports: ["createDesenEditorPersistencePort"],
+    typeExports: [
+      "DesenEditorPersistenceAdapter",
+      "DesenEditorPersistenceAdapterFailureReason",
+      "DesenEditorPersistenceAdapterReadResult",
+      "DesenEditorPersistenceAdapterSourceRecord",
+      "DesenEditorPersistenceAdapterWriteRequest",
+      "DesenEditorPersistenceAdapterWriteResult",
+      "DesenEditorPersistenceDiagnostic",
+      "DesenEditorPersistenceDiagnosticCode",
+      "DesenEditorPersistencePort",
+      "DesenEditorSourceOpenResult",
+      "DesenEditorSourceOpenSuccess",
+      "DesenEditorSourceSaveRequest",
+      "DesenEditorSourceSaveResult",
+    ],
+    publicRuntimeCasesAdded: 3,
+    publicCompilerNegativeAssertionsAdded: 21,
+  });
   assert.deepEqual(built.currentCompatibility.boundary.proofOnlySuccessor, {
     task: "M08-T07",
     runtimeExports: [],
@@ -138,8 +169,14 @@ test("[authority] authenticates the exact frozen M08-T02 artifact and isolated r
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 46);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 75);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 34);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 82);
+  assert.equal(built.currentCompatibility.boundary.emittedFiles, 32);
+  assert.equal(built.currentCompatibility.boundary.staticEsmEdges, 20);
+  assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 30);
+  assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 9);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 49);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
 });
 
 test("[determinism] two fresh M08-T03 builds are byte-identical", async () => {
@@ -218,12 +255,27 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
   assert.equal(runtimeExecuted, false);
 
   const source = await readFile(path.join(ROOT, STRUCTURAL_SOURCE));
+  const persistenceSource = await readFile(path.join(ROOT, PERSISTENCE_SOURCE));
   const authoringRoundTripTest = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TEST));
   const authoringRoundTripTypes = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TYPES));
+  const persistenceTest = await readFile(path.join(ROOT, PERSISTENCE_TEST));
+  const persistenceTypes = await readFile(path.join(ROOT, PERSISTENCE_TYPES));
+  const persistenceRuntime = await readFile(
+    path.join(ROOT, "packages/editor-core/dist/persistence.js"),
+  );
+  const publicTest = await readFile(path.join(ROOT, PUBLIC_TEST));
+  const publicTypes = await readFile(path.join(ROOT, PUBLIC_TYPES));
+  const rootTest = await readFile(path.join(ROOT, ROOT_TEST));
   const dependency = await readFile(path.join(ROOT, PROTOCOL_RUNTIME));
   await assert.rejects(
     buildEditorCoreStructuralEditsEvidence({
       fileOverrides: { [STRUCTURAL_SOURCE]: changedByte(source) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      fileOverrides: { [PERSISTENCE_SOURCE]: changedByte(persistenceSource) },
     }),
     expectedError("BOUNDARY_DRIFT"),
   );
@@ -239,6 +291,38 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
     }),
     expectedError("BOUNDARY_DRIFT"),
   );
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      fileOverrides: { [PERSISTENCE_TEST]: changedByte(persistenceTest) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      fileOverrides: { [PERSISTENCE_TYPES]: changedByte(persistenceTypes) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStructuralEditsEvidence({
+      fileOverrides: {
+        "packages/editor-core/dist/persistence.js": changedByte(persistenceRuntime),
+      },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  for (const [relativePath, bytes] of [
+    [PUBLIC_TEST, publicTest],
+    [PUBLIC_TYPES, publicTypes],
+    [ROOT_TEST, rootTest],
+  ]) {
+    await assert.rejects(
+      buildEditorCoreStructuralEditsEvidence({
+        fileOverrides: { [relativePath]: changedByte(bytes) },
+      }),
+      expectedError("BOUNDARY_DRIFT"),
+    );
+  }
   await assert.rejects(
     buildEditorCoreStructuralEditsEvidence({
       fileOverrides: { [PROTOCOL_RUNTIME]: changedByte(dependency) },

@@ -96,13 +96,13 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = SAFE_OBJECT_FREEZE(
 export const EXPECTED_CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
 const EXPECTED_PREREQUISITE_SHA256 =
-  "cff21c5dd6e483906cb70a86fe475cf5df913b8721de199dac2e16135905c98e";
+  "540feb633d01ea7f8cd72564214451f2dfe1fea0da624c1f0048e9c5595b0f09";
 const EXPECTED_LEAF_INVOCATION_SHA256 =
-  "a05490316408114e99a790018bedbfcb8783286883ddbdd47376251273cf0425";
+  "d826a73e920492e38d1605836656159419296e1d12566a4bcd2d60359665ed49";
 const EXPECTED_DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "302317ed31512f705377338d780dcc5dd352c81cde37f6ff06f91f0db32693fd";
+  "a4e5befa962b78d85dfb67c95d975d376bd3dc81a93caa468c34966517d1292d";
 const EXPECTED_WORKSPACE_TEST_SCRIPT_SHA256 =
-  "0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820";
+  "86f2dbb30344f9fcafbc656627b9a5bd70a4854405066d6e1c9b33594869e47b";
 const EXPECTED_WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = SAFE_OBJECT_FREEZE(["apps/*", "packages/*"]);
@@ -493,6 +493,11 @@ const PROOF_UNIT_TUPLES = SAFE_OBJECT_FREEZE([
     "scripts/verify-editor-core-authoring-round-trip.mjs",
     "tests/editor-core-authoring-round-trip.test.mjs",
   ],
+  [
+    "editor-core-persistence",
+    "scripts/verify-editor-core-persistence.mjs",
+    "tests/editor-core-persistence.test.mjs",
+  ],
 ]);
 
 const NO_SHARED_MUTATION = SAFE_OBJECT_FREEZE({
@@ -868,19 +873,20 @@ function classifyPrerequisite({
   if (task === "test:public-package") {
     const expectedScript =
       "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs";
-    if (
-      ![
-        "editor-core-source-document",
-        "editor-core-stable-id-insert",
-        "editor-core-structural-edits",
-        "editor-core-content-edits",
-        "editor-core-state-binding-edits",
-        "editor-core-event-action-edits",
-        "editor-core-authoring-round-trip",
-      ].includes(currentProofId) ||
-      packageName !== "@desen/editor-core" ||
-      packageScripts[task] !== expectedScript
-    ) {
+    const reviewedEditorCoreProof = [
+      "editor-core-source-document",
+      "editor-core-stable-id-insert",
+      "editor-core-structural-edits",
+      "editor-core-content-edits",
+      "editor-core-state-binding-edits",
+      "editor-core-event-action-edits",
+      "editor-core-authoring-round-trip",
+      "editor-core-persistence",
+    ].includes(currentProofId);
+    const reviewedPackage =
+      packageName === "@desen/editor-core" ||
+      (currentProofId === "editor-core-persistence" && packageName === "@desen/editor-web");
+    if (!reviewedEditorCoreProof || !reviewedPackage || packageScripts[task] !== expectedScript) {
       fail(currentProofId + " uses an unreviewed public-package contract test.", {
         command,
         actual: packageScripts[task],
@@ -1144,6 +1150,15 @@ function buildCanonicalInventory() {
       "SERIAL_BUILD_WRITER",
       SHARED_BUILD_WRITER,
     ),
+    node(
+      "editor-web-public-package-contract",
+      "Editor Web public-package contract",
+      "pnpm",
+      ["--filter", "@desen/editor-web", "test:public-package"],
+      ["editor-core-public-package-contract"],
+      "SERIAL_BUILD_WRITER",
+      SHARED_BUILD_WRITER,
+    ),
   ];
   const verifiers = PROOF_UNIT_TUPLES.map(([id, verifierFile]) =>
     node(
@@ -1160,7 +1175,9 @@ function buildCanonicalInventory() {
         id === "editor-core-event-action-edits" ||
         id === "editor-core-authoring-round-trip"
           ? "editor-core-public-package-contract"
-          : "package-tests",
+          : id === "editor-core-persistence"
+            ? "editor-web-public-package-contract"
+            : "package-tests",
       ],
       "CONCURRENT_PROOF",
       SHARED_BUILD_READER,
@@ -1426,7 +1443,7 @@ export function validateRepositoryWorkloadInputs(rawInputs) {
 
 /** Reviewed digest of the complete neutral exhaustive workload authority. */
 export const EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256 =
-  "8220259aa2a44774d192ea2420f4c2f8423c9dedd93a1fcf9b34340a0ab0dcd3";
+  "37d1c0cd99fbe5d2b411f9e98c22b1afb58cfca175d9c93fa9b1c6c6861b9418";
 
 const CANONICAL_INVENTORY = buildCanonicalInventory();
 if (CANONICAL_INVENTORY.inventorySha256 !== EXPECTED_EXHAUSTIVE_WORKLOAD_INVENTORY_SHA256) {

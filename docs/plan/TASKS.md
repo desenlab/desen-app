@@ -1020,19 +1020,19 @@ hosted M07-T10 claim.
 
 ## M08 — Framework-neutral editor core
 
-| ID      | Status      | Depends on      | Deliverable / evidence                                               |
-| ------- | ----------- | --------------- | -------------------------------------------------------------------- |
-| M08-T01 | DONE        | G07             | Direct DESEN Source editor document model                            |
-| M08-T02 | DONE        | M08-T01         | Stable-ID allocator and insert command                               |
-| M08-T03 | DONE        | M08-T02         | Delete, slot move, and ordered reorder commands                      |
-| M08-T04 | DONE        | M08-T02–M08-T03 | Prop, style-part, condition, and variant editing commands            |
-| M08-T05 | DONE        | M08-T02         | State declaration and binding editing commands                       |
-| M08-T06 | DONE        | M08-T05         | Event and closed-action editing commands                             |
-| M08-T07 | DONE        | M08-T01–M08-T06 | Authoring isolation and unknown-extension round-trip preservation    |
-| M08-T08 | NOT_STARTED | M08-T01         | Persistence port and local source adapter                            |
-| M08-T09 | NOT_STARTED | M08-T03–M08-T07 | Continuous validation and invalid-node mapping                       |
-| M08-T10 | NOT_STARTED | M08-T01–M08-T09 | React/DOM boundary, stable identity, and deterministic command tests |
-| G08     | NOT_STARTED | M08-T01–M08-T10 | UI-independent editor core produces valid sources                    |
+| ID      | Status      | Depends on                | Deliverable / evidence                                               |
+| ------- | ----------- | ------------------------- | -------------------------------------------------------------------- |
+| M08-T01 | DONE        | G07                       | Direct DESEN Source editor document model                            |
+| M08-T02 | DONE        | M08-T01                   | Stable-ID allocator and insert command                               |
+| M08-T03 | DONE        | M08-T02                   | Delete, slot move, and ordered reorder commands                      |
+| M08-T04 | DONE        | M08-T02–M08-T03           | Prop, style-part, condition, and variant editing commands            |
+| M08-T05 | DONE        | M08-T02                   | State declaration and binding editing commands                       |
+| M08-T06 | DONE        | M08-T05                   | Event and closed-action editing commands                             |
+| M08-T07 | DONE        | M08-T01–M08-T06           | Authoring isolation and unknown-extension round-trip preservation    |
+| M08-T08 | DONE        | M07-T05, M08-T01, M08-T07 | Persistence port and local source adapter                            |
+| M08-T09 | NOT_STARTED | M08-T03–M08-T07           | Continuous validation and invalid-node mapping                       |
+| M08-T10 | NOT_STARTED | M08-T01–M08-T09           | React/DOM boundary, stable identity, and deterministic command tests |
+| G08     | NOT_STARTED | M08-T01–M08-T10           | UI-independent editor core produces valid sources                    |
 
 M08-T01 is `DONE` after authenticating its completed I07-04/G07 prerequisite. The built package
 admits unknown inert JSON through the frozen Source and embedded-schema structural validator and
@@ -1296,6 +1296,43 @@ and no `P-*` or proof-gate status changes. M08-T08 retains storage I/O, save/ope
 the persistence adapter; M08-T09 retains continuous semantic diagnostics and invalid-node mapping;
 M08-T10 retains the terminal React/DOM boundary and G08. Overall implementation progress is
 92/145 (63%), M08 is 7/10, proof gates remain 8/13, and M08-T08 is next.
+
+M08-T08 is `DONE`. `@desen/editor-core` now owns a platform-neutral persistence adapter contract
+whose storage edge reads one Source and performs generation-guarded compare-and-set writes; its
+public port exposes open and save without importing browser, React, DOM, Node, SQLite, filesystem,
+or transport authority. Every save canonicalizes the complete Source, including root `authoring`
+and all extension values, enforces the 8 MiB ceiling, and re-admits the stored or returned bytes
+before exposing a detached recursively frozen result. Missing, created, unchanged, updated,
+conflict, exhausted, definite-failure, and indeterminate outcomes remain explicit. An uncertain
+write is never retried or merged automatically and is resolved only by reopening.
+
+`@desen/editor-web` supplies the local adapter for the exact lexical origin
+`http://127.0.0.1:<port>`. It requires an explicitly injected fetch-shaped callback, bearer token,
+redirect rejection, bounded strict JSON, and the M07-T05 generation headers. It has no implicit
+global-fetch fallback, retry, merge, filesystem, or SQLite authority. The existing
+`openLocalControlPlane` SQLite/filesystem implementation remains the unchanged durability
+authority. Real integration opens two control-plane instances against one OS-temporary native
+SQLite database, proves one CAS winner and one conflict, closes and reopens at generation 3, and
+preserves the canonical complete Source with root authoring and all 16 extension locations. A
+durably dispatched PUT whose response is hidden returns `indeterminate`; reopening resolves the
+winner.
+
+The focused core persistence suite passes 10/10. The cumulative built core public-package suite
+passes 49/49 with 96 compiler-negative assertions. The Web adapter passes 12/12 focused cases and
+3/3 public-package cases with six compiler-negative assertions. The independent root proof passes
+10/10 and authenticates 218 tracked receipts, including 180 emitted distribution receipts. Exact
+evidence is the 49,785-byte
+`docs/proof/artifacts/editor-core-0.1.0-persistence.json` at
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe` and
+`docs/proof/EDITOR-CORE-PERSISTENCE.md`. The current CI successor contains 168 workloads and 79
+proof pairs. Append-only checkpoint sequence 36 authenticates 33 frozen artifacts and 66 current
+readers while preserving every M08-T07 and earlier artifact byte; historical T01–T07 hashes remain
+unchanged. These are local code-owned results and make no hosted M08-T08 claim.
+
+`N-012`, `N-018`, and `S-003` remain `TESTED`; `P-17`, `P-18`, and every other proof or normative
+status remain unchanged, and proof gates remain 8/13. Catalog semantic diagnostics and invalid-node
+mapping remain M08-T09. Terminal React/DOM integration, cross-command determinism, and G08 remain
+M08-T10. Overall implementation progress is 93/145 (64%), M08 is 8/10, and M08-T09 is next.
 
 ## M09 — Desen App Web MVP
 

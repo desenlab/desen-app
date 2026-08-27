@@ -141,8 +141,39 @@ scans, and root authoring is charged to the full 8 MiB Source limit. Extension l
 the owning transition: insert-supplied markers enter, move/reorder carry them, delete removes only
 the deleted target, and whole-value replacement replaces that target's old extension while
 unrelated markers survive. Preservation does not apply to an owner deliberately deleted or
-replaced by the requested command. `PF-084` records this boundary. Storage I/O, save/open
-durability, and the persistence adapter remain M08-T08.
+replaced by the requested command. `PF-084` records this boundary.
+
+M08-T08 adds persistence without granting platform authority to editor-core. The core package
+defines `DesenEditorPersistenceAdapter`: one `readSource` operation and one generation-guarded
+`compareAndSetSource` operation. `createDesenEditorPersistencePort` exposes `openSource` and
+`saveSource` over that injected adapter. It canonicalizes the complete direct Source—including root
+`authoring` and every extension value—enforces the 8 MiB ceiling, re-admits adapter bytes, and
+returns detached recursively frozen results. It imports no browser, React, DOM, Node, filesystem,
+SQLite, or concrete transport. Generation creation, exact compare-and-set, unchanged saves,
+conflicts, exhaustion, definite failures, and indeterminate outcomes remain explicit. A write whose
+settlement cannot be authenticated is not retried or merged; the caller must reopen.
+
+`@desen/editor-web` supplies the local transport adapter. Its authority is intentionally lexical
+and injected: only exact `http://127.0.0.1:<port>` origins are accepted, and the caller must supply
+the fetch-shaped callback and bearer token. Requests reject redirects and use the M07-T05 GET/PUT
+Source route and generation headers. There is no global-fetch fallback, automatic retry, merge,
+filesystem path, SQLite handle, or remote-origin mode. The existing control-plane
+`openLocalControlPlane` implementation remains the unchanged filesystem/SQLite durability
+authority. This keeps the composition direction explicit:
+
+```text
+editor-core open/save port
+        ↓ injected adapter
+editor-web exact loopback HTTP adapter
+        ↓ explicit fetch-shaped callback
+control-plane local Source API → SQLite/filesystem
+```
+
+The integration proof uses two independently opened control-plane instances over one OS-temporary
+native SQLite database. It demonstrates a single generation-3 CAS winner, one stale conflict,
+close/reopen durability, and preservation of root authoring plus all 16 Source-reachable extension
+locations. A PUT dispatched to durable storage with its response hidden returns `indeterminate`;
+reopen resolves the committed winner. `PF-085` records the port, adapter, and uncertainty profile.
 
 Insertion, structural edits, content edits, state/binding edits, and event/action edits remain
 structurally authoritative rather than Catalog-semantic: structurally valid unresolved capabilities, slots,
@@ -151,15 +182,16 @@ the authoring graph for M08-T09 to diagnose. The common profile keeps canonical 
 MiB, selected surfaces at 25,000 identity occurrences, component depth at 64 with root at zero,
 and capability IDs at 4,096 code units where a command carries one. `N-012`, `N-014`, `N-018`,
 and `S-003` are `TESTED`; reverse-domain naming remains guidance rather than a new hard validator
-rule. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration.
-Persistence remains M08-T08, semantic resolution and continuous diagnostics remain M08-T09, and
-the terminal React/DOM boundary and G08 remain M08-T10. Selection, viewport, undo/redo, and action
-execution remain outside M08-T07.
+rule. `S-002` remains `PLANNED` until M08-T10 closes terminal stable-identity integration. Semantic
+resolution and continuous diagnostics remain M08-T09, and the terminal React/DOM boundary and G08
+remain M08-T10. Selection, viewport, undo/redo, action execution, multi-user synchronization, and
+remote persistence remain outside M08-T08.
 
 The cumulative M08 proof closes each boundary against the emitted public package as well as the
-source. The package depends only on `protocol` and `validator` and has zero platform imports or
-executable authority. This is not the terminal M08 platform-boundary claim; M08-T10 still owns the
-independent editor-core artifact and React/DOM integration proof.
+source. Editor-core depends only on `protocol` and `validator` and has zero platform imports or
+executable authority; the concrete loopback transport remains in editor-web. This is not the
+terminal M08 platform-boundary claim; M08-T10 still owns the independent editor-core artifact and
+React/DOM integration proof, so P-18 remains `PARTIAL`.
 
 `runtime-core` accepts a verified bundle, exact catalog set, and host ports. It produces
 JSON-serializable state snapshots, diagnostics, and render plans. `runtime-react` translates those

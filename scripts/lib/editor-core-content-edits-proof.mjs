@@ -28,10 +28,13 @@ const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
 const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
 const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-edits.ts";
 const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
+const PERSISTENCE_SOURCE_PATH = "packages/editor-core/src/persistence.ts";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/content-edits.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/content-edits.types.ts";
 const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
 const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
+const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-content-edits.test.mjs";
@@ -83,6 +86,7 @@ const CURRENT_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/content-edits.js",
   "packages/editor-core/dist/state-binding-edits.js",
   "packages/editor-core/dist/event-action-edits.js",
+  "packages/editor-core/dist/persistence.js",
 ]);
 const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
@@ -102,6 +106,7 @@ const DIST_PATHS = Object.freeze(
     "content-edits",
     "state-binding-edits",
     "event-action-edits",
+    "persistence",
   ].flatMap((name) => [
     `packages/editor-core/dist/${name}.d.ts`,
     `packages/editor-core/dist/${name}.d.ts.map`,
@@ -122,6 +127,7 @@ const TRACKED_PATHS = Object.freeze([
   CONTENT_EDITS_SOURCE_PATH,
   STATE_BINDING_EDITS_SOURCE_PATH,
   EVENT_ACTION_EDITS_SOURCE_PATH,
+  PERSISTENCE_SOURCE_PATH,
   INDEX_SOURCE_PATH,
   ...DIST_PATHS,
   "packages/editor-core/test/source-document.test.ts",
@@ -134,6 +140,8 @@ const TRACKED_PATHS = Object.freeze([
   PACKAGE_TYPES_PATH,
   AUTHORING_ROUND_TRIP_TEST_PATH,
   AUTHORING_ROUND_TRIP_TYPES_PATH,
+  PERSISTENCE_TEST_PATH,
+  PERSISTENCE_TYPES_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -152,6 +160,7 @@ const RETAINED_T04_RECEIPT_PATHS = Object.freeze(
         INDEX_SOURCE_PATH,
         STATE_BINDING_EDITS_SOURCE_PATH,
         EVENT_ACTION_EDITS_SOURCE_PATH,
+        PERSISTENCE_SOURCE_PATH,
         "packages/editor-core/dist/index.d.ts",
         "packages/editor-core/dist/index.d.ts.map",
         "packages/editor-core/dist/index.js",
@@ -164,10 +173,16 @@ const RETAINED_T04_RECEIPT_PATHS = Object.freeze(
         "packages/editor-core/dist/event-action-edits.d.ts.map",
         "packages/editor-core/dist/event-action-edits.js",
         "packages/editor-core/dist/event-action-edits.js.map",
+        "packages/editor-core/dist/persistence.d.ts",
+        "packages/editor-core/dist/persistence.d.ts.map",
+        "packages/editor-core/dist/persistence.js",
+        "packages/editor-core/dist/persistence.js.map",
         PUBLIC_TEST_PATH,
         PUBLIC_TYPES_PATH,
         AUTHORING_ROUND_TRIP_TEST_PATH,
         AUTHORING_ROUND_TRIP_TYPES_PATH,
+        PERSISTENCE_TEST_PATH,
+        PERSISTENCE_TYPES_PATH,
         PROOF_LIBRARY_PATH,
         ROOT_TEST_PATH,
       ].includes(relativePath),
@@ -368,17 +383,42 @@ const EVENT_ACTION_TYPE_EXPORTS = Object.freeze(
 const EXPECTED_EVENT_ACTION_EXPORTS = Object.freeze(
   [...EVENT_ACTION_RUNTIME_EXPORTS, ...EVENT_ACTION_TYPE_EXPORTS].sort(compareText),
 );
+const PERSISTENCE_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorPersistencePort"]);
+const PERSISTENCE_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorPersistenceAdapter",
+    "DesenEditorPersistenceAdapterFailureReason",
+    "DesenEditorPersistenceAdapterReadResult",
+    "DesenEditorPersistenceAdapterSourceRecord",
+    "DesenEditorPersistenceAdapterWriteRequest",
+    "DesenEditorPersistenceAdapterWriteResult",
+    "DesenEditorPersistenceDiagnostic",
+    "DesenEditorPersistenceDiagnosticCode",
+    "DesenEditorPersistencePort",
+    "DesenEditorSourceOpenResult",
+    "DesenEditorSourceOpenSuccess",
+    "DesenEditorSourceSaveRequest",
+    "DesenEditorSourceSaveResult",
+  ].sort(compareText),
+);
+const EXPECTED_PERSISTENCE_EXPORTS = Object.freeze(
+  [...PERSISTENCE_RUNTIME_EXPORTS, ...PERSISTENCE_TYPE_EXPORTS].sort(compareText),
+);
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     ...EXPECTED_RUNTIME_EXPORTS,
     ...STATE_BINDING_RUNTIME_EXPORTS,
     ...EVENT_ACTION_RUNTIME_EXPORTS,
+    ...PERSISTENCE_RUNTIME_EXPORTS,
   ].sort(compareText),
 );
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
-  [...EXPECTED_TYPE_EXPORTS, ...STATE_BINDING_TYPE_EXPORTS, ...EVENT_ACTION_TYPE_EXPORTS].sort(
-    compareText,
-  ),
+  [
+    ...EXPECTED_TYPE_EXPORTS,
+    ...STATE_BINDING_TYPE_EXPORTS,
+    ...EVENT_ACTION_TYPE_EXPORTS,
+    ...PERSISTENCE_TYPE_EXPORTS,
+  ].sort(compareText),
 );
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/CONTENT_EDIT_COMMAND_INVALID",
@@ -405,6 +445,18 @@ const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
   "rejects malformed-Unicode prop names with controlled command diagnostics",
   "preserves structural diagnostics when a content value would make the Source invalid",
   "enforces depth, identity-count, and 8 MiB document boundaries",
+]);
+const EXPECTED_PERSISTENCE_TEST_NAMES = Object.freeze([
+  "captures an exact stable adapter and invokes both callbacks without a receiver",
+  "re-admits found parsed values as detached frozen documents with authoring and extensions",
+  "fails closed for malformed reads, invalid stored Source, and unexpected read rejection",
+  "maps explicit adapter read and write failures without leaking platform detail",
+  "sends fresh complete RFC 8785 bytes including unresolved authoring and extensions",
+  "accepts only generation settlements that match the exact compare-and-set precondition",
+  "treats rejected, explicitly uncertain, and malformed write settlements as indeterminate",
+  "rejects malformed save/open requests and invalid documents before adapter invocation",
+  "accepts an exact 8 MiB Source and rejects a one-byte crossing on both open and save",
+  "preserves atomic compare-and-set behavior when two opened generations race",
 ]);
 const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the package manifest keeps one exact root export and the declared runtime dependencies",
@@ -446,6 +498,9 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted event and action commands are deterministic, immutable, and semantically unresolved",
   "the emitted factory isolates authoring and round-trips all Source extension locations",
   "all 32 emitted mutation commands isolate authoring and preserve extension parsed values",
+  "the emitted persistence port re-admits reads and saves complete canonical Source bytes",
+  "the emitted persistence port validates every compare-and-set settlement and uncertainty",
+  "the emitted persistence port enforces structural readmission and the full 8 MiB Source bound",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",
   "[proof-core] rejects caller retention and partial failure authority",
@@ -913,7 +968,8 @@ function verifyBoundary(files) {
     manifest.scripts?.["test:event-action-edits"] !==
       "vitest run test/event-action-edits.test.ts" ||
     manifest.scripts?.["test:authoring-round-trip"] !==
-      "vitest run test/authoring-round-trip.test.ts"
+      "vitest run test/authoring-round-trip.test.ts" ||
+    manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -966,6 +1022,18 @@ function verifyBoundary(files) {
     fail("TSDOC_DRIFT", "Every public event/action-edit declaration must retain TSDoc.");
   }
 
+  const persistenceText = decodeUtf8(files.get(PERSISTENCE_SOURCE_PATH), PERSISTENCE_SOURCE_PATH);
+  const persistenceExports = exportedNames(persistenceText, PERSISTENCE_SOURCE_PATH);
+  exactArray(
+    persistenceExports.names,
+    EXPECTED_PERSISTENCE_EXPORTS,
+    "SOURCE_DRIFT",
+    "Persistence source exports",
+  );
+  if (persistenceExports.tsdocDeclarations !== EXPECTED_PERSISTENCE_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Every public persistence declaration must retain TSDoc.");
+  }
+
   const sourceIndex = reexportedNames(
     decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH),
     INDEX_SOURCE_PATH,
@@ -984,6 +1052,8 @@ function verifyBoundary(files) {
       "./content-edits.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
+      "./persistence.js",
+      "./persistence.js",
       "./source-document.js",
       "./source-document.js",
       "./stable-id-insert.js",
@@ -1005,6 +1075,8 @@ function verifyBoundary(files) {
   const distStateBindingDeclarationPath = "packages/editor-core/dist/state-binding-edits.d.ts";
   const distEventActionPath = "packages/editor-core/dist/event-action-edits.js";
   const distEventActionDeclarationPath = "packages/editor-core/dist/event-action-edits.d.ts";
+  const distPersistencePath = "packages/editor-core/dist/persistence.js";
+  const distPersistenceDeclarationPath = "packages/editor-core/dist/persistence.d.ts";
   const distIndex = decodeUtf8(files.get(distIndexPath), distIndexPath);
   const emittedIndex = reexportedNames(distIndex, distIndexPath);
   const emittedIndexDeclaration = reexportedNames(
@@ -1068,6 +1140,19 @@ function verifyBoundary(files) {
   if (emittedEventAction.tsdocDeclarations !== EXPECTED_EVENT_ACTION_EXPORTS.length) {
     fail("TSDOC_DRIFT", "Emitted event/action declarations lost TSDoc.");
   }
+  const emittedPersistence = exportedNames(
+    decodeUtf8(files.get(distPersistenceDeclarationPath), distPersistenceDeclarationPath),
+    distPersistenceDeclarationPath,
+  );
+  exactArray(
+    emittedPersistence.names,
+    EXPECTED_PERSISTENCE_EXPORTS,
+    "EMITTED_DRIFT",
+    "Emitted persistence declarations",
+  );
+  if (emittedPersistence.tsdocDeclarations !== EXPECTED_PERSISTENCE_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Emitted persistence declarations lost TSDoc.");
+  }
 
   const emittedModules = [
     [
@@ -1079,6 +1164,7 @@ function verifyBoundary(files) {
         "./content-edits.js",
         "./state-binding-edits.js",
         "./event-action-edits.js",
+        "./persistence.js",
       ],
     ],
     ["packages/editor-core/dist/source-document.js", ["@desen/validator"]],
@@ -1087,6 +1173,7 @@ function verifyBoundary(files) {
     [distContentPath, ["@desen/protocol", "./source-document.js"]],
     [distStateBindingPath, ["@desen/protocol", "./source-document.js"]],
     [distEventActionPath, ["@desen/protocol", "./source-document.js"]],
+    [distPersistencePath, ["@desen/protocol", "./source-document.js"]],
   ];
   for (const [relativePath, expected] of emittedModules) {
     exactArray(
@@ -1124,6 +1211,21 @@ function verifyBoundary(files) {
   if (focusedTypeAssertions !== 6) {
     fail("TEST_INVENTORY_DRIFT", "Focused compiler-negative inventory must remain six.");
   }
+  const persistenceTests = testNames(
+    decodeUtf8(files.get(PERSISTENCE_TEST_PATH), PERSISTENCE_TEST_PATH),
+  );
+  exactArray(
+    persistenceTests,
+    EXPECTED_PERSISTENCE_TEST_NAMES,
+    "TEST_INVENTORY_DRIFT",
+    "Persistence behavior inventory",
+  );
+  const persistenceTypeAssertions = countTypeAssertions(
+    decodeUtf8(files.get(PERSISTENCE_TYPES_PATH), PERSISTENCE_TYPES_PATH),
+  );
+  if (persistenceTypeAssertions !== 21) {
+    fail("TEST_INVENTORY_DRIFT", "Persistence compiler-negative inventory must remain twenty-one.");
+  }
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   exactArray(
     publicTests,
@@ -1134,8 +1236,8 @@ function verifyBoundary(files) {
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
   );
-  if (publicTypeAssertions !== 75) {
-    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain seventy-five.");
+  if (publicTypeAssertions !== 96) {
+    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain ninety-six.");
   }
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
@@ -1153,17 +1255,24 @@ function verifyBoundary(files) {
     additiveRuntimeExports: [
       ...STATE_BINDING_RUNTIME_EXPORTS,
       ...EVENT_ACTION_RUNTIME_EXPORTS,
+      ...PERSISTENCE_RUNTIME_EXPORTS,
     ].sort(compareText),
-    additiveTypeExports: [...STATE_BINDING_TYPE_EXPORTS, ...EVENT_ACTION_TYPE_EXPORTS].sort(
-      compareText,
-    ),
+    additiveTypeExports: [
+      ...STATE_BINDING_TYPE_EXPORTS,
+      ...EVENT_ACTION_TYPE_EXPORTS,
+      ...PERSISTENCE_TYPE_EXPORTS,
+    ].sort(compareText),
     additiveSuccessor: {
-      task: "M08-T06",
-      sourcePath: EVENT_ACTION_EDITS_SOURCE_PATH,
-      runtimePath: distEventActionPath,
-      declarationPath: distEventActionDeclarationPath,
-      runtimeExports: [...EVENT_ACTION_RUNTIME_EXPORTS],
-      typeExports: [...EVENT_ACTION_TYPE_EXPORTS],
+      task: "M08-T08",
+      sourcePath: PERSISTENCE_SOURCE_PATH,
+      runtimePath: distPersistencePath,
+      declarationPath: distPersistenceDeclarationPath,
+      focusedTestPath: PERSISTENCE_TEST_PATH,
+      focusedTypesPath: PERSISTENCE_TYPES_PATH,
+      runtimeExports: [...PERSISTENCE_RUNTIME_EXPORTS],
+      typeExports: [...PERSISTENCE_TYPE_EXPORTS],
+      publicRuntimeCasesAdded: 3,
+      publicCompilerNegativeAssertionsAdded: 21,
     },
     proofOnlySuccessor: {
       task: "M08-T07",
@@ -1177,7 +1286,7 @@ function verifyBoundary(files) {
     contentPublicDeclarations: EXPECTED_CONTENT_EXPORTS.length,
     contentTsdocDeclarations: sourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
-    staticEsmEdges: 17,
+    staticEsmEdges: 20,
     unknownStaticEsmEdges: 0,
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length,

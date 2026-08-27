@@ -25,10 +25,13 @@ const FIXTURE_PATH =
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
 const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
+const PERSISTENCE_SOURCE_PATH = "packages/editor-core/src/persistence.ts";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/event-action-edits.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/event-action-edits.types.ts";
 const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
 const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
+const PERSISTENCE_TEST_PATH = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES_PATH = "packages/editor-core/test/persistence.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-event-action-edits.test.mjs";
@@ -80,6 +83,7 @@ const CURRENT_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/content-edits.js",
   "packages/editor-core/dist/state-binding-edits.js",
   "packages/editor-core/dist/event-action-edits.js",
+  "packages/editor-core/dist/persistence.js",
 ]);
 const RETAINED_EDITOR_RUNTIME_PATHS = Object.freeze([
   "packages/editor-core/dist/source-document.js",
@@ -101,6 +105,7 @@ const DIST_PATHS = Object.freeze(
     "content-edits",
     "state-binding-edits",
     "event-action-edits",
+    "persistence",
   ].flatMap((name) => [
     `packages/editor-core/dist/${name}.d.ts`,
     `packages/editor-core/dist/${name}.d.ts.map`,
@@ -121,6 +126,7 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/src/content-edits.ts",
   "packages/editor-core/src/state-binding-edits.ts",
   EVENT_ACTION_EDITS_SOURCE_PATH,
+  PERSISTENCE_SOURCE_PATH,
   INDEX_SOURCE_PATH,
   ...DIST_PATHS,
   "packages/editor-core/test/source-document.test.ts",
@@ -137,6 +143,8 @@ const TRACKED_PATHS = Object.freeze([
   PACKAGE_TYPES_PATH,
   AUTHORING_ROUND_TRIP_TEST_PATH,
   AUTHORING_ROUND_TRIP_TYPES_PATH,
+  PERSISTENCE_TEST_PATH,
+  PERSISTENCE_TYPES_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -152,8 +160,20 @@ const RETAINED_T06_RECEIPT_PATHS = Object.freeze(
     (relativePath) =>
       ![
         PACKAGE_PATH,
+        INDEX_SOURCE_PATH,
+        PERSISTENCE_SOURCE_PATH,
         AUTHORING_ROUND_TRIP_TEST_PATH,
         AUTHORING_ROUND_TRIP_TYPES_PATH,
+        "packages/editor-core/dist/index.d.ts",
+        "packages/editor-core/dist/index.d.ts.map",
+        "packages/editor-core/dist/index.js",
+        "packages/editor-core/dist/index.js.map",
+        "packages/editor-core/dist/persistence.d.ts",
+        "packages/editor-core/dist/persistence.d.ts.map",
+        "packages/editor-core/dist/persistence.js",
+        "packages/editor-core/dist/persistence.js.map",
+        PERSISTENCE_TEST_PATH,
+        PERSISTENCE_TYPES_PATH,
         PUBLIC_TEST_PATH,
         PUBLIC_TYPES_PATH,
         PROOF_LIBRARY_PATH,
@@ -350,6 +370,33 @@ const EXPECTED_EVENT_ACTION_EXPORTS = Object.freeze(
     "DesenEditorEventHandlerInsertCommand",
   ].sort(compareText),
 );
+const PERSISTENCE_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorPersistencePort"]);
+const PERSISTENCE_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorPersistenceAdapter",
+    "DesenEditorPersistenceAdapterFailureReason",
+    "DesenEditorPersistenceAdapterReadResult",
+    "DesenEditorPersistenceAdapterSourceRecord",
+    "DesenEditorPersistenceAdapterWriteRequest",
+    "DesenEditorPersistenceAdapterWriteResult",
+    "DesenEditorPersistenceDiagnostic",
+    "DesenEditorPersistenceDiagnosticCode",
+    "DesenEditorPersistencePort",
+    "DesenEditorSourceOpenResult",
+    "DesenEditorSourceOpenSuccess",
+    "DesenEditorSourceSaveRequest",
+    "DesenEditorSourceSaveResult",
+  ].sort(compareText),
+);
+const EXPECTED_PERSISTENCE_EXPORTS = Object.freeze(
+  [...PERSISTENCE_RUNTIME_EXPORTS, ...PERSISTENCE_TYPE_EXPORTS].sort(compareText),
+);
+const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
+  [...EXPECTED_RUNTIME_EXPORTS, ...PERSISTENCE_RUNTIME_EXPORTS].sort(compareText),
+);
+const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
+  [...EXPECTED_TYPE_EXPORTS, ...PERSISTENCE_TYPE_EXPORTS].sort(compareText),
+);
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
   "run.desen.editor/EVENT_ACTION_EDIT_COMMAND_INVALID",
   "run.desen.editor/EVENT_ACTION_EDIT_LIMIT_EXCEEDED",
@@ -376,6 +423,18 @@ const EXPECTED_PACKAGE_TEST_NAMES = Object.freeze([
   "accepts component and action nesting depth 64 and rejects depth 65 before mutation",
   "accepts exactly 25,000 surface identities and 25,000 owner actions",
   "accepts an exact 8 MiB post-edit Source and rejects a one-byte crossing",
+]);
+const EXPECTED_PERSISTENCE_TEST_NAMES = Object.freeze([
+  "captures an exact stable adapter and invokes both callbacks without a receiver",
+  "re-admits found parsed values as detached frozen documents with authoring and extensions",
+  "fails closed for malformed reads, invalid stored Source, and unexpected read rejection",
+  "maps explicit adapter read and write failures without leaking platform detail",
+  "sends fresh complete RFC 8785 bytes including unresolved authoring and extensions",
+  "accepts only generation settlements that match the exact compare-and-set precondition",
+  "treats rejected, explicitly uncertain, and malformed write settlements as indeterminate",
+  "rejects malformed save/open requests and invalid documents before adapter invocation",
+  "accepts an exact 8 MiB Source and rejects a one-byte crossing on both open and save",
+  "preserves atomic compare-and-set behavior when two opened generations race",
 ]);
 const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the package manifest keeps one exact root export and the declared runtime dependencies",
@@ -417,6 +476,9 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted event and action commands are deterministic, immutable, and semantically unresolved",
   "the emitted factory isolates authoring and round-trips all Source extension locations",
   "all 32 emitted mutation commands isolate authoring and preserve extension parsed values",
+  "the emitted persistence port re-admits reads and saves complete canonical Source bytes",
+  "the emitted persistence port validates every compare-and-set settlement and uncertainty",
+  "the emitted persistence port enforces structural readmission and the full 8 MiB Source bound",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",
   "[proof-core] rejects caller retention and partial failure authority",
@@ -887,7 +949,8 @@ function verifyBoundary(files) {
     manifest.scripts?.["test:event-action-edits"] !==
       "vitest run test/event-action-edits.test.ts" ||
     manifest.scripts?.["test:authoring-round-trip"] !==
-      "vitest run test/authoring-round-trip.test.ts"
+      "vitest run test/authoring-round-trip.test.ts" ||
+    manifest.scripts?.["test:persistence"] !== "vitest run test/persistence.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -913,12 +976,29 @@ function verifyBoundary(files) {
     if (!sourceText.includes(`"${code}"`)) fail("DIAGNOSTIC_DRIFT", `Missing code: ${code}`);
   }
 
+  const persistenceText = decodeUtf8(files.get(PERSISTENCE_SOURCE_PATH), PERSISTENCE_SOURCE_PATH);
+  const persistenceExports = exportedNames(persistenceText, PERSISTENCE_SOURCE_PATH);
+  exactArray(
+    persistenceExports.names,
+    EXPECTED_PERSISTENCE_EXPORTS,
+    "SOURCE_DRIFT",
+    "Persistence source exports",
+  );
+  if (persistenceExports.tsdocDeclarations !== EXPECTED_PERSISTENCE_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Every public persistence declaration must retain TSDoc.");
+  }
+
   const sourceIndex = reexportedNames(
     decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH),
     INDEX_SOURCE_PATH,
   );
-  exactArray(sourceIndex.runtime, EXPECTED_RUNTIME_EXPORTS, "SOURCE_DRIFT", "Runtime exports");
-  exactArray(sourceIndex.types, EXPECTED_TYPE_EXPORTS, "SOURCE_DRIFT", "Type exports");
+  exactArray(
+    sourceIndex.runtime,
+    EXPECTED_CURRENT_RUNTIME_EXPORTS,
+    "SOURCE_DRIFT",
+    "Runtime exports",
+  );
+  exactArray(sourceIndex.types, EXPECTED_CURRENT_TYPE_EXPORTS, "SOURCE_DRIFT", "Type exports");
   exactArray(
     sourceIndex.modules,
     [
@@ -926,6 +1006,8 @@ function verifyBoundary(files) {
       "./content-edits.js",
       "./event-action-edits.js",
       "./event-action-edits.js",
+      "./persistence.js",
+      "./persistence.js",
       "./source-document.js",
       "./source-document.js",
       "./stable-id-insert.js",
@@ -943,22 +1025,29 @@ function verifyBoundary(files) {
   const distIndexDeclarationPath = "packages/editor-core/dist/index.d.ts";
   const distEventActionPath = "packages/editor-core/dist/event-action-edits.js";
   const distEventActionDeclarationPath = "packages/editor-core/dist/event-action-edits.d.ts";
+  const distPersistencePath = "packages/editor-core/dist/persistence.js";
+  const distPersistenceDeclarationPath = "packages/editor-core/dist/persistence.d.ts";
   const distIndex = decodeUtf8(files.get(distIndexPath), distIndexPath);
   const emittedIndex = reexportedNames(distIndex, distIndexPath);
   const emittedIndexDeclaration = reexportedNames(
     decodeUtf8(files.get(distIndexDeclarationPath), distIndexDeclarationPath),
     distIndexDeclarationPath,
   );
-  exactArray(emittedIndex.runtime, EXPECTED_RUNTIME_EXPORTS, "EMITTED_DRIFT", "Emitted exports");
+  exactArray(
+    emittedIndex.runtime,
+    EXPECTED_CURRENT_RUNTIME_EXPORTS,
+    "EMITTED_DRIFT",
+    "Emitted exports",
+  );
   exactArray(
     emittedIndexDeclaration.runtime,
-    EXPECTED_RUNTIME_EXPORTS,
+    EXPECTED_CURRENT_RUNTIME_EXPORTS,
     "EMITTED_DRIFT",
     "Declaration runtime exports",
   );
   exactArray(
     emittedIndexDeclaration.types,
-    EXPECTED_TYPE_EXPORTS,
+    EXPECTED_CURRENT_TYPE_EXPORTS,
     "EMITTED_DRIFT",
     "Declaration type exports",
   );
@@ -975,6 +1064,19 @@ function verifyBoundary(files) {
   if (emittedEventAction.tsdocDeclarations !== EXPECTED_EVENT_ACTION_EXPORTS.length) {
     fail("TSDOC_DRIFT", "Emitted event/action declarations lost TSDoc.");
   }
+  const emittedPersistence = exportedNames(
+    decodeUtf8(files.get(distPersistenceDeclarationPath), distPersistenceDeclarationPath),
+    distPersistenceDeclarationPath,
+  );
+  exactArray(
+    emittedPersistence.names,
+    EXPECTED_PERSISTENCE_EXPORTS,
+    "EMITTED_DRIFT",
+    "Emitted persistence declarations",
+  );
+  if (emittedPersistence.tsdocDeclarations !== EXPECTED_PERSISTENCE_EXPORTS.length) {
+    fail("TSDOC_DRIFT", "Emitted persistence declarations lost TSDoc.");
+  }
 
   const emittedModules = [
     [
@@ -986,6 +1088,7 @@ function verifyBoundary(files) {
         "./content-edits.js",
         "./state-binding-edits.js",
         "./event-action-edits.js",
+        "./persistence.js",
       ],
     ],
     ["packages/editor-core/dist/source-document.js", ["@desen/validator"]],
@@ -997,6 +1100,7 @@ function verifyBoundary(files) {
       ["@desen/protocol", "./source-document.js"],
     ],
     [distEventActionPath, ["@desen/protocol", "./source-document.js"]],
+    [distPersistencePath, ["@desen/protocol", "./source-document.js"]],
   ];
   for (const [relativePath, expected] of emittedModules) {
     exactArray(
@@ -1034,6 +1138,21 @@ function verifyBoundary(files) {
   if (focusedTypeAssertions !== 19) {
     fail("TEST_INVENTORY_DRIFT", "Focused compiler-negative inventory must remain nineteen.");
   }
+  const persistenceTests = testNames(
+    decodeUtf8(files.get(PERSISTENCE_TEST_PATH), PERSISTENCE_TEST_PATH),
+  );
+  exactArray(
+    persistenceTests,
+    EXPECTED_PERSISTENCE_TEST_NAMES,
+    "TEST_INVENTORY_DRIFT",
+    "Persistence behavior inventory",
+  );
+  const persistenceTypeAssertions = countTypeAssertions(
+    decodeUtf8(files.get(PERSISTENCE_TYPES_PATH), PERSISTENCE_TYPES_PATH),
+  );
+  if (persistenceTypeAssertions !== 21) {
+    fail("TEST_INVENTORY_DRIFT", "Persistence compiler-negative inventory must remain twenty-one.");
+  }
   const publicTests = testNames(decodeUtf8(files.get(PUBLIC_TEST_PATH), PUBLIC_TEST_PATH));
   exactArray(
     publicTests,
@@ -1044,8 +1163,8 @@ function verifyBoundary(files) {
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
   );
-  if (publicTypeAssertions !== 75) {
-    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain seventy-five.");
+  if (publicTypeAssertions !== 96) {
+    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain ninety-six.");
   }
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
@@ -1058,6 +1177,22 @@ function verifyBoundary(files) {
   return deepFreeze({
     runtimeExports: [...EXPECTED_RUNTIME_EXPORTS],
     typeExports: [...EXPECTED_TYPE_EXPORTS],
+    currentPackageRuntimeExports: [...EXPECTED_CURRENT_RUNTIME_EXPORTS],
+    currentPackageTypeExports: [...EXPECTED_CURRENT_TYPE_EXPORTS],
+    additiveRuntimeExports: [...PERSISTENCE_RUNTIME_EXPORTS],
+    additiveTypeExports: [...PERSISTENCE_TYPE_EXPORTS],
+    additiveSuccessor: {
+      task: "M08-T08",
+      sourcePath: PERSISTENCE_SOURCE_PATH,
+      runtimePath: distPersistencePath,
+      declarationPath: distPersistenceDeclarationPath,
+      focusedTestPath: PERSISTENCE_TEST_PATH,
+      focusedTypesPath: PERSISTENCE_TYPES_PATH,
+      runtimeExports: [...PERSISTENCE_RUNTIME_EXPORTS],
+      typeExports: [...PERSISTENCE_TYPE_EXPORTS],
+      publicRuntimeCasesAdded: 3,
+      publicCompilerNegativeAssertionsAdded: 21,
+    },
     proofOnlySuccessor: {
       task: "M08-T07",
       focusedTestPath: AUTHORING_ROUND_TRIP_TEST_PATH,
@@ -1070,7 +1205,7 @@ function verifyBoundary(files) {
     eventActionPublicDeclarations: EXPECTED_EVENT_ACTION_EXPORTS.length,
     eventActionTsdocDeclarations: sourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
-    staticEsmEdges: 17,
+    staticEsmEdges: 20,
     unknownStaticEsmEdges: 0,
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length,
@@ -1288,7 +1423,7 @@ async function importReceiptedRuntime(files) {
     const imported = await import(pathToFileURL(entryPath).href);
     exactArray(
       Object.keys(imported.editorCore).sort(compareText),
-      EXPECTED_RUNTIME_EXPORTS,
+      EXPECTED_CURRENT_RUNTIME_EXPORTS,
       "PUBLIC_API_DRIFT",
       "Isolated runtime exports",
     );
@@ -2093,6 +2228,11 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
     publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
+      currentPackageRuntimeExports: boundary.currentPackageRuntimeExports,
+      currentPackageTypeExports: boundary.currentPackageTypeExports,
+      additiveRuntimeExports: boundary.additiveRuntimeExports,
+      additiveTypeExports: boundary.additiveTypeExports,
+      additiveSuccessor: boundary.additiveSuccessor,
       proofOnlySuccessor: boundary.proofOnlySuccessor,
       eventActionPublicDeclarations: boundary.eventActionPublicDeclarations,
       eventActionTsdocDeclarations: boundary.eventActionTsdocDeclarations,
@@ -2123,7 +2263,7 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
     },
     nonclaims: [
       "M08_T07_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T06_CLAIM_AUTHORITY",
-      "PERSISTENCE_M08_T08",
+      "M08_T08_PERSISTENCE_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T06_CLAIM_AUTHORITY",
       "EVENT_ACTION_REFERENCE_AND_CATALOG_SEMANTICS_M08_T09",
       "ACTION_EXECUTION_AND_RUNTIME_TURNS",
       "UNDO_REDO_SELECTION_AND_VIEWPORT_POLICY",

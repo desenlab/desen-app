@@ -89,19 +89,6 @@ importers:
 
   apps/desen-run: {}
 
-  apps/reference-host-web-server:
-    dependencies:
-      '@desen/control-plane-api':
-        specifier: workspace:*
-        version: link:../control-plane-api
-    devDependencies:
-      '@desen/protocol':
-        specifier: workspace:*
-        version: link:../../packages/protocol
-      vitest:
-        specifier: 4.1.10
-        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
-
   apps/reference-host-web:
     dependencies:
       '@desen/reference-catalog-web':
@@ -145,6 +132,19 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
 
+  apps/reference-host-web-server:
+    dependencies:
+      '@desen/control-plane-api':
+        specifier: workspace:*
+        version: link:../control-plane-api
+    devDependencies:
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
+
   packages/catalog-sdk:
     dependencies:
       '@desen/protocol':
@@ -170,7 +170,18 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
 
-  packages/editor-web: {}
+  packages/editor-web:
+    dependencies:
+      '@desen/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+    devDependencies:
+      '@desen/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)
 
   packages/protocol:
     devDependencies:

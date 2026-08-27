@@ -12,7 +12,7 @@ exhaustive. The CI-01 sequential runner remains available only through explicit 
 2. `proof-reader-checkpoints.json` records reviewed live reader hardening without rewriting those
    artifacts.
 3. `exhaustive-workload-inventory.mjs` is the neutral, code-owned authority for the live exact
-   165-node, 78-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
+   168-node, 79-proof-unit workload graph. It owns exact commands, arguments, dependencies, execution
    classes, and inert shared-state metadata without importing either scheduler.
 4. The retained legacy sequential runner is a manual rollback mirror, not the source of the new
    graph.
@@ -257,56 +257,77 @@ graph was `sha256:9fb786d80ac21bef4dc89c9a77986f91dd50c9ff53dd2d54c7a52d5c4ac873
 covered 1,071 paths at `sha256:ae070076003f9ae641a6682aab6280336b7d2ccf6ccd6b96d15b3c10c6cd6c18`, including 152
 proof-owned paths, with projection
 `sha256:d793913bca281e2127151c83ce570ce415c995da42013226731d030b337fc2c0`.
-The current M08-T07 append-only successor contains 165 workloads and 78 proof pairs. Its legacy
-projection contains 549 prerequisite segments, 3,435 ordered leaf invocations, and 260 distinct
+The historical M08-T07 append-only successor contained 165 workloads and 78 proof pairs. Its
+legacy prerequisite, ordered-leaf, distinct-leaf, retained-plan, neutral-inventory, workload-set,
+ordered-projection, impact-graph, required-plan, and shadow-plan pins were respectively
+`sha256:cff21c5dd6e483906cb70a86fe475cf5df913b8721de199dac2e16135905c98e`,
+`sha256:a05490316408114e99a790018bedbfcb8783286883ddbdd47376251273cf0425`,
+`sha256:302317ed31512f705377338d780dcc5dd352c81cde37f6ff06f91f0db32693fd`,
+`sha256:c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b07432e4a47de684e25d`,
+`sha256:8220259aa2a44774d192ea2420f4c2f8423c9dedd93a1fcf9b34340a0ab0dcd3`,
+`sha256:9ea3b95ab6f034473765beb9edb1482532bb1a0b4e05f630c403d38d8df0daef`,
+`sha256:fc588358d8fa3b2e7c2cd9f3a280715d7db34089a41a2fae2c3484d18c040278`,
+`sha256:5aa20b4fb87decc51221bca5a900677d7dfddd1e61c068d5e91420253a3236b2`,
+`sha256:5484324b6d22a5e58bce2431f35382aeeb4e97095c96524e5bdb6211f8650a9e`, and
+`sha256:4beeca9ed27e2e7942951cf0cf014fb7bebca2bcf2f8f69ff0819580aeff3c87`.
+Its 1,088-path ownership, 156-proof-path projection, selector, required-runner, and workspace-script
+pins were `sha256:227cb892270c669646eec89a44243af8e3da5a51bfec8f8e560e2d765c0f2e79`,
+`sha256:d43335b91aa9f3da0571ed2e32e92ea65da81bbcc5efee1aa32bdac30967217d`,
+`sha256:cbd1cce71828ad4ad1c22ede5e6152e5e3130031afebcb1d9c23e32ba55eb7dc`,
+`sha256:9da49a38efa09a48ded3290ba9c2ec4ae57a967d325e61320f39be561b93f9a4`, and
+`sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`.
+Those pins remain historical local authority and make no hosted M08-T07 claim.
+
+The current M08-T08 successor contains 168 workloads and 79 proof pairs. Its legacy projection
+contains 571 prerequisite segments, 3,651 ordered leaf invocations, and 267 distinct
 leaves. Its neutral inventory is
-`sha256:8220259aa2a44774d192ea2420f4c2f8423c9dedd93a1fcf9b34340a0ab0dcd3`, and its required plan is
-`sha256:5484324b6d22a5e58bce2431f35382aeeb4e97095c96524e5bdb6211f8650a9e`. These current pins make no
-hosted M08-T07 claim.
+`sha256:37d1c0cd99fbe5d2b411f9e98c22b1afb58cfca175d9c93fa9b1c6c6861b9418`, and its required plan is
+`sha256:e8ca519dc881aa8cf73651ebbfddbd1d0f97ebba18a68039bb780afdf16b1b6f`. These current pins make no
+hosted M08-T08 claim.
 
 The pre-promotion M07-T11 shadow-selector comparison authority was
 `sha256:ee0cda5b4871ce2e169a958eefd60299197dbf261c0163335cd759e814067dbf`.
 The frozen I07-03 baseline remains historical. I07-04 has independently authenticated `20 / 20`
 eligible hosted comparisons with zero false negatives; promotion and hosted cutover are complete.
 The I07-04 baseline remains byte-identical and historical. Its verifier authenticates that frozen
-promotion receipt first, then separately admits only the exact M08-T07 current-authority successor,
+promotion receipt first, then separately admits only the exact M08-T08 current-authority successor,
 whose comparison digest is
-`sha256:cbd1cce71828ad4ad1c22ede5e6152e5e3130031afebcb1d9c23e32ba55eb7dc`.
+`sha256:4a267ae207bf3ecd22b1a4bd7b46041fb773e7af0c6901b35aa40929ba0fe099`.
 The historical M08-T05 comparison digest remains
 `sha256:41b08d79888fbf3f79f7358ddd02af3bf17d677e9b37c94d58b06d267ad4ced2`.
 
 The complete current reviewed digest set is:
 
 - prerequisite inventory:
-  `cff21c5dd6e483906cb70a86fe475cf5df913b8721de199dac2e16135905c98e`;
+  `540feb633d01ea7f8cd72564214451f2dfe1fea0da624c1f0048e9c5595b0f09`;
 - ordered legacy leaves:
-  `a05490316408114e99a790018bedbfcb8783286883ddbdd47376251273cf0425`;
+  `d826a73e920492e38d1605836656159419296e1d12566a4bcd2d60359665ed49`;
 - distinct leaf workloads:
-  `302317ed31512f705377338d780dcc5dd352c81cde37f6ff06f91f0db32693fd`;
+  `a4e5befa962b78d85dfb67c95d975d376bd3dc81a93caa468c34966517d1292d`;
 - 15 workspace test scripts:
-  `0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`;
+  `86f2dbb30344f9fcafbc656627b9a5bd70a4854405066d6e1c9b33594869e47b`;
 - retained sequential plan:
-  `c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b07432e4a47de684e25d`;
+  `810a62b3f6ff70011d8bc4f6ac7b3495671aa373313b6382e2eb0263f155444d`;
 - neutral inventory:
-  `8220259aa2a44774d192ea2420f4c2f8423c9dedd93a1fcf9b34340a0ab0dcd3`;
+  `37d1c0cd99fbe5d2b411f9e98c22b1afb58cfca175d9c93fa9b1c6c6861b9418`;
 - workload-id set:
-  `9ea3b95ab6f034473765beb9edb1482532bb1a0b4e05f630c403d38d8df0daef`;
+  `36177206bf056ccfebd2f1985c150bacc938edf9a745b9b137a4b8fc7068ea30`;
 - ordered equivalence projection:
-  `fc588358d8fa3b2e7c2cd9f3a280715d7db34089a41a2fae2c3484d18c040278`;
+  `5342b9d8e5a6837da9068a42a0cceb4487dd7cd878d680bbd55972ddb8069b4c`;
 - selector-only impact graph:
-  `5aa20b4fb87decc51221bca5a900677d7dfddd1e61c068d5e91420253a3236b2`;
-- 1,088-path tracked set:
-  `227cb892270c669646eec89a44243af8e3da5a51bfec8f8e560e2d765c0f2e79`;
-- 156-proof-owned-path ownership projection:
-  `d43335b91aa9f3da0571ed2e32e92ea65da81bbcc5efee1aa32bdac30967217d`;
+  `26a3bfd66ae206bd3779c5147cc0b42ae5ba2578e22a6d8a4dcc1a434b9be47f`;
+- 1,103-path tracked set:
+  `b43564894b6c785b15b6a6ab70a844aa3026d962471ee6b0dce9234b237d1c83`;
+- 158-proof-owned-path ownership projection:
+  `63d52bb33742fb5e482e923ab6df080dd4e87c8bc01a771c4f625c1722d5bb1e`;
 - required plan:
-  `5484324b6d22a5e58bce2431f35382aeeb4e97095c96524e5bdb6211f8650a9e`;
+  `e8ca519dc881aa8cf73651ebbfddbd1d0f97ebba18a68039bb780afdf16b1b6f`;
 - shadow plan:
-  `4beeca9ed27e2e7942951cf0cf014fb7bebca2bcf2f8f69ff0819580aeff3c87`;
+  `22f1b0f269f6b5afdd1fc383e4d7be21cd96028b8a5aeeb3b3ef696644f516a7`;
 - current selector authority:
-  `cbd1cce71828ad4ad1c22ede5e6152e5e3130031afebcb1d9c23e32ba55eb7dc`;
+  `4a267ae207bf3ecd22b1a4bd7b46041fb773e7af0c6901b35aa40929ba0fe099`;
 - required-runner authority:
-  `9da49a38efa09a48ded3290ba9c2ec4ae57a967d325e61320f39be561b93f9a4`; and
+  `cbb8346b690817730b301e458d435d940c7ea8543f18402e85e1ecafdd48d9ec`; and
 - promotion artifact:
   `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`.
 
@@ -315,16 +336,20 @@ Every workload has exactly one code-owned shared-state class:
 | Execution class                  | Count | Authority                                            |
 | -------------------------------- | ----: | ---------------------------------------------------- |
 | `GLOBAL_EXCLUSIVE`               |     6 | Repository-wide integrity and boundary barriers      |
-| `WORKSPACE_OUTPUT_EXCLUSIVE`     |     2 | Workspace and public-package output writers          |
+| `WORKSPACE_OUTPUT_EXCLUSIVE`     |     3 | Workspace and public-package output writers          |
 | `PACKAGE_TEST_EXCLUSIVE`         |     1 | Complete workspace package-test barrier              |
 | `PROOF_READ_ONLY`                |    69 | Proof work with no shared workspace writes           |
-| `PROOF_OS_TEMP_ISOLATED`         |    76 | Proof work restricted to a runner-owned OS temp root |
+| `PROOF_OS_TEMP_ISOLATED`         |    78 | Proof work restricted to a runner-owned OS temp root |
 | `PROOF_TRACKED_ALIAS_EXCLUSIVE`  |    10 | Real tracked aliases with a drained scheduler        |
 | `PROOF_WORKSPACE_TEMP_EXCLUSIVE` |     1 | The direct source-audit workspace-temp barrier       |
 
-Sixty-seven proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
+Sixty-eight proof pairs are eligible for pair-level overlap at concurrency two after all dependencies
 pass. Ten real tracked-alias pairs and `reference-host-web-source-audit` are the eleven exclusive
 proof-pair barriers. Within every pair, the root test still depends on its verifier.
+The exact topology is eight serial prefix workloads, 68 ordinary proof pairs, eleven exclusive
+proof-pair barriers, and two serial suffix workloads: `8 + (68 * 2) + (11 * 2) + 2 = 168`. The
+serial `editor-web-public-package-contract` prefix follows the editor-core public-package contract,
+owns the editor-web `dist` write, and closes before the M08-T08 verifier.
 
 The M07-T04 `control-plane-reference-preflight` pair is ordinary and non-barrier. Its verifier is
 `PROOF_READ_ONLY`; its root mutation test is `PROOF_OS_TEMP_ISOLATED` and writes only inside its
@@ -432,6 +457,15 @@ verifier runtime-probe authority; only the root receives the ordinary `NODE_TEST
 policy. The verifier independently reauthenticates all six frozen M08-T01 through M08-T06 editor
 artifacts before admitting T07 evidence.
 
+The M08-T08 `editor-core-persistence` pair is ordinary and non-barrier. Both workloads are
+`PROOF_OS_TEMP_ISOLATED`, follow the serial `editor-web-public-package-contract` predecessor, and
+retain verifier-before-root ordering. Both receive the narrow
+`EDITOR_CORE_PERSISTENCE_SQLITE` native-addon policy. The verifier receives no child-runtime-probe
+grant; only the root receives the ordinary `NODE_TEST_HARNESS` child policy. Neither receives a
+shared workspace-write or listener-port grant. The proof opens no listener: an explicit
+fetch-shaped loopback adapter dispatches through Fastify injection into the same M07-T05 local
+Source route backed by real native SQLite.
+
 The only verifier runtime-probe exceptions, each with isolated temp and child-process authority,
 are:
 
@@ -452,14 +486,16 @@ Native-addon authority is limited to the exact `reference-host-web-source-audit`
 pair, the `publisher-invalid-source-matrix` root test, and the exact `control-plane-local-api`,
 `control-plane-runtime-activation`, `control-plane-runtime-recovery`, and
 `control-plane-runtime-fault-injection` verifier/root-test pairs plus only the
-`control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers.
-Both root proofs receive no native-addon grant.
+`control-plane-runtime-transition-races` and `reference-host-web-channel-consumption` verifiers,
+and the exact `editor-core-persistence` verifier/root-test pair. The transition-races and
+channel-consumption roots receive no native-addon grant. These grants cover fifteen exact steps;
+all unlisted steps remain denied.
 The source-audit verifier remains workspace-read-only; its root test is the sole workspace-temp
 barrier. The publisher root loads only the reviewed Rolldown binding, and the control-plane pairs
 load only their reviewed SQLite binding.
 
 Node 24 requires an orthogonal filesystem-compatibility policy for eighteen exact root tests. The
-distribution across all 165 workloads is 147 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across all 168 workloads is 150 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one `FIXTURE_COPY_AND_REVIEWED_SYMLINK`. Fixture copy accepts only an exact
 code-owned source and bounded no-follow destination tree inside the workload temp root. Reviewed
 symlinks keep temp targets local and pin fourteen workspace-target workloads to eighteen exact
@@ -577,11 +613,16 @@ authority is sequence 33 at
 `64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871`, authenticating 30 frozen
 artifacts and 60 then-current readers. Historical M08-T06 authority remains sequence 34 at
 `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674`, authenticating 31 frozen
-artifacts and 62 then-current readers. Current M08-T07 authority is sequence 35 at
+artifacts and 62 then-current readers. Historical M08-T07 authority is sequence 35 at
 `a2e3ef962ed37e0570cdddef64ae8d0eef2fd3f298cc2580f7ee65d8200f6fa3`, authenticating 32 frozen
-artifacts and 64 current readers while preserving sequence 34 and every earlier byte. The twelve
+artifacts and 64 then-current readers while preserving sequence 34 and every earlier byte. The twelve
 changed historical readers occupy indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]`,
-the T07 proof/root readers occupy `[62, 63]`, and the dedicated checkpoint suite passes 58/58.
+and the T07 proof/root readers occupy `[62, 63]`. Current M08-T08 authority is sequence 36 at
+`4f351f2f535b1fc335876160256a42b1d53c7c7f43db08e0b86bf50c389d1e82`, authenticating 33 frozen
+artifacts and 66 current readers while preserving sequence 35 and every earlier byte. The fourteen
+resealed editor readers occupy indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
+63]`, the T08 proof/root readers occupy `[64, 65]`, and the dedicated checkpoint suite passes
+59/59.
 [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 passed fresh `REQUIRED + EXHAUSTIVE` in
 [run 31674300000, job 94365383803](https://github.com/desenlab/desen-app/actions/runs/31674300000/job/94365383803),
@@ -592,8 +633,8 @@ The one-file [canary PR #37](https://github.com/desenlab/desen-app/pull/37) pass
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07 are
-`DONE`; proof gates are 8/13, implementation is 92/145, M08 is 7/10, `N-012`, `N-014`, `N-018`,
-and `S-003` are `TESTED`, `S-002` remains `PLANNED`, and M08-T08 is next. The exact 30,014-byte
+`DONE`; proof gates are 8/13, implementation is 93/145, M08 is 8/10, `N-012`, `N-014`, `N-018`,
+and `S-003` are `TESTED`, `S-002` remains `PLANNED`, and M08-T09 is next. The exact 30,014-byte
 M08-T05 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`, with reviewed report
@@ -604,7 +645,11 @@ exact 31,310-byte M08-T06 artifact is
 `docs/proof/EDITOR-CORE-EVENT-ACTION-EDITS.md`. The exact 62,304-byte M08-T07 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json` at
 `sha256:33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db`, with reviewed report
-`docs/proof/EDITOR-CORE-AUTHORING-ROUND-TRIP.md`. The full current CI infrastructure suite passes
-265/265; dedicated checkpoint, required-affected, promotion, and retained legacy-gate suites pass
-58/58, 27/27, 19/19, and 25/25 respectively. These T07-integrated local receipts make no hosted
-M08-T07 claim; no `P-*` or proof-gate status changes.
+`docs/proof/EDITOR-CORE-AUTHORING-ROUND-TRIP.md`. The exact 49,785-byte M08-T08 artifact is
+`docs/proof/artifacts/editor-core-0.1.0-persistence.json` at
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`, with reviewed report
+`docs/proof/EDITOR-CORE-PERSISTENCE.md`. The historical T07-integrated CI infrastructure suite
+passed 265/265; its dedicated checkpoint, required-affected, promotion, and retained legacy-gate
+suites passed 58/58, 27/27, 19/19, and 25/25 respectively. The current CI infrastructure suite
+passes 293/293; the persistence root proof and checkpoint suite pass 10/10 and 59/59. These
+T08-integrated local receipts make no hosted M08-T08 claim; no `P-*` or proof-gate status changes.

@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████░░░░░░░░░` **92 / 145 tasks complete (63%)**
+**Overall:** `████████████████░░░░░░░░░` **93 / 145 tasks complete (64%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -22,9 +22,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M08:** `███████░░░` **7 / 10 tasks complete (70%)**
+**M08:** `████████░░` **8 / 10 tasks complete (80%)**
 
-**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T08`
+**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T09`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -217,7 +217,7 @@ barriers. Its shared-state counts are 6/2/1/69/72/10/1, filesystem-policy counts
 and 15 workspace packages expose a `test` script. Its scheduler-neutral inventory is
 `sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`, and its required plan is
 `sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`. This is local code-owned
-authority and makes no hosted M08-T05 claim. The current M08-T07 successor contains 165 workloads
+authority and makes no hosted M08-T05 claim. The historical M08-T07 successor contains 165 workloads
 and 78 proof pairs: 67 ordinary pairs and 11 exclusive barriers. Its 549 prerequisite segments,
 3,435 ordered leaf invocations, and 260 distinct leaves retain the exact quality plan
 `sha256:c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b07432e4a47de684e25d`. The scheduler-neutral
@@ -465,11 +465,14 @@ artifacts and 58 readers. Historical M08-T05 sequence 33 remains
 artifacts and 60 then-current readers while preserving every sequence-32 and earlier byte; its
 dedicated checkpoint suite passes 56/56. Historical M08-T06 sequence 34 remains byte-identical at
 `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674`, authenticating 31 frozen
-artifacts and 62 then-current readers. Current M08-T07 sequence 35 at
+artifacts and 62 then-current readers. Historical M08-T07 sequence 35 at
 `a2e3ef962ed37e0570cdddef64ae8d0eef2fd3f298cc2580f7ee65d8200f6fa3` authenticates 32 frozen
 artifacts and 64 current readers while preserving sequence 34 and every earlier byte. It reseals
 the twelve changed historical readers at `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]`,
 appends the T07 proof/root readers at `[62, 63]`, and passes its dedicated checkpoint suite 58/58.
+Current M08-T08 sequence 36 authenticates 33 frozen artifacts and 66 current readers while
+preserving every sequence-35 and earlier artifact byte. Historical M08-T01–M08-T07 artifact hashes
+remain unchanged.
 M08-T03's delete/move/reorder proof is the exact 22,402-byte
 `docs/proof/artifacts/editor-core-0.1.0-structural-edits.json` at
 `sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. It closes `N-014` as
@@ -525,8 +528,40 @@ save/open durability, and the persistence adapter. The full current CI infrastru
 265/265; checkpoint, required-affected, promotion, and retained legacy-gate suites separately pass
 58/58, 27/27, 19/19, and 25/25. These are local code-owned receipts, not hosted M08-T07 evidence.
 
-I07-04 and G07 remain `DONE`; proof gates remain 8/13, implementation progress is 92/145 (63%),
-M08 is 7/10, and M08-T08 is next.
+M08-T08 adds a platform-neutral persistence port to `@desen/editor-core`. Its adapter boundary
+reads one Source and performs generation-guarded compare-and-set saves; the public port opens and
+saves without browser, React, DOM, Node, filesystem, SQLite, or transport imports. Save canonicalizes
+the complete Source—including root `authoring` and all extension values—enforces the 8 MiB ceiling,
+re-admits bytes, and exposes detached recursively frozen results. Created, unchanged, updated,
+conflict, exhausted, definite-failure, and indeterminate outcomes remain explicit; an uncertain
+write is resolved by reopening and is never retried or merged automatically.
+
+The `@desen/editor-web` local adapter requires the exact lexical origin
+`http://127.0.0.1:<port>`, a bearer token, redirect rejection, and an explicitly injected
+fetch-shaped callback. It has no implicit global-fetch, filesystem, or SQLite authority. The
+existing M07-T05 control-plane implementation remains the unchanged durability owner. A real
+OS-temporary native SQLite integration opens two control-plane instances, proves exactly one
+generation-3 CAS winner and one conflict, closes both, and reopens the exact canonical winner from
+a fresh instance. Root authoring and all 16 Source-reachable extension locations survive the
+create/update/CAS/restart path. A durably dispatched PUT whose response is hidden returns
+`indeterminate`; reopening resolves it.
+
+The exact 49,785-byte
+[`editor-core-0.1.0-persistence.json`](docs/proof/artifacts/editor-core-0.1.0-persistence.json) is
+pinned at `sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`;
+the reviewed report is
+[`EDITOR-CORE-PERSISTENCE.md`](docs/proof/EDITOR-CORE-PERSISTENCE.md). Core persistence passes
+10/10; cumulative core public-package cases pass 49/49 with 96 compiler-negative assertions; Web
+focused cases pass 12/12; Web public-package cases pass 3/3 with six compiler-negative assertions;
+and the independent root proof passes 10/10. The proof authenticates 218 tracked receipts,
+including 180 emitted distribution receipts. The current CI successor contains 168 workloads and
+79 proof pairs. Sequence 36 authenticates 33 frozen artifacts and 66 current readers while keeping
+historical T01–T07 artifact hashes unchanged. These are local code-owned receipts, not hosted
+M08-T08 evidence. `N-012`, `N-018`, and `S-003` remain `TESTED`; P-18 remains `PARTIAL`, and no
+proof-gate or other normative status changes.
+
+I07-04 and G07 remain `DONE`; proof gates remain 8/13, implementation progress is 93/145 (64%),
+M08 is 8/10, and M08-T09 is next.
 Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN

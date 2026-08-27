@@ -1,0 +1,1278 @@
+{
+  "schemaVersion": 1,
+  "proofId": "editor-core-persistence",
+  "profile": "desen.editor-core.persistence-proof.v1",
+  "task": "M08-T08",
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M07-T05",
+      "proofId": "control-plane-local-api",
+      "profile": "desen.control-plane.local-api-proof.v1",
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+      "bytes": 41945,
+      "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES"
+    },
+    {
+      "task": "M08-T07",
+      "proofId": "editor-core-authoring-round-trip",
+      "profile": "desen.editor-core.authoring-round-trip-proof.v1",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
+      "bytes": 62304,
+      "sha256": "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES"
+    }
+  ],
+  "claim": {
+    "protocol": "0.1.0",
+    "platformNeutralPort": true,
+    "webAdapterUsesExplicitTransport": true,
+    "realLocalControlPlane": true,
+    "realNativeSqlite": true,
+    "createOpenUpdateUnchanged": true,
+    "closeReopenDurability": true,
+    "generationCompareAndSet": true,
+    "authoringAndExtensionsPreserved": true,
+    "sourceKeyIndependentOfSourceId": true,
+    "uncertainCommitRequiresReopen": true,
+    "taskStatus": "DONE"
+  },
+  "integration": {
+    "transport": {
+      "publicControlPlaneFactory": "openLocalControlPlane",
+      "webAdapterFactory": "createLocalDesenEditorPersistencePort",
+      "neutralPortFactory": "createDesenEditorPersistencePort",
+      "persistencePortMethods": ["openSource", "saveSource"],
+      "storage": "REAL_OS_TEMP_SQLITE",
+      "sqliteFileName": "control-plane.sqlite3",
+      "sqliteRegularSingleLink": true,
+      "fetchAuthority": "EXPLICIT_INJECT_SHIM",
+      "implicitGlobalFetch": false,
+      "requestCount": 14,
+      "getRequests": 7,
+      "putRequests": 7,
+      "redirectMode": true,
+      "correctBearerRequests": 13
+    },
+    "lifecycle": {
+      "initial": "missing",
+      "createdGeneration": 1,
+      "openedGeneration": 1,
+      "unchangedGeneration": 1,
+      "updatedGeneration": 2,
+      "raceStatuses": ["conflict", "updated"],
+      "raceWinnerGeneration": 3,
+      "raceConflictGeneration": 3,
+      "restartGeneration": 3,
+      "restartUnchangedGeneration": 3
+    },
+    "durability": {
+      "independentControlPlaneInstances": 2,
+      "closeReopen": true,
+      "nativeSqlite": true,
+      "compareAndSetSingleWinner": true,
+      "staleWriterDidNotOverwrite": true
+    },
+    "roundTrip": {
+      "sourceKey": "local-draft",
+      "sourceDocumentId": "com.example.account-app",
+      "sourceKeyIndependentOfDocumentId": true,
+      "canonicalSha256": "b0090769ac2677032be897f275813ed8255bb04877d1992998c8d19ea1433570",
+      "canonicalBytes": 13352,
+      "canonicalEqualAfterRestart": true,
+      "authoringPreserved": true,
+      "extensionLocations": 16,
+      "extensionProjectionSha256": "71ab064596ddb6f5ac4105d66ff8eaa9dd849d42692408cb763c963e03c79c7f",
+      "detached": true,
+      "recursivelyFrozen": true
+    },
+    "uncertainty": {
+      "lostPutResponseStatus": "indeterminate",
+      "reopenResolvedGeneration": 1,
+      "reopenResolvedMarker": "uncertain",
+      "noAutomaticRetry": true
+    },
+    "adversarial": {
+      "malformedReadCode": "run.desen.editor/PERSISTENCE_SOURCE_INVALID",
+      "malformedWriteStatus": "indeterminate",
+      "uncertainPostDispatchStorageResults": [
+        {
+          "code": "STORAGE_IO_FAILURE",
+          "status": "indeterminate"
+        },
+        {
+          "code": "UNSAFE_STORAGE_PATH",
+          "status": "indeterminate"
+        },
+        {
+          "code": "METADATA_CORRUPT",
+          "status": "indeterminate"
+        },
+        {
+          "code": "UNRECOGNIZED_POST_DISPATCH_FAILURE",
+          "status": "indeterminate"
+        }
+      ],
+      "authenticationFailureCode": "run.desen.editor/PERSISTENCE_AUTHENTICATION_REQUIRED",
+      "invalidSourceKeyCode": "run.desen.editor/PERSISTENCE_SOURCE_INVALID",
+      "implicitFetchRejected": true,
+      "platformDetailsLeaked": false
+    }
+  },
+  "executionAuthority": {
+    "workspacePublicPackageImports": true,
+    "emittedDistributionReceipts": 180,
+    "trackedFiles": 218,
+    "osTemporaryRoot": true,
+    "temporaryRootRemoved": true,
+    "nativeAddon": "better-sqlite3@13.0.3",
+    "networkListenerOpened": false,
+    "injectedAndListenerRouteImplementationShared": true
+  },
+  "tests": {
+    "editorCoreFocusedRuntimeCases": 10,
+    "editorCoreFocusedCompilerNegativeAssertions": 21,
+    "editorCorePublicRuntimeCases": 49,
+    "editorCorePublicCompilerNegativeAssertions": 96,
+    "editorWebFocusedRuntimeCases": 12,
+    "editorWebPublicRuntimeCases": 3,
+    "editorWebPublicCompilerNegativeAssertions": 6,
+    "rootProofCases": 10,
+    "rootTestNames": [
+      "[authority] authenticates frozen M07-T05 and M08-T07 plus current emitted integration bytes",
+      "[lifecycle] proves create, open, unchanged, and update through the real local SQLite API",
+      "[durability] proves two-port CAS, close-reopen durability, and independent Source keys",
+      "[round-trip] preserves canonical authoring and all sixteen extension locations",
+      "[adversarial] resolves uncertain commits and fails closed for malformed transport authority",
+      "[determinism] two fresh M08-T08 evidence builds are byte-identical",
+      "[mutation] rejects prerequisite, tracked-file, and runtime substitution",
+      "[artifact] verifies exact bytes and one visible proof-document pin",
+      "[writer] atomically commits exact bytes and protects an existing destination",
+      "[options] rejects linked authority and active, inherited, proxy, or shared inputs"
+    ]
+  },
+  "packageScripts": [
+    {
+      "name": "generate:editor-core-persistence",
+      "command": "pnpm verify:control-plane-local-api && pnpm verify:editor-core-authoring-round-trip && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/editor-web... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/editor-core typecheck && pnpm --filter @desen/editor-web typecheck && pnpm --filter @desen/editor-core test:persistence && pnpm --filter @desen/editor-web test:local-source-persistence && pnpm --filter @desen/editor-core test:public-package && pnpm --filter @desen/editor-web test:public-package && node scripts/generate-editor-core-persistence-proof.mjs"
+    },
+    {
+      "name": "verify:editor-core-persistence",
+      "command": "pnpm verify:control-plane-local-api && pnpm verify:editor-core-authoring-round-trip && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/editor-web... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/editor-core typecheck && pnpm --filter @desen/editor-web typecheck && pnpm --filter @desen/editor-core test:persistence && pnpm --filter @desen/editor-web test:local-source-persistence && pnpm --filter @desen/editor-core test:public-package && pnpm --filter @desen/editor-web test:public-package && node scripts/verify-editor-core-persistence.mjs"
+    },
+    {
+      "name": "test:editor-core-persistence",
+      "command": "pnpm verify:control-plane-local-api && pnpm verify:editor-core-authoring-round-trip && pnpm --filter @desen/control-plane-api... build && pnpm --filter @desen/editor-web... build && pnpm --filter @desen/control-plane-api typecheck && pnpm --filter @desen/editor-core typecheck && pnpm --filter @desen/editor-web typecheck && pnpm --filter @desen/editor-core test:persistence && pnpm --filter @desen/editor-web test:local-source-persistence && pnpm --filter @desen/editor-core test:public-package && pnpm --filter @desen/editor-web test:public-package && node --test tests/editor-core-persistence.test.mjs"
+    }
+  ],
+  "trackedFiles": [
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-contract.d.ts",
+      "bytes": 3537,
+      "sha256": "ce006551785b8d2ed0f19aa1922e3d7968ad2f3462067d249b8fa7fb5a14cbf2"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-contract.js",
+      "bytes": 1382,
+      "sha256": "383d391b5faaabdde068faad94e411585f3f9a2fa5ce59cb8ee3570592310b3f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-internal.d.ts",
+      "bytes": 62,
+      "sha256": "66c67c8ee0f0f00f5d99a6d34ee87e69207146d82ff1d95aad6c007e828c5cda"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store-internal.js",
+      "bytes": 25762,
+      "sha256": "e0bff41ad5993381f6bc441bf5da444ef011b7dbf07b2c55e209cbbd7f4769d6"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store.d.ts",
+      "bytes": 763,
+      "sha256": "9bb752459c145031a76c4b742eae6a08a9cc1c322f9722d73a0c035355b44427"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-store.js",
+      "bytes": 738,
+      "sha256": "7a24e88d5b711f845a7b5596696c3d5b231d81bab1180c739e742084d5113597"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-contract.d.ts",
+      "bytes": 6171,
+      "sha256": "667d6d1b079b22d40b330d586b59159ab763935f2cdaae12a138995ebc7cc028"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-contract.js",
+      "bytes": 1106,
+      "sha256": "82095c8de6b2cfd8e869def67110235addf4765fdb27b4ebe9f2d768e09233fb"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-internal.d.ts",
+      "bytes": 69,
+      "sha256": "e5405e2741dd8f1f6616836ec2e5f1a4a7a78d27d9afc7950cd1c23af01fddee"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-internal.js",
+      "bytes": 14636,
+      "sha256": "58f135d7c403d52ca551d8bfbd3f16f2f385c93902c8c42e8a0baa0661598e13"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-schema-guard.d.ts",
+      "bytes": 347,
+      "sha256": "05071345eb07e366e13b086b358d2e2d9305d39afa25846aea030afe0b70fba9"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-schema-guard.js",
+      "bytes": 12276,
+      "sha256": "22043677dd79de56f863464998edd8119f32502431196a606e3b120c1ab83567"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-standalone-runtime.d.ts",
+      "bytes": 375,
+      "sha256": "a70f1e2bda8c50f9be18af6b740cc647e2cd4740ffb8b88c8388453f9afbdc2e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification-standalone-runtime.js",
+      "bytes": 1456,
+      "sha256": "211e8afbeb624fdf992514a9b6aa99dcc289732833df2fecdc0dc48d04d6509c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification.d.ts",
+      "bytes": 1142,
+      "sha256": "e644539fc6b163f528bcdf8cda704ab13b81544b1be5cf7aed328a9b5574952c"
+    },
+    {
+      "path": "apps/control-plane-api/dist/bundle-verification.js",
+      "bytes": 1028,
+      "sha256": "640bb02bbc9e35aa6dda091c4e02048a69ab4f3f0e6d83a4f61d7818408c66f5"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/bundle-verification-guards.d.ts",
+      "bytes": 3370,
+      "sha256": "2928fda0f0bb939ec029cf223aa125ae6f3a4a939e34bed4ee99848571eee9d4"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/bundle-verification-guards.js",
+      "bytes": 1067394,
+      "sha256": "fa601b42c4f6be533eb1c8af0f24d43a8fdf3b87a77afb0898e2ad69965a6579"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/package-preflight-catalog-guard.d.ts",
+      "bytes": 524,
+      "sha256": "75f7e1f7901758adf948ee90f0c89066386e1b921298b5429438181a319da27d"
+    },
+    {
+      "path": "apps/control-plane-api/dist/generated/0.1.0/package-preflight-catalog-guard.js",
+      "bytes": 696370,
+      "sha256": "0ddb6f4b1545fbb378653f12b7956e07b07382c2f7450f58a3ac1307b5c595a5"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.d.ts",
+      "bytes": 4730,
+      "sha256": "81ced4650dcf6f1fb05980c00c610923083c4262c231d604cda504f569171d56"
+    },
+    {
+      "path": "apps/control-plane-api/dist/index.js",
+      "bytes": 2282,
+      "sha256": "a97d3e83f6319627c78ad38b7d81b6879ac524408c7f8993c5c5f2a53cfbc02a"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-contract.d.ts",
+      "bytes": 13506,
+      "sha256": "2aaca4994f6a3435a114f78efdee27bbb74f352b3840607abac51521f4612e78"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-contract.js",
+      "bytes": 5137,
+      "sha256": "6b2823ca52d2857eac5f9a220ec78f4a494a061eaa2e9e24c97aeb4775be9d94"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-internal.d.ts",
+      "bytes": 69,
+      "sha256": "212f526e05a87d7377954a39dae62f596685a017a4de11f2cf2bd9439f66015e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-internal.js",
+      "bytes": 36207,
+      "sha256": "7699eff3acb401dcde53d06f717e1ccb0475f101d0f595cf34ece466bfd35a11"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-repository-internal.d.ts",
+      "bytes": 80,
+      "sha256": "1e81ee580866f2e4db2346051920e815430881b4fabfb02cc73c9d7416abfdb0"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-repository-internal.js",
+      "bytes": 14421,
+      "sha256": "c222aa4542a9b36358a1cd2ca88f58f27b44c08fae3d21dbe16a777ccec31efb"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-sqlite-internal.d.ts",
+      "bytes": 76,
+      "sha256": "f6b9cb04ff690ed5e6257a7b8d30e64d38349e376bd4bd668677993e7c7b8458"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane-sqlite-internal.js",
+      "bytes": 26095,
+      "sha256": "e43c91fec171aa9ec47630ef08874c4f842a4fed507f99aa8de8c9ff41455259"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane.d.ts",
+      "bytes": 748,
+      "sha256": "39ebbee521ada1b11e4a72fb7a947a643e63108103543cccfb4b3235a8dd231f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/local-control-plane.js",
+      "bytes": 9730,
+      "sha256": "298b69b12a50fcd29eaffaf30c16ef2a9388d5ff6d15509984f253ce872bbf0a"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-contract.d.ts",
+      "bytes": 9015,
+      "sha256": "6d13872f855b476a4ed620c150448bbd138271eb14aaa43a60e06a2cb1a63843"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-contract.js",
+      "bytes": 1949,
+      "sha256": "fd489331ec881b8664ae2e53bc7818b91dc3513f06e582af6b88ea1a87789802"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-internal.d.ts",
+      "bytes": 67,
+      "sha256": "1dd4c976c62d914c59cd187db4b13b75accec96ad787f733832f397c342eea56"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-internal.js",
+      "bytes": 29177,
+      "sha256": "0d685c5244c5a542977f16a750e300381ae1e63a2494054df11e3e611a820f9f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-schema-guard.d.ts",
+      "bytes": 71,
+      "sha256": "68fc8f61f36811ae69a8f84fb6a089f6394bf8550e137eee0bf85e023044d246"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-schema-guard.js",
+      "bytes": 14017,
+      "sha256": "a3035078e4dc8f816023cb07b4cd2a596f06200ca796b0c4de628e59a9306277"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-web-react.d.ts",
+      "bytes": 68,
+      "sha256": "afb8c182d61d79b130882a7a12b1b4354e7584c1eab8f8b84e945da2f66d7e90"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight-web-react.js",
+      "bytes": 2955,
+      "sha256": "a2bc83111c7bacdfb64ec5abf8a298a67c269bc4951268b6c17ff51f15781319"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight.d.ts",
+      "bytes": 1460,
+      "sha256": "c41f734999ecaf5a612b78267222c5458ac6722e4d9ce3e92d2d1d8197c09ed2"
+    },
+    {
+      "path": "apps/control-plane-api/dist/package-preflight.js",
+      "bytes": 1321,
+      "sha256": "bbc22bb0e7199e51bffc8b1cd94ba7bf9c88c2dfdfa10df56220be02849d6504"
+    },
+    {
+      "path": "apps/control-plane-api/dist/reference-preflight-contract.d.ts",
+      "bytes": 6774,
+      "sha256": "d49cb86d18796769ca889f90a0990b7c00ce942e244d62dc951e97997f6687bc"
+    },
+    {
+      "path": "apps/control-plane-api/dist/reference-preflight-contract.js",
+      "bytes": 1365,
+      "sha256": "adc706e80efc028755b46726a66bb476092a56f5b9ce6b607b894bd8aaecb20b"
+    },
+    {
+      "path": "apps/control-plane-api/dist/reference-preflight-internal.d.ts",
+      "bytes": 69,
+      "sha256": "73e834c9b2d45b026539dc01c62dd0cdef7cfe94bbafae0206d3075ce7057c52"
+    },
+    {
+      "path": "apps/control-plane-api/dist/reference-preflight-internal.js",
+      "bytes": 25457,
+      "sha256": "8650fff7248dea7823a372a2ddf314e041e0fcba2868a4c2fe53079802594749"
+    },
+    {
+      "path": "apps/control-plane-api/dist/reference-preflight.d.ts",
+      "bytes": 1166,
+      "sha256": "8aaa3ae296829579789a05d4649c9be54b11e5f1ee663181bf2bcede488afe39"
+    },
+    {
+      "path": "apps/control-plane-api/dist/reference-preflight.js",
+      "bytes": 1061,
+      "sha256": "fde3bdc1fb9803b2d119c702f78ba10875ea5fbed42d72a5743a6880c775f71d"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-contract.d.ts",
+      "bytes": 11806,
+      "sha256": "24e37a4ad7ca6b8c6ac48139d3b094324677a4dd2e839a9ab684e121382ee80e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-contract.js",
+      "bytes": 2560,
+      "sha256": "15a15996ee909537a0504f0250ff8e43dfcf569b08f490bb089b60712aba7b7f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-internal.d.ts",
+      "bytes": 1095,
+      "sha256": "f731075396106cd62420001da75fd5f28246eb145c6600883e63226eb81f62b3"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-internal.js",
+      "bytes": 20019,
+      "sha256": "4f3cee8f943e8e633947062226db0b738d9e7c66941b19640dee784f5eb0536e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-repository-internal.d.ts",
+      "bytes": 324,
+      "sha256": "2a29042c3bce9c3fc42242f33400e8e3504ee0fec6942d168b8d1cd02249d108"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-repository-internal.js",
+      "bytes": 7268,
+      "sha256": "7837993919617a49affd3d55d3547a76c2062cf688c6283a63748b9d69d92fb7"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-sqlite-internal.d.ts",
+      "bytes": 259,
+      "sha256": "fd5948e6c1e6a872e4ba0475699b3d2b867b772feaf222cef46d8a591a8152d7"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation-sqlite-internal.js",
+      "bytes": 22376,
+      "sha256": "7eb443e770bb05b064a6b904142ed3efc4f33e1def8fe74a1d1aef973858045a"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation.d.ts",
+      "bytes": 860,
+      "sha256": "5c4bfc7a24f08d3c547ccbb96ead76424a7eea4f3d491a02ea209e91fa103f14"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-activation.js",
+      "bytes": 5343,
+      "sha256": "58a51393ecb14ca6b089ca1b8d3b894c2830dd1c766dc0ec03aadb628e2a0a60"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-recovery-internal.d.ts",
+      "bytes": 1244,
+      "sha256": "5d1ba9d40412182b35ac21406de9bebee57c52aa8c98ac6eb6835b3fe0f4fd9f"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-recovery-internal.js",
+      "bytes": 10238,
+      "sha256": "97f40140a22c9c6ce932a2c57db141387c50fce266f87baee60928c05fbc4425"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-staging-contract.d.ts",
+      "bytes": 8548,
+      "sha256": "c47de205e1ffa86d4690d843f9844ef1bc65803eb281968bbc4083e9ea9c50c8"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-staging-contract.js",
+      "bytes": 1915,
+      "sha256": "c98fdedafab7c07018d95d19d829e3fe09f1d620c0bc9a06eb13bf61b9713e45"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-staging-internal.d.ts",
+      "bytes": 65,
+      "sha256": "87519df01e574821ba2f58b818a93dc057da306f306d69508707be6a855c4057"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-staging-internal.js",
+      "bytes": 39081,
+      "sha256": "27907d7c55a4903cea4a611f2f2472ae7f8d7b065b20fb3d91b0ca8933701c03"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-staging.d.ts",
+      "bytes": 1262,
+      "sha256": "d385a8a0b340366202c7d5e498c065c988522bcf3fae47b1f2d7e2e6cb235150"
+    },
+    {
+      "path": "apps/control-plane-api/dist/runtime-staging.js",
+      "bytes": 1151,
+      "sha256": "ca323a8eec9379d2768fb8307c99c33e7692618b0cd2ef4df3eb13a903974a9e"
+    },
+    {
+      "path": "apps/control-plane-api/dist/strict-json-internal.d.ts",
+      "bytes": 61,
+      "sha256": "805688d9ffacecd7c642ac7649dadaf5213dfdc939d015dc072a3575142b96c7"
+    },
+    {
+      "path": "apps/control-plane-api/dist/strict-json-internal.js",
+      "bytes": 10415,
+      "sha256": "6812aaafdaef53daf374b519239b3fd6690e378e48971b266758ad7d35ea1993"
+    },
+    {
+      "path": "apps/control-plane-api/package.json",
+      "bytes": 2408,
+      "sha256": "a54beedd590df3f2c802f42fc7adf8f703a7a69eb1c34dc67fedbb4c23a982c2"
+    },
+    {
+      "path": "apps/control-plane-api/src/index.ts",
+      "bytes": 4891,
+      "sha256": "1295547b6c281ea2678583298648a4ad8287205109d670fa422450146da5031e"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-contract.ts",
+      "bytes": 16959,
+      "sha256": "d764ff037aacb422dbcbfd1c99ba768ec6f1ce9467ead3ded15b611b5a1e4b09"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-internal.ts",
+      "bytes": 37835,
+      "sha256": "f723a1c78b3eada3c957b5243907880e7b7241de3ad07f8c9d838273561f66fc"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-repository-internal.ts",
+      "bytes": 19610,
+      "sha256": "3da2371a0d54aa6be8816f9d44e8da059ddece6260dbde8db3439ce6eb61020c"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane-sqlite-internal.ts",
+      "bytes": 28313,
+      "sha256": "e3315c14fdf65ca3d6b999d4a5b713657cbcd048fb55b88db14b35f39576546c"
+    },
+    {
+      "path": "apps/control-plane-api/src/local-control-plane.ts",
+      "bytes": 9350,
+      "sha256": "469b3117c8ea4d71e3aa133e20dc3557d5e7448c4721d4a62c3d3ecd93fc22ba"
+    },
+    {
+      "path": "apps/control-plane-api/test/local-control-plane.test.ts",
+      "bytes": 22299,
+      "sha256": "e74655bf3a6f2c818fd289a61f1b6e0a5d5b56e4795ce71dc9bf281d8e097678"
+    },
+    {
+      "path": "docs/proof/artifacts/control-plane-api-0.1.0-local-api.json",
+      "bytes": 41945,
+      "sha256": "144e8a46b3b41a1f98a022bf4c16dddb9d7415af4e5033322484d4bdd49c55b9"
+    },
+    {
+      "path": "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
+      "bytes": 62304,
+      "sha256": "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db"
+    },
+    {
+      "path": "package.json",
+      "bytes": 78656,
+      "sha256": "88497ac42699ac197e9619913fcb47a2842f2dae6e28397646c4468cc6916ec1"
+    },
+    {
+      "path": "packages/editor-core/dist/content-edits.d.ts",
+      "bytes": 16841,
+      "sha256": "029ce63431bb89f184c6334033b4994d80fadce6150a47d38f6f28868c5dcfc1"
+    },
+    {
+      "path": "packages/editor-core/dist/content-edits.js",
+      "bytes": 38371,
+      "sha256": "bdedf7a4dbe540b54067651bb3af9e269acdb2909d6354fa48c0ca8a6cb1cb69"
+    },
+    {
+      "path": "packages/editor-core/dist/event-action-edits.d.ts",
+      "bytes": 9564,
+      "sha256": "e45abcc3f63d7e1ae4a69959ffddd715f660c58cdc439c7e864cffb2cc950fad"
+    },
+    {
+      "path": "packages/editor-core/dist/event-action-edits.js",
+      "bytes": 33618,
+      "sha256": "51fbea68365ea1cf8b0cc76a6c743c06113e8599154e299b854c005cf0c0c040"
+    },
+    {
+      "path": "packages/editor-core/dist/index.d.ts",
+      "bytes": 4566,
+      "sha256": "4338408882ffba42af33bf393b1d9d5f17276972e571c7e3a6cd4fbefca1b8b9"
+    },
+    {
+      "path": "packages/editor-core/dist/index.js",
+      "bytes": 1427,
+      "sha256": "e06f5ad724f27cb843d7c8ab87253120d34944a2931ebcdcb66c6b8f3a9b3120"
+    },
+    {
+      "path": "packages/editor-core/dist/persistence.d.ts",
+      "bytes": 9952,
+      "sha256": "7456015b5986feb042b26010ddf77ebf9f4a36973e29c2c06c55125089bca58f"
+    },
+    {
+      "path": "packages/editor-core/dist/persistence.js",
+      "bytes": 14726,
+      "sha256": "97005521aaa3a9118ad868e846d7a3d5545380c3e78245fb9e9cc267d9c3a672"
+    },
+    {
+      "path": "packages/editor-core/dist/source-document.d.ts",
+      "bytes": 2091,
+      "sha256": "e9244f005b7ec432a7f6b556ec8af4b81e7ce59b0525bf1cab747cba50ad752a"
+    },
+    {
+      "path": "packages/editor-core/dist/source-document.js",
+      "bytes": 842,
+      "sha256": "6b38f237b884a9f33ca12622ee038adf93f93a30dff005903103ceb0e1101381"
+    },
+    {
+      "path": "packages/editor-core/dist/stable-id-insert.d.ts",
+      "bytes": 4668,
+      "sha256": "d0cc3ab760cf67d38e05fd82e1ac216042aebd7be8a863551bf09605e3c0e075"
+    },
+    {
+      "path": "packages/editor-core/dist/stable-id-insert.js",
+      "bytes": 16696,
+      "sha256": "82b7f43bb4446daac16ad80a8aea896d75abe1094dbc58aa321797ae421bf339"
+    },
+    {
+      "path": "packages/editor-core/dist/state-binding-edits.d.ts",
+      "bytes": 9965,
+      "sha256": "a6aff65e40d7e7dbcd0b477d7c723db1540799477eb63d7c916baf461dddfb41"
+    },
+    {
+      "path": "packages/editor-core/dist/state-binding-edits.js",
+      "bytes": 26979,
+      "sha256": "ec163b8d03efe765c05e5931b63d83eadc979db6dd15a598c79663f15fe8d754"
+    },
+    {
+      "path": "packages/editor-core/dist/structural-edits.d.ts",
+      "bytes": 6315,
+      "sha256": "0be9f7fa1f1ab941cb8621b41dc52f9660d9c8c92be0590dfa60f5c66ab28475"
+    },
+    {
+      "path": "packages/editor-core/dist/structural-edits.js",
+      "bytes": 27005,
+      "sha256": "d8aaffc638922b7daa66656b06def5a263dc569e3fc75d260d4212d57d14de1b"
+    },
+    {
+      "path": "packages/editor-core/package.json",
+      "bytes": 1501,
+      "sha256": "f6d1411ebe7c13ca281003f153de258c2b79d07af4e051d2b9ddc84ed67d74f4"
+    },
+    {
+      "path": "packages/editor-core/src/index.ts",
+      "bytes": 4765,
+      "sha256": "6ed54eed1646d251e19ab19c4f43266c1d4f2f44cf9999941b86e8942a739612"
+    },
+    {
+      "path": "packages/editor-core/src/persistence.ts",
+      "bytes": 25441,
+      "sha256": "075655fa60dcf9bcc9dcdf73684e77d605f23e164ddd13a1aee086d132cb7a25"
+    },
+    {
+      "path": "packages/editor-core/test/persistence.test.ts",
+      "bytes": 22293,
+      "sha256": "17d86804a38c243cbd75a97649b3e9f6716ea57206453851bd98216937b5bc54"
+    },
+    {
+      "path": "packages/editor-core/test/persistence.types.ts",
+      "bytes": 5271,
+      "sha256": "da5114ec835c91e02df73ef58fd3f2a3f8a85508eb0e939d1c1c845bcfbd87f2"
+    },
+    {
+      "path": "packages/editor-core/test/public-package.mjs",
+      "bytes": 132145,
+      "sha256": "29261287880d047a9d1c43f66fa5f9b59b45bbc6129106a432291715333bad1d"
+    },
+    {
+      "path": "packages/editor-core/test/public-package.types.mts",
+      "bytes": 33532,
+      "sha256": "15a4be175dfbe3ccd40ce69e5911072276bdaba9349d77c2501d96199555bbc1"
+    },
+    {
+      "path": "packages/editor-web/dist/index.d.ts",
+      "bytes": 556,
+      "sha256": "458a926fabc16fe2952c64b1c90793aed3f094ca454dfacecbd6631742267ae2"
+    },
+    {
+      "path": "packages/editor-web/dist/index.js",
+      "bytes": 296,
+      "sha256": "ce813b9daf14f8bbbe31753eae797bc4e58eda92092d60345ddacadff5fe4bab"
+    },
+    {
+      "path": "packages/editor-web/dist/local-source-json.d.ts",
+      "bytes": 233,
+      "sha256": "da01a09bf45cd994beb6418d93b92e2a28bafec734ae3e4089493608def3a4ca"
+    },
+    {
+      "path": "packages/editor-web/dist/local-source-json.js",
+      "bytes": 6415,
+      "sha256": "1c3db33d5f0bcc6f569f3a4b78170789a472c9896783b3e406ac2aba4fe44dca"
+    },
+    {
+      "path": "packages/editor-web/dist/local-source-persistence.d.ts",
+      "bytes": 3301,
+      "sha256": "f0e7c5281fce7a2b9ba9a284332d55e75f3411009da7a4d95433b432e9f8d879"
+    },
+    {
+      "path": "packages/editor-web/dist/local-source-persistence.js",
+      "bytes": 17213,
+      "sha256": "758e7b036db33ef7ae4195d64f2e699d37b48867b5c35b4ef854546680f1a1e7"
+    },
+    {
+      "path": "packages/editor-web/package.json",
+      "bytes": 1021,
+      "sha256": "d0cb21566aedd4b9e23122eb28e2c1f1708b1dc75a4e28bdb31bd559fa7409fa"
+    },
+    {
+      "path": "packages/editor-web/src/index.ts",
+      "bytes": 537,
+      "sha256": "d0dc13bfeb9511e0280b51574f071838348282ecb70504456e581a5a78141e2e"
+    },
+    {
+      "path": "packages/editor-web/src/local-source-json.ts",
+      "bytes": 6483,
+      "sha256": "b09718c5d83f3dac7afce8e79d504453be74dc52804cff81c7ba6cd22e61cd0e"
+    },
+    {
+      "path": "packages/editor-web/src/local-source-persistence.ts",
+      "bytes": 20194,
+      "sha256": "b38924f521171d933e5be5e95ed7dad65f51cfb91f50312efb3d68acc2a4204c"
+    },
+    {
+      "path": "packages/editor-web/test/local-source-persistence.test.ts",
+      "bytes": 14877,
+      "sha256": "e1e08e24565621f4f49b93b668a88b30168682e58813c0e78b2453ea58156001"
+    },
+    {
+      "path": "packages/editor-web/test/public-package.mjs",
+      "bytes": 2115,
+      "sha256": "01e0610fd39a74c0a5428d682082900ee0b6a9cf72697abeb124b422ef3d7faa"
+    },
+    {
+      "path": "packages/editor-web/test/public-package.types.mts",
+      "bytes": 2322,
+      "sha256": "8b9d4ec0dd2d3f662e6e48ecb52a21944ca07ba36b6c730061319d218ca24dd6"
+    },
+    {
+      "path": "packages/editor-web/tsconfig.build.json",
+      "bytes": 310,
+      "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+    },
+    {
+      "path": "packages/editor-web/tsconfig.json",
+      "bytes": 172,
+      "sha256": "07fa9ea667348c72c2311ba2a6ebbb2a233e6e572b5977bb54d6cf177278152a"
+    },
+    {
+      "path": "packages/editor-web/tsconfig.public-package.json",
+      "bytes": 147,
+      "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+    },
+    {
+      "path": "packages/protocol/dist/canonicalization.d.ts",
+      "bytes": 3964,
+      "sha256": "61e8cdc0a14021bb967db4f476d31874ac8e30e3c633b876a60b9b7d4a0612fa"
+    },
+    {
+      "path": "packages/protocol/dist/canonicalization.js",
+      "bytes": 17634,
+      "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+    },
+    {
+      "path": "packages/protocol/dist/diagnostics.d.ts",
+      "bytes": 9565,
+      "sha256": "fe2bf78fbe6eb6c28a60def9cd2e8d40d44e897fc853b18a58360693f06728c7"
+    },
+    {
+      "path": "packages/protocol/dist/diagnostics.js",
+      "bytes": 8905,
+      "sha256": "0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+    },
+    {
+      "path": "packages/protocol/dist/generated/0.1.0/desen-bundle.generated.d.ts",
+      "bytes": 7356,
+      "sha256": "c3c58047902e7f7d29fd35dccf190d52ce21385217db595ec77d244e295bb5d5"
+    },
+    {
+      "path": "packages/protocol/dist/generated/0.1.0/desen-bundle.generated.js",
+      "bytes": 490,
+      "sha256": "286c61208581fc657dd74b2be8c18d612eca2289ab029b5d1eca53871db5699a"
+    },
+    {
+      "path": "packages/protocol/dist/generated/0.1.0/desen-catalog.generated.d.ts",
+      "bytes": 6537,
+      "sha256": "9d85f575930bb132277cecd32db3e342da079fbf78e031bc18e3adb878df9bea"
+    },
+    {
+      "path": "packages/protocol/dist/generated/0.1.0/desen-catalog.generated.js",
+      "bytes": 491,
+      "sha256": "a8e57a1d2be228de8f0d0b68733be2404c83fd3fccf197e98fa11da3e6b92a37"
+    },
+    {
+      "path": "packages/protocol/dist/generated/0.1.0/desen-source.generated.d.ts",
+      "bytes": 7250,
+      "sha256": "338d8e25c6783da52c531a120539aba42b954eceb3df67924b6a45d57fc0c563"
+    },
+    {
+      "path": "packages/protocol/dist/generated/0.1.0/desen-source.generated.js",
+      "bytes": 490,
+      "sha256": "eb5397a94bef5e33f45a80f261080589e87aaf9c5f6165c7b517528173280e98"
+    },
+    {
+      "path": "packages/protocol/dist/index.d.ts",
+      "bytes": 3006,
+      "sha256": "4189219fb1e04665db85fa377660ecef385d4e66ce02a719f37249a70bc5b43b"
+    },
+    {
+      "path": "packages/protocol/dist/index.js",
+      "bytes": 679,
+      "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+    },
+    {
+      "path": "packages/protocol/dist/json-pointer.d.ts",
+      "bytes": 3631,
+      "sha256": "a553edcb3642f5241f0a4a2ba69f6c1380eaa4d54eab3c84918d071e8225a171"
+    },
+    {
+      "path": "packages/protocol/dist/json-pointer.js",
+      "bytes": 6499,
+      "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+    },
+    {
+      "path": "packages/protocol/package.json",
+      "bytes": 923,
+      "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+    },
+    {
+      "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+      "bytes": 4719,
+      "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+    },
+    {
+      "path": "packages/runtime-core/dist/action-evaluation.d.ts",
+      "bytes": 3697,
+      "sha256": "691bc5a1cfa886f9f5e4ddb883c1d5b5cb9ab9a82f8138c352f5ea8d277ba14e"
+    },
+    {
+      "path": "packages/runtime-core/dist/action-evaluation.js",
+      "bytes": 15809,
+      "sha256": "fac5bdc2a386e83ed08ebf4b6e856d71f4b9f7c96b6c5dfdee11adcd92673746"
+    },
+    {
+      "path": "packages/runtime-core/dist/action-turns.d.ts",
+      "bytes": 12794,
+      "sha256": "7b4985380a6af70b73688ca1ebced53e28d83ca35fc5896dfa5bb37ea0f88836"
+    },
+    {
+      "path": "packages/runtime-core/dist/action-turns.js",
+      "bytes": 74350,
+      "sha256": "4b35385997035a96558dcc5e1ab6cab4d95710f7810d361078aab3dde8e9fc87"
+    },
+    {
+      "path": "packages/runtime-core/dist/adapter-bridges.d.ts",
+      "bytes": 15414,
+      "sha256": "a67e5039adde3f03b10ab5cec654d4a98726676a6570962d6f390dfa228bc844"
+    },
+    {
+      "path": "packages/runtime-core/dist/adapter-bridges.js",
+      "bytes": 61221,
+      "sha256": "646b2e074c4f9a19ccb17b45700f02bfd9af90c3d78606013d4d90229e7a20d3"
+    },
+    {
+      "path": "packages/runtime-core/dist/command-event-actions.d.ts",
+      "bytes": 13665,
+      "sha256": "0072d32f1675ef4b6bce73b8697b38ca4ba07bfd460028c8f0a03209865a9450"
+    },
+    {
+      "path": "packages/runtime-core/dist/command-event-actions.js",
+      "bytes": 53877,
+      "sha256": "336d211a0d56ffa2bd9686a94703eb770e17604ae1226089c5e2705a7c9e6f0f"
+    },
+    {
+      "path": "packages/runtime-core/dist/command-event-ports.d.ts",
+      "bytes": 5361,
+      "sha256": "28640b704a782d45bcadad368f9e77f017e1a898c6023ed1137290a4ab50edf3"
+    },
+    {
+      "path": "packages/runtime-core/dist/command-event-ports.js",
+      "bytes": 11766,
+      "sha256": "57992f04e6bf12002c6211d581cf4251818d22c76423dca33f55cdca2616ffc8"
+    },
+    {
+      "path": "packages/runtime-core/dist/headless-materialization.d.ts",
+      "bytes": 9363,
+      "sha256": "1c010a3f5620ca60b6d048945b63e72ca1ac15c587a398b7a97f50893e261819"
+    },
+    {
+      "path": "packages/runtime-core/dist/headless-materialization.js",
+      "bytes": 43174,
+      "sha256": "646077ae41a4fa3e71846079c57117a1d0c820f835c740da5fc6739cea27b124"
+    },
+    {
+      "path": "packages/runtime-core/dist/headless-session.d.ts",
+      "bytes": 25938,
+      "sha256": "7cf6292e3f80553ece5f575ff06341ed0501c1ace7cf6ad69bb42523916586b5"
+    },
+    {
+      "path": "packages/runtime-core/dist/headless-session.js",
+      "bytes": 92077,
+      "sha256": "abf33b14dca0008757c088852c1714e553862bee3f26f56ec55acb9abd1ef63c"
+    },
+    {
+      "path": "packages/runtime-core/dist/host-ports.d.ts",
+      "bytes": 16186,
+      "sha256": "fb8ea82503317c2bc6592b128380b68cbbefceb0f44152d990f77e35394b7fbe"
+    },
+    {
+      "path": "packages/runtime-core/dist/host-ports.js",
+      "bytes": 3793,
+      "sha256": "219c24fb3c0d8e0176a21f3c368d0d426449b702594f63e4bd5640ad8ba1c0af"
+    },
+    {
+      "path": "packages/runtime-core/dist/index.d.ts",
+      "bytes": 14533,
+      "sha256": "70a653ba51596d22e9fed9ad4781b18220f003ab565207ad27e50da845118f5f"
+    },
+    {
+      "path": "packages/runtime-core/dist/index.js",
+      "bytes": 3748,
+      "sha256": "f14f1c6e6c746d651b59442347f6bb022abbc0e80de4bad7351f0d46aad52b44"
+    },
+    {
+      "path": "packages/runtime-core/dist/local-state.d.ts",
+      "bytes": 10123,
+      "sha256": "9139f9e516ccf47e3f1c35988a45eb798f7a04830703d37982c7756fbb70436d"
+    },
+    {
+      "path": "packages/runtime-core/dist/local-state.js",
+      "bytes": 18258,
+      "sha256": "15904738295fdd93b186c54823818c07fc704eb8d8f0d46ff9ae5e4b6025c2e6"
+    },
+    {
+      "path": "packages/runtime-core/dist/node-identity.d.ts",
+      "bytes": 5012,
+      "sha256": "2170851fb727405f976458f148a3490feaa79af9b5be770ae028a555b4a84b6c"
+    },
+    {
+      "path": "packages/runtime-core/dist/node-identity.js",
+      "bytes": 6433,
+      "sha256": "c0f3ecb35b5cb19414472454c08c35b756c88bce40dc38341daf325645b8d0f6"
+    },
+    {
+      "path": "packages/runtime-core/dist/operation-lifecycle.d.ts",
+      "bytes": 13927,
+      "sha256": "434af87cd9e138e95e99df0b5d5e64ddaa59810514652b662bcdf57da1a5046e"
+    },
+    {
+      "path": "packages/runtime-core/dist/operation-lifecycle.js",
+      "bytes": 44923,
+      "sha256": "3229f04505988d9e860b22a098d99835d47bf4ac0bee947c40e6b1d1bb9c2e81"
+    },
+    {
+      "path": "packages/runtime-core/dist/operation-resource-actions.d.ts",
+      "bytes": 14487,
+      "sha256": "3cef543d8885066f2a1259e7ff122fb3474a84f16cd36651c9fdca52c23ec006"
+    },
+    {
+      "path": "packages/runtime-core/dist/operation-resource-actions.js",
+      "bytes": 51586,
+      "sha256": "5c36151a954a2c85f45c178713580d7085d5dc6972de2a0be77d2fb1f1da6044"
+    },
+    {
+      "path": "packages/runtime-core/dist/predicate-evaluation.d.ts",
+      "bytes": 8394,
+      "sha256": "e1238050a765095016d4a5f2d8a990362486478dcb3846437e9fcda23c4e04a8"
+    },
+    {
+      "path": "packages/runtime-core/dist/predicate-evaluation.js",
+      "bytes": 32508,
+      "sha256": "1c456e267018977a4959a69d91ead748e2bc68d7cbde3ac1cbcf1655519052bc"
+    },
+    {
+      "path": "packages/runtime-core/dist/reactive-host-ports.d.ts",
+      "bytes": 2570,
+      "sha256": "4f9c2bdca0d88fb4cbb8b7ea1d6daf4fc7aa56738c4b8cb5096150f37f83ba6f"
+    },
+    {
+      "path": "packages/runtime-core/dist/reactive-host-ports.js",
+      "bytes": 6181,
+      "sha256": "56b9af13b550c901f6c995a4a7c55e2e56a07c60364ad8d55794150bb59fabfd"
+    },
+    {
+      "path": "packages/runtime-core/dist/reactive-reevaluation.d.ts",
+      "bytes": 10452,
+      "sha256": "31bcf07d3ec8c9e5cf06c3542129e5a8c0e4bf1ce31d95222166b7b10af22f39"
+    },
+    {
+      "path": "packages/runtime-core/dist/reactive-reevaluation.js",
+      "bytes": 31354,
+      "sha256": "45fb6a7c57fd33e89b3661fb14b9eeed151a9149de06ec3fbfe6bdb8e28cd10a"
+    },
+    {
+      "path": "packages/runtime-core/dist/repeat-materialization.d.ts",
+      "bytes": 12023,
+      "sha256": "4cbab3992edcdb87b2fe89f39cef594a6f790a291034e9b14cc643874e6de722"
+    },
+    {
+      "path": "packages/runtime-core/dist/repeat-materialization.js",
+      "bytes": 14793,
+      "sha256": "f0df8bd5ea97cf048b65a4c41acba6ec5e4bed85a3bef574d1999f063ac6b7ec"
+    },
+    {
+      "path": "packages/runtime-core/dist/resource-lifecycle.d.ts",
+      "bytes": 13667,
+      "sha256": "b1e755fa186f16807c986deaf20b0b3e7f854f0b5d4e70b7706e9d4b625183a7"
+    },
+    {
+      "path": "packages/runtime-core/dist/resource-lifecycle.js",
+      "bytes": 41590,
+      "sha256": "4a80b3291ad449cc2ae61e1a2ac2dea80cb28c1c1b47bdce317b6b5af7aa97cb"
+    },
+    {
+      "path": "packages/runtime-core/dist/runtime-json-snapshot.d.ts",
+      "bytes": 896,
+      "sha256": "530d08f356aae29e2b3abea519a96834e711837ceb3236ce6f61d286443cae0b"
+    },
+    {
+      "path": "packages/runtime-core/dist/runtime-json-snapshot.js",
+      "bytes": 1475,
+      "sha256": "cbba03055cece8b86718a16b6d0cc190eb243fff826ab7635f1537703bb6a4a9"
+    },
+    {
+      "path": "packages/runtime-core/dist/state-navigation-actions.d.ts",
+      "bytes": 10119,
+      "sha256": "3553feb87f8169ea237f26e1c881afd76c31404e530e064e03dd0ce2886d7038"
+    },
+    {
+      "path": "packages/runtime-core/dist/state-navigation-actions.js",
+      "bytes": 33300,
+      "sha256": "68beabcdd45fe83cca6d70cb337869b25bc410a20c6fc1f5b1b3eb61ff974dac"
+    },
+    {
+      "path": "packages/runtime-core/dist/token-format-resolution.d.ts",
+      "bytes": 3932,
+      "sha256": "28c4dcb2dfe0a8b94b6f6988c9c45ea80376d0c28189abe8fac1e17bf26222da"
+    },
+    {
+      "path": "packages/runtime-core/dist/token-format-resolution.js",
+      "bytes": 28825,
+      "sha256": "8c442aa642c95fe41ef9de956c012309ecc710b815ed6eba24c74e42ce4403e4"
+    },
+    {
+      "path": "packages/runtime-core/dist/value-resolution.d.ts",
+      "bytes": 10818,
+      "sha256": "f0ab2e3d7d2eb70fa83b0ca18a3c5eb026a6fa5a08abaa5790e6c1da8aa5e6f4"
+    },
+    {
+      "path": "packages/runtime-core/dist/value-resolution.js",
+      "bytes": 21277,
+      "sha256": "c1f55f997c7e28017ee89f0e664f112577d3e2ea37ea47230a447b5dd2c98d9d"
+    },
+    {
+      "path": "packages/runtime-core/dist/variant-style-evaluation.d.ts",
+      "bytes": 7164,
+      "sha256": "eaa3b4a04da34b6518b1988b806cc9d755cda41c0893bf42261d216743898a9c"
+    },
+    {
+      "path": "packages/runtime-core/dist/variant-style-evaluation.js",
+      "bytes": 37042,
+      "sha256": "16d37842958d1d6ef7b31b83ee080a97cf62174fa0564e9f481fc122b0dcf0cd"
+    },
+    {
+      "path": "packages/runtime-core/package.json",
+      "bytes": 2138,
+      "sha256": "196c2d8d69d56415283535647657ccbda786d3e7600e3c1d3f1d41e34f7dd67e"
+    },
+    {
+      "path": "packages/validator/dist/binding-contract-validation.d.ts",
+      "bytes": 8549,
+      "sha256": "2c2c3b28e2005da9276829624bfb59862b3fccc5041a18030f12f6082efce26b"
+    },
+    {
+      "path": "packages/validator/dist/binding-contract-validation.js",
+      "bytes": 46895,
+      "sha256": "82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19"
+    },
+    {
+      "path": "packages/validator/dist/component-contract-validation.d.ts",
+      "bytes": 7196,
+      "sha256": "ee4fefda11fc59a4d2ee59765e07380762ce236812a6b05a4d6b67c92abdfb16"
+    },
+    {
+      "path": "packages/validator/dist/component-contract-validation.js",
+      "bytes": 24587,
+      "sha256": "f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+    },
+    {
+      "path": "packages/validator/dist/embedded-schema-validation.d.ts",
+      "bytes": 493,
+      "sha256": "ab6bcfed464d994c1b2b65c7e284607561b72ea9a8551d3bd34613f7a247266c"
+    },
+    {
+      "path": "packages/validator/dist/embedded-schema-validation.js",
+      "bytes": 8707,
+      "sha256": "240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+    },
+    {
+      "path": "packages/validator/dist/execution-contract-validation.d.ts",
+      "bytes": 21191,
+      "sha256": "f917b4aa87bee0a4d59b0f1e459a82175e0788e34a86c310109db61388388860"
+    },
+    {
+      "path": "packages/validator/dist/execution-contract-validation.js",
+      "bytes": 76906,
+      "sha256": "2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+    },
+    {
+      "path": "packages/validator/dist/generated/0.1.0/structural-validators.d.ts",
+      "bytes": 3784,
+      "sha256": "9f91904e9f4e36dc124b6e985e23f4bc0b6f8264f3f2ee943cbe5e8327554148"
+    },
+    {
+      "path": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+      "bytes": 1001830,
+      "sha256": "322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+    },
+    {
+      "path": "packages/validator/dist/index.d.ts",
+      "bytes": 5667,
+      "sha256": "78cfad71c07255078d0073106d26ea603656f38b86248b3607ebd93a5ec570b1"
+    },
+    {
+      "path": "packages/validator/dist/index.js",
+      "bytes": 1965,
+      "sha256": "5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+    },
+    {
+      "path": "packages/validator/dist/interaction-contract-validation.d.ts",
+      "bytes": 10949,
+      "sha256": "6d81901405c388d8004b950598eda740811d7d4b7dd859754e3bdaea16f7a2c2"
+    },
+    {
+      "path": "packages/validator/dist/interaction-contract-validation.js",
+      "bytes": 49673,
+      "sha256": "431b473b6aa82a5af848faf74cf5459aa4375e2678f936e51c733212c42af331"
+    },
+    {
+      "path": "packages/validator/dist/schema-instance-validation.d.ts",
+      "bytes": 10481,
+      "sha256": "2dc0339c14a9585d25d0ede5ddd5df72550b661a9e7f583459c168efefbf77cd"
+    },
+    {
+      "path": "packages/validator/dist/schema-instance-validation.js",
+      "bytes": 86247,
+      "sha256": "169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+    },
+    {
+      "path": "packages/validator/dist/semantic-diagnostics.d.ts",
+      "bytes": 4598,
+      "sha256": "0ab4409d2348dd239bd4c801c0889783a4bc86a149c0f6a3ecabd93bb19b8a1f"
+    },
+    {
+      "path": "packages/validator/dist/semantic-diagnostics.js",
+      "bytes": 6799,
+      "sha256": "f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+    },
+    {
+      "path": "packages/validator/dist/semantic-validation.d.ts",
+      "bytes": 8765,
+      "sha256": "6d62a87ae35d8337d51aa78d86737aab7548f040e195b018244012ee8cc39a38"
+    },
+    {
+      "path": "packages/validator/dist/semantic-validation.js",
+      "bytes": 27165,
+      "sha256": "1d89f973a8a768771aabf203e55bc9816e1b06365553604c5808318abc483368"
+    },
+    {
+      "path": "packages/validator/dist/standalone-runtime.d.ts",
+      "bytes": 905,
+      "sha256": "4b526c027034bb61a127d279fa2988112a780b732a931679575c16e7466a3f7c"
+    },
+    {
+      "path": "packages/validator/dist/standalone-runtime.js",
+      "bytes": 2004,
+      "sha256": "0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+    },
+    {
+      "path": "packages/validator/dist/structural-diagnostics.d.ts",
+      "bytes": 1406,
+      "sha256": "541373ad68813469ca9558f4460e275bdadfd8a2e99c4b3dc13696f16b02a546"
+    },
+    {
+      "path": "packages/validator/dist/structural-diagnostics.js",
+      "bytes": 2879,
+      "sha256": "118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+    },
+    {
+      "path": "packages/validator/dist/structural-validation.d.ts",
+      "bytes": 5191,
+      "sha256": "c181a34a04cae2795224e67fde8ed02cedab89ea88f8676c8d9963dba55ec3ea"
+    },
+    {
+      "path": "packages/validator/dist/structural-validation.js",
+      "bytes": 6241,
+      "sha256": "316c1ea98f96ada1cad6a5cb398538fac5c10e94a03e0efa318f07c8d0459c28"
+    },
+    {
+      "path": "packages/validator/dist/uri-reference.d.ts",
+      "bytes": 924,
+      "sha256": "1d9cdc3b9e5a5327526f2eb33b709548889c3b5442ca9a898d5765004522a9f5"
+    },
+    {
+      "path": "packages/validator/dist/uri-reference.js",
+      "bytes": 10282,
+      "sha256": "342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+    },
+    {
+      "path": "packages/validator/dist/validation-internals.d.ts",
+      "bytes": 1831,
+      "sha256": "e70485ae1dc7ca19184329dfabc34a984a55711a17ddbfa885866dca293b7944"
+    },
+    {
+      "path": "packages/validator/dist/validation-internals.js",
+      "bytes": 1381,
+      "sha256": "d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+    },
+    {
+      "path": "packages/validator/package.json",
+      "bytes": 2666,
+      "sha256": "05f8672a36552e2b1782fd50b658b981323916662c0b9a661ebea0963cc84276"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 127589,
+      "sha256": "0c2c48bcff358c2394fce793cd894c933d0d2176db2a57df75311c85e86921e3"
+    },
+    {
+      "path": "scripts/generate-editor-core-persistence-proof.mjs",
+      "bytes": 865,
+      "sha256": "388b599d0484090ad3c57890d0f13b8e8e349321ab80173ec3ce68fba9a94c9b"
+    },
+    {
+      "path": "scripts/lib/atomic-proof-artifact.mjs",
+      "bytes": 3444,
+      "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+    },
+    {
+      "path": "scripts/lib/editor-core-persistence-proof.mjs",
+      "bytes": 49754,
+      "sha256": "29b7a9fe341a8acd1fdf32b0448a8b9a3ef83962594e7089a2a6217e18952da8"
+    },
+    {
+      "path": "scripts/verify-editor-core-persistence.mjs",
+      "bytes": 640,
+      "sha256": "6abc625d1edb8f0b178420790ce9d0ebce290e9a1f22a40fcb627866ac0a40f6"
+    },
+    {
+      "path": "tests/editor-core-persistence.test.mjs",
+      "bytes": 12150,
+      "sha256": "d0685565ed364f26f62d30ef3025144bb9b228d6f0e3403ba82a05677912fc79"
+    }
+  ],
+  "nonclaims": [
+    "Input JSON whitespace, object-member order, and original lexical bytes are not preserved; canonical parsed Source values are.",
+    "The proof uses the shared Fastify injection boundary and does not claim reverse-proxy, TLS, remote-bind, or public deployment behavior.",
+    "Node.js, its ESM loader, Fastify, installed external dependency bytes, the native SQLite addon, operating system, and process environment remain trusted authorities.",
+    "The Web adapter owns no filesystem path, SQLite handle, implicit global fetch, automatic retry, merge, list, or delete authority.",
+    "An indeterminate PUT is resolved only by reopening; it is never converted into a definite failure or automatic retry.",
+    "Continuous Catalog semantic diagnostics and invalid-node mapping remain assigned to M08-T09.",
+    "React/DOM integration, terminal command determinism, and G08 remain assigned to M08-T10.",
+    "Undo/redo, selection policy, viewport policy, multi-user synchronization, and remote persistence remain outside M08-T08."
+  ],
+  "reproduction": [
+    "pnpm generate:editor-core-persistence",
+    "pnpm verify:editor-core-persistence",
+    "pnpm test:editor-core-persistence"
+  ]
+}

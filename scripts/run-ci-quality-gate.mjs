@@ -394,6 +394,11 @@ const PROOF_ENTRIES = Object.freeze(
       "scripts/verify-editor-core-authoring-round-trip.mjs",
       "tests/editor-core-authoring-round-trip.test.mjs",
     ],
+    [
+      "editor-core-persistence",
+      "scripts/verify-editor-core-persistence.mjs",
+      "tests/editor-core-persistence.test.mjs",
+    ],
   ].map(([id, verifierFile, rootTestFile]) => Object.freeze({ id, verifierFile, rootTestFile })),
 );
 
@@ -435,14 +440,14 @@ const EXPECTED_CI_CONTRACT_SCRIPTS = Object.freeze(
 );
 
 const LEGACY_PREREQUISITE_SHA256 =
-  "cff21c5dd6e483906cb70a86fe475cf5df913b8721de199dac2e16135905c98e";
+  "540feb633d01ea7f8cd72564214451f2dfe1fea0da624c1f0048e9c5595b0f09";
 const LEGACY_LEAF_INVOCATION_SHA256 =
-  "a05490316408114e99a790018bedbfcb8783286883ddbdd47376251273cf0425";
+  "d826a73e920492e38d1605836656159419296e1d12566a4bcd2d60359665ed49";
 const DISTINCT_LEAF_WORKLOAD_SHA256 =
-  "302317ed31512f705377338d780dcc5dd352c81cde37f6ff06f91f0db32693fd";
+  "a4e5befa962b78d85dfb67c95d975d376bd3dc81a93caa468c34966517d1292d";
 const CI_CONTRACT_SCRIPT_SHA256 =
   "92bcdb9435a1cb6492c20e5ad82013ac7d65479a15a5f5b5321b8e59351f6014";
-const QUALITY_GATE_PLAN_SHA256 = "c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b07432e4a47de684e25d";
+const QUALITY_GATE_PLAN_SHA256 = "810a62b3f6ff70011d8bc4f6ac7b3495671aa373313b6382e2eb0263f155444d";
 // Historical M06-T08 plan pin retained for its frozen mutation test:
 // 2addb6556f4e24c921b090102a80eee58f0fa3850b844b5f50197e50b759bbd0
 // Historical M06-T09 plan pin retained for its frozen compatibility reader:
@@ -450,7 +455,7 @@ const QUALITY_GATE_PLAN_SHA256 = "c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b0
 // Historical M06-T10 plan pin retained for its frozen compatibility reader:
 // ce00f625601b84a74a0b96d061f9ca25a2aa283d45aae4e8991051de70247582
 const WORKSPACE_TEST_SCRIPT_SHA256 =
-  "0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820";
+  "86f2dbb30344f9fcafbc656627b9a5bd70a4854405066d6e1c9b33594869e47b";
 const WORKSPACE_MANIFEST_SHA256 =
   "6c693fc7e2b55dfc4b2e84a9e267aef0b6aeecb3160a04cdba67ce570f860be9";
 const EXPECTED_WORKSPACE_PACKAGE_GLOBS = Object.freeze(["apps/*", "packages/*"]);
@@ -751,8 +756,10 @@ function classifyLegacyPrerequisite({
         "editor-core-state-binding-edits",
         "editor-core-event-action-edits",
         "editor-core-authoring-round-trip",
+        "editor-core-persistence",
       ].includes(currentProofId) ||
-      packageName !== "@desen/editor-core" ||
+      (packageName !== "@desen/editor-core" &&
+        !(currentProofId === "editor-core-persistence" && packageName === "@desen/editor-web")) ||
       packageManifest.scripts?.[task] !== expectedScript
     ) {
       throw new QualityGateError(
@@ -1068,6 +1075,12 @@ export function createQualityGateSteps() {
       "Editor core public-package contract",
       "pnpm",
       ["--filter", "@desen/editor-core", "test:public-package"],
+    ),
+    commandStep(
+      "editor-web-public-package-contract",
+      "Editor Web public-package contract",
+      "pnpm",
+      ["--filter", "@desen/editor-web", "test:public-package"],
     ),
     ...PROOF_ENTRIES.map(({ id, verifierFile }) =>
       commandStep(`verify-${id}`, `Proof verifier: ${id}`, "node", [verifierFile]),

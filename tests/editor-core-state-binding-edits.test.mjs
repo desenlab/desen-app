@@ -31,6 +31,20 @@ const STATE_BINDING_SOURCE = "packages/editor-core/src/state-binding-edits.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
 const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
+const PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
+const PERSISTENCE_RUNTIME = "packages/editor-core/dist/persistence.js";
+const PERSISTENCE_DECLARATION = "packages/editor-core/dist/persistence.d.ts";
+const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
+const PERSISTENCE_SUCCESSOR_PATHS = Object.freeze([
+  PERSISTENCE_SOURCE,
+  PERSISTENCE_RUNTIME,
+  `${PERSISTENCE_RUNTIME}.map`,
+  PERSISTENCE_DECLARATION,
+  `${PERSISTENCE_DECLARATION}.map`,
+  PERSISTENCE_TEST,
+  PERSISTENCE_TYPES,
+]);
 const RETAINED_CONTENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "clearDesenEditorNodeCondition",
@@ -242,13 +256,45 @@ test("[authority] authenticates exact M08-T02 prerequisite, M08-T04 graph compat
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 46);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 75);
+  assert.deepEqual(built.currentCompatibility.publicApi.additiveSuccessor, {
+    task: "M08-T08",
+    sourcePath: PERSISTENCE_SOURCE,
+    runtimePath: PERSISTENCE_RUNTIME,
+    declarationPath: PERSISTENCE_DECLARATION,
+    focusedTestPath: PERSISTENCE_TEST,
+    focusedTypesPath: PERSISTENCE_TYPES,
+    runtimeExports: ["createDesenEditorPersistencePort"],
+    typeExports: [
+      "DesenEditorPersistenceAdapter",
+      "DesenEditorPersistenceAdapterFailureReason",
+      "DesenEditorPersistenceAdapterReadResult",
+      "DesenEditorPersistenceAdapterSourceRecord",
+      "DesenEditorPersistenceAdapterWriteRequest",
+      "DesenEditorPersistenceAdapterWriteResult",
+      "DesenEditorPersistenceDiagnostic",
+      "DesenEditorPersistenceDiagnosticCode",
+      "DesenEditorPersistencePort",
+      "DesenEditorSourceOpenResult",
+      "DesenEditorSourceOpenSuccess",
+      "DesenEditorSourceSaveRequest",
+      "DesenEditorSourceSaveResult",
+    ],
+    publicRuntimeCasesAdded: 3,
+    publicCompilerNegativeAssertionsAdded: 21,
+  });
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 34);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 82);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 49);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
+  assert.equal(built.currentCompatibility.frozenAuthority.retainedTaskTimeReceipts, 64);
   const currentReceipts = new Set(
     built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),
   );
   assert.equal(currentReceipts.has(AUTHORING_ROUND_TRIP_TEST), true);
   assert.equal(currentReceipts.has(AUTHORING_ROUND_TRIP_TYPES), true);
+  for (const relativePath of PERSISTENCE_SUCCESSOR_PATHS) {
+    assert.equal(currentReceipts.has(relativePath), true);
+  }
 });
 
 test("[determinism] two fresh M08-T05 builds are byte-identical", async () => {
@@ -362,6 +408,15 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
     [AUTHORING_ROUND_TRIP_TEST, authoringTest],
     [AUTHORING_ROUND_TRIP_TYPES, authoringTypes],
   ]) {
+    await assert.rejects(
+      buildEditorCoreStateBindingEditsEvidence({
+        fileOverrides: { [relativePath]: changedByte(bytes) },
+      }),
+      expectedError("BOUNDARY_DRIFT"),
+    );
+  }
+  for (const relativePath of PERSISTENCE_SUCCESSOR_PATHS) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
     await assert.rejects(
       buildEditorCoreStateBindingEditsEvidence({
         fileOverrides: { [relativePath]: changedByte(bytes) },

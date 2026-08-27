@@ -106,12 +106,13 @@ const REVIEWED_PREREQUISITES = SAFE_OBJECT_FREEZE(
     ],
     ["editor-core-event-action-edits", ["editor-core-state-binding-edits"]],
     ["editor-core-authoring-round-trip", ["editor-core-event-action-edits"]],
+    ["editor-core-persistence", ["editor-core-authoring-round-trip"]],
   ].map(([id, prerequisites]) => SAFE_OBJECT_FREEZE([id, SAFE_OBJECT_FREEZE([...prerequisites])])),
 );
 
 /** Reviewed digest of the selector-only semantic impact graph. */
 export const EXPECTED_AFFECTED_IMPACT_GRAPH_SHA256 =
-  "5aa20b4fb87decc51221bca5a900677d7dfddd1e61c068d5e91420253a3236b2";
+  "26a3bfd66ae206bd3779c5147cc0b42ae5ba2578e22a6d8a4dcc1a434b9be47f";
 
 /** Stable failure raised when selector impact ownership is incomplete or ambiguous. */
 export class AffectedImpactGraphError extends Error {
@@ -356,15 +357,22 @@ export function createAffectedImpactClosure(ownerProofUnitIds) {
   }
   const inventory = createExhaustiveWorkloadInventory();
   const proofUnitIds = graph.entries.map(({ id }) => id).filter((id) => affected.has(id));
+  const conditionalPrefixNodeIds = proofUnitIds.includes("editor-core-persistence")
+    ? ["editor-web-public-package-contract"]
+    : [];
   const selected = new Set([
     ...PREFIX_NODE_IDS,
+    ...conditionalPrefixNodeIds,
     ...proofUnitIds.flatMap((id) => [`verify-${id}`, `test-${id}`]),
     ...SUFFIX_NODE_IDS,
   ]);
   const nodeIds = inventory.nodes.map(({ id }) => id).filter((id) => selected.has(id));
   if (
     nodeIds.length !==
-    PREFIX_NODE_IDS.length + proofUnitIds.length * 2 + SUFFIX_NODE_IDS.length
+    PREFIX_NODE_IDS.length +
+      conditionalPrefixNodeIds.length +
+      proofUnitIds.length * 2 +
+      SUFFIX_NODE_IDS.length
   ) {
     fail("AFFECTED_IMPACT_PROJECTION_INVALID", "Affected workload projection is incomplete.");
   }

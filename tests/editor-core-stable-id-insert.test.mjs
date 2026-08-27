@@ -19,9 +19,14 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const INSERT_SOURCE = "packages/editor-core/src/stable-id-insert.ts";
 const STRUCTURAL_EDITS_SOURCE = "packages/editor-core/src/structural-edits.ts";
 const CONTENT_EDITS_SOURCE = "packages/editor-core/src/content-edits.ts";
-const EVENT_ACTION_EDITS_SOURCE = "packages/editor-core/src/event-action-edits.ts";
+const PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
 const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
 const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
+const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
+const PUBLIC_TEST = "packages/editor-core/test/public-package.mjs";
+const PUBLIC_TYPES = "packages/editor-core/test/public-package.types.mts";
+const ROOT_TEST = "tests/editor-core-stable-id-insert.test.mjs";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
 const CONTENT_RUNTIME_EXPORTS = Object.freeze([
   "clearDesenEditorNodeCondition",
@@ -113,6 +118,22 @@ const EVENT_ACTION_TYPE_EXPORTS = Object.freeze([
   "DesenEditorEventActionEditSuccess",
   "DesenEditorEventHandlerDeleteCommand",
   "DesenEditorEventHandlerInsertCommand",
+]);
+const PERSISTENCE_RUNTIME_EXPORTS = Object.freeze(["createDesenEditorPersistencePort"]);
+const PERSISTENCE_TYPE_EXPORTS = Object.freeze([
+  "DesenEditorPersistenceAdapter",
+  "DesenEditorPersistenceAdapterFailureReason",
+  "DesenEditorPersistenceAdapterReadResult",
+  "DesenEditorPersistenceAdapterSourceRecord",
+  "DesenEditorPersistenceAdapterWriteRequest",
+  "DesenEditorPersistenceAdapterWriteResult",
+  "DesenEditorPersistenceDiagnostic",
+  "DesenEditorPersistenceDiagnosticCode",
+  "DesenEditorPersistencePort",
+  "DesenEditorSourceOpenResult",
+  "DesenEditorSourceOpenSuccess",
+  "DesenEditorSourceSaveRequest",
+  "DesenEditorSourceSaveResult",
 ]);
 const temporaryDirectories = [];
 let built;
@@ -241,26 +262,32 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
       ...CONTENT_RUNTIME_EXPORTS,
       ...STATE_BINDING_RUNTIME_EXPORTS,
       ...EVENT_ACTION_RUNTIME_EXPORTS,
+      ...PERSISTENCE_RUNTIME_EXPORTS,
       "deleteDesenEditorNode",
       "moveDesenEditorNode",
       "reorderDesenEditorNode",
     ].sort(),
   );
-  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 59);
+  assert.equal(built.currentCompatibility.boundary.additiveTypeExports.length, 72);
   for (const name of [
     ...CONTENT_TYPE_EXPORTS,
     ...STATE_BINDING_TYPE_EXPORTS,
     ...EVENT_ACTION_TYPE_EXPORTS,
+    ...PERSISTENCE_TYPE_EXPORTS,
   ]) {
     assert.equal(built.currentCompatibility.boundary.additiveTypeExports.includes(name), true);
   }
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T06",
-    sourcePath: EVENT_ACTION_EDITS_SOURCE,
-    runtimePath: "packages/editor-core/dist/event-action-edits.js",
-    declarationPath: "packages/editor-core/dist/event-action-edits.d.ts",
-    runtimeExports: EVENT_ACTION_RUNTIME_EXPORTS,
-    typeExports: EVENT_ACTION_TYPE_EXPORTS,
+    task: "M08-T08",
+    sourcePath: PERSISTENCE_SOURCE,
+    runtimePath: "packages/editor-core/dist/persistence.js",
+    declarationPath: "packages/editor-core/dist/persistence.d.ts",
+    focusedTestPath: PERSISTENCE_TEST,
+    focusedTypesPath: PERSISTENCE_TYPES,
+    runtimeExports: PERSISTENCE_RUNTIME_EXPORTS,
+    typeExports: PERSISTENCE_TYPE_EXPORTS,
+    publicRuntimeCasesAdded: 3,
+    publicCompilerNegativeAssertionsAdded: 21,
   });
   assert.deepEqual(built.currentCompatibility.boundary.proofOnlySuccessor, {
     task: "M08-T07",
@@ -271,12 +298,14 @@ test("[authority] authenticates the exact frozen M08-T01 artifact without a live
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 4);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 5);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 34);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 82);
   assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 23);
   assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 2);
   assert.equal(built.currentCompatibility.executionAuthority.dependencyFiles, 21);
-  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 46);
-  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 75);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeCases, 49);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
   assert.deepEqual(built.currentCompatibility.frozenAuthority, {
     path: "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
     bytes: 19_561,
@@ -345,8 +374,17 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
   const source = await readFile(path.join(ROOT, INSERT_SOURCE));
   const structuralEditsSource = await readFile(path.join(ROOT, STRUCTURAL_EDITS_SOURCE));
   const contentEditsSource = await readFile(path.join(ROOT, CONTENT_EDITS_SOURCE));
+  const persistenceSource = await readFile(path.join(ROOT, PERSISTENCE_SOURCE));
   const authoringRoundTripTest = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TEST));
   const authoringRoundTripTypes = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TYPES));
+  const persistenceTest = await readFile(path.join(ROOT, PERSISTENCE_TEST));
+  const persistenceTypes = await readFile(path.join(ROOT, PERSISTENCE_TYPES));
+  const persistenceRuntime = await readFile(
+    path.join(ROOT, "packages/editor-core/dist/persistence.js"),
+  );
+  const publicTest = await readFile(path.join(ROOT, PUBLIC_TEST));
+  const publicTypes = await readFile(path.join(ROOT, PUBLIC_TYPES));
+  const rootTest = await readFile(path.join(ROOT, ROOT_TEST));
   const dependency = await readFile(path.join(ROOT, PROTOCOL_RUNTIME));
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({
@@ -368,6 +406,12 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
   );
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({
+      fileOverrides: { [PERSISTENCE_SOURCE]: changedByte(persistenceSource) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStableIdInsertEvidence({
       fileOverrides: { [AUTHORING_ROUND_TRIP_TEST]: changedByte(authoringRoundTripTest) },
     }),
     expectedError("BOUNDARY_DRIFT"),
@@ -378,6 +422,38 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
     }),
     expectedError("BOUNDARY_DRIFT"),
   );
+  await assert.rejects(
+    buildEditorCoreStableIdInsertEvidence({
+      fileOverrides: { [PERSISTENCE_TEST]: changedByte(persistenceTest) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStableIdInsertEvidence({
+      fileOverrides: { [PERSISTENCE_TYPES]: changedByte(persistenceTypes) },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  await assert.rejects(
+    buildEditorCoreStableIdInsertEvidence({
+      fileOverrides: {
+        "packages/editor-core/dist/persistence.js": changedByte(persistenceRuntime),
+      },
+    }),
+    expectedError("BOUNDARY_DRIFT"),
+  );
+  for (const [relativePath, bytes] of [
+    [PUBLIC_TEST, publicTest],
+    [PUBLIC_TYPES, publicTypes],
+    [ROOT_TEST, rootTest],
+  ]) {
+    await assert.rejects(
+      buildEditorCoreStableIdInsertEvidence({
+        fileOverrides: { [relativePath]: changedByte(bytes) },
+      }),
+      expectedError("BOUNDARY_DRIFT"),
+    );
+  }
   await assert.rejects(
     buildEditorCoreStableIdInsertEvidence({
       fileOverrides: { [PROTOCOL_RUNTIME]: changedByte(dependency) },

@@ -136,6 +136,7 @@ export const PROOF_IDS = Object.freeze([
   "editor-core-state-binding-edits",
   "editor-core-event-action-edits",
   "editor-core-authoring-round-trip",
+  "editor-core-persistence",
 ]);
 
 /** Proof ids whose root tests make no shared or temporary filesystem writes. */
@@ -180,6 +181,7 @@ export const OS_TEMP_ONLY_VERIFIER_PROOF_IDS = Object.freeze([
   "editor-core-state-binding-edits",
   "editor-core-event-action-edits",
   "editor-core-authoring-round-trip",
+  "editor-core-persistence",
 ]);
 
 /** Sole verifier step eligible to delegate an authenticated loopback port-zero child runtime. */
@@ -196,6 +198,7 @@ export const NATIVE_ADDON_PROOF_IDS = Object.freeze([
   "control-plane-runtime-fault-injection",
   "control-plane-runtime-transition-races",
   "reference-host-web-channel-consumption",
+  "editor-core-persistence",
 ]);
 
 /** Exact additional root-test steps whose nested runtime probes load a reviewed native addon. */
@@ -205,6 +208,7 @@ export const NATIVE_ADDON_ROOT_STEP_IDS = Object.freeze([
   "test-control-plane-runtime-activation",
   "test-control-plane-runtime-recovery",
   "test-control-plane-runtime-fault-injection",
+  "test-editor-core-persistence",
 ]);
 
 /** Exact root-test steps that need bounded Node-permission API compatibility. */
@@ -265,6 +269,7 @@ const GLOBAL_EXCLUSIVE_STEP_IDS = Object.freeze([
 const WORKSPACE_OUTPUT_EXCLUSIVE_STEP_IDS = Object.freeze([
   "workspace-graph",
   "editor-core-public-package-contract",
+  "editor-web-public-package-contract",
 ]);
 const PACKAGE_TEST_EXCLUSIVE_STEP_IDS = Object.freeze(["package-tests"]);
 
@@ -327,6 +332,7 @@ const NATIVE_ADDON_POLICIES = Object.freeze({
   CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE: "CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE",
   CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE: "CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE",
   REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE: "REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE",
+  EDITOR_CORE_PERSISTENCE_SQLITE: "EDITOR_CORE_PERSISTENCE_SQLITE",
   NONE: "NONE",
   PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE: "PUBLISHER_INVALID_SOURCE_MATRIX_RUNTIME_PROBE",
   REFERENCE_HOST_WEB_SOURCE_AUDIT: "REFERENCE_HOST_WEB_SOURCE_AUDIT",
@@ -343,6 +349,7 @@ const NATIVE_ADDON_POLICY_BY_PROOF_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_TRANSITION_RACES_SQLITE,
   "reference-host-web-channel-consumption":
     NATIVE_ADDON_POLICIES.REFERENCE_HOST_WEB_CHANNEL_CONSUMPTION_SQLITE,
+  "editor-core-persistence": NATIVE_ADDON_POLICIES.EDITOR_CORE_PERSISTENCE_SQLITE,
 });
 
 const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
@@ -355,6 +362,7 @@ const NATIVE_ADDON_POLICY_BY_ROOT_STEP_ID = Object.freeze({
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_RECOVERY_SQLITE,
   "test-control-plane-runtime-fault-injection":
     NATIVE_ADDON_POLICIES.CONTROL_PLANE_RUNTIME_FAULT_INJECTION_SQLITE,
+  "test-editor-core-persistence": NATIVE_ADDON_POLICIES.EDITOR_CORE_PERSISTENCE_SQLITE,
 });
 
 /** Stable failure raised when shared-state authority cannot be established safely. */
@@ -531,8 +539,8 @@ for (const proofId of PROOF_IDS) {
   }
 }
 
-if (METADATA_BY_STEP_ID.size !== 165) {
-  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 165 steps.", {
+if (METADATA_BY_STEP_ID.size !== 168) {
+  fail("SHARED_STATE_INTERNAL_INVALID", "Shared-state authority does not own exactly 168 steps.", {
     actual: METADATA_BY_STEP_ID.size,
   });
 }

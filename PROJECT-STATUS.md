@@ -871,18 +871,32 @@ not lexical JSON whitespace/member-order preservation. M08-T08 retains storage I
 durability, and the persistence adapter; M08-T09 retains semantic diagnostics; M08-T10 retains the
 terminal React/DOM boundary and G08.
 
+M08-T08 completes editor persistence without moving platform authority into editor-core. The core
+package defines the read and generation-guarded compare-and-set adapter contract and exposes a
+platform-neutral open/save port. Save canonicalizes the complete Source, including root
+`authoring` and every extension, enforces the 8 MiB ceiling, re-admits bytes, and exposes only
+detached recursively frozen results. The Web package binds that port to an exact lexical
+`http://127.0.0.1:<port>` origin through an explicitly injected fetch-shaped callback. It owns no
+implicit global fetch, retry, merge, filesystem, or SQLite authority; the existing M07-T05 local
+control-plane SQLite/filesystem implementation remains unchanged. Real two-instance CAS, close and
+reopen at generation 3, all 16 extension locations plus root authoring, and a lost-response
+indeterminate write resolved by reopen pass over OS-temporary native SQLite. The exact 49,785-byte
+artifact is pinned at
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. `N-012`, `N-018`, and
+`S-003` remain `TESTED`; no proof or normative status changes.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `92 / 145 tasks complete (63%)`
+- Overall implementation progress: `93 / 145 tasks complete (64%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `7 / 10 tasks complete (70%)`
+- M08 progress: `8 / 10 tasks complete (80%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -960,24 +974,26 @@ terminal React/DOM boundary and G08.
   `M08-T04 — Prop, style-part, condition, and variant editing commands`,
   `M08-T05 — State declaration and binding editing commands`,
   `M08-T06 — Event and closed-action editing commands`,
-  `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`
+  `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`,
+  `M08-T08 — Persistence port and local source adapter`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T08 — Persistence port and local adapter`
-- Status: M08 is 7/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 92/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M08-T09 — Continuous validation and invalid-node mapping`
+- Status: M08 is 8/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 93/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
   `DONE` with its tracked state/binding artifact, independent root proof, and CI registration.
   M08-T06 is `DONE` with its tracked event/action artifact and independent root proof. M08-T07 is
   also `DONE` with its tracked authoring-round-trip artifact, independent root proof, exact
-  165-workload/78-pair CI registration, and sequence-35 reader checkpoint. Exact evidence and
-  nonclaims are recorded below.
+  165-workload/78-pair CI registration, and sequence-35 reader checkpoint. M08-T08 is `DONE` with
+  its tracked persistence artifact, real local SQLite integration, exact 168-workload/79-pair CI
+  registration, and sequence-36 reader checkpoint. Exact evidence and nonclaims are recorded below.
 
 ## Completed preparation
 
@@ -3189,6 +3205,49 @@ M08-T07 evidence:
 - coverage decision: M08-T07 is `DONE`; `N-012`, `N-018`, and `S-003` are `TESTED`; no `P-*` or
   proof-gate status changes; overall progress is 92/145 (63%); M08 is 7/10; proof gates remain
   8/13; M08-T08 owns persistence next
+
+M08-T08 evidence:
+
+- `docs/proof/EDITOR-CORE-PERSISTENCE.md`
+- `docs/proof/artifacts/editor-core-0.1.0-persistence.json`, exactly 49,785 bytes at
+  `sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`
+- core authority: `DesenEditorPersistenceAdapter` owns Source reads and generation-guarded
+  compare-and-set writes; `createDesenEditorPersistencePort` exposes platform-neutral open/save
+  operations without browser, React, DOM, Node, SQLite, filesystem, or transport imports
+- Source boundary: every save canonicalizes the complete Source, including root `authoring` and
+  extensions, enforces the 8 MiB ceiling, re-admits stored or returned bytes, and returns detached
+  recursively frozen values
+- Web authority: `createLocalDesenEditorPersistencePort` requires an explicit fetch-shaped callback,
+  bearer token, redirect rejection, and the exact lexical `http://127.0.0.1:<port>` origin; it has
+  no global-fetch fallback, automatic retry, merge, filesystem, or SQLite authority
+- durability authority: the existing public M07-T05 `openLocalControlPlane` implementation remains
+  unchanged and supplies the real filesystem/SQLite boundary
+- real integration: two independently opened control-plane instances and two editor ports share an
+  OS-temporary native SQLite database; exactly one generation-3 CAS wins, the stale writer observes
+  conflict, both instances close, and a fresh instance reopens the exact generation-3 Source
+- round-trip boundary: canonical complete Source bytes, root authoring, and all 16 Source-reachable
+  extension locations survive create, update, two-instance CAS, close, and reopen; the storage key
+  remains independent of the Source `id`
+- uncertainty boundary: a durably dispatched PUT with its response hidden returns `indeterminate`,
+  performs no retry or merge, and a fresh open resolves the committed generation; malformed
+  successful responses and post-dispatch uncertain storage envelopes are likewise not reported as
+  definite failures
+- local package proof: core persistence passes 10/10; cumulative core public-package cases pass
+  49/49 with 96 compiler-negative assertions; Web focused cases pass 12/12; Web public-package
+  cases pass 3/3 with six compiler-negative assertions; the independent root proof passes 10/10
+- receipt authority: the proof authenticates the exact frozen M07-T05 and M08-T07 artifacts plus
+  218 current tracked receipts, including 180 emitted distribution receipts; historical T01–T07
+  artifact hashes and bytes remain unchanged
+- current CI authority: 168 workloads / 79 proof pairs
+- checkpoint authority: append-only sequence 36 authenticates 33 frozen artifacts and 66 current
+  readers while preserving every sequence-35 and earlier artifact byte
+- evidence boundary: these are local code-owned proof/CI results and make no hosted M08-T08 claim
+- scope nonclaims: Catalog semantic diagnostics and invalid-node mapping remain M08-T09; terminal
+  React/DOM integration, cross-command determinism, and G08 remain M08-T10; undo/redo, selection,
+  viewport policy, multi-user synchronization, and remote persistence remain outside M08-T08
+- coverage decision: M08-T08 is `DONE`; `N-012`, `N-018`, and `S-003` remain `TESTED`; no `P-*`,
+  other `N-*`/`S-*`, or proof-gate status changes; overall progress is 93/145 (64%); M08 is 8/10;
+  proof gates remain 8/13; M08-T09 owns continuous validation and invalid-node mapping next
 
 ## Status vocabulary
 

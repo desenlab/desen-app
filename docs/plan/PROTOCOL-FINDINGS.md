@@ -3515,3 +3515,59 @@ This file records implementation discoveries without changing the frozen DESEN 0
   semantics here. M08-T10 owns terminal React/DOM integration, cross-command terminal determinism,
   and the G08 boundary. Any future hard requirement for reverse-domain extension names requires a
   protocol revision rather than an editor-local rejection rule.
+
+## PF-085 — Editable Source persistence needs an explicit CAS, canonical-byte, and uncertain-commit profile
+
+- Status: OPEN
+- Blocks proof: No; M08-T08 composes the existing local Source repository with one conservative
+  editor persistence port and Web adapter without changing frozen protocol bytes or granting
+  storage authority to the editor document.
+- Protocol location: SPEC Sections 10.2, 11.2, 12.4, 15.1, and 23.5; normative rows `N-012`,
+  `N-018`, and `S-003`; related findings `PF-065`, `PF-066`, `PF-084`, and the M07-T05 local
+  Source profile
+- Observation: DESEN 0.1.0 defines a Source as data and requires unknown-extension preservation,
+  but it does not prescribe storage identities, generations, compare-and-set preconditions,
+  canonical serialization at an editor boundary, local HTTP authentication, commit-outcome
+  recovery, or whether persistence belongs to a framework-neutral editor or a platform adapter.
+  Treating a Source ID as a path, silently overwriting a newer generation, retrying a lost write
+  response, or assuming a rejected response proves non-commit would each create authority or data
+  loss outside the protocol.
+- Implementation decision: `@desen/editor-core` exposes a framework-neutral
+  `DesenEditorPersistencePort` with only `openSource` and `saveSource`. Storage identity is an
+  explicit `sourceKey` independent of `Source.id`. `expectedGeneration: null` means create only
+  when absent; a positive safe integer means update only that exact observed generation. Every save
+  re-admits the complete direct Source, encodes fresh RFC 8785 bytes under the fixed 8 MiB ceiling,
+  and sends the whole document including root `authoring` and every extension. It does not derive a
+  Source digest, omit authoring, retain lexical whitespace/member order, merge, retry, list, delete,
+  or select a filesystem path.
+
+  The neutral port accepts a closed trusted-platform adapter with one read and one atomic
+  compare-and-set callback. Adapter requests and results have exact own-data shapes; keys,
+  generations, returned values, and status-specific invariants are revalidated. An absent identity
+  begins at generation one. An exact canonical candidate at the expected generation is unchanged
+  and does not advance. A different candidate advances exactly once, while a stale precondition is
+  a conflict even when its candidate bytes match current storage. A different candidate at
+  `Number.MAX_SAFE_INTEGER` is generation-exhausted. There is no automatic retry or merge.
+
+  Adapter rejection while reading is a definite redacted failure. Adapter rejection, malformed
+  output, or an explicit uncertain outcome after a compare-and-set dispatch is instead
+  `indeterminate`: the caller must reopen and compare state rather than assuming failure or sending
+  a blind retry. Definite adapter failures are mapped to fixed diagnostics without platform error
+  objects, paths, credentials, or storage detail. The boundary is captured inert data with
+  controlled reflection; necessary inspection of an arbitrary JavaScript `Proxy` may execute its
+  traps, and no hostile-JavaScript or no-code-execution membrane is claimed.
+
+  `@desen/editor-web` supplies the local adapter. It requires an exact
+  `http://127.0.0.1:<port>` origin, a bounded visible-ASCII bearer token, and an explicitly injected
+  fetch-like callback. It never falls back to browser-global `fetch`, follows redirects, or sends a
+  credential to another origin. It accepts only the M07-T05 `/v1/sources/<sourceKey>` grammar,
+  strict interoperable JSON, exact generation ETags, bounded detached bytes, and closed response
+  envelopes. The existing control plane remains the sole Node/SQLite/filesystem durability
+  authority; editor-core gains no Node, DOM, React, HTTP, SQLite, or filesystem dependency.
+
+- Future action: M08-T09 must layer Catalog-backed continuous semantic diagnostics and invalid-node
+  mapping over an opened immutable Source without changing persistence generations. M08-T10 owns
+  terminal React/DOM integration and cross-command determinism. M09-T12 may consume only the public
+  persistence port for save/open UI; it must not depend on the local transport adapter's internal
+  response shapes or acquire storage-path authority. Any interoperable remote-storage or merge
+  protocol requires a later explicit profile.

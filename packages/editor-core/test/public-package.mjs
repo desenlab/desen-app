@@ -17,6 +17,30 @@ function cloneFixture() {
   return JSON.parse(JSON.stringify(validSource));
 }
 
+function persistenceFixture(marker = "stored") {
+  const input = cloneFixture();
+  input.authoring = JSON.parse(
+    `{"viewport":{"marker":${JSON.stringify(marker)},"zoom":1.25},"ordered":["same",null,"same",[],{}],"__proto__":{"retained":true}}`,
+  );
+  input.extensions = {
+    "com.example.persistence": {
+      marker,
+      apparentCore: { id: "sign-in.submit", type: "state.toggle", path: "ignored" },
+      unicode: ["İstanbul", "雪", "😀"],
+    },
+    legacyMarker: { retained: true },
+  };
+  input.surfaces["sign-in"].root.use = "com.example.unresolved/PersistenceRemainsStructural";
+  return input;
+}
+
+function createPersistenceDocument(input = persistenceFixture()) {
+  const result = editorCore.createDesenEditorDocument(input);
+  assert.equal(result.ok, true);
+  if (!result.ok) throw new TypeError("Expected the public persistence fixture to be admitted.");
+  return result.document;
+}
+
 function contentEditFixture() {
   const input = cloneFixture();
   const root = input.surfaces["sign-in"].root;
@@ -351,6 +375,7 @@ test("the package manifest keeps one exact root export and the declared runtime 
       "test:public-package":
         "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
       "test:authoring-round-trip": "vitest run test/authoring-round-trip.test.ts",
+      "test:persistence": "vitest run test/persistence.test.ts",
       "test:content-edits": "vitest run test/content-edits.test.ts",
       "test:event-action-edits": "vitest run test/event-action-edits.test.ts",
       "test:state-binding-edits": "vitest run test/state-binding-edits.test.ts",
@@ -377,6 +402,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
       "content-edits.js",
       "state-binding-edits.js",
       "event-action-edits.js",
+      "persistence.js",
     ].map(async (file) => ({
       file,
       source: await readFile(new URL(`../dist/${file}`, import.meta.url), "utf8"),
@@ -398,6 +424,7 @@ test("the emitted public module graph stays platform-neutral and execution-close
           "./content-edits.js",
           "./state-binding-edits.js",
           "./event-action-edits.js",
+          "./persistence.js",
         ],
       },
       { file: "source-document.js", specifiers: ["@desen/validator"] },
@@ -419,6 +446,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
       },
       {
         file: "event-action-edits.js",
+        specifiers: ["@desen/protocol", "./source-document.js"],
+      },
+      {
+        file: "persistence.js",
         specifiers: ["@desen/protocol", "./source-document.js"],
       },
     ],
@@ -447,6 +478,10 @@ test("the emitted public module graph stays platform-neutral and execution-close
     emittedModules[0].source,
     /export\s*\{\s*deleteDesenEditorAction,\s*deleteDesenEditorEventHandler,\s*insertDesenEditorAction,\s*insertDesenEditorEventHandler,\s*reorderDesenEditorAction,\s*replaceDesenEditorAction\s*,?\s*\}\s*from\s*["']\.\/event-action-edits\.js["']/,
   );
+  assert.match(
+    emittedModules[0].source,
+    /export\s*\{\s*createDesenEditorPersistencePort\s*\}\s*from\s*["']\.\/persistence\.js["']/,
+  );
 
   const emittedGraph = emittedModules.map(({ source }) => source).join("\n");
   for (const forbidden of [
@@ -468,6 +503,7 @@ test("the built public package resolves through its export map and exposes the r
   assert.deepEqual(Object.keys(editorCore), [
     "clearDesenEditorNodeCondition",
     "createDesenEditorDocument",
+    "createDesenEditorPersistencePort",
     "deleteDesenEditorAction",
     "deleteDesenEditorEventHandler",
     "deleteDesenEditorNode",
@@ -2928,6 +2964,201 @@ test("all 32 emitted mutation commands isolate authoring and preserve extension 
     assertPlainOwnDataFrozen(left);
     assertPlainOwnDataFrozen(right);
   }
+});
+
+test("the emitted persistence port re-admits reads and saves complete canonical Source bytes", async () => {
+  const storedInput = persistenceFixture("stored");
+  const candidate = createPersistenceDocument(persistenceFixture("candidate"));
+  const candidateBytes = canonicalizeJsonBytes(candidate);
+  const calls = [];
+  const readSource = async function (sourceKey) {
+    assert.equal(this, undefined);
+    calls.push(`read:${sourceKey}`);
+    return {
+      status: "found",
+      record: { sourceKey, generation: 4, value: storedInput },
+    };
+  };
+  const compareAndSetSource = async function (request) {
+    assert.equal(this, undefined);
+    calls.push(`write:${request.sourceKey}`);
+    assert.deepEqual(Reflect.ownKeys(request), ["sourceKey", "expectedGeneration", "bytes"]);
+    assert.equal(Object.isFrozen(request), true);
+    assert.equal(request.sourceKey, "source-a");
+    assert.equal(request.expectedGeneration, 4);
+    assert.notEqual(request.bytes, candidateBytes);
+    assert.deepEqual(Buffer.from(request.bytes), Buffer.from(candidateBytes));
+    return { status: "updated", generation: 5 };
+  };
+  const adapter = { compareAndSetSource, readSource };
+  const port = editorCore.createDesenEditorPersistencePort(adapter);
+  adapter.readSource = async () => ({ status: "missing" });
+  adapter.compareAndSetSource = async () => ({ status: "indeterminate" });
+
+  const opened = await port.openSource("source-a");
+  assert.equal(opened.status, "opened");
+  if (opened.status !== "opened") throw new TypeError("Expected an emitted open success.");
+  assert.equal(opened.generation, 4);
+  assert.deepEqual(opened.document, storedInput);
+  assert.notEqual(opened.document, storedInput);
+  assert.deepEqual(opened.document.authoring, storedInput.authoring);
+  assert.deepEqual(opened.document.extensions, storedInput.extensions);
+  assertPlainOwnDataFrozen(opened);
+
+  storedInput.authoring.viewport.marker = "caller-mutated";
+  assert.equal(opened.document.authoring.viewport.marker, "stored");
+
+  const saved = await port.saveSource({
+    sourceKey: "source-a",
+    expectedGeneration: opened.generation,
+    document: candidate,
+  });
+  assert.deepEqual(saved, { status: "updated", generation: 5 });
+  assertPlainOwnDataFrozen(saved);
+  assert.deepEqual(calls, ["read:source-a", "write:source-a"]);
+  assert.deepEqual(Reflect.ownKeys(port), ["openSource", "saveSource"]);
+  assert.equal(Object.isFrozen(port), true);
+});
+
+test("the emitted persistence port validates every compare-and-set settlement and uncertainty", async () => {
+  const document = createPersistenceDocument();
+  const valid = [
+    [null, { status: "created", generation: 1 }, { status: "created", generation: 1 }],
+    [4, { status: "updated", generation: 5 }, { status: "updated", generation: 5 }],
+    [4, { status: "unchanged", generation: 4 }, { status: "unchanged", generation: 4 }],
+    [
+      null,
+      { status: "conflict", currentGeneration: 2 },
+      { status: "conflict", currentGeneration: 2 },
+    ],
+    [
+      4,
+      { status: "conflict", currentGeneration: null },
+      { status: "conflict", currentGeneration: null },
+    ],
+    [
+      Number.MAX_SAFE_INTEGER,
+      { status: "generation-exhausted", generation: Number.MAX_SAFE_INTEGER },
+      { status: "generation-exhausted", generation: Number.MAX_SAFE_INTEGER },
+    ],
+  ];
+  for (const [expectedGeneration, settlement, expected] of valid) {
+    const port = editorCore.createDesenEditorPersistencePort({
+      readSource: async () => ({ status: "missing" }),
+      compareAndSetSource: async () => settlement,
+    });
+    const result = await port.saveSource({ sourceKey: "source-a", expectedGeneration, document });
+    assert.deepEqual(result, expected);
+    assertPlainOwnDataFrozen(result);
+  }
+
+  const malformed = [
+    [null, { status: "created", generation: 2 }],
+    [2, { status: "updated", generation: 4 }],
+    [2, { status: "unchanged", generation: 3 }],
+    [null, { status: "conflict", currentGeneration: null }],
+    [2, { status: "conflict", currentGeneration: 2 }],
+    [2, { status: "generation-exhausted", generation: Number.MAX_SAFE_INTEGER }],
+    [null, { status: "created", generation: 1, extra: true }],
+  ];
+  for (const [expectedGeneration, settlement] of malformed) {
+    const port = editorCore.createDesenEditorPersistencePort({
+      readSource: async () => ({ status: "missing" }),
+      compareAndSetSource: async () => settlement,
+    });
+    const result = await port.saveSource({ sourceKey: "source-a", expectedGeneration, document });
+    assert.equal(result.status, "indeterminate");
+    assert.equal(result.diagnostic.code, "run.desen.editor/PERSISTENCE_ADAPTER_RESULT_INVALID");
+    assertPlainOwnDataFrozen(result);
+  }
+
+  for (const compareAndSetSource of [
+    async () => ({ status: "indeterminate" }),
+    async () => {
+      throw new Error("private platform error");
+    },
+  ]) {
+    const port = editorCore.createDesenEditorPersistencePort({
+      readSource: async () => ({ status: "missing" }),
+      compareAndSetSource,
+    });
+    const result = await port.saveSource({
+      sourceKey: "source-a",
+      expectedGeneration: 4,
+      document,
+    });
+    assert.equal(result.status, "indeterminate");
+    assert.equal(result.diagnostic.code, "run.desen.editor/PERSISTENCE_COMMIT_INDETERMINATE");
+    assert.doesNotMatch(JSON.stringify(result), /private/);
+    assertPlainOwnDataFrozen(result);
+  }
+});
+
+test("the emitted persistence port enforces structural readmission and the full 8 MiB Source bound", async () => {
+  function sizedSource(extraBytes) {
+    const input = cloneFixture();
+    input.authoring = { padding: "" };
+    const baseLength = canonicalizeJsonBytes(input).byteLength;
+    input.authoring.padding = "x".repeat(8_388_608 - baseLength + extraBytes);
+    return input;
+  }
+
+  const exactInput = sizedSource(0);
+  const oversizedInput = sizedSource(1);
+  const exactDocument = createPersistenceDocument(exactInput);
+  const oversizedDocument = createPersistenceDocument(oversizedInput);
+  assert.equal(canonicalizeJsonBytes(exactDocument).byteLength, 8_388_608);
+  assert.equal(canonicalizeJsonBytes(oversizedDocument).byteLength, 8_388_609);
+  let writes = 0;
+  const port = editorCore.createDesenEditorPersistencePort({
+    readSource: async (sourceKey) => ({
+      status: "found",
+      record: {
+        sourceKey,
+        generation: 1,
+        value: sourceKey === "exact" ? exactInput : oversizedInput,
+      },
+    }),
+    compareAndSetSource: async () => {
+      writes += 1;
+      return { status: "created", generation: 1 };
+    },
+  });
+
+  const exactOpen = await port.openSource("exact");
+  assert.equal(exactOpen.status, "opened");
+  const oversizedOpen = await port.openSource("oversized");
+  assert.equal(oversizedOpen.status, "failed");
+  assert.equal(oversizedOpen.diagnostic.code, "run.desen.editor/PERSISTENCE_SOURCE_LIMIT_EXCEEDED");
+  assert.deepEqual(
+    await port.saveSource({
+      sourceKey: "exact",
+      expectedGeneration: null,
+      document: exactDocument,
+    }),
+    { status: "created", generation: 1 },
+  );
+  const oversizedSave = await port.saveSource({
+    sourceKey: "oversized",
+    expectedGeneration: null,
+    document: oversizedDocument,
+  });
+  assert.equal(oversizedSave.status, "failed");
+  assert.equal(oversizedSave.diagnostic.code, "run.desen.editor/PERSISTENCE_LIMIT_EXCEEDED");
+  assert.equal(writes, 1);
+
+  const invalidSource = cloneFixture();
+  invalidSource.kind = "desen.bundle";
+  const invalidPort = editorCore.createDesenEditorPersistencePort({
+    readSource: async (sourceKey) => ({
+      status: "found",
+      record: { sourceKey, generation: 1, value: invalidSource },
+    }),
+    compareAndSetSource: async () => ({ status: "created", generation: 1 }),
+  });
+  const invalidOpen = await invalidPort.openSource("source-a");
+  assert.equal(invalidOpen.status, "failed");
+  assert.equal(invalidOpen.diagnostic.code, "run.desen.editor/PERSISTENCE_SOURCE_INVALID");
 });
 
 test("[proof-core] two fresh final builds are byte-identical and preserve honest scope", async () => {
