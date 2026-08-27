@@ -65,18 +65,38 @@ segments, 3,113 ordered leaf invocations, and 236 distinct leaves. M08-T01 appen
 editor-core Source-document proof pair plus its serial public-package contract. M08-T02 appended
 the stable-ID insertion verifier/root pair behind that same serial predecessor. M08-T03 appended
 the structural-edit verifier/root pair behind stable-ID insertion, M08-T04 appended the
-content-edit pair behind both frozen edit prerequisites, and M08-T05 appends the state/binding pair
-behind stable-ID insertion plus current content-edit compatibility. The current successor contains
-161 workloads and 76 proof pairs without rewriting the frozen cutover, with 529 prerequisite
-segments, 3,293 ordered leaf invocations, and 254 distinct leaves. The neutral inventory is
-`sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`; the selector-only impact
-graph is `sha256:9fb786d80ac21bef4dc89c9a77986f91dd50c9ff53dd2d54c7a52d5c4ac8738f`; the required plan is
-`sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`. These are local
-code-owned successor values. Affected ownership covers 1,071 tracked paths at
-`sha256:ae070076003f9ae641a6682aab6280336b7d2ccf6ccd6b96d15b3c10c6cd6c18`, including 152
+content-edit pair behind both frozen edit prerequisites, M08-T05 appended the state/binding pair
+behind stable-ID insertion plus current content-edit compatibility, and M08-T06 appends the
+event/action pair behind its sole formal M08-T05 prerequisite. The historical M08-T05 successor
+contained 161 workloads, 76 proof pairs, 529 prerequisite segments, 3,293 ordered leaf invocations,
+and 254 distinct leaves. Its neutral inventory, impact graph, and required plan were
+`sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`,
+`sha256:9fb786d80ac21bef4dc89c9a77986f91dd50c9ff53dd2d54c7a52d5c4ac8738f`, and
+`sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`; its affected ownership
+covered 1,071 paths at `sha256:ae070076003f9ae641a6682aab6280336b7d2ccf6ccd6b96d15b3c10c6cd6c18`, including 152
+proof-owned paths, with projection
+`sha256:d793913bca281e2127151c83ce570ce415c995da42013226731d030b337fc2c0`. The current successor contains 163
+workloads and 77 proof pairs without rewriting the frozen cutover, with 539 prerequisite segments,
+3,359 ordered leaf invocations, and 257 distinct leaves. The retained quality plan is
+`sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`; the neutral inventory,
+selector-only impact graph, exact workload set, and ordered equivalence projection are respectively
+`sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cfc1f53`,
+`sha256:f7be1ee5bc35a7b0ea2cdcdabacf13f4525fcdabeb97e8854513ed4343e4aab3`,
+`sha256:56c04c534906197d7597c7854ba792d0c96001612f13346a1a104371910fc22a`, and
+`sha256:868d2a59cdf5e95badd7d0cce601003e26280609f44167c831e251595779e6e4`. Required and shadow plans
+are `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3ff3` and
+`sha256:533bdab2a511433e0c1bdb4fab1be27430914489d722918d7d789bdf294d4caf`.
+
+Affected ownership covers 1,080 tracked paths at
+`sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
 proof-owned paths; the complete ownership projection is
-`sha256:d793913bca281e2127151c83ce570ce415c995da42013226731d030b337fc2c0`. No hosted M08-T05 result
-is claimed. The 15 reviewed workspace test scripts remain pinned by
+`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. Current selector and
+required-runner authorities are
+`sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` and
+`sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; the authenticated
+promotion artifact is
+`sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`. No hosted M08-T06
+result is claimed. The 15 reviewed workspace test scripts remain pinned by
 `sha256:0faa6116c99d11f6d059a224de6b08a723657b5c5690a3138e6290d240524820`. Contract and
 hostile-input tests cover exact
 ordered ids, labels, commands, arguments,
@@ -87,9 +107,9 @@ sequential plan and rejects PASS receipts containing missing, duplicated, skippe
 cancelled, timed-out, failed, or unclosed work.
 
 Shared-state mutation tests cover all seven live exact classes and counts: 6 `GLOBAL_EXCLUSIVE`, 2
-`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 72
+`WORKSPACE_OUTPUT_EXCLUSIVE`, 1 `PACKAGE_TEST_EXCLUSIVE`, 69 `PROOF_READ_ONLY`, 74
 `PROOF_OS_TEMP_ISOLATED`, 10 `PROOF_TRACKED_ALIAS_EXCLUSIVE`, and 1
-`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 65 proof pairs are eligible for pair-level overlap
+`PROOF_WORKSPACE_TEMP_EXCLUSIVE`. They prove that 66 proof pairs are eligible for pair-level overlap
 at concurrency two and that the ten tracked-alias pairs plus `reference-host-web-source-audit`
 always drain the scheduler as eleven exclusive proof-pair barriers.
 
@@ -157,12 +177,13 @@ The separate serial `editor-core-public-package-contract` prefix owns the repeat
 runs the exact package export-map, compiler, and emitted-runtime contract before the verifier.
 
 The M08-T02 `editor-core-stable-id-insert`, M08-T03 `editor-core-structural-edits`, M08-T04
-`editor-core-content-edits`, and M08-T05 `editor-core-state-binding-edits` verifier/root pairs are
-ordinary and non-barrier. Each follows the same serial public-package contract. Structural edits
-also follow stable-ID insertion; content edits follow both frozen edit prerequisites; state and
-binding edits follow stable-ID insertion plus current content-edit compatibility. All eight
-workloads are `PROOF_OS_TEMP_ISOLATED` with separate runner-owned roots and verifier-before-root
-ordering.
+`editor-core-content-edits`, M08-T05 `editor-core-state-binding-edits`, and M08-T06
+`editor-core-event-action-edits` verifier/root pairs are ordinary and non-barrier. Each follows the
+same serial public-package contract. Structural edits also follow stable-ID insertion; content edits
+follow both frozen edit prerequisites; state and binding edits follow stable-ID insertion plus
+current content-edit compatibility; event/action edits follow the sole formal M08-T05 prerequisite.
+All ten workloads are `PROOF_OS_TEMP_ISOLATED` with separate runner-owned roots and
+verifier-before-root ordering.
 No pair receives workspace-write, port, native-addon, or verifier runtime-probe authority; only
 each root receives the ordinary `NODE_TEST_HARNESS` child policy.
 
@@ -174,6 +195,15 @@ tracked receipts plus an isolated 28-file ESM graph with fourteen closed static 
 30,014-byte artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`.
+
+The M08-T06 focused package layer passes 16/16 runtime cases and 19 compiler-negative assertions.
+The cumulative editor suite passes 85/85. The emitted public-package layer passes 44/44 runtime
+cases and 69 consumer compiler-negative assertions over 33 runtime exports, 69 type exports, and
+20 T06-owned declarations with TSDoc. The independent root proof passes 10/10 and authenticates 81
+tracked receipts plus an isolated 29-file ESM graph—eight editor and 21 dependency files—with 17
+closed static edges. Its exact 31,310-byte artifact is
+`docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json` at
+`sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`.
 
 Real isolation probes verify per-step temp ownership, Node filesystem permissions, verifier-side
 child-process denial, the exact root-test Node-harness grant, native-addon denial,
@@ -199,7 +229,7 @@ The reviewed production dependency audit for locked Fastify 5.11.2 and better-sq
 reports no known vulnerability.
 
 The probes also pin all eighteen exact Node-permission compatibility workloads and their live policy
-distribution across the 161 workloads: 143 `NONE`, two `FIXTURE_COPY`, fifteen
+distribution across the 163 workloads: 145 `NONE`, two `FIXTURE_COPY`, fifteen
 `REVIEWED_SYMLINK`, and one combined policy.
 They prove exact fixture sources and recursive option shapes, bounded no-follow tree copies,
 matching copy fingerprints, own-temp destination ownership, and rejection of sibling-temp,
@@ -277,10 +307,14 @@ historical sequence 30 authenticates 27 frozen artifacts and 54 readers. Histori
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d` authenticates 28 frozen
 artifacts and 56 then-current readers. Historical append-only sequence 32 at
 `9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424` authenticates 29 frozen
-artifacts and 58 then-current readers. The current append-only sequence 33 at
+artifacts and 58 then-current readers. Historical M08-T05 sequence 33 at
 `64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871` authenticates 30 frozen
 artifacts and 60 current readers while preserving sequence 32 and every predecessor artifact byte.
-The dedicated checkpoint suite passes 56/56.
+Its dedicated checkpoint suite passes 56/56. Current M08-T06 sequence 34 at
+`f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
+artifacts and 62 current readers while preserving sequence 33 and every earlier byte. Existing
+reader indexes `[50, 51, 52, 53, 54, 56, 58]` are resealed, new readers occupy `[60, 61]`, and the
+dedicated checkpoint suite passes 57/57.
 These are joined to the hosted closure evidence. [Cleanup PR #36](https://github.com/desenlab/desen-app/pull/36)
 and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact one-file
 [canary PR #37](https://github.com/desenlab/desen-app/pull/37) passed fresh
@@ -288,12 +322,18 @@ and its landed `main` revision passed fresh `REQUIRED + EXHAUSTIVE`. The exact o
 [run 31676049922, job 94370743935](https://github.com/desenlab/desen-app/actions/runs/31676049922/job/94370743935),
 selecting and closing 10 workloads for one proof unit as a strict subset without cached success.
 All 17 G07-due debt entries are `CLOSED`; `DEBT-I07-007` remains `OPEN` for I07-05. I07-04 and G07
-are `DONE`; proof gates are 8/13, implementation progress is 90/145, M08 is 5/10, `N-014` remains
-`TESTED`, `S-002` remains `PLANNED`, and M08-T06 is next. The exact 30,014-byte M08-T05 artifact is
+are `DONE`; proof gates are 8/13, implementation progress is 91/145, M08 is 6/10, `N-014` remains
+`TESTED`, `S-002` remains `PLANNED`, and M08-T07 is next. The exact 30,014-byte M08-T05 artifact is
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; the report is
-`docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md`. These T05 results are local code-owned/current
-evidence and make no hosted M08-T05 claim; no `P-*`, `N-*`, `S-*`, or proof-gate status changes.
+`docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md` and it remains M08-T06's sole direct prerequisite.
+The exact 31,310-byte M08-T06 artifact is
+`docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json` at
+`sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`; the report is
+`docs/proof/EDITOR-CORE-EVENT-ACTION-EDITS.md`. The targeted CI infrastructure batch passes
+235/235, required-affected contracts pass 27/27, and promotion contracts pass 19/19. These T06
+results are local code-owned/current evidence and make no hosted M08-T06 claim; no `P-*`, `N-*`,
+`S-*`, or proof-gate status changes.
 
 Current reader compatibility is distinct from frozen task evidence. Security hardening may advance
 one live reader through the reviewed checkpoint append procedure only when every previously pinned

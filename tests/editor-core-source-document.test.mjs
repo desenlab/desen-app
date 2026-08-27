@@ -316,6 +316,8 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
   ]);
   assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
     "clearDesenEditorNodeCondition",
+    "deleteDesenEditorAction",
+    "deleteDesenEditorEventHandler",
     "deleteDesenEditorNode",
     "deleteDesenEditorOwnerProp",
     "deleteDesenEditorOwnerStyleProperty",
@@ -324,12 +326,16 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     "deleteDesenEditorVariant",
     "deleteDesenEditorVariantProp",
     "deleteDesenEditorVariantStyleProperty",
+    "insertDesenEditorAction",
+    "insertDesenEditorEventHandler",
     "insertDesenEditorNode",
     "insertDesenEditorStateDeclaration",
     "insertDesenEditorVariant",
     "moveDesenEditorNode",
+    "reorderDesenEditorAction",
     "reorderDesenEditorNode",
     "reorderDesenEditorVariant",
+    "replaceDesenEditorAction",
     "setDesenEditorNodeCondition",
     "setDesenEditorNodeRepeatItems",
     "setDesenEditorNodeRepeatKey",
@@ -349,43 +355,40 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     true,
   );
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T05",
-    sourcePath: "packages/editor-core/src/state-binding-edits.ts",
-    runtimePath: "packages/editor-core/dist/state-binding-edits.js",
-    declarationPath: "packages/editor-core/dist/state-binding-edits.d.ts",
+    task: "M08-T06",
+    sourcePath: "packages/editor-core/src/event-action-edits.ts",
+    runtimePath: "packages/editor-core/dist/event-action-edits.js",
+    declarationPath: "packages/editor-core/dist/event-action-edits.d.ts",
     runtimeExports: [
-      "deleteDesenEditorResourceInput",
-      "deleteDesenEditorStateDeclaration",
-      "insertDesenEditorStateDeclaration",
-      "setDesenEditorNodeRepeatItems",
-      "setDesenEditorNodeRepeatKey",
-      "setDesenEditorResourceInput",
-      "setDesenEditorStateInitial",
-      "setDesenEditorStateSchema",
+      "deleteDesenEditorAction",
+      "deleteDesenEditorEventHandler",
+      "insertDesenEditorAction",
+      "insertDesenEditorEventHandler",
+      "reorderDesenEditorAction",
+      "replaceDesenEditorAction",
     ],
     typeExports: [
-      "DesenEditorBindingValue",
-      "DesenEditorNodeRepeatItemsSetCommand",
-      "DesenEditorNodeRepeatKeySetCommand",
-      "DesenEditorResourceInputDeleteCommand",
-      "DesenEditorResourceInputSetCommand",
-      "DesenEditorStateBindingEditDiagnostic",
-      "DesenEditorStateBindingEditDiagnosticCode",
-      "DesenEditorStateBindingEditFailure",
-      "DesenEditorStateBindingEditResult",
-      "DesenEditorStateBindingEditSuccess",
-      "DesenEditorStateDeclaration",
-      "DesenEditorStateDeclarationDeleteCommand",
-      "DesenEditorStateDeclarationInsertCommand",
-      "DesenEditorStateInitialSetCommand",
-      "DesenEditorStateSchemaSetCommand",
+      "DesenEditorAction",
+      "DesenEditorActionDeleteCommand",
+      "DesenEditorActionInsertCommand",
+      "DesenEditorActionListPointer",
+      "DesenEditorActionPointer",
+      "DesenEditorActionReorderCommand",
+      "DesenEditorActionReplaceCommand",
+      "DesenEditorEventActionEditDiagnostic",
+      "DesenEditorEventActionEditDiagnosticCode",
+      "DesenEditorEventActionEditFailure",
+      "DesenEditorEventActionEditResult",
+      "DesenEditorEventActionEditSuccess",
+      "DesenEditorEventHandlerDeleteCommand",
+      "DesenEditorEventHandlerInsertCommand",
     ],
-    publicDeclarations: 23,
-    tsdocDeclarations: 23,
+    publicDeclarations: 20,
+    tsdocDeclarations: 20,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 3);
-  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 31);
-  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 48);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 4);
+  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 37);
+  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 69);
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {
     const bytes = await workspaceBytes(receipt.path);
     assert.equal(bytes.byteLength, receipt.bytes);

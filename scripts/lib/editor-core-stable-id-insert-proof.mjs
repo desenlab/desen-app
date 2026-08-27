@@ -26,6 +26,7 @@ const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
 const STRUCTURAL_EDITS_SOURCE_PATH = "packages/editor-core/src/structural-edits.ts";
 const CONTENT_EDITS_SOURCE_PATH = "packages/editor-core/src/content-edits.ts";
 const STATE_BINDING_EDITS_SOURCE_PATH = "packages/editor-core/src/state-binding-edits.ts";
+const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
 const PACKAGE_PATH = "packages/editor-core/package.json";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/stable-id-insert.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/stable-id-insert.types.ts";
@@ -56,6 +57,10 @@ const CONTENT_EDITS_DIST_PATHS = Object.freeze([
 const STATE_BINDING_EDITS_DIST_PATHS = Object.freeze([
   "packages/editor-core/dist/state-binding-edits.d.ts",
   "packages/editor-core/dist/state-binding-edits.js",
+]);
+const EVENT_ACTION_EDITS_DIST_PATHS = Object.freeze([
+  "packages/editor-core/dist/event-action-edits.d.ts",
+  "packages/editor-core/dist/event-action-edits.js",
 ]);
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -238,6 +243,34 @@ const EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS = Object.freeze(
     "DesenEditorStateSchemaSetCommand",
   ].sort(compareText),
 );
+const EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS = Object.freeze(
+  [
+    "deleteDesenEditorAction",
+    "deleteDesenEditorEventHandler",
+    "insertDesenEditorAction",
+    "insertDesenEditorEventHandler",
+    "reorderDesenEditorAction",
+    "replaceDesenEditorAction",
+  ].sort(compareText),
+);
+const EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS = Object.freeze(
+  [
+    "DesenEditorAction",
+    "DesenEditorActionDeleteCommand",
+    "DesenEditorActionInsertCommand",
+    "DesenEditorActionListPointer",
+    "DesenEditorActionPointer",
+    "DesenEditorActionReorderCommand",
+    "DesenEditorActionReplaceCommand",
+    "DesenEditorEventActionEditDiagnostic",
+    "DesenEditorEventActionEditDiagnosticCode",
+    "DesenEditorEventActionEditFailure",
+    "DesenEditorEventActionEditResult",
+    "DesenEditorEventActionEditSuccess",
+    "DesenEditorEventHandlerDeleteCommand",
+    "DesenEditorEventHandlerInsertCommand",
+  ].sort(compareText),
+);
 const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "createDesenEditorDocument",
@@ -247,6 +280,7 @@ const EXPECTED_CURRENT_RUNTIME_EXPORTS = Object.freeze(
     "reorderDesenEditorNode",
     ...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
     ...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
+    ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
   ].sort(compareText),
 );
 const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
@@ -255,6 +289,7 @@ const EXPECTED_CURRENT_TYPE_EXPORTS = Object.freeze(
     ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS,
     ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
     ...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
+    ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
   ].sort(compareText),
 );
 const EXPECTED_DIAGNOSTIC_CODES = Object.freeze([
@@ -365,6 +400,8 @@ const CURRENT_COMPATIBILITY_PATHS = Object.freeze([
   ...CONTENT_EDITS_DIST_PATHS,
   STATE_BINDING_EDITS_SOURCE_PATH,
   ...STATE_BINDING_EDITS_DIST_PATHS,
+  EVENT_ACTION_EDITS_SOURCE_PATH,
+  ...EVENT_ACTION_EDITS_DIST_PATHS,
 ]);
 const TRACKED_PATH_SET = new Set(CURRENT_COMPATIBILITY_PATHS);
 const RETAINED_T02_RECEIPT_PATHS = Object.freeze(
@@ -716,7 +753,9 @@ function verifyBoundary(files) {
     manifest.scripts?.["test:stable-id-insert"] !== "vitest run test/stable-id-insert.test.ts" ||
     manifest.scripts?.["test:structural-edits"] !== "vitest run test/structural-edits.test.ts" ||
     manifest.scripts?.["test:content-edits"] !== "vitest run test/content-edits.test.ts" ||
-    manifest.scripts?.["test:state-binding-edits"] !== "vitest run test/state-binding-edits.test.ts"
+    manifest.scripts?.["test:state-binding-edits"] !==
+      "vitest run test/state-binding-edits.test.ts" ||
+    manifest.scripts?.["test:event-action-edits"] !== "vitest run test/event-action-edits.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -801,6 +840,28 @@ function verifyBoundary(files) {
     fail("TSDOC_DRIFT", "Every public state/binding-edit declaration must retain TSDoc.");
   }
 
+  const eventActionEditsSource = decodeUtf8(
+    files.get(EVENT_ACTION_EDITS_SOURCE_PATH),
+    EVENT_ACTION_EDITS_SOURCE_PATH,
+  );
+  const eventActionSourceExports = exportedNames(eventActionEditsSource);
+  exactArray(
+    eventActionSourceExports.names,
+    [
+      ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
+      ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
+    ].sort(compareText),
+    "SOURCE_DRIFT",
+    "Event/action-edit exports",
+  );
+  if (
+    eventActionSourceExports.tsdocDeclarations !==
+    EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS.length +
+      EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Every public event/action-edit declaration must retain TSDoc.");
+  }
+
   const indexSource = decodeUtf8(files.get(INDEX_SOURCE_PATH), INDEX_SOURCE_PATH);
   const sourceIndexExports = reexportedNames(indexSource, INDEX_SOURCE_PATH);
   exactArray(
@@ -820,6 +881,8 @@ function verifyBoundary(files) {
     [
       "./content-edits.js",
       "./content-edits.js",
+      "./event-action-edits.js",
+      "./event-action-edits.js",
       "./source-document.js",
       "./source-document.js",
       "./stable-id-insert.js",
@@ -869,6 +932,14 @@ function verifyBoundary(files) {
     files.get("packages/editor-core/dist/state-binding-edits.d.ts"),
     "packages/editor-core/dist/state-binding-edits.d.ts",
   );
+  const distEventActionEdits = decodeUtf8(
+    files.get("packages/editor-core/dist/event-action-edits.js"),
+    "packages/editor-core/dist/event-action-edits.js",
+  );
+  const distEventActionEditsDeclaration = decodeUtf8(
+    files.get("packages/editor-core/dist/event-action-edits.d.ts"),
+    "packages/editor-core/dist/event-action-edits.d.ts",
+  );
   const distIndexExports = reexportedNames(distIndex, "packages/editor-core/dist/index.js");
   const distIndexDeclarationExports = reexportedNames(
     decodeUtf8(
@@ -903,6 +974,7 @@ function verifyBoundary(files) {
       "./structural-edits.js",
       "./content-edits.js",
       "./state-binding-edits.js",
+      "./event-action-edits.js",
     ],
     "EMITTED_DRIFT",
     "Emitted index edges",
@@ -984,7 +1056,30 @@ function verifyBoundary(files) {
   ) {
     fail("TSDOC_DRIFT", "Emitted state/binding-edit declarations lost TSDoc.");
   }
-  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}\n${distStructuralEdits}\n${distContentEdits}\n${distStateBindingEdits}`;
+  exactArray(
+    staticModuleSpecifiers(distEventActionEdits),
+    ["@desen/protocol", "./source-document.js"],
+    "EMITTED_DRIFT",
+    "Emitted event/action-edit edges",
+  );
+  const eventActionDeclarationExports = exportedNames(distEventActionEditsDeclaration);
+  exactArray(
+    eventActionDeclarationExports.names,
+    [
+      ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
+      ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
+    ].sort(compareText),
+    "EMITTED_DRIFT",
+    "Emitted event/action-edit declarations",
+  );
+  if (
+    eventActionDeclarationExports.tsdocDeclarations !==
+    EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS.length +
+      EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS.length
+  ) {
+    fail("TSDOC_DRIFT", "Emitted event/action-edit declarations lost TSDoc.");
+  }
+  const emittedGraph = `${distIndex}\n${distSource}\n${distInsert}\n${distStructuralEdits}\n${distContentEdits}\n${distStateBindingEdits}\n${distEventActionEdits}`;
   for (const forbidden of [
     /\bimport\s*\(/u,
     /\beval\s*\(/u,
@@ -1035,11 +1130,13 @@ function verifyBoundary(files) {
       ...EXPECTED_STRUCTURAL_EDIT_TYPE_EXPORTS,
       ...EXPECTED_CONTENT_EDIT_TYPE_EXPORTS,
       ...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS,
+      ...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS,
     ].sort(compareText),
     additiveRuntimeExports: [
       ...EXPECTED_STRUCTURAL_EDIT_RUNTIME_EXPORTS,
       ...EXPECTED_CONTENT_EDIT_RUNTIME_EXPORTS,
       ...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS,
+      ...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS,
     ].sort(compareText),
     additiveSuccessors: [
       {
@@ -1066,18 +1163,26 @@ function verifyBoundary(files) {
         runtimeExports: [...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS],
         typeExports: [...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS],
       },
+      {
+        task: "M08-T06",
+        sourcePath: EVENT_ACTION_EDITS_SOURCE_PATH,
+        runtimePath: "packages/editor-core/dist/event-action-edits.js",
+        declarationPath: "packages/editor-core/dist/event-action-edits.d.ts",
+        runtimeExports: [...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS],
+        typeExports: [...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS],
+      },
     ],
     additiveSuccessor: {
-      task: "M08-T05",
-      sourcePath: STATE_BINDING_EDITS_SOURCE_PATH,
-      runtimePath: "packages/editor-core/dist/state-binding-edits.js",
-      declarationPath: "packages/editor-core/dist/state-binding-edits.d.ts",
-      runtimeExports: [...EXPECTED_STATE_BINDING_EDIT_RUNTIME_EXPORTS],
-      typeExports: [...EXPECTED_STATE_BINDING_EDIT_TYPE_EXPORTS],
+      task: "M08-T06",
+      sourcePath: EVENT_ACTION_EDITS_SOURCE_PATH,
+      runtimePath: "packages/editor-core/dist/event-action-edits.js",
+      declarationPath: "packages/editor-core/dist/event-action-edits.d.ts",
+      runtimeExports: [...EXPECTED_EVENT_ACTION_EDIT_RUNTIME_EXPORTS],
+      typeExports: [...EXPECTED_EVENT_ACTION_EDIT_TYPE_EXPORTS],
     },
     publicDeclarations: EXPECTED_INSERT_EXPORTS.length,
     tsdocDeclarations: exports.tsdocDeclarations,
-    staticEsmEdges: 14,
+    staticEsmEdges: 17,
     unknownStaticEsmEdges: 0,
     platformNeutral: true,
     focusedBehaviorCases: EXPECTED_PACKAGE_TEST_NAMES.length,

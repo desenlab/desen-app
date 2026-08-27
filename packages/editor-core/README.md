@@ -128,17 +128,45 @@ dotted reference reachability, repeat semantics, and Catalog resource-input cont
 M08-T09 continuous-validation responsibilities. `PF-082` records these lifecycle and whole-value
 decisions.
 
+## Event and closed-action edits
+
+M08-T06 adds six whole-value and ordered-list commands:
+
+- `insertDesenEditorEventHandler` and `deleteDesenEditorEventHandler` manage one exact owner event
+  key on a uniquely identified component node or behavior;
+- `insertDesenEditorAction`, `replaceDesenEditorAction`, and `deleteDesenEditorAction` edit one
+  complete closed `ActionSpec` in a root event list or nested operation settlement list; and
+- `reorderDesenEditorAction` moves an existing action to its final post-removal index.
+
+Action lists use an owner-relative typed RFC 6901 pointer. A root list is `/on/<event>`; nested
+`onSuccess` or `onFailure` steps descend only through `operation.invoke` actions. Event-handler
+insertion may create an absent own `on` map. Generic action insertion requires an existing root
+handler and may create an absent settlement list only at index zero. Deletion retains empty own
+event, `onSuccess`, and `onFailure` arrays; deleting the handler retains an own empty `on` map.
+
+Whole-action replacement atomically covers all seven frozen variants, including guards,
+navigation params, operation input/concurrency/settlements, component input, event payload, and
+extensions. The editor neither executes these values nor resolves, rewrites, normalizes, or
+cascades their references. Structurally valid unknown state paths, surfaces, operations,
+resources, component targets, commands, and emitted events remain authorable until M08-T09. The
+same exact-command, detached immutable success, atomic failure, stable-identity, and
+Proxy-reflection boundary applies. Recursive settlement addressing has an independent 64-step
+mechanical cap in addition to the shared 8 MiB/25,000/depth-64 Source profile; runtime action-turn
+budgets are not treated as authoring-list limits. `PF-083` records the exact lifecycle, pointer,
+ordering, replacement, limit, and diagnostic decisions.
+
 ## Explicit non-responsibilities
 
-No React, DOM, canvas UI, production activation, Catalog-semantic validation, event/action editing,
+No React, DOM, canvas UI, production activation, Catalog-semantic validation, action execution,
 persistence, authoring selection/viewport policy, or hidden document model.
 
 ## Status
 
 Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, M08-T03
 delete/move/ordered-reorder commands, M08-T04 prop/style/condition/variant commands, and M08-T05
-state-declaration/repeat/resource-input commands are present. The remaining editor commands stay
-assigned to their tracked M08 tasks. `N-014` is `TESTED`;
+state-declaration/repeat/resource-input commands, and M08-T06 event/closed-action commands are
+present. The remaining authoring, persistence, validation, and terminal integration work stays
+assigned to its tracked M08 tasks. `N-014` is `TESTED`;
 `S-002` remains `PLANNED` through terminal M08-T10 integration.
 
 ## Protocol and target support
@@ -209,3 +237,13 @@ authority, executes an isolated 28-file ESM graph, and records 74 exact tracked-
 `docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json` at
 `sha256:b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8`; its evidence document is
 `docs/proof/EDITOR-CORE-STATE-BINDING-EDITS.md`.
+
+For M08-T06, run `pnpm --filter @desen/editor-core test:event-action-edits`, then
+`node scripts/generate-editor-core-event-action-edits-proof.mjs`,
+`node scripts/verify-editor-core-event-action-edits.mjs`, and
+`node --test tests/editor-core-event-action-edits.test.mjs`. The focused suite exercises node and
+behavior handlers, all seven closed action variants, recursively nested operation settlement
+lists, exact pointer/index semantics, whole-value replacement, immutable atomic ownership, hostile
+command shapes, and finite limits. The final case counts, receipt inventory, artifact size/hash,
+and isolated runtime closure are pinned in `docs/proof/EDITOR-CORE-EVENT-ACTION-EDITS.md` and its
+referenced frozen artifact.
