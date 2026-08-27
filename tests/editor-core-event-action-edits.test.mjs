@@ -28,6 +28,8 @@ import {
 const ROOT = path.resolve(import.meta.dirname, "..");
 const EVENT_ACTION_SOURCE = "packages/editor-core/src/event-action-edits.ts";
 const PROTOCOL_RUNTIME = "packages/protocol/dist/index.js";
+const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
 const RETAINED_CONTENT_RUNTIME_EXPORTS = Object.freeze(
   [
     "clearDesenEditorNodeCondition",
@@ -224,6 +226,28 @@ test("[authority] authenticates the exact M08-T05 prerequisite and isolated runt
   ]) {
     assert.deepEqual(trackedReceipts.get(receipt.path), receipt);
   }
+  assert.deepEqual(built.currentCompatibility.publicApi.proofOnlySuccessor, {
+    task: "M08-T07",
+    focusedTestPath: AUTHORING_ROUND_TRIP_TEST,
+    focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES,
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    publicRuntimeCasesAdded: 2,
+    publicCompilerNegativeAssertionsAdded: 6,
+  });
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 46);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 75);
+  assert.deepEqual(built.currentCompatibility.frozenAuthority, {
+    path: "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+    bytes: 31_310,
+    sha256: "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7",
+    retainedTaskTimeReceipts: 76,
+  });
+  const currentReceipts = new Set(
+    built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),
+  );
+  assert.equal(currentReceipts.has(AUTHORING_ROUND_TRIP_TEST), true);
+  assert.equal(currentReceipts.has(AUTHORING_ROUND_TRIP_TYPES), true);
 });
 
 test("[determinism] two fresh M08-T06 builds are byte-identical", async () => {
@@ -328,6 +352,8 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
 
   const source = await readFile(path.join(ROOT, EVENT_ACTION_SOURCE));
   const dependency = await readFile(path.join(ROOT, PROTOCOL_RUNTIME));
+  const authoringTest = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TEST));
+  const authoringTypes = await readFile(path.join(ROOT, AUTHORING_ROUND_TRIP_TYPES));
   await assert.rejects(
     buildEditorCoreEventActionEditsEvidence({
       fileOverrides: { [EVENT_ACTION_SOURCE]: changedByte(source) },
@@ -340,6 +366,17 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
     }),
     expectedError("BOUNDARY_DRIFT"),
   );
+  for (const [relativePath, bytes] of [
+    [AUTHORING_ROUND_TRIP_TEST, authoringTest],
+    [AUTHORING_ROUND_TRIP_TYPES, authoringTypes],
+  ]) {
+    await assert.rejects(
+      buildEditorCoreEventActionEditsEvidence({
+        fileOverrides: { [relativePath]: changedByte(bytes) },
+      }),
+      expectedError("BOUNDARY_DRIFT"),
+    );
+  }
 });
 
 test("[artifact] verifies exact artifact bytes and one exact final proof pin", async () => {
@@ -625,6 +662,7 @@ test("[options] rejects unknown, accessor, inherited, symbol, proxy, and shared 
 
 test("[immutability] freezes evidence and states the exact nonclaim boundary", () => {
   assertDeepFrozen(built.artifact);
+  assertDeepFrozen(built.currentCompatibility);
   assert.deepEqual(built.artifact.nonclaims, [
     "AUTHORING_ISOLATION_AND_UNKNOWN_EXTENSION_PROOF_M08_T07",
     "PERSISTENCE_M08_T08",

@@ -483,7 +483,8 @@ Kanıtın tek doğrudan resmi önkoşulu donmuş M08-T05 artifact'ıdır; 81 exa
 davranışı 8 editor ile 21 dependency dosyasından oluşan 29 dosyalık izole ESM grafında, 17 exact
 statik kenarla çalıştırır.
 
-Güncel M08-T06 CI ardılı 163 iş yükü ve 77 kanıt çiftidir: 66 sıradan çift ve 11 bariyer. Tutulan
+Tarihsel M08-T06 CI ardılı 163 iş yükü ve 77 kanıt çiftidir: 66 sıradan çift ve 11 bariyer. O
+zamanki tutulan
 quality plan `sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`; nötr envanter,
 impact graph, workload set ve ordered projection sırasıyla
 `sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cfc1f53`,
@@ -496,21 +497,55 @@ shadow plan'ları `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def2
 Affected authority, 1.080 tracked path'i
 `sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8` ile mühürler; bunların
 154'ü proof-owned'dır ve ownership projection
-`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828` değerindedir. Güncel
+`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828` değerindedir. O zamanki
 selector ve required-runner authority değerleri
 `sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` ve
 `sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; promotion artifact
 `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549` değerindedir. Sequence
 34, `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` başında 31 donmuş
-artifact ve 62 güncel reader doğrular; sequence 33 ve önceki bütün baytları korur, mevcut reader
+artifact ve 62 o-zamanki reader doğrular; sequence 33 ve önceki bütün baytları korur, mevcut reader
 index'leri `[50, 51, 52, 53, 54, 56, 58]` için yeniden mühürler ve yeni reader'ları `[60, 61]`
 index'lerine ekler. Checkpoint 57/57, hedef CI altyapı testleri 235/235, required-affected 27/27 ve
 promotion testleri 19/19 geçer.
 
-M08-T07 authoring isolation ve tam unknown-extension round-trip kanıtını, M08-T08 persistence'ı,
-M08-T09 action/event semantiği ile sürekli diagnostic/invalid-node mapping'i, M08-T10 ise terminal
-React/DOM sınırı ve G08'i taşır. Genel ilerleme 91/145 (%63), M08 ilerlemesi 6/10, kanıt kapıları
-8/13'tür; sıradaki iş M08-T07'dir.
+M08-T07 de tamamlandı ve yeni runtime komutu ya da public export eklemeden mevcut factory ile 32
+immutable komutun authoring/extension sınırını kanıtladı. Kök `authoring`, her başarılı geçişte
+ayrık ve tamamen donmuş producer-owned parsed veri olarak korunur. Yalnız kök authoring'i farklı
+iki Source'un authoring hariç projeksiyonları ve protokol Source digest'leri aynıdır; kök extension
+değerindeki değişiklik ise digest'i değiştirir. Böylece dışlama sınırı yalnız kök authoring olarak
+kalır.
+
+Source'tan erişilebilen 16 extension konumunun tamamındaki unknown parsed değerler; önerilen
+reverse-domain key ile yasal non-namespaced key'ler, iç içe dizi/nesneler ve görünüşte core alanlar
+dahil, birebir ve inert veri olarak korunur. Editor bunları yorumlamaz, çözmez, normalize etmez ve
+yalnız isimleri nedeniyle reddetmez. Bu garanti parsed JSON value round-trip'idir; lexical
+whitespace veya object-member byte order garantisi değildir. 33/33 odak runtime vakası, 6 odak
+compiler-negatif doğrulama, kümülatif 46/46 public-package vakası, 75 public compiler-negatif
+doğrulama ve bağımsız kök kanıtı geçer. Authoring/extension içindeki sahte kimlikler ve action'lar
+allocator/identity/action taramalarına girmez; kök authoring tam 8 MiB Source limitine dahildir.
+Insert marker'ı ekler, move/reorder onu taşır, delete yalnız hedefle birlikte siler, whole-value
+replace hedefin eski extension'ını yenisiyle değiştirir ve unrelated marker'lar korunur. Bilerek
+silinen veya değiştirilen owner extension'ı için preservation iddiası yoktur. `N-012`, `N-018` ve
+`S-003` artık `TESTED`'dır;
+reverse-domain adlandırma hard validation değil rehberlik olarak kalır.
+
+Exact M08-T07 artifact'ı 62.304 bayttır:
+[`editor-core-0.1.0-authoring-round-trip.json`](../proof/artifacts/editor-core-0.1.0-authoring-round-trip.json)
+`sha256:33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db`. Bağımsız kök kanıtı
+10/10 geçer; verifier 95 tracked receipt, 29 dosyalık izole graph ve 17 statik kenarı doğrular.
+Güncel CI ardılı 165 iş yükü, 78 kanıt çifti, 549 prerequisite segment, 3.435 ordered leaf ve 260
+distinct leaf taşır. Sequence 35,
+`a2e3ef962ed37e0570cdddef64ae8d0eef2fd3f298cc2580f7ee65d8200f6fa3` başında 32 donmuş artifact
+ve 64 güncel reader doğrular; sequence 34 ve daha eski bütün baytlar aynıdır. On iki değişen canlı
+tarihsel reader `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]`, T07 proof/root reader'ları
+`[62, 63]` index'lerinde mühürlenir ve
+checkpoint 58/58 geçer. Güncel tam CI altyapı suite'i 265/265; required-affected, promotion ve
+tutulan legacy-gate suite'leri ayrıca 27/27, 19/19 ve 25/25 geçer. Bunlar yerel code-owned
+kayıtlardır; hosted M08-T07 iddiası değildir.
+
+M08-T08 storage I/O, save/open durability ve persistence adapter'ını; M08-T09 sürekli semantik
+diagnostic/invalid-node mapping'ini; M08-T10 ise terminal React/DOM sınırı ve G08'i taşır. Genel
+ilerleme 92/145 (%63), M08 ilerlemesi 7/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T08'dir.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

@@ -8,7 +8,7 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 <!-- task-progress:start -->
 <!-- Source: docs/plan/TASKS.md. Update this block in the same commit whenever a task status changes. Milestone gates are tracked separately and excluded from task counts. -->
 
-**Overall:** `████████████████░░░░░░░░░` **91 / 145 tasks complete (63%)**
+**Overall:** `████████████████░░░░░░░░░` **92 / 145 tasks complete (63%)**
 
 **M02 complete:** `█████████████` **13 / 13 tasks complete (100%)**
 
@@ -22,9 +22,9 @@ protocol, the Desen App product, and the developer tooling intended for `desen.r
 
 **M07 complete:** `███████████` **11 / 11 tasks complete (100%)**
 
-**M08:** `██████░░░░` **6 / 10 tasks complete (60%)**
+**M08:** `███████░░░` **7 / 10 tasks complete (70%)**
 
-**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T07`
+**Proof gates:** **8 / 13 complete** · **I07-04:** `DONE` (`20 / 20`, zero false negatives) · **G07:** `DONE` · **Next:** `M08-T08`
 
 [View the detailed task board](docs/plan/TASKS.md)
 
@@ -217,23 +217,23 @@ barriers. Its shared-state counts are 6/2/1/69/72/10/1, filesystem-policy counts
 and 15 workspace packages expose a `test` script. Its scheduler-neutral inventory is
 `sha256:ae790f14c376a1fb449e34877a08abba164677ef413583248e5f609f3c7bb292`, and its required plan is
 `sha256:9f7ef05e606afb293b42c650acfcf043d638cd429e07fdee55d01d241f06bf1b`. This is local code-owned
-authority and makes no hosted M08-T05 claim. The current M08-T06 successor contains 163 workloads
-and 77 proof pairs: 66 ordinary pairs and 11 exclusive barriers. Its 539 prerequisite segments,
-3,359 ordered leaf invocations, and 257 distinct leaves retain the exact quality plan
-`sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`. The scheduler-neutral
-inventory is `sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cfc1f53`, the selector-only impact
-graph is `sha256:f7be1ee5bc35a7b0ea2cdcdabacf13f4525fcdabeb97e8854513ed4343e4aab3`, the exact workload set is
-`sha256:56c04c534906197d7597c7854ba792d0c96001612f13346a1a104371910fc22a`, and the ordered
+authority and makes no hosted M08-T05 claim. The current M08-T07 successor contains 165 workloads
+and 78 proof pairs: 67 ordinary pairs and 11 exclusive barriers. Its 549 prerequisite segments,
+3,435 ordered leaf invocations, and 260 distinct leaves retain the exact quality plan
+`sha256:c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b07432e4a47de684e25d`. The scheduler-neutral
+inventory is `sha256:8220259aa2a44774d192ea2420f4c2f8423c9dedd93a1fcf9b34340a0ab0dcd3`, the selector-only impact
+graph is `sha256:5aa20b4fb87decc51221bca5a900677d7dfddd1e61c068d5e91420253a3236b2`, the exact workload set is
+`sha256:9ea3b95ab6f034473765beb9edb1482532bb1a0b4e05f630c403d38d8df0daef`, and the ordered
 equivalence projection is
-`sha256:868d2a59cdf5e95badd7d0cce601003e26280609f44167c831e251595779e6e4`. Required and shadow plans
-are respectively `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3ff3` and
-`sha256:533bdab2a511433e0c1bdb4fab1be27430914489d722918d7d789bdf294d4caf`. Affected ownership covers
-1,080 tracked paths at `sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
+`sha256:fc588358d8fa3b2e7c2cd9f3a280715d7db34089a41a2fae2c3484d18c040278`. Required and shadow plans
+are respectively `sha256:5484324b6d22a5e58bce2431f35382aeeb4e97095c96524e5bdb6211f8650a9e` and
+`sha256:4beeca9ed27e2e7942951cf0cf014fb7bebca2bcf2f8f69ff0819580aeff3c87`. Affected ownership covers
+1,088 tracked paths at `sha256:227cb892270c669646eec89a44243af8e3da5a51bfec8f8e560e2d765c0f2e79`, including 156
 proof-owned paths, with complete projection
-`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. The current selector and
+`sha256:d43335b91aa9f3da0571ed2e32e92ea65da81bbcc5efee1aa32bdac30967217d`. The current selector and
 required-runner authorities are
-`sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` and
-`sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; the authenticated
+`sha256:cbd1cce71828ad4ad1c22ede5e6152e5e3130031afebcb1d9c23e32ba55eb7dc` and
+`sha256:9da49a38efa09a48ded3290ba9c2ec4ae57a967d325e61320f39be561b93f9a4`; the authenticated
 promotion artifact remains
 `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`. For the frozen
 130-workload I07-02 cutover, the then-current exact shared-state classes, cancellation behavior,
@@ -460,15 +460,17 @@ artifacts and 50 readers. Historical sequence 30 remains pinned at
 `181d5a1e0c012f53cfe02640c2f8d0ddf1e300090a3c3742882bb3722175e42d`. The historical M08-T04
 append-only successor is sequence 32 at
 `9be019b902ee17a57c9e2f13270fa67fe26265d06e360719bd1542643be6a424`, authenticating 29 frozen
-artifacts and 58 readers. The last sealed M08-T05 successor is sequence 33 at
+artifacts and 58 readers. Historical M08-T05 sequence 33 remains
 `64da5390046020ed223da42ce8a24d9fcf971c6a5a0a92fc49d368586414c871`, authenticating 30 frozen
-artifacts and 60 current readers while preserving every sequence-32 and earlier byte; its dedicated
-checkpoint suite passes 56/56. The current append-only M08-T06 successor is sequence 34 at
+artifacts and 60 then-current readers while preserving every sequence-32 and earlier byte; its
+dedicated checkpoint suite passes 56/56. Historical M08-T06 sequence 34 remains byte-identical at
 `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674`, authenticating 31 frozen
-artifacts and 62 current readers. It preserves sequence 33 and every predecessor artifact byte,
-reseals existing reader indexes `[50, 51, 52, 53, 54, 56, 58]`, and appends new readers at
-`[60, 61]`; its dedicated checkpoint suite passes 57/57. M08-T03's delete/move/reorder proof is the
-exact 22,402-byte
+artifacts and 62 then-current readers. Current M08-T07 sequence 35 at
+`a2e3ef962ed37e0570cdddef64ae8d0eef2fd3f298cc2580f7ee65d8200f6fa3` authenticates 32 frozen
+artifacts and 64 current readers while preserving sequence 34 and every earlier byte. It reseals
+the twelve changed historical readers at `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]`,
+appends the T07 proof/root readers at `[62, 63]`, and passes its dedicated checkpoint suite 58/58.
+M08-T03's delete/move/reorder proof is the exact 22,402-byte
 `docs/proof/artifacts/editor-core-0.1.0-structural-edits.json` at
 `sha256:0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b`. It closes `N-014` as
 `TESTED`. M08-T04's fourteen immutable prop, style, condition, and ordered-variant commands are
@@ -498,9 +500,33 @@ independent root proof passes 10/10. The proof authenticates only frozen M08-T05
 receipts, imports a 29-file isolated graph, and verifies seventeen static ESM edges. M08-T07 retains
 authoring isolation and unknown-extension preservation; M08-T08 retains persistence; M08-T09
 retains semantics and continuous diagnostics; M08-T10 retains the terminal React/DOM boundary.
-G08 is not yet proven. The targeted CI infrastructure batch passes 235/235, required-affected
-contracts pass 27/27, and promotion contracts pass 19/19. I07-04 and G07 remain `DONE`; proof
-gates remain 8/13, implementation progress is 91/145 (63%), M08 is 6/10, and M08-T07 is next.
+G08 is not yet proven.
+
+M08-T07's exact 62,304-byte
+[`editor-core-0.1.0-authoring-round-trip.json`](docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json)
+is pinned at `sha256:33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db`;
+the reviewed report is
+[`EDITOR-CORE-AUTHORING-ROUND-TRIP.md`](docs/proof/EDITOR-CORE-AUTHORING-ROUND-TRIP.md). It adds no
+runtime API or export. The existing factory and all 32 immutable commands preserve
+root `authoring` as detached recursively immutable producer-owned parsed data and preserve unknown
+extensions at all 16 Source-reachable positions without assigning core semantics. Otherwise
+identical Sources with distinct root authoring retain equal authoring-excluded projections and
+Source digests, while a root extension differential changes the digest. Recommended reverse-domain
+and legal non-namespaced keys are both preserved; the naming recommendation remains guidance, not
+hard validation. Fake authoring/extension IDs and actions do not enter allocator, identity, or
+action scans; root authoring counts toward the full 8 MiB Source limit. Insert-supplied markers
+enter, move/reorder carry them, delete removes only the target, and whole replacement replaces the
+target's old extension while unrelated markers survive. Deliberately deleted or replaced owners
+are outside the preservation claim. The focused suite passes 33/33 with six compiler negatives;
+the cumulative public-package suite passes 46/46 with 75 compiler negatives; and the independent
+root proof passes 10/10. The proof authenticates 95 tracked receipts and an isolated 29-file graph
+with 17 static edges. `N-012`, `N-018`, and `S-003` are now `TESTED`. M08-T08 retains storage I/O,
+save/open durability, and the persistence adapter. The full current CI infrastructure suite passes
+265/265; checkpoint, required-affected, promotion, and retained legacy-gate suites separately pass
+58/58, 27/27, 19/19, and 25/25. These are local code-owned receipts, not hosted M08-T07 evidence.
+
+I07-04 and G07 remain `DONE`; proof gates remain 8/13, implementation progress is 92/145 (63%),
+M08 is 7/10, and M08-T08 is next.
 Legacy retirement remains owned by I07-05.
 
 **Strategic checkpoint:** `SC-01` is complete with the recommendation **`continue`**. DESEN

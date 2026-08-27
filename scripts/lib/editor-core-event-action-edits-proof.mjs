@@ -7,7 +7,6 @@ import path from "node:path";
 import { types as utilTypes } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
@@ -28,6 +27,8 @@ const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
 const EVENT_ACTION_EDITS_SOURCE_PATH = "packages/editor-core/src/event-action-edits.ts";
 const PACKAGE_TEST_PATH = "packages/editor-core/test/event-action-edits.test.ts";
 const PACKAGE_TYPES_PATH = "packages/editor-core/test/event-action-edits.types.ts";
+const AUTHORING_ROUND_TRIP_TEST_PATH = "packages/editor-core/test/authoring-round-trip.test.ts";
+const AUTHORING_ROUND_TRIP_TYPES_PATH = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PUBLIC_TEST_PATH = "packages/editor-core/test/public-package.mjs";
 const PUBLIC_TYPES_PATH = "packages/editor-core/test/public-package.types.mts";
 const ROOT_TEST_PATH = "tests/editor-core-event-action-edits.test.mjs";
@@ -36,6 +37,10 @@ const GENERATOR_PATH = "scripts/generate-editor-core-event-action-edits-proof.mj
 const VERIFIER_PATH = "scripts/verify-editor-core-event-action-edits.mjs";
 const ATOMIC_WRITER_PATH = "scripts/lib/atomic-proof-artifact.mjs";
 const DOCUMENT_LIMIT = 8_388_608;
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 31_310,
+  sha256: "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7",
+});
 
 const PROTOCOL_RUNTIME_PATHS = Object.freeze([
   "packages/protocol/dist/canonicalization.js",
@@ -130,6 +135,8 @@ const TRACKED_PATHS = Object.freeze([
   "packages/editor-core/test/state-binding-edits.types.ts",
   PACKAGE_TEST_PATH,
   PACKAGE_TYPES_PATH,
+  AUTHORING_ROUND_TRIP_TEST_PATH,
+  AUTHORING_ROUND_TRIP_TYPES_PATH,
   PUBLIC_TEST_PATH,
   PUBLIC_TYPES_PATH,
   ...DEPENDENCY_RUNTIME_PATHS,
@@ -140,6 +147,20 @@ const TRACKED_PATHS = Object.freeze([
   ROOT_TEST_PATH,
 ]);
 const TRACKED_PATH_SET = new Set(TRACKED_PATHS);
+const RETAINED_T06_RECEIPT_PATHS = Object.freeze(
+  TRACKED_PATHS.filter(
+    (relativePath) =>
+      ![
+        PACKAGE_PATH,
+        AUTHORING_ROUND_TRIP_TEST_PATH,
+        AUTHORING_ROUND_TRIP_TYPES_PATH,
+        PUBLIC_TEST_PATH,
+        PUBLIC_TYPES_PATH,
+        PROOF_LIBRARY_PATH,
+        ROOT_TEST_PATH,
+      ].includes(relativePath),
+  ),
+);
 const RETAINED_T05_RECEIPT_PATHS = Object.freeze([
   FIXTURE_PATH,
   "tsconfig.base.json",
@@ -394,6 +415,8 @@ const EXPECTED_PUBLIC_TEST_NAMES = Object.freeze([
   "the emitted event and action commands preserve exact failure classes without partial authority",
   "the emitted event and action commands enforce exact own data and contain Proxy traps",
   "the emitted event and action commands are deterministic, immutable, and semantically unresolved",
+  "the emitted factory isolates authoring and round-trips all Source extension locations",
+  "all 32 emitted mutation commands isolate authoring and preserve extension parsed values",
   "[proof-core] two fresh final builds are byte-identical and preserve honest scope",
   "[proof-core] rejects a wrapper-returning or mutable public runtime",
   "[proof-core] rejects caller retention and partial failure authority",
@@ -861,7 +884,10 @@ function verifyBoundary(files) {
       JSON.stringify({ ".": { types: "./dist/index.d.ts", import: "./dist/index.js" } }) ||
     JSON.stringify(manifest.dependencies) !==
       JSON.stringify({ "@desen/protocol": "workspace:*", "@desen/validator": "workspace:*" }) ||
-    manifest.scripts?.["test:event-action-edits"] !== "vitest run test/event-action-edits.test.ts"
+    manifest.scripts?.["test:event-action-edits"] !==
+      "vitest run test/event-action-edits.test.ts" ||
+    manifest.scripts?.["test:authoring-round-trip"] !==
+      "vitest run test/authoring-round-trip.test.ts"
   ) {
     fail("MANIFEST_DRIFT", "The editor-core manifest boundary drifted.");
   }
@@ -1018,8 +1044,8 @@ function verifyBoundary(files) {
   const publicTypeAssertions = countTypeAssertions(
     decodeUtf8(files.get(PUBLIC_TYPES_PATH), PUBLIC_TYPES_PATH),
   );
-  if (publicTypeAssertions !== 69) {
-    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain sixty-nine.");
+  if (publicTypeAssertions !== 75) {
+    fail("TEST_INVENTORY_DRIFT", "Public compiler-negative inventory must remain seventy-five.");
   }
   const rootTests = testNames(decodeUtf8(files.get(ROOT_TEST_PATH), ROOT_TEST_PATH));
   exactArray(
@@ -1032,6 +1058,15 @@ function verifyBoundary(files) {
   return deepFreeze({
     runtimeExports: [...EXPECTED_RUNTIME_EXPORTS],
     typeExports: [...EXPECTED_TYPE_EXPORTS],
+    proofOnlySuccessor: {
+      task: "M08-T07",
+      focusedTestPath: AUTHORING_ROUND_TRIP_TEST_PATH,
+      focusedTypesPath: AUTHORING_ROUND_TRIP_TYPES_PATH,
+      runtimeExportsAdded: 0,
+      typeExportsAdded: 0,
+      publicRuntimeCasesAdded: 2,
+      publicCompilerNegativeAssertionsAdded: 6,
+    },
     eventActionPublicDeclarations: EXPECTED_EVENT_ACTION_EXPORTS.length,
     eventActionTsdocDeclarations: sourceExports.tsdocDeclarations,
     emittedFiles: DIST_PATHS.length,
@@ -1939,8 +1974,63 @@ function verifyBehavior(runtime, validSource, canonicalizeJsonBytes) {
     },
   });
 }
-async function artifactBytes(artifact) {
-  return Buffer.from(await format(`${JSON.stringify(artifact)}\n`, { parser: "json" }), "utf8");
+async function authenticateFrozenArtifact() {
+  const bytes = await readNoFollow(ARTIFACT_PATH, "frozen M08-T06 proof artifact");
+  if (
+    bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes ||
+    sha256(bytes) !== FROZEN_ARTIFACT_PIN.sha256
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T06 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(bytes, "frozen M08-T06 proof artifact");
+  const receipts = artifact.trackedBoundary?.receipts;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.proofId !== "editor-core-event-action-edits" ||
+    artifact.profile !== "desen.editor-core.event-action-edits-proof.v1" ||
+    artifact.task !== "M08-T06" ||
+    artifact.result !== "PASS" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.immutableEventActionEditCommands !== true ||
+    artifact.trackedBoundary?.files !== 81 ||
+    !Array.isArray(receipts) ||
+    receipts.length !== 81 ||
+    new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length ||
+    artifact.executionAuthority?.mode !== "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH" ||
+    artifact.executionAuthority?.runtimeFiles !== 29 ||
+    artifact.executionAuthority?.editorFiles !== 8 ||
+    artifact.executionAuthority?.dependencyFiles !== 21 ||
+    artifact.testAuthority?.focusedBehaviorCases !== 16 ||
+    artifact.testAuthority?.focusedCompilerNegativeAssertions !== 19 ||
+    artifact.testAuthority?.publicRuntimeAndRootCases !== 44 ||
+    artifact.testAuthority?.publicCompilerNegativeAssertions !== 69 ||
+    artifact.testAuthority?.rootProofCases !== EDITOR_CORE_EVENT_ACTION_EDITS_ROOT_TEST_NAMES.length
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T06 artifact identity or retained claim drifted.");
+  }
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: FROZEN_ARTIFACT_PIN.sha256,
+  });
+}
+
+function assertRetainedT06Receipts(frozenArtifact, files) {
+  const receipts = new Map(
+    frozenArtifact.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_T06_RECEIPT_PATHS) {
+    const authority = receipts.get(relativePath);
+    const bytes = files.get(relativePath);
+    if (
+      authority === undefined ||
+      bytes === undefined ||
+      authority.bytes !== bytes.byteLength ||
+      authority.sha256 !== sha256(bytes)
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M08-T06 receipt drifted: ${relativePath}`);
+    }
+  }
 }
 
 export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undefined) {
@@ -1948,6 +2038,7 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
+  const frozen = await authenticateFrozenArtifact();
   const authenticatedPrerequisites = await authenticatePrerequisites(options);
   const files = new Map();
   for (const relativePath of TRACKED_PATHS) {
@@ -1955,6 +2046,7 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
   }
   const boundary = verifyBoundary(files);
   assertRetainedT05Receipts(authenticatedPrerequisites.t05Artifact, files);
+  assertRetainedT06Receipts(frozen.artifact, files);
   const executionAuthority = authenticateRuntimeClosure(
     authenticatedPrerequisites.t05Artifact,
     authenticatedPrerequisites.evidence,
@@ -1967,6 +2059,9 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
     validSource,
     isolatedRuntime.canonicalizeJsonBytes,
   );
+  if (JSON.stringify(behavior) !== JSON.stringify(frozen.artifact.behavior)) {
+    fail("BEHAVIOR_DRIFT", "The retained M08-T06 runtime behavior left its frozen claim.");
+  }
   if (options.fileOverrides.size !== 0) {
     fail("BOUNDARY_DRIFT", "Mutation overrides cannot issue event-action-edit evidence.");
   }
@@ -1976,10 +2071,10 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
       "A caller-supplied authority-read hook cannot issue event-action-edit evidence.",
     );
   }
-  const receipts = [...files.entries()]
+  const currentReceipts = [...files.entries()]
     .map(([relativePath, bytes]) => receipt(relativePath, bytes))
     .sort((left, right) => compareText(left.path, right.path));
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "editor-core-event-action-edits",
     profile: "desen.editor-core.event-action-edits-proof.v1",
@@ -1998,6 +2093,7 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
     publicApi: {
       runtimeExports: boundary.runtimeExports,
       typeExports: boundary.typeExports,
+      proofOnlySuccessor: boundary.proofOnlySuccessor,
       eventActionPublicDeclarations: boundary.eventActionPublicDeclarations,
       eventActionTsdocDeclarations: boundary.eventActionTsdocDeclarations,
     },
@@ -2018,9 +2114,15 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
       publicCompilerNegativeAssertions: boundary.publicCompilerNegativeAssertions,
       rootProofCases: boundary.rootProofCases,
     },
-    trackedBoundary: { files: receipts.length, receipts },
+    trackedBoundary: { files: currentReceipts.length, receipts: currentReceipts },
+    frozenAuthority: {
+      path: ARTIFACT_PATH,
+      bytes: FROZEN_ARTIFACT_PIN.bytes,
+      sha256: FROZEN_ARTIFACT_PIN.sha256,
+      retainedTaskTimeReceipts: RETAINED_T06_RECEIPT_PATHS.length,
+    },
     nonclaims: [
-      "AUTHORING_ISOLATION_AND_UNKNOWN_EXTENSION_PROOF_M08_T07",
+      "M08_T07_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T06_CLAIM_AUTHORITY",
       "PERSISTENCE_M08_T08",
       "EVENT_ACTION_REFERENCE_AND_CATALOG_SEMANTICS_M08_T09",
       "ACTION_EXECUTION_AND_RUNTIME_TURNS",
@@ -2041,11 +2143,11 @@ export async function buildEditorCoreEventActionEditsEvidence(rawOptions = undef
       "node --test tests/editor-core-event-action-edits.test.mjs",
     ],
   });
-  const bytes = await artifactBytes(artifact);
   return deepFreeze({
-    artifact,
-    artifactBytes: bytes,
-    artifactSha256: sha256(bytes),
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
     task: "M08-T06",
   });
 }

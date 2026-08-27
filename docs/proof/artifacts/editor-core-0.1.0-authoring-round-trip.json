@@ -1,0 +1,1506 @@
+{
+  "schemaVersion": 1,
+  "proofId": "editor-core-authoring-round-trip",
+  "profile": "desen.editor-core.authoring-round-trip-proof.v1",
+  "task": "M08-T07",
+  "result": "PASS",
+  "prerequisites": [
+    {
+      "task": "M08-T01",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
+      "bytes": 23270,
+      "sha256": "aaa3a2447b71361361f471a822bba78e90a3f97f493b23ad3314f51c62ad4025",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T02",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
+      "bytes": 19561,
+      "sha256": "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T03",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+      "bytes": 22402,
+      "sha256": "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T04",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-content-edits.json",
+      "bytes": 26988,
+      "sha256": "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T05",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json",
+      "bytes": 30014,
+      "sha256": "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    },
+    {
+      "task": "M08-T06",
+      "path": "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+      "bytes": 31310,
+      "sha256": "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7",
+      "result": "PASS",
+      "authentication": "DIRECT_NO_FOLLOW_EXACT_BYTES",
+      "liveProofReaderInput": false,
+      "checkpointHeadInput": false
+    }
+  ],
+  "retainedNormativeEvidence": {
+    "artifacts": [
+      {
+        "task": "M06-T07",
+        "path": "docs/proof/artifacts/publisher-0.1.0-source-normalization.json",
+        "bytes": 8715,
+        "sha256": "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e",
+        "profile": "desen.publisher.source-normalization-proof.v1",
+        "result": "PASS"
+      },
+      {
+        "task": "M06-T08",
+        "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+        "bytes": 10688,
+        "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f",
+        "profile": "desen.publisher.catalog-pinning-proof.v1",
+        "result": "PASS"
+      },
+      {
+        "task": "M06-T09",
+        "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+        "bytes": 17320,
+        "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df",
+        "profile": "desen.publisher.bundle-publication-proof.v1",
+        "result": "PASS"
+      },
+      {
+        "task": "M06-T10",
+        "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+        "bytes": 13179,
+        "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2",
+        "profile": "desen.publisher.official-golden-proof.v1",
+        "result": "PASS"
+      }
+    ],
+    "rootAuthoringExcludedFromDigest": true,
+    "rootAuthoringExcludedFromTerminalBundle": true,
+    "officialPublicPublicationAuthenticated": true
+  },
+  "claim": {
+    "protocol": "0.1.0",
+    "platform": "platform-neutral",
+    "proofOnlyNoRuntimeOrTypeExportAdded": true,
+    "factoryAndAllMutationCommandsCovered": true,
+    "immutableMutationCommands": 32,
+    "rootAuthoringIsolation": true,
+    "parsedUnknownExtensionPreservation": true,
+    "lifecycleAwareExtensionPreservation": true,
+    "unknownExtensionsReceiveNoCoreSemantics": true,
+    "authoringAndExtensionApparentCoreScannersRemainInert": true,
+    "rootAuthoringIncludedInCompleteSourceByteLimit": true,
+    "jsonSerializationParseAndFactoryReadmission": true,
+    "taskStatus": "DONE",
+    "prerequisiteTasks": ["M08-T01", "M08-T02", "M08-T03", "M08-T04", "M08-T05", "M08-T06"],
+    "prerequisiteStatuses": ["DONE", "DONE", "DONE", "DONE", "DONE", "DONE"]
+  },
+  "publicApi": {
+    "runtimeExports": [
+      "clearDesenEditorNodeCondition",
+      "createDesenEditorDocument",
+      "deleteDesenEditorAction",
+      "deleteDesenEditorEventHandler",
+      "deleteDesenEditorNode",
+      "deleteDesenEditorOwnerProp",
+      "deleteDesenEditorOwnerStyleProperty",
+      "deleteDesenEditorResourceInput",
+      "deleteDesenEditorStateDeclaration",
+      "deleteDesenEditorVariant",
+      "deleteDesenEditorVariantProp",
+      "deleteDesenEditorVariantStyleProperty",
+      "insertDesenEditorAction",
+      "insertDesenEditorEventHandler",
+      "insertDesenEditorNode",
+      "insertDesenEditorStateDeclaration",
+      "insertDesenEditorVariant",
+      "moveDesenEditorNode",
+      "reorderDesenEditorAction",
+      "reorderDesenEditorNode",
+      "reorderDesenEditorVariant",
+      "replaceDesenEditorAction",
+      "setDesenEditorNodeCondition",
+      "setDesenEditorNodeRepeatItems",
+      "setDesenEditorNodeRepeatKey",
+      "setDesenEditorOwnerProp",
+      "setDesenEditorOwnerStyleProperty",
+      "setDesenEditorResourceInput",
+      "setDesenEditorStateInitial",
+      "setDesenEditorStateSchema",
+      "setDesenEditorVariantCondition",
+      "setDesenEditorVariantProp",
+      "setDesenEditorVariantStyleProperty"
+    ],
+    "typeExports": [
+      "DesenEditorAction",
+      "DesenEditorActionDeleteCommand",
+      "DesenEditorActionInsertCommand",
+      "DesenEditorActionListPointer",
+      "DesenEditorActionPointer",
+      "DesenEditorActionReorderCommand",
+      "DesenEditorActionReplaceCommand",
+      "DesenEditorBindingValue",
+      "DesenEditorContentEditDiagnostic",
+      "DesenEditorContentEditDiagnosticCode",
+      "DesenEditorContentEditFailure",
+      "DesenEditorContentEditResult",
+      "DesenEditorContentEditSuccess",
+      "DesenEditorContentPredicate",
+      "DesenEditorContentValue",
+      "DesenEditorContentVariant",
+      "DesenEditorDocument",
+      "DesenEditorDocumentCreationFailure",
+      "DesenEditorDocumentCreationResult",
+      "DesenEditorDocumentCreationSuccess",
+      "DesenEditorEventActionEditDiagnostic",
+      "DesenEditorEventActionEditDiagnosticCode",
+      "DesenEditorEventActionEditFailure",
+      "DesenEditorEventActionEditResult",
+      "DesenEditorEventActionEditSuccess",
+      "DesenEditorEventHandlerDeleteCommand",
+      "DesenEditorEventHandlerInsertCommand",
+      "DesenEditorInsertDiagnostic",
+      "DesenEditorInsertDiagnosticCode",
+      "DesenEditorNodeConditionClearCommand",
+      "DesenEditorNodeConditionSetCommand",
+      "DesenEditorNodeDeleteCommand",
+      "DesenEditorNodeInsertCommand",
+      "DesenEditorNodeInsertFailure",
+      "DesenEditorNodeInsertResult",
+      "DesenEditorNodeInsertSuccess",
+      "DesenEditorNodeMoveCommand",
+      "DesenEditorNodeReorderCommand",
+      "DesenEditorNodeRepeatItemsSetCommand",
+      "DesenEditorNodeRepeatKeySetCommand",
+      "DesenEditorOwnerPropDeleteCommand",
+      "DesenEditorOwnerPropSetCommand",
+      "DesenEditorOwnerStylePropertyDeleteCommand",
+      "DesenEditorOwnerStylePropertySetCommand",
+      "DesenEditorResourceInputDeleteCommand",
+      "DesenEditorResourceInputSetCommand",
+      "DesenEditorStateBindingEditDiagnostic",
+      "DesenEditorStateBindingEditDiagnosticCode",
+      "DesenEditorStateBindingEditFailure",
+      "DesenEditorStateBindingEditResult",
+      "DesenEditorStateBindingEditSuccess",
+      "DesenEditorStateDeclaration",
+      "DesenEditorStateDeclarationDeleteCommand",
+      "DesenEditorStateDeclarationInsertCommand",
+      "DesenEditorStateInitialSetCommand",
+      "DesenEditorStateSchemaSetCommand",
+      "DesenEditorStructuralEditDiagnostic",
+      "DesenEditorStructuralEditDiagnosticCode",
+      "DesenEditorStructuralEditFailure",
+      "DesenEditorStructuralEditResult",
+      "DesenEditorStructuralEditSuccess",
+      "DesenEditorVariantConditionSetCommand",
+      "DesenEditorVariantDeleteCommand",
+      "DesenEditorVariantInsertCommand",
+      "DesenEditorVariantPropDeleteCommand",
+      "DesenEditorVariantPropSetCommand",
+      "DesenEditorVariantReorderCommand",
+      "DesenEditorVariantStylePropertyDeleteCommand",
+      "DesenEditorVariantStylePropertySetCommand"
+    ],
+    "taskRuntimeExportsAdded": 0,
+    "taskTypeExportsAdded": 0,
+    "predecessorExportInvariance": {
+      "predecessorTask": "M08-T06",
+      "predecessorRuntimeExports": 33,
+      "predecessorTypeExports": 69,
+      "sourceRuntimeExact": true,
+      "sourceTypeExact": true,
+      "emittedRuntimeExact": true,
+      "emittedDeclarationRuntimeExact": true,
+      "emittedDeclarationTypeExact": true,
+      "runtimeAdditions": [],
+      "runtimeRemovals": [],
+      "typeAdditions": [],
+      "typeRemovals": [],
+      "taskRuntimeExportsAdded": 0,
+      "taskTypeExportsAdded": 0
+    },
+    "retainedEventActionPublicDeclarations": 20,
+    "retainedEventActionTsdocDeclarations": 20
+  },
+  "behavior": {
+    "commands": {
+      "runtimeExports": 33,
+      "mutationCommands": 32,
+      "eachCommandExecutedAgainstTwoAuthoringVariants": true,
+      "commandReceipts": [
+        {
+          "command": "insertDesenEditorNode",
+          "leftCanonicalSha256": "c18cebffe7784ef8ec0a609c9e29e1cd04dd85d5f2fee74a40da3b8db440b06d",
+          "leftSerializedInputBytes": 17462,
+          "rightCanonicalSha256": "c84cddeb51184c4029e3c0b0bb6c411df1b99834c85e176263d627032093a2f6",
+          "rightSerializedInputBytes": 17462
+        },
+        {
+          "command": "deleteDesenEditorNode",
+          "leftCanonicalSha256": "d3b3b960fda9ba5db56ed4defd1bc1b191ba0199185f967a8652e68dcba8e9d3",
+          "leftSerializedInputBytes": 17346,
+          "rightCanonicalSha256": "8541aac2b5a4ff6cb90464a1c859f1b0bbf22479e6aa1eabdd3ad814e2946420",
+          "rightSerializedInputBytes": 17346
+        },
+        {
+          "command": "moveDesenEditorNode",
+          "leftCanonicalSha256": "6428f972cb38d020af0df72ace162811864f2ab9902e8ae37618d4de2c6fdb03",
+          "leftSerializedInputBytes": 17400,
+          "rightCanonicalSha256": "335d2f15fe0692863c168f2793bf6f0b792dcda4f5369c8b037a5e0728322d27",
+          "rightSerializedInputBytes": 17400
+        },
+        {
+          "command": "reorderDesenEditorNode",
+          "leftCanonicalSha256": "c722189ddd288487481c59f4181f684706d454fda41291d8354e9a61e700ca08",
+          "leftSerializedInputBytes": 17401,
+          "rightCanonicalSha256": "1bababa9b8d5e18bdff2378446ab3429d09d9abb31828ae627c2c1286a2a6fc3",
+          "rightSerializedInputBytes": 17401
+        },
+        {
+          "command": "setDesenEditorOwnerProp",
+          "leftCanonicalSha256": "ee906852df5430126283b006ae228a064dbacca2bcf21166d3694cb9b3eac719",
+          "leftSerializedInputBytes": 17438,
+          "rightCanonicalSha256": "ff306b516d4d79e76926ef3a31c43a027bada4a42217150159ecdab5103b31e0",
+          "rightSerializedInputBytes": 17438
+        },
+        {
+          "command": "deleteDesenEditorOwnerProp",
+          "leftCanonicalSha256": "f1bdfd066c625dc3af899c7f81b3e417073f0e233e1c1561c4fd356ead9b6901",
+          "leftSerializedInputBytes": 17385,
+          "rightCanonicalSha256": "fa4034eca3e2b83f2330e3df2b5f5621851495d275c1a06769cc8bb72c8eddb3",
+          "rightSerializedInputBytes": 17385
+        },
+        {
+          "command": "setDesenEditorOwnerStyleProperty",
+          "leftCanonicalSha256": "e7c3ae1c180a56c07524e5c6889dc90f5802ea2893608b75c869a92f47497f82",
+          "leftSerializedInputBytes": 17455,
+          "rightCanonicalSha256": "c0bf5526535cd2d96b89c5297673d82cfbb92b3a691f1710c04ff93481b63dbb",
+          "rightSerializedInputBytes": 17455
+        },
+        {
+          "command": "deleteDesenEditorOwnerStyleProperty",
+          "leftCanonicalSha256": "5964b1931bbdc62a7cfbf2baece17938b2eb879c0e969578d2f98574e7c2e44d",
+          "leftSerializedInputBytes": 17386,
+          "rightCanonicalSha256": "084b5ed1f8d10421034d26a1e004c62591d793292809c190bfb9abbcc0a74dd4",
+          "rightSerializedInputBytes": 17386
+        },
+        {
+          "command": "setDesenEditorNodeCondition",
+          "leftCanonicalSha256": "04ce9bfd510ad69eebd2cfdccb0320c548b658a9b8d7f3c15899ba4568d22956",
+          "leftSerializedInputBytes": 17402,
+          "rightCanonicalSha256": "a05a6cc0d7c59cdbde832c1d9cf7de37a746f79577076d3cfe592e10609b4a5f",
+          "rightSerializedInputBytes": 17402
+        },
+        {
+          "command": "clearDesenEditorNodeCondition",
+          "leftCanonicalSha256": "6a0414b3e9afec973bcc3a63a578989d6e30b78e45e9d39ca4e1e874b873d622",
+          "leftSerializedInputBytes": 17364,
+          "rightCanonicalSha256": "ab3bc6dbd31ef50cbeeaca0ba536faabcc61cb50f5e91a3a66dbc167ef42afb3",
+          "rightSerializedInputBytes": 17364
+        },
+        {
+          "command": "insertDesenEditorVariant",
+          "leftCanonicalSha256": "23f3d33f87bac54e4a1c49835115e269ffe5bd036b98df39fdd960981edd5c9b",
+          "leftSerializedInputBytes": 17466,
+          "rightCanonicalSha256": "dc5ddc76c90f9261f38a03c0597ce1a69f77be23a9c6c86c9374b7712e19b358",
+          "rightSerializedInputBytes": 17466
+        },
+        {
+          "command": "deleteDesenEditorVariant",
+          "leftCanonicalSha256": "bba2774fd62f5d8ee7a4147be604a53734dd96817a93c4a89581b0c5eb4ce79f",
+          "leftSerializedInputBytes": 17334,
+          "rightCanonicalSha256": "032d4198caee40f8b01be106706bde0d89a801c9dd7e14bceb9f19ca09edd190",
+          "rightSerializedInputBytes": 17334
+        },
+        {
+          "command": "reorderDesenEditorVariant",
+          "leftCanonicalSha256": "bb11a63394a28fbf6e1995416ee93bfd2201ca96b5132e06861a1f23f709ef43",
+          "leftSerializedInputBytes": 17401,
+          "rightCanonicalSha256": "7376e469790cc4cd153aeb91710a624b8f73efec0c72c63e7c3cd0fcef319806",
+          "rightSerializedInputBytes": 17401
+        },
+        {
+          "command": "setDesenEditorVariantCondition",
+          "leftCanonicalSha256": "6c3da924a5b4998acc5ee0f49a0482f8837ed852f3152078d36768f5c8619243",
+          "leftSerializedInputBytes": 17402,
+          "rightCanonicalSha256": "2586658cbfeb6203113aa9cca0576069cb45427a1963487a8154400aa4a35ecf",
+          "rightSerializedInputBytes": 17402
+        },
+        {
+          "command": "setDesenEditorVariantProp",
+          "leftCanonicalSha256": "cea7a06b5f368ae63f90c8b01f2c67131f78e5b57dc58b12b6af122e7416a5b0",
+          "leftSerializedInputBytes": 17415,
+          "rightCanonicalSha256": "2927d820a05753cae1e0f3a3d24577f072b949ed15b98c1eda10a6106ebac1d2",
+          "rightSerializedInputBytes": 17415
+        },
+        {
+          "command": "deleteDesenEditorVariantProp",
+          "leftCanonicalSha256": "5e17e319f631be9781d236fe73ebc30224176384b28286360777901cd1b14431",
+          "leftSerializedInputBytes": 17386,
+          "rightCanonicalSha256": "fd09babbdb990c4e9db883301422d7db071e336dd26816a516acbcfedb9676f4",
+          "rightSerializedInputBytes": 17386
+        },
+        {
+          "command": "setDesenEditorVariantStyleProperty",
+          "leftCanonicalSha256": "3320c1a8e45a2e4f867aad6ed9ca7f758e142c90271be5bc0132aae20e5e35e0",
+          "leftSerializedInputBytes": 17438,
+          "rightCanonicalSha256": "c68ec1d597bec69cfc25b62a0277881913671fca9d769d47b37218f66727d848",
+          "rightSerializedInputBytes": 17438
+        },
+        {
+          "command": "deleteDesenEditorVariantStyleProperty",
+          "leftCanonicalSha256": "c880d8c3fdc8c9f3d532973b1951e14f9d188462f4c1425957c8327dfb1662cc",
+          "leftSerializedInputBytes": 17386,
+          "rightCanonicalSha256": "6a89d8218df7275ff62995ad0c3973354404f4ed715c6d053cad461fa3bdc121",
+          "rightSerializedInputBytes": 17386
+        },
+        {
+          "command": "insertDesenEditorStateDeclaration",
+          "leftCanonicalSha256": "d85973f8323b202ef960c60e1cca59b634cb78eada3daeefb5ba9b0d147f9a5c",
+          "leftSerializedInputBytes": 17454,
+          "rightCanonicalSha256": "65576dcdca54fab5e815374f47ebfbff869d0694a2b05b4e111642dffe7306d8",
+          "rightSerializedInputBytes": 17454
+        },
+        {
+          "command": "deleteDesenEditorStateDeclaration",
+          "leftCanonicalSha256": "b608525254cc438d63e3cf229e9bdf73428776e64934eca7064efcbb57f0bb6f",
+          "leftSerializedInputBytes": 17344,
+          "rightCanonicalSha256": "47c12e8ef62fb99ebad7e9b0f0a3d0e4f5a26d666f458489ebc259bc46ae4db3",
+          "rightSerializedInputBytes": 17344
+        },
+        {
+          "command": "setDesenEditorStateSchema",
+          "leftCanonicalSha256": "010011eb1d29daee98b5b11d1b58b96ae93e4f9f4dee0ea57ee1b5d97cb55017",
+          "leftSerializedInputBytes": 17413,
+          "rightCanonicalSha256": "c5c21783439dc0465bd0052570d6ff0b6f2ac0b69082eece6f322b55d8c83420",
+          "rightSerializedInputBytes": 17413
+        },
+        {
+          "command": "setDesenEditorStateInitial",
+          "leftCanonicalSha256": "ba158ebe2dda7f218e1f8409cd415734d2c2fc8e7951cf4794936f8af1aa1be8",
+          "leftSerializedInputBytes": 17413,
+          "rightCanonicalSha256": "18d844866bc8818552634510cf08cf97241e888c944bfce18f6ca16e18cf7aea",
+          "rightSerializedInputBytes": 17413
+        },
+        {
+          "command": "setDesenEditorNodeRepeatItems",
+          "leftCanonicalSha256": "1860c216325b0578da332a5e648d079fa5d8cf7882919d81bcc914f32da8268b",
+          "leftSerializedInputBytes": 17383,
+          "rightCanonicalSha256": "de77aef453fb1b3834c60d37e990fc471ae8e637381fef96be04b941abaea668",
+          "rightSerializedInputBytes": 17383
+        },
+        {
+          "command": "setDesenEditorNodeRepeatKey",
+          "leftCanonicalSha256": "0728ec2b570476e0c360eee9735a138e36d7d66371c637577bf124a768da8c76",
+          "leftSerializedInputBytes": 17407,
+          "rightCanonicalSha256": "f82c16dca1932837da3631e1020fcc54dd53ad610ed3d64a3b1c56f678c22393",
+          "rightSerializedInputBytes": 17407
+        },
+        {
+          "command": "setDesenEditorResourceInput",
+          "leftCanonicalSha256": "5eb8626997c2e266d7e86a5890fbcf98f8490583dd85c72f02561ff8246e93fd",
+          "leftSerializedInputBytes": 17436,
+          "rightCanonicalSha256": "8fb00a2c63a7e7e4ee9347d54c6e1e6a648acc19c5ac1e494a830410669430fe",
+          "rightSerializedInputBytes": 17436
+        },
+        {
+          "command": "deleteDesenEditorResourceInput",
+          "leftCanonicalSha256": "02325d6b21c5e88b7cef17218ce9d9f35f2e01067b08ea32ab59a7b9cad537c0",
+          "leftSerializedInputBytes": 17364,
+          "rightCanonicalSha256": "d7712fed8f38b3349853bbe9a72c3ae27c859194b82327535c0946a084655a9c",
+          "rightSerializedInputBytes": 17364
+        },
+        {
+          "command": "insertDesenEditorEventHandler",
+          "leftCanonicalSha256": "ad0442435c12ad995650195aa5d0cd10b98f6c70d0fc180a63dc478d7dd4eb5c",
+          "leftSerializedInputBytes": 17461,
+          "rightCanonicalSha256": "f2eadca3eed0ef238a57522f9f9ec64c1eb548a4b84926f33e7a50781e22ffc8",
+          "rightSerializedInputBytes": 17461
+        },
+        {
+          "command": "deleteDesenEditorEventHandler",
+          "leftCanonicalSha256": "2b23b98d9769af3b7c8c57841ab0e2cb2a893bd589d94c1e6c40f909fe137a87",
+          "leftSerializedInputBytes": 17343,
+          "rightCanonicalSha256": "20744e0387cf4c48709ea916b37851d9959acfc736cee66c4ba2d3570877e129",
+          "rightSerializedInputBytes": 17343
+        },
+        {
+          "command": "insertDesenEditorAction",
+          "leftCanonicalSha256": "184daecbe90fe2628c99ef5da176694f3a4438e1f192764abe956311c0e5486f",
+          "leftSerializedInputBytes": 17457,
+          "rightCanonicalSha256": "7bdcec8bf957b6f8fa15283fa9105557114fc57432338183102c9ea3d2b3f0d6",
+          "rightSerializedInputBytes": 17457
+        },
+        {
+          "command": "replaceDesenEditorAction",
+          "leftCanonicalSha256": "7d20db885b5773077cfdaa5e7b5bfe23dc75d6cc69b3622fc3c8388bef367b3e",
+          "leftSerializedInputBytes": 17403,
+          "rightCanonicalSha256": "f50d7d269c12b84a64a361bb130c3fe0194cad1efc0c32ab047d76189008329e",
+          "rightSerializedInputBytes": 17403
+        },
+        {
+          "command": "deleteDesenEditorAction",
+          "leftCanonicalSha256": "6498e0296b8741bf872693aaa204da24fa7f986e40442e6774096d56f4a40710",
+          "leftSerializedInputBytes": 17356,
+          "rightCanonicalSha256": "51f069b63d970601b24f5c6d0f6dae38f8cfed274a9d93d77ffe55e5e2e9c6b6",
+          "rightSerializedInputBytes": 17356
+        },
+        {
+          "command": "reorderDesenEditorAction",
+          "leftCanonicalSha256": "25fbec1459d66b39dbe536e800fefd153e5ba3028646d455371b84bae1e62544",
+          "leftSerializedInputBytes": 17401,
+          "rightCanonicalSha256": "66f10d5f0ec39cc96d970e52b6d085da63618e9bec45dda9435ab28356de2671",
+          "rightSerializedInputBytes": 17401
+        }
+      ]
+    },
+    "authoringIsolation": {
+      "rootAuthoringPreservedAcrossAllCommands": true,
+      "authoringDifferencesDoNotChangeProductionProjection": true,
+      "authoringDifferencesDoNotChangeSourceDigest": true,
+      "authoringApparentCoreDataRemainsInert": true,
+      "scannerIsolation": {
+        "stableAllocatorIgnoresApparentIds": true,
+        "exactAllocatedId": "sign-in.inserted",
+        "ownerIdentityScansIgnoreApparentIds": true,
+        "fakeOwnerIdsRejectedAsNotFound": [
+          "authoring.fake-node.alpha",
+          "extension-document",
+          "nested-extension.fake-owner"
+        ],
+        "ownerProbeReceipts": [
+          {
+            "location": "authoring",
+            "fakeOwnerId": "authoring.fake-node.alpha",
+            "diagnosticCode": "run.desen.editor/CONTENT_EDIT_TARGET_NOT_FOUND"
+          },
+          {
+            "location": "root-extension",
+            "fakeOwnerId": "extension-document",
+            "diagnosticCode": "run.desen.editor/CONTENT_EDIT_TARGET_NOT_FOUND"
+          },
+          {
+            "location": "nested-action-extension",
+            "pointer": "/surfaces/sign-in/root/on/preservation/3/onSuccess/0/extensions",
+            "fakeOwnerId": "nested-extension.fake-owner",
+            "canonicalSourceBytes": 17641,
+            "diagnosticCode": "run.desen.editor/CONTENT_EDIT_TARGET_NOT_FOUND"
+          }
+        ],
+        "actionScansIgnoreApparentActions": true,
+        "coreActionOccurrenceLimit": 25000,
+        "actionProbeReceipts": [
+          {
+            "location": "authoring",
+            "fakeActionShapedValues": 25001,
+            "canonicalSourceBytes": 1201998,
+            "commandSucceededAboveCoreActionLimit": true
+          },
+          {
+            "location": "extensions",
+            "fakeActionShapedValues": 25001,
+            "canonicalSourceBytes": 1202138,
+            "commandSucceededAboveCoreActionLimit": true
+          },
+          {
+            "location": "nested-action-extension",
+            "pointer": "/surfaces/sign-in/root/on/preservation/3/onSuccess/0/extensions",
+            "fakeActionShapedValues": 25001,
+            "canonicalSourceBytes": 1217582,
+            "commandSucceededAboveCoreActionLimit": true
+          }
+        ],
+        "nestedActionExtensionActionScanProbed": true,
+        "nestedActionExtensionOwnerScanProbed": true
+      },
+      "canonicalByteLimit": {
+        "canonicalSourceByteLimit": 8388608,
+        "withRootAuthoringCanonicalBytes": 8388609,
+        "withoutRootAuthoringCanonicalBytes": 1903,
+        "rootAuthoringCanonicalByteContribution": 8386706,
+        "overByOneRejected": true,
+        "authoringExcludedControlSucceeded": true,
+        "limitCoversCompleteSourceIncludingRootAuthoring": true
+      },
+      "baselineSourceDigest": "sha256:49a110efa1a69217683f93c7120ccad21609fff3cc886ca7dccddef157083f98",
+      "alternateAuthoringSourceDigest": "sha256:49a110efa1a69217683f93c7120ccad21609fff3cc886ca7dccddef157083f98"
+    },
+    "unknownExtensions": {
+      "sourceReachableLocations": 16,
+      "locations": [
+        {
+          "kind": "action.component.command",
+          "pointer": "/surfaces/sign-in/root/on/preservation/5/extensions",
+          "valueSha256": "1c924be58d8a0e15ab80e80d764e107b5ca0891949b4e549fd6a72c737b8b4d3"
+        },
+        {
+          "kind": "action.event.emit",
+          "pointer": "/surfaces/sign-in/root/on/preservation/6/extensions",
+          "valueSha256": "915f7a2b1472fd4d6702257a8422e51a6a51d9472d01efb0621dc0529bec4ff9"
+        },
+        {
+          "kind": "action.navigate",
+          "pointer": "/surfaces/sign-in/root/on/preservation/2/extensions",
+          "valueSha256": "f12bdd5e6149d6e3df7e02b0f8b4efd3f2ca7071e9cce82b2f50101c23a37c09"
+        },
+        {
+          "kind": "action.operation.invoke",
+          "pointer": "/surfaces/sign-in/root/on/preservation/3/extensions",
+          "valueSha256": "29a4ed400bad1b13e65cbc919dca4683b86e720a03bf247d0efb70950aa20ef4"
+        },
+        {
+          "kind": "action.resource.refresh",
+          "pointer": "/surfaces/sign-in/root/on/preservation/4/extensions",
+          "valueSha256": "f010bc7aa1f04ef2b245b959d49588a15726633685bb071b07a8b0308ac42450"
+        },
+        {
+          "kind": "action.state.set",
+          "pointer": "/surfaces/sign-in/root/on/preservation/0/extensions",
+          "valueSha256": "22a0718d28f4bb234bd03c46569020fb9306e2c1cd0c20b57187802c52c3d4c7"
+        },
+        {
+          "kind": "action.state.toggle",
+          "pointer": "/surfaces/sign-in/root/on/preservation/1/extensions",
+          "valueSha256": "af6c2dfda8dd9223dc26bd3ed58a06278663d4652d244f61555bee43b4002586"
+        },
+        {
+          "kind": "behavior",
+          "pointer": "/surfaces/sign-in/root/behaviors/0/extensions",
+          "valueSha256": "502e62c9d6c35550a7fb573fe982f45960915bd9eb78769e4a322971fda14065"
+        },
+        {
+          "kind": "document",
+          "pointer": "/extensions",
+          "valueSha256": "cff3c5765e345a065c5615cdfa27fb7e6480f4d4bc6b444b6465ae28facd0b99"
+        },
+        {
+          "kind": "node",
+          "pointer": "/surfaces/sign-in/root/extensions",
+          "valueSha256": "80f8c0098abecbcdfcb7b3988b3d62ecd162e17b32243ed520a62e7ffd1b6d8b"
+        },
+        {
+          "kind": "repeat",
+          "pointer": "/surfaces/sign-in/root/slots/default/0/repeat/extensions",
+          "valueSha256": "c39994426cc99474eed1c6aad5dc270434c8847e360034a5a883afb60bfd3496"
+        },
+        {
+          "kind": "resource-instance",
+          "pointer": "/surfaces/sign-in/resources/proof/extensions",
+          "valueSha256": "063715f7ea95c86c2fa910168bbb620b8555adb5833cd5ce0053a4629688c399"
+        },
+        {
+          "kind": "source-catalog-requirement",
+          "pointer": "/catalogs/0/extensions",
+          "valueSha256": "96252dd111b090072eb687ab114cb6f7432a7b0ad4168bc2e8003d2d256e4430"
+        },
+        {
+          "kind": "state",
+          "pointer": "/surfaces/sign-in/state/email/extensions",
+          "valueSha256": "db60965c364f0490dfd78dcfe6ea61d4c889415889bed289347c5eeb76c06927"
+        },
+        {
+          "kind": "surface",
+          "pointer": "/surfaces/sign-in/extensions",
+          "valueSha256": "e408fbd924203fd09495efeab8157f380eb66daff2e7bd0e4b94d0783d04e91b"
+        },
+        {
+          "kind": "variant",
+          "pointer": "/surfaces/sign-in/root/slots/default/0/variants/0/extensions",
+          "valueSha256": "cfec11b7e841af6c5e198467bff0cc01cccf37120639a507c456eb1b1dc6589b"
+        }
+      ],
+      "valuesPreservedAcrossFactoryAndAllCommands": true,
+      "valuesPreservedAcrossJsonSerializationParseAndReadmission": true,
+      "extensionChangesAffectSourceDigest": true,
+      "extensionChangedSourceDigest": "sha256:b49b62fe32468326952a17dd736864935817e018e12f9024eacc843fc973f902",
+      "coreSemanticsAssigned": false,
+      "namespacedRecommendedMarker": "com.example.editor-roundtrip",
+      "legalNonNamespacedMarker": "legacy-marker",
+      "reverseDomainNamingIsGuidanceNotValidation": true,
+      "lifecycle": {
+        "baselineLocations": 6,
+        "insertCarriesSuppliedMarker": true,
+        "insertMarkerReceipt": {
+          "kind": "lifecycle.inserted",
+          "pointer": "/surfaces/sign-in/root/slots/default/0/on/lifecycle/1/extensions",
+          "valueSha256": "5b08bee85946e74461a766e567d394d23761403bc575678176487ed97b103c53"
+        },
+        "moveCarriesMarkerToNewPointer": true,
+        "move": {
+          "before": {
+            "kind": "lifecycle.move",
+            "pointer": "/surfaces/sign-in/root/slots/default/6/extensions",
+            "valueSha256": "be423aaae23823c2f787b91bca4ae03753100ef94bc8ceca5863a7d901d3c737"
+          },
+          "after": {
+            "kind": "lifecycle.move",
+            "pointer": "/surfaces/sign-in/root/behaviors/0/slots/holding/0/extensions",
+            "valueSha256": "be423aaae23823c2f787b91bca4ae03753100ef94bc8ceca5863a7d901d3c737"
+          }
+        },
+        "reorderCarriesMarkerToNewPointer": true,
+        "reorder": {
+          "before": {
+            "kind": "lifecycle.reorder",
+            "pointer": "/surfaces/sign-in/root/slots/default/7/extensions",
+            "valueSha256": "440814d4511ea6f321fc1df5df305c6554f9f00e7f05dd6e0ba8c03e449db835"
+          },
+          "after": {
+            "kind": "lifecycle.reorder",
+            "pointer": "/surfaces/sign-in/root/slots/default/0/extensions",
+            "valueSha256": "440814d4511ea6f321fc1df5df305c6554f9f00e7f05dd6e0ba8c03e449db835"
+          }
+        },
+        "deleteRemovesOnlyTargetOwnerMarker": true,
+        "wholeReplacementReplacesOldMarkerWithSuppliedMarker": true,
+        "replacementMarkerReceipt": {
+          "kind": "lifecycle.action.replacement",
+          "pointer": "/surfaces/sign-in/root/slots/default/0/on/lifecycle/0/extensions",
+          "valueSha256": "5d5514c8a004dff82b0681fe1686f0a11337ad55b73d2812c95fb65fbc782a84"
+        },
+        "unrelatedMarkersPreserved": 2,
+        "deliberatelyDeletedOrWholeReplacedOwnerMarkerSurvives": false
+      }
+    },
+    "roundTrip": {
+      "boundary": "JSON.stringify -> JSON.parse -> createDesenEditorDocument",
+      "parsedValuesAndCanonicalBytesPreserved": true,
+      "lexicalMemberOrderOrWhitespacePreservationClaimed": false,
+      "storagePortOrDurabilityClaimed": false,
+      "readmissionCycles": 67
+    },
+    "ownershipAndImmutability": {
+      "callerInputsUnchanged": true,
+      "commandResultsFreshAndRecursivelyFrozen": true,
+      "reopenedSourcesRecursivelyFrozen": true
+    }
+  },
+  "frozenProtocol": {
+    "snapshot": {
+      "protocol": "0.1.0",
+      "sourceCommit": "b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca",
+      "sourceTree": "cd7afa57888095718c4ee82b69b5b282980763c8",
+      "snapshotPath": "packages/protocol/upstream/0.1.0/snapshot",
+      "snapshotFiles": 31,
+      "manifestEntries": 30,
+      "totalBytes": 306604,
+      "manifestSha256": "92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd",
+      "aggregateSha256": "afe8fc359465ce891f4325fcdeca4b2f12bca48f1aa54a34c4f3a97985f7e060",
+      "executableModesVerified": true
+    },
+    "exactFiles": [
+      {
+        "path": "packages/protocol/upstream/0.1.0/baseline.json",
+        "bytes": 1459,
+        "sha256": "8b4c7c6ab462a90314bc4fa54a01de8b3d262b367d2e197efba83b3a698314c9"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/SHA256SUMS",
+        "bytes": 2940,
+        "sha256": "92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/SPEC.md",
+        "bytes": 77981,
+        "sha256": "6443aed035cdced68e688402863ae3b7cc77f6dd75c8ad610831483d54b35d9c"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+        "bytes": 19588,
+        "sha256": "5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+        "bytes": 20001,
+        "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-catalog.schema.json",
+        "bytes": 15654,
+        "sha256": "51014ab088b6a483502fd6aee5eed9fc4451be55556b6bd6220a5a6a1b610555"
+      }
+    ],
+    "sourceAndBundleDeclaredExtensionPoints": 17,
+    "sourceReachableExtensionPoints": 16,
+    "bundleReachableExtensionPoints": 16,
+    "sourceReachableSchemaPointers": [
+      "/$defs/actionSpec/oneOf/0/properties/extensions",
+      "/$defs/actionSpec/oneOf/1/properties/extensions",
+      "/$defs/actionSpec/oneOf/2/properties/extensions",
+      "/$defs/actionSpec/oneOf/3/properties/extensions",
+      "/$defs/actionSpec/oneOf/4/properties/extensions",
+      "/$defs/actionSpec/oneOf/5/properties/extensions",
+      "/$defs/actionSpec/oneOf/6/properties/extensions",
+      "/$defs/behaviorSpec/properties/extensions",
+      "/$defs/nodeSpec/properties/extensions",
+      "/$defs/repeatSpec/properties/extensions",
+      "/$defs/resourceInstanceSpec/properties/extensions",
+      "/$defs/sourceCatalogRequirement/properties/extensions",
+      "/$defs/stateSpec/properties/extensions",
+      "/$defs/surfaceSpec/properties/extensions",
+      "/$defs/variantSpec/properties/extensions",
+      "/properties/extensions"
+    ],
+    "normativeRoundTripMustPreserve": true,
+    "normativeUnknownMustRemainInert": true,
+    "reverseDomainNamesRemainGuidance": true,
+    "rootAuthoringExcludedFromSourceDigestAndBundle": true
+  },
+  "executionAuthority": {
+    "mode": "AUTHENTICATED_BYTE_COPY_ISOLATED_ESM_GRAPH",
+    "exactReceiptedBytes": true,
+    "importAfterReceipt": true,
+    "workspaceModuleCacheUsed": false,
+    "runtimeFiles": 29,
+    "editorFiles": 8,
+    "retainedPredecessorEditorFiles": 7,
+    "dependencyFiles": 21,
+    "dependencyModules": 19,
+    "dependencyManifests": 2,
+    "prerequisites": [
+      {
+        "task": "M08-T01",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-source-document.json",
+        "sha256": "aaa3a2447b71361361f471a822bba78e90a3f97f493b23ad3314f51c62ad4025"
+      },
+      {
+        "task": "M08-T02",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-stable-id-insert.json",
+        "sha256": "edc7dc1df296056be0c281ed268d07565b0eca2eed7ba7ba63e69ae6b74f6547"
+      },
+      {
+        "task": "M08-T03",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-structural-edits.json",
+        "sha256": "0d44f67c316c21ff8b612221d01e81c76d3b24783164bb75a772985bbc7def8b"
+      },
+      {
+        "task": "M08-T04",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-content-edits.json",
+        "sha256": "1726d453913c091d30229be02270a0cb4b74bf479f87027c4b9a0da3bb3c7066"
+      },
+      {
+        "task": "M08-T05",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-state-binding-edits.json",
+        "sha256": "b85e578ac2bc27897517f12d8d4cf867a089cd61ff9fd1ab0664c819977634f8"
+      },
+      {
+        "task": "M08-T06",
+        "path": "docs/proof/artifacts/editor-core-0.1.0-event-action-edits.json",
+        "sha256": "05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7"
+      }
+    ],
+    "editorReceipts": [
+      {
+        "path": "packages/editor-core/dist/content-edits.js",
+        "bytes": 38371,
+        "sha256": "bdedf7a4dbe540b54067651bb3af9e269acdb2909d6354fa48c0ca8a6cb1cb69"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.js",
+        "bytes": 33618,
+        "sha256": "51fbea68365ea1cf8b0cc76a6c743c06113e8599154e299b854c005cf0c0c040"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js",
+        "bytes": 1358,
+        "sha256": "0f80d4020372540749ceb6c212d11cc684d217519ad04847dcd9292231656c17"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js",
+        "bytes": 842,
+        "sha256": "6b38f237b884a9f33ca12622ee038adf93f93a30dff005903103ceb0e1101381"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.js",
+        "bytes": 16696,
+        "sha256": "82b7f43bb4446daac16ad80a8aea896d75abe1094dbc58aa321797ae421bf339"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.js",
+        "bytes": 26979,
+        "sha256": "ec163b8d03efe765c05e5931b63d83eadc979db6dd15a598c79663f15fe8d754"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.js",
+        "bytes": 27005,
+        "sha256": "d8aaffc638922b7daa66656b06def5a263dc569e3fc75d260d4212d57d14de1b"
+      },
+      {
+        "path": "packages/editor-core/package.json",
+        "bytes": 1438,
+        "sha256": "00556e63c2ee63c585239b5edce68a6d503f7772539bda0cfc7d54a6c8445f0b"
+      }
+    ],
+    "dependencyReceipts": [
+      {
+        "path": "packages/protocol/dist/canonicalization.js",
+        "bytes": 17634,
+        "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.js",
+        "bytes": 8905,
+        "sha256": "0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+      },
+      {
+        "path": "packages/protocol/dist/index.js",
+        "bytes": 679,
+        "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.js",
+        "bytes": 6499,
+        "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/validator/dist/binding-contract-validation.js",
+        "bytes": 46895,
+        "sha256": "82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.js",
+        "bytes": 24587,
+        "sha256": "f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.js",
+        "bytes": 8707,
+        "sha256": "240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js",
+        "bytes": 76906,
+        "sha256": "2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+        "bytes": 1001830,
+        "sha256": "322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+      },
+      {
+        "path": "packages/validator/dist/index.js",
+        "bytes": 1965,
+        "sha256": "5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.js",
+        "bytes": 49673,
+        "sha256": "431b473b6aa82a5af848faf74cf5459aa4375e2678f936e51c733212c42af331"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js",
+        "bytes": 86247,
+        "sha256": "169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js",
+        "bytes": 6799,
+        "sha256": "f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.js",
+        "bytes": 27165,
+        "sha256": "1d89f973a8a768771aabf203e55bc9816e1b06365553604c5808318abc483368"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.js",
+        "bytes": 2004,
+        "sha256": "0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.js",
+        "bytes": 2879,
+        "sha256": "118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.js",
+        "bytes": 6241,
+        "sha256": "316c1ea98f96ada1cad6a5cb398538fac5c10e94a03e0efa318f07c8d0459c28"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.js",
+        "bytes": 10282,
+        "sha256": "342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.js",
+        "bytes": 1381,
+        "sha256": "d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 2666,
+        "sha256": "05f8672a36552e2b1782fd50b658b981323916662c0b9a661ebea0963cc84276"
+      }
+    ],
+    "trustedAuthorities": ["NODE_RUNTIME", "ESM_LOADER", "PROCESS_ENVIRONMENT"]
+  },
+  "packageBoundary": {
+    "currentEmittedFiles": 28,
+    "staticEsmEdges": 17,
+    "unknownStaticEsmEdges": 0,
+    "platformNeutral": true,
+    "manifestExportRoots": ["."],
+    "productionDependencies": ["@desen/protocol", "@desen/validator"]
+  },
+  "testAuthority": {
+    "focusedBehaviorCases": 33,
+    "focusedCompilerNegativeAssertions": 6,
+    "publicRuntimeAndRootCases": 46,
+    "publicCompilerNegativeAssertions": 75,
+    "rootProofCases": 10
+  },
+  "trackedBoundary": {
+    "files": 95,
+    "receipts": [
+      {
+        "path": "docs/proof/artifacts/publisher-0.1.0-bundle-publication.json",
+        "bytes": 17320,
+        "sha256": "2942aa84066354ee7c27557263a900eb8fd3a149d085ab55c7f880dcfca998df"
+      },
+      {
+        "path": "docs/proof/artifacts/publisher-0.1.0-catalog-pinning.json",
+        "bytes": 10688,
+        "sha256": "de37aa35bcdc67e637d323a559f104160479315f56961c962e00bfdc74459c8f"
+      },
+      {
+        "path": "docs/proof/artifacts/publisher-0.1.0-official-golden.json",
+        "bytes": 13179,
+        "sha256": "a2cde9718894b4af506e750d66ea7577d96da4e8a09649f17afe0f94dada17e2"
+      },
+      {
+        "path": "docs/proof/artifacts/publisher-0.1.0-source-normalization.json",
+        "bytes": 8715,
+        "sha256": "59cb08f75849ae4831644e746a72186227a9774ceb7bcd8281156ccbc6dd085e"
+      },
+      {
+        "path": "packages/editor-core/README.md",
+        "bytes": 19023,
+        "sha256": "2bd9aee1b3075642aff09ce6e0c7dd0c1ba17ce8a93d60591e570823b23d331c"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.d.ts",
+        "bytes": 16841,
+        "sha256": "029ce63431bb89f184c6334033b4994d80fadce6150a47d38f6f28868c5dcfc1"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.d.ts.map",
+        "bytes": 6228,
+        "sha256": "fd3dab9e333afe2e5006643ecb74226a6c19250b21881b7ded700f47efa9bcbb"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.js",
+        "bytes": 38371,
+        "sha256": "bdedf7a4dbe540b54067651bb3af9e269acdb2909d6354fa48c0ca8a6cb1cb69"
+      },
+      {
+        "path": "packages/editor-core/dist/content-edits.js.map",
+        "bytes": 31654,
+        "sha256": "aa89e073a91ec547a5f76cf45be2ca9af212e6613e1dfc23283f0879666f73a1"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.d.ts",
+        "bytes": 9564,
+        "sha256": "e45abcc3f63d7e1ae4a69959ffddd715f660c58cdc439c7e864cffb2cc950fad"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.d.ts.map",
+        "bytes": 3402,
+        "sha256": "73cbc6cc2414c23d6aebeac31b44bd7753fea7f498583c647571db0eb66b3ba9"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.js",
+        "bytes": 33618,
+        "sha256": "51fbea68365ea1cf8b0cc76a6c743c06113e8599154e299b854c005cf0c0c040"
+      },
+      {
+        "path": "packages/editor-core/dist/event-action-edits.js.map",
+        "bytes": 29465,
+        "sha256": "b726dee0c93ab6c7b1ea3640163dd3390e1b02b94260d3f09e47e86cc9cebe7a"
+      },
+      {
+        "path": "packages/editor-core/dist/index.d.ts",
+        "bytes": 3994,
+        "sha256": "81ba4ac687186f1faf008fe6e7e944eaab8ffd2735d27418ddb793359a07e2f6"
+      },
+      {
+        "path": "packages/editor-core/dist/index.d.ts.map",
+        "bytes": 1835,
+        "sha256": "bd88c6df1eb8c645ee098ecd5d2fd9f9e78006bc825f0e4335aa5dad2132cda4"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js",
+        "bytes": 1358,
+        "sha256": "0f80d4020372540749ceb6c212d11cc684d217519ad04847dcd9292231656c17"
+      },
+      {
+        "path": "packages/editor-core/dist/index.js.map",
+        "bytes": 738,
+        "sha256": "43e20736eda86307e8b24b8e43ddd174fea54e40f2be3799c2cee66b07c1103e"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.d.ts",
+        "bytes": 2091,
+        "sha256": "e9244f005b7ec432a7f6b556ec8af4b81e7ce59b0525bf1cab747cba50ad752a"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.d.ts.map",
+        "bytes": 783,
+        "sha256": "521d1f5c2334de4ef00d02de2ee8750380bba3b5b4ccc284131b09ec155000e6"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js",
+        "bytes": 842,
+        "sha256": "6b38f237b884a9f33ca12622ee038adf93f93a30dff005903103ceb0e1101381"
+      },
+      {
+        "path": "packages/editor-core/dist/source-document.js.map",
+        "bytes": 599,
+        "sha256": "0031f544c158ef14f9dd78ce55df5ae73e2632c5c19ec2c145c53a823239d680"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.d.ts",
+        "bytes": 4668,
+        "sha256": "d0cc3ab760cf67d38e05fd82e1ac216042aebd7be8a863551bf09605e3c0e075"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.d.ts.map",
+        "bytes": 1442,
+        "sha256": "34cabcd523d1879fc243077332c5bc1880a6381f285385cbc2dbe3c2f4463b92"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.js",
+        "bytes": 16696,
+        "sha256": "82b7f43bb4446daac16ad80a8aea896d75abe1094dbc58aa321797ae421bf339"
+      },
+      {
+        "path": "packages/editor-core/dist/stable-id-insert.js.map",
+        "bytes": 14152,
+        "sha256": "1575732d590251285ce13169385d73bb80b33367a0c1d58d1a57139a243d97a6"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.d.ts",
+        "bytes": 9965,
+        "sha256": "a6aff65e40d7e7dbcd0b477d7c723db1540799477eb63d7c916baf461dddfb41"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.d.ts.map",
+        "bytes": 3639,
+        "sha256": "b8484b01bcedfab2e8a8be260bcdd764d8c013e3628fdbc200b6fbaca692f309"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.js",
+        "bytes": 26979,
+        "sha256": "ec163b8d03efe765c05e5931b63d83eadc979db6dd15a598c79663f15fe8d754"
+      },
+      {
+        "path": "packages/editor-core/dist/state-binding-edits.js.map",
+        "bytes": 22818,
+        "sha256": "5b72c070a6b940963a7b9a629c3a17d535c624d45bae703b31cbafedfc5c6df6"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.d.ts",
+        "bytes": 6315,
+        "sha256": "0be9f7fa1f1ab941cb8621b41dc52f9660d9c8c92be0590dfa60f5c66ab28475"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.d.ts.map",
+        "bytes": 1994,
+        "sha256": "7b3580660e285ba2daf61f805fcc854121fd94820083d11240bc9c408064aadc"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.js",
+        "bytes": 27005,
+        "sha256": "d8aaffc638922b7daa66656b06def5a263dc569e3fc75d260d4212d57d14de1b"
+      },
+      {
+        "path": "packages/editor-core/dist/structural-edits.js.map",
+        "bytes": 21939,
+        "sha256": "c90ee9eda5b332d0f05e4636771cb87a29c8c301e1cd3a43a230ba0830b2ca5b"
+      },
+      {
+        "path": "packages/editor-core/package.json",
+        "bytes": 1438,
+        "sha256": "00556e63c2ee63c585239b5edce68a6d503f7772539bda0cfc7d54a6c8445f0b"
+      },
+      {
+        "path": "packages/editor-core/src/content-edits.ts",
+        "bytes": 56853,
+        "sha256": "c23952e050497fd44ed1ed1b530fd55bddca33ab612e67e23033334be20b6111"
+      },
+      {
+        "path": "packages/editor-core/src/event-action-edits.ts",
+        "bytes": 47560,
+        "sha256": "0d62f8027b4b4045a4107517034912fbfe60a712743ac5c946561ad5bfe76b77"
+      },
+      {
+        "path": "packages/editor-core/src/index.ts",
+        "bytes": 4166,
+        "sha256": "4bb7d76f8b1730491f48effaa281590ecaf793f0b26a20103adf74ebb1d9f7a2"
+      },
+      {
+        "path": "packages/editor-core/src/source-document.ts",
+        "bytes": 2418,
+        "sha256": "9228d41e1d8db82c52e9883e01516d79e9cefb7e348a0c1354a2e78f44d46686"
+      },
+      {
+        "path": "packages/editor-core/src/stable-id-insert.ts",
+        "bytes": 22701,
+        "sha256": "5086704795cc8384bff496a6a35c3d39303a4f51f8abac151f7078d95a113bee"
+      },
+      {
+        "path": "packages/editor-core/src/state-binding-edits.ts",
+        "bytes": 38296,
+        "sha256": "28baf25a79fbb5c2b0bef6466acca982f966e28d05ab88998d493798ae93b56c"
+      },
+      {
+        "path": "packages/editor-core/src/structural-edits.ts",
+        "bytes": 35599,
+        "sha256": "be33af4cc193bbc4d0adf9043ec3baec9788e8a94ad4195a3ff2eddb6059f285"
+      },
+      {
+        "path": "packages/editor-core/test/authoring-round-trip.test.ts",
+        "bytes": 26494,
+        "sha256": "7240bb77e558485e5b2a8c0645601fe7276c350e307d9dad11a00a2ac14dfaa2"
+      },
+      {
+        "path": "packages/editor-core/test/authoring-round-trip.types.ts",
+        "bytes": 1800,
+        "sha256": "24c41948e51d59c31a342d391a84bd229d39123c8764c3385b2402e1535d0739"
+      },
+      {
+        "path": "packages/editor-core/test/content-edits.test.ts",
+        "bytes": 25435,
+        "sha256": "83db0beb0f74fb3e4a59ec7f94aa1a32487553f4f0aeaf9c5c0c9a512eaf8e91"
+      },
+      {
+        "path": "packages/editor-core/test/content-edits.types.ts",
+        "bytes": 5685,
+        "sha256": "6c29c1e0cbb2c5c1767fd333ec120f22701e110c8c668e2595dca78807d36edd"
+      },
+      {
+        "path": "packages/editor-core/test/event-action-edits.test.ts",
+        "bytes": 32905,
+        "sha256": "ac89aa9e6f97f3867f041d0853a46f1f76ef2ad3ea81cb7d29e8d1e3e50fadc3"
+      },
+      {
+        "path": "packages/editor-core/test/event-action-edits.types.ts",
+        "bytes": 8001,
+        "sha256": "20d9e351166a18e24112864ad33291dd5f981d5e4e23f8dbb72de6a6c32f98c5"
+      },
+      {
+        "path": "packages/editor-core/test/public-package.mjs",
+        "bytes": 122837,
+        "sha256": "070692e36295731021984b453e1ed1fd1dc2ca566eb39614ee04d30a176a56f4"
+      },
+      {
+        "path": "packages/editor-core/test/public-package.types.mts",
+        "bytes": 28374,
+        "sha256": "d443de9f6d1bf9a371c126be33d1cb9e08dc9719e10cedd069f44e4f9cb589a7"
+      },
+      {
+        "path": "packages/editor-core/test/source-document.test.ts",
+        "bytes": 7295,
+        "sha256": "3e032d38875f234a5effa3e8379f67b64280818eafe95b05e42b2551aca0f36d"
+      },
+      {
+        "path": "packages/editor-core/test/source-document.types.ts",
+        "bytes": 1186,
+        "sha256": "69a3e450d55a86bbb26a7b59a2cea84e5f85dfacb51aff3d32097fd81fddbf3e"
+      },
+      {
+        "path": "packages/editor-core/test/stable-id-insert.test.ts",
+        "bytes": 19139,
+        "sha256": "05cfe102310521716b669db964597051d895683075ddf77d41a633ac071e8716"
+      },
+      {
+        "path": "packages/editor-core/test/stable-id-insert.types.ts",
+        "bytes": 2356,
+        "sha256": "060a2c1dfd176cb22ca8f10c96c8d79f7e4e8fdf127b7844dca6eb6e8e68f601"
+      },
+      {
+        "path": "packages/editor-core/test/state-binding-edits.test.ts",
+        "bytes": 23546,
+        "sha256": "5e6a6ce99798c3a63cc1ec13a7cdecf6322ab42192c46f5d0f016c0510eafd9c"
+      },
+      {
+        "path": "packages/editor-core/test/state-binding-edits.types.ts",
+        "bytes": 6176,
+        "sha256": "47f9351e3fee1a62d3a3bc6855b69c79334b216947f5b0098bd7599bd7553cd1"
+      },
+      {
+        "path": "packages/editor-core/test/structural-edits.test.ts",
+        "bytes": 22675,
+        "sha256": "eb697b03ea26fb336c61d051de7a9f52e21b09bd6666e53250c17c2faff68c96"
+      },
+      {
+        "path": "packages/editor-core/test/structural-edits.types.ts",
+        "bytes": 3203,
+        "sha256": "409f23aa8e9b5fab8989d7c50791a7f4056061a923da2991ed60af1290e50eb7"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.build.json",
+        "bytes": 310,
+        "sha256": "f03092c446e145e0e6347632234452f6f74a8ee3b48c55adb00187d2b360ac78"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.json",
+        "bytes": 167,
+        "sha256": "fc1dd95e42092833c4dfc3a59be1fdc0d7f284083260e31c1ec0988925fb392b"
+      },
+      {
+        "path": "packages/editor-core/tsconfig.public-package.json",
+        "bytes": 147,
+        "sha256": "01366a6ddba0a147aabc93fbaff75481dfaf644f628cde2cd584e0f44b7d493c"
+      },
+      {
+        "path": "packages/protocol/dist/canonicalization.js",
+        "bytes": 17634,
+        "sha256": "64a90cd8187af9baae18aee9cacba6d1193cb166cb1d8ecee39ac5928363178f"
+      },
+      {
+        "path": "packages/protocol/dist/diagnostics.js",
+        "bytes": 8905,
+        "sha256": "0a457213b75b7fdd896fa7bd4b37faea7ff9ddc7b97dd24b3bdb99eeca82bdbf"
+      },
+      {
+        "path": "packages/protocol/dist/index.js",
+        "bytes": 679,
+        "sha256": "a5b944cd13abc3f7a24121749ae9bb5aff34efe401df9d7460b75aa6a12552ea"
+      },
+      {
+        "path": "packages/protocol/dist/json-pointer.js",
+        "bytes": 6499,
+        "sha256": "7717c029b1c078693216c2ef856cfa18ff4486e218bfb491b56837332c242930"
+      },
+      {
+        "path": "packages/protocol/package.json",
+        "bytes": 923,
+        "sha256": "122ce900f31201d44a71a13f141dbb85a3381601c715e617d67df291b0a1f10c"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/baseline.json",
+        "bytes": 1459,
+        "sha256": "8b4c7c6ab462a90314bc4fa54a01de8b3d262b367d2e197efba83b3a698314c9"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/SHA256SUMS",
+        "bytes": 2940,
+        "sha256": "92e1c817d75ddc71e993de0dcf42ad7003738b6a59dc57905b879f872828c2cd"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/SPEC.md",
+        "bytes": 77981,
+        "sha256": "6443aed035cdced68e688402863ae3b7cc77f6dd75c8ad610831483d54b35d9c"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json",
+        "bytes": 4719,
+        "sha256": "c4b81882420d1b861dbf421da30c1447558560401f697fb7e3883fd6aaf0f7e1"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-bundle.schema.json",
+        "bytes": 20001,
+        "sha256": "19ac16176289ce03e8997eba1101e121e42f170bf8fe1934a3fb440e64d994b1"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-catalog.schema.json",
+        "bytes": 15654,
+        "sha256": "51014ab088b6a483502fd6aee5eed9fc4451be55556b6bd6220a5a6a1b610555"
+      },
+      {
+        "path": "packages/protocol/upstream/0.1.0/snapshot/schemas/desen-source.schema.json",
+        "bytes": 19588,
+        "sha256": "5ce5d541991940676ce0d3705e5b0658cd60f31025be8bfb96aec21a3116dba3"
+      },
+      {
+        "path": "packages/validator/dist/binding-contract-validation.js",
+        "bytes": 46895,
+        "sha256": "82d2d9ae24ca0283c95c914025e4f708bad7f114879460b5931a25459dc2ad19"
+      },
+      {
+        "path": "packages/validator/dist/component-contract-validation.js",
+        "bytes": 24587,
+        "sha256": "f9fc4e959275308b74b17f935caebde3eb4829052b0fc18bd6486973f96fa617"
+      },
+      {
+        "path": "packages/validator/dist/embedded-schema-validation.js",
+        "bytes": 8707,
+        "sha256": "240e76983e4700658b556a0142c42c0ce9625f4f35be70ddbaecfab9cf2438f1"
+      },
+      {
+        "path": "packages/validator/dist/execution-contract-validation.js",
+        "bytes": 76906,
+        "sha256": "2d84bfa71a348bffe94c8c91711b7a5ea683bd89d8e5a0398e00bda3d63fda4f"
+      },
+      {
+        "path": "packages/validator/dist/generated/0.1.0/structural-validators.js",
+        "bytes": 1001830,
+        "sha256": "322fb4bcaf4359bdb819b1a9ddd2baba21b628cd6c1bb39203932221a3d8bab7"
+      },
+      {
+        "path": "packages/validator/dist/index.js",
+        "bytes": 1965,
+        "sha256": "5009c889ea5eeab437f902057cdee9f84ba39c437239f1f5d222ad2ba5e05ec8"
+      },
+      {
+        "path": "packages/validator/dist/interaction-contract-validation.js",
+        "bytes": 49673,
+        "sha256": "431b473b6aa82a5af848faf74cf5459aa4375e2678f936e51c733212c42af331"
+      },
+      {
+        "path": "packages/validator/dist/schema-instance-validation.js",
+        "bytes": 86247,
+        "sha256": "169312f4eb2c304104c4321b57d0b9f07bfe88285753fd1c3f8d569e544901ca"
+      },
+      {
+        "path": "packages/validator/dist/semantic-diagnostics.js",
+        "bytes": 6799,
+        "sha256": "f2fa2b0d7a1bb5a06d57e577ec0b1922d5b924cefca5c65314a55108f123c09b"
+      },
+      {
+        "path": "packages/validator/dist/semantic-validation.js",
+        "bytes": 27165,
+        "sha256": "1d89f973a8a768771aabf203e55bc9816e1b06365553604c5808318abc483368"
+      },
+      {
+        "path": "packages/validator/dist/standalone-runtime.js",
+        "bytes": 2004,
+        "sha256": "0a3f1eca4cdffbe2ddfef0e7465f2609070e11763a6b809f643c04300b6ed81b"
+      },
+      {
+        "path": "packages/validator/dist/structural-diagnostics.js",
+        "bytes": 2879,
+        "sha256": "118eaf52b80305eecdafabfcfa3d437e4864d54cd0cf8c98f8422b2ff3dd1a0b"
+      },
+      {
+        "path": "packages/validator/dist/structural-validation.js",
+        "bytes": 6241,
+        "sha256": "316c1ea98f96ada1cad6a5cb398538fac5c10e94a03e0efa318f07c8d0459c28"
+      },
+      {
+        "path": "packages/validator/dist/uri-reference.js",
+        "bytes": 10282,
+        "sha256": "342c8e315f8b69ce965c46403c578ef1f2ddeeba8bf76d1df67348a833ae3525"
+      },
+      {
+        "path": "packages/validator/dist/validation-internals.js",
+        "bytes": 1381,
+        "sha256": "d0639abec859e8ab371a0ec3a8fc14a2942184a1f61ccb66111faf1070897114"
+      },
+      {
+        "path": "packages/validator/package.json",
+        "bytes": 2666,
+        "sha256": "05f8672a36552e2b1782fd50b658b981323916662c0b9a661ebea0963cc84276"
+      },
+      {
+        "path": "scripts/generate-editor-core-authoring-round-trip-proof.mjs",
+        "bytes": 911,
+        "sha256": "53c59f0dba60451a497dea150c775bb57be34397f1c6d994fe37406b40a1cbc8"
+      },
+      {
+        "path": "scripts/lib/atomic-proof-artifact.mjs",
+        "bytes": 3444,
+        "sha256": "4995bf5e3f1100f136a8a8553f84ab30e4c09d4bb38784a66f3d1aafae6df70d"
+      },
+      {
+        "path": "scripts/lib/editor-core-authoring-round-trip-proof.mjs",
+        "bytes": 123915,
+        "sha256": "2ecb5023b7a74ec74ffabd0fbd5f19df4a818fefda7c3edf992ffac368c6df76"
+      },
+      {
+        "path": "scripts/lib/protocol-snapshot-integrity.mjs",
+        "bytes": 11031,
+        "sha256": "8b79f21be7d1926b31c5921f82edbe370eedf9be468bd2d3fbabe246f3f0fa66"
+      },
+      {
+        "path": "scripts/verify-editor-core-authoring-round-trip.mjs",
+        "bytes": 677,
+        "sha256": "7233b8bd8ea905ad2589721b802dca742e0d1e6035ac6a192918efaa75b85e3b"
+      },
+      {
+        "path": "tests/editor-core-authoring-round-trip.test.mjs",
+        "bytes": 18354,
+        "sha256": "6b8aeec27c99a6c598037553af9c6da211c85c6f28cedd3a24adbf288765f387"
+      },
+      {
+        "path": "tsconfig.base.json",
+        "bytes": 852,
+        "sha256": "cc75fba8d1b9aaa022463527b1c4621d1754bf710814164148a36deaf08fce21"
+      }
+    ]
+  },
+  "normativeCoverage": [
+    {
+      "id": "N-012",
+      "status": "TESTED",
+      "evidence": "All 16 Source-reachable unknown-extension parsed values survive factory, mutation, JSON parse, and re-admission boundaries without core semantics."
+    },
+    {
+      "id": "N-018",
+      "status": "TESTED",
+      "evidence": "Exact frozen M06 publisher evidence excludes root authoring from digest and Bundle; paired M08-T07 authoring variants retain equal digest/projection while extension changes remain significant."
+    },
+    {
+      "id": "S-003",
+      "status": "TESTED",
+      "evidence": "README guidance recommends a reverse-domain marker while both that marker and one legal non-namespaced marker are exact-preserved without adding a naming validation rule."
+    }
+  ],
+  "nonclaims": [
+    "LEXICAL_JSON_BYTES_WHITESPACE_OR_OBJECT_MEMBER_ORDER_PRESERVATION",
+    "STORAGE_IO_SAVE_OPEN_DURABILITY_AND_PERSISTENCE_PORT_M08_T08",
+    "UNKNOWN_EXTENSION_DEFINED_CORE_SEMANTICS",
+    "DELIBERATELY_DELETED_OR_WHOLE_REPLACED_OWNER_EXTENSION_SURVIVAL",
+    "CONTINUOUS_CATALOG_SEMANTICS_AND_INVALID_NODE_MAPPING_M08_T09",
+    "ACTION_EXECUTION_AND_RUNTIME_TURNS",
+    "UNDO_REDO_SELECTION_AND_VIEWPORT_POLICY",
+    "M08_T10_TERMINAL_REACT_DOM_AND_G08_BOUNDARY",
+    "HOSTILE_JAVASCRIPT_SANDBOX",
+    "NO_PROXY_TRAP_EXECUTION_MEMBRANE",
+    "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",
+    "STREAMING_OR_PREALLOCATION_MEMORY_DOS_BOUND",
+    "P18_OR_G08_ADVANCEMENT"
+  ],
+  "reproduction": [
+    "pnpm --filter @desen/editor-core build",
+    "pnpm --filter @desen/editor-core test:authoring-round-trip",
+    "pnpm --filter @desen/editor-core test:public-package",
+    "node scripts/generate-editor-core-authoring-round-trip-proof.mjs",
+    "node scripts/verify-editor-core-authoring-round-trip.mjs",
+    "node --test tests/editor-core-authoring-round-trip.test.mjs"
+  ]
+}

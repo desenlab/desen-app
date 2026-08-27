@@ -2078,7 +2078,7 @@ edges are closed. Retained predecessor runtime files match M08-T05 receipts befo
 its ESM loader, and the process environment remain trusted authorities; the workspace module cache
 is not execution authority.
 
-The current M08-T06 CI successor contains 163 workloads and 77 proof pairs: 66 ordinary pairs and
+The historical M08-T06 CI successor contained 163 workloads and 77 proof pairs: 66 ordinary pairs and
 11 exclusive barriers. Its retained legacy projection contains 539 prerequisite segments, 3,359
 ordered leaf invocations, and 257 distinct leaves. The retained quality plan is
 `sha256:bc3a2cdc47a430b8c08fc80714fc043a877ced3a0cc62b13ce14743e0d66401d`. Scheduler-neutral
@@ -2090,11 +2090,11 @@ respectively `sha256:e9ec8cad80932a2e1ced17f72525c3e36351fc020eca342791feb0d02cf
 plans are `sha256:7e6afbee5323e174f7507827a69785d8189cb27c1c99fb64b3def258111b3ff3` and
 `sha256:533bdab2a511433e0c1bdb4fab1be27430914489d722918d7d789bdf294d4caf`.
 
-Affected ownership covers 1,080 tracked paths at
+At that historical checkpoint, affected ownership covered 1,080 tracked paths at
 `sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
-proof-owned paths; the complete projection is
-`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. Current selector and
-required-runner authorities are
+proof-owned paths; the complete projection was
+`sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`. The then-current selector
+and required-runner authorities were
 `sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975` and
 `sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`; the authenticated
 promotion artifact is
@@ -2102,7 +2102,7 @@ promotion artifact is
 
 Append-only checkpoint sequence 34 at
 `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
-artifacts and 62 current readers while preserving sequence 33, every earlier checkpoint, and every
+artifacts and 62 then-current readers while preserving sequence 33, every earlier checkpoint, and every
 predecessor artifact byte. Existing reader indexes `[50, 51, 52, 53, 54, 56, 58]` are resealed and
 new readers occupy `[60, 61]`. The dedicated checkpoint suite passes 57/57; the targeted CI
 infrastructure batch passes 235/235, required-affected contracts pass 27/27, and promotion
@@ -2115,3 +2115,54 @@ retains event/action reference resolution, Catalog compatibility, state/operatio
 component semantics, continuous diagnostics, and invalid-node mapping; and M08-T10 retains the
 terminal React/DOM boundary and G08. Action execution and runtime turns, undo/redo, selection,
 viewport policy, P-18, and G08 remain unclaimed. M08-T07 is next.
+
+## M08-T07 — Authoring isolation and unknown-extension round trip
+
+M08-T07 adds no runtime command or public export. The existing factory and all 32 immutable
+commands preserve root `authoring` as detached recursively immutable producer-owned parsed data.
+Two otherwise identical Sources that differ only in root authoring retain those distinct complete
+values while producing equal authoring-excluded transition projections and equal protocol Source
+digests. A root extension-value change still changes the digest, proving that the exclusion remains
+exactly root-authoring-only.
+
+The proof derives and exercises all 16 Source-reachable extension positions: the Source root, all
+seven closed action variants, variants, behaviors, repeats, nodes, state declarations, resource
+instances, surfaces, and Source catalog requirements. Nested arrays, objects, apparent core fields,
+recommended reverse-domain keys, and legal non-namespaced keys remain exact inert parsed values.
+Editor-core neither interprets nor rejects them solely because of their names. This is parsed JSON
+value preservation, not lexical whitespace or object-member byte-order preservation. The emitted
+declarations keep authoring and extensions recursively readonly, while the existing command types
+grant no generic replacement authority over either root field. Authoring- or extension-shaped fake
+IDs and actions do not enter allocator, identity, or action scans, and root authoring is charged to
+the full 8 MiB Source limit. Insert-supplied markers enter, move/reorder carry them, delete removes
+only the target, and whole-value replacement replaces that target's old extension while unrelated
+markers survive. Preservation is not claimed for an owner deliberately deleted or replaced.
+
+The focused suite passes 33/33 runtime cases—one factory/digest case plus one for each existing
+command—and six focused compiler-negative assertions. The cumulative built public-package suite
+passes 46/46 with 75 public consumer compiler-negative assertions, the public root remains 33
+runtime and 69 type exports, and the independent root proof passes 10/10. The verifier
+authenticates 95 tracked receipts, imports an isolated 29-file graph with 28 emitted files, and
+closes 17 exact static edges. Exact evidence lives in
+[`EDITOR-CORE-AUTHORING-ROUND-TRIP.md`](EDITOR-CORE-AUTHORING-ROUND-TRIP.md) and
+the exact 62,304-byte
+[`editor-core-0.1.0-authoring-round-trip.json`](artifacts/editor-core-0.1.0-authoring-round-trip.json)
+at `sha256:33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db`.
+
+The current CI successor contains 165 workloads and 78 proof pairs: 67 ordinary pairs and 11
+barriers. Its legacy projection contains 549 prerequisite segments, 3,435 ordered leaf invocations,
+and 260 distinct leaves. Append-only sequence 35 at
+`a2e3ef962ed37e0570cdddef64ae8d0eef2fd3f298cc2580f7ee65d8200f6fa3` authenticates 32 frozen
+artifacts and 64 current readers while leaving sequence 34 and all earlier bytes unchanged. Exactly
+twelve changed live historical readers are resealed at indexes `[50, 51, 52, 53, 54, 55, 56, 57,
+58, 59, 60, 61]`, and the T07 readers are appended at `[62, 63]`; the checkpoint suite passes
+58/58. The full current CI infrastructure suite passes 265/265; required-affected, promotion, and
+retained legacy-gate suites separately pass 27/27, 19/19, and 25/25. These are local code-owned
+receipts and make no hosted M08-T07 claim.
+
+`N-012`, `N-018`, and `S-003` advance to `TESTED`; reverse-domain naming remains guidance, not hard
+validation. `N-014` remains `TESTED`, `S-002` remains `PLANNED`, and no `P-*` or proof-gate status
+changes. Storage I/O, save/open durability, and the persistence adapter remain M08-T08. Continuous
+semantic diagnostics and invalid-node mapping remain M08-T09. The terminal React/DOM boundary,
+cross-command terminal determinism, and G08 remain M08-T10. Action execution, runtime turns,
+undo/redo, selection, viewport policy, P-18, and G08 remain unclaimed. M08-T08 is next.

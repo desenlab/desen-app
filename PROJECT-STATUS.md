@@ -851,18 +851,38 @@ isolated 29-file ESM graph with 17 static edges. M08-T07 retains authoring isola
 M08-T08 persistence, M08-T09 semantic diagnostics, and M08-T10 the terminal React/DOM boundary and
 G08. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
 
+M08-T07 completes the in-memory authoring-isolation and unknown-extension round-trip proof without
+adding a runtime command or public export. The factory and all 32 existing immutable commands
+preserve distinct root `authoring` values as detached recursively immutable producer-owned data,
+while otherwise identical Sources retain equal authoring-excluded projections and equal protocol
+Source digests. A root extension change still changes the digest, proving that the exclusion is
+root-authoring-only. Unknown parsed extension values remain exact inert data at all 16
+Source-reachable locations, including both recommended reverse-domain keys and legal
+non-namespaced keys; apparent core fields receive no core semantics. The focused 33/33 runtime
+cases and 6 compiler negatives, cumulative 46/46 public-package cases and 75 public compiler
+negatives, and independent root proof pass. Fake authoring/extension IDs and actions do not enter
+allocator, identity, or action scans; root authoring counts toward the full 8 MiB Source limit.
+Insert-supplied extensions enter, move/reorder carry them, delete removes only the target, and
+whole-value replacement replaces only that target's old extension while unrelated markers survive.
+No preservation claim applies to an owner deliberately deleted or replaced. `N-012`, `N-018`, and
+`S-003` advance to `TESTED`;
+reverse-domain naming remains guidance, not hard validation. This is parsed-value preservation,
+not lexical JSON whitespace/member-order preservation. M08-T08 retains storage I/O, save/open
+durability, and the persistence adapter; M08-T09 retains semantic diagnostics; M08-T10 retains the
+terminal React/DOM boundary and G08.
+
 ## Current milestone
 
 - Completed gates: `G00`, `G01` (`G01` is explicitly local-only), `G02`, `G03`, `G04`, `G05`,
   `G06`, `G07`
 - Completed preparation tasks: `M01-T07 — Local tracked baseline`, `M01-T08 — Remote and CI`
 - Current milestone: `M08 — UI-independent editor core`
-- Overall implementation progress: `91 / 145 tasks complete (63%)`
+- Overall implementation progress: `92 / 145 tasks complete (63%)`
 - M04 progress: `17 / 17 tasks complete (100%)`
 - M05 progress: `9 / 9 tasks complete (100%)`
 - M06 progress: `11 / 11 tasks complete (100%)`
 - M07 progress: `11 / 11 tasks complete (100%)`
-- M08 progress: `6 / 10 tasks complete (60%)`
+- M08 progress: `7 / 10 tasks complete (70%)`
 - Proof-gate progress: `8 / 13 complete`
 - Completed implementation tasks: `M02-T01 — Frozen snapshot and checksum enforcement`,
   `M02-T02 — Complete protocol traceability`, `M02-T03 — Schema-derived types`,
@@ -939,22 +959,24 @@ G08. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
   `M08-T03 — Delete, slot move, and ordered reorder commands`,
   `M08-T04 — Prop, style-part, condition, and variant editing commands`,
   `M08-T05 — State declaration and binding editing commands`,
-  `M08-T06 — Event and closed-action editing commands`
+  `M08-T06 — Event and closed-action editing commands`,
+  `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`
 - Completed operational and infrastructure tasks: `CI-01 — Secure single-pass CI orchestration`,
   `I07-01 — Current-reader checkpoint, cleanup register, and exhaustive modular shadow`,
   `I07-02 — Required-exhaustive equivalence, shared-state classification, and CI cutover`,
   `I07-03 — Fail-closed shadow affected-selector and frozen observation threshold`,
   `I07-04 — Required affected-selector promotion after the frozen observation threshold`
   (`DONE`, hosted campaign `20 / 20`, zero false negatives)
-- Next implementation task: `M08-T07 — Authoring isolation and unknown-extension round-trip preservation`
-- Status: M08 is 6/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
-  and implementation progress is 91/145. All 17 G07-due entries remain `CLOSED`;
+- Next implementation task: `M08-T08 — Persistence port and local adapter`
+- Status: M08 is 7/10, M07 is 11/11, I07-04 and G07 remain `DONE`, proof gates remain 8/13,
+  and implementation progress is 92/145. All 17 G07-due entries remain `CLOSED`;
   `DEBT-I07-007` remains `OPEN` under I07-05. M08-T01 through M08-T03 are `DONE` with tracked
   artifacts, independent root proofs, and CI inventory registration. M08-T04 is also `DONE` with
   its tracked content-edit artifact, independent root proof, and CI registration. M08-T05 is
   `DONE` with its tracked state/binding artifact, independent root proof, and CI registration.
-  M08-T06 is `DONE` with its tracked event/action artifact, independent root proof, exact
-  163-workload/77-pair CI registration, and sequence-34 reader checkpoint. Exact evidence and
+  M08-T06 is `DONE` with its tracked event/action artifact and independent root proof. M08-T07 is
+  also `DONE` with its tracked authoring-round-trip artifact, independent root proof, exact
+  165-workload/78-pair CI registration, and sequence-35 reader checkpoint. Exact evidence and
   nonclaims are recorded below.
 
 ## Completed preparation
@@ -1495,10 +1517,11 @@ the public-package suite passes 44/44 with 69 public compiler-negative assertion
 independent root proof passes 10/10. The exact 31,310-byte artifact is
 `sha256:05a7df153512b8dd0f8289991d12a9d12d79903ed8b3637ef6c8a450ca8a6be7`. The proof's sole
 direct official prerequisite is frozen M08-T05; its 81 receipts close an isolated 29-file graph of
-eight editor and 21 dependency files with 17 static edges. The reviewed CI successor topology is
-163 workloads and 77 proof pairs—66 ordinary and 11 barriers. Current sequence 34 at
+eight editor and 21 dependency files with 17 static edges. The historical M08-T06 CI successor
+topology was 163 workloads and 77 proof pairs—66 ordinary and 11 barriers. At that checkpoint,
+sequence 34 at
 `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
-artifacts and 62 current readers while preserving sequence 33 and every earlier byte; the
+artifacts and 62 then-current readers while preserving sequence 33 and every earlier byte; the
 checkpoint suite passes 57/57. Targeted CI infrastructure passes 235/235, required-affected passes
 27/27, and promotion contracts pass 19/19. No `P-*`, `N-*`, `S-*`, or proof-gate status changes.
 Implementation progress is 91/145 (63%), M08 is 6/10, proof gates remain 8/13, and M08-T07
@@ -3083,15 +3106,15 @@ M08-T06 evidence:
 - affected authority: 1,080 tracked paths at
   `sha256:6ea7a544be7ed7817c59b1d723f3a7f4d584e0c8a37def99ed70c375276cd9b8`, including 154
   proof-owned paths, with ownership projection
-  `sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`; current selector
+  `sha256:53d18a28d028ea98406e4ded063f42e408e39bfd692761a8ca53c73c9177d828`; the then-current selector
   `sha256:19d0f2c281bccf26e941c9440e18a7015d281224eed8bdf71c92ee0b5a497975`, required runner
   `sha256:6aef41c5155e041d3fd3f9f0343b1a8aefc66d530378b6e6f402f503cec4fe6d`, and promotion artifact
   `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549` are exact
-- scheduler authority: shared-state counts are 6/2/1/69/74/10/1, filesystem-policy counts are
-  145/2/15/1, and the workspace package-test inventory remains 15 scripts
-- checkpoint authority: append-only sequence 34 at
+- historical M08-T06 scheduler authority: shared-state counts were 6/2/1/69/74/10/1,
+  filesystem-policy counts were 145/2/15/1, and the workspace package-test inventory had 15 scripts
+- historical M08-T06 checkpoint authority: append-only sequence 34 at
   `f641e8d20d0f5e94cca809d330e3ad5bb0d7ffe0c3ec5defc14e0b5fca63b674` authenticates 31 frozen
-  artifacts and 62 current readers; sequence 33 and every earlier byte remain unchanged, existing
+  artifacts and 62 then-current readers; sequence 33 and every earlier byte remain unchanged, existing
   reader indexes `[50, 51, 52, 53, 54, 56, 58]` are resealed, new readers occupy `[60, 61]`, and
   the dedicated checkpoint suite passes 57/57
 - CI validation: the targeted infrastructure batch passes 235/235, required-affected contracts
@@ -3104,6 +3127,68 @@ M08-T06 evidence:
 - coverage decision: M08-T06 is `DONE`; no `P-*`, `N-*`, `S-*`, or proof-gate status changes;
   overall progress is 91/145 (63%); M08 is 6/10; proof gates remain 8/13; M08-T07 owns authoring
   isolation and unknown-extension round-trip preservation next
+
+M08-T07 evidence:
+
+- `docs/proof/EDITOR-CORE-AUTHORING-ROUND-TRIP.md`
+- `docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json`, exactly 62,304 bytes at
+  `sha256:33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db`
+- runtime boundary: proof-only coverage over the existing factory and all 32 immutable commands;
+  no runtime command or public export is added
+- authoring boundary: distinct complete root-authoring values remain detached and recursively
+  immutable through every transition while authoring-excluded projections and Source digests stay
+  equal; a root-extension differential still changes the digest
+- extension boundary: all 16 Source-reachable extension positions preserve exact parsed values,
+  including recommended reverse-domain and legal non-namespaced keys, without assigning core
+  semantics or creating a hard naming validator rule
+- scan and limit boundary: fake authoring/extension IDs and actions do not enter allocator,
+  identity, or action scans; root authoring counts toward the full 8 MiB Source limit
+- lifecycle boundary: insert-supplied markers enter, move/reorder carry them, delete removes only
+  the target, whole-value replacement replaces the target's old extension, and unrelated markers
+  survive; deliberately deleted or replaced owners are outside the preservation claim
+- local proof: focused authoring-round-trip cases pass 33/33 with 6 compiler-negative assertions;
+  the public-package suite passes 46/46 with 75 public compiler-negative assertions; the public
+  root remains 33 runtime and 69 type exports; the independent root proof passes 10/10; 95 exact
+  tracked receipts authenticate an isolated 29-file graph with 28 emitted files and 17 static edges
+- current CI authority: 165 workloads / 78 proof pairs, with 67 ordinary pairs and 11 barriers;
+  the legacy projection has 549 prerequisite segments at
+  `sha256:cff21c5dd6e483906cb70a86fe475cf5df913b8721de199dac2e16135905c98e`, 3,435 ordered leaf
+  invocations at `sha256:a05490316408114e99a790018bedbfcb8783286883ddbdd47376251273cf0425`,
+  and 260 distinct leaves at
+  `sha256:302317ed31512f705377338d780dcc5dd352c81cde37f6ff06f91f0db32693fd`; the retained quality
+  plan is `sha256:c6cf645412661a81e2976e88080d23d6fe0fa4889ef4b07432e4a47de684e25d`
+- current CI digests: neutral inventory
+  `sha256:8220259aa2a44774d192ea2420f4c2f8423c9dedd93a1fcf9b34340a0ab0dcd3`, impact graph
+  `sha256:5aa20b4fb87decc51221bca5a900677d7dfddd1e61c068d5e91420253a3236b2`, workload set
+  `sha256:9ea3b95ab6f034473765beb9edb1482532bb1a0b4e05f630c403d38d8df0daef`, ordered projection
+  `sha256:fc588358d8fa3b2e7c2cd9f3a280715d7db34089a41a2fae2c3484d18c040278`, required plan
+  `sha256:5484324b6d22a5e58bce2431f35382aeeb4e97095c96524e5bdb6211f8650a9e`, and shadow plan
+  `sha256:4beeca9ed27e2e7942951cf0cf014fb7bebca2bcf2f8f69ff0819580aeff3c87`
+- current affected authority: 1,088 tracked paths at
+  `sha256:227cb892270c669646eec89a44243af8e3da5a51bfec8f8e560e2d765c0f2e79`, including 156
+  proof-owned paths, with projection
+  `sha256:d43335b91aa9f3da0571ed2e32e92ea65da81bbcc5efee1aa32bdac30967217d`; current selector
+  `sha256:cbd1cce71828ad4ad1c22ede5e6152e5e3130031afebcb1d9c23e32ba55eb7dc`, required runner
+  `sha256:9da49a38efa09a48ded3290ba9c2ec4ae57a967d325e61320f39be561b93f9a4`, and promotion artifact
+  `sha256:76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549` are exact
+- scheduler authority: shared-state counts are 6/2/1/69/76/10/1, filesystem-policy counts are
+  147/2/15/1, and the workspace package-test inventory remains 15 scripts
+- checkpoint authority: append-only sequence 35 at
+  `a2e3ef962ed37e0570cdddef64ae8d0eef2fd3f298cc2580f7ee65d8200f6fa3` authenticates 32 frozen
+  artifacts and 64 current readers while preserving sequence 34 and every earlier byte; changed
+  historical reader indexes `[50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]` are resealed, T07
+  readers occupy `[62, 63]`, and the dedicated checkpoint suite passes 58/58
+- CI validation: the full current CI infrastructure suite passes 265/265; required-affected,
+  promotion, and retained legacy-gate suites separately pass 27/27, 19/19, and 25/25
+- evidence boundary: these are local code-owned proof/CI results and make no hosted M08-T07 claim
+- evidence boundary: exact parsed JSON values are preserved; input whitespace, lexical bytes, and
+  object-member byte order are not claimed
+- scope nonclaims: M08-T08 retains storage I/O, save/open durability, and the persistence adapter;
+  M08-T09 retains continuous semantic diagnostics and invalid-node mapping; M08-T10 retains the
+  terminal React/DOM boundary, cross-command terminal determinism, and G08
+- coverage decision: M08-T07 is `DONE`; `N-012`, `N-018`, and `S-003` are `TESTED`; no `P-*` or
+  proof-gate status changes; overall progress is 92/145 (63%); M08 is 7/10; proof gates remain
+  8/13; M08-T08 owns persistence next
 
 ## Status vocabulary
 
