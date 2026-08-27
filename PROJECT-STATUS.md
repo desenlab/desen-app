@@ -905,13 +905,15 @@ at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`. Th
 `S-002` to `TESTED`, P-18 to `PROVEN`, G08 to `DONE`, proof gates to 9/13, and M08 to 10/10.
 
 M09-T01 now establishes the first React/Vite Desen App shell without borrowing editor behavior from
-later tasks. It provides a guided projects home, three exact project/surface route forms,
-same-origin History API navigation, fixed inert fixture search, explicit fail-closed recovery,
-responsive presentation, and keyboard/accessibility behavior. The supplied Figma wireframe informs
-only information hierarchy and guidance. The exact 9,795-byte artifact is
-`sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`; the app suite passes
+later tasks. It provides a full-viewport project gallery, project-level surface galleries, a
+centered inert surface frame, three exact project/surface route forms, same-origin History API
+navigation, fixed inert fixture search, explicit fail-closed recovery, responsive presentation,
+and keyboard/accessibility behavior. The M09 UX wireframe informs information architecture and task
+boundaries, while the earlier Desen product exploration informs the visual language. Neither Figma
+source is executable input or proof authority. The exact 12,118-byte artifact is
+`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`; the app suite passes
 43/43, the independent mutation suite passes 8/8, and checkpoint sequence 40 passes 63/63 at
-`sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0`. These are local
+`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`. These are local
 receipts and do not claim a required-gate or hosted-CI pass.
 
 ## Current milestone
@@ -3369,12 +3371,13 @@ M08-T10 / G08 evidence:
 M09-T01 evidence:
 
 - `docs/proof/DESEN-APP-SHELL-NAVIGATION.md`
-- `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json`, exactly 9,795 bytes at
-  `sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`
+- `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json`, exactly 12,118 bytes at
+  `sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`
 - prerequisite authority: the exact completed 325,549-byte M08-T10/G08 terminal-integration
   artifact is authenticated before any M09-T01 task claim
-- shell authority: the private React 19/Vite 8 application owns a guided projects home and only
-  `/projects`, `/projects/:projectId`, and `/projects/:projectId/surfaces/:surfaceId`
+- shell authority: the private React 19/Vite 8 application owns a full-viewport project gallery,
+  project-level surface galleries, a centered inert surface frame, and only `/projects`,
+  `/projects/:projectId`, and `/projects/:projectId/surfaces/:surfaceId`
 - navigation boundary: same-origin History API transitions and browser traversal preserve exact
   canonical routes; ambiguous, encoded-alias, query, fragment, credential, cross-origin, and
   unknown inputs fail closed with explicit recovery
@@ -3382,16 +3385,19 @@ M09-T01 evidence:
   navigation; user project creation remains disabled and explained
 - UX boundary: responsive layouts, landmarks, native controls, current-page semantics, a skip
   target, route-heading focus, visible keyboard focus, and reduced-motion handling are present;
-  Figma supplied hierarchy and guidance only, not executable or proof authority
+  the M09 UX wireframe supplied information architecture and task-boundary input, while the earlier
+  Desen product exploration supplied visual-language input; neither is executable or proof
+  authority
 - package boundary: the app has only React and React DOM runtime dependencies; TypeScript AST
-  inspection pins every static import/re-export to reviewed packages or tracked relative TS/TSX/CSS
-  targets and rejects dynamic/indirect import authority plus extra executable HTML entries
+  inspection pins every static import/re-export to reviewed packages or tracked relative
+  TS/TSX/CSS/SVG targets and rejects dynamic/indirect import authority plus extra executable HTML
+  entries; the five repository-owned SVGs add no icon-package dependency
 - local proof: build, typecheck, and lint pass; the focused app suite passes 43/43 and the
-  independent deterministic mutation suite passes 8/8 across 19 tracked task files
+  independent deterministic mutation suite passes 8/8 across 24 tracked task files
 - CI authority: the current successor contains 174 workloads and 82 proof pairs, split into 71
   ordinary pairs and 11 barriers; sequence 40 passes 63/63 and authenticates 36 frozen artifacts
   plus 72 readers at
-  `sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0`
+  `sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`
 - evidence boundary: these are local task and CI-infrastructure receipts; no required-gate or
   hosted-CI result is inferred before its own execution
 - scope nonclaims: no Catalog-driven panel or layer tree, real adapter canvas, selection/inspector,

@@ -28,7 +28,7 @@ const EXPECTED_CATEGORY_COUNTS = Object.freeze({
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
   FROZEN_INPUT: 126,
-  PACKAGE_OR_APPLICATION: 439,
+  PACKAGE_OR_APPLICATION: 444,
   SHARED_PROOF_INFRASTRUCTURE: 201,
   PROJECT_DOCUMENTATION: 118,
   REPOSITORY_POLICY: 11,
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1135 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1140 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1135 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1135);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1140);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -305,6 +305,11 @@ test("the reviewed M09 successor preserves the historical I07-04 ownership proje
     "scripts/verify-editor-core-terminal-integration.mjs",
     "tests/editor-core-terminal-integration.test.mjs",
     "apps/desen-app/index.html",
+    "apps/desen-app/src/assets/breadcrumb-separator.svg",
+    "apps/desen-app/src/assets/desen-logo.svg",
+    "apps/desen-app/src/assets/plus.svg",
+    "apps/desen-app/src/assets/settings.svg",
+    "apps/desen-app/src/assets/theme.svg",
     "apps/desen-app/src/application.module.css",
     "apps/desen-app/src/application.tsx",
     "apps/desen-app/src/main.tsx",

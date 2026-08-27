@@ -2322,23 +2322,27 @@ M09-T01 is next.
 ## M09-T01 — Desen App shell and project navigation (local evidence)
 
 The implementation introduces the first React/Vite Desen App surface behind the exact
-completed G08 prerequisite. It owns a guided projects home, the three bounded route forms
-`/projects`, `/projects/:projectId`, and `/projects/:projectId/surfaces/:surfaceId`, same-origin
-History API navigation, browser traversal, exact fixture project/surface resolution, fixture-only
-search, explicit not-found recovery, responsive styling, and keyboard/accessibility behavior.
+completed G08 prerequisite. It owns a full-viewport project gallery, project-level surface
+galleries, a centered inert surface frame, the three bounded route forms `/projects`,
+`/projects/:projectId`, and `/projects/:projectId/surfaces/:surfaceId`, same-origin History API
+navigation, browser traversal, exact fixture project/surface resolution, fixture-only search,
+explicit not-found recovery, responsive styling, and keyboard/accessibility behavior.
 
-The Figma wireframe is design input only. It is not proof authority, an executable dependency, or a
-semantic oracle. The task does not connect a Catalog, render a real adapter canvas, expose a
-component panel, layer tree, selection, or inspector, mutate or persist a Source, calculate
-diagnostics, create user projects, run a surface, publish a revision, or activate a channel.
+The M09 UX wireframe supplies information-architecture and task-boundary input, while the earlier
+Desen product exploration supplies visual-language input. Neither Figma source is proof authority,
+an executable dependency, or a semantic oracle. The task does not connect a Catalog, render a real
+adapter canvas, expose a component panel, layer tree, selection, or inspector, mutate or persist a
+Source, calculate diagnostics, create user projects, run a surface, publish a revision, or activate
+a channel.
 
-The exact 9,795-byte task artifact is
+The exact 12,118-byte task artifact is
 `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
-`sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`. The application
-build, typecheck, and lint pass locally; the focused application suite passes 43/43 and the
-independent root suite passes 8/8. Append-only reader checkpoint sequence 40 passes 63/63 and
-closes at `sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0`
-with 36 frozen artifacts and 72 readers while preserving every predecessor artifact receipt.
+`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`. It records 24 tracked
+files, including five repository-owned SVG assets, and 43 runtime cases. The application build,
+typecheck, and lint pass locally; the focused application suite passes 43/43 and the independent
+root suite passes 8/8. Append-only reader checkpoint sequence 40 passes 63/63 and closes at
+`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806` with 36 frozen
+artifacts and 72 readers while preserving every predecessor artifact receipt.
 
 These local receipts make no required-gate or hosted CI claim. M09-T01 is `DONE` in the dedicated
 status documents, advancing implementation progress to 96/145 (66%) and M09 to 1/14 while leaving

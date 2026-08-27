@@ -724,15 +724,19 @@ actions visibly disabled and explained. Native landmarks and controls, a skip li
 semantics, visible keyboard focus, route-heading focus, reduced-motion handling, and responsive CSS
 make the bounded navigation usable without inventing editor behavior.
 
-M09-T01 imports React and React DOM only. It does not import editor-core, editor-web, runtime-react,
-the reference Catalog, publisher, or control-plane code. It therefore has no Source mutation,
-Catalog connection, real-adapter canvas, selection/inspector, persistence, diagnostics, Design/Run,
+The full-viewport project gallery, project-level surface galleries, and centered inert surface
+frame are navigation composition only. M09-T01's only external runtime package imports are React
+and React DOM; its five local SVG imports are repository-owned inert assets rather than an icon
+package or executable capability. It does not import editor-core, editor-web, runtime-react, the
+reference Catalog, publisher, or control-plane code. It therefore has no Source mutation, Catalog
+connection, real-adapter canvas, selection/inspector, persistence, diagnostics, Design/Run,
 publication, or activation authority. Later M09 tasks must connect those capabilities through their
 public package boundaries and establish their own evidence.
 
-The M09 Figma wireframe is UX input for hierarchy and guidance, not architecture, proof, runtime,
-or protocol authority. Repository-owned TypeScript, React structure, CSS Modules, and automated
-user-observable tests remain authoritative for the implementation.
+The M09 UX wireframe is UX input for information architecture and task boundaries, while the
+earlier Desen product exploration is visual-language input. Neither Figma source is architecture,
+proof, runtime, or protocol authority. Repository-owned TypeScript, React structure, CSS Modules,
+local SVG assets, and automated user-observable tests remain authoritative for the implementation.
 
 ### Reference Host Web
 

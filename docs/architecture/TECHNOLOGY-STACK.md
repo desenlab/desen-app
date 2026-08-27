@@ -47,9 +47,10 @@ only by their owning tasks and require an ADR when they affect public capability
 
 The first Desen App slice uses React's external-store contract over an application-owned History
 API helper. It adds no router, query cache, UI kit, icon package, or CSS framework. Routes and inert
-fixtures are deliberately finite, and CSS Modules plus `--desen-app-*` variables keep application
-chrome separate from future Catalog-rendered canvas tokens. This choice is internal to the Web
-application and does not alter a public capability contract.
+fixtures are deliberately finite. Five repository-owned inert SVG assets provide shell icons
+without adding an icon-package or executable dependency, and CSS Modules plus `--desen-app-*`
+variables keep application chrome separate from future Catalog-rendered canvas tokens. This choice
+is internal to the Web application and does not alter a public capability contract.
 
 ## Explicit constraints
 

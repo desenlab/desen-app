@@ -322,16 +322,16 @@ The complete current reviewed digest set is:
 - selector-only impact graph:
   `f3b3f8532709f17addf3895357e8e6d5a96b8a149c2aa60cde731f733e58c639`;
 - affected ownership:
-  1,135 paths at `a9196feadee301157bcea9dd2aaf62a4f96333a26a4b1a19b4ff0adb437ec5ef`, with
+  1,140 paths at `1d338215b607f3ded5500bd3e382eb6fc685b5dcb9c52d09210d656ed05d6393`, with
   164 proof-owned reader paths and projection
-  `d56149960c53cb3fcbb84764c40c4c43c0a686ca55553c2f169746dd173bc4f7`;
+  `838aff55123559e2a5db0cbd938f625bcdaa41c5b7eaa5f688592212833622a4`;
 - required plan:
   `cfe691545a5c122e0afb81fe06abcb7c4abdb26d8c3ea35a5c8dfc787769c4aa`;
 - shadow plan:
   `f5cb39741015bf730f1d36656a057bad691c226870a6105a3f04911ecbc5bb32`;
 - current selector and required-runner authorities:
-  `d1444474eb2333bd20927ff42c0c3e1590b97469adaa3747c76233c33608482c` and
-  `17fa0e7c2a0a61079327c1e211baf4d8d70905302f309804a6e05ae3e7767581`; and
+  `c150610d858c8b47f54546c5ebcd004ea4f7c2ce213cdceeff884d889a463223` and
+  `64379bb92a3a439dbfcf0baf0df2f45a2bd42ccc083450b81cb298bbb3b8e0a7`; and
 - promotion artifact:
   `76a29908843c0bb9a4ca5ad74b5bc94383c3fa21463ce81e98bf53e8f01d7549`.
 
@@ -664,8 +664,8 @@ T09 root 15,066 bytes / `sha256:574467231c3dbf4fd60b350da7f39c008d39072d935f461c
 T10 proof 90,708 bytes / `sha256:53942712a9a1c40a1076b46912d13feb247eda59405790f4f211c495c44e895c`,
 and T10 root 14,830 bytes / `sha256:9cc2fb35ddb5d4b15371f8edcba07837e02a605169a609ef5eeb5da7e3ef0431`.
 M09-T01 appends sequence 40 at
-`eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0`. It preserves
-sequences 1–39 and all 35 predecessor artifact receipts byte-exact, appends the 9,795-byte
+`b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`. It preserves
+sequences 1–39 and all 35 predecessor artifact receipts byte-exact, appends the 12,118-byte
 M09-T01 artifact at index 35 and its proof/root readers at `[70, 71]`, advances live T09/T10
 source-reader indexes `[66, 67, 68]` for current README-bound source bytes, and reauthenticates the
 byte-exact unchanged T10 root receipt at `[69]`. The chain now authenticates 36 frozen artifacts
@@ -709,11 +709,12 @@ The exact 325,549-byte M08-T10 artifact is
 `docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md`. Historical sequence 38 pins its initial 84,005-byte proof reader at
 `sha256:46354aae84ddf65314ad3cd8cfbefc33245e4de495ecda577ca296185f749ca2` and its 13,088-byte
 root reader at `sha256:f1cd04fbccbba01469bfbacad3154c2ba99e130745dbbd1bcf0397230982dff9`.
-The exact 9,795-byte M09-T01 artifact is
+The exact 12,118-byte M09-T01 artifact is
 `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
-`sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`, with reviewed report
-`docs/proof/DESEN-APP-SHELL-NAVIGATION.md`. The focused application suite passes 43/43 and the
-independent root mutation suite passes 8/8. These local task receipts and sequence 40 make no
+`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`, with reviewed report
+`docs/proof/DESEN-APP-SHELL-NAVIGATION.md`. It records 24 tracked task files, including five
+repository-owned SVG assets, and 43 runtime cases. The focused application suite passes 43/43 and
+the independent root mutation suite passes 8/8. These local task receipts and sequence 40 make no
 required-gate or hosted M09-T01 claim.
 The historical T07-integrated CI infrastructure suite
 passed 265/265; its dedicated checkpoint, required-affected, promotion, and retained legacy-gate

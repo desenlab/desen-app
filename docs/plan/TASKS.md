@@ -1423,19 +1423,21 @@ is next.
 | G09     | NOT_STARTED | M09-T01–M09-T14          | User authors, tests, saves, and publishes sign-in visually                      |
 
 M09-T01 establishes the first application-owned React/Vite shell behind the exact completed G08
-prerequisite. It provides a guided projects home, the closed `/projects`,
-`/projects/:projectId`, and `/projects/:projectId/surfaces/:surfaceId` route profile, same-origin
-History API navigation, browser traversal, fixed inert fixture search, explicit fail-closed
-not-found recovery, responsive presentation, and keyboard/accessibility behavior. The supplied
-Figma wireframe informed information hierarchy and product guidance only; it is not executable
-input, architecture, or proof authority.
+prerequisite. It provides a full-viewport project gallery, project-level surface galleries, a
+centered inert surface frame, the closed `/projects`, `/projects/:projectId`, and
+`/projects/:projectId/surfaces/:surfaceId` route profile, same-origin History API navigation,
+browser traversal, fixed inert fixture search, explicit fail-closed not-found recovery, responsive
+presentation, and keyboard/accessibility behavior. The M09 UX wireframe informed information
+architecture and task boundaries, while the earlier Desen product exploration informed the visual
+language. Neither Figma source is executable input, architecture, or proof authority.
 
 The application build, typecheck, and lint pass locally; the focused application suite passes
-43/43 and the independent mutation suite passes 8/8. The exact 9,795-byte artifact is
+43/43 and the independent mutation suite passes 8/8. The exact 12,118-byte artifact is
 `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
-`sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`, covering 19 tracked
-files and 43 runtime cases. Append-only checkpoint sequence 40 passes 63/63 and closes at
-`sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0`, authenticating 36
+`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`, covering 24 tracked
+files, including five repository-owned SVG assets, and 43 runtime cases. Append-only checkpoint
+sequence 40 passes 63/63 and closes at
+`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806`, authenticating 36
 frozen artifacts and 72 readers. The current CI successor contains 174 workloads and 82 proof
 pairs, split into 71 ordinary pairs and 11 barriers. These local receipts make no required-gate or
 hosted-CI claim.

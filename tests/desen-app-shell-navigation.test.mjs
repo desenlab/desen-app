@@ -19,6 +19,7 @@ const ARTIFACT = "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json";
 const PREREQUISITE = "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json";
 const NAVIGATION = "apps/desen-app/src/project-navigation.ts";
 const APPLICATION = "apps/desen-app/src/application.tsx";
+const LOGO = "apps/desen-app/src/assets/desen-logo.svg";
 const INDEX = "apps/desen-app/index.html";
 const PACKAGE = "apps/desen-app/package.json";
 const ROOT_PACKAGE = "package.json";
@@ -92,6 +93,13 @@ test("[shell] records the closed route, fixture, guidance, and accessibility pro
   assert.equal(built.artifact.application.shell.keyboardFocusVisible, true);
   assert.equal(built.artifact.application.shell.routeHeadingFocus, true);
   assert.equal(built.artifact.application.shell.reducedMotionHonored, true);
+  assert.deepEqual(built.artifact.application.shell.localSvgAssets, [
+    "apps/desen-app/src/assets/breadcrumb-separator.svg",
+    "apps/desen-app/src/assets/desen-logo.svg",
+    "apps/desen-app/src/assets/plus.svg",
+    "apps/desen-app/src/assets/settings.svg",
+    "apps/desen-app/src/assets/theme.svg",
+  ]);
   assert.equal(built.artifact.evidence.tests.positiveAndNegativeCoverage, true);
   assert.deepEqual(built.artifact.evidence.tests.runtimeCases, {
     "project-navigation.test.ts": 30,
@@ -123,7 +131,7 @@ test("[boundary] keeps the first app slice free of editor, renderer, persistence
   assert.equal(built.artifact.boundary.imports.desenPackageImports, 0);
   assert.equal(built.artifact.boundary.imports.arbitraryExecutableImports, 0);
   assert.equal(built.artifact.boundary.imports.arbitraryExecutableHtmlEntries, 0);
-  assert.equal(built.artifact.boundary.trackedFiles, 19);
+  assert.equal(built.artifact.boundary.trackedFiles, 24);
   assert.equal(built.artifact.nonclaims.length, 4);
 });
 
@@ -305,6 +313,14 @@ test("[mutation] rejects prerequisite, route, package, and scope-boundary drift"
       fileOverrides: new Map([
         [APPLICATION, Buffer.from(`${application}\ncreateDesenEditor();\n`)],
       ]),
+    }),
+    expectedError("SCOPE_BOUNDARY_DRIFT"),
+  );
+
+  const logo = await readFile(path.join(ROOT, LOGO), "utf8");
+  await assert.rejects(
+    buildDesenAppShellNavigationEvidence({
+      fileOverrides: new Map([[LOGO, Buffer.from(logo.replace("</svg>", "<script/>\n</svg>"))]]),
     }),
     expectedError("SCOPE_BOUNDARY_DRIFT"),
   );

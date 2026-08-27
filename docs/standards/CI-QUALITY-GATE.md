@@ -75,9 +75,9 @@ id/label/command/argument equivalence projection is pinned as
 The selector-only semantic impact graph is pinned independently as
 `sha256:f3b3f8532709f17addf3895357e8e6d5a96b8a149c2aa60cde731f733e58c639`.
 M09-T01 adds one verifier/root pair, so proof ownership contains 164 exact reader paths. The live
-ownership authority covers 1,135 tracked paths at
-`sha256:a9196feadee301157bcea9dd2aaf62a4f96333a26a4b1a19b4ff0adb437ec5ef`; its complete ownership
-projection is `sha256:d56149960c53cb3fcbb84764c40c4c43c0a686ca55553c2f169746dd173bc4f7`.
+ownership authority covers 1,140 tracked paths. Its exact path set is
+`sha256:1d338215b607f3ded5500bd3e382eb6fc685b5dcb9c52d09210d656ed05d6393`, and its complete
+ownership projection is `sha256:838aff55123559e2a5db0cbd938f625bcdaa41c5b7eaa5f688592212833622a4`.
 The prior 1,119-path, 162-proof-path M08-T10 ownership receipts remain historical rather than being
 presented as the M09 successor.
 The preceding M07-T03 retained/neutral workload-set equality receipt remains historically pinned as
@@ -90,8 +90,8 @@ non-authoritative shadow form is pinned separately as
 `sha256:f5cb39741015bf730f1d36656a057bad691c226870a6105a3f04911ecbc5bb32`.
 The historical M08-T10 selector and required-runner authorities remain authenticated by the frozen
 I07-04 promotion artifact. The reviewed M09-T01 selector is
-`sha256:d1444474eb2333bd20927ff42c0c3e1590b97469adaa3747c76233c33608482c`, and its required-runner
-authority is `sha256:17fa0e7c2a0a61079327c1e211baf4d8d70905302f309804a6e05ae3e7767581`.
+`sha256:c150610d858c8b47f54546c5ebcd004ea4f7c2ce213cdceeff884d889a463223`, and its required-runner
+authority is `sha256:64379bb92a3a439dbfcf0baf0df2f45a2bd42ccc083450b81cb298bbb3b8e0a7`.
 
 The reviewed workspace package-test inventory contains 16 test scripts and is pinned as
 `sha256:4d7c4232cc0e31519f2f58e9ebeb355405e493594406aee99ed2a78ce0c796ab`. One
@@ -835,11 +835,11 @@ The exact 325,549-byte M08-T10 artifact is
 `docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md`. Historical sequence 38 pins its initial 84,005-byte proof reader at
 `sha256:46354aae84ddf65314ad3cd8cfbefc33245e4de495ecda577ca296185f749ca2` and its 13,088-byte
 root reader at `sha256:f1cd04fbccbba01469bfbacad3154c2ba99e130745dbbd1bcf0397230982dff9`.
-The exact 9,795-byte M09-T01 task artifact is
+The exact 12,118-byte M09-T01 task artifact is
 `docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json` at
-`sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`, with task report
+`sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`, with task report
 `docs/proof/DESEN-APP-SHELL-NAVIGATION.md`. Append-only checkpoint sequence 40 closes at
-`sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0` with 36 frozen
+`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806` with 36 frozen
 artifacts and 72 readers. It preserves sequences 1–39 and all 35 predecessor artifact receipts,
 appends the M09 artifact at index 35 and readers at `[70, 71]`, advances only live source-reader
 indexes `[66, 67, 68]`, and reauthenticates unchanged reader `[69]`.

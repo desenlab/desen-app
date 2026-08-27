@@ -3670,16 +3670,18 @@ This file records implementation discoveries without changing the frozen DESEN 0
   product's project list, browser URL grammar, navigation library, search behavior, workspace
   chrome, responsive breakpoints, or focus-management policy. A surface identity therefore does
   not authorize route aliases, project discovery, default project selection, or silent fallback.
-  A design file can inform product hierarchy and language but cannot become protocol or proof
-  authority.
+  Design files can inform product hierarchy, task boundaries, and visual language but cannot become
+  protocol or proof authority.
 - Implementation decision: M09-T01 admits only `/projects`, `/projects/:projectId`, and
   `/projects/:projectId/surfaces/:surfaceId`, with bounded lowercase kebab-case segments. The bare
   root is replaced with `/projects`. App-owned transitions stay on the current origin, contain no
   credentials, query, or fragment, and publish one private event after History API mutation;
   `popstate` owns browser traversal. Unknown routes, projects, and surfaces render explicit
   not-found guidance rather than guessing an alias. Search observes only two fixed inert fixtures.
-  Project creation and Catalog connection remain explained disabled actions. The Figma wireframe
-  supplies UX input only and is neither bundled runtime data nor evidence authority.
+  Project creation and Catalog connection remain explained disabled actions. The M09 UX wireframe
+  supplies information-architecture and task-boundary input, while the earlier Desen product
+  exploration supplies visual-language input. Neither Figma source is bundled runtime data or
+  evidence authority.
 - Future action: Later M09 tasks may replace fixture summaries with authenticated application
   state and connect editor, Catalog, canvas, diagnostics, persistence, Run, and publish behavior
   through their public boundaries. They must retain explicit route/failure ownership or document

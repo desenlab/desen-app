@@ -21,19 +21,19 @@ describe("Desen App application shell", () => {
     document.body.replaceChildren();
   });
 
-  it("renders a guided projects home with explicit landmarks and current navigation", async () => {
+  it("renders an app-native projects gallery with explicit landmarks and current navigation", () => {
     renderApplication();
 
     expect(screen.getByRole("banner")).toBeTruthy();
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeTruthy();
     const main = screen.getByRole("main");
     expect(main).toBeTruthy();
-    expect(screen.getByRole("contentinfo")).toBeTruthy();
     expect(screen.getByRole("heading", { level: 1, name: "Projects" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "All projects" })).toBeTruthy();
 
     const projectsLink = screen.getByRole("link", { name: "Projects" });
     expect(projectsLink.getAttribute("aria-current")).toBe("page");
-    expect(screen.getByText("Capability catalogs").getAttribute("aria-disabled")).toBe("true");
+    expect(screen.getByLabelText("Capability catalogs").getAttribute("aria-disabled")).toBe("true");
     const skipLink = screen.getByRole("link", { name: "Skip to main content" });
     expect(skipLink.getAttribute("href")).toBe("#desen-app-content");
     fireEvent.click(skipLink);
@@ -53,10 +53,7 @@ describe("Desen App application shell", () => {
     expect(screen.getByRole("status").textContent).toBe("2 projects");
     expect(screen.getByRole("heading", { level: 3, name: "Account app" })).toBeTruthy();
     expect(screen.getByRole("heading", { level: 3, name: "Checkout pilot" })).toBeTruthy();
-    expect(
-      screen.getByRole("complementary", { name: "A project is not a blank canvas." }),
-    ).toBeTruthy();
-    expect(await screen.findByText("One source")).toBeTruthy();
+    expect(screen.getByLabelText("Preview data boundary")).toBeTruthy();
     expect(document.title).toBe("Projects · DESEN");
   });
 
@@ -85,18 +82,25 @@ describe("Desen App application shell", () => {
 
     fireEvent.click(screen.getByRole("link", { name: "Open project" }));
 
-    expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
+    expect(window.location.pathname).toBe("/projects/account-app");
     const projectHeading = screen.getByRole("heading", { level: 1, name: "Account app" });
     await waitFor(() => {
       expect(document.activeElement).toBe(projectHeading);
     });
-    expect(document.title).toBe("Sign-in · Account app · DESEN");
+    expect(document.title).toBe("Account app · DESEN");
 
     const surfaceNavigation = screen.getByRole("navigation", { name: "Account app surfaces" });
     const signInLink = within(surfaceNavigation).getByRole("link", { name: /Sign-in/ });
-    expect(signInLink.getAttribute("aria-current")).toBe("page");
+    fireEvent.click(signInLink);
+    expect(window.location.pathname).toBe("/projects/account-app/surfaces/sign-in");
+    expect(screen.getByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
+    expect(document.title).toBe("Sign-in · Account app · DESEN");
 
-    fireEvent.click(within(surfaceNavigation).getByRole("link", { name: /Recovery/ }));
+    fireEvent.click(screen.getByRole("link", { name: "Account app" }));
+    const refreshedSurfaceNavigation = screen.getByRole("navigation", {
+      name: "Account app surfaces",
+    });
+    fireEvent.click(within(refreshedSurfaceNavigation).getByRole("link", { name: /Recovery/ }));
     expect(window.location.pathname).toBe("/projects/account-app/surfaces/recovery");
     expect(screen.getByRole("heading", { level: 2, name: "Recovery" })).toBeTruthy();
     expect(document.title).toBe("Recovery · Account app · DESEN");
@@ -136,7 +140,7 @@ describe("Desen App application shell", () => {
     );
     expect(within(breadcrumb).getByText("Sign-in").getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("heading", { level: 2, name: "Sign-in" })).toBeTruthy();
-    expect(screen.getAllByText("account.sign-in")).toHaveLength(2);
+    expect(screen.getAllByText("account.sign-in")).toHaveLength(1);
     expect(
       screen.getByText(
         "This shell does not mutate Source data, render a canvas or publish a revision yet.",

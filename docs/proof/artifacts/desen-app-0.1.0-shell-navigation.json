@@ -59,7 +59,14 @@
       "routeHeadingFocus": true,
       "landmarksAndCurrentPageSemantics": true,
       "disabledFutureActionsExplained": true,
-      "appTokenPrefix": "--desen-app-"
+      "appTokenPrefix": "--desen-app-",
+      "localSvgAssets": [
+        "apps/desen-app/src/assets/breadcrumb-separator.svg",
+        "apps/desen-app/src/assets/desen-logo.svg",
+        "apps/desen-app/src/assets/plus.svg",
+        "apps/desen-app/src/assets/settings.svg",
+        "apps/desen-app/src/assets/theme.svg"
+      ]
     }
   },
   "boundary": {
@@ -83,6 +90,36 @@
           "path": "apps/desen-app/src/application.tsx",
           "specifier": "./project-data.js",
           "resolvedPath": "apps/desen-app/src/project-data.ts"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/breadcrumb-separator.svg",
+          "resolvedPath": "apps/desen-app/src/assets/breadcrumb-separator.svg"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/desen-logo.svg",
+          "resolvedPath": "apps/desen-app/src/assets/desen-logo.svg"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/plus.svg",
+          "resolvedPath": "apps/desen-app/src/assets/plus.svg"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/settings.svg",
+          "resolvedPath": "apps/desen-app/src/assets/settings.svg"
+        },
+        {
+          "kind": "import",
+          "path": "apps/desen-app/src/application.tsx",
+          "specifier": "./assets/theme.svg",
+          "resolvedPath": "apps/desen-app/src/assets/theme.svg"
         },
         {
           "kind": "import",
@@ -144,7 +181,7 @@
       "arbitraryExecutableImports": 0,
       "arbitraryExecutableHtmlEntries": 0
     },
-    "trackedFiles": 19,
+    "trackedFiles": 24,
     "trackedReceipts": [
       {
         "path": "apps/desen-app/package.json",
@@ -163,18 +200,43 @@
       },
       {
         "path": "apps/desen-app/README.md",
-        "bytes": 2893,
-        "sha256": "40be943cf2084568f273781446ff568f7da546e9195bce63cef45116edb7beef"
+        "bytes": 3279,
+        "sha256": "d2402242b81cde419c5a2343c86af4d6df2ac5a0c87b0eb84761cd0269bea04e"
+      },
+      {
+        "path": "apps/desen-app/src/assets/breadcrumb-separator.svg",
+        "bytes": 419,
+        "sha256": "095027d1707a74b5b904a5f4d1aea3db113a4f96efd380477b67731a4132cd11"
+      },
+      {
+        "path": "apps/desen-app/src/assets/desen-logo.svg",
+        "bytes": 564,
+        "sha256": "f96d5554a5b1a3c0755214a488cced06a5d47e37ba243fe425e8b617b186c27a"
+      },
+      {
+        "path": "apps/desen-app/src/assets/plus.svg",
+        "bytes": 427,
+        "sha256": "114cc5ac1e52d62b5a754d4e99099a51b98eb6227330e4e3e49bab6e3c0df1ff"
+      },
+      {
+        "path": "apps/desen-app/src/assets/settings.svg",
+        "bytes": 1080,
+        "sha256": "93d8579fb0902913ccbb5e2329643220a1694444489f034f2bbd118a5a5898f6"
+      },
+      {
+        "path": "apps/desen-app/src/assets/theme.svg",
+        "bytes": 973,
+        "sha256": "e4fb6c23bbd2fe4040867f391234ea8653473038f12d1d6d66059b7dbc9feb49"
       },
       {
         "path": "apps/desen-app/src/application.tsx",
-        "bytes": 20835,
-        "sha256": "39b5a00d1e1526de368d3ffe2a3ebd9c0c281b814e897b5b6d599f8f45351797"
+        "bytes": 17119,
+        "sha256": "06f929ec04c00b1b041f289803826bb2de8abb5506e01ed639b2ad3ef9598755"
       },
       {
         "path": "apps/desen-app/src/application.module.css",
-        "bytes": 19235,
-        "sha256": "d215aa56b046a38cacb6bfbbed2e0528d3a0e0107f682b619bf306fe970f29a5"
+        "bytes": 16608,
+        "sha256": "8feb0ed032e2be68f71a90fdde3fd4babddeaddcaac3349eb0dad4ab9a182d2a"
       },
       {
         "path": "apps/desen-app/src/main.tsx",
@@ -193,13 +255,13 @@
       },
       {
         "path": "apps/desen-app/src/styles.css",
-        "bytes": 1605,
-        "sha256": "23baa927bde1533c2c09af79b7b855ef1e5830c7f894e702d8000e82864e9449"
+        "bytes": 1704,
+        "sha256": "e2ec462676f0852844c6f6fe7d6e24b180615be19fddcf4ce83d504d3c06bcd9"
       },
       {
         "path": "apps/desen-app/test/application.test.tsx",
-        "bytes": 8873,
-        "sha256": "10b1e54541e437b9e669afec5d5dfad7cdc69c1b949f3683f76cb90f63a0d380"
+        "bytes": 9176,
+        "sha256": "fd1b850804c4f6c96464a228731676c313ce26c1476a2c977cdbf6237329d040"
       },
       {
         "path": "apps/desen-app/test/main-lifecycle.test.tsx",
@@ -223,8 +285,8 @@
       },
       {
         "path": "scripts/lib/desen-app-shell-navigation-proof.mjs",
-        "bytes": 29329,
-        "sha256": "670217b11b327d7e98fe0ade8105fd954e1d66086f592af1b18df756458f8863"
+        "bytes": 30756,
+        "sha256": "6465e17ba687b9e4d7873ed5309aebb56a0b989cb719d984a9594a3707ff6a98"
       },
       {
         "path": "scripts/generate-desen-app-shell-navigation-proof.mjs",
@@ -238,8 +300,8 @@
       },
       {
         "path": "tests/desen-app-shell-navigation.test.mjs",
-        "bytes": 14659,
-        "sha256": "e740838c73a3d1f7f7c5d92ad45ac2be2147cdaba51389f2da35b09e1626e52c"
+        "bytes": 15313,
+        "sha256": "6b6a62ea51b15c9ebb52596b3822479b2d714897bf28934c198ecd3892542d2c"
       }
     ]
   },

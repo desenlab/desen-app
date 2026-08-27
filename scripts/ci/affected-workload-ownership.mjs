@@ -83,15 +83,15 @@ const CI_POLICY_EXACT_PATHS = new Set([
 const PROJECT_DOCUMENTATION_ROOT_PATHS = new Set(["PROJECT-STATUS.md", "README.md"]);
 
 /** Reviewed count for the live M09-T01 append-only successor authority. */
-export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1135;
+export const EXPECTED_AFFECTED_TRACKED_PATH_COUNT = 1140;
 
 /** Reviewed SHA-256 of the ordered complete tracked-path set. */
 export const EXPECTED_AFFECTED_TRACKED_PATH_SET_SHA256 =
-  "a9196feadee301157bcea9dd2aaf62a4f96333a26a4b1a19b4ff0adb437ec5ef";
+  "1d338215b607f3ded5500bd3e382eb6fc685b5dcb9c52d09210d656ed05d6393";
 
 /** Reviewed SHA-256 of every exact path, category, disposition, and proof owner. */
 export const EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256 =
-  "d56149960c53cb3fcbb84764c40c4c43c0a686ca55553c2f169746dd173bc4f7";
+  "838aff55123559e2a5db0cbd938f625bcdaa41c5b7eaa5f688592212833622a4";
 
 /** Exact number of verifier/root-test inputs owned by the current 82 proof units. */
 export const EXPECTED_AFFECTED_PROOF_OWNED_PATH_COUNT = 164;

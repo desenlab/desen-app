@@ -515,7 +515,7 @@ test("the reviewed chain authenticates its immutable genesis and current readers
   );
   assert.equal(
     PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256[39],
-    "eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0",
+    "b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806",
   );
   assert.deepEqual(PROOF_READER_CHECKPOINT_REVIEWED_CHAIN_SHA256.slice(0, 7), [
     "5fbf737da2edbac5cd88ba5897013cbe213c32c5e3344b585014e65fa1a707e8",
@@ -705,8 +705,8 @@ test("sequence forty preserves frozen receipts, reseals live editor readers, and
   assert.deepEqual(sequenceForty.artifacts[35], {
     task: "M09-T01",
     path: "docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json",
-    bytes: 9795,
-    sha256: "3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb",
+    bytes: 12118,
+    sha256: "57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83",
   });
   assert.deepEqual(
     sequenceForty.readers.slice(0, sequenceThirtyNine.readers.length).map(identity),
@@ -752,20 +752,20 @@ test("sequence forty preserves frozen receipts, reseals live editor readers, and
       task: "M09-T01",
       role: "proof-library",
       path: "scripts/lib/desen-app-shell-navigation-proof.mjs",
-      bytes: 29329,
-      sha256: "670217b11b327d7e98fe0ade8105fd954e1d66086f592af1b18df756458f8863",
+      bytes: 30756,
+      sha256: "6465e17ba687b9e4d7873ed5309aebb56a0b989cb719d984a9594a3707ff6a98",
     },
     {
       task: "M09-T01",
       role: "root-test",
       path: "tests/desen-app-shell-navigation.test.mjs",
-      bytes: 14659,
-      sha256: "e740838c73a3d1f7f7c5d92ad45ac2be2147cdaba51389f2da35b09e1626e52c",
+      bytes: 15313,
+      sha256: "6b6a62ea51b15c9ebb52596b3822479b2d714897bf28934c198ecd3892542d2c",
     },
   ]);
   assert.equal(
     calculateProofReaderCheckpointSha256(sequenceForty),
-    "eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0",
+    "b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806",
   );
 });
 

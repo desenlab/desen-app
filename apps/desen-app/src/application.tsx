@@ -9,6 +9,11 @@ import {
   subscribeDesenAppNavigation,
 } from "./project-navigation.js";
 import { DESEN_APP_PROJECTS, findDesenAppProject, findDesenAppSurface } from "./project-data.js";
+import breadcrumbSeparatorUrl from "./assets/breadcrumb-separator.svg";
+import desenLogoUrl from "./assets/desen-logo.svg";
+import plusUrl from "./assets/plus.svg";
+import settingsUrl from "./assets/settings.svg";
+import themeUrl from "./assets/theme.svg";
 import styles from "./application.module.css";
 
 import type { MouseEvent, ReactNode } from "react";
@@ -60,61 +65,93 @@ function SkipToMainContentLink() {
 
 function AppHeader({ route }: Readonly<{ readonly route: DesenAppRoute }>) {
   const projectsActive = route.kind === "projects" || route.kind === "project";
+  const project = route.kind === "project" ? findDesenAppProject(route.projectId) : undefined;
+  const surface =
+    project === undefined || route.kind !== "project" || route.surfaceId === undefined
+      ? undefined
+      : findDesenAppSurface(project, route.surfaceId);
+
   return (
     <header className={styles.header}>
       <div className={styles.headerInner}>
         <AppLink className={styles.brand} href="/projects">
-          <span className={styles.brandMark} aria-hidden="true">
-            D
-          </span>
-          <span>DESEN</span>
+          <img alt="" height="24" src={desenLogoUrl} width="24" />
+          <span className={styles.visuallyHidden}>DESEN</span>
         </AppLink>
 
-        <nav aria-label="Primary" className={styles.primaryNav}>
-          <AppLink
-            ariaCurrent={projectsActive ? "page" : undefined}
-            className={`${styles.navLink} ${projectsActive ? styles.navLinkActive : ""}`}
-            href="/projects"
-          >
-            Projects
-          </AppLink>
+        {project === undefined ? (
+          <div className={styles.pathCluster}>
+            <nav aria-label="Primary" className={styles.pathDock}>
+              <span className={styles.pathMuted}>OBSS Draft</span>
+              <img alt="" height="12" src={breadcrumbSeparatorUrl} width="12" />
+              <AppLink
+                ariaCurrent={projectsActive ? "page" : undefined}
+                className={styles.pathCurrent}
+                href="/projects"
+              >
+                Projects
+              </AppLink>
+            </nav>
+            {route.kind === "projects" ? (
+              <button
+                aria-describedby="new-project-unavailable"
+                aria-label="New project"
+                className={styles.addButton}
+                disabled
+                type="button"
+              >
+                <img alt="" height="12" src={plusUrl} width="12" />
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <nav aria-label="Breadcrumb" className={styles.pathDock}>
+            <AppLink className={styles.pathMutedLink} href="/projects">
+              Projects
+            </AppLink>
+            <img alt="" height="12" src={breadcrumbSeparatorUrl} width="12" />
+            {surface === undefined ? (
+              <span aria-current="page" className={styles.pathCurrent}>
+                {project.name}
+              </span>
+            ) : (
+              <>
+                <AppLink
+                  className={styles.pathMutedLink}
+                  href={createDesenAppProjectPath(project.id)}
+                >
+                  {project.name}
+                </AppLink>
+                <img alt="" height="12" src={breadcrumbSeparatorUrl} width="12" />
+                <span aria-current="page" className={styles.pathCurrent}>
+                  {surface.name}
+                </span>
+              </>
+            )}
+          </nav>
+        )}
+
+        <div className={styles.utilityDock} aria-label="Workspace utilities">
+          <span aria-disabled="true" aria-label="Theme" className={styles.iconTool} title="Theme">
+            <img alt="" height="24" src={themeUrl} width="24" />
+          </span>
           <span
             aria-disabled="true"
-            className={styles.navDisabled}
-            title="Available in a later M09 slice"
+            aria-label="Capability catalogs"
+            className={styles.iconTool}
+            title="Capability catalogs · available in a later M09 slice"
           >
-            Capability catalogs
+            <img alt="" height="24" src={settingsUrl} width="24" />
           </span>
-        </nav>
-
-        <div className={styles.profile} aria-label="Preview workspace">
-          <span className={styles.profileAvatar} aria-hidden="true">
-            DW
-          </span>
-          <span className={styles.profileCopy}>
-            <strong>Demo workspace</strong>
-            <span>Local shell preview</span>
+          <span className={styles.profileAvatar} aria-label="Selman Ay">
+            SA
           </span>
         </div>
+        <span className={styles.visuallyHidden} id="new-project-unavailable">
+          Project creation unlocks with catalog setup.
+        </span>
       </div>
     </header>
-  );
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  id,
-}: Readonly<{
-  readonly eyebrow: string;
-  readonly title: string;
-  readonly id?: string | undefined;
-}>) {
-  return (
-    <div className={styles.sectionHeading}>
-      <p className={styles.eyebrow}>{eyebrow}</p>
-      <h2 id={id}>{title}</h2>
-    </div>
   );
 }
 
@@ -126,37 +163,29 @@ function SurfaceState({ state }: Readonly<{ readonly state: DesenAppSurfaceSumma
 }
 
 function ProjectCard({ project }: Readonly<{ readonly project: DesenAppProjectSummary }>) {
-  const destination = createDesenAppProjectPath(project.id, project.surfaces[0]?.id);
+  const destination = createDesenAppProjectPath(project.id);
   return (
     <article className={styles.projectCard}>
-      <div className={styles.projectCardTopline}>
-        <div>
+      <div aria-hidden="true" className={styles.projectPreview}>
+        <div className={styles.previewTopline}>
+          <span>{project.surfaces.length} surfaces</span>
+          <span>Preview data</span>
+        </div>
+        <div className={styles.previewDiagram}>
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+      <div className={styles.projectCardFooter}>
+        <div className={styles.projectCardTitle}>
           <h3>{project.name}</h3>
-          <p>{project.description}</p>
+          <p>{project.catalog ?? "No catalog connected"}</p>
         </div>
         <AppLink className={styles.secondaryButton} href={destination}>
           {project.surfaces.length > 0 ? "Open project" : "Review setup"}
         </AppLink>
       </div>
-
-      <dl className={styles.projectStats}>
-        <div>
-          <dt>Surfaces</dt>
-          <dd>{project.surfaces.length}</dd>
-        </div>
-        <div>
-          <dt>Catalog</dt>
-          <dd>{project.catalog ?? "Not connected"}</dd>
-        </div>
-        <div>
-          <dt>Shell status</dt>
-          <dd>{project.navigationStatus}</dd>
-        </div>
-        <div>
-          <dt>Data source</dt>
-          <dd>Inert preview</dd>
-        </div>
-      </dl>
 
       {project.surfaces.length > 0 ? (
         <ul aria-label={`${project.name} surfaces`} className={styles.surfaceChips}>
@@ -174,114 +203,8 @@ function ProjectCard({ project }: Readonly<{ readonly project: DesenAppProjectSu
   );
 }
 
-const WORKFLOW_STEPS = Object.freeze([
-  Object.freeze({
-    number: "01",
-    title: "Connect",
-    detail: "Choose one trusted capability package and exact version.",
-  }),
-  Object.freeze({
-    number: "02",
-    title: "Compose",
-    detail: "Build through declared components, slots and bindings.",
-  }),
-  Object.freeze({
-    number: "03",
-    title: "Verify + publish",
-    detail: "Run fixtures, review diagnostics, then activate safely.",
-  }),
-]);
-
-function WorkflowGuide() {
-  return (
-    <aside className={styles.guideCard} aria-labelledby="bounded-surface-title">
-      <p className={styles.eyebrow}>Start with a bounded surface</p>
-      <h2 id="bounded-surface-title">A project is not a blank canvas.</h2>
-      <p className={styles.guideIntro}>
-        It starts with trusted capabilities, explicit slots, fixtures and a safe release channel.
-      </p>
-      <ol className={styles.workflowSteps}>
-        {WORKFLOW_STEPS.map((step) => (
-          <li key={step.number}>
-            <span className={styles.stepNumber}>{step.number}</span>
-            <span>
-              <strong>{step.title}</strong>
-              <small>{step.detail}</small>
-            </span>
-          </li>
-        ))}
-      </ol>
-    </aside>
-  );
-}
-
-function RoutePreview() {
-  return (
-    <section aria-labelledby="route-preview-title" className={styles.activitySection}>
-      <SectionHeading
-        eyebrow="Guided preview"
-        id="route-preview-title"
-        title="Routes you can inspect"
-      />
-      <ol className={styles.activityList}>
-        <li>
-          <span>
-            <strong>Account app / Sign-in</strong>
-            <small>Exact project and surface route</small>
-          </span>
-          <span>Fixture</span>
-        </li>
-        <li>
-          <span>
-            <strong>Account app / Recovery</strong>
-            <small>Breadcrumb and active surface state</small>
-          </span>
-          <span>Fixture</span>
-        </li>
-        <li>
-          <span>
-            <strong>Checkout pilot</strong>
-            <small>Setup-safe project route with no surfaces</small>
-          </span>
-          <span>Fixture</span>
-        </li>
-      </ol>
-    </section>
-  );
-}
-
-function ProjectContract() {
-  return (
-    <aside className={styles.contractCard} aria-labelledby="project-contract-title">
-      <p className={styles.eyebrow}>Project contract</p>
-      <h2 className={styles.visuallyHidden} id="project-contract-title">
-        Project contract
-      </h2>
-      <dl>
-        <div>
-          <dt>One source</dt>
-          <dd>Design and Run use the same document.</dd>
-        </div>
-        <div>
-          <dt>Trusted code</dt>
-          <dd>Only registered capabilities execute.</dd>
-        </div>
-        <div>
-          <dt>Visible truth</dt>
-          <dd>Fidelity and diagnostics are never hidden.</dd>
-        </div>
-        <div>
-          <dt>Safe release</dt>
-          <dd>Publish and activation stay separate.</dd>
-        </div>
-      </dl>
-    </aside>
-  );
-}
-
 function ProjectsHome() {
   const searchHelpId = useId();
-  const newProjectHelpId = useId();
   const [query, setQuery] = useState("");
   const normalizedQuery = query.trim().toLocaleLowerCase("en-US");
   const projects = DESEN_APP_PROJECTS.filter((project) => {
@@ -298,14 +221,18 @@ function ProjectsHome() {
   });
 
   return (
-    <>
-      <section className={styles.hero} aria-labelledby="projects-title">
-        <div>
-          <p className={styles.eyebrow}>Your workspace</p>
-          <h1 data-route-heading id="projects-title" tabIndex={-1}>
-            Projects
-          </h1>
-          <p>Open a bounded product surface or continue from a trusted starting point.</p>
+    <section className={styles.projectsHome} aria-labelledby="projects-title">
+      <h1 className={styles.visuallyHidden} data-route-heading id="projects-title" tabIndex={-1}>
+        Projects
+      </h1>
+
+      <div className={styles.collectionToolbar}>
+        <div className={styles.collectionHeading}>
+          <div>
+            <h2 id="all-projects-title">All projects</h2>
+            <p>Open a bounded product surface in OBSS Draft.</p>
+          </div>
+          <span className={styles.previewBadge}>Preview data</span>
         </div>
         <div className={styles.heroActions}>
           <label className={styles.searchField}>
@@ -318,68 +245,39 @@ function ProjectsHome() {
               value={query}
             />
           </label>
-          <button
-            aria-describedby={newProjectHelpId}
-            className={styles.primaryButton}
-            disabled
-            type="button"
-          >
-            New project
-          </button>
-          <p className={styles.availabilityNote} id={newProjectHelpId}>
-            Project creation unlocks with catalog setup.
-          </p>
         </div>
         <p className={styles.visuallyHidden} id={searchHelpId}>
           Results update as you type.
         </p>
-      </section>
-
-      <aside className={styles.previewNotice} aria-label="Preview data boundary">
-        <strong>Navigation preview</strong>
-        <span>
-          Project names and metadata are inert examples. No Source, save, diagnostics, revision or
-          publication state is being read.
-        </span>
-      </aside>
-
-      <div className={styles.projectsLayout}>
-        <section aria-labelledby="recent-projects-title">
-          <div className={styles.resultsHeading}>
-            <SectionHeading
-              eyebrow="Workspace"
-              id="recent-projects-title"
-              title="Recent projects"
-            />
-            <p aria-live="polite" role="status">
-              {projects.length} {projects.length === 1 ? "project" : "projects"}
-            </p>
-          </div>
-          {projects.length > 0 ? (
-            <div className={styles.projectList}>
-              {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <p className={styles.eyebrow}>No matches</p>
-              <h3>No project matches “{query.trim()}”.</h3>
-              <p>Try a project, catalog or surface name.</p>
-              <button className={styles.textButton} onClick={() => setQuery("")} type="button">
-                Clear search
-              </button>
-            </div>
-          )}
-        </section>
-        <WorkflowGuide />
       </div>
 
-      <div className={styles.lowerGrid}>
-        <RoutePreview />
-        <ProjectContract />
+      <p className={styles.previewNotice} aria-label="Preview data boundary">
+        Project names and metadata are inert examples. No Source, save, diagnostics, revision or
+        publication state is being read.
+      </p>
+
+      <div className={styles.resultsHeading}>
+        <p aria-live="polite" role="status">
+          {projects.length} {projects.length === 1 ? "project" : "projects"}
+        </p>
       </div>
-    </>
+      {projects.length > 0 ? (
+        <div className={styles.projectList}>
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
+      ) : (
+        <div className={styles.emptyState}>
+          <p>No matches</p>
+          <h3>No project matches “{query.trim()}”.</h3>
+          <span>Try a project, catalog or surface name.</span>
+          <button className={styles.textButton} onClick={() => setQuery("")} type="button">
+            Clear search
+          </button>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -390,138 +288,106 @@ function ProjectShell({
   readonly project: DesenAppProjectSummary;
   readonly selectedSurface: DesenAppSurfaceSummary | undefined;
 }>) {
-  return (
-    <>
-      <nav aria-label="Breadcrumb" className={styles.breadcrumbs}>
-        <ol>
-          <li>
-            <AppLink href="/projects">Projects</AppLink>
-          </li>
-          {selectedSurface === undefined ? (
-            <li aria-current="page">{project.name}</li>
-          ) : (
-            <>
-              <li>
-                <AppLink href={createDesenAppProjectPath(project.id)}>{project.name}</AppLink>
-              </li>
-              <li aria-current="page">{selectedSurface.name}</li>
-            </>
-          )}
-        </ol>
-      </nav>
+  if (selectedSurface === undefined) {
+    return (
+      <section className={styles.surfaceGallery} aria-labelledby="surfaces-title">
+        <h1 className={styles.visuallyHidden} data-route-heading id="project-title" tabIndex={-1}>
+          {project.name}
+        </h1>
 
-      <section className={styles.projectHero} aria-labelledby="project-title">
-        <div>
-          <p className={styles.eyebrow}>Project shell</p>
-          <h1 data-route-heading id="project-title" tabIndex={-1}>
-            {project.name}
-          </h1>
-          <p>{project.description}</p>
+        <div className={styles.collectionToolbar}>
+          <div className={styles.collectionHeading}>
+            <div>
+              <h2 id="surfaces-title">All surfaces</h2>
+              <p>{project.description}</p>
+            </div>
+            <span className={styles.previewBadge}>Preview data</span>
+          </div>
         </div>
-        <div className={styles.projectHealth}>
-          <span className={styles.healthDot} aria-hidden="true" />
+
+        {project.surfaces.length > 0 ? (
+          <nav aria-label={`${project.name} surfaces`}>
+            <ul className={styles.surfaceGalleryList}>
+              {project.surfaces.map((surface) => (
+                <li key={surface.id}>
+                  <AppLink
+                    className={styles.surfaceCard}
+                    href={createDesenAppProjectPath(project.id, surface.id)}
+                  >
+                    <span aria-hidden="true" className={styles.surfacePreview}>
+                      <span className={styles.surfacePreviewBar} />
+                      <span className={styles.surfacePreviewField} />
+                      <span className={styles.surfacePreviewField} />
+                      <span className={styles.surfacePreviewAction} />
+                    </span>
+                    <span className={styles.surfaceCardFooter}>
+                      <span>
+                        <strong>{surface.name}</strong>
+                        <small>{surface.capabilityId}</small>
+                      </span>
+                      <SurfaceState state={surface.state} />
+                    </span>
+                  </AppLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : (
+          <div className={styles.setupEmpty}>
+            <p>No surfaces yet.</p>
+            <h2 id="workspace-title">Connect a capability catalog to begin.</h2>
+            <span>
+              A DESEN surface starts from an explicit, versioned capability—not an unrestricted
+              blank canvas.
+            </span>
+            <button className={styles.primaryButton} disabled type="button">
+              Connect catalog
+            </button>
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  return (
+    <section className={styles.surfaceEditor} aria-labelledby="workspace-title">
+      <h1 className={styles.visuallyHidden} data-route-heading id="project-title" tabIndex={-1}>
+        {project.name}
+      </h1>
+
+      <div className={styles.surfaceFrame}>
+        <div className={styles.surfaceFrameHeader}>
+          <div>
+            <h2 id="workspace-title">{selectedSurface.name}</h2>
+            <span>{selectedSurface.capabilityId}</span>
+          </div>
+          <SurfaceState state={selectedSurface.state} />
+        </div>
+
+        <div className={styles.surfaceFrameBody}>
+          <div className={styles.framePlaceholder} aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+          <p>Navigation ready</p>
+          <span>Adapter canvas is not available in this slice.</span>
+        </div>
+
+        <div className={styles.boundaryNote}>
+          <strong>Preview data</strong>
           <span>
-            <strong>{project.navigationStatus}</strong>
-            <small>Inert preview data</small>
+            This shell does not mutate Source data, render a canvas or publish a revision yet.
           </span>
         </div>
-      </section>
-
-      <div className={styles.shellLayout}>
-        <aside className={styles.surfaceSidebar} aria-labelledby="surfaces-title">
-          <div className={styles.sidebarHeading}>
-            <p className={styles.eyebrow}>Project structure</p>
-            <h2 id="surfaces-title">Surfaces</h2>
-          </div>
-          {project.surfaces.length > 0 ? (
-            <nav aria-label={`${project.name} surfaces`}>
-              <ul className={styles.surfaceNavigation}>
-                {project.surfaces.map((surface) => {
-                  const active = surface.id === selectedSurface?.id;
-                  return (
-                    <li key={surface.id}>
-                      <AppLink
-                        ariaCurrent={active ? "page" : undefined}
-                        className={`${styles.surfaceNavLink} ${active ? styles.surfaceNavLinkActive : ""}`}
-                        href={createDesenAppProjectPath(project.id, surface.id)}
-                      >
-                        <span>
-                          <strong>{surface.name}</strong>
-                          <small>{surface.capabilityId}</small>
-                        </span>
-                        <SurfaceState state={surface.state} />
-                      </AppLink>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          ) : (
-            <div className={styles.sidebarEmpty}>
-              <p>No surfaces yet.</p>
-              <span>Connect a trusted catalog before composing.</span>
-            </div>
-          )}
-        </aside>
-
-        <section className={styles.workspaceStage} aria-labelledby="workspace-title">
-          {selectedSurface === undefined ? (
-            <div className={styles.workspaceEmpty}>
-              <p className={styles.eyebrow}>
-                {project.catalog === undefined ? "Catalog required" : "Choose a surface"}
-              </p>
-              <h2 id="workspace-title">
-                {project.catalog === undefined
-                  ? "Connect a capability catalog to begin."
-                  : "Choose a surface to open its workspace."}
-              </h2>
-              <p>
-                {project.catalog === undefined
-                  ? "A DESEN project starts from explicit, versioned capabilities—not an unrestricted blank canvas."
-                  : "The project shell keeps your starting decision clear before authoring tools appear."}
-              </p>
-              <button className={styles.primaryButton} disabled type="button">
-                {project.catalog === undefined ? "Connect catalog" : "Select a surface"}
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className={styles.workspaceToolbar}>
-                <div>
-                  <p className={styles.eyebrow}>Authoring workspace</p>
-                  <h2 id="workspace-title">{selectedSurface.name}</h2>
-                  <span>{selectedSurface.capabilityId}</span>
-                </div>
-                <SurfaceState state={selectedSurface.state} />
-              </div>
-              <div className={styles.workspaceCanvas}>
-                <div className={styles.workspaceMessage}>
-                  <span className={styles.workspaceMonogram} aria-hidden="true">
-                    {selectedSurface.name.slice(0, 1)}
-                  </span>
-                  <p className={styles.eyebrow}>Navigation ready</p>
-                  <h3>Your authoring workspace has a stable home.</h3>
-                  <p>
-                    Component browsing and the real adapter canvas will join this shell in the next
-                    focused slices.
-                  </p>
-                </div>
-              </div>
-              <div className={styles.boundaryNote}>
-                <span className={styles.healthDot} aria-hidden="true" />
-                <p>
-                  <strong>Honest boundary</strong>
-                  <span>
-                    This shell does not mutate Source data, render a canvas or publish a revision
-                    yet.
-                  </span>
-                </p>
-              </div>
-            </>
-          )}
-        </section>
       </div>
-    </>
+
+      <div className={styles.editorStatus}>
+        <span>{project.navigationStatus}</span>
+        <span aria-hidden="true">·</span>
+        <span>{selectedSurface.detail}</span>
+      </div>
+    </section>
   );
 }
 
@@ -611,11 +477,6 @@ export function DesenAppApplication() {
       <main className={styles.main} id="desen-app-content" tabIndex={-1}>
         <RouteView route={route} />
       </main>
-      <footer className={styles.footer}>
-        <span>DESEN workspace · local preview</span>
-        <span>Exact routes · explicit boundaries</span>
-        <span>M09 shell preview · no live data</span>
-      </footer>
     </div>
   );
 }

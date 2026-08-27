@@ -22,6 +22,11 @@ const APP_PATHS = Object.freeze([
   "apps/desen-app/tsconfig.json",
   "apps/desen-app/index.html",
   "apps/desen-app/README.md",
+  "apps/desen-app/src/assets/breadcrumb-separator.svg",
+  "apps/desen-app/src/assets/desen-logo.svg",
+  "apps/desen-app/src/assets/plus.svg",
+  "apps/desen-app/src/assets/settings.svg",
+  "apps/desen-app/src/assets/theme.svg",
   "apps/desen-app/src/application.tsx",
   "apps/desen-app/src/application.module.css",
   "apps/desen-app/src/main.tsx",
@@ -43,6 +48,9 @@ const PROOF_PATHS = Object.freeze([
 const TRACKED_PATHS = Object.freeze([...APP_PATHS, ...PROOF_PATHS]);
 const SOURCE_PATHS = Object.freeze(
   APP_PATHS.filter((relativePath) => /\/src\/(?:.+\.(?:ts|tsx)|.+\.css)$/u.test(relativePath)),
+);
+const SVG_ASSET_PATHS = Object.freeze(
+  APP_PATHS.filter((relativePath) => /\/src\/assets\/.+\.svg$/u.test(relativePath)),
 );
 const TEST_PATHS = Object.freeze(
   APP_PATHS.filter((relativePath) => /\/test\//u.test(relativePath)),
@@ -362,6 +370,28 @@ function verifyShellSemantics(files) {
   );
   const readme = decodeUtf8(files.get("apps/desen-app/README.md"), "apps/desen-app/README.md");
 
+  const svgAssets = Object.freeze(
+    [
+      ["apps/desen-app/src/assets/breadcrumb-separator.svg", 12, undefined],
+      ["apps/desen-app/src/assets/desen-logo.svg", 24, 'id="Desys"'],
+      ["apps/desen-app/src/assets/plus.svg", 12, undefined],
+      ["apps/desen-app/src/assets/settings.svg", 24, undefined],
+      ["apps/desen-app/src/assets/theme.svg", 24, undefined],
+    ].map(([relativePath, size, identity]) => {
+      const source = decodeUtf8(files.get(relativePath), relativePath);
+      requireText(source, `<svg`, relativePath);
+      requireText(source, `viewBox="0 0 ${size} ${size}"`, relativePath);
+      requireText(source, 'xmlns="http://www.w3.org/2000/svg"', relativePath);
+      if (identity !== undefined) requireText(source, identity, relativePath);
+      rejectText(
+        source,
+        /<(?:script|foreignObject)\b|\s(?:on[a-z][a-z0-9_-]*|href|xlink:href)\s*=|\bjavascript\s*:/iu,
+        relativePath,
+      );
+      return relativePath;
+    }),
+  );
+
   for (const required of [
     "useSyncExternalStore",
     "aria-current",
@@ -442,6 +472,7 @@ function verifyShellSemantics(files) {
     landmarksAndCurrentPageSemantics: true,
     disabledFutureActionsExplained: true,
     appTokenPrefix: "--desen-app-",
+    localSvgAssets: svgAssets,
   });
 }
 
@@ -515,10 +546,12 @@ function resolveTrackedSourceImport(importerPath, specifier) {
   const candidates =
     extension === ".js"
       ? [`${resolved.slice(0, -3)}.ts`, `${resolved.slice(0, -3)}.tsx`]
-      : [".ts", ".tsx", ".css"].includes(extension)
+      : [".ts", ".tsx", ".css", ".svg"].includes(extension)
         ? [resolved]
         : [];
-  const trackedTargets = candidates.filter((candidate) => SOURCE_PATHS.includes(candidate));
+  const trackedTargets = candidates.filter(
+    (candidate) => SOURCE_PATHS.includes(candidate) || SVG_ASSET_PATHS.includes(candidate),
+  );
   if (trackedTargets.length !== 1) {
     fail(
       "IMPORT_BOUNDARY_DRIFT",

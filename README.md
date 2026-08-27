@@ -607,16 +607,18 @@ at `sha256:5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b`.
 M08-T10 and G08 remain `DONE`; `S-002` is `TESTED`, P-18 is `PROVEN`, and proof gates remain 9/13.
 Legacy retirement remains owned by I07-05.
 
-M09-T01 adds the first React/Vite Desen App shell: a guided projects home, exact project and surface
-routes, same-origin History API navigation, fixed inert fixture search, explicit not-found recovery,
-responsive presentation, and keyboard/accessibility behavior. The supplied Figma wireframe informed
-hierarchy and guidance only; it is neither executable input nor proof authority.
+M09-T01 adds the first React/Vite Desen App shell: a full-viewport project gallery, project-level
+surface galleries, a centered inert surface frame, exact project and surface routes, same-origin
+History API navigation, fixed inert fixture search, explicit not-found recovery, responsive
+presentation, and keyboard/accessibility behavior. The M09 UX wireframe informed information
+architecture and task boundaries, while the earlier Desen product exploration informed the visual
+language. Neither Figma source is executable input or proof authority.
 
 The focused application suite passes 43/43 and the independent mutation suite passes 8/8. Exact
-evidence is the 9,795-byte
+evidence is the 12,118-byte
 [`desen-app-0.1.0-shell-navigation.json`](docs/proof/artifacts/desen-app-0.1.0-shell-navigation.json)
-at `sha256:3a7ff5d58815eb4a731ce10271a39bc8567d846e57c1aaf6303beee624465fdb`; sequence 40 closes at
-`sha256:eedd62fc8e56534a032034280e0189b9ab76445bd89ef2dc735aabc14e1d67c0` with 36 frozen
+at `sha256:57113cb87f2d6e889dc0a8ceb472a0e81be450f43b808502a71cff96ddb67c83`; sequence 40 closes at
+`sha256:b71b67c31b299fa082aad8e1bee67e1c4f02b132c39b7f0a810c6c219f2c6806` with 36 frozen
 artifacts and 72 readers. These are local receipts, not a required-gate or hosted-CI result. This
 slice does not claim a Catalog panel, layer tree, real adapter canvas, Source editing, persistence,
 Design/Run execution, publication, or activation.
