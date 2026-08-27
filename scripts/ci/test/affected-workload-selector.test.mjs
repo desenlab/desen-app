@@ -253,9 +253,7 @@ test("continuous validation selects the exact T03-T07-connected successor closur
 
 test("terminal integration selects every formal editor parent and frozen P-18 runtime proof", async () => {
   const plan = createShadowAffectedSelection(
-    await affectedBoundary(currentPaths(), [
-      "scripts/verify-editor-core-terminal-integration.mjs",
-    ]),
+    await affectedBoundary(currentPaths(), ["scripts/verify-editor-core-terminal-integration.mjs"]),
   );
   assert.equal(plan.effectiveScope, "AFFECTED");
   assert.deepEqual(plan.ownerProofUnitIds, ["editor-core-terminal-integration"]);
