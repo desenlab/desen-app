@@ -27,6 +27,7 @@ const SOURCE_FIXTURE_PATH =
 const CATALOG_FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/web.catalog.json";
 const PACKAGE_PATH = "packages/editor-core/package.json";
+const PACKAGE_README_PATH = "packages/editor-core/README.md";
 const INDEX_SOURCE_PATH = "packages/editor-core/src/index.ts";
 const PERSISTENCE_SOURCE_PATH = "packages/editor-core/src/persistence.ts";
 const CONTINUOUS_SOURCE_PATH = "packages/editor-core/src/continuous-validation.ts";
@@ -136,7 +137,7 @@ const TRACKED_PATHS = Object.freeze([
   CATALOG_FIXTURE_PATH,
   "tsconfig.base.json",
   PACKAGE_PATH,
-  "packages/editor-core/README.md",
+  PACKAGE_README_PATH,
   "packages/editor-core/tsconfig.json",
   "packages/editor-core/tsconfig.build.json",
   "packages/editor-core/tsconfig.public-package.json",
@@ -159,6 +160,7 @@ const RETAINED_T09_RECEIPT_PATHS = Object.freeze(
     (relativePath) =>
       ![
         PACKAGE_PATH,
+        PACKAGE_README_PATH,
         PUBLIC_TEST_PATH,
         TERMINAL_INTEGRATION_TEST_PATH,
         PROOF_LIBRARY_PATH,
@@ -166,6 +168,10 @@ const RETAINED_T09_RECEIPT_PATHS = Object.freeze(
       ].includes(relativePath),
   ),
 );
+const CURRENT_PACKAGE_README_COMPLETION_CLAUSE =
+  "M08-T10 terminal integration and G08 are `DONE`; `N-012`, `N-014`, `N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, M08 is 10/10, and M09-T01 is next.";
+const CURRENT_PACKAGE_README_TERMINAL_CLAUSE =
+  "M08-T10 is a proof-only closure over the existing API and adds no production helper or public export.";
 
 const EXPECTED_TERMINAL_INTEGRATION_TEST_NAMES = Object.freeze([
   "composes all 32 command APIs with immutable snapshots and an exact stable-identity ledger",
@@ -469,6 +475,66 @@ function decodeUtf8(bytes, label) {
   }
 }
 
+function exactReadmeSection(source, heading) {
+  const headingPattern = new RegExp(`^## ${heading}\\r?$`, "gmu");
+  const matches = [...source.matchAll(headingPattern)];
+  if (matches.length !== 1) {
+    fail("README_DRIFT", `The current package README must contain exactly one ${heading} section.`);
+  }
+  const remainder = source.slice(matches[0].index + matches[0][0].length);
+  const nextHeadingIndex = remainder.search(/^## /mu);
+  if (nextHeadingIndex < 0) {
+    fail("README_DRIFT", `The current package README ${heading} section is not bounded.`);
+  }
+  const section = remainder.slice(0, nextHeadingIndex);
+  if (/<!--|-->/u.test(section)) {
+    fail("README_DRIFT", `The current package README ${heading} section hides authority.`);
+  }
+  return section.replace(/\s+/gu, " ").trim();
+}
+
+function exactTextCount(source, expected) {
+  return source.split(expected).length - 1;
+}
+
+function verifyCurrentPackageReadmeCompletion(bytes) {
+  const source = decodeUtf8(bytes, PACKAGE_README_PATH);
+  const terminalSection = exactReadmeSection(source, "Terminal integration proof");
+  const statusSection = exactReadmeSection(source, "Status");
+  if (
+    exactTextCount(terminalSection, CURRENT_PACKAGE_README_TERMINAL_CLAUSE) !== 1 ||
+    exactTextCount(statusSection, CURRENT_PACKAGE_README_COMPLETION_CLAUSE) !== 1
+  ) {
+    fail("README_DRIFT", "The current package README completion semantics drifted.");
+  }
+  for (const staleClaim of [
+    /Terminal integration remains assigned to M08-T10/u,
+    /M08-T10 (?:is|remains) next/u,
+    /S-002[^.]{0,160}`PLANNED`/u,
+    /P-18[^.]{0,120}`PARTIAL`/u,
+    /M08 is 9\/10/u,
+    /G08[^.]{0,120}(?:not yet|`(?:PLANNED|PARTIAL|IN_PROGRESS|NOT_STARTED)`)/u,
+  ]) {
+    if (staleClaim.test(statusSection)) {
+      fail("README_DRIFT", "The current package README retained a predecessor status claim.");
+    }
+  }
+  return deepFreeze({
+    authority: "CURRENT_COMPATIBILITY_ONLY_NOT_FROZEN_M08_T09_AUTHORITY",
+    path: PACKAGE_README_PATH,
+    bytes: bytes.byteLength,
+    sha256: sha256(bytes),
+    task: "M08-T10",
+    taskStatus: "DONE",
+    gate: "G08",
+    gateStatus: "DONE",
+    s002Status: "TESTED",
+    p18Status: "PROVEN",
+    m08Progress: "10/10",
+    nextTask: "M09-T01",
+  });
+}
+
 function parseJson(bytes, label) {
   try {
     return JSON.parse(decodeUtf8(bytes, label));
@@ -482,6 +548,7 @@ async function trackedBytes(relativePath, options) {
   const live = await readNoFollow(relativePath, relativePath);
   const override = options.fileOverrides.get(relativePath);
   if (override === undefined) return live;
+  if (relativePath === PACKAGE_README_PATH) return override;
   if (!override.equals(live)) fail("BOUNDARY_DRIFT", `${relativePath} mutation was rejected.`);
   return override;
 }
@@ -1470,6 +1537,9 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
   for (const relativePath of TRACKED_PATHS) {
     files.set(relativePath, await trackedBytes(relativePath, options));
   }
+  const packageReadmeCompletion = verifyCurrentPackageReadmeCompletion(
+    files.get(PACKAGE_README_PATH),
+  );
   const boundary = verifyBoundary(files, prerequisites.t07Artifact);
   const executionAuthority = authenticateRuntimeClosure(
     prerequisites.t07Artifact,
@@ -1539,6 +1609,7 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
       mappingFields: ["surfaceId", "subject", "diagnosticIndexes", "occurrencePointers"],
       terminalProofSuccessor: boundary.terminalProofSuccessor,
     },
+    packageReadmeCompletion,
     behavior,
     executionAuthority,
     packageBoundary: {
@@ -1573,6 +1644,7 @@ export async function buildEditorCoreContinuousValidationEvidence(rawOptions = u
       "PERSISTENCE_STORAGE_OR_DURABILITY_AUTHORITY",
       "UNDO_REDO_SELECTION_OR_VIEWPORT_POLICY",
       "M08_T10_TERMINAL_BYTES_ARE_COMPATIBILITY_ONLY_NOT_M08_T09_CLAIM_AUTHORITY",
+      "CURRENT_PACKAGE_README_BYTES_ARE_COMPATIBILITY_ONLY_NOT_M08_T09_CLAIM_AUTHORITY",
       "REACT_RENDERER_COMPONENT_OR_DOM_BEHAVIOR",
       "HOSTILE_JAVASCRIPT_SANDBOX",
       "NODE_RUNTIME_ESM_LOADER_AND_PROCESS_ENVIRONMENT_ARE_TRUSTED_AUTHORITIES",

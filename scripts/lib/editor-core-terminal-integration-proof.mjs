@@ -7,7 +7,6 @@ import path from "node:path";
 import { types as utilTypes } from "node:util";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { format } from "prettier";
 import ts from "typescript";
 
 import { writeAtomicProofArtifact } from "./atomic-proof-artifact.mjs";
@@ -19,6 +18,10 @@ const READ_FLAGS =
   fileConstants.O_RDONLY | (fileConstants.O_NOFOLLOW ?? 0) | (fileConstants.O_NONBLOCK ?? 0);
 const ARTIFACT_PATH = "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json";
 const PROOF_DOCUMENT_PATH = "docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md";
+const FROZEN_ARTIFACT_PIN = Object.freeze({
+  bytes: 325_549,
+  sha256: "5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b",
+});
 const SOURCE_FIXTURE_PATH =
   "packages/protocol/upstream/0.1.0/snapshot/conformance/valid/sign-in.source.json";
 const CATALOG_FIXTURE_PATH =
@@ -141,6 +144,18 @@ const TRACKED_PATHS = Object.freeze([
   VERIFIER_PATH,
   ROOT_TEST_PATH,
 ]);
+const CURRENT_COMPATIBILITY_ONLY_PATHS = Object.freeze([
+  PACKAGE_README_PATH,
+  PROOF_LIBRARY_PATH,
+  ROOT_TEST_PATH,
+]);
+const CURRENT_PACKAGE_README_COMPLETION_CLAUSE =
+  "M08-T10 terminal integration and G08 are `DONE`; `N-012`, `N-014`, `N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, M08 is 10/10, and M09-T01 is next.";
+const CURRENT_PACKAGE_README_TERMINAL_CLAUSE =
+  "M08-T10 is a proof-only closure over the existing API and adds no production helper or public export.";
+const RETAINED_T10_RECEIPT_PATHS = Object.freeze(
+  TRACKED_PATHS.filter((relativePath) => !CURRENT_COMPATIBILITY_ONLY_PATHS.includes(relativePath)),
+);
 
 const MUTATION_COMMANDS = Object.freeze([
   "insertDesenEditorNode",
@@ -669,6 +684,7 @@ async function trackedBytes(relativePath, options) {
   const live = await readNoFollow(relativePath, relativePath);
   const override = options.fileOverrides.get(relativePath);
   if (override === undefined) return live;
+  if (relativePath === PACKAGE_README_PATH) return override;
   if (!override.equals(live)) fail("BOUNDARY_DRIFT", `${relativePath} mutation was rejected.`);
   return override;
 }
@@ -983,6 +999,52 @@ function reexportedNames(sourceText, fileName) {
   });
 }
 
+function exactReadmeSection(source, heading) {
+  const headingPattern = new RegExp(`^## ${heading}\\r?$`, "gmu");
+  const matches = [...source.matchAll(headingPattern)];
+  if (matches.length !== 1) {
+    fail("README_DRIFT", `The current package README must contain exactly one ${heading} section.`);
+  }
+  const remainder = source.slice(matches[0].index + matches[0][0].length);
+  const nextHeadingIndex = remainder.search(/^## /mu);
+  if (nextHeadingIndex < 0) {
+    fail("README_DRIFT", `The current package README ${heading} section is not bounded.`);
+  }
+  const section = remainder.slice(0, nextHeadingIndex);
+  if (/<!--|-->/u.test(section)) {
+    fail("README_DRIFT", `The current package README ${heading} section hides authority.`);
+  }
+  return section.replace(/\s+/gu, " ").trim();
+}
+
+function exactTextCount(source, expected) {
+  return source.split(expected).length - 1;
+}
+
+function verifyCurrentPackageReadme(files) {
+  const source = decodeUtf8(files.get(PACKAGE_README_PATH), PACKAGE_README_PATH);
+  const terminalSection = exactReadmeSection(source, "Terminal integration proof");
+  const statusSection = exactReadmeSection(source, "Status");
+  if (
+    exactTextCount(terminalSection, CURRENT_PACKAGE_README_TERMINAL_CLAUSE) !== 1 ||
+    exactTextCount(statusSection, CURRENT_PACKAGE_README_COMPLETION_CLAUSE) !== 1
+  ) {
+    fail("README_DRIFT", "The current package README completion semantics drifted.");
+  }
+  for (const staleClaim of [
+    /Terminal integration remains assigned to M08-T10/u,
+    /M08-T10 (?:is|remains) next/u,
+    /S-002[^.]{0,160}`PLANNED`/u,
+    /P-18[^.]{0,120}`PARTIAL`/u,
+    /M08 is 9\/10/u,
+    /G08[^.]{0,120}(?:not yet|`(?:PLANNED|PARTIAL|IN_PROGRESS|NOT_STARTED)`)/u,
+  ]) {
+    if (staleClaim.test(statusSection)) {
+      fail("README_DRIFT", "The current package README retained a predecessor status claim.");
+    }
+  }
+}
+
 function verifyBoundary(files, t09Artifact, fileInventory) {
   if (
     files.get(PACKAGE_PATH).byteLength !== 1_665 ||
@@ -1010,6 +1072,7 @@ function verifyBoundary(files, t09Artifact, fileInventory) {
   ) {
     fail("MANIFEST_DRIFT", "The editor-core terminal manifest boundary drifted.");
   }
+  verifyCurrentPackageReadme(files);
 
   const rootManifest = parseJson(files.get(ROOT_PACKAGE_PATH), ROOT_PACKAGE_PATH);
   const expectedRootScripts = {
@@ -2016,11 +2079,88 @@ async function runTerminalTranscript(runtime, protocol, validSource, validCatalo
   });
 }
 
-async function artifactBytes(artifact) {
-  return Buffer.from(
-    await format(`${JSON.stringify(artifact)}\n`, { parser: "json", printWidth: 100 }),
-    "utf8",
+async function authenticateFrozenArtifact() {
+  const bytes = await readNoFollow(ARTIFACT_PATH, "frozen M08-T10 proof artifact");
+  const digest = sha256(bytes);
+  if (bytes.byteLength !== FROZEN_ARTIFACT_PIN.bytes || digest !== FROZEN_ARTIFACT_PIN.sha256) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T10 artifact bytes differ from their exact receipt.");
+  }
+  const artifact = parseJson(bytes, "frozen M08-T10 proof artifact");
+  const receipts = artifact.trackedBoundary?.receipts;
+  if (
+    artifact.schemaVersion !== 1 ||
+    artifact.proofId !== "editor-core-terminal-integration" ||
+    artifact.profile !== "desen.editor-core.terminal-integration-proof.v1" ||
+    artifact.task !== "M08-T10" ||
+    artifact.result !== "PASS" ||
+    artifact.claim?.taskStatus !== "DONE" ||
+    artifact.claim?.gate !== "G08" ||
+    artifact.claim?.gateStatus !== "DONE" ||
+    artifact.claim?.p18Status !== "PROVEN" ||
+    artifact.claim?.s002Status !== "TESTED" ||
+    artifact.prerequisites?.length !== EDITOR_CORE_TERMINAL_INTEGRATION_PREREQUISITE_PINS.length ||
+    artifact.publicApi?.runtimeExports?.length !== 35 ||
+    artifact.publicApi?.typeExports?.length !== 88 ||
+    artifact.executionAuthority?.graphCount !== 2 ||
+    artifact.independentGraphs?.graphs !== 2 ||
+    artifact.packageBoundary?.platformNeutral !== true ||
+    artifact.testAuthority?.focusedBehaviorCases !== 4 ||
+    artifact.testAuthority?.publicRuntimeAndRootCases !== 50 ||
+    artifact.testAuthority?.publicCompilerNegativeAssertions !== 102 ||
+    artifact.testAuthority?.rootProofCases !== 10 ||
+    artifact.trackedBoundary?.files !== TRACKED_PATHS.length ||
+    !Array.isArray(receipts) ||
+    receipts.length !== TRACKED_PATHS.length ||
+    new Set(receipts.map((candidate) => candidate?.path)).size !== receipts.length
+  ) {
+    fail("ARTIFACT_DRIFT", "The frozen M08-T10 artifact identity or retained claim drifted.");
+  }
+  return Object.freeze({
+    artifact: deepFreeze(artifact),
+    artifactBytes: Buffer.from(bytes),
+    artifactSha256: digest,
+  });
+}
+
+function assertCurrentTerminalCompatibility(frozenArtifact, currentCompatibility) {
+  const frozenReceipts = new Map(
+    frozenArtifact.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
   );
+  const currentReceipts = new Map(
+    currentCompatibility.trackedBoundary.receipts.map((candidate) => [candidate.path, candidate]),
+  );
+  for (const relativePath of RETAINED_T10_RECEIPT_PATHS) {
+    const frozenReceipt = frozenReceipts.get(relativePath);
+    const currentReceipt = currentReceipts.get(relativePath);
+    if (
+      frozenReceipt === undefined ||
+      currentReceipt === undefined ||
+      frozenReceipt.bytes !== currentReceipt.bytes ||
+      frozenReceipt.sha256 !== currentReceipt.sha256
+    ) {
+      fail("BOUNDARY_DRIFT", `A retained M08-T10 receipt drifted: ${relativePath}`);
+    }
+  }
+  for (const relativePath of CURRENT_COMPATIBILITY_ONLY_PATHS) {
+    if (!frozenReceipts.has(relativePath) || !currentReceipts.has(relativePath)) {
+      fail("BOUNDARY_DRIFT", `A compatibility-only M08-T10 receipt is missing: ${relativePath}`);
+    }
+  }
+  const normalizedReceipts = currentCompatibility.trackedBoundary.receipts.map((candidate) =>
+    CURRENT_COMPATIBILITY_ONLY_PATHS.includes(candidate.path)
+      ? frozenReceipts.get(candidate.path)
+      : candidate,
+  );
+  const normalized = {
+    ...currentCompatibility,
+    trackedBoundary: {
+      files: currentCompatibility.trackedBoundary.files,
+      receipts: normalizedReceipts,
+    },
+  };
+  if (JSON.stringify(normalized) !== JSON.stringify(frozenArtifact)) {
+    fail("BEHAVIOR_DRIFT", "The current M08-T10 graph left its frozen terminal claim.");
+  }
 }
 
 export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = undefined) {
@@ -2028,6 +2168,7 @@ export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = un
   if (options.runtime !== undefined) {
     fail("RUNTIME_OVERRIDE_REJECTED", "A caller-supplied runtime cannot issue PASS.");
   }
+  const frozen = await authenticateFrozenArtifact();
   const fileInventory = await verifyWorkspaceFileInventory(options.inventoryExtraPaths);
   const prerequisites = await authenticatePrerequisites(options);
   const files = new Map();
@@ -2073,7 +2214,7 @@ export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = un
   const receipts = [...files.entries()]
     .map(([relativePath, bytes]) => receipt(relativePath, bytes))
     .sort((left, right) => compareText(left.path, right.path));
-  const artifact = deepFreeze({
+  const currentCompatibility = deepFreeze({
     schemaVersion: 1,
     proofId: "editor-core-terminal-integration",
     profile: "desen.editor-core.terminal-integration-proof.v1",
@@ -2159,11 +2300,19 @@ export async function buildEditorCoreTerminalIntegrationEvidence(rawOptions = un
       "node --test tests/editor-core-terminal-integration.test.mjs",
     ],
   });
-  const bytes = await artifactBytes(artifact);
+  assertCurrentTerminalCompatibility(frozen.artifact, currentCompatibility);
   return deepFreeze({
-    artifact,
-    artifactBytes: bytes,
-    artifactSha256: sha256(bytes),
+    artifact: frozen.artifact,
+    artifactBytes: frozen.artifactBytes,
+    artifactSha256: frozen.artifactSha256,
+    currentCompatibility,
+    frozenAuthority: {
+      path: ARTIFACT_PATH,
+      bytes: FROZEN_ARTIFACT_PIN.bytes,
+      sha256: FROZEN_ARTIFACT_PIN.sha256,
+      retainedTaskTimeReceipts: RETAINED_T10_RECEIPT_PATHS.length,
+      currentCompatibilityOnlyPaths: CURRENT_COMPATIBILITY_ONLY_PATHS,
+    },
     task: "M08-T10",
   });
 }

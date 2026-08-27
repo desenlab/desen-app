@@ -179,8 +179,9 @@ re-admits it through `createDesenEditorDocument`. The reopened Source is canonic
 recursively frozen, and retains exact authoring and extension parsed values. This remains an
 in-memory parsed-value round trip; it does not claim preservation of input JSON whitespace or
 object-member byte order. The M08-T08 persistence boundary owns storage I/O, save/open behavior,
-and adapter-defined durability; M08-T09 owns continuous semantic diagnostics; M08-T10 owns terminal
-React/DOM integration and its independent determinism evidence.
+and adapter-defined durability. M08-T09 supplies continuous semantic diagnostics, and M08-T10
+authenticates the complete command, persistence, validation, and platform-neutrality boundary with
+independent determinism evidence.
 
 ## Persistence port
 
@@ -209,8 +210,9 @@ The port is platform-neutral and imports no Node, browser, React, DOM, filesyste
 or database authority. Concrete authentication, transport, atomic replacement, locking, database
 transactions, fsync/directory-fsync, and recovery behavior belong to a trusted platform adapter.
 The local Web adapter composes outside editor-core against the existing authenticated local Source
-route. M08-T09 still owns Catalog-semantic validation and continuous invalid-node mapping; M08-T10
-owns terminal React/DOM integration; M09-T12 owns save/open UI.
+route. M08-T09 supplies Catalog-semantic validation and continuous invalid-node mapping; M08-T10
+authenticates their terminal integration with this persistence port and the React/DOM-free package
+boundary; M09-T12 owns save/open UI.
 
 ## Continuous validation and invalid-subject mapping
 
@@ -236,6 +238,24 @@ controlled frozen stale-input report with structural diagnostics, empty obligati
 diagnostic indexes unmapped, and `documentFingerprint: null`. No Source value, Catalog snapshot,
 persistence handle, executable adapter, or UI authority crosses the report boundary.
 
+## Terminal integration proof
+
+M08-T10 is a proof-only closure over the existing API and adds no production helper or public export.
+Two independently copied emitted ESM graphs run the same ordered 32-command transcript and produce
+byte-identical terminal Sources, identity ledgers, validation reports, persistence receipts, and
+callback-free JSON/RFC 8785 commitments. The transcript proves stable identity across every command,
+atomic failure and exact resume, zero-diagnostic M08-T09 validation with seven retained dynamic
+obligations, and an exact M08-T08 generation-one save/open round trip.
+
+AST inspection covers every editor-core source, emitted JavaScript, and emitted declaration file. The
+closed graph admits only relative, `@desen/protocol`, and `@desen/validator` static edges and no React,
+ReactDOM, DOM/browser, Node-platform, CSS, dynamic-import, `eval`, or function-constructor authority.
+Exact evidence is recorded in
+[`EDITOR-CORE-TERMINAL-INTEGRATION.md`](../../docs/proof/EDITOR-CORE-TERMINAL-INTEGRATION.md) and the
+frozen
+[`editor-core-0.1.0-terminal-integration.json`](../../docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json)
+artifact.
+
 ## Explicit non-responsibilities
 
 No React, DOM, canvas UI, production activation, action execution, concrete storage/transport
@@ -249,9 +269,8 @@ Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/in
 delete/move/ordered-reorder commands, M08-T04 prop/style/condition/variant commands, and M08-T05
 state-declaration/repeat/resource-input commands, M08-T06 event/closed-action commands, and M08-T07
 authoring-isolation/extension-round-trip proof, M08-T08 platform-neutral persistence port, and M08-T09
-continuous validation are present. Terminal integration remains assigned to M08-T10. `N-012`, `N-014`,
-`N-018`, and `S-003` are `TESTED`;
-`S-002` remains `PLANNED` through terminal M08-T10 integration.
+continuous validation are present. M08-T10 terminal integration and G08 are `DONE`; `N-012`, `N-014`,
+`N-018`, `S-002`, and `S-003` are `TESTED`, P-18 is `PROVEN`, M08 is 10/10, and M09-T01 is next.
 
 ## Protocol and target support
 

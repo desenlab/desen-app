@@ -14,6 +14,7 @@ import {
 } from "../scripts/lib/editor-core-terminal-integration-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const PACKAGE_README = "packages/editor-core/README.md";
 const PROOF_LIBRARY = "scripts/lib/editor-core-terminal-integration-proof.mjs";
 const temporaryDirectories = [];
 let built;
@@ -94,6 +95,31 @@ test("[authority] authenticates M08-T01 through T09 and the exact P-18 platform 
   assert.equal(built.artifact.publicApi.taskRuntimeExportsAdded, 0);
   assert.equal(built.artifact.publicApi.taskTypeExportsAdded, 0);
   assert.equal(built.artifact.publicApi.productionHelperAdded, false);
+  assert.deepEqual(built.frozenAuthority, {
+    path: "docs/proof/artifacts/editor-core-0.1.0-terminal-integration.json",
+    bytes: 325_549,
+    sha256: "5787479d699ab8f53b739e633bf9a88900da00ae4f4c78f96b3e62a73133fa1b",
+    retainedTaskTimeReceipts: 98,
+    currentCompatibilityOnlyPaths: [
+      PACKAGE_README,
+      PROOF_LIBRARY,
+      "tests/editor-core-terminal-integration.test.mjs",
+    ],
+  });
+  const frozenReadmeReceipt = built.artifact.trackedBoundary.receipts.find(
+    ({ path: relativePath }) => relativePath === PACKAGE_README,
+  );
+  const currentReadmeReceipt = built.currentCompatibility.trackedBoundary.receipts.find(
+    ({ path: relativePath }) => relativePath === PACKAGE_README,
+  );
+  assert.deepEqual(frozenReadmeReceipt, {
+    path: PACKAGE_README,
+    bytes: 24_695,
+    sha256: "7946dc61eeed279013fc339f03958afe4d39054ee0ad2f15edf5e744787f2a69",
+  });
+  assert.notDeepEqual(currentReadmeReceipt, frozenReadmeReceipt);
+  assert.equal(built.currentCompatibility.claim.gateStatus, "DONE");
+  assert.equal(built.currentCompatibility.claim.s002Status, "TESTED");
 });
 
 test("[graphs] runs two independent receipted emitted graphs with identical detached outcomes", async () => {
@@ -119,6 +145,7 @@ test("[graphs] runs two independent receipted emitted graphs with identical deta
   const secondBuild = await buildEditorCoreTerminalIntegrationEvidence();
   assert.deepEqual(secondBuild.artifactBytes, built.artifactBytes);
   assert.equal(secondBuild.artifactSha256, built.artifactSha256);
+  assert.deepEqual(secondBuild.currentCompatibility, built.currentCompatibility);
 });
 
 test("[transcript] executes all 32 commands with an exact stable-identity ledger", () => {
@@ -253,6 +280,23 @@ test("[mutation] rejects runtime, tracked boundary, and prerequisite substitutio
       fileOverrides: new Map([[PROOF_LIBRARY, changedByte(proofLibraryBytes)]]),
     }),
     expectedError("BOUNDARY_DRIFT"),
+  );
+  const packageReadme = await readFile(path.join(ROOT, PACKAGE_README), "utf8");
+  await assert.rejects(
+    buildEditorCoreTerminalIntegrationEvidence({
+      fileOverrides: new Map([
+        [
+          PACKAGE_README,
+          Buffer.from(
+            packageReadme.replace(
+              "M08-T10 terminal integration and G08 are `DONE`",
+              "M08-T10 terminal integration and G08 are `NOT_STARTED`",
+            ),
+          ),
+        ],
+      ]),
+    }),
+    expectedError("README_DRIFT"),
   );
   const t09 = EDITOR_CORE_TERMINAL_INTEGRATION_PREREQUISITE_PINS[8];
   const t09Bytes = await readFile(path.join(ROOT, t09.path));

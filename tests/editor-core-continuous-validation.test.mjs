@@ -14,6 +14,7 @@ import {
 } from "../scripts/lib/editor-core-continuous-validation-proof.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const PACKAGE_README = "packages/editor-core/README.md";
 const PROOF_LIBRARY = "scripts/lib/editor-core-continuous-validation-proof.mjs";
 const TERMINAL_INTEGRATION_TEST = "packages/editor-core/test/terminal-integration.test.ts";
 const temporaryDirectories = [];
@@ -143,6 +144,47 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
   assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 102);
   assert.equal(built.currentCompatibility.testAuthority.terminalIntegrationRuntimeCases, 4);
   assert.equal(built.currentCompatibility.trackedBoundary.files, 100);
+  const packageReadmeCompletion = built.currentCompatibility.packageReadmeCompletion;
+  assert.equal(
+    packageReadmeCompletion.authority,
+    "CURRENT_COMPATIBILITY_ONLY_NOT_FROZEN_M08_T09_AUTHORITY",
+  );
+  assert.equal(packageReadmeCompletion.path, PACKAGE_README);
+  assert.equal(Number.isSafeInteger(packageReadmeCompletion.bytes), true);
+  assert.equal(packageReadmeCompletion.bytes > 0, true);
+  assert.match(packageReadmeCompletion.sha256, /^[0-9a-f]{64}$/u);
+  assert.deepEqual(
+    {
+      task: packageReadmeCompletion.task,
+      taskStatus: packageReadmeCompletion.taskStatus,
+      gate: packageReadmeCompletion.gate,
+      gateStatus: packageReadmeCompletion.gateStatus,
+      s002Status: packageReadmeCompletion.s002Status,
+      p18Status: packageReadmeCompletion.p18Status,
+      m08Progress: packageReadmeCompletion.m08Progress,
+      nextTask: packageReadmeCompletion.nextTask,
+    },
+    {
+      task: "M08-T10",
+      taskStatus: "DONE",
+      gate: "G08",
+      gateStatus: "DONE",
+      s002Status: "TESTED",
+      p18Status: "PROVEN",
+      m08Progress: "10/10",
+      nextTask: "M09-T01",
+    },
+  );
+  assert.deepEqual(
+    built.currentCompatibility.trackedBoundary.receipts.find(
+      ({ path: relativePath }) => relativePath === PACKAGE_README,
+    ),
+    {
+      path: PACKAGE_README,
+      bytes: packageReadmeCompletion.bytes,
+      sha256: packageReadmeCompletion.sha256,
+    },
+  );
   assert.equal(
     built.currentCompatibility.trackedBoundary.receipts.some(
       ({ path: relativePath }) => relativePath === TERMINAL_INTEGRATION_TEST,
@@ -153,7 +195,7 @@ test("[authority] authenticates exact M08-T03 through T07 artifacts and an isola
     path: "docs/proof/artifacts/editor-core-0.1.0-continuous-validation.json",
     bytes: 40_099,
     sha256: "7739b5143685d613a678c6eca5480f27a5a303b176bf2bf4613a4d6917fe7e5a",
-    retainedTaskTimeReceipts: 95,
+    retainedTaskTimeReceipts: 94,
     formalPrerequisiteTasks: ["M08-T03", "M08-T04", "M08-T05", "M08-T06", "M08-T07"],
   });
   assert.deepEqual(built.currentCompatibility.behavior, built.artifact.behavior);
@@ -238,6 +280,19 @@ test("[mutation] rejects runtime, tracked-boundary, and prerequisite substitutio
       fileOverrides: new Map([[PROOF_LIBRARY, changedByte(proofLibraryBytes)]]),
     }),
     expectedError("BOUNDARY_DRIFT"),
+  );
+
+  const packageReadme = await readFile(path.join(ROOT, PACKAGE_README), "utf8");
+  const stalePackageReadme = packageReadme.replace(
+    "M08-T10 terminal integration and G08 are `DONE`",
+    "Terminal integration remains assigned to M08-T10",
+  );
+  assert.notEqual(stalePackageReadme, packageReadme);
+  await assert.rejects(
+    buildEditorCoreContinuousValidationEvidence({
+      fileOverrides: new Map([[PACKAGE_README, Buffer.from(stalePackageReadme, "utf8")]]),
+    }),
+    expectedError("README_DRIFT"),
   );
 
   const t07 = EDITOR_CORE_CONTINUOUS_VALIDATION_PREREQUISITE_PINS.at(-1);
