@@ -2166,3 +2166,59 @@ changes. Storage I/O, save/open durability, and the persistence adapter remain M
 semantic diagnostics and invalid-node mapping remain M08-T09. The terminal React/DOM boundary,
 cross-command terminal determinism, and G08 remain M08-T10. Action execution, runtime turns,
 undo/redo, selection, viewport policy, P-18, and G08 remain unclaimed. M08-T08 is next.
+
+## M08-T08 — Persistence port and local source adapter
+
+M08-T08 separates storage contracts from platform authority. `@desen/editor-core` defines an
+injected adapter with `readSource` and generation-guarded `compareAndSetSource`, then exposes
+`openSource` and `saveSource` through `createDesenEditorPersistencePort`. The core path imports no
+browser, React, DOM, Node, filesystem, SQLite, or concrete transport. Every candidate save is
+RFC 8785-canonicalized as a complete Source, including root `authoring` and extensions, charged to
+the 8 MiB Source ceiling, structurally re-admitted, and returned only as detached recursively
+frozen data. Created, unchanged, updated, conflict, generation exhaustion, definite failure, and
+indeterminate settlement remain distinguishable.
+
+`@desen/editor-web` supplies the fixed local HTTP adapter. It accepts only the exact lexical origin
+`http://127.0.0.1:<port>`, an explicit bearer token, and an explicitly injected fetch-shaped
+callback. Redirects are rejected. There is no implicit global-fetch fallback, automatic retry,
+merge, filesystem path, SQLite handle, or remote-origin authority. The public M07-T05
+`openLocalControlPlane` implementation is unchanged and remains the real SQLite/filesystem
+durability boundary.
+
+The integration opens two independently constructed control-plane instances and two persistence
+ports against one fresh OS-temporary native SQLite database. An absent Source creates at generation
+1, an unchanged save stays at generation 1, an update reaches generation 2, and a same-generation
+race produces exactly one generation-3 winner plus one generation-3 conflict. After both instances
+close, a third instance reopens the exact generation-3 Source. The storage key remains independent
+of the protocol Source `id`. Canonical Source bytes, complete root authoring, and all 16
+Source-reachable extension locations survive create, update, CAS, close, and reopen.
+
+A separate PUT is durably dispatched and its response hidden. The port returns `indeterminate`,
+does not retry or merge, and a normal reopen resolves the committed Source. Malformed successful
+responses and post-dispatch `STORAGE_IO_FAILURE`, `UNSAFE_STORAGE_PATH`, `METADATA_CORRUPT`, or
+unknown storage envelopes are likewise never misreported as definite failures. Malformed UTF-8
+reads, wrong authentication, invalid keys, and implicit transport configuration fail closed with
+redacted platform details.
+
+The core persistence suite passes 10/10. The cumulative built core public-package suite passes
+49/49 with 96 public consumer compiler-negative assertions. The Web adapter focused suite passes
+12/12, and its public-package suite passes 3/3 with six compiler-negative assertions. The
+independent root proof passes 10/10. Exact reviewed evidence lives in
+[`EDITOR-CORE-PERSISTENCE.md`](EDITOR-CORE-PERSISTENCE.md) and the exact 49,785-byte
+[`editor-core-0.1.0-persistence.json`](artifacts/editor-core-0.1.0-persistence.json) at
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. The verifier directly
+authenticates the frozen M07-T05 and M08-T07 artifacts plus 218 current tracked receipts, including
+180 emitted distribution receipts. Historical M08-T01–M08-T07 artifact bytes and hashes remain
+unchanged.
+
+The current CI successor contains 168 workloads and 79 proof pairs. Append-only checkpoint
+sequence 36 authenticates 33 frozen artifacts and 66 current readers while preserving every
+sequence-35 and earlier artifact byte. These are local code-owned receipts and make no hosted
+M08-T08 claim.
+
+M08-T08 is `DONE`, advancing implementation progress to 93/145 (64%) and M08 to 8/10. `N-012`,
+`N-018`, and `S-003` remain `TESTED`; P-18 remains `PARTIAL`, and no other `P-*`, `N-*`, `S-*`, or
+proof-gate status changes. Semantic diagnostics and invalid-node mapping remain M08-T09. The
+terminal React/DOM boundary, cross-command determinism, and G08 remain M08-T10. Undo/redo,
+selection, viewport policy, multi-user synchronization, remote persistence, and G08 remain
+unclaimed. M08-T09 is next.

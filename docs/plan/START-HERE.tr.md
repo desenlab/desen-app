@@ -543,9 +543,39 @@ checkpoint 58/58 geçer. Güncel tam CI altyapı suite'i 265/265; required-affec
 tutulan legacy-gate suite'leri ayrıca 27/27, 19/19 ve 25/25 geçer. Bunlar yerel code-owned
 kayıtlardır; hosted M08-T07 iddiası değildir.
 
-M08-T08 storage I/O, save/open durability ve persistence adapter'ını; M08-T09 sürekli semantik
-diagnostic/invalid-node mapping'ini; M08-T10 ise terminal React/DOM sınırı ve G08'i taşır. Genel
-ilerleme 92/145 (%63), M08 ilerlemesi 7/10, kanıt kapıları 8/13'tür; sıradaki iş M08-T08'dir.
+M08-T08 de tamamlandı. `@desen/editor-core`, storage adapter'ında `readSource` ve generation-guarded
+compare-and-set yazmayı tanımlayan, dışarıya ise platformdan bağımsız open/save işlemleri veren
+persistence port'unu taşır. Core; browser, React, DOM, Node, filesystem, SQLite veya transport
+yetkisi almaz. Her save, kök `authoring` ve bütün extension değerleri dahil tam Source'u kanonik
+baytlara çevirir, 8 MiB sınırını uygular, baytları yeniden admit eder ve yalnız ayrık/recursive
+donmuş sonuç döndürür. Created, unchanged, updated, conflict, exhausted, kesin hata ve
+`indeterminate` sonuçları ayrıdır; belirsiz yazma otomatik retry veya merge edilmez, yalnız reopen
+ile çözülür.
+
+`@desen/editor-web` local adapter'ı exact lexical `http://127.0.0.1:<port>` origin, bearer token,
+redirect reddi ve açıkça enjekte edilmiş fetch-shaped callback ister. Global fetch fallback'i,
+filesystem veya SQLite yetkisi yoktur. Mevcut M07-T05 `openLocalControlPlane` SQLite/filesystem
+uygulaması değiştirilmeden durability otoritesi olarak kalır. OS-temp native SQLite üzerinde iki
+bağımsız control-plane instance ve iki editor port, aynı generation için tek generation-3 kazananı
+ve bir conflict'i; close/reopen sonrasında exact generation-3 Source'u; kök authoring ile
+Source'tan erişilebilen 16 extension konumunun tamamını kanıtlar. Gerçek route'a kalıcı olarak
+ulaştırılıp cevabı saklanan PUT `indeterminate` döner, retry yapmaz ve sonraki reopen committed
+generation'ı çözer.
+
+Exact M08-T08 artifact'ı 49.785 bayttır:
+[`editor-core-0.1.0-persistence.json`](../proof/artifacts/editor-core-0.1.0-persistence.json)
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. Core persistence
+10/10; kümülatif core public-package 49/49 ve 96 compiler-negatif; Web odak suite'i 12/12; Web
+public-package 3/3 ve 6 compiler-negatif; bağımsız kök kanıtı 10/10 geçer. Verifier 218 tracked
+receipt'i, bunların içinde 180 emitted distribution receipt'ini doğrular. Güncel CI ardılı 168 iş
+yükü ve 79 kanıt çifti taşır. Sequence 36, önceki bütün artifact baytlarını koruyarak 33 donmuş
+artifact ve 66 güncel reader doğrular; tarihsel M08-T01–M08-T07 hash'leri değişmez. Bunlar yerel
+code-owned kayıtlardır; hosted M08-T08 iddiası değildir. `N-012`, `N-018` ve `S-003` `TESTED`
+kalır; kanıt kapısı veya başka normatif statü değişmez.
+
+M08-T09 sürekli semantik diagnostic/invalid-node mapping'ini; M08-T10 ise terminal React/DOM sınırı,
+cross-command determinizm ve G08'i taşır. Genel ilerleme 93/145 (%64), M08 ilerlemesi 8/10, kanıt
+kapıları 8/13'tür; sıradaki iş M08-T09'dur.
 
 Pazar ve ürün varsayımlarının unutulmaması için
 [`STRATEGIC-VALIDATION.md`](STRATEGIC-VALIDATION.md) içindeki iki sayılmayan kontrol noktası da

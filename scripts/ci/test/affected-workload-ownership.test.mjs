@@ -24,13 +24,13 @@ import { createExhaustiveWorkloadInventory } from "../exhaustive-workload-invent
 const EXEC_FILE = promisify(execFileCallback);
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const EXPECTED_CATEGORY_COUNTS = Object.freeze({
-  PROOF_UNIT: 156,
+  PROOF_UNIT: 158,
   CI_POLICY: 45,
   DEPENDENCY_POLICY: 31,
-  FROZEN_INPUT: 122,
-  PACKAGE_OR_APPLICATION: 416,
-  SHARED_PROOF_INFRASTRUCTURE: 193,
-  PROJECT_DOCUMENTATION: 114,
+  FROZEN_INPUT: 123,
+  PACKAGE_OR_APPLICATION: 425,
+  SHARED_PROOF_INFRASTRUCTURE: 195,
+  PROJECT_DOCUMENTATION: 115,
   REPOSITORY_POLICY: 11,
 });
 
@@ -63,7 +63,7 @@ function assertDeepFrozen(value, visited = new Set()) {
   for (const key of Reflect.ownKeys(value)) assertDeepFrozen(value[key], visited);
 }
 
-test("freezes exact-one ownership for all 1088 reviewed tracked paths", async () => {
+test("freezes exact-one ownership for all 1103 reviewed tracked paths", async () => {
   const paths = await currentTrackedPaths();
   const authority = createAffectedWorkloadOwnership(paths);
 
@@ -85,7 +85,7 @@ test("freezes exact-one ownership for all 1088 reviewed tracked paths", async ()
     categoryCounts: EXPECTED_CATEGORY_COUNTS,
     ownershipSha256: EXPECTED_AFFECTED_WORKLOAD_OWNERSHIP_SHA256,
   });
-  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1088);
+  assert.equal(new Set(authority.entries.map(({ path: trackedPath }) => trackedPath)).size, 1103);
   assert.deepEqual(
     authority.entries.map(({ path: trackedPath }) => trackedPath),
     paths,
@@ -101,7 +101,7 @@ test("permits strict selection only for exact verifier and root-test proof input
     ({ category }) => category === AFFECTED_OWNERSHIP_CATEGORIES.PROOF_UNIT,
   );
 
-  assert.equal(proofEntries.length, 156);
+  assert.equal(proofEntries.length, 158);
   assert.deepEqual(
     proofEntries
       .filter(({ proofUnitId }) => proofUnitId === "reference-host-web-channel-consumption")
@@ -137,6 +137,12 @@ test("permits strict selection only for exact verifier and root-test proof input
       "scripts/verify-editor-core-authoring-round-trip.mjs",
       "tests/editor-core-authoring-round-trip.test.mjs",
     ],
+  );
+  assert.deepEqual(
+    proofEntries
+      .filter(({ proofUnitId }) => proofUnitId === "editor-core-persistence")
+      .map(({ path: trackedPath }) => trackedPath),
+    ["scripts/verify-editor-core-persistence.mjs", "tests/editor-core-persistence.test.mjs"],
   );
   for (const entry of proofEntries) {
     assert.equal(entry.disposition, AFFECTED_OWNERSHIP_DISPOSITIONS.SELECT_PROOF_UNIT);
@@ -243,6 +249,21 @@ test("the reviewed M08 successor preserves the historical I07-04 ownership proje
     "scripts/lib/editor-core-authoring-round-trip-proof.mjs",
     "scripts/verify-editor-core-authoring-round-trip.mjs",
     "tests/editor-core-authoring-round-trip.test.mjs",
+    "docs/proof/EDITOR-CORE-PERSISTENCE.md",
+    "docs/proof/artifacts/editor-core-0.1.0-persistence.json",
+    "packages/editor-core/src/persistence.ts",
+    "packages/editor-core/test/persistence.test.ts",
+    "packages/editor-core/test/persistence.types.ts",
+    "packages/editor-web/src/local-source-json.ts",
+    "packages/editor-web/src/local-source-persistence.ts",
+    "packages/editor-web/test/local-source-persistence.test.ts",
+    "packages/editor-web/test/public-package.mjs",
+    "packages/editor-web/test/public-package.types.mts",
+    "packages/editor-web/tsconfig.public-package.json",
+    "scripts/generate-editor-core-persistence-proof.mjs",
+    "scripts/lib/editor-core-persistence-proof.mjs",
+    "scripts/verify-editor-core-persistence.mjs",
+    "tests/editor-core-persistence.test.mjs",
   ];
   for (const promotedPath of promotedPaths) {
     const entry = current.entries.find(({ path: candidate }) => candidate === promotedPath);

@@ -351,11 +351,15 @@ function selectedRegions(selection, nodeById) {
       "The selector referenced an unknown exhaustive workload.",
     );
   }
-  const prefix = nodes.slice(0, PREFIX_IDS.length);
+  const conditionalPrefixIds = selection.affectedProofUnitIds.includes("editor-core-persistence")
+    ? ["editor-web-public-package-contract"]
+    : [];
+  const expectedPrefixIds = [...PREFIX_IDS, ...conditionalPrefixIds];
+  const prefix = nodes.slice(0, expectedPrefixIds.length);
   const suffix = nodes.slice(-SUFFIX_IDS.length);
-  const proofNodes = nodes.slice(PREFIX_IDS.length, -SUFFIX_IDS.length);
+  const proofNodes = nodes.slice(expectedPrefixIds.length, -SUFFIX_IDS.length);
   if (
-    prefix.some(({ id }, index) => id !== PREFIX_IDS[index]) ||
+    prefix.some(({ id }, index) => id !== expectedPrefixIds[index]) ||
     suffix.some(({ id }, index) => id !== SUFFIX_IDS[index]) ||
     proofNodes.length !== selection.proofUnitCount * 2
   ) {
@@ -383,7 +387,9 @@ function selectedRegions(selection, nodeById) {
       proofId === "editor-core-event-action-edits" ||
       proofId === "editor-core-authoring-round-trip"
         ? "editor-core-public-package-contract"
-        : "package-tests";
+        : proofId === "editor-core-persistence"
+          ? "editor-web-public-package-contract"
+          : "package-tests";
     if (
       verifier === undefined ||
       rootTest === undefined ||
@@ -414,7 +420,7 @@ function selectedRegions(selection, nodeById) {
   const dependencyBoundary = suffix[0];
   const boundaryFixtures = suffix[1];
   if (
-    exhaustiveRootIds.length !== 78 ||
+    exhaustiveRootIds.length !== 79 ||
     dependencyBoundary.dependencies.length !== exhaustiveRootIds.length ||
     dependencyBoundary.dependencies.some(
       (dependency, index) => dependency !== exhaustiveRootIds[index],

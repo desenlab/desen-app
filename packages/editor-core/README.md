@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Framework-neutral immutable commands for editing a DESEN Source with stable identity.
+Framework-neutral immutable Source authoring commands and persistence contracts.
 
 ## Direct Source document model
 
@@ -21,10 +21,10 @@ if (result.ok) {
 ```
 
 Creation deliberately does not require Catalog-backed semantic validity. Continuous validation
-and invalid-node mapping belong to M08-T09, while persistence belongs to M08-T08. M08-T07 now
-proves authoring isolation across this factory and the complete existing mutation surface without
-adding another runtime command. Structural rejection returns the frozen protocol diagnostics and
-no partial document.
+and invalid-node mapping belong to M08-T09. M08-T08 adds the persistence port described below,
+while M08-T07 proves authoring isolation across this factory and the complete existing mutation
+surface without adding another runtime command. Structural rejection returns the frozen protocol
+diagnostics and no partial document.
 
 ## Stable-ID insertion
 
@@ -178,22 +178,53 @@ The proof serializes every factory and command result with `JSON.stringify`, par
 re-admits it through `createDesenEditorDocument`. The reopened Source is canonical-equal, detached,
 recursively frozen, and retains exact authoring and extension parsed values. This remains an
 in-memory parsed-value round trip; it does not claim preservation of input JSON whitespace or
-object-member byte order. M08-T08 owns storage I/O, save/open behavior, and durability; M08-T09 owns
-continuous semantic diagnostics; M08-T10 owns terminal React/DOM integration and its independent
-determinism evidence.
+object-member byte order. The M08-T08 persistence boundary owns storage I/O, save/open behavior,
+and adapter-defined durability; M08-T09 owns continuous semantic diagnostics; M08-T10 owns terminal
+React/DOM integration and its independent determinism evidence.
+
+## Persistence port
+
+`createDesenEditorPersistencePort(adapter)` captures exactly two receiver-independent callbacks:
+`readSource(sourceKey)` and `compareAndSetSource(request)`. The resulting frozen port exposes only
+`openSource(sourceKey)` and `saveSource({ sourceKey, expectedGeneration, document })`. Storage keys
+are opaque editor-selected identities and are independent of the Source document `id`.
+
+A found read carries its own positive safe-integer generation plus an untrusted parsed `value`.
+Editor-core re-admits that value through `createDesenEditorDocument`, rechecks the complete 8 MiB
+canonical bound, and returns a fresh detached recursively frozen Source. A save likewise re-admits
+the complete document before producing fresh RFC 8785 bytes. The bytes cover the whole Source,
+including root `authoring` and every unknown `extensions` value; the adapter receives no hidden AST,
+partial patch, normalized projection, or platform handle.
+
+`expectedGeneration: null` is an absence precondition and can settle only as generation-one
+creation or a conflict with an existing positive generation. A positive expected generation can
+settle as its exact successor, unchanged at the same generation, conflict with a different current
+generation or absence, or exhaustion only at `Number.MAX_SAFE_INTEGER`. Settlement shapes and
+generation relationships fail closed. A malformed result, explicit adapter uncertainty, or a
+throw/rejection after the adapter receives write bytes is reported as indeterminate, so callers
+must reopen instead of assuming that no commit occurred. Explicit adapter failures are fixed,
+redacted diagnostics and mean the adapter proved that no commit occurred.
+
+The port is platform-neutral and imports no Node, browser, React, DOM, filesystem, network, token,
+or database authority. Concrete authentication, transport, atomic replacement, locking, database
+transactions, fsync/directory-fsync, and recovery behavior belong to a trusted platform adapter.
+The local Web adapter composes outside editor-core against the existing authenticated local Source
+route. M08-T09 still owns Catalog-semantic validation and continuous invalid-node mapping; M08-T10
+owns terminal React/DOM integration; M09-T12 owns save/open UI.
 
 ## Explicit non-responsibilities
 
 No React, DOM, canvas UI, production activation, Catalog-semantic validation, action execution,
-persistence, authoring selection/viewport policy, or hidden document model.
+concrete storage/transport implementation, authentication, automatic retries or merges, Source
+listing/deletion, authoring selection/viewport policy, or hidden document model.
 
 ## Status
 
 Private. M08-T01's direct Source document model, M08-T02 stable-ID allocation/insertion, M08-T03
 delete/move/ordered-reorder commands, M08-T04 prop/style/condition/variant commands, and M08-T05
 state-declaration/repeat/resource-input commands, M08-T06 event/closed-action commands, and M08-T07
-authoring-isolation/extension-round-trip proof are present. The remaining persistence, validation,
-and terminal integration work stays assigned to M08-T08 through M08-T10. `N-012`, `N-014`,
+authoring-isolation/extension-round-trip proof, and M08-T08 platform-neutral persistence port are
+present. Continuous validation and terminal integration remain M08-T09 and M08-T10. `N-012`, `N-014`,
 `N-018`, and `S-003` are `TESTED`;
 `S-002` remains `PLANNED` through terminal M08-T10 integration.
 
@@ -208,7 +239,7 @@ Run the direct model suite with
 `pnpm --filter @desen/editor-core test:source-document` and the insert suite with
 `pnpm --filter @desen/editor-core test:stable-id-insert`. The separate
 `pnpm --filter @desen/editor-core test:public-package` check builds the package, resolves the
-public root through its export map, runs the exact current 46 runtime/root cases, and compiles 75
+public root through its export map, runs the exact current 49 runtime/root cases, and compiles 96
 reviewed `@ts-expect-error` assertions against the emitted declarations. The proof cores audit the
 exact source, distribution, manifest, TSDoc, test inventory, and platform boundary. After
 authenticating the exact completed
@@ -284,3 +315,14 @@ compiler-negative assertions. The cumulative emitted-package suite has 46 runtim
 preservation for all 16 Source-reachable extension locations, including both recommended
 reverse-domain and legal non-namespaced unknown keys, without adding runtime authority or claiming
 storage, semantic, or terminal behavior.
+
+For M08-T08 editor-core coverage, run `pnpm --filter @desen/editor-core test:persistence`,
+`pnpm --filter @desen/editor-core typecheck`, and
+`pnpm --filter @desen/editor-core test:public-package`. The focused suite has ten runtime cases and
+21 compiler-negative assertions. It covers adapter capture and receiver isolation, parsed-value
+readmission, detached immutable open results, full canonical Source bytes, all controlled
+compare-and-set settlements, malformed and rejected write uncertainty, fixed failure mapping,
+request rejection, the exact/one-over 8 MiB boundary, and a stale concurrent-writer conflict. The
+cumulative emitted-package suite has 49 runtime/root cases and 96 compiler-negative assertions.
+Concrete local transport/storage evidence and the task-level proof remain separate from this
+platform-neutral package contract.

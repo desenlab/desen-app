@@ -104,5 +104,22 @@ cross-system profile. Evidence: `docs/proof/artifacts/reference-host-web-0.1.0-c
 | S-004 | [1151](https://github.com/desenlab/desen-protocol/blob/b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca/SPEC.md#L1151) | Public catalog prop schemas should normally be closed.                               | M03-T05–M03-T06, M03-T09  | TESTED       | M03-T05/M03-T06 prove all five selected official component schemas closed; M03-T09 binds that exact inventory to complete real implementation parity and mutation-tested evidence.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | S-005 | [1465](https://github.com/desenlab/desen-protocol/blob/b0bd7c4f0f61555b1d90e3a2ceb90d6e3d43daca/SPEC.md#L1465) | Production deployments should use authenticated transport and signed publication.    | M12-T08                   | JUSTIFIED_NA | Production deployment and signature profile are outside this local proof; no public production transport is claimed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
+## M08-T08 evidence extension
+
+M08-T08 extends `N-012` evidence without changing its `TESTED` status. Complete canonical Source
+values survive create, update, two-instance generation-guarded CAS, close, and reopen through the
+real local SQLite authority. Unknown parsed values at all 16 Source-reachable extension locations
+remain detached, recursively frozen, and inert; neither editor-core nor the Web transport adapter
+assigns them semantics. It likewise extends `N-018`: complete root `authoring` survives the same
+persistence path while remaining subject to the full 8 MiB Source ceiling and gaining no production
+authority. The frozen M08-T07 authoring-exclusion and Source-digest result remains unchanged.
+
+The same path extends `S-003` evidence: recommended reverse-domain keys and legal non-namespaced
+keys both survive storage and restart, so the recommendation remains `TESTED` without becoming a
+hard rejection rule. Exact evidence is the 49,785-byte
+`docs/proof/artifacts/editor-core-0.1.0-persistence.json` at
+`sha256:51932d4165afff3c40fae6769527e480f6d0ff355f3fbc6d8ae7c6809e50a6fe`. No other mandatory or
+recommended-clause status changes.
+
 M12-T01 must retain failed, blocked, and justified deviations rather than weakening or deleting a
 clause. Recommended clauses may be deviated from only with an explicit rationale.

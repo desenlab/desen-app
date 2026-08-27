@@ -30,6 +30,20 @@ const FOCUSED_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
 const FOCUSED_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
 const PROOF_LIBRARY = "scripts/lib/editor-core-authoring-round-trip-proof.mjs";
 const ROOT_TEST = "tests/editor-core-authoring-round-trip.test.mjs";
+const PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
+const PERSISTENCE_RUNTIME = "packages/editor-core/dist/persistence.js";
+const PERSISTENCE_DECLARATION = "packages/editor-core/dist/persistence.d.ts";
+const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
+const PERSISTENCE_SUCCESSOR_PATHS = Object.freeze([
+  PERSISTENCE_SOURCE,
+  PERSISTENCE_RUNTIME,
+  `${PERSISTENCE_RUNTIME}.map`,
+  PERSISTENCE_DECLARATION,
+  `${PERSISTENCE_DECLARATION}.map`,
+  PERSISTENCE_TEST,
+  PERSISTENCE_TYPES,
+]);
 const temporaryDirectories = [];
 let built;
 
@@ -153,6 +167,61 @@ test("[authority] authenticates exact M08-T01 through T06 artifacts, frozen prot
   ]) {
     assert.deepEqual(tracked.get(receipt.path), receipt);
   }
+  assert.deepEqual(built.currentCompatibility.publicApi.proofOnlySuccessor, {
+    task: "M08-T07",
+    focusedTestPath: FOCUSED_TEST,
+    focusedTypesPath: FOCUSED_TYPES,
+    runtimeExportsAdded: 0,
+    typeExportsAdded: 0,
+    publicRuntimeCasesAdded: 2,
+    publicCompilerNegativeAssertionsAdded: 6,
+  });
+  assert.deepEqual(built.currentCompatibility.publicApi.additiveSuccessor, {
+    task: "M08-T08",
+    sourcePath: PERSISTENCE_SOURCE,
+    runtimePath: PERSISTENCE_RUNTIME,
+    declarationPath: PERSISTENCE_DECLARATION,
+    focusedTestPath: PERSISTENCE_TEST,
+    focusedTypesPath: PERSISTENCE_TYPES,
+    runtimeExports: ["createDesenEditorPersistencePort"],
+    typeExports: [
+      "DesenEditorPersistenceAdapter",
+      "DesenEditorPersistenceAdapterFailureReason",
+      "DesenEditorPersistenceAdapterReadResult",
+      "DesenEditorPersistenceAdapterSourceRecord",
+      "DesenEditorPersistenceAdapterWriteRequest",
+      "DesenEditorPersistenceAdapterWriteResult",
+      "DesenEditorPersistenceDiagnostic",
+      "DesenEditorPersistenceDiagnosticCode",
+      "DesenEditorPersistencePort",
+      "DesenEditorSourceOpenResult",
+      "DesenEditorSourceOpenSuccess",
+      "DesenEditorSourceSaveRequest",
+      "DesenEditorSourceSaveResult",
+    ],
+    publicRuntimeCasesAdded: 3,
+    publicCompilerNegativeAssertionsAdded: 21,
+  });
+  assert.equal(built.currentCompatibility.publicApi.currentPackageRuntimeExports.length, 34);
+  assert.equal(built.currentCompatibility.publicApi.currentPackageTypeExports.length, 82);
+  assert.equal(built.currentCompatibility.executionAuthority.runtimeFiles, 30);
+  assert.equal(built.currentCompatibility.executionAuthority.editorFiles, 9);
+  assert.equal(built.currentCompatibility.packageBoundary.currentEmittedFiles, 32);
+  assert.equal(built.currentCompatibility.packageBoundary.staticEsmEdges, 20);
+  assert.equal(built.currentCompatibility.testAuthority.publicRuntimeAndRootCases, 49);
+  assert.equal(built.currentCompatibility.testAuthority.publicCompilerNegativeAssertions, 96);
+  assert.deepEqual(built.currentCompatibility.frozenAuthority, {
+    path: "docs/proof/artifacts/editor-core-0.1.0-authoring-round-trip.json",
+    bytes: 62_304,
+    sha256: "33b6f81be62076d304c6daaec5d860e7995fa69ceaf34103469b349a347962db",
+    retainedTaskTimeReceipts: 84,
+  });
+  const currentReceipts = new Set(
+    built.currentCompatibility.trackedBoundary.receipts.map(({ path: receiptPath }) => receiptPath),
+  );
+  for (const relativePath of PERSISTENCE_SUCCESSOR_PATHS) {
+    assert.equal(currentReceipts.has(relativePath), true);
+  }
 });
 
 test("[determinism] two fresh M08-T07 builds are byte-identical", async () => {
@@ -229,11 +298,11 @@ test("[behavior] proves all 32 commands preserve authoring and all 16 unknown-ex
 test("[mutation] rejects runtime substitution and tracked boundary mutation", async () => {
   let runtimeExecuted = false;
   const runtime = Object.fromEntries(
-    Object.entries(editorCore).map(([name, implementation]) => [
+    built.artifact.publicApi.runtimeExports.map((name) => [
       name,
       (...arguments_) => {
         runtimeExecuted = true;
-        return implementation(...arguments_);
+        return editorCore[name](...arguments_);
       },
     ]),
   );
@@ -257,6 +326,15 @@ test("[mutation] rejects runtime substitution and tracked boundary mutation", as
     await assert.rejects(
       buildEditorCoreAuthoringRoundTripEvidence({
         fileOverrides: { [relativePath]: Buffer.concat([bytes, Buffer.from("\n")]) },
+      }),
+      expectedError("BOUNDARY_DRIFT"),
+    );
+  }
+  for (const relativePath of PERSISTENCE_SUCCESSOR_PATHS) {
+    const bytes = await readFile(path.join(ROOT, relativePath));
+    await assert.rejects(
+      buildEditorCoreAuthoringRoundTripEvidence({
+        fileOverrides: { [relativePath]: changedByte(bytes) },
       }),
       expectedError("BOUNDARY_DRIFT"),
     );
@@ -445,6 +523,7 @@ test("[options] rejects unknown, accessor, inherited, symbol, proxy, and shared 
 
 test("[immutability] freezes evidence and states the exact nonclaim boundary", () => {
   assertDeepFrozen(built.artifact);
+  assertDeepFrozen(built.currentCompatibility);
   assert.deepEqual(built.artifact.nonclaims, [
     "LEXICAL_JSON_BYTES_WHITESPACE_OR_OBJECT_MEMBER_ORDER_PRESERVATION",
     "STORAGE_IO_SAVE_OPEN_DURABILITY_AND_PERSISTENCE_PORT_M08_T08",
@@ -467,6 +546,12 @@ test("[immutability] freezes evidence and states the exact nonclaim boundary", (
       ["N-018", "TESTED"],
       ["S-003", "TESTED"],
     ],
+  );
+  assert.equal(
+    built.currentCompatibility.nonclaims.includes(
+      "M08_T08_PERSISTENCE_SUCCESSOR_BYTES_ARE_COMPATIBILITY_ONLY_NOT_T07_CLAIM_AUTHORITY",
+    ),
+    true,
   );
   assert.deepEqual(
     EDITOR_CORE_AUTHORING_ROUND_TRIP_ROOT_TEST_NAMES,

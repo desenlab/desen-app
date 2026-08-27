@@ -45,6 +45,7 @@ export {
   reorderDesenEditorAction,
   replaceDesenEditorAction,
 } from "./event-action-edits.js";
+export { createDesenEditorPersistencePort } from "./persistence.js";
 
 export type {
   DesenEditorDocument,
@@ -132,3 +133,19 @@ export type {
   DesenEditorEventHandlerDeleteCommand,
   DesenEditorEventHandlerInsertCommand,
 } from "./event-action-edits.js";
+
+export type {
+  DesenEditorPersistenceAdapter,
+  DesenEditorPersistenceAdapterFailureReason,
+  DesenEditorPersistenceAdapterReadResult,
+  DesenEditorPersistenceAdapterSourceRecord,
+  DesenEditorPersistenceAdapterWriteRequest,
+  DesenEditorPersistenceAdapterWriteResult,
+  DesenEditorPersistenceDiagnostic,
+  DesenEditorPersistenceDiagnosticCode,
+  DesenEditorPersistencePort,
+  DesenEditorSourceOpenResult,
+  DesenEditorSourceOpenSuccess,
+  DesenEditorSourceSaveRequest,
+  DesenEditorSourceSaveResult,
+} from "./persistence.js";

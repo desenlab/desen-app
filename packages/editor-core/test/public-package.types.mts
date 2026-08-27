@@ -1,6 +1,7 @@
 import {
   clearDesenEditorNodeCondition,
   createDesenEditorDocument,
+  createDesenEditorPersistencePort,
   deleteDesenEditorAction,
   deleteDesenEditorEventHandler,
   deleteDesenEditorNode,
@@ -77,6 +78,12 @@ import type {
   DesenEditorOwnerPropSetCommand,
   DesenEditorOwnerStylePropertyDeleteCommand,
   DesenEditorOwnerStylePropertySetCommand,
+  DesenEditorPersistenceAdapter,
+  DesenEditorPersistenceAdapterSourceRecord,
+  DesenEditorPersistenceAdapterWriteRequest,
+  DesenEditorPersistenceAdapterWriteResult,
+  DesenEditorPersistenceDiagnosticCode,
+  DesenEditorPersistencePort,
   DesenEditorResourceInputDeleteCommand,
   DesenEditorResourceInputSetCommand,
   DesenEditorStateBindingEditDiagnostic,
@@ -92,6 +99,9 @@ import type {
   DesenEditorStructuralEditFailure,
   DesenEditorStructuralEditResult,
   DesenEditorStructuralEditSuccess,
+  DesenEditorSourceOpenResult,
+  DesenEditorSourceSaveRequest,
+  DesenEditorSourceSaveResult,
   DesenEditorVariantConditionSetCommand,
   DesenEditorVariantDeleteCommand,
   DesenEditorVariantInsertCommand,
@@ -837,3 +847,122 @@ const publicExtensionAuthority: DesenEditorNodeInsertCommand = {
 
 void publicAuthoringAuthority;
 void publicExtensionAuthority;
+
+declare const persistenceAdapter: DesenEditorPersistenceAdapter;
+declare const persistenceAdapterRequest: DesenEditorPersistenceAdapterWriteRequest;
+declare const persistenceRecord: DesenEditorPersistenceAdapterSourceRecord;
+declare const publicOpenResult: DesenEditorSourceOpenResult;
+declare const publicSaveResult: DesenEditorSourceSaveResult;
+
+const persistencePort: DesenEditorPersistencePort =
+  createDesenEditorPersistencePort(persistenceAdapter);
+const publicCreateSaveRequest: DesenEditorSourceSaveRequest = {
+  sourceKey: "source-a",
+  expectedGeneration: null,
+  document,
+};
+
+const publicReceiverBoundRead = async function (
+  this: { readonly token: string },
+  sourceKey: string,
+) {
+  void sourceKey;
+  return { status: "missing" } as const;
+};
+
+// @ts-expect-error emitted adapter callbacks cannot require a receiver
+const publicInvalidReceiverRead: DesenEditorPersistenceAdapter["readSource"] =
+  publicReceiverBoundRead;
+
+// @ts-expect-error emitted save preconditions are required rather than inferred
+const publicMissingExpectedGeneration: DesenEditorSourceSaveRequest = {
+  sourceKey: "source-a",
+  document,
+};
+
+const publicStringGeneration: DesenEditorSourceSaveRequest = {
+  sourceKey: "source-a",
+  // @ts-expect-error emitted save generations are exactly number or null
+  expectedGeneration: "1",
+  document,
+};
+
+const publicInvalidCreatedSettlement: DesenEditorPersistenceAdapterWriteResult = {
+  status: "created",
+  // @ts-expect-error emitted create settlements expose only generation one
+  generation: 2,
+};
+
+const publicBroadAdapterRequest: DesenEditorPersistenceAdapterWriteRequest = {
+  sourceKey: "source-a",
+  expectedGeneration: null,
+  bytes: new Uint8Array(),
+  // @ts-expect-error the neutral emitted request carries no filesystem authority
+  path: "/tmp/source.json",
+};
+
+// @ts-expect-error emitted adapter requests keep storage identity immutable
+persistenceAdapterRequest.sourceKey = "source-b";
+
+// @ts-expect-error emitted adapter requests keep the CAS precondition immutable
+persistenceAdapterRequest.expectedGeneration = 2;
+
+// @ts-expect-error emitted public save requests are immutable transition values
+publicCreateSaveRequest.document = document;
+
+// @ts-expect-error emitted adapter contracts cannot have callbacks replaced
+persistenceAdapter.readSource = async () => ({ status: "missing" });
+
+// @ts-expect-error emitted captured ports cannot have callbacks replaced
+persistencePort.openSource = async () => ({ status: "missing" });
+
+// @ts-expect-error emitted stored parsed values remain unknown until core readmission
+const publicTrustedStoredDocument: DesenEditorDocument = persistenceRecord.value;
+
+if (publicOpenResult.status === "opened") {
+  // @ts-expect-error emitted opened documents remain recursively immutable
+  publicOpenResult.document.id = "mutated";
+
+  // @ts-expect-error an emitted open success has no failure diagnostic
+  const publicImpossibleOpenDiagnostic = publicOpenResult.diagnostic;
+  void publicImpossibleOpenDiagnostic;
+} else if (publicOpenResult.status === "missing") {
+  // @ts-expect-error an emitted missing result exposes no partial Source
+  const publicPartialOpenedDocument = publicOpenResult.document;
+  void publicPartialOpenedDocument;
+}
+
+if (publicSaveResult.status === "conflict") {
+  // @ts-expect-error an emitted conflict does not claim a committed generation
+  const publicCommittedConflictGeneration = publicSaveResult.generation;
+  void publicCommittedConflictGeneration;
+} else if (publicSaveResult.status === "failed") {
+  // @ts-expect-error an emitted definite failure has no current conflict generation
+  const publicFailedCurrentGeneration = publicSaveResult.currentGeneration;
+  void publicFailedCurrentGeneration;
+} else if (publicSaveResult.status === "indeterminate") {
+  // @ts-expect-error an emitted uncertain commit cannot expose a trustworthy generation
+  const publicIndeterminateGeneration = publicSaveResult.generation;
+  void publicIndeterminateGeneration;
+}
+
+// @ts-expect-error the minimal emitted port exposes no storage lifecycle authority
+persistencePort.close();
+
+// @ts-expect-error the minimal emitted port cannot enumerate Source identities
+persistencePort.listSources();
+
+// @ts-expect-error the minimal emitted port cannot delete a Source identity
+persistencePort.deleteSource("source-a");
+
+// @ts-expect-error emitted persistence diagnostics stay a closed namespaced union
+const publicInvalidPersistenceDiagnostic: DesenEditorPersistenceDiagnosticCode =
+  "run.desen.editor/PERSISTENCE_PRIVATE_PROVIDER_ERROR";
+
+void publicInvalidReceiverRead;
+void publicMissingExpectedGeneration;
+void publicStringGeneration;
+void publicInvalidCreatedSettlement;
+void publicBroadAdapterRequest;
+void publicTrustedStoredDocument;
+void publicInvalidPersistenceDiagnostic;

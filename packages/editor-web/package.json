@@ -2,7 +2,7 @@
   "name": "@desen/editor-web",
   "version": "0.0.0",
   "private": true,
-  "description": "Desen App Web canvas, inspector, overlays, layer tree, and Design/Run mode UI.",
+  "description": "Local Web adapters plus Desen App canvas, inspector, overlays, and Design/Run UI.",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -17,9 +17,18 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src --max-warnings=0",
+    "lint": "eslint src test --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
+    "test:local-source-persistence": "vitest run test/local-source-persistence.test.ts",
+    "test:public-package": "tsc -p tsconfig.build.json && tsc -p tsconfig.public-package.json --noEmit && node --test test/public-package.mjs",
     "test:coverage": "vitest run --coverage --passWithNoTests"
+  },
+  "dependencies": {
+    "@desen/editor-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@desen/protocol": "workspace:*",
+    "vitest": "4.1.10"
   }
 }

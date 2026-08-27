@@ -14,8 +14,8 @@ function clone(value) {
 
 test("the reviewed impact graph owns every proof unit exactly once", () => {
   const graph = createAffectedImpactGraph();
-  assert.equal(graph.proofUnitCount, 78);
-  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 78);
+  assert.equal(graph.proofUnitCount, 79);
+  assert.equal(new Set(graph.entries.map(({ id }) => id)).size, 79);
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "control-plane-runtime-transition-races")?.prerequisites,
     ["control-plane-runtime-fault-injection"],
@@ -51,6 +51,10 @@ test("the reviewed impact graph owns every proof unit exactly once", () => {
   assert.deepEqual(
     graph.entries.find(({ id }) => id === "editor-core-authoring-round-trip")?.prerequisites,
     ["editor-core-event-action-edits"],
+  );
+  assert.deepEqual(
+    graph.entries.find(({ id }) => id === "editor-core-persistence")?.prerequisites,
+    ["editor-core-authoring-round-trip"],
   );
   assert.equal(validateAffectedImpactGraph(graph), graph);
   assert.equal(Object.isFrozen(graph), true);
@@ -95,8 +99,9 @@ test("the editor stable-ID insert closes over its Source predecessor and structu
     "editor-core-state-binding-edits",
     "editor-core-event-action-edits",
     "editor-core-authoring-round-trip",
+    "editor-core-persistence",
   ]);
-  assert.equal(closure.workloadCount, 25);
+  assert.equal(closure.workloadCount, 28);
 });
 
 test("the editor structural edits close over stable insertion and Source admission", () => {
@@ -110,8 +115,9 @@ test("the editor structural edits close over stable insertion and Source admissi
     "editor-core-state-binding-edits",
     "editor-core-event-action-edits",
     "editor-core-authoring-round-trip",
+    "editor-core-persistence",
   ]);
-  assert.equal(closure.workloadCount, 25);
+  assert.equal(closure.workloadCount, 28);
 });
 
 test("editor content edits close over both immutable T02 and T03 prerequisites", () => {
@@ -125,8 +131,9 @@ test("editor content edits close over both immutable T02 and T03 prerequisites",
     "editor-core-state-binding-edits",
     "editor-core-event-action-edits",
     "editor-core-authoring-round-trip",
+    "editor-core-persistence",
   ]);
-  assert.equal(closure.workloadCount, 25);
+  assert.equal(closure.workloadCount, 28);
 });
 
 test("editor state/binding edits close over the formal T02 and current T04 graph", () => {
@@ -140,8 +147,9 @@ test("editor state/binding edits close over the formal T02 and current T04 graph
     "editor-core-state-binding-edits",
     "editor-core-event-action-edits",
     "editor-core-authoring-round-trip",
+    "editor-core-persistence",
   ]);
-  assert.equal(closure.workloadCount, 25);
+  assert.equal(closure.workloadCount, 28);
 });
 
 test("editor event/action edits close over the formal state/binding predecessor", () => {
@@ -155,8 +163,9 @@ test("editor event/action edits close over the formal state/binding predecessor"
     "editor-core-state-binding-edits",
     "editor-core-event-action-edits",
     "editor-core-authoring-round-trip",
+    "editor-core-persistence",
   ]);
-  assert.equal(closure.workloadCount, 25);
+  assert.equal(closure.workloadCount, 28);
 });
 
 test("editor authoring round-trip closes over the formal event/action predecessor", () => {
@@ -170,8 +179,26 @@ test("editor authoring round-trip closes over the formal event/action predecesso
     "editor-core-state-binding-edits",
     "editor-core-event-action-edits",
     "editor-core-authoring-round-trip",
+    "editor-core-persistence",
   ]);
-  assert.equal(closure.workloadCount, 25);
+  assert.equal(closure.workloadCount, 28);
+});
+
+test("editor persistence closes over the complete neutral authoring predecessor", () => {
+  const closure = createAffectedImpactClosure(["editor-core-persistence"]);
+  assert.deepEqual(closure.proofUnitIds, [
+    "protocol-structural-validation",
+    "editor-core-source-document",
+    "editor-core-stable-id-insert",
+    "editor-core-structural-edits",
+    "editor-core-content-edits",
+    "editor-core-state-binding-edits",
+    "editor-core-event-action-edits",
+    "editor-core-authoring-round-trip",
+    "editor-core-persistence",
+  ]);
+  assert.equal(closure.workloadCount, 28);
+  assert.equal(closure.nodeIds.includes("editor-web-public-package-contract"), true);
 });
 
 test("unknown, duplicate, empty, proxy, and sparse owner inputs fail closed", () => {

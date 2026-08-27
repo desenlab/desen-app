@@ -24,6 +24,9 @@ const DEPENDENCY_AUTHORITY = "docs/proof/artifacts/protocol-0.1.0-execution-cont
 const PACKAGE_TEST = "packages/editor-core/test/source-document.test.ts";
 const AUTHORING_ROUND_TRIP_TEST = "packages/editor-core/test/authoring-round-trip.test.ts";
 const AUTHORING_ROUND_TRIP_TYPES = "packages/editor-core/test/authoring-round-trip.types.ts";
+const PERSISTENCE_SOURCE = "packages/editor-core/src/persistence.ts";
+const PERSISTENCE_TEST = "packages/editor-core/test/persistence.test.ts";
+const PERSISTENCE_TYPES = "packages/editor-core/test/persistence.types.ts";
 const PUBLIC_TEST = "packages/editor-core/test/public-package.mjs";
 const ROOT_TEST = "tests/editor-core-source-document.test.mjs";
 const BASELINE_RUNTIME_PATHS = [
@@ -318,6 +321,7 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
   ]);
   assert.deepEqual(built.currentCompatibility.boundary.additiveRuntimeExports, [
     "clearDesenEditorNodeCondition",
+    "createDesenEditorPersistencePort",
     "deleteDesenEditorAction",
     "deleteDesenEditorEventHandler",
     "deleteDesenEditorNode",
@@ -357,36 +361,32 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     true,
   );
   assert.deepEqual(built.currentCompatibility.boundary.additiveSuccessor, {
-    task: "M08-T06",
-    sourcePath: "packages/editor-core/src/event-action-edits.ts",
-    runtimePath: "packages/editor-core/dist/event-action-edits.js",
-    declarationPath: "packages/editor-core/dist/event-action-edits.d.ts",
-    runtimeExports: [
-      "deleteDesenEditorAction",
-      "deleteDesenEditorEventHandler",
-      "insertDesenEditorAction",
-      "insertDesenEditorEventHandler",
-      "reorderDesenEditorAction",
-      "replaceDesenEditorAction",
-    ],
+    task: "M08-T08",
+    sourcePath: PERSISTENCE_SOURCE,
+    runtimePath: "packages/editor-core/dist/persistence.js",
+    declarationPath: "packages/editor-core/dist/persistence.d.ts",
+    focusedTestPath: PERSISTENCE_TEST,
+    focusedTypesPath: PERSISTENCE_TYPES,
+    runtimeExports: ["createDesenEditorPersistencePort"],
     typeExports: [
-      "DesenEditorAction",
-      "DesenEditorActionDeleteCommand",
-      "DesenEditorActionInsertCommand",
-      "DesenEditorActionListPointer",
-      "DesenEditorActionPointer",
-      "DesenEditorActionReorderCommand",
-      "DesenEditorActionReplaceCommand",
-      "DesenEditorEventActionEditDiagnostic",
-      "DesenEditorEventActionEditDiagnosticCode",
-      "DesenEditorEventActionEditFailure",
-      "DesenEditorEventActionEditResult",
-      "DesenEditorEventActionEditSuccess",
-      "DesenEditorEventHandlerDeleteCommand",
-      "DesenEditorEventHandlerInsertCommand",
+      "DesenEditorPersistenceAdapter",
+      "DesenEditorPersistenceAdapterFailureReason",
+      "DesenEditorPersistenceAdapterReadResult",
+      "DesenEditorPersistenceAdapterSourceRecord",
+      "DesenEditorPersistenceAdapterWriteRequest",
+      "DesenEditorPersistenceAdapterWriteResult",
+      "DesenEditorPersistenceDiagnostic",
+      "DesenEditorPersistenceDiagnosticCode",
+      "DesenEditorPersistencePort",
+      "DesenEditorSourceOpenResult",
+      "DesenEditorSourceOpenSuccess",
+      "DesenEditorSourceSaveRequest",
+      "DesenEditorSourceSaveResult",
     ],
-    publicDeclarations: 20,
-    tsdocDeclarations: 20,
+    publicDeclarations: 14,
+    tsdocDeclarations: 14,
+    publicRuntimeCasesAdded: 3,
+    publicCompilerNegativeAssertionsAdded: 21,
   });
   assert.deepEqual(built.currentCompatibility.boundary.proofOnlySuccessor, {
     task: "M08-T07",
@@ -397,10 +397,14 @@ test("[authority] builds final M08-T01 evidence from the exact G07/I07-04 prereq
     publicRuntimeCasesAdded: 2,
     publicCompilerNegativeAssertionsAdded: 6,
   });
-  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 4);
-  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 39);
-  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 75);
-  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 49);
+  assert.equal(built.currentCompatibility.boundary.additiveSuccessors.length, 5);
+  assert.equal(built.currentCompatibility.boundary.currentPackageRuntimeExports.length, 34);
+  assert.equal(built.currentCompatibility.boundary.currentPackageTypeExports.length, 82);
+  assert.equal(built.currentCompatibility.evidence.tests.persistenceRuntimeCases, 10);
+  assert.equal(built.currentCompatibility.evidence.tests.persistenceCompilerNegativeCases, 21);
+  assert.equal(built.currentCompatibility.evidence.tests.publicRuntimeContractCases, 42);
+  assert.equal(built.currentCompatibility.evidence.tests.publicCompilerNegativeCases, 96);
+  assert.equal(built.currentCompatibility.evidence.trackedFiles.length, 56);
   for (const receipt of SUCCESSOR_RUNTIME_RECEIPTS) {
     const bytes = await workspaceBytes(receipt.path);
     assert.equal(bytes.byteLength, receipt.bytes);
@@ -559,6 +563,9 @@ test("[boundary] rejects source, TSDoc, import, distribution, and manifest drift
     index,
     distSource,
     declaration,
+    persistenceSource,
+    persistenceRuntime,
+    persistenceDeclaration,
     manifestBytes,
     baseConfigBytes,
     packageConfigBytes,
@@ -569,6 +576,9 @@ test("[boundary] rejects source, TSDoc, import, distribution, and manifest drift
     workspaceBytes("packages/editor-core/src/index.ts"),
     workspaceBytes("packages/editor-core/dist/source-document.js"),
     workspaceBytes("packages/editor-core/dist/source-document.d.ts"),
+    workspaceBytes(PERSISTENCE_SOURCE),
+    workspaceBytes("packages/editor-core/dist/persistence.js"),
+    workspaceBytes("packages/editor-core/dist/persistence.d.ts"),
     workspaceBytes("packages/editor-core/package.json"),
     workspaceBytes("tsconfig.base.json"),
     workspaceBytes("packages/editor-core/tsconfig.json"),
@@ -673,6 +683,21 @@ test("[boundary] rejects source, TSDoc, import, distribution, and manifest drift
       "EDITOR_SOURCE_DOCUMENT_PLATFORM_BOUNDARY_DRIFT",
     ],
     [
+      PERSISTENCE_SOURCE,
+      persistenceSource.toString("utf8").replace("/**", "/*"),
+      "EDITOR_SOURCE_DOCUMENT_PUBLIC_API_DRIFT",
+    ],
+    [
+      "packages/editor-core/dist/persistence.js",
+      `${persistenceRuntime}\nexport const hiddenPersistenceAuthority = true;\n`,
+      "EDITOR_SOURCE_DOCUMENT_SOURCE_CONTRACT_DRIFT",
+    ],
+    [
+      "packages/editor-core/dist/persistence.d.ts",
+      `${persistenceDeclaration}\nexport declare const hiddenPersistenceAuthority: true;\n`,
+      "EDITOR_SOURCE_DOCUMENT_SOURCE_CONTRACT_DRIFT",
+    ],
+    [
       "packages/editor-core/package.json",
       JSON.stringify(manifest),
       "EDITOR_SOURCE_DOCUMENT_MANIFEST_DRIFT",
@@ -743,6 +768,8 @@ test("[inventory] rejects package, public, and root test-authority drift", async
     packageTypes,
     authoringRoundTripTest,
     authoringRoundTripTypes,
+    persistenceTest,
+    persistenceTypes,
     publicTest,
     publicTypes,
     rootTest,
@@ -751,6 +778,8 @@ test("[inventory] rejects package, public, and root test-authority drift", async
     workspaceBytes("packages/editor-core/test/source-document.types.ts"),
     workspaceBytes(AUTHORING_ROUND_TRIP_TEST),
     workspaceBytes(AUTHORING_ROUND_TRIP_TYPES),
+    workspaceBytes(PERSISTENCE_TEST),
+    workspaceBytes(PERSISTENCE_TYPES),
     workspaceBytes(PUBLIC_TEST),
     workspaceBytes("packages/editor-core/test/public-package.types.mts"),
     workspaceBytes(ROOT_TEST),
@@ -811,6 +840,8 @@ test("[inventory] rejects package, public, and root test-authority drift", async
     [PACKAGE_TEST, packageNoop],
     [AUTHORING_ROUND_TRIP_TEST, changedByte(authoringRoundTripTest)],
     [AUTHORING_ROUND_TRIP_TYPES, changedByte(authoringRoundTripTypes)],
+    [PERSISTENCE_TEST, changedByte(persistenceTest)],
+    [PERSISTENCE_TYPES, changedByte(persistenceTypes)],
     [PUBLIC_TEST, publicTestText.replace('test("[proof-core] two fresh', 'test("two fresh')],
     [
       PUBLIC_TEST,
